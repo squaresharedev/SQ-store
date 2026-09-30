@@ -184,6 +184,18 @@
       "byStorefront": "Rezervace podle výlohy",
       "awaiting": "Začne se počítat s blokem pro rezervace v kalendáři.",
       "readyToChart": "Graf se zobrazí, jakmile začnou přicházet rezervace."
+    },
+    "checkout_view": {
+      "label": "Zobrazení pokladny",
+      "description": "Kupující, kteří otevřeli pokladnu pro jeden z vašich produktů.",
+      "count": "{count, plural, one {{formatted} zobrazení} few {{formatted} zobrazení} many {{formatted} zobrazení} other {{formatted} zobrazení}}",
+      "total": "Celková zobrazení pokladny",
+      "emptyRange": "Žádná zobrazení pokladny v tomto období",
+      "overTime": "Zobrazení pokladny v čase",
+      "acrossRange": "Zobrazení pokladny ve zvoleném období.",
+      "byChannel": "Zobrazení pokladny podle kanálu",
+      "byWeekday": "Zobrazení pokladny podle dne v týdnu",
+      "byStorefront": "Zobrazení pokladny podle výlohy"
     }
   }
 }

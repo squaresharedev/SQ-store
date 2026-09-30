@@ -173,6 +173,161 @@
     "areaAndTime": "{area}: {time}",
     "areaAndTimeWithCost": "{area}: {time} ({cost})",
     "withCost": "{place} ({cost})",
-    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Reso accettato entro {days} giorno dalla consegna. Le spese di reso sono a nostro carico.} many {Reso accettato entro {days} giorni dalla consegna. Le spese di reso sono a nostro carico.} other {Reso accettato entro {days} giorni dalla consegna. Le spese di reso sono a nostro carico.}}} buyer {{days, plural, one {Reso accettato entro {days} giorno dalla consegna. Le spese di reso sono a carico dell’acquirente.} many {Reso accettato entro {days} giorni dalla consegna. Le spese di reso sono a carico dell’acquirente.} other {Reso accettato entro {days} giorni dalla consegna. Le spese di reso sono a carico dell’acquirente.}}} other {{days, plural, one {Reso accettato entro {days} giorno dalla consegna.} many {Reso accettato entro {days} giorni dalla consegna.} other {Reso accettato entro {days} giorni dalla consegna.}}}}"
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Reso accettato entro {days} giorno dalla consegna. Le spese di reso sono a nostro carico.} many {Reso accettato entro {days} giorni dalla consegna. Le spese di reso sono a nostro carico.} other {Reso accettato entro {days} giorni dalla consegna. Le spese di reso sono a nostro carico.}}} buyer {{days, plural, one {Reso accettato entro {days} giorno dalla consegna. Le spese di reso sono a carico dell’acquirente.} many {Reso accettato entro {days} giorni dalla consegna. Le spese di reso sono a carico dell’acquirente.} other {Reso accettato entro {days} giorni dalla consegna. Le spese di reso sono a carico dell’acquirente.}}} other {{days, plural, one {Reso accettato entro {days} giorno dalla consegna.} many {Reso accettato entro {days} giorni dalla consegna.} other {Reso accettato entro {days} giorni dalla consegna.}}}}",
+    "rateIsFree": "Gratuito",
+    "freeOver": "Consegna gratuita per ordini superiori a {amount}."
+  },
+  "order": {
+    "metadata": {
+      "title": "Il tuo ordine | {store}"
+    },
+    "thanks": "Grazie!",
+    "thanksNamed": "Grazie, {name}!",
+    "number": "Ordine {number}",
+    "confirmationSent": "Una conferma è in arrivo a {email}.",
+    "deliverTo": "Consegna a {place}",
+    "timeline": {
+      "label": "Cosa succede adesso",
+      "paid": "Ordine effettuato",
+      "paidDetail": "Pagato il {date}",
+      "preparing": "In preparazione",
+      "preparingDetail": "{seller} sta preparando il tuo ordine.",
+      "shipped": "In viaggio",
+      "shippedDetail": "Spedito il {date}",
+      "tracking": "Numero di tracciamento {number}",
+      "notYet": "Riceverai un'e-mail quando verrà spedito.",
+      "ready": "Pronto per il download",
+      "readyDetail": "Il tuo file è pronto qui sotto e il link è anche nella tua e-mail."
+    },
+    "download": "Scarica ({format})",
+    "downloadPlain": "Scarica il tuo file",
+    "contact": "Domande sul tuo ordine? Scrivi a {seller}.",
+    "withdraw": {
+      "title": "Hai cambiato idea?",
+      "body": "Puoi recedere da questo acquisto fino al {date}.",
+      "open": "Recedi dal contratto qui",
+      "formTitle": "Recedi da questo acquisto",
+      "formBody": "Conferma il tuo nome e l'e-mail. {seller} sarà informato immediatamente e ti contatterà per la restituzione e il rimborso.",
+      "name": "Il tuo nome",
+      "email": "La tua e-mail",
+      "confirm": "Conferma il recesso",
+      "cancel": "Mantieni il mio ordine",
+      "sending": "Invio in corso...",
+      "done": "Hai esercitato il recesso da questo acquisto il {date}. {seller} è stato informato e una conferma è nella tua casella di posta.",
+      "failed": "Invio non riuscito. Riprova o scrivi a {seller}.",
+      "bodyOpen": "Puoi recedere da questo acquisto in qualsiasi momento fino a {days} giorni dalla ricezione.",
+      "emailMismatch": "Quell'e-mail non corrisponde a questo ordine. Usa l'e-mail con cui hai ordinato."
+    },
+    "lookup": {
+      "metadata": {
+        "title": "Trova il tuo ordine | {store}"
+      },
+      "title": "Trova il tuo ordine",
+      "body": "Inserisci l'e-mail con cui hai ordinato e il numero d'ordine. Ti invieremo il link alla tua pagina dell'ordine, dove puoi anche esercitare il recesso.",
+      "email": "E-mail",
+      "number": "Numero d'ordine",
+      "submit": "Inviami il link",
+      "sending": "Invio in corso...",
+      "done": "Se corrisponde a un ordine di questo negozio, il link è in arrivo a quell'e-mail.",
+      "rateLimited": "Troppi tentativi. Attendi un po' e riprova."
+    },
+    "footerLink": "Recedi da un acquisto",
+    "total": "Totale pagato",
+    "quantity": "Quantità: {quantity}",
+    "editHeadline": "Titolo del ringraziamento"
+  },
+  "checkout": {
+    "metadata": {
+      "title": "Checkout | {store}"
+    },
+    "secure": "Pagamento sicuro",
+    "headline": "Quasi tuo",
+    "back": "Torna a {title}",
+    "changeVersion": "Modifica",
+    "quantity": "Quantità",
+    "sections": {
+      "contact": "Contatto",
+      "delivery": "Consegna",
+      "payment": "Pagamento",
+      "summary": "Riepilogo ordine"
+    },
+    "fields": {
+      "email": "E-mail",
+      "emailHint": "Per la ricevuta e gli aggiornamenti su questo ordine.",
+      "name": "Nome completo",
+      "line1": "Indirizzo",
+      "line2": "Interno, scala, ecc.",
+      "addLine2": "Aggiungi interno, scala, ecc.",
+      "city": "Città",
+      "region": "Provincia o regione",
+      "postalCode": "CAP",
+      "country": "Paese",
+      "whyAsk": "Perché lo chiediamo"
+    },
+    "gift": {
+      "toggle": "Aggiungi un messaggio regalo",
+      "label": "Messaggio regalo",
+      "placeholder": "Qualche parola da includere nel pacco",
+      "count": "{count} di {max}"
+    },
+    "note": {
+      "from": "Da {name}",
+      "placeholder": "Aggiungi qui una nota per i tuoi acquirenti",
+      "editNote": "Nota per gli acquirenti",
+      "editThanks": "Messaggio di ringraziamento",
+      "thanksPlaceholder": "Aggiungi qui un messaggio di ringraziamento"
+    },
+    "summary": {
+      "subtotal": "Subtotale",
+      "delivery": "Spedizione",
+      "deliveryTo": "Spedizione verso {country}",
+      "free": "Gratuita",
+      "total": "Totale",
+      "inclVat": "IVA inclusa",
+      "digital": "Download digitale, nulla da consegnare",
+      "showSummary": "Mostra riepilogo ordine",
+      "digitalFormat": "Download digitale ({format}), nulla da consegnare",
+      "freeGap": "Mancano {amount} alla spedizione gratuita"
+    },
+    "payment": {
+      "testTitle": "Pagamento di prova",
+      "testBody": "Questo è un checkout di sviluppo. Nessuna carta viene addebitata e nessun denaro si muove.",
+      "previewTitle": "Dati della carta",
+      "previewBody": "Carta, Apple Pay e Google Pay appariranno qui nei tuoi colori una volta connesso Stripe.",
+      "cardNumber": "Numero carta",
+      "expiry": "MM / AA",
+      "cvc": "CVV",
+      "card": "Carta"
+    },
+    "legal": {
+      "sellerDetails": "Dati del venditore",
+      "privacy": "{seller} utilizza il tuo nome, indirizzo di consegna e e-mail per eseguire questo ordine e rispettare gli obblighi di legge, e li conserva per il periodo richiesto dalla legge. Puoi chiedere a {seller} di accedervi, rettificarli o cancellarli. Square Share li tratta per conto di {seller}.",
+      "privacyLink": "Privacy",
+      "digitalConsent": "Voglio il download immediatamente e comprendo che perdo il diritto di recesso non appena inizia.",
+      "soldByIn": "Venduto da {seller}, {country}",
+      "privacySummary": "Come {seller} usa i tuoi dati"
+    },
+    "pay": "Ordine con obbligo di pagare ({amount})",
+    "placing": "Invio ordine in corso...",
+    "unwired": "Il checkout si apre per gli acquirenti quando colleghi Stripe.",
+    "errors": {
+      "title": "Non siamo riusciti a effettuare il tuo ordine",
+      "required": "Questo campo è obbligatorio.",
+      "email": "Inserisci un indirizzo e-mail come nome@esempio.it.",
+      "fields": "Controlla i campi evidenziati.",
+      "consent": "Spunta la casella per confermare che vuoi il download immediatamente.",
+      "sold_out": "Ci dispiace, il prodotto è appena esaurito. Non è stato addebitato nulla.",
+      "insufficient_stock": "Non ce ne sono abbastanza per quella quantità. Prova una quantità minore.",
+      "quantity": "Quella quantità non è disponibile. Prova con una minore.",
+      "options": "Quella versione non è più disponibile. Torna indietro e scegline un'altra.",
+      "not_shipped_here": "{seller} non consegna in quel paese.",
+      "no_shipping_rates": "La spedizione non può essere calcolata al momento. Non è stato addebitato nulla.",
+      "not_found": "Questo prodotto non è più disponibile per l'acquisto.",
+      "rate_limited": "Troppi tentativi. Attendi qualche minuto e riprova.",
+      "unavailable": "Il checkout non è disponibile al momento. Non è stato addebitato nulla.",
+      "failed": "Qualcosa è andato storto e non è stato addebitato nulla. Riprova.",
+      "invalid": "Alcuni dettagli richiedono una verifica. Controlla i campi evidenziati."
+    },
+    "editHeadline": "Titolo del checkout"
   }
 }

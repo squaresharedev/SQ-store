@@ -1,10 +1,6 @@
-import type { CSSProperties, ReactNode } from "react";
-import { ChevronDown, Clock, PackageCheck, RotateCcw, ShieldCheck, Truck } from "lucide-react";
+import type { ReactNode } from "react";
+import { ChevronDown } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
-import { resolveBackgroundStyle } from "@/components/storefront/background-presets";
-import { CustomFontFace } from "@/components/storefront/CustomFontFace";
-import { customFontVars, fontPresentation } from "@/lib/theme/storefront-fonts";
 import { isEuSeller, MANDATORY_PRODUCT_PAGE_SECTION_IDS } from "@/lib/storefront/product-page";
 import type { ProseResolver } from "@/lib/shipping/policy-prose";
 import { resolveProductShipping, resolveReturns } from "@/lib/storefront/shipping";
@@ -27,9 +23,12 @@ import { OptionProvider } from "./OptionContext";
 import { OptionPicker } from "./OptionPicker";
 import { QuantityProvider } from "./QuantityContext";
 import { QuantityPicker } from "./QuantityPicker";
+import { PageShell } from "./PageShell";
+import { orderLookupPath } from "@/lib/storefront/product-page-url";
+import { StickyBar } from "./StickyBar";
+import { TrustList, buildTrustLines } from "./TrustList";
 import {
   DARK_INK,
-  firstSentence,
   paragraphs,
   resolveCta,
   resolveInk,
@@ -112,11 +111,6 @@ export function ProductPageView({
   const cta = resolveCta(productPage, theme);
   const rule = ruleColor(ink);
   const radius = surfaceRadius(theme.cornerRadius);
-  // The page's own font falls back to the storefront's, which is what almost
-  // every store wants: the product page is part of the shop, not a separate
-  // publication. "custom" on either resolves to the same uploaded face, whose
-  // family the root declares below.
-  const font = fontPresentation(productPage.font ?? theme.font);
   const isEu = isEuSeller(seller);
   const storeName = storefront.header?.show && storefront.header.name ? storefront.header.name : storefront.name;
   const soldBy = seller.businessName || storefront.name;
@@ -125,46 +119,21 @@ export function ProductPageView({
     seller.email,
     product.title,
     t("cta.mailSubject", { title: product.title }),
+    storefront.checkout ? { storefrontId: storefront.id, productId: product.id } : null,
   );
   // The editor always shows the button, even with nowhere to send it, so the
   // seller can see the page's one action and be told how to wire it up.
   const hasCta = target.kind !== "none" || preview;
 
-  const rootStyle: CSSProperties = {
-    // The page's own backdrop when it has one, otherwise the storefront's
-    // whole background — gradient, image and all. Not merged: a page colour
-    // REPLACES the store's background rather than tinting it, so a store on a
-    // photograph does not end up with the photograph showing through the
-    // colour a seller picked to read against.
-    ...(productPage.backgroundColor
-      ? { backgroundColor: productPage.backgroundColor }
-      : resolveBackgroundStyle(theme.background, storefront.backgroundImageUrl)),
-    ...customFontVars(theme.customFont, storefront.customFontUrl),
-    color: ink,
-    ...font.style,
-  };
-
-  // The three facts a buyer looks for beside the button, drawn from what the
-  // seller actually wrote rather than invented: how it gets to them, how it
-  // goes back, and (in the EU) that the law is behind them either way.
-  const trust: { icon: typeof Truck; text: string }[] = [];
-  // The dispatch line LEADS, when there is one: "when does it leave" is the
-  // first thing asked of anything being posted, and it is the one fact the
-  // shipping paragraph below is worst at answering quickly.
-  if (shipping?.dispatch) {
-    trust.push({ icon: Clock, text: shipping.dispatch });
-  }
-  const shippingLine = product.isDigital
-    ? t("trust.digitalDelivery")
-    : firstSentence(shipping?.body);
-  if (shippingLine) {
-    trust.push({ icon: product.isDigital ? PackageCheck : Truck, text: shippingLine });
-  }
-  const returnsLine = firstSentence(returnsText);
-  if (returnsLine) trust.push({ icon: RotateCcw, text: returnsLine });
-  if (isEu) {
-    trust.push({ icon: ShieldCheck, text: t("trust.euRights") });
-  }
+  // The facts a buyer looks for beside the button, from the seller's own terms
+  // (see buildTrustLines, which the checkout shares).
+  const trust = buildTrustLines({
+    shipping,
+    returnsText,
+    isDigital: product.isDigital,
+    isEu,
+    copy: { digitalDelivery: t("trust.digitalDelivery"), euRights: t("trust.euRights") },
+  });
 
   // THE DESCRIPTION READS UNDER THE TITLE, always: with the title and the
   // price, beside the photos, where a buyer looks for it. The fold below is
@@ -311,40 +280,80 @@ export function ProductPageView({
         initialQuantity={initialQuantity}
         syncUrl={!preview}
       >
-        <CustomFontFace customFont={theme.customFont} url={storefront.customFontUrl} />
-        <div
-          className={cn(
-            "@container w-full",
-            font.className,
-            preview ? "min-h-full" : "min-h-screen",
-            hasCta && "pb-24 @3xl:pb-0",
-          )}
-          style={rootStyle}
-          data-product-page={mode}
-          // The backdrop as DATA, alongside the button's (see ProductCta): the
-          // resolved colour, and whether it is the page's own or the
-          // storefront's. A reader must never have to parse a style attribute
-          // and re-derive the inheritance to answer "what colour is this page".
-          data-page-background={productPage.backgroundColor ?? "storefront"}
-          data-page-ink={ink}
-          // Outermost hotspot, so it is what a click on the page's own backdrop
-          // finds. Every region inside names its own and wins by being nearer.
-          data-setting-hotspot="background"
+        <PageShell
+          storefront={storefront}
+          // The page's own backdrop when it has one, otherwise the storefront's
+          // whole background. The page's font falls back to the storefront's
+          // too: the product page is part of the shop, not a publication of its
+          // own.
+          backgroundColor={productPage.backgroundColor}
+          font={productPage.font}
+          ink={ink}
+          preview={preview}
+          padForStickyBar={hasCta}
+          rootAttributes={{
+            "data-product-page": mode,
+            // The backdrop as DATA, alongside the button's (see ProductCta): the
+            // resolved colour, and whether it is the page's own or the
+            // storefront's. A reader must never have to parse a style
+            // attribute and re-derive the inheritance to answer "what colour is
+            // this page".
+            "data-page-background": productPage.backgroundColor ?? "storefront",
+            "data-page-ink": ink,
+          }}
+          footer={
+            <>
+              {/* `soldBy`, NOT gated on `showSeller`: the switch hides the "Sold
+                  by" line beside the price, which is presentation, but the
+                  footer's disclosure of who the buyer is contracting with is not
+                  the seller's to turn off. See PoweredByFooter's header comment. */}
+              <PoweredByFooter
+                ruleColor={rule}
+                sellerName={soldBy}
+                product={{ id: product.id, title: product.title }}
+                storefront={{ id: storefront.id, name: storeName }}
+                reportScopes={page.reportScopes}
+                preview={preview}
+                withdrawHref={storefront.checkout ? orderLookupPath(storefront.id) : undefined}
+              />
+              {hasCta && (
+                <StickyBar
+                  preview={preview}
+                  hotspot="cta"
+                  // The buy box's own button: the bar steps aside while it is
+                  // on screen (the bar's copy is excluded from the lookup).
+                  watch="[data-product-cta]"
+                  attributes={{ "data-product-sticky-cta": "" }}
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs opacity-70">{product.title}</p>
+                    <ProductPrice
+                      priceCents={product.priceCents}
+                      currency={product.currency}
+                      priceNote={effectivePriceNote}
+                      shippingNote={effectiveShippingNote}
+                      isDigital={product.isDigital}
+                      size="sm"
+                    />
+                  </div>
+                  {/* The SAME resolved appearance as the button above it: the
+                      sticky bar is a second place to press the one button, not a
+                      second button. Only `ink` differs, because that belongs to
+                      the white bar this one sits on rather than to the button. */}
+                  <ProductCta
+                    target={target}
+                    label={productPage.ctaLabel}
+                    cta={cta}
+                    ink={DARK_INK}
+                    soldOut={product.soldOut}
+                    preview={preview}
+                    className="w-44 shrink-0"
+                  />
+                </StickyBar>
+              )}
+            </>
+          }
         >
-          {/* The store's own line above the page. A full-width bar rather than a
-              caption: it is the one piece of chrome that says whose shop this
-              is, and on a full screen it belongs at the top edge. */}
-          <header
-            className="w-full border-b"
-            style={{ borderColor: rule }}
-            data-product-page-header=""
-            data-setting-hotspot="header"
-          >
-            <div className="mx-auto w-full max-w-[76rem] px-4 py-3 @md:px-6 @3xl:px-10">
-              <p className="truncate text-sm font-medium">{storeName}</p>
-            </div>
-          </header>
-
           <div className="mx-auto w-full max-w-[76rem] px-4 py-8 @md:px-6 @3xl:px-10 @3xl:py-12">
             <article aria-labelledby="product-title">
               {/* ONE arrangement: photos on the left, the buy box on the right,
@@ -434,27 +443,7 @@ export function ProductPageView({
                       preview={preview}
                     />
                   </div>
-                  {trust.length > 0 && (
-                    <ul
-                      className="flex flex-col gap-2 border-t pt-4 text-xs"
-                      style={{ borderColor: rule }}
-                      data-product-trust=""
-                      // Every line here is the first sentence of a policy the
-                      // seller wrote, so the policies are what a click wants.
-                      data-setting-hotspot="policies"
-                    >
-                      {trust.map(({ icon: Icon, text }) => (
-                        <li key={text} className="flex items-start gap-2">
-                          <Icon
-                            className="mt-px size-3.5 shrink-0 opacity-60"
-                            strokeWidth={2}
-                            aria-hidden="true"
-                          />
-                          <span className="opacity-80">{text}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  <TrustList lines={trust} ruleColor={rule} />
                 </div>
               </div>
 
@@ -510,61 +499,7 @@ export function ProductPageView({
               )}
             </article>
           </div>
-
-          {/* `soldBy`, NOT gated on `showSeller`: the switch hides the "Sold by"
-              line beside the price, which is presentation, but the footer's
-              disclosure of who the buyer is contracting with is not the seller's
-              to turn off. See PoweredByFooter's header comment. No `preview`
-              prop: unlike everything else on this page, the footer's links are
-              identically live in both modes (see PoweredByFooter itself). */}
-          <PoweredByFooter
-            ruleColor={rule}
-            sellerName={soldBy}
-            product={{ id: product.id, title: product.title }}
-            storefront={{ id: storefront.id, name: storeName }}
-            reportScopes={page.reportScopes}
-            preview={preview}
-          />
-
-          {hasCta && (
-            <div
-              className={cn(
-                "inset-x-0 bottom-0 z-20 flex items-center gap-4 border-t bg-white px-4 py-3 @3xl:hidden",
-                preview ? "sticky" : "fixed",
-              )}
-              // Seller-themed surface, not the dashboard's: fixed white bar with
-              // dark ink whatever the storefront background is.
-              style={{ color: DARK_INK, borderColor: "rgba(23,23,23,0.12)" }}
-              data-product-sticky-cta=""
-              data-setting-hotspot="cta"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs opacity-70">{product.title}</p>
-                <ProductPrice
-                  priceCents={product.priceCents}
-                  currency={product.currency}
-                  priceNote={effectivePriceNote}
-                  shippingNote={effectiveShippingNote}
-                  isDigital={product.isDigital}
-                  size="sm"
-                />
-              </div>
-              {/* The SAME resolved appearance as the button above it: the sticky
-                  bar is a second place to press the one button, not a second
-                  button. Only `ink` differs, because that belongs to the white
-                  bar this one sits on rather than to the button. */}
-              <ProductCta
-                target={target}
-                label={productPage.ctaLabel}
-                cta={cta}
-                ink={DARK_INK}
-                soldOut={product.soldOut}
-                preview={preview}
-                className="w-44 shrink-0"
-              />
-            </div>
-          )}
-        </div>
+        </PageShell>
       </QuantityProvider>
     </OptionProvider>
   );

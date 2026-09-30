@@ -10,13 +10,13 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { recordPaidOrder, type RecordResult } from "@/lib/orders/record";
+import { readAccountBilling } from "@/lib/billing/account-plan";
+import { saleFee } from "@/lib/billing/fees";
+import { DEFAULT_PLAN } from "@/lib/billing/plans";
 import { optionSummaryRows } from "@/lib/products/option-details";
 import { parseOptionGroups } from "@/lib/products/detail";
 import type { ProductOption } from "@/types/product";
 import type { ShipTo } from "@/types/order-view";
-
-/** Our take on a pretend sale, the same rate the seed data uses. */
-const SIMULATED_FEE_RATE = 0.05;
 
 /** Buyers on the reserved .test domain, so nothing here can reach a real
  *  inbox even if a message escaped the dev outbox. */
@@ -97,6 +97,10 @@ export async function simulateSale(
         : Math.floor(Math.random() * BUYERS.length)
     ]!;
   const amountCents = product.price_cents * quantity;
+  // Charged the way a real sale is: the store's own plan rate on the items
+  // (there is no delivery on a pretend sale, so that is the whole amount).
+  const billing = await readAccountBilling(accountId);
+  const fee = saleFee(billing.ok ? billing.billing.plan : DEFAULT_PLAN, amountCents);
 
   return recordPaidOrder({
     checkoutSessionId:
@@ -108,7 +112,7 @@ export async function simulateSale(
     quantity,
     selection: optionSummaryRows(groups, chosen),
     amountCents,
-    platformFeeCents: Math.round(amountCents * SIMULATED_FEE_RATE),
+    ...fee,
     currency: product.currency,
     buyerEmail: buyer.email,
     buyerLocale: buyer.locale,

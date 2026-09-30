@@ -16,7 +16,8 @@
   },
   "channel": {
     "embed": "Intégration",
-    "marketplace": "Marketplace"
+    "marketplace": "Marketplace",
+    "direct": "Vos pages"
   },
   "empty": {
     "filteredTitle": "Aucune commande ne correspond à ces filtres",
@@ -110,6 +111,8 @@
       "copied": "Numéro de téléphone copié",
       "failed": "Impossible de copier le numéro de téléphone. Sélectionnez-le et copiez-le manuellement."
     },
+    "giftMessage": "Message cadeau",
+    "withdrawalNotice": "L'acheteur a demandé à se rétracter de cet achat le {date}. Organisez le retour et le remboursement avec lui.",
     "noAddress": "Cette commande ne comporte pas d'adresse de livraison. Envoyez un e-mail à l'acheteur pour lui demander où l'envoyer.",
     "shipping": "Livraison",
     "shippedOn": "Expédiée le {date}",
@@ -124,7 +127,8 @@
       "pending": "Le paiement n'a pas encore été reçu. Attendez sa confirmation avant d'expédier.",
       "refunded": "Cette commande a été remboursée, il n'y a donc rien à expédier.",
       "disputed": "Ce paiement est en litige. Réglez le litige avant d'expédier."
-    }
+    },
+    "platformFeeRate": "Commission de la plateforme ({rate})"
   },
   "actions": {
     "refundNeedsStripe": "Les remboursements nécessitent que Stripe soit connecté.",
@@ -185,7 +189,8 @@
       "buyer": "Acheteur : {email}",
       "total": "Total de la commande : {amount}",
       "openShip": "Une fois expédiée, marquez-la comme expédiée ici et nous en informerons l'acheteur : {url}",
-      "openDigital": "Voir la commande : {url}"
+      "openDigital": "Voir la commande : {url}",
+      "gift": "Message cadeau à inclure: {message}"
     },
     "shipped": {
       "subject": "Votre commande de {store} est en route",
@@ -196,6 +201,43 @@
       "shipTo": "Elle est adressée à :",
       "questions": "Des questions sur votre commande ? Répondez à cet e-mail pour contacter {store}.",
       "footer": "Envoyé par Square Share pour le compte de {store}."
+    },
+    "confirmation": {
+      "subject": "Votre commande chez {store}: {title}",
+      "intro": "Merci pour votre commande. {store} l'a bien reçue et cet e-mail en est la confirmation.",
+      "order": "Commande {number}, passée le {date}",
+      "bought": "Ce que vous avez acheté",
+      "subtotal": "Articles: {amount}",
+      "delivery": "Livraison: {amount}",
+      "deliveryFree": "Livraison: gratuite",
+      "total": "Total payé: {amount}",
+      "shipTo": "Elle sera expédiée à:",
+      "dispatch": "{store} indique: {dispatch}",
+      "nextShip": "{store} vous enverra un e-mail lorsqu'elle sera en route.",
+      "download": "Téléchargez votre fichier: {url}",
+      "orderPage": "Votre page de commande, pour suivre votre commande ou vous rétracter: {url}",
+      "orderPageDigital": "Votre page de commande: {url}",
+      "seller": "Vendu par",
+      "sellerVat": "Numéro de TVA: {vat}",
+      "withdrawal": "Vous pouvez vous rétracter de cet achat dans les 14 jours suivant la réception, sans avoir à vous justifier. Utilisez votre page de commande ou informez {store} par écrit.",
+      "withdrawalDigital": "Vous avez demandé le téléchargement immédiat et accepté que votre droit de rétractation prend fin dès qu'il commence.",
+      "guarantee": "Vous bénéficiez également de la garantie légale de conformité pour au moins deux ans.",
+      "questions": "Des questions? Répondez à cet e-mail pour contacter {store}.",
+      "footer": "Envoyé par Square Share au nom de {store}. Square Share fournit le logiciel de la boutique et n'est pas partie à cette vente."
+    },
+    "withdrawal": {
+      "buyerSubject": "Votre rétractation de la commande {number} chez {store}",
+      "buyerIntro": "Nous avons reçu votre rétractation de la commande {number} ({title}) le {date} et l'avons immédiatement transmise à {store}.",
+      "buyerNext": "{store} vous contactera au sujet du retour et de votre remboursement, dû dans les 14 jours suivant votre rétractation.",
+      "sellerSubject": "Rétractation: commande {number} ({title})",
+      "sellerIntro": "L'acheteur {email} s'est rétracté de la commande {number} le {date}, en utilisant le bouton de rétractation sur sa page de commande.",
+      "sellerName": "Nom indiqué: {name}",
+      "sellerNext": "Contactez-le pour organiser le retour et remboursez-le dans les 14 jours. Vous pouvez retenir le remboursement jusqu'au retour de l'article ou jusqu'à ce qu'il prouve qu'il a été expédié. La commande: {url}"
+    },
+    "lookup": {
+      "subject": "Votre lien de commande chez {store}",
+      "intro": "Voici le lien vers votre page pour la commande {number} chez {store}:",
+      "ignore": "Si vous n'avez pas fait cette demande, vous pouvez ignorer cet e-mail."
     }
   }
 }

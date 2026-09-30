@@ -6,6 +6,7 @@ import {
   CircleCheck,
   Clock,
   Code2,
+  Globe,
   ListFilter,
   RotateCcw,
   Search,
@@ -58,9 +59,10 @@ const SORT_OPTIONS = [
 const CHANNEL_ICONS: Record<OrderChannel, LucideIcon> = {
   embed: Code2,
   marketplace: Store,
+  direct: Globe,
 };
 
-const CHANNEL_ORDER: OrderChannel[] = ["marketplace", "embed"];
+const CHANNEL_ORDER: OrderChannel[] = ["marketplace", "embed", "direct"];
 
 /** Small muted field label — lowercase to match the app voice. */
 const fieldLabelClass = "font-inter text-xs font-medium text-muted-foreground";

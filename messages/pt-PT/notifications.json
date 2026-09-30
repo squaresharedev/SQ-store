@@ -56,7 +56,8 @@
     "stock": "Stock",
     "system": "Sistema",
     "security": "Segurança",
-    "policy": "Política"
+    "policy": "Política",
+    "billing": "Faturação"
   },
   "time": {
     "justNow": "agora mesmo",
@@ -151,6 +152,28 @@
       "newDigital": {
         "title": "Nova encomenda: {title}",
         "body": "É uma transferência, por isso não há nada para enviar."
+      },
+      "withdrawn": {
+        "title": "Um comprador retirou-se do pedido {number}",
+        "body": "{title}. Acorde com ele a devolução e o reembolso."
+      }
+    },
+    "billing": {
+      "upgraded": {
+        "title": "Está no {plan, select, starter {Starter} pro {Pro} other {plano pago}}",
+        "body": "A sua taxa em cada venda é agora mais baixa e os limites do plano foram levantados."
+      },
+      "plan_changed": {
+        "title": "O seu plano é agora {plan, select, free {Free} starter {Starter} pro {Pro} other {{plan}}}",
+        "body": "A taxa e os limites deste plano aplicam-se a partir de agora."
+      },
+      "downgraded": {
+        "title": "A sua loja está novamente no Free",
+        "body": "O seu plano pago terminou. Tudo o que tem continua a funcionar; atualize quando quiser para ter uma taxa mais baixa."
+      },
+      "paymentFailed": {
+        "title": "O pagamento do seu plano {plan, select, starter {Starter} pro {Pro} other {pago}} falhou",
+        "body": "O Stripe vai tentar novamente. Atualize o seu cartão em Plano e faturação para manter o plano."
       }
     }
   }

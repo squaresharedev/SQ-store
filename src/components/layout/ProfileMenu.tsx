@@ -4,12 +4,13 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Check, ChevronRight, Languages, LogOut, Store, User } from "lucide-react";
+import { Check, ChevronRight, Gem, Languages, LogOut, Store, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocaleSwitch } from "@/i18n/LocaleSwitchProvider";
 import { LOCALES, LOCALE_NAMES, type Locale } from "@/i18n/locales";
 import { Avatar } from "@/components/ui/avatar";
 import { Popover } from "@/components/ui/Popover";
+import { usePricingModal } from "@/components/billing/pricing-modal-context";
 import {
   focusRingClass,
   overlayItemClass,
@@ -51,6 +52,8 @@ export function ProfileMenu({
   const tLocale = useTranslations("LocaleSwitcher");
   const t = useTranslations("Nav.profileMenu");
   const tAll = useTranslations();
+  // The active store's plan, and the modal it opens (null outside a shell).
+  const pricing = usePricingModal();
 
   // Collapse the sub-lists whenever the menu closes (so it opens tidy).
   function handleOpenChange(next: boolean) {
@@ -124,6 +127,24 @@ export function ProfileMenu({
             <User className="size-4 shrink-0 text-muted-foreground" aria-hidden />
             {t("account")}
           </Link>
+
+          {pricing?.plan && (
+            <button
+              type="button"
+              data-profile-plan={pricing.plan}
+              onClick={() => {
+                handleOpenChange(false);
+                pricing.open({ source: "profile_menu" });
+              }}
+              className={ITEM}
+            >
+              <Gem className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+              {t("plan")}
+              <span className="ml-auto truncate font-inter text-xs text-muted-foreground">
+                {tAll(`Billing.plans.${pricing.plan}.name`)}
+              </span>
+            </button>
+          )}
 
           {canSwitch && (
             <>

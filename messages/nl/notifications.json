@@ -151,6 +151,10 @@
       "newDigital": {
         "title": "Nieuwe bestelling: {title}",
         "body": "Het is een download, dus er valt niets te verzenden."
+      },
+      "withdrawn": {
+        "title": "Een koper heeft zich teruggetrokken uit bestelling {number}",
+        "body": "{title}. Regel de retournering en terugbetaling met hem."
       }
     }
   }

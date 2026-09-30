@@ -101,6 +101,32 @@ export const EU_COUNTRIES = [
 
 export const EU_COUNTRY_CODES = EU_COUNTRIES.map((c) => c.code);
 
+/**
+ * The curated list of countries a buyer can choose from at checkout: all EU
+ * member states, plus the most common non-EU shipping markets. Ordered to keep
+ * EU codes together so the list is scannable.
+ *
+ * The "*" catch-all (SHIP_ANYWHERE) is handled separately and is NOT in this
+ * list; it appears as its own "Everywhere else" option in the UI.
+ *
+ * Using `as const` so the TypeScript type is a readonly tuple of literals,
+ * which lets z.enum() pick it up directly in the validation schema.
+ */
+export const SHIPPING_COUNTRY_CODES = [
+  // EU member states (mirrors EU_COUNTRY_CODES, listed explicitly for the
+  // literal-tuple type that z.enum requires)
+  "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
+  "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL",
+  "PL", "PT", "RO", "SK", "SI", "ES", "SE",
+  // EEA non-EU
+  "IS", "LI", "NO",
+  // Other key markets
+  "CH", "GB", "US", "CA", "AU", "NZ",
+] as const;
+
+/** Type-level union of the curated country codes. */
+export type ShippingCountryCode = (typeof SHIPPING_COUNTRY_CODES)[number];
+
 /** Field caps for the account-level seller/trader identity (business name
  *  lives on `tax_business_name`, capped separately at 200 — see taxSchema).
  *  Mirrors what the DB CHECKs on profiles.seller_address/seller_phone allow;

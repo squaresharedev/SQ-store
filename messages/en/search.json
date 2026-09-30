@@ -60,7 +60,9 @@
     "sellerAgreement": "Seller agreement",
     "termsOfService": "Terms of Service",
     "exportData": "Export my data",
-    "deleteAccount": "Delete account"
+    "deleteAccount": "Delete account",
+    "plan": "Plan and pricing",
+    "invoices": "Invoices and payment details"
   },
   "actions": {
     "newProduct": "New product",

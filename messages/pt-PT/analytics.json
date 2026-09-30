@@ -184,6 +184,18 @@
       "byStorefront": "Reservas por montra",
       "awaiting": "Chega com o bloco de reservas de calendário.",
       "readyToChart": "Pronto para o gráfico assim que as reservas começarem a chegar."
+    },
+    "checkout_view": {
+      "label": "Visualizações de pagamento",
+      "description": "Compradores que abriram o pagamento de um dos seus produtos.",
+      "count": "{count, plural, one {{formatted} visualização} other {{formatted} visualizações}}",
+      "total": "Total de visualizações de pagamento",
+      "emptyRange": "Sem visualizações de pagamento neste período",
+      "overTime": "Visualizações de pagamento ao longo do tempo",
+      "acrossRange": "Visualizações de pagamento no período selecionado.",
+      "byChannel": "Visualizações de pagamento por canal",
+      "byWeekday": "Visualizações de pagamento por dia da semana",
+      "byStorefront": "Visualizações de pagamento por montra"
     }
   }
 }

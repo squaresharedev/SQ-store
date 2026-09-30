@@ -50,13 +50,19 @@ create table if not exists auth.users (
   updated_at timestamptz not null default now()
 );
 
+-- The claims setting is emptied to '' (not unset) when a transaction that set
+-- it locally ends, so a pooled connection reads '' from then on. Supabase's own
+-- definitions apply nullif BEFORE the jsonb cast for exactly this reason; these
+-- match them, or any auth.*() call on a reused connection with no claims (a
+-- trigger fired by the signup path, say) fails with "invalid input syntax for
+-- type json".
 create or replace function auth.uid()
 returns uuid
 language sql stable
 as $$
   select coalesce(
     nullif(current_setting('request.jwt.claim.sub', true), ''),
-    nullif(current_setting('request.jwt.claims', true)::jsonb ->> 'sub', '')
+    nullif(nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub', '')
   )::uuid
 $$;
 
@@ -66,7 +72,7 @@ language sql stable
 as $$
   select coalesce(
     nullif(current_setting('request.jwt.claim.role', true), ''),
-    nullif(current_setting('request.jwt.claims', true)::jsonb ->> 'role', '')
+    nullif(nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'role', '')
   )
 $$;
 
@@ -76,7 +82,7 @@ language sql stable
 as $$
   select coalesce(
     nullif(current_setting('request.jwt.claim.email', true), ''),
-    nullif(current_setting('request.jwt.claims', true)::jsonb ->> 'email', '')
+    nullif(nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'email', '')
   )
 $$;
 

@@ -184,6 +184,18 @@
       "byStorefront": "Reservas por escaparate",
       "awaiting": "Llega con el bloque de reserva de calendario.",
       "readyToChart": "Listo para graficarse en cuanto empiecen a llegar reservas."
+    },
+    "checkout_view": {
+      "label": "Vistas de pago",
+      "description": "Compradores que abrieron el pago de uno de tus productos.",
+      "count": "{count, plural, one {{formatted} vista} other {{formatted} vistas}}",
+      "total": "Total de vistas de pago",
+      "emptyRange": "Sin vistas de pago en este periodo",
+      "overTime": "Vistas de pago a lo largo del tiempo",
+      "acrossRange": "Vistas de pago en el periodo seleccionado.",
+      "byChannel": "Vistas de pago por canal",
+      "byWeekday": "Vistas de pago por día de la semana",
+      "byStorefront": "Vistas de pago por escaparate"
     }
   }
 }

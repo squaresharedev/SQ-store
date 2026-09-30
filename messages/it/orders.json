@@ -16,7 +16,8 @@
   },
   "channel": {
     "embed": "Incorporamento",
-    "marketplace": "Marketplace"
+    "marketplace": "Marketplace",
+    "direct": "Le tue pagine"
   },
   "empty": {
     "filteredTitle": "Nessun ordine corrisponde a questi filtri",
@@ -110,6 +111,8 @@
       "copied": "Numero di telefono copiato",
       "failed": "Non è stato possibile copiare il numero di telefono. Selezionalo e copialo manualmente."
     },
+    "giftMessage": "Messaggio regalo",
+    "withdrawalNotice": "L'acquirente ha chiesto di recedere da questo acquisto il {date}. Concordate la restituzione e il rimborso.",
     "noAddress": "Questo ordine non ha un indirizzo di consegna. Scrivi all'acquirente per sapere dove inviarlo.",
     "shipping": "Spedizione",
     "shippedOn": "Spedito {date}",
@@ -124,7 +127,8 @@
       "pending": "Il pagamento non è ancora andato a buon fine. Aspetta prima di spedire.",
       "refunded": "Questo ordine è stato rimborsato, quindi non c'è niente da spedire.",
       "disputed": "Questo pagamento è contestato. Risolvi la contestazione prima di spedire."
-    }
+    },
+    "platformFeeRate": "Commissione della piattaforma ({rate})"
   },
   "actions": {
     "refundNeedsStripe": "I rimborsi richiedono che Stripe sia collegato.",
@@ -185,7 +189,8 @@
       "buyer": "Acquirente: {email}",
       "total": "Totale ordine: {amount}",
       "openShip": "Una volta in viaggio, segnalo come spedito qui e avviseremo l'acquirente: {url}",
-      "openDigital": "Vedi l'ordine: {url}"
+      "openDigital": "Vedi l'ordine: {url}",
+      "gift": "Messaggio regalo da includere: {message}"
     },
     "shipped": {
       "subject": "Il tuo ordine da {store} è in viaggio",
@@ -196,6 +201,43 @@
       "shipTo": "È diretto a:",
       "questions": "Domande sul tuo ordine? Rispondi a questa email per contattare {store}.",
       "footer": "Inviato da Square Share per conto di {store}."
+    },
+    "confirmation": {
+      "subject": "Il tuo ordine da {store}: {title}",
+      "intro": "Grazie per il tuo ordine. {store} lo ha ricevuto e questa e-mail è la tua conferma.",
+      "order": "Ordine {number}, effettuato il {date}",
+      "bought": "Cosa hai acquistato",
+      "subtotal": "Articoli: {amount}",
+      "delivery": "Spedizione: {amount}",
+      "deliveryFree": "Spedizione: gratuita",
+      "total": "Totale pagato: {amount}",
+      "shipTo": "Verrà spedito a:",
+      "dispatch": "{store} comunica: {dispatch}",
+      "nextShip": "{store} ti invierà un'e-mail quando sarà in viaggio.",
+      "download": "Scarica il tuo file: {url}",
+      "orderPage": "La tua pagina dell'ordine, per seguire l'ordine o esercitare il recesso: {url}",
+      "orderPageDigital": "La tua pagina dell'ordine: {url}",
+      "seller": "Venduto da",
+      "sellerVat": "Partita IVA: {vat}",
+      "withdrawal": "Puoi recedere da questo acquisto entro 14 giorni dal ricevimento, senza indicare alcun motivo. Usa la tua pagina dell'ordine oppure comunica il recesso a {store} per iscritto.",
+      "withdrawalDigital": "Hai richiesto il download immediato e hai accettato che il diritto di recesso decade non appena inizia.",
+      "guarantee": "Hai inoltre la garanzia legale di conformità per almeno due anni.",
+      "questions": "Domande? Rispondi a questa e-mail per contattare {store}.",
+      "footer": "Inviato da Square Share per conto di {store}. Square Share fornisce il software del negozio e non è parte di questa vendita."
+    },
+    "withdrawal": {
+      "buyerSubject": "Il tuo recesso dall'ordine {number} presso {store}",
+      "buyerIntro": "Abbiamo ricevuto il tuo recesso dall'ordine {number} ({title}) in data {date} e lo abbiamo trasmesso immediatamente a {store}.",
+      "buyerNext": "{store} ti contatterà per la restituzione e il rimborso, dovuto entro 14 giorni dal tuo recesso.",
+      "sellerSubject": "Recesso: ordine {number} ({title})",
+      "sellerIntro": "L'acquirente {email} ha esercitato il recesso dall'ordine {number} in data {date}, utilizzando il pulsante di recesso sulla sua pagina dell'ordine.",
+      "sellerName": "Nome indicato: {name}",
+      "sellerNext": "Contattalo per organizzare la restituzione e rimborsa entro 14 giorni. Puoi trattenere il rimborso fino al rientro dell'articolo o alla prova di spedizione. L'ordine: {url}"
+    },
+    "lookup": {
+      "subject": "Il tuo link dell'ordine presso {store}",
+      "intro": "Ecco il link alla tua pagina per l'ordine {number} presso {store}:",
+      "ignore": "Se non hai richiesto questo, puoi ignorare questa e-mail."
     }
   }
 }

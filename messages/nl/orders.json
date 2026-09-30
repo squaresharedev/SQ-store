@@ -16,7 +16,8 @@
   },
   "channel": {
     "embed": "Insluiting",
-    "marketplace": "Marketplace"
+    "marketplace": "Marketplace",
+    "direct": "Jouw pagina's"
   },
   "empty": {
     "filteredTitle": "Geen bestellingen komen overeen met deze filters",
@@ -110,6 +111,8 @@
       "copied": "Telefoonnummer gekopieerd",
       "failed": "Kopiëren van het telefoonnummer is mislukt. Selecteer en kopieer het handmatig."
     },
+    "giftMessage": "Cadeaubericht",
+    "withdrawalNotice": "De koper heeft op {date} verzocht dit aankoop te herroepen. Spreek de retourzending en terugbetaling met hen af.",
     "noAddress": "Er staat geen leveringsadres op deze bestelling. Stuur de koper een e-mail om te vragen waar het naartoe moet.",
     "shipping": "Verzending",
     "shippedOn": "Verzonden {date}",
@@ -185,7 +188,8 @@
       "buyer": "Koper: {email}",
       "total": "Totaal bestelling: {amount}",
       "openShip": "Zodra het onderweg is, markeer het dan hier als verzonden en we laten de koper weten: {url}",
-      "openDigital": "Zie de bestelling: {url}"
+      "openDigital": "Zie de bestelling: {url}",
+      "gift": "Cadeauboodschap om in te sluiten: {message}"
     },
     "shipped": {
       "subject": "Je bestelling van {store} is onderweg",
@@ -196,6 +200,43 @@
       "shipTo": "Het gaat naar:",
       "questions": "Vragen over je bestelling? Beantwoord deze e-mail om {store} te bereiken.",
       "footer": "Verstuurd door Square Share namens {store}."
+    },
+    "confirmation": {
+      "subject": "Je bestelling bij {store}: {title}",
+      "intro": "Bedankt voor je bestelling. {store} heeft hem ontvangen en deze e-mail is je bevestiging.",
+      "order": "Bestelling {number}, geplaatst op {date}",
+      "bought": "Wat je hebt gekocht",
+      "subtotal": "Artikelen: {amount}",
+      "delivery": "Bezorging: {amount}",
+      "deliveryFree": "Bezorging: gratis",
+      "total": "Totaal betaald: {amount}",
+      "shipTo": "Het wordt verzonden naar:",
+      "dispatch": "{store} meldt: {dispatch}",
+      "nextShip": "{store} stuurt je een e-mail zodra het onderweg is.",
+      "download": "Download je bestand: {url}",
+      "orderPage": "Je bestelpagina, om je bestelling te volgen of je terug te trekken: {url}",
+      "orderPageDigital": "Je bestelpagina: {url}",
+      "seller": "Verkocht door",
+      "sellerVat": "BTW-nummer: {vat}",
+      "withdrawal": "Je kunt je binnen 14 dagen na ontvangst terugtrekken uit deze aankoop, zonder opgave van reden. Gebruik je bestelpagina of laat het {store} schriftelijk weten.",
+      "withdrawalDigital": "Je hebt om directe download gevraagd en ermee ingestemd dat je herroepingsrecht eindigt zodra het begint.",
+      "guarantee": "Je hebt ook de wettelijke garantie van conformiteit voor minimaal twee jaar.",
+      "questions": "Vragen? Beantwoord deze e-mail om {store} te bereiken.",
+      "footer": "Verzonden door Square Share namens {store}. Square Share levert de winkelsoftware en is geen partij bij deze verkoop."
+    },
+    "withdrawal": {
+      "buyerSubject": "Jouw herroeping van bestelling {number} bij {store}",
+      "buyerIntro": "We hebben je herroeping van bestelling {number} ({title}) op {date} ontvangen en direct doorgegeven aan {store}.",
+      "buyerNext": "{store} neemt contact met je op over het retourneren en je terugbetaling, die binnen 14 dagen na je herroeping verschuldigd is.",
+      "sellerSubject": "Herroeping: bestelling {number} ({title})",
+      "sellerIntro": "De koper {email} heeft bestelling {number} op {date} herroepen via de herroepingsknop op zijn bestelpagina.",
+      "sellerName": "Opgegeven naam: {name}",
+      "sellerNext": "Neem contact op om het retourneren te regelen en betaal binnen 14 dagen terug. Je kunt de terugbetaling inhouden totdat het artikel terug is of de koper aantoont dat het verzonden is. De bestelling: {url}"
+    },
+    "lookup": {
+      "subject": "Jouw bestelkoppeling bij {store}",
+      "intro": "Hier is de koppeling naar je pagina voor bestelling {number} bij {store}:",
+      "ignore": "Als je dit niet hebt aangevraagd, kun je deze e-mail negeren."
     }
   }
 }

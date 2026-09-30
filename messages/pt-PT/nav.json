@@ -38,7 +38,8 @@
     "notifications": "Notificações",
     "language": "Idioma",
     "team": "Equipa e acesso",
-    "danger": "Zona de perigo"
+    "danger": "Zona de perigo",
+    "billing": "Plano e faturação"
   },
   "profileMenu": {
     "label": "Menu da conta",
@@ -46,7 +47,8 @@
     "switchAccounts": "Mudar de conta",
     "yourStore": "A sua loja",
     "owner": "Proprietário",
-    "logOut": "Terminar sessão"
+    "logOut": "Terminar sessão",
+    "plan": "Plano"
   },
   "viewingBanner": {
     "viewing": "{role, select, owner {A ver <store>{storeName}</store> como proprietário} editor {A ver <store>{storeName}</store> como editor} viewer {A ver <store>{storeName}</store> como leitor} other {A ver <store>{storeName}</store>}}",

@@ -94,7 +94,8 @@
       "typography": "Tipografia",
       "cards": "Riquadri prodotto",
       "soldOut": "Esaurito",
-      "productPage": "Pagina prodotto"
+      "productPage": "Pagina prodotto",
+      "checkoutPage": "Checkout"
     },
     "subtitle": {
       "theme": "Vetrina / Tema",
@@ -102,7 +103,8 @@
       "typography": "Vetrina / Tipografia",
       "cards": "Vetrina / Riquadri prodotto",
       "soldOut": "Vetrina / Esaurito",
-      "productPage": "Vetrina / Pagina prodotto"
+      "productPage": "Vetrina / Pagina prodotto",
+      "checkoutPage": "Vetrina / Checkout"
     },
     "labels": {
       "looks": "Aspetto della vetrina",
@@ -135,7 +137,16 @@
       "productPageAvailability": "Disponibilità sulla pagina",
       "productPageByline": "Dicitura «Venduto da»",
       "shippingReturns": "Politica di spedizione e resi",
-      "sellerDetails": "Dati venditore"
+      "sellerDetails": "Dati venditore",
+      "checkoutLayout": "Layout checkout",
+      "checkoutBackground": "Colore checkout",
+      "checkoutHeadline": "Titolo checkout",
+      "checkoutNote": "Nota per gli acquirenti",
+      "checkoutGift": "Messaggi regalo",
+      "thankYouMessage": "Messaggio di ringraziamento",
+      "thankYouCelebration": "Animazione di ringraziamento",
+      "checkoutTexture": "Texture checkout",
+      "checkoutPayButton": "Pulsante di pagamento"
     }
   },
   "editorSearch": {
@@ -151,7 +162,8 @@
       "products": "Aggiungi un prodotto",
       "shapes": "Forme",
       "uploads": "Caricamenti"
-    }
+    },
+    "openCheckout": "Apri il checkout"
   },
   "list": {
     "showingOf": "Mostrando {count} di {total} vetrine",
@@ -329,7 +341,12 @@
     "productPageLabel": " · Pagina prodotto",
     "closeAriaLabel": "Chiudi la pagina prodotto per {title}",
     "desktopSize": "Dimensioni desktop",
-    "mobileSize": "Dimensioni mobile"
+    "mobileSize": "Dimensioni mobile",
+    "checkoutLabel": " · Checkout",
+    "thanksLabel": " · Grazie",
+    "openCheckout": "Checkout",
+    "openCheckoutAriaLabel": "Apri il checkout per {title}",
+    "closeCheckoutAriaLabel": "Chiudi il checkout"
   },
   "customFont": {},
   "metadata": {
@@ -949,7 +966,12 @@
     "zoomInTip": "Aumenta zoom (Ctrl +)",
     "designSettings": "Impostazioni design",
     "page": "Pagina",
-    "moreTools": "Altri strumenti"
+    "moreTools": "Altri strumenti",
+    "checkout": "Checkout",
+    "showCheckout": "Mostra il checkout",
+    "closeCheckout": "Chiudi il checkout",
+    "showCheckoutFull": "Mostra il checkout e la pagina di ringraziamento",
+    "closeCheckoutFull": "Chiudi il checkout e la pagina di ringraziamento"
   },
   "selectionToolbar": {
     "toolsFor": "Strumenti per {name}",
@@ -978,7 +1000,11 @@
     "duplicateNamed": "Duplica {name}",
     "duplicateN": "Duplica {count, plural, one {# elemento} many {# di elementi} other {# elementi}}",
     "removeFrom": "Rimuovi {name} dalla griglia",
-    "removeN": "Rimuovi {count, plural, one {# elemento} many {# di elementi} other {# elementi}} dalla griglia"
+    "removeN": "Rimuovi {count, plural, one {# elemento} many {# di elementi} other {# elementi}} dalla griglia",
+    "openCheckout": "Apri il checkout",
+    "hideCheckout": "Nascondi il checkout",
+    "openCheckoutFor": "Mostra il checkout per {name}",
+    "closeCheckoutFor": "Nascondi il checkout per {name}"
   },
   "canvas": {
     "gridLabel": "Area di lavoro della vetrina",
@@ -1293,5 +1319,60 @@
         }
       }
     }
+  },
+  "checkoutPage": {
+    "unwired": "Gli acquirenti arrivano al checkout una volta connesso Stripe. Puoi progettarlo adesso.",
+    "charsLeft": "{count, plural, one {# carattere rimanente} other {# caratteri rimanenti}}",
+    "layout": {
+      "title": "Layout",
+      "arrangement": {
+        "label": "Disposizione",
+        "showcase": "Showcase",
+        "compact": "Compatto"
+      },
+      "pageColor": "Colore pagina",
+      "followsProductPage": "Sfondo della pagina prodotto",
+      "useProductPage": "Usa lo sfondo della pagina prodotto",
+      "button": "Il pulsante di pagamento corrisponde al pulsante d'acquisto della pagina prodotto.",
+      "styleButton": "Stile pulsante",
+      "payButton": "Pulsante di pagamento",
+      "payButtonInfoLabel": "Informazioni sul pulsante di pagamento",
+      "texture": {
+        "label": "Texture",
+        "none": "Liscia",
+        "paper": "Carta",
+        "dots": "Pois",
+        "grid": "Griglia",
+        "lines": "Righe",
+        "linen": "Lino"
+      }
+    },
+    "message": {
+      "title": "Testo",
+      "headline": "Titolo",
+      "note": "Nota per gli acquirenti",
+      "notePlaceholder": "Qualche parola da te, mostrata accanto all'ordine",
+      "gift": {
+        "label": "Messaggi regalo",
+        "infoLabel": "A cosa servono i messaggi regalo",
+        "info": "Gli acquirenti di prodotti che spedisci possono aggiungere un breve messaggio da includere nel pacco. Lo vedrai sull'ordine."
+      }
+    },
+    "thanks": {
+      "title": "Pagina di ringraziamento",
+      "headline": "Titolo",
+      "sampleName": "Giulia",
+      "message": "Messaggio",
+      "messagePlaceholder": "Cosa succede dopo, con le tue parole",
+      "celebrate": {
+        "label": "Animazione",
+        "confetti": "Coriandoli",
+        "rays": "Luce",
+        "none": "Nessuna",
+        "play": "Riproduci"
+      }
+    },
+    "unwiredBadge": "Non ancora attivo",
+    "unwiredInfoLabel": "Quando gli acquirenti arrivano al checkout"
   }
 }

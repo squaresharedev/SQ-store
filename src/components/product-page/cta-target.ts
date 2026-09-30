@@ -5,6 +5,10 @@
 
 export type CtaTarget =
   | { kind: "link"; href: string; host: string }
+  // Square Share's own checkout. The ids ride along rather than a finished
+  // href because only the CLIENT knows which version and how many are chosen
+  // at the moment of the click (see checkoutPath).
+  | { kind: "checkout"; storefrontId: string; productId: string }
   // `email` and `productTitle` ride along so the CLIENT can rebuild the href
   // once it knows which version is being looked at (see mailtoHref). Neither is
   // new on the wire: the address is already inside the mailto, and the title is
@@ -56,12 +60,24 @@ export function mailtoHref(
   return `mailto:${email}?subject=${subject}&body=${body}`;
 }
 
+/**
+ * Where the buy button goes, in order: the seller's OWN purchase link, then
+ * Square Share checkout, then an enquiry email, then nowhere.
+ *
+ * The link wins over checkout on purpose. A per-product link is a deliberate
+ * choice a seller made for that product (it sells on their own shop, or
+ * through a marketplace that holds the stock), and turning on checkout must
+ * not quietly override it. `checkout` is non-null only where a payment
+ * provider can take the money for this seller (lib/checkout/availability.ts),
+ * decided on the server and handed down as data.
+ */
 export function resolveCtaTarget(
   purchaseUrl: string | null,
   sellerEmail: string | undefined,
   productTitle: string,
   /** The enquiry subject, in the buyer's language (see mailtoHref). */
   enquirySubject: string,
+  checkout: { storefrontId: string; productId: string } | null = null,
 ): CtaTarget {
   if (purchaseUrl) {
     try {
@@ -74,6 +90,7 @@ export function resolveCtaTarget(
       // A stored value that no longer parses is treated as no link at all.
     }
   }
+  if (checkout) return { kind: "checkout", ...checkout };
   if (sellerEmail) {
     // The version-less href, which is what a server render can honestly build.
     return {

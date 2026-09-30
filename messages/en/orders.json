@@ -16,7 +16,8 @@
   },
   "channel": {
     "embed": "Embed",
-    "marketplace": "Marketplace"
+    "marketplace": "Marketplace",
+    "direct": "Your pages"
   },
   "empty": {
     "filteredTitle": "No orders match these filters",
@@ -110,6 +111,8 @@
       "copied": "Copied phone number",
       "failed": "Couldn't copy the phone number. Select and copy it manually."
     },
+    "giftMessage": "Gift message",
+    "withdrawalNotice": "The buyer asked to withdraw from this purchase on {date}. Arrange the return and refund with them.",
     "noAddress": "There's no delivery address on this order. Email the buyer to ask where it should go.",
     "shipping": "Shipping",
     "shippedOn": "Shipped {date}",
@@ -124,7 +127,8 @@
       "pending": "The payment hasn't gone through yet. Wait for it before you ship.",
       "refunded": "This order was refunded, so there's nothing to ship.",
       "disputed": "This payment is disputed. Settle the dispute before you ship."
-    }
+    },
+    "platformFeeRate": "Platform fee ({rate})"
   },
   "actions": {
     "refundNeedsStripe": "Refunds require Stripe to be connected.",
@@ -185,7 +189,8 @@
       "buyer": "Buyer: {email}",
       "total": "Order total: {amount}",
       "openShip": "Once it's on its way, mark it shipped here and we'll tell the buyer: {url}",
-      "openDigital": "See the order: {url}"
+      "openDigital": "See the order: {url}",
+      "gift": "Gift message to include: {message}"
     },
     "shipped": {
       "subject": "Your order from {store} is on its way",
@@ -196,6 +201,43 @@
       "shipTo": "It's going to:",
       "questions": "Questions about your order? Reply to this email to reach {store}.",
       "footer": "Sent by Square Share on behalf of {store}."
+    },
+    "confirmation": {
+      "subject": "Your order from {store}: {title}",
+      "intro": "Thank you for your order. {store} has it, and this email is your confirmation.",
+      "order": "Order {number}, placed {date}",
+      "bought": "What you bought",
+      "subtotal": "Items: {amount}",
+      "delivery": "Delivery: {amount}",
+      "deliveryFree": "Delivery: free",
+      "total": "Total paid: {amount}",
+      "shipTo": "It will be sent to:",
+      "dispatch": "{store} says: {dispatch}",
+      "nextShip": "{store} will email you when it's on its way.",
+      "download": "Download your file: {url}",
+      "orderPage": "Your order page, to follow your order or withdraw from the purchase: {url}",
+      "orderPageDigital": "Your order page: {url}",
+      "seller": "Sold by",
+      "sellerVat": "VAT number: {vat}",
+      "withdrawal": "You can withdraw from this purchase within 14 days of receiving it, without giving a reason. Use your order page, or tell {store} in writing.",
+      "withdrawalDigital": "You asked for the download straight away and agreed that your right to withdraw ends once it starts.",
+      "guarantee": "You also have the legal guarantee of conformity for at least two years.",
+      "questions": "Questions? Reply to this email to reach {store}.",
+      "footer": "Sent by Square Share on behalf of {store}. Square Share provides the shop software and is not a party to this sale."
+    },
+    "withdrawal": {
+      "buyerSubject": "Your withdrawal from order {number} with {store}",
+      "buyerIntro": "We received your withdrawal from order {number} ({title}) on {date} and passed it straight to {store}.",
+      "buyerNext": "{store} will contact you about returning the item and your refund, which is due within 14 days of your withdrawal.",
+      "sellerSubject": "Withdrawal: order {number} ({title})",
+      "sellerIntro": "The buyer {email} withdrew from order {number} on {date}, using the withdrawal button on their order page.",
+      "sellerName": "Name they gave: {name}",
+      "sellerNext": "Contact them to arrange the return, and refund them within 14 days. You may hold the refund until the item is back or they show it has been sent. The order: {url}"
+    },
+    "lookup": {
+      "subject": "Your order link for {store}",
+      "intro": "Here is the link to your page for order {number} with {store}:",
+      "ignore": "If you didn't ask for this, you can ignore this email."
     }
   }
 }

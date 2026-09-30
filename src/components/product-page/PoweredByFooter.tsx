@@ -52,9 +52,16 @@ import { ReportDialog } from "./ReportDialog";
 // unlike components/error/BrandFooter.tsx which sits on an app origin that does
 // set cookies.
 //
-// TODO(checkout): when in-house checkout ships it will load Stripe, which DOES
-// set cookies on this origin. At that point add the cookie policy link
-// (`${SITE}/legal/cookie-policy/`) and revisit whether a consent gate is owed.
+// TODO(stripe): checkout itself stores nothing either, but once it loads
+// Stripe's payment fields, Stripe DOES set cookies on the checkout page. At
+// that point add the cookie policy link (`${SITE}/legal/cookie-policy/`) there
+// and revisit whether a consent gate is owed.
+//
+// THE WITHDRAWAL LINK. A shop that sells through Square Share checkout owes
+// its buyers a way to withdraw from a purchase that they can reach from the
+// shop itself (Consumer Rights Directive art. 11a), not only from an email.
+// When the page passes `withdrawHref`, the footer carries it, at the same
+// quiet weight as everything else here.
 //
 // Nothing beyond attribution and disclosure belongs in this footer: no
 // guarantee, no "buyer protection", nothing that reads as Squareshare standing
@@ -90,6 +97,9 @@ export function PoweredByFooter({
   /** Editor preview: the report link renders but does nothing. See
    *  ReportDialog for why it is shown rather than hidden. */
   preview = false,
+  /** Where a buyer withdraws from a purchase (the order lookup), on a shop
+   *  that sells through checkout. Absent = no such link. */
+  withdrawHref,
 }: {
   ruleColor: string;
   sellerName: string;
@@ -97,8 +107,10 @@ export function PoweredByFooter({
   storefront: { id: string; name: string };
   reportScopes?: ProductPageReportScopes;
   preview?: boolean;
+  withdrawHref?: string;
 }) {
   const t = useTranslations("ProductPage.footer");
+  const tOrder = useTranslations("ProductPage.order");
   return (
     <footer className="w-full border-t" style={{ borderColor: ruleColor }} data-product-page-footer="">
       {/* opacity-70, not lighter: that is the muted level already proven to
@@ -191,6 +203,14 @@ export function PoweredByFooter({
             scopes={reportScopes}
             preview={preview}
           />
+          {withdrawHref && (
+            <>
+              <Dot />
+              <a href={withdrawHref} className="underline-offset-2 hover:underline" data-withdraw-link="">
+                {tOrder("footerLink")}
+              </a>
+            </>
+          )}
         </div>
       </div>
     </footer>

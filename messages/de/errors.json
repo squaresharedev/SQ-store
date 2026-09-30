@@ -52,6 +52,10 @@
     "fulfilOrders": {
       "withRole": "Mit deiner Rolle als {role, select, owner {Inhaber} editor {Bearbeiter} viewer {Betrachter} other {{role}}} kannst du in diesem Shop keine Bestellungen als versandt markieren.",
       "noRole": "Du hast keine Berechtigung, in diesem Shop Bestellungen als versandt zu markieren."
+    },
+    "manageBilling": {
+      "withRole": "Deine Rolle als {role, select, owner {Inhaber} editor {Bearbeiter} viewer {Betrachter} other {{role}}} darf den Tarif dieses Shops nicht ändern.",
+      "noRole": "Du hast keine Berechtigung, den Tarif dieses Shops zu ändern."
     }
   },
   "notFound": {
@@ -76,7 +80,9 @@
     "readProductPageSettings": "Zu viele Versuche, in kurzer Zeit die Produktseiteneinstellungen abzurufen.",
     "requestReview": "Zu viele Überprüfungsanfragen in kurzer Zeit.",
     "fileAppeal": "Zu viele Versuche, einen Einspruch in kurzer Zeit zu senden.",
-    "fulfilOrders": "Zu viele Versuche, Bestellungen in kurzer Zeit als versandt zu markieren."
+    "fulfilOrders": "Zu viele Versuche, Bestellungen in kurzer Zeit als versandt zu markieren.",
+    "readCheckoutSettings": "Zu viele Versuche, in kurzer Zeit die Kasseneinstellungen abzurufen.",
+    "changePlan": "Zu viele Tarifwechsel in kurzer Zeit gestartet."
   },
   "serverError": {
     "fix": "Das ist meist vorübergehend. Warte kurz und versuche es erneut. Falls es weiterhin fehlschlägt, lade die Seite neu.",
@@ -104,7 +110,12 @@
     "saveProductPageSettings": "Deine Produktseiteneinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht gespeichert werden.",
     "sendForReview": "Die Überprüfungsanfrage konnte wegen eines Problems auf unserer Seite nicht gesendet werden.",
     "fileAppeal": "Dein Einspruch konnte aufgrund eines Problems auf unserer Seite nicht gesendet werden.",
-    "markOrderShipped": "Die Bestellung konnte aufgrund eines Problems auf unserer Seite nicht als versandt markiert werden."
+    "markOrderShipped": "Die Bestellung konnte aufgrund eines Problems auf unserer Seite nicht als versandt markiert werden.",
+    "loadCheckoutSettings": "Deine Kasseneinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht geladen werden.",
+    "saveCheckoutSettings": "Deine Kasseneinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht gespeichert werden.",
+    "loadPlans": "Dein Tarif konnte wegen eines Problems auf unserer Seite nicht geladen werden.",
+    "startCheckout": "Der Checkout konnte wegen eines Problems auf unserer Seite nicht geöffnet werden.",
+    "openBillingPortal": "Deine Abrechnungsdaten konnten wegen eines Problems auf unserer Seite nicht geöffnet werden."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Dieses Produkt wurde entfernt, nicht pausiert.} storefront {Dieses Schaufenster wurde entfernt, nicht pausiert.} other {Dieses Element wurde entfernt, nicht pausiert.}}",
@@ -578,5 +589,25 @@
       "message": "Diese Bestellung kann nicht als versandt markiert werden.",
       "fix": "Nur bezahlte Bestellungen mit Artikeln zum Versenden können als versandt markiert werden. Lade die Seite neu, um den aktuellen Status zu sehen."
     }
+  },
+  "checkoutPageApi": {
+    "notObjectFix": "Sende ein JSON-Objekt, z. B. '{'\"layout\": \"compact\"'}'.",
+    "invalid": "Diese Kasseneinstellungen sind ungültig.",
+    "invalidFix": "Überprüfe das oben genannte Feld anhand von `limits` aus einem GET dieser URL und versuche es dann erneut."
+  },
+  "billing": {
+    "unavailable": "Kostenpflichtige Tarife sind gerade nicht verfügbar.",
+    "unavailableFix": "Dein Shop funktioniert weiter mit seinem aktuellen Tarif. Versuche es später erneut.",
+    "invalidPlan": "Diesen Tarif bieten wir nicht an.",
+    "alreadySubscribed": "Dein Shop hat bereits einen kostenpflichtigen Tarif. Wechsle den Tarif, statt einen zweiten zu kaufen.",
+    "noBillingAccount": "Dieser Shop hat noch kein Abrechnungskonto. Wechsle zuerst zu einem kostenpflichtigen Tarif.",
+    "noSubscription": "Dieser Shop hat keinen kostenpflichtigen Tarif, den man ändern könnte. Wähle einen zum Upgraden.",
+    "ownerOnlyFix": "Nur der Inhaber des Shops kann den Tarif ändern. Frage ihn oder wechsle zu deinem eigenen Shop."
+  },
+  "planLimit": {
+    "storefronts": "{plan, select, free {Dein Free-Tarif} starter {Dein Starter-Tarif} pro {Dein Pro-Tarif} other {Dein aktueller Tarif}} enthält {cap, plural, one {# Schaufenster} other {# Schaufenster}}, und dein Shop nutzt sie alle.",
+    "teamSeats": "{plan, select, free {Dein Free-Tarif} starter {Dein Starter-Tarif} pro {Dein Pro-Tarif} other {Dein aktueller Tarif}} enthält {cap, plural, one {# Platz} other {# Plätze}}, du eingeschlossen, und alle sind belegt.",
+    "fix": "Wechsle für mehr zu einem höheren Tarif oder entferne, was du nicht mehr brauchst. Nichts, was du hast, ist betroffen.",
+    "action": "Tarife ansehen"
   }
 }

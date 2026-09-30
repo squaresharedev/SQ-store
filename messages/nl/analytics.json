@@ -184,6 +184,18 @@
       "byStorefront": "Reserveringen per etalage",
       "awaiting": "Komt binnen met het reserveringsblok voor de kalender.",
       "readyToChart": "Klaar om weer te geven zodra de eerste reserveringen binnenkomen."
+    },
+    "checkout_view": {
+      "label": "Afrekenweergaven",
+      "description": "Kopers die de afrekenpagina voor een van jouw producten hebben geopend.",
+      "count": "{count, plural, one {{formatted} weergave} other {{formatted} weergaven}}",
+      "total": "Totaal afrekenweergaven",
+      "emptyRange": "Geen afrekenweergaven in deze periode",
+      "overTime": "Afrekenweergaven in de tijd",
+      "acrossRange": "Afrekenweergaven over de geselecteerde periode.",
+      "byChannel": "Afrekenweergaven per kanaal",
+      "byWeekday": "Afrekenweergaven per weekdag",
+      "byStorefront": "Afrekenweergaven per etalage"
     }
   }
 }

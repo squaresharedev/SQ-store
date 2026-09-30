@@ -1,33 +1,11 @@
-import { revalidatePath } from "next/cache";
-import { getTranslations } from "next-intl/server";
-import { msg, type MessageRef } from "@/i18n/types";
 import { resolveCta, resolveInk } from "@/components/product-page/product-page-maps";
-import {
-  invalidInput,
-  notFound,
-  permissionDenied,
-  rateLimited,
-  serverError,
-  sessionExpired,
-  type ActionError,
-  type ActionErrorCode,
-} from "@/lib/errors";
-import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
+import { pageConfigRoute } from "@/lib/storefront/page-config-route";
 import { isDefaultProductPage, resolveProductPage } from "@/lib/storefront/product-page";
-import { createClient } from "@/lib/supabase/server";
-import { getActiveAccount } from "@/lib/team/account-context";
-import { can } from "@/lib/team/permissions";
-import {
-  parseStoredStorefrontConfig,
-  productPageSchema,
-  storefrontIdSchema,
-} from "@/lib/validation/storefront";
-import { firstIssue } from "@/lib/validation/messages";
+import { productPageSchema } from "@/lib/validation/storefront";
 import {
   PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX,
   PRODUCT_PAGE_CTA_MAX,
   PRODUCT_PAGE_CTA_RADIUS_MAX,
-  type ProductPageConfig,
   type StorefrontConfig,
 } from "@/types/storefront";
 
@@ -69,45 +47,6 @@ import {
  * `handleSave` does it, so an untouched storefront's jsonb stays byte-identical.
  */
 
-const STATUS: Record<ActionErrorCode, number> = {
-  session_expired: 401,
-  permission_denied: 403,
-  not_found: 404,
-  invalid_input: 400,
-  upload_failed: 400,
-  rate_limited: 429,
-  server_error: 500,
-  // The caller is authenticated and permitted, but the ACCOUNT has not
-  // disclosed the trader details a buyer is entitled to, so the request cannot
-  // be fulfilled as it stands: 409, the same answer any other "your account is
-  // not in a state where this is allowed" gets. Not 403, which would say the
-  // token lacks the right — it does not.
-  trader_identity_required: 409,
-  unexpected: 500,
-};
-
-/** ActionError as the error envelope, per docs/agent-surface.md: a stable
- *  machine `code`, a human `message`, and a `fix` that is a next step rather
- *  than an apology. The envelope carries TEXT, in the request's language: a
- *  caller of a JSON API has no catalogue to resolve message keys against. */
-async function fail(error: ActionError) {
-  const t = await getTranslations();
-  const text = (ref: MessageRef) => t(ref.key, ref.values);
-  return Response.json(
-    {
-      error: {
-        code: error.code,
-        message: text(error.message),
-        ...(error.fix ? { fix: text(error.fix) } : {}),
-        ...(error.action
-          ? { action: { href: error.action.href, label: text(error.action.label) } }
-          : {}),
-      },
-    },
-    { status: STATUS[error.code] },
-  );
-}
-
 /** The one payload both verbs answer with, so a write's response is a read. */
 function payload(storefrontId: string, config: StorefrontConfig) {
   const productPage = resolveProductPage(config);
@@ -132,146 +71,30 @@ function payload(storefrontId: string, config: StorefrontConfig) {
   };
 }
 
-/**
- * The storefront's stored config, or an error to answer with.
- *
- * ACCOUNT SCOPING IS NOT OPTIONAL: RLS lets a team member read every store
- * they belong to, so the query pins the ACTIVE account explicitly. Without it
- * a member of two stores could read (and with the write below, edit) either
- * one through the other's URL.
- */
-async function loadConfig(
-  id: string,
-  accountId: string,
-): Promise<{ config: StorefrontConfig } | { error: ActionError }> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("storefronts")
-    .select("config")
-    .eq("id", id)
-    .eq("owner_id", accountId)
-    .maybeSingle();
-  if (error) {
-    console.error("[product-page] read failed", error.message);
-    return { error: serverError("loadProductPageSettings") };
-  }
-  if (!data) return { error: notFound("storefront") };
-  const config = parseStoredStorefrontConfig(data.config);
-  if (!config) {
-    console.warn("[product-page] stored config failed to parse", id);
-    return { error: serverError("loadProductPageSettings") };
-  }
-  return { config };
-}
+// The handlers are the shared page settings route (lib/storefront/
+// page-config-route.ts); the checkout's route is the same one over its own
+// member.
+const route = pageConfigRoute({
+  member: "productPage",
+  schema: productPageSchema,
+  resolve: resolveProductPage,
+  isDefault: isDefaultProductPage,
+  payload,
+  log: "product-page",
+  operations: {
+    read: "readProductPageSettings",
+    load: "loadProductPageSettings",
+    save: "saveProductPageSettings",
+  },
+  messages: {
+    notJson: "Errors.productPageApi.notJson.message",
+    notJsonFix: "Errors.productPageApi.notJson.fix",
+    notObject: "Errors.productPageApi.notObject.message",
+    notObjectFix: "Errors.productPageApi.notObject.fix",
+    invalid: "Errors.productPageApi.invalid",
+    invalidFix: "Errors.productPageApi.invalidFix",
+  },
+});
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const { id } = await params;
-  if (!storefrontIdSchema.safeParse(id).success) return fail(notFound("storefront"));
-
-  const account = await getActiveAccount();
-  if (!account) return fail(sessionExpired());
-  if (!can(account.role, "store.read")) {
-    return fail(permissionDenied(account.role, "viewStorefronts"));
-  }
-  if (!(await rateLimit("product_page_read", RATE_LIMITS.productPageRead))) {
-    return fail(rateLimited("readProductPageSettings"));
-  }
-
-  const loaded = await loadConfig(id, account.accountId);
-  if ("error" in loaded) return fail(loaded.error);
-  return Response.json(payload(id, loaded.config));
-}
-
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const { id } = await params;
-  if (!storefrontIdSchema.safeParse(id).success) return fail(notFound("storefront"));
-
-  const account = await getActiveAccount();
-  if (!account) return fail(sessionExpired());
-  if (!can(account.role, "storefront.write")) {
-    return fail(permissionDenied(account.role, "editStorefronts"));
-  }
-  // The designer's own budget: this writes the same column by the same rules,
-  // so it is the same cost and belongs in the same bucket.
-  if (!(await rateLimit("storefront_write", RATE_LIMITS.storefrontWrite))) {
-    return fail(rateLimited("saveStorefronts"));
-  }
-
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return fail(
-      invalidInput(
-        msg("Errors.productPageApi.notJson.message"),
-        msg("Errors.productPageApi.notJson.fix"),
-      ),
-    );
-  }
-  if (typeof body !== "object" || body === null || Array.isArray(body)) {
-    return fail(
-      invalidInput(
-        msg("Errors.productPageApi.notObject.message"),
-        msg("Errors.productPageApi.notObject.fix"),
-      ),
-    );
-  }
-
-  const loaded = await loadConfig(id, account.accountId);
-  if ("error" in loaded) return fail(loaded.error);
-  const current = resolveProductPage(loaded.config);
-
-  // Merge, then let the schema judge the WHOLE thing. A `null` deletes rather
-  // than sets: for an optional field that is the only way to say "go back to
-  // following the storefront", and for a required one the schema will now
-  // refuse it by name, which is a better answer than storing a null.
-  const merged: Record<string, unknown> = { ...current };
-  for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
-    if (value === null) delete merged[key];
-    else merged[key] = value;
-  }
-
-  const parsed = productPageSchema.safeParse(merged);
-  if (!parsed.success) {
-    // The schema's own message names the field and the bound it broke, which
-    // is exactly what a caller (or an agent) needs to correct the call. It
-    // carries no stored data, so returning it leaks nothing.
-    return fail(
-      invalidInput(
-        firstIssue(parsed.error, msg("Errors.productPageApi.invalid")),
-        msg("Errors.productPageApi.invalidFix"),
-      ),
-    );
-  }
-  const productPage = parsed.data as ProductPageConfig;
-
-  // A page left at the defaults is stored as NO member, the same rule
-  // handleSave applies: an untouched storefront must not start carrying a
-  // productPage key just because something read it back and wrote it out.
-  const config: StorefrontConfig = { ...loaded.config };
-  if (isDefaultProductPage(productPage)) delete config.productPage;
-  else config.productPage = productPage;
-
-  const supabase = await createClient();
-  const { data: row, error } = await supabase
-    .from("storefronts")
-    .update({ config, updated_at: new Date().toISOString() })
-    .eq("id", id)
-    .eq("owner_id", account.accountId)
-    .select("id")
-    .maybeSingle();
-  if (error) {
-    console.error("[product-page] save failed", error.message);
-    return fail(serverError("saveProductPageSettings"));
-  }
-  if (!row) return fail(notFound("storefront"));
-
-  revalidatePath(`/storefront/${id}`);
-  return Response.json(payload(id, config));
-}
+export const GET = route.GET;
+export const PATCH = route.PATCH;

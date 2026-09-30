@@ -184,6 +184,18 @@
       "byStorefront": "Rezerwacje według witryny",
       "awaiting": "Pojawi się wraz z blokiem rezerwacji kalendarza.",
       "readyToChart": "Gotowe do wykresu, gdy tylko zaczną napływać rezerwacje."
+    },
+    "checkout_view": {
+      "label": "Wyświetlenia kasy",
+      "description": "Kupujący, którzy otworzyli kasę dla jednego z Twoich produktów.",
+      "count": "{count, plural, one {{formatted} wyświetlenie} few {{formatted} wyświetlenia} many {{formatted} wyświetleń} other {{formatted} wyświetlenia}}",
+      "total": "Łączna liczba wyświetleń kasy",
+      "emptyRange": "Brak wyświetleń kasy w tym okresie",
+      "overTime": "Wyświetlenia kasy w czasie",
+      "acrossRange": "Wyświetlenia kasy w wybranym okresie.",
+      "byChannel": "Wyświetlenia kasy według kanału",
+      "byWeekday": "Wyświetlenia kasy według dnia tygodnia",
+      "byStorefront": "Wyświetlenia kasy według witryny"
     }
   }
 }

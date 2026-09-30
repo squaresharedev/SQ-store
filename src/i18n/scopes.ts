@@ -64,6 +64,7 @@ export const CLIENT_SCOPES = {
   app: [
     "Analytics",
     "Auth",
+    "Billing",
     "Dashboard",
     "Nav",
     "Notifications",

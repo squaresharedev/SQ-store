@@ -1,3 +1,4 @@
+import type { Currency } from "@/types/product";
 import type { ShippingProfile } from "@/types/storefront";
 
 /**
@@ -42,12 +43,23 @@ export type SellerShippingPolicy = {
    *  below ("Ships within 1-3 business days"), which is why it is its own
    *  field and not the first sentence of a paragraph. */
   dispatch?: string;
-  /** Where it goes and how long it takes. A short list, not a rate table. */
+  /** Where it goes and how long it takes. A short list, not a rate table.
+   *  Rows gain optional machine-readable `countries` and `rateCents` for
+   *  checkout quoting; rows without those remain pure display copy. */
   destinations?: ShippingDestination[];
   /** Anything the rows above cannot say. Appended to the generated prose. */
   shippingNotes?: string;
   /** The seller's own shipping paragraph, used INSTEAD of the generated one. */
   shippingText?: string;
+
+  // --- Rates ---
+  /** ISO 4217 currency for every rate in `destinations` and `freeOverCents`.
+   *  Absent = "EUR". All rates in one policy share one currency so checkout
+   *  can sum them without conversion. */
+  ratesCurrency?: Currency;
+  /** Order subtotal at or above which delivery is free, in `ratesCurrency`.
+   *  0 is falsy here and treated as absent (not a meaningful threshold). */
+  freeOverCents?: number;
 
   // --- Returns ---
   /** Days from delivery. 0 = none offered beyond the statutory right the page
@@ -79,9 +91,28 @@ export type ShippingDestination = {
    *  whether the count includes dispatch, and forcing a number would make the
    *  page state something the seller did not mean. */
   time: string;
-  /** "€4.50", "Free over €50". Absent = say nothing about cost. */
+  /** "€4.50", "Free over €50". Absent = say nothing about cost. Kept for
+   *  display back-compat: when `rateCents` is also set, prose uses the rate
+   *  and this field is the human-readable fallback for non-checkout surfaces. */
   cost?: string;
+  /** ISO 3166-1 alpha-2 country codes this row covers, or the single entry
+   *  `SHIP_ANYWHERE` ("*") meaning every country not matched by another row.
+   *  Absent = this row has no machine-readable geography (display-only). */
+  countries?: string[];
+  /** Rate in cents (integer, 0 = free) for orders to these countries.
+   *  Absent = this row is display-only; checkout ignores it.
+   *  A row is PRICED when both `rateCents` and `countries` are present. */
+  rateCents?: number;
 };
+
+/** The sentinel country code meaning "any country not listed on another row".
+ *  A priced destination row with this as its only country entry matches every
+ *  buyer whose country is not found on a more specific priced row first. */
+export const SHIP_ANYWHERE = "*";
+
+/** Maximum flat delivery rate in cents (€1,000). Past this a seller is
+ *  expressing something a flat-rate table cannot represent cleanly. */
+export const SHIPPING_RATE_MAX_CENTS = 100_000;
 
 export const RETURNS_PAID_BY = ["buyer", "seller"] as const;
 export type ReturnsPaidBy = (typeof RETURNS_PAID_BY)[number];

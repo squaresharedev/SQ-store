@@ -63,6 +63,17 @@ const POLICY_FREE_BY_DESIGN = new Set([
   // could write an opt-in could switch a way in on.
   "mfa_approval_opt_ins",
   "mfa_verify_intents",
+  // Seller plans (20260930_seller_plans). seller_billing is which plan an
+  // account pays for, written only by the Stripe webhook through the service
+  // role (lib/billing). A client that could write it could put itself on Pro;
+  // members read their store's plan through the server, never the table.
+  "seller_billing",
+  // The webhook's idempotency ledger: an event id recorded here is one that is
+  // never applied again, so a client that could write it could block one.
+  "stripe_events",
+  // Pricing-modal funnel events, produced server-side only (lib/billing/
+  // funnel.ts). Nothing here is a seller's to read or forge.
+  "seller_funnel_events",
 ]);
 
 afterAll(async () => {

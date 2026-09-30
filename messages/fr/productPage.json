@@ -173,6 +173,161 @@
     "areaAndTime": "{area} : {time}",
     "areaAndTimeWithCost": "{area} : {time} ({cost})",
     "withCost": "{place} ({cost})",
-    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Retours acceptés dans un délai de {days} jour après la livraison. Les frais de retour sont à notre charge.} many {Retours acceptés dans un délai de {days} jours après la livraison. Les frais de retour sont à notre charge.} other {Retours acceptés dans un délai de {days} jours après la livraison. Les frais de retour sont à notre charge.}}} buyer {{days, plural, one {Retours acceptés dans un délai de {days} jour après la livraison. Les frais de retour sont à la charge de l’acheteur.} many {Retours acceptés dans un délai de {days} jours après la livraison. Les frais de retour sont à la charge de l’acheteur.} other {Retours acceptés dans un délai de {days} jours après la livraison. Les frais de retour sont à la charge de l’acheteur.}}} other {{days, plural, one {Retours acceptés dans un délai de {days} jour après la livraison.} many {Retours acceptés dans un délai de {days} jours après la livraison.} other {Retours acceptés dans un délai de {days} jours après la livraison.}}}}"
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Retours acceptés dans un délai de {days} jour après la livraison. Les frais de retour sont à notre charge.} many {Retours acceptés dans un délai de {days} jours après la livraison. Les frais de retour sont à notre charge.} other {Retours acceptés dans un délai de {days} jours après la livraison. Les frais de retour sont à notre charge.}}} buyer {{days, plural, one {Retours acceptés dans un délai de {days} jour après la livraison. Les frais de retour sont à la charge de l’acheteur.} many {Retours acceptés dans un délai de {days} jours après la livraison. Les frais de retour sont à la charge de l’acheteur.} other {Retours acceptés dans un délai de {days} jours après la livraison. Les frais de retour sont à la charge de l’acheteur.}}} other {{days, plural, one {Retours acceptés dans un délai de {days} jour après la livraison.} many {Retours acceptés dans un délai de {days} jours après la livraison.} other {Retours acceptés dans un délai de {days} jours après la livraison.}}}}",
+    "rateIsFree": "Gratuit",
+    "freeOver": "Livraison gratuite pour les commandes de plus de {amount}."
+  },
+  "order": {
+    "metadata": {
+      "title": "Votre commande | {store}"
+    },
+    "thanks": "Merci !",
+    "thanksNamed": "Merci, {name} !",
+    "number": "Commande {number}",
+    "confirmationSent": "Une confirmation est en route vers {email}.",
+    "deliverTo": "Livraison à {place}",
+    "timeline": {
+      "label": "Et ensuite",
+      "paid": "Commande passée",
+      "paidDetail": "Payée le {date}",
+      "preparing": "En préparation",
+      "preparingDetail": "{seller} prépare votre commande.",
+      "shipped": "En route",
+      "shippedDetail": "Expédiée le {date}",
+      "tracking": "Numéro de suivi {number}",
+      "notYet": "Vous recevrez un e-mail lorsqu'elle sera expédiée.",
+      "ready": "Prêt à télécharger",
+      "readyDetail": "Votre fichier est prêt ci-dessous, et le lien est aussi dans votre e-mail."
+    },
+    "download": "Télécharger ({format})",
+    "downloadPlain": "Télécharger votre fichier",
+    "contact": "Des questions sur votre commande ? Écrivez à {seller}.",
+    "withdraw": {
+      "title": "Vous avez changé d'avis ?",
+      "body": "Vous pouvez vous rétracter de cet achat jusqu'au {date}.",
+      "open": "Se rétracter du contrat ici",
+      "formTitle": "Se rétracter de cet achat",
+      "formBody": "Confirmez votre nom et votre e-mail. {seller} sera informé immédiatement et vous contactera pour le retour et le remboursement.",
+      "name": "Votre nom",
+      "email": "Votre e-mail",
+      "confirm": "Confirmer la rétractation",
+      "cancel": "Conserver ma commande",
+      "sending": "Envoi en cours...",
+      "done": "Vous vous êtes rétracté de cet achat le {date}. {seller} a été informé et une confirmation est dans votre boîte mail.",
+      "failed": "L'envoi a échoué. Réessayez ou écrivez à {seller}.",
+      "bodyOpen": "Vous pouvez vous rétracter de cet achat à tout moment jusqu'à {days} jours après réception.",
+      "emailMismatch": "Cet e-mail ne correspond pas à cette commande. Utilisez l'e-mail avec lequel vous avez passé commande."
+    },
+    "lookup": {
+      "metadata": {
+        "title": "Retrouver ma commande | {store}"
+      },
+      "title": "Retrouver votre commande",
+      "body": "Entrez l'e-mail avec lequel vous avez passé commande et votre numéro de commande. Nous vous enverrons le lien vers votre page de commande, où vous pouvez aussi vous rétracter.",
+      "email": "E-mail",
+      "number": "Numéro de commande",
+      "submit": "M'envoyer le lien",
+      "sending": "Envoi en cours...",
+      "done": "Si cela correspond à une commande de cette boutique, le lien est en route vers cet e-mail.",
+      "rateLimited": "Trop de tentatives. Attendez un moment et réessayez."
+    },
+    "footerLink": "Se rétracter d'un achat",
+    "total": "Total payé",
+    "quantity": "Quantité : {quantity}",
+    "editHeadline": "Titre du remerciement"
+  },
+  "checkout": {
+    "metadata": {
+      "title": "Paiement | {store}"
+    },
+    "secure": "Paiement sécurisé",
+    "headline": "Presque à vous",
+    "back": "Retour à {title}",
+    "changeVersion": "Modifier",
+    "quantity": "Quantité",
+    "sections": {
+      "contact": "Contact",
+      "delivery": "Livraison",
+      "payment": "Paiement",
+      "summary": "Récapitulatif de commande"
+    },
+    "fields": {
+      "email": "E-mail",
+      "emailHint": "Pour votre reçu et les mises à jour sur cette commande.",
+      "name": "Nom complet",
+      "line1": "Adresse",
+      "line2": "Appartement, suite, etc.",
+      "addLine2": "Ajouter appartement, suite, etc.",
+      "city": "Ville",
+      "region": "Département, état ou région",
+      "postalCode": "Code postal",
+      "country": "Pays",
+      "whyAsk": "Pourquoi nous le demandons"
+    },
+    "gift": {
+      "toggle": "Ajouter un message cadeau",
+      "label": "Message cadeau",
+      "placeholder": "Quelques mots à glisser dans le colis",
+      "count": "{count} sur {max}"
+    },
+    "note": {
+      "from": "De {name}",
+      "placeholder": "Ajoutez ici une note pour vos acheteurs",
+      "editNote": "Note aux acheteurs",
+      "editThanks": "Message de remerciement",
+      "thanksPlaceholder": "Ajoutez ici un message de remerciement"
+    },
+    "summary": {
+      "subtotal": "Sous-total",
+      "delivery": "Livraison",
+      "deliveryTo": "Livraison vers {country}",
+      "free": "Gratuit",
+      "total": "Total",
+      "inclVat": "TVA incluse",
+      "digital": "Téléchargement numérique, rien à livrer",
+      "showSummary": "Afficher le récapitulatif",
+      "digitalFormat": "Téléchargement numérique ({format}), rien à livrer",
+      "freeGap": "Plus que {amount} pour la livraison gratuite"
+    },
+    "payment": {
+      "testTitle": "Paiement test",
+      "testBody": "Ceci est un paiement de développement. Aucune carte n'est débitée et aucun argent ne bouge.",
+      "previewTitle": "Détails de la carte",
+      "previewBody": "Carte, Apple Pay et Google Pay apparaîtront ici dans vos couleurs une fois Stripe connecté.",
+      "cardNumber": "Numéro de carte",
+      "expiry": "MM / AA",
+      "cvc": "CVV",
+      "card": "Carte"
+    },
+    "legal": {
+      "sellerDetails": "Informations du vendeur",
+      "privacy": "{seller} utilise votre nom, adresse de livraison et e-mail pour exécuter cette commande et respecter ses obligations légales, et les conserve aussi longtemps que la loi l'exige. Vous pouvez demander à {seller} de les consulter, les rectifier ou les effacer. Square Share les traite pour le compte de {seller}.",
+      "privacyLink": "Confidentialité",
+      "digitalConsent": "Je veux le téléchargement immédiatement et je comprends que je perds mon droit de rétractation dès qu'il commence.",
+      "soldByIn": "Vendu par {seller}, {country}",
+      "privacySummary": "Comment {seller} utilise vos données"
+    },
+    "pay": "Commander avec obligation de paiement ({amount})",
+    "placing": "Passage de la commande...",
+    "unwired": "Le paiement s'ouvre pour les acheteurs lorsque vous connectez Stripe.",
+    "errors": {
+      "title": "Nous n'avons pas pu passer votre commande",
+      "required": "Ce champ est obligatoire.",
+      "email": "Entrez une adresse e-mail comme nom@exemple.com.",
+      "fields": "Vérifiez les champs mis en évidence.",
+      "consent": "Cochez la case pour confirmer que vous voulez le téléchargement immédiatement.",
+      "sold_out": "Désolé, c'est en rupture de stock. Rien n'a été débité.",
+      "insufficient_stock": "Il n'y en a pas assez pour cette quantité. Essayez une quantité inférieure.",
+      "quantity": "Cette quantité n'est pas disponible. Essayez une quantité inférieure.",
+      "options": "Cette version n'est plus disponible. Revenez et choisissez-en une autre.",
+      "not_shipped_here": "{seller} ne livre pas dans ce pays.",
+      "no_shipping_rates": "La livraison ne peut pas être calculée pour l'instant. Rien n'a été débité.",
+      "not_found": "Ce produit n'est plus disponible à l'achat.",
+      "rate_limited": "Trop de tentatives. Attendez quelques minutes et réessayez.",
+      "unavailable": "Le paiement n'est pas disponible pour l'instant. Rien n'a été débité.",
+      "failed": "Une erreur s'est produite et rien n'a été débité. Réessayez.",
+      "invalid": "Certains détails nécessitent une vérification. Vérifiez les champs mis en évidence."
+    },
+    "editHeadline": "Titre du paiement"
   }
 }

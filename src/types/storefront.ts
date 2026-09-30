@@ -950,6 +950,11 @@ export type ShippingProfile = {
   dispatch?: string;
   /** The terms themselves, plain paragraphs like the default's. */
   body: string;
+  /** A flat rate in cents that REPLACES the matched destination's rate for
+   *  products on this profile. Which countries are eligible still comes from
+   *  the destinations; this just overrides the per-country amount. Absent =
+   *  inherit whatever the destination row says. 0 = free for this profile. */
+  rateCents?: number;
 };
 
 /** A store keeps a short list of exceptions, not a rate table. Past a handful
@@ -996,6 +1001,91 @@ export const DEFAULT_PRODUCT_PAGE_CONFIG: ProductPageConfig = {
   showSeller: true,
   allowIndexing: false,
   sections: PRODUCT_PAGE_SECTION_IDS.map((id) => ({ id, show: true })),
+};
+
+// ── Checkout ────────────────────────────────────────────────────────────
+//
+// The hosted checkout a product page's button leads to, and the thank-you
+// page an order lands on. ONE design per storefront, like the product page,
+// and held to the same rules: closed enums, booleans, strict hex, capped plain
+// text, nothing that could render as markup, a URL or CSS.
+//
+// WHAT A SELLER DESIGNS, AND WHAT THEY DO NOT. The seller decides how the
+// checkout LOOKS and what it SAYS around the edges: the arrangement, the
+// backdrop, a line of welcome, a note in their own words, and the thank-you.
+// The platform owns the core a buyer relies on, which is drawn in the seller's
+// colours but never optional or reworded: the contact and delivery fields, the
+// payment, the summary with the full total, the legal block and the pay
+// button. The pay button's LABEL in particular is fixed per language, because
+// EU law (Consumer Rights Directive art. 8(2)) makes an order button that does
+// not say it creates an obligation to pay leave the buyer unbound.
+//
+// INHERITANCE. The checkout follows the product page (its backdrop, its font,
+// its buy button), which follows the storefront. So the pay button is the SAME
+// button as "Buy now", and a checkout nobody has touched already looks like the
+// shop it came from.
+
+/** showcase: the product shown large on the storefront's own backdrop beside
+ *  the form. compact: one calm column with a receipt-like summary on top. */
+export const CHECKOUT_LAYOUTS = ["showcase", "compact"] as const;
+export type CheckoutLayout = (typeof CHECKOUT_LAYOUTS)[number];
+
+/** The moment an order lands on the thank-you page. "rays" is the soft light
+ *  burst the dashboard's empty states use; reduced motion always gets a still
+ *  whichever is chosen. */
+export const CHECKOUT_CELEBRATIONS = ["confetti", "rays", "none"] as const;
+export type CheckoutCelebration = (typeof CHECKOUT_CELEBRATIONS)[number];
+
+/** A quiet pattern over the checkout's surface, drawn in the page's own ink at
+ *  a few percent so it never costs the form its legibility. No "none" member:
+ *  a plain page is the ABSENT field, like every other optional here, so an
+ *  untouched checkout never grows a key. The patterns themselves are code
+ *  (components/checkout/checkout-textures.ts), never stored CSS. */
+export const CHECKOUT_TEXTURES = ["paper", "dots", "grid", "lines", "linen"] as const;
+export type CheckoutTexture = (typeof CHECKOUT_TEXTURES)[number];
+
+/** One line above the form, and one above the thank-you. */
+export const CHECKOUT_HEADLINE_MAX = 60;
+/** The maker's note beside the summary: a few sentences, not a letter. */
+export const CHECKOUT_NOTE_MAX = 280;
+/** The thank-you message: room for "what to expect" in the seller's words. */
+export const CHECKOUT_THANKS_MESSAGE_MAX = 600;
+/** The gift message a buyer may write for the parcel. Mirrors the CHECK on
+ *  orders.gift_message (20260928_checkout.sql). */
+export const GIFT_MESSAGE_MAX = 200;
+
+export type CheckoutPageConfig = {
+  layout: CheckoutLayout;
+  /**
+   * The checkout's own surface. ABSENT = the product page's backdrop, which
+   * itself falls back to the storefront's background. A solid colour only, for
+   * the reason the product page gives: this is a page people READ and type
+   * into. The showcase layout's brand panel keeps the storefront's own
+   * background (gradient or photo included), because that panel is looked at.
+   */
+  backgroundColor?: string;
+  /** A pattern over that surface (the checkout and the thank-you page alike).
+   *  ABSENT = plain. */
+  texture?: CheckoutTexture;
+  /** Above the form. ABSENT = a default line in the buyer's language. */
+  headline?: string;
+  /** A few words from the maker beside the summary, signed with the business
+   *  name. ABSENT = no note. */
+  note?: string;
+  /** Whether a buyer of something that ships may add a gift message. */
+  giftMessage: boolean;
+  /** The thank-you page's heading. ABSENT = a default in the buyer's language. */
+  thanksHeadline?: string;
+  /** The thank-you page's message. ABSENT = none; the page still says what
+   *  happens next, from the order itself. */
+  thanksMessage?: string;
+  celebrate: CheckoutCelebration;
+};
+
+export const DEFAULT_CHECKOUT_PAGE_CONFIG: CheckoutPageConfig = {
+  layout: "showcase",
+  giftMessage: false,
+  celebrate: "confetti",
 };
 
 /**
@@ -1607,6 +1697,8 @@ export type StorefrontConfig = {
   embed?: EmbedSettings;
   /** The hosted product page's own options. Absent = DEFAULT_PRODUCT_PAGE_CONFIG. */
   productPage?: ProductPageConfig;
+  /** The hosted checkout and thank-you page. Absent = DEFAULT_CHECKOUT_PAGE_CONFIG. */
+  checkoutPage?: CheckoutPageConfig;
   // NO `seller`, `policies` OR `shippingProfiles` MEMBER. Trader identity (see
   // the StorefrontSeller doc comment above) and shipping/returns terms (see
   // SellerShippingPolicy in types/shipping-policy.ts) are both account-level

@@ -9,7 +9,7 @@ import {
 } from "@/lib/storefront/layout-presets";
 import { spotRow } from "@/types/storefront";
 import { cn } from "@/lib/utils";
-import { OptionCardPicker } from "./OptionCardPicker";
+import { OptionCardPicker, optionGlyphFrameClass } from "./OptionCardPicker";
 
 /**
  * The five layouts, as pictures of themselves.
@@ -36,7 +36,7 @@ function PresetGlyph({ preset }: { preset: LayoutPreset }) {
   return (
     <span
       aria-hidden="true"
-      className="flex h-12 w-10 flex-col overflow-hidden rounded-sm border border-border bg-background"
+      className={cn("flex h-12 w-10 flex-col", optionGlyphFrameClass)}
     >
       {bar && row === "top" && (
         <span className="flex h-3.5 items-center border-b border-border bg-background px-1">

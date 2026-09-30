@@ -56,7 +56,8 @@
     "stock": "Stock",
     "system": "Sistema",
     "security": "Seguridad",
-    "policy": "Normas"
+    "policy": "Normas",
+    "billing": "Facturación"
   },
   "time": {
     "justNow": "ahora mismo",
@@ -151,6 +152,28 @@
       "newDigital": {
         "title": "Nuevo pedido: {title}",
         "body": "Es una descarga, así que no hay nada que enviar."
+      },
+      "withdrawn": {
+        "title": "Un comprador se retiró del pedido {number}",
+        "body": "{title}. Organiza la devolución y el reembolso con él."
+      }
+    },
+    "billing": {
+      "upgraded": {
+        "title": "Estás en {plan, select, starter {Starter} pro {Pro} other {un plan de pago}}",
+        "body": "Tu comisión en cada venta es más baja a partir de ahora y los límites de tu plan se han ampliado."
+      },
+      "plan_changed": {
+        "title": "Tu plan ahora es {plan, select, free {Free} starter {Starter} pro {Pro} other {{plan}}}",
+        "body": "Su comisión y sus límites se aplican a partir de ahora."
+      },
+      "downgraded": {
+        "title": "Tu tienda está en Free de nuevo",
+        "body": "Tu plan de pago ha terminado. Todo lo que tienes sigue funcionando; actualiza cuando quieras para obtener una comisión más baja."
+      },
+      "paymentFailed": {
+        "title": "El pago de tu plan {plan, select, starter {Starter} pro {Pro} other {de pago}} ha fallado",
+        "body": "Stripe lo intentará de nuevo. Actualiza tu tarjeta en Plan y facturación para conservar el plan."
       }
     }
   }

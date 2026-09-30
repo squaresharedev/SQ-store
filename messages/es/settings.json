@@ -30,6 +30,9 @@
     },
     "security": {
       "title": "Seguridad"
+    },
+    "billing": {
+      "title": "Plan y facturación"
     }
   },
   "loading": "Cargando configuración…",
@@ -400,10 +403,25 @@
       "timePlaceholder": "p. ej. 5-7 días laborables",
       "costLabel": "Coste de envío {number}",
       "costPlaceholder": "p. ej. 9,00 €",
+      "rateLabel": "Tarifa {number}",
+      "ratePlaceholder": "p.ej. 4,50",
+      "rateHint": "Dejar en blanco para solo mostrar.",
+      "countriesLabel": "Países {number}",
+      "countriesNone": "Sin países",
+      "everywhereElse": "En cualquier otro lugar",
       "removeNamed": "Quitar el destino {area}",
       "removeNumbered": "Quitar el destino {number}",
       "add": "Añadir un destino",
       "limitReached": "{max, plural, one {Ese es el límite: # destino. Quita uno para añadir otro.} many {Ese es el límite: # destinos. Quita uno para añadir otro.} other {Ese es el límite: # destinos. Quita uno para añadir otro.}}"
+    },
+    "rates": {
+      "title": "Tarifas de envío",
+      "description": "Establezca tarifas legibles por máquina para que el proceso de pago pueda mostrar el total de entrega antes de que el comprador pague, según lo exige la Directiva de Derechos del Consumidor de la UE.",
+      "currencyLabel": "Moneda de tarifa",
+      "freeOverLabel": "Envío gratuito a partir de",
+      "freeOverPlaceholder": "p.ej. 50,00",
+      "freeOverHint": "Cuando el total del pedido alcance este importe, la entrega es gratuita.",
+      "hint": "Estas tarifas son las que cobra el proceso de pago. Deje la tarifa de un destino en blanco para mantenerlo solo como visualización."
     },
     "notes": {
       "label": "Algo más sobre el envío",
@@ -462,6 +480,9 @@
       "bodyLabel": "Envío",
       "bodyPlaceholder": "Cómo se envían estos productos y cuánto cuesta",
       "noTerms": "Añade condiciones, o este perfil se descartará al guardar.",
+      "rateLabel": "Anular tarifa",
+      "ratePlaceholder": "p.ej. 9,50",
+      "rateHint": "Reemplaza la tarifa de destino correspondiente para los productos de este perfil.",
       "add": "Añadir un perfil",
       "limitReached": "{max, plural, one {Ese es el límite: # perfil. Quita uno para añadir otro.} many {Ese es el límite: # perfiles. Quita uno para añadir otro.} other {Ese es el límite: # perfiles. Quita uno para añadir otro.}}"
     },

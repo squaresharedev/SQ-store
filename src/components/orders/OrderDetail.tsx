@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { TriangleAlert, X } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import {
   helpTextClass,
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { CopyButton, type CopyButtonMessages } from "@/components/ui/CopyButton";
 import { formatOrderDateTime } from "@/lib/format/date";
 import { formatCents } from "@/lib/format/money";
+import { formatFeeRate } from "@/lib/billing/format";
 import { regionName } from "@/lib/format/country";
 import { formatOrderSelection } from "@/lib/orders/selection";
 import { formatShipTo } from "@/lib/orders/ship-to";
@@ -165,6 +166,33 @@ export function OrderDetail({
           )
         )}
 
+        {ships && order.giftMessage && (
+          <Row label={t("detail.giftMessage")}>
+            {/* Quoted and whitespace-pre-line: the buyer's own words, untouched. */}
+            <p className="whitespace-pre-line text-sm text-foreground">
+              {order.giftMessage}
+            </p>
+          </Row>
+        )}
+
+        {order.withdrawalRequestedAt && (
+          <div
+            role="alert"
+            className="flex items-start gap-2 rounded-md border border-border bg-muted/50 px-4 py-3"
+          >
+            <TriangleAlert
+              className="mt-0.5 size-4 shrink-0 text-foreground"
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+            <p className="text-sm text-foreground">
+              {t("detail.withdrawalNotice", {
+                date: formatOrderDateTime(order.withdrawalRequestedAt, locale),
+              })}
+            </p>
+          </div>
+        )}
+
         {ships && (
           <Row label={t("detail.shipTo")}>
             {address ? (
@@ -221,7 +249,15 @@ export function OrderDetail({
           </span>
         </Row>
 
-        <Row label={t("detail.platformFee")}>
+        <Row
+          label={
+            // The rate the sale was charged at, when the order recorded it
+            // (every order since plans; older ones show the bare label).
+            order.platformFeeBps !== null
+              ? t("detail.platformFeeRate", { rate: formatFeeRate(order.platformFeeBps, locale) })
+              : t("detail.platformFee")
+          }
+        >
           <span className="text-sm text-foreground">
             {formatCents(order.platformFeeCents, order.currency, locale)}
           </span>

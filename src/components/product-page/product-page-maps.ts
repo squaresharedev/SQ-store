@@ -152,6 +152,13 @@ export function resolveCta(
   };
 }
 
+/** The buy button's box: size, weight and the hover fade. ONE class for every
+ *  place the page's action is drawn (the buy box, the sticky bar, the
+ *  checkout's pay button), so "Buy now" and "Pay" are the same button rather
+ *  than two that happen to look alike. Colour and shape come from ctaStyle. */
+export const CTA_BUTTON_CLASS =
+  "inline-flex w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold transition-opacity duration-base ease-standard";
+
 /** Inline style for the buy button. The outline is drawn INSIDE the box (an
  *  inset shadow, like the price tag's) so turning it on never resizes the
  *  button or shifts the words inside it. */

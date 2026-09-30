@@ -1,7 +1,8 @@
 {
   "checkForm": "Sprawdź formularz i spróbuj ponownie.",
   "generic": {
-    "invalid": "Sprawdź formularz i spróbuj ponownie."
+    "invalid": "Sprawdź formularz i spróbuj ponownie.",
+    "sellerProse": "Tutaj nie mogą znajdować się linki, adresy e-mail ani dane bankowe. Kupujący płacą przez kasę, a Twoje dane kontaktowe już są na stronie."
   },
   "text": {
     "productTitle": {
@@ -240,6 +241,66 @@
       "required": "Napisz przynajmniej {minimum} znaków wyjaśnienia.",
       "tooLong": "Ogranicz odwołanie do {maximum} znaków.",
       "unsupported": "Twoje odwołanie zawiera nieobsługiwane znaki."
+    },
+    "checkoutHeadline": {
+      "required": "Nagłówek kasy jest wymagany.",
+      "tooLong": "Nagłówek kasy musi mieć co najwyżej {maximum} znaków.",
+      "unsupported": "Nagłówek kasy zawiera nieobsługiwane znaki."
+    },
+    "checkoutNote": {
+      "required": "Notatka dla kupujących jest wymagana.",
+      "tooLong": "Notatka dla kupujących musi mieć co najwyżej {maximum} znaków.",
+      "unsupported": "Notatka dla kupujących zawiera nieobsługiwane znaki."
+    },
+    "thanksHeadline": {
+      "required": "Nagłówek podziękowania jest wymagany.",
+      "tooLong": "Nagłówek podziękowania musi mieć co najwyżej {maximum} znaków.",
+      "unsupported": "Nagłówek podziękowania zawiera nieobsługiwane znaki."
+    },
+    "thanksMessage": {
+      "required": "Wiadomość z podziękowaniem jest wymagana.",
+      "tooLong": "Wiadomość z podziękowaniem musi mieć co najwyżej {maximum} znaków.",
+      "unsupported": "Wiadomość z podziękowaniem zawiera nieobsługiwane znaki."
+    },
+    "giftMessage": {
+      "required": "Napisz wiadomość na prezent lub wyłącz ją.",
+      "tooLong": "Wiadomość na prezent musi mieć co najwyżej {maximum} znaków.",
+      "unsupported": "Wiadomość na prezent zawiera nieobsługiwane znaki."
+    },
+    "buyerName": {
+      "required": "Wpisz swoje imię i nazwisko.",
+      "tooLong": "Imię i nazwisko musi mieć co najwyżej {maximum} znaków.",
+      "unsupported": "Imię i nazwisko zawiera nieobsługiwane znaki."
+    },
+    "addressLine1": {
+      "required": "Wpisz swój adres.",
+      "tooLong": "Adres musi mieć co najwyżej {maximum} znaków.",
+      "unsupported": "Adres zawiera nieobsługiwane znaki."
+    },
+    "addressLine2": {
+      "required": "Wpisz drugi wiersz adresu.",
+      "tooLong": "Drugi wiersz adresu musi mieć co najwyżej {maximum} znaków.",
+      "unsupported": "Drugi wiersz adresu zawiera nieobsługiwane znaki."
+    },
+    "city": {
+      "required": "Wpisz swoją miejscowość.",
+      "tooLong": "Miejscowość musi mieć co najwyżej {maximum} znaków.",
+      "unsupported": "Miejscowość zawiera nieobsługiwane znaki."
+    },
+    "region": {
+      "required": "Wpisz swoje województwo lub region.",
+      "tooLong": "Województwo lub region musi mieć co najwyżej {maximum} znaków.",
+      "unsupported": "Województwo lub region zawiera nieobsługiwane znaki."
+    },
+    "postalCode": {
+      "required": "Wpisz swój kod pocztowy.",
+      "tooLong": "Kod pocztowy musi mieć co najwyżej {maximum} znaków.",
+      "unsupported": "Kod pocztowy zawiera nieobsługiwane znaki."
+    },
+    "orderReference": {
+      "required": "Podaj numer zamówienia.",
+      "tooLong": "Ten numer zamówienia jest za długi.",
+      "unsupported": "Ten numer zamówienia zawiera nieobsługiwane znaki."
     }
   },
   "email": {
@@ -267,6 +328,11 @@
       "format": "E-mail osoby odpowiedzialnej w UE nie wygląda na adres e-mail.",
       "tooLong": "E-mail osoby odpowiedzialnej w UE jest za długi.",
       "unsupported": "E-mail osoby odpowiedzialnej w UE zawiera nieobsługiwane znaki."
+    },
+    "buyer": {
+      "format": "Wpisz adres e-mail, np. imie@przyklad.pl.",
+      "tooLong": "Ten adres e-mail jest za długi.",
+      "unsupported": "Ten adres e-mail zawiera nieobsługiwane znaki."
     }
   },
   "emailQuality": {
@@ -293,7 +359,8 @@
     "notificationRecipient": "Odbiorca powiadomienia jest nieprawidłowy.",
     "factor": "Ta aplikacja uwierzytelniająca jest nieprawidłowa.",
     "reportTarget": "Ten element jest nieprawidłowy.",
-    "moderationDecision": "Ta decyzja jest nieprawidłowa."
+    "moderationDecision": "Ta decyzja jest nieprawidłowa.",
+    "checkoutAttempt": "Sesja kasy wygasła. Odśwież stronę i spróbuj ponownie."
   },
   "handle": {
     "username": "Nazwa użytkownika musi mieć od 3 do 30 znaków, tylko litery, cyfry i znaki podkreślenia."
@@ -323,12 +390,26 @@
       "whole": "Maksimum na zamówienie musi być liczbą całkowitą.",
       "tooSmall": "Maksimum na zamówienie musi wynosić co najmniej {minimum}.",
       "tooBig": "Maksimum na zamówienie nie może przekraczać {maximum}."
+    },
+    "shippingRate": {
+      "whole": "Stawka wysyłkowa musi być całkowitą liczbą centów.",
+      "tooSmall": "Stawka wysyłkowa nie może być ujemna.",
+      "tooBig": "Stawka wysyłkowa nie może przekroczyć {maximum} centów."
+    },
+    "freeOverCents": {
+      "whole": "Próg darmowej wysyłki musi być całkowitą liczbą centów.",
+      "tooSmall": "Próg darmowej wysyłki nie może być ujemny.",
+      "tooBig": "Próg darmowej wysyłki nie może przekroczyć {maximum} centów."
     }
   },
   "list": {
     "domains": {
       "tooMany": "Podaj maksymalnie {maximum} domen.",
       "duplicate": "Każdy wpis w domenach może wystąpić tylko raz."
+    },
+    "destinationCountries": {
+      "tooMany": "Miejsce docelowe może obejmować co najwyżej {maximum} krajów.",
+      "duplicate": "Każdy kraj może pojawić się tylko raz w danym miejscu docelowym."
     }
   },
   "settings": {

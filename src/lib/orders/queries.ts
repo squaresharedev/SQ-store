@@ -28,7 +28,7 @@ import type {
 //   platform_fee_cents, currency, buyer_email, product_title,
 //   product_price_cents, selected_options, created_at, quantity, ship_to,
 //   buyer_locale, fulfilment_status, shipped_at, tracking_number,
-//   checkout_session_id
+//   checkout_session_id, gift_message, withdrawal_requested_at
 
 export const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 100;
@@ -38,9 +38,11 @@ function emptyPage(page: number, pageSize: number): Paginated<OrderView> {
   return { rows: [], total: 0, page, pageSize };
 }
 
-/** Coerce an unknown channel string to a valid OrderChannel. */
-function toChannel(value: unknown): OrderChannel {
-  return value === "marketplace" ? "marketplace" : "embed";
+/** Coerce an unknown channel string to a valid OrderChannel. Exported for tests. */
+export function toChannel(value: unknown): OrderChannel {
+  if (value === "marketplace") return "marketplace";
+  if (value === "direct") return "direct";
+  return "embed";
 }
 
 /** Coerce an unknown status string to a valid OrderStatus. */
@@ -61,17 +63,21 @@ function toOrderView(row: Record<string, unknown>): OrderView {
     fulfilment: parseFulfilment(row),
     amountCents: Number(row.amount_cents ?? 0),
     platformFeeCents: Number(row.platform_fee_cents ?? 0),
+    platformFeeBps: row.platform_fee_bps != null ? Number(row.platform_fee_bps) : null,
     currency: String(row.currency ?? ""),
     channel: toChannel(row.channel),
     status: toStatus(row.status),
     buyerEmail: row.buyer_email != null ? String(row.buyer_email) : null,
     createdAt: String(row.created_at ?? ""),
+    giftMessage: row.gift_message != null ? String(row.gift_message) : null,
+    withdrawalRequestedAt:
+      row.withdrawal_requested_at != null ? String(row.withdrawal_requested_at) : null,
   };
 }
 
 /** The column list every order read selects — one contract, one place. */
 const ORDER_COLUMNS =
-  "id, product_title, selected_options, quantity, ship_to, fulfilment_status, shipped_at, tracking_number, amount_cents, platform_fee_cents, currency, channel, status, buyer_email, created_at";
+  "id, product_title, selected_options, quantity, ship_to, fulfilment_status, shipped_at, tracking_number, amount_cents, platform_fee_cents, platform_fee_bps, currency, channel, status, buyer_email, created_at, gift_message, withdrawal_requested_at";
 
 /**
  * The To ship rule (lib/orders/fulfilment.ts isToShip) as a query filter, so

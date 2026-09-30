@@ -837,8 +837,11 @@ export type Database = {
           checkout_session_id: string | null
           created_at: string
           currency: string
+          digital_file_key: string | null
           fulfilment_status: string
+          gift_message: string | null
           id: string
+          platform_fee_bps: number | null
           platform_fee_cents: number
           product_id: string | null
           product_price_cents: number
@@ -846,11 +849,15 @@ export type Database = {
           quantity: number
           selected_options: Json
           seller_id: string
+          seller_plan: string | null
           ship_to: Json | null
           shipped_at: string | null
+          shipping_cents: number | null
           status: string
           storefront_id: string | null
+          supply_consent_at: string | null
           tracking_number: string | null
+          withdrawal_requested_at: string | null
         }
         Insert: {
           amount_cents: number
@@ -860,8 +867,11 @@ export type Database = {
           checkout_session_id?: string | null
           created_at?: string
           currency?: string
+          digital_file_key?: string | null
           fulfilment_status?: string
+          gift_message?: string | null
           id?: string
+          platform_fee_bps?: number | null
           platform_fee_cents?: number
           product_id?: string | null
           product_price_cents: number
@@ -869,11 +879,15 @@ export type Database = {
           quantity?: number
           selected_options?: Json
           seller_id: string
+          seller_plan?: string | null
           ship_to?: Json | null
           shipped_at?: string | null
+          shipping_cents?: number | null
           status?: string
           storefront_id?: string | null
+          supply_consent_at?: string | null
           tracking_number?: string | null
+          withdrawal_requested_at?: string | null
         }
         Update: {
           amount_cents?: number
@@ -883,8 +897,11 @@ export type Database = {
           checkout_session_id?: string | null
           created_at?: string
           currency?: string
+          digital_file_key?: string | null
           fulfilment_status?: string
+          gift_message?: string | null
           id?: string
+          platform_fee_bps?: number | null
           platform_fee_cents?: number
           product_id?: string | null
           product_price_cents?: number
@@ -892,11 +909,15 @@ export type Database = {
           quantity?: number
           selected_options?: Json
           seller_id?: string
+          seller_plan?: string | null
           ship_to?: Json | null
           shipped_at?: string | null
+          shipping_cents?: number | null
           status?: string
           storefront_id?: string | null
+          supply_consent_at?: string | null
           tracking_number?: string | null
+          withdrawal_requested_at?: string | null
         }
         Relationships: [
           {
@@ -1312,6 +1333,119 @@ export type Database = {
           },
         ]
       }
+      seller_billing: {
+        Row: {
+          billing_interval: string | null
+          cancel_at_period_end: boolean
+          canceled_at: string | null
+          created_at: string
+          currency: string | null
+          current_period_end: string | null
+          livemode: boolean
+          owner_id: string
+          paid_until: string | null
+          plan: string | null
+          price_cents: number | null
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id: string | null
+          stripe_synced_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_interval?: string | null
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          currency?: string | null
+          current_period_end?: string | null
+          livemode?: boolean
+          owner_id: string
+          paid_until?: string | null
+          plan?: string | null
+          price_cents?: number | null
+          status?: string
+          stripe_customer_id: string
+          stripe_subscription_id?: string | null
+          stripe_synced_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_interval?: string | null
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          currency?: string | null
+          current_period_end?: string | null
+          livemode?: boolean
+          owner_id?: string
+          paid_until?: string | null
+          plan?: string | null
+          price_cents?: number | null
+          status?: string
+          stripe_customer_id?: string
+          stripe_subscription_id?: string | null
+          stripe_synced_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_billing_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seller_funnel_events: {
+        Row: {
+          account_id: string
+          actor_id: string | null
+          billing_interval: string | null
+          created_at: string
+          id: string
+          kind: string
+          plan: string | null
+          source: string | null
+        }
+        Insert: {
+          account_id: string
+          actor_id?: string | null
+          billing_interval?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          plan?: string | null
+          source?: string | null
+        }
+        Update: {
+          account_id?: string
+          actor_id?: string | null
+          billing_interval?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          plan?: string | null
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_funnel_events_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seller_funnel_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       storefront_signals: {
         Row: {
           account_id: string
@@ -1457,6 +1591,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      stripe_events: {
+        Row: {
+          id: string
+          livemode: boolean
+          processed_at: string | null
+          received_at: string
+          side_effects_at: string | null
+          type: string
+        }
+        Insert: {
+          id: string
+          livemode: boolean
+          processed_at?: string | null
+          received_at?: string
+          side_effects_at?: string | null
+          type: string
+        }
+        Update: {
+          id?: string
+          livemode?: boolean
+          processed_at?: string | null
+          received_at?: string
+          side_effects_at?: string | null
+          type?: string
+        }
+        Relationships: []
       }
       team_members: {
         Row: {
@@ -1611,6 +1772,7 @@ export type Database = {
       }
     }
     Functions: {
+      account_plan: { Args: { p_owner: string }; Returns: string }
       admin_notification_scan_tick: { Args: never; Returns: undefined }
       admin_revoke_user_sessions: {
         Args: { target_user_id: string }
@@ -1626,6 +1788,37 @@ export type Database = {
       analytics_aggregate: {
         Args: { p_from?: string; p_seller_id: string; p_to?: string }
         Returns: Json
+      }
+      billing_apply_snapshot: {
+        Args: {
+          p_cancel_at_period_end: boolean
+          p_canceled_at: string | null
+          p_currency: string | null
+          p_current_period_end: string | null
+          p_customer: string
+          p_interval: string | null
+          p_livemode: boolean
+          p_owner: string
+          p_paid_until: string | null
+          p_plan: string | null
+          p_price_cents: number | null
+          p_status: string
+          p_subscription: string | null
+          p_synced_at: string
+        }
+        Returns: {
+          applied: boolean
+          previous_paid_until: string | null
+          previous_plan: string | null
+        }[]
+      }
+      billing_sales_summary: {
+        Args: { p_now?: string; p_seller_id: string }
+        Returns: {
+          fees_cents: number
+          sales: number
+          subtotal_cents: number
+        }[]
       }
       current_admin_user_id: { Args: never; Returns: string }
       dashboard_orders_aggregate: {
@@ -1660,6 +1853,7 @@ export type Database = {
         Args: { p_order_id: string; p_tracking_number?: string | null }
         Returns: string
       }
+      plan_limit: { Args: { p_key: string; p_plan: string }; Returns: number }
       product_sales_aggregate: { Args: { p_seller_id: string }; Returns: Json }
       products_ranked_by_metric: {
         Args: {

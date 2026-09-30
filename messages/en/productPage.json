@@ -173,6 +173,161 @@
     "areaAndTime": "{area}: {time}",
     "areaAndTimeWithCost": "{area}: {time} ({cost})",
     "withCost": "{place} ({cost})",
-    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Returns accepted within {days} day of delivery. Return postage is on us.} other {Returns accepted within {days} days of delivery. Return postage is on us.}}} buyer {{days, plural, one {Returns accepted within {days} day of delivery. Return postage is paid by the buyer.} other {Returns accepted within {days} days of delivery. Return postage is paid by the buyer.}}} other {{days, plural, one {Returns accepted within {days} day of delivery.} other {Returns accepted within {days} days of delivery.}}}}"
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Returns accepted within {days} day of delivery. Return postage is on us.} other {Returns accepted within {days} days of delivery. Return postage is on us.}}} buyer {{days, plural, one {Returns accepted within {days} day of delivery. Return postage is paid by the buyer.} other {Returns accepted within {days} days of delivery. Return postage is paid by the buyer.}}} other {{days, plural, one {Returns accepted within {days} day of delivery.} other {Returns accepted within {days} days of delivery.}}}}",
+    "rateIsFree": "Free",
+    "freeOver": "Free delivery on orders over {amount}."
+  },
+  "checkout": {
+    "metadata": {
+      "title": "Checkout | {store}"
+    },
+    "secure": "Secure checkout",
+    "headline": "Almost yours",
+    "back": "Back to {title}",
+    "changeVersion": "Change",
+    "quantity": "Quantity",
+    "sections": {
+      "contact": "Contact",
+      "delivery": "Delivery",
+      "payment": "Payment",
+      "summary": "Order summary"
+    },
+    "fields": {
+      "email": "Email",
+      "emailHint": "For your receipt and updates about this order.",
+      "name": "Full name",
+      "line1": "Address",
+      "line2": "Apartment, suite, etc.",
+      "addLine2": "Add apartment, suite, etc.",
+      "city": "Town or city",
+      "region": "County, state or region",
+      "postalCode": "Postcode",
+      "country": "Country",
+      "whyAsk": "Why we ask"
+    },
+    "gift": {
+      "toggle": "Add a gift message",
+      "label": "Gift message",
+      "placeholder": "A few words to go in the parcel",
+      "count": "{count} of {max}"
+    },
+    "note": {
+      "from": "From {name}",
+      "placeholder": "Add a note to your buyers here",
+      "editNote": "Note to buyers",
+      "editThanks": "Thank-you message",
+      "thanksPlaceholder": "Add a thank-you message here"
+    },
+    "summary": {
+      "subtotal": "Subtotal",
+      "delivery": "Delivery",
+      "deliveryTo": "Delivery to {country}",
+      "free": "Free",
+      "total": "Total",
+      "inclVat": "incl. VAT",
+      "digital": "Digital download, nothing to deliver",
+      "showSummary": "Show order summary",
+      "digitalFormat": "Digital download ({format}), nothing to deliver",
+      "freeGap": "{amount} away from free delivery"
+    },
+    "payment": {
+      "testTitle": "Test payment",
+      "testBody": "This is a development checkout. No card is charged and no money moves.",
+      "previewTitle": "Card details",
+      "previewBody": "Card, Apple Pay and Google Pay appear here, in your colours, once Stripe is connected.",
+      "cardNumber": "Card number",
+      "expiry": "MM / YY",
+      "cvc": "CVC",
+      "card": "Card"
+    },
+    "legal": {
+      "sellerDetails": "Seller details",
+      "privacy": "{seller} uses your name, delivery address and email to fulfil this order and meet its legal duties, and keeps them for as long as the law requires. You can ask {seller} to show, correct or delete them. Square Share handles them on {seller}'s behalf.",
+      "privacyLink": "Privacy",
+      "digitalConsent": "I want the download straight away, and I understand that I lose my right to withdraw once it starts.",
+      "soldByIn": "Sold by {seller}, {country}",
+      "privacySummary": "How {seller} uses your details"
+    },
+    "pay": "Pay {amount}",
+    "placing": "Placing your order…",
+    "unwired": "Checkout opens for buyers when you connect Stripe.",
+    "errors": {
+      "title": "We couldn't place your order",
+      "required": "This is required.",
+      "email": "Enter an email address like name@example.com.",
+      "fields": "Check the highlighted fields.",
+      "consent": "Tick the box to confirm you want the download straight away.",
+      "sold_out": "Sorry, this has just sold out. Nothing was charged.",
+      "insufficient_stock": "There aren't enough left for that many. Try a smaller quantity.",
+      "quantity": "That quantity isn't available. Try a smaller one.",
+      "options": "That version isn't available any more. Go back and choose another.",
+      "not_shipped_here": "{seller} doesn't deliver to that country.",
+      "no_shipping_rates": "Delivery can't be priced right now. Nothing was charged.",
+      "not_found": "This product isn't available to buy any more.",
+      "rate_limited": "Too many attempts. Wait a few minutes and try again.",
+      "unavailable": "Checkout isn't available right now. Nothing was charged.",
+      "failed": "Something went wrong and nothing was charged. Try again.",
+      "invalid": "Some details need another look. Check the highlighted fields."
+    },
+    "editHeadline": "Checkout headline"
+  },
+  "order": {
+    "metadata": {
+      "title": "Your order | {store}"
+    },
+    "thanks": "Thank you!",
+    "thanksNamed": "Thank you, {name}!",
+    "number": "Order {number}",
+    "confirmationSent": "A confirmation is on its way to {email}.",
+    "deliverTo": "Delivering to {place}",
+    "timeline": {
+      "label": "What happens next",
+      "paid": "Order placed",
+      "paidDetail": "Paid {date}",
+      "preparing": "Being prepared",
+      "preparingDetail": "{seller} is getting your order ready.",
+      "shipped": "On its way",
+      "shippedDetail": "Sent {date}",
+      "tracking": "Tracking number {number}",
+      "notYet": "You'll get an email when it's sent.",
+      "ready": "Ready to download",
+      "readyDetail": "Your file is ready below, and the link is in your email too."
+    },
+    "download": "Download ({format})",
+    "downloadPlain": "Download your file",
+    "contact": "Questions about your order? Write to {seller}.",
+    "withdraw": {
+      "title": "Changed your mind?",
+      "body": "You can withdraw from this purchase until {date}.",
+      "open": "Withdraw from contract here",
+      "formTitle": "Withdraw from this purchase",
+      "formBody": "Confirm your name and email. {seller} will be told straight away and will contact you about returning the item and your refund.",
+      "name": "Your name",
+      "email": "Your email",
+      "confirm": "Confirm withdrawal",
+      "cancel": "Keep my order",
+      "sending": "Sending…",
+      "done": "You withdrew from this purchase on {date}. {seller} has been told, and a confirmation is in your inbox.",
+      "failed": "That didn't go through. Try again, or write to {seller}.",
+      "bodyOpen": "You can withdraw from this purchase at any time until {days} days after it arrives.",
+      "emailMismatch": "That email doesn't match this order. Use the email you ordered with."
+    },
+    "lookup": {
+      "metadata": {
+        "title": "Find your order | {store}"
+      },
+      "title": "Find your order",
+      "body": "Enter the email you ordered with and your order number. We'll email you the link to your order page, where you can also withdraw from a purchase.",
+      "email": "Email",
+      "number": "Order number",
+      "submit": "Email me the link",
+      "sending": "Sending…",
+      "done": "If that matches an order from this shop, the link is on its way to that email.",
+      "rateLimited": "Too many attempts. Wait a while and try again."
+    },
+    "footerLink": "Withdraw from a purchase",
+    "total": "Total paid",
+    "quantity": "Quantity {quantity}",
+    "editHeadline": "Thank-you headline"
   }
 }

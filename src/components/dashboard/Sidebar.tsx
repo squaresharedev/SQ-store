@@ -9,6 +9,7 @@ import { MotionConfig, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { focusRingClass, overlayScrimClass, transitionClass } from "@/components/ui/control-styles";
 import { attentionCountClass } from "@/components/ui/surface-styles";
+import { PlanChip } from "@/components/billing/PlanChip";
 import {
   MAIN_NAV,
   SETTINGS_LINK,
@@ -270,6 +271,7 @@ export function Sidebar({
         </div>
 
         <div className="space-y-1 border-t border-border px-3 py-4">
+          <PlanChip className={NAV_ITEM_CLASSES} onOpen={closeDrawer} />
           <NavLinkItem
             item={SETTINGS_LINK}
             pathname={pathname}

@@ -16,7 +16,8 @@
   },
   "channel": {
     "embed": "Einbettung",
-    "marketplace": "Marktplatz"
+    "marketplace": "Marktplatz",
+    "direct": "Deine Seiten"
   },
   "empty": {
     "filteredTitle": "Keine Bestellungen entsprechen diesen Filtern",
@@ -110,6 +111,8 @@
       "copied": "Telefonnummer kopiert",
       "failed": "Telefonnummer konnte nicht kopiert werden. Wähle sie aus und kopiere sie manuell."
     },
+    "giftMessage": "Geschenknotiz",
+    "withdrawalNotice": "Der Käufer hat am {date} den Rücktritt von diesem Kauf beantragt. Kläre die Rücksendung und Erstattung mit ihm.",
     "noAddress": "Diese Bestellung hat keine Lieferadresse. Schreibe dem Käufer eine E-Mail und frage, wohin es gehen soll.",
     "shipping": "Versand",
     "shippedOn": "Versandt am {date}",
@@ -124,7 +127,8 @@
       "pending": "Die Zahlung ist noch nicht eingegangen. Warte darauf, bevor du versendest.",
       "refunded": "Diese Bestellung wurde erstattet, daher ist nichts zu versenden.",
       "disputed": "Diese Zahlung wird angefochten. Kläre die Zahlungsanfechtung, bevor du versendest."
-    }
+    },
+    "platformFeeRate": "Plattformgebühr ({rate})"
   },
   "actions": {
     "refundNeedsStripe": "Rückerstattungen erfordern eine verbundene Stripe-Verbindung.",
@@ -185,7 +189,8 @@
       "buyer": "Käufer: {email}",
       "total": "Bestellsumme: {amount}",
       "openShip": "Sobald es unterwegs ist, markiere es hier als versandt und wir benachrichtigen den Käufer: {url}",
-      "openDigital": "Bestellung ansehen: {url}"
+      "openDigital": "Bestellung ansehen: {url}",
+      "gift": "Geschenknotiz zum Beilegen: {message}"
     },
     "shipped": {
       "subject": "Deine Bestellung von {store} ist unterwegs",
@@ -196,6 +201,43 @@
       "shipTo": "Lieferadresse:",
       "questions": "Fragen zu deiner Bestellung? Antworte auf diese E-Mail, um {store} zu erreichen.",
       "footer": "Gesendet von Square Share im Auftrag von {store}."
+    },
+    "confirmation": {
+      "subject": "Deine Bestellung bei {store}: {title}",
+      "intro": "Danke für deine Bestellung. {store} hat sie erhalten, und diese E-Mail ist deine Bestätigung.",
+      "order": "Bestellung {number}, aufgegeben am {date}",
+      "bought": "Was du gekauft hast",
+      "subtotal": "Artikel: {amount}",
+      "delivery": "Versand: {amount}",
+      "deliveryFree": "Versand: kostenlos",
+      "total": "Gesamtbetrag: {amount}",
+      "shipTo": "Es wird versandt an:",
+      "dispatch": "{store} teilt mit: {dispatch}",
+      "nextShip": "{store} benachrichtigt dich per E-Mail, wenn das Paket unterwegs ist.",
+      "download": "Lade deine Datei herunter: {url}",
+      "orderPage": "Deine Bestellseite, um deine Bestellung zu verfolgen oder vom Kauf zurückzutreten: {url}",
+      "orderPageDigital": "Deine Bestellseite: {url}",
+      "seller": "Verkauft von",
+      "sellerVat": "USt-IdNr.: {vat}",
+      "withdrawal": "Du kannst innerhalb von 14 Tagen nach Erhalt ohne Angabe von Gründen von diesem Kauf zurücktreten. Nutze deine Bestellseite oder teile es {store} schriftlich mit.",
+      "withdrawalDigital": "Du hast sofortigen Download verlangt und bestätigt, dass dein Widerrufsrecht erlischt, sobald er beginnt.",
+      "guarantee": "Du hast außerdem die gesetzliche Gewährleistung auf Konformität für mindestens zwei Jahre.",
+      "questions": "Fragen? Antworte auf diese E-Mail, um {store} zu erreichen.",
+      "footer": "Gesendet von Square Share im Auftrag von {store}. Square Share stellt die Shop-Software bereit und ist nicht Vertragspartei dieses Verkaufs."
+    },
+    "withdrawal": {
+      "buyerSubject": "Dein Widerruf von Bestellung {number} bei {store}",
+      "buyerIntro": "Wir haben deinen Widerruf von Bestellung {number} ({title}) am {date} erhalten und sofort an {store} weitergeleitet.",
+      "buyerNext": "{store} kontaktiert dich wegen der Rücksendung und deiner Erstattung, die innerhalb von 14 Tagen nach deinem Widerruf fällig ist.",
+      "sellerSubject": "Widerruf: Bestellung {number} ({title})",
+      "sellerIntro": "Der Käufer {email} hat am {date} über die Widerruf-Schaltfläche auf seiner Bestellseite von Bestellung {number} zurückgetreten.",
+      "sellerName": "Angegebener Name: {name}",
+      "sellerNext": "Kontaktiere ihn, um die Rücksendung zu regeln, und erstatte den Betrag innerhalb von 14 Tagen. Du kannst die Erstattung zurückhalten, bis die Ware zurück ist oder der Käufer den Versandnachweis erbringt. Die Bestellung: {url}"
+    },
+    "lookup": {
+      "subject": "Dein Bestelllink bei {store}",
+      "intro": "Hier ist der Link zu deiner Bestellseite für Bestellung {number} bei {store}:",
+      "ignore": "Wenn du das nicht angefordert hast, kannst du diese E-Mail ignorieren."
     }
   }
 }

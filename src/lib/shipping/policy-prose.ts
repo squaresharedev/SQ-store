@@ -3,6 +3,7 @@ import type { Locale } from "@/i18n/locales";
 import type { MessageKey, MessageValues } from "@/i18n/types";
 import { countryName as localCountryName } from "@/lib/format/country";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
+import { formatCents } from "@/lib/format/money";
 import productPage from "../../../messages/en/productPage.json";
 
 /**
@@ -120,15 +121,42 @@ function shippingProse(
     );
   }
 
+  const currency = policy.ratesCurrency ?? "EUR";
+
   const lines = (policy.destinations ?? [])
-    .map((destination) =>
-      destinationLine(resolve, destination.area, destination.time, destination.cost),
-    )
+    .map((destination) => {
+      // When the destination has a machine-readable rate, use it in the prose
+      // rather than the free-text `cost` field: the two values can diverge if
+      // the seller edits one and not the other, and the rate is the number
+      // checkout will actually charge.
+      let costDisplay: string | undefined;
+      if (typeof destination.rateCents === "number") {
+        costDisplay =
+          destination.rateCents === 0
+            ? resolve(prose("ProductPage.shippingProse.rateIsFree", {}))
+            : formatCents(destination.rateCents, currency, locale);
+      } else {
+        costDisplay = destination.cost;
+      }
+      return destinationLine(resolve, destination.area, destination.time, costDisplay);
+    })
     .filter(Boolean);
   // One block of lines, not one paragraph each: they are a list and read as
   // one, and a blank line between "Ireland" and "Rest of EU" makes two
   // unrelated statements out of a single table.
   if (lines.length > 0) paragraphs.push(lines.join("\n"));
+
+  // Free-over threshold: one extra sentence that follows the destination list
+  // so a buyer scanning shipping costs sees the threshold before they check out.
+  if (typeof policy.freeOverCents === "number" && policy.freeOverCents > 0) {
+    paragraphs.push(
+      resolve(
+        prose("ProductPage.shippingProse.freeOver", {
+          amount: formatCents(policy.freeOverCents, currency, locale),
+        }),
+      ),
+    );
+  }
 
   const notes = policy.shippingNotes?.trim();
   if (notes) paragraphs.push(notes);

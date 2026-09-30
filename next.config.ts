@@ -176,9 +176,30 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // THE PURCHASE PAGES, tightened past the global set (a later entry
+      // overrides the same key). An order page's URL IS a credential
+      // (lib/orders/order-link.ts), so it must never travel in a Referer, not
+      // even as an origin-only one to a third party, and no cache anywhere
+      // (browser, proxy, CDN) may keep a copy of a page with a buyer's order on
+      // it. The metadata on these pages says the same in markup; a header
+      // cannot be lost to a template.
+      {
+        source: "/s/:storefrontId/order/:path*",
+        headers: PURCHASE_PAGE_HEADERS,
+      },
+      { source: "/s/:storefrontId/orders", headers: PURCHASE_PAGE_HEADERS },
+      { source: "/s/:storefrontId/p/:productId/checkout", headers: PURCHASE_PAGE_HEADERS },
+      { source: "/api/orders/:path*", headers: PURCHASE_PAGE_HEADERS },
+      { source: "/api/checkout/:path*", headers: PURCHASE_PAGE_HEADERS },
     ];
   },
 };
+
+const PURCHASE_PAGE_HEADERS = [
+  { key: "Referrer-Policy", value: "no-referrer" },
+  { key: "Cache-Control", value: "private, no-store, max-age=0" },
+  { key: "X-Robots-Tag", value: "noindex, nofollow" },
+];
 
 // UI translations. Points next-intl at the per-request config, which resolves
 // the locale from a cookie rather than a URL segment: locale routing needs

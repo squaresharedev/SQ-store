@@ -22,6 +22,7 @@ import {
 import { saveShippingPolicy } from "@/lib/settings/shipping-actions";
 import type { ActionState } from "@/lib/errors";
 import { useEuCountries } from "@/components/settings/use-eu-countries";
+import { CountryPicker, countryPickerSummary } from "@/components/settings/CountryPicker";
 import { buildShippingProse } from "@/lib/shipping/policy-prose";
 import { useResolveMessage as useResolveProse } from "@/components/ui/ActionErrorNotice";
 import {
@@ -35,6 +36,7 @@ import {
   RETURNS_WINDOW_DEFAULT_DAYS,
   RETURNS_WINDOW_MAX_DAYS,
   SHIPPING_DESTINATIONS_MAX,
+  SHIPPING_RATE_MAX_CENTS,
   type SellerShippingPolicy,
   type ShippingDestination,
 } from "@/types/shipping-policy";
@@ -45,6 +47,8 @@ import {
   SHIPPING_PROFILE_NAME_MAX,
   type ShippingProfile,
 } from "@/types/storefront";
+import type { Currency } from "@/types/product";
+import { CURRENCIES } from "@/types/product";
 
 const INITIAL: ActionState = {};
 
@@ -94,7 +98,7 @@ export function ShippingSection({
   continueHref?: string;
 }) {
   const t = useTranslations("Settings");
-  const { countries } = useEuCountries();
+  const { countries, countryName } = useEuCountries();
   const fromOptions: readonly SelectOption<string>[] = useMemo(
     () => [
       { value: "", label: t("shipping.shipsFrom.notSet") },
@@ -124,6 +128,10 @@ export function ShippingSection({
       { value: "seller", label: t("shipping.returnsPaidBy.seller") },
     ],
     [t],
+  );
+  const currencyOptions: readonly SelectOption<string>[] = useMemo(
+    () => CURRENCIES.map((c) => ({ value: c, label: c })),
+    [],
   );
   const [state, formAction, isPending] = useActionState(saveShippingPolicy, INITIAL);
   useActionStateToast(state);
@@ -169,6 +177,47 @@ export function ShippingSection({
 
   const [profiles, setProfiles] = useState<ShippingProfile[]>(policy.profiles ?? []);
 
+  // Rates-card state: currency selector, freeOver text input, and parallel
+  // arrays of text inputs for destination/profile rate fields. String state
+  // lets a seller type "4.50" freely; it is only parsed on save (via the
+  // compactShippingPolicy/schema pipeline).
+  const [ratesCurrency, setRatesCurrency] = useState<Currency>(
+    policy.ratesCurrency ?? "EUR",
+  );
+  const [freeOverInput, setFreeOverInput] = useState(
+    typeof policy.freeOverCents === "number" && policy.freeOverCents > 0
+      ? String(policy.freeOverCents / 100)
+      : "",
+  );
+  const [destinationRateInputs, setDestinationRateInputs] = useState<string[]>(() =>
+    (policy.destinations ?? []).map((d) =>
+      typeof d.rateCents === "number" ? String(d.rateCents / 100) : "",
+    ),
+  );
+  const [profileRateInputs, setProfileRateInputs] = useState<string[]>(() =>
+    (policy.profiles ?? []).map((p) =>
+      typeof p.rateCents === "number" ? String(p.rateCents / 100) : "",
+    ),
+  );
+
+  /** Parse a rate text input (allows 0, rejects blank/negative/over-max). */
+  function parseRateInput(text: string): number | undefined {
+    const trimmed = text.trim();
+    if (!trimmed) return undefined;
+    const val = Math.round(parseFloat(trimmed) * 100);
+    if (!Number.isFinite(val) || val < 0 || val > SHIPPING_RATE_MAX_CENTS) return undefined;
+    return val;
+  }
+
+  /** Parse a free-over text input (positive only; 0 is not useful). */
+  function parseFreeOverInput(text: string): number | undefined {
+    const trimmed = text.trim();
+    if (!trimmed) return undefined;
+    const val = Math.round(parseFloat(trimmed) * 100);
+    if (!Number.isFinite(val) || val <= 0) return undefined;
+    return val;
+  }
+
   // The number the policy actually carries. A custom box mid-edit ("" or junk)
   // reads as undefined rather than 0: "not a number yet" is not the same
   // answer as "no returns", and treating it as the latter would quietly change
@@ -179,30 +228,64 @@ export function ShippingSection({
     return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
   }, [windowChoice, customDays]);
 
+  // Merge the rate/country inputs back into the destinations and profiles arrays
+  // so the draft reflects what the seller has typed, not just the last save.
+  const destinationsWithRates = useMemo(
+    () =>
+      destinations.map((dest, i) => {
+        const rateText = destinationRateInputs[i] ?? "";
+        const rateCents = parseRateInput(rateText);
+        return {
+          ...dest,
+          ...(typeof rateCents === "number" ? { rateCents } : {}),
+        };
+      }),
+    [destinations, destinationRateInputs],
+  );
+
+  const profilesWithRates = useMemo(
+    () =>
+      profiles.map((prof, i) => {
+        const rateText = profileRateInputs[i] ?? "";
+        const rateCents = parseRateInput(rateText);
+        return {
+          ...prof,
+          ...(typeof rateCents === "number" ? { rateCents } : {}),
+        };
+      }),
+    [profiles, profileRateInputs],
+  );
+
+  const freeOverCents = parseFreeOverInput(freeOverInput);
+
   const draft: SellerShippingPolicy = useMemo(
     () => ({
       shipsFrom,
       dispatch,
-      destinations,
+      destinations: destinationsWithRates,
       shippingNotes,
       shippingText,
+      ratesCurrency,
+      ...(typeof freeOverCents === "number" ? { freeOverCents } : {}),
       ...(returnsWindowDays === undefined ? {} : { returnsWindowDays }),
       returnsPaidBy: paidBy as SellerShippingPolicy["returnsPaidBy"],
       returnsNotes,
       returnsText,
-      profiles,
+      profiles: profilesWithRates,
     }),
     [
       shipsFrom,
       dispatch,
-      destinations,
+      destinationsWithRates,
       shippingNotes,
       shippingText,
+      ratesCurrency,
+      freeOverCents,
       returnsWindowDays,
       paidBy,
       returnsNotes,
       returnsText,
-      profiles,
+      profilesWithRates,
     ],
   );
 
@@ -220,10 +303,26 @@ export function ShippingSection({
     );
   }
 
+  function setDestinationRateInput(index: number, text: string) {
+    setDestinationRateInputs((current) => {
+      const next = [...current];
+      next[index] = text;
+      return next;
+    });
+  }
+
   function setProfile(index: number, patch: Partial<ShippingProfile>) {
     setProfiles((current) =>
       current.map((row, position) => (position === index ? { ...row, ...patch } : row)),
     );
+  }
+
+  function setProfileRateInput(index: number, text: string) {
+    setProfileRateInputs((current) => {
+      const next = [...current];
+      next[index] = text;
+      return next;
+    });
   }
 
   return (
@@ -284,58 +383,105 @@ export function ShippingSection({
             {destinations.length === 0 ? (
               <p className={helpTextClass}>{t("shipping.destinations.empty")}</p>
             ) : (
-              <ul className="flex flex-col gap-2">
-                {destinations.map((row, index) => (
+              <ul className="flex flex-col gap-3">
+                {destinations.map((row, index) => {
+                  const pickerSummary = countryPickerSummary(
+                    row.countries ?? [],
+                    {
+                      noneLabel: t("shipping.destinations.countriesNone"),
+                      anywhereLabel: t("shipping.destinations.everywhereElse"),
+                      countryName,
+                    },
+                  );
+                  return (
                   <li key={index} className="flex items-start gap-2">
-                    <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-[1fr_1fr_0.6fr]">
-                      <Input
-                        aria-label={t("shipping.destinations.areaLabel", { number: index + 1 })}
-                        value={row.area}
-                        onChange={(event) => setDestination(index, { area: event.target.value })}
-                        placeholder={t("shipping.destinations.areaPlaceholder")}
-                        maxLength={DESTINATION_AREA_MAX}
-                      />
-                      <Input
-                        aria-label={t("shipping.destinations.timeLabel", { number: index + 1 })}
-                        value={row.time}
-                        onChange={(event) => setDestination(index, { time: event.target.value })}
-                        placeholder={t("shipping.destinations.timePlaceholder")}
-                        maxLength={DESTINATION_TIME_MAX}
-                      />
-                      <Input
-                        aria-label={t("shipping.destinations.costLabel", { number: index + 1 })}
-                        value={row.cost ?? ""}
-                        onChange={(event) => setDestination(index, { cost: event.target.value })}
-                        placeholder={t("shipping.destinations.costPlaceholder")}
-                        maxLength={DESTINATION_COST_MAX}
-                      />
+                    <div className="flex min-w-0 flex-1 flex-col gap-2">
+                      <div className="grid gap-2 sm:grid-cols-[1fr_1fr_0.6fr]">
+                        <Input
+                          aria-label={t("shipping.destinations.areaLabel", { number: index + 1 })}
+                          value={row.area}
+                          onChange={(event) => setDestination(index, { area: event.target.value })}
+                          placeholder={t("shipping.destinations.areaPlaceholder")}
+                          maxLength={DESTINATION_AREA_MAX}
+                        />
+                        <Input
+                          aria-label={t("shipping.destinations.timeLabel", { number: index + 1 })}
+                          value={row.time}
+                          onChange={(event) => setDestination(index, { time: event.target.value })}
+                          placeholder={t("shipping.destinations.timePlaceholder")}
+                          maxLength={DESTINATION_TIME_MAX}
+                        />
+                        <Input
+                          aria-label={t("shipping.destinations.costLabel", { number: index + 1 })}
+                          value={row.cost ?? ""}
+                          onChange={(event) => setDestination(index, { cost: event.target.value })}
+                          placeholder={t("shipping.destinations.costPlaceholder")}
+                          maxLength={DESTINATION_COST_MAX}
+                        />
+                      </div>
+                      {/* Rate and country fields for machine-readable checkout quoting */}
+                      <div className="grid gap-2 sm:grid-cols-[0.6fr_1fr]">
+                        <div className="flex flex-col gap-1">
+                          <label
+                            htmlFor={`dest-rate-${index}`}
+                            className="font-inter text-xs text-muted-foreground"
+                          >
+                            {t("shipping.destinations.rateLabel", { number: index + 1 })}
+                          </label>
+                          <Input
+                            id={`dest-rate-${index}`}
+                            value={destinationRateInputs[index] ?? ""}
+                            onChange={(event) =>
+                              setDestinationRateInput(index, event.target.value)
+                            }
+                            placeholder={t("shipping.destinations.ratePlaceholder")}
+                            inputMode="decimal"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="font-inter text-xs text-muted-foreground">
+                            {t("shipping.destinations.countriesLabel", { number: index + 1 })}
+                          </span>
+                          <CountryPicker
+                            value={row.countries ?? []}
+                            onChange={(next) => setDestination(index, { countries: next })}
+                            summaryLabel={pickerSummary}
+                            disabled={isPending}
+                          />
+                        </div>
+                      </div>
                     </div>
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={() => {
                         setDestinations((current) =>
                           current.filter((_, position) => position !== index),
-                        )
-                      }
+                        );
+                        setDestinationRateInputs((current) =>
+                          current.filter((_, position) => position !== index),
+                        );
+                      }}
                       aria-label={
                         row.area.trim()
                           ? t("shipping.destinations.removeNamed", { area: row.area.trim() })
                           : t("shipping.destinations.removeNumbered", { number: index + 1 })
                       }
-                      className={cn(iconButtonClass, "shrink-0")}
+                      className={cn(iconButtonClass, "mt-6 shrink-0")}
                     >
                       <Trash2 className="size-4" aria-hidden="true" />
                     </button>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             )}
             {destinations.length < SHIPPING_DESTINATIONS_MAX ? (
               <button
                 type="button"
-                onClick={() =>
-                  setDestinations((current) => [...current, { area: "", time: "" }])
-                }
+                onClick={() => {
+                  setDestinations((current) => [...current, { area: "", time: "" }]);
+                  setDestinationRateInputs((current) => [...current, ""]);
+                }}
                 className={cn(secondaryButtonClass, "w-fit")}
               >
                 <Plus className="size-4" aria-hidden="true" />
@@ -359,6 +505,44 @@ export function ShippingSection({
               maxLength={POLICY_TEXT_MAX}
             />
           </div>
+        </div>
+      </SettingsCard>
+
+      {/* CHECKOUT RATES: the machine-readable numbers checkout uses to quote a
+          delivery total before the buyer pays (EU CRD art. 6(1)(e)). Optional:
+          a seller who leaves this blank still gets the display-only prose from
+          the destination rows above. The card is separate so it stays out of
+          the way of sellers who do not need it yet. */}
+      <SettingsCard
+        id="checkout-rates"
+        title={t("shipping.rates.title")}
+        description={t("shipping.rates.description")}
+      >
+        <div className="flex flex-col gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="rates_currency">{t("shipping.rates.currencyLabel")}</Label>
+              <Select
+                id="rates_currency"
+                value={ratesCurrency}
+                options={currencyOptions}
+                onChange={(v) => setRatesCurrency(v as Currency)}
+                disabled={isPending}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="free_over">{t("shipping.rates.freeOverLabel")}</Label>
+              <Input
+                id="free_over"
+                value={freeOverInput}
+                onChange={(event) => setFreeOverInput(event.target.value)}
+                placeholder={t("shipping.rates.freeOverPlaceholder")}
+                inputMode="decimal"
+              />
+              <p className={helpTextClass}>{t("shipping.rates.freeOverHint")}</p>
+            </div>
+          </div>
+          <p className={helpTextClass}>{t("shipping.rates.hint")}</p>
         </div>
       </SettingsCard>
 
@@ -551,11 +735,14 @@ export function ShippingSection({
                     </div>
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={() => {
                         setProfiles((current) =>
                           current.filter((_, position) => position !== index),
-                        )
-                      }
+                        );
+                        setProfileRateInputs((current) =>
+                          current.filter((_, position) => position !== index),
+                        );
+                      }}
                       aria-label={
                         profile.name.trim()
                           ? t("shipping.profiles.removeNamed", { name: profile.name.trim() })
@@ -577,6 +764,19 @@ export function ShippingSection({
                       placeholder={t("shipping.profiles.dispatchPlaceholder")}
                       maxLength={SHIPPING_DISPATCH_MAX}
                     />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor={`profile-rate-${profile.id}`}>
+                      {t("shipping.profiles.rateLabel")}
+                    </Label>
+                    <Input
+                      id={`profile-rate-${profile.id}`}
+                      value={profileRateInputs[index] ?? ""}
+                      onChange={(event) => setProfileRateInput(index, event.target.value)}
+                      placeholder={t("shipping.profiles.ratePlaceholder")}
+                      inputMode="decimal"
+                    />
+                    <p className={helpTextClass}>{t("shipping.profiles.rateHint")}</p>
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor={`profile-body-${profile.id}`}>
@@ -604,12 +804,13 @@ export function ShippingSection({
           {canAddShippingProfile(profiles) ? (
             <button
               type="button"
-              onClick={() =>
+              onClick={() => {
                 setProfiles((current) => [
                   ...current,
                   { id: newShippingProfileId(), name: "", body: "" },
-                ])
-              }
+                ]);
+                setProfileRateInputs((current) => [...current, ""]);
+              }}
               className={cn(secondaryButtonClass, "w-fit")}
             >
               <Plus className="size-4" aria-hidden="true" />

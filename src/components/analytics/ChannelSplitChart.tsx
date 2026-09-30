@@ -18,12 +18,13 @@ import { TONE } from "@/components/analytics/palette";
 
 
 /** Colour is PINNED per channel rather than taken in slice order, so a channel
- *  keeps its identity when the other one is empty and the ring re-sorts. Both
- *  are money, but neither is better than the other, so this is a neutral pair
- *  plus the accent rather than green against something. */
+ *  keeps its identity when others are empty and the ring re-sorts. Money, not
+ *  status, so no green or red here: neutral, blue, light grey. Mirrors the
+ *  same map in SignalCharts. */
 const CHANNEL_COLOR_INDEX: Record<ChannelSlice["channel"], number> = {
   embed: TONE.neutral,
   marketplace: TONE.traffic,
+  direct: TONE.faint,
 };
 
 export function ChannelSplitChart({

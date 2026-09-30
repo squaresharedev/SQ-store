@@ -19,11 +19,14 @@ export function orderView(overrides: Partial<OrderView> = {}): OrderView {
     },
     amountCents: 2500,
     platformFeeCents: 250,
+    platformFeeBps: null,
     currency: "EUR",
     channel: "embed",
     status: "paid",
     buyerEmail: "buyer@example.com",
     createdAt: "2026-08-01T10:00:00.000Z",
+    giftMessage: null,
+    withdrawalRequestedAt: null,
     ...overrides,
   };
 }

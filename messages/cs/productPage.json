@@ -173,6 +173,161 @@
     "areaAndTime": "{area}: {time}",
     "areaAndTimeWithCost": "{area}: {time} ({cost})",
     "withCost": "{place} ({cost})",
-    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Vrácení zboží přijímáme do {days} dne od doručení. Poštovné za vrácení hradíme my.} few {Vrácení zboží přijímáme do {days} dnů od doručení. Poštovné za vrácení hradíme my.} many {Vrácení zboží přijímáme do {days} dne od doručení. Poštovné za vrácení hradíme my.} other {Vrácení zboží přijímáme do {days} dnů od doručení. Poštovné za vrácení hradíme my.}}} buyer {{days, plural, one {Vrácení zboží přijímáme do {days} dne od doručení. Poštovné za vrácení hradí kupující.} few {Vrácení zboží přijímáme do {days} dnů od doručení. Poštovné za vrácení hradí kupující.} many {Vrácení zboží přijímáme do {days} dne od doručení. Poštovné za vrácení hradí kupující.} other {Vrácení zboží přijímáme do {days} dnů od doručení. Poštovné za vrácení hradí kupující.}}} other {{days, plural, one {Vrácení zboží přijímáme do {days} dne od doručení.} few {Vrácení zboží přijímáme do {days} dnů od doručení.} many {Vrácení zboží přijímáme do {days} dne od doručení.} other {Vrácení zboží přijímáme do {days} dnů od doručení.}}}}"
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Vrácení zboží přijímáme do {days} dne od doručení. Poštovné za vrácení hradíme my.} few {Vrácení zboží přijímáme do {days} dnů od doručení. Poštovné za vrácení hradíme my.} many {Vrácení zboží přijímáme do {days} dne od doručení. Poštovné za vrácení hradíme my.} other {Vrácení zboží přijímáme do {days} dnů od doručení. Poštovné za vrácení hradíme my.}}} buyer {{days, plural, one {Vrácení zboží přijímáme do {days} dne od doručení. Poštovné za vrácení hradí kupující.} few {Vrácení zboží přijímáme do {days} dnů od doručení. Poštovné za vrácení hradí kupující.} many {Vrácení zboží přijímáme do {days} dne od doručení. Poštovné za vrácení hradí kupující.} other {Vrácení zboží přijímáme do {days} dnů od doručení. Poštovné za vrácení hradí kupující.}}} other {{days, plural, one {Vrácení zboží přijímáme do {days} dne od doručení.} few {Vrácení zboží přijímáme do {days} dnů od doručení.} many {Vrácení zboží přijímáme do {days} dne od doručení.} other {Vrácení zboží přijímáme do {days} dnů od doručení.}}}}",
+    "rateIsFree": "Zdarma",
+    "freeOver": "Doprava zdarma při objednávce nad {amount}."
+  },
+  "order": {
+    "metadata": {
+      "title": "Vaše objednávka | {store}"
+    },
+    "thanks": "Děkujeme!",
+    "thanksNamed": "Děkujeme, {name}!",
+    "number": "Objednávka {number}",
+    "confirmationSent": "Potvrzení je na cestě na {email}.",
+    "deliverTo": "Doručení na {place}",
+    "timeline": {
+      "label": "Co bude dál",
+      "paid": "Objednávka zadána",
+      "paidDetail": "Zaplaceno {date}",
+      "preparing": "Připravuje se",
+      "preparingDetail": "{seller} připravuje vaši objednávku.",
+      "shipped": "Na cestě",
+      "shippedDetail": "Odesláno {date}",
+      "tracking": "Číslo zásilky {number}",
+      "notYet": "E-mail dostanete, až bude odesláno.",
+      "ready": "Připraveno ke stažení",
+      "readyDetail": "Váš soubor je připraven níže a odkaz je také v e-mailu."
+    },
+    "download": "Stáhnout ({format})",
+    "downloadPlain": "Stáhnout soubor",
+    "contact": "Otázky k objednávce? Napište na {seller}.",
+    "withdraw": {
+      "title": "Rozmysleli jste si to?",
+      "body": "Od tohoto nákupu můžete odstoupit do {date}.",
+      "open": "Zde odstoupit od smlouvy",
+      "formTitle": "Odstoupit od tohoto nákupu",
+      "formBody": "Potvrďte své jméno a e-mail. {seller} bude okamžitě informován a kontaktuje vás ohledně vrácení zboží a refundace.",
+      "name": "Vaše jméno",
+      "email": "Váš e-mail",
+      "confirm": "Potvrdit odstoupení od smlouvy",
+      "cancel": "Ponechat objednávku",
+      "sending": "Odesílání...",
+      "done": "Odstoupili jste od tohoto nákupu dne {date}. {seller} byl informován a potvrzení je ve vaší schránce.",
+      "failed": "Nepodařilo se odeslat. Zkuste to znovu nebo napište na {seller}.",
+      "bodyOpen": "Od tohoto nákupu můžete odstoupit kdykoliv do {days} dnů od doručení.",
+      "emailMismatch": "Tento e-mail neodpovídá této objednávce. Použijte e-mail, se kterým jste objednávali."
+    },
+    "lookup": {
+      "metadata": {
+        "title": "Najít objednávku | {store}"
+      },
+      "title": "Najít objednávku",
+      "body": "Zadejte e-mail, se kterým jste objednávali, a číslo objednávky. Pošleme vám odkaz na stránku objednávky, kde můžete také odstoupit od nákupu.",
+      "email": "E-mail",
+      "number": "Číslo objednávky",
+      "submit": "Zaslat odkaz e-mailem",
+      "sending": "Odesílání...",
+      "done": "Pokud to odpovídá objednávce z tohoto obchodu, odkaz je na cestě na tento e-mail.",
+      "rateLimited": "Příliš mnoho pokusů. Počkejte chvíli a zkuste to znovu."
+    },
+    "footerLink": "Odstoupit od nákupu",
+    "total": "Celkem zaplaceno",
+    "quantity": "Množství {quantity}",
+    "editHeadline": "Nadpis poděkování"
+  },
+  "checkout": {
+    "metadata": {
+      "title": "Pokladna | {store}"
+    },
+    "secure": "Zabezpečená platba",
+    "headline": "Téměř vaše",
+    "back": "Zpět na {title}",
+    "changeVersion": "Změnit",
+    "quantity": "Množství",
+    "sections": {
+      "contact": "Kontakt",
+      "delivery": "Doručení",
+      "payment": "Platba",
+      "summary": "Přehled objednávky"
+    },
+    "fields": {
+      "email": "E-mail",
+      "emailHint": "Pro potvrzení a aktualizace k této objednávce.",
+      "name": "Celé jméno",
+      "line1": "Adresa",
+      "line2": "Byt, kancelář atd.",
+      "addLine2": "Přidat byt, kancelář atd.",
+      "city": "Město",
+      "region": "Kraj nebo region",
+      "postalCode": "PSČ",
+      "country": "Země",
+      "whyAsk": "Proč se ptáme"
+    },
+    "gift": {
+      "toggle": "Přidat vzkaz",
+      "label": "Vzkaz",
+      "placeholder": "Pár slov do balíčku",
+      "count": "{count} z {max}"
+    },
+    "note": {
+      "from": "Od {name}",
+      "placeholder": "Přidejte zde vzkaz pro kupující",
+      "editNote": "Poznámka pro kupující",
+      "editThanks": "Poděkování",
+      "thanksPlaceholder": "Sem napište poděkování"
+    },
+    "summary": {
+      "subtotal": "Mezisoučet",
+      "delivery": "Doručení",
+      "deliveryTo": "Doručení do {country}",
+      "free": "Zdarma",
+      "total": "Celkem",
+      "inclVat": "vč. DPH",
+      "digital": "Digitální stažení, nic k doručení",
+      "showSummary": "Zobrazit přehled objednávky",
+      "digitalFormat": "Digitální stažení ({format}), nic k doručení",
+      "freeGap": "Do doručení zdarma zbývá {amount}"
+    },
+    "payment": {
+      "testTitle": "Testovací platba",
+      "testBody": "Toto je vývojová pokladna. Žádná karta není účtována a žádné peníze se nepřesouvají.",
+      "previewTitle": "Údaje karty",
+      "previewBody": "Karta, Apple Pay a Google Pay se zobrazí zde ve vašich barvách, jakmile propojíte Stripe.",
+      "cardNumber": "Číslo karty",
+      "expiry": "MM / RR",
+      "cvc": "CVC",
+      "card": "Karta"
+    },
+    "legal": {
+      "sellerDetails": "Informace o prodejci",
+      "privacy": "{seller} zpracovává vaše jméno, adresu doručení a e-mail za účelem splnění této objednávky a zákonných povinností a uchovává je po dobu stanovenou zákonem. Máte právo požádat {seller} o přístup k těmto údajům, jejich opravu nebo výmaz. Square Share zpracovává tyto údaje jménem {seller}.",
+      "privacyLink": "Ochrana osobních údajů",
+      "digitalConsent": "Chci stáhnout okamžitě a chápu, že ztratím právo na odstoupení od smlouvy, jakmile stahování začne.",
+      "soldByIn": "Prodává {seller}, {country}",
+      "privacySummary": "Jak {seller} nakládá s vašimi údaji"
+    },
+    "pay": "Objednávka zavazující k platbě ({amount})",
+    "placing": "Zadávání objednávky...",
+    "unwired": "Pokladna se otevře pro kupující, jakmile propojíte Stripe.",
+    "errors": {
+      "title": "Objednávku se nepodařilo zadat",
+      "required": "Toto pole je povinné.",
+      "email": "Zadejte e-mailovou adresu ve formátu jmeno@priklad.cz.",
+      "fields": "Zkontrolujte zvýrazněná pole.",
+      "consent": "Zaškrtněte políčko a potvrďte, že chcete stáhnout okamžitě.",
+      "sold_out": "Omlouváme se, právě došlo zboží. Nic nebylo účtováno.",
+      "insufficient_stock": "Není dostatek kusů pro toto množství. Zkuste menší množství.",
+      "quantity": "Toto množství není dostupné. Zkuste menší.",
+      "options": "Tato varianta již není dostupná. Vraťte se a vyberte jinou.",
+      "not_shipped_here": "{seller} do této země nedoručuje.",
+      "no_shipping_rates": "Doručení nelze momentálně nacenit. Nic nebylo účtováno.",
+      "not_found": "Tento produkt již není k prodeji.",
+      "rate_limited": "Příliš mnoho pokusů. Počkejte pár minut a zkuste to znovu.",
+      "unavailable": "Pokladna momentálně není dostupná. Nic nebylo účtováno.",
+      "failed": "Něco se pokazilo a nic nebylo účtováno. Zkuste to znovu.",
+      "invalid": "Některé údaje vyžadují kontrolu. Zkontrolujte zvýrazněná pole."
+    },
+    "editHeadline": "Nadpis pokladny"
   }
 }

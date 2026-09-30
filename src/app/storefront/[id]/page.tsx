@@ -4,6 +4,7 @@ import { listAllProducts } from "@/lib/products/queries";
 import { getStorefront } from "@/lib/storefront/queries";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
 import { getActiveAccount } from "@/lib/team/account-context";
+import { checkoutProviderFor } from "@/lib/checkout/availability";
 import { can } from "@/lib/team/permissions";
 import { getSellerIdentity } from "@/lib/settings/seller-identity";
 import { getShippingPolicy } from "@/lib/settings/shipping-policy";
@@ -93,6 +94,9 @@ export default async function StorefrontEditorPage({
       initialSetting={initialSetting ?? null}
       sellerIdentity={sellerIdentity}
       shippingPolicy={shippingPolicy}
+      // Whether buyers can reach this store's checkout yet: the checkout
+      // artboard says so under its pay button when they cannot.
+      checkoutLive={account ? checkoutProviderFor(account.accountId) !== null : false}
       // The designer renders its own universal-search provider (it is outside
       // the dashboard shell), so it needs the role the shell would have given.
       role={account?.role ?? null}

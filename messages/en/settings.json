@@ -30,6 +30,9 @@
     },
     "security": {
       "title": "Security"
+    },
+    "billing": {
+      "title": "Plan & billing"
     }
   },
   "loading": "Loading settings…",
@@ -400,10 +403,25 @@
       "timePlaceholder": "e.g. 5-7 business days",
       "costLabel": "Shipping cost {number}",
       "costPlaceholder": "e.g. €9.00",
+      "rateLabel": "Rate {number}",
+      "ratePlaceholder": "e.g. 4.50",
+      "rateHint": "Leave blank for display only.",
+      "countriesLabel": "Countries {number}",
+      "countriesNone": "No countries",
+      "everywhereElse": "Everywhere else",
       "removeNamed": "Remove the {area} destination",
       "removeNumbered": "Remove destination {number}",
       "add": "Add a destination",
       "limitReached": "{max, plural, one {That is all # destination. Remove one to add another.} other {That is all # destinations. Remove one to add another.}}"
+    },
+    "rates": {
+      "title": "Checkout rates",
+      "description": "Set machine-readable rates so checkout can quote a delivery total before the buyer pays, as required by the EU Consumer Rights Directive.",
+      "currencyLabel": "Rate currency",
+      "freeOverLabel": "Free shipping over",
+      "freeOverPlaceholder": "e.g. 50.00",
+      "freeOverHint": "When the order total reaches this amount, delivery is free.",
+      "hint": "Rates here are what checkout charges. Leave a destination's rate blank to keep it display-only."
     },
     "notes": {
       "label": "Anything else about shipping",
@@ -462,6 +480,9 @@
       "bodyLabel": "Shipping",
       "bodyPlaceholder": "How these products ship, and what it costs",
       "noTerms": "Add terms, or this profile is dropped when you save.",
+      "rateLabel": "Override rate",
+      "ratePlaceholder": "e.g. 9.50",
+      "rateHint": "Replaces the matched destination rate for products on this profile.",
       "add": "Add a profile",
       "limitReached": "{max, plural, one {That is all # profile. Remove one to add another.} other {That is all # profiles. Remove one to add another.}}"
     },

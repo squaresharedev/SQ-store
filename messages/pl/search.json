@@ -60,7 +60,9 @@
     "sellerAgreement": "Umowa sprzedawcy",
     "termsOfService": "Warunki korzystania z usługi",
     "exportData": "Eksportuj moje dane",
-    "deleteAccount": "Usuń konto"
+    "deleteAccount": "Usuń konto",
+    "plan": "Plan i cennik",
+    "invoices": "Faktury i dane płatnicze"
   },
   "actions": {
     "newProduct": "Nowy produkt",

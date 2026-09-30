@@ -1,7 +1,8 @@
 {
   "checkForm": "Controlla il modulo e riprova.",
   "generic": {
-    "invalid": "Controlla il modulo e riprova."
+    "invalid": "Controlla il modulo e riprova.",
+    "sellerProse": "Link, indirizzi e-mail e dati bancari non possono essere inseriti qui. Gli acquirenti pagano tramite il checkout e i tuoi dati di contatto sono già presenti nella pagina."
   },
   "text": {
     "productTitle": {
@@ -240,6 +241,66 @@
       "required": "Spiegaci il motivo in almeno {minimum} caratteri.",
       "tooLong": "La contestazione non può superare {maximum} caratteri.",
       "unsupported": "La contestazione contiene caratteri non supportati."
+    },
+    "checkoutHeadline": {
+      "required": "Il titolo del checkout è obbligatorio.",
+      "tooLong": "Il titolo del checkout deve essere di {maximum} caratteri o meno.",
+      "unsupported": "Il titolo del checkout contiene caratteri non supportati."
+    },
+    "checkoutNote": {
+      "required": "La nota agli acquirenti è obbligatoria.",
+      "tooLong": "La nota agli acquirenti deve essere di {maximum} caratteri o meno.",
+      "unsupported": "La nota agli acquirenti contiene caratteri non supportati."
+    },
+    "thanksHeadline": {
+      "required": "Il titolo di ringraziamento è obbligatorio.",
+      "tooLong": "Il titolo di ringraziamento deve essere di {maximum} caratteri o meno.",
+      "unsupported": "Il titolo di ringraziamento contiene caratteri non supportati."
+    },
+    "thanksMessage": {
+      "required": "Il messaggio di ringraziamento è obbligatorio.",
+      "tooLong": "Il messaggio di ringraziamento deve essere di {maximum} caratteri o meno.",
+      "unsupported": "Il messaggio di ringraziamento contiene caratteri non supportati."
+    },
+    "giftMessage": {
+      "required": "Scrivi un messaggio regalo o disattivalo.",
+      "tooLong": "Il messaggio regalo deve essere di {maximum} caratteri o meno.",
+      "unsupported": "Il messaggio regalo contiene caratteri non supportati."
+    },
+    "buyerName": {
+      "required": "Inserisci il tuo nome completo.",
+      "tooLong": "Il tuo nome deve essere di {maximum} caratteri o meno.",
+      "unsupported": "Il tuo nome contiene caratteri non supportati."
+    },
+    "addressLine1": {
+      "required": "Inserisci il tuo indirizzo.",
+      "tooLong": "L'indirizzo deve essere di {maximum} caratteri o meno.",
+      "unsupported": "L'indirizzo contiene caratteri non supportati."
+    },
+    "addressLine2": {
+      "required": "Inserisci la seconda riga dell'indirizzo.",
+      "tooLong": "La seconda riga dell'indirizzo deve essere di {maximum} caratteri o meno.",
+      "unsupported": "La seconda riga dell'indirizzo contiene caratteri non supportati."
+    },
+    "city": {
+      "required": "Inserisci la tua città.",
+      "tooLong": "La città deve essere di {maximum} caratteri o meno.",
+      "unsupported": "La città contiene caratteri non supportati."
+    },
+    "region": {
+      "required": "Inserisci la tua provincia o regione.",
+      "tooLong": "La provincia o regione deve essere di {maximum} caratteri o meno.",
+      "unsupported": "La provincia o regione contiene caratteri non supportati."
+    },
+    "postalCode": {
+      "required": "Inserisci il tuo CAP.",
+      "tooLong": "Il CAP deve essere di {maximum} caratteri o meno.",
+      "unsupported": "Il CAP contiene caratteri non supportati."
+    },
+    "orderReference": {
+      "required": "Inserisci il numero d'ordine.",
+      "tooLong": "Quel numero d'ordine è troppo lungo.",
+      "unsupported": "Quel numero d'ordine contiene caratteri non supportati."
     }
   },
   "email": {
@@ -267,6 +328,11 @@
       "format": "L’email della persona responsabile nell’UE non sembra un indirizzo email valido.",
       "tooLong": "L’email della persona responsabile nell’UE è troppo lunga.",
       "unsupported": "L’email della persona responsabile nell’UE contiene caratteri non supportati."
+    },
+    "buyer": {
+      "format": "Inserisci un indirizzo e-mail come nome@esempio.it.",
+      "tooLong": "Questo indirizzo e-mail è troppo lungo.",
+      "unsupported": "Questo indirizzo e-mail contiene caratteri non supportati."
     }
   },
   "emailQuality": {
@@ -293,7 +359,8 @@
     "notificationRecipient": "Un destinatario della notifica non è valido.",
     "factor": "Quell’app di autenticazione non è valida.",
     "reportTarget": "Quell’elemento non è valido.",
-    "moderationDecision": "Questa decisione non è valida."
+    "moderationDecision": "Questa decisione non è valida.",
+    "checkoutAttempt": "Questo checkout è scaduto. Ricarica la pagina e riprova."
   },
   "handle": {
     "username": "Un nome utente deve avere da 3 a 30 caratteri, usando solo lettere, numeri e trattini bassi."
@@ -323,12 +390,26 @@
       "whole": "Il massimo per ordine deve essere un numero intero.",
       "tooSmall": "Il massimo per ordine deve essere {minimum} o superiore.",
       "tooBig": "Il massimo per ordine deve essere {maximum} o inferiore."
+    },
+    "shippingRate": {
+      "whole": "Una tariffa di spedizione deve essere un numero intero di centesimi.",
+      "tooSmall": "Una tariffa di spedizione non può essere negativa.",
+      "tooBig": "Una tariffa di spedizione non può superare {maximum} centesimi."
+    },
+    "freeOverCents": {
+      "whole": "Una soglia per la spedizione gratuita deve essere un numero intero di centesimi.",
+      "tooSmall": "Una soglia per la spedizione gratuita non può essere negativa.",
+      "tooBig": "Una soglia per la spedizione gratuita non può superare {maximum} centesimi."
     }
   },
   "list": {
     "domains": {
       "tooMany": "Elenca fino a {maximum} domini.",
       "duplicate": "Ogni voce nei domini può essere elencata una sola volta."
+    },
+    "destinationCountries": {
+      "tooMany": "Una destinazione può coprire al massimo {maximum} paesi.",
+      "duplicate": "Ogni paese può apparire solo una volta per destinazione."
     }
   },
   "settings": {

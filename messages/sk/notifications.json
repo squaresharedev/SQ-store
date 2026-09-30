@@ -56,7 +56,8 @@
     "stock": "Zásoby",
     "system": "Systém",
     "security": "Bezpečnosť",
-    "policy": "Pravidlá"
+    "policy": "Pravidlá",
+    "billing": "Fakturácia"
   },
   "time": {
     "justNow": "práve teraz",
@@ -151,6 +152,28 @@
       "newDigital": {
         "title": "Nová objednávka: {title}",
         "body": "Je to stiahnutie, takže nie je nič na odoslanie."
+      },
+      "withdrawn": {
+        "title": "Kupujúci odstúpil od objednávky {number}",
+        "body": "{title}. Dohodnite s ním vrátenie tovaru a refundáciu."
+      }
+    },
+    "billing": {
+      "upgraded": {
+        "title": "Ste na pláne {plan, select, starter {Starter} pro {Pro} other {platenom}}",
+        "body": "Váš poplatok pri každom predaji je teraz nižší a limity plánu sú zrušené."
+      },
+      "plan_changed": {
+        "title": "Váš plán je teraz {plan, select, free {Free} starter {Starter} pro {Pro} other {{plan}}}",
+        "body": "Jeho poplatok a limity platia od teraz."
+      },
+      "downgraded": {
+        "title": "Váš obchod je opäť na Free",
+        "body": "Váš platený plán skončil. Všetko, čo máte, funguje ďalej; kedykoľvek upgradujte pre nižší poplatok."
+      },
+      "paymentFailed": {
+        "title": "Platba za {plan, select, starter {Starter} pro {Pro} other {platený}} plán zlyhala",
+        "body": "Stripe to skúsi znova. Aktualizujte svoju kartu v sekcii Plán a fakturácia, aby ste si zachovali plán."
       }
     }
   }

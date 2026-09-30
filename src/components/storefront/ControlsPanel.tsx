@@ -2,11 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import type {
-  ProductPageConfig,
-  StorefrontHeader,
-  StorefrontSeller,
-  StorefrontTheme,
+import {
+  DEFAULT_CHECKOUT_PAGE_CONFIG,
+  type CheckoutPageConfig,
+  type ProductPageConfig,
+  type StorefrontHeader,
+  type StorefrontSeller,
+  type StorefrontTheme,
 } from "@/types/storefront";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import {
@@ -30,6 +32,7 @@ import { LayoutSection } from "./LayoutSection";
 import { TypographySection } from "./TypographySection";
 import { SoldOutSection } from "./SoldOutSection";
 import { ProductPageSection } from "./ProductPageSection";
+import { CheckoutPageSection } from "./CheckoutPageSection";
 
 /**
  * GLOBAL design settings, as a menu of named groups rather than one column of
@@ -79,6 +82,10 @@ export function ControlsPanel({
   onJump,
   productPage,
   onProductPageChange,
+  checkoutPage = DEFAULT_CHECKOUT_PAGE_CONFIG,
+  onCheckoutPageChange,
+  checkoutLive = false,
+  onPlayCelebration,
   shippingPolicy,
   sellerIdentity,
 }: {
@@ -89,6 +96,14 @@ export function ControlsPanel({
   /** The product page's own options. */
   productPage: ProductPageConfig;
   onProductPageChange: (next: ProductPageConfig) => void;
+  /** The checkout's own design. Absent (the dev gallery) edits the defaults,
+   *  with no owner to keep them. */
+  checkoutPage?: CheckoutPageConfig;
+  onCheckoutPageChange?: (next: CheckoutPageConfig) => void;
+  /** Whether buyers can reach checkout yet. */
+  checkoutLive?: boolean;
+  /** Replay the thank-you celebration on its artboard. */
+  onPlayCelebration?: () => void;
   /** The account's shipping and returns terms, read-only here — see
    *  lib/settings/shipping-policy.ts. No `onChange`: they are set in
    *  Settings, not in this panel, so a storefront save cannot touch the terms
@@ -160,6 +175,8 @@ export function ControlsPanel({
   const summonedTheme = activeRef?.kind === "theme" ? activeRef.section : null;
   /** Which section of Product page a summons is pointing at, if any. */
   const summonedPage = activeRef?.kind === "productPage" ? activeRef.section : null;
+  /** Which section of Checkout a summons is pointing at, if any. */
+  const summonedCheckout = activeRef?.kind === "checkoutPage" ? activeRef.section : null;
 
   // Never offer a row that would do nothing. Without an owner to jump for it,
   // this panel can only open a settings group, so that is all it indexes.
@@ -213,10 +230,13 @@ export function ControlsPanel({
             // it opens through the setting opener (the designer owns that
             // switch), exactly as a search hit would. Without a provider it
             // simply opens the group.
+            // Checkout does the same: it puts the checkout on the canvas.
             onClick={() =>
               id === "productPage" && setting
                 ? setting.open({ kind: "productPage", section: "layout" })
-                : setGroup(id)
+                : id === "checkoutPage" && setting
+                  ? setting.open({ kind: "checkoutPage", section: "layout" })
+                  : setGroup(id)
             }
           />
         ))}
@@ -283,6 +303,17 @@ export function ControlsPanel({
           accent={theme.accent}
           cornerRadius={theme.cornerRadius}
           summoned={summonedPage}
+        />
+      ) : group === "checkoutPage" ? (
+        /* Three full-width sections, like the product page's. */
+        <CheckoutPageSection
+          checkoutPage={checkoutPage}
+          onCheckoutPageChange={(next) => onCheckoutPageChange?.(next)}
+          productPage={productPage}
+          theme={theme}
+          live={checkoutLive}
+          summoned={summonedCheckout}
+          onPlayCelebration={onPlayCelebration}
         />
       ) : group === "theme" ? (
         /* The published look and the board itself are the same call under

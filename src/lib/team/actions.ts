@@ -35,6 +35,11 @@ import {
 import { ACTIVE_ACCOUNT_COOKIE } from "@/lib/team/account-context";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import {
+  planLimitError,
+  planLimitErrorFromTrigger,
+  planLimitKeyOf,
+} from "@/lib/billing/limits";
+import {
   teamInviteSchema,
   teamAcceptSchema,
   teamChangeRoleSchema,
@@ -135,6 +140,12 @@ export async function inviteMember(
     return failed(invalidInput(msg("Errors.team.inviteSelf")));
   }
 
+  // The store's plan caps its seats (lib/billing/limits.ts). Before the
+  // step-up below, so nobody types a two-factor code only to be told the team
+  // is full; the database trigger holds the same line for a racing insert.
+  const overLimit = await planLimitError(account_owner_id, "teamSeats", user.id);
+  if (overLimit) return failed(overLimit);
+
   // Granting someone access to the store is how an intruder keeps a way in
   // after the owner changes their password, so with 2FA on it takes a recent
   // code. After the permission checks: nobody without invite rights ever
@@ -165,6 +176,9 @@ export async function inviteMember(
     // exists for this email on this account.
     if (error.code === "23505") {
       return failed(invalidInput(msg("Errors.team.alreadyInvited")));
+    }
+    if (planLimitKeyOf(error)) {
+      return failed(await planLimitErrorFromTrigger(account_owner_id, "teamSeats"));
     }
     return failed(actionError("server_error", msg("Errors.team.inviteFailed")));
   }

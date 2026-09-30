@@ -21,6 +21,7 @@ import {
   settingIndexFields,
 } from "@/lib/storefront/setting-ref";
 import type { TeamAction, TeamRole } from "@/lib/team/permissions";
+import { BILLING_SETTINGS_PATH } from "@/lib/billing/paths";
 
 /**
  * THE LOCAL INDEX — every page, settings section, settings FIELD and quick
@@ -152,6 +153,7 @@ const SETTINGS_SECTIONS: EntrySpec[] = SETTINGS_NAV.map((link) => ({
 /** The settings sections the fields below sit in, by the rail's own labels. */
 const ACCOUNT: MessageKey = "Nav.settings.account";
 const SECURITY: MessageKey = "Nav.settings.security";
+const BILLING: MessageKey = "Nav.settings.billing";
 const BUSINESS: MessageKey = "Nav.settings.tax";
 const NOTIFICATIONS: MessageKey = "Nav.settings.notifications";
 const LEGAL: MessageKey = "Nav.settings.legal";
@@ -214,6 +216,35 @@ const SETTINGS_FIELDS: EntrySpec[] = [
       "security",
       "credentials",
     ],
+  },
+  {
+    id: "field:plan",
+    type: "settings",
+    title: "Search.fields.plan",
+    section: BILLING,
+    href: `${BILLING_SETTINGS_PATH}#plan`,
+    synonyms: [
+      "plan",
+      "pricing",
+      "upgrade",
+      "subscription",
+      "free plan",
+      "starter",
+      "pro",
+      "fee",
+      "platform fee",
+      "commission",
+      "cancel plan",
+      "downgrade",
+    ],
+  },
+  {
+    id: "field:invoices",
+    type: "settings",
+    title: "Search.fields.invoices",
+    section: BILLING,
+    href: `${BILLING_SETTINGS_PATH}#invoices`,
+    synonyms: ["invoice", "receipt", "billing", "card", "payment method", "vat", "billing address"],
   },
   {
     id: "field:two-factor",

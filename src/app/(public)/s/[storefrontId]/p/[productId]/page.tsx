@@ -12,13 +12,8 @@ import {
 import { getPublicProductPage, resolveDisplayName } from "@/lib/products/public";
 import { QUANTITY_QUERY_PARAM, requestedQuantity } from "@/lib/products/quantity";
 import { clientKey } from "@/lib/rate-limit";
-import {
-  LEGACY_VARIANT_QUERY_PARAM,
-  OPTION_QUERY_PARAM,
-} from "@/lib/storefront/product-page-url";
-import { uuidField } from "@/lib/validation/inputs";
+import { requestedOptions, type SearchParams } from "@/lib/storefront/product-page-url";
 import { collectOptionIds } from "@/lib/validation/product";
-import { OPTIONS_TOTAL_MAX } from "@/types/product";
 
 /**
  * /s/[storefrontId]/p/[productId]: the hosted product page a buyer lands on
@@ -43,36 +38,6 @@ import { OPTIONS_TOTAL_MAX } from "@/types/product";
  */
 
 type Params = { storefrontId: string; productId: string };
-type SearchParams = { [key: string]: string | string[] | undefined };
-
-const optionIdSchema = uuidField("option");
-
-/** A repeated parameter arrives as an array; take the first, as one address
- *  bar can only mean one selection. */
-function firstValue(raw: string | string[] | undefined): string | undefined {
-  return Array.isArray(raw) ? raw[0] : raw;
-}
-
-/**
- * The option ids the URL asks for, filtered to ones this product actually has.
- * The split is capped before anything is examined: a product can never have
- * more than OPTIONS_TOTAL_MAX options, so a longer parameter is a scan, not a
- * selection, and there is no reason to walk it.
- */
-function requestedOptions(searchParams: SearchParams, optionIds: ReadonlySet<string>): string[] {
-  const raw = [
-    ...(firstValue(searchParams[OPTION_QUERY_PARAM])?.split(",").slice(0, OPTIONS_TOTAL_MAX) ?? []),
-    firstValue(searchParams[LEGACY_VARIANT_QUERY_PARAM]) ?? "",
-  ];
-  const wanted = new Set<string>();
-  for (const value of raw) {
-    const id = value.trim();
-    if (!id || wanted.has(id) || !optionIds.has(id)) continue;
-    if (!optionIdSchema.safeParse(id).success) continue;
-    wanted.add(id);
-  }
-  return [...wanted];
-}
 
 /** Description for search and share cards: first 160 characters, one line. */
 function summary(text: string, fallback: string): string {

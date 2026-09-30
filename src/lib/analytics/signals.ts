@@ -8,7 +8,7 @@
 // THIS LIST IS MIRRORED IN SQL. The CHECK constraint on
 // storefront_signals.kind carries the same strings
 // (supabase/migrations/20260830_storefront_signals.sql, extended by
-// 20260902_product_page.sql). Adding a kind means editing BOTH, in the same
+// 20260902_product_page.sql and 20260928_checkout.sql). Adding a kind means editing BOTH, in the same
 // change. A kind added only here fails the insert at runtime, and a kind added
 // only in SQL is invisible to the page. This is the same two-list hazard the
 // notification types have.
@@ -26,6 +26,7 @@ export const SIGNAL_KINDS = [
   "email_signup",
   "booking",
   "product_view",
+  "checkout_view",
 ] as const;
 
 export type SignalKind = (typeof SIGNAL_KINDS)[number];

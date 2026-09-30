@@ -10,7 +10,7 @@ import { useIsomorphicLayoutEffect } from "@/lib/hooks/useIsomorphicLayoutEffect
  * A `transform: scale()` never changes what an element reports for its own
  * size (offsetWidth/scrollHeight): transforms are paint-only, which is
  * exactly why they are the right tool for a miniature that must still RENDER
- * at full fidelity (see PRODUCT_PAGE_SCALE in ProductPageArtboard). But it
+ * at full fidelity (see ARTBOARD_SCALE in ArtboardFrame). But it
  * also means nothing that wraps a scaled element can size itself from that
  * element directly: this hook is the other half, measuring the natural size
  * once so a caller can shrink a wrapper to match it at whatever scale it's

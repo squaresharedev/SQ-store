@@ -19,12 +19,14 @@ import { MANIFEST_ICONS, type ManifestIconPurpose } from "../src/lib/pwa/icons.t
 const ROOT = join(import.meta.dirname, "..");
 
 type Look = {
-  /** "tile": a rounded square on transparent corners, shown as-is by desktops
+  /** "tile": a square on transparent corners, shown as-is by desktops
    *  and tabs. "bleed": square to the edges, for platforms that crop the icon
    *  to their own shape (Android, iOS). */
   background: "tile" | "bleed";
   /** The mark's width as a share of the icon's. */
   markScale: number;
+  /** Corner radius of a "tile" background, as a share of its side. Defaults to TILE_RADIUS. */
+  radius?: number;
 };
 
 /** The logo's own proportion: the mark spans 630 of its 1080 canvas. */
@@ -37,8 +39,9 @@ const LOOKS = {
   maskable: { background: "bleed", markScale: 0.46 },
   // iOS rounds the corners itself, and fills anything transparent with black.
   touch: { background: "bleed", markScale: LOGO_SCALE },
-  // A bigger mark, so it still reads at 16px in a browser tab.
-  favicon: { background: "tile", markScale: 0.68 },
+  // A bigger mark, so it still reads at 16px in a browser tab. Sharp
+  // corners: a rounded tile disappears into the tab's own curve at that size.
+  favicon: { background: "tile", markScale: 0.68, radius: 0 },
 } satisfies Record<ManifestIconPurpose | "touch" | "favicon", Look>;
 
 /** Corner radius of the "tile" background, as a share of its side. */
@@ -51,21 +54,33 @@ function iconSvg(size: number, look: Look): string {
   const scale = (size * look.markScale) / BRAND_MARK.width;
   const x = (size - BRAND_MARK.width * scale) / 2;
   const y = (size - BRAND_MARK.height * scale) / 2;
-  const radius = look.background === "tile" ? size * TILE_RADIUS : 0;
+  const radius = look.background === "tile" ? size * (look.radius ?? TILE_RADIUS) : 0;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display:block">
     <rect width="${size}" height="${size}" rx="${radius}" fill="${BRAND_SURFACE}"/>
     <path d="${BRAND_MARK.path}" fill="${BRAND_INK}" shape-rendering="crispEdges" transform="translate(${x} ${y}) scale(${scale})"/>
   </svg>`;
 }
 
+// Draws onto a <canvas> and reads it back via toDataURL rather than
+// page.screenshot(): Chromium's screenshot encoder drops the alpha channel
+// for a fully-opaque capture (e.g. a sharp-cornered favicon tile), and
+// Next.js's ICO decoder rejects a favicon.ico frame that isn't RGBA. Canvas
+// PNG encoding always keeps the alpha channel, opaque or not.
 async function render(page: Page, size: number, look: Look): Promise<Buffer> {
-  await page.setContent(
-    `<body style="margin:0;background:transparent">${iconSvg(size, look)}</body>`,
+  const svgDataUrl = `data:image/svg+xml;base64,${Buffer.from(iconSvg(size, look)).toString("base64")}`;
+  await page.setContent(`<canvas id="c" width="${size}" height="${size}"></canvas>`);
+  const dataUrl = await page.evaluate(
+    async ({ svgDataUrl, size }) => {
+      const img = new Image();
+      img.src = svgDataUrl;
+      await img.decode();
+      const canvas = document.getElementById("c") as HTMLCanvasElement;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, size, size);
+      return canvas.toDataURL("image/png");
+    },
+    { svgDataUrl, size },
   );
-  return page.screenshot({
-    omitBackground: true,
-    clip: { x: 0, y: 0, width: size, height: size },
-  });
+  return Buffer.from(dataUrl.split(",")[1], "base64");
 }
 
 /** Packs PNGs into one .ico (PNG-in-ICO, which every current browser reads). */

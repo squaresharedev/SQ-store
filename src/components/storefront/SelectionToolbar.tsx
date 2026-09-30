@@ -60,7 +60,6 @@ import {
   Copy,
   Crop,
   Equal,
-  FileText,
   Spline,
   Trash2,
   Type,
@@ -88,6 +87,7 @@ import {
 import { supportsRoundness } from "./shape-geometry";
 import type { BlockField } from "./SummonedField";
 import { CANVAS_PANEL_ATTR } from "./useCanvasAnchor";
+import { CheckoutNodeIcon, PageNodeIcon } from "./page-node-icons";
 import type { CanvasViewport } from "./useCanvasViewport";
 
 /** How far above the block the bar floats, in screen pixels. */
@@ -156,6 +156,7 @@ function ToolButton({
   pressed,
   danger = false,
   pageNode,
+  checkoutNode,
   children,
 }: {
   /** The word that pops above the button. */
@@ -167,6 +168,8 @@ function ToolButton({
   danger?: boolean;
   /** Marks the product-page toggle for the specs that drive it. */
   pageNode?: "open" | "closed";
+  /** Marks the checkout toggle, likewise. */
+  checkoutNode?: "open" | "closed";
   children: React.ReactNode;
 }) {
   return (
@@ -177,6 +180,7 @@ function ToolButton({
       aria-label={label}
       aria-pressed={pressed}
       data-page-node={pageNode}
+      data-quick-checkout-node={checkoutNode}
       className={cn(
         ICON_BTN,
         pressed && "bg-accent text-foreground",
@@ -458,8 +462,10 @@ export function SelectionToolbar({
   productsById,
   elementUrls,
   openPages,
+  checkoutOpenFor = null,
   viewport,
   onOpenPages,
+  onToggleCheckout,
   onType,
   onFrame,
   onOpenColor,
@@ -474,6 +480,8 @@ export function SelectionToolbar({
   elementUrls?: Record<string, string>;
   /** Products whose page is out on the canvas, so Page reads as a toggle. */
   openPages: readonly string[];
+  /** The product whose checkout is out on the canvas, if any. */
+  checkoutOpenFor?: string | null;
   /** The board's pan and zoom, so the bar can follow a block through both.
    *  Absent in harnesses whose board does neither. */
   viewport?: CanvasViewport;
@@ -481,6 +489,10 @@ export function SelectionToolbar({
    *  however many tiles point at it. Out with all of them, or away with all of
    *  them — the caller decides which from what is already open. */
   onOpenPages: (productIds: readonly string[]) => void;
+  /** Out with one product's checkout and thank-you page (and its product
+   *  page, which they hang off), or away with them. Absent in harnesses
+   *  that have no checkout. */
+  onToggleCheckout?: (productId: string) => void;
   onType: (key: string) => void;
   onFrame: (key: string) => void;
   /** Shapes: put these blocks' fill or outline in the colour panel, which is
@@ -533,6 +545,8 @@ export function SelectionToolbar({
   const pagesAreOpen =
     pageProductIds.length > 0 &&
     pageProductIds.every((id) => openPages.includes(id));
+  const checkoutProductId = pageProductIds.length === 1 ? pageProductIds[0] : null;
+  const checkoutIsOpen = checkoutProductId !== null && checkoutOpenFor === checkoutProductId;
   const framable =
     only !== null && framedSrcOf(only, productsById, elementUrls) !== null;
 
@@ -677,7 +691,27 @@ export function SelectionToolbar({
                     : t("selectionToolbar.openProductPage", { name: singlePageName ?? name })
               }
             >
-              <FileText className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
+              <PageNodeIcon className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
+            </ToolButton>
+          )}
+
+          {/* The next door along: this product's checkout and thank-you page,
+              straight from the tile, without going through its page's frame
+              first. One product at a time, since a storefront has ONE
+              checkout design, previewed with whichever product it hangs off. */}
+          {checkoutProductId !== null && onToggleCheckout && (
+            <ToolButton
+              tip={checkoutIsOpen ? t("selectionToolbar.hideCheckout") : t("selectionToolbar.openCheckout")}
+              pressed={checkoutIsOpen}
+              checkoutNode={checkoutIsOpen ? "open" : "closed"}
+              onClick={() => onToggleCheckout(checkoutProductId)}
+              label={
+                checkoutIsOpen
+                  ? t("selectionToolbar.closeCheckoutFor", { name: singlePageName ?? name })
+                  : t("selectionToolbar.openCheckoutFor", { name: singlePageName ?? name })
+              }
+            >
+              <CheckoutNodeIcon className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
             </ToolButton>
           )}
 

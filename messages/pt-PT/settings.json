@@ -30,6 +30,9 @@
     },
     "security": {
       "title": "Segurança"
+    },
+    "billing": {
+      "title": "Plano e faturação"
     }
   },
   "loading": "A carregar definições…",
@@ -400,10 +403,25 @@
       "timePlaceholder": "p. ex. 5–7 dias úteis",
       "costLabel": "Custo de envio {number}",
       "costPlaceholder": "p. ex. 9,00 €",
+      "rateLabel": "Taxa {number}",
+      "ratePlaceholder": "ex. 4,50",
+      "rateHint": "Deixar em branco para apenas visualização.",
+      "countriesLabel": "Países {number}",
+      "countriesNone": "Nenhum país",
+      "everywhereElse": "Em qualquer outro lugar",
       "removeNamed": "Remover o destino {area}",
       "removeNumbered": "Remover o destino {number}",
       "add": "Adicionar um destino",
       "limitReached": "{max, plural, one {É o máximo: # destino. Remova um para adicionar outro.} many {É o máximo: # destinos. Remova um para adicionar outro.} other {É o máximo: # destinos. Remova um para adicionar outro.}}"
+    },
+    "rates": {
+      "title": "Taxas de envio",
+      "description": "Defina taxas legíveis por máquina para que o checkout possa indicar o total de entrega antes do pagamento, conforme exigido pela Diretiva dos Direitos dos Consumidores da UE.",
+      "currencyLabel": "Moeda da taxa",
+      "freeOverLabel": "Envio gratuito acima de",
+      "freeOverPlaceholder": "ex. 50,00",
+      "freeOverHint": "Quando o total do pedido atingir este valor, a entrega é gratuita.",
+      "hint": "Estas taxas são as cobradas no checkout. Deixe a taxa de um destino em branco para o manter apenas como visualização."
     },
     "notes": {
       "label": "Mais alguma coisa sobre o envio",
@@ -462,6 +480,9 @@
       "bodyLabel": "Envio",
       "bodyPlaceholder": "Como estes produtos são enviados, e quanto custa",
       "noTerms": "Adicione condições, ou este perfil é eliminado ao guardar.",
+      "rateLabel": "Substituir taxa",
+      "ratePlaceholder": "ex. 9,50",
+      "rateHint": "Substitui a taxa de destino correspondente para produtos neste perfil.",
       "add": "Adicionar um perfil",
       "limitReached": "{max, plural, one {É o máximo: # perfil. Remova um para adicionar outro.} many {É o máximo: # perfis. Remova um para adicionar outro.} other {É o máximo: # perfis. Remova um para adicionar outro.}}"
     },

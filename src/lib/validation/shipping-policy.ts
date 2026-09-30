@@ -1,21 +1,25 @@
 import { z } from "zod";
-import { multiLineText, singleLineText } from "@/lib/validation/inputs";
+import { boundedInt, multiLineText, singleLineText, uniqueList } from "@/lib/validation/inputs";
 import { issueKey } from "@/lib/validation/messages";
-import { EU_COUNTRY_CODES } from "@/lib/settings/constants";
+import { EU_COUNTRY_CODES, SHIPPING_COUNTRY_CODES } from "@/lib/settings/constants";
 import {
   DESTINATION_AREA_MAX,
   DESTINATION_COST_MAX,
   DESTINATION_TIME_MAX,
   RETURNS_PAID_BY,
   RETURNS_WINDOW_MAX_DAYS,
+  SHIP_ANYWHERE,
   SHIPPING_DESTINATIONS_MAX,
+  SHIPPING_RATE_MAX_CENTS,
 } from "@/types/shipping-policy";
 import {
   POLICY_TEXT_MAX,
   SHIPPING_DISPATCH_MAX,
 } from "@/types/storefront";
+import { CURRENCIES } from "@/types/product";
 import { shippingProfilesSchema } from "@/lib/validation/storefront";
 import { compactShippingProfiles } from "@/lib/storefront/shipping";
+import { PRICE_CENTS_MAX } from "@/lib/validation/product";
 import type { ShippingProfile } from "@/types/storefront";
 
 /**
@@ -34,10 +38,30 @@ import type { ShippingProfile } from "@/types/storefront";
  * by a reader.
  */
 
+// Every ISO-2 code in the curated shipping list, plus the "*" catch-all. The
+// tuple form is what z.enum needs; SHIPPING_COUNTRY_CODES is `as const` so
+// TypeScript tracks the literal types, and the spread here builds a new tuple.
+const DESTINATION_COUNTRY_VALUES = [
+  ...SHIPPING_COUNTRY_CODES,
+  SHIP_ANYWHERE,
+] as const;
+
 const destinationSchema = z.strictObject({
   area: singleLineText({ field: "destinationArea", max: DESTINATION_AREA_MAX }),
   time: singleLineText({ field: "deliveryTime", max: DESTINATION_TIME_MAX }),
   cost: singleLineText({ field: "shippingCost", max: DESTINATION_COST_MAX }).optional(),
+  // Countries this row covers, or the single "*" catch-all. Bounded to the
+  // number of valid codes plus one catch-all entry; uniqueness is enforced so
+  // a typo cannot create two rows that both match "IE" in different ways.
+  countries: uniqueList(z.enum(DESTINATION_COUNTRY_VALUES), {
+    field: "destinationCountries",
+    max: DESTINATION_COUNTRY_VALUES.length,
+  }).optional(),
+  rateCents: boundedInt({
+    field: "shippingRate",
+    min: 0,
+    max: SHIPPING_RATE_MAX_CENTS,
+  }).optional(),
 });
 
 export const shippingPolicySchema = z.strictObject({
@@ -50,6 +74,17 @@ export const shippingPolicySchema = z.strictObject({
       error: issueKey("Validation.shipping.shipsFromInvalid"),
     })
     .optional(),
+  // ISO 4217 currency for all rates in this policy. Absent = "EUR". Stored so
+  // a seller who switches currency does not silently misquote old rates.
+  ratesCurrency: z.enum(CURRENCIES).optional(),
+  // Free-shipping threshold, in the same currency as ratesCurrency. Bounded by
+  // the same ceiling as product prices (PRICE_CENTS_MAX), which is already
+  // absurdly generous; in practice any threshold fits comfortably inside it.
+  freeOverCents: boundedInt({
+    field: "freeOverCents",
+    min: 0,
+    max: PRICE_CENTS_MAX,
+  }).optional(),
   dispatch: singleLineText({
     field: "dispatchTime",
     max: SHIPPING_DISPATCH_MAX,
@@ -144,6 +179,7 @@ export function compactShippingPolicy(raw: unknown): Record<string, unknown> {
     "returnsNotes",
     "returnsText",
     "returnsPaidBy",
+    "ratesCurrency",
   ]) {
     text(key);
   }
@@ -153,8 +189,16 @@ export function compactShippingPolicy(raw: unknown): Record<string, unknown> {
   const days = input.returnsWindowDays;
   if (typeof days === "number" && Number.isFinite(days)) out.returnsWindowDays = days;
 
+  // freeOverCents: 0 is NOT a meaningful threshold (every order would be free,
+  // which the seller would express by setting every rateCents to 0 instead),
+  // so it is treated as absent, like an empty string field.
+  const freeOver = input.freeOverCents;
+  if (typeof freeOver === "number" && Number.isFinite(freeOver) && freeOver > 0) {
+    out.freeOverCents = freeOver;
+  }
+
   // A row is worth keeping once it says WHERE and HOW LONG; either alone is
-  // half a sentence on the page. Cost is genuinely optional.
+  // half a sentence on the page. Cost, countries and rateCents are optional.
   if (Array.isArray(input.destinations)) {
     const rows = input.destinations
       .filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null)
@@ -162,9 +206,24 @@ export function compactShippingPolicy(raw: unknown): Record<string, unknown> {
         area: typeof row.area === "string" ? row.area.trim() : "",
         time: typeof row.time === "string" ? row.time.trim() : "",
         cost: typeof row.cost === "string" ? row.cost.trim() : "",
+        // countries: keep only if it is a non-empty array (absent or [] both
+        // mean "no machine-readable geography")
+        countries: Array.isArray(row.countries) && row.countries.length > 0
+          ? row.countries.filter((c): c is string => typeof c === "string" && c.trim() !== "")
+          : null,
+        // rateCents: keep 0 (free) explicitly, drop non-finite/negative
+        rateCents: typeof row.rateCents === "number" && Number.isFinite(row.rateCents) && row.rateCents >= 0
+          ? row.rateCents
+          : null,
       }))
       .filter((row) => row.area && row.time)
-      .map((row) => ({ area: row.area, time: row.time, ...(row.cost ? { cost: row.cost } : {}) }));
+      .map((row) => ({
+        area: row.area,
+        time: row.time,
+        ...(row.cost ? { cost: row.cost } : {}),
+        ...(row.countries && row.countries.length > 0 ? { countries: row.countries } : {}),
+        ...(row.rateCents !== null ? { rateCents: row.rateCents } : {}),
+      }));
     if (rows.length > 0) out.destinations = rows;
   }
 

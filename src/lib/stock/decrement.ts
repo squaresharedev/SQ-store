@@ -9,10 +9,10 @@ import { STOCK_QUANTITY_MAX } from "@/lib/validation/product";
 // attempting to do so returns a Postgres permission error, which we treat as
 // "error" (not insufficient_stock) so the caller's audit trail stays accurate.
 //
-// TODO(checkout): called from order creation / the Stripe webhook when a sale
-// lands. Nothing in the app invokes this yet — the caller context must supply
-// a service-role SupabaseClient (dependency injection; we never construct it
-// here so the caller is explicit about its privilege level).
+// Called by the order writer (lib/orders/record.ts) once a paid order is
+// recorded, which the payment webhook will feed once checkout is live. The
+// caller supplies a service-role SupabaseClient (dependency injection; we
+// never construct it here so the caller is explicit about its privilege level).
 //
 // THE DB FUNCTION ALSO ENFORCES products.max_per_order, as a second fence
 // behind resolveOrderQuantity (lib/products/order-quantity.ts). It reads the
@@ -75,7 +75,8 @@ export async function decrementStock(
     // the checkout/order-creation caller (which knows the owner id + new qty):
     //   await createNotification({ userId: ownerId, type: "stock",
     //     title: `${title} is low on stock`, data: { href: `/products/${id}/edit` } });
-    // (from "@/lib/notifications/create"). Not wired: nothing calls decrementStock yet.
+    // (from "@/lib/notifications/create"). Not wired yet; the order writer
+    // (lib/orders/record.ts) is the caller that knows the owner.
     return { ok: true };
   }
   return { ok: false, reason: "insufficient_stock" };

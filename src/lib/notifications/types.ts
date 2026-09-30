@@ -23,6 +23,10 @@ export const NOTIFICATION_TYPES = [
    *  Digital Services Act, Art. 17 requires a statement of reasons), so it has
    *  to be findable by type later, not buried in a general feed. */
   "policy",
+  /** The seller's own plan: an upgrade confirmed, a renewal that failed, a
+   *  plan that is about to end. About what the seller PAYS us, so kept apart
+   *  from "payment", which is about what buyers pay them. */
+  "billing",
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];

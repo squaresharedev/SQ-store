@@ -184,6 +184,18 @@
       "byStorefront": "Buchungen nach Schaufenster",
       "awaiting": "Verfügbar mit dem Kalender-Buchungs-Block.",
       "readyToChart": "Bereit zur Darstellung, sobald Buchungen eintreffen."
+    },
+    "checkout_view": {
+      "label": "Checkout-Aufrufe",
+      "description": "Käufer, die den Checkout für eines deiner Produkte öffnen.",
+      "count": "{count, plural, one {{formatted} Aufruf} other {{formatted} Aufrufe}}",
+      "total": "Checkout-Aufrufe gesamt",
+      "emptyRange": "Keine Checkout-Aufrufe in diesem Zeitraum",
+      "overTime": "Checkout-Aufrufe im Zeitverlauf",
+      "acrossRange": "Checkout-Aufrufe im ausgewählten Zeitraum.",
+      "byChannel": "Checkout-Aufrufe nach Kanal",
+      "byWeekday": "Checkout-Aufrufe nach Wochentag",
+      "byStorefront": "Checkout-Aufrufe nach Schaufenster"
     }
   }
 }

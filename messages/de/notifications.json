@@ -56,7 +56,8 @@
     "stock": "Lagerbestand",
     "system": "System",
     "security": "Sicherheit",
-    "policy": "Richtlinie"
+    "policy": "Richtlinie",
+    "billing": "Abrechnung"
   },
   "time": {
     "justNow": "gerade eben",
@@ -151,6 +152,28 @@
       "newDigital": {
         "title": "Neue Bestellung: {title}",
         "body": "Es ist ein Download, daher ist nichts zu versenden."
+      },
+      "withdrawn": {
+        "title": "Ein Käufer hat Bestellung {number} widerrufen",
+        "body": "{title}. Kläre die Rücksendung und Erstattung mit ihm."
+      }
+    },
+    "billing": {
+      "upgraded": {
+        "title": "Du hast jetzt {plan, select, starter {Starter} pro {Pro} other {einen kostenpflichtigen Tarif}}",
+        "body": "Deine Gebühr pro Verkauf ist ab sofort niedriger, und die Grenzen deines Tarifs sind aufgehoben."
+      },
+      "plan_changed": {
+        "title": "Dein Tarif ist jetzt {plan, select, free {Free} starter {Starter} pro {Pro} other {{plan}}}",
+        "body": "Gebühr und Grenzen gelten ab sofort."
+      },
+      "downgraded": {
+        "title": "Dein Shop ist wieder bei Free",
+        "body": "Dein kostenpflichtiger Tarif ist beendet. Alles, was du hast, funktioniert weiter; wechsle jederzeit für eine niedrigere Gebühr zu einem höheren Tarif."
+      },
+      "paymentFailed": {
+        "title": "Die Zahlung für {plan, select, starter {deinen Starter-Tarif} pro {deinen Pro-Tarif} other {deinen kostenpflichtigen Tarif}} ist fehlgeschlagen",
+        "body": "Stripe versucht es erneut. Aktualisiere deine Karte unter Tarif und Abrechnung, damit du deinen Tarif behältst."
       }
     }
   }

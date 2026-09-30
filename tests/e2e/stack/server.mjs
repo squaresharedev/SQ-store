@@ -627,6 +627,19 @@ async function handleAuth(req, res, url) {
     return json(res, 200, factorJson(rows[0]));
   }
 
+  // ---- Users (the admin API, service role only) ------------------------------
+
+  // The account as the admin API serialises it. The order writer reads a
+  // seller's sign-in address this way for the "ship this" email
+  // (src/lib/orders/record.ts).
+  const adminUser = path.match(/^\/admin\/users\/([0-9a-f-]{36})$/);
+  if (req.method === "GET" && adminUser) {
+    if (!requireServiceRole(req, res)) return;
+    const row = await loadUser(adminUser[1]);
+    if (!row) return fail(res, 404, "user_not_found", "User not found");
+    return json(res, 200, await userJson(row));
+  }
+
   // ---- Test-only hooks (never part of GoTrue) --------------------------------
 
   if (req.method === "GET" && path === "/__e2e/last-recovery") {

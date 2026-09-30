@@ -94,7 +94,8 @@
       "typography": "Typografia",
       "cards": "Kafelki produktów",
       "soldOut": "Wyprzedane",
-      "productPage": "Strona produktu"
+      "productPage": "Strona produktu",
+      "checkoutPage": "Kasa"
     },
     "subtitle": {
       "theme": "Witryna / Motyw",
@@ -102,7 +103,8 @@
       "typography": "Witryna / Typografia",
       "cards": "Witryna / Kafelki produktów",
       "soldOut": "Witryna / Wyprzedane",
-      "productPage": "Witryna / Strona produktu"
+      "productPage": "Witryna / Strona produktu",
+      "checkoutPage": "Witryna / Kasa"
     },
     "labels": {
       "looks": "Wygląd witryny",
@@ -135,7 +137,16 @@
       "productPageAvailability": "Dostępność na stronie",
       "productPageByline": "Podpis „Sprzedawca:”",
       "shippingReturns": "Zasady wysyłki i zwrotów",
-      "sellerDetails": "Dane sprzedawcy"
+      "sellerDetails": "Dane sprzedawcy",
+      "checkoutLayout": "Układ kasy",
+      "checkoutBackground": "Kolor kasy",
+      "checkoutHeadline": "Nagłówek kasy",
+      "checkoutNote": "Notatka dla kupujących",
+      "checkoutGift": "Wiadomości na prezent",
+      "thankYouMessage": "Wiadomość z podziękowaniem",
+      "thankYouCelebration": "Celebracja podziękowania",
+      "checkoutTexture": "Tekstura kasy",
+      "checkoutPayButton": "Przycisk płatności"
     }
   },
   "editorSearch": {
@@ -151,7 +162,8 @@
       "products": "Dodaj produkt",
       "shapes": "Kształty",
       "uploads": "Przesłane pliki"
-    }
+    },
+    "openCheckout": "Otwórz kasę"
   },
   "list": {
     "showingOf": "Pokazano {count} z {total} witryn",
@@ -329,7 +341,12 @@
     "productPageLabel": " · Strona produktu",
     "closeAriaLabel": "Zamknij stronę produktu: {title}",
     "desktopSize": "Rozmiar na komputer",
-    "mobileSize": "Rozmiar na telefon"
+    "mobileSize": "Rozmiar na telefon",
+    "checkoutLabel": " · Kasa",
+    "thanksLabel": " · Dziękujemy",
+    "openCheckout": "Kasa",
+    "openCheckoutAriaLabel": "Otwórz kasę dla: {title}",
+    "closeCheckoutAriaLabel": "Zamknij kasę"
   },
   "customFont": {},
   "metadata": {
@@ -949,7 +966,12 @@
     "zoomInTip": "Powiększ (Ctrl +)",
     "designSettings": "Ustawienia projektu",
     "page": "Strona",
-    "moreTools": "Więcej narzędzi"
+    "moreTools": "Więcej narzędzi",
+    "checkout": "Kasa",
+    "showCheckout": "Pokaż kasę",
+    "closeCheckout": "Zamknij kasę",
+    "showCheckoutFull": "Pokaż kasę i stronę z podziękowaniem",
+    "closeCheckoutFull": "Zamknij kasę i stronę z podziękowaniem"
   },
   "selectionToolbar": {
     "toolsFor": "Narzędzia dla: {name}",
@@ -978,7 +1000,11 @@
     "duplicateNamed": "Duplikuj: {name}",
     "duplicateN": "Duplikuj {count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}",
     "removeFrom": "Usuń z siatki: {name}",
-    "removeN": "Usuń z siatki: {count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}"
+    "removeN": "Usuń z siatki: {count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}",
+    "openCheckout": "Otwórz kasę",
+    "hideCheckout": "Ukryj kasę",
+    "openCheckoutFor": "Pokaż kasę: {name}",
+    "closeCheckoutFor": "Ukryj kasę: {name}"
   },
   "canvas": {
     "gridLabel": "Obszar roboczy witryny",
@@ -1293,5 +1319,60 @@
         }
       }
     }
+  },
+  "checkoutPage": {
+    "unwired": "Kupujący trafiają do kasy po połączeniu ze Stripe. Możesz teraz projektować jej wygląd.",
+    "charsLeft": "{count, plural, one {Pozostał # znak} few {Pozostały # znaki} many {Pozostało # znaków} other {Pozostało # znaku}}",
+    "layout": {
+      "title": "Układ",
+      "arrangement": {
+        "label": "Rozmieszczenie",
+        "showcase": "Prezentacja",
+        "compact": "Kompaktowy"
+      },
+      "pageColor": "Kolor kasy",
+      "followsProductPage": "Tło strony produktu",
+      "useProductPage": "Użyj tła strony produktu",
+      "button": "Przycisk płatności naśladuje przycisk zakupu ze strony produktu.",
+      "styleButton": "Ostyluj przycisk",
+      "payButton": "Przycisk płatności",
+      "payButtonInfoLabel": "O przycisku płatności",
+      "texture": {
+        "label": "Tekstura",
+        "none": "Gładka",
+        "paper": "Papier",
+        "dots": "Kropki",
+        "grid": "Kratka",
+        "lines": "Linie",
+        "linen": "Len"
+      }
+    },
+    "message": {
+      "title": "Tekst",
+      "headline": "Nagłówek",
+      "note": "Notatka dla kupujących",
+      "notePlaceholder": "Kilka słów od ciebie, widocznych obok zamówienia",
+      "gift": {
+        "label": "Wiadomości na prezent",
+        "infoLabel": "Do czego służą wiadomości na prezent",
+        "info": "Kupujący produktów wysyłanych mogą dodać krótką notatkę do paczki. Zobaczysz ją na zamówieniu."
+      }
+    },
+    "thanks": {
+      "title": "Strona z podziękowaniem",
+      "headline": "Nagłówek",
+      "sampleName": "Agnieszka",
+      "message": "Wiadomość",
+      "messagePlaceholder": "Co dalej, własnymi słowami",
+      "celebrate": {
+        "label": "Celebracja",
+        "confetti": "Konfetti",
+        "rays": "Światło",
+        "none": "Brak",
+        "play": "Odtwórz"
+      }
+    },
+    "unwiredBadge": "Jeszcze nieaktywna",
+    "unwiredInfoLabel": "Kiedy kupujący trafią do kasy"
   }
 }

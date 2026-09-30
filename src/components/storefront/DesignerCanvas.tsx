@@ -12,6 +12,7 @@ import {
   tileCovers,
   type HeaderLine,
   type ImagePlacement,
+  type CheckoutPageConfig,
   type ProductPageConfig,
   type StorefrontBlock,
   type StorefrontHeader,
@@ -20,6 +21,13 @@ import {
   type TextSpan,
 } from "@/types/storefront";
 import { ProductPageArtboard } from "./ProductPageArtboard";
+import {
+  CheckoutArtboard,
+  ThanksArtboard,
+  checkoutArtboardId,
+  thanksArtboardId,
+} from "./CheckoutArtboards";
+import type { PageLink } from "./PageConnectors";
 import { PageConnectors } from "./PageConnectors";
 import { DeviceSizeSwitch, type PreviewDevice } from "./DeviceSizeSwitch";
 import { cn } from "@/lib/utils";
@@ -99,21 +107,21 @@ const PRODUCT_PAGE_DESKTOP_WIDTH = 1280;
  * Empty band above the whole stage row (the board AND the pages beside it),
  * in px.
  *
- * Each connector (see PageConnectors) leaves the board's own top-right corner
- * heading straight up, arcs over, and comes straight down into a page's
- * top-centre: an arch, which needs headroom above both ends to rise into.
- * Reserving that headroom here, above the row rather than only above the
- * pages, is also what keeps a page's own top level with the board's: the two
- * start the same distance below this band, so a page reads as belonging to
- * the storefront it opened from rather than hanging lower on the workspace.
- * And reserving it as real layout space (padding on the stage, not a margin
- * that only the connectors know about) is what keeps an arc's peak inside the
- * box Fit measures, so fitting the canvas never crops one off the top.
+ * Connectors between neighbouring cards run straight across the gap between
+ * them, but one that has to get past other pages (see PageConnectors) climbs
+ * above every label row, crosses, and comes back down: it needs headroom above
+ * the row to cross in. Reserving that headroom here, above the row rather than
+ * only above the pages, is also what keeps a page's own top level with the
+ * board's: the two start the same distance below this band, so a page reads as
+ * belonging to the storefront it opened from rather than hanging lower on the
+ * workspace. And reserving it as real layout space (padding on the stage, not
+ * a margin that only the connectors know about) is what keeps a crossing
+ * inside the box Fit measures, so fitting the canvas never crops one off the
+ * top.
  *
- * Comfortably above the tallest arc a connector ever draws (see ARC_LIFT_MAX
- * in PageConnectors): every arch rises to some position-dependent height at
- * or below that ceiling, so reserving the ceiling itself plus a margin covers
- * all of them regardless of how many pages are open.
+ * Comfortably above the highest crossing a connector ever draws (CLEARANCE_MAX
+ * in PageConnectors), plus the label rows themselves, so it covers any number
+ * of open pages.
  */
 const CONNECTOR_ARC_BAND_PX = 240;
 
@@ -165,6 +173,13 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   storefrontId = "",
   storefrontName = "",
   productPage,
+  checkoutPage,
+  checkoutFor = null,
+  checkoutLive = false,
+  onToggleCheckout,
+  onCloseCheckout,
+  onCheckoutPageChange,
+  celebrationPlays = 0,
   shippingPolicy = {},
   seller = {},
 }: {
@@ -277,6 +292,20 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   storefrontName?: string;
   /** The page's own design. Absent leaves the artboards unrendered. */
   productPage?: ProductPageConfig;
+  /** The checkout's design. Absent leaves the checkout artboards unrendered. */
+  checkoutPage?: CheckoutPageConfig;
+  /** The product whose checkout and thank-you page are out beside its page:
+   *  one at a time, since there is one checkout design per storefront. View
+   *  state, never saved. */
+  checkoutFor?: string | null;
+  /** Whether buyers can reach checkout yet, for the unwired note. */
+  checkoutLive?: boolean;
+  onToggleCheckout?: (productId: string) => void;
+  onCloseCheckout?: () => void;
+  /** The checkout's words, typed straight onto its artboards. */
+  onCheckoutPageChange?: (next: CheckoutPageConfig) => void;
+  /** Bumped by the panel's "Play it": replays the thank-you celebration. */
+  celebrationPlays?: number;
   /** The account's shipping and returns terms, read-only — the preview
    *  renders what they produce. See lib/settings/shipping-policy.ts. */
   shippingPolicy?: SellerShippingPolicy;
@@ -680,10 +709,36 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     return ids;
   }, [blocks]);
 
+  // The checkout chain hangs off ONE open product page. A checkout whose page
+  // has been closed (or whose product has gone) is simply not drawn.
+  const checkoutId =
+    checkoutPage && checkoutFor && openProductIds.includes(checkoutFor) ? checkoutFor : null;
+
   const artboards = productPage
     ? openProductIds.flatMap((id) => {
         const product = productsById.get(id);
         if (!product) return [];
+        const chain =
+          checkoutPage && id === checkoutId
+            ? {
+                product,
+                soldOut: soldOutProducts.has(id),
+                storefrontId,
+                storefrontName,
+                theme,
+                header,
+                productPage,
+                checkoutPage,
+                shippingPolicy,
+                seller,
+                backgroundImageUrl,
+                customFontUrl,
+                widths: pageWidths,
+                initialDevice: previewMode,
+                onClose: () => onCloseCheckout?.(),
+                onCheckoutPageChange,
+              }
+            : null;
         return [
           <ProductPageArtboard
             key={id}
@@ -701,10 +756,32 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             backgroundImageUrl={backgroundImageUrl}
             customFontUrl={customFontUrl}
             onClose={() => onClosePage?.(id)}
+            checkoutOpen={id === checkoutId}
+            onToggleCheckout={checkoutPage && onToggleCheckout ? () => onToggleCheckout(id) : undefined}
           />,
+          // The checkout and its thank-you, right after the page they follow.
+          ...(chain
+            ? [
+                <CheckoutArtboard key={checkoutArtboardId(id)} {...chain} live={checkoutLive} />,
+                <ThanksArtboard key={thanksArtboardId(id)} {...chain} playKey={celebrationPlays} />,
+              ]
+            : []),
         ];
       })
     : [];
+
+  // THE LINES: the board to each page, and a chained page to the page before
+  // it (product page, then checkout, then thank-you), so the canvas reads as
+  // the path a buyer takes.
+  const pageLinks: PageLink[] = [
+    ...openProductIds.map((id) => ({ id })),
+    ...(checkoutId
+      ? [
+          { id: checkoutArtboardId(checkoutId), from: checkoutId },
+          { id: thanksArtboardId(checkoutId), from: checkoutArtboardId(checkoutId) },
+        ]
+      : []),
+  ];
 
   // What can move either end of a line without the connectors hearing about
   // it: which pages are out, and where the tiles sit on the board.
@@ -712,12 +789,13 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     () =>
       [
         openProductIds.join(","),
+        checkoutId ?? "",
         theme.columns,
         theme.rows,
         theme.gridGap,
         blocks.map((block) => `${block.x},${block.y},${block.w},${block.h}`).join("|"),
       ].join("~"),
-    [openProductIds, theme.columns, theme.rows, theme.gridGap, blocks],
+    [openProductIds, checkoutId, theme.columns, theme.rows, theme.gridGap, blocks],
   );
 
   const canvas = (
@@ -954,7 +1032,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
       boardWidth={boardWidth}
       canvas={canvas}
       artboards={artboards}
-      pageLinks={openProductIds}
+      pageLinks={pageLinks}
       connectorRevision={connectorRevision}
       previewMode={previewMode}
       onPreviewModeChange={onPreviewModeChange}
@@ -992,8 +1070,8 @@ function Stage({
   boardWidth: number;
   canvas: ReactNode;
   artboards: ReactNode[];
-  /** Product ids of the open pages, in artboard order. */
-  pageLinks: readonly string[];
+  /** The open pages, in artboard order, and what each one's line leaves from. */
+  pageLinks: readonly PageLink[];
   connectorRevision: string;
   previewMode: PreviewDevice;
   onPreviewModeChange: (mode: PreviewDevice) => void;

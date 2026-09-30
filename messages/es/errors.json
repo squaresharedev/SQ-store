@@ -52,6 +52,10 @@
     "fulfilOrders": {
       "withRole": "Tu rol de {role, select, owner {propietario} editor {editor} viewer {lector} other {{role}}} no te permite marcar pedidos como enviados en esta tienda.",
       "noRole": "No tienes permiso para marcar pedidos como enviados en esta tienda."
+    },
+    "manageBilling": {
+      "withRole": "Tu rol de {role, select, owner {propietario} editor {editor} viewer {lector} other {{role}}} no te permite cambiar el plan de esta tienda.",
+      "noRole": "No tienes permiso para cambiar el plan de esta tienda."
     }
   },
   "notFound": {
@@ -76,7 +80,9 @@
     "readProductPageSettings": "Demasiados intentos de leer los ajustes de la página de producto en poco tiempo.",
     "requestReview": "Demasiados intentos de solicitar una revisión en poco tiempo.",
     "fileAppeal": "Demasiados intentos de enviar un recurso en poco tiempo.",
-    "fulfilOrders": "Demasiados intentos de marcar pedidos como enviados en poco tiempo."
+    "fulfilOrders": "Demasiados intentos de marcar pedidos como enviados en poco tiempo.",
+    "readCheckoutSettings": "Demasiados intentos de leer los ajustes del proceso de pago en poco tiempo.",
+    "changePlan": "Demasiados cambios de plan iniciados en poco tiempo."
   },
   "serverError": {
     "fix": "Suele ser algo temporal. Espera un momento y vuelve a intentarlo; si sigue fallando, recarga la página.",
@@ -104,7 +110,12 @@
     "saveProductPageSettings": "No se han podido guardar los ajustes de tu página de producto por un problema en nuestro sistema.",
     "sendForReview": "No se ha podido enviar a revisión por un problema de nuestra parte.",
     "fileAppeal": "No se ha podido enviar tu recurso por un problema en nuestro lado.",
-    "markOrderShipped": "No se ha podido marcar el pedido como enviado por un problema en nuestro sistema."
+    "markOrderShipped": "No se ha podido marcar el pedido como enviado por un problema en nuestro sistema.",
+    "loadCheckoutSettings": "No se han podido cargar los ajustes de tu proceso de pago por un problema en nuestro sistema.",
+    "saveCheckoutSettings": "No se han podido guardar los ajustes de tu proceso de pago por un problema en nuestro sistema.",
+    "loadPlans": "No se ha podido cargar tu plan por un problema en nuestro lado.",
+    "startCheckout": "No se ha podido abrir el proceso de pago por un problema en nuestro lado.",
+    "openBillingPortal": "No se han podido abrir tus datos de facturación por un problema en nuestro lado."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Este producto se ha retirado, no está en pausa.} storefront {Este escaparate se ha retirado, no está en pausa.} other {Este elemento se ha retirado, no está en pausa.}}",
@@ -578,5 +589,25 @@
       "message": "Este pedido no se puede marcar como enviado.",
       "fix": "Solo se pueden enviar los pedidos pagados con artículos que enviar. Actualiza la página para ver en qué estado está este."
     }
+  },
+  "checkoutPageApi": {
+    "notObjectFix": "Envía un objeto JSON, p. ej. '{'\"layout\": \"compact\"'}'.",
+    "invalid": "Esos ajustes del proceso de pago no son válidos.",
+    "invalidFix": "Comprueba el campo indicado arriba contra `limits` en un GET de esta URL, e inténtalo de nuevo."
+  },
+  "billing": {
+    "unavailable": "Los planes de pago no están disponibles ahora mismo.",
+    "unavailableFix": "Tu tienda sigue funcionando con el plan actual. Inténtalo de nuevo más tarde.",
+    "invalidPlan": "Ese plan no es uno de los que ofrecemos.",
+    "alreadySubscribed": "Tu tienda ya tiene un plan de pago. Cambia de plan en lugar de comprar un segundo.",
+    "noBillingAccount": "Esta tienda todavía no tiene cuenta de facturación. Pasa a un plan de pago primero.",
+    "noSubscription": "Esta tienda no tiene un plan de pago que cambiar. Elige uno para actualizar.",
+    "ownerOnlyFix": "Solo el propietario de la tienda puede cambiar el plan. Pídele que lo haga, o cambia a tu propia tienda."
+  },
+  "planLimit": {
+    "storefronts": "Tu plan {plan, select, free {Free} starter {Starter} pro {Pro} other {actual}} incluye {cap, plural, one {# escaparate} other {# escaparates}}, y tu tienda los tiene todos.",
+    "teamSeats": "Tu plan {plan, select, free {Free} starter {Starter} pro {Pro} other {actual}} incluye {cap, plural, one {# plaza} other {# plazas}}, tú incluido, y están todas ocupadas.",
+    "fix": "Actualiza para tener más, o elimina uno que ya no necesites. Nada de lo que tienes se ve afectado.",
+    "action": "Ver planes"
   }
 }

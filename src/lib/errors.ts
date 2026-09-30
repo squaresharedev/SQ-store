@@ -1,5 +1,7 @@
 import { msg, type MessageRef } from "@/i18n/types";
 import type { TeamRole } from "@/lib/team/permissions";
+import { pricingHref, type PricingSource } from "@/lib/billing/paths";
+import type { PlanId, PlanLimitKey } from "@/lib/billing/plans";
 import {
   TRADER_IDENTITY_HEADLINE,
   traderIdentityFix,
@@ -37,6 +39,7 @@ export type ActionErrorCode =
   | "rate_limited"
   | "server_error"
   | "trader_identity_required"
+  | "plan_limit"
   | "unexpected";
 
 export interface ActionError {
@@ -52,14 +55,26 @@ export interface ActionError {
    */
   fix?: MessageRef;
   /**
-   * An in-app destination that RESOLVES this error, when one exists.
+   * What RESOLVES this error, when something does. `ActionErrorNotice`
+   * renders it as a button; no consumer has to know which codes carry one.
    *
-   * Only set by errors whose fix is "go to this other page and fill something
-   * in": a message telling someone to open Settings is worth less than a
-   * button that opens it. `ActionErrorNotice` renders it as that button; no
-   * consumer has to know which codes carry one.
+   *   { href }     "go to this other page and fill something in": a message
+   *                telling someone to open Settings is worth less than a
+   *                button that opens it.
+   *   { pricing }  "a bigger plan lifts this": opens the pricing modal IN
+   *                PLACE, never a navigation, so a form with unsaved work is
+   *                not asked to discard it. `pricing` says where it was opened
+   *                from, for the funnel.
    */
-  action?: { href: string; label: MessageRef };
+  action?: { href: string; label: MessageRef } | { pricing: PricingSource; label: MessageRef };
+}
+
+/**
+ * Where an error's action leads as a plain link, for a surface that cannot
+ * open the pricing modal (the agent API, a notice with no modal around it).
+ */
+export function actionHref(action: NonNullable<ActionError["action"]>): string {
+  return "href" in action ? action.href : pricingHref(action.pricing);
 }
 
 /** The failure half of an action result. */
@@ -134,7 +149,8 @@ export type PermissionCapability =
   | "viewStorefronts"
   | "editThisProduct"
   | "editThisStorefront"
-  | "fulfilOrders";
+  | "fulfilOrders"
+  | "manageBilling";
 
 /**
  * Role-aware permission error: names the caller's actual role, what it can't
@@ -187,9 +203,11 @@ export type RateLimitedOperation =
   | "rotateEmbedKeys"
   | "updateStock"
   | "readProductPageSettings"
+  | "readCheckoutSettings"
   | "requestReview"
   | "fileAppeal"
-  | "fulfilOrders";
+  | "fulfilOrders"
+  | "changePlan";
 
 /**
  * A signed-in write budget is spent (lib/rate-limit.ts).
@@ -229,6 +247,24 @@ export function traderIdentityRequired(
   };
 }
 
+/**
+ * A create was refused because the account's plan caps how many of `key` it
+ * may have (lib/billing/limits.ts). Not a failure of the seller's: the fix is
+ * a bigger plan, so it carries the pricing modal as its action rather than an
+ * apology. `plan` and `cap` go in as data, so the sentence can name them.
+ */
+export function planLimitReached(key: PlanLimitKey, plan: PlanId, cap: number): ActionError {
+  return {
+    code: "plan_limit",
+    message: msg(`Errors.planLimit.${key}`, { plan, cap }),
+    fix: msg("Errors.planLimit.fix"),
+    action: {
+      pricing: key === "storefronts" ? "storefront_limit" : "team_limit",
+      label: msg("Errors.planLimit.action"),
+    },
+  };
+}
+
 /** The operation that failed on our side. Each has its own sentence. */
 export type ServerErrorOperation =
   | "createProduct"
@@ -253,9 +289,14 @@ export type ServerErrorOperation =
   | "checkSellerDetails"
   | "loadProductPageSettings"
   | "saveProductPageSettings"
+  | "loadCheckoutSettings"
+  | "saveCheckoutSettings"
   | "sendForReview"
   | "fileAppeal"
-  | "markOrderShipped";
+  | "markOrderShipped"
+  | "loadPlans"
+  | "startCheckout"
+  | "openBillingPortal";
 
 export function serverError(operation: ServerErrorOperation): ActionError {
   return {

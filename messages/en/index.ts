@@ -16,6 +16,7 @@ import Search from "./search.json";
 import Orders from "./orders.json";
 import Analytics from "./analytics.json";
 import Payments from "./payments.json";
+import Billing from "./billing.json";
 import Settings from "./settings.json";
 import Products from "./products.json";
 import ProductPage from "./productPage.json";
@@ -36,6 +37,7 @@ const messages = {
   Orders,
   Analytics,
   Payments,
+  Billing,
   Settings,
   Products,
   ProductPage,

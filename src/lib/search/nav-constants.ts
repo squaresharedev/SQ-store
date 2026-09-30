@@ -10,6 +10,7 @@ import {
 } from "@/components/dashboard/nav-icons";
 import {
   Bell,
+  Gem,
   Languages,
   Receipt,
   ScrollText,
@@ -29,6 +30,7 @@ import {
   SETTINGS_PATH,
 } from "@/lib/dashboard/paths";
 import { PRODUCTS_PATH } from "@/lib/products/paths";
+import { BILLING_SETTINGS_PATH } from "@/lib/billing/paths";
 import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
 
 /**
@@ -87,6 +89,8 @@ export const SETTINGS_NAV: SettingsNavEntry[] = [
   // Straight after Account: two-factor, recovery codes and the security
   // activity log. The rail marks it "Recommended" while 2FA is off.
   { href: "/settings/security", label: "Nav.settings.security", icon: ShieldCheck },
+  // The store's plan, its fee per sale and its invoices (lib/billing).
+  { href: BILLING_SETTINGS_PATH, label: "Nav.settings.billing", icon: Gem },
   { href: "/settings/legal", label: "Nav.settings.legal", icon: ScrollText },
   { href: "/settings/tax", label: "Nav.settings.tax", icon: Receipt },
   // Beside Tax, not off in the storefront designer where these terms used to

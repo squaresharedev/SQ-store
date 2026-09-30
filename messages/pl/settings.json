@@ -30,6 +30,9 @@
     },
     "security": {
       "title": "Bezpieczeństwo"
+    },
+    "billing": {
+      "title": "Plan i rozliczenia"
     }
   },
   "loading": "Wczytywanie ustawień…",
@@ -400,10 +403,25 @@
       "timePlaceholder": "np. 5-7 dni roboczych",
       "costLabel": "Koszt wysyłki {number}",
       "costPlaceholder": "np. 9,00 EUR",
+      "rateLabel": "Stawka {number}",
+      "ratePlaceholder": "np. 4,50",
+      "rateHint": "Pozostaw puste, aby wyświetlać tylko.",
+      "countriesLabel": "Kraje {number}",
+      "countriesNone": "Brak krajów",
+      "everywhereElse": "Wszędzie indziej",
       "removeNamed": "Usuń kierunek {area}",
       "removeNumbered": "Usuń kierunek {number}",
       "add": "Dodaj kierunek",
       "limitReached": "{max, plural, one {To wszystkie # kierunek. Usuń jeden, aby dodać kolejny.} few {To wszystkie # kierunki. Usuń jeden, aby dodać kolejny.} many {To wszystkie # kierunków. Usuń jeden, aby dodać kolejny.} other {To wszystkie # kierunku. Usuń jeden, aby dodać kolejny.}}"
+    },
+    "rates": {
+      "title": "Stawki wysyłki",
+      "description": "Ustaw stawki czytelne maszynowo, aby kasa mogła podać łączną kwotę dostawy przed zapłatą, zgodnie z wymogami dyrektywy UE o prawach konsumentów.",
+      "currencyLabel": "Waluta stawki",
+      "freeOverLabel": "Darmowa wysyłka powyżej",
+      "freeOverPlaceholder": "np. 50,00",
+      "freeOverHint": "Gdy łączna kwota zamówienia osiągnie tę wartość, dostawa jest bezpłatna.",
+      "hint": "Te stawki są tym, co kasa pobiera. Pozostaw stawkę miejsca docelowego pustą, aby zachować je tylko do wyświetlania."
     },
     "notes": {
       "label": "Coś jeszcze o wysyłce",
@@ -462,6 +480,9 @@
       "bodyLabel": "Wysyłka",
       "bodyPlaceholder": "Jak wysyłane są te produkty i ile to kosztuje",
       "noTerms": "Dodaj warunki, w przeciwnym razie ten profil zostanie usunięty przy zapisie.",
+      "rateLabel": "Zastąp stawkę",
+      "ratePlaceholder": "np. 9,50",
+      "rateHint": "Zastępuje dopasowaną stawkę miejsca docelowego dla produktów w tym profilu.",
       "add": "Dodaj profil",
       "limitReached": "{max, plural, one {To wszystkie # profil. Usuń jeden, aby dodać kolejny.} few {To wszystkie # profile. Usuń jeden, aby dodać kolejny.} many {To wszystkie # profili. Usuń jeden, aby dodać kolejny.} other {To wszystkie # profilu. Usuń jeden, aby dodać kolejny.}}"
     },

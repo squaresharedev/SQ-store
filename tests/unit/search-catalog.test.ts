@@ -178,12 +178,12 @@ describe("the two surfaces agree about a setting", () => {
   // promising they could never disagree.
 
   it("indexes every setting on identical terms in both", () => {
-    // With a page out, which is the state where the editor lists everything:
-    // the product page's settings are gated on the page being on the canvas
-    // (see editor-search), and that is a question of WHEN a row is offered,
-    // never of what its terms are once it is.
+    // With a page and its checkout out, which is the state where the editor
+    // lists everything: both pages' settings are gated on the page being on
+    // the canvas (see editor-search), and that is a question of WHEN a row is
+    // offered, never of what its terms are once it is.
     const editorBySetting = new Map(
-      editorEntries([], new Map(), english, { pageOpen: true })
+      editorEntries([], new Map(), english, { pageOpen: true, checkoutOpen: true })
         .filter((entry) => entry.payload.kind === "setting")
         .map((entry) => [entry.title, entryTerms(entry)]),
     );

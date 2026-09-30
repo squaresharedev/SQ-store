@@ -51,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
 type SearchParams = { [key: string]: string | string[] | undefined };
 
 const STATUSES: OrderStatus[] = ["paid", "refunded", "disputed", "pending"];
-const CHANNELS: OrderChannel[] = ["embed", "marketplace"];
+const CHANNELS: OrderChannel[] = ["embed", "marketplace", "direct"];
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 function first(value: string | string[] | undefined): string | undefined {

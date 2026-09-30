@@ -15,7 +15,7 @@
 import type { MessageKey } from "@/i18n/types";
 import type { ProductPageSectionId } from "@/types/storefront";
 
-/** The design panel's six groups, mirrored from ControlsPanel. */
+/** The design panel's seven groups, mirrored from ControlsPanel. */
 export const CONTROLS_GROUPS = [
   "theme",
   "header",
@@ -23,6 +23,7 @@ export const CONTROLS_GROUPS = [
   "cards",
   "soldOut",
   "productPage",
+  "checkoutPage",
 ] as const;
 export type ControlsGroup = (typeof CONTROLS_GROUPS)[number];
 
@@ -40,6 +41,10 @@ export type ThemeSectionId = "look" | "canvas";
  *  confused with the page's own on-screen sections, ProductPageSectionId.) */
 export type ProductPagePanelSection = "layout" | "cta" | "sections" | "policies" | "seller";
 
+/** The three sections of the Checkout group: how it is arranged and coloured,
+ *  what it says around the form, and the thank-you page. */
+export type CheckoutPagePanelSection = "layout" | "message" | "thanks";
+
 export type SettingRef =
   /** A whole group of the design panel. */
   | { kind: "group"; group: ControlsGroup }
@@ -50,7 +55,10 @@ export type SettingRef =
   | { kind: "theme"; section: ThemeSectionId }
   /** One section of the Product page group. Opening any of these also turns
    *  the canvas to the product page, so the seller sees what they edit. */
-  | { kind: "productPage"; section: ProductPagePanelSection };
+  | { kind: "productPage"; section: ProductPagePanelSection }
+  /** One section of the Checkout group. Opening any of these puts the
+   *  checkout and thank-you artboards on the canvas. */
+  | { kind: "checkoutPage"; section: CheckoutPagePanelSection };
 
 /**
  * CLICKING THE PAGE ITSELF opens the setting behind what was clicked.
@@ -104,6 +112,40 @@ export function isProductPageHotspot(value: string): value is ProductPageHotspot
 }
 
 /**
+ * The checkout's and the thank-you page's hotspots, on the same terms as the
+ * product page's above.
+ *
+ * TWO of them lead back to the PRODUCT PAGE's own settings, deliberately: the
+ * pay button IS the product page's buy button (one action, one colour, set in
+ * one place), and the trust lines are the seller's shipping and returns terms.
+ * Sending a click on either to a checkout control that cannot change it would
+ * be a dead end. The contact, delivery and payment fields have no hotspot at
+ * all: they are the part of checkout no seller designs.
+ */
+export const CHECKOUT_PAGE_HOTSPOTS = {
+  /** The page's surface. */
+  background: { kind: "checkoutPage", section: "layout" },
+  /** The store's name bar across the top. */
+  header: { kind: "group", group: "header" },
+  /** The showcase panel or the compact summary: the arrangement. */
+  layout: { kind: "checkoutPage", section: "layout" },
+  /** The headline, the maker's note and the gift message. */
+  message: { kind: "checkoutPage", section: "message" },
+  /** The thank-you page's welcome: heading, message, celebration. */
+  thanks: { kind: "checkoutPage", section: "thanks" },
+  /** The pay button: the product page's buy button. */
+  cta: { kind: "productPage", section: "cta" },
+  /** The trust lines: the seller's shipping and returns terms. */
+  policies: { kind: "productPage", section: "policies" },
+} as const satisfies Record<string, SettingRef>;
+
+export type CheckoutPageHotspot = keyof typeof CHECKOUT_PAGE_HOTSPOTS;
+
+export function isCheckoutPageHotspot(value: string): value is CheckoutPageHotspot {
+  return Object.hasOwn(CHECKOUT_PAGE_HOTSPOTS, value);
+}
+
+/**
  * Which hotspot each of the page's own collapsible sections answers to.
  *
  * Shipping and returns are the seller's POLICY TEXT, and the seller block is
@@ -126,6 +168,7 @@ export function settingGroup(ref: SettingRef): ControlsGroup {
   if (ref.kind === "group") return ref.group;
   if (ref.kind === "cards") return "cards";
   if (ref.kind === "theme") return "theme";
+  if (ref.kind === "checkoutPage") return "checkoutPage";
   return "productPage";
 }
 
@@ -141,6 +184,9 @@ export function isSameSettingRef(
   if (a.kind === "cards" && b.kind === "cards") return a.section === b.section;
   if (a.kind === "theme" && b.kind === "theme") return a.section === b.section;
   if (a.kind === "productPage" && b.kind === "productPage") {
+    return a.section === b.section;
+  }
+  if (a.kind === "checkoutPage" && b.kind === "checkoutPage") {
     return a.section === b.section;
   }
   return false;
@@ -207,6 +253,7 @@ export const GROUP_LABELS: Record<ControlsGroup, MessageKey> = {
   cards: "Storefront.settings.groups.cards",
   soldOut: "Storefront.settings.groups.soldOut",
   productPage: "Storefront.settings.groups.productPage",
+  checkoutPage: "Storefront.settings.groups.checkoutPage",
 };
 
 /** The "Storefront / Theme" line, one whole message per group so a language
@@ -218,6 +265,7 @@ export const GROUP_SUBTITLES: Record<ControlsGroup, MessageKey> = {
   cards: "Storefront.settings.subtitle.cards",
   soldOut: "Storefront.settings.subtitle.soldOut",
   productPage: "Storefront.settings.subtitle.productPage",
+  checkoutPage: "Storefront.settings.subtitle.checkoutPage",
 };
 
 /**
@@ -757,6 +805,120 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
     ],
     ref: { kind: "productPage", section: "seller" },
   },
+
+  // ---------------------------------------------------------------------
+  // CHECKOUT. Gated like the product page's settings: inside the editor they
+  // are offered once the checkout is on the canvas, and before that one row
+  // puts it there.
+  // ---------------------------------------------------------------------
+  {
+    id: "checkout-layout",
+    label: "Storefront.settings.labels.checkoutLayout",
+    keywords: [
+      "checkout",
+      "check out",
+      "payment page",
+      "pay page",
+      "basket",
+      "cart",
+      "showcase",
+      "compact",
+      "big product photo at checkout",
+      "what buy now opens",
+    ],
+    ref: { kind: "checkoutPage", section: "layout" },
+  },
+  {
+    id: "checkout-background",
+    label: "Storefront.settings.labels.checkoutBackground",
+    keywords: ["checkout background", "checkout colour", "payment page colour", "backdrop"],
+    ref: { kind: "checkoutPage", section: "layout" },
+  },
+  {
+    id: "checkout-texture",
+    label: "Storefront.settings.labels.checkoutTexture",
+    keywords: [
+      "texture",
+      "pattern",
+      "paper",
+      "grain",
+      "noise",
+      "dots",
+      "polka dots",
+      "grid",
+      "graph paper",
+      "lines",
+      "stripes",
+      "pinstripe",
+      "linen",
+      "fabric",
+      "weave",
+      "background pattern",
+      "checkout pattern",
+    ],
+    ref: { kind: "checkoutPage", section: "layout" },
+  },
+  {
+    // The pay button's paint lives with the product page's buy button (one
+    // action, one colour); the checkout panel shows it and links there, so a
+    // seller asking for "the pay button" is sent to the row that says so.
+    id: "checkout-pay-button",
+    label: "Storefront.settings.labels.checkoutPayButton",
+    keywords: [
+      "pay button",
+      "payment button",
+      "checkout button",
+      "place order",
+      "order button",
+      "complete purchase",
+    ],
+    ref: { kind: "checkoutPage", section: "layout" },
+  },
+  {
+    id: "checkout-headline",
+    label: "Storefront.settings.labels.checkoutHeadline",
+    keywords: ["checkout title", "checkout heading", "welcome at checkout", "almost yours"],
+    ref: { kind: "checkoutPage", section: "message" },
+  },
+  {
+    id: "checkout-note",
+    label: "Storefront.settings.labels.checkoutNote",
+    keywords: [
+      "note to buyers",
+      "maker note",
+      "personal note",
+      "message at checkout",
+      "handwritten note",
+      "a word from me",
+    ],
+    ref: { kind: "checkoutPage", section: "message" },
+  },
+  {
+    id: "checkout-gift",
+    label: "Storefront.settings.labels.checkoutGift",
+    keywords: ["gift message", "gift note", "present", "gift wrap", "note in the parcel"],
+    ref: { kind: "checkoutPage", section: "message" },
+  },
+  {
+    id: "thank-you-message",
+    label: "Storefront.settings.labels.thankYouMessage",
+    keywords: [
+      "thank you page",
+      "thanks page",
+      "order confirmation",
+      "confirmation page",
+      "after purchase",
+      "success page",
+      "receipt page",
+    ],
+    ref: { kind: "checkoutPage", section: "thanks" },
+  },
+  {
+    id: "thank-you-celebration",
+    label: "Storefront.settings.labels.thankYouCelebration",
+    keywords: ["confetti", "celebration", "animation after purchase", "light rays", "party"],
+    ref: { kind: "checkoutPage", section: "thanks" },
+  },
 ];
 
 /**
@@ -770,9 +932,14 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
 export const PRODUCT_PAGE_SETTINGS: readonly SettingEntry[] =
   STOREFRONT_SETTINGS.filter((entry) => entry.ref.kind === "productPage");
 
-/** Everything that is NOT the product page's: findable at all times. */
-export const STOREFRONT_ONLY_SETTINGS: readonly SettingEntry[] =
-  STOREFRONT_SETTINGS.filter((entry) => entry.ref.kind !== "productPage");
+/** The checkout's own settings, derived for the same reason. */
+export const CHECKOUT_PAGE_SETTINGS: readonly SettingEntry[] =
+  STOREFRONT_SETTINGS.filter((entry) => entry.ref.kind === "checkoutPage");
+
+/** Everything that is NOT a page's: findable at all times. */
+export const STOREFRONT_ONLY_SETTINGS: readonly SettingEntry[] = STOREFRONT_SETTINGS.filter(
+  (entry) => entry.ref.kind !== "productPage" && entry.ref.kind !== "checkoutPage",
+);
 
 const BY_ID = new Map(STOREFRONT_SETTINGS.map((entry) => [entry.id, entry]));
 

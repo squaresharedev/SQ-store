@@ -56,7 +56,8 @@
     "stock": "Stock",
     "system": "System",
     "security": "Security",
-    "policy": "Policy"
+    "policy": "Policy",
+    "billing": "Billing"
   },
   "time": {
     "justNow": "just now",
@@ -151,6 +152,28 @@
       "newDigital": {
         "title": "New order: {title}",
         "body": "It's a download, so there's nothing to ship."
+      },
+      "withdrawn": {
+        "title": "A buyer withdrew from order {number}",
+        "body": "{title}. Arrange the return and refund with them."
+      }
+    },
+    "billing": {
+      "upgraded": {
+        "title": "You're on {plan, select, starter {Starter} pro {Pro} other {a paid plan}}",
+        "body": "Your fee on each sale is lower from now on, and your plan's limits are lifted."
+      },
+      "plan_changed": {
+        "title": "Your plan is now {plan, select, free {Free} starter {Starter} pro {Pro} other {{plan}}}",
+        "body": "Its fee and limits apply from now on."
+      },
+      "downgraded": {
+        "title": "Your store is on Free again",
+        "body": "Your paid plan has ended. Everything you have keeps working; upgrade any time for a lower fee."
+      },
+      "paymentFailed": {
+        "title": "The payment for your {plan, select, starter {Starter} pro {Pro} other {paid}} plan failed",
+        "body": "Stripe will try again. Update your card in Plan & billing to keep your plan."
       }
     }
   }

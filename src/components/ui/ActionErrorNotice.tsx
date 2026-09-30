@@ -7,8 +7,9 @@ import { useTranslations } from "next-intl";
 import { errorTextClass, helpTextClass } from "@/components/ui/control-styles";
 import { useToast } from "@/components/ui/Toast";
 import type { SaveResult } from "@/components/ui/SaveButton";
+import { usePricingModal } from "@/components/billing/pricing-modal-context";
 import type { MessageRef, MessageValues } from "@/i18n/types";
-import type { ActionError, ActionState } from "@/lib/errors";
+import { actionHref, type ActionError, type ActionState } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 
 /**
@@ -94,16 +95,20 @@ export function useSaveResult(state: ActionState): SaveResult {
   );
 }
 
+/** The shared shape of an error's action button; the tone is added per kind. */
+const actionButtonClass =
+  "mt-1 inline-flex items-center rounded-sm border px-3 py-1.5 font-inter text-xs font-medium transition-colors duration-base ease-standard hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none";
+
 /**
  * Standard renderer for a structured ActionError: it always shows what happened
  * AND how to fix it, so no consumer can accidentally drop the fix line.
  * `banner` is the boxed alert used above forms and lists; `inline` is compact
  * stacked text for tight side panels and modals.
  *
- * An error carrying `action` (see lib/errors.ts) also gets the link that
+ * An error carrying `action` (see lib/errors.ts) also gets the control that
  * resolves it, in BOTH variants: the errors that carry one are the ones whose
- * fix lives on another page, and a fix line naming a page the user then has to
- * go and find is half an answer.
+ * fix lives somewhere else (another page, or a bigger plan), and a fix line
+ * naming a place the user then has to go and find is half an answer.
  */
 export function ActionErrorNotice({
   error,
@@ -115,16 +120,35 @@ export function ActionErrorNotice({
   className?: string;
 }) {
   const resolve = useResolveMessage();
-  const action = error.action ? (
-    <Link
-      href={error.action.href}
-      // Outlined rather than filled, matching SellerDetailsNotice: the only
-      // solid buttons in this dashboard are its black primaries.
-      className="mt-1 inline-flex items-center rounded-sm border border-destructive/40 px-3 py-1.5 font-inter text-xs font-medium text-destructive transition-colors duration-base ease-standard hover:bg-destructive hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
-    >
-      {resolve(error.action.label)}
-    </Link>
-  ) : null;
+  const pricing = usePricingModal();
+  const target = error.action;
+  let action: React.ReactNode = null;
+  if (target && "pricing" in target && pricing) {
+    // "A bigger plan lifts this": the plans open over the page, never a
+    // navigation, so a form with unsaved work keeps it. Ink, not red: an
+    // upgrade is the way forward, not a second error.
+    action = (
+      <button
+        type="button"
+        onClick={() => pricing.open({ source: target.pricing })}
+        className={cn(actionButtonClass, "border-foreground text-foreground hover:bg-foreground")}
+      >
+        {resolve(target.label)}
+      </button>
+    );
+  } else if (target) {
+    // Outlined rather than filled, matching SellerDetailsNotice: the only
+    // solid buttons in this dashboard are its black primaries. A pricing
+    // action with no modal around it becomes a link to the plans page.
+    action = (
+      <Link
+        href={actionHref(target)}
+        className={cn(actionButtonClass, "border-destructive/40 text-destructive hover:bg-destructive")}
+      >
+        {resolve(target.label)}
+      </Link>
+    );
+  }
 
   if (variant === "inline") {
     return (

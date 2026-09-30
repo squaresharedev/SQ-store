@@ -5,6 +5,7 @@ import {
   type SectionSpec,
 } from "@/lib/search/catalog";
 import {
+  CHECKOUT_PAGE_SETTINGS,
   GROUP_SUBTITLES,
   PRODUCT_PAGE_SETTINGS,
   STOREFRONT_ONLY_SETTINGS,
@@ -166,6 +167,27 @@ function openPageEntry(t: KeyTranslator): EditorSearchEntry {
 }
 
 /**
+ * The checkout's twin of openPageEntry: with no checkout out, its settings
+ * collapse to one row that puts it on the canvas (the designer's opener does
+ * that for any checkoutPage ref), carrying every gated row's vocabulary.
+ */
+function openCheckoutEntry(t: KeyTranslator): EditorSearchEntry {
+  return {
+    id: "setting:open-checkout",
+    title: t("Storefront.editorSearch.openCheckout"),
+    subtitle: t(GROUP_SUBTITLES.checkoutPage),
+    keywords: Array.from(
+      new Set([
+        ...CHECKOUT_PAGE_SETTINGS.map((setting) => t(setting.label)),
+        ...CHECKOUT_PAGE_SETTINGS.flatMap((setting) => setting.keywords),
+      ]),
+    ),
+    section: EDITOR_SECTIONS.settings,
+    payload: { kind: "setting", ref: { kind: "checkoutPage", section: "layout" } },
+  };
+}
+
+/**
  * The drawers. Titled as the thing you would go there TO DO rather than as
  * the panel's own name, because nobody searches for "the library".
  */
@@ -248,6 +270,8 @@ type StaticRows = {
   settings: EditorSearchEntry[];
   productPage: EditorSearchEntry[];
   openPage: EditorSearchEntry;
+  checkoutPage: EditorSearchEntry[];
+  openCheckout: EditorSearchEntry;
   panels: EditorSearchEntry[];
 };
 
@@ -261,6 +285,8 @@ function staticRows(t: KeyTranslator): StaticRows {
     settings: settingRows(STOREFRONT_ONLY_SETTINGS, t),
     productPage: settingRows(PRODUCT_PAGE_SETTINGS, t),
     openPage: openPageEntry(t),
+    checkoutPage: settingRows(CHECKOUT_PAGE_SETTINGS, t),
+    openCheckout: openCheckoutEntry(t),
     panels: panelEntries(t),
   };
   STATIC_ROWS.set(t, rows);
@@ -306,13 +332,14 @@ export function editorEntries(
   blocks: readonly StorefrontBlock[],
   productsById: ReadonlyMap<string, Product>,
   t: KeyTranslator,
-  options: { pageOpen?: boolean } = {},
+  options: { pageOpen?: boolean; checkoutOpen?: boolean } = {},
 ): EditorSearchEntry[] {
   const rows = staticRows(t);
   return [
     ...canvasEntries(blocks, productsById, t),
     ...rows.settings,
     ...(options.pageOpen ? rows.productPage : [rows.openPage]),
+    ...(options.checkoutOpen ? rows.checkoutPage : [rows.openCheckout]),
     ...rows.panels,
   ];
 }

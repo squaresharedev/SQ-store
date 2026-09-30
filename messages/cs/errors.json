@@ -52,6 +52,10 @@
     "fulfilOrders": {
       "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě označovat objednávky jako odeslané.",
       "noRole": "Nemáte oprávnění označovat objednávky jako odeslané v tomto obchodě."
+    },
+    "manageBilling": {
+      "withRole": "Vaše role {role, select, owner {vlastník} editor {editor} viewer {čtenář} other {{role}}} nemůže měnit plán tohoto obchodu.",
+      "noRole": "Nemáte oprávnění měnit plán tohoto obchodu."
     }
   },
   "notFound": {
@@ -76,7 +80,9 @@
     "readProductPageSettings": "Příliš mnoho pokusů o načtení nastavení produktové stránky v krátké době.",
     "requestReview": "Příliš mnoho žádostí o kontrolu během krátké doby.",
     "fileAppeal": "Příliš mnoho pokusů o odeslání odvolání za krátkou dobu.",
-    "fulfilOrders": "Příliš mnoho pokusů o označení objednávek jako odeslaných v krátké době."
+    "fulfilOrders": "Příliš mnoho pokusů o označení objednávek jako odeslaných v krátké době.",
+    "readCheckoutSettings": "Příliš mnoho pokusů o načtení nastavení pokladny v krátké době.",
+    "changePlan": "Příliš mnoho změn plánu za krátkou dobu."
   },
   "serverError": {
     "fix": "Obvykle jde o dočasný problém. Chvíli počkejte a zkuste to znovu; pokud to stále nejde, obnovte stránku.",
@@ -104,7 +110,12 @@
     "saveProductPageSettings": "Nastavení produktové stránky se kvůli problému na naší straně nepodařilo uložit.",
     "sendForReview": "Kontrolu se nepodařilo odeslat kvůli chybě na naší straně.",
     "fileAppeal": "Odvolání nebylo možné odeslat kvůli problému na naší straně.",
-    "markOrderShipped": "Objednávku se nepodařilo označit jako odeslanou kvůli problému na naší straně."
+    "markOrderShipped": "Objednávku se nepodařilo označit jako odeslanou kvůli problému na naší straně.",
+    "loadCheckoutSettings": "Nastavení pokladny se kvůli problému na naší straně nepodařilo načíst.",
+    "saveCheckoutSettings": "Nastavení pokladny se kvůli problému na naší straně nepodařilo uložit.",
+    "loadPlans": "Váš plán se nepodařilo načíst kvůli chybě na naší straně.",
+    "startCheckout": "Pokladnu se nepodařilo otevřít kvůli chybě na naší straně.",
+    "openBillingPortal": "Fakturační údaje se nepodařilo otevřít kvůli chybě na naší straně."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Tento produkt byl odstraněn, nikoli pozastaven.} storefront {Tato výloha byla odstraněna, nikoli pozastavena.} other {Tato položka byla odstraněna, nikoli pozastavena.}}",
@@ -578,5 +589,25 @@
       "message": "Tuto objednávku nelze označit jako odeslanou.",
       "fix": "Odesílat lze jen zaplacené objednávky s položkou k odeslání. Obnovte stránku a zjistěte, v jakém je tato objednávka stavu."
     }
+  },
+  "checkoutPageApi": {
+    "notObjectFix": "Pošlete objekt JSON, např. '{'\"layout\": \"compact\"'}'.",
+    "invalid": "Nastavení pokladny je neplatné.",
+    "invalidFix": "Zkontrolujte výše uvedené pole podle `limits` z požadavku GET na tuto adresu URL a zkuste to znovu."
+  },
+  "billing": {
+    "unavailable": "Placené plány teď nejsou k dispozici.",
+    "unavailableFix": "Váš obchod funguje dál na aktuálním plánu. Zkuste to později.",
+    "invalidPlan": "Takový plán nenabízíme.",
+    "alreadySubscribed": "Váš obchod už má placený plán. Místo nákupu druhého plán přepněte.",
+    "noBillingAccount": "Tento obchod zatím nemá fakturační účet. Nejdřív přejděte na placený plán.",
+    "noSubscription": "Tento obchod nemá žádný placený plán ke změně. Vyberte si některý a přejděte na něj.",
+    "ownerOnlyFix": "Plán obchodu může měnit jen vlastník. Požádejte ho nebo přepněte na vlastní obchod."
+  },
+  "planLimit": {
+    "storefronts": "Váš {plan, select, free {plán Free} starter {plán Starter} pro {plán Pro} other {aktuální plán}} zahrnuje {cap, plural, one {# výlohu} few {# výlohy} many {# výlohy} other {# výloh}} a váš obchod má všechny obsazené.",
+    "teamSeats": "Váš {plan, select, free {plán Free} starter {plán Starter} pro {plán Pro} other {aktuální plán}} zahrnuje {cap, plural, one {# místo} few {# místa} many {# místa} other {# míst}}, včetně vás, a všechna jsou obsazená.",
+    "fix": "Přejděte na vyšší plán pro více nebo odeberte to, co už nepotřebujete. Nic z toho, co máte, to neovlivní.",
+    "action": "Zobrazit plány"
   }
 }

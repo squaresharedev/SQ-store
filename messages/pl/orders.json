@@ -16,7 +16,8 @@
   },
   "channel": {
     "embed": "Osadzenie",
-    "marketplace": "Marketplace"
+    "marketplace": "Marketplace",
+    "direct": "Twoje strony"
   },
   "empty": {
     "filteredTitle": "Żadne zamówienie nie pasuje do tych filtrów",
@@ -110,6 +111,8 @@
       "copied": "Skopiowano numer telefonu",
       "failed": "Nie udało się skopiować numeru telefonu. Zaznacz i skopiuj ręcznie."
     },
+    "giftMessage": "Wiadomość prezentowa",
+    "withdrawalNotice": "Kupujący poprosił o odstąpienie od zakupu w dniu {date}. Uzgodnij z nim zwrot i refundację.",
     "noAddress": "To zamówienie nie ma adresu dostawy. Napisz do kupującego i zapytaj, gdzie wysłać.",
     "shipping": "Wysyłka",
     "shippedOn": "Wysłano {date}",
@@ -124,7 +127,8 @@
       "pending": "Płatność jeszcze nie przeszła. Poczekaj, zanim wyślesz.",
       "refunded": "To zamówienie zostało zwrócone, więc nie ma czego wysyłać.",
       "disputed": "Ta płatność jest sporna. Rozwiąż spór przed wysłaniem."
-    }
+    },
+    "platformFeeRate": "Opłata platformy ({rate})"
   },
   "actions": {
     "refundNeedsStripe": "Zwroty wymagają połączenia ze Stripe.",
@@ -185,7 +189,8 @@
       "buyer": "Kupujący: {email}",
       "total": "Łączna kwota zamówienia: {amount}",
       "openShip": "Gdy wyślesz, oznacz zamówienie jako wysłane, a my powiadomimy kupującego: {url}",
-      "openDigital": "Zobacz zamówienie: {url}"
+      "openDigital": "Zobacz zamówienie: {url}",
+      "gift": "Wiadomość na prezent do dołączenia: {message}"
     },
     "shipped": {
       "subject": "Twoje zamówienie z {store} jest w drodze",
@@ -196,6 +201,43 @@
       "shipTo": "Zamówienie jedzie pod adres:",
       "questions": "Pytania dotyczące zamówienia? Odpowiedz na tego e-maila, aby skontaktować się z {store}.",
       "footer": "Wysłano przez Square Share w imieniu {store}."
+    },
+    "confirmation": {
+      "subject": "Twoje zamówienie od {store}: {title}",
+      "intro": "Dziękujemy za zamówienie. {store} je otrzymał, a ten e-mail jest potwierdzeniem.",
+      "order": "Zamówienie {number}, złożone {date}",
+      "bought": "Co kupiłeś",
+      "subtotal": "Produkty: {amount}",
+      "delivery": "Dostawa: {amount}",
+      "deliveryFree": "Dostawa: bezpłatna",
+      "total": "Łącznie zapłacono: {amount}",
+      "shipTo": "Zostanie wysłane do:",
+      "dispatch": "{store} informuje: {dispatch}",
+      "nextShip": "{store} wyśle Ci e-mail, gdy paczka będzie w drodze.",
+      "download": "Pobierz plik: {url}",
+      "orderPage": "Strona Twojego zamówienia, gdzie możesz śledzić zamówienie lub odstąpić od umowy: {url}",
+      "orderPageDigital": "Strona Twojego zamówienia: {url}",
+      "seller": "Sprzedawca",
+      "sellerVat": "NIP: {vat}",
+      "withdrawal": "Możesz odstąpić od tego zakupu w ciągu 14 dni od otrzymania, bez podania przyczyny. Skorzystaj ze strony zamówienia lub powiadom {store} na piśmie.",
+      "withdrawalDigital": "Poprosiłeś o natychmiastowe pobranie i zgodziłeś się, że Twoje prawo do odstąpienia wygasa po jego rozpoczęciu.",
+      "guarantee": "Masz również ustawową gwarancję zgodności przez co najmniej dwa lata.",
+      "questions": "Pytania? Odpowiedz na tego e-maila, aby skontaktować się z {store}.",
+      "footer": "Wysłane przez Square Share w imieniu {store}. Square Share dostarcza oprogramowanie sklepu i nie jest stroną tej sprzedaży."
+    },
+    "withdrawal": {
+      "buyerSubject": "Twoje odstąpienie od zamówienia {number} w {store}",
+      "buyerIntro": "Otrzymaliśmy Twoje odstąpienie od zamówienia {number} ({title}) w dniu {date} i natychmiast przekazaliśmy je do {store}.",
+      "buyerNext": "{store} skontaktuje się z Tobą w sprawie zwrotu i refundacji, która jest należna w ciągu 14 dni od Twojego odstąpienia.",
+      "sellerSubject": "Odstąpienie: zamówienie {number} ({title})",
+      "sellerIntro": "Kupujący {email} odstąpił od zamówienia {number} w dniu {date}, używając przycisku odstąpienia na stronie zamówienia.",
+      "sellerName": "Podane imię i nazwisko: {name}",
+      "sellerNext": "Skontaktuj się z nim, aby uzgodnić zwrot, i dokonaj refundacji w ciągu 14 dni. Możesz wstrzymać refundację do czasu otrzymania towaru lub udowodnienia jego wysyłki. Zamówienie: {url}"
+    },
+    "lookup": {
+      "subject": "Twój link do zamówienia w {store}",
+      "intro": "Oto link do Twojej strony zamówienia {number} w {store}:",
+      "ignore": "Jeśli tego nie żądałeś, możesz zignorować tego e-maila."
     }
   }
 }

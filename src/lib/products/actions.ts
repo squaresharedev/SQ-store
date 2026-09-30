@@ -517,7 +517,11 @@ export async function updateProduct(
     if (replacingImage && existing.image_key !== data.imageKey) {
       stale.push(existing.image_key);
     }
-    if (replacingFile && existing.digital_file_key !== data.digitalFileKey) {
+    if (
+      replacingFile &&
+      existing.digital_file_key !== data.digitalFileKey &&
+      !(await fileStillSold(supabase, existing.digital_file_key))
+    ) {
       stale.push(existing.digital_file_key);
     }
     if (replacingGallery) {
@@ -568,12 +572,32 @@ export async function deleteProduct(id: string): Promise<ProductActionResult> {
 
   await evictObjects([
     deleted.image_key,
-    deleted.digital_file_key,
+    (await fileStillSold(supabase, deleted.digital_file_key)) ? null : deleted.digital_file_key,
     ...parseGallery(deleted.gallery).map((image) => image.key),
     ...parseDocuments(deleted.documents).map((document) => document.key),
   ]);
   revalidatePath("/products");
   return { ok: true, id };
+}
+
+/**
+ * Whether a paid order still points at this download. Orders SNAPSHOT the file
+ * they paid for (orders.digital_file_key, 20260928_checkout.sql), so a buyer's
+ * download survives the seller replacing the file or deleting the product; this
+ * is the other half of that promise, keeping the object in storage. Unsure
+ * (a read error) counts as yes: an orphaned file costs a few kilobytes, a
+ * deleted one costs a buyer what they paid for.
+ */
+async function fileStillSold(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  key: string | null,
+): Promise<boolean> {
+  if (!key) return false;
+  const { count, error } = await supabase
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("digital_file_key", key);
+  return Boolean(error) || (count ?? 0) > 0;
 }
 
 /** Best-effort R2 cleanup — storage cleanup never fails the parent operation. */

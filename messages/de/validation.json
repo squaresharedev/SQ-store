@@ -1,7 +1,8 @@
 {
   "checkForm": "Überprüfe das Formular und versuche es erneut.",
   "generic": {
-    "invalid": "Überprüfe das Formular und versuche es erneut."
+    "invalid": "Überprüfe das Formular und versuche es erneut.",
+    "sellerProse": "Links, E-Mail-Adressen und Bankdaten dürfen hier nicht stehen. Käufer zahlen über den Checkout, und deine Kontaktdaten erscheinen bereits auf der Seite."
   },
   "text": {
     "productTitle": {
@@ -240,6 +241,66 @@
       "required": "Erkläre uns den Grund mit mindestens {minimum} Zeichen.",
       "tooLong": "Dein Einspruch darf höchstens {maximum} Zeichen haben.",
       "unsupported": "Dein Einspruch enthält nicht unterstützte Zeichen."
+    },
+    "checkoutHeadline": {
+      "required": "Die Checkout-Überschrift ist erforderlich.",
+      "tooLong": "Die Checkout-Überschrift darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Die Checkout-Überschrift enthält nicht unterstützte Zeichen."
+    },
+    "checkoutNote": {
+      "required": "Die Notiz für Käufer ist erforderlich.",
+      "tooLong": "Die Notiz für Käufer darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Die Notiz für Käufer enthält nicht unterstützte Zeichen."
+    },
+    "thanksHeadline": {
+      "required": "Die Dankes-Überschrift ist erforderlich.",
+      "tooLong": "Die Dankes-Überschrift darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Die Dankes-Überschrift enthält nicht unterstützte Zeichen."
+    },
+    "thanksMessage": {
+      "required": "Die Dankesnachricht ist erforderlich.",
+      "tooLong": "Die Dankesnachricht darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Die Dankesnachricht enthält nicht unterstützte Zeichen."
+    },
+    "giftMessage": {
+      "required": "Schreib eine Geschenknotiz oder schalte sie aus.",
+      "tooLong": "Die Geschenknotiz darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Die Geschenknotiz enthält nicht unterstützte Zeichen."
+    },
+    "buyerName": {
+      "required": "Gib deinen vollständigen Namen ein.",
+      "tooLong": "Dein Name darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Dein Name enthält nicht unterstützte Zeichen."
+    },
+    "addressLine1": {
+      "required": "Gib deine Straße und Hausnummer ein.",
+      "tooLong": "Die Straße darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Die Straße enthält nicht unterstützte Zeichen."
+    },
+    "addressLine2": {
+      "required": "Gib die zweite Adresszeile ein.",
+      "tooLong": "Die zweite Adresszeile darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Die zweite Adresszeile enthält nicht unterstützte Zeichen."
+    },
+    "city": {
+      "required": "Gib deine Stadt ein.",
+      "tooLong": "Die Stadt darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Die Stadt enthält nicht unterstützte Zeichen."
+    },
+    "region": {
+      "required": "Gib dein Bundesland oder deine Region ein.",
+      "tooLong": "Das Bundesland oder die Region darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Das Bundesland oder die Region enthält nicht unterstützte Zeichen."
+    },
+    "postalCode": {
+      "required": "Gib deine Postleitzahl ein.",
+      "tooLong": "Die Postleitzahl darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Die Postleitzahl enthält nicht unterstützte Zeichen."
+    },
+    "orderReference": {
+      "required": "Gib deine Bestellnummer ein.",
+      "tooLong": "Diese Bestellnummer ist zu lang.",
+      "unsupported": "Diese Bestellnummer enthält nicht unterstützte Zeichen."
     }
   },
   "email": {
@@ -267,6 +328,11 @@
       "format": "Die E-Mail-Adresse der verantwortlichen Person in der EU scheint ungültig zu sein.",
       "tooLong": "Die E-Mail-Adresse der verantwortlichen Person in der EU ist zu lang.",
       "unsupported": "Die E-Mail-Adresse der verantwortlichen Person in der EU enthält nicht unterstützte Zeichen."
+    },
+    "buyer": {
+      "format": "Gib eine E-Mail-Adresse ein, z. B. name@beispiel.de.",
+      "tooLong": "Diese E-Mail-Adresse ist zu lang.",
+      "unsupported": "Diese E-Mail-Adresse enthält nicht unterstützte Zeichen."
     }
   },
   "emailQuality": {
@@ -293,7 +359,8 @@
     "notificationRecipient": "Ein Benachrichtigungsempfänger ist ungültig.",
     "factor": "Dieser Authenticator ist ungültig.",
     "reportTarget": "Dieses Element ist ungültig.",
-    "moderationDecision": "Diese Entscheidung ist ungültig."
+    "moderationDecision": "Diese Entscheidung ist ungültig.",
+    "checkoutAttempt": "Dieser Checkout ist abgelaufen. Lade die Seite neu und versuche es erneut."
   },
   "handle": {
     "username": "Ein Benutzername muss 3 bis 30 Zeichen lang sein und darf nur Buchstaben, Zahlen und Unterstriche enthalten."
@@ -323,12 +390,26 @@
       "whole": "Das Maximum pro Bestellung muss eine ganze Zahl sein.",
       "tooSmall": "Das Maximum pro Bestellung muss mindestens {minimum} betragen.",
       "tooBig": "Das Maximum pro Bestellung darf höchstens {maximum} betragen."
+    },
+    "shippingRate": {
+      "whole": "Ein Versandsatz muss eine ganze Anzahl von Cent sein.",
+      "tooSmall": "Ein Versandsatz kann nicht negativ sein.",
+      "tooBig": "Ein Versandsatz darf {maximum} Cent nicht überschreiten."
+    },
+    "freeOverCents": {
+      "whole": "Ein Gratisverschand-Schwellenwert muss eine ganze Anzahl von Cent sein.",
+      "tooSmall": "Ein Gratisverschand-Schwellenwert kann nicht negativ sein.",
+      "tooBig": "Ein Gratisverschand-Schwellenwert darf {maximum} Cent nicht überschreiten."
     }
   },
   "list": {
     "domains": {
       "tooMany": "Gib höchstens {maximum} Domains an.",
       "duplicate": "Jede Domain darf nur einmal eingetragen werden."
+    },
+    "destinationCountries": {
+      "tooMany": "Ein Ziel kann höchstens {maximum} Länder umfassen.",
+      "duplicate": "Jedes Land darf pro Ziel nur einmal erscheinen."
     }
   },
   "settings": {

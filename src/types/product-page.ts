@@ -32,6 +32,13 @@ export type ProductPageStorefront = {
   backgroundImageUrl: string | null;
   /** Signed URL for the uploaded typeface, else null. */
   customFontUrl: string | null;
+  /**
+   * Whether this product can be bought through Square Share checkout right
+   * now (lib/checkout/availability.ts). Decided on the server and handed down
+   * as data, because the page decides where its button goes in a component
+   * that must not read the environment. Absent = no.
+   */
+  checkout?: boolean;
 };
 
 export type ProductPageData = {

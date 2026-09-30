@@ -28,6 +28,10 @@
 
 import { randomUUID } from "node:crypto";
 import { CATALOG } from "./catalog.ts";
+// The ONE exception to "scripts never import from src": the fee arithmetic
+// and the plan catalog are import-free on purpose, so a seeded order is
+// charged exactly what a real one on the same plan would be.
+import { saleFee } from "../../src/lib/billing/fees.ts";
 
 // ---------------------------------------------------------------------------
 // Deterministic RNG + small sampling helpers
@@ -811,6 +815,9 @@ export interface OrderInsert {
   status: OrderStatus;
   amount_cents: number;
   platform_fee_cents: number;
+  /** The rate and plan behind platform_fee_cents, as the order writer snapshots them. */
+  platform_fee_bps: number;
+  seller_plan: string;
   currency: string;
   buyer_email: string;
   product_title: string;
@@ -841,8 +848,6 @@ export type SeedShipTo = {
   country: string;
 };
 
-/** Small, realistic platform take rate applied to the gross amount. */
-const PLATFORM_TAKE_RATE = 0.05;
 const DAY_MS = 86_400_000;
 
 /**
@@ -1013,7 +1018,8 @@ function makeOrder(
   // Mostly one unit, sometimes two or three: the same split as the simulator.
   const quantity = weightedPick<number>(rng, [[1, 82], [2, 14], [3, 4]]);
   const amount_cents = product.price_cents * quantity; // gross
-  const platform_fee_cents = Math.round(amount_cents * PLATFORM_TAKE_RATE);
+  // Seeded sellers are on Free, the plan every account starts on.
+  const fee = saleFee("free", amount_cents);
   // Embed sales flow through the seller's storefront widget; marketplace sales
   // come from the (future) discovery feed and aren't tied to a storefront.
   const storefront_id = channel === "embed" ? storefrontId : null;
@@ -1037,7 +1043,9 @@ function makeOrder(
     channel,
     status,
     amount_cents,
-    platform_fee_cents,
+    platform_fee_cents: fee.platformFeeCents,
+    platform_fee_bps: fee.platformFeeBps,
+    seller_plan: fee.sellerPlan,
     currency: product.currency,
     buyer_email,
     product_title: product.title,

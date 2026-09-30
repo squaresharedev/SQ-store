@@ -98,7 +98,9 @@ export function RecentOrders({
                         {t(
                           order.channel === "marketplace"
                             ? "Orders.channel.marketplace"
-                            : "Orders.channel.embed",
+                            : order.channel === "direct"
+                              ? "Orders.channel.direct"
+                              : "Orders.channel.embed",
                         )}{" "}
                         ·{" "}
                         {formatOrderDate(order.created_at, locale)}

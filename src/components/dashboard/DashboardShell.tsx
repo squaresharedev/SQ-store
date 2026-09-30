@@ -11,12 +11,16 @@ import { TourOverlay } from "@/components/onboarding/TourOverlay";
 import { SearchProvider } from "@/components/search/SearchProvider";
 import { SearchMobileTrigger } from "@/components/search/SearchMobileTrigger";
 import { SellerDetailsBanner } from "@/components/settings/SellerDetailsNotice";
+import { PricingModalProvider } from "@/components/billing/PricingModalProvider";
+import { PlanStatusBanner } from "@/components/billing/PlanStatusBanner";
 import {
   getAccessibleAccounts,
   getActiveAccount,
 } from "@/lib/team/account-context";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
-import { getProfile, getUser } from "@/lib/auth/session";
+import { getAssurance, getProfile, getUser } from "@/lib/auth/session";
+import { stepUpFreshUntil } from "@/lib/auth/assurance";
+import { getAccountBilling } from "@/lib/billing/account-plan";
 import { countOrdersToShip } from "@/lib/orders/queries";
 import { ORDERS_PATH } from "@/lib/dashboard/paths";
 
@@ -39,13 +43,14 @@ export async function DashboardShell({
   username: string;
   children: ReactNode;
 }) {
-  const [account, accounts, profile, user, toShipCount] = await Promise.all([
+  const [account, accounts, profile, user, toShipCount, assurance] = await Promise.all([
     getActiveAccount(),
     getAccessibleAccounts(),
     getProfile(),
     getUser(),
     // Cached per request, so the Orders page and the overview reuse it.
     countOrdersToShip(),
+    getAssurance(),
   ]);
   const t = await getTranslations("Dashboard.shell");
   const tOrders = await getTranslations("Orders");
@@ -87,6 +92,23 @@ export async function DashboardShell({
     />
   );
 
+  // The ACTIVE store's plan: the rail's chip, the profile menu's row and the
+  // plans all describe the store being worked on, which for a teammate is the
+  // owner's. A read failure shows no plan at all rather than a guessed one.
+  const billing = account ? await getAccountBilling(account.accountId) : null;
+  const plan = billing?.ok ? billing.billing.plan : null;
+  const pastDuePlan =
+    billing?.ok && billing.billing.status === "past_due" && billing.billing.plan !== "free"
+      ? billing.billing.plan
+      : null;
+  // The plans' switch and cancel buttons open billing details, which asks for
+  // a two-factor code first, as the settings forms do.
+  const stepUp = {
+    enrolled: assurance?.enrolled ?? false,
+    freshUntil: stepUpFreshUntil(assurance),
+    factors: (assurance?.factors ?? []).map(({ id, name, type }) => ({ id, name, type })),
+  };
+
   // Mobile: search + bell + profile menu ride in the Sidebar's mobile header.
   const mobileControls = (
     <div className="flex items-center gap-1">
@@ -110,40 +132,45 @@ export async function DashboardShell({
         role={account?.role ?? null}
         accountId={account?.accountId ?? null}
       >
-        <div className="min-h-screen bg-background">
-          <Sidebar topBarSlot={mobileControls} counts={navCounts} />
-          <div className="md:pl-64">
-            <TopBar
-              accounts={accounts}
-              currentAccountId={currentAccountId}
-              name={name}
-              email={email}
-              avatarUrl={avatarUrl}
-            />
-            {viewingOther && viewingStoreName && (
-              <ViewingBanner
-                storeName={viewingStoreName}
-                role={viewingOther.role}
-                ownAccountId={viewingOther.userId}
+        {/* The plans, openable from anywhere in the shell (the rail's chip, the
+            profile menu, a plan-limit error) without leaving the page. */}
+        <PricingModalProvider plan={plan} stepUp={stepUp}>
+          <div className="min-h-screen bg-background">
+            <Sidebar topBarSlot={mobileControls} counts={navCounts} />
+            <div className="md:pl-64">
+              <TopBar
+                accounts={accounts}
+                currentAccountId={currentAccountId}
+                name={name}
+                email={email}
+                avatarUrl={avatarUrl}
               />
-            )}
-            {/* Under the "viewing another store" banner, because which store
-                this is about has to be read first for the warning to mean
-                anything. */}
-            {viewingOther ? (
-              sellerDetailsBanner
-            ) : (
-              <HiddenOnPaths paths={BANNER_HIDDEN_PATHS}>
-                {sellerDetailsBanner}
-              </HiddenOnPaths>
-            )}
-            {children}
+              {viewingOther && viewingStoreName && (
+                <ViewingBanner
+                  storeName={viewingStoreName}
+                  role={viewingOther.role}
+                  ownAccountId={viewingOther.userId}
+                />
+              )}
+              {/* Under the "viewing another store" banner, because which store
+                  this is about has to be read first for the warning to mean
+                  anything. */}
+              {viewingOther ? (
+                sellerDetailsBanner
+              ) : (
+                <HiddenOnPaths paths={BANNER_HIDDEN_PATHS}>
+                  {sellerDetailsBanner}
+                </HiddenOnPaths>
+              )}
+              <PlanStatusBanner pastDuePlan={pastDuePlan} audience={viewingOther ? "member" : "owner"} />
+              {children}
+            </div>
           </div>
-        </div>
-        {/* The guided tour's layer. Inside SearchProvider so opening search can
-            end it; rendered by every shell, so it is present on each page the
-            tour walks through. */}
-        <TourOverlay role={account?.role ?? null} />
+          {/* The guided tour's layer. Inside SearchProvider so opening search can
+              end it; rendered by every shell, so it is present on each page the
+              tour walks through. */}
+          <TourOverlay role={account?.role ?? null} />
+        </PricingModalProvider>
       </SearchProvider>
     </NotificationsProvider>
   );

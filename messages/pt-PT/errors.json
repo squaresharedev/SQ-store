@@ -52,6 +52,10 @@
     "fulfilOrders": {
       "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite marcar encomendas como enviadas nesta loja.",
       "noRole": "Não tem permissão para marcar encomendas como enviadas nesta loja."
+    },
+    "manageBilling": {
+      "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite alterar o plano desta loja.",
+      "noRole": "Não tem permissão para alterar o plano desta loja."
     }
   },
   "notFound": {
@@ -76,7 +80,9 @@
     "readProductPageSettings": "Demasiadas tentativas de ler as definições da página de produto num curto espaço de tempo.",
     "requestReview": "Demasiadas tentativas de pedir uma revisão num curto espaço de tempo.",
     "fileAppeal": "Demasiadas tentativas de enviar um recurso num curto espaço de tempo.",
-    "fulfilOrders": "Demasiadas tentativas de marcar encomendas como enviadas num curto espaço de tempo."
+    "fulfilOrders": "Demasiadas tentativas de marcar encomendas como enviadas num curto espaço de tempo.",
+    "readCheckoutSettings": "Demasiadas tentativas de ler as definições de pagamento num curto espaço de tempo.",
+    "changePlan": "Demasiadas alterações de plano iniciadas num curto espaço de tempo."
   },
   "serverError": {
     "fix": "Isto costuma ser temporário. Aguarde um momento e tente novamente; se continuar a falhar, atualize a página.",
@@ -104,7 +110,12 @@
     "saveProductPageSettings": "Não foi possível guardar as definições da página de produto devido a um problema do nosso lado.",
     "sendForReview": "Não foi possível enviar isto para revisão devido a um problema do nosso lado.",
     "fileAppeal": "Não foi possível enviar o seu recurso devido a um problema do nosso lado.",
-    "markOrderShipped": "Não foi possível marcar a encomenda como enviada devido a um problema do nosso lado."
+    "markOrderShipped": "Não foi possível marcar a encomenda como enviada devido a um problema do nosso lado.",
+    "loadCheckoutSettings": "Não foi possível carregar as definições de pagamento devido a um problema do nosso lado.",
+    "saveCheckoutSettings": "Não foi possível guardar as definições de pagamento devido a um problema do nosso lado.",
+    "loadPlans": "Não foi possível carregar o seu plano devido a um problema da nossa parte.",
+    "startCheckout": "Não foi possível abrir a finalização de compra devido a um problema da nossa parte.",
+    "openBillingPortal": "Não foi possível abrir os dados de faturação devido a um problema da nossa parte."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Este produto foi removido, não pausado.} storefront {Esta montra foi removida, não pausada.} other {Este item foi removido, não pausado.}}",
@@ -578,5 +589,25 @@
       "message": "Esta encomenda não pode ser marcada como enviada.",
       "fix": "Só as encomendas pagas com algo para enviar podem ser marcadas como enviadas. Atualize a página para ver o estado desta encomenda."
     }
+  },
+  "checkoutPageApi": {
+    "notObjectFix": "Envie um objeto JSON, p. ex. '{'\"layout\": \"compact\"'}'.",
+    "invalid": "Essas definições de pagamento não são válidas.",
+    "invalidFix": "Verifique o campo indicado acima em relação a `limits`, obtido através de um GET a este URL, e tente novamente."
+  },
+  "billing": {
+    "unavailable": "Os planos pagos não estão disponíveis de momento.",
+    "unavailableFix": "A sua loja continua a funcionar no plano atual. Tente novamente mais tarde.",
+    "invalidPlan": "Esse plano não faz parte da nossa oferta.",
+    "alreadySubscribed": "A sua loja já tem um plano pago. Mude de plano em vez de comprar um segundo.",
+    "noBillingAccount": "Esta loja ainda não tem conta de faturação. Passe para um plano pago primeiro.",
+    "noSubscription": "Esta loja não tem plano pago para alterar. Escolha um para subscrever.",
+    "ownerOnlyFix": "Só o proprietário da loja pode alterar o plano. Peça-lhe ou mude para a sua própria loja."
+  },
+  "planLimit": {
+    "storefronts": "O seu plano {plan, select, free {Free} starter {Starter} pro {Pro} other {atual}} inclui {cap, plural, one {# montra} many {# de montras} other {# montras}}, e a sua loja já as tem todas.",
+    "teamSeats": "O seu plano {plan, select, free {Free} starter {Starter} pro {Pro} other {atual}} inclui {cap, plural, one {# lugar} many {# de lugares} other {# lugares}}, incluindo o seu, e estão todos ocupados.",
+    "fix": "Atualize para ter mais ou remova um que já não precisa. Nada do que tem é afetado.",
+    "action": "Ver planos"
   }
 }

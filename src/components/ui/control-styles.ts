@@ -219,6 +219,14 @@ export const quietLinkClass = `font-inter text-xs text-muted-foreground underlin
 export const lastUsedBadgeClass =
   "inline-flex shrink-0 items-center rounded-full border border-border bg-muted px-1.5 py-px font-inter text-[0.6875rem] font-medium leading-tight text-foreground";
 
+/**
+ * The action on a dashboard banner strip (surface-styles `bannerStripClass`):
+ * sharp like every CTA, neutral grey rather than red because it is the helpful
+ * way out, with the "go" arrow (pair with iconNudgeRightClass).
+ */
+export const bannerActionClass =
+  "group/btn inline-flex shrink-0 items-center gap-1 rounded-none border border-border px-2 py-1 font-inter text-xs font-medium text-muted-foreground transition-colors duration-base ease-standard hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none";
+
 /** "Soon" chip for stubbed, not-yet-wired controls. */
 export const stubBadgeClass =
   "ml-2 inline-flex shrink-0 items-center rounded-full border border-border bg-muted px-1.5 py-0.5 font-inter text-xs font-medium uppercase tracking-wide text-muted-foreground";

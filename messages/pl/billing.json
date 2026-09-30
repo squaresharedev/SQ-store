@@ -1,0 +1,102 @@
+{
+  "plans": {
+    "free": {
+      "name": "Free",
+      "tagline": "Wszystko, czego potrzebujesz, żeby zacząć sprzedawać."
+    },
+    "starter": {
+      "name": "Starter",
+      "tagline": "Niższa opłata dla sklepu, który sprzedaje co tydzień."
+    },
+    "pro": {
+      "name": "Pro",
+      "tagline": "Najniższa opłata dla sklepu, który sprzedaje każdego dnia."
+    }
+  },
+  "card": {
+    "perMonth": "/ miesiąc",
+    "exclVat": "bez VAT",
+    "freeForever": "Bezpłatnie, tak długo jak chcesz",
+    "billedYearly": "{amount} rozliczane raz do roku, bez VAT",
+    "feePerSale": "+ {rate} od sprzedaży",
+    "storefronts": "{count, plural, one {# witryna} few {# witryny} many {# witryn} other {# witryny}}",
+    "storefrontsUnlimited": "Nieograniczona liczba witryn",
+    "teammates": "{count, plural, =0 {Tylko ty, bez współpracowników} one {Ty i # współpracownik} few {Ty i # współpracownicy} many {Ty i # współpracowników} other {Ty i # współpracowników}}",
+    "teammatesUnlimited": "Nieograniczona liczba współpracowników",
+    "everything": "Strony produktów, realizacja zakupu, analityka: wszystko w cenie"
+  },
+  "modal": {
+    "title": "Plany",
+    "description": "Zacznij bezpłatnie. Przejdź wyżej, gdy niższa opłata zwróci się sama.",
+    "loading": "Wczytywanie planów",
+    "intervalLabel": "Okres rozliczeniowy",
+    "month": "Miesięcznie",
+    "year": "Rocznie",
+    "yearlySaving": "2 miesiące gratis przy rozliczeniu rocznym",
+    "current": "Obecny plan",
+    "recommended": "Polecany",
+    "cheapest": "Najtańszy dla ciebie",
+    "upgrade": "Przejdź na {plan}",
+    "switch": "Zmień na {plan}",
+    "switchInterval": "{interval, select, year {Przejdź na rozliczenie roczne} other {Przejdź na rozliczenie miesięczne}}",
+    "moveToFree": "Przejdź na Free",
+    "soon": "Wkrótce",
+    "soonTitle": "Płatne plany otworzą się wkrótce. W międzyczasie wszystko na Free działa bez zmian.",
+    "ownerOnly": "Tylko właściciel sklepu może zmieniać jego plan.",
+    "pastDue": "Ostatnia płatność za plan {plan} nie powiodła się. Zaktualizuj kartę, aby go zachować.",
+    "endsOn": "Twój plan {plan} kończy się {date}, a twój sklep przechodzi wtedy na Free. Nic nie jest usuwane.",
+    "finePrint": "Ceny nie zawierają VAT. Opłata od sprzedaży dotyczy zakupów przez realizację zakupu Square Share i jest naliczana od ceny produktu, nigdy od dostawy. Do tego dochodzą własne opłaty Stripe za obsługę kart. Anuluj w dowolnym momencie: zachowujesz plan do końca opłaconego okresu."
+  },
+  "portal": {
+    "opening": "Otwieranie Stripe",
+    "stepUp": "Potwierdź swoją tożsamość przed otwarciem danych rozliczeniowych."
+  },
+  "calculator": {
+    "toggle": "Który plan jest dla mnie najtańszy?",
+    "salesLabel": "Sprzedaż miesięcznie",
+    "salesAria": "Twoja miesięczna sprzedaż w euro",
+    "fromYourSales": "Wypełnione na podstawie twoich ostatnich 30 dni sprzedaży.",
+    "perMonth": "miesięcznie, opłaty w cenie",
+    "cheapest": "Przy sprzedaży {sales} miesięcznie {plan} jest dla ciebie najtańszy.",
+    "breakEven": "{plan} zwraca się powyżej {amount} sprzedaży miesięcznie."
+  },
+  "chip": {
+    "label": "Plan: {plan}",
+    "upgrade": "Ulepsz"
+  },
+  "banner": {
+    "label": "Płatność za plan",
+    "pastDue": "Płatność za plan {plan} nie powiodła się. Zaktualizuj kartę, aby go zachować.",
+    "pastDueMember": "Płatność za plan {plan} tego sklepu nie powiodła się. Tylko właściciel może zaktualizować kartę.",
+    "action": "Zaktualizuj kartę"
+  },
+  "settings": {
+    "planTitle": "Twój plan",
+    "planDescription": "Co płaci twój sklep i opłata od każdej sprzedaży.",
+    "priceLine": "{price} {interval, select, year {rocznie} other {miesięcznie}}, bez VAT",
+    "freeLine": "Brak subskrypcji.",
+    "renews": "Odnawia się {date}.",
+    "ends": "Kończy się {date}. Sklep przechodzi wtedy na Free i nic nie jest usuwane.",
+    "pastDue": "Płatność nie powiodła się. Stripe ponowi próbę; zaktualizuj kartę, aby zachować {plan}.",
+    "feeLine": "Opłata od każdej sprzedaży: {rate} ceny produktu.",
+    "changePlan": "Zmień plan",
+    "seePlans": "Zobacz plany",
+    "memberNote": "Tylko właściciel sklepu może zmieniać plan lub przeglądać jego faktury.",
+    "usageTitle": "Z czego korzystasz",
+    "usageDescription": "Limity twojego planu dotyczą tylko dodawania nowych. Nic, co już masz, nie zostanie usunięte.",
+    "usage": {
+      "storefronts": "Witryny: {used} z {cap}",
+      "storefrontsUnlimited": "Witryny: {used}, bez limitu",
+      "teamSeats": "Miejsca w zespole, wliczając ciebie: {used} z {cap}",
+      "teamSeatsUnlimited": "Miejsca w zespole, wliczając ciebie: {used}, bez limitu"
+    },
+    "overLimit": "Przekroczono limit tego planu. Wszystko działa bez zmian; usuń jeden element lub przejdź wyżej, żeby dodać więcej.",
+    "invoicesTitle": "Rozliczenia i faktury",
+    "invoicesDescription": "Twoja karta, adres rozliczeniowy, NIP i wszystkie faktury na bezpiecznej stronie Stripe.",
+    "manage": "Zarządzaj rozliczeniami i fakturami",
+    "noBilling": "Faktury i dane płatnicze pojawią się tutaj po przejściu na plan płatny.",
+    "confirmed": "Jesteś na planie {plan}. Dziękujemy za wsparcie Square Share.",
+    "pending": "Potwierdzamy twoją płatność ze Stripe. Odśwież za chwilę, jeśli plan się nie zmienił.",
+    "unavailable": "Twój plan nie może być teraz wyświetlony. Odśwież stronę za chwilę."
+  }
+}

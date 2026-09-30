@@ -2,6 +2,10 @@
 
 import { cn } from "@/lib/utils";
 
+/** The little canvas every option's illustration is drawn on, so all the
+ *  visual pickers' pictures share one frame. Size is the glyph's own. */
+export const optionGlyphFrameClass = "overflow-hidden rounded-sm border border-border bg-background";
+
 export type OptionCard<T extends string> = {
   value: T;
   label: string;

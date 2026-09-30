@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { TITLE_STYLES, type TitleStyle } from "@/types/storefront";
-import { OptionCardPicker } from "./OptionCardPicker";
+import { OptionCardPicker, optionGlyphFrameClass } from "./OptionCardPicker";
 
 /** Miniature card depicting one title style: where the title line sits and
  *  what backs it (solid bar, translucent overlay, or gradient shadow). */
@@ -10,7 +10,7 @@ function StyleGlyph({ style }: { style: TitleStyle }) {
   return (
     <span
       aria-hidden="true"
-      className="flex h-12 w-10 flex-col overflow-hidden rounded-sm border border-border bg-background"
+      className={`flex h-12 w-10 flex-col ${optionGlyphFrameClass}`}
     >
       <span className="relative flex-1 bg-muted">
         {style === "overlay" && (

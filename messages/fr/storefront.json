@@ -94,7 +94,8 @@
       "typography": "Typographie",
       "cards": "Vignettes produit",
       "soldOut": "Épuisé",
-      "productPage": "Page produit"
+      "productPage": "Page produit",
+      "checkoutPage": "Paiement"
     },
     "subtitle": {
       "theme": "Vitrine / Thème",
@@ -102,7 +103,8 @@
       "typography": "Vitrine / Typographie",
       "cards": "Vitrine / Vignettes produit",
       "soldOut": "Vitrine / Épuisé",
-      "productPage": "Vitrine / Page produit"
+      "productPage": "Vitrine / Page produit",
+      "checkoutPage": "Vitrine / Paiement"
     },
     "labels": {
       "looks": "Aspect de la vitrine",
@@ -135,7 +137,16 @@
       "productPageAvailability": "Disponibilité sur la page",
       "productPageByline": "Mention « Vendu par »",
       "shippingReturns": "Politique de livraison et retours",
-      "sellerDetails": "Informations vendeur"
+      "sellerDetails": "Informations vendeur",
+      "checkoutLayout": "Disposition de la page de paiement",
+      "checkoutBackground": "Couleur de la page de paiement",
+      "checkoutHeadline": "Titre de la page de paiement",
+      "checkoutNote": "Note aux acheteurs",
+      "checkoutGift": "Messages cadeaux",
+      "thankYouMessage": "Message de remerciement",
+      "thankYouCelebration": "Animation de remerciement",
+      "checkoutTexture": "Texture de la page de paiement",
+      "checkoutPayButton": "Bouton de paiement"
     }
   },
   "editorSearch": {
@@ -151,7 +162,8 @@
       "products": "Ajouter un produit",
       "shapes": "Formes",
       "uploads": "Imports"
-    }
+    },
+    "openCheckout": "Ouvrir la page de paiement"
   },
   "list": {
     "showingOf": "Affichage de {count} sur {total} vitrines",
@@ -329,7 +341,12 @@
     "productPageLabel": " · Page produit",
     "closeAriaLabel": "Fermer la page produit de {title}",
     "desktopSize": "Taille bureau",
-    "mobileSize": "Taille mobile"
+    "mobileSize": "Taille mobile",
+    "checkoutLabel": " · Paiement",
+    "thanksLabel": " · Merci",
+    "openCheckout": "Paiement",
+    "openCheckoutAriaLabel": "Ouvrir le paiement pour {title}",
+    "closeCheckoutAriaLabel": "Fermer la page de paiement"
   },
   "customFont": {},
   "metadata": {
@@ -949,7 +966,12 @@
     "zoomInTip": "Zoom avant (Ctrl +)",
     "designSettings": "Paramètres de design",
     "page": "Page",
-    "moreTools": "Plus d’outils"
+    "moreTools": "Plus d’outils",
+    "checkout": "Paiement",
+    "showCheckout": "Afficher le paiement",
+    "closeCheckout": "Fermer le paiement",
+    "showCheckoutFull": "Afficher le paiement et la page de remerciement",
+    "closeCheckoutFull": "Fermer le paiement et la page de remerciement"
   },
   "selectionToolbar": {
     "toolsFor": "Outils pour {name}",
@@ -978,7 +1000,11 @@
     "duplicateNamed": "Dupliquer {name}",
     "duplicateN": "Dupliquer {count, plural, one {# élément} many {# éléments} other {# éléments}}",
     "removeFrom": "Retirer {name} de la grille",
-    "removeN": "Retirer {count, plural, one {# élément} many {# éléments} other {# éléments}} de la grille"
+    "removeN": "Retirer {count, plural, one {# élément} many {# éléments} other {# éléments}} de la grille",
+    "openCheckout": "Ouvrir le paiement",
+    "hideCheckout": "Masquer le paiement",
+    "openCheckoutFor": "Afficher le paiement de {name}",
+    "closeCheckoutFor": "Masquer le paiement de {name}"
   },
   "canvas": {
     "gridLabel": "Canevas de la vitrine",
@@ -1293,5 +1319,60 @@
         }
       }
     }
+  },
+  "checkoutPage": {
+    "unwired": "Les acheteurs accèdent au paiement une fois que vous connectez Stripe. Vous pouvez le concevoir dès maintenant.",
+    "charsLeft": "{count, plural, one {# caractère restant} other {# caractères restants}}",
+    "layout": {
+      "title": "Disposition",
+      "arrangement": {
+        "label": "Disposition",
+        "showcase": "En vedette",
+        "compact": "Compact"
+      },
+      "pageColor": "Couleur de la page",
+      "followsProductPage": "Fond de la page produit",
+      "useProductPage": "Utiliser le fond de la page produit",
+      "button": "Le bouton de paiement reprend le style du bouton d'achat de votre page produit.",
+      "styleButton": "Personnaliser le bouton",
+      "payButton": "Bouton de paiement",
+      "payButtonInfoLabel": "À propos du bouton de paiement",
+      "texture": {
+        "label": "Texture",
+        "none": "Unie",
+        "paper": "Papier",
+        "dots": "Pois",
+        "grid": "Grille",
+        "lines": "Rayures",
+        "linen": "Lin"
+      }
+    },
+    "message": {
+      "title": "Texte",
+      "headline": "Titre",
+      "note": "Note aux acheteurs",
+      "notePlaceholder": "Quelques mots de votre part, affichés à côté de la commande",
+      "gift": {
+        "label": "Messages cadeaux",
+        "infoLabel": "À quoi servent les messages cadeaux",
+        "info": "Les acheteurs de produits à expédier peuvent ajouter un court message à glisser dans le colis. Vous le verrez dans la commande."
+      }
+    },
+    "thanks": {
+      "title": "Page de remerciement",
+      "headline": "Titre",
+      "sampleName": "Marie",
+      "message": "Message",
+      "messagePlaceholder": "La suite en quelques mots",
+      "celebrate": {
+        "label": "Animation",
+        "confetti": "Confettis",
+        "rays": "Lumière",
+        "none": "Aucune",
+        "play": "Lancer"
+      }
+    },
+    "unwiredBadge": "Pas encore en ligne",
+    "unwiredInfoLabel": "Quand les acheteurs accèdent au paiement"
   }
 }

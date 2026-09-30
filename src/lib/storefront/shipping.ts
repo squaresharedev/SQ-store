@@ -123,6 +123,8 @@ export function compactShippingProfiles(
       name: profile.name.trim() || "Shipping profile",
       ...(dispatch ? { dispatch } : {}),
       body,
+      // Keep an explicit 0 (free for this profile) as well as positive rates.
+      ...(typeof profile.rateCents === "number" ? { rateCents: profile.rateCents } : {}),
     });
   }
   return clean;

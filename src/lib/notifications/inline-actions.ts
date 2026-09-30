@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { safeInternalPath } from "@/lib/utils/safe-path";
 import { storedNotificationMessage } from "@/lib/notifications/message";
+import { BILLING_SETTINGS_PATH } from "@/lib/billing/paths";
 import type { NotificationType } from "@/lib/notifications/types";
 
 /**
@@ -94,6 +95,7 @@ const TYPE_DESTINATION: Partial<Record<NotificationType, string>> = {
   order: "/orders",
   payment: "/payments",
   stock: "/products",
+  billing: BILLING_SETTINGS_PATH,
 };
 
 /**

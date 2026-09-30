@@ -240,8 +240,8 @@ const GET_EXPIRY_SECONDS = 2 * 60 * 60;
  * Returns null instead of throwing when R2 credentials are not configured yet,
  * so pages degrade to placeholder tiles rather than erroring.
  *
- * TODO(delivery stage): buyer-side post-purchase downloads are a separate,
- * stricter path (purchase check + short expiry) — do not reuse this for them.
+ * Buyer-side post-purchase downloads are a separate, stricter path
+ * (presignDownloadUrl below, behind a purchase check) and must not reuse this.
  */
 export async function presignGetUrl(key: string): Promise<string | null> {
   // Seeded dev data stores full https:// stock-photo URLs in image_key (see
@@ -266,6 +266,41 @@ export async function presignGetUrl(key: string): Promise<string | null> {
     return signed.url;
   } catch (error) {
     console.error("[r2] presign GET failed", error);
+    return null;
+  }
+}
+
+/** A paid download's link lives just long enough to be clicked. */
+export const DOWNLOAD_EXPIRY_SECONDS = 5 * 60;
+
+/**
+ * Signed GET for a buyer's PAID download: the file an order bought.
+ *
+ * Stricter than presignGetUrl on every axis. It is minted only by the order
+ * download route, after that route has proved the order (its credential), that
+ * it is paid, and that it is for a download; it lives for minutes, not hours,
+ * and is minted fresh per click rather than anchored for caching; and it tells
+ * R2 to serve the object as an ATTACHMENT under a clean name, so the browser
+ * saves it rather than opening it on R2's origin.
+ *
+ * Never put in an email or a page: those link the download ROUTE, which
+ * re-checks the order and mints one of these on the spot.
+ */
+export async function presignDownloadUrl(key: string, filename: string): Promise<string | null> {
+  if (!hasR2Credentials()) return null;
+  try {
+    const url = objectUrl(key);
+    url.searchParams.set("X-Amz-Expires", String(DOWNLOAD_EXPIRY_SECONDS));
+    url.searchParams.set(
+      "response-content-disposition",
+      `attachment; filename="${sanitizeFilename(filename)}"`,
+    );
+    const signed = await r2Client().sign(new Request(url, { method: "GET" }), {
+      aws: { signQuery: true },
+    });
+    return signed.url;
+  } catch (error) {
+    console.error("[r2] presign download failed", error);
     return null;
   }
 }

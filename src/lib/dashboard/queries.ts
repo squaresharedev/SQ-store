@@ -14,7 +14,7 @@ import type { Currency } from "@/types/product";
 //   platform_fee_cents, currency, product_title, product_price_cents,
 //   created_at
 
-export type OrderChannel = "embed" | "marketplace";
+export type OrderChannel = "embed" | "marketplace" | "direct";
 export type OrderStatus = "paid" | "refunded" | "disputed" | "pending";
 
 /** The subset of order columns the dashboard reads. */

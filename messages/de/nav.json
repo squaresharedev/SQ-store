@@ -38,7 +38,8 @@
     "notifications": "Benachrichtigungen",
     "language": "Sprache",
     "team": "Team und Zugriff",
-    "danger": "Gefahrenzone"
+    "danger": "Gefahrenzone",
+    "billing": "Tarif und Abrechnung"
   },
   "profileMenu": {
     "label": "Kontomenü",
@@ -46,7 +47,8 @@
     "switchAccounts": "Konto wechseln",
     "yourStore": "Dein Shop",
     "owner": "Inhaber",
-    "logOut": "Abmelden"
+    "logOut": "Abmelden",
+    "plan": "Tarif"
   },
   "viewingBanner": {
     "viewing": "{role, select, owner {Ansicht von <store>{storeName}</store> als Inhaber} editor {Ansicht von <store>{storeName}</store> als Bearbeiter} viewer {Ansicht von <store>{storeName}</store> als Betrachter} other {Ansicht von <store>{storeName}</store>}}",

@@ -1,7 +1,8 @@
 {
   "checkForm": "Vérifiez le formulaire et réessayez.",
   "generic": {
-    "invalid": "Vérifiez le formulaire et réessayez."
+    "invalid": "Vérifiez le formulaire et réessayez.",
+    "sellerProse": "Les liens, adresses e-mail et coordonnées bancaires ne peuvent pas figurer ici. Les acheteurs paient via le paiement et vos coordonnées apparaissent déjà sur la page."
   },
   "text": {
     "productTitle": {
@@ -240,6 +241,66 @@
       "required": "Expliquez-nous pourquoi en au moins {minimum} caractères.",
       "tooLong": "Limitez votre contestation à {maximum} caractères maximum.",
       "unsupported": "Votre contestation contient des caractères non pris en charge."
+    },
+    "checkoutHeadline": {
+      "required": "Le titre de la page de paiement est obligatoire.",
+      "tooLong": "Le titre de la page de paiement doit faire {maximum} caractères ou moins.",
+      "unsupported": "Le titre de la page de paiement contient des caractères non pris en charge."
+    },
+    "checkoutNote": {
+      "required": "La note aux acheteurs est obligatoire.",
+      "tooLong": "La note aux acheteurs doit faire {maximum} caractères ou moins.",
+      "unsupported": "La note aux acheteurs contient des caractères non pris en charge."
+    },
+    "thanksHeadline": {
+      "required": "Le titre de remerciement est obligatoire.",
+      "tooLong": "Le titre de remerciement doit faire {maximum} caractères ou moins.",
+      "unsupported": "Le titre de remerciement contient des caractères non pris en charge."
+    },
+    "thanksMessage": {
+      "required": "Le message de remerciement est obligatoire.",
+      "tooLong": "Le message de remerciement doit faire {maximum} caractères ou moins.",
+      "unsupported": "Le message de remerciement contient des caractères non pris en charge."
+    },
+    "giftMessage": {
+      "required": "Rédigez un message cadeau ou désactivez-le.",
+      "tooLong": "Le message cadeau doit faire {maximum} caractères ou moins.",
+      "unsupported": "Le message cadeau contient des caractères non pris en charge."
+    },
+    "buyerName": {
+      "required": "Entrez votre nom complet.",
+      "tooLong": "Votre nom doit faire {maximum} caractères ou moins.",
+      "unsupported": "Votre nom contient des caractères non pris en charge."
+    },
+    "addressLine1": {
+      "required": "Entrez votre adresse.",
+      "tooLong": "L'adresse doit faire {maximum} caractères ou moins.",
+      "unsupported": "L'adresse contient des caractères non pris en charge."
+    },
+    "addressLine2": {
+      "required": "Entrez la deuxième ligne d'adresse.",
+      "tooLong": "La deuxième ligne d'adresse doit faire {maximum} caractères ou moins.",
+      "unsupported": "La deuxième ligne d'adresse contient des caractères non pris en charge."
+    },
+    "city": {
+      "required": "Entrez votre ville.",
+      "tooLong": "La ville doit faire {maximum} caractères ou moins.",
+      "unsupported": "La ville contient des caractères non pris en charge."
+    },
+    "region": {
+      "required": "Entrez votre département, état ou région.",
+      "tooLong": "Le département, état ou région doit faire {maximum} caractères ou moins.",
+      "unsupported": "Le département, état ou région contient des caractères non pris en charge."
+    },
+    "postalCode": {
+      "required": "Entrez votre code postal.",
+      "tooLong": "Le code postal doit faire {maximum} caractères ou moins.",
+      "unsupported": "Le code postal contient des caractères non pris en charge."
+    },
+    "orderReference": {
+      "required": "Saisissez votre numéro de commande.",
+      "tooLong": "Ce numéro de commande est trop long.",
+      "unsupported": "Ce numéro de commande contient des caractères non pris en charge."
     }
   },
   "email": {
@@ -267,6 +328,11 @@
       "format": "L’e-mail de la personne responsable dans l’UE ne ressemble pas à une adresse e-mail.",
       "tooLong": "L’e-mail de la personne responsable dans l’UE est trop long.",
       "unsupported": "L’e-mail de la personne responsable dans l’UE contient des caractères non pris en charge."
+    },
+    "buyer": {
+      "format": "Entrez une adresse e-mail comme nom@exemple.com.",
+      "tooLong": "Cette adresse e-mail est trop longue.",
+      "unsupported": "Cette adresse e-mail contient des caractères non pris en charge."
     }
   },
   "emailQuality": {
@@ -293,7 +359,8 @@
     "notificationRecipient": "Un destinataire de notification n’est pas valide.",
     "factor": "Cette application d’authentification n’est pas valide.",
     "reportTarget": "Cet élément n’est pas valide.",
-    "moderationDecision": "Cette décision n'est pas valide."
+    "moderationDecision": "Cette décision n'est pas valide.",
+    "checkoutAttempt": "Ce paiement a expiré. Rechargez la page et réessayez."
   },
   "handle": {
     "username": "Un nom d’utilisateur doit comporter de 3 à 30 caractères, en utilisant uniquement des lettres, chiffres et tirets bas."
@@ -323,12 +390,26 @@
       "whole": "Le maximum par commande doit être un nombre entier.",
       "tooSmall": "Le maximum par commande doit être {minimum} ou plus.",
       "tooBig": "Le maximum par commande doit être {maximum} ou moins."
+    },
+    "shippingRate": {
+      "whole": "Un tarif d’expédition doit être un nombre entier de centimes.",
+      "tooSmall": "Un tarif d’expédition ne peut pas être négatif.",
+      "tooBig": "Un tarif d’expédition ne peut pas dépasser {maximum} centimes."
+    },
+    "freeOverCents": {
+      "whole": "Un seuil de livraison gratuite doit être un nombre entier de centimes.",
+      "tooSmall": "Un seuil de livraison gratuite ne peut pas être négatif.",
+      "tooBig": "Un seuil de livraison gratuite ne peut pas dépasser {maximum} centimes."
     }
   },
   "list": {
     "domains": {
       "tooMany": "Indiquez jusqu’à {maximum} domaines.",
       "duplicate": "Chaque domaine ne peut être indiqué qu’une seule fois."
+    },
+    "destinationCountries": {
+      "tooMany": "Une destination peut couvrir au maximum {maximum} pays.",
+      "duplicate": "Chaque pays ne peut apparaître qu’une seule fois par destination."
     }
   },
   "settings": {

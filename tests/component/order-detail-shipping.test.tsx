@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
-import { cleanup, render, screen, within } from "../setup/render";
+import { act, cleanup, render, screen, within } from "../setup/render";
 import { orderView } from "../setup/order-view";
 import { stubClipboard } from "../setup/clipboard";
 import type { OrderView } from "@/types/order-view";
@@ -85,7 +85,24 @@ describe("what to pack, and where it goes", () => {
   });
 });
 
+/**
+ * Marking shipped plays a sequence (the truck revs, drives across the button,
+ * the success holds) before the panel moves on. Real time flows, so nothing
+ * that waits on a clock can hang, and `playOut` jumps the rest of it.
+ */
+const playOut = (ms = 5000) =>
+  act(async () => {
+    await vi.advanceTimersByTimeAsync(ms);
+  });
+
 describe("marking it shipped", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("asks for an optional tracking number, then ships and tells the seller the buyer was emailed", async () => {
     const user = userEvent.setup();
     const onOrderChange = vi.fn();
@@ -105,6 +122,7 @@ describe("marking it shipped", () => {
     await user.click(screen.getByRole("button", { name: "Mark shipped" }));
 
     expect(markOrderShippedMock).toHaveBeenCalledWith(waiting.id, "RR123456789IE");
+    await playOut();
     expect(onOrderChange).toHaveBeenCalledWith(after);
     expect(await screen.findByText("Marked as shipped. We've emailed the buyer.")).toBeInTheDocument();
   });
@@ -115,8 +133,43 @@ describe("marking it shipped", () => {
     renderDetail(waiting);
     await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
     await user.click(screen.getByRole("button", { name: "Mark shipped" }));
+    await playOut();
     expect(await screen.findByText("Marked as shipped.")).toBeInTheDocument();
     expect(screen.queryByText(/We've emailed the buyer/)).toBeNull();
+  });
+
+  it("spins the wheels until the server answers, then drives into a success state and only then moves on", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const onOrderChange = vi.fn();
+    const after = orderView({
+      ...waiting,
+      fulfilment: { status: "shipped", shippedAt: "2026-09-27T10:00:00Z", trackingNumber: null },
+    });
+    let answer!: (value: unknown) => void;
+    markOrderShippedMock.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    renderDetail(waiting, { onOrderChange });
+
+    await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
+    const confirm = screen.getByRole("button", { name: "Mark shipped" });
+    expect(confirm).toHaveAttribute("data-ship", "idle");
+    await user.click(confirm);
+    expect(confirm).toHaveAttribute("data-ship", "working");
+    expect(confirm).toHaveAttribute("aria-busy", "true");
+
+    // Long past the shortest rev, and still no success: the server has not said yes.
+    await playOut(3000);
+    expect(confirm).toHaveAttribute("data-ship", "working");
+    await user.click(confirm);
+    expect(markOrderShippedMock).toHaveBeenCalledTimes(1);
+
+    answer({ ok: true, order: after, buyerEmailed: true });
+    await playOut(50);
+    expect(confirm).toHaveAttribute("data-ship", "delivered");
+    // The success is left standing rather than swapped away the instant it lands.
+    expect(onOrderChange).not.toHaveBeenCalled();
+
+    await playOut(3000);
+    expect(onOrderChange).toHaveBeenCalledWith(after);
   });
 
   it("shows the server's refusal next to the field and keeps the form open", async () => {
@@ -132,8 +185,11 @@ describe("marking it shipped", () => {
     await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
     await user.type(screen.getByLabelText("Tracking number (optional)"), "no");
     await user.click(screen.getByRole("button", { name: "Mark shipped" }));
+    await playOut(1000);
     expect(await screen.findByRole("alert")).toHaveTextContent("A tracking number is 4 to 40 letters");
     expect(screen.getByLabelText("Tracking number (optional)")).toBeInTheDocument();
+    // The truck parks again: a refusal never shows the success.
+    expect(screen.getByRole("button", { name: "Mark shipped" })).toHaveAttribute("data-ship", "idle");
   });
 
   it("cancel closes the form without shipping", async () => {

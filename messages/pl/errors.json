@@ -52,6 +52,10 @@
     "fulfilOrders": {
       "withRole": "Twoja rola {role, select, owner {Właściciel} editor {Edytor} viewer {Przeglądający} other {{role}}} nie pozwala oznaczać zamówień jako wysłane w tym sklepie.",
       "noRole": "Nie masz uprawnień, aby oznaczać zamówień jako wysłane w tym sklepie."
+    },
+    "manageBilling": {
+      "withRole": "Twoja rola {role, select, owner {Właściciel} editor {Edytor} viewer {Przeglądający} other {{role}}} nie pozwala zmieniać planu tego sklepu.",
+      "noRole": "Nie masz uprawnień, aby zmieniać plan tego sklepu."
     }
   },
   "notFound": {
@@ -76,7 +80,9 @@
     "readProductPageSettings": "Zbyt wiele prób odczytania ustawień strony produktu w krótkim czasie.",
     "requestReview": "Zbyt wiele próśb o ponowne sprawdzenie w krótkim czasie.",
     "fileAppeal": "Zbyt wiele prób wysłania odwołania w krótkim czasie.",
-    "fulfilOrders": "Zbyt wiele prób oznaczania zamówień jako wysłane w krótkim czasie."
+    "fulfilOrders": "Zbyt wiele prób oznaczania zamówień jako wysłane w krótkim czasie.",
+    "readCheckoutSettings": "Zbyt wiele prób odczytania ustawień kasy w krótkim czasie.",
+    "changePlan": "Za dużo zmian planu w krótkim czasie."
   },
   "serverError": {
     "fix": "Zwykle jest to problem tymczasowy. Odczekaj chwilę i spróbuj ponownie; jeśli nadal się nie udaje, odśwież stronę.",
@@ -104,7 +110,12 @@
     "saveProductPageSettings": "Nie udało się zapisać ustawień strony produktu z powodu problemu po naszej stronie.",
     "sendForReview": "Nie udało się wysłać tego do sprawdzenia z powodu problemu po naszej stronie.",
     "fileAppeal": "Nie udało się wysłać odwołania z powodu błędu po naszej stronie.",
-    "markOrderShipped": "Nie udało się oznaczyć zamówienia jako wysłane z powodu problemu po naszej stronie."
+    "markOrderShipped": "Nie udało się oznaczyć zamówienia jako wysłane z powodu problemu po naszej stronie.",
+    "loadCheckoutSettings": "Nie udało się wczytać ustawień kasy z powodu problemu po naszej stronie.",
+    "saveCheckoutSettings": "Nie udało się zapisać ustawień kasy z powodu problemu po naszej stronie.",
+    "loadPlans": "Nie udało się wczytać twojego planu z powodu błędu po naszej stronie.",
+    "startCheckout": "Nie udało się otworzyć realizacji zakupu z powodu błędu po naszej stronie.",
+    "openBillingPortal": "Nie udało się otworzyć danych rozliczeniowych z powodu błędu po naszej stronie."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Ten produkt został usunięty, a nie wstrzymany.} storefront {Ta witryna została usunięta, a nie wstrzymana.} other {Ten element został usunięty, a nie wstrzymany.}}",
@@ -578,5 +589,25 @@
       "message": "Tego zamówienia nie można oznaczyć jako wysłane.",
       "fix": "Wysłać można tylko opłacone zamówienia zawierające produkty do wysłania. Odśwież stronę, aby sprawdzić status tego zamówienia."
     }
+  },
+  "checkoutPageApi": {
+    "notObjectFix": "Wyślij obiekt JSON, np. '{'\"layout\": \"compact\"'}'.",
+    "invalid": "Te ustawienia kasy są nieprawidłowe.",
+    "invalidFix": "Sprawdź pole wskazane powyżej względem `limits` z zapytania GET pod tym adresem URL, a potem spróbuj ponownie."
+  },
+  "billing": {
+    "unavailable": "Płatne plany nie są teraz dostępne.",
+    "unavailableFix": "Twój sklep działa normalnie na obecnym planie. Spróbuj ponownie później.",
+    "invalidPlan": "Tego planu nie ma w naszej ofercie.",
+    "alreadySubscribed": "Twój sklep ma już plan płatny. Zamiast kupować drugi, zmień plan.",
+    "noBillingAccount": "Ten sklep nie ma jeszcze konta rozliczeniowego. Najpierw przejdź na plan płatny.",
+    "noSubscription": "Ten sklep nie ma płatnego planu do zmiany. Wybierz plan, aby go aktywować.",
+    "ownerOnlyFix": "Tylko właściciel sklepu może zmieniać jego plan. Poproś go albo przełącz się na swój sklep."
+  },
+  "planLimit": {
+    "storefronts": "Twój plan {plan, select, free {Free} starter {Starter} pro {Pro} other {obecny}} obejmuje {cap, plural, one {# witrynę} few {# witryny} many {# witryn} other {# witryny}}, a twój sklep je wszystkie zajął.",
+    "teamSeats": "Twój plan {plan, select, free {Free} starter {Starter} pro {Pro} other {obecny}} obejmuje {cap, plural, one {# miejsce} few {# miejsca} many {# miejsc} other {# miejsca}} (wliczając ciebie) i są wszystkie zajęte.",
+    "fix": "Przejdź wyżej, aby dodać więcej, lub usuń to, czego nie potrzebujesz. Nic, co masz, nie jest naruszane.",
+    "action": "Zobacz plany"
   }
 }

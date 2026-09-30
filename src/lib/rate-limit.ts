@@ -254,6 +254,22 @@ export const RATE_LIMITS = {
   orderFulfil: { max: 240, windowSeconds: 60 * 60 },
   /** Profile / tax / notification-preference writes. */
   settingsWrite: { max: 60, windowSeconds: 60 * 60 },
+  // --- Plans & billing (lib/billing) ---------------------------------------
+  /**
+   * Opening Stripe Checkout or the Customer Portal. Each one is a call to
+   * Stripe on the platform's key (and may create a customer there), so a
+   * stuck or scripted client must not be able to spin them without end. A
+   * real owner opens a handful in an afternoon.
+   */
+  billingWrite: { max: 20, windowSeconds: 60 * 60 },
+  /** Loading the pricing modal: a few reads, per signed-in user. */
+  billingRead: { max: 300, windowSeconds: 60 * 60 },
+  /**
+   * Not a budget: at most one "pricing viewed" funnel row per account and
+   * entry point in this window, so a seller flicking the modal open and shut
+   * counts once.
+   */
+  pricingViewDedupe: { max: 1, windowSeconds: 10 * 60 },
   // --- Contact verification ----------------------------------------------
   // A code emailed or texted to the seller's buyer-facing contact details
   // (lib/contact-verification). Sending is the expensive and abusable half:
@@ -360,6 +376,36 @@ export const RATE_LIMITS = {
    * time; each refusal is logged, but the owner gets one message, not ten.
    */
   mfaApprovalDenyAlert: { max: 1, windowSeconds: 15 * 60 },
+  /**
+   * Views of a hosted checkout, per client IP. The same ceiling as the product
+   * page it is reached from: a buyer comparing versions reloads it a few times,
+   * a scanner walking ids pays like one.
+   */
+  checkoutPage: { max: 600, windowSeconds: 60 * 60 },
+  /**
+   * Placing an order, per client IP. The one public write that starts a
+   * payment, so it is where card testing would aim: twenty an hour is several
+   * honest retries after a declined card, and nothing like a script's pace.
+   */
+  checkoutPlace: { max: 20, windowSeconds: 60 * 60 },
+  /** Opens of an order page (the thank-you and order status), per client IP. */
+  orderPage: { max: 240, windowSeconds: 60 * 60 },
+  /** Download links handed out from order pages, per client IP. */
+  orderDownload: { max: 60, windowSeconds: 60 * 60 },
+  /** Withdrawal requests, per client IP. Each one is a real email to a seller. */
+  orderWithdraw: { max: 10, windowSeconds: 60 * 60 },
+  /**
+   * Withdrawal attempts against ONE order, whoever they come from. The buyer's
+   * email is the second factor on the withdrawal form, and a per-IP budget
+   * alone lets a crowd of addresses guess at it in parallel; this bounds the
+   * guessing per order however many IPs it arrives from.
+   */
+  orderWithdrawPerOrder: { max: 8, windowSeconds: 60 * 60 },
+  /**
+   * "Email me my order link" lookups, per client IP. Each can send mail, and
+   * an address is not proof of anything, so this stays small.
+   */
+  orderLookup: { max: 5, windowSeconds: 60 * 60 },
 } as const;
 
 export type RateLimitBudget = { max: number; windowSeconds: number };

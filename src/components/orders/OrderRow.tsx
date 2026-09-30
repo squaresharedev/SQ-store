@@ -28,7 +28,13 @@ export function OrderRow({
 }) {
   const t = useTranslations("Orders");
   const locale = useLocale();
-  const channelLabel = t(order.channel === "marketplace" ? "channel.marketplace" : "channel.embed");
+  const channelLabel = t(
+    order.channel === "marketplace"
+      ? "channel.marketplace"
+      : order.channel === "direct"
+        ? "channel.direct"
+        : "channel.embed",
+  );
 
   // Bring the row to the user rather than making them find the marked one:
   // it can be well down a filtered list. Focus goes with the scroll so the

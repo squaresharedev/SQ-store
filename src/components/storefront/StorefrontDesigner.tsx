@@ -45,10 +45,12 @@ import {
   type TextSpan,
   DEFAULT_PRODUCT_PAGE_CONFIG,
   type ProductPageConfig,
+  type CheckoutPageConfig,
   type StorefrontSeller,
 } from "@/types/storefront";
 import { LAYER_OPS, moveLayerTo, type LayerOp } from "@/lib/storefront/layers";
 import { isDefaultProductPage } from "@/lib/storefront/product-page";
+import { isDefaultCheckoutPage, resolveCheckoutPage } from "@/lib/storefront/checkout-page";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { applyFormatToRange } from "@/lib/storefront/text-spans";
 import { isDefaultPlacement } from "@/lib/images/placement";
@@ -171,6 +173,7 @@ type EditorSnapshot = {
   header: StorefrontHeader;
   blocks: StorefrontBlock[];
   productPage: ProductPageConfig;
+  checkoutPage: CheckoutPageConfig;
   // NO `policies` OR `shippingProfiles` HERE either, for the same reason as
   // `seller`: shipping and returns terms are account-level and read-only in
   // this editor, so there is nothing about them to undo.
@@ -341,6 +344,7 @@ export function StorefrontDesigner({
   accountId = null,
   sellerIdentity = {},
   shippingPolicy = {},
+  checkoutLive = false,
   sample = null,
   takedown = null,
 }: {
@@ -366,6 +370,9 @@ export function StorefrontDesigner({
    *  product page of this storefront sells under them; this editor has no
    *  control that edits them, only a link to where it is. */
   shippingPolicy?: SellerShippingPolicy;
+  /** Whether buyers can reach this seller's checkout yet (a payment provider
+   *  can take their money). Server-decided; the editor only says so. */
+  checkoutLive?: boolean;
   /** Signed display URL for a stored image background (null when none). */
   initialBackgroundImageUrl?: string | null;
   /** Signed display URL for a stored uploaded font (null when none). */
@@ -442,6 +449,17 @@ export function StorefrontDesigner({
   // VIEW state: which pages the seller has open is not part of the design, so
   // it is never saved and never enters the undo history.
   const [openPages, setOpenPages] = useState<string[]>([]);
+  // The checkout's design: a config member like the product page's, on the
+  // same undo history and the same save.
+  const [checkoutPage, setCheckoutPage] = useState<CheckoutPageConfig>(() =>
+    resolveCheckoutPage(initialConfig),
+  );
+  // WHICH PRODUCT'S CHECKOUT IS OUT beside its page (with its thank-you), or
+  // none. One at a time: there is one checkout design per storefront, and a
+  // second chain would show the same design twice. View state, never saved.
+  const [checkoutFor, setCheckoutFor] = useState<string | null>(null);
+  // Bumped by the panel's "Play it" to replay the thank-you celebration.
+  const [celebrationPlays, setCelebrationPlays] = useState(0);
   const [saving, setSaving] = useState(false);
   // Unsaved-edits flag. The header shows exactly one thing — whether there is
   // work not yet written — while the OUTCOME of a save (done / dropped blocks
@@ -561,6 +579,8 @@ export function StorefrontDesigner({
 
   /** Whether any product page is out on the canvas. */
   const pageOpen = openPages.length > 0;
+  /** Whether the checkout is out, hanging off an open page. */
+  const checkoutOpen = checkoutFor !== null && openPages.includes(checkoutFor);
 
   // What the design panel's search field can find. Rebuilt when the board or
   // the catalogue changes, because half of this index IS the board: the
@@ -571,8 +591,8 @@ export function StorefrontDesigner({
   // collapse to a single row that opens one, so the same words still answer
   // and what they answer with is the step that has to come first anyway.
   const editorSearchEntries = useMemo(
-    () => editorEntries(blocks, productsById, tKey, { pageOpen }),
-    [blocks, productsById, tKey, pageOpen],
+    () => editorEntries(blocks, productsById, tKey, { pageOpen, checkoutOpen }),
+    [blocks, productsById, tKey, pageOpen, checkoutOpen],
   );
   const usedProductIds = useMemo(
     () =>
@@ -769,6 +789,7 @@ export function StorefrontDesigner({
     header,
     blocks,
     productPage,
+    checkoutPage,
   });
 
   /** Every undoable mutation calls this FIRST with an optional coalesce key. */
@@ -782,6 +803,7 @@ export function StorefrontDesigner({
     setHeader(next.header);
     setBlocks(next.blocks);
     setProductPage(next.productPage);
+    setCheckoutPage(next.checkoutPage);
     markDirty();
   }
 
@@ -3181,6 +3203,17 @@ export function StorefrontDesigner({
   }, [settingTarget]);
 
   function openSetting(ref: SettingRef) {
+    // A checkout setting is edited while looking at the checkout, so opening
+    // one puts the chain out (its product page included) if it is not.
+    if (ref.kind === "checkoutPage") {
+      if (!checkoutOpen && defaultPageProductId) {
+        openCheckout(checkoutFor ?? defaultPageProductId, ref);
+      } else {
+        setSettingTarget(freshSettingRef(ref));
+        setPanelOpen(true);
+      }
+      return;
+    }
     // A product page setting is edited while LOOKING at the page, so opening
     // one puts a page on the canvas if none is out yet. The mobile settings
     // sheet is left standing on purpose: it navigates in place.
@@ -3225,6 +3258,38 @@ export function StorefrontDesigner({
 
   function closeProductPage(productId: string) {
     setOpenPages((current) => current.filter((id) => id !== productId));
+    // The checkout hangs off its page: closing the page takes it too.
+    if (checkoutFor === productId) setCheckoutFor(null);
+  }
+
+  /**
+   * Put a product's checkout and thank-you page out beside its product page
+   * (opening that too if it is not out), and aim the panel at the checkout.
+   */
+  function openCheckout(
+    productId: string,
+    ref: SettingRef = { kind: "checkoutPage", section: "layout" },
+  ) {
+    setOpenPages((current) => (current.includes(productId) ? current : [...current, productId]));
+    setCheckoutFor(productId);
+    setSettingTarget(freshSettingRef(ref));
+    setPanelOpen(true);
+    revealArtboard();
+  }
+
+  /** The Checkout node on a product page's frame (and on its tile's quick
+   *  bar) is a toggle. */
+  function toggleCheckout(productId: string) {
+    if (checkoutOpen && checkoutFor === productId) setCheckoutFor(null);
+    else openCheckout(productId);
+  }
+
+  /** The toolbar's Checkout button: the checkout for whatever the seller is
+   *  on (the selected tile, else the first product), or put it away. Opens the
+   *  product page too, since the checkout hangs off it. */
+  function toggleDefaultCheckout() {
+    if (checkoutOpen) setCheckoutFor(null);
+    else if (defaultPageProductId) openCheckout(defaultPageProductId);
   }
 
   /** The node on a tile is a toggle: pressing it again puts the page away. */
@@ -3251,6 +3316,8 @@ export function StorefrontDesigner({
     if (productIds.length === 0) return;
     if (productIds.every((id) => openPages.includes(id))) {
       setOpenPages((current) => current.filter((id) => !productIds.includes(id)));
+      // The checkout hangs off its page: putting the page away takes it too.
+      if (checkoutFor !== null && productIds.includes(checkoutFor)) setCheckoutFor(null);
       return;
     }
     // One state write for the whole group, so the canvas lays the new row out
@@ -3269,6 +3336,7 @@ export function StorefrontDesigner({
   function toggleProductPages() {
     if (openPages.length > 0) {
       setOpenPages([]);
+      setCheckoutFor(null);
       return;
     }
     if (defaultPageProductId) openProductPage(defaultPageProductId);
@@ -3337,6 +3405,11 @@ export function StorefrontDesigner({
   function updateProductPage(next: ProductPageConfig) {
     recordChange(`productPage:${changedField(productPage, next)}`);
     setProductPage(next);
+  }
+
+  function updateCheckoutPage(next: CheckoutPageConfig) {
+    recordChange(`checkoutPage:${changedField(checkoutPage, next)}`);
+    setCheckoutPage(next);
   }
 
 
@@ -3450,6 +3523,11 @@ export function StorefrontDesigner({
       ...(initialConfig.embed ? { embed: initialConfig.embed } : {}),
       ...(initialConfig.productPage || !isDefaultProductPage(productPage)
         ? { productPage }
+        : {}),
+      // The same rule for the checkout: sent once it was ever stored or the
+      // seller moved it off the defaults, so an untouched one stays absent.
+      ...(initialConfig.checkoutPage || !isDefaultCheckoutPage(checkoutPage)
+        ? { checkoutPage }
         : {}),
     };
     // SF-01: Warn when any block in the grid points at a draft product.
@@ -3968,6 +4046,13 @@ export function StorefrontDesigner({
             storefrontId={storefrontId}
             storefrontName={name}
             productPage={productPage}
+            checkoutPage={checkoutPage}
+            checkoutFor={checkoutFor}
+            checkoutLive={checkoutLive}
+            onToggleCheckout={toggleCheckout}
+            onCloseCheckout={() => setCheckoutFor(null)}
+            onCheckoutPageChange={updateCheckoutPage}
+            celebrationPlays={celebrationPlays}
             shippingPolicy={shippingPolicy}
             seller={sellerIdentity}
           />
@@ -3984,9 +4069,11 @@ export function StorefrontDesigner({
               productsById={productsById}
               elementUrls={elementUrls}
               openPages={openPages}
+              checkoutOpenFor={checkoutOpen ? checkoutFor : null}
               // So the bar can follow its block through a pan and a zoom.
               viewport={viewport}
               onOpenPages={togglePagesForProducts}
+              onToggleCheckout={toggleCheckout}
               onType={onTypeStart}
               onFrame={onFrameBlock}
               // The panel opens on the FIRST selected shape's colour, which is
@@ -4081,6 +4168,10 @@ export function StorefrontDesigner({
               onJump={jumpTo}
               productPage={productPage}
               onProductPageChange={updateProductPage}
+              checkoutPage={checkoutPage}
+              onCheckoutPageChange={updateCheckoutPage}
+              checkoutLive={checkoutLive}
+              onPlayCelebration={() => setCelebrationPlays((count) => count + 1)}
               shippingPolicy={shippingPolicy}
               sellerIdentity={sellerIdentity}
             />
@@ -4272,6 +4363,8 @@ export function StorefrontDesigner({
         pagesOpen={openPages.length > 0}
         canOpenPage={defaultPageProductId !== null}
         onTogglePages={toggleProductPages}
+        checkoutOpen={checkoutOpen}
+        onToggleCheckout={toggleDefaultCheckout}
       />
 
       <Modal

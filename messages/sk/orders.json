@@ -16,7 +16,8 @@
   },
   "channel": {
     "embed": "Vloženie na web",
-    "marketplace": "Trhovisko"
+    "marketplace": "Trhovisko",
+    "direct": "Vaše stránky"
   },
   "empty": {
     "filteredTitle": "Žiadne objednávky nevyhovujú týmto filtrom",
@@ -110,6 +111,8 @@
       "copied": "Telefónne číslo skopírované",
       "failed": "Telefónne číslo sa nepodarilo skopírovať. Vyberte ho ručne a skopírujte."
     },
+    "giftMessage": "Darčekový odkaz",
+    "withdrawalNotice": "Kupujúci požiadal o odstúpenie od tohto nákupu dňa {date}. Dohodnite s ním vrátenie tovaru a refundáciu.",
     "noAddress": "Táto objednávka nemá doručovaciu adresu. Pošlite kupujúcemu e-mail a opýtajte sa, kam to má ísť.",
     "shipping": "Doprava",
     "shippedOn": "Odoslané {date}",
@@ -124,7 +127,8 @@
       "pending": "Platba ešte nebola prijatá. Počkajte na jej potvrdenie a potom odošlite.",
       "refunded": "Táto objednávka bola refundovaná, takže nie je nič na odoslanie.",
       "disputed": "Táto platba je napadnutá. Najprv vyriešte spor, potom odošlite."
-    }
+    },
+    "platformFeeRate": "Poplatok platformy ({rate})"
   },
   "actions": {
     "refundNeedsStripe": "Na vrátenie peňazí je potrebné mať pripojený Stripe.",
@@ -185,7 +189,8 @@
       "buyer": "Kupujúci: {email}",
       "total": "Celková suma objednávky: {amount}",
       "openShip": "Keď balík odošlete, označte ho tu ako odoslané a kupujúceho budeme informovať: {url}",
-      "openDigital": "Zobraziť objednávku: {url}"
+      "openDigital": "Zobraziť objednávku: {url}",
+      "gift": "Darčeková správa na priloženie: {message}"
     },
     "shipped": {
       "subject": "Vaša objednávka z {store} je na ceste",
@@ -196,6 +201,43 @@
       "shipTo": "Smeruje na:",
       "questions": "Máte otázky o vašej objednávke? Odpovedzte na tento e-mail a dostanete sa k {store}.",
       "footer": "Odoslané cez Square Share v mene {store}."
+    },
+    "confirmation": {
+      "subject": "Vaša objednávka od {store}: {title}",
+      "intro": "Ďakujeme za vašu objednávku. {store} ju prijal a tento e-mail je vaším potvrdením.",
+      "order": "Objednávka {number}, zadaná {date}",
+      "bought": "Čo ste si kúpili",
+      "subtotal": "Položky: {amount}",
+      "delivery": "Doručenie: {amount}",
+      "deliveryFree": "Doručenie: zdarma",
+      "total": "Celkom zaplatené: {amount}",
+      "shipTo": "Bude odoslané na:",
+      "dispatch": "{store} uvádza: {dispatch}",
+      "nextShip": "{store} vám pošle e-mail, keď bude zásielka na ceste.",
+      "download": "Stiahnite si súbor: {url}",
+      "orderPage": "Vaša stránka objednávky, kde môžete sledovať objednávku alebo odstúpiť od zmluvy: {url}",
+      "orderPageDigital": "Vaša stránka objednávky: {url}",
+      "seller": "Predáva",
+      "sellerVat": "IČ DPH: {vat}",
+      "withdrawal": "Od tohto nákupu môžete odstúpiť do 14 dní od prevzatia bez uvedenia dôvodu. Použite stránku objednávky alebo informujte {store} písomne.",
+      "withdrawalDigital": "Požiadali ste o okamžité stiahnutie a súhlasili ste s tým, že právo na odstúpenie od zmluvy zaniká po jeho začatí.",
+      "guarantee": "Máte tiež zákonnú záruku zhody po dobu najmenej dvoch rokov.",
+      "questions": "Máte otázky? Odpovedzte na tento e-mail, aby ste sa obrátili na {store}.",
+      "footer": "Odoslané prostredníctvom Square Share v mene {store}. Square Share poskytuje softvér obchodu a nie je stranou tohto predaja."
+    },
+    "withdrawal": {
+      "buyerSubject": "Vaše odstúpenie od objednávky {number} u {store}",
+      "buyerIntro": "Prijali sme vaše odstúpenie od objednávky {number} ({title}) dňa {date} a okamžite sme ho postúpili {store}.",
+      "buyerNext": "{store} vás bude kontaktovať ohľadom vrátenia tovaru a vašej refundácie, ktorá je splatná do 14 dní od odstúpenia.",
+      "sellerSubject": "Odstúpenie: objednávka {number} ({title})",
+      "sellerIntro": "Kupujúci {email} odstúpil od objednávky {number} dňa {date} pomocou tlačidla na stránke objednávky.",
+      "sellerName": "Uvedené meno: {name}",
+      "sellerNext": "Kontaktujte ho ohľadom vrátenia tovaru a vykonajte refundáciu do 14 dní. Refundáciu môžete pozastaviť, kým tovar nie je späť alebo kupujúci nepreukáže jeho odoslanie. Objednávka: {url}"
+    },
+    "lookup": {
+      "subject": "Váš odkaz na objednávku u {store}",
+      "intro": "Tu je odkaz na vašu stránku objednávky {number} u {store}:",
+      "ignore": "Ak ste o to nežiadali, tento e-mail ignorujte."
     }
   }
 }

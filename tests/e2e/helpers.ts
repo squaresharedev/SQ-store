@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import { ANON_KEY, GATEWAY_URL, SERVICE_KEY } from "./stack/keys.mjs";
+import { saleFee } from "../../src/lib/billing/fees.ts";
 
 /** The app under test. Mirrors playwright.config.ts's baseURL, for the few
  *  helpers that fetch it directly rather than through a page. */
@@ -684,7 +685,8 @@ export async function seedOrders(
         channel: o.channel ?? "embed",
         status: o.status ?? "paid",
         amount_cents: o.amount_cents,
-        platform_fee_cents: Math.round(o.amount_cents * 0.05),
+        // Seeded sellers are on Free: the same fee a real sale would carry.
+        platform_fee_cents: saleFee("free", o.amount_cents).platformFeeCents,
         currency: "EUR",
         buyer_email: o.buyer_email ?? "buyer@example.com",
         product_title: o.product_title ?? "Seeded product",

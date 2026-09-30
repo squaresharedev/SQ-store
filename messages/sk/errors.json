@@ -52,6 +52,10 @@
     "fulfilOrders": {
       "withRole": "Vaša rola {role, select, owner {vlastník} editor {editor} viewer {čitateľ} other {{role}}} nemôže v tomto obchode označovať objednávky ako odoslané.",
       "noRole": "Nemáte oprávnenie označovať objednávky ako odoslané v tomto obchode."
+    },
+    "manageBilling": {
+      "withRole": "Vaša rola {role, select, owner {vlastník} editor {editor} viewer {čitateľ} other {{role}}} nemôže meniť plán tohto obchodu.",
+      "noRole": "Nemáte oprávnenie meniť plán tohto obchodu."
     }
   },
   "notFound": {
@@ -76,7 +80,9 @@
     "readProductPageSettings": "Príliš veľa pokusov o načítanie nastavení produktovej stránky za krátky čas.",
     "requestReview": "Príliš veľa žiadostí o preskúmanie za krátky čas.",
     "fileAppeal": "Príliš veľa pokusov o odoslanie odvolania za krátky čas.",
-    "fulfilOrders": "Príliš veľa pokusov o označenie objednávok ako odoslaných v krátkom čase."
+    "fulfilOrders": "Príliš veľa pokusov o označenie objednávok ako odoslaných v krátkom čase.",
+    "readCheckoutSettings": "Príliš veľa pokusov o načítanie nastavení pokladne za krátky čas.",
+    "changePlan": "Príliš veľa zmien plánu v krátkom čase."
   },
   "serverError": {
     "fix": "Zvyčajne je to dočasné. Chvíľu počkajte a skúste to znova. Ak sa problém opakuje, obnovte stránku.",
@@ -104,7 +110,12 @@
     "saveProductPageSettings": "Nastavenia produktovej stránky sa nepodarilo uložiť kvôli problému na našej strane.",
     "sendForReview": "Nepodarilo sa to odoslať na preskúmanie kvôli problému na našej strane.",
     "fileAppeal": "Vaše odvolanie sa nepodarilo odoslať kvôli problému na našej strane.",
-    "markOrderShipped": "Objednávku sa nepodarilo označiť ako odoslanú kvôli chybe na našej strane."
+    "markOrderShipped": "Objednávku sa nepodarilo označiť ako odoslanú kvôli chybe na našej strane.",
+    "loadCheckoutSettings": "Nastavenia pokladne sa nepodarilo načítať kvôli problému na našej strane.",
+    "saveCheckoutSettings": "Nastavenia pokladne sa nepodarilo uložiť kvôli problému na našej strane.",
+    "loadPlans": "Váš plán sa nepodarilo načítať z dôvodu chyby na našej strane.",
+    "startCheckout": "Pokladňu sa nepodarilo otvoriť z dôvodu chyby na našej strane.",
+    "openBillingPortal": "Fakturačné údaje sa nepodarilo otvoriť z dôvodu chyby na našej strane."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Tento produkt bol odstránený, nie pozastavený.} storefront {Tento výklad bol odstránený, nie pozastavený.} other {Táto položka bola odstránená, nie pozastavená.}}",
@@ -578,5 +589,25 @@
       "message": "Túto objednávku nie je možné označiť ako odoslanú.",
       "fix": "Odoslať je možné iba zaplatené objednávky, pri ktorých je čo poslať. Obnovte stránku a zistite, v akom stave táto objednávka je."
     }
+  },
+  "checkoutPageApi": {
+    "notObjectFix": "Odošlite JSON objekt, napr. '{'\"layout\": \"compact\"'}'.",
+    "invalid": "Tieto nastavenia pokladne sú neplatné.",
+    "invalidFix": "Porovnajte uvedené pole s hodnotami `limits` z GET tohto URL a skúste to znova."
+  },
+  "billing": {
+    "unavailable": "Platené plány momentálne nie sú k dispozícii.",
+    "unavailableFix": "Váš obchod funguje ďalej na aktuálnom pláne. Skúste to neskôr.",
+    "invalidPlan": "Takýto plán neponúkame.",
+    "alreadySubscribed": "Váš obchod už má platený plán. Namiesto kúpy druhého prepnite plán.",
+    "noBillingAccount": "Tento obchod zatiaľ nemá fakturačný účet. Najprv prejdite na platený plán.",
+    "noSubscription": "Tento obchod nemá platený plán na zmenu. Vyberte si jeden a prihláste sa naň.",
+    "ownerOnlyFix": "Plán obchodu môže meniť iba vlastník. Požiadajte ho alebo prepnite na vlastný obchod."
+  },
+  "planLimit": {
+    "storefronts": "Váš plán {plan, select, free {Free} starter {Starter} pro {Pro} other {aktuálny}} zahŕňa {cap, plural, one {# výklad} few {# výklady} many {# výkladov} other {# výkladov}} a váš obchod ich má všetky obsadené.",
+    "teamSeats": "Váš plán {plan, select, free {Free} starter {Starter} pro {Pro} other {aktuálny}} zahŕňa {cap, plural, one {# miesto} few {# miesta} many {# miest} other {# miest}} vrátane vás a sú všetky obsadené.",
+    "fix": "Upgradujte pre viac alebo odstráňte niečo, čo už nepotrebujete. Nič, čo máte, to neovplyvní.",
+    "action": "Zobraziť plány"
   }
 }

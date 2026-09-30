@@ -54,6 +54,14 @@ export const badgeClass =
   "rounded-full bg-secondary px-2 py-0.5 font-inter text-xs font-medium";
 
 /**
+ * A strip across the top of every dashboard page for a standing condition the
+ * seller must act on (seller details missing, a plan payment failing). The
+ * tint alone separates it from the page: no rule underneath.
+ */
+export const bannerStripClass =
+  "flex flex-wrap items-center gap-x-2 gap-y-1 bg-destructive/5 px-4 py-2 text-sm md:px-6";
+
+/**
  * A count that is asking for work (orders waiting to ship): an ink pill, the
  * same ink as the "To ship" chip, so the number on the nav rail and on the
  * Orders tab read as the same thing. Pair it with a screen-reader sentence;

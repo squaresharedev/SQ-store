@@ -173,6 +173,161 @@
     "areaAndTime": "{area}: {time}",
     "areaAndTimeWithCost": "{area}: {time} ({cost})",
     "withCost": "{place} ({cost})",
-    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Zwroty przyjmujemy w ciągu {days} dnia od dostawy. Koszt odesłania zwrotu pokrywamy my.} few {Zwroty przyjmujemy w ciągu {days} dni od dostawy. Koszt odesłania zwrotu pokrywamy my.} many {Zwroty przyjmujemy w ciągu {days} dni od dostawy. Koszt odesłania zwrotu pokrywamy my.} other {Zwroty przyjmujemy w ciągu {days} dnia od dostawy. Koszt odesłania zwrotu pokrywamy my.}}} buyer {{days, plural, one {Zwroty przyjmujemy w ciągu {days} dnia od dostawy. Koszt odesłania zwrotu pokrywa kupujący.} few {Zwroty przyjmujemy w ciągu {days} dni od dostawy. Koszt odesłania zwrotu pokrywa kupujący.} many {Zwroty przyjmujemy w ciągu {days} dni od dostawy. Koszt odesłania zwrotu pokrywa kupujący.} other {Zwroty przyjmujemy w ciągu {days} dnia od dostawy. Koszt odesłania zwrotu pokrywa kupujący.}}} other {{days, plural, one {Zwroty przyjmujemy w ciągu {days} dnia od dostawy.} few {Zwroty przyjmujemy w ciągu {days} dni od dostawy.} many {Zwroty przyjmujemy w ciągu {days} dni od dostawy.} other {Zwroty przyjmujemy w ciągu {days} dnia od dostawy.}}}}"
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Zwroty przyjmujemy w ciągu {days} dnia od dostawy. Koszt odesłania zwrotu pokrywamy my.} few {Zwroty przyjmujemy w ciągu {days} dni od dostawy. Koszt odesłania zwrotu pokrywamy my.} many {Zwroty przyjmujemy w ciągu {days} dni od dostawy. Koszt odesłania zwrotu pokrywamy my.} other {Zwroty przyjmujemy w ciągu {days} dnia od dostawy. Koszt odesłania zwrotu pokrywamy my.}}} buyer {{days, plural, one {Zwroty przyjmujemy w ciągu {days} dnia od dostawy. Koszt odesłania zwrotu pokrywa kupujący.} few {Zwroty przyjmujemy w ciągu {days} dni od dostawy. Koszt odesłania zwrotu pokrywa kupujący.} many {Zwroty przyjmujemy w ciągu {days} dni od dostawy. Koszt odesłania zwrotu pokrywa kupujący.} other {Zwroty przyjmujemy w ciągu {days} dnia od dostawy. Koszt odesłania zwrotu pokrywa kupujący.}}} other {{days, plural, one {Zwroty przyjmujemy w ciągu {days} dnia od dostawy.} few {Zwroty przyjmujemy w ciągu {days} dni od dostawy.} many {Zwroty przyjmujemy w ciągu {days} dni od dostawy.} other {Zwroty przyjmujemy w ciągu {days} dnia od dostawy.}}}}",
+    "rateIsFree": "Gratis",
+    "freeOver": "Bezpłatna dostawa przy zamówieniach powyżej {amount}."
+  },
+  "order": {
+    "metadata": {
+      "title": "Twoje zamówienie | {store}"
+    },
+    "thanks": "Dziękujemy!",
+    "thanksNamed": "Dziękujemy, {name}!",
+    "number": "Zamówienie {number}",
+    "confirmationSent": "Potwierdzenie jest w drodze do {email}.",
+    "deliverTo": "Dostawa do {place}",
+    "timeline": {
+      "label": "Co dalej",
+      "paid": "Zamówienie złożone",
+      "paidDetail": "Zapłacono {date}",
+      "preparing": "W przygotowaniu",
+      "preparingDetail": "{seller} przygotowuje Twoje zamówienie.",
+      "shipped": "W drodze",
+      "shippedDetail": "Wysłano {date}",
+      "tracking": "Numer śledzenia {number}",
+      "notYet": "Otrzymasz e-mail, gdy zostanie wysłane.",
+      "ready": "Gotowe do pobrania",
+      "readyDetail": "Twój plik jest gotowy poniżej, a link jest też w Twoim e-mailu."
+    },
+    "download": "Pobierz ({format})",
+    "downloadPlain": "Pobierz plik",
+    "contact": "Pytania dotyczące zamówienia? Napisz do {seller}.",
+    "withdraw": {
+      "title": "Zmieniłeś zdanie?",
+      "body": "Możesz odstąpić od tego zakupu do {date}.",
+      "open": "Odstąp od umowy tutaj",
+      "formTitle": "Odstąp od tego zakupu",
+      "formBody": "Potwierdź swoje imię i nazwisko oraz e-mail. {seller} zostanie natychmiast powiadomiony i skontaktuje się z Tobą w sprawie zwrotu i refundacji.",
+      "name": "Twoje imię i nazwisko",
+      "email": "Twój e-mail",
+      "confirm": "Potwierdź odstąpienie",
+      "cancel": "Zachowaj zamówienie",
+      "sending": "Wysyłanie...",
+      "done": "Odstąpiłeś od tego zakupu w dniu {date}. {seller} został powiadomiony, a potwierdzenie jest w Twojej skrzynce.",
+      "failed": "Nie udało się wysłać. Spróbuj ponownie lub napisz do {seller}.",
+      "bodyOpen": "Możesz odstąpić od tego zakupu w dowolnym momencie do {days} dni po jego otrzymaniu.",
+      "emailMismatch": "Ten e-mail nie pasuje do tego zamówienia. Użyj e-maila, którym składałeś zamówienie."
+    },
+    "lookup": {
+      "metadata": {
+        "title": "Znajdź zamówienie | {store}"
+      },
+      "title": "Znajdź zamówienie",
+      "body": "Podaj e-mail użyty podczas zamawiania i numer zamówienia. Wyślemy Ci link do strony zamówienia, gdzie możesz też odstąpić od zakupu.",
+      "email": "E-mail",
+      "number": "Numer zamówienia",
+      "submit": "Wyślij mi link",
+      "sending": "Wysyłanie...",
+      "done": "Jeśli pasuje to do zamówienia z tego sklepu, link jest w drodze na ten e-mail.",
+      "rateLimited": "Zbyt wiele prób. Poczekaj chwilę i spróbuj ponownie."
+    },
+    "footerLink": "Odstąp od zakupu",
+    "total": "Łącznie zapłacono",
+    "quantity": "Ilość {quantity}",
+    "editHeadline": "Nagłówek podziękowania"
+  },
+  "checkout": {
+    "metadata": {
+      "title": "Kasa | {store}"
+    },
+    "secure": "Bezpieczna płatność",
+    "headline": "Prawie Twoje",
+    "back": "Powrót do {title}",
+    "changeVersion": "Zmień",
+    "quantity": "Ilość",
+    "sections": {
+      "contact": "Kontakt",
+      "delivery": "Dostawa",
+      "payment": "Płatność",
+      "summary": "Podsumowanie zamówienia"
+    },
+    "fields": {
+      "email": "E-mail",
+      "emailHint": "Do potwierdzenia i aktualizacji dotyczących zamówienia.",
+      "name": "Imię i nazwisko",
+      "line1": "Adres",
+      "line2": "Mieszkanie, biuro itp.",
+      "addLine2": "Dodaj mieszkanie, biuro itp.",
+      "city": "Miejscowość",
+      "region": "Województwo lub region",
+      "postalCode": "Kod pocztowy",
+      "country": "Kraj",
+      "whyAsk": "Dlaczego o to pytamy"
+    },
+    "gift": {
+      "toggle": "Dodaj wiadomość na prezent",
+      "label": "Wiadomość na prezent",
+      "placeholder": "Kilka słów do paczki",
+      "count": "{count} z {max}"
+    },
+    "note": {
+      "from": "Od {name}",
+      "placeholder": "Dodaj tutaj wiadomość dla kupujących",
+      "editNote": "Notatka dla kupujących",
+      "editThanks": "Podziękowanie",
+      "thanksPlaceholder": "Dodaj tutaj podziękowanie"
+    },
+    "summary": {
+      "subtotal": "Suma częściowa",
+      "delivery": "Dostawa",
+      "deliveryTo": "Dostawa do {country}",
+      "free": "Bezpłatna",
+      "total": "Razem",
+      "inclVat": "z VAT",
+      "digital": "Pobieranie cyfrowe, nic do dostarczenia",
+      "showSummary": "Pokaż podsumowanie zamówienia",
+      "digitalFormat": "Pobieranie cyfrowe ({format}), nic do dostarczenia",
+      "freeGap": "Brakuje {amount} do bezpłatnej dostawy"
+    },
+    "payment": {
+      "testTitle": "Płatność testowa",
+      "testBody": "To jest kasa deweloperska. Żadna karta nie zostaje obciążona i żadne pieniądze nie są przenoszone.",
+      "previewTitle": "Dane karty",
+      "previewBody": "Karta, Apple Pay i Google Pay pojawią się tutaj w Twoich kolorach po połączeniu ze Stripe.",
+      "cardNumber": "Numer karty",
+      "expiry": "MM / RR",
+      "cvc": "CVV",
+      "card": "Karta"
+    },
+    "legal": {
+      "sellerDetails": "Dane sprzedawcy",
+      "privacy": "{seller} przetwarza Twoje imię i nazwisko, adres dostawy oraz e-mail w celu realizacji zamówienia i wywiązania się z obowiązków prawnych, i przechowuje je przez okres wymagany przez prawo. Możesz zwrócić się do {seller} z prośbą o dostęp do tych danych, ich sprostowanie lub usunięcie. Square Share przetwarza je w imieniu {seller}.",
+      "privacyLink": "Prywatność",
+      "digitalConsent": "Chcę pobrać natychmiast i rozumiem, że tracę prawo do odstąpienia od umowy z chwilą rozpoczęcia pobierania.",
+      "soldByIn": "Sprzedane przez {seller}, {country}",
+      "privacySummary": "Jak {seller} wykorzystuje Twoje dane"
+    },
+    "pay": "Zamawiam i płacę ({amount})",
+    "placing": "Składanie zamówienia...",
+    "unwired": "Kasa otwiera się dla kupujących po połączeniu ze Stripe.",
+    "errors": {
+      "title": "Nie udało się złożyć zamówienia",
+      "required": "To pole jest wymagane.",
+      "email": "Wpisz adres e-mail, np. imie@przyklad.pl.",
+      "fields": "Sprawdź wyróżnione pola.",
+      "consent": "Zaznacz pole, aby potwierdzić, że chcesz natychmiast pobrać.",
+      "sold_out": "Przepraszamy, produkt właśnie się wyczerpał. Nic nie zostało obciążone.",
+      "insufficient_stock": "Nie ma wystarczającej ilości dla tej liczby. Spróbuj mniejszej ilości.",
+      "quantity": "Ta ilość nie jest dostępna. Spróbuj mniejszej.",
+      "options": "Ta wersja nie jest już dostępna. Wróć i wybierz inną.",
+      "not_shipped_here": "{seller} nie dostarcza do tego kraju.",
+      "no_shipping_rates": "Dostawa nie może być teraz wyceniona. Nic nie zostało obciążone.",
+      "not_found": "Ten produkt nie jest już dostępny do kupienia.",
+      "rate_limited": "Zbyt wiele prób. Poczekaj kilka minut i spróbuj ponownie.",
+      "unavailable": "Kasa jest teraz niedostępna. Nic nie zostało obciążone.",
+      "failed": "Coś poszło nie tak i nic nie zostało obciążone. Spróbuj ponownie.",
+      "invalid": "Niektóre dane wymagają sprawdzenia. Sprawdź wyróżnione pola."
+    },
+    "editHeadline": "Nagłówek kasy"
   }
 }

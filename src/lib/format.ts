@@ -7,7 +7,7 @@ import type { Currency } from "@/types/product";
 
 // English formats with a European English locale (EUR-primary market); every
 // other language formats in its own.
-const ENGLISH_PRICE_LOCALE = "en-IE";
+export const ENGLISH_PRICE_LOCALE = "en-IE";
 
 /** Format a major-unit amount as a currency string, e.g. `formatPrice(9.5, "EUR", "en")` -> "€9.50". */
 export function formatPrice(amount: number, currency: Currency, locale: Locale): string {

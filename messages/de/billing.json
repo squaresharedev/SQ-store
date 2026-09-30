@@ -1,0 +1,102 @@
+{
+  "plans": {
+    "free": {
+      "name": "Free",
+      "tagline": "Alles, was du zum Verkaufen brauchst."
+    },
+    "starter": {
+      "name": "Starter",
+      "tagline": "Eine niedrigere Gebühr für einen Shop, der jede Woche verkauft."
+    },
+    "pro": {
+      "name": "Pro",
+      "tagline": "Die niedrigste Gebühr für einen Shop, der jeden Tag verkauft."
+    }
+  },
+  "card": {
+    "perMonth": "/ Monat",
+    "exclVat": "zzgl. MwSt.",
+    "freeForever": "Kostenlos, so lange du willst",
+    "billedYearly": "{amount} einmal im Jahr abgerechnet, zzgl. MwSt.",
+    "feePerSale": "+ {rate} pro Verkauf",
+    "storefronts": "{count, plural, one {# Schaufenster} other {# Schaufenster}}",
+    "storefrontsUnlimited": "Unbegrenzt viele Schaufenster",
+    "teammates": "{count, plural, =0 {Nur du, keine Teammitglieder} one {Du und # Teammitglied} other {Du und # Teammitglieder}}",
+    "teammatesUnlimited": "Unbegrenzt viele Teammitglieder",
+    "everything": "Produktseiten, Checkout, Analysen: alles inklusive"
+  },
+  "modal": {
+    "title": "Tarife",
+    "description": "Starte kostenlos. Wechsle, wenn sich eine niedrigere Gebühr lohnt.",
+    "loading": "Tarife werden geladen",
+    "intervalLabel": "Abrechnungszeitraum",
+    "month": "Monatlich",
+    "year": "Jährlich",
+    "yearlySaving": "2 Monate gratis bei jährlicher Zahlung",
+    "current": "Aktueller Tarif",
+    "recommended": "Empfohlen",
+    "cheapest": "Am günstigsten für dich",
+    "upgrade": "Auf {plan} upgraden",
+    "switch": "Zu {plan} wechseln",
+    "switchInterval": "{interval, select, year {Zu jährlicher Zahlung wechseln} other {Zu monatlicher Zahlung wechseln}}",
+    "moveToFree": "Zu Free wechseln",
+    "soon": "Bald",
+    "soonTitle": "Kostenpflichtige Tarife starten bald. Alles in Free funktioniert in der Zwischenzeit weiter.",
+    "ownerOnly": "Nur der Inhaber des Shops kann den Tarif ändern.",
+    "pastDue": "Die letzte Zahlung für deinen {plan}-Tarif ist nicht durchgegangen. Aktualisiere deine Karte, um ihn zu behalten.",
+    "endsOn": "Dein {plan}-Tarif endet am {date}, danach wechselt dein Shop zu Free. Es wird nichts offline genommen.",
+    "finePrint": "Die Preise verstehen sich zzgl. MwSt. Die Gebühr pro Verkauf gilt für Verkäufe über den Checkout von Square Share und wird auf den Artikelpreis erhoben, nie auf den Versand. Die eigenen Kartengebühren von Stripe kommen hinzu. Jederzeit kündbar: Du behältst deinen Tarif bis zum Ende des bezahlten Zeitraums."
+  },
+  "portal": {
+    "opening": "Stripe wird geöffnet",
+    "stepUp": "Bestätige, dass du es bist, bevor sich deine Abrechnungsdaten öffnen."
+  },
+  "calculator": {
+    "toggle": "Welcher Tarif kostet mich am wenigsten?",
+    "salesLabel": "Verkäufe pro Monat",
+    "salesAria": "Deine Verkäufe pro Monat, in Euro",
+    "fromYourSales": "Aus deinen Verkäufen der letzten 30 Tage übernommen.",
+    "perMonth": "im Monat, inklusive Gebühren",
+    "cheapest": "Bei einem Umsatz von {sales} im Monat kostet dich {plan} am wenigsten.",
+    "breakEven": "{plan} rechnet sich ab einem Umsatz von {amount} im Monat."
+  },
+  "chip": {
+    "label": "Tarif: {plan}",
+    "upgrade": "Upgraden"
+  },
+  "banner": {
+    "label": "Tarifzahlung",
+    "pastDue": "Die Zahlung für deinen {plan}-Tarif ist fehlgeschlagen. Aktualisiere deine Karte, um ihn zu behalten.",
+    "pastDueMember": "Die {plan}-Zahlung dieses Shops ist fehlgeschlagen. Nur der Inhaber kann die Karte aktualisieren.",
+    "action": "Karte aktualisieren"
+  },
+  "settings": {
+    "planTitle": "Dein Tarif",
+    "planDescription": "Was dein Shop zahlt und die Gebühr pro Verkauf.",
+    "priceLine": "{price} pro {interval, select, year {Jahr} other {Monat}}, zzgl. MwSt.",
+    "freeLine": "Kein Abonnement.",
+    "renews": "Verlängert sich am {date}.",
+    "ends": "Endet am {date}. Dein Shop wechselt dann zu Free, und nichts wird offline genommen.",
+    "pastDue": "Zahlung fehlgeschlagen. Stripe versucht es mit deiner Karte erneut; aktualisiere sie, um {plan} zu behalten.",
+    "feeLine": "Gebühr pro Verkauf: {rate} des Artikelpreises.",
+    "changePlan": "Tarif ändern",
+    "seePlans": "Tarife ansehen",
+    "memberNote": "Nur der Inhaber des Shops kann den Tarif ändern oder seine Rechnungen sehen.",
+    "usageTitle": "Was du nutzt",
+    "usageDescription": "Die Grenzen deines Tarifs gelten nur für neue Ergänzungen. Nichts, was du hast, wird je entfernt.",
+    "usage": {
+      "storefronts": "Schaufenster: {used} von {cap}",
+      "storefrontsUnlimited": "Schaufenster: {used}, unbegrenzt",
+      "teamSeats": "Teamplätze, du eingeschlossen: {used} von {cap}",
+      "teamSeatsUnlimited": "Teamplätze, du eingeschlossen: {used}, unbegrenzt"
+    },
+    "overLimit": "Über der Grenze dieses Tarifs. Alles funktioniert weiter; entferne eines oder wechsle zu einem höheren Tarif, um mehr hinzuzufügen.",
+    "invoicesTitle": "Abrechnung und Rechnungen",
+    "invoicesDescription": "Deine Karte, Rechnungsadresse, USt-IdNr. und alle Rechnungen, auf der sicheren Seite von Stripe.",
+    "manage": "Abrechnung und Rechnungen verwalten",
+    "noBilling": "Rechnungen und Zahlungsdaten erscheinen hier, sobald du einen kostenpflichtigen Tarif hast.",
+    "confirmed": "Du hast jetzt {plan}. Danke, dass du Square Share unterstützt.",
+    "pending": "Wir bestätigen deine Zahlung bei Stripe. Lade die Seite gleich neu, falls sich dein Tarif nicht geändert hat.",
+    "unavailable": "Dein Tarif kann gerade nicht angezeigt werden. Lade die Seite gleich neu."
+  }
+}

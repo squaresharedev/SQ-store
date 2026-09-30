@@ -38,7 +38,8 @@
     "notifications": "Oznámení",
     "language": "Jazyk",
     "team": "Tým a přístup",
-    "danger": "Nebezpečná zóna"
+    "danger": "Nebezpečná zóna",
+    "billing": "Plán a fakturace"
   },
   "profileMenu": {
     "label": "Nabídka účtu",
@@ -46,7 +47,8 @@
     "switchAccounts": "Přepnout účet",
     "yourStore": "Váš obchod",
     "owner": "Vlastník",
-    "logOut": "Odhlásit se"
+    "logOut": "Odhlásit se",
+    "plan": "Plán"
   },
   "viewingBanner": {
     "viewing": "{role, select, owner {Prohlížíte si obchod <store>{storeName}</store> jako vlastník} editor {Prohlížíte si obchod <store>{storeName}</store> jako editor} viewer {Prohlížíte si obchod <store>{storeName}</store> jako čtenář} other {Prohlížíte si obchod <store>{storeName}</store>}}",

@@ -131,7 +131,7 @@ describe("ControlsPanel grouping", () => {
     // search field violated axe). Use the data attribute instead.
     const menu = document.querySelector("[data-panel-menu]")!;
     expect(menu).not.toBeNull();
-    expect(menu.querySelectorAll("[data-panel-menu-item]")).toHaveLength(6);
+    expect(menu.querySelectorAll("[data-panel-menu-item]")).toHaveLength(7);
     // Nothing editable until a group is chosen: that IS the fix.
     expect(screen.queryByRole("slider")).not.toBeInTheDocument();
     expect(screen.queryByRole("switch")).not.toBeInTheDocument();

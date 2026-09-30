@@ -60,7 +60,9 @@
     "sellerAgreement": "Zmluva s predajcom",
     "termsOfService": "Podmienky služby",
     "exportData": "Exportovať moje dáta",
-    "deleteAccount": "Zmazať účet"
+    "deleteAccount": "Zmazať účet",
+    "plan": "Plán a cenník",
+    "invoices": "Faktúry a platobné údaje"
   },
   "actions": {
     "newProduct": "Nový produkt",

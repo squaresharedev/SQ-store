@@ -184,6 +184,18 @@
       "byStorefront": "Réservations par vitrine",
       "awaiting": "Arrive avec le bloc de réservation de calendrier.",
       "readyToChart": "Prêt à afficher dès que les réservations commencent à arriver."
+    },
+    "checkout_view": {
+      "label": "Vues de la commande",
+      "description": "Acheteurs qui ont ouvert le paiement pour l'un de vos produits.",
+      "count": "{count, plural, one {{formatted} vue} other {{formatted} vues}}",
+      "total": "Total des vues de commande",
+      "emptyRange": "Aucune vue de commande sur cette période",
+      "overTime": "Vues de la commande dans le temps",
+      "acrossRange": "Vues de la commande sur la période sélectionnée.",
+      "byChannel": "Vues de la commande par canal",
+      "byWeekday": "Vues de la commande par jour de la semaine",
+      "byStorefront": "Vues de la commande par vitrine"
     }
   }
 }

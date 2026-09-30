@@ -7,7 +7,7 @@
 // (lib/format/money.ts). Dates are ISO strings from the DB.
 
 /** Where the sale happened. Mirrors the orders.channel CHECK constraint. */
-export type OrderChannel = "embed" | "marketplace";
+export type OrderChannel = "embed" | "marketplace" | "direct";
 
 /** Order lifecycle. Mirrors the orders.status CHECK constraint. */
 export type OrderStatus = "paid" | "refunded" | "disputed" | "pending";
@@ -107,6 +107,9 @@ export type OrderView = {
   fulfilment: OrderFulfilment;
   amountCents: number;
   platformFeeCents: number;
+  /** The fee's rate in basis points (300 = 3%), as snapshotted at sale time;
+   *  null on orders written before plans existed. */
+  platformFeeBps: number | null;
   /** "EUR" | "USD" today; keep string so new currencies are additive. */
   currency: string;
   channel: OrderChannel;
@@ -114,6 +117,12 @@ export type OrderView = {
   buyerEmail: string | null;
   /** ISO timestamp (orders.created_at). */
   createdAt: string;
+  /** The buyer's gift note for the parcel. Null when none was written. Physical
+   *  orders only; the writer drops it for a download. */
+  giftMessage: string | null;
+  /** ISO timestamp: when the buyer used the EU withdrawal function on their
+   *  order page (CRD art. 11a). Null when no withdrawal was requested. */
+  withdrawalRequestedAt: string | null;
 };
 
 /**

@@ -1,0 +1,102 @@
+{
+  "plans": {
+    "free": {
+      "name": "Free",
+      "tagline": "Tudo o que precisa para começar a vender."
+    },
+    "starter": {
+      "name": "Starter",
+      "tagline": "Uma taxa mais baixa para uma loja que vende todas as semanas."
+    },
+    "pro": {
+      "name": "Pro",
+      "tagline": "A taxa mais baixa, para uma loja que vende todos os dias."
+    }
+  },
+  "card": {
+    "perMonth": "/ mês",
+    "exclVat": "sem IVA",
+    "freeForever": "Gratuito pelo tempo que quiser",
+    "billedYearly": "{amount} faturado uma vez por ano, sem IVA",
+    "feePerSale": "+ {rate} por venda",
+    "storefronts": "{count, plural, one {# montra} many {# de montras} other {# montras}}",
+    "storefrontsUnlimited": "Montras ilimitadas",
+    "teammates": "{count, plural, =0 {Só você, sem colaboradores} one {Você e # colaborador} many {Você e # de colaboradores} other {Você e # colaboradores}}",
+    "teammatesUnlimited": "Colaboradores ilimitados",
+    "everything": "Páginas de produto, finalização de compra, estatísticas: tudo incluído"
+  },
+  "modal": {
+    "title": "Planos",
+    "description": "Comece gratuitamente. Mude de plano quando uma taxa mais baixa se pagar a si própria.",
+    "loading": "A carregar planos",
+    "intervalLabel": "Período de faturação",
+    "month": "Mensal",
+    "year": "Anual",
+    "yearlySaving": "2 meses grátis no plano anual",
+    "current": "Plano atual",
+    "recommended": "Recomendado",
+    "cheapest": "O mais económico para si",
+    "upgrade": "Atualizar para {plan}",
+    "switch": "Mudar para {plan}",
+    "switchInterval": "{interval, select, year {Mudar para anual} other {Mudar para mensal}}",
+    "moveToFree": "Passar para Free",
+    "soon": "Em breve",
+    "soonTitle": "Os planos pagos abrem em breve. Entretanto, tudo no Free continua a funcionar.",
+    "ownerOnly": "Só o proprietário da loja pode alterar o plano.",
+    "pastDue": "O último pagamento do plano {plan} não foi processado. Atualize o cartão para o manter.",
+    "endsOn": "O seu plano {plan} termina em {date} e a loja passa para Free nessa altura. Nada é removido.",
+    "finePrint": "Preços sem IVA. A taxa por venda aplica-se às vendas através da finalização de compra do Square Share e incide sobre o preço do artigo, nunca sobre a entrega. As taxas de processamento de cartão do próprio Stripe acrescem. Cancele quando quiser: mantém o plano até ao fim do período pago."
+  },
+  "portal": {
+    "opening": "A abrir o Stripe",
+    "stepUp": "Confirme que é você antes de abrir os dados de faturação."
+  },
+  "calculator": {
+    "toggle": "Qual o plano que me fica mais barato?",
+    "salesLabel": "Vendas por mês",
+    "salesAria": "As suas vendas mensais, em euros",
+    "fromYourSales": "Preenchido com base nos seus últimos 30 dias de vendas.",
+    "perMonth": "por mês, taxas incluídas",
+    "cheapest": "Com {sales} de vendas por mês, {plan} fica-lhe mais barato.",
+    "breakEven": "{plan} paga-se a si próprio acima de {amount} de vendas por mês."
+  },
+  "chip": {
+    "label": "Plano: {plan}",
+    "upgrade": "Atualizar"
+  },
+  "banner": {
+    "label": "Pagamento do plano",
+    "pastDue": "O pagamento do plano {plan} falhou. Atualize o cartão para o manter.",
+    "pastDueMember": "O pagamento do plano {plan} desta loja falhou. Só o proprietário pode atualizar o cartão.",
+    "action": "Atualizar cartão"
+  },
+  "settings": {
+    "planTitle": "O seu plano",
+    "planDescription": "O que a sua loja paga e a taxa em cada venda.",
+    "priceLine": "{price} {interval, select, year {por ano} other {por mês}}, sem IVA",
+    "freeLine": "Sem subscrição.",
+    "renews": "Renova em {date}.",
+    "ends": "Termina em {date}. A loja passa para Free nessa altura e nada é removido.",
+    "pastDue": "Pagamento falhou. O Stripe vai tentar novamente; atualize o cartão para manter {plan}.",
+    "feeLine": "Taxa em cada venda: {rate} do preço do artigo.",
+    "changePlan": "Alterar plano",
+    "seePlans": "Ver planos",
+    "memberNote": "Só o proprietário da loja pode alterar o plano ou ver as suas faturas.",
+    "usageTitle": "O que está a usar",
+    "usageDescription": "Os limites do seu plano aplicam-se apenas ao adicionar mais. Nada do que já tem é alguma vez removido.",
+    "usage": {
+      "storefronts": "Montras: {used} de {cap}",
+      "storefrontsUnlimited": "Montras: {used}, sem limite",
+      "teamSeats": "Lugares na equipa, incluindo o seu: {used} de {cap}",
+      "teamSeatsUnlimited": "Lugares na equipa, incluindo o seu: {used}, sem limite"
+    },
+    "overLimit": "Acima do limite deste plano. Tudo continua a funcionar; remova um ou atualize para adicionar mais.",
+    "invoicesTitle": "Faturação e faturas",
+    "invoicesDescription": "O seu cartão, morada de faturação, NIF e todas as faturas, na página segura do Stripe.",
+    "manage": "Gerir faturação e faturas",
+    "noBilling": "As faturas e os dados de pagamento aparecem aqui quando tiver um plano pago.",
+    "confirmed": "Está no {plan}. Obrigado pelo apoio ao Square Share.",
+    "pending": "Estamos a confirmar o seu pagamento com o Stripe. Atualize a página num momento se o plano não tiver mudado.",
+    "unavailable": "O seu plano não pode ser apresentado agora. Atualize a página num momento."
+  }
+}

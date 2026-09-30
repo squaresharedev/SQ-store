@@ -1,5 +1,6 @@
 import {
   CreditCard,
+  Gem,
   Info,
   KeyRound,
   Package,
@@ -37,6 +38,8 @@ export const TYPE_ICON: Record<NotificationType, LucideIcon> = {
   security: KeyRound,
   // A moderation decision, with the statement of reasons it comes with.
   policy: Scale,
+  // The seller's own plan, as on the Plan & billing settings page.
+  billing: Gem,
 };
 
 export const TYPE_LABEL: Record<NotificationType, MessageKey> = {
@@ -47,6 +50,7 @@ export const TYPE_LABEL: Record<NotificationType, MessageKey> = {
   system: "Notifications.types.system",
   security: "Notifications.types.security",
   policy: "Notifications.types.policy",
+  billing: "Notifications.types.billing",
 };
 
 const MINUTE = 60_000;

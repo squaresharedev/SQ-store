@@ -173,6 +173,161 @@
     "areaAndTime": "{area}: {time}",
     "areaAndTimeWithCost": "{area}: {time} ({cost})",
     "withCost": "{place} ({cost})",
-    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Retouren worden geaccepteerd binnen {days} dag na levering. De retourkosten zijn voor ons.} other {Retouren worden geaccepteerd binnen {days} dagen na levering. De retourkosten zijn voor ons.}}} buyer {{days, plural, one {Retouren worden geaccepteerd binnen {days} dag na levering. De retourkosten zijn voor de koper.} other {Retouren worden geaccepteerd binnen {days} dagen na levering. De retourkosten zijn voor de koper.}}} other {{days, plural, one {Retouren worden geaccepteerd binnen {days} dag na levering.} other {Retouren worden geaccepteerd binnen {days} dagen na levering.}}}}"
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Retouren worden geaccepteerd binnen {days} dag na levering. De retourkosten zijn voor ons.} other {Retouren worden geaccepteerd binnen {days} dagen na levering. De retourkosten zijn voor ons.}}} buyer {{days, plural, one {Retouren worden geaccepteerd binnen {days} dag na levering. De retourkosten zijn voor de koper.} other {Retouren worden geaccepteerd binnen {days} dagen na levering. De retourkosten zijn voor de koper.}}} other {{days, plural, one {Retouren worden geaccepteerd binnen {days} dag na levering.} other {Retouren worden geaccepteerd binnen {days} dagen na levering.}}}}",
+    "rateIsFree": "Gratis",
+    "freeOver": "Gratis bezorging bij bestellingen boven {amount}."
+  },
+  "order": {
+    "metadata": {
+      "title": "Jouw bestelling | {store}"
+    },
+    "thanks": "Bedankt!",
+    "thanksNamed": "Bedankt, {name}!",
+    "number": "Bestelling {number}",
+    "confirmationSent": "Er is een bevestiging onderweg naar {email}.",
+    "deliverTo": "Bezorging aan {place}",
+    "timeline": {
+      "label": "Wat er nu gebeurt",
+      "paid": "Bestelling geplaatst",
+      "paidDetail": "Betaald op {date}",
+      "preparing": "Wordt voorbereid",
+      "preparingDetail": "{seller} bereidt jouw bestelling voor.",
+      "shipped": "Onderweg",
+      "shippedDetail": "Verzonden op {date}",
+      "tracking": "Trackingnummer {number}",
+      "notYet": "Je ontvangt een e-mail zodra het verzonden is.",
+      "ready": "Klaar om te downloaden",
+      "readyDetail": "Je bestand staat hieronder klaar en de link staat ook in je e-mail."
+    },
+    "download": "Downloaden ({format})",
+    "downloadPlain": "Download je bestand",
+    "contact": "Vragen over je bestelling? Schrijf naar {seller}.",
+    "withdraw": {
+      "title": "Van gedachten veranderd?",
+      "body": "Je kunt je tot {date} terugtrekken uit deze aankoop.",
+      "open": "Overeenkomst hier herroepen",
+      "formTitle": "Herroep deze aankoop",
+      "formBody": "Bevestig je naam en e-mail. {seller} wordt direct op de hoogte gesteld en neemt contact met je op over het retourneren en de terugbetaling.",
+      "name": "Jouw naam",
+      "email": "Jouw e-mail",
+      "confirm": "Herroeping bevestigen",
+      "cancel": "Bestelling behouden",
+      "sending": "Wordt verzonden...",
+      "done": "Je hebt deze aankoop op {date} herroepen. {seller} is op de hoogte gesteld en een bevestiging staat in je inbox.",
+      "failed": "Dat is niet verzonden. Probeer het opnieuw of schrijf naar {seller}.",
+      "bodyOpen": "Je kunt je tot {days} dagen na ontvangst terugtrekken uit deze aankoop.",
+      "emailMismatch": "Dat e-mailadres klopt niet bij deze bestelling. Gebruik het e-mailadres waarmee je hebt besteld."
+    },
+    "lookup": {
+      "metadata": {
+        "title": "Bestelling zoeken | {store}"
+      },
+      "title": "Jouw bestelling zoeken",
+      "body": "Vul het e-mailadres in waarmee je hebt besteld en je bestelnummer. We sturen je de koppeling naar je bestelpagina, waar je ook een aankoop kunt herroepen.",
+      "email": "E-mail",
+      "number": "Bestelnummer",
+      "submit": "Stuur mij de koppeling",
+      "sending": "Wordt verzonden...",
+      "done": "Als dit overeenkomt met een bestelling bij deze winkel, is de koppeling onderweg naar dat e-mailadres.",
+      "rateLimited": "Te veel pogingen. Wacht even en probeer het opnieuw."
+    },
+    "footerLink": "Herroep een aankoop",
+    "total": "Totaal betaald",
+    "quantity": "Aantal: {quantity}",
+    "editHeadline": "Koptekst van de bedankpagina"
+  },
+  "checkout": {
+    "metadata": {
+      "title": "Afrekenen | {store}"
+    },
+    "secure": "Veilig afrekenen",
+    "headline": "Bijna van jou",
+    "back": "Terug naar {title}",
+    "changeVersion": "Wijzigen",
+    "quantity": "Aantal",
+    "sections": {
+      "contact": "Contact",
+      "delivery": "Bezorging",
+      "payment": "Betaling",
+      "summary": "Besteloverzicht"
+    },
+    "fields": {
+      "email": "E-mail",
+      "emailHint": "Voor je bon en updates over deze bestelling.",
+      "name": "Volledige naam",
+      "line1": "Adres",
+      "line2": "Appartement, suite, enz.",
+      "addLine2": "Appartement, suite, enz. toevoegen",
+      "city": "Stad of gemeente",
+      "region": "Provincie of regio",
+      "postalCode": "Postcode",
+      "country": "Land",
+      "whyAsk": "Waarom we dit vragen"
+    },
+    "gift": {
+      "toggle": "Cadeauboodschap toevoegen",
+      "label": "Cadeauboodschap",
+      "placeholder": "Een paar woorden voor het pakket",
+      "count": "{count} van {max}"
+    },
+    "note": {
+      "from": "Van {name}",
+      "placeholder": "Voeg hier een notitie toe voor je kopers",
+      "editNote": "Notitie voor kopers",
+      "editThanks": "Bedankbericht",
+      "thanksPlaceholder": "Voeg hier een bedankbericht toe"
+    },
+    "summary": {
+      "subtotal": "Subtotaal",
+      "delivery": "Bezorging",
+      "deliveryTo": "Bezorging naar {country}",
+      "free": "Gratis",
+      "total": "Totaal",
+      "inclVat": "incl. btw",
+      "digital": "Digitale download, niets te bezorgen",
+      "showSummary": "Besteloverzicht tonen",
+      "digitalFormat": "Digitale download ({format}), niets te bezorgen",
+      "freeGap": "Nog {amount} tot gratis bezorging"
+    },
+    "payment": {
+      "testTitle": "Testbetaling",
+      "testBody": "Dit is een ontwikkelingsafrekening. Er wordt geen kaart belast en er gaat geen geld over.",
+      "previewTitle": "Kaartgegevens",
+      "previewBody": "Kaart, Apple Pay en Google Pay verschijnen hier in jouw kleuren zodra Stripe is verbonden.",
+      "cardNumber": "Kaartnummer",
+      "expiry": "MM / JJ",
+      "cvc": "CVC",
+      "card": "Kaart"
+    },
+    "legal": {
+      "sellerDetails": "Verkopersgegevens",
+      "privacy": "{seller} gebruikt je naam, bezorgadres en e-mail om deze bestelling af te handelen en aan wettelijke verplichtingen te voldoen, en bewaart ze zolang de wet dat vereist. Je kunt {seller} vragen om ze in te zien, te rectificeren of te wissen. Square Share verwerkt ze namens {seller}.",
+      "privacyLink": "Privacy",
+      "digitalConsent": "Ik wil de download meteen en begrijp dat ik mijn herroepingsrecht verlies zodra het begint.",
+      "soldByIn": "Verkocht door {seller}, {country}",
+      "privacySummary": "Hoe {seller} je gegevens gebruikt"
+    },
+    "pay": "Bestelling met betalingsverplichting ({amount})",
+    "placing": "Bestelling wordt geplaatst...",
+    "unwired": "Afrekenen opent voor kopers wanneer je Stripe verbindt.",
+    "errors": {
+      "title": "We konden je bestelling niet plaatsen",
+      "required": "Dit is verplicht.",
+      "email": "Vul een e-mailadres in zoals naam@voorbeeld.nl.",
+      "fields": "Controleer de gemarkeerde velden.",
+      "consent": "Vink het vakje aan om te bevestigen dat je de download meteen wilt.",
+      "sold_out": "Sorry, dit is net uitverkocht. Er is niets in rekening gebracht.",
+      "insufficient_stock": "Er zijn er niet genoeg voor dat aantal. Probeer een kleiner aantal.",
+      "quantity": "Dat aantal is niet beschikbaar. Probeer een kleiner aantal.",
+      "options": "Die versie is niet meer beschikbaar. Ga terug en kies een andere.",
+      "not_shipped_here": "{seller} levert niet in dat land.",
+      "no_shipping_rates": "Bezorging kan nu niet worden berekend. Er is niets in rekening gebracht.",
+      "not_found": "Dit product is niet meer beschikbaar om te kopen.",
+      "rate_limited": "Te veel pogingen. Wacht een paar minuten en probeer het opnieuw.",
+      "unavailable": "Afrekenen is momenteel niet beschikbaar. Er is niets in rekening gebracht.",
+      "failed": "Er is iets misgegaan en er is niets in rekening gebracht. Probeer het opnieuw.",
+      "invalid": "Sommige gegevens moeten worden nagekeken. Controleer de gemarkeerde velden."
+    },
+    "editHeadline": "Koptekst van afrekenen"
   }
 }

@@ -26,11 +26,9 @@ export function sanitizeHeaderText(value: string, allowNewlines: boolean): strin
     : value.replace(/[\p{Cc}]/gu, "");
 }
 
-/** Sanitize and cap in one step, for the in-place editor: it reads whole
- *  strings back out of the DOM rather than one keystroke at a time. */
-export function clampHeaderText(line: HeaderLine, value: string): string {
-  return sanitizeHeaderText(value, headerLineAllowsNewlines(line)).slice(
-    0,
-    HEADER_LINE_MAX[line],
-  );
+/** Sanitize and cap in one step, for the in-place editor (PlainTextEditor):
+ *  it reads whole strings back out of the DOM rather than one keystroke at a
+ *  time, so what it reads is cleaned and bounded exactly as a field would be. */
+export function clampPlainText(value: string, allowNewlines: boolean, max: number): string {
+  return sanitizeHeaderText(value, allowNewlines).slice(0, max);
 }

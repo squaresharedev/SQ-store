@@ -30,6 +30,9 @@
     },
     "security": {
       "title": "Sicherheit"
+    },
+    "billing": {
+      "title": "Tarif und Abrechnung"
     }
   },
   "loading": "Einstellungen werden geladen…",
@@ -400,10 +403,25 @@
       "timePlaceholder": "z. B. 5–7 Werktage",
       "costLabel": "Versandkosten {number}",
       "costPlaceholder": "z. B. 9,00 €",
+      "rateLabel": "Tarif {number}",
+      "ratePlaceholder": "z.B. 4,50",
+      "rateHint": "Leer lassen für reine Anzeige.",
+      "countriesLabel": "Länder {number}",
+      "countriesNone": "Keine Länder",
+      "everywhereElse": "Überall sonst",
       "removeNamed": "Lieferziel {area} entfernen",
       "removeNumbered": "Lieferziel {number} entfernen",
       "add": "Lieferziel hinzufügen",
       "limitReached": "{max, plural, one {Das ist das einzige # Lieferziel. Entferne es, um ein weiteres hinzuzufügen.} other {Das sind alle # Lieferziele. Entferne eines, um ein weiteres hinzuzufügen.}}"
+    },
+    "rates": {
+      "title": "Versandtarife",
+      "description": "Fügen Sie maschinenlesbare Tarife hinzu, damit der Checkout vor dem Kauf eine Liefergesamtsumme anzeigen kann, wie von der EU-Verbraucherrechterichtlinie vorgeschrieben.",
+      "currencyLabel": "Tarifwährung",
+      "freeOverLabel": "Kostenloser Versand ab",
+      "freeOverPlaceholder": "z.B. 50,00",
+      "freeOverHint": "Wenn der Bestellwert diesen Betrag erreicht, ist die Lieferung kostenlos.",
+      "hint": "Diese Tarife werden an der Kasse berechnet. Lassen Sie den Tarif einer Destination leer, um sie nur zur Anzeige zu behalten."
     },
     "notes": {
       "label": "Weitere Versandhinweise",
@@ -462,6 +480,9 @@
       "bodyLabel": "Versand",
       "bodyPlaceholder": "Wie diese Produkte versandt werden und was es kostet",
       "noTerms": "Versandbedingungen hinzufügen, sonst wird dieses Profil beim Speichern verworfen.",
+      "rateLabel": "Tarif überschreiben",
+      "ratePlaceholder": "z.B. 9,50",
+      "rateHint": "Ersetzt den passenden Zieltarif für Produkte in diesem Profil.",
       "add": "Profil hinzufügen",
       "limitReached": "{max, plural, one {Das ist das einzige # Versandprofil. Entferne es, um ein weiteres hinzuzufügen.} other {Das sind alle # Versandprofile. Entferne eines, um ein weiteres hinzuzufügen.}}"
     },

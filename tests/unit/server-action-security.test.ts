@@ -156,6 +156,14 @@ const REGISTRY: Record<string, Classification> = {
   // other action that can put mail in a stranger's inbox.
   "lib/orders/actions.ts::markOrderShipped": limited(),
 
+  // --- plans & billing (lib/billing) -----------------------------------------
+  // Opening the plans reads the store's plan, sales and usage: a read budget.
+  // Starting a checkout or opening the Customer Portal calls Stripe on the
+  // platform's key (and may create a customer there): a write budget.
+  "lib/billing/actions.ts::loadPricingContext": limited(),
+  "lib/billing/actions.ts::startCheckout": limited(),
+  "lib/billing/actions.ts::openBillingPortal": limited(),
+
   // --- team ---------------------------------------------------------------
   "lib/team/actions.ts::inviteMember": limited(),
   "lib/team/actions.ts::changeMemberRole": limited(),
@@ -519,6 +527,8 @@ describe("two-factor step-up invariants", () => {
     "lib/auth/mfa-actions.ts::confirmIdentity",
     // Changes which ways past 2FA the account has.
     "lib/auth/sign-in-approval-actions.ts::setSignInApproval",
+    // Opens the store's card, billing address and invoices at Stripe.
+    "lib/billing/actions.ts::openBillingPortal",
   ];
 
   it("every sensitive action calls requireStepUp", () => {

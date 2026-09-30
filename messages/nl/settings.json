@@ -400,10 +400,25 @@
       "timePlaceholder": "bijv. 5–7 werkdagen",
       "costLabel": "Verzendkosten {number}",
       "costPlaceholder": "bijv. € 9,00",
+      "rateLabel": "Tarief {number}",
+      "ratePlaceholder": "bijv. 4,50",
+      "rateHint": "Leeg laten voor weergave alleen.",
+      "countriesLabel": "Landen {number}",
+      "countriesNone": "Geen landen",
+      "everywhereElse": "Overal elders",
       "removeNamed": "Bestemming {area} verwijderen",
       "removeNumbered": "Bestemming {number} verwijderen",
       "add": "Bestemming toevoegen",
       "limitReached": "{max, plural, one {Dat is de enige # bestemming. Verwijder er een om een andere toe te voegen.} other {Dat zijn alle # bestemmingen. Verwijder er een om een andere toe te voegen.}}"
+    },
+    "rates": {
+      "title": "Verzendtarieven",
+      "description": "Stel machineleesbare tarieven in zodat de kassa een bezorgingstotaal kan tonen voordat de koper betaalt, zoals vereist door de EU-richtlijn consumentenrechten.",
+      "currencyLabel": "Tariefvaluta",
+      "freeOverLabel": "Gratis verzending boven",
+      "freeOverPlaceholder": "bijv. 50,00",
+      "freeOverHint": "Wanneer het ordertotaal dit bedrag bereikt, is bezorging gratis.",
+      "hint": "Deze tarieven zijn wat de kassa in rekening brengt. Laat het tarief van een bestemming leeg om het alleen als weergave te bewaren."
     },
     "notes": {
       "label": "Nog iets over verzending",
@@ -462,6 +477,9 @@
       "bodyLabel": "Verzending",
       "bodyPlaceholder": "Hoe deze producten worden verzonden, en wat het kost",
       "noTerms": "Voeg voorwaarden toe, anders vervalt dit profiel wanneer je opslaat.",
+      "rateLabel": "Tarief overschrijven",
+      "ratePlaceholder": "bijv. 9,50",
+      "rateHint": "Vervangt het overeenkomende bestemmingstarief voor producten in dit profiel.",
       "add": "Profiel toevoegen",
       "limitReached": "{max, plural, one {Dat is het enige # profiel. Verwijder er een om een ander toe te voegen.} other {Dat zijn alle # profielen. Verwijder er een om een ander toe te voegen.}}"
     },

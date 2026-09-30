@@ -52,6 +52,10 @@
     "fulfilOrders": {
       "withRole": "Your {role, select, owner {Owner} editor {Editor} viewer {Viewer} other {{role}}} role can't mark orders shipped in this store.",
       "noRole": "You don't have permission to mark orders shipped in this store."
+    },
+    "manageBilling": {
+      "withRole": "Your {role, select, owner {Owner} editor {Editor} viewer {Viewer} other {{role}}} role can't change this store's plan.",
+      "noRole": "You don't have permission to change this store's plan."
     }
   },
   "notFound": {
@@ -76,7 +80,9 @@
     "readProductPageSettings": "Too many attempts to read product page settings in a short time.",
     "requestReview": "Too many attempts to ask for a review in a short time.",
     "fileAppeal": "Too many attempts to send an appeal in a short time.",
-    "fulfilOrders": "Too many attempts to mark orders shipped in a short time."
+    "fulfilOrders": "Too many attempts to mark orders shipped in a short time.",
+    "readCheckoutSettings": "Too many attempts to read checkout settings in a short time.",
+    "changePlan": "Too many plan changes started in a short time."
   },
   "serverError": {
     "fix": "This is usually temporary. Wait a moment and try again; if it keeps failing, refresh the page.",
@@ -104,7 +110,12 @@
     "saveProductPageSettings": "Could not save your product page settings because of a problem on our side.",
     "sendForReview": "Could not send this for review because of a problem on our side.",
     "fileAppeal": "Could not send your appeal because of a problem on our side.",
-    "markOrderShipped": "Could not mark the order shipped because of a problem on our side."
+    "markOrderShipped": "Could not mark the order shipped because of a problem on our side.",
+    "loadCheckoutSettings": "Could not load your checkout settings because of a problem on our side.",
+    "saveCheckoutSettings": "Could not save your checkout settings because of a problem on our side.",
+    "loadPlans": "Could not load your plan because of a problem on our side.",
+    "startCheckout": "Could not open checkout because of a problem on our side.",
+    "openBillingPortal": "Could not open your billing details because of a problem on our side."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {This product was removed, not paused.} storefront {This storefront was removed, not paused.} other {This item was removed, not paused.}}",
@@ -578,5 +589,25 @@
       "message": "This order can't be marked shipped.",
       "fix": "Only paid orders with something to send can be shipped. Refresh the page to see where this one stands."
     }
+  },
+  "checkoutPageApi": {
+    "notObjectFix": "Send a JSON object, e.g. '{'\"layout\": \"compact\"'}'.",
+    "invalid": "Those checkout settings are invalid.",
+    "invalidFix": "Check the field named above against `limits` from a GET of this URL, then try again."
+  },
+  "billing": {
+    "unavailable": "Paid plans aren't available right now.",
+    "unavailableFix": "Your store keeps working on its current plan. Try again later.",
+    "invalidPlan": "That plan isn't one we offer.",
+    "alreadySubscribed": "Your store already has a paid plan. Switch plans instead of buying a second one.",
+    "noBillingAccount": "This store has no billing account yet. Upgrade to a paid plan first.",
+    "noSubscription": "This store has no paid plan to change. Choose one to upgrade.",
+    "ownerOnlyFix": "Only the store owner can change its plan. Ask them, or switch to your own store."
+  },
+  "planLimit": {
+    "storefronts": "Your {plan, select, free {Free} starter {Starter} pro {Pro} other {current}} plan includes {cap, plural, one {# storefront} other {# storefronts}}, and your store has them all.",
+    "teamSeats": "Your {plan, select, free {Free} starter {Starter} pro {Pro} other {current}} plan includes {cap, plural, one {# seat} other {# seats}}, you included, and they're all taken.",
+    "fix": "Upgrade for more, or remove one you no longer need. Nothing you have is affected.",
+    "action": "See plans"
   }
 }

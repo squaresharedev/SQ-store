@@ -1,28 +1,29 @@
 "use client";
 
-import { ArrowUpRight, Mail } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { optionSummaryRows } from "@/lib/products/option-details";
+import { checkoutPath } from "@/lib/storefront/product-page-url";
 import { mailtoHref, type CtaTarget } from "./cta-target";
-import { ctaGhostStyle, ctaStyle, type CtaAppearance } from "./product-page-maps";
+import { CTA_BUTTON_CLASS, ctaGhostStyle, ctaStyle, type CtaAppearance } from "./product-page-maps";
 import { useOptionSelection } from "./OptionContext";
 import { useQuantity } from "./QuantityContext";
 
-// TODO(checkout): when in-house checkout ships, add a "checkout" mode here
-// that posts to the order route (and calls decrementStock with the service
-// role). The label, style and disabled logic below are already the seam; the
-// purchase link stays as the fallback for sellers who sell elsewhere.
-// Where the button goes is decided in ./cta-target.ts (server-callable).
+// WHERE THE BUTTON GOES is decided in ./cta-target.ts (server-callable): the
+// seller's own purchase link, else Square Share checkout, else an enquiry
+// email. The checkout is a page of its own (/s/<store>/p/<product>/checkout),
+// so this stays a plain link that carries the version and quantity along.
 //
-// THE QUANTITY THAT MODE POSTS IS A REQUEST, NOT A PRICE. `quantity` below is
-// client state: it decides what this button says and what an enquiry email
-// carries, and it decides nothing else. The order route MUST pass it through
-// resolveOrderQuantity (lib/products/order-quantity.ts), which re-reads the
-// product's own ceiling, price and stock and refuses anything that does not
-// fit, and MUST build the charge from the `totalCents` that comes back rather
-// than from anything this component sent. A checkout that multiplies a price
-// by a number the browser supplied is a checkout with a price field in it.
+// THE QUANTITY THIS BUTTON CARRIES IS A REQUEST, NOT A PRICE. `quantity` below
+// is client state: it decides what this button says, what an enquiry email
+// carries and what the checkout opens on, and it decides nothing else. The
+// checkout's quote (lib/checkout/quote.ts) passes it through
+// resolveOrderQuantity, which re-reads the product's own ceiling, price and
+// stock and refuses anything that does not fit, and the charge is built from
+// the total that comes back rather than from anything this component sent. A
+// checkout that multiplies a price by a number the browser supplied is a
+// checkout with a price field in it.
 //
 // NOT MERCHANT OF RECORD — this is load-bearing, not a style note. Squareshare
 // is the software/platform; each SELLER is who the buyer contracts with, pays,
@@ -67,7 +68,7 @@ export function ProductCta({
 }) {
   const t = useTranslations("ProductPage.cta");
   const tStock = useTranslations("Common.stock");
-  const { unavailableIn, groups, selection } = useOptionSelection();
+  const { unavailableIn, groups, selection, selectedIds } = useOptionSelection();
   const { quantity } = useQuantity();
 
   // NO DESTINATION SET. On a live page there is nothing honest to render: a
@@ -111,7 +112,7 @@ export function ProductCta({
       : target.kind === "mail"
         ? t("askAbout")
         : label;
-  const Icon = target.kind === "mail" ? Mail : ArrowUpRight;
+  const Icon = target.kind === "mail" ? Mail : target.kind === "checkout" ? ArrowRight : ArrowUpRight;
 
   // THE ENQUIRY CARRIES THE VERSION. Only the client knows which one is on
   // screen, so the mail href is rebuilt here from the same rows the specs
@@ -134,14 +135,13 @@ export function ProductCta({
           optionSummaryRows(groups, selection),
           quantity,
         )
-      : target.href;
+      : target.kind === "checkout"
+        ? checkoutPath(target.storefrontId, target.productId, { optionIds: [...selectedIds], quantity })
+        : target.href;
 
   const button = (
     <span
-      className={cn(
-        "inline-flex w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold transition-opacity duration-base ease-standard",
-        unavailable ? "opacity-50" : "hover:opacity-90",
-      )}
+      className={cn(CTA_BUTTON_CLASS, unavailable ? "opacity-50" : "hover:opacity-90")}
       style={ctaStyle(cta)}
     >
       {text}

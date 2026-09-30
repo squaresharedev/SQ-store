@@ -5,6 +5,7 @@ import {
   MousePointerClick,
   Receipt,
   ScanEye,
+  ShoppingBag,
   type LucideIcon,
 } from "lucide-react";
 import type { SignalKind } from "@/lib/analytics/signals";
@@ -78,6 +79,13 @@ export type AnalyticsSource = {
   blockType?: string;
   /** True when the signal can carry money (value_cents), e.g. a paid booking. */
   carriesValue?: boolean;
+  /**
+   * Relevant only once this seller has recorded one. For a signal no block
+   * produces and not every seller can have: a checkout view exists only where
+   * checkout can take the seller's payments, so a section waiting for one
+   * would be a feature advertised, not a number reported.
+   */
+  recordedOnly?: true;
 };
 
 /**
@@ -105,6 +113,12 @@ export const SIGNAL_SOURCES: AnalyticsSource[] = [
     icon: ScanEye,
     panels: ["trend", "storefronts", "channels"],
     blockType: "product",
+  },
+  {
+    id: "checkout_view",
+    icon: ShoppingBag,
+    panels: ["trend", "storefronts"],
+    recordedOnly: true,
   },
   {
     id: "email_signup",
@@ -183,6 +197,7 @@ export function isSourceRelevant(
   // storefront_view). Always show it: a zero there is a real answer.
   // A source with no awaiting but WITH a blockType (e.g. product_view) is
   // only relevant for sellers who use that block or have already recorded it.
+  if (source.recordedOnly) return context.everRecorded.includes(source.id);
   if (!source.awaiting && !source.blockType) return true;
   if (context.everRecorded.includes(source.id)) return true;
   return source.blockType

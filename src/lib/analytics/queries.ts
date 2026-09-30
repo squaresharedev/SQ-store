@@ -137,18 +137,24 @@ function buildSeries(
   return [...buckets.values()];
 }
 
-/** Always both channels, embed first, zeros included. */
+/** All three channels, embed first, zeros included. */
 function buildChannels(rows: AggregatePayload["channels"]): ChannelSlice[] {
   const slices: Record<OrderChannel, ChannelSlice> = {
     embed: { channel: "embed", revenueCents: 0, sales: 0 },
     marketplace: { channel: "marketplace", revenueCents: 0, sales: 0 },
+    direct: { channel: "direct", revenueCents: 0, sales: 0 },
   };
   for (const row of rows) {
-    const slice = slices[row.channel === "marketplace" ? "marketplace" : "embed"];
-    slice.revenueCents += row.revenue_cents;
-    slice.sales += row.sales;
+    const key: OrderChannel =
+      row.channel === "marketplace"
+        ? "marketplace"
+        : row.channel === "direct"
+          ? "direct"
+          : "embed";
+    slices[key].revenueCents += row.revenue_cents;
+    slices[key].sales += row.sales;
   }
-  return [slices.embed, slices.marketplace];
+  return [slices.embed, slices.marketplace, slices.direct];
 }
 
 /** All seven weekdays Mon..Sun, zeros included. */
@@ -203,6 +209,7 @@ export function emptyAnalyticsData(available = false): AnalyticsData {
     channels: [
       { channel: "embed", revenueCents: 0, sales: 0 },
       { channel: "marketplace", revenueCents: 0, sales: 0 },
+      { channel: "direct", revenueCents: 0, sales: 0 },
     ],
     topProducts: [],
     weekdays: WEEKDAYS.map((weekday) => ({ weekday, sales: 0, revenueCents: 0 })),

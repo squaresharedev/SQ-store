@@ -37,7 +37,16 @@ vi.mock("@/lib/rate-limit", async (importOriginal) => ({
   rateLimit: (...args: unknown[]) => rateLimit(...(args as [])),
 }));
 
+// The plan comes from the service-role billing read. Scoped by the id it is
+// handed, which must be the session's: recorded here so the test can say so.
+const readAccountBilling = vi.fn();
+vi.mock("@/lib/billing/account-plan", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/billing/account-plan")>()),
+  readAccountBilling: (...args: unknown[]) => readAccountBilling(...args),
+}));
+
 import { GET } from "@/app/settings/export/route";
+import { FREE_BILLING } from "@/lib/billing/account-plan";
 
 const USER = {
   id: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
@@ -48,6 +57,7 @@ const USER = {
 beforeEach(() => {
   vi.clearAllMocks();
   rateLimit.mockResolvedValue(true);
+  readAccountBilling.mockResolvedValue({ ok: true, billing: { ...FREE_BILLING, customerId: "cus_secret", subscriptionId: "sub_secret" } });
   for (const k of Object.keys(tables)) delete tables[k];
   for (const k of Object.keys(filters)) delete filters[k];
 });
@@ -96,6 +106,11 @@ describe("GET /settings/export", () => {
     expect(filters.profiles).toEqual(["id", USER.id]);
     expect(filters.products).toEqual(["owner_id", USER.id]);
     expect(filters.storefronts).toEqual(["owner_id", USER.id]);
+    expect(readAccountBilling).toHaveBeenCalledWith(USER.id);
+
+    // The plan is exported; the Stripe ids behind it are not.
+    expect(body.billing).toMatchObject({ plan: "free", status: "none" });
+    expect(JSON.stringify(body)).not.toMatch(/cus_secret|sub_secret/);
   });
 
   it("500 when any query errors — no partial export", async () => {

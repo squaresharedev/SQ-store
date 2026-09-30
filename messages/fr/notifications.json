@@ -56,7 +56,8 @@
     "stock": "Stock",
     "system": "Système",
     "security": "Sécurité",
-    "policy": "Règles"
+    "policy": "Règles",
+    "billing": "Facturation"
   },
   "time": {
     "justNow": "à l’instant",
@@ -151,6 +152,28 @@
       "newDigital": {
         "title": "Nouvelle commande : {title}",
         "body": "C'est un téléchargement, il n'y a donc rien à expédier."
+      },
+      "withdrawn": {
+        "title": "Un acheteur s'est rétracté de la commande {number}",
+        "body": "{title}. Organisez le retour et le remboursement avec lui."
+      }
+    },
+    "billing": {
+      "upgraded": {
+        "title": "Vous êtes sur {plan, select, starter {Starter} pro {Pro} other {un forfait payant}}",
+        "body": "Votre commission sur chaque vente est désormais plus basse, et les limites de votre forfait sont levées."
+      },
+      "plan_changed": {
+        "title": "Votre forfait est maintenant {plan, select, free {Free} starter {Starter} pro {Pro} other {{plan}}}",
+        "body": "Sa commission et ses limites s'appliquent à partir de maintenant."
+      },
+      "downgraded": {
+        "title": "Votre boutique est à nouveau sur Free",
+        "body": "Votre forfait payant a pris fin. Tout ce que vous avez continue de fonctionner ; passez à un niveau supérieur à tout moment pour une commission réduite."
+      },
+      "paymentFailed": {
+        "title": "Le paiement de votre forfait {plan, select, starter {Starter} pro {Pro} other {payant}} a échoué",
+        "body": "Stripe va réessayer. Mettez à jour votre carte dans Forfait et facturation pour conserver votre forfait."
       }
     }
   }

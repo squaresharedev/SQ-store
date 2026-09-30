@@ -1,11 +1,13 @@
 // SERVER ONLY. THE ORDER WRITER: the one place a paid checkout becomes an
 // order, and the one place a new order tells its seller.
 //
-// WHO CALLS IT. Today, the dev sale simulator (app/dev/simulate-sale), which is
-// how the whole flow is driven on a laptop and in the e2e suite. Once checkout
-// is live, the payment webhook, which does not exist yet because it cannot
-// exist safely before Stripe Connect onboarding does (lib/payments/
-// availability.ts). TODO(checkout): that webhook must
+// WHO CALLS IT. The hosted checkout's order route (app/api/checkout), through
+// its payment provider: today the development TEST provider, which records the
+// order the moment the buyer presses Pay (lib/checkout/provider.ts); and the
+// dev sale simulator (app/dev/simulate-sale). Once Stripe is live, the payment
+// webhook, which does not exist yet because it cannot exist safely before
+// Stripe Connect onboarding does (lib/payments/availability.ts).
+// TODO(stripe): that webhook must
 //   1. verify the Stripe-Signature header against STRIPE_WEBHOOK_SECRET, over
 //      the raw body, with a timestamp tolerance;
 //   2. resolve the seller from the event's CONNECTED ACCOUNT (event.account)
@@ -14,12 +16,14 @@
 //      its metadata, including another seller's product id;
 //   3. map checkout.session.completed with payment_status "paid" (and
 //      checkout.session.async_payment_succeeded) to a PaidCheckout: the session
-//      id, the product/storefront/channel/version from the session's metadata
-//      (written at session creation from resolveOrderQuantity's answer), the
-//      line item quantity, amount_total, the application fee,
-//      customer_details.email and .phone, collected_information.
-//      shipping_details (older API versions: shipping_details), and the
-//      checkout's locale;
+//      id, the product/storefront/channel/version/gift message/consent from the
+//      session's metadata (written at session creation from the checkout's
+//      quote, lib/checkout/quote.ts), the line item quantity, amount_total and
+//      shipping_cost.amount_total, the application fee (with the rate and
+//      plan that set it, written into the session's metadata at creation
+//      from lib/billing/fees.ts `saleFee`), customer_details.email
+//      and .phone, collected_information.shipping_details (older API
+//      versions: shipping_details), and the checkout's locale;
 //   4. call recordPaidOrder and answer 2xx whatever it says about duplicates.
 //
 // WHAT THIS DOES, in order:
@@ -36,10 +40,14 @@
 //      there and stops, so nothing below ever happens twice.
 //   4. Takes the units off the shelf (decrementStock) when the product tracks
 //      stock.
-//   5. Tells the seller: a bell notification, and the "ship this" email unless
-//      they turned sales emails off (Settings › Notifications).
+//   5. Tells the seller (a bell notification, and the "ship this" email unless
+//      they turned sales emails off in Settings › Notifications) and the buyer
+//      (the order confirmation EU law owes them). AFTER the response where
+//      there is one: the buyer is waiting on a redirect to their order page,
+//      and no mail server gets to hold that up.
 
 import { z } from "zod";
+import { after } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createNotification } from "@/lib/notifications/create";
 import { decrementStock } from "@/lib/stock/decrement";
@@ -47,8 +55,11 @@ import { parseOrderSelection } from "@/lib/orders/selection";
 import { parseShipTo } from "@/lib/orders/ship-to";
 import { orderDetailPath } from "@/lib/orders/paths";
 import { sendNewOrderEmail } from "@/lib/orders/emails";
+import { sendBuyerConfirmation } from "@/lib/orders/confirmation";
 import { PURCHASE_QUANTITY_MAX } from "@/lib/validation/product";
+import { GIFT_MESSAGE_MAX } from "@/types/storefront";
 import { DEFAULT_LOCALE, parseLocale } from "@/i18n/locales";
+import { PLAN_IDS, type PlanId } from "@/lib/billing/plans";
 import type { Json } from "@/types";
 import type { FulfilmentStatus, OrderChannel, ShipTo } from "@/types/order-view";
 
@@ -67,14 +78,28 @@ export type PaidCheckout = {
   selection: unknown;
   /** What was actually charged, in integer cents, shipping included. */
   amountCents: number;
-  /** Our cut of it (the application fee). */
+  /** Delivery's share of amountCents, when the provider reports it. For the
+   *  buyer's confirmation, which itemises it; null or absent = not known. */
+  shippingCents?: number | null;
+  /** Our cut of it (the application fee), charged on the item subtotal. */
   platformFeeCents: number;
+  /** The rate that produced platformFeeCents, in basis points, and the
+   *  seller's plan that set the rate (lib/billing/fees.ts `saleFee`). Both
+   *  snapshotted on the order, so a later price change never rewrites what a
+   *  past sale was charged. Absent only for callers that predate plans. */
+  platformFeeBps?: number | null;
+  sellerPlan?: PlanId | null;
   currency: string;
   buyerEmail: string | null;
   /** The language the buyer checked out in, if known. */
   buyerLocale: string | null;
   /** The delivery address as collected; normalised here. */
   shipTo: unknown;
+  /** The buyer's gift message for the parcel. Kept only when something ships. */
+  giftMessage?: string | null;
+  /** A download buyer agreed to immediate supply (and the loss of the right to
+   *  withdraw). Recorded as the moment the order was written. */
+  supplyConsent?: boolean;
 };
 
 export type RecordResult =
@@ -89,12 +114,21 @@ const paidCheckoutSchema = z.object({
   productId: z.uuid(),
   sellerId: z.uuid().optional(),
   storefrontId: z.uuid().nullable(),
-  channel: z.enum(["embed", "marketplace"]),
+  channel: z.enum(["embed", "marketplace", "direct"]),
   quantity: z.number().int().min(1).max(PURCHASE_QUANTITY_MAX),
   amountCents: z.number().int().min(0),
   platformFeeCents: z.number().int().min(0),
+  // Mirror the orders.platform_fee_bps and orders.seller_plan CHECKs.
+  platformFeeBps: z.number().int().min(0).max(10_000).nullable().optional(),
+  sellerPlan: z.enum(PLAN_IDS).nullable().optional(),
   currency: z.string().regex(/^[A-Za-z]{3}$/),
   buyerEmail: z.email().max(254).nullable(),
+  shippingCents: z.number().int().min(0).nullable().optional(),
+  // Mirrors the orders.gift_message CHECK. Already validated by the checkout;
+  // bounded again here because this is the write, and the webhook will read
+  // it back out of provider metadata.
+  giftMessage: z.string().trim().min(1).max(GIFT_MESSAGE_MAX).nullable().optional(),
+  supplyConsent: z.boolean().optional(),
 });
 
 type ProductRow = {
@@ -103,6 +137,7 @@ type ProductRow = {
   price_cents: number;
   digital_file_key: string | null;
   track_stock: boolean;
+  shipping_profile_id: string | null;
 };
 
 /**
@@ -112,7 +147,11 @@ type ProductRow = {
  */
 export async function recordPaidOrder(input: PaidCheckout): Promise<RecordResult> {
   const parsed = paidCheckoutSchema.safeParse(input);
-  if (!parsed.success || parsed.data.platformFeeCents > parsed.data.amountCents) {
+  if (
+    !parsed.success ||
+    parsed.data.platformFeeCents > parsed.data.amountCents ||
+    (parsed.data.shippingCents ?? 0) > parsed.data.amountCents
+  ) {
     console.error("[orders] refused a malformed paid checkout", parsed.error?.issues[0]?.path);
     return { ok: false, reason: "invalid" };
   }
@@ -123,7 +162,7 @@ export async function recordPaidOrder(input: PaidCheckout): Promise<RecordResult
 
     const { data: product, error: productError } = await admin
       .from("products")
-      .select("owner_id, title, price_cents, digital_file_key, track_stock")
+      .select("owner_id, title, price_cents, digital_file_key, track_stock, shipping_profile_id")
       .eq("id", checkout.productId)
       .maybeSingle<ProductRow>();
     if (productError) throw productError;
@@ -163,6 +202,9 @@ export async function recordPaidOrder(input: PaidCheckout): Promise<RecordResult
           status: "paid",
           amount_cents: checkout.amountCents,
           platform_fee_cents: checkout.platformFeeCents,
+          platform_fee_bps: checkout.platformFeeBps ?? null,
+          seller_plan: checkout.sellerPlan ?? null,
+          shipping_cents: checkout.shippingCents ?? null,
           currency: checkout.currency.toUpperCase(),
           buyer_email: checkout.buyerEmail,
           buyer_locale: parseLocale(input.buyerLocale),
@@ -173,6 +215,12 @@ export async function recordPaidOrder(input: PaidCheckout): Promise<RecordResult
           ship_to: shipTo as unknown as Json,
           fulfilment_status: fulfilment,
           checkout_session_id: checkout.checkoutSessionId,
+          // A gift message belongs with a parcel; a download has none to go in.
+          gift_message: ships ? (checkout.giftMessage ?? null) : null,
+          supply_consent_at: !ships && checkout.supplyConsent ? new Date().toISOString() : null,
+          // The file this order paid for, snapshotted so a replaced or deleted
+          // product cannot take the buyer's download with it.
+          digital_file_key: product.digital_file_key,
         },
         { onConflict: "checkout_session_id", ignoreDuplicates: true },
       )
@@ -200,22 +248,58 @@ export async function recordPaidOrder(input: PaidCheckout): Promise<RecordResult
       if (!stock.ok) console.warn(`[orders] stock not decremented for order ${orderId}: ${stock.reason}`);
     }
 
-    await tellSeller(sellerId, {
-      orderId,
-      productTitle: product.title,
-      quantity: checkout.quantity,
-      selection,
-      ships,
-      shipTo,
-      amountCents: checkout.amountCents,
-      currency: checkout.currency.toUpperCase(),
-      buyerEmail: checkout.buyerEmail,
+    const currency = checkout.currency.toUpperCase();
+    await afterResponse(async () => {
+      await tellSeller(sellerId, {
+        orderId,
+        productTitle: product.title,
+        quantity: checkout.quantity,
+        selection,
+        ships,
+        shipTo,
+        amountCents: checkout.amountCents,
+        currency,
+        buyerEmail: checkout.buyerEmail,
+        giftMessage: ships ? (checkout.giftMessage ?? null) : null,
+      });
+      await sendBuyerConfirmation({
+        orderId,
+        sellerId,
+        storefrontId,
+        buyerEmail: checkout.buyerEmail,
+        buyerLocale: input.buyerLocale,
+        productTitle: product.title,
+        quantity: checkout.quantity,
+        selection,
+        shipTo,
+        shippingProfileId: product.shipping_profile_id,
+        amountCents: checkout.amountCents,
+        shippingCents: checkout.shippingCents ?? null,
+        currency,
+        isDigital: !ships,
+        supplyConsent: !ships && Boolean(checkout.supplyConsent),
+        placedAt: new Date(),
+      });
     });
 
     return { ok: true, orderId, duplicate: false };
   } catch (error) {
     console.error("[orders] recording a paid checkout failed:", error instanceof Error ? error.message : error);
     return { ok: false, reason: "error" };
+  }
+}
+
+/**
+ * Run `task` after the response has been sent when there is a response to
+ * wait for (a route handler, a page), and straight away otherwise (a script, a
+ * test). `after` throws outside a request scope, which is how the second case
+ * is told apart from the first.
+ */
+async function afterResponse(task: () => Promise<void>): Promise<void> {
+  try {
+    after(task);
+  } catch {
+    await task();
   }
 }
 

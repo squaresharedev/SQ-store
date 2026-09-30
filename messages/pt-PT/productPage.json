@@ -173,6 +173,161 @@
     "areaAndTime": "{area}: {time}",
     "areaAndTimeWithCost": "{area}: {time} ({cost})",
     "withCost": "{place} ({cost})",
-    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Aceitamos devoluções até {days} dia após a entrega. Os portes de devolução são por nossa conta.} many {Aceitamos devoluções até {days} dias após a entrega. Os portes de devolução são por nossa conta.} other {Aceitamos devoluções até {days} dias após a entrega. Os portes de devolução são por nossa conta.}}} buyer {{days, plural, one {Aceitamos devoluções até {days} dia após a entrega. Os portes de devolução são pagos pelo comprador.} many {Aceitamos devoluções até {days} dias após a entrega. Os portes de devolução são pagos pelo comprador.} other {Aceitamos devoluções até {days} dias após a entrega. Os portes de devolução são pagos pelo comprador.}}} other {{days, plural, one {Aceitamos devoluções até {days} dia após a entrega.} many {Aceitamos devoluções até {days} dias após a entrega.} other {Aceitamos devoluções até {days} dias após a entrega.}}}}"
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Aceitamos devoluções até {days} dia após a entrega. Os portes de devolução são por nossa conta.} many {Aceitamos devoluções até {days} dias após a entrega. Os portes de devolução são por nossa conta.} other {Aceitamos devoluções até {days} dias após a entrega. Os portes de devolução são por nossa conta.}}} buyer {{days, plural, one {Aceitamos devoluções até {days} dia após a entrega. Os portes de devolução são pagos pelo comprador.} many {Aceitamos devoluções até {days} dias após a entrega. Os portes de devolução são pagos pelo comprador.} other {Aceitamos devoluções até {days} dias após a entrega. Os portes de devolução são pagos pelo comprador.}}} other {{days, plural, one {Aceitamos devoluções até {days} dia após a entrega.} many {Aceitamos devoluções até {days} dias após a entrega.} other {Aceitamos devoluções até {days} dias após a entrega.}}}}",
+    "rateIsFree": "Grátis",
+    "freeOver": "Entrega gratuita em encomendas acima de {amount}."
+  },
+  "order": {
+    "metadata": {
+      "title": "A sua encomenda | {store}"
+    },
+    "thanks": "Obrigado!",
+    "thanksNamed": "Obrigado, {name}!",
+    "number": "Encomenda {number}",
+    "confirmationSent": "Uma confirmação está a caminho de {email}.",
+    "deliverTo": "Entrega em {place}",
+    "timeline": {
+      "label": "O que acontece a seguir",
+      "paid": "Encomenda efetuada",
+      "paidDetail": "Pago em {date}",
+      "preparing": "Em preparação",
+      "preparingDetail": "{seller} está a preparar a sua encomenda.",
+      "shipped": "A caminho",
+      "shippedDetail": "Enviado em {date}",
+      "tracking": "Número de rastreio {number}",
+      "notYet": "Receberá um e-mail quando for enviado.",
+      "ready": "Pronto para descarregar",
+      "readyDetail": "O seu ficheiro está pronto abaixo e o link também está no seu e-mail."
+    },
+    "download": "Descarregar ({format})",
+    "downloadPlain": "Descarregue o seu ficheiro",
+    "contact": "Questões sobre a sua encomenda? Escreva para {seller}.",
+    "withdraw": {
+      "title": "Mudou de ideias?",
+      "body": "Pode desistir desta compra até {date}.",
+      "open": "Retratar-se do contrato aqui",
+      "formTitle": "Desistir desta compra",
+      "formBody": "Confirme o seu nome e e-mail. {seller} será informado imediatamente e entrará em contacto consigo sobre a devolução e o reembolso.",
+      "name": "O seu nome",
+      "email": "O seu e-mail",
+      "confirm": "Confirmar retratação",
+      "cancel": "Manter a minha encomenda",
+      "sending": "A enviar...",
+      "done": "Desistiu desta compra em {date}. {seller} foi informado e uma confirmação está na sua caixa de entrada.",
+      "failed": "Não foi possível enviar. Tente novamente ou escreva para {seller}.",
+      "bodyOpen": "Pode retratar-se desta compra a qualquer momento ate {days} dias apos a sua receção.",
+      "emailMismatch": "Este e-mail não corresponde a esta encomenda. Use o e-mail com que encomendou."
+    },
+    "lookup": {
+      "metadata": {
+        "title": "Encontrar encomenda | {store}"
+      },
+      "title": "Encontrar a sua encomenda",
+      "body": "Introduza o e-mail com que encomendou e o número de encomenda. Enviaremos o link para a sua página de encomenda, onde também pode desistir de uma compra.",
+      "email": "E-mail",
+      "number": "Número de encomenda",
+      "submit": "Enviar-me o link",
+      "sending": "A enviar...",
+      "done": "Se corresponder a uma encomenda desta loja, o link está a caminho desse e-mail.",
+      "rateLimited": "Demasiadas tentativas. Aguarde um momento e tente novamente."
+    },
+    "footerLink": "Desistir de uma compra",
+    "total": "Total pago",
+    "quantity": "Quantidade {quantity}",
+    "editHeadline": "Título do agradecimento"
+  },
+  "checkout": {
+    "metadata": {
+      "title": "Pagamento | {store}"
+    },
+    "secure": "Pagamento seguro",
+    "headline": "Quase seu",
+    "back": "Voltar a {title}",
+    "changeVersion": "Alterar",
+    "quantity": "Quantidade",
+    "sections": {
+      "contact": "Contacto",
+      "delivery": "Entrega",
+      "payment": "Pagamento",
+      "summary": "Resumo da encomenda"
+    },
+    "fields": {
+      "email": "E-mail",
+      "emailHint": "Para o seu recibo e atualizações sobre esta encomenda.",
+      "name": "Nome completo",
+      "line1": "Morada",
+      "line2": "Apartamento, andar, etc.",
+      "addLine2": "Adicionar apartamento, andar, etc.",
+      "city": "Localidade ou cidade",
+      "region": "Distrito ou região",
+      "postalCode": "Código postal",
+      "country": "País",
+      "whyAsk": "Porque pedimos isto"
+    },
+    "gift": {
+      "toggle": "Adicionar mensagem de oferta",
+      "label": "Mensagem de oferta",
+      "placeholder": "Algumas palavras para incluir na encomenda",
+      "count": "{count} de {max}"
+    },
+    "note": {
+      "from": "De {name}",
+      "placeholder": "Adicione aqui uma nota para os seus compradores",
+      "editNote": "Nota para compradores",
+      "editThanks": "Mensagem de agradecimento",
+      "thanksPlaceholder": "Adicione aqui uma mensagem de agradecimento"
+    },
+    "summary": {
+      "subtotal": "Subtotal",
+      "delivery": "Entrega",
+      "deliveryTo": "Entrega para {country}",
+      "free": "Gratuita",
+      "total": "Total",
+      "inclVat": "IVA incluído",
+      "digital": "Descarregamento digital, sem entrega",
+      "showSummary": "Mostrar resumo da encomenda",
+      "digitalFormat": "Descarregamento digital ({format}), sem entrega",
+      "freeGap": "Faltam {amount} para a entrega gratuita"
+    },
+    "payment": {
+      "testTitle": "Pagamento de teste",
+      "testBody": "Este é um pagamento de desenvolvimento. Nenhum cartão é cobrado e nenhum dinheiro é movido.",
+      "previewTitle": "Dados do cartão",
+      "previewBody": "Cartão, Apple Pay e Google Pay aparecerão aqui nas suas cores quando ligar o Stripe.",
+      "cardNumber": "Número do cartão",
+      "expiry": "MM / AA",
+      "cvc": "CVV",
+      "card": "Cartão"
+    },
+    "legal": {
+      "sellerDetails": "Dados do vendedor",
+      "privacy": "{seller} utiliza o seu nome, morada de entrega e e-mail para processar esta encomenda e cumprir as suas obrigações legais, e conserva-os durante o período exigido por lei. Pode solicitar a {seller} que os consulte, retifique ou elimine. A Square Share trata-os em nome de {seller}.",
+      "privacyLink": "Privacidade",
+      "digitalConsent": "Quero o descarregamento imediatamente e compreendo que perco o direito de retratação assim que começar.",
+      "soldByIn": "Vendido por {seller}, {country}",
+      "privacySummary": "Como {seller} utiliza os seus dados"
+    },
+    "pay": "Encomenda com obrigação de pagamento ({amount})",
+    "placing": "A efetuar a sua encomenda...",
+    "unwired": "O pagamento abre para compradores quando ligar o Stripe.",
+    "errors": {
+      "title": "Não foi possível efetuar a sua encomenda",
+      "required": "Este campo é obrigatório.",
+      "email": "Introduza um endereço de e-mail como nome@exemplo.pt.",
+      "fields": "Verifique os campos assinalados.",
+      "consent": "Assinale a caixa para confirmar que quer o descarregamento imediatamente.",
+      "sold_out": "Lamentamos, isto acabou de esgotar. Não foi cobrado nada.",
+      "insufficient_stock": "Não há quantidade suficiente para esse número. Tente uma quantidade menor.",
+      "quantity": "Essa quantidade não está disponível. Tente uma menor.",
+      "options": "Essa versão já não está disponível. Volte atrás e escolha outra.",
+      "not_shipped_here": "{seller} não entrega nesse país.",
+      "no_shipping_rates": "A entrega não pode ser calculada agora. Não foi cobrado nada.",
+      "not_found": "Este produto já não está disponível para compra.",
+      "rate_limited": "Demasiadas tentativas. Aguarde alguns minutos e tente novamente.",
+      "unavailable": "O pagamento não está disponível agora. Não foi cobrado nada.",
+      "failed": "Algo correu mal e não foi cobrado nada. Tente novamente.",
+      "invalid": "Alguns detalhes precisam de revisão. Verifique os campos assinalados."
+    },
+    "editHeadline": "Título do pagamento"
   }
 }

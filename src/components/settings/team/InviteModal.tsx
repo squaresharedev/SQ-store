@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import type { SelectOption } from "@/components/ui/select";
 import { StepUpField } from "@/components/auth/StepUp";
+import { useOpenPlansFor } from "@/components/billing/useOpenPlansFor";
 import {
   canGrant,
   ASSIGNABLE_ROLES,
@@ -41,6 +42,16 @@ export function InviteModal({
   const [state, formAction, isPending] = useActionState(inviteMember, INITIAL);
   useActionStateToast(state);
   const saveResult = useSaveResult(state);
+  const openPlansFor = useOpenPlansFor();
+
+  // Every seat on the plan is taken: the toast says why, and the plans take
+  // this dialog's place, since a bigger plan is the way to add someone.
+  const handledError = React.useRef<ActionState["error"]>(undefined);
+  React.useEffect(() => {
+    if (!state.error || state.error === handledError.current) return;
+    handledError.current = state.error;
+    if (openPlansFor(state.error)) onClose();
+  }, [state.error, openPlansFor, onClose]);
   const [email, setEmail] = React.useState("");
   const [selectedRole, setSelectedRole] = React.useState<"editor" | "viewer">(
     DEFAULT_INVITE_ROLE === "owner" ? "viewer" : (DEFAULT_INVITE_ROLE as "editor" | "viewer"),

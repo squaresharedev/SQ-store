@@ -184,6 +184,18 @@
       "byStorefront": "Prenotazioni per vetrina",
       "awaiting": "Arriva con il blocco di prenotazione calendario.",
       "readyToChart": "Pronto per il grafico non appena arrivano le prenotazioni."
+    },
+    "checkout_view": {
+      "label": "Visualizzazioni checkout",
+      "description": "Acquirenti che hanno aperto il checkout per uno dei tuoi prodotti.",
+      "count": "{count, plural, one {{formatted} visualizzazione} other {{formatted} visualizzazioni}}",
+      "total": "Totale visualizzazioni checkout",
+      "emptyRange": "Nessuna visualizzazione checkout in questo periodo",
+      "overTime": "Visualizzazioni checkout nel tempo",
+      "acrossRange": "Visualizzazioni checkout nel periodo selezionato.",
+      "byChannel": "Visualizzazioni checkout per canale",
+      "byWeekday": "Visualizzazioni checkout per giorno della settimana",
+      "byStorefront": "Visualizzazioni checkout per vetrina"
     }
   }
 }

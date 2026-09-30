@@ -157,6 +157,18 @@
       "byWeekday": "Product page views by weekday",
       "byStorefront": "Product page views by storefront"
     },
+    "checkout_view": {
+      "label": "Checkout views",
+      "description": "Buyers opening checkout for one of your products.",
+      "count": "{count, plural, one {{formatted} view} other {{formatted} views}}",
+      "total": "Total checkout views",
+      "emptyRange": "No checkout views in this range",
+      "overTime": "Checkout views over time",
+      "acrossRange": "Checkout views across the selected range.",
+      "byChannel": "Checkout views by channel",
+      "byWeekday": "Checkout views by weekday",
+      "byStorefront": "Checkout views by storefront"
+    },
     "email_signup": {
       "label": "Email signups",
       "description": "People joining your list from a storefront.",

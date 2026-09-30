@@ -128,9 +128,27 @@ export async function productViewDedupeKey(
   productId: string,
   hash: string | null,
 ): Promise<string | null> {
+  return pageViewDedupeKey("product_view", productId, hash);
+}
+
+/** The same, for a view of a product's hosted checkout. Its own kind in the
+ *  key, so opening the checkout never collides with the product page view
+ *  recorded a moment before it. */
+export async function checkoutViewDedupeKey(
+  productId: string,
+  hash: string | null,
+): Promise<string | null> {
+  return pageViewDedupeKey("checkout_view", productId, hash);
+}
+
+async function pageViewDedupeKey(
+  kind: "product_view" | "checkout_view",
+  productId: string,
+  hash: string | null,
+): Promise<string | null> {
   if (!hash) return null;
   const hour = new Date().toISOString().slice(0, 13); // YYYY-MM-DDTHH
-  return sha256Hex(`product_view|${productId}|${hash}|${hour}`);
+  return sha256Hex(`${kind}|${productId}|${hash}|${hour}`);
 }
 
 /**

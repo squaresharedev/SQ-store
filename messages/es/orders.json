@@ -16,7 +16,8 @@
   },
   "channel": {
     "embed": "Incorporación",
-    "marketplace": "Marketplace"
+    "marketplace": "Marketplace",
+    "direct": "Tus páginas"
   },
   "empty": {
     "filteredTitle": "Ningún pedido coincide con estos filtros",
@@ -110,6 +111,8 @@
       "copied": "Número de teléfono copiado",
       "failed": "No hemos podido copiar el número de teléfono. Selecciónalo y cópialo a mano."
     },
+    "giftMessage": "Mensaje de regalo",
+    "withdrawalNotice": "El comprador solicitó desistir de esta compra el {date}. Acuerda la devolución y el reembolso con él.",
     "noAddress": "Este pedido no tiene dirección de entrega. Escribe al comprador para preguntarle adónde enviarlo.",
     "shipping": "Envío",
     "shippedOn": "Enviado el {date}",
@@ -124,7 +127,8 @@
       "pending": "El pago aún no se ha completado. Espera a que se confirme antes de enviarlo.",
       "refunded": "Este pedido fue reembolsado, así que no hay nada que enviar.",
       "disputed": "Este pago está en disputa. Resuélvela antes de enviarlo."
-    }
+    },
+    "platformFeeRate": "Tasa de la plataforma ({rate})"
   },
   "actions": {
     "refundNeedsStripe": "Los reembolsos requieren tener Stripe conectado.",
@@ -185,7 +189,8 @@
       "buyer": "Comprador: {email}",
       "total": "Total del pedido: {amount}",
       "openShip": "Una vez que esté en camino, márcalo como enviado aquí y se lo comunicaremos al comprador: {url}",
-      "openDigital": "Ver el pedido: {url}"
+      "openDigital": "Ver el pedido: {url}",
+      "gift": "Mensaje de regalo a incluir: {message}"
     },
     "shipped": {
       "subject": "Tu pedido de {store} está en camino",
@@ -196,6 +201,43 @@
       "shipTo": "Va con destino a:",
       "questions": "¿Tienes alguna pregunta sobre tu pedido? Responde a este correo para ponerte en contacto con {store}.",
       "footer": "Enviado por Square Share en nombre de {store}."
+    },
+    "confirmation": {
+      "subject": "Tu pedido de {store}: {title}",
+      "intro": "Gracias por tu pedido. {store} lo tiene y este correo es tu confirmación.",
+      "order": "Pedido {number}, realizado el {date}",
+      "bought": "Lo que compraste",
+      "subtotal": "Artículos: {amount}",
+      "delivery": "Envío: {amount}",
+      "deliveryFree": "Envío: gratis",
+      "total": "Total pagado: {amount}",
+      "shipTo": "Se enviará a:",
+      "dispatch": "{store} dice: {dispatch}",
+      "nextShip": "{store} te enviará un correo cuando esté en camino.",
+      "download": "Descarga tu archivo: {url}",
+      "orderPage": "Tu página de pedido, para seguir tu pedido o desistir de la compra: {url}",
+      "orderPageDigital": "Tu página de pedido: {url}",
+      "seller": "Vendido por",
+      "sellerVat": "NIF/CIF: {vat}",
+      "withdrawal": "Puedes desistir de esta compra en un plazo de 14 días desde su recepción, sin necesidad de indicar el motivo. Usa tu página de pedido o comunícaselo a {store} por escrito.",
+      "withdrawalDigital": "Solicitaste la descarga de inmediato y aceptaste que tu derecho de desistimiento finaliza una vez que comience.",
+      "guarantee": "También tienes la garantía legal de conformidad por al menos dos años.",
+      "questions": "¿Preguntas? Responde a este correo para contactar con {store}.",
+      "footer": "Enviado por Square Share en nombre de {store}. Square Share proporciona el software de la tienda y no es parte de esta venta."
+    },
+    "withdrawal": {
+      "buyerSubject": "Tu desistimiento del pedido {number} en {store}",
+      "buyerIntro": "Recibimos tu desistimiento del pedido {number} ({title}) el {date} y lo trasladamos inmediatamente a {store}.",
+      "buyerNext": "{store} se pondrá en contacto contigo sobre la devolución y tu reembolso, que se abonará en un plazo de 14 días desde tu desistimiento.",
+      "sellerSubject": "Desistimiento: pedido {number} ({title})",
+      "sellerIntro": "El comprador {email} desistió del pedido {number} el {date}, usando el botón de desistimiento en su página de pedido.",
+      "sellerName": "Nombre indicado: {name}",
+      "sellerNext": "Contáctale para organizar la devolución y realiza el reembolso en 14 días. Puedes retener el reembolso hasta que el artículo sea devuelto o muestre que ha sido enviado. El pedido: {url}"
+    },
+    "lookup": {
+      "subject": "Tu enlace de pedido en {store}",
+      "intro": "Aquí tienes el enlace a tu página para el pedido {number} en {store}:",
+      "ignore": "Si no solicitaste esto, puedes ignorar este correo."
     }
   }
 }

@@ -3,7 +3,7 @@
 // else; the division cents→major units happens ONLY inside formatCents below.
 
 import type { Locale } from "@/i18n/locales";
-import { formatPrice } from "@/lib/format";
+import { ENGLISH_PRICE_LOCALE, formatPrice } from "@/lib/format";
 import { intlTag, numberFormat } from "@/lib/format/intl";
 import type { Currency } from "@/types/product";
 
@@ -14,8 +14,24 @@ export function toCurrency(value: string): Currency {
 }
 
 /** Format an integer cents amount as a display string, e.g. `1400, "EUR", "en"` → `"€14.00"`
- *  (`"14,00 €"` in Czech). The currency comes from the data; only its presentation follows the locale. */
-export function formatCents(amountCents: number, currency: string, locale: Locale): string {
+ *  (`"14,00 €"` in Czech). The currency comes from the data; only its presentation follows the locale.
+ *
+ *  `wholeUnits` drops the ".00" from a whole amount ("€15", but still "€12.50"), for headline
+ *  prices such as a plan's; amounts on orders and receipts keep their cents. */
+export function formatCents(
+  amountCents: number,
+  currency: string,
+  locale: Locale,
+  options: { wholeUnits?: boolean } = {},
+): string {
+  if (options.wholeUnits && amountCents % 100 === 0) {
+    return numberFormat(intlTag(locale, ENGLISH_PRICE_LOCALE), {
+      style: "currency",
+      currency: toCurrency(currency),
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amountCents / 100);
+  }
   return formatPrice(amountCents / 100, toCurrency(currency), locale);
 }
 
@@ -23,7 +39,7 @@ export function formatCents(amountCents: number, currency: string, locale: Local
 export function currencySymbol(currency: string, locale: Locale): string {
   try {
     return (
-      numberFormat(intlTag(locale, "en-IE"), {
+      numberFormat(intlTag(locale, ENGLISH_PRICE_LOCALE), {
         style: "currency",
         currency,
         currencyDisplay: "narrowSymbol",

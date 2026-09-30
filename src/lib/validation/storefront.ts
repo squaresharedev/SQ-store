@@ -1,18 +1,27 @@
 import { z } from "zod";
 import {
+  boundedInt,
   hexColor,
   hostname,
   isStrictHexColor,
   multiLineText,
+  sellerProse,
   singleLineText,
   uniqueList,
   uuidField,
 } from "@/lib/validation/inputs";
+import { SHIPPING_RATE_MAX_CENTS } from "@/types/shipping-policy";
 import { issueKey } from "@/lib/validation/messages";
 import { isOnBoard } from "@/lib/geometry/rotated-box";
 import {
   BACKGROUND_IMAGE_SCALE_MAX,
   BACKGROUND_IMAGE_SCALE_MIN,
+  CHECKOUT_CELEBRATIONS,
+  CHECKOUT_HEADLINE_MAX,
+  CHECKOUT_LAYOUTS,
+  CHECKOUT_NOTE_MAX,
+  CHECKOUT_TEXTURES,
+  CHECKOUT_THANKS_MESSAGE_MAX,
   IMAGE_SCALE_MAX,
   IMAGE_SCALE_MIN,
   CANVAS_COLUMNS_MAX,
@@ -507,6 +516,29 @@ export const productPageSchema = z.preprocess(
   }),
 );
 
+// The hosted checkout's own design. Same discipline as the product page: every
+// member a closed enum, a boolean, a strict hex or capped plain text, and the
+// words a seller writes here go through sellerProse, which keeps links, email
+// addresses and bank details off the one page where a buyer is about to pay.
+export const checkoutPageSchema = z.strictObject({
+  layout: z.enum(CHECKOUT_LAYOUTS),
+  backgroundColor: hexColorSchema.optional(),
+  // Optional, absent = plain: a checkout saved before textures existed parses
+  // unchanged, which a required member would not (strictObject drops the
+  // whole member on a miss).
+  texture: z.enum(CHECKOUT_TEXTURES).optional(),
+  headline: sellerProse({ field: "checkoutHeadline", max: CHECKOUT_HEADLINE_MAX }).optional(),
+  note: sellerProse({ field: "checkoutNote", max: CHECKOUT_NOTE_MAX, multiline: true }).optional(),
+  giftMessage: z.boolean(),
+  thanksHeadline: sellerProse({ field: "thanksHeadline", max: CHECKOUT_HEADLINE_MAX }).optional(),
+  thanksMessage: sellerProse({
+    field: "thanksMessage",
+    max: CHECKOUT_THANKS_MESSAGE_MAX,
+    multiline: true,
+  }).optional(),
+  celebrate: z.enum(CHECKOUT_CELEBRATIONS),
+});
+
 // `policiesSchema` lived here. Shipping and returns terms are account-level
 // now (Settings › Shipping & returns, lib/validation/shipping-policy.ts) — a
 // storefront is a presentation of one catalogue rather than a business, so it
@@ -531,6 +563,15 @@ export const shippingProfileSchema = z.strictObject({
     max: SHIPPING_DISPATCH_MAX,
   }).optional(),
   body: multiLineText({ field: "shippingTerms", max: POLICY_TEXT_MAX, min: 1 }),
+  // An optional flat rate that overrides the matched destination row's rate for
+  // products on this profile. 0 is allowed (= free for this profile). Absent =
+  // inherit the destination row's rate. Same ceiling as a destination row's
+  // rateCents, since the currency context is the same.
+  rateCents: boundedInt({
+    field: "shippingRate",
+    min: 0,
+    max: SHIPPING_RATE_MAX_CENTS,
+  }).optional(),
 });
 
 export const shippingProfilesSchema = z
@@ -739,6 +780,7 @@ const configObjectSchema = z
     header: headerSchema.optional(),
     embed: embedSettingsSchema.optional(),
     productPage: productPageSchema.optional(),
+    checkoutPage: checkoutPageSchema.optional(),
     // No `policies` or `shippingProfiles` member: shipping and returns terms
     // are account-level now (profiles.shipping_policy, bounded by
     // lib/validation/shipping-policy.ts). See RETIRED_TOP_LEVEL_FIELDS.
@@ -954,6 +996,7 @@ export function parseStoredStorefrontConfig(
     header?: unknown;
     embed?: unknown;
     productPage?: unknown;
+    checkoutPage?: unknown;
     policies?: unknown;
     shippingProfiles?: unknown;
   };
@@ -985,6 +1028,9 @@ export function parseStoredStorefrontConfig(
       : {}),
     ...(productPageSchema.safeParse(candidate.productPage).success
       ? { productPage: candidate.productPage }
+      : {}),
+    ...(checkoutPageSchema.safeParse(candidate.checkoutPage).success
+      ? { checkoutPage: candidate.checkoutPage }
       : {}),
     // Nothing to carry for policies or shipping profiles: they are not config
     // members any more, and the preprocess above has already dropped them.

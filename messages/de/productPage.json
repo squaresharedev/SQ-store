@@ -173,6 +173,161 @@
     "areaAndTime": "{area}: {time}",
     "areaAndTimeWithCost": "{area}: {time} ({cost})",
     "withCost": "{place} ({cost})",
-    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Rücksendungen werden innerhalb von {days} Tag nach Lieferung akzeptiert. Die Rücksendekosten trägt der Verkäufer.} other {Rücksendungen werden innerhalb von {days} Tagen nach Lieferung akzeptiert. Die Rücksendekosten trägt der Verkäufer.}}} buyer {{days, plural, one {Rücksendungen werden innerhalb von {days} Tag nach Lieferung akzeptiert. Die Rücksendekosten trägt der Käufer.} other {Rücksendungen werden innerhalb von {days} Tagen nach Lieferung akzeptiert. Die Rücksendekosten trägt der Käufer.}}} other {{days, plural, one {Rücksendungen werden innerhalb von {days} Tag nach Lieferung akzeptiert.} other {Rücksendungen werden innerhalb von {days} Tagen nach Lieferung akzeptiert.}}}}}"
+    "returnsWindow": "{paidBy, select, seller {{days, plural, one {Rücksendungen werden innerhalb von {days} Tag nach Lieferung akzeptiert. Die Rücksendekosten trägt der Verkäufer.} other {Rücksendungen werden innerhalb von {days} Tagen nach Lieferung akzeptiert. Die Rücksendekosten trägt der Verkäufer.}}} buyer {{days, plural, one {Rücksendungen werden innerhalb von {days} Tag nach Lieferung akzeptiert. Die Rücksendekosten trägt der Käufer.} other {Rücksendungen werden innerhalb von {days} Tagen nach Lieferung akzeptiert. Die Rücksendekosten trägt der Käufer.}}} other {{days, plural, one {Rücksendungen werden innerhalb von {days} Tag nach Lieferung akzeptiert.} other {Rücksendungen werden innerhalb von {days} Tagen nach Lieferung akzeptiert.}}}}}",
+    "rateIsFree": "Kostenlos",
+    "freeOver": "Kostenloser Versand ab einem Bestellwert von {amount}."
+  },
+  "order": {
+    "metadata": {
+      "title": "Deine Bestellung | {store}"
+    },
+    "thanks": "Vielen Dank!",
+    "thanksNamed": "Vielen Dank, {name}!",
+    "number": "Bestellung {number}",
+    "confirmationSent": "Eine Bestätigung ist auf dem Weg zu {email}.",
+    "deliverTo": "Lieferung an {place}",
+    "timeline": {
+      "label": "Was passiert als Nächstes",
+      "paid": "Bestellung aufgegeben",
+      "paidDetail": "Bezahlt am {date}",
+      "preparing": "Wird vorbereitet",
+      "preparingDetail": "{seller} bereitet deine Bestellung vor.",
+      "shipped": "Unterwegs",
+      "shippedDetail": "Versandt am {date}",
+      "tracking": "Tracking-Nummer {number}",
+      "notYet": "Du erhältst eine E-Mail, wenn es versandt wurde.",
+      "ready": "Bereit zum Herunterladen",
+      "readyDetail": "Deine Datei ist unten bereit, und der Link ist auch in deiner E-Mail."
+    },
+    "download": "Herunterladen ({format})",
+    "downloadPlain": "Datei herunterladen",
+    "contact": "Fragen zu deiner Bestellung? Schreibe an {seller}.",
+    "withdraw": {
+      "title": "Meinung geändert?",
+      "body": "Du kannst bis zum {date} von diesem Kauf zurücktreten.",
+      "open": "Vertrag hier widerrufen",
+      "formTitle": "Von diesem Kauf zurücktreten",
+      "formBody": "Bestätige deinen Namen und deine E-Mail. {seller} wird sofort benachrichtigt und kontaktiert dich wegen der Rücksendung und Erstattung.",
+      "name": "Dein Name",
+      "email": "Deine E-Mail",
+      "confirm": "Widerruf bestätigen",
+      "cancel": "Bestellung behalten",
+      "sending": "Wird gesendet...",
+      "done": "Du hast am {date} von diesem Kauf zurückgetreten. {seller} wurde benachrichtigt, und eine Bestätigung ist in deinem Posteingang.",
+      "failed": "Das hat nicht geklappt. Versuche es erneut oder schreibe an {seller}.",
+      "bodyOpen": "Du kannst diesen Kauf jederzeit bis zu {days} Tagen nach Erhalt widerrufen.",
+      "emailMismatch": "Diese E-Mail-Adresse stimmt nicht mit der Bestellung überein. Verwende die E-Mail-Adresse, mit der du bestellt hast."
+    },
+    "lookup": {
+      "metadata": {
+        "title": "Bestellung finden | {store}"
+      },
+      "title": "Bestellung finden",
+      "body": "Gib die E-Mail-Adresse ein, mit der du bestellt hast, und deine Bestellnummer. Wir senden dir den Link zu deiner Bestellseite, wo du auch von einem Kauf zurücktreten kannst.",
+      "email": "E-Mail",
+      "number": "Bestellnummer",
+      "submit": "Link zusenden",
+      "sending": "Wird gesendet...",
+      "done": "Wenn das zu einer Bestellung aus diesem Shop passt, ist der Link auf dem Weg zu dieser E-Mail.",
+      "rateLimited": "Zu viele Versuche. Warte eine Weile und versuche es erneut."
+    },
+    "footerLink": "Von einem Kauf zurücktreten",
+    "total": "Gesamtbetrag",
+    "quantity": "Menge {quantity}",
+    "editHeadline": "Überschrift der Dankes-Seite"
+  },
+  "checkout": {
+    "metadata": {
+      "title": "Kasse | {store}"
+    },
+    "secure": "Sicherer Checkout",
+    "headline": "Fast deins",
+    "back": "Zurück zu {title}",
+    "changeVersion": "Ändern",
+    "quantity": "Menge",
+    "sections": {
+      "contact": "Kontakt",
+      "delivery": "Lieferung",
+      "payment": "Zahlung",
+      "summary": "Bestellübersicht"
+    },
+    "fields": {
+      "email": "E-Mail",
+      "emailHint": "Für deine Quittung und Updates zu dieser Bestellung.",
+      "name": "Vollständiger Name",
+      "line1": "Adresse",
+      "line2": "Wohnung, Suite usw.",
+      "addLine2": "Wohnung, Suite usw. hinzufügen",
+      "city": "Stadt",
+      "region": "Bundesland oder Region",
+      "postalCode": "Postleitzahl",
+      "country": "Land",
+      "whyAsk": "Wozu wir das brauchen"
+    },
+    "gift": {
+      "toggle": "Geschenknotiz hinzufügen",
+      "label": "Geschenknotiz",
+      "placeholder": "Ein paar Worte fürs Paket",
+      "count": "{count} von {max}"
+    },
+    "note": {
+      "from": "Von {name}",
+      "placeholder": "Hier eine Notiz für deine Käufer hinzufügen",
+      "editNote": "Notiz für Käufer",
+      "editThanks": "Dankesnachricht",
+      "thanksPlaceholder": "Schreib hier eine Dankesnachricht"
+    },
+    "summary": {
+      "subtotal": "Zwischensumme",
+      "delivery": "Versand",
+      "deliveryTo": "Versand nach {country}",
+      "free": "Kostenlos",
+      "total": "Gesamt",
+      "inclVat": "inkl. MwSt.",
+      "digital": "Digitaler Download, nichts zu liefern",
+      "showSummary": "Bestellübersicht anzeigen",
+      "digitalFormat": "Digitaler Download ({format}), nichts zu liefern",
+      "freeGap": "Noch {amount} bis zum kostenlosen Versand"
+    },
+    "payment": {
+      "testTitle": "Testzahlung",
+      "testBody": "Dies ist ein Entwicklungs-Checkout. Es wird keine Karte belastet und kein Geld bewegt.",
+      "previewTitle": "Kartendetails",
+      "previewBody": "Karte, Apple Pay und Google Pay erscheinen hier in deinen Farben, sobald Stripe verbunden ist.",
+      "cardNumber": "Kartennummer",
+      "expiry": "MM / JJ",
+      "cvc": "CVC",
+      "card": "Karte"
+    },
+    "legal": {
+      "sellerDetails": "Verkäuferdetails",
+      "privacy": "{seller} verwendet deinen Namen, deine Lieferadresse und E-Mail-Adresse, um diese Bestellung zu erfüllen und gesetzlichen Pflichten nachzukommen, und bewahrt sie so lange auf, wie es das Gesetz verlangt. Du kannst {seller} bitten, deine Daten einzusehen, zu berichtigen oder löschen zu lassen. Square Share verarbeitet sie im Auftrag von {seller}.",
+      "privacyLink": "Datenschutz",
+      "digitalConsent": "Ich möchte den Download sofort und verstehe, dass ich mein Widerrufsrecht verliere, sobald er beginnt.",
+      "soldByIn": "Verkauft von {seller}, {country}",
+      "privacySummary": "Wie {seller} deine Daten verwendet"
+    },
+    "pay": "Zahlungspflichtig bestellen ({amount})",
+    "placing": "Bestellung wird aufgegeben...",
+    "unwired": "Der Checkout öffnet für Käufer, wenn du Stripe verbindest.",
+    "errors": {
+      "title": "Wir konnten deine Bestellung nicht aufgeben",
+      "required": "Dies ist erforderlich.",
+      "email": "Gib eine E-Mail-Adresse ein, z. B. name@beispiel.de.",
+      "fields": "Überprüfe die hervorgehobenen Felder.",
+      "consent": "Setze das Häkchen, um zu bestätigen, dass du den Download sofort haben möchtest.",
+      "sold_out": "Tut uns leid, das ist gerade ausverkauft. Es wurde nichts belastet.",
+      "insufficient_stock": "Es sind nicht genug für diese Menge vorhanden. Wähle eine kleinere Menge.",
+      "quantity": "Diese Menge ist nicht verfügbar. Versuche eine kleinere Menge.",
+      "options": "Diese Version ist nicht mehr verfügbar. Geh zurück und wähle eine andere.",
+      "not_shipped_here": "{seller} liefert nicht in dieses Land.",
+      "no_shipping_rates": "Der Versand kann gerade nicht berechnet werden. Es wurde nichts belastet.",
+      "not_found": "Dieses Produkt ist nicht mehr zum Kauf verfügbar.",
+      "rate_limited": "Zu viele Versuche. Warte ein paar Minuten und versuche es erneut.",
+      "unavailable": "Der Checkout ist gerade nicht verfügbar. Es wurde nichts belastet.",
+      "failed": "Etwas ist schiefgelaufen und es wurde nichts belastet. Versuche es erneut.",
+      "invalid": "Einige Details müssen überprüft werden. Prüfe die hervorgehobenen Felder."
+    },
+    "editHeadline": "Überschrift der Kasse"
   }
 }

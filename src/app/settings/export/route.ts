@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSessionState } from "@/lib/auth/session";
 import { STEP_UP_WINDOW_SECONDS, secondFactorIsFresh } from "@/lib/auth/assurance";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
+import { readAccountBilling } from "@/lib/billing/account-plan";
 
 /**
  * GDPR data export. Streams everything we hold for the SIGNED-IN user,
@@ -84,13 +85,16 @@ export async function GET() {
     );
   }
 
-  const [profile, products, storefronts] = await Promise.all([
+  const [profile, products, storefronts, billing] = await Promise.all([
     supabase.from("profiles").select(PROFILE_COLUMNS).eq("id", user.id).maybeSingle(),
     supabase.from("products").select(PRODUCT_COLUMNS).eq("owner_id", user.id),
     // A user can own MANY storefronts; export all of them, not just one.
     supabase.from("storefronts").select(STOREFRONT_COLUMNS).eq("owner_id", user.id),
+    // The user's OWN plan (seller_billing has no client policy, so this is a
+    // service-role read keyed on the session's user id, never a parameter).
+    readAccountBilling(user.id),
   ]);
-  if (profile.error || products.error || storefronts.error) {
+  if (profile.error || products.error || storefronts.error || !billing.ok) {
     return NextResponse.json(
       { error: "Export failed. Try again in a minute." },
       { status: 500 },
@@ -108,6 +112,18 @@ export async function GET() {
     profile: profile.data,
     products: products.data,
     storefronts: storefronts.data,
+    // What the seller agreed to pay us. The Stripe customer and subscription
+    // ids stay out (system bookkeeping, as above); invoices are in the
+    // Customer Portal, where Stripe keeps them.
+    billing: {
+      plan: billing.billing.plan,
+      billing_interval: billing.billing.interval,
+      status: billing.billing.status,
+      price_cents: billing.billing.priceCents,
+      currency: billing.billing.currency,
+      current_period_end: billing.billing.currentPeriodEnd,
+      cancel_at_period_end: billing.billing.cancelAtPeriodEnd,
+    },
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {

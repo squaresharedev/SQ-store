@@ -1,0 +1,102 @@
+{
+  "plans": {
+    "free": {
+      "name": "Free",
+      "tagline": "Everything you need to start selling."
+    },
+    "starter": {
+      "name": "Starter",
+      "tagline": "A lower fee for a shop that sells every week."
+    },
+    "pro": {
+      "name": "Pro",
+      "tagline": "The lowest fee, for a shop that sells every day."
+    }
+  },
+  "card": {
+    "perMonth": "/ month",
+    "exclVat": "excl. VAT",
+    "freeForever": "Free for as long as you like",
+    "billedYearly": "{amount} billed once a year, excl. VAT",
+    "feePerSale": "+ {rate} per sale",
+    "storefronts": "{count, plural, one {# storefront} other {# storefronts}}",
+    "storefrontsUnlimited": "Unlimited storefronts",
+    "teammates": "{count, plural, =0 {Just you, no teammates} one {You and # teammate} other {You and # teammates}}",
+    "teammatesUnlimited": "Unlimited teammates",
+    "everything": "Product pages, checkout, analytics: all included"
+  },
+  "modal": {
+    "title": "Plans",
+    "description": "Start free. Upgrade when a lower fee pays for itself.",
+    "loading": "Loading plans",
+    "intervalLabel": "Billing period",
+    "month": "Monthly",
+    "year": "Yearly",
+    "yearlySaving": "2 months free on yearly",
+    "current": "Current plan",
+    "recommended": "Recommended",
+    "cheapest": "Cheapest for you",
+    "upgrade": "Upgrade to {plan}",
+    "switch": "Switch to {plan}",
+    "switchInterval": "{interval, select, year {Switch to yearly} other {Switch to monthly}}",
+    "moveToFree": "Move to Free",
+    "soon": "Soon",
+    "soonTitle": "Paid plans open soon. Everything on Free keeps working in the meantime.",
+    "ownerOnly": "Only the store owner can change its plan.",
+    "pastDue": "The last payment for your {plan} plan did not go through. Update your card to keep it.",
+    "endsOn": "Your {plan} plan ends on {date}, and your store moves to Free then. Nothing is taken down.",
+    "finePrint": "Prices exclude VAT. The per-sale fee applies to sales through Square Share checkout and is charged on the item price, never on delivery. Stripe's own card processing fees come on top. Cancel any time: you keep your plan until the end of the period you paid for."
+  },
+  "portal": {
+    "opening": "Opening Stripe",
+    "stepUp": "Confirm it's you before your billing details open."
+  },
+  "calculator": {
+    "toggle": "Which plan costs me least?",
+    "salesLabel": "Sales per month",
+    "salesAria": "Your sales per month, in euros",
+    "fromYourSales": "Filled in from your last 30 days of sales.",
+    "perMonth": "a month, fees included",
+    "cheapest": "At {sales} a month in sales, {plan} costs you least.",
+    "breakEven": "{plan} pays for itself above {amount} a month in sales."
+  },
+  "chip": {
+    "label": "Plan: {plan}",
+    "upgrade": "Upgrade"
+  },
+  "banner": {
+    "label": "Plan payment",
+    "pastDue": "The payment for your {plan} plan failed. Update your card to keep it.",
+    "pastDueMember": "This store's {plan} payment failed. Only the owner can update the card.",
+    "action": "Update card"
+  },
+  "settings": {
+    "planTitle": "Your plan",
+    "planDescription": "What your store pays, and the fee on each sale.",
+    "priceLine": "{price} a {interval, select, year {year} other {month}}, excl. VAT",
+    "freeLine": "No subscription.",
+    "renews": "Renews on {date}.",
+    "ends": "Ends on {date}. Your store moves to Free then, and nothing is taken down.",
+    "pastDue": "Payment failed. Stripe will try your card again; update it to keep {plan}.",
+    "feeLine": "Fee on each sale: {rate} of the item price.",
+    "changePlan": "Change plan",
+    "seePlans": "See plans",
+    "memberNote": "Only the store owner can change the plan or see its invoices.",
+    "usageTitle": "What you're using",
+    "usageDescription": "Your plan's limits only apply to adding more. Nothing you have is ever removed.",
+    "usage": {
+      "storefronts": "Storefronts: {used} of {cap}",
+      "storefrontsUnlimited": "Storefronts: {used}, no limit",
+      "teamSeats": "Team seats, you included: {used} of {cap}",
+      "teamSeatsUnlimited": "Team seats, you included: {used}, no limit"
+    },
+    "overLimit": "Over this plan's limit. Everything keeps working; remove one or upgrade to add more.",
+    "invoicesTitle": "Billing & invoices",
+    "invoicesDescription": "Your card, billing address, VAT ID and every invoice, on Stripe's secure page.",
+    "manage": "Manage billing & invoices",
+    "noBilling": "Invoices and payment details appear here once you're on a paid plan.",
+    "confirmed": "You're on {plan}. Thanks for backing Square Share.",
+    "pending": "We're confirming your payment with Stripe. Refresh in a moment if your plan hasn't changed.",
+    "unavailable": "Your plan can't be shown right now. Refresh the page in a moment."
+  }
+}

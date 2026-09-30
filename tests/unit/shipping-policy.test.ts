@@ -153,6 +153,129 @@ describe("compactShippingPolicy", () => {
   });
 });
 
+describe("shippingPolicySchema — new rate fields", () => {
+  it("accepts a rateCents on a destination row", () => {
+    expect(
+      shippingPolicySchema.safeParse({
+        destinations: [{ area: "IE", time: "2 days", rateCents: 450 }],
+      }).success,
+    ).toBe(true);
+  });
+
+  it("accepts 0 rateCents (free row)", () => {
+    expect(
+      shippingPolicySchema.safeParse({
+        destinations: [{ area: "IE", time: "2 days", rateCents: 0 }],
+      }).success,
+    ).toBe(true);
+  });
+
+  it("refuses a negative rateCents", () => {
+    expect(
+      shippingPolicySchema.safeParse({
+        destinations: [{ area: "IE", time: "2 days", rateCents: -1 }],
+      }).success,
+    ).toBe(false);
+  });
+
+  it("refuses a rateCents above the max", () => {
+    expect(
+      shippingPolicySchema.safeParse({
+        destinations: [{ area: "IE", time: "2 days", rateCents: 100_001 }],
+      }).success,
+    ).toBe(false);
+  });
+
+  it("accepts a countries array with known codes", () => {
+    expect(
+      shippingPolicySchema.safeParse({
+        destinations: [{ area: "IE", time: "2 days", countries: ["IE", "GB"] }],
+      }).success,
+    ).toBe(true);
+  });
+
+  it("accepts * in countries as the catch-all sentinel", () => {
+    expect(
+      shippingPolicySchema.safeParse({
+        destinations: [{ area: "Everywhere", time: "7 days", countries: ["*"] }],
+      }).success,
+    ).toBe(true);
+  });
+
+  it("refuses an unknown country code in countries", () => {
+    expect(
+      shippingPolicySchema.safeParse({
+        destinations: [{ area: "a", time: "b", countries: ["XX"] }],
+      }).success,
+    ).toBe(false);
+  });
+
+  it("refuses a duplicate country code within one destination", () => {
+    expect(
+      shippingPolicySchema.safeParse({
+        destinations: [{ area: "a", time: "b", countries: ["IE", "IE"] }],
+      }).success,
+    ).toBe(false);
+  });
+
+  it("accepts ratesCurrency on the policy root", () => {
+    expect(shippingPolicySchema.safeParse({ ratesCurrency: "EUR" }).success).toBe(true);
+    expect(shippingPolicySchema.safeParse({ ratesCurrency: "USD" }).success).toBe(true);
+  });
+
+  it("refuses an unknown ratesCurrency value", () => {
+    expect(shippingPolicySchema.safeParse({ ratesCurrency: "XYZ" }).success).toBe(false);
+    expect(shippingPolicySchema.safeParse({ ratesCurrency: "GBP" }).success).toBe(false);
+  });
+
+  it("accepts freeOverCents on the policy root", () => {
+    expect(shippingPolicySchema.safeParse({ freeOverCents: 5000 }).success).toBe(true);
+    expect(shippingPolicySchema.safeParse({ freeOverCents: 0 }).success).toBe(true);
+  });
+
+  it("refuses a negative freeOverCents", () => {
+    expect(shippingPolicySchema.safeParse({ freeOverCents: -1 }).success).toBe(false);
+  });
+});
+
+describe("compactShippingPolicy — new rate fields survive round-trip", () => {
+  it("keeps rateCents including explicit 0", () => {
+    expect(
+      compactShippingPolicy({
+        destinations: [{ area: "IE", time: "2 days", rateCents: 0 }],
+      }),
+    ).toEqual({ destinations: [{ area: "IE", time: "2 days", rateCents: 0 }] });
+  });
+
+  it("keeps rateCents on a destination row", () => {
+    expect(
+      compactShippingPolicy({
+        destinations: [{ area: "IE", time: "2 days", rateCents: 450 }],
+      }),
+    ).toEqual({ destinations: [{ area: "IE", time: "2 days", rateCents: 450 }] });
+  });
+
+  it("keeps countries on a destination row", () => {
+    expect(
+      compactShippingPolicy({
+        destinations: [{ area: "IE", time: "2 days", countries: ["IE", "GB"] }],
+      }),
+    ).toEqual({ destinations: [{ area: "IE", time: "2 days", countries: ["IE", "GB"] }] });
+  });
+
+  it("keeps ratesCurrency", () => {
+    expect(compactShippingPolicy({ ratesCurrency: "EUR" })).toEqual({ ratesCurrency: "EUR" });
+  });
+
+  it("keeps freeOverCents when > 0", () => {
+    expect(compactShippingPolicy({ freeOverCents: 5000 })).toEqual({ freeOverCents: 5000 });
+  });
+
+  it("drops freeOverCents = 0 (not a meaningful threshold)", () => {
+    expect(compactShippingPolicy({ freeOverCents: 0 })).toEqual({});
+  });
+});
+
 describe("shippingPolicySchema", () => {
   it("refuses an unknown key anywhere in the tree", () => {
     // The column is jsonb, so this schema is the only thing standing between a

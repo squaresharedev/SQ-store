@@ -1,0 +1,102 @@
+{
+  "plans": {
+    "free": {
+      "name": "Free",
+      "tagline": "Tout ce qu'il vous faut pour commencer à vendre."
+    },
+    "starter": {
+      "name": "Starter",
+      "tagline": "Une commission réduite pour une boutique qui vend chaque semaine."
+    },
+    "pro": {
+      "name": "Pro",
+      "tagline": "La commission la plus basse, pour une boutique qui vend chaque jour."
+    }
+  },
+  "card": {
+    "perMonth": "/ mois",
+    "exclVat": "TVA excl.",
+    "freeForever": "Gratuit aussi longtemps que vous voulez",
+    "billedYearly": "{amount} facturé une fois par an, TVA excl.",
+    "feePerSale": "+ {rate} par vente",
+    "storefronts": "{count, plural, one {# vitrine} other {# vitrines}}",
+    "storefrontsUnlimited": "Vitrines illimitées",
+    "teammates": "{count, plural, =0 {Vous seul, sans coéquipiers} one {Vous et # coéquipier} other {Vous et # coéquipiers}}",
+    "teammatesUnlimited": "Coéquipiers illimités",
+    "everything": "Pages produit, paiement, statistiques : tout inclus"
+  },
+  "modal": {
+    "title": "Forfaits",
+    "description": "Commencez gratuitement. Passez à un forfait supérieur quand la commission réduite s'en justifie.",
+    "loading": "Chargement des forfaits",
+    "intervalLabel": "Période de facturation",
+    "month": "Mensuel",
+    "year": "Annuel",
+    "yearlySaving": "2 mois offerts avec l'abonnement annuel",
+    "current": "Forfait actuel",
+    "recommended": "Recommandé",
+    "cheapest": "Le moins cher pour vous",
+    "upgrade": "Passer à {plan}",
+    "switch": "Changer pour {plan}",
+    "switchInterval": "{interval, select, year {Passer à l'annuel} other {Passer au mensuel}}",
+    "moveToFree": "Passer à Free",
+    "soon": "Bientôt",
+    "soonTitle": "Les forfaits payants ouvriront bientôt. En attendant, tout ce qui est sur Free continue de fonctionner.",
+    "ownerOnly": "Seul le propriétaire de la boutique peut changer de forfait.",
+    "pastDue": "Le dernier paiement pour votre forfait {plan} n'a pas abouti. Mettez à jour votre carte pour le conserver.",
+    "endsOn": "Votre forfait {plan} se termine le {date}, et votre boutique passe à Free à ce moment-là. Rien n'est supprimé.",
+    "finePrint": "Prix hors TVA. La commission par vente s'applique aux ventes via le paiement Square Share et porte sur le prix de l'article, jamais sur la livraison. Les frais de traitement de carte de Stripe s'ajoutent. Annulation à tout moment : vous conservez votre forfait jusqu'à la fin de la période payée."
+  },
+  "portal": {
+    "opening": "Ouverture de Stripe",
+    "stepUp": "Confirmez votre identité avant d'accéder à vos informations de facturation."
+  },
+  "calculator": {
+    "toggle": "Quel forfait me revient le moins cher ?",
+    "salesLabel": "Ventes par mois",
+    "salesAria": "Vos ventes mensuelles, en euros",
+    "fromYourSales": "Rempli à partir de vos 30 derniers jours de ventes.",
+    "perMonth": "par mois, commissions incluses",
+    "cheapest": "Avec {sales} de ventes par mois, {plan} vous revient le moins cher.",
+    "breakEven": "{plan} s'autofinance au-delà de {amount} de ventes par mois."
+  },
+  "chip": {
+    "label": "Forfait : {plan}",
+    "upgrade": "Mettre à niveau"
+  },
+  "banner": {
+    "label": "Paiement du forfait",
+    "pastDue": "Le paiement de votre forfait {plan} a échoué. Mettez à jour votre carte pour le conserver.",
+    "pastDueMember": "Le paiement du forfait {plan} de cette boutique a échoué. Seul le propriétaire peut mettre à jour la carte.",
+    "action": "Mettre à jour la carte"
+  },
+  "settings": {
+    "planTitle": "Votre forfait",
+    "planDescription": "Ce que votre boutique paie et la commission sur chaque vente.",
+    "priceLine": "{price} {interval, select, year {par an} other {par mois}}, TVA excl.",
+    "freeLine": "Pas d'abonnement.",
+    "renews": "Renouvellement le {date}.",
+    "ends": "Se termine le {date}. Votre boutique passe à Free à ce moment-là, et rien n'est supprimé.",
+    "pastDue": "Paiement échoué. Stripe va réessayer votre carte ; mettez-la à jour pour conserver {plan}.",
+    "feeLine": "Commission sur chaque vente : {rate} du prix de l'article.",
+    "changePlan": "Changer de forfait",
+    "seePlans": "Voir les forfaits",
+    "memberNote": "Seul le propriétaire de la boutique peut changer de forfait ou consulter ses factures.",
+    "usageTitle": "Ce que vous utilisez",
+    "usageDescription": "Les limites de votre forfait s'appliquent uniquement à l'ajout de nouveaux éléments. Rien de ce que vous avez n'est jamais supprimé.",
+    "usage": {
+      "storefronts": "Vitrines : {used} sur {cap}",
+      "storefrontsUnlimited": "Vitrines : {used}, sans limite",
+      "teamSeats": "Sièges d'équipe, vous inclus : {used} sur {cap}",
+      "teamSeatsUnlimited": "Sièges d'équipe, vous inclus : {used}, sans limite"
+    },
+    "overLimit": "Au-delà de la limite de ce forfait. Tout continue de fonctionner ; supprimez-en un ou mettez à niveau pour en ajouter.",
+    "invoicesTitle": "Facturation et factures",
+    "invoicesDescription": "Votre carte, adresse de facturation, numéro de TVA et toutes vos factures, sur la page sécurisée de Stripe.",
+    "manage": "Gérer la facturation et les factures",
+    "noBilling": "Les factures et les informations de paiement apparaissent ici une fois que vous êtes sur un forfait payant.",
+    "confirmed": "Vous êtes sur {plan}. Merci de soutenir Square Share.",
+    "pending": "Nous confirmons votre paiement avec Stripe. Actualisez dans un moment si votre forfait n'a pas changé.",
+    "unavailable": "Votre forfait ne peut pas être affiché pour l'instant. Actualisez la page dans un moment."
+  }
+}

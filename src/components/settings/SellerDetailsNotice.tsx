@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, ShieldAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { iconNudgeRightClass } from "@/components/ui/control-styles";
+import { bannerActionClass, iconNudgeRightClass } from "@/components/ui/control-styles";
+import { bannerStripClass } from "@/components/ui/surface-styles";
 import {
   TRADER_IDENTITY_FIELDS,
   TRADER_IDENTITY_HEADLINE,
@@ -73,7 +74,7 @@ export function SellerDetailsBanner({
       aria-label={t("Settings.sellerDetails.bannerLabel")}
       // No rule underneath: the tint alone separates it from the page, and a
       // red line under a red strip read as a second, louder warning.
-      className="flex flex-wrap items-center gap-x-2 gap-y-1 bg-destructive/5 px-4 py-2 text-sm md:px-6"
+      className={bannerStripClass}
     >
       <ShieldAlert
         className="size-4 shrink-0 text-destructive"
@@ -98,7 +99,7 @@ export function SellerDetailsBanner({
           // Sharp, like every other CTA (control-styles' brand rule), with the
           // "go" arrow the product's other forward links carry. Neutral grey
           // instead of destructive red to signal this is a helpful action, not risky.
-          className="group/btn inline-flex shrink-0 items-center gap-1 rounded-none border border-border px-2 py-1 font-inter text-xs font-medium text-muted-foreground transition-colors duration-base ease-standard hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+          className={bannerActionClass}
         >
           {t("Settings.sellerDetails.addLink")}
           <ArrowRight

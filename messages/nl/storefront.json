@@ -94,7 +94,8 @@
       "typography": "Typografie",
       "cards": "Producttegels",
       "soldOut": "Uitverkocht",
-      "productPage": "Productpagina"
+      "productPage": "Productpagina",
+      "checkoutPage": "Afrekenen"
     },
     "subtitle": {
       "theme": "Etalage / Thema",
@@ -102,7 +103,8 @@
       "typography": "Etalage / Typografie",
       "cards": "Etalage / Producttegels",
       "soldOut": "Etalage / Uitverkocht",
-      "productPage": "Etalage / Productpagina"
+      "productPage": "Etalage / Productpagina",
+      "checkoutPage": "Etalage / Afrekenen"
     },
     "labels": {
       "looks": "Etalage-uitstraling",
@@ -135,7 +137,16 @@
       "productPageAvailability": "Beschikbaarheid op de pagina",
       "productPageByline": "“Verkocht door”-regel",
       "shippingReturns": "Verzend- en retourbeleid",
-      "sellerDetails": "Verkopersgegevens"
+      "sellerDetails": "Verkopersgegevens",
+      "checkoutLayout": "Lay-out afrekenen",
+      "checkoutBackground": "Kleur afrekenen",
+      "checkoutHeadline": "Koptekst afrekenen",
+      "checkoutNote": "Notitie voor kopers",
+      "checkoutGift": "Cadeauberichten",
+      "thankYouMessage": "Bedankbericht",
+      "thankYouCelebration": "Bedankanimatie",
+      "checkoutTexture": "Textuur afrekenen",
+      "checkoutPayButton": "Betaalknop"
     }
   },
   "editorSearch": {
@@ -151,7 +162,8 @@
       "products": "Product toevoegen",
       "shapes": "Vormen",
       "uploads": "Uploads"
-    }
+    },
+    "openCheckout": "Afrekenen openen"
   },
   "list": {
     "showingOf": "{count} van {total} etalages weergegeven",
@@ -329,7 +341,12 @@
     "productPageLabel": " · Productpagina",
     "closeAriaLabel": "De productpagina voor {title} sluiten",
     "desktopSize": "Desktopformaat",
-    "mobileSize": "Mobiel formaat"
+    "mobileSize": "Mobiel formaat",
+    "checkoutLabel": " · Afrekenen",
+    "thanksLabel": " · Bedankt",
+    "openCheckout": "Afrekenen",
+    "openCheckoutAriaLabel": "Afrekenen openen voor {title}",
+    "closeCheckoutAriaLabel": "Afrekenen sluiten"
   },
   "customFont": {},
   "metadata": {
@@ -949,7 +966,12 @@
     "zoomInTip": "Inzoomen (Ctrl +)",
     "designSettings": "Ontwerpinstellingen",
     "page": "Pagina",
-    "moreTools": "Meer hulpmiddelen"
+    "moreTools": "Meer hulpmiddelen",
+    "checkout": "Afrekenen",
+    "showCheckout": "Afrekenen tonen",
+    "closeCheckout": "Afrekenen sluiten",
+    "showCheckoutFull": "Afrekenen en bedankpagina tonen",
+    "closeCheckoutFull": "Afrekenen en bedankpagina sluiten"
   },
   "selectionToolbar": {
     "toolsFor": "Hulpmiddelen voor {name}",
@@ -978,7 +1000,11 @@
     "duplicateNamed": "{name} dupliceren",
     "duplicateN": "{count, plural, one {# element} other {# elementen}} dupliceren",
     "removeFrom": "{name} verwijderen uit raster",
-    "removeN": "{count, plural, one {# element} other {# elementen}} verwijderen uit raster"
+    "removeN": "{count, plural, one {# element} other {# elementen}} verwijderen uit raster",
+    "openCheckout": "Afrekenen openen",
+    "hideCheckout": "Afrekenen verbergen",
+    "openCheckoutFor": "Afrekenen voor {name} tonen",
+    "closeCheckoutFor": "Afrekenen voor {name} verbergen"
   },
   "canvas": {
     "gridLabel": "Canvas van de etalage",
@@ -1293,5 +1319,60 @@
         }
       }
     }
+  },
+  "checkoutPage": {
+    "unwired": "Kopers bereiken het afrekenen zodra je Stripe verbindt. Je kunt het nu al ontwerpen.",
+    "charsLeft": "{count, plural, one {# teken over} other {# tekens over}}",
+    "layout": {
+      "title": "Lay-out",
+      "arrangement": {
+        "label": "Indeling",
+        "showcase": "Showcase",
+        "compact": "Compact"
+      },
+      "pageColor": "Kleur pagina",
+      "followsProductPage": "Achtergrond productpagina",
+      "useProductPage": "Achtergrond productpagina gebruiken",
+      "button": "De betaalknop is gelijk aan de koopknop van je productpagina.",
+      "styleButton": "Knop opmaken",
+      "payButton": "Betaalknop",
+      "payButtonInfoLabel": "Over de betaalknop",
+      "texture": {
+        "label": "Textuur",
+        "none": "Effen",
+        "paper": "Papier",
+        "dots": "Stippen",
+        "grid": "Raster",
+        "lines": "Lijnen",
+        "linen": "Linnen"
+      }
+    },
+    "message": {
+      "title": "Tekst",
+      "headline": "Koptekst",
+      "note": "Notitie voor kopers",
+      "notePlaceholder": "Een paar woorden van jou, getoond naast de bestelling",
+      "gift": {
+        "label": "Cadeauberichten",
+        "infoLabel": "Wat cadeauberichten doen",
+        "info": "Kopers van dingen die je verzendt kunnen een korte notitie toevoegen voor in het pakket. Je ziet die op de bestelling."
+      }
+    },
+    "thanks": {
+      "title": "Bedankpagina",
+      "headline": "Koptekst",
+      "sampleName": "Emma",
+      "message": "Bericht",
+      "messagePlaceholder": "Wat er daarna gebeurt, in je eigen woorden",
+      "celebrate": {
+        "label": "Animatie",
+        "confetti": "Confetti",
+        "rays": "Licht",
+        "none": "Geen",
+        "play": "Afspelen"
+      }
+    },
+    "unwiredBadge": "Nog niet live",
+    "unwiredInfoLabel": "Wanneer kopers kunnen afrekenen"
   }
 }

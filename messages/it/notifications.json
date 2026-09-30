@@ -56,7 +56,8 @@
     "stock": "Scorte",
     "system": "Sistema",
     "security": "Sicurezza",
-    "policy": "Norme"
+    "policy": "Norme",
+    "billing": "Fatturazione"
   },
   "time": {
     "justNow": "adesso",
@@ -151,6 +152,28 @@
       "newDigital": {
         "title": "Nuovo ordine: {title}",
         "body": "È un download, quindi non c'è niente da spedire."
+      },
+      "withdrawn": {
+        "title": "Un acquirente ha esercitato il recesso sull'ordine {number}",
+        "body": "{title}. Concordate la restituzione e il rimborso con lui."
+      }
+    },
+    "billing": {
+      "upgraded": {
+        "title": "Sei su {plan, select, starter {Starter} pro {Pro} other {un piano a pagamento}}",
+        "body": "D’ora in poi la tua commissione su ogni vendita è più bassa e i limiti del tuo piano sono stati rimossi."
+      },
+      "plan_changed": {
+        "title": "Il tuo piano ora è {plan, select, free {Free} starter {Starter} pro {Pro} other {{plan}}}",
+        "body": "Commissione e limiti si applicano da ora in poi."
+      },
+      "downgraded": {
+        "title": "Il tuo negozio è di nuovo su Free",
+        "body": "Il tuo piano a pagamento è terminato. Tutto ciò che hai continua a funzionare; passa a un piano superiore quando vuoi per una commissione più bassa."
+      },
+      "paymentFailed": {
+        "title": "Il pagamento del tuo piano {plan, select, starter {Starter} pro {Pro} other {a pagamento}} non è riuscito",
+        "body": "Stripe riproverà. Aggiorna la carta in Piano e fatturazione per mantenere il tuo piano."
       }
     }
   }

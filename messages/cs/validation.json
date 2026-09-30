@@ -1,7 +1,8 @@
 {
   "checkForm": "Zkontrolujte formulář a zkuste to znovu.",
   "generic": {
-    "invalid": "Zkontrolujte formulář a zkuste to znovu."
+    "invalid": "Zkontrolujte formulář a zkuste to znovu.",
+    "sellerProse": "Zde nelze uvádět odkazy, e-mailové adresy ani bankovní údaje. Kupující platí přes pokladnu a vaše kontaktní údaje se na stránce již zobrazují."
   },
   "text": {
     "productTitle": {
@@ -240,6 +241,66 @@
       "required": "Řekněte nám proč alespoň v {minimum} znacích.",
       "tooLong": "Odvolání musí mít nejvýše {maximum} znaků.",
       "unsupported": "Odvolání obsahuje nepodporované znaky."
+    },
+    "checkoutHeadline": {
+      "required": "Nadpis pokladny je povinný.",
+      "tooLong": "Nadpis pokladny musí mít nejvýše {maximum} znaků.",
+      "unsupported": "Nadpis pokladny obsahuje nepodporované znaky."
+    },
+    "checkoutNote": {
+      "required": "Poznámka pro kupující je povinná.",
+      "tooLong": "Poznámka pro kupující musí mít nejvýše {maximum} znaků.",
+      "unsupported": "Poznámka pro kupující obsahuje nepodporované znaky."
+    },
+    "thanksHeadline": {
+      "required": "Nadpis poděkování je povinný.",
+      "tooLong": "Nadpis poděkování musí mít nejvýše {maximum} znaků.",
+      "unsupported": "Nadpis poděkování obsahuje nepodporované znaky."
+    },
+    "thanksMessage": {
+      "required": "Zpráva s poděkováním je povinná.",
+      "tooLong": "Zpráva s poděkováním musí mít nejvýše {maximum} znaků.",
+      "unsupported": "Zpráva s poděkováním obsahuje nepodporované znaky."
+    },
+    "giftMessage": {
+      "required": "Napište vzkaz nebo ho vypněte.",
+      "tooLong": "Vzkaz musí mít nejvýše {maximum} znaků.",
+      "unsupported": "Vzkaz obsahuje nepodporované znaky."
+    },
+    "buyerName": {
+      "required": "Zadejte celé jméno.",
+      "tooLong": "Jméno musí mít nejvýše {maximum} znaků.",
+      "unsupported": "Jméno obsahuje nepodporované znaky."
+    },
+    "addressLine1": {
+      "required": "Zadejte adresu.",
+      "tooLong": "Adresa musí mít nejvýše {maximum} znaků.",
+      "unsupported": "Adresa obsahuje nepodporované znaky."
+    },
+    "addressLine2": {
+      "required": "Zadejte druhý řádek adresy.",
+      "tooLong": "Druhý řádek adresy musí mít nejvýše {maximum} znaků.",
+      "unsupported": "Druhý řádek adresy obsahuje nepodporované znaky."
+    },
+    "city": {
+      "required": "Zadejte město.",
+      "tooLong": "Název města musí mít nejvýše {maximum} znaků.",
+      "unsupported": "Název města obsahuje nepodporované znaky."
+    },
+    "region": {
+      "required": "Zadejte kraj nebo region.",
+      "tooLong": "Kraj nebo region musí mít nejvýše {maximum} znaků.",
+      "unsupported": "Kraj nebo region obsahuje nepodporované znaky."
+    },
+    "postalCode": {
+      "required": "Zadejte PSČ.",
+      "tooLong": "PSČ musí mít nejvýše {maximum} znaků.",
+      "unsupported": "PSČ obsahuje nepodporované znaky."
+    },
+    "orderReference": {
+      "required": "Zadejte číslo objednávky.",
+      "tooLong": "Toto číslo objednávky je příliš dlouhé.",
+      "unsupported": "Toto číslo objednávky obsahuje nepodporované znaky."
     }
   },
   "email": {
@@ -267,6 +328,11 @@
       "format": "E-mail odpovědné osoby v EU nevypadá jako e-mailová adresa.",
       "tooLong": "E-mail odpovědné osoby v EU je příliš dlouhý.",
       "unsupported": "E-mail odpovědné osoby v EU obsahuje nepodporované znaky."
+    },
+    "buyer": {
+      "format": "Zadejte e-mailovou adresu ve formátu jmeno@priklad.cz.",
+      "tooLong": "Tato e-mailová adresa je příliš dlouhá.",
+      "unsupported": "Tato e-mailová adresa obsahuje nepodporované znaky."
     }
   },
   "emailQuality": {
@@ -293,7 +359,8 @@
     "notificationRecipient": "Příjemce oznámení není platný.",
     "factor": "Tato ověřovací aplikace není platná.",
     "reportTarget": "Tato položka není platná.",
-    "moderationDecision": "Toto rozhodnutí není platné."
+    "moderationDecision": "Toto rozhodnutí není platné.",
+    "checkoutAttempt": "Tato relace pokladny vypršela. Načtěte stránku znovu a zkuste to."
   },
   "handle": {
     "username": "Uživatelské jméno musí mít 3 až 30 znaků a smí obsahovat jen písmena, číslice a podtržítka."
@@ -323,12 +390,26 @@
       "whole": "Maximum na objednávku musí být celé číslo.",
       "tooSmall": "Maximum na objednávku musí být alespoň {minimum}.",
       "tooBig": "Maximum na objednávku může být nejvýše {maximum}."
+    },
+    "shippingRate": {
+      "whole": "Sazba za dopravu musí být celé číslo centů.",
+      "tooSmall": "Sazba za dopravu nemůže být záporná.",
+      "tooBig": "Sazba za dopravu nesmí překročit {maximum} centů."
+    },
+    "freeOverCents": {
+      "whole": "Limit pro dopravu zdarma musí být celé číslo centů.",
+      "tooSmall": "Limit pro dopravu zdarma nemůže být záporný.",
+      "tooBig": "Limit pro dopravu zdarma nesmí překročit {maximum} centů."
     }
   },
   "list": {
     "domains": {
       "tooMany": "Uveďte nejvýše {maximum} domén.",
       "duplicate": "Každá doména smí být v seznamu jen jednou."
+    },
+    "destinationCountries": {
+      "tooMany": "Destinace může zahrnovat nejvýše {maximum} zemí.",
+      "duplicate": "Každá země se může v destinaci vyskytnout pouze jednou."
     }
   },
   "settings": {

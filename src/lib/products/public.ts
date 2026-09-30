@@ -3,44 +3,22 @@
 // editor's preview action so the two can never disagree.
 //
 // SECURITY MODEL, same as /api/embed/[key]: a service-role read behind an
-// application gate, never an anon RLS policy. The gate, in order: both ids
-// must be UUIDs before any I/O; the client IP spends a rate-limit token; the
-// storefront must exist and have its product page switched on; the product
-// must be PLACED on that storefront; the product must be `active` and owned by
-// the storefront's owner. Every failure is the same `null`, which the route
-// turns into the same 404, so nothing here is enumerable.
+// application gate, never an anon RLS policy. The gate itself lives in
+// lib/products/purchasable.ts, shared with the checkout and its quote, so a
+// product the page would refuse is a product nobody can pay for either. Every
+// failure is the same `null`, which the route turns into the same 404, so
+// nothing here is enumerable.
 //
 // The payload is BUILT field by field, never spread. That is what keeps
 // digital_file_key, owner_id, raw stock numbers and R2 keys out of a buyer's
 // hands by default rather than by remembering to strip them.
 
 import { cache } from "react";
-import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
-import {
-  TRADER_GATE_SELECT,
-  buildSellerIdentity,
-  buildTraderIdentityInput,
-  type SellerIdentityRow,
-  type TraderGateRow,
-} from "@/lib/settings/seller-identity";
-import { emailProofRequired } from "@/lib/contact-verification/availability";
-import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
-import {
-  SHIPPING_POLICY_SELECT,
-  buildShippingPolicy,
-  type ShippingPolicyRow,
-} from "@/lib/settings/shipping-policy";
 import { presignGetUrl } from "@/lib/r2";
-import {
-  MODERATION_GATE_SELECT,
-  isContentVisible,
-} from "@/lib/moderation/removal";
-import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
-import { uuidField } from "@/lib/validation/inputs";
+import { RATE_LIMITS } from "@/lib/rate-limit";
 import { purchaseUrlSchema } from "@/lib/validation/product";
-import { parseStoredStorefrontConfig } from "@/lib/validation/storefront";
-import { PUBLIC_STOCK_SELECT, toPublicStockBadge } from "@/lib/stock/public";
+import { toPublicStockBadge } from "@/lib/stock/public";
 import { publicQuantityLimit } from "@/lib/products/quantity";
 import {
   parseDetails,
@@ -49,7 +27,8 @@ import {
   parseOptionGroups,
   reconcileGalleryOptions,
 } from "@/lib/products/detail";
-import { resolveProductPage } from "@/lib/storefront/product-page";
+import { loadPurchasable, type PublicProductRow } from "@/lib/products/purchasable";
+import { checkoutAvailableFor } from "@/lib/checkout/availability";
 import { productPageUrl } from "@/lib/storefront/product-page-url";
 import { toCurrency } from "@/lib/format/money";
 import type {
@@ -59,37 +38,10 @@ import type {
 } from "@/types/product";
 import type { ProductPageData, ProductPageReportScopes } from "@/types/product-page";
 
-/**
- * Exactly the columns the builder reads. `digital_file_key` is here ONLY so
- * `isDigital` and the format can be derived; it never leaves this module.
- * The stock fragment comes from the stock seam so this select cannot drift
- * onto a column that seam has not admitted.
- */
-export const PUBLIC_PRODUCT_SELECT =
-  `id, title, description, price_cents, currency, image_key, digital_file_key, gallery, option_groups, details, documents, purchase_url, shipping_profile_id, max_per_order, ${MODERATION_GATE_SELECT}, ${PUBLIC_STOCK_SELECT}` as const;
-
-export type PublicProductRow = {
-  id: string;
-  title: string;
-  description: string | null;
-  price_cents: number;
-  currency: string;
-  image_key: string | null;
-  digital_file_key: string | null;
-  gallery: unknown;
-  option_groups: unknown;
-  details: unknown;
-  documents: unknown;
-  purchase_url: string | null;
-  shipping_profile_id: string | null;
-  max_per_order: number | null;
-  /** Takedown state. Read by the gate below, never by the payload builder:
-   *  nothing about a removal is buyer-facing. */
-  moderation_status: string | null;
-  track_stock: boolean;
-  stock_quantity: number | null;
-  low_stock_threshold: number;
-};
+// The select and the row type live with the gate (lib/products/purchasable.ts),
+// which reads them for every buyer-facing surface; re-exported for the editor
+// preview, which builds the same payload from the same row.
+export { PUBLIC_PRODUCT_SELECT, type PublicProductRow } from "@/lib/products/purchasable";
 
 /** "PDF", "ZIP"... from a key's extension. Never the name, never the key. */
 function formatFromKey(key: string | null): string | null {
@@ -221,127 +173,29 @@ export type PublicProductPageResult = {
   ownerId: string;
 };
 
-const idSchema = uuidField();
-
 /**
  * Load a product page for a buyer, or `null` for every reason it cannot be
- * shown. Wrapped in React's `cache` so generateMetadata and the page body share
- * one read (and one rate-limit token) per request.
+ * shown. The gate is lib/products/purchasable.ts, shared with the checkout so
+ * the two can never disagree about what is for sale; what this adds is the
+ * PAGE: the buyer-safe product, the report scopes, and the signed URLs.
+ * Wrapped in React's `cache` so generateMetadata and the page body share one
+ * read (and one rate-limit token) per request.
  */
 export const getPublicProductPage = cache(
   async (
     storefrontId: string,
     productId: string,
   ): Promise<PublicProductPageResult | null> => {
-    if (!idSchema.safeParse(storefrontId).success) return null;
-    if (!idSchema.safeParse(productId).success) return null;
-
-    // The budget is spent before the first read, so a scan pays before it
-    // learns anything. rateLimitKey fails closed.
-    const key = await clientKey(await headers());
-    if (!(await rateLimitKey(key, "product_page", RATE_LIMITS.productPage))) {
-      return null;
-    }
-
-    const admin = createAdminClient();
-    const { data: storefront, error: storefrontError } = await admin
-      .from("storefronts")
-      .select(`id, name, owner_id, config, ${MODERATION_GATE_SELECT}`)
-      .eq("id", storefrontId)
-      .maybeSingle();
-    if (storefrontError) {
-      console.error("[product-page] storefront read failed", storefrontError);
-      return null;
-    }
-    if (!storefront) return null;
-
-    // A removed STOREFRONT takes every page hanging off it, before the product
-    // is even read: taking down a shop and leaving its product pages reachable
-    // by direct link would be a takedown in name only.
-    if (!isContentVisible(storefront.moderation_status)) return null;
-
-    const config = parseStoredStorefrontConfig(storefront.config);
-    if (!config) return null;
-    const productPage = resolveProductPage(config);
-    if (!productPage.enabled) return null;
-
-    // The page belongs to a tile. A product the seller has not placed on this
-    // storefront has no page here, whatever its status. Hidden sold-out tiles
-    // still count: the page then simply says sold out.
-    const block = config.blocks.find(
-      (candidate) => candidate.type === "product" && candidate.productId === productId,
+    const gate = await loadPurchasable(
+      storefrontId,
+      productId,
+      { action: "product_page", budget: RATE_LIMITS.productPage },
+      reportScopesFor,
     );
-    if (!block || block.type !== "product") return null;
+    if (!gate) return null;
+    const { config, productPage, block, row, seller, shippingPolicy } = gate;
 
-    // Product and seller identity both depend only on the owner id already in
-    // hand, so they run together rather than one after the other.
-    const [
-      { data: row, error: productError },
-      { data: sellerRow, error: sellerError },
-      reportScopes,
-    ] = await Promise.all([
-      admin
-        .from("products")
-        .select(PUBLIC_PRODUCT_SELECT)
-        .eq("id", productId)
-        .eq("owner_id", storefront.owner_id)
-        .eq("status", "active")
-        .maybeSingle(),
-      admin
-        .from("profiles")
-        // Trader identity AND shipping terms, in ONE select: both are
-        // account-level facts read off the same row, and asking for that row
-        // twice on the public page's hot path would be two round trips for
-        // one read.
-        .select(`${TRADER_GATE_SELECT}, ${SHIPPING_POLICY_SELECT}`)
-        .eq("id", storefront.owner_id)
-        .maybeSingle(),
-      reportScopesFor(admin, storefront.owner_id),
-    ]);
-    if (productError) {
-      console.error("[product-page] product read failed", productError);
-      return null;
-    }
-    if (!row) return null;
-
-    // THE REMOVAL GATE. Same 404 as every other refusal in this function, so a
-    // takedown is indistinguishable from a product that never existed: a page
-    // that said "removed" would tell a scanner exactly which listings were
-    // worth looking at on an archive, and would put the platform's finding in
-    // front of buyers who were never the audience for it. The seller is told
-    // directly instead (a policy notification and a banner in the dashboard).
-    if (!isContentVisible((row as PublicProductRow).moderation_status)) return null;
-
-    if (sellerError) {
-      console.error("[product-page] seller identity read failed", sellerError);
-    }
-
-    // THE READ SIDE OF THE PUBLISH GATE, and the reason there is no way around
-    // it: the write side stops a product going `active` without the seller's
-    // trader details, and this stops one that went active before those details
-    // were cleared (or before the gate existed) from still being sold. A buyer
-    // may not be shown an offer without being told who is making it and how to
-    // reach them, so a page that cannot say those things is not shown at all.
-    //
-    // 404, the same answer as every other refusal here, so an incomplete
-    // seller's catalogue is not enumerable by the shape of the response. And
-    // fail-closed on a read error: an identity we could not read is one we
-    // cannot display, which is the same problem as one that is not there.
-    //
-    // `seller` is what the page SHOWS (the identity columns, built field by field, so
-    // the verification flag cannot ride along onto a buyer's page); the gate
-    // asks a wider question of the same row.
-    const gateRow = sellerError ? null : (sellerRow as TraderGateRow | null);
-    const seller = buildSellerIdentity(gateRow as SellerIdentityRow | null);
-    if (
-      !isTraderIdentityComplete(buildTraderIdentityInput(gateRow), {
-        requireVerifiedEmail: emailProofRequired(),
-      })
-    ) {
-      return null;
-    }
-
-    const product = await buildProductPageProduct(row as PublicProductRow, {
+    const product = await buildProductPageProduct(row, {
       soldOutFlag: block.soldOut,
       showStock: productPage.showStock,
     });
@@ -354,23 +208,22 @@ export const getPublicProductPage = cache(
     return {
       page: {
         storefront: {
-          id: storefront.id,
-          name: storefront.name,
+          id: gate.storefront.id,
+          name: gate.storefront.name,
           theme,
           ...(config.header ? { header: config.header } : {}),
           productPage,
-          shippingPolicy: buildShippingPolicy(
-            sellerError ? null : (sellerRow as ShippingPolicyRow | null),
-          ),
+          shippingPolicy,
           seller,
           backgroundImageUrl,
           customFontUrl,
+          checkout: checkoutAvailableFor(gate),
         },
         product,
-        productUrl: productPageUrl(storefront.id, product.id),
-        reportScopes,
+        productUrl: productPageUrl(gate.storefront.id, product.id),
+        reportScopes: gate.extra,
       },
-      ownerId: storefront.owner_id,
+      ownerId: gate.ownerId,
     };
   },
 );

@@ -52,6 +52,10 @@
     "fulfilOrders": {
       "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de marquer les commandes comme expédiées dans cette boutique.",
       "noRole": "Vous n'avez pas la permission de marquer les commandes comme expédiées dans cette boutique."
+    },
+    "manageBilling": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de changer le forfait de cette boutique.",
+      "noRole": "Vous n'avez pas la permission de changer le forfait de cette boutique."
     }
   },
   "notFound": {
@@ -76,7 +80,9 @@
     "readProductPageSettings": "Trop de tentatives de lecture des paramètres de page produit en peu de temps.",
     "requestReview": "Trop de demandes de réexamen en peu de temps.",
     "fileAppeal": "Trop de tentatives d'envoi d'une contestation en peu de temps.",
-    "fulfilOrders": "Trop de tentatives pour marquer des commandes comme expédiées en peu de temps."
+    "fulfilOrders": "Trop de tentatives pour marquer des commandes comme expédiées en peu de temps.",
+    "readCheckoutSettings": "Trop de tentatives de lecture des paramètres de paiement en peu de temps.",
+    "changePlan": "Trop de changements de forfait lancés en peu de temps."
   },
   "serverError": {
     "fix": "C’est généralement temporaire. Attendez un instant puis réessayez ; si le problème persiste, actualisez la page.",
@@ -104,7 +110,12 @@
     "saveProductPageSettings": "Impossible d’enregistrer vos paramètres de page produit en raison d’un problème de notre côté.",
     "sendForReview": "Impossible d’envoyer cette demande de réexamen : un problème est survenu de notre côté.",
     "fileAppeal": "Impossible d'envoyer votre contestation en raison d'un problème de notre côté.",
-    "markOrderShipped": "Impossible de marquer la commande comme expédiée en raison d'un problème de notre côté."
+    "markOrderShipped": "Impossible de marquer la commande comme expédiée en raison d'un problème de notre côté.",
+    "loadCheckoutSettings": "Impossible de charger vos paramètres de paiement en raison d'un problème de notre côté.",
+    "saveCheckoutSettings": "Impossible d'enregistrer vos paramètres de paiement en raison d'un problème de notre côté.",
+    "loadPlans": "Impossible de charger votre forfait en raison d'un problème de notre côté.",
+    "startCheckout": "Impossible d'ouvrir le paiement en raison d'un problème de notre côté.",
+    "openBillingPortal": "Impossible d'ouvrir vos informations de facturation en raison d'un problème de notre côté."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Ce produit a été retiré, et non mis en pause.} storefront {Cette vitrine a été retirée, et non mise en pause.} other {Cet élément a été retiré, et non mis en pause.}}",
@@ -578,5 +589,25 @@
       "message": "Cette commande ne peut pas être marquée comme expédiée.",
       "fix": "Seules les commandes payées avec quelque chose à envoyer peuvent être expédiées. Actualisez la page pour voir le statut de cette commande."
     }
+  },
+  "checkoutPageApi": {
+    "notObjectFix": "Envoyez un objet JSON, par exemple '{'\"layout\": \"compact\"'}'.",
+    "invalid": "Ces paramètres de paiement ne sont pas valides.",
+    "invalidFix": "Vérifiez le champ nommé ci-dessus par rapport à `limits` d'un GET de cette URL, puis réessayez."
+  },
+  "billing": {
+    "unavailable": "Les forfaits payants ne sont pas disponibles pour l'instant.",
+    "unavailableFix": "Votre boutique continue de fonctionner sur son forfait actuel. Réessayez plus tard.",
+    "invalidPlan": "Ce forfait ne fait pas partie de notre offre.",
+    "alreadySubscribed": "Votre boutique a déjà un forfait payant. Changez de forfait plutôt que d'en acheter un second.",
+    "noBillingAccount": "Cette boutique n'a pas encore de compte de facturation. Passez d'abord à un forfait payant.",
+    "noSubscription": "Cette boutique n'a pas de forfait payant à modifier. Choisissez-en un pour vous abonner.",
+    "ownerOnlyFix": "Seul le propriétaire de la boutique peut changer de forfait. Demandez-lui, ou passez à votre propre boutique."
+  },
+  "planLimit": {
+    "storefronts": "Votre forfait {plan, select, free {Free} starter {Starter} pro {Pro} other {actuel}} comprend {cap, plural, one {# vitrine} other {# vitrines}}, et votre boutique les a toutes.",
+    "teamSeats": "Votre forfait {plan, select, free {Free} starter {Starter} pro {Pro} other {actuel}} comprend {cap, plural, one {# siège} other {# sièges}}, vous inclus, et ils sont tous pris.",
+    "fix": "Mettez à niveau pour en avoir plus, ou supprimez-en un dont vous n'avez plus besoin. Rien de ce que vous avez n'est affecté.",
+    "action": "Voir les forfaits"
   }
 }

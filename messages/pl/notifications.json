@@ -56,7 +56,8 @@
     "stock": "Stan magazynowy",
     "system": "System",
     "security": "Bezpieczeństwo",
-    "policy": "Zasady"
+    "policy": "Zasady",
+    "billing": "Rozliczenia"
   },
   "time": {
     "justNow": "przed chwilą",
@@ -151,6 +152,28 @@
       "newDigital": {
         "title": "Nowe zamówienie: {title}",
         "body": "To plik do pobrania, więc nie ma czego wysyłać."
+      },
+      "withdrawn": {
+        "title": "Kupujący odstąpił od zamówienia {number}",
+        "body": "{title}. Uzgodnij z nim zwrot towaru i refundację."
+      }
+    },
+    "billing": {
+      "upgraded": {
+        "title": "Jesteś na planie {plan, select, starter {Starter} pro {Pro} other {płatnym}}",
+        "body": "Twoja opłata od każdej sprzedaży jest teraz niższa i limity planu zostały zniesione."
+      },
+      "plan_changed": {
+        "title": "Twój plan to teraz {plan, select, free {Free} starter {Starter} pro {Pro} other {{plan}}}",
+        "body": "Od teraz obowiązują jego opłata i limity."
+      },
+      "downgraded": {
+        "title": "Twój sklep jest ponownie na Free",
+        "body": "Twój plan płatny dobiegł końca. Wszystko, co masz, działa bez zmian; przejdź wyżej w dowolnym momencie, aby mieć niższą opłatę."
+      },
+      "paymentFailed": {
+        "title": "Płatność za plan {plan, select, starter {Starter} pro {Pro} other {płatny}} nie powiodła się",
+        "body": "Stripe spróbuje ponownie. Zaktualizuj kartę w sekcji Plan i rozliczenia, aby zachować swój plan."
       }
     }
   }

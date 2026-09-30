@@ -94,7 +94,8 @@
       "typography": "Typography",
       "cards": "Product cards",
       "soldOut": "Sold out",
-      "productPage": "Product page"
+      "productPage": "Product page",
+      "checkoutPage": "Checkout"
     },
     "subtitle": {
       "theme": "Storefront / Theme",
@@ -102,7 +103,8 @@
       "typography": "Storefront / Typography",
       "cards": "Storefront / Product cards",
       "soldOut": "Storefront / Sold out",
-      "productPage": "Storefront / Product page"
+      "productPage": "Storefront / Product page",
+      "checkoutPage": "Storefront / Checkout"
     },
     "labels": {
       "looks": "Storefront look",
@@ -135,7 +137,16 @@
       "productPageAvailability": "Availability on the page",
       "productPageByline": "Sold by byline",
       "shippingReturns": "Shipping and returns policy",
-      "sellerDetails": "Seller details"
+      "sellerDetails": "Seller details",
+      "checkoutLayout": "Checkout layout",
+      "checkoutBackground": "Checkout color",
+      "checkoutHeadline": "Checkout headline",
+      "checkoutNote": "Note to buyers",
+      "checkoutGift": "Gift messages",
+      "thankYouMessage": "Thank-you message",
+      "thankYouCelebration": "Thank-you celebration",
+      "checkoutTexture": "Checkout texture",
+      "checkoutPayButton": "Pay button"
     }
   },
   "editorSearch": {
@@ -151,7 +162,8 @@
       "products": "Add a product",
       "shapes": "Shapes",
       "uploads": "Uploads"
-    }
+    },
+    "openCheckout": "Open the checkout"
   },
   "list": {
     "showingOf": "Showing {count} of {total} storefronts",
@@ -329,7 +341,12 @@
     "productPageLabel": " · Product page",
     "closeAriaLabel": "Close the product page for {title}",
     "desktopSize": "Desktop size",
-    "mobileSize": "Mobile size"
+    "mobileSize": "Mobile size",
+    "checkoutLabel": " · Checkout",
+    "thanksLabel": " · Thank you",
+    "openCheckout": "Checkout",
+    "openCheckoutAriaLabel": "Open the checkout for {title}",
+    "closeCheckoutAriaLabel": "Close the checkout"
   },
   "customFont": {},
   "metadata": {
@@ -949,7 +966,12 @@
     "zoomInTip": "Zoom in (Ctrl +)",
     "designSettings": "Design settings",
     "page": "Page",
-    "moreTools": "More tools"
+    "moreTools": "More tools",
+    "checkout": "Checkout",
+    "showCheckout": "Show checkout",
+    "closeCheckout": "Close checkout",
+    "showCheckoutFull": "Show the checkout and thank-you page",
+    "closeCheckoutFull": "Close the checkout and thank-you page"
   },
   "selectionToolbar": {
     "toolsFor": "Tools for {name}",
@@ -978,7 +1000,11 @@
     "duplicateNamed": "Duplicate {name}",
     "duplicateN": "Duplicate {count, plural, one {# element} other {# elements}}",
     "removeFrom": "Remove {name} from grid",
-    "removeN": "Remove {count, plural, one {# element} other {# elements}} from grid"
+    "removeN": "Remove {count, plural, one {# element} other {# elements}} from grid",
+    "openCheckout": "Open checkout",
+    "hideCheckout": "Hide checkout",
+    "openCheckoutFor": "Show the checkout for {name}",
+    "closeCheckoutFor": "Hide the checkout for {name}"
   },
   "canvas": {
     "gridLabel": "Storefront canvas",
@@ -1293,5 +1319,60 @@
         }
       }
     }
+  },
+  "checkoutPage": {
+    "unwired": "Buyers reach checkout once you connect Stripe. You can design it now.",
+    "charsLeft": "{count, plural, one {# character left} other {# characters left}}",
+    "layout": {
+      "title": "Layout",
+      "arrangement": {
+        "label": "Arrangement",
+        "showcase": "Showcase",
+        "compact": "Compact"
+      },
+      "pageColor": "Checkout color",
+      "followsProductPage": "Product page background",
+      "useProductPage": "Use product page background",
+      "button": "The pay button matches your product page's buy button.",
+      "styleButton": "Style the button",
+      "payButton": "Pay button",
+      "payButtonInfoLabel": "About the pay button",
+      "texture": {
+        "label": "Texture",
+        "none": "Plain",
+        "paper": "Paper",
+        "dots": "Dots",
+        "grid": "Grid",
+        "lines": "Lines",
+        "linen": "Linen"
+      }
+    },
+    "message": {
+      "title": "Words",
+      "headline": "Headline",
+      "note": "Note to buyers",
+      "notePlaceholder": "A few words from you, shown beside the order",
+      "gift": {
+        "label": "Gift messages",
+        "infoLabel": "What gift messages do",
+        "info": "Buyers of things you ship can add a short note to go in the parcel. You'll see it on the order."
+      }
+    },
+    "thanks": {
+      "title": "Thank-you page",
+      "headline": "Headline",
+      "sampleName": "Aoife",
+      "message": "Message",
+      "messagePlaceholder": "What happens next, in your own words",
+      "celebrate": {
+        "label": "Celebration",
+        "confetti": "Confetti",
+        "rays": "Light",
+        "none": "None",
+        "play": "Play it"
+      }
+    },
+    "unwiredBadge": "Not live yet",
+    "unwiredInfoLabel": "When buyers can reach checkout"
   }
 }

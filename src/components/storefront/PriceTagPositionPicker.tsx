@@ -8,7 +8,7 @@ import {
   type PriceTagFloatPosition,
   type SpotRow,
 } from "@/types/storefront";
-import { OptionCardPicker } from "./OptionCardPicker";
+import { OptionCardPicker, optionGlyphFrameClass } from "./OptionCardPicker";
 import { TileSpotPicker, unclippedSpots } from "./TileSpotPicker";
 
 /** The three placement modes the mode picker offers; "float" opens the
@@ -21,7 +21,7 @@ function ModeGlyph({ mode }: { mode: PriceTagMode }) {
   return (
     <span
       aria-hidden="true"
-      className="flex h-12 w-10 flex-col overflow-hidden rounded-sm border border-border bg-background"
+      className={`flex h-12 w-10 flex-col ${optionGlyphFrameClass}`}
     >
       <span className="relative flex-1 bg-muted">
         {mode === "float" && (

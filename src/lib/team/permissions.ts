@@ -33,6 +33,10 @@ export const TEAM_ACTIONS = [
   // Marking an order shipped (public.order_mark_shipped). Editors pack parcels
   // too; viewers see the queue but do not change it.
   "orders.fulfil",
+  // Choosing, paying for and cancelling the store's plan (lib/billing). The
+  // owner's alone: a plan is a contract the owner pays for. Teammates see the
+  // plan, never change it.
+  "billing.manage",
 ] as const;
 
 export type TeamAction = (typeof TEAM_ACTIONS)[number];
@@ -48,6 +52,7 @@ export const TEAM_PERMISSIONS: Record<TeamRole, readonly TeamAction[]> = {
     "products.write",
     "storefront.write",
     "orders.fulfil",
+    "billing.manage",
   ],
   editor: [
     "team.read",

@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
+  actionHref,
   notFound,
   permissionDenied,
   rateLimited,
@@ -93,7 +94,7 @@ describe("ActionError factories: English is unchanged", () => {
     expect(english(error.message)).toBe(
       "You can't publish or sell until your seller details are complete.",
     );
-    expect(error.action?.href).toBe("/settings/tax#address");
+    expect(error.action && actionHref(error.action)).toBe("/settings/tax#address");
     expect(english(error.action!.label)).toBe("Add seller details");
   });
 });

@@ -30,6 +30,9 @@
     },
     "security": {
       "title": "Zabezpečenie"
+    },
+    "billing": {
+      "title": "Plán a fakturácia"
     }
   },
   "loading": "Načítavajú sa nastavenia…",
@@ -400,10 +403,25 @@
       "timePlaceholder": "napr. 5–7 pracovných dní",
       "costLabel": "Cena dopravy {number}",
       "costPlaceholder": "napr. 9,00 €",
+      "rateLabel": "Sadzba {number}",
+      "ratePlaceholder": "napr. 4,50",
+      "rateHint": "Ponechajte prázdne iba pre zobrazenie.",
+      "countriesLabel": "Krajiny {number}",
+      "countriesNone": "Žiadne krajiny",
+      "everywhereElse": "Všade inde",
       "removeNamed": "Odstrániť oblasť doručenia {area}",
       "removeNumbered": "Odstrániť oblasť doručenia {number}",
       "add": "Pridať oblasť doručenia",
       "limitReached": "{max, plural, one {Môžete pridať najviac # oblasť doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.} few {Môžete pridať najviac # oblasti doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.} many {Môžete pridať najviac # oblasti doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.} other {Môžete pridať najviac # oblastí doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.}}"
+    },
+    "rates": {
+      "title": "Sadzby za dopravu",
+      "description": "Nastavte strojovo čitateľné sadzby, aby pokladňa mohla pred platbou uviesť celkovú sumu doručenia, ako to vyžaduje smernica EÚ o právach spotrebiteľov.",
+      "currencyLabel": "Mena sadzieb",
+      "freeOverLabel": "Doprava zadarmo nad",
+      "freeOverPlaceholder": "napr. 50,00",
+      "freeOverHint": "Keď celková hodnota objednávky dosiahne túto sumu, doručenie je zadarmo.",
+      "hint": "Tieto sadzby sú to, čo pokladňa účtuje. Ponechajte sadzbu destinácie prázdnu, aby zostala iba ako zobrazovacia."
     },
     "notes": {
       "label": "Ďalšie informácie o doprave",
@@ -462,6 +480,9 @@
       "bodyLabel": "Doprava",
       "bodyPlaceholder": "Ako sa tieto produkty posielajú a čo to stojí",
       "noTerms": "Pridajte podmienky, inak sa tento profil pri ukladaní vynechá.",
+      "rateLabel": "Prepísať sadzbu",
+      "ratePlaceholder": "napr. 9,50",
+      "rateHint": "Nahrádza zodpovedajúcu sadzbu destinácie pre produkty v tomto profile.",
       "add": "Pridať profil",
       "limitReached": "{max, plural, one {Môžete pridať najviac # profil dopravy. Jeden odstráňte, aby ste mohli pridať ďalší.} few {Môžete pridať najviac # profily dopravy. Jeden odstráňte, aby ste mohli pridať ďalší.} many {Môžete pridať najviac # profilu dopravy. Jeden odstráňte, aby ste mohli pridať ďalší.} other {Môžete pridať najviac # profilov dopravy. Jeden odstráňte, aby ste mohli pridať ďalší.}}"
     },

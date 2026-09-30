@@ -1,7 +1,8 @@
 {
   "checkForm": "Check the form and try again.",
   "generic": {
-    "invalid": "Check the form and try again."
+    "invalid": "Check the form and try again.",
+    "sellerProse": "Links, email addresses and bank details can't go here. Buyers pay through checkout, and your contact details already appear on the page."
   },
   "text": {
     "productTitle": {
@@ -240,6 +241,66 @@
       "required": "Tell us why in at least {minimum} characters.",
       "tooLong": "Keep your appeal to {maximum} characters or fewer.",
       "unsupported": "Your appeal contains unsupported characters."
+    },
+    "checkoutHeadline": {
+      "required": "The checkout headline is required.",
+      "tooLong": "The checkout headline must be {maximum} characters or fewer.",
+      "unsupported": "The checkout headline contains unsupported characters."
+    },
+    "checkoutNote": {
+      "required": "The note to buyers is required.",
+      "tooLong": "The note to buyers must be {maximum} characters or fewer.",
+      "unsupported": "The note to buyers contains unsupported characters."
+    },
+    "thanksHeadline": {
+      "required": "The thank-you headline is required.",
+      "tooLong": "The thank-you headline must be {maximum} characters or fewer.",
+      "unsupported": "The thank-you headline contains unsupported characters."
+    },
+    "thanksMessage": {
+      "required": "The thank-you message is required.",
+      "tooLong": "The thank-you message must be {maximum} characters or fewer.",
+      "unsupported": "The thank-you message contains unsupported characters."
+    },
+    "giftMessage": {
+      "required": "Write a gift message, or switch it off.",
+      "tooLong": "Keep the gift message to {maximum} characters or fewer.",
+      "unsupported": "The gift message contains unsupported characters."
+    },
+    "buyerName": {
+      "required": "Enter your full name.",
+      "tooLong": "Your name must be {maximum} characters or fewer.",
+      "unsupported": "Your name contains unsupported characters."
+    },
+    "addressLine1": {
+      "required": "Enter your street address.",
+      "tooLong": "The street address must be {maximum} characters or fewer.",
+      "unsupported": "The street address contains unsupported characters."
+    },
+    "addressLine2": {
+      "required": "Enter the second address line.",
+      "tooLong": "The second address line must be {maximum} characters or fewer.",
+      "unsupported": "The second address line contains unsupported characters."
+    },
+    "city": {
+      "required": "Enter your town or city.",
+      "tooLong": "The town or city must be {maximum} characters or fewer.",
+      "unsupported": "The town or city contains unsupported characters."
+    },
+    "region": {
+      "required": "Enter your county, state or region.",
+      "tooLong": "The region must be {maximum} characters or fewer.",
+      "unsupported": "The region contains unsupported characters."
+    },
+    "postalCode": {
+      "required": "Enter your postcode.",
+      "tooLong": "The postcode must be {maximum} characters or fewer.",
+      "unsupported": "The postcode contains unsupported characters."
+    },
+    "orderReference": {
+      "required": "Enter your order number.",
+      "tooLong": "That order number is too long.",
+      "unsupported": "That order number contains unsupported characters."
     }
   },
   "email": {
@@ -267,6 +328,11 @@
       "format": "The EU responsible person's email doesn't look like an email address.",
       "tooLong": "The EU responsible person's email is too long.",
       "unsupported": "The EU responsible person's email contains unsupported characters."
+    },
+    "buyer": {
+      "format": "Enter an email address like name@example.com.",
+      "tooLong": "That email address is too long.",
+      "unsupported": "That email address contains unsupported characters."
     }
   },
   "emailQuality": {
@@ -293,7 +359,8 @@
     "notificationRecipient": "A notification recipient is not valid.",
     "factor": "That authenticator is not valid.",
     "reportTarget": "That item is not valid.",
-    "moderationDecision": "That decision is not valid."
+    "moderationDecision": "That decision is not valid.",
+    "checkoutAttempt": "This checkout has expired. Reload the page and try again."
   },
   "handle": {
     "username": "A username must be 3 to 30 characters, using only letters, numbers and underscores."
@@ -323,12 +390,26 @@
       "whole": "The maximum per order must be a whole number.",
       "tooSmall": "The maximum per order must be {minimum} or more.",
       "tooBig": "The maximum per order must be {maximum} or fewer."
+    },
+    "shippingRate": {
+      "whole": "A shipping rate must be a whole number of cents.",
+      "tooSmall": "A shipping rate cannot be negative.",
+      "tooBig": "A shipping rate cannot exceed {maximum} cents."
+    },
+    "freeOverCents": {
+      "whole": "A free-shipping threshold must be a whole number of cents.",
+      "tooSmall": "A free-shipping threshold cannot be negative.",
+      "tooBig": "A free-shipping threshold cannot exceed {maximum} cents."
     }
   },
   "list": {
     "domains": {
       "tooMany": "List up to {maximum} domains.",
       "duplicate": "Each entry in domains can only be listed once."
+    },
+    "destinationCountries": {
+      "tooMany": "A destination can cover at most {maximum} countries.",
+      "duplicate": "Each country can only appear once per destination."
     }
   },
   "settings": {

@@ -1,7 +1,8 @@
 {
   "checkForm": "Controleer het formulier en probeer het opnieuw.",
   "generic": {
-    "invalid": "Controleer het formulier en probeer het opnieuw."
+    "invalid": "Controleer het formulier en probeer het opnieuw.",
+    "sellerProse": "Hier mogen geen links, e-mailadressen of bankgegevens staan. Kopers betalen via het afrekenproces en je contactgegevens staan al op de pagina."
   },
   "text": {
     "productTitle": {
@@ -240,6 +241,66 @@
       "required": "Vertel ons waarom in minstens {minimum} tekens.",
       "tooLong": "Houd je bezwaar beperkt tot {maximum} tekens.",
       "unsupported": "Je bezwaar bevat niet-ondersteunde tekens."
+    },
+    "checkoutHeadline": {
+      "required": "De afrekenheadline is verplicht.",
+      "tooLong": "De afrekenheadline mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "De afrekenheadline bevat niet-ondersteunde tekens."
+    },
+    "checkoutNote": {
+      "required": "De notitie aan kopers is verplicht.",
+      "tooLong": "De notitie aan kopers mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "De notitie aan kopers bevat niet-ondersteunde tekens."
+    },
+    "thanksHeadline": {
+      "required": "De bedankheadline is verplicht.",
+      "tooLong": "De bedankheadline mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "De bedankheadline bevat niet-ondersteunde tekens."
+    },
+    "thanksMessage": {
+      "required": "Het bedankbericht is verplicht.",
+      "tooLong": "Het bedankbericht mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "Het bedankbericht bevat niet-ondersteunde tekens."
+    },
+    "giftMessage": {
+      "required": "Schrijf een cadeauboodschap of schakel deze uit.",
+      "tooLong": "De cadeauboodschap mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "De cadeauboodschap bevat niet-ondersteunde tekens."
+    },
+    "buyerName": {
+      "required": "Vul je volledige naam in.",
+      "tooLong": "Je naam mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "Je naam bevat niet-ondersteunde tekens."
+    },
+    "addressLine1": {
+      "required": "Vul je adres in.",
+      "tooLong": "Het adres mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "Het adres bevat niet-ondersteunde tekens."
+    },
+    "addressLine2": {
+      "required": "Vul de tweede adresregel in.",
+      "tooLong": "De tweede adresregel mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "De tweede adresregel bevat niet-ondersteunde tekens."
+    },
+    "city": {
+      "required": "Vul je stad of gemeente in.",
+      "tooLong": "De stad of gemeente mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "De stad of gemeente bevat niet-ondersteunde tekens."
+    },
+    "region": {
+      "required": "Vul je provincie of regio in.",
+      "tooLong": "De provincie of regio mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "De provincie of regio bevat niet-ondersteunde tekens."
+    },
+    "postalCode": {
+      "required": "Vul je postcode in.",
+      "tooLong": "De postcode mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "De postcode bevat niet-ondersteunde tekens."
+    },
+    "orderReference": {
+      "required": "Voer je bestelnummer in.",
+      "tooLong": "Dat bestelnummer is te lang.",
+      "unsupported": "Dat bestelnummer bevat niet-ondersteunde tekens."
     }
   },
   "email": {
@@ -267,6 +328,11 @@
       "format": "Het e-mailadres van de verantwoordelijke persoon in de EU lijkt geen geldig e-mailadres te zijn.",
       "tooLong": "Het e-mailadres van de verantwoordelijke persoon in de EU is te lang.",
       "unsupported": "Het e-mailadres van de verantwoordelijke persoon in de EU bevat niet-ondersteunde tekens."
+    },
+    "buyer": {
+      "format": "Vul een e-mailadres in zoals naam@voorbeeld.nl.",
+      "tooLong": "Dat e-mailadres is te lang.",
+      "unsupported": "Dat e-mailadres bevat niet-ondersteunde tekens."
     }
   },
   "emailQuality": {
@@ -293,7 +359,8 @@
     "notificationRecipient": "Een ontvanger van de melding is niet geldig.",
     "factor": "Die authenticator is niet geldig.",
     "reportTarget": "Dat item is niet geldig.",
-    "moderationDecision": "Die beslissing is niet geldig."
+    "moderationDecision": "Die beslissing is niet geldig.",
+    "checkoutAttempt": "Deze afrekenpoging is verlopen. Laad de pagina opnieuw en probeer het opnieuw."
   },
   "handle": {
     "username": "Een gebruikersnaam moet 3 tot 30 tekens lang zijn en mag alleen letters, cijfers en underscores bevatten."
@@ -323,12 +390,26 @@
       "whole": "Het maximum per bestelling moet een heel getal zijn.",
       "tooSmall": "Het maximum per bestelling moet {minimum} of meer zijn.",
       "tooBig": "Het maximum per bestelling moet {maximum} of minder zijn."
+    },
+    "shippingRate": {
+      "whole": "Een verzendtarief moet een geheel aantal centen zijn.",
+      "tooSmall": "Een verzendtarief kan niet negatief zijn.",
+      "tooBig": "Een verzendtarief mag {maximum} cent niet overschrijden."
+    },
+    "freeOverCents": {
+      "whole": "Een drempelwaarde voor gratis verzending moet een geheel aantal centen zijn.",
+      "tooSmall": "Een drempelwaarde voor gratis verzending kan niet negatief zijn.",
+      "tooBig": "Een drempelwaarde voor gratis verzending mag {maximum} cent niet overschrijden."
     }
   },
   "list": {
     "domains": {
       "tooMany": "Vermeld maximaal {maximum} domeinen.",
       "duplicate": "Elke vermelding bij domeinen mag maar één keer voorkomen."
+    },
+    "destinationCountries": {
+      "tooMany": "Een bestemming kan maximaal {maximum} landen omvatten.",
+      "duplicate": "Elk land kan slechts eenmaal per bestemming voorkomen."
     }
   },
   "settings": {

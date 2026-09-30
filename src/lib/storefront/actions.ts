@@ -35,6 +35,11 @@ import {
 } from "@/lib/errors";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { publishBlockedError } from "@/lib/settings/seller-identity";
+import {
+  planLimitError,
+  planLimitErrorFromTrigger,
+  planLimitKeyOf,
+} from "@/lib/billing/limits";
 import { firstIssue } from "@/lib/validation/messages";
 import { msg } from "@/i18n/types";
 import {
@@ -99,6 +104,11 @@ export async function createStorefront(
   if (!(await rateLimit("storefront_write", RATE_LIMITS.storefrontWrite))) {
     return failure(rateLimited("createStorefronts"));
   }
+  // The store's plan caps how many storefronts it holds (lib/billing/limits.ts).
+  // Checked before anything is written; the database trigger holds the same
+  // line for a create that races past this check.
+  const overLimit = await planLimitError(account.accountId, "storefronts", account.userId);
+  if (overLimit) return failure(overLimit);
 
   const payload: { name?: unknown; brief?: unknown } =
     typeof input === "object" && input !== null
@@ -174,6 +184,9 @@ export async function createStorefront(
     .single();
 
   if (error || !row) {
+    if (planLimitKeyOf(error)) {
+      return failure(await planLimitErrorFromTrigger(account.accountId, "storefronts"));
+    }
     console.error("[storefront] create failed", error);
     return failure(serverError("createStorefront"));
   }
@@ -261,6 +274,10 @@ export async function saveStorefront(
     // That separation is the point: a storefront save can no longer touch the
     // terms every OTHER storefront is also selling under.
     ...(parsed.data.productPage ? { productPage: parsed.data.productPage } : {}),
+    // The checkout's design, on the same terms as the product page: bounded by
+    // the schema and persisted only when sent. The designer sends it whenever
+    // one was stored or the seller moved it off the defaults.
+    ...(parsed.data.checkoutPage ? { checkoutPage: parsed.data.checkoutPage } : {}),
   };
 
   // Uploaded assets (image background, custom font): the config stores only the

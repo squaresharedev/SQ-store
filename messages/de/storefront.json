@@ -94,7 +94,8 @@
       "typography": "Typografie",
       "cards": "Produktkacheln",
       "soldOut": "Ausverkauft",
-      "productPage": "Produktseite"
+      "productPage": "Produktseite",
+      "checkoutPage": "Kasse"
     },
     "subtitle": {
       "theme": "Schaufenster / Theme",
@@ -102,7 +103,8 @@
       "typography": "Schaufenster / Typografie",
       "cards": "Schaufenster / Produktkacheln",
       "soldOut": "Schaufenster / Ausverkauft",
-      "productPage": "Schaufenster / Produktseite"
+      "productPage": "Schaufenster / Produktseite",
+      "checkoutPage": "Schaufenster / Kasse"
     },
     "labels": {
       "looks": "Schaufenster-Look",
@@ -135,7 +137,16 @@
       "productPageAvailability": "Verfügbarkeit auf der Seite",
       "productPageByline": "„Verkauft von“-Zeile",
       "shippingReturns": "Versand- und Rückgaberichtlinie",
-      "sellerDetails": "Verkäuferangaben"
+      "sellerDetails": "Verkäuferangaben",
+      "checkoutLayout": "Kassen-Layout",
+      "checkoutBackground": "Kassen-Farbe",
+      "checkoutHeadline": "Kassen-Überschrift",
+      "checkoutNote": "Notiz für Käufer",
+      "checkoutGift": "Geschenknotizen",
+      "thankYouMessage": "Dankesnachricht",
+      "thankYouCelebration": "Dankes-Effekt",
+      "checkoutTexture": "Kassen-Textur",
+      "checkoutPayButton": "Bezahlknopf"
     }
   },
   "editorSearch": {
@@ -151,7 +162,8 @@
       "products": "Produkt hinzufügen",
       "shapes": "Formen",
       "uploads": "Uploads"
-    }
+    },
+    "openCheckout": "Kasse öffnen"
   },
   "list": {
     "showingOf": "Es werden {count} von {total} Schaufenstern angezeigt",
@@ -329,7 +341,12 @@
     "productPageLabel": " · Produktseite",
     "closeAriaLabel": "Produktseite für {title} schließen",
     "desktopSize": "Desktop-Größe",
-    "mobileSize": "Mobile Größe"
+    "mobileSize": "Mobile Größe",
+    "checkoutLabel": " · Kasse",
+    "thanksLabel": " · Danke",
+    "openCheckout": "Kasse",
+    "openCheckoutAriaLabel": "Kasse für {title} öffnen",
+    "closeCheckoutAriaLabel": "Kasse schließen"
   },
   "customFont": {},
   "metadata": {
@@ -949,7 +966,12 @@
     "zoomInTip": "Hineinzoomen (Ctrl +)",
     "designSettings": "Design-Einstellungen",
     "page": "Seite",
-    "moreTools": "Weitere Werkzeuge"
+    "moreTools": "Weitere Werkzeuge",
+    "checkout": "Kasse",
+    "showCheckout": "Kasse anzeigen",
+    "closeCheckout": "Kasse schließen",
+    "showCheckoutFull": "Kasse und Dankes-Seite anzeigen",
+    "closeCheckoutFull": "Kasse und Dankes-Seite schließen"
   },
   "selectionToolbar": {
     "toolsFor": "Werkzeuge für {name}",
@@ -978,7 +1000,11 @@
     "duplicateNamed": "{name} duplizieren",
     "duplicateN": "{count, plural, one {# Element duplizieren} other {# Elemente duplizieren}}",
     "removeFrom": "{name} aus dem Raster entfernen",
-    "removeN": "{count, plural, one {# Element aus dem Raster entfernen} other {# Elemente aus dem Raster entfernen}}"
+    "removeN": "{count, plural, one {# Element aus dem Raster entfernen} other {# Elemente aus dem Raster entfernen}}",
+    "openCheckout": "Kasse öffnen",
+    "hideCheckout": "Kasse ausblenden",
+    "openCheckoutFor": "Kasse für {name} anzeigen",
+    "closeCheckoutFor": "Kasse für {name} ausblenden"
   },
   "canvas": {
     "gridLabel": "Schaufenster-Arbeitsfläche",
@@ -1293,5 +1319,60 @@
         }
       }
     }
+  },
+  "checkoutPage": {
+    "unwired": "Käufer gelangen zur Kasse, sobald du Stripe verbindest. Du kannst sie jetzt schon gestalten.",
+    "charsLeft": "{count, plural, one {# Zeichen übrig} other {# Zeichen übrig}}",
+    "layout": {
+      "title": "Layout",
+      "arrangement": {
+        "label": "Anordnung",
+        "showcase": "Showcase",
+        "compact": "Kompakt"
+      },
+      "pageColor": "Kassen-Farbe",
+      "followsProductPage": "Produktseiten-Hintergrund",
+      "useProductPage": "Produktseiten-Hintergrund übernehmen",
+      "button": "Der Bezahlknopf entspricht dem Kaufknopf auf deiner Produktseite.",
+      "styleButton": "Button gestalten",
+      "payButton": "Bezahlknopf",
+      "payButtonInfoLabel": "Über den Bezahlknopf",
+      "texture": {
+        "label": "Textur",
+        "none": "Glatt",
+        "paper": "Papier",
+        "dots": "Punkte",
+        "grid": "Raster",
+        "lines": "Linien",
+        "linen": "Leinen"
+      }
+    },
+    "message": {
+      "title": "Texte",
+      "headline": "Überschrift",
+      "note": "Notiz für Käufer",
+      "notePlaceholder": "Ein paar Worte von dir, neben der Bestellung angezeigt",
+      "gift": {
+        "label": "Geschenknotizen",
+        "infoLabel": "Was Geschenknotizen bewirken",
+        "info": "Käufer von Waren, die du versendest, können eine kurze Notiz hinzufügen, die ins Paket kommt. Du siehst sie auf der Bestellung."
+      }
+    },
+    "thanks": {
+      "title": "Dankes-Seite",
+      "headline": "Überschrift",
+      "sampleName": "Lukas",
+      "message": "Nachricht",
+      "messagePlaceholder": "Was als Nächstes passiert, in deinen eigenen Worten",
+      "celebrate": {
+        "label": "Effekt",
+        "confetti": "Konfetti",
+        "rays": "Licht",
+        "none": "Kein",
+        "play": "Abspielen"
+      }
+    },
+    "unwiredBadge": "Noch nicht live",
+    "unwiredInfoLabel": "Wann Käufer zur Kasse gelangen"
   }
 }

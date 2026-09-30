@@ -24,3 +24,6 @@ export const STEP_SWAP = { duration: DURATION.base, ease: EASE_STANDARD };
 
 /** Something small landing with a little overshoot: a badge, a status. */
 export const POP = { type: "spring", stiffness: 420, damping: 18 } as const;
+
+/** The scale a button sinks to while it is held down; POP brings it back with a little bounce. */
+export const PRESS_SCALE = 0.95;

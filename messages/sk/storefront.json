@@ -94,7 +94,8 @@
       "typography": "Typografia",
       "cards": "Produktové dlaždice",
       "soldOut": "Vypredané",
-      "productPage": "Produktová stránka"
+      "productPage": "Produktová stránka",
+      "checkoutPage": "Pokladňa"
     },
     "subtitle": {
       "theme": "Výklad / Motív",
@@ -102,7 +103,8 @@
       "typography": "Výklad / Typografia",
       "cards": "Výklad / Produktové dlaždice",
       "soldOut": "Výklad / Vypredané",
-      "productPage": "Výklad / Produktová stránka"
+      "productPage": "Výklad / Produktová stránka",
+      "checkoutPage": "Výklad / Pokladňa"
     },
     "labels": {
       "looks": "Vzhľad výkladu",
@@ -135,7 +137,16 @@
       "productPageAvailability": "Dostupnosť na stránke",
       "productPageByline": "Riadok „Predáva“",
       "shippingReturns": "Podmienky dopravy a vrátenia tovaru",
-      "sellerDetails": "Údaje predajcu"
+      "sellerDetails": "Údaje predajcu",
+      "checkoutLayout": "Rozloženie pokladne",
+      "checkoutBackground": "Farba pokladne",
+      "checkoutHeadline": "Nadpis pokladne",
+      "checkoutNote": "Poznámka pre kupujúcich",
+      "checkoutGift": "Darčekové správy",
+      "thankYouMessage": "Správa s poďakovaním",
+      "thankYouCelebration": "Oslava poďakovania",
+      "checkoutTexture": "Textúra pokladne",
+      "checkoutPayButton": "Tlačidlo platby"
     }
   },
   "editorSearch": {
@@ -151,7 +162,8 @@
       "products": "Pridať produkt",
       "shapes": "Tvary",
       "uploads": "Nahrané obrázky"
-    }
+    },
+    "openCheckout": "Otvoriť pokladňu"
   },
   "list": {
     "showingOf": "Zobrazuje sa {count} z {total} výkladov",
@@ -329,7 +341,12 @@
     "productPageLabel": " · Produktová stránka",
     "closeAriaLabel": "Zavrieť produktovú stránku pre {title}",
     "desktopSize": "Veľkosť pre desktop",
-    "mobileSize": "Veľkosť pre mobil"
+    "mobileSize": "Veľkosť pre mobil",
+    "checkoutLabel": " · Pokladňa",
+    "thanksLabel": " · Ďakujeme",
+    "openCheckout": "Pokladňa",
+    "openCheckoutAriaLabel": "Otvoriť pokladňu pre {title}",
+    "closeCheckoutAriaLabel": "Zavrieť pokladňu"
   },
   "customFont": {},
   "metadata": {
@@ -949,7 +966,12 @@
     "zoomInTip": "Priblížiť (Ctrl +)",
     "designSettings": "Nastavenia dizajnu",
     "page": "Stránka",
-    "moreTools": "Ďalšie nástroje"
+    "moreTools": "Ďalšie nástroje",
+    "checkout": "Pokladňa",
+    "showCheckout": "Zobraziť pokladňu",
+    "closeCheckout": "Zavrieť pokladňu",
+    "showCheckoutFull": "Zobraziť pokladňu a stránku s poďakovaním",
+    "closeCheckoutFull": "Zavrieť pokladňu a stránku s poďakovaním"
   },
   "selectionToolbar": {
     "toolsFor": "Nástroje pre {name}",
@@ -978,7 +1000,11 @@
     "duplicateNamed": "Duplikovať: {name}",
     "duplicateN": "Duplikovať {count, plural, one {# prvok} few {# prvky} many {# prvku} other {# prvkov}}",
     "removeFrom": "Odobrať z mriežky: {name}",
-    "removeN": "Odobrať {count, plural, one {# prvok} few {# prvky} many {# prvku} other {# prvkov}} z mriežky"
+    "removeN": "Odobrať {count, plural, one {# prvok} few {# prvky} many {# prvku} other {# prvkov}} z mriežky",
+    "openCheckout": "Otvoriť pokladňu",
+    "hideCheckout": "Skryť pokladňu",
+    "openCheckoutFor": "Zobraziť pokladňu: {name}",
+    "closeCheckoutFor": "Skryť pokladňu: {name}"
   },
   "canvas": {
     "gridLabel": "Plátno výkladu",
@@ -1293,5 +1319,60 @@
         }
       }
     }
+  },
+  "checkoutPage": {
+    "unwired": "Kupujúci sa dostanú do pokladne po prepojení so Stripe. Môžete ju teraz navrhnúť.",
+    "charsLeft": "{count, plural, one {# znak zostáva} few {# znaky zostávajú} other {# znakov zostáva}}",
+    "layout": {
+      "title": "Rozloženie",
+      "arrangement": {
+        "label": "Usporiadanie",
+        "showcase": "Výkladný",
+        "compact": "Kompaktný"
+      },
+      "pageColor": "Farba pokladne",
+      "followsProductPage": "Pozadie produktovej stránky",
+      "useProductPage": "Použiť pozadie produktovej stránky",
+      "button": "Tlačidlo platby zodpovedá tlačidlu kúpiť na vašej produktovej stránke.",
+      "styleButton": "Upraviť štýl tlačidla",
+      "payButton": "Tlačidlo platby",
+      "payButtonInfoLabel": "O tlačidle platby",
+      "texture": {
+        "label": "Textúra",
+        "none": "Hladká",
+        "paper": "Papier",
+        "dots": "Bodky",
+        "grid": "Mriežka",
+        "lines": "Čiary",
+        "linen": "Ľan"
+      }
+    },
+    "message": {
+      "title": "Text",
+      "headline": "Nadpis",
+      "note": "Poznámka pre kupujúcich",
+      "notePlaceholder": "Pár slov od vás, zobrazených vedľa objednávky",
+      "gift": {
+        "label": "Darčekové správy",
+        "infoLabel": "Na čo slúžia darčekové správy",
+        "info": "Kupujúci fyzických produktov môžu pridať krátku poznámku do balíka. Uvidíte ju na objednávke."
+      }
+    },
+    "thanks": {
+      "title": "Stránka s poďakovaním",
+      "headline": "Nadpis",
+      "sampleName": "Jana",
+      "message": "Správa",
+      "messagePlaceholder": "Čo bude ďalej, vlastnými slovami",
+      "celebrate": {
+        "label": "Oslava",
+        "confetti": "Konfety",
+        "rays": "Svetlo",
+        "none": "Žiadna",
+        "play": "Prehrať"
+      }
+    },
+    "unwiredBadge": "Zatiaľ nie je aktívna",
+    "unwiredInfoLabel": "Kedy sa kupujúci dostanú do pokladne"
   }
 }

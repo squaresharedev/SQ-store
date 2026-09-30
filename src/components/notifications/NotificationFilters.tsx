@@ -3,6 +3,7 @@
 import {
   CreditCard,
   Flag,
+  Gem,
   Info,
   ListFilter,
   Package,
@@ -28,6 +29,7 @@ const TYPE_ICON: Record<NotificationType, { icon: LucideIcon; tone?: string }> =
   system: { icon: Info, tone: "text-muted-foreground" },
   security: { icon: ShieldAlert, tone: "text-destructive" },
   policy: { icon: Flag, tone: "text-destructive" },
+  billing: { icon: Gem },
 };
 
 /**

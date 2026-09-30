@@ -35,6 +35,7 @@ import {
   type ActionState,
 } from "@/lib/errors";
 import { msg } from "@/i18n/types";
+import { endPlanForDeletion } from "@/lib/billing/lifecycle";
 import type { Tables, TablesUpdate } from "@/types";
 import type { z } from "zod";
 
@@ -616,6 +617,11 @@ export async function requestAccountDeletion(
   console.warn(
     `[settings] account deletion REQUESTED user=${user.id} at=${requestedAt}`,
   );
+  // A paid plan stops renewing: it runs to the end of the period already paid
+  // for, then the account is on Free until it is deleted. Best-effort by
+  // design (lib/billing/lifecycle.ts logs a failure for support): the request
+  // above is what the owner asked for, and it stands either way.
+  await endPlanForDeletion(user.id);
   revalidatePath("/settings/danger");
   return succeeded(msg("Settings.danger.success.deletionRequested"));
 }

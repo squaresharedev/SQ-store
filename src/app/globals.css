@@ -1416,3 +1416,6 @@ textarea {
     display: none;
   }
 }
+
+/* The checkout thank-you's confetti is drawn on a canvas now
+   (components/checkout/confetti.ts), so it has no CSS here. */

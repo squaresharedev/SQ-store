@@ -32,12 +32,19 @@ export function QuantityPicker({
   currency,
   radius,
   ink,
+  inline = false,
 }: {
   /** Unit price, for the line total under the control. */
   priceCents: number;
   currency: Currency;
   radius: number;
   ink: string;
+  /**
+   * One row, label and control side by side, and no line total: for the
+   * checkout's summary, where the subtotal printed right below already IS the
+   * line total and a second copy of it is a sum the buyer has to check twice.
+   */
+  inline?: boolean;
 }) {
   // Minted rather than spelled out: the editor can have a product page beside
   // other surfaces, and a duplicated id would point the label at the wrong
@@ -52,11 +59,11 @@ export function QuantityPicker({
 
   return (
     <div
-      className="flex flex-col gap-2"
+      className={inline ? "flex items-center justify-between gap-4" : "flex flex-col gap-2"}
       data-product-quantity={quantity}
       data-quantity-limit={limit}
     >
-      <label className="text-sm opacity-70" htmlFor={controlId}>
+      <label className={inline ? "text-sm opacity-80" : "text-sm opacity-70"} htmlFor={controlId}>
         {t("label")}
       </label>
       {/* The same control as an option group's dropdown, from the same file:
@@ -78,7 +85,7 @@ export function QuantityPicker({
       {/* Only once there is arithmetic to show. At one unit the total is the
           price already printed above it, and repeating it reads as a second,
           different number. */}
-      {quantity > 1 && (
+      {quantity > 1 && !inline && (
         <p className="text-sm opacity-70" data-product-line-total={total}>
           {quantity} × {formatCents(priceCents, currency, locale)} ={" "}
           <span className="font-medium opacity-100">{formatCents(total, currency, locale)}</span>
