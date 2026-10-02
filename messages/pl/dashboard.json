@@ -28,7 +28,8 @@
   },
   "shell": {
     "accountFallback": "Konto",
-    "anotherStore": "inny sklep"
+    "anotherStore": "inny sklep",
+    "skipToContent": "Przejdź do głównej treści"
   },
   "overview": {
     "title": "Przegląd",
@@ -120,6 +121,11 @@
     "toShip": {
       "description": "Kupujący czekają na przesyłki. Zapakuj i oznacz jako wysłane.",
       "action": "Wyślij zamówienia"
+    },
+    "checkoutRates": {
+      "label": "Ustaw stawki dostawy",
+      "description": "Kupujący nie mogą sfinalizować zakupu fizycznego produktu, dopóki kierunek nie ma zarówno stawki, jak i kraju.",
+      "action": "Ustaw stawki"
     }
   }
 }

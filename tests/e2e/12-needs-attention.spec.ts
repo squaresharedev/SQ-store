@@ -99,7 +99,7 @@ test.describe("needs attention links", () => {
     ]);
     await gotoApp(page, "/dashboard");
     await expect(page.getByText(/2 orders to review/i)).toBeVisible();
-    url = await followAction(page, /review orders/i, /\/orders$/);
+    url = await followAction(page, /review orders/i, /\/orders(\?view=[a-z-]+)?$/);
     expect(url.pathname).toBe("/orders");
     expect(url.searchParams.get("status")).toBeNull();
     await expect(page.getByText("Disputed one").first()).toBeVisible();

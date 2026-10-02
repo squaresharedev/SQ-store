@@ -28,7 +28,8 @@
   },
   "shell": {
     "accountFallback": "Account",
-    "anotherStore": "un altro negozio"
+    "anotherStore": "un altro negozio",
+    "skipToContent": "Vai al contenuto principale"
   },
   "overview": {
     "title": "Panoramica",
@@ -120,6 +121,11 @@
     "toShip": {
       "description": "Gli acquirenti li stanno aspettando. Imballali e segnali come spediti.",
       "action": "Spedisci gli ordini"
+    },
+    "checkoutRates": {
+      "label": "Imposta i prezzi di consegna",
+      "description": "Gli acquirenti non possono completare l’acquisto di un prodotto fisico finché una destinazione non ha sia una tariffa sia un paese.",
+      "action": "Imposta prezzi"
     }
   }
 }

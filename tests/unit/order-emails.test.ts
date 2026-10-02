@@ -9,7 +9,7 @@ vi.mock("@/lib/email/send", () => ({
   sendEmail: (...args: unknown[]) => sendEmailMock(...args),
 }));
 
-import { sendNewOrderEmail, sendShippedEmail } from "@/lib/orders/emails";
+import { sendNewOrderEmail, sendShippedEmail, sendWithdrawalNotice } from "@/lib/orders/emails";
 import type { OutboundEmail } from "@/lib/email/send";
 
 const ORDER_ID = "aaaaaaaa-1111-4111-8111-111111111111";
@@ -56,9 +56,23 @@ describe("the seller's new-order email", () => {
     expect(mail.text).toContain("Phone: +353 87 123 4567");
     expect(mail.text).toContain("Buyer: aoife.byrne@example.test");
     expect(mail.text).toContain("€42.00");
-    expect(mail.text).toContain(`https://store.example/orders?order=${ORDER_ID}`);
     // Mail to the seller is ours, not sent on anyone's behalf.
     expect(mail.replyTo).toBeUndefined();
+  });
+
+  it("leads with the order number the buyer will quote", async () => {
+    await sendNewOrderEmail("seller@example.test", "en", order);
+    expect(sent().text).toContain("Order number: AAAAAAAA");
+  });
+
+  it("links through sign-in, so the order opens whether or not they are signed in", async () => {
+    // A link straight to /orders?order=… lost its target when the seller was
+    // signed out: the dashboard layout sent them to sign in with no way back.
+    // Through /login?next=… it works signed out, signed in and with 2FA.
+    await sendNewOrderEmail("seller@example.test", "en", order);
+    const next = encodeURIComponent(`/orders?order=${ORDER_ID}`);
+    expect(sent().text).toContain(`https://store.example/login?next=${next}`);
+    expect(sent().text).not.toContain(`https://store.example/orders?order=`);
   });
 
   it("says so when the address is missing, instead of printing half a label", async () => {
@@ -88,6 +102,23 @@ describe("the seller's new-order email", () => {
   });
 });
 
+describe("the seller's withdrawal notice", () => {
+  it("links through sign-in too, and replies reach the buyer", async () => {
+    await sendWithdrawalNotice("seller@example.test", "en", {
+      orderId: ORDER_ID,
+      number: "AAAAAAAA",
+      productTitle: "Blue mug",
+      requestedAt: new Date("2026-09-01T10:00:00Z"),
+      store: { name: "Harbour Pottery", contactEmail: null },
+      buyerEmail: "aoife.byrne@example.test",
+      buyerName: "Aoife Byrne",
+    });
+    const next = encodeURIComponent(`/orders?order=${ORDER_ID}`);
+    expect(sent().text).toContain(`https://store.example/login?next=${next}`);
+    expect(sent().replyTo).toBe("aoife.byrne@example.test");
+  });
+});
+
 describe("the buyer's shipped email", () => {
   const shipped = {
     kind: "shipped" as const,
@@ -95,6 +126,8 @@ describe("the buyer's shipped email", () => {
     quantity: 1,
     selection: [],
     trackingNumber: "RR123456789IE",
+    carrier: null,
+    orderUrl: null,
     shipTo: ADDRESS,
     store: { name: "Harbour Pottery", contactEmail: "hello@harbour.example" },
   };
@@ -115,6 +148,22 @@ describe("the buyer's shipped email", () => {
     await sendShippedEmail("aoife.byrne@example.test", "en", { ...shipped, kind: "tracking" });
     expect(sent().subject).toBe("Tracking for your order from Harbour Pottery");
     expect(sent().text).toContain("Harbour Pottery has added a tracking number to your order.");
+  });
+
+  it("names the carrier, and links only to the buyer's own order page", async () => {
+    const orderUrl = "https://store.example/s/sf/order/ref";
+    await sendShippedEmail("aoife.byrne@example.test", "en", { ...shipped, carrier: "an-post", orderUrl });
+    const { text } = sent();
+    expect(text).toContain("Tracking number: RR123456789IE (An Post)");
+    expect(text).toContain(`Follow your order here: ${orderUrl}`);
+    // The carrier's site is linked from the order page, never from mail we send.
+    expect(text).not.toContain("anpost.com");
+    expect(text.split("://")).toHaveLength(2);
+  });
+
+  it("carries no link at all when there is no order page to send the buyer to", async () => {
+    await sendShippedEmail("aoife.byrne@example.test", "en", shipped);
+    expect(sent().text).not.toContain("://");
   });
 
   it("does not offer a reply the seller cannot receive", async () => {

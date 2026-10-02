@@ -195,6 +195,7 @@
       "shipped": "Unterwegs",
       "shippedDetail": "Versandt am {date}",
       "tracking": "Tracking-Nummer {number}",
+      "track": "Bei {carrier} verfolgen",
       "notYet": "Du erhältst eine E-Mail, wenn es versandt wurde.",
       "ready": "Bereit zum Herunterladen",
       "readyDetail": "Deine Datei ist unten bereit, und der Link ist auch in deiner E-Mail."
@@ -262,6 +263,8 @@
       "region": "Bundesland oder Region",
       "postalCode": "Postleitzahl",
       "country": "Land",
+      "phone": "Telefon (optional)",
+      "phoneHint": "Nur für den Zusteller, falls er dich wegen der Lieferung erreichen muss.",
       "whyAsk": "Wozu wir das brauchen"
     },
     "gift": {
@@ -309,11 +312,11 @@
     },
     "pay": "Zahlungspflichtig bestellen ({amount})",
     "placing": "Bestellung wird aufgegeben...",
-    "unwired": "Der Checkout öffnet für Käufer, wenn du Stripe verbindest.",
     "errors": {
       "title": "Wir konnten deine Bestellung nicht aufgeben",
       "required": "Dies ist erforderlich.",
       "email": "Gib eine E-Mail-Adresse ein, z. B. name@beispiel.de.",
+      "phone": "Gib eine Telefonnummer in Ziffern ein, z. B. +49 151 23456789.",
       "fields": "Überprüfe die hervorgehobenen Felder.",
       "consent": "Setze das Häkchen, um zu bestätigen, dass du den Download sofort haben möchtest.",
       "sold_out": "Tut uns leid, das ist gerade ausverkauft. Es wurde nichts belastet.",

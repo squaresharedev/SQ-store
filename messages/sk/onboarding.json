@@ -201,7 +201,7 @@
       },
       "ordersSearch": {
         "title": "Nájdite objednávku",
-        "body": "Hľadajte podľa e-mailu kupujúceho. Objednávky sa tu objavia po otvorení pokladne Square Share."
+        "body": "Hľadajte v tomto zozname podľa e-mailu kupujúceho. Objednávku podľa čísla, mena, mesta alebo sledovacieho čísla nájdete cez vyhľadávanie v hornej časti stránky."
       },
       "ordersFilters": {
         "title": "Filtrujte a zoraďte",

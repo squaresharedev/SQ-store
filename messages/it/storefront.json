@@ -145,8 +145,9 @@
       "checkoutGift": "Messaggi regalo",
       "thankYouMessage": "Messaggio di ringraziamento",
       "thankYouCelebration": "Animazione di ringraziamento",
-      "checkoutTexture": "Texture checkout",
-      "checkoutPayButton": "Pulsante di pagamento"
+      "checkoutPayButton": "Pulsante di pagamento",
+      "productPagePhoto": "Foto della pagina prodotto",
+      "checkoutPhoto": "Foto del checkout e del ringraziamento"
     }
   },
   "editorSearch": {
@@ -790,6 +791,11 @@
       "nothingSet": "Ancora niente impostato. Finché non aggiungi i tuoi dati aziendali, gli acquirenti vedono solo la dicitura «Venduto da» sotto il titolo.",
       "editSettings": "Modifica in Impostazioni",
       "addDetails": "Aggiungi i tuoi dati aziendali"
+    },
+    "groups": {
+      "look": "Aspetto",
+      "style": "Stile",
+      "besidePrice": "Accanto al prezzo"
     }
   },
   "productBlock": {
@@ -1154,10 +1160,6 @@
         "speaker": {
           "title": "Speaker portatile",
           "description": "Impermeabile, con 12 ore di riproduzione con una carica."
-        },
-        "succulent": {
-          "title": "Succulenta da scrivania",
-          "description": "Una piccola haworthia in un vaso di ceramica. Va annaffiata circa una volta al mese."
         }
       }
     }
@@ -1321,7 +1323,6 @@
     }
   },
   "checkoutPage": {
-    "unwired": "Gli acquirenti arrivano al checkout una volta connesso Stripe. Puoi progettarlo adesso.",
     "charsLeft": "{count, plural, one {# carattere rimanente} other {# caratteri rimanenti}}",
     "layout": {
       "title": "Layout",
@@ -1336,16 +1337,7 @@
       "button": "Il pulsante di pagamento corrisponde al pulsante d'acquisto della pagina prodotto.",
       "styleButton": "Stile pulsante",
       "payButton": "Pulsante di pagamento",
-      "payButtonInfoLabel": "Informazioni sul pulsante di pagamento",
-      "texture": {
-        "label": "Texture",
-        "none": "Liscia",
-        "paper": "Carta",
-        "dots": "Pois",
-        "grid": "Griglia",
-        "lines": "Righe",
-        "linen": "Lino"
-      }
+      "payButtonInfoLabel": "Informazioni sul pulsante di pagamento"
     },
     "message": {
       "title": "Testo",
@@ -1365,14 +1357,15 @@
       "message": "Messaggio",
       "messagePlaceholder": "Cosa succede dopo, con le tue parole",
       "celebrate": {
-        "label": "Animazione",
         "confetti": "Coriandoli",
-        "rays": "Luce",
-        "none": "Nessuna",
         "play": "Riproduci"
       }
-    },
-    "unwiredBadge": "Non ancora attivo",
-    "unwiredInfoLabel": "Quando gli acquirenti arrivano al checkout"
+    }
+  },
+  "pagePhoto": {
+    "label": "Foto",
+    "infoLabel": "Come viene usata la foto",
+    "info": "Mostrata dietro la pagina e tinta con il colore della pagina, così il testo resta leggibile. Cambia il colore per schiarire o scurire la foto.",
+    "remove": "Rimuovi foto"
   }
 }

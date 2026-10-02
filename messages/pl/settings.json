@@ -175,7 +175,7 @@
     "prefs": {
       "sales": {
         "label": "Sprzedaż",
-        "blurb": "Wysyłaj e-mail za każdym razem, gdy coś się sprzeda. Ten rodzaj hałasu w skrzynce lubimy."
+        "blurb": "Wyślij mi e-mail, gdy coś się sprzeda, z informacją, co zapakować i dokąd wysłać."
       },
       "productUpdates": {
         "label": "Nowości w produkcie",
@@ -188,7 +188,8 @@
     },
     "success": {
       "notificationsSaved": "Zapisano preferencje."
-    }
+    },
+    "emailOff": "E-mail nie jest jeszcze włączony dla Square Share, więc nic poniżej nie zostanie wysłane. Nowe zamówienia nadal pojawiają się w sekcji Zamówienia i w twoich powiadomieniach."
   },
   "legal": {
     "cardTitle": "Umowa sprzedawcy, warunki i prywatność",
@@ -412,7 +413,8 @@
       "removeNamed": "Usuń kierunek {area}",
       "removeNumbered": "Usuń kierunek {number}",
       "add": "Dodaj kierunek",
-      "limitReached": "{max, plural, one {To wszystkie # kierunek. Usuń jeden, aby dodać kolejny.} few {To wszystkie # kierunki. Usuń jeden, aby dodać kolejny.} many {To wszystkie # kierunków. Usuń jeden, aby dodać kolejny.} other {To wszystkie # kierunku. Usuń jeden, aby dodać kolejny.}}"
+      "limitReached": "{max, plural, one {To wszystkie # kierunek. Usuń jeden, aby dodać kolejny.} few {To wszystkie # kierunki. Usuń jeden, aby dodać kolejny.} many {To wszystkie # kierunków. Usuń jeden, aby dodać kolejny.} other {To wszystkie # kierunku. Usuń jeden, aby dodać kolejny.}}",
+      "needsRate": "Kasa nie może użyć tego wiersza, dopóki nie ma zarówno stawki, jak i kraju. Kupujący nadal widzą go na stronie produktu."
     },
     "rates": {
       "title": "Stawki wysyłki",

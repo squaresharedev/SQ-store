@@ -608,6 +608,18 @@
     "storefronts": "{plan, select, free {Dein Free-Tarif} starter {Dein Starter-Tarif} pro {Dein Pro-Tarif} other {Dein aktueller Tarif}} enthält {cap, plural, one {# Schaufenster} other {# Schaufenster}}, und dein Shop nutzt sie alle.",
     "teamSeats": "{plan, select, free {Dein Free-Tarif} starter {Dein Starter-Tarif} pro {Dein Pro-Tarif} other {Dein aktueller Tarif}} enthält {cap, plural, one {# Platz} other {# Plätze}}, du eingeschlossen, und alle sind belegt.",
     "fix": "Wechsle für mehr zu einem höheren Tarif oder entferne, was du nicht mehr brauchst. Nichts, was du hast, ist betroffen.",
-    "action": "Tarife ansehen"
+    "action": "Tarife ansehen",
+    "products": "{plan, select, free {Dein Free-Tarif} starter {Dein Starter-Tarif} pro {Dein Pro-Tarif} other {Dein aktueller Tarif}} enthält {cap, plural, one {# Produkt} other {# Produkte}}, und dein Shop nutzt sie alle.",
+    "fixTop": "Entferne eines, das du nicht mehr brauchst, um ein weiteres hinzuzufügen. Nichts, was du hast, ist betroffen."
+  },
+  "ordersExport": {
+    "signIn": "Melde dich an, um deine Bestellungen zu exportieren.",
+    "permissionDenied": "Du hast keinen Zugriff auf die Bestellungen dieses Shops.",
+    "unavailable": "Deine Bestellungen können gerade nicht exportiert werden.",
+    "tryAgain": "Versuche es gleich noch einmal.",
+    "planRequired": "Der Export von Bestellungen gehört zu einem kostenpflichtigen Tarif.",
+    "planRequiredFix": "Wechsle auf der Seite Tarife zu einem höheren Tarif, um deine Bestellungen zu exportieren.",
+    "rateLimited": "Das sind viele Exporte in kurzer Zeit.",
+    "rateLimitedFix": "Warte ein paar Minuten und versuche es dann noch einmal."
   }
 }

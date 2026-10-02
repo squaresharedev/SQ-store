@@ -197,5 +197,9 @@
       "byWeekday": "Visualizações de pagamento por dia da semana",
       "byStorefront": "Visualizações de pagamento por montra"
     }
+  },
+  "export": {
+    "button": "Descarregar relatório",
+    "lockedTitle": "Os relatórios de estatísticas estão incluídos no {plan}."
   }
 }

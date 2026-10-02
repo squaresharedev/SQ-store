@@ -100,7 +100,6 @@ describe("sample storefront", () => {
       "Smartwatch",
       "Wireless mouse",
       "Portable speaker",
-      "Desk succulent",
     ]);
     // Brand names are never translated.
     expect(SAMPLE_STOREFRONT_CONFIG.header?.name).toBe("Parallel Goods");

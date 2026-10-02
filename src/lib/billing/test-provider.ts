@@ -34,6 +34,17 @@ function assertEnabled(): void {
 /** The account id without dashes: Stripe-shaped ids are [A-Za-z0-9_]. */
 const compact = (ownerId: string) => ownerId.replace(/-/g, "");
 
+/**
+ * Where to send the browser "back from Stripe": the same path, on whatever
+ * origin the browser is already on. Real Stripe needs the absolute URL built
+ * from NEXT_PUBLIC_APP_URL; a stand-in that pretends to have been there must
+ * not bounce a second dev server (the e2e stack on :3100) to the first (:3000).
+ */
+const sameOrigin = (absoluteUrl: string) => {
+  const url = new URL(absoluteUrl);
+  return `${url.pathname}${url.search}`;
+};
+
 /** A pretend checkout session id that names its account, so the success URL
  *  can be resolved back to the customer without storing anything. */
 const TEST_SESSION_PREFIX = "cs_sstest_";
@@ -97,7 +108,7 @@ export const testBillingProvider: BillingProvider = {
       subscribedSnapshot(request.ownerId, request.plan, request.interval, new Date()),
       new Date(),
     );
-    return request.successUrl.replace(
+    return sameOrigin(request.successUrl).replace(
       "{CHECKOUT_SESSION_ID}",
       `${TEST_SESSION_PREFIX}${compact(request.ownerId)}`,
     );
@@ -116,7 +127,7 @@ export const testBillingProvider: BillingProvider = {
     } else if (request.flow.kind === "cancel") {
       await cancelAtPeriodEnd(request.ownerId, request.customerId, now);
     }
-    return request.returnUrl;
+    return sameOrigin(request.returnUrl);
   },
 
   async scheduleCancellation(ownerId: string, customerId: string): Promise<void> {

@@ -271,7 +271,7 @@ export function Sidebar({
         </div>
 
         <div className="space-y-1 border-t border-border px-3 py-4">
-          <PlanChip className={NAV_ITEM_CLASSES} onOpen={closeDrawer} />
+          <PlanChip className={NAV_ITEM_CLASSES} onNavigate={closeDrawer} />
           <NavLinkItem
             item={SETTINGS_LINK}
             pathname={pathname}

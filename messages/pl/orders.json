@@ -28,13 +28,15 @@
     "goToProducts": "Przejdź do produktów",
     "toShipTitle": "Nic do wysłania",
     "toShipHint": "Wszystko na bieżąco. Opłacone zamówienia czekające na wysłanie pojawiają się tutaj, od najstarszego.",
-    "seeAllOrders": "Zobacz wszystkie zamówienia"
+    "seeAllOrders": "Zobacz wszystkie zamówienia",
+    "hintOpen": "Gdy ktoś kupi w twoim sklepie, zamówienie pojawi się tutaj, a ty od razu dostaniesz powiadomienie."
   },
   "list": {
     "updating": "Aktualizowanie…",
     "summary": "{total, plural, one {{total} zamówienie} few {{total} zamówienia} many {{total} zamówień} other {{total} zamówienia}} · strona {page} z {totalPages}",
     "detailDialog": "Szczegóły zamówienia",
-    "closeDetail": "Zamknij szczegóły zamówienia"
+    "closeDetail": "Zamknij szczegóły zamówienia",
+    "withdrawn": "Odstąpiono"
   },
   "table": {
     "product": "Produkt",
@@ -117,6 +119,7 @@
     "shipping": "Wysyłka",
     "shippedOn": "Wysłano {date}",
     "trackingNumber": "Numer śledzenia",
+    "trackingCarrier": "Numer śledzenia ({carrier})",
     "copyTracking": {
       "copy": "Kopiuj numer śledzenia",
       "copied": "Skopiowano numer śledzenia",
@@ -128,7 +131,16 @@
       "refunded": "To zamówienie zostało zwrócone, więc nie ma czego wysyłać.",
       "disputed": "Ta płatność jest sporna. Rozwiąż spór przed wysłaniem."
     },
-    "platformFeeRate": "Opłata platformy ({rate})"
+    "platformFeeRate": "Opłata platformy ({rate})",
+    "orderNumberLine": "Zamówienie {number}",
+    "copyOrderNumber": {
+      "copy": "Kopiuj numer zamówienia",
+      "copied": "Skopiowano numer zamówienia",
+      "failed": "Nie udało się skopiować numeru zamówienia. Zaznacz i skopiuj ręcznie."
+    },
+    "emailBuyer": "Wyślij e-mail do kupującego",
+    "mailSubject": "Twoje zamówienie {number}",
+    "withdrawnShipWarning": "Kupujący odstąpił od tego zakupu. Wyślij zamówienie tylko wtedy, gdy uzgodniono to z kupującym."
   },
   "actions": {
     "refundNeedsStripe": "Zwroty wymagają połączenia ze Stripe.",
@@ -139,7 +151,8 @@
     "disputeInStripe": "Spory obsługujesz w panelu Stripe po połączeniu ze Stripe.",
     "disputeConfirm": "Otworzyć obsługę sporu dla tego zamówienia?",
     "handleDispute": "Obsłuż spór",
-    "none": "Dla tego zamówienia nie ma dostępnych żadnych akcji."
+    "none": "Dla tego zamówienia nie ma dostępnych żadnych akcji.",
+    "refundManual": "Nie możesz jeszcze zwracać środków w Square Share. Aby zwrócić środki za to zamówienie, oddaj kupującemu pieniądze samodzielnie i poinformuj go o tym."
   },
   "skeleton": {
     "loading": "wczytywanie zamówień"
@@ -163,6 +176,9 @@
     "markShipped": "Oznacz jako wysłane",
     "trackingLabel": "Numer śledzenia (opcjonalny)",
     "trackingPlaceholder": "np. RR123456789IE",
+    "carrierLabel": "Przewoźnik (opcjonalnie)",
+    "carrierOther": "Inny lub spoza listy",
+    "carrierHint": "Z numerem śledzenia i przewoźnikiem kupujący dostanie link do śledzenia przesyłki.",
     "tellsBuyer": "Wyślemy kupującemu e-mail, że przesyłka jest w drodze, z numerem śledzenia, jeśli go podasz.",
     "noBuyerEmail": "To zamówienie nie ma adresu e-mail kupującego, więc kupujący nie zostanie powiadomiony.",
     "confirm": "Oznacz jako wysłane",
@@ -172,7 +188,10 @@
     "editTracking": "Zmień numer śledzenia",
     "saveTracking": "Zapisz numer śledzenia",
     "trackingSaved": "Numer śledzenia zapisany. Wysłaliśmy go do kupującego.",
-    "trackingSavedNoEmail": "Numer śledzenia zapisany."
+    "trackingSavedNoEmail": "Numer śledzenia zapisany.",
+    "mailOff": "E-mail nie jest jeszcze włączony, więc kupujący nie zostanie powiadomiony. Powiadom go samodzielnie.",
+    "next": "Następne zamówienie do wysłania",
+    "caughtUp": "To było ostatnie. Wszystko na bieżąco."
   },
   "email": {
     "fromName": "{store} przez Square Share",
@@ -190,7 +209,8 @@
       "total": "Łączna kwota zamówienia: {amount}",
       "openShip": "Gdy wyślesz, oznacz zamówienie jako wysłane, a my powiadomimy kupującego: {url}",
       "openDigital": "Zobacz zamówienie: {url}",
-      "gift": "Wiadomość na prezent do dołączenia: {message}"
+      "gift": "Wiadomość na prezent do dołączenia: {message}",
+      "number": "Numer zamówienia: {number}"
     },
     "shipped": {
       "subject": "Twoje zamówienie z {store} jest w drodze",
@@ -198,6 +218,8 @@
       "intro": "Dobra wiadomość: {store} wysłało twoje zamówienie.",
       "introTracking": "{store} dodało numer śledzenia do twojego zamówienia.",
       "tracking": "Numer śledzenia: {tracking}",
+      "trackingCarrier": "Numer śledzenia: {tracking} ({carrier})",
+      "orderPage": "Śledź swoje zamówienie tutaj: {url}",
       "shipTo": "Zamówienie jedzie pod adres:",
       "questions": "Pytania dotyczące zamówienia? Odpowiedz na tego e-maila, aby skontaktować się z {store}.",
       "footer": "Wysłano przez Square Share w imieniu {store}."
@@ -239,5 +261,13 @@
       "intro": "Oto link do Twojej strony zamówienia {number} w {store}:",
       "ignore": "Jeśli tego nie żądałeś, możesz zignorować tego e-maila."
     }
+  },
+  "export": {
+    "button": "Eksportuj CSV",
+    "preparing": "Przygotowywanie pliku",
+    "failed": "Eksport nie został pobrany. Spróbuj ponownie za chwilę.",
+    "truncated": "W pliku jest {count, number} twoich najnowszych zamówień.",
+    "lockedTitle": "Eksport zamówień jest dostępny w planie {plan} i wyższych.",
+    "fileName": "zamowienia.csv"
   }
 }

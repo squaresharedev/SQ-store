@@ -40,13 +40,15 @@ import { Select, type SelectOption } from "@/components/ui/select";
 import { SliderField } from "@/components/ui/SliderField";
 import { Switch } from "@/components/ui/switch";
 import {
-  fieldBaseClass,
   ghostButtonClass,
   helpTextClass,
   infoTextClass,
-  labelClass,
+  panelCaptionClass,
+  panelSettingClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
+import { PagePhotoField } from "./PagePhotoField";
+import { PanelField, PanelGroup, PanelRow, PanelTextField } from "./PanelField";
 
 /**
  * The Product page group of the design panel: five sections, each a
@@ -86,7 +88,7 @@ const INHERIT_FONT = "";
  */
 function withoutKey(
   config: ProductPageConfig,
-  key: "backgroundColor" | "ctaColor" | "ctaRadius" | "ctaBorderWidth" | "ctaBorderColor",
+  key: "backgroundColor" | "backgroundImage" | "ctaColor" | "ctaRadius" | "ctaBorderWidth" | "ctaBorderColor",
 ): ProductPageConfig {
   const next = { ...config };
   delete next[key];
@@ -103,6 +105,8 @@ export function ProductPageSection({
   background,
   accent,
   cornerRadius,
+  pagePhotoUrls = {},
+  onPagePhotoUrl = () => {},
   summoned,
 }: {
   productPage: ProductPageConfig;
@@ -131,6 +135,9 @@ export function ProductPageSection({
    *  only things about the board it needs to be able to name. */
   accent: string;
   cornerRadius: number;
+  /** Display URLs of the page photos by object key, and a way to add one. */
+  pagePhotoUrls?: Record<string, string>;
+  onPagePhotoUrl?: (key: string, url: string) => void;
   /** Which section a search hit named, if any. */
   summoned: ProductPagePanelSection | null;
 }) {
@@ -192,104 +199,113 @@ export function ProductPageSection({
         collapsible
         summon={summoned === "layout"}
       >
-        <div className="space-y-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5">
-              <label htmlFor={`${fieldId}-enabled`} className={labelClass}>
-                {t("productPage.layout.showPage.label")}
-              </label>
-              <InfoTip label={t("productPage.layout.showPage.infoLabel")}>
-                {productPage.enabled
+        <div className="space-y-5">
+          {/* WHETHER THE PAGE EXISTS, and who may find it: yes-or-no lines,
+              first, because everything below only matters if the first one is
+              on. */}
+          <PanelGroup>
+            <PanelRow
+              label={t("productPage.layout.showPage.label")}
+              htmlFor={`${fieldId}-enabled`}
+              info={{
+                label: t("productPage.layout.showPage.infoLabel"),
+                content: productPage.enabled
                   ? t("productPage.layout.showPage.infoOn")
-                  : t("productPage.layout.showPage.infoOff")}
-              </InfoTip>
-            </div>
-            <Switch
-              id={`${fieldId}-enabled`}
-              checked={productPage.enabled}
-              onCheckedChange={(enabled) => onProductPageChange({ ...productPage, enabled })}
-            />
-          </div>
+                  : t("productPage.layout.showPage.infoOff"),
+              }}
+            >
+              <Switch
+                id={`${fieldId}-enabled`}
+                checked={productPage.enabled}
+                onCheckedChange={(enabled) => onProductPageChange({ ...productPage, enabled })}
+              />
+            </PanelRow>
+            <PanelRow
+              label={t("productPage.layout.indexing.label")}
+              htmlFor={`${fieldId}-index`}
+              info={{
+                label: t("productPage.layout.indexing.infoLabel"),
+                content: t("productPage.layout.indexing.infoContent"),
+              }}
+            >
+              <Switch
+                id={`${fieldId}-index`}
+                checked={productPage.allowIndexing}
+                onCheckedChange={(allowIndexing) => onProductPageChange({ ...productPage, allowIndexing })}
+              />
+            </PanelRow>
+          </PanelGroup>
 
-          {/* THE PAGE'S BACKDROP. A colour, not the storefront's three-kind
-              background: a page is read rather than looked at, so what a
-              seller wants here is a surface their specifications table is
-              legible on. The inherit dot is how they get the store's own
-              backdrop back, and it shows what following currently gets them
-              (an image backdrop reads as dark, which is the ink decision the
-              page has always made about photos). */}
-          <ColorPicker
-            label={t("productPage.layout.pageColor")}
-            value={productPage.backgroundColor ?? storefrontBackdrop}
-            onChange={(backgroundColor) =>
-              onProductPageChange({ ...productPage, backgroundColor })
-            }
-            inherit={{
-              label: t("productPage.layout.storefrontBackground"),
-              useLabel: t("productPage.layout.useStorefrontBackground"),
-              value: storefrontBackdrop,
-              active: productPage.backgroundColor === undefined,
-              onSelect: () => onProductPageChange(withoutKey(productPage, "backgroundColor")),
-            }}
-          />
-
-          <div className="space-y-1.5">
-            <span className={labelClass}>{t("productPage.layout.photoFit.label")}</span>
-            <SegmentedControl
-              ariaLabel={t("productPage.layout.photoFit.ariaLabel")}
-              value={productPage.imageFit}
-              options={[
-                { value: "contain", label: t("productPage.layout.photoFit.fit") },
-                { value: "cover", label: t("productPage.layout.photoFit.fill") },
-              ]}
-              onChange={(imageFit) => onProductPageChange({ ...productPage, imageFit })}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-1.5">
-              <label htmlFor={`${fieldId}-font`} className={labelClass}>
-                {t("productPage.layout.font.label")}
-              </label>
-              <InfoTip label={t("productPage.layout.font.infoLabel")}>
-                {productPage.font
-                  ? t("productPage.layout.font.infoOwn")
-                  : t("productPage.layout.font.infoFollows")}
-              </InfoTip>
-            </div>
-            <Select
-              id={`${fieldId}-font`}
-              value={productPage.font ?? INHERIT_FONT}
-              options={fontOptions}
-              onChange={(value) => {
-                if (value === INHERIT_FONT) {
-                  const { font, ...rest } = productPage;
-                  void font;
-                  onProductPageChange(rest);
-                  return;
-                }
-                onProductPageChange({ ...productPage, font: value as StorefrontFont });
+          <PanelGroup title={t("productPage.groups.look")}>
+            {/* THE PAGE'S BACKDROP. A colour, not the storefront's three-kind
+                background: a page is read rather than looked at, so what a
+                seller wants here is a surface their specifications table is
+                legible on. The inherit dot is how they get the store's own
+                backdrop back, and it shows what following currently gets them
+                (an image backdrop reads as dark, which is the ink decision the
+                page has always made about photos). */}
+            <ColorPicker
+              label={t("productPage.layout.pageColor")}
+              labelClassName={panelCaptionClass}
+              value={productPage.backgroundColor ?? storefrontBackdrop}
+              onChange={(backgroundColor) => onProductPageChange({ ...productPage, backgroundColor })}
+              inherit={{
+                label: t("productPage.layout.storefrontBackground"),
+                useLabel: t("productPage.layout.useStorefrontBackground"),
+                value: storefrontBackdrop,
+                active: productPage.backgroundColor === undefined,
+                onSelect: () => onProductPageChange(withoutKey(productPage, "backgroundColor")),
               }}
             />
-          </div>
-
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5">
-              <label htmlFor={`${fieldId}-index`} className={labelClass}>
-                {t("productPage.layout.indexing.label")}
-              </label>
-              <InfoTip label={t("productPage.layout.indexing.infoLabel")}>
-                {t("productPage.layout.indexing.infoContent")}
-              </InfoTip>
-            </div>
-            <Switch
-              id={`${fieldId}-index`}
-              checked={productPage.allowIndexing}
-              onCheckedChange={(allowIndexing) =>
-                onProductPageChange({ ...productPage, allowIndexing })
+            <PagePhotoField
+              photo={productPage.backgroundImage}
+              url={productPage.backgroundImage ? (pagePhotoUrls[productPage.backgroundImage.key] ?? null) : null}
+              onUrl={onPagePhotoUrl}
+              onChange={(backgroundImage) =>
+                onProductPageChange(
+                  backgroundImage ? { ...productPage, backgroundImage } : withoutKey(productPage, "backgroundImage"),
+                )
               }
             />
-          </div>
+            <PanelRow label={t("productPage.layout.photoFit.label")}>
+              <div className="w-36">
+                <SegmentedControl
+                  ariaLabel={t("productPage.layout.photoFit.ariaLabel")}
+                  value={productPage.imageFit}
+                  options={[
+                    { value: "contain", label: t("productPage.layout.photoFit.fit") },
+                    { value: "cover", label: t("productPage.layout.photoFit.fill") },
+                  ]}
+                  onChange={(imageFit) => onProductPageChange({ ...productPage, imageFit })}
+                />
+              </div>
+            </PanelRow>
+            <PanelField
+              label={t("productPage.layout.font.label")}
+              htmlFor={`${fieldId}-font`}
+              info={{
+                label: t("productPage.layout.font.infoLabel"),
+                content: productPage.font
+                  ? t("productPage.layout.font.infoOwn")
+                  : t("productPage.layout.font.infoFollows"),
+              }}
+            >
+              <Select
+                id={`${fieldId}-font`}
+                value={productPage.font ?? INHERIT_FONT}
+                options={fontOptions}
+                onChange={(value) => {
+                  if (value === INHERIT_FONT) {
+                    const { font, ...rest } = productPage;
+                    void font;
+                    onProductPageChange(rest);
+                    return;
+                  }
+                  onProductPageChange({ ...productPage, font: value as StorefrontFont });
+                }}
+              />
+            </PanelField>
+          </PanelGroup>
         </div>
       </CollapsibleSection>
 
@@ -304,31 +320,15 @@ export function ProductPageSection({
           </InfoTip>
         }
       >
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label htmlFor={`${fieldId}-cta`} className={labelClass}>
-              {t("productPage.cta.buttonText.label")}
-            </label>
-            <input
-              id={`${fieldId}-cta`}
-              type="text"
-              value={productPage.ctaLabel}
-              maxLength={PRODUCT_PAGE_CTA_MAX}
-              spellCheck={false}
-              onChange={(event) =>
-                onProductPageChange({
-                  ...productPage,
-                  ctaLabel: sanitizeHeaderText(event.target.value, false),
-                })
-              }
-              className={fieldBaseClass}
-            />
-            <p className={helpTextClass}>
-              {t("productPage.cta.buttonText.charsLeft", {
-                count: PRODUCT_PAGE_CTA_MAX - productPage.ctaLabel.length,
-              })}
-            </p>
-          </div>
+        <div className="space-y-5">
+          <PanelTextField
+            id={`${fieldId}-cta`}
+            label={t("productPage.cta.buttonText.label")}
+            value={productPage.ctaLabel}
+            max={PRODUCT_PAGE_CTA_MAX}
+            charsLeft={(count) => t("productPage.cta.buttonText.charsLeft", { count })}
+            onChange={(raw) => onProductPageChange({ ...productPage, ctaLabel: sanitizeHeaderText(raw, false) })}
+          />
 
           {/* THE BUTTON'S OWN PAINT. Four controls, every one of them
               optional: the inherit dot and the "Auto" reset are how a seller
@@ -336,117 +336,122 @@ export function ProductPageSection({
               never a one-way door. What is deliberately NOT here is the
               label's ink — it is derived from the fill (see resolveCta), so
               there is no way to end up with a button nobody can read. */}
-          <ColorPicker
-            label={t("productPage.cta.buttonColor")}
-            value={cta.fill}
-            onChange={(ctaColor) => onProductPageChange({ ...productPage, ctaColor })}
-            inherit={{
-              label: t("productPage.cta.storefrontAccent"),
-              useLabel: t("productPage.cta.useStorefrontAccent"),
-              value: accent,
-              active: productPage.ctaColor === undefined,
-              onSelect: () => onProductPageChange(withoutKey(productPage, "ctaColor")),
-            }}
-          />
-
-          <SliderField
-            id={`${fieldId}-cta-radius`}
-            label={t("productPage.cta.cornerRoundness.label")}
-            min={0}
-            max={PRODUCT_PAGE_CTA_RADIUS_MAX}
-            value={cta.radius}
-            onChange={(ctaRadius) => onProductPageChange({ ...productPage, ctaRadius })}
-            ariaLabel={t("productPage.cta.cornerRoundness.ariaLabel")}
-            valueText={t("productPage.cta.cornerRoundness.valueText", { value: cta.radius })}
-            unit="px"
-            // Auto is a real state, not a number: with nothing chosen the
-            // button takes the storefront's own tile roundness, so the page
-            // and the board it opened from match without anyone setting this.
-            headerAction={
-              productPage.ctaRadius === undefined ? (
-                <span className={infoTextClass}>{t("productPage.cta.cornerRoundness.auto")}</span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => onProductPageChange(withoutKey(productPage, "ctaRadius"))}
-                  className={cn(ghostButtonClass, "px-2 py-1 text-xs")}
-                >
-                  <RotateCcw className="size-3" strokeWidth={2} aria-hidden="true" />
-                  {t("productPage.cta.cornerRoundness.auto")}
-                </button>
-              )
-            }
-          />
-
-          <SliderField
-            id={`${fieldId}-cta-border-width`}
-            label={t("productPage.cta.borderThickness.label")}
-            min={0}
-            max={PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX}
-            value={cta.borderWidth}
-            onChange={(width) =>
-              // Zero is "no border", which is the absence of the field rather
-              // than a value: dropping the key keeps an untouched page out of
-              // the saved jsonb entirely (isDefaultProductPage).
-              onProductPageChange(
-                width === 0
-                  ? withoutKey(productPage, "ctaBorderWidth")
-                  : { ...productPage, ctaBorderWidth: width },
-              )
-            }
-            ariaLabel={t("productPage.cta.borderThickness.ariaLabel")}
-            valueText={t("productPage.cta.borderThickness.valueText", { value: cta.borderWidth })}
-            unit="px"
-            statusText={cta.borderWidth === 0 ? t("productPage.cta.borderThickness.none") : undefined}
-          />
-
-          {/* Only once there is a border to colour. A colour picker for an
-              invisible outline is a control that appears to do nothing. */}
-          {cta.borderWidth > 0 && (
+          <PanelGroup title={t("productPage.groups.style")}>
             <ColorPicker
-              label={t("productPage.cta.borderColor")}
-              value={cta.borderColor}
-              onChange={(ctaBorderColor) =>
-                onProductPageChange({ ...productPage, ctaBorderColor })
-              }
+              label={t("productPage.cta.buttonColor")}
+              labelClassName={panelCaptionClass}
+              value={cta.fill}
+              onChange={(ctaColor) => onProductPageChange({ ...productPage, ctaColor })}
               inherit={{
-                label: t("productPage.cta.buttonTextColor"),
-                useLabel: t("productPage.cta.useButtonTextColor"),
-                value: cta.text,
-                active: productPage.ctaBorderColor === undefined,
-                onSelect: () =>
-                  onProductPageChange(withoutKey(productPage, "ctaBorderColor")),
+                label: t("productPage.cta.storefrontAccent"),
+                useLabel: t("productPage.cta.useStorefrontAccent"),
+                value: accent,
+                active: productPage.ctaColor === undefined,
+                onSelect: () => onProductPageChange(withoutKey(productPage, "ctaColor")),
               }}
             />
-          )}
 
-          <div className="space-y-1.5">
-            <span className={labelClass}>{t("productPage.cta.priceNote.label")}</span>
-            <SegmentedControl
-              ariaLabel={t("productPage.cta.priceNote.ariaLabel")}
-              value={productPage.priceNote}
-              options={[
-                { value: "incl-vat", label: t("productPage.cta.priceNote.inclVat") },
-                { value: "excl-vat", label: t("productPage.cta.priceNote.exclTax") },
-                { value: "none", label: t("productPage.cta.priceNote.none") },
-              ]}
-              onChange={(priceNote) => onProductPageChange({ ...productPage, priceNote })}
+            <SliderField
+              id={`${fieldId}-cta-radius`}
+              label={t("productPage.cta.cornerRoundness.label")}
+              labelClassName={panelCaptionClass}
+              min={0}
+              max={PRODUCT_PAGE_CTA_RADIUS_MAX}
+              value={cta.radius}
+              onChange={(ctaRadius) => onProductPageChange({ ...productPage, ctaRadius })}
+              ariaLabel={t("productPage.cta.cornerRoundness.ariaLabel")}
+              valueText={t("productPage.cta.cornerRoundness.valueText", { value: cta.radius })}
+              unit="px"
+              // Auto is a real state, not a number: with nothing chosen the
+              // button takes the storefront's own tile roundness, so the page
+              // and the board it opened from match without anyone setting this.
+              headerAction={
+                productPage.ctaRadius === undefined ? (
+                  <span className={infoTextClass}>{t("productPage.cta.cornerRoundness.auto")}</span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onProductPageChange(withoutKey(productPage, "ctaRadius"))}
+                    className={cn(ghostButtonClass, "px-2 py-1 text-xs")}
+                  >
+                    <RotateCcw className="size-3" strokeWidth={2} aria-hidden="true" />
+                    {t("productPage.cta.cornerRoundness.auto")}
+                  </button>
+                )
+              }
             />
-          </div>
 
-          <div className="space-y-1.5">
-            <span className={labelClass}>{t("productPage.cta.shippingNote.label")}</span>
-            <SegmentedControl
-              ariaLabel={t("productPage.cta.shippingNote.ariaLabel")}
-              value={productPage.shippingNote}
-              options={[
-                { value: "plus-shipping", label: t("productPage.cta.shippingNote.plusShipping") },
-                { value: "free-shipping", label: t("productPage.cta.shippingNote.freeShipping") },
-                { value: "none", label: t("productPage.cta.shippingNote.none") },
-              ]}
-              onChange={(shippingNote) => onProductPageChange({ ...productPage, shippingNote })}
+            <SliderField
+              id={`${fieldId}-cta-border-width`}
+              label={t("productPage.cta.borderThickness.label")}
+              labelClassName={panelCaptionClass}
+              min={0}
+              max={PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX}
+              value={cta.borderWidth}
+              onChange={(width) =>
+                // Zero is "no border", which is the absence of the field rather
+                // than a value: dropping the key keeps an untouched page out of
+                // the saved jsonb entirely (isDefaultProductPage).
+                onProductPageChange(
+                  width === 0
+                    ? withoutKey(productPage, "ctaBorderWidth")
+                    : { ...productPage, ctaBorderWidth: width },
+                )
+              }
+              ariaLabel={t("productPage.cta.borderThickness.ariaLabel")}
+              valueText={t("productPage.cta.borderThickness.valueText", { value: cta.borderWidth })}
+              unit="px"
+              statusText={cta.borderWidth === 0 ? t("productPage.cta.borderThickness.none") : undefined}
             />
-          </div>
+
+            {/* Only once there is a border to colour. A colour picker for an
+                invisible outline is a control that appears to do nothing. */}
+            {cta.borderWidth > 0 && (
+              <ColorPicker
+                label={t("productPage.cta.borderColor")}
+                labelClassName={panelCaptionClass}
+                value={cta.borderColor}
+                onChange={(ctaBorderColor) =>
+                  onProductPageChange({ ...productPage, ctaBorderColor })
+                }
+                inherit={{
+                  label: t("productPage.cta.buttonTextColor"),
+                  useLabel: t("productPage.cta.useButtonTextColor"),
+                  value: cta.text,
+                  active: productPage.ctaBorderColor === undefined,
+                  onSelect: () =>
+                    onProductPageChange(withoutKey(productPage, "ctaBorderColor")),
+                }}
+              />
+            )}
+          </PanelGroup>
+
+          <PanelGroup title={t("productPage.groups.besidePrice")}>
+            <PanelField label={t("productPage.cta.priceNote.label")}>
+              <SegmentedControl
+                ariaLabel={t("productPage.cta.priceNote.ariaLabel")}
+                value={productPage.priceNote}
+                options={[
+                  { value: "incl-vat", label: t("productPage.cta.priceNote.inclVat") },
+                  { value: "excl-vat", label: t("productPage.cta.priceNote.exclTax") },
+                  { value: "none", label: t("productPage.cta.priceNote.none") },
+                ]}
+                onChange={(priceNote) => onProductPageChange({ ...productPage, priceNote })}
+              />
+            </PanelField>
+            <PanelField label={t("productPage.cta.shippingNote.label")}>
+              <SegmentedControl
+                ariaLabel={t("productPage.cta.shippingNote.ariaLabel")}
+                value={productPage.shippingNote}
+                options={[
+                  { value: "plus-shipping", label: t("productPage.cta.shippingNote.plusShipping") },
+                  { value: "free-shipping", label: t("productPage.cta.shippingNote.freeShipping") },
+                  { value: "none", label: t("productPage.cta.shippingNote.none") },
+                ]}
+                onChange={(shippingNote) => onProductPageChange({ ...productPage, shippingNote })}
+              />
+            </PanelField>
+          </PanelGroup>
         </div>
       </CollapsibleSection>
 
@@ -485,16 +490,16 @@ export function ProductPageSection({
                       reader would announce a placement as if it were the
                       thing being switched. */}
                   <span className="flex min-w-0 flex-1 items-baseline gap-1.5">
-                    <label htmlFor={rowId} className={cn(labelClass, "truncate")}>
+                    <label htmlFor={rowId} className={cn(panelSettingClass, "truncate")}>
                       {t(`productPage.sections.sectionLabels.${entry.id}`)}
                     </label>
                     {entry.id === "description" && (
-                      <span className={cn(helpTextClass, "truncate")} aria-hidden="true">
+                      <span className={cn(infoTextClass, "truncate")} aria-hidden="true">
                         {t("productPage.sections.underTheTitle")}
                       </span>
                     )}
                     {mandatory && (
-                      <span className={cn(helpTextClass, "truncate")} aria-hidden="true">
+                      <span className={cn(infoTextClass, "truncate")} aria-hidden="true">
                         {t("productPage.sections.requiredByLaw")}
                       </span>
                     )}
@@ -517,7 +522,7 @@ export function ProductPageSection({
             })}
 
             <li className="flex items-center justify-between gap-2">
-              <label htmlFor={`${fieldId}-stock`} className={cn(labelClass, "min-w-0 flex-1 truncate")}>
+              <label htmlFor={`${fieldId}-stock`} className={cn(panelSettingClass, "min-w-0 flex-1 truncate")}>
                 {t("productPage.sections.availability")}
               </label>
               <Switch
@@ -527,7 +532,7 @@ export function ProductPageSection({
               />
             </li>
             <li className="flex items-center justify-between gap-2">
-              <label htmlFor={`${fieldId}-soldby`} className={cn(labelClass, "min-w-0 flex-1 truncate")}>
+              <label htmlFor={`${fieldId}-soldby`} className={cn(panelSettingClass, "min-w-0 flex-1 truncate")}>
                 {t("productPage.sections.soldByByline")}
               </label>
               <Switch

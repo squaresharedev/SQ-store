@@ -24,6 +24,7 @@ import type { ActionState } from "@/lib/errors";
 import { useEuCountries } from "@/components/settings/use-eu-countries";
 import { CountryPicker, countryPickerSummary } from "@/components/settings/CountryPicker";
 import { buildShippingProse } from "@/lib/shipping/policy-prose";
+import { isPriced } from "@/lib/shipping/rates";
 import { useResolveMessage as useResolveProse } from "@/components/ui/ActionErrorNotice";
 import {
   canAddShippingProfile,
@@ -450,6 +451,17 @@ export function ShippingSection({
                           />
                         </div>
                       </div>
+                      {/* A row that is only words (no rate, or no country) still
+                          prints on the product page but cannot be quoted at
+                          checkout, and nothing else says so: the seller sees a
+                          finished-looking row and a buyer never gets a Pay
+                          button. Only said once the row has a name, so a row
+                          just added is not scolded before it is started. */}
+                      {row.area.trim() !== "" && !isPriced(destinationsWithRates[index] ?? row) && (
+                        <p className={helpTextClass} data-destination-needs-rate="">
+                          {t("shipping.destinations.needsRate")}
+                        </p>
+                      )}
                     </div>
                     <button
                       type="button"

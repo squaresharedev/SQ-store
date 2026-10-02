@@ -56,7 +56,8 @@
     "stock": "Voorraad",
     "system": "Systeem",
     "security": "Beveiliging",
-    "policy": "Beleid"
+    "policy": "Beleid",
+    "billing": "Facturering"
   },
   "time": {
     "justNow": "zojuist",
@@ -155,6 +156,24 @@
       "withdrawn": {
         "title": "Een koper heeft zich teruggetrokken uit bestelling {number}",
         "body": "{title}. Regel de retournering en terugbetaling met hem."
+      }
+    },
+    "billing": {
+      "upgraded": {
+        "title": "Je zit op {plan, select, starter {Starter} pro {Pro} other {een betaald abonnement}}",
+        "body": "Je kosten per verkoop zijn vanaf nu lager en de limieten van je abonnement zijn opgeheven."
+      },
+      "plan_changed": {
+        "title": "Je abonnement is nu {plan, select, free {Free} starter {Starter} pro {Pro} other {{plan}}}",
+        "body": "De kosten en limieten ervan gelden vanaf nu."
+      },
+      "downgraded": {
+        "title": "Je winkel zit weer op Free",
+        "body": "Je betaalde abonnement is afgelopen. Alles wat je hebt blijft werken; upgrade op elk moment voor lagere kosten."
+      },
+      "paymentFailed": {
+        "title": "De betaling voor {plan, select, starter {je Starter-abonnement} pro {je Pro-abonnement} other {je betaalde abonnement}} is mislukt",
+        "body": "Stripe probeert het opnieuw. Werk je kaart bij onder Abonnement en facturering om je abonnement te behouden."
       }
     }
   }

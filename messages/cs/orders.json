@@ -28,13 +28,15 @@
     "goToProducts": "Přejít na produkty",
     "toShipTitle": "Nic k odeslání",
     "toShipHint": "Máte vše vyřízeno. Zaplacené objednávky k odeslání se tu zobrazí od nejstarší.",
-    "seeAllOrders": "Zobrazit všechny objednávky"
+    "seeAllOrders": "Zobrazit všechny objednávky",
+    "hintOpen": "Když někdo nakoupí ve vašem obchodě, objednávka se zobrazí tady a hned se to dozvíte."
   },
   "list": {
     "updating": "Aktualizace…",
     "summary": "{total, plural, one {{total} objednávka} few {{total} objednávky} many {{total} objednávky} other {{total} objednávek}} · strana {page} z {totalPages}",
     "detailDialog": "Podrobnosti objednávky",
-    "closeDetail": "Zavřít podrobnosti objednávky"
+    "closeDetail": "Zavřít podrobnosti objednávky",
+    "withdrawn": "Odstoupeno"
   },
   "table": {
     "product": "Produkt",
@@ -117,6 +119,7 @@
     "shipping": "Doprava",
     "shippedOn": "Odesláno {date}",
     "trackingNumber": "Číslo zásilky",
+    "trackingCarrier": "Číslo zásilky ({carrier})",
     "copyTracking": {
       "copy": "Kopírovat číslo zásilky",
       "copied": "Číslo zásilky zkopírováno",
@@ -128,7 +131,16 @@
       "refunded": "Tato objednávka byla vrácena, takže není co odesílat.",
       "disputed": "Tato platba je ve sporu. Před odesláním zásilky spor vyřešte."
     },
-    "platformFeeRate": "Poplatek platformy ({rate})"
+    "platformFeeRate": "Poplatek platformy ({rate})",
+    "orderNumberLine": "Objednávka {number}",
+    "copyOrderNumber": {
+      "copy": "Kopírovat číslo objednávky",
+      "copied": "Číslo objednávky zkopírováno",
+      "failed": "Číslo objednávky se nepodařilo zkopírovat. Označte ho a zkopírujte ručně."
+    },
+    "emailBuyer": "Poslat e-mail kupujícímu",
+    "mailSubject": "Vaše objednávka {number}",
+    "withdrawnShipWarning": "Kupující od tohoto nákupu odstoupil. Zásilku odešlete, jen pokud jste se na tom s ním dohodli."
   },
   "actions": {
     "refundNeedsStripe": "Vrácení peněz vyžaduje propojený Stripe.",
@@ -139,7 +151,8 @@
     "disputeInStripe": "Spory se po propojení Stripe řeší v panelu Stripe.",
     "disputeConfirm": "Otevřít řešení sporu k této objednávce?",
     "handleDispute": "Řešit spor",
-    "none": "K této objednávce nejsou dostupné žádné akce."
+    "none": "K této objednávce nejsou dostupné žádné akce.",
+    "refundManual": "Ze Square Share zatím nejde vracet peníze. Chcete-li za tuto objednávku vrátit peníze, pošlete je kupujícímu sami a dejte mu vědět."
   },
   "skeleton": {
     "loading": "načítání objednávek"
@@ -163,6 +176,9 @@
     "markShipped": "Označit jako odesláno",
     "trackingLabel": "Číslo zásilky (nepovinné)",
     "trackingPlaceholder": "např. RR123456789IE",
+    "carrierLabel": "Dopravce (nepovinné)",
+    "carrierOther": "Jiný nebo není v seznamu",
+    "carrierHint": "S číslem zásilky a dopravcem dostane kupující odkaz ke sledování zásilky.",
     "tellsBuyer": "Kupujícímu pošleme e-mail, že zásilka je na cestě. Pokud přidáte číslo zásilky, pošleme ho také.",
     "noBuyerEmail": "Tato objednávka nemá e-mail kupujícího, takže kupujícímu nic neodesíláme.",
     "confirm": "Označit jako odesláno",
@@ -172,7 +188,10 @@
     "editTracking": "Změnit číslo zásilky",
     "saveTracking": "Uložit číslo zásilky",
     "trackingSaved": "Číslo zásilky uloženo. Odeslali jsme ho kupujícímu.",
-    "trackingSavedNoEmail": "Číslo zásilky uloženo."
+    "trackingSavedNoEmail": "Číslo zásilky uloženo.",
+    "mailOff": "E-mail zatím není zapnutý, takže se kupující nic nedozví. Dejte mu vědět sami.",
+    "next": "Další objednávka k odeslání",
+    "caughtUp": "To byla poslední. Máte vše vyřízeno."
   },
   "email": {
     "fromName": "{store} přes Square Share",
@@ -190,7 +209,8 @@
       "total": "Celková částka: {amount}",
       "openShip": "Jakmile zásilka odejde, označte ji jako odeslanou a my kupujícímu dáme vědět: {url}",
       "openDigital": "Zobrazit objednávku: {url}",
-      "gift": "Přiložit do balíčku vzkaz: {message}"
+      "gift": "Přiložit do balíčku vzkaz: {message}",
+      "number": "Číslo objednávky: {number}"
     },
     "shipped": {
       "subject": "Vaše objednávka z obchodu {store} je na cestě",
@@ -198,6 +218,8 @@
       "intro": "Dobrá zpráva: obchod {store} odeslal vaši objednávku.",
       "introTracking": "Obchod {store} přidal k vaší objednávce číslo zásilky.",
       "tracking": "Číslo zásilky: {tracking}",
+      "trackingCarrier": "Číslo zásilky: {tracking} ({carrier})",
+      "orderPage": "Objednávku můžete sledovat zde: {url}",
       "shipTo": "Zásilka míří na adresu:",
       "questions": "Dotazy k objednávce? Odpovězte na tento e-mail a oslovíte obchod {store}.",
       "footer": "Zprávu zaslal Square Share jménem obchodu {store}."
@@ -239,5 +261,13 @@
       "intro": "Zde je odkaz na vaši stránku objednávky {number} u {store}:",
       "ignore": "Pokud jste o to nežádali, tento e-mail ignorujte."
     }
+  },
+  "export": {
+    "button": "Exportovat CSV",
+    "preparing": "Připravuje se soubor",
+    "failed": "Export se nestáhl. Za chvíli to zkuste znovu.",
+    "truncated": "Soubor obsahuje vašich {count, number} nejnovějších objednávek.",
+    "lockedTitle": "Export objednávek je součástí plánu {plan} a vyšších.",
+    "fileName": "objednavky.csv"
   }
 }

@@ -201,7 +201,7 @@
       },
       "ordersSearch": {
         "title": "Retrouvez une commande",
-        "body": "Recherchez par e-mail de l’acheteur. Les commandes arriveront ici dès l’ouverture du paiement Square Share."
+        "body": "Recherchez dans cette liste par e-mail de l’acheteur. Pour retrouver une commande par son numéro, un nom, une ville ou un numéro de suivi, utilisez la recherche en haut de la page."
       },
       "ordersFilters": {
         "title": "Filtrez et triez",

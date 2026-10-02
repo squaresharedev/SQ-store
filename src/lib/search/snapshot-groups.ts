@@ -1,3 +1,4 @@
+import { orderNumberLabel } from "@/lib/orders/order-number";
 import { orderResultHref } from "@/lib/search/hrefs";
 import { rankEntries } from "@/lib/search/rank";
 import type { MessageKey } from "@/i18n/types";
@@ -69,7 +70,9 @@ function toResults(snapshot: SearchSnapshot, t: SearchTranslator): SearchResult[
         id: `order:${row.id}`,
         type: "order",
         title: row.product_title || t("Search.results.order"),
-        subtitle: row.buyer_email ?? undefined,
+        // The number leads, as in the live rows, and is what makes "4456…" find
+        // the order a buyer wrote about (termsFor matches the subtitle).
+        subtitle: [orderNumberLabel(row.id), row.buyer_email].filter(Boolean).join(" · "),
         href: orderResultHref(row.id, row.buyer_email),
         badge: row.status || undefined,
       }),
@@ -95,7 +98,8 @@ const GROUPS: { type: SearchResult["type"]; label: MessageKey }[] = [
 ];
 
 /** Which fields a query matches per entity. Title plus the same second column
- *  the live search matches (buyer email for orders, email for team). */
+ *  the live search matches (order number and buyer email for orders, email for
+ *  team). */
 function termsFor(result: SearchResult): string[] {
   return result.subtitle ? [result.title, result.subtitle] : [result.title];
 }

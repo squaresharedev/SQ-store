@@ -60,13 +60,16 @@
     "sellerAgreement": "Verkopersovereenkomst",
     "termsOfService": "Servicevoorwaarden",
     "exportData": "Mijn gegevens exporteren",
-    "deleteAccount": "Account verwijderen"
+    "deleteAccount": "Account verwijderen",
+    "plan": "Abonnement en prijzen",
+    "invoices": "Facturen en betaalgegevens"
   },
   "actions": {
     "newProduct": "Nieuw product",
     "newStorefront": "Nieuwe etalage",
     "inviteMember": "Teamlid uitnodigen",
     "notificationHistory": "Meldingengeschiedenis",
-    "showMeAround": "Laat het me zien"
+    "showMeAround": "Laat het me zien",
+    "comparePlans": "Abonnementen vergelijken"
   }
 }

@@ -74,6 +74,9 @@ const POLICY_FREE_BY_DESIGN = new Set([
   // Pricing-modal funnel events, produced server-side only (lib/billing/
   // funnel.ts). Nothing here is a seller's to read or forge.
   "seller_funnel_events",
+  // The launch switch for plan limits. A client that could write it could
+  // switch its own limits off.
+  "billing_switches",
 ]);
 
 afterAll(async () => {

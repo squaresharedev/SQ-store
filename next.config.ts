@@ -119,6 +119,15 @@ const nextConfig: NextConfig = {
    */
   distDir: process.env.NEXT_DIST_DIR || ".next",
 
+  // Server action request bodies. Next's default is 1 MB, which a product
+  // CSV import (IMPORT_BYTES_MAX, 2 MB, in lib/products/csv.ts) outgrows: the
+  // file travels as the action's argument, escaped, so the limit leaves
+  // headroom over the file cap. Every action still checks its own input
+  // size; this only stops the framework refusing a file the import allows.
+  experimental: {
+    serverActions: { bodySizeLimit: "3mb" },
+  },
+
   // Out of the toast stack's corner (bottom-right): the badge sat directly on
   // top of every confirmation in development, hiding the exact thing being
   // worked on. Dev-only; production never renders it.

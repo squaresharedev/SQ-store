@@ -1,6 +1,6 @@
 import { resolveCta } from "@/components/product-page/product-page-maps";
 import { resolveCheckoutTheme } from "@/components/checkout/checkout-theme";
-import { pageConfigRoute } from "@/lib/storefront/page-config-route";
+import { pageConfigRoute, withoutObjectKeys } from "@/lib/storefront/page-config-route";
 import { resolveProductPage } from "@/lib/storefront/product-page";
 import { isDefaultCheckoutPage, resolveCheckoutPage } from "@/lib/storefront/checkout-page";
 import { checkoutPageSchema } from "@/lib/validation/storefront";
@@ -9,7 +9,6 @@ import {
   CHECKOUT_HEADLINE_MAX,
   CHECKOUT_LAYOUTS,
   CHECKOUT_NOTE_MAX,
-  CHECKOUT_TEXTURES,
   CHECKOUT_THANKS_MESSAGE_MAX,
   type StorefrontConfig,
 } from "@/types/storefront";
@@ -26,9 +25,8 @@ import {
  * product page's buy button and the surface inherits through the product page
  * to the storefront, which is a question a caller must never answer itself.
  * `limits` are the text caps the schema holds the words to, and `options` the
- * closed lists the enum fields accept, so a caller discovers the presets
- * (the textures among them) from the resource rather than from a copy of them.
- * A texture is set by name and cleared with `null`, which leaves the page plain.
+ * closed lists the enum fields accept, so a caller discovers the choices from
+ * the resource rather than from a copy of them.
  */
 function payload(storefrontId: string, config: StorefrontConfig) {
   const productPage = resolveProductPage(config);
@@ -46,14 +44,12 @@ function payload(storefrontId: string, config: StorefrontConfig) {
   });
   return {
     storefrontId,
-    checkoutPage,
+    checkoutPage: withoutObjectKeys(checkoutPage),
     payButton: resolveCta(productPage, config.theme),
     surface: {
       color: theme.surface,
       ink: theme.ink,
       followsProductPage: checkoutPage.backgroundColor === undefined,
-      // The pattern drawn over `color` in `ink`, or null for a plain page.
-      texture: checkoutPage.texture ?? null,
     },
     limits: {
       headlineMax: CHECKOUT_HEADLINE_MAX,
@@ -62,7 +58,6 @@ function payload(storefrontId: string, config: StorefrontConfig) {
     },
     options: {
       layouts: CHECKOUT_LAYOUTS,
-      textures: CHECKOUT_TEXTURES,
       celebrations: CHECKOUT_CELEBRATIONS,
     },
   };

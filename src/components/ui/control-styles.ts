@@ -182,6 +182,27 @@ export const labelClass = "font-inter text-sm font-medium text-foreground";
  *  hierarchy in dense panels (the storefront designer's sections). */
 export const strongLabelClass = "font-inter text-sm font-semibold text-foreground";
 
+/**
+ * THE DESIGN PANEL'S TYPE LADDER, so a dense panel scans top down instead of
+ * reading as one list of equally loud lines:
+ *
+ *   section title  CollapsibleSection's header: semibold, foreground;
+ *   eyebrow        panelEyebrowClass, over a run of related controls inside a
+ *                  section ("Style", "Beside the price"): tiny, uppercase,
+ *                  muted (styles.md's eyebrow role);
+ *   setting        panelSettingClass, a line that IS the setting and is read
+ *                  as a statement (a switch row): regular weight, foreground;
+ *   caption        panelCaptionClass, the name over a control whose VALUE is
+ *                  what the eye wants (a colour row, a slider, a segmented
+ *                  choice): muted, so the control is the loud thing.
+ *
+ * Laid out by the primitives in components/storefront/PanelField.tsx.
+ */
+export const panelEyebrowClass =
+  "font-inter text-xs font-medium uppercase tracking-widest text-muted-foreground";
+export const panelSettingClass = "font-inter text-sm text-foreground";
+export const panelCaptionClass = "font-inter text-sm text-muted-foreground";
+
 /** Muted helper text under a field. */
 export const helpTextClass = "font-inter text-sm text-muted-foreground";
 

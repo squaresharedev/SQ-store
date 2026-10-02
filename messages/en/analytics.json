@@ -197,5 +197,9 @@
       "awaiting": "Arrives with the calendar booking block.",
       "readyToChart": "Ready to chart as soon as bookings start arriving."
     }
+  },
+  "export": {
+    "button": "Download report",
+    "lockedTitle": "Analytics reports come with {plan}."
   }
 }

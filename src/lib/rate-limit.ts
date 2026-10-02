@@ -262,14 +262,21 @@ export const RATE_LIMITS = {
    * real owner opens a handful in an afternoon.
    */
   billingWrite: { max: 20, windowSeconds: 60 * 60 },
-  /** Loading the pricing modal: a few reads, per signed-in user. */
+  /** Confirming a Stripe Checkout return (one read from Stripe), per user. */
   billingRead: { max: 300, windowSeconds: 60 * 60 },
   /**
    * Not a budget: at most one "pricing viewed" funnel row per account and
-   * entry point in this window, so a seller flicking the modal open and shut
-   * counts once.
+   * entry point in this window, so a seller reloading the plans page counts
+   * once.
    */
   pricingViewDedupe: { max: 1, windowSeconds: 10 * 60 },
+  /**
+   * The orders CSV (app/api/orders/export). Reads up to ten thousand orders
+   * in pages and builds a file from them, so it is the heaviest read a seller
+   * can start from a button. Bookkeeping needs it a few times a month; this
+   * leaves room for retries and bites only a loop.
+   */
+  ordersExport: { max: 20, windowSeconds: 60 * 60 },
   // --- Contact verification ----------------------------------------------
   // A code emailed or texted to the seller's buyer-facing contact details
   // (lib/contact-verification). Sending is the expensive and abusable half:

@@ -1,9 +1,9 @@
-// SERVER ONLY. The pricing funnel: what happens around the pricing modal, per
+// SERVER ONLY. The pricing funnel: what happens around the plans page, per
 // account, so we can see which entry points lead to an upgrade and which
 // never do.
 //
 // SERVER-PRODUCED ONLY. Every event is recorded by the code that knows it
-// happened (the modal's loader, the checkout action, the limit check, the
+// happened (the plans page's loader, the checkout action, the limit check, the
 // webhook), never reported by a browser. There is no endpoint a client can
 // post to, so the numbers cannot be padded or forged.
 //
@@ -20,7 +20,8 @@ import type { PricingSource } from "@/lib/billing/paths";
  * its insert fail silently (this module is best-effort). Edit both together.
  */
 export const FUNNEL_EVENT_KINDS = [
-  /** The pricing modal was opened (deduped per account and source). */
+  /** The plans page was opened from a named entry point (deduped per
+   *  account and source). */
   "pricing_viewed",
   /** A create action was refused by a plan limit. */
   "limit_hit",

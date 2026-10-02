@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { helpTextClass } from "@/components/ui/control-styles";
 import { DURATION, EASE_ENTRANCE } from "@/components/ui/motion-tokens";
+import { saveFile } from "@/lib/utils/save-file";
 
 /**
  * Each code arrives this long after the one before it, the first a beat after
@@ -68,15 +69,7 @@ export function RecoveryCodesDisplay({
   ].join("\n");
 
   function download() {
-    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "square-share-recovery-codes.txt";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+    saveFile(text, "square-share-recovery-codes.txt");
   }
 
   return (

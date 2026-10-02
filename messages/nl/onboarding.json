@@ -201,7 +201,7 @@
       },
       "ordersSearch": {
         "title": "Zoek een bestelling",
-        "body": "Zoek op het e-mailadres van de koper. Bestellingen verschijnen hier zodra de checkout van Square Share opent."
+        "body": "Zoek in deze lijst op het e-mailadres van de koper. Gebruik zoeken bovenaan de pagina om een bestelling te vinden op nummer, naam, plaats of trackingnummer."
       },
       "ordersFilters": {
         "title": "Filteren en sorteren",

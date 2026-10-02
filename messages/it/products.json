@@ -195,7 +195,9 @@
     "importing": "Importazione…",
     "importedLabel": "Importato",
     "run": "{count, plural, one {Importa {count} prodotto} many {Importa {count} di prodotti} other {Importa {count} prodotti}}",
-    "clear": "Cancella"
+    "clear": "Cancella",
+    "planRoom": "{max, plural, one {Il tuo piano ha spazio per # prodotto in più} many {Il tuo piano ha spazio per # di prodotti in più} other {Il tuo piano ha spazio per # prodotti in più}}",
+    "droppedByPlan": "{count, plural, one {# riga non verrà importata: il tuo piano ha spazio per altri {max}.} many {# di righe non verranno importate: il tuo piano ha spazio per altri {max}.} other {# righe non verranno importate: il tuo piano ha spazio per altri {max}.}}"
   },
   "form": {
     "sections": {

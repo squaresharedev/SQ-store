@@ -31,6 +31,7 @@ export function DashboardHome({
   recentOrderDetails = [],
   toShipCount = 0,
   canFulfil = false,
+  checkoutOpen = false,
 }: {
   orders: DashboardOrdersData;
   /** Full detail for the Recent orders rows, so each opens in place. */
@@ -39,6 +40,8 @@ export function DashboardHome({
   toShipCount?: number;
   /** Whether the viewer may mark orders shipped from an opened order. */
   canFulfil?: boolean;
+  /** Whether a buyer can pay through Square Share checkout right now. */
+  checkoutOpen?: boolean;
   products: ProductsSummary;
   storefronts: StorefrontAttentionInfo;
   /** Null when the profile read failed softly; profile attention rows are hidden. */
@@ -119,6 +122,7 @@ export function DashboardHome({
               setupVisible,
               twoFactorEnabled,
               toShipCount,
+              checkoutOpen,
             })}
           />
           <RecentOrders

@@ -71,8 +71,7 @@ export function selectionChips(
       {
         label,
         value,
-        ...(group.display === "swatch" && chosen.swatch ? { swatch: chosen.swatch } : {}),
-      },
+        ...(group.display === "swatch" && chosen.swatch ? { swatch: chosen.swatch } : {}),      },
     ];
   });
 }

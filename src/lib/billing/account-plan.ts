@@ -1,5 +1,5 @@
 // SERVER ONLY. Reading an account's billing row: the plan it is on, and what
-// the settings page and the pricing modal show about it.
+// the settings page and the plans page show about it.
 //
 // SERVICE ROLE, and so NOT an access check. seller_billing has no client
 // policy (see the migration), so every read goes through here. A caller must
@@ -106,6 +106,22 @@ export async function readAccountBilling(accountId: string, now: Date = new Date
   }
 }
 
-/** readAccountBilling, once per request: the shell, the page and the modal
- *  loader all ask on the same render. */
+/**
+ * The account's last 30 days of paid item sales in cents (what the per-sale
+ * fee is charged on), for the pricing calculator. Null when unreadable: the
+ * calculator then starts from a default instead of a wrong figure.
+ */
+export async function readSalesSubtotal30d(accountId: string): Promise<number | null> {
+  try {
+    const { data, error } = await createAdminClient().rpc("billing_sales_summary", { p_seller_id: accountId });
+    const row = Array.isArray(data) ? data[0] : null;
+    if (error || !row) return null;
+    return Number(row.subtotal_cents);
+  } catch {
+    return null;
+  }
+}
+
+/** readAccountBilling, once per request: the shell, the page and the Orders
+ *  export check all ask on the same render. */
 export const getAccountBilling = cache((accountId: string) => readAccountBilling(accountId));

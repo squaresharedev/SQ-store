@@ -819,6 +819,17 @@ export const PRODUCT_PAGE_CTA_RADIUS_MAX = 24;
  *  being an outline and starts being the button. */
 export const PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX = 8;
 
+/**
+ * A photo behind a hosted page: an R2 object KEY, like the storefront's own
+ * image background, and nothing else. It is always drawn to cover the page,
+ * under a veil of the page's colour (PAGE_PHOTO_VEIL, components/product-page/
+ * product-page-maps.ts), and the page's ink is derived from that colour, never
+ * from the photo, so a seller can make any photograph readable by choosing the
+ * colour that tints it. Display URLs are signed on the server and are never
+ * part of the config.
+ */
+export type PagePhoto = { key: string };
+
 export type ProductPageConfig = {
   /** Off = product tiles have no page to open and the route 404s. */
   enabled: boolean;
@@ -828,13 +839,11 @@ export type ProductPageConfig = {
    * default and stays right for almost every store: the page is part of the
    * shop, not a separate publication.
    *
-   * A SOLID COLOUR ONLY, deliberately. The storefront's background is a
-   * structured three-kind value because a board is the thing a shopper looks
-   * AT; a product page is a thing they READ, and a photograph or a gradient
-   * behind a specification table is a legibility problem rather than a design
-   * option. What a seller actually reaches for here is "white, not the store's
-   * deep green" — one colour — and keeping it to one means no upload, no
-   * object key and no eviction path riding along with a page setting.
+   * A SOLID COLOUR, and a photo may sit behind it (backgroundImage). The
+   * storefront's background is a structured three-kind value because a board
+   * is the thing a shopper looks AT; a product page is a thing they READ, so
+   * a gradient is still not offered, and a photo is always tinted with this
+   * colour (see PagePhoto) so the words on it stay legible.
    *
    * The page's INK is not stored beside it: it stays derived from whatever the
    * page ends up on (see resolveInk), so choosing a dark backdrop flips the
@@ -842,6 +851,8 @@ export type ProductPageConfig = {
    * cannot be read.
    */
   backgroundColor?: string;
+  /** A photo behind the page, tinted with the page colour. ABSENT = none. */
+  backgroundImage?: PagePhoto;
   /** Whether photos are fitted whole or cropped to fill. The one photo choice
    *  that survives, because getting it wrong crops the product out of frame. */
   imageFit: ImageFit;
@@ -1030,19 +1041,11 @@ export const DEFAULT_PRODUCT_PAGE_CONFIG: ProductPageConfig = {
 export const CHECKOUT_LAYOUTS = ["showcase", "compact"] as const;
 export type CheckoutLayout = (typeof CHECKOUT_LAYOUTS)[number];
 
-/** The moment an order lands on the thank-you page. "rays" is the soft light
- *  burst the dashboard's empty states use; reduced motion always gets a still
- *  whichever is chosen. */
-export const CHECKOUT_CELEBRATIONS = ["confetti", "rays", "none"] as const;
+/** The moment an order lands on the thank-you page; reduced motion always
+ *  gets a still whichever is chosen. A third option, "rays" (a soft burst of
+ *  light), was retired: a stored one reads as confetti (checkoutPageSchema). */
+export const CHECKOUT_CELEBRATIONS = ["confetti", "none"] as const;
 export type CheckoutCelebration = (typeof CHECKOUT_CELEBRATIONS)[number];
-
-/** A quiet pattern over the checkout's surface, drawn in the page's own ink at
- *  a few percent so it never costs the form its legibility. No "none" member:
- *  a plain page is the ABSENT field, like every other optional here, so an
- *  untouched checkout never grows a key. The patterns themselves are code
- *  (components/checkout/checkout-textures.ts), never stored CSS. */
-export const CHECKOUT_TEXTURES = ["paper", "dots", "grid", "lines", "linen"] as const;
-export type CheckoutTexture = (typeof CHECKOUT_TEXTURES)[number];
 
 /** One line above the form, and one above the thank-you. */
 export const CHECKOUT_HEADLINE_MAX = 60;
@@ -1064,9 +1067,9 @@ export type CheckoutPageConfig = {
    * background (gradient or photo included), because that panel is looked at.
    */
   backgroundColor?: string;
-  /** A pattern over that surface (the checkout and the thank-you page alike).
-   *  ABSENT = plain. */
-  texture?: CheckoutTexture;
+  /** A photo behind the checkout AND the thank-you page (one design), tinted
+   *  with the surface colour. ABSENT = none. */
+  backgroundImage?: PagePhoto;
   /** Above the form. ABSENT = a default line in the buyer's language. */
   headline?: string;
   /** A few words from the maker beside the summary, signed with the business

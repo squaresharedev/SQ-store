@@ -11,7 +11,6 @@ import {
   type CtaAppearance,
 } from "@/components/product-page/product-page-maps";
 import type { CheckoutStorefront } from "@/types/checkout";
-import { textureLayers } from "./checkout-textures";
 
 /**
  * WHAT THE CHECKOUT PAINTS, resolved in one place: the checkout page, the
@@ -35,9 +34,6 @@ import { textureLayers } from "./checkout-textures";
 export type CheckoutTheme = {
   /** The page and form surface (a hex). */
   surface: string;
-  /** The seller's texture over that surface, as background layers in the
-   *  surface's own ink; empty for a plain page. */
-  surfaceTexture: CSSProperties;
   /** Text on the surface. */
   ink: string;
   /** Hairlines on the surface. */
@@ -68,7 +64,6 @@ export function resolveCheckoutTheme(storefront: CheckoutStorefront): CheckoutTh
   const panelInk = resolveInk(theme);
   return {
     surface,
-    surfaceTexture: textureLayers(checkoutPage.texture, ink),
     ink,
     rule: ruleColor(ink),
     surfaceRadius: surfaceRadius(theme.cornerRadius),

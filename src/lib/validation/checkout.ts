@@ -5,7 +5,9 @@ import {
   singleLineText,
   uuidField,
 } from "@/lib/validation/inputs";
+import { issueKey } from "@/lib/validation/messages";
 import { PURCHASE_QUANTITY_MAX } from "@/lib/validation/product";
+import { isCourierPhone } from "@/lib/orders/ship-to";
 import { OPTIONS_TOTAL_MAX } from "@/types/product";
 import { SHIP_TO_MAX } from "@/types/order-view";
 import { GIFT_MESSAGE_MAX } from "@/types/storefront";
@@ -31,6 +33,11 @@ export const shipToSchema = z.strictObject({
   // which every seller's delivery rows are drawn from. Whether THIS seller
   // delivers there is the quote's question (quoteShipping), not this one's.
   country: z.enum(SHIPPING_COUNTRY_CODES),
+  // For the courier, and only if the buyer chose to give one. A number, not
+  // free text: it is shown to the seller and copied into a carrier's form.
+  phone: singleLineText({ field: "phone", max: SHIP_TO_MAX.phone })
+    .refine(isCourierPhone, { error: issueKey("Validation.text.phone.unsupported") })
+    .optional(),
 });
 
 export const placeOrderSchema = z.strictObject({

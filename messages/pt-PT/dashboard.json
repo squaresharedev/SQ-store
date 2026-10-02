@@ -28,7 +28,8 @@
   },
   "shell": {
     "accountFallback": "Conta",
-    "anotherStore": "outra loja"
+    "anotherStore": "outra loja",
+    "skipToContent": "Saltar para o conteúdo principal"
   },
   "overview": {
     "title": "Visão geral",
@@ -120,6 +121,11 @@
     "toShip": {
       "description": "Os compradores estão à espera. Embale-as e marque-as como enviadas.",
       "action": "Enviar encomendas"
+    },
+    "checkoutRates": {
+      "label": "Defina os preços de entrega",
+      "description": "Os compradores não podem finalizar a compra de um produto físico até um destino ter taxa e país.",
+      "action": "Definir preços"
     }
   }
 }

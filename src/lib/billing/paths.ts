@@ -1,28 +1,25 @@
-// Where billing lives, and how a link opens the pricing modal. Pure strings:
-// safe on the server and in the browser.
+// Where plans and billing live, and how a link says where it came from. Pure
+// strings: safe on the server and in the browser.
 
-/** Settings › Plan & billing. */
+/** The plans page: every plan, what it costs and what it adds. */
+export const PLANS_PATH = "/plans";
+
+/** Settings › Plan & billing: the store's own plan, usage and invoices. */
 export const BILLING_SETTINGS_PATH = "/settings/billing";
 
 /** Stripe's billing webhook. Registered in the Stripe dashboard at this path. */
 export const BILLING_WEBHOOK_PATH = "/api/billing/webhook";
 
-/**
- * The query parameter that opens the pricing modal on arrival, carrying the
- * source it was opened from (`?plans=email`). For links that come from
- * OUTSIDE the page (an email, a notification, Stripe's cancel_url); anything
- * on the page opens the modal directly (usePricingModal().open) instead of
- * navigating, so a form with unsaved edits is never asked to discard them.
- */
-export const PLANS_PARAM = "plans";
+/** The query parameter a link to the plans page names its entry point in. */
+export const PLANS_SOURCE_PARAM = "from";
 
 /** The query parameter Stripe Checkout returns with (`{CHECKOUT_SESSION_ID}`). */
 export const CHECKOUT_SESSION_PARAM = "session_id";
 
 /**
- * Every place the pricing modal can be opened from. A fixed list so the
- * funnel (lib/billing/funnel.ts, mirrored by a SQL CHECK) can say which entry
- * points convert, and so a URL cannot write arbitrary text into it.
+ * Every place the plans page can be reached from. A fixed list so the funnel
+ * (lib/billing/funnel.ts, mirrored by a SQL CHECK) can say which entry points
+ * convert, and so a URL cannot write arbitrary text into it.
  */
 export const PRICING_SOURCES = [
   "sidebar",
@@ -30,13 +27,22 @@ export const PRICING_SOURCES = [
   "settings",
   "storefront_limit",
   "team_limit",
+  "product_limit",
   "order_nudge",
   "analytics_nudge",
   "email",
   "notification",
   "checkout_cancel",
+  "orders_export",
 ] as const;
 export type PricingSource = (typeof PRICING_SOURCES)[number];
+
+/** The entry point a plan limit sends a seller from, per capped thing. */
+export const LIMIT_SOURCE = {
+  storefronts: "storefront_limit",
+  teamSeats: "team_limit",
+  products: "product_limit",
+} as const satisfies Record<string, PricingSource>;
 
 /** Narrow an untrusted value (a URL parameter) to a known source. */
 export function parsePricingSource(value: unknown): PricingSource | null {
@@ -45,7 +51,7 @@ export function parsePricingSource(value: unknown): PricingSource | null {
     : null;
 }
 
-/** A link that lands on Settings › Plan & billing with the modal open. */
-export function pricingHref(source: PricingSource): string {
-  return `${BILLING_SETTINGS_PATH}?${PLANS_PARAM}=${source}`;
+/** A link to the plans page that says where it was followed from. */
+export function plansHref(source: PricingSource): string {
+  return `${PLANS_PATH}?${PLANS_SOURCE_PARAM}=${source}`;
 }

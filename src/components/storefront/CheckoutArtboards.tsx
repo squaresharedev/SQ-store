@@ -39,6 +39,8 @@ type ChainProps = {
   seller: StorefrontSeller;
   backgroundImageUrl: string | null;
   customFontUrl: string | null;
+  /** Display URL of the checkout's photo backdrop (shared with the thank-you). */
+  pagePhotoUrl: string | null;
   widths: Record<PreviewDevice, number>;
   initialDevice: PreviewDevice;
   onClose: () => void;
@@ -82,6 +84,7 @@ function chainStorefront(props: ChainProps): CheckoutStorefront {
     seller: props.seller,
     backgroundImageUrl: props.backgroundImageUrl,
     customFontUrl: props.customFontUrl,
+    pagePhotoUrl: props.pagePhotoUrl,
   };
 }
 
@@ -89,10 +92,9 @@ function chainStorefront(props: ChainProps): CheckoutStorefront {
  * THE CHECKOUT, as an artboard: the page a product page's button leads to,
  * drawn exactly as a buyer would see it for this product (its first available
  * version, one of it), with the payment shown as a still drawing of the card
- * fields. `live` says whether buyers can reach it yet; when they cannot, the
- * pay button says so underneath, the way an unwired buy button does.
+ * fields.
  */
-export function CheckoutArtboard(props: ChainProps & { live: boolean }) {
+export function CheckoutArtboard(props: ChainProps) {
   const t = useTranslations("Storefront.artboard");
   const product = usePreviewProduct(props.product, props.productPage.showStock, props.soldOut);
   return (
@@ -110,7 +112,6 @@ export function CheckoutArtboard(props: ChainProps & { live: boolean }) {
         <CheckoutView
           page={{ storefront: chainStorefront(props), product }}
           mode="preview"
-          unwired={!props.live}
         />
       </Editable>
     </ArtboardFrame>
@@ -184,6 +185,7 @@ export function sampleOrder(
     fulfilment,
     shippedAt: null,
     trackingNumber: null,
+    trackingLink: null,
     dispatch: product.isDigital
       ? null
       : (findShippingProfile(policy.profiles, product.shippingProfileId)?.dispatch ?? policy.dispatch ?? null),

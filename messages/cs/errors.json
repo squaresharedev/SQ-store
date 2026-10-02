@@ -608,6 +608,18 @@
     "storefronts": "Váš {plan, select, free {plán Free} starter {plán Starter} pro {plán Pro} other {aktuální plán}} zahrnuje {cap, plural, one {# výlohu} few {# výlohy} many {# výlohy} other {# výloh}} a váš obchod má všechny obsazené.",
     "teamSeats": "Váš {plan, select, free {plán Free} starter {plán Starter} pro {plán Pro} other {aktuální plán}} zahrnuje {cap, plural, one {# místo} few {# místa} many {# místa} other {# míst}}, včetně vás, a všechna jsou obsazená.",
     "fix": "Přejděte na vyšší plán pro více nebo odeberte to, co už nepotřebujete. Nic z toho, co máte, to neovlivní.",
-    "action": "Zobrazit plány"
+    "action": "Zobrazit plány",
+    "products": "Váš {plan, select, free {plán Free} starter {plán Starter} pro {plán Pro} other {aktuální plán}} zahrnuje {cap, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktů}} a váš obchod je má všechny obsazené.",
+    "fixTop": "Odeberte ten, který už nepotřebujete, a budete moci přidat další. Nic z toho, co máte, to neovlivní."
+  },
+  "ordersExport": {
+    "signIn": "Přihlaste se, abyste mohli exportovat objednávky.",
+    "permissionDenied": "K objednávkám tohoto obchodu nemáte přístup.",
+    "unavailable": "Vaše objednávky se teď nedají exportovat.",
+    "tryAgain": "Za chvíli to zkuste znovu.",
+    "planRequired": "Export objednávek je součástí placeného plánu.",
+    "planRequiredFix": "Pro export objednávek přejděte na vyšší plán na stránce Plány.",
+    "rateLimited": "Exportů za krátkou dobu je příliš mnoho.",
+    "rateLimitedFix": "Počkejte pár minut a zkuste to znovu."
   }
 }

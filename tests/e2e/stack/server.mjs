@@ -748,6 +748,11 @@ const next = spawn(
       // go to the in-memory dev outbox, and specs read them back from
       // /dev/outbox. The HMAC key is a fixed test value (32 x 0x01), never a
       // real one. Nothing leaves the machine.
+      // Plans: the dev-only TEST billing provider (lib/billing/test-provider.ts),
+      // so upgrading, switching and cancelling run end to end with no Stripe
+      // account. It writes seller_billing through the same function the
+      // Stripe webhook uses; nothing leaves the machine.
+      BILLING_TEST_PROVIDER: "1",
       TRANSACTIONAL_EMAIL_FROM: "no-reply@e2e.squareshare.to",
       SMS_SENDER: "Squareshare",
       CONTACT_VERIFICATION_KEY: "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE",

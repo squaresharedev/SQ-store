@@ -9,7 +9,7 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
-import { useOpenPlansFor } from "@/components/billing/useOpenPlansFor";
+import { usePlanLimitRedirect } from "@/components/billing/usePlanLimitRedirect";
 import {
   fieldBaseClass,
   helpTextClass,
@@ -82,7 +82,7 @@ export function CreateStorefrontWizard({
   const tOptions = useTranslations("Storefront.createOptions");
   const tCommon = useTranslations("Common");
   const showActionError = useActionErrorToast();
-  const openPlansFor = useOpenPlansFor();
+  const toPlansFor = usePlanLimitRedirect();
   const fieldId = useId();
   const reducedMotion = useReducedMotion();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -190,8 +190,8 @@ export function CreateStorefrontWizard({
       showActionError(result.error);
       setSubmitting(false);
       // At the plan's storefront limit: the toast says why, and the plans
-      // take this dialog's place, since a bigger plan is the way on.
-      if (openPlansFor(result.error)) onClose();
+      // page takes this dialog's place, since a bigger plan is the way on.
+      if (toPlansFor(result.error)) onClose();
       return;
     }
     // Leave `submitting` set: we are navigating away, and re-enabling the

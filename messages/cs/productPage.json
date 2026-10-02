@@ -195,6 +195,7 @@
       "shipped": "Na cestě",
       "shippedDetail": "Odesláno {date}",
       "tracking": "Číslo zásilky {number}",
+      "track": "Sledovat u dopravce {carrier}",
       "notYet": "E-mail dostanete, až bude odesláno.",
       "ready": "Připraveno ke stažení",
       "readyDetail": "Váš soubor je připraven níže a odkaz je také v e-mailu."
@@ -262,6 +263,8 @@
       "region": "Kraj nebo region",
       "postalCode": "PSČ",
       "country": "Země",
+      "phone": "Telefon (nepovinné)",
+      "phoneHint": "Jen pro dopravce, kdyby vás potřeboval kvůli doručení zastihnout.",
       "whyAsk": "Proč se ptáme"
     },
     "gift": {
@@ -309,11 +312,11 @@
     },
     "pay": "Objednávka zavazující k platbě ({amount})",
     "placing": "Zadávání objednávky...",
-    "unwired": "Pokladna se otevře pro kupující, jakmile propojíte Stripe.",
     "errors": {
       "title": "Objednávku se nepodařilo zadat",
       "required": "Toto pole je povinné.",
       "email": "Zadejte e-mailovou adresu ve formátu jmeno@priklad.cz.",
+      "phone": "Zadejte telefonní číslo číslicemi, např. +420 601 123 456.",
       "fields": "Zkontrolujte zvýrazněná pole.",
       "consent": "Zaškrtněte políčko a potvrďte, že chcete stáhnout okamžitě.",
       "sold_out": "Omlouváme se, právě došlo zboží. Nic nebylo účtováno.",

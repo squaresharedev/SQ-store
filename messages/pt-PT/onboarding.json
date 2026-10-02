@@ -201,7 +201,7 @@
       },
       "ordersSearch": {
         "title": "Encontre uma encomenda",
-        "body": "Pesquise pelo e-mail do comprador. As encomendas chegam aqui quando o checkout da Square Share abrir."
+        "body": "Pesquise nesta lista pelo e-mail do comprador. Para encontrar uma encomenda pelo número, um nome, uma cidade ou um número de rastreio, use a pesquisa no topo da página."
       },
       "ordersFilters": {
         "title": "Filtre e ordene",

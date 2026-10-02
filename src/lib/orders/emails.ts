@@ -4,7 +4,8 @@
 //      everything needed to pack and address the parcel without opening the
 //      dashboard, plus one link to the order to mark it shipped.
 //   2. "It's on its way" to the BUYER when the seller marks it shipped, or
-//      adds a tracking number afterwards (lib/orders/actions.ts).
+//      adds a tracking number afterwards (lib/orders/actions.ts), with the
+//      link to their order page, where the parcel is followed.
 //   3. The order CONFIRMATION to the BUYER when an order lands: the contract
 //      confirmation EU distance selling owes them on a durable medium (CRD
 //      art. 8(7)), which is why it carries the seller's identity and the
@@ -27,15 +28,18 @@
 // answers questions about the goods (see components/product-page/ProductCta.tsx).
 
 import { appUrl } from "@/lib/app-url";
+import { signInPath } from "@/lib/auth/paths";
 import { sendEmail, type SendResult } from "@/lib/email/send";
 import { formatCents } from "@/lib/format/money";
 import { regionName } from "@/lib/format/country";
+import { carrierName } from "@/lib/orders/carriers";
+import { orderNumber } from "@/lib/orders/order-number";
 import { orderDetailPath } from "@/lib/orders/paths";
 import { formatOrderSelection } from "@/lib/orders/selection";
 import { formatShipTo } from "@/lib/orders/ship-to";
 import { translatorFor, type Translate } from "@/i18n/translator";
 import type { Locale } from "@/i18n/locales";
-import type { OrderSelection, ShipTo } from "@/types/order-view";
+import type { CarrierId, OrderSelection, ShipTo } from "@/types/order-view";
 import type { StorefrontSeller } from "@/types/storefront";
 
 /** What both emails say about the goods. */
@@ -56,6 +60,17 @@ function packLines(t: Translate, goods: Goods): string[] {
 /** The address as parcel-label lines, its country named in the reader's language. */
 function addressBlock(address: ShipTo, locale: Locale): string {
   return formatShipTo(address, regionName(address.country, locale));
+}
+
+/**
+ * The link to an order, for a seller reading mail. Goes through sign-in rather
+ * than straight to the order: a seller tapping it on a phone is usually signed
+ * out, and a dashboard page a signed-out visitor requests forgets where they
+ * were going. `/login?next=` remembers, sends a signed-in seller straight on,
+ * and sends one who owes a second factor to the challenge first.
+ */
+function sellerOrderLink(orderId: string): string {
+  return appUrl(signInPath(orderDetailPath(orderId)));
 }
 
 /** Log a delivery that should have worked. "disabled" is a deployment choice
@@ -92,7 +107,7 @@ export async function sendNewOrderEmail(
 ): Promise<SendResult> {
   try {
     const t = await translatorFor(locale);
-    const url = appUrl(orderDetailPath(order.orderId));
+    const url = sellerOrderLink(order.orderId);
     const lines: string[] = [];
 
     if (order.ships) {
@@ -115,6 +130,9 @@ export async function sendNewOrderEmail(
       lines.push(t("Orders.email.newOrder.introDigital", { title: order.productTitle }), "");
     }
 
+    // The number the buyer will quote when they write, so the seller can match
+    // it to this order without opening anything.
+    lines.push(t("Orders.email.newOrder.number", { number: orderNumber(order.orderId) }));
     if (order.buyerEmail) lines.push(t("Orders.email.newOrder.buyer", { email: order.buyerEmail }));
     lines.push(
       t("Orders.email.newOrder.total", {
@@ -152,6 +170,11 @@ export type ShippedEmail = Goods & {
   /** "shipped" when it has just gone; "tracking" when a number was added later. */
   kind: "shipped" | "tracking";
   trackingNumber: string | null;
+  /** Who is carrying it, when the seller said. Named beside the number. */
+  carrier: CarrierId | null;
+  /** The buyer's order page (their credential; lib/orders/order-link.ts),
+   *  where the parcel is followed. Null where there is none. */
+  orderUrl: string | null;
   shipTo: ShipTo | null;
   /** Who the buyer bought from: the seller's trading name, and where replies go. */
   store: { name: string; contactEmail: string | null };
@@ -178,7 +201,21 @@ export async function sendShippedEmail(
       ...packLines(t, order),
     ];
     if (order.trackingNumber) {
-      lines.push("", t("Orders.email.shipped.tracking", { tracking: order.trackingNumber }));
+      lines.push(
+        "",
+        order.carrier
+          ? t("Orders.email.shipped.trackingCarrier", {
+              tracking: order.trackingNumber,
+              carrier: carrierName(order.carrier),
+            })
+          : t("Orders.email.shipped.tracking", { tracking: order.trackingNumber }),
+      );
+    }
+    // The one link this mail carries is to the buyer's own order page on this
+    // domain. The carrier's tracking link lives THERE, so mail sent from our
+    // domain never points a buyer at a third party's site.
+    if (order.orderUrl) {
+      lines.push("", t("Orders.email.shipped.orderPage", { url: order.orderUrl }));
     }
     if (order.shipTo) {
       lines.push("", t("Orders.email.shipped.shipTo"), addressBlock(order.shipTo, locale));
@@ -399,7 +436,7 @@ export async function sendWithdrawalNotice(
       }),
       t("Orders.email.withdrawal.sellerName", { name: withdrawal.buyerName }),
       "",
-      t("Orders.email.withdrawal.sellerNext", { url: appUrl(orderDetailPath(withdrawal.orderId)) }),
+      t("Orders.email.withdrawal.sellerNext", { url: sellerOrderLink(withdrawal.orderId) }),
       "",
       t("Orders.email.signOff"),
     ];

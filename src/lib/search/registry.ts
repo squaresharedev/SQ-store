@@ -21,7 +21,7 @@ import {
   settingIndexFields,
 } from "@/lib/storefront/setting-ref";
 import type { TeamAction, TeamRole } from "@/lib/team/permissions";
-import { BILLING_SETTINGS_PATH } from "@/lib/billing/paths";
+import { BILLING_SETTINGS_PATH, PLANS_PATH } from "@/lib/billing/paths";
 
 /**
  * THE LOCAL INDEX — every page, settings section, settings FIELD and quick
@@ -223,20 +223,7 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     title: "Search.fields.plan",
     section: BILLING,
     href: `${BILLING_SETTINGS_PATH}#plan`,
-    synonyms: [
-      "plan",
-      "pricing",
-      "upgrade",
-      "subscription",
-      "free plan",
-      "starter",
-      "pro",
-      "fee",
-      "platform fee",
-      "commission",
-      "cancel plan",
-      "downgrade",
-    ],
+    synonyms: ["plan", "subscription", "free plan", "fee", "platform fee", "commission", "cancel plan", "downgrade"],
   },
   {
     id: "field:invoices",
@@ -432,6 +419,13 @@ const ACTIONS: EntrySpec[] = [
     title: "Search.actions.notificationHistory",
     href: "/notifications",
     synonyms: ["alerts", "inbox", "unread", "bell"],
+  },
+  {
+    id: "action:compare-plans",
+    type: "action",
+    title: "Search.actions.comparePlans",
+    href: PLANS_PATH,
+    synonyms: ["plans", "pricing", "upgrade", "starter", "pro", "lower fees", "export orders"],
   },
   // The welcome flow's map, on demand. Last on purpose: the empty state shows
   // the first three actions, and this one is for someone who goes looking.

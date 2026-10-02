@@ -203,6 +203,8 @@
       "region": "County, state or region",
       "postalCode": "Postcode",
       "country": "Country",
+      "phone": "Phone (optional)",
+      "phoneHint": "Only for the courier, in case they need to reach you about the delivery.",
       "whyAsk": "Why we ask"
     },
     "gift": {
@@ -250,11 +252,11 @@
     },
     "pay": "Pay {amount}",
     "placing": "Placing your order…",
-    "unwired": "Checkout opens for buyers when you connect Stripe.",
     "errors": {
       "title": "We couldn't place your order",
       "required": "This is required.",
       "email": "Enter an email address like name@example.com.",
+      "phone": "Enter a phone number using digits, like +353 85 123 4567.",
       "fields": "Check the highlighted fields.",
       "consent": "Tick the box to confirm you want the download straight away.",
       "sold_out": "Sorry, this has just sold out. Nothing was charged.",
@@ -289,6 +291,7 @@
       "shipped": "On its way",
       "shippedDetail": "Sent {date}",
       "tracking": "Tracking number {number}",
+      "track": "Track with {carrier}",
       "notYet": "You'll get an email when it's sent.",
       "ready": "Ready to download",
       "readyDetail": "Your file is ready below, and the link is in your email too."

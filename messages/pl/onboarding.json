@@ -201,7 +201,7 @@
       },
       "ordersSearch": {
         "title": "Znajdź zamówienie",
-        "body": "Szukaj po adresie e-mail kupującego. Zamówienia pojawią się tutaj, gdy ruszy realizacja zakupu w Square Share."
+        "body": "Szukaj na tej liście po adresie e-mail kupującego. Aby znaleźć zamówienie po numerze, imieniu i nazwisku, mieście lub numerze śledzenia, użyj wyszukiwania u góry strony."
       },
       "ordersFilters": {
         "title": "Filtruj i sortuj",

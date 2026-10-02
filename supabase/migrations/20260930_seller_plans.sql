@@ -21,7 +21,9 @@
 --      points convert. Server-produced; nothing a browser can write.
 --   5. plan_limit() and the triggers that enforce it on storefronts and
 --      team_members. The app checks first and explains; these make the limit
---      true for a direct REST insert too.
+--      true for a direct REST insert too. Both obey one switch,
+--      billing_switches.plan_limits_enforced, which ships OFF: a limit must
+--      not bite before a bigger plan can be bought.
 --   6. billing_sales_summary(): the last 30 days of item sales, for the
 --      pricing modal's "which plan is cheapest for me" calculator.
 --   7. The 'billing.manage' permission (owners only) and the 'billing'
@@ -190,6 +192,28 @@ grant all on table public.seller_funnel_events to service_role;
 
 -- ---- 5. Plan limits ----------------------------------------------------------------
 
+-- THE SWITCH. Limits are only enforced once a bigger plan can actually be
+-- bought: a limit whose only way out is an "upgrade" button marked Soon is a
+-- dead end, not an upsell. One row, one flag, read by BOTH the app's check
+-- (src/lib/billing/limits.ts) and the trigger below, so the two can never
+-- disagree. It ships OFF. Turn it on the day Stripe Billing is live:
+--   update public.billing_switches set plan_limits_enforced = true;
+create table if not exists public.billing_switches (
+  -- A single-row table: the primary key can only ever be true.
+  id                   boolean primary key default true check (id),
+  plan_limits_enforced boolean not null default false,
+  updated_at           timestamptz not null default now()
+);
+
+insert into public.billing_switches (id) values (true) on conflict (id) do nothing;
+
+comment on table public.billing_switches is
+  'Launch switches for seller plans. plan_limits_enforced: whether plan limits refuse creates (off until paid plans can be bought). Service role only.';
+
+alter table public.billing_switches enable row level security;
+revoke all on table public.billing_switches from anon, authenticated;
+grant all on table public.billing_switches to service_role;
+
 -- MIRROR of PLANS[..].limits in src/lib/billing/plans.ts. Null = unlimited.
 -- Pure data, so any role may read it: the same numbers are on the pricing page.
 create or replace function public.plan_limit(p_plan text, p_key text)
@@ -235,7 +259,8 @@ grant execute on function public.account_plan(uuid) to service_role;
 comment on function public.account_plan(uuid) is
   'free | starter | pro: the plan an account is on now (paid plan until paid_until, else free). Service role only.';
 
--- THE LIMIT, enforced on insert. The server actions check first and answer
+-- THE LIMIT, enforced on insert (and when a row moves into an account, or a
+-- revoked seat is revived). The server actions check first and answer
 -- with an upgrade prompt (src/lib/billing/limits.ts); this is the same rule
 -- held by the database, so a client that skips the action and inserts over
 -- REST meets it anyway.
@@ -279,13 +304,27 @@ begin
     return new;
   end if;
 
+  -- Off until paid plans can be bought (see billing_switches above).
+  if not coalesce((select s.plan_limits_enforced from public.billing_switches s where s.id), false) then
+    return new;
+  end if;
+
   if tg_table_name = 'storefronts' then
+    -- An UPDATE only reaches here when owner_id changed (see the trigger):
+    -- a storefront moved INTO an account counts against that account.
+    if tg_op = 'UPDATE' then
+      if new.owner_id is not distinct from old.owner_id then
+        return new;
+      end if;
+    end if;
     owner := new.owner_id;
   elsif tg_table_name = 'team_members' then
-    -- Re-activating a revoked row adds a seat; editing a live one does not.
+    -- Re-activating a revoked row adds a seat, and so does moving a live row
+    -- to another account; editing a live row in place does not.
     -- (Nested, not ANDed: OLD only exists for an UPDATE.)
     if tg_op = 'UPDATE' then
-      if old.status in ('invited', 'active') then
+      if old.status in ('invited', 'active')
+         and new.account_owner_id is not distinct from old.account_owner_id then
         return new;
       end if;
     end if;
@@ -319,14 +358,16 @@ $$;
 
 revoke execute on function public.enforce_plan_limit() from public, anon, authenticated;
 
+-- Insert, and any change of the owning account: a row moved from one account
+-- into another is a new one for the account it lands in.
 drop trigger if exists storefronts_plan_limit on public.storefronts;
 create trigger storefronts_plan_limit
-  before insert on public.storefronts
+  before insert or update of owner_id on public.storefronts
   for each row execute function public.enforce_plan_limit('storefronts');
 
 drop trigger if exists team_members_plan_limit on public.team_members;
 create trigger team_members_plan_limit
-  before insert or update of status on public.team_members
+  before insert or update of status, account_owner_id on public.team_members
   for each row execute function public.enforce_plan_limit('teamSeats');
 
 -- ---- 6. Applying a Stripe snapshot ----------------------------------------------
@@ -416,9 +457,10 @@ comment on function public.billing_apply_snapshot(
 -- ---- 7. Sales for the calculator ----------------------------------------------------
 
 -- The last 30 days of an account's paid EUR sales: the item subtotal (what the
--- fee is charged on), how many sales, and the fees charged. SECURITY INVOKER:
--- it reads orders under the caller's own RLS (owner or store.read, and the
--- two-factor bar), so it can tell nobody anything they could not already read.
+-- fee is charged on), how many sales, and the fees charged. Service role only:
+-- its one caller (the pricing modal's loader) has already checked that the
+-- signed-in user may read the store it names, and a client has no reason to
+-- probe other stores' figures through an arbitrary seller id.
 create or replace function public.billing_sales_summary(p_seller_id uuid, p_now timestamptz default now())
 returns table (subtotal_cents bigint, sales integer, fees_cents bigint)
 language sql stable
@@ -436,11 +478,11 @@ as $$
     and o.created_at <= p_now
 $$;
 
-revoke execute on function public.billing_sales_summary(uuid, timestamptz) from public, anon;
-grant execute on function public.billing_sales_summary(uuid, timestamptz) to authenticated, service_role;
+revoke execute on function public.billing_sales_summary(uuid, timestamptz) from public, anon, authenticated;
+grant execute on function public.billing_sales_summary(uuid, timestamptz) to service_role;
 
 comment on function public.billing_sales_summary(uuid, timestamptz) is
-  'Last 30 days of an account''s paid EUR sales: item subtotal, count, fees. Invoker: reads orders under the caller''s RLS.';
+  'Last 30 days of an account''s paid EUR sales: item subtotal, count, fees. Service role only; the caller authorises the account first.';
 
 -- ---- 8. Permission mirror ------------------------------------------------------------
 -- MIRROR of src/lib/team/permissions.ts. Edit BOTH together. 'billing.manage'

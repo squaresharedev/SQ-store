@@ -28,7 +28,8 @@
   },
   "shell": {
     "accountFallback": "Account",
-    "anotherStore": "another store"
+    "anotherStore": "another store",
+    "skipToContent": "Skip to main content"
   },
   "overview": {
     "title": "Overview",
@@ -120,6 +121,11 @@
     "toShip": {
       "description": "Buyers are waiting on these. Pack them, then mark them shipped.",
       "action": "Ship orders"
+    },
+    "checkoutRates": {
+      "label": "Set your delivery prices",
+      "description": "Buyers can't check out a physical product until a destination has both a rate and a country.",
+      "action": "Set prices"
     }
   }
 }

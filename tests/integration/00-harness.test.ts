@@ -34,6 +34,9 @@ describe("embedded supabase replica", () => {
       "admin_users",
       "artifact_likes",
       "artifacts",
+      // The seller-plan launch switch: whether plan limits refuse creates
+      // yet (20260930_seller_plans). Service-role only.
+      "billing_switches",
       "collections",
       // Pending codes proving a seller owns their buyer-facing email and
       // phone (20260926_contact_verification). Service-role only.
@@ -72,8 +75,15 @@ describe("embedded supabase replica", () => {
       "rate_limits",
       "reports",
       "security_events",
+      // A store's plan as Stripe last reported it, and what happens around
+      // the plans page (20260930_seller_plans). Service-role only.
+      "seller_billing",
+      "seller_funnel_events",
       "storefront_signals",
       "storefronts",
+      // Stripe webhook events already handled, so a redelivery is a no-op
+      // (20260930_seller_plans). Service-role only.
+      "stripe_events",
       "team_members",
       "waitlist_signups",
     ]);

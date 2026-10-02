@@ -1,2 +1,196 @@
 {
+  "plans": {
+    "free": {
+      "name": "Free",
+      "tagline": "Alles wat je nodig hebt om te beginnen met verkopen."
+    },
+    "starter": {
+      "name": "Starter",
+      "tagline": "Lagere kosten en ruimte om te groeien, voor een winkel die elke week verkoopt."
+    },
+    "pro": {
+      "name": "Pro",
+      "tagline": "De laagste kosten en alles wat we bieden, voor een winkel die elke dag verkoopt."
+    }
+  },
+  "page": {
+    "metaTitle": "Abonnementen",
+    "title": "Kies je abonnement",
+    "lead": "Begin gratis en blijf gratis zo lang je wilt. Upgrade wanneer lagere kosten zichzelf terugbetalen.",
+    "trust": {
+      "secure": "Veilig afrekenen via Stripe",
+      "cancel": "Op elk moment opzeggen",
+      "keep": "Er wordt nooit iets verwijderd"
+    },
+    "intervalLabel": "Factureringsperiode",
+    "month": "Maandelijks",
+    "year": "Jaarlijks",
+    "yearlySaving": "2 maanden gratis bij jaarlijks",
+    "pastDue": "De laatste betaling voor je {plan}-abonnement is niet gelukt. Werk je kaart bij om het te behouden.",
+    "endsOn": "Je {plan}-abonnement eindigt op {date}, daarna gaat je winkel over naar Free. Er wordt niets verwijderd.",
+    "ownerOnly": "Alleen de eigenaar van de winkel kan het abonnement wijzigen.",
+    "soon": "Binnenkort",
+    "soonTitle": "Betaalde abonnementen komen binnenkort. Alles op Free blijft in de tussentijd gewoon werken.",
+    "finePrint": "Prijzen zijn excl. btw. De kosten per verkoop gelden voor verkopen via de afrekenpagina van Square Share en worden berekend over de productprijs, nooit over de verzending. De eigen kosten van Stripe voor kaartverwerking komen daar nog bij. Je kunt op elk moment opzeggen: je houdt je abonnement tot het einde van de periode die je hebt betaald.",
+    "unavailable": "Abonnementen kunnen nu niet worden getoond. Vernieuw de pagina over een moment."
+  },
+  "card": {
+    "perMonth": "/ maand",
+    "exclVat": "excl. btw",
+    "freeForever": "Gratis, zo lang als je wilt",
+    "billedYearly": "{amount} eenmaal per jaar gefactureerd, excl. btw",
+    "bestValue": "Beste prijs-kwaliteit",
+    "current": "Huidig abonnement",
+    "everythingIn": "Alles in {plan}, plus",
+    "includes": "Inbegrepen",
+    "upgrade": "Upgraden naar {plan}",
+    "switch": "Overstappen naar {plan}",
+    "switchInterval": "{interval, select, year {Overstappen op jaarlijks} other {Overstappen op maandelijks}}",
+    "moveToFree": "Overstappen naar Free"
+  },
+  "features": {
+    "fee": "{rate} kosten per verkoop",
+    "storefronts": "{count, plural, one {# etalage} other {# etalages}}",
+    "storefrontsUnlimited": "Onbeperkt aantal etalages",
+    "teammates": "{count, plural, =0 {Alleen jij, geen teamgenoten} one {Jij en # teamgenoot} other {Jij en # teamgenoten}}",
+    "teammatesUnlimited": "Onbeperkt aantal teamgenoten",
+    "core": "Productpagina's, afrekenen en statistieken",
+    "ordersExport": "Exporteer je bestellingen naar een spreadsheet (CSV)",
+    "earlyAccess": "Vroege toegang tot nieuwe functies",
+    "prioritySupport": "Voorrang bij support: je berichten worden als eerste beantwoord",
+    "analyticsExport": "Statistiekrapporten downloaden (CSV)",
+    "products": "{count, plural, one {# product} other {# producten}}",
+    "productsUnlimited": "Onbeperkt aantal producten"
+  },
+  "calculator": {
+    "eyebrow": "Calculator",
+    "title": "Welk abonnement kost je het minst?",
+    "lead": "Schuif naar je verkoop in een maand. Elke balk is de prijs van het abonnement plus de kosten over die verkoop.",
+    "salesLabel": "Verkoop per maand",
+    "salesAria": "Je verkoop per maand, in euro",
+    "fromYourSales": "Ingevuld op basis van je verkopen van de afgelopen 30 dagen.",
+    "perMonth": "per maand",
+    "cheapest": "Bij een verkoop van {sales} per maand is {plan} het voordeligst voor jou.",
+    "legendPrice": "Abonnementsprijs",
+    "legendFee": "Kosten over je verkoop",
+    "cheapestTag": "Voordeligst voor jou"
+  },
+  "compare": {
+    "eyebrow": "Vergelijken",
+    "title": "Alle abonnementen naast elkaar",
+    "feature": "Functie",
+    "price": "Prijs",
+    "unlimited": "Onbeperkt",
+    "included": "Inbegrepen",
+    "notIncluded": "Niet inbegrepen",
+    "rows": {
+      "fee": "Kosten per verkoop",
+      "storefronts": "Etalages",
+      "teamSeats": "Teamplekken, jij inbegrepen",
+      "ordersExport": "Bestellingen exporteren (CSV)",
+      "earlyAccess": "Vroege toegang tot nieuwe functies",
+      "prioritySupport": "Voorrang bij support",
+      "products": "Producten",
+      "productPages": "Productpagina's",
+      "checkout": "Veilig afrekenen",
+      "digitalDownloads": "Digitale downloads, bestanden tot {size}",
+      "stock": "Voorraad bijhouden",
+      "shipping": "Verzendprofielen",
+      "embed": "Insluiten op je eigen website",
+      "designer": "Etalage-editor",
+      "roles": "Teamrollen",
+      "analytics": "Statistieken",
+      "analyticsExport": "Statistiekrapporten (CSV)",
+      "productImport": "Productimport (CSV)"
+    },
+    "groups": {
+      "selling": "Verkopen",
+      "store": "Je winkel",
+      "tools": "Tools en inzichten",
+      "support": "Support"
+    }
+  },
+  "faq": {
+    "eyebrow": "Vragen",
+    "title": "Voordat je upgradet",
+    "items": {
+      "cancel": {
+        "q": "Kan ik op elk moment opzeggen?",
+        "a": "Ja. Zeg op via Instellingen › Abonnement en facturering en je houdt je abonnement tot het einde van de periode die je hebt betaald. Daarna gaat je winkel over naar Free."
+      },
+      "downgrade": {
+        "q": "Wat gebeurt er met mijn winkel als ik terugga naar Free?",
+        "a": "Er wordt niets verwijderd. Elke etalage, elk product en elke teamgenoot blijft. Je kunt alleen niet meer toevoegen dan Free toestaat, totdat je er een paar verwijdert of weer upgradet."
+      },
+      "vat": {
+        "q": "Zijn de prijzen inclusief btw?",
+        "a": "Nee, prijzen worden getoond zonder btw, die bij het afrekenen wordt toegevoegd waar dat van toepassing is. Voeg bij het afrekenen je btw-nummer toe en het staat op elke factuur."
+      },
+      "fee": {
+        "q": "Waarover worden de kosten per verkoop berekend?",
+        "a": "Over de productprijs van elke verkoop via de afrekenpagina van Square Share, nooit over de verzending. De eigen kosten van Stripe voor kaartverwerking staan daar los van."
+      },
+      "switch": {
+        "q": "Kan ik later van abonnement wisselen?",
+        "a": "Op elk moment, omhoog of omlaag, maandelijks of jaarlijks. Stripe laat precies zien wat je gaat betalen voordat je bevestigt."
+      }
+    }
+  },
+  "upsell": {
+    "eyebrow": "Upgraden",
+    "eyebrowBestValue": "Beste prijs-kwaliteit",
+    "title": "Krijg meer met {plan}",
+    "lead": "Lagere kosten bij elke verkoop, meer ruimte om te groeien en betere tools om je winkel te runnen.",
+    "feeLabel": "Jouw kosten per verkoop",
+    "saving": "Bij je verkoop van de afgelopen 30 dagen bespaart {plan} je {amount} per maand.",
+    "breakEven": "{plan} verdient zichzelf terug zodra je meer dan {amount} per maand verkoopt.",
+    "gains": "Wat {plan} toevoegt",
+    "cta": "Upgraden naar {plan}, {price} per maand",
+    "compare": "Alle abonnementen vergelijken",
+    "topEyebrow": "Hoogste abonnement",
+    "topTitle": "Alles in {plan} is van jou"
+  },
+  "portal": {
+    "opening": "Stripe openen",
+    "stepUp": "Bevestig dat jij het bent voordat je factureringsgegevens worden geopend."
+  },
+  "chip": {
+    "label": "Abonnement: {plan}",
+    "upgrade": "Upgraden"
+  },
+  "banner": {
+    "label": "Betaling abonnement",
+    "pastDue": "De betaling voor je {plan}-abonnement is mislukt. Werk je kaart bij om het te behouden.",
+    "pastDueMember": "De {plan}-betaling van deze winkel is mislukt. Alleen de eigenaar kan de kaart bijwerken.",
+    "action": "Kaart bijwerken"
+  },
+  "settings": {
+    "planTitle": "Je abonnement",
+    "planDescription": "Wat je winkel betaalt, en de kosten bij elke verkoop.",
+    "priceLine": "{price} per {interval, select, year {jaar} other {maand}}, excl. btw",
+    "freeLine": "Geen abonnementskosten.",
+    "renews": "Wordt verlengd op {date}.",
+    "ends": "Eindigt op {date}. Je winkel gaat dan over naar Free en er wordt niets verwijderd.",
+    "pastDue": "Betaling mislukt. Stripe probeert je kaart opnieuw; werk je kaart bij om {plan} te behouden.",
+    "feeLine": "Kosten bij elke verkoop: {rate} van de productprijs.",
+    "memberNote": "Alleen de eigenaar van de winkel kan het abonnement wijzigen of de facturen bekijken.",
+    "usageTitle": "Wat je gebruikt",
+    "usageDescription": "De limieten van je abonnement gelden alleen voor het toevoegen van meer. Wat je hebt, wordt nooit verwijderd.",
+    "usage": {
+      "storefronts": "Etalages: {used} van {cap}",
+      "storefrontsUnlimited": "Etalages: {used}, geen limiet",
+      "teamSeats": "Teamplekken, jij inbegrepen: {used} van {cap}",
+      "teamSeatsUnlimited": "Teamplekken, jij inbegrepen: {used}, geen limiet",
+      "products": "Producten: {used} van {cap}",
+      "productsUnlimited": "Producten: {used}, geen limiet"
+    },
+    "overLimit": "Boven de limiet van dit abonnement. Alles blijft werken; verwijder er een of upgrade om meer toe te voegen.",
+    "invoicesTitle": "Facturering en facturen",
+    "invoicesDescription": "Je kaart, factuuradres, btw-nummer en alle facturen, op de beveiligde pagina van Stripe.",
+    "manage": "Facturering en facturen beheren",
+    "noBilling": "Facturen en betaalgegevens verschijnen hier zodra je een betaald abonnement hebt.",
+    "confirmed": "Je zit op {plan}. Bedankt voor je steun aan Square Share.",
+    "pending": "We bevestigen je betaling bij Stripe. Vernieuw de pagina over een moment als je abonnement nog niet is gewijzigd.",
+    "unavailable": "Je abonnement kan nu niet worden getoond. Vernieuw de pagina over een moment."
+  }
 }

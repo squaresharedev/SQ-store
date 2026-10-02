@@ -175,7 +175,7 @@
     "prefs": {
       "sales": {
         "label": "Prodeje",
-        "blurb": "E-mail pokaždé, když se něco prodá. Takové zprávy ve schránce potěší."
+        "blurb": "E-mail, když se něco prodá, s informací, co zabalit a kam to poslat."
       },
       "productUpdates": {
         "label": "Novinky v produktu",
@@ -188,7 +188,8 @@
     },
     "success": {
       "notificationsSaved": "Předvolby uloženy."
-    }
+    },
+    "emailOff": "E-mail pro Square Share zatím není zapnutý, takže se nic z níže uvedeného neodesílá. Nové objednávky se vám přesto zobrazí v Objednávkách a v oznámeních."
   },
   "legal": {
     "cardTitle": "Smlouva s prodejcem, podmínky a ochrana soukromí",
@@ -412,7 +413,8 @@
       "removeNamed": "Odebrat oblast doručení {area}",
       "removeNumbered": "Odebrat oblast doručení {number}",
       "add": "Přidat oblast doručení",
-      "limitReached": "{max, plural, one {Maximum je # oblast doručení. Pokud chcete přidat další, nějakou odeberte.} few {Maximum jsou # oblasti doručení. Pokud chcete přidat další, nějakou odeberte.} many {Maximum je # oblasti doručení. Pokud chcete přidat další, nějakou odeberte.} other {Maximum je # oblastí doručení. Pokud chcete přidat další, nějakou odeberte.}}"
+      "limitReached": "{max, plural, one {Maximum je # oblast doručení. Pokud chcete přidat další, nějakou odeberte.} few {Maximum jsou # oblasti doručení. Pokud chcete přidat další, nějakou odeberte.} many {Maximum je # oblasti doručení. Pokud chcete přidat další, nějakou odeberte.} other {Maximum je # oblastí doručení. Pokud chcete přidat další, nějakou odeberte.}}",
+      "needsRate": "Pokladna tento řádek nemůže použít, dokud nemá sazbu i zemi. Kupující si ho přesto přečtou na stránce produktu."
     },
     "rates": {
       "title": "Sazby za dopravu",

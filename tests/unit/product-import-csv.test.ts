@@ -10,6 +10,7 @@ import {
   parseCsv,
   parsePriceCents,
 } from "@/lib/products/csv";
+import { PLANS, PLAN_IDS } from "@/lib/billing/plans";
 import { english } from "../setup/translate";
 
 // The importer's whole job is to not corrupt a seller's catalogue silently, so
@@ -183,6 +184,20 @@ describe("buildImportPlan", () => {
     const plan = buildImportPlan(rows);
     expect(plan.rows).toHaveLength(IMPORT_ROWS_MAX);
     expect(plan.dropped).toBe(5);
+  });
+
+  it("stops sooner when the store's plan has room for fewer, and says how many it left", () => {
+    // The import page and action pass the plan's remaining room as maxRows.
+    const rows = [["Title", "Price"]];
+    for (let i = 0; i < 30; i += 1) rows.push([`Product ${i}`, "10"]);
+    const plan = buildImportPlan(rows, undefined, { maxRows: 12 });
+    expect(plan.rows).toHaveLength(12);
+    expect(plan.dropped).toBe(18);
+  });
+
+  it("sizes one file to the biggest catalogue a plan holds", () => {
+    const biggest = Math.max(...PLAN_IDS.map((id) => PLANS[id].limits.products ?? 0));
+    expect(IMPORT_ROWS_MAX).toBe(biggest);
   });
 
   it("honours a corrected mapping over the guessed one", () => {

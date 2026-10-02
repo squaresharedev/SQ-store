@@ -145,8 +145,9 @@
       "checkoutGift": "Geschenknotizen",
       "thankYouMessage": "Dankesnachricht",
       "thankYouCelebration": "Dankes-Effekt",
-      "checkoutTexture": "Kassen-Textur",
-      "checkoutPayButton": "Bezahlknopf"
+      "checkoutPayButton": "Bezahlknopf",
+      "productPagePhoto": "Foto der Produktseite",
+      "checkoutPhoto": "Foto für Kasse und Dankeseite"
     }
   },
   "editorSearch": {
@@ -790,6 +791,11 @@
       "nothingSet": "Noch nichts festgelegt. Bis du deine Geschäftsdaten hinzufügst, sehen Käufer nur die „Verkauft von“-Zeile unter dem Titel.",
       "editSettings": "In den Einstellungen bearbeiten",
       "addDetails": "Geschäftsdaten hinzufügen"
+    },
+    "groups": {
+      "look": "Aussehen",
+      "style": "Stil",
+      "besidePrice": "Neben dem Preis"
     }
   },
   "productBlock": {
@@ -1154,10 +1160,6 @@
         "speaker": {
           "title": "Tragbarer Lautsprecher",
           "description": "Wasserdicht, mit 12 Stunden Spielzeit pro Ladung."
-        },
-        "succulent": {
-          "title": "Sukkulente für den Schreibtisch",
-          "description": "Eine kleine Haworthia im Keramiktopf. Braucht etwa einmal im Monat Wasser."
         }
       }
     }
@@ -1321,7 +1323,6 @@
     }
   },
   "checkoutPage": {
-    "unwired": "Käufer gelangen zur Kasse, sobald du Stripe verbindest. Du kannst sie jetzt schon gestalten.",
     "charsLeft": "{count, plural, one {# Zeichen übrig} other {# Zeichen übrig}}",
     "layout": {
       "title": "Layout",
@@ -1336,16 +1337,7 @@
       "button": "Der Bezahlknopf entspricht dem Kaufknopf auf deiner Produktseite.",
       "styleButton": "Button gestalten",
       "payButton": "Bezahlknopf",
-      "payButtonInfoLabel": "Über den Bezahlknopf",
-      "texture": {
-        "label": "Textur",
-        "none": "Glatt",
-        "paper": "Papier",
-        "dots": "Punkte",
-        "grid": "Raster",
-        "lines": "Linien",
-        "linen": "Leinen"
-      }
+      "payButtonInfoLabel": "Über den Bezahlknopf"
     },
     "message": {
       "title": "Texte",
@@ -1365,14 +1357,15 @@
       "message": "Nachricht",
       "messagePlaceholder": "Was als Nächstes passiert, in deinen eigenen Worten",
       "celebrate": {
-        "label": "Effekt",
         "confetti": "Konfetti",
-        "rays": "Licht",
-        "none": "Kein",
         "play": "Abspielen"
       }
-    },
-    "unwiredBadge": "Noch nicht live",
-    "unwiredInfoLabel": "Wann Käufer zur Kasse gelangen"
+    }
+  },
+  "pagePhoto": {
+    "label": "Foto",
+    "infoLabel": "Wie das Foto verwendet wird",
+    "info": "Wird hinter der Seite gezeigt und in der Seitenfarbe getönt, damit der Text lesbar bleibt. Ändere die Farbe, um das Foto heller oder dunkler zu machen.",
+    "remove": "Foto entfernen"
   }
 }

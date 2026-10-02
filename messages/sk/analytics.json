@@ -197,5 +197,9 @@
       "byWeekday": "Zobrazenia pokladne podľa dňa v týždni",
       "byStorefront": "Zobrazenia pokladne podľa výkladu"
     }
+  },
+  "export": {
+    "button": "Stiahnuť report",
+    "lockedTitle": "Reporty z analytiky sú súčasťou plánu {plan}."
   }
 }

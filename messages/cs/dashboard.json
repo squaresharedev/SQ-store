@@ -28,7 +28,8 @@
   },
   "shell": {
     "accountFallback": "Účet",
-    "anotherStore": "jiný obchod"
+    "anotherStore": "jiný obchod",
+    "skipToContent": "Přeskočit na hlavní obsah"
   },
   "overview": {
     "title": "Přehled",
@@ -120,6 +121,11 @@
     "toShip": {
       "description": "Kupující čekají na zásilky. Zabalte je a označte jako odeslané.",
       "action": "Odeslat objednávky"
+    },
+    "checkoutRates": {
+      "label": "Nastavte ceny doručení",
+      "description": "Kupující nemohou fyzický produkt zaplatit v pokladně, dokud destinace nemá sazbu i zemi.",
+      "action": "Nastavit ceny"
     }
   }
 }

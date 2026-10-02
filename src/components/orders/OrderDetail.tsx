@@ -13,11 +13,12 @@ import { formatOrderDateTime } from "@/lib/format/date";
 import { formatCents } from "@/lib/format/money";
 import { formatFeeRate } from "@/lib/billing/format";
 import { regionName } from "@/lib/format/country";
+import { orderNumber } from "@/lib/orders/order-number";
 import { formatOrderSelection } from "@/lib/orders/selection";
 import { formatShipTo } from "@/lib/orders/ship-to";
 import type { OrderView } from "@/types/order-view";
 import { OrderStatusBadge } from "./OrderStatusBadge";
-import { OrderActions } from "./OrderActions";
+import { EmailBuyerLink, OrderActions } from "./OrderActions";
 import { OrderShipping } from "./OrderShipping";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -62,6 +63,11 @@ const copyMessages = {
     copied: "Orders.detail.copyOrderId.copied",
     failed: "Orders.detail.copyOrderId.failed",
   },
+  copyOrderNumber: {
+    copy: "Orders.detail.copyOrderNumber.copy",
+    copied: "Orders.detail.copyOrderNumber.copied",
+    failed: "Orders.detail.copyOrderNumber.failed",
+  },
 } satisfies Record<string, CopyButtonMessages>;
 
 /** The version the buyer chose, as label/value pairs. */
@@ -83,6 +89,8 @@ export function OrderDetail({
   onClose,
   canFulfil = false,
   onOrderChange,
+  onNext,
+  queueDone = false,
 }: {
   order: OrderView;
   onClose: () => void;
@@ -90,6 +98,11 @@ export function OrderDetail({
   canFulfil?: boolean;
   /** Called with the order as it stands after a shipping change. */
   onOrderChange?: (order: OrderView) => void;
+  /** Opens the next order waiting to ship, when this panel was opened from the
+   *  To ship queue and there is one (see OrderShipping). */
+  onNext?: () => void;
+  /** This panel was opened from the To ship queue and nothing else is in it. */
+  queueDone?: boolean;
 }) {
   const t = useTranslations("Orders");
   const locale = useLocale();
@@ -136,6 +149,15 @@ export function OrderDetail({
           gone. This panel is what a seller has open while packing, so the
           money (for the books) and the ids (for support) come after. */}
       <div className="flex flex-col gap-4 overflow-y-auto p-4">
+        {/* THE NUMBER THE BUYER QUOTES. Their confirmation and order page call
+            this "Order 44561113"; without it here a seller reading "where is my
+            order 44561113?" has to match it to a UUID by eye. Search finds an
+            order by it too. */}
+        <div className="flex items-center gap-1 font-inter text-xs text-muted-foreground">
+          <span data-order-number="">{t("detail.orderNumberLine", { number: orderNumber(order.id) })}</span>
+          <CopyButton value={orderNumber(order.id)} messages={copyMessages.copyOrderNumber} />
+        </div>
+
         {ships ? (
           <Row label={t("detail.pack")}>
             <div className="flex items-start gap-1">
@@ -185,11 +207,16 @@ export function OrderDetail({
               strokeWidth={2}
               aria-hidden="true"
             />
-            <p className="text-sm text-foreground">
-              {t("detail.withdrawalNotice", {
-                date: formatOrderDateTime(order.withdrawalRequestedAt, locale),
-              })}
-            </p>
+            <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
+              <p className="text-sm text-foreground">
+                {t("detail.withdrawalNotice", {
+                  date: formatOrderDateTime(order.withdrawalRequestedAt, locale),
+                })}
+              </p>
+              {/* "Arrange the return and refund with them" needs a way to reach
+                  them; the address is otherwise only a copy button further down. */}
+              <EmailBuyerLink order={order} />
+            </div>
           </div>
         )}
 
@@ -219,13 +246,23 @@ export function OrderDetail({
                 )}
               </div>
             ) : (
-              <p className={helpTextClass}>{t("detail.noAddress")}</p>
+              <div className="flex flex-col items-start gap-2">
+                <p className={helpTextClass}>{t("detail.noAddress")}</p>
+                <EmailBuyerLink order={order} />
+              </div>
             )}
           </Row>
         )}
 
         <Row label={t("detail.shipping")}>
-          <OrderShipping order={order} canFulfil={canFulfil} onOrderChange={onOrderChange} />
+          <OrderShipping
+            order={order}
+            canFulfil={canFulfil}
+            onOrderChange={onOrderChange}
+            onNext={onNext}
+            queueDone={queueDone}
+            withdrawn={order.withdrawalRequestedAt !== null}
+          />
         </Row>
 
         <Row label={t("detail.buyerEmail")}>
@@ -291,10 +328,14 @@ export function OrderDetail({
         </Row>
       </div>
 
-      {/* Footer */}
-      <div className="mt-auto border-t border-border px-4 py-3">
-        <OrderActions order={order} />
-      </div>
+      {/* Footer: what can be done to the order beyond shipping it. Not for a
+          member who cannot fulfil: a viewer was offered a red Refund button
+          they could press and be refused by, and read-only means no controls. */}
+      {canFulfil && (
+        <div className="mt-auto border-t border-border px-4 py-3">
+          <OrderActions order={order} />
+        </div>
+      )}
     </div>
   );
 }

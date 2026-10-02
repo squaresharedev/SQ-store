@@ -6,7 +6,11 @@ import { cn } from "@/lib/utils";
 import { getAnalyticsSnapshot } from "@/lib/analytics/queries";
 import type { AnalyticsRange, RangePreset } from "@/lib/analytics/types";
 import { AnalyticsPage } from "@/components/analytics/AnalyticsPage";
+import { AnalyticsExportButton } from "@/components/analytics/AnalyticsExportButton";
 import { getAccountActivity } from "@/lib/onboarding/queries";
+import { getActiveAccount } from "@/lib/team/account-context";
+import { getAccountBilling } from "@/lib/billing/account-plan";
+import { planHas } from "@/lib/billing/features";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Analytics.metadata.analytics");
@@ -74,10 +78,15 @@ export default async function AnalyticsRoutePage({
   // One payload for the whole page: the charts render it and the page also
   // publishes it verbatim as machine-readable JSON, so the two cannot drift.
   const t = await getTranslations("Analytics.page");
-  const [snapshot, activity] = await Promise.all([
+  const account = await getActiveAccount();
+  const [snapshot, activity, billing] = await Promise.all([
     getAnalyticsSnapshot(effective, preset),
     getAccountActivity(),
+    account ? getAccountBilling(account.accountId) : Promise.resolve(null),
   ]);
+  // Which button shows: the report download, or the locked one naming the
+  // plan that has it. The figures themselves are everyone's either way.
+  const canExport = billing?.ok === true && planHas(billing.billing.plan, "analyticsExport");
   // A store that has not started: no order ever, no storefront, and no signal
   // ever recorded. Its page is one honest empty state rather than a wall of
   // zero tiles and blank charts. A storefront alone is enough to show the real
@@ -95,6 +104,7 @@ export default async function AnalyticsRoutePage({
       <PageHeader
         title={t("title")}
         subtitle={t("subtitle")}
+        action={firstRun ? null : <AnalyticsExportButton enabled={canExport} snapshot={snapshot} />}
       />
       <AnalyticsPage snapshot={snapshot} custom={custom} firstRun={firstRun} />
     </main>

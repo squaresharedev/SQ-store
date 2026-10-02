@@ -197,5 +197,9 @@
       "byWeekday": "Wyświetlenia kasy według dnia tygodnia",
       "byStorefront": "Wyświetlenia kasy według witryny"
     }
+  },
+  "export": {
+    "button": "Pobierz raport",
+    "lockedTitle": "Raporty analityki są w planie {plan}."
   }
 }

@@ -19,6 +19,7 @@
 //     neither half can be true there; tests/unit/checkout-availability.test.ts
 //     pins that.
 
+import { emailSendingEnabled } from "@/lib/email/send";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { turnstileEnabled } from "@/lib/turnstile";
 import { canQuoteShipping } from "@/lib/shipping/rates";
@@ -39,7 +40,7 @@ export function testPaymentsEnabled(): boolean {
  */
 export function checkoutProviderFor(ownerId: string): CheckoutProviderId | null {
   void ownerId;
-  if (STRIPE_CONNECT_AVAILABLE && turnstileEnabled()) {
+  if (STRIPE_CONNECT_AVAILABLE && turnstileEnabled() && emailSendingEnabled()) {
     // TODO(stripe): look up the seller's connected account and return "stripe"
     // when it has charges enabled. Until then Connect is not live, so there is
     // no account to charge.
@@ -49,6 +50,12 @@ export function checkoutProviderFor(ownerId: string): CheckoutProviderId | null 
     // card-testing endpoint, and the bot check is off unless its keys are
     // configured. Real payments therefore cannot be switched on by flipping
     // STRIPE_CONNECT_AVAILABLE alone; the keys have to be there too.
+    //
+    // So is `emailSendingEnabled()`: a paid order is announced to the seller
+    // and confirmed to the buyer by email (lib/orders/emails.ts). Without a
+    // mail provider a sale would happen in silence, the seller learning of a
+    // parcel they owe only by opening the dashboard, the buyer with money taken
+    // and nothing in their inbox. Taking payment is what requires mail to work.
   }
   return testPaymentsEnabled() ? "test" : null;
 }

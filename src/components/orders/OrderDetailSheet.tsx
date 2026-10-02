@@ -17,6 +17,8 @@ export function OrderDetailSheet({
   onClose,
   canFulfil = false,
   onOrderChange,
+  onNext,
+  queueDone = false,
 }: {
   order: OrderView;
   onClose: () => void;
@@ -25,6 +27,10 @@ export function OrderDetailSheet({
   /** Called with the order as it stands after a shipping change, so the
    *  caller's copy (and therefore this panel) shows it at once. */
   onOrderChange?: (order: OrderView) => void;
+  /** Opens the next order waiting to ship (the To ship queue only). */
+  onNext?: () => void;
+  /** The queue this order came from has nothing else in it. */
+  queueDone?: boolean;
 }) {
   const t = useTranslations("Orders.list");
   const panelRef = useRef<HTMLDivElement>(null);
@@ -55,6 +61,15 @@ export function OrderDetailSheet({
     };
   }, []);
 
+  // Moving on to another order (the queue's "Next order") swaps what the panel
+  // shows without closing it. The button that was pressed has gone with the old
+  // order, so focus comes back to the panel rather than falling to the page.
+  // Keyed on the id only: saving a tracking number replaces the SAME order, and
+  // that hand-off belongs to OrderShipping.
+  useEffect(() => {
+    panelRef.current?.focus({ preventScroll: true });
+  }, [order.id]);
+
   return (
     <div
       className="fixed inset-0 z-50 flex justify-end"
@@ -73,11 +88,17 @@ export function OrderDetailSheet({
         tabIndex={-1}
         className="relative h-full w-full max-w-md shadow-lg outline-none"
       >
+        {/* Keyed by order: the shipping step holds its own state (an open
+            form, the truck's progress), and it must not carry over from one
+            parcel to the next. */}
         <OrderDetail
+          key={order.id}
           order={order}
           onClose={onClose}
           canFulfil={canFulfil}
           onOrderChange={onOrderChange}
+          onNext={onNext}
+          queueDone={queueDone}
         />
       </div>
     </div>

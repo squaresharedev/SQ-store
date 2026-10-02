@@ -28,13 +28,15 @@
     "goToProducts": "Go to products",
     "toShipTitle": "Nothing to ship",
     "toShipHint": "You're all caught up. Paid orders waiting to be sent show up here, oldest first.",
-    "seeAllOrders": "See all orders"
+    "seeAllOrders": "See all orders",
+    "hintOpen": "When someone buys from your store, the order shows up here and you're told straight away."
   },
   "list": {
     "updating": "Updating…",
     "summary": "{total, plural, one {{total} order} other {{total} orders}} · page {page} of {totalPages}",
     "detailDialog": "Order details",
-    "closeDetail": "Close order details"
+    "closeDetail": "Close order details",
+    "withdrawn": "Withdrawn"
   },
   "table": {
     "product": "Product",
@@ -117,6 +119,7 @@
     "shipping": "Shipping",
     "shippedOn": "Shipped {date}",
     "trackingNumber": "Tracking number",
+    "trackingCarrier": "Tracking number ({carrier})",
     "copyTracking": {
       "copy": "Copy tracking number",
       "copied": "Copied tracking number",
@@ -128,7 +131,16 @@
       "refunded": "This order was refunded, so there's nothing to ship.",
       "disputed": "This payment is disputed. Settle the dispute before you ship."
     },
-    "platformFeeRate": "Platform fee ({rate})"
+    "platformFeeRate": "Platform fee ({rate})",
+    "orderNumberLine": "Order {number}",
+    "copyOrderNumber": {
+      "copy": "Copy order number",
+      "copied": "Copied order number",
+      "failed": "Couldn't copy the order number. Select and copy it manually."
+    },
+    "emailBuyer": "Email the buyer",
+    "mailSubject": "Your order {number}",
+    "withdrawnShipWarning": "The buyer has withdrawn from this purchase. Ship it only if you've agreed that with them."
   },
   "actions": {
     "refundNeedsStripe": "Refunds require Stripe to be connected.",
@@ -139,7 +151,8 @@
     "disputeInStripe": "Disputes are handled in your Stripe dashboard once Stripe is connected.",
     "disputeConfirm": "Open dispute handling for this order?",
     "handleDispute": "Handle dispute",
-    "none": "No actions are available for this order."
+    "none": "No actions are available for this order.",
+    "refundManual": "You can't refund from Square Share yet. To refund this order, pay the buyer back yourself and tell them."
   },
   "skeleton": {
     "loading": "loading orders"
@@ -163,6 +176,9 @@
     "markShipped": "Mark as shipped",
     "trackingLabel": "Tracking number (optional)",
     "trackingPlaceholder": "e.g. RR123456789IE",
+    "carrierLabel": "Carrier (optional)",
+    "carrierOther": "Other or not listed",
+    "carrierHint": "With a tracking number and its carrier, the buyer gets a link to follow the parcel.",
     "tellsBuyer": "We'll email the buyer that it's on its way, with the tracking number if you add one.",
     "noBuyerEmail": "This order has no buyer email, so the buyer won't be told.",
     "confirm": "Mark shipped",
@@ -172,7 +188,10 @@
     "editTracking": "Change tracking number",
     "saveTracking": "Save tracking number",
     "trackingSaved": "Tracking number saved. We've sent it to the buyer.",
-    "trackingSavedNoEmail": "Tracking number saved."
+    "trackingSavedNoEmail": "Tracking number saved.",
+    "mailOff": "Email isn't switched on yet, so the buyer won't be told. Let them know yourself.",
+    "next": "Next order to ship",
+    "caughtUp": "That was the last one. You're all caught up."
   },
   "email": {
     "fromName": "{store} via Square Share",
@@ -190,7 +209,8 @@
       "total": "Order total: {amount}",
       "openShip": "Once it's on its way, mark it shipped here and we'll tell the buyer: {url}",
       "openDigital": "See the order: {url}",
-      "gift": "Gift message to include: {message}"
+      "gift": "Gift message to include: {message}",
+      "number": "Order number: {number}"
     },
     "shipped": {
       "subject": "Your order from {store} is on its way",
@@ -198,6 +218,8 @@
       "intro": "Good news: {store} has shipped your order.",
       "introTracking": "{store} has added a tracking number to your order.",
       "tracking": "Tracking number: {tracking}",
+      "trackingCarrier": "Tracking number: {tracking} ({carrier})",
+      "orderPage": "Follow your order here: {url}",
       "shipTo": "It's going to:",
       "questions": "Questions about your order? Reply to this email to reach {store}.",
       "footer": "Sent by Square Share on behalf of {store}."
@@ -239,5 +261,13 @@
       "intro": "Here is the link to your page for order {number} with {store}:",
       "ignore": "If you didn't ask for this, you can ignore this email."
     }
+  },
+  "export": {
+    "button": "Export CSV",
+    "preparing": "Preparing file",
+    "failed": "The export didn't download. Try again in a moment.",
+    "truncated": "The file holds your newest {count, number} orders.",
+    "lockedTitle": "Exporting orders comes with {plan} and above.",
+    "fileName": "orders.csv"
   }
 }

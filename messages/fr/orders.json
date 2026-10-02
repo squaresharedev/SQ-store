@@ -28,13 +28,15 @@
     "goToProducts": "Aller aux produits",
     "toShipTitle": "Rien à expédier",
     "toShipHint": "Vous êtes à jour. Les commandes payées en attente d'envoi apparaissent ici, les plus anciennes en premier.",
-    "seeAllOrders": "Voir toutes les commandes"
+    "seeAllOrders": "Voir toutes les commandes",
+    "hintOpen": "Quand quelqu’un achète dans votre boutique, la commande apparaît ici et vous êtes prévenu tout de suite."
   },
   "list": {
     "updating": "Mise à jour…",
     "summary": "{total, plural, one {{total} commande} many {{total} commandes} other {{total} commandes}} · page {page} sur {totalPages}",
     "detailDialog": "Détails de la commande",
-    "closeDetail": "Fermer les détails de la commande"
+    "closeDetail": "Fermer les détails de la commande",
+    "withdrawn": "Rétractée"
   },
   "table": {
     "product": "Produit",
@@ -117,6 +119,7 @@
     "shipping": "Livraison",
     "shippedOn": "Expédiée le {date}",
     "trackingNumber": "Numéro de suivi",
+    "trackingCarrier": "Numéro de suivi ({carrier})",
     "copyTracking": {
       "copy": "Copier le numéro de suivi",
       "copied": "Numéro de suivi copié",
@@ -128,7 +131,16 @@
       "refunded": "Cette commande a été remboursée, il n'y a donc rien à expédier.",
       "disputed": "Ce paiement est en litige. Réglez le litige avant d'expédier."
     },
-    "platformFeeRate": "Commission de la plateforme ({rate})"
+    "platformFeeRate": "Commission de la plateforme ({rate})",
+    "orderNumberLine": "Commande {number}",
+    "copyOrderNumber": {
+      "copy": "Copier le numéro de commande",
+      "copied": "Numéro de commande copié",
+      "failed": "Impossible de copier le numéro de commande. Sélectionnez-le et copiez-le manuellement."
+    },
+    "emailBuyer": "Envoyer un e-mail à l’acheteur",
+    "mailSubject": "Votre commande {number}",
+    "withdrawnShipWarning": "L’acheteur s’est rétracté de cet achat. N’expédiez que si vous en êtes convenu avec lui."
   },
   "actions": {
     "refundNeedsStripe": "Les remboursements nécessitent que Stripe soit connecté.",
@@ -139,7 +151,8 @@
     "disputeInStripe": "Les litiges se gèrent depuis votre tableau de bord Stripe une fois Stripe connecté.",
     "disputeConfirm": "Ouvrir la gestion du litige pour cette commande ?",
     "handleDispute": "Gérer le litige",
-    "none": "Aucune action n’est disponible pour cette commande."
+    "none": "Aucune action n’est disponible pour cette commande.",
+    "refundManual": "Vous ne pouvez pas encore rembourser depuis Square Share. Pour rembourser cette commande, remboursez vous-même l’acheteur et prévenez-le."
   },
   "skeleton": {
     "loading": "chargement des commandes"
@@ -163,6 +176,9 @@
     "markShipped": "Marquer comme expédiée",
     "trackingLabel": "Numéro de suivi (facultatif)",
     "trackingPlaceholder": "p. ex. RR123456789IE",
+    "carrierLabel": "Transporteur (facultatif)",
+    "carrierOther": "Autre ou absent de la liste",
+    "carrierHint": "Avec un numéro de suivi et son transporteur, l'acheteur reçoit un lien pour suivre le colis.",
     "tellsBuyer": "Nous enverrons un e-mail à l'acheteur pour lui indiquer que sa commande est en route, avec le numéro de suivi si vous en ajoutez un.",
     "noBuyerEmail": "Cette commande n'a pas d'e-mail d'acheteur, l'acheteur ne sera donc pas informé.",
     "confirm": "Marquer comme expédiée",
@@ -172,7 +188,10 @@
     "editTracking": "Modifier le numéro de suivi",
     "saveTracking": "Enregistrer le numéro de suivi",
     "trackingSaved": "Numéro de suivi enregistré. Nous l'avons envoyé à l'acheteur.",
-    "trackingSavedNoEmail": "Numéro de suivi enregistré."
+    "trackingSavedNoEmail": "Numéro de suivi enregistré.",
+    "mailOff": "L’e-mail n’est pas encore activé, l’acheteur ne sera donc pas prévenu. Informez-le vous-même.",
+    "next": "Prochaine commande à expédier",
+    "caughtUp": "C’était la dernière. Vous êtes à jour."
   },
   "email": {
     "fromName": "{store} via Square Share",
@@ -190,7 +209,8 @@
       "total": "Total de la commande : {amount}",
       "openShip": "Une fois expédiée, marquez-la comme expédiée ici et nous en informerons l'acheteur : {url}",
       "openDigital": "Voir la commande : {url}",
-      "gift": "Message cadeau à inclure: {message}"
+      "gift": "Message cadeau à inclure: {message}",
+      "number": "Numéro de commande : {number}"
     },
     "shipped": {
       "subject": "Votre commande de {store} est en route",
@@ -198,6 +218,8 @@
       "intro": "Bonne nouvelle : {store} a expédié votre commande.",
       "introTracking": "{store} a ajouté un numéro de suivi à votre commande.",
       "tracking": "Numéro de suivi : {tracking}",
+      "trackingCarrier": "Numéro de suivi : {tracking} ({carrier})",
+      "orderPage": "Suivez votre commande ici : {url}",
       "shipTo": "Elle est adressée à :",
       "questions": "Des questions sur votre commande ? Répondez à cet e-mail pour contacter {store}.",
       "footer": "Envoyé par Square Share pour le compte de {store}."
@@ -239,5 +261,13 @@
       "intro": "Voici le lien vers votre page pour la commande {number} chez {store}:",
       "ignore": "Si vous n'avez pas fait cette demande, vous pouvez ignorer cet e-mail."
     }
+  },
+  "export": {
+    "button": "Exporter en CSV",
+    "preparing": "Préparation du fichier",
+    "failed": "L'export n'a pas été téléchargé. Réessayez dans un instant.",
+    "truncated": "Le fichier contient vos {count, number} commandes les plus récentes.",
+    "lockedTitle": "L'export des commandes est inclus à partir de {plan}.",
+    "fileName": "commandes.csv"
   }
 }

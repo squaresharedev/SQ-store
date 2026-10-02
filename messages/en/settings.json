@@ -175,7 +175,7 @@
     "prefs": {
       "sales": {
         "label": "Sales",
-        "blurb": "Email me every time something sells. The good kind of inbox noise."
+        "blurb": "Email me when something sells, with what to pack and where to send it."
       },
       "productUpdates": {
         "label": "Product updates",
@@ -188,7 +188,8 @@
     },
     "success": {
       "notificationsSaved": "Preferences saved."
-    }
+    },
+    "emailOff": "Email isn't switched on for Square Share yet, so nothing below is sent. New orders still show up under Orders and in your notifications."
   },
   "legal": {
     "cardTitle": "Seller Agreement, Terms & Privacy",
@@ -412,7 +413,8 @@
       "removeNamed": "Remove the {area} destination",
       "removeNumbered": "Remove destination {number}",
       "add": "Add a destination",
-      "limitReached": "{max, plural, one {That is all # destination. Remove one to add another.} other {That is all # destinations. Remove one to add another.}}"
+      "limitReached": "{max, plural, one {That is all # destination. Remove one to add another.} other {That is all # destinations. Remove one to add another.}}",
+      "needsRate": "Checkout can't use this row until it has both a rate and a country. Buyers still read it on the product page."
     },
     "rates": {
       "title": "Checkout rates",

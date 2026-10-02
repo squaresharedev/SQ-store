@@ -6,59 +6,153 @@
     },
     "starter": {
       "name": "Starter",
-      "tagline": "Una commissione più bassa per un negozio che vende ogni settimana."
+      "tagline": "Una commissione più bassa e più spazio per crescere, per un negozio che vende ogni settimana."
     },
     "pro": {
       "name": "Pro",
-      "tagline": "La commissione più bassa, per un negozio che vende ogni giorno."
+      "tagline": "La commissione più bassa e tutto ciò che offriamo, per un negozio che vende ogni giorno."
     }
+  },
+  "page": {
+    "metaTitle": "Piani",
+    "title": "Scegli il tuo piano",
+    "lead": "Inizia gratis e resta gratis per tutto il tempo che vuoi. Passa a un piano superiore quando una commissione più bassa si ripaga da sola.",
+    "trust": {
+      "secure": "Checkout sicuro con Stripe",
+      "cancel": "Annulli quando vuoi",
+      "keep": "Non viene mai rimosso nulla"
+    },
+    "intervalLabel": "Periodo di fatturazione",
+    "month": "Mensile",
+    "year": "Annuale",
+    "yearlySaving": "2 mesi gratis con il piano annuale",
+    "pastDue": "L’ultimo pagamento del tuo piano {plan} non è andato a buon fine. Aggiorna la carta per mantenerlo.",
+    "endsOn": "Il tuo piano {plan} termina il {date} e da quel momento il tuo negozio passa a Free. Non viene rimosso nulla.",
+    "ownerOnly": "Solo il proprietario del negozio può cambiare il piano.",
+    "soon": "In arrivo",
+    "soonTitle": "I piani a pagamento arriveranno presto. Nel frattempo tutto ciò che c’è in Free continua a funzionare.",
+    "finePrint": "I prezzi sono IVA esclusa. La commissione per vendita si applica alle vendite tramite il checkout di Square Share e viene calcolata sul prezzo dell’articolo, mai sulla spedizione. Le commissioni di elaborazione delle carte di Stripe si aggiungono a queste. Puoi annullare quando vuoi: mantieni il tuo piano fino alla fine del periodo che hai pagato.",
+    "unavailable": "Al momento non è possibile mostrare i piani. Aggiorna la pagina tra un istante."
   },
   "card": {
     "perMonth": "/ mese",
     "exclVat": "IVA esclusa",
     "freeForever": "Gratis per tutto il tempo che vuoi",
     "billedYearly": "{amount} fatturati una sola volta all’anno, IVA esclusa",
-    "feePerSale": "+ {rate} per vendita",
-    "storefronts": "{count, plural, one {# vetrina} other {# vetrine}}",
-    "storefrontsUnlimited": "Vetrine illimitate",
-    "teammates": "{count, plural, =0 {Solo tu, nessun collaboratore} one {Tu e # collaboratore} other {Tu e # collaboratori}}",
-    "teammatesUnlimited": "Collaboratori illimitati",
-    "everything": "Pagine prodotto, checkout, statistiche: tutto incluso"
-  },
-  "modal": {
-    "title": "Piani",
-    "description": "Inizia gratis. Passa a un piano superiore quando una commissione più bassa si ripaga da sola.",
-    "loading": "Caricamento dei piani",
-    "intervalLabel": "Periodo di fatturazione",
-    "month": "Mensile",
-    "year": "Annuale",
-    "yearlySaving": "2 mesi gratis con il piano annuale",
+    "bestValue": "Il più conveniente",
     "current": "Piano attuale",
-    "recommended": "Consigliato",
-    "cheapest": "Il più conveniente per te",
+    "everythingIn": "Tutto ciò che c’è in {plan}, più",
+    "includes": "Include",
     "upgrade": "Passa a {plan}",
     "switch": "Cambia in {plan}",
     "switchInterval": "{interval, select, year {Passa al piano annuale} other {Passa al piano mensile}}",
-    "moveToFree": "Passa a Free",
-    "soon": "In arrivo",
-    "soonTitle": "I piani a pagamento arriveranno presto. Nel frattempo tutto ciò che c’è in Free continua a funzionare.",
-    "ownerOnly": "Solo il proprietario del negozio può cambiare il piano.",
-    "pastDue": "L’ultimo pagamento del tuo piano {plan} non è andato a buon fine. Aggiorna la carta per mantenerlo.",
-    "endsOn": "Il tuo piano {plan} termina il {date} e da quel momento il tuo negozio passa a Free. Non viene rimosso nulla.",
-    "finePrint": "I prezzi sono IVA esclusa. La commissione per vendita si applica alle vendite tramite il checkout di Square Share e viene calcolata sul prezzo dell’articolo, mai sulla spedizione. Le commissioni di elaborazione delle carte di Stripe si aggiungono a queste. Puoi annullare quando vuoi: mantieni il tuo piano fino alla fine del periodo che hai pagato."
+    "moveToFree": "Passa a Free"
+  },
+  "features": {
+    "fee": "{rate} di commissione per vendita",
+    "storefronts": "{count, plural, one {# vetrina} many {# di vetrine} other {# vetrine}}",
+    "storefrontsUnlimited": "Vetrine illimitate",
+    "teammates": "{count, plural, =0 {Solo tu, nessun collaboratore} one {Tu e # collaboratore} many {Tu e # di collaboratori} other {Tu e # collaboratori}}",
+    "teammatesUnlimited": "Collaboratori illimitati",
+    "core": "Pagine prodotto, checkout e statistiche",
+    "ordersExport": "Esporta i tuoi ordini in un foglio di calcolo (CSV)",
+    "earlyAccess": "Accesso anticipato alle nuove funzionalità",
+    "prioritySupport": "Assistenza prioritaria: rispondiamo prima ai tuoi messaggi",
+    "analyticsExport": "Scarica i report delle statistiche (CSV)",
+    "products": "{count, plural, one {# prodotto} many {# di prodotti} other {# prodotti}}",
+    "productsUnlimited": "Prodotti illimitati"
+  },
+  "calculator": {
+    "eyebrow": "Calcolatore",
+    "title": "Quale piano ti costa meno?",
+    "lead": "Scorri fino alle tue vendite in un mese. Ogni barra è il prezzo del piano più la sua commissione su quelle vendite.",
+    "salesLabel": "Vendite al mese",
+    "salesAria": "Le tue vendite al mese, in euro",
+    "fromYourSales": "Compilato in base alle vendite degli ultimi 30 giorni.",
+    "perMonth": "al mese",
+    "cheapest": "Con {sales} di vendite al mese, {plan} è quello che ti costa meno.",
+    "legendPrice": "Prezzo del piano",
+    "legendFee": "Commissione sulle tue vendite",
+    "cheapestTag": "Il più economico per te"
+  },
+  "compare": {
+    "eyebrow": "Confronta",
+    "title": "Tutti i piani, uno accanto all’altro",
+    "feature": "Funzionalità",
+    "price": "Prezzo",
+    "unlimited": "Illimitato",
+    "included": "Incluso",
+    "notIncluded": "Non incluso",
+    "rows": {
+      "fee": "Commissione per vendita",
+      "storefronts": "Vetrine",
+      "teamSeats": "Posti nel team, compreso il tuo",
+      "ordersExport": "Esportazione ordini (CSV)",
+      "earlyAccess": "Accesso anticipato alle nuove funzionalità",
+      "prioritySupport": "Assistenza prioritaria",
+      "products": "Prodotti",
+      "productPages": "Pagine prodotto",
+      "checkout": "Checkout sicuro",
+      "digitalDownloads": "Download digitali, file fino a {size}",
+      "stock": "Monitoraggio delle scorte",
+      "shipping": "Profili di spedizione",
+      "embed": "Incorporamento nel tuo sito web",
+      "designer": "Designer della vetrina",
+      "roles": "Ruoli del team",
+      "analytics": "Statistiche",
+      "analyticsExport": "Report delle statistiche (CSV)",
+      "productImport": "Importazione prodotti (CSV)"
+    },
+    "groups": {
+      "selling": "Vendita",
+      "store": "Il tuo negozio",
+      "tools": "Strumenti e approfondimenti",
+      "support": "Assistenza"
+    }
+  },
+  "faq": {
+    "eyebrow": "Domande",
+    "title": "Prima di passare a un piano superiore",
+    "items": {
+      "cancel": {
+        "q": "Posso annullare quando voglio?",
+        "a": "Sì. Se annulli da Impostazioni › Piano e fatturazione, mantieni il tuo piano fino alla fine del periodo che hai pagato. Poi il tuo negozio passa a Free."
+      },
+      "downgrade": {
+        "q": "Cosa succede al mio negozio se torno a Free?",
+        "a": "Non viene rimosso nulla. Ogni vetrina, prodotto e collaboratore resta dov’è. Semplicemente non puoi aggiungerne più di quanti ne consente Free, finché non ne rimuovi qualcuno o passi di nuovo a un piano superiore."
+      },
+      "vat": {
+        "q": "I prezzi includono l’IVA?",
+        "a": "No, i prezzi sono mostrati IVA esclusa, che viene aggiunta al checkout dove prevista. Aggiungi la tua partita IVA al checkout e comparirà su ogni fattura."
+      },
+      "fee": {
+        "q": "Su cosa viene calcolata la commissione per vendita?",
+        "a": "Sul prezzo dell’articolo di ogni vendita effettuata tramite il checkout di Square Share, mai sulla spedizione. Le commissioni di elaborazione delle carte di Stripe sono separate."
+      },
+      "switch": {
+        "q": "Posso cambiare piano più avanti?",
+        "a": "Quando vuoi, in su o in giù, mensile o annuale. Stripe mostra esattamente quanto pagherai prima che tu confermi."
+      }
+    }
+  },
+  "upsell": {
+    "eyebrow": "Potenzia",
+    "eyebrowBestValue": "Il più conveniente",
+    "title": "Ottieni di più con {plan}",
+    "lead": "Una commissione più bassa su ogni vendita, più spazio per crescere e strumenti migliori per gestire il tuo negozio.",
+    "feeLabel": "La tua commissione per vendita",
+    "saving": "Con le vendite degli ultimi 30 giorni, {plan} ti farebbe risparmiare {amount} al mese.",
+    "breakEven": "{plan} si ripaga da solo quando vendi più di {amount} al mese.",
+    "gains": "Cosa aggiunge {plan}",
+    "cta": "Passa a {plan}, {price} al mese",
+    "compare": "Confronta tutti i piani",
+    "topEyebrow": "Piano più alto",
+    "topTitle": "Tutto ciò che c’è in {plan} è tuo"
   },
   "portal": {
     "opening": "Apertura di Stripe",
     "stepUp": "Conferma che sei tu prima di aprire i tuoi dati di fatturazione."
-  },
-  "calculator": {
-    "toggle": "Quale piano mi costa meno?",
-    "salesLabel": "Vendite al mese",
-    "salesAria": "Le tue vendite al mese, in euro",
-    "fromYourSales": "Compilato in base alle vendite degli ultimi 30 giorni.",
-    "perMonth": "al mese, commissioni incluse",
-    "cheapest": "Con {sales} di vendite al mese, {plan} è quello che ti costa meno.",
-    "breakEven": "{plan} si ripaga da solo oltre {amount} di vendite al mese."
   },
   "chip": {
     "label": "Piano: {plan}",
@@ -79,8 +173,6 @@
     "ends": "Termina il {date}. Da quel momento il tuo negozio passa a Free e non viene rimosso nulla.",
     "pastDue": "Pagamento non riuscito. Stripe riproverà ad addebitare la tua carta; aggiornala per mantenere {plan}.",
     "feeLine": "Commissione su ogni vendita: {rate} del prezzo dell’articolo.",
-    "changePlan": "Cambia piano",
-    "seePlans": "Vedi i piani",
     "memberNote": "Solo il proprietario del negozio può cambiare il piano o vedere le relative fatture.",
     "usageTitle": "Cosa stai usando",
     "usageDescription": "I limiti del tuo piano valgono solo per le aggiunte. Nulla di ciò che hai viene mai rimosso.",
@@ -88,7 +180,9 @@
       "storefronts": "Vetrine: {used} su {cap}",
       "storefrontsUnlimited": "Vetrine: {used}, nessun limite",
       "teamSeats": "Posti nel team, compreso il tuo: {used} su {cap}",
-      "teamSeatsUnlimited": "Posti nel team, compreso il tuo: {used}, nessun limite"
+      "teamSeatsUnlimited": "Posti nel team, compreso il tuo: {used}, nessun limite",
+      "products": "Prodotti: {used} su {cap}",
+      "productsUnlimited": "Prodotti: {used}, nessun limite"
     },
     "overLimit": "Oltre il limite di questo piano. Tutto continua a funzionare; rimuovine uno o passa a un piano superiore per aggiungerne altri.",
     "invoicesTitle": "Fatturazione e fatture",

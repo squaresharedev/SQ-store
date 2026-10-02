@@ -96,6 +96,7 @@ const HEALTHY_PROFILE: ProfileAttentionData = {
   // ask for them.
   sellerAddress: "12 Market Street, Dublin",
   shippingPolicySet: true,
+  shippingRatesSet: true,
   legalAcceptedVersion: LEGAL_VERSION,
 };
 
@@ -108,6 +109,7 @@ function build(overrides: {
   stripeConnectAvailable?: boolean;
   setupVisible?: boolean;
   toShipCount?: number;
+  checkoutOpen?: boolean;
 } = {}) {
   const items = buildAttentionItems({
     orders: { ...NO_ORDERS, ...overrides.orders },
@@ -118,6 +120,7 @@ function build(overrides: {
     stripeConnectAvailable: overrides.stripeConnectAvailable,
     setupVisible: overrides.setupVisible,
     toShipCount: overrides.toShipCount,
+    checkoutOpen: overrides.checkoutOpen,
   });
   return new Map(items.map((item) => [item.key, item]));
 }
@@ -144,6 +147,12 @@ const ALL_BRANCHES = [
   build({
     products: { hasPhysicalProducts: true },
     profile: { ...HEALTHY_PROFILE, shippingPolicySet: false },
+  }),
+  // Checkout open, terms written, no delivery prices
+  build({
+    checkoutOpen: true,
+    products: { hasPhysicalProducts: true },
+    profile: { ...HEALTHY_PROFILE, shippingRatesSet: false },
   }),
   // Storefront: none saved
   build(),
@@ -413,6 +422,49 @@ describe("needs-attention destinations", () => {
       profile: { ...HEALTHY_PROFILE, shippingPolicySet: false },
     }).get("no-shipping");
     expect(item).toBeUndefined();
+  });
+
+  describe("the checkout-rates row", () => {
+    const unpriced = { ...HEALTHY_PROFILE, shippingPolicySet: true, shippingRatesSet: false };
+
+    it("asks for delivery prices once checkout is open and none are set", () => {
+      const item = build({
+        checkoutOpen: true,
+        products: { hasPhysicalProducts: true },
+        profile: unpriced,
+      }).get("checkout-rates");
+      expect(item?.href).toBe("/settings/shipping#checkout-rates");
+    });
+
+    it("stays quiet while checkout is closed, since nothing is lost yet", () => {
+      const keys = [
+        ...build({ products: { hasPhysicalProducts: true }, profile: unpriced }).keys(),
+      ];
+      expect(keys).not.toContain("checkout-rates");
+    });
+
+    it("stays quiet for a seller with nothing physical, or with prices set", () => {
+      expect(
+        build({ checkoutOpen: true, profile: unpriced }).has("checkout-rates"),
+      ).toBe(false);
+      expect(
+        build({
+          checkoutOpen: true,
+          products: { hasPhysicalProducts: true },
+          profile: { ...unpriced, shippingRatesSet: true },
+        }).has("checkout-rates"),
+      ).toBe(false);
+    });
+
+    it("leaves the no-terms case to the no-shipping row, so one page is one row", () => {
+      const items = build({
+        checkoutOpen: true,
+        products: { hasPhysicalProducts: true },
+        profile: { ...unpriced, shippingPolicySet: false },
+      });
+      expect(items.has("no-shipping")).toBe(true);
+      expect(items.has("checkout-rates")).toBe(false);
+    });
   });
 
   it("adds the noindex row and links to the storefront designer", () => {

@@ -135,14 +135,29 @@ describe("sample storefront in the list", () => {
     expect(await screen.findByRole("dialog", { name: "Create storefront setup" })).toBeInTheDocument();
   });
 
-  it("sits at the foot of the list, after the seller's own cards", async () => {
+  it("goes away while the list holds a live storefront", async () => {
     await renderList({ sample: "shown", storefronts: [storefront("Gilt & Grain")] });
-    const items = [...document.querySelectorAll("main > ul > li")];
-    expect(items).toHaveLength(1);
+    expect(document.querySelectorAll("main > ul > li")).toHaveLength(1);
     expect(screen.getByText("1 storefront")).toBeInTheDocument();
-    const list = document.querySelector("main > ul")!;
-    const link = sampleLink()!;
-    expect(list.compareDocumentPosition(link) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(sampleLink()).toBeNull();
+    expect(document.querySelector("[data-storefront-sample]")).toBeNull();
+  });
+
+  it("stays when every storefront is one staff have taken down", async () => {
+    const taken: StorefrontSummary = {
+      ...storefront("Gilt & Grain"),
+      removal: {
+        kind: "removed" as const,
+        reviewRequestedAt: null,
+        ground: null,
+        note: null,
+        at: null,
+        fields: [],
+        decisionId: null,
+      },
+    };
+    await renderList({ sample: "shown", storefronts: [taken] });
+    expect(sampleLink()).toHaveAttribute("href", "/storefront/sample");
   });
 
   it("stays away for a read-only role, an unreadable flag, or someone who hid the sample", async () => {

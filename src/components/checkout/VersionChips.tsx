@@ -37,7 +37,7 @@ export function VersionChips({
         >
           {chip.swatch && (
             <span
-              className="size-3 shrink-0 rounded-full"
+              className="size-3.5 shrink-0 rounded-full"
               // The hairline in the page's own rule colour keeps a white or
               // pale swatch visible on a light chip.
               style={{ backgroundColor: chip.swatch, boxShadow: `inset 0 0 0 1px ${ruleColor(ink)}` }}

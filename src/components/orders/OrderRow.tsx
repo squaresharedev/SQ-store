@@ -4,12 +4,15 @@ import { useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import type { OrderView, OrdersView } from "@/types/order-view";
 import { cn } from "@/lib/utils";
+import { badgeClass } from "@/components/ui/surface-styles";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { FulfilmentBadge } from "./FulfilmentBadge";
 import { formatCents } from "@/lib/format/money";
-import { formatOrderDate } from "@/lib/format/date";
+import { formatAge, formatOrderDate } from "@/lib/format/date";
 import { regionName } from "@/lib/format/country";
+import { isOverdue } from "@/lib/orders/fulfilment";
 import { formatOrderSelection } from "@/lib/orders/selection";
+import { useNow } from "@/lib/hooks/useNow";
 
 export function OrderRow({
   order,
@@ -28,6 +31,11 @@ export function OrderRow({
 }) {
   const t = useTranslations("Orders");
   const locale = useLocale();
+  // How long it has waited, for the queue only. Null until the browser has a
+  // clock (see useNow), so the server render and hydration agree.
+  const now = useNow();
+  const waiting = view === "to-ship" && now ? formatAge(order.createdAt, locale, now) : null;
+  const overdue = view === "to-ship" && now ? isOverdue(order.createdAt, now) : false;
   const channelLabel = t(
     order.channel === "marketplace"
       ? "channel.marketplace"
@@ -85,13 +93,27 @@ export function OrderRow({
           sold ("the six seater one"), it is empty for most products, and a
           column that is blank on nine rows in ten is a column that earns
           nothing. */}
-      <td className="py-2.5 px-3 max-w-xs text-sm">
+      {/* Narrower on a phone: at max-w-xs the queue's three columns were 45px wider
+          than a 390px screen and the date was cut off at the edge. */}
+      <td className="py-2.5 px-3 max-w-40 text-sm sm:max-w-xs">
         {/* "2 × Lamp" when more than one was bought; a lone unit is just
             its name, which is what nearly every row is. */}
-        <span className="block truncate font-medium text-foreground">
-          {order.quantity > 1
-            ? t("detail.packLine", { quantity: order.quantity, title: order.productTitle })
-            : order.productTitle}
+        <span className="flex items-center gap-2">
+          <span className="truncate font-medium text-foreground">
+            {order.quantity > 1
+              ? t("detail.packLine", { quantity: order.quantity, title: order.productTitle })
+              : order.productTitle}
+          </span>
+          {/* The buyer has withdrawn: whatever this row was, it is now a
+              conversation, and the list must not read like plain work. */}
+          {order.withdrawalRequestedAt && (
+            <span
+              className={cn(badgeClass, "shrink-0 text-danger-strong")}
+              data-order-withdrawn=""
+            >
+              {t("list.withdrawn")}
+            </span>
+          )}
         </span>
         {order.selection.length > 0 && (
           <span
@@ -106,7 +128,7 @@ export function OrderRow({
       {view === "to-ship" ? (
         // Where it goes: the name, and the town and country a seller sorts a
         // pile of parcels by. The full label is one click away.
-        <td className="py-2.5 px-3 max-w-xs text-sm" data-order-ship-to-summary="">
+        <td className="py-2.5 px-3 max-w-36 text-sm sm:max-w-xs" data-order-ship-to-summary="">
           {order.shipTo ? (
             <>
               <span className="block truncate text-foreground">{order.shipTo.name}</span>
@@ -135,9 +157,14 @@ export function OrderRow({
             <OrderStatusBadge status={order.status} />
           </td>
 
-          {/* shipping */}
+          {/* shipping. Said only where it means something: an unpaid,
+              disputed or refunded order that has not gone is not "to ship" (it
+              is not in the queue), and a loud chip on it would ask for work
+              the panel then tells the seller not to do. */}
           <td className="py-2.5 px-3">
-            <FulfilmentBadge status={order.fulfilment.status} />
+            {(order.fulfilment.status !== "unfulfilled" || order.status === "paid") && (
+              <FulfilmentBadge status={order.fulfilment.status} />
+            )}
           </td>
         </>
       )}
@@ -149,9 +176,19 @@ export function OrderRow({
         )}
       </td>
 
-      {/* date */}
+      {/* date, and in the queue how long it has been waiting: the oldest is
+          first, and one that has waited past OVERDUE_AFTER_DAYS is said in ink
+          so a forgotten parcel does not read like today's. */}
       <td className="py-2.5 px-3 font-inter text-sm text-muted-foreground whitespace-nowrap">
-        {formatOrderDate(order.createdAt, locale)}
+        <span className="block">{formatOrderDate(order.createdAt, locale)}</span>
+        {waiting && (
+          <span
+            className={cn("block text-xs", overdue && "font-medium text-foreground")}
+            data-order-waiting={overdue ? "overdue" : "ok"}
+          >
+            {waiting}
+          </span>
+        )}
       </td>
     </tr>
   );

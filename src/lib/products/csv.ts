@@ -4,6 +4,7 @@ import { CURRENCIES, type Currency, type ProductStatus } from "@/types/product";
 // implementation lives in price.ts.
 import { parsePriceCents } from "./price";
 import { msg, type MessageRef } from "@/i18n/types";
+import { PLANS, PLAN_IDS } from "@/lib/billing/plans";
 export { parsePriceCents };
 
 /**
@@ -33,13 +34,26 @@ export { parsePriceCents };
  *   seller is told how many variant rows were folded in.
  */
 
-/** How many rows one import may carry. Sized for a real catalogue move while
- *  bounding the work a single request can ask of the database. */
-export const IMPORT_ROWS_MAX = 200;
+/** The most rows any import carries when no plan caps products at all: bounds
+ *  the work a single request can ask of the database. */
+const IMPORT_ROWS_CEILING = 2000;
 
-/** Bytes of CSV one upload may carry. IMPORT_ROWS_MAX rows of ordinary product
- *  copy fit inside this many times over; it exists so a huge file is refused
- *  before it is read rather than after. */
+/**
+ * How many rows one import file may carry: the biggest catalogue any plan
+ * holds (PLANS[..].limits.products), since a file larger than that could
+ * never land whole. A store's own plan may leave room for fewer; the import
+ * page and action pass that room to buildImportPlan as `maxRows`
+ * (lib/billing/limits.ts planRoom).
+ */
+export const IMPORT_ROWS_MAX = Math.min(
+  IMPORT_ROWS_CEILING,
+  Math.max(...PLAN_IDS.map((plan) => PLANS[plan].limits.products ?? IMPORT_ROWS_CEILING)),
+);
+
+/** Bytes of CSV one upload may carry. IMPORT_ROWS_MAX rows of ordinary
+ *  product copy fit inside it; it exists so a huge file is refused before it
+ *  is read rather than after. next.config.ts sizes the server action body
+ *  limit to fit it. */
 export const IMPORT_BYTES_MAX = 2 * 1024 * 1024;
 
 /** Longest single field we will look at, so a pathological cell cannot make
@@ -291,7 +305,8 @@ export type ImportPlan = {
   rows: ImportRow[];
   /** Shopify variant rows folded into the product above them. */
   foldedVariants: number;
-  /** Rows past IMPORT_ROWS_MAX, which are not in `rows` at all. */
+  /** Rows past the cap (`maxRows`: the file cap, or the room the store's
+   *  plan has left), which are not in `rows` at all. */
   dropped: number;
 };
 
@@ -312,7 +327,7 @@ function cell(row: readonly string[], index: number | null): string {
 export function buildImportPlan(
   table: readonly (readonly string[])[],
   overrides?: Partial<ColumnMap>,
-  defaults?: { status?: ProductStatus },
+  defaults?: { status?: ProductStatus; maxRows?: number },
 ): ImportPlan {
   const [headerRow = [], ...body] = table;
   const header = headerRow.map((name) => name.trim());
@@ -320,6 +335,7 @@ export function buildImportPlan(
   const shopify = isShopifyExport(header);
   const handleAt = handleColumn(header);
   const defaultStatus = defaults?.status ?? "draft";
+  const maxRows = defaults?.maxRows ?? IMPORT_ROWS_MAX;
 
   const rows: ImportRow[] = [];
   const seenHandles = new Set<string>();
@@ -345,7 +361,7 @@ export function buildImportPlan(
     // Wholly blank lines are not rows a seller wrote; they are how files end.
     if (raw.every((value) => value.trim() === "")) return;
 
-    if (rows.length >= IMPORT_ROWS_MAX) {
+    if (rows.length >= maxRows) {
       dropped += 1;
       return;
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { AlertTriangle, FileSpreadsheet, Upload } from "lucide-react";
@@ -15,11 +16,13 @@ import {
   helpTextClass,
   infoTextClass,
   labelClass,
+  quietLinkClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { formatBytes } from "@/lib/format";
 import { formatCents } from "@/lib/format/money";
 import { importProducts } from "@/lib/products/import-actions";
+import { plansHref } from "@/lib/billing/paths";
 import {
   IMPORT_BYTES_MAX,
   IMPORT_ROWS_MAX,
@@ -69,13 +72,19 @@ type Loaded = { name: string; size: number; text: string };
 
 export function ProductImport({
   missingTraderDetails = [],
+  planRoomLeft = null,
 }: {
   /** Trader details the store still owes buyers. Non-empty means the server
    *  refuses a live import, so only drafts are offered. */
   missingTraderDetails?: readonly TraderIdentityField[];
+  /** How many more products the store's plan has room for; null when nothing
+   *  caps it. The server applies the same number: this keeps the preview
+   *  honest about which rows will land. */
+  planRoomLeft?: number | null;
 } = {}) {
   const router = useRouter();
   const t = useTranslations("Products.import");
+  const tErrors = useTranslations("Errors");
   const locale = useLocale();
   const toast = useToast();
   const showActionError = useActionErrorToast();
@@ -97,8 +106,12 @@ export function ProductImport({
   const [busy, setBusy] = useState(false);
   const [saveResult, setSaveResult] = useState<SaveResult | null>(null);
 
+  // One file carries IMPORT_ROWS_MAX rows, or as many as the plan has room
+  // for when that is fewer; which of the two binds decides how it is worded.
+  const maxRows = Math.min(IMPORT_ROWS_MAX, planRoomLeft ?? IMPORT_ROWS_MAX);
+  const cappedByPlan = planRoomLeft !== null && planRoomLeft < IMPORT_ROWS_MAX;
   const plan: ImportPlan | null = file
-    ? buildImportPlan(parseCsv(file.text), overrides, { status: importStatus })
+    ? buildImportPlan(parseCsv(file.text), overrides, { status: importStatus, maxRows })
     : null;
   const ready = plan ? importableRows(plan) : [];
   const failing = plan ? plan.rows.filter((row) => row.problem !== null) : [];
@@ -205,7 +218,7 @@ export function ProductImport({
           <span className="block font-inter text-xs text-muted-foreground">
             {file
               ? t("fileMeta", { size: formatBytes(file.size, locale) })
-              : t("rowsLimit", { max: IMPORT_ROWS_MAX })}
+              : t(cappedByPlan ? "planRoom" : "rowsLimit", { max: maxRows })}
           </span>
         </span>
       </label>
@@ -238,7 +251,17 @@ export function ProductImport({
                 <li>{t("foldedVariants", { count: plan.foldedVariants })}</li>
               )}
               {plan.dropped > 0 && (
-                <li>{t("droppedRows", { count: plan.dropped, max: IMPORT_ROWS_MAX })}</li>
+                <li data-import-dropped={cappedByPlan ? "plan" : "file"}>
+                  {t(cappedByPlan ? "droppedByPlan" : "droppedRows", { count: plan.dropped, max: maxRows })}
+                  {cappedByPlan && (
+                    <>
+                      {" "}
+                      <Link href={plansHref("product_limit")} className={quietLinkClass}>
+                        {tErrors("planLimit.action")}
+                      </Link>
+                    </>
+                  )}
+                </li>
               )}
             </ul>
           )}

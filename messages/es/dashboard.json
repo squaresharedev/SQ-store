@@ -28,7 +28,8 @@
   },
   "shell": {
     "accountFallback": "Cuenta",
-    "anotherStore": "otra tienda"
+    "anotherStore": "otra tienda",
+    "skipToContent": "Saltar al contenido principal"
   },
   "overview": {
     "title": "Resumen",
@@ -120,6 +121,11 @@
     "toShip": {
       "description": "Los compradores están esperando. Empaquétalos y márcalos como enviados.",
       "action": "Enviar pedidos"
+    },
+    "checkoutRates": {
+      "label": "Fija tus precios de entrega",
+      "description": "Los compradores no pueden pagar un producto físico hasta que un destino tenga tanto una tarifa como un país.",
+      "action": "Fijar precios"
     }
   }
 }

@@ -7,6 +7,7 @@ import { helpTextClass, infoTextClass, secondaryButtonClass } from "@/components
 import { PageTabs } from "@/components/ui/PageTabs";
 import { Spinner } from "@/components/ui/spinner";
 import { useTourReveal } from "@/lib/onboarding/tour-store";
+import { isToShip } from "@/lib/orders/fulfilment";
 import { ORDERS_VIEW_PARAM, ordersViewPath } from "@/lib/orders/paths";
 import { cn } from "@/lib/utils";
 import { TYPING_DEBOUNCE_MS } from "@/lib/typing-debounce";
@@ -69,6 +70,7 @@ export function OrdersPage({
   view,
   toShipCount,
   canFulfil = false,
+  checkoutOpen = false,
   data,
   filters,
   sort,
@@ -81,6 +83,9 @@ export function OrdersPage({
   toShipCount: number;
   /** Whether the viewer may mark orders shipped. */
   canFulfil?: boolean;
+  /** Whether a buyer can pay through Square Share checkout right now. It
+   *  decides what an empty list says (see OrdersEmptyState). */
+  checkoutOpen?: boolean;
   data: Paginated<OrderView>;
   filters: OrderFilters;
   sort: OrderSort;
@@ -137,6 +142,20 @@ export function OrdersPage({
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, []);
+
+  // Pin the list the page chose into the address. With no `?view=` the server
+  // opens on the To ship queue while anything is waiting, and on the full list
+  // when nothing is, so a refresh after shipping the last parcel would flip the
+  // seller from the queue to the ledger under them. Naming the view once they
+  // have arrived makes a refresh, a shared link and the back button all stay
+  // where they were. replaceState, not router.replace: nothing needs to be
+  // re-queried, and it adds no history entry.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has(ORDERS_VIEW_PARAM)) return;
+    url.searchParams.set(ORDERS_VIEW_PARAM, view);
+    window.history.replaceState(null, "", url);
+  }, [view]);
 
   /** Go to a URL inside the busy treatment (see above). */
   const go = useCallback(
@@ -210,6 +229,19 @@ export function OrdersPage({
   // (lib/onboarding/tour-steps.ts). It hides again when the tour moves on.
   const tourShowsToolbar = useTourReveal("orders-toolbar");
 
+  // Clearing the queue: the panel offers the next parcel, so working through
+  // the To ship list is one press per order instead of close, find, open. The
+  // list re-queries after each ship, so the order just sent has already left
+  // `data.rows`; it is excluded by id anyway for the moment before it has.
+  // `remaining` counts what is still owed beyond the open order, including
+  // rows on other pages, so "caught up" is only said when it is true.
+  const nextOrder =
+    toShip && selected
+      ? (data.rows.find((row) => row.id !== selected.id && isToShip(row)) ?? null)
+      : null;
+  const remaining = data.total - (selected && data.rows.some((row) => row.id === selected.id) ? 1 : 0);
+  const queueDone = toShip && selected !== null && remaining <= 0;
+
   return (
     <div className="space-y-4">
       {/* The two lists. Hidden only for an account with no orders at all,
@@ -266,6 +298,7 @@ export function OrdersPage({
             onClear={() => handleFilters({})}
             toShip={toShip}
             onSeeAll={() => go(ordersViewPath("all"))}
+            checkoutOpen={checkoutOpen}
           />
         ) : (
           <div className="border border-border bg-card">
@@ -312,6 +345,8 @@ export function OrdersPage({
           onClose={closeDetail}
           canFulfil={canFulfil}
           onOrderChange={setSelected}
+          onNext={nextOrder ? () => setSelected(nextOrder) : undefined}
+          queueDone={queueDone}
         />
       )}
     </div>

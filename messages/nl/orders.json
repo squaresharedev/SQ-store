@@ -28,13 +28,15 @@
     "goToProducts": "Naar producten",
     "toShipTitle": "Niets te verzenden",
     "toShipHint": "Je bent helemaal bij. Betaalde bestellingen die wachten om te worden verstuurd, verschijnen hier, oudste eerst.",
-    "seeAllOrders": "Alle bestellingen bekijken"
+    "seeAllOrders": "Alle bestellingen bekijken",
+    "hintOpen": "Zodra iemand iets koopt in je winkel, verschijnt de bestelling hier en krijg je direct bericht."
   },
   "list": {
     "updating": "Bijwerken…",
     "summary": "{total, plural, one {{total} bestelling} other {{total} bestellingen}} · pagina {page} van {totalPages}",
     "detailDialog": "Bestelgegevens",
-    "closeDetail": "Bestelgegevens sluiten"
+    "closeDetail": "Bestelgegevens sluiten",
+    "withdrawn": "Herroepen"
   },
   "table": {
     "product": "Product",
@@ -117,6 +119,7 @@
     "shipping": "Verzending",
     "shippedOn": "Verzonden {date}",
     "trackingNumber": "Trackingnummer",
+    "trackingCarrier": "Trackingnummer ({carrier})",
     "copyTracking": {
       "copy": "Trackingnummer kopiëren",
       "copied": "Trackingnummer gekopieerd",
@@ -127,7 +130,17 @@
       "pending": "De betaling is nog niet verwerkt. Wacht tot die klaar is voordat je verzendt.",
       "refunded": "Deze bestelling is terugbetaald, dus er valt niets te verzenden.",
       "disputed": "Deze betaling is betwist. Los het geschil op voordat je verzendt."
-    }
+    },
+    "platformFeeRate": "Platformkosten ({rate})",
+    "orderNumberLine": "Bestelling {number}",
+    "copyOrderNumber": {
+      "copy": "Bestelnummer kopiëren",
+      "copied": "Bestelnummer gekopieerd",
+      "failed": "Kopiëren van het bestelnummer is mislukt. Selecteer en kopieer het handmatig."
+    },
+    "emailBuyer": "Stuur de koper een e-mail",
+    "mailSubject": "Je bestelling {number}",
+    "withdrawnShipWarning": "De koper heeft deze aankoop herroepen. Verzend hem alleen als je dat met de koper hebt afgesproken."
   },
   "actions": {
     "refundNeedsStripe": "Voor terugbetalingen moet Stripe gekoppeld zijn.",
@@ -138,7 +151,8 @@
     "disputeInStripe": "Geschillen worden afgehandeld in je Stripe-dashboard zodra Stripe is gekoppeld.",
     "disputeConfirm": "Geschilbehandeling openen voor deze bestelling?",
     "handleDispute": "Geschil behandelen",
-    "none": "Er zijn geen acties beschikbaar voor deze bestelling."
+    "none": "Er zijn geen acties beschikbaar voor deze bestelling.",
+    "refundManual": "Je kunt nog niet terugbetalen via Square Share. Betaal de koper zelf terug om deze bestelling terug te betalen en laat het de koper weten."
   },
   "skeleton": {
     "loading": "bestellingen laden"
@@ -162,6 +176,9 @@
     "markShipped": "Markeer als verzonden",
     "trackingLabel": "Trackingnummer (optioneel)",
     "trackingPlaceholder": "bijv. RR123456789IE",
+    "carrierLabel": "Vervoerder (optioneel)",
+    "carrierOther": "Anders of niet in de lijst",
+    "carrierHint": "Met een trackingnummer en de vervoerder krijgt de koper een link om het pakket te volgen.",
     "tellsBuyer": "We sturen de koper een e-mail dat het onderweg is, met het trackingnummer als je dat invult.",
     "noBuyerEmail": "Deze bestelling heeft geen e-mailadres van de koper, dus die wordt niet op de hoogte gesteld.",
     "confirm": "Markeer als verzonden",
@@ -171,7 +188,10 @@
     "editTracking": "Trackingnummer wijzigen",
     "saveTracking": "Trackingnummer opslaan",
     "trackingSaved": "Trackingnummer opgeslagen. We hebben het naar de koper gestuurd.",
-    "trackingSavedNoEmail": "Trackingnummer opgeslagen."
+    "trackingSavedNoEmail": "Trackingnummer opgeslagen.",
+    "mailOff": "E-mail staat nog niet aan, dus de koper krijgt geen bericht. Laat het de koper zelf weten.",
+    "next": "Volgende bestelling om te verzenden",
+    "caughtUp": "Dat was de laatste. Je bent helemaal bij."
   },
   "email": {
     "fromName": "{store} via Square Share",
@@ -189,7 +209,8 @@
       "total": "Totaal bestelling: {amount}",
       "openShip": "Zodra het onderweg is, markeer het dan hier als verzonden en we laten de koper weten: {url}",
       "openDigital": "Zie de bestelling: {url}",
-      "gift": "Cadeauboodschap om in te sluiten: {message}"
+      "gift": "Cadeauboodschap om in te sluiten: {message}",
+      "number": "Bestelnummer: {number}"
     },
     "shipped": {
       "subject": "Je bestelling van {store} is onderweg",
@@ -197,6 +218,8 @@
       "intro": "Goed nieuws: {store} heeft je bestelling verzonden.",
       "introTracking": "{store} heeft een trackingnummer toegevoegd aan je bestelling.",
       "tracking": "Trackingnummer: {tracking}",
+      "trackingCarrier": "Trackingnummer: {tracking} ({carrier})",
+      "orderPage": "Volg je bestelling hier: {url}",
       "shipTo": "Het gaat naar:",
       "questions": "Vragen over je bestelling? Beantwoord deze e-mail om {store} te bereiken.",
       "footer": "Verstuurd door Square Share namens {store}."
@@ -238,5 +261,13 @@
       "intro": "Hier is de koppeling naar je pagina voor bestelling {number} bij {store}:",
       "ignore": "Als je dit niet hebt aangevraagd, kun je deze e-mail negeren."
     }
+  },
+  "export": {
+    "button": "CSV exporteren",
+    "preparing": "Bestand voorbereiden",
+    "failed": "De export is niet gedownload. Probeer het over een moment opnieuw.",
+    "truncated": "Het bestand bevat je {count, number} nieuwste bestellingen.",
+    "lockedTitle": "Bestellingen exporteren hoort bij {plan} en hoger.",
+    "fileName": "bestellingen.csv"
   }
 }

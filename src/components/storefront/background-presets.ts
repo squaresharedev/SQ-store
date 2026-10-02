@@ -33,6 +33,15 @@ export const LEGACY_BACKGROUND_GRADIENTS: Record<
 const IMAGE_BACKGROUND_BASE = "#f5f5f5";
 
 /**
+ * A url() value for a display URL. Quotes cannot appear in signed R2 / blob:
+ * URLs, but escape defensively so the url() literal can never be broken out
+ * of. The one place a display URL becomes CSS.
+ */
+export function cssUrl(url: string): string {
+  return `url("${url.replace(/["\\]/g, encodeURIComponent)}")`;
+}
+
+/**
  * Resolve a structured `theme.background` into a style object. All inputs are
  * schema-validated (strict hex, integer angle, shape-checked object key), so
  * the produced CSS is always safe to place in a style attribute.
@@ -55,12 +64,9 @@ export function resolveBackgroundStyle(
       };
     case "image": {
       if (!imageUrl) return { backgroundColor: IMAGE_BACKGROUND_BASE };
-      // Quotes cannot appear in signed R2 / blob: URLs, but escape defensively
-      // so the url() literal can never be broken out of.
-      const safeUrl = imageUrl.replace(/["\\]/g, encodeURIComponent);
       return {
         backgroundColor: IMAGE_BACKGROUND_BASE,
-        backgroundImage: `url("${safeUrl}")`,
+        backgroundImage: cssUrl(imageUrl),
         backgroundSize: `${background.scale}% auto`,
         backgroundPosition: `${background.x}% ${background.y}%`,
         backgroundRepeat: "no-repeat",

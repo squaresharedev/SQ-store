@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
+import { helpTextClass } from "@/components/ui/control-styles";
 import { Switch } from "@/components/ui/switch";
 import {
   saveNotifications,
@@ -25,8 +26,13 @@ type PrefName = (typeof PREFS)[number]["name"];
 
 export function NotificationsSection({
   defaults,
+  emailEnabled,
 }: {
   defaults: Record<PrefName, boolean>;
+  /** Whether this deployment can send mail at all (emailSendingEnabled). When
+   *  it cannot, every switch below is a promise about mail that will not be
+   *  sent, so the card says so instead of letting them read as live. */
+  emailEnabled: boolean;
 }) {
   const t = useTranslations("Settings.notifications");
   const [state, formAction, isPending] = useActionState(
@@ -45,6 +51,11 @@ export function NotificationsSection({
       description={t("cardDescription")}
     >
       <form action={formAction} className="flex flex-col gap-4">
+        {!emailEnabled && (
+          <p className={helpTextClass} data-email-off="">
+            {t("emailOff")}
+          </p>
+        )}
         <div className="flex flex-col divide-y divide-border">
           {PREFS.map((pref) => (
             <div

@@ -355,6 +355,24 @@ export type Database = {
           },
         ]
       }
+      billing_switches: {
+        Row: {
+          id: boolean
+          plan_limits_enforced: boolean
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          plan_limits_enforced?: boolean
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          plan_limits_enforced?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       collections: {
         Row: {
           created_at: string
@@ -856,6 +874,7 @@ export type Database = {
           status: string
           storefront_id: string | null
           supply_consent_at: string | null
+          tracking_carrier: string | null
           tracking_number: string | null
           withdrawal_requested_at: string | null
         }
@@ -886,6 +905,7 @@ export type Database = {
           status?: string
           storefront_id?: string | null
           supply_consent_at?: string | null
+          tracking_carrier?: string | null
           tracking_number?: string | null
           withdrawal_requested_at?: string | null
         }
@@ -916,6 +936,7 @@ export type Database = {
           status?: string
           storefront_id?: string | null
           supply_consent_at?: string | null
+          tracking_carrier?: string | null
           tracking_number?: string | null
           withdrawal_requested_at?: string | null
         }
@@ -1850,7 +1871,11 @@ export type Database = {
       }
       mfa_session_ok: { Args: never; Returns: boolean }
       order_mark_shipped: {
-        Args: { p_order_id: string; p_tracking_number?: string | null }
+        Args: {
+          p_carrier?: string | null
+          p_order_id: string
+          p_tracking_number?: string | null
+        }
         Returns: string
       }
       plan_limit: { Args: { p_key: string; p_plan: string }; Returns: number }

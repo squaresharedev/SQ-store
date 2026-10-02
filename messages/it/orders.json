@@ -28,13 +28,15 @@
     "goToProducts": "Vai ai prodotti",
     "toShipTitle": "Niente da spedire",
     "toShipHint": "Sei in pari. Gli ordini pagati in attesa di essere inviati compaiono qui, i più vecchi prima.",
-    "seeAllOrders": "Vedi tutti gli ordini"
+    "seeAllOrders": "Vedi tutti gli ordini",
+    "hintOpen": "Quando qualcuno acquista dal tuo negozio, l’ordine compare qui e ricevi subito un avviso."
   },
   "list": {
     "updating": "Aggiornamento…",
     "summary": "{total, plural, one {{total} ordine} many {{total} di ordini} other {{total} ordini}} · pagina {page} di {totalPages}",
     "detailDialog": "Dettagli ordine",
-    "closeDetail": "Chiudi dettagli ordine"
+    "closeDetail": "Chiudi dettagli ordine",
+    "withdrawn": "Recesso"
   },
   "table": {
     "product": "Prodotto",
@@ -117,6 +119,7 @@
     "shipping": "Spedizione",
     "shippedOn": "Spedito {date}",
     "trackingNumber": "Numero di tracciamento",
+    "trackingCarrier": "Numero di tracciamento ({carrier})",
     "copyTracking": {
       "copy": "Copia numero di tracciamento",
       "copied": "Numero di tracciamento copiato",
@@ -128,7 +131,16 @@
       "refunded": "Questo ordine è stato rimborsato, quindi non c'è niente da spedire.",
       "disputed": "Questo pagamento è contestato. Risolvi la contestazione prima di spedire."
     },
-    "platformFeeRate": "Commissione della piattaforma ({rate})"
+    "platformFeeRate": "Commissione della piattaforma ({rate})",
+    "orderNumberLine": "Ordine {number}",
+    "copyOrderNumber": {
+      "copy": "Copia numero d’ordine",
+      "copied": "Numero d’ordine copiato",
+      "failed": "Non è stato possibile copiare il numero d’ordine. Selezionalo e copialo manualmente."
+    },
+    "emailBuyer": "Invia un’email all’acquirente",
+    "mailSubject": "Il tuo ordine {number}",
+    "withdrawnShipWarning": "L’acquirente ha esercitato il recesso da questo acquisto. Spediscilo solo se vi siete accordati in tal senso."
   },
   "actions": {
     "refundNeedsStripe": "I rimborsi richiedono che Stripe sia collegato.",
@@ -139,7 +151,8 @@
     "disputeInStripe": "Le contestazioni si gestiscono dalla tua dashboard Stripe una volta collegato Stripe.",
     "disputeConfirm": "Aprire la gestione della contestazione per questo ordine?",
     "handleDispute": "Gestisci contestazione",
-    "none": "Nessuna azione disponibile per questo ordine."
+    "none": "Nessuna azione disponibile per questo ordine.",
+    "refundManual": "Da Square Share non puoi ancora rimborsare. Per rimborsare questo ordine, restituisci tu l’importo all’acquirente e comunicaglielo."
   },
   "skeleton": {
     "loading": "caricamento ordini"
@@ -163,6 +176,9 @@
     "markShipped": "Segna come spedito",
     "trackingLabel": "Numero di tracciamento (facoltativo)",
     "trackingPlaceholder": "es. RR123456789IE",
+    "carrierLabel": "Corriere (facoltativo)",
+    "carrierOther": "Altro o non in elenco",
+    "carrierHint": "Con il numero di tracciamento e il corriere, l'acquirente riceve un link per seguire il pacco.",
     "tellsBuyer": "Invieremo un'email all'acquirente per comunicare che è in arrivo, con il numero di tracciamento se ne aggiungi uno.",
     "noBuyerEmail": "Questo ordine non ha l'email dell'acquirente, quindi l'acquirente non verrà avvisato.",
     "confirm": "Segna come spedito",
@@ -172,7 +188,10 @@
     "editTracking": "Modifica numero di tracciamento",
     "saveTracking": "Salva numero di tracciamento",
     "trackingSaved": "Numero di tracciamento salvato. L'abbiamo inviato all'acquirente.",
-    "trackingSavedNoEmail": "Numero di tracciamento salvato."
+    "trackingSavedNoEmail": "Numero di tracciamento salvato.",
+    "mailOff": "L’email non è ancora attiva, quindi l’acquirente non verrà avvisato. Avvisalo tu.",
+    "next": "Prossimo ordine da spedire",
+    "caughtUp": "Era l’ultimo. Sei in pari."
   },
   "email": {
     "fromName": "{store} via Square Share",
@@ -190,7 +209,8 @@
       "total": "Totale ordine: {amount}",
       "openShip": "Una volta in viaggio, segnalo come spedito qui e avviseremo l'acquirente: {url}",
       "openDigital": "Vedi l'ordine: {url}",
-      "gift": "Messaggio regalo da includere: {message}"
+      "gift": "Messaggio regalo da includere: {message}",
+      "number": "Numero d’ordine: {number}"
     },
     "shipped": {
       "subject": "Il tuo ordine da {store} è in viaggio",
@@ -198,6 +218,8 @@
       "intro": "Buone notizie: {store} ha spedito il tuo ordine.",
       "introTracking": "{store} ha aggiunto un numero di tracciamento al tuo ordine.",
       "tracking": "Numero di tracciamento: {tracking}",
+      "trackingCarrier": "Numero di tracciamento: {tracking} ({carrier})",
+      "orderPage": "Segui il tuo ordine qui: {url}",
       "shipTo": "È diretto a:",
       "questions": "Domande sul tuo ordine? Rispondi a questa email per contattare {store}.",
       "footer": "Inviato da Square Share per conto di {store}."
@@ -239,5 +261,13 @@
       "intro": "Ecco il link alla tua pagina per l'ordine {number} presso {store}:",
       "ignore": "Se non hai richiesto questo, puoi ignorare questa e-mail."
     }
+  },
+  "export": {
+    "button": "Esporta CSV",
+    "preparing": "Preparazione del file",
+    "failed": "Il download dell’esportazione non è riuscito. Riprova tra un istante.",
+    "truncated": "Il file contiene i tuoi {count, number} ordini più recenti.",
+    "lockedTitle": "L’esportazione degli ordini è inclusa in {plan} e nei piani superiori.",
+    "fileName": "ordini.csv"
   }
 }

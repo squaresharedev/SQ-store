@@ -28,6 +28,10 @@ import { VIBE_PRESETS } from "./presets";
  * which is why these products carry plain paths where a real product carries a
  * signed URL.
  *
+ * ONE SHOP, ONE KIND OF THING. Every product is a piece of everyday tech, so
+ * the storefront reads as a single believable shop (the bio says so too); a
+ * plant or a mug beside a speaker would read as a stock-photo mix.
+ *
  * THE LOOK is deliberately plain and current: a light neutral canvas, the sans
  * face, near-black ink, sharp tiles that are all picture, and the name and
  * price on an overlay that arrives on hover. A first storefront gets copied,
@@ -54,7 +58,6 @@ const PRODUCT_IDS = {
   watch: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a03",
   mouse: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a04",
   speaker: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a05",
-  succulent: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a06",
 } as const;
 
 function sampleProduct(
@@ -115,12 +118,6 @@ const PRODUCTS: readonly {
     title: "Storefront.sample.content.products.speaker.title",
     description: "Storefront.sample.content.products.speaker.description",
   },
-  {
-    key: "succulent",
-    price: 18,
-    title: "Storefront.sample.content.products.succulent.title",
-    description: "Storefront.sample.content.products.succulent.description",
-  },
 ];
 
 const TEXT_IDS = {
@@ -151,7 +148,7 @@ function sampleConfig(t: Translate): StorefrontConfig {
       priceTagPosition: "below",
       priceTagFont: "inter",
       columns: 6,
-      rows: 9,
+      rows: 8,
     },
     header: {
       show: true,
@@ -174,18 +171,17 @@ function sampleConfig(t: Translate): StorefrontConfig {
       },
       { type: "product", productId: PRODUCT_IDS.watch, x: 0, y: 4, w: 2, h: 2 },
       { type: "product", productId: PRODUCT_IDS.mouse, x: 2, y: 4, w: 2, h: 2 },
-      { type: "product", productId: PRODUCT_IDS.succulent, x: 4, y: 4, w: 2, h: 2 },
-      { type: "product", productId: PRODUCT_IDS.speaker, x: 0, y: 6, w: 4, h: 3 },
+      { type: "product", productId: PRODUCT_IDS.speaker, x: 4, y: 4, w: 2, h: 2 },
       {
         type: "text",
         id: TEXT_IDS.story,
         text: t("Storefront.sample.content.story"),
         variant: "body",
         align: "left",
-        x: 4,
+        x: 0,
         y: 6,
-        w: 2,
-        h: 3,
+        w: 6,
+        h: 2,
       },
     ],
     productPage: DEFAULT_PRODUCT_PAGE_CONFIG,

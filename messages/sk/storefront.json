@@ -145,8 +145,9 @@
       "checkoutGift": "Darčekové správy",
       "thankYouMessage": "Správa s poďakovaním",
       "thankYouCelebration": "Oslava poďakovania",
-      "checkoutTexture": "Textúra pokladne",
-      "checkoutPayButton": "Tlačidlo platby"
+      "checkoutPayButton": "Tlačidlo platby",
+      "productPagePhoto": "Fotka produktovej stránky",
+      "checkoutPhoto": "Fotka pokladne a poďakovania"
     }
   },
   "editorSearch": {
@@ -790,6 +791,11 @@
       "nothingSet": "Zatiaľ nič nenastavené. Kým nepridáte obchodné údaje, kupujúci vidia len riadok „Predáva“ pod názvom.",
       "editSettings": "Upraviť v Nastaveniach",
       "addDetails": "Pridajte obchodné údaje"
+    },
+    "groups": {
+      "look": "Vzhľad",
+      "style": "Štýl",
+      "besidePrice": "Pri cene"
     }
   },
   "productBlock": {
@@ -1154,10 +1160,6 @@
         "speaker": {
           "title": "Prenosný reproduktor",
           "description": "Vodotesný, až 12 hodín prehrávania na jedno nabitie."
-        },
-        "succulent": {
-          "title": "Sukulent na stôl",
-          "description": "Malá haworthia v keramickom kvetináči. Stačí ju poliať približne raz za mesiac."
         }
       }
     }
@@ -1321,7 +1323,6 @@
     }
   },
   "checkoutPage": {
-    "unwired": "Kupujúci sa dostanú do pokladne po prepojení so Stripe. Môžete ju teraz navrhnúť.",
     "charsLeft": "{count, plural, one {# znak zostáva} few {# znaky zostávajú} other {# znakov zostáva}}",
     "layout": {
       "title": "Rozloženie",
@@ -1336,16 +1337,7 @@
       "button": "Tlačidlo platby zodpovedá tlačidlu kúpiť na vašej produktovej stránke.",
       "styleButton": "Upraviť štýl tlačidla",
       "payButton": "Tlačidlo platby",
-      "payButtonInfoLabel": "O tlačidle platby",
-      "texture": {
-        "label": "Textúra",
-        "none": "Hladká",
-        "paper": "Papier",
-        "dots": "Bodky",
-        "grid": "Mriežka",
-        "lines": "Čiary",
-        "linen": "Ľan"
-      }
+      "payButtonInfoLabel": "O tlačidle platby"
     },
     "message": {
       "title": "Text",
@@ -1365,14 +1357,15 @@
       "message": "Správa",
       "messagePlaceholder": "Čo bude ďalej, vlastnými slovami",
       "celebrate": {
-        "label": "Oslava",
         "confetti": "Konfety",
-        "rays": "Svetlo",
-        "none": "Žiadna",
         "play": "Prehrať"
       }
-    },
-    "unwiredBadge": "Zatiaľ nie je aktívna",
-    "unwiredInfoLabel": "Kedy sa kupujúci dostanú do pokladne"
+    }
+  },
+  "pagePhoto": {
+    "label": "Fotka",
+    "infoLabel": "Ako sa fotka používa",
+    "info": "Zobrazí sa za stránkou a je prefarbená farbou stránky, aby text zostal čitateľný. Zmenou farby fotku zosvetlíte alebo stmavíte.",
+    "remove": "Odstrániť fotku"
   }
 }

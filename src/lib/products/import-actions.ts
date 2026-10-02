@@ -19,6 +19,7 @@ import { productWriteSchema } from "@/lib/validation/product";
 import { firstIssue } from "@/lib/validation/messages";
 import { msg, type MessageRef } from "@/i18n/types";
 import { CURRENCIES, PRODUCT_STATUSES, type Currency, type ProductStatus } from "@/types/product";
+import { planLimitError, planLimitErrorFromTrigger, planLimitKeyOf, planRoom } from "@/lib/billing/limits";
 import {
   IMPORT_BYTES_MAX,
   IMPORT_ROWS_MAX,
@@ -115,6 +116,15 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
   if (typeof csv !== "string" || csv.trim() === "") {
     return failure(invalidInput(msg("Errors.productImport.empty.message"), msg("Errors.productImport.empty.fix")));
   }
+  // The store's plan caps how many products it holds (lib/billing/limits.ts).
+  // A store with no room left is told so, like a single create; one with some
+  // room imports up to it, and the rows past it are reported as left out, the
+  // same way rows past the file cap are.
+  const overLimit = await planLimitError(account.accountId, "products", account.userId);
+  if (overLimit) return failure(overLimit);
+  const room = await planRoom(account.accountId, "products");
+  const maxRows = Math.min(IMPORT_ROWS_MAX, room?.left ?? IMPORT_ROWS_MAX);
+
   // Measured in BYTES, not characters: a file of multi-byte text is bigger
   // than its length suggests, and the cap is about the work this does.
   if (new TextEncoder().encode(csv).length > IMPORT_BYTES_MAX) {
@@ -122,7 +132,7 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
     return failure(
       invalidInput(
         msg("Errors.productImport.tooLarge.message"),
-        msg("Errors.productImport.tooLarge.fix", { maxMb, maxRows: IMPORT_ROWS_MAX }),
+        msg("Errors.productImport.tooLarge.fix", { maxMb, maxRows }),
       ),
     );
   }
@@ -147,6 +157,7 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
 
   const plan = buildImportPlan(parseCsv(csv), safeColumns(columns), {
     status: status as ProductStatus,
+    maxRows,
   });
   const rows = importableRows(plan);
   const problems = plan.rows.flatMap((row) =>
@@ -221,8 +232,9 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
     );
   }
 
-  // ONE insert for the whole file. Row by row would be IMPORT_ROWS_MAX round
-  // trips, and would leave a half-imported catalogue behind on any failure.
+  // ONE insert for the whole file. Row by row would be a round trip per row
+  // (up to the plan's cap), and would leave a half-imported catalogue behind
+  // on any failure.
   // RLS re-checks the caller's permission on every row here, exactly as it
   // does for a single create.
   const supabase = await createClient();
@@ -231,6 +243,11 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
     .insert(inserts)
     .select("id");
   if (error) {
+    // The trigger caught a batch the check above let through (another create
+    // took the room in between): nothing was written, and the plan says why.
+    if (planLimitKeyOf(error)) {
+      return failure(await planLimitErrorFromTrigger(account.accountId, "products"));
+    }
     console.error("[products] import failed", error);
     return failure(serverError("importProducts"));
   }

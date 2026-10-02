@@ -339,12 +339,12 @@ export function StorefrontDesigner({
   initialBackgroundImageUrl = null,
   initialCustomFontUrl = null,
   initialElementUrls = {},
+  initialPagePhotoUrls = {},
   initialSetting = null,
   role = null,
   accountId = null,
   sellerIdentity = {},
   shippingPolicy = {},
-  checkoutLive = false,
   sample = null,
   takedown = null,
 }: {
@@ -370,9 +370,6 @@ export function StorefrontDesigner({
    *  product page of this storefront sells under them; this editor has no
    *  control that edits them, only a link to where it is. */
   shippingPolicy?: SellerShippingPolicy;
-  /** Whether buyers can reach this seller's checkout yet (a payment provider
-   *  can take their money). Server-decided; the editor only says so. */
-  checkoutLive?: boolean;
   /** Signed display URL for a stored image background (null when none). */
   initialBackgroundImageUrl?: string | null;
   /** Signed display URL for a stored uploaded font (null when none). */
@@ -380,6 +377,9 @@ export function StorefrontDesigner({
   /** Signed display URL per image block, keyed by blockKey. Blocks whose
    *  signing failed are simply absent and render their placeholder. */
   initialElementUrls?: Record<string, string>;
+  /** Signed display URL per photo the hosted pages hold as their backdrop,
+   *  keyed by object key. */
+  initialPagePhotoUrls?: Record<string, string>;
   /** A setting named in the URL, from a search result picked outside the
    *  editor. Opened once on arrival and never read again. */
   initialSetting?: string | null;
@@ -417,6 +417,9 @@ export function StorefrontDesigner({
   // URLs the server resolved at page load, then extended with a local object
   // URL for each element added in this session (signing is server-side, so a
   // block created here has no signed URL until the page is loaded again).
+  // Display URLs for the page photos, by object key: server-signed at load, a
+  // local object URL right after an upload. Never part of the config.
+  const [pagePhotoUrls, setPagePhotoUrls] = useState<Record<string, string>>(initialPagePhotoUrls);
   const [elementUrls, setElementUrls] = useState<Record<string, string>>(
     initialElementUrls,
   );
@@ -4005,6 +4008,7 @@ export function StorefrontDesigner({
             backgroundImageUrl={backgroundImageUrl}
             customFontUrl={customFontUrl}
             elementUrls={elementUrls}
+            pagePhotoUrls={pagePhotoUrls}
             showGrid={showGrid}
             viewport={viewport}
             onMoveBlock={onMoveBlock}
@@ -4048,7 +4052,6 @@ export function StorefrontDesigner({
             productPage={productPage}
             checkoutPage={checkoutPage}
             checkoutFor={checkoutFor}
-            checkoutLive={checkoutLive}
             onToggleCheckout={toggleCheckout}
             onCloseCheckout={() => setCheckoutFor(null)}
             onCheckoutPageChange={updateCheckoutPage}
@@ -4170,7 +4173,8 @@ export function StorefrontDesigner({
               onProductPageChange={updateProductPage}
               checkoutPage={checkoutPage}
               onCheckoutPageChange={updateCheckoutPage}
-              checkoutLive={checkoutLive}
+              pagePhotoUrls={pagePhotoUrls}
+              onPagePhotoUrl={(key, url) => setPagePhotoUrls((current) => ({ ...current, [key]: url }))}
               onPlayCelebration={() => setCelebrationPlays((count) => count + 1)}
               shippingPolicy={shippingPolicy}
               sellerIdentity={sellerIdentity}

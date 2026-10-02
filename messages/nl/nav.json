@@ -38,7 +38,8 @@
     "notifications": "Meldingen",
     "language": "Taal",
     "team": "Team en toegang",
-    "danger": "Gevarenzone"
+    "danger": "Gevarenzone",
+    "billing": "Abonnement en facturering"
   },
   "profileMenu": {
     "label": "Accountmenu",
@@ -46,7 +47,8 @@
     "switchAccounts": "Van account wisselen",
     "yourStore": "Je winkel",
     "owner": "Eigenaar",
-    "logOut": "Uitloggen"
+    "logOut": "Uitloggen",
+    "plan": "Abonnement"
   },
   "viewingBanner": {
     "viewing": "{role, select, owner {Je bekijkt <store>{storeName}</store> als eigenaar} editor {Je bekijkt <store>{storeName}</store> als bewerker} viewer {Je bekijkt <store>{storeName}</store> als lezer} other {Je bekijkt <store>{storeName}</store>}}",

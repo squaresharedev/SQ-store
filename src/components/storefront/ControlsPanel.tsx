@@ -84,7 +84,8 @@ export function ControlsPanel({
   onProductPageChange,
   checkoutPage = DEFAULT_CHECKOUT_PAGE_CONFIG,
   onCheckoutPageChange,
-  checkoutLive = false,
+  pagePhotoUrls = {},
+  onPagePhotoUrl = () => {},
   onPlayCelebration,
   shippingPolicy,
   sellerIdentity,
@@ -100,8 +101,10 @@ export function ControlsPanel({
    *  with no owner to keep them. */
   checkoutPage?: CheckoutPageConfig;
   onCheckoutPageChange?: (next: CheckoutPageConfig) => void;
-  /** Whether buyers can reach checkout yet. */
-  checkoutLive?: boolean;
+  /** Display URLs of the hosted pages' photo backdrops by object key, and a
+   *  way to report one just uploaded. Absent (the dev gallery) shows none. */
+  pagePhotoUrls?: Record<string, string>;
+  onPagePhotoUrl?: (key: string, url: string) => void;
   /** Replay the thank-you celebration on its artboard. */
   onPlayCelebration?: () => void;
   /** The account's shipping and returns terms, read-only here — see
@@ -302,6 +305,8 @@ export function ControlsPanel({
           background={theme.background}
           accent={theme.accent}
           cornerRadius={theme.cornerRadius}
+          pagePhotoUrls={pagePhotoUrls}
+          onPagePhotoUrl={onPagePhotoUrl}
           summoned={summonedPage}
         />
       ) : group === "checkoutPage" ? (
@@ -311,7 +316,8 @@ export function ControlsPanel({
           onCheckoutPageChange={(next) => onCheckoutPageChange?.(next)}
           productPage={productPage}
           theme={theme}
-          live={checkoutLive}
+          pagePhotoUrls={pagePhotoUrls}
+          onPagePhotoUrl={onPagePhotoUrl}
           summoned={summonedCheckout}
           onPlayCelebration={onPlayCelebration}
         />

@@ -157,10 +157,8 @@ const REGISTRY: Record<string, Classification> = {
   "lib/orders/actions.ts::markOrderShipped": limited(),
 
   // --- plans & billing (lib/billing) -----------------------------------------
-  // Opening the plans reads the store's plan, sales and usage: a read budget.
   // Starting a checkout or opening the Customer Portal calls Stripe on the
   // platform's key (and may create a customer there): a write budget.
-  "lib/billing/actions.ts::loadPricingContext": limited(),
   "lib/billing/actions.ts::startCheckout": limited(),
   "lib/billing/actions.ts::openBillingPortal": limited(),
 

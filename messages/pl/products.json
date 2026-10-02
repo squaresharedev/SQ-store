@@ -195,7 +195,9 @@
     "importing": "Importowanie…",
     "importedLabel": "Zaimportowano",
     "run": "{count, plural, one {Importuj {count} produkt} few {Importuj {count} produkty} many {Importuj {count} produktów} other {Importuj {count} produktu}}",
-    "clear": "Wyczyść"
+    "clear": "Wyczyść",
+    "planRoom": "{max, plural, one {Twój plan ma miejsce na # kolejny produkt} few {Twój plan ma miejsce na # kolejne produkty} many {Twój plan ma miejsce na # kolejnych produktów} other {Twój plan ma miejsce na # kolejnego produktu}}",
+    "droppedByPlan": "{count, plural, one {# wiersz nie zostanie zaimportowany: twój plan ma miejsce na {max} więcej.} few {# wiersze nie zostaną zaimportowane: twój plan ma miejsce na {max} więcej.} many {# wierszy nie zostanie zaimportowanych: twój plan ma miejsce na {max} więcej.} other {# wiersza nie zostanie zaimportowanego: twój plan ma miejsce na {max} więcej.}}"
   },
   "form": {
     "sections": {

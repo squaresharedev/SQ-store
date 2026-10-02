@@ -9,7 +9,7 @@
 //
 // PRICES ARE CHECKED, NOT TRUSTED. The price a checkout charges is looked up
 // by the lookup key in lib/billing/plans.ts and must charge exactly what that
-// catalog (and so the pricing modal) says: same amount, same currency, same
+// catalog (and so the plans page) says: same amount, same currency, same
 // interval. A mismatch refuses the checkout (BillingConfigError) instead of
 // charging a seller a price they were not shown.
 

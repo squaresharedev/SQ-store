@@ -1,13 +1,11 @@
 "use server";
 
-// Plans & billing server actions: what the pricing modal and Settings › Plan &
-// billing call.
+// Plans & billing server actions: what the plans page and Settings › Plan &
+// billing call to change a plan. (Reading it is lib/billing/pricing-context.ts.)
 //
 // SECURITY MODEL, the same order as every other action here:
 //   session -> ACTIVE account -> permission -> input -> (step-up) -> budget ->
 //   provider.
-//   - Reading the plan (loadPricingContext) is for anyone with store.read on
-//     the active store: teammates see the plan their store is on.
 //   - Changing it is `billing.manage`, the OWNER's alone, and only for the
 //     store they own (the active account must be their own). An editor
 //     looking at someone else's store can never start a checkout that bills
@@ -27,7 +25,6 @@ import { getUser } from "@/lib/auth/session";
 import { STEP_UP_FIELDS, requireStepUpState } from "@/lib/auth/mfa";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { createClient } from "@/lib/supabase/server";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { appUrl } from "@/lib/app-url";
 import { DEFAULT_LOCALE, parseLocale } from "@/i18n/locales";
@@ -47,110 +44,20 @@ import {
 } from "@/lib/errors";
 import { unknownField } from "@/lib/validation/form-fields";
 import { readAccountBilling } from "@/lib/billing/account-plan";
-import { billingProvider } from "@/lib/billing/availability";
 import { ensureBillingCustomer } from "@/lib/billing/customer";
-import { isLiveSubscription, type SubscriptionStatus } from "@/lib/billing/entitlement";
+import { isLiveSubscription } from "@/lib/billing/entitlement";
 import { recordFunnelEvent } from "@/lib/billing/funnel";
-import { countPlanUsage } from "@/lib/billing/limits";
 import {
   BILLING_SETTINGS_PATH,
   CHECKOUT_SESSION_PARAM,
   PRICING_SOURCES,
   parsePricingSource,
-  pricingHref,
+  plansHref,
   type PricingSource,
 } from "@/lib/billing/paths";
-import {
-  BILLING_INTERVALS,
-  PAID_PLAN_IDS,
-  type BillingInterval,
-  type PlanId,
-  type PlanLimitKey,
-} from "@/lib/billing/plans";
+import { BILLING_INTERVALS, PAID_PLAN_IDS } from "@/lib/billing/plans";
 import { BillingConfigError, type PortalFlow } from "@/lib/billing/provider";
 import { getBillingProvider } from "@/lib/billing/providers";
-
-/** What the pricing modal needs to know, and nothing it must not. No Stripe
- *  ids, no customer details: this goes to the browser. */
-export type PricingContext = {
-  /** The plan in force now. */
-  plan: PlanId;
-  interval: BillingInterval | null;
-  status: SubscriptionStatus | "none";
-  cancelAtPeriodEnd: boolean;
-  currentPeriodEnd: string | null;
-  /** What this account pays per interval, when it pays (grandfathered prices). */
-  priceCents: number | null;
-  /** A live subscription exists: plan changes go through the Customer Portal
-   *  (switch or cancel), not a second checkout. */
-  hasSubscription: boolean;
-  /** The viewer is the store's owner, the only person who can change its plan. */
-  canManage: boolean;
-  /** Plans can be bought in this deployment (a billing provider is set up). */
-  available: boolean;
-  /** The last 30 days of item sales, for the calculator; null if unreadable. */
-  salesSubtotal30dCents: number | null;
-  /** What the store has of each capped thing now; null if uncounted. */
-  usage: Record<PlanLimitKey, number | null>;
-};
-
-export type PricingContextResult = { ok: true; context: PricingContext } | ActionFailure;
-
-/**
- * Everything the pricing modal shows about the ACTIVE store. Records a
- * `pricing_viewed` funnel event (at most once per entry point per ten
- * minutes) when opened from a known entry point.
- */
-export async function loadPricingContext(source?: unknown): Promise<PricingContextResult> {
-  const account = await getActiveAccount();
-  if (!account) return failure(sessionExpired());
-  if (!can(account.role, "store.read")) return failure(permissionDenied(account.role, "manageBilling"));
-  if (!(await rateLimit("billing_read", RATE_LIMITS.billingRead))) {
-    return failure(rateLimited("changePlan"));
-  }
-
-  const billing = await readAccountBilling(account.accountId);
-  if (!billing.ok) return failure(serverError("loadPlans"));
-
-  const supabase = await createClient();
-  const [sales, storefronts, teamSeats] = await Promise.all([
-    // Under the caller's own RLS (an invoker function): it can only ever
-    // count orders this person may already read.
-    supabase.rpc("billing_sales_summary", { p_seller_id: account.accountId }),
-    countPlanUsage(account.accountId, "storefronts"),
-    countPlanUsage(account.accountId, "teamSeats"),
-  ]);
-  const salesRow = Array.isArray(sales.data) ? sales.data[0] : null;
-
-  const entry = parsePricingSource(source);
-  if (entry && (await rateLimit(`pricing_view:${entry}`, RATE_LIMITS.pricingViewDedupe))) {
-    await recordFunnelEvent({
-      accountId: account.accountId,
-      actorId: account.userId,
-      kind: "pricing_viewed",
-      source: entry,
-      plan: billing.billing.plan,
-    });
-  }
-
-  const { billing: b } = billing;
-  return {
-    ok: true,
-    context: {
-      plan: b.plan,
-      interval: b.interval,
-      status: b.status,
-      cancelAtPeriodEnd: b.cancelAtPeriodEnd,
-      currentPeriodEnd: b.currentPeriodEnd,
-      priceCents: b.priceCents,
-      hasSubscription: Boolean(b.subscriptionId) && isLiveSubscription(b.status),
-      canManage: account.isOwner && can(account.role, "billing.manage"),
-      available: billingProvider() !== null,
-      salesSubtotal30dCents: sales.error || !salesRow ? null : Number(salesRow.subtotal_cents),
-      usage: { storefronts, teamSeats },
-    },
-  };
-}
 
 const checkoutSchema = z.object({
   plan: z.enum(PAID_PLAN_IDS),
@@ -191,7 +98,7 @@ async function requestLocale() {
 
 /**
  * Send the owner to Stripe Checkout to start a paid plan. Returns the URL for
- * the browser to go to (the modal navigates with window.location, which keeps
+ * the browser to go to (the page navigates with window.location, which keeps
  * the redirect out of the page's form-action policy).
  *
  * Refuses when the store already has a live subscription: a change of plan
@@ -236,7 +143,7 @@ export async function startCheckout(input: unknown): Promise<CheckoutResult> {
       locale,
       // `{CHECKOUT_SESSION_ID}` is Stripe's placeholder, filled in on return.
       successUrl: appUrl(`${BILLING_SETTINGS_PATH}?${CHECKOUT_SESSION_PARAM}={CHECKOUT_SESSION_ID}`),
-      cancelUrl: appUrl(pricingHref("checkout_cancel")),
+      cancelUrl: appUrl(plansHref("checkout_cancel")),
     });
     await recordFunnelEvent({
       accountId: account.accountId,

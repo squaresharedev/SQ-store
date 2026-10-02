@@ -9,6 +9,13 @@ import { getShippingChoices } from "@/lib/storefront/queries";
 import { getShippingPolicy } from "@/lib/settings/shipping-policy";
 import { EMPTY_SHIPPING_POLICY } from "@/types/shipping-policy";
 import { storefrontReturnPath } from "@/lib/products/return-path";
+import { PRODUCTS_PATH } from "@/lib/products/paths";
+import { planRoom } from "@/lib/billing/limits";
+import { PlanLimitNotice } from "@/components/billing/PlanLimitNotice";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { BackLink } from "@/components/ui/BackLink";
+import { pageShellClass } from "@/components/ui/surface-styles";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Products.metadata.new");
@@ -32,6 +39,22 @@ export default async function NewProductPage({
   ]);
   if (!can(account?.role, "products.write")) redirect("/products");
 
+  const t = await getTranslations("Products.page");
+
+  // A store whose plan has no room for another product gets the limit and the
+  // way to the plans, not a form to fill in and have refused at Save (the
+  // action and the database hold the same line: lib/billing/limits.ts).
+  const room = account ? await planRoom(account.accountId, "products") : null;
+  if (room && room.left === 0) {
+    return (
+      <main className={cn(pageShellClass, "space-y-6")}>
+        <BackLink href={PRODUCTS_PATH}>{t("back")}</BackLink>
+        <PageHeader title={t("new.title")} subtitle={t("new.subtitle")} />
+        <PlanLimitNotice limitKey="products" plan={room.plan} cap={room.cap} />
+      </main>
+    );
+  }
+
   // What the form needs to know before it offers "Active": the server refuses
   // that status without the store's trader details (lib/products/actions.ts),
   // so the control says so up front rather than letting a seller fill in a
@@ -47,12 +70,10 @@ export default async function NewProductPage({
     ? await getShippingPolicy(account.userId)
     : EMPTY_SHIPPING_POLICY;
 
-  const t = await getTranslations("Products.page.new");
-
   return (
     <ProductFormView
-      title={t("title")}
-      subtitle={t("subtitle")}
+      title={t("new.title")}
+      subtitle={t("new.subtitle")}
       // Set when the seller left a storefront designer to create this product
       // (ProductPicker's empty state): saving takes them back to that board.
       returnTo={storefrontReturnPath(params.next)}

@@ -7,9 +7,10 @@
  *   - no client role can read or write the billing tables, or call the
  *     service-only functions;
  *   - the webhook's snapshot write only ever moves forward in time;
- *   - the storefront and team-seat limits hold for a direct insert by a
- *     signed-in client (owner or teammate), lift with a paid plan, and never
- *     apply to the trusted service role;
+ *   - the storefront, team-seat and product limits hold for a direct insert by
+ *     a signed-in client (owner or teammate), lift with a paid plan, and never
+ *     apply to the trusted service role; the product limit holds for a batch
+ *     insert too, and never removes or blocks editing what a store already has;
  *   - the calculator's sales summary counts exactly what the fee is charged on,
  *     and only for someone allowed to read the orders;
  *   - the order snapshot columns, the permission and the notification type.
@@ -27,6 +28,7 @@ import {
   type TestUser,
 } from "../db/client";
 import { PLANS, PLAN_IDS, PLAN_LIMIT_KEYS } from "../../src/lib/billing/plans";
+import { PRICING_SOURCES } from "../../src/lib/billing/paths";
 
 const email = (label: string) => `${label}-${randomUUID().slice(0, 6)}@test.squareshare.to`;
 
@@ -51,7 +53,38 @@ const accountPlan = (user: TestUser) =>
 const FUTURE = "2999-01-01T00:00:00Z";
 const PAST = "2000-01-01T00:00:00Z";
 
-afterAll(closePool);
+/** The launch switch (billing_switches), which ships off. */
+const setLimitsEnforced = (on: boolean) =>
+  asSuper((q) => q.query(`update public.billing_switches set plan_limits_enforced = $1`, [on]));
+
+afterAll(async () => {
+  // Other files share this database; leave the switch as the migration ships it.
+  await setLimitsEnforced(false);
+  await closePool();
+});
+
+describe("the limits launch switch", () => {
+  let seller: TestUser;
+  beforeAll(async () => {
+    seller = await createUser(email("switch"));
+  });
+
+  it("ships off, so nothing is refused before paid plans are on sale", async () => {
+    const [row] = await asSuper(async (q) => (await q.query(`select * from public.billing_switches`)).rows);
+    expect(row.plan_limits_enforced).toBe(false);
+    const cap = PLANS.free.limits.storefronts as number;
+    for (let i = 0; i <= cap; i += 1) {
+      await asUser(seller, (q) =>
+        q.query(`insert into public.storefronts (owner_id, name) values ($1, $2)`, [seller.id, `Shop ${i}`]),
+      );
+    }
+  });
+
+  it("is closed to every client role", async () => {
+    const attempt = asUser(seller, (q) => q.query(`update public.billing_switches set plan_limits_enforced = false`));
+    expect(await expectDbError(attempt)).toMatch(/permission denied/);
+  });
+});
 
 describe("plan_limit mirrors the catalog", () => {
   it("agrees with PLANS for every plan and key", async () => {
@@ -183,6 +216,7 @@ describe("the storefront limit", () => {
     );
 
   beforeAll(async () => {
+    await setLimitsEnforced(true);
     owner = await createUser(email("sf-owner"));
     editor = await createUser(email("sf-editor"));
     await asService((q) =>
@@ -205,6 +239,22 @@ describe("the storefront limit", () => {
     expect(await expectDbError(create(editor, "Editor's extra"))).toMatch(
       /plan_limit_reached:storefronts/,
     );
+  });
+
+  it("counts a storefront moved INTO a full account", async () => {
+    // The editor may write the owner's store, so RLS lets them move their own
+    // storefront into it; the limit is what has to stop that.
+    const moved = await asUser(editor, async (q) =>
+      (
+        await q.query(`insert into public.storefronts (owner_id, name) values ($1, 'Mine') returning id`, [
+          editor.id,
+        ])
+      ).rows[0].id as string,
+    );
+    const attempt = asUser(editor, (q) =>
+      q.query(`update public.storefronts set owner_id = $1 where id = $2`, [owner.id, moved]),
+    );
+    expect(await expectDbError(attempt)).toMatch(/plan_limit_reached:storefronts/);
   });
 
   it("never limits the service role", async () => {
@@ -235,6 +285,7 @@ describe("the team-seat limit", () => {
     );
 
   beforeAll(async () => {
+    await setLimitsEnforced(true);
     owner = await createUser(email("seat-owner"));
   });
 
@@ -269,6 +320,111 @@ describe("the team-seat limit", () => {
   });
 });
 
+describe("the product limit (20261002_product_limits)", () => {
+  let owner: TestUser;
+  const cap = PLANS.free.limits.products as number;
+
+  /** `count` products in ONE statement, as the CSV import writes them. */
+  const createBatch = (user: TestUser, count: number, label: string) =>
+    asUser(user, (q) =>
+      q.query(
+        `insert into public.products (owner_id, title, price_cents)
+         select $1, $2 || ' ' || n, 100 from generate_series(1, $3::int) as n`,
+        [owner.id, label, count],
+      ),
+    );
+
+  const countProducts = () =>
+    asSuper(async (q) =>
+      Number((await q.query(`select count(*) from public.products where owner_id = $1`, [owner.id])).rows[0].count),
+    );
+
+  beforeAll(async () => {
+    await setLimitsEnforced(true);
+    owner = await createUser(email("product-owner"));
+  });
+
+  it(`lets a Free account hold ${cap}, and refuses one more`, async () => {
+    await createBatch(owner, cap, "Product");
+    expect(await expectDbError(createBatch(owner, 1, "One too many"))).toMatch(/plan_limit_reached:products/);
+    expect(await countProducts()).toBe(cap);
+  });
+
+  it("refuses a whole batch that would cross the cap, writing none of it", async () => {
+    const other = await createUser(email("product-batch"));
+    const insert = asUser(other, (q) =>
+      q.query(
+        `insert into public.products (owner_id, title, price_cents)
+         select $1, 'Row ' || n, 100 from generate_series(1, $2::int) as n`,
+        [other.id, cap + 3],
+      ),
+    );
+    expect(await expectDbError(insert)).toMatch(/plan_limit_reached:products/);
+    const written = await asSuper(async (q) =>
+      Number((await q.query(`select count(*) from public.products where owner_id = $1`, [other.id])).rows[0].count),
+    );
+    expect(written).toBe(0);
+  });
+
+  it("never touches a product that already exists: editing one at the cap still works", async () => {
+    await asUser(owner, (q) =>
+      q.query(`update public.products set title = 'Renamed' where owner_id = $1 and title = 'Product 1'`, [owner.id]),
+    );
+    expect(await countProducts()).toBe(cap);
+  });
+
+  it("never limits the service role", async () => {
+    await asService((q) =>
+      q.query(`insert into public.products (owner_id, title, price_cents) values ($1, 'Seeded', 100)`, [owner.id]),
+    );
+    expect(await countProducts()).toBe(cap + 1);
+  });
+
+  it("makes room again when one is deleted, and lifts on a bigger plan up to ITS cap", async () => {
+    // Over the cap by one (the seeded row): deleting one is not enough room.
+    await asUser(owner, (q) => q.query(`delete from public.products where owner_id = $1 and title = 'Seeded'`, [owner.id]));
+    expect(await expectDbError(createBatch(owner, 1, "Still full"))).toMatch(/plan_limit_reached:products/);
+    await asUser(owner, (q) =>
+      q.query(`delete from public.products where owner_id = $1 and title = 'Renamed'`, [owner.id]),
+    );
+    await createBatch(owner, 1, "Room again");
+
+    await setPlan(owner, "starter", FUTURE);
+    const starterCap = PLANS.starter.limits.products as number;
+    await createBatch(owner, starterCap - cap, "On Starter");
+    expect(await expectDbError(createBatch(owner, 1, "Past Starter"))).toMatch(/plan_limit_reached:products/);
+
+    // Back on Free and far over its cap: nothing is removed, nothing can be added.
+    await setPlan(owner, "starter", PAST);
+    expect(await countProducts()).toBe(starterCap);
+    expect(await expectDbError(createBatch(owner, 1, "After Starter"))).toMatch(/plan_limit_reached:products/);
+  });
+
+  it("is off with the launch switch, like the other limits", async () => {
+    await setLimitsEnforced(false);
+    await createBatch(owner, 1, "Switch off");
+    await setLimitsEnforced(true);
+  });
+});
+
+describe("the funnel's entry points mirror PRICING_SOURCES", () => {
+  const record = (accountId: string, source: string) =>
+    asService((q) =>
+      q.query(`insert into public.seller_funnel_events (account_id, kind, source) values ($1, 'pricing_viewed', $2)`, [
+        accountId,
+        source,
+      ]),
+    );
+
+  it("accepts every source the app can send, and nothing else", async () => {
+    // A source missing from the CHECK makes its funnel insert fail silently
+    // (recording is best-effort), so the two lists are compared here.
+    const seller = await createUser(email("funnel"));
+    for (const source of PRICING_SOURCES) await record(seller.id, source);
+    expect(await expectDbError(record(seller.id, "made_up_source"))).toMatch(/seller_funnel_events_source_check/);
+  });
+});
+
 describe("billing_sales_summary", () => {
   let seller: TestUser;
   let stranger: TestUser;
@@ -290,17 +446,17 @@ describe("billing_sales_summary", () => {
   });
 
   it("sums the item subtotal of paid EUR sales in the last 30 days", async () => {
-    const row = await asUser(seller, async (q) =>
+    const row = await asService(async (q) =>
       (await q.query(`select * from public.billing_sales_summary($1)`, [seller.id])).rows[0],
     );
     expect(row).toEqual({ subtotal_cents: "2000", sales: 1, fees_cents: "100" });
   });
 
-  it("tells a stranger nothing", async () => {
-    const row = await asUser(stranger, async (q) =>
-      (await q.query(`select * from public.billing_sales_summary($1)`, [seller.id])).rows[0],
-    );
-    expect(row).toEqual({ subtotal_cents: "0", sales: 0, fees_cents: "0" });
+  it("is not callable by any client, the seller included", async () => {
+    for (const user of [seller, stranger]) {
+      const attempt = asUser(user, (q) => q.query(`select * from public.billing_sales_summary($1)`, [seller.id]));
+      expect(await expectDbError(attempt)).toMatch(/permission denied/);
+    }
   });
 });
 

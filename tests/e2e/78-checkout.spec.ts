@@ -309,6 +309,91 @@ test.describe("hosted checkout", () => {
     expect(confirmation.fromName).toBe(`${s.store} via Square Share`);
   });
 
+  test("a phone for the courier reaches the seller, and a named carrier gives the buyer a link to follow", async ({ page }) => {
+    const s = await seed(page, "co-track");
+    test.skip(!(await checkoutOffered(page, s)), "stack started without CHECKOUT_TEST_PAYMENTS=1");
+    const buyer = "nora.walsh@example.test";
+    const tracking = "RR123456789IE";
+    const carrierPage = `https://www.anpost.com/Post-Parcels/Track/History?item=${tracking}`;
+
+    // 1. The buyer checks out, giving the optional phone.
+    await page.goto(`${productUrl(s, s.vase)}/checkout?o=${SMALL}`);
+    await page.getByLabel("Email").fill(buyer);
+    await page.getByLabel("Full name").fill("Nora Walsh");
+    await page.getByLabel("Address", { exact: true }).fill("4 Mill Lane");
+    await page.getByLabel("Town or city").fill("Sligo");
+    await page.getByLabel("Postcode").fill("F91 AB12");
+    // Something that is not a number is caught before the round trip...
+    const phone = page.getByLabel("Phone (optional)");
+    await phone.fill("ring the bell");
+    await phone.blur();
+    await expect(phone).toHaveAttribute("aria-invalid", "true");
+    // ...and a real one goes through.
+    await phone.fill("+353 87 123 4567");
+    await phone.blur();
+    await expect(phone).toHaveAttribute("aria-invalid", "false");
+    await pay(page);
+    await expect(page).toHaveURL(/\/order\/[0-9a-f-]{36}\.[A-Za-z0-9_-]{43}\?placed=1$/, { timeout: 20_000 });
+    const orderPath = new URL(page.url()).pathname;
+
+    // Nothing to follow yet, and the buyer's page never shows the phone back.
+    await expect(page.locator("[data-order-step='shipped']")).toContainText("You'll get an email when it's sent.");
+    await expect(page.locator("[data-order-track]")).toHaveCount(0);
+    await expect(page.locator("[data-order-page]")).not.toContainText("123 4567");
+    await expect(page.locator("[data-order-page]")).not.toContainText("+353");
+
+    // 2. The seller sees the phone beside the address, ships, and names the carrier.
+    await gotoApp(page, "/orders");
+    await page.locator("tr", { hasText: "Stoneware vase" }).click();
+    const detail = page.getByRole("dialog", { name: /order details/i });
+    await expect(detail.locator("[data-order-ship-to]")).toContainText("4 Mill Lane");
+    await expect(detail).toContainText("+353 87 123 4567");
+    await expect(detail.getByRole("button", { name: "Copy phone number" })).toBeVisible();
+
+    await detail.getByRole("button", { name: "Mark as shipped" }).click();
+    const carrier = detail.getByRole("combobox", { name: "Carrier (optional)" });
+    // A carrier describes a number, so it waits for one.
+    await expect(carrier).toBeDisabled();
+    await detail.getByLabel("Tracking number (optional)").fill(tracking);
+    await carrier.click();
+    await page.getByRole("option", { name: "An Post" }).click();
+    await expect(carrier).toContainText("An Post");
+    await detail.getByRole("button", { name: "Mark shipped" }).click();
+    await expectToast(page, "Marked as shipped. We've emailed the buyer.");
+
+    // The seller's own panel links the number to the carrier's page.
+    await expect(detail.getByText("Tracking number (An Post)")).toBeVisible();
+    await expect(detail.locator("a[data-order-tracking]")).toHaveText(tracking);
+    await expect(detail.locator("a[data-order-tracking]")).toHaveAttribute("href", carrierPage);
+
+    // What was stored: an id and a number, never a link.
+    const [order] = (await serviceRest(
+      `/orders?seller_id=eq.${s.sellerId}&select=ship_to,tracking_number,tracking_carrier`,
+    )) as { ship_to: { phone?: string }; tracking_number: string; tracking_carrier: string }[];
+    expect(order).toMatchObject({ tracking_number: tracking, tracking_carrier: "an-post" });
+    expect(order.ship_to.phone).toBe("+353 87 123 4567");
+
+    // 3. The buyer's mail names the carrier and links to THEIR order page only.
+    await expect
+      .poll(async () => (await devEmails(buyer)).find((m) => m.subject.includes("is on its way"))?.text ?? "")
+      .toContain(`Tracking number: ${tracking} (An Post)`);
+    const shippedMail = (await devEmails(buyer)).find((m) => m.subject.includes("is on its way"))!;
+    expect(shippedMail.subject).toBe(`Your order from ${s.store} is on its way`);
+    expect(shippedMail.text).toContain(`Follow your order here: `);
+    expect(shippedMail.text).toContain(orderPath);
+    expect(shippedMail.text).not.toContain("anpost.com");
+
+    // 4. The order page now offers the carrier's own page, in a new tab, and
+    //    without handing it this page's address (which is the buyer's credential).
+    await page.goto(orderPath);
+    const track = page.locator("[data-order-step='shipped'] a[data-order-track]");
+    await expect(track).toHaveText("Track with An Post");
+    await expect(track).toHaveAttribute("href", carrierPage);
+    await expect(track).toHaveAttribute("target", "_blank");
+    await expect(track).toHaveAttribute("rel", "noopener noreferrer");
+    await expect(page.locator("[data-order-step='shipped']")).toContainText(`Tracking number ${tracking}`);
+  });
+
   test("a download needs the buyer's consent, and its order page hands out the file", async ({ page }) => {
     const s = await seed(page, "co-digital");
     test.skip(!(await checkoutOffered(page, s)), "stack started without CHECKOUT_TEST_PAYMENTS=1");
@@ -496,10 +581,12 @@ test.describe("hosted checkout", () => {
     await checkout.locator("[data-checkout-note] figcaption").click();
     await expect(page.getByRole("textbox", { name: "Note to buyers" })).toHaveValue("Every vase is thrown by hand.");
 
-    // The thank-you page's celebration, from the thank-you artboard's hero.
+    // The thank-you page's celebration, from the thank-you artboard's hero:
+    // one switch, confetti or nothing.
     await thanks.locator("[data-order-hero]").click({ position: { x: 4, y: 4 } });
-    await page.getByRole("group", { name: "Celebration" }).getByRole("button", { name: "Light" }).click();
-    await expect(thanks.locator("[data-celebration='rays']")).toBeAttached();
+    await expect(thanks.locator("[data-celebration='confetti']")).toBeAttached();
+    await page.getByRole("switch", { name: "Confetti" }).click();
+    await expect(thanks.locator("[data-celebration]")).toHaveCount(0);
 
     // A second product's page lands past the whole chain, so its line has to
     // get over three pages: it climbs above their labels rather than through.
@@ -520,7 +607,7 @@ test.describe("hosted checkout", () => {
       layout: "compact",
       headline: "Nearly there",
       note: "Every vase is thrown by hand.",
-      celebrate: "rays",
+      celebrate: "none",
     });
   });
   test("the checkout and the order page pass an accessibility scan", async ({ page }) => {

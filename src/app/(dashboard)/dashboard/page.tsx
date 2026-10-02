@@ -9,6 +9,7 @@ import {
 } from "@/lib/dashboard/queries";
 import { listStorefronts } from "@/lib/storefront/queries";
 import { countOrdersToShip, getOrdersByIds } from "@/lib/orders/queries";
+import { checkoutProviderFor } from "@/lib/checkout/availability";
 import { getAccountStatus } from "@/lib/payments/mock";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
@@ -183,6 +184,7 @@ export default async function DashboardOverviewPage({
         recentOrderDetails={recentOrderDetails}
         toShipCount={toShipCount}
         canFulfil={can(account?.role, "orders.fulfil")}
+        checkoutOpen={account ? checkoutProviderFor(account.accountId) !== null : false}
       />
     </main>
   );

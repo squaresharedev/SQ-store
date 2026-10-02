@@ -5,7 +5,6 @@ import {
   useId,
   useRef,
   useState,
-  type CSSProperties,
   type FormEvent,
   type ReactNode,
 } from "react";
@@ -28,6 +27,7 @@ import { formatCents } from "@/lib/format/money";
 import { lineTotalCents } from "@/lib/products/quantity";
 import { freeDeliveryGapCents, quoteShipping } from "@/lib/shipping/rates";
 import { checkoutApiPath } from "@/lib/checkout/paths";
+import { isCourierPhone } from "@/lib/orders/ship-to";
 import { SHIP_TO_MAX } from "@/types/order-view";
 import { CHECKOUT_HEADLINE_MAX, GIFT_MESSAGE_MAX } from "@/types/storefront";
 import { EditableText } from "./EditableText";
@@ -53,6 +53,7 @@ type FieldName =
   | "city"
   | "region"
   | "postalCode"
+  | "phone"
   | "giftMessage"
   | "consent";
 
@@ -66,6 +67,7 @@ const EMPTY: Values = {
   city: "",
   region: "",
   postalCode: "",
+  phone: "",
   giftMessage: "",
 };
 
@@ -75,7 +77,8 @@ const EMPTY: Values = {
  *
  * As short as an order allows. A download asks for an email and nothing else;
  * something that ships adds a name and an address, with the second address
- * line behind a link because most people do not need it. No account, before
+ * line behind a link because most people do not need it, and an optional
+ * phone that exists only for the courier. No account, before
  * or after. Every field says what it is for in its own label, validates when
  * the buyer leaves it rather than while they type, and keeps what they typed
  * whatever goes wrong.
@@ -91,7 +94,6 @@ const EMPTY: Values = {
  */
 export function CheckoutForm({
   preview,
-  unwired,
   storefrontId,
   productId,
   optionIds,
@@ -105,7 +107,6 @@ export function CheckoutForm({
   giftMessage: giftAllowed,
   vatIncluded,
   sellerName,
-  surface,
   ink,
   rule,
   cornerRadius,
@@ -115,8 +116,6 @@ export function CheckoutForm({
   trust,
 }: {
   preview: boolean;
-  /** Editor only: say that buyers cannot reach this yet. */
-  unwired: boolean;
   storefrontId: string;
   productId: string;
   optionIds: readonly string[];
@@ -142,9 +141,6 @@ export function CheckoutForm({
   giftMessage: boolean;
   vatIncluded: boolean;
   sellerName: string;
-  /** The page's solid surface, which the fields are filled with so a texture
-   *  on the page never runs through the words typed into them. */
-  surface: string;
   ink: string;
   rule: string;
   cornerRadius: number;
@@ -235,6 +231,9 @@ export function CheckoutForm({
         return postcodeRequired && !value ? t("errors.required") : undefined;
       case "region":
         return showRegion && !value ? t("errors.required") : undefined;
+      case "phone":
+        // Optional: only a number that was typed has to look like one.
+        return ships && value && !isCourierPhone(value) ? t("errors.phone") : undefined;
       case "giftMessage":
         return giftOn && !value ? t("errors.required") : undefined;
       case "consent":
@@ -257,7 +256,7 @@ export function CheckoutForm({
     event.preventDefault();
     if (preview || submitting || !attemptId) return;
 
-    const fields: FieldName[] = ["email", "name", "line1", "city", "region", "postalCode", "giftMessage", "consent"];
+    const fields: FieldName[] = ["email", "name", "line1", "city", "region", "postalCode", "phone", "giftMessage", "consent"];
     const found: Partial<Record<FieldName, string>> = {};
     for (const field of fields) {
       const problem = problemWith(field);
@@ -297,6 +296,7 @@ export function CheckoutForm({
               ...(showRegion ? { region: values.region.trim() } : {}),
               ...(values.postalCode.trim() ? { postalCode: values.postalCode.trim() } : {}),
               country,
+              ...(values.phone.trim() ? { phone: values.phone.trim() } : {}),
             },
             ...(giftOn && values.giftMessage.trim() ? { giftMessage: values.giftMessage.trim() } : {}),
           }
@@ -359,10 +359,8 @@ export function CheckoutForm({
       className="flex flex-col gap-7"
       // The app's own field classes, re-pointed at the storefront's ink and
       // corners (the same re-skin the product page's dropdowns wear), so every
-      // input here is the seller's rather than the dashboard's. The fields are
-      // filled with the page's own surface rather than left see-through, so a
-      // textured page reads as paper with clean boxes on it.
-      style={{ ...storefrontOverlayVars(ink, cornerRadius), "--background": surface } as CSSProperties}
+      // input here is the seller's rather than the dashboard's.
+      style={storefrontOverlayVars(ink, cornerRadius)}
       data-checkout-form=""
     >
       {/* Typed straight onto the canvas in the editor (EditableText). */}
@@ -528,6 +526,27 @@ export function CheckoutForm({
                 </p>
               )}
             </div>
+            {/* Last, and optional: a courier may need to ring, most never do.
+                Why it is asked sits behind the (i), like the email's. */}
+            <Field
+              label={t("fields.phone")}
+              hint={t("fields.phoneHint")}
+              hintToggleLabel={t("fields.whyAsk")}
+              error={errors.phone}
+              input={(props) => (
+                <input
+                  {...props}
+                  type="tel"
+                  name="phone"
+                  autoComplete="shipping tel"
+                  inputMode="tel"
+                  maxLength={SHIP_TO_MAX.phone}
+                  value={values.phone}
+                  onChange={(event) => set("phone", event.target.value)}
+                  onBlur={() => check("phone")}
+                />
+              )}
+            />
           </Fieldset>
         )}
 
@@ -694,7 +713,6 @@ export function CheckoutForm({
             badges rather than sentences. */}
         <div className="flex flex-col gap-3" data-setting-hotspot="cta">
           {payButton()}
-          {preview && unwired && <p className="text-center text-xs opacity-70">{t("unwired")}</p>}
           {trust}
         </div>
       </form>

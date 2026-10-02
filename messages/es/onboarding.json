@@ -201,7 +201,7 @@
       },
       "ordersSearch": {
         "title": "Encuentra un pedido",
-        "body": "Busca por el correo del comprador. Los pedidos llegarán aquí cuando se abra el proceso de pago de Square Share."
+        "body": "Busca en esta lista por el correo del comprador. Para encontrar un pedido por su número, un nombre, una ciudad o un número de seguimiento, usa la búsqueda de la parte superior de la página."
       },
       "ordersFilters": {
         "title": "Filtra y ordena",

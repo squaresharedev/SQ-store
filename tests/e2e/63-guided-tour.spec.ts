@@ -37,6 +37,10 @@ type Stop = {
 /** A new seller's tour: no storefront of their own (so the sample stop points
  *  at the sample's link, and the embed stop, with no card to point at, falls
  *  back to its snippet), no orders. */
+/** The Orders page names the list it opened on in the address (`?view=all`), so
+ *  the tour is on /orders with or without that. */
+const ORDERS_PATH = /\/orders(\?view=[a-z-]+)?$/;
+
 const NEW_SELLER_STOPS: Stop[] = [
   { id: "overview-nav", path: /\/dashboard$/, target: 'nav[aria-label="Dashboard"]' },
   { id: "search", path: /\/dashboard$/, target: '[data-testid="top-bar"] button[aria-keyshortcuts]' },
@@ -45,8 +49,8 @@ const NEW_SELLER_STOPS: Stop[] = [
   { id: "storefront-create", path: /\/storefront$/, target: '[data-tour="storefront-create"] >> nth=0' },
   { id: "storefront-sample", path: /\/storefront$/, target: "main [data-storefront-sample]" },
   { id: "storefront-embed", path: /\/storefront$/, state: "fallback" },
-  { id: "orders-search", path: /\/orders$/, target: '[data-tour="orders-search"]' },
-  { id: "orders-filters", path: /\/orders$/, target: '[role="search"][aria-label="order filters"]' },
+  { id: "orders-search", path: ORDERS_PATH, target: '[data-tour="orders-search"]' },
+  { id: "orders-filters", path: ORDERS_PATH, target: '[role="search"][aria-label="order filters"]' },
   { id: "analytics", path: /\/analytics$/, target: "[data-analytics-first-run] > div" },
   { id: "payments", path: /\/payments$/, target: 'section[aria-label="Stripe connection"]' },
   { id: "finish", path: /\/settings\/account$/, target: "#tour" },

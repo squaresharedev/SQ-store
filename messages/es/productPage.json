@@ -195,6 +195,7 @@
       "shipped": "En camino",
       "shippedDetail": "Enviado el {date}",
       "tracking": "Número de seguimiento {number}",
+      "track": "Seguir con {carrier}",
       "notYet": "Recibirás un correo cuando sea enviado.",
       "ready": "Listo para descargar",
       "readyDetail": "Tu archivo está listo abajo y el enlace también está en tu correo."
@@ -262,6 +263,8 @@
       "region": "Provincia, estado o región",
       "postalCode": "Código postal",
       "country": "País",
+      "phone": "Teléfono (opcional)",
+      "phoneHint": "Solo para el transportista, por si necesita contactarte sobre la entrega.",
       "whyAsk": "Por qué lo pedimos"
     },
     "gift": {
@@ -309,11 +312,11 @@
     },
     "pay": "Pedido con obligación de pago ({amount})",
     "placing": "Realizando tu pedido...",
-    "unwired": "El pago se abre para los compradores cuando conectas Stripe.",
     "errors": {
       "title": "No pudimos realizar tu pedido",
       "required": "Esto es obligatorio.",
       "email": "Introduce una dirección de correo como nombre@ejemplo.com.",
+      "phone": "Introduce un número de teléfono con dígitos, como +34 612 34 56 78.",
       "fields": "Revisa los campos marcados.",
       "consent": "Marca la casilla para confirmar que quieres la descarga de inmediato.",
       "sold_out": "Lo sentimos, esto acaba de agotarse. No se ha cobrado nada.",

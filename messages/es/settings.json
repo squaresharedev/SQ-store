@@ -175,7 +175,7 @@
     "prefs": {
       "sales": {
         "label": "Ventas",
-        "blurb": "Avísame por correo cada vez que se venda algo. El buen tipo de ruido en la bandeja de entrada."
+        "blurb": "Avísame por correo cuando se venda algo, con lo que hay que empaquetar y adónde enviarlo."
       },
       "productUpdates": {
         "label": "Novedades del producto",
@@ -188,7 +188,8 @@
     },
     "success": {
       "notificationsSaved": "Preferencias guardadas."
-    }
+    },
+    "emailOff": "El correo aún no está activado en Square Share, así que no se envía nada de lo de abajo. Los pedidos nuevos siguen apareciendo en Pedidos y en tus notificaciones."
   },
   "legal": {
     "cardTitle": "Acuerdo de vendedor, condiciones y privacidad",
@@ -412,7 +413,8 @@
       "removeNamed": "Quitar el destino {area}",
       "removeNumbered": "Quitar el destino {number}",
       "add": "Añadir un destino",
-      "limitReached": "{max, plural, one {Ese es el límite: # destino. Quita uno para añadir otro.} many {Ese es el límite: # destinos. Quita uno para añadir otro.} other {Ese es el límite: # destinos. Quita uno para añadir otro.}}"
+      "limitReached": "{max, plural, one {Ese es el límite: # destino. Quita uno para añadir otro.} many {Ese es el límite: # destinos. Quita uno para añadir otro.} other {Ese es el límite: # destinos. Quita uno para añadir otro.}}",
+      "needsRate": "El proceso de pago no puede usar esta fila hasta que tenga tanto una tarifa como un país. Los compradores la siguen viendo en la página de producto."
     },
     "rates": {
       "title": "Tarifas de envío",

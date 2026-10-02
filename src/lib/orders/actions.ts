@@ -17,17 +17,18 @@ import {
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { uuidField } from "@/lib/validation/inputs";
 import { firstIssue } from "@/lib/validation/messages";
-import { trackingNumberSchema } from "@/lib/validation/orders";
+import { carrierSchema, trackingNumberSchema } from "@/lib/validation/orders";
 import { getOrderById } from "@/lib/orders/queries";
 import { sendShippedEmail } from "@/lib/orders/emails";
+import { orderLinkUrl } from "@/lib/orders/order-link";
 import { getSellerIdentity } from "@/lib/settings/seller-identity";
 import { ORDERS_PATH, OVERVIEW_PATH } from "@/lib/dashboard/paths";
 import { DEFAULT_LOCALE, parseLocale } from "@/i18n/locales";
 import { msg } from "@/i18n/types";
-import type { OrderView } from "@/types/order-view";
+import type { CarrierId, OrderView } from "@/types/order-view";
 
 // The seller's ONE write on an order: it has shipped (or here is its tracking
-// number). Session -> role -> budget -> parse -> active-store scope -> the
+// number and carrier). Session -> role -> budget -> parse -> active-store scope -> the
 // self-gated database function, which re-checks all of it on its own
 // (20260927_order_fulfilment.sql), then the buyer's email.
 
@@ -51,16 +52,20 @@ const NOT_SHIPPABLE = invalidInput(
 );
 
 /**
- * Mark an order shipped, optionally with a tracking number; on an order that
- * has already shipped, set or change its tracking number.
+ * Mark an order shipped, optionally with a tracking number and the carrier it
+ * belongs to; on an order that has already shipped, set or change them.
  *
- * The buyer is emailed when the order ships, and again when a tracking number
- * is added or changed afterwards (with the number). Nothing is sent when the
+ * The buyer is emailed when the order ships, and again when the tracking number
+ * or its carrier is added or changed afterwards. Nothing is sent when the
  * number is cleared or re-saved unchanged.
+ *
+ * `carrier` is an id from CARRIER_IDS or null. It is never a link: the buyer's
+ * tracking link is built from it (lib/orders/carriers.ts).
  */
 export async function markOrderShipped(
   orderId: string,
   trackingNumber: string,
+  carrier: CarrierId | null = null,
 ): Promise<MarkShippedResult> {
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
@@ -77,6 +82,8 @@ export async function markOrderShipped(
     typeof trackingNumber === "string" ? trackingNumber : "",
   );
   if (!tracking.success) return failure(invalidInput(firstIssue(tracking.error)));
+  const chosenCarrier = carrierSchema.safeParse(carrier ?? null);
+  if (!chosenCarrier.success) return failure(invalidInput(firstIssue(chosenCarrier.error)));
 
   // In THIS store. The database function would also ship an order in any other
   // store the caller may fulfil, and the page only ever acts on the active one,
@@ -87,6 +94,8 @@ export async function markOrderShipped(
   const { data, error } = await supabase.rpc("order_mark_shipped", {
     p_order_id: id.data,
     p_tracking_number: tracking.data || null,
+    // A carrier says where a number is followed; without one it is nothing.
+    p_carrier: tracking.data ? chosenCarrier.data : null,
   });
   if (error) {
     console.error("[orders] order_mark_shipped failed", error.message);
@@ -112,11 +121,11 @@ export async function markOrderShipped(
 }
 
 /**
- * The shipping notice, on the seller's behalf. Reads the two things the view
- * does not carry: the language the buyer checked out in, and who they bought
- * from. The seller identity is a service-role read, gated here by everything
- * markOrderShipped has already checked (a member of this store who may
- * fulfil its orders).
+ * The shipping notice, on the seller's behalf. Reads the things the view does
+ * not carry: the language the buyer checked out in, the storefront their order
+ * page lives under, and who they bought from. The seller identity is a
+ * service-role read, gated here by everything markOrderShipped has already
+ * checked (a member of this store who may fulfil its orders).
  */
 async function emailBuyer(
   accountId: string,
@@ -129,13 +138,16 @@ async function emailBuyer(
   const [{ data: row }, identity, accounts] = await Promise.all([
     supabase
       .from("orders")
-      .select("buyer_locale")
+      .select("buyer_locale, storefront_id")
       .eq("id", order.id)
       .eq("seller_id", accountId)
       .maybeSingle(),
     getSellerIdentity(accountId),
     getAccessibleAccounts(),
   ]);
+  // The buyer's own order page, where the parcel is followed. Null for an
+  // order recorded without a storefront, or where no link key is configured.
+  const orderUrl = row?.storefront_id ? await orderLinkUrl(row.storefront_id, order.id) : null;
   // The trading name buyers see on the product page, else the store's name.
   const storeName =
     identity.businessName ??
@@ -151,6 +163,8 @@ async function emailBuyer(
       quantity: order.quantity,
       selection: order.selection,
       trackingNumber: order.fulfilment.trackingNumber,
+      carrier: order.fulfilment.carrier,
+      orderUrl,
       shipTo: order.shipTo,
       store: { name: storeName, contactEmail: identity.email ?? null },
     },

@@ -56,6 +56,23 @@ export function parseShipTo(raw: unknown): ShipTo | null {
   return { name, line1, ...present, city, country };
 }
 
+/** A phone as people write one: digits with an optional leading plus and the
+ *  separators numbers are printed with. */
+const PHONE_SHAPE = /^\+?[0-9 ()./-]+$/;
+/** Shorter than this is not a number a courier can ring. */
+const PHONE_MIN_DIGITS = 6;
+
+/**
+ * Whether a buyer's phone is something a courier could dial. Deliberately
+ * loose: it is a contact detail for a delivery driver in any country, not an
+ * identity to verify (the seller's own phone is the strict one, see
+ * lib/validation/phone.ts), so it only has to be a number and not a sentence.
+ * The checkout form and its server schema both ask here.
+ */
+export function isCourierPhone(value: string): boolean {
+  return PHONE_SHAPE.test(value) && value.replace(/\D/g, "").length >= PHONE_MIN_DIGITS;
+}
+
 /** Where the city and postcode lines go, by country. The rest of Europe
  *  writes "postcode city" on one line; these do not. */
 const CITY_THEN_POSTCODE = new Set(["GB", "IE"]);

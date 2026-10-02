@@ -32,7 +32,7 @@ import { DUST, kickDust } from "./ship-dust";
  * of overlapping discs melted together by a gooey filter (see ship-cone), so
  * its sides are even but never regular and a few blobs part from it and float
  * off. The van sheds dust from its wheels the whole way, and leaves a trail of
- * it. The check draws as the cloud clears, the button pops and a ring leaves it.
+ * it. The check draws as the cloud clears and the button pops.
  *
  * The success is only ever shown for a success: the truck does not leave until
  * the order is really marked, and a refusal parks it again with the form still
@@ -108,12 +108,9 @@ const GOO_ALPHA = "0 0 0 16 -7";
  * never catches a letter half on black.
  */
 const TEXT_LAG = 28;
-/** How far the landing ring travels out from the button. */
-const RIPPLE_PX = 10;
 /** The button's little jump as the success lands. */
 const LAND_POP_SCALE = 1.06;
 const LAND_POP_SECONDS = 0.4;
-const RIPPLE_SECONDS = 0.5;
 
 /** Phone haptics (Vibration API, so Android only): a tick as it launches, a double tap as it lands. */
 const HAPTIC = { launch: 10, land: [14, 40, 22] } as const;
@@ -240,22 +237,6 @@ export function ShipConfirmButton({
           <feColorMatrix in="blur" type="matrix" values={`1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  ${GOO_ALPHA}`} />
         </filter>
       </svg>
-      {/* The ring that leaves the button as the success lands. Outside the
-          button, whose overflow is clipped. */}
-      <motion.span
-        aria-hidden="true"
-        className="pointer-events-none absolute border-2 border-success dark:border-success-dark"
-        initial={false}
-        animate={
-          travelling
-            ? {
-                inset: ["0px", `-${RIPPLE_PX}px`],
-                opacity: [0.7, 0],
-                transition: { delay: roll, duration: RIPPLE_SECONDS, ease: "easeOut" },
-              }
-            : { inset: "0px", opacity: 0, transition: INSTANT }
-        }
-      />
       <motion.button
         ref={buttonRef}
         type="submit"

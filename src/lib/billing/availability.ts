@@ -7,12 +7,12 @@
 //     STRIPE_SECRET_KEY (a restricted key) and STRIPE_WEBHOOK_SECRET.
 //   - `test`: the development stand-in. No money moves; "checkout" writes the
 //     subscription straight through the same sync the webhook uses, so the
-//     modal, the settings page and the fee a sale is charged can all be driven
+//     plans page, the settings page and the fee a sale is charged can all be driven
 //     on a laptop and in the e2e suite. It exists ONLY under `next dev` AND
 //     with BILLING_TEST_PROVIDER=1, so a deployed Worker (always a production
 //     build) can never reach it.
 //
-// With neither, every account stays on Free and the pricing modal shows the
+// With neither, every account stays on Free and the plans page shows the
 // plans with its upgrade buttons marked "Soon". Nothing else changes: the
 // plan readers only ever look at seller_billing, never at these switches.
 

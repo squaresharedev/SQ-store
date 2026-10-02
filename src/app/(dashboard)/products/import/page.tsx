@@ -8,6 +8,8 @@ import { can } from "@/lib/team/permissions";
 import { ProductImport } from "@/components/products/ProductImport";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { ghostButtonClass } from "@/components/ui/control-styles";
+import { planRoom } from "@/lib/billing/limits";
+import { PlanLimitNotice } from "@/components/billing/PlanLimitNotice";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Products.metadata.import");
@@ -29,6 +31,11 @@ export default async function ImportProductsPage() {
     ? await getTraderIdentityStatus(account.accountId)
     : { ok: true as const, missing: [] };
 
+  // How much room the store's plan has for more products: none means the
+  // limit is shown in place of the importer; some narrows what one file may
+  // bring in (the action applies the same number).
+  const room = account ? await planRoom(account.accountId, "products") : null;
+
   const t = await getTranslations("Products.page");
 
   return (
@@ -45,7 +52,14 @@ export default async function ImportProductsPage() {
           </p>
         </div>
       </div>
-      <ProductImport missingTraderDetails={identity.ok ? identity.missing : []} />
+      {room && room.left === 0 ? (
+        <PlanLimitNotice limitKey="products" plan={room.plan} cap={room.cap} />
+      ) : (
+        <ProductImport
+          missingTraderDetails={identity.ok ? identity.missing : []}
+          planRoomLeft={room?.left ?? null}
+        />
+      )}
     </div>
   );
 }

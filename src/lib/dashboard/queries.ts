@@ -2,6 +2,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { toCurrency } from "@/lib/format/money";
+import { buildShippingPolicy } from "@/lib/settings/shipping-policy";
+import { hasPricedDestination } from "@/lib/shipping/rates";
 import type { Currency } from "@/types/product";
 
 // READ-ONLY dashboard aggregates. Server Components / Route Handlers only
@@ -321,6 +323,14 @@ export type ProfileSummary = {
    */
   shippingPolicySet: boolean;
   /**
+   * True when at least one destination can be QUOTED at checkout: it has both a
+   * delivery rate and a country (lib/shipping/rates.ts hasPricedDestination).
+   * Terms can be set without this, and then a physical product has no Pay
+   * button however open checkout is.
+   * Fixed at Settings › Shipping › Checkout rates.
+   */
+  shippingRatesSet: boolean;
+  /**
    * Null = never accepted legal docs. Non-null: the version string; compare
    * to LEGAL_VERSION in constants.ts to decide if it is current.
    * Fixed at Settings › Legal.
@@ -382,6 +392,9 @@ export async function getProfileSummary(): Promise<ProfileSummary | null> {
     sellerEmail: data.seller_email ?? null,
     sellerAddress: data.seller_address ?? null,
     shippingPolicySet: data.shipping_policy !== null,
+    shippingRatesSet: hasPricedDestination(
+      buildShippingPolicy({ shipping_policy: data.shipping_policy }),
+    ),
     legalAcceptedVersion: data.legal_accepted_version ?? null,
   };
 }

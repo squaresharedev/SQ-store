@@ -175,7 +175,7 @@
     "prefs": {
       "sales": {
         "label": "Verkäufe",
-        "blurb": "Schick mir eine E-Mail, wenn etwas verkauft wird. Das ist die gute Art von Posteingang-Lärm."
+        "blurb": "Schick mir eine E-Mail, wenn etwas verkauft wird, mit Packliste und Versandadresse."
       },
       "productUpdates": {
         "label": "Produkt-Updates",
@@ -188,7 +188,8 @@
     },
     "success": {
       "notificationsSaved": "Einstellungen gespeichert."
-    }
+    },
+    "emailOff": "E-Mail ist für Square Share noch nicht eingeschaltet, daher wird unten nichts gesendet. Neue Bestellungen erscheinen weiterhin unter Bestellungen und in deinen Benachrichtigungen."
   },
   "legal": {
     "cardTitle": "Verkäufervereinbarung, Nutzungsbedingungen und Datenschutz",
@@ -412,7 +413,8 @@
       "removeNamed": "Lieferziel {area} entfernen",
       "removeNumbered": "Lieferziel {number} entfernen",
       "add": "Lieferziel hinzufügen",
-      "limitReached": "{max, plural, one {Das ist das einzige # Lieferziel. Entferne es, um ein weiteres hinzuzufügen.} other {Das sind alle # Lieferziele. Entferne eines, um ein weiteres hinzuzufügen.}}"
+      "limitReached": "{max, plural, one {Das ist das einzige # Lieferziel. Entferne es, um ein weiteres hinzuzufügen.} other {Das sind alle # Lieferziele. Entferne eines, um ein weiteres hinzuzufügen.}}",
+      "needsRate": "Der Checkout kann diese Zeile erst verwenden, wenn sie sowohl einen Tarif als auch ein Land hat. Käufer sehen sie weiterhin auf der Produktseite."
     },
     "rates": {
       "title": "Versandtarife",

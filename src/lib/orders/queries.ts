@@ -6,6 +6,7 @@ import { getActiveAccount } from "@/lib/team/account-context";
 import { parseOrderSelection } from "@/lib/orders/selection";
 import { parseShipTo } from "@/lib/orders/ship-to";
 import { parseFulfilment } from "@/lib/orders/fulfilment";
+import type { OrderExportRow } from "@/lib/orders/csv";
 import type {
   OrderView,
   OrderFilters,
@@ -28,7 +29,8 @@ import type {
 //   platform_fee_cents, currency, buyer_email, product_title,
 //   product_price_cents, selected_options, created_at, quantity, ship_to,
 //   buyer_locale, fulfilment_status, shipped_at, tracking_number,
-//   checkout_session_id, gift_message, withdrawal_requested_at
+//   tracking_carrier, checkout_session_id, gift_message, withdrawal_requested_at,
+//   platform_fee_bps, shipping_cents
 
 export const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 100;
@@ -77,7 +79,7 @@ function toOrderView(row: Record<string, unknown>): OrderView {
 
 /** The column list every order read selects — one contract, one place. */
 const ORDER_COLUMNS =
-  "id, product_title, selected_options, quantity, ship_to, fulfilment_status, shipped_at, tracking_number, amount_cents, platform_fee_cents, platform_fee_bps, currency, channel, status, buyer_email, created_at, gift_message, withdrawal_requested_at";
+  "id, product_title, selected_options, quantity, ship_to, fulfilment_status, shipped_at, tracking_number, tracking_carrier, amount_cents, platform_fee_cents, platform_fee_bps, currency, channel, status, buyer_email, created_at, gift_message, withdrawal_requested_at";
 
 /**
  * The To ship rule (lib/orders/fulfilment.ts isToShip) as a query filter, so
@@ -167,6 +169,49 @@ export const countOrdersToShip = cache(async (): Promise<number> => {
   }
   return count ?? 0;
 });
+
+/** PostgREST hands back at most this many rows a request, so the export
+ *  reads in pages of it. */
+const EXPORT_PAGE_SIZE = 1000;
+
+/**
+ * Every order in the ACTIVE store for the CSV export (lib/orders/csv.ts),
+ * newest first, up to `maxRows`. Scoped like every read here: the store comes
+ * from the session, and RLS enforces the same boundary underneath. Reads one
+ * row past the cap so the caller can say the file is the newest slice.
+ *
+ * THROWS on a read error, like listOrders: a half-read ledger handed over as
+ * if it were whole is worse than no file.
+ */
+export async function listOrdersForExport(
+  maxRows: number,
+): Promise<{ rows: OrderExportRow[]; truncated: boolean }> {
+  const account = await getActiveAccount();
+  if (!account) return { rows: [], truncated: false };
+
+  const supabase = await createClient();
+  const rows: OrderExportRow[] = [];
+  for (let from = 0; from <= maxRows; from += EXPORT_PAGE_SIZE) {
+    const to = Math.min(from + EXPORT_PAGE_SIZE, maxRows + 1) - 1;
+    const { data, error } = await (supabase as SupabaseClient)
+      .from("orders")
+      .select(`${ORDER_COLUMNS}, shipping_cents`)
+      .eq("seller_id", account.accountId)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to);
+    if (error) throw new Error(`Orders export read failed: ${error.message}`);
+    const page = (data ?? []) as Record<string, unknown>[];
+    for (const row of page) {
+      rows.push({
+        ...toOrderView(row),
+        shippingCents: row.shipping_cents != null ? Number(row.shipping_cents) : null,
+      });
+    }
+    if (page.length < to - from + 1) break;
+  }
+  return { rows: rows.slice(0, maxRows), truncated: rows.length > maxRows };
+}
 
 /**
  * Owner-scoped, paginated order list. The seller id comes from the session

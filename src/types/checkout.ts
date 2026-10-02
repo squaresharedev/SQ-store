@@ -1,6 +1,7 @@
 import type { ProductPageImage, ProductPageProduct } from "@/types/product";
 import type { ProductPageReportScopes, ProductPageStorefront } from "@/types/product-page";
 import type { CheckoutPageConfig } from "@/types/storefront";
+import type { TrackingLink } from "@/types/order-view";
 
 // What the checkout RENDERS. Client-safe types only, like types/product-page.ts:
 // the public loader (lib/checkout/page.ts) builds one for a buyer and the
@@ -70,6 +71,9 @@ export type BuyerOrder = {
   fulfilment: "unfulfilled" | "shipped" | "not_required";
   shippedAt: string | null;
   trackingNumber: string | null;
+  /** Where the parcel is followed, when the seller named its carrier: the
+   *  carrier's name and its own page for this parcel (lib/orders/carriers.ts). */
+  trackingLink: TrackingLink | null;
   /** The seller's own dispatch line for this product, if any. */
   dispatch: string | null;
   withdrawal: BuyerWithdrawal;

@@ -135,6 +135,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   backgroundImageUrl = null,
   customFontUrl = null,
   elementUrls,
+  pagePhotoUrls,
   showGrid = true,
   viewport,
   onMoveBlock,
@@ -175,7 +176,6 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   productPage,
   checkoutPage,
   checkoutFor = null,
-  checkoutLive = false,
   onToggleCheckout,
   onCloseCheckout,
   onCheckoutPageChange,
@@ -207,6 +207,8 @@ export const DesignerCanvas = memo(function DesignerCanvas({
    *  local object URL for an element added in this session. A missing entry
    *  renders the element's placeholder rather than a broken image. */
   elementUrls?: Record<string, string>;
+  /** Display URL per photo a hosted page holds as its backdrop, by object key. */
+  pagePhotoUrls?: Record<string, string>;
   /** Draw the free cells (editor guide only, never for buyers). */
   showGrid?: boolean;
   /** Owns the live pan + zoom and writes them to the stage imperatively.
@@ -298,8 +300,6 @@ export const DesignerCanvas = memo(function DesignerCanvas({
    *  one at a time, since there is one checkout design per storefront. View
    *  state, never saved. */
   checkoutFor?: string | null;
-  /** Whether buyers can reach checkout yet, for the unwired note. */
-  checkoutLive?: boolean;
   onToggleCheckout?: (productId: string) => void;
   onCloseCheckout?: () => void;
   /** The checkout's words, typed straight onto its artboards. */
@@ -733,6 +733,9 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                 seller,
                 backgroundImageUrl,
                 customFontUrl,
+                pagePhotoUrl: checkoutPage.backgroundImage
+                  ? (pagePhotoUrls?.[checkoutPage.backgroundImage.key] ?? null)
+                  : null,
                 widths: pageWidths,
                 initialDevice: previewMode,
                 onClose: () => onCloseCheckout?.(),
@@ -755,6 +758,9 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             seller={seller}
             backgroundImageUrl={backgroundImageUrl}
             customFontUrl={customFontUrl}
+            pagePhotoUrl={
+              productPage.backgroundImage ? (pagePhotoUrls?.[productPage.backgroundImage.key] ?? null) : null
+            }
             onClose={() => onClosePage?.(id)}
             checkoutOpen={id === checkoutId}
             onToggleCheckout={checkoutPage && onToggleCheckout ? () => onToggleCheckout(id) : undefined}
@@ -762,7 +768,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
           // The checkout and its thank-you, right after the page they follow.
           ...(chain
             ? [
-                <CheckoutArtboard key={checkoutArtboardId(id)} {...chain} live={checkoutLive} />,
+                <CheckoutArtboard key={checkoutArtboardId(id)} {...chain} />,
                 <ThanksArtboard key={thanksArtboardId(id)} {...chain} playKey={celebrationPlays} />,
               ]
             : []),

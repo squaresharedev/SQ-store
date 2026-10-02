@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createNotification, notificationInEnglish } from "@/lib/notifications/create";
 import { sendEmail } from "@/lib/email/send";
 import { appUrl } from "@/lib/app-url";
+import { signInPath } from "@/lib/auth/paths";
 import type { NotificationMessageRef } from "@/lib/notifications/message";
 import { clientKey } from "@/lib/rate-limit";
 import type { MessageKey } from "@/i18n/types";
@@ -226,7 +227,9 @@ async function emailSecurityNotice(to: string, notify: SecurityNotice): Promise<
       body: notificationInEnglish(notify.body),
       href: notify.href,
     };
-    const link = appUrl(notice.href ?? "/settings/security");
+    // Through sign-in, so the link still lands on the right page for someone who
+    // opens it signed out (see sellerOrderLink in lib/orders/emails.ts).
+    const link = appUrl(signInPath(notice.href ?? "/settings/security"));
     const result = await sendEmail({
       to,
       subject: `Security alert: ${notice.title}`,

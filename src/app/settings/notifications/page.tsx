@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { NotificationsSection } from "@/components/settings/NotificationsSection";
 import { requireProfile, requireUser } from "@/lib/auth/session";
+import { emailSendingEnabled } from "@/lib/email/send";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Settings.metadata.notifications");
@@ -14,6 +15,7 @@ export default async function NotificationsSettingsPage() {
 
   return (
     <NotificationsSection
+      emailEnabled={emailSendingEnabled()}
       defaults={{
         // DB defaults for new users: sales + product updates on, marketing off.
         notify_sales: profile?.notify_sales ?? true,

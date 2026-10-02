@@ -197,5 +197,9 @@
       "byWeekday": "Checkout-Aufrufe nach Wochentag",
       "byStorefront": "Checkout-Aufrufe nach Schaufenster"
     }
+  },
+  "export": {
+    "button": "Bericht herunterladen",
+    "lockedTitle": "Analyseberichte gibt es mit {plan}."
   }
 }

@@ -61,7 +61,8 @@ test.describe("order fulfilment", () => {
       expect(mail?.subject).toBe("New order: ship 2 × Blue mug to Dublin");
       expect(mail?.text).toContain("2 × Blue mug\nSize: Large");
       expect(mail?.text).toContain("Aoife Byrne\n12 Harbour Road\nApartment 4\nDublin\nD02 X285\nIreland");
-      expect(mail?.text).toContain(`/orders?order=${orderId}`);
+      // Through sign-in, so the link still opens the order when the seller is signed out.
+      expect(mail?.text).toContain(`/login?next=${encodeURIComponent(`/orders?order=${orderId}`)}`);
     }).toPass({ timeout: 15_000 });
 
     // 2. The dashboard says so, first thing, and so does the rail.

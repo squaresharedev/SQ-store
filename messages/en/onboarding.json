@@ -201,7 +201,7 @@
       },
       "ordersSearch": {
         "title": "Find an order",
-        "body": "Search by the buyer's email. Orders land here once Square Share checkout opens."
+        "body": "Search this list by the buyer's email. To find an order by its number, a name, a city or a tracking number, use search at the top of the page."
       },
       "ordersFilters": {
         "title": "Filter and sort",

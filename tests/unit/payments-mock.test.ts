@@ -34,16 +34,31 @@ function listFiles(dir: string): string[] {
 
 const sourceFiles = listFiles(SRC).filter((f) => /\.(ts|tsx)$/.test(f));
 
+/**
+ * The ONE module allowed to talk to Stripe's API: seller plans' thin client
+ * (Stripe Billing on the platform account). It takes its key from the
+ * environment and names a key prefix only as a pattern, to tell live mode
+ * from test mode. Everything else stays Stripe-free until Connect ships.
+ */
+const STRIPE_BILLING_CLIENT = join(SRC, "lib", "billing", "stripe-api.ts");
+
 describe("no live Stripe anywhere in the app source", () => {
   it("no file references a Stripe API host or secret key prefix", () => {
     const offenders: string[] = [];
     for (const file of sourceFiles) {
+      if (file === STRIPE_BILLING_CLIENT) continue;
       const text = readFileSync(file, "utf8");
       if (/api\.stripe\.com|\bsk_live_|\bsk_test_|\brk_live_/.test(text)) {
         offenders.push(file);
       }
     }
     expect(offenders).toEqual([]);
+  });
+
+  it("the billing client holds no key of its own, only reads one from the environment", () => {
+    const text = readFileSync(STRIPE_BILLING_CLIENT, "utf8");
+    expect(text).not.toMatch(/\b(sk|rk|pk)_(live|test)_[A-Za-z0-9]{8,}/);
+    expect(text).toMatch(/process\.env\.STRIPE_SECRET_KEY/);
   });
 
   it("the stripe SDK is not a dependency and is never imported", () => {

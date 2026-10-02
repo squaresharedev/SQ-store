@@ -204,6 +204,9 @@ export const getPublicProductPage = cache(
     const backgroundImageUrl =
       theme.background.kind === "image" ? await presignGetUrl(theme.background.key) : null;
     const customFontUrl = theme.customFont ? await presignGetUrl(theme.customFont.key) : null;
+    const pagePhotoUrl = productPage.backgroundImage
+      ? await presignGetUrl(productPage.backgroundImage.key)
+      : null;
 
     return {
       page: {
@@ -217,6 +220,7 @@ export const getPublicProductPage = cache(
           seller,
           backgroundImageUrl,
           customFontUrl,
+          pagePhotoUrl,
           checkout: checkoutAvailableFor(gate),
         },
         product,

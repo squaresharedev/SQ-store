@@ -28,13 +28,15 @@
     "goToProducts": "Prejsť na produkty",
     "toShipTitle": "Nič na odoslanie",
     "toShipHint": "Máte všetko v poriadku. Zaplatené objednávky čakajúce na odoslanie sa tu zobrazia, najstaršie ako prvé.",
-    "seeAllOrders": "Zobraziť všetky objednávky"
+    "seeAllOrders": "Zobraziť všetky objednávky",
+    "hintOpen": "Keď si u vás niekto niečo kúpi, objednávka sa zobrazí tu a hneď sa to dozviete."
   },
   "list": {
     "updating": "Aktualizuje sa…",
     "summary": "{total, plural, one {{total} objednávka} few {{total} objednávky} many {{total} objednávky} other {{total} objednávok}} · strana {page} z {totalPages}",
     "detailDialog": "Podrobnosti objednávky",
-    "closeDetail": "Zavrieť podrobnosti objednávky"
+    "closeDetail": "Zavrieť podrobnosti objednávky",
+    "withdrawn": "Odstúpená"
   },
   "table": {
     "product": "Produkt",
@@ -117,6 +119,7 @@
     "shipping": "Doprava",
     "shippedOn": "Odoslané {date}",
     "trackingNumber": "Sledovacie číslo",
+    "trackingCarrier": "Sledovacie číslo ({carrier})",
     "copyTracking": {
       "copy": "Kopírovať sledovacie číslo",
       "copied": "Sledovacie číslo skopírované",
@@ -128,7 +131,16 @@
       "refunded": "Táto objednávka bola refundovaná, takže nie je nič na odoslanie.",
       "disputed": "Táto platba je napadnutá. Najprv vyriešte spor, potom odošlite."
     },
-    "platformFeeRate": "Poplatok platformy ({rate})"
+    "platformFeeRate": "Poplatok platformy ({rate})",
+    "orderNumberLine": "Objednávka {number}",
+    "copyOrderNumber": {
+      "copy": "Kopírovať číslo objednávky",
+      "copied": "Číslo objednávky skopírované",
+      "failed": "Číslo objednávky sa nepodarilo skopírovať. Vyberte ho ručne a skopírujte."
+    },
+    "emailBuyer": "Poslať e-mail kupujúcemu",
+    "mailSubject": "Vaša objednávka {number}",
+    "withdrawnShipWarning": "Kupujúci odstúpil od tohto nákupu. Odošlite ju iba vtedy, ak ste sa na tom s ním dohodli."
   },
   "actions": {
     "refundNeedsStripe": "Na vrátenie peňazí je potrebné mať pripojený Stripe.",
@@ -139,7 +151,8 @@
     "disputeInStripe": "Spory sa riešia vo vašom paneli Stripe po jeho prepojení.",
     "disputeConfirm": "Otvoriť riešenie sporu pre túto objednávku?",
     "handleDispute": "Riešiť spor",
-    "none": "Pre túto objednávku nie sú k dispozícii žiadne akcie."
+    "none": "Pre túto objednávku nie sú k dispozícii žiadne akcie.",
+    "refundManual": "Zo Square Share zatiaľ nemôžete vrátiť peniaze. Ak chcete túto objednávku refundovať, vráťte kupujúcemu peniaze sami a dajte mu to vedieť."
   },
   "skeleton": {
     "loading": "načítavajú sa objednávky"
@@ -163,6 +176,9 @@
     "markShipped": "Označiť ako odoslané",
     "trackingLabel": "Sledovacie číslo (voliteľné)",
     "trackingPlaceholder": "napr. RR123456789IE",
+    "carrierLabel": "Dopravca (voliteľné)",
+    "carrierOther": "Iný alebo nie je v zozname",
+    "carrierHint": "So sledovacím číslom a dopravcom dostane kupujúci odkaz na sledovanie balíka.",
     "tellsBuyer": "Kupujúcemu pošleme e-mail, že balík je na ceste, a ak sledovacie číslo zadáte, priložíme ho.",
     "noBuyerEmail": "Táto objednávka nemá e-mail kupujúceho, preto ho nebudeme informovať.",
     "confirm": "Označiť ako odoslané",
@@ -172,7 +188,10 @@
     "editTracking": "Zmeniť sledovacie číslo",
     "saveTracking": "Uložiť sledovacie číslo",
     "trackingSaved": "Sledovacie číslo uložené. Poslali sme ho kupujúcemu.",
-    "trackingSavedNoEmail": "Sledovacie číslo uložené."
+    "trackingSavedNoEmail": "Sledovacie číslo uložené.",
+    "mailOff": "E-mail ešte nie je zapnutý, takže sa to kupujúci nedozvie. Dajte mu to vedieť sami.",
+    "next": "Ďalšia objednávka na odoslanie",
+    "caughtUp": "To bola posledná. Máte všetko vybavené."
   },
   "email": {
     "fromName": "{store} cez Square Share",
@@ -190,7 +209,8 @@
       "total": "Celková suma objednávky: {amount}",
       "openShip": "Keď balík odošlete, označte ho tu ako odoslané a kupujúceho budeme informovať: {url}",
       "openDigital": "Zobraziť objednávku: {url}",
-      "gift": "Darčeková správa na priloženie: {message}"
+      "gift": "Darčeková správa na priloženie: {message}",
+      "number": "Číslo objednávky: {number}"
     },
     "shipped": {
       "subject": "Vaša objednávka z {store} je na ceste",
@@ -198,6 +218,8 @@
       "intro": "Dobrá správa: {store} odoslal vašu objednávku.",
       "introTracking": "{store} pridal k vašej objednávke sledovacie číslo.",
       "tracking": "Sledovacie číslo: {tracking}",
+      "trackingCarrier": "Sledovacie číslo: {tracking} ({carrier})",
+      "orderPage": "Objednávku môžete sledovať tu: {url}",
       "shipTo": "Smeruje na:",
       "questions": "Máte otázky o vašej objednávke? Odpovedzte na tento e-mail a dostanete sa k {store}.",
       "footer": "Odoslané cez Square Share v mene {store}."
@@ -239,5 +261,13 @@
       "intro": "Tu je odkaz na vašu stránku objednávky {number} u {store}:",
       "ignore": "Ak ste o to nežiadali, tento e-mail ignorujte."
     }
+  },
+  "export": {
+    "button": "Exportovať CSV",
+    "preparing": "Pripravuje sa súbor",
+    "failed": "Export sa nestiahol. Skúste to o chvíľu znova.",
+    "truncated": "Súbor obsahuje vašich najnovších {count, number} objednávok.",
+    "lockedTitle": "Export objednávok je súčasťou plánu {plan} a vyšších.",
+    "fileName": "objednavky.csv"
   }
 }

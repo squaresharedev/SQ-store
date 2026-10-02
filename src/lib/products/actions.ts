@@ -21,6 +21,7 @@ import {
   type ServerErrorOperation,
 } from "@/lib/errors";
 import { publishBlockedError } from "@/lib/settings/seller-identity";
+import { planLimitError, planLimitErrorFromTrigger, planLimitKeyOf } from "@/lib/billing/limits";
 import { msg } from "@/i18n/types";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import {
@@ -327,6 +328,12 @@ export async function createProduct(
     return failure(rateLimited("createProducts"));
   }
 
+  // The store's plan caps how many products it holds (lib/billing/limits.ts).
+  // Checked before anything is verified or written; the database trigger
+  // holds the same line for a create that races past this check.
+  const overLimit = await planLimitError(account.accountId, "products", account.userId);
+  if (overLimit) return failure(overLimit);
+
   const parsed = parseWrite(account.userId, input);
   if ("error" in parsed) return failure(parsed.error);
   const { data } = parsed;
@@ -374,6 +381,9 @@ export async function createProduct(
     .single();
 
   if (error || !row) {
+    if (planLimitKeyOf(error)) {
+      return failure(await planLimitErrorFromTrigger(account.accountId, "products"));
+    }
     console.error("[products] create failed", error);
     return failure(serverError("createProduct"));
   }

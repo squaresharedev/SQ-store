@@ -22,7 +22,6 @@ import { getTranslations } from "next-intl/server";
 import type { z } from "zod";
 import { msg, type MessageKey, type MessageRef } from "@/i18n/types";
 import {
-  actionHref,
   invalidInput,
   notFound,
   permissionDenied,
@@ -35,12 +34,13 @@ import {
   type ServerErrorOperation,
 } from "@/lib/errors";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
+import { evictObject, settlePagePhotos } from "@/lib/storefront/uploads";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { parseStoredStorefrontConfig, storefrontIdSchema } from "@/lib/validation/storefront";
 import { firstIssue } from "@/lib/validation/messages";
-import type { StorefrontConfig } from "@/types/storefront";
+import type { PagePhoto, StorefrontConfig } from "@/types/storefront";
 
 /** HTTP status for each ActionError code. */
 const STATUS: Record<ActionErrorCode, number> = {
@@ -66,7 +66,7 @@ async function fail(error: ActionError) {
         code: error.code,
         message: text(error.message),
         ...(error.fix ? { fix: text(error.fix) } : {}),
-        ...(error.action ? { action: { href: actionHref(error.action), label: text(error.action.label) } } : {}),
+        ...(error.action ? { action: { href: error.action.href, label: text(error.action.label) } } : {}),
       },
     },
     { status: STATUS[error.code] },
@@ -185,6 +185,13 @@ export function pageConfigRoute<Name extends Member>(
     if (spec.isDefault(value)) delete config[spec.member];
     else (config as Record<Member, unknown>)[spec.member] = value;
 
+    // A page photo is an upload by key, so the same boundary the designer's
+    // save applies applies here: a key new to this storefront must be one this
+    // account's user uploaded, really an image, really within the size cap.
+    // Without it this route would link anyone's object to a public page.
+    const photos = await settlePagePhotos(loaded.config, config, account.userId);
+    if (!photos.ok) return fail(photos.error);
+
     const supabase = await createClient();
     const { data: row, error } = await supabase
       .from("storefronts")
@@ -199,9 +206,25 @@ export function pageConfigRoute<Name extends Member>(
     }
     if (!row) return fail(notFound("storefront"));
 
+    // Photos this write let go of go with it, once it is safely saved.
+    for (const key of photos.released) await evictObject(key);
+
     revalidatePath(`/storefront/${id}`);
     return Response.json(spec.payload(id, config));
   };
 
   return { GET, PATCH };
+}
+
+/**
+ * A page member as the routes REPORT it: the photo's object key is withheld
+ * (docs/agent-surface.md, B6) and only whether a photo is set is said. A write
+ * can still clear it (`backgroundImage: null`); setting one needs a key from
+ * the upload flow, which a caller of these routes does not hold.
+ */
+export function withoutObjectKeys<T extends { backgroundImage?: PagePhoto }>(
+  page: T,
+): Omit<T, "backgroundImage"> & { hasBackgroundImage: boolean } {
+  const { backgroundImage, ...rest } = page;
+  return { ...rest, hasBackgroundImage: backgroundImage !== undefined };
 }

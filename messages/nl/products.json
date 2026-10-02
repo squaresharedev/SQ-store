@@ -195,7 +195,9 @@
     "importing": "Importeren…",
     "importedLabel": "Geïmporteerd",
     "run": "{count, plural, one {{count} product importeren} other {{count} producten importeren}}",
-    "clear": "Wissen"
+    "clear": "Wissen",
+    "planRoom": "{max, plural, one {Je abonnement heeft ruimte voor # product extra} other {Je abonnement heeft ruimte voor # producten extra}}",
+    "droppedByPlan": "{count, plural, one {# rij wordt niet geïmporteerd: je abonnement heeft ruimte voor {max} extra.} other {# rijen worden niet geïmporteerd: je abonnement heeft ruimte voor {max} extra.}}"
   },
   "form": {
     "sections": {

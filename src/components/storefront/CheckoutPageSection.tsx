@@ -3,13 +3,11 @@
 import { useId } from "react";
 import { Play } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
 import { sanitizeHeaderText } from "@/lib/storefront/header-text";
 import { hasContactOrPaymentDetails } from "@/lib/validation/inputs";
 import { useSettingTarget } from "@/lib/storefront/setting-context";
 import type { CheckoutPagePanelSection } from "@/lib/storefront/setting-ref";
 import {
-  CHECKOUT_CELEBRATIONS,
   CHECKOUT_HEADLINE_MAX,
   CHECKOUT_LAYOUTS,
   CHECKOUT_NOTE_MAX,
@@ -21,39 +19,26 @@ import {
 import { storefrontBackdropHex } from "@/components/product-page/product-page-maps";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { ColorPicker } from "@/components/ui/ColorPicker";
-import { InfoTip } from "@/components/ui/InfoTip";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { Switch } from "@/components/ui/switch";
 import {
-  errorTextClass,
-  fieldBaseClass,
-  helpTextClass,
   infoTipTriggerClass,
-  labelClass,
-  stubBadgeClass,
+  panelCaptionClass,
 } from "@/components/ui/control-styles";
 import { OptionCardPicker } from "./OptionCardPicker";
-import { ArrangementGlyph, CelebrationGlyph } from "./CheckoutGlyphs";
-import { CheckoutTexturePicker } from "./CheckoutTexturePicker";
+import { ArrangementGlyph } from "./CheckoutGlyphs";
+import { PanelField, PanelRow, PanelTextField } from "./PanelField";
+import { PagePhotoField } from "./PagePhotoField";
 import { PayButtonSwatch } from "./PayButtonSwatch";
 
 type OptionalText = "headline" | "note" | "thanksHeadline" | "thanksMessage";
 
-/** The share of a field's limit left at which "N characters left" appears.
- *  Above it the count is noise; the field's maxLength still holds. */
-const CHARS_LEFT_SHOWN_BELOW = 0.2;
-
-function nearLimit(length: number, max: number): boolean {
-  return max - length <= max * CHARS_LEFT_SHOWN_BELOW;
-}
-
-/** The config without one optional field: emptying a text, going back to
- *  following the product page, or back to a plain page, DELETES the key rather
- *  than storing "" (which the schema would refuse) or a value that means
- *  "inherit". */
+/** The config without one optional field: emptying a text, or going back to
+ *  following the product page, DELETES the key rather than storing "" (which
+ *  the schema would refuse) or a value that means "inherit". */
 function withoutKey(
   config: CheckoutPageConfig,
-  key: OptionalText | "backgroundColor" | "texture",
+  key: OptionalText | "backgroundColor" | "backgroundImage",
 ): CheckoutPageConfig {
   const next = { ...config };
   delete next[key];
@@ -63,7 +48,7 @@ function withoutKey(
 /**
  * The Checkout group of the design panel: three sections, each a
  * CollapsibleSection so a search hit or a click on the artboard can summon
- * exactly one.
+ * exactly one, each laid out with the panel primitives (PanelField).
  *
  * WHAT IS HERE is what a seller designs about their checkout: how it is laid
  * out, its colour, the words around the form, and the thank-you. WHAT IS NOT
@@ -81,7 +66,8 @@ export function CheckoutPageSection({
   onCheckoutPageChange,
   productPage,
   theme,
-  live,
+  pagePhotoUrls = {},
+  onPagePhotoUrl = () => {},
   summoned,
   onPlayCelebration,
 }: {
@@ -92,8 +78,9 @@ export function CheckoutPageSection({
   /** The storefront's background (the backdrop's last fallback), and the
    *  accent and roundness the pay button follows while the product page does. */
   theme: Pick<StorefrontTheme, "background" | "accent" | "cornerRadius">;
-  /** Whether buyers can reach checkout yet (a payment provider is connected). */
-  live: boolean;
+  /** Display URLs of the page photos by object key, and a way to add one. */
+  pagePhotoUrls?: Record<string, string>;
+  onPagePhotoUrl?: (key: string, url: string) => void;
   summoned: CheckoutPagePanelSection | null;
   /** Replay the celebration on the thank-you artboard. */
   onPlayCelebration?: () => void;
@@ -107,81 +94,35 @@ export function CheckoutPageSection({
   // page's own colour, else the one colour that stands for the storefront.
   const inherited = productPage.backgroundColor ?? storefrontBackdropHex(theme);
 
-  /** One text control: sanitized as typed, dropped when emptied. */
-  function setText(key: OptionalText, raw: string, multiline: boolean) {
-    const value = sanitizeHeaderText(raw, multiline);
-    onCheckoutPageChange(
-      value.trim() === "" ? withoutKey(checkoutPage, key) : { ...checkoutPage, [key]: value },
-    );
-  }
-
-  /** The prose rule, said as the seller types rather than when a save fails. */
-  function proseProblem(value: string | undefined): string | null {
-    return value && hasContactOrPaymentDetails(value) ? tRoot("Validation.generic.sellerProse") : null;
-  }
-
-  function textField(options: {
-    key: OptionalText;
-    label: string;
-    placeholder: string;
-    max: number;
-    multiline: boolean;
-  }) {
-    const id = `${fieldId}-${options.key}`;
-    const value = checkoutPage[options.key] ?? "";
-    const problem = proseProblem(checkoutPage[options.key]);
-    const shared = {
-      id,
-      value,
-      maxLength: options.max,
-      placeholder: options.placeholder,
-      "aria-invalid": problem !== null,
-      className: fieldBaseClass,
-    };
+  /** One of the seller's texts: sanitized as typed, dropped when emptied, and
+   *  held to the prose rule as it is typed rather than when a save fails. */
+  function textField(key: OptionalText, label: string, placeholder: string, max: number, multiline = false) {
+    const value = checkoutPage[key];
     return (
-      <div className="space-y-1.5">
-        <label htmlFor={id} className={labelClass}>
-          {options.label}
-        </label>
-        {options.multiline ? (
-          <textarea
-            {...shared}
-            rows={3}
-            onChange={(event) => setText(options.key, event.target.value, true)}
-          />
-        ) : (
-          <input
-            {...shared}
-            type="text"
-            spellCheck={false}
-            onChange={(event) => setText(options.key, event.target.value, false)}
-          />
-        )}
-        {problem ? (
-          <p className={errorTextClass}>{problem}</p>
-        ) : (
-          nearLimit(value.length, options.max) && (
-            <p className={helpTextClass}>{t("charsLeft", { count: options.max - value.length })}</p>
-          )
-        )}
-      </div>
+      <PanelTextField
+        id={`${fieldId}-${key}`}
+        label={label}
+        value={value ?? ""}
+        max={max}
+        multiline={multiline}
+        placeholder={placeholder}
+        problem={value && hasContactOrPaymentDetails(value) ? tRoot("Validation.generic.sellerProse") : null}
+        charsLeft={(count) => t("charsLeft", { count })}
+        onChange={(raw) => {
+          const next = sanitizeHeaderText(raw, multiline);
+          onCheckoutPageChange(
+            next.trim() === "" ? withoutKey(checkoutPage, key) : { ...checkoutPage, [key]: next },
+          );
+        }}
+      />
     );
   }
 
   return (
     <>
-      {/* Not reachable by buyers yet: a chip, with the why behind its tip. */}
-      {!live && (
-        <div className="flex items-center gap-1 px-1 pb-2" data-checkout-unwired="">
-          <span className={cn(stubBadgeClass, "ml-0")}>{t("unwiredBadge")}</span>
-          <InfoTip label={t("unwiredInfoLabel")}>{t("unwired")}</InfoTip>
-        </div>
-      )}
-
       <CollapsibleSection title={t("layout.title")} collapsible summon={summoned === "layout"}>
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <span className={labelClass}>{t("layout.arrangement.label")}</span>
+        <div className="space-y-5">
+          <PanelField label={t("layout.arrangement.label")}>
             <OptionCardPicker
               ariaLabel={t("layout.arrangement.label")}
               value={checkoutPage.layout}
@@ -192,10 +133,11 @@ export function CheckoutPageSection({
               }))}
               onChange={(layout) => onCheckoutPageChange({ ...checkoutPage, layout })}
             />
-          </div>
+          </PanelField>
 
           <ColorPicker
             label={t("layout.pageColor")}
+            labelClassName={panelCaptionClass}
             value={checkoutPage.backgroundColor ?? inherited}
             onChange={(backgroundColor) => onCheckoutPageChange({ ...checkoutPage, backgroundColor })}
             inherit={{
@@ -207,44 +149,39 @@ export function CheckoutPageSection({
             }}
           />
 
-          {/* Each choice drawn over the colour just picked above, so the
-              swatches re-tint as the colour changes. */}
-          <div className="space-y-1.5" data-checkout-texture-row="">
-            <span className={labelClass}>{t("layout.texture.label")}</span>
-            <CheckoutTexturePicker
-              value={checkoutPage.texture}
-              surface={checkoutPage.backgroundColor ?? inherited}
-              onChange={(texture) =>
-                onCheckoutPageChange(
-                  texture ? { ...checkoutPage, texture } : withoutKey(checkoutPage, "texture"),
-                )
-              }
-            />
-          </div>
+          {/* The checkout's photo is the thank-you page's too: one design. */}
+          <PagePhotoField
+            photo={checkoutPage.backgroundImage}
+            url={checkoutPage.backgroundImage ? (pagePhotoUrls[checkoutPage.backgroundImage.key] ?? null) : null}
+            onUrl={onPagePhotoUrl}
+            onChange={(backgroundImage) =>
+              onCheckoutPageChange(
+                backgroundImage ? { ...checkoutPage, backgroundImage } : withoutKey(checkoutPage, "backgroundImage"),
+              )
+            }
+          />
 
-          {/* THE PAY BUTTON IS THE BUY BUTTON. Given a row here, with a way to
-              it, because a seller looking for "the button" in the checkout's
-              own panel should find out where it lives rather than conclude it
-              cannot be styled. */}
-          <div className="flex items-center justify-between gap-3" data-checkout-pay-row="">
-            <div className="flex items-center gap-1.5">
-              <span className={labelClass}>{t("layout.payButton")}</span>
-              <InfoTip label={t("layout.payButtonInfoLabel")}>{t("layout.button")}</InfoTip>
-            </div>
-            {/* The button itself, in miniature, and pressing it is how it is
-                styled: like a colour swatch, the picture is the control. */}
-            {setting ? (
-              <Tooltip label={t("layout.styleButton")}>
-                <PayButtonSwatch
-                  productPage={productPage}
-                  theme={theme}
-                  styleLabel={t("layout.styleButton")}
-                  onStyle={() => setting.open({ kind: "productPage", section: "cta" })}
-                />
-              </Tooltip>
-            ) : (
-              <PayButtonSwatch productPage={productPage} theme={theme} />
-            )}
+          {/* THE PAY BUTTON IS THE BUY BUTTON: shown here in miniature, and
+              pressing it is how it is styled (the product page's button
+              settings), like a colour swatch is the way to its colour. */}
+          <div data-checkout-pay-row="">
+            <PanelRow
+              label={t("layout.payButton")}
+              info={{ label: t("layout.payButtonInfoLabel"), content: t("layout.button") }}
+            >
+              {setting ? (
+                <Tooltip label={t("layout.styleButton")}>
+                  <PayButtonSwatch
+                    productPage={productPage}
+                    theme={theme}
+                    styleLabel={t("layout.styleButton")}
+                    onStyle={() => setting.open({ kind: "productPage", section: "cta" })}
+                  />
+                </Tooltip>
+              ) : (
+                <PayButtonSwatch productPage={productPage} theme={theme} />
+              )}
+            </PanelRow>
           </div>
         </div>
       </CollapsibleSection>
@@ -255,34 +192,20 @@ export function CheckoutPageSection({
         defaultOpen={false}
         summon={summoned === "message"}
       >
-        <div className="space-y-4">
-          {textField({
-            key: "headline",
-            label: t("message.headline"),
-            placeholder: tRoot("ProductPage.checkout.headline"),
-            max: CHECKOUT_HEADLINE_MAX,
-            multiline: false,
-          })}
-          {textField({
-            key: "note",
-            label: t("message.note"),
-            placeholder: t("message.notePlaceholder"),
-            max: CHECKOUT_NOTE_MAX,
-            multiline: true,
-          })}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5">
-              <label htmlFor={`${fieldId}-gift`} className={labelClass}>
-                {t("message.gift.label")}
-              </label>
-              <InfoTip label={t("message.gift.infoLabel")}>{t("message.gift.info")}</InfoTip>
-            </div>
+        <div className="space-y-5">
+          {textField("headline", t("message.headline"), tRoot("ProductPage.checkout.headline"), CHECKOUT_HEADLINE_MAX)}
+          {textField("note", t("message.note"), t("message.notePlaceholder"), CHECKOUT_NOTE_MAX, true)}
+          <PanelRow
+            label={t("message.gift.label")}
+            htmlFor={`${fieldId}-gift`}
+            info={{ label: t("message.gift.infoLabel"), content: t("message.gift.info") }}
+          >
             <Switch
               id={`${fieldId}-gift`}
               checked={checkoutPage.giftMessage}
               onCheckedChange={(giftMessage) => onCheckoutPageChange({ ...checkoutPage, giftMessage })}
             />
-          </div>
+          </PanelRow>
         </div>
       </CollapsibleSection>
 
@@ -292,52 +215,37 @@ export function CheckoutPageSection({
         defaultOpen={false}
         summon={summoned === "thanks"}
       >
-        <div className="space-y-4">
-          {textField({
-            key: "thanksHeadline",
-            label: t("thanks.headline"),
-            placeholder: tRoot("ProductPage.order.thanksNamed", { name: t("thanks.sampleName") }),
-            max: CHECKOUT_HEADLINE_MAX,
-            multiline: false,
-          })}
-          {textField({
-            key: "thanksMessage",
-            label: t("thanks.message"),
-            placeholder: t("thanks.messagePlaceholder"),
-            max: CHECKOUT_THANKS_MESSAGE_MAX,
-            multiline: true,
-          })}
-          <div className="space-y-1.5">
-            <div className="flex min-h-6 items-center justify-between gap-3">
-              <span className={labelClass}>{t("thanks.celebrate.label")}</span>
-              {/* Replays it on the thank-you artboard. An icon beside the
-                  label rather than a row of its own: it is a preview, not a
-                  setting. */}
-              {onPlayCelebration && checkoutPage.celebrate !== "none" && (
-                <Tooltip label={t("thanks.celebrate.play")}>
-                  <button
-                    type="button"
-                    className={infoTipTriggerClass}
-                    onClick={onPlayCelebration}
-                    aria-label={t("thanks.celebrate.play")}
-                    data-checkout-play=""
-                  >
-                    <Play className="size-3.5" strokeWidth={2} aria-hidden="true" />
-                  </button>
-                </Tooltip>
-              )}
-            </div>
-            <OptionCardPicker
-              ariaLabel={t("thanks.celebrate.label")}
-              value={checkoutPage.celebrate}
-              options={CHECKOUT_CELEBRATIONS.map((kind) => ({
-                value: kind,
-                label: t(`thanks.celebrate.${kind}`),
-                glyph: <CelebrationGlyph kind={kind} />,
-              }))}
-              onChange={(celebrate) => onCheckoutPageChange({ ...checkoutPage, celebrate })}
+        <div className="space-y-5">
+          {textField(
+            "thanksHeadline",
+            t("thanks.headline"),
+            tRoot("ProductPage.order.thanksNamed", { name: t("thanks.sampleName") }),
+            CHECKOUT_HEADLINE_MAX,
+          )}
+          {textField("thanksMessage", t("thanks.message"), t("thanks.messagePlaceholder"), CHECKOUT_THANKS_MESSAGE_MAX, true)}
+          {/* One switch: confetti or nothing. Play replays it on the thank-you
+              artboard, and sits beside the switch because it previews the
+              setting rather than being one. */}
+          <PanelRow label={t("thanks.celebrate.confetti")} htmlFor={`${fieldId}-confetti`}>
+            {onPlayCelebration && checkoutPage.celebrate === "confetti" && (
+              <Tooltip label={t("thanks.celebrate.play")}>
+                <button
+                  type="button"
+                  className={infoTipTriggerClass}
+                  onClick={onPlayCelebration}
+                  aria-label={t("thanks.celebrate.play")}
+                  data-checkout-play=""
+                >
+                  <Play className="size-3.5" strokeWidth={2} aria-hidden="true" />
+                </button>
+              </Tooltip>
+            )}
+            <Switch
+              id={`${fieldId}-confetti`}
+              checked={checkoutPage.celebrate === "confetti"}
+              onCheckedChange={(on) => onCheckoutPageChange({ ...checkoutPage, celebrate: on ? "confetti" : "none" })}
             />
-          </div>
+          </PanelRow>
         </div>
       </CollapsibleSection>
     </>

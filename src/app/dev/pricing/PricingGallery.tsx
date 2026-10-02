@@ -1,18 +1,22 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { PricingModalProvider } from "@/components/billing/PricingModalProvider";
-import { usePricingModal } from "@/components/billing/pricing-modal-context";
+import { AccountPlanProvider } from "@/components/billing/plan-context";
 import { PlanChip } from "@/components/billing/PlanChip";
-import { BillingSettings } from "@/components/billing/BillingSettings";
-import type { PricingModalActions } from "@/components/billing/PricingModal";
-import type { PortalState, PricingContext, PricingContextResult } from "@/lib/billing/actions";
-import { serverError } from "@/lib/errors";
+import { PlanLimitNotice } from "@/components/billing/PlanLimitNotice";
+import { PlansPage } from "@/components/billing/PlansPage";
+import { UpgradeCard } from "@/components/billing/UpgradeCard";
+import type { BillingActions } from "@/components/billing/billing-actions";
+import { BillingSection } from "@/components/settings/BillingSection";
+import { OrdersExportButton } from "@/components/orders/OrdersExportButton";
+import type { PortalState } from "@/lib/billing/actions";
+import type { PricingContext } from "@/lib/billing/pricing-context";
+import { planHas } from "@/lib/billing/features";
+import { PLANS } from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
 
-/** The store states the modal must handle, each a PricingContext as the
- *  server would send it. */
+/** The store states the billing surfaces must handle, each a PricingContext
+ *  as the server would send it. */
 const BASE: PricingContext = {
   plan: "free",
   interval: null,
@@ -20,66 +24,49 @@ const BASE: PricingContext = {
   cancelAtPeriodEnd: false,
   currentPeriodEnd: null,
   priceCents: null,
+  currency: null,
   hasSubscription: false,
+  hasBillingAccount: false,
   canManage: true,
   available: true,
   salesSubtotal30dCents: 0,
-  usage: { storefronts: 1, teamSeats: 1 },
+  usage: { storefronts: 1, teamSeats: 1, products: 4 },
 };
 
 const IN_A_MONTH = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
-const SCENARIOS: { key: string; label: string; context: PricingContext | "error" }[] = [
+const PAID: Partial<PricingContext> = {
+  status: "active",
+  currency: "EUR",
+  currentPeriodEnd: IN_A_MONTH,
+  hasSubscription: true,
+  hasBillingAccount: true,
+};
+
+const SCENARIOS: { key: string; label: string; context: PricingContext }[] = [
   { key: "free", label: "Free owner, no sales yet", context: BASE },
   {
     key: "free-selling",
     label: "Free owner selling €1,800 a month",
-    context: { ...BASE, salesSubtotal30dCents: 180_000, usage: { storefronts: 3, teamSeats: 2 } },
+    context: { ...BASE, salesSubtotal30dCents: 180_000, usage: { storefronts: 3, teamSeats: 2, products: 23 } },
   },
   {
     key: "starter",
     label: "Starter, monthly",
-    context: {
-      ...BASE,
-      plan: "starter",
-      interval: "month",
-      status: "active",
-      priceCents: 1500,
-      currentPeriodEnd: IN_A_MONTH,
-      hasSubscription: true,
-      salesSubtotal30dCents: 90_000,
-    },
+    context: { ...BASE, ...PAID, plan: "starter", interval: "month", priceCents: 1500, salesSubtotal30dCents: 160_000 },
   },
   {
     key: "pro-ending",
-    label: "Pro, cancelled at period end",
-    context: {
-      ...BASE,
-      plan: "pro",
-      interval: "year",
-      status: "active",
-      priceCents: 40000,
-      currentPeriodEnd: IN_A_MONTH,
-      cancelAtPeriodEnd: true,
-      hasSubscription: true,
-    },
+    label: "Pro yearly, cancelled at period end",
+    context: { ...BASE, ...PAID, plan: "pro", interval: "year", priceCents: 40000, cancelAtPeriodEnd: true },
   },
   {
     key: "past-due",
     label: "Pro, payment failed",
-    context: {
-      ...BASE,
-      plan: "pro",
-      interval: "month",
-      status: "past_due",
-      priceCents: 4000,
-      currentPeriodEnd: IN_A_MONTH,
-      hasSubscription: true,
-    },
+    context: { ...BASE, ...PAID, plan: "pro", interval: "month", status: "past_due", priceCents: 4000 },
   },
   { key: "member", label: "Teammate (read only)", context: { ...BASE, plan: "starter", canManage: false } },
   { key: "unavailable", label: "Billing not set up here", context: { ...BASE, available: false } },
-  { key: "error", label: "Plans failed to load", context: "error" },
 ];
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -87,20 +74,13 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export function PricingGallery({ banners }: { banners: React.ReactNode }) {
   const [scenarioKey, setScenarioKey] = useState(SCENARIOS[0]!.key);
   const [lastNavigation, setLastNavigation] = useState<string | null>(null);
-  const scenario = SCENARIOS.find((candidate) => candidate.key === scenarioKey)!;
-  const context = scenario.context === "error" ? BASE : scenario.context;
+  const { context } = SCENARIOS.find((candidate) => candidate.key === scenarioKey)!;
 
   // Stand-ins for the server actions: a short wait so pending states show,
   // then what the server would answer. "Navigating" only records the URL.
   const navigate = useCallback((url: string) => setLastNavigation(url), []);
-  const actions = useMemo<PricingModalActions>(
+  const actions = useMemo<BillingActions>(
     () => ({
-      loadContext: async (): Promise<PricingContextResult> => {
-        await wait(400);
-        return scenario.context === "error"
-          ? { ok: false, error: serverError("loadPlans") }
-          : { ok: true, context: scenario.context };
-      },
       startCheckout: async ({ plan, interval }) => {
         await wait(600);
         return { ok: true, url: `https://checkout.stripe.com/(dev) ${plan}/${interval}` };
@@ -111,90 +91,89 @@ export function PricingGallery({ banners }: { banners: React.ReactNode }) {
       },
       navigate,
     }),
-    [scenario, navigate],
+    [navigate],
   );
 
   return (
-    <PricingModalProvider
-      // Keyed on the scenario so the provider (and an open modal) starts fresh.
-      key={scenario.key}
-      plan={context.plan}
-      stepUp={{ enrolled: false, freshUntil: null, factors: [] }}
-      actions={actions}
-    >
-      <main className="mx-auto max-w-5xl space-y-10 px-6 py-10">
+    <AccountPlanProvider plan={context.plan}>
+      <div className="mx-auto max-w-6xl space-y-4 px-6 pt-10">
         <header>
           <h1 className="text-2xl font-semibold text-foreground">Plans &amp; billing</h1>
           <p className="mt-1 font-inter text-sm text-muted-foreground">
-            Every state of the pricing modal, with stand-in actions. Nothing is bought.
+            Every billing surface in every store state, with stand-in actions. Nothing is bought.
           </p>
         </header>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Store state">
+          {SCENARIOS.map((candidate) => (
+            <button
+              key={candidate.key}
+              type="button"
+              aria-pressed={candidate.key === scenarioKey}
+              onClick={() => setScenarioKey(candidate.key)}
+              className={cn(
+                "border px-3 py-1.5 font-inter text-xs",
+                candidate.key === scenarioKey ? "border-foreground bg-accent" : "border-border",
+              )}
+            >
+              {candidate.label}
+            </button>
+          ))}
+        </div>
+        {lastNavigation && (
+          <p className="font-inter text-xs text-muted-foreground" data-dev-navigation>
+            Would open: {lastNavigation}
+          </p>
+        )}
+      </div>
 
-        <section className="space-y-3">
-          <h2 className="text-base font-semibold text-foreground">Store state</h2>
-          <div className="flex flex-wrap gap-2">
-            {SCENARIOS.map((candidate) => (
-              <button
-                key={candidate.key}
-                type="button"
-                aria-pressed={candidate.key === scenario.key}
-                onClick={() => setScenarioKey(candidate.key)}
-                className={cn(
-                  "border px-3 py-1.5 font-inter text-xs",
-                  candidate.key === scenario.key ? "border-foreground bg-accent" : "border-border",
-                )}
-              >
-                {candidate.label}
-              </button>
-            ))}
+      {/* Keyed on the scenario so every surface starts fresh. */}
+      <div key={scenarioKey}>
+        <GallerySection title="Settings › Plan & billing">
+          <div className="max-w-3xl">
+            <BillingSection context={context} returned={null} actions={actions} />
           </div>
-          <OpenButton />
-          {lastNavigation && (
-            <p className="font-inter text-xs text-muted-foreground" data-dev-navigation>
-              Would open: {lastNavigation}
-            </p>
-          )}
-        </section>
+        </GallerySection>
 
-        <section className="space-y-3">
-          <h2 className="text-base font-semibold text-foreground">Rail chip</h2>
-          <div className="w-64 border border-border p-3">
-            <PlanChip className="flex items-center gap-2 rounded-sm px-3 py-2.5 text-sm font-medium" />
+        <GallerySection title="Upsell card alone (owner)">
+          <div className="max-w-3xl">
+            <UpgradeCard context={{ ...context, canManage: true }} actions={actions} />
           </div>
-        </section>
+        </GallerySection>
 
-        <section className="space-y-3">
-          <h2 className="text-base font-semibold text-foreground">Past-due banner (owner, then teammate)</h2>
-          {banners}
-        </section>
+        <GallerySection title="Rail chip, Orders export button">
+          <div className="flex flex-wrap items-center gap-6">
+            <div className="w-64 border border-border p-3">
+              <PlanChip className="flex items-center gap-2 rounded-sm px-3 py-2.5 text-sm font-medium" />
+            </div>
+            <OrdersExportButton enabled={planHas(context.plan, "ordersExport")} />
+          </div>
+        </GallerySection>
 
-        <section className="space-y-3">
-          <h2 className="text-base font-semibold text-foreground">Settings › Plan &amp; billing</h2>
-          <div className="max-w-2xl">
-            <BillingSettings
+        <GallerySection title="Past-due banner (owner, then teammate)">{banners}</GallerySection>
+
+        <GallerySection title="Product limit reached (shown on /products/new and /products/import)">
+          <div className="max-w-3xl">
+            <PlanLimitNotice
+              limitKey="products"
               plan={context.plan}
-              interval={context.interval}
-              status={context.status}
-              priceCents={context.priceCents}
-              currency="EUR"
-              currentPeriodEnd={context.currentPeriodEnd}
-              cancelAtPeriodEnd={context.cancelAtPeriodEnd}
-              hasBillingAccount={context.plan !== "free"}
-              usage={context.usage}
-              canManage={context.canManage}
-              available={context.available}
-              returned={null}
-              portalAction={actions.openPortal}
-              navigate={navigate}
+              cap={PLANS[context.plan].limits.products ?? 0}
             />
           </div>
-        </section>
-      </main>
-    </PricingModalProvider>
+        </GallerySection>
+
+        <GallerySection title="/plans">
+          <PlansPage context={context} source={null} actions={actions} />
+        </GallerySection>
+      </div>
+    </AccountPlanProvider>
   );
 }
 
-function OpenButton() {
-  const pricing = usePricingModal();
-  return <Button onClick={() => pricing?.open({ source: "settings" })}>Open plans</Button>;
+function GallerySection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="mx-auto max-w-6xl space-y-3 px-6 py-6">
+      <h2 className="text-base font-semibold text-foreground">{title}</h2>
+      {children}
+    </section>
+  );
 }

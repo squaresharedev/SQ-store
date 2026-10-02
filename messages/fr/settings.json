@@ -175,7 +175,7 @@
     "prefs": {
       "sales": {
         "label": "Ventes",
-        "blurb": "M’envoyer un e-mail à chaque vente. Le bon genre de bruit dans la boîte de réception."
+        "blurb": "M’envoyer un e-mail à chaque vente, avec ce qu’il faut préparer et où l’envoyer."
       },
       "productUpdates": {
         "label": "Mises à jour produit",
@@ -188,7 +188,8 @@
     },
     "success": {
       "notificationsSaved": "Préférences enregistrées."
-    }
+    },
+    "emailOff": "L’e-mail n’est pas encore activé pour Square Share, donc rien de ce qui suit n’est envoyé. Les nouvelles commandes apparaissent toujours dans Commandes et dans vos notifications."
   },
   "legal": {
     "cardTitle": "Contrat vendeur, conditions et confidentialité",
@@ -412,7 +413,8 @@
       "removeNamed": "Supprimer la destination {area}",
       "removeNumbered": "Supprimer la destination {number}",
       "add": "Ajouter une destination",
-      "limitReached": "{max, plural, one {C’est la limite : # destination. Retirez-en une pour en ajouter une autre.} many {C’est la limite : # destinations. Retirez-en une pour en ajouter une autre.} other {C’est la limite : # destinations. Retirez-en une pour en ajouter une autre.}}"
+      "limitReached": "{max, plural, one {C’est la limite : # destination. Retirez-en une pour en ajouter une autre.} many {C’est la limite : # destinations. Retirez-en une pour en ajouter une autre.} other {C’est la limite : # destinations. Retirez-en une pour en ajouter une autre.}}",
+      "needsRate": "La caisse ne peut pas utiliser cette ligne tant qu’elle n’a pas à la fois un tarif et un pays. Les acheteurs la lisent quand même sur la page produit."
     },
     "rates": {
       "title": "Tarifs de livraison",

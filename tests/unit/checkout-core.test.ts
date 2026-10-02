@@ -13,7 +13,7 @@ import { hasContactOrPaymentDetails } from "@/lib/validation/inputs";
 import { isDefaultCheckoutPage, resolveCheckoutPage } from "@/lib/storefront/checkout-page";
 import { resolveCtaTarget } from "@/components/product-page/cta-target";
 import { checkoutPath } from "@/lib/storefront/product-page-url";
-import { testPaymentsEnabled } from "@/lib/checkout/availability";
+import { checkoutProviderFor, testPaymentsEnabled } from "@/lib/checkout/availability";
 import { DEFAULT_CHECKOUT_PAGE_CONFIG, DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 import type { ProductOptionGroup } from "@/types/product";
 
@@ -238,5 +238,14 @@ describe("the development test provider", () => {
     expect(testPaymentsEnabled()).toBe(true);
     vi.stubEnv("CHECKOUT_TEST_PAYMENTS", "");
     expect(testPaymentsEnabled()).toBe(false);
+  });
+
+  it("leaves a deployed build with no provider at all, whatever else is configured", () => {
+    // Mail and the bot check both on: checkout still does not open, because
+    // the only provider that exists here is the test one, and it is dev-only.
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("CHECKOUT_TEST_PAYMENTS", "1");
+    vi.stubEnv("TRANSACTIONAL_EMAIL_ENABLED", "true");
+    expect(checkoutProviderFor("any-owner")).toBeNull();
   });
 });

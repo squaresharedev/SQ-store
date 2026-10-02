@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { checkoutProviderFor } from "@/lib/checkout/availability";
 import {
   DEFAULT_PAGE_SIZE,
   countOrdersToShip,
@@ -13,6 +14,9 @@ import { ORDER_DETAIL_PARAM, ORDERS_VIEW_PARAM } from "@/lib/orders/paths";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { OrdersPage } from "@/components/orders/OrdersPage";
+import { OrdersExportButton } from "@/components/orders/OrdersExportButton";
+import { getAccountBilling } from "@/lib/billing/account-plan";
+import { planHas } from "@/lib/billing/features";
 import {
   ORDERS_SEARCH_MAX_LENGTH,
   ORDERS_VIEWS,
@@ -136,23 +140,28 @@ export default async function OrdersRoutePage({
   const [toShipCount, account] = await Promise.all([countOrdersToShip(), getActiveAccount()]);
   const view = resolveView(params, filters, toShipCount);
 
-  const [data, deepLinked] = await Promise.all([
+  const [data, deepLinked, billing] = await Promise.all([
     listOrders({ view, filters, sort, page, pageSize: DEFAULT_PAGE_SIZE }),
     // A stale or foreign id resolves to null: the list still renders, just
     // without a detail panel.
     deepLinkedId ? getOrderById(deepLinkedId) : Promise.resolve(null),
+    account ? getAccountBilling(account.accountId) : Promise.resolve(null),
   ]);
+  // Only decides which button shows; the export route re-checks the plan.
+  const canExport = billing?.ok === true && planHas(billing.billing.plan, "ordersExport");
 
   return (
     <main className={cn(pageShellClass, "space-y-6")}>
       <PageHeader
         title={t("title")}
         subtitle={t("subtitle")}
+        action={account ? <OrdersExportButton enabled={canExport} /> : null}
       />
       <OrdersPage
         view={view}
         toShipCount={toShipCount}
         canFulfil={can(account?.role, "orders.fulfil")}
+        checkoutOpen={account ? checkoutProviderFor(account.accountId) !== null : false}
         data={data}
         filters={view === "all" ? filters : {}}
         sort={sort}

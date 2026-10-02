@@ -195,6 +195,7 @@
       "shipped": "A caminho",
       "shippedDetail": "Enviado em {date}",
       "tracking": "Número de rastreio {number}",
+      "track": "Seguir com a transportadora {carrier}",
       "notYet": "Receberá um e-mail quando for enviado.",
       "ready": "Pronto para descarregar",
       "readyDetail": "O seu ficheiro está pronto abaixo e o link também está no seu e-mail."
@@ -262,6 +263,8 @@
       "region": "Distrito ou região",
       "postalCode": "Código postal",
       "country": "País",
+      "phone": "Telefone (opcional)",
+      "phoneHint": "Apenas para a transportadora, caso precise de entrar em contacto consigo sobre a entrega.",
       "whyAsk": "Porque pedimos isto"
     },
     "gift": {
@@ -309,11 +312,11 @@
     },
     "pay": "Encomenda com obrigação de pagamento ({amount})",
     "placing": "A efetuar a sua encomenda...",
-    "unwired": "O pagamento abre para compradores quando ligar o Stripe.",
     "errors": {
       "title": "Não foi possível efetuar a sua encomenda",
       "required": "Este campo é obrigatório.",
       "email": "Introduza um endereço de e-mail como nome@exemplo.pt.",
+      "phone": "Introduza um número de telefone com algarismos, como +351 912 345 678.",
       "fields": "Verifique os campos assinalados.",
       "consent": "Assinale a caixa para confirmar que quer o descarregamento imediatamente.",
       "sold_out": "Lamentamos, isto acabou de esgotar. Não foi cobrado nada.",

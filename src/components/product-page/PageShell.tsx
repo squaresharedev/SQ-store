@@ -5,7 +5,7 @@ import { CustomFontFace } from "@/components/storefront/CustomFontFace";
 import { customFontVars, fontPresentation } from "@/lib/theme/storefront-fonts";
 import type { ProductPageStorefront } from "@/types/product-page";
 import type { StorefrontFont } from "@/types/storefront";
-import { ruleColor } from "./product-page-maps";
+import { pagePhotoStyle, ruleColor } from "./product-page-maps";
 
 /**
  * THE FRAME EVERY HOSTED PAGE SITS IN: the product page, the checkout and the
@@ -25,7 +25,7 @@ import { ruleColor } from "./product-page-maps";
 export function PageShell({
   storefront,
   backgroundColor,
-  surfaceLayers,
+  photo,
   font,
   ink,
   preview,
@@ -43,10 +43,14 @@ export function PageShell({
    *  (a gradient or photograph included). A colour REPLACES that background
    *  rather than tinting it. */
   backgroundColor?: string;
-  /** Extra background layers over `backgroundColor` (the checkout's texture).
-   *  Ignored without it: a pattern belongs on a solid surface, never over a
-   *  storefront's gradient or photograph. */
-  surfaceLayers?: CSSProperties;
+  /**
+   * The page's own photo backdrop (its signed or local URL) with the colour it
+   * is veiled in, which is also the colour the page's ink was derived from.
+   * Drawn on a layer behind the content: fixed to the screen for a buyer (so a
+   * long page keeps one photo rather than stretching it), and to the page
+   * itself inside the editor's artboard, where a fixed layer would escape it.
+   */
+  photo?: { url: string; tint: string } | null;
   /** The page's typeface; absent = the storefront's. */
   font?: StorefrontFont;
   /** Whichever ink reads on the backdrop (resolveInk). */
@@ -67,9 +71,13 @@ export function PageShell({
     storefront.header?.show && storefront.header.name ? storefront.header.name : storefront.name;
 
   const rootStyle: CSSProperties = {
-    ...(backgroundColor
-      ? { backgroundColor, ...surfaceLayers }
-      : resolveBackgroundStyle(theme.background, storefront.backgroundImageUrl)),
+    // A photo replaces the storefront's background just as a colour does: the
+    // veil's colour is the base under it, so the two can never disagree.
+    ...(photo
+      ? { backgroundColor: photo.tint }
+      : backgroundColor
+        ? { backgroundColor }
+        : resolveBackgroundStyle(theme.background, storefront.backgroundImageUrl)),
     ...customFontVars(theme.customFont, storefront.customFontUrl),
     color: ink,
     ...presentation.style,
@@ -80,7 +88,8 @@ export function PageShell({
       <CustomFontFace customFont={theme.customFont} url={storefront.customFontUrl} />
       <div
         className={cn(
-          "@container flex w-full flex-col",
+          // `isolate` keeps the photo layer's negative z-index inside this page.
+          "@container relative isolate flex w-full flex-col",
           presentation.className,
           preview ? "min-h-full" : "min-h-screen",
           padForStickyBar && "pb-24 @3xl:pb-0",
@@ -95,6 +104,14 @@ export function PageShell({
         data-page-root=""
         {...rootAttributes}
       >
+        {photo && (
+          <div
+            aria-hidden="true"
+            className={cn("pointer-events-none inset-0 -z-10", preview ? "absolute" : "fixed")}
+            style={pagePhotoStyle(photo)}
+            data-page-photo=""
+          />
+        )}
         {/* The store's own line above the page. A full-width bar rather than a
             caption: it is the one piece of chrome that says whose shop this
             is, and on a full screen it belongs at the top edge. */}

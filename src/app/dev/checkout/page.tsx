@@ -7,14 +7,23 @@ import { CheckoutGallery } from "./CheckoutGallery";
 // CheckoutView and OrderStatusView in preview mode, beside the real Checkout
 // panel from the storefront designer, so the design and every one of its
 // settings can be judged without a sign-in, a database or a product page.
-// `?w=390` draws the phone width, `?kind=digital` a download, `?view=thanks`
-// the thank-you page, `?q=3` three of it, `?scroll=1` the page inside a
-// phone-height window it scrolls in (as the editor shows it on a phone),
-// `?view=thanks&buyer=1` the thank-you in the buyer's mode (screen-wide
-// confetti), and
-// `?texture=` / `?layout=` /
-// `?bg=` (a hex without the #) start the design somewhere other than the
-// defaults. Dev-only: the route 404s in production builds.
+// `?w=390` draws that width (320 to 1440, default 1280), `?kind=digital` a
+// download, `?view=thanks` the thank-you page, `?q=3` three of it, `?scroll=1`
+// the page inside a phone-height window it scrolls in (as the editor shows it
+// on a phone), `?view=thanks&buyer=1` the thank-you in the buyer's mode
+// (screen-wide confetti), and `?layout=` / `?bg=` (a hex without the #) / `?photo=1` start
+// the design somewhere other than the defaults. Dev-only: the route 404s in
+// production builds.
+
+/** A stand-in uploaded photo for `?photo=1`: a key shaped like a real one, shown
+ *  from a picture the app already serves. */
+const HARNESS_PHOTO_KEY = "images/00000000-0000-4000-8000-000000000000/00000000-0000-4000-8000-000000000001-harness.webp";
+const HARNESS_PHOTO_URL = "/sample-storefront/camera.webp";
+
+/** The frame's width bounds, in px: a small phone to a wide desktop. */
+const WIDTH_MIN = 320;
+const WIDTH_MAX = 1440;
+const WIDTH_DEFAULT = 1280;
 
 export const metadata = { title: "Checkout: dev gallery" };
 
@@ -24,22 +33,24 @@ export default async function CheckoutDevPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   if (process.env.NODE_ENV === "production") notFound();
-  const { w, kind, view, q, texture, layout, bg, scroll, buyer } = await searchParams;
+  const { w, kind, view, q, layout, bg, scroll, buyer, photo } = await searchParams;
   const initial = checkoutPageSchema.safeParse({
     ...DEFAULT_CHECKOUT_PAGE_CONFIG,
-    ...(texture ? { texture } : {}),
     ...(layout ? { layout } : {}),
     ...(bg ? { backgroundColor: `#${bg}` } : {}),
+    ...(photo === "1" ? { backgroundImage: { key: HARNESS_PHOTO_KEY } } : {}),
   });
+  const width = Number(w);
   return (
     <CheckoutGallery
-      width={w === "390" ? 390 : 1280}
+      width={Number.isInteger(width) ? Math.min(Math.max(width, WIDTH_MIN), WIDTH_MAX) : WIDTH_DEFAULT}
       digital={kind === "digital"}
       view={view === "thanks" ? "thanks" : "checkout"}
       quantity={Math.min(Math.max(Number(q) || 1, 1), 5)}
       scroll={scroll === "1"}
       buyer={buyer === "1"}
       initialCheckoutPage={initial.success ? initial.data : DEFAULT_CHECKOUT_PAGE_CONFIG}
+      initialPhotoUrls={{ [HARNESS_PHOTO_KEY]: HARNESS_PHOTO_URL }}
     />
   );
 }

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { RadialLightRays } from "@/components/ui/RadialLightRays";
 import {
   CELEBRATION_ORIGIN,
   confettiPalette,
@@ -13,14 +12,13 @@ import {
 } from "./confetti";
 
 /**
- * THE MOMENT AN ORDER LANDS, on the thank-you page, in the seller's choice
- * (checkoutPage.celebrate): confetti, or a soft burst of light. Played once,
- * and never in the way: nothing here takes a pointer or says anything to a
- * screen reader.
+ * THE MOMENT AN ORDER LANDS, on the thank-you page, when the seller has it on
+ * (checkoutPage.celebrate). Played once, and never in the way: nothing here
+ * takes a pointer or says anything to a screen reader.
  *
  * Only on the visit straight after paying (the order page passes `play` from
  * `?placed=1`); the same page opened from the email days later is a status
- * page and opens quietly. Reduced motion gets neither; the still check mark
+ * page and opens quietly. Reduced motion gets none; the still check mark
  * carries the news.
  */
 
@@ -126,20 +124,6 @@ export function CelebrationConfetti({
       data-celebration-state="waiting"
     >
       <canvas ref={ref} className="size-full" />
-    </div>
-  );
-}
-
-/** A soft burst of light in the storefront's accent, behind the heading. */
-export function CelebrationRays({ play, accent }: { play: boolean; accent: string }) {
-  if (!play) return null;
-  return (
-    <div
-      className="pointer-events-none absolute inset-0 -z-10 opacity-70 motion-reduce:hidden"
-      aria-hidden="true"
-      data-celebration="rays"
-    >
-      <RadialLightRays color={accent} intensity={0.8} className="size-full" />
     </div>
   );
 }

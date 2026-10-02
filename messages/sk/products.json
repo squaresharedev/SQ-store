@@ -195,7 +195,9 @@
     "importing": "Importuje sa…",
     "importedLabel": "Naimportované",
     "run": "{count, plural, one {Importovať {count} produkt} few {Importovať {count} produkty} many {Importovať {count} produktu} other {Importovať {count} produktov}}",
-    "clear": "Vymazať"
+    "clear": "Vymazať",
+    "planRoom": "{max, plural, one {Váš plán má miesto pre # ďalší produkt} few {Váš plán má miesto pre # ďalšie produkty} many {Váš plán má miesto pre # ďalšieho produktu} other {Váš plán má miesto pre # ďalších produktov}}",
+    "droppedByPlan": "{count, plural, one {# riadok sa nenaimportuje: váš plán má miesto pre {max} ďalších.} few {# riadky sa nenaimportujú: váš plán má miesto pre {max} ďalších.} many {# riadku sa nenaimportuje: váš plán má miesto pre {max} ďalších.} other {# riadkov sa nenaimportuje: váš plán má miesto pre {max} ďalších.}}"
   },
   "form": {
     "sections": {

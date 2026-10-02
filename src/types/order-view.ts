@@ -56,12 +56,48 @@ export const SHIP_TO_MAX = {
 export const TRACKING_NUMBER_MIN = 4;
 export const TRACKING_NUMBER_MAX = 40;
 
+/**
+ * WHO IS CARRYING THE PARCEL: the carriers a seller can name beside a tracking
+ * number, so the buyer gets a link to follow it instead of a bare code. The ids
+ * are what orders.tracking_carrier stores (its CHECK holds the SHAPE only, so
+ * this list lives here and nowhere else); each one's name and tracking page are
+ * in lib/orders/carriers.ts. Add an id here and its entry there; never rename
+ * or remove one an order may already carry.
+ */
+export const CARRIER_IDS = [
+  "an-post",
+  "ceska-posta",
+  "colissimo",
+  "correos",
+  "ctt",
+  "dhl",
+  "dpd",
+  "evri",
+  "fedex",
+  "gls",
+  "inpost",
+  "packeta",
+  "poczta-polska",
+  "poste-italiane",
+  "postnl",
+  "royal-mail",
+  "slovenska-posta",
+  "ups",
+] as const;
+export type CarrierId = (typeof CARRIER_IDS)[number];
+
+/** How a parcel is followed: who has it ("DHL"), and that carrier's own page
+ *  for it. Built by lib/orders/carriers.ts, never stored and never typed. */
+export type TrackingLink = { carrier: string; url: string };
+
 /** Whether an order's parcel has gone, and how the buyer can follow it. */
 export type OrderFulfilment = {
   status: FulfilmentStatus;
   /** ISO timestamp, set exactly when status is "shipped". */
   shippedAt: string | null;
   trackingNumber: string | null;
+  /** Who is carrying it. Only ever set beside a tracking number. */
+  carrier: CarrierId | null;
 };
 
 /**

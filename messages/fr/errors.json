@@ -608,6 +608,18 @@
     "storefronts": "Votre forfait {plan, select, free {Free} starter {Starter} pro {Pro} other {actuel}} comprend {cap, plural, one {# vitrine} other {# vitrines}}, et votre boutique les a toutes.",
     "teamSeats": "Votre forfait {plan, select, free {Free} starter {Starter} pro {Pro} other {actuel}} comprend {cap, plural, one {# siège} other {# sièges}}, vous inclus, et ils sont tous pris.",
     "fix": "Mettez à niveau pour en avoir plus, ou supprimez-en un dont vous n'avez plus besoin. Rien de ce que vous avez n'est affecté.",
-    "action": "Voir les forfaits"
+    "action": "Voir les forfaits",
+    "products": "Votre forfait {plan, select, free {Free} starter {Starter} pro {Pro} other {actuel}} comprend {cap, plural, one {# produit} other {# produits}}, et votre boutique les a tous.",
+    "fixTop": "Supprimez-en un dont vous n'avez plus besoin pour en ajouter un autre. Rien de ce que vous avez n'est affecté."
+  },
+  "ordersExport": {
+    "signIn": "Connectez-vous pour exporter vos commandes.",
+    "permissionDenied": "Vous n'avez pas accès aux commandes de cette boutique.",
+    "unavailable": "Vos commandes ne peuvent pas être exportées pour l'instant.",
+    "tryAgain": "Réessayez dans un instant.",
+    "planRequired": "L'export des commandes fait partie d'un forfait payant.",
+    "planRequiredFix": "Passez à un forfait supérieur sur la page Forfaits pour exporter vos commandes.",
+    "rateLimited": "Cela fait beaucoup d'exports en peu de temps.",
+    "rateLimitedFix": "Attendez quelques minutes, puis réessayez."
   }
 }

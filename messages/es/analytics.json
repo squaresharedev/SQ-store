@@ -197,5 +197,9 @@
       "byWeekday": "Vistas de pago por día de la semana",
       "byStorefront": "Vistas de pago por escaparate"
     }
+  },
+  "export": {
+    "button": "Descargar informe",
+    "lockedTitle": "Los informes de estadísticas vienen con {plan}."
   }
 }

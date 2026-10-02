@@ -1,5 +1,5 @@
 import { resolveCta, resolveInk } from "@/components/product-page/product-page-maps";
-import { pageConfigRoute } from "@/lib/storefront/page-config-route";
+import { pageConfigRoute, withoutObjectKeys } from "@/lib/storefront/page-config-route";
 import { isDefaultProductPage, resolveProductPage } from "@/lib/storefront/product-page";
 import { productPageSchema } from "@/lib/validation/storefront";
 import {
@@ -52,7 +52,7 @@ function payload(storefrontId: string, config: StorefrontConfig) {
   const productPage = resolveProductPage(config);
   return {
     storefrontId,
-    productPage,
+    productPage: withoutObjectKeys(productPage),
     buyButton: resolveCta(productPage, config.theme),
     // The page's backdrop, resolved the same way. `color` is null while the
     // page follows the storefront, because "follow" can mean a gradient or an

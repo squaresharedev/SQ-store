@@ -145,8 +145,9 @@
       "checkoutGift": "Messages cadeaux",
       "thankYouMessage": "Message de remerciement",
       "thankYouCelebration": "Animation de remerciement",
-      "checkoutTexture": "Texture de la page de paiement",
-      "checkoutPayButton": "Bouton de paiement"
+      "checkoutPayButton": "Bouton de paiement",
+      "productPagePhoto": "Photo de la page produit",
+      "checkoutPhoto": "Photo du paiement et du remerciement"
     }
   },
   "editorSearch": {
@@ -790,6 +791,11 @@
       "nothingSet": "Rien n’est encore défini. Tant que vous n’ajoutez pas vos informations d’entreprise, les acheteurs ne voient que la mention « Vendu par » sous le titre.",
       "editSettings": "Modifier dans Paramètres",
       "addDetails": "Ajoutez vos informations d’entreprise"
+    },
+    "groups": {
+      "look": "Apparence",
+      "style": "Style",
+      "besidePrice": "À côté du prix"
     }
   },
   "productBlock": {
@@ -1154,10 +1160,6 @@
         "speaker": {
           "title": "Enceinte portable",
           "description": "Étanche, avec 12 heures d’écoute par charge."
-        },
-        "succulent": {
-          "title": "Succulente de bureau",
-          "description": "Une petite haworthia dans un pot en céramique. À arroser environ une fois par mois."
         }
       }
     }
@@ -1321,7 +1323,6 @@
     }
   },
   "checkoutPage": {
-    "unwired": "Les acheteurs accèdent au paiement une fois que vous connectez Stripe. Vous pouvez le concevoir dès maintenant.",
     "charsLeft": "{count, plural, one {# caractère restant} other {# caractères restants}}",
     "layout": {
       "title": "Disposition",
@@ -1336,16 +1337,7 @@
       "button": "Le bouton de paiement reprend le style du bouton d'achat de votre page produit.",
       "styleButton": "Personnaliser le bouton",
       "payButton": "Bouton de paiement",
-      "payButtonInfoLabel": "À propos du bouton de paiement",
-      "texture": {
-        "label": "Texture",
-        "none": "Unie",
-        "paper": "Papier",
-        "dots": "Pois",
-        "grid": "Grille",
-        "lines": "Rayures",
-        "linen": "Lin"
-      }
+      "payButtonInfoLabel": "À propos du bouton de paiement"
     },
     "message": {
       "title": "Texte",
@@ -1365,14 +1357,15 @@
       "message": "Message",
       "messagePlaceholder": "La suite en quelques mots",
       "celebrate": {
-        "label": "Animation",
         "confetti": "Confettis",
-        "rays": "Lumière",
-        "none": "Aucune",
         "play": "Lancer"
       }
-    },
-    "unwiredBadge": "Pas encore en ligne",
-    "unwiredInfoLabel": "Quand les acheteurs accèdent au paiement"
+    }
+  },
+  "pagePhoto": {
+    "label": "Photo",
+    "infoLabel": "Comment la photo est utilisée",
+    "info": "Affichée derrière la page et teintée de la couleur de la page, pour que le texte reste lisible. Changez la couleur pour éclaircir ou assombrir la photo.",
+    "remove": "Retirer la photo"
   }
 }

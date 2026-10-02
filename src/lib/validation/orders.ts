@@ -1,5 +1,6 @@
+import { z } from "zod";
 import { referenceCode } from "@/lib/validation/inputs";
-import { TRACKING_NUMBER_MAX, TRACKING_NUMBER_MIN } from "@/types/order-view";
+import { CARRIER_IDS, TRACKING_NUMBER_MAX, TRACKING_NUMBER_MIN } from "@/types/order-view";
 
 /**
  * THE WRITE BOUNDARY for what a seller types about an order.
@@ -15,3 +16,11 @@ export const trackingNumberSchema = referenceCode({
   min: TRACKING_NUMBER_MIN,
   max: TRACKING_NUMBER_MAX,
 });
+
+/**
+ * Who is carrying the parcel: one of the carriers this app can build a tracking
+ * link for (CARRIER_IDS), or null for "another carrier". A seller picks from a
+ * list and never types a link, so an id outside the list is a forged request,
+ * and it is refused rather than stored.
+ */
+export const carrierSchema = z.enum(CARRIER_IDS).nullable();

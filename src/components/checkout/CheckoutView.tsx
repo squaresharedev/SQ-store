@@ -55,7 +55,6 @@ export function CheckoutView({
   initialQuantity = 1,
   attemptId = null,
   provider = null,
-  unwired = false,
   initialCountry,
 }: {
   page: CheckoutPageData;
@@ -67,8 +66,6 @@ export function CheckoutView({
   attemptId?: string | null;
   /** Who takes the money; null in the editor. */
   provider?: CheckoutProviderId | null;
-  /** Editor only: whether buyers cannot reach this checkout yet. */
-  unwired?: boolean;
   /** A country to start the delivery picker on (the buyer's, when known). */
   initialCountry?: string | null;
 }) {
@@ -207,7 +204,6 @@ export function CheckoutView({
   const form = (
     <CheckoutForm
       preview={preview}
-      unwired={unwired}
       storefrontId={storefront.id}
       productId={product.id}
       optionIds={selectionIds(groups, selection)}
@@ -227,7 +223,6 @@ export function CheckoutView({
       giftMessage={checkoutPage.giftMessage}
       vatIncluded={vatIncluded}
       sellerName={sellerName}
-      surface={theme.surface}
       ink={theme.ink}
       rule={theme.rule}
       cornerRadius={theme.cornerRadius}
@@ -243,7 +238,7 @@ export function CheckoutView({
       <PageShell
         storefront={storefront}
         backgroundColor={theme.surface}
-        surfaceLayers={theme.surfaceTexture}
+        photo={storefront.pagePhotoUrl ? { url: storefront.pagePhotoUrl, tint: theme.surface } : null}
         font={productPage.font}
         ink={theme.ink}
         preview={preview}
@@ -251,7 +246,6 @@ export function CheckoutView({
         rootAttributes={{
           "data-checkout-page": mode,
           "data-checkout-layout": checkoutPage.layout,
-          "data-checkout-texture": checkoutPage.texture ?? "none",
           "data-page-background": checkoutPage.backgroundColor ?? productPage.backgroundColor ?? "storefront",
           "data-page-ink": theme.ink,
         }}

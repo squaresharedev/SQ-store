@@ -197,5 +197,9 @@
       "byWeekday": "Vues de la commande par jour de la semaine",
       "byStorefront": "Vues de la commande par vitrine"
     }
+  },
+  "export": {
+    "button": "Télécharger le rapport",
+    "lockedTitle": "Les rapports de statistiques sont inclus avec {plan}."
   }
 }

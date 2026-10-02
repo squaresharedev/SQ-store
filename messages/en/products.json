@@ -195,7 +195,9 @@
     "importing": "Importing…",
     "importedLabel": "Imported",
     "run": "{count, plural, one {Import {count} product} other {Import {count} products}}",
-    "clear": "Clear"
+    "clear": "Clear",
+    "planRoom": "{max, plural, one {Your plan has room for # more product} other {Your plan has room for # more products}}",
+    "droppedByPlan": "{count, plural, one {# row will not be imported: your plan has room for {max} more.} other {# rows will not be imported: your plan has room for {max} more.}}"
   },
   "form": {
     "sections": {

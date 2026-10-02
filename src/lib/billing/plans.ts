@@ -2,7 +2,7 @@
 //
 // Prices, the per-sale platform fee, the limits each plan lifts, and the
 // Stripe price each paid plan is billed through. Changing a number here
-// changes it everywhere: the pricing modal, the fee a sale is charged, the
+// changes it everywhere: the plans page, the fee a sale is charged, the
 // limits the create actions (and their database mirror) enforce.
 //
 // IMPORT-FREE ON PURPOSE. Scripts (the seed data) and the Playwright helpers
@@ -19,7 +19,7 @@
 // MONEY IS INTEGER CENTS, FEES ARE INTEGER BASIS POINTS (100 bps = 1%), so no
 // float ever touches an amount. See fees.ts for the arithmetic.
 
-/** Every plan, cheapest first. The order is the order the pricing modal shows. */
+/** Every plan, cheapest first. The order is the order the plans page shows. */
 export const PLAN_IDS = ["free", "starter", "pro"] as const;
 export type PlanId = (typeof PLAN_IDS)[number];
 
@@ -50,16 +50,35 @@ export const PAST_DUE_GRACE_DAYS = 7;
  */
 export const RENEWAL_SLACK_HOURS = 48;
 
-/** The things a plan caps. Each is enforced where it is created (limits.ts). */
-export const PLAN_LIMIT_KEYS = ["storefronts", "teamSeats"] as const;
+/** The things a plan caps. Each is enforced where it is created (limits.ts),
+ *  and again by the database (public.plan_limit mirrors these numbers). */
+export const PLAN_LIMIT_KEYS = ["storefronts", "teamSeats", "products"] as const;
 export type PlanLimitKey = (typeof PLAN_LIMIT_KEYS)[number];
 
 /**
  * A plan's caps. `null` = unlimited. `teamSeats` counts everyone with access
  * to the store, the owner included, and pending invites too (an invite is a
- * seat promised).
+ * seat promised). `products` counts every product the store holds, whatever
+ * its status (a draft takes a place like a live one).
  */
 export type PlanLimits = Record<PlanLimitKey, number | null>;
+
+/**
+ * Features a plan switches on. A paid plan only ever ADDS to Free: nothing
+ * here is ever taken away from it.
+ *
+ *   ordersExport     orders as a CSV file for bookkeeping, on every plan
+ *                    (GET /api/orders/export checks this flag)
+ *   earlyAccess      new features switched on for the account before
+ *                    everyone else (an operational promise, not a code gate)
+ *   analyticsExport  the analytics page's figures for the chosen range as a
+ *                    CSV report (components/analytics/AnalyticsExportButton)
+ *   prioritySupport  support answers first, within one business day (an
+ *                    operational promise: whoever staffs support keeps it)
+ */
+export const PLAN_PERK_KEYS = ["ordersExport", "earlyAccess", "analyticsExport", "prioritySupport"] as const;
+export type PlanPerkKey = (typeof PLAN_PERK_KEYS)[number];
+export type PlanPerks = Record<PlanPerkKey, boolean>;
 
 export type PlanDefinition = {
   id: PlanId;
@@ -75,7 +94,8 @@ export type PlanDefinition = {
    */
   lookupKey: Record<BillingInterval, string> | null;
   limits: PlanLimits;
-  /** The plan the modal badges as recommended when it has no sales to go on. */
+  perks: PlanPerks;
+  /** The one plan the plans page and the upsell point at ("Best value"). */
   recommended: boolean;
 };
 
@@ -87,7 +107,8 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     feeBps: 500,
     priceCents: { month: 0, year: 0 },
     lookupKey: null,
-    limits: { storefronts: 3, teamSeats: 2 },
+    limits: { storefronts: 3, teamSeats: 2, products: 20 },
+    perks: { ordersExport: true, earlyAccess: false, analyticsExport: false, prioritySupport: false },
     recommended: false,
   },
   starter: {
@@ -95,18 +116,33 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     feeBps: 300,
     priceCents: { month: 1500, year: 15000 },
     lookupKey: { month: "starter_month_eur_v1", year: "starter_year_eur_v1" },
-    limits: { storefronts: 10, teamSeats: 5 },
-    recommended: false,
+    limits: { storefronts: 10, teamSeats: 5, products: 60 },
+    perks: { ordersExport: true, earlyAccess: true, analyticsExport: false, prioritySupport: false },
+    // The best value: most of Pro's saving on a typical shop, at a third of
+    // the price.
+    recommended: true,
   },
   pro: {
     id: "pro",
     feeBps: 100,
     priceCents: { month: 4000, year: 40000 },
     lookupKey: { month: "pro_month_eur_v1", year: "pro_year_eur_v1" },
-    limits: { storefronts: null, teamSeats: null },
-    recommended: true,
+    limits: { storefronts: null, teamSeats: null, products: 500 },
+    perks: { ordersExport: true, earlyAccess: true, analyticsExport: true, prioritySupport: true },
+    recommended: false,
   },
 };
+
+/** The plan the plans page and the upsell recommend ("Best value"). */
+export const RECOMMENDED_PLAN: PlanId = PLAN_IDS.find((plan) => PLANS[plan].recommended) ?? DEFAULT_PLAN;
+
+/**
+ * The next plan up from `plan`, the one an upsell offers; null on the top plan.
+ */
+export function nextPlanUp(plan: PlanId): PaidPlanId | null {
+  const next = PLAN_IDS[PLAN_IDS.indexOf(plan) + 1];
+  return next && next !== "free" ? next : null;
+}
 
 /** Narrow an untrusted value (a form field, a URL param, a DB column) to a plan. */
 export function parsePlanId(value: unknown): PlanId | null {

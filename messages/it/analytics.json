@@ -197,5 +197,9 @@
       "byWeekday": "Visualizzazioni checkout per giorno della settimana",
       "byStorefront": "Visualizzazioni checkout per vetrina"
     }
+  },
+  "export": {
+    "button": "Scarica il report",
+    "lockedTitle": "I report delle statistiche sono inclusi in {plan}."
   }
 }

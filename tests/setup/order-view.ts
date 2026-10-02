@@ -16,6 +16,7 @@ export function orderView(overrides: Partial<OrderView> = {}): OrderView {
       status: "shipped",
       shippedAt: "2026-08-02T10:00:00.000Z",
       trackingNumber: null,
+      carrier: null,
     },
     amountCents: 2500,
     platformFeeCents: 250,

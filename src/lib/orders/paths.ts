@@ -14,6 +14,9 @@ export const ORDERS_VIEW_PARAM = "view";
 /** `?order=<id>` opens that order's detail panel over the list. */
 export const ORDER_DETAIL_PARAM = "order";
 
+/** The orders CSV export (lib/orders/csv.ts), a paid-plan perk. */
+export const ORDERS_EXPORT_PATH = "/api/orders/export";
+
 /** One order, opened: the notification, the seller's email and the overview's
  *  Recent orders rows all land here. */
 export function orderDetailPath(id: string): string {

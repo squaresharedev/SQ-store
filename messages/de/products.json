@@ -195,7 +195,9 @@
     "importing": "Wird importiert…",
     "importedLabel": "Importiert",
     "run": "{count, plural, one {{count} Produkt importieren} other {{count} Produkte importieren}}",
-    "clear": "Zurücksetzen"
+    "clear": "Zurücksetzen",
+    "planRoom": "{max, plural, one {Dein Tarif hat noch Platz für # weiteres Produkt} other {Dein Tarif hat noch Platz für # weitere Produkte}}",
+    "droppedByPlan": "{count, plural, one {# Zeile wird nicht importiert: Dein Tarif hat noch Platz für {max} weitere.} other {# Zeilen werden nicht importiert: Dein Tarif hat noch Platz für {max} weitere.}}"
   },
   "form": {
     "sections": {

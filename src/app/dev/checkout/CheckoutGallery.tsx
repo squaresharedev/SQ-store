@@ -99,6 +99,7 @@ export function CheckoutGallery({
   scroll,
   buyer,
   initialCheckoutPage,
+  initialPhotoUrls,
 }: {
   width: number;
   digital: boolean;
@@ -109,9 +110,12 @@ export function CheckoutGallery({
   /** Draw the thank-you page in the buyer's mode. */
   buyer: boolean;
   initialCheckoutPage: CheckoutPageConfig;
+  /** Display URLs by object key, for a design that starts with a photo. */
+  initialPhotoUrls: Record<string, string>;
 }) {
   const [checkoutPage, setCheckoutPage] = useState<CheckoutPageConfig>(initialCheckoutPage);
   const [playKey, setPlayKey] = useState(0);
+  const [pagePhotoUrls, setPagePhotoUrls] = useState(initialPhotoUrls);
   const storefront: CheckoutStorefront = {
     id: "00000000-0000-4000-8000-000000000000",
     name: "Clay House",
@@ -123,6 +127,7 @@ export function CheckoutGallery({
     seller: SELLER,
     backgroundImageUrl: null,
     customFontUrl: null,
+    pagePhotoUrl: checkoutPage.backgroundImage ? (pagePhotoUrls[checkoutPage.backgroundImage.key] ?? null) : null,
   };
   const item = product(digital);
 
@@ -134,7 +139,8 @@ export function CheckoutGallery({
           onCheckoutPageChange={setCheckoutPage}
           productPage={DEFAULT_PRODUCT_PAGE_CONFIG}
           theme={THEME}
-          live={false}
+          pagePhotoUrls={pagePhotoUrls}
+          onPagePhotoUrl={(key, url) => setPagePhotoUrls((current) => ({ ...current, [key]: url }))}
           summoned={null}
           onPlayCelebration={() => setPlayKey((key) => key + 1)}
         />
@@ -150,7 +156,7 @@ export function CheckoutGallery({
         {/* Editable in place exactly as on the artboard. */}
         <CheckoutEditProvider checkoutPage={checkoutPage} onChange={setCheckoutPage}>
           {view === "checkout" ? (
-            <CheckoutView page={{ storefront, product: item }} mode="preview" unwired initialQuantity={quantity} />
+            <CheckoutView page={{ storefront, product: item }} mode="preview" initialQuantity={quantity} />
           ) : (
             <OrderStatusView
               key={playKey}

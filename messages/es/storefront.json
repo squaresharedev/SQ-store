@@ -145,8 +145,9 @@
       "checkoutGift": "Mensajes de regalo",
       "thankYouMessage": "Mensaje de agradecimiento",
       "thankYouCelebration": "Celebración de agradecimiento",
-      "checkoutTexture": "Textura del proceso de pago",
-      "checkoutPayButton": "Botón de pago"
+      "checkoutPayButton": "Botón de pago",
+      "productPagePhoto": "Foto de la página de producto",
+      "checkoutPhoto": "Foto del pago y del agradecimiento"
     }
   },
   "editorSearch": {
@@ -790,6 +791,11 @@
       "nothingSet": "Nada configurado todavía. Hasta que añadas tus datos de empresa, los compradores solo verán la línea «Vendido por» bajo el título.",
       "editSettings": "Editar en Configuración",
       "addDetails": "Añade tus datos de empresa"
+    },
+    "groups": {
+      "look": "Aspecto",
+      "style": "Estilo",
+      "besidePrice": "Junto al precio"
     }
   },
   "productBlock": {
@@ -1154,10 +1160,6 @@
         "speaker": {
           "title": "Altavoz portátil",
           "description": "Resistente al agua, con 12 horas de reproducción por carga."
-        },
-        "succulent": {
-          "title": "Suculenta de escritorio",
-          "description": "Una pequeña haworthia en maceta de cerámica. Necesita agua más o menos una vez al mes."
         }
       }
     }
@@ -1321,7 +1323,6 @@
     }
   },
   "checkoutPage": {
-    "unwired": "Los compradores acceden al proceso de pago cuando conectas Stripe. Ya puedes diseñarlo.",
     "charsLeft": "{count, plural, one {# carácter restante} other {# caracteres restantes}}",
     "layout": {
       "title": "Diseño",
@@ -1336,16 +1337,7 @@
       "button": "El botón de pago coincide con el botón de compra de tu página de producto.",
       "styleButton": "Personalizar el botón",
       "payButton": "Botón de pago",
-      "payButtonInfoLabel": "Sobre el botón de pago",
-      "texture": {
-        "label": "Textura",
-        "none": "Lisa",
-        "paper": "Papel",
-        "dots": "Puntos",
-        "grid": "Cuadrícula",
-        "lines": "Líneas",
-        "linen": "Lino"
-      }
+      "payButtonInfoLabel": "Sobre el botón de pago"
     },
     "message": {
       "title": "Palabras",
@@ -1365,14 +1357,15 @@
       "message": "Mensaje",
       "messagePlaceholder": "Qué ocurre ahora, con tus propias palabras",
       "celebrate": {
-        "label": "Celebración",
         "confetti": "Confeti",
-        "rays": "Luz",
-        "none": "Ninguna",
         "play": "Reproducir"
       }
-    },
-    "unwiredBadge": "Aún no está activo",
-    "unwiredInfoLabel": "Cuándo pueden pagar los compradores"
+    }
+  },
+  "pagePhoto": {
+    "label": "Foto",
+    "infoLabel": "Cómo se usa la foto",
+    "info": "Se muestra detrás de la página y se tiñe con el color de la página, para que el texto siga siendo legible. Cambia el color para aclarar u oscurecer la foto.",
+    "remove": "Quitar foto"
   }
 }

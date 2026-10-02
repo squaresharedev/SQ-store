@@ -22,6 +22,7 @@ import {
 } from "@/components/search/SearchBar";
 import { useIsMacPlatform } from "@/lib/hooks/useIsMacPlatform";
 import { TYPING_DEBOUNCE_MS } from "@/lib/typing-debounce";
+import { entitiesLead } from "@/lib/search/lead";
 import { searchLocalRegistry } from "@/lib/search/registry";
 import {
   buildRecentGroup,
@@ -210,7 +211,11 @@ export function SearchOverlay({
     const live = wantsRemote ? remoteGroups : [];
     const liveTypes = new Set(live.map((group) => group.type));
     const fillIn = snapshotGroups.filter((group) => !liveTypes.has(group.type));
-    return [...localGroups, ...fillIn, ...live];
+    // A pasted email or order number is someone's order, never a page: their
+    // things lead and the registry follows (see lib/search/lead.ts).
+    return entitiesLead(trimmed)
+      ? [...fillIn, ...live, ...localGroups]
+      : [...localGroups, ...fillIn, ...live];
   }, [trimmed, localGroups, snapshotGroups, remoteGroups, wantsRemote, snapshot, t]);
   const flat = React.useMemo(
     () => groups.flatMap((group) => group.results),

@@ -28,13 +28,15 @@
     "goToProducts": "Zu den Produkten",
     "toShipTitle": "Nichts zu versenden",
     "toShipHint": "Du bist auf dem neuesten Stand. Bezahlte Bestellungen, die noch nicht versendet wurden, erscheinen hier, älteste zuerst.",
-    "seeAllOrders": "Alle Bestellungen anzeigen"
+    "seeAllOrders": "Alle Bestellungen anzeigen",
+    "hintOpen": "Wenn jemand in deinem Shop kauft, erscheint die Bestellung hier und du wirst sofort benachrichtigt."
   },
   "list": {
     "updating": "Wird aktualisiert…",
     "summary": "{total, plural, one {{total} Bestellung} other {{total} Bestellungen}} · Seite {page} von {totalPages}",
     "detailDialog": "Bestelldetails",
-    "closeDetail": "Bestelldetails schließen"
+    "closeDetail": "Bestelldetails schließen",
+    "withdrawn": "Widerrufen"
   },
   "table": {
     "product": "Produkt",
@@ -117,6 +119,7 @@
     "shipping": "Versand",
     "shippedOn": "Versandt am {date}",
     "trackingNumber": "Tracking-Nummer",
+    "trackingCarrier": "Tracking-Nummer ({carrier})",
     "copyTracking": {
       "copy": "Tracking-Nummer kopieren",
       "copied": "Tracking-Nummer kopiert",
@@ -128,7 +131,16 @@
       "refunded": "Diese Bestellung wurde erstattet, daher ist nichts zu versenden.",
       "disputed": "Diese Zahlung wird angefochten. Kläre die Zahlungsanfechtung, bevor du versendest."
     },
-    "platformFeeRate": "Plattformgebühr ({rate})"
+    "platformFeeRate": "Plattformgebühr ({rate})",
+    "orderNumberLine": "Bestellung {number}",
+    "copyOrderNumber": {
+      "copy": "Bestellnummer kopieren",
+      "copied": "Bestellnummer kopiert",
+      "failed": "Bestellnummer konnte nicht kopiert werden. Wähle sie aus und kopiere sie manuell."
+    },
+    "emailBuyer": "Dem Käufer eine E-Mail schreiben",
+    "mailSubject": "Deine Bestellung {number}",
+    "withdrawnShipWarning": "Der Käufer ist von diesem Kauf zurückgetreten. Versende nur, wenn du das mit ihm vereinbart hast."
   },
   "actions": {
     "refundNeedsStripe": "Rückerstattungen erfordern eine verbundene Stripe-Verbindung.",
@@ -139,7 +151,8 @@
     "disputeInStripe": "Zahlungsanfechtungen werden in deinem Stripe-Dashboard bearbeitet, sobald Stripe verbunden ist.",
     "disputeConfirm": "Zahlungsanfechtung für diese Bestellung öffnen?",
     "handleDispute": "Zahlungsanfechtung bearbeiten",
-    "none": "Für diese Bestellung sind keine Aktionen verfügbar."
+    "none": "Für diese Bestellung sind keine Aktionen verfügbar.",
+    "refundManual": "Erstattungen sind über Square Share noch nicht möglich. Um diese Bestellung zu erstatten, zahle dem Käufer das Geld selbst zurück und teile es ihm mit."
   },
   "skeleton": {
     "loading": "Bestellungen werden geladen"
@@ -163,6 +176,9 @@
     "markShipped": "Als versandt markieren",
     "trackingLabel": "Tracking-Nummer (optional)",
     "trackingPlaceholder": "z. B. RR123456789IE",
+    "carrierLabel": "Versanddienst (optional)",
+    "carrierOther": "Anderer oder nicht aufgeführt",
+    "carrierHint": "Mit Tracking-Nummer und Versanddienst erhält der Käufer einen Link zur Sendungsverfolgung.",
     "tellsBuyer": "Wir benachrichtigen den Käufer per E-Mail, dass das Paket unterwegs ist, mit der Tracking-Nummer, wenn du eine angibst.",
     "noBuyerEmail": "Diese Bestellung hat keine Käufer-E-Mail, daher wird der Käufer nicht benachrichtigt.",
     "confirm": "Als versandt markieren",
@@ -172,7 +188,10 @@
     "editTracking": "Tracking-Nummer ändern",
     "saveTracking": "Tracking-Nummer speichern",
     "trackingSaved": "Tracking-Nummer gespeichert. Wir haben sie dem Käufer gesendet.",
-    "trackingSavedNoEmail": "Tracking-Nummer gespeichert."
+    "trackingSavedNoEmail": "Tracking-Nummer gespeichert.",
+    "mailOff": "E-Mail ist noch nicht eingeschaltet, daher wird der Käufer nicht benachrichtigt. Gib ihm selbst Bescheid.",
+    "next": "Nächste Bestellung zum Versenden",
+    "caughtUp": "Das war die letzte. Du bist auf dem neuesten Stand."
   },
   "email": {
     "fromName": "{store} via Square Share",
@@ -190,7 +209,8 @@
       "total": "Bestellsumme: {amount}",
       "openShip": "Sobald es unterwegs ist, markiere es hier als versandt und wir benachrichtigen den Käufer: {url}",
       "openDigital": "Bestellung ansehen: {url}",
-      "gift": "Geschenknotiz zum Beilegen: {message}"
+      "gift": "Geschenknotiz zum Beilegen: {message}",
+      "number": "Bestellnummer: {number}"
     },
     "shipped": {
       "subject": "Deine Bestellung von {store} ist unterwegs",
@@ -198,6 +218,8 @@
       "intro": "Gute Neuigkeiten: {store} hat deine Bestellung versandt.",
       "introTracking": "{store} hat deiner Bestellung eine Tracking-Nummer hinzugefügt.",
       "tracking": "Tracking-Nummer: {tracking}",
+      "trackingCarrier": "Tracking-Nummer: {tracking} ({carrier})",
+      "orderPage": "Hier kannst du deine Bestellung verfolgen: {url}",
       "shipTo": "Lieferadresse:",
       "questions": "Fragen zu deiner Bestellung? Antworte auf diese E-Mail, um {store} zu erreichen.",
       "footer": "Gesendet von Square Share im Auftrag von {store}."
@@ -239,5 +261,13 @@
       "intro": "Hier ist der Link zu deiner Bestellseite für Bestellung {number} bei {store}:",
       "ignore": "Wenn du das nicht angefordert hast, kannst du diese E-Mail ignorieren."
     }
+  },
+  "export": {
+    "button": "CSV exportieren",
+    "preparing": "Datei wird vorbereitet",
+    "failed": "Der Export wurde nicht heruntergeladen. Versuche es gleich noch einmal.",
+    "truncated": "Die Datei enthält deine {count, number} neuesten Bestellungen.",
+    "lockedTitle": "Der Bestellexport ist ab {plan} enthalten.",
+    "fileName": "bestellungen.csv"
   }
 }

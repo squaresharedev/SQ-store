@@ -195,7 +195,9 @@
     "importing": "Importando…",
     "importedLabel": "Importado",
     "run": "{count, plural, one {Importar {count} producto} many {Importar {count} productos} other {Importar {count} productos}}",
-    "clear": "Borrar"
+    "clear": "Borrar",
+    "planRoom": "{max, plural, one {Tu plan tiene espacio para # producto más} other {Tu plan tiene espacio para # productos más}}",
+    "droppedByPlan": "{count, plural, one {# fila no se importará: tu plan tiene espacio para {max} más.} other {# filas no se importarán: tu plan tiene espacio para {max} más.}}"
   },
   "form": {
     "sections": {

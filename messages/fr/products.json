@@ -195,7 +195,9 @@
     "importing": "Importation…",
     "importedLabel": "Importé",
     "run": "{count, plural, one {Importer {count} produit} many {Importer {count} produits} other {Importer {count} produits}}",
-    "clear": "Effacer"
+    "clear": "Effacer",
+    "planRoom": "{max, plural, one {Votre forfait a de la place pour # produit de plus} other {Votre forfait a de la place pour # produits de plus}}",
+    "droppedByPlan": "{count, plural, one {# ligne ne sera pas importée : votre forfait a de la place pour {max} de plus.} other {# lignes ne seront pas importées : votre forfait a de la place pour {max} de plus.}}"
   },
   "form": {
     "sections": {

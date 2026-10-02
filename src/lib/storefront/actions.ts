@@ -28,10 +28,7 @@ import {
   rateLimited,
   serverError,
   sessionExpired,
-  uploadFailed,
-  type ActionError,
   type ActionFailure,
-  type ServerErrorOperation,
 } from "@/lib/errors";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { publishBlockedError } from "@/lib/settings/seller-identity";
@@ -46,13 +43,12 @@ import {
   listStorefronts,
   type StorefrontsPage,
 } from "@/lib/storefront/queries";
-import { deleteObject, headObject } from "@/lib/r2";
 import {
-  isAllowedContentType,
-  isOwnedObjectKey,
-  maxBytesForKind,
-  type UploadKind,
-} from "@/lib/validation/product";
+  evictObject,
+  settlePagePhotos,
+  storedPagePhotoKeys,
+  verifyUpload,
+} from "@/lib/storefront/uploads";
 
 // Storefront CRUD for the ACTIVE account's store. A store owns MANY storefronts,
 // so every mutation is keyed by row id and scoped to the active account (explicit
@@ -340,6 +336,11 @@ export async function saveStorefront(
     const verified = await verifyUpload(key, "element", account.userId);
     if (!verified.ok) return failure(verified.error);
   }
+  // The hosted pages' own photo backdrops, on the same terms: only keys new to
+  // this storefront are checked, and the ones this save lets go of are evicted
+  // once the row is written.
+  const pagePhotos = await settlePagePhotos(existingRow.config, config, account.userId);
+  if (!pagePhotos.ok) return failure(pagePhotos.error);
 
   const { data: row, error } = await supabase
     .from("storefronts")
@@ -369,6 +370,7 @@ export async function saveStorefront(
   for (const key of previousElementKeys) {
     if (!nextElementKeys.has(key)) await evictObject(key);
   }
+  for (const key of pagePhotos.released) await evictObject(key);
 
   revalidatePath("/storefront");
   revalidatePath(`/storefront/${id}`);
@@ -421,80 +423,6 @@ function storedElementKeys(config: unknown): Set<string> {
 
 /** How many NEW element uploads one save may introduce. See the call site. */
 const MAX_NEW_ELEMENT_KEYS_PER_SAVE = 10;
-
-/** Best-effort R2 cleanup: never fails the parent operation. */
-async function evictObject(key: string): Promise<void> {
-  await deleteObject(key).catch((error) =>
-    console.warn("[storefront] failed to evict object", key, error),
-  );
-}
-
-/** Where each verifiable upload's copy lives (Errors.storefront.upload.*) and
- *  which operation a failed check names. Keeps {@link verifyUpload} one
- *  function rather than three copies that drift. */
-const UPLOAD_COPY = {
-  image: { copy: "backgroundImage", verify: "verifyBackgroundImage" },
-  font: { copy: "font", verify: "verifyFont" },
-  element: { copy: "element", verify: "verifyImage" },
-} as const satisfies Partial<
-  Record<UploadKind, { copy: string; verify: ServerErrorOperation }>
->;
-
-/**
- * Post-upload boundary for a NEW object key on a config, mirroring the product
- * image rules: the key must be one this user uploaded, and the stored object's
- * REAL size and type are checked via HEAD. Anything oversized or of the wrong
- * type is evicted and never linked to a config.
- */
-async function verifyUpload(
-  key: string,
-  kind: keyof typeof UPLOAD_COPY,
-  uploaderId: string,
-): Promise<{ ok: true } | { ok: false; error: ActionError }> {
-  const { copy, verify } = UPLOAD_COPY[kind];
-  const missingFix = msg(`Errors.storefront.upload.${copy}.missingFix`);
-  if (!isOwnedObjectKey(key, kind, uploaderId)) {
-    return {
-      ok: false,
-      error: invalidInput(msg(`Errors.storefront.upload.${copy}.notOwned`), missingFix),
-    };
-  }
-
-  let meta;
-  try {
-    meta = await headObject(key);
-  } catch (error) {
-    console.error(`[storefront] ${kind} verification failed`, error);
-    return { ok: false, error: serverError(verify) };
-  }
-  if (!meta) {
-    return {
-      ok: false,
-      error: uploadFailed(msg(`Errors.storefront.upload.${copy}.unfinished`), missingFix),
-    };
-  }
-  const tooBig =
-    !Number.isFinite(meta.size) ||
-    meta.size <= 0 ||
-    meta.size > maxBytesForKind(kind);
-  const wrongType = !isAllowedContentType(kind, meta.contentType);
-  if (tooBig || wrongType) {
-    await evictObject(key);
-    return {
-      ok: false,
-      error: tooBig
-        ? uploadFailed(
-            msg(`Errors.storefront.upload.${copy}.tooLarge`),
-            msg(`Errors.storefront.upload.${copy}.tooLargeFix`),
-          )
-        : uploadFailed(
-            msg("Errors.upload.typeNotSupported"),
-            msg(`Errors.storefront.upload.${copy}.wrongTypeFix`),
-          ),
-    };
-  }
-  return { ok: true };
-}
 
 export type UpdateEmbedSettingsResult = { ok: true } | ActionFailure;
 
@@ -617,6 +545,7 @@ export async function deleteStorefront(
   const fontKey = storedFontKey(deleted.config);
   if (fontKey) await evictObject(fontKey);
   for (const key of storedElementKeys(deleted.config)) await evictObject(key);
+  for (const key of storedPagePhotoKeys(deleted.config)) await evictObject(key);
 
   revalidatePath("/storefront");
   return { ok: true };

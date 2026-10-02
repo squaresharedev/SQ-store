@@ -30,6 +30,9 @@
     },
     "security": {
       "title": "Beveiliging"
+    },
+    "billing": {
+      "title": "Abonnement en facturering"
     }
   },
   "loading": "Instellingen laden…",
@@ -172,7 +175,7 @@
     "prefs": {
       "sales": {
         "label": "Verkopen",
-        "blurb": "Mail me elke keer dat er iets wordt verkocht. Het goede soort inboxlawaai."
+        "blurb": "Mail me als er iets wordt verkocht, met wat je moet inpakken en waar je het naartoe stuurt."
       },
       "productUpdates": {
         "label": "Productupdates",
@@ -185,7 +188,8 @@
     },
     "success": {
       "notificationsSaved": "Voorkeuren opgeslagen."
-    }
+    },
+    "emailOff": "E-mail staat nog niet aan voor Square Share, dus hieronder wordt niets verstuurd. Nieuwe bestellingen verschijnen nog wel onder Bestellingen en in je meldingen."
   },
   "legal": {
     "cardTitle": "Verkopersovereenkomst, voorwaarden en privacy",
@@ -409,7 +413,8 @@
       "removeNamed": "Bestemming {area} verwijderen",
       "removeNumbered": "Bestemming {number} verwijderen",
       "add": "Bestemming toevoegen",
-      "limitReached": "{max, plural, one {Dat is de enige # bestemming. Verwijder er een om een andere toe te voegen.} other {Dat zijn alle # bestemmingen. Verwijder er een om een andere toe te voegen.}}"
+      "limitReached": "{max, plural, one {Dat is de enige # bestemming. Verwijder er een om een andere toe te voegen.} other {Dat zijn alle # bestemmingen. Verwijder er een om een andere toe te voegen.}}",
+      "needsRate": "De kassa kan deze rij pas gebruiken als die zowel een tarief als een land heeft. Kopers zien hem nog wel op de productpagina."
     },
     "rates": {
       "title": "Verzendtarieven",

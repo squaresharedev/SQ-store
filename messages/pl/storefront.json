@@ -145,8 +145,9 @@
       "checkoutGift": "Wiadomości na prezent",
       "thankYouMessage": "Wiadomość z podziękowaniem",
       "thankYouCelebration": "Celebracja podziękowania",
-      "checkoutTexture": "Tekstura kasy",
-      "checkoutPayButton": "Przycisk płatności"
+      "checkoutPayButton": "Przycisk płatności",
+      "productPagePhoto": "Zdjęcie strony produktu",
+      "checkoutPhoto": "Zdjęcie kasy i strony z podziękowaniem"
     }
   },
   "editorSearch": {
@@ -790,6 +791,11 @@
       "nothingSet": "Nic jeszcze nie ustawiono. Dopóki nie dodasz danych firmy, kupujący widzą pod tytułem tylko linię „Sprzedawca:”.",
       "editSettings": "Edytuj w Ustawieniach",
       "addDetails": "Dodaj dane firmy"
+    },
+    "groups": {
+      "look": "Wygląd",
+      "style": "Styl",
+      "besidePrice": "Przy cenie"
     }
   },
   "productBlock": {
@@ -1154,10 +1160,6 @@
         "speaker": {
           "title": "Głośnik przenośny",
           "description": "Wodoodporny, do 12 godzin odtwarzania na jednym ładowaniu."
-        },
-        "succulent": {
-          "title": "Sukulent na biurko",
-          "description": "Mała haworsja w ceramicznej doniczce. Podlewaj mniej więcej raz w miesiącu."
         }
       }
     }
@@ -1321,7 +1323,6 @@
     }
   },
   "checkoutPage": {
-    "unwired": "Kupujący trafiają do kasy po połączeniu ze Stripe. Możesz teraz projektować jej wygląd.",
     "charsLeft": "{count, plural, one {Pozostał # znak} few {Pozostały # znaki} many {Pozostało # znaków} other {Pozostało # znaku}}",
     "layout": {
       "title": "Układ",
@@ -1336,16 +1337,7 @@
       "button": "Przycisk płatności naśladuje przycisk zakupu ze strony produktu.",
       "styleButton": "Ostyluj przycisk",
       "payButton": "Przycisk płatności",
-      "payButtonInfoLabel": "O przycisku płatności",
-      "texture": {
-        "label": "Tekstura",
-        "none": "Gładka",
-        "paper": "Papier",
-        "dots": "Kropki",
-        "grid": "Kratka",
-        "lines": "Linie",
-        "linen": "Len"
-      }
+      "payButtonInfoLabel": "O przycisku płatności"
     },
     "message": {
       "title": "Tekst",
@@ -1365,14 +1357,15 @@
       "message": "Wiadomość",
       "messagePlaceholder": "Co dalej, własnymi słowami",
       "celebrate": {
-        "label": "Celebracja",
         "confetti": "Konfetti",
-        "rays": "Światło",
-        "none": "Brak",
         "play": "Odtwórz"
       }
-    },
-    "unwiredBadge": "Jeszcze nieaktywna",
-    "unwiredInfoLabel": "Kiedy kupujący trafią do kasy"
+    }
+  },
+  "pagePhoto": {
+    "label": "Zdjęcie",
+    "infoLabel": "Jak używane jest zdjęcie",
+    "info": "Wyświetlane za stroną i przyciemnione kolorem strony, aby tekst pozostał czytelny. Zmień kolor, by rozjaśnić lub przyciemnić zdjęcie.",
+    "remove": "Usuń zdjęcie"
   }
 }

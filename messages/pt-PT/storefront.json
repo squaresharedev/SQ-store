@@ -145,8 +145,9 @@
       "checkoutGift": "Mensagens de oferta",
       "thankYouMessage": "Mensagem de agradecimento",
       "thankYouCelebration": "Celebração de agradecimento",
-      "checkoutTexture": "Textura do pagamento",
-      "checkoutPayButton": "Botão de pagamento"
+      "checkoutPayButton": "Botão de pagamento",
+      "productPagePhoto": "Foto da página de produto",
+      "checkoutPhoto": "Foto do pagamento e do agradecimento"
     }
   },
   "editorSearch": {
@@ -790,6 +791,11 @@
       "nothingSet": "Ainda nada definido. Até adicionar os seus dados de empresa, os compradores só veem a linha «Vendido por» debaixo do título.",
       "editSettings": "Editar em Definições",
       "addDetails": "Adicione os seus dados de empresa"
+    },
+    "groups": {
+      "look": "Aspeto",
+      "style": "Estilo",
+      "besidePrice": "Junto ao preço"
     }
   },
   "productBlock": {
@@ -1154,10 +1160,6 @@
         "speaker": {
           "title": "Coluna portátil",
           "description": "À prova de água, com 12 horas de reprodução por carga."
-        },
-        "succulent": {
-          "title": "Suculenta de secretária",
-          "description": "Uma pequena haworthia num vaso de cerâmica. Precisa de água mais ou menos uma vez por mês."
         }
       }
     }
@@ -1321,7 +1323,6 @@
     }
   },
   "checkoutPage": {
-    "unwired": "Os compradores chegam ao pagamento quando ligar o Stripe. Pode desenhá-lo agora.",
     "charsLeft": "{count, plural, one {# caráter restante} other {# carateres restantes}}",
     "layout": {
       "title": "Esquema",
@@ -1336,16 +1337,7 @@
       "button": "O botão de pagamento corresponde ao botão de compra da sua página de produto.",
       "styleButton": "Personalizar o botão",
       "payButton": "Botão de pagamento",
-      "payButtonInfoLabel": "Sobre o botão de pagamento",
-      "texture": {
-        "label": "Textura",
-        "none": "Lisa",
-        "paper": "Papel",
-        "dots": "Pontos",
-        "grid": "Grelha",
-        "lines": "Linhas",
-        "linen": "Linho"
-      }
+      "payButtonInfoLabel": "Sobre o botão de pagamento"
     },
     "message": {
       "title": "Texto",
@@ -1365,14 +1357,15 @@
       "message": "Mensagem",
       "messagePlaceholder": "O que acontece a seguir, com as suas palavras",
       "celebrate": {
-        "label": "Celebração",
         "confetti": "Confetes",
-        "rays": "Luz",
-        "none": "Nenhuma",
         "play": "Reproduzir"
       }
-    },
-    "unwiredBadge": "Ainda não está ativo",
-    "unwiredInfoLabel": "Quando os compradores chegam ao pagamento"
+    }
+  },
+  "pagePhoto": {
+    "label": "Foto",
+    "infoLabel": "Como a foto é usada",
+    "info": "Mostrada atrás da página e tingida com a cor da página, para o texto continuar legível. Mude a cor para tornar a foto mais clara ou mais escura.",
+    "remove": "Remover foto"
   }
 }

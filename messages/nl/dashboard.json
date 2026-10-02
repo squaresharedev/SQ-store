@@ -28,7 +28,8 @@
   },
   "shell": {
     "accountFallback": "Account",
-    "anotherStore": "een andere winkel"
+    "anotherStore": "een andere winkel",
+    "skipToContent": "Ga naar de hoofdinhoud"
   },
   "overview": {
     "title": "Overzicht",
@@ -120,6 +121,11 @@
     "toShip": {
       "description": "Kopers wachten hierop. Pak ze in en markeer ze dan als verzonden.",
       "action": "Bestellingen verzenden"
+    },
+    "checkoutRates": {
+      "label": "Stel je bezorgprijzen in",
+      "description": "Kopers kunnen een fysiek product pas afrekenen als een bestemming zowel een tarief als een land heeft.",
+      "action": "Prijzen instellen"
     }
   }
 }

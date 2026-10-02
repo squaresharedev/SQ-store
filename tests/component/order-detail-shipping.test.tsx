@@ -32,7 +32,7 @@ const waiting = orderView({
   quantity: 2,
   selection: [{ label: "Size", value: "Large" }],
   shipTo: ADDRESS,
-  fulfilment: { status: "unfulfilled", shippedAt: null, trackingNumber: null },
+  fulfilment: { status: "unfulfilled", shippedAt: null, trackingNumber: null, carrier: null },
 });
 
 function renderDetail(order: OrderView, options: { canFulfil?: boolean; onOrderChange?: (o: OrderView) => void } = {}) {
@@ -78,7 +78,7 @@ describe("what to pack, and where it goes", () => {
   });
 
   it("has nothing to pack or address for a download", () => {
-    renderDetail(orderView({ fulfilment: { status: "not_required", shippedAt: null, trackingNumber: null } }));
+    renderDetail(orderView({ fulfilment: { status: "not_required", shippedAt: null, trackingNumber: null, carrier: null } }));
     expect(screen.queryByText("What to pack")).toBeNull();
     expect(screen.queryByText("Ship to")).toBeNull();
     expect(screen.getByText("Nothing to ship for this order.")).toBeInTheDocument();
@@ -108,7 +108,7 @@ describe("marking it shipped", () => {
     const onOrderChange = vi.fn();
     const after = orderView({
       ...waiting,
-      fulfilment: { status: "shipped", shippedAt: "2026-09-27T10:00:00Z", trackingNumber: "RR123456789IE" },
+      fulfilment: { status: "shipped", shippedAt: "2026-09-27T10:00:00Z", trackingNumber: "RR123456789IE", carrier: null },
     });
     markOrderShippedMock.mockResolvedValue({ ok: true, order: after, buyerEmailed: true });
     renderDetail(waiting, { onOrderChange });
@@ -121,10 +121,54 @@ describe("marking it shipped", () => {
     await user.type(field, "RR123456789IE");
     await user.click(screen.getByRole("button", { name: "Mark shipped" }));
 
-    expect(markOrderShippedMock).toHaveBeenCalledWith(waiting.id, "RR123456789IE");
+    expect(markOrderShippedMock).toHaveBeenCalledWith(waiting.id, "RR123456789IE", null);
     await playOut();
     expect(onOrderChange).toHaveBeenCalledWith(after);
     expect(await screen.findByText("Marked as shipped. We've emailed the buyer.")).toBeInTheDocument();
+  });
+
+  it("takes the carrier from a list, once there is a number for it to describe", async () => {
+    const user = userEvent.setup();
+    markOrderShippedMock.mockResolvedValue({ ok: true, order: waiting, buyerEmailed: true });
+    renderDetail(waiting);
+
+    await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
+    const carrier = screen.getByRole("combobox", { name: "Carrier (optional)" });
+    // A carrier says where a NUMBER is followed, so it waits for one.
+    expect(carrier).toBeDisabled();
+    expect(carrier).toHaveTextContent("Other or not listed");
+
+    await user.type(screen.getByLabelText("Tracking number (optional)"), "RR123456789IE");
+    expect(carrier).toBeEnabled();
+    await user.click(carrier);
+    // A pick, never a typed link: the list is the carriers this app can link to.
+    expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual(
+      expect.arrayContaining(["Other or not listed", "An Post", "DHL", "Royal Mail"]),
+    );
+    await user.click(screen.getByRole("option", { name: "An Post" }));
+    expect(carrier).toHaveTextContent("An Post");
+
+    await user.click(screen.getByRole("button", { name: "Mark shipped" }));
+    expect(markOrderShippedMock).toHaveBeenCalledWith(waiting.id, "RR123456789IE", "an-post");
+    await playOut();
+  });
+
+  it("sends no carrier once the number it described has been cleared", async () => {
+    const user = userEvent.setup();
+    markOrderShippedMock.mockResolvedValue({ ok: true, order: waiting, buyerEmailed: true });
+    renderDetail(waiting);
+
+    await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
+    const field = screen.getByLabelText("Tracking number (optional)");
+    await user.type(field, "RR123456789IE");
+    await user.click(screen.getByRole("combobox", { name: "Carrier (optional)" }));
+    await user.click(screen.getByRole("option", { name: "DHL" }));
+    await user.clear(field);
+    expect(screen.getByRole("combobox", { name: "Carrier (optional)" })).toHaveTextContent("Other or not listed");
+
+    await user.click(screen.getByRole("button", { name: "Mark shipped" }));
+    expect(markOrderShippedMock).toHaveBeenCalledWith(waiting.id, "", null);
+    await playOut();
   });
 
   it("does not claim the buyer was told when they were not", async () => {
@@ -143,7 +187,7 @@ describe("marking it shipped", () => {
     const onOrderChange = vi.fn();
     const after = orderView({
       ...waiting,
-      fulfilment: { status: "shipped", shippedAt: "2026-09-27T10:00:00Z", trackingNumber: null },
+      fulfilment: { status: "shipped", shippedAt: "2026-09-27T10:00:00Z", trackingNumber: null, carrier: null },
     });
     let answer!: (value: unknown) => void;
     markOrderShippedMock.mockReturnValue(new Promise((resolve) => (answer = resolve)));
@@ -217,7 +261,7 @@ describe("marking it shipped", () => {
 describe("a shipped order", () => {
   const sent = orderView({
     ...waiting,
-    fulfilment: { status: "shipped", shippedAt: "2026-09-27T10:00:00Z", trackingNumber: "RR123456789IE" },
+    fulfilment: { status: "shipped", shippedAt: "2026-09-27T10:00:00Z", trackingNumber: "RR123456789IE", carrier: null },
   });
 
   it("says when it went and how to follow it", () => {
@@ -225,6 +269,33 @@ describe("a shipped order", () => {
     expect(screen.getByText(/^Shipped /)).toBeInTheDocument();
     expect(document.querySelector("[data-order-tracking]")).toHaveTextContent("RR123456789IE");
     expect(screen.getByRole("button", { name: "Copy tracking number" })).toBeInTheDocument();
+  });
+
+  it("links the number to its carrier's own tracking page when the carrier is named", () => {
+    renderDetail({ ...sent, fulfilment: { ...sent.fulfilment, carrier: "an-post" } });
+    expect(screen.getByText("Tracking number (An Post)")).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: "RR123456789IE" });
+    expect(link).toHaveAttribute("href", "https://www.anpost.com/Post-Parcels/Track/History?item=RR123456789IE");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(screen.getByRole("button", { name: "Copy tracking number" })).toBeInTheDocument();
+  });
+
+  it("leaves the number as plain text when no carrier is named", () => {
+    renderDetail(sent);
+    expect(screen.getByText("Tracking number")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "RR123456789IE" })).toBeNull();
+  });
+
+  it("opens the change form with the carrier it already has", async () => {
+    const user = userEvent.setup();
+    const withCarrier = { ...sent, fulfilment: { ...sent.fulfilment, carrier: "dhl" as const } };
+    markOrderShippedMock.mockResolvedValue({ ok: true, order: withCarrier, buyerEmailed: false });
+    renderDetail(withCarrier);
+    await user.click(screen.getByRole("button", { name: "Change tracking number" }));
+    expect(screen.getByRole("combobox", { name: "Carrier (optional)" })).toHaveTextContent("DHL");
+    await user.click(screen.getByRole("button", { name: "Save tracking number" }));
+    expect(markOrderShippedMock).toHaveBeenCalledWith(sent.id, "RR123456789IE", "dhl");
   });
 
   it("lets the tracking number be changed, prefilled with the current one", async () => {
@@ -237,7 +308,7 @@ describe("a shipped order", () => {
     await user.clear(field);
     await user.type(field, "RR000000001IE");
     await user.click(screen.getByRole("button", { name: "Save tracking number" }));
-    expect(markOrderShippedMock).toHaveBeenCalledWith(sent.id, "RR000000001IE");
+    expect(markOrderShippedMock).toHaveBeenCalledWith(sent.id, "RR000000001IE", null);
     expect(
       await screen.findByText("Tracking number saved. We've sent it to the buyer."),
     ).toBeInTheDocument();

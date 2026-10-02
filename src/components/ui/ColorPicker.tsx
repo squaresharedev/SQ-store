@@ -168,9 +168,13 @@ export function ColorPicker({
   target,
   presets = COLOR_PRESETS,
   compact = false,
+  labelClassName = labelClass,
 }: {
   id?: string;
   label?: string;
+  /** The label's type, for a panel that sets its own ladder (the design
+   *  panel's captions); defaults to the ordinary form label. */
+  labelClassName?: string;
   value: string;
   onChange: (hex: string) => void;
   inherit?: ColorInheritOption;
@@ -519,11 +523,11 @@ export function ColorPicker({
     <div className="flex w-full flex-col gap-1.5">
       {label &&
         (id ? (
-          <label htmlFor={id} className={labelClass}>
+          <label htmlFor={id} className={labelClassName}>
             {label}
           </label>
         ) : (
-          <span className={labelClass}>{label}</span>
+          <span className={labelClassName}>{label}</span>
         ))}
 
       <div

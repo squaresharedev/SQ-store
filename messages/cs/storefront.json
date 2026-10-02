@@ -145,8 +145,9 @@
       "checkoutGift": "Dárkové vzkazy",
       "thankYouMessage": "Zpráva s poděkováním",
       "thankYouCelebration": "Oslava po nákupu",
-      "checkoutTexture": "Textura pokladny",
-      "checkoutPayButton": "Tlačítko Zaplatit"
+      "checkoutPayButton": "Tlačítko Zaplatit",
+      "productPagePhoto": "Fotka produktové stránky",
+      "checkoutPhoto": "Fotka pokladny a poděkování"
     }
   },
   "editorSearch": {
@@ -790,6 +791,11 @@
       "nothingSet": "Zatím nic. Dokud nedoplníte údaje o firmě, kupující uvidí pod názvem jen řádek „Prodává“.",
       "editSettings": "Upravit v Nastavení",
       "addDetails": "Doplnit údaje o firmě"
+    },
+    "groups": {
+      "look": "Vzhled",
+      "style": "Styl",
+      "besidePrice": "U ceny"
     }
   },
   "productBlock": {
@@ -1154,10 +1160,6 @@
         "speaker": {
           "title": "Přenosný reproduktor",
           "description": "Voděodolný, až 12 hodin přehrávání na jedno nabití."
-        },
-        "succulent": {
-          "title": "Sukulent na stůl",
-          "description": "Malá haworthie v keramickém květináči. Stačí ji zalít zhruba jednou za měsíc."
         }
       }
     }
@@ -1321,7 +1323,6 @@
     }
   },
   "checkoutPage": {
-    "unwired": "Kupující se dostanou do pokladny, jakmile propojíte Stripe. Teď ji ale můžete navrhnout.",
     "charsLeft": "{count, plural, one {# znak zbývá} few {# znaky zbývají} many {# znaků zbývá} other {# znaků zbývá}}",
     "layout": {
       "title": "Rozvržení",
@@ -1336,16 +1337,7 @@
       "button": "Tlačítko Zaplatit odpovídá tlačítku nákupu na produktové stránce.",
       "styleButton": "Upravit tlačítko",
       "payButton": "Tlačítko Zaplatit",
-      "payButtonInfoLabel": "O tlačítku Zaplatit",
-      "texture": {
-        "label": "Textura",
-        "none": "Hladká",
-        "paper": "Papír",
-        "dots": "Puntíky",
-        "grid": "Mřížka",
-        "lines": "Linky",
-        "linen": "Len"
-      }
+      "payButtonInfoLabel": "O tlačítku Zaplatit"
     },
     "message": {
       "title": "Text",
@@ -1365,14 +1357,15 @@
       "message": "Zpráva",
       "messagePlaceholder": "Co bude dál, vlastními slovy",
       "celebrate": {
-        "label": "Oslava",
         "confetti": "Konfety",
-        "rays": "Světlo",
-        "none": "Nic",
         "play": "Přehrát"
       }
-    },
-    "unwiredBadge": "Zatím není aktivní",
-    "unwiredInfoLabel": "Kdy se kupující dostanou do pokladny"
+    }
+  },
+  "pagePhoto": {
+    "label": "Fotka",
+    "infoLabel": "Jak se fotka používá",
+    "info": "Zobrazí se za stránkou a je přebarvená barvou stránky, aby text zůstal čitelný. Změnou barvy fotku zesvětlíte nebo ztmavíte.",
+    "remove": "Odebrat fotku"
   }
 }

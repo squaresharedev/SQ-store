@@ -195,6 +195,7 @@
       "shipped": "Na ceste",
       "shippedDetail": "Odoslané {date}",
       "tracking": "Číslo zásielky {number}",
+      "track": "Sledovať u dopravcu {carrier}",
       "notYet": "E-mail dostanete, keď bude odoslané.",
       "ready": "Pripravené na stiahnutie",
       "readyDetail": "Váš súbor je pripravený nižšie a odkaz je aj v e-maile."
@@ -262,6 +263,8 @@
       "region": "Kraj alebo región",
       "postalCode": "PSČ",
       "country": "Krajina",
+      "phone": "Telefón (voliteľné)",
+      "phoneHint": "Len pre kuriéra, keby vás potreboval zastihnúť pre doručenie.",
       "whyAsk": "Prečo sa pýtame"
     },
     "gift": {
@@ -309,11 +312,11 @@
     },
     "pay": "Objednávka zaväzujúca k platbe ({amount})",
     "placing": "Zadávanie objednávky...",
-    "unwired": "Pokladňa sa otvorí pre kupujúcich, keď prepojíte Stripe.",
     "errors": {
       "title": "Objednávku sa nepodarilo zadať",
       "required": "Toto pole je povinné.",
       "email": "Zadajte e-mailovú adresu vo formáte meno@priklad.sk.",
+      "phone": "Zadajte telefónne číslo číslicami, napr. +421 901 123 456.",
       "fields": "Skontrolujte zvýraznené polia.",
       "consent": "Zaškrtnite políčko a potvrďte, že chcete stiahnuť okamžite.",
       "sold_out": "Ospravedlňujeme sa, tovar práve došiel. Nič nebolo účtované.",

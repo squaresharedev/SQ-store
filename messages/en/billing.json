@@ -6,59 +6,153 @@
     },
     "starter": {
       "name": "Starter",
-      "tagline": "A lower fee for a shop that sells every week."
+      "tagline": "A lower fee and room to grow, for a shop that sells every week."
     },
     "pro": {
       "name": "Pro",
-      "tagline": "The lowest fee, for a shop that sells every day."
+      "tagline": "The lowest fee and everything we offer, for a shop that sells every day."
     }
+  },
+  "page": {
+    "metaTitle": "Plans",
+    "title": "Choose your plan",
+    "lead": "Start free and stay free for as long as you like. Upgrade when a lower fee pays for itself.",
+    "trust": {
+      "secure": "Secure checkout by Stripe",
+      "cancel": "Cancel any time",
+      "keep": "Nothing is ever taken down"
+    },
+    "intervalLabel": "Billing period",
+    "month": "Monthly",
+    "year": "Yearly",
+    "yearlySaving": "2 months free on yearly",
+    "pastDue": "The last payment for your {plan} plan did not go through. Update your card to keep it.",
+    "endsOn": "Your {plan} plan ends on {date}, and your store moves to Free then. Nothing is taken down.",
+    "ownerOnly": "Only the store owner can change its plan.",
+    "soon": "Soon",
+    "soonTitle": "Paid plans open soon. Everything on Free keeps working in the meantime.",
+    "finePrint": "Prices exclude VAT. The per-sale fee applies to sales through Square Share checkout and is charged on the item price, never on delivery. Stripe's own card processing fees come on top. Cancel any time: you keep your plan until the end of the period you paid for.",
+    "unavailable": "Plans can't be shown right now. Refresh the page in a moment."
   },
   "card": {
     "perMonth": "/ month",
     "exclVat": "excl. VAT",
     "freeForever": "Free for as long as you like",
     "billedYearly": "{amount} billed once a year, excl. VAT",
-    "feePerSale": "+ {rate} per sale",
+    "bestValue": "Best value",
+    "current": "Current plan",
+    "everythingIn": "Everything in {plan}, plus",
+    "includes": "Includes",
+    "upgrade": "Upgrade to {plan}",
+    "switch": "Switch to {plan}",
+    "switchInterval": "{interval, select, year {Switch to yearly} other {Switch to monthly}}",
+    "moveToFree": "Move to Free"
+  },
+  "features": {
+    "fee": "{rate} fee per sale",
     "storefronts": "{count, plural, one {# storefront} other {# storefronts}}",
     "storefrontsUnlimited": "Unlimited storefronts",
     "teammates": "{count, plural, =0 {Just you, no teammates} one {You and # teammate} other {You and # teammates}}",
     "teammatesUnlimited": "Unlimited teammates",
-    "everything": "Product pages, checkout, analytics: all included"
+    "core": "Product pages, checkout and analytics",
+    "ordersExport": "Export your orders to a spreadsheet (CSV)",
+    "earlyAccess": "Early access to new features",
+    "prioritySupport": "Priority support: your messages answered first",
+    "analyticsExport": "Download analytics reports (CSV)",
+    "products": "{count, plural, one {# product} other {# products}}",
+    "productsUnlimited": "Unlimited products"
   },
-  "modal": {
-    "title": "Plans",
-    "description": "Start free. Upgrade when a lower fee pays for itself.",
-    "loading": "Loading plans",
-    "intervalLabel": "Billing period",
-    "month": "Monthly",
-    "year": "Yearly",
-    "yearlySaving": "2 months free on yearly",
-    "current": "Current plan",
-    "recommended": "Recommended",
-    "cheapest": "Cheapest for you",
-    "upgrade": "Upgrade to {plan}",
-    "switch": "Switch to {plan}",
-    "switchInterval": "{interval, select, year {Switch to yearly} other {Switch to monthly}}",
-    "moveToFree": "Move to Free",
-    "soon": "Soon",
-    "soonTitle": "Paid plans open soon. Everything on Free keeps working in the meantime.",
-    "ownerOnly": "Only the store owner can change its plan.",
-    "pastDue": "The last payment for your {plan} plan did not go through. Update your card to keep it.",
-    "endsOn": "Your {plan} plan ends on {date}, and your store moves to Free then. Nothing is taken down.",
-    "finePrint": "Prices exclude VAT. The per-sale fee applies to sales through Square Share checkout and is charged on the item price, never on delivery. Stripe's own card processing fees come on top. Cancel any time: you keep your plan until the end of the period you paid for."
+  "calculator": {
+    "eyebrow": "Calculator",
+    "title": "Which plan costs you least?",
+    "lead": "Drag to your sales in a month. Each bar is the plan's price plus its fee on those sales.",
+    "salesLabel": "Sales per month",
+    "salesAria": "Your sales per month, in euros",
+    "fromYourSales": "Filled in from your last 30 days of sales.",
+    "perMonth": "a month",
+    "cheapest": "At {sales} a month in sales, {plan} costs you least.",
+    "legendPrice": "Plan price",
+    "legendFee": "Fee on your sales",
+    "cheapestTag": "Cheapest for you"
+  },
+  "compare": {
+    "eyebrow": "Compare",
+    "title": "Every plan, side by side",
+    "feature": "Feature",
+    "price": "Price",
+    "unlimited": "Unlimited",
+    "included": "Included",
+    "notIncluded": "Not included",
+    "rows": {
+      "fee": "Fee per sale",
+      "storefronts": "Storefronts",
+      "teamSeats": "Team seats, you included",
+      "ordersExport": "Orders export (CSV)",
+      "earlyAccess": "Early access to new features",
+      "prioritySupport": "Priority support",
+      "products": "Products",
+      "productPages": "Product pages",
+      "checkout": "Secure checkout",
+      "digitalDownloads": "Digital downloads, files up to {size}",
+      "stock": "Stock tracking",
+      "shipping": "Shipping profiles",
+      "embed": "Embed on your own website",
+      "designer": "Storefront designer",
+      "roles": "Team roles",
+      "analytics": "Analytics",
+      "analyticsExport": "Analytics reports (CSV)",
+      "productImport": "Product import (CSV)"
+    },
+    "groups": {
+      "selling": "Selling",
+      "store": "Your store",
+      "tools": "Tools and insights",
+      "support": "Support"
+    }
+  },
+  "faq": {
+    "eyebrow": "Questions",
+    "title": "Before you upgrade",
+    "items": {
+      "cancel": {
+        "q": "Can I cancel any time?",
+        "a": "Yes. Cancel from Settings › Plan & billing and you keep your plan until the end of the period you paid for. Then your store moves to Free."
+      },
+      "downgrade": {
+        "q": "What happens to my store if I go back to Free?",
+        "a": "Nothing is taken down. Every storefront, product and teammate stays. You just can't add more than Free allows until you remove some or upgrade again."
+      },
+      "vat": {
+        "q": "Do prices include VAT?",
+        "a": "No, prices are shown without VAT, which is added at checkout where it applies. Add your VAT ID at checkout and it appears on every invoice."
+      },
+      "fee": {
+        "q": "What is the per-sale fee charged on?",
+        "a": "On the item price of each sale made through Square Share checkout, never on delivery. Stripe's own card processing fees are separate."
+      },
+      "switch": {
+        "q": "Can I switch plans later?",
+        "a": "Any time, up or down, monthly or yearly. Stripe shows exactly what you'll pay before you confirm."
+      }
+    }
+  },
+  "upsell": {
+    "eyebrow": "Upgrade",
+    "eyebrowBestValue": "Best value",
+    "title": "Get more with {plan}",
+    "lead": "A lower fee on every sale, more room to grow, and better tools for running your shop.",
+    "feeLabel": "Your fee per sale",
+    "saving": "At your last 30 days of sales, {plan} would save you {amount} a month.",
+    "breakEven": "{plan} pays for itself once you sell more than {amount} a month.",
+    "gains": "What {plan} adds",
+    "cta": "Upgrade to {plan}, {price} a month",
+    "compare": "Compare all plans",
+    "topEyebrow": "Top plan",
+    "topTitle": "Everything in {plan} is yours"
   },
   "portal": {
     "opening": "Opening Stripe",
     "stepUp": "Confirm it's you before your billing details open."
-  },
-  "calculator": {
-    "toggle": "Which plan costs me least?",
-    "salesLabel": "Sales per month",
-    "salesAria": "Your sales per month, in euros",
-    "fromYourSales": "Filled in from your last 30 days of sales.",
-    "perMonth": "a month, fees included",
-    "cheapest": "At {sales} a month in sales, {plan} costs you least.",
-    "breakEven": "{plan} pays for itself above {amount} a month in sales."
   },
   "chip": {
     "label": "Plan: {plan}",
@@ -79,8 +173,6 @@
     "ends": "Ends on {date}. Your store moves to Free then, and nothing is taken down.",
     "pastDue": "Payment failed. Stripe will try your card again; update it to keep {plan}.",
     "feeLine": "Fee on each sale: {rate} of the item price.",
-    "changePlan": "Change plan",
-    "seePlans": "See plans",
     "memberNote": "Only the store owner can change the plan or see its invoices.",
     "usageTitle": "What you're using",
     "usageDescription": "Your plan's limits only apply to adding more. Nothing you have is ever removed.",
@@ -88,7 +180,9 @@
       "storefronts": "Storefronts: {used} of {cap}",
       "storefrontsUnlimited": "Storefronts: {used}, no limit",
       "teamSeats": "Team seats, you included: {used} of {cap}",
-      "teamSeatsUnlimited": "Team seats, you included: {used}, no limit"
+      "teamSeatsUnlimited": "Team seats, you included: {used}, no limit",
+      "products": "Products: {used} of {cap}",
+      "productsUnlimited": "Products: {used}, no limit"
     },
     "overLimit": "Over this plan's limit. Everything keeps working; remove one or upgrade to add more.",
     "invoicesTitle": "Billing & invoices",

@@ -41,6 +41,10 @@ export const getCheckoutPage = cache(
     const backgroundImageUrl =
       theme.background.kind === "image" ? await presignGetUrl(theme.background.key) : null;
     const customFontUrl = theme.customFont ? await presignGetUrl(theme.customFont.key) : null;
+    const checkoutPage = resolveCheckoutPage(config);
+    const pagePhotoUrl = checkoutPage.backgroundImage
+      ? await presignGetUrl(checkoutPage.backgroundImage.key)
+      : null;
 
     return {
       page: {
@@ -50,11 +54,12 @@ export const getCheckoutPage = cache(
           theme,
           ...(config.header ? { header: config.header } : {}),
           productPage,
-          checkoutPage: resolveCheckoutPage(config),
+          checkoutPage,
           shippingPolicy,
           seller,
           backgroundImageUrl,
           customFontUrl,
+          pagePhotoUrl,
           checkout: true,
         },
         product,

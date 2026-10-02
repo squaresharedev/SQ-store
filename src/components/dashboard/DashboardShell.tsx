@@ -11,22 +11,27 @@ import { TourOverlay } from "@/components/onboarding/TourOverlay";
 import { SearchProvider } from "@/components/search/SearchProvider";
 import { SearchMobileTrigger } from "@/components/search/SearchMobileTrigger";
 import { SellerDetailsBanner } from "@/components/settings/SellerDetailsNotice";
-import { PricingModalProvider } from "@/components/billing/PricingModalProvider";
+import { AccountPlanProvider } from "@/components/billing/plan-context";
 import { PlanStatusBanner } from "@/components/billing/PlanStatusBanner";
 import {
   getAccessibleAccounts,
   getActiveAccount,
 } from "@/lib/team/account-context";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
-import { getAssurance, getProfile, getUser } from "@/lib/auth/session";
-import { stepUpFreshUntil } from "@/lib/auth/assurance";
+import { getProfile, getUser } from "@/lib/auth/session";
 import { getAccountBilling } from "@/lib/billing/account-plan";
 import { countOrdersToShip } from "@/lib/orders/queries";
 import { ORDERS_PATH } from "@/lib/dashboard/paths";
+import { emailSendingEnabled } from "@/lib/email/send";
+import { OrderMailProvider } from "@/components/orders/OrderMailProvider";
+import { SkipLink } from "@/components/ui/SkipLink";
 
 /** Where the seller-details banner stands down for owners: the setup checklist
  *  on Overview states the same gap as a step. */
 const BANNER_HIDDEN_PATHS = ["/dashboard"] as const;
+
+/** The element "Skip to main content" moves focus to. */
+const MAIN_CONTENT_ID = "main-content";
 
 /**
  * The dashboard chrome: fixed left Sidebar + content offset by the rail width,
@@ -43,14 +48,13 @@ export async function DashboardShell({
   username: string;
   children: ReactNode;
 }) {
-  const [account, accounts, profile, user, toShipCount, assurance] = await Promise.all([
+  const [account, accounts, profile, user, toShipCount] = await Promise.all([
     getActiveAccount(),
     getAccessibleAccounts(),
     getProfile(),
     getUser(),
     // Cached per request, so the Orders page and the overview reuse it.
     countOrdersToShip(),
-    getAssurance(),
   ]);
   const t = await getTranslations("Dashboard.shell");
   const tOrders = await getTranslations("Orders");
@@ -92,8 +96,8 @@ export async function DashboardShell({
     />
   );
 
-  // The ACTIVE store's plan: the rail's chip, the profile menu's row and the
-  // plans all describe the store being worked on, which for a teammate is the
+  // The ACTIVE store's plan: the rail's chip and the profile menu's row
+  // describe the store being worked on, which for a teammate is the
   // owner's. A read failure shows no plan at all rather than a guessed one.
   const billing = account ? await getAccountBilling(account.accountId) : null;
   const plan = billing?.ok ? billing.billing.plan : null;
@@ -101,14 +105,6 @@ export async function DashboardShell({
     billing?.ok && billing.billing.status === "past_due" && billing.billing.plan !== "free"
       ? billing.billing.plan
       : null;
-  // The plans' switch and cancel buttons open billing details, which asks for
-  // a two-factor code first, as the settings forms do.
-  const stepUp = {
-    enrolled: assurance?.enrolled ?? false,
-    freshUntil: stepUpFreshUntil(assurance),
-    factors: (assurance?.factors ?? []).map(({ id, name, type }) => ({ id, name, type })),
-  };
-
   // Mobile: search + bell + profile menu ride in the Sidebar's mobile header.
   const mobileControls = (
     <div className="flex items-center gap-1">
@@ -132,10 +128,12 @@ export async function DashboardShell({
         role={account?.role ?? null}
         accountId={account?.accountId ?? null}
       >
-        {/* The plans, openable from anywhere in the shell (the rail's chip, the
-            profile menu, a plan-limit error) without leaving the page. */}
-        <PricingModalProvider plan={plan} stepUp={stepUp}>
+        {/* The store's plan, for the rail's chip and the profile menu. */}
+        <AccountPlanProvider plan={plan}>
           <div className="min-h-screen bg-background">
+            {/* First in the tab order, so it is the first thing a keyboard user
+                can reach and skip the rail with. */}
+            <SkipLink href={`#${MAIN_CONTENT_ID}`}>{t("skipToContent")}</SkipLink>
             <Sidebar topBarSlot={mobileControls} counts={navCounts} />
             <div className="md:pl-64">
               <TopBar
@@ -163,14 +161,18 @@ export async function DashboardShell({
                 </HiddenOnPaths>
               )}
               <PlanStatusBanner pastDuePlan={pastDuePlan} audience={viewingOther ? "member" : "owner"} />
-              {children}
+              {/* Where "Skip to main content" lands. A plain wrapper: each page
+                  brings its own <main>, and this only has to take focus. */}
+              <div id={MAIN_CONTENT_ID} tabIndex={-1} className="outline-none">
+                <OrderMailProvider enabled={emailSendingEnabled()}>{children}</OrderMailProvider>
+              </div>
             </div>
           </div>
           {/* The guided tour's layer. Inside SearchProvider so opening search can
               end it; rendered by every shell, so it is present on each page the
               tour walks through. */}
           <TourOverlay role={account?.role ?? null} />
-        </PricingModalProvider>
+        </AccountPlanProvider>
       </SearchProvider>
     </NotificationsProvider>
   );

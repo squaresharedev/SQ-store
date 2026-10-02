@@ -145,8 +145,9 @@
       "checkoutGift": "Cadeauberichten",
       "thankYouMessage": "Bedankbericht",
       "thankYouCelebration": "Bedankanimatie",
-      "checkoutTexture": "Textuur afrekenen",
-      "checkoutPayButton": "Betaalknop"
+      "checkoutPayButton": "Betaalknop",
+      "productPagePhoto": "Foto van de productpagina",
+      "checkoutPhoto": "Foto van afrekenen en bedankpagina"
     }
   },
   "editorSearch": {
@@ -790,6 +791,11 @@
       "nothingSet": "Nog niets ingesteld. Totdat je je bedrijfsgegevens toevoegt, zien kopers alleen de regel “Verkocht door” onder de titel.",
       "editSettings": "Bewerken in Instellingen",
       "addDetails": "Voeg je bedrijfsgegevens toe"
+    },
+    "groups": {
+      "look": "Uiterlijk",
+      "style": "Stijl",
+      "besidePrice": "Naast de prijs"
     }
   },
   "productBlock": {
@@ -1154,10 +1160,6 @@
         "speaker": {
           "title": "Draagbare speaker",
           "description": "Waterdicht, met 12 uur speeltijd op één lading."
-        },
-        "succulent": {
-          "title": "Vetplantje voor op je bureau",
-          "description": "Een kleine haworthia in een keramische pot. Heeft ongeveer eens per maand water nodig."
         }
       }
     }
@@ -1321,7 +1323,6 @@
     }
   },
   "checkoutPage": {
-    "unwired": "Kopers bereiken het afrekenen zodra je Stripe verbindt. Je kunt het nu al ontwerpen.",
     "charsLeft": "{count, plural, one {# teken over} other {# tekens over}}",
     "layout": {
       "title": "Lay-out",
@@ -1336,16 +1337,7 @@
       "button": "De betaalknop is gelijk aan de koopknop van je productpagina.",
       "styleButton": "Knop opmaken",
       "payButton": "Betaalknop",
-      "payButtonInfoLabel": "Over de betaalknop",
-      "texture": {
-        "label": "Textuur",
-        "none": "Effen",
-        "paper": "Papier",
-        "dots": "Stippen",
-        "grid": "Raster",
-        "lines": "Lijnen",
-        "linen": "Linnen"
-      }
+      "payButtonInfoLabel": "Over de betaalknop"
     },
     "message": {
       "title": "Tekst",
@@ -1365,14 +1357,15 @@
       "message": "Bericht",
       "messagePlaceholder": "Wat er daarna gebeurt, in je eigen woorden",
       "celebrate": {
-        "label": "Animatie",
         "confetti": "Confetti",
-        "rays": "Licht",
-        "none": "Geen",
         "play": "Afspelen"
       }
-    },
-    "unwiredBadge": "Nog niet live",
-    "unwiredInfoLabel": "Wanneer kopers kunnen afrekenen"
+    }
+  },
+  "pagePhoto": {
+    "label": "Foto",
+    "infoLabel": "Hoe de foto wordt gebruikt",
+    "info": "Wordt achter de pagina getoond en getint met de paginakleur, zodat de tekst leesbaar blijft. Verander de kleur om de foto lichter of donkerder te maken.",
+    "remove": "Foto verwijderen"
   }
 }

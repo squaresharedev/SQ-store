@@ -7,7 +7,7 @@
 // timestamp renders in the runtime's zone (the viewer's, in the browser).
 
 import type { Locale } from "@/i18n/locales";
-import { dateTimeFormat, intlTag } from "@/lib/format/intl";
+import { dateTimeFormat, intlTag, relativeTimeFormat } from "@/lib/format/intl";
 
 const ORDER_DATE: Intl.DateTimeFormatOptions = {
   day: "numeric",
@@ -45,6 +45,28 @@ export function formatOrderDate(isoDate: string, locale: Locale): string {
 export function formatOrderDateTime(isoDate: string, locale: Locale): string {
   const date = valid(isoDate);
   return date ? dateTimeFormat(intlTag(locale, "en-IE"), ORDER_DATE_TIME).format(date) : "—";
+}
+
+const MINUTE_MS = 60_000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
+
+/**
+ * How long ago something happened, in the reader's language ("3 hours ago",
+ * "yesterday", "10 days ago"). Whole units of the largest size that fits, and
+ * "today"/"yesterday" style wording where the language has it.
+ *
+ * `now` is a parameter so the same instant renders the same text on the server
+ * and at hydration, and so a test can pin it. Null for an unparseable date.
+ */
+export function formatAge(isoDate: string, locale: Locale, now: Date = new Date()): string | null {
+  const date = valid(isoDate);
+  if (!date) return null;
+  const elapsed = now.getTime() - date.getTime();
+  const format = relativeTimeFormat(intlTag(locale, "en-IE"), { numeric: "auto" });
+  if (elapsed < HOUR_MS) return format.format(-Math.max(0, Math.round(elapsed / MINUTE_MS)), "minute");
+  if (elapsed < DAY_MS) return format.format(-Math.round(elapsed / HOUR_MS), "hour");
+  return format.format(-Math.floor(elapsed / DAY_MS), "day");
 }
 
 /** `"2026-07-02T14:05:00Z"` -> `"2 July 2026"` in English (en-GB, month spelled out). */

@@ -1,3 +1,4 @@
+import { parseCarrier } from "@/lib/orders/carriers";
 import type {
   FulfilmentStatus,
   OrderFulfilment,
@@ -20,15 +21,19 @@ export function parseFulfilment(row: {
   fulfilment_status?: unknown;
   shipped_at?: unknown;
   tracking_number?: unknown;
+  tracking_carrier?: unknown;
 }): OrderFulfilment {
   const status = FULFILMENT_STATUSES.find((value) => value === row.fulfilment_status) ?? "not_required";
+  const trackingNumber =
+    status === "shipped" && typeof row.tracking_number === "string" && row.tracking_number
+      ? row.tracking_number
+      : null;
   return {
     status,
     shippedAt: status === "shipped" && typeof row.shipped_at === "string" ? row.shipped_at : null,
-    trackingNumber:
-      status === "shipped" && typeof row.tracking_number === "string" && row.tracking_number
-        ? row.tracking_number
-        : null,
+    trackingNumber,
+    // A carrier says where a NUMBER is followed, so it never stands alone.
+    carrier: trackingNumber ? parseCarrier(row.tracking_carrier) : null,
   };
 }
 
@@ -44,4 +49,20 @@ export function isToShip(order: {
   fulfilment: Pick<OrderFulfilment, "status">;
 }): boolean {
   return order.status === "paid" && order.fulfilment.status === "unfulfilled";
+}
+
+/**
+ * How many days a parcel can wait before the queue starts calling it out. A
+ * house rule rather than the seller's own promise: their dispatch time is free
+ * text ("packed and posted within 2 days"), which nothing can compare against a
+ * date. Three days is long enough that a busy weekend does not light the whole
+ * queue, and short enough that a forgotten order does not go unnoticed for a week.
+ */
+export const OVERDUE_AFTER_DAYS = 3;
+
+/** Whether an order placed at `createdAt` has waited past OVERDUE_AFTER_DAYS. */
+export function isOverdue(createdAt: string, now: Date = new Date()): boolean {
+  const placed = new Date(createdAt).getTime();
+  if (Number.isNaN(placed)) return false;
+  return now.getTime() - placed > OVERDUE_AFTER_DAYS * 24 * 60 * 60 * 1000;
 }

@@ -6,59 +6,153 @@
     },
     "starter": {
       "name": "Starter",
-      "tagline": "Nižší poplatek pro obchod, který prodává každý týden."
+      "tagline": "Nižší poplatek a prostor k růstu pro obchod, který prodává každý týden."
     },
     "pro": {
       "name": "Pro",
-      "tagline": "Nejnižší poplatek pro obchod, který prodává každý den."
+      "tagline": "Nejnižší poplatek a vše, co nabízíme, pro obchod, který prodává každý den."
     }
+  },
+  "page": {
+    "metaTitle": "Plány",
+    "title": "Vyberte si plán",
+    "lead": "Začněte zdarma a zůstaňte na Free, jak dlouho chcete. Přejděte na vyšší plán, až se nižší poplatek vyplatí.",
+    "trust": {
+      "secure": "Zabezpečená platba přes Stripe",
+      "cancel": "Zrušit můžete kdykoli",
+      "keep": "Nic se nikdy neodstraní"
+    },
+    "intervalLabel": "Fakturační období",
+    "month": "Měsíčně",
+    "year": "Ročně",
+    "yearlySaving": "Při ročním plánu 2 měsíce zdarma",
+    "pastDue": "Poslední platba za plán {plan} neproběhla. Aktualizujte kartu, abyste si ho ponechali.",
+    "endsOn": "Váš plán {plan} končí {date} a obchod pak přejde na Free. Nic se neodstraní.",
+    "ownerOnly": "Plán obchodu může měnit jen jeho vlastník.",
+    "soon": "Brzy",
+    "soonTitle": "Placené plány se brzy otevřou. Do té doby vše na Free funguje beze změny.",
+    "finePrint": "Ceny jsou bez DPH. Poplatek za prodej se vztahuje na prodeje přes pokladnu Square Share a účtuje se z ceny položky, nikdy z dopravy. Vlastní poplatky Stripe za zpracování karty se přičítají. Zrušit můžete kdykoli: plán si ponecháte do konce zaplaceného období.",
+    "unavailable": "Plány se teď nedají zobrazit. Za chvíli stránku obnovte."
   },
   "card": {
     "perMonth": "/ měsíc",
     "exclVat": "bez DPH",
     "freeForever": "Zdarma, jak dlouho chcete",
     "billedYearly": "{amount} účtováno jednou ročně, bez DPH",
-    "feePerSale": "+ {rate} za prodej",
+    "bestValue": "Nejvýhodnější",
+    "current": "Aktuální plán",
+    "everythingIn": "Vše z plánu {plan} a navíc",
+    "includes": "Zahrnuje",
+    "upgrade": "Přejít na {plan}",
+    "switch": "Přepnout na {plan}",
+    "switchInterval": "{interval, select, year {Přepnout na roční} other {Přepnout na měsíční}}",
+    "moveToFree": "Přejít na Free"
+  },
+  "features": {
+    "fee": "Poplatek {rate} za prodej",
     "storefronts": "{count, plural, one {# výloha} few {# výlohy} many {# výlohy} other {# výloh}}",
     "storefrontsUnlimited": "Neomezený počet výloh",
     "teammates": "{count, plural, =0 {Jen vy, žádní spolupracovníci} one {Vy a # spolupracovník} few {Vy a # spolupracovníci} many {Vy a # spolupracovníka} other {Vy a # spolupracovníků}}",
     "teammatesUnlimited": "Neomezený počet spolupracovníků",
-    "everything": "Stránky produktů, pokladna, analytika: vše v ceně"
+    "core": "Stránky produktů, pokladna a analytika",
+    "ordersExport": "Export objednávek do tabulky (CSV)",
+    "earlyAccess": "Předběžný přístup k novým funkcím",
+    "prioritySupport": "Prioritní podpora: vaše zprávy vyřídíme jako první",
+    "analyticsExport": "Stahování reportů analytiky (CSV)",
+    "products": "{count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktů}}",
+    "productsUnlimited": "Neomezený počet produktů"
   },
-  "modal": {
-    "title": "Plány",
-    "description": "Začněte zdarma. Přejděte na vyšší plán, až se nižší poplatek vyplatí.",
-    "loading": "Načítání plánů",
-    "intervalLabel": "Fakturační období",
-    "month": "Měsíčně",
-    "year": "Ročně",
-    "yearlySaving": "Při ročním plánu 2 měsíce zdarma",
-    "current": "Aktuální plán",
-    "recommended": "Doporučeno",
-    "cheapest": "Nejlevnější pro vás",
-    "upgrade": "Přejít na {plan}",
-    "switch": "Přepnout na {plan}",
-    "switchInterval": "{interval, select, year {Přepnout na roční} other {Přepnout na měsíční}}",
-    "moveToFree": "Přejít na Free",
-    "soon": "Brzy",
-    "soonTitle": "Placené plány se brzy otevřou. Do té doby vše na Free funguje beze změny.",
-    "ownerOnly": "Plán obchodu může měnit jen jeho vlastník.",
-    "pastDue": "Poslední platba za plán {plan} neproběhla. Aktualizujte kartu, abyste si ho ponechali.",
-    "endsOn": "Váš plán {plan} končí {date} a obchod pak přejde na Free. Nic se neodstraní.",
-    "finePrint": "Ceny jsou bez DPH. Poplatek za prodej se vztahuje na prodeje přes pokladnu Square Share a účtuje se z ceny položky, nikdy z dopravy. Vlastní poplatky Stripe za zpracování karty se přičítají. Zrušit můžete kdykoli: plán si ponecháte do konce zaplaceného období."
+  "calculator": {
+    "eyebrow": "Kalkulačka",
+    "title": "Který plán vás vyjde nejlevněji?",
+    "lead": "Posuňte jezdec na své měsíční prodeje. Každý sloupec je cena plánu plus jeho poplatek z těchto prodejů.",
+    "salesLabel": "Prodeje za měsíc",
+    "salesAria": "Vaše prodeje za měsíc v eurech",
+    "fromYourSales": "Vyplněno z vašich prodejů za posledních 30 dní.",
+    "perMonth": "měsíčně",
+    "cheapest": "Při prodejích {sales} měsíčně vás nejlevněji vyjde {plan}.",
+    "legendPrice": "Cena plánu",
+    "legendFee": "Poplatek z vašich prodejů",
+    "cheapestTag": "Pro vás nejlevnější"
+  },
+  "compare": {
+    "eyebrow": "Porovnání",
+    "title": "Všechny plány vedle sebe",
+    "feature": "Funkce",
+    "price": "Cena",
+    "unlimited": "Neomezeně",
+    "included": "V ceně",
+    "notIncluded": "Není v ceně",
+    "rows": {
+      "fee": "Poplatek za prodej",
+      "storefronts": "Výlohy",
+      "teamSeats": "Místa v týmu, včetně vás",
+      "ordersExport": "Export objednávek (CSV)",
+      "earlyAccess": "Předběžný přístup k novým funkcím",
+      "prioritySupport": "Prioritní podpora",
+      "products": "Produkty",
+      "productPages": "Stránky produktů",
+      "checkout": "Zabezpečená pokladna",
+      "digitalDownloads": "Digitální stahování, soubory do {size}",
+      "stock": "Sledování zásob",
+      "shipping": "Profily dopravy",
+      "embed": "Vložení na vlastní web",
+      "designer": "Návrhář výlohy",
+      "roles": "Role v týmu",
+      "analytics": "Analytika",
+      "analyticsExport": "Reporty analytiky (CSV)",
+      "productImport": "Import produktů (CSV)"
+    },
+    "groups": {
+      "selling": "Prodej",
+      "store": "Váš obchod",
+      "tools": "Nástroje a přehledy",
+      "support": "Podpora"
+    }
+  },
+  "faq": {
+    "eyebrow": "Otázky",
+    "title": "Než přejdete na vyšší plán",
+    "items": {
+      "cancel": {
+        "q": "Mohu plán kdykoli zrušit?",
+        "a": "Ano. Zrušit můžete v Nastavení › Plán a fakturace a plán si ponecháte do konce zaplaceného období. Potom obchod přejde na Free."
+      },
+      "downgrade": {
+        "q": "Co se stane s mým obchodem, když se vrátím na Free?",
+        "a": "Nic se neodstraní. Všechny výlohy, produkty i spolupracovníci zůstanou. Jen nemůžete přidávat víc, než Free dovoluje, dokud některé neodeberete nebo znovu nepřejdete na vyšší plán."
+      },
+      "vat": {
+        "q": "Zahrnují ceny DPH?",
+        "a": "Ne, ceny jsou uvedeny bez DPH, která se tam, kde se uplatňuje, přičte při platbě. Uveďte při platbě své DIČ a objeví se na každé faktuře."
+      },
+      "fee": {
+        "q": "Z čeho se účtuje poplatek za prodej?",
+        "a": "Z ceny položky u každého prodeje přes pokladnu Square Share, nikdy z dopravy. Vlastní poplatky Stripe za zpracování karty jsou oddělené."
+      },
+      "switch": {
+        "q": "Mohu plán později změnit?",
+        "a": "Kdykoli, na vyšší i nižší, měsíční i roční. Stripe před potvrzením přesně ukáže, kolik zaplatíte."
+      }
+    }
+  },
+  "upsell": {
+    "eyebrow": "Upgrade",
+    "eyebrowBestValue": "Nejvýhodnější",
+    "title": "Získejte víc s plánem {plan}",
+    "lead": "Nižší poplatek z každého prodeje, víc prostoru k růstu a lepší nástroje pro provoz obchodu.",
+    "feeLabel": "Váš poplatek za prodej",
+    "saving": "Při vašich prodejích za posledních 30 dní by vám plán {plan} ušetřil {amount} měsíčně.",
+    "breakEven": "{plan} se vyplatí při prodejích nad {amount} měsíčně.",
+    "gains": "Co přináší plán {plan}",
+    "cta": "Přejít na {plan}, {price} měsíčně",
+    "compare": "Porovnat všechny plány",
+    "topEyebrow": "Nejvyšší plán",
+    "topTitle": "Vše z plánu {plan} je vaše"
   },
   "portal": {
     "opening": "Otevírá se Stripe",
     "stepUp": "Než se otevřou vaše fakturační údaje, potvrďte svou totožnost."
-  },
-  "calculator": {
-    "toggle": "Který plán mě vyjde nejlevněji?",
-    "salesLabel": "Prodeje za měsíc",
-    "salesAria": "Vaše prodeje za měsíc v eurech",
-    "fromYourSales": "Vyplněno z vašich prodejů za posledních 30 dní.",
-    "perMonth": "měsíčně, včetně poplatků",
-    "cheapest": "Při prodejích {sales} měsíčně vás nejlevněji vyjde {plan}.",
-    "breakEven": "{plan} se vyplatí při prodejích nad {amount} měsíčně."
   },
   "chip": {
     "label": "Plán: {plan}",
@@ -79,8 +173,6 @@
     "ends": "Končí {date}. Obchod pak přejde na Free a nic se neodstraní.",
     "pastDue": "Platba selhala. Stripe to zkusí znovu; aktualizujte kartu, abyste si ponechali {plan}.",
     "feeLine": "Poplatek za každý prodej: {rate} z ceny položky.",
-    "changePlan": "Změnit plán",
-    "seePlans": "Zobrazit plány",
     "memberNote": "Plán obchodu může měnit a jeho faktury zobrazit jen vlastník.",
     "usageTitle": "Co využíváte",
     "usageDescription": "Limity vašeho plánu platí jen pro přidávání dalších. Nic, co už máte, se nikdy neodstraní.",
@@ -88,7 +180,9 @@
       "storefronts": "Výlohy: {used} z {cap}",
       "storefrontsUnlimited": "Výlohy: {used}, bez limitu",
       "teamSeats": "Místa v týmu, včetně vás: {used} z {cap}",
-      "teamSeatsUnlimited": "Místa v týmu, včetně vás: {used}, bez limitu"
+      "teamSeatsUnlimited": "Místa v týmu, včetně vás: {used}, bez limitu",
+      "products": "Produkty: {used} z {cap}",
+      "productsUnlimited": "Produkty: {used}, bez limitu"
     },
     "overLimit": "Nad limitem tohoto plánu. Vše funguje dál; odeberte jednu položku nebo přejděte na vyšší plán, abyste mohli přidávat.",
     "invoicesTitle": "Fakturace a faktury",

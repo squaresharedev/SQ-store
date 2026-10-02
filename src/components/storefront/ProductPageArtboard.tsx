@@ -41,6 +41,7 @@ export function ProductPageArtboard({
   seller,
   backgroundImageUrl,
   customFontUrl,
+  pagePhotoUrl,
   onClose,
   widths,
   initialDevice,
@@ -60,6 +61,8 @@ export function ProductPageArtboard({
   seller: StorefrontSeller;
   backgroundImageUrl: string | null;
   customFontUrl: string | null;
+  /** Display URL of this page's own photo backdrop, when it has one. */
+  pagePhotoUrl: string | null;
   onClose: () => void;
   widths: Record<PreviewDevice, number>;
   initialDevice: PreviewDevice;
@@ -82,6 +85,7 @@ export function ProductPageArtboard({
       seller,
       backgroundImageUrl,
       customFontUrl,
+      pagePhotoUrl,
     },
     product: previewed,
     productUrl: "",

@@ -99,11 +99,8 @@ export async function orderLinkUrl(storefrontId: string, orderId: string): Promi
 }
 
 /**
- * The short number a buyer can read out or type: the first eight characters of
- * the order id, upper-cased. For recognising an order, never for opening one:
- * the lookup form that takes it also takes the buyer's email, and answers by
- * email, never on the page.
+ * The short number a buyer can read out or type. Lives in order-number.ts, which
+ * is client-safe (this module needs crypto); re-exported so the order routes
+ * that already import it from here keep working.
  */
-export function orderNumber(orderId: string): string {
-  return orderId.replace(/-/g, "").slice(0, 8).toUpperCase();
-}
+export { orderNumber } from "@/lib/orders/order-number";

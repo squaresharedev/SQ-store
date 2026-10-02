@@ -175,7 +175,7 @@
     "prefs": {
       "sales": {
         "label": "Vendite",
-        "blurb": "Inviami un’email ogni volta che vendo qualcosa. Il bel tipo di rumore in casella di posta."
+        "blurb": "Inviami un’email quando vendo qualcosa, con cosa imballare e dove spedire."
       },
       "productUpdates": {
         "label": "Novità della piattaforma",
@@ -188,7 +188,8 @@
     },
     "success": {
       "notificationsSaved": "Preferenze salvate."
-    }
+    },
+    "emailOff": "L’email non è ancora attiva per Square Share, quindi qui sotto non viene inviato nulla. I nuovi ordini compaiono comunque in Ordini e nelle tue notifiche."
   },
   "legal": {
     "cardTitle": "Accordo per i venditori, Termini e Privacy",
@@ -412,7 +413,8 @@
       "removeNamed": "Rimuovi la destinazione {area}",
       "removeNumbered": "Rimuovi la destinazione {number}",
       "add": "Aggiungi una destinazione",
-      "limitReached": "{max, plural, one {È il massimo: # destinazione. Rimuovine una per aggiungerne un’altra.} many {È il massimo: # destinazioni. Rimuovine una per aggiungerne un’altra.} other {È il massimo: # destinazioni. Rimuovine una per aggiungerne un’altra.}}"
+      "limitReached": "{max, plural, one {È il massimo: # destinazione. Rimuovine una per aggiungerne un’altra.} many {È il massimo: # destinazioni. Rimuovine una per aggiungerne un’altra.} other {È il massimo: # destinazioni. Rimuovine una per aggiungerne un’altra.}}",
+      "needsRate": "Il checkout non può usare questa riga finché non ha sia una tariffa sia un paese. Gli acquirenti la leggono comunque nella pagina prodotto."
     },
     "rates": {
       "title": "Tariffe di spedizione",

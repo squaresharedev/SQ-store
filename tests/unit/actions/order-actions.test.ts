@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { orderView } from "../../setup/order-view";
+import type { CarrierId } from "@/types/order-view";
 
 // markOrderShipped: every gate in front of the database function, and the
 // rule for when the BUYER is emailed. The database function's own gates are
@@ -33,12 +34,20 @@ vi.mock("@/lib/orders/emails", () => ({
   sendShippedEmail: (...args: unknown[]) => sendShippedEmailMock(...args),
 }));
 
+// The buyer's order page link is a signed credential (it needs a key); here it
+// only has to be built from the right storefront and order.
+const orderLinkUrlMock = vi.fn();
+vi.mock("@/lib/orders/order-link", () => ({
+  orderLinkUrl: (...args: unknown[]) => orderLinkUrlMock(...args),
+}));
+
 const getSellerIdentityMock = vi.fn();
 vi.mock("@/lib/settings/seller-identity", () => ({
   getSellerIdentity: (...args: unknown[]) => getSellerIdentityMock(...args),
 }));
 
-// The request client: the RPC, and the one read of the buyer's language.
+// The request client: the RPC, and the one read of the buyer's language and
+// the storefront their order page lives under.
 const rpcMock = vi.fn();
 const localeRead = vi.fn();
 const db: Record<string, unknown> = {};
@@ -58,18 +67,20 @@ import { markOrderShipped } from "@/lib/orders/actions";
 const OWNER_ID = "10000000-0000-4000-8000-000000000001";
 const VIEWER_ID = "20000000-0000-4000-8000-000000000002";
 const ORDER_ID = "30000000-0000-4000-8000-000000000003";
+const STOREFRONT_ID = "40000000-0000-4000-8000-000000000004";
+const ORDER_URL = "https://store.example/s/sf/order/ref";
 
 const owner = { accountId: OWNER_ID, userId: OWNER_ID, role: "owner" as const, isOwner: true };
 const viewer = { accountId: OWNER_ID, userId: VIEWER_ID, role: "viewer" as const, isOwner: false };
 
 const waiting = orderView({
   id: ORDER_ID,
-  fulfilment: { status: "unfulfilled", shippedAt: null, trackingNumber: null },
+  fulfilment: { status: "unfulfilled", shippedAt: null, trackingNumber: null, carrier: null },
 });
-const shipped = (trackingNumber: string | null) =>
+const shipped = (trackingNumber: string | null, carrier: CarrierId | null = null) =>
   orderView({
     id: ORDER_ID,
-    fulfilment: { status: "shipped", shippedAt: "2026-09-27T10:00:00Z", trackingNumber },
+    fulfilment: { status: "shipped", shippedAt: "2026-09-27T10:00:00Z", trackingNumber, carrier },
   });
 
 beforeEach(() => {
@@ -81,7 +92,8 @@ beforeEach(() => {
   rateLimitMock.mockResolvedValue(true);
   getOrderByIdMock.mockResolvedValue(waiting);
   rpcMock.mockResolvedValue({ data: "shipped", error: null });
-  localeRead.mockResolvedValue({ data: { buyer_locale: "de" }, error: null });
+  localeRead.mockResolvedValue({ data: { buyer_locale: "de", storefront_id: STOREFRONT_ID }, error: null });
+  orderLinkUrlMock.mockResolvedValue(ORDER_URL);
   getSellerIdentityMock.mockResolvedValue({ businessName: "Harbour Pottery", email: "hello@harbour.example" });
   sendShippedEmailMock.mockResolvedValue({ sent: true });
 });
@@ -122,6 +134,14 @@ describe("markOrderShipped - gates", () => {
     expect(rpcMock).not.toHaveBeenCalled();
   });
 
+  it("refuses a carrier that is not on the list, so no link can be smuggled in", async () => {
+    for (const forged of ["https://evil.example/track", "not-a-carrier", ""]) {
+      const result = await markOrderShipped(ORDER_ID, "RR123456789IE", forged as CarrierId);
+      expect(result).toMatchObject({ ok: false, error: { code: "invalid_input" } });
+    }
+    expect(rpcMock).not.toHaveBeenCalled();
+  });
+
   it("only ships an order in the store being worked on", async () => {
     getOrderByIdMock.mockResolvedValue(null);
     expect(await markOrderShipped(ORDER_ID, "")).toMatchObject({ error: { code: "not_found" } });
@@ -139,6 +159,7 @@ describe("markOrderShipped - outcomes", () => {
     expect(rpcMock).toHaveBeenCalledWith("order_mark_shipped", {
       p_order_id: ORDER_ID,
       p_tracking_number: "RR123456789IE",
+      p_carrier: null,
     });
     expect(result).toMatchObject({ ok: true, buyerEmailed: true });
     const [to, locale, mail] = sendShippedEmailMock.mock.calls[0]!;
@@ -153,7 +174,48 @@ describe("markOrderShipped - outcomes", () => {
 
   it("sends no tracking number when none was typed", async () => {
     await markOrderShipped(ORDER_ID, "   ");
-    expect(rpcMock.mock.calls[0]![1]).toEqual({ p_order_id: ORDER_ID, p_tracking_number: null });
+    expect(rpcMock.mock.calls[0]![1]).toEqual({
+      p_order_id: ORDER_ID,
+      p_tracking_number: null,
+      p_carrier: null,
+    });
+  });
+
+  it("names the carrier beside the number, and tells the buyer where to follow it", async () => {
+    getOrderByIdMock.mockResolvedValueOnce(waiting).mockResolvedValueOnce(shipped("RR123456789IE", "an-post"));
+    await markOrderShipped(ORDER_ID, "RR123456789IE", "an-post");
+
+    expect(rpcMock.mock.calls[0]![1]).toEqual({
+      p_order_id: ORDER_ID,
+      p_tracking_number: "RR123456789IE",
+      p_carrier: "an-post",
+    });
+    expect(orderLinkUrlMock).toHaveBeenCalledWith(STOREFRONT_ID, ORDER_ID);
+    expect(sendShippedEmailMock.mock.calls[0]![2]).toMatchObject({
+      trackingNumber: "RR123456789IE",
+      carrier: "an-post",
+      orderUrl: ORDER_URL,
+    });
+  });
+
+  it("drops a carrier that has no number to go with", async () => {
+    await markOrderShipped(ORDER_ID, "  ", "dhl");
+    expect(rpcMock.mock.calls[0]![1]).toMatchObject({ p_tracking_number: null, p_carrier: null });
+  });
+
+  it("sends no order link for an order that has no storefront to open it under", async () => {
+    localeRead.mockResolvedValue({ data: { buyer_locale: "de", storefront_id: null }, error: null });
+    await markOrderShipped(ORDER_ID, "");
+    expect(orderLinkUrlMock).not.toHaveBeenCalled();
+    expect(sendShippedEmailMock.mock.calls[0]![2]).toMatchObject({ orderUrl: null });
+  });
+
+  it("tells the buyer when only the carrier changed, since that is what gives them a link", async () => {
+    rpcMock.mockResolvedValue({ data: "tracking_updated", error: null });
+    getOrderByIdMock.mockResolvedValue(shipped("RR000000001IE", "dhl"));
+    const result = await markOrderShipped(ORDER_ID, "RR000000001IE", "dhl");
+    expect(result).toMatchObject({ ok: true, buyerEmailed: true });
+    expect(sendShippedEmailMock.mock.calls[0]![2]).toMatchObject({ kind: "tracking", carrier: "dhl" });
   });
 
   it("tells the buyer about a tracking number added later", async () => {

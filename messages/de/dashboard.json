@@ -28,7 +28,8 @@
   },
   "shell": {
     "accountFallback": "Konto",
-    "anotherStore": "ein anderer Shop"
+    "anotherStore": "ein anderer Shop",
+    "skipToContent": "Zum Hauptinhalt springen"
   },
   "overview": {
     "title": "Übersicht",
@@ -120,6 +121,11 @@
     "toShip": {
       "description": "Käufer warten auf diese Bestellungen. Packe sie ein und markiere sie als versandt.",
       "action": "Bestellungen versenden"
+    },
+    "checkoutRates": {
+      "label": "Lege deine Versandtarife fest",
+      "description": "Käufer können ein physisches Produkt erst kaufen, wenn ein Lieferziel sowohl einen Tarif als auch ein Land hat.",
+      "action": "Tarife festlegen"
     }
   }
 }

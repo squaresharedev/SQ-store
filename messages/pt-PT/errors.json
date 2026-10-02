@@ -608,6 +608,18 @@
     "storefronts": "O seu plano {plan, select, free {Free} starter {Starter} pro {Pro} other {atual}} inclui {cap, plural, one {# montra} many {# de montras} other {# montras}}, e a sua loja já as tem todas.",
     "teamSeats": "O seu plano {plan, select, free {Free} starter {Starter} pro {Pro} other {atual}} inclui {cap, plural, one {# lugar} many {# de lugares} other {# lugares}}, incluindo o seu, e estão todos ocupados.",
     "fix": "Atualize para ter mais ou remova um que já não precisa. Nada do que tem é afetado.",
-    "action": "Ver planos"
+    "action": "Ver planos",
+    "products": "O seu plano {plan, select, free {Free} starter {Starter} pro {Pro} other {atual}} inclui {cap, plural, one {# produto} many {# de produtos} other {# produtos}}, e a sua loja já os tem todos.",
+    "fixTop": "Remova um que já não precisa para adicionar outro. Nada do que tem é afetado."
+  },
+  "ordersExport": {
+    "signIn": "Inicie sessão para exportar as suas encomendas.",
+    "permissionDenied": "Não tem acesso às encomendas desta loja.",
+    "unavailable": "Não é possível exportar as suas encomendas neste momento.",
+    "tryAgain": "Tente novamente daqui a pouco.",
+    "planRequired": "A exportação de encomendas faz parte de um plano pago.",
+    "planRequiredFix": "Atualize o plano na página Planos para exportar as suas encomendas.",
+    "rateLimited": "São muitas exportações num curto espaço de tempo.",
+    "rateLimitedFix": "Aguarde alguns minutos e tente novamente."
   }
 }

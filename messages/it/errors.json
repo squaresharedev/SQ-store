@@ -608,6 +608,18 @@
     "storefronts": "Il tuo piano {plan, select, free {Free} starter {Starter} pro {Pro} other {attuale}} include {cap, plural, one {# vetrina} other {# vetrine}} e il tuo negozio le ha già tutte.",
     "teamSeats": "Il tuo piano {plan, select, free {Free} starter {Starter} pro {Pro} other {attuale}} include {cap, plural, one {# posto} other {# posti}}, compreso il tuo, e sono tutti occupati.",
     "fix": "Passa a un piano superiore per averne di più, oppure rimuovine uno che non ti serve più. Nulla di ciò che hai viene toccato.",
-    "action": "Vedi i piani"
+    "action": "Vedi i piani",
+    "products": "Il tuo piano {plan, select, free {Free} starter {Starter} pro {Pro} other {attuale}} include {cap, plural, one {# prodotto} other {# prodotti}} e il tuo negozio li ha già tutti.",
+    "fixTop": "Rimuovine uno che non ti serve più per aggiungerne un altro. Nulla di ciò che hai viene toccato."
+  },
+  "ordersExport": {
+    "signIn": "Accedi per esportare i tuoi ordini.",
+    "permissionDenied": "Non hai accesso agli ordini di questo negozio.",
+    "unavailable": "Al momento non è possibile esportare i tuoi ordini.",
+    "tryAgain": "Riprova tra un istante.",
+    "planRequired": "L’esportazione degli ordini fa parte di un piano a pagamento.",
+    "planRequiredFix": "Passa a un piano superiore dalla pagina Piani per esportare i tuoi ordini.",
+    "rateLimited": "Hai fatto molte esportazioni in poco tempo.",
+    "rateLimitedFix": "Aspetta qualche minuto, poi riprova."
   }
 }

@@ -108,7 +108,12 @@ describe("fulfilment", () => {
         shipped_at: "2026-09-27T10:00:00Z",
         tracking_number: "RR123456789IE",
       }),
-    ).toEqual({ status: "shipped", shippedAt: "2026-09-27T10:00:00Z", trackingNumber: "RR123456789IE" });
+    ).toEqual({
+      status: "shipped",
+      shippedAt: "2026-09-27T10:00:00Z",
+      trackingNumber: "RR123456789IE",
+      carrier: null,
+    });
   });
 
   it("never reads an unknown status as a parcel still owed", () => {
@@ -119,7 +124,7 @@ describe("fulfilment", () => {
   it("ignores a date or tracking number on an order that has not shipped", () => {
     expect(
       parseFulfilment({ fulfilment_status: "unfulfilled", shipped_at: "x", tracking_number: "RR1" }),
-    ).toEqual({ status: "unfulfilled", shippedAt: null, trackingNumber: null });
+    ).toEqual({ status: "unfulfilled", shippedAt: null, trackingNumber: null, carrier: null });
   });
 
   it("counts only paid, unsent orders as to ship", () => {

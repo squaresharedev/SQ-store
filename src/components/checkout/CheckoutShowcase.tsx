@@ -75,13 +75,7 @@ export function CheckoutSummaryCard({ item, theme }: { item: CheckoutItem; theme
   return (
     <section
       className="flex items-center gap-4 border p-4"
-      // Filled with the surface itself, so on a textured page the order sits
-      // on a clean card like the fields below it.
-      style={{
-        borderColor: theme.rule,
-        borderRadius: `${theme.surfaceRadius}px`,
-        backgroundColor: theme.surface,
-      }}
+      style={{ borderColor: theme.rule, borderRadius: `${theme.surfaceRadius}px` }}
       data-checkout-summary-card=""
       data-setting-hotspot="layout"
     >

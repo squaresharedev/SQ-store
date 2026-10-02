@@ -28,7 +28,8 @@
   },
   "shell": {
     "accountFallback": "Compte",
-    "anotherStore": "une autre boutique"
+    "anotherStore": "une autre boutique",
+    "skipToContent": "Passer au contenu principal"
   },
   "overview": {
     "title": "Vue d’ensemble",
@@ -120,6 +121,11 @@
     "toShip": {
       "description": "Des acheteurs attendent ces commandes. Préparez-les, puis marquez-les comme expédiées.",
       "action": "Expédier les commandes"
+    },
+    "checkoutRates": {
+      "label": "Définissez vos tarifs de livraison",
+      "description": "Les acheteurs ne peuvent pas passer commande pour un produit physique tant qu’une destination n’a pas à la fois un tarif et un pays.",
+      "action": "Définir les tarifs"
     }
   }
 }

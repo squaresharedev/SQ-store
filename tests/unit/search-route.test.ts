@@ -48,7 +48,7 @@ function builderFor(table: string) {
   };
 
   const builder: Record<string, unknown> = {};
-  for (const method of ["select", "eq", "ilike", "or", "order", "limit", "in", "range"]) {
+  for (const method of ["select", "eq", "ilike", "or", "order", "limit", "in", "range", "gte", "lte"]) {
     builder[method] = (...args: unknown[]) => {
       record.calls.push({ method, args });
       return builder;
@@ -254,6 +254,68 @@ describe("GET /api/search — matching", () => {
   it("trims the query before searching", async () => {
     await GET(request("  shoes  "));
     expect(ilikePatterns("products")).toEqual(["%shoes%"]);
+  });
+});
+
+describe("GET /api/search: finding an order by what a buyer would quote", () => {
+  const orderColumns = () =>
+    callsFor("orders")
+      .filter((call) => call.method === "ilike")
+      .map((call) => call.args[0]);
+
+  it("also searches the tracking number and the name and town it is going to", async () => {
+    await GET(request("anna"));
+    expect(orderColumns()).toEqual(
+      expect.arrayContaining(["tracking_number", "ship_to->>name", "ship_to->>city"]),
+    );
+  });
+
+  it("looks an order number up as a range of ids, not a text match on the id", async () => {
+    await GET(request("#44561113"));
+    const calls = callsFor("orders");
+    expect(calls.find((call) => call.method === "gte")?.args).toEqual([
+      "id",
+      "44561113-0000-0000-0000-000000000000",
+    ]);
+    expect(calls.find((call) => call.method === "lte")?.args).toEqual([
+      "id",
+      "44561113-ffff-ffff-ffff-ffffffffffff",
+    ]);
+  });
+
+  it("does not run the number lookup for an ordinary word", async () => {
+    await GET(request("shoes"));
+    const methods = callsFor("orders").map((call) => call.method);
+    expect(methods).not.toContain("gte");
+    expect(methods).not.toContain("lte");
+  });
+
+  it("pins EVERY order query to the active store, however many there are", async () => {
+    await GET(request("4456"));
+    const orderQueries = tableCalls.filter((entry) => entry.table === "orders");
+    expect(orderQueries.length).toBeGreaterThan(2);
+    for (const query of orderQueries) {
+      const pinned = query.calls.find((call) => call.method === "eq" && call.args[0] === "seller_id");
+      expect(pinned?.args[1]).toBe("owner-1");
+    }
+  });
+
+  it("puts the number first on the row, then the buyer", async () => {
+    tableRows.orders = [
+      {
+        id: "44561113-aaaa-4bbb-8ccc-dddddddddddd",
+        product_title: "Blue mug",
+        buyer_email: "anna@example.com",
+        status: "paid",
+        amount_cents: 1000,
+        currency: "EUR",
+        created_at: "2026-01-01",
+      },
+    ];
+    const res = await GET(request("44561113"));
+    const body = (await res.json()) as SearchApiResponse;
+    const row = body.groups.find((g) => g.type === "order")?.results[0];
+    expect(row?.subtitle).toBe("#44561113 · anna@example.com · 10.00 EUR");
   });
 });
 

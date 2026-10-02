@@ -4,7 +4,6 @@ import { listAllProducts } from "@/lib/products/queries";
 import { getStorefront } from "@/lib/storefront/queries";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
 import { getActiveAccount } from "@/lib/team/account-context";
-import { checkoutProviderFor } from "@/lib/checkout/availability";
 import { can } from "@/lib/team/permissions";
 import { getSellerIdentity } from "@/lib/settings/seller-identity";
 import { getShippingPolicy } from "@/lib/settings/shipping-policy";
@@ -31,6 +30,15 @@ async function signElementUrls(
   const signed = await Promise.all(
     images.map(async (block) => [blockKey(block), await presignGetUrl(block.key)] as const),
   );
+  return Object.fromEntries(
+    signed.filter((entry): entry is readonly [string, string] => entry[1] !== null),
+  );
+}
+
+/** Display URLs for the photos the hosted pages hold as their backdrop, by key. */
+async function signPagePhotoUrls(keys: (string | undefined)[]): Promise<Record<string, string>> {
+  const unique = [...new Set(keys.filter((key): key is string => Boolean(key)))];
+  const signed = await Promise.all(unique.map(async (key) => [key, await presignGetUrl(key)] as const));
   return Object.fromEntries(
     signed.filter((entry): entry is readonly [string, string] => entry[1] !== null),
   );
@@ -76,10 +84,12 @@ export default async function StorefrontEditorPage({
   // Uploaded assets store only the R2 object key; sign their display URLs here
   // (server-only credentials) so the client never mints URLs itself.
   const { background, customFont } = storefront.config.theme;
-  const [backgroundImageUrl, customFontUrl, elementUrls] = await Promise.all([
+  const { productPage, checkoutPage } = storefront.config;
+  const [backgroundImageUrl, customFontUrl, elementUrls, pagePhotoUrls] = await Promise.all([
     background.kind === "image" ? presignGetUrl(background.key) : null,
     customFont ? presignGetUrl(customFont.key) : null,
     signElementUrls(storefront.config.blocks),
+    signPagePhotoUrls([productPage?.backgroundImage?.key, checkoutPage?.backgroundImage?.key]),
   ]);
 
   return (
@@ -91,12 +101,10 @@ export default async function StorefrontEditorPage({
       initialBackgroundImageUrl={backgroundImageUrl}
       initialCustomFontUrl={customFontUrl}
       initialElementUrls={elementUrls}
+      initialPagePhotoUrls={pagePhotoUrls}
       initialSetting={initialSetting ?? null}
       sellerIdentity={sellerIdentity}
       shippingPolicy={shippingPolicy}
-      // Whether buyers can reach this store's checkout yet: the checkout
-      // artboard says so under its pay button when they cannot.
-      checkoutLive={account ? checkoutProviderFor(account.accountId) !== null : false}
       // The designer renders its own universal-search provider (it is outside
       // the dashboard shell), so it needs the role the shell would have given.
       role={account?.role ?? null}

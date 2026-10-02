@@ -217,6 +217,8 @@ const FROM_SOURCE: ReadonlySet<string> = new Set([
   "#tour",
   "[data-design-panel] [data-panel-menu]",
   "[data-sample-create]",
+  // Only a seller with no live storefront is shown it; checked on its own below.
+  "main [data-storefront-sample]",
 ]);
 
 /** Every selector either tour looks up: each candidate, and each `waitFor`. */
@@ -253,8 +255,19 @@ describe.each(["en", "cs"] as const)("tour targets, with the UI in %s", (locale)
     expect(document.querySelector(selector("payments"))?.tagName).toBe("SECTION");
     expect(document.querySelector(editorSelector("editor-add"))).toHaveAttribute("role", "toolbar");
     // The embed stop has the seller's own card to itself: the sample is a
-    // link at the foot of the list now, not a card with a button of its own.
+    // link at the foot of the list, not a card with a button of its own.
     expect(document.querySelectorAll(selector("storefront-embed"))).toHaveLength(1);
+    // With a live storefront of their own there is no sample link to point at.
+    expect(document.querySelector(selector("storefront-sample"))).toBeNull();
+  });
+
+  it("puts the sample stop on the link under a new seller's empty list", () => {
+    renderIn(
+      locale,
+      <main>
+        <StorefrontsList storefronts={[]} total={0} products={[]} canWrite sample="shown" />
+      </main>,
+    );
     expect(
       document.querySelector(selector("storefront-sample"))?.querySelector('a[href="/storefront/sample"]'),
     ).not.toBeNull();

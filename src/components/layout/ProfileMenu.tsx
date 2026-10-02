@@ -10,7 +10,8 @@ import { useLocaleSwitch } from "@/i18n/LocaleSwitchProvider";
 import { LOCALES, LOCALE_NAMES, type Locale } from "@/i18n/locales";
 import { Avatar } from "@/components/ui/avatar";
 import { Popover } from "@/components/ui/Popover";
-import { usePricingModal } from "@/components/billing/pricing-modal-context";
+import { useAccountPlan } from "@/components/billing/plan-context";
+import { plansHref } from "@/lib/billing/paths";
 import {
   focusRingClass,
   overlayItemClass,
@@ -52,8 +53,8 @@ export function ProfileMenu({
   const tLocale = useTranslations("LocaleSwitcher");
   const t = useTranslations("Nav.profileMenu");
   const tAll = useTranslations();
-  // The active store's plan, and the modal it opens (null outside a shell).
-  const pricing = usePricingModal();
+  // The active store's plan (null outside a shell, or when it could not be read).
+  const plan = useAccountPlan();
 
   // Collapse the sub-lists whenever the menu closes (so it opens tidy).
   function handleOpenChange(next: boolean) {
@@ -128,22 +129,19 @@ export function ProfileMenu({
             {t("account")}
           </Link>
 
-          {pricing?.plan && (
-            <button
-              type="button"
-              data-profile-plan={pricing.plan}
-              onClick={() => {
-                handleOpenChange(false);
-                pricing.open({ source: "profile_menu" });
-              }}
+          {plan && (
+            <Link
+              href={plansHref("profile_menu")}
+              data-profile-plan={plan}
+              onClick={() => handleOpenChange(false)}
               className={ITEM}
             >
               <Gem className="size-4 shrink-0 text-muted-foreground" aria-hidden />
               {t("plan")}
               <span className="ml-auto truncate font-inter text-xs text-muted-foreground">
-                {tAll(`Billing.plans.${pricing.plan}.name`)}
+                {tAll(`Billing.plans.${plan}.name`)}
               </span>
-            </button>
+            </Link>
           )}
 
           {canSwitch && (

@@ -32,6 +32,7 @@ import {
   paragraphs,
   resolveCta,
   resolveInk,
+  storefrontBackdropHex,
   ruleColor,
   surfaceRadius,
 } from "./product-page-maps";
@@ -287,6 +288,12 @@ export function ProductPageView({
           // too: the product page is part of the shop, not a publication of its
           // own.
           backgroundColor={productPage.backgroundColor}
+          // Its own photo, veiled in the colour its ink was derived from.
+          photo={
+            storefront.pagePhotoUrl
+              ? { url: storefront.pagePhotoUrl, tint: productPage.backgroundColor ?? storefrontBackdropHex(theme) }
+              : null
+          }
           font={productPage.font}
           ink={ink}
           preview={preview}

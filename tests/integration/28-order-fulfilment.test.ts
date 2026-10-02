@@ -1,5 +1,6 @@
 /**
- * Order fulfilment (20260927_order_fulfilment), against the replayed schema.
+ * Order fulfilment (20260927_order_fulfilment, and the carrier added by
+ * 20261001_order_tracking_carrier), against the replayed schema.
  *
  * Two things are proven here. The COLUMNS: every fence a service-role write
  * cannot climb (the order writer is the service role, so these CHECKs are the
@@ -48,20 +49,38 @@ async function seedOrder(seed: OrderSeed = {}): Promise<string> {
   });
 }
 
-const markShipped = (user: TestUser, orderId: string, tracking: string | null = null) =>
+/**
+ * Without a carrier this is the TWO-argument call, deliberately: it is the
+ * shape the app released before the carrier existed still sends, and the
+ * migration promises that app keeps working against the new function.
+ */
+const markShipped = (
+  user: TestUser,
+  orderId: string,
+  tracking: string | null = null,
+  carrier?: string | null,
+) =>
   asUser(user, async (q) =>
-    (await q.query(`select public.order_mark_shipped($1, $2) as outcome`, [orderId, tracking])).rows[0]
-      .outcome as string,
+    (carrier === undefined
+      ? await q.query(`select public.order_mark_shipped($1, $2) as outcome`, [orderId, tracking])
+      : await q.query(`select public.order_mark_shipped($1, $2, $3) as outcome`, [orderId, tracking, carrier])
+    ).rows[0].outcome as string,
   );
 
 const fulfilmentOf = (orderId: string) =>
   asSuper(async (q) =>
     (
       await q.query(
-        `select fulfilment_status, shipped_at, tracking_number from public.orders where id = $1`,
+        `select fulfilment_status, shipped_at, tracking_number, tracking_carrier
+           from public.orders where id = $1`,
         [orderId],
       )
-    ).rows[0] as { fulfilment_status: string; shipped_at: Date | null; tracking_number: string | null },
+    ).rows[0] as {
+      fulfilment_status: string;
+      shipped_at: Date | null;
+      tracking_number: string | null;
+      tracking_carrier: string | null;
+    },
   );
 
 beforeAll(async () => {
@@ -147,6 +166,22 @@ describe("order columns", () => {
     ).toMatch(/orders_tracking_number_shape/);
   });
 
+  it("takes a carrier only beside a tracking number, and only as an id", async () => {
+    const shipped = ", fulfilment_status, shipped_at";
+    expect(
+      await expectDbError(insert(`${shipped}, tracking_carrier`, ", 'shipped', now(), 'dhl'")),
+    ).toMatch(/orders_tracking_carrier_needs_number/);
+    // An id, never a link or a name: the app builds the link from the id.
+    for (const forged of ["https://evil.example/track", "An Post", "x", "a".repeat(25)]) {
+      expect(
+        await expectDbError(
+          insert(`${shipped}, tracking_number, tracking_carrier`, `, 'shipped', now(), 'RR123456789IE', '${forged}'`),
+        ),
+      ).toMatch(/orders_tracking_carrier_shape/);
+    }
+    await insert(`${shipped}, tracking_number, tracking_carrier`, ", 'shipped', now(), 'RR123456789IE', 'an-post'");
+  });
+
   it("stores an address as an object, and a small one", async () => {
     expect(await expectDbError(insert(", ship_to", `, '["not","an","object"]'`))).toMatch(
       /orders_ship_to_is_object/,
@@ -215,6 +250,62 @@ describe("order_mark_shipped", () => {
     const row = await fulfilmentOf(id);
     expect(row.tracking_number).toBe("RR000000001IE");
     expect(row.shipped_at).toEqual(shippedAt);
+  });
+
+  it("stores the carrier beside the number, trimmed", async () => {
+    const id = await seedOrder();
+    expect(await markShipped(owner, id, "RR123456789IE", " an-post ")).toBe("shipped");
+    expect(await fulfilmentOf(id)).toMatchObject({ tracking_number: "RR123456789IE", tracking_carrier: "an-post" });
+  });
+
+  it("drops a carrier that has no tracking number to describe", async () => {
+    const id = await seedOrder();
+    expect(await markShipped(owner, id, "  ", "dhl")).toBe("shipped");
+    expect(await fulfilmentOf(id)).toMatchObject({ tracking_number: null, tracking_carrier: null });
+  });
+
+  it("on a shipped order, a carrier added or changed is a change, and the same pair is not", async () => {
+    const id = await seedOrder();
+    await markShipped(owner, id, "RR000000001IE");
+    expect(await markShipped(owner, id, "RR000000001IE", "dhl")).toBe("tracking_updated");
+    expect(await markShipped(owner, id, "RR000000001IE", "dhl")).toBe("unchanged");
+    expect(await markShipped(owner, id, "RR000000001IE", "ups")).toBe("tracking_updated");
+    expect((await fulfilmentOf(id)).tracking_carrier).toBe("ups");
+    // Clearing the number takes the carrier with it: it described that number.
+    expect(await markShipped(owner, id, "", "ups")).toBe("tracking_updated");
+    expect(await fulfilmentOf(id)).toMatchObject({ tracking_number: null, tracking_carrier: null });
+  });
+
+  it("refuses a carrier that is a link rather than an id, and ships nothing", async () => {
+    const id = await seedOrder();
+    expect(
+      await expectDbError(markShipped(owner, id, "RR123456789IE", "https://evil.example/track")),
+    ).toMatch(/orders_tracking_carrier_shape/);
+    expect((await fulfilmentOf(id)).fulfilment_status).toBe("unfulfilled");
+  });
+
+  it("gates the carrier exactly as it gates shipping", async () => {
+    const id = await seedOrder();
+    expect(await markShipped(viewer, id, "RR123456789IE", "dhl")).toBe("not_found");
+    expect(await markShipped(stranger, id, "RR123456789IE", "dhl")).toBe("not_found");
+    expect(await fulfilmentOf(id)).toMatchObject({ fulfilment_status: "unfulfilled", tracking_carrier: null });
+  });
+
+  it("is the only function by that name, and anon cannot run it", async () => {
+    const { rows } = await asSuper((q) =>
+      q.query(
+        `select pg_get_function_identity_arguments(p.oid) as args,
+                has_function_privilege('anon', p.oid, 'execute') as anon,
+                has_function_privilege('authenticated', p.oid, 'execute') as authenticated
+           from pg_proc p
+          where p.pronamespace = 'public'::regnamespace and p.proname = 'order_mark_shipped'`,
+      ),
+    );
+    // The two-argument original is dropped: left behind it would be a way to
+    // ship that knows nothing about the carrier.
+    expect(rows).toEqual([
+      { args: "p_order_id uuid, p_tracking_number text, p_carrier text", anon: false, authenticated: true },
+    ]);
   });
 
   it("lets an editor ship the owner's orders", async () => {

@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { BillingSettings } from "@/components/billing/BillingSettings";
+import { BillingSection } from "@/components/settings/BillingSection";
 import { requireUser } from "@/lib/auth/session";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { readAccountBilling } from "@/lib/billing/account-plan";
-import { billingProvider } from "@/lib/billing/availability";
 import { confirmCheckoutReturn, type CheckoutReturn } from "@/lib/billing/checkout-return";
-import { countPlanUsage } from "@/lib/billing/limits";
+import { getPricingContext } from "@/lib/billing/pricing-context";
 import { BILLING_SETTINGS_PATH, CHECKOUT_SESSION_PARAM } from "@/lib/billing/paths";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -17,8 +15,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /**
  * Settings › Plan & billing: the plan the store is on, what it costs, the fee
- * each sale pays, how much of the plan's limits is used, and the way to its
- * invoices and card (the Stripe Customer Portal).
+ * each sale pays, what the next plan up would change for it, how much of the
+ * plan's limits is used, and the way to its invoices and card (the Stripe
+ * Customer Portal).
  *
  * About the ACTIVE store, like the plans themselves: a plan belongs to a store,
  * so a teammate working on someone else's store sees that store's plan, read
@@ -46,31 +45,13 @@ export default async function BillingSettingsPage({
   }
 
   // Read after any sync above, so the page shows the plan it just confirmed.
-  const [billing, storefronts, teamSeats] = await Promise.all([
-    readAccountBilling(account.accountId),
-    countPlanUsage(account.accountId, "storefronts"),
-    countPlanUsage(account.accountId, "teamSeats"),
-  ]);
-  if (!billing.ok) {
+  // No funnel source: opening Settings is not looking at plans; the upsell's
+  // own button and "Compare all plans" link carry `settings` onwards.
+  const result = await getPricingContext();
+  if (!result.ok) {
     const t = await getTranslations("Billing.settings");
     return <p className="font-inter text-sm text-destructive">{t("unavailable")}</p>;
   }
 
-  const { billing: b } = billing;
-  return (
-    <BillingSettings
-      plan={b.plan}
-      interval={b.interval}
-      status={b.status}
-      priceCents={b.priceCents}
-      currency={b.currency}
-      currentPeriodEnd={b.currentPeriodEnd}
-      cancelAtPeriodEnd={b.cancelAtPeriodEnd}
-      hasBillingAccount={b.customerId !== null}
-      usage={{ storefronts, teamSeats }}
-      canManage={canManage}
-      available={billingProvider() !== null}
-      returned={returned}
-    />
-  );
+  return <BillingSection context={result.context} returned={returned} />;
 }

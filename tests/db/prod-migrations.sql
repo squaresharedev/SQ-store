@@ -4544,13 +4544,12 @@ comment on function public.guard_moderation_columns() is
   'Refuses any change to moderation_* columns (including moderation_review_requested_at, moderation_fields and moderation_decision_id) unless the writer is service_role. Attached to products, storefronts and artifacts.';
 
 -- =============================================================================
--- ===== (pending) contact_verification ========================================
--- supabase/migrations/20260926_contact_verification.sql, replayed verbatim. NOT
--- yet applied to prod. Replayed because the integration suite proves the guard
+-- ===== (applied) contact_verification ========================================
+-- supabase/migrations/20260926_contact_verification.sql, replayed verbatim.
+-- APPLIED to prod 2026-09-30 through the Management API query endpoint (no
+-- schema_migrations row, so nothing in TRIAGE). Replayed because the integration suite proves the guard
 -- trigger (a seller cannot grant their own proof, a changed value loses it) and
 -- the issue/redeem functions, and the e2e stack drives the code flow on them.
--- When it is applied, record the version in scripts/check-prod-migrations.ts
--- TRIAGE with marker "contact_verification" (SQL-editor runs record none).
 -- =============================================================================
 -- ====================================================================
 -- CONTACT VERIFICATION: a seller proves they OWN the email address and phone
@@ -5370,11 +5369,11 @@ comment on column public.mfa_sign_in_approvals.approval_code is
 notify pgrst, 'reload schema';
 
 -- =============================================================================
--- ===== (pending) seller_plans ================================================
--- supabase/migrations/20260930_seller_plans.sql, replayed verbatim.
--- NOT YET APPLIED TO PROD at the time of writing. Applied through the SQL
--- editor it records no migration version; through apply_migration, add that
--- version to TRIAGE in scripts/check-prod-migrations.ts with this marker.
+-- ===== (applied) seller_plans ================================================
+-- supabase/migrations/20260930_seller_plans.sql, replayed verbatim. APPLIED to
+-- prod 2026-09-30 through the Management API query endpoint (no
+-- schema_migrations row, so nothing in TRIAGE). Plan limits ship switched
+-- off (billing_switches) until paid plans are on sale.
 -- =============================================================================
 -- Seller plans: Free, Starter and Pro, billed through Stripe.
 --
@@ -5399,7 +5398,9 @@ notify pgrst, 'reload schema';
 --      points convert. Server-produced; nothing a browser can write.
 --   5. plan_limit() and the triggers that enforce it on storefronts and
 --      team_members. The app checks first and explains; these make the limit
---      true for a direct REST insert too.
+--      true for a direct REST insert too. Both obey one switch,
+--      billing_switches.plan_limits_enforced, which ships OFF: a limit must
+--      not bite before a bigger plan can be bought.
 --   6. billing_sales_summary(): the last 30 days of item sales, for the
 --      pricing modal's "which plan is cheapest for me" calculator.
 --   7. The 'billing.manage' permission (owners only) and the 'billing'
@@ -5568,6 +5569,28 @@ grant all on table public.seller_funnel_events to service_role;
 
 -- ---- 5. Plan limits ----------------------------------------------------------------
 
+-- THE SWITCH. Limits are only enforced once a bigger plan can actually be
+-- bought: a limit whose only way out is an "upgrade" button marked Soon is a
+-- dead end, not an upsell. One row, one flag, read by BOTH the app's check
+-- (src/lib/billing/limits.ts) and the trigger below, so the two can never
+-- disagree. It ships OFF. Turn it on the day Stripe Billing is live:
+--   update public.billing_switches set plan_limits_enforced = true;
+create table if not exists public.billing_switches (
+  -- A single-row table: the primary key can only ever be true.
+  id                   boolean primary key default true check (id),
+  plan_limits_enforced boolean not null default false,
+  updated_at           timestamptz not null default now()
+);
+
+insert into public.billing_switches (id) values (true) on conflict (id) do nothing;
+
+comment on table public.billing_switches is
+  'Launch switches for seller plans. plan_limits_enforced: whether plan limits refuse creates (off until paid plans can be bought). Service role only.';
+
+alter table public.billing_switches enable row level security;
+revoke all on table public.billing_switches from anon, authenticated;
+grant all on table public.billing_switches to service_role;
+
 -- MIRROR of PLANS[..].limits in src/lib/billing/plans.ts. Null = unlimited.
 -- Pure data, so any role may read it: the same numbers are on the pricing page.
 create or replace function public.plan_limit(p_plan text, p_key text)
@@ -5613,7 +5636,8 @@ grant execute on function public.account_plan(uuid) to service_role;
 comment on function public.account_plan(uuid) is
   'free | starter | pro: the plan an account is on now (paid plan until paid_until, else free). Service role only.';
 
--- THE LIMIT, enforced on insert. The server actions check first and answer
+-- THE LIMIT, enforced on insert (and when a row moves into an account, or a
+-- revoked seat is revived). The server actions check first and answer
 -- with an upgrade prompt (src/lib/billing/limits.ts); this is the same rule
 -- held by the database, so a client that skips the action and inserts over
 -- REST meets it anyway.
@@ -5657,13 +5681,27 @@ begin
     return new;
   end if;
 
+  -- Off until paid plans can be bought (see billing_switches above).
+  if not coalesce((select s.plan_limits_enforced from public.billing_switches s where s.id), false) then
+    return new;
+  end if;
+
   if tg_table_name = 'storefronts' then
+    -- An UPDATE only reaches here when owner_id changed (see the trigger):
+    -- a storefront moved INTO an account counts against that account.
+    if tg_op = 'UPDATE' then
+      if new.owner_id is not distinct from old.owner_id then
+        return new;
+      end if;
+    end if;
     owner := new.owner_id;
   elsif tg_table_name = 'team_members' then
-    -- Re-activating a revoked row adds a seat; editing a live one does not.
+    -- Re-activating a revoked row adds a seat, and so does moving a live row
+    -- to another account; editing a live row in place does not.
     -- (Nested, not ANDed: OLD only exists for an UPDATE.)
     if tg_op = 'UPDATE' then
-      if old.status in ('invited', 'active') then
+      if old.status in ('invited', 'active')
+         and new.account_owner_id is not distinct from old.account_owner_id then
         return new;
       end if;
     end if;
@@ -5697,14 +5735,16 @@ $$;
 
 revoke execute on function public.enforce_plan_limit() from public, anon, authenticated;
 
+-- Insert, and any change of the owning account: a row moved from one account
+-- into another is a new one for the account it lands in.
 drop trigger if exists storefronts_plan_limit on public.storefronts;
 create trigger storefronts_plan_limit
-  before insert on public.storefronts
+  before insert or update of owner_id on public.storefronts
   for each row execute function public.enforce_plan_limit('storefronts');
 
 drop trigger if exists team_members_plan_limit on public.team_members;
 create trigger team_members_plan_limit
-  before insert or update of status on public.team_members
+  before insert or update of status, account_owner_id on public.team_members
   for each row execute function public.enforce_plan_limit('teamSeats');
 
 -- ---- 6. Applying a Stripe snapshot ----------------------------------------------
@@ -5794,9 +5834,10 @@ comment on function public.billing_apply_snapshot(
 -- ---- 7. Sales for the calculator ----------------------------------------------------
 
 -- The last 30 days of an account's paid EUR sales: the item subtotal (what the
--- fee is charged on), how many sales, and the fees charged. SECURITY INVOKER:
--- it reads orders under the caller's own RLS (owner or store.read, and the
--- two-factor bar), so it can tell nobody anything they could not already read.
+-- fee is charged on), how many sales, and the fees charged. Service role only:
+-- its one caller (the pricing modal's loader) has already checked that the
+-- signed-in user may read the store it names, and a client has no reason to
+-- probe other stores' figures through an arbitrary seller id.
 create or replace function public.billing_sales_summary(p_seller_id uuid, p_now timestamptz default now())
 returns table (subtotal_cents bigint, sales integer, fees_cents bigint)
 language sql stable
@@ -5814,11 +5855,11 @@ as $$
     and o.created_at <= p_now
 $$;
 
-revoke execute on function public.billing_sales_summary(uuid, timestamptz) from public, anon;
-grant execute on function public.billing_sales_summary(uuid, timestamptz) to authenticated, service_role;
+revoke execute on function public.billing_sales_summary(uuid, timestamptz) from public, anon, authenticated;
+grant execute on function public.billing_sales_summary(uuid, timestamptz) to service_role;
 
 comment on function public.billing_sales_summary(uuid, timestamptz) is
-  'Last 30 days of an account''s paid EUR sales: item subtotal, count, fees. Invoker: reads orders under the caller''s RLS.';
+  'Last 30 days of an account''s paid EUR sales: item subtotal, count, fees. Service role only; the caller authorises the account first.';
 
 -- ---- 8. Permission mirror ------------------------------------------------------------
 -- MIRROR of src/lib/team/permissions.ts. Edit BOTH together. 'billing.manage'
@@ -6021,5 +6062,356 @@ begin
   end loop;
 end
 $$;
+
+notify pgrst, 'reload schema';
+
+-- =============================================================================
+-- ===== (applied) plan_perks ==================================================
+-- supabase/migrations/20261001_plan_perks.sql, replayed verbatim. Applied to
+-- prod 2026-09-30 through the Management API (records no schema_migrations
+-- row, so nothing in TRIAGE).
+-- =============================================================================
+-- Plan perks: the plans page's new entry point in the pricing funnel.
+--
+-- WHY. Paid plans gain the orders CSV export (src/lib/billing/plans.ts,
+-- PLANS[..].perks). On Free, the Orders page offers it as a link to the plans
+-- page, and the funnel should be able to tell those arrivals apart from every
+-- other entry point.
+--
+-- WHAT THIS CHANGES. One value, 'orders_export', joins the
+-- seller_funnel_events source CHECK. MIRROR of PRICING_SOURCES in
+-- src/lib/billing/paths.ts: a source missing here makes its funnel insert fail
+-- silently (recording is best-effort by contract). Edit both together.
+--
+-- Apply via the Management API query endpoint or the SQL editor.
+
+alter table public.seller_funnel_events
+  drop constraint if exists seller_funnel_events_source_check;
+
+alter table public.seller_funnel_events
+  add constraint seller_funnel_events_source_check
+    check (source is null or source in ('sidebar', 'profile_menu', 'settings', 'storefront_limit',
+                                        'team_limit', 'order_nudge', 'analytics_nudge', 'email',
+                                        'notification', 'checkout_cancel', 'orders_export'));
+
+notify pgrst, 'reload schema';
+
+-- =============================================================================
+-- ===== (applied) product_limits ============================================
+-- supabase/migrations/20261002_product_limits.sql, replayed verbatim. Applied
+-- to prod 2026-10-01 through the Management API (records no schema_migrations
+-- row, so nothing in TRIAGE).
+-- =============================================================================
+-- Product limits: a plan now caps how many products a store holds.
+--
+-- WHY. Plans cap storefronts and team seats already (20260930_seller_plans).
+-- Products join them: 20 on Free, 60 on Starter, 500 on Pro. The numbers are
+-- the owner's and live in src/lib/billing/plans.ts (PLANS[..].limits);
+-- plan_limit() below is their SQL mirror.
+--
+-- WHAT THIS CHANGES.
+--   1. plan_limit() learns the 'products' key, and Pro stops being "no cap on
+--      anything": it is unlimited on storefronts and seats, capped on products.
+--   2. enforce_plan_limit() learns the products table, and a trigger puts it
+--      on products for inserts and for a product moved into another account.
+--   3. 'product_limit' joins the seller_funnel_events source CHECK (the entry
+--      point a refused create sends a seller from).
+--
+-- WHAT IT DOES NOT CHANGE.
+--   - Nothing is deleted, hidden or unpublished. Only CREATING a product is
+--     limited: a store already over its cap keeps and sells every product it
+--     has, and can still edit them. It cannot add another until it is back
+--     under the cap or on a bigger plan.
+--   - Nothing is refused until billing_switches.plan_limits_enforced is turned
+--     on (it ships OFF). The trigger and the server actions read that one
+--     switch, so this migration is inert on the day it is applied.
+--   - The service role and direct SQL stay trusted (seed scripts, fixtures,
+--     support), as for the other two limits.
+--
+-- MIRRORS. Edit these together, or the two sides disagree:
+--   plan_limit()                       <-> PLANS[..].limits (plans.ts)
+--   seller_funnel_events source CHECK  <-> PRICING_SOURCES (billing/paths.ts)
+--
+-- A multi-row insert (the CSV import) is checked row by row: a BEFORE ROW
+-- trigger sees the rows the same statement has already inserted, so a batch
+-- that would cross the cap fails at the first row past it and the whole
+-- statement rolls back. The import action sizes its batch to the room left
+-- (src/lib/products/import-actions.ts), so this is the backstop, not the path.
+--
+-- Recreating a function re-grants EXECUTE to the API roles (the PostgREST
+-- auto-grant trap), so every grant is restated after its function.
+--
+-- Apply via the Management API query endpoint or the SQL editor.
+
+-- ---- 1. The caps -----------------------------------------------------------------
+
+create or replace function public.plan_limit(p_plan text, p_key text)
+returns integer
+language sql immutable
+set search_path = ''
+as $$
+  select case p_plan
+    when 'free'    then case p_key when 'storefronts' then 3  when 'teamSeats' then 2 when 'products' then 20  end
+    when 'starter' then case p_key when 'storefronts' then 10 when 'teamSeats' then 5 when 'products' then 60  end
+    when 'pro'     then case p_key                                                    when 'products' then 500 end
+  end
+$$;
+
+revoke execute on function public.plan_limit(text, text) from public, anon;
+grant execute on function public.plan_limit(text, text) to authenticated, service_role;
+
+comment on function public.plan_limit(text, text) is
+  'The cap a plan puts on storefronts, teamSeats or products; null = unlimited. Mirror of src/lib/billing/plans.ts.';
+
+-- ---- 2. The trigger function, now for products too ------------------------------
+
+-- Unchanged for storefronts and team seats (see 20260930_seller_plans for the
+-- reasoning on each line); the products branch follows the storefronts one.
+create or replace function public.enforce_plan_limit()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  limit_key text := tg_argv[0];
+  owner uuid;
+  cap integer;
+  used integer;
+begin
+  -- The owner's own seat is always there (it is seeded at signup); only a seat
+  -- for someone else, and only one that is live (invited or active), takes
+  -- one of the plan's. Decided first: it needs no claims at all. (Nested, not
+  -- ANDed: plpgsql does not short-circuit, and other tables have no role.)
+  if tg_table_name = 'team_members' then
+    if new.role = 'owner' or new.status not in ('invited', 'active') then
+      return new;
+    end if;
+  end if;
+
+  if coalesce((select auth.role()), '') <> 'authenticated' then
+    return new;
+  end if;
+
+  -- Off until paid plans can be bought (see billing_switches).
+  if not coalesce((select s.plan_limits_enforced from public.billing_switches s where s.id), false) then
+    return new;
+  end if;
+
+  if tg_table_name in ('storefronts', 'products') then
+    -- An UPDATE only reaches here when owner_id changed (see the triggers):
+    -- a row moved INTO an account counts against that account.
+    if tg_op = 'UPDATE' then
+      if new.owner_id is not distinct from old.owner_id then
+        return new;
+      end if;
+    end if;
+    owner := new.owner_id;
+  elsif tg_table_name = 'team_members' then
+    -- Re-activating a revoked row adds a seat, and so does moving a live row
+    -- to another account; editing a live row in place does not.
+    -- (Nested, not ANDed: OLD only exists for an UPDATE.)
+    if tg_op = 'UPDATE' then
+      if old.status in ('invited', 'active')
+         and new.account_owner_id is not distinct from old.account_owner_id then
+        return new;
+      end if;
+    end if;
+    owner := new.account_owner_id;
+  else
+    raise exception 'enforce_plan_limit: unsupported table %', tg_table_name;
+  end if;
+
+  cap := public.plan_limit(public.account_plan(owner), limit_key);
+  if cap is null then
+    return new;
+  end if;
+
+  perform pg_advisory_xact_lock(hashtextextended('plan_limit:' || limit_key || ':' || owner::text, 0));
+
+  if tg_table_name = 'storefronts' then
+    select count(*) into used from public.storefronts s where s.owner_id = owner;
+  elsif tg_table_name = 'products' then
+    -- Every product counts, whatever its status: a draft takes a place.
+    select count(*) into used from public.products p where p.owner_id = owner;
+  else
+    select count(*) into used
+      from public.team_members tm
+     where tm.account_owner_id = owner
+       and tm.status in ('invited', 'active');
+  end if;
+
+  if used >= cap then
+    raise exception 'plan_limit_reached:%', limit_key using errcode = '23514';
+  end if;
+  return new;
+end
+$$;
+
+revoke execute on function public.enforce_plan_limit() from public, anon, authenticated;
+
+-- Insert, and any change of the owning account: a product moved from one
+-- account into another is a new one for the account it lands in.
+drop trigger if exists products_plan_limit on public.products;
+create trigger products_plan_limit
+  before insert or update of owner_id on public.products
+  for each row execute function public.enforce_plan_limit('products');
+
+-- ---- 3. The funnel's entry points ------------------------------------------------
+
+alter table public.seller_funnel_events
+  drop constraint if exists seller_funnel_events_source_check;
+
+alter table public.seller_funnel_events
+  add constraint seller_funnel_events_source_check
+    check (source is null or source in ('sidebar', 'profile_menu', 'settings', 'storefront_limit',
+                                        'team_limit', 'product_limit', 'order_nudge',
+                                        'analytics_nudge', 'email', 'notification',
+                                        'checkout_cancel', 'orders_export'));
+
+notify pgrst, 'reload schema';
+
+-- =============================================================================
+-- ===== (pending) order_tracking_carrier ======================================
+-- supabase/migrations/20261001_order_tracking_carrier.sql, replayed verbatim.
+-- NOT yet applied to prod: apply it BEFORE deploying the app that reads
+-- orders.tracking_carrier (see DEPLOY ORDER in the migration).
+-- =============================================================================
+-- Order tracking carrier: who is carrying the parcel, so a buyer can follow it.
+--
+-- WHY. A shipped order carried a tracking number and nothing else. A buyer was
+-- handed "RR123456789IE" and left to guess which carrier's site to paste it
+-- into. Naming the carrier lets the order page offer a link straight to that
+-- parcel.
+--
+-- COLUMN
+--   tracking_carrier   The carrier's id from CARRIER_IDS in
+--                      src/types/order-view.ts (e.g. 'dhl', 'an-post'). Null =
+--                      no carrier named. Only ever set beside a tracking number.
+--
+-- STILL NOT A LINK. 20260927_order_fulfilment keeps the tracking number to
+-- reference-code characters because it is shown to a buyer on the seller's
+-- behalf. That holds: no URL is stored and no seller types one. The link is
+-- BUILT by the app (src/lib/orders/carriers.ts) from the carrier's own fixed
+-- https tracking page plus the encoded number.
+--
+-- ONE LIST, NOT TWO. The CHECK below holds the SHAPE of an id, not the list of
+-- carriers. The list lives in the app alone, so adding a carrier is one edit
+-- and cannot leave a database list behind it (the notification-type trap). An
+-- id the app does not know reads as "no carrier" (parseCarrier), and the
+-- server action refuses to write one (carrierSchema).
+--
+-- THE FUNCTION. order_mark_shipped gains a third argument, p_carrier. Changing
+-- an argument list makes a NEW function, so the two-argument one is dropped
+-- first: left behind, it would be a second way to ship an order that knows
+-- nothing about the carrier. Every gate is restated unchanged (two-factor
+-- session, owner or orders.fulfil, 'not_found' for any refusal), and the
+-- grants are set again explicitly because a new function is auto-granted to
+-- anon.
+--
+-- DEPLOY ORDER: this migration FIRST, then the app. The released app calls
+-- order_mark_shipped with its two named arguments, which the new function
+-- still answers (p_carrier defaults to null). The new app selects
+-- orders.tracking_carrier on every order read, which fails until this has run.
+--
+-- Apply via the Management API query endpoint or the SQL editor.
+
+-- ---- 1. Column -----------------------------------------------------------------
+
+alter table public.orders
+  add column tracking_carrier text;
+
+alter table public.orders
+  add constraint orders_tracking_carrier_shape
+    check (tracking_carrier is null or tracking_carrier ~ '^[a-z0-9-]{2,24}$'),
+  add constraint orders_tracking_carrier_needs_number
+    check (tracking_carrier is null or tracking_number is not null);
+
+comment on column public.orders.tracking_carrier is
+  'Optional carrier id (CARRIER_IDS in src/types/order-view.ts), only beside a tracking number. An id, never a URL: the tracking link is built by the app from the carrier''s fixed tracking page.';
+
+-- ---- 2. Marking an order shipped -------------------------------------------------
+-- As 20260927_order_fulfilment, plus the carrier. Results are unchanged:
+--
+--   'shipped'           unfulfilled -> shipped, stamped now, tracking stored
+--   'tracking_updated'  already shipped; the tracking number or carrier changed
+--   'unchanged'         already shipped with this exact number and carrier
+--   'not_shippable'     not paid (pending, refunded, disputed), or nothing ships
+--   'not_found'         no such order, or not yours to ship
+--
+-- A carrier given without a tracking number is dropped, not refused: it says
+-- where a number is followed, and there is no number.
+
+drop function if exists public.order_mark_shipped(uuid, text);
+
+create function public.order_mark_shipped(
+  p_order_id uuid,
+  p_tracking_number text default null,
+  p_carrier text default null
+)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  target public.orders%rowtype;
+  tracking text := nullif(btrim(coalesce(p_tracking_number, '')), '');
+  carrier text := nullif(btrim(coalesce(p_carrier, '')), '');
+begin
+  if not public.mfa_session_ok() then
+    return 'not_found';
+  end if;
+
+  if tracking is null then
+    carrier := null;
+  end if;
+
+  select * into target
+    from public.orders
+   where id = p_order_id
+     for update;
+
+  if not found
+     or not (
+       target.seller_id = (select auth.uid())
+       or public.team_role_can(public.team_actor_role(target.seller_id), 'orders.fulfil')
+     ) then
+    return 'not_found';
+  end if;
+
+  if target.status <> 'paid' or target.fulfilment_status = 'not_required' then
+    return 'not_shippable';
+  end if;
+
+  if target.fulfilment_status = 'shipped' then
+    if tracking is not distinct from target.tracking_number
+       and carrier is not distinct from target.tracking_carrier then
+      return 'unchanged';
+    end if;
+    update public.orders
+       set tracking_number = tracking,
+           tracking_carrier = carrier
+     where id = target.id;
+    return 'tracking_updated';
+  end if;
+
+  update public.orders
+     set fulfilment_status = 'shipped',
+         shipped_at = now(),
+         tracking_number = tracking,
+         tracking_carrier = carrier
+   where id = target.id;
+  return 'shipped';
+end
+$$;
+
+-- A new function is auto-granted to anon (the PostgREST auto-grant trap), so
+-- the grant is set explicitly both ways.
+revoke execute on function public.order_mark_shipped(uuid, text, text) from public, anon;
+grant execute on function public.order_mark_shipped(uuid, text, text) to authenticated, service_role;
+
+comment on function public.order_mark_shipped(uuid, text, text) is
+  'Seller marks a paid order shipped (optionally with a tracking number and its carrier), or changes them on a shipped one. Self-gated: 2FA session bar, owner or orders.fulfil. Returns shipped | tracking_updated | unchanged | not_shippable | not_found.';
 
 notify pgrst, 'reload schema';

@@ -608,6 +608,18 @@
     "storefronts": "Your {plan, select, free {Free} starter {Starter} pro {Pro} other {current}} plan includes {cap, plural, one {# storefront} other {# storefronts}}, and your store has them all.",
     "teamSeats": "Your {plan, select, free {Free} starter {Starter} pro {Pro} other {current}} plan includes {cap, plural, one {# seat} other {# seats}}, you included, and they're all taken.",
     "fix": "Upgrade for more, or remove one you no longer need. Nothing you have is affected.",
-    "action": "See plans"
+    "action": "See plans",
+    "products": "Your {plan, select, free {Free} starter {Starter} pro {Pro} other {current}} plan includes {cap, plural, one {# product} other {# products}}, and your store has them all.",
+    "fixTop": "Remove one you no longer need to add another. Nothing you have is affected."
+  },
+  "ordersExport": {
+    "signIn": "Sign in to export your orders.",
+    "permissionDenied": "You don't have access to this store's orders.",
+    "unavailable": "Your orders can't be exported right now.",
+    "tryAgain": "Try again in a moment.",
+    "planRequired": "Exporting orders is part of a paid plan.",
+    "planRequiredFix": "Upgrade on the Plans page to export your orders.",
+    "rateLimited": "That's a lot of exports in a short time.",
+    "rateLimitedFix": "Wait a few minutes, then try again."
   }
 }

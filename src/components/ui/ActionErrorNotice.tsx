@@ -7,9 +7,8 @@ import { useTranslations } from "next-intl";
 import { errorTextClass, helpTextClass } from "@/components/ui/control-styles";
 import { useToast } from "@/components/ui/Toast";
 import type { SaveResult } from "@/components/ui/SaveButton";
-import { usePricingModal } from "@/components/billing/pricing-modal-context";
 import type { MessageRef, MessageValues } from "@/i18n/types";
-import { actionHref, type ActionError, type ActionState } from "@/lib/errors";
+import type { ActionError, ActionState } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 
 /**
@@ -120,35 +119,23 @@ export function ActionErrorNotice({
   className?: string;
 }) {
   const resolve = useResolveMessage();
-  const pricing = usePricingModal();
-  const target = error.action;
-  let action: React.ReactNode = null;
-  if (target && "pricing" in target && pricing) {
-    // "A bigger plan lifts this": the plans open over the page, never a
-    // navigation, so a form with unsaved work keeps it. Ink, not red: an
-    // upgrade is the way forward, not a second error.
-    action = (
-      <button
-        type="button"
-        onClick={() => pricing.open({ source: target.pricing })}
-        className={cn(actionButtonClass, "border-foreground text-foreground hover:bg-foreground")}
-      >
-        {resolve(target.label)}
-      </button>
-    );
-  } else if (target) {
-    // Outlined rather than filled, matching SellerDetailsNotice: the only
-    // solid buttons in this dashboard are its black primaries. A pricing
-    // action with no modal around it becomes a link to the plans page.
-    action = (
-      <Link
-        href={actionHref(target)}
-        className={cn(actionButtonClass, "border-destructive/40 text-destructive hover:bg-destructive")}
-      >
-        {resolve(target.label)}
-      </Link>
-    );
-  }
+  const action = error.action ? (
+    <Link
+      href={error.action.href}
+      // Outlined rather than filled, matching SellerDetailsNotice: the only
+      // solid buttons in this dashboard are its black primaries. Ink rather
+      // than red for a plan limit: a bigger plan is the way forward, not a
+      // second error.
+      className={cn(
+        actionButtonClass,
+        error.code === "plan_limit"
+          ? "border-foreground text-foreground hover:bg-foreground"
+          : "border-destructive/40 text-destructive hover:bg-destructive",
+      )}
+    >
+      {resolve(error.action.label)}
+    </Link>
+  ) : null;
 
   if (variant === "inline") {
     return (

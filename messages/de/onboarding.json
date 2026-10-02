@@ -201,7 +201,7 @@
       },
       "ordersSearch": {
         "title": "Eine Bestellung finden",
-        "body": "Suche nach der E-Mail-Adresse des Käufers. Bestellungen erscheinen hier, sobald der Square Share Checkout startet."
+        "body": "Durchsuche diese Liste nach der E-Mail-Adresse des Käufers. Eine Bestellung findest du über ihre Nummer, einen Namen, eine Stadt oder eine Tracking-Nummer mit der Suche oben auf der Seite."
       },
       "ordersFilters": {
         "title": "Filtern und sortieren",

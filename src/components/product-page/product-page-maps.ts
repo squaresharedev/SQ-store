@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { isLightColor } from "@/lib/format/color";
+import { cssUrl } from "@/components/storefront/background-presets";
 import {
   PRODUCT_PAGE_CTA_RADIUS_MAX,
   type ProductPageConfig,
@@ -195,6 +196,35 @@ export function chipStyle(ink: string, cornerRadius: number): CSSProperties {
     backgroundColor: ink === LIGHT_INK ? "rgba(255,255,255,0.14)" : "rgba(23,23,23,0.06)",
     color: ink,
     borderRadius: `${controlRadius(cornerRadius)}px`,
+  };
+}
+
+/** How much of a hosted page's photo backdrop is covered by a veil of the
+ *  page's own colour. The ink is derived from that colour, so the veil is what
+ *  makes any photograph a surface the page's words can sit on; the rest of the
+ *  photo is what the seller chose it for. */
+export const PAGE_PHOTO_VEIL = 0.72;
+
+/** A strict #rrggbb as rgba(), for a veil. Anything else answers transparent. */
+function veilColor(hex: string, alpha: number): string {
+  const match = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!match) return "transparent";
+  const int = parseInt(match[1], 16);
+  return `rgba(${(int >> 16) & 255},${(int >> 8) & 255},${int & 255},${alpha})`;
+}
+
+/**
+ * The paint of a hosted page's photo backdrop: the photo to cover the page,
+ * under a veil of `tint` (the page's colour). Applied to a layer behind the
+ * page's content (PageShell), never to the content itself.
+ */
+export function pagePhotoStyle(photo: { url: string; tint: string }): CSSProperties {
+  const veil = veilColor(photo.tint, PAGE_PHOTO_VEIL);
+  return {
+    backgroundImage: `linear-gradient(${veil}, ${veil}), ${cssUrl(photo.url)}`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
   };
 }
 

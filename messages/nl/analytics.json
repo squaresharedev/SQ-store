@@ -197,5 +197,9 @@
       "byWeekday": "Afrekenweergaven per weekdag",
       "byStorefront": "Afrekenweergaven per etalage"
     }
+  },
+  "export": {
+    "button": "Rapport downloaden",
+    "lockedTitle": "Statistiekrapporten zijn onderdeel van {plan}."
   }
 }

@@ -175,7 +175,7 @@
     "prefs": {
       "sales": {
         "label": "Predaje",
-        "blurb": "Pošlite mi e-mail zakaždým, keď sa niečo predá. Taký šum v doručenej pošte sa počíta."
+        "blurb": "Pošlite mi e-mail, keď sa niečo predá, s informáciou, čo zbaliť a kam to poslať."
       },
       "productUpdates": {
         "label": "Aktualizácie produktu",
@@ -188,7 +188,8 @@
     },
     "success": {
       "notificationsSaved": "Predvoľby uložené."
-    }
+    },
+    "emailOff": "E-mail ešte nie je pre Square Share zapnutý, takže sa nič z nižšie uvedeného neposiela. Nové objednávky sa stále zobrazujú v Objednávkach a vo vašich upozorneniach."
   },
   "legal": {
     "cardTitle": "Zmluva s predajcom, podmienky a ochrana súkromia",
@@ -412,7 +413,8 @@
       "removeNamed": "Odstrániť oblasť doručenia {area}",
       "removeNumbered": "Odstrániť oblasť doručenia {number}",
       "add": "Pridať oblasť doručenia",
-      "limitReached": "{max, plural, one {Môžete pridať najviac # oblasť doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.} few {Môžete pridať najviac # oblasti doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.} many {Môžete pridať najviac # oblasti doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.} other {Môžete pridať najviac # oblastí doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.}}"
+      "limitReached": "{max, plural, one {Môžete pridať najviac # oblasť doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.} few {Môžete pridať najviac # oblasti doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.} many {Môžete pridať najviac # oblasti doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.} other {Môžete pridať najviac # oblastí doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.}}",
+      "needsRate": "Pokladňa nemôže použiť tento riadok, kým nemá sadzbu aj krajinu. Kupujúci si ho stále prečítajú na stránke produktu."
     },
     "rates": {
       "title": "Sadzby za dopravu",

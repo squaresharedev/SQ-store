@@ -53,12 +53,19 @@ type PricedDestination = ShippingDestination & {
   countries: string[];
 };
 
-function isPriced(dest: ShippingDestination): dest is PricedDestination {
+export function isPriced(dest: ShippingDestination): dest is PricedDestination {
   return (
     typeof dest.rateCents === "number" &&
     Array.isArray(dest.countries) &&
     dest.countries.length > 0
   );
+}
+
+/** Whether the policy has any destination checkout can quote from, whatever
+ *  currency it is in. "Has the seller priced delivery at all", for the places
+ *  that nudge them to (the dashboard, the shipping settings). */
+export function hasPricedDestination(policy: SellerShippingPolicy): boolean {
+  return (policy.destinations ?? []).some(isPriced);
 }
 
 // ── Public API ─────────────────────────────────────────────────────────────────

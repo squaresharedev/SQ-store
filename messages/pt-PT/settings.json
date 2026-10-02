@@ -175,7 +175,7 @@
     "prefs": {
       "sales": {
         "label": "Vendas",
-        "blurb": "Envie-me um e-mail sempre que houver uma venda. O tipo bom de barulho na caixa de entrada."
+        "blurb": "Envie-me um e-mail quando algo for vendido, com o que embalar e para onde enviar."
       },
       "productUpdates": {
         "label": "Atualizações do produto",
@@ -188,7 +188,8 @@
     },
     "success": {
       "notificationsSaved": "Preferências guardadas."
-    }
+    },
+    "emailOff": "O e-mail ainda não está ativado na Square Share, por isso nada do que está abaixo é enviado. As novas encomendas continuam a aparecer em Encomendas e nas suas notificações."
   },
   "legal": {
     "cardTitle": "Acordo de vendedor, Termos e Privacidade",
@@ -412,7 +413,8 @@
       "removeNamed": "Remover o destino {area}",
       "removeNumbered": "Remover o destino {number}",
       "add": "Adicionar um destino",
-      "limitReached": "{max, plural, one {É o máximo: # destino. Remova um para adicionar outro.} many {É o máximo: # destinos. Remova um para adicionar outro.} other {É o máximo: # destinos. Remova um para adicionar outro.}}"
+      "limitReached": "{max, plural, one {É o máximo: # destino. Remova um para adicionar outro.} many {É o máximo: # destinos. Remova um para adicionar outro.} other {É o máximo: # destinos. Remova um para adicionar outro.}}",
+      "needsRate": "A finalização de compra não pode usar esta linha até ter taxa e país. Os compradores continuam a vê-la na página de produto."
     },
     "rates": {
       "title": "Taxas de envio",

@@ -1,4 +1,4 @@
-import { Check, Download, MapPin } from "lucide-react";
+import { Check, Download, ExternalLink, MapPin } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/format/money";
@@ -9,7 +9,7 @@ import { CTA_BUTTON_CLASS, ctaStyle, subtleFill } from "@/components/product-pag
 import { PageShell } from "@/components/product-page/PageShell";
 import { PoweredByFooter } from "@/components/product-page/PoweredByFooter";
 import type { OrderPageData } from "@/types/checkout";
-import { CelebrationConfetti, CelebrationRays } from "./Celebration";
+import { CelebrationConfetti } from "./Celebration";
 import { CELEBRATION_ORIGIN } from "./confetti";
 import { MakerNote } from "./CheckoutShowcase";
 import { EditableText } from "./EditableText";
@@ -19,7 +19,14 @@ import { VersionChips } from "./VersionChips";
 import { WithdrawalPanel } from "./WithdrawalPanel";
 import { resolveCheckoutTheme } from "./checkout-theme";
 
-type Step = { key: string; title: string; detail: string | null; done: boolean };
+type Step = {
+  key: string;
+  title: string;
+  detail: string | null;
+  done: boolean;
+  /** Somewhere to go from this step: the carrier's page for the parcel. */
+  link?: { href: string; label: string };
+};
 
 /**
  * THE ORDER PAGE: the thank-you a buyer lands on straight after paying, and
@@ -86,6 +93,16 @@ export function OrderStatusView({
             .join(" · ") || null
         : t("timeline.notYet"),
       done: shipped,
+      // Only when the seller named the carrier: a number alone says nothing
+      // about whose site it belongs to, and a guessed link is worse than none.
+      ...(shipped && order.trackingLink
+        ? {
+            link: {
+              href: order.trackingLink.url,
+              label: t("timeline.track", { carrier: order.trackingLink.carrier }),
+            },
+          }
+        : {}),
     });
   }
   const current = steps.findIndex((step) => !step.done);
@@ -94,13 +111,12 @@ export function OrderStatusView({
     <PageShell
       storefront={storefront}
       backgroundColor={theme.surface}
-      surfaceLayers={theme.surfaceTexture}
+      photo={storefront.pagePhotoUrl ? { url: storefront.pagePhotoUrl, tint: theme.surface } : null}
       font={productPage.font}
       ink={theme.ink}
       preview={preview}
       rootAttributes={{
         "data-order-page": mode,
-        "data-checkout-texture": checkoutPage.texture ?? "none",
         "data-page-ink": theme.ink,
         "data-order-fulfilment": order.fulfilment,
       }}
@@ -130,13 +146,10 @@ export function OrderStatusView({
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 @md:px-6 @3xl:py-16">
         {/* THE WELCOME: the one part of this page the seller designs. */}
         <section
-          className="relative isolate flex flex-col items-center gap-4 text-center"
+          className="flex flex-col items-center gap-4 text-center"
           data-setting-hotspot="thanks"
           data-order-hero=""
         >
-          {checkoutPage.celebrate === "rays" && (
-            <CelebrationRays play={placed} accent={storefront.theme.accent} />
-          )}
           <span
             className="flex size-14 items-center justify-center rounded-full"
             style={{ backgroundColor: theme.cta.fill, color: theme.cta.text }}
@@ -180,12 +193,7 @@ export function OrderStatusView({
         {/* WHAT WAS BOUGHT. */}
         <section
           className="flex items-center gap-4 border p-4"
-          // A clean card on a textured page, like the checkout's summary.
-          style={{
-            borderColor: theme.rule,
-            borderRadius: `${theme.surfaceRadius}px`,
-            backgroundColor: theme.surface,
-          }}
+          style={{ borderColor: theme.rule, borderRadius: `${theme.surfaceRadius}px` }}
           data-order-summary=""
         >
           {order.photo && (
@@ -267,6 +275,22 @@ export function OrderStatusView({
                     {step.title}
                   </p>
                   {step.detail && <p className="text-sm opacity-70">{step.detail}</p>}
+                  {step.link && (
+                    // The carrier's own site, in a new tab so the order page
+                    // stays open. noreferrer: this page's address is the
+                    // buyer's credential and must not travel with the click.
+                    <a
+                      href={preview ? undefined : step.link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex w-fit items-center gap-1 text-sm font-medium underline underline-offset-2"
+                      data-order-track=""
+                      data-setting-skip=""
+                    >
+                      {step.link.label}
+                      <ExternalLink className="size-3.5 shrink-0" strokeWidth={2} aria-hidden="true" />
+                    </a>
+                  )}
                 </div>
               </li>
             ))}

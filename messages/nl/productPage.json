@@ -195,6 +195,7 @@
       "shipped": "Onderweg",
       "shippedDetail": "Verzonden op {date}",
       "tracking": "Trackingnummer {number}",
+      "track": "Volgen bij {carrier}",
       "notYet": "Je ontvangt een e-mail zodra het verzonden is.",
       "ready": "Klaar om te downloaden",
       "readyDetail": "Je bestand staat hieronder klaar en de link staat ook in je e-mail."
@@ -262,6 +263,8 @@
       "region": "Provincie of regio",
       "postalCode": "Postcode",
       "country": "Land",
+      "phone": "Telefoon (optioneel)",
+      "phoneHint": "Alleen voor de bezorger, voor als die je over de levering moet bereiken.",
       "whyAsk": "Waarom we dit vragen"
     },
     "gift": {
@@ -309,11 +312,11 @@
     },
     "pay": "Bestelling met betalingsverplichting ({amount})",
     "placing": "Bestelling wordt geplaatst...",
-    "unwired": "Afrekenen opent voor kopers wanneer je Stripe verbindt.",
     "errors": {
       "title": "We konden je bestelling niet plaatsen",
       "required": "Dit is verplicht.",
       "email": "Vul een e-mailadres in zoals naam@voorbeeld.nl.",
+      "phone": "Vul een telefoonnummer in cijfers in, zoals +31 6 12345678.",
       "fields": "Controleer de gemarkeerde velden.",
       "consent": "Vink het vakje aan om te bevestigen dat je de download meteen wilt.",
       "sold_out": "Sorry, dit is net uitverkocht. Er is niets in rekening gebracht.",

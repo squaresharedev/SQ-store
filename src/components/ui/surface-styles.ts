@@ -54,6 +54,26 @@ export const badgeClass =
   "rounded-full bg-secondary px-2 py-0.5 font-inter text-xs font-medium";
 
 /**
+ * An ink pill that marks the one thing in a set worth looking at first ("Best
+ * value" on a plan, "Cheapest for you" in the calculator). Monochrome: the
+ * ink is the emphasis, never a colour.
+ */
+export const inkBadgeClass =
+  "inline-flex shrink-0 items-center gap-1 rounded-full bg-foreground px-2 py-0.5 font-inter text-xs font-medium text-background";
+
+/**
+ * The card a set leads with (the recommended plan): an ink outline and a
+ * lifted shadow instead of a tint, so it stands out without a colour.
+ */
+export const featuredCardClass = "border-foreground ring-1 ring-foreground shadow-md";
+
+/**
+ * The small uppercase label over a group of content ("Everything in Free,
+ * plus", a section's kicker). Quiet on purpose: the content is the loud thing.
+ */
+export const eyebrowClass = "font-inter text-xs font-medium uppercase tracking-wide text-muted-foreground";
+
+/**
  * A strip across the top of every dashboard page for a standing condition the
  * seller must act on (seller details missing, a plan payment failing). The
  * tint alone separates it from the page: no rule underneath.

@@ -3,77 +3,51 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
 import { AnimatedCheck } from "@/components/ui/animated-check";
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { PortalButton } from "@/components/billing/PortalButton";
-import { usePricingModal } from "@/components/billing/pricing-modal-context";
+import { UpgradeCard } from "@/components/billing/UpgradeCard";
+import { SERVER_BILLING_ACTIONS, navigateOf, type BillingActions } from "@/components/billing/billing-actions";
 import { cn } from "@/lib/utils";
 import { formatLongDate } from "@/lib/format/date";
 import { formatCents } from "@/lib/format/money";
 import { formatFeeRate } from "@/lib/billing/format";
-import { openBillingPortal, type PortalState } from "@/lib/billing/actions";
 import type { CheckoutReturn } from "@/lib/billing/checkout-return";
-import type { SubscriptionStatus } from "@/lib/billing/entitlement";
-import { BILLING_SETTINGS_PATH, pricingHref } from "@/lib/billing/paths";
-import {
-  BILLING_CURRENCY,
-  PLANS,
-  PLAN_LIMIT_KEYS,
-  isPaidPlan,
-  type BillingInterval,
-  type PlanId,
-  type PlanLimitKey,
-} from "@/lib/billing/plans";
-
-const leaveFor = (url: string) => window.location.assign(url);
+import type { PricingContext } from "@/lib/billing/pricing-context";
+import { BILLING_SETTINGS_PATH } from "@/lib/billing/paths";
+import { BILLING_CURRENCY, PLANS, PLAN_LIMIT_KEYS, isPaidPlan } from "@/lib/billing/plans";
 
 /**
- * Settings › Plan & billing (see app/settings/billing/page.tsx): three cards.
+ * Settings › Plan & billing (see app/settings/billing/page.tsx):
  *
  *   Your plan            which plan, what it costs, when it renews or ends,
- *                        the fee on each sale, and "Change plan".
+ *                        and the fee on each sale.
+ *   The upgrade          for the owner: the plan one step up and what it
+ *                        would change for this store (UpgradeCard); on the top
+ *                        plan, what it includes.
  *   What you're using    storefronts and team seats against the plan's caps.
  *   Billing & invoices   the Stripe Customer Portal (owner only, 2FA first).
+ *
+ * The upgrade is left out while a payment is failing: the one thing worth
+ * asking then is a working card, which "Manage billing" is for.
  */
-export function BillingSettings({
-  plan,
-  interval,
-  status,
-  priceCents,
-  currency,
-  currentPeriodEnd,
-  cancelAtPeriodEnd,
-  hasBillingAccount,
-  usage,
-  canManage,
-  available,
+export function BillingSection({
+  context,
   returned,
-  portalAction = openBillingPortal,
-  navigate = leaveFor,
+  actions = SERVER_BILLING_ACTIONS,
 }: {
-  plan: PlanId;
-  interval: BillingInterval | null;
-  status: SubscriptionStatus | "none";
-  priceCents: number | null;
-  currency: string | null;
-  currentPeriodEnd: string | null;
-  cancelAtPeriodEnd: boolean;
-  hasBillingAccount: boolean;
-  usage: Record<PlanLimitKey, number | null>;
-  canManage: boolean;
-  available: boolean;
+  context: PricingContext;
+  /** Back from Stripe Checkout, confirmed (or still pending) on the server. */
   returned: CheckoutReturn | null;
-  /** openBillingPortal, or a stand-in on /dev/pricing. */
-  portalAction?: (prev: PortalState, formData: FormData) => Promise<PortalState>;
-  /** Leave for Stripe's page; a full navigation by default. */
-  navigate?: (url: string) => void;
+  /** The server calls, or stand-ins on /dev/pricing. */
+  actions?: BillingActions;
 }) {
   const t = useTranslations("Billing");
   const locale = useLocale();
   const router = useRouter();
-  const pricing = usePricingModal();
+  const { plan, interval, status, priceCents, currency, currentPeriodEnd, cancelAtPeriodEnd, usage, canManage } =
+    context;
   const planName = t(`plans.${plan}.name`);
   const paid = isPaidPlan(plan);
 
@@ -84,11 +58,6 @@ export function BillingSettings({
     if (!returned) return;
     router.replace(BILLING_SETTINGS_PATH);
   }, [returned, router]);
-
-  const openPlans = () => {
-    if (pricing) pricing.open({ source: "settings" });
-    else router.push(pricingHref("settings"));
-  };
 
   const renewal = !paid
     ? null
@@ -115,7 +84,7 @@ export function BillingSettings({
         </p>
       )}
 
-      <SettingsCard id="plan" title={t("settings.planTitle")} description={t("settings.planDescription")} decoration="glow">
+      <SettingsCard id="plan" title={t("settings.planTitle")} description={t("settings.planDescription")}>
         <div data-billing-plan={plan} className="space-y-1">
           <p className="text-2xl font-semibold text-foreground">{planName}</p>
           <p className={helpTextClass}>
@@ -129,13 +98,10 @@ export function BillingSettings({
           {renewal && <p className={cn(helpTextClass, status === "past_due" && "text-destructive")}>{renewal}</p>}
           <p className={helpTextClass}>{t("settings.feeLine", { rate: formatFeeRate(PLANS[plan].feeBps, locale) })}</p>
         </div>
-        <div className="mt-5">
-          <Button variant={paid ? "secondary" : "primary"} onClick={openPlans}>
-            {paid ? t("settings.changePlan") : t("settings.seePlans")}
-          </Button>
-        </div>
         {!canManage && <p className={cn(infoTextClass, "mt-3")}>{t("settings.memberNote")}</p>}
       </SettingsCard>
+
+      {canManage && status !== "past_due" && <UpgradeCard context={context} actions={actions} />}
 
       <SettingsCard id="usage" title={t("settings.usageTitle")} description={t("settings.usageDescription")}>
         <ul className="space-y-2">
@@ -158,7 +124,7 @@ export function BillingSettings({
 
       {canManage && (
         <SettingsCard id="invoices" title={t("settings.invoicesTitle")} description={t("settings.invoicesDescription")}>
-          {hasBillingAccount && available ? (
+          {context.hasBillingAccount && context.available ? (
             <div className="max-w-xs">
               <PortalButton
                 id="billing-portal-manage"
@@ -166,8 +132,8 @@ export function BillingSettings({
                 source="settings"
                 label={t("settings.manage")}
                 variant="secondary"
-                action={portalAction}
-                navigate={navigate}
+                action={actions.openPortal}
+                navigate={navigateOf(actions)}
               />
             </div>
           ) : (

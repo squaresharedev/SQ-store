@@ -20,7 +20,6 @@ import {
   CHECKOUT_HEADLINE_MAX,
   CHECKOUT_LAYOUTS,
   CHECKOUT_NOTE_MAX,
-  CHECKOUT_TEXTURES,
   CHECKOUT_THANKS_MESSAGE_MAX,
   IMAGE_SCALE_MAX,
   IMAGE_SCALE_MIN,
@@ -78,6 +77,7 @@ import {
   TITLE_INSET_MAX,
   TITLE_STYLES,
   blockKey,
+  type CheckoutCelebration,
   type StorefrontBackground,
   type StorefrontConfig,
 } from "@/types/storefront";
@@ -467,6 +467,18 @@ const RETIRED_PRODUCT_PAGE_FIELDS = [
   "textColor",
 ] as const;
 
+/** A photo behind a hosted page: the key of an image this seller uploaded (the
+ *  same images/ objects the storefront's background uses), nothing else. */
+const pagePhotoSchema = z.strictObject({
+  key: z
+    .string()
+    .max(600)
+    .regex(OBJECT_KEY_PATTERN)
+    .refine((key) => key.startsWith("images/"), {
+      error: issueKey("Validation.storefront.backgroundImageKind"),
+    }),
+});
+
 export const productPageSchema = z.preprocess(
   (value) => {
     if (typeof value !== "object" || value === null) return value;
@@ -481,6 +493,7 @@ export const productPageSchema = z.preprocess(
     // The page's own backdrop; absent = the storefront's background. Strict
     // hex like every other colour here, and a colour only: see the type.
     backgroundColor: hexColorSchema.optional(),
+    backgroundImage: pagePhotoSchema.optional(),
     imageFit: z.enum(IMAGE_FITS),
     // Absent = the storefront's own font, which is the default.
     font: z.enum(STOREFRONT_FONTS).optional(),
@@ -516,17 +529,37 @@ export const productPageSchema = z.preprocess(
   }),
 );
 
+/**
+ * What a checkout saved by an earlier version may still carry, and what it
+ * means now, applied before the strict parse (the same pattern as
+ * RETIRED_PRODUCT_PAGE_FIELDS: a strictObject would otherwise refuse the whole
+ * member, and the seller's checkout would silently fall back to the defaults).
+ *
+ * - `texture`: a pattern over the checkout's surface, retired 2026-09-30 in
+ *   favour of textures on product OPTIONS (ProductOption.texture), where a
+ *   texture describes the thing being sold. Dropped.
+ * - `celebrate: "rays"`: the soft light burst, retired the same day. Read as
+ *   confetti, the default, so a seller who chose to celebrate still does.
+ */
+const RETIRED_CHECKOUT_PAGE_FIELDS = ["texture"] as const;
+const RETIRED_CELEBRATIONS: Record<string, CheckoutCelebration> = { rays: "confetti" };
+
 // The hosted checkout's own design. Same discipline as the product page: every
 // member a closed enum, a boolean, a strict hex or capped plain text, and the
 // words a seller writes here go through sellerProse, which keeps links, email
 // addresses and bank details off the one page where a buyer is about to pay.
-export const checkoutPageSchema = z.strictObject({
+export const checkoutPageSchema = z.preprocess((value) => {
+  if (typeof value !== "object" || value === null) return value;
+  const config = value as Record<string, unknown>;
+  const celebrate = typeof config.celebrate === "string" ? RETIRED_CELEBRATIONS[config.celebrate] : undefined;
+  if (!celebrate && !RETIRED_CHECKOUT_PAGE_FIELDS.some((field) => field in config)) return value;
+  const next: Record<string, unknown> = { ...config, ...(celebrate ? { celebrate } : {}) };
+  for (const field of RETIRED_CHECKOUT_PAGE_FIELDS) delete next[field];
+  return next;
+}, z.strictObject({
   layout: z.enum(CHECKOUT_LAYOUTS),
   backgroundColor: hexColorSchema.optional(),
-  // Optional, absent = plain: a checkout saved before textures existed parses
-  // unchanged, which a required member would not (strictObject drops the
-  // whole member on a miss).
-  texture: z.enum(CHECKOUT_TEXTURES).optional(),
+  backgroundImage: pagePhotoSchema.optional(),
   headline: sellerProse({ field: "checkoutHeadline", max: CHECKOUT_HEADLINE_MAX }).optional(),
   note: sellerProse({ field: "checkoutNote", max: CHECKOUT_NOTE_MAX, multiline: true }).optional(),
   giftMessage: z.boolean(),
@@ -537,7 +570,7 @@ export const checkoutPageSchema = z.strictObject({
     multiline: true,
   }).optional(),
   celebrate: z.enum(CHECKOUT_CELEBRATIONS),
-});
+}));
 
 // `policiesSchema` lived here. Shipping and returns terms are account-level
 // now (Settings › Shipping & returns, lib/validation/shipping-policy.ts) — a

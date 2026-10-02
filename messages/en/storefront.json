@@ -145,8 +145,9 @@
       "checkoutGift": "Gift messages",
       "thankYouMessage": "Thank-you message",
       "thankYouCelebration": "Thank-you celebration",
-      "checkoutTexture": "Checkout texture",
-      "checkoutPayButton": "Pay button"
+      "checkoutPayButton": "Pay button",
+      "productPagePhoto": "Product page photo",
+      "checkoutPhoto": "Checkout and thank-you photo"
     }
   },
   "editorSearch": {
@@ -790,6 +791,11 @@
       "nothingSet": "Nothing set yet. Until you add your business details, buyers only see the “Sold by” line under the title.",
       "editSettings": "Edit in Settings",
       "addDetails": "Add your business details"
+    },
+    "groups": {
+      "look": "Look",
+      "style": "Style",
+      "besidePrice": "Beside the price"
     }
   },
   "productBlock": {
@@ -1154,10 +1160,6 @@
         "speaker": {
           "title": "Portable speaker",
           "description": "Waterproof, with 12 hours of play on a single charge."
-        },
-        "succulent": {
-          "title": "Desk succulent",
-          "description": "A small haworthia in a ceramic pot. Needs water about once a month."
         }
       }
     }
@@ -1321,7 +1323,6 @@
     }
   },
   "checkoutPage": {
-    "unwired": "Buyers reach checkout once you connect Stripe. You can design it now.",
     "charsLeft": "{count, plural, one {# character left} other {# characters left}}",
     "layout": {
       "title": "Layout",
@@ -1336,16 +1337,7 @@
       "button": "The pay button matches your product page's buy button.",
       "styleButton": "Style the button",
       "payButton": "Pay button",
-      "payButtonInfoLabel": "About the pay button",
-      "texture": {
-        "label": "Texture",
-        "none": "Plain",
-        "paper": "Paper",
-        "dots": "Dots",
-        "grid": "Grid",
-        "lines": "Lines",
-        "linen": "Linen"
-      }
+      "payButtonInfoLabel": "About the pay button"
     },
     "message": {
       "title": "Words",
@@ -1365,14 +1357,15 @@
       "message": "Message",
       "messagePlaceholder": "What happens next, in your own words",
       "celebrate": {
-        "label": "Celebration",
         "confetti": "Confetti",
-        "rays": "Light",
-        "none": "None",
         "play": "Play it"
       }
-    },
-    "unwiredBadge": "Not live yet",
-    "unwiredInfoLabel": "When buyers can reach checkout"
+    }
+  },
+  "pagePhoto": {
+    "label": "Photo",
+    "infoLabel": "How the photo is used",
+    "info": "Drawn behind the page and tinted with the page color, so the text stays readable. Change the color to make the photo lighter or darker.",
+    "remove": "Remove photo"
   }
 }

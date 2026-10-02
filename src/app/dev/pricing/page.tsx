@@ -2,11 +2,12 @@ import { notFound } from "next/navigation";
 import { PlanStatusBanner } from "@/components/billing/PlanStatusBanner";
 import { PricingGallery } from "./PricingGallery";
 
-// Living reference for plans & billing (components/billing): the pricing modal
-// in every state a store can be in, with stand-in actions (nothing is bought,
-// nothing leaves the page), the rail's plan chip, the past-due banner as an
-// owner and as a teammate, and the settings page's cards. No account, no
-// database, no Stripe. Dev-only: the route 404s in production builds.
+// Living reference for plans & billing (components/billing): the plans page,
+// the settings page and its upsell card in every state a store can be in,
+// with stand-in actions (nothing is bought, nothing leaves the page), plus the
+// rail's plan chip, the Orders export button (locked and not), and the
+// past-due banner as an owner and as a teammate. No account, no database, no
+// Stripe. Dev-only: the route 404s in production builds.
 
 export const metadata = { title: "Pricing: dev gallery" };
 

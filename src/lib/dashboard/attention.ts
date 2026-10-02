@@ -29,6 +29,7 @@ export type ProfileAttentionData = Pick<
   | "sellerEmail"
   | "sellerAddress"
   | "shippingPolicySet"
+  | "shippingRatesSet"
   | "legalAcceptedVersion"
 >;
 
@@ -78,6 +79,7 @@ export function buildAttentionItems({
   setupVisible = false,
   twoFactorEnabled = true,
   toShipCount = 0,
+  checkoutOpen = false,
 }: {
   orders: DashboardOrdersData;
   products: ProductsSummary;
@@ -110,6 +112,12 @@ export function buildAttentionItems({
   twoFactorEnabled?: boolean;
   /** Paid orders waiting to be shipped (lib/orders/queries.ts countOrdersToShip). */
   toShipCount?: number;
+  /**
+   * A buyer can pay through Square Share checkout right now
+   * (lib/checkout/availability.ts). Only then does an unpriced delivery policy
+   * cost a sale, so only then does it earn a row.
+   */
+  checkoutOpen?: boolean;
 }): AttentionItem[] {
   const items: AttentionItem[] = [];
 
@@ -219,6 +227,28 @@ export function buildAttentionItems({
       description: msg("Dashboard.attention.noShipping.description"),
       href: "/settings/shipping",
       actionLabel: msg("Dashboard.attention.noShipping.action"),
+    });
+  }
+
+  // Delivery prices: terms are written, checkout is open, and no destination
+  // carries both a rate and a country. A physical product then has no Pay
+  // button (lib/checkout/availability.ts checkoutAvailableFor): it quietly
+  // falls back to the seller's own link or an enquiry, and nothing on screen
+  // says why. Not when there are no terms at all: the row above already asks
+  // for those, and two rows for one page would read as two problems.
+  if (
+    checkoutOpen &&
+    products.hasPhysicalProducts &&
+    profile &&
+    profile.shippingPolicySet &&
+    !profile.shippingRatesSet
+  ) {
+    items.push({
+      key: "checkout-rates",
+      label: msg("Dashboard.attention.checkoutRates.label"),
+      description: msg("Dashboard.attention.checkoutRates.description"),
+      href: "/settings/shipping#checkout-rates",
+      actionLabel: msg("Dashboard.attention.checkoutRates.action"),
     });
   }
 

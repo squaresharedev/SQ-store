@@ -49,9 +49,10 @@ warm.
 6. The Money-Making Model
 Square Share operates on a simple, low-friction revenue structure:
 
-Transaction Fees: Instead of charging monthly subscription fees, Square Share automatically takes a small cut from each purchase made through the platform.
+Plans first, a smaller fee second: Every seller starts on a generous Free plan (no subscription, the highest per-sale fee). Paid plans (Starter, Pro) are the primary revenue: a monthly or yearly subscription that lowers the fee taken on each sale and lifts the limits on products, storefronts and teammates (products: 20 on Free, 60 on Starter, 500 on Pro; a limit only ever stops adding more, never removes or hides what a store has). The plans page (/plans) shows the seller which plan costs them least at their own sales volume, Free included, and Settings › Plan & billing offers the next plan up with what it would change. Paid plans also add perks (early access; on Pro, analytics reports and priority support). Free keeps the orders CSV export and the product import. Every number (prices, fees, limits, perks) lives in src/lib/billing/plans.ts.
+Transaction Fees: On top of the plan, Square Share takes its plan's cut of each purchase made through Square Share checkout, charged on the item price and never on delivery.
 Immediate Cash Flow: Because the API widget allows sellers to make sales on their own sites immediately, the platform generates instant revenue without needing to wait for a massive user base to form.
-Infrastructure: The financial logistics and automatic fee deductions are handled seamlessly by integrating Stripe Connect.
+Infrastructure: Subscriptions are billed through Stripe Billing on the platform's own account (hosted Checkout and Customer Portal). Per-sale fees are deducted automatically through Stripe Connect as an application fee once Connect onboarding ships.
 
 7. Marketing Direction
 The go-to-market strategy leverages the unique age and attitude of the founders to achieve a zero Customer Acquisition Cost (CAC).

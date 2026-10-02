@@ -9,6 +9,11 @@ import { escapeIlike } from "@/lib/supabase/ilike";
 import { getActiveAccount, type ActiveAccount } from "@/lib/team/account-context";
 import { getTeamRoster } from "@/lib/team/queries";
 import { can } from "@/lib/team/permissions";
+import {
+  orderNumberLabel,
+  orderNumberRange,
+  parseOrderNumberQuery,
+} from "@/lib/orders/order-number";
 import { orderResultHref } from "@/lib/search/hrefs";
 import { rankEntries } from "@/lib/search/rank";
 import { parseSearchTypes, searchQuerySchema } from "@/lib/validation/search";
@@ -199,38 +204,57 @@ function buildSources({
       type: "order",
       label: t("groups.orders"),
       run: async () => {
-        // TWO queries, not one `.or()`. PostgREST's `or=` takes a PARSED filter
-        // string, so a comma, period or parenthesis inside the user's term
-        // breaks the expression — escapeIlike escapes ilike wildcards, not the
-        // PostgREST grammar. Searching "shoes, red" would 400 or, worse,
-        // silently filter on something else. Two indexed queries in parallel
-        // cost one round trip's latency and cannot be confused this way.
+        // One query per column, not one `.or()`. PostgREST's `or=` takes a
+        // PARSED filter string, so a comma, period or parenthesis inside the
+        // user's term breaks the expression: escapeIlike escapes ilike
+        // wildcards, not the PostgREST grammar. Searching "shoes, red" would
+        // 400 or, worse, silently filter on something else. Indexed queries in
+        // parallel cost one round trip's latency and cannot be confused this way.
+        //
+        // What a seller types to find an order is whatever the BUYER told them,
+        // so every column a buyer can quote is searched: the order number off
+        // their confirmation, the address they typed, the tracking number on
+        // their parcel, as well as the product and their email.
         const columns =
           "id, product_title, buyer_email, status, amount_cents, currency, created_at";
-        const [byTitle, byEmail] = await Promise.all([
+        const base = () =>
           untyped
             .from("orders")
             .select(columns)
             .eq("seller_id", accountId)
-            .ilike("product_title", pattern)
             .order("created_at", { ascending: false })
-            .limit(LIMITS.order),
-          untyped
-            .from("orders")
-            .select(columns)
-            .eq("seller_id", accountId)
-            .ilike("buyer_email", pattern)
-            .order("created_at", { ascending: false })
-            .limit(LIMITS.order),
+            .limit(LIMITS.order);
+
+        // The order number is the first group of the id, so a typed prefix is a
+        // range of ids (see lib/orders/order-number.ts). Only asked when the
+        // term looks like one.
+        const numberPrefix = parseOrderNumberQuery(query);
+        const range = numberPrefix ? orderNumberRange(numberPrefix) : null;
+        const noRows = Promise.resolve({
+          data: [] as Record<string, unknown>[],
+          error: null as { message: string } | null,
+        });
+
+        // Order is priority: a number is the most exact thing a person can type,
+        // so its rows lead; mergeById keeps first-seen order.
+        const outcomes = await Promise.all([
+          range ? base().gte("id", range.from).lte("id", range.to) : noRows,
+          base().ilike("product_title", pattern),
+          base().ilike("buyer_email", pattern),
+          base().ilike("tracking_number", pattern),
+          base().ilike("ship_to->>name", pattern),
+          base().ilike("ship_to->>city", pattern),
         ]);
-        if (byTitle.error) throw new Error(byTitle.error.message);
-        if (byEmail.error) throw new Error(byEmail.error.message);
+        for (const outcome of outcomes) {
+          if (outcome.error) throw new Error(outcome.error.message);
+        }
 
         const toResult = (row: Record<string, unknown>): SearchResult => ({
           id: `order:${String(row.id)}`,
           type: "order",
           title: String(row.product_title ?? t("results.order")),
           subtitle: [
+            orderNumberLabel(String(row.id)),
             row.buyer_email ? String(row.buyer_email) : null,
             money(Number(row.amount_cents ?? 0), String(row.currency ?? "EUR"), locale),
           ]
@@ -244,8 +268,7 @@ function buildSources({
         });
 
         return mergeById(
-          (byTitle.data ?? []).map(toResult),
-          (byEmail.data ?? []).map(toResult),
+          ...outcomes.map((outcome) => (outcome.data ?? []).map(toResult)),
         ).slice(0, LIMITS.order);
       },
     },

@@ -608,6 +608,18 @@
     "storefronts": "Váš plán {plan, select, free {Free} starter {Starter} pro {Pro} other {aktuálny}} zahŕňa {cap, plural, one {# výklad} few {# výklady} many {# výkladov} other {# výkladov}} a váš obchod ich má všetky obsadené.",
     "teamSeats": "Váš plán {plan, select, free {Free} starter {Starter} pro {Pro} other {aktuálny}} zahŕňa {cap, plural, one {# miesto} few {# miesta} many {# miest} other {# miest}} vrátane vás a sú všetky obsadené.",
     "fix": "Upgradujte pre viac alebo odstráňte niečo, čo už nepotrebujete. Nič, čo máte, to neovplyvní.",
-    "action": "Zobraziť plány"
+    "action": "Zobraziť plány",
+    "products": "Váš plán {plan, select, free {Free} starter {Starter} pro {Pro} other {aktuálny}} zahŕňa {cap, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktov}} a váš obchod ich má všetky obsadené.",
+    "fixTop": "Odstráňte produkt, ktorý už nepotrebujete, a pridajte ďalší. Nič, čo máte, to neovplyvní."
+  },
+  "ordersExport": {
+    "signIn": "Prihláste sa, aby ste mohli exportovať objednávky.",
+    "permissionDenied": "K objednávkam tohto obchodu nemáte prístup.",
+    "unavailable": "Vaše objednávky sa momentálne nedajú exportovať.",
+    "tryAgain": "Skúste to o chvíľu znova.",
+    "planRequired": "Export objednávok je súčasťou platených plánov.",
+    "planRequiredFix": "Prejdite na vyšší plán na stránke Plány a exportujte svoje objednávky.",
+    "rateLimited": "To je veľa exportov za krátky čas.",
+    "rateLimitedFix": "Počkajte niekoľko minút a skúste to znova."
   }
 }

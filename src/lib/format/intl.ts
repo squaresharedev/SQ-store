@@ -28,6 +28,7 @@ export function intlTag(locale: Locale, english: string): string {
 const numberFormats = new Map<string, Intl.NumberFormat>();
 const dateTimeFormats = new Map<string, Intl.DateTimeFormat>();
 const listFormats = new Map<string, Intl.ListFormat>();
+const relativeTimeFormats = new Map<string, Intl.RelativeTimeFormat>();
 
 function memo<T>(cache: Map<string, T>, tag: string, options: object, build: () => T): T {
   const key = `${tag}|${JSON.stringify(options)}`;
@@ -52,6 +53,13 @@ export function dateTimeFormat(
 
 export function listFormat(tag: string, options: Intl.ListFormatOptions = {}): Intl.ListFormat {
   return memo(listFormats, tag, options, () => new Intl.ListFormat(tag, options));
+}
+
+export function relativeTimeFormat(
+  tag: string,
+  options: Intl.RelativeTimeFormatOptions = {},
+): Intl.RelativeTimeFormat {
+  return memo(relativeTimeFormats, tag, options, () => new Intl.RelativeTimeFormat(tag, options));
 }
 
 /**

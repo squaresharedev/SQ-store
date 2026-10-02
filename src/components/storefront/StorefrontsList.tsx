@@ -40,7 +40,10 @@ import { RemovalNotice } from "@/components/products/RemovalNotice";
  * of the list, never a card: the list holds the seller's own storefronts and
  * nothing else, and with none it is the empty state alone. The link opens the
  * sample in the designer, where nothing saves, and is what the guided tour's
- * "See how it's done" stop points at (`data-storefront-sample`).
+ * "See how it's done" stop points at (`data-storefront-sample`). It is an
+ * aid for someone with nothing of their own yet, so it goes away while the
+ * list holds a live storefront (one staff have not taken down) and comes back
+ * if the last one is deleted.
  */
 export function StorefrontsList({
   storefronts: initial,
@@ -72,7 +75,8 @@ export function StorefrontsList({
   const showActionError = useActionErrorToast();
   const [storefronts, setStorefronts] = useState(initial);
   const [wizardOpen, setWizardOpen] = useState(false);
-  const sampleLink = canWrite && sample === "shown";
+  const hasLiveStorefront = storefronts.some((storefront) => !storefront.removal);
+  const sampleLink = canWrite && sample === "shown" && !hasLiveStorefront;
   // Stays true from the moment the wizard hands back an id until the route
   // change lands, so the create buttons can't fire a second time behind it.
   const [creating, setCreating] = useState(false);

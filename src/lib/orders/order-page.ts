@@ -27,6 +27,7 @@ import { orderNumber, verifyOrderRef } from "@/lib/orders/order-link";
 import { parseShipTo } from "@/lib/orders/ship-to";
 import { parseOrderSelection } from "@/lib/orders/selection";
 import { parseFulfilment } from "@/lib/orders/fulfilment";
+import { trackingLinkFor } from "@/lib/orders/carriers";
 import { buyerWithdrawal } from "@/lib/orders/withdrawal";
 import { parseGallery, parseOptionGroups } from "@/lib/products/detail";
 import type { OrderPageData } from "@/types/checkout";
@@ -36,7 +37,7 @@ const idSchema = uuidField();
 /** The order columns an order page reads. Named, so a new column is never
  *  shown to a buyer by accident. */
 const ORDER_PAGE_SELECT =
-  "id, storefront_id, seller_id, product_id, product_title, quantity, selected_options, amount_cents, currency, status, buyer_email, ship_to, fulfilment_status, shipped_at, tracking_number, created_at, withdrawal_requested_at, supply_consent_at, digital_file_key" as const;
+  "id, storefront_id, seller_id, product_id, product_title, quantity, selected_options, amount_cents, currency, status, buyer_email, ship_to, fulfilment_status, shipped_at, tracking_number, tracking_carrier, created_at, withdrawal_requested_at, supply_consent_at, digital_file_key" as const;
 
 export type OrderRow = {
   id: string;
@@ -54,6 +55,7 @@ export type OrderRow = {
   fulfilment_status: string;
   shipped_at: string | null;
   tracking_number: string | null;
+  tracking_carrier: string | null;
   created_at: string;
   withdrawal_requested_at: string | null;
   supply_consent_at: string | null;
@@ -148,6 +150,10 @@ export const getOrderPage = cache(
     const backgroundImageUrl =
       theme.background.kind === "image" ? await presignGetUrl(theme.background.key) : null;
     const customFontUrl = theme.customFont ? await presignGetUrl(theme.customFont.key) : null;
+    const checkoutPage = resolveCheckoutPage(config);
+    const pagePhotoUrl = checkoutPage.backgroundImage
+      ? await presignGetUrl(checkoutPage.backgroundImage.key)
+      : null;
 
     const shipTo = parseShipTo(order.ship_to);
     const fulfilment = parseFulfilment(order);
@@ -165,11 +171,12 @@ export const getOrderPage = cache(
         theme,
         ...(config.header ? { header: config.header } : {}),
         productPage: resolveProductPage(config),
-        checkoutPage: resolveCheckoutPage(config),
+        checkoutPage,
         shippingPolicy,
         seller,
         backgroundImageUrl,
         customFontUrl,
+        pagePhotoUrl,
       },
       order: {
         ref,
@@ -190,6 +197,9 @@ export const getOrderPage = cache(
         fulfilment: fulfilment.status,
         shippedAt: fulfilment.shippedAt,
         trackingNumber: fulfilment.trackingNumber,
+        // Built here, where the full address is, so the page gets a finished
+        // link and still never holds more of the address than town and country.
+        trackingLink: trackingLinkFor(fulfilment, shipTo),
         dispatch: dispatch || null,
         withdrawal: buyerWithdrawal(order, shippingPolicy),
       },
