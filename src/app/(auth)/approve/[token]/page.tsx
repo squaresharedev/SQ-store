@@ -1,12 +1,13 @@
-import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { History, LogIn, TimerOff, UserX } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
+import { AuthNotice } from "@/components/auth/AuthNotice";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { ApproveSignIn } from "@/components/auth/ApproveSignIn";
 import { buttonClassName } from "@/components/ui/button";
-import { helpTextClass } from "@/components/ui/control-styles";
+import { HeroMark } from "@/components/ui/HeroMark";
 import type { Locale } from "@/i18n/locales";
 import { secondFactorIsFresh } from "@/lib/auth/assurance";
 import { approveSignInPath, signInPath } from "@/lib/auth/paths";
@@ -58,11 +59,15 @@ export default async function ApproveSignInPage({
   if (session.kind === "signed_out") {
     return (
       <AuthPageShell>
-        <Notice heading={t("signIn.heading")} body={t("signIn.body")}>
+        <AuthNotice
+          visual={<HeroMark icon={LogIn} />}
+          heading={t("signIn.heading")}
+          body={t("signIn.body")}
+        >
           <Link href={signInPath(here)} className={buttonClassName("primary", "w-full")}>
             {t("signIn.button")}
           </Link>
-        </Notice>
+        </AuthNotice>
       </AuthPageShell>
     );
   }
@@ -73,14 +78,26 @@ export default async function ApproveSignInPage({
   if (!request || !request.open || request.matchCode === null) {
     return (
       <AuthPageShell>
-        <Notice heading={t("expired.heading")} body={t("expired.body")} state="expired" />
+        <AuthNotice
+          visual={<HeroMark icon={TimerOff} />}
+          heading={t("expired.heading")}
+          body={t("expired.body")}
+          back
+          attributes={{ "data-approve-state": "expired" }}
+        />
       </AuthPageShell>
     );
   }
   if (request.userId !== session.user.id) {
     return (
       <AuthPageShell>
-        <Notice heading={t("otherAccount.heading")} body={t("otherAccount.body")} state="other-account" />
+        <AuthNotice
+          visual={<HeroMark icon={UserX} />}
+          heading={t("otherAccount.heading")}
+          body={t("otherAccount.body")}
+          back
+          attributes={{ "data-approve-state": "other-account" }}
+        />
       </AuthPageShell>
     );
   }
@@ -90,14 +107,19 @@ export default async function ApproveSignInPage({
   if (!secondFactorIsFresh(session.assurance, APPROVER_MAX_AGE_SECONDS)) {
     return (
       <AuthPageShell>
-        <Notice heading={t("stale.heading")} body={t("stale.body")} state="stale">
+        <AuthNotice
+          visual={<HeroMark icon={History} />}
+          heading={t("stale.heading")}
+          body={t("stale.body")}
+          attributes={{ "data-approve-state": "stale" }}
+        >
           <form action={reconfirmToApprove}>
             <input type="hidden" name="token" value={token} />
             <button type="submit" className={buttonClassName("primary", "w-full")}>
               {t("stale.button")}
             </button>
           </form>
-        </Notice>
+        </AuthNotice>
       </AuthPageShell>
     );
   }
@@ -113,27 +135,5 @@ export default async function ApproveSignInPage({
         choices={matchChoices(request.matchCode)}
       />
     </AuthPageShell>
-  );
-}
-
-function Notice({
-  heading,
-  body,
-  state,
-  children,
-}: {
-  heading: string;
-  body: string;
-  state?: string;
-  children?: ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-5" data-approve-state={state}>
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">{heading}</h1>
-        <p className={`${helpTextClass} mt-1`}>{body}</p>
-      </div>
-      {children}
-    </div>
   );
 }

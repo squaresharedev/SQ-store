@@ -5,17 +5,13 @@ import {
   ArrowUpWideNarrow,
   CircleCheck,
   Clock,
-  Code2,
-  Globe,
   ListFilter,
   RotateCcw,
   Search,
-  Store,
   TrendingDown,
   TrendingUp,
   TriangleAlert,
   X,
-  type LucideIcon,
 } from "lucide-react";
 import { fieldBaseClass, ghostButtonClass } from "@/components/ui/control-styles";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -28,6 +24,7 @@ import {
   type OrderStatus,
 } from "@/types/order-view";
 import { useTranslations } from "next-intl";
+import { CHANNEL_ICONS } from "./channel-icons";
 import { FilterSelect, type FilterOption } from "./FilterSelect";
 
 export type SortValue = `${OrderSort["field"]}-${OrderSort["direction"]}`;
@@ -56,13 +53,7 @@ const SORT_OPTIONS = [
   { value: "amount-asc", labelKey: "amountLow", icon: TrendingUp, tone: "text-muted-foreground" },
 ] as const satisfies readonly (Omit<FilterOption<SortValue>, "label"> & { labelKey: string })[];
 
-const CHANNEL_ICONS: Record<OrderChannel, LucideIcon> = {
-  embed: Code2,
-  marketplace: Store,
-  direct: Globe,
-};
-
-const CHANNEL_ORDER: OrderChannel[] = ["marketplace", "embed", "direct"];
+const CHANNEL_ORDER = Object.keys(CHANNEL_ICONS) as OrderChannel[];
 
 /** Small muted field label — lowercase to match the app voice. */
 const fieldLabelClass = "font-inter text-xs font-medium text-muted-foreground";
@@ -92,6 +83,11 @@ export function OrdersToolbar({
     ...option,
     label: t(`sort.${labelKey}`),
   }));
+  // The same channels as the toggle, as a list, for where the toggle has no room.
+  const channelOptions: FilterOption<OrderChannel | "">[] = [
+    { value: "", icon: ListFilter, label: t("toolbar.allChannels") },
+    ...CHANNEL_ORDER.map((value) => ({ value, icon: CHANNEL_ICONS[value], label: t(`channel.${value}`) })),
+  ];
   function emit(patch: Partial<OrderFilters>) {
     const next = { ...filters, ...patch };
     // Remove keys that are undefined so callers get a clean object
@@ -130,15 +126,35 @@ export function OrdersToolbar({
       aria-label={t("toolbar.region")}
       className="flex flex-wrap items-end gap-x-3 gap-y-3 rounded-lg border border-border bg-muted/50 p-4"
     >
-      {/* Channel segmented toggle */}
+      {/* Channel. A one-click toggle where the toolbar is wide enough for
+          every channel's name in every language; the same choices as a list
+          where it is not (a phone, a tablet beside the sidebar), so the row
+          never overflows and no channel is reduced to a bare icon.
+
+          `lg`, by arithmetic: the four names run to about 600px in the
+          longest language, and from 1024px the toolbar has 688 (the viewport
+          less the 256px sidebar and 80px of padding). A viewport breakpoint
+          and not a container query on purpose: containment would re-anchor
+          the fixed phone sheets the pickers in this toolbar open. */}
       <div className="flex flex-col gap-1.5">
-        <span className={fieldLabelClass} id="orders-channel-label">
+        <label htmlFor="orders-channel" className={fieldLabelClass} id="orders-channel-label">
           {t("toolbar.channel")}
-        </span>
+        </label>
+        <div className="lg:hidden">
+          <FilterSelect
+            id="orders-channel"
+            ariaLabel={t("toolbar.channel")}
+            value={filters.channel ?? ""}
+            options={channelOptions}
+            mutedValue=""
+            onChange={(value) => emit({ channel: value === "" ? undefined : value })}
+            triggerClassName="w-52"
+          />
+        </div>
         <div
           role="group"
           aria-labelledby="orders-channel-label"
-          className="flex overflow-hidden rounded-md border border-border bg-background"
+          className="hidden overflow-hidden rounded-md border border-border bg-background lg:flex"
         >
           {CHANNEL_ORDER.map((value, i) => {
             const Icon = CHANNEL_ICONS[value];
@@ -150,7 +166,7 @@ export function OrdersToolbar({
                 aria-pressed={isActive}
                 onClick={() => handleChannel(value)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors duration-base",
+                  "flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-sm font-medium transition-colors duration-base",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                   i > 0 && "border-l border-border",
                   isActive

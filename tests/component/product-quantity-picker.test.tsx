@@ -24,6 +24,7 @@ function product(overrides: Partial<ProductPageProduct> = {}): ProductPageProduc
     description: "Warm light.",
     priceCents: 1250,
     currency: "EUR",
+    sale: null,
     purchaseUrl: null,
     shippingProfileId: null,
     images: [],

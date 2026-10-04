@@ -135,6 +135,7 @@ test.describe("checkout visuals", () => {
       giftMessage: true,
       celebrate: "confetti",
       hasBackgroundImage: false,
+      hasThanksBackgroundImage: false,
     });
     expect(read.options).toEqual({ layouts: ["showcase", "compact"], celebrations: ["confetti", "none"] });
     expect(read.surface).not.toHaveProperty("texture");
@@ -162,11 +163,18 @@ test.describe("checkout visuals", () => {
       giftMessage: false,
       celebrate: "confetti",
       backgroundImage: { key: ownKey },
+      thanksBackgroundImage: { key: ownKey, overlay: false },
     });
 
     const read = await (await page.request.get(api(s))).json();
     // The key stays on the server: a caller is told only that a photo is set.
-    expect(read.checkoutPage).toEqual({ layout: "showcase", giftMessage: false, celebrate: "confetti", hasBackgroundImage: true });
+    expect(read.checkoutPage).toEqual({
+      layout: "showcase",
+      giftMessage: false,
+      celebrate: "confetti",
+      hasBackgroundImage: true,
+      hasThanksBackgroundImage: true,
+    });
     expect(JSON.stringify(read)).not.toContain(ownKey);
 
     // Pointing the page at an object some OTHER user uploaded is refused, and
@@ -177,6 +185,16 @@ test.describe("checkout visuals", () => {
     expect((await refused.json()).error.fix).toBeTruthy();
     expect((await (await page.request.get(api(s))).json()).checkoutPage.hasBackgroundImage).toBe(true);
 
+    // The thank-you page's photo is its own: the checkout's can go and it stays.
+    const thanksRefused = await page.request.patch(api(s), {
+      data: { thanksBackgroundImage: { key: foreign } },
+    });
+    expect(thanksRefused.status()).toBe(400);
+    const keepOverlay = await page.request.patch(api(s), {
+      data: { backgroundImage: { key: ownKey, overlay: false } },
+    });
+    expect(keepOverlay.status()).toBe(200);
+
     // A URL is not a photo.
     const url = await page.request.patch(api(s), { data: { backgroundImage: { key: "https://evil.example/x.png" } } });
     expect(url.status()).toBe(400);
@@ -184,7 +202,9 @@ test.describe("checkout visuals", () => {
     // Null is the way back to no photo.
     const cleared = await page.request.patch(api(s), { data: { backgroundImage: null } });
     expect(cleared.status()).toBe(200);
-    expect((await cleared.json()).checkoutPage.hasBackgroundImage).toBe(false);
+    const after = (await cleared.json()).checkoutPage;
+    expect(after.hasBackgroundImage).toBe(false);
+    expect(after.hasThanksBackgroundImage).toBe(true);
   });
 
   test("the buyer sees the version as swatches and the words one tap away", async ({ page }) => {

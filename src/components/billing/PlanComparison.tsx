@@ -23,7 +23,7 @@ import { formatBytes } from "@/lib/format";
 import { formatCents } from "@/lib/format/money";
 import { formatFeeRate } from "@/lib/billing/format";
 import { COMPARE_GROUPS, planHas, type CompareRowKey, type IncludedFeatureKey } from "@/lib/billing/features";
-import { monthlyPriceCents } from "@/lib/billing/fees";
+import { monthlyListPriceCents, monthlyPriceCents } from "@/lib/billing/fees";
 import { BILLING_CURRENCY, PLANS, PLAN_IDS, type BillingInterval, type PlanId } from "@/lib/billing/plans";
 import { DIGITAL_FILE_MAX_BYTES } from "@/lib/validation/product";
 
@@ -95,7 +95,10 @@ export function PlanComparison({ interval, currentPlan }: { interval: BillingInt
       <h2 id="plans-compare-title" className="mt-1 text-xl font-semibold text-foreground">
         {t("compare.title")}
       </h2>
-      <div className="mt-6 overflow-x-auto">
+      {/* `relative`, so the scroll box also clips what is absolutely positioned
+          inside it (the screen-reader labels in the cells): without it they
+          escape the box and widen the whole page on a phone. */}
+      <div className="relative mt-6 overflow-x-auto">
         <table className="w-full min-w-xl border-collapse font-inter text-sm">
           <thead>
             <tr className="border-b border-border">
@@ -121,12 +124,21 @@ export function PlanComparison({ interval, currentPlan }: { interval: BillingInt
               <th scope="row" className="py-3 pr-4 text-left font-medium text-foreground">
                 {t("compare.price")}
               </th>
-              {PLAN_IDS.map((plan) => (
-                <td key={plan} className={cn(columnClass(plan), "py-3 tabular-nums text-foreground")}>
-                  {formatCents(monthlyPriceCents(plan, interval), BILLING_CURRENCY, locale, { wholeUnits: true })}
-                  <span className="text-muted-foreground"> {t("card.perMonth")}</span>
-                </td>
-              ))}
+              {PLAN_IDS.map((plan) => {
+                const listPrice = monthlyListPriceCents(plan, interval);
+                return (
+                  <td key={plan} className={cn(columnClass(plan), "py-3 tabular-nums text-foreground")}>
+                    {listPrice !== null && (
+                      <s className="mr-1.5 text-muted-foreground">
+                        <span className="sr-only">{t("card.regularPrice")} </span>
+                        {formatCents(listPrice, BILLING_CURRENCY, locale, { wholeUnits: true })}
+                      </s>
+                    )}
+                    {formatCents(monthlyPriceCents(plan, interval), BILLING_CURRENCY, locale, { wholeUnits: true })}
+                    <span className="text-muted-foreground"> {t("card.perMonth")}</span>
+                  </td>
+                );
+              })}
             </tr>
           </tbody>
           {COMPARE_GROUPS.map((group) => (

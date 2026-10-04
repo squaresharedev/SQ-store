@@ -27,6 +27,10 @@
     "settings": {
       "label": "Impostazioni",
       "description": "I tuoi dati venditore, le condizioni di spedizione e l’account."
+    },
+    "discounts": {
+      "label": "Sconti",
+      "description": "Crea promozioni e condividi codici sconto."
     }
   },
   "settings": {

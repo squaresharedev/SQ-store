@@ -25,14 +25,15 @@
     "intervalLabel": "Abrechnungszeitraum",
     "month": "Monatlich",
     "year": "Jährlich",
-    "yearlySaving": "2 Monate gratis bei jährlicher Zahlung",
     "pastDue": "Die letzte Zahlung für deinen {plan}-Tarif ist nicht durchgegangen. Aktualisiere deine Karte, um ihn zu behalten.",
     "endsOn": "Dein {plan}-Tarif endet am {date}, danach wechselt dein Shop zu Free. Es wird nichts offline genommen.",
     "ownerOnly": "Nur der Inhaber des Shops kann den Tarif ändern.",
     "soon": "Bald",
     "soonTitle": "Kostenpflichtige Tarife starten bald. Alles in Free funktioniert in der Zwischenzeit weiter.",
     "finePrint": "Die Preise verstehen sich zzgl. MwSt. Die Gebühr pro Verkauf gilt für Verkäufe über den Checkout von Square Share und wird auf den Artikelpreis erhoben, nie auf den Versand. Die eigenen Kartengebühren von Stripe kommen hinzu. Jederzeit kündbar: Du behältst deinen Tarif bis zum Ende des bezahlten Zeitraums.",
-    "unavailable": "Die Tarife können gerade nicht angezeigt werden. Lade die Seite gleich neu."
+    "unavailable": "Die Tarife können gerade nicht angezeigt werden. Lade die Seite gleich neu.",
+    "yearlyFree": "{count, plural, one {# Monat gratis} other {# Monate gratis}}",
+    "launchNote": "Ein Einführungspreis ist ein Preis zum Start: Der reguläre Preis ist der durchgestrichene."
   },
   "card": {
     "perMonth": "/ Monat",
@@ -46,7 +47,12 @@
     "upgrade": "Auf {plan} upgraden",
     "switch": "Zu {plan} wechseln",
     "switchInterval": "{interval, select, year {Zu jährlicher Zahlung wechseln} other {Zu monatlicher Zahlung wechseln}}",
-    "moveToFree": "Zu Free wechseln"
+    "moveToFree": "Zu Free wechseln",
+    "regularPrice": "Regulärer Preis",
+    "launchPrice": "Einführungspreis",
+    "save": "{percent} sparen",
+    "launchExclVat": "Einführungspreis (regulär {regular}), zzgl. MwSt.",
+    "launchBilledYearly": "{amount} einmal im Jahr zum Einführungspreis abgerechnet (regulär {regular}), zzgl. MwSt."
   },
   "features": {
     "fee": "{rate} Gebühr pro Verkauf",
@@ -63,12 +69,10 @@
     "productsUnlimited": "Unbegrenzt viele Produkte"
   },
   "calculator": {
-    "eyebrow": "Rechner",
     "title": "Welcher Tarif kostet dich am wenigsten?",
     "lead": "Ziehe den Regler auf deine Verkäufe in einem Monat. Jeder Balken ist der Preis des Tarifs plus seine Gebühr auf diese Verkäufe.",
     "salesLabel": "Verkäufe pro Monat",
     "salesAria": "Deine Verkäufe pro Monat, in Euro",
-    "fromYourSales": "Aus deinen Verkäufen der letzten 30 Tage übernommen.",
     "perMonth": "im Monat",
     "cheapest": "Bei einem Umsatz von {sales} im Monat kostet dich {plan} am wenigsten.",
     "legendPrice": "Tarifpreis",
@@ -148,7 +152,7 @@
     "cta": "Auf {plan} upgraden, {price} im Monat",
     "compare": "Alle Tarife vergleichen",
     "topEyebrow": "Höchster Tarif",
-    "topTitle": "Alles in {plan} gehört dir"
+    "topTitle": "Alles in <mark>{plan}</mark> gehört dir"
   },
   "portal": {
     "opening": "Stripe wird geöffnet",
@@ -182,7 +186,10 @@
       "teamSeats": "Teamplätze, du eingeschlossen: {used} von {cap}",
       "teamSeatsUnlimited": "Teamplätze, du eingeschlossen: {used}, unbegrenzt",
       "products": "Produkte: {used} von {cap}",
-      "productsUnlimited": "Produkte: {used}, unbegrenzt"
+      "productsUnlimited": "Produkte: {used}, unbegrenzt",
+      "left": "{count} frei",
+      "over": "{count} zu viel",
+      "full": "Voll"
     },
     "overLimit": "Über der Grenze dieses Tarifs. Alles funktioniert weiter; entferne eines oder wechsle zu einem höheren Tarif, um mehr hinzuzufügen.",
     "invoicesTitle": "Abrechnung und Rechnungen",
@@ -191,6 +198,30 @@
     "noBilling": "Rechnungen und Zahlungsdaten erscheinen hier, sobald du einen kostenpflichtigen Tarif hast.",
     "confirmed": "Du hast jetzt {plan}. Danke, dass du Square Share unterstützt.",
     "pending": "Wir bestätigen deine Zahlung bei Stripe. Lade die Seite gleich neu, falls sich dein Tarif nicht geändert hat.",
-    "unavailable": "Dein Tarif kann gerade nicht angezeigt werden. Lade die Seite gleich neu."
+    "unavailable": "Dein Tarif kann gerade nicht angezeigt werden. Lade die Seite gleich neu.",
+    "cancelPlan": "Tarif kündigen"
+  },
+  "cancel": {
+    "title": "{plan} kündigen?",
+    "keepUntil": "Du behältst {plan} bis zum {date}, danach wechselst du zu Free. Es wird nichts offline genommen.",
+    "loseLegend": "In Free nicht enthalten",
+    "reasonLegend": "Warum kündigst du? <muted>(optional)</muted>",
+    "reasons": {
+      "too_expensive": "Zu teuer",
+      "unused": "Nutze es zu wenig",
+      "missing_features": "Mir fehlt etwas",
+      "switched_service": "Wechsle den Dienst",
+      "temporary": "Nur kurz gebraucht",
+      "other": "Etwas anderes"
+    },
+    "detailLabel": "Was könnten wir besser machen? <muted>(optional)</muted>",
+    "detailPlaceholder": "Ein oder zwei Sätze reichen völlig. Wir lesen jede Antwort.",
+    "keep": "Tarif behalten",
+    "confirm": "Tarif kündigen",
+    "cancelling": "Wird gekündigt",
+    "doneTitle": "Dein Tarif ist gekündigt",
+    "doneBody": "Du behältst {plan} bis zum {date}. Anders überlegt? Bis dahin kannst du deinen Tarif jederzeit behalten.",
+    "done": "Fertig",
+    "kept": "Du behältst {plan}. Er verlängert sich wie gewohnt."
   }
 }

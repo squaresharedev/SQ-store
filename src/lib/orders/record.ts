@@ -21,7 +21,10 @@
 //      quote, lib/checkout/quote.ts), the line item quantity, amount_total and
 //      shipping_cost.amount_total, the application fee (with the rate and
 //      plan that set it, written into the session's metadata at creation
-//      from lib/billing/fees.ts `saleFee`), customer_details.email
+//      from lib/billing/fees.ts `saleFee`), the regular unit price and the
+//      discount ids (`unitPriceCents`, `discountId`, `credit`: also written
+//      into the metadata from the quote, and checked against the seller
+//      below), customer_details.email
 //      and .phone, collected_information.shipping_details (older API
 //      versions: shipping_details), and the checkout's locale;
 //   4. call recordPaidOrder and answer 2xx whatever it says about duplicates.
@@ -57,11 +60,12 @@ import { orderDetailPath } from "@/lib/orders/paths";
 import { sendNewOrderEmail } from "@/lib/orders/emails";
 import { sendBuyerConfirmation } from "@/lib/orders/confirmation";
 import { PURCHASE_QUANTITY_MAX } from "@/lib/validation/product";
+import { DISCOUNT_CODE_PATTERN } from "@/lib/discounts/code";
 import { GIFT_MESSAGE_MAX } from "@/types/storefront";
 import { DEFAULT_LOCALE, parseLocale } from "@/i18n/locales";
 import { PLAN_IDS, type PlanId } from "@/lib/billing/plans";
 import type { Json } from "@/types";
-import type { FulfilmentStatus, OrderChannel, ShipTo } from "@/types/order-view";
+import { ORDER_CHANNELS, type FulfilmentStatus, type OrderChannel, type ShipTo } from "@/types/order-view";
 
 /** What was bought and paid, as the payment provider recorded it. */
 export type PaidCheckout = {
@@ -76,6 +80,14 @@ export type PaidCheckout = {
   quantity: number;
   /** What the buyer picked, in the seller's words: [{ label, value }]. */
   selection: unknown;
+  /** The REGULAR price of one, as the quote priced it. Snapshotted as
+   *  product_price_cents; absent means the product's price as read here. */
+  unitPriceCents?: number;
+  /** The discount that set the price (a sale, or a code that beat it). Only
+   *  an id: how much it took off is worked out here from what was charged. */
+  discountId?: string | null;
+  /** The valid code the buyer entered, credited to its channel. */
+  credit?: { id: string; code: string } | null;
   /** What was actually charged, in integer cents, shipping included. */
   amountCents: number;
   /** Delivery's share of amountCents, when the provider reports it. For the
@@ -114,8 +126,11 @@ const paidCheckoutSchema = z.object({
   productId: z.uuid(),
   sellerId: z.uuid().optional(),
   storefrontId: z.uuid().nullable(),
-  channel: z.enum(["embed", "marketplace", "direct"]),
+  channel: z.enum(ORDER_CHANNELS),
   quantity: z.number().int().min(1).max(PURCHASE_QUANTITY_MAX),
+  unitPriceCents: z.number().int().min(0).optional(),
+  discountId: z.uuid().nullable().optional(),
+  credit: z.object({ id: z.uuid(), code: z.string().regex(DISCOUNT_CODE_PATTERN) }).nullable().optional(),
   amountCents: z.number().int().min(0),
   platformFeeCents: z.number().int().min(0),
   // Mirror the orders.platform_fee_bps and orders.seller_plan CHECKs.
@@ -191,6 +206,19 @@ export async function recordPaidOrder(input: PaidCheckout): Promise<RecordResult
     const selection = parseOrderSelection(input.selection);
     const fulfilment: FulfilmentStatus = ships ? "unfulfilled" : "not_required";
 
+    // What a discount did, from what was actually CHARGED: the items cost
+    // amount minus delivery, and anything below the regular price is the
+    // discount. Worked out here rather than taken from the caller, so a
+    // provider's figures can never make the order claim a discount it did not
+    // charge.
+    const unitPriceCents = checkout.unitPriceCents ?? product.price_cents;
+    const regularItems = unitPriceCents * checkout.quantity;
+    const discountCents = Math.min(
+      regularItems,
+      Math.max(0, regularItems - (checkout.amountCents - (checkout.shippingCents ?? 0))),
+    );
+    const attribution = await verifyAttribution(admin, sellerId, checkout.discountId ?? null, checkout.credit ?? null);
+
     const { data: inserted, error: insertError } = await admin
       .from("orders")
       .upsert(
@@ -209,7 +237,11 @@ export async function recordPaidOrder(input: PaidCheckout): Promise<RecordResult
           buyer_email: checkout.buyerEmail,
           buyer_locale: parseLocale(input.buyerLocale),
           product_title: product.title,
-          product_price_cents: product.price_cents,
+          product_price_cents: unitPriceCents,
+          discount_cents: discountCents,
+          discount_id: discountCents > 0 ? attribution.discountId : null,
+          discount_code_id: attribution.credit?.id ?? null,
+          discount_code: attribution.credit?.code ?? null,
           selected_options: selection as unknown as Json,
           quantity: checkout.quantity,
           ship_to: shipTo as unknown as Json,
@@ -261,6 +293,7 @@ export async function recordPaidOrder(input: PaidCheckout): Promise<RecordResult
         currency,
         buyerEmail: checkout.buyerEmail,
         giftMessage: ships ? (checkout.giftMessage ?? null) : null,
+        discountCode: attribution.credit?.code ?? null,
       });
       await sendBuyerConfirmation({
         orderId,
@@ -275,6 +308,12 @@ export async function recordPaidOrder(input: PaidCheckout): Promise<RecordResult
         shippingProfileId: product.shipping_profile_id,
         amountCents: checkout.amountCents,
         shippingCents: checkout.shippingCents ?? null,
+        // Shown to the buyer as its own line only when THEIR code set the
+        // price; a sale's lower price is simply the price they paid.
+        codeDiscount:
+          discountCents > 0 && attribution.credit && attribution.discountId === attribution.credit.id
+            ? { code: attribution.credit.code, cents: discountCents }
+            : null,
         currency,
         isDigital: !ships,
         supplyConsent: !ships && Boolean(checkout.supplyConsent),
@@ -287,6 +326,35 @@ export async function recordPaidOrder(input: PaidCheckout): Promise<RecordResult
     console.error("[orders] recording a paid checkout failed:", error instanceof Error ? error.message : error);
     return { ok: false, reason: "error" };
   }
+}
+
+/**
+ * The discount ids an order may be credited to: only discounts of THIS seller.
+ * A provider's ids arrive from session metadata, which a connected seller
+ * controls, so an id from another store is dropped (with a log) rather than
+ * letting one store's order count on another's Discounts page. Never refuses:
+ * the money is taken, and attribution is the one thing worth losing.
+ */
+async function verifyAttribution(
+  admin: ReturnType<typeof createAdminClient>,
+  sellerId: string,
+  discountId: string | null,
+  credit: { id: string; code: string } | null,
+): Promise<{ discountId: string | null; credit: { id: string; code: string } | null }> {
+  const ids = [...new Set([discountId, credit?.id].filter((id): id is string => Boolean(id)))];
+  if (ids.length === 0) return { discountId: null, credit: null };
+  const { data, error } = await admin.from("discounts").select("id, code").eq("owner_id", sellerId).in("id", ids);
+  if (error) {
+    console.error("[orders] discount attribution read failed:", error.message);
+    return { discountId: null, credit: null };
+  }
+  const owned = new Map((data ?? []).map((row) => [row.id, row.code]));
+  if (ids.some((id) => !owned.has(id))) console.warn("[orders] dropped a discount id the seller does not own");
+  const creditCode = credit ? owned.get(credit.id) : undefined;
+  return {
+    discountId: discountId && owned.has(discountId) ? discountId : null,
+    credit: credit && creditCode ? { id: credit.id, code: creditCode } : null,
+  };
 }
 
 /**

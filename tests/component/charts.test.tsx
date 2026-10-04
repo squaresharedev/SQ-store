@@ -95,6 +95,46 @@ describe("LineChart", () => {
     );
     expect(container.querySelectorAll(".recharts-area").length).toBe(1);
   });
+
+  it("bleeds edge to edge: the line starts and ends on the box's own edges", () => {
+    const { container } = render(
+      <LineChart
+        data={TREND}
+        xKey="week"
+        series={[{ key: "revenue" }]}
+        variant="area"
+        bleed
+        valueSide="right"
+        yDomain={[0, 2000]}
+        yTicks={[0, 500, 1000, 1500, 2000]}
+        width={600}
+        height={300}
+        animate={false}
+      />,
+    );
+    // No axis column and no side margins: the curve spans all 600px.
+    const curve = container.querySelector(".recharts-area-curve")!.getAttribute("d")!;
+    const xs = Array.from(curve.matchAll(/(-?[0-9.]+),-?[0-9.]+/g), (match) => Number(match[1]));
+    expect(Math.min(...xs)).toBe(0);
+    expect(Math.max(...xs)).toBe(600);
+
+    // The value labels are inside the plot, on the side asked for, one per
+    // tick the caller set.
+    const values = Array.from(container.querySelectorAll(".recharts-yAxis-tick-labels text"));
+    expect(values.map((label) => label.textContent)).toEqual(["0", "500", "1k", "1.5k", "2k"]);
+    for (const label of values) {
+      expect(label.getAttribute("text-anchor")).toBe("end");
+      expect(Number(label.getAttribute("x"))).toBeGreaterThan(500);
+      expect(Number(label.getAttribute("x"))).toBeLessThan(600);
+    }
+
+    // The two end labels are tucked inward so the box cannot clip them.
+    const dates = Array.from(container.querySelectorAll(".recharts-xAxis-tick-labels text"));
+    expect(dates[0].getAttribute("text-anchor")).toBe("start");
+    expect(Number(dates[0].getAttribute("x"))).toBeGreaterThan(0);
+    expect(dates[dates.length - 1].getAttribute("text-anchor")).toBe("end");
+    expect(Number(dates[dates.length - 1].getAttribute("x"))).toBeLessThan(600);
+  });
 });
 
 describe("BarChart", () => {

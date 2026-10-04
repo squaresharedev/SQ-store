@@ -32,6 +32,7 @@ import { CATALOG } from "./catalog.ts";
 // and the plan catalog are import-free on purpose, so a seeded order is
 // charged exactly what a real one on the same plan would be.
 import { saleFee } from "../../src/lib/billing/fees.ts";
+import type { OrderChannel as AppOrderChannel } from "../../src/types/order-view.ts";
 
 // ---------------------------------------------------------------------------
 // Deterministic RNG + small sampling helpers
@@ -73,7 +74,9 @@ export function weightedPick<T>(rng: Rng, entries: readonly (readonly [T, number
 // Order enums — kept in sync with the orders table CHECK constraints.
 // ---------------------------------------------------------------------------
 
-export const ORDER_CHANNELS = ["embed", "marketplace"] as const;
+// The channels the SEED generates: a subset of the app's ORDER_CHANNELS (the
+// list the CHECK enforces), held to it at compile time.
+export const ORDER_CHANNELS = ["embed", "marketplace"] as const satisfies readonly AppOrderChannel[];
 export type OrderChannel = (typeof ORDER_CHANNELS)[number];
 
 export const ORDER_STATUSES = ["paid", "refunded", "disputed", "pending"] as const;

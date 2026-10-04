@@ -155,12 +155,22 @@ const REGISTRY: Record<string, Classification> = {
   // Marking an order shipped mails the BUYER, so it is bounded like every
   // other action that can put mail in a stranger's inbox.
   "lib/orders/actions.ts::markOrderShipped": limited(),
+  "lib/discounts/actions.ts::createDiscount": limited(),
+  "lib/discounts/actions.ts::updateDiscount": limited(),
+  "lib/discounts/actions.ts::setCodeEnabled": limited(),
+  "lib/discounts/actions.ts::endSale": limited(),
+  "lib/discounts/actions.ts::deleteDiscount": limited(),
 
   // --- plans & billing (lib/billing) -----------------------------------------
   // Starting a checkout or opening the Customer Portal calls Stripe on the
   // platform's key (and may create a customer there): a write budget.
   "lib/billing/actions.ts::startCheckout": limited(),
   "lib/billing/actions.ts::openBillingPortal": limited(),
+  // Cancel and keep call Stripe too. No two-factor step (not in
+  // STEP_UP_REQUIRED below): leaving must be easy, it is owner-only, and
+  // either one is undone by the other until the paid period ends.
+  "lib/billing/actions.ts::cancelPlan": limited(),
+  "lib/billing/actions.ts::resumePlan": limited(),
 
   // --- team ---------------------------------------------------------------
   "lib/team/actions.ts::inviteMember": limited(),
@@ -282,13 +292,39 @@ const SETUP_LIMITERS = ["readyToEnroll"];
  */
 const CONTACT_LIMITERS = ["issueContactCode", "redeemContactCode"];
 
+/**
+ * The discount writes' shared gate (lib/discounts/actions.ts): session, role,
+ * then the discount_write budget, before any parse or read. Pinned below.
+ */
+const DISCOUNT_LIMITERS = ["authorizeDiscountWrite"];
+
 /** Does this body take from a rate-limit budget? */
 function isRateLimited(body: string): boolean {
   if (/\brateLimit(?:Key)?\s*\(/.test(body)) return true;
-  return [...SECOND_FACTOR_LIMITERS, ...SETUP_LIMITERS, ...CONTACT_LIMITERS].some((name) =>
+  return [...SECOND_FACTOR_LIMITERS, ...SETUP_LIMITERS, ...CONTACT_LIMITERS, ...DISCOUNT_LIMITERS].some((name) =>
     new RegExp(`\\b${name}\\s*\\(`).test(body),
   );
 }
+
+describe("discount write gate", () => {
+  // The registry trusts this name as a budget, so pin that it is one, and that
+  // every discount write passes it before doing anything else.
+  const source = readFileSync(join(process.cwd(), "src", "lib", "discounts", "actions.ts"), "utf8");
+
+  it("authorizeDiscountWrite takes from the discount_write budget", () => {
+    const body = source.slice(source.indexOf("async function authorizeDiscountWrite"));
+    expect(body.slice(0, body.indexOf("\n}\n"))).toMatch(
+      /rateLimit\("discount_write", RATE_LIMITS\.discountWrite\)/,
+    );
+  });
+
+  it("every exported discount write starts at the gate", () => {
+    const exported = [...source.matchAll(/export async function (\w+)\([^)]*\)[^{]*\{\n\s*const gated = await authorizeDiscountWrite\(\);/g)];
+    expect(exported.map((match) => match[1]).sort()).toEqual(
+      ["createDiscount", "deleteDiscount", "endSale", "setCodeEnabled", "updateDiscount"],
+    );
+  });
+});
 
 describe("contact-proof limiters", () => {
   // The registry trusts these two names as budgets, so pin that they are, and

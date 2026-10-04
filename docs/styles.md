@@ -198,8 +198,9 @@ Soft, small scale. Pills for round things, gentle radii for surfaces.
 |---|---|
 | Search bar, chips, avatar | `--radius-full` |
 | Buttons, icon buttons, inputs, image/artifact tiles, placeholder cells | `--radius-sm` |
-| Cards (collection card), popovers, dropdowns | `--radius-md` |
-| Modals, large panels | `--radius-lg` |
+| Cards (collection card) | `--radius-md` |
+| Large in-page panels | `--radius-lg` |
+| Modals, popovers, dropdowns, menus, toasts, buttons | none: every floating surface and every button is sharp (the brand rule at the top of `components/ui/control-styles.ts`, which wins over this scale) |
 | Logo square | `--radius-sm` (subtle) |
 
 ---
@@ -548,6 +549,55 @@ The bubble is `position: fixed` in a portal on `<body>`, placed from the
 trigger's rect and clamped to the viewport. An absolutely-positioned tip is
 clipped the moment it is used inside anything that scrolls — which the
 storefront designer's side panel does.
+
+### 8.14 Modal anatomy: the blur test
+
+**The test.** Blur your eyes (or press B on `/dev/modals`). If you can still
+tell what the dialog is for, it passes. A dialog that needs reading before it
+can be understood does not.
+
+What makes one pass:
+
+1. **One central element**, 56px or more, above the title: the thing the
+   dialog is about (the product's photo, the plan, a QR code, the number to
+   tap), or a glyph for it. `Modal`'s `visual` prop puts it there and centres
+   the header under it. `ui/HeroMark` is the default: an `icon` on a tinted
+   disc, or `children` for the thing itself, with an optional corner `badge`
+   for what is about to happen to it (a bin on a product being deleted).
+2. **A title of five words or fewer, and at most one visible sentence** under
+   it (`description`).
+3. **One primary button**, last in a `ModalActions` row. Everything else is a
+   ghost button or the X.
+4. **One decision per screen.** An optional follow-up (a note after "why?")
+   appears only once the main choice is made.
+5. **Words that are not needed are not shown.** In order of preference:
+   - it only restates its control: delete it (§8.13);
+   - one caveat sentence that some people need: the "?" (`ui/InfoTip`);
+   - a paragraph, a list, or a field almost nobody changes: `ui/Disclosure`,
+     one line that opens. It is a native `<details>`, so a field folded inside
+     it is still submitted with its form.
+6. **Security copy is shortened, never hidden.** A warning against approving
+   someone else's sign-in, the instruction to match a number, what a recovery
+   code will do: these stay on screen, in as few words as say it.
+
+The parts, so none of this is re-spelled at a call site:
+
+| Need | Use |
+|---|---|
+| Any dialog | `ui/modal.tsx`: `Modal` (`visual`, `size`, `initialFocus`) and `ModalActions` |
+| "Are you sure?" | `ui/ConfirmDialog.tsx`: `visual` is required, `tone="danger"` for what cannot be undone, `action` when it posts a form |
+| A choice between a few things | `ui/ChoiceCards.tsx`: `variant="tiles"` with an `icon` each when they can be told apart at a glance, cards when each needs a sentence |
+| The central glyph | `ui/HeroMark.tsx` (static), `auth/SuccessMark.tsx` (the moment it succeeds; same sizes) |
+| A product, as a picture | `ui/ProductThumb.tsx` |
+| Folded words | `ui/Disclosure.tsx`, `ui/InfoTip.tsx` |
+
+Widths come from `size` (`md` by default, then `lg`, `xl`, `2xl`), never a
+`max-w-*` in `className`. Focus is `Modal`'s job: it lands on the first real
+control, or on the inert panel (`initialFocus="dialog"`) when that first
+control would ACT on a stray Enter or Space (a radio, a destructive button).
+
+`/dev/modals` opens every dialog from a fixture, with the Blur toggle and a
+phone frame. A new dialog gets an entry there.
 
 ---
 

@@ -72,7 +72,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
-import { Modal } from "@/components/ui/modal";
+import { UnsavedChangesDialog } from "@/components/ui/UnsavedChangesDialog";
 import {
   ghostButtonClass,
   helpTextClass,
@@ -4371,38 +4371,19 @@ export function StorefrontDesigner({
         onToggleCheckout={toggleDefaultCheckout}
       />
 
-      <Modal
+      <UnsavedChangesDialog
         open={leaveGuard.promptOpen}
-        onClose={leaveGuard.cancel}
         title={t("leave.title")}
         description={t("leave.description")}
-      >
-        <div className="flex flex-col gap-2 sm:flex-row-reverse">
-          <Button
-            onClick={handleSaveAndLeave}
-            disabled={saving}
-          >
-            {saving ? tCommon("saving") : t("leave.save")}
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={leaveGuard.leave}
-            disabled={saving}
-          >
-            {t("leave.discard")}
-          </Button>
-          {/* mr-auto pushes "Keep editing" to the opposite end from the two
-              leave actions, so it's not mistaken for one of them. */}
-          <Button
-            variant="ghost"
-            onClick={leaveGuard.cancel}
-            disabled={saving}
-            className="sm:mr-auto"
-          >
-            {t("leave.keepEditing")}
-          </Button>
-        </div>
-      </Modal>
+        saveLabel={t("leave.save")}
+        savingLabel={tCommon("saving")}
+        discardLabel={t("leave.discard")}
+        stayLabel={t("leave.keepEditing")}
+        saving={saving}
+        onSave={handleSaveAndLeave}
+        onDiscard={leaveGuard.leave}
+        onStay={leaveGuard.cancel}
+      />
       {/* Inside the search provider on purpose: opening search ends the tour. */}
       {sample && <EditorTour autoStart={sample.autoStartTour} />}
       {sample && (

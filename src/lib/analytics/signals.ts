@@ -18,6 +18,7 @@
 // different places.
 
 import type { MessageKey } from "@/i18n/types";
+import { ORDER_CHANNELS } from "@/types/order-view";
 
 /** Every signal kind the stream accepts. Mirrored by the SQL CHECK. */
 export const SIGNAL_KINDS = [
@@ -31,8 +32,9 @@ export const SIGNAL_KINDS = [
 
 export type SignalKind = (typeof SIGNAL_KINDS)[number];
 
-/** Where a signal happened. Mirrors orders.channel, plus the hosted storefront. */
-export const SIGNAL_CHANNELS = ["embed", "marketplace", "direct"] as const;
+/** Where a signal came from. The SAME list as orders.channel (see
+ *  ORDER_CHANNELS), so a visit and the sale it leads to are filed alike. */
+export const SIGNAL_CHANNELS = ORDER_CHANNELS;
 
 export type SignalChannel = (typeof SIGNAL_CHANNELS)[number];
 
@@ -56,4 +58,5 @@ export const CHANNEL_LABELS: Record<SignalChannel, MessageKey> = {
   embed: "Analytics.channels.embed",
   marketplace: "Analytics.channels.marketplace",
   direct: "Analytics.channels.direct",
+  button: "Analytics.channels.button",
 };

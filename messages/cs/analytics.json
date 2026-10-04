@@ -89,7 +89,8 @@
   "channels": {
     "embed": "Vložení",
     "marketplace": "Tržiště",
-    "direct": "Přímý"
+    "direct": "Přímý",
+    "button": "Tlačítko na webu"
   },
   "signalsUnavailable": {
     "title": "Zobrazení a přihlášení k odběru teď nejsou k dispozici",

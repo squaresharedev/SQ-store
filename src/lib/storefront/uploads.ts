@@ -9,7 +9,7 @@
 // the stored object's real size and type are re-checked (upload-time checks
 // alone are not a boundary), and objects a save lets go of are evicted.
 
-import { deleteObject, headObject } from "@/lib/r2";
+import { deleteObject, headObject, presignGetUrl } from "@/lib/r2";
 import {
   uploadFailed,
   invalidInput,
@@ -18,6 +18,8 @@ import {
   type ServerErrorOperation,
 } from "@/lib/errors";
 import { msg } from "@/i18n/types";
+import { pagePhotoView } from "@/lib/storefront/product-page";
+import type { PagePhoto } from "@/types/storefront";
 import {
   isAllowedContentType,
   isOwnedObjectKey,
@@ -99,19 +101,29 @@ export async function verifyUpload(
   return { ok: true };
 }
 
+/** The config fields that hold a page photo, on whichever page member has them. */
+const PAGE_PHOTO_FIELDS = ["backgroundImage", "thanksBackgroundImage"] as const;
+
+/** A stored page photo signed for display, as the page paints it; null without one. */
+export async function signPagePhoto(photo: PagePhoto | undefined) {
+  return pagePhotoView(photo, photo ? await presignGetUrl(photo.key) : null);
+}
+
 /**
  * The photos the hosted pages hold as their backdrop, inside a stored
- * (untrusted) config jsonb: the product page's and the checkout's (which the
- * thank-you page shares). Read field by field, because this runs against
- * whatever is already in the column.
+ * (untrusted) config jsonb: the product page's, the checkout's and the
+ * thank-you page's. Read field by field, because this runs against whatever is
+ * already in the column.
  */
 export function storedPagePhotoKeys(config: unknown): Set<string> {
   const keys = new Set<string>();
   if (typeof config !== "object" || config === null) return keys;
   for (const member of ["productPage", "checkoutPage"] as const) {
-    const photo = (config as Record<string, { backgroundImage?: { key?: unknown } } | undefined>)[member]
-      ?.backgroundImage;
-    if (typeof photo?.key === "string") keys.add(photo.key);
+    const page = (config as Record<string, Record<string, { key?: unknown } | undefined> | undefined>)[member];
+    for (const field of PAGE_PHOTO_FIELDS) {
+      const key = page?.[field]?.key;
+      if (typeof key === "string") keys.add(key);
+    }
   }
   return keys;
 }

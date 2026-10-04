@@ -301,6 +301,11 @@
       "required": "Enter your order number.",
       "tooLong": "That order number is too long.",
       "unsupported": "That order number contains unsupported characters."
+    },
+    "shareChannel": {
+      "required": "Name the channel, or leave it empty.",
+      "tooLong": "The channel name must be {maximum} characters or fewer.",
+      "unsupported": "The channel name contains unsupported characters."
     }
   },
   "email": {
@@ -360,7 +365,8 @@
     "factor": "That authenticator is not valid.",
     "reportTarget": "That item is not valid.",
     "moderationDecision": "That decision is not valid.",
-    "checkoutAttempt": "This checkout has expired. Reload the page and try again."
+    "checkoutAttempt": "This checkout has expired. Reload the page and try again.",
+    "product": "That product could not be found."
   },
   "handle": {
     "username": "A username must be 3 to 30 characters, using only letters, numbers and underscores."
@@ -400,6 +406,21 @@
       "whole": "A free-shipping threshold must be a whole number of cents.",
       "tooSmall": "A free-shipping threshold cannot be negative.",
       "tooBig": "A free-shipping threshold cannot exceed {maximum} cents."
+    },
+    "percentOff": {
+      "whole": "The percentage must be a whole number.",
+      "tooSmall": "The percentage must be at least {minimum}%.",
+      "tooBig": "The percentage can be at most {maximum}%."
+    },
+    "amountOff": {
+      "whole": "The amount must be a whole number of cents.",
+      "tooSmall": "The amount must be more than zero.",
+      "tooBig": "The amount is too large."
+    },
+    "usageLimit": {
+      "whole": "The limit must be a whole number.",
+      "tooSmall": "The limit must be at least {minimum}.",
+      "tooBig": "The limit can be at most {maximum}."
     }
   },
   "list": {
@@ -410,6 +431,10 @@
     "destinationCountries": {
       "tooMany": "A destination can cover at most {maximum} countries.",
       "duplicate": "Each country can only appear once per destination."
+    },
+    "discountProducts": {
+      "tooMany": "Choose up to {maximum} products.",
+      "duplicate": "Each product can only be chosen once."
     }
   },
   "settings": {
@@ -488,5 +513,18 @@
     "blocksTooMany": "A storefront can hold up to {maximum} blocks. Remove some blocks or split this storefront in two.",
     "blocksDuplicate": "Grid blocks must be unique.",
     "blockOutsideCanvas": "A block sits outside the canvas."
+  },
+  "discountCode": {
+    "code": "A code is {min} to {max} letters or numbers, and can also use - or _."
+  },
+  "instant": {
+    "startsAt": "Choose a valid start date and time.",
+    "endsAt": "Choose a valid end date and time."
+  },
+  "discount": {
+    "productsRequired": "Choose at least one product, or apply the discount to all products.",
+    "endBeforeStart": "The end has to be after the start.",
+    "startInPast": "The start can't be in the past. Choose a later time, or start it now.",
+    "endInPast": "The end can't be in the past."
   }
 }

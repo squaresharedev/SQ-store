@@ -11,7 +11,7 @@ import { CheckoutGallery } from "./CheckoutGallery";
 // download, `?view=thanks` the thank-you page, `?q=3` three of it, `?scroll=1`
 // the page inside a phone-height window it scrolls in (as the editor shows it
 // on a phone), `?view=thanks&buyer=1` the thank-you in the buyer's mode
-// (screen-wide confetti), and `?layout=` / `?bg=` (a hex without the #) / `?photo=1` start
+// (screen-wide confetti), and `?layout=` / `?bg=` (a hex without the #) / `?photo=1` (with `&overlay=0` for a photo shown as it is) start
 // the design somewhere other than the defaults. Dev-only: the route 404s in
 // production builds.
 
@@ -33,12 +33,13 @@ export default async function CheckoutDevPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   if (process.env.NODE_ENV === "production") notFound();
-  const { w, kind, view, q, layout, bg, scroll, buyer, photo } = await searchParams;
+  const { w, kind, view, q, layout, bg, scroll, buyer, photo, overlay } = await searchParams;
+  const harnessPhoto = { key: HARNESS_PHOTO_KEY, ...(overlay === "0" ? { overlay: false } : {}) };
   const initial = checkoutPageSchema.safeParse({
     ...DEFAULT_CHECKOUT_PAGE_CONFIG,
     ...(layout ? { layout } : {}),
     ...(bg ? { backgroundColor: `#${bg}` } : {}),
-    ...(photo === "1" ? { backgroundImage: { key: HARNESS_PHOTO_KEY } } : {}),
+    ...(photo === "1" ? { backgroundImage: harnessPhoto, thanksBackgroundImage: harnessPhoto } : {}),
   });
   const width = Number(w);
   return (

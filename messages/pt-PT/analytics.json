@@ -89,7 +89,8 @@
   "channels": {
     "embed": "Incorporação",
     "marketplace": "Marketplace",
-    "direct": "Direto"
+    "direct": "Direto",
+    "button": "Botão no seu site"
   },
   "signalsUnavailable": {
     "title": "As visualizações e subscrições estão indisponíveis de momento",

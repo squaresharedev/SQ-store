@@ -54,6 +54,8 @@ export const ORDERS_CSV_COLUMNS = [
   "shipped_at",
   "tracking_number",
   "tracking_carrier",
+  "discount",
+  "discount_code",
 ] as const;
 
 /** One order's cells, in ORDERS_CSV_COLUMNS order. */
@@ -78,6 +80,10 @@ function orderCells(order: OrderExportRow): CsvValue[] {
     order.fulfilment.shippedAt,
     order.fulfilment.trackingNumber,
     order.fulfilment.carrier,
+    // How much less than the regular price the buyer paid, and the code they
+    // used (the channel the sale is credited to), for the books.
+    order.discount ? centsToDecimal(order.discount.cents) : centsToDecimal(0),
+    order.discount?.code ?? null,
   ];
 }
 

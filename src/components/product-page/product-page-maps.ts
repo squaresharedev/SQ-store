@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import type { PagePhotoView } from "@/types/product-page";
 import { isLightColor } from "@/lib/format/color";
 import { cssUrl } from "@/components/storefront/background-presets";
 import {
@@ -199,13 +200,13 @@ export function chipStyle(ink: string, cornerRadius: number): CSSProperties {
   };
 }
 
-/** How much of a hosted page's photo backdrop is covered by a veil of the
- *  page's own colour. The ink is derived from that colour, so the veil is what
+/** How much of a hosted page's photo backdrop is covered by an overlay of the
+ *  page's own colour. The ink is derived from that colour, so the overlay is what
  *  makes any photograph a surface the page's words can sit on; the rest of the
  *  photo is what the seller chose it for. */
 export const PAGE_PHOTO_VEIL = 0.72;
 
-/** A strict #rrggbb as rgba(), for a veil. Anything else answers transparent. */
+/** A strict #rrggbb as rgba(), for an overlay. Anything else answers transparent. */
 function veilColor(hex: string, alpha: number): string {
   const match = /^#([0-9a-f]{6})$/i.exec(hex);
   if (!match) return "transparent";
@@ -215,13 +216,16 @@ function veilColor(hex: string, alpha: number): string {
 
 /**
  * The paint of a hosted page's photo backdrop: the photo to cover the page,
- * under a veil of `tint` (the page's colour). Applied to a layer behind the
- * page's content (PageShell), never to the content itself.
+ * under an overlay of `tint` (the page's colour) unless `overlay` is off.
+ * Applied to a layer behind the page's content (PageShell), never to the
+ * content itself.
  */
-export function pagePhotoStyle(photo: { url: string; tint: string }): CSSProperties {
+export function pagePhotoStyle(photo: PagePhotoView & { tint: string }): CSSProperties {
   const veil = veilColor(photo.tint, PAGE_PHOTO_VEIL);
   return {
-    backgroundImage: `linear-gradient(${veil}, ${veil}), ${cssUrl(photo.url)}`,
+    backgroundImage: photo.overlay
+      ? `linear-gradient(${veil}, ${veil}), ${cssUrl(photo.url)}`
+      : cssUrl(photo.url),
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundRepeat: "no-repeat",

@@ -72,6 +72,8 @@ function fromCatalogRow(product: Product, showStock: boolean): ProductPageProduc
     description: product.description,
     priceCents: Math.round(product.price * 100),
     currency: product.currency,
+    // The editor previews the product as listed, never as discounted.
+    sale: null,
     purchaseUrl: null,
     // The catalogue row has no page facts, so the first frame shows the store
     // default; the real choice arrives with the preview load a tick later.

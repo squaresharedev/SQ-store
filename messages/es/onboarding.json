@@ -109,7 +109,8 @@
       "nameAlternative": "O tu nombre completo, si vendes a título personal.",
       "addressPlaceholder": "p. ej. Calle Mayor 12\n28013 Madrid\nEspaña",
       "emailPlaceholder": "p. ej. hola@tutienda.example",
-      "emailHelp": "Adónde te escriben los compradores. Puede ser distinto de tu correo de inicio de sesión."
+      "emailHelp": "Adónde te escriben los compradores. Puede ser distinto de tu correo de inicio de sesión.",
+      "emailTipLabel": "Sobre este correo"
     },
     "confirm": {
       "goLive": "Tus páginas de producto pueden publicarse en cuanto esté confirmado."
@@ -155,7 +156,7 @@
     "shortcut": "Atajo: <kbd>{shortcut}</kbd>",
     "skipTour": "Omitir visita",
     "next": "Siguiente",
-    "openingPage": "{page, select, overview {Abriendo Resumen…} products {Abriendo Productos…} storefront {Abriendo Escaparate…} orders {Abriendo Pedidos…} analytics {Abriendo Estadísticas…} payments {Abriendo Pagos…} settings {Abriendo Configuración…} sampleStorefront {Abriendo Escaparate de ejemplo…} other {Abriendo…}}"
+    "openingPage": "{page, select, overview {Abriendo Resumen…} products {Abriendo Productos…} storefront {Abriendo Escaparate…} orders {Abriendo Pedidos…} discounts {Abriendo Descuentos…} analytics {Abriendo Estadísticas…} payments {Abriendo Pagos…} settings {Abriendo Configuración…} sampleStorefront {Abriendo Escaparate de ejemplo…} other {Abriendo…}}"
   },
   "tourReplay": {
     "title": "Visita guiada",

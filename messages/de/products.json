@@ -97,7 +97,8 @@
     "copyLink": "Produktlink kopieren",
     "openPage": "Produktseite öffnen",
     "unitsSold": "{count, plural, one {{count} verkauft} other {{count} verkauft}}",
-    "noSales": "Noch keine Verkäufe"
+    "noSales": "Noch keine Verkäufe",
+    "addToWebsite": "Zu deiner Website hinzufügen"
   },
   "removal": {
     "badge": "Entfernt",
@@ -332,7 +333,9 @@
       "title": "Änderungen verwerfen?",
       "editDescription": "Die Änderungen, die du an diesem Produkt vorgenommen hast, wurden noch nicht gespeichert.",
       "newDescription": "Dieses Produkt wurde noch nicht gespeichert, daher wird nichts behalten.",
-      "discard": "Verwerfen"
+      "discard": "Änderungen verwerfen",
+      "keepEditing": "Weiter bearbeiten",
+      "saveAndLeave": "Speichern und verlassen"
     },
     "nav": {
       "label": "Formularabschnitte",
@@ -636,5 +639,70 @@
     },
     "footer": "SquareShare · {reference} · Seite {page} von {total}",
     "generated": "Erstellt am {date}."
+  },
+  "buyButton": {
+    "title": "Kauf-Button für deine Website",
+    "summary": "Dein eigener Button auf deiner eigenen Website führt Käufer zur Seite und zum Checkout von „{title}“.",
+    "storefrontLabel": "Seitendesign",
+    "flow": {
+      "button": "Dein Button",
+      "checkout": "Checkout"
+    },
+    "methods": "So fügst du ihn hinzu",
+    "method": {
+      "link": "Link",
+      "html": "HTML",
+      "agent": "KI-Agent"
+    },
+    "hint": {
+      "link": "Füge ihn in die Link-Einstellung deines Buttons ein.",
+      "html": "Füge ihn dort ein, wo der Button stehen soll.",
+      "agent": "Füge ihn in deinen KI-Coding-Agenten ein."
+    },
+    "copy": {
+      "link": {
+        "copy": "Link kopieren",
+        "copied": "Link kopiert",
+        "failed": "Der Link konnte nicht kopiert werden. Markiere ihn und kopiere ihn selbst."
+      },
+      "html": {
+        "copy": "HTML kopieren",
+        "copied": "HTML kopiert",
+        "failed": "Das HTML konnte nicht kopiert werden. Markiere es und kopiere es selbst."
+      },
+      "agent": {
+        "copy": "Prompt kopieren",
+        "copied": "Prompt kopiert",
+        "failed": "Der Prompt konnte nicht kopiert werden. Markiere ihn und kopiere ihn selbst."
+      }
+    },
+    "snippetText": "Jetzt kaufen",
+    "prompt": {
+      "task": "Füge meiner Website einen Kauf-Button hinzu. Er muss genau auf diese URL verlinken:",
+      "html": "Als reines HTML ist das:",
+      "style": "Gestalte ihn wie die anderen Buttons auf meiner Website. Wenn es für dieses Produkt schon einen Kauf-Button gibt, lass diesen auf die URL zeigen, statt einen zweiten hinzuzufügen.",
+      "normal": "Er muss als normale Seite im selben Tab öffnen. Lade sie nicht in einem iframe, Pop-up oder einer Lightbox: Die Seite lässt sich nicht einbetten.",
+      "exact": "Es ist kein Skript, SDK oder API-Aufruf nötig. Lass die URL genau so, wie sie ist, einschließlich allem nach dem Fragezeichen."
+    },
+    "tryIt": "Button testen",
+    "tracking": "Erscheint in Analysen als „Website-Button“.",
+    "blocked": {
+      "removed": "Dieses Produkt wurde offline genommen. Öffne es, um zu sehen, warum.",
+      "draft": "Dieses Produkt ist ein Entwurf. Stelle es zuerst auf Aktiv.",
+      "notPlaced": "Platziere dieses Produkt zuerst auf einem Schaufenster, damit es eine Seite hat, auf der Käufer landen."
+    },
+    "editProduct": "Produkt bearbeiten",
+    "goToStorefronts": "Zu den Schaufenstern",
+    "embedPointer": "Du verkaufst nur ein Produkt? Statt das ganze Schaufenster einzubetten, gib ihm einen Kauf-Button auf deiner Website: Öffne unter Produkte sein Menü und wähle „Zu deiner Website hinzufügen“.",
+    "embedPointerLink": "Zu den Produkten",
+    "demo": {
+      "play": "Animation abspielen",
+      "pause": "Animation anhalten",
+      "siteLine": "Deine Website, dein Design.",
+      "email": "E-Mail",
+      "card": "Kartennummer",
+      "total": "Gesamt",
+      "pay": "{price} zahlen"
+    }
   }
 }

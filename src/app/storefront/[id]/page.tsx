@@ -89,7 +89,11 @@ export default async function StorefrontEditorPage({
     background.kind === "image" ? presignGetUrl(background.key) : null,
     customFont ? presignGetUrl(customFont.key) : null,
     signElementUrls(storefront.config.blocks),
-    signPagePhotoUrls([productPage?.backgroundImage?.key, checkoutPage?.backgroundImage?.key]),
+    signPagePhotoUrls([
+      productPage?.backgroundImage?.key,
+      checkoutPage?.backgroundImage?.key,
+      checkoutPage?.thanksBackgroundImage?.key,
+    ]),
   ]);
 
   return (

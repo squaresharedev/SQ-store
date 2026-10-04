@@ -329,8 +329,28 @@
       "rate_limited": "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.",
       "unavailable": "El pago no está disponible ahora mismo. No se ha cobrado nada.",
       "failed": "Algo salió mal y no se ha cobrado nada. Inténtalo de nuevo.",
-      "invalid": "Algunos datos necesitan revisión. Revisa los campos marcados."
+      "invalid": "Algunos datos necesitan revisión. Revisa los campos marcados.",
+      "discount_invalid": "Este código de descuento ya no puede usarse. Quítalo para pagar el precio completo.",
+      "price_changed": "El precio cambió mientras tenías esta página abierta, así que no se ha cobrado nada. Comprueba el nuevo total y paga."
     },
-    "editHeadline": "Titular del pago"
+    "editHeadline": "Titular del pago",
+    "discount": {
+      "add": "Añadir un código de descuento",
+      "label": "Código de descuento",
+      "apply": "Aplicar",
+      "applying": "Comprobando",
+      "remove": "Quitar",
+      "applied": "{code} aplicado.",
+      "saleBetter": "{code} funciona, pero el precio de rebaja ya es más bajo, así que lo hemos mantenido.",
+      "invalid": "Este código no puede usarse para este pedido.",
+      "rateLimited": "Demasiados códigos probados. Espera un momento e inténtalo de nuevo.",
+      "line": "Descuento ({code})"
+    }
+  },
+  "sale": {
+    "wasNow": "Antes {was}, ahora {now}",
+    "percentOff": "-{percent}%",
+    "priorNote": "Precio tachado: el precio más bajo en los 30 días anteriores al inicio de esta rebaja.",
+    "endsOn": "La rebaja termina el {date}"
   }
 }

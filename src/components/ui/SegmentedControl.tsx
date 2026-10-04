@@ -25,8 +25,11 @@ export function SegmentedControl<T extends string>({
    * option stays visible on purpose: removing it would hide that the choice
    * exists at all, and the surface around the control is where the reason
    * belongs.
+   *
+   * `label` is usually a word; it may carry a small chip beside it (the plans
+   * page's "Yearly" with what yearly saves), which the segment lays out inline.
    */
-  options: readonly { value: T; label: string; disabled?: boolean }[];
+  options: readonly { value: T; label: React.ReactNode; disabled?: boolean }[];
   onChange: (value: T) => void;
   ariaLabel: string;
   id?: string;
@@ -50,7 +53,7 @@ export function SegmentedControl<T extends string>({
             disabled={disabled || option.disabled}
             onClick={() => onChange(option.value)}
             className={cn(
-              "flex-1 border border-border px-3 py-1.5 font-inter text-xs font-medium",
+              "inline-flex flex-1 items-center justify-center gap-2 whitespace-nowrap border border-border px-3 py-1.5 font-inter text-xs font-medium",
               "transition-colors duration-base ease-standard motion-reduce:transition-none",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
               "disabled:opacity-50 disabled:pointer-events-none",

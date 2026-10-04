@@ -31,9 +31,12 @@ import type { CheckoutErrorCode, PlaceOrderResponse } from "@/types/checkout";
  *      fail-closed): where card testing would aim, this is what it hits.
  *   4. Turnstile, when this deployment has it configured.
  *   5. THE QUOTE (lib/checkout/quote.ts), behind the product page's own gate,
- *      re-reads price, stock, options and delivery from the database. It is
- *      the only source of the amount a provider is handed.
- *   6. The provider takes the payment and the order writer records it.
+ *      re-reads price, stock, options, delivery and any discount from the
+ *      database. It is the only source of the amount a provider is handed.
+ *   6. The total the buyer was shown, when the page sends it, must be the
+ *      quote's total. A sale that ended (or a price that changed) between the
+ *      page loading and Pay is answered with `price_changed`, never charged.
+ *   7. The provider takes the payment and the order writer records it.
  *
  * The answer is the buyer's order page (a credential, see
  * lib/orders/order-link.ts) or a reason the checkout can put into words.
@@ -99,6 +102,7 @@ export async function POST(request: Request, { params }: { params: Promise<Param
       optionIds: order.optionIds,
       quantity: order.quantity,
       country: order.shipTo?.country ?? null,
+      discountCode: order.discountCode ?? null,
     },
     // The gate spends from the checkout PAGE budget: the place budget above is
     // already spent, and a buyer who has just loaded the page is well within
@@ -109,6 +113,13 @@ export async function POST(request: Request, { params }: { params: Promise<Param
     return refuse(quoted.reason, quoted.reason === "not_found" ? 404 : 409);
   }
   const { quote } = quoted;
+
+  // Only what the buyer saw is charged (CRD art. 6(1)(e) and 8(2)): the page
+  // sends the total on its Pay button, and any difference is the buyer's to
+  // see before anything is taken.
+  if (order.expectedTotalCents !== undefined && order.expectedTotalCents !== quote.totalCents) {
+    return refuse("price_changed", 409);
+  }
 
   // Checkout must still be open for this product: a provider can take the
   // money, and delivery is priced. The page asked the same question when it
@@ -132,6 +143,8 @@ export async function POST(request: Request, { params }: { params: Promise<Param
       shipTo: quote.isDigital ? null : (order.shipTo ?? null),
       giftMessage: quote.isDigital ? null : (order.giftMessage ?? null),
       supplyConsent: quote.isDigital && order.supplyConsent === true,
+      // Where the buyer arrived from; a label for the seller's numbers only.
+      channel: order.channel ?? "direct",
     },
     order.attemptId,
   );

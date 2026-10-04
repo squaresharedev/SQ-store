@@ -16,6 +16,7 @@ const { quoteFromGate } = await import("@/lib/checkout/quote");
 import type { Purchasable } from "@/lib/products/purchasable";
 import { DEFAULT_PRODUCT_PAGE_CONFIG, DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
+import type { ActiveSale, ResolvedCode } from "@/types/discount";
 
 const PRODUCT = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const GROUP = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
@@ -41,7 +42,9 @@ type RowOverrides = Partial<{
   digital_file_key: string | null;
 }>;
 
-function gate(options: { soldOut?: boolean; row?: RowOverrides; policy?: SellerShippingPolicy } = {}): Purchasable {
+function gate(
+  options: { soldOut?: boolean; row?: RowOverrides; policy?: SellerShippingPolicy; sales?: ActiveSale[] } = {},
+): Purchasable {
   return {
     ownerId: "ffffffff-ffff-4fff-8fff-ffffffffffff",
     storefront: { id: "99999999-9999-4999-8999-999999999999", name: "Studio" },
@@ -82,6 +85,8 @@ function gate(options: { soldOut?: boolean; row?: RowOverrides; policy?: SellerS
     },
     seller: { businessName: "Studio" },
     shippingPolicy: options.policy ?? POLICY,
+    sales: options.sales ?? [],
+    now: new Date("2026-10-03T12:00:00Z"),
   } as Purchasable;
 }
 
@@ -95,7 +100,10 @@ function admin(g: Purchasable) {
   return { from: () => chain } as never;
 }
 
-async function quote(g: Purchasable, request: { optionIds?: string[]; quantity?: unknown; country?: string | null }) {
+async function quote(
+  g: Purchasable,
+  request: { optionIds?: string[]; quantity?: unknown; country?: string | null; code?: ResolvedCode },
+) {
   return quoteFromGate(
     g,
     {
@@ -104,8 +112,19 @@ async function quote(g: Purchasable, request: { optionIds?: string[]; quantity?:
       country: "country" in request ? (request.country ?? null) : "IE",
     },
     admin(g),
+    request.code ?? null,
   );
 }
+
+const SALE_ID = "11111111-1111-4111-8111-111111111111";
+const CODE_ID = "22222222-2222-4222-8222-222222222222";
+const sale = (percentOff: number): ActiveSale => ({
+  id: SALE_ID,
+  value: { type: "percent", percentOff },
+  startsAt: "2026-09-01T00:00:00Z",
+  endsAt: null,
+});
+const code = (value: ResolvedCode["value"]): ResolvedCode => ({ id: CODE_ID, code: "SUMMER10", value });
 
 describe("quoteFromGate", () => {
   it("prices from the row and the seller's rates: 2 × €24 + €4.50 to Ireland", async () => {
@@ -166,5 +185,70 @@ describe("quoteFromGate", () => {
     const digital = gate({ row: { digital_file_key: "files/x/y-z.pdf" }, policy: {} });
     const result = await quote(digital, { country: null });
     expect(result).toMatchObject({ ok: true, quote: { isDigital: true, shippingCents: null, totalCents: 2400 } });
+  });
+});
+
+describe("quoteFromGate with discounts", () => {
+  it("prices a running sale per item, records it, and charges the fee base on what is paid", async () => {
+    const result = await quote(gate({ sales: [sale(25)] }), { quantity: 2 });
+    expect(result).toMatchObject({
+      ok: true,
+      quote: {
+        regularUnitCents: 2400,
+        unitPriceCents: 1800,
+        subtotalCents: 3600,
+        itemsCents: 3600,
+        discount: { id: SALE_ID, cents: 1200 },
+        credit: null,
+        shippingCents: 450,
+        totalCents: 4050,
+      },
+    });
+  });
+
+  it("lets a code that does better replace the sale, taken off the regular price", async () => {
+    const result = await quote(gate({ sales: [sale(10)] }), {
+      quantity: 2,
+      code: code({ type: "percent", percentOff: 30 }),
+    });
+    expect(result).toMatchObject({
+      ok: true,
+      quote: {
+        unitPriceCents: 2400,
+        subtotalCents: 4800,
+        itemsCents: 3360,
+        discount: { id: CODE_ID, cents: 1440 },
+        credit: { id: CODE_ID, code: "SUMMER10" },
+        totalCents: 3810,
+      },
+    });
+  });
+
+  it("keeps the better sale but still credits the code the buyer came with", async () => {
+    const result = await quote(gate({ sales: [sale(30)] }), { code: code({ type: "percent", percentOff: 10 }) });
+    expect(result).toMatchObject({
+      ok: true,
+      quote: { unitPriceCents: 1680, discount: { id: SALE_ID, cents: 720 }, credit: { id: CODE_ID } },
+    });
+  });
+
+  it("measures free delivery on the items after discounts", async () => {
+    // 2 x 50.00 = 100.00 earns free delivery; 10% off brings it under the threshold.
+    const full = await quote(gate({ row: { price_cents: 5000 } }), { quantity: 2 });
+    expect(full.ok && full.quote.shippingCents).toBe(0);
+    const discounted = await quote(gate({ row: { price_cents: 5000 }, sales: [sale(10)] }), { quantity: 2 });
+    expect(discounted.ok && discounted.quote.shippingCents).toBe(450);
+  });
+
+  it("never discounts the items below the smallest card payment", async () => {
+    const result = await quote(gate({ row: { price_cents: 60 } }), {
+      code: code({ type: "amount", amountOffCents: 500, currency: "EUR" }),
+    });
+    expect(result.ok && result.quote.itemsCents).toBe(50);
+  });
+
+  it("ignores an amount off in another currency", async () => {
+    const result = await quote(gate(), { code: code({ type: "amount", amountOffCents: 500, currency: "USD" }) });
+    expect(result).toMatchObject({ ok: true, quote: { itemsCents: 2400, discount: null } });
   });
 });

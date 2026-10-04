@@ -147,7 +147,8 @@
       "thankYouCelebration": "Oslava po nákupu",
       "checkoutPayButton": "Tlačítko Zaplatit",
       "productPagePhoto": "Fotka produktové stránky",
-      "checkoutPhoto": "Fotka pokladny a poděkování"
+      "checkoutPhoto": "Fotka pokladny",
+      "thanksPhoto": "Fotka stránky s poděkováním"
     }
   },
   "editorSearch": {
@@ -1365,7 +1366,8 @@
   "pagePhoto": {
     "label": "Fotka",
     "infoLabel": "Jak se fotka používá",
-    "info": "Zobrazí se za stránkou a je přebarvená barvou stránky, aby text zůstal čitelný. Změnou barvy fotku zesvětlíte nebo ztmavíte.",
-    "remove": "Odebrat fotku"
+    "info": "Zobrazí se za stránkou. Překryv v barvě stránky udrží text čitelný; vypnutím se fotka ukáže tak, jak je.",
+    "remove": "Odebrat fotku",
+    "overlay": "Barevný překryv"
   }
 }

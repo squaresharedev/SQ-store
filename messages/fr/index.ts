@@ -15,6 +15,7 @@ import Onboarding from "./onboarding.json";
 import Notifications from "./notifications.json";
 import Search from "./search.json";
 import Orders from "./orders.json";
+import Discounts from "./discounts.json";
 import Analytics from "./analytics.json";
 import Payments from "./payments.json";
 import Billing from "./billing.json";
@@ -36,6 +37,7 @@ const messages = {
   Notifications,
   Search,
   Orders,
+  Discounts,
   Analytics,
   Payments,
   Billing,

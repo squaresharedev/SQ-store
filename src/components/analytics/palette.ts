@@ -26,6 +26,8 @@
 // colours. Slots resolve to tokens, tokens re-step per theme, and green in
 // particular is a different green in dark mode (see --chart-positive).
 
+import type { OrderChannel } from "@/types/order-view";
+
 export const TONE = {
   /** Ink. The default weight, for a lone neutral series. */
   neutral: 0,
@@ -40,3 +42,14 @@ export const TONE = {
   /** Red. Money lost. Refunds only. */
   loss: 5,
 } as const;
+
+/** Each channel's colour, PINNED rather than taken in slice order, so a channel
+ *  keeps its identity when a sibling is empty and the ring re-sorts. No channel
+ *  is better than another, so neutrals plus the accent, never green against
+ *  grey. One map for the revenue split and every signal's channel split. */
+export const CHANNEL_TONE: Record<OrderChannel, number> = {
+  embed: TONE.neutral,
+  marketplace: TONE.traffic,
+  direct: TONE.faint,
+  button: TONE.quiet,
+};

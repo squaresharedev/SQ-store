@@ -384,8 +384,10 @@ export async function getProductSales(): Promise<ProductSalesSummary> {
   return { byProduct, bestsellerId: payload.bestseller_id };
 }
 
-/** A single storefront a product is placed on. */
-export type StorefrontPlacement = { id: string; name: string };
+/** A single storefront a product is placed on. `productPagesOn` is false when
+ *  that storefront has switched product pages off, so a link to the product's
+ *  page there would 404 (absent reads as on, the default). */
+export type StorefrontPlacement = { id: string; name: string; productPagesOn?: boolean };
 
 /**
  * Every storefront (by id and name) that each product appears in, for the
@@ -414,6 +416,9 @@ export async function getProductPlacements(): Promise<Record<string, StorefrontP
   for (const sf of data ?? []) {
     const config = sf.config as Record<string, unknown>;
     const blocks = Array.isArray(config?.blocks) ? config.blocks : [];
+    // The raw member, like `blocks` above: product pages are on unless the
+    // seller switched them off (DEFAULT_PRODUCT_PAGE_CONFIG.enabled is true).
+    const productPagesOn = (config?.productPage as { enabled?: unknown } | undefined)?.enabled !== false;
     for (const block of blocks) {
       if (
         typeof block !== "object" ||
@@ -426,7 +431,7 @@ export async function getProductPlacements(): Promise<Record<string, StorefrontP
       const productId = (block as Record<string, unknown>).productId as string;
       const list = result[productId] ?? [];
       if (!list.some((s) => s.id === sf.id)) {
-        list.push({ id: sf.id, name: sf.name });
+        list.push({ id: sf.id, name: sf.name, productPagesOn });
       }
       result[productId] = list;
     }

@@ -27,6 +27,10 @@
     "settings": {
       "label": "Ustawienia",
       "description": "Twoje dane sprzedawcy, warunki wysyłki i konto."
+    },
+    "discounts": {
+      "label": "Rabaty",
+      "description": "Organizuj obniżki i udostępniaj kody rabatowe."
     }
   },
   "settings": {

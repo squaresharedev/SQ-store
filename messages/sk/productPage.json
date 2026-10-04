@@ -329,8 +329,28 @@
       "rate_limited": "Príliš veľa pokusov. Počkajte pár minút a skúste to znova.",
       "unavailable": "Pokladňa momentálne nie je dostupná. Nič nebolo účtované.",
       "failed": "Niečo sa pokazilo a nič nebolo účtované. Skúste to znova.",
-      "invalid": "Niektoré údaje vyžadujú kontrolu. Skontrolujte zvýraznené polia."
+      "invalid": "Niektoré údaje vyžadujú kontrolu. Skontrolujte zvýraznené polia.",
+      "discount_invalid": "Tento zľavový kód sa už nedá použiť. Odstráňte ho a zaplaťte plnú cenu.",
+      "price_changed": "Cena sa počas otvorenej stránky zmenila, takže nič nebolo účtované. Skontrolujte nový súhrn a zaplaťte."
     },
-    "editHeadline": "Nadpis pokladne"
+    "editHeadline": "Nadpis pokladne",
+    "discount": {
+      "add": "Pridať zľavový kód",
+      "label": "Zľavový kód",
+      "apply": "Uplatniť",
+      "applying": "Kontrolujem",
+      "remove": "Odstrániť",
+      "applied": "Kód {code} bol uplatnený.",
+      "saleBetter": "Kód {code} funguje, ale cena z akcie je už nižšia, takže sme ju ponechali.",
+      "invalid": "Tento kód sa nedá použiť pre túto objednávku.",
+      "rateLimited": "Príliš veľa pokusov s kódmi. Chvíľu počkajte a skúste to znova.",
+      "line": "Zľava ({code})"
+    }
+  },
+  "sale": {
+    "wasNow": "Bolo {was}, teraz {now}",
+    "percentOff": "-{percent}%",
+    "priorNote": "Prečiarknutá cena: najnižšia cena za posledných 30 dní pred touto zľavou.",
+    "endsOn": "Akcia končí {date}"
   }
 }

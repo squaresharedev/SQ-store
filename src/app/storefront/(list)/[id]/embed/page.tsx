@@ -1,6 +1,11 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { pageColumnNarrowClass, pageShellClass } from "@/components/ui/surface-styles";
+import { ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { cardClass, pageColumnNarrowClass, pageShellClass } from "@/components/ui/surface-styles";
+import { bannerActionClass, helpTextClass, iconNudgeRightClass } from "@/components/ui/control-styles";
+import { PRODUCTS_PATH } from "@/lib/products/paths";
 import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { EmbedSettings } from "@/components/storefront/EmbedSettings";
@@ -29,9 +34,10 @@ export default async function StorefrontEmbedPage({
   const account = await getActiveAccount();
   if (!can(account?.role, "storefront.write")) redirect(STOREFRONT_LIST_PATH);
 
-  const [t, tDesigner, storefront, products, identity] = await Promise.all([
+  const [t, tDesigner, tButton, storefront, products, identity] = await Promise.all([
     getTranslations("Storefront.embed"),
     getTranslations("Storefront.designer.header"),
+    getTranslations("Products.buyButton"),
     getStorefrontSummary(id),
     listAllProducts(),
     account
@@ -49,6 +55,17 @@ export default async function StorefrontEmbedPage({
           title={t("title")}
           subtitle={t("description", { name: storefront.name })}
         />
+        {/* The other way onto a seller's own site, for someone selling one
+            product: the buy button lives on the product, so this points there.
+            First on the page, because that seller should not have to read
+            the whole embed setup to learn they do not need it. */}
+        <aside className={cn(cardClass, "mb-5 flex flex-wrap items-center justify-between gap-3 p-4")}>
+          <p className={helpTextClass}>{tButton("embedPointer")}</p>
+          <Link href={PRODUCTS_PATH} className={bannerActionClass}>
+            {tButton("embedPointerLink")}
+            <ArrowRight className={cn("size-3.5", iconNudgeRightClass)} strokeWidth={2} aria-hidden />
+          </Link>
+        </aside>
         <EmbedSettings
           storefront={storefront}
           products={products}

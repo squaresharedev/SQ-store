@@ -8,6 +8,11 @@ export function checkoutApiPath(storefrontId: string, productId: string): string
   return `/api/checkout/${encodeURIComponent(storefrontId)}/${encodeURIComponent(productId)}`;
 }
 
+/** POST: check a discount code for this product before paying. */
+export function checkoutDiscountApiPath(storefrontId: string, productId: string): string {
+  return `${checkoutApiPath(storefrontId, productId)}/discount`;
+}
+
 /** POST: the withdrawal function on an order page (CRD art. 11a). */
 export const ORDER_WITHDRAW_API_PATH = "/api/orders/withdraw";
 

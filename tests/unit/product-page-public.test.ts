@@ -42,6 +42,19 @@ vi.mock("@/lib/supabase/admin", () => ({
   createAdminClient: () => ({ from }),
 }));
 
+// The discount reads have their own tests (discount-public); here they only
+// decide what the page is told about a sale.
+const readActiveSales = vi.fn(async (): Promise<unknown[]> => []);
+const loadProductSale = vi.fn(async (_admin: unknown, input: { regularPriceCents: number }) => ({
+  priceCents: input.regularPriceCents,
+  sale: null as unknown,
+}));
+vi.mock("@/lib/discounts/public", () => ({
+  readActiveSales: (...args: unknown[]) => readActiveSales(...(args as [])),
+  loadProductSale: (...args: [unknown, { regularPriceCents: number }]) => loadProductSale(...args),
+  findCodeFor: vi.fn(async () => null),
+}));
+
 const { buildProductPageProduct, getPublicProductPage } = await import("@/lib/products/public");
 
 const STOREFRONT_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -233,6 +246,35 @@ describe("getPublicProductPage gates", () => {
     expect(pageJson).not.toContain('"embed"');
     expect(result?.page.productUrl).toContain(`/s/${STOREFRONT_ID}/p/${PRODUCT_ID}`);
     expect(result?.page.storefront.productPage).toEqual(DEFAULT_PRODUCT_PAGE_CONFIG);
+  });
+
+  it("prices the page from the store's running sale, and never hands the browser a discount id", async () => {
+    const SALE_ID = "99999999-9999-4999-8999-999999999999";
+    readActiveSales.mockResolvedValueOnce([
+      { id: SALE_ID, value: { type: "percent", percentOff: 20 }, startsAt: "2026-01-01T00:00:00Z", endsAt: null },
+    ]);
+    loadProductSale.mockResolvedValueOnce({
+      priceCents: 10320,
+      sale: { regularPriceCents: 12900, priorPriceCents: 12900, percentOff: 20, endsAt: null },
+    });
+    const result = await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID);
+
+    // The sale read is the gate's, scoped to this storefront's owner and this product.
+    expect(readActiveSales).toHaveBeenCalledWith(expect.anything(), OWNER_ID, PRODUCT_ID, expect.any(Date));
+    expect(loadProductSale).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ ownerId: OWNER_ID, productId: PRODUCT_ID, regularPriceCents: 12900 }),
+    );
+    expect(result?.page.product.priceCents).toBe(10320);
+    expect(result?.page.product.sale).toEqual({
+      regularPriceCents: 12900,
+      priorPriceCents: 12900,
+      percentOff: 20,
+      endsAt: null,
+    });
+    expect(JSON.stringify(result?.page)).not.toContain(SALE_ID);
+    // One rate-limit token for the whole page, sale included.
+    expect(rateLimitKey).toHaveBeenCalledTimes(1);
   });
 
   it("marks the page sold out from the tile's flag", async () => {

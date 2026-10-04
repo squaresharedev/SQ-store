@@ -11,6 +11,7 @@
 // planTransition) is unit-tested in tests/unit/billing-sync.test.ts.
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { recordFunnelEvent } from "@/lib/billing/funnel";
 import {
   computePaidUntil,
   effectivePlan,
@@ -168,5 +169,11 @@ export async function applyBillingSnapshot(
     { plan: snapshot.plan, paid_until: snapshot.paidUntil?.toISOString() ?? null },
     syncedAt,
   );
-  return { applied: Boolean(row?.applied), before, after };
+  const applied = Boolean(row?.applied);
+  // The funnel row is written HERE, by whichever write moved the plan: the
+  // webhook, or the checkout return page when it syncs first. Recorded by the
+  // webhook alone, an upgrade the return page applied would never count.
+  const transition = applied ? planTransition(before, after) : null;
+  if (transition) await recordFunnelEvent({ accountId: ownerId, actorId: null, kind: transition, plan: after });
+  return { applied, before, after };
 }

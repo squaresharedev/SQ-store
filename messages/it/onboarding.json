@@ -109,7 +109,8 @@
       "nameAlternative": "Oppure il tuo nome e cognome, se vendi a titolo personale.",
       "addressPlaceholder": "es. Via del Mercato 12\n20100 Milano\nItalia",
       "emailPlaceholder": "es. ciao@iltuonegozio.example",
-      "emailHelp": "Dove gli acquirenti ti scrivono. Può essere diversa dalla tua email di accesso."
+      "emailHelp": "Dove gli acquirenti ti scrivono. Può essere diversa dalla tua email di accesso.",
+      "emailTipLabel": "Informazioni su questa email"
     },
     "confirm": {
       "goLive": "Le tue pagine prodotto possono essere pubblicate non appena è confermata."
@@ -155,7 +156,7 @@
     "shortcut": "Scorciatoia: <kbd>{shortcut}</kbd>",
     "skipTour": "Salta il tour",
     "next": "Avanti",
-    "openingPage": "{page, select, overview {Apertura di Panoramica…} products {Apertura di Prodotti…} storefront {Apertura di Vetrina…} orders {Apertura di Ordini…} analytics {Apertura di Statistiche…} payments {Apertura di Pagamenti…} settings {Apertura di Impostazioni…} sampleStorefront {Apertura della vetrina di esempio…} other {Apertura…}}"
+    "openingPage": "{page, select, overview {Apertura di Panoramica…} products {Apertura di Prodotti…} storefront {Apertura di Vetrina…} orders {Apertura di Ordini…} discounts {Apertura di Sconti…} analytics {Apertura di Statistiche…} payments {Apertura di Pagamenti…} settings {Apertura di Impostazioni…} sampleStorefront {Apertura della vetrina di esempio…} other {Apertura…}}"
   },
   "tourReplay": {
     "title": "Tour guidato",

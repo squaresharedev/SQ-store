@@ -3,10 +3,13 @@ import { describe, expect, it } from "vitest";
 import {
   breakEvenCents,
   cheapestPlanFor,
+  launchDiscountPercent,
   monthlyCostCents,
+  monthlyListPriceCents,
   monthlyPriceCents,
   platformFeeCents,
   saleFee,
+  yearlyFreeMonths,
   yearlySavingCents,
 } from "@/lib/billing/fees";
 import { PLANS, PLAN_IDS } from "@/lib/billing/plans";
@@ -97,6 +100,45 @@ describe("yearlySavingCents", () => {
     for (const plan of PLAN_IDS) {
       const { month, year } = PLANS[plan].priceCents;
       expect(yearlySavingCents(plan)).toBe(Math.max(0, month * 12 - year));
+    }
+  });
+
+  it("gives every paid plan the months the Yearly chip promises", () => {
+    // "2 months free" is said once, beside the toggle, so it has to be true
+    // of each paid plan, not of the best one.
+    expect(yearlyFreeMonths()).toBe(2);
+    for (const plan of PLAN_IDS) {
+      const { month } = PLANS[plan].priceCents;
+      if (month > 0) expect(yearlySavingCents(plan), plan).toBeGreaterThanOrEqual(yearlyFreeMonths() * month);
+    }
+  });
+});
+
+describe("the launch price", () => {
+  it("shows Starter's regular price above what it charges, and nothing on the others", () => {
+    expect(monthlyListPriceCents("starter", "month")).toBe(2000);
+    expect(monthlyPriceCents("starter", "month")).toBe(1500);
+    expect(launchDiscountPercent("starter", "month")).toBe(25);
+    for (const plan of ["free", "pro"] as const) {
+      expect(monthlyListPriceCents(plan, "month"), plan).toBeNull();
+      expect(launchDiscountPercent(plan, "month"), plan).toBe(0);
+    }
+  });
+
+  it("is the same saving yearly, spread over twelve months like the price", () => {
+    expect(launchDiscountPercent("starter", "year")).toBe(25);
+    expect(monthlyListPriceCents("starter", "year")).toBe(Math.round(PLANS.starter.listPriceCents!.year / 12));
+  });
+
+  it("never claims a regular price at or below the price charged", () => {
+    // A struck-through price that is not above the real one is no discount
+    // at all, and showing it would be a false claim.
+    for (const plan of PLAN_IDS) {
+      const list = PLANS[plan].listPriceCents;
+      if (!list) continue;
+      for (const interval of ["month", "year"] as const) {
+        expect(list[interval], `${plan}.${interval}`).toBeGreaterThan(PLANS[plan].priceCents[interval]);
+      }
     }
   });
 });

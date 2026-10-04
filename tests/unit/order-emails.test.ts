@@ -9,7 +9,12 @@ vi.mock("@/lib/email/send", () => ({
   sendEmail: (...args: unknown[]) => sendEmailMock(...args),
 }));
 
-import { sendNewOrderEmail, sendShippedEmail, sendWithdrawalNotice } from "@/lib/orders/emails";
+import {
+  sendNewOrderEmail,
+  sendOrderConfirmation,
+  sendShippedEmail,
+  sendWithdrawalNotice,
+} from "@/lib/orders/emails";
 import type { OutboundEmail } from "@/lib/email/send";
 
 const ORDER_ID = "aaaaaaaa-1111-4111-8111-111111111111";
@@ -175,5 +180,66 @@ describe("the buyer's shipped email", () => {
     expect(sent().replyTo).toBeUndefined();
     expect(sent().text).not.toContain("Reply to this email");
     expect(sent().text).not.toContain("Tracking number");
+  });
+});
+
+describe("discounts in order mail", () => {
+  it("tells the seller which code the sale came with", async () => {
+    await sendNewOrderEmail("seller@example.test", "en", {
+      orderId: ORDER_ID,
+      productTitle: "Blue mug",
+      quantity: 1,
+      selection: [],
+      ships: false,
+      shipTo: null,
+      amountCents: 2160,
+      currency: "EUR",
+      buyerEmail: null,
+      discountCode: "INSTA10",
+    });
+    expect(sent().text).toContain("Discount code: INSTA10");
+  });
+
+  const confirmation = {
+    productTitle: "Blue mug",
+    quantity: 2,
+    selection: [],
+    number: "AAAAAAAA",
+    placedAt: new Date("2026-10-03T12:00:00Z"),
+    subtotalCents: 4800,
+    codeDiscount: { code: "SUMMER10", cents: 480 },
+    shippingCents: 450,
+    amountCents: 4770,
+    currency: "EUR",
+    shipTo: ADDRESS,
+    dispatch: null,
+    orderUrl: null,
+    downloadUrl: null,
+    seller: { businessName: "Harbour Pottery", address: "1 Quay, Galway", country: "IE", email: "hi@harbour.example" },
+    store: { name: "Harbour Pottery", contactEmail: "hi@harbour.example" },
+    isEu: true,
+    supplyConsent: false,
+  };
+
+  it("itemises a code's discount between the items and delivery, so the lines add up", async () => {
+    await sendOrderConfirmation("aoife.byrne@example.test", "en", confirmation);
+    const { text } = sent();
+    const items = text.indexOf("Items: €48.00");
+    const discount = text.indexOf("Discount (SUMMER10): -€4.80");
+    const delivery = text.indexOf("Delivery: €4.50");
+    expect(items).toBeGreaterThan(-1);
+    expect(discount).toBeGreaterThan(items);
+    expect(delivery).toBeGreaterThan(discount);
+    expect(text).toContain("Total paid: €47.70");
+  });
+
+  it("prints no discount line when no code set the price", async () => {
+    await sendOrderConfirmation("aoife.byrne@example.test", "en", {
+      ...confirmation,
+      subtotalCents: 4320,
+      codeDiscount: null,
+      amountCents: 4770,
+    });
+    expect(sent().text).not.toContain("Discount");
   });
 });

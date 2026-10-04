@@ -43,6 +43,14 @@
      the hue alone. Two steps so it stays legible on both surfaces. */
   --color-crown: #ca8a04; /* amber-600 on light surfaces */
   --color-crown-dark: #fbbf24; /* amber-400: brighter for black cards */
+
+  /* The top plan's crown (the plan wordmark in Settings > Plan & billing).
+     Same hue as the owner crown but its own token, as that comment asks: the
+     owner badge and the plan are two meanings that merely share a metal. The
+     middle plan's spark is the brand accent (acid-ink), not a token of its
+     own. Decorative: the plan's name is always the text right under it. */
+  --color-plan-gold: #ca8a04; /* amber-600 on light surfaces */
+  --color-plan-gold-dark: #fbbf24; /* amber-400 on black cards */
 }
 
 /* Font utilities map to the next/font local faces set on <html> in layout.tsx.
@@ -243,6 +251,12 @@
      as counting, short enough that the real number is never withheld. Lives
      here (not @theme) because it is read from JS, not spent as a utility. */
   --duration-countup: 900ms;
+
+  /* One slow turn of the code block's flowing border (.code-surface below).
+     Ambient rather than a response to anything, so it is measured in seconds
+     and not on the motion scale above; kept here beside the other long
+     durations so every timing the app can retune is in one place. */
+  --duration-flow: 8s;
 }
 
 /* Two selectors, one palette.
@@ -479,10 +493,13 @@ html {
   color-scheme: light;
 }
 
-/* iOS zoom guard: force 16px on text inputs so focus never zooms the viewport. */
+/* iOS zoom guard: force 16px on text inputs so focus never zooms the viewport.
+   A field that sets its figure LARGER than that (ui/AmountField) opts out with
+   data-display-field: the zoom only happens below 16px, so bigger text is
+   safe, and without the opt-out this rule would shrink the figure. */
 input[type="email"],
 input[type="password"],
-input[type="text"],
+input[type="text"]:not([data-display-field]),
 textarea {
   font-size: 16px !important;
 }
@@ -736,6 +753,72 @@ textarea {
   animation: gradient-wave 6s linear infinite;
 }
 
+/* CODE SURFACE: the block a seller copies code from (surface-styles.ts
+   `codeSurfaceClass`). A white slab inside a thick border of green shades that
+   flows slowly around it. The gradient lives INSIDE the border and nothing
+   spills past it.
+
+   One pseudo-element does all of it, so the markup is only the element:
+     ::before  the ring AND the white inside it: a transparent border over a
+               two-layer background, the fill clipped to the padding box and the
+               gradient to the border box
+   `isolation: isolate` keeps it behind the content and inside this block, so it
+   cannot slip behind an ancestor's background. It takes the block's own
+   `border-radius` (a utility the call site spells) and no pointer events.
+
+   The flow is a registered angle turning the gradient. Where @property is not
+   supported (Firefox before 128) the angle stays at 0 and the border is simply
+   still. */
+@property --flow-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes code-flow {
+  to {
+    --flow-angle: 360deg;
+  }
+}
+.code-surface {
+  /* Everything worth retuning is here. LIGHT shades of green only, deepest to
+     palest and back, so the ring thins out and thickens as it turns: the dark
+     success green (green-700) was tried and read as heavy on a white slab. */
+  --flow-ring: 4px;
+  --flow-stops: #22c55e, var(--color-success-dark) 25%, #bbf7d0 50%,
+    var(--color-success-dark) 75%, #22c55e; /* green-500, 400, 200 */
+  position: relative;
+  isolation: isolate;
+}
+.code-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  border: var(--flow-ring) solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    conic-gradient(from var(--flow-angle), var(--flow-stops)) border-box;
+  background-origin: border-box;
+  animation: code-flow var(--duration-flow) linear infinite;
+  transition: filter var(--transition-duration-slow) var(--ease-standard);
+}
+/* Not ready to copy from (the embed snippet until embedding is on): the colour
+   drains out and the flow holds still, the way the picture above it dims, and
+   comes back when it unlocks. */
+.code-surface[data-idle]::before {
+  animation-play-state: paused;
+  /* Faded as well as greyed: a 4px ring in full-strength grey reads louder
+     than the live one, which is backwards for something that is switched off. */
+  filter: grayscale(1) opacity(0.45);
+}
+@media (prefers-reduced-motion: reduce) {
+  .code-surface::before {
+    animation: none;
+    transition: none;
+  }
+}
 /* Success checkmark: the stroke draws itself in while the whole mark pops. Used
    by the settings Save buttons when a submit succeeds. */
 @keyframes check-draw {

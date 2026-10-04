@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
-import { freshUser, seedProducts, seedStorefronts, serviceRest, signUp, userIdByEmail } from "./helpers";
+import { expectToast, freshUser, seedProducts, seedStorefronts, serviceRest, signUp, userIdByEmail } from "./helpers";
 import { ANON_KEY, GATEWAY_URL, signJwt } from "./stack/keys.mjs";
 
 /**
@@ -12,7 +12,10 @@ import { ANON_KEY, GATEWAY_URL, signJwt } from "./stack/keys.mjs";
  *   - upgrading goes plans page -> checkout -> back to Settings, which
  *     confirms the new plan on its first render and drops the session id;
  *   - a sale on Pro is charged Pro's rate, snapshotted on the order;
- *   - moving back to Free is scheduled for the end of the period;
+ *   - moving back to Free is scheduled for the end of the period, through the
+ *     in-app cancel, which records the optional reason and note;
+ *   - a cancelled plan can be kept, and cancelled again, but not kept while
+ *     the account is set to be deleted;
  *   - Settings sells the next plan up with its benefit, and buying it there
  *     unlocks the orders export, whose file is a ledger without buyer details;
  *   - an outside link to the plans page is counted under its source;
@@ -37,6 +40,47 @@ async function downloadFrom(page: Page, button: Locator): Promise<Download> {
     [file] = await Promise.all([page.waitForEvent("download", { timeout: 4_000 }), button.click()]);
   }).toPass({ timeout: 30_000 });
   return file!;
+}
+
+/** Open the cancel dialog from its trigger (retrying a pre-hydration click). */
+async function openCancelDialog(page: Page, trigger: Locator): Promise<Locator> {
+  const dialog = page.getByRole("dialog").filter({ has: page.locator("[data-cancel-form]") });
+  await expect(async () => {
+    await trigger.click();
+    await expect(dialog).toBeVisible({ timeout: 3_000 });
+  }).toPass({ timeout: 30_000 });
+  return dialog;
+}
+
+/** Confirm the cancel, then close the done state. */
+async function confirmCancel(page: Page, dialog: Locator) {
+  await dialog.locator("[data-cancel-confirm]").click();
+  const done = page.getByRole("dialog").filter({ has: page.locator("[data-cancel-done]") });
+  await expect(done).toContainText("Changed your mind?");
+  await done.getByRole("button", { name: "Done" }).click();
+  await expect(done).toBeHidden();
+}
+
+/** The account's cancellations, oldest first, as the admin panel reads them. */
+async function cancellations(ownerId: string) {
+  return (await serviceRest(
+    `/plan_cancellations?owner_id=eq.${ownerId}&select=plan,billing_interval,reason,detail,ends_at,resumed_at&order=created_at`,
+  )) as Array<{
+    plan: string;
+    billing_interval: string;
+    reason: string | null;
+    detail: string | null;
+    ends_at: string;
+    resumed_at: string | null;
+  }>;
+}
+
+async function billingFlags(ownerId: string) {
+  const [row] = (await serviceRest(`/seller_billing?owner_id=eq.${ownerId}&select=plan,cancel_at_period_end`)) as Array<{
+    plan: string;
+    cancel_at_period_end: boolean;
+  }>;
+  return row;
 }
 
 async function openPlansFromRail(page: Page) {
@@ -97,15 +141,75 @@ test.describe("seller plans", () => {
     // The one sale above: a single order of two lamps.
     expect(reportCsv).toContain(",1,50.00,50.00,EUR");
 
-    // Moving back to Free ends the plan with its period, not now.
+    // Moving back to Free ends the plan with its period, not now, and asks
+    // (optionally) why: the answer is recorded for the admin panel.
     await openPlansFromRail(page);
-    await page.locator("[data-pricing-plan='free']").getByRole("button", { name: /Move to Free/ }).click();
-    await page.waitForURL(/\/settings\/billing/);
-    await expect(page.locator("[data-billing-plan='pro']")).toContainText("Ends on");
+    const dialog = await openCancelDialog(page, page.locator("[data-pricing-plan='free']").getByRole("button", { name: /Move to Free/ }));
+    await dialog.locator("[data-cancel-reason='missing_features']").check();
+    await dialog.getByLabel(/What could we do better/).fill("Needs a\nwholesale price list");
+    await confirmCancel(page, dialog);
+    await expect(page.getByRole("status").filter({ hasText: "Your Pro plan ends on" })).toBeVisible();
+    await expect(page.locator("[data-keep-plan]")).toBeVisible();
+    await expect(page.locator("[data-pricing-plan='free'] [data-cancel-plan]")).toHaveCount(0);
+
     const [cancelled] = (await serviceRest(
-      `/seller_billing?owner_id=eq.${sellerId}&select=plan,cancel_at_period_end`,
-    )) as Array<{ plan: string; cancel_at_period_end: boolean }>;
-    expect(cancelled).toEqual({ plan: "pro", cancel_at_period_end: true });
+      `/seller_billing?owner_id=eq.${sellerId}&select=plan,cancel_at_period_end,current_period_end`,
+    )) as Array<{ plan: string; cancel_at_period_end: boolean; current_period_end: string }>;
+    expect(cancelled).toMatchObject({ plan: "pro", cancel_at_period_end: true });
+    expect(await cancellations(sellerId)).toEqual([
+      {
+        plan: "pro",
+        billing_interval: "month",
+        reason: "missing_features",
+        detail: "Needs a\nwholesale price list",
+        ends_at: cancelled.current_period_end,
+        resumed_at: null,
+      },
+    ]);
+  });
+
+  test("a cancelled plan can be kept and cancelled again, but not kept past an account deletion", async ({ page }) => {
+    const seller = freshUser("plans-keep");
+    await signUp(page, seller);
+    const sellerId = await userIdByEmail(seller.email);
+    await openPlansFromRail(page);
+    await page.locator("[data-pricing-upgrade='starter']").click();
+    await page.waitForURL(/\/settings\/billing$/, { timeout: 30_000 });
+    const plan = page.locator("[data-billing-plan='starter']");
+    await expect(plan).toContainText("Renews on");
+
+    // Settings: cancel with no reason at all. Leaving never waits on feedback.
+    const controls = page.locator("[data-plan-controls]");
+    await confirmCancel(page, await openCancelDialog(page, controls.locator("[data-cancel-plan]")));
+    await expect(plan).toContainText("Ends on");
+    expect(await cancellations(sellerId)).toMatchObject([{ plan: "starter", reason: null, detail: null, resumed_at: null }]);
+
+    // Keep my plan: one click, and it renews again.
+    await controls.locator("[data-keep-plan]").click();
+    await expectToast(page, "You're keeping Starter. It renews as usual.");
+    await expect(plan).toContainText("Renews on");
+    expect(await billingFlags(sellerId)).toEqual({ plan: "starter", cancel_at_period_end: false });
+    const [kept] = await cancellations(sellerId);
+    expect(kept.resumed_at).not.toBeNull();
+
+    // Cancelling again records a second answer; the first stays closed.
+    const again = await openCancelDialog(page, controls.locator("[data-cancel-plan]"));
+    await again.locator("[data-cancel-reason='temporary']").check();
+    await confirmCancel(page, again);
+    await expect(plan).toContainText("Ends on");
+    expect((await cancellations(sellerId)).map((row) => [row.reason, row.resumed_at === null])).toEqual([
+      [null, false],
+      ["temporary", true],
+    ]);
+
+    // An account set to be deleted keeps its plan ending: the deletion ended it.
+    await serviceRest(`/profiles?id=eq.${sellerId}`, {
+      method: "PATCH",
+      body: { deletion_requested_at: new Date().toISOString() },
+    });
+    await controls.locator("[data-keep-plan]").click();
+    await expectToast(page, /Your account is set to be deleted/);
+    expect(await billingFlags(sellerId)).toEqual({ plan: "starter", cancel_at_period_end: true });
   });
 
   test("Free exports its orders, Settings sells Starter with its benefit, and reports stay Pro's", async ({ page }) => {

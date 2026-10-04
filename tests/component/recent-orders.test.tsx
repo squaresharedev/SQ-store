@@ -63,6 +63,56 @@ describe("RecentOrders", () => {
     expect(link).toHaveTextContent("25");
   });
 
+  describe("photo and quantity", () => {
+    const LAMP_ID = "aaaaaaaa-1111-4111-8111-111111111111";
+
+    it("shows the product photo to the left of the text", () => {
+      const { container } = render(
+        <RecentOrders
+          orders={[order({ id: LAMP_ID })]}
+          glances={{ [LAMP_ID]: { quantity: 1, photoUrl: "https://cdn.example/lamp.jpg" } }}
+        />,
+      );
+      const img = container.querySelector("img");
+      expect(img).toHaveAttribute("src", "https://cdn.example/lamp.jpg");
+      const link = screen.getByRole("link");
+      expect(
+        img!.compareDocumentPosition(screen.getByText("Lamp")) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      expect(link).toContainElement(img);
+    });
+
+    it("falls back to a placeholder tile when there is no photo", () => {
+      const { container } = render(
+        <RecentOrders
+          orders={[order({ id: LAMP_ID })]}
+          glances={{ [LAMP_ID]: { quantity: 1, photoUrl: null } }}
+        />,
+      );
+      expect(container.querySelector("img")).toBeNull();
+      expect(container.querySelector("svg.lucide-image")).not.toBeNull();
+    });
+
+    it("shows the units bought only when more than one", () => {
+      const CHAIR_ID = "bbbbbbbb-2222-4222-8222-222222222222";
+      render(
+        <RecentOrders
+          orders={[
+            order({ id: LAMP_ID, product_title: "Lamp" }),
+            order({ id: CHAIR_ID, product_title: "Chair" }),
+          ]}
+          glances={{
+            [LAMP_ID]: { quantity: 1, photoUrl: null },
+            [CHAIR_ID]: { quantity: 3, photoUrl: null },
+          }}
+        />,
+      );
+      expect(screen.getByText("3 × Chair")).toBeInTheDocument();
+      expect(screen.getByText("Lamp")).toBeInTheDocument();
+      expect(screen.queryByText(/1 × Lamp/)).not.toBeInTheDocument();
+    });
+  });
+
   it("falls back to the orders list when a row has no id", () => {
     // Defensive: an older cached RPC payload predates the id. Better the list
     // than a link to nowhere.

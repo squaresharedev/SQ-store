@@ -14,6 +14,7 @@ import { photoForSelection, previewSelection } from "@/lib/checkout/selection";
 import { buyerWithdrawal } from "@/lib/orders/withdrawal";
 import { findShippingProfile } from "@/lib/storefront/shipping";
 import type { CheckoutStorefront, OrderPageData } from "@/types/checkout";
+import type { PagePhotoView } from "@/types/product-page";
 import type { Product, ProductPageProduct } from "@/types/product";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import type {
@@ -39,8 +40,9 @@ type ChainProps = {
   seller: StorefrontSeller;
   backgroundImageUrl: string | null;
   customFontUrl: string | null;
-  /** Display URL of the checkout's photo backdrop (shared with the thank-you). */
-  pagePhotoUrl: string | null;
+  /** The checkout's photo backdrop, and the thank-you page's own. */
+  checkoutPhoto: PagePhotoView | null;
+  thanksPhoto: PagePhotoView | null;
   widths: Record<PreviewDevice, number>;
   initialDevice: PreviewDevice;
   onClose: () => void;
@@ -72,7 +74,7 @@ function resolveCheckoutHotspot(name: string) {
   return isCheckoutPageHotspot(name) ? CHECKOUT_PAGE_HOTSPOTS[name] : null;
 }
 
-function chainStorefront(props: ChainProps): CheckoutStorefront {
+function chainStorefront(props: ChainProps, pagePhoto: PagePhotoView | null): CheckoutStorefront {
   return {
     id: props.storefrontId,
     name: props.storefrontName,
@@ -84,7 +86,7 @@ function chainStorefront(props: ChainProps): CheckoutStorefront {
     seller: props.seller,
     backgroundImageUrl: props.backgroundImageUrl,
     customFontUrl: props.customFontUrl,
-    pagePhotoUrl: props.pagePhotoUrl,
+    pagePhoto,
   };
 }
 
@@ -110,7 +112,7 @@ export function CheckoutArtboard(props: ChainProps) {
     >
       <Editable props={props}>
         <CheckoutView
-          page={{ storefront: chainStorefront(props), product }}
+          page={{ storefront: chainStorefront(props, props.checkoutPhoto), product }}
           mode="preview"
         />
       </Editable>
@@ -129,7 +131,7 @@ export function ThanksArtboard(props: ChainProps & { playKey: number }) {
   const tPanel = useTranslations("Storefront.checkoutPage");
   const product = usePreviewProduct(props.product, props.productPage.showStock, props.soldOut);
   const page: OrderPageData = {
-    storefront: chainStorefront(props),
+    storefront: chainStorefront(props, props.thanksPhoto),
     order: sampleOrder(product, props.shippingPolicy, tPanel("thanks.sampleName")),
   };
   return (

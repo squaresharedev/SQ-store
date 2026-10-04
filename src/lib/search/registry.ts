@@ -22,6 +22,7 @@ import {
 } from "@/lib/storefront/setting-ref";
 import type { TeamAction, TeamRole } from "@/lib/team/permissions";
 import { BILLING_SETTINGS_PATH, PLANS_PATH } from "@/lib/billing/paths";
+import { NEW_DISCOUNT_PATH } from "@/lib/discounts/paths";
 
 /**
  * THE LOCAL INDEX — every page, settings section, settings FIELD and quick
@@ -123,6 +124,7 @@ const PAGE_SYNONYMS: Record<string, string[]> = {
   "/products": ["catalogue", "catalog", "items", "inventory", "stock", "listings"],
   "/storefront": ["shop", "store", "designer", "editor", "embed", "widget"],
   "/orders": ["sales", "purchases", "transactions", "buyers", "customers"],
+  "/discounts": ["coupons", "codes", "promo", "promotions", "vouchers", "offers", "markdown"],
   "/analytics": ["stats", "statistics", "metrics", "reports", "revenue", "charts"],
   "/payments": ["payouts", "stripe", "money", "bank", "balance"],
   "/settings": ["preferences", "options", "configuration", "account"],
@@ -412,6 +414,14 @@ const ACTIONS: EntrySpec[] = [
     href: "/settings/team#invite",
     synonyms: ["add teammate", "add user", "share access", "collaborator", "invite"],
     permission: "team.invite",
+  },
+  {
+    id: "action:new-discount",
+    type: "action",
+    title: "Search.actions.newDiscount",
+    href: NEW_DISCOUNT_PATH,
+    synonyms: ["add discount", "create coupon", "discount code", "promo code", "run a sale", "voucher"],
+    permission: "products.write",
   },
   {
     id: "action:notifications",

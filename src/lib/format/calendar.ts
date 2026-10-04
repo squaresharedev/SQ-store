@@ -155,3 +155,65 @@ export function buildMonthGrid(month: Date): Date[] {
   const start = addDays(first, -offset);
   return Array.from({ length: 42 }, (_, i) => addDays(start, i));
 }
+
+// ── Date and time of day ───────────────────────────────────────────────────
+// For a moment a person picks as a date plus a time (a discount's start and
+// end), in THEIR time zone: the browser's. The value that leaves the browser
+// is always an ISO instant (toISOString), never the local pieces.
+
+/** Times of day a picker offers: every half hour, "00:00" to "23:30". */
+export const TIME_SLOTS: readonly string[] = Array.from({ length: 48 }, (_, slot) => {
+  const hours = String(Math.floor(slot / 2)).padStart(2, "0");
+  return `${hours}:${slot % 2 === 0 ? "00" : "30"}`;
+});
+
+const TIME_OF_DAY = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+/** A local "YYYY-MM-DD" and "HH:MM" as one instant (ISO), or null. */
+export function toLocalInstant(isoDate: string, time: string): string | null {
+  const date = fromISODate(isoDate);
+  const parts = TIME_OF_DAY.exec(time);
+  if (!date || !parts) return null;
+  date.setHours(Number(parts[1]), Number(parts[2]), 0, 0);
+  return date.toISOString();
+}
+
+/** An instant as the local date and time of day a picker shows, to the
+ *  minute. Never rounded: a moment that was stored reads back as it is, so
+ *  opening and saving a form cannot move it. Null for junk. */
+export function fromLocalInstant(iso: string): { date: string; time: string } | null {
+  const instant = new Date(iso);
+  if (Number.isNaN(instant.getTime())) return null;
+  const hours = String(instant.getHours()).padStart(2, "0");
+  const minutes = String(instant.getMinutes()).padStart(2, "0");
+  return { date: toISODate(instant), time: `${hours}:${minutes}` };
+}
+
+/** The times a picker lists for a value of `time`: the half-hour slots, plus
+ *  `time` itself when it falls between two (a stored moment, or "a week from
+ *  this minute"), in order. */
+export function timeOptions(time: string): readonly string[] {
+  return TIME_SLOTS.includes(time) || !TIME_OF_DAY.test(time) ? TIME_SLOTS : [...TIME_SLOTS, time].sort();
+}
+
+/** `iso` moved by whole days or months, keeping its local time of day. A
+ *  month on from the 31st is the last day of a shorter month, never a day
+ *  into the one after. */
+export function shiftInstant(iso: string, by: { days?: number; months?: number }): string | null {
+  const instant = new Date(iso);
+  if (Number.isNaN(instant.getTime())) return null;
+  if (by.months) {
+    const day = instant.getDate();
+    instant.setDate(1);
+    instant.setMonth(instant.getMonth() + by.months);
+    const lastDay = new Date(instant.getFullYear(), instant.getMonth() + 1, 0).getDate();
+    instant.setDate(Math.min(day, lastDay));
+  }
+  if (by.days) instant.setDate(instant.getDate() + by.days);
+  return instant.toISOString();
+}
+
+/** The browser's time zone name ("Europe/Dublin"), for "times are in ...". */
+export function localTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}

@@ -4,7 +4,8 @@ import { useId, useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Download, Scale } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { Modal } from "@/components/ui/modal";
+import { HeroMark } from "@/components/ui/HeroMark";
+import { Modal, ModalActions } from "@/components/ui/modal";
 import { Button, buttonClassName } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -150,6 +151,7 @@ function AppealForm({
       <Modal
         open={open}
         onClose={() => (pending ? undefined : setOpen(false))}
+        visual={<HeroMark icon={Scale} />}
         title={tForm("title")}
         description={tForm("description")}
       >
@@ -184,14 +186,14 @@ function AppealForm({
             </p>
           )}
 
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <ModalActions>
             <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={pending}>
               {tCommon("cancel")}
             </Button>
             <Button type="submit" disabled={!ready || pending} data-appeal-submit="">
               {pending ? tCommon("sending") : tForm("submit")}
             </Button>
-          </div>
+          </ModalActions>
         </form>
       </Modal>
     </>

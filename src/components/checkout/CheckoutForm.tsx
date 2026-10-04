@@ -23,16 +23,21 @@ import { QuantityPicker } from "@/components/product-page/QuantityPicker";
 import { useQuantity } from "@/components/product-page/QuantityContext";
 import { StickyBar } from "@/components/product-page/StickyBar";
 import { Turnstile } from "@/components/auth/Turnstile";
+import { useRouter } from "next/navigation";
 import { formatCents } from "@/lib/format/money";
-import { lineTotalCents } from "@/lib/products/quantity";
+import { priceOrder } from "@/lib/discounts/pricing";
 import { freeDeliveryGapCents, quoteShipping } from "@/lib/shipping/rates";
 import { checkoutApiPath } from "@/lib/checkout/paths";
+import type { LinkChannel } from "@/lib/storefront/product-page-url";
 import { isCourierPhone } from "@/lib/orders/ship-to";
 import { SHIP_TO_MAX } from "@/types/order-view";
 import { CHECKOUT_HEADLINE_MAX, GIFT_MESSAGE_MAX } from "@/types/storefront";
 import { EditableText } from "./EditableText";
+import { DiscountCodeField } from "./DiscountCodeField";
+import { useAppliedCode } from "./DiscountCodeContext";
+import { checkoutTextButtonClass } from "./checkout-theme";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
-import type { Currency } from "@/types/product";
+import type { Currency, ProductSale } from "@/types/product";
 import type { CheckoutErrorCode, PlaceOrderResponse } from "@/types/checkout";
 
 /** Countries whose addresses carry a state or province a courier needs. */
@@ -98,6 +103,7 @@ export function CheckoutForm({
   productId,
   optionIds,
   attemptId,
+  via = null,
   headline,
   defaultHeadline,
   product,
@@ -121,13 +127,18 @@ export function CheckoutForm({
   optionIds: readonly string[];
   /** Minted when the page rendered, so a double click places one order. */
   attemptId: string | null;
+  /** How the buyer arrived (`?via=`); sent as the order's channel when set. */
+  via?: LinkChannel | null;
   /** The seller's own headline, if they wrote one. */
   headline: string | undefined;
   /** What it reads as otherwise, in the buyer's language. */
   defaultHeadline: string;
   product: {
+    /** One item now: the sale price while a sale runs. */
     priceCents: number;
     currency: Currency;
+    /** The running sale, for the best-of against an applied code. */
+    sale: ProductSale | null;
     isDigital: boolean;
     /** "PDF", for a download: what the buyer is getting, said before they pay
      *  (CRD art. 6(1)(r)-(s) functionality and format). */
@@ -151,8 +162,10 @@ export function CheckoutForm({
 }) {
   const t = useTranslations("ProductPage.checkout");
   const locale = useLocale();
+  const router = useRouter();
   const formId = useId();
   const { quantity, limit } = useQuantity();
+  const { terms: code, setTerms: setCode } = useAppliedCode();
 
   const [values, setValues] = useState<Values>(EMPTY);
   const [country, setCountry] = useState(initialCountry);
@@ -176,25 +189,35 @@ export function CheckoutForm({
   const showRegion = ships && REGION_COUNTRIES.has(country);
   const postcodeRequired = ships && !POSTCODE_OPTIONAL.has(country);
 
-  const subtotal = lineTotalCents(product.priceCents, quantity);
+  // The items, priced by the function the quote uses: the sale, or an applied
+  // code when it does better.
+  const priced = priceOrder({
+    regularUnitCents: product.sale?.regularPriceCents ?? product.priceCents,
+    currency: product.currency,
+    quantity,
+    saleUnitCents: product.sale ? product.priceCents : null,
+    code: code?.value ?? null,
+  });
+  const subtotal = priced.subtotalCents;
+  const items = priced.itemsCents;
   const shipping = ships
     ? quoteShipping(shippingPolicy, {
         profileId: product.shippingProfileId,
         country,
-        subtotalCents: subtotal,
+        subtotalCents: items,
         currency: product.currency,
       })
     : null;
   const shippingCents = shipping?.ok ? shipping.rateCents : 0;
-  const total = subtotal + shippingCents;
+  const total = items + shippingCents;
   const money = (cents: number) => formatCents(cents, product.currency, locale);
   const countryName = countries.find((entry) => entry.code === country)?.name ?? country;
   const deliverable = !shipping || shipping.ok;
   // "€12 away from free delivery": only while one more of it could get there,
   // since a nudge toward a quantity the buyer cannot pick is a tease.
-  const freeGap = quantity < limit ? freeDeliveryGapCents(shippingPolicy, shipping, subtotal) : null;
+  const freeGap = quantity < limit ? freeDeliveryGapCents(shippingPolicy, shipping, items) : null;
   const freeProgress =
-    freeGap !== null && shippingPolicy.freeOverCents ? (subtotal / shippingPolicy.freeOverCents) * 100 : 0;
+    freeGap !== null && shippingPolicy.freeOverCents ? (items / shippingPolicy.freeOverCents) * 100 : 0;
 
   /**
    * After a failed submit, put the keyboard where the problem is: the first
@@ -285,6 +308,11 @@ export function CheckoutForm({
       quantity,
       email: values.email.trim(),
       locale,
+      ...(via ? { channel: via } : {}),
+      ...(code ? { discountCode: code.code } : {}),
+      // The total on the Pay button: the route refuses rather than charge
+      // anything else (a sale that ended while the page was open).
+      expectedTotalCents: total,
       ...(needsTurnstile ? { turnstileToken } : {}),
       ...(ships
         ? {
@@ -314,11 +342,16 @@ export function CheckoutForm({
         window.location.assign(result.orderUrl);
         return;
       }
-      const code: CheckoutErrorCode = result?.error ?? "failed";
+      const reason: CheckoutErrorCode = result?.error ?? "failed";
       if (result && !result.ok && result.fields?.length) {
         setErrors(Object.fromEntries(result.fields.map((field) => [field, t("errors.fields")])));
       }
-      setFormError(messageFor(code));
+      // A code that stopped working comes off, so the total on the button is
+      // the one that will be charged; a changed price is re-read from the
+      // server, so the buyer pays the new total only after seeing it.
+      if (reason === "discount_invalid") setCode(null);
+      if (reason === "price_changed") router.refresh();
+      setFormError(messageFor(reason));
     } catch {
       setFormError(messageFor("failed"));
     }
@@ -450,7 +483,7 @@ export function CheckoutForm({
             ) : (
               <button
                 type="button"
-                className="inline-flex items-center gap-1.5 self-start text-sm opacity-75 transition-opacity duration-base ease-standard hover:opacity-100"
+                className={checkoutTextButtonClass}
                 onClick={() => setShowLine2(true)}
               >
                 <Plus className="size-3.5" strokeWidth={2.25} aria-hidden="true" />
@@ -606,8 +639,23 @@ export function CheckoutForm({
               only term and value pairs: the lines, then what is said about
               them, then the total. */}
           <div className="flex flex-col gap-2 border-t pt-4 text-sm" style={{ borderColor: rule }}>
+            <DiscountCodeField
+              storefrontId={storefrontId}
+              productId={productId}
+              preview={preview}
+              outdone={priced.codeOutdone}
+              ink={ink}
+            />
             <dl className="flex flex-col gap-2">
               <Line term={t("summary.subtotal")} value={money(subtotal)} dataKey="subtotal" cents={subtotal} />
+              {code && priced.codeDiscountCents > 0 && (
+                <Line
+                  term={t("discount.line", { code: code.code })}
+                  value={`-${money(priced.codeDiscountCents)}`}
+                  dataKey="discount"
+                  cents={priced.codeDiscountCents}
+                />
+              )}
               {ships && (
                 <Line
                   term={t("summary.deliveryTo", { country: countryName })}

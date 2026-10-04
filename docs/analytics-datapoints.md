@@ -70,7 +70,7 @@ the page is addressable without matching on a heading string.
 
 One per source: `data-analytics-section="<id>"`, where the id is `sales` or a
 signal kind (`storefront_view`, `product_click`, `email_signup`, `booking`,
-`product_view`).
+`product_view`, `checkout_view`).
 
 **A section is absent when the seller does not run that source.** Registered is
 not the same as relevant: a source appears only if it has a live producer, or
@@ -108,6 +108,14 @@ Read `data-analytics-value`, never the rendered text. `€1,204.50` is a string
 with a locale and a symbol baked into it; `120450` is a fact. (The rendered
 text also animates on mount, so it is briefly wrong on purpose.)
 
+**`sales.revenue` is not a tile.** Revenue is the page's headline: the figure
+sits over the revenue chart, which runs the full width of the page at the top
+of the sales section (`RevenueHero`). It carries the same six attributes as a
+tile, on the element that shows the figure, so select it by
+`data-analytics-metric` like any other and never by position. That element
+moves: it is in the chart's top left corner when the graph is going up and its
+top right when it is going down.
+
 Current metric ids:
 
 ```
@@ -123,11 +131,21 @@ sales.fees             currency_cents
 <kind>.value            currency_cents   money-carrying kinds only
 ```
 
+The Discounts page (`/discounts`) draws its figures with the same tile and card,
+so it publishes the same attributes with `data-analytics-source="discounts"`:
+the metric `discounts.orders` (count) and the `channels` panel (orders per
+sharing channel). They are that page's own and are not part of the analytics
+snapshot; [agent-surface.md](./agent-surface.md) says what each one counts.
+
 ### Chart cards
 
 `data-analytics-panel` (`trend`, `channels`, `weekdays`, `storefronts`, `aov`,
 `top_products`, `statuses`) plus `data-analytics-source`, and the same
 `data-analytics-state` with an extra `empty` for "measured, nothing in range".
+
+The sales `trend` panel is the revenue hero, which is not a card, and it
+publishes the same attributes as one. The `sales.revenue` metric element is
+inside it.
 
 Charts also render an `sr-only` table twin carrying every plotted value, so the
 series are reachable without parsing SVG. Prefer the snapshot.
@@ -185,6 +203,7 @@ did I earn".
 | `storefront_view` | `GET /api/embed/[key]` serving a payload to an allowed origin | live |
 | `product_click` | `POST /api/embed/[key]/signal` from the embed widget | route live, widget pending |
 | `product_view` | the hosted product page (`/s/[storefrontId]/p/[productId]`) serving a buyer, recorded server-side after the response | live |
+| `checkout_view` | the hosted checkout (`/s/[storefrontId]/p/[productId]/checkout`) serving a buyer, recorded the same way | live |
 | `email_signup` | The email signup block's server handler | not built |
 | `booking` | The calendar booking block's server handler | not built |
 
@@ -195,3 +214,15 @@ Two caveats a consumer should carry:
 - **Views undercount.** The embed response is CDN-cacheable for five minutes,
   and a cached hit never reaches the server. The bias is downward, which is the
   safe direction for a number someone makes decisions on.
+
+### Channels
+
+Every sale and every signal carries a `channel`, from one vocabulary for both
+(`ORDER_CHANNELS` in `src/types/order-view.ts`, mirrored by a CHECK on each
+table): `embed`, `marketplace`, `direct` and `button`. On the hosted pages the
+channel is how the buyer ARRIVED: a link carrying `?via=button` (the seller's
+own buy button on their website) or `?via=embed` (a storefront tile) files the
+product page view, the checkout view and the order under that channel, and any
+other arrival is `direct`. The marker is attribution only and anyone can type
+it, so read the split as a guide rather than an audit; it never touches a price
+or a fee.

@@ -1,0 +1,165 @@
+{
+  "metadata": {
+    "title": "Kortingen"
+  },
+  "page": {
+    "title": "Kortingen",
+    "subtitle": "Voer een actie uit, of deel een code en zie welke kanalen bestellingen opleveren.",
+    "create": "Korting aanmaken"
+  },
+  "empty": {
+    "title": "Nog geen kortingen",
+    "hint": "Een actie verlaagt je prijzen voor iedereen, zo lang als je wilt. Een code is voor de mensen aan wie je hem deelt, en laat zien waar je kopers vandaan komen.",
+    "hintReadOnly": "Eigenaren en bewerkers kunnen hier kortingen aanmaken."
+  },
+  "terms": {
+    "percentEach": "{percent}% korting op elk artikel",
+    "amountEach": "{amount} korting op elk artikel",
+    "percentOrder": "{percent}% korting op de bestelling",
+    "amountOrder": "{amount} korting op de bestelling",
+    "allProducts": "Alle producten",
+    "someProducts": "{count, plural, one {# product} other {# producten}}",
+    "kindCode": "Kortingscode",
+    "kindAutomatic": "Automatische actie",
+    "status": {
+      "scheduled": "Gepland",
+      "active": "Actief",
+      "paused": "Uit",
+      "used_up": "Opgebruikt",
+      "ended": "Beëindigd"
+    }
+  },
+  "performance": {
+    "title": "Hoe je kortingen presteren",
+    "orders": "Bestellingen met korting",
+    "revenue": "Omzet uit die bestellingen",
+    "given": "Aan kortingen gegeven",
+    "none": "Nog niets",
+    "channelsTitle": "Bestellingen per kanaal",
+    "channelsDescription": "Codes tellen mee onder het kanaal waarop je ze hebt gedeeld, of onder de code zelf als je geen kanaal hebt opgegeven.",
+    "channelsEmpty": "Nog geen bestellingen met korting.",
+    "automatic": "Automatische acties",
+    "series": "Bestellingen"
+  },
+  "list": {
+    "title": "Je kortingen",
+    "none": "Op dit moment geen kortingen. Verwijderde kortingen blijven hun bestellingen hierboven meetellen.",
+    "channel": "Gedeeld op {channel}",
+    "startsOn": "Start op {date}",
+    "endsOn": "Eindigt op {date}",
+    "ended": "Beëindigd op {date}",
+    "noEnd": "Geen einddatum",
+    "orders": "{orders, plural, =0 {Nog geen bestellingen} one {# bestelling} other {# bestellingen}}",
+    "uses": "{uses} van {limit} keer gebruikt",
+    "switchLabel": "Aan",
+    "edit": "Bewerken",
+    "endNow": "Nu beëindigen",
+    "delete": "Verwijderen",
+    "copy": {
+      "copy": "Code kopiëren",
+      "copied": "Code gekopieerd",
+      "failed": "Code kon niet worden gekopieerd. Selecteer en kopieer hem handmatig."
+    }
+  },
+  "confirmDelete": {
+    "title": "Deze korting verwijderen?",
+    "body": "Hij wordt direct niet meer toegepast. Bestellingen die hij al heeft opgeleverd, blijven meegeteld.",
+    "confirm": "Korting verwijderen"
+  },
+  "confirmEnd": {
+    "title": "Deze actie nu beëindigen?",
+    "body": "Prijzen gaan direct terug naar normaal. Maak een nieuwe actie om hem later opnieuw uit te voeren.",
+    "confirm": "Actie beëindigen"
+  },
+  "toast": {
+    "deleted": "Korting verwijderd.",
+    "ended": "Actie beëindigd.",
+    "switchedOn": "Code aangezet.",
+    "switchedOff": "Code uitgezet."
+  },
+  "form": {
+    "newTitle": "Nieuwe korting",
+    "editTitle": "Korting bewerken",
+    "back": "Terug naar kortingen",
+    "kind": {
+      "title": "Wat voor korting?",
+      "code": "Kortingscode",
+      "codeHint": "Kopers typen hem in bij het afrekenen. Deel hem op Instagram, in een nieuwsbrief of via een creator, en zie welk kanaal verkoopt.",
+      "automatic": "Automatische actie",
+      "automaticHint": "Iedereen ziet de lagere prijs op je productpagina's. Geen code nodig.",
+      "fixed": "Het type van een korting kan niet worden gewijzigd. Maak een nieuwe aan om te wisselen."
+    },
+    "code": {
+      "title": "Code",
+      "description": "Wat kopers invoeren bij het afrekenen.",
+      "label": "Code",
+      "generate": "Genereren",
+      "hint": "3 tot 24 letters of cijfers. Kopers kunnen hem in hoofd- of kleine letters invoeren."
+    },
+    "channel": {
+      "label": "Kanaal (optioneel)",
+      "hint": "Waar je deze code deelt, zodat je kunt zien welk kanaal bestellingen oplevert.",
+      "suggestions": "Voorgestelde kanalen",
+      "newsletter": "Nieuwsbrief",
+      "creator": "Creator"
+    },
+    "value": {
+      "title": "Korting",
+      "each": "Afgetrokken van de prijs van elk artikel.",
+      "order": "Afgetrokken van de artikelen in de bestelling. Verzending wordt niet gekort.",
+      "percent": "Percentage",
+      "amount": "Vast bedrag",
+      "percentLabel": "Kortingspercentage",
+      "amountLabel": "Kortingsbedrag",
+      "currencyHint": "Geldt alleen voor producten geprijsd in deze valuta."
+    },
+    "products": {
+      "title": "Van toepassing op",
+      "all": "Alle producten",
+      "some": "Specifieke producten",
+      "summary": "{count, plural, =0 {Kies producten} one {# product gekozen} other {# producten gekozen}}",
+      "search": "Producten zoeken",
+      "none": "Geen producten gevonden."
+    },
+    "schedule": {
+      "title": "Wanneer",
+      "timeZone": "Tijden zijn in je tijdzone ({zone}).",
+      "starts": "Start",
+      "ends": "Einde",
+      "now": "Nu",
+      "later": "Later",
+      "noEnd": "Geen einde",
+      "onDate": "Op een datum",
+      "date": "Datum",
+      "time": "Tijd",
+      "started": "Gestart op {date}",
+      "runFor": "Looptijd",
+      "preset": {
+        "day": "1 dag",
+        "threeDays": "3 dagen",
+        "week": "1 week",
+        "month": "1 maand"
+      }
+    },
+    "limit": {
+      "title": "Limieten",
+      "label": "Beperk hoeveel bestellingen er gebruik van kunnen maken",
+      "count": "Aantal bestellingen"
+    },
+    "enabled": "Code staat aan",
+    "locked": "Deze actie is al begonnen, dus alleen het einde kan worden gewijzigd. Beëindig hem en maak een nieuwe actie om iets anders te wijzigen.",
+    "summary": {
+      "title": "Samenvatting",
+      "startsNow": "Start nu",
+      "starts": "Start op {date}",
+      "ends": "Eindigt op {date}",
+      "noEnd": "Geen einddatum",
+      "example": "Voorbeeld: {title} voor {regular} kost nu {now}."
+    },
+    "create": "Korting aanmaken",
+    "save": "Wijzigingen opslaan",
+    "saving": "Opslaan",
+    "created": "Korting aangemaakt.",
+    "saved": "Korting opgeslagen."
+  }
+}

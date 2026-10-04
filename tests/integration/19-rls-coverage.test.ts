@@ -77,6 +77,15 @@ const POLICY_FREE_BY_DESIGN = new Set([
   // The launch switch for plan limits. A client that could write it could
   // switch its own limits off.
   "billing_switches",
+  // Why sellers cancelled (20261003_plan_cancellations): written by the
+  // cancel action, read by the admin panel, both through the service role.
+  // A seller's note is staff-only reading.
+  "plan_cancellations",
+  // Price history for the EU 30-day rule on sales (20261004_discounts):
+  // written by a trigger on products, read by the server when it decides
+  // whether a sale may show a "was" price. A client that could write it could
+  // invent a higher earlier price and advertise a bigger reduction.
+  "product_price_history",
 ]);
 
 afterAll(async () => {

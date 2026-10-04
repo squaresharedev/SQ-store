@@ -16,6 +16,7 @@
 import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { presignGetUrl } from "@/lib/r2";
+import { signPagePhoto } from "@/lib/storefront/uploads";
 import { RATE_LIMITS } from "@/lib/rate-limit";
 import { purchaseUrlSchema } from "@/lib/validation/product";
 import { toPublicStockBadge } from "@/lib/stock/public";
@@ -27,14 +28,16 @@ import {
   parseOptionGroups,
   reconcileGalleryOptions,
 } from "@/lib/products/detail";
-import { loadPurchasable, type PublicProductRow } from "@/lib/products/purchasable";
+import { loadPurchasable, type Purchasable, type PublicProductRow } from "@/lib/products/purchasable";
 import { checkoutAvailableFor } from "@/lib/checkout/availability";
 import { productPageUrl } from "@/lib/storefront/product-page-url";
 import { toCurrency } from "@/lib/format/money";
+import { loadProductSale } from "@/lib/discounts/public";
 import type {
   ProductPageDocument,
   ProductPageImage,
   ProductPageProduct,
+  ProductSale,
 } from "@/types/product";
 import type { ProductPageData, ProductPageReportScopes } from "@/types/product-page";
 
@@ -67,6 +70,10 @@ export async function buildProductPageProduct(
      *  see publicQuantityLimit. Absent means "not shown", which is the safe
      *  answer for a caller that has not thought about it. */
     showStock?: boolean;
+    /** The running sale and the price it sets (lib/discounts/public.ts
+     *  loadProductSale). Absent means the regular price: the editor's preview
+     *  shows the product as listed, not as discounted. */
+    pricing?: { priceCents: number; sale: ProductSale | null };
   } = {},
 ): Promise<ProductPageProduct> {
   const optionGroups = parseOptionGroups(row.option_groups);
@@ -112,8 +119,9 @@ export async function buildProductPageProduct(
     id: row.id,
     title: row.title,
     description: row.description ?? "",
-    priceCents: row.price_cents,
+    priceCents: options.pricing?.priceCents ?? row.price_cents,
     currency: toCurrency(row.currency),
+    sale: options.pricing?.sale ?? null,
     purchaseUrl,
     // A REFERENCE, not terms. The words it resolves to are the storefront's
     // own, which this page already carries; what crosses here is only which
@@ -146,6 +154,21 @@ export async function buildProductPageProduct(
       { stockShown: options.showStock === true },
     ),
   };
+}
+
+/**
+ * What a buyer pays for the gated product right now, and the sale behind it:
+ * for the pages that SHOW a price (the product page and the checkout). The
+ * quote prices from the same `gate.sales`, so the two cannot disagree.
+ */
+export function gatePricing(gate: Purchasable): Promise<{ priceCents: number; sale: ProductSale | null }> {
+  return loadProductSale(createAdminClient(), {
+    ownerId: gate.ownerId,
+    productId: gate.row.id,
+    regularPriceCents: gate.row.price_cents,
+    currency: toCurrency(gate.row.currency),
+    sales: gate.sales,
+  });
 }
 
 /** Everything the page renders. No owner id, no embed settings, no keys. */
@@ -198,15 +221,14 @@ export const getPublicProductPage = cache(
     const product = await buildProductPageProduct(row, {
       soldOutFlag: block.soldOut,
       showStock: productPage.showStock,
+      pricing: await gatePricing(gate),
     });
 
     const theme = config.theme;
     const backgroundImageUrl =
       theme.background.kind === "image" ? await presignGetUrl(theme.background.key) : null;
     const customFontUrl = theme.customFont ? await presignGetUrl(theme.customFont.key) : null;
-    const pagePhotoUrl = productPage.backgroundImage
-      ? await presignGetUrl(productPage.backgroundImage.key)
-      : null;
+    const pagePhoto = await signPagePhoto(productPage.backgroundImage);
 
     return {
       page: {
@@ -220,7 +242,7 @@ export const getPublicProductPage = cache(
           seller,
           backgroundImageUrl,
           customFontUrl,
-          pagePhotoUrl,
+          pagePhoto,
           checkout: checkoutAvailableFor(gate),
         },
         product,

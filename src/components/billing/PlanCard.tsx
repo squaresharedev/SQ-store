@@ -2,14 +2,21 @@
 
 import { Star } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { cardClass, eyebrowClass, featuredCardClass, inkBadgeClass } from "@/components/ui/surface-styles";
+import {
+  cardClass,
+  eyebrowClass,
+  featuredCardClass,
+  inkBadgeClass,
+  savingBadgeClass,
+} from "@/components/ui/surface-styles";
 import { helpTextClass, infoTextClass, lastUsedBadgeClass } from "@/components/ui/control-styles";
 import { PlanFeatureList } from "@/components/billing/PlanFeatureList";
 import { PlanVisual } from "@/components/billing/PlanVisual";
 import { cn } from "@/lib/utils";
+import { formatPercent } from "@/lib/format/intl";
 import { formatCents } from "@/lib/format/money";
 import { planCardFeatures } from "@/lib/billing/features";
-import { monthlyPriceCents } from "@/lib/billing/fees";
+import { launchDiscountPercent, monthlyListPriceCents, monthlyPriceCents } from "@/lib/billing/fees";
 import { BILLING_CURRENCY, PLANS, type BillingInterval, type PlanId } from "@/lib/billing/plans";
 
 /**
@@ -20,9 +27,12 @@ import { BILLING_CURRENCY, PLANS, type BillingInterval, type PlanId } from "@/li
  *
  * The recommended plan (PLANS[..].recommended) wears the "Best value" pill
  * and the ink outline, so the eye lands on it first. No tint and no glow:
- * the product photos are the page's only colour. Everything shown is read
- * from the catalog, so a number changed there changes here with no copy to
- * update.
+ * the product photos and a saving are the page's only colour.
+ *
+ * A plan on a launch price (PLANS[..].listPriceCents) shows its regular
+ * price struck through beside it, the saving as a green chip, and a line
+ * saying in words which price is which. Everything shown is read from the
+ * catalog, so a number changed there changes here with no copy to update.
  */
 export function PlanCard({
   plan,
@@ -43,6 +53,8 @@ export function PlanCard({
   const recommended = definition.recommended;
   const free = definition.priceCents.month === 0;
   const { below, features } = planCardFeatures(plan);
+  const listPrice = monthlyListPriceCents(plan, interval);
+  const money = (cents: number) => formatCents(cents, BILLING_CURRENCY, locale, { wholeUnits: true });
 
   return (
     <li
@@ -67,20 +79,40 @@ export function PlanCard({
         </div>
         <p className={cn(helpTextClass, "mt-1 min-h-10")}>{t(`plans.${plan}.tagline`)}</p>
 
-        <p className="mt-4 flex items-baseline gap-1.5">
+        <p className="mt-4 flex flex-wrap items-baseline gap-x-1.5 gap-y-1" data-plan-price={plan}>
+          {listPrice !== null && (
+            // The regular price, struck through: what the plan costs once the
+            // launch price ends (PLANS[..].listPriceCents, a real price).
+            <s className="mr-0.5 text-xl font-medium tabular-nums text-muted-foreground" data-plan-list-price>
+              <span className="sr-only">{t("card.regularPrice")} </span>
+              {money(listPrice)}
+            </s>
+          )}
           <span className="text-4xl font-semibold tracking-tight tabular-nums text-foreground">
-            {formatCents(monthlyPriceCents(plan, interval), BILLING_CURRENCY, locale, { wholeUnits: true })}
+            {listPrice !== null && <span className="sr-only">{t("card.launchPrice")} </span>}
+            {money(monthlyPriceCents(plan, interval))}
           </span>
           <span className={helpTextClass}>{t("card.perMonth")}</span>
+          {listPrice !== null && (
+            <span className={cn(savingBadgeClass, "ml-1 self-center")}>
+              {t("card.save", { percent: formatPercent(launchDiscountPercent(plan, interval), locale) })}
+            </span>
+          )}
         </p>
         <p className={cn(infoTextClass, "mt-1 min-h-4")}>
           {free
             ? t("card.freeForever")
-            : interval === "year"
-              ? t("card.billedYearly", {
-                  amount: formatCents(definition.priceCents.year, BILLING_CURRENCY, locale, { wholeUnits: true }),
-                })
-              : t("card.exclVat")}
+            : listPrice !== null && definition.listPriceCents
+              ? // Says in words what the struck figure is, per billing period.
+                interval === "year"
+                ? t("card.launchBilledYearly", {
+                    amount: money(definition.priceCents.year),
+                    regular: money(definition.listPriceCents.year),
+                  })
+                : t("card.launchExclVat", { regular: money(definition.listPriceCents.month) })
+              : interval === "year"
+                ? t("card.billedYearly", { amount: money(definition.priceCents.year) })
+                : t("card.exclVat")}
         </p>
 
         {/* Always the same height, so the feature lists below start level. */}

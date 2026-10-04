@@ -1,0 +1,165 @@
+{
+  "metadata": {
+    "title": "Zľavy"
+  },
+  "page": {
+    "title": "Zľavy",
+    "subtitle": "Spustite akciu alebo zdieľajte kód a sledujte, ktoré kanály prinášajú objednávky.",
+    "create": "Vytvoriť zľavu"
+  },
+  "empty": {
+    "title": "Zatiaľ žiadne zľavy",
+    "hint": "Akcia znižuje vaše ceny pre všetkých po dobu, ktorú si zvolíte. Kód je pre ľudí, s ktorými ho zdieľate, a ukáže vám, odkiaľ vaši kupujúci prišli.",
+    "hintReadOnly": "Vlastník a editori môžu tu vytvárať zľavy."
+  },
+  "terms": {
+    "percentEach": "{percent}% z každej položky",
+    "amountEach": "{amount} z každej položky",
+    "percentOrder": "{percent}% z objednávky",
+    "amountOrder": "{amount} z objednávky",
+    "allProducts": "Všetky produkty",
+    "someProducts": "{count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktov}}",
+    "kindCode": "Zľavový kód",
+    "kindAutomatic": "Automatická akcia",
+    "status": {
+      "scheduled": "Naplánovaná",
+      "active": "Aktívna",
+      "paused": "Vypnutá",
+      "used_up": "Vyčerpaná",
+      "ended": "Ukončená"
+    }
+  },
+  "performance": {
+    "title": "Ako sa darí vašim zľavám",
+    "orders": "Objednávky so zľavou",
+    "revenue": "Tržby z týchto objednávok",
+    "given": "Poskytnuté zľavy",
+    "none": "Zatiaľ nič",
+    "channelsTitle": "Objednávky podľa kanála",
+    "channelsDescription": "Kódy sa počítajú pod kanálom, na ktorom boli zdieľané, alebo pod samotným kódom, ak kanál nie je pomenovaný.",
+    "channelsEmpty": "Zatiaľ žiadne objednávky so zľavou.",
+    "automatic": "Automatické akcie",
+    "series": "Objednávky"
+  },
+  "list": {
+    "title": "Vaše zľavy",
+    "none": "Momentálne žiadne zľavy. Odstránené zľavy naďalej zobrazujú počet svojich objednávok vyššie.",
+    "channel": "Zdieľané na {channel}",
+    "startsOn": "Začína {date}",
+    "endsOn": "Končí {date}",
+    "ended": "Skončila {date}",
+    "noEnd": "Bez dátumu konca",
+    "orders": "{orders, plural, =0 {Zatiaľ žiadne objednávky} one {# objednávka} few {# objednávky} many {# objednávky} other {# objednávok}}",
+    "uses": "{uses} z {limit} použití",
+    "switchLabel": "Zapnutý",
+    "edit": "Upraviť",
+    "endNow": "Ukončiť teraz",
+    "delete": "Odstrániť",
+    "copy": {
+      "copy": "Kopírovať kód",
+      "copied": "Kód skopírovaný",
+      "failed": "Kód sa nepodarilo skopírovať. Vyberte ho a skopírujte manuálne."
+    }
+  },
+  "confirmDelete": {
+    "title": "Odstrániť túto zľavu?",
+    "body": "Prestane platiť okamžite. Objednávky, ktoré priniesla, zostanú zahrnuté.",
+    "confirm": "Odstrániť zľavu"
+  },
+  "confirmEnd": {
+    "title": "Ukončiť túto akciu teraz?",
+    "body": "Ceny sa okamžite vrátia na normálnu hodnotu. Ak ju chcete spustiť znova neskôr, vytvorte novú akciu.",
+    "confirm": "Ukončiť akciu"
+  },
+  "toast": {
+    "deleted": "Zľava bola odstránená.",
+    "ended": "Akcia bola ukončená.",
+    "switchedOn": "Kód bol zapnutý.",
+    "switchedOff": "Kód bol vypnutý."
+  },
+  "form": {
+    "newTitle": "Nová zľava",
+    "editTitle": "Upraviť zľavu",
+    "back": "Späť na zľavy",
+    "kind": {
+      "title": "Aký druh zľavy?",
+      "code": "Zľavový kód",
+      "codeHint": "Kupujúci ho zadajú v pokladni. Zdieľajte ho na Instagrame, v newsletteri alebo s tvorcom a sledujte, ktorý kanál predáva.",
+      "automatic": "Automatická akcia",
+      "automaticHint": "Všetci vidia nižšiu cenu na vašich produktových stránkach. Kód nie je potrebný.",
+      "fixed": "Druh zľavy sa nedá zmeniť. Ak chcete prepnúť, vytvorte novú."
+    },
+    "code": {
+      "title": "Kód",
+      "description": "Čo kupujúci zadajú v pokladni.",
+      "label": "Kód",
+      "generate": "Vygenerovať",
+      "hint": "3 až 24 písmen alebo číslic. Kupujúci ho môžu zadať s veľkými alebo malými písmenami."
+    },
+    "channel": {
+      "label": "Kanál (voliteľný)",
+      "hint": "Kde budete zdieľať tento kód, aby ste videli, ktorý kanál prináša objednávky.",
+      "suggestions": "Odporúčané kanály",
+      "newsletter": "Newsletter",
+      "creator": "Tvorca"
+    },
+    "value": {
+      "title": "Zľava",
+      "each": "Odpočíta sa z ceny každej položky.",
+      "order": "Odpočíta sa z položiek objednávky. Doručenie nie je zľavnené.",
+      "percent": "Percento",
+      "amount": "Pevná suma",
+      "percentLabel": "Percento zľavy",
+      "amountLabel": "Výška zľavy",
+      "currencyHint": "Platí len pre produkty s cenou v tejto mene."
+    },
+    "products": {
+      "title": "Platí pre",
+      "all": "Všetky produkty",
+      "some": "Konkrétne produkty",
+      "summary": "{count, plural, =0 {Vybrať produkty} one {# produkt vybraný} few {# produkty vybrané} many {# produktu vybraného} other {# produktov vybraných}}",
+      "search": "Hľadať produkty",
+      "none": "Žiadne produkty nezodpovedajú vyhľadávaniu."
+    },
+    "schedule": {
+      "title": "Kedy",
+      "timeZone": "Časy sú vo vašom časovom pásme ({zone}).",
+      "starts": "Začiatok",
+      "ends": "Koniec",
+      "now": "Teraz",
+      "later": "Neskôr",
+      "noEnd": "Bez konca",
+      "onDate": "K dátumu",
+      "date": "Dátum",
+      "time": "Čas",
+      "started": "Začala {date}",
+      "runFor": "Spustiť na",
+      "preset": {
+        "day": "1 deň",
+        "threeDays": "3 dni",
+        "week": "1 týždeň",
+        "month": "1 mesiac"
+      }
+    },
+    "limit": {
+      "title": "Limity",
+      "label": "Obmedziť počet objednávok, ktoré ho môžu použiť",
+      "count": "Počet objednávok"
+    },
+    "enabled": "Kód je zapnutý",
+    "locked": "Táto akcia už začala, takže sa dá meniť len jej koniec. Ak chcete čokoľvek iné zmeniť, ukončite ju a vytvorte novú akciu.",
+    "summary": {
+      "title": "Súhrn",
+      "startsNow": "Začína teraz",
+      "starts": "Začína {date}",
+      "ends": "Končí {date}",
+      "noEnd": "Bez dátumu konca",
+      "example": "Príklad: {title} za {regular} stojí {now}."
+    },
+    "create": "Vytvoriť zľavu",
+    "save": "Uložiť zmeny",
+    "saving": "Ukladá sa",
+    "created": "Zľava bola vytvorená.",
+    "saved": "Zľava bola uložená."
+  }
+}

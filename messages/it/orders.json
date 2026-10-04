@@ -17,7 +17,8 @@
   "channel": {
     "embed": "Incorporamento",
     "marketplace": "Marketplace",
-    "direct": "Le tue pagine"
+    "direct": "Le tue pagine",
+    "button": "Pulsante sul tuo sito"
   },
   "empty": {
     "filteredTitle": "Nessun ordine corrisponde a questi filtri",
@@ -61,7 +62,8 @@
     "datePlaceholder": "qualsiasi data",
     "sort": "ordina",
     "sortAriaLabel": "Ordina gli ordini",
-    "clearFilters": "rimuovi filtri"
+    "clearFilters": "rimuovi filtri",
+    "allChannels": "Tutti i canali"
   },
   "sort": {
     "newest": "Più recenti prima",
@@ -140,7 +142,11 @@
     },
     "emailBuyer": "Invia un’email all’acquirente",
     "mailSubject": "Il tuo ordine {number}",
-    "withdrawnShipWarning": "L’acquirente ha esercitato il recesso da questo acquisto. Spediscilo solo se vi siete accordati in tal senso."
+    "withdrawnShipWarning": "L’acquirente ha esercitato il recesso da questo acquisto. Spediscilo solo se vi siete accordati in tal senso.",
+    "discount": "Sconto",
+    "discountSale": "Promozione, {amount} di sconto",
+    "discountCode": "Codice {code}, {amount} di sconto",
+    "discountCodeOutdone": "Codice {code} usato, ma il prezzo della promozione era più basso"
   },
   "actions": {
     "refundNeedsStripe": "I rimborsi richiedono che Stripe sia collegato.",
@@ -210,7 +216,8 @@
       "openShip": "Una volta in viaggio, segnalo come spedito qui e avviseremo l'acquirente: {url}",
       "openDigital": "Vedi l'ordine: {url}",
       "gift": "Messaggio regalo da includere: {message}",
-      "number": "Numero d’ordine: {number}"
+      "number": "Numero d’ordine: {number}",
+      "discountCode": "Codice sconto: {code}"
     },
     "shipped": {
       "subject": "Il tuo ordine da {store} è in viaggio",
@@ -245,7 +252,8 @@
       "withdrawalDigital": "Hai richiesto il download immediato e hai accettato che il diritto di recesso decade non appena inizia.",
       "guarantee": "Hai inoltre la garanzia legale di conformità per almeno due anni.",
       "questions": "Domande? Rispondi a questa e-mail per contattare {store}.",
-      "footer": "Inviato da Square Share per conto di {store}. Square Share fornisce il software del negozio e non è parte di questa vendita."
+      "footer": "Inviato da Square Share per conto di {store}. Square Share fornisce il software del negozio e non è parte di questa vendita.",
+      "discount": "Sconto ({code}): -{amount}"
     },
     "withdrawal": {
       "buyerSubject": "Il tuo recesso dall'ordine {number} presso {store}",

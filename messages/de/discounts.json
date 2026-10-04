@@ -1,0 +1,165 @@
+{
+  "metadata": {
+    "title": "Rabatte"
+  },
+  "page": {
+    "title": "Rabatte",
+    "subtitle": "Starte eine Aktion oder teile einen Code und sieh, welche Kanäle Bestellungen bringen.",
+    "create": "Rabatt erstellen"
+  },
+  "empty": {
+    "title": "Noch keine Rabatte",
+    "hint": "Eine Aktion senkt deine Preise für alle, so lange du möchtest. Ein Code gilt für die Personen, mit denen du ihn teilst, und zeigt dir, woher deine Käufer kommen.",
+    "hintReadOnly": "Inhaber und Bearbeiter können hier Rabatte erstellen."
+  },
+  "terms": {
+    "percentEach": "{percent}% auf jeden Artikel",
+    "amountEach": "{amount} auf jeden Artikel",
+    "percentOrder": "{percent}% auf die Bestellung",
+    "amountOrder": "{amount} auf die Bestellung",
+    "allProducts": "Alle Produkte",
+    "someProducts": "{count, plural, one {# Produkt} other {# Produkte}}",
+    "kindCode": "Rabattcode",
+    "kindAutomatic": "Automatische Aktion",
+    "status": {
+      "scheduled": "Geplant",
+      "active": "Aktiv",
+      "paused": "Inaktiv",
+      "used_up": "Aufgebraucht",
+      "ended": "Beendet"
+    }
+  },
+  "performance": {
+    "title": "So laufen deine Rabatte",
+    "orders": "Bestellungen mit Rabatt",
+    "revenue": "Umsatz aus diesen Bestellungen",
+    "given": "Als Rabatt gewährt",
+    "none": "Noch nichts",
+    "channelsTitle": "Bestellungen nach Kanal",
+    "channelsDescription": "Codes werden dem Kanal zugeordnet, auf dem du sie geteilt hast, oder dem Code selbst, wenn du keinen Kanal angegeben hast.",
+    "channelsEmpty": "Noch keine Bestellungen mit Rabatt.",
+    "automatic": "Automatische Aktionen",
+    "series": "Bestellungen"
+  },
+  "list": {
+    "title": "Deine Rabatte",
+    "none": "Aktuell keine Rabatte. Gelöschte Rabatte werden in der Übersicht oben weiterhin gezählt.",
+    "channel": "Geteilt auf {channel}",
+    "startsOn": "Startet {date}",
+    "endsOn": "Endet {date}",
+    "ended": "Beendet {date}",
+    "noEnd": "Kein Enddatum",
+    "orders": "{orders, plural, =0 {Noch keine Bestellungen} one {# Bestellung} other {# Bestellungen}}",
+    "uses": "{uses} von {limit} Nutzungen",
+    "switchLabel": "An",
+    "edit": "Bearbeiten",
+    "endNow": "Jetzt beenden",
+    "delete": "Löschen",
+    "copy": {
+      "copy": "Code kopieren",
+      "copied": "Code kopiert",
+      "failed": "Code konnte nicht kopiert werden. Wähle ihn aus und kopiere ihn manuell."
+    }
+  },
+  "confirmDelete": {
+    "title": "Diesen Rabatt löschen?",
+    "body": "Er wird sofort deaktiviert. Die bisherigen Bestellungen bleiben weiterhin gezählt.",
+    "confirm": "Rabatt löschen"
+  },
+  "confirmEnd": {
+    "title": "Diese Aktion jetzt beenden?",
+    "body": "Die normalen Preise gelten sofort wieder. Erstelle eine neue Aktion, um sie später erneut zu starten.",
+    "confirm": "Aktion beenden"
+  },
+  "toast": {
+    "deleted": "Rabatt gelöscht.",
+    "ended": "Aktion beendet.",
+    "switchedOn": "Code eingeschaltet.",
+    "switchedOff": "Code ausgeschaltet."
+  },
+  "form": {
+    "newTitle": "Neuer Rabatt",
+    "editTitle": "Rabatt bearbeiten",
+    "back": "Zurück zu Rabatten",
+    "kind": {
+      "title": "Welche Art von Rabatt?",
+      "code": "Rabattcode",
+      "codeHint": "Käufer geben ihn beim Checkout ein. Teile ihn auf Instagram, in einem Newsletter oder mit einem Creator und sieh, welcher Kanal verkauft.",
+      "automatic": "Automatische Aktion",
+      "automaticHint": "Alle sehen den günstigeren Preis auf deinen Produktseiten. Kein Code erforderlich.",
+      "fixed": "Die Art eines Rabatts kann nicht geändert werden. Erstelle einen neuen, um zu wechseln."
+    },
+    "code": {
+      "title": "Code",
+      "description": "Was Käufer beim Checkout eingeben.",
+      "label": "Code",
+      "generate": "Generieren",
+      "hint": "3 bis 24 Buchstaben oder Ziffern. Käufer können ihn groß oder klein eingeben."
+    },
+    "channel": {
+      "label": "Kanal (optional)",
+      "hint": "Wo du diesen Code teilen wirst, damit du siehst, welcher Kanal Bestellungen bringt.",
+      "suggestions": "Vorgeschlagene Kanäle",
+      "newsletter": "Newsletter",
+      "creator": "Creator"
+    },
+    "value": {
+      "title": "Rabatt",
+      "each": "Wird vom Preis jedes Artikels abgezogen.",
+      "order": "Wird von den Artikelpreisen der Bestellung abgezogen. Versand wird nicht rabattiert.",
+      "percent": "Prozentsatz",
+      "amount": "Fester Betrag",
+      "percentLabel": "Prozentualer Rabatt",
+      "amountLabel": "Rabattbetrag",
+      "currencyHint": "Gilt nur für Produkte, die in dieser Währung angeboten werden."
+    },
+    "products": {
+      "title": "Gilt für",
+      "all": "Alle Produkte",
+      "some": "Bestimmte Produkte",
+      "summary": "{count, plural, =0 {Produkte auswählen} one {# Produkt ausgewählt} other {# Produkte ausgewählt}}",
+      "search": "Produkte suchen",
+      "none": "Keine Produkte gefunden."
+    },
+    "schedule": {
+      "title": "Wann",
+      "timeZone": "Zeiten sind in deiner Zeitzone ({zone}).",
+      "starts": "Startet",
+      "ends": "Endet",
+      "now": "Jetzt",
+      "later": "Später",
+      "noEnd": "Kein Ende",
+      "onDate": "An einem Datum",
+      "date": "Datum",
+      "time": "Uhrzeit",
+      "started": "Gestartet {date}",
+      "runFor": "Laufzeit",
+      "preset": {
+        "day": "1 Tag",
+        "threeDays": "3 Tage",
+        "week": "1 Woche",
+        "month": "1 Monat"
+      }
+    },
+    "limit": {
+      "title": "Begrenzung",
+      "label": "Bestellanzahl begrenzen",
+      "count": "Anzahl der Bestellungen"
+    },
+    "enabled": "Code ist eingeschaltet",
+    "locked": "Diese Aktion hat bereits begonnen, daher kann nur ihr Ende geändert werden. Um etwas anderes zu ändern, beende sie und erstelle eine neue Aktion.",
+    "summary": {
+      "title": "Zusammenfassung",
+      "startsNow": "Startet jetzt",
+      "starts": "Startet {date}",
+      "ends": "Endet {date}",
+      "noEnd": "Kein Enddatum",
+      "example": "Beispiel: {title} für {regular} kostet {now}."
+    },
+    "create": "Rabatt erstellen",
+    "save": "Änderungen speichern",
+    "saving": "Wird gespeichert",
+    "created": "Rabatt erstellt.",
+    "saved": "Rabatt gespeichert."
+  }
+}

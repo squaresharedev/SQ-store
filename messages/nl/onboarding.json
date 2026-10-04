@@ -109,7 +109,8 @@
       "nameAlternative": "Of je volledige naam, als je als privépersoon verkoopt.",
       "addressPlaceholder": "bijv. Marktstraat 12\n1012 AB Amsterdam\nNederland",
       "emailPlaceholder": "bijv. hallo@jouwwinkel.example",
-      "emailHelp": "Waar kopers je kunnen bereiken. Dit mag afwijken van je inlog-e-mailadres."
+      "emailHelp": "Waar kopers je kunnen bereiken. Dit mag afwijken van je inlog-e-mailadres.",
+      "emailTipLabel": "Over dit e-mailadres"
     },
     "confirm": {
       "goLive": "Je productpagina's kunnen online gaan zodra het is bevestigd."
@@ -155,7 +156,7 @@
     "shortcut": "Sneltoets: <kbd>{shortcut}</kbd>",
     "skipTour": "Rondleiding overslaan",
     "next": "Volgende",
-    "openingPage": "{page, select, overview {Overzicht openen…} products {Producten openen…} storefront {Etalage openen…} orders {Bestellingen openen…} analytics {Statistieken openen…} payments {Betalingen openen…} settings {Instellingen openen…} sampleStorefront {Voorbeeldetalage openen…} other {Openen…}}"
+    "openingPage": "{page, select, overview {Overzicht openen…} products {Producten openen…} storefront {Etalage openen…} orders {Bestellingen openen…} discounts {Kortingen openen…} analytics {Statistieken openen…} payments {Betalingen openen…} settings {Instellingen openen…} sampleStorefront {Voorbeeldetalage openen…} other {Openen…}}"
   },
   "tourReplay": {
     "title": "Rondleiding",

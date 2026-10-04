@@ -48,12 +48,23 @@ describe("ReportDialog", () => {
     ).toBeInTheDocument();
     expect(within(dialog).getByText("What is wrong with it?").tagName).toBe("LEGEND");
 
-    const illegal = within(dialog).getByRole("radio", { name: /Illegal goods or activity/ });
-    expect(illegal.closest("label")?.textContent).toBe(
-      "Illegal goods or activitySelling something that is against the law, or using the listing to arrange it.",
-    );
+    // Eight categories as tiles: the name alone, until one is picked.
+    const illegal = within(dialog).getByRole("radio", { name: "Illegal goods or activity" });
+    expect(illegal.closest("label")?.textContent).toBe("Illegal goods or activity");
     expect(within(dialog).getAllByRole("radio")).toHaveLength(8);
+    expect(dialog.querySelector("[data-report-reason-hint]")).toBeNull();
 
+    // It opens as that one question: nothing else is asked yet.
+    expect(within(dialog).queryByLabelText("Anything else? (optional)")).toBeNull();
+    expect(within(dialog).queryByLabelText("Your email (optional)")).toBeNull();
+    expect(within(dialog).getByRole("button", { name: "Cancel" })).toBeEnabled();
+    expect(within(dialog).getByRole("button", { name: "Send report" })).toBeDisabled();
+
+    // Picking one says what it covers, and asks for the rest.
+    fireEvent.click(illegal);
+    expect(dialog.querySelector("[data-report-reason-hint]")?.textContent).toBe(
+      "Selling something that is against the law, or using the listing to arrange it.",
+    );
     const details = within(dialog).getByLabelText("Anything else? (optional)");
     expect(details).toHaveAttribute("placeholder", "What should the person reviewing this know?");
     const email = within(dialog).getByLabelText("Your email (optional)");
@@ -63,9 +74,7 @@ describe("ReportDialog", () => {
         "Only so we can confirm we got this and ask a question if we need to. It is never shown to the seller.",
       ),
     ).toBeInTheDocument();
-
-    expect(within(dialog).getByRole("button", { name: "Cancel" })).toBeEnabled();
-    expect(within(dialog).getByRole("button", { name: "Send report" })).toBeDisabled();
+    expect(within(dialog).getByRole("button", { name: "Send report" })).toBeEnabled();
   });
 
   it("confirms without saying what happened underneath", async () => {
@@ -139,18 +148,19 @@ describe("ReportDialog", () => {
     expect(within(scopes).getByText("What do you want to report?").tagName).toBe("LEGEND");
     expect(
       within(scopes).getAllByRole("radio").map((radio) => radio.closest("label")?.textContent),
-    ).toEqual([
-      "This productBrass lamp",
-      "This storefrontLamp studio, and everything on it",
-      "This sellerLamp Studio s.r.o., across all of their storefronts",
-    ]);
+    ).toEqual(["This product", "This storefront", "This seller"]);
+    // Which one, by name, is said once: for the target that is chosen.
+    const named = () => dialog.querySelector("[data-report-scope-hint]")?.textContent;
     expect(within(scopes).getByRole("radio", { name: /This product/ })).toBeChecked();
+    expect(named()).toBe("Brass lamp");
 
     fireEvent.click(within(scopes).getByRole("radio", { name: /This storefront/ }));
     expect(within(dialog).getByRole("heading", { name: "Report this storefront" })).toBeVisible();
+    expect(named()).toBe("Lamp studio, and everything on it");
 
     fireEvent.click(within(scopes).getByRole("radio", { name: /This seller/ }));
     expect(within(dialog).getByRole("heading", { name: "Report this seller" })).toBeVisible();
+    expect(named()).toBe("Lamp Studio s.r.o., across all of their storefronts");
     fireEvent.click(within(dialog).getByRole("radio", { name: /Scam or fraud/ }));
     fireEvent.click(within(dialog).getByRole("button", { name: "Send report" }));
 

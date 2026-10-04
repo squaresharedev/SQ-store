@@ -56,6 +56,10 @@
     "manageBilling": {
       "withRole": "Vaše role {role, select, owner {vlastník} editor {editor} viewer {čtenář} other {{role}}} nemůže měnit plán tohoto obchodu.",
       "noRole": "Nemáte oprávnění měnit plán tohoto obchodu."
+    },
+    "manageDiscounts": {
+      "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě spravovat slevy.",
+      "noRole": "Nemáte oprávnění spravovat slevy v tomto obchodě."
     }
   },
   "notFound": {
@@ -63,7 +67,8 @@
     "product": "Tento produkt se nepodařilo najít.",
     "storefront": "Tuto výlohu se nepodařilo najít.",
     "item": "Tuto položku se nepodařilo najít.",
-    "order": "Tuto objednávku se nepodařilo najít."
+    "order": "Tuto objednávku se nepodařilo najít.",
+    "discount": "Tuto slevu se nepodařilo najít."
   },
   "rateLimited": {
     "fix": "Počkejte pár minut a zkuste to znovu. Pokud se nic nezkouší znovu na pozadí, nejdřív obnovte stránku.",
@@ -82,7 +87,8 @@
     "fileAppeal": "Příliš mnoho pokusů o odeslání odvolání za krátkou dobu.",
     "fulfilOrders": "Příliš mnoho pokusů o označení objednávek jako odeslaných v krátké době.",
     "readCheckoutSettings": "Příliš mnoho pokusů o načtení nastavení pokladny v krátké době.",
-    "changePlan": "Příliš mnoho změn plánu za krátkou dobu."
+    "changePlan": "Příliš mnoho změn plánu za krátkou dobu.",
+    "saveDiscounts": "Příliš mnoho změn slev za krátkou dobu."
   },
   "serverError": {
     "fix": "Obvykle jde o dočasný problém. Chvíli počkejte a zkuste to znovu; pokud to stále nejde, obnovte stránku.",
@@ -115,7 +121,10 @@
     "saveCheckoutSettings": "Nastavení pokladny se kvůli problému na naší straně nepodařilo uložit.",
     "loadPlans": "Váš plán se nepodařilo načíst kvůli chybě na naší straně.",
     "startCheckout": "Pokladnu se nepodařilo otevřít kvůli chybě na naší straně.",
-    "openBillingPortal": "Fakturační údaje se nepodařilo otevřít kvůli chybě na naší straně."
+    "openBillingPortal": "Fakturační údaje se nepodařilo otevřít kvůli chybě na naší straně.",
+    "cancelPlan": "Plán se nepodařilo zrušit kvůli problému na naší straně.",
+    "resumePlan": "Plán se nepodařilo ponechat kvůli problému na naší straně.",
+    "saveDiscount": "Slevu se kvůli problému na naší straně nepodařilo uložit."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Tento produkt byl odstraněn, nikoli pozastaven.} storefront {Tato výloha byla odstraněna, nikoli pozastavena.} other {Tato položka byla odstraněna, nikoli pozastavena.}}",
@@ -602,7 +611,11 @@
     "alreadySubscribed": "Váš obchod už má placený plán. Místo nákupu druhého plán přepněte.",
     "noBillingAccount": "Tento obchod zatím nemá fakturační účet. Nejdřív přejděte na placený plán.",
     "noSubscription": "Tento obchod nemá žádný placený plán ke změně. Vyberte si některý a přejděte na něj.",
-    "ownerOnlyFix": "Plán obchodu může měnit jen vlastník. Požádejte ho nebo přepněte na vlastní obchod."
+    "ownerOnlyFix": "Plán obchodu může měnit jen vlastník. Požádejte ho nebo přepněte na vlastní obchod.",
+    "invalidFeedback": "Vaši zpětnou vazbu se nepodařilo přečíst.",
+    "notCancellable": "Tento obchod nemá placený plán ke zrušení, nebo je už nastaven na ukončení.",
+    "notResumable": "Tento plán není nastaven na ukončení, nebo jeho zaplacené období už skončilo.",
+    "deletionPending": "Váš účet je určen ke smazání, takže s ním končí i jeho plán. Chcete-li si plán ponechat, nejdřív smazání zrušte."
   },
   "planLimit": {
     "storefronts": "Váš {plan, select, free {plán Free} starter {plán Starter} pro {plán Pro} other {aktuální plán}} zahrnuje {cap, plural, one {# výlohu} few {# výlohy} many {# výlohy} other {# výloh}} a váš obchod má všechny obsazené.",
@@ -621,5 +634,23 @@
     "planRequiredFix": "Pro export objednávek přejděte na vyšší plán na stránce Plány.",
     "rateLimited": "Exportů za krátkou dobu je příliš mnoho.",
     "rateLimitedFix": "Počkejte pár minut a zkuste to znovu."
+  },
+  "discounts": {
+    "invalid": {
+      "message": "Údaje slevy neprošly kontrolou.",
+      "fix": "Zkontrolujte zvýrazněná pole a zkuste slevu uložit znovu."
+    },
+    "codeTaken": {
+      "message": "Tento kód se v tomto obchodě už používá.",
+      "fix": "Zvolte jiný kód nebo nejdřív odstraňte druhou slevu."
+    },
+    "started": {
+      "message": "Tato akce již začala, takže její podmínky nelze měnit.",
+      "fix": "Ukončete ji a vytvořte novou akci s novými podmínkami. Předpisy EU o zobrazování snížení cen vyžadují, aby podmínky akce zůstaly v historii nezměněné."
+    },
+    "tooMany": {
+      "message": "Tento obchod má maximální počet slev.",
+      "fix": "Odstraňte slevy, které již nevyužíváte, a zkuste to znovu."
+    }
   }
 }

@@ -89,7 +89,8 @@
   "channels": {
     "embed": "Vloženie",
     "marketplace": "Trhovisko",
-    "direct": "Priamy"
+    "direct": "Priamy",
+    "button": "Tlačidlo na webe"
   },
   "signalsUnavailable": {
     "title": "Zobrazenia a prihlásenia na odber sú momentálne nedostupné",

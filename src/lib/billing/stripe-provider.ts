@@ -3,9 +3,11 @@
 // integration that does not exist yet; see lib/payments/availability.ts.)
 //
 // Hosted pages only. A new subscription goes through Stripe Checkout; a plan
-// switch, a cancellation, a new card and the invoice history go through the
-// Stripe Customer Portal. No card number, address or invoice ever passes
-// through this app.
+// switch, a new card and the invoice history go through the Stripe Customer
+// Portal. No card number, address or invoice ever passes through this app.
+// Cancelling and resuming are API calls the app makes itself (the seller
+// says why in the app first), so the portal configuration must have
+// `subscription_cancel` switched OFF.
 //
 // PRICES ARE CHECKED, NOT TRUSTED. The price a checkout charges is looked up
 // by the lookup key in lib/billing/plans.ts and must charge exactly what that
@@ -14,6 +16,7 @@
 // charging a seller a price they were not shown.
 
 import { toStripeLocale } from "@/lib/billing/stripe-locale";
+import { STRIPE_CANCELLATION_FEEDBACK, type CancellationFeedback } from "@/lib/billing/cancellation";
 import {
   BILLING_CURRENCY,
   PLANS,
@@ -45,6 +48,21 @@ import {
   normalizeSubscription,
   pickCurrentSubscription,
 } from "@/lib/billing/sync";
+
+/**
+ * The stored subscription, fetched from Stripe and checked to belong to the
+ * stored customer: never act on a subscription that is someone else's.
+ */
+async function ownedSubscription(subscriptionId: string, customerId: string): Promise<StripeSubscription> {
+  const subscription = await stripeRequest<StripeSubscription>(
+    "GET",
+    `/subscriptions/${encodeURIComponent(subscriptionId)}`,
+  );
+  if (subscription.customer !== customerId) {
+    throw new BillingConfigError("stored subscription does not belong to the stored customer");
+  }
+  return subscription;
+}
 
 /** The active Stripe price for a plan and interval, checked against the catalog. */
 async function catalogPrice(plan: PaidPlanId, interval: BillingInterval): Promise<StripePrice> {
@@ -162,35 +180,20 @@ export const stripeBillingProvider: BillingProvider = {
     };
     const afterCompletion = { type: "redirect", redirect: { return_url: request.returnUrl } };
 
-    if (request.flow.kind !== "manage") {
+    if (request.flow.kind === "switch") {
       if (!request.subscriptionId) throw new BillingConfigError("no subscription to change");
-      const subscription = await stripeRequest<StripeSubscription>(
-        "GET",
-        `/subscriptions/${encodeURIComponent(request.subscriptionId)}`,
-      );
-      if (subscription.customer !== request.customerId) {
-        // The stored subscription belongs to someone else: never open it.
-        throw new BillingConfigError("stored subscription does not belong to the stored customer");
-      }
-      if (request.flow.kind === "switch") {
-        const item = subscription.items.data[0];
-        if (!item) throw new BillingConfigError("subscription has no item to switch");
-        const price = await catalogPrice(request.flow.plan, request.flow.interval);
-        params.flow_data = {
-          type: "subscription_update_confirm",
-          subscription_update_confirm: {
-            subscription: subscription.id,
-            items: [{ id: item.id, price: price.id, quantity: 1 }],
-          },
-          after_completion: afterCompletion,
-        };
-      } else {
-        params.flow_data = {
-          type: "subscription_cancel",
-          subscription_cancel: { subscription: subscription.id },
-          after_completion: afterCompletion,
-        };
-      }
+      const subscription = await ownedSubscription(request.subscriptionId, request.customerId);
+      const item = subscription.items.data[0];
+      if (!item) throw new BillingConfigError("subscription has no item to switch");
+      const price = await catalogPrice(request.flow.plan, request.flow.interval);
+      params.flow_data = {
+        type: "subscription_update_confirm",
+        subscription_update_confirm: {
+          subscription: subscription.id,
+          items: [{ id: item.id, price: price.id, quantity: 1 }],
+        },
+        after_completion: afterCompletion,
+      };
     }
 
     const session = await stripeRequest<StripePortalSession>("POST", "/billing_portal/sessions", params);
@@ -199,19 +202,44 @@ export const stripeBillingProvider: BillingProvider = {
 
   syncCustomer: syncStripeCustomer,
 
-  async scheduleCancellation(ownerId: string, customerId: string, subscriptionId: string): Promise<void> {
-    const subscription = await stripeRequest<StripeSubscription>(
-      "GET",
+  async scheduleCancellation(
+    ownerId: string,
+    customerId: string,
+    subscriptionId: string,
+    feedback?: CancellationFeedback,
+  ): Promise<void> {
+    await ownedSubscription(subscriptionId, customerId);
+    await stripeRequest<StripeSubscription>(
+      "POST",
       `/subscriptions/${encodeURIComponent(subscriptionId)}`,
+      {
+        cancel_at_period_end: true,
+        // What the seller told us, kept on Stripe's side too.
+        cancellation_details: feedback
+          ? {
+              feedback: feedback.reason ? STRIPE_CANCELLATION_FEEDBACK[feedback.reason] : undefined,
+              comment: feedback.detail ?? undefined,
+            }
+          : undefined,
+      },
+      // A fresh key per request: Stripe replays a reused key's reply for 24h,
+      // which would make cancel, keep, cancel again silently do nothing.
+      { idempotencyKey: `cancel-at-period-end-${subscriptionId}-${crypto.randomUUID()}` },
     );
-    if (subscription.customer !== customerId) {
-      throw new BillingConfigError("stored subscription does not belong to the stored customer");
+    await syncStripeCustomer(ownerId, customerId);
+  },
+
+  async resumeSubscription(ownerId: string, customerId: string, subscriptionId: string): Promise<void> {
+    const subscription = await ownedSubscription(subscriptionId, customerId);
+    const periodEnd = subscription.items.data[0]?.current_period_end ?? 0;
+    if (subscription.status === "canceled" || periodEnd * 1000 <= Date.now()) {
+      throw new BillingConfigError("subscription is over and cannot be resumed");
     }
     await stripeRequest<StripeSubscription>(
       "POST",
       `/subscriptions/${encodeURIComponent(subscriptionId)}`,
-      { cancel_at_period_end: true },
-      { idempotencyKey: `cancel-at-period-end-${subscriptionId}` },
+      { cancel_at_period_end: false },
+      { idempotencyKey: `resume-${subscriptionId}-${crypto.randomUUID()}` },
     );
     await syncStripeCustomer(ownerId, customerId);
   },

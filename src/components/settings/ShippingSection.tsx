@@ -90,8 +90,13 @@ const WINDOW_CHOICES = ["0", "14", "30", "custom"] as const;
 export function ShippingSection({
   policy,
   continueHref,
+  compact = false,
 }: {
   policy: SellerShippingPolicy;
+  /** Inside a dialog (the product form's shipping modal): each card is one
+   *  line that opens, the first one already open, so the dialog is a short
+   *  list of what can be changed rather than the whole settings page. */
+  compact?: boolean;
   /** Where "Continue to your storefront" goes once terms are saved. Omitted
    *  when this form is embedded somewhere that isn't the settings page (e.g.
    *  the product form's shipping modal) — there is nowhere sensible for that
@@ -336,6 +341,7 @@ export function ShippingSection({
 
       <SettingsCard
         id="shipping"
+        fold={compact ? "open" : undefined}
         title={t("shipping.shippingCard.title")}
         description={t("shipping.shippingCard.description")}
         decoration="grid"
@@ -527,6 +533,7 @@ export function ShippingSection({
           the way of sellers who do not need it yet. */}
       <SettingsCard
         id="checkout-rates"
+        fold={compact ? "closed" : undefined}
         title={t("shipping.rates.title")}
         description={t("shipping.rates.description")}
       >
@@ -560,6 +567,7 @@ export function ShippingSection({
 
       <SettingsCard
         id="returns"
+        fold={compact ? "closed" : undefined}
         title={t("shipping.returnsCard.title")}
         description={t("shipping.returnsCard.description")}
       >
@@ -641,6 +649,7 @@ export function ShippingSection({
           their answers stop saying anything useful. */}
       <SettingsCard
         id="preview"
+        fold={compact ? "closed" : undefined}
         title={t("shipping.preview.title")}
         description={t("shipping.preview.description")}
       >
@@ -680,6 +689,7 @@ export function ShippingSection({
           being three empty boxes nobody filled in. */}
       <SettingsCard
         id="own-words"
+        fold={compact ? "closed" : undefined}
         title={t("shipping.ownWords.title")}
         description={t("shipping.ownWords.description")}
       >
@@ -718,6 +728,7 @@ export function ShippingSection({
           exception is a sentence, not a structure worth five fields. */}
       <SettingsCard
         id="profiles"
+        fold={compact ? "closed" : undefined}
         title={t("shipping.profiles.title")}
         description={t("shipping.profiles.description")}
       >

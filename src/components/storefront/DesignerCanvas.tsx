@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { ShoppingBag } from "lucide-react";
 import type { Product } from "@/types/product";
+import type { PagePhotoView } from "@/types/product-page";
+import { pagePhotoView } from "@/lib/storefront/product-page";
 import {
   blockKey,
   isFreelyArranged,
@@ -12,6 +14,7 @@ import {
   tileCovers,
   type HeaderLine,
   type ImagePlacement,
+  type PagePhoto,
   type CheckoutPageConfig,
   type ProductPageConfig,
   type StorefrontBlock,
@@ -714,6 +717,10 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   const checkoutId =
     checkoutPage && checkoutFor && openProductIds.includes(checkoutFor) ? checkoutFor : null;
 
+  // A stored photo with the display URL this session holds for it.
+  const photoView = (photo: PagePhoto | undefined): PagePhotoView | null =>
+    pagePhotoView(photo, photo ? pagePhotoUrls?.[photo.key] : null);
+
   const artboards = productPage
     ? openProductIds.flatMap((id) => {
         const product = productsById.get(id);
@@ -733,9 +740,8 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                 seller,
                 backgroundImageUrl,
                 customFontUrl,
-                pagePhotoUrl: checkoutPage.backgroundImage
-                  ? (pagePhotoUrls?.[checkoutPage.backgroundImage.key] ?? null)
-                  : null,
+                checkoutPhoto: photoView(checkoutPage.backgroundImage),
+                thanksPhoto: photoView(checkoutPage.thanksBackgroundImage),
                 widths: pageWidths,
                 initialDevice: previewMode,
                 onClose: () => onCloseCheckout?.(),
@@ -758,9 +764,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             seller={seller}
             backgroundImageUrl={backgroundImageUrl}
             customFontUrl={customFontUrl}
-            pagePhotoUrl={
-              productPage.backgroundImage ? (pagePhotoUrls?.[productPage.backgroundImage.key] ?? null) : null
-            }
+            pagePhoto={photoView(productPage.backgroundImage)}
             onClose={() => onClosePage?.(id)}
             checkoutOpen={id === checkoutId}
             onToggleCheckout={checkoutPage && onToggleCheckout ? () => onToggleCheckout(id) : undefined}

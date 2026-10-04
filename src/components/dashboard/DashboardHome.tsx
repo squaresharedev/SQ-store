@@ -11,6 +11,7 @@ import {
 } from "@/lib/dashboard/attention";
 import { formatMoney } from "@/lib/dashboard/format";
 import type { OrderView } from "@/types/order-view";
+import type { OrderGlance } from "@/lib/orders/queries";
 import { MetricTile } from "./MetricTile";
 import { MobileRevenueHero } from "./MobileRevenueHero";
 import { NeedsAttention } from "./NeedsAttention";
@@ -29,6 +30,7 @@ export function DashboardHome({
   onboarding,
   twoFactorEnabled = true,
   recentOrderDetails = [],
+  recentOrderGlances,
   toShipCount = 0,
   canFulfil = false,
   checkoutOpen = false,
@@ -36,6 +38,8 @@ export function DashboardHome({
   orders: DashboardOrdersData;
   /** Full detail for the Recent orders rows, so each opens in place. */
   recentOrderDetails?: OrderView[];
+  /** Photo and unit count per Recent orders row, keyed by order id. */
+  recentOrderGlances?: Record<string, OrderGlance>;
   /** Paid orders waiting to be shipped; above zero adds the row that says so. */
   toShipCount?: number;
   /** Whether the viewer may mark orders shipped from an opened order. */
@@ -128,6 +132,7 @@ export function DashboardHome({
           <RecentOrders
             orders={orders.recentOrders}
             details={recentOrderDetails}
+            glances={recentOrderGlances}
             id={RECENT_ORDERS_ID}
             canFulfil={canFulfil}
           />

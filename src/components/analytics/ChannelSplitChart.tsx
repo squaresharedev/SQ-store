@@ -5,7 +5,7 @@ import { PieChart } from "@/components/charts";
 import type { ChannelSlice } from "@/lib/analytics/types";
 import { moneyExact } from "@/components/analytics/chart-format";
 import { CHART_HEIGHT } from "@/components/analytics/chart-layout";
-import { TONE } from "@/components/analytics/palette";
+import { CHANNEL_TONE } from "@/components/analytics/palette";
 
 // Where the money comes from, a donut from the shared chart kit
 // (/dev/charts). The hole carries the total, so the card answers "how much"
@@ -14,18 +14,8 @@ import { TONE } from "@/components/analytics/palette";
 // Zero-revenue channels are dropped rather than passed through as empty
 // slices: a legend row reading "Marketplace 0%" next to a ring it contributes
 // nothing to is noise, and the card's empty state already covers the case
-// where there is no revenue at all.
-
-
-/** Colour is PINNED per channel rather than taken in slice order, so a channel
- *  keeps its identity when others are empty and the ring re-sorts. Money, not
- *  status, so no green or red here: neutral, blue, light grey. Mirrors the
- *  same map in SignalCharts. */
-const CHANNEL_COLOR_INDEX: Record<ChannelSlice["channel"], number> = {
-  embed: TONE.neutral,
-  marketplace: TONE.traffic,
-  direct: TONE.faint,
-};
+// where there is no revenue at all. Colours are pinned per channel in
+// CHANNEL_TONE: money, not status, so no green or red here.
 
 export function ChannelSplitChart({
   channels,
@@ -41,7 +31,7 @@ export function ChannelSplitChart({
     .map((slice) => ({
       label: t(`channels.${slice.channel}`),
       value: slice.revenueCents,
-      colorIndex: CHANNEL_COLOR_INDEX[slice.channel],
+      colorIndex: CHANNEL_TONE[slice.channel],
     }));
 
   return (

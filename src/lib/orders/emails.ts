@@ -93,6 +93,9 @@ export type NewOrderEmail = Goods & {
   buyerEmail: string | null;
   /** What the buyer asked to go in the parcel, if anything. */
   giftMessage?: string | null;
+  /** The discount code the buyer used, so the seller sees which channel the
+   *  sale came from. */
+  discountCode?: string | null;
 };
 
 /**
@@ -134,6 +137,7 @@ export async function sendNewOrderEmail(
     // it to this order without opening anything.
     lines.push(t("Orders.email.newOrder.number", { number: orderNumber(order.orderId) }));
     if (order.buyerEmail) lines.push(t("Orders.email.newOrder.buyer", { email: order.buyerEmail }));
+    if (order.discountCode) lines.push(t("Orders.email.newOrder.discountCode", { code: order.discountCode }));
     lines.push(
       t("Orders.email.newOrder.total", {
         amount: formatCents(order.amountCents, order.currency, locale),
@@ -249,7 +253,10 @@ export type OrderConfirmationEmail = Goods & {
   /** The short number printed on the order page (orderNumber). */
   number: string;
   placedAt: Date;
+  /** The items, before a code's discount. */
   subtotalCents: number;
+  /** The buyer's code and what it took off, when a code set the price. */
+  codeDiscount: { code: string; cents: number } | null;
   /** Null for a download. */
   shippingCents: number | null;
   amountCents: number;
@@ -299,6 +306,14 @@ export async function sendOrderConfirmation(
       "",
       t("Orders.email.confirmation.subtotal", { amount: money(order.subtotalCents) }),
     ];
+    if (order.codeDiscount) {
+      lines.push(
+        t("Orders.email.confirmation.discount", {
+          code: order.codeDiscount.code,
+          amount: money(order.codeDiscount.cents),
+        }),
+      );
+    }
     if (order.shippingCents !== null) {
       lines.push(
         order.shippingCents === 0

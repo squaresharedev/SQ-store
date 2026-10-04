@@ -5,22 +5,39 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { helpTextClass, overlayCloseButtonClass, overlayScrimClass, overlaySurfaceClass } from "@/components/ui/control-styles";
+import {
+  helpTextClass,
+  modalActionsClass,
+  modalSizeClass,
+  modalTitleClass,
+  overlayCloseButtonClass,
+  overlayScrimClass,
+  overlaySurfaceClass,
+} from "@/components/ui/control-styles";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+export type ModalSize = keyof typeof modalSizeClass;
 
 /**
  * Lightweight accessible modal dialog. Renders nothing when closed. On mobile
  * it's a bottom sheet (full-width); from `sm` up it's a centered
  * card. Esc and backdrop-click close it, focus is moved in on open and trapped,
  * and background scroll is locked.
+ *
+ * THE BLUR TEST (styles.md §8.14): blurred, a dialog should still say what it
+ * is for. Give it a `visual` (the thing it is about, or a HeroMark), a title
+ * of a few words, at most one sentence of `description`, and end it on a
+ * `ModalActions` row with one primary button.
  */
 export function Modal({
   open,
   onClose,
   title,
   description,
+  visual,
+  size = "md",
   children,
   className,
   initialFocus = "first-control",
@@ -30,6 +47,14 @@ export function Modal({
   onClose: () => void;
   title: string;
   description?: string;
+  /**
+   * The dialog's central element, set above the title: a HeroMark, or the
+   * thing the dialog is about (a product photo, a QR code). With one, the
+   * header centres under it.
+   */
+  visual?: React.ReactNode;
+  /** The card's width from `sm` up (modalSizeClass). */
+  size?: ModalSize;
   children: React.ReactNode;
   className?: string;
   /**
@@ -184,16 +209,22 @@ export function Modal({
         onSubmit={(event) => event.stopPropagation()}
         className={cn(
           overlaySurfaceClass,
-          "relative z-10 max-h-[90vh] w-full overflow-y-auto p-6 sm:max-w-md",
+          "relative z-10 max-h-[90vh] w-full overflow-y-auto p-6",
+          modalSizeClass[size],
           className,
         )}
       >
-        <div className="mb-4 flex items-start justify-between gap-4">
+        <div
+          className={cn(
+            "mb-4 flex gap-4",
+            // Under a visual the words centre with it, and the close button
+            // leaves the row for the corner (below).
+            visual ? "flex-col items-center text-center" : "items-start justify-between",
+          )}
+        >
+          {visual}
           <div>
-            <h2
-              id={titleId}
-              className="text-lg font-semibold tracking-tight text-popover-foreground"
-            >
+            <h2 id={titleId} className={modalTitleClass}>
               {title}
             </h2>
             {description && (
@@ -211,15 +242,38 @@ export function Modal({
               type="button"
               onClick={onClose}
               aria-label={t("close")}
-              className={cn(overlayCloseButtonClass, "-mr-1.5 -mt-1.5")}
+              className={cn(
+                overlayCloseButtonClass,
+                // The same spot either way: 1.5 in from the panel's padding.
+                visual ? "absolute right-4.5 top-4.5" : "-mr-1.5 -mt-1.5",
+              )}
             >
               <X className="size-5" aria-hidden />
             </button>
           )}
         </div>
         {children}
+        {/* A phone's sheet runs to the bottom edge: clear the home indicator.
+            Its own element, because a padding utility on the panel would
+            replace the panel's bottom padding rather than add to it. */}
+        <div aria-hidden className="pb-safe shrink-0 sm:hidden" />
       </div>
     </div>,
     document.body,
   );
+}
+
+/**
+ * The row a dialog ends on (modalActionsClass). Put the quiet action first and
+ * the primary one last: it lands on top on a phone and at the far end from
+ * `sm` up.
+ */
+export function ModalActions({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return <div className={cn(modalActionsClass, className)}>{children}</div>;
 }

@@ -17,7 +17,8 @@
   "channel": {
     "embed": "Vložení",
     "marketplace": "Tržiště",
-    "direct": "Vaše stránky"
+    "direct": "Vaše stránky",
+    "button": "Tlačítko na webu"
   },
   "empty": {
     "filteredTitle": "Filtrům neodpovídají žádné objednávky",
@@ -61,7 +62,8 @@
     "datePlaceholder": "jakékoli datum",
     "sort": "řazení",
     "sortAriaLabel": "Seřadit objednávky",
-    "clearFilters": "vymazat filtry"
+    "clearFilters": "vymazat filtry",
+    "allChannels": "Všechny kanály"
   },
   "sort": {
     "newest": "Od nejnovějších",
@@ -140,7 +142,11 @@
     },
     "emailBuyer": "Poslat e-mail kupujícímu",
     "mailSubject": "Vaše objednávka {number}",
-    "withdrawnShipWarning": "Kupující od tohoto nákupu odstoupil. Zásilku odešlete, jen pokud jste se na tom s ním dohodli."
+    "withdrawnShipWarning": "Kupující od tohoto nákupu odstoupil. Zásilku odešlete, jen pokud jste se na tom s ním dohodli.",
+    "discount": "Sleva",
+    "discountSale": "Akce, sleva {amount}",
+    "discountCode": "Kód {code}, sleva {amount}",
+    "discountCodeOutdone": "Kód {code} použit, ale akční cena byla nižší"
   },
   "actions": {
     "refundNeedsStripe": "Vrácení peněz vyžaduje propojený Stripe.",
@@ -210,7 +216,8 @@
       "openShip": "Jakmile zásilka odejde, označte ji jako odeslanou a my kupujícímu dáme vědět: {url}",
       "openDigital": "Zobrazit objednávku: {url}",
       "gift": "Přiložit do balíčku vzkaz: {message}",
-      "number": "Číslo objednávky: {number}"
+      "number": "Číslo objednávky: {number}",
+      "discountCode": "Slevový kód: {code}"
     },
     "shipped": {
       "subject": "Vaše objednávka z obchodu {store} je na cestě",
@@ -245,7 +252,8 @@
       "withdrawalDigital": "Požádali jste o okamžité stažení a souhlasili jste s tím, že právo na odstoupení od smlouvy zaniká po jeho zahájení.",
       "guarantee": "Máte také zákonnou záruku shody po dobu nejméně dvou let.",
       "questions": "Máte otázky? Odpovězte na tento e-mail, abyste se obrátili na {store}.",
-      "footer": "Odesláno prostřednictvím Square Share jménem {store}. Square Share poskytuje software obchodu a není stranou tohoto prodeje."
+      "footer": "Odesláno prostřednictvím Square Share jménem {store}. Square Share poskytuje software obchodu a není stranou tohoto prodeje.",
+      "discount": "Sleva ({code}): -{amount}"
     },
     "withdrawal": {
       "buyerSubject": "Vaše odstoupení od objednávky {number} u {store}",

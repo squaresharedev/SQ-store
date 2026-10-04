@@ -455,6 +455,69 @@ export type Database = {
           },
         ]
       }
+      discounts: {
+        Row: {
+          amount_off_cents: number | null
+          applies_to: string
+          archived_at: string | null
+          code: string | null
+          created_at: string
+          currency: string | null
+          enabled: boolean
+          ends_at: string | null
+          id: string
+          kind: string
+          owner_id: string
+          percent_off: number | null
+          product_ids: string[]
+          share_channel: string | null
+          starts_at: string
+          updated_at: string
+          usage_limit: number | null
+          value_type: string
+        }
+        Insert: {
+          amount_off_cents?: number | null
+          applies_to?: string
+          archived_at?: string | null
+          code?: string | null
+          created_at?: string
+          currency?: string | null
+          enabled?: boolean
+          ends_at?: string | null
+          id?: string
+          kind: string
+          owner_id: string
+          percent_off?: number | null
+          product_ids?: string[]
+          share_channel?: string | null
+          starts_at?: string
+          updated_at?: string
+          usage_limit?: number | null
+          value_type: string
+        }
+        Update: {
+          amount_off_cents?: number | null
+          applies_to?: string
+          archived_at?: string | null
+          code?: string | null
+          created_at?: string
+          currency?: string | null
+          enabled?: boolean
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          owner_id?: string
+          percent_off?: number | null
+          product_ids?: string[]
+          share_channel?: string | null
+          starts_at?: string
+          updated_at?: string
+          usage_limit?: number | null
+          value_type?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
@@ -856,6 +919,10 @@ export type Database = {
           created_at: string
           currency: string
           digital_file_key: string | null
+          discount_cents: number
+          discount_code: string | null
+          discount_code_id: string | null
+          discount_id: string | null
           fulfilment_status: string
           gift_message: string | null
           id: string
@@ -887,6 +954,10 @@ export type Database = {
           created_at?: string
           currency?: string
           digital_file_key?: string | null
+          discount_cents?: number
+          discount_code?: string | null
+          discount_code_id?: string | null
+          discount_id?: string | null
           fulfilment_status?: string
           gift_message?: string | null
           id?: string
@@ -918,6 +989,10 @@ export type Database = {
           created_at?: string
           currency?: string
           digital_file_key?: string | null
+          discount_cents?: number
+          discount_code?: string | null
+          discount_code_id?: string | null
+          discount_id?: string | null
           fulfilment_status?: string
           gift_message?: string | null
           id?: string
@@ -942,6 +1017,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "orders_discount_code_id_fkey"
+            columns: ["discount_code_id"]
+            isOneToOne: false
+            referencedRelation: "discounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_discount_id_fkey"
+            columns: ["discount_id"]
+            isOneToOne: false
+            referencedRelation: "discounts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "orders_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
@@ -960,6 +1049,82 @@ export type Database = {
             columns: ["storefront_id"]
             isOneToOne: false
             referencedRelation: "storefronts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_cancellations: {
+        Row: {
+          billing_interval: string | null
+          created_at: string
+          detail: string | null
+          ends_at: string
+          id: string
+          owner_id: string
+          plan: string
+          reason: string | null
+          resumed_at: string | null
+        }
+        Insert: {
+          billing_interval?: string | null
+          created_at?: string
+          detail?: string | null
+          ends_at: string
+          id?: string
+          owner_id: string
+          plan: string
+          reason?: string | null
+          resumed_at?: string | null
+        }
+        Update: {
+          billing_interval?: string | null
+          created_at?: string
+          detail?: string | null
+          ends_at?: string
+          id?: string
+          owner_id?: string
+          plan?: string
+          reason?: string | null
+          resumed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_cancellations_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_price_history: {
+        Row: {
+          currency: string
+          id: number
+          price_cents: number
+          product_id: string
+          valid_from: string
+        }
+        Insert: {
+          currency: string
+          id?: never
+          price_cents: number
+          product_id: string
+          valid_from?: string
+        }
+        Update: {
+          currency?: string
+          id?: never
+          price_cents?: number
+          product_id?: string
+          valid_from?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_price_history_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -1849,6 +2014,18 @@ export type Database = {
       decrement_stock: {
         Args: { p_product_id: string; p_quantity: number }
         Returns: boolean
+      }
+      discount_performance: {
+        Args: { p_seller_id: string }
+        Returns: {
+          currency: string
+          discount_cents: number
+          discount_id: string
+          last_order_at: string | null
+          orders: number
+          revenue_cents: number
+          uses: number
+        }[]
       }
       email_by_username: { Args: { p_username: string }; Returns: string }
       is_squareshare_staff: { Args: never; Returns: boolean }

@@ -1,14 +1,31 @@
 "use client";
 
 import * as React from "react";
-import { Flag } from "lucide-react";
+import {
+  Copyright,
+  Ellipsis,
+  EyeOff,
+  Flag,
+  Gavel,
+  HandCoins,
+  MailWarning,
+  MessageCircleWarning,
+  Package,
+  Store,
+  Swords,
+  UserRound,
+  type LucideIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Modal } from "@/components/ui/modal";
+import { Modal, ModalActions } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ChoiceCards } from "@/components/ui/ChoiceCards";
 import { AnimatedCheck } from "@/components/ui/animated-check";
+import { infoTextClass } from "@/components/ui/control-styles";
+import { HeroMark } from "@/components/ui/HeroMark";
 import type { MessageRef } from "@/i18n/types";
 import type { ProductPageReportScopes } from "@/types/product-page";
 import {
@@ -25,10 +42,25 @@ type ReportScopeOption = keyof ProductPageReportScopes;
 
 const NO_WIDER_SCOPES: ProductPageReportScopes = { storefront: false, seller: false };
 
-/** One choosable card, for both the target and the reason: the whole card is
- *  the hit area, and the chosen one takes the ink border. */
-const REPORT_OPTION_CLASS =
-  "flex cursor-pointer items-start gap-3 rounded-md border border-border p-3 hover:bg-muted/40 has-[:checked]:border-foreground";
+/** A category as a picture. Eight tiles can be told apart at a glance where
+ *  eight sentences have to be read; the words stay under each, and what the
+ *  chosen one covers is spelled out once it is picked. */
+const REASON_ICONS: Record<ReportReason, LucideIcon> = {
+  illegal: Gavel,
+  sexual: EyeOff,
+  violence: Swords,
+  hate: MessageCircleWarning,
+  counterfeit: Copyright,
+  scam: HandCoins,
+  spam: MailWarning,
+  other: Ellipsis,
+};
+
+const SCOPE_ICONS: Record<ReportScope, LucideIcon> = {
+  product: Package,
+  storefront: Store,
+  seller: UserRound,
+};
 
 /** The "(optional)" after a field label, a step quieter than the label. */
 function optionalMarker(chunks: React.ReactNode) {
@@ -56,6 +88,11 @@ function optionalMarker(chunks: React.ReactNode) {
  *      Services Act (Art. 16) a notice carrying contact details is the form
  *      that gives the platform actual knowledge. Requiring it would stop most
  *      people reporting anything, which is the worse failure.
+ *
+ * The dialog OPENS AS ONE QUESTION. The categories are tiles (a glyph over a
+ * few words), told apart at a glance, and what the chosen one covers is spelled
+ * out under them once it is picked. 2 and 3 only appear then: someone who has
+ * not said what is wrong has nothing to add to it yet.
  *
  * THE CONFIRMATION IS ALWAYS THE SAME. A duplicate report, a first report and
  * a report on something already removed all end here. The endpoint is built
@@ -192,115 +229,123 @@ export function ReportDialog({
         // silently file the most serious category. Land on the inert panel so
         // choosing a reason is always deliberate.
         initialFocus="dialog"
+        // The flag they pressed, then a tick once it is sent. The tick only
+        // exists in that state, so it draws itself in on every submission
+        // rather than sitting fully drawn from a previous one. That is the
+        // confirmation a person reacts to: the words say it happened, this is
+        // what makes it FEEL like it did.
+        visual={
+          state === "sent" ? (
+            <HeroMark tone="success" icon={AnimatedCheck} />
+          ) : (
+            <HeroMark icon={Flag} />
+          )
+        }
         title={state === "sent" ? t("sentTitle") : t("title", { target: scope })}
-        description={state === "sent" ? undefined : t("description")}
+        description={state === "sent" ? t("sentBody", { target: scope }) : t("description")}
       >
         {state === "sent" ? (
-          <div className="flex flex-col items-center gap-4 py-2 text-center">
-            {/* Remounted fresh every time `state` becomes "sent" (this whole
-                branch only exists then), so the draw-in replays on every
-                submission rather than sitting fully-drawn from a previous
-                one. That is the actual confirmation a person reacts to: the
-                words say it happened, this is what makes it FEEL like it
-                did. */}
-            <span
-              aria-hidden="true"
-              className="flex size-12 items-center justify-center rounded-full bg-success/15 text-success"
-            >
-              <AnimatedCheck className="size-6" />
-            </span>
-            <p className="text-sm text-muted-foreground">
-              {t("sentBody", { target: scope })}
-            </p>
-            <Button type="button" onClick={close} className="w-full sm:w-auto">
+          <ModalActions>
+            <Button type="button" onClick={close}>
               {tActions("close")}
             </Button>
-          </div>
+          </ModalActions>
         ) : (
-          <form onSubmit={submit} className="flex flex-col gap-5">
+          <form onSubmit={submit} className="flex flex-col gap-4">
             {choosing && (
-              <fieldset className="flex flex-col gap-2" data-report-scopes="">
-                <legend className="pb-2 text-sm font-medium">{t("scopeLegend")}</legend>
-                {available.map((value) => (
-                  <label
-                    key={value}
-                    className={REPORT_OPTION_CLASS}
-                    data-report-scope={value}
-                  >
-                    <input
-                      type="radio"
-                      name="scope"
-                      value={value}
-                      checked={scope === value}
-                      onChange={() => setScope(value)}
-                      className="mt-0.5 size-4 shrink-0 accent-foreground"
-                    />
-                    <span className="flex min-w-0 flex-col gap-0.5">
-                      <span className="text-sm font-medium">{t(`scopes.${value}.label`)}</span>
-                      <span className="truncate text-xs text-muted-foreground">
-                        {scopeHints[value]}
-                      </span>
-                    </span>
-                  </label>
-                ))}
-              </fieldset>
+              <div className="flex flex-col gap-2">
+                <ChoiceCards
+                  name="scope"
+                  legend={t("scopeLegend")}
+                  variant="tiles"
+                  columns={3}
+                  options={available.map((value) => {
+                    const Icon = SCOPE_ICONS[value];
+                    return {
+                      value,
+                      label: t(`scopes.${value}.label`),
+                      icon: <Icon className="size-5" strokeWidth={1.75} aria-hidden />,
+                    };
+                  })}
+                  value={scope}
+                  onChange={setScope}
+                  optionDataAttribute="data-report-scope"
+                  fieldsetData={{ "data-report-scopes": "" }}
+                />
+                {/* Which one, by name: one line for the chosen target. */}
+                <p className={`${infoTextClass} truncate text-center`} aria-live="polite" data-report-scope-hint>
+                  {scopeHints[scope]}
+                </p>
+              </div>
             )}
 
-            <fieldset className="flex flex-col gap-2">
-              <legend className="pb-2 text-sm font-medium">{t("reasonsLegend")}</legend>
-              {REPORT_REASONS.map((value) => (
-                <label key={value} className={REPORT_OPTION_CLASS}>
-                  <input
-                    type="radio"
-                    name="reason"
-                    value={value}
-                    checked={reason === value}
-                    onChange={() => setReason(value)}
-                    className="mt-0.5 size-4 shrink-0 accent-foreground"
-                    required
+            <div className="flex flex-col gap-2">
+              <ChoiceCards
+                name="reason"
+                legend={t("reasonsLegend")}
+                // Alone, the dialog's own sentence already asks it. Beside the
+                // "what" group above, each group needs its question in view.
+                legendHidden={!choosing}
+                variant="tiles"
+                columns={2}
+                options={REPORT_REASONS.map((value) => {
+                  const Icon = REASON_ICONS[value];
+                  return {
+                    value,
+                    label: resolve(REPORT_REASON_COPY[value].label),
+                    icon: <Icon className="size-5" strokeWidth={1.75} aria-hidden />,
+                  };
+                })}
+                value={reason || null}
+                onChange={setReason}
+                required
+              />
+              {/* What the chosen category covers: one definition on screen,
+                  not eight to read past. */}
+              {reason && (
+                <p className={`${infoTextClass} text-center`} aria-live="polite" data-report-reason-hint>
+                  {resolve(REPORT_REASON_COPY[reason].hint)}
+                </p>
+              )}
+            </div>
+
+            {/* The rest is asked only once there is a reason to say more
+                about, so the dialog opens as one question. */}
+            {reason && (
+              <>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="report-details">
+                    {t.rich("detailsLabel", { muted: optionalMarker })}
+                  </Label>
+                  <Textarea
+                    id="report-details"
+                    name="details"
+                    rows={3}
+                    maxLength={REPORT_DETAILS_MAX}
+                    value={details}
+                    onChange={(event) => setDetails(event.target.value)}
+                    placeholder={t("detailsPlaceholder")}
                   />
-                  <span className="flex flex-col gap-0.5">
-                    <span className="text-sm font-medium">
-                      {resolve(REPORT_REASON_COPY[value].label)}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {resolve(REPORT_REASON_COPY[value].hint)}
-                    </span>
-                  </span>
-                </label>
-              ))}
-            </fieldset>
+                </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="report-details">
-                {t.rich("detailsLabel", { muted: optionalMarker })}
-              </Label>
-              <Textarea
-                id="report-details"
-                name="details"
-                rows={3}
-                maxLength={REPORT_DETAILS_MAX}
-                value={details}
-                onChange={(event) => setDetails(event.target.value)}
-                placeholder={t("detailsPlaceholder")}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="report-email">
-                {t.rich("emailLabel", { muted: optionalMarker })}
-              </Label>
-              <Input
-                id="report-email"
-                name="reporterEmail"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder={t("emailPlaceholder")}
-              />
-              <p className="text-xs text-muted-foreground">{t("emailHelp")}</p>
-            </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="report-email">
+                    {t.rich("emailLabel", { muted: optionalMarker })}
+                  </Label>
+                  <Input
+                    id="report-email"
+                    name="reporterEmail"
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder={t("emailPlaceholder")}
+                  />
+                  {/* Kept in view: it is the promise that makes an address safe to give. */}
+                  <p className={infoTextClass}>{t("emailHelp")}</p>
+                </div>
+              </>
+            )}
 
             {error && (
               <p role="alert" className="text-sm text-destructive">
@@ -308,14 +353,14 @@ export function ReportDialog({
               </p>
             )}
 
-            <div className="flex items-center justify-end gap-3">
+            <ModalActions>
               <Button type="button" variant="ghost" onClick={close}>
                 {tActions("cancel")}
               </Button>
               <Button type="submit" disabled={!reason || state === "sending"}>
                 {state === "sending" ? tActions("sending") : t("send")}
               </Button>
-            </div>
+            </ModalActions>
           </form>
         )}
       </Modal>

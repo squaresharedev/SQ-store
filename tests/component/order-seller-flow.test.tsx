@@ -132,7 +132,7 @@ describe("what the ship form promises", () => {
     const user = userEvent.setup();
     renderDetail(waiting);
     await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
-    expect(screen.getByText(/We'll email the buyer/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /We'll email the buyer/ })).toBeInTheDocument();
   });
 
   it("says the buyer will NOT be told, where mail is off", async () => {

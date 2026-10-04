@@ -46,6 +46,20 @@ export const iconTileClass =
   "flex shrink-0 items-center justify-center rounded-sm bg-secondary text-foreground";
 
 /**
+ * A greyed bar standing in for a line of content in a DRAWN page (the embed
+ * hero, the buy button story). Give it a width at the call site.
+ */
+export const placeholderBarClass = "h-2 rounded-full bg-border";
+
+/**
+ * The round lock that sits over a picture of something not switched on yet (a
+ * dimmed embed slot, a buy button with no page to land on). Centre it at the
+ * call site.
+ */
+export const lockBadgeClass =
+  "flex size-10 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-xs";
+
+/**
  * Status chip: a pill on the secondary surface. The TONE is the caller's
  * (`text-success`, `text-destructive`, …) because that is the only thing an
  * order status, a payout status and a stock level should differ by.
@@ -60,6 +74,20 @@ export const badgeClass =
  */
 export const inkBadgeClass =
   "inline-flex shrink-0 items-center gap-1 rounded-full bg-foreground px-2 py-0.5 font-inter text-xs font-medium text-background";
+
+/**
+ * A saving, said in green ("Save 25%", "2 months free"): the one place a plan
+ * surface spends colour, because money kept is the thing worth noticing and a
+ * grey pill reads as a footnote. `text-success` is AA on its own tint.
+ * On an ink surface (a selected segment) use `savingBadgeOnInkClass`.
+ */
+export const savingBadgeClass =
+  "inline-flex shrink-0 items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 font-inter text-xs font-semibold text-success";
+
+/** `savingBadgeClass` for an ink background, where green-700 sinks into the
+ *  surface: the lighter green the dark cards already use. */
+export const savingBadgeOnInkClass =
+  "inline-flex shrink-0 items-center gap-1 rounded-full bg-success-dark/20 px-2 py-0.5 font-inter text-xs font-semibold text-success-dark";
 
 /**
  * The card a set leads with (the recommended plan): an ink outline and a
@@ -90,12 +118,27 @@ export const bannerStripClass =
 export const attentionCountClass =
   "inline-flex min-w-5 items-center justify-center rounded-full bg-foreground px-1.5 font-inter text-xs font-medium leading-5 tabular-nums text-background";
 
+/** The page column on its own: centred, capped, with the page gutters. */
+export const pageGutterClass = "mx-auto max-w-7xl px-6";
+
+/**
+ * The shell of a page that lets one band run edge to edge (the analytics
+ * revenue hero): the page's top and bottom air and nothing at the sides.
+ * Everything else on such a page wraps itself in `pageGutterClass`.
+ */
+export const pageBleedShellClass = "py-8";
+
 /** Dashboard page column: centred, capped, with the page gutters. */
-export const pageShellClass = "mx-auto max-w-7xl px-6 py-8";
+export const pageShellClass = `${pageGutterClass} ${pageBleedShellClass}`;
 
 /** Page `<h1>`. */
 export const pageTitleClass =
   "text-2xl font-semibold text-foreground md:text-3xl";
+
+/** The `<h1>` of a card that IS the page: a sign-in step, an approval, one of
+ *  their dead ends (components/auth). A step smaller than a page title, since
+ *  the card around it is small. */
+export const authHeadingClass = "text-xl font-semibold tracking-tight text-foreground";
 
 /** The one line under a page title, and under a section heading. */
 export const pageSubtitleClass = "mt-1 font-inter text-sm text-muted-foreground";
@@ -104,10 +147,20 @@ export const pageSubtitleClass = "mt-1 font-inter text-sm text-muted-foreground"
  *  for one thing). Sits inside `pageShellClass`, so the gutters still apply. */
 export const pageColumnNarrowClass = "mx-auto w-full max-w-2xl";
 
-/** Code the seller copies: a dark slab on either theme, so it reads as code and
- *  not as another form card. Pair with `cardHeaderClass`-style rows inside. */
-export const codeSurfaceClass =
-  "rounded-md border border-border bg-surface-dark text-surface-light";
+/**
+ * Code the seller copies (the embed snippet, the buy button's link, HTML and AI
+ * prompt): a white slab inside a thick border of light green shades that flows slowly
+ * around it, so it reads as something to take away and not as another form
+ * card. The gradient stays inside the border. Still under reduced motion.
+ *
+ * The look is the `.code-surface` block in globals.css (it needs a
+ * pseudo-element and a registered angle, which utilities cannot spell), tuned
+ * there in one place; this only names it and keeps it SHARP, the brand's square
+ * corners (the ring follows whatever radius the element has).
+ * `p-1` keeps content clear of the ring by default (the ring is 4px); a call
+ * site that sets its own padding replaces it. Lay out the inside yourself.
+ */
+export const codeSurfaceClass = "code-surface rounded-none p-1 text-foreground";
 
 /**
  * Something SquareShare staff asked the seller to change (a paused product's

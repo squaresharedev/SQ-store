@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import { MonitorSmartphone, Smartphone } from "lucide-react";
 import { AnimatedFingerprint } from "@/components/auth/AnimatedFingerprint";
+import { MARK_SIZES, type MarkSize } from "@/components/ui/HeroMark";
 import { DURATION, EASE_ENTRANCE, EASE_STANDARD, POP } from "@/components/ui/motion-tokens";
 import { cn } from "@/lib/utils";
 
@@ -19,12 +20,10 @@ import { cn } from "@/lib/utils";
  * Monochrome like the rest of the dashboard, with the one success green on the
  * badge (the same token pair the success toast uses), so the colour says only
  * "done".
+ *
+ * Sized from MARK_SIZES, the table ui/HeroMark (its static sibling) uses, so
+ * the mark a dialog opened with and the success that replaces it line up.
  */
-
-const SIZES = {
-  lg: { box: "size-20", glyph: "size-9", badge: "size-7", check: "size-4" },
-  md: { box: "size-14", glyph: "size-7", badge: "size-6", check: "size-3.5" },
-} as const;
 
 /**
  * The choreography, in seconds from mount. The badge lands once the ring has
@@ -48,11 +47,11 @@ export function SuccessMark({
   className,
 }: {
   kind: SuccessKind;
-  size?: keyof typeof SIZES;
+  size?: MarkSize;
   className?: string;
 }) {
   const reducedMotion = useReducedMotion();
-  const s = SIZES[size];
+  const s = MARK_SIZES[size];
   const still = Boolean(reducedMotion);
   const Glyph = kind === "passkey" ? null : GLYPHS[kind];
 
@@ -112,7 +111,7 @@ export function SuccessMark({
       >
         <svg
           viewBox="0 0 24 24"
-          className={s.check}
+          className={s.badgeGlyph}
           fill="none"
           stroke="currentColor"
           strokeWidth={3}

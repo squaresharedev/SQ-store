@@ -147,7 +147,8 @@
       "thankYouCelebration": "Celebración de agradecimiento",
       "checkoutPayButton": "Botón de pago",
       "productPagePhoto": "Foto de la página de producto",
-      "checkoutPhoto": "Foto del pago y del agradecimiento"
+      "checkoutPhoto": "Foto del pago",
+      "thanksPhoto": "Foto de la página de agradecimiento"
     }
   },
   "editorSearch": {
@@ -1365,7 +1366,8 @@
   "pagePhoto": {
     "label": "Foto",
     "infoLabel": "Cómo se usa la foto",
-    "info": "Se muestra detrás de la página y se tiñe con el color de la página, para que el texto siga siendo legible. Cambia el color para aclarar u oscurecer la foto.",
-    "remove": "Quitar foto"
+    "info": "Se muestra detrás de la página. La capa del color de la página mantiene el texto legible; desactívala para mostrar la foto tal cual.",
+    "remove": "Quitar foto",
+    "overlay": "Capa de color"
   }
 }

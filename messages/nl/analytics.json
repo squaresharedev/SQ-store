@@ -89,7 +89,8 @@
   "channels": {
     "embed": "Insluiting",
     "marketplace": "Marketplace",
-    "direct": "Direct"
+    "direct": "Direct",
+    "button": "Websiteknop"
   },
   "signalsUnavailable": {
     "title": "Weergaven en aanmeldingen zijn nu niet beschikbaar",

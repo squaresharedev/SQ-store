@@ -329,8 +329,28 @@
       "rate_limited": "Trop de tentatives. Attendez quelques minutes et réessayez.",
       "unavailable": "Le paiement n'est pas disponible pour l'instant. Rien n'a été débité.",
       "failed": "Une erreur s'est produite et rien n'a été débité. Réessayez.",
-      "invalid": "Certains détails nécessitent une vérification. Vérifiez les champs mis en évidence."
+      "invalid": "Certains détails nécessitent une vérification. Vérifiez les champs mis en évidence.",
+      "discount_invalid": "Ce code de réduction ne peut plus être utilisé. Retirez-le pour payer le prix normal.",
+      "price_changed": "Le prix a changé pendant que cette page était ouverte, rien n'a donc été débité. Vérifiez le nouveau total, puis payez."
     },
-    "editHeadline": "Titre du paiement"
+    "editHeadline": "Titre du paiement",
+    "discount": {
+      "add": "Ajouter un code de réduction",
+      "label": "Code de réduction",
+      "apply": "Appliquer",
+      "applying": "Vérification",
+      "remove": "Retirer",
+      "applied": "{code} appliqué.",
+      "saleBetter": "{code} est valide, mais votre prix promotionnel est déjà plus bas, donc on l'a conservé.",
+      "invalid": "Ce code ne peut pas être utilisé pour cette commande.",
+      "rateLimited": "Trop de codes essayés. Attendez un moment, puis réessayez.",
+      "line": "Réduction ({code})"
+    }
+  },
+  "sale": {
+    "wasNow": "Était {was}, maintenant {now}",
+    "percentOff": "-{percent}%",
+    "priorNote": "Prix barré : le prix le plus bas pratiqué dans les 30 jours précédant cette réduction.",
+    "endsOn": "Promo jusqu'au {date}"
   }
 }

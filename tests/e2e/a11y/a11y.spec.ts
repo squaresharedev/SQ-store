@@ -72,6 +72,8 @@ test.describe("accessibility", () => {
       "/products",
       "/products/new",
       "/orders",
+      "/discounts",
+      "/discounts/new",
       "/analytics",
       "/payments",
       "/notifications",

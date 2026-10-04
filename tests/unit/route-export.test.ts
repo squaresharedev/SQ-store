@@ -15,6 +15,7 @@ function chain(table: string) {
       filters[table] = [col, val];
       return builder;
     },
+    order: () => builder,
     maybeSingle: () => Promise.resolve(result),
     then: (resolve: (v: QueryResult) => unknown) => resolve(result),
   };
@@ -26,6 +27,12 @@ vi.mock("@/lib/supabase/server", () => ({
     auth: { getUser: () => getUser() },
     from: (table: string) => chain(table),
   }),
+}));
+
+// The cancellation feedback is a service-role read (the table has no client
+// grant), through the same recorded chain.
+vi.mock("@/lib/supabase/admin", () => ({
+  createAdminClient: () => ({ from: (table: string) => chain(table) }),
 }));
 
 // The route takes from the dataExport budget before querying. Allowed by
@@ -85,6 +92,7 @@ describe("GET /settings/export", () => {
     tables.profiles = { data: { id: USER.id, username: "me" }, error: null };
     tables.products = { data: [{ id: "p1", owner_id: USER.id }], error: null };
     tables.storefronts = { data: [{ id: "s1", owner_id: USER.id }], error: null };
+    tables.plan_cancellations = { data: [{ plan: "starter", reason: "unused", detail: "Back in spring" }], error: null };
 
     const res = await GET();
     expect(res.status).toBe(200);
@@ -106,11 +114,20 @@ describe("GET /settings/export", () => {
     expect(filters.profiles).toEqual(["id", USER.id]);
     expect(filters.products).toEqual(["owner_id", USER.id]);
     expect(filters.storefronts).toEqual(["owner_id", USER.id]);
+    expect(filters.plan_cancellations).toEqual(["owner_id", USER.id]);
+    expect(body.plan_cancellations).toEqual([{ plan: "starter", reason: "unused", detail: "Back in spring" }]);
     expect(readAccountBilling).toHaveBeenCalledWith(USER.id);
 
     // The plan is exported; the Stripe ids behind it are not.
     expect(body.billing).toMatchObject({ plan: "free", status: "none" });
     expect(JSON.stringify(body)).not.toMatch(/cus_secret|sub_secret/);
+  });
+
+  it("500 when the cancellation read errors too", async () => {
+    getUser.mockResolvedValue({ data: { user: USER }, error: null } as never);
+    tables.plan_cancellations = { data: null, error: { message: "boom" } };
+    const res = await GET();
+    expect(res.status).toBe(500);
   });
 
   it("500 when any query errors — no partial export", async () => {

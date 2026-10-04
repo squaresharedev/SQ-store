@@ -52,6 +52,26 @@ export function monthlyPriceCents(plan: PlanId, interval: BillingInterval): numb
 }
 
 /**
+ * A plan's REGULAR price as a per-month figure, when what it charges today is
+ * a launch price below it (PLANS[..].listPriceCents); null when the price
+ * charged is the regular one. Spread over twelve months like the price itself.
+ */
+export function monthlyListPriceCents(plan: PlanId, interval: BillingInterval): number | null {
+  const list = PLANS[plan].listPriceCents?.[interval];
+  if (list === undefined || list <= PLANS[plan].priceCents[interval]) return null;
+  return interval === "year" ? Math.round(list / 12) : list;
+}
+
+/** How far the launch price sits below the regular one, as a whole percent
+ *  of the regular price; 0 when the plan has no launch price. */
+export function launchDiscountPercent(plan: PlanId, interval: BillingInterval): number {
+  const list = PLANS[plan].listPriceCents?.[interval];
+  const price = PLANS[plan].priceCents[interval];
+  if (list === undefined || list <= price) return 0;
+  return Math.round(((list - price) / list) * 100);
+}
+
+/**
  * What a seller would pay on `plan` in a month with `monthlySalesCents` of
  * item sales: the subscription (per month) plus the fee on those sales.
  */
@@ -109,4 +129,17 @@ export function cheapestPlanFor(monthlySalesCents: number, interval: BillingInte
 export function yearlySavingCents(plan: PlanId): number {
   const { month, year } = PLANS[plan].priceCents;
   return Math.max(0, month * 12 - year);
+}
+
+/**
+ * How many whole months a year on the yearly price gives away against paying
+ * monthly: the SMALLEST across the paid plans, so "2 months free" is true of
+ * every plan it is said beside. Zero when any paid plan saves less than a
+ * month, or there is no paid plan.
+ */
+export function yearlyFreeMonths(): number {
+  const months = PLAN_IDS.filter((plan) => PLANS[plan].priceCents.month > 0).map((plan) =>
+    Math.floor(yearlySavingCents(plan) / PLANS[plan].priceCents.month),
+  );
+  return months.length > 0 ? Math.min(...months) : 0;
 }

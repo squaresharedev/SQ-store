@@ -1,9 +1,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
-import { Copy, ExternalLink, Image as ImageIcon, MoreVertical, Pencil, Trash2, TrendingUp } from "lucide-react";
+import { Copy, ExternalLink, Image as ImageIcon, MoreVertical, MousePointerClick, Pencil, Trash2, TrendingUp } from "lucide-react";
 import type { Product, ProductSales } from "@/types/product";
 import { cn } from "@/lib/utils";
+import { productEditPath } from "@/lib/products/paths";
 import {
   hoverLiftClass,
   iconButtonClass,
@@ -33,6 +34,7 @@ export function ProductCard({
   onDelete,
   onCopyLink,
   onOpenPage,
+  onBuyButton,
 }: {
   product: Product;
   /** Hide edit/delete controls when the active role is read-only. */
@@ -52,6 +54,8 @@ export function ProductCard({
   onCopyLink: () => void;
   /** Called when the seller asks to open the product's hosted page. */
   onOpenPage: () => void;
+  /** Called when the seller asks for a buy button for their own website. */
+  onBuyButton: () => void;
 }) {
   const { id, title, price, currency, status, imageUrl, trackStock, stockQuantity, lowStockThreshold, removal } = product;
   const stockBadge = deriveStockBadge({ trackStock, stockQuantity, lowStockThreshold });
@@ -154,7 +158,7 @@ export function ProductCard({
         <div className="flex shrink-0 items-center gap-1">
           {canWrite && (
             <Link
-              href={`/products/${id}/edit`}
+              href={productEditPath(id)}
               aria-label={t("edit", { title })}
               className={cn(iconButtonClass, "size-8")}
             >
@@ -206,6 +210,19 @@ export function ProductCard({
               >
                 <ExternalLink className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                 {t("openPage")}
+              </button>
+              {/* Every role: the dialog only hands out a link. It explains
+                  for itself when there is nothing to link to yet. */}
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onBuyButton();
+                }}
+                className={overlayItemClass}
+              >
+                <MousePointerClick className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                {t("addToWebsite")}
               </button>
               {canWrite && (
                 <button

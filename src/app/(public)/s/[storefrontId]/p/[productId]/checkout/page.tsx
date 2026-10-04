@@ -12,9 +12,11 @@ import { QUANTITY_QUERY_PARAM, requestedQuantity } from "@/lib/products/quantity
 import { clientKey } from "@/lib/rate-limit";
 import {
   OPTION_QUERY_PARAM,
+  VIA_QUERY_PARAM,
   firstValue,
   productPagePath,
   requestedOptions,
+  requestedVia,
   type SearchParams,
 } from "@/lib/storefront/product-page-url";
 import { collectOptionIds } from "@/lib/validation/product";
@@ -34,6 +36,9 @@ import { collectOptionIds } from "@/lib/validation/product";
  * does not say that (a hand-edited one, or a version that sold out in the
  * minute between the two pages) goes back to the product page to choose,
  * rather than checking out a version nobody picked.
+ *
+ * `?via=` (how the buyer arrived, see product-page-url.ts) files this view
+ * under its channel, survives that trip back, and goes with the order.
  *
  * Never indexed (the public group's layout says so) and never cached: every
  * render mints its own attempt id, and prices and stock are read live.
@@ -66,6 +71,7 @@ export default async function CheckoutPage({
   if (!result) notFound();
   const { page, ownerId } = result;
   const { product } = page;
+  const via = requestedVia(query);
 
   // Back to the product page, carrying whatever the link did say, when this
   // checkout cannot be for a specific, available version (or cannot be at all
@@ -75,6 +81,7 @@ export default async function CheckoutPage({
     const back = new URLSearchParams();
     const o = firstValue(query[OPTION_QUERY_PARAM]);
     if (o) back.set(OPTION_QUERY_PARAM, o);
+    if (via) back.set(VIA_QUERY_PARAM, via);
     redirect(`${productPagePath(storefrontId, productId)}${back.size > 0 ? `?${back}` : ""}`);
   }
 
@@ -93,7 +100,7 @@ export default async function CheckoutPage({
       accountId: ownerId,
       kind: "checkout_view",
       storefrontId: page.storefront.id,
-      channel: "direct",
+      channel: via ?? "direct",
       blockId: `p_${product.id}`,
       visitorHash: hash,
       dedupeKey: await checkoutViewDedupeKey(product.id, hash),
@@ -113,6 +120,7 @@ export default async function CheckoutPage({
         attemptId={crypto.randomUUID()}
         provider={checkoutProviderFor(ownerId)}
         initialCountry={country}
+        via={via}
       />
     </main>
   );

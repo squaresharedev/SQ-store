@@ -28,6 +28,7 @@ export function orderView(overrides: Partial<OrderView> = {}): OrderView {
     createdAt: "2026-08-01T10:00:00.000Z",
     giftMessage: null,
     withdrawalRequestedAt: null,
+    discount: null,
     ...overrides,
   };
 }

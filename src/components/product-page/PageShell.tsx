@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { resolveBackgroundStyle } from "@/components/storefront/background-presets";
 import { CustomFontFace } from "@/components/storefront/CustomFontFace";
 import { customFontVars, fontPresentation } from "@/lib/theme/storefront-fonts";
-import type { ProductPageStorefront } from "@/types/product-page";
+import type { PagePhotoView, ProductPageStorefront } from "@/types/product-page";
 import type { StorefrontFont } from "@/types/storefront";
 import { pagePhotoStyle, ruleColor } from "./product-page-maps";
 
@@ -45,12 +45,12 @@ export function PageShell({
   backgroundColor?: string;
   /**
    * The page's own photo backdrop (its signed or local URL) with the colour it
-   * is veiled in, which is also the colour the page's ink was derived from.
+   * is overlaid in, which is also the colour the page's ink was derived from.
    * Drawn on a layer behind the content: fixed to the screen for a buyer (so a
    * long page keeps one photo rather than stretching it), and to the page
    * itself inside the editor's artboard, where a fixed layer would escape it.
    */
-  photo?: { url: string; tint: string } | null;
+  photo?: (PagePhotoView & { tint: string }) | null;
   /** The page's typeface; absent = the storefront's. */
   font?: StorefrontFont;
   /** Whichever ink reads on the backdrop (resolveInk). */
@@ -72,7 +72,7 @@ export function PageShell({
 
   const rootStyle: CSSProperties = {
     // A photo replaces the storefront's background just as a colour does: the
-    // veil's colour is the base under it, so the two can never disagree.
+    // overlay's colour is the base under it, so the two can never disagree.
     ...(photo
       ? { backgroundColor: photo.tint }
       : backgroundColor

@@ -97,7 +97,8 @@
     "copyLink": "Copiar link do produto",
     "openPage": "Abrir página de produto",
     "unitsSold": "{count, plural, one {{count} vendido} many {{count} vendidos} other {{count} vendidos}}",
-    "noSales": "Ainda sem vendas"
+    "noSales": "Ainda sem vendas",
+    "addToWebsite": "Adicionar ao seu site"
   },
   "removal": {
     "badge": "Removido",
@@ -332,7 +333,9 @@
       "title": "Descartar as suas alterações?",
       "editDescription": "As edições que fez a este produto ainda não foram guardadas.",
       "newDescription": "Este produto ainda não foi guardado, por isso nada vai ficar guardado.",
-      "discard": "Descartar"
+      "discard": "Descartar alterações",
+      "keepEditing": "Continuar a editar",
+      "saveAndLeave": "Guardar e sair"
     },
     "nav": {
       "label": "Secções do formulário",
@@ -636,5 +639,70 @@
     },
     "footer": "SquareShare · {reference} · Página {page} de {total}",
     "generated": "Gerado em {date}."
+  },
+  "buyButton": {
+    "title": "Adicione um botão de compra ao seu site",
+    "summary": "O seu próprio botão no seu próprio site leva os compradores à página e ao pagamento de «{title}».",
+    "storefrontLabel": "Design da página",
+    "flow": {
+      "button": "O seu botão",
+      "checkout": "Pagamento"
+    },
+    "methods": "Como adicioná-lo",
+    "method": {
+      "link": "Link",
+      "html": "HTML",
+      "agent": "Agente de IA"
+    },
+    "hint": {
+      "link": "Cole-o na definição de link do seu botão.",
+      "html": "Cole-o onde o botão deve aparecer.",
+      "agent": "Cole-o no seu agente de IA de programação."
+    },
+    "copy": {
+      "link": {
+        "copy": "Copiar o link",
+        "copied": "Link copiado",
+        "failed": "Não foi possível copiar o link. Selecione-o e copie-o manualmente."
+      },
+      "html": {
+        "copy": "Copiar o HTML",
+        "copied": "HTML copiado",
+        "failed": "Não foi possível copiar o HTML. Selecione-o e copie-o manualmente."
+      },
+      "agent": {
+        "copy": "Copiar o prompt",
+        "copied": "Prompt copiado",
+        "failed": "Não foi possível copiar o prompt. Selecione-o e copie-o manualmente."
+      }
+    },
+    "snippetText": "Comprar agora",
+    "prompt": {
+      "task": "Adiciona um botão de compra ao meu site. Tem de apontar exatamente para este URL:",
+      "html": "Em HTML simples fica assim:",
+      "style": "Dá-lhe o mesmo estilo dos outros botões do meu site. Se o site já tiver um botão de compra para este produto, faz com que esse aponte para o URL em vez de adicionares um segundo.",
+      "normal": "Tem de abrir como uma página normal no mesmo separador. Não a carregues num iframe, numa janela pop-up nem numa lightbox: a página recusa-se a ser mostrada dentro de uma moldura.",
+      "exact": "Não é necessário nenhum script, SDK nem chamada a uma API. Mantém o URL exatamente como está, incluindo tudo o que vem depois do ponto de interrogação."
+    },
+    "tryIt": "Experimentar o botão",
+    "tracking": "Aparece em Estatísticas como «Botão no seu site».",
+    "blocked": {
+      "removed": "Este produto foi retirado. Abra-o para saber porquê.",
+      "draft": "Este produto é um rascunho. Defina-o primeiro como Ativo.",
+      "notPlaced": "Coloque primeiro este produto numa montra, para que tenha uma página onde os compradores chegam."
+    },
+    "editProduct": "Editar produto",
+    "goToStorefronts": "Ir para as montras",
+    "embedPointer": "Vende apenas um produto? Em vez de incorporar toda a montra, dê-lhe um botão de compra no seu site: em Produtos, abra o menu do produto e escolha «Adicionar ao seu site».",
+    "embedPointerLink": "Ir para Produtos",
+    "demo": {
+      "play": "Reproduzir a animação",
+      "pause": "Pausar a animação",
+      "siteLine": "O teu site, o teu design.",
+      "email": "E-mail",
+      "card": "Número do cartão",
+      "total": "Total",
+      "pay": "Pagar {price}"
+    }
   }
 }

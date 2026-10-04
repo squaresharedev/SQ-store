@@ -27,6 +27,10 @@
     "settings": {
       "label": "Settings",
       "description": "Your seller details, shipping terms and account."
+    },
+    "discounts": {
+      "label": "Discounts",
+      "description": "Run sales and share discount codes."
     }
   },
   "settings": {

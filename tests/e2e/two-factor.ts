@@ -78,6 +78,16 @@ export async function chooseAuthenticatorApp(dialog: Locator) {
 }
 
 /**
+ * The name is suggested and folded away on one line ("Name: Passkey"): open
+ * that line, then type over it. After the method is chosen, for the same
+ * reason as above.
+ */
+export async function nameAuthenticator(dialog: Locator, name: string) {
+  await dialog.locator("[data-setup-name] summary").click();
+  await dialog.getByLabel("Name this authenticator").fill(name);
+}
+
+/**
  * Turn 2FA on through the real Settings › Security UI, for a signed-in user
  * who has a password. Returns the phone and the recovery codes shown.
  */
@@ -96,7 +106,7 @@ export async function enableTwoFactor(
   }).toPass({ timeout: 20_000 });
 
   await chooseAuthenticatorApp(dialog);
-  if (options.name) await dialog.getByLabel("Name this authenticator").fill(options.name);
+  if (options.name) await nameAuthenticator(dialog, options.name);
   // Asked for only when the sign-in is not recent (a fresh sign-up is recent,
   // and counts as proof on its own). ageSession() forces the prompt.
   const passwordBox = dialog.getByLabel(/^(Current|Square Share) password$/);

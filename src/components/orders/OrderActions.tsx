@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Mail } from "lucide-react";
+import { Info, Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { destructiveButtonClass, ghostButtonClass, helpTextClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
+import { destructiveButtonClass, ghostButtonClass, helpTextClass, infoTextClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
+import { cn } from "@/lib/utils";
 import { PAYMENTS_PATH } from "@/lib/dashboard/paths";
 import { buyerMailto } from "@/lib/orders/buyer-mailto";
 import { orderNumber } from "@/lib/orders/order-number";
@@ -159,7 +160,13 @@ export function OrderActions({ order }: { order: OrderView }) {
     if (!STRIPE_CONNECT_AVAILABLE) {
       return (
         <div className="flex flex-col gap-2">
-          <p className={helpTextClass}>{t("refundManual")}</p>
+          {/* Said plainly and kept on screen (a seller must know there is no
+              refund button), but small and led by an icon so it reads as a note
+              rather than a paragraph. */}
+          <p className={cn(infoTextClass, "flex items-start gap-1.5")}>
+            <Info className="mt-0.5 size-3.5 shrink-0" strokeWidth={2} aria-hidden="true" />
+            {t("refundManual")}
+          </p>
           <EmailBuyerLink order={order} className={`${secondaryButtonClass} w-fit`} />
         </div>
       );

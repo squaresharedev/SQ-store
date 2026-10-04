@@ -1,7 +1,9 @@
 import { EU_COUNTRY_CODES } from "@/lib/settings/constants";
+import type { PagePhotoView } from "@/types/product-page";
 import {
   DEFAULT_PRODUCT_PAGE_CONFIG,
   PRODUCT_PAGE_SECTION_IDS,
+  type PagePhoto,
   type ProductPageConfig,
   type ProductPageSectionEntry,
   type ProductPageSectionId,
@@ -12,6 +14,15 @@ import {
 // Pure helpers for the product page's config. Client-safe (no server imports):
 // the editor, the public loader and the embed route all read the same
 // resolution so "what does an absent field mean" is answered in one place.
+
+/** A stored page photo and its display URL as the page paints them; null while
+ *  either is missing (no photo, or no URL signed yet). */
+export function pagePhotoView(
+  photo: PagePhoto | undefined,
+  url: string | null | undefined,
+): PagePhotoView | null {
+  return photo && url ? { url, overlay: photo.overlay !== false } : null;
+}
 
 export const PRODUCT_PAGE_SECTION_LABELS: Record<ProductPageSectionId, string> = {
   description: "Description",

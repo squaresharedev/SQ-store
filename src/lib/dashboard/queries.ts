@@ -2,9 +2,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { toCurrency } from "@/lib/format/money";
+import { toChannel } from "@/lib/orders/queries";
 import { buildShippingPolicy } from "@/lib/settings/shipping-policy";
 import { hasPricedDestination } from "@/lib/shipping/rates";
 import type { Currency } from "@/types/product";
+import type { OrderChannel, OrderStatus } from "@/types/order-view";
 
 // READ-ONLY dashboard aggregates. Server Components / Route Handlers only
 // (cookies() is Node-only — never middleware).
@@ -16,8 +18,9 @@ import type { Currency } from "@/types/product";
 //   platform_fee_cents, currency, product_title, product_price_cents,
 //   created_at
 
-export type OrderChannel = "embed" | "marketplace" | "direct";
-export type OrderStatus = "paid" | "refunded" | "disputed" | "pending";
+// The shared orders vocabulary, re-exported for this module's readers rather
+// than spelled out a second time.
+export type { OrderChannel, OrderStatus };
 
 /** The subset of order columns the dashboard reads. */
 export type DashboardOrder = {
@@ -187,7 +190,9 @@ export async function getDashboardOrders(): Promise<DashboardOrdersData> {
     allTime: windowFromSums(payload.all_time),
     salesTrend,
     aovTrend,
-    recentOrders: payload.recent_orders,
+    // Coerced like every orders read, so the label lookup can never meet a
+    // channel the catalogue has no words for.
+    recentOrders: payload.recent_orders.map((order) => ({ ...order, channel: toChannel(order.channel) })),
     refundedCount: payload.refunded_count,
     disputedCount: payload.disputed_count,
   };

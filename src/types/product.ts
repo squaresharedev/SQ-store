@@ -326,9 +326,14 @@ export interface ProductPageProduct {
   id: string;
   title: string;
   description: string;
-  /** Integer cents; formatting happens at the edge. */
+  /** What one costs right now, in integer cents: the sale price while a sale
+   *  runs, else the regular price. Formatting happens at the edge. */
   priceCents: number;
   currency: Currency;
+  /** The running sale, or null. Present only to EXPLAIN priceCents (the
+   *  regular price for the checkout's best-of, and the "was" price the page
+   *  may announce); it never carries the discount's id. */
+  sale: ProductSale | null;
   purchaseUrl: string | null;
   /** Which of the rendering storefront's shipping profiles applies, or null
    *  for its default terms. An id the storefront does not have resolves to the
@@ -363,6 +368,27 @@ export interface ProductPageProduct {
    * whether a quantity may actually be sold.
    */
   maxQuantity: number;
+}
+
+/**
+ * A sale on one product, as a buyer's page may show it.
+ *
+ * `priorPriceCents` and `percentOff` are the ANNOUNCEMENT, and they are null
+ * whenever the reduction cannot be shown lawfully: EU law (Price Indication
+ * Directive art. 6a) lets a shop show a "was" price only if it is the lowest
+ * price it charged in the 30 days before the sale (lib/discounts/prior-price.ts).
+ * Without one the sale price is simply the price.
+ */
+export interface ProductSale {
+  /** The price without the sale. The checkout compares a code against it. */
+  regularPriceCents: number;
+  /** The lowest price of the 30 days before the sale, when it is higher than
+   *  the sale price and the history proves it. */
+  priorPriceCents: number | null;
+  /** Measured against priorPriceCents, rounded down. Null below 1%. */
+  percentOff: number | null;
+  /** When the sale ends, or null for no set end. */
+  endsAt: string | null;
 }
 
 /**

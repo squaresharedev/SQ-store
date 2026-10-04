@@ -8,6 +8,7 @@ import { OrderStatusView } from "@/components/checkout/OrderStatusView";
 import { CheckoutPageSection } from "@/components/storefront/CheckoutPageSection";
 import { sampleOrder } from "@/components/storefront/CheckoutArtboards";
 import type { CheckoutStorefront } from "@/types/checkout";
+import { pagePhotoView } from "@/lib/storefront/product-page";
 import type { ProductPageProduct } from "@/types/product";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import {
@@ -54,6 +55,7 @@ function product(digital: boolean): ProductPageProduct {
     description: "",
     priceCents: digital ? 1200 : 2400,
     currency: "EUR",
+    sale: null,
     purchaseUrl: null,
     shippingProfileId: null,
     images: [{ url: "/sample-storefront/succulent.webp", alt: "A stoneware vase" }],
@@ -116,6 +118,7 @@ export function CheckoutGallery({
   const [checkoutPage, setCheckoutPage] = useState<CheckoutPageConfig>(initialCheckoutPage);
   const [playKey, setPlayKey] = useState(0);
   const [pagePhotoUrls, setPagePhotoUrls] = useState(initialPhotoUrls);
+  const shownPhoto = view === "checkout" ? checkoutPage.backgroundImage : checkoutPage.thanksBackgroundImage;
   const storefront: CheckoutStorefront = {
     id: "00000000-0000-4000-8000-000000000000",
     name: "Clay House",
@@ -127,7 +130,7 @@ export function CheckoutGallery({
     seller: SELLER,
     backgroundImageUrl: null,
     customFontUrl: null,
-    pagePhotoUrl: checkoutPage.backgroundImage ? (pagePhotoUrls[checkoutPage.backgroundImage.key] ?? null) : null,
+    pagePhoto: pagePhotoView(shownPhoto, shownPhoto && pagePhotoUrls[shownPhoto.key]),
   };
   const item = product(digital);
 

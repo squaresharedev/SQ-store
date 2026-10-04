@@ -97,7 +97,8 @@
     "copyLink": "Copier le lien du produit",
     "openPage": "Ouvrir la page produit",
     "unitsSold": "{count, plural, one {{count} vendu} many {{count} vendus} other {{count} vendus}}",
-    "noSales": "Pas encore de ventes"
+    "noSales": "Pas encore de ventes",
+    "addToWebsite": "Ajouter à votre site"
   },
   "removal": {
     "badge": "Retiré",
@@ -332,7 +333,9 @@
       "title": "Abandonner vos modifications ?",
       "editDescription": "Les modifications apportées à ce produit n’ont pas encore été enregistrées.",
       "newDescription": "Ce produit n’a pas encore été enregistré, rien ne sera donc conservé.",
-      "discard": "Abandonner"
+      "discard": "Abandonner les modifications",
+      "keepEditing": "Continuer à modifier",
+      "saveAndLeave": "Enregistrer et quitter"
     },
     "nav": {
       "label": "Sections du formulaire",
@@ -636,5 +639,70 @@
     },
     "footer": "SquareShare · {reference} · Page {page} sur {total}",
     "generated": "Généré le {date}."
+  },
+  "buyButton": {
+    "title": "Ajoutez un bouton d’achat à votre site",
+    "summary": "Votre propre bouton sur votre propre site mène les acheteurs à la page et au paiement de « {title} ».",
+    "storefrontLabel": "Design de la page",
+    "flow": {
+      "button": "Votre bouton",
+      "checkout": "Paiement"
+    },
+    "methods": "Comment l’ajouter",
+    "method": {
+      "link": "Lien",
+      "html": "HTML",
+      "agent": "Agent IA"
+    },
+    "hint": {
+      "link": "Collez-le dans le réglage de lien de votre bouton.",
+      "html": "Collez-le là où le bouton doit apparaître.",
+      "agent": "Collez-le dans votre agent IA de programmation."
+    },
+    "copy": {
+      "link": {
+        "copy": "Copier le lien",
+        "copied": "Lien copié",
+        "failed": "Impossible de copier le lien. Sélectionnez-le et copiez-le vous-même."
+      },
+      "html": {
+        "copy": "Copier le HTML",
+        "copied": "HTML copié",
+        "failed": "Impossible de copier le HTML. Sélectionnez-le et copiez-le vous-même."
+      },
+      "agent": {
+        "copy": "Copier le prompt",
+        "copied": "Prompt copié",
+        "failed": "Impossible de copier le prompt. Sélectionnez-le et copiez-le vous-même."
+      }
+    },
+    "snippetText": "Acheter",
+    "prompt": {
+      "task": "Ajoute un bouton d’achat à mon site. Il doit pointer exactement vers cette URL :",
+      "html": "En HTML simple, cela donne :",
+      "style": "Donne-lui le même style que les autres boutons de mon site. Si le site a déjà un bouton d’achat pour ce produit, fais-le pointer vers l’URL au lieu d’en ajouter un second.",
+      "normal": "Il doit s’ouvrir comme une page normale dans le même onglet. Ne la charge pas dans une iframe, une fenêtre pop-up ou une lightbox : la page refuse d’être affichée dans un cadre.",
+      "exact": "Aucun script, SDK ou appel d’API n’est nécessaire. Garde l’URL exactement telle quelle, y compris tout ce qui suit le point d’interrogation."
+    },
+    "tryIt": "Tester votre bouton",
+    "tracking": "Apparaît dans Statistiques sous « Bouton sur votre site ».",
+    "blocked": {
+      "removed": "Ce produit a été retiré. Ouvrez-le pour savoir pourquoi.",
+      "draft": "Ce produit est un brouillon. Passez-le d’abord en Actif.",
+      "notPlaced": "Placez d’abord ce produit sur une vitrine, pour qu’il ait une page où arrivent les acheteurs."
+    },
+    "editProduct": "Modifier le produit",
+    "goToStorefronts": "Aller aux vitrines",
+    "embedPointer": "Vous ne vendez qu’un seul produit ? Au lieu d’intégrer toute la vitrine, donnez-lui un bouton d’achat sur votre site : dans Produits, ouvrez son menu et choisissez « Ajouter à votre site ».",
+    "embedPointerLink": "Aller aux produits",
+    "demo": {
+      "play": "Lire l’animation",
+      "pause": "Mettre l’animation en pause",
+      "siteLine": "Votre site, votre design.",
+      "email": "E-mail",
+      "card": "Numéro de carte",
+      "total": "Total",
+      "pay": "Payer {price}"
+    }
   }
 }

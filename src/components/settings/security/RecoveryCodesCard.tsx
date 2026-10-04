@@ -2,15 +2,16 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { RefreshCw, TriangleAlert } from "lucide-react";
+import { KeyRound, RefreshCw, TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { HeroMark } from "@/components/ui/HeroMark";
 import { Modal } from "@/components/ui/modal";
-import { Spinner } from "@/components/ui/spinner";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { helpTextClass } from "@/components/ui/control-styles";
 import { SettingsCard } from "@/components/settings/SettingsCard";
-import { StepUpField } from "@/components/auth/StepUp";
+import { StepUpPrompt, StepUpScope, StepUpSubmit } from "@/components/auth/StepUp";
 import { RecoveryCodesDisplay } from "@/components/settings/security/RecoveryCodesDisplay";
 import { regenerateRecoveryCodes, type ManageState } from "@/lib/auth/mfa-actions";
 import { RECOVERY_CODES_LOW, RECOVERY_CODE_COUNT } from "@/lib/auth/recovery-codes";
@@ -62,54 +63,46 @@ export function RecoveryCodesCard({ remaining }: { remaining: number | null }) {
 
 function RegenerateModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useTranslations("Settings.security");
-  const tCommon = useTranslations("Common.actions");
   const resolve = useResolveMessage();
   const [state, formAction, isPending] = useActionState(regenerateRecoveryCodes, INITIAL);
 
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title={state.codes ? t("recoveryCodes.newTitle") : t("recoveryCodes.regenerateTitle")}
-      description={
-        state.codes
-          ? t("recoveryCodes.newDescription")
-          : t("recoveryCodes.regenerateDescription")
-      }
-      className="rounded-none sm:rounded-none"
-    >
-      {state.codes ? (
+  // The new set, once made: the codes are the dialog, shown once.
+  if (state.codes) {
+    return (
+      <Modal
+        open={open}
+        onClose={onClose}
+        title={t("recoveryCodes.newTitle")}
+        description={t("recoveryCodes.newDescription")}
+      >
         <RecoveryCodesDisplay codes={state.codes} onDone={onClose} />
-      ) : (
-        <form action={formAction} className="flex flex-col gap-4" noValidate>
-          <StepUpField
-            id="regenerate-codes"
-            state={state}
-            always
-            description={t("stepUpConfirm")}
-          />
-          {state.error && (
-            <p role="alert" className="font-inter text-sm font-medium text-destructive">
-              {resolve(state.error.message)}
-            </p>
-          )}
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button type="button" variant="ghost" onClick={onClose}>
-              {tCommon("cancel")}
-            </Button>
-            <Button type="submit" disabled={isPending} suppressHydrationWarning>
-              {isPending ? (
-                <>
-                  <Spinner />
-                  {t("recoveryCodes.generating")}
-                </>
-              ) : (
-                t("recoveryCodes.generate")
-              )}
-            </Button>
-          </div>
-        </form>
-      )}
-    </Modal>
+      </Modal>
+    );
+  }
+
+  return (
+    // Always confirmed in the same request, and with a passkey that
+    // confirmation IS the dialog's button (auth/StepUp).
+    <StepUpScope id="regenerate-codes" state={state} always description={t("stepUpConfirm")}>
+      <ConfirmDialog
+        open={open}
+        onClose={onClose}
+        visual={<HeroMark icon={KeyRound} badge={RefreshCw} />}
+        title={t("recoveryCodes.regenerateTitle")}
+        description={t("recoveryCodes.regenerateDescription")}
+        action={formAction}
+        pending={isPending}
+        confirmLabel={t("recoveryCodes.generate")}
+        pendingLabel={t("recoveryCodes.generating")}
+        submitAs={StepUpSubmit}
+      >
+        <StepUpPrompt />
+        {state.error && (
+          <p role="alert" className="font-inter text-sm font-medium text-destructive">
+            {resolve(state.error.message)}
+          </p>
+        )}
+      </ConfirmDialog>
+    </StepUpScope>
   );
 }

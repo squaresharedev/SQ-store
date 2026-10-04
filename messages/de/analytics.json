@@ -89,7 +89,8 @@
   "channels": {
     "embed": "Einbettung",
     "marketplace": "Marktplatz",
-    "direct": "Direkt"
+    "direct": "Direkt",
+    "button": "Website-Button"
   },
   "signalsUnavailable": {
     "title": "Aufrufe und Anmeldungen sind gerade nicht verfügbar",

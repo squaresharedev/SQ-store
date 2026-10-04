@@ -97,7 +97,8 @@
     "copyLink": "Kopiuj link do produktu",
     "openPage": "Otwórz stronę produktu",
     "unitsSold": "{count, plural, one {{count} sprzedana} few {{count} sprzedane} many {{count} sprzedanych} other {{count} sprzedanej}}",
-    "noSales": "Jeszcze brak sprzedaży"
+    "noSales": "Jeszcze brak sprzedaży",
+    "addToWebsite": "Dodaj do swojej strony"
   },
   "removal": {
     "badge": "Usunięto",
@@ -332,7 +333,9 @@
       "title": "Odrzucić zmiany?",
       "editDescription": "Zmiany wprowadzone w tym produkcie nie zostały jeszcze zapisane.",
       "newDescription": "Ten produkt nie został jeszcze zapisany, więc nic nie zostanie zachowane.",
-      "discard": "Odrzuć"
+      "discard": "Odrzuć zmiany",
+      "keepEditing": "Kontynuuj edycję",
+      "saveAndLeave": "Zapisz i wyjdź"
     },
     "nav": {
       "label": "Sekcje formularza",
@@ -636,5 +639,70 @@
     },
     "footer": "SquareShare · {reference} · Strona {page} z {total}",
     "generated": "Wygenerowano {date}."
+  },
+  "buyButton": {
+    "title": "Dodaj przycisk zakupu do swojej strony",
+    "summary": "Twój własny przycisk na Twojej stronie prowadzi kupujących na stronę i do kasy produktu „{title}”.",
+    "storefrontLabel": "Wygląd strony",
+    "flow": {
+      "button": "Twój przycisk",
+      "checkout": "Kasa"
+    },
+    "methods": "Jak go dodać",
+    "method": {
+      "link": "Link",
+      "html": "HTML",
+      "agent": "Agent AI"
+    },
+    "hint": {
+      "link": "Wklej go w ustawieniach linku przycisku.",
+      "html": "Wklej go tam, gdzie ma być przycisk.",
+      "agent": "Wklej go swojemu agentowi AI do kodowania."
+    },
+    "copy": {
+      "link": {
+        "copy": "Kopiuj link",
+        "copied": "Skopiowano link",
+        "failed": "Nie udało się skopiować linku. Zaznacz go i skopiuj samodzielnie."
+      },
+      "html": {
+        "copy": "Kopiuj HTML",
+        "copied": "Skopiowano HTML",
+        "failed": "Nie udało się skopiować HTML. Zaznacz go i skopiuj samodzielnie."
+      },
+      "agent": {
+        "copy": "Kopiuj prompt",
+        "copied": "Skopiowano prompt",
+        "failed": "Nie udało się skopiować promptu. Zaznacz go i skopiuj samodzielnie."
+      }
+    },
+    "snippetText": "Kup teraz",
+    "prompt": {
+      "task": "Dodaj do mojej strony przycisk zakupu. Musi prowadzić dokładnie pod ten adres URL:",
+      "html": "W zwykłym HTML wygląda to tak:",
+      "style": "Nadaj mu taki sam styl jak innym przyciskom na mojej stronie. Jeśli strona ma już przycisk zakupu tego produktu, skieruj go pod ten adres zamiast dodawać drugi.",
+      "normal": "Ma się otwierać jako zwykła strona w tej samej karcie. Nie ładuj jej w iframe, oknie wyskakującym ani lightboksie: strona odmawia wyświetlenia w ramce.",
+      "exact": "Nie potrzeba żadnego skryptu, SDK ani wywołania API. Zostaw adres URL dokładnie taki, jaki jest, razem ze wszystkim po znaku zapytania."
+    },
+    "tryIt": "Wypróbuj przycisk",
+    "tracking": "W Analityce widoczne jako „Przycisk WWW”.",
+    "blocked": {
+      "removed": "Ten produkt został wycofany. Otwórz go, aby zobaczyć dlaczego.",
+      "draft": "Ten produkt to wersja robocza. Najpierw ustaw go jako Aktywny.",
+      "notPlaced": "Najpierw umieść ten produkt w witrynie, aby miał stronę, na którą trafią kupujący."
+    },
+    "editProduct": "Edytuj produkt",
+    "goToStorefronts": "Przejdź do witryn",
+    "embedPointer": "Sprzedajesz tylko jeden produkt? Zamiast osadzać całą witrynę, daj mu przycisk zakupu na swojej stronie: w Produktach otwórz jego menu i wybierz „Dodaj do swojej strony”.",
+    "embedPointerLink": "Przejdź do Produktów",
+    "demo": {
+      "play": "Odtwórz animację",
+      "pause": "Wstrzymaj animację",
+      "siteLine": "Twoja strona, twój projekt.",
+      "email": "E-mail",
+      "card": "Numer karty",
+      "total": "Razem",
+      "pay": "Zapłać {price}"
+    }
   }
 }

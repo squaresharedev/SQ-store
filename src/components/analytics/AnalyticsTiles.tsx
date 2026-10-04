@@ -6,7 +6,10 @@ import { formatNumber } from "@/components/charts";
 import type { AnalyticsTotals } from "@/lib/analytics/types";
 
 /**
- * The headline sales metrics for the selected range.
+ * The sales metrics for the selected range, under the revenue hero.
+ *
+ * Revenue itself is not here: RevenueHero is that tile and the revenue trend
+ * in one piece, and publishes `sales.revenue` the same way a tile would.
  *
  * Money renders only via formatCents from integer cents; zero sales shows the
  * calm zero state instead of a fake "0.00".
@@ -34,26 +37,7 @@ export function AnalyticsTiles({ totals }: { totals: AnalyticsTotals }) {
     hasSales && totals.rangeDays > 0 ? totals.sales / totals.rangeDays : null;
 
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
-      <MetricTile
-        label={t("revenue")}
-        value={hasSales ? formatCents(totals.revenueCents, totals.currency, locale) : null}
-        hint={
-          hasSales
-            ? t("afterFees", {
-                amount: formatCents(totals.netRevenueCents, totals.currency, locale),
-              })
-            : undefined
-        }
-        zeroText={t("noSales")}
-        datapoint={{
-          metric: "sales.revenue",
-          value: totals.revenueCents,
-          unit: "currency_cents",
-          currency: totals.currency,
-          source: "sales",
-        }}
-      />
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       <MetricTile
         label={t("sales")}
         value={hasSales ? formatNumber(totals.sales, locale) : null}

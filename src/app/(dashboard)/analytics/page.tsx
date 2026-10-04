@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { pageShellClass } from "@/components/ui/surface-styles";
+import { pageBleedShellClass, pageGutterClass } from "@/components/ui/surface-styles";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 import { getAnalyticsSnapshot } from "@/lib/analytics/queries";
@@ -100,8 +100,11 @@ export default async function AnalyticsRoutePage({
   );
 
   return (
-    <main className={cn(pageShellClass, "space-y-6")}>
+    // No gutters on the shell: the revenue hero runs edge to edge, and
+    // everything else on the page puts itself back in the page column.
+    <main className={cn(pageBleedShellClass, "space-y-6")}>
       <PageHeader
+        className={pageGutterClass}
         title={t("title")}
         subtitle={t("subtitle")}
         action={firstRun ? null : <AnalyticsExportButton enabled={canExport} snapshot={snapshot} />}

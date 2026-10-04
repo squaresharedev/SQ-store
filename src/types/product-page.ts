@@ -12,6 +12,10 @@ import type { SellerShippingPolicy } from "@/types/shipping-policy";
 // preview builds one from the seller's live edits, so the view component has
 // a single contract and no server import.
 
+/** A page photo as the page paints it: where to fetch it, and whether the
+ *  page's colour is laid over it. */
+export type PagePhotoView = { url: string; overlay: boolean };
+
 export type ProductPageStorefront = {
   id: string;
   name: string;
@@ -32,10 +36,10 @@ export type ProductPageStorefront = {
   backgroundImageUrl: string | null;
   /** Signed URL for the uploaded typeface, else null. */
   customFontUrl: string | null;
-  /** Signed URL for the photo THIS page paints behind itself (the product
-   *  page's own, or the checkout's, which the thank-you page shares), else
-   *  absent. Each loader fills it from the right config member. */
-  pagePhotoUrl?: string | null;
+  /** The photo THIS page paints behind itself (the product page's, the
+   *  checkout's or the thank-you's own), else absent. Each loader fills it from
+   *  the right config member. */
+  pagePhoto?: PagePhotoView | null;
   /**
    * Whether this product can be bought through Square Share checkout right
    * now (lib/checkout/availability.ts). Decided on the server and handed down

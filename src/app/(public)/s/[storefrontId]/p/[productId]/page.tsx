@@ -12,7 +12,7 @@ import {
 import { getPublicProductPage, resolveDisplayName } from "@/lib/products/public";
 import { QUANTITY_QUERY_PARAM, requestedQuantity } from "@/lib/products/quantity";
 import { clientKey } from "@/lib/rate-limit";
-import { requestedOptions, type SearchParams } from "@/lib/storefront/product-page-url";
+import { requestedOptions, requestedVia, type SearchParams } from "@/lib/storefront/product-page-url";
 import { collectOptionIds } from "@/lib/validation/product";
 
 /**
@@ -35,6 +35,10 @@ import { collectOptionIds } from "@/lib/validation/product";
  * the product's own per-order limit here, on the server, and anything outside
  * it falls back to one. That is a rule about what gets RENDERED — the number is
  * display state, and lib/products/order-quantity.ts is what a sale has to pass.
+ *
+ * `?via=button|embed` names how the buyer arrived (the seller's own buy button,
+ * a storefront tile). The view is filed under that channel and the marker is
+ * handed on to the checkout link; anything unknown reads as `direct`.
  */
 
 type Params = { storefrontId: string; productId: string };
@@ -114,6 +118,7 @@ export default async function ProductPage({
   const result = await getPublicProductPage(storefrontId, productId);
   if (!result) notFound();
   const { page, ownerId } = result;
+  const via = requestedVia(query);
 
   // A served page is a product view. Recorded after the response so a counter
   // can never slow a buyer down, deduped per visitor per product per hour, and
@@ -128,7 +133,7 @@ export default async function ProductPage({
       accountId: ownerId,
       kind: "product_view",
       storefrontId: page.storefront.id,
-      channel: "direct",
+      channel: via ?? "direct",
       blockId: `p_${page.product.id}`,
       visitorHash: hash,
       dedupeKey: await productViewDedupeKey(page.product.id, hash),
@@ -160,8 +165,11 @@ export default async function ProductPage({
     ...(page.product.images.length > 0 ? { image: ogImageUrl } : {}),
     offers: {
       "@type": "Offer",
+      // What it costs today: the sale price while a sale runs, valid until the
+      // sale ends.
       price: (page.product.priceCents / 100).toFixed(2),
       priceCurrency: page.product.currency,
+      ...(page.product.sale?.endsAt ? { priceValidUntil: page.product.sale.endsAt.slice(0, 10) } : {}),
       availability: page.product.soldOut
         ? "https://schema.org/OutOfStock"
         : page.product.stock?.state === "low_stock"
@@ -185,6 +193,7 @@ export default async function ProductPage({
         <ProductPageView
           page={page}
           mode="public"
+          via={via}
           initialOptionIds={requestedOptions(query, collectOptionIds(page.product.optionGroups))}
           // `?q=` is read exactly the way `?o=` above is: whatever the address
           // bar says, measured against what THIS product allows, with anything

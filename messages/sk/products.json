@@ -97,7 +97,8 @@
     "copyLink": "Skopírovať odkaz na produkt",
     "openPage": "Otvoriť stránku produktu",
     "unitsSold": "{count, plural, one {{count} predaný kus} few {{count} predané kusy} many {{count} predaného kusa} other {{count} predaných kusov}}",
-    "noSales": "Zatiaľ žiadny predaj"
+    "noSales": "Zatiaľ žiadny predaj",
+    "addToWebsite": "Pridať na váš web"
   },
   "removal": {
     "badge": "Odstránené",
@@ -332,7 +333,9 @@
       "title": "Zahodiť zmeny?",
       "editDescription": "Úpravy, ktoré ste vykonali na tomto produkte, ešte neboli uložené.",
       "newDescription": "Tento produkt ešte nebol uložený, takže nič sa nezachová.",
-      "discard": "Zahodiť"
+      "discard": "Zahodiť zmeny",
+      "keepEditing": "Pokračovať v úprave",
+      "saveAndLeave": "Uložiť a odísť"
     },
     "nav": {
       "label": "Sekcie formulára",
@@ -636,5 +639,70 @@
     },
     "footer": "SquareShare · {reference} · Strana {page} z {total}",
     "generated": "Vygenerované dňa {date}."
+  },
+  "buyButton": {
+    "title": "Pridajte na svoj web tlačidlo na nákup",
+    "summary": "Vaše vlastné tlačidlo na vašom webe zavedie kupujúcich na stránku a do pokladne produktu „{title}“.",
+    "storefrontLabel": "Vzhľad stránky",
+    "flow": {
+      "button": "Vaše tlačidlo",
+      "checkout": "Pokladňa"
+    },
+    "methods": "Ako ho pridať",
+    "method": {
+      "link": "Odkaz",
+      "html": "HTML",
+      "agent": "AI agent"
+    },
+    "hint": {
+      "link": "Vložte ho do nastavenia odkazu tlačidla.",
+      "html": "Vložte ho tam, kde má tlačidlo byť.",
+      "agent": "Vložte ho svojmu AI agentovi na kód."
+    },
+    "copy": {
+      "link": {
+        "copy": "Skopírovať odkaz",
+        "copied": "Odkaz skopírovaný",
+        "failed": "Odkaz sa nepodarilo skopírovať. Označte ho a skopírujte ručne."
+      },
+      "html": {
+        "copy": "Skopírovať HTML",
+        "copied": "HTML skopírované",
+        "failed": "HTML sa nepodarilo skopírovať. Označte ho a skopírujte ručne."
+      },
+      "agent": {
+        "copy": "Skopírovať prompt",
+        "copied": "Prompt skopírovaný",
+        "failed": "Prompt sa nepodarilo skopírovať. Označte ho a skopírujte ručne."
+      }
+    },
+    "snippetText": "Kúpiť",
+    "prompt": {
+      "task": "Pridaj na môj web tlačidlo na nákup. Musí odkazovať presne na túto adresu:",
+      "html": "V čistom HTML to vyzerá takto:",
+      "style": "Naštýluj ho rovnako ako ostatné tlačidlá na mojom webe. Ak web už tlačidlo na nákup tohto produktu má, nasmeruj na túto adresu to existujúce a nepridávaj druhé.",
+      "normal": "Musí sa otvoriť ako bežná stránka na tej istej karte. Nenačítavaj ju v iframe, vyskakovacom okne ani lightboxe: stránka sa v ráme odmietne načítať.",
+      "exact": "Nie je potrebný žiadny skript, SDK ani volanie API. Adresu ponechaj presne takú, aká je, vrátane všetkého za otáznikom."
+    },
+    "tryIt": "Vyskúšať tlačidlo",
+    "tracking": "V Analytike sa zobrazí ako „Tlačidlo na webe“.",
+    "blocked": {
+      "removed": "Tento produkt bol stiahnutý. Otvorte ho a uvidíte prečo.",
+      "draft": "Tento produkt je koncept. Najprv ho nastavte ako Aktívny.",
+      "notPlaced": "Najprv umiestnite produkt do výkladu, aby mal stránku, na ktorú kupujúci prídu."
+    },
+    "editProduct": "Upraviť produkt",
+    "goToStorefronts": "Prejsť na výklady",
+    "embedPointer": "Predávate len jeden produkt? Namiesto vloženia celého výkladu mu dajte tlačidlo na nákup na vašom webe: v Produktoch otvorte jeho ponuku a zvoľte „Pridať na váš web“.",
+    "embedPointerLink": "Prejsť na Produkty",
+    "demo": {
+      "play": "Prehrať animáciu",
+      "pause": "Pozastaviť animáciu",
+      "siteLine": "Váš web, váš vlastný dizajn.",
+      "email": "E-mail",
+      "card": "Číslo karty",
+      "total": "Spolu",
+      "pay": "Zaplatiť {price}"
+    }
   }
 }

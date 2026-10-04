@@ -5,11 +5,11 @@ import { useActionState } from "react";
 import { MonitorSmartphone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Modal } from "@/components/ui/modal";
-import { Spinner } from "@/components/ui/spinner";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { HeroMark } from "@/components/ui/HeroMark";
 import { useActionStateToast, useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { infoTextClass } from "@/components/ui/control-styles";
-import { StepUpField } from "@/components/auth/StepUp";
+import { StepUpPrompt, StepUpScope, StepUpSubmit } from "@/components/auth/StepUp";
 import { setSignInApproval } from "@/lib/auth/sign-in-approval-actions";
 import type { ActionState } from "@/lib/errors";
 import { cn } from "@/lib/utils";
@@ -72,7 +72,6 @@ export function SignInApprovalRow({
 
 function SwitchModal({ turningOn, onClose }: { turningOn: boolean; onClose: () => void }) {
   const t = useTranslations("Settings.security.approvals");
-  const tCommon = useTranslations("Common.actions");
   const resolve = useResolveMessage();
   const [state, formAction, isPending] = useActionState(setSignInApproval, INITIAL);
   // Success as a toast (the modal closes with it); errors stay inline.
@@ -87,39 +86,29 @@ function SwitchModal({ turningOn, onClose }: { turningOn: boolean; onClose: () =
   }, [state.success, onClose]);
 
   return (
-    <Modal
-      open
-      onClose={onClose}
-      title={turningOn ? t("confirmOnTitle") : t("confirmOffTitle")}
-      description={turningOn ? t("confirmOnDescription") : t("confirmOffDescription")}
-      className="rounded-none sm:rounded-none"
-    >
-      <form action={formAction} className="flex flex-col gap-4" noValidate>
+    // Asked for only when the last second factor has gone stale, and then in
+    // the dialog's own button (auth/StepUp).
+    <StepUpScope id="sign-in-approval" state={state}>
+      <ConfirmDialog
+        open
+        onClose={onClose}
+        visual={<HeroMark icon={MonitorSmartphone} />}
+        title={turningOn ? t("confirmOnTitle") : t("confirmOffTitle")}
+        description={turningOn ? t("confirmOnDescription") : t("confirmOffDescription")}
+        action={formAction}
+        pending={isPending}
+        confirmLabel={turningOn ? t("turnOn") : t("turnOff")}
+        pendingLabel={t("saving")}
+        submitAs={StepUpSubmit}
+      >
         <input type="hidden" name="enabled" value={turningOn ? "on" : "off"} />
-        <StepUpField id="sign-in-approval" state={state} />
+        <StepUpPrompt />
         {state.error && (
           <p role="alert" className="font-inter text-sm font-medium text-destructive">
             {resolve(state.error.message)}
           </p>
         )}
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button type="button" variant="ghost" onClick={onClose}>
-            {tCommon("cancel")}
-          </Button>
-          <Button type="submit" disabled={isPending} suppressHydrationWarning>
-            {isPending ? (
-              <>
-                <Spinner />
-                {t("saving")}
-              </>
-            ) : turningOn ? (
-              t("turnOn")
-            ) : (
-              t("turnOff")
-            )}
-          </Button>
-        </div>
-      </form>
-    </Modal>
+      </ConfirmDialog>
+    </StepUpScope>
   );
 }

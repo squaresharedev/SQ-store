@@ -56,6 +56,10 @@
     "manageBilling": {
       "withRole": "Deine Rolle als {role, select, owner {Inhaber} editor {Bearbeiter} viewer {Betrachter} other {{role}}} darf den Tarif dieses Shops nicht ändern.",
       "noRole": "Du hast keine Berechtigung, den Tarif dieses Shops zu ändern."
+    },
+    "manageDiscounts": {
+      "withRole": "Mit deiner Rolle als {role, select, owner {Inhaber} editor {Bearbeiter} viewer {Betrachter} other {{role}}} kannst du in diesem Shop keine Rabatte verwalten.",
+      "noRole": "Du hast keine Berechtigung, in diesem Shop Rabatte zu verwalten."
     }
   },
   "notFound": {
@@ -63,7 +67,8 @@
     "product": "Dieses Produkt konnte nicht gefunden werden.",
     "storefront": "Dieses Schaufenster konnte nicht gefunden werden.",
     "item": "Dieses Element wurde nicht gefunden.",
-    "order": "Diese Bestellung konnte nicht gefunden werden."
+    "order": "Diese Bestellung konnte nicht gefunden werden.",
+    "discount": "Dieser Rabatt konnte nicht gefunden werden."
   },
   "rateLimited": {
     "fix": "Warte einige Minuten und versuche es erneut. Falls nichts im Hintergrund wiederholt wird, lade die Seite zuerst neu.",
@@ -82,7 +87,8 @@
     "fileAppeal": "Zu viele Versuche, einen Einspruch in kurzer Zeit zu senden.",
     "fulfilOrders": "Zu viele Versuche, Bestellungen in kurzer Zeit als versandt zu markieren.",
     "readCheckoutSettings": "Zu viele Versuche, in kurzer Zeit die Kasseneinstellungen abzurufen.",
-    "changePlan": "Zu viele Tarifwechsel in kurzer Zeit gestartet."
+    "changePlan": "Zu viele Tarifwechsel in kurzer Zeit gestartet.",
+    "saveDiscounts": "Zu viele Rabattänderungen in kurzer Zeit."
   },
   "serverError": {
     "fix": "Das ist meist vorübergehend. Warte kurz und versuche es erneut. Falls es weiterhin fehlschlägt, lade die Seite neu.",
@@ -115,7 +121,10 @@
     "saveCheckoutSettings": "Deine Kasseneinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht gespeichert werden.",
     "loadPlans": "Dein Tarif konnte wegen eines Problems auf unserer Seite nicht geladen werden.",
     "startCheckout": "Der Checkout konnte wegen eines Problems auf unserer Seite nicht geöffnet werden.",
-    "openBillingPortal": "Deine Abrechnungsdaten konnten wegen eines Problems auf unserer Seite nicht geöffnet werden."
+    "openBillingPortal": "Deine Abrechnungsdaten konnten wegen eines Problems auf unserer Seite nicht geöffnet werden.",
+    "cancelPlan": "Dein Tarif konnte wegen eines Problems auf unserer Seite nicht gekündigt werden.",
+    "resumePlan": "Dein Tarif konnte wegen eines Problems auf unserer Seite nicht behalten werden.",
+    "saveDiscount": "Der Rabatt konnte aufgrund eines Problems auf unserer Seite nicht gespeichert werden."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Dieses Produkt wurde entfernt, nicht pausiert.} storefront {Dieses Schaufenster wurde entfernt, nicht pausiert.} other {Dieses Element wurde entfernt, nicht pausiert.}}",
@@ -602,7 +611,11 @@
     "alreadySubscribed": "Dein Shop hat bereits einen kostenpflichtigen Tarif. Wechsle den Tarif, statt einen zweiten zu kaufen.",
     "noBillingAccount": "Dieser Shop hat noch kein Abrechnungskonto. Wechsle zuerst zu einem kostenpflichtigen Tarif.",
     "noSubscription": "Dieser Shop hat keinen kostenpflichtigen Tarif, den man ändern könnte. Wähle einen zum Upgraden.",
-    "ownerOnlyFix": "Nur der Inhaber des Shops kann den Tarif ändern. Frage ihn oder wechsle zu deinem eigenen Shop."
+    "ownerOnlyFix": "Nur der Inhaber des Shops kann den Tarif ändern. Frage ihn oder wechsle zu deinem eigenen Shop.",
+    "invalidFeedback": "Dieses Feedback konnte nicht gelesen werden.",
+    "notCancellable": "Dieser Shop hat keinen kostenpflichtigen Tarif, den man kündigen könnte, oder er endet bereits.",
+    "notResumable": "Dieser Tarif endet nicht, oder sein bezahlter Zeitraum ist bereits vorbei.",
+    "deletionPending": "Dein Konto soll gelöscht werden, daher endet sein Tarif damit. Brich zuerst die Löschung ab, um deinen Tarif zu behalten."
   },
   "planLimit": {
     "storefronts": "{plan, select, free {Dein Free-Tarif} starter {Dein Starter-Tarif} pro {Dein Pro-Tarif} other {Dein aktueller Tarif}} enthält {cap, plural, one {# Schaufenster} other {# Schaufenster}}, und dein Shop nutzt sie alle.",
@@ -621,5 +634,23 @@
     "planRequiredFix": "Wechsle auf der Seite Tarife zu einem höheren Tarif, um deine Bestellungen zu exportieren.",
     "rateLimited": "Das sind viele Exporte in kurzer Zeit.",
     "rateLimitedFix": "Warte ein paar Minuten und versuche es dann noch einmal."
+  },
+  "discounts": {
+    "invalid": {
+      "message": "Die Rabattangaben haben die Überprüfung nicht bestanden.",
+      "fix": "Überprüfe die markierten Felder und versuche dann erneut zu speichern."
+    },
+    "codeTaken": {
+      "message": "Dieser Code wird in diesem Shop bereits verwendet.",
+      "fix": "Wähle einen anderen Code oder lösche zuerst den anderen Rabatt."
+    },
+    "started": {
+      "message": "Diese Aktion hat bereits begonnen, daher können ihre Bedingungen nicht mehr geändert werden.",
+      "fix": "Beende sie und erstelle eine neue Aktion mit den neuen Bedingungen. Die EU-Vorschriften zur Anzeige von Preisermäßigungen setzen voraus, dass die Aktionshistorie unverändert bleibt."
+    },
+    "tooMany": {
+      "message": "Dieser Shop hat die maximale Anzahl an Rabatten erreicht.",
+      "fix": "Lösche Rabatte, die du nicht mehr verwendest, und versuche es dann erneut."
+    }
   }
 }

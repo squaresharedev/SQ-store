@@ -89,7 +89,8 @@
   "channels": {
     "embed": "Embed",
     "marketplace": "Marketplace",
-    "direct": "Direct"
+    "direct": "Direct",
+    "button": "Website button"
   },
   "signalsUnavailable": {
     "title": "Views and signups are unavailable right now",

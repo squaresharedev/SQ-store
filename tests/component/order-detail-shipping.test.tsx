@@ -116,7 +116,7 @@ describe("marking it shipped", () => {
     await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
     const field = screen.getByLabelText("Tracking number (optional)");
     expect(field).toHaveFocus();
-    expect(screen.getByText(/We'll email the buyer/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /We'll email the buyer/ })).toBeInTheDocument();
 
     await user.type(field, "RR123456789IE");
     await user.click(screen.getByRole("button", { name: "Mark shipped" }));
@@ -318,5 +318,33 @@ describe("a shipped order", () => {
     renderDetail({ ...sent, fulfilment: { ...sent.fulfilment, trackingNumber: null } });
     const shipping = screen.getByText("Shipping").parentElement!;
     expect(within(shipping).getByRole("button", { name: "Add tracking number" })).toBeInTheDocument();
+  });
+});
+
+describe("a discounted order", () => {
+  const discountRow = () => document.querySelector("[data-order-discount]");
+
+  it("names the code and what it took off", () => {
+    renderDetail(orderView({ discount: { cents: 480, code: "SUMMER10", byCode: true } }));
+    expect(screen.getByText("Discount")).toBeInTheDocument();
+    expect(discountRow()).toHaveTextContent("Code SUMMER10, €4.80 off");
+  });
+
+  it("still names the code a buyer came with when the sale price beat it", () => {
+    // The code is the channel: it is credited even though the sale set the price.
+    renderDetail(orderView({ discount: { cents: 480, code: "INSTA10", byCode: false } }));
+    expect(discountRow()).toHaveTextContent("Sale, €4.80 off");
+    expect(discountRow()).toHaveTextContent("Code INSTA10 used, but the sale price was lower");
+  });
+
+  it("says a sale took it off when no code was typed", () => {
+    renderDetail(orderView({ discount: { cents: 480, code: null, byCode: false } }));
+    expect(discountRow()).toHaveTextContent("Sale, €4.80 off");
+    expect(discountRow()).not.toHaveTextContent("Code");
+  });
+
+  it("has no discount row for a full-price order", () => {
+    renderDetail(orderView());
+    expect(discountRow()).toBeNull();
   });
 });

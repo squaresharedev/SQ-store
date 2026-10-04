@@ -24,7 +24,7 @@ import { OptionPicker } from "./OptionPicker";
 import { QuantityProvider } from "./QuantityContext";
 import { QuantityPicker } from "./QuantityPicker";
 import { PageShell } from "./PageShell";
-import { orderLookupPath } from "@/lib/storefront/product-page-url";
+import { orderLookupPath, type LinkChannel } from "@/lib/storefront/product-page-url";
 import { StickyBar } from "./StickyBar";
 import { TrustList, buildTrustLines } from "./TrustList";
 import {
@@ -56,9 +56,13 @@ export function ProductPageView({
   mode,
   initialOptionIds = NO_OPTIONS,
   initialQuantity = 1,
+  via = null,
 }: {
   page: ProductPageData;
   mode: "public" | "preview";
+  /** How the buyer arrived (`?via=`), already allowlisted. Handed on to the
+   *  checkout link so the order is filed where the visit was. */
+  via?: LinkChannel | null;
   /** Preselected options from the URL, already checked against the product. */
   initialOptionIds?: readonly string[];
   /** From `?q=`, already clamped against this product's own limit by the
@@ -120,7 +124,7 @@ export function ProductPageView({
     seller.email,
     product.title,
     t("cta.mailSubject", { title: product.title }),
-    storefront.checkout ? { storefrontId: storefront.id, productId: product.id } : null,
+    storefront.checkout ? { storefrontId: storefront.id, productId: product.id, via } : null,
   );
   // The editor always shows the button, even with nowhere to send it, so the
   // seller can see the page's one action and be told how to wire it up.
@@ -288,10 +292,10 @@ export function ProductPageView({
           // too: the product page is part of the shop, not a publication of its
           // own.
           backgroundColor={productPage.backgroundColor}
-          // Its own photo, veiled in the colour its ink was derived from.
+          // Its own photo, overlaid in the colour its ink was derived from.
           photo={
-            storefront.pagePhotoUrl
-              ? { url: storefront.pagePhotoUrl, tint: productPage.backgroundColor ?? storefrontBackdropHex(theme) }
+            storefront.pagePhoto
+              ? { ...storefront.pagePhoto, tint: productPage.backgroundColor ?? storefrontBackdropHex(theme) }
               : null
           }
           font={productPage.font}
@@ -337,6 +341,7 @@ export function ProductPageView({
                     <ProductPrice
                       priceCents={product.priceCents}
                       currency={product.currency}
+                      sale={product.sale}
                       priceNote={effectivePriceNote}
                       shippingNote={effectiveShippingNote}
                       isDigital={product.isDigital}
@@ -401,6 +406,7 @@ export function ProductPageView({
                     <ProductPrice
                       priceCents={product.priceCents}
                       currency={product.currency}
+                      sale={product.sale}
                       priceNote={effectivePriceNote}
                       shippingNote={effectiveShippingNote}
                       isDigital={product.isDigital}

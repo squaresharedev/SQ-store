@@ -6,9 +6,14 @@ import { getActiveAccount } from "@/lib/team/account-context";
 import { parseOrderSelection } from "@/lib/orders/selection";
 import { parseShipTo } from "@/lib/orders/ship-to";
 import { parseFulfilment } from "@/lib/orders/fulfilment";
+import { orderPhotoKey } from "@/lib/orders/photo";
+import { presignGetUrl } from "@/lib/r2";
+import { isContentVisible } from "@/lib/moderation/removal";
 import type { OrderExportRow } from "@/lib/orders/csv";
+import { ORDER_CHANNELS } from "@/types/order-view";
 import type {
   OrderView,
+  OrderDiscount,
   OrderFilters,
   OrderSort,
   OrderChannel,
@@ -30,7 +35,8 @@ import type {
 //   product_price_cents, selected_options, created_at, quantity, ship_to,
 //   buyer_locale, fulfilment_status, shipped_at, tracking_number,
 //   tracking_carrier, checkout_session_id, gift_message, withdrawal_requested_at,
-//   platform_fee_bps, shipping_cents
+//   platform_fee_bps, shipping_cents, discount_id, discount_cents,
+//   discount_code_id, discount_code
 
 export const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 100;
@@ -40,11 +46,10 @@ function emptyPage(page: number, pageSize: number): Paginated<OrderView> {
   return { rows: [], total: 0, page, pageSize };
 }
 
-/** Coerce an unknown channel string to a valid OrderChannel. Exported for tests. */
+/** Coerce an unknown channel string to a valid OrderChannel; anything the list
+ *  does not know reads as the embed, the oldest channel. Exported for tests. */
 export function toChannel(value: unknown): OrderChannel {
-  if (value === "marketplace") return "marketplace";
-  if (value === "direct") return "direct";
-  return "embed";
+  return (ORDER_CHANNELS as readonly unknown[]).includes(value) ? (value as OrderChannel) : "embed";
 }
 
 /** Coerce an unknown status string to a valid OrderStatus. */
@@ -74,12 +79,26 @@ function toOrderView(row: Record<string, unknown>): OrderView {
     giftMessage: row.gift_message != null ? String(row.gift_message) : null,
     withdrawalRequestedAt:
       row.withdrawal_requested_at != null ? String(row.withdrawal_requested_at) : null,
+    discount: toOrderDiscount(row),
+  };
+}
+
+/** The orders.discount_* snapshot, or null when no discount touched the order. */
+function toOrderDiscount(row: Record<string, unknown>): OrderDiscount | null {
+  const cents = Number(row.discount_cents ?? 0);
+  const code = typeof row.discount_code === "string" && row.discount_code ? row.discount_code : null;
+  const safeCents = Number.isInteger(cents) && cents > 0 ? cents : 0;
+  if (safeCents === 0 && !code) return null;
+  return {
+    cents: safeCents,
+    code,
+    byCode: code !== null && row.discount_code_id != null && row.discount_code_id === row.discount_id,
   };
 }
 
 /** The column list every order read selects — one contract, one place. */
 const ORDER_COLUMNS =
-  "id, product_title, selected_options, quantity, ship_to, fulfilment_status, shipped_at, tracking_number, tracking_carrier, amount_cents, platform_fee_cents, platform_fee_bps, currency, channel, status, buyer_email, created_at, gift_message, withdrawal_requested_at";
+  "id, product_title, selected_options, quantity, ship_to, fulfilment_status, shipped_at, tracking_number, tracking_carrier, amount_cents, platform_fee_cents, platform_fee_bps, currency, channel, status, buyer_email, created_at, gift_message, withdrawal_requested_at, discount_id, discount_cents, discount_code_id, discount_code";
 
 /**
  * The To ship rule (lib/orders/fulfilment.ts isToShip) as a query filter, so
@@ -142,6 +161,65 @@ export async function getOrdersByIds(ids: string[]): Promise<OrderView[]> {
 
   if (error || !data) return [];
   return (data as Record<string, unknown>[]).map(toOrderView);
+}
+
+/** What a Recent orders row shows beside its title: the photo and the units. */
+export type OrderGlance = {
+  /** Units sold, 1 or more. */
+  quantity: number;
+  /** Signed photo URL of the product bought; null when it has none, is gone,
+   *  or moderation has taken it down. */
+  photoUrl: string | null;
+};
+
+/**
+ * Photo and quantity for several orders in one pair of queries (orders, then
+ * their products), keyed by order id. Scoped like getOrdersByIds. Soft-fails
+ * to {}: the card reads fine without thumbnails, so a blip costs polish only.
+ */
+export async function getOrderGlances(ids: string[]): Promise<Record<string, OrderGlance>> {
+  const valid = Array.from(new Set(ids.filter((id) => UUID.test(id)))).slice(0, MAX_BATCH_IDS);
+  if (valid.length === 0) return {};
+
+  const account = await getActiveAccount();
+  if (!account) return {};
+
+  const supabase = (await createClient()) as SupabaseClient;
+  const { data: orders, error } = await supabase
+    .from("orders")
+    .select("id, product_id, quantity, selected_options")
+    .eq("seller_id", account.accountId)
+    .in("id", valid);
+  if (error || !orders) return {};
+
+  const productIds = Array.from(
+    new Set(orders.map((row) => row.product_id as string | null).filter((id): id is string => Boolean(id))),
+  );
+  const { data: products } = productIds.length
+    ? await supabase
+        .from("products")
+        .select("id, image_key, gallery, option_groups, moderation_status")
+        .eq("owner_id", account.accountId)
+        .in("id", productIds)
+    : { data: [] };
+  const productById = new Map((products ?? []).map((product) => [product.id as string, product]));
+
+  const glances: Record<string, OrderGlance> = {};
+  await Promise.all(
+    orders.map(async (row) => {
+      const quantity = Number(row.quantity);
+      const product = row.product_id ? productById.get(row.product_id as string) : undefined;
+      const key =
+        product && isContentVisible(product.moderation_status)
+          ? orderPhotoKey(product, parseOrderSelection(row.selected_options))
+          : null;
+      glances[String(row.id)] = {
+        quantity: Number.isInteger(quantity) && quantity >= 1 ? quantity : 1,
+        photoUrl: key ? await presignGetUrl(key) : null,
+      };
+    }),
+  );
+  return glances;
 }
 
 /**

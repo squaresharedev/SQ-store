@@ -109,7 +109,8 @@
       "nameAlternative": "Nebo své celé jméno, pokud prodáváte jako fyzická osoba.",
       "addressPlaceholder": "např. Tržní 12\n110 00 Praha 1\nČeská republika",
       "emailPlaceholder": "např. ahoj@vasobchod.example",
-      "emailHelp": "Sem vám budou psát kupující. Může se lišit od přihlašovacího e-mailu."
+      "emailHelp": "Sem vám budou psát kupující. Může se lišit od přihlašovacího e-mailu.",
+      "emailTipLabel": "O tomto e-mailu"
     },
     "confirm": {
       "goLive": "Vaše produktové stránky se zveřejní, jakmile ho potvrdíte."
@@ -155,7 +156,7 @@
     "shortcut": "Zkratka: <kbd>{shortcut}</kbd>",
     "skipTour": "Přeskočit prohlídku",
     "next": "Další",
-    "openingPage": "{page, select, overview {Otevírám přehled…} products {Otevírám produkty…} storefront {Otevírám obchod…} orders {Otevírám objednávky…} analytics {Otevírám analytiku…} payments {Otevírám platby…} settings {Otevírám nastavení…} sampleStorefront {Otevírám ukázkový obchod…} other {Otevírám…}}"
+    "openingPage": "{page, select, overview {Otevírám přehled…} products {Otevírám produkty…} storefront {Otevírám obchod…} orders {Otevírám objednávky…} discounts {Otevírám slevy…} analytics {Otevírám analytiku…} payments {Otevírám platby…} settings {Otevírám nastavení…} sampleStorefront {Otevírám ukázkový obchod…} other {Otevírám…}}"
   },
   "tourReplay": {
     "title": "Prohlídka s průvodcem",

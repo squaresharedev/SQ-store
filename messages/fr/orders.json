@@ -17,7 +17,8 @@
   "channel": {
     "embed": "Intégration",
     "marketplace": "Marketplace",
-    "direct": "Vos pages"
+    "direct": "Vos pages",
+    "button": "Bouton sur votre site"
   },
   "empty": {
     "filteredTitle": "Aucune commande ne correspond à ces filtres",
@@ -61,7 +62,8 @@
     "datePlaceholder": "toutes les dates",
     "sort": "trier",
     "sortAriaLabel": "Trier les commandes",
-    "clearFilters": "effacer les filtres"
+    "clearFilters": "effacer les filtres",
+    "allChannels": "Tous les canaux"
   },
   "sort": {
     "newest": "Plus récentes d’abord",
@@ -140,7 +142,11 @@
     },
     "emailBuyer": "Envoyer un e-mail à l’acheteur",
     "mailSubject": "Votre commande {number}",
-    "withdrawnShipWarning": "L’acheteur s’est rétracté de cet achat. N’expédiez que si vous en êtes convenu avec lui."
+    "withdrawnShipWarning": "L’acheteur s’est rétracté de cet achat. N’expédiez que si vous en êtes convenu avec lui.",
+    "discount": "Réduction",
+    "discountSale": "Promotion, {amount} de remise",
+    "discountCode": "Code {code}, {amount} de remise",
+    "discountCodeOutdone": "Code {code} utilisé, mais le prix promotionnel était plus bas"
   },
   "actions": {
     "refundNeedsStripe": "Les remboursements nécessitent que Stripe soit connecté.",
@@ -210,7 +216,8 @@
       "openShip": "Une fois expédiée, marquez-la comme expédiée ici et nous en informerons l'acheteur : {url}",
       "openDigital": "Voir la commande : {url}",
       "gift": "Message cadeau à inclure: {message}",
-      "number": "Numéro de commande : {number}"
+      "number": "Numéro de commande : {number}",
+      "discountCode": "Code de réduction : {code}"
     },
     "shipped": {
       "subject": "Votre commande de {store} est en route",
@@ -245,7 +252,8 @@
       "withdrawalDigital": "Vous avez demandé le téléchargement immédiat et accepté que votre droit de rétractation prend fin dès qu'il commence.",
       "guarantee": "Vous bénéficiez également de la garantie légale de conformité pour au moins deux ans.",
       "questions": "Des questions? Répondez à cet e-mail pour contacter {store}.",
-      "footer": "Envoyé par Square Share au nom de {store}. Square Share fournit le logiciel de la boutique et n'est pas partie à cette vente."
+      "footer": "Envoyé par Square Share au nom de {store}. Square Share fournit le logiciel de la boutique et n'est pas partie à cette vente.",
+      "discount": "Réduction ({code}) : -{amount}"
     },
     "withdrawal": {
       "buyerSubject": "Votre rétractation de la commande {number} chez {store}",

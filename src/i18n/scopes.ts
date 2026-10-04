@@ -66,6 +66,7 @@ export const CLIENT_SCOPES = {
     "Auth",
     "Billing",
     "Dashboard",
+    "Discounts",
     "Nav",
     "Notifications",
     "Onboarding",

@@ -97,7 +97,8 @@
     "copyLink": "Productlink kopiëren",
     "openPage": "Productpagina openen",
     "unitsSold": "{count, plural, one {{count} verkocht} other {{count} verkocht}}",
-    "noSales": "Nog geen verkopen"
+    "noSales": "Nog geen verkopen",
+    "addToWebsite": "Toevoegen aan je website"
   },
   "removal": {
     "badge": "Verwijderd",
@@ -332,7 +333,9 @@
       "title": "Wijzigingen negeren?",
       "editDescription": "De wijzigingen die je aan dit product hebt aangebracht, zijn nog niet opgeslagen.",
       "newDescription": "Dit product is nog niet opgeslagen, dus er blijft niets bewaard.",
-      "discard": "Negeren"
+      "discard": "Wijzigingen negeren",
+      "keepEditing": "Doorgaan met bewerken",
+      "saveAndLeave": "Opslaan en verlaten"
     },
     "nav": {
       "label": "Formulieronderdelen",
@@ -636,5 +639,70 @@
     },
     "footer": "SquareShare · {reference} · Pagina {page} van {total}",
     "generated": "Gegenereerd op {date}."
+  },
+  "buyButton": {
+    "title": "Voeg een koopknop toe aan je website",
+    "summary": "Je eigen knop op je eigen site brengt kopers naar de pagina en het afrekenen van \"{title}\".",
+    "storefrontLabel": "Paginaontwerp",
+    "flow": {
+      "button": "Jouw knop",
+      "checkout": "Afrekenen"
+    },
+    "methods": "Zo voeg je hem toe",
+    "method": {
+      "link": "Link",
+      "html": "HTML",
+      "agent": "AI-agent"
+    },
+    "hint": {
+      "link": "Plak hem in de linkinstelling van je knop.",
+      "html": "Plak hem waar de knop moet komen.",
+      "agent": "Plak hem in je AI-codeagent."
+    },
+    "copy": {
+      "link": {
+        "copy": "Link kopiëren",
+        "copied": "Link gekopieerd",
+        "failed": "Kopiëren van de link is mislukt. Selecteer hem en kopieer hem zelf."
+      },
+      "html": {
+        "copy": "HTML kopiëren",
+        "copied": "HTML gekopieerd",
+        "failed": "Kopiëren van de HTML is mislukt. Selecteer hem en kopieer hem zelf."
+      },
+      "agent": {
+        "copy": "Prompt kopiëren",
+        "copied": "Prompt gekopieerd",
+        "failed": "Kopiëren van de prompt is mislukt. Selecteer hem en kopieer hem zelf."
+      }
+    },
+    "snippetText": "Nu kopen",
+    "prompt": {
+      "task": "Voeg een koopknop toe aan mijn website. Hij moet precies naar deze URL linken:",
+      "html": "Als gewone HTML is dat:",
+      "style": "Geef hem dezelfde stijl als de andere knoppen op mijn site. Heeft de site al een koopknop voor dit product, laat die dan naar de URL wijzen in plaats van een tweede toe te voegen.",
+      "normal": "Hij moet als een gewone pagina in hetzelfde tabblad openen. Laad de pagina niet in een iframe, pop-up of lightbox: de pagina weigert in een frame te laden.",
+      "exact": "Er is geen script, SDK of API-aanroep nodig. Laat de URL precies zoals hij is, inclusief alles na het vraagteken."
+    },
+    "tryIt": "Probeer je knop",
+    "tracking": "Staat in Statistieken als \"Websiteknop\".",
+    "blocked": {
+      "removed": "Dit product is offline gehaald. Open het om te zien waarom.",
+      "draft": "Dit product is een concept. Zet het eerst op Actief.",
+      "notPlaced": "Zet dit product eerst op een etalage, zodat het een pagina heeft waar kopers op landen."
+    },
+    "editProduct": "Product bewerken",
+    "goToStorefronts": "Naar etalages",
+    "embedPointer": "Verkoop je maar één product? Sluit dan niet de hele etalage in, maar geef het een koopknop op je eigen website: open in Producten het menu van het product en kies \"Toevoegen aan je website\".",
+    "embedPointerLink": "Naar Producten",
+    "demo": {
+      "play": "Animatie afspelen",
+      "pause": "Animatie pauzeren",
+      "siteLine": "Je eigen site, je eigen ontwerp.",
+      "email": "E-mail",
+      "card": "Kaartnummer",
+      "total": "Totaal",
+      "pay": "Betaal {price}"
+    }
   }
 }

@@ -8,9 +8,15 @@ import { orderView } from "../setup/order-view";
 // button. What each offers depends on the store's plan and on who is looking,
 // and pressing an action asks the server, never builds a URL of its own.
 
-vi.mock("@/lib/billing/actions", () => ({ startCheckout: vi.fn(), openBillingPortal: vi.fn() }));
+vi.mock("@/lib/billing/actions", () => ({
+  startCheckout: vi.fn(),
+  openBillingPortal: vi.fn(),
+  cancelPlan: vi.fn(),
+  resumePlan: vi.fn(),
+}));
 vi.mock("@/lib/orders/actions", () => ({ markOrderShipped: vi.fn() }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }) }));
+const router = vi.hoisted(() => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => router }));
 
 import { PlansPage } from "@/components/billing/PlansPage";
 import { UpgradeCard } from "@/components/billing/UpgradeCard";
@@ -22,8 +28,12 @@ import { AnalyticsExportButton } from "@/components/analytics/AnalyticsExportBut
 import { OrderDetail } from "@/components/orders/OrderDetail";
 import type { PricingContext } from "@/lib/billing/pricing-context";
 import type { AnalyticsSnapshot } from "@/lib/analytics/types";
+import { formatLongDate } from "@/lib/format/date";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
 
 beforeAll(() => {
   // jsdom has neither; the calculator's slider reads matchMedia and its chart
@@ -76,12 +86,18 @@ const STARTER: PricingContext = {
   currency: "EUR",
   hasSubscription: true,
   hasBillingAccount: true,
+  currentPeriodEnd: "2026-11-03T12:00:00.000Z",
 };
+
+/** How the dialogs write STARTER's period end. */
+const PERIOD_END = formatLongDate(STARTER.currentPeriodEnd!, "en");
 
 function stubActions(overrides: Partial<BillingActions> = {}): BillingActions {
   return {
     startCheckout: vi.fn(async () => ({ ok: true as const, url: "https://checkout.stripe.com/c/pay/cs_test_1" })),
     openPortal: vi.fn(async () => ({ url: "https://billing.stripe.com/p/session/1" })),
+    cancelPlan: vi.fn(async () => ({ ok: true as const, endsAt: STARTER.currentPeriodEnd! })),
+    resumePlan: vi.fn(async () => ({ ok: true as const })),
     navigate: vi.fn(),
     ...overrides,
   };
@@ -113,9 +129,41 @@ describe("PlansPage", () => {
     const actions = stubActions();
     const user = userEvent.setup();
     render(<PlansPage context={FREE} source="settings" actions={actions} />);
-    await user.click(screen.getByRole("button", { name: "Yearly" }));
+    await user.click(screen.getByRole("button", { name: /Yearly/ }));
     await user.click(screen.getByRole("button", { name: /Upgrade to Starter/ }));
     expect(actions.startCheckout).toHaveBeenCalledWith({ plan: "starter", interval: "year", source: "settings" });
+  });
+
+  it("says what yearly saves on the Yearly option itself, not beside the toggle", () => {
+    render(<PlansPage context={FREE} source={null} actions={stubActions()} />);
+    const yearly = screen.getByRole("button", { name: /Yearly/ });
+    expect(within(yearly).getByText("2 months free")).toBeTruthy();
+    // The old standalone pill is gone.
+    expect(screen.queryByText("2 months free on yearly")).toBeNull();
+    expect(screen.getAllByText("2 months free")).toHaveLength(1);
+  });
+
+  it("shows Starter's launch price against its regular price, and says which is which", async () => {
+    const user = userEvent.setup();
+    render(<PlansPage context={FREE} source={null} actions={stubActions()} />);
+    const starter = document.querySelector("[data-pricing-plan='starter']") as HTMLElement;
+    const price = starter.querySelector("[data-plan-price]") as HTMLElement;
+    expect((price.querySelector("[data-plan-list-price]") as HTMLElement).textContent).toBe("Regular price €20");
+    expect(price.querySelector("s")).toBeTruthy();
+    expect(price.textContent).toContain("€15");
+    expect(within(starter).getByText("Save 25%")).toBeTruthy();
+    expect(within(starter).getByText("Launch price (regular €20), excl. VAT")).toBeTruthy();
+    // Free and Pro charge their regular price: nothing struck through.
+    for (const plan of ["free", "pro"]) {
+      expect(document.querySelector(`[data-pricing-plan='${plan}'] [data-plan-list-price]`)).toBeNull();
+    }
+    expect(screen.getByText(/A launch price is an introductory price/)).toBeTruthy();
+
+    // Yearly: the same saving, per month and for the year.
+    await user.click(screen.getByRole("button", { name: /Yearly/ }));
+    expect(price.textContent).toContain("€16.67");
+    expect(price.textContent).toContain("€12.50");
+    expect(within(starter).getByText("€150 billed once a year at the launch price (regular €200), excl. VAT")).toBeTruthy();
   });
 
   it("shows the server's refusal instead of leaving", async () => {
@@ -132,11 +180,23 @@ describe("PlansPage", () => {
     expect(actions.navigate).not.toHaveBeenCalled();
   });
 
-  it("routes a subscribed owner's changes through the Customer Portal", () => {
-    render(<PlansPage context={STARTER} source={null} actions={stubActions()} />);
+  it("routes a subscribed owner's switch through the Customer Portal, and Free through the in-app cancel", async () => {
+    const actions = stubActions();
+    const user = userEvent.setup();
+    render(<PlansPage context={STARTER} source={null} actions={actions} />);
     expect(screen.queryByRole("button", { name: /Upgrade to/ })).toBeNull();
     expect(screen.getByRole("button", { name: /Switch to Pro/ })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Move to Free/ })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: /Move to Free/ }));
+    expect(screen.getByRole("dialog", { name: "Cancel Starter?" })).toBeTruthy();
+    expect(actions.openPortal).not.toHaveBeenCalled();
+  });
+
+  it("offers a plan that is ending a way back beside the notice, and no second cancel", () => {
+    render(<PlansPage context={{ ...STARTER, cancelAtPeriodEnd: true }} source={null} actions={stubActions()} />);
+    const notice = screen.getByRole("status");
+    expect(notice.textContent).toContain(`Your Starter plan ends on ${PERIOD_END}`);
+    expect(within(notice).getByRole("button", { name: "Keep my plan" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Move to Free/ })).toBeNull();
   });
 
   it("gives a teammate the plans to read and nothing to press", () => {
@@ -210,6 +270,31 @@ describe("PlansPage", () => {
     );
     expect(document.querySelector(".recharts-wrapper")).toBeNull();
   });
+
+  it("takes the sales figure in a field that shows it whole, and follows what is typed", async () => {
+    const user = userEvent.setup();
+    render(<PlansPage context={{ ...FREE, salesSubtotal30dCents: 183_700 }} source={null} actions={stubActions()} />);
+    // Starts on the store's own sales, grouped, with no caption about it.
+    const field = screen.getByLabelText("Sales per month") as HTMLInputElement;
+    expect(field.value).toBe("1,837");
+    expect(screen.queryByText(/Filled in from your last 30 days/)).toBeNull();
+    expect(screen.queryByText("Calculator")).toBeNull();
+
+    await user.click(field);
+    await user.keyboard("10000");
+    await user.tab();
+    expect(field.value).toBe("10,000");
+    expect(document.querySelector("[data-cheapest]")?.getAttribute("data-pricing-cost")).toBe("pro");
+    // The sentence is for screen readers only now; the pill says it on screen.
+    const spoken = screen.getByText("At €10,000 a month in sales, Pro costs you least.");
+    expect(spoken.className).toContain("sr-only");
+
+    // More than the field goes up to is brought back to its ceiling.
+    await user.click(field);
+    await user.keyboard("99999");
+    await user.tab();
+    expect(field.value).toBe("10,000");
+  });
 });
 
 describe("UpgradeCard (Settings › Plan & billing)", () => {
@@ -272,6 +357,126 @@ describe("BillingSection", () => {
     render(<BillingSection context={{ ...STARTER, status: "past_due" }} returned={null} actions={stubActions()} />);
     expect(document.querySelector("[data-upsell]")).toBeNull();
     expect(screen.getByRole("button", { name: /Manage billing/ })).toBeTruthy();
+  });
+
+  it("gives a subscribed owner a quiet Cancel plan on the plan card, and a teammate none", () => {
+    render(<BillingSection context={STARTER} returned={null} actions={stubActions()} />);
+    const controls = document.querySelector("[data-plan-controls]") as HTMLElement;
+    expect(within(controls).getByRole("button", { name: "Cancel plan" })).toBeTruthy();
+    cleanup();
+    render(<BillingSection context={{ ...STARTER, canManage: false }} returned={null} actions={stubActions()} />);
+    expect(document.querySelector("[data-plan-controls]")).toBeNull();
+    cleanup();
+    // Free has nothing to cancel.
+    render(<BillingSection context={FREE} returned={null} actions={stubActions()} />);
+    expect(document.querySelector("[data-plan-controls]")).toBeNull();
+  });
+
+  it("while a plan is ending, says when and offers Keep my plan in one click", async () => {
+    const actions = stubActions();
+    const user = userEvent.setup();
+    render(<BillingSection context={{ ...STARTER, cancelAtPeriodEnd: true }} returned={null} actions={actions} />);
+    expect(screen.getByText(`Ends on ${PERIOD_END}. Your store moves to Free then, and nothing is taken down.`)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Cancel plan" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Keep my plan" }));
+    expect(actions.resumePlan).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText("You're keeping Starter. It renews as usual.")).toBeTruthy();
+    expect(router.refresh).toHaveBeenCalled();
+  });
+
+  it("shows the server's refusal when the plan cannot be kept", async () => {
+    const actions = stubActions({
+      resumePlan: vi.fn(async () => ({
+        ok: false as const,
+        error: { code: "invalid_input" as const, message: { key: "Errors.billing.deletionPending" as const } },
+      })),
+    });
+    const user = userEvent.setup();
+    render(<BillingSection context={{ ...STARTER, cancelAtPeriodEnd: true }} returned={null} actions={actions} />);
+    await user.click(screen.getByRole("button", { name: "Keep my plan" }));
+    expect(await screen.findByText(/Your account is set to be deleted/)).toBeTruthy();
+    expect(router.refresh).not.toHaveBeenCalled();
+  });
+});
+
+describe("Cancelling a plan (CancelPlanDialog)", () => {
+  async function openDialog(actions = stubActions()) {
+    const user = userEvent.setup();
+    render(<BillingSection context={STARTER} returned={null} actions={actions} />);
+    await user.click(screen.getByRole("button", { name: "Cancel plan" }));
+    return { user, actions, dialog: screen.getByRole("dialog", { name: "Cancel Starter?" }) };
+  }
+
+  it("says what happens and what Free goes without, on one screen", async () => {
+    const { dialog } = await openDialog();
+    // The one sentence, as the dialog's own description.
+    expect(dialog).toHaveAccessibleDescription(
+      `You keep Starter until ${PERIOD_END}, then move to Free. Nothing is taken down.`,
+    );
+    // What Free goes without is one line that opens, not a list to read past.
+    const lost = within(dialog).getByText("Not included on Free").closest("details") as HTMLDetailsElement;
+    expect(lost.open).toBe(false);
+    expect(within(dialog).getByText("60 products")).toBeTruthy();
+    // Every reason, each a radio, none picked for the owner.
+    const reasons = within(dialog).getAllByRole("radio") as HTMLInputElement[];
+    expect(reasons.map((radio) => radio.value)).toEqual([
+      "too_expensive",
+      "unused",
+      "missing_features",
+      "switched_service",
+      "temporary",
+      "other",
+    ]);
+    expect(reasons.some((radio) => radio.checked)).toBe(false);
+  });
+
+  it("asks for a note only once a reason is picked", async () => {
+    const { user, dialog } = await openDialog();
+    expect(within(dialog).queryByLabelText(/What could we do better?/)).toBeNull();
+    await user.click(within(dialog).getByRole("radio", { name: "Something else" }));
+    expect(within(dialog).getByLabelText(/What could we do better?/)).toBeTruthy();
+  });
+
+  it("cancels without asking for a reason: the feedback is optional", async () => {
+    const { user, actions, dialog } = await openDialog();
+    await user.click(within(dialog).getByRole("button", { name: "Cancel plan" }));
+    expect(actions.cancelPlan).toHaveBeenCalledWith({ reason: null, detail: null });
+    expect(await screen.findByText(/Changed your mind?/)).toBeTruthy();
+  });
+
+  it("sends the reason and the note, then confirms the date and refreshes on close", async () => {
+    const { user, actions, dialog } = await openDialog();
+    await user.click(within(dialog).getByRole("radio", { name: "Too expensive" }));
+    await user.type(within(dialog).getByLabelText(/What could we do better?/), "  Cheaper yearly please  ");
+    await user.click(within(dialog).getByRole("button", { name: "Cancel plan" }));
+    expect(actions.cancelPlan).toHaveBeenCalledWith({ reason: "too_expensive", detail: "Cheaper yearly please" });
+
+    const done = await screen.findByRole("dialog", { name: "Your plan is cancelled" });
+    expect(within(done).getByText(new RegExp(`You keep Starter until ${PERIOD_END}`))).toBeTruthy();
+    expect(router.refresh).not.toHaveBeenCalled();
+    await user.click(within(done).getByRole("button", { name: "Done" }));
+    expect(router.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("Keep my plan closes without cancelling anything", async () => {
+    const { user, actions, dialog } = await openDialog();
+    await user.click(within(dialog).getByRole("button", { name: "Keep my plan" }));
+    expect(actions.cancelPlan).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(router.refresh).not.toHaveBeenCalled();
+  });
+
+  it("shows the server's refusal in the dialog and stays open", async () => {
+    const actions = stubActions({
+      cancelPlan: vi.fn(async () => ({
+        ok: false as const,
+        error: { code: "invalid_input" as const, message: { key: "Errors.billing.notCancellable" as const } },
+      })),
+    });
+    const { user, dialog } = await openDialog(actions);
+    await user.click(within(dialog).getByRole("button", { name: "Cancel plan" }));
+    expect(await within(dialog).findByText(/already set to end/)).toBeTruthy();
+    expect(await within(dialog).findByRole("button", { name: "Cancel plan" })).toBeTruthy();
   });
 });
 

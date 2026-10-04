@@ -25,14 +25,15 @@
     "intervalLabel": "Fakturační období",
     "month": "Měsíčně",
     "year": "Ročně",
-    "yearlySaving": "Při ročním plánu 2 měsíce zdarma",
     "pastDue": "Poslední platba za plán {plan} neproběhla. Aktualizujte kartu, abyste si ho ponechali.",
     "endsOn": "Váš plán {plan} končí {date} a obchod pak přejde na Free. Nic se neodstraní.",
     "ownerOnly": "Plán obchodu může měnit jen jeho vlastník.",
     "soon": "Brzy",
     "soonTitle": "Placené plány se brzy otevřou. Do té doby vše na Free funguje beze změny.",
     "finePrint": "Ceny jsou bez DPH. Poplatek za prodej se vztahuje na prodeje přes pokladnu Square Share a účtuje se z ceny položky, nikdy z dopravy. Vlastní poplatky Stripe za zpracování karty se přičítají. Zrušit můžete kdykoli: plán si ponecháte do konce zaplaceného období.",
-    "unavailable": "Plány se teď nedají zobrazit. Za chvíli stránku obnovte."
+    "unavailable": "Plány se teď nedají zobrazit. Za chvíli stránku obnovte.",
+    "yearlyFree": "{count, plural, one {# měsíc zdarma} few {# měsíce zdarma} many {# měsíce zdarma} other {# měsíců zdarma}}",
+    "launchNote": "Úvodní cena je zvýhodněná cena na začátku: běžná cena je ta přeškrtnutá."
   },
   "card": {
     "perMonth": "/ měsíc",
@@ -46,7 +47,12 @@
     "upgrade": "Přejít na {plan}",
     "switch": "Přepnout na {plan}",
     "switchInterval": "{interval, select, year {Přepnout na roční} other {Přepnout na měsíční}}",
-    "moveToFree": "Přejít na Free"
+    "moveToFree": "Přejít na Free",
+    "regularPrice": "Běžná cena",
+    "launchPrice": "Úvodní cena",
+    "save": "Ušetříte {percent}",
+    "launchExclVat": "Úvodní cena (běžně {regular}), bez DPH",
+    "launchBilledYearly": "{amount} účtováno jednou ročně za úvodní cenu (běžně {regular}), bez DPH"
   },
   "features": {
     "fee": "Poplatek {rate} za prodej",
@@ -63,12 +69,10 @@
     "productsUnlimited": "Neomezený počet produktů"
   },
   "calculator": {
-    "eyebrow": "Kalkulačka",
     "title": "Který plán vás vyjde nejlevněji?",
     "lead": "Posuňte jezdec na své měsíční prodeje. Každý sloupec je cena plánu plus jeho poplatek z těchto prodejů.",
     "salesLabel": "Prodeje za měsíc",
     "salesAria": "Vaše prodeje za měsíc v eurech",
-    "fromYourSales": "Vyplněno z vašich prodejů za posledních 30 dní.",
     "perMonth": "měsíčně",
     "cheapest": "Při prodejích {sales} měsíčně vás nejlevněji vyjde {plan}.",
     "legendPrice": "Cena plánu",
@@ -148,7 +152,7 @@
     "cta": "Přejít na {plan}, {price} měsíčně",
     "compare": "Porovnat všechny plány",
     "topEyebrow": "Nejvyšší plán",
-    "topTitle": "Vše z plánu {plan} je vaše"
+    "topTitle": "Vše z plánu <mark>{plan}</mark> je vaše"
   },
   "portal": {
     "opening": "Otevírá se Stripe",
@@ -182,7 +186,10 @@
       "teamSeats": "Místa v týmu, včetně vás: {used} z {cap}",
       "teamSeatsUnlimited": "Místa v týmu, včetně vás: {used}, bez limitu",
       "products": "Produkty: {used} z {cap}",
-      "productsUnlimited": "Produkty: {used}, bez limitu"
+      "productsUnlimited": "Produkty: {used}, bez limitu",
+      "left": "Zbývá {count}",
+      "over": "{count} nad limit",
+      "full": "Plno"
     },
     "overLimit": "Nad limitem tohoto plánu. Vše funguje dál; odeberte jednu položku nebo přejděte na vyšší plán, abyste mohli přidávat.",
     "invoicesTitle": "Fakturace a faktury",
@@ -191,6 +198,30 @@
     "noBilling": "Faktury a platební údaje se zde zobrazí, jakmile přejdete na placený plán.",
     "confirmed": "Máte plán {plan}. Děkujeme, že podporujete Square Share.",
     "pending": "Potvrzujeme vaši platbu se Stripe. Pokud se plán nezměnil, za chvíli stránku obnovte.",
-    "unavailable": "Váš plán se teď nedá zobrazit. Za chvíli stránku obnovte."
+    "unavailable": "Váš plán se teď nedá zobrazit. Za chvíli stránku obnovte.",
+    "cancelPlan": "Zrušit plán"
+  },
+  "cancel": {
+    "title": "Zrušit plán {plan}?",
+    "keepUntil": "Plán {plan} máte do {date}, potom přejdete na Free. Nic se neodstraní.",
+    "loseLegend": "Na Free není v ceně",
+    "reasonLegend": "Proč plán rušíte? <muted>(volitelné)</muted>",
+    "reasons": {
+      "too_expensive": "Příliš drahé",
+      "unused": "Využívám ho málo",
+      "missing_features": "Něco mi chybí",
+      "switched_service": "Přecházím jinam",
+      "temporary": "Jen na čas",
+      "other": "Něco jiného"
+    },
+    "detailLabel": "Co bychom mohli dělat lépe? <muted>(volitelné)</muted>",
+    "detailPlaceholder": "Stačí věta nebo dvě. Čteme každou odpověď.",
+    "keep": "Ponechat si plán",
+    "confirm": "Zrušit plán",
+    "cancelling": "Ruším",
+    "doneTitle": "Váš plán je zrušen",
+    "doneBody": "Plán {plan} máte do {date}. Rozmyslíte-li si to, můžete si plán do té doby kdykoli ponechat.",
+    "done": "Hotovo",
+    "kept": "Plán {plan} si ponecháváte. Obnoví se jako obvykle."
   }
 }

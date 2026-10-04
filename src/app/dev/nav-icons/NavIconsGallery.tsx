@@ -9,6 +9,7 @@ import {
   AnalyticsIcon,
   DiscoverIcon,
   OrdersIcon,
+  DiscountsIcon,
   OverviewIcon,
   PaymentsIcon,
   ProductsIcon,
@@ -43,6 +44,11 @@ const ICONS: Array<{
     story:
       "Wind tears down the whole flank, then thins out as the cart coasts to a stop.",
     icon: OrdersIcon,
+  },
+  {
+    name: "Discounts",
+    story: "The ticket shakes as if torn off a strip, the slash redraws, and its dots pop in.",
+    icon: DiscountsIcon,
   },
   {
     name: "Analytics",

@@ -1,6 +1,8 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import { ANON_KEY, GATEWAY_URL, SERVICE_KEY } from "./stack/keys.mjs";
 import { saleFee } from "../../src/lib/billing/fees.ts";
+import type { SignalKind } from "../../src/lib/analytics/signals.ts";
+import type { OrderChannel } from "../../src/types/order-view.ts";
 
 /** The app under test. Mirrors playwright.config.ts's baseURL, for the few
  *  helpers that fetch it directly rather than through a page. */
@@ -625,9 +627,9 @@ export async function clearContactCooldown(userId: string) {
 export async function seedSignals(
   accountId: string,
   signals: Array<{
-    kind: "storefront_view" | "product_click" | "email_signup" | "booking";
+    kind: SignalKind;
     storefrontId?: string;
-    channel?: "embed" | "marketplace" | "direct";
+    channel?: OrderChannel;
     visitorHash?: string;
     valueCents?: number;
     daysAgo?: number;
@@ -659,7 +661,7 @@ export async function seedOrders(
   sellerId: string,
   orders: Array<{
     amount_cents: number;
-    channel?: "embed" | "marketplace";
+    channel?: OrderChannel;
     status?: "paid" | "refunded" | "disputed" | "pending";
     buyer_email?: string;
     product_title?: string;
@@ -668,6 +670,8 @@ export async function seedOrders(
     selected_options?: { label: string; value: string }[];
     created_at?: string;
     quantity?: number;
+    /** The product sold (products.id), so the order can show its photo. */
+    product_id?: string | null;
     /** Delivery address, in the shape src/lib/orders/ship-to.ts reads. */
     ship_to?: Record<string, string> | null;
     /** Defaults to "shipped": a seeded order is history, so only a spec about
@@ -695,6 +699,7 @@ export async function seedOrders(
         // whose objects do not share their keys.
         selected_options: o.selected_options ?? [],
         quantity: o.quantity ?? 1,
+        product_id: o.product_id ?? null,
         ship_to: o.ship_to ?? null,
         fulfilment_status: fulfilment,
         shipped_at: fulfilment === "shipped" ? (o.created_at ?? new Date().toISOString()) : null,

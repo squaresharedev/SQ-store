@@ -16,11 +16,14 @@
 //     builds every URL from NEXT_PUBLIC_APP_URL.
 //   - The Customer Portal shows the owner's card, address and invoices, so
 //     opening it takes a fresh two-factor code on an account that has 2FA.
+//     Cancelling (and undoing it) shows nothing and is one click to reverse,
+//     so it takes no code: leaving must be easy.
 //   - Checkout and portal URLs are bearer links to a seller's billing: they go
 //     back to the owner's own browser and are never logged.
 
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/auth/session";
 import { STEP_UP_FIELDS, requireStepUpState } from "@/lib/auth/mfa";
 import { getActiveAccount } from "@/lib/team/account-context";
@@ -43,7 +46,12 @@ import {
   type ActionState,
 } from "@/lib/errors";
 import { unknownField } from "@/lib/validation/form-fields";
-import { readAccountBilling } from "@/lib/billing/account-plan";
+import { readAccountBilling, type AccountBilling } from "@/lib/billing/account-plan";
+import {
+  CANCELLATION_DETAIL_MAX,
+  CANCELLATION_REASONS,
+  type CancellationFeedback,
+} from "@/lib/billing/cancellation";
 import { ensureBillingCustomer } from "@/lib/billing/customer";
 import { isLiveSubscription } from "@/lib/billing/entitlement";
 import { recordFunnelEvent } from "@/lib/billing/funnel";
@@ -160,9 +168,10 @@ export async function startCheckout(input: unknown): Promise<CheckoutResult> {
   }
 }
 
+// No "cancel" flow: cancelling is cancelPlan below, in the app, where the
+// seller can say why. The portal is for the card, invoices and switches.
 const portalSchema = z.discriminatedUnion("flow", [
   z.object({ flow: z.literal("manage") }),
-  z.object({ flow: z.literal("cancel") }),
   z.object({ flow: z.literal("switch"), plan: z.enum(PAID_PLAN_IDS), interval: z.enum(BILLING_INTERVALS) }),
 ]);
 
@@ -171,8 +180,7 @@ export type PortalState = ActionState & { url?: string };
 
 /**
  * Open the Stripe Customer Portal for the active store's owner: its home
- * (card, invoices, address), or straight to confirming a switch of plan, or
- * to cancelling back to Free at the end of the period.
+ * (card, invoices, address), or straight to confirming a switch of plan.
  *
  * A form action (not a plain call) because it may ask for a two-factor code
  * first: the form renders <StepUpField> and the owner resubmits.
@@ -210,7 +218,7 @@ export async function openBillingPortal(_prev: PortalState, formData: FormData):
   const flow: PortalFlow =
     parsed.data.flow === "switch"
       ? { kind: "switch", plan: parsed.data.plan, interval: parsed.data.interval }
-      : { kind: parsed.data.flow };
+      : { kind: "manage" };
   if (flow.kind !== "manage" && !(subscriptionId && isLiveSubscription(status))) {
     return failed(invalidInput(msg("Errors.billing.noSubscription")));
   }
@@ -236,6 +244,159 @@ export async function openBillingPortal(_prev: PortalState, formData: FormData):
   } catch (error) {
     logBillingFailure("portal", error);
     return failed(error instanceof BillingConfigError ? unavailable() : serverError("openBillingPortal"));
+  }
+}
+
+/** Characters a note never needs and a reader can be fooled by: control
+ *  characters (line breaks are kept) and the bidi overrides and isolates,
+ *  which can make text display in a different order than it was typed. */
+const UNSAFE_NOTE_CHARS = /[\u0000-\u0009\u000b-\u001f\u007f\u202a-\u202e\u2066-\u2069]/g;
+
+const cancelSchema = z.object({
+  reason: z.enum(CANCELLATION_REASONS).nullish(),
+  // Cleaned, not refused: leaving must never fail over an invisible character.
+  detail: z
+    .string()
+    .nullish()
+    .transform((value) => value?.replace(UNSAFE_NOTE_CHARS, "").trim() || null)
+    .pipe(z.string().max(CANCELLATION_DETAIL_MAX).nullable()),
+});
+
+export type CancelPlanResult = { ok: true; endsAt: string } | ActionFailure;
+export type ResumePlanResult = { ok: true } | ActionFailure;
+
+/**
+ * Cancel the active store's paid plan at the end of the period it has paid
+ * for, with what the owner chose to tell us (both parts optional). The plan
+ * keeps working until then; the store then moves to Free and keeps
+ * everything it has. Reversible until the period ends (resumePlan).
+ *
+ * NO TWO-FACTOR STEP-UP, unlike the portal: cancelling must be easy, it is
+ * undone with one click until the period ends, and it is still the owner's
+ * alone and rate limited. (The portal asks for a code because it shows a card
+ * and invoices; this shows nothing.)
+ */
+export async function cancelPlan(input: unknown): Promise<CancelPlanResult> {
+  const owner = await billingOwner();
+  if (!owner.ok) return failure(owner.error);
+  const { account } = owner;
+
+  const parsed = cancelSchema.safeParse(input ?? {});
+  if (!parsed.success) return failure(invalidInput(msg("Errors.billing.invalidFeedback")));
+  const feedback = { reason: parsed.data.reason ?? null, detail: parsed.data.detail };
+
+  if (!(await rateLimit("billing_write", RATE_LIMITS.billingWrite))) {
+    return failure(rateLimited("changePlan"));
+  }
+
+  const provider = getBillingProvider();
+  if (!provider) return failure(unavailable());
+
+  const billing = await readAccountBilling(account.accountId);
+  if (!billing.ok) return failure(serverError("cancelPlan"));
+  const { customerId, subscriptionId, status, cancelAtPeriodEnd } = billing.billing;
+  if (!customerId || !subscriptionId || !isLiveSubscription(status) || cancelAtPeriodEnd) {
+    return failure(invalidInput(msg("Errors.billing.notCancellable")));
+  }
+
+  try {
+    await provider.scheduleCancellation(account.accountId, customerId, subscriptionId, feedback);
+    // What the provider actually did, not what was asked: only a plan that is
+    // now set to end gets a cancellation on record.
+    const after = await readAccountBilling(account.accountId);
+    if (!after.ok || !after.billing.cancelAtPeriodEnd || !after.billing.currentPeriodEnd) {
+      return failure(serverError("cancelPlan"));
+    }
+    await recordCancellation(account.accountId, after.billing, after.billing.currentPeriodEnd, feedback);
+    // No revalidatePath: it would re-render the page under the open dialog,
+    // swap the cancel button for "Keep my plan" and unmount the confirmation.
+    // The dialog refreshes the page itself when it closes.
+    return { ok: true, endsAt: after.billing.currentPeriodEnd };
+  } catch (error) {
+    logBillingFailure("cancel", error);
+    return failure(error instanceof BillingConfigError ? unavailable() : serverError("cancelPlan"));
+  }
+}
+
+/**
+ * Undo a scheduled cancellation while the paid period is still running, so
+ * the plan renews as before ("Keep my plan").
+ *
+ * Refused while the account has asked to be deleted: that request ends the
+ * plan on purpose (lib/settings/actions.ts requestAccountDeletion), and
+ * resuming it would keep charging an account that is about to be gone.
+ */
+export async function resumePlan(): Promise<ResumePlanResult> {
+  const owner = await billingOwner();
+  if (!owner.ok) return failure(owner.error);
+  const { account } = owner;
+
+  if (!(await rateLimit("billing_write", RATE_LIMITS.billingWrite))) {
+    return failure(rateLimited("changePlan"));
+  }
+
+  const provider = getBillingProvider();
+  if (!provider) return failure(unavailable());
+
+  const admin = createAdminClient();
+  const { data: profile, error: profileError } = await admin
+    .from("profiles")
+    .select("deletion_requested_at")
+    .eq("id", account.accountId)
+    .maybeSingle();
+  if (profileError) return failure(serverError("resumePlan"));
+  if (profile?.deletion_requested_at) return failure(invalidInput(msg("Errors.billing.deletionPending")));
+
+  const billing = await readAccountBilling(account.accountId);
+  if (!billing.ok) return failure(serverError("resumePlan"));
+  const { customerId, subscriptionId, status, cancelAtPeriodEnd, currentPeriodEnd } = billing.billing;
+  const periodRunning = currentPeriodEnd !== null && new Date(currentPeriodEnd).getTime() > Date.now();
+  if (!customerId || !subscriptionId || !isLiveSubscription(status) || !cancelAtPeriodEnd || !periodRunning) {
+    return failure(invalidInput(msg("Errors.billing.notResumable")));
+  }
+
+  try {
+    await provider.resumeSubscription(account.accountId, customerId, subscriptionId);
+    const { error } = await admin
+      .from("plan_cancellations")
+      .update({ resumed_at: new Date().toISOString() })
+      .eq("owner_id", account.accountId)
+      .is("resumed_at", null);
+    if (error) console.warn("[billing] resume not marked on the cancellation:", error.message);
+    // KeepPlanButton refreshes the page once its toast is up.
+    return { ok: true };
+  } catch (error) {
+    logBillingFailure("resume", error);
+    return failure(error instanceof BillingConfigError ? unavailable() : serverError("resumePlan"));
+  }
+}
+
+/** Postgres: a unique index refused the row. */
+const UNIQUE_VIOLATION = "23505";
+
+/**
+ * The cancellation on record, for the admin panel's feedback list. One open
+ * row per plan end: a double submit lands on the partial unique index and is
+ * dropped as already recorded, never counted twice. Best effort: the
+ * cancellation itself has happened, and a missing note must not tell the
+ * seller it failed.
+ */
+async function recordCancellation(
+  ownerId: string,
+  billing: AccountBilling,
+  endsAt: string,
+  feedback: CancellationFeedback,
+): Promise<void> {
+  const { error } = await createAdminClient().from("plan_cancellations").insert({
+    owner_id: ownerId,
+    plan: billing.storedPlan ?? billing.plan,
+    billing_interval: billing.interval,
+    reason: feedback.reason,
+    detail: feedback.detail,
+    ends_at: endsAt,
+  });
+  if (error && error.code !== UNIQUE_VIOLATION) {
+    console.warn("[billing] cancellation not recorded:", error.message);
   }
 }
 

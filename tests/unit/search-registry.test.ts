@@ -79,6 +79,10 @@ describe("local search registry — matching by intent", () => {
     ["payouts", "/payments"],
     ["stats", "/analytics"],
     ["shop", "/storefront"],
+    ["coupons", "/discounts"],
+    ["vouchers", "/discounts"],
+    ["promo code", "/discounts/new"],
+    ["run a sale", "/discounts/new"],
   ];
 
   for (const [query, expectedHref] of cases) {
@@ -220,6 +224,16 @@ describe("local search registry — permission gate", () => {
     expect(
       hrefs(searchLocalRegistry("invite", { role: "editor", limit: 50, t: english })),
     ).toContain("/settings/team#invite");
+  });
+
+  it("offers creating a discount to an editor, never to a viewer", () => {
+    // A discount is pricing power: the same gate as a product.
+    const viewer = searchLocalRegistry("discount", { role: "viewer", limit: 50, t: english });
+    expect(hrefs(viewer)).not.toContain("/discounts/new");
+    expect(hrefs(viewer)).toContain("/discounts");
+    expect(
+      hrefs(searchLocalRegistry("discount", { role: "editor", limit: 50, t: english })),
+    ).toContain("/discounts/new");
   });
 
   it("hides every gated action when the role is unknown", () => {

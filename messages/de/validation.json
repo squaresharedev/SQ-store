@@ -301,6 +301,11 @@
       "required": "Gib deine Bestellnummer ein.",
       "tooLong": "Diese Bestellnummer ist zu lang.",
       "unsupported": "Diese Bestellnummer enthält nicht unterstützte Zeichen."
+    },
+    "shareChannel": {
+      "required": "Benenne den Kanal oder lass das Feld leer.",
+      "tooLong": "Der Kanalname darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Der Kanalname enthält nicht unterstützte Zeichen."
     }
   },
   "email": {
@@ -360,7 +365,8 @@
     "factor": "Dieser Authenticator ist ungültig.",
     "reportTarget": "Dieses Element ist ungültig.",
     "moderationDecision": "Diese Entscheidung ist ungültig.",
-    "checkoutAttempt": "Dieser Checkout ist abgelaufen. Lade die Seite neu und versuche es erneut."
+    "checkoutAttempt": "Dieser Checkout ist abgelaufen. Lade die Seite neu und versuche es erneut.",
+    "product": "Dieses Produkt konnte nicht gefunden werden."
   },
   "handle": {
     "username": "Ein Benutzername muss 3 bis 30 Zeichen lang sein und darf nur Buchstaben, Zahlen und Unterstriche enthalten."
@@ -400,6 +406,21 @@
       "whole": "Ein Gratisverschand-Schwellenwert muss eine ganze Anzahl von Cent sein.",
       "tooSmall": "Ein Gratisverschand-Schwellenwert kann nicht negativ sein.",
       "tooBig": "Ein Gratisverschand-Schwellenwert darf {maximum} Cent nicht überschreiten."
+    },
+    "percentOff": {
+      "whole": "Der Prozentwert muss eine ganze Zahl sein.",
+      "tooSmall": "Der Prozentwert muss mindestens {minimum}% betragen.",
+      "tooBig": "Der Prozentwert darf höchstens {maximum}% betragen."
+    },
+    "amountOff": {
+      "whole": "Der Betrag muss eine ganze Anzahl von Cent sein.",
+      "tooSmall": "Der Betrag muss mehr als null sein.",
+      "tooBig": "Der Betrag ist zu groß."
+    },
+    "usageLimit": {
+      "whole": "Das Limit muss eine ganze Zahl sein.",
+      "tooSmall": "Das Limit muss mindestens {minimum} betragen.",
+      "tooBig": "Das Limit darf höchstens {maximum} betragen."
     }
   },
   "list": {
@@ -410,6 +431,10 @@
     "destinationCountries": {
       "tooMany": "Ein Ziel kann höchstens {maximum} Länder umfassen.",
       "duplicate": "Jedes Land darf pro Ziel nur einmal erscheinen."
+    },
+    "discountProducts": {
+      "tooMany": "Wähle bis zu {maximum} Produkte aus.",
+      "duplicate": "Jedes Produkt kann nur einmal ausgewählt werden."
     }
   },
   "settings": {
@@ -488,5 +513,18 @@
     "blocksTooMany": "Ein Schaufenster kann bis zu {maximum} Blöcke enthalten. Entferne einige Blöcke oder teile dieses Schaufenster in zwei.",
     "blocksDuplicate": "Rasterblöcke müssen eindeutig sein.",
     "blockOutsideCanvas": "Ein Block liegt außerhalb der Arbeitsfläche."
+  },
+  "discountCode": {
+    "code": "Ein Code besteht aus {min} bis {max} Buchstaben oder Ziffern und kann auch - oder _ enthalten."
+  },
+  "instant": {
+    "startsAt": "Wähle ein gültiges Startdatum und eine gültige Uhrzeit.",
+    "endsAt": "Wähle ein gültiges Enddatum und eine gültige Uhrzeit."
+  },
+  "discount": {
+    "productsRequired": "Wähle mindestens ein Produkt aus oder wende den Rabatt auf alle Produkte an.",
+    "endBeforeStart": "Das Ende muss nach dem Start liegen.",
+    "startInPast": "Der Start kann nicht in der Vergangenheit liegen. Wähle eine spätere Zeit oder starte jetzt.",
+    "endInPast": "Das Ende kann nicht in der Vergangenheit liegen."
   }
 }

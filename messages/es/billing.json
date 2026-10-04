@@ -25,14 +25,15 @@
     "intervalLabel": "Período de facturación",
     "month": "Mensual",
     "year": "Anual",
-    "yearlySaving": "2 meses gratis con el plan anual",
     "pastDue": "El último pago del plan {plan} no se procesó. Actualiza tu tarjeta para conservarlo.",
     "endsOn": "Tu plan {plan} termina el {date} y tu tienda pasa a Free en ese momento. Nada se elimina.",
     "ownerOnly": "Solo el propietario de la tienda puede cambiar el plan.",
     "soon": "Próximamente",
     "soonTitle": "Los planes de pago abren pronto. Mientras tanto, todo en Free sigue funcionando.",
     "finePrint": "Precios sin IVA. La comisión por venta se aplica a las ventas a través del proceso de pago de Square Share y se calcula sobre el precio del artículo, nunca sobre el envío. Las tarifas de procesamiento de tarjeta del propio Stripe se añaden aparte. Cancela cuando quieras: conservas tu plan hasta el final del período pagado.",
-    "unavailable": "Ahora mismo no se pueden mostrar los planes. Recarga la página en un momento."
+    "unavailable": "Ahora mismo no se pueden mostrar los planes. Recarga la página en un momento.",
+    "yearlyFree": "{count, plural, one {# mes gratis} other {# meses gratis}}",
+    "launchNote": "Un precio de lanzamiento es un precio introductorio: el precio habitual es el que aparece tachado."
   },
   "card": {
     "perMonth": "/ mes",
@@ -46,7 +47,12 @@
     "upgrade": "Actualizar a {plan}",
     "switch": "Cambiar a {plan}",
     "switchInterval": "{interval, select, year {Cambiar a anual} other {Cambiar a mensual}}",
-    "moveToFree": "Pasar a Free"
+    "moveToFree": "Pasar a Free",
+    "regularPrice": "Precio habitual",
+    "launchPrice": "Precio de lanzamiento",
+    "save": "Ahorra {percent}",
+    "launchExclVat": "Precio de lanzamiento (habitual {regular}), sin IVA",
+    "launchBilledYearly": "{amount} facturado una vez al año al precio de lanzamiento (habitual {regular}), sin IVA"
   },
   "features": {
     "fee": "{rate} de comisión por venta",
@@ -63,12 +69,10 @@
     "productsUnlimited": "Productos ilimitados"
   },
   "calculator": {
-    "eyebrow": "Calculadora",
     "title": "¿Qué plan te sale más barato?",
     "lead": "Desliza hasta tus ventas de un mes. Cada barra es el precio del plan más su comisión sobre esas ventas.",
     "salesLabel": "Ventas al mes",
     "salesAria": "Tus ventas mensuales, en euros",
-    "fromYourSales": "Rellenado con tus ventas de los últimos 30 días.",
     "perMonth": "al mes",
     "cheapest": "Con {sales} al mes en ventas, {plan} te sale más barato.",
     "legendPrice": "Precio del plan",
@@ -148,7 +152,7 @@
     "cta": "Actualizar a {plan}, {price} al mes",
     "compare": "Comparar todos los planes",
     "topEyebrow": "Plan superior",
-    "topTitle": "Todo lo de {plan} es tuyo"
+    "topTitle": "Todo lo de <mark>{plan}</mark> es tuyo"
   },
   "portal": {
     "opening": "Abriendo Stripe",
@@ -182,7 +186,10 @@
       "teamSeats": "Plazas del equipo, tú incluido: {used} de {cap}",
       "teamSeatsUnlimited": "Plazas del equipo, tú incluido: {used}, sin límite",
       "products": "Productos: {used} de {cap}",
-      "productsUnlimited": "Productos: {used}, sin límite"
+      "productsUnlimited": "Productos: {used}, sin límite",
+      "left": "Quedan {count}",
+      "over": "{count} de más",
+      "full": "Completo"
     },
     "overLimit": "Por encima del límite de este plan. Todo sigue funcionando; elimina uno o actualiza para añadir más.",
     "invoicesTitle": "Facturación y facturas",
@@ -191,6 +198,30 @@
     "noBilling": "Las facturas y los datos de pago aparecen aquí cuando tengas un plan de pago.",
     "confirmed": "Estás en {plan}. Gracias por apoyar Square Share.",
     "pending": "Estamos confirmando tu pago con Stripe. Recarga la página en un momento si el plan no ha cambiado.",
-    "unavailable": "Tu plan no puede mostrarse ahora mismo. Recarga la página en un momento."
+    "unavailable": "Tu plan no puede mostrarse ahora mismo. Recarga la página en un momento.",
+    "cancelPlan": "Cancelar plan"
+  },
+  "cancel": {
+    "title": "¿Cancelar {plan}?",
+    "keepUntil": "Conservas {plan} hasta el {date} y después pasas a Free. No se elimina nada.",
+    "loseLegend": "No incluido en Free",
+    "reasonLegend": "¿Por qué cancelas? <muted>(opcional)</muted>",
+    "reasons": {
+      "too_expensive": "Demasiado caro",
+      "unused": "Lo uso poco",
+      "missing_features": "Le falta algo",
+      "switched_service": "Me cambio de servicio",
+      "temporary": "Solo por un tiempo",
+      "other": "Otro motivo"
+    },
+    "detailLabel": "¿Qué podríamos mejorar? <muted>(opcional)</muted>",
+    "detailPlaceholder": "Con una o dos frases basta. Las leemos todas.",
+    "keep": "Mantener mi plan",
+    "confirm": "Cancelar plan",
+    "cancelling": "Cancelando",
+    "doneTitle": "Tu plan está cancelado",
+    "doneBody": "Conservas {plan} hasta el {date}. ¿Has cambiado de opinión? Mantén tu plan en cualquier momento antes de esa fecha.",
+    "done": "Hecho",
+    "kept": "Sigues con {plan}. Se renueva como siempre."
   }
 }

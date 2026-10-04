@@ -2,15 +2,17 @@
 
 import * as React from "react";
 import { useActionState } from "react";
+import { Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { authenticate } from "@/lib/auth/actions";
 import { actionError, failed, type ActionState } from "@/lib/errors";
 import { msg } from "@/i18n/types";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
+import { HeroMark } from "@/components/ui/HeroMark";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Modal } from "@/components/ui/modal";
+import { Modal, ModalActions } from "@/components/ui/modal";
 import { Spinner } from "@/components/ui/spinner";
 
 const INITIAL: ActionState = {};
@@ -53,9 +55,9 @@ export function PasswordResetModal({
     <Modal
       open={open}
       onClose={onClose}
+      visual={<HeroMark icon={Mail} />}
       title={t("title")}
       description={t("description")}
-      className="rounded-none sm:rounded-none"
     >
       <form action={formAction} className="flex flex-col gap-4" noValidate>
         {/* The reset branch ignores `next` for its own redirect, but the hidden
@@ -92,7 +94,7 @@ export function PasswordResetModal({
           </div>
         )}
 
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <ModalActions>
           <Button type="button" variant="ghost" onClick={onClose}>
             {t("backToSignIn")}
           </Button>
@@ -106,7 +108,7 @@ export function PasswordResetModal({
               t("send")
             )}
           </Button>
-        </div>
+        </ModalActions>
       </form>
     </Modal>
   );

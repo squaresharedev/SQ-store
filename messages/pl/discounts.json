@@ -1,0 +1,165 @@
+{
+  "metadata": {
+    "title": "Rabaty"
+  },
+  "page": {
+    "title": "Rabaty",
+    "subtitle": "Uruchom obniżkę lub udostępnij kod i sprawdź, które kanały przynoszą zamówienia.",
+    "create": "Utwórz rabat"
+  },
+  "empty": {
+    "title": "Jeszcze żadnych rabatów",
+    "hint": "Obniżka cen dotyczy wszystkich i trwa tak długo, jak wybierzesz. Kod jest dla osób, którym go udostępniasz, i pokazuje, skąd przyszli twoi kupujący.",
+    "hintReadOnly": "Właściciele i edytorzy mogą tu tworzyć rabaty."
+  },
+  "terms": {
+    "percentEach": "{percent}% od każdego produktu",
+    "amountEach": "{amount} taniej od każdego produktu",
+    "percentOrder": "{percent}% od zamówienia",
+    "amountOrder": "{amount} taniej od zamówienia",
+    "allProducts": "Wszystkie produkty",
+    "someProducts": "{count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}}",
+    "kindCode": "Kod rabatowy",
+    "kindAutomatic": "Automatyczna obniżka cen",
+    "status": {
+      "scheduled": "Zaplanowany",
+      "active": "Aktywny",
+      "paused": "Wyłączony",
+      "used_up": "Wyczerpany",
+      "ended": "Zakończony"
+    }
+  },
+  "performance": {
+    "title": "Jak idą twoje rabaty",
+    "orders": "Zamówienia z rabatem",
+    "revenue": "Przychód z tych zamówień",
+    "given": "Udzielone rabaty",
+    "none": "Jeszcze nic",
+    "channelsTitle": "Zamówienia według kanałów",
+    "channelsDescription": "Kody są liczone pod kanałem, na którym je udostępniono, albo pod samym kodem, jeśli nie podano nazwy kanału.",
+    "channelsEmpty": "Jeszcze żadnych zamówień z rabatem.",
+    "automatic": "Automatyczne obniżki cen",
+    "series": "Zamówienia"
+  },
+  "list": {
+    "title": "Twoje rabaty",
+    "none": "Teraz brak rabatów. Usunięte rabaty nadal wliczają się do statystyk powyżej.",
+    "channel": "Udostępniono na {channel}",
+    "startsOn": "Zaczyna się {date}",
+    "endsOn": "Kończy się {date}",
+    "ended": "Zakończono {date}",
+    "noEnd": "Bez daty końca",
+    "orders": "{orders, plural, =0 {Jeszcze żadnych zamówień} one {# zamówienie} few {# zamówienia} many {# zamówień} other {# zamówienia}}",
+    "uses": "{uses} z {limit} użyć",
+    "switchLabel": "Włączony",
+    "edit": "Edytuj",
+    "endNow": "Zakończ teraz",
+    "delete": "Usuń",
+    "copy": {
+      "copy": "Kopiuj kod",
+      "copied": "Skopiowano kod",
+      "failed": "Nie udało się skopiować kodu. Zaznacz i skopiuj ręcznie."
+    }
+  },
+  "confirmDelete": {
+    "title": "Usunąć ten rabat?",
+    "body": "Przestanie być stosowany natychmiast. Przyniesione przez niego zamówienia nadal są liczone.",
+    "confirm": "Usuń rabat"
+  },
+  "confirmEnd": {
+    "title": "Zakończyć tę obniżkę teraz?",
+    "body": "Ceny wracają do normy natychmiast. Aby uruchomić ją ponownie, utwórz nową obniżkę.",
+    "confirm": "Zakończ obniżkę"
+  },
+  "toast": {
+    "deleted": "Rabat usunięty.",
+    "ended": "Obniżka zakończona.",
+    "switchedOn": "Kod włączony.",
+    "switchedOff": "Kod wyłączony."
+  },
+  "form": {
+    "newTitle": "Nowy rabat",
+    "editTitle": "Edytuj rabat",
+    "back": "Wróć do rabatów",
+    "kind": {
+      "title": "Jaki rodzaj rabatu?",
+      "code": "Kod rabatowy",
+      "codeHint": "Kupujący wpisują go przy kasie. Udostępnij go na Instagramie, w newsletterze lub przez twórcę i sprawdź, który kanał sprzedaje.",
+      "automatic": "Automatyczna obniżka cen",
+      "automaticHint": "Wszyscy widzą niższą cenę na stronach twoich produktów. Kod nie jest potrzebny.",
+      "fixed": "Rodzaju rabatu nie można zmienić. Aby zmienić, utwórz nowy."
+    },
+    "code": {
+      "title": "Kod",
+      "description": "To, co kupujący wpisują przy kasie.",
+      "label": "Kod",
+      "generate": "Wygeneruj",
+      "hint": "3 do 24 liter lub cyfr. Kupujący mogą wpisać go dużymi lub małymi literami."
+    },
+    "channel": {
+      "label": "Kanał (opcjonalny)",
+      "hint": "Gdzie udostępnisz ten kod, abyś mógł sprawdzić, który kanał przynosi zamówienia.",
+      "suggestions": "Sugerowane kanały",
+      "newsletter": "Newsletter",
+      "creator": "Twórca"
+    },
+    "value": {
+      "title": "Rabat",
+      "each": "Odejmowany od ceny każdego produktu.",
+      "order": "Odejmowany od produktów w zamówieniu. Dostawa nie jest objęta rabatem.",
+      "percent": "Procent",
+      "amount": "Kwota stała",
+      "percentLabel": "Procent rabatu",
+      "amountLabel": "Kwota rabatu",
+      "currencyHint": "Dotyczy tylko produktów w tej walucie."
+    },
+    "products": {
+      "title": "Dotyczy",
+      "all": "Wszystkie produkty",
+      "some": "Wybrane produkty",
+      "summary": "{count, plural, =0 {Wybierz produkty} one {Wybrano # produkt} few {Wybrano # produkty} many {Wybrano # produktów} other {Wybrano # produktu}}",
+      "search": "Szukaj produktów",
+      "none": "Żadne produkty nie pasują."
+    },
+    "schedule": {
+      "title": "Kiedy",
+      "timeZone": "Czasy podane są w twoim czasie ({zone}).",
+      "starts": "Zaczyna się",
+      "ends": "Kończy się",
+      "now": "Teraz",
+      "later": "Później",
+      "noEnd": "Bez końca",
+      "onDate": "W określonym dniu",
+      "date": "Data",
+      "time": "Godzina",
+      "started": "Rozpoczęto {date}",
+      "runFor": "Czas trwania",
+      "preset": {
+        "day": "1 dzień",
+        "threeDays": "3 dni",
+        "week": "1 tydzień",
+        "month": "1 miesiąc"
+      }
+    },
+    "limit": {
+      "title": "Limity",
+      "label": "Ogranicz liczbę zamówień",
+      "count": "Liczba zamówień"
+    },
+    "enabled": "Kod jest włączony",
+    "locked": "Ta obniżka już się rozpoczęła, więc można zmienić tylko jej koniec. Aby zmienić cokolwiek innego, zakończ ją i utwórz nową.",
+    "summary": {
+      "title": "Podsumowanie",
+      "startsNow": "Zaczyna się teraz",
+      "starts": "Zaczyna się {date}",
+      "ends": "Kończy się {date}",
+      "noEnd": "Bez daty końca",
+      "example": "Przykład: {title} w cenie {regular} kosztuje {now}."
+    },
+    "create": "Utwórz rabat",
+    "save": "Zapisz zmiany",
+    "saving": "Zapisywanie",
+    "created": "Rabat utworzony.",
+    "saved": "Rabat zapisany."
+  }
+}

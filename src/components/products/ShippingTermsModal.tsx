@@ -36,12 +36,13 @@ export function ShippingTermsModal({
       open={open}
       onClose={onClose}
       title={t("modalTitle")}
-      className="sm:max-w-2xl"
+      size="2xl"
     >
       {/* No `continueHref`: "Continue to your storefront" has nowhere sensible
           to go from mid-product-edit, so ShippingSection omits it entirely
-          when the prop isn't passed. */}
-      <ShippingSection policy={policy} />
+          when the prop isn't passed. `compact`: a dialog is not a page, so
+          each card is one line that opens instead of six forms to scroll. */}
+      <ShippingSection policy={policy} compact />
     </Modal>
   );
 }

@@ -147,7 +147,8 @@
       "thankYouCelebration": "Thank-you celebration",
       "checkoutPayButton": "Pay button",
       "productPagePhoto": "Product page photo",
-      "checkoutPhoto": "Checkout and thank-you photo"
+      "checkoutPhoto": "Checkout photo",
+      "thanksPhoto": "Thank-you page photo"
     }
   },
   "editorSearch": {
@@ -1365,7 +1366,8 @@
   "pagePhoto": {
     "label": "Photo",
     "infoLabel": "How the photo is used",
-    "info": "Drawn behind the page and tinted with the page color, so the text stays readable. Change the color to make the photo lighter or darker.",
-    "remove": "Remove photo"
+    "info": "Drawn behind the page. The overlay uses the page color to keep the text readable; turn it off to show the photo as it is.",
+    "remove": "Remove photo",
+    "overlay": "Color overlay"
   }
 }

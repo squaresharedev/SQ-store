@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Image as ImageIcon } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { iconNudgeRightClass, infoTextClass } from "@/components/ui/control-styles";
 import { badgeClass } from "@/components/ui/surface-styles";
@@ -14,6 +14,7 @@ import { orderDetailPath } from "@/lib/orders/paths";
 import type { DashboardOrder, OrderStatus } from "@/lib/dashboard/queries";
 import { formatCents, formatOrderDate } from "@/lib/dashboard/format";
 import type { OrderView } from "@/types/order-view";
+import type { OrderGlance } from "@/lib/orders/queries";
 import { ModuleCard, ModuleEmptyText } from "./ModuleCard";
 
 
@@ -39,10 +40,25 @@ function StatusBadge({ status }: { status: OrderStatus }) {
   );
 }
 
+/** The product's photo at row size; a quiet placeholder when it has none. */
+function OrderThumb({ url }: { url: string | null }) {
+  return (
+    <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-muted">
+      {url ? (
+        // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
+        <img src={url} alt="" loading="lazy" className="size-full object-cover" />
+      ) : (
+        <ImageIcon className="size-4 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
+      )}
+    </span>
+  );
+}
+
 /** The latest ~5 orders across all statuses. */
 export function RecentOrders({
   orders,
   details = [],
+  glances = {},
   id,
   canFulfil = false,
 }: {
@@ -50,6 +66,9 @@ export function RecentOrders({
   /** Full detail for these rows, read with the page. A row found here opens
    *  its panel in place, instantly; one that is not falls back to its link. */
   details?: OrderView[];
+  /** Photo and unit count per row, keyed by order id. A row without one shows
+   *  the placeholder tile and counts as a single unit. */
+  glances?: Record<string, OrderGlance>;
   id?: string;
   /** Whether the viewer may mark orders shipped from the panel. */
   canFulfil?: boolean;
@@ -67,6 +86,8 @@ export function RecentOrders({
         <ul className="divide-y divide-border">
           {orders.map((order, index) => {
             const detail = order.id ? detailById.get(order.id) : undefined;
+            const glance = order.id ? glances[order.id] : undefined;
+            const quantity = glance?.quantity ?? detail?.quantity ?? 1;
             return (
               <li
                 key={order.id ?? `${order.created_at}-${index}`}
@@ -87,21 +108,20 @@ export function RecentOrders({
                     setSelected(detail);
                   }}
                   aria-haspopup={detail ? "dialog" : undefined}
-                  className="group/btn -mx-2 flex items-center gap-2 rounded-sm px-2 py-2.5 transition-colors duration-base ease-standard hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+                  className="group/btn -mx-2 flex items-center gap-3 rounded-sm px-2 py-2.5 transition-colors duration-base ease-standard hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
                 >
+                  <OrderThumb url={glance?.photoUrl ?? null} />
                   <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-3 gap-y-1">
                     <div className="min-w-0 flex-1">
+                      {/* "2 × Lamp" when more than one was bought; a lone
+                          unit is just its name (same rule as the orders list). */}
                       <p className="truncate text-sm font-medium text-foreground">
-                        {order.product_title}
+                        {quantity > 1
+                          ? t("Orders.detail.packLine", { quantity, title: order.product_title })
+                          : order.product_title}
                       </p>
                       <p className={infoTextClass}>
-                        {t(
-                          order.channel === "marketplace"
-                            ? "Orders.channel.marketplace"
-                            : order.channel === "direct"
-                              ? "Orders.channel.direct"
-                              : "Orders.channel.embed",
-                        )}{" "}
+                        {t(`Orders.channel.${order.channel}`)}{" "}
                         ·{" "}
                         {formatOrderDate(order.created_at, locale)}
                       </p>

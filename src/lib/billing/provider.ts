@@ -16,6 +16,7 @@
 
 import type { Locale } from "@/i18n/locales";
 import type { BillingProviderId } from "@/lib/billing/availability";
+import type { CancellationFeedback } from "@/lib/billing/cancellation";
 import type { BillingInterval, PaidPlanId } from "@/lib/billing/plans";
 import type { ApplyResult } from "@/lib/billing/sync";
 
@@ -33,14 +34,17 @@ export type BillingCustomerDetails = {
   locale: Locale;
 };
 
-/** What a Customer Portal session opens on. */
+/**
+ * What a Customer Portal session opens on. There is deliberately no "cancel":
+ * cancelling happens in the app (cancelPlan in lib/billing/actions.ts), where
+ * the seller can say why, and the Stripe portal configuration must have
+ * `subscription_cancel` switched OFF so its home page cannot go around that.
+ */
 export type PortalFlow =
   /** The portal's home: card, invoices, address, VAT ID. */
   | { kind: "manage" }
   /** Straight to "confirm the switch to this plan", with Stripe's proration. */
-  | { kind: "switch"; plan: PaidPlanId; interval: BillingInterval }
-  /** Straight to "cancel at the end of the period" (back to Free). */
-  | { kind: "cancel" };
+  | { kind: "switch"; plan: PaidPlanId; interval: BillingInterval };
 
 export type CheckoutRequest = {
   ownerId: string;
@@ -73,11 +77,24 @@ export interface BillingProvider {
   /** Re-read the customer's subscriptions and write seller_billing. */
   syncCustomer(ownerId: string, customerId: string): Promise<ApplyResult>;
   /**
-   * End a subscription at the close of its paid period, without the seller
-   * clicking through the portal (an account deletion request does this).
-   * Writes the result to seller_billing.
+   * End a subscription at the close of its paid period: the seller's own
+   * cancel (with what they told us, passed on to the provider), or an account
+   * deletion request. Writes the result to seller_billing. Safe to call again
+   * after a resume: each call is its own request, never a replay.
    */
-  scheduleCancellation(ownerId: string, customerId: string, subscriptionId: string): Promise<void>;
+  scheduleCancellation(
+    ownerId: string,
+    customerId: string,
+    subscriptionId: string,
+    feedback?: CancellationFeedback,
+  ): Promise<void>;
+  /**
+   * Undo a scheduled cancellation while the paid period is still running, so
+   * the subscription renews as before. Refuses a subscription that is not
+   * this customer's, already over, or past its period end. Writes the result
+   * to seller_billing.
+   */
+  resumeSubscription(ownerId: string, customerId: string, subscriptionId: string): Promise<void>;
   /** The customer a checkout session belongs to, or null if unknown. */
   checkoutSessionCustomer(sessionId: string): Promise<string | null>;
 }

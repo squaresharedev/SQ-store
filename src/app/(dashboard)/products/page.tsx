@@ -12,6 +12,7 @@ import { PRODUCT_SORTS, type ProductSort } from "@/lib/products/sort";
 import { PRODUCT_STATUSES, type ProductFilters, type ProductStatus } from "@/types/product";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
+import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { DEV_PREVIEW_PARAM, previewsEmptyList } from "@/lib/dev/preview";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -77,6 +78,11 @@ export default async function ProductsPage({
     getProductPlacements(),
   ]);
   const canWrite = can(account?.role, "products.write");
+  // React-cached, and the dashboard shell has already asked it this request,
+  // so the buy button dialog's "seller details missing" state costs no read.
+  const identity = account
+    ? await getTraderIdentityStatus(account.accountId)
+    : { ok: true as const, missing: [] };
   const t = await getTranslations("Products.page");
 
   return (
@@ -90,6 +96,7 @@ export default async function ProductsPage({
         canWrite={canWrite}
         sales={sales}
         placements={placements}
+        missingTraderDetails={identity.ok ? identity.missing : []}
         heading={
           <div>
             <h1 className="text-3xl font-semibold text-foreground md:text-4xl">

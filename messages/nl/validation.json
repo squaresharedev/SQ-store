@@ -301,6 +301,11 @@
       "required": "Voer je bestelnummer in.",
       "tooLong": "Dat bestelnummer is te lang.",
       "unsupported": "Dat bestelnummer bevat niet-ondersteunde tekens."
+    },
+    "shareChannel": {
+      "required": "Geef het kanaal een naam, of laat het leeg.",
+      "tooLong": "De kanaalnaam mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "De kanaalnaam bevat niet-ondersteunde tekens."
     }
   },
   "email": {
@@ -360,7 +365,8 @@
     "factor": "Die authenticator is niet geldig.",
     "reportTarget": "Dat item is niet geldig.",
     "moderationDecision": "Die beslissing is niet geldig.",
-    "checkoutAttempt": "Deze afrekenpoging is verlopen. Laad de pagina opnieuw en probeer het opnieuw."
+    "checkoutAttempt": "Deze afrekenpoging is verlopen. Laad de pagina opnieuw en probeer het opnieuw.",
+    "product": "Dat product kon niet worden gevonden."
   },
   "handle": {
     "username": "Een gebruikersnaam moet 3 tot 30 tekens lang zijn en mag alleen letters, cijfers en underscores bevatten."
@@ -400,6 +406,21 @@
       "whole": "Een drempelwaarde voor gratis verzending moet een geheel aantal centen zijn.",
       "tooSmall": "Een drempelwaarde voor gratis verzending kan niet negatief zijn.",
       "tooBig": "Een drempelwaarde voor gratis verzending mag {maximum} cent niet overschrijden."
+    },
+    "percentOff": {
+      "whole": "Het percentage moet een heel getal zijn.",
+      "tooSmall": "Het percentage moet minstens {minimum}% zijn.",
+      "tooBig": "Het percentage mag maximaal {maximum}% zijn."
+    },
+    "amountOff": {
+      "whole": "Het bedrag moet een heel aantal centen zijn.",
+      "tooSmall": "Het bedrag moet meer dan nul zijn.",
+      "tooBig": "Het bedrag is te hoog."
+    },
+    "usageLimit": {
+      "whole": "De limiet moet een heel getal zijn.",
+      "tooSmall": "De limiet moet minstens {minimum} zijn.",
+      "tooBig": "De limiet mag maximaal {maximum} zijn."
     }
   },
   "list": {
@@ -410,6 +431,10 @@
     "destinationCountries": {
       "tooMany": "Een bestemming kan maximaal {maximum} landen omvatten.",
       "duplicate": "Elk land kan slechts eenmaal per bestemming voorkomen."
+    },
+    "discountProducts": {
+      "tooMany": "Kies maximaal {maximum} producten.",
+      "duplicate": "Elk product kan maar eenmaal worden gekozen."
     }
   },
   "settings": {
@@ -488,5 +513,18 @@
     "blocksTooMany": "Een etalage kan maximaal {maximum} blokken bevatten. Verwijder een paar blokken of splits deze etalage in tweeën.",
     "blocksDuplicate": "Rasterblokken moeten uniek zijn.",
     "blockOutsideCanvas": "Een blok staat buiten het canvas."
+  },
+  "discountCode": {
+    "code": "Een code bestaat uit {min} tot {max} letters of cijfers, en mag ook - of _ bevatten."
+  },
+  "instant": {
+    "startsAt": "Kies een geldige startdatum en -tijd.",
+    "endsAt": "Kies een geldige einddatum en -tijd."
+  },
+  "discount": {
+    "productsRequired": "Kies minstens één product, of pas de korting toe op alle producten.",
+    "endBeforeStart": "Het einde moet na het begin liggen.",
+    "startInPast": "Het begin kan niet in het verleden liggen. Kies een later tijdstip, of start nu.",
+    "endInPast": "Het einde kan niet in het verleden liggen."
   }
 }

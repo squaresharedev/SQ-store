@@ -17,3 +17,11 @@
 // ResponsiveContainer already owns that: axis ticks thin out via minTickGap
 // rather than overlapping as the column narrows.
 export const CHART_HEIGHT = 256;
+
+// The revenue hero is the one chart that is not a card and not this height:
+// it is the page's headline, drawn edge to edge, so it gets more room. The
+// class is the same 320px for the two places that hold the hero's box without
+// a chart in it (its empty state and the loading skeleton), so neither resizes
+// the page when the chart arrives.
+export const HERO_CHART_HEIGHT = 320;
+export const heroChartHeightClass = "h-80";

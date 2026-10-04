@@ -97,7 +97,8 @@
     "copyLink": "Copia link prodotto",
     "openPage": "Apri pagina prodotto",
     "unitsSold": "{count, plural, one {{count} venduto} many {{count} venduti} other {{count} venduti}}",
-    "noSales": "Ancora nessuna vendita"
+    "noSales": "Ancora nessuna vendita",
+    "addToWebsite": "Aggiungi al tuo sito"
   },
   "removal": {
     "badge": "Rimosso",
@@ -332,7 +333,9 @@
       "title": "Scartare le modifiche?",
       "editDescription": "Le modifiche che hai fatto a questo prodotto non sono ancora state salvate.",
       "newDescription": "Questo prodotto non è ancora stato salvato, quindi non verrà mantenuto nulla.",
-      "discard": "Scarta"
+      "discard": "Scarta modifiche",
+      "keepEditing": "Continua a modificare",
+      "saveAndLeave": "Salva ed esci"
     },
     "nav": {
       "label": "Sezioni del modulo",
@@ -636,5 +639,70 @@
     },
     "footer": "SquareShare · {reference} · Pagina {page} di {total}",
     "generated": "Generato il {date}."
+  },
+  "buyButton": {
+    "title": "Aggiungi un pulsante di acquisto al tuo sito",
+    "summary": "Il tuo pulsante sul tuo sito porta gli acquirenti alla pagina e al checkout di «{title}».",
+    "storefrontLabel": "Design della pagina",
+    "flow": {
+      "button": "Il tuo pulsante",
+      "checkout": "Checkout"
+    },
+    "methods": "Come aggiungerlo",
+    "method": {
+      "link": "Link",
+      "html": "HTML",
+      "agent": "Agente IA"
+    },
+    "hint": {
+      "link": "Incollalo nell’impostazione del link del pulsante.",
+      "html": "Incollalo dove deve comparire il pulsante.",
+      "agent": "Incollalo nel tuo agente IA di programmazione."
+    },
+    "copy": {
+      "link": {
+        "copy": "Copia il link",
+        "copied": "Link copiato",
+        "failed": "Impossibile copiare il link. Selezionalo e copialo tu."
+      },
+      "html": {
+        "copy": "Copia l’HTML",
+        "copied": "HTML copiato",
+        "failed": "Impossibile copiare l’HTML. Selezionalo e copialo tu."
+      },
+      "agent": {
+        "copy": "Copia il prompt",
+        "copied": "Prompt copiato",
+        "failed": "Impossibile copiare il prompt. Selezionalo e copialo tu."
+      }
+    },
+    "snippetText": "Acquista ora",
+    "prompt": {
+      "task": "Aggiungi un pulsante di acquisto al mio sito. Deve puntare esattamente a questo URL:",
+      "html": "In semplice HTML è:",
+      "style": "Dagli lo stesso stile degli altri pulsanti del mio sito. Se il sito ha già un pulsante di acquisto per questo prodotto, fai puntare quello all’URL invece di aggiungerne un secondo.",
+      "normal": "Deve aprirsi come una pagina normale nella stessa scheda. Non caricarla in un iframe, in un pop-up o in una lightbox: la pagina rifiuta di essere mostrata in un frame.",
+      "exact": "Non servono script, SDK o chiamate API. Lascia l’URL esattamente com’è, compreso tutto ciò che segue il punto interrogativo."
+    },
+    "tryIt": "Prova il tuo pulsante",
+    "tracking": "Compare in Statistiche come «Pulsante sul tuo sito».",
+    "blocked": {
+      "removed": "Questo prodotto è stato rimosso. Aprilo per vedere perché.",
+      "draft": "Questo prodotto è una bozza. Impostalo prima su Attivo.",
+      "notPlaced": "Metti prima questo prodotto in una vetrina, così avrà una pagina su cui arrivano gli acquirenti."
+    },
+    "editProduct": "Modifica prodotto",
+    "goToStorefronts": "Vai alle vetrine",
+    "embedPointer": "Vendi un solo prodotto? Invece di incorporare tutta la vetrina, dagli un pulsante di acquisto sul tuo sito: in Prodotti, apri il suo menu e scegli «Aggiungi al tuo sito».",
+    "embedPointerLink": "Vai ai prodotti",
+    "demo": {
+      "play": "Riproduci l’animazione",
+      "pause": "Metti in pausa l’animazione",
+      "siteLine": "Il tuo sito, il tuo design.",
+      "email": "E-mail",
+      "card": "Numero carta",
+      "total": "Totale",
+      "pay": "Paga {price}"
+    }
   }
 }

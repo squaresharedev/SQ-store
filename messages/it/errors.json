@@ -56,6 +56,10 @@
     "manageBilling": {
       "withRole": "Il tuo ruolo di {role, select, owner {proprietario} editor {editor} viewer {visualizzatore} other {{role}}} non consente di cambiare il piano di questo negozio.",
       "noRole": "Non hai il permesso di cambiare il piano di questo negozio."
+    },
+    "manageDiscounts": {
+      "withRole": "Il tuo ruolo {role, select, owner {Proprietario} editor {Editor} viewer {Visualizzatore} other {{role}}} non può gestire gli sconti in questo negozio.",
+      "noRole": "Non hai il permesso di gestire gli sconti in questo negozio."
     }
   },
   "notFound": {
@@ -63,7 +67,8 @@
     "product": "Non è stato possibile trovare quel prodotto.",
     "storefront": "Non è stato possibile trovare quella vetrina.",
     "item": "Non è stato possibile trovare questo elemento.",
-    "order": "Non è stato possibile trovare quell'ordine."
+    "order": "Non è stato possibile trovare quell'ordine.",
+    "discount": "Sconto non trovato."
   },
   "rateLimited": {
     "fix": "Attendi qualche minuto e riprova. Se non c’è nulla che si sta ritentando in background, aggiorna prima la pagina.",
@@ -82,7 +87,8 @@
     "fileAppeal": "Troppi tentativi di inviare una contestazione in poco tempo.",
     "fulfilOrders": "Troppi tentativi di segnare ordini come spediti in poco tempo.",
     "readCheckoutSettings": "Troppi tentativi di leggere le impostazioni del checkout in poco tempo.",
-    "changePlan": "Hai avviato troppe modifiche di piano in poco tempo."
+    "changePlan": "Hai avviato troppe modifiche di piano in poco tempo.",
+    "saveDiscounts": "Troppe modifiche agli sconti in poco tempo."
   },
   "serverError": {
     "fix": "Di solito è temporaneo. Attendi un momento e riprova; se continua a non funzionare, aggiorna la pagina.",
@@ -115,7 +121,10 @@
     "saveCheckoutSettings": "Non è stato possibile salvare le impostazioni del tuo checkout per un problema dalla nostra parte.",
     "loadPlans": "Non è stato possibile caricare il tuo piano a causa di un problema da parte nostra.",
     "startCheckout": "Non è stato possibile aprire il checkout a causa di un problema da parte nostra.",
-    "openBillingPortal": "Non è stato possibile aprire i tuoi dati di fatturazione a causa di un problema da parte nostra."
+    "openBillingPortal": "Non è stato possibile aprire i tuoi dati di fatturazione a causa di un problema da parte nostra.",
+    "cancelPlan": "Non è stato possibile annullare il tuo piano a causa di un problema da parte nostra.",
+    "resumePlan": "Non è stato possibile mantenere il tuo piano a causa di un problema da parte nostra.",
+    "saveDiscount": "Non è stato possibile salvare lo sconto per un problema dalla nostra parte."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Questo prodotto è stato rimosso, non messo in pausa.} storefront {Questa vetrina è stata rimossa, non messa in pausa.} other {Questo elemento è stato rimosso, non messo in pausa.}}",
@@ -602,7 +611,11 @@
     "alreadySubscribed": "Il tuo negozio ha già un piano a pagamento. Cambia piano invece di acquistarne un secondo.",
     "noBillingAccount": "Questo negozio non ha ancora un account di fatturazione. Passa prima a un piano a pagamento.",
     "noSubscription": "Questo negozio non ha un piano a pagamento da modificare. Scegline uno per passare a un piano superiore.",
-    "ownerOnlyFix": "Solo il proprietario del negozio può cambiare il piano. Chiedi a lui o passa al tuo negozio."
+    "ownerOnlyFix": "Solo il proprietario del negozio può cambiare il piano. Chiedi a lui o passa al tuo negozio.",
+    "invalidFeedback": "Non è stato possibile leggere quel feedback.",
+    "notCancellable": "Questo negozio non ha un piano a pagamento da annullare, oppure è già impostato per terminare.",
+    "notResumable": "Questo piano non è impostato per terminare, oppure il periodo pagato è già finito.",
+    "deletionPending": "Il tuo account è in attesa di eliminazione, quindi il suo piano termina con esso. Annulla prima l’eliminazione per mantenere il tuo piano."
   },
   "planLimit": {
     "storefronts": "Il tuo piano {plan, select, free {Free} starter {Starter} pro {Pro} other {attuale}} include {cap, plural, one {# vetrina} other {# vetrine}} e il tuo negozio le ha già tutte.",
@@ -621,5 +634,23 @@
     "planRequiredFix": "Passa a un piano superiore dalla pagina Piani per esportare i tuoi ordini.",
     "rateLimited": "Hai fatto molte esportazioni in poco tempo.",
     "rateLimitedFix": "Aspetta qualche minuto, poi riprova."
+  },
+  "discounts": {
+    "invalid": {
+      "message": "I dati dello sconto non hanno superato la convalida.",
+      "fix": "Controlla i campi evidenziati, poi prova a salvare di nuovo."
+    },
+    "codeTaken": {
+      "message": "Quel codice è già in uso in questo negozio.",
+      "fix": "Scegli un codice diverso, oppure elimina prima l'altro sconto."
+    },
+    "started": {
+      "message": "Questa promozione è già iniziata, quindi le sue condizioni non possono essere modificate.",
+      "fix": "Terminala e crea una nuova promozione con le nuove condizioni. Le norme UE sulla visualizzazione delle riduzioni di prezzo si basano sulla cronologia della promozione così com'era."
+    },
+    "tooMany": {
+      "message": "Questo negozio ha raggiunto il numero massimo di sconti consentiti.",
+      "fix": "Elimina gli sconti che non usi più, poi riprova."
+    }
   }
 }

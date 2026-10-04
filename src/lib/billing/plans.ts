@@ -93,6 +93,19 @@ export type PlanDefinition = {
    * gets `_v2` and existing subscribers keep paying `_v1` (grandfathered).
    */
   lookupKey: Record<BillingInterval, string> | null;
+  /**
+   * The REGULAR price per interval, when what is charged today (`priceCents`)
+   * is a launch price below it; null when the price charged IS the regular
+   * one. Shown struck through beside the price, labelled as the regular price.
+   *
+   * IT MUST BE A REAL PRICE: the one a new subscriber will pay once the launch
+   * price ends (raising it is a new `_vN` lookup key; existing subscribers keep
+   * theirs). A struck-through price that nobody has paid or ever will is
+   * misleading advertising, which is unlawful in the EU towards business
+   * customers too (Directive 2006/114/EC), so set this only to a price you
+   * mean to charge, and drop it the day the launch price becomes permanent.
+   */
+  listPriceCents: Record<BillingInterval, number> | null;
   limits: PlanLimits;
   perks: PlanPerks;
   /** The one plan the plans page and the upsell point at ("Best value"). */
@@ -107,6 +120,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     feeBps: 500,
     priceCents: { month: 0, year: 0 },
     lookupKey: null,
+    listPriceCents: null,
     limits: { storefronts: 3, teamSeats: 2, products: 20 },
     perks: { ordersExport: true, earlyAccess: false, analyticsExport: false, prioritySupport: false },
     recommended: false,
@@ -116,6 +130,9 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     feeBps: 300,
     priceCents: { month: 1500, year: 15000 },
     lookupKey: { month: "starter_month_eur_v1", year: "starter_year_eur_v1" },
+    // The launch price is €15; €20 is what Starter costs once it ends. Yearly
+    // keeps "two months free" at either price (10 x the monthly figure).
+    listPriceCents: { month: 2000, year: 20000 },
     limits: { storefronts: 10, teamSeats: 5, products: 60 },
     perks: { ordersExport: true, earlyAccess: true, analyticsExport: false, prioritySupport: false },
     // The best value: most of Pro's saving on a typical shop, at a third of
@@ -127,6 +144,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     feeBps: 100,
     priceCents: { month: 4000, year: 40000 },
     lookupKey: { month: "pro_month_eur_v1", year: "pro_year_eur_v1" },
+    listPriceCents: null,
     limits: { storefronts: null, teamSeats: null, products: 500 },
     perks: { ordersExport: true, earlyAccess: true, analyticsExport: true, prioritySupport: true },
     recommended: false,

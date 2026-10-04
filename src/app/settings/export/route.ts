@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionState } from "@/lib/auth/session";
 import { STEP_UP_WINDOW_SECONDS, secondFactorIsFresh } from "@/lib/auth/assurance";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
@@ -50,6 +51,9 @@ const PRODUCT_COLUMNS =
 // their export. `embed_key` still does not: see the note above.
 const STOREFRONT_COLUMNS = "id, name, config, brief, created_at, updated_at";
 
+// The seller's own words and the plan they ended; the row id is bookkeeping.
+const CANCELLATION_COLUMNS = "plan, billing_interval, reason, detail, ends_at, created_at, resumed_at";
+
 export async function GET() {
   // Through the shared session gate, not a bare auth.getUser(): a session that
   // still owes its second factor reads as signed out here like everywhere else.
@@ -85,7 +89,7 @@ export async function GET() {
     );
   }
 
-  const [profile, products, storefronts, billing] = await Promise.all([
+  const [profile, products, storefronts, billing, cancellations] = await Promise.all([
     supabase.from("profiles").select(PROFILE_COLUMNS).eq("id", user.id).maybeSingle(),
     supabase.from("products").select(PRODUCT_COLUMNS).eq("owner_id", user.id),
     // A user can own MANY storefronts; export all of them, not just one.
@@ -93,8 +97,15 @@ export async function GET() {
     // The user's OWN plan (seller_billing has no client policy, so this is a
     // service-role read keyed on the session's user id, never a parameter).
     readAccountBilling(user.id),
+    // What they told us when they cancelled a plan: their words, so theirs to
+    // export. Service-role read keyed on the session's user id, like billing.
+    createAdminClient()
+      .from("plan_cancellations")
+      .select(CANCELLATION_COLUMNS)
+      .eq("owner_id", user.id)
+      .order("created_at", { ascending: true }),
   ]);
-  if (profile.error || products.error || storefronts.error || !billing.ok) {
+  if (profile.error || products.error || storefronts.error || !billing.ok || cancellations.error) {
     return NextResponse.json(
       { error: "Export failed. Try again in a minute." },
       { status: 500 },
@@ -124,6 +135,7 @@ export async function GET() {
       current_period_end: billing.billing.currentPeriodEnd,
       cancel_at_period_end: billing.billing.cancelAtPeriodEnd,
     },
+    plan_cancellations: cancellations.data,
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {

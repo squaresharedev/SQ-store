@@ -97,7 +97,8 @@
     "copyLink": "Copy product link",
     "openPage": "Open product page",
     "unitsSold": "{count, plural, one {{count} sold} other {{count} sold}}",
-    "noSales": "No sales yet"
+    "noSales": "No sales yet",
+    "addToWebsite": "Add to your website"
   },
   "removal": {
     "badge": "Removed",
@@ -332,7 +333,9 @@
       "title": "Discard your changes?",
       "editDescription": "The edits you've made to this product haven't been saved yet.",
       "newDescription": "This product hasn't been saved yet, so nothing will be kept.",
-      "discard": "Discard"
+      "discard": "Discard changes",
+      "keepEditing": "Keep editing",
+      "saveAndLeave": "Save and leave"
     },
     "nav": {
       "label": "Form sections",
@@ -636,5 +639,70 @@
     },
     "footer": "SquareShare · {reference} · Page {page} of {total}",
     "generated": "Generated on {date}."
+  },
+  "buyButton": {
+    "title": "Add a buy button to your website",
+    "summary": "Your own button on your own site takes buyers to the page and checkout for \"{title}\".",
+    "storefrontLabel": "Page design",
+    "flow": {
+      "button": "Your button",
+      "checkout": "Checkout"
+    },
+    "methods": "How to add it",
+    "method": {
+      "link": "Link",
+      "html": "HTML",
+      "agent": "AI agent"
+    },
+    "hint": {
+      "link": "Paste it into your button's link setting.",
+      "html": "Paste it where the button should go.",
+      "agent": "Paste it into your AI coding agent."
+    },
+    "copy": {
+      "link": {
+        "copy": "Copy the link",
+        "copied": "Link copied",
+        "failed": "Could not copy the link. Select it and copy it yourself."
+      },
+      "html": {
+        "copy": "Copy the HTML",
+        "copied": "HTML copied",
+        "failed": "Could not copy the HTML. Select it and copy it yourself."
+      },
+      "agent": {
+        "copy": "Copy the prompt",
+        "copied": "Prompt copied",
+        "failed": "Could not copy the prompt. Select it and copy it yourself."
+      }
+    },
+    "snippetText": "Buy now",
+    "prompt": {
+      "task": "Add a buy button to my website. It must link to exactly this URL:",
+      "html": "As plain HTML, that is:",
+      "style": "Style it like the other buttons on my site. If the site already has a buy button for this product, point that one at the URL instead of adding a second.",
+      "normal": "It has to open as a normal page in the same tab. Do not load it in an iframe, pop-up or lightbox: the page refuses to be framed.",
+      "exact": "No script, SDK or API call is needed. Keep the URL exactly as it is, including everything after the question mark."
+    },
+    "tryIt": "Try your button",
+    "tracking": "Shows in Analytics as “Website button”.",
+    "blocked": {
+      "removed": "This product was taken offline. Open it to see why.",
+      "draft": "This product is a draft. Make it Active first.",
+      "notPlaced": "Put this product on a storefront first, so it has a page to land on."
+    },
+    "editProduct": "Edit product",
+    "goToStorefronts": "Go to storefronts",
+    "embedPointer": "Selling just one product? Skip the embed and give it a buy button on your own website: in Products, open its menu and choose “Add to your website”.",
+    "embedPointerLink": "Go to Products",
+    "demo": {
+      "play": "Play the animation",
+      "pause": "Pause the animation",
+      "siteLine": "Your own site, your own design.",
+      "email": "Email",
+      "card": "Card number",
+      "total": "Total",
+      "pay": "Pay {price}"
+    }
   }
 }

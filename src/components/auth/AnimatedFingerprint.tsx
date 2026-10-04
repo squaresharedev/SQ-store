@@ -88,6 +88,11 @@ const GLYPH: Variants = {
   error: { x: [0, -1.6, 1.6, -1, 1, 0], transition: { duration: SHAKE_SECONDS, ease: EASE_STANDARD } },
 };
 
+/** The fingerprint at rest, as a glyph a HeroMark can wear (ui/HeroMark). */
+export function FingerprintGlyph({ className }: { className?: string }) {
+  return <AnimatedFingerprint className={className} />;
+}
+
 export function AnimatedFingerprint({
   state = "idle",
   className,

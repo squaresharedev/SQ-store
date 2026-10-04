@@ -25,14 +25,15 @@
     "intervalLabel": "Période de facturation",
     "month": "Mensuel",
     "year": "Annuel",
-    "yearlySaving": "2 mois offerts avec l'abonnement annuel",
     "pastDue": "Le dernier paiement pour votre forfait {plan} n'a pas abouti. Mettez à jour votre carte pour le conserver.",
     "endsOn": "Votre forfait {plan} se termine le {date}, et votre boutique passe à Free à ce moment-là. Rien n'est supprimé.",
     "ownerOnly": "Seul le propriétaire de la boutique peut changer de forfait.",
     "soon": "Bientôt",
     "soonTitle": "Les forfaits payants ouvriront bientôt. En attendant, tout ce qui est sur Free continue de fonctionner.",
     "finePrint": "Prix hors TVA. La commission par vente s'applique aux ventes via le paiement Square Share et porte sur le prix de l'article, jamais sur la livraison. Les frais de traitement de carte de Stripe s'ajoutent. Annulation à tout moment : vous conservez votre forfait jusqu'à la fin de la période payée.",
-    "unavailable": "Les forfaits ne peuvent pas être affichés pour l'instant. Actualisez la page dans un moment."
+    "unavailable": "Les forfaits ne peuvent pas être affichés pour l'instant. Actualisez la page dans un moment.",
+    "yearlyFree": "{count, plural, one {# mois offert} other {# mois offerts}}",
+    "launchNote": "Un prix de lancement est un prix introductif : le prix habituel est celui affiché barré."
   },
   "card": {
     "perMonth": "/ mois",
@@ -46,7 +47,12 @@
     "upgrade": "Passer à {plan}",
     "switch": "Changer pour {plan}",
     "switchInterval": "{interval, select, year {Passer à l'annuel} other {Passer au mensuel}}",
-    "moveToFree": "Passer à Free"
+    "moveToFree": "Passer à Free",
+    "regularPrice": "Prix habituel",
+    "launchPrice": "Prix de lancement",
+    "save": "Économisez {percent}",
+    "launchExclVat": "Prix de lancement (habituel {regular}), TVA excl.",
+    "launchBilledYearly": "{amount} facturé une fois par an au prix de lancement (habituel {regular}), TVA excl."
   },
   "features": {
     "fee": "{rate} de commission par vente",
@@ -63,12 +69,10 @@
     "productsUnlimited": "Produits illimités"
   },
   "calculator": {
-    "eyebrow": "Calculateur",
     "title": "Quel forfait vous revient le moins cher ?",
     "lead": "Faites glisser jusqu'à vos ventes du mois. Chaque barre est le prix du forfait plus sa commission sur ces ventes.",
     "salesLabel": "Ventes par mois",
     "salesAria": "Vos ventes mensuelles, en euros",
-    "fromYourSales": "Rempli à partir de vos 30 derniers jours de ventes.",
     "perMonth": "par mois",
     "cheapest": "Avec {sales} de ventes par mois, {plan} vous revient le moins cher.",
     "legendPrice": "Prix du forfait",
@@ -148,7 +152,7 @@
     "cta": "Passer à {plan}, {price} par mois",
     "compare": "Comparer tous les forfaits",
     "topEyebrow": "Forfait le plus complet",
-    "topTitle": "Tout ce que propose {plan} est à vous"
+    "topTitle": "Tout ce que propose <mark>{plan}</mark> est à vous"
   },
   "portal": {
     "opening": "Ouverture de Stripe",
@@ -182,7 +186,10 @@
       "teamSeats": "Sièges d'équipe, vous inclus : {used} sur {cap}",
       "teamSeatsUnlimited": "Sièges d'équipe, vous inclus : {used}, sans limite",
       "products": "Produits : {used} sur {cap}",
-      "productsUnlimited": "Produits : {used}, sans limite"
+      "productsUnlimited": "Produits : {used}, sans limite",
+      "left": "Reste {count}",
+      "over": "{count} en trop",
+      "full": "Complet"
     },
     "overLimit": "Au-delà de la limite de ce forfait. Tout continue de fonctionner ; supprimez-en un ou mettez à niveau pour en ajouter.",
     "invoicesTitle": "Facturation et factures",
@@ -191,6 +198,30 @@
     "noBilling": "Les factures et les informations de paiement apparaissent ici une fois que vous êtes sur un forfait payant.",
     "confirmed": "Vous êtes sur {plan}. Merci de soutenir Square Share.",
     "pending": "Nous confirmons votre paiement avec Stripe. Actualisez dans un moment si votre forfait n'a pas changé.",
-    "unavailable": "Votre forfait ne peut pas être affiché pour l'instant. Actualisez la page dans un moment."
+    "unavailable": "Votre forfait ne peut pas être affiché pour l'instant. Actualisez la page dans un moment.",
+    "cancelPlan": "Annuler le forfait"
+  },
+  "cancel": {
+    "title": "Annuler {plan} ?",
+    "keepUntil": "Vous conservez {plan} jusqu’au {date}, puis vous passez à Free. Rien n’est supprimé.",
+    "loseLegend": "Non inclus dans Free",
+    "reasonLegend": "Pourquoi annulez-vous ? <muted>(facultatif)</muted>",
+    "reasons": {
+      "too_expensive": "Trop cher",
+      "unused": "Pas assez utilisé",
+      "missing_features": "Il me manque quelque chose",
+      "switched_service": "Je change de service",
+      "temporary": "Besoin temporaire",
+      "other": "Autre chose"
+    },
+    "detailLabel": "Que pourrions-nous améliorer ? <muted>(facultatif)</muted>",
+    "detailPlaceholder": "Une ou deux phrases suffisent. Nous les lisons toutes.",
+    "keep": "Garder mon forfait",
+    "confirm": "Annuler le forfait",
+    "cancelling": "Annulation en cours",
+    "doneTitle": "Votre forfait est annulé",
+    "doneBody": "Vous conservez {plan} jusqu’au {date}. Vous avez changé d’avis ? Gardez votre forfait à tout moment avant cette date.",
+    "done": "Terminé",
+    "kept": "Vous gardez {plan}. Il se renouvelle comme d’habitude."
   }
 }

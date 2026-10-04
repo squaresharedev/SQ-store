@@ -329,8 +329,28 @@
       "rate_limited": "Zu viele Versuche. Warte ein paar Minuten und versuche es erneut.",
       "unavailable": "Der Checkout ist gerade nicht verfügbar. Es wurde nichts belastet.",
       "failed": "Etwas ist schiefgelaufen und es wurde nichts belastet. Versuche es erneut.",
-      "invalid": "Einige Details müssen überprüft werden. Prüfe die hervorgehobenen Felder."
+      "invalid": "Einige Details müssen überprüft werden. Prüfe die hervorgehobenen Felder.",
+      "discount_invalid": "Dieser Rabattcode kann nicht mehr verwendet werden. Entferne ihn, um den vollen Preis zu zahlen.",
+      "price_changed": "Der Preis hat sich geändert, während diese Seite geöffnet war, daher wurde nichts berechnet. Prüfe den neuen Gesamtbetrag und zahle dann."
     },
-    "editHeadline": "Überschrift der Kasse"
+    "editHeadline": "Überschrift der Kasse",
+    "discount": {
+      "add": "Rabattcode hinzufügen",
+      "label": "Rabattcode",
+      "apply": "Einlösen",
+      "applying": "Wird geprüft",
+      "remove": "Entfernen",
+      "applied": "{code} eingelöst.",
+      "saleBetter": "{code} ist gültig, aber der Aktionspreis ist bereits günstiger, daher haben wir ihn beibehalten.",
+      "invalid": "Dieser Code kann für diese Bestellung nicht verwendet werden.",
+      "rateLimited": "Zu viele Codes ausprobiert. Warte kurz und versuche es dann erneut.",
+      "line": "Rabatt ({code})"
+    }
+  },
+  "sale": {
+    "wasNow": "War {was}, jetzt {now}",
+    "percentOff": "-{percent}%",
+    "priorNote": "Durchgestrichener Preis: niedrigster Gesamtpreis der letzten 30 Tage vor der Preisermäßigung.",
+    "endsOn": "Aktion endet {date}"
   }
 }

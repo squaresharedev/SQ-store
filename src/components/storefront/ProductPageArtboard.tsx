@@ -9,7 +9,7 @@ import { usePreviewProduct } from "./usePreviewProduct";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
 import { PRODUCT_PAGE_HOTSPOTS, isProductPageHotspot } from "@/lib/storefront/setting-ref";
 import type { Product } from "@/types/product";
-import type { ProductPageData } from "@/types/product-page";
+import type { PagePhotoView, ProductPageData } from "@/types/product-page";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import type {
   ProductPageConfig,
@@ -41,7 +41,7 @@ export function ProductPageArtboard({
   seller,
   backgroundImageUrl,
   customFontUrl,
-  pagePhotoUrl,
+  pagePhoto,
   onClose,
   widths,
   initialDevice,
@@ -62,7 +62,7 @@ export function ProductPageArtboard({
   backgroundImageUrl: string | null;
   customFontUrl: string | null;
   /** Display URL of this page's own photo backdrop, when it has one. */
-  pagePhotoUrl: string | null;
+  pagePhoto: PagePhotoView | null;
   onClose: () => void;
   widths: Record<PreviewDevice, number>;
   initialDevice: PreviewDevice;
@@ -85,7 +85,7 @@ export function ProductPageArtboard({
       seller,
       backgroundImageUrl,
       customFontUrl,
-      pagePhotoUrl,
+      pagePhoto,
     },
     product: previewed,
     productUrl: "",

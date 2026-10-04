@@ -252,6 +252,8 @@ export const RATE_LIMITS = {
    * for a seller clearing a busy day's queue in one sitting.
    */
   orderFulfil: { max: 240, windowSeconds: 60 * 60 },
+  /** Creating, changing, switching off and deleting discounts, per seller. */
+  discountWrite: { max: 120, windowSeconds: 60 * 60 },
   /** Profile / tax / notification-preference writes. */
   settingsWrite: { max: 60, windowSeconds: 60 * 60 },
   // --- Plans & billing (lib/billing) ---------------------------------------
@@ -395,6 +397,12 @@ export const RATE_LIMITS = {
    * honest retries after a declined card, and nothing like a script's pace.
    */
   checkoutPlace: { max: 20, windowSeconds: 60 * 60 },
+  /**
+   * Discount codes tried at checkout, per client IP. A buyer types one code,
+   * maybe two after a typo; thirty an hour is generous for that and slow for
+   * anyone guessing at a store's codes.
+   */
+  discountCheck: { max: 30, windowSeconds: 60 * 60 },
   /** Opens of an order page (the thank-you and order status), per client IP. */
   orderPage: { max: 240, windowSeconds: 60 * 60 },
   /** Download links handed out from order pages, per client IP. */

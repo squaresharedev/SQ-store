@@ -13,9 +13,8 @@ import {
   Layers,
   Package,
   Ruler,
-  Save,
+  Send,
   ShieldCheck,
-  Trash2,
   Truck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -66,16 +65,18 @@ import {
   useResolveMessage,
 } from "@/components/ui/ActionErrorNotice";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { Modal } from "@/components/ui/modal";
+import { HeroMark } from "@/components/ui/HeroMark";
+import { Modal, ModalActions } from "@/components/ui/modal";
+import { UnsavedChangesDialog } from "@/components/ui/UnsavedChangesDialog";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { useUnsavedChangesGuard } from "@/lib/hooks/useUnsavedChangesGuard";
 import { useNavigationBlocker } from "@/lib/hooks/useNavigationBlocker";
 import { parseFormPriceCents, priceErrorMessage } from "@/lib/products/price";
 import { formatPercent } from "@/lib/format/intl";
 import {
-  destructiveButtonClass,
   errorTextClass,
   fieldBaseClass,
+  ghostButtonClass,
   helpTextClass,
   labelClass,
   primaryButtonClass,
@@ -1528,17 +1529,18 @@ export function ProductForm({
         <Modal
           open={reviewPromptOpen}
           onClose={keepEditing}
+          visual={<HeroMark icon={Send} />}
           title={t("form.moderation.reviewPrompt.title")}
           description={t("form.moderation.reviewPrompt.body")}
         >
           <div className="flex flex-col gap-4" data-review-prompt="">
             {reviewError && <ActionErrorNotice error={reviewError} />}
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <ModalActions>
               <button
                 type="button"
                 onClick={keepEditing}
                 disabled={reviewPending}
-                className={cn(secondaryButtonClass, "whitespace-nowrap")}
+                className={cn(ghostButtonClass, "whitespace-nowrap")}
               >
                 {t("form.moderation.reviewPrompt.keepEditing")}
               </button>
@@ -1551,54 +1553,26 @@ export function ProductForm({
               >
                 {reviewPending ? tCommon("sending") : t("form.moderation.reviewPrompt.send")}
               </button>
-            </div>
+            </ModalActions>
           </div>
         </Modal>
       )}
 
-      <Modal
+      <UnsavedChangesDialog
         open={leaveGuard.promptOpen}
-        onClose={leaveGuard.cancel}
         title={t("form.discard.title")}
         description={
           product ? t("form.discard.editDescription") : t("form.discard.newDescription")
         }
-      >
-        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={leaveGuard.cancel}
-            disabled={submitting}
-            className={cn(secondaryButtonClass, "whitespace-nowrap")}
-          >
-            {tCommon("cancel")}
-          </button>
-          <button
-            type="button"
-            onClick={leaveGuard.leave}
-            disabled={submitting}
-            className={cn(destructiveButtonClass, "whitespace-nowrap")}
-          >
-            <Trash2 className="size-4" strokeWidth={2} aria-hidden="true" />
-            {t("form.discard.discard")}
-          </button>
-          <button
-            type="button"
-            onClick={handleSaveAndLeave}
-            disabled={submitting}
-            className={cn(primaryButtonClass, "whitespace-nowrap")}
-          >
-            {submitting ? (
-              tCommon("saving")
-            ) : (
-              <>
-                <Save className="size-4" strokeWidth={2} aria-hidden="true" />
-                {tCommon("save")}
-              </>
-            )}
-          </button>
-        </div>
-      </Modal>
+        saveLabel={t("form.discard.saveAndLeave")}
+        savingLabel={tCommon("saving")}
+        discardLabel={t("form.discard.discard")}
+        stayLabel={t("form.discard.keepEditing")}
+        saving={submitting}
+        onSave={handleSaveAndLeave}
+        onDiscard={leaveGuard.leave}
+        onStay={leaveGuard.cancel}
+      />
       </form>
 
       {/* The index, in the margin. Sticky so it stays with the reader on a

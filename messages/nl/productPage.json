@@ -329,8 +329,28 @@
       "rate_limited": "Te veel pogingen. Wacht een paar minuten en probeer het opnieuw.",
       "unavailable": "Afrekenen is momenteel niet beschikbaar. Er is niets in rekening gebracht.",
       "failed": "Er is iets misgegaan en er is niets in rekening gebracht. Probeer het opnieuw.",
-      "invalid": "Sommige gegevens moeten worden nagekeken. Controleer de gemarkeerde velden."
+      "invalid": "Sommige gegevens moeten worden nagekeken. Controleer de gemarkeerde velden.",
+      "discount_invalid": "Deze kortingscode kan niet meer worden gebruikt. Verwijder hem om de volle prijs te betalen.",
+      "price_changed": "De prijs is gewijzigd terwijl deze pagina open was, dus er is niets in rekening gebracht. Bekijk het nieuwe totaal en betaal dan."
     },
-    "editHeadline": "Koptekst van afrekenen"
+    "editHeadline": "Koptekst van afrekenen",
+    "discount": {
+      "add": "Kortingscode toevoegen",
+      "label": "Kortingscode",
+      "apply": "Toepassen",
+      "applying": "Controleren",
+      "remove": "Verwijderen",
+      "applied": "{code} toegepast.",
+      "saleBetter": "{code} werkt, maar je actieprijs is al lager, dus die geldt.",
+      "invalid": "Deze code kan niet worden gebruikt voor deze bestelling.",
+      "rateLimited": "Te veel codes geprobeerd. Wacht even en probeer het opnieuw.",
+      "line": "Korting ({code})"
+    }
+  },
+  "sale": {
+    "wasNow": "Was {was}, nu {now}",
+    "percentOff": "-{percent}%",
+    "priorNote": "Doorgestreepte prijs: laagste prijs in de 30 dagen voor deze kortingsactie.",
+    "endsOn": "Actie eindigt op {date}"
   }
 }

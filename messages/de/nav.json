@@ -27,6 +27,10 @@
     "settings": {
       "label": "Einstellungen",
       "description": "Deine Verkäuferangaben, Versandbedingungen und dein Konto."
+    },
+    "discounts": {
+      "label": "Rabatte",
+      "description": "Aktionen starten und Rabattcodes teilen."
     }
   },
   "settings": {

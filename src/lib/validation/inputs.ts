@@ -1,6 +1,8 @@
 import { z } from "zod";
 import type { Messages } from "@/i18n/messages";
 import { issueKey, isValidationKey } from "@/lib/validation/messages";
+import { isDiscountCode, normalizeDiscountCode } from "@/lib/discounts/code";
+import { DISCOUNT_CODE_MAX, DISCOUNT_CODE_MIN } from "@/types/discount";
 
 /**
  * THE input primitives. Every user-supplied field in the product is built from
@@ -37,6 +39,8 @@ export type UuidField = keyof ValidationCatalogue["uuid"];
 export type HandleField = keyof ValidationCatalogue["handle"];
 export type HostnameField = keyof ValidationCatalogue["hostname"];
 export type ReferenceCodeField = keyof ValidationCatalogue["referenceCode"];
+export type DiscountCodeField = keyof ValidationCatalogue["discountCode"];
+export type InstantField = keyof ValidationCatalogue["instant"];
 export type OneTimeCodeField = keyof ValidationCatalogue["oneTimeCode"];
 export type HexColorField = keyof ValidationCatalogue["hexColor"];
 export type IntField = keyof ValidationCatalogue["int"];
@@ -257,6 +261,33 @@ export function referenceCode(options: {
         (value.length >= min && value.length <= max && CODE_PATTERN.test(value)),
       { error: issueKey(`Validation.referenceCode.${field}`), params: { min, max } },
     );
+}
+
+/**
+ * A DISCOUNT CODE as a seller sets it or a buyer types it: trimmed, folded to
+ * upper case, then held to the code shape (lib/discounts/code.ts: letters,
+ * digits, `-` and `_`, 3 to 24 long). The parsed output is the canonical form
+ * every lookup and every stored row uses, so "summer10" finds SUMMER10.
+ */
+export function discountCode(field: DiscountCodeField = "code") {
+  return z
+    .string()
+    .transform(normalizeDiscountCode)
+    .pipe(
+      z.string().refine(isDiscountCode, {
+        error: issueKey(`Validation.discountCode.${field}`),
+        params: { min: DISCOUNT_CODE_MIN, max: DISCOUNT_CODE_MAX },
+      }),
+    );
+}
+
+/**
+ * An instant in time, as the browser sends it: an ISO 8601 date-time with its
+ * offset (what `Date.prototype.toISOString` writes). Never a bare date, which
+ * would mean a different moment in every time zone.
+ */
+export function isoInstant(field: InstantField) {
+  return z.iso.datetime({ offset: true, error: issueKey(`Validation.instant.${field}`) });
 }
 
 /**

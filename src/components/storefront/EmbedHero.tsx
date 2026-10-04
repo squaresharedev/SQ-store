@@ -3,13 +3,11 @@
 import { Globe, Lock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { badgeClass, cardClass } from "@/components/ui/surface-styles";
+import { BrowserChrome } from "@/components/ui/BrowserChrome";
+import { badgeClass, cardClass, lockBadgeClass, placeholderBarClass } from "@/components/ui/surface-styles";
 import type { Product } from "@/types/product";
 import { buyerVisibleBlocks, type StorefrontConfig } from "@/types/storefront";
 import { StorefrontPreview } from "./StorefrontPreview";
-
-/** A greyed bar standing in for a line of the host page's own content. */
-const PLACEHOLDER_BAR = "h-2 rounded-full bg-border";
 
 /** Four tiles standing in for the products of a storefront that has none yet. */
 const STAND_IN_TILES = [0, 1, 2, 3] as const;
@@ -42,28 +40,20 @@ export function EmbedHero({
   const isEmpty = buyerVisibleBlocks(config).length === 0;
   return (
     <div aria-hidden="true" className={cn(cardClass, "overflow-hidden")}>
-      {/* Browser chrome. */}
-      <div className="flex items-center gap-3 border-b border-border bg-secondary px-3 py-2">
-        <div className="flex gap-1.5">
-          <span className="size-2.5 rounded-full bg-border" />
-          <span className="size-2.5 rounded-full bg-border" />
-          <span className="size-2.5 rounded-full bg-border" />
-        </div>
-        <div className="flex min-w-0 flex-1 items-center gap-1.5 rounded-full bg-background px-3 py-1 font-inter text-xs text-muted-foreground">
-          <Globe className="size-3 shrink-0" strokeWidth={2} />
-          {domain ? (
-            <span className="truncate text-foreground">{domain}</span>
-          ) : (
-            <span className={cn(PLACEHOLDER_BAR, "w-24")} />
-          )}
-        </div>
-      </div>
+      <BrowserChrome>
+        <Globe className="size-3 shrink-0" strokeWidth={2} />
+        {domain ? (
+          <span className="truncate text-foreground">{domain}</span>
+        ) : (
+          <span className={cn(placeholderBarClass, "w-24")} />
+        )}
+      </BrowserChrome>
 
       {/* The host page: a few stand-in lines around the embed slot. */}
       <div className="space-y-4 bg-muted/40 px-6 py-6">
         <div className="space-y-2">
-          <span className={cn(PLACEHOLDER_BAR, "block w-1/3")} />
-          <span className={cn(PLACEHOLDER_BAR, "block w-2/3")} />
+          <span className={cn(placeholderBarClass, "block w-1/3")} />
+          <span className={cn(placeholderBarClass, "block w-2/3")} />
         </div>
 
         <div
@@ -100,7 +90,7 @@ export function EmbedHero({
             </span>
           ) : (
             <span className="absolute inset-0 flex items-center justify-center">
-              <span className="flex size-10 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-xs">
+              <span className={lockBadgeClass}>
                 <Lock className="size-4" strokeWidth={2} />
               </span>
             </span>
@@ -108,8 +98,8 @@ export function EmbedHero({
         </div>
 
         <div className="space-y-2">
-          <span className={cn(PLACEHOLDER_BAR, "block w-1/2")} />
-          <span className={cn(PLACEHOLDER_BAR, "block w-1/4")} />
+          <span className={cn(placeholderBarClass, "block w-1/2")} />
+          <span className={cn(placeholderBarClass, "block w-1/4")} />
         </div>
       </div>
     </div>

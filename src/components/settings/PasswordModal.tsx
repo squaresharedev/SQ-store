@@ -2,10 +2,13 @@
 
 import * as React from "react";
 import { useActionState } from "react";
+import { Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { helpTextClass } from "@/components/ui/control-styles";
 import { Button } from "@/components/ui/button";
-import { Modal } from "@/components/ui/modal";
+import { Disclosure } from "@/components/ui/Disclosure";
+import { HeroMark } from "@/components/ui/HeroMark";
+import { Modal, ModalActions } from "@/components/ui/modal";
 import { Spinner } from "@/components/ui/spinner";
 import { useActionStateToast } from "@/components/ui/ActionErrorNotice";
 import { sendPasswordReset } from "@/lib/settings/actions";
@@ -49,13 +52,8 @@ export function PasswordModal({
     <Modal
       open={open}
       onClose={onClose}
-      // Hard corners, deliberately against the modal default. styles.md puts
-      // modals on --radius-lg, but the auth surfaces are the documented
-      // exception (see the "hard corners" auth card on /login) and this is one
-      // of them. Scoped to this instance rather than the shared primitive, so
-      // the invite modals keep following the design system. rounded-none is a
-      // token (--radius-none), not a raw value.
-      className="rounded-none sm:rounded-none"
+      // What this dialog does is send one email.
+      visual={<HeroMark icon={Mail} />}
       title={hasPassword ? t("modalTitleReset") : t("modalTitleSet")}
       description={t("modalDescriptionReset", { email })}
     >
@@ -144,13 +142,13 @@ function ResetView({
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      {hasPassword ? (
-        <p className={helpTextClass}>{t("neverShownNote")}</p>
-      ) : (
-        <p className={helpTextClass}>{t("googleAccountNote")}</p>
-      )}
+      {/* What the link will do matters once it is opened, not before the
+          button is pressed: one line that opens, for whoever wants it now. */}
+      <Disclosure summary={t("whatHappens")} className={helpTextClass}>
+        <p>{hasPassword ? t("neverShownNote") : t("googleAccountNote")}</p>
+      </Disclosure>
 
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <ModalActions>
         <Button type="button" variant="ghost" onClick={onClose}>
           {tCommon("cancel")}
         </Button>
@@ -162,7 +160,7 @@ function ResetView({
           {isPending && <Spinner />}
           {label}
         </Button>
-      </div>
+      </ModalActions>
     </form>
   );
 }

@@ -109,7 +109,8 @@
       "nameAlternative": "Ou votre nom complet, si vous vendez en votre nom propre.",
       "addressPlaceholder": "p. ex. 12 rue du Marché\n75001 Paris\nFrance",
       "emailPlaceholder": "p. ex. bonjour@votreboutique.example",
-      "emailHelp": "L’adresse à laquelle les acheteurs vous écrivent. Elle peut différer de votre e-mail de connexion."
+      "emailHelp": "L’adresse à laquelle les acheteurs vous écrivent. Elle peut différer de votre e-mail de connexion.",
+      "emailTipLabel": "À propos de cet e-mail"
     },
     "confirm": {
       "goLive": "Vos pages produit pourront être mises en ligne une fois confirmé."
@@ -155,7 +156,7 @@
     "shortcut": "Raccourci : <kbd>{shortcut}</kbd>",
     "skipTour": "Quitter la visite",
     "next": "Suivant",
-    "openingPage": "{page, select, overview {Ouverture de la vue d’ensemble…} products {Ouverture des produits…} storefront {Ouverture de la vitrine…} orders {Ouverture des commandes…} analytics {Ouverture des statistiques…} payments {Ouverture des paiements…} settings {Ouverture des paramètres…} sampleStorefront {Ouverture de la vitrine d’exemple…} other {Ouverture…}}"
+    "openingPage": "{page, select, overview {Ouverture de la vue d’ensemble…} products {Ouverture des produits…} storefront {Ouverture de la vitrine…} orders {Ouverture des commandes…} discounts {Ouverture des réductions…} analytics {Ouverture des statistiques…} payments {Ouverture des paiements…} settings {Ouverture des paramètres…} sampleStorefront {Ouverture de la vitrine d’exemple…} other {Ouverture…}}"
   },
   "tourReplay": {
     "title": "Visite guidée",

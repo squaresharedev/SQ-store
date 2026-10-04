@@ -12,6 +12,7 @@ import { SaveButton } from "@/components/ui/SaveButton";
 import { StepUpField } from "@/components/auth/StepUp";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { InfoTip } from "@/components/ui/InfoTip";
 import { Label } from "@/components/ui/label";
 import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import {
@@ -320,7 +321,8 @@ export function WelcomeFlow({
       dismissible={!termsPending}
       // A column, so only the step's content scrolls and the progress and the
       // controls stay on screen (the storefront wizard's layout).
-      className="flex flex-col overflow-y-hidden pb-3 sm:max-w-xl"
+      size="xl"
+      className="flex flex-col overflow-y-hidden pb-3"
     >
       {/* Where they are, as a picture rather than "Step 1 of 3", beside the way
           out of all of it, found before anything is filled in and apart from
@@ -447,7 +449,14 @@ export function WelcomeFlow({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor={`${fieldId}-email`}>{t(fieldLabel("email"))}</Label>
+                  {/* A caveat only some people need (it may differ from the
+                      sign-in address), so it sits behind the "?". */}
+                  <div className="flex items-center gap-1.5">
+                    <Label htmlFor={`${fieldId}-email`}>{t(fieldLabel("email"))}</Label>
+                    <InfoTip label={t("Onboarding.welcome.seller.emailTipLabel")}>
+                      {t("Onboarding.welcome.seller.emailHelp")}
+                    </InfoTip>
+                  </div>
                   <Input
                     id={`${fieldId}-email`}
                     name="seller_email"
@@ -458,12 +467,8 @@ export function WelcomeFlow({
                     maxLength={254}
                     autoComplete="email"
                     aria-required="true"
-                    aria-describedby={`${fieldId}-email-help`}
                     disabled={savePending}
                   />
-                  <p id={`${fieldId}-email-help`} className={helpTextClass}>
-                    {t("Onboarding.welcome.seller.emailHelp")}
-                  </p>
                 </div>
                 {/* Only ever appears for someone who turned 2FA on before
                     finishing setup and whose last code has gone stale: the

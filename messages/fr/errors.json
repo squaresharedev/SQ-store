@@ -56,6 +56,10 @@
     "manageBilling": {
       "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de changer le forfait de cette boutique.",
       "noRole": "Vous n'avez pas la permission de changer le forfait de cette boutique."
+    },
+    "manageDiscounts": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de gérer les réductions dans cette boutique.",
+      "noRole": "Vous n'avez pas la permission de gérer les réductions dans cette boutique."
     }
   },
   "notFound": {
@@ -63,7 +67,8 @@
     "product": "Ce produit est introuvable.",
     "storefront": "Cette vitrine est introuvable.",
     "item": "Cet élément est introuvable.",
-    "order": "Cette commande est introuvable."
+    "order": "Cette commande est introuvable.",
+    "discount": "Cette réduction est introuvable."
   },
   "rateLimited": {
     "fix": "Attendez quelques minutes puis réessayez. Si rien ne se relance en arrière-plan, rechargez d’abord la page.",
@@ -82,7 +87,8 @@
     "fileAppeal": "Trop de tentatives d'envoi d'une contestation en peu de temps.",
     "fulfilOrders": "Trop de tentatives pour marquer des commandes comme expédiées en peu de temps.",
     "readCheckoutSettings": "Trop de tentatives de lecture des paramètres de paiement en peu de temps.",
-    "changePlan": "Trop de changements de forfait lancés en peu de temps."
+    "changePlan": "Trop de changements de forfait lancés en peu de temps.",
+    "saveDiscounts": "Trop de modifications de réductions en peu de temps."
   },
   "serverError": {
     "fix": "C’est généralement temporaire. Attendez un instant puis réessayez ; si le problème persiste, actualisez la page.",
@@ -115,7 +121,10 @@
     "saveCheckoutSettings": "Impossible d'enregistrer vos paramètres de paiement en raison d'un problème de notre côté.",
     "loadPlans": "Impossible de charger votre forfait en raison d'un problème de notre côté.",
     "startCheckout": "Impossible d'ouvrir le paiement en raison d'un problème de notre côté.",
-    "openBillingPortal": "Impossible d'ouvrir vos informations de facturation en raison d'un problème de notre côté."
+    "openBillingPortal": "Impossible d'ouvrir vos informations de facturation en raison d'un problème de notre côté.",
+    "cancelPlan": "Impossible d’annuler votre forfait en raison d’un problème de notre côté.",
+    "resumePlan": "Impossible de conserver votre forfait en raison d’un problème de notre côté.",
+    "saveDiscount": "Impossible d'enregistrer la réduction en raison d'un problème de notre côté."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Ce produit a été retiré, et non mis en pause.} storefront {Cette vitrine a été retirée, et non mise en pause.} other {Cet élément a été retiré, et non mis en pause.}}",
@@ -602,7 +611,11 @@
     "alreadySubscribed": "Votre boutique a déjà un forfait payant. Changez de forfait plutôt que d'en acheter un second.",
     "noBillingAccount": "Cette boutique n'a pas encore de compte de facturation. Passez d'abord à un forfait payant.",
     "noSubscription": "Cette boutique n'a pas de forfait payant à modifier. Choisissez-en un pour vous abonner.",
-    "ownerOnlyFix": "Seul le propriétaire de la boutique peut changer de forfait. Demandez-lui, ou passez à votre propre boutique."
+    "ownerOnlyFix": "Seul le propriétaire de la boutique peut changer de forfait. Demandez-lui, ou passez à votre propre boutique.",
+    "invalidFeedback": "Ce commentaire n’a pas pu être lu.",
+    "notCancellable": "Cette boutique n’a pas de forfait payant à annuler, ou il est déjà programmé pour se terminer.",
+    "notResumable": "Ce forfait n’est pas programmé pour se terminer, ou sa période payée est déjà écoulée.",
+    "deletionPending": "La suppression de votre compte est programmée, son forfait se termine donc avec lui. Annulez d’abord la suppression pour conserver votre forfait."
   },
   "planLimit": {
     "storefronts": "Votre forfait {plan, select, free {Free} starter {Starter} pro {Pro} other {actuel}} comprend {cap, plural, one {# vitrine} other {# vitrines}}, et votre boutique les a toutes.",
@@ -621,5 +634,23 @@
     "planRequiredFix": "Passez à un forfait supérieur sur la page Forfaits pour exporter vos commandes.",
     "rateLimited": "Cela fait beaucoup d'exports en peu de temps.",
     "rateLimitedFix": "Attendez quelques minutes, puis réessayez."
+  },
+  "discounts": {
+    "invalid": {
+      "message": "Les détails de la réduction n'ont pas passé la validation.",
+      "fix": "Vérifiez les champs mis en évidence, puis réessayez d'enregistrer."
+    },
+    "codeTaken": {
+      "message": "Ce code est déjà utilisé dans cette boutique.",
+      "fix": "Choisissez un autre code, ou supprimez d'abord l'autre réduction."
+    },
+    "started": {
+      "message": "Cette promotion a déjà démarré, ses conditions ne peuvent donc plus changer.",
+      "fix": "Terminez-la et créez une nouvelle promotion avec les nouvelles conditions. La réglementation européenne sur l'affichage des réductions de prix repose sur l'historique d'une promotion tel qu'il était."
+    },
+    "tooMany": {
+      "message": "Cette boutique a atteint le nombre maximal de réductions.",
+      "fix": "Supprimez les réductions que vous n'utilisez plus, puis réessayez."
+    }
   }
 }

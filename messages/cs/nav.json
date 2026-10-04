@@ -27,6 +27,10 @@
     "settings": {
       "label": "Nastavení",
       "description": "Údaje prodejce, dopravní podmínky a účet."
+    },
+    "discounts": {
+      "label": "Slevy",
+      "description": "Spouštějte akce a sdílejte slevové kódy."
     }
   },
   "settings": {

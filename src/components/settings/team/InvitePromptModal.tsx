@@ -1,9 +1,11 @@
 "use client";
 
 import * as React from "react";
+import { UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Modal } from "@/components/ui/modal";
+import { HeroMark } from "@/components/ui/HeroMark";
+import { Modal, ModalActions } from "@/components/ui/modal";
 import { InviteAcceptRow } from "@/components/settings/team/InviteAcceptRow";
 import type { PendingInviteRow } from "@/lib/team/queries";
 
@@ -41,6 +43,7 @@ export function InvitePromptModal({ invites }: { invites: PendingInviteRow[] }) 
     <Modal
       open={open}
       onClose={() => setOpen(false)}
+      visual={<HeroMark icon={UserPlus} />}
       title={t("title", { count: invites.length })}
       description={t("description", { count: invites.length })}
     >
@@ -52,11 +55,11 @@ export function InvitePromptModal({ invites }: { invites: PendingInviteRow[] }) 
         ))}
       </ul>
 
-      <div className="mt-4 flex justify-end">
+      <ModalActions className="mt-4">
         <Button variant="ghost" onClick={() => setOpen(false)}>
           {t("maybeLater")}
         </Button>
-      </div>
+      </ModalActions>
     </Modal>
   );
 }

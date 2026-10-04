@@ -3,12 +3,18 @@
 // merely renders it: a function exported from a client module cannot be called
 // during a server render.
 
+import type { LinkChannel } from "@/lib/storefront/product-page-url";
+
+/** What a checkout button needs to build its link: the ids, and how the buyer
+ *  arrived (`?via=`), so the order is filed where the visit was. */
+type CheckoutTarget = { storefrontId: string; productId: string; via?: LinkChannel | null };
+
 export type CtaTarget =
   | { kind: "link"; href: string; host: string }
   // Square Share's own checkout. The ids ride along rather than a finished
   // href because only the CLIENT knows which version and how many are chosen
   // at the moment of the click (see checkoutPath).
-  | { kind: "checkout"; storefrontId: string; productId: string }
+  | ({ kind: "checkout" } & CheckoutTarget)
   // `email` and `productTitle` ride along so the CLIENT can rebuild the href
   // once it knows which version is being looked at (see mailtoHref). Neither is
   // new on the wire: the address is already inside the mailto, and the title is
@@ -77,7 +83,7 @@ export function resolveCtaTarget(
   productTitle: string,
   /** The enquiry subject, in the buyer's language (see mailtoHref). */
   enquirySubject: string,
-  checkout: { storefrontId: string; productId: string } | null = null,
+  checkout: CheckoutTarget | null = null,
 ): CtaTarget {
   if (purchaseUrl) {
     try {

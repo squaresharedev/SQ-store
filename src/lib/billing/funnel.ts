@@ -4,7 +4,7 @@
 //
 // SERVER-PRODUCED ONLY. Every event is recorded by the code that knows it
 // happened (the plans page's loader, the checkout action, the limit check, the
-// webhook), never reported by a browser. There is no endpoint a client can
+// billing sync, the webhook), never reported by a browser. There is no endpoint a client can
 // post to, so the numbers cannot be padded or forged.
 //
 // BEST EFFORT. Recording never throws and never holds anything up: an upgrade
@@ -27,11 +27,11 @@ export const FUNNEL_EVENT_KINDS = [
   "limit_hit",
   /** The owner pressed Upgrade and was sent to Checkout. */
   "checkout_started",
-  /** The owner was sent to the Customer Portal (switch, cancel, manage). */
+  /** The owner was sent to the Customer Portal (switch, manage). */
   "portal_opened",
-  /** Free to a paid plan, confirmed by Stripe. */
+  /** Free to a paid plan, written by the billing sync that applied it. */
   "upgraded",
-  /** One paid plan to another, confirmed by Stripe. */
+  /** One paid plan to another, written the same way. */
   "plan_changed",
   /** A paid plan ended; the account is on Free again. */
   "downgraded",

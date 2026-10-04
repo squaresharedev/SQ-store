@@ -35,6 +35,7 @@ function product(overrides: Partial<ProductPageProduct> = {}): ProductPageProduc
     description: "Warm light for long evenings.\n\nHand finished in Lisbon.",
     priceCents: 12900,
     currency: "EUR",
+    sale: null,
     purchaseUrl: "https://shop.example.com/lamp",
     shippingProfileId: null,
     images: [

@@ -38,6 +38,24 @@ export type MetricDatapoint = {
   source?: string;
 };
 
+/**
+ * The attributes that publish a datapoint, for whatever element shows the
+ * figure: a tile, or a headline that is not one (the analytics revenue hero).
+ * One function, so every figure on the page is published the same way.
+ */
+export function metricDataAttributes(datapoint?: MetricDatapoint, pending = false) {
+  return {
+    "data-analytics-metric": datapoint?.metric,
+    // Pending figures publish no value at all rather than a zero: a reader must
+    // be able to tell "nothing has happened" from "nothing measures this".
+    "data-analytics-value": datapoint && !pending ? String(datapoint.value) : undefined,
+    "data-analytics-unit": datapoint?.unit,
+    "data-analytics-currency": datapoint?.currency,
+    "data-analytics-source": datapoint?.source,
+    "data-analytics-state": datapoint ? (pending ? "awaiting" : "live") : undefined,
+  };
+}
+
 export function MetricTile({
   label,
   value,
@@ -82,16 +100,7 @@ export function MetricTile({
         pending ? "border-dashed border-border" : "border-border",
         decoration && "relative overflow-hidden",
       )}
-      data-analytics-metric={datapoint?.metric}
-      // Pending tiles publish no value at all rather than a zero: a reader must
-      // be able to tell "nothing has happened" from "nothing measures this".
-      data-analytics-value={
-        datapoint && !pending ? String(datapoint.value) : undefined
-      }
-      data-analytics-unit={datapoint?.unit}
-      data-analytics-currency={datapoint?.currency}
-      data-analytics-source={datapoint?.source}
-      data-analytics-state={datapoint ? (pending ? "awaiting" : "live") : undefined}
+      {...metricDataAttributes(datapoint, pending)}
     >
       {decoration && (
         <CardBackdrop variant={decoration} corner="tr" tone={decorationTone} />

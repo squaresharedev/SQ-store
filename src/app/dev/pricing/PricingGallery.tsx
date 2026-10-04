@@ -1,98 +1,64 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
 import { AccountPlanProvider } from "@/components/billing/plan-context";
 import { PlanChip } from "@/components/billing/PlanChip";
 import { PlanLimitNotice } from "@/components/billing/PlanLimitNotice";
 import { PlansPage } from "@/components/billing/PlansPage";
 import { UpgradeCard } from "@/components/billing/UpgradeCard";
-import type { BillingActions } from "@/components/billing/billing-actions";
 import { BillingSection } from "@/components/settings/BillingSection";
 import { OrdersExportButton } from "@/components/orders/OrdersExportButton";
-import type { PortalState } from "@/lib/billing/actions";
 import type { PricingContext } from "@/lib/billing/pricing-context";
 import { planHas } from "@/lib/billing/features";
 import { PLANS } from "@/lib/billing/plans";
-import { cn } from "@/lib/utils";
+import { FREE_CONTEXT, inAMonth, paidContext, standInBillingActions } from "./fixtures";
+import { DevOptionGroup, GallerySection } from "./DevControls";
+
+const IN_A_MONTH = inAMonth();
 
 /** The store states the billing surfaces must handle, each a PricingContext
  *  as the server would send it. */
-const BASE: PricingContext = {
-  plan: "free",
-  interval: null,
-  status: "none",
-  cancelAtPeriodEnd: false,
-  currentPeriodEnd: null,
-  priceCents: null,
-  currency: null,
-  hasSubscription: false,
-  hasBillingAccount: false,
-  canManage: true,
-  available: true,
-  salesSubtotal30dCents: 0,
-  usage: { storefronts: 1, teamSeats: 1, products: 4 },
-};
-
-const IN_A_MONTH = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-
-const PAID: Partial<PricingContext> = {
-  status: "active",
-  currency: "EUR",
-  currentPeriodEnd: IN_A_MONTH,
-  hasSubscription: true,
-  hasBillingAccount: true,
-};
-
-const SCENARIOS: { key: string; label: string; context: PricingContext }[] = [
-  { key: "free", label: "Free owner, no sales yet", context: BASE },
+const SCENARIOS: { value: string; label: string; context: PricingContext }[] = [
+  { value: "free", label: "Free owner, no sales yet", context: FREE_CONTEXT },
   {
-    key: "free-selling",
+    value: "free-selling",
     label: "Free owner selling €1,800 a month",
-    context: { ...BASE, salesSubtotal30dCents: 180_000, usage: { storefronts: 3, teamSeats: 2, products: 23 } },
+    context: { ...FREE_CONTEXT, salesSubtotal30dCents: 180_000, usage: { storefronts: 3, teamSeats: 2, products: 23 } },
   },
   {
-    key: "starter",
+    value: "free-over",
+    label: "Free owner over the storefront limit",
+    context: { ...FREE_CONTEXT, usage: { storefronts: 5, teamSeats: 2, products: 8 } },
+  },
+  {
+    value: "starter",
     label: "Starter, monthly",
-    context: { ...BASE, ...PAID, plan: "starter", interval: "month", priceCents: 1500, salesSubtotal30dCents: 160_000 },
+    context: paidContext("starter", "month", IN_A_MONTH, { salesSubtotal30dCents: 160_000 }),
   },
   {
-    key: "pro-ending",
+    value: "pro-ending",
     label: "Pro yearly, cancelled at period end",
-    context: { ...BASE, ...PAID, plan: "pro", interval: "year", priceCents: 40000, cancelAtPeriodEnd: true },
+    context: paidContext("pro", "year", IN_A_MONTH, { cancelAtPeriodEnd: true }),
   },
   {
-    key: "past-due",
+    value: "past-due",
     label: "Pro, payment failed",
-    context: { ...BASE, ...PAID, plan: "pro", interval: "month", status: "past_due", priceCents: 4000 },
+    context: paidContext("pro", "month", IN_A_MONTH, { status: "past_due" }),
   },
-  { key: "member", label: "Teammate (read only)", context: { ...BASE, plan: "starter", canManage: false } },
-  { key: "unavailable", label: "Billing not set up here", context: { ...BASE, available: false } },
+  { value: "member", label: "Teammate (read only)", context: { ...FREE_CONTEXT, plan: "starter", canManage: false } },
+  { value: "unavailable", label: "Billing not set up here", context: { ...FREE_CONTEXT, available: false } },
 ];
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export function PricingGallery({ banners }: { banners: React.ReactNode }) {
-  const [scenarioKey, setScenarioKey] = useState(SCENARIOS[0]!.key);
+  const [scenarioKey, setScenarioKey] = useState(SCENARIOS[0]!.value);
   const [lastNavigation, setLastNavigation] = useState<string | null>(null);
-  const { context } = SCENARIOS.find((candidate) => candidate.key === scenarioKey)!;
+  const { context } = SCENARIOS.find((candidate) => candidate.value === scenarioKey)!;
 
-  // Stand-ins for the server actions: a short wait so pending states show,
-  // then what the server would answer. "Navigating" only records the URL.
-  const navigate = useCallback((url: string) => setLastNavigation(url), []);
-  const actions = useMemo<BillingActions>(
-    () => ({
-      startCheckout: async ({ plan, interval }) => {
-        await wait(600);
-        return { ok: true, url: `https://checkout.stripe.com/(dev) ${plan}/${interval}` };
-      },
-      openPortal: async (_prev: PortalState, formData: FormData): Promise<PortalState> => {
-        await wait(600);
-        return { url: `https://billing.stripe.com/(dev) ${String(formData.get("flow"))}` };
-      },
-      navigate,
-    }),
-    [navigate],
-  );
+  // Stand-ins for the server actions. Nothing changes here: they say what the
+  // server was sent, or the URL a real one would open. /dev/cancel walks the
+  // cancel flow through its states.
+  const actions = useMemo(() => standInBillingActions(setLastNavigation), []);
 
   return (
     <AccountPlanProvider plan={context.plan}>
@@ -100,25 +66,15 @@ export function PricingGallery({ banners }: { banners: React.ReactNode }) {
         <header>
           <h1 className="text-2xl font-semibold text-foreground">Plans &amp; billing</h1>
           <p className="mt-1 font-inter text-sm text-muted-foreground">
-            Every billing surface in every store state, with stand-in actions. Nothing is bought.
+            Every billing surface in every store state, with stand-in actions. Nothing is bought. To walk
+            the cancel flow through its states, use{" "}
+            <Link href="/dev/cancel" className="underline underline-offset-4">
+              /dev/cancel
+            </Link>
+            .
           </p>
         </header>
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Store state">
-          {SCENARIOS.map((candidate) => (
-            <button
-              key={candidate.key}
-              type="button"
-              aria-pressed={candidate.key === scenarioKey}
-              onClick={() => setScenarioKey(candidate.key)}
-              className={cn(
-                "border px-3 py-1.5 font-inter text-xs",
-                candidate.key === scenarioKey ? "border-foreground bg-accent" : "border-border",
-              )}
-            >
-              {candidate.label}
-            </button>
-          ))}
-        </div>
+        <DevOptionGroup label="Store state" options={SCENARIOS} value={scenarioKey} onChange={setScenarioKey} />
         {lastNavigation && (
           <p className="font-inter text-xs text-muted-foreground" data-dev-navigation>
             Would open: {lastNavigation}
@@ -166,14 +122,5 @@ export function PricingGallery({ banners }: { banners: React.ReactNode }) {
         </GallerySection>
       </div>
     </AccountPlanProvider>
-  );
-}
-
-function GallerySection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mx-auto max-w-6xl space-y-3 px-6 py-6">
-      <h2 className="text-base font-semibold text-foreground">{title}</h2>
-      {children}
-    </section>
   );
 }

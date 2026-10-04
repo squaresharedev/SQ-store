@@ -147,7 +147,8 @@
       "thankYouCelebration": "Celebracja podziękowania",
       "checkoutPayButton": "Przycisk płatności",
       "productPagePhoto": "Zdjęcie strony produktu",
-      "checkoutPhoto": "Zdjęcie kasy i strony z podziękowaniem"
+      "checkoutPhoto": "Zdjęcie kasy",
+      "thanksPhoto": "Zdjęcie strony z podziękowaniem"
     }
   },
   "editorSearch": {
@@ -1365,7 +1366,8 @@
   "pagePhoto": {
     "label": "Zdjęcie",
     "infoLabel": "Jak używane jest zdjęcie",
-    "info": "Wyświetlane za stroną i przyciemnione kolorem strony, aby tekst pozostał czytelny. Zmień kolor, by rozjaśnić lub przyciemnić zdjęcie.",
-    "remove": "Usuń zdjęcie"
+    "info": "Wyświetlane za stroną. Nakładka w kolorze strony zapewnia czytelność tekstu; wyłącz ją, by pokazać zdjęcie bez zmian.",
+    "remove": "Usuń zdjęcie",
+    "overlay": "Nakładka kolorystyczna"
   }
 }

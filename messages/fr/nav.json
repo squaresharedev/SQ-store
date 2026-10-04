@@ -27,6 +27,10 @@
     "settings": {
       "label": "Paramètres",
       "description": "Vos informations vendeur, conditions de livraison et compte."
+    },
+    "discounts": {
+      "label": "Réductions",
+      "description": "Organisez des promotions et partagez des codes de réduction."
     }
   },
   "settings": {

@@ -4,8 +4,9 @@
 //
 // It pretends each hosted page was completed the moment it is opened: "open
 // checkout" subscribes the account there and then and sends the browser
-// straight to the success URL; "open the portal" applies the switch or the
-// cancellation and sends the browser straight back. What it writes goes
+// straight to the success URL; "open the portal" applies the switch and sends
+// the browser straight back; cancelling and resuming flip the end-of-period
+// flag as Stripe would. What it writes goes
 // through applyBillingSnapshot, the same write the Stripe webhook makes, so
 // everything downstream of seller_billing is the production code path.
 //
@@ -69,24 +70,32 @@ function subscribedSnapshot(ownerId: string, plan: PaidPlanId, interval: Billing
   };
 }
 
-/** The current paid plan, set to end with its period (what Stripe's
- *  cancel_at_period_end does). No-op for an account on Free. */
-async function cancelAtPeriodEnd(ownerId: string, customerId: string, now: Date): Promise<void> {
+/**
+ * The current paid plan with its end-of-period cancellation set or cleared
+ * (what Stripe's cancel_at_period_end does): the period, price and plan stay
+ * as they are, only the flag and the entitlement date follow it. No-op for an
+ * account with no subscription period (Free).
+ */
+async function setCancelAtPeriodEnd(ownerId: string, customerId: string, cancel: boolean, now: Date): Promise<void> {
   const current = await readAccountBilling(ownerId, now);
-  if (!current.ok || !current.billing.storedPlan || !current.billing.interval) return;
-  const snapshot = subscribedSnapshot(ownerId, current.billing.storedPlan, current.billing.interval, now);
-  const periodEnd = current.billing.currentPeriodEnd
-    ? new Date(current.billing.currentPeriodEnd)
-    : snapshot.currentPeriodEnd;
+  if (!current.ok) return;
+  const { storedPlan, interval, currentPeriodEnd } = current.billing;
+  if (!storedPlan || !interval || !currentPeriodEnd) return;
+  const snapshot = subscribedSnapshot(ownerId, storedPlan, interval, now);
+  const periodEnd = new Date(currentPeriodEnd);
+  // Stripe would refuse to resume a subscription whose period is over.
+  if (!cancel && periodEnd.getTime() <= now.getTime()) {
+    throw new Error("this subscription's period is over and cannot be resumed");
+  }
   await applyBillingSnapshot(
     ownerId,
     customerId,
     {
       ...snapshot,
       currentPeriodEnd: periodEnd,
-      cancelAtPeriodEnd: true,
+      cancelAtPeriodEnd: cancel,
       priceCents: current.billing.priceCents,
-      paidUntil: computePaidUntil("active", periodEnd, true, now),
+      paidUntil: computePaidUntil("active", periodEnd, cancel, now),
     },
     now,
   );
@@ -124,15 +133,20 @@ export const testBillingProvider: BillingProvider = {
         subscribedSnapshot(request.ownerId, request.flow.plan, request.flow.interval, now),
         now,
       );
-    } else if (request.flow.kind === "cancel") {
-      await cancelAtPeriodEnd(request.ownerId, request.customerId, now);
     }
     return sameOrigin(request.returnUrl);
   },
 
+  // The feedback is Stripe's to keep; here plan_cancellations (written by the
+  // action) is the only record of it, which is all a stand-in needs.
   async scheduleCancellation(ownerId: string, customerId: string): Promise<void> {
     assertEnabled();
-    await cancelAtPeriodEnd(ownerId, customerId, new Date());
+    await setCancelAtPeriodEnd(ownerId, customerId, true, new Date());
+  },
+
+  async resumeSubscription(ownerId: string, customerId: string): Promise<void> {
+    assertEnabled();
+    await setCancelAtPeriodEnd(ownerId, customerId, false, new Date());
   },
 
   async syncCustomer(ownerId: string): Promise<ApplyResult> {

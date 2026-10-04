@@ -1,0 +1,165 @@
+{
+  "metadata": {
+    "title": "Descontos"
+  },
+  "page": {
+    "title": "Descontos",
+    "subtitle": "Crie uma promoção ou partilhe um código e veja quais os canais que trazem mais encomendas.",
+    "create": "Criar desconto"
+  },
+  "empty": {
+    "title": "Ainda sem descontos",
+    "hint": "Uma promoção baixa os seus preços para toda a gente, durante o tempo que escolher. Um código é para as pessoas com quem o partilha e mostra-lhe de onde vêm os seus compradores.",
+    "hintReadOnly": "Os proprietários e editores podem criar descontos aqui."
+  },
+  "terms": {
+    "percentEach": "{percent}% de desconto em cada artigo",
+    "amountEach": "{amount} de desconto em cada artigo",
+    "percentOrder": "{percent}% de desconto na encomenda",
+    "amountOrder": "{amount} de desconto na encomenda",
+    "allProducts": "Todos os produtos",
+    "someProducts": "{count, plural, one {# produto} other {# produtos}}",
+    "kindCode": "Código de desconto",
+    "kindAutomatic": "Promoção automática",
+    "status": {
+      "scheduled": "Agendada",
+      "active": "Ativa",
+      "paused": "Desativada",
+      "used_up": "Esgotada",
+      "ended": "Terminada"
+    }
+  },
+  "performance": {
+    "title": "Como estão os seus descontos",
+    "orders": "Encomendas com desconto",
+    "revenue": "Receita dessas encomendas",
+    "given": "Concedido em descontos",
+    "none": "Ainda nada",
+    "channelsTitle": "Encomendas por canal",
+    "channelsDescription": "Os códigos contam no canal onde os partilhou, ou no próprio código quando não nomeou um canal.",
+    "channelsEmpty": "Ainda não há encomendas com desconto.",
+    "automatic": "Promoções automáticas",
+    "series": "Encomendas"
+  },
+  "list": {
+    "title": "Os seus descontos",
+    "none": "Sem descontos neste momento. Os descontos eliminados continuam a contar as suas encomendas acima.",
+    "channel": "Partilhado em {channel}",
+    "startsOn": "Inicia em {date}",
+    "endsOn": "Termina em {date}",
+    "ended": "Terminou em {date}",
+    "noEnd": "Sem data de fim",
+    "orders": "{orders, plural, =0 {Ainda sem encomendas} one {# encomenda} other {# encomendas}}",
+    "uses": "{uses} de {limit} utilizações",
+    "switchLabel": "Ativo",
+    "edit": "Editar",
+    "endNow": "Terminar agora",
+    "delete": "Eliminar",
+    "copy": {
+      "copy": "Copiar código",
+      "copied": "Código copiado",
+      "failed": "Não foi possível copiar o código. Selecione-o e copie-o manualmente."
+    }
+  },
+  "confirmDelete": {
+    "title": "Eliminar este desconto?",
+    "body": "Deixa de ser aplicado de imediato. As encomendas que trouxe continuam a ser contadas.",
+    "confirm": "Eliminar desconto"
+  },
+  "confirmEnd": {
+    "title": "Terminar esta promoção agora?",
+    "body": "Os preços voltam ao normal de imediato. Para a repetir mais tarde, crie uma nova promoção.",
+    "confirm": "Terminar promoção"
+  },
+  "toast": {
+    "deleted": "Desconto eliminado.",
+    "ended": "Promoção terminada.",
+    "switchedOn": "Código ativado.",
+    "switchedOff": "Código desativado."
+  },
+  "form": {
+    "newTitle": "Novo desconto",
+    "editTitle": "Editar desconto",
+    "back": "Voltar aos descontos",
+    "kind": {
+      "title": "Que tipo de desconto?",
+      "code": "Código de desconto",
+      "codeHint": "Os compradores introduzem-no na finalização de compra. Partilhe-o no Instagram, numa newsletter ou com um criador e veja qual o canal que vende mais.",
+      "automatic": "Promoção automática",
+      "automaticHint": "Toda a gente vê o preço mais baixo nas suas páginas de produto. Não é necessário código.",
+      "fixed": "Um desconto não pode mudar de tipo. Para mudar, crie um novo."
+    },
+    "code": {
+      "title": "Código",
+      "description": "O que os compradores introduzem na finalização de compra.",
+      "label": "Código",
+      "generate": "Gerar",
+      "hint": "3 a 24 letras ou números. Os compradores podem introduzi-lo em maiúsculas ou minúsculas."
+    },
+    "channel": {
+      "label": "Canal (opcional)",
+      "hint": "Onde vai partilhar este código, para poder ver qual o canal que traz mais encomendas.",
+      "suggestions": "Canais sugeridos",
+      "newsletter": "Newsletter",
+      "creator": "Criador"
+    },
+    "value": {
+      "title": "Desconto",
+      "each": "Deduzido do preço de cada artigo.",
+      "order": "Deduzido dos artigos da encomenda. O envio não tem desconto.",
+      "percent": "Percentagem",
+      "amount": "Valor fixo",
+      "percentLabel": "Percentagem de desconto",
+      "amountLabel": "Valor de desconto",
+      "currencyHint": "Aplica-se apenas a produtos com preço nesta moeda."
+    },
+    "products": {
+      "title": "Aplica-se a",
+      "all": "Todos os produtos",
+      "some": "Produtos específicos",
+      "summary": "{count, plural, =0 {Escolher produtos} one {# produto escolhido} other {# produtos escolhidos}}",
+      "search": "Pesquisar produtos",
+      "none": "Nenhum produto corresponde."
+    },
+    "schedule": {
+      "title": "Quando",
+      "timeZone": "Os horários estão no seu fuso horário ({zone}).",
+      "starts": "Início",
+      "ends": "Fim",
+      "now": "Agora",
+      "later": "Mais tarde",
+      "noEnd": "Sem fim",
+      "onDate": "Numa data",
+      "date": "Data",
+      "time": "Hora",
+      "started": "Iniciada em {date}",
+      "runFor": "Duração",
+      "preset": {
+        "day": "1 dia",
+        "threeDays": "3 dias",
+        "week": "1 semana",
+        "month": "1 mês"
+      }
+    },
+    "limit": {
+      "title": "Limites",
+      "label": "Limitar o número de encomendas que o podem usar",
+      "count": "Número de encomendas"
+    },
+    "enabled": "Código ativado",
+    "locked": "Esta promoção já foi iniciada, por isso só o fim pode ser alterado. Para alterar qualquer outra coisa, termine-a e crie uma nova promoção.",
+    "summary": {
+      "title": "Resumo",
+      "startsNow": "Inicia agora",
+      "starts": "Inicia em {date}",
+      "ends": "Termina em {date}",
+      "noEnd": "Sem data de fim",
+      "example": "Exemplo: {title} a {regular} custa {now}."
+    },
+    "create": "Criar desconto",
+    "save": "Guardar alterações",
+    "saving": "A guardar",
+    "created": "Desconto criado.",
+    "saved": "Desconto guardado."
+  }
+}

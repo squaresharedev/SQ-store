@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { freshUser, seedOrders, signUp, userIdByEmail } from "./helpers";
+import { freshUser, seedOrders, seedProducts, serviceRest, signUp, userIdByEmail } from "./helpers";
 
 test.describe("orders + analytics (seeded)", () => {
   test("orders list shows seeded rows, filters by channel and status", async ({ page }) => {
@@ -156,6 +156,50 @@ test.describe("orders + analytics (seeded)", () => {
       await expect(detail).not.toBeVisible({ timeout: 3_000 });
     }).toPass({ timeout: 20_000 });
     await expect(page).not.toHaveURL(/order=/);
+  });
+
+  test("overview's Recent orders rows show the product photo and units bought", async ({ page }) => {
+    const user = freshUser("recentphoto");
+    await signUp(page, user);
+    const sellerId = await userIdByEmail(user.email);
+    // An https:// image_key is served straight through (no R2 in the stack).
+    const photo = "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=200";
+    await seedProducts(sellerId, [{ title: "Photo lamp", image_key: photo }]);
+    const [product] = (await serviceRest(`/products?owner_id=eq.${sellerId}&select=id`)) as {
+      id: string;
+    }[];
+    await seedOrders(sellerId, [
+      { amount_cents: 7500, product_title: "Photo lamp", product_id: product.id, quantity: 3 },
+      { amount_cents: 2500, product_title: "Plain one", quantity: 1 },
+    ]);
+
+    await page.goto("/dashboard");
+    const card = page.locator("#recent-orders");
+    const lamp = card.getByRole("link", { name: /Photo lamp/ });
+    await expect(lamp).toBeVisible();
+
+    // More than one unit reads "3 × Photo lamp"; a lone unit is just its name.
+    await expect(lamp).toContainText("3 × Photo lamp");
+    const plain = card.getByRole("link", { name: /Plain one/ });
+    await expect(plain).not.toContainText("×");
+
+    // The photo sits to the LEFT of the text; the photo-less row keeps a tile.
+    const img = lamp.locator("img");
+    await expect(img).toHaveAttribute("src", photo);
+    // ...and it really paints (a dead URL would leave the grey tile).
+    await expect
+      .poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0), {
+        timeout: 20_000,
+      })
+      .toBe(true);
+    const [imgBox, textBox] = await Promise.all([
+      img.boundingBox(),
+      lamp.getByText("3 × Photo lamp").boundingBox(),
+    ]);
+    expect(imgBox!.x + imgBox!.width).toBeLessThanOrEqual(textBox!.x);
+    await expect(plain.locator("img")).toHaveCount(0);
+    await expect(plain.locator("svg.lucide-image")).toHaveCount(1);
+    await card.screenshot({ path: "test-results/recent-orders-photo.png" });
   });
 
   test("analytics shows seeded revenue and channel split", async ({ page }) => {

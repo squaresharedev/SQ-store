@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { SliderField } from "@/components/ui/SliderField";
+import { AmountField } from "@/components/ui/AmountField";
+import { Slider } from "@/components/ui/slider";
 import { CountUp } from "@/components/ui/CountUp";
-import { cardClass, eyebrowClass, inkBadgeClass } from "@/components/ui/surface-styles";
+import { cardClass, inkBadgeClass } from "@/components/ui/surface-styles";
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
-import { currencySymbol, formatCents } from "@/lib/format/money";
+import { formatCents } from "@/lib/format/money";
 import { cheapestPlanFor, monthlyPriceCents, platformFeeCents } from "@/lib/billing/fees";
 import { BILLING_CURRENCY, PLANS, PLAN_IDS, type BillingInterval } from "@/lib/billing/plans";
 
@@ -24,15 +25,16 @@ const BAR_PART_CLASS = {
 } as const;
 
 /**
- * "Which plan costs you least?": one slider (a month of sales) and one bar
- * per plan, drawn in two parts so the sum explains itself: the plan's price
- * in ink, the fee on those sales in grey. The shortest bar is the cheapest
- * plan, and it is named. It names Free when Free is cheapest: a calculator
- * that only ever recommends the dearest plan is an advert, and sellers can
- * tell.
+ * "Which plan costs you least?": a month of sales, typed (AmountField) or
+ * dragged (the slider under it, the same figure), and one bar per plan, drawn
+ * in two parts so the sum explains itself: the plan's price in ink, the fee
+ * on those sales in grey. The shortest bar is the cheapest plan, and it wears
+ * the pill. It can be Free: a calculator that only ever recommends the
+ * dearest plan is an advert, and sellers can tell.
  *
- * Prefilled from the store's own last 30 days of sales when it has any. All
- * the arithmetic is lib/billing/fees.ts, the same the checkout charges with.
+ * Starts on the store's own last 30 days of sales when it has any (silently:
+ * it is a starting point, not a claim). All the arithmetic is
+ * lib/billing/fees.ts, the same the checkout charges with.
  */
 export function CostExplorer({
   interval,
@@ -68,25 +70,34 @@ export function CostExplorer({
     <section aria-labelledby={`${id}-title`} className={cn(cardClass, "p-6 sm:p-8")}>
       <div className="grid gap-8 lg:grid-cols-5 lg:gap-12">
         <div className="lg:col-span-2">
-          <p className={eyebrowClass}>{t("calculator.eyebrow")}</p>
-          <h2 id={`${id}-title`} className="mt-1 text-xl font-semibold text-foreground">
+          <h2 id={`${id}-title`} className="text-xl font-semibold text-foreground">
             {t("calculator.title")}
           </h2>
           <p className={cn(helpTextClass, "mt-1")}>{t("calculator.lead")}</p>
-          <div className="mt-6">
-            <SliderField
-              id={`${id}-sales`}
-              label={t("calculator.salesLabel")}
-              ariaLabel={t("calculator.salesAria")}
-              value={euros}
+          <AmountField
+            id={`${id}-sales`}
+            className="mt-6"
+            label={t("calculator.salesLabel")}
+            value={euros}
+            max={SALES_MAX_EUROS}
+            onChange={setEuros}
+            currency={BILLING_CURRENCY}
+            suffix={t("calculator.perMonth")}
+          />
+          <div className="mt-4">
+            <Slider
               min={0}
               max={SALES_MAX_EUROS}
               step={SALES_STEP_EUROS}
+              value={euros}
               onChange={setEuros}
+              ariaLabel={t("calculator.salesAria")}
               valueText={money(salesCents)}
-              unit={currencySymbol(BILLING_CURRENCY, locale)}
             />
-            {fromSales && <p className={cn(infoTextClass, "mt-1.5")}>{t("calculator.fromYourSales")}</p>}
+            <div className={cn(infoTextClass, "mt-1.5 flex justify-between tabular-nums")} aria-hidden>
+              <span>{wholeMoney(0)}</span>
+              <span>{wholeMoney(SALES_MAX_EUROS * 100)}</span>
+            </div>
           </div>
         </div>
 
@@ -97,11 +108,13 @@ export function CostExplorer({
               return (
                 <li key={plan} data-pricing-cost={plan} data-cheapest={isCheapest || undefined}>
                   <div className="flex items-center justify-between gap-3">
-                    <span className="flex items-center gap-2 font-inter text-sm font-medium text-foreground">
+                    <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 font-inter text-sm font-medium text-foreground">
                       {t(`plans.${plan}.name`)}
                       {isCheapest && <span className={inkBadgeClass}>{t("calculator.cheapestTag")}</span>}
                     </span>
-                    <span className="font-inter text-sm">
+                    {/* The total stays on one line; a narrow column wraps the
+                        pill under the plan's name instead. */}
+                    <span className="shrink-0 whitespace-nowrap font-inter text-sm">
                       <CountUp
                         className={cn("tabular-nums text-foreground", isCheapest ? "font-semibold" : "font-medium")}
                         value={money(total)}
@@ -135,7 +148,10 @@ export function CostExplorer({
             </span>
           </div>
 
-          <p className="mt-5 font-inter text-sm font-medium text-foreground" aria-live="polite">
+          {/* Not shown: the "Cheapest for you" pill says it to the eye. Kept
+              for a screen reader, which cannot see a pill move as the figure
+              changes and is told in a sentence instead. */}
+          <p className="sr-only" aria-live="polite">
             {t("calculator.cheapest", { sales: wholeMoney(salesCents), plan: t(`plans.${cheapest}.name`) })}
           </p>
         </div>

@@ -10,9 +10,10 @@
 
 import { cache } from "react";
 import { presignGetUrl } from "@/lib/r2";
+import { signPagePhoto } from "@/lib/storefront/uploads";
 import { RATE_LIMITS } from "@/lib/rate-limit";
 import { loadPurchasable } from "@/lib/products/purchasable";
-import { buildProductPageProduct } from "@/lib/products/public";
+import { buildProductPageProduct, gatePricing } from "@/lib/products/public";
 import { checkoutAvailableFor } from "@/lib/checkout/availability";
 import { resolveCheckoutPage } from "@/lib/storefront/checkout-page";
 import type { CheckoutPageData } from "@/types/checkout";
@@ -35,6 +36,7 @@ export const getCheckoutPage = cache(
     const product = await buildProductPageProduct(row, {
       soldOutFlag: block.soldOut,
       showStock: productPage.showStock,
+      pricing: await gatePricing(gate),
     });
 
     const theme = config.theme;
@@ -42,9 +44,7 @@ export const getCheckoutPage = cache(
       theme.background.kind === "image" ? await presignGetUrl(theme.background.key) : null;
     const customFontUrl = theme.customFont ? await presignGetUrl(theme.customFont.key) : null;
     const checkoutPage = resolveCheckoutPage(config);
-    const pagePhotoUrl = checkoutPage.backgroundImage
-      ? await presignGetUrl(checkoutPage.backgroundImage.key)
-      : null;
+    const pagePhoto = await signPagePhoto(checkoutPage.backgroundImage);
 
     return {
       page: {
@@ -59,7 +59,7 @@ export const getCheckoutPage = cache(
           seller,
           backgroundImageUrl,
           customFontUrl,
-          pagePhotoUrl,
+          pagePhoto,
           checkout: true,
         },
         product,

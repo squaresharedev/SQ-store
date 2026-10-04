@@ -17,7 +17,8 @@
   "channel": {
     "embed": "Incorporação",
     "marketplace": "Marketplace",
-    "direct": "As suas páginas"
+    "direct": "As suas páginas",
+    "button": "Botão no seu site"
   },
   "empty": {
     "filteredTitle": "Nenhuma encomenda corresponde a estes filtros",
@@ -61,7 +62,8 @@
     "datePlaceholder": "qualquer data",
     "sort": "ordenar",
     "sortAriaLabel": "Ordenar encomendas",
-    "clearFilters": "limpar filtros"
+    "clearFilters": "limpar filtros",
+    "allChannels": "Todos os canais"
   },
   "sort": {
     "newest": "Mais recentes primeiro",
@@ -140,7 +142,11 @@
     },
     "emailBuyer": "Enviar e-mail ao comprador",
     "mailSubject": "A sua encomenda {number}",
-    "withdrawnShipWarning": "O comprador desistiu desta compra. Só a envie se tiver acordado isso com ele."
+    "withdrawnShipWarning": "O comprador desistiu desta compra. Só a envie se tiver acordado isso com ele.",
+    "discount": "Desconto",
+    "discountSale": "Promoção, {amount} de desconto",
+    "discountCode": "Código {code}, {amount} de desconto",
+    "discountCodeOutdone": "Código {code} utilizado, mas o preço da promoção era inferior"
   },
   "actions": {
     "refundNeedsStripe": "Os reembolsos exigem que o Stripe esteja ligado.",
@@ -210,7 +216,8 @@
       "openShip": "Assim que estiver a caminho, marque-a como enviada aqui e avisaremos o comprador: {url}",
       "openDigital": "Ver a encomenda: {url}",
       "gift": "Mensagem de oferta a incluir: {message}",
-      "number": "Número da encomenda: {number}"
+      "number": "Número da encomenda: {number}",
+      "discountCode": "Código de desconto: {code}"
     },
     "shipped": {
       "subject": "A sua encomenda de {store} está a caminho",
@@ -245,7 +252,8 @@
       "withdrawalDigital": "Pediu o descarregamento imediato e aceitou que o seu direito de desistência termina assim que começar.",
       "guarantee": "Tem também a garantia legal de conformidade por pelo menos dois anos.",
       "questions": "Tem dúvidas? Responda a este e-mail para contactar {store}.",
-      "footer": "Enviado pela Square Share em nome de {store}. A Square Share fornece o software da loja e não é parte desta venda."
+      "footer": "Enviado pela Square Share em nome de {store}. A Square Share fornece o software da loja e não é parte desta venda.",
+      "discount": "Desconto ({code}): -{amount}"
     },
     "withdrawal": {
       "buyerSubject": "A sua desistência da encomenda {number} em {store}",

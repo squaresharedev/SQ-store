@@ -8,24 +8,20 @@ import { Spinner } from "@/components/ui/spinner";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { pageShellClass } from "@/components/ui/surface-styles";
-import {
-  helpTextClass,
-  iconNudgeRightClass,
-  infoTextClass,
-  lastUsedBadgeClass,
-  stubBadgeClass,
-} from "@/components/ui/control-styles";
+import { pageShellClass, savingBadgeClass, savingBadgeOnInkClass } from "@/components/ui/surface-styles";
+import { helpTextClass, iconNudgeRightClass, infoTextClass, stubBadgeClass } from "@/components/ui/control-styles";
 import { PlanCard } from "@/components/billing/PlanCard";
 import { CostExplorer } from "@/components/billing/CostExplorer";
 import { PlanComparison } from "@/components/billing/PlanComparison";
 import { PlansFaq } from "@/components/billing/PlansFaq";
 import { PortalButton } from "@/components/billing/PortalButton";
+import { CancelPlanButton } from "@/components/billing/CancelPlanDialog";
+import { KeepPlanButton } from "@/components/billing/KeepPlanButton";
 import { SERVER_BILLING_ACTIONS, navigateOf, type BillingActions } from "@/components/billing/billing-actions";
 import { cn } from "@/lib/utils";
 import { formatLongDate } from "@/lib/format/date";
 import type { PricingContext } from "@/lib/billing/pricing-context";
-import { yearlySavingCents } from "@/lib/billing/fees";
+import { launchDiscountPercent, yearlyFreeMonths } from "@/lib/billing/fees";
 import type { PricingSource } from "@/lib/billing/paths";
 import {
   BILLING_INTERVALS,
@@ -37,8 +33,13 @@ import {
 } from "@/lib/billing/plans";
 import type { ActionError } from "@/lib/errors";
 
-/** Does any plan save money by paying yearly? Drives the "2 months free" pill. */
-const YEARLY_SAVES = PLAN_IDS.some((plan) => yearlySavingCents(plan) > 0);
+/** The whole months a year on the yearly price gives away, on every paid
+ *  plan: the figure on the Yearly option's green chip. Zero shows no chip. */
+const YEARLY_FREE_MONTHS = yearlyFreeMonths();
+
+/** Any plan is on a launch price (shown beside its struck-through regular
+ *  price), so the fine print says what that means. */
+const HAS_LAUNCH_PRICE = PLAN_IDS.some((plan) => launchDiscountPercent(plan, "month") > 0);
 
 /** The promises under the headline, each with its glyph. */
 const TRUST = [
@@ -54,7 +55,9 @@ const TRUST = [
  * store is now:
  *
  *   on Free          Upgrade          -> Stripe Checkout
- *   on a paid plan   Switch / Free    -> Stripe Customer Portal (2FA first)
+ *   on a paid plan   Switch           -> Stripe Customer Portal (2FA first)
+ *                    Move to Free     -> the in-app cancel (CancelPlanButton)
+ *   plan ending      Keep my plan     -> resumePlan, beside the "ends on" notice
  *   a teammate       nothing          -> "only the owner can change the plan"
  *   not set up here  "Soon"           -> the plans, with nothing to press
  */
@@ -99,24 +102,41 @@ export function PlansPage({
           title={t("page.title")}
           subtitle={t("page.lead")}
           action={
-            <div className="flex flex-wrap items-center gap-3">
-              {YEARLY_SAVES && <span className={lastUsedBadgeClass}>{t("page.yearlySaving")}</span>}
-              <div className="w-56">
-                <SegmentedControl
-                  value={interval}
-                  onChange={setInterval}
-                  ariaLabel={t("page.intervalLabel")}
-                  options={BILLING_INTERVALS.map((value) => ({ value, label: t(`page.${value}`) }))}
-                />
-              </div>
-            </div>
+            <SegmentedControl
+              value={interval}
+              onChange={setInterval}
+              ariaLabel={t("page.intervalLabel")}
+              options={BILLING_INTERVALS.map((value) => ({
+                value,
+                // What yearly saves rides ON the Yearly choice, in green: a
+                // reason to press it, not a note beside the control.
+                label:
+                  value === "year" && YEARLY_FREE_MONTHS > 0 ? (
+                    <>
+                      {t("page.year")}
+                      <span
+                        data-yearly-saving
+                        className={cn(interval === "year" ? savingBadgeOnInkClass : savingBadgeClass, "px-1.5 py-0")}
+                      >
+                        {t("page.yearlyFree", { count: YEARLY_FREE_MONTHS })}
+                      </span>
+                    </>
+                  ) : (
+                    t(`page.${value}`)
+                  ),
+              }))}
+            />
           }
         />
 
         {notice && (
-          <p role="status" className={cn(helpTextClass, "mx-auto max-w-2xl border-l-2 border-foreground pl-3")}>
-            {notice}
-          </p>
+          <div role="status" className="mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-3 border-l-2 border-foreground pl-3">
+            <p className={helpTextClass}>{notice}</p>
+            {/* Ending, not past due: the owner can still change their mind. */}
+            {context.canManage && context.cancelAtPeriodEnd && context.status !== "past_due" && isPaidPlan(context.plan) && (
+              <KeepPlanButton plan={context.plan} actions={actions} />
+            )}
+          </div>
         )}
         {!context.canManage && (
           <p role="note" className={cn(helpTextClass, "text-center")}>
@@ -135,7 +155,7 @@ export function PlansPage({
                 source,
                 leavingFor,
                 onUpgrade: upgrade,
-                openPortal: actions.openPortal,
+                actions,
                 navigate,
                 t,
               })}
@@ -156,7 +176,11 @@ export function PlansPage({
       <CostExplorer interval={interval} salesSubtotal30dCents={context.salesSubtotal30dCents} />
       <PlanComparison interval={interval} currentPlan={context.plan} />
       <PlansFaq />
-      <p className={cn(infoTextClass, "mx-auto max-w-3xl text-center")}>{t("page.finePrint")}</p>
+      <p className={cn(infoTextClass, "mx-auto max-w-3xl text-center")}>
+        {t("page.finePrint")}
+        {/* What a struck-through price is, wherever one is shown. */}
+        {HAS_LAUNCH_PRICE && <> {t("page.launchNote")}</>}
+      </p>
     </div>
   );
 }
@@ -171,7 +195,7 @@ function planAction({
   source,
   leavingFor,
   onUpgrade,
-  openPortal,
+  actions,
   navigate,
   t,
 }: {
@@ -181,7 +205,7 @@ function planAction({
   source: PricingSource | null;
   leavingFor: PaidPlanId | null;
   onUpgrade: (plan: PaidPlanId) => void;
-  openPortal: BillingActions["openPortal"];
+  actions: BillingActions;
   navigate: (url: string) => void;
   t: Translate;
 }): React.ReactNode {
@@ -200,20 +224,20 @@ function planAction({
     );
   }
 
-  // On a live paid plan, every change goes through the Customer Portal, where
-  // Stripe shows the proration before anything is charged.
+  // On a live paid plan, a switch goes through the Customer Portal, where
+  // Stripe shows the proration before anything is charged; going back to Free
+  // is the in-app cancel, which asks (optionally) why.
   if (context.hasSubscription) {
     if (!isPaidPlan(plan)) {
-      if (context.cancelAtPeriodEnd) return null;
+      if (context.cancelAtPeriodEnd || !isPaidPlan(context.plan) || !context.currentPeriodEnd) return null;
       return (
-        <PortalButton
-          id={`plans-portal-${plan}`}
-          target={{ flow: "cancel" }}
-          source={source ?? undefined}
+        <CancelPlanButton
+          plan={context.plan}
+          periodEnd={context.currentPeriodEnd}
+          actions={actions}
           label={t("card.moveToFree")}
           variant="secondary"
-          action={openPortal}
-          navigate={navigate}
+          className="w-full"
         />
       );
     }
@@ -224,7 +248,7 @@ function planAction({
         source={source ?? undefined}
         label={plan === context.plan ? t("card.switchInterval", { interval }) : t("card.switch", { plan: name })}
         variant={plan === context.plan ? "secondary" : "primary"}
-        action={openPortal}
+        action={actions.openPortal}
         navigate={navigate}
       />
     );

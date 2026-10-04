@@ -18,6 +18,7 @@ import { OrdersExportButton } from "@/components/orders/OrdersExportButton";
 import { getAccountBilling } from "@/lib/billing/account-plan";
 import { planHas } from "@/lib/billing/features";
 import {
+  ORDER_CHANNELS,
   ORDERS_SEARCH_MAX_LENGTH,
   ORDERS_VIEWS,
   type OrderChannel,
@@ -55,7 +56,6 @@ export async function generateMetadata(): Promise<Metadata> {
 type SearchParams = { [key: string]: string | string[] | undefined };
 
 const STATUSES: OrderStatus[] = ["paid", "refunded", "disputed", "pending"];
-const CHANNELS: OrderChannel[] = ["embed", "marketplace", "direct"];
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 function first(value: string | string[] | undefined): string | undefined {
@@ -75,7 +75,7 @@ function parseParams(params: SearchParams): {
     filters.status = status as OrderStatus;
   }
   const channel = first(params.channel);
-  if (CHANNELS.includes(channel as OrderChannel)) {
+  if ((ORDER_CHANNELS as readonly (string | undefined)[]).includes(channel)) {
     filters.channel = channel as OrderChannel;
   }
   const from = first(params.from);

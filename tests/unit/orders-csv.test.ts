@@ -93,8 +93,8 @@ describe("ordersCsv", () => {
     expect(cells[ORDERS_CSV_COLUMNS.indexOf("platform_fee_rate_percent")]).toBe("");
   });
 
-  it("names the carrier after the tracking number, as the newest and so the last column", () => {
-    expect(ORDERS_CSV_COLUMNS.slice(-2)).toEqual(["tracking_number", "tracking_carrier"]);
+  it("names the carrier right after the tracking number", () => {
+    expect(ORDERS_CSV_COLUMNS.slice(-4, -2)).toEqual(["tracking_number", "tracking_carrier"]);
     const [, line] = ordersCsv([
       row({
         fulfilment: {
@@ -108,7 +108,27 @@ describe("ordersCsv", () => {
       .replace(CSV_BOM, "")
       .trimEnd()
       .split("\r\n");
-    expect(line!.split(",").slice(-2)).toEqual(["RR123456789IE", "an-post"]);
+    const cells = Object.fromEntries(ORDERS_CSV_COLUMNS.map((column, i) => [column, line!.split(",")[i]]));
+    expect([cells.tracking_number, cells.tracking_carrier]).toEqual(["RR123456789IE", "an-post"]);
+  });
+
+  it("ends with what a discount took off and the code used, the newest columns", () => {
+    expect(ORDERS_CSV_COLUMNS.slice(-2)).toEqual(["discount", "discount_code"]);
+    const lines = ordersCsv([
+      row({ discount: { cents: 480, code: "SUMMER10", byCode: true } }),
+      row({ discount: { cents: 600, code: null, byCode: false } }),
+      row(),
+    ])
+      .replace(CSV_BOM, "")
+      .trimEnd()
+      .split("\r\n")
+      .slice(1)
+      .map((line) => line.split(",").slice(-2));
+    expect(lines).toEqual([
+      ["4.80", "SUMMER10"],
+      ["6.00", ""],
+      ["0.00", ""],
+    ]);
   });
 
   it("is a ledger, not a mailing list: no buyer email, name or street", () => {

@@ -7,6 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 import { checkoutPageSchema, productPageSchema } from "@/lib/validation/storefront";
 import { storedPagePhotoKeys } from "@/lib/storefront/uploads";
 import { pagePhotoStyle } from "@/components/product-page/product-page-maps";
+import { pagePhotoView } from "@/lib/storefront/product-page";
 import { DEFAULT_CHECKOUT_PAGE_CONFIG, DEFAULT_PRODUCT_PAGE_CONFIG } from "@/types/storefront";
 
 vi.mock("@/lib/r2", () => ({}));
@@ -36,7 +37,9 @@ describe("pagePhotoSchema", () => {
 });
 
 describe("storedPagePhotoKeys", () => {
-  it("collects the product page's and the checkout's keys, and survives junk", () => {
+  it("collects the product page's, the checkout's and the thank-you's keys, and survives junk", () => {
+    const thanks = "images/00000000-0000-4000-8000-000000000003/00000000-0000-4000-8000-0000000000dd-thanks.webp";
+    expect(storedPagePhotoKeys({ checkoutPage: { thanksBackgroundImage: { key: thanks } } })).toEqual(new Set([thanks]));
     const other = "images/00000000-0000-4000-8000-000000000002/00000000-0000-4000-8000-0000000000bb-other.webp";
     expect(
       storedPagePhotoKeys({ productPage: { backgroundImage: { key: KEY } }, checkoutPage: { backgroundImage: { key: other } } }),
@@ -47,10 +50,28 @@ describe("storedPagePhotoKeys", () => {
 });
 
 describe("pagePhotoStyle", () => {
-  it("lays a veil of the page colour over the photo, covering the page", () => {
-    const style = pagePhotoStyle({ url: "https://cdn.example/a.webp", tint: "#102030" });
+  it("lays an overlay of the page colour over the photo, covering the page", () => {
+    const style = pagePhotoStyle({ url: "https://cdn.example/a.webp", overlay: true, tint: "#102030" });
     expect(style.backgroundImage).toContain("rgba(16,32,48,");
     expect(style.backgroundImage).toContain("https://cdn.example/a.webp");
     expect(style.backgroundSize).toBe("cover");
+  });
+
+  it("shows the photo as it is when the overlay is off", () => {
+    const style = pagePhotoStyle({ url: "https://cdn.example/a.webp", overlay: false, tint: "#102030" });
+    expect(style.backgroundImage).not.toContain("rgba");
+    expect(style.backgroundImage).toContain("https://cdn.example/a.webp");
+  });
+});
+
+describe("pagePhotoView", () => {
+  it("has the overlay on unless the photo says otherwise, and no view without a URL", () => {
+    expect(pagePhotoView({ key: KEY }, "https://cdn.example/a.webp")).toEqual({
+      url: "https://cdn.example/a.webp",
+      overlay: true,
+    });
+    expect(pagePhotoView({ key: KEY, overlay: false }, "https://cdn.example/a.webp")?.overlay).toBe(false);
+    expect(pagePhotoView({ key: KEY }, null)).toBeNull();
+    expect(pagePhotoView(undefined, "https://cdn.example/a.webp")).toBeNull();
   });
 });

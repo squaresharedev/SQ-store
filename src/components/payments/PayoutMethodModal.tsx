@@ -2,9 +2,11 @@
 
 import { ArrowUpRight, Landmark } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Modal } from "@/components/ui/modal";
+import { Modal, ModalActions } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { infoTextClass, stubBadgeClass } from "@/components/ui/control-styles";
+import { iconTileClass } from "@/components/ui/surface-styles";
+import { cn } from "@/lib/utils";
 import type { PayoutMethod } from "@/lib/payments/types";
 import { DetailRow } from "./DetailRow";
 
@@ -38,7 +40,7 @@ export function PayoutMethodModal({
       description={t("payoutMethodModal.description")}
     >
       <div className="flex items-center gap-3 rounded-md border border-border bg-muted p-4">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-background text-foreground">
+        <span className={cn(iconTileClass, "size-10 bg-background")}>
           <Landmark className="size-5" strokeWidth={2} aria-hidden />
         </span>
         <div className="min-w-0">
@@ -71,7 +73,7 @@ export function PayoutMethodModal({
         {t("payoutMethodModal.securityNote")}
       </p>
 
-      <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <ModalActions className="mt-4">
         <Button variant="ghost" onClick={onClose}>
           {tCommon("close")}
         </Button>
@@ -80,7 +82,7 @@ export function PayoutMethodModal({
           <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden />
           <span className={stubBadgeClass}>{t("soon")}</span>
         </Button>
-      </div>
+      </ModalActions>
     </Modal>
   );
 }

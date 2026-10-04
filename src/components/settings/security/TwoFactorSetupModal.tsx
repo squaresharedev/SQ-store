@@ -6,21 +6,26 @@ import { ExternalLink, Smartphone } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { ChoiceCards } from "@/components/ui/ChoiceCards";
 import { CopyButton } from "@/components/ui/CopyButton";
+import { Disclosure } from "@/components/ui/Disclosure";
+import { HeroMark } from "@/components/ui/HeroMark";
+import { InfoTip } from "@/components/ui/InfoTip";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Modal } from "@/components/ui/modal";
+import { Modal, ModalActions } from "@/components/ui/modal";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/Toast";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { STEP_SWAP } from "@/components/ui/motion-tokens";
-import { AnimatedFingerprint } from "@/components/auth/AnimatedFingerprint";
+import { inkBadgeClass } from "@/components/ui/surface-styles";
+import { AnimatedFingerprint, FingerprintGlyph } from "@/components/auth/AnimatedFingerprint";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { OneTimeCodeInput } from "@/components/auth/OneTimeCodeInput";
 import { QrTile } from "@/components/auth/QrTile";
-import { StepUpField } from "@/components/auth/StepUp";
+import { StepUpPrompt, StepUpScope, StepUpSubmit } from "@/components/auth/StepUp";
 import { SuccessMark } from "@/components/auth/SuccessMark";
 import { RecoveryCodesDisplay } from "@/components/settings/security/RecoveryCodesDisplay";
 import {
@@ -37,7 +42,6 @@ import {
 import { suggestedName } from "@/lib/auth/factor-names";
 import { createPasskey } from "@/lib/auth/webauthn-client";
 import { FACTOR_NAME_MAX } from "@/lib/validation/mfa";
-import { cn } from "@/lib/utils";
 
 const BEGIN_INITIAL: BeginSetupState = {};
 const PASSKEY_BEGIN_INITIAL: BeginPasskeySetupState = {};
@@ -54,11 +58,19 @@ function groupSecret(secret: string): string {
 }
 
 /**
+ * Every way the setup actions refuse a NAME (missing, taken, a reserved
+ * prefix) is a message whose key carries this, which is how the folded name
+ * field knows to open itself.
+ */
+const NAME_REFUSAL_KEY = "factorName";
+
+/**
  * Turning 2FA on, or adding another way to confirm it's you. Three steps:
  *
  *   1. Choose a passkey (the default: nothing to install) or an authenticator
- *      app, name it, and prove it's you (password; or, adding, an existing
- *      passkey or app; or, for a Google-only account, a recent sign-in).
+ *      app, as two pictures, and prove it's you (password; or, adding, an
+ *      existing passkey or app; or, for a Google-only account, a recent
+ *      sign-in). Its name is suggested and folded away: most people keep it.
  *   2. Passkey: the browser's own prompt creates it (on a computer, with a
  *      QR code for the phone). App: scan the QR code, enter the first code.
  *      Either way that is what actually switches it on.
@@ -158,16 +170,19 @@ export function TwoFactorSetupModal({
           ? t("titleAdd")
           : t("titleEnable");
 
+  // Adding needs no sentence: the title and the two pictures say it.
   const description =
     step === "start"
       ? mode === "add"
-        ? t("descriptionAdd")
+        ? undefined
         : t("descriptionEnable")
       : step === "scan"
         ? t("descriptionScan")
         : step === "passkey"
           ? t("descriptionPasskey")
-          : t("descriptionCodes");
+          : step === "codes"
+            ? t("descriptionCodes")
+            : undefined;
 
   // How this person proves it's them before a new factor can be enrolled.
   // A sign-in in the last 10 minutes is proof enough on its own. Otherwise a
@@ -180,8 +195,26 @@ export function TwoFactorSetupModal({
   const askPassword = mode === "enable" && hasPassword && !signedInRecently;
   const offerGoogle = mode === "enable" && !signedInRecently && (signsInWithGoogle || reauthHint);
 
-  const startError = method === "passkey" ? passkeyBegin.error : begin.error;
+  const startState = method === "passkey" ? passkeyBegin : begin;
+  const startError = startState.error;
   const startPending = beginPending || passkeyBeginPending;
+
+  // The name each kind starts with. Shown on the folded line, and the field's
+  // starting value.
+  const suggested =
+    method === "passkey"
+      ? suggestedName(existingNames, t("suggestedPasskeyName"), (number) =>
+          t("suggestedPasskeyNameNumbered", { number }),
+        )
+      : suggestedName(existingNames, t("suggestedName"), (number) =>
+          t("suggestedNameNumbered", { number }),
+        );
+  // What was typed over it, for the folded line only (the field itself stays
+  // uncontrolled). Dropped when the field starts over: on a change of method
+  // (it is re-keyed), and when an action answers (React resets the form).
+  const [typed, setTyped] = React.useState<{ name: string; method: Method; state: object } | null>(null);
+  const shownName = typed && typed.method === method && typed.state === startState ? typed.name : suggested;
+  const nameRefused = Boolean(startError?.message.key.includes(NAME_REFUSAL_KEY));
 
   return (
     <Modal
@@ -189,8 +222,7 @@ export function TwoFactorSetupModal({
       onClose={close}
       title={title}
       description={description}
-      // The auth surfaces keep hard corners (see PasswordModal).
-      className="rounded-none sm:rounded-none"
+      visual={step === "passkey" ? <HeroMark icon={FingerprintGlyph} size="lg" /> : undefined}
     >
       {/* One step at a time, each easing in as the last one leaves. */}
       <AnimatePresence mode="wait" initial={false}>
@@ -231,85 +263,131 @@ export function TwoFactorSetupModal({
               className="flex flex-col gap-4"
               noValidate
             >
-              {passkeysAvailable && (
-                <MethodChoice method={method} onChange={setMethod} />
-              )}
+              {/* Adding always confirms with a passkey or app the account
+                  already has, and with a passkey that confirmation IS this
+                  form's button. Turning 2FA on has neither yet, so the scope
+                  stays quiet and the button is a plain Continue. */}
+              <StepUpScope
+                id="setup-step-up"
+                state={startState}
+                always={mode === "add"}
+                description={t("stepUpDescription")}
+              >
+                {passkeysAvailable && (
+                  <div className="flex flex-col gap-2">
+                    <ChoiceCards
+                      name="setup-method"
+                      legend={t("methodLabel")}
+                      legendHidden
+                      variant="tiles"
+                      columns={2}
+                      // Not a form field: which action runs is the choice itself.
+                      detached
+                      optionDataAttribute="data-setup-method"
+                      options={[
+                        {
+                          value: "passkey",
+                          label: t("methodPasskey"),
+                          // Chosen, its ridges draw themselves in: a small "yes, this one".
+                          icon: (
+                            <AnimatedFingerprint
+                              state={method === "passkey" ? "success" : "idle"}
+                              className="size-9"
+                            />
+                          ),
+                          badge: <span className={inkBadgeClass}>{t("recommended")}</span>,
+                        },
+                        {
+                          value: "app",
+                          label: t("methodApp"),
+                          icon: <Smartphone aria-hidden className="size-9" strokeWidth={1.5} />,
+                        },
+                      ]}
+                      value={method}
+                      onChange={setMethod}
+                    />
+                    {/* One line for the chosen one, not a paragraph under each. */}
+                    <p className={`${infoTextClass} text-center`}>
+                      {method === "passkey" ? t("methodPasskeyHint") : t("methodAppHint")}
+                    </p>
+                  </div>
+                )}
 
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="factor-name">{t("nameLabel")}</Label>
-                <Input
-                  // Re-keyed per method so the suggested name follows the choice.
-                  key={method}
-                  id="factor-name"
-                  name="name"
-                  defaultValue={
-                    method === "passkey"
-                      ? suggestedName(existingNames, t("suggestedPasskeyName"), (number) =>
-                          t("suggestedPasskeyNameNumbered", { number }),
-                        )
-                      : suggestedName(existingNames, t("suggestedName"), (number) =>
-                          t("suggestedNameNumbered", { number }),
-                        )
-                  }
-                  maxLength={FACTOR_NAME_MAX}
-                  autoComplete="off"
-                  required
-                />
-                <p className={infoTextClass}>
-                  {method === "passkey" ? t("passkeyNameHint") : t("nameHint")}
-                </p>
-              </div>
+                {/* Suggested, so almost nobody needs it: one line that opens.
+                    Folded, it is still sent with the form. */}
+                <Disclosure
+                  summary={t("nameSummary", { name: shownName })}
+                  open={nameRefused || undefined}
+                  className={helpTextClass}
+                  attributes={{ "data-setup-name": "" }}
+                >
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="factor-name">{t("nameLabel")}</Label>
+                    <Input
+                      // Re-keyed per method so the suggested name follows the choice.
+                      key={method}
+                      id="factor-name"
+                      name="name"
+                      defaultValue={suggested}
+                      onChange={(event) =>
+                        setTyped({ name: event.target.value, method, state: startState })
+                      }
+                      maxLength={FACTOR_NAME_MAX}
+                      autoComplete="off"
+                      required
+                    />
+                    <p className={infoTextClass}>
+                      {method === "passkey" ? t("passkeyNameHint") : t("nameHint")}
+                    </p>
+                  </div>
+                </Disclosure>
 
-              {mode === "add" ? (
-                <StepUpField
-                  id="setup-step-up"
-                  state={method === "passkey" ? passkeyBegin : begin}
-                  always
-                  description={t("stepUpDescription")}
-                />
-              ) : askPassword ? (
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="setup-password">
-                    {signsInWithGoogle ? t("squareSharePasswordLabel") : t("passwordLabel")}
-                  </Label>
-                  {/* Never revealable: it holds the account's existing password. */}
-                  <PasswordInput
-                    id="setup-password"
-                    name="current_password"
-                    revealable={false}
-                    autoComplete="current-password"
-                    placeholder="••••••••"
-                    required
-                  />
-                  <p className={infoTextClass}>
-                    {signsInWithGoogle ? t("notYourGooglePassword") : t("passwordHint")}
+                {askPassword && (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <Label htmlFor="setup-password">
+                        {signsInWithGoogle ? t("squareSharePasswordLabel") : t("passwordLabel")}
+                      </Label>
+                      {/* WHY a password is asked is for the curious: behind the "?". */}
+                      {!signsInWithGoogle && (
+                        <InfoTip label={t("passwordTipLabel")}>{t("passwordHint")}</InfoTip>
+                      )}
+                    </div>
+                    {/* Never revealable: it holds the account's existing password. */}
+                    <PasswordInput
+                      id="setup-password"
+                      name="current_password"
+                      revealable={false}
+                      autoComplete="current-password"
+                      placeholder="••••••••"
+                      required
+                    />
+                    {/* WHICH password is something to act on, so it stays in
+                        view: someone who signs in with Google would type that
+                        one, and may not remember this one at all. */}
+                    {signsInWithGoogle && (
+                      <p className={infoTextClass}>{t("notYourGooglePassword")}</p>
+                    )}
+                  </div>
+                )}
+
+                <StepUpPrompt />
+
+                {startError && (
+                  <p role="alert" className="font-inter text-sm font-medium text-destructive">
+                    {resolve(startError.message)}
                   </p>
-                </div>
-              ) : mode === "enable" ? (
-                <p className={infoTextClass}>{t("signedInRecently")}</p>
-              ) : null}
+                )}
 
-              {startError && (
-                <p role="alert" className="font-inter text-sm font-medium text-destructive">
-                  {resolve(startError.message)}
-                </p>
-              )}
-
-              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                <Button type="button" variant="ghost" onClick={close}>
-                  {tCommon("cancel")}
-                </Button>
-                <Button type="submit" disabled={startPending} suppressHydrationWarning>
-                  {startPending ? (
-                    <>
-                      <Spinner />
-                      {t("checking")}
-                    </>
-                  ) : (
-                    t("continue")
-                  )}
-                </Button>
-              </div>
+                <ModalActions>
+                  <Button type="button" variant="ghost" onClick={close}>
+                    {tCommon("cancel")}
+                  </Button>
+                  <StepUpSubmit pending={startPending} pendingLabel={t("checking")}>
+                    {t("continue")}
+                  </StepUpSubmit>
+                </ModalActions>
+              </StepUpScope>
             </form>
           )}
 
@@ -340,10 +418,20 @@ export function TwoFactorSetupModal({
             <form action={confirmAction} className="flex flex-col gap-5" noValidate>
               <input type="hidden" name="factor_id" value={enrollment.factorId} />
 
-              <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
+              {/* The code is the step: centred, with the two ways round a scan
+                  (a tap on a phone, the key typed in) small beneath it. */}
+              <div className="flex flex-col items-center gap-3 text-center">
                 <QrTile src={enrollment.qrCode} alt={t("qrAlt")} />
-                <div className="flex min-w-0 flex-col gap-2">
-                  <p className={helpTextClass}>{t("anyApp")}</p>
+                {/* On a phone the app is on the same device, so a tap beats a
+                    scan. Harmless elsewhere, just less useful: hidden from sm. */}
+                <a
+                  href={enrollment.uri}
+                  className="inline-flex items-center gap-1.5 font-inter text-sm font-medium text-foreground underline underline-offset-4 sm:hidden"
+                >
+                  {t("openInApp")}
+                  <ExternalLink aria-hidden className="size-3.5" />
+                </a>
+                <div className="flex flex-col items-center gap-1.5">
                   <p className={infoTextClass}>{t("cantScan")}</p>
                   <div className="flex items-center gap-2">
                     <code
@@ -361,15 +449,6 @@ export function TwoFactorSetupModal({
                       }}
                     />
                   </div>
-                  {/* On a phone the app is on the same device, so a tap beats a
-                      scan. Harmless elsewhere, just less useful: hidden from sm. */}
-                  <a
-                    href={enrollment.uri}
-                    className="inline-flex items-center gap-1.5 font-inter text-sm font-medium text-foreground underline underline-offset-4 sm:hidden"
-                  >
-                    {t("openInApp")}
-                    <ExternalLink aria-hidden className="size-3.5" />
-                  </a>
                 </div>
               </div>
 
@@ -390,7 +469,7 @@ export function TwoFactorSetupModal({
                 </p>
               )}
 
-              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <ModalActions>
                 <Button type="button" variant="ghost" onClick={close}>
                   {tCommon("cancel")}
                 </Button>
@@ -406,7 +485,7 @@ export function TwoFactorSetupModal({
                     t("verifyAndTurnOn")
                   )}
                 </Button>
-              </div>
+              </ModalActions>
             </form>
           )}
 
@@ -437,68 +516,6 @@ export function TwoFactorSetupModal({
         </motion.div>
       </AnimatePresence>
     </Modal>
-  );
-}
-
-/**
- * Passkey or authenticator app, as two large choices. A radio group, so the
- * arrow keys move between them and the choice is announced as one.
- */
-function MethodChoice({ method, onChange }: { method: Method; onChange: (method: Method) => void }) {
-  const t = useTranslations("Settings.security.setup");
-  const options: { value: Method; label: string; hint: string; icon: React.ReactNode }[] = [
-    {
-      value: "passkey",
-      label: t("methodPasskey"),
-      hint: t("methodPasskeyHint"),
-      // Chosen, its ridges draw themselves in: a small "yes, this one".
-      icon: <AnimatedFingerprint state={method === "passkey" ? "success" : "idle"} className="size-5" />,
-    },
-    {
-      value: "app",
-      label: t("methodApp"),
-      hint: t("methodAppHint"),
-      icon: <Smartphone aria-hidden className="size-5 shrink-0" />,
-    },
-  ];
-  return (
-    <fieldset className="flex flex-col gap-2">
-      <legend className="mb-2 font-inter text-sm font-medium text-foreground">{t("methodLabel")}</legend>
-      {options.map((option) => (
-        <label
-          key={option.value}
-          className={cn(
-            "flex cursor-pointer items-start gap-3 border p-3 transition-colors duration-base ease-standard motion-reduce:transition-none",
-            method === option.value
-              ? "border-foreground bg-muted/40"
-              : "border-border hover:bg-accent/50",
-          )}
-        >
-          <input
-            type="radio"
-            name="setup-method"
-            value={option.value}
-            checked={method === option.value}
-            onChange={() => onChange(option.value)}
-            // Not a form field: which action runs is the choice itself.
-            form="__none__"
-            className="mt-1 accent-foreground"
-          />
-          <span className="mt-0.5 text-foreground">{option.icon}</span>
-          <span className="flex min-w-0 flex-col gap-0.5">
-            <span className="flex flex-wrap items-center gap-2 font-inter text-sm font-medium text-foreground">
-              {option.label}
-              {option.value === "passkey" && (
-                <span className="border border-foreground px-1.5 py-0.5 text-[11px] font-semibold leading-none">
-                  {t("recommended")}
-                </span>
-              )}
-            </span>
-            <span className={infoTextClass}>{option.hint}</span>
-          </span>
-        </label>
-      ))}
-    </fieldset>
   );
 }
 
@@ -562,7 +579,7 @@ function CreatePasskey({
   const shownError = problem ?? (confirm.error ? resolve(confirm.error.message) : null);
 
   return (
-    <div className="flex flex-col gap-5" data-passkey-setup>
+    <div className="flex flex-col gap-3" data-passkey-setup>
       <Button
         type="button"
         onClick={create}
@@ -580,16 +597,19 @@ function CreatePasskey({
       </Button>
 
       {shownError && (
-        <p role="alert" className="font-inter text-sm font-medium text-destructive">
+        <p role="alert" className="text-center font-inter text-sm font-medium text-destructive">
           {shownError}
         </p>
       )}
 
-      <div className="flex justify-end">
-        <Button type="button" variant="ghost" onClick={onCancel}>
-          {tCommon("cancel")}
-        </Button>
-      </div>
+      {/* The one thing people get stuck on, for the people it applies to. */}
+      <Disclosure summary={t("passkeyOnPhone")} className={infoTextClass}>
+        <p>{t("passkeyOnPhoneBody")}</p>
+      </Disclosure>
+
+      <Button type="button" variant="ghost" onClick={onCancel} className="w-full">
+        {tCommon("cancel")}
+      </Button>
     </div>
   );
 }

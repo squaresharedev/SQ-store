@@ -31,6 +31,8 @@ export function PriceField({
   error,
   onPriceChange,
   onCurrencyChange,
+  label,
+  datapoints = true,
 }: {
   id: string;
   errorId: string;
@@ -39,6 +41,12 @@ export function PriceField({
   error?: string;
   onPriceChange: (value: string) => void;
   onCurrencyChange: (value: Currency) => void;
+  /** The field's name, for an amount that is not the product's price (a
+   *  discount's "Amount off"). Defaults to "Price". */
+  label?: string;
+  /** Publishes the field as the product's price (the data-product-* facts
+   *  below). Off for any other amount, which is not a product field. */
+  datapoints?: boolean;
 }) {
   // Integer cents for the datapoint below, or undefined while the field is
   // blank or mid-edit. Deliberately the same parser the save path uses, so
@@ -64,7 +72,7 @@ export function PriceField({
           teaches a seller to stop reading the ones that do. */}
       <div className="flex items-center">
         <label htmlFor={id} className={labelClass}>
-          {t("label")}
+          {label ?? t("label")}
         </label>
         <RequiredMark />
       </div>
@@ -86,22 +94,25 @@ export function PriceField({
           required
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
-          data-product-field="price"
           // The FACT, beside the string a person types. The input holds
           // "129.00" — a decimal with a locale's assumptions in it — while
           // the database, the write payload and the agent surface all deal in
           // integer cents (docs/agent-surface.md B3). A reader takes this and
           // never parses the rendered value.
-          data-product-value={priceCents ?? undefined}
-          data-product-unit="currency_cents"
-          data-product-currency={currency}
+          {...(datapoints
+            ? {
+                "data-product-field": "price",
+                "data-product-value": priceCents ?? undefined,
+                "data-product-unit": "currency_cents",
+                "data-product-currency": currency,
+              }
+            : {})}
           className={cn(fieldBaseClass, "pl-8 pr-32 tabular-nums")}
         />
         <div
           role="group"
           aria-label={t("currency")}
-          data-product-field="currency"
-          data-product-value={currency}
+          {...(datapoints ? { "data-product-field": "currency", "data-product-value": currency } : {})}
           className="absolute inset-y-0 right-1.5 flex items-center"
         >
           {CURRENCIES.map((option) => {

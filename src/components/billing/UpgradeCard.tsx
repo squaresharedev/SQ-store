@@ -12,6 +12,7 @@ import { helpTextClass, iconNudgeRightClass, stubBadgeClass } from "@/components
 import { PlanFeatureList } from "@/components/billing/PlanFeatureList";
 import { PortalButton } from "@/components/billing/PortalButton";
 import { PlanVisual } from "@/components/billing/PlanVisual";
+import { MarkedPlanName } from "@/components/billing/PlanWordmark";
 import { navigateOf, type BillingActions } from "@/components/billing/billing-actions";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/format/money";
@@ -201,7 +202,11 @@ function TopPlanCard({ context }: { context: PricingContext }) {
               {t("upsell.topEyebrow")}
             </p>
             <h2 id="top-plan-title" className="mt-1 text-xl font-semibold text-foreground">
-              {t("upsell.topTitle", { plan: t(`plans.${context.plan}.name`) })}
+              {/* The plan's name wears its mark here too (a small crown on Pro). */}
+              {t.rich("upsell.topTitle", {
+                plan: t(`plans.${context.plan}.name`),
+                mark: (chunks) => <MarkedPlanName plan={context.plan} name={String(chunks)} />,
+              })}
             </h2>
           </div>
           <PlanVisual plan={context.plan} className="hidden w-48 shrink-0 sm:flex" />

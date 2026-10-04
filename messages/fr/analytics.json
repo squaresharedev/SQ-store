@@ -89,7 +89,8 @@
   "channels": {
     "embed": "Intégration",
     "marketplace": "Marketplace",
-    "direct": "Direct"
+    "direct": "Direct",
+    "button": "Bouton sur votre site"
   },
   "signalsUnavailable": {
     "title": "Les vues et inscriptions sont indisponibles pour le moment",

@@ -109,7 +109,8 @@
       "nameAlternative": "Alebo vaše celé meno, ak predávate ako fyzická osoba.",
       "addressPlaceholder": "napr. Hlavná 12\nBratislava, 811 01\nSlovensko",
       "emailPlaceholder": "napr. hello@yourshop.example",
-      "emailHelp": "Na túto adresu vám píšu kupujúci. Môže sa líšiť od vášho prihlasovacieho e-mailu."
+      "emailHelp": "Na túto adresu vám píšu kupujúci. Môže sa líšiť od vášho prihlasovacieho e-mailu.",
+      "emailTipLabel": "O tomto e-maile"
     },
     "confirm": {
       "goLive": "Vaše produktové stránky budú zverejnené, akonáhle ho potvrdíte."
@@ -155,7 +156,7 @@
     "shortcut": "Skratka: <kbd>{shortcut}</kbd>",
     "skipTour": "Preskočiť sprievodcu",
     "next": "Ďalej",
-    "openingPage": "{page, select, overview {Otvára sa Prehľad…} products {Otvárajú sa Produkty…} storefront {Otvára sa Výklad…} orders {Otvárajú sa Objednávky…} analytics {Otvára sa Analytika…} payments {Otvárajú sa Platby…} settings {Otvárajú sa Nastavenia…} sampleStorefront {Otvára sa Ukážkový výklad…} other {Otvára sa…}}"
+    "openingPage": "{page, select, overview {Otvára sa Prehľad…} products {Otvárajú sa Produkty…} storefront {Otvára sa Výklad…} orders {Otvárajú sa Objednávky…} discounts {Otvárajú sa Zľavy…} analytics {Otvára sa Analytika…} payments {Otvárajú sa Platby…} settings {Otvárajú sa Nastavenia…} sampleStorefront {Otvára sa Ukážkový výklad…} other {Otvára sa…}}"
   },
   "tourReplay": {
     "title": "Sprievodca",

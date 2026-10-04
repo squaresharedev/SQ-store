@@ -282,11 +282,16 @@ test.describe("the report dialog", () => {
     await expect(dialog).toBeVisible();
     await expect(dialog.locator("input[name=reason]:checked")).toHaveCount(0);
 
+    // The follow-up fields are asked for once a reason is picked.
+    await dialog.getByRole("radio", { name: /spam/i }).check();
     const details = dialog.getByLabel(/anything else/i);
     await details.click();
     await page.keyboard.type("These are fake, look at the logo.", { delay: 15 });
     await expect(details).toHaveValue("These are fake, look at the logo.");
     await expect(details).toBeFocused();
+    // Every Space in that sentence stayed in the field: the reason picked is
+    // still the one picked, not whichever radio a stray key would land on.
+    await expect(dialog.locator("input[name=reason]:checked")).toHaveValue("spam");
 
     const email = dialog.getByLabel(/your email/i);
     await email.click();

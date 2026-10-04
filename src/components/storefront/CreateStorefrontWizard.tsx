@@ -213,7 +213,8 @@ export function CreateStorefrontWizard({
       // the progress and the controls are always on screen. `pb-3` trims the
       // panel's own bottom padding, which the footer no longer has to sit on
       // top of.
-      className="flex flex-col overflow-y-hidden pb-3 sm:max-w-xl"
+      size="xl"
+      className="flex flex-col overflow-y-hidden pb-3"
     >
       <div className="shrink-0">
         <ProgressBar

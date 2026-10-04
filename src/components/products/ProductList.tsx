@@ -1,24 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { SearchX } from "lucide-react";
+import { SearchX, Store, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { emptyStateClass } from "@/components/ui/surface-styles";
 import type { Product, ProductSalesSummary } from "@/types/product";
 import { deleteProduct } from "@/lib/products/actions";
 import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
-import { Modal } from "@/components/ui/modal";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { HeroMark } from "@/components/ui/HeroMark";
+import { Modal, ModalActions } from "@/components/ui/modal";
+import { ProductThumb } from "@/components/ui/ProductThumb";
 import {
-  destructiveButtonClass,
+  ghostButtonClass,
   infoTextClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import type { StorefrontPlacement } from "@/lib/products/queries";
+import type { TraderIdentityField } from "@/lib/settings/trader-identity";
 import {
   productPagePath,
   productPageUrl,
 } from "@/lib/storefront/product-page-url";
+import { BuyButtonDialog } from "./BuyButtonDialog";
 import { ProductCard } from "./ProductCard";
 import { ProductEmptyState } from "./ProductEmptyState";
 
@@ -31,6 +36,7 @@ export function ProductList({
   canWrite,
   sales,
   placements = {},
+  missingTraderDetails = [],
   filtered = false,
   onClearFilters,
 }: {
@@ -45,6 +51,9 @@ export function ProductList({
    * and open affordances.
    */
   placements?: Record<string, StorefrontPlacement[]>;
+  /** Trader details the store still owes buyers: the buy button dialog says
+   *  so instead of handing out a link the page would refuse. */
+  missingTraderDetails?: readonly TraderIdentityField[];
   /** True when a search or status filter is narrowing the list. Distinguishes
    *  "no products yet" from "nothing matched", which need different words. */
   filtered?: boolean;
@@ -66,6 +75,9 @@ export function ProductList({
     product: Product;
     action: "copy" | "open";
   } | null>(null);
+  // The product whose "Add to your website" dialog is open. The dialog picks
+  // the storefront itself, so it needs no chooser step first.
+  const [buyButtonFor, setBuyButtonFor] = useState<Product | null>(null);
 
   // After a save the server re-renders with fresh props; adopt them (render-time
   // reset on prop change, same pattern as the Sidebar's route tracking).
@@ -202,16 +214,24 @@ export function ProductList({
               onDelete={() => setPendingDelete(product)}
               onCopyLink={() => handleLinkAction(product, "copy")}
               onOpenPage={() => handleLinkAction(product, "open")}
+              onBuyButton={() => setBuyButtonFor(product)}
             />
           </li>
         ))}
       </ul>
 
-      <Modal
+      <ConfirmDialog
         open={pendingDelete !== null}
         onClose={() => {
           if (!deleting) setPendingDelete(null);
         }}
+        tone="danger"
+        // The product itself, with what is about to happen to it.
+        visual={
+          <HeroMark tone="danger" badge={Trash2} size="lg">
+            <ProductThumb src={pendingDelete?.imageUrl} className="size-full" />
+          </HeroMark>
+        }
         title={t("deleteDialog.title")}
         description={
           pendingDelete
@@ -221,26 +241,11 @@ export function ProductList({
               })
             : undefined
         }
-      >
-        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={() => setPendingDelete(null)}
-            disabled={deleting}
-            className={secondaryButtonClass}
-          >
-            {tCommon("cancel")}
-          </button>
-          <button
-            type="button"
-            onClick={handleConfirmDelete}
-            disabled={deleting}
-            className={destructiveButtonClass}
-          >
-            {deleting ? tCommon("deleting") : t("deleteDialog.confirm")}
-          </button>
-        </div>
-      </Modal>
+        confirmLabel={t("deleteDialog.confirm")}
+        pendingLabel={tCommon("deleting")}
+        pending={deleting}
+        onConfirm={handleConfirmDelete}
+      />
 
       {/* Storefront chooser: shown when a link action targets a product that is
           on more than one storefront. The seller picks which URL to copy or
@@ -248,6 +253,12 @@ export function ProductList({
       <Modal
         open={linkTarget !== null}
         onClose={() => setLinkTarget(null)}
+        // Which product the link is for, as a picture.
+        visual={
+          <HeroMark>
+            <ProductThumb src={linkTarget?.product.imageUrl} className="size-full" />
+          </HeroMark>
+        }
         title={linkTarget?.action === "open" ? t("chooser.openTitle") : t("chooser.copyTitle")}
         description={
           linkTarget
@@ -268,23 +279,37 @@ export function ProductList({
                 setLinkTarget(null);
                 executeLinkAction(linkTarget.action, sf.id, linkTarget.product.id);
               }}
-              className={secondaryButtonClass}
+              className={`${secondaryButtonClass} justify-start`}
             >
+              <Store className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
               {sf.name}
             </button>
           ))}
-          <p className={infoTextClass}>
+          <p className={`${infoTextClass} text-center`}>
             {t("chooser.hint")}
           </p>
-          <button
-            type="button"
-            onClick={() => setLinkTarget(null)}
-            className={secondaryButtonClass}
-          >
-            {tCommon("cancel")}
-          </button>
+          <ModalActions>
+            <button
+              type="button"
+              onClick={() => setLinkTarget(null)}
+              className={ghostButtonClass}
+            >
+              {tCommon("cancel")}
+            </button>
+          </ModalActions>
         </div>
       </Modal>
+
+      {buyButtonFor && (
+        <BuyButtonDialog
+          key={buyButtonFor.id}
+          product={buyButtonFor}
+          placements={placements[buyButtonFor.id] ?? []}
+          canWrite={canWrite}
+          missingTraderDetails={missingTraderDetails}
+          onClose={() => setBuyButtonFor(null)}
+        />
+      )}
     </>
   );
 }

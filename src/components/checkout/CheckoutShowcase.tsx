@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { formatCents } from "@/lib/format/money";
 import { subtleFill } from "@/components/product-page/product-page-maps";
 import type { SelectionChip } from "@/lib/checkout/selection";
 import { EditableText } from "./EditableText";
 import { QuantityBadge } from "./QuantityBadge";
 import { VersionChips } from "./VersionChips";
+import { CheckoutItemPrice } from "./CheckoutItemPrice";
 import type { ImageFit } from "@/types/storefront";
-import type { ProductPageImage } from "@/types/product";
+import type { Currency, ProductPageImage, ProductSale } from "@/types/product";
 import type { CheckoutTheme } from "./checkout-theme";
 
 /** What every summary of the item shows, whichever layout draws it. */
@@ -17,8 +17,11 @@ export type CheckoutItem = {
   photo: ProductPageImage | null;
   /** The version, in the seller's words, with a colour where it has one. */
   chips: SelectionChip[];
+  /** What one costs now (the sale price while a sale runs). */
   priceCents: number;
-  currency: string;
+  currency: Currency;
+  /** The running sale, which the card announces like the product page. */
+  sale: ProductSale | null;
   imageFit: ImageFit;
 };
 
@@ -122,21 +125,18 @@ function ItemFacts({
   cornerRadius: number;
   size: "lg" | "sm";
 }) {
-  const locale = useLocale();
   return (
     <div className={cn("flex min-w-0 flex-col", size === "lg" ? "gap-2 @3xl:gap-3" : "gap-1.5")}>
       <h2 className={cn("font-semibold leading-tight", size === "lg" ? "text-lg @3xl:text-2xl" : "text-base")}>
         {item.title}
       </h2>
       <VersionChips chips={item.chips} ink={ink} cornerRadius={cornerRadius} />
-      <p
-        className={cn(
-          "font-semibold tabular-nums",
-          size === "lg" ? "text-base @3xl:text-xl" : "text-sm",
-        )}
-      >
-        {formatCents(item.priceCents, item.currency, locale)}
-      </p>
+      <CheckoutItemPrice
+        priceCents={item.priceCents}
+        currency={item.currency}
+        sale={item.sale}
+        className={cn("font-semibold tabular-nums", size === "lg" ? "text-base @3xl:text-xl" : "text-sm")}
+      />
     </div>
   );
 }

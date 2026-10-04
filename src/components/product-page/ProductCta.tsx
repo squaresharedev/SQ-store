@@ -136,7 +136,11 @@ export function ProductCta({
           quantity,
         )
       : target.kind === "checkout"
-        ? checkoutPath(target.storefrontId, target.productId, { optionIds: [...selectedIds], quantity })
+        ? checkoutPath(target.storefrontId, target.productId, {
+            optionIds: [...selectedIds],
+            quantity,
+            via: target.via,
+          })
         : target.href;
 
   const button = (

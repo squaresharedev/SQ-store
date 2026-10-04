@@ -6,8 +6,19 @@
 // Money is ALWAYS integer cents; formatting happens in one place
 // (lib/format/money.ts). Dates are ISO strings from the DB.
 
-/** Where the sale happened. Mirrors the orders.channel CHECK constraint. */
-export type OrderChannel = "embed" | "marketplace" | "direct";
+/**
+ * WHERE A SALE (OR A VISIT) CAME FROM. One vocabulary for orders.channel and
+ * storefront_signals.channel, each mirrored by a SQL CHECK constraint: add an
+ * id here AND in both CHECKs, in one change, and never rename or remove one a
+ * stored row may carry.
+ *
+ *   embed        the storefront embedded on the seller's own site
+ *   marketplace  the Square Share marketplace
+ *   direct       the hosted pages, reached any other way (a shared link)
+ *   button       the seller's own buy button on their website
+ */
+export const ORDER_CHANNELS = ["embed", "marketplace", "direct", "button"] as const;
+export type OrderChannel = (typeof ORDER_CHANNELS)[number];
 
 /** Order lifecycle. Mirrors the orders.status CHECK constraint. */
 export type OrderStatus = "paid" | "refunded" | "disputed" | "pending";
@@ -159,6 +170,19 @@ export type OrderView = {
   /** ISO timestamp: when the buyer used the EU withdrawal function on their
    *  order page (CRD art. 11a). Null when no withdrawal was requested. */
   withdrawalRequestedAt: string | null;
+  /** What a discount did to this order. Null when none touched it. */
+  discount: OrderDiscount | null;
+};
+
+/** A discount on one order (the orders.discount_* snapshot). */
+export type OrderDiscount = {
+  /** How much less than the regular price the items cost. 0 when a code was
+   *  only credited (the buyer's sale price was already lower). */
+  cents: number;
+  /** The code the buyer used, if one: the channel the sale is credited to. */
+  code: string | null;
+  /** Whether that code set the price (otherwise a sale did, or nothing). */
+  byCode: boolean;
 };
 
 /**

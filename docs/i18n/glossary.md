@@ -123,6 +123,7 @@ nominative. `&` becomes your language's word for "and".
 | Products | Produkty | Produkty | Produkte | Produits | Productos | Prodotti | Producten | Produkty | Produtos |
 | Storefront | Výloha | Výklad | Schaufenster | Vitrine | Escaparate | Vetrina | Etalage | Witryna | Montra |
 | Orders | Objednávky | Objednávky | Bestellungen | Commandes | Pedidos | Ordini | Bestellingen | Zamówienia | Encomendas |
+| Discounts | Slevy | Zľavy | Rabatte | Réductions | Descuentos | Sconti | Kortingen | Rabaty | Descontos |
 | Analytics | Analytika | Analytika | Analysen | Statistiques | Estadísticas | Statistiche | Statistieken | Analityka | Estatísticas |
 | Payments | Platby | Platby | Zahlungen | Paiements | Pagos | Pagamenti | Betalingen | Płatności | Pagamentos |
 | Settings | Nastavení | Nastavenia | Einstellungen | Paramètres | Configuración | Impostazioni | Instellingen | Ustawienia | Definições |
@@ -506,6 +507,22 @@ both.
 | Shopify export | export ze Shopify | export zo Shopify | Shopify-Export | export Shopify | exportación de Shopify | esportazione Shopify | Shopify-export | eksport z Shopify | exportação do Shopify | |
 | variant rows (folded into a product) | řádky variant | riadky variantov | Variantenzeilen | lignes de variantes | filas de variantes | righe delle varianti | variantrijen | wiersze wariantów | linhas de variantes | |
 
+### 4.9 Discounts
+
+| EN | cs | sk | de | fr | es | it | nl | pl | pt | Note |
+|---|---|---|---|---|---|---|---|---|---|---|
+| discount | sleva | zľava | Rabatt | réduction | descuento | sconto | korting | rabat | desconto | The umbrella word: a sale and a code are both discounts. |
+| discount code | slevový kód | zľavový kód | Rabattcode | code de réduction | código de descuento | codice sconto | kortingscode | kod rabatowy | código de desconto | What a buyer types at checkout. Never "coupon" or "voucher". |
+| sale (automatic) | akce | akcia | Aktion | promotion | rebaja | promozione | actie | obniżka | promoção | A reduction every buyer gets for a while. **Not** the word for selling something (fr `vente`, the Analytics "sales") and not a clearance (cs `výprodej`, de `Ausverkauf`, fr `soldes`, which French law reserves for fixed periods). |
+| sale price | akční cena | cena z akcie | Aktionspreis | prix promotionnel | precio de rebaja | prezzo in promozione | actieprijs | cena promocyjna | preço da promoção | |
+| channel (where a code was shared) | kanál | kanál | Kanal | canal | canal | canale | kanaal | kanał | canal | Same word as the order channel in 4.6. |
+| X% off, X off | sleva X % | zľava X % | X % Rabatt | X % de réduction | X % de descuento | X% di sconto | X% korting | X% rabatu | X% de desconto | Follow 2.1 for the space before `%`. |
+| to end (a sale) | ukončit | ukončiť | beenden | terminer | terminar | terminare | beëindigen | zakończyć | terminar | nl: with the diaeresis, in every form (`beëindigd`). |
+
+A status chip (`Discounts.terms.status.*`) describes the DISCOUNT, so it agrees
+with your word for "discount"; the switch beside a code describes the CODE.
+The two may differ in gender, and that is correct.
+
 ---
 
 ## 5. Legal and statutory terms
@@ -594,6 +611,27 @@ Notes for the reviewer (translators: do not change the figures):
 | responsible person (in the EU) | odpovědná osoba | zodpovedná osoba | verantwortliche Person | personne responsable | persona responsable | persona responsabile | verantwoordelijke persoon | osoba odpowiedzialna | pessoa responsável |
 | warnings and safety information | upozornění a bezpečnostní informace | upozornenia a bezpečnostné informácie | Warnhinweise und Sicherheitsinformationen | avertissements et informations de sécurité | advertencias e información de seguridad | avvertenze e informazioni sulla sicurezza | waarschuwingen en veiligheidsinformatie | ostrzeżenia i informacje dotyczące bezpieczeństwa | advertências e informações de segurança |
 | "is not a party to the sale" (`footer.disclosure`) | není smluvní stranou kupní smlouvy | nie je zmluvnou stranou kúpnej zmluvy | ist nicht Vertragspartei des Kaufvertrags | n’est pas partie au contrat de vente | no es parte del contrato de compraventa | non è parte del contratto di vendita | is geen partij bij de koopovereenkomst | nie jest stroną umowy sprzedaży | não é parte no contrato de compra e venda |
+
+### 5.4 Directive 98/6/EC, art. 6a (announcing a price reduction)
+
+A struck-through price beside a sale price is a legal claim: it must be the
+lowest price the seller charged in the 30 days before the reduction. The line
+under it (`ProductPage.sale.priorNote`) says so in the words each country's
+own implementation uses. Keep "lowest price" and "30 days" exactly; do not
+soften it to "previous price" or "usual price", which claim something else.
+
+| Lang | `ProductPage.sale.priorNote` |
+|---|---|
+| en | Crossed-out price: the lowest price in the 30 days before this sale. |
+| cs | Přeškrtnutá cena: nejnižší cena za posledních 30 dní před slevou. |
+| sk | Prečiarknutá cena: najnižšia cena za posledných 30 dní pred touto zľavou. |
+| de | Durchgestrichener Preis: niedrigster Gesamtpreis der letzten 30 Tage vor der Preisermäßigung. |
+| fr | Prix barré : le prix le plus bas pratiqué dans les 30 jours précédant cette réduction. |
+| es | Precio tachado: el precio más bajo en los 30 días anteriores al inicio de esta rebaja. |
+| it | Prezzo barrato: il prezzo più basso applicato nei 30 giorni precedenti la riduzione. |
+| nl | Doorgestreepte prijs: laagste prijs in de 30 dagen voor deze kortingsactie. |
+| pl | Przekreślona cena: najniższa cena z 30 dni przed obniżką. |
+| pt | Preço riscado: o preço mais baixo praticado nos 30 dias anteriores à redução. |
 
 ---
 

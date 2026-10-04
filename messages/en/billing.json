@@ -25,14 +25,15 @@
     "intervalLabel": "Billing period",
     "month": "Monthly",
     "year": "Yearly",
-    "yearlySaving": "2 months free on yearly",
     "pastDue": "The last payment for your {plan} plan did not go through. Update your card to keep it.",
     "endsOn": "Your {plan} plan ends on {date}, and your store moves to Free then. Nothing is taken down.",
     "ownerOnly": "Only the store owner can change its plan.",
     "soon": "Soon",
     "soonTitle": "Paid plans open soon. Everything on Free keeps working in the meantime.",
     "finePrint": "Prices exclude VAT. The per-sale fee applies to sales through Square Share checkout and is charged on the item price, never on delivery. Stripe's own card processing fees come on top. Cancel any time: you keep your plan until the end of the period you paid for.",
-    "unavailable": "Plans can't be shown right now. Refresh the page in a moment."
+    "unavailable": "Plans can't be shown right now. Refresh the page in a moment.",
+    "yearlyFree": "{count, plural, one {# month free} other {# months free}}",
+    "launchNote": "A launch price is an introductory price: the regular price is the one shown struck through."
   },
   "card": {
     "perMonth": "/ month",
@@ -46,7 +47,12 @@
     "upgrade": "Upgrade to {plan}",
     "switch": "Switch to {plan}",
     "switchInterval": "{interval, select, year {Switch to yearly} other {Switch to monthly}}",
-    "moveToFree": "Move to Free"
+    "moveToFree": "Move to Free",
+    "regularPrice": "Regular price",
+    "launchPrice": "Launch price",
+    "save": "Save {percent}",
+    "launchExclVat": "Launch price (regular {regular}), excl. VAT",
+    "launchBilledYearly": "{amount} billed once a year at the launch price (regular {regular}), excl. VAT"
   },
   "features": {
     "fee": "{rate} fee per sale",
@@ -63,12 +69,10 @@
     "productsUnlimited": "Unlimited products"
   },
   "calculator": {
-    "eyebrow": "Calculator",
     "title": "Which plan costs you least?",
     "lead": "Drag to your sales in a month. Each bar is the plan's price plus its fee on those sales.",
     "salesLabel": "Sales per month",
     "salesAria": "Your sales per month, in euros",
-    "fromYourSales": "Filled in from your last 30 days of sales.",
     "perMonth": "a month",
     "cheapest": "At {sales} a month in sales, {plan} costs you least.",
     "legendPrice": "Plan price",
@@ -148,7 +152,7 @@
     "cta": "Upgrade to {plan}, {price} a month",
     "compare": "Compare all plans",
     "topEyebrow": "Top plan",
-    "topTitle": "Everything in {plan} is yours"
+    "topTitle": "Everything in <mark>{plan}</mark> is yours"
   },
   "portal": {
     "opening": "Opening Stripe",
@@ -182,7 +186,10 @@
       "teamSeats": "Team seats, you included: {used} of {cap}",
       "teamSeatsUnlimited": "Team seats, you included: {used}, no limit",
       "products": "Products: {used} of {cap}",
-      "productsUnlimited": "Products: {used}, no limit"
+      "productsUnlimited": "Products: {used}, no limit",
+      "left": "{count} left",
+      "over": "{count} over",
+      "full": "Full"
     },
     "overLimit": "Over this plan's limit. Everything keeps working; remove one or upgrade to add more.",
     "invoicesTitle": "Billing & invoices",
@@ -191,6 +198,30 @@
     "noBilling": "Invoices and payment details appear here once you're on a paid plan.",
     "confirmed": "You're on {plan}. Thanks for backing Square Share.",
     "pending": "We're confirming your payment with Stripe. Refresh in a moment if your plan hasn't changed.",
-    "unavailable": "Your plan can't be shown right now. Refresh the page in a moment."
+    "unavailable": "Your plan can't be shown right now. Refresh the page in a moment.",
+    "cancelPlan": "Cancel plan"
+  },
+  "cancel": {
+    "title": "Cancel {plan}?",
+    "keepUntil": "You keep {plan} until {date}, then move to Free. Nothing is taken down.",
+    "loseLegend": "Not included on Free",
+    "reasonLegend": "Why are you cancelling? <muted>(optional)</muted>",
+    "reasons": {
+      "too_expensive": "Too expensive",
+      "unused": "Not using it enough",
+      "missing_features": "Missing something",
+      "switched_service": "Moving elsewhere",
+      "temporary": "Only needed it briefly",
+      "other": "Something else"
+    },
+    "detailLabel": "What could we do better? <muted>(optional)</muted>",
+    "detailPlaceholder": "A sentence or two is plenty. We read every one.",
+    "keep": "Keep my plan",
+    "confirm": "Cancel plan",
+    "cancelling": "Cancelling",
+    "doneTitle": "Your plan is cancelled",
+    "doneBody": "You keep {plan} until {date}. Changed your mind? Keep your plan any time before then.",
+    "done": "Done",
+    "kept": "You're keeping {plan}. It renews as usual."
   }
 }

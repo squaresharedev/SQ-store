@@ -8,7 +8,7 @@ import {
   getExistingProductIds,
 } from "@/lib/dashboard/queries";
 import { listStorefronts } from "@/lib/storefront/queries";
-import { countOrdersToShip, getOrdersByIds } from "@/lib/orders/queries";
+import { countOrdersToShip, getOrderGlances, getOrdersByIds } from "@/lib/orders/queries";
 import { checkoutProviderFor } from "@/lib/checkout/availability";
 import { getAccountStatus } from "@/lib/payments/mock";
 import { getActiveAccount } from "@/lib/team/account-context";
@@ -72,9 +72,11 @@ export default async function DashboardOverviewPage({
   // One extra query each (not N+1), side by side: which referenced product IDs
   // still exist, and the full detail behind the Recent orders rows, so a click
   // on one opens its panel in place instead of a trip to /orders.
-  const [existingIds, recentOrderDetails] = await Promise.all([
+  const recentOrderIds = orders.recentOrders.map((order) => order.id).filter(Boolean);
+  const [existingIds, recentOrderDetails, recentOrderGlances] = await Promise.all([
     getExistingProductIds(referencedProductIds),
-    getOrdersByIds(orders.recentOrders.map((order) => order.id).filter(Boolean)),
+    getOrdersByIds(recentOrderIds),
+    getOrderGlances(recentOrderIds),
   ]);
   const existingSet = new Set(existingIds);
   const deadBlockCount = referencedProductIds.filter(
@@ -182,6 +184,7 @@ export default async function DashboardOverviewPage({
         // A failed read (null) counts as "on": never nag on a guess.
         twoFactorEnabled={assurance ? assurance.enrolled : true}
         recentOrderDetails={recentOrderDetails}
+        recentOrderGlances={recentOrderGlances}
         toShipCount={toShipCount}
         canFulfil={can(account?.role, "orders.fulfil")}
         checkoutOpen={account ? checkoutProviderFor(account.accountId) !== null : false}

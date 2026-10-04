@@ -109,7 +109,8 @@
       "nameAlternative": "Or your full name, if you sell as yourself.",
       "addressPlaceholder": "e.g. 12 Market Street\nDublin, D02 X285\nIreland",
       "emailPlaceholder": "e.g. hello@yourshop.example",
-      "emailHelp": "Where buyers write to you. It can differ from your sign-in email."
+      "emailHelp": "Where buyers write to you. It can differ from your sign-in email.",
+      "emailTipLabel": "About this email"
     },
     "confirm": {
       "goLive": "Your product pages can go live once it's confirmed."
@@ -155,7 +156,7 @@
     "shortcut": "Shortcut: <kbd>{shortcut}</kbd>",
     "skipTour": "Skip tour",
     "next": "Next",
-    "openingPage": "{page, select, overview {Opening Overview…} products {Opening Products…} storefront {Opening Storefront…} orders {Opening Orders…} analytics {Opening Analytics…} payments {Opening Payments…} settings {Opening Settings…} sampleStorefront {Opening Sample storefront…} other {Opening…}}"
+    "openingPage": "{page, select, overview {Opening Overview…} products {Opening Products…} storefront {Opening Storefront…} orders {Opening Orders…} discounts {Opening Discounts…} analytics {Opening Analytics…} payments {Opening Payments…} settings {Opening Settings…} sampleStorefront {Opening Sample storefront…} other {Opening…}}"
   },
   "tourReplay": {
     "title": "Guided tour",

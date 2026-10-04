@@ -100,11 +100,12 @@ test("a version states its own measurements, and the page shows them", async ({ 
   )) as { id: string; title: string }[];
   const productId = products[0]!.id;
 
-  // The address is required too, or the publish gate 404s the page below.
+  // The address is required too, or the publish gate 404s the page below. So
+  // is a contact email that could really take mail: PUBLISHABLE_SELLER's own,
+  // since the gate refuses a placeholder (".example") domain.
   await seedSellerIdentity(sellerId, {
     ...PUBLISHABLE_SELLER,
     businessName: "Table Studio Ltd",
-    email: "hi@table.example",
   });
   await serviceRest(`/storefronts?id=eq.${storefrontId}`, {
     method: "PATCH",

@@ -1,5 +1,6 @@
 import {
   AnalyticsIcon,
+  DiscountsIcon,
   OrdersIcon,
   OverviewIcon,
   PaymentsIcon,
@@ -30,6 +31,7 @@ import {
   SETTINGS_PATH,
 } from "@/lib/dashboard/paths";
 import { PRODUCTS_PATH } from "@/lib/products/paths";
+import { DISCOUNTS_PATH } from "@/lib/discounts/paths";
 import { BILLING_SETTINGS_PATH } from "@/lib/billing/paths";
 import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
 
@@ -74,6 +76,7 @@ export const MAIN_NAV: NavEntry[] = [
   { label: "Nav.main.products.label", href: PRODUCTS_PATH, icon: ProductsIcon },
   { label: "Nav.main.storefront.label", href: STOREFRONT_LIST_PATH, icon: StorefrontIcon },
   { label: "Nav.main.orders.label", href: ORDERS_PATH, icon: OrdersIcon },
+  { label: "Nav.main.discounts.label", href: DISCOUNTS_PATH, icon: DiscountsIcon },
   { label: "Nav.main.analytics.label", href: ANALYTICS_PATH, icon: AnalyticsIcon },
   { label: "Nav.main.payments.label", href: PAYMENTS_PATH, icon: PaymentsIcon },
 ];

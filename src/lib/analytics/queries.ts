@@ -1,7 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAccount } from "@/lib/team/account-context";
-import type { OrderChannel, OrderStatus } from "@/types/order-view";
+import { toChannel } from "@/lib/orders/queries";
+import { ORDER_CHANNELS, type OrderChannel, type OrderStatus } from "@/types/order-view";
 import {
   SIGNAL_CHANNELS,
   SIGNAL_KINDS,
@@ -137,24 +138,21 @@ function buildSeries(
   return [...buckets.values()];
 }
 
-/** All three channels, embed first, zeros included. */
+/** Every channel, zeros included, in the vocabulary's order. */
+function emptyChannels(): ChannelSlice[] {
+  return ORDER_CHANNELS.map((channel) => ({ channel, revenueCents: 0, sales: 0 }));
+}
+
 function buildChannels(rows: AggregatePayload["channels"]): ChannelSlice[] {
-  const slices: Record<OrderChannel, ChannelSlice> = {
-    embed: { channel: "embed", revenueCents: 0, sales: 0 },
-    marketplace: { channel: "marketplace", revenueCents: 0, sales: 0 },
-    direct: { channel: "direct", revenueCents: 0, sales: 0 },
-  };
+  const slices = emptyChannels();
   for (const row of rows) {
-    const key: OrderChannel =
-      row.channel === "marketplace"
-        ? "marketplace"
-        : row.channel === "direct"
-          ? "direct"
-          : "embed";
-    slices[key].revenueCents += row.revenue_cents;
-    slices[key].sales += row.sales;
+    const channel: OrderChannel = toChannel(row.channel);
+    const slice = slices.find((candidate) => candidate.channel === channel);
+    if (!slice) continue;
+    slice.revenueCents += row.revenue_cents;
+    slice.sales += row.sales;
   }
-  return [slices.embed, slices.marketplace, slices.direct];
+  return slices;
 }
 
 /** All seven weekdays Mon..Sun, zeros included. */
@@ -206,11 +204,7 @@ export function emptyAnalyticsData(available = false): AnalyticsData {
       currency: "EUR",
     },
     series: [],
-    channels: [
-      { channel: "embed", revenueCents: 0, sales: 0 },
-      { channel: "marketplace", revenueCents: 0, sales: 0 },
-      { channel: "direct", revenueCents: 0, sales: 0 },
-    ],
+    channels: emptyChannels(),
     topProducts: [],
     weekdays: WEEKDAYS.map((weekday) => ({ weekday, sales: 0, revenueCents: 0 })),
     statuses: STATUS_ORDER.map((status) => ({ status, count: 0 })),

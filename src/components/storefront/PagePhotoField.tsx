@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { unexpectedError } from "@/lib/errors";
@@ -12,14 +12,16 @@ import { cssUrl } from "./background-presets";
 import { cn } from "@/lib/utils";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { Switch } from "@/components/ui/switch";
 import { iconButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import type { PagePhoto } from "@/types/storefront";
-import { PanelField } from "./PanelField";
+import { PanelField, PanelRow } from "./PanelField";
 
 /**
- * A hosted page's photo backdrop: add one, replace it, take it away. One field
- * for the product page's panel and the checkout's (which the thank-you page
- * shares), so the control is the same wherever a seller meets it.
+ * A hosted page's photo backdrop: add one, replace it, take it away, and
+ * choose whether the page's colour is laid over it. One field for the product
+ * page, the checkout and the thank-you page, so the control is the same
+ * wherever a seller meets it.
  *
  * The upload is the one every image in the designer takes (uploadToR2: type
  * and size checked before a byte is sent, progress shown); the config keeps
@@ -44,6 +46,7 @@ export function PagePhotoField({
   onUrl: (key: string, url: string) => void;
 }) {
   const t = useTranslations("Storefront");
+  const overlayId = useId();
   const showActionError = useActionErrorToast();
   const sample = useSampleMode();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -59,7 +62,7 @@ export function PagePhotoField({
     try {
       const key = sample ? sampleObjectKey("images", file) : await uploadToR2(file, "image", setProgress);
       onUrl(key, URL.createObjectURL(file));
-      onChange({ key });
+      onChange({ ...photo, key });
     } catch (error) {
       showActionError(
         error instanceof UploadError
@@ -123,6 +126,16 @@ export function PagePhotoField({
         )}
       </div>
       {uploading && <ProgressBar value={progress} label={t("background.uploadingProgress")} />}
+      {photo && (
+        <PanelRow label={t("pagePhoto.overlay")} htmlFor={overlayId}>
+          <Switch
+            id={overlayId}
+            checked={photo.overlay !== false}
+            // On is the default and is never stored.
+            onCheckedChange={(on) => onChange(on ? { key: photo.key } : { key: photo.key, overlay: false })}
+          />
+        </PanelRow>
+      )}
     </PanelField>
   );
 }

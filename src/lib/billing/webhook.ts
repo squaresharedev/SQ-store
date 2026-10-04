@@ -170,10 +170,10 @@ async function tellSeller(event: StripeEvent, ownerId: string, result: ApplyResu
       return;
     }
 
-    // A stale snapshot (a newer one was already stored) says nothing new.
+    // A stale snapshot (a newer one was already stored) says nothing new. The
+    // funnel row for the change is applyBillingSnapshot's to write.
     const transition = result.applied ? planTransition(result.before, result.after) : null;
     if (!transition) return;
-    await recordFunnelEvent({ accountId: ownerId, actorId: null, kind: transition, plan: result.after });
     await createNotification({
       userId: ownerId,
       type: "billing",

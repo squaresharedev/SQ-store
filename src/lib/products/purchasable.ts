@@ -41,6 +41,8 @@ import { uuidField } from "@/lib/validation/inputs";
 import { parseStoredStorefrontConfig } from "@/lib/validation/storefront";
 import { resolveProductPage } from "@/lib/storefront/product-page";
 import { PUBLIC_STOCK_SELECT } from "@/lib/stock/public";
+import { readActiveSales } from "@/lib/discounts/public";
+import type { ActiveSale } from "@/types/discount";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import type {
   ProductBlock,
@@ -94,6 +96,12 @@ export type Purchasable = {
   /** The six buyer-facing identity columns, built field by field. */
   seller: StorefrontSeller;
   shippingPolicy: SellerShippingPolicy;
+  /** The store's sales running now that cover this product. Server-side: each
+   *  carries the id an order is credited to. */
+  sales: ActiveSale[];
+  /** The one "now" this request priced at, so the page, the quote and the
+   *  code check never disagree about whether something has started or ended. */
+  now: Date;
 };
 
 /** Which rate-limit bucket a caller spends, and how much it holds. */
@@ -157,9 +165,11 @@ export async function loadPurchasable<Extra = undefined>(
   );
   if (!block || block.type !== "product") return null;
 
-  // Product and seller identity both depend only on the owner id already in
-  // hand, so they run together rather than one after the other.
-  const [{ data: row, error: productError }, { data: sellerRow, error: sellerError }, extra] =
+  // Product, seller identity and the store's running sales all depend only on
+  // the owner id already in hand, so they run together rather than one after
+  // the other.
+  const now = new Date();
+  const [{ data: row, error: productError }, { data: sellerRow, error: sellerError }, sales, extra] =
     await Promise.all([
       admin
         .from("products")
@@ -176,6 +186,7 @@ export async function loadPurchasable<Extra = undefined>(
         .select(`${TRADER_GATE_SELECT}, ${SHIPPING_POLICY_SELECT}`)
         .eq("id", storefront.owner_id)
         .maybeSingle(),
+      readActiveSales(admin, storefront.owner_id, productId, now),
       alongside ? alongside(admin, storefront.owner_id) : Promise.resolve(undefined as Extra),
     ]);
   if (productError) {
@@ -222,6 +233,8 @@ export async function loadPurchasable<Extra = undefined>(
     row: row as PublicProductRow,
     seller: buildSellerIdentity(gateRow as SellerIdentityRow | null),
     shippingPolicy: buildShippingPolicy(sellerError ? null : (sellerRow as ShippingPolicyRow | null)),
+    sales,
+    now,
     extra: extra as Extra,
   };
 }

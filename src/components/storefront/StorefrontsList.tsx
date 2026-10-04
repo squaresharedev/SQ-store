@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight, Plus, Store, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   errorTextClass,
@@ -18,7 +18,8 @@ import { storefrontEmbedPath } from "@/lib/storefront/paths";
 import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
-import { Modal } from "@/components/ui/modal";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { HeroMark } from "@/components/ui/HeroMark";
 import {
   deleteStorefront,
   fetchStorefrontsPage,
@@ -269,37 +270,26 @@ export function StorefrontsList({
         previousBrief={storefronts[0]?.brief}
       />
 
-      <Modal
+      <ConfirmDialog
         open={pendingDelete !== null}
         // Closable even while the delete is in flight: the action carries on
         // server-side and its outcome still lands as a toast either way, which
         // is exactly why closing early is now safe. Blocking ESC/backdrop/X
         // here turned a hung request into a user trapped in a modal.
         onClose={() => setPendingDelete(null)}
+        tone="danger"
+        visual={<HeroMark icon={Store} tone="danger" badge={Trash2} />}
         title={t("deleteTitle")}
         description={
           pendingDelete
             ? t("deleteDesc", { name: pendingDelete.name })
             : undefined
         }
-      >
-        <div className="flex justify-end gap-3">
-          <Button
-            variant="secondary"
-            onClick={() => setPendingDelete(null)}
-            disabled={deleting}
-          >
-            {tCommon("actions.cancel")}
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={confirmDelete}
-            disabled={deleting}
-          >
-            {deleting ? tCommon("actions.deleting") : tCommon("actions.delete")}
-          </Button>
-        </div>
-      </Modal>
+        confirmLabel={tCommon("actions.delete")}
+        pendingLabel={tCommon("actions.deleting")}
+        pending={deleting}
+        onConfirm={confirmDelete}
+      />
     </>
   );
 }

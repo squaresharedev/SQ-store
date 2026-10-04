@@ -56,6 +56,10 @@
     "manageBilling": {
       "withRole": "Your {role, select, owner {Owner} editor {Editor} viewer {Viewer} other {{role}}} role can't change this store's plan.",
       "noRole": "You don't have permission to change this store's plan."
+    },
+    "manageDiscounts": {
+      "withRole": "Your {role, select, owner {Owner} editor {Editor} viewer {Viewer} other {{role}}} role can't manage discounts in this store.",
+      "noRole": "You don't have permission to manage discounts in this store."
     }
   },
   "notFound": {
@@ -63,7 +67,8 @@
     "product": "That product could not be found.",
     "storefront": "That storefront could not be found.",
     "item": "That item could not be found.",
-    "order": "That order could not be found."
+    "order": "That order could not be found.",
+    "discount": "That discount could not be found."
   },
   "rateLimited": {
     "fix": "Wait a few minutes and try again. If nothing is retrying in the background, reload the page first.",
@@ -82,7 +87,8 @@
     "fileAppeal": "Too many attempts to send an appeal in a short time.",
     "fulfilOrders": "Too many attempts to mark orders shipped in a short time.",
     "readCheckoutSettings": "Too many attempts to read checkout settings in a short time.",
-    "changePlan": "Too many plan changes started in a short time."
+    "changePlan": "Too many plan changes started in a short time.",
+    "saveDiscounts": "Too many discount changes in a short time."
   },
   "serverError": {
     "fix": "This is usually temporary. Wait a moment and try again; if it keeps failing, refresh the page.",
@@ -115,7 +121,10 @@
     "saveCheckoutSettings": "Could not save your checkout settings because of a problem on our side.",
     "loadPlans": "Could not load your plan because of a problem on our side.",
     "startCheckout": "Could not open checkout because of a problem on our side.",
-    "openBillingPortal": "Could not open your billing details because of a problem on our side."
+    "openBillingPortal": "Could not open your billing details because of a problem on our side.",
+    "cancelPlan": "Could not cancel your plan because of a problem on our side.",
+    "resumePlan": "Could not keep your plan because of a problem on our side.",
+    "saveDiscount": "Could not save the discount because of a problem on our side."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {This product was removed, not paused.} storefront {This storefront was removed, not paused.} other {This item was removed, not paused.}}",
@@ -602,7 +611,11 @@
     "alreadySubscribed": "Your store already has a paid plan. Switch plans instead of buying a second one.",
     "noBillingAccount": "This store has no billing account yet. Upgrade to a paid plan first.",
     "noSubscription": "This store has no paid plan to change. Choose one to upgrade.",
-    "ownerOnlyFix": "Only the store owner can change its plan. Ask them, or switch to your own store."
+    "ownerOnlyFix": "Only the store owner can change its plan. Ask them, or switch to your own store.",
+    "invalidFeedback": "That feedback could not be read.",
+    "notCancellable": "This store has no paid plan to cancel, or it is already set to end.",
+    "notResumable": "This plan is not set to end, or its paid period is already over.",
+    "deletionPending": "Your account is set to be deleted, so its plan ends with it. Cancel the deletion first to keep your plan."
   },
   "planLimit": {
     "storefronts": "Your {plan, select, free {Free} starter {Starter} pro {Pro} other {current}} plan includes {cap, plural, one {# storefront} other {# storefronts}}, and your store has them all.",
@@ -621,5 +634,23 @@
     "planRequiredFix": "Upgrade on the Plans page to export your orders.",
     "rateLimited": "That's a lot of exports in a short time.",
     "rateLimitedFix": "Wait a few minutes, then try again."
+  },
+  "discounts": {
+    "invalid": {
+      "message": "The discount details didn't pass validation.",
+      "fix": "Check the highlighted fields, then try saving again."
+    },
+    "codeTaken": {
+      "message": "That code is already in use in this store.",
+      "fix": "Choose a different code, or delete the other discount first."
+    },
+    "started": {
+      "message": "This sale has already started, so its terms can't change.",
+      "fix": "End it and create a new sale with the new terms. EU rules on showing price reductions rely on a sale's history staying as it was."
+    },
+    "tooMany": {
+      "message": "This store has the most discounts it can have.",
+      "fix": "Delete discounts you no longer use, then try again."
+    }
   }
 }

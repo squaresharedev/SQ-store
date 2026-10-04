@@ -31,6 +31,8 @@ export const CHART = {
    *  and the ring around overlapping markers (white does the separating —
    *  never a contrasting stroke). */
   surface: "var(--card)",
+  /** The same job for a chart that sits on the page itself, not in a card. */
+  page: "var(--background)",
   /** De-emphasis fill for folded "Other" slices and series past the slots. */
   other: "var(--chart-4)",
 } as const;
@@ -97,7 +99,50 @@ export const MARK = {
   lineWidth: 2,
   /** Gap between touching fills (stacked segments, pie slices), in px. */
   surfaceGap: 2,
+  /** Opacity of an area's wash where it meets its line; it fades to nothing. */
+  areaWash: 0.12,
 } as const;
+
+/** Plot geometry the cartesian charts share, in px. */
+export const PLOT = {
+  /** Air above the plot, so the top gridline is never clipped. */
+  top: 8,
+  /** Air right of the plot, so the last point's hover dot is never clipped. */
+  right: 8,
+  /** The band under the plot that holds the category labels. */
+  xAxisHeight: 30,
+} as const;
+
+/**
+ * Edge-to-edge ("bleed") plots: a chart drawn on the page itself, running the
+ * full width of its box, with no card around it and no axis column beside it.
+ * The value labels move INSIDE the plot and sit on their gridlines.
+ */
+export const BLEED = {
+  /** How far labels stand in from the box's edges. The page gutter (px-6), so
+   *  a bled chart's labels line up with the column of cards under it. */
+  inset: 24,
+  /** Air above the plot: room for the top value label, which sits on its
+   *  gridline instead of beside it. */
+  top: 20,
+  /** How far a value label is lifted to sit on its gridline. */
+  labelLift: 6,
+  /** Page-coloured outline around a value label, so the line can pass behind
+   *  it and the label still reads. */
+  labelHalo: 4,
+  /** Extra room between x labels: the two end labels are tucked inward, so
+   *  each takes more of the axis than a centred one. */
+  tickGap: 24,
+  /** A stronger wash than MARK.areaWash: with no card to frame it, the fill
+   *  is what gives the chart its body. */
+  areaWash: 0.2,
+} as const;
+
+/** Where a bled plot sits inside a chart of `height`: its top edge and its own
+ *  height, in px. For a caller laying something over the plot. */
+export function bleedPlot(height: number): { top: number; height: number } {
+  return { top: BLEED.top, height: height - BLEED.top - PLOT.xAxisHeight };
+}
 
 // Custom tooltip chrome (Recharts `content={...}` — never the default
 // tooltip). Popover-styled per styles.md: token surfaces, hairline border,

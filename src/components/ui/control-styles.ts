@@ -16,6 +16,12 @@ export const transitionClass =
 export const focusRingClass =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
+/** The same ring for a composed field, drawn on the BOX around a bare input
+ *  (a sign, the digits and a unit in one frame): the box lights up while the
+ *  input inside it holds focus. Pair with `outline-none` on that input. */
+export const focusWithinRingClass =
+  "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background";
+
 /** Focus ring for a control sitting INSIDE an overlay: drawn inset, since an
  *  offset ring on a full-width menu row is clipped by the panel edge. */
 export const focusRingInsetClass =
@@ -75,6 +81,31 @@ export const overlayItemClass = `flex w-full min-h-11 items-center gap-2.5 round
 
 /** Icon-only dismiss control on an overlay (a modal header, a sheet). */
 export const overlayCloseButtonClass = `flex size-9 shrink-0 items-center justify-center rounded-none text-muted-foreground hover:bg-accent hover:text-foreground ${TRANSITION} ${focusRingInsetClass}`;
+
+/* --- Modal anatomy (components/ui/modal.tsx) ---------------------------
+   A dialog is read blurred: one central visual, a short title, at most one
+   sentence, one primary button (styles.md §8.14). These are the parts every
+   dialog shares, so none of them is re-spelled at a call site. */
+
+/** A dialog's title: the one line read before anything else. */
+export const modalTitleClass =
+  "text-lg font-semibold tracking-tight text-popover-foreground";
+
+/** How wide a dialog's card grows from `sm` up (below it every dialog is a
+ *  full-width bottom sheet). `md` fits a confirm or a short form; reach past
+ *  it only for content that is wide by nature. */
+export const modalSizeClass = {
+  md: "sm:max-w-md",
+  lg: "sm:max-w-lg",
+  xl: "sm:max-w-xl",
+  "2xl": "sm:max-w-2xl",
+} as const;
+
+/** The row a dialog ends on. The primary action is LAST in the markup: on a
+ *  phone the row stacks in reverse so it sits on top, under the thumb; from
+ *  `sm` up it is a right-aligned row with the primary at the far end. */
+export const modalActionsClass =
+  "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end";
 
 /* --- Tooltips: ONE bubble shape, everywhere ----------------------------
    A tooltip is the one floating surface that is NOT a panel: it belongs to

@@ -9,13 +9,16 @@ import { motion, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import type { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/browser";
 import { Button } from "@/components/ui/button";
+import { Disclosure } from "@/components/ui/Disclosure";
+import { HeroMark, type MarkGlyph } from "@/components/ui/HeroMark";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { SETTLE } from "@/components/ui/motion-tokens";
 import { helpTextClass, infoTextClass, quietLinkClass } from "@/components/ui/control-styles";
-import { AnimatedFingerprint } from "@/components/auth/AnimatedFingerprint";
+import { authHeadingClass } from "@/components/ui/surface-styles";
+import { AnimatedFingerprint, FingerprintGlyph } from "@/components/auth/AnimatedFingerprint";
 import { ApproveFromDevice } from "@/components/auth/ApproveFromDevice";
 import { FactorPicker, type FactorChoice } from "@/components/auth/FactorPicker";
 import { OneTimeCodeInput } from "@/components/auth/OneTimeCodeInput";
@@ -146,7 +149,7 @@ export function TwoFactorChallenge({
   if (showOffer && offerKind) {
     return (
       <div className="flex flex-col gap-5">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("heading")}</h1>
+        <h1 className={authHeadingClass}>{t("heading")}</h1>
         <PasskeyHereOffer
           kind={offerKind}
           device={device}
@@ -160,7 +163,7 @@ export function TwoFactorChallenge({
   if (destination || holding) {
     return (
       <div className="flex flex-col gap-5">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("heading")}</h1>
+        <h1 className={authHeadingClass}>{t("heading")}</h1>
         <SigningIn kind={verified?.kind ?? (mode === "recovery" ? "app" : SUCCESS_KIND[mode])} />
       </div>
     );
@@ -224,6 +227,31 @@ export function TwoFactorChallenge({
             {t("notYou")}
           </button>
         </form>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * What every way through opens with: its mark (so the step can be told from
+ * the others at a glance), the heading, and one sentence. The sentence stays
+ * the element right after the heading.
+ */
+function ChallengeHeader({
+  glyph,
+  heading,
+  children,
+}: {
+  glyph: MarkGlyph;
+  heading: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-3 text-center">
+      <HeroMark icon={glyph} size="lg" />
+      <div>
+        <h1 className={authHeadingClass}>{heading}</h1>
+        <p className={`${helpTextClass} mt-1`}>{children}</p>
       </div>
     </div>
   );
@@ -414,12 +442,9 @@ function PasskeyForm({
 
   return (
     <div className="flex flex-col gap-5" data-passkey-challenge>
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("heading")}</h1>
-        <p className={`${helpTextClass} mt-1`}>
-          {email ? tp.rich("introAs", { email, strong }) : tp("intro")}
-        </p>
-      </div>
+      <ChallengeHeader glyph={FingerprintGlyph} heading={t("heading")}>
+        {email ? tp.rich("introAs", { email, strong }) : tp("intro")}
+      </ChallengeHeader>
 
       <div className="flex flex-col gap-2">
         <Button
@@ -445,7 +470,11 @@ function PasskeyForm({
         )}
         {/* After a miss the way round below says it better: one explanation
             on screen at a time. */}
-        {!offerApproval && <p className={infoTextClass}>{tp("hint")}</p>}
+        {!offerApproval && (
+          <Disclosure summary={tp("hintSummary")} className={infoTextClass}>
+            <p>{tp("hint")}</p>
+          </Disclosure>
+        )}
       </div>
 
       <Status state={state} next={next} />
@@ -508,12 +537,9 @@ function CodeForm({
   return (
     <form action={formAction} className="flex flex-col gap-5" noValidate>
       <input type="hidden" name="next" value={next} />
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("heading")}</h1>
-        <p className={`${helpTextClass} mt-1`}>
-          <CodeIntro name={single ? single.name : null} email={email} />
-        </p>
-      </div>
+      <ChallengeHeader glyph={Smartphone} heading={t("heading")}>
+        <CodeIntro name={single ? single.name : null} email={email} />
+      </ChallengeHeader>
 
       <FactorPicker factors={factors} name="factor_id" id="challenge-factor" />
 
@@ -560,10 +586,9 @@ function RecoveryForm({ next }: { next: string }) {
   return (
     <form action={formAction} className="flex flex-col gap-5" noValidate>
       <input type="hidden" name="next" value={next} />
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("heading")}</h1>
-        <p className={`${helpTextClass} mt-1`}>{t("intro")}</p>
-      </div>
+      <ChallengeHeader glyph={KeyRound} heading={t("heading")}>
+        {t("intro")}
+      </ChallengeHeader>
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="recovery_code">{t("label")}</Label>

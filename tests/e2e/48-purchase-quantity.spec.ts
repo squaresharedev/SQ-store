@@ -130,13 +130,13 @@ async function seed(page: Page, tag: string): Promise<Seeded> {
     gone: byTitle("Empty shelf print"),
   };
 
-  // A contact email, so the buy button is a live mailto rather than absent —
-  // that is where the chosen quantity travels today.
-  // The address is required too, or the publish gate 404s the page below.
+  // A contact email, so the buy button is a live mailto rather than absent:
+  // that is where the chosen quantity travels today. It is PUBLISHABLE_SELLER's
+  // own address, because the publish gate refuses a placeholder one (a
+  // ".example" domain) and 404s the page below, as it does without an address.
   await seedSellerIdentity(sellerId, {
     ...PUBLISHABLE_SELLER,
     businessName: "Quantity Studio Ltd",
-    email: "hi@quantity.example",
   });
 
   await serviceRest(`/storefronts?id=eq.${storefrontId}`, {

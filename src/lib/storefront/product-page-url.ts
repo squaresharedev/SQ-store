@@ -1,6 +1,7 @@
 import { appUrl } from "@/lib/app-url";
 import { QUANTITY_QUERY_PARAM } from "@/lib/products/quantity";
 import { uuidField } from "@/lib/validation/inputs";
+import type { OrderChannel } from "@/types/order-view";
 import { OPTIONS_TOTAL_MAX } from "@/types/product";
 
 // Where a product page lives. One function, so the embed payload, the editor
@@ -55,6 +56,35 @@ export function firstValue(raw: string | string[] | undefined): string | undefin
 }
 
 /**
+ * `?via=` says how the buyer ARRIVED, when it was through one of the seller's
+ * own links: `button` from the buy button on their website, `embed` from a
+ * storefront tile. It is the channel the product page's view, the checkout's
+ * view and the order are filed under, so a seller can see what their button
+ * sells. It rides along from page to checkout (see checkoutPath) because the
+ * order is placed two pages after the arrival.
+ *
+ * ATTRIBUTION, NEVER AUTHORITY. Anyone can type it, so the worst a forged one
+ * does is relabel the seller's own numbers: it never reaches a price, a fee or
+ * a gate. Only an allowlisted value is ever read or written back.
+ */
+export const VIA_QUERY_PARAM = "via";
+
+/** The channels a buyer can arrive in by link. Never `marketplace` (a channel
+ *  of its own) or `direct` (the absence of a marker). Never remove one while a
+ *  checkout tab could still send it: the order schema would refuse the order. */
+export const LINK_CHANNELS = ["button", "embed"] as const satisfies readonly OrderChannel[];
+export type LinkChannel = (typeof LINK_CHANNELS)[number];
+
+/** A link's marker, for the builders below. Null and absent mean none. */
+type ViaOption = { via?: LinkChannel | null };
+
+/** The marker this URL carries, if it is one we know; anything else is none. */
+export function requestedVia(searchParams: SearchParams): LinkChannel | null {
+  const raw = firstValue(searchParams[VIA_QUERY_PARAM]);
+  return (LINK_CHANNELS as readonly (string | undefined)[]).includes(raw) ? (raw as LinkChannel) : null;
+}
+
+/**
  * The option ids the URL asks for, filtered to ones this product actually has.
  * Read the same way by the product page and the checkout it leads to. The
  * split is capped before anything is examined: a product can never have more
@@ -77,13 +107,15 @@ export function requestedOptions(searchParams: SearchParams, optionIds: Readonly
 }
 
 /** Path only, for same-origin links and tests. */
-export function productPagePath(storefrontId: string, productId: string): string {
-  return `${PUBLIC_PAGES_PREFIX}${encodeURIComponent(storefrontId)}/p/${encodeURIComponent(productId)}`;
+export function productPagePath(storefrontId: string, productId: string, { via }: ViaOption = {}): string {
+  const path = `${PUBLIC_PAGES_PREFIX}${encodeURIComponent(storefrontId)}/p/${encodeURIComponent(productId)}`;
+  return via ? `${path}?${VIA_QUERY_PARAM}=${via}` : path;
 }
 
-/** Absolute URL on the app's own origin, for the embed payload and metadata. */
-export function productPageUrl(storefrontId: string, productId: string): string {
-  return appUrl(productPagePath(storefrontId, productId));
+/** Absolute URL on the app's own origin, for the embed payload, metadata and
+ *  the seller's buy button (`{ via: "button" }`). */
+export function productPageUrl(storefrontId: string, productId: string, options: ViaOption = {}): string {
+  return appUrl(productPagePath(storefrontId, productId, options));
 }
 
 /**
@@ -92,17 +124,19 @@ export function productPageUrl(storefrontId: string, productId: string): string 
  * buyer lands on the checkout holding exactly what they chose. Requests, not
  * decisions: the checkout re-checks both against the product before it shows
  * a price, and the quote re-checks them again before anything is charged.
+ * The arrival marker rides along too, so the order is filed where the visit was.
  */
 export function checkoutPath(
   storefrontId: string,
   productId: string,
-  choice: { optionIds?: readonly string[]; quantity?: number } = {},
+  choice: { optionIds?: readonly string[]; quantity?: number } & ViaOption = {},
 ): string {
   const params = new URLSearchParams();
   if (choice.optionIds && choice.optionIds.length > 0) {
     params.set(OPTION_QUERY_PARAM, choice.optionIds.join(","));
   }
   if (choice.quantity && choice.quantity > 1) params.set(QUANTITY_QUERY_PARAM, String(choice.quantity));
+  if (choice.via) params.set(VIA_QUERY_PARAM, choice.via);
   const query = params.toString();
   return `${productPagePath(storefrontId, productId)}/checkout${query ? `?${query}` : ""}`;
 }

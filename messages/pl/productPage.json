@@ -329,8 +329,28 @@
       "rate_limited": "Zbyt wiele prób. Poczekaj kilka minut i spróbuj ponownie.",
       "unavailable": "Kasa jest teraz niedostępna. Nic nie zostało obciążone.",
       "failed": "Coś poszło nie tak i nic nie zostało obciążone. Spróbuj ponownie.",
-      "invalid": "Niektóre dane wymagają sprawdzenia. Sprawdź wyróżnione pola."
+      "invalid": "Niektóre dane wymagają sprawdzenia. Sprawdź wyróżnione pola.",
+      "discount_invalid": "Ten kod rabatowy nie może być już użyty. Usuń go, aby zapłacić pełną cenę.",
+      "price_changed": "Cena zmieniła się, gdy ta strona była otwarta, więc nic nie zostało pobrane. Sprawdź nową kwotę i zapłać."
     },
-    "editHeadline": "Nagłówek kasy"
+    "editHeadline": "Nagłówek kasy",
+    "discount": {
+      "add": "Dodaj kod rabatowy",
+      "label": "Kod rabatowy",
+      "apply": "Zastosuj",
+      "applying": "Sprawdzanie",
+      "remove": "Usuń",
+      "applied": "Zastosowano {code}.",
+      "saleBetter": "{code} działa, ale cena promocyjna jest już niższa, więc ją zachowaliśmy.",
+      "invalid": "Ten kod nie może być użyty do tego zamówienia.",
+      "rateLimited": "Zbyt wiele prób. Poczekaj chwilę i spróbuj ponownie.",
+      "line": "Rabat ({code})"
+    }
+  },
+  "sale": {
+    "wasNow": "Było {was}, teraz {now}",
+    "percentOff": "-{percent}%",
+    "priorNote": "Przekreślona cena: najniższa cena z 30 dni przed obniżką.",
+    "endsOn": "Obniżka kończy się {date}"
   }
 }

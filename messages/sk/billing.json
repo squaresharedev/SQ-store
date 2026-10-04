@@ -25,14 +25,15 @@
     "intervalLabel": "Fakturačné obdobie",
     "month": "Mesačne",
     "year": "Ročne",
-    "yearlySaving": "2 mesiace zadarmo pri ročnom pláne",
     "pastDue": "Posledná platba za plán {plan} sa neuskutočnila. Aktualizujte kartu, aby ste ho zachovali.",
     "endsOn": "Váš plán {plan} končí {date} a obchod prejde na Free. Nič sa neodstráni.",
     "ownerOnly": "Plán obchodu môže meniť iba vlastník.",
     "soon": "Čoskoro",
     "soonTitle": "Platené plány sa otvoria čoskoro. Dovtedy všetko na Free funguje bez zmien.",
     "finePrint": "Ceny sú bez DPH. Poplatok za predaj sa vzťahuje na predaje cez pokladňu Square Share a účtuje sa z ceny položky, nie z doručenia. Vlastné poplatky Stripe za spracovanie karty sa pripočítajú. Zrušiť môžete kedykoľvek: plán si ponechávate do konca zaplateného obdobia.",
-    "unavailable": "Plány sa momentálne nedajú zobraziť. Za chvíľu obnovte stránku."
+    "unavailable": "Plány sa momentálne nedajú zobraziť. Za chvíľu obnovte stránku.",
+    "yearlyFree": "{count, plural, one {# mesiac zadarmo} few {# mesiace zadarmo} many {# mesiaca zadarmo} other {# mesiacov zadarmo}}",
+    "launchNote": "Úvodná cena je zvýhodnená cena na začiatok: bežná cena je tá, ktorá je prečiarknutá."
   },
   "card": {
     "perMonth": "/ mesiac",
@@ -46,7 +47,12 @@
     "upgrade": "Prejsť na {plan}",
     "switch": "Prepnúť na {plan}",
     "switchInterval": "{interval, select, year {Prejsť na ročné} other {Prejsť na mesačné}}",
-    "moveToFree": "Prejsť na Free"
+    "moveToFree": "Prejsť na Free",
+    "regularPrice": "Bežná cena",
+    "launchPrice": "Úvodná cena",
+    "save": "Ušetríte {percent}",
+    "launchExclVat": "Úvodná cena (bežná {regular}), bez DPH",
+    "launchBilledYearly": "{amount} účtované raz ročne za úvodnú cenu (bežná {regular}), bez DPH"
   },
   "features": {
     "fee": "{rate} poplatok za predaj",
@@ -63,12 +69,10 @@
     "productsUnlimited": "Neobmedzený počet produktov"
   },
   "calculator": {
-    "eyebrow": "Kalkulačka",
     "title": "Ktorý plán vás vyjde najlacnejšie?",
     "lead": "Posuňte jazdec na svoje mesačné predaje. Každý stĺpec je cena plánu plus jeho poplatok z týchto predajov.",
     "salesLabel": "Predaje za mesiac",
     "salesAria": "Vaše mesačné predaje v eurách",
-    "fromYourSales": "Vyplnené z vašich predajov za posledných 30 dní.",
     "perMonth": "mesačne",
     "cheapest": "Pri predajoch {sales} mesačne vás {plan} vyjde najlacnejšie.",
     "legendPrice": "Cena plánu",
@@ -148,7 +152,7 @@
     "cta": "Prejsť na {plan}, {price} mesačne",
     "compare": "Porovnať všetky plány",
     "topEyebrow": "Najvyšší plán",
-    "topTitle": "Všetko z plánu {plan} je vaše"
+    "topTitle": "Všetko z plánu <mark>{plan}</mark> je vaše"
   },
   "portal": {
     "opening": "Otvára sa Stripe",
@@ -182,7 +186,10 @@
       "teamSeats": "Miesta v tíme vrátane vás: {used} z {cap}",
       "teamSeatsUnlimited": "Miesta v tíme vrátane vás: {used}, bez limitu",
       "products": "Produkty: {used} z {cap}",
-      "productsUnlimited": "Produkty: {used}, bez limitu"
+      "productsUnlimited": "Produkty: {used}, bez limitu",
+      "left": "Zostáva {count}",
+      "over": "{count} nad limit",
+      "full": "Plné"
     },
     "overLimit": "Nad limitom tohto plánu. Všetko funguje bez zmien; odstráňte jeden alebo upgradujte, aby ste mohli pridávať.",
     "invoicesTitle": "Fakturácia a faktúry",
@@ -191,6 +198,30 @@
     "noBilling": "Faktúry a platobné údaje sa zobrazia, keď prejdete na platený plán.",
     "confirmed": "Ste na pláne {plan}. Ďakujeme za podporu Square Share.",
     "pending": "Potvrdzujeme vašu platbu so Stripe. Ak sa plán nezmenil, za chvíľu obnovte stránku.",
-    "unavailable": "Váš plán sa momentálne nedá zobraziť. Za chvíľu obnovte stránku."
+    "unavailable": "Váš plán sa momentálne nedá zobraziť. Za chvíľu obnovte stránku.",
+    "cancelPlan": "Zrušiť plán"
+  },
+  "cancel": {
+    "title": "Zrušiť plán {plan}?",
+    "keepUntil": "Plán {plan} máte do {date}, potom prejdete na Free. Nič sa neodstráni.",
+    "loseLegend": "Na Free nie je zahrnuté",
+    "reasonLegend": "Prečo plán rušíte? <muted>(nepovinné)</muted>",
+    "reasons": {
+      "too_expensive": "Príliš drahé",
+      "unused": "Používam ho málo",
+      "missing_features": "Niečo mi chýba",
+      "switched_service": "Prechádzam inam",
+      "temporary": "Len na krátky čas",
+      "other": "Niečo iné"
+    },
+    "detailLabel": "Čo by sme mohli robiť lepšie? <muted>(nepovinné)</muted>",
+    "detailPlaceholder": "Stačí veta či dve. Čítame každú odpoveď.",
+    "keep": "Ponechať môj plán",
+    "confirm": "Zrušiť plán",
+    "cancelling": "Ruší sa",
+    "doneTitle": "Váš plán je zrušený",
+    "doneBody": "Plán {plan} máte do {date}. Rozmysleli ste si to? Plán môžete ponechať kedykoľvek do tohto dátumu.",
+    "done": "Hotovo",
+    "kept": "Plán {plan} si ponechávate. Obnoví sa ako zvyčajne."
   }
 }

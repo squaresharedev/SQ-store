@@ -1,0 +1,165 @@
+{
+  "metadata": {
+    "title": "Réductions"
+  },
+  "page": {
+    "title": "Réductions",
+    "subtitle": "Organisez une promotion, ou partagez un code et voyez quels canaux génèrent des commandes.",
+    "create": "Créer une réduction"
+  },
+  "empty": {
+    "title": "Pas encore de réductions",
+    "hint": "Une promotion baisse vos prix pour tout le monde, aussi longtemps que vous le souhaitez. Un code est destiné aux personnes avec qui vous le partagez, et vous indique d'où viennent vos acheteurs.",
+    "hintReadOnly": "Les propriétaires et les éditeurs peuvent créer des réductions ici."
+  },
+  "terms": {
+    "percentEach": "{percent} % sur chaque article",
+    "amountEach": "{amount} sur chaque article",
+    "percentOrder": "{percent} % sur la commande",
+    "amountOrder": "{amount} sur la commande",
+    "allProducts": "Tous les produits",
+    "someProducts": "{count, plural, one {# produit} other {# produits}}",
+    "kindCode": "Code de réduction",
+    "kindAutomatic": "Promotion automatique",
+    "status": {
+      "scheduled": "Planifiée",
+      "active": "En cours",
+      "paused": "Désactivée",
+      "used_up": "Épuisée",
+      "ended": "Terminée"
+    }
+  },
+  "performance": {
+    "title": "Résultats de vos réductions",
+    "orders": "Commandes avec une réduction",
+    "revenue": "Chiffre d'affaires de ces commandes",
+    "given": "Accordé en réductions",
+    "none": "Rien pour l'instant",
+    "channelsTitle": "Commandes par canal",
+    "channelsDescription": "Les codes comptent sous le canal où vous les avez partagés, ou sous le code lui-même si vous n'en avez pas nommé un.",
+    "channelsEmpty": "Pas encore de commandes avec une réduction.",
+    "automatic": "Promotions automatiques",
+    "series": "Commandes"
+  },
+  "list": {
+    "title": "Vos réductions",
+    "none": "Pas de réductions pour l'instant. Les réductions supprimées continuent de comptabiliser leurs commandes ci-dessus.",
+    "channel": "Partagé sur {channel}",
+    "startsOn": "Démarre le {date}",
+    "endsOn": "Se termine le {date}",
+    "ended": "Terminée le {date}",
+    "noEnd": "Sans date de fin",
+    "orders": "{orders, plural, =0 {Pas encore de commandes} one {# commande} other {# commandes}}",
+    "uses": "{uses} sur {limit} utilisations",
+    "switchLabel": "Activé",
+    "edit": "Modifier",
+    "endNow": "Terminer maintenant",
+    "delete": "Supprimer",
+    "copy": {
+      "copy": "Copier le code",
+      "copied": "Code copié",
+      "failed": "Impossible de copier le code. Sélectionnez-le et copiez-le manuellement."
+    }
+  },
+  "confirmDelete": {
+    "title": "Supprimer cette réduction ?",
+    "body": "Elle cesse de s'appliquer immédiatement. Les commandes qu'elle a déjà générées restent comptabilisées.",
+    "confirm": "Supprimer la réduction"
+  },
+  "confirmEnd": {
+    "title": "Terminer cette promotion maintenant ?",
+    "body": "Les prix reviennent à la normale immédiatement. Pour la relancer plus tard, créez une nouvelle promotion.",
+    "confirm": "Terminer la promotion"
+  },
+  "toast": {
+    "deleted": "Réduction supprimée.",
+    "ended": "Promotion terminée.",
+    "switchedOn": "Code activé.",
+    "switchedOff": "Code désactivé."
+  },
+  "form": {
+    "newTitle": "Nouvelle réduction",
+    "editTitle": "Modifier la réduction",
+    "back": "Retour aux réductions",
+    "kind": {
+      "title": "Quel type de réduction ?",
+      "code": "Code de réduction",
+      "codeHint": "Les acheteurs le saisissent à la caisse. Partagez-le sur Instagram, dans une newsletter ou avec un créateur, et voyez quel canal vend le plus.",
+      "automatic": "Promotion automatique",
+      "automaticHint": "Tout le monde voit le prix réduit sur vos pages produit. Aucun code nécessaire.",
+      "fixed": "Le type d'une réduction ne peut pas changer. Pour en changer, créez-en une nouvelle."
+    },
+    "code": {
+      "title": "Le code",
+      "description": "Ce que les acheteurs saisissent à la caisse.",
+      "label": "Le code",
+      "generate": "Générer",
+      "hint": "3 à 24 lettres ou chiffres. Les acheteurs peuvent le saisir en majuscules ou non."
+    },
+    "channel": {
+      "label": "Canal (facultatif)",
+      "hint": "L'endroit où vous partagerez ce code, pour voir quel canal génère des commandes.",
+      "suggestions": "Canaux suggérés",
+      "newsletter": "Newsletter",
+      "creator": "Créateur"
+    },
+    "value": {
+      "title": "Réduction",
+      "each": "Déduit du prix de chaque article.",
+      "order": "Déduit du montant des articles de la commande. La livraison n'est pas réduite.",
+      "percent": "Pourcentage",
+      "amount": "Montant fixe",
+      "percentLabel": "Pourcentage de réduction",
+      "amountLabel": "Montant de la réduction",
+      "currencyHint": "S'applique uniquement aux produits dans cette devise."
+    },
+    "products": {
+      "title": "S'applique à",
+      "all": "Tous les produits",
+      "some": "Produits spécifiques",
+      "summary": "{count, plural, =0 {Choisir des produits} one {# produit choisi} other {# produits choisis}}",
+      "search": "Rechercher des produits",
+      "none": "Aucun produit ne correspond."
+    },
+    "schedule": {
+      "title": "Quand",
+      "timeZone": "Les heures sont dans votre fuseau horaire ({zone}).",
+      "starts": "Début",
+      "ends": "Fin",
+      "now": "Maintenant",
+      "later": "Plus tard",
+      "noEnd": "Sans fin",
+      "onDate": "À une date",
+      "date": "La date",
+      "time": "Heure",
+      "started": "Démarré le {date}",
+      "runFor": "Durée",
+      "preset": {
+        "day": "1 jour",
+        "threeDays": "3 jours",
+        "week": "1 semaine",
+        "month": "1 mois"
+      }
+    },
+    "limit": {
+      "title": "Limites",
+      "label": "Limiter le nombre de commandes pouvant l'utiliser",
+      "count": "Nombre de commandes"
+    },
+    "enabled": "Code activé",
+    "locked": "Cette promotion a démarré, seule sa date de fin peut changer. Pour modifier autre chose, terminez-la et créez une nouvelle promotion.",
+    "summary": {
+      "title": "Résumé",
+      "startsNow": "Démarre maintenant",
+      "starts": "Démarre le {date}",
+      "ends": "Se termine le {date}",
+      "noEnd": "Sans date de fin",
+      "example": "Exemple : {title} à {regular} coûte {now}."
+    },
+    "create": "Créer la réduction",
+    "save": "Enregistrer les modifications",
+    "saving": "Enregistrement",
+    "created": "Réduction créée.",
+    "saved": "Réduction enregistrée."
+  }
+}

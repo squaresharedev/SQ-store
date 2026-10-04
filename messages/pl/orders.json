@@ -17,7 +17,8 @@
   "channel": {
     "embed": "Osadzenie",
     "marketplace": "Marketplace",
-    "direct": "Twoje strony"
+    "direct": "Twoje strony",
+    "button": "Przycisk WWW"
   },
   "empty": {
     "filteredTitle": "Żadne zamówienie nie pasuje do tych filtrów",
@@ -61,7 +62,8 @@
     "datePlaceholder": "dowolne daty",
     "sort": "sortuj",
     "sortAriaLabel": "Sortuj zamówienia",
-    "clearFilters": "wyczyść filtry"
+    "clearFilters": "wyczyść filtry",
+    "allChannels": "Wszystkie kanały"
   },
   "sort": {
     "newest": "Od najnowszych",
@@ -140,7 +142,11 @@
     },
     "emailBuyer": "Wyślij e-mail do kupującego",
     "mailSubject": "Twoje zamówienie {number}",
-    "withdrawnShipWarning": "Kupujący odstąpił od tego zakupu. Wyślij zamówienie tylko wtedy, gdy uzgodniono to z kupującym."
+    "withdrawnShipWarning": "Kupujący odstąpił od tego zakupu. Wyślij zamówienie tylko wtedy, gdy uzgodniono to z kupującym.",
+    "discount": "Rabat",
+    "discountSale": "Obniżka, -{amount}",
+    "discountCode": "Kod {code}, -{amount}",
+    "discountCodeOutdone": "Użyto kodu {code}, ale cena promocyjna była niższa"
   },
   "actions": {
     "refundNeedsStripe": "Zwroty wymagają połączenia ze Stripe.",
@@ -210,7 +216,8 @@
       "openShip": "Gdy wyślesz, oznacz zamówienie jako wysłane, a my powiadomimy kupującego: {url}",
       "openDigital": "Zobacz zamówienie: {url}",
       "gift": "Wiadomość na prezent do dołączenia: {message}",
-      "number": "Numer zamówienia: {number}"
+      "number": "Numer zamówienia: {number}",
+      "discountCode": "Kod rabatowy: {code}"
     },
     "shipped": {
       "subject": "Twoje zamówienie z {store} jest w drodze",
@@ -245,7 +252,8 @@
       "withdrawalDigital": "Poprosiłeś o natychmiastowe pobranie i zgodziłeś się, że Twoje prawo do odstąpienia wygasa po jego rozpoczęciu.",
       "guarantee": "Masz również ustawową gwarancję zgodności przez co najmniej dwa lata.",
       "questions": "Pytania? Odpowiedz na tego e-maila, aby skontaktować się z {store}.",
-      "footer": "Wysłane przez Square Share w imieniu {store}. Square Share dostarcza oprogramowanie sklepu i nie jest stroną tej sprzedaży."
+      "footer": "Wysłane przez Square Share w imieniu {store}. Square Share dostarcza oprogramowanie sklepu i nie jest stroną tej sprzedaży.",
+      "discount": "Rabat ({code}): -{amount}"
     },
     "withdrawal": {
       "buyerSubject": "Twoje odstąpienie od zamówienia {number} w {store}",

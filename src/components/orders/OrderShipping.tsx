@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, useTransition, type FormEvent } from "react";
-import { CircleCheck } from "lucide-react";
+import { CircleCheck, MailX } from "lucide-react";
 import { motion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { TruckIcon, useIconHoverProps } from "@/components/ui/action-icons";
 import { Button, buttonClassName } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/CopyButton";
+import { InfoTip } from "@/components/ui/InfoTip";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, type SelectOption } from "@/components/ui/select";
@@ -140,6 +141,8 @@ export function OrderShipping({
   }
 
   const hasTracking = tracking.trim() !== "";
+  // Whether the buyer will really be emailed when this ships.
+  const tellsBuyer = mailOn && order.buyerEmail !== null;
   const carrierOptions: SelectOption<CarrierChoice>[] = [
     { value: NO_CARRIER, label: t("ship.carrierOther") },
     ...CARRIER_OPTIONS,
@@ -192,7 +195,13 @@ export function OrderShipping({
   const form = (
     <form onSubmit={submit} noValidate className="flex flex-col gap-3" data-order-ship-form="">
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor={inputId}>{t("ship.trackingLabel")}</Label>
+        <div className="flex items-center gap-1.5">
+          <Label htmlFor={inputId}>{t("ship.trackingLabel")}</Label>
+          {/* The reassurance (the buyer is emailed) waits behind a "?": it is
+              the expected case, so it need not be read. Only the cases that
+              ask something of the seller are printed (below). */}
+          {!shipped && tellsBuyer && <InfoTip label={t("ship.tellsBuyer")}>{t("ship.tellsBuyer")}</InfoTip>}
+        </div>
         <Input
           ref={inputRef}
           id={inputId}
@@ -205,16 +214,14 @@ export function OrderShipping({
           invalid={error !== null}
           disabled={pending}
         />
-        {!shipped && (
-          <p className={helpTextClass}>
-            {/* Only promise mail that will be sent. Where this deployment has
-                no email switched on the buyer is NOT told, and saying "we'll
-                email the buyer" would leave both of them waiting. */}
-            {!mailOn
-              ? t("ship.mailOff")
-              : order.buyerEmail
-                ? t("ship.tellsBuyer")
-                : t("ship.noBuyerEmail")}
+        {!shipped && !tellsBuyer && (
+          // Only promise mail that will be sent. Where this deployment has no
+          // email switched on, or the order has no address to send to, the
+          // buyer is NOT told, and saying "we'll email the buyer" would leave
+          // both of them waiting. This one IS printed: the seller has to act.
+          <p className="flex items-start gap-1.5 font-inter text-sm text-muted-foreground">
+            <MailX className="mt-0.5 size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+            {!mailOn ? t("ship.mailOff") : t("ship.noBuyerEmail")}
           </p>
         )}
         {!shipped && withdrawn && (
@@ -224,7 +231,10 @@ export function OrderShipping({
         )}
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor={carrierId}>{t("ship.carrierLabel")}</Label>
+        <div className="flex items-center gap-1.5">
+          <Label htmlFor={carrierId}>{t("ship.carrierLabel")}</Label>
+          <InfoTip label={t("ship.carrierHint")}>{t("ship.carrierHint")}</InfoTip>
+        </div>
         <Select
           id={carrierId}
           value={hasTracking ? carrier : NO_CARRIER}
@@ -232,7 +242,6 @@ export function OrderShipping({
           onChange={setCarrier}
           disabled={pending || !hasTracking}
         />
-        <p className={helpTextClass}>{t("ship.carrierHint")}</p>
       </div>
       {error && <ActionErrorNotice error={error} variant="inline" />}
       {/* The main button takes all the width it can; Cancel keeps its own size

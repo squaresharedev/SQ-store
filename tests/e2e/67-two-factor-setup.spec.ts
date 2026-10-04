@@ -163,7 +163,8 @@ test.describe("two-factor setup", () => {
     await page.getByRole("button", { name: "Set up two-factor authentication" }).click();
     const dialog = page.getByRole("dialog");
     await chooseAuthenticatorApp(dialog);
-    await expect(dialog.getByText(/signed in a moment ago/i)).toBeVisible();
+    // Nothing is asked, and nothing needs saying about that: the form is
+    // simply the choice and Continue.
     await expect(dialog.getByLabel(/password/i)).toHaveCount(0);
     await dialog.getByRole("button", { name: "Continue" }).click();
     await expect(dialog.getByLabel("Setup key", { exact: true })).toBeVisible({ timeout: 20_000 });

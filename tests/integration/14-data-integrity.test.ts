@@ -277,4 +277,32 @@ describe("currency + money constraints", () => {
       expect(failed, `${channel}/${status}`).toBe(true);
     }
   });
+
+  it("both channel CHECKs take the website button, so its visits and sales are kept", async () => {
+    await asService((q) =>
+      q.query(
+        `insert into public.orders (seller_id, channel, status, amount_cents, product_title, product_price_cents)
+         values ($1, 'button', 'paid', 100, 'x', 100)`,
+        [seller.id],
+      ),
+    );
+    await asService((q) =>
+      q.query(
+        `insert into public.storefront_signals (account_id, kind, channel) values ($1, 'product_view', 'button')`,
+        [seller.id],
+      ),
+    );
+    let failed = false;
+    try {
+      await asService((q) =>
+        q.query(
+          `insert into public.storefront_signals (account_id, kind, channel) values ($1, 'product_view', 'telepathy')`,
+          [seller.id],
+        ),
+      );
+    } catch {
+      failed = true;
+    }
+    expect(failed, "signals still refuse a channel outside the list").toBe(true);
+  });
 });

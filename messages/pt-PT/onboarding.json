@@ -109,7 +109,8 @@
       "nameAlternative": "Ou o seu nome completo, se vende em nome próprio.",
       "addressPlaceholder": "p. ex. Rua do Mercado, 12\n1200-109 Lisboa\nPortugal",
       "emailPlaceholder": "p. ex. ola@asualoja.example",
-      "emailHelp": "Para onde os compradores lhe escrevem. Pode ser diferente do seu e-mail de início de sessão."
+      "emailHelp": "Para onde os compradores lhe escrevem. Pode ser diferente do seu e-mail de início de sessão.",
+      "emailTipLabel": "Sobre este e-mail"
     },
     "confirm": {
       "goLive": "As suas páginas de produto ficam publicadas assim que o confirmar."
@@ -155,7 +156,7 @@
     "shortcut": "Atalho: <kbd>{shortcut}</kbd>",
     "skipTour": "Saltar a visita",
     "next": "Seguinte",
-    "openingPage": "{page, select, overview {A abrir Visão geral…} products {A abrir Produtos…} storefront {A abrir Montra…} orders {A abrir Encomendas…} analytics {A abrir Estatísticas…} payments {A abrir Pagamentos…} settings {A abrir Definições…} sampleStorefront {A abrir Montra de exemplo…} other {A abrir…}}"
+    "openingPage": "{page, select, overview {A abrir Visão geral…} products {A abrir Produtos…} storefront {A abrir Montra…} orders {A abrir Encomendas…} discounts {A abrir Descontos…} analytics {A abrir Estatísticas…} payments {A abrir Pagamentos…} settings {A abrir Definições…} sampleStorefront {A abrir Montra de exemplo…} other {A abrir…}}"
   },
   "tourReplay": {
     "title": "Visita guiada",

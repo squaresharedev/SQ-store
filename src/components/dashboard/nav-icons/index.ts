@@ -26,6 +26,7 @@ export { OverviewIcon } from "./OverviewIcon";
 export { ProductsIcon } from "./ProductsIcon";
 export { StorefrontIcon } from "./StorefrontIcon";
 export { OrdersIcon } from "./OrdersIcon";
+export { DiscountsIcon } from "./DiscountsIcon";
 export { AnalyticsIcon } from "./AnalyticsIcon";
 export { PaymentsIcon } from "./PaymentsIcon";
 export { SettingsIcon } from "./SettingsIcon";

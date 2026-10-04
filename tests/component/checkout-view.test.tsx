@@ -11,6 +11,13 @@ import {
 import type { BuyerOrder, CheckoutPageData } from "@/types/checkout";
 import type { ProductPageProduct } from "@/types/product";
 
+// The form re-reads the page (router.refresh) when the server says the price
+// changed while it was open.
+const refresh = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh, push: vi.fn(), replace: vi.fn() }),
+}));
+
 afterEach(cleanup);
 
 const POLICY = {
@@ -26,6 +33,7 @@ function product(overrides: Partial<ProductPageProduct> = {}): ProductPageProduc
     description: "",
     priceCents: 2400,
     currency: "EUR",
+    sale: null,
     purchaseUrl: null,
     shippingProfileId: null,
     images: [],
@@ -163,7 +171,7 @@ describe("CheckoutView", () => {
 describe("CheckoutView page photo", () => {
   it("paints the seller's photo behind the page, and nothing without one", () => {
     const withPhoto = page();
-    withPhoto.storefront.pagePhotoUrl = "https://cdn.example/bg.webp";
+    withPhoto.storefront.pagePhoto = { url: "https://cdn.example/bg.webp", overlay: true };
     const { unmount } = render(<CheckoutView page={withPhoto} mode="public" attemptId={ATTEMPT} provider="test" />);
     const photo = document.querySelector<HTMLElement>("[data-page-photo]");
     expect(photo).not.toBeNull();
@@ -171,6 +179,15 @@ describe("CheckoutView page photo", () => {
     unmount();
     render(<CheckoutView page={page()} mode="public" attemptId={ATTEMPT} provider="test" />);
     expect(document.querySelector("[data-page-photo]")).toBeNull();
+  });
+});
+
+describe("page photo overlay", () => {
+  it("draws the photo plain when the overlay is off", () => {
+    const withPhoto = page();
+    withPhoto.storefront.pagePhoto = { url: "https://cdn.example/bg.webp", overlay: false };
+    render(<CheckoutView page={withPhoto} mode="public" attemptId={ATTEMPT} provider="test" />);
+    expect(document.querySelector<HTMLElement>("[data-page-photo]")!.style.backgroundImage).not.toContain("rgba");
   });
 });
 
@@ -222,9 +239,129 @@ describe("OrderStatusView tracking", () => {
     expect(within(shippedStep()).queryByRole("link")).toBeNull();
   });
 
+  it("paints the thank-you page's own photo behind it", () => {
+    const storefront = { ...page().storefront, pagePhoto: { url: "https://cdn.example/thanks.webp", overlay: true } };
+    render(<OrderStatusView page={{ storefront, order: order() }} mode="public" placed={false} />);
+    expect(document.querySelector<HTMLElement>("[data-page-photo]")!.style.backgroundImage).toContain("thanks.webp");
+  });
+
   it("offers nothing to follow before the parcel has gone", () => {
     view({ fulfilment: "unfulfilled", shippedAt: null, trackingNumber: null });
     expect(document.querySelector("[data-order-track]")).toBeNull();
     expect(shippedStep()).toHaveTextContent("You'll get an email when it's sent.");
+  });
+});
+
+describe("checkout discounts", () => {
+  /** A sale: 20% off, announced against a proven 30-day price. */
+  const SALE = { regularPriceCents: 2400, priorPriceCents: 2400, percentOff: 20, endsAt: null };
+  const terms = (percentOff: number) => ({ code: "SUMMER10", value: { type: "percent", percentOff } });
+
+  /** Answers the code check with `check`, and records every order body. */
+  function stubFetch(check: unknown, order: unknown = { ok: false, error: "failed" }) {
+    const orders: Record<string, unknown>[] = [];
+    const spy = vi.spyOn(globalThis, "fetch").mockImplementation(async (url, init) => {
+      if (String(url).endsWith("/discount")) return new Response(JSON.stringify(check), { status: 200 });
+      orders.push(JSON.parse(String(init?.body)));
+      return new Response(JSON.stringify(order), { status: 409 });
+    });
+    return { orders, restore: () => spy.mockRestore() };
+  }
+
+  async function applyCode(user: ReturnType<typeof userEvent.setup>, code: string) {
+    await user.click(screen.getByRole("button", { name: "Add a discount code" }));
+    await user.type(screen.getByLabelText("Discount code"), code);
+    await user.click(screen.getByRole("button", { name: "Apply" }));
+  }
+
+  async function fillAddress(user: ReturnType<typeof userEvent.setup>) {
+    await user.type(screen.getByLabelText("Email"), "aoife@example.test");
+    await user.type(screen.getByLabelText("Full name"), "Aoife Byrne");
+    await user.type(screen.getByLabelText("Address", { exact: true }), "12 Harbour Road");
+    await user.type(screen.getByLabelText("Town or city"), "Dublin");
+  }
+
+  it("applies a code, takes it off the items, and sends it with the total the buyer saw", async () => {
+    const user = userEvent.setup();
+    const fetches = stubFetch({ ok: true, terms: terms(10) });
+    render(<CheckoutView page={page()} mode="public" attemptId={ATTEMPT} provider="test" />);
+    await applyCode(user, "summer10");
+
+    expect(await screen.findByText("SUMMER10 applied.")).toBeInTheDocument();
+    const line = document.querySelector("[data-checkout-line='discount']");
+    expect(line).toHaveTextContent("Discount (SUMMER10)");
+    expect(line).toHaveTextContent("-€2.40");
+    // 24.00 - 2.40 + 4.50 delivery.
+    expect(payButton()).toHaveTextContent("Pay €26.10");
+
+    await fillAddress(user);
+    await user.click(payButton());
+    await vi.waitFor(() => expect(fetches.orders).toHaveLength(1));
+    expect(fetches.orders[0]).toMatchObject({ discountCode: "SUMMER10", expectedTotalCents: 2610 });
+    fetches.restore();
+  });
+
+  it("says plainly when a code cannot be used, and charges as before", async () => {
+    const user = userEvent.setup();
+    const fetches = stubFetch({ ok: false, error: "discount_invalid" });
+    render(<CheckoutView page={page()} mode="public" attemptId={ATTEMPT} provider="test" />);
+    await applyCode(user, "nope10");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("This code can't be used for this order.");
+    expect(screen.getByLabelText("Discount code")).toHaveAttribute("aria-invalid", "true");
+    expect(document.querySelector("[data-checkout-line='discount']")).toBeNull();
+    expect(payButton()).toHaveTextContent("Pay €28.50");
+    fetches.restore();
+  });
+
+  it("applies the code on Enter instead of placing the order", async () => {
+    const user = userEvent.setup();
+    const fetches = stubFetch({ ok: true, terms: terms(10) });
+    render(<CheckoutView page={page()} mode="public" attemptId={ATTEMPT} provider="test" />);
+    await user.click(screen.getByRole("button", { name: "Add a discount code" }));
+    await user.type(screen.getByLabelText("Discount code"), "summer10{Enter}");
+    expect(await screen.findByText("SUMMER10 applied.")).toBeInTheDocument();
+    expect(fetches.orders).toHaveLength(0);
+    fetches.restore();
+  });
+
+  it("keeps the sale price when the code does no better, and says so", async () => {
+    const user = userEvent.setup();
+    const fetches = stubFetch({ ok: true, terms: terms(10) });
+    render(<CheckoutView page={page({ priceCents: 1920, sale: SALE })} mode="public" attemptId={ATTEMPT} provider="test" />);
+    // The card announces the sale like the product page.
+    expect(document.querySelector("[data-checkout-unit-price='1920']")).toHaveTextContent("Was €24.00, now €19.20");
+    await applyCode(user, "summer10");
+
+    expect(await screen.findByText("SUMMER10 works, but your sale price is already lower, so we kept it.")).toBeInTheDocument();
+    expect(document.querySelector("[data-checkout-line='discount']")).toBeNull();
+    expect(payButton()).toHaveTextContent("Pay €23.70");
+    fetches.restore();
+  });
+
+  it("swaps the sale for a code that does better, from the regular price", async () => {
+    const user = userEvent.setup();
+    const fetches = stubFetch({ ok: true, terms: terms(30) });
+    render(<CheckoutView page={page({ priceCents: 1920, sale: SALE })} mode="public" attemptId={ATTEMPT} provider="test" />);
+    await applyCode(user, "summer10");
+
+    expect(await screen.findByText("SUMMER10 applied.")).toBeInTheDocument();
+    expect(document.querySelector("[data-checkout-unit-price='2400']")).not.toBeNull();
+    expect(document.querySelector("[data-checkout-line='discount']")).toHaveTextContent("-€7.20");
+    // 24.00 - 7.20 + 4.50.
+    expect(payButton()).toHaveTextContent("Pay €21.30");
+    fetches.restore();
+  });
+
+  it("re-reads the page when the price changed while it was open", async () => {
+    const user = userEvent.setup();
+    refresh.mockClear();
+    const fetches = stubFetch(null, { ok: false, error: "price_changed" });
+    render(<CheckoutView page={page()} mode="public" attemptId={ATTEMPT} provider="test" />);
+    await fillAddress(user);
+    await user.click(payButton());
+    expect(await screen.findByRole("alert")).toHaveTextContent("The price changed while this page was open");
+    expect(refresh).toHaveBeenCalled();
+    fetches.restore();
   });
 });

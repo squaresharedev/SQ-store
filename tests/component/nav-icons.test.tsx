@@ -5,6 +5,7 @@ import {
   AnalyticsIcon,
   DiscoverIcon,
   OrdersIcon,
+  DiscountsIcon,
   OverviewIcon,
   PaymentsIcon,
   ProductsIcon,
@@ -35,6 +36,7 @@ const ICONS = [
   ["Products", ProductsIcon],
   ["Storefront", StorefrontIcon],
   ["Orders", OrdersIcon],
+  ["Discounts", DiscountsIcon],
   ["Analytics", AnalyticsIcon],
   ["Payments", PaymentsIcon],
   ["Settings", SettingsIcon],
@@ -122,6 +124,7 @@ describe("Sidebar with animated icons", () => {
       ["Products", "/products"],
       ["Storefront", "/storefront"],
       ["Orders", "/orders"],
+      ["Discounts", "/discounts"],
       ["Analytics", "/analytics"],
       ["Payments", "/payments"],
       ["Settings", "/settings"],
@@ -130,11 +133,11 @@ describe("Sidebar with animated icons", () => {
       expect(link).toHaveAttribute("href", href);
       expect(link.querySelector("svg")).not.toBeNull();
     }
-    // Those seven and nothing else. The rail used to carry a permanently
+    // Those eight and nothing else. The rail used to carry a permanently
     // disabled "Discover / Coming soon" row: a roadmap entry occupying a slot
     // in navigation a seller uses dozens of times a day. Asserting the exact
     // set, rather than just the rows we want, is what stops the next one.
-    expect(within(nav).getAllByRole("link")).toHaveLength(7);
+    expect(within(nav).getAllByRole("link")).toHaveLength(8);
   });
 
   it("marks the active route, and carries no dead rows", () => {

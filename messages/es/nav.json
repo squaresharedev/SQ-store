@@ -27,6 +27,10 @@
     "settings": {
       "label": "Configuración",
       "description": "Tus datos de vendedor, condiciones de envío y cuenta."
+    },
+    "discounts": {
+      "label": "Descuentos",
+      "description": "Crea rebajas y comparte códigos de descuento."
     }
   },
   "settings": {

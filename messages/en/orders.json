@@ -17,7 +17,8 @@
   "channel": {
     "embed": "Embed",
     "marketplace": "Marketplace",
-    "direct": "Your pages"
+    "direct": "Your pages",
+    "button": "Website button"
   },
   "empty": {
     "filteredTitle": "No orders match these filters",
@@ -61,7 +62,8 @@
     "datePlaceholder": "any dates",
     "sort": "sort",
     "sortAriaLabel": "Sort orders",
-    "clearFilters": "clear filters"
+    "clearFilters": "clear filters",
+    "allChannels": "All channels"
   },
   "sort": {
     "newest": "Newest first",
@@ -140,7 +142,11 @@
     },
     "emailBuyer": "Email the buyer",
     "mailSubject": "Your order {number}",
-    "withdrawnShipWarning": "The buyer has withdrawn from this purchase. Ship it only if you've agreed that with them."
+    "withdrawnShipWarning": "The buyer has withdrawn from this purchase. Ship it only if you've agreed that with them.",
+    "discount": "Discount",
+    "discountSale": "Sale, {amount} off",
+    "discountCode": "Code {code}, {amount} off",
+    "discountCodeOutdone": "Code {code} used, but the sale price was lower"
   },
   "actions": {
     "refundNeedsStripe": "Refunds require Stripe to be connected.",
@@ -210,7 +216,8 @@
       "openShip": "Once it's on its way, mark it shipped here and we'll tell the buyer: {url}",
       "openDigital": "See the order: {url}",
       "gift": "Gift message to include: {message}",
-      "number": "Order number: {number}"
+      "number": "Order number: {number}",
+      "discountCode": "Discount code: {code}"
     },
     "shipped": {
       "subject": "Your order from {store} is on its way",
@@ -245,7 +252,8 @@
       "withdrawalDigital": "You asked for the download straight away and agreed that your right to withdraw ends once it starts.",
       "guarantee": "You also have the legal guarantee of conformity for at least two years.",
       "questions": "Questions? Reply to this email to reach {store}.",
-      "footer": "Sent by Square Share on behalf of {store}. Square Share provides the shop software and is not a party to this sale."
+      "footer": "Sent by Square Share on behalf of {store}. Square Share provides the shop software and is not a party to this sale.",
+      "discount": "Discount ({code}): -{amount}"
     },
     "withdrawal": {
       "buyerSubject": "Your withdrawal from order {number} with {store}",

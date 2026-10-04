@@ -1,13 +1,18 @@
 import { useTranslations } from "next-intl";
 import { SIGNAL_SOURCES } from "@/lib/analytics/sources";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cardClass } from "@/components/ui/surface-styles";
+import { cardClass, pageGutterClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
+import { heroChartHeightClass } from "@/components/analytics/chart-layout";
 
 /**
  * Module-level loading skeleton mirroring the analytics layout: the range
- * controls, the sales section (six tiles, one full-width chart, three two-up
- * rows) and then one band per registered signal source.
+ * controls, the sales section (the revenue hero, four tiles, two two-up rows
+ * and the full-width status card) and then one band per registered signal
+ * source.
+ *
+ * Like the page, it has no gutters of its own at the sides: each band puts
+ * itself in the page column, and the hero's box is held at full width.
  *
  * The signal bands are DERIVED from SIGNAL_SOURCES rather than hard-coded, for
  * the same reason the page itself is: a source added to the registry that then
@@ -21,35 +26,53 @@ export function AnalyticsSkeleton() {
     <div className="flex flex-col gap-10" aria-hidden="true">
       <span className="sr-only">{t("srLoading")}</span>
 
-      <div className="flex flex-col gap-4">
-        {/* Range controls placeholder */}
+      {/* Range controls placeholder */}
+      <div className={pageGutterClass}>
         <Skeleton className="h-9 w-64" />
+      </div>
 
-        {/* Headline tiles */}
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
-          {Array.from({ length: 6 }, (_, i) => (
-            <div key={i} className={cn(cardClass, "flex flex-col gap-3 p-4")}>
-              <Skeleton className="h-3 w-16" />
-              <Skeleton className="h-8 w-24" />
-            </div>
-          ))}
+      <div className="flex flex-col gap-4">
+        {/* Section heading */}
+        <div className={pageGutterClass}>
+          <Skeleton className="h-6 w-40" />
         </div>
 
-        {/* Full-width chart card */}
-        <div className={cn(cardClass, "p-4")}>
-          <Skeleton className="h-64" />
+        {/* The revenue hero: its label and figure, over the height its chart
+            will take. No card, because the hero has none. */}
+        <div className={heroChartHeightClass}>
+          <div className={cn(pageGutterClass, "flex flex-col gap-3")}>
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-10 w-48" />
+          </div>
         </div>
 
-        {/* Secondary chart pairs */}
-        {Array.from({ length: 3 }, (_, row) => (
-          <div key={row} className="grid gap-4 lg:grid-cols-2">
-            {Array.from({ length: 2 }, (_, i) => (
-              <div key={i} className={cn(cardClass, "p-4")}>
-                <Skeleton className="h-64" />
+        <div className={cn(pageGutterClass, "flex flex-col gap-4")}>
+          {/* Tiles */}
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {Array.from({ length: 4 }, (_, i) => (
+              <div key={i} className={cn(cardClass, "flex flex-col gap-3 p-4")}>
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-8 w-24" />
               </div>
             ))}
           </div>
-        ))}
+
+          {/* Chart pairs */}
+          {Array.from({ length: 2 }, (_, row) => (
+            <div key={row} className="grid gap-4 lg:grid-cols-2">
+              {Array.from({ length: 2 }, (_, i) => (
+                <div key={i} className={cn(cardClass, "p-4")}>
+                  <Skeleton className="h-64" />
+                </div>
+              ))}
+            </div>
+          ))}
+
+          {/* Full-width status card */}
+          <div className={cn(cardClass, "p-4")}>
+            <Skeleton className="h-64" />
+          </div>
+        </div>
       </div>
 
       {/* Only the sources shown to EVERY seller. Which of the rest appear
@@ -62,7 +85,7 @@ export function AnalyticsSkeleton() {
         const tiles = source.carriesValue ? 3 : 2;
         const pairs = Math.max(source.panels.length - 1, 1);
         return (
-          <div key={source.id} className="flex flex-col gap-4">
+          <div key={source.id} className={cn(pageGutterClass, "flex flex-col gap-4")}>
             <Skeleton className="h-6 w-40" />
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               {Array.from({ length: tiles }, (_, i) => (

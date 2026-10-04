@@ -51,3 +51,22 @@ export function currencySymbol(currency: string, locale: Locale): string {
     return currency;
   }
 }
+
+/**
+ * Whether the currency sign goes BEFORE the number in this language ("€1,000"
+ * in English) or after it ("1 000 €" in Czech or German): where a field that
+ * shows the sign beside its digits should put it.
+ */
+export function currencySymbolLeads(currency: string, locale: Locale): boolean {
+  try {
+    const parts = numberFormat(intlTag(locale, ENGLISH_PRICE_LOCALE), { style: "currency", currency }).formatToParts(1);
+    return parts.findIndex((part) => part.type === "currency") < parts.findIndex((part) => part.type === "integer");
+  } catch {
+    return true;
+  }
+}
+
+/** A whole number grouped the reader's way ("10,000", "10 000"), no sign. */
+export function formatWholeNumber(value: number, locale: Locale): string {
+  return numberFormat(intlTag(locale, ENGLISH_PRICE_LOCALE), { maximumFractionDigits: 0 }).format(value);
+}

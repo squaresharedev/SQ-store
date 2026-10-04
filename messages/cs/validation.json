@@ -301,6 +301,11 @@
       "required": "Zadejte číslo objednávky.",
       "tooLong": "Toto číslo objednávky je příliš dlouhé.",
       "unsupported": "Toto číslo objednávky obsahuje nepodporované znaky."
+    },
+    "shareChannel": {
+      "required": "Pojmenujte kanál, nebo ho nechte prázdný.",
+      "tooLong": "Název kanálu musí mít nejvýše {maximum} znaků.",
+      "unsupported": "Název kanálu obsahuje nepodporované znaky."
     }
   },
   "email": {
@@ -360,7 +365,8 @@
     "factor": "Tato ověřovací aplikace není platná.",
     "reportTarget": "Tato položka není platná.",
     "moderationDecision": "Toto rozhodnutí není platné.",
-    "checkoutAttempt": "Tato relace pokladny vypršela. Načtěte stránku znovu a zkuste to."
+    "checkoutAttempt": "Tato relace pokladny vypršela. Načtěte stránku znovu a zkuste to.",
+    "product": "Tento produkt se nepodařilo najít."
   },
   "handle": {
     "username": "Uživatelské jméno musí mít 3 až 30 znaků a smí obsahovat jen písmena, číslice a podtržítka."
@@ -400,6 +406,21 @@
       "whole": "Limit pro dopravu zdarma musí být celé číslo centů.",
       "tooSmall": "Limit pro dopravu zdarma nemůže být záporný.",
       "tooBig": "Limit pro dopravu zdarma nesmí překročit {maximum} centů."
+    },
+    "percentOff": {
+      "whole": "Procentuální hodnota musí být celé číslo.",
+      "tooSmall": "Procento musí být alespoň {minimum} %.",
+      "tooBig": "Procento může být nejvýše {maximum} %."
+    },
+    "amountOff": {
+      "whole": "Částka musí být celé číslo centů.",
+      "tooSmall": "Částka musí být větší než nula.",
+      "tooBig": "Částka je příliš velká."
+    },
+    "usageLimit": {
+      "whole": "Limit musí být celé číslo.",
+      "tooSmall": "Limit musí být alespoň {minimum}.",
+      "tooBig": "Limit může být nejvýše {maximum}."
     }
   },
   "list": {
@@ -410,6 +431,10 @@
     "destinationCountries": {
       "tooMany": "Destinace může zahrnovat nejvýše {maximum} zemí.",
       "duplicate": "Každá země se může v destinaci vyskytnout pouze jednou."
+    },
+    "discountProducts": {
+      "tooMany": "Vyberte nejvýše {maximum} produktů.",
+      "duplicate": "Každý produkt lze vybrat jen jednou."
     }
   },
   "settings": {
@@ -488,5 +513,18 @@
     "blocksTooMany": "Výloha může obsahovat nejvýše {maximum} bloků. Některé bloky odeberte, nebo výlohu rozdělte na dvě.",
     "blocksDuplicate": "Bloky v mřížce musí být jedinečné.",
     "blockOutsideCanvas": "Jeden z bloků leží mimo plátno."
+  },
+  "discountCode": {
+    "code": "Kód musí mít {min} až {max} písmen nebo číslic a může také obsahovat - nebo _."
+  },
+  "instant": {
+    "startsAt": "Zadejte platné datum a čas začátku.",
+    "endsAt": "Zadejte platné datum a čas konce."
+  },
+  "discount": {
+    "productsRequired": "Vyberte alespoň jeden produkt nebo uplatněte slevu na všechny produkty.",
+    "endBeforeStart": "Konec musí být po začátku.",
+    "startInPast": "Začátek nemůže být v minulosti. Zvolte pozdější čas nebo ho spusťte hned.",
+    "endInPast": "Konec nemůže být v minulosti."
   }
 }

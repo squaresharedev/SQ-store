@@ -25,14 +25,15 @@
     "intervalLabel": "Periodo di fatturazione",
     "month": "Mensile",
     "year": "Annuale",
-    "yearlySaving": "2 mesi gratis con il piano annuale",
     "pastDue": "L’ultimo pagamento del tuo piano {plan} non è andato a buon fine. Aggiorna la carta per mantenerlo.",
     "endsOn": "Il tuo piano {plan} termina il {date} e da quel momento il tuo negozio passa a Free. Non viene rimosso nulla.",
     "ownerOnly": "Solo il proprietario del negozio può cambiare il piano.",
     "soon": "In arrivo",
     "soonTitle": "I piani a pagamento arriveranno presto. Nel frattempo tutto ciò che c’è in Free continua a funzionare.",
     "finePrint": "I prezzi sono IVA esclusa. La commissione per vendita si applica alle vendite tramite il checkout di Square Share e viene calcolata sul prezzo dell’articolo, mai sulla spedizione. Le commissioni di elaborazione delle carte di Stripe si aggiungono a queste. Puoi annullare quando vuoi: mantieni il tuo piano fino alla fine del periodo che hai pagato.",
-    "unavailable": "Al momento non è possibile mostrare i piani. Aggiorna la pagina tra un istante."
+    "unavailable": "Al momento non è possibile mostrare i piani. Aggiorna la pagina tra un istante.",
+    "yearlyFree": "{count, plural, one {# mese gratis} many {# di mesi gratis} other {# mesi gratis}}",
+    "launchNote": "Un prezzo di lancio è un prezzo introduttivo: il prezzo di listino è quello mostrato barrato."
   },
   "card": {
     "perMonth": "/ mese",
@@ -46,7 +47,12 @@
     "upgrade": "Passa a {plan}",
     "switch": "Cambia in {plan}",
     "switchInterval": "{interval, select, year {Passa al piano annuale} other {Passa al piano mensile}}",
-    "moveToFree": "Passa a Free"
+    "moveToFree": "Passa a Free",
+    "regularPrice": "Prezzo di listino",
+    "launchPrice": "Prezzo di lancio",
+    "save": "Risparmia {percent}",
+    "launchExclVat": "Prezzo di lancio (di listino {regular}), IVA esclusa",
+    "launchBilledYearly": "{amount} fatturati una sola volta all’anno al prezzo di lancio (di listino {regular}), IVA esclusa"
   },
   "features": {
     "fee": "{rate} di commissione per vendita",
@@ -63,12 +69,10 @@
     "productsUnlimited": "Prodotti illimitati"
   },
   "calculator": {
-    "eyebrow": "Calcolatore",
     "title": "Quale piano ti costa meno?",
     "lead": "Scorri fino alle tue vendite in un mese. Ogni barra è il prezzo del piano più la sua commissione su quelle vendite.",
     "salesLabel": "Vendite al mese",
     "salesAria": "Le tue vendite al mese, in euro",
-    "fromYourSales": "Compilato in base alle vendite degli ultimi 30 giorni.",
     "perMonth": "al mese",
     "cheapest": "Con {sales} di vendite al mese, {plan} è quello che ti costa meno.",
     "legendPrice": "Prezzo del piano",
@@ -148,7 +152,7 @@
     "cta": "Passa a {plan}, {price} al mese",
     "compare": "Confronta tutti i piani",
     "topEyebrow": "Piano più alto",
-    "topTitle": "Tutto ciò che c’è in {plan} è tuo"
+    "topTitle": "Tutto ciò che c’è in <mark>{plan}</mark> è tuo"
   },
   "portal": {
     "opening": "Apertura di Stripe",
@@ -182,7 +186,10 @@
       "teamSeats": "Posti nel team, compreso il tuo: {used} su {cap}",
       "teamSeatsUnlimited": "Posti nel team, compreso il tuo: {used}, nessun limite",
       "products": "Prodotti: {used} su {cap}",
-      "productsUnlimited": "Prodotti: {used}, nessun limite"
+      "productsUnlimited": "Prodotti: {used}, nessun limite",
+      "left": "Ne restano {count}",
+      "over": "{count} in più",
+      "full": "Al limite"
     },
     "overLimit": "Oltre il limite di questo piano. Tutto continua a funzionare; rimuovine uno o passa a un piano superiore per aggiungerne altri.",
     "invoicesTitle": "Fatturazione e fatture",
@@ -191,6 +198,30 @@
     "noBilling": "Fatture e dati di pagamento compariranno qui quando passerai a un piano a pagamento.",
     "confirmed": "Sei su {plan}. Grazie per il tuo sostegno a Square Share.",
     "pending": "Stiamo confermando il tuo pagamento con Stripe. Se il tuo piano non è cambiato, aggiorna la pagina tra un istante.",
-    "unavailable": "Al momento non è possibile mostrare il tuo piano. Aggiorna la pagina tra un istante."
+    "unavailable": "Al momento non è possibile mostrare il tuo piano. Aggiorna la pagina tra un istante.",
+    "cancelPlan": "Annulla piano"
+  },
+  "cancel": {
+    "title": "Annullare {plan}?",
+    "keepUntil": "Mantieni {plan} fino al {date}, poi passi a Free. Non viene rimosso nulla.",
+    "loseLegend": "Non incluso in Free",
+    "reasonLegend": "Perché annulli? <muted>(facoltativo)</muted>",
+    "reasons": {
+      "too_expensive": "Costa troppo",
+      "unused": "Lo uso poco",
+      "missing_features": "Mi manca qualcosa",
+      "switched_service": "Cambio servizio",
+      "temporary": "Solo per un periodo",
+      "other": "Altro"
+    },
+    "detailLabel": "Cosa potremmo fare meglio? <muted>(facoltativo)</muted>",
+    "detailPlaceholder": "Bastano una o due frasi. Le leggiamo tutte.",
+    "keep": "Mantieni il mio piano",
+    "confirm": "Annulla piano",
+    "cancelling": "Annullamento in corso",
+    "doneTitle": "Il tuo piano è stato annullato",
+    "doneBody": "Mantieni {plan} fino al {date}. Hai cambiato idea? Mantieni il tuo piano in qualsiasi momento prima di quella data.",
+    "done": "Fatto",
+    "kept": "Stai mantenendo {plan}. Si rinnova come al solito."
   }
 }

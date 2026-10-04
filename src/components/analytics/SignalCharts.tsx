@@ -3,7 +3,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import { BarChart, HBarChart, LineChart, PieChart, formatNumber } from "@/components/charts";
 import { formatBucketLabel, formatWeekdayLabel, isMonthlySeries } from "@/lib/analytics/buckets";
-import { CHANNEL_LABELS, type SignalChannel, type SignalKind } from "@/lib/analytics/signals";
+import { CHANNEL_LABELS, type SignalKind } from "@/lib/analytics/signals";
 import type {
   SignalChannelSlice,
   SignalPoint,
@@ -12,7 +12,7 @@ import type {
 } from "@/lib/analytics/types";
 
 import { CHART_HEIGHT } from "@/components/analytics/chart-layout";
-import { TONE } from "@/components/analytics/palette";
+import { CHANNEL_TONE, TONE } from "@/components/analytics/palette";
 
 // THE PANELS EVERY SIGNAL SOURCE SHARES.
 //
@@ -71,15 +71,6 @@ export function SignalTrendChart({
   );
 }
 
-/** Pinned per channel, so a channel keeps its colour when a sibling is empty
- *  and the ring re-sorts. None of the three is better than the others, so this
- *  is the neutral pair plus the accent, never green against grey. */
-const CHANNEL_COLOR_INDEX: Record<SignalChannel, number> = {
-  embed: TONE.neutral,
-  marketplace: TONE.traffic,
-  direct: TONE.faint,
-};
-
 export function SignalChannelChart({
   channels,
   kind,
@@ -97,7 +88,7 @@ export function SignalChannelChart({
     .map((slice) => ({
       label: tAll(CHANNEL_LABELS[slice.channel]),
       value: slice.count,
-      colorIndex: CHANNEL_COLOR_INDEX[slice.channel],
+      colorIndex: CHANNEL_TONE[slice.channel],
     }));
 
   return (

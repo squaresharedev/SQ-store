@@ -1,0 +1,165 @@
+{
+  "metadata": {
+    "title": "Descuentos"
+  },
+  "page": {
+    "title": "Descuentos",
+    "subtitle": "Crea una rebaja o comparte un código y ve qué canales traen pedidos.",
+    "create": "Crear descuento"
+  },
+  "empty": {
+    "title": "Todavía no hay descuentos",
+    "hint": "Una rebaja baja tus precios para todos durante el tiempo que elijas. Un código es para las personas con las que lo compartes y te muestra de dónde vienen tus compradores.",
+    "hintReadOnly": "Los propietarios y editores pueden crear descuentos aquí."
+  },
+  "terms": {
+    "percentEach": "{percent}% de descuento en cada artículo",
+    "amountEach": "{amount} de descuento en cada artículo",
+    "percentOrder": "{percent}% de descuento en el pedido",
+    "amountOrder": "{amount} de descuento en el pedido",
+    "allProducts": "Todos los productos",
+    "someProducts": "{count, plural, one {# producto} other {# productos}}",
+    "kindCode": "Código de descuento",
+    "kindAutomatic": "Rebaja automática",
+    "status": {
+      "scheduled": "Programado",
+      "active": "Activo",
+      "paused": "Desactivado",
+      "used_up": "Agotado",
+      "ended": "Finalizado"
+    }
+  },
+  "performance": {
+    "title": "Cómo van tus descuentos",
+    "orders": "Pedidos con descuento",
+    "revenue": "Ingresos de esos pedidos",
+    "given": "Total descontado",
+    "none": "Todavía nada",
+    "channelsTitle": "Pedidos por canal",
+    "channelsDescription": "Los códigos cuentan en el canal donde los compartiste, o en el propio código cuando no le pusiste ninguno.",
+    "channelsEmpty": "Todavía no hay pedidos con descuento.",
+    "automatic": "Rebajas automáticas",
+    "series": "Pedidos"
+  },
+  "list": {
+    "title": "Tus descuentos",
+    "none": "Ningún descuento ahora mismo. Los descuentos eliminados siguen contando sus pedidos arriba.",
+    "channel": "Compartido en {channel}",
+    "startsOn": "Empieza el {date}",
+    "endsOn": "Termina el {date}",
+    "ended": "Terminó el {date}",
+    "noEnd": "Sin fecha de fin",
+    "orders": "{orders, plural, =0 {Todavía no hay pedidos} one {# pedido} other {# pedidos}}",
+    "uses": "{uses} de {limit} usos",
+    "switchLabel": "Activo",
+    "edit": "Editar",
+    "endNow": "Terminar ahora",
+    "delete": "Eliminar",
+    "copy": {
+      "copy": "Copiar código",
+      "copied": "Código copiado",
+      "failed": "No hemos podido copiar el código. Selecciónalo y cópialo a mano."
+    }
+  },
+  "confirmDelete": {
+    "title": "¿Eliminar este descuento?",
+    "body": "Deja de aplicarse de inmediato. Los pedidos que ya trajo se siguen contando.",
+    "confirm": "Eliminar descuento"
+  },
+  "confirmEnd": {
+    "title": "¿Terminar esta rebaja ahora?",
+    "body": "Los precios vuelven a la normalidad de inmediato. Para volver a ejecutarla más adelante, crea una nueva rebaja.",
+    "confirm": "Terminar rebaja"
+  },
+  "toast": {
+    "deleted": "Descuento eliminado.",
+    "ended": "Rebaja finalizada.",
+    "switchedOn": "Código activado.",
+    "switchedOff": "Código desactivado."
+  },
+  "form": {
+    "newTitle": "Nuevo descuento",
+    "editTitle": "Editar descuento",
+    "back": "Volver a descuentos",
+    "kind": {
+      "title": "¿Qué tipo de descuento?",
+      "code": "Código de descuento",
+      "codeHint": "Los compradores lo escriben al pagar. Compártelo en Instagram, en un boletín o con un creador, y ve qué canal vende.",
+      "automatic": "Rebaja automática",
+      "automaticHint": "Todos ven el precio rebajado en tus páginas de producto. No hace falta ningún código.",
+      "fixed": "El tipo de descuento no puede cambiarse. Para cambiarlo, crea uno nuevo."
+    },
+    "code": {
+      "title": "Código",
+      "description": "Lo que los compradores escriben al pagar.",
+      "label": "Código",
+      "generate": "Generar",
+      "hint": "De 3 a 24 letras o números. Los compradores pueden escribirlo en mayúsculas o no."
+    },
+    "channel": {
+      "label": "Canal (opcional)",
+      "hint": "Dónde vas a compartir este código, para ver qué canal trae pedidos.",
+      "suggestions": "Canales sugeridos",
+      "newsletter": "Boletín",
+      "creator": "Creador"
+    },
+    "value": {
+      "title": "Descuento",
+      "each": "Se resta del precio de cada artículo.",
+      "order": "Se resta de los artículos del pedido. El envío no se descuenta.",
+      "percent": "Porcentaje",
+      "amount": "Importe fijo",
+      "percentLabel": "Porcentaje de descuento",
+      "amountLabel": "Importe de descuento",
+      "currencyHint": "Solo se aplica a productos con precio en esta moneda."
+    },
+    "products": {
+      "title": "Se aplica a",
+      "all": "Todos los productos",
+      "some": "Productos específicos",
+      "summary": "{count, plural, =0 {Elige productos} one {# producto elegido} other {# productos elegidos}}",
+      "search": "Buscar productos",
+      "none": "Ningún producto coincide."
+    },
+    "schedule": {
+      "title": "Cuándo",
+      "timeZone": "Las horas están en tu zona horaria ({zone}).",
+      "starts": "Empieza",
+      "ends": "Termina",
+      "now": "Ahora",
+      "later": "Más tarde",
+      "noEnd": "Sin fin",
+      "onDate": "En una fecha",
+      "date": "Fecha",
+      "time": "Hora",
+      "started": "Empezó el {date}",
+      "runFor": "Duración",
+      "preset": {
+        "day": "1 día",
+        "threeDays": "3 días",
+        "week": "1 semana",
+        "month": "1 mes"
+      }
+    },
+    "limit": {
+      "title": "Límites",
+      "label": "Limitar cuántos pedidos pueden usarlo",
+      "count": "Número de pedidos"
+    },
+    "enabled": "Código activado",
+    "locked": "Esta rebaja ya ha empezado, así que solo puede cambiarse su fin. Para cambiar cualquier otra cosa, termínala y crea una nueva rebaja.",
+    "summary": {
+      "title": "Resumen",
+      "startsNow": "Empieza ahora",
+      "starts": "Empieza el {date}",
+      "ends": "Termina el {date}",
+      "noEnd": "Sin fecha de fin",
+      "example": "Ejemplo: {title} a {regular} cuesta {now}."
+    },
+    "create": "Crear descuento",
+    "save": "Guardar cambios",
+    "saving": "Guardando",
+    "created": "Descuento creado.",
+    "saved": "Descuento guardado."
+  }
+}

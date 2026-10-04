@@ -3,7 +3,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { formatList } from "@/lib/format/intl";
 import { TrendingUp } from "lucide-react";
 import { secondaryButtonClass } from "@/components/ui/control-styles";
-import { emptyStateClass } from "@/components/ui/surface-styles";
+import { emptyStateClass, pageGutterClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import {
   SIGNAL_SOURCES,
@@ -18,7 +18,7 @@ import { AovTrendChart } from "./AovTrendChart";
 import { ChartCard } from "./ChartCard";
 import { ChannelSplitChart } from "./ChannelSplitChart";
 import { RangeSelector } from "./RangeSelector";
-import { RevenueTrendChart } from "./RevenueTrendChart";
+import { RevenueHero } from "./RevenueHero";
 import { SignalSection } from "./SignalSection";
 import { SignalsUnavailableNotice } from "./SignalsUnavailableNotice";
 import { StatusBreakdown } from "./StatusBreakdown";
@@ -34,6 +34,11 @@ import { WeekdayChart } from "./WeekdayChart";
 // a status lifecycle, so its panels genuinely differ from every other source's.
 // Everything after it is generated from SIGNAL_SOURCES, so shipping a new
 // measurable surface adds a section here without touching this file.
+//
+// NO GUTTERS AT THE SIDES. The route's shell is pageBleedShellClass, so the
+// revenue hero can run from one edge of the screen to the other. Sections put
+// themselves back in the page column (AnalyticsSection); the few things here
+// that are not a section wrap themselves in pageGutterClass.
 
 /**
  * The analytics page body: range selector, the sales section, then one section
@@ -79,7 +84,7 @@ export function AnalyticsPage({
 
   if (firstRun) {
     return (
-      <div className="space-y-10" {...rootData} data-analytics-first-run="1">
+      <div className={cn(pageGutterClass, "space-y-10")} {...rootData} data-analytics-first-run="1">
         <AnalyticsSnapshotScript snapshot={snapshot} />
         <div className={cn(emptyStateClass, "bg-background")}>
           <div className="flex size-12 items-center justify-center rounded-full bg-muted">
@@ -110,7 +115,9 @@ export function AnalyticsPage({
           hydrates. */}
       <AnalyticsSnapshotScript snapshot={snapshot} />
 
-      <RangeSelector preset={range.preset} range={custom} />
+      <div className={pageGutterClass}>
+        <RangeSelector preset={range.preset} range={custom} />
+      </div>
 
       <AnalyticsSection
         id={SALES_SOURCE.id}
@@ -118,19 +125,21 @@ export function AnalyticsPage({
         description={t("sales.description")}
         icon={SALES_SOURCE.icon}
         state="live"
+        // Revenue leads, edge to edge, as the page's one headline figure. It
+        // is the Revenue tile and the revenue trend in a single piece, so
+        // neither appears again among the tiles and cards below.
+        lead={
+          <RevenueHero
+            series={sales.series}
+            range={range}
+            revenueCents={sales.totals.revenueCents}
+            netRevenueCents={sales.totals.netRevenueCents}
+            currency={currency}
+            empty={!hasSales || sales.series.length === 0}
+          />
+        }
       >
         <AnalyticsTiles totals={sales.totals} />
-
-        <ChartCard
-          title={t("sales.revenue.title")}
-          description={t("sales.revenue.description")}
-          empty={!hasSales || sales.series.length === 0}
-          panel="trend"
-          source="sales"
-          headingLevel="h3"
-        >
-          <RevenueTrendChart series={sales.series} currency={currency} />
-        </ChartCard>
 
         <div className="grid gap-4 lg:grid-cols-2">
           <ChartCard
@@ -198,7 +207,11 @@ export function AnalyticsPage({
 
       {/* One read failing must not take the page with it: revenue is still
           right above, so the signal sections say so and stop. */}
-      {!signals.available && <SignalsUnavailableNotice />}
+      {!signals.available && (
+        <div className={pageGutterClass}>
+          <SignalsUnavailableNotice />
+        </div>
+      )}
 
       {/* Only the sources this seller actually runs. A registered kind with no
           block placed and no history is a feature they have not adopted, and
@@ -240,7 +253,7 @@ export function AnalyticsPage({
                 />
               ))}
               {upcomingSources.length > 0 && (
-                <p className="text-sm text-muted-foreground">
+                <p className={cn(pageGutterClass, "text-sm text-muted-foreground")}>
                   {upcomingNeedProducts
                     ? t("upcoming.needProducts", { labels: upcomingLabels })
                     : t("upcoming.needBlocks", { labels: upcomingLabels })}

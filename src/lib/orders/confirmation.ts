@@ -33,6 +33,10 @@ export type ConfirmationInput = {
   amountCents: number;
   /** Delivery's share of the amount; null for a download or when unknown. */
   shippingCents: number | null;
+  /** The buyer's code, when it is what set the price: printed as its own
+   *  line, with the items before it. Null otherwise (a sale's lower price is
+   *  simply the price). */
+  codeDiscount: { code: string; cents: number } | null;
   currency: string;
   isDigital: boolean;
   supplyConsent: boolean;
@@ -66,7 +70,8 @@ export async function sendBuyerConfirmation(order: ConfirmationInput): Promise<v
       selection: order.selection,
       number: orderNumber(order.orderId),
       placedAt: order.placedAt,
-      subtotalCents: order.amountCents - (shippingCents ?? 0),
+      subtotalCents: order.amountCents - (shippingCents ?? 0) + (order.codeDiscount?.cents ?? 0),
+      codeDiscount: order.codeDiscount,
       shippingCents,
       amountCents: order.amountCents,
       currency: order.currency,

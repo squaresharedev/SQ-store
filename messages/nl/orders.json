@@ -17,7 +17,8 @@
   "channel": {
     "embed": "Insluiting",
     "marketplace": "Marketplace",
-    "direct": "Jouw pagina's"
+    "direct": "Jouw pagina's",
+    "button": "Websiteknop"
   },
   "empty": {
     "filteredTitle": "Geen bestellingen komen overeen met deze filters",
@@ -61,7 +62,8 @@
     "datePlaceholder": "alle datums",
     "sort": "sorteren",
     "sortAriaLabel": "Bestellingen sorteren",
-    "clearFilters": "filters wissen"
+    "clearFilters": "filters wissen",
+    "allChannels": "Alle kanalen"
   },
   "sort": {
     "newest": "Nieuwste eerst",
@@ -140,7 +142,11 @@
     },
     "emailBuyer": "Stuur de koper een e-mail",
     "mailSubject": "Je bestelling {number}",
-    "withdrawnShipWarning": "De koper heeft deze aankoop herroepen. Verzend hem alleen als je dat met de koper hebt afgesproken."
+    "withdrawnShipWarning": "De koper heeft deze aankoop herroepen. Verzend hem alleen als je dat met de koper hebt afgesproken.",
+    "discount": "Korting",
+    "discountSale": "Actie, {amount} korting",
+    "discountCode": "Code {code}, {amount} korting",
+    "discountCodeOutdone": "Code {code} gebruikt, maar de actieprijs was lager"
   },
   "actions": {
     "refundNeedsStripe": "Voor terugbetalingen moet Stripe gekoppeld zijn.",
@@ -210,7 +216,8 @@
       "openShip": "Zodra het onderweg is, markeer het dan hier als verzonden en we laten de koper weten: {url}",
       "openDigital": "Zie de bestelling: {url}",
       "gift": "Cadeauboodschap om in te sluiten: {message}",
-      "number": "Bestelnummer: {number}"
+      "number": "Bestelnummer: {number}",
+      "discountCode": "Kortingscode: {code}"
     },
     "shipped": {
       "subject": "Je bestelling van {store} is onderweg",
@@ -245,7 +252,8 @@
       "withdrawalDigital": "Je hebt om directe download gevraagd en ermee ingestemd dat je herroepingsrecht eindigt zodra het begint.",
       "guarantee": "Je hebt ook de wettelijke garantie van conformiteit voor minimaal twee jaar.",
       "questions": "Vragen? Beantwoord deze e-mail om {store} te bereiken.",
-      "footer": "Verzonden door Square Share namens {store}. Square Share levert de winkelsoftware en is geen partij bij deze verkoop."
+      "footer": "Verzonden door Square Share namens {store}. Square Share levert de winkelsoftware en is geen partij bij deze verkoop.",
+      "discount": "Korting ({code}): -{amount}"
     },
     "withdrawal": {
       "buyerSubject": "Jouw herroeping van bestelling {number} bij {store}",

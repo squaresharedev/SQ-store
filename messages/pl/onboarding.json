@@ -109,7 +109,8 @@
       "nameAlternative": "Albo swoje imię i nazwisko, jeśli sprzedajesz jako osoba prywatna.",
       "addressPlaceholder": "np. ul. Rynek 12\nWarszawa, 00-001\nPolska",
       "emailPlaceholder": "np. kontakt@twojsklep.example",
-      "emailHelp": "Adres, na który piszą kupujący. Może różnić się od e-maila do logowania."
+      "emailHelp": "Adres, na który piszą kupujący. Może różnić się od e-maila do logowania.",
+      "emailTipLabel": "O tym adresie e-mail"
     },
     "confirm": {
       "goLive": "Strony twoich produktów zostaną opublikowane po jego potwierdzeniu."
@@ -155,7 +156,7 @@
     "shortcut": "Skrót: <kbd>{shortcut}</kbd>",
     "skipTour": "Pomiń przewodnik",
     "next": "Dalej",
-    "openingPage": "{page, select, overview {Otwieram Przegląd…} products {Otwieram Produkty…} storefront {Otwieram Witrynę…} orders {Otwieram Zamówienia…} analytics {Otwieram Analitykę…} payments {Otwieram Płatności…} settings {Otwieram Ustawienia…} sampleStorefront {Otwieram Przykładową witrynę…} other {Otwieram…}}"
+    "openingPage": "{page, select, overview {Otwieram Przegląd…} products {Otwieram Produkty…} storefront {Otwieram Witrynę…} orders {Otwieram Zamówienia…} discounts {Otwieram Rabaty…} analytics {Otwieram Analitykę…} payments {Otwieram Płatności…} settings {Otwieram Ustawienia…} sampleStorefront {Otwieram Przykładową witrynę…} other {Otwieram…}}"
   },
   "tourReplay": {
     "title": "Przewodnik po panelu",

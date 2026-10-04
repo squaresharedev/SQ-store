@@ -2,17 +2,26 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { Check, Fingerprint, Plus, ShieldCheck, Smartphone, TriangleAlert } from "lucide-react";
+import {
+  Check,
+  Fingerprint,
+  Plus,
+  ShieldCheck,
+  ShieldOff,
+  Smartphone,
+  Trash2,
+  TriangleAlert,
+} from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { DURATION, EASE_ENTRANCE, POP, SETTLE } from "@/components/ui/motion-tokens";
 import { Button } from "@/components/ui/button";
-import { Modal } from "@/components/ui/modal";
-import { Spinner } from "@/components/ui/spinner";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { HeroMark } from "@/components/ui/HeroMark";
 import { useActionStateToast, useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { dangerNoticeClass, helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { SettingsCard } from "@/components/settings/SettingsCard";
-import { StepUpField } from "@/components/auth/StepUp";
+import { StepUpPrompt, StepUpScope, StepUpSubmit } from "@/components/auth/StepUp";
 import { SignInApprovalRow } from "@/components/settings/security/SignInApprovalRow";
 import { TwoFactorSetupModal } from "@/components/settings/security/TwoFactorSetupModal";
 import type { SecurityFactor } from "@/components/settings/security/SecuritySection";
@@ -277,48 +286,43 @@ function RemoveAuthenticatorModal({
   if (!factor) return null;
 
   return (
-    <Modal
-      open
-      onClose={onClose}
-      title={isLast ? t("remove.titleLast") : t("remove.title", { name: factor.name })}
-      description={
-        isLast
-          ? t("remove.descriptionLast")
-          : t("remove.description", { name: factor.name })
-      }
-      className="rounded-none sm:rounded-none"
-    >
-      <form action={formAction} className="flex flex-col gap-4" noValidate>
+    // The proof is asked for in the dialog's own button: with a passkey, the
+    // confirmation IS "Turn off" (auth/StepUp).
+    <StepUpScope id="remove-factor" state={state} always description={t("stepUpConfirm")}>
+      <ConfirmDialog
+        open
+        onClose={onClose}
+        tone="danger"
+        // The lock coming off, or the one way in being taken away.
+        visual={
+          isLast ? (
+            <HeroMark icon={ShieldOff} tone="danger" />
+          ) : (
+            <HeroMark icon={FACTOR_ICON[factor.type]} tone="danger" badge={Trash2} />
+          )
+        }
+        title={isLast ? t("remove.titleLast") : t("remove.title", { name: factor.name })}
+        description={
+          isLast
+            ? t("remove.descriptionLast")
+            : t("remove.description", { name: factor.name })
+        }
+        action={formAction}
+        pending={isPending}
+        confirmLabel={isLast ? t("remove.turnOff") : tCommon("remove")}
+        pendingLabel={t("remove.removing")}
+        submitAs={StepUpSubmit}
+        // A code is typed here, so focus goes to its box as it always did.
+        initialFocus="first-control"
+      >
         <input type="hidden" name="factor_id" value={factor.id} />
-        <StepUpField
-          id="remove-factor"
-          state={state}
-          always
-          description={t("stepUpConfirm")}
-        />
+        <StepUpPrompt />
         {state.error && (
           <p role="alert" className="font-inter text-sm font-medium text-destructive">
             {resolve(state.error.message)}
           </p>
         )}
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button type="button" variant="ghost" onClick={onClose}>
-            {tCommon("cancel")}
-          </Button>
-          <Button type="submit" variant="destructive" disabled={isPending} suppressHydrationWarning>
-            {isPending ? (
-              <>
-                <Spinner />
-                {t("remove.removing")}
-              </>
-            ) : isLast ? (
-              t("remove.turnOff")
-            ) : (
-              tCommon("remove")
-            )}
-          </Button>
-        </div>
-      </form>
-    </Modal>
+      </ConfirmDialog>
+    </StepUpScope>
   );
 }

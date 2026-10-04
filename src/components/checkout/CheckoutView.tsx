@@ -7,7 +7,7 @@ import { shippingCountries } from "@/lib/shipping/rates";
 import { regionName } from "@/lib/format/country";
 import { SHIPPING_COUNTRY_CODES } from "@/lib/settings/constants";
 import { LEGAL_LINKS } from "@/lib/legal/links";
-import { orderLookupPath } from "@/lib/storefront/product-page-url";
+import { orderLookupPath, type LinkChannel } from "@/lib/storefront/product-page-url";
 import {
   photoForSelection,
   previewSelection,
@@ -19,13 +19,14 @@ import type { CheckoutProviderId } from "@/lib/checkout/availability";
 import { PageShell } from "@/components/product-page/PageShell";
 import { PoweredByFooter } from "@/components/product-page/PoweredByFooter";
 import { QuantityProvider } from "@/components/product-page/QuantityContext";
+import { DiscountCodeProvider } from "./DiscountCodeContext";
 import { SellerBlock } from "@/components/product-page/SellerBlock";
 import { StatutoryNotes } from "@/components/product-page/StatutoryNotes";
 import { TrustList, buildTrustLines } from "@/components/product-page/TrustList";
 import type { CheckoutPageData } from "@/types/checkout";
 import { CHECKOUT_NOTE_MAX } from "@/types/storefront";
 import { CheckoutForm } from "./CheckoutForm";
-import { Disclosure } from "./Disclosure";
+import { Disclosure } from "@/components/ui/Disclosure";
 import { PaymentSlot } from "./PaymentSlot";
 import { CheckoutShowcase, CheckoutSummaryCard, MakerNote, type CheckoutItem } from "./CheckoutShowcase";
 import { resolveCheckoutTheme } from "./checkout-theme";
@@ -56,9 +57,12 @@ export function CheckoutView({
   attemptId = null,
   provider = null,
   initialCountry,
+  via = null,
 }: {
   page: CheckoutPageData;
   mode: "public" | "preview";
+  /** How the buyer arrived (`?via=`), already allowlisted; sent with the order. */
+  via?: LinkChannel | null;
   /** The version, already checked strictly against the product by the route. */
   optionIds?: readonly string[];
   initialQuantity?: number;
@@ -88,6 +92,7 @@ export function CheckoutView({
     chips: selectionChips(groups, selection),
     priceCents: product.priceCents,
     currency: product.currency,
+    sale: product.sale,
     imageFit: productPage.imageFit,
   };
 
@@ -208,11 +213,13 @@ export function CheckoutView({
       productId={product.id}
       optionIds={selectionIds(groups, selection)}
       attemptId={attemptId}
+      via={via}
       headline={checkoutPage.headline}
       defaultHeadline={t("headline")}
       product={{
         priceCents: product.priceCents,
         currency: product.currency,
+        sale: product.sale,
         isDigital: product.isDigital,
         digitalFormat: product.digitalFormat,
         shippingProfileId: product.shippingProfileId,
@@ -235,53 +242,55 @@ export function CheckoutView({
 
   return (
     <QuantityProvider limit={product.maxQuantity} initialQuantity={initialQuantity} syncUrl={!preview}>
-      <PageShell
-        storefront={storefront}
-        backgroundColor={theme.surface}
-        photo={storefront.pagePhotoUrl ? { url: storefront.pagePhotoUrl, tint: theme.surface } : null}
-        font={productPage.font}
-        ink={theme.ink}
-        preview={preview}
-        padForStickyBar
-        rootAttributes={{
-          "data-checkout-page": mode,
-          "data-checkout-layout": checkoutPage.layout,
-          "data-page-background": checkoutPage.backgroundColor ?? productPage.backgroundColor ?? "storefront",
-          "data-page-ink": theme.ink,
-        }}
-        headerAside={
-          <span className="flex shrink-0 items-center gap-1.5 text-xs opacity-70" data-checkout-secure="">
-            <Lock className="size-3.5" strokeWidth={2} aria-hidden="true" />
-            {t("secure")}
-          </span>
-        }
-        footer={
-          <PoweredByFooter
-            ruleColor={theme.rule}
-            sellerName={sellerName}
-            product={{ id: product.id, title: product.title }}
-            storefront={{ id: storefront.id, name: storeName }}
-            reportScopes={page.reportScopes}
-            preview={preview}
-            withdrawHref={orderLookupPath(storefront.id)}
-          />
-        }
-      >
-        <div className="mx-auto w-full max-w-[76rem] px-4 py-8 @md:px-6 @3xl:px-10 @3xl:py-12">
-          {checkoutPage.layout === "showcase" ? (
-            <div className="grid items-start gap-8 @3xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] @3xl:gap-14">
-              <CheckoutShowcase item={item} note={note} theme={theme} />
-              {form}
-            </div>
-          ) : (
-            <div className="mx-auto flex w-full max-w-xl flex-col gap-8">
-              <CheckoutSummaryCard item={item} theme={theme} />
-              {note}
-              {form}
-            </div>
-          )}
-        </div>
-      </PageShell>
+      <DiscountCodeProvider>
+        <PageShell
+          storefront={storefront}
+          backgroundColor={theme.surface}
+          photo={storefront.pagePhoto ? { ...storefront.pagePhoto, tint: theme.surface } : null}
+          font={productPage.font}
+          ink={theme.ink}
+          preview={preview}
+          padForStickyBar
+          rootAttributes={{
+            "data-checkout-page": mode,
+            "data-checkout-layout": checkoutPage.layout,
+            "data-page-background": checkoutPage.backgroundColor ?? productPage.backgroundColor ?? "storefront",
+            "data-page-ink": theme.ink,
+          }}
+          headerAside={
+            <span className="flex shrink-0 items-center gap-1.5 text-xs opacity-70" data-checkout-secure="">
+              <Lock className="size-3.5" strokeWidth={2} aria-hidden="true" />
+              {t("secure")}
+            </span>
+          }
+          footer={
+            <PoweredByFooter
+              ruleColor={theme.rule}
+              sellerName={sellerName}
+              product={{ id: product.id, title: product.title }}
+              storefront={{ id: storefront.id, name: storeName }}
+              reportScopes={page.reportScopes}
+              preview={preview}
+              withdrawHref={orderLookupPath(storefront.id)}
+            />
+          }
+        >
+          <div className="mx-auto w-full max-w-[76rem] px-4 py-8 @md:px-6 @3xl:px-10 @3xl:py-12">
+            {checkoutPage.layout === "showcase" ? (
+              <div className="grid items-start gap-8 @3xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] @3xl:gap-14">
+                <CheckoutShowcase item={item} note={note} theme={theme} />
+                {form}
+              </div>
+            ) : (
+              <div className="mx-auto flex w-full max-w-xl flex-col gap-8">
+                <CheckoutSummaryCard item={item} theme={theme} />
+                {note}
+                {form}
+              </div>
+            )}
+          </div>
+        </PageShell>
+      </DiscountCodeProvider>
     </QuantityProvider>
   );
 }

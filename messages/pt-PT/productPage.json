@@ -329,8 +329,28 @@
       "rate_limited": "Demasiadas tentativas. Aguarde alguns minutos e tente novamente.",
       "unavailable": "O pagamento não está disponível agora. Não foi cobrado nada.",
       "failed": "Algo correu mal e não foi cobrado nada. Tente novamente.",
-      "invalid": "Alguns detalhes precisam de revisão. Verifique os campos assinalados."
+      "invalid": "Alguns detalhes precisam de revisão. Verifique os campos assinalados.",
+      "discount_invalid": "Este código de desconto já não pode ser utilizado. Remova-o para pagar o preço normal.",
+      "price_changed": "O preço alterou-se enquanto esta página estava aberta, por isso nada foi cobrado. Verifique o novo total e pague."
     },
-    "editHeadline": "Título do pagamento"
+    "editHeadline": "Título do pagamento",
+    "discount": {
+      "add": "Adicionar um código de desconto",
+      "label": "Código de desconto",
+      "apply": "Aplicar",
+      "applying": "A verificar",
+      "remove": "Remover",
+      "applied": "{code} aplicado.",
+      "saleBetter": "{code} é válido, mas o preço da promoção já é inferior, por isso mantivemo-lo.",
+      "invalid": "Este código não pode ser utilizado para esta encomenda.",
+      "rateLimited": "Demasiados códigos tentados. Aguarde um momento e tente novamente.",
+      "line": "Desconto ({code})"
+    }
+  },
+  "sale": {
+    "wasNow": "Era {was}, agora {now}",
+    "percentOff": "-{percent}%",
+    "priorNote": "Preço riscado: o preço mais baixo praticado nos 30 dias anteriores à redução.",
+    "endsOn": "Promoção termina em {date}"
   }
 }

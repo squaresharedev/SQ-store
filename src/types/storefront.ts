@@ -821,14 +821,15 @@ export const PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX = 8;
 
 /**
  * A photo behind a hosted page: an R2 object KEY, like the storefront's own
- * image background, and nothing else. It is always drawn to cover the page,
- * under a veil of the page's colour (PAGE_PHOTO_VEIL, components/product-page/
- * product-page-maps.ts), and the page's ink is derived from that colour, never
- * from the photo, so a seller can make any photograph readable by choosing the
- * colour that tints it. Display URLs are signed on the server and are never
- * part of the config.
+ * image background, and one choice. It is always drawn to cover the page. By
+ * default it sits under an overlay of the page's colour (PAGE_PHOTO_VEIL,
+ * components/product-page/product-page-maps.ts), and the page's ink is derived
+ * from that colour, never from the photo, so a seller can make any photograph
+ * readable by choosing the colour that tints it. `overlay: false` shows the
+ * photo as it is. ABSENT = on, so a photo never stores the default. Display
+ * URLs are signed on the server and are never part of the config.
  */
-export type PagePhoto = { key: string };
+export type PagePhoto = { key: string; overlay?: boolean };
 
 export type ProductPageConfig = {
   /** Off = product tiles have no page to open and the route 404s. */
@@ -1067,9 +1068,12 @@ export type CheckoutPageConfig = {
    * background (gradient or photo included), because that panel is looked at.
    */
   backgroundColor?: string;
-  /** A photo behind the checkout AND the thank-you page (one design), tinted
-   *  with the surface colour. ABSENT = none. */
+  /** A photo behind the checkout, overlaid with the surface colour unless the
+   *  photo says otherwise. ABSENT = none. */
   backgroundImage?: PagePhoto;
+  /** The thank-you page's own photo, the same way. Not inherited from the
+   *  checkout's: the two pages are two moments. ABSENT = none. */
+  thanksBackgroundImage?: PagePhoto;
   /** Above the form. ABSENT = a default line in the buyer's language. */
   headline?: string;
   /** A few words from the maker beside the summary, signed with the business

@@ -41,6 +41,9 @@ describe("embedded supabase replica", () => {
       // Pending codes proving a seller owns their buyer-facing email and
       // phone (20260926_contact_verification). Service-role only.
       "contact_verifications",
+      // Automatic sales and discount codes (20261004_discounts). The store's
+      // team reads them, owners and editors write them; nobody deletes.
+      "discounts",
       "follows",
       // Sign-in approval from a signed-in device: its sealed factor secret,
       // the off switch, and the requests (20260927_sign_in_approvals).
@@ -66,6 +69,12 @@ describe("embedded supabase replica", () => {
       "moderation_decisions",
       "notifications",
       "orders",
+      // Why sellers cancelled a paid plan, for the admin panel
+      // (20261003_plan_cancellations). Service-role only.
+      "plan_cancellations",
+      // Every price a product has had, for the 30-day prior-price rule on
+      // sales (20261004_discounts). Trigger-written, service-role only.
+      "product_price_history",
       "products",
       // The public part of opted-in profiles, behind the public_profiles view
       // (20260924_public_profiles_invoker). Trigger-written, client read-only.

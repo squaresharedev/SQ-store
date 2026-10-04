@@ -222,9 +222,11 @@ export function pageConfigRoute<Name extends Member>(
  * can still clear it (`backgroundImage: null`); setting one needs a key from
  * the upload flow, which a caller of these routes does not hold.
  */
-export function withoutObjectKeys<T extends { backgroundImage?: PagePhoto }>(
+export function withoutObjectKeys<T extends { backgroundImage?: PagePhoto; thanksBackgroundImage?: PagePhoto }>(
   page: T,
-): Omit<T, "backgroundImage"> & { hasBackgroundImage: boolean } {
-  const { backgroundImage, ...rest } = page;
-  return { ...rest, hasBackgroundImage: backgroundImage !== undefined };
+): Omit<T, "backgroundImage" | "thanksBackgroundImage"> & { hasBackgroundImage: boolean } {
+  const rest = { ...page };
+  delete rest.backgroundImage;
+  delete rest.thanksBackgroundImage;
+  return { ...rest, hasBackgroundImage: page.backgroundImage !== undefined };
 }

@@ -2,12 +2,14 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { Mail } from "lucide-react";
+import { Mail, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { infoTextClass } from "@/components/ui/control-styles";
 import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
+import { Button } from "@/components/ui/button";
+import { HeroMark } from "@/components/ui/HeroMark";
 import { SaveButton } from "@/components/ui/SaveButton";
-import { Modal } from "@/components/ui/modal";
+import { Modal, ModalActions } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -91,6 +93,7 @@ export function InviteModal({
     <Modal
       open={open}
       onClose={onClose}
+      visual={<HeroMark icon={UserPlus} />}
       title={t("Settings.team.inviteModal.title")}
       description={t("Settings.team.inviteModal.description")}
     >
@@ -134,7 +137,10 @@ export function InviteModal({
 
         <StepUpField id="invite-step-up" state={state} />
 
-        <div>
+        <ModalActions>
+          <Button type="button" variant="ghost" onClick={onClose}>
+            {t("Common.actions.cancel")}
+          </Button>
           <SaveButton
             type="submit"
             pending={isPending}
@@ -144,7 +150,7 @@ export function InviteModal({
           >
             {t("Settings.team.inviteModal.sendButton")}
           </SaveButton>
-        </div>
+        </ModalActions>
       </form>
     </Modal>
   );

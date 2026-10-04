@@ -32,13 +32,14 @@ import { PagePhotoField } from "./PagePhotoField";
 import { PayButtonSwatch } from "./PayButtonSwatch";
 
 type OptionalText = "headline" | "note" | "thanksHeadline" | "thanksMessage";
+type PhotoKey = "backgroundImage" | "thanksBackgroundImage";
 
 /** The config without one optional field: emptying a text, or going back to
  *  following the product page, DELETES the key rather than storing "" (which
  *  the schema would refuse) or a value that means "inherit". */
 function withoutKey(
   config: CheckoutPageConfig,
-  key: OptionalText | "backgroundColor" | "backgroundImage",
+  key: OptionalText | PhotoKey | "backgroundColor",
 ): CheckoutPageConfig {
   const next = { ...config };
   delete next[key];
@@ -118,6 +119,21 @@ export function CheckoutPageSection({
     );
   }
 
+  /** The photo of the checkout, or of the thank-you page: the same field. */
+  function photoField(key: PhotoKey) {
+    const photo = checkoutPage[key];
+    return (
+      <PagePhotoField
+        photo={photo}
+        url={photo ? (pagePhotoUrls[photo.key] ?? null) : null}
+        onUrl={onPagePhotoUrl}
+        onChange={(next) =>
+          onCheckoutPageChange(next ? { ...checkoutPage, [key]: next } : withoutKey(checkoutPage, key))
+        }
+      />
+    );
+  }
+
   return (
     <>
       <CollapsibleSection title={t("layout.title")} collapsible summon={summoned === "layout"}>
@@ -149,17 +165,7 @@ export function CheckoutPageSection({
             }}
           />
 
-          {/* The checkout's photo is the thank-you page's too: one design. */}
-          <PagePhotoField
-            photo={checkoutPage.backgroundImage}
-            url={checkoutPage.backgroundImage ? (pagePhotoUrls[checkoutPage.backgroundImage.key] ?? null) : null}
-            onUrl={onPagePhotoUrl}
-            onChange={(backgroundImage) =>
-              onCheckoutPageChange(
-                backgroundImage ? { ...checkoutPage, backgroundImage } : withoutKey(checkoutPage, "backgroundImage"),
-              )
-            }
-          />
+          {photoField("backgroundImage")}
 
           {/* THE PAY BUTTON IS THE BUY BUTTON: shown here in miniature, and
               pressing it is how it is styled (the product page's button
@@ -223,6 +229,7 @@ export function CheckoutPageSection({
             CHECKOUT_HEADLINE_MAX,
           )}
           {textField("thanksMessage", t("thanks.message"), t("thanks.messagePlaceholder"), CHECKOUT_THANKS_MESSAGE_MAX, true)}
+          {photoField("thanksBackgroundImage")}
           {/* One switch: confetti or nothing. Play replays it on the thank-you
               artboard, and sits beside the switch because it previews the
               setting rather than being one. */}

@@ -23,6 +23,7 @@ import type {
   ProductStatus,
 } from "@/types/product";
 import type { StorefrontPlacement } from "@/lib/products/queries";
+import type { TraderIdentityField } from "@/lib/settings/trader-identity";
 import type { Paginated } from "@/types/pagination";
 import { PRODUCT_SORTS, type ProductSort } from "@/lib/products/sort";
 import { FilterMenu } from "@/components/ui/FilterMenu";
@@ -87,6 +88,7 @@ export function ProductsBrowser({
   canWrite,
   sales,
   placements = {},
+  missingTraderDetails = [],
   heading,
 }: {
   data: Paginated<Product>;
@@ -103,6 +105,8 @@ export function ProductsBrowser({
    * link affordances degrade gracefully to count 0 in that case.
    */
   placements?: Record<string, StorefrontPlacement[]>;
+  /** Trader details the store still owes buyers (for the buy button dialog). */
+  missingTraderDetails?: readonly TraderIdentityField[];
   /** Server-rendered page title block, kept out of this client boundary. */
   heading: React.ReactNode;
 }) {
@@ -276,6 +280,7 @@ export function ProductsBrowser({
           canWrite={canWrite}
           sales={sales}
           placements={placements}
+          missingTraderDetails={missingTraderDetails}
           filtered={filtered}
           onClearFilters={handleClear}
         />

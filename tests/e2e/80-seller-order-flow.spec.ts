@@ -116,7 +116,7 @@ test("1. clearing the To ship queue, start to finish", async ({ page }) => {
   await expect(panel(page)).toContainText("You can't refund from Square Share yet");
 
   await panel(page).getByRole("button", { name: "Mark as shipped" }).click();
-  await expect(panel(page)).toContainText("We'll email the buyer");
+  await expect(panel(page).getByRole("button", { name: /We'll email the buyer/ })).toBeVisible();
   await panel(page).getByLabel(/Tracking number/).fill("RR123456789IE");
   await panel(page).getByRole("button", { name: /^Mark shipped/ }).click();
   await expect(panel(page).locator("[data-order-shipped-status]")).toBeFocused({ timeout: 25_000 });

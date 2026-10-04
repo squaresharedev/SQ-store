@@ -27,6 +27,10 @@
     "settings": {
       "label": "Definições",
       "description": "Os seus dados de vendedor, condições de envio e conta."
+    },
+    "discounts": {
+      "label": "Descontos",
+      "description": "Crie promoções e partilhe códigos de desconto."
     }
   },
   "settings": {

@@ -89,7 +89,8 @@
   "channels": {
     "embed": "Osadzenie",
     "marketplace": "Marketplace",
-    "direct": "Bezpośrednio"
+    "direct": "Bezpośrednio",
+    "button": "Przycisk WWW"
   },
   "signalsUnavailable": {
     "title": "Wyświetlenia i zapisy są teraz niedostępne",

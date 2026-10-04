@@ -10,6 +10,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { signInPath } from "@/lib/auth/paths";
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
+import { authHeadingClass } from "@/components/ui/surface-styles";
 import { QrTile } from "@/components/auth/QrTile";
 import {
   cancelSignInApproval,
@@ -143,7 +144,7 @@ export function ApproveFromDevice({
   return (
     <div className="flex flex-col gap-5" data-approval-challenge={phase.kind}>
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">{ta("heading")}</h1>
+        <h1 className={authHeadingClass}>{ta("heading")}</h1>
         <p className={`${helpTextClass} mt-1`}>{ta("hint")}</p>
       </div>
 

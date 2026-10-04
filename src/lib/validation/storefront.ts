@@ -470,6 +470,7 @@ const RETIRED_PRODUCT_PAGE_FIELDS = [
 /** A photo behind a hosted page: the key of an image this seller uploaded (the
  *  same images/ objects the storefront's background uses), nothing else. */
 const pagePhotoSchema = z.strictObject({
+  overlay: z.boolean().optional(),
   key: z
     .string()
     .max(600)
@@ -560,6 +561,7 @@ export const checkoutPageSchema = z.preprocess((value) => {
   layout: z.enum(CHECKOUT_LAYOUTS),
   backgroundColor: hexColorSchema.optional(),
   backgroundImage: pagePhotoSchema.optional(),
+  thanksBackgroundImage: pagePhotoSchema.optional(),
   headline: sellerProse({ field: "checkoutHeadline", max: CHECKOUT_HEADLINE_MAX }).optional(),
   note: sellerProse({ field: "checkoutNote", max: CHECKOUT_NOTE_MAX, multiline: true }).optional(),
   giftMessage: z.boolean(),

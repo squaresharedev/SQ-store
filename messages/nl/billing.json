@@ -25,14 +25,15 @@
     "intervalLabel": "Factureringsperiode",
     "month": "Maandelijks",
     "year": "Jaarlijks",
-    "yearlySaving": "2 maanden gratis bij jaarlijks",
     "pastDue": "De laatste betaling voor je {plan}-abonnement is niet gelukt. Werk je kaart bij om het te behouden.",
     "endsOn": "Je {plan}-abonnement eindigt op {date}, daarna gaat je winkel over naar Free. Er wordt niets verwijderd.",
     "ownerOnly": "Alleen de eigenaar van de winkel kan het abonnement wijzigen.",
     "soon": "Binnenkort",
     "soonTitle": "Betaalde abonnementen komen binnenkort. Alles op Free blijft in de tussentijd gewoon werken.",
     "finePrint": "Prijzen zijn excl. btw. De kosten per verkoop gelden voor verkopen via de afrekenpagina van Square Share en worden berekend over de productprijs, nooit over de verzending. De eigen kosten van Stripe voor kaartverwerking komen daar nog bij. Je kunt op elk moment opzeggen: je houdt je abonnement tot het einde van de periode die je hebt betaald.",
-    "unavailable": "Abonnementen kunnen nu niet worden getoond. Vernieuw de pagina over een moment."
+    "unavailable": "Abonnementen kunnen nu niet worden getoond. Vernieuw de pagina over een moment.",
+    "yearlyFree": "{count, plural, one {# maand gratis} other {# maanden gratis}}",
+    "launchNote": "Een lanceringsprijs is een introductieprijs: de normale prijs is de doorgestreepte prijs."
   },
   "card": {
     "perMonth": "/ maand",
@@ -46,7 +47,12 @@
     "upgrade": "Upgraden naar {plan}",
     "switch": "Overstappen naar {plan}",
     "switchInterval": "{interval, select, year {Overstappen op jaarlijks} other {Overstappen op maandelijks}}",
-    "moveToFree": "Overstappen naar Free"
+    "moveToFree": "Overstappen naar Free",
+    "regularPrice": "Normale prijs",
+    "launchPrice": "Lanceringsprijs",
+    "save": "Bespaar {percent}",
+    "launchExclVat": "Lanceringsprijs (normaal {regular}), excl. btw",
+    "launchBilledYearly": "{amount} eenmaal per jaar gefactureerd tegen de lanceringsprijs (normaal {regular}), excl. btw"
   },
   "features": {
     "fee": "{rate} kosten per verkoop",
@@ -63,12 +69,10 @@
     "productsUnlimited": "Onbeperkt aantal producten"
   },
   "calculator": {
-    "eyebrow": "Calculator",
     "title": "Welk abonnement kost je het minst?",
     "lead": "Schuif naar je verkoop in een maand. Elke balk is de prijs van het abonnement plus de kosten over die verkoop.",
     "salesLabel": "Verkoop per maand",
     "salesAria": "Je verkoop per maand, in euro",
-    "fromYourSales": "Ingevuld op basis van je verkopen van de afgelopen 30 dagen.",
     "perMonth": "per maand",
     "cheapest": "Bij een verkoop van {sales} per maand is {plan} het voordeligst voor jou.",
     "legendPrice": "Abonnementsprijs",
@@ -148,7 +152,7 @@
     "cta": "Upgraden naar {plan}, {price} per maand",
     "compare": "Alle abonnementen vergelijken",
     "topEyebrow": "Hoogste abonnement",
-    "topTitle": "Alles in {plan} is van jou"
+    "topTitle": "Alles in <mark>{plan}</mark> is van jou"
   },
   "portal": {
     "opening": "Stripe openen",
@@ -182,7 +186,10 @@
       "teamSeats": "Teamplekken, jij inbegrepen: {used} van {cap}",
       "teamSeatsUnlimited": "Teamplekken, jij inbegrepen: {used}, geen limiet",
       "products": "Producten: {used} van {cap}",
-      "productsUnlimited": "Producten: {used}, geen limiet"
+      "productsUnlimited": "Producten: {used}, geen limiet",
+      "left": "{count} resterend",
+      "over": "{count} te veel",
+      "full": "Vol"
     },
     "overLimit": "Boven de limiet van dit abonnement. Alles blijft werken; verwijder er een of upgrade om meer toe te voegen.",
     "invoicesTitle": "Facturering en facturen",
@@ -191,6 +198,30 @@
     "noBilling": "Facturen en betaalgegevens verschijnen hier zodra je een betaald abonnement hebt.",
     "confirmed": "Je zit op {plan}. Bedankt voor je steun aan Square Share.",
     "pending": "We bevestigen je betaling bij Stripe. Vernieuw de pagina over een moment als je abonnement nog niet is gewijzigd.",
-    "unavailable": "Je abonnement kan nu niet worden getoond. Vernieuw de pagina over een moment."
+    "unavailable": "Je abonnement kan nu niet worden getoond. Vernieuw de pagina over een moment.",
+    "cancelPlan": "Abonnement opzeggen"
+  },
+  "cancel": {
+    "title": "{plan} opzeggen?",
+    "keepUntil": "Je houdt {plan} tot {date}, daarna ga je over naar Free. Er wordt niets verwijderd.",
+    "loseLegend": "Niet inbegrepen bij Free",
+    "reasonLegend": "Waarom zeg je op? <muted>(optioneel)</muted>",
+    "reasons": {
+      "too_expensive": "Te duur",
+      "unused": "Gebruik het te weinig",
+      "missing_features": "Er mist iets",
+      "switched_service": "Ik stap over",
+      "temporary": "Maar even nodig",
+      "other": "Iets anders"
+    },
+    "detailLabel": "Wat kunnen we beter doen? <muted>(optioneel)</muted>",
+    "detailPlaceholder": "Een zin of twee is genoeg. We lezen ze allemaal.",
+    "keep": "Mijn abonnement behouden",
+    "confirm": "Abonnement opzeggen",
+    "cancelling": "Bezig met opzeggen",
+    "doneTitle": "Je abonnement is opgezegd",
+    "doneBody": "Je houdt {plan} tot {date}. Bedenk je je? Je kunt je abonnement tot die tijd op elk moment behouden.",
+    "done": "Klaar",
+    "kept": "Je houdt {plan}. Het wordt gewoon verlengd."
   }
 }

@@ -147,7 +147,8 @@
       "thankYouCelebration": "Dankes-Effekt",
       "checkoutPayButton": "Bezahlknopf",
       "productPagePhoto": "Foto der Produktseite",
-      "checkoutPhoto": "Foto für Kasse und Dankeseite"
+      "checkoutPhoto": "Foto der Kasse",
+      "thanksPhoto": "Foto der Dankeseite"
     }
   },
   "editorSearch": {
@@ -1365,7 +1366,8 @@
   "pagePhoto": {
     "label": "Foto",
     "infoLabel": "Wie das Foto verwendet wird",
-    "info": "Wird hinter der Seite gezeigt und in der Seitenfarbe getönt, damit der Text lesbar bleibt. Ändere die Farbe, um das Foto heller oder dunkler zu machen.",
-    "remove": "Foto entfernen"
+    "info": "Wird hinter der Seite gezeigt. Die Überlagerung in der Seitenfarbe hält den Text lesbar; schalte sie aus, um das Foto unverändert zu zeigen.",
+    "remove": "Foto entfernen",
+    "overlay": "Farbüberlagerung"
   }
 }

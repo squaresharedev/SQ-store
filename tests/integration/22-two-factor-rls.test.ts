@@ -41,6 +41,8 @@ const ENFORCED_TABLES = [
   "follows",
   "artifact_likes",
   "reports",
+  // Added with the table itself (20261004_discounts).
+  "discounts",
 ];
 
 let alice: TestUser; // turns 2FA on

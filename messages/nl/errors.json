@@ -56,6 +56,10 @@
     "manageBilling": {
       "withRole": "Met je rol {role, select, owner {Eigenaar} editor {Bewerker} viewer {Lezer} other {{role}}} kun je het abonnement van deze winkel niet wijzigen.",
       "noRole": "Je hebt geen toestemming om het abonnement van deze winkel te wijzigen."
+    },
+    "manageDiscounts": {
+      "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} kan geen kortingen beheren in deze winkel.",
+      "noRole": "Je hebt geen toestemming om kortingen te beheren in deze winkel."
     }
   },
   "notFound": {
@@ -63,7 +67,8 @@
     "product": "Dat product kon niet worden gevonden.",
     "storefront": "Die etalage kon niet worden gevonden.",
     "item": "Dat item is niet gevonden.",
-    "order": "Die bestelling kon niet worden gevonden."
+    "order": "Die bestelling kon niet worden gevonden.",
+    "discount": "Die korting kon niet worden gevonden."
   },
   "rateLimited": {
     "fix": "Wacht een paar minuten en probeer het opnieuw. Als er niets op de achtergrond opnieuw wordt geprobeerd, laad de pagina dan eerst opnieuw.",
@@ -82,7 +87,8 @@
     "fileAppeal": "Te veel pogingen om een bezwaar in korte tijd in te dienen.",
     "fulfilOrders": "Te veel pogingen om bestellingen als verzonden te markeren in korte tijd.",
     "readCheckoutSettings": "Te veel pogingen om afrekeneinstellingen te lezen in korte tijd.",
-    "changePlan": "Je hebt in korte tijd te veel abonnementswijzigingen gestart."
+    "changePlan": "Je hebt in korte tijd te veel abonnementswijzigingen gestart.",
+    "saveDiscounts": "Te veel kortingswijzigingen in korte tijd."
   },
   "serverError": {
     "fix": "Dit is meestal tijdelijk. Wacht even en probeer het opnieuw; als het blijft mislukken, vernieuw dan de pagina.",
@@ -115,7 +121,10 @@
     "saveCheckoutSettings": "Je afrekeneinstellingen konden niet worden opgeslagen door een probleem aan onze kant.",
     "loadPlans": "Je abonnement kon niet worden geladen door een probleem aan onze kant.",
     "startCheckout": "De afrekenpagina kon niet worden geopend door een probleem aan onze kant.",
-    "openBillingPortal": "Je factureringsgegevens konden niet worden geopend door een probleem aan onze kant."
+    "openBillingPortal": "Je factureringsgegevens konden niet worden geopend door een probleem aan onze kant.",
+    "cancelPlan": "Je abonnement kon niet worden opgezegd door een probleem aan onze kant.",
+    "resumePlan": "Je abonnement kon niet worden behouden door een probleem aan onze kant.",
+    "saveDiscount": "De korting kon niet worden opgeslagen door een probleem aan onze kant."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Dit product is verwijderd, niet gepauzeerd.} storefront {Deze etalage is verwijderd, niet gepauzeerd.} other {Dit item is verwijderd, niet gepauzeerd.}}",
@@ -602,7 +611,11 @@
     "alreadySubscribed": "Je winkel heeft al een betaald abonnement. Stap over naar een ander abonnement in plaats van een tweede te nemen.",
     "noBillingAccount": "Deze winkel heeft nog geen factureringsaccount. Upgrade eerst naar een betaald abonnement.",
     "noSubscription": "Deze winkel heeft geen betaald abonnement om te wijzigen. Kies er een om te upgraden.",
-    "ownerOnlyFix": "Alleen de eigenaar van de winkel kan het abonnement wijzigen. Vraag het aan die persoon, of schakel over naar je eigen winkel."
+    "ownerOnlyFix": "Alleen de eigenaar van de winkel kan het abonnement wijzigen. Vraag het aan die persoon, of schakel over naar je eigen winkel.",
+    "invalidFeedback": "Die feedback kon niet worden gelezen.",
+    "notCancellable": "Deze winkel heeft geen betaald abonnement om op te zeggen, of het is al opgezegd.",
+    "notResumable": "Dit abonnement is niet opgezegd, of de betaalde periode is al voorbij.",
+    "deletionPending": "Je account staat gepland om te worden verwijderd, dus het abonnement eindigt daarmee. Annuleer eerst de verwijdering om je abonnement te behouden."
   },
   "planLimit": {
     "storefronts": "{plan, select, free {Je Free-abonnement} starter {Je Starter-abonnement} pro {Je Pro-abonnement} other {Je huidige abonnement}} bevat {cap, plural, one {# etalage} other {# etalages}}, en je winkel heeft ze allemaal.",
@@ -621,5 +634,23 @@
     "planRequiredFix": "Upgrade op de pagina Abonnementen om je bestellingen te exporteren.",
     "rateLimited": "Dat zijn veel exports in korte tijd.",
     "rateLimitedFix": "Wacht een paar minuten en probeer het dan opnieuw."
+  },
+  "discounts": {
+    "invalid": {
+      "message": "De kortingsgegevens zijn niet geldig bevonden.",
+      "fix": "Controleer de gemarkeerde velden en probeer dan opnieuw op te slaan."
+    },
+    "codeTaken": {
+      "message": "Die code is al in gebruik in deze winkel.",
+      "fix": "Kies een andere code, of verwijder de andere korting eerst."
+    },
+    "started": {
+      "message": "Deze actie is al begonnen, dus de voorwaarden kunnen niet meer wijzigen.",
+      "fix": "Beëindig hem en maak een nieuwe actie met de nieuwe voorwaarden. EU-regels over het tonen van prijsverlagingen zijn gebaseerd op de oorspronkelijke geschiedenis van een actie."
+    },
+    "tooMany": {
+      "message": "Deze winkel heeft het maximum aantal kortingen bereikt.",
+      "fix": "Verwijder kortingen die je niet meer gebruikt en probeer het opnieuw."
+    }
   }
 }

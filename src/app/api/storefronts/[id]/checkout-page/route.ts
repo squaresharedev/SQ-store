@@ -44,7 +44,10 @@ function payload(storefrontId: string, config: StorefrontConfig) {
   });
   return {
     storefrontId,
-    checkoutPage: withoutObjectKeys(checkoutPage),
+    checkoutPage: {
+      ...withoutObjectKeys(checkoutPage),
+      hasThanksBackgroundImage: checkoutPage.thanksBackgroundImage !== undefined,
+    },
     payButton: resolveCta(productPage, config.theme),
     surface: {
       color: theme.surface,

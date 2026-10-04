@@ -269,9 +269,23 @@
       "rate_limited": "Too many attempts. Wait a few minutes and try again.",
       "unavailable": "Checkout isn't available right now. Nothing was charged.",
       "failed": "Something went wrong and nothing was charged. Try again.",
-      "invalid": "Some details need another look. Check the highlighted fields."
+      "invalid": "Some details need another look. Check the highlighted fields.",
+      "discount_invalid": "This discount code can't be used any more. Remove it to pay the full price.",
+      "price_changed": "The price changed while this page was open, so nothing was charged. Check the new total, then pay."
     },
-    "editHeadline": "Checkout headline"
+    "editHeadline": "Checkout headline",
+    "discount": {
+      "add": "Add a discount code",
+      "label": "Discount code",
+      "apply": "Apply",
+      "applying": "Checking",
+      "remove": "Remove",
+      "applied": "{code} applied.",
+      "saleBetter": "{code} works, but your sale price is already lower, so we kept it.",
+      "invalid": "This code can't be used for this order.",
+      "rateLimited": "Too many codes tried. Wait a while, then try again.",
+      "line": "Discount ({code})"
+    }
   },
   "order": {
     "metadata": {
@@ -332,5 +346,11 @@
     "total": "Total paid",
     "quantity": "Quantity {quantity}",
     "editHeadline": "Thank-you headline"
+  },
+  "sale": {
+    "wasNow": "Was {was}, now {now}",
+    "percentOff": "-{percent}%",
+    "priorNote": "Crossed-out price: the lowest price in the 30 days before this sale.",
+    "endsOn": "Sale ends {date}"
   }
 }

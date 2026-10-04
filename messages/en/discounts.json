@@ -1,0 +1,165 @@
+{
+  "metadata": {
+    "title": "Discounts"
+  },
+  "page": {
+    "title": "Discounts",
+    "subtitle": "Run a sale, or share a code and see which channels bring in orders.",
+    "create": "Create discount"
+  },
+  "empty": {
+    "title": "No discounts yet",
+    "hint": "A sale lowers your prices for everyone, for as long as you choose. A code is for the people you share it with, and shows you where your buyers came from.",
+    "hintReadOnly": "Owners and editors can create discounts here."
+  },
+  "terms": {
+    "percentEach": "{percent}% off each item",
+    "amountEach": "{amount} off each item",
+    "percentOrder": "{percent}% off the order",
+    "amountOrder": "{amount} off the order",
+    "allProducts": "All products",
+    "someProducts": "{count, plural, one {# product} other {# products}}",
+    "kindCode": "Discount code",
+    "kindAutomatic": "Automatic sale",
+    "status": {
+      "scheduled": "Scheduled",
+      "active": "Active",
+      "paused": "Off",
+      "used_up": "Used up",
+      "ended": "Ended"
+    }
+  },
+  "performance": {
+    "title": "How your discounts are doing",
+    "orders": "Orders with a discount",
+    "revenue": "Revenue from those orders",
+    "given": "Given in discounts",
+    "none": "Nothing yet",
+    "channelsTitle": "Orders by channel",
+    "channelsDescription": "Codes count under the channel you shared them on, or under the code itself when you didn't name one.",
+    "channelsEmpty": "No orders with a discount yet.",
+    "automatic": "Automatic sales",
+    "series": "Orders"
+  },
+  "list": {
+    "title": "Your discounts",
+    "none": "No discounts right now. Deleted discounts keep counting their orders above.",
+    "channel": "Shared on {channel}",
+    "startsOn": "Starts {date}",
+    "endsOn": "Ends {date}",
+    "ended": "Ended {date}",
+    "noEnd": "No end date",
+    "orders": "{orders, plural, =0 {No orders yet} one {# order} other {# orders}}",
+    "uses": "{uses} of {limit} uses",
+    "switchLabel": "On",
+    "edit": "Edit",
+    "endNow": "End now",
+    "delete": "Delete",
+    "copy": {
+      "copy": "Copy code",
+      "copied": "Copied code",
+      "failed": "Couldn't copy the code. Select and copy it manually."
+    }
+  },
+  "confirmDelete": {
+    "title": "Delete this discount?",
+    "body": "It stops applying straight away. Orders it already brought in stay counted.",
+    "confirm": "Delete discount"
+  },
+  "confirmEnd": {
+    "title": "End this sale now?",
+    "body": "Prices go back to normal straight away. To run it again later, create a new sale.",
+    "confirm": "End sale"
+  },
+  "toast": {
+    "deleted": "Discount deleted.",
+    "ended": "Sale ended.",
+    "switchedOn": "Code switched on.",
+    "switchedOff": "Code switched off."
+  },
+  "form": {
+    "newTitle": "New discount",
+    "editTitle": "Edit discount",
+    "back": "Back to discounts",
+    "kind": {
+      "title": "What kind of discount?",
+      "code": "Discount code",
+      "codeHint": "Buyers type it at checkout. Share it on Instagram, in a newsletter or with a creator, and see which channel sells.",
+      "automatic": "Automatic sale",
+      "automaticHint": "Everyone sees the lower price on your product pages. No code needed.",
+      "fixed": "A discount can't change kind. To switch, create a new one."
+    },
+    "code": {
+      "title": "Code",
+      "description": "What buyers type at checkout.",
+      "label": "Code",
+      "generate": "Generate",
+      "hint": "3 to 24 letters or numbers. Buyers can type it in capitals or not."
+    },
+    "channel": {
+      "label": "Channel (optional)",
+      "hint": "Where you'll share this code, so you can see which channel brings in orders.",
+      "suggestions": "Suggested channels",
+      "newsletter": "Newsletter",
+      "creator": "Creator"
+    },
+    "value": {
+      "title": "Discount",
+      "each": "Taken off the price of each item.",
+      "order": "Taken off the order's items. Delivery is not discounted.",
+      "percent": "Percentage",
+      "amount": "Fixed amount",
+      "percentLabel": "Percentage off",
+      "amountLabel": "Amount off",
+      "currencyHint": "Applies only to products priced in this currency."
+    },
+    "products": {
+      "title": "Applies to",
+      "all": "All products",
+      "some": "Specific products",
+      "summary": "{count, plural, =0 {Choose products} one {# product chosen} other {# products chosen}}",
+      "search": "Search products",
+      "none": "No products match."
+    },
+    "schedule": {
+      "title": "When",
+      "timeZone": "Times are in your time zone ({zone}).",
+      "starts": "Starts",
+      "ends": "Ends",
+      "now": "Now",
+      "later": "Later",
+      "noEnd": "No end",
+      "onDate": "On a date",
+      "date": "Date",
+      "time": "Time",
+      "started": "Started {date}",
+      "runFor": "Run for",
+      "preset": {
+        "day": "1 day",
+        "threeDays": "3 days",
+        "week": "1 week",
+        "month": "1 month"
+      }
+    },
+    "limit": {
+      "title": "Limits",
+      "label": "Limit how many orders can use it",
+      "count": "Number of orders"
+    },
+    "enabled": "Code is switched on",
+    "locked": "This sale has started, so only its end can change. To change anything else, end it and create a new sale.",
+    "summary": {
+      "title": "Summary",
+      "startsNow": "Starts now",
+      "starts": "Starts {date}",
+      "ends": "Ends {date}",
+      "noEnd": "No end date",
+      "example": "Example: {title} at {regular} costs {now}."
+    },
+    "create": "Create discount",
+    "save": "Save changes",
+    "saving": "Saving",
+    "created": "Discount created.",
+    "saved": "Discount saved."
+  }
+}

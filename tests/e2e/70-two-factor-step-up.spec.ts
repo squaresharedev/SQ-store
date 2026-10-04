@@ -8,6 +8,7 @@ import {
   continuePastPasskeyOffer,
   enterChallengeCode,
   markSignsInWithGoogle,
+  nameAuthenticator,
   nextCode,
   signInToChallenge,
   signInWithTwoFactor,
@@ -190,7 +191,7 @@ test.describe("two-factor step-up", () => {
     await page.getByRole("button", { name: "Add another passkey or app" }).click();
     const dialog = page.getByRole("dialog", { name: "Add another way to sign in" });
     await chooseAuthenticatorApp(dialog);
-    await dialog.getByLabel("Name this authenticator").fill("Backup tablet");
+    await nameAuthenticator(dialog, "Backup tablet");
     // A code from the EXISTING authenticator, not a password.
     await expect(dialog.getByLabel("Current password")).toHaveCount(0);
     await dialog.getByLabel("Authenticator code").fill(await nextCode(app));

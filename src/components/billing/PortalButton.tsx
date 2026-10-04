@@ -17,14 +17,14 @@ import type { BillingInterval, PaidPlanId } from "@/lib/billing/plans";
 /** The Customer Portal flow a button opens (see lib/billing/provider.ts). */
 export type PortalButtonFlow =
   | { flow: "manage" }
-  | { flow: "cancel" }
   | { flow: "switch"; plan: PaidPlanId; interval: BillingInterval };
 
 const INITIAL: PortalState = {};
 
 /**
- * One button that opens the Stripe Customer Portal (to switch plan, move back
- * to Free, or manage the card and invoices).
+ * One button that opens the Stripe Customer Portal (to switch plan, or manage
+ * the card and invoices). Moving back to Free is not here: that is the in-app
+ * cancel (CancelPlanButton), which asks why.
  *
  * A FORM, because the server may ask for a two-factor code before it opens
  * someone's billing details: the code box appears above the button and the

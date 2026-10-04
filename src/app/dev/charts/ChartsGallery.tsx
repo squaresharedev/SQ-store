@@ -1,9 +1,10 @@
 "use client";
 
 import { helpTextClass } from "@/components/ui/control-styles";
-import { pageShellClass } from "@/components/ui/surface-styles";
+import { pageBleedShellClass, pageGutterClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { ChartCard } from "@/components/analytics/ChartCard";
+import { RevenueHero } from "@/components/analytics/RevenueHero";
 import {
   BarChart,
   CompositionBar,
@@ -118,10 +119,51 @@ const CATEGORY_SALES = [
   { label: "Misc", value: 12 },
 ];
 
+/** Thirty daily buckets shaped by `value(day)`, as the analytics feed sends them. */
+function heroSeries(value: (day: number) => number) {
+  return Array.from({ length: 30 }, (_, day) => {
+    const revenueCents = Math.max(0, Math.round(value(day)));
+    return {
+      date: `2026-09-${String(day + 1).padStart(2, "0")}`,
+      revenueCents,
+      sales: Math.round(revenueCents / 4_000),
+      aovCents: 4_000,
+    };
+  });
+}
+
+/** The window the hero specimens cover, as the page resolves a range. */
+const HERO_RANGE = { from: "2026-09-01", to: "2026-09-30" };
+
+// The analytics revenue hero, once per shape that changes where its figure
+// sits: the figure takes the top corner the line leaves free.
+const HERO_SPECIMENS = [
+  {
+    title: "Bleed — going up",
+    note: "Low on the left, so the figure sits top left and the value labels run down the right",
+    series: heroSeries((day) => 9_000 + day * 2_600 + Math.sin(day * 1.7) * 9_000),
+  },
+  {
+    title: "Bleed — going down",
+    note: "Low on the right, so the figure moves top right and the value labels move left",
+    series: heroSeries((day) => 88_000 - day * 2_400 + Math.sin(day * 1.3) * 10_000),
+  },
+  {
+    title: "Bleed — one early spike",
+    note: "Rising overall, but the room is on the right: the corner is judged on where the line is low",
+    series: heroSeries((day) => (day === 2 ? 120_000 : 8_000 + day * 900 + Math.cos(day) * 5_000)),
+  },
+  {
+    title: "Bleed — empty range",
+    note: "No sales: the same chart lying flat, grey, with words where the figure would be",
+    series: [],
+  },
+];
+
 export function ChartsGallery() {
   return (
-    <main className={cn(pageShellClass, "space-y-6")}>
-      <div>
+    <main className={cn(pageBleedShellClass, "space-y-6")}>
+      <div className={pageGutterClass}>
         <h1 className="text-xl font-semibold text-foreground">Chart kit</h1>
         <p className={helpTextClass}>
           Reusable analytics graphs (components/charts) — every family and
@@ -129,7 +171,29 @@ export function ChartsGallery() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      {/* The one chart that is not a card: it runs the full width of the page,
+          so it sits outside the gutters the rest of the gallery keeps. */}
+      {HERO_SPECIMENS.map((specimen) => {
+        const revenueCents = specimen.series.reduce((sum, point) => sum + point.revenueCents, 0);
+        return (
+          <section key={specimen.title} className="space-y-4">
+            <div className={pageGutterClass}>
+              <h2 className="text-base font-semibold text-foreground">{specimen.title}</h2>
+              <p className={helpTextClass}>{specimen.note}</p>
+            </div>
+            <RevenueHero
+              series={specimen.series}
+              range={HERO_RANGE}
+              revenueCents={revenueCents}
+              netRevenueCents={Math.round(revenueCents * 0.95)}
+              currency="EUR"
+              empty={specimen.series.length === 0}
+            />
+          </section>
+        );
+      })}
+
+      <div className={cn(pageGutterClass, "grid gap-4 md:grid-cols-2")}>
         <ChartCard
           title="Line — multi-series"
           description="Ink leads; refunds pinned red because red means money going back"

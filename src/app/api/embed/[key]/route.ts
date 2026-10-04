@@ -360,8 +360,10 @@ async function publicBlocks(
           imagePlacement: block.imagePlacement,
           // The hosted product page for this tile: an absolute URL on the
           // app's own origin, built from two UUIDs the buyer can already see.
+          // `via=embed` files the visit, and any sale it leads to, under the
+          // embed rather than "direct".
           ...(productPagesOn
-            ? { productUrl: productPageUrl(storefrontId, block.productId) }
+            ? { productUrl: productPageUrl(storefrontId, block.productId, { via: "embed" }) }
             : {}),
         };
       }

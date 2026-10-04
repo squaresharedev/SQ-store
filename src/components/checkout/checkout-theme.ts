@@ -31,6 +31,11 @@ import type { CheckoutStorefront } from "@/types/checkout";
  *     now" and "Pay" are one action in one colour.
  * Inks are derived from whatever they sit on, never chosen.
  */
+/** A quiet text button that opens an optional field ("Add apartment, suite,
+ *  etc.", "Add a discount code"): the page's own ink, brightening on hover. */
+export const checkoutTextButtonClass =
+  "inline-flex items-center gap-1.5 self-start text-sm opacity-75 transition-opacity duration-base ease-standard hover:opacity-100";
+
 export type CheckoutTheme = {
   /** The page and form surface (a hex). */
   surface: string;

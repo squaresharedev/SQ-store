@@ -56,6 +56,10 @@
     "manageBilling": {
       "withRole": "Tu rol de {role, select, owner {propietario} editor {editor} viewer {lector} other {{role}}} no te permite cambiar el plan de esta tienda.",
       "noRole": "No tienes permiso para cambiar el plan de esta tienda."
+    },
+    "manageDiscounts": {
+      "withRole": "Tu rol de {role, select, owner {propietario} editor {editor} viewer {lector} other {{role}}} no te permite gestionar descuentos en esta tienda.",
+      "noRole": "No tienes permiso para gestionar descuentos en esta tienda."
     }
   },
   "notFound": {
@@ -63,7 +67,8 @@
     "product": "No se ha encontrado ese producto.",
     "storefront": "No se ha encontrado ese escaparate.",
     "item": "No se ha encontrado ese elemento.",
-    "order": "No se ha encontrado ese pedido."
+    "order": "No se ha encontrado ese pedido.",
+    "discount": "No se ha encontrado ese descuento."
   },
   "rateLimited": {
     "fix": "Espera unos minutos y vuelve a intentarlo. Si no hay nada reintentándolo en segundo plano, recarga la página primero.",
@@ -82,7 +87,8 @@
     "fileAppeal": "Demasiados intentos de enviar un recurso en poco tiempo.",
     "fulfilOrders": "Demasiados intentos de marcar pedidos como enviados en poco tiempo.",
     "readCheckoutSettings": "Demasiados intentos de leer los ajustes del proceso de pago en poco tiempo.",
-    "changePlan": "Demasiados cambios de plan iniciados en poco tiempo."
+    "changePlan": "Demasiados cambios de plan iniciados en poco tiempo.",
+    "saveDiscounts": "Demasiados cambios de descuentos en poco tiempo."
   },
   "serverError": {
     "fix": "Suele ser algo temporal. Espera un momento y vuelve a intentarlo; si sigue fallando, recarga la página.",
@@ -115,7 +121,10 @@
     "saveCheckoutSettings": "No se han podido guardar los ajustes de tu proceso de pago por un problema en nuestro sistema.",
     "loadPlans": "No se ha podido cargar tu plan por un problema en nuestro lado.",
     "startCheckout": "No se ha podido abrir el proceso de pago por un problema en nuestro lado.",
-    "openBillingPortal": "No se han podido abrir tus datos de facturación por un problema en nuestro lado."
+    "openBillingPortal": "No se han podido abrir tus datos de facturación por un problema en nuestro lado.",
+    "cancelPlan": "No se ha podido cancelar tu plan por un problema en nuestro lado.",
+    "resumePlan": "No se ha podido mantener tu plan por un problema en nuestro lado.",
+    "saveDiscount": "No se ha podido guardar el descuento por un problema en nuestro sistema."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Este producto se ha retirado, no está en pausa.} storefront {Este escaparate se ha retirado, no está en pausa.} other {Este elemento se ha retirado, no está en pausa.}}",
@@ -602,7 +611,11 @@
     "alreadySubscribed": "Tu tienda ya tiene un plan de pago. Cambia de plan en lugar de comprar un segundo.",
     "noBillingAccount": "Esta tienda todavía no tiene cuenta de facturación. Pasa a un plan de pago primero.",
     "noSubscription": "Esta tienda no tiene un plan de pago que cambiar. Elige uno para actualizar.",
-    "ownerOnlyFix": "Solo el propietario de la tienda puede cambiar el plan. Pídele que lo haga, o cambia a tu propia tienda."
+    "ownerOnlyFix": "Solo el propietario de la tienda puede cambiar el plan. Pídele que lo haga, o cambia a tu propia tienda.",
+    "invalidFeedback": "No se han podido leer esos comentarios.",
+    "notCancellable": "Esta tienda no tiene un plan de pago que cancelar, o ya está programado para terminar.",
+    "notResumable": "Este plan no está programado para terminar, o su período pagado ya ha acabado.",
+    "deletionPending": "Tu cuenta está programada para eliminarse, así que su plan termina con ella. Cancela primero la eliminación para conservar tu plan."
   },
   "planLimit": {
     "storefronts": "Tu plan {plan, select, free {Free} starter {Starter} pro {Pro} other {actual}} incluye {cap, plural, one {# escaparate} other {# escaparates}}, y tu tienda los tiene todos.",
@@ -621,5 +634,23 @@
     "planRequiredFix": "Actualiza tu plan en la página Planes para exportar tus pedidos.",
     "rateLimited": "Son muchas exportaciones en poco tiempo.",
     "rateLimitedFix": "Espera unos minutos e inténtalo de nuevo."
+  },
+  "discounts": {
+    "invalid": {
+      "message": "Los datos del descuento no han pasado la validación.",
+      "fix": "Comprueba los campos marcados e inténtalo de nuevo."
+    },
+    "codeTaken": {
+      "message": "Ese código ya está en uso en esta tienda.",
+      "fix": "Elige un código diferente o elimina primero el otro descuento."
+    },
+    "started": {
+      "message": "Esta rebaja ya ha empezado, así que sus condiciones no pueden cambiar.",
+      "fix": "Termínala y crea una nueva rebaja con las nuevas condiciones. Las normas de la UE sobre la indicación de reducciones de precio dependen de que el historial de una rebaja se mantenga tal como era."
+    },
+    "tooMany": {
+      "message": "Esta tienda tiene el máximo de descuentos que puede tener.",
+      "fix": "Elimina los descuentos que ya no uses e inténtalo de nuevo."
+    }
   }
 }

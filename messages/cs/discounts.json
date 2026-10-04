@@ -1,0 +1,165 @@
+{
+  "metadata": {
+    "title": "Slevy"
+  },
+  "page": {
+    "title": "Slevy",
+    "subtitle": "Spusťte akci nebo sdílejte kód a zjistěte, které kanály přinášejí objednávky.",
+    "create": "Vytvořit slevu"
+  },
+  "empty": {
+    "title": "Zatím žádné slevy",
+    "hint": "Akce sníží vaše ceny pro všechny na dobu, kterou zvolíte. Kód je určen těm, s nimiž ho sdílíte, a ukáže vám, odkud vaši kupující přicházejí.",
+    "hintReadOnly": "Slevy tady mohou vytvářet vlastníci a editori."
+  },
+  "terms": {
+    "percentEach": "{percent}% sleva z každé položky",
+    "amountEach": "Sleva {amount} z každé položky",
+    "percentOrder": "{percent}% sleva z objednávky",
+    "amountOrder": "Sleva {amount} z objednávky",
+    "allProducts": "Všechny produkty",
+    "someProducts": "{count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktů}}",
+    "kindCode": "Slevový kód",
+    "kindAutomatic": "Automatická akce",
+    "status": {
+      "scheduled": "Naplánováno",
+      "active": "Aktivní",
+      "paused": "Vypnuto",
+      "used_up": "Vyčerpáno",
+      "ended": "Ukončeno"
+    }
+  },
+  "performance": {
+    "title": "Jak se vám slevy daří",
+    "orders": "Objednávky se slevou",
+    "revenue": "Příjmy z těchto objednávek",
+    "given": "Poskytnuto na slevách",
+    "none": "Zatím nic",
+    "channelsTitle": "Objednávky podle kanálu",
+    "channelsDescription": "Kódy se počítají pod kanálem, na kterém byly sdíleny, nebo přímo pod kódem, pokud kanál není pojmenován.",
+    "channelsEmpty": "Zatím žádné objednávky se slevou.",
+    "automatic": "Automatické akce",
+    "series": "Objednávky"
+  },
+  "list": {
+    "title": "Vaše slevy",
+    "none": "Momentálně žádné slevy. Odstraněné slevy se dále počítají v přehledu výše.",
+    "channel": "Sdíleno na {channel}",
+    "startsOn": "Začíná {date}",
+    "endsOn": "Končí {date}",
+    "ended": "Ukončeno {date}",
+    "noEnd": "Bez data ukončení",
+    "orders": "{orders, plural, =0 {Zatím žádné objednávky} one {# objednávka} few {# objednávky} many {# objednávky} other {# objednávek}}",
+    "uses": "{uses} z {limit} použití",
+    "switchLabel": "Zapnuto",
+    "edit": "Upravit",
+    "endNow": "Ukončit nyní",
+    "delete": "Smazat",
+    "copy": {
+      "copy": "Kopírovat kód",
+      "copied": "Kód zkopírován",
+      "failed": "Kód se nepodařilo zkopírovat. Označte ho a zkopírujte ručně."
+    }
+  },
+  "confirmDelete": {
+    "title": "Smazat tuto slevu?",
+    "body": "Přestane platit okamžitě. Objednávky, které přinesla, se dále počítají.",
+    "confirm": "Smazat slevu"
+  },
+  "confirmEnd": {
+    "title": "Ukončit tuto akci nyní?",
+    "body": "Ceny se okamžitě vrátí na normální úroveň. Chcete-li ji spustit znovu, vytvořte novou akci.",
+    "confirm": "Ukončit akci"
+  },
+  "toast": {
+    "deleted": "Sleva smazána.",
+    "ended": "Akce ukončena.",
+    "switchedOn": "Kód zapnut.",
+    "switchedOff": "Kód vypnut."
+  },
+  "form": {
+    "newTitle": "Nová sleva",
+    "editTitle": "Upravit slevu",
+    "back": "Zpět na slevy",
+    "kind": {
+      "title": "Jaký druh slevy?",
+      "code": "Slevový kód",
+      "codeHint": "Kupující ho zadají při pokladně. Sdílejte ho na Instagramu, v newsletteru nebo s tvůrcem a zjistěte, který kanál prodává.",
+      "automatic": "Automatická akce",
+      "automaticHint": "Každý vidí nižší cenu na stránkách vašich produktů. Žádný kód není potřeba.",
+      "fixed": "Druh slevy nelze změnit. Chcete-li ho změnit, vytvořte novou."
+    },
+    "code": {
+      "title": "Kód",
+      "description": "Co kupující zadají při pokladně.",
+      "label": "Kód",
+      "generate": "Vygenerovat",
+      "hint": "3 až 24 písmen nebo číslic. Kupující ho mohou zadat velkými i malými písmeny."
+    },
+    "channel": {
+      "label": "Kanál (nepovinné)",
+      "hint": "Kde budete tento kód sdílet, abyste viděli, který kanál přináší objednávky.",
+      "suggestions": "Doporučené kanály",
+      "newsletter": "Newsletter",
+      "creator": "Tvůrce"
+    },
+    "value": {
+      "title": "Sleva",
+      "each": "Odečteno z ceny každé položky.",
+      "order": "Odečteno z položek objednávky. Doprava se neslevuje.",
+      "percent": "Procento",
+      "amount": "Pevná částka",
+      "percentLabel": "Procentuální sleva",
+      "amountLabel": "Sleva částkou",
+      "currencyHint": "Platí pouze pro produkty oceněné v této měně."
+    },
+    "products": {
+      "title": "Platí pro",
+      "all": "Všechny produkty",
+      "some": "Konkrétní produkty",
+      "summary": "{count, plural, =0 {Vyberte produkty} one {# produkt vybrán} few {# produkty vybrány} many {# produktu vybráno} other {# produktů vybráno}}",
+      "search": "Hledat produkty",
+      "none": "Žádné produkty neodpovídají."
+    },
+    "schedule": {
+      "title": "Kdy",
+      "timeZone": "Časy jsou ve vašem časovém pásmu ({zone}).",
+      "starts": "Začíná",
+      "ends": "Končí",
+      "now": "Nyní",
+      "later": "Později",
+      "noEnd": "Bez konce",
+      "onDate": "K datu",
+      "date": "Datum",
+      "time": "Čas",
+      "started": "Zahájeno {date}",
+      "runFor": "Trvat",
+      "preset": {
+        "day": "1 den",
+        "threeDays": "3 dny",
+        "week": "1 týden",
+        "month": "1 měsíc"
+      }
+    },
+    "limit": {
+      "title": "Limity",
+      "label": "Omezit počet objednávek, které ho mohou použít",
+      "count": "Počet objednávek"
+    },
+    "enabled": "Kód je zapnutý",
+    "locked": "Tato akce již začala, takže lze měnit pouze její konec. Chcete-li změnit cokoli jiného, ukončete ji a vytvořte novou akci.",
+    "summary": {
+      "title": "Přehled",
+      "startsNow": "Začíná nyní",
+      "starts": "Začíná {date}",
+      "ends": "Končí {date}",
+      "noEnd": "Bez data ukončení",
+      "example": "Příklad: {title} za {regular} stojí nyní {now}."
+    },
+    "create": "Vytvořit slevu",
+    "save": "Uložit změny",
+    "saving": "Ukládání",
+    "created": "Sleva vytvořena.",
+    "saved": "Sleva uložena."
+  }
+}

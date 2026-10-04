@@ -2,6 +2,7 @@
 // surface. Four families, each with subtypes:
 //
 //   LineChart       variant="line" | "area"            trend over time
+//                   (+ `bleed`: edge to edge, on the page instead of in a card)
 //   BarChart        variant="grouped" | "stacked"      vertical columns
 //   HBarChart       variant="grouped" | "stacked"      horizontal bars
 //   CompositionBar  (single divided total bar)         the "one line" h-subtype
@@ -27,12 +28,16 @@ export { ChartTooltipContent } from "@/components/charts/ChartTooltip";
 export { ChartLegend, SliceLegend } from "@/components/charts/ChartLegend";
 export type { ChartDatum, ChartSeries, ChartSlice } from "@/components/charts/types";
 export {
+  BLEED,
   CHART,
   CATEGORICAL,
   CHART_ANIMATION,
   MARK,
+  PLOT,
+  bleedPlot,
   tooltipWrapperClass,
   tooltipLabelClass,
   tooltipValueClass,
 } from "@/components/charts/theme";
 export { compactNumber, formatNumber, formatShare } from "@/components/charts/format";
+export { niceTicks } from "@/components/charts/scale";

@@ -110,10 +110,11 @@ test.describe("two-factor with a passkey", () => {
     await page.getByRole("button", { name: "Remove Passkey" }).click();
     const remove = page.getByRole("dialog", { name: "Turn off two-factor authentication?" });
     await expect(remove).toBeVisible();
-    await expect(remove.getByText("This is a sensitive change. Confirm it's you with your passkey.")).toBeVisible();
+    // The confirmation IS the submit: one button, and no other way to turn it
+    // off from here.
     const confirm = remove.getByRole("button", { name: "Confirm with passkey" });
     await expect(confirm).toBeEnabled({ timeout: 20_000 });
-    // The confirmation IS the submit.
+    await expect(remove.getByRole("button", { name: "Turn off" })).toHaveCount(0);
     await confirm.click();
     await expect(page.locator('[data-two-factor-status="off"]')).toBeVisible({ timeout: 30_000 });
 

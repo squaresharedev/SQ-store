@@ -111,7 +111,7 @@ export function OrderStatusView({
     <PageShell
       storefront={storefront}
       backgroundColor={theme.surface}
-      photo={storefront.pagePhotoUrl ? { url: storefront.pagePhotoUrl, tint: theme.surface } : null}
+      photo={storefront.pagePhoto ? { ...storefront.pagePhoto, tint: theme.surface } : null}
       font={productPage.font}
       ink={theme.ink}
       preview={preview}

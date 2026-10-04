@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { ArrowRight, Image as ImageIcon, Trash2 } from "lucide-react";
+import { ArrowRight, Trash2 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import type { Product } from "@/types/product";
 import {
@@ -21,12 +21,14 @@ import {
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
-import { destructiveButtonClass, errorTextClass, fieldBaseClass, ghostButtonClass, infoTextClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
+import { destructiveButtonClass, errorTextClass, fieldBaseClass, ghostButtonClass, infoTextClass, primaryButtonClass } from "@/components/ui/control-styles";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { useSettingTarget } from "@/lib/storefront/setting-context";
 import { useSampleMode } from "@/lib/storefront/sample-mode";
 import { InfoTip } from "@/components/ui/InfoTip";
-import { Modal } from "@/components/ui/modal";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { HeroMark } from "@/components/ui/HeroMark";
+import { ProductThumb } from "@/components/ui/ProductThumb";
 import { CardStyleControls } from "./CardStyleControls";
 import { PriceTagControls } from "./PriceTagControls";
 
@@ -83,7 +85,6 @@ export function ProductBlockEditor({
 }) {
   const fieldId = useId();
   const t = useTranslations("Storefront");
-  const tCommon = useTranslations("Common");
   const locale = useLocale();
   const [draftTitle, setDraftTitle] = useState(product?.title ?? "");
   const [draftPrice, setDraftPrice] = useState(
@@ -222,25 +223,7 @@ export function ProductBlockEditor({
       <div className="space-y-1.5">
         <div className="flex items-start gap-2.5">
           {/* Two h-8 fields plus their gap-1.5, so the photo lines up with both. */}
-          <div className="size-[4.375rem] shrink-0 overflow-hidden rounded-sm bg-muted">
-            {product.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
-              <img
-                src={product.imageUrl}
-                alt=""
-                draggable={false}
-                className="size-full object-cover"
-              />
-            ) : (
-              <div className="flex size-full items-center justify-center">
-                <ImageIcon
-                  className="size-4 text-muted-foreground"
-                  strokeWidth={2}
-                  aria-hidden="true"
-                />
-              </div>
-            )}
-          </div>
+          <ProductThumb src={product.imageUrl} className="size-[4.375rem]" />
           <div className="min-w-0 flex-1 space-y-1.5">
             {/* Labels are for assistive tech only: the placeholder, the
                 currency sign and the values themselves say which is which. */}
@@ -397,7 +380,7 @@ export function ProductBlockEditor({
         {t("productBlock.removeFromGrid")}
       </button>
 
-      <Modal
+      <ConfirmDialog
         open={confirmOpen}
         // Closable even while the save is in flight: the update carries on
         // server-side and its outcome still lands as a toast either way, which
@@ -406,52 +389,42 @@ export function ProductBlockEditor({
         onClose={() => {
           setConfirmOpen(false);
         }}
+        // The product itself, since that is what changes, then what changes on it.
+        visual={
+          <HeroMark>
+            <ProductThumb src={product.imageUrl} className="size-full" />
+          </HeroMark>
+        }
         title={t("productBlock.modal.title")}
         description={t("productBlock.modal.description")}
+        confirmLabel={t("productBlock.modal.updateEverywhere")}
+        pendingLabel={t("productBlock.updating")}
+        pending={saving}
+        onConfirm={confirmSave}
       >
-        <div className="space-y-4">
-          <ul className="space-y-1 font-inter text-sm text-muted-foreground">
-            {titleChanged && (
-              <li>
-                {t("productBlock.modal.nameLabel")}{" "}
-                <span className="line-through">{product.title}</span>{" "}
-                <span className="font-medium text-foreground">
-                  {trimmedTitle}
-                </span>
-              </li>
-            )}
-            {priceChanged && draftCents !== null && (
-              <li>
-                {t("productBlock.modal.priceLabel")}{" "}
-                <span className="line-through">
-                  {formatPrice(product.price, product.currency, locale)}
-                </span>{" "}
-                <span className="font-medium text-foreground">
-                  {formatPrice(draftCents / 100, product.currency, locale)}
-                </span>
-              </li>
-            )}
-          </ul>
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => setConfirmOpen(false)}
-              disabled={saving}
-              className={secondaryButtonClass}
-            >
-              {tCommon("actions.cancel")}
-            </button>
-            <button
-              type="button"
-              onClick={confirmSave}
-              disabled={saving}
-              className={primaryButtonClass}
-            >
-              {saving ? t("productBlock.updating") : t("productBlock.modal.updateEverywhere")}
-            </button>
-          </div>
-        </div>
-      </Modal>
+        <ul className="space-y-1 text-center font-inter text-sm text-muted-foreground">
+          {titleChanged && (
+            <li>
+              {t("productBlock.modal.nameLabel")}{" "}
+              <span className="line-through">{product.title}</span>{" "}
+              <span className="font-medium text-foreground">
+                {trimmedTitle}
+              </span>
+            </li>
+          )}
+          {priceChanged && draftCents !== null && (
+            <li>
+              {t("productBlock.modal.priceLabel")}{" "}
+              <span className="line-through">
+                {formatPrice(product.price, product.currency, locale)}
+              </span>{" "}
+              <span className="font-medium text-foreground">
+                {formatPrice(draftCents / 100, product.currency, locale)}
+              </span>
+            </li>
+          )}
+        </ul>
+      </ConfirmDialog>
     </div>
   );
 }

@@ -12,10 +12,14 @@
 //   - "stripe": TODO(stripe). Creates a Checkout Session (ui_mode "elements")
 //     on the seller's CONNECTED account from the quote, with
 //     application_fee_amount as our cut (sellerFee below: the seller's plan
-//     rate on the item subtotal) and the quote in its metadata; the
-//     buyer confirms payment in the Payment Element; the webhook (and the
-//     return route, idempotently) hand the paid session to the order writer.
-//     See the header of lib/orders/record.ts for what the webhook owes it.
+//     rate on the items after discounts) and the quote in its metadata,
+//     including the discount fields recordPaidOrder takes (unit price,
+//     discount, credit) and the buyer's channel; the buyer confirms payment in
+//     the Payment Element;
+//     the webhook (and the return route, idempotently) hand the paid session
+//     to the order writer. Discounts need nothing from Stripe: the quote's
+//     total is already discounted. See the header of lib/orders/record.ts
+//     for what the webhook owes it.
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recordPaidOrder } from "@/lib/orders/record";
@@ -23,7 +27,7 @@ import { readAccountBilling } from "@/lib/billing/account-plan";
 import { saleFee, type SaleFee } from "@/lib/billing/fees";
 import { testPaymentsEnabled, type CheckoutProviderId } from "@/lib/checkout/availability";
 import type { CheckoutQuote } from "@/lib/checkout/quote";
-import type { ShipTo } from "@/types/order-view";
+import type { OrderChannel, ShipTo } from "@/types/order-view";
 
 /** Who is buying and where it goes, as validated by the order route. */
 export type CheckoutBuyer = {
@@ -32,6 +36,9 @@ export type CheckoutBuyer = {
   shipTo: ShipTo | null;
   giftMessage: string | null;
   supplyConsent: boolean;
+  /** Where they arrived from (the seller's buy button, the embed, or
+   *  `direct`). A label on the order only: nothing here prices it. */
+  channel: OrderChannel;
 };
 
 export type PlaceResult =
@@ -43,15 +50,16 @@ export type PlaceResult =
 const TEST_SESSION_PREFIX = "cs_sstest_";
 
 /**
- * Our cut of this sale: the seller's plan rate (lib/billing/plans.ts) on the
- * item subtotal, shipping excluded. Null when the seller's plan cannot be
- * read, and the sale is then refused rather than charged a guessed rate: the
- * fee is part of the seller's contract, and a buyer retrying a moment later
- * loses nothing.
+ * Our cut of this sale: the seller's plan rate (lib/billing/plans.ts) on what
+ * the buyer pays for the items, after discounts, shipping excluded. A seller
+ * is never charged a fee on money they gave away. Null when the seller's plan
+ * cannot be read, and the sale is then refused rather than charged a guessed
+ * rate: the fee is part of the seller's contract, and a buyer retrying a
+ * moment later loses nothing.
  */
 async function sellerFee(quote: CheckoutQuote): Promise<SaleFee | null> {
   const billing = await readAccountBilling(quote.gate.ownerId);
-  return billing.ok ? saleFee(billing.billing.plan, quote.subtotalCents) : null;
+  return billing.ok ? saleFee(billing.billing.plan, quote.itemsCents) : null;
 }
 
 /**
@@ -96,9 +104,12 @@ async function placeTestOrder(
     productId: quote.productId,
     sellerId: quote.gate.ownerId,
     storefrontId: quote.gate.storefront.id,
-    channel: "direct",
+    channel: buyer.channel,
     quantity: quote.quantity,
     selection: quote.selection,
+    unitPriceCents: quote.regularUnitCents,
+    discountId: quote.discount?.id ?? null,
+    credit: quote.credit,
     amountCents: quote.totalCents,
     shippingCents: quote.shippingCents,
     ...fee,

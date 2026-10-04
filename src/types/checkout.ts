@@ -2,6 +2,7 @@ import type { ProductPageImage, ProductPageProduct } from "@/types/product";
 import type { ProductPageReportScopes, ProductPageStorefront } from "@/types/product-page";
 import type { CheckoutPageConfig } from "@/types/storefront";
 import type { TrackingLink } from "@/types/order-view";
+import type { CodeTerms } from "@/types/discount";
 
 // What the checkout RENDERS. Client-safe types only, like types/product-page.ts:
 // the public loader (lib/checkout/page.ts) builds one for a buyer and the
@@ -35,7 +36,18 @@ export type CheckoutErrorCode =
   | "invalid"
   | "rate_limited"
   | "unavailable"
-  | "failed";
+  | "failed"
+  /** A discount code that does not apply to this order (any reason). */
+  | "discount_invalid"
+  /** The total changed since the page was opened (a sale ended, a price
+   *  moved). Nothing was charged; the buyer sees the new total first. */
+  | "price_changed";
+
+/** The discount-code check's answer: the code's terms, or one refusal for
+ *  every reason it cannot be used (nothing here says whether a code exists). */
+export type DiscountCheckResponse =
+  | { ok: true; terms: CodeTerms }
+  | { ok: false; error: "discount_invalid" | "rate_limited" | "unavailable" };
 
 /** The order route's answer. `fields` names the inputs to mark, by form name. */
 export type PlaceOrderResponse =

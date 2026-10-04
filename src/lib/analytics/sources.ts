@@ -117,7 +117,7 @@ export const SIGNAL_SOURCES: AnalyticsSource[] = [
   {
     id: "checkout_view",
     icon: ShoppingBag,
-    panels: ["trend", "storefronts"],
+    panels: ["trend", "storefronts", "channels"],
     recordedOnly: true,
   },
   {

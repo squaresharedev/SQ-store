@@ -147,7 +147,8 @@
       "thankYouCelebration": "Bedankanimatie",
       "checkoutPayButton": "Betaalknop",
       "productPagePhoto": "Foto van de productpagina",
-      "checkoutPhoto": "Foto van afrekenen en bedankpagina"
+      "checkoutPhoto": "Foto van afrekenen",
+      "thanksPhoto": "Foto van de bedankpagina"
     }
   },
   "editorSearch": {
@@ -1365,7 +1366,8 @@
   "pagePhoto": {
     "label": "Foto",
     "infoLabel": "Hoe de foto wordt gebruikt",
-    "info": "Wordt achter de pagina getoond en getint met de paginakleur, zodat de tekst leesbaar blijft. Verander de kleur om de foto lichter of donkerder te maken.",
-    "remove": "Foto verwijderen"
+    "info": "Wordt achter de pagina getoond. De laag in de paginakleur houdt de tekst leesbaar; zet hem uit om de foto onaangepast te tonen.",
+    "remove": "Foto verwijderen",
+    "overlay": "Kleurlaag"
   }
 }

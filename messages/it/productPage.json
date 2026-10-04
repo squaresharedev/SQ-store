@@ -329,8 +329,28 @@
       "rate_limited": "Troppi tentativi. Attendi qualche minuto e riprova.",
       "unavailable": "Il checkout non è disponibile al momento. Non è stato addebitato nulla.",
       "failed": "Qualcosa è andato storto e non è stato addebitato nulla. Riprova.",
-      "invalid": "Alcuni dettagli richiedono una verifica. Controlla i campi evidenziati."
+      "invalid": "Alcuni dettagli richiedono una verifica. Controlla i campi evidenziati.",
+      "discount_invalid": "Questo codice sconto non può più essere usato. Rimuovilo per pagare il prezzo intero.",
+      "price_changed": "Il prezzo è cambiato mentre questa pagina era aperta, quindi non è stato addebitato nulla. Controlla il nuovo totale, poi paga."
     },
-    "editHeadline": "Titolo del checkout"
+    "editHeadline": "Titolo del checkout",
+    "discount": {
+      "add": "Aggiungi un codice sconto",
+      "label": "Codice sconto",
+      "apply": "Applica",
+      "applying": "Verifica",
+      "remove": "Rimuovi",
+      "applied": "{code} applicato.",
+      "saleBetter": "{code} è valido, ma il tuo prezzo in promozione è già più basso, quindi abbiamo mantenuto quello.",
+      "invalid": "Questo codice non può essere usato per questo ordine.",
+      "rateLimited": "Troppi codici inseriti. Aspetta un po', poi riprova.",
+      "line": "Sconto ({code})"
+    }
+  },
+  "sale": {
+    "wasNow": "Era {was}, ora {now}",
+    "percentOff": "-{percent}%",
+    "priorNote": "Prezzo barrato: il prezzo più basso applicato nei 30 giorni precedenti la riduzione.",
+    "endsOn": "Promozione fino al {date}"
   }
 }

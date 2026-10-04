@@ -17,6 +17,7 @@ import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 import { uuidField } from "@/lib/validation/inputs";
 import { parseStoredStorefrontConfig } from "@/lib/validation/storefront";
 import { presignGetUrl } from "@/lib/r2";
+import { signPagePhoto } from "@/lib/storefront/uploads";
 import { resolveProductPage } from "@/lib/storefront/product-page";
 import { resolveCheckoutPage } from "@/lib/storefront/checkout-page";
 import { findShippingProfile } from "@/lib/storefront/shipping";
@@ -29,7 +30,7 @@ import { parseOrderSelection } from "@/lib/orders/selection";
 import { parseFulfilment } from "@/lib/orders/fulfilment";
 import { trackingLinkFor } from "@/lib/orders/carriers";
 import { buyerWithdrawal } from "@/lib/orders/withdrawal";
-import { parseGallery, parseOptionGroups } from "@/lib/products/detail";
+import { orderPhotoKey } from "@/lib/orders/photo";
 import type { OrderPageData } from "@/types/checkout";
 
 const idSchema = uuidField();
@@ -132,16 +133,7 @@ export const getOrderPage = cache(
     // order (and the buyer's receipt) stands, but the page must not keep
     // showing content that was removed.
     if (product && isContentVisible(product.moderation_status)) {
-      const groups = parseOptionGroups(product.option_groups);
-      const chosen = new Set(
-        groups.flatMap((group) =>
-          group.options
-            .filter((option) => selection.some((row) => row.label === group.name && row.value === option.name))
-            .map((option) => option.id),
-        ),
-      );
-      const own = parseGallery(product.gallery).find((image) => image.optionId && chosen.has(image.optionId));
-      const photoKey = own?.key ?? product.image_key;
+      const photoKey = orderPhotoKey(product, selection);
       const url = photoKey ? await presignGetUrl(photoKey) : null;
       if (url) photo = { url, alt: order.product_title };
     }
@@ -151,9 +143,7 @@ export const getOrderPage = cache(
       theme.background.kind === "image" ? await presignGetUrl(theme.background.key) : null;
     const customFontUrl = theme.customFont ? await presignGetUrl(theme.customFont.key) : null;
     const checkoutPage = resolveCheckoutPage(config);
-    const pagePhotoUrl = checkoutPage.backgroundImage
-      ? await presignGetUrl(checkoutPage.backgroundImage.key)
-      : null;
+    const pagePhoto = await signPagePhoto(checkoutPage.thanksBackgroundImage);
 
     const shipTo = parseShipTo(order.ship_to);
     const fulfilment = parseFulfilment(order);
@@ -176,7 +166,7 @@ export const getOrderPage = cache(
         seller,
         backgroundImageUrl,
         customFontUrl,
-        pagePhotoUrl,
+        pagePhoto,
       },
       order: {
         ref,

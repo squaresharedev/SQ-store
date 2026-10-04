@@ -147,7 +147,8 @@
       "thankYouCelebration": "Animation de remerciement",
       "checkoutPayButton": "Bouton de paiement",
       "productPagePhoto": "Photo de la page produit",
-      "checkoutPhoto": "Photo du paiement et du remerciement"
+      "checkoutPhoto": "Photo du paiement",
+      "thanksPhoto": "Photo de la page de remerciement"
     }
   },
   "editorSearch": {
@@ -1365,7 +1366,8 @@
   "pagePhoto": {
     "label": "Photo",
     "infoLabel": "Comment la photo est utilisée",
-    "info": "Affichée derrière la page et teintée de la couleur de la page, pour que le texte reste lisible. Changez la couleur pour éclaircir ou assombrir la photo.",
-    "remove": "Retirer la photo"
+    "info": "Affichée derrière la page. La couche de la couleur de la page garde le texte lisible ; désactivez-la pour montrer la photo telle quelle.",
+    "remove": "Retirer la photo",
+    "overlay": "Couche de couleur"
   }
 }

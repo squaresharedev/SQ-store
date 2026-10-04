@@ -41,7 +41,7 @@ keys themselves are the lib agent's responsibility.
 separators. They must be threaded with a locale value (from `next-intl`'s
 `useFormatter` / `getFormatter`) rather than wrapped with `t()`. These are
 tracked in `docs/plans/04-ui-localisation.md` Phase 3. Affected chart files:
-`RevenueTrendChart.tsx`, `AovTrendChart.tsx`, `ChannelSplitChart.tsx`,
+`RevenueHero.tsx`, `AovTrendChart.tsx`, `ChannelSplitChart.tsx`,
 `TopProductsChart.tsx`, `WeekdayChart.tsx`, `StatusBreakdown.tsx`.
 
 ---

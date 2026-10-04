@@ -234,9 +234,11 @@ export function EmbedSettings({
         </div>
       </section>
 
-      <section className={cn(codeSurfaceClass, "overflow-hidden")}>
-        <div className="flex items-center justify-between gap-3 border-b border-border/40 px-4 py-2">
-          <span className="flex items-center gap-2 font-inter text-xs font-medium text-surface-light/70">
+      {/* Idle until Copy works: the border drains to grey and holds still (see
+          .code-surface[data-idle]), and lights up when embedding goes live. */}
+      <section className={codeSurfaceClass} data-idle={canCopy ? undefined : ""}>
+        <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2">
+          <span className="flex items-center gap-2 font-inter text-xs font-medium text-muted-foreground">
             <Code2 className="size-4" strokeWidth={2} aria-hidden="true" />
             {t("snippetLabel")}
           </span>

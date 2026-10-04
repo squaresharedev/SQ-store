@@ -109,7 +109,8 @@
       "nameAlternative": "Oder dein vollständiger Name, wenn du unter eigenem Namen verkaufst.",
       "addressPlaceholder": "z. B. Musterstraße 12\n10115 Berlin\nDeutschland",
       "emailPlaceholder": "z. B. hallo@deinshop.example",
-      "emailHelp": "Wohin Käufer dir schreiben. Diese kann sich von deiner Anmelde-E-Mail unterscheiden."
+      "emailHelp": "Wohin Käufer dir schreiben. Diese kann sich von deiner Anmelde-E-Mail unterscheiden.",
+      "emailTipLabel": "Zu dieser E-Mail-Adresse"
     },
     "confirm": {
       "goLive": "Deine Produktseiten gehen online, sobald sie bestätigt ist."
@@ -155,7 +156,7 @@
     "shortcut": "Tastenkürzel: <kbd>{shortcut}</kbd>",
     "skipTour": "Tour überspringen",
     "next": "Weiter",
-    "openingPage": "{page, select, overview {Übersicht wird geöffnet…} products {Produkte werden geöffnet…} storefront {Schaufenster wird geöffnet…} orders {Bestellungen werden geöffnet…} analytics {Analysen werden geöffnet…} payments {Zahlungen werden geöffnet…} settings {Einstellungen werden geöffnet…} sampleStorefront {Beispiel-Schaufenster wird geöffnet…} other {Wird geöffnet…}}"
+    "openingPage": "{page, select, overview {Übersicht wird geöffnet…} products {Produkte werden geöffnet…} storefront {Schaufenster wird geöffnet…} orders {Bestellungen werden geöffnet…} discounts {Rabatte werden geöffnet…} analytics {Analysen werden geöffnet…} payments {Zahlungen werden geöffnet…} settings {Einstellungen werden geöffnet…} sampleStorefront {Beispiel-Schaufenster wird geöffnet…} other {Wird geöffnet…}}"
   },
   "tourReplay": {
     "title": "Geführte Tour",
