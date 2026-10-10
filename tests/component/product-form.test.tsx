@@ -401,7 +401,7 @@ describe("ProductForm - unsaved changes", () => {
     await user.type(screen.getByPlaceholderText(/ambient loops/i), "Half typed");
     await user.click(screen.getByRole("button", { name: /^cancel$/i }));
     const dialog = await screen.findByRole("dialog");
-    await user.click(within(dialog).getByRole("button", { name: /^cancel$/i }));
+    await user.click(within(dialog).getByRole("button", { name: /^keep editing$/i }));
 
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
@@ -416,7 +416,7 @@ describe("ProductForm - unsaved changes", () => {
 
     await user.type(screen.getByPlaceholderText(/ambient loops/i), "Half typed");
     await user.click(screen.getByRole("button", { name: /^cancel$/i }));
-    await user.click(await screen.findByRole("button", { name: /^discard$/i }));
+    await user.click(await screen.findByRole("button", { name: /^discard changes$/i }));
 
     await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/products"));
   });
