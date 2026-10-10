@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { appOrigin } from "@/lib/app-url";
-import { getAssurance, getUser } from "@/lib/auth/session";
+import { getAssurance, getProfile, getUser } from "@/lib/auth/session";
 import { STEP_UP_FIELDS, requireStepUpState } from "@/lib/auth/mfa";
 import { checkPassword } from "@/lib/auth/reauth";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
@@ -36,6 +36,12 @@ import {
 } from "@/lib/errors";
 import { msg } from "@/i18n/types";
 import { endPlanForDeletion } from "@/lib/billing/lifecycle";
+import { deletionDueAt } from "@/lib/account-deletion/policy";
+import { recordDeletionRequest, withdrawDeletionRequest } from "@/lib/account-deletion/requests";
+import { sendDeletionScheduledEmail } from "@/lib/account-deletion/emails";
+import { alertOps } from "@/lib/ops/alert";
+import { cronConfigured } from "@/lib/ops/cron";
+import { DEFAULT_LOCALE, parseLocale } from "@/i18n/locales";
 import type { Tables, TablesUpdate } from "@/types";
 import type { z } from "zod";
 
@@ -581,10 +587,12 @@ export async function saveNotifications(
 // --- Danger zone -----------------------------------------------------------
 
 /**
- * Deliberately a "request deletion" soft flag, not a hard delete. A complete
- * hard delete needs a service-role job (auth.admin.deleteUser cascades to
- * profiles/products/storefronts) plus R2 object cleanup. Wiring that here
- * with the anon-key client would silently half-delete, so we flag instead.
+ * A REQUEST, not the deletion. The deletion itself is the scheduled job
+ * (lib/account-deletion/run.ts), which runs once the waiting period is over
+ * and nothing is owed to a buyer; until it begins, "Keep my account" undoes
+ * this. What the job acts on is the request recorded HERE, in a table only the
+ * server writes, after the checks below; the flag on the profile is set
+ * alongside for the seller's own pages and is not what anything is deleted by.
  * Owner-scoped: the id comes from the session, never from the client.
  */
 export async function requestAccountDeletion(
@@ -608,7 +616,9 @@ export async function requestAccountDeletion(
     return TOO_MANY;
   }
 
-  const requestedAt = new Date().toISOString();
+  // The request the job will act on. Asking twice keeps the first date.
+  const requestedAt = await recordDeletionRequest(user.id);
+  if (!requestedAt) return SAVE_FAILED;
   const ok = await updateOwnProfile(user.id, {
     deletion_requested_at: requestedAt,
   });
@@ -617,6 +627,25 @@ export async function requestAccountDeletion(
   console.warn(
     `[settings] account deletion REQUESTED user=${user.id} at=${requestedAt}`,
   );
+  // Where the job that carries this out is not switched on (no CRON_SECRET),
+  // the request would wait for a schedule that never comes. Then a person has
+  // to hear of it instead. Ids only; alertOps cannot throw.
+  if (!cronConfigured()) {
+    await alertOps("An account deletion was requested and the deletion job is switched off", {
+      user: user.id,
+      requested: requestedAt,
+    });
+  }
+  // Said to the account's own inbox, with the way to stop it: the notice a
+  // real owner needs if it was not them who asked. Best-effort, never throws.
+  if (user.email) {
+    const profile = await getProfile();
+    await sendDeletionScheduledEmail(
+      user.email,
+      parseLocale(profile?.locale) ?? DEFAULT_LOCALE,
+      deletionDueAt(requestedAt).toISOString(),
+    );
+  }
   // A paid plan stops renewing: it runs to the end of the period already paid
   // for, then the account is on Free until it is deleted. Best-effort by
   // design (lib/billing/lifecycle.ts logs a failure for support): the request
@@ -635,6 +664,13 @@ export async function cancelAccountDeletion(
   const rejected = unknownField(formData, []);
   if (rejected) return rejected;
 
+  // Only a request that has not begun: once the job has started taking the
+  // account apart, keeping it would keep half of it.
+  const withdrawn = await withdrawDeletionRequest(user.id);
+  if (withdrawn === "started") {
+    return failed(actionError("invalid_input", msg("Errors.settings.deletionUnderWay")));
+  }
+  if (withdrawn === "failed") return SAVE_FAILED;
   if (!(await updateOwnProfile(user.id, { deletion_requested_at: null }))) {
     return SAVE_FAILED;
   }

@@ -30,6 +30,8 @@ describe("embedded supabase replica", () => {
     // replica did not carry them until 2026-08-07, so no test could see them.
     // If this list needs changing, check `pnpm check:migrations` first.
     expect(names).toEqual([
+      // Whose account is to be deleted, and since when (20261010). Service-role only.
+      "account_deletion_requests",
       "admin_audit_log",
       "admin_users",
       "artifact_likes",

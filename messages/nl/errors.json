@@ -210,7 +210,8 @@
     "resetRateLimited": "Te veel herstel-e-mails. Wacht even voordat je het opnieuw probeert.",
     "resetSendRateLimited": "Te veel verzoeken. Wacht een minuut en probeer het opnieuw.",
     "resetFailed": "De herstel-e-mail kon niet worden verzonden. Probeer het opnieuw.",
-    "contactEmailTakesNoMail": "Het domein van dat contact-e-mailadres accepteert geen e-mail. Controleer de spelling, of gebruik een adres dat kopers echt kunnen bereiken."
+    "contactEmailTakesNoMail": "Het domein van dat contact-e-mailadres accepteert geen e-mail. Controleer de spelling, of gebruik een adres dat kopers echt kunnen bereiken.",
+    "deletionUnderWay": "Dit account wordt al verwijderd en kan niet meer worden behouden."
   },
   "contactVerification": {
     "unavailable": "{channel, select, email {E-mailbevestiging is nu niet beschikbaar.} other {Bevestiging per sms is nu niet beschikbaar.}}",

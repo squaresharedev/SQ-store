@@ -210,7 +210,8 @@
     "resetRateLimited": "Zu viele Zurücksetzungs-E-Mails. Warte eine Weile, bevor du es erneut versuchst.",
     "resetSendRateLimited": "Zu viele Anfragen. Warte eine Minute und versuche es erneut.",
     "resetFailed": "Die Zurücksetzungs-E-Mail konnte nicht gesendet werden. Versuche es erneut.",
-    "contactEmailTakesNoMail": "Die Domain dieser Kontakt-E-Mail akzeptiert keine E-Mails. Überprüfe die Schreibweise oder verwende eine Adresse, die Käufer tatsächlich erreichen können."
+    "contactEmailTakesNoMail": "Die Domain dieser Kontakt-E-Mail akzeptiert keine E-Mails. Überprüfe die Schreibweise oder verwende eine Adresse, die Käufer tatsächlich erreichen können.",
+    "deletionUnderWay": "Dieses Konto wird bereits gelöscht und kann nicht mehr behalten werden."
   },
   "contactVerification": {
     "unavailable": "{channel, select, email {Die E-Mail-Bestätigung ist gerade nicht verfügbar.} other {Die Bestätigung per SMS ist gerade nicht verfügbar.}}",

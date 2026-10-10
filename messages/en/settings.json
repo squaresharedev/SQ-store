@@ -142,11 +142,19 @@
     },
     "delete": {
       "requestedTitle": "Deletion requested",
-      "requestedDescription": "You asked us to delete this account on {date}. It's flagged for permanent deletion, products and storefront included. Until that actually runs, you can still change your mind.",
+      "requestedDescription": "You asked us to delete this account on {date}. It will be permanently deleted on {deleteOn}, products, storefronts and orders included. Until then you can change your mind.",
+      "started": "This account is being deleted now. That can no longer be undone.",
+      "holdsTitle": "Deletion is waiting on your orders",
+      "holds": {
+        "toShip": "You still have orders to ship.",
+        "paymentPending": "A buyer's payment is still being confirmed.",
+        "disputed": "A payment is in dispute.",
+        "recentSale": "Your account is kept until {date}, {days} days after your last sale, so buyers can still reach their orders."
+      },
       "cancelling": "Cancelling…",
       "keepButton": "Keep my account",
       "title": "Delete account",
-      "description": "This flags your account, products and storefront for permanent deletion. No soft-pedaling: once it runs, it's gone.",
+      "description": "Your account, products, storefronts and orders are permanently deleted {days} days after you ask. Until then you can change your mind. After that it's gone.",
       "deleteButton": "Delete my account",
       "confirmLabel": "Type <code>{phrase}</code> to confirm",
       "flagging": "Flagging…",
@@ -156,6 +164,18 @@
     "success": {
       "deletionRequested": "Deletion requested.",
       "deletionCancelled": "Deletion request cancelled. Good to have you back."
+    },
+    "email": {
+      "scheduled": {
+        "subject": "Your Square Share account is scheduled for deletion",
+        "body": "You asked us to delete your Square Share account. It will be permanently deleted on {date}, with its products, storefronts, orders and files.",
+        "undo": "Changed your mind? Sign in and choose Keep my account: {url}"
+      },
+      "notYou": "If you didn't ask for this, write to {email} right away.",
+      "deleted": {
+        "subject": "Your Square Share account has been deleted",
+        "body": "Your Square Share account and everything in it (products, storefronts, orders and uploaded files) has been permanently deleted, as you asked on {date}."
+      }
     }
   },
   "notifications": {

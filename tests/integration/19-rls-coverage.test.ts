@@ -68,6 +68,11 @@ const POLICY_FREE_BY_DESIGN = new Set([
   // role (lib/billing). A client that could write it could put itself on Pro;
   // members read their store's plan through the server, never the table.
   "seller_billing",
+  // Account deletion (20261010_account_deletion_requests): the record the
+  // deletion job acts on. A client that could write it could delete an account
+  // without the two-factor step or the waiting period, or, by removing a row,
+  // call off a deletion its owner asked for.
+  "account_deletion_requests",
   // The webhook's idempotency ledger: an event id recorded here is one that is
   // never applied again, so a client that could write it could block one.
   "stripe_events",

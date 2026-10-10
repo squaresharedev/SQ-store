@@ -84,6 +84,15 @@
   // Stripe Tax, the Customer Portal) is set up first; a price that does not
   // match plans.ts refuses checkout rather than charge it.
   //
+  // ACCOUNT DELETIONS (src/lib/account-deletion). A request made in Settings
+  // is carried out by a scheduled job 14 days later, once the seller owes no
+  // buyer anything. OFF until one secret exists in two places:
+  //   CRON_SECRET   `wrangler secret put CRON_SECRET` (32+ random characters),
+  //                 and the same value as a repository secret, which
+  //                 .github/workflows/scheduled.yml calls the job with daily.
+  // Without it the job's route answers 404 and requests simply wait. The
+  // migration 20261010_account_deletion_requests must be applied first.
+  //
   // Bindings (KV/R2/D1/Hyperdrive/secrets) get added here as the dashboard
   // grows. Secrets for the Workers runtime go in `.dev.vars` (local) and
   // `wrangler secret put` / the CF dashboard (production) — never in this file.

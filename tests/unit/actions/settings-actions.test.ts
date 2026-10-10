@@ -56,6 +56,21 @@ const STEP_UP_REFUSAL = {
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
+// The record a deletion is carried out from is a service-role table with its
+// own module (lib/account-deletion/requests.ts, covered by its integration
+// test). Here it answers as told, so the ACTIONS' use of it can be asserted:
+// that they write it before the profile flag, and obey a refusal.
+const recordDeletionRequestMock = vi.fn<(userId: string) => Promise<string | null>>();
+const withdrawDeletionRequestMock = vi.fn<(userId: string) => Promise<"gone" | "started" | "failed">>();
+vi.mock("@/lib/account-deletion/requests", () => ({
+  recordDeletionRequest: (userId: string) => recordDeletionRequestMock(userId),
+  withdrawDeletionRequest: (userId: string) => withdrawDeletionRequestMock(userId),
+}));
+const sendDeletionScheduledEmailMock = vi.fn<(...args: unknown[]) => Promise<boolean>>();
+vi.mock("@/lib/account-deletion/emails", () => ({
+  sendDeletionScheduledEmail: (...args: unknown[]) => sendDeletionScheduledEmailMock(...args),
+}));
+
 // next/headers is imported by settings/actions.ts even though none of the
 // tested functions call siteOrigin(). Mock it to prevent side effects.
 vi.mock("next/headers", () => ({
@@ -768,19 +783,53 @@ describe("requestAccountDeletion", () => {
     expect(db.update).not.toHaveBeenCalled();
   });
 
-  it("correct phrase sets deletion_requested_at on the profile", async () => {
+  it("correct phrase records the request, then sets deletion_requested_at on the profile", async () => {
     getUserMock.mockResolvedValue(USER);
+    recordDeletionRequestMock.mockResolvedValue("2026-10-10T09:00:00.000Z");
+    sendDeletionScheduledEmailMock.mockResolvedValue(true);
     const fd = new FormData();
     fd.append("confirm", "delete my account");
 
     const result = await requestAccountDeletion(PREV, fd);
 
     expect(result.success).toBeTruthy();
+    // The record the job acts on, for the SESSION's user.
+    expect(recordDeletionRequestMock).toHaveBeenCalledWith(USER_ID);
     const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
-    expect(typeof updatePayload.deletion_requested_at).toBe("string");
+    // The flag mirrors the request's own date, not a second clock reading.
+    expect(updatePayload.deletion_requested_at).toBe("2026-10-10T09:00:00.000Z");
     // Scoped to the session user
     const eqCalls = db.eq.mock.calls as [string, string][];
     expect(eqCalls.some(([col, val]) => col === "id" && val === USER_ID)).toBe(true);
+  });
+
+  it("tells the account's own inbox when it will happen: 14 days on", async () => {
+    getUserMock.mockResolvedValue(USER);
+    recordDeletionRequestMock.mockResolvedValue("2026-10-10T09:00:00.000Z");
+    sendDeletionScheduledEmailMock.mockResolvedValue(true);
+    const fd = new FormData();
+    fd.append("confirm", "delete my account");
+
+    await requestAccountDeletion(PREV, fd);
+
+    expect(sendDeletionScheduledEmailMock).toHaveBeenCalledTimes(1);
+    const [to, , deleteOn] = sendDeletionScheduledEmailMock.mock.calls[0];
+    expect(to).toBe(USER.email);
+    expect(deleteOn).toBe("2026-10-24T09:00:00.000Z");
+  });
+
+  it("flags nothing when the request could not be recorded", async () => {
+    getUserMock.mockResolvedValue(USER);
+    recordDeletionRequestMock.mockResolvedValue(null);
+    const fd = new FormData();
+    fd.append("confirm", "delete my account");
+
+    const result = await requestAccountDeletion(PREV, fd);
+
+    expect(result.error).toBeTruthy();
+    // A flag with no request behind it would promise a deletion nothing carries out.
+    expect(db.update).not.toHaveBeenCalled();
+    expect(sendDeletionScheduledEmailMock).not.toHaveBeenCalled();
   });
 
   it("unknown field is rejected", async () => {
@@ -793,6 +842,7 @@ describe("requestAccountDeletion", () => {
 
     expect(errorText(result)).toMatch(/user_id/);
     expect(db.update).not.toHaveBeenCalled();
+    expect(recordDeletionRequestMock).not.toHaveBeenCalled();
   });
 });
 
@@ -801,15 +851,29 @@ describe("requestAccountDeletion", () => {
 // ==========================================================================
 
 describe("cancelAccountDeletion", () => {
-  it("success sets deletion_requested_at = null", async () => {
+  it("success withdraws the request and sets deletion_requested_at = null", async () => {
     getUserMock.mockResolvedValue(USER);
+    withdrawDeletionRequestMock.mockResolvedValue("gone");
     const fd = new FormData(); // no fields expected
 
     const result = await cancelAccountDeletion(PREV, fd);
 
     expect(result.success).toBeTruthy();
+    expect(withdrawDeletionRequestMock).toHaveBeenCalledWith(USER_ID);
     const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
     expect(updatePayload.deletion_requested_at).toBeNull();
+  });
+
+  it("refuses once the deletion has begun, and leaves the flag where it is", async () => {
+    getUserMock.mockResolvedValue(USER);
+    withdrawDeletionRequestMock.mockResolvedValue("started");
+
+    const result = await cancelAccountDeletion(PREV, new FormData());
+
+    expect(errorText(result)).toMatch(/already being deleted/i);
+    // Clearing the flag would tell a seller their account is safe while it is
+    // being taken apart.
+    expect(db.update).not.toHaveBeenCalled();
   });
 
   it("unknown field is rejected", async () => {

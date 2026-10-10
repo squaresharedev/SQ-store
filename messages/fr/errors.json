@@ -210,7 +210,8 @@
     "resetRateLimited": "Trop d’e-mails de réinitialisation. Attendez un moment avant de réessayer.",
     "resetSendRateLimited": "Trop de demandes. Attendez une minute et réessayez.",
     "resetFailed": "Impossible d’envoyer l’e-mail de réinitialisation. Réessayez.",
-    "contactEmailTakesNoMail": "Le domaine de cet e-mail de contact n’accepte aucun courrier. Vérifiez l’orthographe, ou utilisez une adresse que les acheteurs peuvent réellement joindre."
+    "contactEmailTakesNoMail": "Le domaine de cet e-mail de contact n’accepte aucun courrier. Vérifiez l’orthographe, ou utilisez une adresse que les acheteurs peuvent réellement joindre.",
+    "deletionUnderWay": "Ce compte est déjà en cours de suppression et ne peut plus être conservé."
   },
   "contactVerification": {
     "unavailable": "{channel, select, email {La confirmation par e-mail n'est pas disponible pour le moment.} other {La confirmation par SMS n'est pas disponible pour le moment.}}",

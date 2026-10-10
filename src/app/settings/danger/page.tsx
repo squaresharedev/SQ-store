@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { DangerZone } from "@/components/settings/DangerZone";
-import { requireProfile, requireUser } from "@/lib/auth/session";
+import { requireUser } from "@/lib/auth/session";
+import { getDeletionStatus } from "@/lib/account-deletion/requests";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Settings.metadata.danger");
@@ -9,10 +10,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function DangerSettingsPage() {
-  await requireUser("/settings/danger");
-  const profile = await requireProfile();
-
-  return (
-    <DangerZone deletionRequestedAt={profile?.deletion_requested_at ?? null} />
-  );
+  const user = await requireUser("/settings/danger");
+  // From the record the deletion job acts on, not the flag on the profile: the
+  // page then says exactly what will happen, and when.
+  return <DangerZone deletion={await getDeletionStatus(user.id)} />;
 }

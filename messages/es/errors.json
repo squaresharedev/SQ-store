@@ -210,7 +210,8 @@
     "resetRateLimited": "Demasiados correos de restablecimiento. Espera un poco antes de volver a intentarlo.",
     "resetSendRateLimited": "Demasiadas solicitudes. Espera un minuto e inténtalo de nuevo.",
     "resetFailed": "No se ha podido enviar el correo de restablecimiento. Inténtalo de nuevo.",
-    "contactEmailTakesNoMail": "El dominio de ese correo de contacto no acepta correo. Revisa que esté bien escrito, o usa una dirección a la que los compradores puedan escribirte de verdad."
+    "contactEmailTakesNoMail": "El dominio de ese correo de contacto no acepta correo. Revisa que esté bien escrito, o usa una dirección a la que los compradores puedan escribirte de verdad.",
+    "deletionUnderWay": "Esta cuenta ya se está eliminando, así que ya no se puede conservar."
   },
   "contactVerification": {
     "unavailable": "{channel, select, email {La confirmación por correo no está disponible ahora mismo.} other {La confirmación por SMS no está disponible ahora mismo.}}",

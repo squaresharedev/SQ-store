@@ -142,11 +142,19 @@
     },
     "delete": {
       "requestedTitle": "Zgłoszono usunięcie",
-      "requestedDescription": "Zgłoszono prośbę o usunięcie tego konta dnia {date}. Zostało oznaczone do trwałego usunięcia, razem z produktami i witryną. Do czasu faktycznego usunięcia nadal można to cofnąć.",
+      "requestedDescription": "Prośba o usunięcie tego konta wpłynęła {date}. Zostanie ono trwale usunięte {deleteOn}, razem z produktami, witrynami i zamówieniami. Do tego czasu możesz zmienić zdanie.",
+      "started": "To konto jest właśnie usuwane. Tego nie da się już cofnąć.",
+      "holdsTitle": "Usunięcie czeka na twoje zamówienia",
+      "holds": {
+        "toShip": "Masz jeszcze zamówienia do wysłania.",
+        "paymentPending": "Płatność kupującego jest jeszcze potwierdzana.",
+        "disputed": "Jedna z płatności jest przedmiotem sporu.",
+        "recentSale": "Twoje konto zostanie zachowane do {date}, czyli {days} dni po ostatniej sprzedaży, aby kupujący nadal mieli dostęp do swoich zamówień."
+      },
       "cancelling": "Anulowanie…",
       "keepButton": "Zachowaj moje konto",
       "title": "Usuń konto",
-      "description": "To oznacza twoje konto, produkty i witrynę do trwałego usunięcia. Bez owijania w bawełnę: gdy to nastąpi, wszystko znika bezpowrotnie.",
+      "description": "Twoje konto, produkty, witryny i zamówienia zostaną trwale usunięte {days} dni po zgłoszeniu. Do tego czasu możesz zmienić zdanie. Potem już nie.",
       "deleteButton": "Usuń moje konto",
       "confirmLabel": "Wpisz <code>{phrase}</code>, aby potwierdzić",
       "flagging": "Oznaczanie…",
@@ -156,6 +164,18 @@
     "success": {
       "deletionRequested": "Zgłoszono usunięcie.",
       "deletionCancelled": "Anulowano prośbę o usunięcie. Dobrze, że jesteś z nami."
+    },
+    "email": {
+      "scheduled": {
+        "subject": "Twoje konto Square Share zostanie usunięte",
+        "body": "Poprosiłeś nas o usunięcie konta Square Share. Zostanie ono trwale usunięte {date}, razem z produktami, witrynami, zamówieniami i plikami.",
+        "undo": "Zmieniasz zdanie? Zaloguj się i wybierz Zachowaj moje konto: {url}"
+      },
+      "notYou": "Jeśli to nie ty o to prosiłeś, napisz od razu na {email}.",
+      "deleted": {
+        "subject": "Twoje konto Square Share zostało usunięte",
+        "body": "Twoje konto Square Share i wszystko, co zawierało (produkty, witryny, zamówienia i przesłane pliki), zostało trwale usunięte, zgodnie z prośbą z {date}."
+      }
     }
   },
   "notifications": {

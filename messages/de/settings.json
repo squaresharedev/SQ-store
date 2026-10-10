@@ -142,11 +142,19 @@
     },
     "delete": {
       "requestedTitle": "Löschung beantragt",
-      "requestedDescription": "Du hast uns am {date} gebeten, dieses Konto zu löschen. Es ist zur dauerhaften Löschung markiert, einschließlich Produkte und Schaufenster. Solange dies noch nicht ausgeführt wurde, kannst du noch deine Meinung ändern.",
+      "requestedDescription": "Du hast am {date} die Löschung dieses Kontos angefragt. Es wird am {deleteOn} endgültig gelöscht, samt Produkten, Schaufenstern und Bestellungen. Bis dahin kannst du es dir anders überlegen.",
+      "started": "Dieses Konto wird gerade gelöscht. Das lässt sich nicht mehr rückgängig machen.",
+      "holdsTitle": "Die Löschung wartet auf deine Bestellungen",
+      "holds": {
+        "toShip": "Du hast noch Bestellungen zu versenden.",
+        "paymentPending": "Die Zahlung eines Käufers wird noch bestätigt.",
+        "disputed": "Eine Zahlung wird angefochten.",
+        "recentSale": "Dein Konto bleibt bis {date} bestehen, {days} Tage nach deinem letzten Verkauf, damit Käufer ihre Bestellungen noch erreichen."
+      },
       "cancelling": "Wird abgebrochen…",
       "keepButton": "Konto behalten",
       "title": "Konto löschen",
-      "description": "Dies markiert dein Konto, deine Produkte und dein Schaufenster zur dauerhaften Löschung. Kein Zurück: Sobald es ausgeführt wird, ist alles weg.",
+      "description": "Dein Konto, deine Produkte, Schaufenster und Bestellungen werden {days} Tage nach deiner Anfrage endgültig gelöscht. Bis dahin kannst du es dir anders überlegen. Danach ist alles weg.",
       "deleteButton": "Mein Konto löschen",
       "confirmLabel": "Gib <code>{phrase}</code> ein, um zu bestätigen",
       "flagging": "Wird markiert…",
@@ -156,6 +164,18 @@
     "success": {
       "deletionRequested": "Löschung beantragt.",
       "deletionCancelled": "Löschungsantrag storniert. Schön, dass du bleibst."
+    },
+    "email": {
+      "scheduled": {
+        "subject": "Dein Square Share Konto wird gelöscht",
+        "body": "Du hast uns gebeten, dein Square Share Konto zu löschen. Es wird am {date} endgültig gelöscht, samt Produkten, Schaufenstern, Bestellungen und Dateien.",
+        "undo": "Hast du es dir anders überlegt? Melde dich an und wähle Mein Konto behalten: {url}"
+      },
+      "notYou": "Wenn du das nicht angefragt hast, schreib sofort an {email}.",
+      "deleted": {
+        "subject": "Dein Square Share Konto wurde gelöscht",
+        "body": "Dein Square Share Konto und alles darin (Produkte, Schaufenster, Bestellungen und hochgeladene Dateien) wurde endgültig gelöscht, wie du es am {date} angefragt hast."
+      }
     }
   },
   "notifications": {

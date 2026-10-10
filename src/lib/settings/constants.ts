@@ -141,3 +141,7 @@ export const SELLER_FIELD_MAX = {
  *  column name and the setting's home have drifted apart). Mirrors the DB
  *  CHECK on profiles.seller_bio; keep the two in step. */
 export const BIO_MAX = 100;
+
+/** The Supabase Storage bucket profile photos live in, one folder per user.
+ *  Written by lib/settings/avatar.ts, emptied by the account deletion job. */
+export const AVATAR_BUCKET = "avatars";

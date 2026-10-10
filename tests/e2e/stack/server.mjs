@@ -640,6 +640,16 @@ async function handleAuth(req, res, url) {
     return json(res, 200, await userJson(row));
   }
 
+  // Deleting an account, as the admin API does it: the row goes, and every
+  // table that references it with ON DELETE CASCADE follows. The account
+  // deletion job ends with this call (src/lib/account-deletion/run.ts).
+  if (req.method === "DELETE" && adminUser) {
+    if (!requireServiceRole(req, res)) return;
+    const { rowCount } = await pool.query(`delete from auth.users where id = $1`, [adminUser[1]]);
+    if (!rowCount) return fail(res, 404, "user_not_found", "User not found");
+    return json(res, 200, {});
+  }
+
   // ---- Test-only hooks (never part of GoTrue) --------------------------------
 
   if (req.method === "GET" && path === "/__e2e/last-recovery") {
@@ -753,6 +763,9 @@ const next = spawn(
       // account. It writes seller_billing through the same function the
       // Stripe webhook uses; nothing leaves the machine.
       BILLING_TEST_PROVIDER: "1",
+      // Scheduled jobs (lib/ops/cron.ts): a fixed, obviously fake secret, so
+      // specs can start a run the way the scheduler does.
+      CRON_SECRET: "e2e-cron-secret-not-a-real-one-0123456789",
       TRANSACTIONAL_EMAIL_FROM: "no-reply@e2e.squareshare.to",
       SMS_SENDER: "Squareshare",
       CONTACT_VERIFICATION_KEY: "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE",

@@ -9,3 +9,6 @@
 
 /** The marketplace / marketing site (waitlist + public pages). */
 export const MARKETPLACE_URL = "https://squareshare.to";
+
+/** Where anyone writes to reach Square Share. One mailbox, named once. */
+export const SUPPORT_EMAIL = "support@squareshare.eu";

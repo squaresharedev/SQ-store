@@ -20,22 +20,42 @@ import {
 } from "@/lib/settings/constants";
 import type { ActionState } from "@/lib/errors";
 import { formatLongDate } from "@/lib/format/date";
+import { helpTextClass } from "@/components/ui/control-styles";
+import { ACCOUNT_DELETION_GRACE_DAYS, ORDER_AFTERCARE_DAYS } from "@/lib/account-deletion/policy";
+import type { DeletionStatus } from "@/lib/account-deletion/requests";
 
 const INITIAL: ActionState = {};
 
 /**
  * Deliberate, two-step deletion: reveal, then type-to-confirm. Submitting
- * flags the account for deletion (soft flag + server log). The full
- * hard-delete cascade runs as a service-role job, never from here.
+ * records a REQUEST. The deletion itself is a scheduled job
+ * (lib/account-deletion/run.ts) that runs after the waiting period, once
+ * nothing is owed to a buyer.
+ *
+ * With a request standing, the card says what will happen and when: the date,
+ * anything the seller's orders are holding it for, and the way to undo it
+ * (until the job has begun, after which there is none).
  */
 export function DeleteAccountForm({
-  deletionRequestedAt,
+  deletion,
 }: {
-  deletionRequestedAt: string | null;
+  deletion: DeletionStatus | null;
 }) {
   const t = useTranslations("Settings.danger.delete");
   const [armed, setArmed] = React.useState(false);
   const [phrase, setPhrase] = React.useState("");
+  // Once a request stands, the confirmation that made it is spent. Without
+  // this, "Keep my account" would hand back a form still armed and still
+  // holding the typed phrase: one press away from asking all over again.
+  const requested = deletion !== null;
+  const [wasRequested, setWasRequested] = React.useState(requested);
+  if (requested !== wasRequested) {
+    setWasRequested(requested);
+    if (requested) {
+      setArmed(false);
+      setPhrase("");
+    }
+  }
   const [deleteState, deleteAction, deletePending] = useActionState(
     requestAccountDeletion,
     INITIAL,
@@ -54,15 +74,43 @@ export function DeleteAccountForm({
   const deleteResult = useSaveResult(deleteState);
   const cancelResult = useSaveResult(cancelState);
 
-  if (deletionRequestedAt) {
+  if (deletion?.started) {
+    return (
+      <SettingsCard title={t("requestedTitle")} description={t("started")} danger>
+        {null}
+      </SettingsCard>
+    );
+  }
+
+  if (deletion) {
     return (
       <SettingsCard
         title={t("requestedTitle")}
         description={t("requestedDescription", {
-          date: formatLongDate(deletionRequestedAt, locale),
+          date: formatLongDate(deletion.requestedAt, locale),
+          deleteOn: formatLongDate(deletion.deleteOn, locale),
         })}
         danger
       >
+        {/* What the seller's own orders are holding it for, so a date that
+            passes without a deletion is not a mystery. */}
+        {deletion.holds.length > 0 && (
+          <div className="mb-4 flex flex-col gap-1" data-deletion-holds={deletion.holds.join(" ")}>
+            <p className="text-sm font-medium text-foreground">{t("holdsTitle")}</p>
+            <ul className={helpTextClass}>
+              {deletion.holds.map((hold) => (
+                <li key={hold}>
+                  {hold === "recentSale"
+                    ? t("holds.recentSale", {
+                        date: formatLongDate(deletion.aftercareEndsOn ?? deletion.deleteOn, locale),
+                        days: ORDER_AFTERCARE_DAYS,
+                      })
+                    : t(`holds.${hold}`)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <form action={cancelAction} className="flex flex-col gap-4">
           <div>
             <SaveButton
@@ -82,7 +130,7 @@ export function DeleteAccountForm({
   return (
     <SettingsCard
       title={t("title")}
-      description={t("description")}
+      description={t("description", { days: ACCOUNT_DELETION_GRACE_DAYS })}
       danger
     >
       {!armed ? (

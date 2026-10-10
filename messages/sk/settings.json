@@ -142,11 +142,19 @@
     },
     "delete": {
       "requestedTitle": "Vymazanie požiadané",
-      "requestedDescription": "Požiadali ste nás o vymazanie tohto konta dňa {date}. Je označené na trvalé vymazanie vrátane produktov a výkladu. Kým k tomu skutočne nedôjde, môžete si to ešte rozmyslieť.",
+      "requestedDescription": "O vymazanie tohto účtu ste požiadali {date}. Natrvalo vymazaný bude {deleteOn}, vrátane produktov, výkladov a objednávok. Dovtedy si to môžete rozmyslieť.",
+      "started": "Tento účet sa práve maže. To sa už nedá vrátiť späť.",
+      "holdsTitle": "Vymazanie čaká na vaše objednávky",
+      "holds": {
+        "toShip": "Stále máte objednávky na odoslanie.",
+        "paymentPending": "Platba kupujúceho sa ešte potvrdzuje.",
+        "disputed": "Jedna platba je predmetom sporu.",
+        "recentSale": "Váš účet zostane zachovaný do {date}, teda {days} dní po poslednom predaji, aby sa kupujúci stále dostali k svojim objednávkam."
+      },
       "cancelling": "Ruší sa…",
       "keepButton": "Ponechať konto",
       "title": "Zmazať konto",
-      "description": "Tým sa vaše konto, produkty a výklad označia na trvalé vymazanie. Po vykonaní to definitívne zmizne.",
+      "description": "Váš účet, produkty, výklady a objednávky sa natrvalo vymažú {days} dní po tom, čo o to požiadate. Dovtedy si to môžete rozmyslieť. Potom už nie.",
       "deleteButton": "Zmazať konto",
       "confirmLabel": "Zadajte <code>{phrase}</code> na potvrdenie",
       "flagging": "Označuje sa…",
@@ -156,6 +164,18 @@
     "success": {
       "deletionRequested": "Vymazanie požiadané.",
       "deletionCancelled": "Žiadosť o vymazanie zrušená. Radi vás máme späť."
+    },
+    "email": {
+      "scheduled": {
+        "subject": "Váš účet Square Share bude vymazaný",
+        "body": "Požiadali ste nás o vymazanie svojho účtu Square Share. Natrvalo vymazaný bude {date}, vrátane produktov, výkladov, objednávok a súborov.",
+        "undo": "Rozmysleli ste si to? Prihláste sa a zvoľte Ponechať môj účet: {url}"
+      },
+      "notYou": "Ak ste o to nežiadali, napíšte ihneď na {email}.",
+      "deleted": {
+        "subject": "Váš účet Square Share bol vymazaný",
+        "body": "Váš účet Square Share a všetko, čo obsahoval (produkty, výklady, objednávky a nahrané súbory), bol natrvalo vymazaný, ako ste požiadali {date}."
+      }
     }
   },
   "notifications": {

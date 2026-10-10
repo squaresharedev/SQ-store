@@ -142,11 +142,19 @@
     },
     "delete": {
       "requestedTitle": "Eliminación solicitada",
-      "requestedDescription": "Nos pediste eliminar esta cuenta el {date}. Está marcada para eliminación permanente, incluidos productos y escaparate. Hasta que eso ocurra, aún puedes cambiar de opinión.",
+      "requestedDescription": "Nos pediste eliminar esta cuenta el {date}. Se eliminará de forma permanente el {deleteOn}, con sus productos, escaparates y pedidos. Hasta entonces puedes cambiar de opinión.",
+      "started": "Esta cuenta se está eliminando ahora. Ya no se puede deshacer.",
+      "holdsTitle": "La eliminación está a la espera de tus pedidos",
+      "holds": {
+        "toShip": "Aún tienes pedidos por enviar.",
+        "paymentPending": "El pago de un comprador aún se está confirmando.",
+        "disputed": "Hay un pago en disputa.",
+        "recentSale": "Tu cuenta se conserva hasta el {date}, {days} días después de tu última venta, para que los compradores puedan seguir accediendo a sus pedidos."
+      },
       "cancelling": "Cancelando…",
       "keepButton": "Conservar mi cuenta",
       "title": "Eliminar cuenta",
-      "description": "Esto marca tu cuenta, productos y escaparate para eliminación permanente. Sin rodeos: una vez se ejecute, desaparece todo.",
+      "description": "Tu cuenta, tus productos, escaparates y pedidos se eliminan de forma permanente {days} días después de que lo pidas. Hasta entonces puedes cambiar de opinión. Después, desaparece.",
       "deleteButton": "Eliminar mi cuenta",
       "confirmLabel": "Escribe <code>{phrase}</code> para confirmar",
       "flagging": "Marcando…",
@@ -156,6 +164,18 @@
     "success": {
       "deletionRequested": "Eliminación solicitada.",
       "deletionCancelled": "Solicitud de eliminación cancelada. Qué bien tenerte de vuelta."
+    },
+    "email": {
+      "scheduled": {
+        "subject": "Tu cuenta de Square Share está programada para eliminarse",
+        "body": "Nos pediste eliminar tu cuenta de Square Share. Se eliminará de forma permanente el {date}, con sus productos, escaparates, pedidos y archivos.",
+        "undo": "¿Has cambiado de opinión? Inicia sesión y elige Conservar mi cuenta: {url}"
+      },
+      "notYou": "Si no lo has pedido tú, escribe de inmediato a {email}.",
+      "deleted": {
+        "subject": "Tu cuenta de Square Share se ha eliminado",
+        "body": "Tu cuenta de Square Share y todo lo que contenía (productos, escaparates, pedidos y archivos subidos) se ha eliminado de forma permanente, como pediste el {date}."
+      }
     }
   },
   "notifications": {

@@ -142,11 +142,19 @@
     },
     "delete": {
       "requestedTitle": "Eliminazione richiesta",
-      "requestedDescription": "Hai chiesto di eliminare questo account il {date}. È segnalato per l’eliminazione definitiva, prodotti e vetrina inclusi. Finché non viene eseguita, puoi ancora cambiare idea.",
+      "requestedDescription": "Hai chiesto di eliminare questo account il {date}. Verrà eliminato definitivamente il {deleteOn}, compresi prodotti, vetrine e ordini. Fino ad allora puoi cambiare idea.",
+      "started": "Questo account è in fase di eliminazione. Non è più possibile annullare.",
+      "holdsTitle": "L’eliminazione è in attesa dei tuoi ordini",
+      "holds": {
+        "toShip": "Hai ancora ordini da spedire.",
+        "paymentPending": "Il pagamento di un acquirente è ancora in fase di conferma.",
+        "disputed": "Un pagamento è in contestazione.",
+        "recentSale": "Il tuo account viene conservato fino al {date}, {days} giorni dopo l’ultima vendita, così gli acquirenti possono ancora raggiungere i loro ordini."
+      },
       "cancelling": "Annullamento…",
       "keepButton": "Mantieni il mio account",
       "title": "Elimina account",
-      "description": "Questo segnala il tuo account, i prodotti e la vetrina per l’eliminazione definitiva. Nessun giro di parole: una volta eseguita, è tutto perso.",
+      "description": "Il tuo account, i prodotti, le vetrine e gli ordini vengono eliminati definitivamente {days} giorni dopo la richiesta. Fino ad allora puoi cambiare idea. Dopo, non c’è più.",
       "deleteButton": "Elimina il mio account",
       "confirmLabel": "Digita <code>{phrase}</code> per confermare",
       "flagging": "Segnalazione…",
@@ -156,6 +164,18 @@
     "success": {
       "deletionRequested": "Eliminazione richiesta.",
       "deletionCancelled": "Richiesta di eliminazione annullata. Bello riaverti qui."
+    },
+    "email": {
+      "scheduled": {
+        "subject": "Il tuo account Square Share sta per essere eliminato",
+        "body": "Ci hai chiesto di eliminare il tuo account Square Share. Verrà eliminato definitivamente il {date}, con prodotti, vetrine, ordini e file.",
+        "undo": "Hai cambiato idea? Accedi e scegli Mantieni il mio account: {url}"
+      },
+      "notYou": "Se non l’hai chiesto tu, scrivi subito a {email}.",
+      "deleted": {
+        "subject": "Il tuo account Square Share è stato eliminato",
+        "body": "Il tuo account Square Share e tutto ciò che conteneva (prodotti, vetrine, ordini e file caricati) è stato eliminato definitivamente, come hai chiesto il {date}."
+      }
     }
   },
   "notifications": {

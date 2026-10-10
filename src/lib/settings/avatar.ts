@@ -14,6 +14,7 @@ import {
   type ActionState,
 } from "@/lib/errors";
 import { msg } from "@/i18n/types";
+import { AVATAR_BUCKET } from "@/lib/settings/constants";
 
 /**
  * Profile-photo upload — SERVER-SIDE ONLY, client-hostile by construction:
@@ -39,7 +40,7 @@ const SIGNED_OUT: ActionState = failed(
 );
 const TOO_MANY: ActionState = failed(actionError("rate_limited", msg("Errors.avatar.rateLimited")));
 
-const BUCKET = "avatars";
+const BUCKET = AVATAR_BUCKET;
 const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
 
 /** Avatars accept a narrower set than product images: no GIF (animated

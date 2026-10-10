@@ -210,7 +210,8 @@
     "resetRateLimited": "Príliš veľa e-mailov na obnovenie. Pred ďalším pokusom chvíľu počkajte.",
     "resetSendRateLimited": "Príliš veľa požiadaviek. Minútu počkajte a skúste to znova.",
     "resetFailed": "E-mail na obnovenie sa nepodarilo odoslať. Skúste to znova.",
-    "contactEmailTakesNoMail": "Doména tohto kontaktného e-mailu neprijíma poštu. Skontrolujte pravopis alebo použite adresu, na ktorú vás kupujúci skutočne dosiahnu."
+    "contactEmailTakesNoMail": "Doména tohto kontaktného e-mailu neprijíma poštu. Skontrolujte pravopis alebo použite adresu, na ktorú vás kupujúci skutočne dosiahnu.",
+    "deletionUnderWay": "Tento účet sa už maže, takže ho už nemožno ponechať."
   },
   "contactVerification": {
     "unavailable": "{channel, select, email {Potvrdenie e-mailom momentálne nie je k dispozícii.} other {Potvrdenie textovou správou momentálne nie je k dispozícii.}}",

@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { DeleteAccountForm } from "@/components/settings/DeleteAccountForm";
 import { ExportDataButton } from "@/components/settings/ExportDataButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
+import type { DeletionStatus } from "@/lib/account-deletion/requests";
 
 /**
  * Danger zone: GDPR data export and account deletion. Export is a plain GET
@@ -9,9 +10,10 @@ import { SettingsCard } from "@/components/settings/SettingsCard";
  * directly (after a two-factor code, for an account with 2FA on).
  */
 export function DangerZone({
-  deletionRequestedAt,
+  deletion,
 }: {
-  deletionRequestedAt: string | null;
+  /** The account's deletion request and where it stands, or null. */
+  deletion: DeletionStatus | null;
 }) {
   const t = useTranslations("Settings.danger.export");
   return (
@@ -27,7 +29,7 @@ export function DangerZone({
       </SettingsCard>
 
       <div id="delete" className="scroll-mt-20">
-        <DeleteAccountForm deletionRequestedAt={deletionRequestedAt} />
+        <DeleteAccountForm deletion={deletion} />
       </div>
     </div>
   );

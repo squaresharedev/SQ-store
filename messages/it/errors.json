@@ -210,7 +210,8 @@
     "resetRateLimited": "Troppe email di reimpostazione. Attendi un po’ prima di riprovare.",
     "resetSendRateLimited": "Troppe richieste. Attendi un minuto e riprova.",
     "resetFailed": "Non è stato possibile inviare l’email di reimpostazione. Riprova.",
-    "contactEmailTakesNoMail": "Il dominio di quell’email di contatto non accetta posta. Controlla che sia scritta correttamente, oppure usa un indirizzo che gli acquirenti possano davvero raggiungere."
+    "contactEmailTakesNoMail": "Il dominio di quell’email di contatto non accetta posta. Controlla che sia scritta correttamente, oppure usa un indirizzo che gli acquirenti possano davvero raggiungere.",
+    "deletionUnderWay": "Questo account è già in fase di eliminazione e non può più essere mantenuto."
   },
   "contactVerification": {
     "unavailable": "{channel, select, email {La conferma via email non è disponibile in questo momento.} other {La conferma via SMS non è disponibile in questo momento.}}",

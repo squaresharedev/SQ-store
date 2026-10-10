@@ -1,0 +1,63 @@
+# Work the app does on a timer. Each job calls a route under /api/cron/ with
+# the scheduler's secret; the route does the work (see src/lib/ops/cron.ts).
+#
+# ACCOUNT DELETIONS (src/lib/account-deletion/run.ts). Once a day, carry out
+# the deletions people asked for in Settings whose 14-day waiting period is
+# over and whose orders owe no buyer anything. One call does a bounded amount
+# of work on one account and answers `"more":true` when there is more to do
+# right now, so this calls again until it does not.
+#
+# Required secret (the job is skipped, loudly, without it):
+#   CRON_SECRET   A long random string (32 characters or more), set BOTH here
+#                 as a repository secret and on the Worker
+#                 (`wrangler secret put CRON_SECRET`). Until the Worker has it,
+#                 the route answers 404 and nothing is ever deleted.
+#
+# What it prints is counts (deleted, held, failed), never an account id.
+name: Scheduled jobs
+
+on:
+  schedule:
+    # 03:23 UTC, off the hour.
+    - cron: "23 3 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: scheduled-jobs
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  account-deletions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # Job level so the steps' `if` can test it (see deploy.yml).
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      # The production dashboard (NEXT_PUBLIC_APP_URL in wrangler.jsonc).
+      APP_URL: https://dashboard.squareshare.eu
+    steps:
+      - name: Say so when it is not set up
+        if: ${{ env.CRON_SECRET == '' }}
+        run: echo "::warning title=Account deletions did not run::Set the CRON_SECRET repository secret (and the same value on the Worker). Until then, deletion requests wait."
+
+      - name: Carry out the account deletions that are due
+        if: ${{ env.CRON_SECRET != '' }}
+        run: |
+          set -euo pipefail
+          # Bounded: a run that keeps answering "more" for this long is stuck,
+          # and tomorrow's run picks up where it stopped.
+          for attempt in $(seq 1 40); do
+            # --fail: a 404 (secret not on the Worker, or wrong) or a 500 turns
+            # the job red instead of passing for "nothing to do".
+            result="$(curl --fail --silent --show-error --max-time 60 \
+              --request POST \
+              --header "Authorization: Bearer ${CRON_SECRET}" \
+              "${APP_URL}/api/cron/account-deletions")"
+            echo "run ${attempt}: ${result}"
+            if ! printf '%s' "${result}" | grep -q '"more":true'; then
+              exit 0
+            fi
+          done
+          echo "::warning title=Account deletions are not finishing::40 runs in a row still had more to do."

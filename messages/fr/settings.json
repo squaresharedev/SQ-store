@@ -142,11 +142,19 @@
     },
     "delete": {
       "requestedTitle": "Suppression demandée",
-      "requestedDescription": "Vous nous avez demandé de supprimer ce compte le {date}. Il est marqué pour une suppression définitive, produits et vitrine compris. Tant que cela n’est pas encore effectif, vous pouvez encore changer d’avis.",
+      "requestedDescription": "Vous avez demandé la suppression de ce compte le {date}. Il sera supprimé définitivement le {deleteOn}, produits, vitrines et commandes compris. D’ici là, vous pouvez changer d’avis.",
+      "started": "Ce compte est en cours de suppression. Il n’est plus possible de revenir en arrière.",
+      "holdsTitle": "La suppression attend vos commandes",
+      "holds": {
+        "toShip": "Vous avez encore des commandes à expédier.",
+        "paymentPending": "Le paiement d’un acheteur est encore en cours de confirmation.",
+        "disputed": "Un paiement fait l’objet d’un litige.",
+        "recentSale": "Votre compte est conservé jusqu’au {date}, {days} jours après votre dernière vente, pour que les acheteurs puissent encore accéder à leurs commandes."
+      },
       "cancelling": "Annulation…",
       "keepButton": "Garder mon compte",
       "title": "Supprimer le compte",
-      "description": "Ceci marque votre compte, vos produits et votre vitrine pour une suppression définitive. Sans détour : une fois effectuée, c’est irréversible.",
+      "description": "Votre compte, vos produits, vitrines et commandes sont supprimés définitivement {days} jours après votre demande. D’ici là, vous pouvez changer d’avis. Ensuite, c’est définitif.",
       "deleteButton": "Supprimer mon compte",
       "confirmLabel": "Tapez <code>{phrase}</code> pour confirmer",
       "flagging": "Marquage…",
@@ -156,6 +164,18 @@
     "success": {
       "deletionRequested": "Suppression demandée.",
       "deletionCancelled": "Demande de suppression annulée. Ravis de vous revoir."
+    },
+    "email": {
+      "scheduled": {
+        "subject": "Votre compte Square Share va être supprimé",
+        "body": "Vous nous avez demandé de supprimer votre compte Square Share. Il sera supprimé définitivement le {date}, avec ses produits, vitrines, commandes et fichiers.",
+        "undo": "Vous avez changé d’avis ? Connectez-vous et choisissez Conserver mon compte : {url}"
+      },
+      "notYou": "Si vous n’êtes pas à l’origine de cette demande, écrivez tout de suite à {email}.",
+      "deleted": {
+        "subject": "Votre compte Square Share a été supprimé",
+        "body": "Votre compte Square Share et tout ce qu’il contenait (produits, vitrines, commandes et fichiers importés) a été supprimé définitivement, comme vous l’avez demandé le {date}."
+      }
     }
   },
   "notifications": {

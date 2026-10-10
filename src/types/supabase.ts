@@ -18,6 +18,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_requests: {
+        Row: {
+          last_attempt_at: string | null
+          last_error: string | null
+          requested_at: string
+          started_at: string | null
+          user_id: string
+        }
+        Insert: {
+          last_attempt_at?: string | null
+          last_error?: string | null
+          requested_at?: string
+          started_at?: string | null
+          user_id: string
+        }
+        Update: {
+          last_attempt_at?: string | null
+          last_error?: string | null
+          requested_at?: string
+          started_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_audit_log: {
         Row: {
           action: string

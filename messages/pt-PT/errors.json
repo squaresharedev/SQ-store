@@ -210,7 +210,8 @@
     "resetRateLimited": "Demasiados e-mails de redefinição. Aguarde um pouco antes de tentar novamente.",
     "resetSendRateLimited": "Demasiados pedidos. Aguarde um minuto e tente novamente.",
     "resetFailed": "Não foi possível enviar o e-mail de redefinição. Tente novamente.",
-    "contactEmailTakesNoMail": "O domínio desse e-mail de contacto não aceita correio. Verifique a ortografia, ou utilize um endereço que os compradores consigam realmente contactar."
+    "contactEmailTakesNoMail": "O domínio desse e-mail de contacto não aceita correio. Verifique a ortografia, ou utilize um endereço que os compradores consigam realmente contactar.",
+    "deletionUnderWay": "Esta conta já está a ser eliminada, pelo que já não pode ser mantida."
   },
   "contactVerification": {
     "unavailable": "{channel, select, email {A confirmação por e-mail não está disponível neste momento.} other {A confirmação por mensagem de texto não está disponível neste momento.}}",

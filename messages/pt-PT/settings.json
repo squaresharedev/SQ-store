@@ -142,11 +142,19 @@
     },
     "delete": {
       "requestedTitle": "Eliminação solicitada",
-      "requestedDescription": "Pediu-nos para eliminar esta conta em {date}. Está sinalizada para eliminação permanente, incluindo produtos e montra. Até isso acontecer, ainda pode mudar de ideias.",
+      "requestedDescription": "Pediu-nos para eliminar esta conta em {date}. Será eliminada definitivamente em {deleteOn}, incluindo produtos, montras e encomendas. Até lá pode mudar de ideias.",
+      "started": "Esta conta está a ser eliminada agora. Já não é possível anular.",
+      "holdsTitle": "A eliminação está à espera das suas encomendas",
+      "holds": {
+        "toShip": "Ainda tem encomendas por enviar.",
+        "paymentPending": "O pagamento de um comprador ainda está a ser confirmado.",
+        "disputed": "Há um pagamento em disputa.",
+        "recentSale": "A sua conta é mantida até {date}, {days} dias após a última venda, para que os compradores ainda possam aceder às encomendas."
+      },
       "cancelling": "A cancelar…",
       "keepButton": "Manter a minha conta",
       "title": "Eliminar conta",
-      "description": "Isto sinaliza a sua conta, produtos e montra para eliminação permanente. Sem rodeios: depois de executado, desaparece para sempre.",
+      "description": "A sua conta, os produtos, as montras e as encomendas são eliminados definitivamente {days} dias depois de o pedir. Até lá pode mudar de ideias. Depois disso, desaparece.",
       "deleteButton": "Eliminar a minha conta",
       "confirmLabel": "Escreva <code>{phrase}</code> para confirmar",
       "flagging": "A sinalizar…",
@@ -156,6 +164,18 @@
     "success": {
       "deletionRequested": "Eliminação solicitada.",
       "deletionCancelled": "Pedido de eliminação cancelado. Ainda bem que decidiu continuar."
+    },
+    "email": {
+      "scheduled": {
+        "subject": "A sua conta Square Share vai ser eliminada",
+        "body": "Pediu-nos para eliminar a sua conta Square Share. Será eliminada definitivamente em {date}, com os produtos, montras, encomendas e ficheiros.",
+        "undo": "Mudou de ideias? Inicie sessão e escolha Manter a minha conta: {url}"
+      },
+      "notYou": "Se não foi você que o pediu, escreva de imediato para {email}.",
+      "deleted": {
+        "subject": "A sua conta Square Share foi eliminada",
+        "body": "A sua conta Square Share e tudo o que continha (produtos, montras, encomendas e ficheiros carregados) foi eliminada definitivamente, como pediu em {date}."
+      }
     }
   },
   "notifications": {

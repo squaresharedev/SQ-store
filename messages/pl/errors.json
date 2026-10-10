@@ -210,7 +210,8 @@
     "resetRateLimited": "Zbyt wiele e-maili resetujących. Odczekaj chwilę przed kolejną próbą.",
     "resetSendRateLimited": "Zbyt wiele żądań. Odczekaj minutę i spróbuj ponownie.",
     "resetFailed": "Nie udało się wysłać e-maila resetującego. Spróbuj ponownie.",
-    "contactEmailTakesNoMail": "Domena tego e-maila kontaktowego nie przyjmuje poczty. Sprawdź pisownię albo użyj adresu, na który kupujący faktycznie mogą pisać."
+    "contactEmailTakesNoMail": "Domena tego e-maila kontaktowego nie przyjmuje poczty. Sprawdź pisownię albo użyj adresu, na który kupujący faktycznie mogą pisać.",
+    "deletionUnderWay": "To konto jest już usuwane, więc nie można go zachować."
   },
   "contactVerification": {
     "unavailable": "{channel, select, email {Potwierdzanie e-mailem jest teraz niedostępne.} other {Potwierdzanie SMS-em jest teraz niedostępne.}}",

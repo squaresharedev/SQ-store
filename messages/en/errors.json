@@ -210,7 +210,8 @@
     "resetRateLimited": "Too many reset emails. Wait a while before trying again.",
     "resetSendRateLimited": "Too many requests. Wait a minute and try again.",
     "resetFailed": "Could not send the reset email. Try again.",
-    "contactEmailTakesNoMail": "That contact email's domain doesn't accept mail. Check the spelling, or use an address buyers can actually reach."
+    "contactEmailTakesNoMail": "That contact email's domain doesn't accept mail. Check the spelling, or use an address buyers can actually reach.",
+    "deletionUnderWay": "This account is already being deleted, so it can no longer be kept."
   },
   "contactVerification": {
     "unavailable": "{channel, select, email {Email confirmation isn't available right now.} other {Confirming by text isn't available right now.}}",

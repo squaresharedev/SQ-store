@@ -142,11 +142,19 @@
     },
     "delete": {
       "requestedTitle": "Verwijdering aangevraagd",
-      "requestedDescription": "Je hebt ons gevraagd dit account te verwijderen op {date}. Het staat gemarkeerd voor permanente verwijdering, inclusief producten en etalage. Tot dat daadwerkelijk gebeurt, kun je nog van gedachten veranderen.",
+      "requestedDescription": "Je hebt op {date} gevraagd dit account te verwijderen. Het wordt op {deleteOn} definitief verwijderd, inclusief producten, etalages en bestellingen. Tot dan kun je je bedenken.",
+      "started": "Dit account wordt nu verwijderd. Dat kan niet meer ongedaan worden gemaakt.",
+      "holdsTitle": "Het verwijderen wacht op je bestellingen",
+      "holds": {
+        "toShip": "Je hebt nog bestellingen te verzenden.",
+        "paymentPending": "De betaling van een koper wordt nog bevestigd.",
+        "disputed": "Er loopt een geschil over een betaling.",
+        "recentSale": "Je account blijft bestaan tot {date}, {days} dagen na je laatste verkoop, zodat kopers nog bij hun bestellingen kunnen."
+      },
       "cancelling": "Annuleren…",
       "keepButton": "Mijn account behouden",
       "title": "Account verwijderen",
-      "description": "Dit markeert je account, producten en etalage voor permanente verwijdering. Geen omwegen: zodra het gebeurt, is het weg.",
+      "description": "Je account, producten, etalages en bestellingen worden {days} dagen na je verzoek definitief verwijderd. Tot dan kun je je bedenken. Daarna is het weg.",
       "deleteButton": "Mijn account verwijderen",
       "confirmLabel": "Typ <code>{phrase}</code> ter bevestiging",
       "flagging": "Markeren…",
@@ -156,6 +164,18 @@
     "success": {
       "deletionRequested": "Verwijdering aangevraagd.",
       "deletionCancelled": "Verwijderingsverzoek geannuleerd. Fijn dat je er weer bent."
+    },
+    "email": {
+      "scheduled": {
+        "subject": "Je Square Share-account wordt verwijderd",
+        "body": "Je hebt ons gevraagd je Square Share-account te verwijderen. Het wordt op {date} definitief verwijderd, met de producten, etalages, bestellingen en bestanden.",
+        "undo": "Bedacht? Log in en kies Mijn account behouden: {url}"
+      },
+      "notYou": "Heb je hier niet om gevraagd? Schrijf dan meteen naar {email}.",
+      "deleted": {
+        "subject": "Je Square Share-account is verwijderd",
+        "body": "Je Square Share-account en alles erin (producten, etalages, bestellingen en geüploade bestanden) is definitief verwijderd, zoals je op {date} hebt gevraagd."
+      }
     }
   },
   "notifications": {
