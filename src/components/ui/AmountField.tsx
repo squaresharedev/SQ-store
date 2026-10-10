@@ -76,10 +76,18 @@ export function AmountField({
           autoComplete="off"
           value={draft ?? formatWholeNumber(value, locale)}
           onFocus={(event) => {
-            setDraft(String(value));
-            // Select the figure, so typing replaces it rather than appends.
+            const bare = String(value);
+            setDraft(bare);
+            // Select the figure, so typing replaces it rather than appends. A
+            // frame later, once the bare digits are in the box and a click has
+            // put its caret down. ONLY if nothing has been typed meanwhile: a
+            // select that lands between two keystrokes makes the next one
+            // replace everything before it, and "10000" typed quickly came out
+            // as "0".
             const input = event.currentTarget;
-            requestAnimationFrame(() => input.select());
+            requestAnimationFrame(() => {
+              if (input.value === bare) input.select();
+            });
           }}
           onChange={(event) => {
             // Digits only, and never more of them than `max` has.
