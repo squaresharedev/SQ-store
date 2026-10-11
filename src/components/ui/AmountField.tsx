@@ -43,6 +43,12 @@ export function AmountField({
   const locale = useLocale();
   // Bare digits while the field is being edited; null at rest.
   const [draft, setDraft] = React.useState<string | null>(null);
+  // Whether anything has been typed since the field took focus. The select on
+  // focus must not fire after that: comparing the box's value to what it held
+  // is not enough, because a keystroke the field refuses (a sixth digit) leaves
+  // that value unchanged, and the select then lands between two keystrokes and
+  // the next one replaces everything before it.
+  const typed = React.useRef(false);
   const symbol = currencySymbol(currency, locale);
   const leads = currencySymbolLeads(currency, locale);
   const sign = (
@@ -77,6 +83,7 @@ export function AmountField({
           value={draft ?? formatWholeNumber(value, locale)}
           onFocus={(event) => {
             const bare = String(value);
+            typed.current = false;
             setDraft(bare);
             // Select the figure, so typing replaces it rather than appends. A
             // frame later, once the bare digits are in the box and a click has
@@ -86,10 +93,11 @@ export function AmountField({
             // as "0".
             const input = event.currentTarget;
             requestAnimationFrame(() => {
-              if (input.value === bare) input.select();
+              if (!typed.current && input.value === bare) input.select();
             });
           }}
           onChange={(event) => {
+            typed.current = true;
             // Digits only, and never more of them than `max` has.
             const digits = event.target.value.replace(/\D/g, "").slice(0, String(max).length);
             setDraft(digits);
