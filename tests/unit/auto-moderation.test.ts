@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   classifyMedia,
   classifyText,
+  isHotlinkedFileLine,
   isPlatformStorageLine,
   normalizeVerdict,
 } from "@/lib/moderation/auto/classify";
@@ -197,9 +198,11 @@ describe("a file on the platform's own storage", () => {
     expect(parse).not.toHaveBeenCalled();
   });
 
-  it("still sends an address that is anywhere else", async () => {
+  it("still sends an ordinary address that is anywhere else", async () => {
+    // A file field holding one is held without asking (see the next block);
+    // a link to the seller's own shop is the model's to read.
     parse.mockResolvedValueOnce(answer(CLEAN));
-    await classifyText("product", ["title=Poster", "image_key=https://hotlink.example.net/photo.jpg"]);
+    await classifyText("product", ["title=Poster", "purchase_url=https://hotlink.example.net/photo.jpg"]);
     const request = parse.mock.calls[0][0] as { messages: { content: { text: string }[] }[] };
     expect(request.messages[0].content[0].text).toContain("hotlink.example.net");
   });
@@ -216,6 +219,81 @@ describe("with nothing configured", () => {
     process.env.ANTHROPIC_API_KEY = "test-key";
     expect(await classifyMedia("image", "images/a/b-x.jpg", null)).toBeNull();
     delete process.env.ANTHROPIC_API_KEY;
+  });
+});
+
+describe("a file field that holds another website's address", () => {
+  const parse = vi.spyOn(Anthropic.Messages.prototype, "parse");
+
+  beforeEach(() => {
+    process.env.ANTHROPIC_API_KEY = "test-key";
+    parse.mockReset();
+  });
+  afterEach(() => {
+    delete process.env.ANTHROPIC_API_KEY;
+  });
+
+  it("is recognised by the field's name and the address's scheme", () => {
+    for (const line of [
+      "image_key=https://hotlink.example.net/photo.jpg",
+      "gallery[].key=http://example.org/a.png",
+      "documents[].key=https://example.org/guide.pdf",
+      "config.blocks[].key=https://example.org/logo.svg",
+    ]) {
+      expect(isHotlinkedFileLine(line), line).toBe(true);
+    }
+    for (const line of [
+      "purchase_url=https://example.com/checkout/mug",
+      "description=See https://example.com for details",
+      "title=https://example.com",
+      "image_key=images/11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222-a.png",
+      "gallery[].alt=https://example.com/not-a-file",
+    ]) {
+      expect(isHotlinkedFileLine(line), line).toBe(false);
+    }
+  });
+
+  it("is held for a person without asking the model, and names the field", async () => {
+    await expect(
+      classifyText("product", ["title=Poster", "image_key=https://hotlink.example.net/photo.jpg"]),
+    ).resolves.toEqual({ verdict: "unsure", ground: null, paths: ["image_key"] });
+    expect(parse).not.toHaveBeenCalled();
+  });
+});
+
+describe("a ground the model made up", () => {
+  const parse = vi.spyOn(Anthropic.Messages.prototype, "parse");
+
+  beforeEach(() => {
+    process.env.ANTHROPIC_API_KEY = "test-key";
+    parse.mockReset();
+  });
+  afterEach(() => {
+    delete process.env.ANTHROPIC_API_KEY;
+  });
+
+  it("is brought back to a ground we have, instead of becoming no answer", async () => {
+    // The model reached for its own word for the adults-only goods. A strict
+    // enum made that a failed parse, which left the part waiting for ever.
+    parse.mockResolvedValueOnce(
+      answer({ verdict: "violation", ground: "age_restricted", paths: ["title"] } as never),
+    );
+    expect(await classifyText("product", ["title=Riesling 2023"])).toEqual({
+      verdict: "violation",
+      ground: "other",
+      paths: ["title"],
+    });
+
+    parse.mockResolvedValueOnce(
+      answer({ verdict: "unsure", ground: "adults_only", paths: [] } as never),
+    );
+    expect((await classifyText("product", ["title=Candle"]))?.ground).toBe("other");
+  });
+
+  it("leaves a known ground, and a missing one, alone", () => {
+    expect(normalizeVerdict({ verdict: "unsure", ground: "scam", paths: [] }, [])).toMatchObject({ ground: "scam" });
+    expect(normalizeVerdict({ verdict: "unsure", ground: null, paths: [] }, [])).toMatchObject({ ground: null });
+    expect(normalizeVerdict({ verdict: "violation", ground: null, paths: [] }, [])).toMatchObject({ ground: "other" });
   });
 });
 

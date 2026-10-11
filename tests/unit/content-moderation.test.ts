@@ -173,7 +173,8 @@ describe("removalStatement", () => {
         "Counterfeit or stolen. It appeared to offer counterfeit goods, or work that belongs to someone else.",
       scam: "Scam or fraud. It appeared designed to take payment without delivering what was promised.",
       spam: "Spam. It was repetitive or misleading rather than a genuine listing.",
-      other: "Something else. It broke the platform rules.",
+      other:
+        "Something else. It broke the platform rules, for example by offering goods that are only for adults, such as alcohol, tobacco, vapes or CBD.",
     };
     for (const ground of REMOVAL_GROUNDS) {
       expect(english(removalStatement(ground))).toBe(expected[ground]);

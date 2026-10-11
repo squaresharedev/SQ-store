@@ -19,7 +19,7 @@ import type { MessageKey } from "@/i18n/types";
 
 /** The full Terms' own "last updated" date, as an ISO calendar date. Render it
  *  with formatLongCalendarDate (lib/format/calendar.ts). */
-export const TERMS_LAST_UPDATED = "2026-09-09";
+export const TERMS_LAST_UPDATED = "2026-10-11";
 
 export type TermsSummarySection = {
   heading: MessageKey;

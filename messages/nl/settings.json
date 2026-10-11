@@ -276,7 +276,7 @@
         "notAllowed": {
           "heading": "Wat niet is toegestaan",
           "points": {
-            "products": "Illegale, namaak- of inbreukmakende producten, malware, haatdragende inhoud en inhoud voor volwassenen.",
+            "products": "Illegale, namaak- of inbreukmakende producten, producten alleen voor volwassenen (alcohol, tabak, vapes, CBD, gokken en erotische producten), malware, haatdragende inhoud en inhoud voor volwassenen.",
             "conduct": "Fraude, het ontduiken van platformkosten, scraping, andermans inhoud gebruiken om AI-modellen te trainen, of de dienst aanvallen.",
             "tampering": "Verbergen of wijzigen wat Square Share aan kopers toont, zoals je verkopersgegevens, prijzen of juridische mededelingen."
           }

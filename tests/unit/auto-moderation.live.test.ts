@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { MODERATION_CASES, type ModerationCase } from "../moderation/cases";
+import { MODERATION_CASES, OWN_STORAGE, type ModerationCase } from "../moderation/cases";
 import { HOLDOUT_CASES } from "../moderation/holdout";
 
 /** Which cases to run: the tuned set (default), the held-out set, or both. */
@@ -53,6 +53,13 @@ async function inBatches<T, R>(items: readonly T[], run: (item: T) => Promise<R>
   return results;
 }
 
+// The check skips files on the project's own storage by origin, which it reads
+// from this variable: set it, as it is set where the check really runs, or a
+// case that carries one is held as a hotlink.
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  process.env.NEXT_PUBLIC_SUPABASE_URL = new URL(OWN_STORAGE).origin;
+}
+
 describe.skipIf(!LIVE)("the classifier on labelled cases (live)", () => {
   it(
     "leaks nothing, and holds few ordinary listings",
@@ -74,8 +81,10 @@ describe.skipIf(!LIVE)("the classifier on labelled cases (live)", () => {
       }));
 
       const unanswered = answers.filter(({ answer }) => answer === null);
+      // "report" cases are shown in the table and never asserted.
       const leaks = answers.filter(
-        ({ item, answer }) => item.expect !== "clean" && answer?.verdict === "clean",
+        ({ item, answer }) =>
+          (item.expect === "held" || item.expect === "block") && answer?.verdict === "clean",
       );
       const clean = answers.filter(({ item }) => item.expect === "clean");
       const falseHolds = clean.filter(({ answer }) => answer?.verdict !== "clean");
@@ -96,6 +105,24 @@ describe.skipIf(!LIVE)("the classifier on labelled cases (live)", () => {
             .join("")}`,
         ].join("\n"),
       );
+
+      // Every verdict, for a human to read: MODERATION_TABLE_FILE=<path>.
+      if (process.env.MODERATION_TABLE_FILE) {
+        const { writeFileSync } = await import("node:fs");
+        writeFileSync(
+          process.env.MODERATION_TABLE_FILE,
+          JSON.stringify(
+            answers.map(({ item, answer }) => ({
+              name: item.name,
+              expect: item.expect,
+              verdict: answer?.verdict ?? "no answer",
+              ground: answer?.ground ?? null,
+            })),
+            null,
+            1,
+          ),
+        );
+      }
 
       expect(unanswered.map(({ item }) => item.name)).toEqual([]);
       expect(leaks.map(({ item }) => item.name)).toEqual([]);

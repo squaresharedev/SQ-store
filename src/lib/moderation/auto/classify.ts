@@ -16,6 +16,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import {
+  answerSchema,
   linePath,
   mediaInstruction,
   MODERATION_EFFORT,
@@ -23,10 +24,11 @@ import {
   POLICY_PROMPT,
   textInstruction,
   TEXT_MAX_CHARS,
-  verdictSchema,
   type ModerationScope,
   type PartVerdict,
+  type RawAnswer,
 } from "@/lib/moderation/auto/policy";
+import { isRemovalGround } from "@/lib/moderation/removal";
 import { classifyMediaForTest, classifyTextForTest } from "@/lib/moderation/auto/test-provider";
 
 /** Null means "no answer": see the contract above. */
@@ -95,12 +97,15 @@ function client(): Anthropic | null {
  * field, a violation always names a ground, and a field the content does not
  * have is dropped rather than shown to a seller.
  */
-export function normalizeVerdict(answer: PartVerdict, knownPaths: readonly string[]): PartVerdict {
+export function normalizeVerdict(answer: RawAnswer | PartVerdict, knownPaths: readonly string[]): PartVerdict {
   if (answer.verdict === "clean") return { verdict: "clean", ground: null, paths: [] };
   const known = new Set(knownPaths);
+  // A ground we do not have becomes "other": the reason is still shown as a
+  // rule broken, and the seller is pointed at what to change either way.
+  const named = isRemovalGround(answer.ground) ? answer.ground : null;
   return {
     verdict: answer.verdict,
-    ground: answer.verdict === "violation" ? (answer.ground ?? "other") : answer.ground,
+    ground: answer.verdict === "violation" ? (named ?? "other") : answer.ground ? (named ?? "other") : null,
     paths: [...new Set(answer.paths)].filter((path) => known.has(path)),
   };
 }
@@ -124,7 +129,7 @@ async function ask(
       system: POLICY_PROMPT,
       messages: [{ role: "user", content }],
       // No temperature or top_p: this model answers them with a 400.
-      output_config: { effort: MODERATION_EFFORT, format: zodOutputFormat(verdictSchema) },
+      output_config: { effort: MODERATION_EFFORT, format: zodOutputFormat(answerSchema) },
     });
     // The model's own safety check declined to read it. Asking again gets the
     // same answer, and it is neither proof the content is fine nor proof it is
@@ -201,6 +206,32 @@ export function isPlatformStorageLine(line: string, supabaseUrl = process.env.NE
 }
 
 /**
+ * Whether a line is a FILE field holding another website's address.
+ *
+ * Uploaded files are stored under a key the platform minted; a field that
+ * should hold one and holds http(s)://elsewhere is an image the seller
+ * hotlinked, which nobody has seen and which the buyer's browser would load
+ * from a server the seller controls (and can change afterwards). Only a
+ * database write made around the app can put one there. Decided here, not left
+ * to the model: a rule the whole check leans on must not be a coin the model
+ * flips differently from one run to the next.
+ *
+ * File fields are the ones named "key" or ending in "_key" (image_key,
+ * gallery[].key, documents[].key, an image block's key). purchase_url and the
+ * like are ordinary addresses.
+ */
+export function isHotlinkedFileLine(line: string): boolean {
+  const cut = line.indexOf("=");
+  if (cut === -1) return false;
+  const field = line.slice(0, cut).split(".").pop() ?? "";
+  // An array position is written "name[]": drop the brackets.
+  const name = field.endsWith("[]") ? field.slice(0, -2) : field;
+  if (name !== "key" && !name.endsWith("_key")) return false;
+  const value = line.slice(cut + 1).trim().toLowerCase();
+  return value.startsWith("https://") || value.startsWith("http://");
+}
+
+/**
  * Judge the text of one row, given as "field=value" lines.
  *
  * Text too long to be a real listing is held without being sent: see
@@ -216,6 +247,12 @@ export async function classifyText(
   if (moderationTestProvider()) return classifyTextForTest(lines);
 
   const judged = lines.filter((line) => !isPlatformStorageLine(line));
+  // A hotlinked file is held for a person without asking the model: see
+  // isHotlinkedFileLine. The field is named so the seller knows what to fix.
+  const hotlinked = judged.filter(isHotlinkedFileLine);
+  if (hotlinked.length > 0) {
+    return { verdict: "unsure", ground: null, paths: [...new Set(hotlinked.map(linePath))] };
+  }
   if (judged.length === 0) return { verdict: "clean", ground: null, paths: [] };
   const text = judged.join("\n");
 

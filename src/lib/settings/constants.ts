@@ -10,7 +10,7 @@ import type { Locale } from "@/i18n/locales";
  * anyone who agreed to an older version is asked again (the Overview attention
  * row). Capped at 32 characters by a DB CHECK.
  */
-export const LEGAL_VERSION = "tos-2026-09-09";
+export const LEGAL_VERSION = "tos-2026-10-11";
 
 // The account's name bounds live with the rest of the handle rules, in
 // lib/validation/auth.ts (USERNAME_MIN_LENGTH / USERNAME_MAX_LENGTH). They are

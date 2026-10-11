@@ -276,7 +276,7 @@
         "notAllowed": {
           "heading": "O que não é permitido",
           "points": {
-            "products": "Produtos ilegais, contrafeitos ou que violem direitos, software malicioso, conteúdo de ódio e conteúdo para adultos.",
+            "products": "Produtos ilegais, contrafeitos ou que violem direitos, produtos só para adultos (álcool, tabaco, cigarros eletrónicos, CBD, jogos de azar e produtos eróticos), software malicioso, conteúdo de ódio e conteúdo para adultos.",
             "conduct": "Fraude, fuga às taxas da plataforma, extração automática de dados, utilização de conteúdo de terceiros para treinar modelos de IA, ou ataques ao serviço.",
             "tampering": "Ocultar ou alterar o que a Square Share mostra aos compradores, como os seus dados de vendedor, preços ou avisos legais."
           }

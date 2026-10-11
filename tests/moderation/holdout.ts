@@ -41,16 +41,9 @@ export const HOLDOUT_CASES: ModerationCase[] = [
   // ── Clean: fashion, adult-adjacent but not explicit ─────────────────────
   { name: "h-clean: corset", expect: "clean", lines: product("Steel boned underbust corset", "Waist training corset in black satin, sizes 60 to 80. Lace-up back.") },
   { name: "h-clean: thong 3-pack", expect: "clean", lines: product("Cotton thongs, 3-pack", "Seamless cotton thongs in black, nude and white. Sizes S to XL.") },
-  { name: "h-clean: latex catsuit", expect: "clean", lines: product("Latex catsuit, black, made to measure", "Handmade 0.4 mm latex. Includes a bottle of shine and a talc.") },
-  { name: "h-clean: silicone massager", expect: "clean", lines: product("Personal massager, silicone, USB rechargeable", "Waterproof body massager with six speeds. Body safe silicone. 18+.") },
-  { name: "h-clean: couples game", expect: "clean", lines: product("Date night card game for couples", "100 cards with questions and playful dares. 18+.") },
 
   // ── Clean: food, drink, tobacco ─────────────────────────────────────────
-  { name: "h-clean: mead", expect: "clean", lines: product("Honey mead, 14%, 0.5 l", "Traditional sweet mead brewed from wildflower honey.") },
-  { name: "h-clean: plum brandy", expect: "clean", lines: product("Slivovice, 52%, 0.5 l", "Aged plum brandy from Moravia, in a glass bottle. For adults.") },
   { name: "h-clean: kombucha", expect: "clean", lines: product("Kombucha starter kit", "SCOBY, tea blend and instructions. Brew your own at home.") },
-  { name: "h-clean: snus", expect: "clean", lines: product("Snus, 10 tins", "Classic white portion snus. 18+, contains nicotine.") },
-  { name: "h-clean: nicotine pouches", expect: "clean", lines: product("Nicotine pouches, mint, strong", "20 pouches per tin, 12 mg each. For adult nicotine users only.") },
   { name: "h-clean: hemp seeds", expect: "clean", lines: product("Hulled hemp seeds, 500 g", "Raw shelled hemp seeds, rich in protein and omega 3. For salads and smoothies.") },
   { name: "h-clean: truffle oil", expect: "clean", lines: product("Black truffle oil, 100 ml", "Extra virgin olive oil infused with black truffle.") },
 
@@ -68,6 +61,36 @@ export const HOLDOUT_CASES: ModerationCase[] = [
   { name: "h-clean: photo session", expect: "clean", lines: product("Portrait photography session, 1 hour", "Studio or outdoor session in Prague. Ten retouched photos included.") },
   { name: "h-clean: logo design", expect: "clean", lines: product("Custom logo design service", "Three concepts, two revisions, vector files. Delivered in a week.") },
   { name: "h-clean: storefront", expect: "clean", lines: ["name=Studio Aura Perfumery", "config.header.bio=Small-batch perfumes and candles, poured in Brno", "config.blocks[].type=product"] },
+
+  // ── Clean: objects around the things that are not allowed ───────────────
+  { name: "h-clean: bar stool", expect: "clean", lines: product("Leather bar stool, adjustable height", "Swivel stool with a chrome footrest. Seat height 60 to 80 cm.") },
+  { name: "h-clean: wine glass set", expect: "clean", lines: product("Red wine glasses, set of 4", "Lead-free crystal, 550 ml, dishwasher safe.") },
+  { name: "h-clean: pipe cleaner craft", expect: "clean", lines: product("Pipe cleaners for crafts, 200 pcs", "Fuzzy chenille stems in 20 colours for children's crafts.") },
+  { name: "h-clean: tobacco brown leather", expect: "clean", lines: product("Messenger bag in tobacco brown leather", "Full grain leather, laptop sleeve, brass buckles.") },
+  { name: "h-clean: smoked salmon", expect: "clean", lines: product("Cold smoked salmon, 200 g", "Atlantic salmon smoked over beech wood. Vacuum packed.") },
+  { name: "h-clean: ginger beer", expect: "clean", lines: product("Ginger beer, non-alcoholic, 12 bottles", "Traditionally brewed spicy ginger drink, 0% alcohol.") },
+  { name: "h-clean: root beer", expect: "clean", lines: product("Root beer, 6 cans", "Sweet American-style soft drink with vanilla and wintergreen.") },
+  { name: "h-clean: vape-free air freshener", expect: "clean", lines: product("Reed diffuser, cedar and amber", "Fragrance sticks in a glass bottle, 200 ml.") },
+  { name: "h-clean: beer batter mix", expect: "clean", lines: product("Fish and chips batter mix, 500 g", "Crispy tempura-style coating. Just add cold water.") },
+
+  // ── Block: adults-only goods in different words ─────────────────────────
+  { name: "h-block: vodka, polish", expect: "block", lines: product("Wódka żytnia 0,7 l", "Czysta wódka z żyta, 40%. Sprzedaż detaliczna i hurtowa.") },
+  { name: "h-block: prosecco", expect: "block", lines: product("Prosecco DOC, 6 bottles", "Dry sparkling wine from Veneto. Gift carton.") },
+  { name: "h-block: homemade rakija", expect: "block", lines: product("Homemade plum rakija, 1 l", "Grandfather's recipe, 50% alcohol, bottled by hand.") },
+  { name: "h-block: hard seltzer", expect: "block", lines: product("Hard seltzer variety pack, 12 cans", "Lime, mango and berry. 5% ABV.") },
+  { name: "h-block: pipe tobacco", expect: "block", lines: product("Pipe tobacco, vanilla cavendish, 50 g", "Aromatic blend in a resealable tin.") },
+  { name: "h-block: heated tobacco", expect: "block", lines: product("Heated tobacco sticks, 10 packs", "Compatible with the popular heating devices. Menthol.") },
+  { name: "h-block: e-cig, german", expect: "block", lines: product("E-Zigarette mit Nikotinsalz, 20 mg", "Einweg-Vape, 800 Züge, Geschmack Wassermelone.") },
+  { name: "h-block: CBD drops, czech", expect: "block", lines: product("CBD kapky 10 %, 10 ml", "Plnospektrální konopný extrakt s obsahem THC pod 0,2 %. Pro lepší spánek.") },
+  { name: "h-block: CBD flowers, french", expect: "block", lines: product("Fleurs de CBD, 5 g", "Têtes de chanvre indoor, riche en CBD, moins de 0,3 % de THC.") },
+  { name: "h-block: poppers", expect: "block", lines: product("Poppers, 24 ml", "Strong room aroma. Do not inhale. Discreet shipping.") },
+  { name: "h-block: salvia", expect: "block", lines: product("Salvia divinorum extract, 20x", "Dried leaf extract, legal in many countries. For botanical collection.") },
+  { name: "h-block: dildo, italian", expect: "block", lines: product("Vibratore in silicone", "Giocattolo erotico ricaricabile, impermeabile, confezione discreta.") },
+  { name: "h-block: fetish gear", expect: "block", lines: product("Leather bondage harness and restraints set", "Adjustable full body harness with wrist and ankle cuffs.") },
+  { name: "h-block: adult magazines", expect: "block", lines: product("Vintage adult magazines, 1970s collection", "Twenty issues of classic nude men's magazines. Collectors only.") },
+  { name: "h-block: poker chips and casino", expect: "block", lines: product("Online poker coaching, win at cash games", "Join our paid group and get daily bankroll plans. Deposit bonuses inside.") },
+  { name: "h-block: firecrackers", expect: "block", lines: product("Firecrackers, 500 pack, loud bangers", "Strong cherry bombs. Bang guaranteed. Not for children.") },
+  { name: "h-block: age marker", expect: "block", lines: product("Gift for her, only for adults", "Adults only product, 18+, discreet parcel. Sealed packaging.") },
 
   // ── Held: a person should look ──────────────────────────────────────────
   { name: "h-held: dupe of luxury perfume", expect: "held", lines: product("Baccarat Rouge 540 dupe, same smell, 1:1", "Our clone of the famous original. Identical scent, a fraction of the price. Fake the real thing.") },

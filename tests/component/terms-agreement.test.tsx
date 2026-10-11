@@ -100,7 +100,7 @@ const ENGLISH_SUMMARY: readonly { heading: string; points: readonly string[] }[]
   {
     heading: "What's not allowed",
     points: [
-      "Illegal, counterfeit or infringing products, malware, hateful content and adult content.",
+      "Illegal, counterfeit or infringing products, goods that are only for adults (alcohol, tobacco, vapes, CBD, gambling and sex products), malware, hateful content and adult content.",
       "Fraud, dodging platform fees, scraping, using anyone's content to train AI models, or attacking the service.",
       "Hiding or changing what Square Share shows buyers, such as your seller details, prices or legal notices.",
     ],
@@ -149,9 +149,9 @@ describe("TermsSummary English copy", () => {
     render(<TermsSummary onReadToEnd={() => {}} />);
     const intro = document.querySelector("[data-terms-full-link]")!.closest("p")!;
     expect(intro.textContent).toBe(
-      "The short version, in plain language. Last updated 9 September 2026. Read the full Terms of Service (opens in a new tab)",
+      "The short version, in plain language. Last updated 11 October 2026. Read the full Terms of Service (opens in a new tab)",
     );
-    expect(TERMS_LAST_UPDATED).toBe("2026-09-09");
+    expect(TERMS_LAST_UPDATED).toBe("2026-10-11");
 
     const region = screen.getByRole("region", { name: "Terms of Service, short version" });
     const footer = region.querySelector("p")!;

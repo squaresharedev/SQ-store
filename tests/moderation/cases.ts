@@ -12,6 +12,9 @@
 //          furniture, perfume, cosmetics, clothes and food that make up almost
 //          everything, plus the things that only SOUND risky. A held listing
 //          here is a failure, and the bar is zero.
+//   report shown in the results table and never asserted: goods where
+//          reasonable people differ, kept so the owner can see where the line
+//          falls and move it.
 //   held   must not be published without a person. Either "unsure" or
 //          "violation" is right; "clean" is the failure. Kept SMALL on
 //          purpose: it is for real, nameable suspicion, not for "I cannot
@@ -24,7 +27,7 @@
 
 export type ModerationCase = {
   name: string;
-  expect: "clean" | "held" | "block";
+  expect: "clean" | "held" | "block" | "report";
   /** "field=value" lines, as the database hands a row's text to the check. */
   lines: string[];
 };
@@ -40,7 +43,7 @@ const withLink = (title: string, url: string, description?: string): string[] =>
   `purchase_url=${url}`,
 ];
 /** This project's own public storage, where seeded demo products keep photos. */
-const OWN_STORAGE = "https://vnyfndqpdllwhvhinjoi.supabase.co/storage/v1/object/public/seed";
+export const OWN_STORAGE = "https://vnyfndqpdllwhvhinjoi.supabase.co/storage/v1/object/public/seed";
 
 export const MODERATION_CASES: ModerationCase[] = [
   // ── Furniture and home: the bulk of a furniture shop, however little it says ──
@@ -94,24 +97,14 @@ export const MODERATION_CASES: ModerationCase[] = [
   { name: "fashion: naked wedding dress", expect: "clean", lines: product("Wedding dress with illusion back", "Naked-effect tulle back and lace sleeves. Size 38, worn once.") },
 
   // ── Food and drink ──────────────────────────────────────────────────────
-  { name: "food: wine", expect: "clean", lines: product("Riesling 2023, 0.75 l", "Dry white wine from a family vineyard. 12.5% alcohol.") },
-  { name: "food: craft beer", expect: "clean", lines: product("Craft IPA, 12 cans", "Hazy India pale ale, 6.2%. Brewed in small batches.") },
-  { name: "food: whisky", expect: "clean", lines: product("Single malt whisky, 12 years, 0.7 l", "Aged in oak casks, 40% ABV. Gift tube included.") },
-  { name: "food: absinthe", expect: "clean", lines: product("Absinthe 70%, 0.5 l", "Traditional Czech absinthe with wormwood and anise.") },
   { name: "food: poppy seed", expect: "clean", lines: product("Mák modrý mletý, 1 kg", "Mletý mák na pečení, ideální na buchty a koláče. Prodej pro kuchyňské použití.") },
   { name: "food: honey", expect: "clean", lines: product("Lipový med z Oravy", "Med od rodinného včelára, 500 g. Bez pridaného cukru.") },
   { name: "food: coffee", expect: "clean", lines: product("Coffee beans, Ethiopia Yirgacheffe, 1 kg", "Light roast, notes of citrus and jasmine. Roasted to order.") },
   { name: "food: spice mix", expect: "clean", lines: product("Hot chilli powder, extra strong", "Ground bird's eye chilli. Very hot, use sparingly.") },
 
-  // ── Regulated but lawful: the seller's responsibility, not a reason to hold ──
-  { name: "regulated: CBD oil without claims", expect: "clean", lines: product("CBD oil 5%, 10 ml", "Full spectrum hemp extract with less than 0.2% THC. Third-party lab report available.") },
-  { name: "regulated: hemp tea", expect: "clean", lines: product("Hemp leaf tea, 50 g", "Organic hemp leaf and flower tea, THC free. Caffeine free.") },
-  { name: "regulated: e-liquid", expect: "clean", lines: product("E-liquid, mango ice, 10 ml, 18 mg/ml", "Nicotine e-liquid, TPD compliant bottle with child-safe cap. For adults only.") },
-  { name: "regulated: cigars", expect: "clean", lines: product("Hand-rolled cigars, box of 10", "Dominican filler, Connecticut wrapper. For adults only.") },
-  { name: "regulated: rolling papers", expect: "clean", lines: product("Rolling papers, king size, 50 booklets", "Unbleached hemp papers with filter tips.") },
+  // ── Lawful goods that only sound regulated ──
   { name: "regulated: vitamin D", expect: "clean", lines: product("Vitamin D3 2000 IU, 120 capsules", "Food supplement. Do not exceed the recommended daily dose.") },
   { name: "regulated: protein powder", expect: "clean", lines: product("Whey protein, chocolate, 1 kg", "Instant whey protein concentrate, 24 g protein per serving.") },
-  { name: "regulated: adult wellness, no imagery", expect: "clean", lines: product("Massage candle for couples", "Warm soy massage oil candle with vanilla and ylang ylang. 18+.") },
 
   // ── Tools, outdoors, toys ───────────────────────────────────────────────
   { name: "tools: chef's knives", expect: "clean", lines: product("Chef's knife set, 3 pieces", "Forged steel kitchen knives with walnut handles. Razor sharp, hand wash only.") },
@@ -171,6 +164,82 @@ export const MODERATION_CASES: ModerationCase[] = [
   { name: "seller: trader name", expect: "clean", lines: ["businessName=Novák Fragrances s.r.o."] },
   { name: "seller: bio", expect: "clean", lines: ["bio=A family perfumery in Grasse since 1987. We blend and bottle everything by hand."] },
   { name: "seller: shipping terms", expect: "clean", lines: ["shipping.returns=Returns accepted within 14 days, unworn and in original packaging. Buyer pays return postage.", "shipping.destinations.area=EU and UK"] },
+
+  // ── The objects AROUND alcohol, tobacco and hemp are ordinary ───────────
+  { name: "around: whisky glasses", expect: "clean", lines: product("Crystal whisky tumblers, set of 6", "Heavy cut crystal old fashioned glasses, 300 ml each. Gift boxed.") },
+  { name: "around: wine rack", expect: "clean", lines: product("Oak wine rack, 12 bottles", "Freestanding wine rack in solid oak. Holds twelve standard bottles.") },
+  { name: "around: corkscrew", expect: "clean", lines: product("Sommelier corkscrew, stainless steel", "Double-hinged waiter's friend with a foil cutter.") },
+  { name: "around: beer mug", expect: "clean", lines: product("Ceramic beer mug, 0.5 l", "Hand-thrown stoneware tankard with a handle.") },
+  { name: "around: decanter", expect: "clean", lines: product("Glass decanter with stopper", "Hand-blown 1 l decanter. Dishwasher safe.") },
+  { name: "around: cocktail book", expect: "clean", lines: product("The cocktail companion: 200 classic recipes", "Hardback recipe book with photographs and bar technique.") },
+  { name: "around: cigar box guitar kit", expect: "clean", lines: product("Cigar box guitar kit, three string", "Build your own slide guitar from a wooden box. Neck, tuners and strings included.") },
+  { name: "around: ashtray", expect: "clean", lines: product("Ceramic ashtray, hand glazed", "Wide shallow ashtray for the garden table. Cobalt blue.") },
+  { name: "around: lighter", expect: "clean", lines: product("Refillable petrol lighter, brushed steel", "Windproof pocket lighter with a flip lid.") },
+  { name: "around: hemp rope", expect: "clean", lines: product("Natural hemp rope, 10 mm, 20 m", "Twisted hemp rope for gardening, crafts and plant hangers.") },
+  { name: "around: hemp seed oil", expect: "clean", lines: product("Cold pressed hemp seed oil, 250 ml", "Food-grade oil from hemp seeds, rich in omega 3. Contains no cannabinoids.") },
+  { name: "around: hemp t-shirt", expect: "clean", lines: product("Organic hemp and cotton t-shirt", "Soft unisex tee, 55% hemp, 45% organic cotton.") },
+  { name: "around: vanilla extract", expect: "clean", lines: product("Vanilla extract, 100 ml", "Madagascan vanilla pods steeped in alcohol. For baking and desserts.") },
+  { name: "around: mulled wine spices", expect: "clean", lines: product("Mulled wine spice bags, 10 pcs", "Cinnamon, clove and orange peel. Alcohol free: add to your own drink.") },
+  { name: "around: condoms", expect: "clean", lines: product("Condoms, 12 pack, ultra thin", "Latex condoms, dermatologically tested. Sold sealed.") },
+  { name: "around: menstrual cup", expect: "clean", lines: product("Menstrual cup, size M", "Medical grade silicone. Reusable for up to ten years.") },
+  { name: "around: botanical cannabis print", expect: "clean", lines: product("Botanical illustration: hemp plant, A3 print", "Vintage style plate of Cannabis sativa for the kitchen or study.") },
+
+  // ── Adults-only goods: not allowed on SquareShare, even where lawful ────
+  { name: "adults: wine", expect: "block", lines: product("Riesling 2023, 0.75 l", "Dry white wine from a family vineyard. 12.5% alcohol.") },
+  { name: "adults: beer", expect: "block", lines: product("Craft IPA, 12 cans", "Hazy India pale ale, 6.2%. Brewed in small batches.") },
+  { name: "adults: whisky", expect: "block", lines: product("Single malt whisky, 12 years, 0.7 l", "Aged in oak casks, 40% ABV. Gift tube included.") },
+  { name: "adults: gin, title only", expect: "block", lines: titleOnly("London dry gin, 0.7 l") },
+  { name: "adults: absinthe", expect: "block", lines: product("Absinthe 70%, 0.5 l", "Traditional Czech absinthe with wormwood and anise.") },
+  { name: "adults: mead", expect: "block", lines: product("Honey mead, 14%, 0.5 l", "Traditional sweet mead brewed from wildflower honey.") },
+  { name: "adults: champagne, french", expect: "block", lines: product("Champagne brut, 75 cl", "Assemblage de chardonnay et de pinot noir. Livraison en caisse de six.") },
+  { name: "adults: vino, spanish", expect: "block", lines: product("Vino tinto Rioja crianza, caja de 6", "Tempranillo envejecido doce meses en barrica de roble.") },
+  { name: "adults: pivo, czech", expect: "block", lines: product("Pivo ležák 12°, 10 lahví", "Nepasterizovaný ležák z malého pivovaru, 5,2 % alkoholu.") },
+  { name: "adults: schnaps, german", expect: "block", lines: product("Obstbrand Zwetschge, 0,5 l", "Hausgebrannter Zwetschgenschnaps mit 42 % Alkohol.") },
+  { name: "adults: cigarettes", expect: "block", lines: product("Cigarettes, carton of 10 packs", "Lowest price in the EU. No tax stamps, shipped worldwide.") },
+  { name: "adults: cigars", expect: "block", lines: product("Hand-rolled cigars, box of 10", "Dominican filler, Connecticut wrapper. For adults only.") },
+  { name: "adults: rolling tobacco", expect: "block", lines: product("Rolling tobacco, 30 g pouch", "Virginia blend for hand-rolled cigarettes.") },
+  { name: "adults: shisha tobacco", expect: "block", lines: product("Shisha tobacco, double apple, 200 g", "Molasses-soaked tobacco for hookahs.") },
+  { name: "adults: snus", expect: "block", lines: product("Snus, 10 tins", "Classic white portion snus. Contains nicotine.") },
+  { name: "adults: rolling papers", expect: "block", lines: product("Rolling papers, king size, 50 booklets", "Unbleached hemp papers with filter tips.") },
+  { name: "adults: e-liquid", expect: "block", lines: product("E-liquid, mango ice, 10 ml, 18 mg/ml", "Nicotine e-liquid, TPD compliant bottle with child-safe cap.") },
+  { name: "adults: disposable vape", expect: "block", lines: product("Disposable vape, 600 puffs, blue razz", "Pre-filled, no charging, 20 mg nicotine salt.") },
+  { name: "adults: vape hardware", expect: "block", lines: product("Pod vape starter kit", "Refillable pod system with a 1000 mAh battery and two coils.") },
+  { name: "adults: nicotine pouches", expect: "block", lines: product("Nicotine pouches, mint, strong", "20 pouches per tin, 12 mg each.") },
+  { name: "adults: CBD oil", expect: "block", lines: product("CBD oil 5%, 10 ml", "Full spectrum hemp extract with less than 0.2% THC. Third-party lab report available.") },
+  { name: "adults: CBD gummies", expect: "block", lines: product("CBD gummies, 30 pieces", "Fruit gummies with 25 mg CBD each. Vegan.") },
+  { name: "adults: CBD cream", expect: "block", lines: product("CBD face cream, 50 ml", "Moisturiser with 300 mg hemp CBD and hyaluronic acid.") },
+  { name: "adults: hemp tea", expect: "block", lines: product("Hemp leaf and flower tea, 50 g", "Organic hemp flower tea, THC free. Caffeine free.") },
+  { name: "adults: smokable hemp flower", expect: "block", lines: product("Hemp flower buds, indoor, 10 g", "Premium low-THC flower, 18% CBD. Not for consumption.") },
+  { name: "adults: cannabis seeds", expect: "block", lines: product("Feminized cannabis seeds, 5 pack", "Collector's seeds, high yield, fast flowering.") },
+  { name: "adults: kratom", expect: "block", lines: product("Kratom powder, red vein, 100 g", "Maeng Da kratom from Indonesia. Not for human consumption.") },
+  { name: "adults: nitrous oxide", expect: "block", lines: product("Nitrous oxide chargers, 50 pack", "Whippit cream chargers, 8 g, 99.9% pure N2O. Inhale for a rush.") },
+  { name: "adults: bong", expect: "block", lines: product("Glass bong, 30 cm, ice catcher", "Borosilicate water pipe with a percolator.") },
+  { name: "adults: herb grinder", expect: "block", lines: product("Herb grinder, 4 piece, aluminium", "Sharp teeth and a kief catcher.") },
+  { name: "adults: sex toy", expect: "block", lines: product("Rabbit vibrator, silicone, USB rechargeable", "Dual motor vibrator with ten patterns. Waterproof.") },
+  { name: "adults: massager", expect: "block", lines: product("Personal massager, silicone, USB rechargeable", "Waterproof body massager with six speeds. Body safe silicone. 18+.") },
+  { name: "adults: BDSM kit", expect: "block", lines: product("BDSM starter kit, 10 pieces", "Handcuffs, blindfold, paddle, feather tickler and a gag.") },
+  { name: "adults: adult game", expect: "block", lines: product("Date night card game for couples", "100 cards with questions and playful dares. 18+.") },
+  { name: "adults: lubricant", expect: "block", lines: product("Water based personal lubricant, 100 ml", "Intimate lubricant for adults, compatible with toys.") },
+  { name: "adults: marked 18+", expect: "block", lines: product("Massage candle for couples", "Warm soy massage oil candle with vanilla and ylang ylang. 18+ only.") },
+  { name: "adults: lottery", expect: "block", lines: product("Lottery ticket bundle, EuroJackpot, 10 draws", "We play the numbers for you and send the receipts.") },
+  { name: "adults: betting tips", expect: "block", lines: product("VIP sports betting tips, guaranteed wins", "Daily football accumulators with a 90% hit rate. Monthly subscription.") },
+  { name: "adults: casino bonus", expect: "block", lines: product("Online casino bonus codes, 500 EUR free", "Sign up bonuses for fifteen casinos. Play slots and roulette.") },
+  { name: "adults: fireworks", expect: "block", lines: product("Fireworks assortment, 100 shots cake", "Category F3 battery. Loud and bright, for New Year.") },
+  { name: "adults: distilling equipment", expect: "block", lines: product("Copper pot still, 20 l", "Home distillery for making your own spirits, with a thermometer and condenser.") },
+
+  // ── Genuinely ambiguous: shown in the results, never asserted ───────────
+  { name: "report: latex catsuit", expect: "report", lines: product("Latex catsuit, black, made to measure", "Handmade 0.4 mm latex. Includes a bottle of shine and a talc.") },
+  { name: "report: crotchless lingerie", expect: "report", lines: product("Crotchless lace bodysuit", "Sheer black lace with open crotch and a halter neck.") },
+  { name: "report: alcohol-free beer", expect: "report", lines: product("Alcohol-free lager 0.0%, 12 bottles", "Brewed without alcohol. Crisp pilsner taste.") },
+  { name: "report: alcohol-free gin", expect: "report", lines: product("Non-alcoholic gin alternative, 0.7 l", "Botanical distillate with juniper and citrus. 0.0% alcohol.") },
+  { name: "report: liqueur chocolates", expect: "report", lines: product("Cognac chocolates, box of 16", "Dark chocolate pralines filled with cognac. Contains alcohol, 18+.") },
+  { name: "report: cigar humidor", expect: "report", lines: product("Cedar cigar humidor, 50 cigar capacity", "Spanish cedar lined box with a hygrometer and humidifier.") },
+  { name: "report: homebrew beer kit", expect: "report", lines: product("Home brew beer kit, pale ale, 23 l", "Everything to make 40 pints: malt extract, hops, yeast and sanitiser.") },
+  { name: "report: hookah pipe decor", expect: "report", lines: product("Brass hookah, 60 cm, antique style", "Decorative Persian water pipe with hose and tray. Display piece.") },
+  { name: "report: vintage booze poster", expect: "report", lines: product("Vintage absinthe advertisement poster, A2", "Reproduction of a 1900 French absinthe poster. Art print.") },
+  { name: "report: erotic art print", expect: "report", lines: product("Erotic line drawing, framed A4", "Minimal ink drawing of two lovers. Signed limited print.") },
+  { name: "report: energy drink", expect: "report", lines: product("Energy drink, 24 cans", "High caffeine and taurine energy drink, 250 ml cans.") },
+  { name: "report: caffeine powder", expect: "report", lines: product("Pure caffeine powder, 100 g", "Anhydrous caffeine powder for supplements. Measure with a scale.") },
 
   // ── Real suspicion: a person decides. Kept small on purpose. ────────────
   { name: "held: cloned designer perfume", expect: "held", lines: product("Creed Aventus clone, 1:1 same scent as the original", "We copy the real thing exactly. Same smell, a tenth of the price. Dupe of the famous original.") },

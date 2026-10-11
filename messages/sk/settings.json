@@ -276,7 +276,7 @@
         "notAllowed": {
           "heading": "Čo nie je povolené",
           "points": {
-            "products": "Nezákonné, falšované alebo porušujúce produkty, škodlivý softvér, nenávistný obsah a obsah pre dospelých.",
+            "products": "Nezákonné, falšované alebo porušujúce produkty, tovar len pre dospelých (alkohol, tabak, e-cigarety, CBD, hazard a erotické pomôcky), škodlivý softvér, nenávistný obsah a obsah pre dospelých.",
             "conduct": "Podvod, obchádzanie poplatkov platformy, automatizované preberanie údajov, používanie cudzieho obsahu na trénovanie modelov AI alebo útoky na službu.",
             "tampering": "Skrývanie alebo zmena toho, čo Square Share zobrazuje kupujúcim, napríklad vašich údajov predajcu, cien alebo právnych oznámení."
           }
