@@ -68,6 +68,9 @@ describe("embedded supabase replica", () => {
       // themselves (20260926_moderation_decisions_and_appeals). Read-only to
       // the store's owner and team; written by service_role only.
       "moderation_appeals",
+      // The automatic check's verdict per part of content: the approved list
+      // the moderation wall reads (20261012_auto_moderation). Service-role only.
+      "moderation_checks",
       "moderation_decisions",
       "notifications",
       "orders",

@@ -175,6 +175,12 @@
         "title": "Die Zahlung für {plan, select, starter {deinen Starter-Tarif} pro {deinen Pro-Tarif} other {deinen kostenpflichtigen Tarif}} ist fehlgeschlagen",
         "body": "Stripe versucht es erneut. Aktualisiere deine Karte unter Tarif und Abrechnung, damit du deinen Tarif behältst."
       }
+    },
+    "policy": {
+      "autoPaused": {
+        "title": "Handlung nötig: {target, select, product {Dein Produkt „{title}“ ist pausiert} other {Dein Schaufenster „{title}“ ist pausiert}}",
+        "body": "Eine automatische Prüfung hat es für Käufer verborgen, weil es anscheinend gegen die Regeln verstößt. Ändere es, dann wird es sofort erneut geprüft, oder bitte darum, dass eine Person die Entscheidung überprüft."
+      }
     }
   }
 }

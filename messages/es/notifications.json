@@ -175,6 +175,12 @@
         "title": "El pago de tu plan {plan, select, starter {Starter} pro {Pro} other {de pago}} ha fallado",
         "body": "Stripe lo intentará de nuevo. Actualiza tu tarjeta en Plan y facturación para conservar el plan."
       }
+    },
+    "policy": {
+      "autoPaused": {
+        "title": "Tienes que actuar: {target, select, product {tu producto «{title}» está en pausa} other {tu escaparate «{title}» está en pausa}}",
+        "body": "Una revisión automática lo ha ocultado a los compradores porque parece incumplir las normas. Cámbialo y se revisará de nuevo al momento, o pide que una persona revise la decisión."
+      }
     }
   }
 }

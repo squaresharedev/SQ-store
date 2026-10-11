@@ -1,10 +1,11 @@
 import { createServer, type Server } from "node:http";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { expect, test, type Browser, type Page } from "@playwright/test";
+import { expect, test, type Browser } from "@playwright/test";
 import pg from "pg";
 import {
   freshUser,
+  gotoApp,
   PUBLISHABLE_SELLER,
   seedProducts,
   seedSellerIdentity,
@@ -13,7 +14,7 @@ import {
   signUp,
   userIdByEmail,
 } from "./helpers";
-import { ANON_KEY, GATEWAY_URL } from "./stack/keys.mjs";
+import { enableTwoFactor } from "./two-factor";
 
 /**
  * THE WHOLE MODERATION LOOP, ACROSS BOTH APPS.
@@ -34,9 +35,11 @@ import { ANON_KEY, GATEWAY_URL } from "./stack/keys.mjs";
  *   1. Start the stack with the ping configured:
  *        ADMIN_NOTIFY_URL=http://localhost:3201 ADMIN_NOTIFY_SECRET=e2e-scan \
  *          node tests/e2e/stack/server.mjs
- *   2. Start SQ-admin against it (its .env.e2e plus the three below):
+ *   2. Start SQ-admin against it (its .env.e2e plus the four below; the
+ *      empty mail key keeps its .env.local one from sending real email):
  *        NOTIFY_SCAN_SECRET=e2e-scan STORE_APP_URL=http://localhost:3100 \
- *          NEXT_PUBLIC_APP_URL=http://localhost:3201 next dev -p 3201
+ *          NEXT_PUBLIC_APP_URL=http://localhost:3201 RESEND_API_KEY= \
+ *          next dev -p 3201
  *   3. E2E_ADMIN_URL=http://localhost:3201 E2E_ADMIN_SCAN_SECRET=e2e-scan \
  *        npx playwright test 72-admin-moderation
  *
@@ -203,6 +206,36 @@ async function ensureAdminNotificationTables() {
   const client = new pg.Client({ connectionString: DB_URL });
   await client.connect();
   try {
+    // The directory view too: the replica carries SQ-store's definition of
+    // admin_user_directory, and the admin panel reads two columns (the avatar,
+    // the last sign-in) that only its own 0005 adds. Without them every seller
+    // lookup fails and the seller card comes up empty.
+    const directory = await client.query(
+      `select count(*)::int as n from information_schema.columns
+        where table_schema = 'public' and table_name = 'admin_user_directory'
+          and column_name = 'last_sign_in_at'`,
+    );
+    if (directory.rows[0].n === 0) {
+      // Two pieces of the real auth schema the mock GoTrue never needed (it
+      // keeps sessions in memory); the migration only has to find them there.
+      await client.query(
+        `alter table auth.users add column if not exists last_sign_in_at timestamptz;
+         create table if not exists auth.sessions (
+           id uuid primary key default gen_random_uuid(),
+           user_id uuid,
+           updated_at timestamptz not null default now()
+         );`,
+      );
+      await client.query(
+        readFileSync(
+          join(ADMIN_REPO, "supabase", "migrations", "0005_admin_directory_activity.sql"),
+          "utf8",
+        ).replace(/[^ -]/g, ""),
+      );
+      await client.query(`notify pgrst, 'reload schema'`);
+      await new Promise((resolve) => setTimeout(resolve, 1_500));
+    }
+
     const { rows } = await client.query(
       `select to_regclass('public.admin_notification_cursor') is not null as present`,
     );
@@ -223,14 +256,23 @@ async function ensureAdminNotificationTables() {
   }
 }
 
-async function signUpViaGateway(email: string, password: string): Promise<string> {
-  const res = await fetch(`${GATEWAY_URL}/auth/v1/signup`, {
-    method: "POST",
-    headers: { apikey: ANON_KEY, "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
-  expect(res.ok, `gateway signup ${res.status}`).toBe(true);
-  return ((await res.json()) as { user: { id: string } }).user.id;
+/**
+ * A member of staff, signed in the way one really is.
+ *
+ * The admin panel lets staff in only on a session that has passed two-factor,
+ * and takes no second factor itself: the dashboard does, on the session
+ * cookie the two apps share (a cookie belongs to a host, not a port, so
+ * localhost:3100 and :3201 share one here as .squareshare.eu does live). So
+ * staff are a dashboard account with two-factor turned on through its real
+ * settings screen, which leaves this very session at the higher level.
+ */
+async function staffWithTwoFactor(browser: Browser, tag: string) {
+  const context = await browser.newContext({ baseURL: "http://localhost:3100" });
+  const page = await context.newPage();
+  const user = freshUser(tag);
+  await signUp(page, user);
+  await enableTwoFactor(page, user.password);
+  return { context, page, userId: await userIdByEmail(user.email) };
 }
 
 async function adminNotify() {
@@ -240,14 +282,6 @@ async function adminNotify() {
   });
   expect(res.status, "admin notify endpoint").toBe(200);
   return (await res.json()) as { events: number; sent: number; initialised: string[] };
-}
-
-async function signInToAdmin(page: Page, email: string, password: string) {
-  await page.goto(`${ADMIN_URL}/login`);
-  await page.locator('input[name="email"]').fill(email);
-  await page.locator('input[name="password"]').fill(password);
-  await page.locator('button[name="intent"]').click();
-  await page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 60_000 });
 }
 
 async function waitForPush(received: Push[], match: (push: Push) => boolean, what: string) {
@@ -309,9 +343,8 @@ test("report, push, pause, fix, push, approve", async ({ browser }: { browser: B
   });
 
   // --- Staff, with a device that "receives" push -----------------------------
-  const staffEmail = `xapp-staff-${Date.now()}@e2e.squareshare.to`;
-  const staffPassword = "e2e-password-123";
-  const staffUserId = await signUpViaGateway(staffEmail, staffPassword);
+  const staffSession = await staffWithTwoFactor(browser, "xapp-staff");
+  const staffUserId = staffSession.userId;
   const [adminRow] = (await serviceRest(`/admin_users`, {
     method: "POST",
     body: [{ user_id: staffUserId, role: "staff" }],
@@ -359,9 +392,8 @@ test("report, push, pause, fix, push, approve", async ({ browser }: { browser: B
     expect(reported.url).toBe(`/moderation/product/${productId}`);
 
     // --- Staff open it -------------------------------------------------------
-    const staffContext = await browser.newContext();
-    const staff = await staffContext.newPage();
-    await signInToAdmin(staff, staffEmail, staffPassword);
+    const staffContext = staffSession.context;
+    const staff = staffSession.page;
 
     await staff.goto(`${ADMIN_URL}/moderation`);
     await expect(staff.locator("[data-nav-count]").first()).toHaveAttribute("data-nav-count", /[1-9]/);
@@ -371,7 +403,9 @@ test("report, push, pause, fix, push, approve", async ({ browser }: { browser: B
 
     // Everything needed to decide, on one page.
     await expect(staff.getByRole("heading", { level: 1 })).toHaveText("Suspicious sneakers");
-    await expect(staff.getByText("€45.00")).toBeVisible();
+    // Twice on the page since the seller's catalogue joined it: the facts,
+    // and this item's own row in that list.
+    await expect(staff.getByText("€45.00").first()).toBeVisible();
     await expect(staff.getByText("Brand new, 100% authentic.")).toBeVisible();
     await expect(staff.getByText("https://totally-legit.example/pay")).toBeVisible();
     await expect(staff.locator("li", { hasText: "Size:" })).toContainText("43 (unavailable)");
@@ -552,9 +586,8 @@ test("remove, appeal, turn down, pause, appeal, accept", async ({ browser }: { b
   });
   const productPage = `/s/${storefrontId}/p/${productId}`;
 
-  const staffEmail = `xapp-appeal-staff-${Date.now()}@e2e.squareshare.to`;
-  const staffPassword = "e2e-password-123";
-  const staffUserId = await signUpViaGateway(staffEmail, staffPassword);
+  const staffSession = await staffWithTwoFactor(browser, "xapp-appeal-staff");
+  const staffUserId = staffSession.userId;
   const [adminRow] = (await serviceRest(`/admin_users`, {
     method: "POST",
     body: [{ user_id: staffUserId, role: "staff" }],
@@ -578,9 +611,8 @@ test("remove, appeal, turn down, pause, appeal, accept", async ({ browser }: { b
   const appealsFor = (push: Push) => push.title === "Decision appealed" && push.url === `/moderation/product/${productId}`;
 
   try {
-    const staffContext = await browser.newContext();
-    const staff = await staffContext.newPage();
-    await signInToAdmin(staff, staffEmail, staffPassword);
+    const staffContext = staffSession.context;
+    const staff = staffSession.page;
 
     // --- Staff remove it --------------------------------------------------------
     await staff.goto(`${ADMIN_URL}/moderation/product/${productId}`);
@@ -705,6 +737,151 @@ test("remove, appeal, turn down, pause, appeal, accept", async ({ browser }: { b
 
     await expect(staff.getByText("Appeal turned down")).toBeVisible();
     await expect(staff.getByText("Appeal accepted, put back live")).toBeVisible();
+    await staffContext.close();
+  } finally {
+    await sink.close();
+    await sellerContext.close();
+  }
+});
+
+// ── The automatic check's hold ────────────────────────────────────────────
+
+/**
+ * WHAT THE AUTOMATIC CHECK COULD NOT DECIDE, A PERSON DOES:
+ *
+ *   a seller saves words the check is not sure about
+ *     -> the product is hidden, and nothing has been decided against them
+ *     -> staff get a push, and it heads the queue under its own heading
+ *   staff open it, see WHICH words were held, and approve
+ *     -> it is live, the seller is told, and those words are never held again
+ *
+ * The check itself is the development stand-in the stack runs with
+ * (lib/moderation/auto/test-provider.ts): "[[unsure]]" is its marker.
+ */
+test("held by the automatic check, approved by a person", async ({ browser }: { browser: Browser }) => {
+  await ensureAdminNotificationTables();
+
+  const sellerContext = await browser.newContext({ baseURL: "http://localhost:3100" });
+  const seller = await sellerContext.newPage();
+  const sellerUser = freshUser("xapp-held");
+  await signUp(seller, sellerUser);
+  const sellerId = await userIdByEmail(sellerUser.email);
+  await seedStorefronts(sellerId, [{ name: "Held studio" }]);
+  const storefrontId = ((await serviceRest(
+    `/storefronts?owner_id=eq.${sellerId}&select=id`,
+  )) as { id: string }[])[0]!.id;
+  await seedProducts(sellerId, [
+    { title: "Borderline lamp", price_cents: 9900, description: "A lamp for a wall." },
+  ]);
+  const productId = ((await serviceRest(
+    `/products?owner_id=eq.${sellerId}&select=id`,
+  )) as { id: string }[])[0]!.id;
+  await seedSellerIdentity(sellerId, PUBLISHABLE_SELLER);
+  await serviceRest(`/storefronts?id=eq.${storefrontId}`, {
+    method: "PATCH",
+    body: {
+      config: {
+        theme: THEME,
+        productPage: PRODUCT_PAGE,
+        embed: { enabled: false, domains: [] },
+        blocks: [{ type: "product", productId, x: 0, y: 0, w: 2, h: 2 }],
+      },
+    },
+  });
+  const productPage = `/s/${storefrontId}/p/${productId}`;
+  const status = async () =>
+    ((await serviceRest(`/products?id=eq.${productId}&select=moderation_status`)) as {
+      moderation_status: string;
+    }[])[0]!.moderation_status;
+
+  const staffSession = await staffWithTwoFactor(browser, "xapp-held-staff");
+  const staffUserId = staffSession.userId;
+  const [adminRow] = (await serviceRest(`/admin_users`, {
+    method: "POST",
+    body: [{ user_id: staffUserId, role: "staff" }],
+  })) as { id: string }[];
+  const sink = await pushSink();
+  await serviceRest(`/admin_push_subscriptions`, {
+    method: "POST",
+    body: [
+      {
+        admin_user_id: adminRow!.id,
+        endpoint: sink.endpoint,
+        p256dh: sink.p256dh,
+        auth: sink.auth,
+        device_label: "e2e sink",
+      },
+    ],
+  });
+  await adminNotify();
+
+  try {
+    // --- The seller saves something the check cannot call -------------------
+    const held = "A lamp. [[unsure]] Something borderline.";
+    await gotoApp(seller, `/products/${productId}/edit`);
+    await seller.locator('[data-product-field="description"]').fill(held);
+    await seller.getByRole("button", { name: "Save changes" }).click();
+    await seller.waitForURL(/\/products$/, { timeout: 90_000 });
+
+    expect(await status()).toBe("review");
+    expect((await seller.request.get(productPage)).status()).toBe(404);
+
+    // Staff hear about it: nothing else would tell anyone it is waiting.
+    const push = await waitForPush(
+      sink.received,
+      (candidate) => candidate.title === "Held for review" && candidate.body.includes("Borderline lamp"),
+      "push for the held product",
+    );
+    expect(push.url).toBe(`/moderation/product/${productId}`);
+
+    // --- Staff open it ---------------------------------------------------------
+    const staffContext = staffSession.context;
+    const staff = staffSession.page;
+    await staff.goto(`${ADMIN_URL}/moderation`);
+    await expect(
+      staff.getByRole("heading", { name: /Held by the automatic check \(\d+\)/ }),
+    ).toBeVisible();
+    await staff
+      .locator("[data-held-list]")
+      .locator(`a[href="/moderation/product/${productId}"]`)
+      .click();
+    await staff.waitForURL(new RegExp(`/moderation/product/${productId}`));
+
+    // What was held, in the seller's own words, so the decision is about the
+    // part and not a guess at it.
+    await expect(staff.locator("[data-held]")).toContainText("Nothing has been decided");
+    const reasons = staff.locator("[data-held-reasons]");
+    await expect(reasons.locator('[data-held-part="text"]')).toContainText(held);
+    // The seller's catalogue says the same thing about it: held, not live,
+    // and not a takedown on their record.
+    await expect(staff.locator("tr", { hasText: "this one" })).toContainText("Held for review");
+    await expect(staff.getByRole("region", { name: "The seller" })).toContainText(
+      "1 held for review",
+    );
+    await expect(staff.getByRole("region", { name: "The seller" })).not.toContainText("taken down");
+    await staff.screenshot({ path: test.info().outputPath("admin-held.png"), fullPage: true });
+
+    // --- And approve ------------------------------------------------------------
+    await staff.getByRole("button", { name: "Approve it and put it live" }).click();
+    await expect(staff.locator("[data-action-result]")).toContainText("Product is live again.");
+    await expect(staff.getByText("Live", { exact: true }).first()).toBeVisible();
+
+    expect(await status()).toBe("ok");
+    expect((await seller.request.get(productPage)).status()).toBe(200);
+
+    const notices = (await serviceRest(
+      `/notifications?user_id=eq.${sellerId}&type=eq.policy&select=title,body&order=created_at.asc`,
+    )) as { title: string; body: string }[];
+    expect(notices.at(-1)!.title).toBe('Your product "Borderline lamp" is live');
+    expect(notices.at(-1)!.body).toContain("Our automatic check held this product");
+
+    // Remembered: saving those exact words again is not held a second time.
+    await gotoApp(seller, `/products/${productId}/edit`);
+    await seller.getByLabel(/price/i).fill("101.00");
+    await seller.getByRole("button", { name: "Save changes" }).click();
+    await seller.waitForURL(/\/products$/, { timeout: 90_000 });
+    expect(await status()).toBe("ok");
+
     await staffContext.close();
   } finally {
     await sink.close();

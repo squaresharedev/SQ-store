@@ -2,72 +2,30 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { moderateUpload, QUARANTINE_PREFIX } from "@/lib/moderation";
-import { isOwnedObjectKey } from "@/lib/validation/product";
 
 /**
- * The moderation SEAM. There is no moderation provider yet; what these pin is
- * that one can be attached later without hunting for call sites — and that the
- * guarantees the seam depends on are still standing.
+ * WHERE UPLOADS MEET MODERATION. Content is judged when the row that uses a
+ * file is saved (the moderation wall, tests/integration/37-auto-moderation),
+ * not here. What these pin is the part of the guarantee that only the upload
+ * path can hold up:
  *
- * The load-bearing one is that images cannot reach a product except through
- * the route that moderates them. If the presign endpoint ever starts handing
- * out image URLs again, moderation becomes bypassable by any client that calls
- * it directly, and no amount of care inside the provider would help.
+ *   - every image reaches storage through a route of ours that holds its
+ *     bytes, so its real type is a fact and nothing can be swapped in behind a
+ *     key after the fact (a presigned PUT would allow exactly that);
+ *   - a file the classifier cannot fully see (an animation, an AVIF, an SVG)
+ *     is flagged for a person before its key is handed back.
  */
 
 const repoFile = (...parts: string[]) =>
   readFileSync(join(process.cwd(), ...parts), "utf8");
 
-describe("moderateUpload - the default no-op", () => {
-  it("allows content, because there is no provider to consult yet", async () => {
-    const verdict = await moderateUpload({
-      kind: "product-image",
-      bytes: new Uint8Array([0xff, 0xd8, 0xff]),
-      contentType: "image/jpeg",
-      uploaderId: "00000000-0000-4000-8000-000000000001",
-      accountId: "00000000-0000-4000-8000-000000000002",
-    });
-    expect(verdict).toEqual({ decision: "allow" });
-  });
-
-  it("receives the real bytes, so a classifier can be dropped in as-is", async () => {
-    // If this ever stops taking bytes, a provider cannot be attached without
-    // changing every call site — which is the thing the seam exists to avoid.
-    await expect(
-      moderateUpload({
-        kind: "product-image",
-        bytes: new Uint8Array(16),
-        contentType: "image/png",
-        uploaderId: "u",
-        accountId: "a",
-      }),
-    ).resolves.toBeDefined();
-  });
-});
-
-describe("quarantine keys can never be attached to a product", () => {
-  const owner = "11111111-1111-4111-8111-111111111111";
-  const live = `images/${owner}/22222222-2222-4222-8222-222222222222-photo.png`;
-
-  it("accepts a normal image key", () => {
-    expect(isOwnedObjectKey(live, "image", owner)).toBe(true);
-  });
-
-  it("rejects the same key under the quarantine prefix", () => {
-    // Held content is stored, but stored somewhere the product write path
-    // structurally cannot reference — belt as well as braces.
-    expect(isOwnedObjectKey(`${QUARANTINE_PREFIX}/${live}`, "image", owner)).toBe(false);
-  });
-});
-
 describe("images have exactly one route into storage", () => {
   it("there is no presigned-upload endpoint left to bypass it", () => {
     // A presigned PUT hands the client a URL that writes straight into the
-    // bucket, so anything minted that way reaches storage without the server
-    // ever seeing its bytes — moderation could simply be skipped by calling
-    // that endpoint directly. It is gone; if one ever comes back, this has to
-    // be reconsidered at the same time.
+    // bucket: the server never sees the bytes, so it cannot tell an animation
+    // from a still, and the client can overwrite the object after it has been
+    // approved. It is gone; if one ever comes back, the moderation wall's
+    // guarantee has to be reconsidered at the same time.
     expect(
       existsSync(join(process.cwd(), "src", "app", "api", "uploads", "presign")),
     ).toBe(false);
@@ -88,13 +46,37 @@ describe("images have exactly one route into storage", () => {
     expect(client).not.toMatch(/r2\.cloudflarestorage\.com/);
   });
 
-  it("the image route moderates BEFORE it stores", () => {
-    const route = repoFile("src", "app", "api", "uploads", "image", "route.ts");
-    const moderatedAt = route.indexOf("moderateUpload(");
-    const storedAt = route.indexOf("await putObject(");
-    expect(moderatedAt).toBeGreaterThan(-1);
-    expect(storedAt).toBeGreaterThan(-1);
-    expect(moderatedAt).toBeLessThan(storedAt);
+  it.each(["image", "element"])(
+    "the %s route flags what the classifier cannot see, or refuses the upload",
+    (name) => {
+      const route = repoFile("src", "app", "api", "uploads", name, "route.ts");
+      // Asked of the real bytes, and a hold that cannot be recorded is not
+      // waved through: the object is deleted and no key is returned.
+      expect(route).toMatch(/classifierCanSee\(bytes, sniffed\.mime\)/);
+      expect(route).toMatch(/!\(await holdForPerson\(key\)\)/);
+      const heldAt = route.indexOf("holdForPerson(key)");
+      const refusedAt = route.indexOf("deleteObject(key)", heldAt);
+      const returnedAt = route.lastIndexOf("Response.json({ key })");
+      expect(heldAt).toBeGreaterThan(-1);
+      expect(refusedAt).toBeGreaterThan(heldAt);
+      expect(returnedAt).toBeGreaterThan(refusedAt);
+    },
+  );
+
+  it("the element route holds every SVG for a person", () => {
+    const route = repoFile("src", "app", "api", "uploads", "element", "route.ts");
+    expect(route).toMatch(/\(svg \|\| !classifierCanSee\(bytes, sniffed\.mime\)\)/);
+  });
+
+  it("no upload route classifies content itself any more", () => {
+    // One checker (lib/moderation/auto), reached through the wall. A second
+    // classifier here is a second policy.
+    expect(existsSync(join(process.cwd(), "src", "lib", "moderation", "index.ts"))).toBe(false);
+    for (const name of ["image", "element", "font", "file", "document"]) {
+      expect(repoFile("src", "app", "api", "uploads", name, "route.ts")).not.toMatch(
+        /moderateUpload|classifyMedia|classifyText/,
+      );
+    }
   });
 
   it("the image route sniffs magic bytes rather than trusting the claim", () => {

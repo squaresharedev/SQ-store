@@ -152,7 +152,16 @@
       "upheld": "Vaše odvolání jsme posoudili dne <time>{date}</time>. Rozhodnutí zůstává v platnosti.",
       "answer": "Naše odpověď: {note}"
     },
-    "editorDetails": "Proč a co dělat dál"
+    "editorDetails": "Proč a co dělat dál",
+    "badgePending": "Kontroluje se",
+    "badgeReview": "V posouzení",
+    "titlePending": "{kind, select, product {Tento produkt se právě kontroluje} other {Tato výloha se právě kontroluje}}",
+    "titleReview": "{kind, select, product {Tento produkt kontroluje člověk} other {Tuto výlohu kontroluje člověk}}",
+    "hiddenPending": "Kupující ho neuvidí, dokud neskončí automatická kontrola. Obvykle to trvá pár sekund: načtěte stránku znovu a uvidíte, jak to dopadlo.",
+    "hiddenReview": "Automatická kontrola ho nedokázala schválit, proto se na něj dívá člověk. Kupující ho neuvidí, dokud nerozhodne. Obrázky SVG, AVIF a animované obrázky vždy kontroluje člověk, takže když takový obrázek odeberete, zbytek se zkontroluje hned.",
+    "hiddenPausedAuto": "Kupující ho teď nevidí: ani na své stránce, ani ve vloženém widgetu, ani ve sdíleném odkazu. Rozhodla o tom automatická kontrola a žádný člověk se na něj zatím nedíval. Nic nebylo smazáno.",
+    "autoFixHint": "{kind, select, product {Upravte níže zvýrazněné části a uložte. Hned se zkontroluje znovu, a pokud projde, zveřejní se.} other {Otevřete výlohu, upravte to, co je uvedeno výše, a uložte. Hned se zkontroluje znovu, a pokud projde, zveřejní se.}}",
+    "readOnlyHintAuto": "{kind, select, product {Upravit ho musí někdo, kdo může tento produkt upravovat. Zkontroluje se znovu, jakmile ho uloží.} other {Upravit ji musí někdo, kdo může tuto výlohu upravovat. Zkontroluje se znovu, jakmile ji uloží.}}"
   },
   "import": {
     "fields": {
@@ -600,12 +609,14 @@
     "content": "{target, select, product {Produkt} other {Výloha}}: {title}",
     "decision": {
       "paused": "Pozastaveno. Obsah je kupujícím skrytý, dokud neprovedete níže uvedené změny a my je neschválíme.",
-      "removed": "Odstraněno. Obsah již není kupujícím dostupný. Toto rozhodnutí je konečné, pokud ho odvolání nezmění."
+      "removed": "Odstraněno. Obsah již není kupujícím dostupný. Toto rozhodnutí je konečné, pokud ho odvolání nezmění.",
+      "pausedAutomated": "Pozastaveno. Obsah je kupujícím skrytý, dokud ho neupravíte. Zkontroluje se znovu, jakmile úpravu uložíte."
     },
     "scope": "Všude, kde ho SquareShare zobrazuje: na vlastní stránce, ve vložených widgetech na jiných webech a ve sdílených odkazech, ve všech zemích.",
     "duration": {
       "paused": "Dokud neschválíme vaše úpravy.",
-      "removed": "Na dobu neurčitou."
+      "removed": "Na dobu neurčitou.",
+      "pausedAutomated": "Dokud ho neupravíte a úprava neprojde kontrolou."
     },
     "status": {
       "inForce": "V platnosti.",
@@ -615,7 +626,8 @@
     },
     "facts": {
       "notices": "{count, plural, =0 {Toto jsme zjistili sami, bez podnětu od kohokoli mimo SquareShare.} one {Toto následovalo po # podnětu od osoby mimo SquareShare, ve věci: {reasons}.} few {Toto následovalo po # podnětech od osob mimo SquareShare, ve věci: {reasons}.} many {Toto následovalo po # podnětech od osob mimo SquareShare, ve věci: {reasons}.} other {Toto následovalo po # podnětech od osob mimo SquareShare, ve věci: {reasons}.}}",
-      "review": "Obsah samotný před rozhodnutím posoudil člen týmu SquareShare. Neprozrazujeme, kdo podnět zaslal."
+      "review": "Obsah samotný před rozhodnutím posoudil člen týmu SquareShare. Neprozrazujeme, kdo podnět zaslal.",
+      "automated": "Na tento obsah přišla naše automatická kontrola při jeho uložení. Nikdo mimo SquareShare ho nenahlásil a žádný člen týmu ho neposuzoval."
     },
     "automated": "K odhalení tohoto obsahu ani k přijetí tohoto rozhodnutí nebyly použity žádné automatizované prostředky.",
     "legalBasis": {
@@ -638,7 +650,8 @@
       "message": "Co jste napsali: {message}"
     },
     "footer": "SquareShare · {reference} · Strana {page} z {total}",
-    "generated": "Vygenerováno dne {date}."
+    "generated": "Vygenerováno dne {date}.",
+    "automatedYes": "K odhalení tohoto obsahu i k přijetí tohoto rozhodnutí byly použity automatizované prostředky a nepodílel se na něm žádný člověk. Pokud se odvoláte, posoudí ho člen týmu."
   },
   "buyButton": {
     "title": "Přidejte na svůj web tlačítko pro nákup",

@@ -132,7 +132,13 @@
     "notPaused": "{target, select, product {Este producto no está en pausa.} storefront {Este escaparate no está en pausa.} other {Este elemento no está en pausa.}}",
     "notPausedFix": "No hay nada que revisar: ya lo ven los compradores.",
     "decisionSuperseded": "Esta decisión ya no está en vigor, por lo que no hay nada que recurrir.",
-    "decisionSupersededFix": "Recarga la página para ver el estado actual."
+    "decisionSupersededFix": "Recarga la página para ver el estado actual.",
+    "checkUnavailable": "{what, select, image {Ahora mismo no se puede revisar esta imagen, así que no se ha guardado.} other {Ahora mismo no se puede revisar este texto, así que no se ha guardado.}}",
+    "checkUnavailableFix": "Vuelve a intentarlo en unos minutos.",
+    "refused": "{what, select, image {Esta imagen incumple las normas de la plataforma, así que no se ha guardado.} other {Este texto incumple las normas de la plataforma, así que no se ha guardado.}}",
+    "refusedFix": "Cámbialo y guarda de nuevo. Si crees que es un error, escribe a {email}.",
+    "notApproved": "{what, select, image {Esta imagen no se ha podido aprobar automáticamente, así que no se ha guardado.} other {Este texto no se ha podido aprobar automáticamente, así que no se ha guardado.}}",
+    "notApprovedFix": "Prueba con otra cosa, o escribe a {email} y lo revisará una persona."
   },
   "traderIdentityRequired": {
     "message": "No puedes publicar ni vender hasta que completes tus datos de vendedor.",
@@ -399,14 +405,7 @@
       "documentType": "Exporta el manual o certificado como PDF y súbelo.",
       "documentContents": "Vuelve a exportarlo como PDF. Cambiar el nombre de un archivo no cambia su formato."
     },
-    "moderationUnavailable": "Ahora mismo no se pueden revisar las imágenes.",
-    "moderationRejected": {
-      "explicit": "Esa imagen parece sexualmente explícita, así que no se puede usar en un producto.",
-      "violent": "Esa imagen parece mostrar violencia explícita, así que no se puede usar.",
-      "hate": "Esa imagen parece contener símbolos de odio, así que no se puede usar."
-    },
-    "inReview": "Esa imagen se está revisando antes de publicarse.",
-    "inReviewFix": "Podrás usarla cuando se apruebe.",
+    "moderationUnavailable": "Ahora mismo no se puede aceptar este archivo.",
     "storeFailed": {
       "image": "No se ha podido guardar la imagen.",
       "document": "No se ha podido guardar el documento.",
@@ -417,8 +416,7 @@
       "tryAgain": "Inténtalo de nuevo.",
       "tryAgainInAMoment": "Inténtalo de nuevo en un momento.",
       "tryAgainInAFewMinutes": "Inténtalo de nuevo en unos minutos.",
-      "pickFile": "Elige otro archivo.",
-      "pickImage": "Elige otra imagen."
+      "pickFile": "Elige otro archivo."
     }
   },
   "products": {

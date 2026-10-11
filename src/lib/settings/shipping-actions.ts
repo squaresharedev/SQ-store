@@ -1,7 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import {
+  sellerTextRefusal,
+  textLeaves,
+  writeOwnProfile,
+} from "@/lib/moderation/auto/seller-text";
 import { getUser } from "@/lib/auth/session";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import {
@@ -101,15 +105,14 @@ export async function saveShippingPolicy(
   // migration normalises the same way, so there is one representation of it.
   const empty = Object.keys(parsed.data).length === 0;
 
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("profiles")
-    .update({
-      shipping_policy: empty ? null : parsed.data,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", user.id); // owner id from the session; RLS enforces it again
-  if (error) return SAVE_FAILED;
+  // These terms print on every hosted product page, so the words are checked
+  // before they are stored (lib/moderation/auto/seller-text.ts).
+  const refused = await sellerTextRefusal(textLeaves("shipping", parsed.data));
+  if (refused) return failed(refused);
+
+  if (!(await writeOwnProfile(user.id, { shipping_policy: empty ? null : parsed.data }))) {
+    return SAVE_FAILED;
+  }
 
   revalidatePath("/settings/shipping");
   // The hosted product pages print these terms, and the designer's panel shows

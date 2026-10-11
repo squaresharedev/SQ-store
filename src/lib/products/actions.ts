@@ -5,7 +5,7 @@ import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { deleteObject, headObject } from "@/lib/r2";
-import type { TablesUpdate } from "@/types";
+import type { TablesInsert, TablesUpdate } from "@/types";
 import type { Json } from "@/types/supabase";
 import { parseDocuments, parseGallery, parseOptionGroups } from "@/lib/products/detail";
 import {
@@ -21,6 +21,7 @@ import {
   type ServerErrorOperation,
 } from "@/lib/errors";
 import { publishBlockedError } from "@/lib/settings/seller-identity";
+import { precheck, settleAfterWrite } from "@/lib/moderation/auto/check";
 import { planLimitError, planLimitErrorFromTrigger, planLimitKeyOf } from "@/lib/billing/limits";
 import { msg } from "@/i18n/types";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
@@ -349,35 +350,41 @@ export async function createProduct(
   const verified = await verifyNewKeys(account.userId, data, new Set(), new Set());
   if (!verified.ok) return failure(verified.error);
 
+  const insert: TablesInsert<"products"> = {
+    owner_id: account.accountId,
+    title: data.title,
+    description: data.description || null,
+    price_cents: data.priceCents,
+    currency: data.currency,
+    status: data.status,
+    image_key: data.imageKey ?? null,
+    digital_file_key: data.digitalFileKey ?? null,
+    track_stock: data.trackStock ?? false,
+    // Quantity is only meaningful (and only stored) when tracking is enabled.
+    stock_quantity:
+      (data.trackStock ?? false) ? (data.stockQuantity ?? null) : null,
+    low_stock_threshold: data.lowStockThreshold ?? 5,
+    // Absent leaves the column's own default (MAX_PER_ORDER_DEFAULT), so a
+    // payload from an older client or the CSV import still lands on a
+    // concrete, bounded ceiling rather than on "no limit".
+    ...(data.maxPerOrder !== undefined ? { max_per_order: data.maxPerOrder } : {}),
+    gallery: toJson(data.gallery ?? []),
+    option_groups: toJson(data.optionGroups ?? []),
+    details: toJson(data.details ?? {}),
+    documents: toJson(data.documents ?? []),
+    purchase_url: data.purchaseUrl ?? null,
+    shipping_profile_id: data.shippingProfileId ?? null,
+  };
+
+  // The words and photos are judged before they are stored, so a clean
+  // listing passes the moderation wall as it is written (lib/moderation/auto).
+  await precheck("product", null, insert);
+
   const supabase = await createClient();
   const { data: row, error } = await supabase
     .from("products")
-    .insert({
-      owner_id: account.accountId,
-      title: data.title,
-      description: data.description || null,
-      price_cents: data.priceCents,
-      currency: data.currency,
-      status: data.status,
-      image_key: data.imageKey ?? null,
-      digital_file_key: data.digitalFileKey ?? null,
-      track_stock: data.trackStock ?? false,
-      // Quantity is only meaningful (and only stored) when tracking is enabled.
-      stock_quantity:
-        (data.trackStock ?? false) ? (data.stockQuantity ?? null) : null,
-      low_stock_threshold: data.lowStockThreshold ?? 5,
-      // Absent leaves the column's own default (MAX_PER_ORDER_DEFAULT), so a
-      // payload from an older client or the CSV import still lands on a
-      // concrete, bounded ceiling rather than on "no limit".
-      ...(data.maxPerOrder !== undefined ? { max_per_order: data.maxPerOrder } : {}),
-      gallery: toJson(data.gallery ?? []),
-      option_groups: toJson(data.optionGroups ?? []),
-      details: toJson(data.details ?? {}),
-      documents: toJson(data.documents ?? []),
-      purchase_url: data.purchaseUrl ?? null,
-      shipping_profile_id: data.shippingProfileId ?? null,
-    })
-    .select("id")
+    .insert(insert)
+    .select("id, moderation_status")
     .single();
 
   if (error || !row) {
@@ -387,6 +394,7 @@ export async function createProduct(
     console.error("[products] create failed", error);
     return failure(serverError("createProduct"));
   }
+  await settleAfterWrite("product", row.id, row.moderation_status);
   revalidatePath("/products");
   return { ok: true, id: row.id };
 }
@@ -506,12 +514,14 @@ export async function updateProduct(
     update.max_per_order = data.maxPerOrder;
   }
 
+  await precheck("product", id, update);
+
   const { data: row, error } = await supabase
     .from("products")
     .update(update)
     .eq("id", id)
     .eq("owner_id", account.accountId)
-    .select("id")
+    .select("id, moderation_status")
     .maybeSingle();
 
   if (error) {
@@ -545,6 +555,7 @@ export async function updateProduct(
     await evictObjects(stale);
   }
 
+  await settleAfterWrite("product", row.id, row.moderation_status);
   revalidatePath("/products");
   return { ok: true, id: row.id };
 }

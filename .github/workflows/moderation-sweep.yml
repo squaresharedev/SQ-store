@@ -1,0 +1,69 @@
+# The automatic content check's sweep (src/lib/moderation/auto/check.ts).
+#
+# Every product, storefront and marketplace item is hidden until its content
+# has been approved (migration 20261012_auto_moderation). A save in the
+# dashboard is checked as it happens. This run settles everything a save did
+# not: a row written straight through the REST API or by another app, a check
+# that timed out or found the classifier down, and content from before the
+# check existed, which is audited while it stays live.
+#
+# WHY ITS OWN FILE and not a job in scheduled.yml: that one runs once a day,
+# and this has to run every few minutes. A late or missed run delays a seller,
+# never safety: what the sweep has not reached is hidden, not public.
+#
+# One call does a bounded amount of work and answers `"more":true` when there
+# is more waiting AND this run got somewhere, so this calls again until it
+# does not.
+#
+# Required secret (the job is skipped, loudly, without it):
+#   CRON_SECRET   The same secret scheduled.yml uses, set BOTH here as a
+#                 repository secret and on the Worker
+#                 (`wrangler secret put CRON_SECRET`).
+#
+# What it prints is counts by outcome, never an id.
+name: Moderation sweep
+
+on:
+  schedule:
+    # Every five minutes, the shortest interval GitHub runs. Under load GitHub
+    # delays scheduled runs; see the note above on what a late run costs.
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: moderation-sweep
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      # Job level so the steps' `if` can test it (see deploy.yml).
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      # The production dashboard (NEXT_PUBLIC_APP_URL in wrangler.jsonc).
+      APP_URL: https://dashboard.squareshare.eu
+    steps:
+      - name: Say so when it is not set up
+        if: ${{ env.CRON_SECRET == '' }}
+        run: echo "::warning title=The moderation sweep did not run::Set the CRON_SECRET repository secret (and the same value on the Worker). Until then, content no save settled stays hidden."
+
+      - name: Settle what is waiting on the automatic check
+        if: ${{ env.CRON_SECRET != '' }}
+        run: |
+          set -euo pipefail
+          # Bounded: the next run, five minutes on, picks up where this stops.
+          for attempt in $(seq 1 12); do
+            # --fail: a 404 (secret not on the Worker, or wrong) or a 500 turns
+            # the job red instead of passing for "nothing to do".
+            result="$(curl --fail --silent --show-error --max-time 60 \
+              --request POST \
+              --header "Authorization: Bearer ${CRON_SECRET}" \
+              "${APP_URL}/api/cron/moderation")"
+            echo "run ${attempt}: ${result}"
+            if ! printf '%s' "${result}" | grep -q '"more":true'; then
+              exit 0
+            fi
+          done

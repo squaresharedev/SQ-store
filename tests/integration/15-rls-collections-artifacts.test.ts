@@ -37,7 +37,23 @@ beforeAll(async () => {
     q.query(`update public.profiles set is_public = true where id = $1`, [carol.id]),
   );
 
-  [publicCollectionId, privateCollectionId] = await asUser(carol, async (q) => {
+  // The handle carol claims below, approved ahead of time: the public
+  // directory lists a profile only under a handle on the approved list
+  // (20261013_marketplace_moderation), and her loose artifacts are public only
+  // while she is in it.
+  await asService((q) =>
+    q.query(
+      `insert into public.moderation_checks (subject, verdict, source, model)
+       values ('handle:carol_123', 'clean', 'model', 'test')`,
+    ),
+  );
+
+  // Written by the server, as the app does: a collection's name is checked
+  // before it is stored and only the service role may write one
+  // (guard_collection_name), and a row the server writes starts live, where an
+  // artifact a user writes waits behind the moderation wall. These tests are
+  // about who can SEE what, so the fixtures are content that is already live.
+  [publicCollectionId, privateCollectionId] = await asService(async (q) => {
     const { rows } = await q.query(
       `insert into public.collections (owner_id, name, is_public)
        values ($1, 'Carol public', true), ($1, 'Carol private', false)
@@ -47,8 +63,7 @@ beforeAll(async () => {
     return [rows[0].id, rows[1].id];
   });
 
-  [artifactInPublicId, artifactInPrivateId, looseArtifactId] = await asUser(
-    carol,
+  [artifactInPublicId, artifactInPrivateId, looseArtifactId] = await asService(
     async (q) => {
       const { rows } = await q.query(
         `insert into public.artifacts (owner_id, collection_id, title, image_key)
@@ -161,7 +176,9 @@ describe("collections RLS", () => {
         ]),
       ),
     );
-    expect(spoof).toMatch(/row-level security/i);
+    // Refused twice over: no client may name a collection at all, and RLS
+    // would refuse this owner id even if one could.
+    expect(spoof).toMatch(/row-level security|checked before it is saved/i);
 
     await expectDbError(
       asAnon((q) =>
@@ -175,7 +192,7 @@ describe("collections RLS", () => {
   it("enforces name length 1..80", async () => {
     for (const bad of ["", "x".repeat(81)]) {
       const msg = await expectDbError(
-        asUser(carol, (q) =>
+        asService((q) =>
           q.query(`insert into public.collections (owner_id, name) values ($1, $2)`, [
             carol.id,
             bad,
@@ -308,14 +325,14 @@ describe("artifacts RLS", () => {
 
 describe("artifact FK detach behavior", () => {
   it("deleting a collection detaches its artifacts (collection_id -> null), which then follow profile visibility", async () => {
-    const tempCollection = await asUser(carol, async (q) => {
+    const tempCollection = await asService(async (q) => {
       const { rows } = await q.query(
         `insert into public.collections (owner_id, name, is_public) values ($1, 'temp', false) returning id`,
         [carol.id],
       );
       return rows[0].id as string;
     });
-    const tempArtifact = await asUser(carol, async (q) => {
+    const tempArtifact = await asService(async (q) => {
       const { rows } = await q.query(
         `insert into public.artifacts (owner_id, collection_id, image_key) values ($1, $2, 'images/t.webp') returning id`,
         [carol.id, tempCollection],
@@ -371,7 +388,7 @@ describe("artifact FK detach behavior", () => {
 
   it("deleting the auth user cascades collections and artifacts away", async () => {
     const ephemeral = await createUser("ephemeral-curation@test.squareshare.to");
-    await asUser(ephemeral, async (q) => {
+    await asService(async (q) => {
       const { rows } = await q.query(
         `insert into public.collections (owner_id, name) values ($1, 'doomed') returning id`,
         [ephemeral.id],

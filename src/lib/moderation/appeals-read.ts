@@ -31,34 +31,56 @@ export function appealSummary(row: AppealRow): ModerationAppealSummary {
   };
 }
 
-/** The appeals filed against these decisions, keyed by decision id. A failed
- *  read is an empty map: the banner then offers the appeal button, and the
- *  action itself refuses a second appeal if one exists. */
+/** What a banner needs from the decision records behind a set of takedowns:
+ *  the appeal against each, and which were made by the automatic check. */
+export type DecisionFacts = {
+  appeals: Map<string, ModerationAppealSummary>;
+  automated: Set<string>;
+};
+
+/**
+ * The appeals filed against these decisions, and which of the decisions were
+ * automated, keyed by decision id.
+ *
+ * A failed appeal read is an empty map: the banner then offers the appeal
+ * button, and the action itself refuses a second appeal if one exists. A
+ * failed "was it automated" read is an empty set: the banner then words the
+ * decision as a person's, which only costs the seller a button they did not
+ * need (the database, not this flag, decides what an edit does).
+ */
 export async function appealsByDecision(
   supabase: SupabaseClient<Database>,
   accountId: string,
   decisionIds: readonly string[],
-): Promise<Map<string, ModerationAppealSummary>> {
-  const found = new Map<string, ModerationAppealSummary>();
-  if (decisionIds.length === 0) return found;
-  const { data, error } = await supabase
-    .from("moderation_appeals")
-    .select(APPEAL_SUMMARY_SELECT)
-    .eq("owner_id", accountId)
-    .in("decision_id", [...decisionIds]);
-  if (error) {
-    console.error("[moderation] appeal read failed", error.message);
-    return found;
-  }
-  for (const row of data ?? []) found.set(row.decision_id, appealSummary(row));
-  return found;
+): Promise<DecisionFacts> {
+  const facts: DecisionFacts = { appeals: new Map(), automated: new Set() };
+  if (decisionIds.length === 0) return facts;
+  const [appeals, automated] = await Promise.all([
+    supabase
+      .from("moderation_appeals")
+      .select(APPEAL_SUMMARY_SELECT)
+      .eq("owner_id", accountId)
+      .in("decision_id", [...decisionIds]),
+    supabase
+      .from("moderation_decisions")
+      .select("id")
+      .eq("owner_id", accountId)
+      .eq("automated", true)
+      .in("id", [...decisionIds]),
+  ]);
+  if (appeals.error) console.error("[moderation] appeal read failed", appeals.error.message);
+  for (const row of appeals.data ?? []) facts.appeals.set(row.decision_id, appealSummary(row));
+  for (const row of automated.data ?? []) facts.automated.add(row.id);
+  return facts;
 }
 
-/** `removal` with its appeal attached, when the seller filed one. */
-export function withAppeal(
-  removal: ProductRemoval,
-  appeals: Map<string, ModerationAppealSummary>,
-): ProductRemoval {
-  const appeal = removal.decisionId ? appeals.get(removal.decisionId) : undefined;
-  return { ...removal, appeal: appeal ?? null };
+/** `removal` with what its decision record adds: the appeal, when the seller
+ *  filed one, and whether the automatic check made the decision. */
+export function withAppeal(removal: ProductRemoval, facts: DecisionFacts): ProductRemoval {
+  const id = removal.decisionId;
+  return {
+    ...removal,
+    automated: id ? facts.automated.has(id) : false,
+    appeal: (id ? facts.appeals.get(id) : undefined) ?? null,
+  };
 }

@@ -35,15 +35,13 @@
     // widget exists in the Cloudflare dashboard for this zone — see
     // lib/turnstile.ts. Until then the sign-up bot check is off in
     // production, same as it is in local dev.
-  },
-  // Workers AI, used by lib/moderation to classify product images before they
-  // reach R2. Binding it costs nothing on its own: the code only calls the
-  // model when MODERATION_ENABLED=true, which is NOT set here on purpose (see
-  // moderationEnabled() — the request shape is unverified until a deploy
-  // proves it, so switching it on is a deliberate act, not a default).
-  "ai": {
-    "binding": "AI"
   }
+  // CONTENT MODERATION needs no binding. The automatic check
+  // (lib/moderation/auto) calls its classifier over HTTPS with a secret:
+  // `wrangler secret put ANTHROPIC_API_KEY`. Without it nothing a seller saves
+  // can be approved once migration 20261012_auto_moderation is applied, so set
+  // the secret BEFORE that migration. The sweep that settles what no save did
+  // is .github/workflows/moderation-sweep.yml, behind CRON_SECRET.
   // CONTACT VERIFICATION: a code emailed or texted to the seller's buyer-facing
   // contact email and phone, typed back to prove they own them (see
   // lib/contact-verification). Mail and texts go out through Brevo's REST API

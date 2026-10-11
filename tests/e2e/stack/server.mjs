@@ -763,6 +763,14 @@ const next = spawn(
       // account. It writes seller_billing through the same function the
       // Stripe webhook uses; nothing leaves the machine.
       BILLING_TEST_PROVIDER: "1",
+      // Content moderation: the dev-only stand-in classifier
+      // (lib/moderation/auto/test-provider.ts), so every save runs the real
+      // wall, check and outcome with no key. It answers clean unless a spec
+      // puts a marker in the content ([[violation]], [[unsure]]), and it only
+      // ever answers against a local database, which this is. The real key is
+      // blanked so nothing a spec types can leave the machine.
+      MODERATION_TEST_PROVIDER: "1",
+      ANTHROPIC_API_KEY: "",
       // Scheduled jobs (lib/ops/cron.ts): a fixed, obviously fake secret, so
       // specs can start a run the way the scheduler does.
       CRON_SECRET: "e2e-cron-secret-not-a-real-one-0123456789",

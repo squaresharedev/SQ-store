@@ -69,7 +69,10 @@ beforeAll(async () => {
 afterAll(closePool);
 
 describe("moderation columns", () => {
-  it("default to visible, so the migration cannot black out the catalogue", async () => {
+  it("start pending for a seller's own write, with no finding attached", async () => {
+    // Nothing a seller writes is public until it has been checked (the wall,
+    // 37-auto-moderation). Rows that existed before it, and rows the server
+    // writes, keep the column's 'ok' default.
     const { rows } = await asUser(seller, (q) =>
       q.query(
         `select moderation_status, moderation_ground, moderated_at
@@ -77,7 +80,7 @@ describe("moderation columns", () => {
         [productId],
       ),
     );
-    expect(rows[0].moderation_status).toBe("ok");
+    expect(rows[0].moderation_status).toBe("pending");
     expect(rows[0].moderation_ground).toBeNull();
     expect(rows[0].moderated_at).toBeNull();
   });

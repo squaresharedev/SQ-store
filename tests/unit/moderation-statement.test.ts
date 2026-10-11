@@ -28,6 +28,7 @@ function input(overrides: Partial<StatementInput["decision"]> = {}): StatementIn
       reportCount: 2,
       reportReasons: ["counterfeit", "scam"],
       decidedAt: "2026-09-23T10:00:00Z",
+      automated: false,
       ...overrides,
     },
     appeal: null,
@@ -103,6 +104,34 @@ describe("renderStatement", () => {
       "Page 1 of",
     ]) {
       expect(text).toContain(expected);
+    }
+  });
+
+  it("says so when the automatic check decided, and never claims a person did", () => {
+    const text = extractText(
+      latin1(
+        renderStatement(
+          input({ automated: true, note: null, reportCount: 0, reportReasons: [] }),
+          english,
+        ),
+      ),
+    ).replace(/\n/g, " ");
+    for (const expected of [
+      // The duty this line exists for: DSA Art. 17(3)(c).
+      "Automated means were used both to detect this content and to take this decision",
+      "no member of staff has reviewed it",
+      "It is checked again as soon as you save a change.",
+      "Until you change it and the change passes the check.",
+    ]) {
+      expect(text).toContain(expected);
+    }
+    for (const forbidden of [
+      "No automated means were used",
+      "A member of SquareShare staff reviewed the content",
+      "Note from our reviewer",
+      "until you make the changes listed below and we approve them",
+    ]) {
+      expect(text).not.toContain(forbidden);
     }
   });
 

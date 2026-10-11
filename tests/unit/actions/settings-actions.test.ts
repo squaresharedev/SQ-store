@@ -112,6 +112,28 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => clientWrapper,
 }));
 
+// Buyer-facing seller text (the trader name, the bio) is written by the
+// SERVICE role, after the session's own write of everything else
+// (lib/moderation/auto/seller-text.ts). Both clients are the one fake here, so
+// what an action wrote is every update it made, whichever client made it.
+vi.mock("@/lib/supabase/admin", () => ({
+  createAdminClient: () => clientWrapper,
+}));
+const writtenProfile = () =>
+  Object.assign({}, ...db.update.mock.calls.map((call: unknown[]) => call[0])) as Record<string, unknown>;
+
+/** The automatic check on seller text. Its own suite is
+ *  tests/unit/auto-moderation.test.ts; here it answers as told, "clean" by
+ *  default, so the cases below can prove an action obeys a refusal. */
+const sellerTextMock = vi.fn();
+vi.mock("@/lib/moderation/auto/check", () => ({
+  checkSellerText: (...args: unknown[]) => sellerTextMock(...args),
+  // A handle is judged by its own check (it is approved by value); it answers
+  // through the same mock so one refusal covers every kind of seller text.
+  checkHandle: (handle: string) => sellerTextMock({ username: handle }),
+  checkAvatar: vi.fn(),
+}));
+
 // The contact email's DOMAIN check talks to a public DNS resolver over HTTPS.
 // Faked here so these specs never depend on the network; "unknown" is the
 // real thing's own answer whenever the resolver does not reply, and it is the
@@ -204,7 +226,10 @@ beforeEach(() => {
   alertMock.mockResolvedValue(undefined);
   channelAvailableMock.mockReturnValue(false);
   issueContactCodeMock.mockResolvedValue({ ok: true, status: "sent", target: "sent-to" });
-  dbFn.mockResolvedValue({ error: null });
+  // A write answers with the row it touched: the seller-text path asks for
+  // it, to know the session's own write was allowed before the service role's.
+  dbFn.mockResolvedValue({ data: { id: USER_ID }, error: null });
+  sellerTextMock.mockResolvedValue({ verdict: "clean", ground: null, paths: [] });
   for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in"]) {
     db[m].mockReturnValue(db);
   }
@@ -323,7 +348,7 @@ describe("updateBio - validation", () => {
     const result = await updateBio(PREV, fd);
 
     expect(result.success).toBeTruthy();
-    const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    const updatePayload = writtenProfile();
     expect(updatePayload.seller_bio).toBe("Screen prints from a garage in Leipzig");
     const eqCalls = db.eq.mock.calls as [string, string][];
     expect(eqCalls.some(([col, val]) => col === "id" && val === USER_ID)).toBe(true);
@@ -348,7 +373,7 @@ describe("updateBio - validation", () => {
     const result = await updateBio(PREV, fd);
 
     expect(result.success).toBeTruthy();
-    const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    const updatePayload = writtenProfile();
     expect(updatePayload.seller_bio).toBeNull();
   });
 });
@@ -370,6 +395,85 @@ describe("saveTaxInfo - field whitelist", () => {
 
     expect(errorText(result)).toMatch(/is_seller/);
     expect(db.update).not.toHaveBeenCalled();
+  });
+});
+
+describe("seller text is checked before it is stored", () => {
+  const bio = (value: string) => {
+    const fd = new FormData();
+    fd.append("seller_bio", value);
+    return fd;
+  };
+
+  it("a violation is refused and nothing is written", async () => {
+    getUserMock.mockResolvedValue(USER);
+    sellerTextMock.mockResolvedValue({ verdict: "violation", ground: "hate", paths: ["bio"] });
+
+    const result = await updateBio(PREV, bio("Words nobody may publish"));
+
+    expect(errorText(result)).toMatch(/breaks the platform rules/);
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("an unsure answer is not an approval", async () => {
+    getUserMock.mockResolvedValue(USER);
+    sellerTextMock.mockResolvedValue({ verdict: "unsure", ground: null, paths: [] });
+
+    const result = await updateBio(PREV, bio("Something borderline"));
+
+    expect(errorText(result)).toMatch(/could not be approved automatically/);
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("nor is no answer at all", async () => {
+    getUserMock.mockResolvedValue(USER);
+    sellerTextMock.mockResolvedValue(null);
+
+    const result = await updateBio(PREV, bio("Perfectly ordinary"));
+
+    expect(errorText(result)).toMatch(/cannot be checked right now/);
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("the handle and the trader name are checked too", async () => {
+    getUserMock.mockResolvedValue(USER);
+    sellerTextMock.mockResolvedValue({ verdict: "violation", ground: "hate", paths: [] });
+
+    const handle = new FormData();
+    handle.append("username", "someslur");
+    expect(errorText(await updateUsername(PREV, handle))).toMatch(/breaks the platform rules/);
+
+    const trader = new FormData();
+    trader.append("tax_business_name", "A name nobody may trade under");
+    expect(errorText(await saveTaxInfo(PREV, trader))).toMatch(/breaks the platform rules/);
+
+    expect(db.update).not.toHaveBeenCalled();
+    expect(sellerTextMock).toHaveBeenCalledWith({ username: "someslur" });
+    expect(sellerTextMock).toHaveBeenCalledWith({ businessName: "A name nobody may trade under" });
+  });
+
+  it("clean text is written by the service role, only after the session's own write went through", async () => {
+    getUserMock.mockResolvedValue(USER);
+
+    expect((await updateBio(PREV, bio("Screen prints from Leipzig"))).success).toBeTruthy();
+    const [own, guarded] = db.update.mock.calls.map((call: unknown[]) => call[0] as Record<string, unknown>);
+    // The session's write carries no seller text at all; the second does.
+    expect(own).not.toHaveProperty("seller_bio");
+    expect(guarded).toEqual({ seller_bio: "Screen prints from Leipzig" });
+
+    // A session whose own write touched no row (RLS said no) gets no further.
+    vi.clearAllMocks();
+    getUserMock.mockResolvedValue(USER);
+    rateLimitMock.mockResolvedValue(true);
+    sellerTextMock.mockResolvedValue({ verdict: "clean", ground: null, paths: [] });
+    dbFn.mockResolvedValue({ data: null, error: null });
+    for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in"]) {
+      db[m].mockReturnValue(db);
+    }
+    db.maybeSingle.mockImplementation(() => dbFn());
+
+    expect((await updateBio(PREV, bio("Screen prints from Leipzig"))).success).toBeFalsy();
+    expect(db.update).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -403,7 +507,7 @@ describe("saveTaxInfo - happy path", () => {
     const result = await saveTaxInfo(PREV, fd);
 
     expect(result.success).toBeTruthy();
-    const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    const updatePayload = writtenProfile();
     expect(updatePayload.seller_address).toBe("12 Market Street\nDublin, D02 X285");
     expect(updatePayload.seller_email).toBe("hello@acme-prints.de");
     // One canonical spelling per number: E.164.
@@ -432,7 +536,7 @@ describe("saveTaxInfo - happy path", () => {
     const result = await saveTaxInfo(PREV, fd);
 
     expect(result.success).toBeTruthy();
-    const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    const updatePayload = writtenProfile();
     // Normalised to LF-only on the way in, same as every other stored value.
     expect(updatePayload.seller_address).toBe("12 Market Street\nDublin, D02 X285");
   });
@@ -450,7 +554,7 @@ describe("saveTaxInfo - happy path", () => {
     const result = await saveTaxInfo(PREV, fd);
 
     expect(result.success).toBeTruthy();
-    const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    const updatePayload = writtenProfile();
     for (const field of ["seller_address", "seller_email", "seller_phone"]) {
       expect(updatePayload[field]).toBeNull();
     }
@@ -542,7 +646,7 @@ describe("saveTaxInfo - partial writes", () => {
     const result = await saveTaxInfo(PREV, fd);
 
     expect(result.success).toBeTruthy();
-    const payload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    const payload = writtenProfile();
     expect(payload.tax_business_name).toBe("ACME Corp");
     expect(payload.seller_address).toBe("12 Market Street\nDublin");
     expect(payload.seller_email).toBe("hello@acme-prints.de");
@@ -559,7 +663,7 @@ describe("saveTaxInfo - partial writes", () => {
     const result = await saveTaxInfo(PREV, fd);
 
     expect(result.success).toBeTruthy();
-    const payload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    const payload = writtenProfile();
     expect(payload).not.toHaveProperty("seller_email");
     // Dropping the stored proof is only right when the address itself changed.
     expect(payload).not.toHaveProperty("seller_email_verified_at");
@@ -595,7 +699,7 @@ describe("saveTaxInfo - contact details", () => {
     return fd;
   }
 
-  const payload = () => db.update.mock.calls[0]?.[0] as Record<string, unknown> | undefined;
+  const payload = () => (db.update.mock.calls.length > 0 ? writtenProfile() : undefined);
 
   beforeEach(() => getUserMock.mockResolvedValue(USER));
 
@@ -718,7 +822,7 @@ describe("saveNotifications", () => {
     const result = await saveNotifications(PREV, fd);
 
     expect(result.success).toBeTruthy();
-    const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    const updatePayload = writtenProfile();
     expect(updatePayload).toHaveProperty("notify_sales", true);
     expect(updatePayload).toHaveProperty("notify_product_updates", false);
     expect(updatePayload).toHaveProperty("notify_marketing", false);
@@ -761,7 +865,7 @@ describe("acceptLegal", () => {
     const result = await acceptLegal(PREV, fd);
 
     expect(result.success).toBeTruthy();
-    const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    const updatePayload = writtenProfile();
     expect(typeof updatePayload.legal_accepted_at).toBe("string");
     expect(updatePayload.legal_accepted_version).toBe(LEGAL_VERSION);
   });
@@ -795,7 +899,7 @@ describe("requestAccountDeletion", () => {
     expect(result.success).toBeTruthy();
     // The record the job acts on, for the SESSION's user.
     expect(recordDeletionRequestMock).toHaveBeenCalledWith(USER_ID);
-    const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    const updatePayload = writtenProfile();
     // The flag mirrors the request's own date, not a second clock reading.
     expect(updatePayload.deletion_requested_at).toBe("2026-10-10T09:00:00.000Z");
     // Scoped to the session user
@@ -860,7 +964,7 @@ describe("cancelAccountDeletion", () => {
 
     expect(result.success).toBeTruthy();
     expect(withdrawDeletionRequestMock).toHaveBeenCalledWith(USER_ID);
-    const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
+    const updatePayload = writtenProfile();
     expect(updatePayload.deletion_requested_at).toBeNull();
   });
 

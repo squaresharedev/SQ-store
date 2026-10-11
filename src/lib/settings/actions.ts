@@ -41,6 +41,11 @@ import { recordDeletionRequest, withdrawDeletionRequest } from "@/lib/account-de
 import { sendDeletionScheduledEmail } from "@/lib/account-deletion/emails";
 import { alertOps } from "@/lib/ops/alert";
 import { cronConfigured } from "@/lib/ops/cron";
+import {
+  handleRefusal,
+  sellerTextRefusal,
+  writeOwnProfile,
+} from "@/lib/moderation/auto/seller-text";
 import { DEFAULT_LOCALE, parseLocale } from "@/i18n/locales";
 import type { Tables, TablesUpdate } from "@/types";
 import type { z } from "zod";
@@ -105,17 +110,14 @@ function invalid(error: z.ZodError): ActionState {
   return failed(invalidInput(firstIssue(error)));
 }
 
-/** Owner-scoped profile update. Only whitelisted columns ever reach this. */
+/** Owner-scoped profile update. Only whitelisted columns ever reach this.
+ *  Buyer-facing seller text among them is the server's to write, after the
+ *  action has had it checked (lib/moderation/auto/seller-text.ts). */
 async function updateOwnProfile(
   userId: string,
   update: TablesUpdate<"profiles">,
 ): Promise<boolean> {
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("profiles")
-    .update({ ...update, updated_at: new Date().toISOString() })
-    .eq("id", userId); // owner id from the session, RLS enforces it again
-  return !error;
+  return writeOwnProfile(userId, update);
 }
 
 // --- Account ---------------------------------------------------------------
@@ -153,6 +155,12 @@ export async function updateUsername(
   if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
     return TOO_MANY;
   }
+
+  // A handle is public wherever the account is, so it is checked before it
+  // is stored. The approval is also what the marketplace's public directory
+  // goes by, so a handle set here needs no second look there.
+  const refused = await handleRefusal(parsed.data.username);
+  if (refused) return failed(refused);
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -201,6 +209,10 @@ export async function updateBio(
   if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) {
     return TOO_MANY;
   }
+
+  // Printed on every product page this account sells on.
+  const refused = await sellerTextRefusal({ bio: parsed.data.seller_bio ?? "" });
+  if (refused) return failed(refused);
 
   if (!(await updateOwnProfile(user.id, { seller_bio: parsed.data.seller_bio }))) {
     return SAVE_FAILED;
@@ -495,6 +507,13 @@ export async function saveTaxInfo(
       .eq("id", user.id)
       .maybeSingle();
     current = data;
+  }
+
+  // The trader name is the one free-text field here that buyers read as the
+  // seller's own words; the rest are an address and identifiers.
+  if (parsed.data.tax_business_name) {
+    const refused = await sellerTextRefusal({ businessName: parsed.data.tax_business_name });
+    if (refused) return failed(refused);
   }
 
   const update: TablesUpdate<"profiles"> = { ...parsed.data };

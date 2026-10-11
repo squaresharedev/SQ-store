@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { PauseCircle, PencilRuler, ShieldAlert } from "lucide-react";
+import { Hourglass, PauseCircle, PencilRuler, ShieldAlert } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { MessageRef } from "@/i18n/types";
@@ -8,7 +8,9 @@ import { formatLongDate } from "@/lib/format/date";
 import {
   REMOVAL_APPEAL_EMAIL,
   decisionReference,
+  isAwaitingCheck,
   removalFinding,
+  type TakedownKind,
 } from "@/lib/moderation/removal";
 import { moderationNoticeId } from "@/lib/moderation/paths";
 import { storefrontEditorPath } from "@/lib/storefront/paths";
@@ -36,6 +38,15 @@ import { ReviewRequestButton } from "./ReviewRequestButton";
  *            person. Neutral, not red: nothing is lost yet, and a red box
  *            reads as a verdict when this is a request.
  *   removed  "this is final". Red, no fix button.
+ *
+ * A PAUSE THE AUTOMATIC CHECK MADE is the same shape with one difference: no
+ * person is waiting to be told. Saving a change has it checked again on the
+ * spot, so it says so and offers no "I've made the changes" button.
+ *
+ * TWO MORE STATES ARE NOT TAKEDOWNS AT ALL and get a quieter box, with no
+ * reasons and nothing to appeal: `pending` (the automatic check has not
+ * finished) and `review` (it could not approve the content, so a person is
+ * looking). Nothing has been decided against the seller in either.
  *
  * BOTH carry the decision's reference, a download of the full statement (EU
  * Digital Services Act Art. 17) and a way to appeal it in-app (Art. 20), once
@@ -66,6 +77,33 @@ export function RemovalNotice({
   const paused = removal.kind === "paused";
   const headingId = `takedown-${id}`;
   const fields = removal.fields;
+
+  if (isAwaitingCheck(removal.kind)) {
+    const pending = removal.kind === "pending";
+    return (
+      <section
+        id={moderationNoticeId(id)}
+        aria-labelledby={headingId}
+        className={cn("flex scroll-mt-20 items-start gap-3 border-2 border-border bg-muted p-4", className)}
+        data-removal-notice={kind}
+        data-takedown={removal.kind}
+      >
+        <Hourglass aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-foreground" />
+        <div className="flex flex-col gap-1">
+          <h2 id={headingId} className="text-sm font-semibold text-foreground">
+            {pending ? t("titlePending", { kind }) : t("titleReview", { kind })}
+          </h2>
+          <p id={`${headingId}-title`} className="text-sm font-medium text-foreground">
+            {title}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {pending ? t("hiddenPending") : t("hiddenReview")}
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   const mailLink = (chunks: ReactNode) => (
     <a
       className="font-medium text-foreground underline underline-offset-2"
@@ -107,7 +145,11 @@ export function RemovalNotice({
             {title}
           </p>
           <p className="text-sm text-muted-foreground">
-            {paused ? t("hiddenPaused") : t("hiddenRemoved")}
+            {paused
+              ? removal.automated
+                ? t("hiddenPausedAuto")
+                : t("hiddenPaused")
+              : t("hiddenRemoved")}
           </p>
         </div>
       </div>
@@ -164,7 +206,9 @@ export function RemovalNotice({
           {canRequestReview ? (
             <>
               {!removal.reviewRequestedAt && (
-                <p className="text-sm text-muted-foreground">{t("fixHint", { kind })}</p>
+                <p className="text-sm text-muted-foreground" data-fix-hint="">
+                  {removal.automated ? t("autoFixHint", { kind }) : t("fixHint", { kind })}
+                </p>
               )}
               {/* The storefront's parts live in its editor, one click away. */}
               {kind === "storefront" && !removal.reviewRequestedAt && (
@@ -177,14 +221,20 @@ export function RemovalNotice({
                   {t("openEditor")}
                 </Link>
               )}
-              <ReviewRequestButton
-                kind={kind}
-                id={id}
-                requestedAt={removal.reviewRequestedAt}
-              />
+              {/* Nobody to send an automatic pause back to: the save itself
+                  has it checked again. */}
+              {!removal.automated && (
+                <ReviewRequestButton
+                  kind={kind}
+                  id={id}
+                  requestedAt={removal.reviewRequestedAt}
+                />
+              )}
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">{t("readOnlyHint", { kind })}</p>
+            <p className="text-sm text-muted-foreground">
+              {removal.automated ? t("readOnlyHintAuto", { kind }) : t("readOnlyHint", { kind })}
+            </p>
           )}
         </div>
       )}
@@ -211,16 +261,24 @@ export function RemovalNotice({
 /**
  * The list-card version: a word, not a paragraph.
  *
- * Deliberately says "Paused" or "Removed" and nothing else. A card in a grid
- * has room for a state, not for a reason, and a truncated reason is worse than
- * none: the seller reads half a sentence and fills in the rest themselves. The
- * full statement is one click away on the product itself.
+ * Deliberately says "Paused" or "Removed" (or "Checking", "In review") and
+ * nothing else. A card in a grid has room for a state, not for a reason, and a
+ * truncated reason is worse than none: the seller reads half a sentence and
+ * fills in the rest themselves. The full statement is one click away on the
+ * product itself.
  */
+const BADGE_LABEL = {
+  pending: "badgePending",
+  review: "badgeReview",
+  paused: "badgePaused",
+  removed: "badge",
+} as const satisfies Record<TakedownKind, string>;
+
 export function RemovalBadge({
   kind,
   className,
 }: {
-  kind: "paused" | "removed";
+  kind: TakedownKind;
   className?: string;
 }) {
   const t = useTranslations("Products.removal");
@@ -229,14 +287,17 @@ export function RemovalBadge({
       className={cn(
         "inline-flex items-center rounded-sm px-1.5 py-0.5 shadow-sm",
         "font-inter text-xs font-medium",
-        kind === "paused"
-          ? "bg-foreground text-background"
-          : "bg-destructive text-destructive-foreground",
+        kind === "removed"
+          ? "bg-destructive text-destructive-foreground"
+          : kind === "paused"
+            ? "bg-foreground text-background"
+            : // Waiting, not judged: the quietest of the three.
+              "bg-muted text-foreground",
         className,
       )}
       data-removal-badge={kind}
     >
-      {kind === "paused" ? t("badgePaused") : t("badge")}
+      {t(BADGE_LABEL[kind])}
     </span>
   );
 }

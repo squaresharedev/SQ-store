@@ -97,6 +97,8 @@ describe("takedownFromRow", () => {
   it("carries the review request on a pause", () => {
     expect(takedownFromRow({ ...base, moderation_status: "paused" })).toEqual({
       kind: "paused",
+      // Only the decision record knows who decided; the row alone says no.
+      automated: false,
       ground: "other",
       note: "Replace the second photo.",
       at: "2026-09-23T10:00:00Z",

@@ -43,24 +43,34 @@ export const MODERATION_DETAIL_SELECT =
  * What the platform may do with a piece of content.
  *
  *   ok       served normally.
- *   paused   hidden until the seller fixes what staff pointed at and staff
- *            approve the change. The seller has a way back from here.
+ *   pending  waiting for the automatic check (lib/moderation/auto). Seconds,
+ *            normally; nothing for the seller to do.
+ *   review   the automatic check could not approve it, so a person decides.
+ *   paused   hidden until the seller fixes what was pointed at. A person's
+ *            pause also needs that person's approval; an automatic one is
+ *            checked again as soon as the seller saves a change.
  *   removed  hidden for good. The only way back is an appeal.
  *
- * Both non-ok states are hidden by the same gate below; the difference is
+ * Every non-ok state is hidden by the same gate below; the difference is
  * entirely in what the SELLER is told and offered.
  */
-export type ModerationStatus = "ok" | "paused" | "removed";
+export type ModerationStatus = "ok" | "pending" | "review" | "paused" | "removed";
 
-/** Which kind of takedown a seller is looking at, for the surfaces that word
- *  the two differently. Anything unrecognised that is not `ok` reads as
- *  `removed`: the stricter reading, and the one that offers no button whose
- *  server half would refuse it. */
-export type TakedownKind = "paused" | "removed";
+/** Which hidden state a seller is looking at, for the surfaces that word them
+ *  differently. Anything unrecognised that is not `ok` reads as `removed`:
+ *  the stricter reading, and the one that offers no button whose server half
+ *  would refuse it. */
+export type TakedownKind = "pending" | "review" | "paused" | "removed";
 
 export function takedownKind(status: string | null | undefined): TakedownKind | null {
   if (isContentVisible(status)) return null;
-  return status === "paused" ? "paused" : "removed";
+  return status === "pending" || status === "review" || status === "paused" ? status : "removed";
+}
+
+/** The two states in which nothing has been decided against the content: it
+ *  is only waiting, on the automatic check or on a person. */
+export function isAwaitingCheck(kind: TakedownKind): kind is "pending" | "review" {
+  return kind === "pending" || kind === "review";
 }
 
 /**
@@ -185,6 +195,7 @@ export function takedownFromRow(
   target: FixTarget = "product",
 ): {
   kind: TakedownKind;
+  automated: boolean;
   ground: string | null;
   note: string | null;
   at: string | null;
@@ -196,6 +207,10 @@ export function takedownFromRow(
   if (!kind) return null;
   return {
     kind,
+    // Not knowable from the row: whether a person or the automatic check
+    // decided lives on the decision record, and the reads that show a banner
+    // fill it in from there (withAppeal in lib/moderation/appeals-read.ts).
+    automated: false,
     ground: row.moderation_ground ?? null,
     note: row.moderation_note ?? null,
     at: row.moderated_at ?? null,

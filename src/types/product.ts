@@ -58,11 +58,16 @@ export interface Product {
   removal?: ProductRemoval;
 }
 
-/** What a seller is told about their own paused or removed content. */
+/** What a seller is told about their own content while it is not public. */
 export interface ProductRemoval {
-  /** `paused`: hidden until the seller fixes it and staff approve. `removed`:
-   *  hidden for good. See takedownKind in lib/moderation/removal.ts. */
-  kind: "paused" | "removed";
+  /** `pending`: waiting for the automatic check. `review`: held for a
+   *  person. `paused`: hidden until the seller fixes it. `removed`: hidden
+   *  for good. See takedownKind in lib/moderation/removal.ts. */
+  kind: "pending" | "review" | "paused" | "removed";
+  /** True when the automatic check made the decision and no person did. An
+   *  automated pause is checked again when the seller saves a change, so it
+   *  offers no "I've made the changes" button. */
+  automated: boolean;
   /** When the seller asked staff to look again at a paused item. Null when
    *  nothing is waiting, and always null for a removal. ISO 8601. */
   reviewRequestedAt: string | null;

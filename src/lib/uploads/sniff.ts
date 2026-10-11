@@ -61,6 +61,96 @@ export function sniffImage(bytes: Uint8Array): SniffedImage | null {
   return null;
 }
 
+/** How far into a file the animation checks below will walk. Every marker
+ *  they look for sits in the header region; a file that hides one deeper than
+ *  this is not one any encoder produced. */
+const ANIMATION_SCAN_BYTES = 1024 * 1024;
+
+function uint32(bytes: Uint8Array, at: number): number {
+  return ((bytes[at] << 24) | (bytes[at + 1] << 16) | (bytes[at + 2] << 8) | bytes[at + 3]) >>> 0;
+}
+
+/** A GIF is animated when it holds a second frame. Walks the block structure
+ *  (not a byte search: 0x2C also turns up inside pixel data). */
+function gifHasSecondFrame(bytes: Uint8Array): boolean {
+  // Header (6) + logical screen descriptor (7), then an optional global table.
+  let at = 13;
+  if (bytes[10] & 0x80) at += 3 * (1 << ((bytes[10] & 0x07) + 1));
+  let frames = 0;
+  const skipSubBlocks = () => {
+    while (at < bytes.length && bytes[at] !== 0) at += bytes[at] + 1;
+    at += 1;
+  };
+  while (at < bytes.length && at < ANIMATION_SCAN_BYTES) {
+    const block = bytes[at];
+    if (block === 0x2c) {
+      frames += 1;
+      if (frames > 1) return true;
+      const packed = bytes[at + 9];
+      at += 10;
+      if (packed & 0x80) at += 3 * (1 << ((packed & 0x07) + 1));
+      at += 1; // LZW minimum code size
+      skipSubBlocks();
+    } else if (block === 0x21) {
+      at += 2;
+      skipSubBlocks();
+    } else {
+      // The trailer (0x3B), or bytes that are not a block at all.
+      return false;
+    }
+  }
+  // Ran out of the scan window mid-file with one frame seen: a first frame
+  // that large is a still, as far as anything here can tell.
+  return false;
+}
+
+/** A PNG is animated (APNG) when an `acTL` chunk comes before the image data. */
+function pngIsAnimated(bytes: Uint8Array): boolean {
+  let at = 8;
+  while (at + 8 <= bytes.length && at < ANIMATION_SCAN_BYTES) {
+    if (ascii(bytes, at + 4, "acTL")) return true;
+    if (ascii(bytes, at + 4, "IDAT")) return false;
+    at += 12 + uint32(bytes, at);
+  }
+  return false;
+}
+
+/**
+ * Whether an image holds more than one frame.
+ *
+ * It matters to content moderation and nothing else: a classifier is shown
+ * the FIRST frame of an animation, so an animated file with an innocent
+ * opening frame would be approved for what follows it. An animated upload is
+ * therefore one the automatic check cannot fully see, and goes to a person
+ * (see the upload routes).
+ */
+export function isAnimated(bytes: Uint8Array, mime: string): boolean {
+  switch (mime) {
+    case "image/gif":
+      return gifHasSecondFrame(bytes);
+    case "image/png":
+      return pngIsAnimated(bytes);
+    case "image/webp":
+      // The extended header's flags byte carries an animation bit.
+      return ascii(bytes, 12, "VP8X") && (bytes[20] & 0x02) !== 0;
+    case "image/avif":
+      // The image-sequence brand.
+      return ascii(bytes, 8, "avis");
+    default:
+      return false;
+  }
+}
+
+/**
+ * Whether the automatic check can judge this image at all: a still JPEG, PNG,
+ * GIF or WebP. Anything else it either cannot open (AVIF) or would see only
+ * the first frame of.
+ */
+export function classifierCanSee(bytes: Uint8Array, mime: string): boolean {
+  if (mime === "image/avif") return false;
+  return !isAnimated(bytes, mime);
+}
+
 export type SniffedSvg = { mime: "image/svg+xml"; ext: "svg" };
 
 /**

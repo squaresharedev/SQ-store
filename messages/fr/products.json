@@ -152,7 +152,16 @@
       "upheld": "Nous avons examiné votre contestation le <time>{date}</time>. La décision est maintenue.",
       "answer": "Notre réponse : {note}"
     },
-    "editorDetails": "Pourquoi, et que faire ensuite"
+    "editorDetails": "Pourquoi, et que faire ensuite",
+    "badgePending": "Vérification",
+    "badgeReview": "En examen",
+    "titlePending": "{kind, select, product {Ce produit est en cours de vérification} other {Cette vitrine est en cours de vérification}}",
+    "titleReview": "{kind, select, product {Une personne vérifie ce produit} other {Une personne vérifie cette vitrine}}",
+    "hiddenPending": "Les acheteurs ne pourront pas le voir tant que la vérification automatique n’est pas terminée. Cela prend généralement quelques secondes : rechargez la page pour voir où elle en est.",
+    "hiddenReview": "La vérification automatique n’a pas pu l’approuver, une personne l’examine donc. Les acheteurs ne pourront pas le voir tant qu’elle n’a pas décidé. Les images SVG, AVIF et animées sont toujours vérifiées par une personne : si vous en retirez une, le reste est vérifié aussitôt.",
+    "hiddenPausedAuto": "Les acheteurs ne peuvent pas le voir pour le moment : ni sur sa page, ni dans un widget intégré, ni via un lien partagé. Cette décision a été prise par une vérification automatique et aucune personne ne l’a encore examiné. Rien n’a été supprimé.",
+    "autoFixHint": "{kind, select, product {Modifiez les parties surlignées ci-dessous et enregistrez. Il est vérifié à nouveau aussitôt et mis en ligne s’il passe la vérification.} other {Ouvrez la vitrine, modifiez ce qui est indiqué ci-dessus et enregistrez. Elle est vérifiée à nouveau aussitôt et mise en ligne si elle passe la vérification.}}",
+    "readOnlyHintAuto": "{kind, select, product {Une personne autorisée à modifier ce produit doit le modifier. Il est vérifié à nouveau dès l’enregistrement.} other {Une personne autorisée à modifier cette vitrine doit la modifier. Elle est vérifiée à nouveau dès l’enregistrement.}}"
   },
   "import": {
     "fields": {
@@ -600,12 +609,14 @@
     "content": "{target, select, product {Produit} other {Vitrine}} : {title}",
     "decision": {
       "paused": "Mis en pause. Le contenu est masqué aux acheteurs jusqu'à ce que vous apportiez les modifications indiquées ci-dessous et que nous les approuvions.",
-      "removed": "Retiré. Le contenu n'est plus accessible aux acheteurs. Cette décision est définitive, sauf si une contestation la modifie."
+      "removed": "Retiré. Le contenu n'est plus accessible aux acheteurs. Cette décision est définitive, sauf si une contestation la modifie.",
+      "pausedAutomated": "Mis en pause. Le contenu est masqué aux acheteurs jusqu'à ce que vous le modifiiez. Il est vérifié à nouveau dès que vous enregistrez une modification."
     },
     "scope": "Partout où SquareShare l'affiche : sa propre page, les intégrations sur d'autres sites et les liens partagés, dans tous les pays.",
     "duration": {
       "paused": "Jusqu'à l'approbation de vos modifications.",
-      "removed": "Indéfinie."
+      "removed": "Indéfinie.",
+      "pausedAutomated": "Jusqu'à ce que vous le modifiiez et que la modification passe la vérification."
     },
     "status": {
       "inForce": "En vigueur.",
@@ -615,7 +626,8 @@
     },
     "facts": {
       "notices": "{count, plural, =0 {Nous l'avons détecté nous-mêmes, sans signalement extérieur à SquareShare.} one {Cette décision fait suite à # signalement provenant d'une personne extérieure à SquareShare, concernant : {reasons}.} other {Cette décision fait suite à # signalements provenant de personnes extérieures à SquareShare, concernant : {reasons}.}}",
-      "review": "Un membre de l'équipe SquareShare a examiné le contenu avant de prendre cette décision. Nous ne communiquons pas l'identité des personnes ayant envoyé un signalement."
+      "review": "Un membre de l'équipe SquareShare a examiné le contenu avant de prendre cette décision. Nous ne communiquons pas l'identité des personnes ayant envoyé un signalement.",
+      "automated": "Notre vérification automatique l'a détecté lors de l'enregistrement du contenu. Personne en dehors de SquareShare ne l'a signalé, et aucun membre de l'équipe ne l'a examiné."
     },
     "automated": "Aucun moyen automatisé n'a été utilisé pour détecter ce contenu ni pour prendre cette décision.",
     "legalBasis": {
@@ -638,7 +650,8 @@
       "message": "Ce que vous avez écrit : {message}"
     },
     "footer": "SquareShare · {reference} · Page {page} sur {total}",
-    "generated": "Généré le {date}."
+    "generated": "Généré le {date}.",
+    "automatedYes": "Des moyens automatisés ont été utilisés à la fois pour détecter ce contenu et pour prendre cette décision, sans intervention humaine. Si vous contestez la décision, un membre de l'équipe l'examinera."
   },
   "buyButton": {
     "title": "Ajoutez un bouton d’achat à votre site",

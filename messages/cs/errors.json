@@ -132,7 +132,13 @@
     "notPaused": "{target, select, product {Tento produkt není pozastaven.} storefront {Tato výloha není pozastavena.} other {Tato položka není pozastavena.}}",
     "notPausedFix": "Není co kontrolovat: kupující ji už vidí.",
     "decisionSuperseded": "Toto rozhodnutí již neplatí, takže není co napadnout.",
-    "decisionSupersededFix": "Znovu načtěte stránku a zjistěte, jaký je aktuální stav."
+    "decisionSupersededFix": "Znovu načtěte stránku a zjistěte, jaký je aktuální stav.",
+    "checkUnavailable": "{what, select, image {Tento obrázek teď nelze zkontrolovat, proto nebyl uložen.} other {Tento text teď nelze zkontrolovat, proto nebyl uložen.}}",
+    "checkUnavailableFix": "Zkuste to znovu za pár minut.",
+    "refused": "{what, select, image {Tento obrázek porušuje pravidla platformy, proto nebyl uložen.} other {Tento text porušuje pravidla platformy, proto nebyl uložen.}}",
+    "refusedFix": "Upravte ho a uložte znovu. Pokud si myslíte, že jde o omyl, napište na {email}.",
+    "notApproved": "{what, select, image {Tento obrázek se nepodařilo automaticky schválit, proto nebyl uložen.} other {Tento text se nepodařilo automaticky schválit, proto nebyl uložen.}}",
+    "notApprovedFix": "Zkuste něco jiného, nebo napište na {email} a podívá se na to člověk."
   },
   "traderIdentityRequired": {
     "message": "Dokud nebudou vaše údaje prodejce kompletní, nemůžete zveřejňovat ani prodávat.",
@@ -399,14 +405,7 @@
       "documentType": "Exportujte návod nebo certifikát do PDF a pak ho nahrajte.",
       "documentContents": "Znovu ho vyexportujte do PDF. Přejmenováním se formát souboru nezmění."
     },
-    "moderationUnavailable": "Obrázky teď nelze zkontrolovat.",
-    "moderationRejected": {
-      "explicit": "Obrázek působí sexuálně explicitně, proto ho u produktu nelze použít.",
-      "violent": "Obrázek zobrazuje drastické násilí, proto ho nelze použít.",
-      "hate": "Obrázek zřejmě obsahuje symboly nenávisti, proto ho nelze použít."
-    },
-    "inReview": "Obrázek před zveřejněním prochází kontrolou.",
-    "inReviewFix": "Po schválení ho budete moct použít.",
+    "moderationUnavailable": "Tento soubor teď nelze přijmout.",
     "storeFailed": {
       "image": "Obrázek se nepodařilo uložit.",
       "document": "Dokument se nepodařilo uložit.",
@@ -417,8 +416,7 @@
       "tryAgain": "Zkuste to znovu.",
       "tryAgainInAMoment": "Zkuste to za chvíli znovu.",
       "tryAgainInAFewMinutes": "Zkuste to znovu za pár minut.",
-      "pickFile": "Vyberte jiný soubor.",
-      "pickImage": "Vyberte jiný obrázek."
+      "pickFile": "Vyberte jiný soubor."
     }
   },
   "products": {

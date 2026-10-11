@@ -132,7 +132,13 @@
     "notPaused": "{target, select, product {Este produto não está pausado.} storefront {Esta montra não está pausada.} other {Este item não está pausado.}}",
     "notPausedFix": "Não há nada para rever: já está visível para os compradores.",
     "decisionSuperseded": "Esta decisão já não se aplica, pelo que não há nada a recorrer.",
-    "decisionSupersededFix": "Recarregue a página para ver a situação atual."
+    "decisionSupersededFix": "Recarregue a página para ver a situação atual.",
+    "checkUnavailable": "{what, select, image {Neste momento não é possível verificar esta imagem, por isso não foi guardada.} other {Neste momento não é possível verificar este texto, por isso não foi guardado.}}",
+    "checkUnavailableFix": "Tente novamente dentro de alguns minutos.",
+    "refused": "{what, select, image {Esta imagem viola as regras da plataforma, por isso não foi guardada.} other {Este texto viola as regras da plataforma, por isso não foi guardado.}}",
+    "refusedFix": "Altere-o e guarde novamente. Se considerar que se trata de um erro, escreva para {email}.",
+    "notApproved": "{what, select, image {Não foi possível aprovar esta imagem automaticamente, por isso não foi guardada.} other {Não foi possível aprovar este texto automaticamente, por isso não foi guardado.}}",
+    "notApprovedFix": "Experimente algo diferente, ou escreva para {email} e uma pessoa irá analisar."
   },
   "traderIdentityRequired": {
     "message": "Não pode publicar nem vender enquanto os seus dados de vendedor não estiverem completos.",
@@ -399,14 +405,7 @@
       "documentType": "Exporte o manual ou certificado como PDF e depois carregue-o.",
       "documentContents": "Exporte-o novamente como PDF. Mudar o nome de um ficheiro não altera o seu formato."
     },
-    "moderationUnavailable": "Neste momento não é possível verificar imagens.",
-    "moderationRejected": {
-      "explicit": "Essa imagem parece sexualmente explícita, por isso não pode ser utilizada num produto.",
-      "violent": "Essa imagem parece conter violência gráfica, por isso não pode ser utilizada.",
-      "hate": "Essa imagem parece conter símbolos de ódio, por isso não pode ser utilizada."
-    },
-    "inReview": "Essa imagem está a ser verificada antes de ser publicada.",
-    "inReviewFix": "Poderá utilizá-la assim que for aprovada.",
+    "moderationUnavailable": "Neste momento não é possível aceitar este ficheiro.",
     "storeFailed": {
       "image": "Não foi possível guardar a imagem.",
       "document": "Não foi possível guardar o documento.",
@@ -417,8 +416,7 @@
       "tryAgain": "Tente novamente.",
       "tryAgainInAMoment": "Tente novamente daqui a pouco.",
       "tryAgainInAFewMinutes": "Tente novamente dentro de alguns minutos.",
-      "pickFile": "Escolha outro ficheiro.",
-      "pickImage": "Escolha outra imagem."
+      "pickFile": "Escolha outro ficheiro."
     }
   },
   "products": {

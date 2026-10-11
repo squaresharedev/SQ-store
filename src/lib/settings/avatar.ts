@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { sniffImage } from "@/lib/uploads/sniff";
+import { avatarRefusal } from "@/lib/moderation/auto/seller-text";
 import {
   actionError,
   failed,
@@ -111,6 +112,14 @@ export async function uploadAvatar(
 
   const { data: pub } = admin.storage.from(BUCKET).getPublicUrl(path);
   const avatarUrl = pub.publicUrl;
+
+  // Checked before the profile points at it. A picture that does not pass is
+  // deleted again, so nothing unapproved stays in the public bucket.
+  const refused = await avatarRefusal(avatarUrl);
+  if (refused) {
+    await admin.storage.from(BUCKET).remove([path]);
+    return failed(refused);
+  }
 
   const { error: updateError } = await supabase
     .from("profiles")

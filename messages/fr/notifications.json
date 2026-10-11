@@ -175,6 +175,12 @@
         "title": "Le paiement de votre forfait {plan, select, starter {Starter} pro {Pro} other {payant}} a échoué",
         "body": "Stripe va réessayer. Mettez à jour votre carte dans Forfait et facturation pour conserver votre forfait."
       }
+    },
+    "policy": {
+      "autoPaused": {
+        "title": "Action requise : {target, select, product {votre produit « {title} » est en pause} other {votre vitrine « {title} » est en pause}}",
+        "body": "Une vérification automatique l’a masqué aux acheteurs, car il semble enfreindre les règles. Modifiez-le et il sera vérifié à nouveau aussitôt, ou demandez qu’une personne réexamine la décision."
+      }
     }
   }
 }

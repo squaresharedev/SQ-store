@@ -126,7 +126,9 @@ describe("guard_contact_proof: a seller cannot prove their own contact details",
       q.query(`update public.profiles set seller_email_verified_at = now() where id = $1`, [seller.id]),
     );
     await asUser(seller, (q) =>
-      q.query(`update public.profiles set tax_business_name = 'Renamed Ltd' where id = $1`, [seller.id]),
+      // An address, not the trader name: seller text is the server's to write
+      // now (guard_seller_text, 20261012_auto_moderation).
+      q.query(`update public.profiles set seller_address = '2 Renamed Road, Cork' where id = $1`, [seller.id]),
     );
     expect((await proofs()).seller_email_verified_at).not.toBeNull();
 

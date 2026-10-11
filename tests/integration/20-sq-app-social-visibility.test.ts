@@ -41,6 +41,15 @@ beforeAll(async () => {
   // trusted it was asserting against the opposite privacy posture from the real
   // database. Saying which is which here means these tests cannot be quietly
   // inverted by a schema change again.
+  // Public also means "under a handle that has been approved": the directory
+  // lists nobody else (20261013_marketplace_moderation). Recorded first, since
+  // the directory is written when the profile is.
+  await asService((q) =>
+    q.query(
+      `insert into public.moderation_checks (subject, verdict, source, model)
+       values ('handle:social_public', 'clean', 'model', 'test')`,
+    ),
+  );
   await asService((q) =>
     q.query(`update public.profiles set is_public = true where id = $1`, [
       publicUser.id,
@@ -52,7 +61,10 @@ beforeAll(async () => {
     ]),
   );
 
-  publicArtifactId = await asUser(publicUser, async (q) => {
+  // Seeded by the server, so they are live: an artifact a user writes waits
+  // behind the moderation wall, and these tests are about who can see what
+  // hangs off a visible one.
+  publicArtifactId = await asService(async (q) => {
     const { rows } = await q.query(
       `insert into public.artifacts (owner_id, title, image_key)
        values ($1, 'public art', 'images/${publicUser.id}/a.webp') returning id`,
@@ -61,7 +73,7 @@ beforeAll(async () => {
     return rows[0].id;
   });
 
-  privateArtifactId = await asUser(privateUser, async (q) => {
+  privateArtifactId = await asService(async (q) => {
     const { rows } = await q.query(
       `insert into public.artifacts (owner_id, title, image_key)
        values ($1, 'private art', 'images/${privateUser.id}/b.webp') returning id`,

@@ -132,7 +132,13 @@
     "notPaused": "{target, select, product {Dieses Produkt ist nicht pausiert.} storefront {Dieses Schaufenster ist nicht pausiert.} other {Dieses Element ist nicht pausiert.}}",
     "notPausedFix": "Es gibt nichts zu überprüfen: Es ist bereits für Käufer sichtbar.",
     "decisionSuperseded": "Diese Entscheidung gilt nicht mehr, daher gibt es nichts anzufechten.",
-    "decisionSupersededFix": "Lade die Seite neu, um den aktuellen Stand zu sehen."
+    "decisionSupersededFix": "Lade die Seite neu, um den aktuellen Stand zu sehen.",
+    "checkUnavailable": "{what, select, image {Dieses Bild kann gerade nicht geprüft werden und wurde deshalb nicht gespeichert.} other {Dieser Text kann gerade nicht geprüft werden und wurde deshalb nicht gespeichert.}}",
+    "checkUnavailableFix": "Versuche es in ein paar Minuten noch einmal.",
+    "refused": "{what, select, image {Dieses Bild verstößt gegen die Regeln der Plattform und wurde deshalb nicht gespeichert.} other {Dieser Text verstößt gegen die Regeln der Plattform und wurde deshalb nicht gespeichert.}}",
+    "refusedFix": "Ändere es und speichere erneut. Wenn du das für einen Fehler hältst, schreib an {email}.",
+    "notApproved": "{what, select, image {Dieses Bild konnte nicht automatisch freigegeben werden und wurde deshalb nicht gespeichert.} other {Dieser Text konnte nicht automatisch freigegeben werden und wurde deshalb nicht gespeichert.}}",
+    "notApprovedFix": "Versuche etwas anderes oder schreib an {email}, dann schaut sich das eine Person an."
   },
   "traderIdentityRequired": {
     "message": "Du kannst nicht veröffentlichen oder verkaufen, bis deine Verkäuferangaben vollständig sind.",
@@ -399,14 +405,7 @@
       "documentType": "Exportiere das Handbuch oder Zertifikat als PDF und lade es dann hoch.",
       "documentContents": "Exportiere sie neu als PDF. Durch Umbenennen ändert sich das Format einer Datei nicht."
     },
-    "moderationUnavailable": "Bilder können gerade nicht geprüft werden.",
-    "moderationRejected": {
-      "explicit": "Dieses Bild wirkt sexuell explizit und kann deshalb nicht für ein Produkt verwendet werden.",
-      "violent": "Dieses Bild wirkt drastisch gewalttätig und kann deshalb nicht verwendet werden.",
-      "hate": "Dieses Bild scheint Hasssymbole zu enthalten und kann deshalb nicht verwendet werden."
-    },
-    "inReview": "Dieses Bild wird geprüft, bevor es online geht.",
-    "inReviewFix": "Du kannst es verwenden, sobald es freigegeben ist.",
+    "moderationUnavailable": "Diese Datei kann gerade nicht angenommen werden.",
     "storeFailed": {
       "image": "Das Bild konnte nicht gespeichert werden.",
       "document": "Das Dokument konnte nicht gespeichert werden.",
@@ -417,8 +416,7 @@
       "tryAgain": "Versuche es erneut.",
       "tryAgainInAMoment": "Versuche es gleich noch einmal.",
       "tryAgainInAFewMinutes": "Versuche es in ein paar Minuten erneut.",
-      "pickFile": "Wähle eine andere Datei.",
-      "pickImage": "Wähle ein anderes Bild."
+      "pickFile": "Wähle eine andere Datei."
     }
   },
   "products": {

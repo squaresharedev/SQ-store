@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
   createStorefrontViaUI,
+  expectToast,
   freshUser,
   gotoApp,
   serviceRest,
@@ -237,6 +238,9 @@ test.describe("an image block on the canvas", () => {
     await page.getByRole("button", { name: "Fit" }).click();
     await page.getByLabel("Description").fill("Company mark");
     await page.getByRole("button", { name: "Save" }).click();
+    // The save is confirmed before the reload: its content is checked first
+    // (lib/moderation/auto), so the write is no longer instant.
+    await expectToast(page, /storefront saved|saved, but some products are still drafts/i, 15_000);
     await page.reload();
 
     await page.locator("li[data-grid-cell]").first().click();

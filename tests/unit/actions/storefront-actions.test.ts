@@ -37,6 +37,17 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => clientWrapper,
 }));
 
+// The automatic content check has its own suites (tests/unit/auto-moderation,
+// tests/integration/37-auto-moderation). Here it is a pair of spies, so these
+// specs can assert WHEN a save calls it: before the write, and after.
+const precheckMock = vi.fn(async (..._args: unknown[]) => {});
+const settleMock = vi.fn(async (..._args: unknown[]) => "ok");
+vi.mock("@/lib/moderation/auto/check", () => ({
+  precheck: (...args: unknown[]) => precheckMock(...args),
+  settleAfterWrite: (...args: unknown[]) => settleMock(...args),
+  checkMany: vi.fn(async () => {}),
+}));
+
 
 // Rate limiting is exercised by its own tests; here it defaults to ALLOWED so
 // these specs assert the action logic. Each file also has one case that flips

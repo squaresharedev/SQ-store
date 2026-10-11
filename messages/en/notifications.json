@@ -175,6 +175,12 @@
         "title": "The payment for your {plan, select, starter {Starter} pro {Pro} other {paid}} plan failed",
         "body": "Stripe will try again. Update your card in Plan & billing to keep your plan."
       }
+    },
+    "policy": {
+      "autoPaused": {
+        "title": "Action needed: your {target, select, product {product} other {storefront}} \"{title}\" is paused",
+        "body": "An automatic check hid it from buyers because it appears to break the rules. Change it and it is checked again straight away, or ask for a person to review the decision."
+      }
     }
   }
 }

@@ -73,6 +73,10 @@ const POLICY_FREE_BY_DESIGN = new Set([
   // without the two-factor step or the waiting period, or, by removing a row,
   // call off a deletion its owner asked for.
   "account_deletion_requests",
+  // The automatic check's approved list (20261012_auto_moderation). A row is
+  // public only while every part of it is 'clean' here, so a client that
+  // could write it could approve its own content.
+  "moderation_checks",
   // The webhook's idempotency ledger: an event id recorded here is one that is
   // never applied again, so a client that could write it could block one.
   "stripe_events",

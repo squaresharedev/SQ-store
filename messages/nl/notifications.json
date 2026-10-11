@@ -175,6 +175,12 @@
         "title": "De betaling voor {plan, select, starter {je Starter-abonnement} pro {je Pro-abonnement} other {je betaalde abonnement}} is mislukt",
         "body": "Stripe probeert het opnieuw. Werk je kaart bij onder Abonnement en facturering om je abonnement te behouden."
       }
+    },
+    "policy": {
+      "autoPaused": {
+        "title": "Actie vereist: {target, select, product {je product \"{title}\" is gepauzeerd} other {je etalage \"{title}\" is gepauzeerd}}",
+        "body": "Een automatische controle heeft het voor kopers verborgen omdat het in strijd lijkt met de regels. Pas het aan en het wordt meteen opnieuw gecontroleerd, of vraag of iemand de beslissing wil beoordelen."
+      }
     }
   }
 }

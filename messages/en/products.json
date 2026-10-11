@@ -152,7 +152,16 @@
       "upheld": "We reviewed your appeal on <time>{date}</time>. The decision stands.",
       "answer": "Our answer: {note}"
     },
-    "editorDetails": "Why, and what to do next"
+    "editorDetails": "Why, and what to do next",
+    "badgePending": "Checking",
+    "badgeReview": "In review",
+    "titlePending": "{kind, select, product {This product is being checked} other {This storefront is being checked}}",
+    "titleReview": "{kind, select, product {A person is checking this product} other {A person is checking this storefront}}",
+    "hiddenPending": "Buyers cannot see it until the automatic check finishes. That usually takes a few seconds: reload the page to see where it stands.",
+    "hiddenReview": "The automatic check could not approve it, so a person is looking. Buyers cannot see it until they decide. SVG, AVIF and animated images are always checked by a person, so taking one out lets the rest be checked straight away.",
+    "hiddenPausedAuto": "Buyers cannot see it right now: not on its page, not in an embed, not in a shared link. An automatic check made this decision and no person has looked at it. Nothing has been deleted.",
+    "autoFixHint": "{kind, select, product {Change the highlighted parts below and save. It is checked again straight away and goes live if it passes.} other {Open the storefront, change what is listed above and save. It is checked again straight away and goes live if it passes.}}",
+    "readOnlyHintAuto": "{kind, select, product {Someone who can edit this product has to change it. It is checked again as soon as they save.} other {Someone who can edit this storefront has to change it. It is checked again as soon as they save.}}"
   },
   "import": {
     "fields": {
@@ -600,12 +609,14 @@
     "content": "{target, select, product {Product} other {Storefront}}: {title}",
     "decision": {
       "paused": "Paused. The content is hidden from buyers until you make the changes listed below and we approve them.",
-      "removed": "Removed. The content is no longer available to buyers. This decision is final unless an appeal changes it."
+      "removed": "Removed. The content is no longer available to buyers. This decision is final unless an appeal changes it.",
+      "pausedAutomated": "Paused. The content is hidden from buyers until you change it. It is checked again as soon as you save a change."
     },
     "scope": "Everywhere SquareShare shows it: its own page, embeds on other websites and shared links, in every country.",
     "duration": {
       "paused": "Until we approve your changes.",
-      "removed": "Indefinite."
+      "removed": "Indefinite.",
+      "pausedAutomated": "Until you change it and the change passes the check."
     },
     "status": {
       "inForce": "In force.",
@@ -615,7 +626,8 @@
     },
     "facts": {
       "notices": "{count, plural, =0 {We found this ourselves, without a notice from anyone outside SquareShare.} one {This followed # notice from someone outside SquareShare, about: {reasons}.} other {This followed # notices from people outside SquareShare, about: {reasons}.}}",
-      "review": "A member of SquareShare staff reviewed the content itself before deciding. We do not share who sent a notice."
+      "review": "A member of SquareShare staff reviewed the content itself before deciding. We do not share who sent a notice.",
+      "automated": "Our automatic check found this when the content was saved. Nobody outside SquareShare reported it, and no member of staff has reviewed it."
     },
     "automated": "No automated means were used to detect this content or to take this decision.",
     "legalBasis": {
@@ -638,7 +650,8 @@
       "message": "What you wrote: {message}"
     },
     "footer": "SquareShare · {reference} · Page {page} of {total}",
-    "generated": "Generated on {date}."
+    "generated": "Generated on {date}.",
+    "automatedYes": "Automated means were used both to detect this content and to take this decision, and no person was involved. If you appeal, a member of staff reviews it."
   },
   "buyButton": {
     "title": "Add a buy button to your website",

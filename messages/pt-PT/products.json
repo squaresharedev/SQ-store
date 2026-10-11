@@ -152,7 +152,16 @@
       "upheld": "Analisámos o seu recurso em <time>{date}</time>. A decisão mantém-se.",
       "answer": "A nossa resposta: {note}"
     },
-    "editorDetails": "Porquê e o que fazer a seguir"
+    "editorDetails": "Porquê e o que fazer a seguir",
+    "badgePending": "Em verificação",
+    "badgeReview": "Em análise",
+    "titlePending": "{kind, select, product {Este produto está a ser verificado} other {Esta montra está a ser verificada}}",
+    "titleReview": "{kind, select, product {Uma pessoa está a verificar este produto} other {Uma pessoa está a verificar esta montra}}",
+    "hiddenPending": "Os compradores só o conseguem ver quando a verificação automática terminar. Normalmente demora alguns segundos: recarregue a página para ver em que ponto está.",
+    "hiddenReview": "A verificação automática não conseguiu aprová-lo, por isso está a ser analisado por uma pessoa. Os compradores só o conseguem ver depois de essa pessoa decidir. As imagens SVG, AVIF e animadas são sempre verificadas por uma pessoa: se retirar uma, o resto é verificado de imediato.",
+    "hiddenPausedAuto": "Os compradores não o conseguem ver neste momento: nem na respetiva página, nem numa incorporação, nem num link partilhado. Esta decisão foi tomada por uma verificação automática e ainda nenhuma pessoa o analisou. Nada foi eliminado.",
+    "autoFixHint": "{kind, select, product {Altere as partes destacadas abaixo e guarde. É verificado de novo de imediato e fica online se passar na verificação.} other {Abra a montra, altere o que está indicado acima e guarde. É verificada de novo de imediato e fica online se passar na verificação.}}",
+    "readOnlyHintAuto": "{kind, select, product {Alguém que possa editar este produto tem de o alterar. É verificado de novo assim que for guardado.} other {Alguém que possa editar esta montra tem de a alterar. É verificada de novo assim que for guardada.}}"
   },
   "import": {
     "fields": {
@@ -600,12 +609,14 @@
     "content": "{target, select, product {Produto} other {Montra}}: {title}",
     "decision": {
       "paused": "Pausado. O conteúdo está oculto para os compradores até efetuar as alterações indicadas abaixo e estas serem aprovadas por nós.",
-      "removed": "Removido. O conteúdo já não está disponível para os compradores. Esta decisão é definitiva, salvo se um recurso a alterar."
+      "removed": "Removido. O conteúdo já não está disponível para os compradores. Esta decisão é definitiva, salvo se um recurso a alterar.",
+      "pausedAutomated": "Pausado. O conteúdo está oculto para os compradores até ser alterado. É verificado de novo assim que guardar uma alteração."
     },
     "scope": "Em todos os locais onde a SquareShare o apresenta: na respetiva página, em incorporações noutros sítios web e em links partilhados, em todos os países.",
     "duration": {
       "paused": "Até aprovarmos as suas alterações.",
-      "removed": "Indefinido."
+      "removed": "Indefinido.",
+      "pausedAutomated": "Até o alterar e a alteração passar na verificação."
     },
     "status": {
       "inForce": "Em vigor.",
@@ -615,7 +626,8 @@
     },
     "facts": {
       "notices": "{count, plural, =0 {Identificámos esta situação por conta própria, sem qualquer denúncia de terceiros exteriores à SquareShare.} one {Esta decisão resultou de # denúncia de um terceiro exterior à SquareShare, sobre: {reasons}.} other {Esta decisão resultou de # denúncias de terceiros exteriores à SquareShare, sobre: {reasons}.}}",
-      "review": "Um membro da equipa da SquareShare analisou o próprio conteúdo antes de decidir. Não revelamos a identidade de quem enviou uma denúncia."
+      "review": "Um membro da equipa da SquareShare analisou o próprio conteúdo antes de decidir. Não revelamos a identidade de quem enviou uma denúncia.",
+      "automated": "A nossa verificação automática detetou-o quando o conteúdo foi guardado. Ninguém fora da SquareShare o denunciou e nenhum membro da equipa o analisou."
     },
     "automated": "Não foram utilizados meios automatizados para detetar este conteúdo nem para tomar esta decisão.",
     "legalBasis": {
@@ -638,7 +650,8 @@
       "message": "O que escreveu: {message}"
     },
     "footer": "SquareShare · {reference} · Página {page} de {total}",
-    "generated": "Gerado em {date}."
+    "generated": "Gerado em {date}.",
+    "automatedYes": "Foram utilizados meios automatizados tanto para detetar este conteúdo como para tomar esta decisão, sem intervenção de qualquer pessoa. Se apelar, um membro da equipa irá analisá-lo."
   },
   "buyButton": {
     "title": "Adicione um botão de compra ao seu site",

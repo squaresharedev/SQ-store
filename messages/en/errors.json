@@ -132,7 +132,13 @@
     "notPaused": "{target, select, product {This product is not paused.} storefront {This storefront is not paused.} other {This item is not paused.}}",
     "notPausedFix": "There is nothing to review: it is already visible to buyers.",
     "decisionSuperseded": "This decision no longer applies, so there is nothing to appeal.",
-    "decisionSupersededFix": "Reload the page to see where it stands now."
+    "decisionSupersededFix": "Reload the page to see where it stands now.",
+    "checkUnavailable": "{what, select, image {This picture cannot be checked right now, so it was not saved.} other {This text cannot be checked right now, so it was not saved.}}",
+    "checkUnavailableFix": "Try again in a few minutes.",
+    "refused": "{what, select, image {This picture breaks the platform rules, so it was not saved.} other {This text breaks the platform rules, so it was not saved.}}",
+    "refusedFix": "Change it and save again. If you think this is a mistake, write to {email}.",
+    "notApproved": "{what, select, image {This picture could not be approved automatically, so it was not saved.} other {This text could not be approved automatically, so it was not saved.}}",
+    "notApprovedFix": "Try something different, or write to {email} and a person will look."
   },
   "traderIdentityRequired": {
     "message": "You can't publish or sell until your seller details are complete.",
@@ -399,14 +405,7 @@
       "documentType": "Export the manual or certificate as a PDF, then upload it.",
       "documentContents": "Re-export it as a PDF. Renaming a file does not change its format."
     },
-    "moderationUnavailable": "Images can't be checked right now.",
-    "moderationRejected": {
-      "explicit": "That image looks explicit, so it can't be used on a product.",
-      "violent": "That image looks graphically violent, so it can't be used.",
-      "hate": "That image appears to contain hate symbolism, so it can't be used."
-    },
-    "inReview": "That image is being checked before it goes live.",
-    "inReviewFix": "You'll be able to use it once it's approved.",
+    "moderationUnavailable": "This file cannot be accepted right now.",
     "storeFailed": {
       "image": "The image could not be stored.",
       "document": "The document could not be stored.",
@@ -417,8 +416,7 @@
       "tryAgain": "Try again.",
       "tryAgainInAMoment": "Try again in a moment.",
       "tryAgainInAFewMinutes": "Try again in a few minutes.",
-      "pickFile": "Pick a different file.",
-      "pickImage": "Pick a different image."
+      "pickFile": "Pick a different file."
     }
   },
   "products": {

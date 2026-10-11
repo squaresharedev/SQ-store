@@ -73,6 +73,44 @@ export function fixFieldsFor(
   return VOCABULARY[target].filter((field) => wanted.has(field));
 }
 
+/**
+ * Which field a path inside the moderated content belongs to, longest prefix
+ * first. The paths are the ones the database hands the automatic check
+ * (moderation_parts in 20261012_auto_moderation.sql: "gallery[].alt",
+ * "config.header.bio"), so an automated pause can point at the same parts of
+ * the form a person would have ticked.
+ */
+const PATH_FIX_FIELDS: Record<FixTarget, readonly (readonly [string, string])[]> = {
+  product: [
+    ["title", "title"],
+    ["description", "description"],
+    ["image_key", "image"],
+    ["gallery", "photos"],
+    ["option_groups", "options"],
+    ["variants", "options"],
+    ["details.safety", "safety"],
+    ["details", "specs"],
+    ["documents", "documents"],
+    ["purchase_url", "purchaseLink"],
+  ],
+  storefront: [
+    ["name", "name"],
+    ["config.header", "header"],
+    ["config.blocks[].text", "text"],
+    ["config.blocks", "images"],
+    ["config.theme.background", "background"],
+    ["config.productPage", "productPage"],
+  ],
+};
+
+/** The fix field for one path; `other` for a path this build has no place for. */
+export function fixFieldForPath(target: FixTarget, path: string): string {
+  const match = PATH_FIX_FIELDS[target].find(
+    ([prefix]) => path === prefix || path.startsWith(`${prefix}.`) || path.startsWith(`${prefix}[`),
+  );
+  return match ? match[1] : "other";
+}
+
 /** The seller-facing name of one field ("Photos", "Purchase link"). */
 export function fixFieldLabel(target: FixTarget, field: string): MessageRef {
   return target === "product"

@@ -10,7 +10,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 import { presignGetUrl } from "@/lib/r2";
 import { uuidField } from "@/lib/validation/inputs";
-import { parseStoredStorefrontConfig } from "@/lib/validation/storefront";
+import { buyerFacingStorefront } from "@/lib/storefront/buyer-face";
 import { resolveProductPage } from "@/lib/storefront/product-page";
 import { resolveCheckoutPage } from "@/lib/storefront/checkout-page";
 import { getSellerIdentity } from "@/lib/settings/seller-identity";
@@ -25,7 +25,9 @@ import type { CheckoutStorefront } from "@/types/checkout";
  *
  * Drawn in the checkout's own colours, like every page of a purchase. Deliberately
  * NOT behind the storefront's moderation state: a buyer's way back to an order
- * they paid for outlives a shop being paused.
+ * they paid for outlives a shop being paused. What does follow that state is
+ * the dressing: a storefront that is not live lends this page no name, colours
+ * or photos of its own (lib/storefront/buyer-face.ts).
  */
 
 type Params = { storefrontId: string };
@@ -38,21 +40,22 @@ const getLookupStorefront = cache(async (storefrontId: string): Promise<Checkout
   if (!(await rateLimitKey(key, "checkout_page", RATE_LIMITS.checkoutPage))) return null;
   const { data: row } = await createAdminClient()
     .from("storefronts")
-    .select("id, name, owner_id, config")
+    .select("id, name, owner_id, config, moderation_status")
     .eq("id", storefrontId)
     .maybeSingle();
   if (!row) return null;
-  const config = parseStoredStorefrontConfig(row.config);
-  if (!config) return null;
+  const seller = await getSellerIdentity(row.owner_id);
+  const face = buyerFacingStorefront(row, seller.businessName);
+  if (!face) return null;
+  const { config } = face;
   const theme = config.theme;
-  const [seller, backgroundImageUrl, customFontUrl] = await Promise.all([
-    getSellerIdentity(row.owner_id),
+  const [backgroundImageUrl, customFontUrl] = await Promise.all([
     theme.background.kind === "image" ? presignGetUrl(theme.background.key) : Promise.resolve(null),
     theme.customFont ? presignGetUrl(theme.customFont.key) : Promise.resolve(null),
   ]);
   return {
     id: row.id,
-    name: row.name,
+    name: face.name,
     theme,
     ...(config.header ? { header: config.header } : {}),
     productPage: resolveProductPage(config),

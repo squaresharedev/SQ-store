@@ -15,6 +15,7 @@ import {
 } from "@/lib/errors";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { publishBlockedError } from "@/lib/settings/seller-identity";
+import { checkMany } from "@/lib/moderation/auto/check";
 import { productWriteSchema } from "@/lib/validation/product";
 import { firstIssue } from "@/lib/validation/messages";
 import { msg, type MessageRef } from "@/i18n/types";
@@ -251,6 +252,11 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
     console.error("[products] import failed", error);
     return failure(serverError("importProducts"));
   }
+
+  // Imported rows land behind the moderation wall like any other. The first
+  // few are checked now so a small file is live when the page reloads; the
+  // rest are picked up by the sweep (lib/moderation/auto).
+  await checkMany("product", (written ?? []).map((row) => row.id));
 
   revalidatePath("/products");
   return { ok: true, imported: written?.length ?? inserts.length, skipped };

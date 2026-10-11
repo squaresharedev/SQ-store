@@ -148,6 +148,7 @@ describe("sample storefront in the list", () => {
       ...storefront("Gilt & Grain"),
       removal: {
         kind: "removed" as const,
+        automated: false,
         reviewRequestedAt: null,
         ground: null,
         note: null,

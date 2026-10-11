@@ -152,7 +152,16 @@
       "upheld": "Wir haben deinen Einspruch am <time>{date}</time> geprüft. Die Entscheidung bleibt bestehen.",
       "answer": "Unsere Antwort: {note}"
     },
-    "editorDetails": "Warum, und wie es weitergeht"
+    "editorDetails": "Warum, und wie es weitergeht",
+    "badgePending": "Wird geprüft",
+    "badgeReview": "In Prüfung",
+    "titlePending": "{kind, select, product {Dieses Produkt wird gerade geprüft} other {Dieses Schaufenster wird gerade geprüft}}",
+    "titleReview": "{kind, select, product {Eine Person prüft dieses Produkt} other {Eine Person prüft dieses Schaufenster}}",
+    "hiddenPending": "Käufer können es erst sehen, wenn die automatische Prüfung abgeschlossen ist. Das dauert meist nur ein paar Sekunden: Lade die Seite neu, um den Stand zu sehen.",
+    "hiddenReview": "Die automatische Prüfung konnte es nicht freigeben, deshalb schaut es sich eine Person an. Käufer können es erst sehen, wenn sie entschieden hat. SVG-, AVIF- und animierte Bilder werden immer von einer Person geprüft: Wenn du ein solches Bild entfernst, wird der Rest sofort geprüft.",
+    "hiddenPausedAuto": "Käufer können es im Moment nicht sehen: nicht auf seiner Seite, nicht in einer Einbettung, nicht über einen geteilten Link. Diese Entscheidung hat eine automatische Prüfung getroffen, bisher hat es sich keine Person angesehen. Nichts wurde gelöscht.",
+    "autoFixHint": "{kind, select, product {Ändere die hervorgehobenen Teile unten und speichere. Es wird sofort erneut geprüft und geht online, wenn es die Prüfung besteht.} other {Öffne das Schaufenster, ändere was oben aufgelistet ist, und speichere. Es wird sofort erneut geprüft und geht online, wenn es die Prüfung besteht.}}",
+    "readOnlyHintAuto": "{kind, select, product {Jemand mit Bearbeitungsrechten für dieses Produkt muss es ändern. Es wird erneut geprüft, sobald gespeichert wurde.} other {Jemand mit Bearbeitungsrechten für dieses Schaufenster muss es ändern. Es wird erneut geprüft, sobald gespeichert wurde.}}"
   },
   "import": {
     "fields": {
@@ -600,12 +609,14 @@
     "content": "{target, select, product {Produkt} other {Schaufenster}}: {title}",
     "decision": {
       "paused": "Pausiert. Der Inhalt ist für Käufer verborgen, bis du die unten aufgeführten Änderungen vorgenommen hast und wir sie genehmigt haben.",
-      "removed": "Entfernt. Der Inhalt ist für Käufer nicht mehr verfügbar. Diese Entscheidung ist endgültig, sofern ein Einspruch sie nicht ändert."
+      "removed": "Entfernt. Der Inhalt ist für Käufer nicht mehr verfügbar. Diese Entscheidung ist endgültig, sofern ein Einspruch sie nicht ändert.",
+      "pausedAutomated": "Pausiert. Der Inhalt ist für Käufer verborgen, bis du ihn änderst. Er wird erneut geprüft, sobald du eine Änderung speicherst."
     },
     "scope": "Überall, wo SquareShare es anzeigt: auf seiner eigenen Seite, in Einbettungen auf anderen Websites und in geteilten Links, in jedem Land.",
     "duration": {
       "paused": "Bis wir deine Änderungen genehmigt haben.",
-      "removed": "Unbefristet."
+      "removed": "Unbefristet.",
+      "pausedAutomated": "Bis du ihn änderst und die Änderung die Prüfung besteht."
     },
     "status": {
       "inForce": "In Kraft.",
@@ -615,7 +626,8 @@
     },
     "facts": {
       "notices": "{count, plural, =0 {Wir haben das selbst festgestellt, ohne einen Hinweis von außerhalb von SquareShare.} one {Diesem ist # Hinweis von außerhalb von SquareShare vorausgegangen, mit folgendem Inhalt: {reasons}.} other {Diesem sind # Hinweise von außerhalb von SquareShare vorausgegangen, mit folgendem Inhalt: {reasons}.}}",
-      "review": "Ein Mitglied des SquareShare-Teams hat den Inhalt selbst geprüft, bevor eine Entscheidung getroffen wurde. Wir geben nicht bekannt, wer einen Hinweis gesendet hat."
+      "review": "Ein Mitglied des SquareShare-Teams hat den Inhalt selbst geprüft, bevor eine Entscheidung getroffen wurde. Wir geben nicht bekannt, wer einen Hinweis gesendet hat.",
+      "automated": "Unsere automatische Prüfung hat dies beim Speichern des Inhalts festgestellt. Niemand außerhalb von SquareShare hat ihn gemeldet, und kein Mitglied des Teams hat ihn geprüft."
     },
     "automated": "Es wurden keine automatisierten Mittel eingesetzt, um diesen Inhalt zu erkennen oder diese Entscheidung zu treffen.",
     "legalBasis": {
@@ -638,7 +650,8 @@
       "message": "Was du geschrieben hast: {message}"
     },
     "footer": "SquareShare · {reference} · Seite {page} von {total}",
-    "generated": "Erstellt am {date}."
+    "generated": "Erstellt am {date}.",
+    "automatedYes": "Sowohl zur Erkennung dieses Inhalts als auch für diese Entscheidung wurden automatisierte Mittel eingesetzt, und es war keine Person beteiligt. Wenn du die Entscheidung anfichtst, prüft sie ein Mitglied des Teams."
   },
   "buyButton": {
     "title": "Kauf-Button für deine Website",

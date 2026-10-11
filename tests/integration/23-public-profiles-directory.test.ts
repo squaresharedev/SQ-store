@@ -47,6 +47,28 @@ beforeAll(async () => {
   hidden = await createUser("dir-hidden@test.squareshare.to", { username: "dir_hidden" });
   changer = await createUser("dir-changer@test.squareshare.to", { username: "dir_changer" });
 
+  // The directory lists a profile only under an approved handle, and shows a
+  // picture only when that URL is approved (20261013_marketplace_moderation).
+  // These are what the apps record when they check a value; "dir_unchecked"
+  // and c.webp are deliberately left off.
+  await asService((q) =>
+    q.query(
+      `insert into public.moderation_checks (subject, verdict, source, model)
+       select s, 'clean', 'model', 'test'
+         from unnest($1::text[]) s`,
+      [
+        [
+          "handle:dir_opted",
+          "handle:dir_changer",
+          "handle:dir_renamed",
+          "handle:dir_leaving",
+          "avatar:https://x.test/a.webp",
+          "avatar:https://x.test/b.webp",
+        ],
+      ],
+    ),
+  );
+
   // Postures set explicitly, never trusted to the column default (see the
   // note in 20-sq-app-social-visibility about the default that drifted).
   await asService((q) =>
@@ -154,6 +176,46 @@ describe("the directory follows the profile", () => {
       username: "dir_renamed",
       avatar_url: "https://x.test/b.webp",
     });
+  });
+
+  it("lists nobody under a handle that has not been approved, whoever wrote it", async () => {
+    // The route that matters: the owner's own session, straight at the table.
+    // Nothing stops the write, and nothing needs to. It is simply not public.
+    await asUser(changer, (q) =>
+      q.query(`update public.profiles set username = 'dir_unchecked' where id = $1`, [changer.id]),
+    );
+    expect(await directoryRow(changer.id)).toBeUndefined();
+
+    // Sign-up is the other route: the handle arrives as metadata the person
+    // signing up controls, and the definer trigger writes it.
+    const fresh = await createUser("dir-fresh@test.squareshare.to", { username: "dir_fresh" });
+    await asUser(fresh, (q) =>
+      q.query(`update public.profiles set is_public = true where id = $1`, [fresh.id]),
+    );
+    expect(await directoryRow(fresh.id)).toBeUndefined();
+
+    // Back under the approved one, it is listed again.
+    await asUser(changer, (q) =>
+      q.query(`update public.profiles set username = 'dir_renamed' where id = $1`, [changer.id]),
+    );
+    expect((await directoryRow(changer.id))?.username).toBe("dir_renamed");
+  });
+
+  it("shows no picture that has not been approved", async () => {
+    await asUser(changer, (q) =>
+      q.query(`update public.profiles set avatar_url = 'https://elsewhere.test/c.webp' where id = $1`, [
+        changer.id,
+      ]),
+    );
+    // Still listed, without it: a picture is not worth unlisting someone for.
+    expect(await directoryRow(changer.id)).toMatchObject({ username: "dir_renamed", avatar_url: null });
+
+    await asUser(changer, (q) =>
+      q.query(`update public.profiles set avatar_url = 'https://x.test/b.webp' where id = $1`, [
+        changer.id,
+      ]),
+    );
+    expect((await directoryRow(changer.id))?.avatar_url).toBe("https://x.test/b.webp");
   });
 
   it("disappears the moment the owner goes private", async () => {

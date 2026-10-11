@@ -33,6 +33,7 @@ import {
   type RateLimitedOperation,
   type ServerErrorOperation,
 } from "@/lib/errors";
+import { precheck, settleAfterWrite } from "@/lib/moderation/auto/check";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { evictObject, settlePagePhotos } from "@/lib/storefront/uploads";
 import { createClient } from "@/lib/supabase/server";
@@ -192,19 +193,24 @@ export function pageConfigRoute<Name extends Member>(
     const photos = await settlePagePhotos(loaded.config, config, account.userId);
     if (!photos.ok) return fail(photos.error);
 
+    // Judged before it is stored, settled after: the moderation wall
+    // (lib/moderation/auto) treats this write like the designer's own save.
+    await precheck("storefront", id, { config });
+
     const supabase = await createClient();
     const { data: row, error } = await supabase
       .from("storefronts")
       .update({ config, updated_at: new Date().toISOString() })
       .eq("id", id)
       .eq("owner_id", account.accountId)
-      .select("id")
+      .select("id, moderation_status")
       .maybeSingle();
     if (error) {
       console.error(`[${spec.log}] save failed`, error.message);
       return fail(serverError(spec.operations.save));
     }
     if (!row) return fail(notFound("storefront"));
+    await settleAfterWrite("storefront", row.id, row.moderation_status);
 
     // Photos this write let go of go with it, once it is safely saved.
     for (const key of photos.released) await evictObject(key);

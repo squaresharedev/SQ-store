@@ -132,7 +132,13 @@
     "notPaused": "{target, select, product {Ce produit n’est pas en pause.} storefront {Cette vitrine n’est pas en pause.} other {Cet élément n’est pas en pause.}}",
     "notPausedFix": "Il n’y a rien à réexaminer : il est déjà visible par les acheteurs.",
     "decisionSuperseded": "Cette décision ne s'applique plus, il n'y a donc rien à contester.",
-    "decisionSupersededFix": "Rechargez la page pour voir la situation actuelle."
+    "decisionSupersededFix": "Rechargez la page pour voir la situation actuelle.",
+    "checkUnavailable": "{what, select, image {Cette image ne peut pas être vérifiée pour le moment, elle n’a donc pas été enregistrée.} other {Ce texte ne peut pas être vérifié pour le moment, il n’a donc pas été enregistré.}}",
+    "checkUnavailableFix": "Réessayez dans quelques minutes.",
+    "refused": "{what, select, image {Cette image enfreint les règles de la plateforme, elle n’a donc pas été enregistrée.} other {Ce texte enfreint les règles de la plateforme, il n’a donc pas été enregistré.}}",
+    "refusedFix": "Modifiez-le et enregistrez à nouveau. Si vous pensez qu’il s’agit d’une erreur, écrivez à {email}.",
+    "notApproved": "{what, select, image {Cette image n’a pas pu être approuvée automatiquement, elle n’a donc pas été enregistrée.} other {Ce texte n’a pas pu être approuvé automatiquement, il n’a donc pas été enregistré.}}",
+    "notApprovedFix": "Essayez autre chose, ou écrivez à {email} et une personne s’en occupera."
   },
   "traderIdentityRequired": {
     "message": "Vous ne pouvez ni publier ni vendre tant que vos informations vendeur ne sont pas complètes.",
@@ -399,14 +405,7 @@
       "documentType": "Exportez le manuel ou le certificat en PDF, puis importez-le.",
       "documentContents": "Exportez-le à nouveau en PDF. Renommer un fichier ne change pas son format."
     },
-    "moderationUnavailable": "Les images ne peuvent pas être vérifiées pour le moment.",
-    "moderationRejected": {
-      "explicit": "Cette image semble sexuellement explicite, elle ne peut donc pas être utilisée pour un produit.",
-      "violent": "Cette image semble montrer une violence choquante, elle ne peut donc pas être utilisée.",
-      "hate": "Cette image semble contenir des symboles haineux, elle ne peut donc pas être utilisée."
-    },
-    "inReview": "Cette image est en cours de vérification avant sa mise en ligne.",
-    "inReviewFix": "Vous pourrez l’utiliser dès qu’elle sera approuvée.",
+    "moderationUnavailable": "Ce fichier ne peut pas être accepté pour le moment.",
     "storeFailed": {
       "image": "L’image n’a pas pu être enregistrée.",
       "document": "Le document n’a pas pu être enregistré.",
@@ -417,8 +416,7 @@
       "tryAgain": "Réessayez.",
       "tryAgainInAMoment": "Réessayez dans un instant.",
       "tryAgainInAFewMinutes": "Réessayez dans quelques minutes.",
-      "pickFile": "Choisissez un autre fichier.",
-      "pickImage": "Choisissez une autre image."
+      "pickFile": "Choisissez un autre fichier."
     }
   },
   "products": {

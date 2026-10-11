@@ -175,6 +175,12 @@
         "title": "Il pagamento del tuo piano {plan, select, starter {Starter} pro {Pro} other {a pagamento}} non è riuscito",
         "body": "Stripe riproverà. Aggiorna la carta in Piano e fatturazione per mantenere il tuo piano."
       }
+    },
+    "policy": {
+      "autoPaused": {
+        "title": "Serve un tuo intervento: {target, select, product {il tuo prodotto «{title}» è in pausa} other {la tua vetrina «{title}» è in pausa}}",
+        "body": "Un controllo automatico lo ha nascosto agli acquirenti perché sembra violare le regole. Modificalo e verrà controllato di nuovo subito, oppure chiedi che una persona riesamini la decisione."
+      }
     }
   }
 }

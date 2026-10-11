@@ -15,7 +15,7 @@ import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 import { uuidField } from "@/lib/validation/inputs";
-import { parseStoredStorefrontConfig } from "@/lib/validation/storefront";
+import { buyerFacingStorefront } from "@/lib/storefront/buyer-face";
 import { presignGetUrl } from "@/lib/r2";
 import { signPagePhoto } from "@/lib/storefront/uploads";
 import { resolveProductPage } from "@/lib/storefront/product-page";
@@ -109,7 +109,11 @@ export const getOrderPage = cache(
 
     const admin = createAdminClient();
     const [{ data: storefront }, seller, shippingPolicy, { data: product }] = await Promise.all([
-      admin.from("storefronts").select("id, name, config").eq("id", storefrontId).maybeSingle(),
+      admin
+        .from("storefronts")
+        .select("id, name, config, moderation_status")
+        .eq("id", storefrontId)
+        .maybeSingle(),
       getSellerIdentity(order.seller_id),
       getShippingPolicy(order.seller_id),
       order.product_id
@@ -121,8 +125,11 @@ export const getOrderPage = cache(
         : Promise.resolve({ data: null }),
     ]);
     if (!storefront) return null;
-    const config = parseStoredStorefrontConfig(storefront.config);
-    if (!config) return null;
+    // The order outlives the shop's moderation state; the shop's own name and
+    // design on this page do not (lib/storefront/buyer-face.ts).
+    const face = buyerFacingStorefront(storefront, seller.businessName);
+    if (!face) return null;
+    const { config } = face;
 
     // The photo of the version bought, when the product is still there: the
     // version's own photo, else the cover. A missing product just means no
@@ -157,7 +164,7 @@ export const getOrderPage = cache(
     return {
       storefront: {
         id: storefront.id,
-        name: storefront.name,
+        name: face.name,
         theme,
         ...(config.header ? { header: config.header } : {}),
         productPage: resolveProductPage(config),

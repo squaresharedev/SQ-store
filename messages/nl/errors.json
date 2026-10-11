@@ -132,7 +132,13 @@
     "notPaused": "{target, select, product {Dit product is niet gepauzeerd.} storefront {Deze etalage is niet gepauzeerd.} other {Dit item is niet gepauzeerd.}}",
     "notPausedFix": "Er is niets te beoordelen: het is al zichtbaar voor kopers.",
     "decisionSuperseded": "Deze beslissing is niet meer van toepassing, dus er valt niets te betwisten.",
-    "decisionSupersededFix": "Herlaad de pagina om te zien hoe het er nu voor staat."
+    "decisionSupersededFix": "Herlaad de pagina om te zien hoe het er nu voor staat.",
+    "checkUnavailable": "{what, select, image {Deze afbeelding kan nu niet worden gecontroleerd en is daarom niet opgeslagen.} other {Deze tekst kan nu niet worden gecontroleerd en is daarom niet opgeslagen.}}",
+    "checkUnavailableFix": "Probeer het over een paar minuten opnieuw.",
+    "refused": "{what, select, image {Deze afbeelding is in strijd met de regels van het platform en is daarom niet opgeslagen.} other {Deze tekst is in strijd met de regels van het platform en is daarom niet opgeslagen.}}",
+    "refusedFix": "Pas het aan en sla opnieuw op. Denk je dat dit een vergissing is, schrijf dan naar {email}.",
+    "notApproved": "{what, select, image {Deze afbeelding kon niet automatisch worden goedgekeurd en is daarom niet opgeslagen.} other {Deze tekst kon niet automatisch worden goedgekeurd en is daarom niet opgeslagen.}}",
+    "notApprovedFix": "Probeer iets anders, of schrijf naar {email}, dan kijkt er iemand naar."
   },
   "traderIdentityRequired": {
     "message": "Je kunt niet publiceren of verkopen totdat je verkopersgegevens compleet zijn.",
@@ -399,14 +405,7 @@
       "documentType": "Exporteer de handleiding of het certificaat als PDF en upload het dan.",
       "documentContents": "Exporteer het opnieuw als PDF. Een bestand hernoemen verandert het formaat niet."
     },
-    "moderationUnavailable": "Afbeeldingen kunnen nu niet worden gecontroleerd.",
-    "moderationRejected": {
-      "explicit": "Die afbeelding lijkt seksueel expliciet en kan daarom niet bij een product worden gebruikt.",
-      "violent": "Die afbeelding lijkt grof geweld te tonen en kan daarom niet worden gebruikt.",
-      "hate": "Die afbeelding lijkt haatsymbolen te bevatten en kan daarom niet worden gebruikt."
-    },
-    "inReview": "Die afbeelding wordt gecontroleerd voordat hij online gaat.",
-    "inReviewFix": "Je kunt hem gebruiken zodra hij is goedgekeurd.",
+    "moderationUnavailable": "Dit bestand kan nu niet worden geaccepteerd.",
     "storeFailed": {
       "image": "De afbeelding kon niet worden opgeslagen.",
       "document": "Het document kon niet worden opgeslagen.",
@@ -417,8 +416,7 @@
       "tryAgain": "Probeer het opnieuw.",
       "tryAgainInAMoment": "Probeer het straks opnieuw.",
       "tryAgainInAFewMinutes": "Probeer het over een paar minuten opnieuw.",
-      "pickFile": "Kies een ander bestand.",
-      "pickImage": "Kies een andere afbeelding."
+      "pickFile": "Kies een ander bestand."
     }
   },
   "products": {

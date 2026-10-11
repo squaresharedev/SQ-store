@@ -175,6 +175,12 @@
         "title": "O pagamento do seu plano {plan, select, starter {Starter} pro {Pro} other {pago}} falhou",
         "body": "O Stripe vai tentar novamente. Atualize o seu cartão em Plano e faturação para manter o plano."
       }
+    },
+    "policy": {
+      "autoPaused": {
+        "title": "Ação necessária: {target, select, product {o seu produto «{title}» está pausado} other {a sua montra «{title}» está pausada}}",
+        "body": "Uma verificação automática ocultou-o dos compradores porque parece violar as regras. Altere-o e será verificado de novo de imediato, ou peça que uma pessoa reveja a decisão."
+      }
     }
   }
 }

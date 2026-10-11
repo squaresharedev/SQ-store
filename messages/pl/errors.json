@@ -132,7 +132,13 @@
     "notPaused": "{target, select, product {Ten produkt nie jest wstrzymany.} storefront {Ta witryna nie jest wstrzymana.} other {Ten element nie jest wstrzymany.}}",
     "notPausedFix": "Nie ma czego sprawdzać: jest już widoczny dla kupujących.",
     "decisionSuperseded": "Ta decyzja nie ma już zastosowania, więc nie ma od czego się odwoływać.",
-    "decisionSupersededFix": "Załaduj ponownie stronę, aby zobaczyć aktualny status."
+    "decisionSupersededFix": "Załaduj ponownie stronę, aby zobaczyć aktualny status.",
+    "checkUnavailable": "{what, select, image {Tego obrazu nie można teraz sprawdzić, więc nie został zapisany.} other {Tego tekstu nie można teraz sprawdzić, więc nie został zapisany.}}",
+    "checkUnavailableFix": "Spróbuj ponownie za kilka minut.",
+    "refused": "{what, select, image {Ten obraz narusza zasady platformy, więc nie został zapisany.} other {Ten tekst narusza zasady platformy, więc nie został zapisany.}}",
+    "refusedFix": "Zmień go i zapisz ponownie. Jeśli uważasz, że to pomyłka, napisz na {email}.",
+    "notApproved": "{what, select, image {Tego obrazu nie udało się zatwierdzić automatycznie, więc nie został zapisany.} other {Tego tekstu nie udało się zatwierdzić automatycznie, więc nie został zapisany.}}",
+    "notApprovedFix": "Spróbuj czegoś innego albo napisz na {email}, a sprawdzi to człowiek."
   },
   "traderIdentityRequired": {
     "message": "Nie możesz publikować ani sprzedawać, dopóki dane sprzedawcy nie są kompletne.",
@@ -399,14 +405,7 @@
       "documentType": "Wyeksportuj instrukcję lub certyfikat jako PDF, a potem prześlij.",
       "documentContents": "Wyeksportuj go ponownie jako PDF. Zmiana nazwy pliku nie zmienia jego formatu."
     },
-    "moderationUnavailable": "Nie można teraz sprawdzić obrazów.",
-    "moderationRejected": {
-      "explicit": "Ten obraz wygląda na treść o charakterze seksualnym, więc nie można go użyć w produkcie.",
-      "violent": "Ten obraz wygląda na drastyczną przemoc, więc nie można go użyć.",
-      "hate": "Ten obraz prawdopodobnie zawiera symbole nienawiści, więc nie można go użyć."
-    },
-    "inReview": "Ten obraz jest sprawdzany przed publikacją.",
-    "inReviewFix": "Będzie można go użyć po zatwierdzeniu.",
+    "moderationUnavailable": "Tego pliku nie można teraz przyjąć.",
     "storeFailed": {
       "image": "Nie udało się zapisać obrazu.",
       "document": "Nie udało się zapisać dokumentu.",
@@ -417,8 +416,7 @@
       "tryAgain": "Spróbuj ponownie.",
       "tryAgainInAMoment": "Spróbuj ponownie za chwilę.",
       "tryAgainInAFewMinutes": "Spróbuj ponownie za kilka minut.",
-      "pickFile": "Wybierz inny plik.",
-      "pickImage": "Wybierz inny obraz."
+      "pickFile": "Wybierz inny plik."
     }
   },
   "products": {

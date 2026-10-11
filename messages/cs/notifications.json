@@ -175,6 +175,12 @@
         "title": "Platba za {plan, select, starter {plán Starter} pro {plán Pro} other {placený plán}} selhala",
         "body": "Stripe to zkusí znovu. Aktualizujte kartu v sekci Plán a fakturace, abyste si plán ponechali."
       }
+    },
+    "policy": {
+      "autoPaused": {
+        "title": "Je potřeba zásah: {target, select, product {váš produkt „{title}“ je pozastaven} other {vaše výloha „{title}“ je pozastavena}}",
+        "body": "Automatická kontrola ho skryla před kupujícími, protože to vypadá, že porušuje pravidla. Upravte ho a hned se zkontroluje znovu, nebo požádejte, aby rozhodnutí posoudil člověk."
+      }
     }
   }
 }

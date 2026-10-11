@@ -48,6 +48,17 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => clientWrapper,
 }));
 
+// The automatic content check has its own suites (tests/unit/auto-moderation,
+// tests/integration/37-auto-moderation). Here it is a pair of spies, so these
+// specs can assert WHEN a save calls it: before the write, and after.
+const precheckMock = vi.fn(async (..._args: unknown[]) => {});
+const settleMock = vi.fn(async (..._args: unknown[]) => "ok");
+vi.mock("@/lib/moderation/auto/check", () => ({
+  precheck: (...args: unknown[]) => precheckMock(...args),
+  settleAfterWrite: (...args: unknown[]) => settleMock(...args),
+  checkMany: vi.fn(async () => {}),
+}));
+
 
 // Rate limiting is exercised by its own tests; here it defaults to ALLOWED so
 // these specs assert the action logic. Each file also has one case that flips
@@ -209,6 +220,51 @@ describe("createProduct - object verification", () => {
     expect(english((result as { error: ActionError }).error.message)).toMatch(/not supported/i);
     expect(deleteObjectMock).toHaveBeenCalledWith(ownedImageKey);
     expect(db.insert).not.toHaveBeenCalled();
+  });
+});
+
+describe("the automatic content check", () => {
+  it("judges a new product before it is written, and settles it after", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({
+      data: { id: PRODUCT_ID, moderation_status: "pending" },
+      error: null,
+    });
+
+    await createProduct(validInput({ title: "Checked Product" }));
+
+    // Before: the very object about to be inserted, and no id yet.
+    expect(precheckMock).toHaveBeenCalledWith("product", null, db.insert.mock.calls[0][0]);
+    expect(precheckMock.mock.invocationCallOrder[0]).toBeLessThan(
+      db.insert.mock.invocationCallOrder[0],
+    );
+    // After: the row the write returned, with the status the wall gave it.
+    expect(settleMock).toHaveBeenCalledWith("product", PRODUCT_ID, "pending");
+    expect(settleMock.mock.invocationCallOrder[0]).toBeGreaterThan(
+      db.insert.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("does the same for an edit, against the stored row", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({ data: { id: PRODUCT_ID, moderation_status: "ok" }, error: null });
+
+    await updateProduct(PRODUCT_ID, validInput({ title: "Edited Product" }));
+
+    expect(precheckMock).toHaveBeenCalledWith("product", PRODUCT_ID, db.update.mock.calls[0][0]);
+    expect(precheckMock.mock.invocationCallOrder[0]).toBeLessThan(
+      db.update.mock.invocationCallOrder[0],
+    );
+    expect(settleMock).toHaveBeenCalledWith("product", PRODUCT_ID, "ok");
+  });
+
+  it("is not asked about a save that was refused", async () => {
+    getActiveAccountMock.mockResolvedValue(viewerAccount());
+
+    await createProduct(validInput());
+
+    expect(precheckMock).not.toHaveBeenCalled();
+    expect(settleMock).not.toHaveBeenCalled();
   });
 });
 

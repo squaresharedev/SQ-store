@@ -629,6 +629,9 @@ export function ProductForm({
   // lights the form up.
   const takedown = product?.removal;
   const pausedForFix = takedown?.kind === "paused";
+  // A person's pause is sent back to that person; an automatic one is checked
+  // again by the save itself, so there is nobody to send it to.
+  const pausedByStaff = pausedForFix && !takedown.automated;
   const fixFields = pausedForFix ? takedown.fields : NO_FIX_FIELDS;
   const awaitingReview = Boolean(takedown?.reviewRequestedAt);
   const fixProgress = useFixProgress(pausedForFix ? takedown.decisionId : null);
@@ -961,7 +964,7 @@ export function ProductForm({
         fixProgress.remember(
           fixFields.filter((field) => changedNow(field as ProductFixField)),
         );
-        if (!leaving) {
+        if (pausedByStaff && !leaving) {
           setReviewPromptOpen(true);
           return true;
         }

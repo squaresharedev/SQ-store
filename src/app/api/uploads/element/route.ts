@@ -1,13 +1,13 @@
 import { getTranslations } from "next-intl/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { buildObjectKey, hasR2Credentials, putObject } from "@/lib/r2";
+import { buildObjectKey, deleteObject, hasR2Credentials, putObject } from "@/lib/r2";
 import {
   ELEMENT_CONTENT_TYPES,
   ELEMENT_MAX_BYTES,
 } from "@/lib/validation/product";
-import { sniffImage, sniffSvg } from "@/lib/uploads/sniff";
-import { moderateUpload, QUARANTINE_PREFIX } from "@/lib/moderation";
+import { classifierCanSee, sniffImage, sniffSvg } from "@/lib/uploads/sniff";
+import { holdForPerson } from "@/lib/moderation/auto/check";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 
 /**
@@ -32,10 +32,12 @@ import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
  *     document and refuses anything carrying script, event handlers, external
  *     references or entity declarations.
  *
- * SVG SKIPS CONTENT MODERATION, and rasters do not. The classifier is a vision
- * model: it reads pixels, and handing it markup produces noise rather than a
- * verdict. `sniffSvg` is that path's gate. Rasters are ordinary pictures and go
- * through `moderateUpload` exactly like a product photo, fail-closed.
+ * CONTENT MODERATION does not happen here: artwork is judged when the
+ * storefront that uses it is saved (the moderation wall, lib/moderation/auto).
+ * AN SVG IS ALWAYS HELD FOR A PERSON. The classifier reads pixels, and markup
+ * shown to it produces noise rather than a verdict, so this route records an
+ * SVG (and an animation or AVIF, as the image route does) as something only a
+ * person can approve. `sniffSvg` is still what keeps the file inert.
  */
 
 /** The one multipart field this route accepts. */
@@ -119,51 +121,6 @@ export async function POST(request: Request) {
     file.name || `element.${sniffed.ext}`,
   );
 
-  // Rasters only — see the header for why a vision classifier has nothing to
-  // say about markup.
-  if (!svg) {
-    let verdict;
-    try {
-      verdict = await moderateUpload({
-        kind: "product-image",
-        bytes,
-        contentType: sniffed.mime,
-        uploaderId: account.userId,
-        accountId: account.accountId,
-      });
-    } catch (error) {
-      // A moderation provider that is down must not silently publish content.
-      console.error("[uploads] element moderation failed", error);
-      return bad(
-        503,
-        t("moderationUnavailable"),
-        t("fix.tryAgainInAFewMinutes"),
-      );
-    }
-
-    if (verdict.decision === "reject") {
-      return bad(422, t(`moderationRejected.${verdict.code}`), t("fix.pickImage"));
-    }
-
-    if (verdict.decision === "review") {
-      // Stored out of reach: the quarantine prefix can never satisfy
-      // isOwnedObjectKey, so a held image cannot be attached to a storefront
-      // even if the key leaked back to a client.
-      try {
-        await putObject(`${QUARANTINE_PREFIX}/${key}`, bytes, sniffed.mime);
-      } catch (error) {
-        console.error("[uploads] element quarantine store failed", error);
-      }
-      // 202 Accepted: we took the file, but it yields no key, so the caller
-      // cannot attach it to anything.
-      return bad(
-        202,
-        t("inReview"),
-        t("inReviewFix"),
-      );
-    }
-  }
-
   try {
     // `attachment` on SVG only: it changes nothing about how an `<img>` loads
     // the artwork, and makes a presigned URL opened directly in a tab download
@@ -177,6 +134,14 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[uploads] element store failed", error);
     return bad(502, t("storeFailed.image"), t("fix.tryAgainInAMoment"));
+  }
+
+  // Markup, and any raster the classifier cannot fully see, goes to a person.
+  // Unrecorded, it would be judged on what a classifier could make of it, so
+  // an upload whose hold cannot be written is refused.
+  if ((svg || !classifierCanSee(bytes, sniffed.mime)) && !(await holdForPerson(key))) {
+    await deleteObject(key).catch(() => {});
+    return bad(503, t("moderationUnavailable"), t("fix.tryAgainInAFewMinutes"));
   }
 
   return Response.json({ key });

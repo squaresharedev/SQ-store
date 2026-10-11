@@ -214,6 +214,7 @@ describe("RemovalNotice", () => {
       <RemovalNotice
         removal={{
           kind: "removed",
+          automated: false,
           ground: "counterfeit",
           note: "The mark is registered.",
           at: "2026-09-17T10:00:00Z",
@@ -259,6 +260,7 @@ describe("RemovalNotice", () => {
       <RemovalNotice
         removal={{
           kind: "removed",
+          automated: false,
           ground: "nonsense",
           note: null,
           at: null,

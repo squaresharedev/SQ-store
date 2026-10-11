@@ -70,7 +70,17 @@ export async function GET(
   if (!decision) return notFound();
 
   const targetType = decision.target_type === "storefront" ? "storefront" : "product";
-  const [{ data: content }, { data: appealRow }] = await Promise.all([
+  const [{ data: origin }, { data: content }, { data: appealRow }] = await Promise.all([
+    // Asked for on its own: the column arrives with 20261012_auto_moderation,
+    // and a statement must still download where that is not applied yet. A
+    // failed read is "a person decided", which was true of every decision
+    // before it.
+    supabase
+      .from("moderation_decisions")
+      .select("automated")
+      .eq("id", id)
+      .eq("owner_id", account.accountId)
+      .maybeSingle(),
     supabase
       .from(targetType === "storefront" ? "storefronts" : "products")
       .select("moderation_status, moderation_decision_id")
@@ -101,6 +111,7 @@ export async function GET(
         reportCount: decision.report_count,
         reportReasons: decision.report_reasons,
         decidedAt: decision.decided_at,
+        automated: origin?.automated === true,
       },
       appeal: appealRow
         ? ({

@@ -47,6 +47,10 @@ export type StatementDecision = {
   reportCount: number;
   reportReasons: readonly string[];
   decidedAt: string;
+  /** True when the automatic check made the decision and no person did. The
+   *  statement must say which (DSA Art. 17(3)(c)), and an automatic pause
+   *  ends differently: it is checked again when the seller saves a change. */
+  automated: boolean;
 };
 
 export type StatementAppeal = {
@@ -112,16 +116,21 @@ export function renderStatement(input: StatementInput, resolve: Resolve): Uint8A
   section(pdf, t("sections.decision"));
   pdf.field(t("labels.content"), t("content", { target, title: decision.targetTitle }));
   pdf.field(t("labels.contentId"), decision.targetId);
-  pdf.field(t("labels.decision"), t(`decision.${decision.action}`));
+  // An automatic pause is lifted by the check itself, not by a person's
+  // approval, so it is worded on its own.
+  const outcome = decision.automated && decision.action === "paused" ? "pausedAutomated" : decision.action;
+  pdf.field(t("labels.decision"), t(`decision.${outcome}`));
   pdf.field(t("labels.decidedOn"), date(decision.decidedAt));
   pdf.field(t("labels.scope"), t("scope"));
-  pdf.field(t("labels.duration"), t(`duration.${decision.action}`));
+  pdf.field(t("labels.duration"), t(`duration.${outcome}`));
   pdf.field(t("labels.status"), t(`status.${status}`));
 
   // ── 2. Why ───────────────────────────────────────────────────────────
   section(pdf, t("sections.reasons"));
   pdf.field(t("labels.ground"), resolve(removalStatement(decision.ground, null)));
-  pdf.field(t("labels.note"), decision.note?.trim() || t("noNote"));
+  // No reviewer wrote anything on an automated decision, so there is no
+  // reviewer's note to print or to report as missing.
+  if (!decision.automated) pdf.field(t("labels.note"), decision.note?.trim() || t("noNote"));
   // A removal has nothing left to fix, but the parts it concerned are still
   // part of the reasons (a pause lists them under "What to change" below).
   const fields = fixFieldsFor(target, decision.fields);
@@ -137,12 +146,14 @@ export function renderStatement(input: StatementInput, resolve: Resolve): Uint8A
     .map((reason) => resolve(REPORT_REASON_COPY[reason].label));
   pdf.field(
     t("labels.facts"),
-    `${t("facts.notices", {
-      count: decision.reportCount,
-      reasons: formatList(reasons, locale, { englishSeparator: ", " }),
-    })} ${t("facts.review")}`,
+    decision.automated
+      ? t("facts.automated")
+      : `${t("facts.notices", {
+          count: decision.reportCount,
+          reasons: formatList(reasons, locale, { englishSeparator: ", " }),
+        })} ${t("facts.review")}`,
   );
-  pdf.field(t("labels.automated"), t("automated"));
+  pdf.field(t("labels.automated"), decision.automated ? t("automatedYes") : t("automated"));
   const basis = [t("legalBasis.contract", { url: LEGAL_LINKS.terms.href })];
   if (decision.ground === "illegal") basis.push(t("legalBasis.illegal"));
   pdf.field(t("labels.legalBasis"), basis.join("\n"), { url: LEGAL_LINKS.terms.href });

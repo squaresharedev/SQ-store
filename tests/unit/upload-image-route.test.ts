@@ -147,44 +147,25 @@ describe.skipIf(!HAS_R2)("POST /api/uploads/image - against real R2", () => {
   });
 });
 
-describe.skipIf(!HAS_R2)("moderation verdicts are honoured", () => {
-  it("a reject verdict stores nothing and tells the uploader why", async () => {
+describe.skipIf(!HAS_R2)("an image the classifier cannot fully see", () => {
+  it("is refused, and not left in storage, when the hold cannot be recorded", async () => {
     vi.resetModules();
-    vi.doMock("@/lib/moderation", async (importOriginal) => ({
-      ...(await importOriginal<typeof import("@/lib/moderation")>()),
-      moderateUpload: vi.fn(async () => ({
-        decision: "reject" as const,
-        code: "explicit" as const,
-      })),
+    vi.doMock("@/lib/uploads/sniff", async (importOriginal) => ({
+      ...(await importOriginal<typeof import("@/lib/uploads/sniff")>()),
+      classifierCanSee: () => false,
+    }));
+    vi.doMock("@/lib/moderation/auto/check", () => ({
+      holdForPerson: vi.fn(async () => false),
     }));
     const { POST } = await import("@/app/api/uploads/image/route");
 
     const res = await POST(request(png()));
-    expect(res.status).toBe(422);
-    const body = (await res.json()) as { error: string };
-    // The code, not the classifier's words: the sentence comes from the
-    // catalogue, so a Czech seller reads it in Czech.
-    expect(body.error).toBe("That image looks explicit, so it can't be used on a product.");
-    vi.doUnmock("@/lib/moderation");
-    vi.resetModules();
-  });
-
-  it("a review verdict yields NO key, so nothing can be published", async () => {
-    vi.resetModules();
-    vi.doMock("@/lib/moderation", async (importOriginal) => ({
-      ...(await importOriginal<typeof import("@/lib/moderation")>()),
-      moderateUpload: vi.fn(async () => ({
-        decision: "review" as const,
-        reason: "borderline",
-      })),
-    }));
-    const { POST } = await import("@/app/api/uploads/image/route");
-
-    const res = await POST(request(png()));
+    expect(res.status).toBe(503);
     const body = (await res.json()) as { key?: string };
-    // The contract the client relies on: 2xx without a key is not success.
+    // No key: an animation nobody flagged would be approved on its first frame.
     expect(body.key).toBeUndefined();
-    vi.doUnmock("@/lib/moderation");
+    vi.doUnmock("@/lib/uploads/sniff");
+    vi.doUnmock("@/lib/moderation/auto/check");
     vi.resetModules();
   });
 });

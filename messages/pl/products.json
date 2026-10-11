@@ -152,7 +152,16 @@
       "upheld": "Twoje odwołanie rozpatrzono <time>{date}</time>. Decyzja pozostaje w mocy.",
       "answer": "Nasza odpowiedź: {note}"
     },
-    "editorDetails": "Dlaczego i co zrobić dalej"
+    "editorDetails": "Dlaczego i co zrobić dalej",
+    "badgePending": "Sprawdzanie",
+    "badgeReview": "W ocenie",
+    "titlePending": "{kind, select, product {Ten produkt jest właśnie sprawdzany} other {Ta witryna jest właśnie sprawdzana}}",
+    "titleReview": "{kind, select, product {Ten produkt sprawdza człowiek} other {Tę witrynę sprawdza człowiek}}",
+    "hiddenPending": "Kupujący nie zobaczą tego, dopóki nie zakończy się automatyczne sprawdzanie. Zwykle trwa to kilka sekund: odśwież stronę, żeby zobaczyć wynik.",
+    "hiddenReview": "Automatyczne sprawdzanie nie mogło tego zatwierdzić, więc przygląda się temu człowiek. Kupujący nie zobaczą tego, dopóki nie zapadnie decyzja. Obrazy SVG, AVIF i animowane zawsze sprawdza człowiek, więc po usunięciu takiego obrazu reszta zostanie sprawdzona od razu.",
+    "hiddenPausedAuto": "Kupujący nie mogą tego teraz zobaczyć: ani na stronie, ani we wbudowanym widżecie, ani przez udostępniony link. Tę decyzję podjęło automatyczne sprawdzanie i nie oglądał tego jeszcze żaden człowiek. Nic nie zostało usunięte.",
+    "autoFixHint": "{kind, select, product {Zmień podkreślone części poniżej i zapisz. Produkt zostanie od razu sprawdzony ponownie i opublikowany, jeśli przejdzie sprawdzanie.} other {Otwórz witrynę, zmień to, co jest wymienione powyżej, i zapisz. Witryna zostanie od razu sprawdzona ponownie i opublikowana, jeśli przejdzie sprawdzanie.}}",
+    "readOnlyHintAuto": "{kind, select, product {Osoba, która może edytować ten produkt, musi go zmienić. Zostanie sprawdzony ponownie zaraz po zapisaniu.} other {Osoba, która może edytować tę witrynę, musi ją zmienić. Zostanie sprawdzona ponownie zaraz po zapisaniu.}}"
   },
   "import": {
     "fields": {
@@ -600,12 +609,14 @@
     "content": "{target, select, product {Produkt} other {Witryna}}: {title}",
     "decision": {
       "paused": "Wstrzymane. Treść jest ukryta przed kupującymi do czasu wprowadzenia poniższych zmian i ich zatwierdzenia przez nas.",
-      "removed": "Usunięte. Treść nie jest już dostępna dla kupujących. Decyzja jest ostateczna, chyba że zmieni ją odwołanie."
+      "removed": "Usunięte. Treść nie jest już dostępna dla kupujących. Decyzja jest ostateczna, chyba że zmieni ją odwołanie.",
+      "pausedAutomated": "Wstrzymane. Treść jest ukryta przed kupującymi, dopóki jej nie zmienisz. Zostanie sprawdzona ponownie, gdy tylko zapiszesz zmianę."
     },
     "scope": "Wszędzie tam, gdzie SquareShare to wyświetla: na własnej stronie, w osadzeniach na innych stronach internetowych i udostępnionych linkach, we wszystkich krajach.",
     "duration": {
       "paused": "Do zatwierdzenia twoich zmian przez nas.",
-      "removed": "Bezterminowo."
+      "removed": "Bezterminowo.",
+      "pausedAutomated": "Dopóki jej nie zmienisz, a zmiana nie przejdzie sprawdzania."
     },
     "status": {
       "inForce": "Obowiązuje.",
@@ -615,7 +626,8 @@
     },
     "facts": {
       "notices": "{count, plural, =0 {Stwierdziliśmy to sami, bez zgłoszenia od kogokolwiek spoza SquareShare.} one {Nastąpiło to po # zgłoszeniu od osoby spoza SquareShare, dotyczącym: {reasons}.} few {Nastąpiło to po # zgłoszeniach od osób spoza SquareShare, dotyczących: {reasons}.} many {Nastąpiło to po # zgłoszeniach od osób spoza SquareShare, dotyczących: {reasons}.} other {Nastąpiło to po # zgłoszeniu od osoby spoza SquareShare, dotyczącym: {reasons}.}}",
-      "review": "Członek personelu SquareShare zapoznał się z treścią przed podjęciem decyzji. Nie ujawniamy, kto wysłał zgłoszenie."
+      "review": "Członek personelu SquareShare zapoznał się z treścią przed podjęciem decyzji. Nie ujawniamy, kto wysłał zgłoszenie.",
+      "automated": "Nasze automatyczne sprawdzanie wykryło to przy zapisywaniu treści. Nikt spoza SquareShare tego nie zgłosił i żaden członek personelu nie zapoznał się z treścią."
     },
     "automated": "Do wykrycia tej treści ani do podjęcia tej decyzji nie użyto żadnych środków automatycznych.",
     "legalBasis": {
@@ -638,7 +650,8 @@
       "message": "Twoja wiadomość: {message}"
     },
     "footer": "SquareShare · {reference} · Strona {page} z {total}",
-    "generated": "Wygenerowano {date}."
+    "generated": "Wygenerowano {date}.",
+    "automatedYes": "Zarówno do wykrycia tej treści, jak i do podjęcia tej decyzji użyto środków automatycznych, bez udziału człowieka. Jeśli się odwołasz, treść oceni członek personelu."
   },
   "buyButton": {
     "title": "Dodaj przycisk zakupu do swojej strony",

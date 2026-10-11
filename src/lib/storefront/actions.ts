@@ -32,6 +32,7 @@ import {
 } from "@/lib/errors";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { publishBlockedError } from "@/lib/settings/seller-identity";
+import { precheck, settleAfterWrite } from "@/lib/moderation/auto/check";
 import {
   planLimitError,
   planLimitErrorFromTrigger,
@@ -163,20 +164,25 @@ export async function createStorefront(
       : {}),
   };
 
+  const insert = {
+    owner_id: account.accountId,
+    name: finalName,
+    config: {
+      ...DEFAULT_STOREFRONT_CONFIG,
+      theme: themeForVibe(brief.vibe),
+      header: initialHeader,
+      productPage: initialProductPage,
+    },
+    brief,
+  };
+  // Judged before it is stored, so a clean storefront passes the moderation
+  // wall as it is written (lib/moderation/auto).
+  await precheck("storefront", null, insert);
+
   const { data: row, error } = await supabase
     .from("storefronts")
-    .insert({
-      owner_id: account.accountId,
-      name: finalName,
-      config: {
-        ...DEFAULT_STOREFRONT_CONFIG,
-        theme: themeForVibe(brief.vibe),
-        header: initialHeader,
-        productPage: initialProductPage,
-      },
-      brief,
-    })
-    .select("id")
+    .insert(insert)
+    .select("id, moderation_status")
     .single();
 
   if (error || !row) {
@@ -187,6 +193,7 @@ export async function createStorefront(
     return failure(serverError("createStorefront"));
   }
 
+  await settleAfterWrite("storefront", row.id, row.moderation_status);
   revalidatePath("/storefront");
   return { ok: true, id: row.id };
 }
@@ -342,6 +349,8 @@ export async function saveStorefront(
   const pagePhotos = await settlePagePhotos(existingRow.config, config, account.userId);
   if (!pagePhotos.ok) return failure(pagePhotos.error);
 
+  await precheck("storefront", id, { name: parsedName.data, config });
+
   const { data: row, error } = await supabase
     .from("storefronts")
     .update({
@@ -351,7 +360,7 @@ export async function saveStorefront(
     })
     .eq("id", id)
     .eq("owner_id", account.accountId)
-    .select("id")
+    .select("id, moderation_status")
     .maybeSingle();
 
   if (error) {
@@ -359,6 +368,7 @@ export async function saveStorefront(
     return failure(serverError("saveStorefront"));
   }
   if (!row) return failure(notFound("storefront"));
+  await settleAfterWrite("storefront", row.id, row.moderation_status);
 
   // Replaced or removed uploads: evict the detached objects.
   if (previousBackgroundKey && previousBackgroundKey !== nextBackgroundKey) {
@@ -489,18 +499,21 @@ export async function updateEmbedSettings(
     embed: parsed.data,
   };
 
+  await precheck("storefront", id, { config });
+
   const { data: updated, error } = await supabase
     .from("storefronts")
     .update({ config, updated_at: new Date().toISOString() })
     .eq("id", id)
     .eq("owner_id", account.accountId)
-    .select("id")
+    .select("id, moderation_status")
     .maybeSingle();
   if (error) {
     console.error("[storefront] embed settings save failed", error);
     return failure(serverError("saveEmbedSettings"));
   }
   if (!updated) return failure(notFound("storefront"));
+  await settleAfterWrite("storefront", updated.id, updated.moderation_status);
 
   revalidatePath("/storefront");
   return { ok: true };

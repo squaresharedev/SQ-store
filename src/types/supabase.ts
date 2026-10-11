@@ -291,6 +291,8 @@ export type Database = {
           img_offset_y: number
           moderated_at: string | null
           moderated_by: string | null
+          moderation_checked_at: string | null
+          moderation_rev: number
           moderation_ground: string | null
           moderation_note: string | null
           moderation_status: string
@@ -314,6 +316,8 @@ export type Database = {
           img_offset_y?: number
           moderated_at?: string | null
           moderated_by?: string | null
+          moderation_checked_at?: string | null
+          moderation_rev?: number
           moderation_ground?: string | null
           moderation_note?: string | null
           moderation_status?: string
@@ -337,6 +341,8 @@ export type Database = {
           img_offset_y?: number
           moderated_at?: string | null
           moderated_by?: string | null
+          moderation_checked_at?: string | null
+          moderation_rev?: number
           moderation_ground?: string | null
           moderation_note?: string | null
           moderation_status?: string
@@ -836,9 +842,40 @@ export type Database = {
           },
         ]
       }
+      moderation_checks: {
+        Row: {
+          checked_at: string
+          ground: string | null
+          model: string | null
+          paths: string[]
+          source: string
+          subject: string
+          verdict: string
+        }
+        Insert: {
+          checked_at?: string
+          ground?: string | null
+          model?: string | null
+          paths?: string[]
+          source: string
+          subject: string
+          verdict: string
+        }
+        Update: {
+          checked_at?: string
+          ground?: string | null
+          model?: string | null
+          paths?: string[]
+          source?: string
+          subject?: string
+          verdict?: string
+        }
+        Relationships: []
+      }
       moderation_decisions: {
         Row: {
           action: string
+          automated: boolean
           decided_at: string
           decided_by: string | null
           fields: string[]
@@ -854,6 +891,7 @@ export type Database = {
         }
         Insert: {
           action: string
+          automated?: boolean
           decided_at?: string
           decided_by?: string | null
           fields?: string[]
@@ -869,6 +907,7 @@ export type Database = {
         }
         Update: {
           action?: string
+          automated?: boolean
           decided_at?: string
           decided_by?: string | null
           fields?: string[]
@@ -1168,6 +1207,8 @@ export type Database = {
           max_per_order: number
           moderated_at: string | null
           moderated_by: string | null
+          moderation_checked_at: string | null
+          moderation_rev: number
           moderation_decision_id: string | null
           moderation_fields: string[] | null
           moderation_ground: string | null
@@ -1199,6 +1240,8 @@ export type Database = {
           max_per_order?: number
           moderated_at?: string | null
           moderated_by?: string | null
+          moderation_checked_at?: string | null
+          moderation_rev?: number
           moderation_decision_id?: string | null
           moderation_fields?: string[] | null
           moderation_ground?: string | null
@@ -1230,6 +1273,8 @@ export type Database = {
           max_per_order?: number
           moderated_at?: string | null
           moderated_by?: string | null
+          moderation_checked_at?: string | null
+          moderation_rev?: number
           moderation_decision_id?: string | null
           moderation_fields?: string[] | null
           moderation_ground?: string | null
@@ -1732,6 +1777,8 @@ export type Database = {
           id: string
           moderated_at: string | null
           moderated_by: string | null
+          moderation_checked_at: string | null
+          moderation_rev: number
           moderation_decision_id: string | null
           moderation_fields: string[] | null
           moderation_ground: string | null
@@ -1750,6 +1797,8 @@ export type Database = {
           id?: string
           moderated_at?: string | null
           moderated_by?: string | null
+          moderation_checked_at?: string | null
+          moderation_rev?: number
           moderation_decision_id?: string | null
           moderation_fields?: string[] | null
           moderation_ground?: string | null
@@ -1768,6 +1817,8 @@ export type Database = {
           id?: string
           moderated_at?: string | null
           moderated_by?: string | null
+          moderation_checked_at?: string | null
+          moderation_rev?: number
           moderation_decision_id?: string | null
           moderation_fields?: string[] | null
           moderation_ground?: string | null
@@ -2071,6 +2122,32 @@ export type Database = {
         Returns: number
       }
       mfa_session_ok: { Args: never; Returns: boolean }
+      moderation_claim: {
+        Args: { p_id: string; p_type: string }
+        Returns: Json
+      }
+      moderation_due: {
+        Args: { p_limit?: number }
+        Returns: {
+          target_id: string
+          target_type: string
+        }[]
+      }
+      moderation_preview: {
+        Args: { p_id: string | null; p_patch: Json; p_type: string }
+        Returns: Json
+      }
+      moderation_recheck_all: { Args: never; Returns: undefined }
+      moderation_settle: {
+        Args: {
+          p_fields?: string[] | null
+          p_ground?: string | null
+          p_id: string
+          p_rev: number
+          p_type: string
+        }
+        Returns: Json
+      }
       order_mark_shipped: {
         Args: {
           p_carrier?: string | null

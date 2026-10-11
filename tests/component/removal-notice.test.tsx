@@ -27,6 +27,7 @@ const DECISION = "d3c15e0f-1111-4222-8333-444455556666";
 function takedown(overrides: Partial<ProductRemoval> = {}): ProductRemoval {
   return {
     kind: "paused",
+    automated: false,
     ground: "counterfeit",
     note: "Remove the logo from the second photo.",
     at: "2026-09-23T10:00:00Z",

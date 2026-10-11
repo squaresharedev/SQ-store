@@ -175,6 +175,12 @@
         "title": "Płatność za plan {plan, select, starter {Starter} pro {Pro} other {płatny}} nie powiodła się",
         "body": "Stripe spróbuje ponownie. Zaktualizuj kartę w sekcji Plan i rozliczenia, aby zachować swój plan."
       }
+    },
+    "policy": {
+      "autoPaused": {
+        "title": "Wymagane działanie: {target, select, product {twój produkt „{title}” jest wstrzymany} other {twoja witryna „{title}” jest wstrzymana}}",
+        "body": "Automatyczne sprawdzanie ukryło to przed kupującymi, ponieważ wygląda na naruszenie zasad. Zmień to, a zostanie od razu sprawdzone ponownie, albo poproś, aby decyzję ocenił człowiek."
+      }
     }
   }
 }
