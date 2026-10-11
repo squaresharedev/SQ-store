@@ -1,7 +1,12 @@
 // @vitest-environment node
 import Anthropic from "@anthropic-ai/sdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { classifyMedia, classifyText, normalizeVerdict } from "@/lib/moderation/auto/classify";
+import {
+  classifyMedia,
+  classifyText,
+  isPlatformStorageLine,
+  normalizeVerdict,
+} from "@/lib/moderation/auto/classify";
 import { TEXT_MAX_CHARS, type PartVerdict } from "@/lib/moderation/auto/policy";
 import { classifyMediaForTest, classifyTextForTest } from "@/lib/moderation/auto/test-provider";
 import {
@@ -136,6 +141,67 @@ describe("what the classifier's answer becomes", () => {
     const verdict = await classifyText("storefront", [`config.blocks[].text=${"x".repeat(TEXT_MAX_CHARS)}`]);
     expect(verdict?.verdict).toBe("unsure");
     expect(parse).not.toHaveBeenCalled();
+  });
+});
+
+describe("a file on the platform's own storage", () => {
+  const SUPABASE = "https://abcdefgh.supabase.co";
+  const OWN = `${SUPABASE}/storage/v1/object/public/seed-assets/c1/chair.jpg`;
+  const parse = vi.spyOn(Anthropic.Messages.prototype, "parse");
+
+  beforeEach(() => {
+    process.env.ANTHROPIC_API_KEY = "test-key";
+    process.env.NEXT_PUBLIC_SUPABASE_URL = SUPABASE;
+    parse.mockReset();
+  });
+  afterEach(() => {
+    delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+  });
+
+  it("is recognised by origin and path, and nothing looser", () => {
+    expect(isPlatformStorageLine(`image_key=${OWN}`)).toBe(true);
+    expect(isPlatformStorageLine(`documents[].key=${SUPABASE}/storage/v1/object/public/seed/guide.pdf`)).toBe(true);
+
+    for (const other of [
+      "image_key=https://hotlink.example.net/photo.jpg",
+      // The right host somewhere it is not storage, or in a lookalike.
+      `image_key=${SUPABASE}/rest/v1/products`,
+      `image_key=${SUPABASE}/storage/v1/object/sign/private/x.jpg?token=abc`,
+      "image_key=https://abcdefgh.supabase.co.evil.example/storage/v1/object/public/x.jpg",
+      "image_key=https://abcdefgh.supabase.co@evil.example/storage/v1/object/public/x.jpg",
+      `image_key=http://abcdefgh.supabase.co/storage/v1/object/public/x.jpg`,
+      "image_key=images/11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222-a.png",
+      "title=See https://abcdefgh.supabase.co/storage/v1/object/public/x.jpg for details",
+    ]) {
+      expect(isPlatformStorageLine(other), other).toBe(false);
+    }
+  });
+
+  it("recognises nothing when the project's address is not known", () => {
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    expect(isPlatformStorageLine(`image_key=${OWN}`)).toBe(false);
+    expect(isPlatformStorageLine(`image_key=${OWN}`, "")).toBe(false);
+  });
+
+  it("is not sent to the classifier, and a row with nothing else is clean without a call", async () => {
+    parse.mockResolvedValueOnce(answer(CLEAN));
+    await classifyText("product", ["title=Oak Chair", `image_key=${OWN}`, "description=Solid oak."]);
+    const request = parse.mock.calls[0][0] as { messages: { content: { text: string }[] }[] };
+    const sent = request.messages[0].content[0].text;
+    expect(sent).toContain("title=Oak Chair");
+    expect(sent).not.toContain("supabase.co");
+
+    parse.mockClear();
+    await expect(classifyText("product", [`image_key=${OWN}`])).resolves.toEqual(CLEAN);
+    expect(parse).not.toHaveBeenCalled();
+  });
+
+  it("still sends an address that is anywhere else", async () => {
+    parse.mockResolvedValueOnce(answer(CLEAN));
+    await classifyText("product", ["title=Poster", "image_key=https://hotlink.example.net/photo.jpg"]);
+    const request = parse.mock.calls[0][0] as { messages: { content: { text: string }[] }[] };
+    expect(request.messages[0].content[0].text).toContain("hotlink.example.net");
   });
 });
 

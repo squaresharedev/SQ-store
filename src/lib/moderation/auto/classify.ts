@@ -175,24 +175,55 @@ async function ask(
 }
 
 /**
+ * Whether a line's value is a file on this project's OWN public storage.
+ *
+ * Only the platform writes there: no client role has a policy or a grant on
+ * the storage tables, so an address on this origin cannot have been put there
+ * by a seller. It is the platform's own file (seeded demo content, a stock
+ * image), not a seller hotlinking something unchecked. Everything else that
+ * looks like an address is still the classifier's to judge.
+ */
+export function isPlatformStorageLine(line: string, supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL): boolean {
+  if (!supabaseUrl) return false;
+  const value = line.slice(line.indexOf("=") + 1).trim();
+  try {
+    const origin = new URL(supabaseUrl).origin;
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      url.origin === origin &&
+      url.username === "" &&
+      url.pathname.startsWith("/storage/v1/object/public/")
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Judge the text of one row, given as "field=value" lines.
  *
  * Text too long to be a real listing is held without being sent: see
- * TEXT_MAX_CHARS.
+ * TEXT_MAX_CHARS. Lines that only name a file on the platform's own storage
+ * are left out (isPlatformStorageLine); a row with nothing else on it has
+ * nothing to judge.
  */
 export async function classifyText(
   scope: ModerationScope,
   lines: readonly string[],
 ): Promise<ClassifyResult> {
-  const text = lines.join("\n");
-  if (text.length > TEXT_MAX_CHARS) return HELD;
+  if (lines.join("\n").length > TEXT_MAX_CHARS) return HELD;
   if (moderationTestProvider()) return classifyTextForTest(lines);
+
+  const judged = lines.filter((line) => !isPlatformStorageLine(line));
+  if (judged.length === 0) return { verdict: "clean", ground: null, paths: [] };
+  const text = judged.join("\n");
 
   return ask(
     [
       { type: "text", text: `${textInstruction(scope)}\n\n<content>\n${text}\n</content>` },
     ],
-    lines.map(linePath),
+    judged.map(linePath),
     false,
   );
 }

@@ -22,6 +22,13 @@
 // NO WAY BACK ONCE BEGUN. The first step stamps the request `started_at`, and
 // "Keep my account" refuses a request that carries it.
 //
+// WHAT THE AUTOMATIC CONTENT CHECK REMEMBERED goes too: its record of a
+// file (image:<key>, pdf:<key>), of the handle (handle:<name>) and of the
+// picture (avatar:<url>) names the account or its files, so it is removed with
+// them. Its record of a piece of TEXT is a fingerprint of the words and says
+// nothing about who wrote them; it stays, so the same words are not judged
+// twice. See forgetChecks.
+//
 // WHAT IS LEFT BEHIND, knowingly:
 //   - files this person uploaded while working in SOMEONE ELSE's store: they
 //     are that store's, and its rows still point at them;
@@ -131,6 +138,35 @@ async function removeFiles(keys: Iterable<string>): Promise<void> {
   }
 }
 
+/**
+ * Forget what the automatic content check remembered about these subjects.
+ * Best-effort, like the avatar: a record that cannot be removed now is not a
+ * reason to keep an account, and an object that was never checked has none.
+ * Quiet before the check's migration exists (there is no table to clear).
+ */
+async function forgetChecks(admin: Admin, subjects: string[]): Promise<void> {
+  for (let at = 0; at < subjects.length; at += 50) {
+    try {
+      const { error } = await admin
+        .from("moderation_checks")
+        .delete()
+        .in("subject", subjects.slice(at, at + 50));
+      if (error && error.code !== "PGRST205" && error.code !== "42P01") {
+        console.warn("[account deletion] content check records were not removed:", error.message);
+      }
+    } catch (error) {
+      console.warn(
+        "[account deletion] content check records were not removed:",
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+}
+
+/** The approved-list subjects that name these stored files. */
+const fileSubjects = (keys: Iterable<string>): string[] =>
+  [...keys].flatMap((key) => [`image:${key}`, `pdf:${key}`]);
+
 /** How much of the run's budget is left, counted down as work is done. */
 type Budget = { left: number; spent: number };
 
@@ -159,6 +195,7 @@ async function emptyTable(
       // or one row with many files could never be got past.
       if (budget.spent > 0 && keys.size + 1 > budget.left) break;
       await removeFiles(keys);
+      await forgetChecks(admin, fileSubjects(keys));
       budget.left -= keys.size;
       budget.spent += keys.size;
       done.push(row.id);
@@ -192,7 +229,9 @@ async function emptyOrderFiles(admin: Admin, userId: string, budget: Budget): Pr
     if (keys.length === 0) return true;
 
     const batch = keys.slice(0, Math.max(1, budget.left - 1));
-    await removeFiles(collectObjectKeys(batch));
+    const batchKeys = collectObjectKeys(batch);
+    await removeFiles(batchKeys);
+    await forgetChecks(admin, fileSubjects(batchKeys));
     must(
       "order files",
       await admin.from("orders").update({ digital_file_key: null }).eq("seller_id", userId).in("digital_file_key", batch),
@@ -231,11 +270,19 @@ async function deleteAccount(
   if (!(await emptyOrderFiles(admin, userId, budget))) return "more";
   await removeAvatar(admin, userId);
 
-  // Who to tell, read while there is still someone to read it from.
+  // Who to tell, and what the content check remembered by name, read while
+  // there is still a profile to read it from.
   const [account, profile] = await Promise.all([
     admin.auth.admin.getUserById(userId),
-    admin.from("profiles").select("locale").eq("id", userId).maybeSingle(),
+    admin.from("profiles").select("locale, username, avatar_url").eq("id", userId).maybeSingle(),
   ]);
+  await forgetChecks(
+    admin,
+    [
+      profile.data?.username ? `handle:${profile.data.username.toLowerCase()}` : null,
+      profile.data?.avatar_url ? `avatar:${profile.data.avatar_url}` : null,
+    ].filter((subject): subject is string => subject !== null),
+  );
   const email = account.data.user?.email ?? null;
   const locale = parseLocale(profile.data?.locale) ?? DEFAULT_LOCALE;
 

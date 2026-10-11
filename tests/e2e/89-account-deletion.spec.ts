@@ -132,7 +132,25 @@ test.describe("account deletion", () => {
     const leaving = await newSeller(page, "del-due");
     await seedSellerIdentity(leaving.id, { ...PUBLISHABLE_SELLER, businessName: "Leaving Pottery" });
     await seedStorefronts(leaving.id, [{ name: "Leaving" }]);
-    await seedProducts(leaving.id, [{ title: "Last vase", price_cents: 2400 }]);
+    const leavingKey = `images/${leaving.id}/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa-vase.jpg`;
+    await seedProducts(leaving.id, [{ title: "Last vase", price_cents: 2400, image_key: leavingKey }]);
+    // What the automatic content check remembered about this account: its
+    // file and its handle name it, so they go with it. A fingerprint of some
+    // words does not, so it stays.
+    const leavingHandle = ((await serviceRest(`/profiles?id=eq.${leaving.id}&select=username`)) as {
+      username: string;
+    }[])[0]!.username;
+    const remembered = [`image:${leavingKey}`, `handle:${leavingHandle.toLowerCase()}`];
+    const wordsOnly = `text:${"b".repeat(32)}`;
+    await serviceRest("/moderation_checks", {
+      method: "POST",
+      body: [...remembered, wordsOnly].map((subject) => ({
+        subject,
+        verdict: "clean",
+        source: "model",
+        model: "test",
+      })),
+    });
     // An old, finished sale: nothing is owed on it any more.
     await seedOrders(leaving.id, [{ amount_cents: 2400, created_at: daysAgo(90), fulfilment_status: "shipped" }]);
 
@@ -158,6 +176,11 @@ test.describe("account deletion", () => {
     ] as const) {
       expect(await rowsOf(table, column, leaving.id), table).toBe(0);
     }
+    // The check's records that name the account went with it.
+    const left = (await serviceRest(
+      `/moderation_checks?subject=in.(${[...remembered, wordsOnly].map((s) => `"${s}"`).join(",")})&select=subject`,
+    )) as { subject: string }[];
+    expect(left.map((row) => row.subject)).toEqual([wordsOnly]);
     // The session that asked is a session for nobody now.
     await page.goto("/dashboard");
     await page.waitForURL(/\/login/, { timeout: 30_000 });

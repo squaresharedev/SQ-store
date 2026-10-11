@@ -1,6 +1,15 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { MODERATION_CASES, type ModerationCase } from "../moderation/cases";
+import { HOLDOUT_CASES } from "../moderation/holdout";
+
+/** Which cases to run: the tuned set (default), the held-out set, or both. */
+const CASES: ModerationCase[] =
+  process.env.MODERATION_SET === "holdout"
+    ? HOLDOUT_CASES
+    : process.env.MODERATION_SET === "all"
+      ? [...MODERATION_CASES, ...HOLDOUT_CASES]
+      : MODERATION_CASES;
 
 /**
  * THE REAL CLASSIFIER, AGAINST LABELLED CASES. Opt-in: it calls the model and
@@ -30,7 +39,7 @@ import { MODERATION_CASES, type ModerationCase } from "../moderation/cases";
 const LIVE = process.env.MODERATION_LIVE_TEST === "1" && Boolean(process.env.ANTHROPIC_API_KEY);
 
 /** How many ordinary listings may be held before the policy is too jumpy to ship. */
-const FALSE_HOLD_CEILING = 0.2;
+const FALSE_HOLD_CEILING = 0.02;
 
 /** Calls in flight at once: enough to finish in a minute, few enough not to
  *  trip a new key's rate limit. */
@@ -59,7 +68,7 @@ describe.skipIf(!LIVE)("the classifier on labelled cases (live)", () => {
       const { classifyText } = await import("@/lib/moderation/auto/classify");
       const { MODERATION_MODEL } = await import("@/lib/moderation/auto/policy");
 
-      const answers = await inBatches(MODERATION_CASES, async (item: ModerationCase) => ({
+      const answers = await inBatches(CASES, async (item: ModerationCase) => ({
         item,
         answer: await classifyText(item.lines[0]?.startsWith("name=") ? "storefront" : "product", item.lines),
       }));
