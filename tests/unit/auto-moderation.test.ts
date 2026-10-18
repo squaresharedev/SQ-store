@@ -290,6 +290,14 @@ describe("a ground the model made up", () => {
     expect((await classifyText("product", ["title=Candle"]))?.ground).toBe("other");
   });
 
+  it("reads a ground however the model capitalises it", () => {
+    // The policy names the grounds in capitals and the model answers the same way.
+    expect(normalizeVerdict({ verdict: "violation", ground: "ILLEGAL", paths: [] }, [])).toMatchObject({ ground: "illegal" });
+    expect(normalizeVerdict({ verdict: "violation", ground: " Counterfeit ", paths: [] }, [])).toMatchObject({ ground: "counterfeit" });
+    expect(normalizeVerdict({ verdict: "unsure", ground: "SCAM", paths: [] }, [])).toMatchObject({ ground: "scam" });
+    expect(normalizeVerdict({ verdict: "violation", ground: "PROHIBITED", paths: [] }, [])).toMatchObject({ ground: "other" });
+  });
+
   it("leaves a known ground, and a missing one, alone", () => {
     expect(normalizeVerdict({ verdict: "unsure", ground: "scam", paths: [] }, [])).toMatchObject({ ground: "scam" });
     expect(normalizeVerdict({ verdict: "unsure", ground: null, paths: [] }, [])).toMatchObject({ ground: null });

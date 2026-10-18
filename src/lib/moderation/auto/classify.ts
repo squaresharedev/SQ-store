@@ -100,9 +100,12 @@ function client(): Anthropic | null {
 export function normalizeVerdict(answer: RawAnswer | PartVerdict, knownPaths: readonly string[]): PartVerdict {
   if (answer.verdict === "clean") return { verdict: "clean", ground: null, paths: [] };
   const known = new Set(knownPaths);
+  // The policy names each ground in capitals ("ILLEGAL"), and the model gives
+  // it back that way, so the spelling is folded before it is looked up.
+  const label = answer.ground?.trim().toLowerCase();
   // A ground we do not have becomes "other": the reason is still shown as a
   // rule broken, and the seller is pointed at what to change either way.
-  const named = isRemovalGround(answer.ground) ? answer.ground : null;
+  const named = isRemovalGround(label) ? label : null;
   return {
     verdict: answer.verdict,
     ground: answer.verdict === "violation" ? (named ?? "other") : answer.ground ? (named ?? "other") : null,
