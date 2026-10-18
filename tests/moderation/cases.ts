@@ -35,7 +35,7 @@ export type ModerationCase = {
    *  and fairly "sexual" too). Checked only when the answer names a ground. */
   grounds?: RemovalGround[];
   /** The fields the problem sits in. The seller is sent to fix what the
-   *  answer names, so each of these must be among them. */
+   *  answer names, so at least one of these must be among them. */
   fields?: string[];
   /** "field=value" lines, as the database hands a row's text to the check. */
   lines: string[];

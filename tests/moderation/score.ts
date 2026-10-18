@@ -10,9 +10,10 @@
 //   wrong reason  a held or flagged answer whose ground is not one the case
 //                 allows: the seller is told the wrong rule (a drug listing
 //                 told it broke the adults-only rule). Bounded.
-//   wrong field   a held or flagged answer that does not name every field the
+//   wrong field   a held or flagged answer that names none of the fields the
 //                 problem sits in: the seller is sent to fix the wrong part of
-//                 the form. Bounded.
+//                 the form. Bounded. (Naming one of two is not counted: the
+//                 seller fixes it, saves, and is told about the other.)
 //
 // "No answer" (the provider down, a refused key) fails the run rather than
 // being counted either way: a measurement with holes in it is not one.
@@ -48,7 +49,7 @@ export function score(answers: Answered[]) {
   const reasoned = withheld.filter(({ item, answer }) => item.grounds && answer?.ground);
   const wrongGround = reasoned.filter(({ item, answer }) => !item.grounds!.includes(answer!.ground!));
   const located = withheld.filter(({ item }) => item.fields);
-  const wrongField = located.filter(({ item, answer }) => !item.fields!.every((field) => answer!.paths.includes(field)));
+  const wrongField = located.filter(({ item, answer }) => !item.fields!.some((field) => answer!.paths.includes(field)));
   return { unanswered, leaks, clean, falseHolds, softBlocks, reasoned, wrongGround, located, wrongField };
 }
 
