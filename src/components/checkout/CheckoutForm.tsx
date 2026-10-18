@@ -49,6 +49,9 @@ const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /** The bot check, present only where a deployment has configured it (the
  *  same "off unless configured" rule as signup, see LoginForm). */
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+/** How the order route names the bot check in a refusal's `fields`
+ *  (api/checkout/[storefrontId]/[productId]/route.ts). */
+const TURNSTILE_FIELD = "turnstile";
 
 type FieldName =
   | "email"
@@ -184,6 +187,17 @@ export function CheckoutForm({
   // from under a click that has already started.
   const clearTurnstileToken = useCallback(() => setTurnstileToken(""), []);
   const needsTurnstile = Boolean(TURNSTILE_SITE_KEY) && !preview;
+  // A Turnstile token is good for ONE verification, and the order route spends
+  // it before it prices or places anything. So an attempt it refuses (sold out,
+  // a price that moved, a code that ended) leaves this form holding a dead
+  // token: without a new one the buyer's second try fails the bot check however
+  // well they fixed the first problem. Bumping the round remounts the widget,
+  // which issues a fresh token; Pay waits for it.
+  const [turnstileRound, setTurnstileRound] = useState(0);
+  const renewTurnstile = useCallback(() => {
+    setTurnstileToken("");
+    setTurnstileRound((round) => round + 1);
+  }, []);
 
   const ships = !product.isDigital;
   const showRegion = ships && REGION_COUNTRIES.has(country);
@@ -343,16 +357,22 @@ export function CheckoutForm({
         return;
       }
       const reason: CheckoutErrorCode = result?.error ?? "failed";
-      if (result && !result.ok && result.fields?.length) {
+      // The bot check is not a field: nothing on the form would be highlighted,
+      // so it gets its own sentence instead of "check the highlighted fields".
+      const botCheckFailed = Boolean(result && !result.ok && result.fields?.includes(TURNSTILE_FIELD));
+      if (result && !result.ok && result.fields?.length && !botCheckFailed) {
         setErrors(Object.fromEntries(result.fields.map((field) => [field, t("errors.fields")])));
       }
+      if (needsTurnstile) renewTurnstile();
       // A code that stopped working comes off, so the total on the button is
       // the one that will be charged; a changed price is re-read from the
       // server, so the buyer pays the new total only after seeing it.
       if (reason === "discount_invalid") setCode(null);
       if (reason === "price_changed") router.refresh();
-      setFormError(messageFor(reason));
+      setFormError(botCheckFailed ? t("errors.turnstile") : messageFor(reason));
     } catch {
+      // No answer at all: the request may still have reached the route.
+      if (needsTurnstile) renewTurnstile();
       setFormError(messageFor("failed"));
     }
     setSubmitting(false);
@@ -750,6 +770,7 @@ export function CheckoutForm({
 
         {needsTurnstile && TURNSTILE_SITE_KEY && (
           <Turnstile
+            key={turnstileRound}
             siteKey={TURNSTILE_SITE_KEY}
             onVerify={setTurnstileToken}
             onExpire={clearTurnstileToken}

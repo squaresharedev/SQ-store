@@ -176,6 +176,18 @@
         "body": "Stripe versucht es erneut. Aktualisiere deine Karte unter Tarif und Abrechnung, damit du deinen Tarif behältst."
       }
     },
+    "stock": {
+      "low": {
+        "title": "Niedriger Lagerbestand: {title}",
+        "body": "{count, plural, =0 {Nichts mehr übrig.} one {Nur noch # übrig.} other {Nur noch # übrig.}} Lagere nach oder schalte die Bestandsverfolgung aus, wenn du auf Anfrage produzierst."
+      }
+    },
+    "payment": {
+      "dispute": {
+        "title": "Ein Käufer hat die Zahlung für {title} angefochten",
+        "body": "Ihre Bank hat eine Zahlungsanfechtung eröffnet. Beantworte sie in deinem Stripe-Dashboard vor Ablauf der Frist."
+      }
+    },
     "policy": {
       "autoPaused": {
         "title": "Handlung nötig: {target, select, product {Dein Produkt „{title}“ ist pausiert} other {Dein Schaufenster „{title}“ ist pausiert}}",

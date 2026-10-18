@@ -1,155 +1,153 @@
 "use client";
 
-import Link from "next/link";
-import { useId } from "react";
-import { useTranslations } from "next-intl";
+import { useId, useState } from "react";
 import { cn } from "@/lib/utils";
-import { CopyButton } from "@/components/ui/CopyButton";
-import { Switch } from "@/components/ui/switch";
-import { badgeClass, cardClass } from "@/components/ui/surface-styles";
-import { ghostButtonClass, helpTextClass, secondaryButtonClass } from "@/components/ui/control-styles";
-import { discountEditPath } from "@/lib/discounts/paths";
-import { useNow } from "@/lib/hooks/useNow";
-import type { DiscountListItem } from "@/lib/discounts/summary";
-import type { DiscountStatus } from "@/types/discount";
-import { useDiscountWording } from "./useDiscountWording";
+import { FitText } from "@/components/ui/FitText";
+import { cardClass, eyebrowClass } from "@/components/ui/surface-styles";
+import {
+  DISCOUNT_FACT_ICONS,
+  DISCOUNT_KIND_ICONS,
+  DiscountFact,
+  DiscountOrders,
+  DiscountProductsPanel,
+  DiscountRevenue,
+  DiscountRowActions,
+  DiscountRunMeter,
+  DiscountSchedule,
+  DiscountScope,
+  DiscountStatusBadge,
+  DiscountTitle,
+  DiscountUsage,
+  type DiscountRowProps,
+  useDiscountRowFacts,
+} from "./DiscountRowParts";
 
-/** The one status worth colour is the live one; the rest step back. */
-const STATUS_TONE: Record<DiscountStatus, string> = {
-  active: "text-success",
-  scheduled: "text-foreground",
-  paused: "text-muted-foreground",
-  used_up: "text-muted-foreground",
-  ended: "text-muted-foreground",
-};
+// THE STUB AND ITS TEAR LINE. On a wide row the stub stands at the left and the
+// ticket tears down a vertical line; on a narrow one it lies across the top (a
+// tall black strip beside a stacked body is all stub and no ticket) and tears
+// along a horizontal line. STUB sets where that line is and the two NOTCH
+// constants sit on it, so the three are one measurement: change them together.
+
+/** The stub: a `h-14` band across the top, a `w-36` column from `@5xl` up
+ *  (the width of the longest status chip in any language, plus its padding). */
+const STUB =
+  "h-14 flex-row gap-3 rounded-t-md border-b px-4 @5xl:h-auto @5xl:w-36 @5xl:flex-col @5xl:justify-center @5xl:gap-2 @5xl:rounded-t-none @5xl:rounded-l-md @5xl:border-b-0 @5xl:border-r @5xl:px-3 @5xl:py-4";
 
 /**
- * One discount in the list: what it is, where it stands, what it sold, and
- * (for owners and editors) the controls. A code leads with the code itself,
- * the thing a seller shares; a sale leads with what it takes off.
+ * One of the two half-circles punched out where the stub tears off: a circle
+ * in the page's colour, centred on the card's edge and clipped to the half
+ * that lies inside the card (a pixel past half, so it also covers the card's
+ * own hairline, which would otherwise run straight across the hole).
  */
-export function DiscountRow({
-  item,
-  canWrite,
-  busy,
-  onToggle,
-  onEnd,
-  onDelete,
-}: {
-  item: DiscountListItem;
-  canWrite: boolean;
-  /** An action on this row is in flight. */
-  busy: boolean;
-  onToggle: (enabled: boolean) => void;
-  onEnd: () => void;
-  onDelete: () => void;
-}) {
-  const t = useTranslations("Discounts.list");
-  const words = useDiscountWording();
-  const switchLabelId = useId();
-  const { discount, status } = item;
-  const isCode = discount.kind === "code";
+const NOTCH =
+  "pointer-events-none absolute size-4 rounded-full border border-border bg-background";
+/** Left end of the band's tear line; the top of the column's. */
+const NOTCH_START =
+  "-left-2 top-14 -translate-y-1/2 [clip-path:inset(0_0_0_calc(50%_-_1px))] @5xl:-top-2 @5xl:left-36 @5xl:-translate-x-1/2 @5xl:translate-y-0 @5xl:[clip-path:inset(calc(50%_-_1px)_0_0_0)]";
+/** Right end of the band's tear line; the bottom of the column's. */
+const NOTCH_END =
+  "-right-2 top-14 -translate-y-1/2 [clip-path:inset(0_calc(50%_-_1px)_0_0)] @5xl:-bottom-2 @5xl:left-36 @5xl:right-auto @5xl:top-auto @5xl:-translate-x-1/2 @5xl:translate-y-0 @5xl:[clip-path:inset(0_0_calc(50%_-_1px)_0)]";
 
-  // The dates are in the READER'S time zone, which only their browser knows
-  // (the server renders in its own). So the line is said once the browser has
-  // spoken, and holds its place until then, rather than said wrong.
-  const inBrowser = useNow() !== null;
-  const schedule = !inBrowser
-    ? null
-    : status === "ended" && discount.endsAt
-      ? t("ended", { date: words.when(discount.endsAt) })
-      : status === "scheduled"
-        ? t("startsOn", { date: words.when(discount.startsAt) })
-        : discount.endsAt
-          ? t("endsOn", { date: words.when(discount.endsAt) })
-          : t("noEnd");
+/**
+ * ONE DISCOUNT IN THE LIST, drawn as the coupon it is: what it takes off and
+ * where it stands on the stub, then what it is, when it runs, what it sold,
+ * and (for owners and editors) the controls.
+ *
+ * The stub is ink while the discount is live and grey once it is not, so a
+ * list sorts itself at a glance. The body says the rest as glyph-led facts;
+ * the one about products opens, and the list unfolds inside the ticket.
+ *
+ * The item is the size container, so the row answers to the room IT has
+ * (`@5xl:`), not the window: the dashboard's rail and the page gutters take a
+ * different share at every width. That is also why the product list unfolds in
+ * place rather than in a popover, whose phone sheet a size container would
+ * capture.
+ */
+export function DiscountRow({ item, products, canWrite, ...controls }: DiscountRowProps) {
+  const facts = useDiscountRowFacts(item);
+  const KindIcon = DISCOUNT_KIND_ICONS[item.discount.kind];
+  const [productsOpen, setProductsOpen] = useState(false);
+  const productsId = useId();
 
   return (
     <li
-      className={cn(cardClass, "flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between")}
-      data-discount-row={discount.id}
-      data-discount-kind={discount.kind}
-      data-discount-status={status}
+      className="@container"
+      data-discount-row={item.discount.id}
+      data-discount-kind={item.discount.kind}
+      data-discount-status={item.status}
     >
-      <div className="flex min-w-0 flex-col gap-1.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className={cn(badgeClass, STATUS_TONE[status])}>{words.status(status)}</span>
-          <span className={helpTextClass}>{words.kind(discount.kind)}</span>
+      <div className={cn(cardClass, "relative flex flex-col @5xl:flex-row")}>
+        <div
+          className={cn(
+            "flex shrink-0 items-center border-dashed",
+            STUB,
+            facts.live
+              ? "border-background/50 bg-foreground text-background"
+              : "border-border bg-secondary text-muted-foreground",
+          )}
+        >
+          <KindIcon className="size-5 shrink-0" strokeWidth={2} aria-hidden="true" />
+          {/* Decorative: the body says the same figure in words. */}
+          <span
+            aria-hidden="true"
+            className="min-w-0 flex-1 text-2xl font-bold leading-none tracking-tight tabular-nums @5xl:w-full @5xl:flex-none @5xl:text-center @5xl:text-3xl"
+          >
+            <FitText measure={facts.figure}>{facts.figure}</FitText>
+          </span>
+          <DiscountStatusBadge status={item.status} />
         </div>
-        {isCode && discount.code ? (
-          <div className="flex items-center gap-1">
-            <span className="font-mono text-lg font-semibold tracking-wide text-foreground" data-discount-code="">
-              {discount.code}
-            </span>
-            <CopyButton
-              value={discount.code}
-              messages={{
-                copy: "Discounts.list.copy.copy",
-                copied: "Discounts.list.copy.copied",
-                failed: "Discounts.list.copy.failed",
-              }}
-            />
-          </div>
-        ) : (
-          <p className="text-lg font-semibold text-foreground">{words.value(discount.kind, discount.value)}</p>
-        )}
-        <p className="text-sm text-foreground">
-          {[
-            isCode ? words.value(discount.kind, discount.value) : null,
-            words.scope(discount.appliesTo, discount.productIds.length),
-            isCode && discount.shareChannel ? t("channel", { channel: discount.shareChannel }) : null,
-          ]
-            .filter(Boolean)
-            .join(" · ")}
-        </p>
-        <p className={helpTextClass} data-discount-schedule="">
-          <time dateTime={discount.endsAt ?? discount.startsAt}>{schedule ?? <>&nbsp;</>}</time>
-        </p>
-        <p className={helpTextClass} data-discount-orders={item.orders}>
-          {[
-            t("orders", { orders: item.orders }),
-            item.revenue.length > 0 ? words.money(item.revenue) : null,
-            isCode && discount.usageLimit !== null
-              ? t("uses", { uses: item.uses, limit: discount.usageLimit })
-              : null,
-          ]
-            .filter(Boolean)
-            .join(" · ")}
-        </p>
-      </div>
+        <span aria-hidden="true" className={cn(NOTCH, NOTCH_START)} />
+        <span aria-hidden="true" className={cn(NOTCH, NOTCH_END)} />
 
-      {canWrite && (
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
-          {isCode && status !== "ended" && (
-            <span className="flex items-center gap-2 pr-1">
-              <span id={switchLabelId} className="text-sm text-foreground">
-                {t("switchLabel")}
-              </span>
-              <Switch
-                checked={discount.enabled}
-                onCheckedChange={onToggle}
-                disabled={busy}
-                aria-labelledby={switchLabelId}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* One column on a phone; from `@2xl` the title beside the controls,
+              over the dates and the results side by side; from `@5xl` a single
+              line. The controls' track is a fixed width, not `auto`, so the
+              two columns under it start at the same place whatever a row's
+              controls are. */}
+          <div className="grid min-w-0 flex-1 gap-4 p-4 @2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_9rem] @2xl:gap-x-6 @5xl:flex @5xl:items-center">
+            <div className="flex min-w-0 flex-col gap-2 @2xl:col-span-2 @5xl:flex-1">
+              <span className={eyebrowClass}>{facts.kind}</span>
+              <DiscountTitle item={item} facts={facts} />
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
+                {facts.isCode && <DiscountFact icon={DISCOUNT_FACT_ICONS.value}>{facts.value}</DiscountFact>}
+                <DiscountScope
+                  facts={facts}
+                  count={products.length}
+                  open={productsOpen}
+                  onOpenChange={setProductsOpen}
+                  panelId={productsId}
+                />
+                {facts.channel && <DiscountFact icon={DISCOUNT_FACT_ICONS.channel}>{facts.channel}</DiscountFact>}
+              </div>
+            </div>
+
+            {/* Fixed widths from here on, so the columns line up down the list. */}
+            <div className="flex min-w-0 flex-col gap-2 @2xl:col-start-1 @2xl:row-start-2 @5xl:w-56 @5xl:shrink-0">
+              <DiscountSchedule item={item} facts={facts} />
+              <DiscountRunMeter facts={facts} />
+            </div>
+            <div className="flex min-w-0 flex-col gap-1.5 @2xl:col-span-2 @2xl:col-start-2 @2xl:row-start-2 @5xl:w-40 @5xl:shrink-0">
+              <DiscountOrders item={item} facts={facts} />
+              <DiscountRevenue facts={facts} />
+              <DiscountUsage facts={facts} />
+            </div>
+            {canWrite && (
+              <DiscountRowActions
+                item={item}
+                {...controls}
+                className="@2xl:col-start-3 @2xl:row-start-1 @2xl:self-start @2xl:justify-end @5xl:w-36 @5xl:self-auto"
               />
-            </span>
+            )}
+          </div>
+
+          {productsOpen && products.length > 0 && (
+            <div className="border-t border-border px-4 py-3">
+              <DiscountProductsPanel id={productsId} products={products} />
+            </div>
           )}
-          {/* An ended sale is history (the EU price rule reads it); an ended
-              code can still be given more time. */}
-          {(isCode || status !== "ended") && (
-            <Link href={discountEditPath(discount.id)} className={secondaryButtonClass}>
-              {t("edit")}
-            </Link>
-          )}
-          {!isCode && status === "active" && (
-            <button type="button" className={secondaryButtonClass} onClick={onEnd} disabled={busy}>
-              {t("endNow")}
-            </button>
-          )}
-          <button type="button" className={ghostButtonClass} onClick={onDelete} disabled={busy}>
-            {t("delete")}
-          </button>
         </div>
-      )}
+      </div>
     </li>
   );
 }

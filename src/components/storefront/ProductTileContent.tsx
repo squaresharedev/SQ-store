@@ -5,9 +5,11 @@ import { useTranslations, useLocale } from "next-intl";
 import { Image as ImageIcon } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
+  PRICE_TAG_SIZE_MIN,
   defaultPriceTagFill,
   resolveCardStyle,
   resolvePriceTagPosition,
+  resolveSaleBadgePosition,
   resolveTitlePosition,
   spotColumn,
   spotRow,
@@ -31,14 +33,18 @@ import {
   TILE_SPOT_CLASSES,
   TITLE_BAND_ROW_CLASSES,
   TITLE_BAND_SHADOW_CLASSES,
+  chipWidth,
   priceTagChipStyle,
   priceTagInsetStyle,
+  priceTagWasStyle,
+  tileLabelSize,
   titleBandFontStyle,
   titleBandStyle,
   titleShadowBackdrop,
   titleShadowInk,
   titleShadowStyle,
 } from "./config-maps";
+import { SaleChip, saleChipWidth, useSaleChipWords } from "./SaleChip";
 import {
   tileSpotTokenLabel,
   tileSpotTokenProps,
@@ -130,6 +136,12 @@ function priceBackdrop(card: CardStyle, position: PriceTagPosition): string {
  * and a name proportional to one cell, and a 3x3 hero wears ones proportional
  * to nine, from the same single setting.
  *
+ * A product on sale wears a SALE CHIP over its picture (SALE_BADGES, drawn in
+ * one of SALE_BADGE_LOOKS by SaleChip): how much comes off, or a word, on a
+ * row clear of the title band and, wherever there is one, of the price
+ * (resolveSaleBadgePosition). It follows the card style like the price tag, so
+ * a seller sets it for the whole board or for one tile.
+ *
  * A block the seller marked sold out dims its image and (per
  * theme.soldOutBadge) wears a corner badge, which steps to the opposite edge
  * rather than hiding under an overlaid title. Accent and the sold-out badge
@@ -160,8 +172,10 @@ export function ProductTileContent({
    *  then renders with no handlers, no tab stops and no affordance. */
   spotDrag?: TileSpotDrag;
 }) {
-  const t = useTranslations("Storefront");
+  const t = useTranslations("Storefront.spotDrag");
   const tCommon = useTranslations("Common");
+  const tSale = useTranslations("ProductPage.sale");
+  const saleWords = useSaleChipWords();
   const locale = useLocale();
   const card = resolveCardStyle(theme, overrides);
 
@@ -219,7 +233,7 @@ export function ProductTileContent({
   // of a `shadow` title band still claimed the white ink that band needs while
   // already wearing the white backing a floated tag gets.
   const chipStyle = priceTagChipStyle(
-    card,
+    { ...card, chipScale: theme.chipScale },
     {
       fill: defaultPriceTagFill(pricePosition),
       text: priceTagAutoTextColor(
@@ -230,6 +244,88 @@ export function ProductTileContent({
     priceBackdrop(card, pricePosition),
   );
   const chipFontClass = PRICE_TAG_FONT_CLASSES[card.priceTagFont];
+
+  // WHAT THE CHIP SAYS. The price is what one costs right now: a running
+  // sale's price when there is one (product.sale), else the listed price.
+  // While a sale runs the regular price is struck through ahead of it, the
+  // same as on the product page (SalePrice), wherever the tile has room for
+  // both: the struck price gives way before the price is ever clipped (see
+  // priceTagWasStyle).
+  const priceNow = formatPrice(product.sale?.price ?? product.price, product.currency, locale);
+  const priceWas = product.sale ? formatPrice(product.price, product.currency, locale) : null;
+
+  // THE SALE CHIP, on a product a sale lowers (see SALE_BADGES). Not on one
+  // that is sold out here: there is nothing to sell at the lower price, and
+  // that corner is the sold-out badge's.
+  const saleBadgeSpot =
+    product.sale && card.saleBadge !== "hidden" && !soldOut
+      ? resolveSaleBadgePosition(card.saleBadgePosition, {
+          cornerRadius: card.cornerRadius,
+          titleBand: bandRow,
+          priceTag: priceHidden ? "hidden" : tagPosition,
+        })
+      : null;
+  // What it says: how much this sale takes off the price struck beside it,
+  // in percent or in money, or the word. Worked out from the two prices, so
+  // it cannot say more came off than did.
+  const saleBadgeLabel =
+    product.sale && card.saleBadge !== "hidden"
+      ? saleWords(card.saleBadge, {
+          amountCents: Math.round(product.price * 100) - Math.round(product.sale.price * 100),
+          percent: product.sale.offerPercent,
+          currency: product.currency,
+        })
+      : "";
+  // Sharing the price's row (the one layout with no free edge, see
+  // resolveSaleBadgePosition): each then makes room for the other, the struck
+  // price first and the chip after it, and the price itself never.
+  const saleBadgeBesidePrice =
+    saleBadgeSpot !== null && !priceHidden && tagPosition !== "below" && tagPosition !== "hidden"
+      ? spotRow(saleBadgeSpot) === spotRow(tagPosition)
+      : false;
+  const saleBadge = saleBadgeSpot && (
+    <SaleChip
+      look={card.saleBadgeLook}
+      says={card.saleBadge}
+      label={saleBadgeLabel}
+      spot={saleBadgeSpot}
+      fill={card.saleBadgeColor ?? theme.accent}
+      fontClass={chipFontClass}
+      size={tileLabelSize(card.priceTagSize, PRICE_TAG_SIZE_MIN, theme.chipScale)}
+      besidePrice={
+        saleBadgeBesidePrice
+          ? { width: chipWidth([...priceNow].length), borderWidth: card.priceTagBorderWidth }
+          : undefined
+      }
+      style={priceTagInsetStyle(card.priceTagInset)}
+    />
+  );
+  const priceLabel =
+    priceWas === null ? (
+      priceNow
+    ) : (
+      <>
+        {/* Heard once as a sentence, not as two loose numbers. */}
+        <span className="sr-only">{tSale("wasNow", { was: priceWas, now: priceNow })}</span>
+        <del
+          aria-hidden="true"
+          style={priceTagWasStyle({
+            wasLength: [...priceWas].length,
+            nowLength: [...priceNow].length,
+            inBand: tagPosition === "below",
+            borderWidth: card.priceTagBorderWidth,
+            besideWidth:
+              saleBadgeBesidePrice && saleBadgeSpot
+                ? saleChipWidth(card.saleBadgeLook, saleBadgeSpot, saleBadgeLabel)
+                : undefined,
+          })}
+          data-tile-price-was=""
+        >
+          {priceWas}
+        </del>
+        <span aria-hidden="true">{priceNow}</span>
+      </>
+    );
 
   // The token props are the only thing separating an editable tile from a
   // buyer's: absent, both spans render exactly as they always have.
@@ -260,8 +356,9 @@ export function ProductTileContent({
           ...priceTagInsetStyle(card.priceTagInset),
           ...hoverDurationStyle(card.priceHoverMs),
         }}
+        data-tile-price=""
       >
-        {formatPrice(product.price, product.currency, locale)}
+        {priceLabel}
       </span>
     ) : null;
 
@@ -277,8 +374,9 @@ export function ProductTileContent({
           priceToken?.className,
         )}
         style={{ ...chipStyle, ...hoverDurationStyle(card.priceHoverMs) }}
+        data-tile-price=""
       >
-        {formatPrice(product.price, product.currency, locale)}
+        {priceLabel}
       </span>
     ) : null;
 
@@ -409,6 +507,7 @@ export function ProductTileContent({
         )}
         {/* Floating price tag, placed over the image per the chosen spot. */}
         {floatedPrice}
+        {saleBadge}
         {soldOut && theme.soldOutBadge && (
           <span
             className={cn(

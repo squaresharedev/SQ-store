@@ -19,6 +19,8 @@ import {
   buildProductPageProduct,
   type PublicProductRow,
 } from "@/lib/products/public";
+import { loadPreviewPricing } from "@/lib/discounts/storefront-preview";
+import { toCurrency } from "@/lib/format/money";
 import type { ProductPageProduct } from "@/types/product";
 
 /**
@@ -32,6 +34,10 @@ import type { ProductPageProduct } from "@/types/product";
  * looks at one page at a time. Owner-scoped through the active account, so a
  * team member previews the store they are editing; RLS re-checks at the DB.
  * Drafts preview fine here (the public route is what refuses them).
+ *
+ * PRICED AS A BUYER SEES IT: a running sale sets the price here exactly as it
+ * does on the public page (lib/discounts/storefront-preview.ts), so the page a
+ * seller previews and the tile beside it on the canvas say the same number.
  */
 export type ProductPagePreviewResult =
   | { ok: true; product: ProductPageProduct }
@@ -70,11 +76,22 @@ export async function getProductPagePreviewData(
   }
   if (!data) return failure(notFound("product"));
 
+  const row = data as PublicProductRow;
+  const pricing = await loadPreviewPricing(account.accountId, [
+    {
+      id: row.id,
+      price: row.price_cents / 100,
+      currency: toCurrency(row.currency),
+      listedAt: row.created_at ?? null,
+    },
+  ]);
+
   return {
     ok: true,
-    product: await buildProductPageProduct(data as PublicProductRow, {
+    product: await buildProductPageProduct(row, {
       soldOutFlag: soldOutFlag === true,
       showStock: showStock === true,
+      pricing: pricing.get(row.id),
     }),
   };
 }

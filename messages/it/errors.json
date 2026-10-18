@@ -53,6 +53,14 @@
       "withRole": "Il tuo ruolo {role, select, owner {Proprietario} editor {Editor} viewer {Visualizzatore} other {{role}}} non può segnare gli ordini come spediti in questo negozio.",
       "noRole": "Non hai il permesso di segnare gli ordini come spediti in questo negozio."
     },
+    "refundOrders": {
+      "withRole": "Il tuo ruolo {role, select, owner {Proprietario} editor {Editor} viewer {Visualizzatore} other {{role}}} non consente di rimborsare o annullare ordini in questo negozio.",
+      "noRole": "Non hai il permesso di rimborsare o annullare ordini in questo negozio."
+    },
+    "connectPayments": {
+      "withRole": "Il tuo ruolo {role, select, owner {Proprietario} editor {Editor} viewer {Visualizzatore} other {{role}}} non consente di collegare un account di pagamento per questo negozio.",
+      "noRole": "Non hai il permesso di collegare un account di pagamento per questo negozio."
+    },
     "manageBilling": {
       "withRole": "Il tuo ruolo di {role, select, owner {proprietario} editor {editor} viewer {visualizzatore} other {{role}}} non consente di cambiare il piano di questo negozio.",
       "noRole": "Non hai il permesso di cambiare il piano di questo negozio."
@@ -86,6 +94,8 @@
     "requestReview": "Troppi tentativi di chiedere una revisione in poco tempo.",
     "fileAppeal": "Troppi tentativi di inviare una contestazione in poco tempo.",
     "fulfilOrders": "Troppi tentativi di segnare ordini come spediti in poco tempo.",
+    "refundOrders": "Troppi rimborsi in poco tempo.",
+    "connectPayments": "Troppi tentativi di collegamento a Stripe in poco tempo.",
     "readCheckoutSettings": "Troppi tentativi di leggere le impostazioni del checkout in poco tempo.",
     "changePlan": "Hai avviato troppe modifiche di piano in poco tempo.",
     "saveDiscounts": "Troppe modifiche agli sconti in poco tempo."
@@ -117,6 +127,8 @@
     "sendForReview": "Non è stato possibile inviare la richiesta di revisione per un problema dalla nostra parte.",
     "fileAppeal": "Non è stato possibile inviare la tua contestazione a causa di un problema da parte nostra.",
     "markOrderShipped": "Non è stato possibile segnare l'ordine come spedito per un problema dalla nostra parte.",
+    "refundOrder": "Impossibile registrare il rimborso a causa di un problema da parte nostra.",
+    "connectPayments": "Impossibile aprire Stripe a causa di un problema da parte nostra.",
     "loadCheckoutSettings": "Non è stato possibile caricare le impostazioni del tuo checkout per un problema dalla nostra parte.",
     "saveCheckoutSettings": "Non è stato possibile salvare le impostazioni del tuo checkout per un problema dalla nostra parte.",
     "loadPlans": "Non è stato possibile caricare il tuo piano a causa di un problema da parte nostra.",
@@ -596,6 +608,14 @@
     "notShippable": {
       "message": "Questo ordine non può essere segnato come spedito.",
       "fix": "Solo gli ordini pagati con qualcosa da inviare possono essere spediti. Aggiorna la pagina per vedere lo stato di questo."
+    },
+    "notRefundable": {
+      "message": "Questo ordine non può essere rimborsato.",
+      "fix": "Solo un ordine pagato può essere rimborsato. Ricarica la pagina per vedere lo stato attuale."
+    },
+    "refundRefused": {
+      "message": "Stripe non è riuscito a elaborare questo rimborso.",
+      "fix": "Non è stato modificato nulla. Riprova tra un momento o effettua il rimborso dal tuo dashboard Stripe."
     }
   },
   "checkoutPageApi": {

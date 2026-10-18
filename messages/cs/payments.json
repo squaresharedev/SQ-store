@@ -16,6 +16,11 @@
       "label": "Další výplata",
       "zero": "Žádná naplánovaná výplata",
       "hint": "Očekáváno {date}"
+    },
+    "fees": {
+      "label": "Poplatky tento měsíc",
+      "zero": "Tento měsíc žádné poplatky",
+      "hint": "Podíl Square Share z vašich prodejů, po vrácených platbách"
     }
   },
   "connection": {
@@ -29,6 +34,8 @@
     "charges": "Přijímání plateb",
     "payouts": "Výplaty",
     "verified": "Ověřeno",
+    "finish": "Stripe potřebuje od vás ještě několik údajů. Dokud je nemá, kupující nemohou platit.",
+    "finishButton": "Dokončit u Stripe",
     "requirementsDue": "Stripe potřebuje další informace, než bude možné pokračovat ve výplatách."
   },
   "connectModal": {
@@ -106,6 +113,7 @@
     "sentTo": "Odesláno na",
     "bankAccount": "Bankovní účet ···· {last4}",
     "arrives": "Připsání",
+    "arrived": "Připsáno",
     "initiated": "Zahájeno",
     "type": "Typ",
     "typeValue": "{method, select, instant {Okamžitá} other {Standardní}} · {automatic, select, true {Automatická} other {Ruční}}",

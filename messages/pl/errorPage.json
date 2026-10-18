@@ -9,6 +9,11 @@
     "description": "Nie udało się wczytać tej strony. To zwykle tymczasowy problem z połączeniem: twoje konto jest bezpieczne, a sesja logowania pozostaje aktywna.",
     "reference": "Numer referencyjny: {digest}"
   },
+  "outdated": {
+    "title": "Ta strona została zaktualizowana",
+    "description": "Gdy ta strona była otwarta, pojawiła się nowsza wersja Square Share, dlatego nie może dokończyć tej operacji. Odśwież stronę i spróbuj ponownie.",
+    "cta": "Odśwież stronę"
+  },
   "footer": {
     "legal": "Informacje prawne",
     "contact": "Kontakt",

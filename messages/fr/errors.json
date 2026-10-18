@@ -53,6 +53,14 @@
       "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de marquer les commandes comme expédiées dans cette boutique.",
       "noRole": "Vous n'avez pas la permission de marquer les commandes comme expédiées dans cette boutique."
     },
+    "refundOrders": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de rembourser ou d'annuler des commandes dans cette boutique.",
+      "noRole": "Vous n'avez pas la permission de rembourser ou d'annuler des commandes dans cette boutique."
+    },
+    "connectPayments": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de connecter un compte de paiement pour cette boutique.",
+      "noRole": "Vous n'avez pas la permission de connecter un compte de paiement pour cette boutique."
+    },
     "manageBilling": {
       "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de changer le forfait de cette boutique.",
       "noRole": "Vous n'avez pas la permission de changer le forfait de cette boutique."
@@ -86,6 +94,8 @@
     "requestReview": "Trop de demandes de réexamen en peu de temps.",
     "fileAppeal": "Trop de tentatives d'envoi d'une contestation en peu de temps.",
     "fulfilOrders": "Trop de tentatives pour marquer des commandes comme expédiées en peu de temps.",
+    "refundOrders": "Trop de remboursements en peu de temps.",
+    "connectPayments": "Trop de tentatives de connexion à Stripe en peu de temps.",
     "readCheckoutSettings": "Trop de tentatives de lecture des paramètres de paiement en peu de temps.",
     "changePlan": "Trop de changements de forfait lancés en peu de temps.",
     "saveDiscounts": "Trop de modifications de réductions en peu de temps."
@@ -117,6 +127,8 @@
     "sendForReview": "Impossible d’envoyer cette demande de réexamen : un problème est survenu de notre côté.",
     "fileAppeal": "Impossible d'envoyer votre contestation en raison d'un problème de notre côté.",
     "markOrderShipped": "Impossible de marquer la commande comme expédiée en raison d'un problème de notre côté.",
+    "refundOrder": "Impossible d'enregistrer le remboursement en raison d'un problème de notre côté.",
+    "connectPayments": "Impossible d'ouvrir Stripe en raison d'un problème de notre côté.",
     "loadCheckoutSettings": "Impossible de charger vos paramètres de paiement en raison d'un problème de notre côté.",
     "saveCheckoutSettings": "Impossible d'enregistrer vos paramètres de paiement en raison d'un problème de notre côté.",
     "loadPlans": "Impossible de charger votre forfait en raison d'un problème de notre côté.",
@@ -596,6 +608,14 @@
     "notShippable": {
       "message": "Cette commande ne peut pas être marquée comme expédiée.",
       "fix": "Seules les commandes payées avec quelque chose à envoyer peuvent être expédiées. Actualisez la page pour voir le statut de cette commande."
+    },
+    "notRefundable": {
+      "message": "Cette commande ne peut pas être remboursée.",
+      "fix": "Seule une commande payée peut être remboursée. Actualisez la page pour voir où en est celle-ci."
+    },
+    "refundRefused": {
+      "message": "Stripe n'a pas pu effectuer ce remboursement.",
+      "fix": "Rien n'a été modifié. Réessayez dans un instant ou effectuez le remboursement depuis votre tableau de bord Stripe."
     }
   },
   "checkoutPageApi": {

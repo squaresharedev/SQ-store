@@ -146,9 +146,12 @@
       "thankYouMessage": "Messaggio di ringraziamento",
       "thankYouCelebration": "Animazione di ringraziamento",
       "checkoutPayButton": "Pulsante di pagamento",
+      "saleChip": "Etichetta promo",
+      "salePrice": "Prezzo in promozione",
       "productPagePhoto": "Foto della pagina prodotto",
       "checkoutPhoto": "Foto del checkout",
-      "thanksPhoto": "Foto della pagina di ringraziamento"
+      "thanksPhoto": "Foto della pagina di ringraziamento",
+      "chipScale": "Stessa misura delle etichette su tutte le schede"
     }
   },
   "editorSearch": {
@@ -206,11 +209,23 @@
     "snippetLabel": "Snippet",
     "snippetReadyHint": "Incolla questo snippet nell’HTML del tuo sito.",
     "snippetLockedHint": "Attiva l’incorporamento e aggiungi almeno un dominio per sbloccare il pulsante Copia.",
+    "snippetSaveHint": "Salva le impostazioni per sbloccare il pulsante Copia.",
+    "pagesOffHint": "Attiva prima le pagine prodotto nell’editor. Un clic su un prodotto apre la sua pagina.",
+    "notShowingLabel": "Se la vetrina non compare",
+    "notShowingTip": "L’indirizzo del tuo sito deve essere tra i Domini consentiti e il sito deve usare https. I costruttori di siti che inseriscono l’HTML personalizzato in un proprio riquadro (Wix, Google Sites) non sono ancora supportati.",
     "copySnippet": {
       "copy": "Copia snippet di incorporamento",
       "copied": "Snippet di incorporamento copiato",
       "failed": "Non è stato possibile copiare lo snippet di incorporamento. Selezionalo e copialo manualmente.",
       "cannotCopyYet": "lo snippet di incorporamento non può ancora essere copiato"
+    },
+    "privacyLabel": "Per la tua informativa sulla privacy",
+    "privacyHint": "Il tuo sito ora carica la vetrina da Squareshare, quindi la sua informativa sulla privacy dovrebbe dirlo. Puoi incollare questo testo:",
+    "privacyText": "Questo sito mostra una vetrina fornita da Squareshare. Al caricamento, l’indirizzo IP e i dati del browser del visitatore vengono inviati a Squareshare per mostrare i prodotti e contare le visite. A questo scopo Squareshare non imposta cookie e non salva nulla sul dispositivo del visitatore. Dettagli: {policy}",
+    "copyPrivacy": {
+      "copy": "Copia testo sulla privacy",
+      "copied": "Testo sulla privacy copiato",
+      "failed": "Non è stato possibile copiare il testo. Selezionalo e copialo manualmente."
     },
     "snippetKeyLabel": "Chiave dello snippet",
     "rotateConfirmText": "Rigenerare crea una nuova chiave. Ogni copia del vecchio snippet smette di funzionare immediatamente, comprese quelle sui siti che vuoi ancora usare: dovrai incollare il nuovo snippet ovunque.",
@@ -222,6 +237,19 @@
     "saved": "Impostazioni di incorporamento salvate.",
     "newKeyIssued": "Nuova chiave di incorporamento generata.",
     "newKeyDetail": "Incolla di nuovo lo snippet ovunque questa vetrina sia incorporata."
+  },
+  "share": {
+    "title": "Link della vetrina",
+    "live": "La tua vetrina ha una pagina tutta sua. Chiunque abbia questo link può sfogliarla, senza bisogno di un sito.",
+    "pagesOff": "Attiva le pagine prodotto nell’editor e questa vetrina avrà un link da condividere.",
+    "detailsMissing": "Questa vetrina avrà un link da condividere quando i tuoi dati venditore saranno completi.",
+    "open": "Apri",
+    "openDesigner": "Apri editor",
+    "copy": {
+      "copy": "Copia link della vetrina",
+      "copied": "Link della vetrina copiato",
+      "failed": "Non è stato possibile copiare il link. Selezionalo e copialo manualmente."
+    }
   },
   "wizard": {
     "category": {
@@ -559,6 +587,27 @@
     "spotBottomCenter": "Cartellino prezzo in basso al centro",
     "spotBottomRight": "Cartellino prezzo in basso a destra"
   },
+  "saleBadge": {
+    "title": "Etichetta promo",
+    "says": "Mostra",
+    "hint": "Appare sul prodotto finché una promozione ne riduce il prezzo.",
+    "percent": "Percentuale",
+    "amount": "Importo",
+    "hidden": "Nascosta",
+    "lookLabel": "Stile",
+    "look": {
+      "pill": "Pillola",
+      "sticker": "Adesivo",
+      "flag": "Bandierina",
+      "ribbon": "Nastro"
+    },
+    "spot": "Etichetta promo {spot, select, top_left {in alto a sinistra} top_center {in alto al centro} top_right {in alto a destra} middle_center {al centro} bottom_left {in basso a sinistra} bottom_center {in basso al centro} bottom_right {in basso a destra} other {}}"
+  },
+  "chipScale": {
+    "label": "Sulle schede più grandi",
+    "tile": "Ingrandisci",
+    "cell": "Stessa misura"
+  },
   "layout": {
     "canvasWidth": "Larghezza dell’area di lavoro",
     "canvasWidthAriaLabel": "Larghezza dell’area di lavoro in blocchi",
@@ -750,6 +799,11 @@
         "plusShipping": "Più spedizione",
         "freeShipping": "Spedizione gratuita",
         "none": "Nessuna"
+      },
+      "saleStyle": {
+        "label": "Prezzo in promozione",
+        "strike": "Linea",
+        "slash": "Diagonale"
       },
       "useStorefrontAccent": "Usa l’accento della vetrina",
       "useButtonTextColor": "Usa il colore del testo del pulsante"

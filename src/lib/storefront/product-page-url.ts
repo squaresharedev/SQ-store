@@ -106,6 +106,21 @@ export function requestedOptions(searchParams: SearchParams, optionIds: Readonly
   return [...wanted];
 }
 
+/** A storefront's own hosted page: the whole board, on an address of its own
+ *  (app/(public)/s/[storefrontId]). Path only, for same-origin links. */
+export function storefrontPagePath(storefrontId: string): string {
+  return `${PUBLIC_PAGES_PREFIX}${encodeURIComponent(storefrontId)}`;
+}
+
+/** The same, absolute on the app's own origin: what a seller shares. */
+export function storefrontPageUrl(storefrontId: string): string {
+  return appUrl(storefrontPagePath(storefrontId));
+}
+
+/** `#report` on a hosted page: its footer, where the report link is. The embed
+ *  frame links here rather than carry a dialog it has no room for. */
+export const REPORT_FRAGMENT = "report";
+
 /** Path only, for same-origin links and tests. */
 export function productPagePath(storefrontId: string, productId: string, { via }: ViaOption = {}): string {
   const path = `${PUBLIC_PAGES_PREFIX}${encodeURIComponent(storefrontId)}/p/${encodeURIComponent(productId)}`;

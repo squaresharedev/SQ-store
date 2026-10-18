@@ -35,7 +35,7 @@ describe("heroCeiling", () => {
     // The figure sits over the first two points (100, 120) and the neighbour
     // just past its edge (150): far below the peak, so the peak sets the axis.
     const ceiling = heroCeiling(rising, { from: 0, to: 0.2, depth: 0.3 });
-    expect(ceiling).toBeCloseTo(1060, 5);
+    expect(ceiling).toBeCloseTo(1120, 5);
   });
 
   it("raises the axis until the line under the figure clears it", () => {

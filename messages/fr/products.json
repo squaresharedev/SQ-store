@@ -390,6 +390,8 @@
     "noTerms": "Aucune condition de livraison rédigée pour l’instant.",
     "profile": "Profil de livraison",
     "edit": "Modifier",
+    "unpriced": "La livraison n'a pas de prix en {currency}, les acheteurs ne peuvent donc pas payer ce produit lors du paiement.",
+    "unpricedAction": "Définir les prix de livraison",
     "modalTitle": "Livraison et retours"
   },
   "optionsField": {

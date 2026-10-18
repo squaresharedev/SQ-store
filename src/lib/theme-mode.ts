@@ -28,6 +28,8 @@
  * that one selector and the whole app follows.
  */
 
+import { EMBED_FRAME_PREFIX } from "@/lib/storefront/embed-frame";
+
 /** What a person can choose. "system" is the default and follows the OS. */
 export type ThemePreference = "light" | "dark" | "system";
 
@@ -56,8 +58,15 @@ export const SYSTEM_DARK_QUERY = "(prefers-color-scheme: dark)";
  *
  * Also subscribes: the OS theme flipping, or another tab saving a preference,
  * re-resolves without React being involved at all.
+ *
+ * NOT IN THE EMBED FRAME, which is the first thing it checks. That document
+ * runs inside a seller's website for a visitor who never came to us: it wears
+ * the seller's own colours whatever the visitor's system says, and it does not
+ * read their storage, which is what lets the embed promise it keeps and reads
+ * nothing on a visitor's device.
  */
 export const THEME_BOOTSTRAP = `(function(){
+if(location.pathname.indexOf(${JSON.stringify(EMBED_FRAME_PREFIX)})===0)return;
 var K=${JSON.stringify(THEME_STORAGE_KEY)},m;
 function r(){
 var p=null;try{p=localStorage.getItem(K)}catch(_){}

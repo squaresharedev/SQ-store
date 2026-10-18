@@ -146,9 +146,12 @@
       "thankYouMessage": "Mensagem de agradecimento",
       "thankYouCelebration": "Celebração de agradecimento",
       "checkoutPayButton": "Botão de pagamento",
+      "saleChip": "Etiqueta de promoção",
+      "salePrice": "Preço em promoção",
       "productPagePhoto": "Foto da página de produto",
       "checkoutPhoto": "Foto do pagamento",
-      "thanksPhoto": "Foto da página de agradecimento"
+      "thanksPhoto": "Foto da página de agradecimento",
+      "chipScale": "Mesmo tamanho de etiqueta em todos os cartões"
     }
   },
   "editorSearch": {
@@ -206,11 +209,23 @@
     "snippetLabel": "Código",
     "snippetReadyHint": "Cole este código no HTML do seu site.",
     "snippetLockedHint": "Ative a incorporação e adicione pelo menos um domínio para desbloquear o botão Copiar.",
+    "snippetSaveHint": "Guarde as definições para desbloquear o botão Copiar.",
+    "pagesOffHint": "Ative primeiro as páginas de produto no editor. Um clique num produto abre a respetiva página.",
+    "notShowingLabel": "Se a montra não aparecer",
+    "notShowingTip": "O endereço do seu site tem de estar em Domínios permitidos e o site tem de usar https. Os construtores de sites que colocam o HTML personalizado numa moldura própria (Wix, Google Sites) ainda não são suportados.",
     "copySnippet": {
       "copy": "Copiar código de incorporação",
       "copied": "Código de incorporação copiado",
       "failed": "Não foi possível copiar o código de incorporação. Selecione-o e copie-o manualmente.",
       "cannotCopyYet": "o código de incorporação ainda não pode ser copiado"
+    },
+    "privacyLabel": "Para a sua política de privacidade",
+    "privacyHint": "O seu site passa a carregar a montra a partir da Squareshare, pelo que a política de privacidade deve indicá-lo. Pode colar este texto:",
+    "privacyText": "Este site apresenta uma montra fornecida pela Squareshare. Ao carregar, o endereço IP e os dados do navegador do visitante são enviados à Squareshare para apresentar os produtos e contar as visitas. Para este efeito, a Squareshare não define cookies nem guarda nada no dispositivo do visitante. Mais informações: {policy}",
+    "copyPrivacy": {
+      "copy": "Copiar texto de privacidade",
+      "copied": "Texto de privacidade copiado",
+      "failed": "Não foi possível copiar o texto. Selecione-o e copie-o manualmente."
     },
     "snippetKeyLabel": "Chave do código",
     "rotateConfirmText": "Renovar emite uma nova chave. Todas as cópias do código antigo deixam de funcionar de imediato, incluindo as que estão em sites que ainda quer manter: vai ter de colar o novo código em todo o lado.",
@@ -222,6 +237,19 @@
     "saved": "Definições de incorporação guardadas.",
     "newKeyIssued": "Nova chave de incorporação emitida.",
     "newKeyDetail": "Cole novamente o código em todos os locais onde esta montra está incorporada."
+  },
+  "share": {
+    "title": "Ligação da montra",
+    "live": "A sua montra tem uma página própria. Qualquer pessoa com esta ligação pode vê-la, sem precisar de um site.",
+    "pagesOff": "Ative as páginas de produto no editor e esta montra passa a ter uma ligação para partilhar.",
+    "detailsMissing": "Esta montra passa a ter uma ligação para partilhar quando os seus dados de vendedor estiverem completos.",
+    "open": "Abrir",
+    "openDesigner": "Abrir editor",
+    "copy": {
+      "copy": "Copiar ligação da montra",
+      "copied": "Ligação da montra copiada",
+      "failed": "Não foi possível copiar a ligação. Selecione-a e copie-a manualmente."
+    }
   },
   "wizard": {
     "category": {
@@ -559,6 +587,27 @@
     "spotBottomCenter": "Etiqueta de preço na base ao centro",
     "spotBottomRight": "Etiqueta de preço no canto inferior direito"
   },
+  "saleBadge": {
+    "title": "Etiqueta de promoção",
+    "says": "Mostrar",
+    "hint": "Aparece no produto enquanto uma promoção lhe reduz o preço.",
+    "percent": "Percentagem",
+    "amount": "Valor",
+    "hidden": "Oculta",
+    "lookLabel": "Estilo",
+    "look": {
+      "pill": "Cápsula",
+      "sticker": "Autocolante",
+      "flag": "Bandeirola",
+      "ribbon": "Fita"
+    },
+    "spot": "Etiqueta de promoção {spot, select, top_left {no canto superior esquerdo} top_center {no topo ao centro} top_right {no canto superior direito} middle_center {ao centro} bottom_left {no canto inferior esquerdo} bottom_center {na base ao centro} bottom_right {no canto inferior direito} other {}}"
+  },
+  "chipScale": {
+    "label": "Em cartões maiores",
+    "tile": "Aumentar",
+    "cell": "Mesmo tamanho"
+  },
   "layout": {
     "canvasWidth": "Largura da tela",
     "canvasWidthAriaLabel": "Largura da tela em blocos",
@@ -750,6 +799,11 @@
         "plusShipping": "Portes à parte",
         "freeShipping": "Envio grátis",
         "none": "Nenhuma"
+      },
+      "saleStyle": {
+        "label": "Preço em promoção",
+        "strike": "Linha",
+        "slash": "Diagonal"
       },
       "useStorefrontAccent": "Utilizar a cor de destaque da montra",
       "useButtonTextColor": "Utilizar a cor do texto do botão"

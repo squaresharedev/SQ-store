@@ -53,6 +53,14 @@
       "withRole": "Your {role, select, owner {Owner} editor {Editor} viewer {Viewer} other {{role}}} role can't mark orders shipped in this store.",
       "noRole": "You don't have permission to mark orders shipped in this store."
     },
+    "refundOrders": {
+      "withRole": "Your {role, select, owner {Owner} editor {Editor} viewer {Viewer} other {{role}}} role can't refund or cancel orders in this store.",
+      "noRole": "You don't have permission to refund or cancel orders in this store."
+    },
+    "connectPayments": {
+      "withRole": "Your {role, select, owner {Owner} editor {Editor} viewer {Viewer} other {{role}}} role can't connect a payment account for this store.",
+      "noRole": "You don't have permission to connect a payment account for this store."
+    },
     "manageBilling": {
       "withRole": "Your {role, select, owner {Owner} editor {Editor} viewer {Viewer} other {{role}}} role can't change this store's plan.",
       "noRole": "You don't have permission to change this store's plan."
@@ -86,6 +94,8 @@
     "requestReview": "Too many attempts to ask for a review in a short time.",
     "fileAppeal": "Too many attempts to send an appeal in a short time.",
     "fulfilOrders": "Too many attempts to mark orders shipped in a short time.",
+    "refundOrders": "Too many refunds in a short time.",
+    "connectPayments": "Too many attempts to connect Stripe in a short time.",
     "readCheckoutSettings": "Too many attempts to read checkout settings in a short time.",
     "changePlan": "Too many plan changes started in a short time.",
     "saveDiscounts": "Too many discount changes in a short time."
@@ -117,6 +127,8 @@
     "sendForReview": "Could not send this for review because of a problem on our side.",
     "fileAppeal": "Could not send your appeal because of a problem on our side.",
     "markOrderShipped": "Could not mark the order shipped because of a problem on our side.",
+    "refundOrder": "Could not record the refund because of a problem on our side.",
+    "connectPayments": "Could not open Stripe because of a problem on our side.",
     "loadCheckoutSettings": "Could not load your checkout settings because of a problem on our side.",
     "saveCheckoutSettings": "Could not save your checkout settings because of a problem on our side.",
     "loadPlans": "Could not load your plan because of a problem on our side.",
@@ -596,6 +608,14 @@
     "notShippable": {
       "message": "This order can't be marked shipped.",
       "fix": "Only paid orders with something to send can be shipped. Refresh the page to see where this one stands."
+    },
+    "notRefundable": {
+      "message": "This order can't be refunded.",
+      "fix": "Only a paid order can be refunded. Refresh the page to see where this one stands."
+    },
+    "refundRefused": {
+      "message": "Stripe couldn't make this refund.",
+      "fix": "Nothing was changed. Try again in a moment, or make the refund from your Stripe dashboard."
     }
   },
   "checkoutPageApi": {

@@ -138,6 +138,8 @@ export type PermissionCapability =
   | "editThisProduct"
   | "editThisStorefront"
   | "fulfilOrders"
+  | "refundOrders"
+  | "connectPayments"
   | "manageBilling"
   | "manageDiscounts";
 
@@ -196,6 +198,8 @@ export type RateLimitedOperation =
   | "requestReview"
   | "fileAppeal"
   | "fulfilOrders"
+  | "refundOrders"
+  | "connectPayments"
   | "changePlan"
   | "saveDiscounts";
 
@@ -293,6 +297,8 @@ export type ServerErrorOperation =
   | "sendForReview"
   | "fileAppeal"
   | "markOrderShipped"
+  | "refundOrder"
+  | "connectPayments"
   | "loadPlans"
   | "startCheckout"
   | "openBillingPortal"

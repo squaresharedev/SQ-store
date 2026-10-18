@@ -20,7 +20,7 @@
     "allProducts": "Wszystkie produkty",
     "someProducts": "{count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}}",
     "kindCode": "Kod rabatowy",
-    "kindAutomatic": "Automatyczna obniżka cen",
+    "kindAutomatic": "Obniżka",
     "status": {
       "scheduled": "Zaplanowany",
       "active": "Aktywny",
@@ -80,14 +80,15 @@
   "form": {
     "newTitle": "Nowy rabat",
     "editTitle": "Edytuj rabat",
+    "editSale": "Edytuj obniżkę",
+    "editCode": "Edytuj kod rabatowy",
     "back": "Wróć do rabatów",
     "kind": {
       "title": "Jaki rodzaj rabatu?",
       "code": "Kod rabatowy",
-      "codeHint": "Kupujący wpisują go przy kasie. Udostępnij go na Instagramie, w newsletterze lub przez twórcę i sprawdź, który kanał sprzedaje.",
-      "automatic": "Automatyczna obniżka cen",
-      "automaticHint": "Wszyscy widzą niższą cenę na stronach twoich produktów. Kod nie jest potrzebny.",
-      "fixed": "Rodzaju rabatu nie można zmienić. Aby zmienić, utwórz nowy."
+      "codeHint": "Kupujący wpisują go przy płatności, a ty widzisz, z którego kanału przyszli.",
+      "automatic": "Obniżka",
+      "automaticHint": "Obniża ceny dla wszystkich. Bez kodu."
     },
     "code": {
       "title": "Kod",
@@ -97,24 +98,22 @@
       "hint": "3 do 24 liter lub cyfr. Kupujący mogą wpisać go dużymi lub małymi literami."
     },
     "channel": {
-      "label": "Kanał (opcjonalny)",
-      "hint": "Gdzie udostępnisz ten kod, abyś mógł sprawdzić, który kanał przynosi zamówienia.",
+      "label": "Udostępniony w (opcjonalnie)",
       "suggestions": "Sugerowane kanały",
       "newsletter": "Newsletter",
       "creator": "Twórca"
     },
     "value": {
-      "title": "Rabat",
+      "title": "Ile zniżki?",
       "each": "Odejmowany od ceny każdego produktu.",
       "order": "Odejmowany od produktów w zamówieniu. Dostawa nie jest objęta rabatem.",
-      "percent": "Procent",
-      "amount": "Kwota stała",
+      "unit": "Procent lub kwota",
       "percentLabel": "Procent rabatu",
       "amountLabel": "Kwota rabatu",
       "currencyHint": "Dotyczy tylko produktów w tej walucie."
     },
     "products": {
-      "title": "Dotyczy",
+      "title": "Które produkty?",
       "all": "Wszystkie produkty",
       "some": "Wybrane produkty",
       "summary": "{count, plural, =0 {Wybierz produkty} one {Wybrano # produkt} few {Wybrano # produkty} many {Wybrano # produktów} other {Wybrano # produktu}}",
@@ -122,7 +121,7 @@
       "none": "Żadne produkty nie pasują."
     },
     "schedule": {
-      "title": "Kiedy",
+      "title": "Kiedy?",
       "timeZone": "Czasy podane są w twoim czasie ({zone}).",
       "starts": "Zaczyna się",
       "ends": "Kończy się",
@@ -142,11 +141,9 @@
       }
     },
     "limit": {
-      "title": "Limity",
-      "label": "Ogranicz liczbę zamówień",
-      "count": "Liczba zamówień"
+      "label": "Maksymalnie zamówień (opcjonalnie)",
+      "none": "Bez limitu"
     },
-    "enabled": "Kod jest włączony",
     "locked": "Ta obniżka już się rozpoczęła, więc można zmienić tylko jej koniec. Aby zmienić cokolwiek innego, zakończ ją i utwórz nową.",
     "summary": {
       "title": "Podsumowanie",
@@ -154,7 +151,9 @@
       "starts": "Zaczyna się {date}",
       "ends": "Kończy się {date}",
       "noEnd": "Bez daty końca",
-      "example": "Przykład: {title} w cenie {regular} kosztuje {now}."
+      "exampleLabel": "Przykład",
+      "example": "Przykład: {title} w cenie {regular} kosztuje {now}.",
+      "chipLink": "Zmień wygląd obniżek w sklepie"
     },
     "create": "Utwórz rabat",
     "save": "Zapisz zmiany",

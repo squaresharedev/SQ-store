@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "../setup/render";
+import { render, screen, cleanup, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import {
   DEFAULT_STOREFRONT_CONFIG,
@@ -9,6 +9,8 @@ import {
 } from "@/types/storefront";
 import { PriceTagControls } from "@/components/storefront/PriceTagControls";
 import { PriceTagSection } from "@/components/storefront/PriceTagSection";
+import { SaleBadgeControls } from "@/components/storefront/SaleBadgeControls";
+import type { Product } from "@/types/product";
 
 /**
  * The price tag's own controls, used at two scopes: the theme's Price tag
@@ -23,6 +25,14 @@ import { PriceTagSection } from "@/components/storefront/PriceTagSection";
 afterEach(cleanup);
 
 const themed = () => structuredClone(DEFAULT_STOREFRONT_CONFIG.theme);
+
+/** The sale chip's controls at theme scope, as the Sale chip section mounts
+ *  them. */
+function renderChip(over: CardStyleOverrides = {}) {
+  const onChange = vi.fn();
+  render(<SaleBadgeControls theme={{ ...themed(), ...over }} onChange={onChange} />);
+  return onChange;
+}
 
 /** Theme scope: the controls edit the theme itself, so `over` is the theme's
  *  own values rather than an override layer. */
@@ -88,13 +98,98 @@ describe("PriceTagControls", () => {
     await user.click(screen.getByRole("switch", { name: "Show on hover" }));
     expect(onChange).toHaveBeenLastCalledWith({ priceDisplay: "hover" });
 
-    await user.click(screen.getByRole("button", { name: "Hidden" }));
+    // The sale chip under it has a "Hidden" of its own, so each is asked for
+    // inside its own group.
+    await user.click(
+      within(screen.getByRole("group", { name: "Price tag placement" })).getByRole("button", { name: "Hidden" }),
+    );
     expect(onChange).toHaveBeenLastCalledWith({ priceTagPosition: "hidden" });
 
     // No call ever carries more than its one field.
     for (const call of onChange.mock.calls) {
       expect(Object.keys(call[0])).toHaveLength(1);
     }
+  });
+
+  it("edits the sale chip the same way: what it shows, its look, where it sits, and its fill, one field at a time", async () => {
+    const user = userEvent.setup();
+    const onChange = renderChip();
+    const chip = within(document.querySelector<HTMLElement>("[data-sale-badge-controls]")!);
+
+    // Four things it can show, none of them typed.
+    const says = within(chip.getByRole("group", { name: "Shows" }));
+    expect(says.getAllByRole("button").map((option) => option.textContent)).toEqual([
+      "Percentage",
+      "Amount",
+      "Sale",
+      "Hidden",
+    ]);
+    expect(says.getByRole("button", { name: "Percentage" })).toHaveAttribute("aria-pressed", "true");
+    expect(chip.queryByRole("textbox")).toBeNull();
+    await user.click(says.getByRole("button", { name: "Amount" }));
+    expect(onChange).toHaveBeenLastCalledWith({ saleBadge: "amount" });
+
+    // Four looks, picked from pictures of the real chip saying what it will say.
+    const looks = within(chip.getByRole("group", { name: "Style" }));
+    expect(looks.getAllByRole("button").map((option) => option.getAttribute("data-option-card"))).toEqual([
+      "pill",
+      "sticker",
+      "flag",
+      "ribbon",
+    ]);
+    expect(looks.getByRole("button", { name: "Pill" })).toHaveAttribute("aria-pressed", "true");
+    expect(looks.getAllByText("-20%")).toHaveLength(4);
+    await user.click(looks.getByRole("button", { name: "Ribbon" }));
+    expect(onChange).toHaveBeenLastCalledWith({ saleBadgeLook: "ribbon" });
+
+    await user.click(chip.getByRole("button", { name: "Sale chip bottom right" }));
+    expect(onChange).toHaveBeenLastCalledWith({ saleBadgePosition: "bottom-right" });
+
+    await user.click(
+      chip.getByRole("group", { name: "Fill swatches" }).querySelector<HTMLButtonElement>('[aria-label^="Grey"]')!,
+    );
+    expect(Object.keys(onChange.mock.lastCall![0])).toEqual(["saleBadgeColor"]);
+    expect(onChange.mock.lastCall![0].saleBadgeColor).toMatch(/^#[0-9a-f]{6}$/);
+
+    // Back to following the accent clears the field rather than storing it.
+    await user.click(chip.getByRole("button", { name: "Use Theme color" }));
+    expect(onChange).toHaveBeenLastCalledWith({ saleBadgeColor: undefined });
+  });
+
+  it("pictures a tile's own sale in its inspector: what that product's chip will really say", () => {
+    const product: Product = {
+      id: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+      title: "Alder rocking chair",
+      description: "",
+      price: 745,
+      currency: "EUR",
+      status: "active",
+      imageUrl: null,
+      digitalFileName: null,
+      trackStock: false,
+      stockQuantity: null,
+      lowStockThreshold: 3,
+      maxPerOrder: 10,
+      sale: { price: 670.5, offerPercent: 10 },
+    };
+    render(<SaleBadgeControls theme={themed()} overrides={{ saleBadge: "amount" }} onChange={vi.fn()} product={product} />);
+    expect(within(screen.getByRole("group", { name: "Style" })).getAllByText("-€74.50")).toHaveLength(4);
+  });
+
+  it("offers the sale chip no spot on the price's row, and none of its controls once hidden", () => {
+    renderChip({ priceTagPosition: "top-left" });
+    const chip = within(document.querySelector<HTMLElement>("[data-sale-badge-controls]")!);
+    // The whole top row is the price's: side by side they collide on a small tile.
+    expect(chip.queryByRole("button", { name: /^Sale chip top / })).toBeNull();
+    // Asked for the price's corner, it is shown where it will really be drawn.
+    expect(chip.getByRole("button", { name: "Sale chip bottom left" })).toHaveAttribute("aria-pressed", "true");
+    cleanup();
+
+    renderChip({ saleBadge: "hidden" });
+    const hidden = within(document.querySelector<HTMLElement>("[data-sale-badge-controls]")!);
+    expect(hidden.queryByRole("group", { name: "Style" })).toBeNull();
+    expect(hidden.queryByRole("button", { name: /^Sale chip / })).toBeNull();
+    expect(hidden.queryByRole("group", { name: "Fill swatches" })).toBeNull();
   });
 
   it("sets each of the three colors independently", async () => {
@@ -238,5 +333,28 @@ describe("PriceTagSection (theme scope)", () => {
     // one that never had it — a key holding undefined is not the same thing.
     expect(next).not.toHaveProperty("priceTagColor");
     expect(next).toEqual(themed());
+  });
+
+  it("offers one switch for the whole board: chips grow with bigger cards, or stay the same", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const theme = themed();
+    render(<PriceTagSection theme={theme} onChange={onChange} />);
+    const scale = screen.getByRole("group", { name: "On bigger cards" });
+    expect(within(scale).getByRole("button", { name: "Grow" })).toHaveAttribute("aria-pressed", "true");
+    await user.click(within(scale).getByRole("button", { name: "Stay the same" }));
+    expect(onChange).toHaveBeenLastCalledWith({ ...theme, chipScale: "cell" });
+    cleanup();
+
+    // Back to the default is no key at all.
+    const onBack = vi.fn();
+    render(<PriceTagSection theme={{ ...theme, chipScale: "cell" }} onChange={onBack} />);
+    await user.click(within(screen.getByRole("group", { name: "On bigger cards" })).getByRole("button", { name: "Grow" }));
+    expect(onBack.mock.lastCall![0]).not.toHaveProperty("chipScale");
+  });
+
+  it("does not offer the board's chip size on one tile", () => {
+    render(<PriceTagControls theme={themed()} overrides={{}} onChange={vi.fn()} scope={{ blockKey: "p_x" }} />);
+    expect(screen.queryByRole("group", { name: "On bigger cards" })).toBeNull();
   });
 });

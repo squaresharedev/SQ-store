@@ -13,16 +13,21 @@
 /** The top corner the headline sits in. */
 export type HeroSide = "left" | "right";
 
-/** The headline's box over the plot, in shares of the plot (0 to 1): how far
- *  across it starts and ends, and how far down from the top it reaches. */
+/** The headline's box over the plot, in shares (0 to 1): how far along the
+ *  DATA it starts and ends (first value to last, which is not quite the whole
+ *  width: the chart keeps its ends for the tails), and how far down from the
+ *  top of the plot it reaches. */
 export type HeroFootprint = { from: number; to: number; depth: number };
 
 /** How much of the series each corner is judged on: its outer third. */
 const CORNER_SHARE = 1 / 3;
 
 /** Clear air kept above the tallest point, as a share of it, so the peak
- *  never touches the top of the plot. */
-const HEADROOM = 0.06;
+ *  stands well clear of the top of the plot. */
+const HEADROOM = 0.12;
+
+/** Where a series of one value is drawn: the middle of the plot. */
+const LONE_POINT_AT = 0.5;
 
 /** The deepest the headline is allowed to count as reaching. Past this the
  *  ceiling would grow without limit and flatten the line to nothing. */
@@ -59,6 +64,9 @@ export function heroSide(values: number[]): HeroSide {
  * The stretch is widened to the points just outside the footprint, because the
  * curve between an outside point and an inside one runs through the
  * footprint's edge.
+ *
+ * A single value is not a stretch: the chart draws it as one point in the
+ * middle of the plot, so it only counts if the headline reaches the middle.
  */
 export function heroCeiling(values: number[], footprint: HeroFootprint): number {
   const peak = Math.max(0, ...values);
@@ -67,7 +75,9 @@ export function heroCeiling(values: number[], footprint: HeroFootprint): number 
   const clampIndex = (index: number) => Math.min(last, Math.max(0, index));
   const start = clampIndex(Math.floor(footprint.from * last));
   const end = clampIndex(Math.ceil(footprint.to * last));
-  const under = Math.max(0, ...values.slice(start, end + 1));
+  const overMiddle = footprint.from <= LONE_POINT_AT && footprint.to >= LONE_POINT_AT;
+  const under =
+    last === 0 ? (overMiddle ? peak : 0) : Math.max(0, ...values.slice(start, end + 1));
   const depth = Math.min(MAX_DEPTH, Math.max(0, footprint.depth));
   return Math.max(peak * (1 + HEADROOM), under / (1 - depth));
 }

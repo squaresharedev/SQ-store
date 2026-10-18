@@ -12,9 +12,11 @@ import {
   getArchivedDiscountLabels,
   getDiscountPerformance,
   listDiscounts,
+  listProductChoices,
 } from "@/lib/discounts/queries";
 import { summarizeDiscounts } from "@/lib/discounts/summary";
-import { NEW_DISCOUNT_PATH } from "@/lib/discounts/paths";
+import { NEW_DISCOUNT_PATH, DISCOUNTS_PATH } from "@/lib/discounts/paths";
+import { requireUser } from "@/lib/auth/session";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Discounts.metadata");
@@ -25,10 +27,15 @@ export async function generateMetadata(): Promise<Metadata> {
 // store (lib/discounts/queries.ts); anyone on the team may look, and only
 // owners and editors get the controls (the actions re-check regardless).
 export default async function DiscountsRoute() {
-  const [account, discounts, performance, t] = await Promise.all([
+  // The layout's session gate does not run again on a move between sections
+  // (see ../layout.tsx, or ../../layout.tsx from a nested page): a page asks.
+  await requireUser(DISCOUNTS_PATH);
+  const [account, discounts, performance, products, t] = await Promise.all([
     getActiveAccount(),
     listDiscounts(),
     getDiscountPerformance(),
+    // What each row opens to list: the part of the catalogue it covers.
+    listProductChoices(),
     getTranslations("Discounts.page"),
   ]);
   const canWrite = can(account?.role, "products.write");
@@ -52,7 +59,7 @@ export default async function DiscountsRoute() {
           ) : undefined
         }
       />
-      <DiscountsPage summary={summary} canWrite={canWrite} />
+      <DiscountsPage summary={summary} products={products} canWrite={canWrite} />
     </main>
   );
 }

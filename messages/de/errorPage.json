@@ -9,6 +9,11 @@
     "description": "Diese Seite konnte nicht geladen werden. Das ist meist ein vorübergehendes Verbindungsproblem: Dein Konto ist in Ordnung, und du bist weiterhin angemeldet.",
     "reference": "Referenz: {digest}"
   },
+  "outdated": {
+    "title": "Diese Seite wurde aktualisiert",
+    "description": "Während diese Seite geöffnet war, ist eine neuere Version von Square Share erschienen. Deshalb kann sie deine Aktion nicht abschließen. Lade die Seite neu und versuche es erneut.",
+    "cta": "Seite neu laden"
+  },
   "footer": {
     "legal": "Rechtliches",
     "contact": "Kontakt",

@@ -1,10 +1,11 @@
 "use client";
 
 import { helpTextClass } from "@/components/ui/control-styles";
-import { pageBleedShellClass, pageGutterClass } from "@/components/ui/surface-styles";
+import { pageShellClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { ChartCard } from "@/components/analytics/ChartCard";
 import { RevenueHero } from "@/components/analytics/RevenueHero";
+import { HERO_RANGE, heroSeries } from "./hero-fixtures";
 import {
   BarChart,
   CompositionBar,
@@ -119,25 +120,38 @@ const CATEGORY_SALES = [
   { label: "Misc", value: 12 },
 ];
 
-/** Thirty daily buckets shaped by `value(day)`, as the analytics feed sends them. */
-function heroSeries(value: (day: number) => number) {
-  return Array.from({ length: 30 }, (_, day) => {
-    const revenueCents = Math.max(0, Math.round(value(day)));
-    return {
-      date: `2026-09-${String(day + 1).padStart(2, "0")}`,
-      revenueCents,
-      sales: Math.round(revenueCents / 4_000),
-      aovCents: 4_000,
-    };
-  });
-}
 
-/** The window the hero specimens cover, as the page resolves a range. */
-const HERO_RANGE = { from: "2026-09-01", to: "2026-09-30" };
+type HeroSpecimen = {
+  title: string;
+  note: string;
+  series: ReturnType<typeof heroSeries>;
+  /** The period before, for the versus specimens. */
+  previous?: ReturnType<typeof heroSeries>;
+  range?: { from: string; to: string };
+};
 
 // The analytics revenue hero, once per shape that changes where its figure
 // sits: the figure takes the top corner the line leaves free.
-const HERO_SPECIMENS = [
+const HERO_SPECIMENS: HeroSpecimen[] = [
+  {
+    title: "Bleed — versus the previous period, up",
+    note: "The period before is the dashed grey line, first day on first day; the change is stated under the figure",
+    series: heroSeries((day) => 22_000 + day * 2_100 + Math.sin(day * 1.7) * 9_000),
+    previous: heroSeries((day) => 18_000 + day * 1_300 + Math.sin(day * 1.1 + 2) * 8_000),
+  },
+  {
+    title: "Bleed — versus the previous period, down",
+    note: "A slower period: the dashed line runs above, and the change is stated without turning red",
+    series: heroSeries((day) => 70_000 - day * 1_500 + Math.sin(day * 1.3) * 9_000),
+    previous: heroSeries((day) => 82_000 - day * 900 + Math.sin(day * 0.9 + 1) * 10_000),
+  },
+  {
+    title: "Bleed — one value",
+    note: "A one-day range: the point is marked and a dotted level runs through it, with the day before as a grey point",
+    series: heroSeries(() => 48_500).slice(0, 1),
+    previous: heroSeries(() => 31_000).slice(0, 1),
+    range: { from: "2026-09-01", to: "2026-09-01" },
+  },
   {
     title: "Bleed — going up",
     note: "Low on the left, so the figure sits top left and the value labels run down the right",
@@ -162,8 +176,8 @@ const HERO_SPECIMENS = [
 
 export function ChartsGallery() {
   return (
-    <main className={cn(pageBleedShellClass, "space-y-6")}>
-      <div className={pageGutterClass}>
+    <main className={cn(pageShellClass, "space-y-6")}>
+      <div>
         <h1 className="text-xl font-semibold text-foreground">Chart kit</h1>
         <p className={helpTextClass}>
           Reusable analytics graphs (components/charts) — every family and
@@ -171,29 +185,35 @@ export function ChartsGallery() {
         </p>
       </div>
 
-      {/* The one chart that is not a card: it runs the full width of the page,
-          so it sits outside the gutters the rest of the gallery keeps. */}
+      {/* The one chart that is not a card: the analytics revenue hero, in its
+          frame of corner marks. */}
       {HERO_SPECIMENS.map((specimen) => {
         const revenueCents = specimen.series.reduce((sum, point) => sum + point.revenueCents, 0);
         return (
           <section key={specimen.title} className="space-y-4">
-            <div className={pageGutterClass}>
+            <div>
               <h2 className="text-base font-semibold text-foreground">{specimen.title}</h2>
               <p className={helpTextClass}>{specimen.note}</p>
             </div>
             <RevenueHero
               series={specimen.series}
-              range={HERO_RANGE}
+              range={specimen.range ?? HERO_RANGE}
               revenueCents={revenueCents}
               netRevenueCents={Math.round(revenueCents * 0.95)}
               currency="EUR"
               empty={specimen.series.length === 0}
+              previous={
+                specimen.previous && {
+                  revenueCents: specimen.previous.reduce((sum, point) => sum + point.revenueCents, 0),
+                  series: specimen.previous,
+                }
+              }
             />
           </section>
         );
       })}
 
-      <div className={cn(pageGutterClass, "grid gap-4 md:grid-cols-2")}>
+      <div className="grid gap-4 md:grid-cols-2">
         <ChartCard
           title="Line — multi-series"
           description="Ink leads; refunds pinned red because red means money going back"
@@ -221,6 +241,54 @@ export function ChartsGallery() {
             series={[{ key: "sessions", label: "Sessions" }]}
             variant="area"
             ariaLabel="Daily storefront sessions"
+          />
+        </ChartCard>
+
+        <ChartCard
+          title="Line — versus a reference"
+          description="reference: true. The previous period is dashed, thin and behind; the legend names both"
+        >
+          <LineChart
+            data={DAILY_SESSIONS.map((point, index) => ({
+              ...point,
+              before: Math.round(point.sessions * (0.78 + ((index * 7) % 5) / 20)),
+            }))}
+            xKey="day"
+            series={[
+              { key: "sessions", label: "Sessions", colorIndex: 3 },
+              { key: "before", label: "Previous period", colorIndex: 1, reference: true },
+            ]}
+            variant="area"
+            ariaLabel="Daily sessions versus the previous period"
+          />
+        </ChartCard>
+
+        <ChartCard
+          title="Line — one value"
+          description="A line needs two points. One value is a marked point with a dotted level through it"
+        >
+          <LineChart
+            data={[{ day: "Jul 20", sessions: 640 }]}
+            xKey="day"
+            series={[{ key: "sessions", label: "Sessions", colorIndex: 3 }]}
+            variant="area"
+            ariaLabel="Sessions on one day"
+          />
+        </ChartCard>
+
+        <ChartCard
+          title="Line — one value among gaps"
+          description="Thirteen days, one of them with a value (an average with a single sale): the point sits on its own day"
+        >
+          <LineChart
+            data={DAILY_SESSIONS.map((point, index) => ({
+              day: point.day,
+              sessions: index === 8 ? point.sessions : null,
+            }))}
+            xKey="day"
+            series={[{ key: "sessions", label: "Sessions", colorIndex: 4 }]}
+            connectNulls
+            ariaLabel="Sessions with a single recorded day"
           />
         </ChartCard>
 

@@ -1,4 +1,32 @@
+import { embedOrigin } from "@/lib/app-url";
 import { escapeHtml } from "@/lib/format/html";
+
+/**
+ * Whether the embed can be put on a website yet. ONE answer, like
+ * STRIPE_CONNECT_AVAILABLE (lib/payments/availability.ts), for every surface
+ * that would otherwise hand a seller a snippet that does nothing.
+ *
+ * The answer is "does the embed have a host": NEXT_PUBLIC_EMBED_URL (see
+ * embedOrigin in lib/app-url.ts, and LAUNCH SWITCHES in wrangler.jsonc). The
+ * code ships before that hostname exists, and a seller who copied a script tag
+ * pointing at a host nothing serves would get an empty div on their site with
+ * nothing to say why. So until there is one, the snippet is shown but cannot
+ * be copied, whatever the settings say, and the page says the embed is still
+ * on its way. The settings themselves save either way, so they are ready.
+ */
+export function isEmbedAvailable(): boolean {
+  return embedOrigin() !== null;
+}
+
+/** The loader's file name on the embed origin (public/widget.js). */
+export const EMBED_LOADER_PATH = "/widget.js";
+
+/**
+ * The host a snippet names while the embed has none of its own yet. Shown,
+ * never copied (see isEmbedAvailable): it only keeps the picture of a snippet
+ * honest about where the real one will point.
+ */
+const PLANNED_EMBED_ORIGIN = "https://embed.squareshare.eu";
 
 /**
  * The snippet sellers paste into their own site.
@@ -15,7 +43,7 @@ import { escapeHtml } from "@/lib/format/html";
 export function embedSnippet(embedKey: string): string {
   return [
     `<div data-squareshare-storefront="${embedKey}"></div>`,
-    `<script async src="https://embed.squareshare.to/widget.js"></script>`,
+    `<script async src="${embedOrigin() ?? PLANNED_EMBED_ORIGIN}${EMBED_LOADER_PATH}"></script>`,
   ].join("\n");
 }
 

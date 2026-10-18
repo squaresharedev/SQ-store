@@ -2,7 +2,10 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { toCurrency } from "@/lib/format/money";
+import { presignGetUrl } from "@/lib/r2";
 import { DISCOUNT_COLUMNS, toDiscountView, type DiscountRow } from "@/lib/discounts/row";
+import { getPrimaryStorefrontId } from "@/lib/storefront/queries";
+import { SALE_CHIP_SETTING_ID, settingHref } from "@/lib/storefront/setting-ref";
 import {
   DISCOUNT_PRODUCTS_MAX,
   LIVE_DISCOUNTS_MAX,
@@ -122,7 +125,7 @@ export async function listProductChoices(): Promise<DiscountProductChoice[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("id, title, price_cents, currency")
+    .select("id, title, price_cents, currency, image_key")
     .eq("owner_id", account.accountId)
     .order("title", { ascending: true })
     .limit(DISCOUNT_PRODUCTS_MAX);
@@ -130,10 +133,29 @@ export async function listProductChoices(): Promise<DiscountProductChoice[]> {
     console.error("[discounts] product choices failed", error.message);
     return [];
   }
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    title: row.title,
-    priceCents: row.price_cents,
-    currency: toCurrency(row.currency),
-  }));
+  // Signed the way the Products page signs its covers (a local HMAC, no
+  // network round-trip), so a catalogue of hundreds costs nothing extra.
+  return Promise.all(
+    (data ?? []).map(async (row) => ({
+      id: row.id,
+      title: row.title,
+      priceCents: row.price_cents,
+      currency: toCurrency(row.currency),
+      imageUrl: row.image_key ? await presignGetUrl(row.image_key) : null,
+    })),
+  );
+}
+
+/**
+ * Where a seller changes how a sale looks to buyers: the Sale chip section of
+ * the storefront they most recently worked on, or null without one. Never
+ * throws: a link left out is better than a form that fails to open.
+ */
+export async function saleChipHref(): Promise<string | null> {
+  try {
+    const id = await getPrimaryStorefrontId();
+    return id ? settingHref(SALE_CHIP_SETTING_ID, id) : null;
+  } catch {
+    return null;
+  }
 }

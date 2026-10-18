@@ -59,9 +59,19 @@ function snapshot(overrides: Partial<AnalyticsSnapshot> = {}): AnalyticsSnapshot
       channels: [],
       topProducts: [],
       weekdays: [],
+      weekdayProducts: [],
       statuses: [],
     },
     signals: { available: true, byKind, everRecorded: ["storefront_view"], activeBlockTypes: [] },
+    funnel: {
+      checkoutsAvailable: true,
+      embedViews: 0,
+      productOpens: 0,
+      embedOrders: 0,
+      checkoutsStarted: 0,
+      checkoutsExpired: 0,
+    },
+    previous: null,
     ...overrides,
   };
 }

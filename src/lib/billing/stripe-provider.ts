@@ -10,19 +10,16 @@
 // `subscription_cancel` switched OFF.
 //
 // PRICES ARE CHECKED, NOT TRUSTED. The price a checkout charges is looked up
-// by the lookup key in lib/billing/plans.ts and must charge exactly what that
-// catalog (and so the plans page) says: same amount, same currency, same
-// interval. A mismatch refuses the checkout (BillingConfigError) instead of
-// charging a seller a price they were not shown.
+// by the lookup key of the plan_prices row in force (lib/billing/catalog.ts)
+// and must charge exactly what that row (and so the plans page) says: same
+// amount, same currency, same interval. A mismatch refuses the checkout
+// (BillingConfigError) instead of charging a seller a price they were not
+// shown.
 
 import { toStripeLocale } from "@/lib/billing/stripe-locale";
 import { STRIPE_CANCELLATION_FEEDBACK, type CancellationFeedback } from "@/lib/billing/cancellation";
-import {
-  BILLING_CURRENCY,
-  PLANS,
-  type BillingInterval,
-  type PaidPlanId,
-} from "@/lib/billing/plans";
+import { readSoldPrice } from "@/lib/billing/catalog";
+import type { BillingInterval, PaidPlanId } from "@/lib/billing/plans";
 import {
   BillingConfigError,
   type BillingCustomerDetails,
@@ -64,10 +61,12 @@ async function ownedSubscription(subscriptionId: string, customerId: string): Pr
   return subscription;
 }
 
-/** The active Stripe price for a plan and interval, checked against the catalog. */
+/** The active Stripe price for a plan and interval, checked against the
+ *  plan_prices row in force. */
 async function catalogPrice(plan: PaidPlanId, interval: BillingInterval): Promise<StripePrice> {
-  const lookupKey = PLANS[plan].lookupKey?.[interval];
-  if (!lookupKey) throw new BillingConfigError(`no lookup key for ${plan}/${interval}`);
+  const sold = await readSoldPrice(plan, interval);
+  const lookupKey = sold?.stripeLookupKey;
+  if (!sold || !lookupKey) throw new BillingConfigError(`no price in force for ${plan}/${interval}`);
   const prices = await stripeRequest<StripeList<StripePrice>>("GET", "/prices", {
     lookup_keys: [lookupKey],
     active: true,
@@ -75,16 +74,16 @@ async function catalogPrice(plan: PaidPlanId, interval: BillingInterval): Promis
   });
   const price = prices.data[0];
   if (!price) throw new BillingConfigError(`no active Stripe price with lookup key ${lookupKey}`);
-  const expected = PLANS[plan].priceCents[interval];
+  const expected = sold.priceCents;
   if (
     price.unit_amount !== expected ||
-    price.currency.toUpperCase() !== BILLING_CURRENCY ||
+    price.currency.toUpperCase() !== sold.currency ||
     price.recurring?.interval !== interval ||
     price.recurring.interval_count !== 1
   ) {
     throw new BillingConfigError(
-      `Stripe price ${price.id} (${lookupKey}) does not match plans.ts: ` +
-        `${price.unit_amount} ${price.currency}/${price.recurring?.interval} vs ${expected} ${BILLING_CURRENCY}/${interval}`,
+      `Stripe price ${price.id} (${lookupKey}) does not match plan_prices: ` +
+        `${price.unit_amount} ${price.currency}/${price.recurring?.interval} vs ${expected} ${sold.currency}/${interval}`,
     );
   }
   return price;

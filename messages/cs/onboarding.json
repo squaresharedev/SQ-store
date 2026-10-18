@@ -38,6 +38,22 @@
       "actionOpen": "Otevřít editor",
       "cta": "Zveřejněte svůj produkt",
       "ctaPagesOff": "Zapnout produktové stránky"
+    },
+    "payments": {
+      "label": "Přijímat platby",
+      "detail": "Propojte Stripe, aby kupující mohli platit kartou na vašich produktových stránkách.",
+      "detailUnfinished": "Stripe ještě potřebuje několik údajů, aby kupující mohli platit.",
+      "detailDone": "Kupující mohou platit kartou.",
+      "action": "Propojit Stripe",
+      "actionFinish": "Dokončit u Stripe",
+      "cta": "Propojte Stripe a přijímejte platby"
+    },
+    "delivery": {
+      "label": "Nastavit cenu dopravy",
+      "detail": "Bez ceny dopravy nemají produkty s doručením žádné tlačítko nákupu.",
+      "detailDone": "Kupující vidí celkovou cenu před zaplacením.",
+      "action": "Nastavit ceny",
+      "cta": "Nastavte ceny dopravy"
     }
   },
   "checklist": {
@@ -198,7 +214,10 @@
         "title": "Vložte výlohu na svůj web",
         "body": "Každá výloha má tlačítko pro vložení na web, které vám dá kód podobný tomuto. Widget je zatím ve vývoji a na jiných webech se ještě nezobrazuje.",
         "bodyButton": "Toto tlačítko vám dá kód podobný tomu níže, který vložíte na svůj web. Widget je zatím ve vývoji a na jiných webech se ještě nezobrazuje.",
-        "fallbackBody": "Jakmile budete mít výlohu, tlačítko pro vložení na její kartě vám dá kód podobný tomuto. Widget je zatím ve vývoji a na jiných webech se ještě nezobrazuje."
+        "fallbackBody": "Jakmile budete mít výlohu, tlačítko pro vložení na její kartě vám dá kód podobný tomuto. Widget je zatím ve vývoji a na jiných webech se ještě nezobrazuje.",
+        "bodyLive": "Každá výloha má tlačítko pro vložení na web, které vám dá kód podobný tomuto. Vložte ho na svůj web a výloha se tam zobrazí.",
+        "bodyButtonLive": "Toto tlačítko vám dá kód podobný tomu níže. Vložte ho na svůj web a výloha se tam zobrazí.",
+        "fallbackBodyLive": "Jakmile budete mít výlohu, tlačítko pro vložení na její kartě vám dá kód podobný tomuto, který vložíte na svůj web."
       },
       "ordersSearch": {
         "title": "Najděte objednávku",

@@ -136,7 +136,7 @@
   "danger": {
     "export": {
       "cardTitle": "Exporter mes données",
-      "cardDescription": "Tout ce que nous détenons sur vous : profil, produits, configuration de la vitrine, réuni dans un seul fichier JSON. Ce sont vos données, à vous de les garder.",
+      "cardDescription": "Tout ce que nous détenons sur vous : profil, produits, vitrines, commandes que vous avez vendues, notifications et journal de sécurité, réuni dans un seul fichier JSON. Ce sont vos données, à vous de les garder.",
       "downloadButton": "Télécharger mes données",
       "stepUpDescription": "Votre export contient l’ensemble de votre compte. Saisissez le code actuel de votre application d’authentification pour le télécharger."
     },
@@ -781,10 +781,20 @@
       "cardDescription": "Acceptez une invitation pour rejoindre l’équipe de cette boutique."
     },
     "success": {
-      "inviteCreated": "Invitation créée. Il la verra en se connectant avec cette adresse e-mail. (L’envoi d’e-mails n’est pas encore en place.)",
+      "inviteCreated": "Invitation créée, mais l’e-mail n’a pas pu être envoyé. Prévenez la personne vous-même : elle la verra en se connectant avec cette adresse e-mail.",
+      "inviteEmailed": "Invitation envoyée. Nous lui avons expliqué par e-mail comment l’accepter.",
       "inviteAccepted": "Bienvenue dans l’équipe.",
       "roleUpdated": "Rôle mis à jour.",
       "memberRemoved": "Membre retiré."
+    },
+    "inviteEmail": {
+      "subject": "{store} vous invite à rejoindre son équipe sur Square Share",
+      "subjectUnnamed": "Vous êtes invité à rejoindre une équipe sur Square Share",
+      "intro": "{store} vous invite à rejoindre son équipe sur Square Share.",
+      "introUnnamed": "Une boutique sur Square Share vous invite à rejoindre son équipe.",
+      "role": "Votre rôle : {role}",
+      "how": "Pour accepter, connectez-vous avec cette adresse e-mail ({email}) ou créez un compte avec elle. L’invitation vous attendra dans Paramètres, sous Équipe et accès.",
+      "ignore": "Vous ne vous y attendiez pas ? Vous pouvez ignorer cet e-mail. Rien ne se passe tant que vous n’acceptez pas."
     }
   }
 }

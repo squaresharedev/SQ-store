@@ -96,7 +96,7 @@ describe("LineChart", () => {
     expect(container.querySelectorAll(".recharts-area").length).toBe(1);
   });
 
-  it("bleeds edge to edge: the line starts and ends on the box's own edges", () => {
+  it("bleeds edge to edge: the data stands clear of both ends and a blurred tail runs on to each", () => {
     const { container } = render(
       <LineChart
         data={TREND}
@@ -112,11 +112,33 @@ describe("LineChart", () => {
         animate={false}
       />,
     );
-    // No axis column and no side margins: the curve spans all 600px.
+    // No axis column and no side margins, but the DATA does not touch the
+    // edges: 8% of 600px is kept at each end, so the first and last values
+    // are never in the part that blurs away.
     const curve = container.querySelector(".recharts-area-curve")!.getAttribute("d")!;
     const xs = Array.from(curve.matchAll(/(-?[0-9.]+),-?[0-9.]+/g), (match) => Number(match[1]));
-    expect(Math.min(...xs)).toBe(0);
-    expect(Math.max(...xs)).toBe(600);
+    expect(Math.min(...xs)).toBe(48);
+    expect(Math.max(...xs)).toBe(552);
+    expect(container.querySelector(".recharts-area-curve")!.getAttribute("mask")).toBeNull();
+
+    // From each end value a level tail runs on to the box's edge, drawn twice:
+    // sharp, and blurred, each under its own mask.
+    const tails = Array.from(container.querySelectorAll("[data-chart-tail]"));
+    expect(tails.map((tail) => tail.getAttribute("data-chart-tail"))).toEqual(["start", "end"]);
+    for (const tail of tails) {
+      const [sharp, soft] = Array.from(tail.children);
+      expect(sharp.getAttribute("mask")).toContain("-sharp)");
+      expect(sharp.getAttribute("filter")).toBeNull();
+      expect(soft.getAttribute("mask")).toContain("-soft)");
+      expect(soft.getAttribute("filter")).toContain("-blur)");
+      const line = sharp.querySelector("line")!;
+      const atEdge = tail.getAttribute("data-chart-tail") === "start" ? "0" : "600";
+      expect(line.getAttribute("x2")).toBe(atEdge);
+      // Level: it claims no value the data did not have.
+      expect(line.getAttribute("y1")).toBe(line.getAttribute("y2"));
+    }
+    expect(tails[0].querySelector("line")!.getAttribute("x1")).toBe("48");
+    expect(tails[1].querySelector("line")!.getAttribute("x1")).toBe("552");
 
     // The value labels are inside the plot, on the side asked for, one per
     // tick the caller set.
@@ -128,12 +150,142 @@ describe("LineChart", () => {
       expect(Number(label.getAttribute("x"))).toBeLessThan(600);
     }
 
-    // The two end labels are tucked inward so the box cannot clip them.
+    // The end dates sit under their own points, clear of the edges.
     const dates = Array.from(container.querySelectorAll(".recharts-xAxis-tick-labels text"));
-    expect(dates[0].getAttribute("text-anchor")).toBe("start");
-    expect(Number(dates[0].getAttribute("x"))).toBeGreaterThan(0);
-    expect(dates[dates.length - 1].getAttribute("text-anchor")).toBe("end");
-    expect(Number(dates[dates.length - 1].getAttribute("x"))).toBeLessThan(600);
+    expect(Number(dates[0].getAttribute("x"))).toBe(48);
+    expect(Number(dates[dates.length - 1].getAttribute("x"))).toBe(552);
+
+    // The gridlines have no focus to lose, so they simply thin out at the
+    // ends. The labels do neither: the ends are read against them.
+    for (const gridline of container.querySelectorAll(".recharts-cartesian-grid-horizontal line")) {
+      expect(gridline.getAttribute("mask")).toContain("-fade)");
+    }
+    for (const label of [...values, ...dates]) {
+      expect(label.getAttribute("mask")).toBeNull();
+      expect(label.getAttribute("filter")).toBeNull();
+    }
+  });
+
+  it("draws a reference series dashed, without a wash, behind what is measured", () => {
+    const { container } = render(
+      <LineChart
+        data={TREND}
+        xKey="week"
+        series={[
+          { key: "revenue", label: "Revenue" },
+          { key: "refunds", label: "Previous period", reference: true },
+        ]}
+        variant="area"
+        width={600}
+        height={300}
+        animate={false}
+        ariaLabel="Revenue versus the previous period"
+      />,
+    );
+    const curves = Array.from(container.querySelectorAll(".recharts-area-curve"));
+    expect(curves).toHaveLength(2);
+    // Drawn first, so the measured line sits over it.
+    expect(curves[0].getAttribute("stroke-dasharray")).toBe("4 4");
+    expect(curves[1].getAttribute("stroke-dasharray")).toBeNull();
+    const washes = Array.from(container.querySelectorAll(".recharts-area-area"));
+    expect(washes[0].getAttribute("fill")).toBe("none");
+    expect(washes[1].getAttribute("fill")).toContain("url(#");
+    // The legend and the table keep the caller's order: measured first.
+    const legend = Array.from(container.querySelectorAll("ul li")).map((row) => row.textContent);
+    expect(legend).toEqual(["Revenue", "Previous period"]);
+    const headers = within(
+      screen.getByRole("table", { name: "Revenue versus the previous period" }),
+    ).getAllByRole("columnheader");
+    expect(headers.map((header) => header.textContent).slice(1)).toEqual([
+      "Revenue",
+      "Previous period",
+    ]);
+  });
+
+  it("can leave the legend to its caller", () => {
+    const { container } = render(
+      <LineChart
+        data={TREND}
+        xKey="week"
+        series={[{ key: "revenue" }, { key: "refunds", reference: true }]}
+        legend={false}
+        width={600}
+        height={300}
+        animate={false}
+      />,
+    );
+    expect(container.querySelector("ul")).toBeNull();
+  });
+
+  it("marks a single value as a point with a level through it, since no line can be drawn", () => {
+    const { container } = render(
+      <LineChart
+        data={[{ week: "W1", revenue: 1200 }]}
+        xKey="week"
+        series={[{ key: "revenue", label: "Revenue" }]}
+        variant="area"
+        width={600}
+        height={300}
+        animate={false}
+      />,
+    );
+    expect(container.querySelectorAll(".recharts-area-dot")).toHaveLength(1);
+    const level = container.querySelector(".recharts-reference-line line")!;
+    expect(level.getAttribute("stroke-dasharray")).toBe("2 4");
+    // The level runs through the point.
+    const dot = container.querySelector(".recharts-area-dot")!;
+    expect(Number(level.getAttribute("y1"))).toBeCloseTo(Number(dot.getAttribute("cy")), 3);
+  });
+
+  it("marks the one value in a series of gaps, and nothing in a series that has a line", () => {
+    const gaps = render(
+      <LineChart
+        data={[
+          { week: "W1", revenue: null },
+          { week: "W2", revenue: 900 },
+          { week: "W3", revenue: null },
+        ]}
+        xKey="week"
+        series={[{ key: "revenue" }]}
+        connectNulls
+        width={600}
+        height={300}
+        animate={false}
+      />,
+    );
+    expect(gaps.container.querySelectorAll(".recharts-line-dot")).toHaveLength(1);
+    expect(gaps.container.querySelectorAll(".recharts-reference-line")).toHaveLength(1);
+    cleanup();
+
+    const full = render(
+      <LineChart
+        data={TREND}
+        xKey="week"
+        series={[{ key: "revenue" }]}
+        width={600}
+        height={300}
+        animate={false}
+      />,
+    );
+    expect(full.container.querySelectorAll(".recharts-line-dot")).toHaveLength(0);
+    expect(full.container.querySelectorAll(".recharts-reference-line")).toHaveLength(0);
+  });
+
+  it("fills the height of its parent when asked to", () => {
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <LineChart
+          data={TREND}
+          xKey="week"
+          series={[{ key: "revenue" }]}
+          height="fill"
+          animate={false}
+        />
+      </div>,
+    );
+    const group = container.querySelector('[role="group"]') as HTMLElement;
+    expect(group.className).toContain("h-full");
+    expect((group.firstElementChild as HTMLElement).style.height).toBe("100%");
   });
 });
 
@@ -250,6 +402,8 @@ describe("PieChart", () => {
       />,
     );
     expect(screen.getByText("Total")).toBeInTheDocument();
-    expect(screen.getByText("658")).toBeInTheDocument();
+    // Twice in the markup: the figure, and the hidden copy it is fitted to
+    // the hole against.
+    expect(screen.getAllByText("658").length).toBeGreaterThan(0);
   });
 });

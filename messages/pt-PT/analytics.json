@@ -33,6 +33,7 @@
     "emptyDefault": "Sem vendas neste intervalo"
   },
   "sales": {
+    "untitledProduct": "Produto sem título",
     "label": "Vendas",
     "description": "Encomendas pagas feitas através da finalização de compra do Square Share.",
     "revenue": {
@@ -71,6 +72,28 @@
       "empty": "Sem encomendas neste intervalo",
       "ariaLabel": "Distribuição do estado das encomendas"
     }
+  },
+  "compare": {
+    "previous": "Período anterior",
+    "vsPrevious": "{change} face ao período anterior"
+  },
+  "funnel": {
+    "label": "Funil da montra",
+    "description": "Desde a montra ser mostrada no seu próprio site até uma encomenda paga. Contam-se eventos, não pessoas.",
+    "views": "Visualizações no seu site",
+    "viewsEmpty": "Sem visualizações neste período",
+    "opens": "Produtos abertos",
+    "opensEmpty": "Nenhum aberto neste período",
+    "started": "Pagamentos iniciados",
+    "startedEmpty": "Sem pagamentos neste período",
+    "expired": "Pagamentos por concluir",
+    "expiredEmpty": "Nenhum por concluir",
+    "conversion": "Encomendas por 100 visualizações",
+    "conversionCounts": "Encomendas: {orders}, visualizações: {views}",
+    "abandonment": "Abandono no pagamento",
+    "abandonmentCounts": "Por concluir: {expired}, iniciados: {started}",
+    "notEnough": "Ainda sem dados suficientes",
+    "notEnoughHint": "As taxas aparecem quando este período tiver {min} visualizações."
   },
   "tiles": {
     "revenue": "Receita",
@@ -142,9 +165,7 @@
       "acrossRange": "Cliques em produtos no intervalo selecionado.",
       "byChannel": "Cliques em produtos por canal",
       "byWeekday": "Cliques em produtos por dia da semana",
-      "byStorefront": "Cliques em produtos por montra",
-      "awaiting": "Chega assim que o widget de incorporação comunicar aberturas de produtos.",
-      "readyToChart": "Pronto para o gráfico assim que os cliques começarem a chegar."
+      "byStorefront": "Cliques em produtos por montra"
     },
     "product_view": {
       "label": "Visualizações da página de produto",

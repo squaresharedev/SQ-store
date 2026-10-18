@@ -15,6 +15,10 @@ import { cn } from "@/lib/utils";
  * visible text would otherwise resize on every frame). The scale is applied as
  * an `em` multiplier, so the caller keeps setting the base size with its usual
  * text-* classes and the line box stays in flow.
+ *
+ * The box clips sideways. The ghost is the text at FULL size, so wherever the
+ * text needs shrinking the ghost is wider than the box, and unclipped it
+ * widened the page itself into a sideways scroll on a small phone.
  */
 export function FitText({
   measure,
@@ -51,7 +55,7 @@ export function FitText({
   return (
     <span
       ref={boxRef}
-      className={cn("relative block whitespace-nowrap", className)}
+      className={cn("relative block overflow-x-clip whitespace-nowrap", className)}
     >
       <span
         ref={ghostRef}

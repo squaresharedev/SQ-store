@@ -133,6 +133,15 @@ describe("buildImportPlan", () => {
     expect(ready.map((row) => row.status)).toEqual(["draft", "draft"]);
   });
 
+  it("reads stock as whole units, and never guesses zero from a cell that names no number", () => {
+    const cells = ["4", "10,000", "1.000", "12 pcs", "1.5", "0", "", "N/A", "Unlimited", "-3"];
+    const plan = buildImportPlan(
+      [["Title", "Price", "On hand"], ...cells.map((stock, i) => [`Lamp ${i}`, "10", stock])],
+      { title: 0, price: 1, stock: 2 },
+    );
+    expect(plan.rows.map((row) => row.stock)).toEqual([4, 10_000, 1000, 12, 1, 0, null, null, null, null]);
+  });
+
   it("reports each unusable row with its line number instead of dropping it", () => {
     const plan = buildImportPlan([
       ["Title", "Price"],

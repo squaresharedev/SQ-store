@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { meterFillClass, meterTrackClass } from "@/components/ui/surface-styles";
 
 /**
  * Determinate progress track. `value` is 0..1; pass `null` for indeterminate
@@ -6,7 +7,8 @@ import { cn } from "@/lib/utils";
  * second animation competing with whatever spinner is already on screen.
  *
  * Exposed as a real `progressbar` so assistive tech reads the percentage
- * instead of inferring it from a visual bar.
+ * instead of inferring it from a visual bar. For a standing fact (a limit half
+ * used) rather than work under way, use Meter.
  */
 export function ProgressBar({
   value,
@@ -30,13 +32,10 @@ export function ProgressBar({
       // Omitted while indeterminate, which is how a progressbar signals
       // "working, length unknown".
       aria-valuenow={pct ?? undefined}
-      className={cn("h-1 w-full overflow-hidden rounded-full bg-muted", className)}
+      className={cn(meterTrackClass, className)}
     >
       <div
-        className={cn(
-          "h-full rounded-full bg-primary transition-[width] duration-base ease-standard motion-reduce:transition-none",
-          pct === null && "w-full opacity-60",
-        )}
+        className={cn(meterFillClass, pct === null && "w-full opacity-60")}
         style={pct === null ? undefined : { width: `${pct}%` }}
       />
     </div>

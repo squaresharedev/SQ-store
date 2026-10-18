@@ -48,7 +48,8 @@
     "date": "Datum",
     "shipping": "Versand",
     "shipTo": "Versandadresse",
-    "noAddress": "Keine Adresse"
+    "noAddress": "Keine Adresse",
+    "feeLine": "Gebühr {amount}"
   },
   "toolbar": {
     "region": "Bestellfilter",
@@ -149,16 +150,29 @@
     "discountCodeOutdone": "Code {code} verwendet, aber der Aktionspreis war günstiger"
   },
   "actions": {
-    "refundNeedsStripe": "Rückerstattungen erfordern eine verbundene Stripe-Verbindung.",
-    "connectStripe": "Stripe verbinden, um Rückerstattungen zu aktivieren",
-    "refundConfirm": "Diese Bestellung erstatten? Dies kann nicht rückgängig gemacht werden, sobald Stripe verbunden ist.",
-    "confirmRefund": "Rückerstattung bestätigen",
-    "refundOrder": "Bestellung erstatten",
     "disputeInStripe": "Zahlungsanfechtungen werden in deinem Stripe-Dashboard bearbeitet, sobald Stripe verbunden ist.",
-    "disputeConfirm": "Zahlungsanfechtung für diese Bestellung öffnen?",
-    "handleDispute": "Zahlungsanfechtung bearbeiten",
-    "none": "Für diese Bestellung sind keine Aktionen verfügbar.",
-    "refundManual": "Erstattungen sind über Square Share noch nicht möglich. Um diese Bestellung zu erstatten, zahle dem Käufer das Geld selbst zurück und teile es ihm mit."
+    "none": "Für diese Bestellung sind keine Aktionen verfügbar."
+  },
+  "refund": {
+    "open": "Erstatten oder stornieren",
+    "reasonLabel": "Grund",
+    "reasons": {
+      "cancelled": "Vor dem Versenden storniert",
+      "returned": "Vom Käufer zurückgeschickt",
+      "other": "Anderer Grund"
+    },
+    "restock": "{count, plural, one {Wieder einlagern} other {Alle # wieder einlagern}}",
+    "confirm": "Rückerstattung von {amount} erfassen",
+    "confirmProvider": "Erstatten: {amount}",
+    "recorded": "Rückerstattung erfasst.",
+    "refunded": "Rückerstattung gesendet.",
+    "buyerEmailed": "Der Käufer wurde per E-Mail informiert.",
+    "buyerNotEmailed": "Der Käufer wurde nicht per E-Mail informiert. Schreib ihm selbst.",
+    "refundedOn": "Erstattet am {date}",
+    "refundedOnReason": "{reason, select, cancelled {Storniert und erstattet am {date}} returned {Zurückgegeben und erstattet am {date}} other {Erstattet am {date}}}",
+    "ownerOnly": "Nur der Inhaber des Shops kann eine Bestellung erstatten oder stornieren.",
+    "manual": "Diese Zahlung lief nicht über Square Share. Erstatte dem Käufer das Geld selbst und erfasse es dann hier.",
+    "viaProvider": "Der volle Betrag wird über Stripe auf die Karte des Käufers zurückgebucht. Das kann nicht rückgängig gemacht werden."
   },
   "skeleton": {
     "loading": "Bestellungen werden geladen"
@@ -230,6 +244,13 @@
       "shipTo": "Lieferadresse:",
       "questions": "Fragen zu deiner Bestellung? Antworte auf diese E-Mail, um {store} zu erreichen.",
       "footer": "Gesendet von Square Share im Auftrag von {store}."
+    },
+    "refund": {
+      "subject": "Deine Bestellung bei {store} wurde erstattet",
+      "intro": "{reason, select, cancelled {{store} hat deine Bestellung storniert und erstattet.} returned {{store} hat deine Rücksendung erhalten und deine Bestellung erstattet.} other {{store} hat deine Bestellung erstattet.}}",
+      "amount": "Erstattet: {amount}",
+      "howManual": "{store} zahlt dir direkt zurück. Falls das Geld nach 14 Tagen noch nicht angekommen ist, antworte auf diese E-Mail.",
+      "howCard": "Das Geld wird auf demselben Weg zurückgebucht, was normalerweise 5 bis 10 Tage dauert."
     },
     "confirmation": {
       "subject": "Deine Bestellung bei {store}: {title}",

@@ -240,12 +240,24 @@ describe("the development test provider", () => {
     expect(testPaymentsEnabled()).toBe(false);
   });
 
-  it("leaves a deployed build with no provider at all, whatever else is configured", () => {
+  it("leaves a deployed build with no provider at all, whatever else is configured", async () => {
     // Mail and the bot check both on: checkout still does not open, because
     // the only provider that exists here is the test one, and it is dev-only.
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("CHECKOUT_TEST_PAYMENTS", "1");
     vi.stubEnv("TRANSACTIONAL_EMAIL_ENABLED", "true");
-    expect(checkoutProviderFor("any-owner")).toBeNull();
+    expect(await checkoutProviderFor("any-owner")).toBeNull();
+  });
+
+  it("is not offered where no order link could be issued", async () => {
+    // A buyer who paid and cannot be handed their order has no receipt, no
+    // download and no way to withdraw: with no key, there is no checkout.
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("CHECKOUT_TEST_PAYMENTS", "1");
+    vi.stubEnv("ORDER_LINK_SECRET", "");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "");
+    expect(await checkoutProviderFor("any-owner")).toBeNull();
+    vi.stubEnv("ORDER_LINK_SECRET", "a-key");
+    expect(await checkoutProviderFor("any-owner")).toBe("test");
   });
 });

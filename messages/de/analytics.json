@@ -33,6 +33,7 @@
     "emptyDefault": "Keine Verkäufe in diesem Zeitraum"
   },
   "sales": {
+    "untitledProduct": "Produkt ohne Titel",
     "label": "Verkäufe",
     "description": "Bezahlte Bestellungen über den Square Share Checkout.",
     "revenue": {
@@ -71,6 +72,28 @@
       "empty": "Keine Bestellungen in diesem Zeitraum",
       "ariaLabel": "Bestellstatus-Mix"
     }
+  },
+  "compare": {
+    "previous": "Vorheriger Zeitraum",
+    "vsPrevious": "{change} gegenüber dem vorherigen Zeitraum"
+  },
+  "funnel": {
+    "label": "Storefront-Trichter",
+    "description": "Von der Anzeige deines Storefronts auf deiner eigenen Website bis zur bezahlten Bestellung. Gezählt werden Ereignisse, nicht Personen.",
+    "views": "Aufrufe auf deiner Website",
+    "viewsEmpty": "Keine Aufrufe in diesem Zeitraum",
+    "opens": "Geöffnete Produkte",
+    "opensEmpty": "Keine geöffnet in diesem Zeitraum",
+    "started": "Begonnene Bezahlvorgänge",
+    "startedEmpty": "Keine Bezahlvorgänge in diesem Zeitraum",
+    "expired": "Unbezahlt verlassen",
+    "expiredEmpty": "Keiner unbezahlt verlassen",
+    "conversion": "Bestellungen pro 100 Aufrufe",
+    "conversionCounts": "Bestellungen: {orders}, Aufrufe: {views}",
+    "abandonment": "Abbruchquote im Bezahlvorgang",
+    "abandonmentCounts": "Unbezahlt: {expired}, begonnen: {started}",
+    "notEnough": "Noch nicht genug Daten",
+    "notEnoughHint": "Quoten erscheinen, sobald dieser Zeitraum {min} Aufrufe enthält."
   },
   "tiles": {
     "revenue": "Umsatz",
@@ -142,9 +165,7 @@
       "acrossRange": "Produkt-Klicks im ausgewählten Zeitraum.",
       "byChannel": "Produkt-Klicks nach Kanal",
       "byWeekday": "Produkt-Klicks nach Wochentag",
-      "byStorefront": "Produkt-Klicks nach Schaufenster",
-      "awaiting": "Verfügbar, sobald das Einbettungs-Widget Produktöffnungen meldet.",
-      "readyToChart": "Bereit zur Darstellung, sobald Klicks eintreffen."
+      "byStorefront": "Produkt-Klicks nach Schaufenster"
     },
     "product_view": {
       "label": "Produktseitenaufrufe",

@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { cleanup, render, screen } from "../setup/render";
+import { DiscountEmptyState } from "@/components/discounts/DiscountEmptyState";
 import { ProductEmptyState } from "@/components/products/ProductEmptyState";
 import { StorefrontEmptyState } from "@/components/storefront/StorefrontEmptyState";
 
@@ -54,6 +55,25 @@ describe("empty products list", () => {
     render(<ProductEmptyState canWrite={false} />);
     expect(screen.queryByRole("link")).toBeNull();
     expect(screen.getByText("This store has no products yet.")).toBeInTheDocument();
+  });
+});
+
+describe("empty discounts list", () => {
+  it("offers the create card and a plain button to a writer, with a sale and a code either side hidden from assistive tech", () => {
+    const { container } = render(<DiscountEmptyState canWrite />);
+    const links = screen.getAllByRole("link", { name: "Create discount" });
+    expect(links).toHaveLength(2);
+    for (const link of links) expect(link).toHaveAttribute("href", "/discounts/new");
+    expect(screen.getByRole("heading", { name: "No discounts yet" })).toBeInTheDocument();
+    for (const side of [".showcase-peek-left", ".showcase-peek-right"]) {
+      expect(container.querySelector(side)).toHaveAttribute("aria-hidden", "true");
+    }
+  });
+
+  it("shows a reader the two coupons alone, with nothing to click", () => {
+    render(<DiscountEmptyState canWrite={false} />);
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.getByText("Owners and editors can create discounts here.")).toBeInTheDocument();
   });
 });
 

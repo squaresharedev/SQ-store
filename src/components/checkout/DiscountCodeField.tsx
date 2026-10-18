@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { Plus, TicketPercent } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { Plus } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { FitText } from "@/components/ui/FitText";
 import { fieldBaseClass } from "@/components/ui/control-styles";
+import { PageTicket } from "@/components/product-page/PageTicket";
+import { formatCents } from "@/lib/format/money";
 import { checkoutDiscountApiPath } from "@/lib/checkout/paths";
 import { DISCOUNT_CODE_MAX } from "@/types/discount";
 import type { DiscountCheckResponse } from "@/types/checkout";
@@ -20,6 +23,11 @@ type Notice = "invalid" | "rateLimited" | null;
  *
  * It sits INSIDE the order form, so Enter in the field applies the code
  * instead of placing the order.
+ *
+ * An applied code is drawn as a TICKET (PageTicket, the coupon a sale wears
+ * on the product page): what it takes off on the stub, the code and what
+ * became of it in the body. The stub greys when the running sale is already
+ * the better price, so the ticket is visibly not the one in force.
  *
  * In the editor (`preview`) it opens and takes typing, so a seller sees how it
  * sits, but never asks the server.
@@ -39,6 +47,8 @@ export function DiscountCodeField({
   ink: string;
 }) {
   const t = useTranslations("ProductPage.checkout.discount");
+  const tSale = useTranslations("ProductPage.sale");
+  const locale = useLocale();
   const id = useId();
   const noticeId = `${id}-notice`;
   const { terms, setTerms } = useAppliedCode();
@@ -84,13 +94,30 @@ export function DiscountCodeField({
   }
 
   if (terms) {
+    // What the code takes off, the way the totals write a reduction: a minus
+    // and the figure.
+    const figure =
+      terms.value.type === "percent"
+        ? tSale("percentOff", { percent: terms.value.percentOff })
+        : `-${formatCents(terms.value.amountOffCents, terms.value.currency, locale)}`;
     return (
-      <div className="flex flex-col gap-1" data-checkout-discount="applied" data-setting-skip="">
-        <div className="flex items-center justify-between gap-3 text-sm">
-          <span className="flex items-center gap-1.5 font-medium">
-            <TicketPercent className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
-            {terms.code}
+      <PageTicket
+        ink={ink}
+        muted={outdone}
+        attributes={{
+          "data-checkout-discount": "applied",
+          "data-checkout-discount-state": outdone ? "outdone" : "in-force",
+          "data-setting-skip": "",
+        }}
+        // Decorative: the totals below say the amount, in words and to the cent.
+        stub={
+          <span aria-hidden="true" className="w-full text-center">
+            <FitText measure={figure}>{figure}</FitText>
           </span>
+        }
+      >
+        <div className="flex items-center justify-between gap-3">
+          <span className="min-w-0 truncate font-mono text-sm font-semibold tracking-wide">{terms.code}</span>
           <button
             type="button"
             className={checkoutTextButtonClass}
@@ -105,7 +132,7 @@ export function DiscountCodeField({
         <p className="text-xs opacity-75" role="status">
           {outdone ? t("saleBetter", { code: terms.code }) : t("applied", { code: terms.code })}
         </p>
-      </div>
+      </PageTicket>
     );
   }
 

@@ -27,8 +27,11 @@ export const CONTROLS_GROUPS = [
 ] as const;
 export type ControlsGroup = (typeof CONTROLS_GROUPS)[number];
 
-/** The two halves of the Product cards group. */
-export type CardsSectionId = "cardStyle" | "priceTag";
+/** The sections of the Product cards group. */
+export type CardsSectionId = "cardStyle" | "priceTag" | "saleChip";
+
+/** The sale chip's own setting, which the discount form links to. */
+export const SALE_CHIP_SETTING_ID = "sale-chip";
 
 /** The two halves of the Theme group: the published look, and the board
  *  itself (size, grid gap, and the seller-only grid guide). Merged into one
@@ -522,6 +525,38 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
     ref: { kind: "cards", section: "priceTag" },
   },
   {
+    id: "chip-size",
+    label: "Storefront.settings.labels.chipScale",
+    keywords: [
+      "same size chips",
+      "chip size",
+      "badge size",
+      "price tag size",
+      "uniform",
+      "scale with tile",
+    ],
+    ref: { kind: "cards", section: "priceTag" },
+  },
+  {
+    id: SALE_CHIP_SETTING_ID,
+    label: "Storefront.settings.labels.saleChip",
+    keywords: [
+      "sale badge",
+      "discount badge",
+      "discount chip",
+      "sale label",
+      "sale sticker",
+      "percent off",
+      "amount off",
+      "on sale",
+      "offer",
+      "ribbon",
+      "pill",
+      "flag",
+    ],
+    ref: { kind: "cards", section: "saleChip" },
+  },
+  {
     id: "sold-out",
     label: "Storefront.settings.labels.soldOut",
     keywords: [
@@ -661,6 +696,20 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "purchase button",
       "order button",
       "what the button says",
+    ],
+    ref: { kind: "productPage", section: "cta" },
+  },
+  {
+    id: "product-page-sale-price",
+    label: "Storefront.settings.labels.salePrice",
+    keywords: [
+      "sale price",
+      "crossed out price",
+      "old price",
+      "strikethrough",
+      "struck price",
+      "discount look",
+      "was price",
     ],
     ref: { kind: "productPage", section: "cta" },
   },

@@ -1,8 +1,10 @@
 // What each plan offers, as lists the plans page, the comparison table and
 // the Settings upsell all read. Pure, client-safe: derived from the catalog
-// (lib/billing/plans.ts), so a number changed there changes every place a
+// (lib/billing/plans.ts) and, for the fee, from the plan prices in force
+// (lib/billing/fees.ts), so a number changed in either changes every place a
 // plan is described.
 
+import { directFeeBps, type PlanPrices } from "@/lib/billing/fees";
 import {
   PLAN_IDS,
   PLAN_PERK_KEYS,
@@ -79,10 +81,10 @@ export function cheapestPlanWith(key: PlanFeatureKey): PlanId {
 }
 
 /** Whether `to` is strictly better than `from` on `key`. */
-function improves(from: PlanId, to: PlanId, key: PlanFeatureKey): boolean {
+function improves(prices: PlanPrices, from: PlanId, to: PlanId, key: PlanFeatureKey): boolean {
   switch (key) {
     case "fee":
-      return PLANS[to].feeBps < PLANS[from].feeBps;
+      return directFeeBps(prices, to) < directFeeBps(prices, from);
     case "products":
     case "storefronts":
     case "teamSeats":
@@ -100,16 +102,19 @@ export function planFeatures(plan: PlanId): PlanFeatureKey[] {
 }
 
 /** What `to` adds over `from`: the upsell's list of reasons. */
-export function gainsOver(from: PlanId, to: PlanId): PlanFeatureKey[] {
-  return PLAN_FEATURE_KEYS.filter((key) => improves(from, to, key));
+export function gainsOver(prices: PlanPrices, from: PlanId, to: PlanId): PlanFeatureKey[] {
+  return PLAN_FEATURE_KEYS.filter((key) => improves(prices, from, to, key));
 }
 
 /**
  * What a plan's card lists: everything, for the first plan; for every other,
  * only what it adds over the plan below it ("Everything in Free, plus").
  */
-export function planCardFeatures(plan: PlanId): { below: PlanId | null; features: PlanFeatureKey[] } {
+export function planCardFeatures(
+  prices: PlanPrices,
+  plan: PlanId,
+): { below: PlanId | null; features: PlanFeatureKey[] } {
   const index = PLAN_IDS.indexOf(plan);
   const below = index > 0 ? PLAN_IDS[index - 1]! : null;
-  return { below, features: below ? gainsOver(below, plan) : planFeatures(plan) };
+  return { below, features: below ? gainsOver(prices, below, plan) : planFeatures(plan) };
 }

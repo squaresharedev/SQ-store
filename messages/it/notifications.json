@@ -176,6 +176,18 @@
         "body": "Stripe riproverà. Aggiorna la carta in Piano e fatturazione per mantenere il tuo piano."
       }
     },
+    "stock": {
+      "low": {
+        "title": "Scorte in esaurimento: {title}",
+        "body": "{count, plural, =0 {Nessuna scorta.} one {Ne rimane solo #.} many {Ne rimangono solo # in stock.} other {Ne rimangono solo #.}} Rifornisci le scorte o disattiva il monitoraggio se produci su ordinazione."
+      }
+    },
+    "payment": {
+      "dispute": {
+        "title": "Un acquirente ha contestato il pagamento per {title}",
+        "body": "La loro banca ha aperto una contestazione. Rispondici nel tuo dashboard Stripe prima della scadenza."
+      }
+    },
     "policy": {
       "autoPaused": {
         "title": "Serve un tuo intervento: {target, select, product {il tuo prodotto «{title}» è in pausa} other {la tua vetrina «{title}» è in pausa}}",

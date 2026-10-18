@@ -176,6 +176,18 @@
         "body": "Stripe to skúsi znova. Aktualizujte svoju kartu v sekcii Plán a fakturácia, aby ste si zachovali plán."
       }
     },
+    "stock": {
+      "low": {
+        "title": "Dochádzajú zásoby: {title}",
+        "body": "{count, plural, =0 {Žiadne zásoby.} one {Zostáva len #.} few {Zostávajú len #.} many {Zostáva len #.} other {Zostáva len #.}} Doplňte zásoby alebo vypnite sledovanie zásob, ak vyrábate na zákazku."
+      }
+    },
+    "payment": {
+      "dispute": {
+        "title": "Kupujúci spochybnil platbu za: {title}",
+        "body": "Ich banka spor otvorila. Odpovedzte naň vo svojom Stripe dashboardu pred uplynutím lehoty."
+      }
+    },
     "policy": {
       "autoPaused": {
         "title": "Je potrebný zásah: {target, select, product {váš produkt „{title}“ je pozastavený} other {váš výklad „{title}“ je pozastavený}}",

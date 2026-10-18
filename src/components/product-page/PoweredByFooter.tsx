@@ -1,7 +1,9 @@
 import { useTranslations } from "next-intl";
 import { LEGAL_LINKS, SQUARESHARE_SITE } from "@/lib/legal/links";
+import { REPORT_FRAGMENT } from "@/lib/storefront/product-page-url";
 import type { ProductPageReportScopes } from "@/types/product-page";
 import { ReportDialog } from "./ReportDialog";
+import { quietLinkClass } from "./product-page-maps";
 
 // The foot of the buyer's page: who they are actually buying from, and the two
 // policies that are OURS rather than the seller's.
@@ -78,7 +80,7 @@ const POLICIES = [
 ] as const;
 
 /** A dot between footer items, spoken by nothing. */
-function Dot() {
+export function FooterDot() {
   return <span aria-hidden="true">·</span>;
 }
 
@@ -87,7 +89,8 @@ export function PoweredByFooter({
   /** The trader, as named beside the price: the business name, or the store's
    *  name when no business name was given. Never empty. */
   sellerName,
-  /** This page's product, so a report names what it is about. */
+  /** This page's product, so a report names what it is about. Absent on a
+   *  storefront's own page: the report is then about the storefront. */
   product,
   /** The storefront it hangs off, as buyers know it: the other thing a buyer
    *  may report, and the way to the seller behind it. */
@@ -103,7 +106,7 @@ export function PoweredByFooter({
 }: {
   ruleColor: string;
   sellerName: string;
-  product: { id: string; title: string };
+  product?: { id: string; title: string };
   storefront: { id: string; name: string };
   reportScopes?: ProductPageReportScopes;
   preview?: boolean;
@@ -112,7 +115,14 @@ export function PoweredByFooter({
   const t = useTranslations("ProductPage.footer");
   const tOrder = useTranslations("ProductPage.order");
   return (
-    <footer className="w-full border-t" style={{ borderColor: ruleColor }} data-product-page-footer="">
+    <footer
+      // Where the embed frame's own "Report" link lands: the frame is too
+      // small to hold the report dialog, so it sends the reader here.
+      id={REPORT_FRAGMENT}
+      className="w-full border-t"
+      style={{ borderColor: ruleColor }}
+      data-product-page-footer=""
+    >
       {/* opacity-70, not lighter: that is the muted level already proven to
           clear WCAG AA contrast for xs text on this page (see the trust list
           and "Sold by" line) — a bespoke lighter value here would be an
@@ -157,13 +167,13 @@ export function PoweredByFooter({
             href={SQUARESHARE_SITE}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline-offset-2 hover:underline"
+            className={quietLinkClass}
           >
             {t.rich("poweredBy", {
               brand: (chunks) => <span className="font-medium">{chunks}</span>,
             })}
           </a>
-          <Dot />
+          <FooterDot />
           {/* Named for what it is: a screen reader reaching this group is
               told whose policies these are before it reads "Privacy". */}
           <nav
@@ -172,7 +182,7 @@ export function PoweredByFooter({
           >
             {POLICIES.map((policy, index) => (
               <span key={policy.href} className="flex items-center gap-x-3">
-                {index > 0 && <Dot />}
+                {index > 0 && <FooterDot />}
                 <a
                   href={policy.href}
                   target="_blank"
@@ -184,7 +194,7 @@ export function PoweredByFooter({
                   // the seller's own, on the live page and to a seller
                   // skimming their own storefront alike.
                   aria-label={t(`policies.${policy.id}.name`)}
-                  className="underline-offset-2 hover:underline"
+                  className={quietLinkClass}
                 >
                   {t(`policies.${policy.id}.label`)}
                 </a>
@@ -195,7 +205,7 @@ export function PoweredByFooter({
               report link has to be findable by someone looking for it and
               unremarkable to everyone else. Making it louder would print a
               standing accusation under every honest listing. */}
-          <Dot />
+          <FooterDot />
           <ReportDialog
             product={product}
             storefront={storefront}
@@ -205,8 +215,8 @@ export function PoweredByFooter({
           />
           {withdrawHref && (
             <>
-              <Dot />
-              <a href={withdrawHref} className="underline-offset-2 hover:underline" data-withdraw-link="">
+              <FooterDot />
+              <a href={withdrawHref} className={quietLinkClass} data-withdraw-link="">
                 {tOrder("footerLink")}
               </a>
             </>

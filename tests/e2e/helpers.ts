@@ -1,6 +1,7 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import { ANON_KEY, GATEWAY_URL, SERVICE_KEY } from "./stack/keys.mjs";
 import { saleFee } from "../../src/lib/billing/fees.ts";
+import { PLAN_PRICE_SEED } from "../../src/lib/billing/pricing-seed.ts";
 import type { SignalKind } from "../../src/lib/analytics/signals.ts";
 import type { OrderChannel } from "../../src/types/order-view.ts";
 
@@ -690,7 +691,7 @@ export async function seedOrders(
         status: o.status ?? "paid",
         amount_cents: o.amount_cents,
         // Seeded sellers are on Free: the same fee a real sale would carry.
-        platform_fee_cents: saleFee("free", o.amount_cents).platformFeeCents,
+        platform_fee_cents: saleFee(PLAN_PRICE_SEED, "free", o.amount_cents).platformFeeCents,
         currency: "EUR",
         buyer_email: o.buyer_email ?? "buyer@example.com",
         product_title: o.product_title ?? "Seeded product",

@@ -390,6 +390,8 @@
     "noTerms": "Todavía no se han escrito condiciones de envío.",
     "profile": "Perfil de envío",
     "edit": "Editar",
+    "unpriced": "El envío no tiene precio en {currency}, por lo que los compradores no pueden pagar este producto en el proceso de pago.",
+    "unpricedAction": "Establecer precios de envío",
     "modalTitle": "Envíos y devoluciones"
   },
   "optionsField": {

@@ -390,6 +390,8 @@
     "noTerms": "Nog geen verzendvoorwaarden geschreven.",
     "profile": "Verzendprofiel",
     "edit": "Bewerken",
+    "unpriced": "Verzending heeft geen prijs in {currency}, waardoor kopers dit product niet kunnen afrekenen.",
+    "unpricedAction": "Verzendkosten instellen",
     "modalTitle": "Verzending en retouren"
   },
   "optionsField": {

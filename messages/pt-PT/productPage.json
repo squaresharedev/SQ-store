@@ -7,6 +7,20 @@
     "body": "Pode ter sido removido, ou o link que seguiu está desatualizado. Volte à loja para ver o que está disponível agora.",
     "back": "Voltar"
   },
+  "unavailable": {
+    "title": "Não foi possível carregar esta página",
+    "body": "O problema é nosso e costuma passar num instante.",
+    "orderBody": "A sua encomenda está segura. Só não foi possível carregar esta página agora, o que costuma passar num instante."
+  },
+  "pageNotFound": {
+    "title": "Esta página não está disponível",
+    "body": "O link que seguiu pode estar desatualizado ou incompleto. Volte atrás e tente novamente."
+  },
+  "storefront": {
+    "gridLabel": "O que {store} vende",
+    "empty": "{store} não tem nada em exposição neste momento.",
+    "description": "Veja o que {store} vende."
+  },
   "sections": {
     "description": "Descrição",
     "specs": "Especificações",
@@ -29,6 +43,11 @@
     "warnings": "Avisos"
   },
   "priceNotes": "{price, select, incl {{shipping, select, plus {IVA incl., portes à parte} free {IVA incl., envio grátis} other {IVA incl.}}} excl {{shipping, select, plus {impostos não incl., portes à parte} free {impostos não incl., envio grátis} other {impostos não incl.}}} other {{shipping, select, plus {portes à parte} free {envio grátis} other {}}}}",
+  "delivery": {
+    "free": "Envio gratuito",
+    "flat": "Envio {amount}",
+    "from": "Envio a partir de {amount}"
+  },
   "stock": {
     "digitalDownload": "Transferência digital",
     "digitalDownloadFormat": "Transferência digital ({format})"
@@ -190,6 +209,8 @@
       "label": "O que acontece a seguir",
       "paid": "Encomenda efetuada",
       "paidDetail": "Pago em {date}",
+      "confirming": "A confirmar o pagamento",
+      "confirmingDetail": "Normalmente demora um momento. Recarregue a página se não mudar.",
       "preparing": "Em preparação",
       "preparingDetail": "{seller} está a preparar a sua encomenda.",
       "shipped": "A caminho",
@@ -198,7 +219,10 @@
       "track": "Seguir com a transportadora {carrier}",
       "notYet": "Receberá um e-mail quando for enviado.",
       "ready": "Pronto para descarregar",
-      "readyDetail": "O seu ficheiro está pronto abaixo e o link também está no seu e-mail."
+      "readyDetail": "O seu ficheiro está pronto abaixo e o link também está no seu e-mail.",
+      "refunded": "Reembolsado",
+      "refundedDetail": "{seller} reembolsou esta encomenda em {date}.",
+      "refundedDetailNoDate": "{seller} reembolsou esta encomenda."
     },
     "download": "Descarregar ({format})",
     "downloadPlain": "Descarregue o seu ficheiro",
@@ -295,6 +319,8 @@
     "payment": {
       "testTitle": "Pagamento de teste",
       "testBody": "Este é um pagamento de desenvolvimento. Nenhum cartão é cobrado e nenhum dinheiro é movido.",
+      "stripeTitle": "Pague em segurança com Stripe",
+      "stripeBody": "Introduz os dados do cartão na página segura do Stripe no passo seguinte.",
       "previewTitle": "Dados do cartão",
       "previewBody": "Cartão, Apple Pay e Google Pay aparecerão aqui nas suas cores quando ligar o Stripe.",
       "cardNumber": "Número do cartão",
@@ -331,7 +357,8 @@
       "failed": "Algo correu mal e não foi cobrado nada. Tente novamente.",
       "invalid": "Alguns detalhes precisam de revisão. Verifique os campos assinalados.",
       "discount_invalid": "Este código de desconto já não pode ser utilizado. Remova-o para pagar o preço normal.",
-      "price_changed": "O preço alterou-se enquanto esta página estava aberta, por isso nada foi cobrado. Verifique o novo total e pague."
+      "price_changed": "O preço alterou-se enquanto esta página estava aberta, por isso nada foi cobrado. Verifique o novo total e pague.",
+      "turnstile": "A verificação de segurança não foi concluída, por isso não foi cobrado nada. Está a ser repetida: aguarde um momento e tente novamente."
     },
     "editHeadline": "Título do pagamento",
     "discount": {
@@ -350,7 +377,11 @@
   "sale": {
     "wasNow": "Era {was}, agora {now}",
     "percentOff": "-{percent}%",
+    "amountOff": "-{amount}",
     "priorNote": "Preço riscado: o preço mais baixo praticado nos 30 dias anteriores à redução.",
+    "regularNote": "Preço riscado: o preço habitual.",
+    "lowestNote": "Preço riscado: o preço habitual. Preço mais baixo praticado nos 30 dias anteriores à redução: {price}.",
+    "badgeSale": "Promoção",
     "endsOn": "Promoção termina em {date}"
   }
 }

@@ -105,9 +105,48 @@ function step(data: SetupChecklistData, id: SetupStepId) {
 
 describe("buildSetupSteps", () => {
   it("lists the four steps in the order a seller takes them", () => {
-    expect(buildSetupSteps(NEW_SELLER).steps.map((s) => s.id)).toEqual([
-      ...SETUP_STEP_IDS,
-    ]);
+    // Where no payment account can be connected, a page a buyer can open is
+    // the finish line: the two steps about being paid do not exist.
+    expect(buildSetupSteps(NEW_SELLER).steps.map((s) => s.id)).toEqual(
+      SETUP_STEP_IDS.slice(0, 4),
+    );
+  });
+
+  it("adds getting paid, and pricing delivery, where buyers can pay through checkout", () => {
+    const data = buildSetupSteps(
+      placedSeller({ checkout: { payments: "none", deliveryPriced: false } }),
+    );
+    expect(data.steps.map((s) => s.id)).toEqual([...SETUP_STEP_IDS]);
+    // Live, and still not set up: nobody can pay yet.
+    expect(data.livePage).not.toBeNull();
+    expect(data.complete).toBe(false);
+    expect(data.next?.id).toBe("payments");
+    expect(step(data, "payments").action?.href).toBe("/payments");
+    expect(text(step(data, "payments").action?.label)).toBe("Connect Stripe");
+    expect(step(data, "delivery").action?.href).toBe("/settings/shipping#checkout-rates");
+  });
+
+  it("tells an unfinished connection apart from none, and from one that takes payments", () => {
+    const unfinished = buildSetupSteps(
+      placedSeller({ checkout: { payments: "unfinished", deliveryPriced: true } }),
+    );
+    expect(step(unfinished, "payments").done).toBe(false);
+    expect(text(step(unfinished, "payments").action?.label)).toBe("Finish on Stripe");
+    expect(step(unfinished, "delivery").done).toBe(true);
+
+    const ready = buildSetupSteps(
+      placedSeller({ checkout: { payments: "ready", deliveryPriced: true } }),
+    );
+    expect(step(ready, "payments").done).toBe(true);
+    expect(ready.complete).toBe(true);
+  });
+
+  it("has no delivery step for a store with nothing to ship", () => {
+    const data = buildSetupSteps(
+      placedSeller({ checkout: { payments: "ready", deliveryPriced: null } }),
+    );
+    expect(data.steps.map((s) => s.id)).toEqual([...SETUP_STEP_IDS.slice(0, 4), "payments"]);
+    expect(data.complete).toBe(true);
   });
 
   it("starts a new seller at their seller details, with nothing done", () => {
@@ -248,6 +287,7 @@ describe("buildSetupSteps", () => {
       buildSetupSteps(
         placedSeller({ storefronts: [storefront("sf-1", [productBlock("p-1")], false)] }),
       ),
+      buildSetupSteps(placedSeller({ checkout: { payments: "none", deliveryPriced: false } })),
     ];
     const broken = branches
       .flatMap((data) => data.steps)

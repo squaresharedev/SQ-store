@@ -1,54 +1,66 @@
+import { useId } from "react";
 import { motion, type Variants } from "motion/react";
 import { IconSvg } from "./IconSvg";
 import { EASE_ENTRANCE, EASE_STANDARD, SETTLE } from "./motion-tokens";
 import type { NavIconProps } from "./types";
 
 /**
- * Discounts: the ticket gives a little shake, as if torn off a strip, while the
- * percent slash draws itself again and its two dots pop in after it.
+ * Discounts: a percent badge. On hover the % scrolls up out of it, a price tag
+ * rolls in from below and swings from its hole; leaving rolls it all back.
  *
- * Geometry is lucide's ticket-percent, so at rest it is the static glyph.
+ * Geometry is lucide's badge-percent, so at rest it is the static glyph. The
+ * roll is clipped to the badge so nothing shows outside its edge.
  */
-const TICKET_SHAKE: Variants = {
+const BADGE =
+  "M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z";
+
+const PERCENT_OUT: Variants = {
+  idle: { y: 0, transition: SETTLE },
+  hover: { y: -18, transition: { duration: 0.35, ease: EASE_STANDARD } },
+};
+
+const TAG_IN: Variants = {
+  idle: { y: 18, transition: SETTLE },
+  hover: {
+    y: [18, -1.5, 0],
+    transition: { delay: 0.12, duration: 0.4, ease: EASE_ENTRANCE },
+  },
+};
+
+/** Once the tag has landed it swings from its hole in decaying passes. */
+const TAG_SWING: Variants = {
   idle: { rotate: 0, transition: SETTLE },
   hover: {
-    rotate: [0, -7, 4, 0],
-    transition: { duration: 0.42, ease: EASE_STANDARD },
+    rotate: [0, -24, 14, -6, 0],
+    transition: { delay: 0.38, duration: 0.65, ease: EASE_STANDARD },
   },
 };
-
-const SLASH: Variants = {
-  idle: { pathLength: 1, transition: SETTLE },
-  hover: {
-    pathLength: [0, 1],
-    transition: { duration: 0.3, ease: EASE_ENTRANCE },
-  },
-};
-
-/** A dot pops past full size once the slash has passed it. */
-function dotVariants(delay: number): Variants {
-  return {
-    idle: { scale: 1, transition: SETTLE },
-    hover: {
-      scale: [1, 2.2, 1],
-      transition: { delay, duration: 0.3, ease: EASE_ENTRANCE },
-    },
-  };
-}
-
-const TOP_DOT = dotVariants(0.12);
-const BOTTOM_DOT = dotVariants(0.26);
 
 export function DiscountsIcon({ className }: NavIconProps) {
+  // Per instance: the rail and a gallery can both draw it, and a clip defined
+  // inside a hidden copy would not apply to the visible one.
+  const clipId = useId();
   return (
     <IconSvg className={className}>
-      {/* Ticket, slash and dots as one, so the shake carries them together. */}
-      <motion.g variants={TICKET_SHAKE}>
-        <path d="M2 9a3 3 0 1 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 1 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
-        <motion.path variants={TOP_DOT} d="M9 9h.01" />
-        <motion.path variants={SLASH} d="m15 9-6 6" />
-        <motion.path variants={BOTTOM_DOT} d="M15 15h.01" />
-      </motion.g>
+      <defs>
+        <clipPath id={clipId}>
+          <path d={BADGE} />
+        </clipPath>
+      </defs>
+      <path d={BADGE} />
+      <g clipPath={`url(#${clipId})`}>
+        <motion.g variants={PERCENT_OUT}>
+          <path d="M9 9h.01" />
+          <path d="m15 9-6 6" />
+          <path d="M15 15h.01" />
+        </motion.g>
+        <motion.g variants={TAG_IN}>
+          <motion.g variants={TAG_SWING} style={{ originX: 0.3, originY: 0.3 }}>
+            <path d="M8 8h4l5 5-4 4-5-5z" />
+            <path d="M10 10h.01" />
+          </motion.g>
+        </motion.g>
+      </g>
     </IconSvg>
   );
 }

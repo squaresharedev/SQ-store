@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { transitionClass } from "@/components/ui/control-styles";
 import { LEGAL_LINKS } from "@/lib/legal/links";
+import { SUPPORT_EMAIL } from "@/lib/site";
 
 /**
  * Company-wide footer for the error surfaces: the same legal, social and
@@ -56,7 +57,7 @@ export function BrandFooter() {
               {tKey(label)}
             </a>
           ))}
-          <a href="mailto:squareshare.to@gmail.com" className={linkClass}>
+          <a href={`mailto:${SUPPORT_EMAIL}`} className={linkClass}>
             {t("contact")}
           </a>
         </nav>

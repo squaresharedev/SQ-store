@@ -1,4 +1,4 @@
-import { CreditCard, FlaskConical } from "lucide-react";
+import { CreditCard, FlaskConical, Lock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { fieldBaseClass } from "@/components/ui/control-styles";
@@ -16,11 +16,10 @@ const WALLETS = ["Apple Pay", "Google Pay"] as const;
  *     seller's own field style, so the design can be judged with the payment
  *     in place, and a line saying what will appear there;
  *   - the development test provider: a plain notice that no money moves;
- *   - Stripe, once it is wired: its Payment Element and Express Checkout
- *     Element mount here, themed from the same CheckoutTheme as the fields
- *     around them. TODO(stripe): mount them for provider "stripe".
+ *   - Stripe: a notice that the card is entered on Stripe's own page, which
+ *     is where the Pay button leads (lib/checkout/stripe-provider.ts).
  *
- * Nothing here ever holds card data: the real fields are Stripe's own iframes,
+ * Nothing here ever holds card data: the card is typed into Stripe's page,
  * which is what keeps a card number off our servers entirely.
  */
 export function PaymentSlot({
@@ -45,6 +44,22 @@ export function PaymentSlot({
         <div className="flex flex-col gap-0.5">
           <p className="font-medium">{t("testTitle")}</p>
           <p className="opacity-75">{t("testBody")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (provider === "stripe") {
+    return (
+      <div
+        className="flex items-start gap-3 px-4 py-3.5 text-sm"
+        style={{ backgroundColor: subtleFill(ink), borderRadius: `${radius}px` }}
+        data-checkout-payment="stripe"
+      >
+        <Lock className="mt-0.5 size-4 shrink-0 opacity-70" strokeWidth={2} aria-hidden="true" />
+        <div className="flex flex-col gap-0.5">
+          <p className="font-medium">{t("stripeTitle")}</p>
+          <p className="opacity-75">{t("stripeBody")}</p>
         </div>
       </div>
     );

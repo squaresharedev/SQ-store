@@ -30,7 +30,7 @@
     "ownerOnly": "Plán obchodu může měnit jen jeho vlastník.",
     "soon": "Brzy",
     "soonTitle": "Placené plány se brzy otevřou. Do té doby vše na Free funguje beze změny.",
-    "finePrint": "Ceny jsou bez DPH. Poplatek za prodej se vztahuje na prodeje přes pokladnu Square Share a účtuje se z ceny položky, nikdy z dopravy. Vlastní poplatky Stripe za zpracování karty se přičítají. Zrušit můžete kdykoli: plán si ponecháte do konce zaplaceného období.",
+    "finePrint": "Ceny jsou bez DPH. Poplatek za prodej se vztahuje na prodeje přes pokladnu Square Share a účtuje se z celé částky, kterou kupující zaplatí, včetně dopravy. Vlastní poplatky Stripe za zpracování karty se přičítají. Zrušit můžete kdykoli: plán si ponecháte do konce zaplaceného období.",
     "unavailable": "Plány se teď nedají zobrazit. Za chvíli stránku obnovte.",
     "yearlyFree": "{count, plural, one {# měsíc zdarma} few {# měsíce zdarma} many {# měsíce zdarma} other {# měsíců zdarma}}",
     "launchNote": "Úvodní cena je zvýhodněná cena na začátku: běžná cena je ta přeškrtnutá."
@@ -132,11 +132,11 @@
       },
       "fee": {
         "q": "Z čeho se účtuje poplatek za prodej?",
-        "a": "Z ceny položky u každého prodeje přes pokladnu Square Share, nikdy z dopravy. Vlastní poplatky Stripe za zpracování karty jsou oddělené."
+        "a": "Z celé částky, kterou kupující zaplatí u každého prodeje přes pokladnu Square Share, včetně dopravy. Vlastní poplatky Stripe za zpracování karty jsou oddělené."
       },
       "switch": {
         "q": "Mohu plán později změnit?",
-        "a": "Kdykoli, na vyšší i nižší, měsíční i roční. Stripe před potvrzením přesně ukáže, kolik zaplatíte."
+        "a": "Kdykoli, na vyšší i nižší. Stripe před potvrzením přesně ukáže, kolik zaplatíte."
       }
     }
   },
@@ -176,7 +176,8 @@
     "renews": "Obnoví se {date}.",
     "ends": "Končí {date}. Obchod pak přejde na Free a nic se neodstraní.",
     "pastDue": "Platba selhala. Stripe to zkusí znovu; aktualizujte kartu, abyste si ponechali {plan}.",
-    "feeLine": "Poplatek za každý prodej: {rate} z ceny položky.",
+    "feeLine": "Poplatek za každý prodej: {rate} z částky, kterou kupující zaplatí.",
+    "feeWaivedLine": "Z vašich prodejů se neplatí žádný poplatek: pro váš obchod je prominutý.",
     "memberNote": "Plán obchodu může měnit a jeho faktury zobrazit jen vlastník.",
     "usageTitle": "Co využíváte",
     "usageDescription": "Limity vašeho plánu platí jen pro přidávání dalších. Nic, co už máte, se nikdy neodstraní.",

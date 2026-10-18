@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/format/money";
 import { regionName } from "@/lib/format/country";
 import { orderDownloadApiPath } from "@/lib/checkout/paths";
+import { storefrontPagePath } from "@/lib/storefront/product-page-url";
 import { AnimatedCheck } from "@/components/ui/animated-check";
 import { CTA_BUTTON_CLASS, ctaStyle, subtleFill } from "@/components/product-page/product-page-maps";
 import { PageShell } from "@/components/product-page/PageShell";
@@ -17,6 +18,7 @@ import { CHECKOUT_HEADLINE_MAX, CHECKOUT_THANKS_MESSAGE_MAX } from "@/types/stor
 import { QuantityMark } from "./QuantityMark";
 import { VersionChips } from "./VersionChips";
 import { WithdrawalPanel } from "./WithdrawalPanel";
+import { PaymentWatch } from "./PaymentWatch";
 import { resolveCheckoutTheme } from "./checkout-theme";
 
 type Step = {
@@ -67,12 +69,33 @@ export function OrderStatusView({
   // What the heading reads as while the seller has not written their own.
   const defaultHeadline = order.firstName ? t("thanksNamed", { name: order.firstName }) : t("thanks");
 
-  // WHAT HAPPENS NEXT, from what is actually true of this order.
+  // WHAT HAPPENS NEXT, from what is actually true of this order. The first
+  // step is the money: taken, or (for a moment, with a provider that confirms
+  // afterwards) still being confirmed. Saying "Paid" before it is would be a
+  // receipt for a payment nobody has seen yet.
+  const paying = order.payment === "pending";
+  const refunded = order.payment === "refunded";
+  // What a PAID order comes with: the file, and the right to send it back.
+  // Not one still being paid for, and not one already refunded (the download
+  // route refuses both: app/api/orders/[orderRef]/download).
+  const paid = order.payment === "paid";
   const steps: Step[] = [
-    { key: "paid", title: t("timeline.paid"), detail: t("timeline.paidDetail", { date: date(order.placedAt) }), done: true },
+    paying
+      ? { key: "paid", title: t("timeline.confirming"), detail: t("timeline.confirmingDetail"), done: false }
+      : { key: "paid", title: t("timeline.paid"), detail: t("timeline.paidDetail", { date: date(order.placedAt) }), done: true },
   ];
-  if (order.isDigital) {
-    steps.push({ key: "ready", title: t("timeline.ready"), detail: t("timeline.readyDetail"), done: true });
+  // A refunded order that never left has nothing more to happen to it: the
+  // refund is the whole of what comes next. One that was sent keeps its story.
+  const showFulfilment = !refunded || order.fulfilment === "shipped";
+  if (!showFulfilment) {
+    // Nothing to prepare or send.
+  } else if (order.isDigital) {
+    steps.push({
+      key: "ready",
+      title: t("timeline.ready"),
+      detail: paid ? t("timeline.readyDetail") : null,
+      done: paid,
+    });
   } else {
     const shipped = order.fulfilment === "shipped";
     steps.push({
@@ -105,11 +128,22 @@ export function OrderStatusView({
         : {}),
     });
   }
+  if (refunded) {
+    steps.push({
+      key: "refunded",
+      title: t("timeline.refunded"),
+      detail: order.refundedAt
+        ? t("timeline.refundedDetail", { date: date(order.refundedAt), seller: sellerName })
+        : t("timeline.refundedDetailNoDate", { seller: sellerName }),
+      done: true,
+    });
+  }
   const current = steps.findIndex((step) => !step.done);
 
   return (
     <PageShell
       storefront={storefront}
+      shopHref={preview ? undefined : storefrontPagePath(storefront.id)}
       backgroundColor={theme.surface}
       photo={storefront.pagePhoto ? { ...storefront.pagePhoto, tint: theme.surface } : null}
       font={productPage.font}
@@ -119,6 +153,7 @@ export function OrderStatusView({
         "data-order-page": mode,
         "data-page-ink": theme.ink,
         "data-order-fulfilment": order.fulfilment,
+        "data-order-payment": order.payment,
       }}
       footer={
         <PoweredByFooter
@@ -134,6 +169,7 @@ export function OrderStatusView({
           check mark below and falls across the whole page) has the page to
           fill on the editor's artboard; a buyer's covers the screen. */}
       <div className="relative">
+      {paying && !preview && <PaymentWatch />}
       {checkoutPage.celebrate === "confetti" && (
         <CelebrationConfetti
           play={placed}
@@ -168,7 +204,10 @@ export function OrderStatusView({
           />
           <p className="text-sm opacity-75">
             {t("number", { number: order.number })}
-            {order.maskedEmail && (
+            {/* Only once it has really gone: with mail off, or a send that
+                failed, a buyer would otherwise wait for a message that is not
+                coming. */}
+            {order.maskedEmail && order.confirmationSent && (
               <>
                 {" · "}
                 {t("confirmationSent", { email: order.maskedEmail })}
@@ -297,7 +336,7 @@ export function OrderStatusView({
           </ol>
         </section>
 
-        {order.isDigital && (
+        {order.isDigital && paid && (
           <a
             href={preview ? undefined : orderDownloadApiPath(order.ref)}
             aria-disabled={preview || undefined}
@@ -311,15 +350,17 @@ export function OrderStatusView({
           </a>
         )}
 
-        <WithdrawalPanel
-          orderRef={order.ref}
-          withdrawal={order.withdrawal}
-          sellerName={sellerName}
-          ink={theme.ink}
-          rule={theme.rule}
-          cta={theme.cta}
-          preview={preview}
-        />
+        {paid && (
+          <WithdrawalPanel
+            orderRef={order.ref}
+            withdrawal={order.withdrawal}
+            sellerName={sellerName}
+            ink={theme.ink}
+            rule={theme.rule}
+            cta={theme.cta}
+            preview={preview}
+          />
+        )}
 
         {seller.email && (
           <p className="text-sm opacity-75" data-setting-skip="">

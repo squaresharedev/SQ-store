@@ -66,14 +66,26 @@ export function usePreviewProduct(product: Product, showStock: boolean, soldOut:
  *  options, no details and no purchase link until the action answers. */
 function fromCatalogRow(product: Product, showStock: boolean): ProductPageProduct {
   const stock = deriveStockBadge(product);
+  const cents = (price: number) => Math.round(price * 100);
   return {
     id: product.id,
     title: product.title,
     description: product.description,
-    priceCents: Math.round(product.price * 100),
+    // The price a buyer is shown: the running sale's when the catalogue row
+    // carries one (Product.sale), as the tile beside this page draws it. When
+    // the sale ends, the lowest price it is measured against and the
+    // percentage that measures, arrive with the preview load.
+    priceCents: cents(product.sale?.price ?? product.price),
     currency: product.currency,
-    // The editor previews the product as listed, never as discounted.
-    sale: null,
+    sale: product.sale
+      ? {
+          regularPriceCents: cents(product.price),
+          priorPriceCents: null,
+          percentOff: null,
+          offerPercent: product.sale.offerPercent,
+          endsAt: null,
+        }
+      : null,
     purchaseUrl: null,
     // The catalogue row has no page facts, so the first frame shows the store
     // default; the real choice arrives with the preview load a tick later.

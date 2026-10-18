@@ -38,6 +38,7 @@ import {
   RETURNS_WINDOW_MAX_DAYS,
   SHIPPING_DESTINATIONS_MAX,
   SHIPPING_RATE_MAX_CENTS,
+  SHIPPING_RATES_ANCHOR,
   type SellerShippingPolicy,
   type ShippingDestination,
 } from "@/types/shipping-policy";
@@ -532,7 +533,7 @@ export function ShippingSection({
           the destination rows above. The card is separate so it stays out of
           the way of sellers who do not need it yet. */}
       <SettingsCard
-        id="checkout-rates"
+        id={SHIPPING_RATES_ANCHOR}
         fold={compact ? "closed" : undefined}
         title={t("shipping.rates.title")}
         description={t("shipping.rates.description")}

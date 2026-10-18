@@ -37,6 +37,18 @@ describe("singleLineText", () => {
     }
   });
 
+  it("drops invisible direction controls, and keeps what right-to-left text and emoji are made of", () => {
+    // Overrides, embeddings and isolates: pasted in unseen, able to reverse a line.
+    for (const code of [0x202a, 0x202c, 0x202e, 0x2066, 0x2069]) {
+      expect(field.parse(`ab${String.fromCodePoint(code)}cd`), code.toString(16)).toBe("abcd");
+    }
+    // A right-to-left mark and a zero-width joiner are part of real text.
+    for (const code of [0x200f, 0x200d]) {
+      const kept = `ab${String.fromCodePoint(code)}cd`;
+      expect(field.parse(kept), code.toString(16)).toBe(kept);
+    }
+  });
+
   it("enforces the length cap", () => {
     expect(field.safeParse("x".repeat(11)).success).toBe(false);
     expect(field.safeParse("x".repeat(10)).success).toBe(true);

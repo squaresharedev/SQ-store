@@ -19,9 +19,20 @@
 export const CHART_HEIGHT = 256;
 
 // The revenue hero is the one chart that is not a card and not this height:
-// it is the page's headline, drawn edge to edge, so it gets more room. The
-// class is the same 320px for the two places that hold the hero's box without
-// a chart in it (its empty state and the loading skeleton), so neither resizes
-// the page when the chart arrives.
-export const HERO_CHART_HEIGHT = 320;
-export const heroChartHeightClass = "h-80";
+// it is the page's headline, in a frame of its own, so it gets more room, and
+// more of it where there is a screen to spend it on (352px on a phone, 448px
+// from a tablet up). A class, because its height follows the screen; the chart
+// fills the box the class makes (the kit's height="fill"). The same class
+// holds the hero's box where there is no chart in it (its empty state and the
+// loading skeleton), so neither resizes the page when the chart arrives.
+export const heroChartHeightClass = "h-88 md:h-112";
+
+// The air above and below a section's lead (the hero), on top of the
+// section's own spacing, so it reads as the headline and not as the first
+// card. Shared with the loading skeleton, so the page does not shift when the
+// hero arrives.
+export const leadLaneClass = "py-2 md:py-6";
+
+// The room the hero keeps between its corner marks and its chart, top and
+// bottom. Shared with the loading skeleton for the same reason.
+export const heroFrameClass = "relative py-7";

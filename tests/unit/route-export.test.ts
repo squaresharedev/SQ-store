@@ -6,16 +6,25 @@ type QueryResult = { data: unknown; error: unknown };
 const getUser = vi.fn<() => Promise<QueryResult>>();
 const tables: Record<string, QueryResult> = {};
 const filters: Record<string, unknown[]> = {};
+/** Every filter a table was read with (team_members is read twice). */
+const everyFilter: Record<string, unknown[][]> = {};
+/** The columns each table was asked for. */
+const selected: Record<string, string> = {};
 
 function chain(table: string) {
   const result = tables[table] ?? { data: [], error: null };
   const builder = {
-    select: () => builder,
+    select: (columns: string) => {
+      selected[table] = columns;
+      return builder;
+    },
     eq: (col: string, val: unknown) => {
       filters[table] = [col, val];
+      (everyFilter[table] ??= []).push([col, val]);
       return builder;
     },
     order: () => builder,
+    limit: () => builder,
     maybeSingle: () => Promise.resolve(result),
     then: (resolve: (v: QueryResult) => unknown) => resolve(result),
   };
@@ -67,6 +76,8 @@ beforeEach(() => {
   readAccountBilling.mockResolvedValue({ ok: true, billing: { ...FREE_BILLING, customerId: "cus_secret", subscriptionId: "sub_secret" } });
   for (const k of Object.keys(tables)) delete tables[k];
   for (const k of Object.keys(filters)) delete filters[k];
+  for (const k of Object.keys(everyFilter)) delete everyFilter[k];
+  for (const k of Object.keys(selected)) delete selected[k];
 });
 
 describe("GET /settings/export", () => {
@@ -118,9 +129,36 @@ describe("GET /settings/export", () => {
     expect(body.plan_cancellations).toEqual([{ plan: "starter", reason: "unused", detail: "Back in spring" }]);
     expect(readAccountBilling).toHaveBeenCalledWith(USER.id);
 
+    // The rest of what we hold about THIS person, each keyed on the session.
+    expect(filters.orders).toEqual(["seller_id", USER.id]);
+    expect(filters.notifications).toEqual(["user_id", USER.id]);
+    expect(filters.security_events).toEqual(["user_id", USER.id]);
+    expect(everyFilter.team_members).toEqual([
+      ["account_owner_id", USER.id],
+      ["member_user_id", USER.id],
+    ]);
+    expect(body).toMatchObject({
+      orders: [],
+      notifications: [],
+      security_events: [],
+      team: { invited: [], member_of: [] },
+      truncated: { orders: false, notifications: false, security_events: false },
+    });
+    // A buyer's email and address are another person's data: never selected.
+    expect(selected.orders).not.toMatch(/buyer_email|ship_to|gift_message|payment_ref|checkout_session_id/);
+    // Nor the salted IP digest on the security log.
+    expect(selected.security_events).not.toMatch(/ip_hash|meta/);
+
     // The plan is exported; the Stripe ids behind it are not.
     expect(body.billing).toMatchObject({ plan: "free", status: "none" });
     expect(JSON.stringify(body)).not.toMatch(/cus_secret|sub_secret/);
+  });
+
+  it("500 when one of the wider reads errors: an export missing its orders is not the whole file", async () => {
+    getUser.mockResolvedValue({ data: { user: USER }, error: null } as never);
+    tables.orders = { data: null, error: { message: "boom" } };
+    const res = await GET();
+    expect(res.status).toBe(500);
   });
 
   it("500 when the cancellation read errors too", async () => {

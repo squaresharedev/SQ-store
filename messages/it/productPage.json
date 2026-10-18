@@ -7,6 +7,20 @@
     "body": "Potrebbe essere stato rimosso, oppure il link che hai seguito non è più valido. Torna al negozio per vedere cosa è disponibile ora.",
     "back": "Torna indietro"
   },
+  "unavailable": {
+    "title": "Non è stato possibile caricare questa pagina",
+    "body": "Il problema è nostro e di solito si risolve in un attimo.",
+    "orderBody": "Il tuo ordine è al sicuro. È solo questa pagina che al momento non si riesce a caricare, e di solito si risolve in un attimo."
+  },
+  "pageNotFound": {
+    "title": "Questa pagina non è disponibile",
+    "body": "Il link che hai seguito potrebbe essere scaduto o incompleto. Torna indietro e riprova."
+  },
+  "storefront": {
+    "gridLabel": "Cosa vende {store}",
+    "empty": "{store} non ha nulla in vetrina al momento.",
+    "description": "Scopri cosa vende {store}."
+  },
   "sections": {
     "description": "Descrizione",
     "specs": "Specifiche",
@@ -29,6 +43,11 @@
     "warnings": "Avvertenze"
   },
   "priceNotes": "{price, select, incl {{shipping, select, plus {IVA inclusa, più spedizione} free {IVA inclusa, spedizione gratuita} other {IVA inclusa}}} excl {{shipping, select, plus {tasse escluse, più spedizione} free {tasse escluse, spedizione gratuita} other {tasse escluse}}} other {{shipping, select, plus {più spedizione} free {spedizione gratuita} other {}}}}",
+  "delivery": {
+    "free": "Spedizione gratuita",
+    "flat": "Spedizione {amount}",
+    "from": "Spedizione da {amount}"
+  },
   "stock": {
     "digitalDownload": "Download digitale",
     "digitalDownloadFormat": "Download digitale ({format})"
@@ -190,6 +209,8 @@
       "label": "Cosa succede adesso",
       "paid": "Ordine effettuato",
       "paidDetail": "Pagato il {date}",
+      "confirming": "Conferma del pagamento",
+      "confirmingDetail": "Di solito richiede un momento. Ricarica la pagina se non cambia nulla.",
       "preparing": "In preparazione",
       "preparingDetail": "{seller} sta preparando il tuo ordine.",
       "shipped": "In viaggio",
@@ -198,7 +219,10 @@
       "track": "Traccia con {carrier}",
       "notYet": "Riceverai un'e-mail quando verrà spedito.",
       "ready": "Pronto per il download",
-      "readyDetail": "Il tuo file è pronto qui sotto e il link è anche nella tua e-mail."
+      "readyDetail": "Il tuo file è pronto qui sotto e il link è anche nella tua e-mail.",
+      "refunded": "Rimborsato",
+      "refundedDetail": "{seller} ha rimborsato questo ordine il {date}.",
+      "refundedDetailNoDate": "{seller} ha rimborsato questo ordine."
     },
     "download": "Scarica ({format})",
     "downloadPlain": "Scarica il tuo file",
@@ -295,6 +319,8 @@
     "payment": {
       "testTitle": "Pagamento di prova",
       "testBody": "Questo è un checkout di sviluppo. Nessuna carta viene addebitata e nessun denaro si muove.",
+      "stripeTitle": "Paga in modo sicuro con Stripe",
+      "stripeBody": "Inserisci i dati della tua carta nella pagina sicura di Stripe nel passaggio successivo.",
       "previewTitle": "Dati della carta",
       "previewBody": "Carta, Apple Pay e Google Pay appariranno qui nei tuoi colori una volta connesso Stripe.",
       "cardNumber": "Numero carta",
@@ -331,7 +357,8 @@
       "failed": "Qualcosa è andato storto e non è stato addebitato nulla. Riprova.",
       "invalid": "Alcuni dettagli richiedono una verifica. Controlla i campi evidenziati.",
       "discount_invalid": "Questo codice sconto non può più essere usato. Rimuovilo per pagare il prezzo intero.",
-      "price_changed": "Il prezzo è cambiato mentre questa pagina era aperta, quindi non è stato addebitato nulla. Controlla il nuovo totale, poi paga."
+      "price_changed": "Il prezzo è cambiato mentre questa pagina era aperta, quindi non è stato addebitato nulla. Controlla il nuovo totale, poi paga.",
+      "turnstile": "Il controllo di sicurezza non è stato completato, quindi non è stato addebitato nulla. È ripartito ora: attendi un momento e riprova."
     },
     "editHeadline": "Titolo del checkout",
     "discount": {
@@ -350,7 +377,11 @@
   "sale": {
     "wasNow": "Era {was}, ora {now}",
     "percentOff": "-{percent}%",
+    "amountOff": "-{amount}",
     "priorNote": "Prezzo barrato: il prezzo più basso applicato nei 30 giorni precedenti la riduzione.",
+    "regularNote": "Prezzo barrato: il prezzo abituale.",
+    "lowestNote": "Prezzo barrato: il prezzo abituale. Prezzo più basso applicato nei 30 giorni precedenti la riduzione: {price}.",
+    "badgeSale": "Promo",
     "endsOn": "Promozione fino al {date}"
   }
 }

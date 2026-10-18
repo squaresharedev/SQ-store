@@ -176,6 +176,18 @@
         "body": "Stripe va réessayer. Mettez à jour votre carte dans Forfait et facturation pour conserver votre forfait."
       }
     },
+    "stock": {
+      "low": {
+        "title": "Stock faible : {title}",
+        "body": "{count, plural, =0 {Aucun article en stock.} one {Seulement # restant.} many {Seulement # restants.} other {Seulement # restants.}} Réapprovisionnez ou désactivez le suivi du stock si vous fabriquez sur commande."
+      }
+    },
+    "payment": {
+      "dispute": {
+        "title": "Un acheteur a contesté le paiement pour {title}",
+        "body": "Sa banque a ouvert un litige. Répondez-y dans votre tableau de bord Stripe avant la date limite."
+      }
+    },
     "policy": {
       "autoPaused": {
         "title": "Action requise : {target, select, product {votre produit « {title} » est en pause} other {votre vitrine « {title} » est en pause}}",

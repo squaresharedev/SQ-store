@@ -38,6 +38,22 @@
       "actionOpen": "Open designer",
       "cta": "Publish your product",
       "ctaPagesOff": "Turn on product pages"
+    },
+    "payments": {
+      "label": "Get paid",
+      "detail": "Connect Stripe so buyers can pay by card on your product pages.",
+      "detailUnfinished": "Stripe still needs a few details before buyers can pay.",
+      "detailDone": "Buyers can pay by card.",
+      "action": "Connect Stripe",
+      "actionFinish": "Finish on Stripe",
+      "cta": "Connect Stripe to get paid"
+    },
+    "delivery": {
+      "label": "Price delivery",
+      "detail": "Without a delivery price, products that ship have no Pay button.",
+      "detailDone": "Buyers see the full total before they pay.",
+      "action": "Set prices",
+      "cta": "Set your delivery prices"
     }
   },
   "checklist": {
@@ -198,7 +214,10 @@
         "title": "Embed a storefront on your site",
         "body": "Each storefront has an embed button that gives you a snippet like this one. The widget is still in development and doesn't show on other sites yet.",
         "bodyButton": "This button gives you a snippet like the one below to paste into your site. The widget is still in development and doesn't show on other sites yet.",
-        "fallbackBody": "Once you have a storefront, the embed button on its card gives you a snippet like this one. The widget is still in development and doesn't show on other sites yet."
+        "fallbackBody": "Once you have a storefront, the embed button on its card gives you a snippet like this one. The widget is still in development and doesn't show on other sites yet.",
+        "bodyLive": "Each storefront has an embed button that gives you a snippet like this one. Paste it into your own site and the storefront shows there.",
+        "bodyButtonLive": "This button gives you a snippet like the one below. Paste it into your own site and the storefront shows there.",
+        "fallbackBodyLive": "Once you have a storefront, the embed button on its card gives you a snippet like this one to paste into your own site."
       },
       "ordersSearch": {
         "title": "Find an order",

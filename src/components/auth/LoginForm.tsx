@@ -41,13 +41,17 @@ const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 export function LoginForm({
   next = "/",
   lastUsed = null,
+  initialMode = "signin",
 }: {
   next?: string;
   /** Sign-in option this browser used last, or null if unknown. */
   lastUsed?: SignInMethod | null;
+  /** Which tab the form opens on. `/login?mode=signup` asks for sign-up, so
+   *  a "create an account" link from anywhere lands on the right form. */
+  initialMode?: "signin" | "signup";
 }) {
   const t = useTranslations("Auth.login");
-  const [mode, setMode] = React.useState<Mode>("signin");
+  const [mode, setMode] = React.useState<Mode>(initialMode);
   const [state, formAction, isPending] = useActionState(authenticate, INITIAL);
   const resolveMessage = useResolveMessage();
   const formRef = React.useRef<HTMLFormElement>(null);
@@ -55,6 +59,19 @@ export function LoginForm({
   const [resetEmail, setResetEmail] = React.useState("");
   const [turnstileToken, setTurnstileToken] = React.useState("");
   const clearTurnstileToken = React.useCallback(() => setTurnstileToken(""), []);
+  // A Turnstile token is good for ONE verification, and sign-up spends it
+  // before it checks the email or the password. So an answer to a submit means
+  // the token this form holds is dead: without a new one, fixing a weak
+  // password and pressing the button again fails the bot check instead. Every
+  // new result remounts the widget, which issues a fresh token. (Set during
+  // render, React's own way to reset state when a value changes.)
+  const [turnstileRound, setTurnstileRound] = React.useState(0);
+  const [answeredState, setAnsweredState] = React.useState(state);
+  if (answeredState !== state) {
+    setAnsweredState(state);
+    setTurnstileToken("");
+    setTurnstileRound((round) => round + 1);
+  }
 
   React.useEffect(() => {
     if (state.error) {
@@ -256,6 +273,7 @@ export function LoginForm({
           <div className="flex flex-col gap-2">
             <input type="hidden" name="cf_turnstile_token" value={turnstileToken} />
             <Turnstile
+              key={turnstileRound}
               siteKey={TURNSTILE_SITE_KEY}
               onVerify={setTurnstileToken}
               onExpire={clearTurnstileToken}

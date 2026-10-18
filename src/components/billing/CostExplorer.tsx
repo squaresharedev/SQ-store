@@ -6,11 +6,13 @@ import { AmountField } from "@/components/ui/AmountField";
 import { Slider } from "@/components/ui/slider";
 import { CountUp } from "@/components/ui/CountUp";
 import { cardClass, inkBadgeClass } from "@/components/ui/surface-styles";
+import { usePlanPrices } from "@/components/billing/plan-context";
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/format/money";
-import { cheapestPlanFor, monthlyPriceCents, platformFeeCents } from "@/lib/billing/fees";
-import { BILLING_CURRENCY, PLANS, PLAN_IDS, type BillingInterval } from "@/lib/billing/plans";
+import { cheapestPlanFor, directFeeBps, monthlyPriceCents } from "@/lib/billing/fees";
+import { BILLING_CURRENCY, PLAN_IDS, type BillingInterval } from "@/lib/billing/plans";
+import { feeCents } from "@/lib/pricing";
 
 /** The slider's range and step, in whole euros of monthly sales. */
 const SALES_MAX_EUROS = 10_000;
@@ -34,32 +36,35 @@ const BAR_PART_CLASS = {
  *
  * Starts on the store's own last 30 days of sales when it has any (silently:
  * it is a starting point, not a claim). All the arithmetic is
- * lib/billing/fees.ts, the same the checkout charges with.
+ * lib/billing/fees.ts on the plan prices in force, the same the checkout
+ * charges with.
  */
 export function CostExplorer({
   interval,
-  salesSubtotal30dCents,
+  directSales30dCents,
 }: {
   interval: BillingInterval;
-  /** The store's last 30 days of item sales; null or 0 when it has none. */
-  salesSubtotal30dCents: number | null;
+  /** The store's last 30 days of sales through its own doors (what buyers
+   *  paid, delivery included); null or 0 when it has none. */
+  directSales30dCents: number | null;
 }) {
   const t = useTranslations("Billing");
   const locale = useLocale();
   const id = React.useId();
-  const fromSales = (salesSubtotal30dCents ?? 0) > 0;
+  const prices = usePlanPrices();
+  const fromSales = (directSales30dCents ?? 0) > 0;
   const [euros, setEuros] = React.useState(() =>
-    fromSales ? Math.min(SALES_MAX_EUROS, Math.round((salesSubtotal30dCents ?? 0) / 100)) : DEFAULT_SALES_EUROS,
+    fromSales ? Math.min(SALES_MAX_EUROS, Math.round((directSales30dCents ?? 0) / 100)) : DEFAULT_SALES_EUROS,
   );
 
   const salesCents = euros * 100;
-  const cheapest = cheapestPlanFor(salesCents, interval);
+  const cheapest = cheapestPlanFor(prices, salesCents, interval);
   const money = (cents: number) => formatCents(cents, BILLING_CURRENCY, locale);
   const wholeMoney = (cents: number) => formatCents(cents, BILLING_CURRENCY, locale, { wholeUnits: true });
 
   const costs = PLAN_IDS.map((plan) => {
-    const price = monthlyPriceCents(plan, interval);
-    const fee = platformFeeCents(salesCents, PLANS[plan].feeBps);
+    const price = monthlyPriceCents(prices, plan, interval);
+    const fee = feeCents(salesCents, directFeeBps(prices, plan));
     return { plan, price, fee, total: price + fee };
   });
   // Bars share one scale, so the longest is full width and the rest compare.

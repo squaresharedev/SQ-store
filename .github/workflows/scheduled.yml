@@ -7,6 +7,13 @@
 # of work on one account and answers `"more":true` when there is more to do
 # right now, so this calls again until it does not.
 #
+# STOREFRONT FUNNEL ROLLUP (src/lib/analytics/funnel/rollup.ts). Once a day,
+# count the last finished days of buyer funnel events in Workers Analytics
+# Engine (which keeps 90 days) and store them in Supabase. Each run redoes the
+# last three days, so a missed night costs nothing. It answers
+# `"configured":false` until the Worker has what it reads with (wrangler.jsonc,
+# STOREFRONT FUNNEL), and that is not a failure.
+#
 # Required secret (the job is skipped, loudly, without it):
 #   CRON_SECRET   A long random string (32 characters or more), set BOTH here
 #                 as a repository secret and on the Worker
@@ -61,3 +68,26 @@ jobs:
             fi
           done
           echo "::warning title=Account deletions are not finishing::40 runs in a row still had more to do."
+
+  funnel-rollup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      APP_URL: https://dashboard.squareshare.eu
+    steps:
+      - name: Say so when it is not set up
+        if: ${{ env.CRON_SECRET == '' }}
+        run: echo "::warning title=The funnel rollup did not run::Set the CRON_SECRET repository secret (and the same value on the Worker)."
+
+      - name: Roll up the finished days of storefront funnel events
+        if: ${{ env.CRON_SECRET != '' }}
+        run: |
+          set -euo pipefail
+          # --fail: a 404 (secret not on the Worker, or wrong) or a 500 (a day
+          # could not be rolled) turns the job red. Tomorrow's run redoes it.
+          result="$(curl --fail --silent --show-error --max-time 120 \
+            --request POST \
+            --header "Authorization: Bearer ${CRON_SECRET}" \
+            "${APP_URL}/api/cron/funnel-rollup")"
+          echo "${result}"

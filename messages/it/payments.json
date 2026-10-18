@@ -16,6 +16,11 @@
       "label": "Prossimo bonifico",
       "zero": "Nessun bonifico programmato",
       "hint": "Previsto per il {date}"
+    },
+    "fees": {
+      "label": "Commissioni di questo mese",
+      "zero": "Nessuna commissione questo mese",
+      "hint": "La quota di Square Share sulle tue vendite, al netto dei rimborsi"
     }
   },
   "connection": {
@@ -29,6 +34,8 @@
     "charges": "Incassi",
     "payouts": "Bonifici",
     "verified": "Verificato",
+    "finish": "Stripe ha ancora bisogno di alcuni dati. Finché non li ha, gli acquirenti non possono pagare.",
+    "finishButton": "Completa su Stripe",
     "requirementsDue": "Stripe ha bisogno di ulteriori informazioni prima che i bonifici possano continuare."
   },
   "connectModal": {
@@ -106,6 +113,7 @@
     "sentTo": "Inviato a",
     "bankAccount": "Conto bancario ···· {last4}",
     "arrives": "Arrivo",
+    "arrived": "Arrivato",
     "initiated": "Avviato",
     "type": "Tipo",
     "typeValue": "{method, select, instant {Istantaneo} other {Standard}} · {automatic, select, true {Automatico} other {Manuale}}",

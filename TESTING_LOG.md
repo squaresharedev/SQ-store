@@ -68,8 +68,7 @@ possible without paying or pausing live infra. Prod was only ever read
 
 ### STUB features (placeholder `it.todo`, not asserted — they don't exist yet)
 Payments/Stripe Connect (mock layer only), checkout/order creation +
-`decrementStock` caller, public embed endpoint + image proxy (widget lives at
-`embed.squareshare.to`, a separate service), team invite emails, account hard
+`decrementStock` caller, image proxy, team invite emails, account hard
 delete, analytics Views/Clicks/Demographics, onboarding checklist, tax
 downstream use. `tests/unit/stubs.placeholder.test.ts` enumerates them.
 

@@ -146,9 +146,12 @@
       "thankYouMessage": "Wiadomość z podziękowaniem",
       "thankYouCelebration": "Celebracja podziękowania",
       "checkoutPayButton": "Przycisk płatności",
+      "saleChip": "Etykieta obniżki",
+      "salePrice": "Cena po obniżce",
       "productPagePhoto": "Zdjęcie strony produktu",
       "checkoutPhoto": "Zdjęcie kasy",
-      "thanksPhoto": "Zdjęcie strony z podziękowaniem"
+      "thanksPhoto": "Zdjęcie strony z podziękowaniem",
+      "chipScale": "Ten sam rozmiar etykiet na wszystkich kartach"
     }
   },
   "editorSearch": {
@@ -206,11 +209,23 @@
     "snippetLabel": "Kod",
     "snippetReadyHint": "Wklej ten kod do kodu HTML swojej strony.",
     "snippetLockedHint": "Włącz osadzenie i dodaj co najmniej jedną domenę, aby odblokować przycisk Kopiuj.",
+    "snippetSaveHint": "Zapisz ustawienia, aby odblokować przycisk Kopiuj.",
+    "pagesOffHint": "Najpierw włącz strony produktów w edytorze. Kliknięcie produktu otwiera jego stronę.",
+    "notShowingLabel": "Jeśli witryna się nie wyświetla",
+    "notShowingTip": "Adres twojej strony musi być na liście Dozwolone domeny, a strona musi używać https. Kreatory stron, które umieszczają własny kod HTML we własnej ramce (Wix, Google Sites), nie są jeszcze obsługiwane.",
     "copySnippet": {
       "copy": "Kopiuj kod do osadzenia",
       "copied": "Skopiowano kod do osadzenia",
       "failed": "Nie udało się skopiować kodu do osadzenia. Zaznacz i skopiuj ręcznie.",
       "cannotCopyYet": "kodu do osadzenia nie można jeszcze skopiować"
+    },
+    "privacyLabel": "Do twojej polityki prywatności",
+    "privacyHint": "Twoja strona wczytuje teraz witrynę ze Squareshare, więc jej polityka prywatności powinna o tym mówić. Możesz wkleić ten tekst:",
+    "privacyText": "Ta strona wyświetla witrynę sklepową dostarczaną przez Squareshare. Podczas jej wczytywania adres IP i dane przeglądarki odwiedzającego są przesyłane do Squareshare w celu wyświetlenia produktów i zliczania wizyt. Squareshare nie zapisuje w tym celu plików cookie ani niczego innego na urządzeniu odwiedzającego. Szczegóły: {policy}",
+    "copyPrivacy": {
+      "copy": "Kopiuj tekst o prywatności",
+      "copied": "Skopiowano tekst o prywatności",
+      "failed": "Nie udało się skopiować tekstu. Zaznacz i skopiuj ręcznie."
     },
     "snippetKeyLabel": "Klucz kodu",
     "rotateConfirmText": "Wygenerowanie nowego klucza od razu unieważnia każdą kopię starego kodu, również te na stronach, które nadal chcesz używać: nowy kod trzeba będzie wkleić wszędzie.",
@@ -222,6 +237,19 @@
     "saved": "Zapisano ustawienia osadzenia.",
     "newKeyIssued": "Wygenerowano nowy klucz osadzenia.",
     "newKeyDetail": "Wklej kod ponownie wszędzie tam, gdzie ta witryna jest osadzona."
+  },
+  "share": {
+    "title": "Link do witryny",
+    "live": "Twoja witryna ma własną stronę. Każdy, kto ma ten link, może ją przeglądać, bez własnej strony internetowej.",
+    "pagesOff": "Włącz strony produktów w edytorze, a ta witryna dostanie link, który możesz udostępnić.",
+    "detailsMissing": "Ta witryna dostanie link do udostępnienia, gdy uzupełnisz dane sprzedawcy.",
+    "open": "Otwórz",
+    "openDesigner": "Otwórz edytor",
+    "copy": {
+      "copy": "Kopiuj link do witryny",
+      "copied": "Skopiowano link do witryny",
+      "failed": "Nie udało się skopiować linku. Zaznacz i skopiuj ręcznie."
+    }
   },
   "wizard": {
     "category": {
@@ -559,6 +587,27 @@
     "spotBottomCenter": "Etykieta z ceną na dolnym środku",
     "spotBottomRight": "Etykieta z ceną w prawym dolnym rogu"
   },
+  "saleBadge": {
+    "title": "Etykieta obniżki",
+    "says": "Pokaż",
+    "hint": "Widoczna na produkcie, dopóki obniżka zmniejsza jego cenę.",
+    "percent": "Procent",
+    "amount": "Kwota",
+    "hidden": "Ukryta",
+    "lookLabel": "Styl",
+    "look": {
+      "pill": "Pigułka",
+      "sticker": "Naklejka",
+      "flag": "Proporczyk",
+      "ribbon": "Wstęga"
+    },
+    "spot": "Etykieta obniżki {spot, select, top_left {w lewym górnym rogu} top_center {na górnym środku} top_right {w prawym górnym rogu} middle_center {na środku} bottom_left {w lewym dolnym rogu} bottom_center {na dolnym środku} bottom_right {w prawym dolnym rogu} other {}}"
+  },
+  "chipScale": {
+    "label": "Na większych kartach",
+    "tile": "Powiększ",
+    "cell": "Ten sam rozmiar"
+  },
   "layout": {
     "canvasWidth": "Szerokość obszaru roboczego",
     "canvasWidthAriaLabel": "Szerokość obszaru roboczego w blokach",
@@ -750,6 +799,11 @@
         "plusShipping": "Plus wysyłka",
         "freeShipping": "Darmowa wysyłka",
         "none": "Brak"
+      },
+      "saleStyle": {
+        "label": "Cena po obniżce",
+        "strike": "Linia",
+        "slash": "Ukośnie"
       },
       "useStorefrontAccent": "Użyj akcentu witryny",
       "useButtonTextColor": "Użyj koloru tekstu przycisku"

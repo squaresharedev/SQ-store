@@ -27,6 +27,8 @@ import {
   type OrderStatus,
   type OrdersView,
 } from "@/types/order-view";
+import { requireUser } from "@/lib/auth/session";
+import { ORDERS_PATH } from "@/lib/dashboard/paths";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Orders.metadata.orders");
@@ -132,6 +134,9 @@ export default async function OrdersRoutePage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  // The layout's session gate does not run again on a move between sections
+  // (see ../layout.tsx, or ../../layout.tsx from a nested page): a page asks.
+  await requireUser(ORDERS_PATH);
   const params = await searchParams;
   const { filters, sort, page } = parseParams(params);
   const deepLinkedId = first(params[ORDER_DETAIL_PARAM]);
@@ -161,7 +166,7 @@ export default async function OrdersRoutePage({
         view={view}
         toShipCount={toShipCount}
         canFulfil={can(account?.role, "orders.fulfil")}
-        checkoutOpen={account ? checkoutProviderFor(account.accountId) !== null : false}
+        checkoutOpen={account ? (await checkoutProviderFor(account.accountId)) !== null : false}
         data={data}
         filters={view === "all" ? filters : {}}
         sort={sort}

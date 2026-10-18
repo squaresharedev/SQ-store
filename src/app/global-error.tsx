@@ -277,15 +277,16 @@ export default function GlobalError({
               them from lib/legal/links.ts. This boundary renders when the root
               layout itself has failed, so it must not depend on a module that
               could be part of what failed. The cost is that these two hrefs
-              have to be updated alongside that file. They are the only copies
-              left, and nothing else may add a third. */}
+              have to be updated alongside that file, and the contact address
+              alongside SUPPORT_EMAIL in lib/site.ts. They are the only copies
+              left, and nothing else may add another. */}
           <a style={linkStyle} href="https://squareshare.eu/legal/privacy-policy/">
             Privacy
           </a>
           <a style={linkStyle} href="https://squareshare.eu/terms">
             Terms
           </a>
-          <a style={linkStyle} href="mailto:squareshare.to@gmail.com">
+          <a style={linkStyle} href="mailto:support@squareshare.eu">
             Contact
           </a>
           <span style={{ ...linkStyle, textTransform: "none" }}>

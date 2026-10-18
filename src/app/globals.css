@@ -338,6 +338,23 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/*
+ * A PRICE CROSSED OUT WITH A DIAGONAL STROKE: the product page's `slash` sale
+ * look (SALE_PRICE_LOOKS, components/product-page/product-page-maps.ts). The
+ * stroke runs corner to corner of the price's own box in the text's colour, so
+ * it follows the page's ink on any backdrop, and its weight follows the type.
+ */
+.ss-price-slash {
+  text-decoration: none;
+  background-image: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 0.045em),
+    currentColor calc(50% - 0.045em),
+    currentColor calc(50% + 0.045em),
+    transparent calc(50% + 0.045em)
+  );
+}
+
 /* ============================================================
    SHARED BENTO GRID  (components/grid/Grid.tsx)
    Presentation-agnostic grid used by the storefront builder AND the
@@ -437,7 +454,26 @@
 .ss-grid > [data-grid-cell]:has([data-block-overlay]) + [data-grid-chrome] {
   display: none;
 }
+/* ONE CELL'S SIDE, handed down to every tile for what should be the same
+   size on all of them whatever their span: chips, when the theme asks for
+   that (theme.chipScale "cell", tileLabelSize). REGISTERED, so it is worked
+   out here, against the grid's container, and inherited as a length; a plain
+   custom property would carry the cqw down and resolve it against the tile.
+   --ss-in-grid says a tile is in a grid at all: outside one it is 0, and the
+   label falls back to its own tile. */
+@property --ss-cell {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+@property --ss-in-grid {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
 .ss-grid {
+  --ss-cell: calc((100cqw - (var(--ss-cols, 6) - 1) * var(--grid-gap)) / var(--ss-cols, 6));
+  --ss-in-grid: 1;
   display: grid;
   grid-template-columns: repeat(var(--ss-cols, 6), minmax(0, 1fr));
   /* row height = column width = (container - gaps) / columns → square cells.
@@ -470,9 +506,23 @@ html {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans;
+    /* `wrap-break-word`, inherited by every word in the app: a name, address
+       or note with no space to break at wraps inside its box. Left to run
+       on, it reaches past the edge of a phone, where the `overflow-x`
+       below cuts it off with no way to scroll to the rest. */
+    @apply bg-background text-foreground font-sans wrap-break-word;
     overflow-x: hidden;
   }
+}
+
+/* The storefront embed's frame (app/(public)/e) is sized by the page that
+   holds it to exactly the height of its content. The root layout's
+   min-h-screen on <body> would be measured against that same frame, and a
+   scrollbar appearing while the height is on its way would change the width
+   the board reflows to. Unlayered, so it outranks the utility. */
+html:has([data-embed-frame]) body {
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* A themed surface paints a full-viewport panel, but the page CANVAS takes its
@@ -918,6 +968,21 @@ textarea {
   animation: swipe-sheen 3s cubic-bezier(0.5, 0, 0.2, 1) infinite;
 }
 
+/* Payments: the road a payout travels (components/payments/PayoutTrack), drawn
+   as a row of square pixels, the brand's grid motif, in the element's own
+   colour. The row sizes ITSELF to a whole number of pixels (round() down to
+   the pixel step, less the last gap), so no pixel is ever cut or stretched and
+   both ends finish on ink; centre it in whatever space it is given. A browser
+   without round() drops the width, so the row fills its box (last pixel cut). */
+.pixel-trail {
+  --pixel: 0.5rem;
+  --pixel-step: calc(var(--pixel) + 1px);
+  width: calc(round(down, 100% + 1px, var(--pixel-step)) - 1px);
+  height: var(--pixel);
+  background-image: linear-gradient(to right, currentColor var(--pixel), transparent 0);
+  background-size: var(--pixel-step) 100%;
+}
+
 /* Upload control: the arrow hops once on hover, so the icon reads as "send
    this up" before you commit to the file picker. Fires on hover AND keyboard
    focus; one iteration, with a small settle so it lands rather than snapping.
@@ -967,12 +1032,28 @@ textarea {
   transition-delay: 90ms;
 }
 
-/* Chart tooltips have NO entrance animation, deliberately, so there is nothing
-   to declare here. They used to fade and rise on first hover while recharts
-   separately tweened their POSITION, which together launched a card from the
-   chart's top-left corner and flew it to the cursor. A readout that is still
-   arriving is a readout you cannot read: it appears at the pointer, instantly.
+/* Chart readouts ARRIVE IN PLACE, then follow the pointer.
+   Two motions, and the order between them is the whole design:
+     1. Arriving. The card fades in and rises a few px, where it already is.
+        Its POSITION is never animated on arrival: recharts tweening that is
+        what once launched the card from the chart's corner and flew it to the
+        cursor, and a readout still travelling is a readout nobody can read.
+     2. Following. Only once it has been placed (`data-settled`, set a frame
+        later by ChartTooltipContent) does it glide between points, briefly,
+        instead of jumping from one to the next.
    See TOOLTIP in components/charts/theme.ts. */
+@keyframes chart-tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.97);
+  }
+}
+.chart-tip-enter {
+  animation: chart-tip-in var(--transition-duration-base) var(--ease-entrance) both;
+}
+.recharts-tooltip-wrapper[data-settled] {
+  transition: transform var(--transition-duration-fast) var(--ease-standard);
+}
 
 /* Composition-bar sections grow from zero into their share on mount. A
    from-only keyframe animates to each section's own inline width, so one
@@ -1418,8 +1499,12 @@ textarea {
   .group\/btn:focus-visible .cta-arrow {
     transform: none;
   }
-  .chart-seg-enter {
+  .chart-seg-enter,
+  .chart-tip-enter {
     animation: none;
+  }
+  .recharts-tooltip-wrapper[data-settled] {
+    transition: none;
   }
   /* Toasts appear and disappear outright. The lifetime bar goes with the
      motion: a hairline that cannot sweep says nothing, and a frozen full-width

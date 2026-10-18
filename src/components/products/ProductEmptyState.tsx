@@ -18,7 +18,7 @@ import { AddShowcase } from "@/components/ui/AddShowcase";
  * cut off rather than shrunk. See the `max-w-*` half of exampleClassName
  * below, which is what actually gives this something to contain within.
  */
-function Cutout({ src, width, height }: { src: string; width: number; height: number }) {
+export function Cutout({ src, width, height }: { src: string; width: number; height: number }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element -- a small static cut-out from /public; next/image adds nothing here.
     <img

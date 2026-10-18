@@ -176,6 +176,18 @@
         "body": "Stripe lo intentará de nuevo. Actualiza tu tarjeta en Plan y facturación para conservar el plan."
       }
     },
+    "stock": {
+      "low": {
+        "title": "Pocas existencias: {title}",
+        "body": "{count, plural, =0 {No quedan existencias.} one {Solo queda #.} many {Solo quedan # existencias.} other {Solo quedan #.}} Repón existencias o desactiva el seguimiento de existencias si fabricas bajo pedido."
+      }
+    },
+    "payment": {
+      "dispute": {
+        "title": "Un comprador ha disputado el pago de {title}",
+        "body": "Su banco ha abierto una disputa. Respóndela en tu panel de Stripe antes de la fecha límite."
+      }
+    },
     "policy": {
       "autoPaused": {
         "title": "Tienes que actuar: {target, select, product {tu producto «{title}» está en pausa} other {tu escaparate «{title}» está en pausa}}",

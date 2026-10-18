@@ -65,7 +65,10 @@ describe("dates", () => {
     expect(formatShortOrderDate(iso, "en")).toBe("2 Jul");
     expect(formatLongDate(iso, "en")).toBe("2 July 2026");
     expect(formatNumericDate(iso, "en")).toBe("7/2/2026");
-    expect(formatOrderDateTime("garbage", "en")).toBe("—");
+    // No formatter prints the runtime's own "Invalid Date" (two of them fill emails).
+    for (const format of [formatOrderDate, formatOrderDateTime, formatLongDate, formatNumericDate]) {
+      expect(format("garbage", "en")).toBe("—");
+    }
   });
 
   it("writes month names in the reader's language", () => {
@@ -122,6 +125,10 @@ describe("numbers and percentages", () => {
     expect(moneyExact("EUR", "en")(120450)).toBe("€1,204.50");
     expect(moneyCompact("EUR", "en")(120450)).toBe("€1.2k");
     expect(moneyCompact("EUR", "en")(95000)).toBe("€950");
+    // Past thousands it keeps compacting: an axis in the millions has no room
+    // for "€1500k".
+    expect(moneyCompact("EUR", "en")(150_000_000)).toBe("€1.5M");
+    expect(moneyCompact("EUR", "en")(300_000_000_000)).toBe("€3B");
     expect(spaces(moneyCompact("EUR", "cs")(95000))).toBe("950 €");
     expect(spaces(moneyCompact("EUR", "cs")(120450))).toBe("1,2 tis. €");
   });

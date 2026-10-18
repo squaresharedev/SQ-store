@@ -103,6 +103,34 @@ describe("ProductPageSection", () => {
     );
   });
 
+  it("offers two looks for a sale price, drawn as they will look, and stores the default as no key", async () => {
+    const user = userEvent.setup();
+    const { onProductPageChange } = mount({ summoned: "cta" });
+    const looks = within(screen.getByRole("group", { name: "Sale price" }));
+    const line = looks.getByRole("button", { name: /Line$/ });
+    const slash = looks.getByRole("button", { name: /Slash$/ });
+    expect(line).toHaveAttribute("aria-pressed", "true");
+    // Each tile is the real price line in that look: the same two prices,
+    // crossed out the two different ways.
+    expect(line.querySelector("del")).toHaveTextContent("€24.00");
+    expect(line.querySelector("del")?.className).not.toContain("ss-price-slash");
+    expect(slash.querySelector("del")?.className).toContain("ss-price-slash");
+
+    await user.click(slash);
+    expect(onProductPageChange).toHaveBeenLastCalledWith(expect.objectContaining({ saleStyle: "slash" }));
+
+    cleanup();
+    const stored = mount({
+      summoned: "cta",
+      productPage: { ...DEFAULT_PRODUCT_PAGE_CONFIG, saleStyle: "slash" },
+    });
+    const again = within(screen.getByRole("group", { name: "Sale price" }));
+    expect(again.getByRole("button", { name: /Slash$/ })).toHaveAttribute("aria-pressed", "true");
+    await user.click(again.getByRole("button", { name: /Line$/ }));
+    // Back to the default look: the key goes, so an untouched page stays as it was.
+    expect(stored.onProductPageChange.mock.lastCall?.[0]).not.toHaveProperty("saleStyle");
+  });
+
   it("caps the button text and keeps the price notes", async () => {
     const user = userEvent.setup();
     const { onProductPageChange } = mount({ summoned: "cta" });

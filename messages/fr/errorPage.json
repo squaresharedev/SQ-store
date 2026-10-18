@@ -9,6 +9,11 @@
     "description": "Nous n’avons pas pu charger cette page. Il s’agit généralement d’un problème de connexion temporaire : votre compte n’a rien et vous êtes toujours connecté.",
     "reference": "Référence : {digest}"
   },
+  "outdated": {
+    "title": "Cette page a été mise à jour",
+    "description": "Une version plus récente de Square Share a été publiée pendant que cette page était ouverte, elle ne peut donc pas terminer votre demande. Rechargez la page et réessayez.",
+    "cta": "Recharger la page"
+  },
   "footer": {
     "legal": "Informations juridiques",
     "contact": "Contact",

@@ -48,7 +48,8 @@
     "date": "Data",
     "shipping": "Wysyłka",
     "shipTo": "Adresat",
-    "noAddress": "Brak adresu"
+    "noAddress": "Brak adresu",
+    "feeLine": "Opłata {amount}"
   },
   "toolbar": {
     "region": "filtry zamówień",
@@ -149,16 +150,29 @@
     "discountCodeOutdone": "Użyto kodu {code}, ale cena promocyjna była niższa"
   },
   "actions": {
-    "refundNeedsStripe": "Zwroty wymagają połączenia ze Stripe.",
-    "connectStripe": "Połącz Stripe, aby włączyć zwroty",
-    "refundConfirm": "Zwrócić środki za to zamówienie? Tej operacji nie da się cofnąć po połączeniu ze Stripe.",
-    "confirmRefund": "Potwierdź zwrot",
-    "refundOrder": "Zwróć środki za zamówienie",
     "disputeInStripe": "Spory obsługujesz w panelu Stripe po połączeniu ze Stripe.",
-    "disputeConfirm": "Otworzyć obsługę sporu dla tego zamówienia?",
-    "handleDispute": "Obsłuż spór",
-    "none": "Dla tego zamówienia nie ma dostępnych żadnych akcji.",
-    "refundManual": "Nie możesz jeszcze zwracać środków w Square Share. Aby zwrócić środki za to zamówienie, oddaj kupującemu pieniądze samodzielnie i poinformuj go o tym."
+    "none": "Dla tego zamówienia nie ma dostępnych żadnych akcji."
+  },
+  "refund": {
+    "open": "Zwróć środki lub anuluj",
+    "reasonLabel": "Powód",
+    "reasons": {
+      "cancelled": "Anulowano przed wysyłką",
+      "returned": "Zwrócono przez kupującego",
+      "other": "Inny powód"
+    },
+    "restock": "{count, plural, one {Przywróć na stan} few {Przywróć wszystkie # na stan} many {Przywróć wszystkie # na stan} other {Przywróć # na stan}}",
+    "confirm": "Zapisz zwrot środków: {amount}",
+    "confirmProvider": "Zwróć środki: {amount}",
+    "recorded": "Zwrot środków zapisany.",
+    "refunded": "Zwrot środków wysłany.",
+    "buyerEmailed": "Kupujący otrzymał wiadomość e-mail.",
+    "buyerNotEmailed": "Kupujący nie otrzymał wiadomości. Poinformuj go bezpośrednio.",
+    "refundedOn": "Zwrot środków: {date}",
+    "refundedOnReason": "{reason, select, cancelled {Anulowano i zwrócono środki {date}} returned {Zwrócono towar i środki {date}} other {Zwrócono środki {date}}}",
+    "ownerOnly": "Tylko właściciel sklepu może zwrócić środki lub anulować zamówienie.",
+    "manual": "Ta płatność nie przeszła przez Square Share. Sam zwróć kupującemu środki, a następnie odnotuj to tutaj.",
+    "viaProvider": "Pełna kwota wraca na kartę kupującego przez Stripe. Tej operacji nie można cofnąć."
   },
   "skeleton": {
     "loading": "wczytywanie zamówień"
@@ -230,6 +244,13 @@
       "shipTo": "Zamówienie jedzie pod adres:",
       "questions": "Pytania dotyczące zamówienia? Odpowiedz na tego e-maila, aby skontaktować się z {store}.",
       "footer": "Wysłano przez Square Share w imieniu {store}."
+    },
+    "refund": {
+      "subject": "Twoje zamówienie w {store} zostało zwrócone",
+      "intro": "{reason, select, cancelled {{store} anulował Twoje zamówienie i zwrócił środki.} returned {{store} otrzymał Twój zwrot i zwrócił środki za zamówienie.} other {{store} zwrócił środki za Twoje zamówienie.}}",
+      "amount": "Zwrot: {amount}",
+      "howManual": "{store} zwróci Ci pieniądze bezpośrednio. Jeśli nie dotrą w ciągu 14 dni, odpowiedz na tę wiadomość.",
+      "howCard": "Kwota wraca tą samą drogą, którą zapłacono, co zwykle zajmuje od 5 do 10 dni."
     },
     "confirmation": {
       "subject": "Twoje zamówienie od {store}: {title}",

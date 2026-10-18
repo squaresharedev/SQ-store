@@ -47,12 +47,13 @@ const ICONS: Array<{
   },
   {
     name: "Discounts",
-    story: "The ticket shakes as if torn off a strip, the slash redraws, and its dots pop in.",
+    story: "The % scrolls up out of the badge and a price tag rolls in from below, then swings from its hole.",
     icon: DiscountsIcon,
   },
   {
     name: "Analytics",
-    story: "The line traces itself from the tail up, and the arrowhead pops in at the tip.",
+    story:
+      "The arrow surges up its slope without going anywhere; wind tears back past it, then thins out.",
     icon: AnalyticsIcon,
   },
   {

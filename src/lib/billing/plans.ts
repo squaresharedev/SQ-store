@@ -1,14 +1,18 @@
-// THE PLAN CATALOG: every number a seller's plan decides, in one place.
+// THE PLAN CATALOG: what each plan lifts and adds, in one place.
 //
-// Prices, the per-sale platform fee, the limits each plan lifts, and the
-// Stripe price each paid plan is billed through. Changing a number here
-// changes it everywhere: the plans page, the fee a sale is charged, the
-// limits the create actions (and their database mirror) enforce.
+// The limits each plan lifts and the perks it switches on. Changing a number
+// here changes it everywhere: the plans page and the limits the create
+// actions (and their database mirror) enforce.
 //
-// IMPORT-FREE ON PURPOSE. Scripts (the seed data) and the Playwright helpers
-// import this file by relative path, outside the app's module resolution, so
-// it must not import anything itself. Copy for each plan lives in
-// plan-copy.ts for the same reason.
+// NOT THE MONEY. What a plan costs and what it charges per sale are rows in
+// the database (plan_prices, read through lib/billing/catalog.ts), so a price
+// or a fee changes without a deploy. See fees.ts for the arithmetic on them.
+//
+// IMPORT-FREE ON PURPOSE, apart from the pricing contract (itself
+// import-free, by relative path). Scripts (the seed data) and the Playwright
+// helpers import this file by relative path, outside the app's module
+// resolution, so it must not import anything through an alias. Copy for each
+// plan lives in plan-copy.ts for the same reason.
 //
 // MIRRORED IN SQL. The limits are enforced a second time by a database
 // trigger (supabase/migrations/20260930_seller_plans.sql, public.plan_limit),
@@ -16,12 +20,12 @@
 // 29-seller-plans.test.ts reads BOTH and fails when they disagree: edit the
 // migration's plan_limit() in the same change as PLANS below.
 //
-// MONEY IS INTEGER CENTS, FEES ARE INTEGER BASIS POINTS (100 bps = 1%), so no
-// float ever touches an amount. See fees.ts for the arithmetic.
+// THE PLAN IDS AND BILLING INTERVALS are the pricing contract's
+// (lib/pricing/enums.ts), re-exported here so billing code has one import.
 
-/** Every plan, cheapest first. The order is the order the plans page shows. */
-export const PLAN_IDS = ["free", "starter", "pro"] as const;
-export type PlanId = (typeof PLAN_IDS)[number];
+import { BILLING_INTERVALS, PLAN_IDS, type BillingInterval, type PlanId } from "../pricing/enums.ts";
+
+export { BILLING_INTERVALS, PLAN_IDS, type BillingInterval, type PlanId };
 
 /** The plans a seller pays for, i.e. the ones with a Stripe price. */
 export const PAID_PLAN_IDS = ["starter", "pro"] as const satisfies readonly PlanId[];
@@ -30,9 +34,6 @@ export type PaidPlanId = (typeof PAID_PLAN_IDS)[number];
 /** The plan every account is on until it pays for another, and falls back to
  *  when a paid plan ends. Never a lockout: Free can build, publish and sell. */
 export const DEFAULT_PLAN: PlanId = "free";
-
-export const BILLING_INTERVALS = ["month", "year"] as const;
-export type BillingInterval = (typeof BILLING_INTERVALS)[number];
 
 /** The currency plans are priced and billed in. EU platform, EU sellers. */
 export const BILLING_CURRENCY = "EUR";
@@ -82,69 +83,30 @@ export type PlanPerks = Record<PlanPerkKey, boolean>;
 
 export type PlanDefinition = {
   id: PlanId;
-  /** Our cut of each sale through Square Share checkout, in basis points of
-   *  the item subtotal (shipping excluded). 500 = 5%. */
-  feeBps: number;
-  /** What the plan costs per billing interval, in cents, excluding VAT. */
-  priceCents: Record<BillingInterval, number>;
-  /**
-   * The Stripe Price lookup key per interval; null for Free. The `_vN` suffix
-   * is how a price change is done: Stripe prices are immutable, so a new price
-   * gets `_v2` and existing subscribers keep paying `_v1` (grandfathered).
-   */
-  lookupKey: Record<BillingInterval, string> | null;
-  /**
-   * The REGULAR price per interval, when what is charged today (`priceCents`)
-   * is a launch price below it; null when the price charged IS the regular
-   * one. Shown struck through beside the price, labelled as the regular price.
-   *
-   * IT MUST BE A REAL PRICE: the one a new subscriber will pay once the launch
-   * price ends (raising it is a new `_vN` lookup key; existing subscribers keep
-   * theirs). A struck-through price that nobody has paid or ever will is
-   * misleading advertising, which is unlawful in the EU towards business
-   * customers too (Directive 2006/114/EC), so set this only to a price you
-   * mean to charge, and drop it the day the launch price becomes permanent.
-   */
-  listPriceCents: Record<BillingInterval, number> | null;
   limits: PlanLimits;
   perks: PlanPerks;
   /** The one plan the plans page and the upsell point at ("Best value"). */
   recommended: boolean;
 };
 
-// DRAFT NUMBERS. The owner sets the final prices, fees and limits here.
+// DRAFT NUMBERS. The owner sets the final limits here.
 export const PLANS: Record<PlanId, PlanDefinition> = {
   free: {
     id: "free",
-    // Today's rate, unchanged, so no existing seller is worse off.
-    feeBps: 500,
-    priceCents: { month: 0, year: 0 },
-    lookupKey: null,
-    listPriceCents: null,
     limits: { storefronts: 3, teamSeats: 2, products: 20 },
     perks: { ordersExport: true, earlyAccess: false, analyticsExport: false, prioritySupport: false },
     recommended: false,
   },
   starter: {
     id: "starter",
-    feeBps: 300,
-    priceCents: { month: 1500, year: 15000 },
-    lookupKey: { month: "starter_month_eur_v1", year: "starter_year_eur_v1" },
-    // The launch price is €15; €20 is what Starter costs once it ends. Yearly
-    // keeps "two months free" at either price (10 x the monthly figure).
-    listPriceCents: { month: 2000, year: 20000 },
     limits: { storefronts: 10, teamSeats: 5, products: 60 },
     perks: { ordersExport: true, earlyAccess: true, analyticsExport: false, prioritySupport: false },
-    // The best value: most of Pro's saving on a typical shop, at a third of
-    // the price.
+    // The best value: most of Pro's saving on a typical shop, at under a
+    // third of the price.
     recommended: true,
   },
   pro: {
     id: "pro",
-    feeBps: 100,
-    priceCents: { month: 4000, year: 40000 },
-    lookupKey: { month: "pro_month_eur_v1", year: "pro_year_eur_v1" },
-    listPriceCents: null,
     limits: { storefronts: null, teamSeats: null, products: 500 },
     perks: { ordersExport: true, earlyAccess: true, analyticsExport: true, prioritySupport: true },
     recommended: false,
@@ -187,15 +149,16 @@ export function isPaidPlan(plan: PlanId): plan is PaidPlanId {
   return plan !== "free";
 }
 
-/** `<plan>_<interval>_<currency>_v<N>`, the shape every lookup key above has. */
+/** `<plan>_<interval>_<currency>_v<N>`, the shape every plan_prices lookup key
+ *  has (the table's CHECK holds it). */
 const LOOKUP_KEY_SHAPE = /^([a-z]+)_([a-z]+)_[a-z]{3}_v\d+$/;
 
 /**
  * The paid plan and interval a Stripe price lookup key belongs to, if any.
  *
- * Read from the key's SHAPE, not by matching the current keys above: a seller
- * on a grandfathered `_v1` price is still on that plan after the catalog moves
- * on to `_v2`, and must not read as Free because their key is no longer listed.
+ * Read from the key's SHAPE, not by matching the keys in force: a seller on a
+ * grandfathered `_v1` price is still on that plan after plan_prices moves on
+ * to `_v2`, and must not read as Free because their key is no longer current.
  */
 export function planForLookupKey(
   lookupKey: string,

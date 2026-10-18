@@ -28,6 +28,7 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { readAccountBilling } from "@/lib/billing/account-plan";
+import { readBillingSwitches } from "@/lib/billing/switches";
 import { recordFunnelEvent } from "@/lib/billing/funnel";
 import { LIMIT_SOURCE } from "@/lib/billing/paths";
 import { PLANS, PLAN_LIMIT_KEYS, type PlanId, type PlanLimitKey } from "@/lib/billing/plans";
@@ -42,16 +43,7 @@ const LIVE_SEAT_STATUSES = ["invited", "active"] as const;
  * any read failure, including a database the migration has not reached.
  */
 export async function planLimitsEnforced(): Promise<boolean> {
-  try {
-    const { data, error } = await createAdminClient()
-      .from("billing_switches")
-      .select("plan_limits_enforced")
-      .eq("id", true)
-      .maybeSingle();
-    return !error && data?.plan_limits_enforced === true;
-  } catch {
-    return false;
-  }
+  return (await readBillingSwitches()).planLimitsEnforced;
 }
 
 /** How many of `key` the account has now. Null when it could not be counted. */

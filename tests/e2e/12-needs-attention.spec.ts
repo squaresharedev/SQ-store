@@ -15,7 +15,16 @@ import {
  * rows a real seller sees, in the order they appear, and follows each link.
  */
 
-/** Click a row's action, wait for the navigation, and return where it landed. */
+/**
+ * Click a row's action, wait for the navigation, and return where it landed.
+ *
+ * ONE click, on purpose. A link pressed while the notification bell was still
+ * starting up used to be answered by the server and never navigate (the bell
+ * started with server actions, which share a queue with navigations; it now
+ * starts with a plain request, see lib/notifications/bootstrap.ts). This
+ * helper clicks the moment the row is visible, which is exactly when that
+ * happened, so a retry here would hide the bug coming back.
+ */
 async function followAction(page: Page, name: RegExp, expected: RegExp) {
   const link = page.getByRole("link", { name });
   await expect(link).toBeVisible({ timeout: 20_000 });

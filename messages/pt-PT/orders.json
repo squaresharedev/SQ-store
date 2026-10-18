@@ -48,7 +48,8 @@
     "date": "Data",
     "shipping": "Envio",
     "shipTo": "Enviar para",
-    "noAddress": "Sem morada"
+    "noAddress": "Sem morada",
+    "feeLine": "Taxa {amount}"
   },
   "toolbar": {
     "region": "filtros de encomendas",
@@ -149,16 +150,29 @@
     "discountCodeOutdone": "Código {code} utilizado, mas o preço da promoção era inferior"
   },
   "actions": {
-    "refundNeedsStripe": "Os reembolsos exigem que o Stripe esteja ligado.",
-    "connectStripe": "Ligue o Stripe para ativar reembolsos",
-    "refundConfirm": "Reembolsar esta encomenda? Esta ação não pode ser anulada assim que o Stripe estiver ligado.",
-    "confirmRefund": "Confirmar reembolso",
-    "refundOrder": "Reembolsar encomenda",
     "disputeInStripe": "As disputas são geridas no seu painel do Stripe assim que o Stripe estiver ligado.",
-    "disputeConfirm": "Abrir gestão de disputa para esta encomenda?",
-    "handleDispute": "Gerir disputa",
-    "none": "Não há ações disponíveis para esta encomenda.",
-    "refundManual": "Ainda não é possível reembolsar a partir da Square Share. Para reembolsar esta encomenda, devolva o dinheiro ao comprador por sua conta e avise-o."
+    "none": "Não há ações disponíveis para esta encomenda."
+  },
+  "refund": {
+    "open": "Reembolsar ou cancelar",
+    "reasonLabel": "Motivo",
+    "reasons": {
+      "cancelled": "Cancelado antes do envio",
+      "returned": "Devolvido pelo comprador",
+      "other": "Outro motivo"
+    },
+    "restock": "{count, plural, one {Repor no stock} many {Repor todos os # no stock} other {Repor todos os # no stock}}",
+    "confirm": "Registar reembolso de {amount}",
+    "confirmProvider": "Reembolsar {amount}",
+    "recorded": "Reembolso registado.",
+    "refunded": "Reembolso enviado.",
+    "buyerEmailed": "O comprador recebeu um e-mail.",
+    "buyerNotEmailed": "O comprador não recebeu um e-mail. Informe-o diretamente.",
+    "refundedOn": "Reembolsado em {date}",
+    "refundedOnReason": "{reason, select, cancelled {Cancelado e reembolsado em {date}} returned {Devolvido e reembolsado em {date}} other {Reembolsado em {date}}}",
+    "ownerOnly": "Só o proprietário da loja pode reembolsar ou cancelar uma encomenda.",
+    "manual": "Este pagamento não passou pelo Square Share. Reembolse o comprador diretamente e registe-o aqui.",
+    "viaProvider": "O valor total é devolvido para o cartão do comprador via Stripe. Esta operação não pode ser desfeita."
   },
   "skeleton": {
     "loading": "a carregar encomendas"
@@ -230,6 +244,13 @@
       "shipTo": "Vai para:",
       "questions": "Tem dúvidas sobre a sua encomenda? Responda a este e-mail para contactar {store}.",
       "footer": "Enviado pelo Square Share em nome de {store}."
+    },
+    "refund": {
+      "subject": "A sua encomenda em {store} foi reembolsada",
+      "intro": "{reason, select, cancelled {{store} cancelou a sua encomenda e reembolsou-a.} returned {{store} recebeu a sua devolução e reembolsou a sua encomenda.} other {{store} reembolsou a sua encomenda.}}",
+      "amount": "Reembolsado: {amount}",
+      "howManual": "{store} irá reembolsá-lo diretamente. Se não receber o valor em 14 dias, responda a este e-mail.",
+      "howCard": "O valor é devolvido pelo mesmo meio de pagamento, o que normalmente demora entre 5 e 10 dias."
     },
     "confirmation": {
       "subject": "A sua encomenda de {store}: {title}",

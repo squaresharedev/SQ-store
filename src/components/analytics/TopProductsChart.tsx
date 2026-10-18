@@ -29,10 +29,17 @@ export function TopProductsChart({
   currency: string;
 }) {
   const t = useTranslations("Analytics.sales.topProducts");
+  const tSales = useTranslations("Analytics.sales");
   const locale = useLocale();
+  // A product sold with no title still earned its revenue: it gets a name,
+  // not a bar beside a blank label.
+  const rows = products.map((product) => ({
+    ...product,
+    title: product.title || tSales("untitledProduct"),
+  }));
   return (
     <HBarChart
-      data={products}
+      data={rows}
       xKey="title"
       series={[{ key: "revenueCents", label: t("series"), colorIndex: TONE.money }]}
       categoryWidth={116}

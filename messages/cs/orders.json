@@ -48,7 +48,8 @@
     "date": "Datum",
     "shipping": "Doprava",
     "shipTo": "Doručit na adresu",
-    "noAddress": "Žádná adresa"
+    "noAddress": "Žádná adresa",
+    "feeLine": "Poplatek {amount}"
   },
   "toolbar": {
     "region": "filtry objednávek",
@@ -149,16 +150,29 @@
     "discountCodeOutdone": "Kód {code} použit, ale akční cena byla nižší"
   },
   "actions": {
-    "refundNeedsStripe": "Vrácení peněz vyžaduje propojený Stripe.",
-    "connectStripe": "Propojte Stripe a povolte vracení peněz",
-    "refundConfirm": "Vrátit peníze za tuto objednávku? Po propojení se Stripe to nepůjde vzít zpět.",
-    "confirmRefund": "Potvrdit vrácení peněz",
-    "refundOrder": "Vrátit peníze",
     "disputeInStripe": "Spory se po propojení Stripe řeší v panelu Stripe.",
-    "disputeConfirm": "Otevřít řešení sporu k této objednávce?",
-    "handleDispute": "Řešit spor",
-    "none": "K této objednávce nejsou dostupné žádné akce.",
-    "refundManual": "Ze Square Share zatím nejde vracet peníze. Chcete-li za tuto objednávku vrátit peníze, pošlete je kupujícímu sami a dejte mu vědět."
+    "none": "K této objednávce nejsou dostupné žádné akce."
+  },
+  "refund": {
+    "open": "Vrátit peníze nebo zrušit",
+    "reasonLabel": "Důvod",
+    "reasons": {
+      "cancelled": "Zrušeno před odesláním",
+      "returned": "Vráceno kupujícím",
+      "other": "Jiný důvod"
+    },
+    "restock": "{count, plural, one {Vrátit zpět na sklad} few {Vrátit všechny # zpět na sklad} many {Vrátit všech # zpět na sklad} other {Vrátit všech # zpět na sklad}}",
+    "confirm": "Zaznamenat vrácení peněz ve výši {amount}",
+    "confirmProvider": "Vrátit {amount}",
+    "recorded": "Vrácení peněz zaznamenáno.",
+    "refunded": "Vrácení peněz odesláno.",
+    "buyerEmailed": "Kupujícímu byl odeslán e-mail.",
+    "buyerNotEmailed": "Kupujícímu nebyl odeslán e-mail. Informujte ho sami.",
+    "refundedOn": "Vráceno {date}",
+    "refundedOnReason": "{reason, select, cancelled {Zrušeno a vráceno {date}} returned {Vráceno zboží a peníze {date}} other {Vráceno {date}}}",
+    "ownerOnly": "Vrátit peníze nebo zrušit objednávku může jen vlastník obchodu.",
+    "manual": "Tato platba neproběhla přes Square Share. Vraťte kupujícímu peníze sami a poté to zaznamenejte zde.",
+    "viaProvider": "Plná částka se přes Stripe vrátí na kartu kupujícího. Tuto akci nelze vrátit zpět."
   },
   "skeleton": {
     "loading": "načítání objednávek"
@@ -230,6 +244,13 @@
       "shipTo": "Zásilka míří na adresu:",
       "questions": "Dotazy k objednávce? Odpovězte na tento e-mail a oslovíte obchod {store}.",
       "footer": "Zprávu zaslal Square Share jménem obchodu {store}."
+    },
+    "refund": {
+      "subject": "Vaše objednávka z obchodu {store} byla vrácena",
+      "intro": "{reason, select, cancelled {{store} zrušil vaši objednávku a vrátil peníze.} returned {{store} přijal vaše zboží zpět a vrátil peníze za objednávku.} other {{store} vrátil peníze za vaši objednávku.}}",
+      "amount": "Vrácená částka: {amount}",
+      "howManual": "{store} vám peníze vrátí přímo. Pokud je nedostanete do 14 dnů, odpovězte na tento e-mail.",
+      "howCard": "Peníze se vrátí stejnou cestou, jakou jste zaplatili, což obvykle trvá 5 až 10 dní."
     },
     "confirmation": {
       "subject": "Vaše objednávka u {store}: {title}",

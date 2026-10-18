@@ -88,6 +88,92 @@ describe("EmbedSettings - snippet", () => {
     expect(btn).toBeInTheDocument();
     expect(btn).toBeDisabled();
   });
+
+  it("keeps the snippet locked while the embed has no host, however it is configured", () => {
+    // No NEXT_PUBLIC_EMBED_URL (a test run, and production before launch): the
+    // script the snippet loads is served by nothing. Embedding switched on with
+    // a domain set used to unlock Copy all the same, and a seller who followed
+    // the steps pasted a dead tag.
+    renderSettings(storefront({ enabled: true, domains: ["shop.example"] }));
+    expect(
+      within(document.body).getByRole("button", { name: /embed snippet/i }),
+    ).toBeDisabled();
+    // Nor a hint that says the two steps already taken will unlock it.
+    expect(document.body).not.toHaveTextContent(/to unlock the copy button/i);
+    expect(document.body).toHaveTextContent(/widget is in development/i);
+  });
+});
+
+// The embed is offered once it has a host of its own (lib/app-url.ts
+// embedOrigin). Everything above runs without one, which is the state the app
+// ships in; these run with one.
+describe("EmbedSettings - once the embed has a host", () => {
+  beforeEach(() => vi.stubEnv("NEXT_PUBLIC_EMBED_URL", "https://embed.test"));
+  afterEach(() => vi.unstubAllEnvs());
+
+  const copySnippet = () => within(document.body).getByRole("button", { name: /embed snippet/i });
+
+  it("drops the in-development notice and points the snippet at that host", () => {
+    renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
+    expect(document.body).not.toHaveTextContent(/widget is in development/i);
+    expect(document.body).toHaveTextContent('src="https://embed.test/widget.js"');
+  });
+
+  it("unlocks Copy for settings that are saved, on, and name a domain", () => {
+    renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
+    expect(copySnippet()).toBeEnabled();
+    expect(document.body).toHaveTextContent(/paste this snippet into your site/i);
+  });
+
+  it("keeps Copy locked for settings that are only typed, until they are saved", async () => {
+    // The frame reads what the server holds. "On, a domain typed, never saved"
+    // is the easiest way to paste a snippet that shows nothing.
+    const user = userEvent.setup();
+    renderSettings();
+    await user.click(screen.getByRole("switch", { name: /embed enabled/i }));
+    await user.type(screen.getByLabelText(/allowed domains/i), "shop.example.com");
+    expect(copySnippet()).toBeDisabled();
+    expect(document.body).toHaveTextContent(/save your settings to unlock/i);
+
+    await user.click(screen.getByRole("button", { name: /save settings/i }));
+    await waitFor(() => expect(copySnippet()).toBeEnabled());
+    expect(document.body).not.toHaveTextContent(/save your settings to unlock/i);
+  });
+
+  it("says what is missing when nothing is set up yet", () => {
+    renderSettings();
+    expect(copySnippet()).toBeDisabled();
+    expect(document.body).toHaveTextContent(/enable embedding and add at least one domain/i);
+  });
+
+  it("keeps Copy locked while product pages are off, and says that is why", () => {
+    // Every tile opens its product page, so without them the frame draws
+    // nothing (lib/storefront/embed-frame-loader.ts).
+    render(
+      <EmbedSettings
+        storefront={storefront({ enabled: true, domains: ["shop.example.com"] })}
+        onSaved={vi.fn()}
+        productPagesOn={false}
+      />,
+    );
+    expect(copySnippet()).toBeDisabled();
+    expect(document.body).toHaveTextContent(/turn on product pages in the designer first/i);
+  });
+
+  it("hands over the words for the seller's own privacy policy, naming ours", () => {
+    renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
+    expect(document.body).toHaveTextContent(/storefront provided by squareshare/i);
+    expect(document.body).toHaveTextContent("https://squareshare.eu/legal/privacy-policy/");
+    expect(within(document.body).getByRole("button", { name: /copy privacy text/i })).toBeEnabled();
+  });
+
+  it("explains a storefront that does not show behind a tip, only once there is a snippet to paste", () => {
+    renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
+    expect(within(document.body).getByRole("button", { name: /if the storefront does not show/i })).toBeInTheDocument();
+    cleanup();
+    renderSettings();
+    expect(within(document.body).queryByRole("button", { name: /if the storefront does not show/i })).toBeNull();
+  });
 });
 
 describe("EmbedSettings - saving", () => {

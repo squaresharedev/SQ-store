@@ -30,7 +30,7 @@
     "ownerOnly": "Só o proprietário da loja pode alterar o plano.",
     "soon": "Em breve",
     "soonTitle": "Os planos pagos abrem em breve. Entretanto, tudo no Free continua a funcionar.",
-    "finePrint": "Preços sem IVA. A taxa por venda aplica-se às vendas através da finalização de compra do Square Share e incide sobre o preço do artigo, nunca sobre a entrega. As taxas de processamento de cartão do próprio Stripe acrescem. Cancele quando quiser: mantém o plano até ao fim do período pago.",
+    "finePrint": "Preços sem IVA. A taxa por venda aplica-se às vendas através da finalização de compra do Square Share e incide sobre tudo o que o comprador paga, entrega incluída. As taxas de processamento de cartão do próprio Stripe acrescem. Cancele quando quiser: mantém o plano até ao fim do período pago.",
     "unavailable": "Não é possível mostrar os planos agora. Atualize a página num momento.",
     "yearlyFree": "{count, plural, one {# mês grátis} many {# de meses grátis} other {# meses grátis}}",
     "launchNote": "Um preço de lançamento é um preço introdutório: o preço normal é o que aparece riscado."
@@ -132,11 +132,11 @@
       },
       "fee": {
         "q": "Sobre o que incide a taxa por venda?",
-        "a": "Sobre o preço do artigo de cada venda feita através da finalização de compra do Square Share, nunca sobre a entrega. As taxas de processamento de cartão do próprio Stripe são à parte."
+        "a": "Sobre tudo o que o comprador paga em cada venda feita através da finalização de compra do Square Share, entrega incluída. As taxas de processamento de cartão do próprio Stripe são à parte."
       },
       "switch": {
         "q": "Posso mudar de plano mais tarde?",
-        "a": "A qualquer momento, para um plano superior ou inferior, mensal ou anual. O Stripe mostra exatamente o que vai pagar antes de confirmar."
+        "a": "A qualquer momento, para um plano superior ou inferior. O Stripe mostra exatamente o que vai pagar antes de confirmar."
       }
     }
   },
@@ -176,7 +176,8 @@
     "renews": "Renova em {date}.",
     "ends": "Termina em {date}. A loja passa para Free nessa altura e nada é removido.",
     "pastDue": "Pagamento falhou. O Stripe vai tentar novamente; atualize o cartão para manter {plan}.",
-    "feeLine": "Taxa em cada venda: {rate} do preço do artigo.",
+    "feeLine": "Taxa em cada venda: {rate} do que o comprador paga.",
+    "feeWaivedLine": "Sem taxa nas suas vendas: a sua loja está isenta.",
     "memberNote": "Só o proprietário da loja pode alterar o plano ou ver as suas faturas.",
     "usageTitle": "O que está a usar",
     "usageDescription": "Os limites do seu plano aplicam-se apenas ao adicionar mais. Nada do que já tem é alguma vez removido.",

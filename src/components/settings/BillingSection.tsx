@@ -13,10 +13,12 @@ import { UpgradeCard } from "@/components/billing/UpgradeCard";
 import { UsageMeter } from "@/components/billing/UsageMeter";
 import { CancelPlanButton } from "@/components/billing/CancelPlanDialog";
 import { KeepPlanButton } from "@/components/billing/KeepPlanButton";
+import { PlanPricesProvider } from "@/components/billing/plan-context";
 import { SERVER_BILLING_ACTIONS, navigateOf, type BillingActions } from "@/components/billing/billing-actions";
 import { cn } from "@/lib/utils";
 import { formatLongDate } from "@/lib/format/date";
 import { formatCents } from "@/lib/format/money";
+import { directFeeBps } from "@/lib/billing/fees";
 import { formatFeeRate } from "@/lib/billing/format";
 import type { CheckoutReturn } from "@/lib/billing/checkout-return";
 import type { PricingContext } from "@/lib/billing/pricing-context";
@@ -105,7 +107,10 @@ export function YourPlanCard({
           </div>
           <div className="border-t border-border pt-4">
             <PlanFact icon={Percent}>
-              {t("settings.feeLine", { rate: formatFeeRate(PLANS[plan].feeBps, locale) })}
+              {/* A waived store is told so: the plan's rate is not what it pays. */}
+              {context.feeWaived
+                ? t("settings.feeWaivedLine")
+                : t("settings.feeLine", { rate: formatFeeRate(directFeeBps(context.prices, plan), locale) })}
             </PlanFact>
           </div>
           {/* The owner's way out, or back: quiet, but always here, never buried. */}
@@ -143,18 +148,27 @@ export function YourPlanCard({
  *
  * The upgrade is left out while a payment is failing: the one thing worth
  * asking then is a working card, which "Manage billing" is for.
+ *
+ * Every fee and price under it is read from `context.prices`, the plan prices
+ * in force in the database.
  */
-export function BillingSection({
-  context,
-  returned,
-  actions = SERVER_BILLING_ACTIONS,
-}: {
+export function BillingSection(props: BillingSectionProps) {
+  return (
+    <PlanPricesProvider prices={props.context.prices}>
+      <BillingSectionBody {...props} />
+    </PlanPricesProvider>
+  );
+}
+
+type BillingSectionProps = {
   context: PricingContext;
   /** Back from Stripe Checkout, confirmed (or still pending) on the server. */
   returned: CheckoutReturn | null;
   /** The server calls, or stand-ins on /dev/pricing. */
   actions?: BillingActions;
-}) {
+};
+
+function BillingSectionBody({ context, returned, actions = SERVER_BILLING_ACTIONS }: BillingSectionProps) {
   const t = useTranslations("Billing");
   const router = useRouter();
   const { plan, status, usage, canManage } = context;

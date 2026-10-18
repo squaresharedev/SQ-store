@@ -20,13 +20,17 @@ vi.mock("next/navigation", () => ({ useRouter: () => router }));
 
 import { PlansPage } from "@/components/billing/PlansPage";
 import { UpgradeCard } from "@/components/billing/UpgradeCard";
+import { PlanPricesProvider } from "@/components/billing/plan-context";
 import { PlanLimitNotice } from "@/components/billing/PlanLimitNotice";
 import type { BillingActions } from "@/components/billing/billing-actions";
 import { BillingSection } from "@/components/settings/BillingSection";
 import { OrdersExportButton } from "@/components/orders/OrdersExportButton";
 import { AnalyticsExportButton } from "@/components/analytics/AnalyticsExportButton";
 import { OrderDetail } from "@/components/orders/OrderDetail";
+import type { PlanPrices } from "@/lib/billing/fees";
 import type { PricingContext } from "@/lib/billing/pricing-context";
+import { PLAN_PRICE_SEED } from "@/lib/billing/pricing-seed";
+import { PRICES_WITH_YEARLY } from "@/app/dev/pricing/fixtures";
 import type { AnalyticsSnapshot } from "@/lib/analytics/types";
 import { formatLongDate } from "@/lib/format/date";
 
@@ -61,7 +65,16 @@ beforeAll(() => {
   );
 });
 
+/** The seeded prices with yearly rows, and Starter on a launch price: EUR 12
+ *  charged against EUR 15 regular (120 against 150 a year). Neither is seeded,
+ *  so both are only ever what a later plan_prices row could make them. */
+const WITH_LAUNCH: PlanPrices = PRICES_WITH_YEARLY.map((price) =>
+  price.planId === "starter" ? { ...price, listPriceCents: price.interval === "year" ? 15_000 : 1500 } : price,
+);
+
 const FREE: PricingContext = {
+  // Option A, as plan_prices is seeded: Free 5%, Starter EUR 12 + 2%, Pro EUR 39 + 0.5%.
+  prices: PLAN_PRICE_SEED,
   plan: "free",
   interval: null,
   status: "none",
@@ -73,16 +86,20 @@ const FREE: PricingContext = {
   hasBillingAccount: false,
   canManage: true,
   available: true,
-  salesSubtotal30dCents: 0,
+  directSales30dCents: 0,
+  feeWaived: false,
   usage: { storefronts: 1, teamSeats: 1, products: 4 },
 };
+
+/** The same store once yearly prices are sold. */
+const FREE_YEARLY: PricingContext = { ...FREE, prices: PRICES_WITH_YEARLY };
 
 const STARTER: PricingContext = {
   ...FREE,
   plan: "starter",
   interval: "month",
   status: "active",
-  priceCents: 1500,
+  priceCents: 1200,
   currency: "EUR",
   hasSubscription: true,
   hasBillingAccount: true,
@@ -101,6 +118,15 @@ function stubActions(overrides: Partial<BillingActions> = {}): BillingActions {
     navigate: vi.fn(),
     ...overrides,
   };
+}
+
+/** The upsell on its own: on the page it sits under the section's provider. */
+function renderUpsell(context: PricingContext, actions: BillingActions = stubActions()) {
+  return render(
+    <PlanPricesProvider prices={context.prices}>
+      <UpgradeCard context={context} actions={actions} />
+    </PlanPricesProvider>,
+  );
 }
 
 describe("PlansPage", () => {
@@ -128,14 +154,38 @@ describe("PlansPage", () => {
   it("sends the chosen billing period with the upgrade", async () => {
     const actions = stubActions();
     const user = userEvent.setup();
-    render(<PlansPage context={FREE} source="settings" actions={actions} />);
+    render(<PlansPage context={FREE_YEARLY} source="settings" actions={actions} />);
     await user.click(screen.getByRole("button", { name: /Yearly/ }));
     await user.click(screen.getByRole("button", { name: /Upgrade to Starter/ }));
     expect(actions.startCheckout).toHaveBeenCalledWith({ plan: "starter", interval: "year", source: "settings" });
   });
 
-  it("says what yearly saves on the Yearly option itself, not beside the toggle", () => {
+  it("shows the prices plan_prices holds, and no billing period to choose while only monthly is sold", () => {
     render(<PlansPage context={FREE} source={null} actions={stubActions()} />);
+    const priceOf = (plan: string) =>
+      (document.querySelector(`[data-pricing-plan='${plan}'] [data-plan-price]`) as HTMLElement).textContent;
+    expect(priceOf("free")).toContain("€0");
+    expect(priceOf("starter")).toContain("€12");
+    expect(priceOf("pro")).toContain("€39");
+    const fee = document.querySelector("[data-compare-row='fee']") as HTMLElement;
+    expect(Array.from(fee.querySelectorAll("td")).map((cell) => cell.textContent)).toEqual(["5%", "2%", "0.5%"]);
+    // One way to pay is not a choice.
+    expect(screen.queryByRole("button", { name: /Yearly/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Monthly/ })).toBeNull();
+  });
+
+  it("follows a price changed in the database, with no code to update", () => {
+    const repriced = PLAN_PRICE_SEED.map((price) =>
+      price.planId === "pro" ? { ...price, priceCents: 4500, directFeeBps: 25 } : price,
+    );
+    render(<PlansPage context={{ ...FREE, prices: repriced }} source={null} actions={stubActions()} />);
+    const pro = document.querySelector("[data-pricing-plan='pro']") as HTMLElement;
+    expect((pro.querySelector("[data-plan-price]") as HTMLElement).textContent).toContain("€45");
+    expect(within(pro).getByText("0.25% fee per sale")).toBeTruthy();
+  });
+
+  it("says what yearly saves on the Yearly option itself, not beside the toggle", () => {
+    render(<PlansPage context={FREE_YEARLY} source={null} actions={stubActions()} />);
     const yearly = screen.getByRole("button", { name: /Yearly/ });
     expect(within(yearly).getByText("2 months free")).toBeTruthy();
     // The old standalone pill is gone.
@@ -143,16 +193,22 @@ describe("PlansPage", () => {
     expect(screen.getAllByText("2 months free")).toHaveLength(1);
   });
 
-  it("shows Starter's launch price against its regular price, and says which is which", async () => {
-    const user = userEvent.setup();
+  it("strikes nothing through while every plan charges its regular price", () => {
     render(<PlansPage context={FREE} source={null} actions={stubActions()} />);
+    expect(document.querySelector("[data-plan-list-price]")).toBeNull();
+    expect(screen.queryByText(/A launch price is an introductory price/)).toBeNull();
+  });
+
+  it("shows a launch price against its regular price, and says which is which", async () => {
+    const user = userEvent.setup();
+    render(<PlansPage context={{ ...FREE, prices: WITH_LAUNCH }} source={null} actions={stubActions()} />);
     const starter = document.querySelector("[data-pricing-plan='starter']") as HTMLElement;
     const price = starter.querySelector("[data-plan-price]") as HTMLElement;
-    expect((price.querySelector("[data-plan-list-price]") as HTMLElement).textContent).toBe("Regular price €20");
+    expect((price.querySelector("[data-plan-list-price]") as HTMLElement).textContent).toBe("Regular price €15");
     expect(price.querySelector("s")).toBeTruthy();
-    expect(price.textContent).toContain("€15");
-    expect(within(starter).getByText("Save 25%")).toBeTruthy();
-    expect(within(starter).getByText("Launch price (regular €20), excl. VAT")).toBeTruthy();
+    expect(price.textContent).toContain("€12");
+    expect(within(starter).getByText("Save 20%")).toBeTruthy();
+    expect(within(starter).getByText("Launch price (regular €15), excl. VAT")).toBeTruthy();
     // Free and Pro charge their regular price: nothing struck through.
     for (const plan of ["free", "pro"]) {
       expect(document.querySelector(`[data-pricing-plan='${plan}'] [data-plan-list-price]`)).toBeNull();
@@ -161,9 +217,9 @@ describe("PlansPage", () => {
 
     // Yearly: the same saving, per month and for the year.
     await user.click(screen.getByRole("button", { name: /Yearly/ }));
-    expect(price.textContent).toContain("€16.67");
     expect(price.textContent).toContain("€12.50");
-    expect(within(starter).getByText("€150 billed once a year at the launch price (regular €200), excl. VAT")).toBeTruthy();
+    expect(price.textContent).toContain("€10");
+    expect(within(starter).getByText("€120 billed once a year at the launch price (regular €150), excl. VAT")).toBeTruthy();
   });
 
   it("shows the server's refusal instead of leaving", async () => {
@@ -214,7 +270,7 @@ describe("PlansPage", () => {
 
   it("points a store with small sales at the plan that costs it least, even Free", () => {
     // €200 a month: Free's fee is still less than any subscription.
-    render(<PlansPage context={{ ...FREE, salesSubtotal30dCents: 20_000 }} source={null} actions={stubActions()} />);
+    render(<PlansPage context={{ ...FREE, directSales30dCents: 20_000 }} source={null} actions={stubActions()} />);
     expect(document.querySelector("[data-cheapest]")?.getAttribute("data-pricing-cost")).toBe("free");
   });
 
@@ -264,7 +320,7 @@ describe("PlansPage", () => {
     render(<PlansPage context={FREE} source={null} actions={stubActions()} />);
     const calculator = document.querySelector("[data-pricing-calculator]") as HTMLElement;
     expect(calculator.querySelectorAll("[data-pricing-cost]")).toHaveLength(3);
-    // €1,000 a month by default: Free €50, Starter €45, Pro €50.
+    // €1,000 a month by default: Free €50, Starter €32, Pro €44.
     expect(within(calculator).getByText("Cheapest for you").closest("[data-pricing-cost]")?.getAttribute("data-pricing-cost")).toBe(
       "starter",
     );
@@ -273,7 +329,7 @@ describe("PlansPage", () => {
 
   it("takes the sales figure in a field that shows it whole, and follows what is typed", async () => {
     const user = userEvent.setup();
-    render(<PlansPage context={{ ...FREE, salesSubtotal30dCents: 183_700 }} source={null} actions={stubActions()} />);
+    render(<PlansPage context={{ ...FREE, directSales30dCents: 183_700 }} source={null} actions={stubActions()} />);
     // Starts on the store's own sales, grouped, with no caption about it.
     const field = screen.getByLabelText("Sales per month") as HTMLInputElement;
     expect(field.value).toBe("1,837");
@@ -301,14 +357,14 @@ describe("UpgradeCard (Settings › Plan & billing)", () => {
   it("offers a Free owner Starter, with the fee it drops to and what it adds", async () => {
     const actions = stubActions();
     const user = userEvent.setup();
-    render(<UpgradeCard context={FREE} actions={actions} />);
+    renderUpsell(FREE, actions);
 
     const card = document.querySelector("[data-upsell]") as HTMLElement;
     expect(card.getAttribute("data-upsell")).toBe("starter");
     expect(within(card).getByText("Best value")).toBeTruthy();
     const fee = card.querySelector("[data-upsell-fee]") as HTMLElement;
     expect(fee.textContent).toContain("5%");
-    expect(fee.textContent).toContain("3%");
+    expect(fee.textContent).toContain("2%");
     expect(within(card).getByText("60 products")).toBeTruthy();
     expect(card.querySelector("[style*='radial-gradient']")).toBeNull();
     // No sales yet: where it starts paying for itself, not a saving.
@@ -320,20 +376,31 @@ describe("UpgradeCard (Settings › Plan & billing)", () => {
   });
 
   it("names the saving at the store's own sales when there is one", () => {
-    // €2,000 a month: Free's 5% is €100, Starter's 3% plus €15 is €75.
-    render(<UpgradeCard context={{ ...FREE, salesSubtotal30dCents: 200_000 }} actions={stubActions()} />);
-    expect(document.querySelector("[data-upsell-worth]")?.textContent).toMatch(/save you €25\.00 a month/);
+    // €2,000 a month: Free's 5% is €100, Starter's 2% plus €12 is €52.
+    renderUpsell({ ...FREE, directSales30dCents: 200_000 });
+    expect(document.querySelector("[data-upsell-worth]")?.textContent).toMatch(/save you €48\.00 a month/);
+  });
+
+  it("claims no saving below the EUR 400 a month where Starter pays for itself", () => {
+    // €400 exactly: €20 on Free, €12 + €8 on Starter. Nothing saved, so the
+    // card says where it starts paying, never a saving of nothing.
+    renderUpsell({ ...FREE, directSales30dCents: 40_000 });
+    expect(document.querySelector("[data-upsell-worth]")?.textContent).toMatch(/pays for itself once you sell more than €400/);
+    cleanup();
+    // €500: €25 against €22.
+    renderUpsell({ ...FREE, directSales30dCents: 50_000 });
+    expect(document.querySelector("[data-upsell-worth]")?.textContent).toMatch(/save you €3\.00 a month/);
   });
 
   it("offers a subscribed Starter owner Pro as a switch through the portal", () => {
-    render(<UpgradeCard context={STARTER} actions={stubActions()} />);
+    renderUpsell(STARTER);
     expect(document.querySelector("[data-upsell]")?.getAttribute("data-upsell")).toBe("pro");
     expect(screen.getByRole("button", { name: /Switch to Pro/ })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Upgrade to/ })).toBeNull();
   });
 
   it("shows a Pro store what it has rather than something to buy", () => {
-    render(<UpgradeCard context={{ ...STARTER, plan: "pro" }} actions={stubActions()} />);
+    renderUpsell({ ...STARTER, plan: "pro" });
     expect(document.querySelector("[data-upsell]")?.getAttribute("data-upsell")).toBe("top");
     expect(screen.queryByRole("button")).toBeNull();
     expect(screen.getByRole("link", { name: "Compare all plans" }).getAttribute("href")).toBe("/plans?from=settings");
@@ -341,6 +408,20 @@ describe("UpgradeCard (Settings › Plan & billing)", () => {
 });
 
 describe("BillingSection", () => {
+  it("states the fee of the plan price in force, on what the buyer pays", () => {
+    render(<BillingSection context={FREE} returned={null} actions={stubActions()} />);
+    expect(screen.getByText("Fee on each sale: 5% of what the buyer pays.")).toBeTruthy();
+    cleanup();
+    render(<BillingSection context={{ ...STARTER, plan: "pro" }} returned={null} actions={stubActions()} />);
+    expect(screen.getByText("Fee on each sale: 0.5% of what the buyer pays.")).toBeTruthy();
+  });
+
+  it("tells a waived store its sales pay no fee, not the plan's rate", () => {
+    render(<BillingSection context={{ ...FREE, feeWaived: true }} returned={null} actions={stubActions()} />);
+    expect(screen.getByText("No fee on your sales: it is waived for your store.")).toBeTruthy();
+    expect(screen.queryByText(/Fee on each sale/)).toBeNull();
+  });
+
   it("replaces the old plans button with the upsell for an owner", () => {
     render(<BillingSection context={FREE} returned={null} actions={stubActions()} />);
     expect(screen.queryByRole("button", { name: /See plans|Change plan/ })).toBeNull();

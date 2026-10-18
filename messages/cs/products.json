@@ -390,6 +390,8 @@
     "noTerms": "Zatím nejsou napsané žádné dopravní podmínky.",
     "profile": "Profil dopravy",
     "edit": "Upravit",
+    "unpriced": "Doprava nemá v měně {currency} nastavenou cenu, takže kupující nemohou za tento produkt zaplatit při pokladně.",
+    "unpricedAction": "Nastavit ceny dopravy",
     "modalTitle": "Doprava a vrácení zboží"
   },
   "optionsField": {

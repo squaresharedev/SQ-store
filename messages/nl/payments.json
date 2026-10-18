@@ -16,6 +16,11 @@
       "label": "Volgende uitbetaling",
       "zero": "Geen uitbetaling gepland",
       "hint": "Verwacht op {date}"
+    },
+    "fees": {
+      "label": "Kosten deze maand",
+      "zero": "Geen kosten deze maand",
+      "hint": "Het aandeel van Square Share in je verkopen, na terugbetalingen"
     }
   },
   "connection": {
@@ -29,6 +34,8 @@
     "charges": "Betalingen ontvangen",
     "payouts": "Uitbetalingen",
     "verified": "Geverifieerd",
+    "finish": "Stripe heeft nog wat gegevens van je nodig. Zolang het die niet heeft, kunnen kopers niet betalen.",
+    "finishButton": "Afronden bij Stripe",
     "requirementsDue": "Stripe heeft meer informatie nodig voordat uitbetalingen kunnen doorgaan."
   },
   "connectModal": {
@@ -106,6 +113,7 @@
     "sentTo": "Verzonden naar",
     "bankAccount": "Bankrekening ···· {last4}",
     "arrives": "Aankomst",
+    "arrived": "Aangekomen",
     "initiated": "Gestart",
     "type": "Type",
     "typeValue": "{method, select, instant {Direct} other {Standaard}} · {automatic, select, true {Automatisch} other {Handmatig}}",

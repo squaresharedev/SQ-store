@@ -77,15 +77,23 @@ const POLICY_FREE_BY_DESIGN = new Set([
   // public only while every part of it is 'clean' here, so a client that
   // could write it could approve its own content.
   "moderation_checks",
+  // Buyer payments (20261008_seller_payment_accounts): which connected Stripe
+  // account belongs to which seller, written only by the server from Stripe's
+  // own answers. A client that could write it could point another store's
+  // payments at an account of its own, or mark its own as cleared to charge.
+  "seller_payment_accounts",
   // The webhook's idempotency ledger: an event id recorded here is one that is
   // never applied again, so a client that could write it could block one.
   "stripe_events",
   // Pricing-modal funnel events, produced server-side only (lib/billing/
   // funnel.ts). Nothing here is a seller's to read or forge.
   "seller_funnel_events",
-  // The launch switch for plan limits. A client that could write it could
-  // switch its own limits off.
+  // The launch switches for plan limits, the per-sale fee and feature gating.
+  // A client that could write them could switch its own limits or fees off.
   "billing_switches",
+  // Who pays no per-sale fee (20261011_pricing_config), read by the checkout
+  // when it prices a sale. A client that could write it could waive its own.
+  "seller_fee_waivers",
   // Why sellers cancelled (20261003_plan_cancellations): written by the
   // cancel action, read by the admin panel, both through the service role.
   // A seller's note is staff-only reading.

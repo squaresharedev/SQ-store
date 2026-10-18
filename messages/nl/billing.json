@@ -30,7 +30,7 @@
     "ownerOnly": "Alleen de eigenaar van de winkel kan het abonnement wijzigen.",
     "soon": "Binnenkort",
     "soonTitle": "Betaalde abonnementen komen binnenkort. Alles op Free blijft in de tussentijd gewoon werken.",
-    "finePrint": "Prijzen zijn excl. btw. De kosten per verkoop gelden voor verkopen via de afrekenpagina van Square Share en worden berekend over de productprijs, nooit over de verzending. De eigen kosten van Stripe voor kaartverwerking komen daar nog bij. Je kunt op elk moment opzeggen: je houdt je abonnement tot het einde van de periode die je hebt betaald.",
+    "finePrint": "Prijzen zijn excl. btw. De kosten per verkoop gelden voor verkopen via de afrekenpagina van Square Share en worden berekend over alles wat de koper betaalt, inclusief verzending. De eigen kosten van Stripe voor kaartverwerking komen daar nog bij. Je kunt op elk moment opzeggen: je houdt je abonnement tot het einde van de periode die je hebt betaald.",
     "unavailable": "Abonnementen kunnen nu niet worden getoond. Vernieuw de pagina over een moment.",
     "yearlyFree": "{count, plural, one {# maand gratis} other {# maanden gratis}}",
     "launchNote": "Een lanceringsprijs is een introductieprijs: de normale prijs is de doorgestreepte prijs."
@@ -132,11 +132,11 @@
       },
       "fee": {
         "q": "Waarover worden de kosten per verkoop berekend?",
-        "a": "Over de productprijs van elke verkoop via de afrekenpagina van Square Share, nooit over de verzending. De eigen kosten van Stripe voor kaartverwerking staan daar los van."
+        "a": "Over alles wat de koper betaalt bij elke verkoop via de afrekenpagina van Square Share, inclusief verzending. De eigen kosten van Stripe voor kaartverwerking staan daar los van."
       },
       "switch": {
         "q": "Kan ik later van abonnement wisselen?",
-        "a": "Op elk moment, omhoog of omlaag, maandelijks of jaarlijks. Stripe laat precies zien wat je gaat betalen voordat je bevestigt."
+        "a": "Op elk moment, omhoog of omlaag. Stripe laat precies zien wat je gaat betalen voordat je bevestigt."
       }
     }
   },
@@ -176,7 +176,8 @@
     "renews": "Wordt verlengd op {date}.",
     "ends": "Eindigt op {date}. Je winkel gaat dan over naar Free en er wordt niets verwijderd.",
     "pastDue": "Betaling mislukt. Stripe probeert je kaart opnieuw; werk je kaart bij om {plan} te behouden.",
-    "feeLine": "Kosten bij elke verkoop: {rate} van de productprijs.",
+    "feeLine": "Kosten bij elke verkoop: {rate} van wat de koper betaalt.",
+    "feeWaivedLine": "Geen kosten over je verkopen: jouw winkel is ervan vrijgesteld.",
     "memberNote": "Alleen de eigenaar van de winkel kan het abonnement wijzigen of de facturen bekijken.",
     "usageTitle": "Wat je gebruikt",
     "usageDescription": "De limieten van je abonnement gelden alleen voor het toevoegen van meer. Wat je hebt, wordt nooit verwijderd.",

@@ -11,9 +11,10 @@ import { listStorefronts } from "@/lib/storefront/queries";
 import { countOrdersToShip, getOrderGlances, getOrdersByIds } from "@/lib/orders/queries";
 import { checkoutProviderFor } from "@/lib/checkout/availability";
 import { getAccountStatus } from "@/lib/payments/mock";
+import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { getAssurance, getProfile } from "@/lib/auth/session";
+import { getAssurance, getProfile, requireUser } from "@/lib/auth/session";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { emailProofRequired } from "@/lib/contact-verification/availability";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
@@ -23,6 +24,7 @@ import { productPageUrl } from "@/lib/storefront/product-page-url";
 import { DashboardHome } from "@/components/dashboard/DashboardHome";
 import type { OnboardingData } from "@/components/dashboard/OnboardingSlot";
 import type { StorefrontAttentionInfo } from "@/lib/dashboard/attention";
+import { OVERVIEW_PATH } from "@/lib/dashboard/paths";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Dashboard.metadata.overview");
@@ -36,6 +38,9 @@ export default async function DashboardOverviewPage({
 }: {
   searchParams: Promise<{ tour?: string | string[] }>;
 }) {
+  // The layout's session gate does not run again on a move between sections
+  // (see ../layout.tsx, or ../../layout.tsx from a nested page): a page asks.
+  await requireUser(OVERVIEW_PATH);
   const [orders, products, storefronts, profile, payments, account, ownProfile, params, assurance, toShipCount] =
     await Promise.all([
       getDashboardOrders(),
@@ -121,6 +126,14 @@ export default async function DashboardOverviewPage({
           activeProductIds: products.activeProductIds,
           existingProductIds: existingIds,
           storefronts: storefronts.rows,
+          // Only where a payment account can be connected: see SetupFacts.
+          checkout: STRIPE_CONNECT_AVAILABLE
+            ? {
+                payments: payments.chargesEnabled ? "ready" : payments.connected ? "unfinished" : "none",
+                deliveryPriced:
+                  products.hasPhysicalProducts && profile ? profile.shippingRatesSet : null,
+              }
+            : undefined,
         })
       : null;
     onboarding = {
@@ -179,7 +192,9 @@ export default async function DashboardOverviewPage({
         products={products}
         storefronts={storefrontInfo}
         profile={profile}
-        stripeConnected={payments.connected}
+        // Connected AND cleared to take payments: an account Stripe is still
+        // checking cannot be paid, so it still needs attention.
+        stripeConnected={payments.connected && payments.chargesEnabled}
         onboarding={onboarding}
         // A failed read (null) counts as "on": never nag on a guess.
         twoFactorEnabled={assurance ? assurance.enrolled : true}
@@ -187,7 +202,7 @@ export default async function DashboardOverviewPage({
         recentOrderGlances={recentOrderGlances}
         toShipCount={toShipCount}
         canFulfil={can(account?.role, "orders.fulfil")}
-        checkoutOpen={account ? checkoutProviderFor(account.accountId) !== null : false}
+        checkoutOpen={account ? (await checkoutProviderFor(account.accountId)) !== null : false}
       />
     </main>
   );

@@ -7,6 +7,20 @@
     "body": "It may have been removed, or the link you followed is out of date. Head back to the shop to see what's on offer now.",
     "back": "Go back"
   },
+  "unavailable": {
+    "title": "This page couldn't be loaded",
+    "body": "The problem is on our side and usually passes in a moment.",
+    "orderBody": "Your order is safe. This page just couldn't be loaded right now, which usually passes in a moment."
+  },
+  "pageNotFound": {
+    "title": "This page isn't available",
+    "body": "The link you followed may be out of date, or part of it may be missing. Go back and try it again."
+  },
+  "storefront": {
+    "gridLabel": "What {store} sells",
+    "empty": "{store} has nothing on show right now.",
+    "description": "Browse what {store} sells."
+  },
   "sections": {
     "description": "Description",
     "specs": "Specifications",
@@ -29,6 +43,11 @@
     "warnings": "Warnings"
   },
   "priceNotes": "{price, select, incl {{shipping, select, plus {incl. VAT, plus shipping} free {incl. VAT, free shipping} other {incl. VAT}}} excl {{shipping, select, plus {excl. tax, plus shipping} free {excl. tax, free shipping} other {excl. tax}}} other {{shipping, select, plus {plus shipping} free {free shipping} other {}}}}",
+  "delivery": {
+    "free": "Free delivery",
+    "flat": "Delivery {amount}",
+    "from": "Delivery from {amount}"
+  },
   "stock": {
     "digitalDownload": "Digital download",
     "digitalDownloadFormat": "Digital download ({format})"
@@ -235,6 +254,8 @@
     "payment": {
       "testTitle": "Test payment",
       "testBody": "This is a development checkout. No card is charged and no money moves.",
+      "stripeTitle": "Pay securely with Stripe",
+      "stripeBody": "You enter your card on Stripe's secure page in the next step.",
       "previewTitle": "Card details",
       "previewBody": "Card, Apple Pay and Google Pay appear here, in your colours, once Stripe is connected.",
       "cardNumber": "Card number",
@@ -271,7 +292,8 @@
       "failed": "Something went wrong and nothing was charged. Try again.",
       "invalid": "Some details need another look. Check the highlighted fields.",
       "discount_invalid": "This discount code can't be used any more. Remove it to pay the full price.",
-      "price_changed": "The price changed while this page was open, so nothing was charged. Check the new total, then pay."
+      "price_changed": "The price changed while this page was open, so nothing was charged. Check the new total, then pay.",
+      "turnstile": "The security check didn't finish, so nothing was charged. It's running again now: wait a moment, then try again."
     },
     "editHeadline": "Checkout headline",
     "discount": {
@@ -300,6 +322,8 @@
       "label": "What happens next",
       "paid": "Order placed",
       "paidDetail": "Paid {date}",
+      "confirming": "Confirming your payment",
+      "confirmingDetail": "This usually takes a moment. Reload the page if it doesn't change.",
       "preparing": "Being prepared",
       "preparingDetail": "{seller} is getting your order ready.",
       "shipped": "On its way",
@@ -308,7 +332,10 @@
       "track": "Track with {carrier}",
       "notYet": "You'll get an email when it's sent.",
       "ready": "Ready to download",
-      "readyDetail": "Your file is ready below, and the link is in your email too."
+      "readyDetail": "Your file is ready below, and the link is in your email too.",
+      "refunded": "Refunded",
+      "refundedDetail": "{seller} refunded this order on {date}.",
+      "refundedDetailNoDate": "{seller} refunded this order."
     },
     "download": "Download ({format})",
     "downloadPlain": "Download your file",
@@ -350,7 +377,11 @@
   "sale": {
     "wasNow": "Was {was}, now {now}",
     "percentOff": "-{percent}%",
+    "amountOff": "-{amount}",
     "priorNote": "Crossed-out price: the lowest price in the 30 days before this sale.",
+    "regularNote": "Crossed-out price: the regular price.",
+    "lowestNote": "Crossed-out price: the regular price. Lowest price in the 30 days before this sale: {price}.",
+    "badgeSale": "Sale",
     "endsOn": "Sale ends {date}"
   }
 }

@@ -14,6 +14,8 @@ import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { DEV_PREVIEW_PARAM, previewsEmptyList } from "@/lib/dev/preview";
+import { requireUser } from "@/lib/auth/session";
+import { PRODUCTS_PATH } from "@/lib/products/paths";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Products.metadata.list");
@@ -61,6 +63,9 @@ export default async function ProductsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  // The layout's session gate does not run again on a move between sections
+  // (see ../layout.tsx, or ../../layout.tsx from a nested page): a page asks.
+  await requireUser(PRODUCTS_PATH);
   const params = await searchParams;
   const { filters, sort, page } = parseParams(params);
   // Dev only: `?preview=empty` shows the new-seller empty state on a real account.

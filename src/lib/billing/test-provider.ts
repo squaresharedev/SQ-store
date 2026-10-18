@@ -16,13 +16,15 @@
 
 import { readAccountBilling } from "@/lib/billing/account-plan";
 import { billingTestProviderEnabled } from "@/lib/billing/availability";
+import { readSoldPrice } from "@/lib/billing/catalog";
 import { computePaidUntil } from "@/lib/billing/entitlement";
-import { PLANS, type BillingInterval, type PaidPlanId } from "@/lib/billing/plans";
-import type {
-  BillingCustomerDetails,
-  BillingProvider,
-  CheckoutRequest,
-  PortalRequest,
+import type { BillingInterval, PaidPlanId } from "@/lib/billing/plans";
+import {
+  BillingConfigError,
+  type BillingCustomerDetails,
+  type BillingProvider,
+  type CheckoutRequest,
+  type PortalRequest,
 } from "@/lib/billing/provider";
 import { applyBillingSnapshot, type ApplyResult, type BillingSnapshot } from "@/lib/billing/sync";
 
@@ -50,8 +52,26 @@ const sameOrigin = (absoluteUrl: string) => {
  *  can be resolved back to the customer without storing anything. */
 const TEST_SESSION_PREFIX = "cs_sstest_";
 
-/** A paid, active subscription starting now. */
-function subscribedSnapshot(ownerId: string, plan: PaidPlanId, interval: BillingInterval, now: Date): BillingSnapshot {
+/**
+ * What a new subscription to `plan` is charged per `interval`: the
+ * plan_prices row in force, the same one real Stripe's price is checked
+ * against. Refused, as Stripe's checkout would be, for a plan not sold by
+ * that interval.
+ */
+async function soldPriceCents(plan: PaidPlanId, interval: BillingInterval): Promise<number> {
+  const sold = await readSoldPrice(plan, interval);
+  if (!sold) throw new BillingConfigError(`no price in force for ${plan}/${interval}`);
+  return sold.priceCents;
+}
+
+/** A paid, active subscription starting now, at `priceCents` per interval. */
+function subscribedSnapshot(
+  ownerId: string,
+  plan: PaidPlanId,
+  interval: BillingInterval,
+  priceCents: number | null,
+  now: Date,
+): BillingSnapshot {
   const periodEnd = new Date(now);
   if (interval === "year") periodEnd.setUTCFullYear(periodEnd.getUTCFullYear() + 1);
   else periodEnd.setUTCMonth(periodEnd.getUTCMonth() + 1);
@@ -60,7 +80,7 @@ function subscribedSnapshot(ownerId: string, plan: PaidPlanId, interval: Billing
     plan,
     interval,
     status: "active",
-    priceCents: PLANS[plan].priceCents[interval],
+    priceCents,
     currency: "EUR",
     currentPeriodEnd: periodEnd,
     cancelAtPeriodEnd: false,
@@ -81,7 +101,8 @@ async function setCancelAtPeriodEnd(ownerId: string, customerId: string, cancel:
   if (!current.ok) return;
   const { storedPlan, interval, currentPeriodEnd } = current.billing;
   if (!storedPlan || !interval || !currentPeriodEnd) return;
-  const snapshot = subscribedSnapshot(ownerId, storedPlan, interval, now);
+  // What this account already pays: a grandfathered price stays its own.
+  const snapshot = subscribedSnapshot(ownerId, storedPlan, interval, current.billing.priceCents, now);
   const periodEnd = new Date(currentPeriodEnd);
   // Stripe would refuse to resume a subscription whose period is over.
   if (!cancel && periodEnd.getTime() <= now.getTime()) {
@@ -94,7 +115,6 @@ async function setCancelAtPeriodEnd(ownerId: string, customerId: string, cancel:
       ...snapshot,
       currentPeriodEnd: periodEnd,
       cancelAtPeriodEnd: cancel,
-      priceCents: current.billing.priceCents,
       paidUntil: computePaidUntil("active", periodEnd, cancel, now),
     },
     now,
@@ -111,10 +131,11 @@ export const testBillingProvider: BillingProvider = {
 
   async createCheckout(request: CheckoutRequest): Promise<string> {
     assertEnabled();
+    const priceCents = await soldPriceCents(request.plan, request.interval);
     await applyBillingSnapshot(
       request.ownerId,
       request.customerId,
-      subscribedSnapshot(request.ownerId, request.plan, request.interval, new Date()),
+      subscribedSnapshot(request.ownerId, request.plan, request.interval, priceCents, new Date()),
       new Date(),
     );
     return sameOrigin(request.successUrl).replace(
@@ -127,10 +148,11 @@ export const testBillingProvider: BillingProvider = {
     assertEnabled();
     const now = new Date();
     if (request.flow.kind === "switch") {
+      const priceCents = await soldPriceCents(request.flow.plan, request.flow.interval);
       await applyBillingSnapshot(
         request.ownerId,
         request.customerId,
-        subscribedSnapshot(request.ownerId, request.flow.plan, request.flow.interval, now),
+        subscribedSnapshot(request.ownerId, request.flow.plan, request.flow.interval, priceCents, now),
         now,
       );
     }

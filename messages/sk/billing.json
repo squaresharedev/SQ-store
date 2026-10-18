@@ -30,7 +30,7 @@
     "ownerOnly": "Plán obchodu môže meniť iba vlastník.",
     "soon": "Čoskoro",
     "soonTitle": "Platené plány sa otvoria čoskoro. Dovtedy všetko na Free funguje bez zmien.",
-    "finePrint": "Ceny sú bez DPH. Poplatok za predaj sa vzťahuje na predaje cez pokladňu Square Share a účtuje sa z ceny položky, nie z doručenia. Vlastné poplatky Stripe za spracovanie karty sa pripočítajú. Zrušiť môžete kedykoľvek: plán si ponechávate do konca zaplateného obdobia.",
+    "finePrint": "Ceny sú bez DPH. Poplatok za predaj sa vzťahuje na predaje cez pokladňu Square Share a účtuje sa z celej sumy, ktorú kupujúci zaplatí, vrátane doručenia. Vlastné poplatky Stripe za spracovanie karty sa pripočítajú. Zrušiť môžete kedykoľvek: plán si ponechávate do konca zaplateného obdobia.",
     "unavailable": "Plány sa momentálne nedajú zobraziť. Za chvíľu obnovte stránku.",
     "yearlyFree": "{count, plural, one {# mesiac zadarmo} few {# mesiace zadarmo} many {# mesiaca zadarmo} other {# mesiacov zadarmo}}",
     "launchNote": "Úvodná cena je zvýhodnená cena na začiatok: bežná cena je tá, ktorá je prečiarknutá."
@@ -132,11 +132,11 @@
       },
       "fee": {
         "q": "Z čoho sa účtuje poplatok za predaj?",
-        "a": "Z ceny položky pri každom predaji cez pokladňu Square Share, nikdy nie z doručenia. Vlastné poplatky Stripe za spracovanie karty sú samostatné."
+        "a": "Z celej sumy, ktorú kupujúci zaplatí pri každom predaji cez pokladňu Square Share, vrátane doručenia. Vlastné poplatky Stripe za spracovanie karty sú samostatné."
       },
       "switch": {
         "q": "Môžem plán neskôr zmeniť?",
-        "a": "Kedykoľvek, na vyšší aj nižší, mesačný aj ročný. Stripe vám pred potvrdením presne ukáže, koľko zaplatíte."
+        "a": "Kedykoľvek, na vyšší aj nižší. Stripe vám pred potvrdením presne ukáže, koľko zaplatíte."
       }
     }
   },
@@ -176,7 +176,8 @@
     "renews": "Obnoví sa {date}.",
     "ends": "Končí {date}. Obchod potom prejde na Free a nič sa neodstráni.",
     "pastDue": "Platba zlyhala. Stripe to skúsi znova; aktualizujte kartu, aby ste zachovali {plan}.",
-    "feeLine": "Poplatok pri každom predaji: {rate} z ceny položky.",
+    "feeLine": "Poplatok pri každom predaji: {rate} zo sumy, ktorú kupujúci zaplatí.",
+    "feeWaivedLine": "Z vašich predajov sa neplatí žiadny poplatok: pre váš obchod je odpustený.",
     "memberNote": "Plán obchodu a jeho faktúry môže meniť a zobrazovať iba vlastník.",
     "usageTitle": "Čo používate",
     "usageDescription": "Limity vášho plánu platia len pri pridávaní nových. Nič, čo už máte, sa nikdy neodstráni.",

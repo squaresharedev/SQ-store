@@ -33,6 +33,7 @@ import pg from "pg";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO = join(__dirname, "..", "..", "..");
 
+import { REPLICA_INITDB_FLAGS } from "../../db/replica.mjs";
 import { ANON_KEY, JWT_SECRET, SERVICE_KEY, signJwt } from "./keys.mjs";
 import { newSecret, totpValid } from "./totp.mjs";
 
@@ -69,6 +70,7 @@ const epg = new EmbeddedPostgres({
   password: "postgres",
   port: PG_PORT,
   persistent: false,
+  initdbFlags: REPLICA_INITDB_FLAGS,
 });
 
 console.log("[stack] starting embedded postgres...");
@@ -752,6 +754,10 @@ const next = spawn(
       // "localhost", which covers both.
       MFA_PASSKEY_KEY: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
       WEBAUTHN_ORIGINS: `http://localhost:${NEXT_PORT}`,
+      // The storefront embed is served from THIS server (its loader and its
+      // frame). Without this it would borrow NEXT_PUBLIC_APP_URL, and for the
+      // same reason as above a snippet would then load the developer's :3000.
+      NEXT_PUBLIC_EMBED_URL: `http://localhost:${NEXT_PORT}`,
       // Contact verification ON for both channels, which is what makes the
       // publish gate demand a PROVEN email and product pages show only a
       // proven phone. Under NODE_ENV=development nothing is ever sent: codes

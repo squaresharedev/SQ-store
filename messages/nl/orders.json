@@ -48,7 +48,8 @@
     "date": "Datum",
     "shipping": "Verzending",
     "shipTo": "Verzenden naar",
-    "noAddress": "Geen adres"
+    "noAddress": "Geen adres",
+    "feeLine": "Kosten {amount}"
   },
   "toolbar": {
     "region": "bestelfilters",
@@ -149,16 +150,29 @@
     "discountCodeOutdone": "Code {code} gebruikt, maar de actieprijs was lager"
   },
   "actions": {
-    "refundNeedsStripe": "Voor terugbetalingen moet Stripe gekoppeld zijn.",
-    "connectStripe": "Koppel Stripe om terugbetalingen mogelijk te maken",
-    "refundConfirm": "Deze bestelling terugbetalen? Dit kan niet ongedaan worden gemaakt zodra Stripe is gekoppeld.",
-    "confirmRefund": "Terugbetaling bevestigen",
-    "refundOrder": "Bestelling terugbetalen",
     "disputeInStripe": "Geschillen worden afgehandeld in je Stripe-dashboard zodra Stripe is gekoppeld.",
-    "disputeConfirm": "Geschilbehandeling openen voor deze bestelling?",
-    "handleDispute": "Geschil behandelen",
-    "none": "Er zijn geen acties beschikbaar voor deze bestelling.",
-    "refundManual": "Je kunt nog niet terugbetalen via Square Share. Betaal de koper zelf terug om deze bestelling terug te betalen en laat het de koper weten."
+    "none": "Er zijn geen acties beschikbaar voor deze bestelling."
+  },
+  "refund": {
+    "open": "Terugbetalen of annuleren",
+    "reasonLabel": "Reden",
+    "reasons": {
+      "cancelled": "Geannuleerd voor verzending",
+      "returned": "Teruggestuurd door de koper",
+      "other": "Andere reden"
+    },
+    "restock": "{count, plural, one {Terugzetten op voorraad} other {Alle # terugzetten op voorraad}}",
+    "confirm": "Terugbetaling van {amount} vastleggen",
+    "confirmProvider": "Terugbetalen: {amount}",
+    "recorded": "Terugbetaling vastgelegd.",
+    "refunded": "Terugbetaling verzonden.",
+    "buyerEmailed": "De koper heeft een e-mail ontvangen.",
+    "buyerNotEmailed": "De koper heeft geen e-mail ontvangen. Neem zelf contact met hem op.",
+    "refundedOn": "Terugbetaald op {date}",
+    "refundedOnReason": "{reason, select, cancelled {Geannuleerd en terugbetaald op {date}} returned {Teruggestuurd en terugbetaald op {date}} other {Terugbetaald op {date}}}",
+    "ownerOnly": "Alleen de eigenaar van de winkel kan een bestelling terugbetalen of annuleren.",
+    "manual": "Deze betaling is niet via Square Share verlopen. Betaal de koper zelf terug en leg het hier vast.",
+    "viaProvider": "Het volledige bedrag gaat via Stripe terug naar de kaart van de koper. Dit kan niet ongedaan worden gemaakt."
   },
   "skeleton": {
     "loading": "bestellingen laden"
@@ -230,6 +244,13 @@
       "shipTo": "Het gaat naar:",
       "questions": "Vragen over je bestelling? Beantwoord deze e-mail om {store} te bereiken.",
       "footer": "Verstuurd door Square Share namens {store}."
+    },
+    "refund": {
+      "subject": "Je bestelling bij {store} is terugbetaald",
+      "intro": "{reason, select, cancelled {{store} heeft je bestelling geannuleerd en terugbetaald.} returned {{store} heeft je retour ontvangen en je bestelling terugbetaald.} other {{store} heeft je bestelling terugbetaald.}}",
+      "amount": "Terugbetaald: {amount}",
+      "howManual": "{store} betaalt je rechtstreeks terug. Als het geld binnen 14 dagen niet is binnengekomen, antwoord dan op deze e-mail.",
+      "howCard": "Het bedrag wordt terugbetaald via dezelfde betaalmethode, wat meestal 5 tot 10 dagen duurt."
     },
     "confirmation": {
       "subject": "Je bestelling bij {store}: {title}",

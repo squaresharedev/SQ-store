@@ -53,6 +53,14 @@
       "withRole": "Tu rol de {role, select, owner {propietario} editor {editor} viewer {lector} other {{role}}} no te permite marcar pedidos como enviados en esta tienda.",
       "noRole": "No tienes permiso para marcar pedidos como enviados en esta tienda."
     },
+    "refundOrders": {
+      "withRole": "Tu rol de {role, select, owner {propietario} editor {editor} viewer {lector} other {{role}}} no permite reembolsar ni cancelar pedidos en esta tienda.",
+      "noRole": "No tienes permiso para reembolsar ni cancelar pedidos en esta tienda."
+    },
+    "connectPayments": {
+      "withRole": "Tu rol de {role, select, owner {Propietario} editor {Editor} viewer {Lector} other {{role}}} no permite conectar una cuenta de pago en esta tienda.",
+      "noRole": "No tienes permiso para conectar una cuenta de pago en esta tienda."
+    },
     "manageBilling": {
       "withRole": "Tu rol de {role, select, owner {propietario} editor {editor} viewer {lector} other {{role}}} no te permite cambiar el plan de esta tienda.",
       "noRole": "No tienes permiso para cambiar el plan de esta tienda."
@@ -86,6 +94,8 @@
     "requestReview": "Demasiados intentos de solicitar una revisión en poco tiempo.",
     "fileAppeal": "Demasiados intentos de enviar un recurso en poco tiempo.",
     "fulfilOrders": "Demasiados intentos de marcar pedidos como enviados en poco tiempo.",
+    "refundOrders": "Demasiados reembolsos en poco tiempo.",
+    "connectPayments": "Demasiados intentos de conectar Stripe en poco tiempo.",
     "readCheckoutSettings": "Demasiados intentos de leer los ajustes del proceso de pago en poco tiempo.",
     "changePlan": "Demasiados cambios de plan iniciados en poco tiempo.",
     "saveDiscounts": "Demasiados cambios de descuentos en poco tiempo."
@@ -117,6 +127,8 @@
     "sendForReview": "No se ha podido enviar a revisión por un problema de nuestra parte.",
     "fileAppeal": "No se ha podido enviar tu recurso por un problema en nuestro lado.",
     "markOrderShipped": "No se ha podido marcar el pedido como enviado por un problema en nuestro sistema.",
+    "refundOrder": "No se pudo registrar el reembolso por un problema de nuestra parte.",
+    "connectPayments": "No se pudo abrir Stripe por un problema de nuestra parte.",
     "loadCheckoutSettings": "No se han podido cargar los ajustes de tu proceso de pago por un problema en nuestro sistema.",
     "saveCheckoutSettings": "No se han podido guardar los ajustes de tu proceso de pago por un problema en nuestro sistema.",
     "loadPlans": "No se ha podido cargar tu plan por un problema en nuestro lado.",
@@ -596,6 +608,14 @@
     "notShippable": {
       "message": "Este pedido no se puede marcar como enviado.",
       "fix": "Solo se pueden enviar los pedidos pagados con artículos que enviar. Actualiza la página para ver en qué estado está este."
+    },
+    "notRefundable": {
+      "message": "Este pedido no puede ser reembolsado.",
+      "fix": "Solo se puede reembolsar un pedido pagado. Recarga la página para ver en qué estado está este pedido."
+    },
+    "refundRefused": {
+      "message": "Stripe no pudo realizar este reembolso.",
+      "fix": "Nada ha cambiado. Inténtalo de nuevo en un momento o realiza el reembolso desde tu panel de Stripe."
     }
   },
   "checkoutPageApi": {

@@ -15,6 +15,7 @@ import {
   WEEKDAYS,
   bucketKeyFor,
   planBuckets,
+  previousRange,
   rangeDayCount,
   toIsoDay,
 } from "@/lib/analytics/buckets";
@@ -24,6 +25,7 @@ import {
   type AnalyticsRange,
   type AnalyticsSnapshot,
   type ChannelSlice,
+  type PreviousPeriod,
   type RangePreset,
   type RevenuePoint,
   type SignalBreakdown,
@@ -36,6 +38,11 @@ import {
   type TopProduct,
   type WeekdaySlice,
 } from "@/lib/analytics/types";
+import {
+  withWeekdayProducts,
+  type WeekdayProductsPayload,
+} from "@/lib/analytics/weekday-products";
+import { buildFunnel, type FunnelCheckoutCounts } from "@/lib/analytics/funnel/summary";
 
 // READ-ONLY analytics aggregates. Server Components / Route Handlers only
 // (cookies() is Node-only, never middleware).
@@ -157,10 +164,11 @@ function buildChannels(rows: AggregatePayload["channels"]): ChannelSlice[] {
 
 /** All seven weekdays Mon..Sun, zeros included. */
 function buildWeekdays(rows: AggregatePayload["weekdays"]): WeekdaySlice[] {
-  const slices = WEEKDAYS.map((weekday) => ({
+  const slices: WeekdaySlice[] = WEEKDAYS.map((weekday) => ({
     weekday,
     sales: 0,
     revenueCents: 0,
+    products: [],
   }));
   for (const row of rows) {
     // ISO dow 1..7 -> Mon-first index 0..6.
@@ -206,7 +214,8 @@ export function emptyAnalyticsData(available = false): AnalyticsData {
     series: [],
     channels: emptyChannels(),
     topProducts: [],
-    weekdays: WEEKDAYS.map((weekday) => ({ weekday, sales: 0, revenueCents: 0 })),
+    weekdays: WEEKDAYS.map((weekday) => ({ weekday, sales: 0, revenueCents: 0, products: [] })),
+    weekdayProducts: [],
     statuses: STATUS_ORDER.map((status) => ({ status, count: 0 })),
   };
 }
@@ -292,8 +301,35 @@ export async function getAnalytics(range: AnalyticsRange): Promise<AnalyticsData
       }),
     ),
     weekdays: buildWeekdays(payload.weekdays),
+    weekdayProducts: [],
     statuses: buildStatuses(payload.statuses),
   };
+}
+
+/**
+ * Which products sold on which weekday, for the range.
+ *
+ * Its own RPC, and SOFT-FAILING to null: the split is a refinement of a bar
+ * that is already right, so an error here (including the function not
+ * existing yet, on a database the migration has not reached) leaves the page
+ * with the plain bars it always had. Same security model as getAnalytics.
+ */
+async function getWeekdayProducts(range: AnalyticsRange): Promise<WeekdayProductsPayload | null> {
+  const account = await getActiveAccount();
+  if (!account) return null;
+
+  const supabase = await createClient();
+  // Untyped rpc, like analytics_aggregate: the generated types predate it.
+  const { data, error } = await (supabase as SupabaseClient).rpc("analytics_weekday_products", {
+    p_seller_id: account.accountId,
+    p_from: range.from ?? null,
+    p_to: range.to ?? null,
+  });
+  if (error) {
+    console.warn("[analytics] weekday products read failed:", error.message);
+    return null;
+  }
+  return data as WeekdayProductsPayload;
 }
 
 /**
@@ -416,6 +452,73 @@ export async function getSignals(range: AnalyticsRange): Promise<SignalsData> {
 }
 
 /**
+ * How many checkouts were started and left unpaid in the range, from the
+ * daily funnel table (public.storefront_funnel_aggregate).
+ *
+ * SOFT-FAILS to null, like the signals read and for the same reason, and null
+ * also covers a database the migration has not reached: the page then says
+ * these two are not counted yet instead of showing a zero. Same security
+ * model as getAnalytics.
+ */
+async function getFunnelCheckouts(range: AnalyticsRange): Promise<FunnelCheckoutCounts | null> {
+  const account = await getActiveAccount();
+  if (!account) return null;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("storefront_funnel_aggregate", {
+    p_account_id: account.accountId,
+    p_from: range.from ?? undefined,
+    p_to: range.to ?? undefined,
+  });
+  if (error) {
+    console.warn("[analytics] funnel read failed:", error.message);
+    return null;
+  }
+  const totals = (data as { totals?: { event: string; count: number }[] } | null)?.totals ?? [];
+  const count = (event: string) => totals.find((row) => row.event === event)?.count ?? 0;
+  return { started: count("checkout_started"), expired: count("checkout_expired") };
+}
+
+/**
+ * The period before `range`, read with the same two aggregates.
+ *
+ * Soft-fails to null, both halves together: a chart with half a comparison is
+ * harder to read than one with none, and nothing here is worth an error page.
+ */
+async function getPreviousPeriod(range: AnalyticsRange): Promise<PreviousPeriod | null> {
+  // The open end of a preset is today, exactly as the snapshot resolves it.
+  const before = previousRange({ from: range.from, to: range.to ?? toIsoDay(Date.now()) });
+  if (!before) return null;
+  try {
+    const [sales, signals, checkouts] = await Promise.all([
+      getAnalytics(before),
+      getSignals(before),
+      getFunnelCheckouts(before),
+    ]);
+    if (!sales.available) return null;
+    return {
+      range: before,
+      sales: {
+        revenueCents: sales.totals.revenueCents,
+        sales: sales.totals.sales,
+        aovCents: sales.totals.aovCents,
+        series: sales.series,
+      },
+      signals: Object.fromEntries(
+        SIGNAL_KINDS.map((kind) => [
+          kind,
+          { count: signals.byKind[kind].totals.count, series: signals.byKind[kind].series },
+        ]),
+      ) as PreviousPeriod["signals"],
+      funnel: buildFunnel(sales, signals, checkouts),
+    };
+  } catch (error) {
+    console.warn("[analytics] previous period read failed:", error);
+    return null;
+  }
+}
+
+/**
  * The whole analytics payload, orders and signals, for one range.
  *
  * Both reads run in parallel and both are account-scoped by the same session.
@@ -427,10 +530,19 @@ export async function getAnalyticsSnapshot(
   range: AnalyticsRange,
   preset: RangePreset,
 ): Promise<AnalyticsSnapshot> {
-  const [sales, signals] = await Promise.all([
+  const [totals, signals, previous, weekdayProducts, checkouts] = await Promise.all([
     getAnalytics(range),
     getSignals(range),
+    getPreviousPeriod(range),
+    getWeekdayProducts(range),
+    getFunnelCheckouts(range),
   ]);
+  const split = withWeekdayProducts(totals.weekdays, weekdayProducts);
+  const sales: AnalyticsData = {
+    ...totals,
+    weekdays: split.weekdays,
+    weekdayProducts: split.products,
+  };
 
   return {
     version: 1,
@@ -444,6 +556,8 @@ export async function getAnalyticsSnapshot(
     currency: sales.totals.currency,
     sales,
     signals,
+    funnel: buildFunnel(sales, signals, checkouts),
+    previous,
     generatedAt: new Date().toISOString(),
   };
 }

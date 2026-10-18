@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { pageBleedShellClass, pageGutterClass } from "@/components/ui/surface-styles";
+import { pageShellClass } from "@/components/ui/surface-styles";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 import { getAnalyticsSnapshot } from "@/lib/analytics/queries";
@@ -11,6 +11,8 @@ import { getAccountActivity } from "@/lib/onboarding/queries";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { getAccountBilling } from "@/lib/billing/account-plan";
 import { planHas } from "@/lib/billing/features";
+import { requireUser } from "@/lib/auth/session";
+import { ANALYTICS_PATH } from "@/lib/dashboard/paths";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Analytics.metadata.analytics");
@@ -74,6 +76,9 @@ export default async function AnalyticsRoutePage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  // The layout's session gate does not run again on a move between sections
+  // (see ../layout.tsx, or ../../layout.tsx from a nested page): a page asks.
+  await requireUser(ANALYTICS_PATH);
   const { preset, custom, effective } = parseParams(await searchParams);
   // One payload for the whole page: the charts render it and the page also
   // publishes it verbatim as machine-readable JSON, so the two cannot drift.
@@ -100,11 +105,8 @@ export default async function AnalyticsRoutePage({
   );
 
   return (
-    // No gutters on the shell: the revenue hero runs edge to edge, and
-    // everything else on the page puts itself back in the page column.
-    <main className={cn(pageBleedShellClass, "space-y-6")}>
+    <main className={cn(pageShellClass, "space-y-6")}>
       <PageHeader
-        className={pageGutterClass}
         title={t("title")}
         subtitle={t("subtitle")}
         action={firstRun ? null : <AnalyticsExportButton enabled={canExport} snapshot={snapshot} />}

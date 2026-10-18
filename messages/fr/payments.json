@@ -16,6 +16,11 @@
       "label": "Prochain virement",
       "zero": "Aucun virement prévu",
       "hint": "Prévu le {date}"
+    },
+    "fees": {
+      "label": "Frais ce mois-ci",
+      "zero": "Aucuns frais ce mois-ci",
+      "hint": "La part de Square Share sur vos ventes, après remboursements"
     }
   },
   "connection": {
@@ -29,6 +34,8 @@
     "charges": "Encaissements",
     "payouts": "Virements",
     "verified": "Vérifié",
+    "finish": "Stripe a encore besoin de quelques informations. Tant qu'il ne les a pas, les acheteurs ne peuvent pas payer.",
+    "finishButton": "Terminer sur Stripe",
     "requirementsDue": "Stripe a besoin d’informations supplémentaires pour poursuivre les virements."
   },
   "connectModal": {
@@ -106,6 +113,7 @@
     "sentTo": "Envoyé à",
     "bankAccount": "Compte bancaire ···· {last4}",
     "arrives": "Arrivée",
+    "arrived": "Arrivé",
     "initiated": "Initié",
     "type": "Type",
     "typeValue": "{method, select, instant {Instantané} other {Standard}} · {automatic, select, true {Automatique} other {Manuel}}",

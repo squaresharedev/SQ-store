@@ -9,6 +9,11 @@
     "description": "No hemos podido cargar esta página. Suele ser un problema de conexión temporal: tu cuenta está bien y sigues conectado.",
     "reference": "Referencia: {digest}"
   },
+  "outdated": {
+    "title": "Esta página se ha actualizado",
+    "description": "Mientras tenías esta página abierta se publicó una versión más reciente de Square Share, así que no puede completar lo que pediste. Recarga la página e inténtalo de nuevo.",
+    "cta": "Recargar página"
+  },
   "footer": {
     "legal": "Información legal",
     "contact": "Contacto",

@@ -9,6 +9,8 @@ import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { getShippingChoices } from "@/lib/storefront/queries";
 import { getShippingPolicy } from "@/lib/settings/shipping-policy";
 import { EMPTY_SHIPPING_POLICY } from "@/types/shipping-policy";
+import { requireUser } from "@/lib/auth/session";
+import { PRODUCTS_PATH } from "@/lib/products/paths";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Products.metadata.edit");
@@ -22,6 +24,9 @@ export default async function EditProductPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  // The layout's session gate does not run again on a move between sections
+  // (see ../layout.tsx, or ../../layout.tsx from a nested page): a page asks.
+  await requireUser(PRODUCTS_PATH);
   const { id } = await params;
 
   // Both reads in one round trip. Safe to overlap the permission check with

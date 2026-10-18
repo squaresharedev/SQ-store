@@ -20,7 +20,7 @@
     "allProducts": "Tutti i prodotti",
     "someProducts": "{count, plural, one {# prodotto} other {# prodotti}}",
     "kindCode": "Codice sconto",
-    "kindAutomatic": "Promozione automatica",
+    "kindAutomatic": "Promo",
     "status": {
       "scheduled": "Programmato",
       "active": "Attivo",
@@ -80,14 +80,15 @@
   "form": {
     "newTitle": "Nuovo sconto",
     "editTitle": "Modifica sconto",
+    "editSale": "Modifica promo",
+    "editCode": "Modifica codice sconto",
     "back": "Torna agli sconti",
     "kind": {
       "title": "Che tipo di sconto?",
       "code": "Codice sconto",
-      "codeHint": "Gli acquirenti lo digitano al checkout. Condividilo su Instagram, in una newsletter o con un creatore, e scopri quale canale vende.",
-      "automatic": "Promozione automatica",
-      "automaticHint": "Tutti vedono il prezzo ridotto sulle tue pagine prodotto. Nessun codice necessario.",
-      "fixed": "Il tipo di sconto non può essere cambiato. Per passare a un altro tipo, crea un nuovo sconto."
+      "codeHint": "Gli acquirenti lo inseriscono al pagamento, e vedi da quale canale sono arrivati.",
+      "automatic": "Promo",
+      "automaticHint": "Abbassa i prezzi per tutti. Senza codice."
     },
     "code": {
       "title": "Codice",
@@ -97,24 +98,22 @@
       "hint": "Da 3 a 24 lettere o numeri. Gli acquirenti possono digitarlo in maiuscolo o minuscolo."
     },
     "channel": {
-      "label": "Canale (facoltativo)",
-      "hint": "Dove condividerai questo codice, per vedere quale canale porta ordini.",
+      "label": "Condiviso su (facoltativo)",
       "suggestions": "Canali suggeriti",
       "newsletter": "Newsletter",
       "creator": "Creatore"
     },
     "value": {
-      "title": "Sconto",
+      "title": "Quanto sconto?",
       "each": "Sottratto dal prezzo di ogni articolo.",
       "order": "Sottratto dagli articoli dell'ordine. La spedizione non è scontata.",
-      "percent": "Percentuale",
-      "amount": "Importo fisso",
+      "unit": "Percentuale o importo",
       "percentLabel": "Percentuale di sconto",
       "amountLabel": "Importo di sconto",
       "currencyHint": "Si applica solo ai prodotti con prezzo in questa valuta."
     },
     "products": {
-      "title": "Si applica a",
+      "title": "Quali prodotti?",
       "all": "Tutti i prodotti",
       "some": "Prodotti specifici",
       "summary": "{count, plural, =0 {Scegli prodotti} one {# prodotto scelto} other {# prodotti scelti}}",
@@ -122,7 +121,7 @@
       "none": "Nessun prodotto trovato."
     },
     "schedule": {
-      "title": "Quando",
+      "title": "Quando?",
       "timeZone": "Gli orari sono nel tuo fuso orario ({zone}).",
       "starts": "Inizia",
       "ends": "Termina",
@@ -142,11 +141,9 @@
       }
     },
     "limit": {
-      "title": "Limiti",
-      "label": "Limita il numero di ordini che possono usarlo",
-      "count": "Numero di ordini"
+      "label": "Ordini massimi (facoltativo)",
+      "none": "Nessun limite"
     },
-    "enabled": "Codice attivato",
     "locked": "Questa promozione è già iniziata, quindi solo la data di fine può essere modificata. Per cambiare qualsiasi altra cosa, terminala e crea una nuova promozione.",
     "summary": {
       "title": "Riepilogo",
@@ -154,7 +151,9 @@
       "starts": "Inizia il {date}",
       "ends": "Termina il {date}",
       "noEnd": "Nessuna data di fine",
-      "example": "Esempio: {title} a {regular} costa {now}."
+      "exampleLabel": "Esempio",
+      "example": "Esempio: {title} a {regular} costa {now}.",
+      "chipLink": "Cambia l'aspetto delle promo nel tuo negozio"
     },
     "create": "Crea sconto",
     "save": "Salva modifiche",

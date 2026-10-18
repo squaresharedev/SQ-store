@@ -10,6 +10,10 @@ export const BILLING_SETTINGS_PATH = "/settings/billing";
 /** Stripe's billing webhook. Registered in the Stripe dashboard at this path. */
 export const BILLING_WEBHOOK_PATH = "/api/billing/webhook";
 
+/** The public price list: what each plan costs and charges per sale, as JSON.
+ *  Read by the homepage's pricing section, so its numbers are plan_prices'. */
+export const PLAN_PRICES_API_PATH = "/api/billing/plan-prices";
+
 /** The query parameter a link to the plans page names its entry point in. */
 export const PLANS_SOURCE_PARAM = "from";
 

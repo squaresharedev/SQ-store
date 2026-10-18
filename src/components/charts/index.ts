@@ -34,6 +34,7 @@ export {
   CHART_ANIMATION,
   MARK,
   PLOT,
+  bleedFade,
   bleedPlot,
   tooltipWrapperClass,
   tooltipLabelClass,

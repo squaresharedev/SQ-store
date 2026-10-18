@@ -38,6 +38,22 @@
       "actionOpen": "Otwórz edytor",
       "cta": "Opublikuj swój produkt",
       "ctaPagesOff": "Włącz strony produktów"
+    },
+    "payments": {
+      "label": "Otrzymuj płatności",
+      "detail": "Połącz Stripe, aby kupujący mogli płacić kartą na stronach produktów.",
+      "detailUnfinished": "Stripe potrzebuje jeszcze kilku danych, zanim kupujący będą mogli płacić.",
+      "detailDone": "Kupujący mogą płacić kartą.",
+      "action": "Połącz Stripe",
+      "actionFinish": "Zakończ w Stripe",
+      "cta": "Połącz Stripe, aby otrzymywać płatności"
+    },
+    "delivery": {
+      "label": "Ustal cenę wysyłki",
+      "detail": "Bez ceny wysyłki produkty wysyłkowe nie mają przycisku zakupu.",
+      "detailDone": "Kupujący widzą pełną sumę przed zapłatą.",
+      "action": "Ustaw ceny",
+      "cta": "Ustaw ceny wysyłki"
     }
   },
   "checklist": {
@@ -198,7 +214,10 @@
         "title": "Osadź witrynę na swojej stronie",
         "body": "Każda witryna ma przycisk osadzenia, który daje kod taki jak ten. Widget jest jeszcze w trakcie tworzenia i nie wyświetla się jeszcze na innych stronach.",
         "bodyButton": "Ten przycisk daje kod taki jak ten poniżej, do wklejenia na swojej stronie. Widget jest jeszcze w trakcie tworzenia i nie wyświetla się jeszcze na innych stronach.",
-        "fallbackBody": "Gdy będziesz mieć witrynę, przycisk osadzenia na jej kafelku da ci kod taki jak ten. Widget jest jeszcze w trakcie tworzenia i nie wyświetla się jeszcze na innych stronach."
+        "fallbackBody": "Gdy będziesz mieć witrynę, przycisk osadzenia na jej kafelku da ci kod taki jak ten. Widget jest jeszcze w trakcie tworzenia i nie wyświetla się jeszcze na innych stronach.",
+        "bodyLive": "Każda witryna ma przycisk osadzenia, który daje kod taki jak ten. Wklej go na swojej stronie, a witryna się tam wyświetli.",
+        "bodyButtonLive": "Ten przycisk daje kod taki jak ten poniżej. Wklej go na swojej stronie, a witryna się tam wyświetli.",
+        "fallbackBodyLive": "Gdy będziesz mieć witrynę, przycisk osadzenia na jej kafelku da ci kod taki jak ten do wklejenia na swojej stronie."
       },
       "ordersSearch": {
         "title": "Znajdź zamówienie",

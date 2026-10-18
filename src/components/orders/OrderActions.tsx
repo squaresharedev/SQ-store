@@ -1,18 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { Info, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { destructiveButtonClass, ghostButtonClass, helpTextClass, infoTextClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
-import { cn } from "@/lib/utils";
-import { PAYMENTS_PATH } from "@/lib/dashboard/paths";
+import { helpTextClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { buyerMailto } from "@/lib/orders/buyer-mailto";
 import { orderNumber } from "@/lib/orders/order-number";
-import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import type { OrderView } from "@/types/order-view";
-
-type ConfirmState = "idle" | "confirming" | "done";
+import { OrderRefund } from "./OrderRefund";
 
 /** "Email the buyer", about this order: the subject carries the number they
  *  know it by, so their reply can be matched to it. */
@@ -30,161 +24,40 @@ export function EmailBuyerLink({ order, className }: { order: OrderView; classNa
   );
 }
 
-function RefundAction() {
-  const t = useTranslations("Orders.actions");
-  const tCommon = useTranslations("Common.actions");
-  const [state, setState] = useState<ConfirmState>("idle");
-
-  if (state === "done") {
-    return (
-      <div className="flex flex-col gap-2">
-        <p className={helpTextClass}>
-          {t("refundNeedsStripe")}
-        </p>
-        <Link href={PAYMENTS_PATH} className={secondaryButtonClass}>
-          {t("connectStripe")}
-        </Link>
-      </div>
-    );
-  }
-
-  if (state === "confirming") {
-    return (
-      <div className="flex flex-col gap-3">
-        <p className="font-inter text-sm text-foreground">
-          {t("refundConfirm")}
-        </p>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            className={primaryButtonClass}
-            onClick={() => {
-              // TODO(stripe): trigger refund mutation via Stripe slice
-              setState("done");
-            }}
-          >
-            {t("confirmRefund")}
-          </button>
-          <button
-            type="button"
-            className={ghostButtonClass}
-            onClick={() => setState("idle")}
-          >
-            {tCommon("cancel")}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      className={destructiveButtonClass}
-      onClick={() => setState("confirming")}
-    >
-      {t("refundOrder")}
-    </button>
-  );
-}
-
-function DisputeAction() {
-  const t = useTranslations("Orders.actions");
-  const tCommon = useTranslations("Common.actions");
-  const [state, setState] = useState<ConfirmState>("idle");
-
-  if (state === "done") {
-    return (
-      <p className={helpTextClass}>
-        {t("disputeInStripe")}
-      </p>
-    );
-  }
-
-  if (state === "confirming") {
-    return (
-      <div className="flex flex-col gap-3">
-        <p className="font-inter text-sm text-foreground">
-          {t("disputeConfirm")}
-        </p>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            className={primaryButtonClass}
-            onClick={() => {
-              // TODO(stripe): open dispute in Stripe slice / redirect to Stripe dashboard
-              setState("done");
-            }}
-          >
-            {tCommon("confirm")}
-          </button>
-          <button
-            type="button"
-            className={ghostButtonClass}
-            onClick={() => setState("idle")}
-          >
-            {tCommon("cancel")}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      className={secondaryButtonClass}
-      onClick={() => setState("confirming")}
-    >
-      {t("handleDispute")}
-    </button>
-  );
-}
-
 /**
- * What a seller can DO to an order beyond shipping it: refund it, or answer a
- * dispute. Both belong to the payment provider, and until one is connected
- * (STRIPE_CONNECT_AVAILABLE) neither can be done from here.
+ * What a seller can DO to an order beyond shipping it.
  *
- * So until then this does not offer them. A red "Refund order" that asks to be
- * confirmed and then answers "Refunds require Stripe to be connected", with a
- * link to a page that has no Stripe on it, is a button that teaches a seller
- * the product is broken. It says what is true instead: how to refund today,
- * and a way to reach the buyer. The stub flows stay below for the day Stripe
- * lands, and reach the connect page (/payments) where they used to reach
- * Settings.
+ * A paid order can be taken back (OrderRefund: cancelled, returned, or
+ * otherwise refunded), and a refunded one says when and why. A way to reach
+ * the buyer sits beside it, because most of these start with a conversation.
+ *
+ * A dispute is not ours to answer: it is opened by the buyer's bank and
+ * settled with the payment provider, so a disputed order says where that
+ * happens rather than offering a button that could do nothing.
  */
-export function OrderActions({ order }: { order: OrderView }) {
+export function OrderActions({
+  order,
+  onOrderChange,
+}: {
+  order: OrderView;
+  /** The order as it stands after a change, for the panel's owner to keep. */
+  onOrderChange?: (order: OrderView) => void;
+}) {
   const t = useTranslations("Orders.actions");
-  if (order.status === "paid") {
-    if (!STRIPE_CONNECT_AVAILABLE) {
-      return (
-        <div className="flex flex-col gap-2">
-          {/* Said plainly and kept on screen (a seller must know there is no
-              refund button), but small and led by an icon so it reads as a note
-              rather than a paragraph. */}
-          <p className={cn(infoTextClass, "flex items-start gap-1.5")}>
-            <Info className="mt-0.5 size-3.5 shrink-0" strokeWidth={2} aria-hidden="true" />
-            {t("refundManual")}
-          </p>
-          <EmailBuyerLink order={order} className={`${secondaryButtonClass} w-fit`} />
-        </div>
-      );
-    }
-    return <RefundAction />;
-  }
 
+  if (order.status === "paid" || order.status === "refunded") {
+    return (
+      // Buttons share a line and wrap on a narrow panel; the open refund form
+      // and the refunded note take a full row of their own.
+      <div className="flex flex-wrap items-center gap-3 [&>form]:basis-full [&>p]:basis-full">
+        <OrderRefund order={order} onOrderChange={onOrderChange} />
+        <EmailBuyerLink order={order} className={`${secondaryButtonClass} w-fit`} />
+      </div>
+    );
+  }
   if (order.status === "disputed") {
-    if (!STRIPE_CONNECT_AVAILABLE) {
-      return <p className={helpTextClass}>{t("disputeInStripe")}</p>;
-    }
-    return <DisputeAction />;
+    return <p className={helpTextClass}>{t("disputeInStripe")}</p>;
   }
-
-  // status === "refunded" | "pending"
-  return (
-    <p className={helpTextClass}>
-      {t("none")}
-    </p>
-  );
+  // Still waiting on its payment: nothing to do until that is settled.
+  return <p className={helpTextClass}>{t("none")}</p>;
 }

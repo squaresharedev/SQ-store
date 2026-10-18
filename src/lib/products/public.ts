@@ -28,11 +28,12 @@ import {
   parseOptionGroups,
   reconcileGalleryOptions,
 } from "@/lib/products/detail";
-import { loadPurchasable, type Purchasable, type PublicProductRow } from "@/lib/products/purchasable";
+import { gatePurchasable, type Purchasable, type PublicProductRow } from "@/lib/products/purchasable";
+import { PAGE_BUSY, type PageBusy } from "@/lib/public/busy";
 import { checkoutAvailableFor } from "@/lib/checkout/availability";
 import { productPageUrl } from "@/lib/storefront/product-page-url";
 import { toCurrency } from "@/lib/format/money";
-import { loadProductSale } from "@/lib/discounts/public";
+import { loadProductSale, msUntilSaleEnds } from "@/lib/discounts/public";
 import type {
   ProductPageDocument,
   ProductPageImage,
@@ -71,8 +72,8 @@ export async function buildProductPageProduct(
      *  answer for a caller that has not thought about it. */
     showStock?: boolean;
     /** The running sale and the price it sets (lib/discounts/public.ts
-     *  loadProductSale). Absent means the regular price: the editor's preview
-     *  shows the product as listed, not as discounted. */
+     *  loadProductSale). Absent means the regular price: a product no sale
+     *  covers, or a preview whose sales could not be read. */
     pricing?: { priceCents: number; sale: ProductSale | null };
   } = {},
 ): Promise<ProductPageProduct> {
@@ -168,6 +169,7 @@ export function gatePricing(gate: Purchasable): Promise<{ priceCents: number; sa
     regularPriceCents: gate.row.price_cents,
     currency: toCurrency(gate.row.currency),
     sales: gate.sales,
+    listedAt: gate.row.created_at ?? null,
   });
 }
 
@@ -194,11 +196,16 @@ export type PublicProductPageResult = {
   page: PublicProductPage;
   /** For the view signal only. Never placed on `page`. */
   ownerId: string;
+  /** How long until the sale price shown stops being true, or null without a
+   *  sale that ends. The page reads itself again then
+   *  (components/product-page/PriceRefresh). */
+  saleEndsInMs: number | null;
 };
 
 /**
  * Load a product page for a buyer, or `null` for every reason it cannot be
- * shown. The gate is lib/products/purchasable.ts, shared with the checkout so
+ * shown (PAGE_BUSY when the reason is only "not right now": see
+ * lib/public/busy.ts). The gate is lib/products/purchasable.ts, shared with the checkout so
  * the two can never disagree about what is for sale; what this adds is the
  * PAGE: the buyer-safe product, the report scopes, and the signed URLs.
  * Wrapped in React's `cache` so generateMetadata and the page body share one
@@ -208,20 +215,21 @@ export const getPublicProductPage = cache(
   async (
     storefrontId: string,
     productId: string,
-  ): Promise<PublicProductPageResult | null> => {
-    const gate = await loadPurchasable(
+  ): Promise<PublicProductPageResult | PageBusy | null> => {
+    const gate = await gatePurchasable(
       storefrontId,
       productId,
       { action: "product_page", budget: RATE_LIMITS.productPage },
       reportScopesFor,
     );
-    if (!gate) return null;
+    if (!gate || gate === PAGE_BUSY) return gate;
     const { config, productPage, block, row, seller, shippingPolicy } = gate;
 
+    const pricing = await gatePricing(gate);
     const product = await buildProductPageProduct(row, {
       soldOutFlag: block.soldOut,
       showStock: productPage.showStock,
-      pricing: await gatePricing(gate),
+      pricing,
     });
 
     const theme = config.theme;
@@ -243,13 +251,14 @@ export const getPublicProductPage = cache(
           backgroundImageUrl,
           customFontUrl,
           pagePhoto,
-          checkout: checkoutAvailableFor(gate),
+          checkout: await checkoutAvailableFor(gate),
         },
         product,
         productUrl: productPageUrl(gate.storefront.id, product.id),
         reportScopes: gate.extra,
       },
       ownerId: gate.ownerId,
+      saleEndsInMs: msUntilSaleEnds([pricing], gate.now),
     };
   },
 );

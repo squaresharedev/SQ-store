@@ -2,7 +2,8 @@
 // the product page's own gate (lib/products/purchasable.ts), plus one question
 // the product page does not ask: can this product actually be paid for here
 // (lib/checkout/availability.ts). Every "no" is the same `null`, which the
-// route turns into the same 404 as a product page that does not exist.
+// route turns into the same 404 as a product page that does not exist. "Not
+// right now" (PAGE_BUSY, lib/public/busy.ts) is the one other answer.
 //
 // The product itself comes from buildProductPageProduct, the builder the
 // product page uses, so the checkout cannot describe a product differently
@@ -12,7 +13,8 @@ import { cache } from "react";
 import { presignGetUrl } from "@/lib/r2";
 import { signPagePhoto } from "@/lib/storefront/uploads";
 import { RATE_LIMITS } from "@/lib/rate-limit";
-import { loadPurchasable } from "@/lib/products/purchasable";
+import { gatePurchasable } from "@/lib/products/purchasable";
+import { PAGE_BUSY, type PageBusy } from "@/lib/public/busy";
 import { buildProductPageProduct, gatePricing } from "@/lib/products/public";
 import { checkoutAvailableFor } from "@/lib/checkout/availability";
 import { resolveCheckoutPage } from "@/lib/storefront/checkout-page";
@@ -25,12 +27,13 @@ export type CheckoutPageResult = {
 };
 
 export const getCheckoutPage = cache(
-  async (storefrontId: string, productId: string): Promise<CheckoutPageResult | null> => {
-    const gate = await loadPurchasable(storefrontId, productId, {
+  async (storefrontId: string, productId: string): Promise<CheckoutPageResult | PageBusy | null> => {
+    const gate = await gatePurchasable(storefrontId, productId, {
       action: "checkout_page",
       budget: RATE_LIMITS.checkoutPage,
     });
-    if (!gate || !checkoutAvailableFor(gate)) return null;
+    if (gate === PAGE_BUSY) return PAGE_BUSY;
+    if (!gate || !(await checkoutAvailableFor(gate))) return null;
     const { config, productPage, block, row, seller, shippingPolicy } = gate;
 
     const product = await buildProductPageProduct(row, {

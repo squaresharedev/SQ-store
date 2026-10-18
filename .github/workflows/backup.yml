@@ -1,0 +1,94 @@
+# A nightly, encrypted dump of the production database, kept for 14 days.
+#
+# WHY THIS EXISTS. The production Supabase project is on the Free plan, which
+# keeps NO backups and has no point-in-time recovery (checked 2026-10-09
+# through the Management API: zero backups listed). Until the project is on a
+# plan that has them, this is the only copy of every order, product and
+# account outside the live database. It is a stopgap, not a substitute: a
+# Supabase plan with daily backups (or PITR) is the real fix.
+#
+# NOT YET RUN. It was written without access to a runner or the secrets below.
+# Before relying on it: run it once by hand (Actions, "Database backup", Run
+# workflow), download the artifact, and restore it into a scratch database.
+# A backup nobody has restored is a hope, not a backup.
+#
+# Required repository secrets (the job is skipped, loudly, without both):
+#   BACKUP_DB_URL        Postgres connection URI for the project (Supabase
+#                        dashboard, Connect, "Session pooler"), with the
+#                        database password. This one reads every table, so it
+#                        is NOT the login-only role the schema gate uses.
+#   BACKUP_PASSPHRASE    A long random passphrase. The dump is encrypted with
+#                        it before it leaves the runner, because it holds
+#                        buyers' names and addresses. Keep a copy somewhere
+#                        that is not GitHub: without it the backups are noise.
+#
+# To restore:
+#   gpg --decrypt squareshare-<stamp>.dump.gpg > squareshare.dump
+#   pg_restore --no-owner --no-privileges --dbname "<target uri>" squareshare.dump
+name: Database backup
+
+on:
+  schedule:
+    # 02:17 UTC, off the hour so it does not queue behind everyone's midnight.
+    - cron: "17 2 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: database-backup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Job level so the steps' `if` can test them: the `secrets` context is
+      # not available inside a step-level `if` (see deploy.yml).
+      BACKUP_DB_URL: ${{ secrets.BACKUP_DB_URL }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+    steps:
+      - name: Say so when it is not set up
+        if: ${{ env.BACKUP_DB_URL == '' || env.BACKUP_PASSPHRASE == '' }}
+        run: echo "::warning title=No database backup was taken::Set the BACKUP_DB_URL and BACKUP_PASSPHRASE repository secrets. The production database has no other backup."
+
+      # pg_dump must be at least as new as the server (Postgres 17).
+      - name: Install pg_dump 17
+        if: ${{ env.BACKUP_DB_URL != '' && env.BACKUP_PASSPHRASE != '' }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -qq postgresql-client-17
+
+      # The app's own data (public) and its accounts (auth). Custom format, so
+      # one table can be restored without the rest. Encrypted in the same
+      # pipe: the plain dump never touches the runner's disk.
+      - name: Dump and encrypt
+        if: ${{ env.BACKUP_DB_URL != '' && env.BACKUP_PASSPHRASE != '' }}
+        run: |
+          set -euo pipefail
+          stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+          /usr/lib/postgresql/17/bin/pg_dump "$BACKUP_DB_URL" \
+            --format=custom --no-owner --no-privileges \
+            --schema=public --schema=auth \
+            | gpg --batch --yes --pinentry-mode loopback --symmetric --cipher-algo AES256 \
+                  --passphrase-file <(printf '%s' "$BACKUP_PASSPHRASE") \
+                  --output "squareshare-${stamp}.dump.gpg"
+          size="$(stat --format=%s "squareshare-${stamp}.dump.gpg")"
+          echo "Encrypted dump: ${size} bytes"
+          # A dump this small is an empty or failed one: fail the run so the
+          # red mark is seen, rather than keep 14 days of nothing.
+          test "$size" -gt 10000
+
+      - name: Keep it for 14 days
+        if: ${{ env.BACKUP_DB_URL != '' && env.BACKUP_PASSPHRASE != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-backup-${{ github.run_id }}
+          path: squareshare-*.dump.gpg
+          retention-days: 14
+          if-no-files-found: error
+          compression-level: 0

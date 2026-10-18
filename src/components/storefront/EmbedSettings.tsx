@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Code2, Globe, KeyRound, Lock, Power } from "lucide-react";
+import { Code2, Globe, KeyRound, Lock, Power, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ import {
   useIconHoverProps,
 } from "@/components/ui/action-icons";
 import { CopyButton } from "@/components/ui/CopyButton";
+import { InfoTip } from "@/components/ui/InfoTip";
 import { Switch } from "@/components/ui/switch";
 import { badgeClass, cardClass, codeSurfaceClass, iconTileClass } from "@/components/ui/surface-styles";
 import { destructiveButtonClass, errorTextClass, fieldBaseClass, helpTextClass, labelClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
@@ -21,7 +22,8 @@ import { msg } from "@/i18n/types";
 import { embedSettingsSchema } from "@/lib/validation/storefront";
 import { normalizeHostname } from "@/lib/validation/inputs";
 import { rotateEmbedKey, updateEmbedSettings } from "@/lib/storefront/actions";
-import { embedSnippet } from "@/lib/storefront/embed-snippet";
+import { embedSnippet, isEmbedAvailable } from "@/lib/storefront/embed-snippet";
+import { LEGAL_LINKS } from "@/lib/legal/links";
 import { SellerDetailsNotice } from "@/components/settings/SellerDetailsNotice";
 import type { TraderIdentityField } from "@/lib/settings/trader-identity";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
@@ -62,6 +64,7 @@ export function EmbedSettings({
   products = [],
   onSaved,
   missingTraderDetails = [],
+  productPagesOn = true,
 }: {
   storefront: StorefrontSummary;
   /** Feeds the live preview in the hero picture. */
@@ -72,6 +75,10 @@ export function EmbedSettings({
    *  will refuse to switch embedding ON (lib/storefront/actions.ts), so the
    *  switch is not offered. Turning it OFF is never blocked, here or there. */
   missingTraderDetails?: readonly TraderIdentityField[];
+  /** Whether this storefront's product pages are switched on. The embed's
+   *  tiles open them, so without them the frame draws nothing
+   *  (lib/storefront/embed-frame-loader.ts) and the snippet is not offered. */
+  productPagesOn?: boolean;
 }) {
   const t = useTranslations("Storefront.embed");
   const tCommon = useTranslations("Common");
@@ -85,6 +92,9 @@ export function EmbedSettings({
     [products],
   );
   const stored = storefront.config.embed ?? DEFAULT_EMBED_SETTINGS;
+  // What the server holds, as opposed to what is in the form: the frame reads
+  // the saved settings, so those are what decide whether the snippet works.
+  const [saved, setSaved] = useState<EmbedSettingsValue>(stored);
   const [enabled, setEnabled] = useState(stored.enabled);
   const [domainsText, setDomainsText] = useState(stored.domains.join(", "));
   const [saving, setSaving] = useState(false);
@@ -114,6 +124,7 @@ export function EmbedSettings({
       return;
     }
     setDomainsText(parsed.data.domains.join(", "));
+    setSaved(parsed.data);
     onSaved?.(storefront.id, parsed.data);
     toast.success(t("saved"));
   }
@@ -136,14 +147,22 @@ export function EmbedSettings({
     });
   }
 
-  // SELL-03: Copy is only meaningful once embedding is actually live (enabled
-  // AND at least one domain configured). Handing someone a snippet before those
-  // conditions are met would make it look ready when it cannot work.
+  // SELL-03: Copy is only meaningful once the embed would actually show:
+  // switched on, with a domain, SAVED (the frame reads what the server holds,
+  // and "on, a domain typed, never saved" is the easiest way to paste a
+  // snippet that shows nothing), on a storefront that may publish and has
+  // product pages for its tiles to open. And only once the embed has a host at
+  // all (isEmbedAvailable).
+  const available = isEmbedAvailable();
   const domains = parseDomains(domainsText);
   // A store that may not publish can neither turn embedding on nor be handed a
-  // snippet: the endpoint the snippet calls refuses it too (api/embed/[key]).
+  // snippet: the frame the snippet asks for refuses it too.
   const canPublish = missingTraderDetails.length === 0;
-  const canCopy = enabled && domains.length > 0 && canPublish;
+  const savedOn = saved.enabled && saved.domains.length > 0;
+  const canCopy = available && savedOn && canPublish && productPagesOn;
+  // The form says "ready" but the server has not been told yet.
+  const unsaved = !savedOn && enabled && domains.length > 0;
+  const privacyText = t("privacyText", { policy: LEGAL_LINKS.privacy.href });
 
   return (
     <div className="space-y-5">
@@ -154,10 +173,13 @@ export function EmbedSettings({
         live={canCopy}
       />
 
-      {/* SELL-03: in-development notice is the headline, not a footnote. */}
-      <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 font-inter text-xs font-medium text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
-        {t("inDevNotice")}
-      </p>
+      {/* SELL-03: in-development notice is the headline, not a footnote. Only
+          while the embed has no host to be served from. */}
+      {!available && (
+        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 font-inter text-xs font-medium text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+          {t("inDevNotice")}
+        </p>
+      )}
 
       {/* Above the switch it disables, so the reason arrives before the
           dead control rather than after it. */}
@@ -264,12 +286,54 @@ export function EmbedSettings({
           {embedSnippet(embedKey)}
         </pre>
       </section>
-      <p className={cn(helpTextClass, "flex items-center gap-2")}>
-        {!canCopy && (
-          <Lock className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
-        )}
-        {canCopy ? t("snippetReadyHint") : t("snippetLockedHint")}
-      </p>
+      {/* Not while the embed has no host: "enable embedding and add a domain
+          to unlock Copy" would then be a promise the page cannot keep, and the
+          notice at the top already says why the snippet is locked. Otherwise
+          ONE line: where to paste it, or the one thing still in the way. */}
+      {available && (
+        <p className={cn(helpTextClass, "flex items-center gap-2")} data-embed-hint="">
+          {!canCopy && (
+            <Lock className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+          )}
+          {canCopy
+            ? t("snippetReadyHint")
+            : !productPagesOn
+              ? t("pagesOffHint")
+              : unsaved
+                ? t("snippetSaveHint")
+                : t("snippetLockedHint")}
+          {/* For the seller who pasted it and sees nothing: the three causes,
+              behind a "?" because most never need them. */}
+          {canCopy && <InfoTip label={t("notShowingLabel")}>{t("notShowingTip")}</InfoTip>}
+        </p>
+      )}
+
+      {/* The seller's own site now loads something from us, and their privacy
+          policy should say so. We cannot check that it does, so the words are
+          handed over ready to paste. */}
+      {available && (
+        <section className={cn(cardClass, "flex items-start gap-3 p-4")} data-embed-privacy="">
+          <span className={cn(iconTileClass, "size-9")}>
+            <ShieldCheck className="size-4" strokeWidth={2} aria-hidden="true" />
+          </span>
+          <div className="min-w-0 flex-1 space-y-2">
+            <span className={labelClass}>{t("privacyLabel")}</span>
+            <p className={helpTextClass}>{t("privacyHint")}</p>
+            <p className={cn(helpTextClass, "rounded-sm border border-border p-3 text-foreground")}>
+              {privacyText}
+            </p>
+            <CopyButton
+              value={privacyText}
+              variant="labelled"
+              messages={{
+                copy: "Storefront.embed.copyPrivacy.copy",
+                copied: "Storefront.embed.copyPrivacy.copied",
+                failed: "Storefront.embed.copyPrivacy.failed",
+              }}
+            />
+          </div>
+        </section>
+      )}
 
       {/* Revoke. Its own section, its own confirm, its own errors: this is
           the only control here that breaks working embeds. */}

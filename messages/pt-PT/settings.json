@@ -136,7 +136,7 @@
   "danger": {
     "export": {
       "cardTitle": "Exportar os meus dados",
-      "cardDescription": "Tudo o que guardamos sobre si: perfil, produtos, configuração da montra, tudo reunido num único ficheiro JSON. São os seus dados, para guardar como quiser.",
+      "cardDescription": "Tudo o que guardamos sobre si: perfil, produtos, montras, as encomendas que vendeu, as notificações e o registo de segurança, tudo reunido num único ficheiro JSON. São os seus dados, para guardar como quiser.",
       "downloadButton": "Transferir os meus dados",
       "stepUpDescription": "A exportação contém toda a sua conta. Introduza o código atual da sua aplicação de autenticação para a transferir."
     },
@@ -781,10 +781,20 @@
       "cardDescription": "Aceite um convite para se juntar à equipa dessa loja."
     },
     "success": {
-      "inviteCreated": "Convite criado. Vai aparecer quando a pessoa iniciar sessão com esse e-mail. (O envio de e-mails ainda não está configurado.)",
+      "inviteCreated": "Convite criado, mas não foi possível enviar o e-mail. Avise a pessoa: o convite vai aparecer quando iniciar sessão com esse e-mail.",
+      "inviteEmailed": "Convite enviado. Explicámos-lhe por e-mail como aceitar.",
       "inviteAccepted": "Já faz parte da equipa.",
       "roleUpdated": "Função atualizada.",
       "memberRemoved": "Membro removido."
+    },
+    "inviteEmail": {
+      "subject": "{store} enviou-lhe um convite para a equipa no Square Share",
+      "subjectUnnamed": "Recebeu um convite para uma equipa no Square Share",
+      "intro": "{store} enviou-lhe um convite para fazer parte da sua equipa no Square Share.",
+      "introUnnamed": "Uma loja no Square Share enviou-lhe um convite para fazer parte da sua equipa.",
+      "role": "A sua função: {role}",
+      "how": "Para aceitar, inicie sessão com este endereço de e-mail ({email}) ou crie uma conta com ele. O convite estará à sua espera em Definições, em Equipa e acesso.",
+      "ignore": "Não estava à espera disto? Pode ignorar este e-mail. Nada acontece a menos que aceite."
     }
   }
 }

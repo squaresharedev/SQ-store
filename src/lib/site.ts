@@ -7,8 +7,11 @@
 // already drifted to a different domain than the one actually in force, which
 // is exactly the failure a second copy invites.
 
-/** The marketplace / marketing site (waitlist + public pages). */
-export const MARKETPLACE_URL = "https://squareshare.to";
-
-/** Where anyone writes to reach Square Share. One mailbox, named once. */
+/**
+ * Where anyone writes to reach Square Share: the Contact link on the error
+ * pages, and the address a statement of reasons prints for an appeal
+ * (lib/moderation/removal.ts). One mailbox, named once. app/global-error.tsx
+ * carries its own copy on purpose (it must not import anything that could be
+ * part of what failed), so change that one with this.
+ */
 export const SUPPORT_EMAIL = "support@squareshare.eu";

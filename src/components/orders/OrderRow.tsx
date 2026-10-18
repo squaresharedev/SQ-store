@@ -136,9 +136,16 @@ export function OrderRow({
         </td>
       ) : (
         <>
-          {/* amount */}
+          {/* amount, and under it what Square Share took of it. Nothing is
+              said for a sale that paid no fee: a line reading "Fee €0.00" on
+              every row of a waived store would be noise. */}
           <td className="py-2.5 px-3 font-inter text-sm text-foreground whitespace-nowrap">
             {formatCents(order.amountCents, order.currency, locale)}
+            {order.platformFeeCents > 0 && (
+              <span className="block text-xs text-muted-foreground" data-order-fee="">
+                {t("table.feeLine", { amount: formatCents(order.platformFeeCents, order.currency, locale) })}
+              </span>
+            )}
           </td>
 
           {/* channel — hidden below md */}

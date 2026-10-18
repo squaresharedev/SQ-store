@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { CheckoutView } from "@/components/checkout/CheckoutView";
@@ -19,6 +19,19 @@ vi.mock("next/navigation", () => ({
 }));
 
 afterEach(cleanup);
+
+beforeAll(() => {
+  // An applied code's ticket fits its figure to the stub, which measures; jsdom
+  // has nothing to measure with.
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
+});
 
 const POLICY = {
   ratesCurrency: "EUR" as const,
@@ -215,6 +228,9 @@ describe("OrderStatusView tracking", () => {
       trackingLink: null,
       dispatch: null,
       withdrawal: { requestedAt: null, available: false, until: null, days: 14 },
+      payment: "paid",
+      refundedAt: null,
+      confirmationSent: true,
       ...overrides,
     };
   }
@@ -254,7 +270,7 @@ describe("OrderStatusView tracking", () => {
 
 describe("checkout discounts", () => {
   /** A sale: 20% off, announced against a proven 30-day price. */
-  const SALE = { regularPriceCents: 2400, priorPriceCents: 2400, percentOff: 20, endsAt: null };
+  const SALE = { regularPriceCents: 2400, priorPriceCents: 2400, percentOff: 20, offerPercent: 20, endsAt: null };
   const terms = (percentOff: number) => ({ code: "SUMMER10", value: { type: "percent", percentOff } });
 
   /** Answers the code check with `check`, and records every order body. */
@@ -288,6 +304,12 @@ describe("checkout discounts", () => {
     await applyCode(user, "summer10");
 
     expect(await screen.findByText("SUMMER10 applied.")).toBeInTheDocument();
+    // Drawn as a ticket: what comes off on the stub, the code beside it.
+    const ticket = document.querySelector<HTMLElement>("[data-checkout-discount='applied']")!;
+    expect(ticket).toHaveAttribute("data-checkout-discount-state", "in-force");
+    expect(ticket).toHaveTextContent("-10%");
+    expect(within(ticket).getByText("SUMMER10")).toBeInTheDocument();
+    expect(within(ticket).getByRole("button", { name: "Remove" })).toBeInTheDocument();
     const line = document.querySelector("[data-checkout-line='discount']");
     expect(line).toHaveTextContent("Discount (SUMMER10)");
     expect(line).toHaveTextContent("-€2.40");
@@ -334,6 +356,11 @@ describe("checkout discounts", () => {
     await applyCode(user, "summer10");
 
     expect(await screen.findByText("SUMMER10 works, but your sale price is already lower, so we kept it.")).toBeInTheDocument();
+    // Still a ticket, but marked as not the one in force.
+    expect(document.querySelector("[data-checkout-discount='applied']")).toHaveAttribute(
+      "data-checkout-discount-state",
+      "outdone",
+    );
     expect(document.querySelector("[data-checkout-line='discount']")).toBeNull();
     expect(payButton()).toHaveTextContent("Pay €23.70");
     fetches.restore();

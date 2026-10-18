@@ -7,6 +7,20 @@
     "body": "Mohol byť odstránený alebo odkaz, ktorý ste použili, je zastaraný. Vráťte sa do obchodu a pozrite si, čo je teraz v ponuke.",
     "back": "Späť"
   },
+  "unavailable": {
+    "title": "Túto stránku sa nepodarilo načítať",
+    "body": "Chyba je na našej strane a zvyčajne o chvíľu pominie.",
+    "orderBody": "Vaša objednávka je v poriadku. Túto stránku sa len teraz nepodarilo načítať, čo zvyčajne o chvíľu pominie."
+  },
+  "pageNotFound": {
+    "title": "Táto stránka nie je dostupná",
+    "body": "Odkaz môže byť zastaraný alebo neúplný. Vráťte sa späť a skúste to znova."
+  },
+  "storefront": {
+    "gridLabel": "Čo predáva {store}",
+    "empty": "{store} teraz nemá nič vystavené.",
+    "description": "Pozrite si, čo predáva {store}."
+  },
   "sections": {
     "description": "Popis",
     "specs": "Špecifikácie",
@@ -29,6 +43,11 @@
     "warnings": "Upozornenia"
   },
   "priceNotes": "{price, select, incl {{shipping, select, plus {vr. DPH, plus doprava} free {vr. DPH, doprava zadarmo} other {vr. DPH}}} excl {{shipping, select, plus {bez dane, plus doprava} free {bez dane, doprava zadarmo} other {bez dane}}} other {{shipping, select, plus {plus doprava} free {doprava zadarmo} other {}}}}",
+  "delivery": {
+    "free": "Doprava zadarmo",
+    "flat": "Doprava {amount}",
+    "from": "Doprava od {amount}"
+  },
   "stock": {
     "digitalDownload": "Digitálne stiahnutie",
     "digitalDownloadFormat": "Digitálne stiahnutie ({format})"
@@ -190,6 +209,8 @@
       "label": "Čo bude ďalej",
       "paid": "Objednávka zadaná",
       "paidDetail": "Zaplatené {date}",
+      "confirming": "Potvrdzovanie platby",
+      "confirmingDetail": "Zvyčajne to chvíľu trvá. Obnovte stránku, ak sa stav nezmení.",
       "preparing": "Pripravuje sa",
       "preparingDetail": "{seller} pripravuje vašu objednávku.",
       "shipped": "Na ceste",
@@ -198,7 +219,10 @@
       "track": "Sledovať u dopravcu {carrier}",
       "notYet": "E-mail dostanete, keď bude odoslané.",
       "ready": "Pripravené na stiahnutie",
-      "readyDetail": "Váš súbor je pripravený nižšie a odkaz je aj v e-maile."
+      "readyDetail": "Váš súbor je pripravený nižšie a odkaz je aj v e-maile.",
+      "refunded": "Vrátené",
+      "refundedDetail": "{seller} vrátil peniaze za túto objednávku dňa {date}.",
+      "refundedDetailNoDate": "{seller} vrátil peniaze za túto objednávku."
     },
     "download": "Stiahnuť ({format})",
     "downloadPlain": "Stiahnite si súbor",
@@ -295,6 +319,8 @@
     "payment": {
       "testTitle": "Testovacia platba",
       "testBody": "Toto je vývojová pokladňa. Žiadna karta nie je účtovaná a žiadne peniaze sa nepohybujú.",
+      "stripeTitle": "Bezpečná platba cez Stripe",
+      "stripeBody": "Údaje karty zadáte na zabezpečenej stránke Stripe v ďalšom kroku.",
       "previewTitle": "Údaje karty",
       "previewBody": "Karta, Apple Pay a Google Pay sa zobrazia tu vo vašich farbách, keď prepojíte Stripe.",
       "cardNumber": "Číslo karty",
@@ -331,7 +357,8 @@
       "failed": "Niečo sa pokazilo a nič nebolo účtované. Skúste to znova.",
       "invalid": "Niektoré údaje vyžadujú kontrolu. Skontrolujte zvýraznené polia.",
       "discount_invalid": "Tento zľavový kód sa už nedá použiť. Odstráňte ho a zaplaťte plnú cenu.",
-      "price_changed": "Cena sa počas otvorenej stránky zmenila, takže nič nebolo účtované. Skontrolujte nový súhrn a zaplaťte."
+      "price_changed": "Cena sa počas otvorenej stránky zmenila, takže nič nebolo účtované. Skontrolujte nový súhrn a zaplaťte.",
+      "turnstile": "Bezpečnostná kontrola neprebehla, takže nič nebolo účtované. Práve beží znova: chvíľu počkajte a skúste to znova."
     },
     "editHeadline": "Nadpis pokladne",
     "discount": {
@@ -350,7 +377,11 @@
   "sale": {
     "wasNow": "Bolo {was}, teraz {now}",
     "percentOff": "-{percent}%",
+    "amountOff": "-{amount}",
     "priorNote": "Prečiarknutá cena: najnižšia cena za posledných 30 dní pred touto zľavou.",
+    "regularNote": "Prečiarknutá cena: bežná cena.",
+    "lowestNote": "Prečiarknutá cena: bežná cena. Najnižšia cena za posledných 30 dní pred touto zľavou: {price}.",
+    "badgeSale": "Akcia",
     "endsOn": "Akcia končí {date}"
   }
 }

@@ -6,6 +6,7 @@ import {
   PRODUCT_PAGE_CTA_RADIUS_MAX,
   type ProductPageConfig,
   type ProductPagePriceNote,
+  type ProductPageSaleStyle,
   type ProductPageShippingNote,
   type StorefrontTheme,
 } from "@/types/storefront";
@@ -24,6 +25,10 @@ import {
 // The three layout class maps that lived here are gone with the layout
 // option: the page has one arrangement, written where it is used.
 
+/** A link in running text on a buyer page: the text's own colour, underlined
+ *  only on hover, so a footer of policies does not shout. */
+export const quietLinkClass = "underline-offset-2 hover:underline";
+
 /** The price notes as the branch names `ProductPage.priceNotes` selects on.
  *  The copy itself lives in the catalogue, in the buyer's language. */
 export const PRICE_NOTE_TOKENS: Record<ProductPagePriceNote, "incl" | "excl" | "none"> = {
@@ -36,6 +41,18 @@ export const SHIPPING_NOTE_TOKENS: Record<ProductPageShippingNote, "plus" | "fre
   "plus-shipping": "plus",
   "free-shipping": "free",
   none: "none",
+};
+
+/**
+ * How each sale look crosses out the regular price, at the buy box's size
+ * (`lg`) and the sticky bar's and checkout card's (`sm`). The <del> follows the
+ * price in the markup either way; `slash` moves it in front (`order-first`)
+ * and trades the line-through for a diagonal stroke (`.ss-price-slash`,
+ * globals.css).
+ */
+export const SALE_PRICE_LOOKS: Record<ProductPageSaleStyle, Record<"lg" | "sm", string>> = {
+  strike: { lg: "text-base opacity-60", sm: "text-sm opacity-60" },
+  slash: { lg: "ss-price-slash order-first text-xl opacity-70", sm: "ss-price-slash order-first text-sm opacity-70" },
 };
 
 export const DARK_INK = "#171717";

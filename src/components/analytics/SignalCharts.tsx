@@ -12,6 +12,7 @@ import type {
 } from "@/lib/analytics/types";
 
 import { CHART_HEIGHT } from "@/components/analytics/chart-layout";
+import { alignPrevious } from "@/components/analytics/compare";
 import { CHANNEL_TONE, TONE } from "@/components/analytics/palette";
 
 // THE PANELS EVERY SIGNAL SOURCE SHARES.
@@ -51,19 +52,39 @@ export function SignalTrendChart({
   series,
   kind,
   tone = TONE.traffic,
+  previous,
 }: Toned & {
   series: SignalPoint[];
   kind: SignalKind;
+  /** The same buckets for the period before the range, if it recorded any. */
+  previous?: SignalPoint[];
 }) {
   const { t, locale, label, count } = useSourceCopy(kind);
   const monthly = isMonthlySeries(series.map((point) => point.date));
+  // Versus the previous period: the dashed line is the same days, one period
+  // back, so "are views up" is answered by the gap between the two.
+  const before = alignPrevious(series.length, (previous ?? []).map((point) => point.count));
+  const data = series.map((point, index) => ({ ...point, previousCount: before?.[index] ?? null }));
   return (
     <LineChart
-      data={series}
+      data={data}
       xKey="date"
-      series={[{ key: "count", label, colorIndex: tone }]}
+      series={[
+        { key: "count", label, colorIndex: tone },
+        ...(before
+          ? [
+              {
+                key: "previousCount",
+                label: t("compare.previous"),
+                colorIndex: TONE.quiet,
+                reference: true,
+              },
+            ]
+          : []),
+      ]}
       variant="area"
       height={CHART_HEIGHT}
+      whole
       valueFormatter={count}
       xFormatter={(date) => formatBucketLabel(date, monthly, locale)}
       ariaLabel={t(`sources.${kind}.overTime`)}
@@ -119,6 +140,7 @@ export function SignalWeekdayChart({
       xFormatter={(weekday) => formatWeekdayLabel(weekday, locale)}
       series={[{ key: "count", label, colorIndex: tone }]}
       height={CHART_HEIGHT}
+      whole
       valueFormatter={count}
       ariaLabel={t(`sources.${kind}.byWeekday`)}
     />
@@ -157,6 +179,7 @@ export function SignalStorefrontsChart({
       xKey="name"
       series={[{ key: "count", label, colorIndex: tone }]}
       categoryWidth={116}
+      whole
       categoryFormatter={(name) => {
         // Recharts 3.x SVG text nodes lose regular spaces when the browser
         // renders them: "Untitled storefront" becomes "Untitledstorefront".

@@ -13,12 +13,13 @@ import { PlanFeatureList } from "@/components/billing/PlanFeatureList";
 import { PortalButton } from "@/components/billing/PortalButton";
 import { PlanVisual } from "@/components/billing/PlanVisual";
 import { MarkedPlanName } from "@/components/billing/PlanWordmark";
+import { usePlanPrices } from "@/components/billing/plan-context";
 import { navigateOf, type BillingActions } from "@/components/billing/billing-actions";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/format/money";
 import { formatFeeRate } from "@/lib/billing/format";
 import { gainsOver, planFeatures } from "@/lib/billing/features";
-import { breakEvenCents, monthlyCostCents } from "@/lib/billing/fees";
+import { breakEvenCents, directFeeBps, intervalPriceCents, monthlyCostCents } from "@/lib/billing/fees";
 import { plansHref } from "@/lib/billing/paths";
 import type { PricingContext } from "@/lib/billing/pricing-context";
 import { BILLING_CURRENCY, PLANS, nextPlanUp, type PaidPlanId } from "@/lib/billing/plans";
@@ -27,9 +28,11 @@ import type { ActionError } from "@/lib/errors";
 /**
  * Settings › Plan & billing's upsell: not "see plans", but the plan one step
  * up and exactly what it would change for THIS store. The fee drawn from and
- * to, what it would save at the store's own sales over the last 30 days (or,
- * with none yet, where it starts paying for itself), everything it adds, and
- * one button that goes straight to checkout.
+ * to, what it would have saved at the store's own sales over the last 30 days
+ * ("Starter would have saved you EUR 18": the upgrade hint, worked out on
+ * every visit from the plan prices in force, so it needs no monthly job), or,
+ * with nothing to save yet, where it starts paying for itself; everything it
+ * adds; and one button that goes straight to checkout.
  *
  * On the top plan it becomes a summary of what the plan includes instead:
  * the reasons to stay are worth showing too. Owners only: a teammate cannot
@@ -62,17 +65,21 @@ function UpsellCard({
   const [error, setError] = React.useState<ActionError | null>(null);
   const [, startTransition] = React.useTransition();
   const navigate = navigateOf(actions);
+  const prices = usePlanPrices();
 
   const current = context.plan;
   const targetName = t(`plans.${target}.name`);
   const wholeMoney = (cents: number) => formatCents(cents, BILLING_CURRENCY, locale, { wholeUnits: true });
-  const price = wholeMoney(PLANS[target].priceCents.month);
+  const price = wholeMoney(intervalPriceCents(prices, target, "month"));
 
   // What the step up is worth at this store's own sales: a saving when there
   // is one, and otherwise the figure it starts paying for itself at.
-  const sales = context.salesSubtotal30dCents ?? 0;
-  const saving = sales > 0 ? monthlyCostCents(current, "month", sales) - monthlyCostCents(target, "month", sales) : 0;
-  const breakEven = breakEvenCents(current, target, "month");
+  const sales = context.directSales30dCents ?? 0;
+  const saving =
+    sales > 0
+      ? monthlyCostCents(prices, current, "month", sales) - monthlyCostCents(prices, target, "month", sales)
+      : 0;
+  const breakEven = breakEvenCents(prices, current, target, "month");
   const worth =
     saving > 0
       ? t("upsell.saving", { plan: targetName, amount: formatCents(saving, BILLING_CURRENCY, locale) })
@@ -152,11 +159,11 @@ function UpsellCard({
             <p className={eyebrowClass}>{t("upsell.feeLabel")}</p>
             <p className="mt-2 flex items-center gap-3" data-upsell-fee>
               <span className="text-2xl font-semibold tabular-nums text-muted-foreground line-through">
-                {formatFeeRate(PLANS[current].feeBps, locale)}
+                {formatFeeRate(directFeeBps(prices, current), locale)}
               </span>
               <ArrowRight className="size-5 text-muted-foreground" strokeWidth={2} aria-hidden />
               <span className="text-4xl font-semibold tabular-nums text-foreground">
-                {formatFeeRate(PLANS[target].feeBps, locale)}
+                {formatFeeRate(directFeeBps(prices, target), locale)}
               </span>
             </p>
             {worth && (
@@ -167,7 +174,7 @@ function UpsellCard({
           </div>
           <div>
             <p className={cn(eyebrowClass, "mb-3")}>{t("upsell.gains", { plan: targetName })}</p>
-            <PlanFeatureList plan={target} features={gainsOver(current, target)} tone="strong" />
+            <PlanFeatureList plan={target} features={gainsOver(prices, current, target)} tone="strong" />
           </div>
         </div>
 

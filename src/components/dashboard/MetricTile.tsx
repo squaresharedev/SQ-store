@@ -124,8 +124,10 @@ export function MetricTile({
         ) : value && trend ? (
           // Bigger value pinned left, bare trend line filling the right.
           <div className="flex items-center gap-3">
-            <p className="truncate text-3xl font-semibold text-foreground sm:text-4xl">
-              <CountUp value={value} />
+            <p className="min-w-0 flex-1 text-3xl font-semibold text-foreground sm:text-4xl">
+              <FitText measure={value}>
+                <CountUp value={value} />
+              </FitText>
             </p>
             <Sparkline
               points={trend.points}
@@ -138,16 +140,15 @@ export function MetricTile({
             className={cn(
               emphasis
                 ? "text-4xl font-bold text-success sm:text-5xl lg:text-6xl"
-                : "truncate text-2xl font-semibold text-foreground",
+                : "text-2xl font-semibold text-foreground",
             )}
           >
-            {emphasis ? (
-              <FitText measure={value}>
-                <CountUp value={value} />
-              </FitText>
-            ) : (
+            {/* Shrunk to fit, never cut short: a figure ending in an
+                ellipsis is a number nobody can read, and on a small phone
+                a four-figure sum was already too wide for its tile. */}
+            <FitText measure={value}>
               <CountUp value={value} />
-            )}
+            </FitText>
           </p>
         ) : (
           <p className="text-base font-medium text-muted-foreground">

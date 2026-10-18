@@ -29,6 +29,9 @@ export function orderView(overrides: Partial<OrderView> = {}): OrderView {
     giftMessage: null,
     withdrawalRequestedAt: null,
     discount: null,
+    refund: null,
+    stockReserved: 0,
+    paidThroughProvider: false,
     ...overrides,
   };
 }

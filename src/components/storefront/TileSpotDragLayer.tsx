@@ -129,9 +129,11 @@ export function tileSpotTokenProps(
 
 /** Minimal translator shape: a function that accepts the tokenLabel key and
  *  its ICU values, returning the formatted string. Satisfied by
- *  `useTranslations("Storefront")` from the call site. */
+ *  `useTranslations("Storefront.spotDrag")` from the call site: the subtree,
+ *  not the namespace, so a page that only DRAWS a tile (the hosted storefront)
+ *  ships these few words rather than the whole designer. */
 type SpotLabelTranslator = (
-  key: "spotDrag.tokenLabel",
+  key: "tokenLabel",
   values: { token: string; drop: string },
 ) => string;
 
@@ -146,7 +148,7 @@ export function tileSpotTokenLabel(
 ): string {
   // ICU select case names cannot contain hyphens, so "top-left" is passed as
   // "top_left".
-  return t("spotDrag.tokenLabel", { token, drop: drop.replace(/-/g, "_") });
+  return t("tokenLabel", { token, drop: drop.replace(/-/g, "_") });
 }
 
 /**

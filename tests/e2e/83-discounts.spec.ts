@@ -75,7 +75,8 @@ type Seeded = {
   store: string;
   /** €24, and it has cost €24 for 40 days: a sale may strike that through. */
   vase: string;
-  /** €38 since today: a sale lowers it, but has no earlier price to show. */
+  /** €38, listed 90 days ago with its first price on record only today: a
+   *  sale lowers it and crosses €38 out, but can claim no percentage. */
   apron: string;
 };
 
@@ -114,6 +115,9 @@ async function seed(page: Page, tag: string): Promise<Seeded> {
     method: "PATCH",
     body: { valid_from: ago(40) },
   });
+  // The apron is older than its records: listed 90 days ago, with nothing on
+  // file about what it cost until today.
+  await serviceRest(`/products?id=eq.${seeded.apron}`, { method: "PATCH", body: { created_at: ago(90) } });
 
   await serviceRest(`/storefronts?id=eq.${storefrontId}`, {
     method: "PATCH",
@@ -284,15 +288,18 @@ test.describe("discounts", () => {
     const empty = page.locator("[data-discounts-empty]");
     await expect(empty).toContainText("No discounts yet");
 
-    // 2. A CODE, shared on Instagram: three things to fill in.
-    let form = await openNewDiscount(page, empty.getByRole("link", { name: "Create discount" }));
+    // 2. A CODE, shared on Instagram. A sale is the default, and a code
+    //    arrives filled in; this one is typed over.
+    let form = await openNewDiscount(page, empty.getByRole("link", { name: "Create discount" }).last());
     await expect(async () => {
+      await form.locator("[data-discount-kind-option='code']").click();
       const code = form.getByLabel("Code", { exact: true });
+      await expect(code).not.toHaveValue("", { timeout: 1_000 });
       await code.fill("insta10");
       await expect(code).toHaveValue("INSTA10", { timeout: 1_000 });
     }).toPass({ timeout: 15_000 });
     await form.getByRole("button", { name: "Instagram" }).click();
-    await expect(form.getByLabel("Channel (optional)")).toHaveValue("Instagram");
+    await expect(form.getByLabel("Shared on (optional)")).toHaveValue("Instagram");
     const summary = form.locator("[data-discount-summary]");
     await expect(summary).toContainText("INSTA10 · 10% off the order · All products");
     await expect(summary).toContainText("Example: Linen apron at €38.00 costs €34.20.");
@@ -302,14 +309,14 @@ test.describe("discounts", () => {
     const codeRow = page.locator("[data-discount-kind='code']");
     await expect(codeRow).toHaveAttribute("data-discount-status", "active");
     await expect(codeRow.locator("[data-discount-code]")).toHaveText("INSTA10");
-    await expect(codeRow).toContainText("10% off the order · All products · Shared on Instagram");
+    for (const fact of ["10% off the order", "All products", "Shared on Instagram"]) {
+      await expect(codeRow).toContainText(fact);
+    }
 
-    // 3. A SALE: 25% off everything, for a week.
+    // 3. A SALE (the default): 25% off everything, for a week.
     form = await openNewDiscount(page, page.getByRole("link", { name: "Create discount" }));
-    await expect(async () => {
-      await form.locator("[data-discount-kind-option='automatic']").click();
-      await expect(form.getByLabel("Code", { exact: true })).toHaveCount(0, { timeout: 1_000 });
-    }).toPass({ timeout: 15_000 });
+    await expect(form.locator("[data-discount-kind-option='automatic'] input")).toBeChecked();
+    await expect(form.getByLabel("Code", { exact: true })).toHaveCount(0);
     await form.getByLabel("Percentage off").fill("25");
     await form.getByRole("button", { name: "1 week" }).click();
     await expect(form.locator("[data-discount-summary]")).toContainText("25% off each item · All products");
@@ -321,6 +328,15 @@ test.describe("discounts", () => {
     await expect(saleRow).toHaveAttribute("data-discount-status", "active");
     await expect(saleRow).toContainText("25% off each item");
     await expect(saleRow).toContainText("Ends ");
+    // The ticket opens to show what the sale covers, and what each now costs.
+    await expect(async () => {
+      const scope = saleRow.getByRole("button", { name: "All products" });
+      if ((await scope.getAttribute("aria-expanded")) !== "true") await scope.click();
+      await expect(saleRow.locator("[data-discount-products]")).toBeVisible({ timeout: 1_000 });
+    }).toPass({ timeout: 15_000 });
+    const covered = saleRow.locator("[data-discount-products] li");
+    await expect(covered.filter({ hasText: "Linen apron" })).toContainText("Was €38.00, now €28.50");
+    await expect(covered.filter({ hasText: "Stoneware vase" })).toContainText("Was €24.00, now €18.00");
 
     const made = await discountsOf(s);
     const insta = made.find((row) => row.code === "INSTA10")!;
@@ -335,7 +351,10 @@ test.describe("discounts", () => {
     // €24 for the 30 days before: the reduction is announced against it.
     await expect(vasePrice.locator("[data-product-sale]")).toContainText("Was €24.00, now €18.00");
     await expect(vasePrice.locator("del")).toHaveText("€24.00");
-    await expect(vasePrice.locator("[data-product-sale-percent]")).toHaveText("-25%");
+    // The percent, the end and what the struck price is, on the sale's ticket.
+    const saleTicket = buyer.locator("[data-product-sale-ticket]").filter({ visible: true }).first();
+    await expect(saleTicket.locator("[data-product-sale-percent]")).toHaveText("-25%");
+    await expect(saleTicket).toContainText("Sale ends ");
     await expect(buyer.getByText("Crossed-out price: the lowest price in the 30 days before this sale.")).toBeVisible();
     await expect(buyer.locator("[data-product-sale-ends]").filter({ visible: true }).first()).toContainText("Sale ends ");
     const jsonLd = JSON.parse((await buyer.locator('script[type="application/ld+json"]').first().textContent()) ?? "{}");
@@ -347,14 +366,18 @@ test.describe("discounts", () => {
     expect(html).not.toContain(insta.id);
     expect(html).not.toContain("INSTA10");
 
-    // The apron has cost €38 only since today: the lower price is shown, with
-    // nothing struck through, because no earlier price can be proven.
+    // The apron's earlier prices are not on record. A buyer still sees what the
+    // sale takes it down from, the regular price crossed out; what the page
+    // does not do is claim a percentage, or that €38 was the lowest price of
+    // the last 30 days. Its ticket calls the crossed-out price what it is.
     await buyer.goto(productUrl(s, s.apron));
     const apronPrice = buyer.locator("[data-product-price='2850']").filter({ visible: true }).first();
-    await expect(apronPrice).toContainText("€28.50");
-    await expect(buyer.locator("[data-product-sale]")).toHaveCount(0);
-    await expect(buyer.locator("del")).toHaveCount(0);
-    await expect(buyer.getByText(/Crossed-out price/)).toHaveCount(0);
+    await expect(apronPrice.locator("[data-product-sale]")).toContainText("Was €38.00, now €28.50");
+    await expect(apronPrice.locator("del")).toHaveText("€38.00");
+    const apronTicket = buyer.locator("[data-product-sale-ticket='regular']").filter({ visible: true }).first();
+    await expect(apronTicket).toContainText("Crossed-out price: the regular price.");
+    await expect(buyer.locator("[data-product-sale-percent]")).toHaveCount(0);
+    await expect(buyer.getByText(/lowest price in the 30 days/)).toHaveCount(0);
 
     // 5. CHECKOUT. The sale price, plus €4.50 to Ireland.
     await buyer.goto(`${productUrl(s, s.vase)}/checkout`);
@@ -400,6 +423,11 @@ test.describe("discounts", () => {
     await expect(total(buyer)).toHaveAttribute("data-checkout-total", "2250");
     await applyCode(buyer, "vip40");
     await expect(buyer.locator("[data-checkout-discount='applied']")).toContainText("VIP40 applied.");
+    await expect(buyer.locator("[data-checkout-discount='applied']")).toHaveAttribute(
+      "data-checkout-discount-state",
+      "in-force",
+    );
+    await expect(buyer.locator("[data-checkout-discount='applied']")).toContainText("-40%");
     await expect(discountLine(buyer)).toContainText("Discount (VIP40)");
     await expect(discountLine(buyer)).toHaveAttribute("data-cents", "960");
     await expect(buyer.locator("[data-checkout-unit-price='2400']").first()).toBeVisible();
@@ -524,7 +552,7 @@ test.describe("discounts", () => {
     // THE CODE: what it takes off can change. Its start is a fact by now.
     await gotoApp(page, "/discounts");
     let form = await openEdit(page, codeId);
-    await expect(form.locator("[data-discount-kind-fixed='code']")).toBeVisible();
+    await expect(page.locator("[data-discount-kind-fixed='code']")).toHaveText("Edit discount code");
     await expect(form.getByRole("group", { name: "Starts" })).toHaveCount(0);
     await expect(form.locator("[data-discount-summary]")).toContainText("Started ");
     await expect(async () => {
@@ -542,11 +570,12 @@ test.describe("discounts", () => {
     expect(code.percent_off).toBe(15);
     expect(sameMoment(code.starts_at, startedAt), `start moved: ${code.starts_at}`).toBe(true);
 
-    // THE SALE: its terms are shown, not offered; its end can move.
+    // THE SALE: what can change is said first, and only its end is offered.
     form = await openEdit(page, saleId);
-    await expect(form.getByLabel("Percentage off")).toBeDisabled();
-    await expect(form.getByRole("button", { name: "Fixed amount" })).toBeDisabled();
-    await expect(form.getByText(/only its end can change/)).toBeVisible();
+    await expect(form.locator("[data-discount-locked]")).toContainText("only its end can change");
+    await expect(form.getByLabel("Percentage off")).toHaveCount(0);
+    await expect(form.getByRole("group", { name: "Percentage or amount" })).toHaveCount(0);
+    await expect(form.locator("[data-discount-summary]")).toContainText("25% off each item");
     await expect(async () => {
       await form.getByRole("button", { name: "1 month" }).click();
       await expect(form.getByRole("group", { name: "Ends" }).getByRole("button", { name: "On a date" })).toHaveAttribute(

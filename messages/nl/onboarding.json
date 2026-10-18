@@ -38,6 +38,22 @@
       "actionOpen": "Editor openen",
       "cta": "Publiceer je product",
       "ctaPagesOff": "Zet productpagina's aan"
+    },
+    "payments": {
+      "label": "Betalingen ontvangen",
+      "detail": "Koppel Stripe zodat kopers met kaart kunnen betalen op je productpagina's.",
+      "detailUnfinished": "Stripe heeft nog wat gegevens nodig voordat kopers kunnen betalen.",
+      "detailDone": "Kopers kunnen met kaart betalen.",
+      "action": "Stripe koppelen",
+      "actionFinish": "Afronden bij Stripe",
+      "cta": "Stripe koppelen om betalingen te ontvangen"
+    },
+    "delivery": {
+      "label": "Verzendkosten instellen",
+      "detail": "Zonder verzendprijs hebben producten die verzonden worden geen koopknop.",
+      "detailDone": "Kopers zien het volledige totaal voordat ze betalen.",
+      "action": "Prijzen instellen",
+      "cta": "Stel je verzendkosten in"
     }
   },
   "checklist": {
@@ -198,7 +214,10 @@
         "title": "Sluit een etalage in op je site",
         "body": "Elke etalage heeft een insluitknop die je een insluitcode geeft zoals deze. De widget is nog in ontwikkeling en wordt op andere sites nog niet getoond.",
         "bodyButton": "Deze knop geeft je een insluitcode zoals die hieronder, om in je site te plakken. De widget is nog in ontwikkeling en wordt op andere sites nog niet getoond.",
-        "fallbackBody": "Zodra je een etalage hebt, geeft de insluitknop op de kaart een insluitcode zoals deze. De widget is nog in ontwikkeling en wordt op andere sites nog niet getoond."
+        "fallbackBody": "Zodra je een etalage hebt, geeft de insluitknop op de kaart een insluitcode zoals deze. De widget is nog in ontwikkeling en wordt op andere sites nog niet getoond.",
+        "bodyLive": "Elke etalage heeft een insluitknop die je een insluitcode geeft zoals deze. Plak hem in je eigen site en de etalage verschijnt daar.",
+        "bodyButtonLive": "Deze knop geeft je een insluitcode zoals die hieronder. Plak hem in je eigen site en de etalage verschijnt daar.",
+        "fallbackBodyLive": "Zodra je een etalage hebt, geeft de insluitknop op de kaart een insluitcode zoals deze om in je eigen site te plakken."
       },
       "ordersSearch": {
         "title": "Zoek een bestelling",

@@ -1311,6 +1311,7 @@ export function ProductForm({
             value={shippingProfileId}
             choices={shippingChoices}
             policy={shippingPolicy}
+            currency={values.currency}
             onChange={setShippingProfileId}
           />
         </FormSection>

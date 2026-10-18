@@ -9,6 +9,11 @@
     "description": "We konden deze pagina niet laden. Dit is meestal een tijdelijk verbindingsprobleem: je account is in orde en je bent nog steeds ingelogd.",
     "reference": "Referentie: {digest}"
   },
+  "outdated": {
+    "title": "Deze pagina is bijgewerkt",
+    "description": "Terwijl deze pagina openstond is er een nieuwere versie van Square Share uitgebracht, waardoor ze je verzoek niet kan afronden. Laad de pagina opnieuw en probeer het nog eens.",
+    "cta": "Pagina opnieuw laden"
+  },
   "footer": {
     "legal": "Juridisch",
     "contact": "Contact",

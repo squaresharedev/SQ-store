@@ -102,10 +102,6 @@ export const SIGNAL_SOURCES: AnalyticsSource[] = [
     id: "product_click",
     icon: MousePointerClick,
     panels: ["trend", "storefronts", "channels"],
-    awaiting: {
-      reason: "Analytics.sources.product_click.awaiting",
-      readyToChart: "Analytics.sources.product_click.readyToChart",
-    },
     blockType: "product",
   },
   {

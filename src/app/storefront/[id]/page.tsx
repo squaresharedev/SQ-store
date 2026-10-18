@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { listAllProducts } from "@/lib/products/queries";
+import { listStorefrontProducts } from "@/lib/discounts/storefront-preview";
 import { getStorefront } from "@/lib/storefront/queries";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
 import { getActiveAccount } from "@/lib/team/account-context";
@@ -75,7 +75,9 @@ export default async function StorefrontEditorPage({
   // lib/settings/seller-identity.ts for why this is a service-role read.
   const [storefront, products, sellerIdentity, shippingPolicy] = await Promise.all([
     getStorefront(id),
-    listAllProducts(),
+    // The catalogue as a storefront draws it: a running sale's price on the
+    // tile, exactly as the published page shows it to buyers.
+    listStorefrontProducts(),
     account ? getSellerIdentity(account.accountId) : Promise.resolve({}),
     account ? getShippingPolicy(account.accountId) : Promise.resolve({}),
   ]);

@@ -16,6 +16,7 @@ import { join } from "node:path";
 import EmbeddedPostgres from "embedded-postgres";
 import { Client } from "pg";
 import type { TestProject } from "vitest/node";
+import { REPLICA_INITDB_FLAGS } from "./replica.mjs";
 
 const PORT = 55_432 + Math.floor(Math.random() * 500);
 const DB_NAME = "sqstore_test";
@@ -35,6 +36,7 @@ export default async function setup(project: TestProject) {
     password: "postgres",
     port: PORT,
     persistent: false,
+    initdbFlags: REPLICA_INITDB_FLAGS,
   });
 
   await pg.initialise();

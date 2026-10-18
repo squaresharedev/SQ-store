@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
 import { OFFLINE_LOCALE_MESSAGE, SERVICE_WORKER_PATH } from "@/lib/pwa/paths";
+import { isEmbedFramePath } from "@/lib/storefront/embed-frame";
 import { PUBLIC_PAGES_PREFIX } from "@/lib/storefront/product-page-url";
 
 /**
@@ -20,7 +21,9 @@ import { PUBLIC_PAGES_PREFIX } from "@/lib/storefront/product-page-url";
  */
 export function ServiceWorkerRegistrar() {
   const locale = useLocale();
-  const isPublicPage = usePathname().startsWith(PUBLIC_PAGES_PREFIX);
+  const pathname = usePathname();
+  // The embed frame least of all: it runs inside someone else's website.
+  const isPublicPage = pathname.startsWith(PUBLIC_PAGES_PREFIX) || isEmbedFramePath(pathname);
 
   useEffect(() => {
     if (isPublicPage || !("serviceWorker" in navigator)) return;

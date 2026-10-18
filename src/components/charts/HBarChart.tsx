@@ -53,6 +53,10 @@ export interface HBarChartProps {
   categoryFormatter?: (value: string) => string;
   /** Width reserved for category labels on the y axis. */
   categoryWidth?: number;
+  /** The values are counts (sales, views): the value axis steps in whole
+   *  numbers. Without it a week with one sale gets gridlines at 0.25, 0.5 and
+   *  0.75 of a sale. */
+  whole?: boolean;
   animate?: boolean;
   ariaLabel?: string;
   className?: string;
@@ -77,6 +81,7 @@ export function HBarChart({
   axisValueFormatter: axisValueFormatterProp,
   categoryFormatter,
   categoryWidth = 96,
+  whole = false,
   animate = true,
   ariaLabel: ariaLabelProp,
   className,
@@ -117,6 +122,7 @@ export function HBarChart({
         tickLine={false}
         tick={CHART.axisTick}
         tickMargin={8}
+        allowDecimals={!whole}
         tickFormatter={axisValueFormatter}
       />
       <YAxis
@@ -159,6 +165,9 @@ export function HBarChart({
             activeBar={{ fillOpacity: 0.85 }}
             stackId={stacked ? "stack" : undefined}
             maxBarSize={maxBarSize}
+            // A value too small to draw beside its neighbours still gets a
+            // sliver. Not in a stack, where it would add to the bar's length.
+            minPointSize={stacked ? undefined : MARK.minBar}
             // Data-end (the right cap) rounded, baseline square.
             radius={!stacked || last ? ([0, r, r, 0] as const) : ([0, 0, 0, 0] as const)}
             stroke={stacked ? CHART.surface : undefined}

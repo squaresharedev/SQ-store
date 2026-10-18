@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { CancelPlanDialog } from "@/components/billing/CancelPlanDialog";
+import { PlanPricesProvider } from "@/components/billing/plan-context";
 import { ConnectStripeModal } from "@/components/payments/ConnectStripeModal";
 import { PayoutDetailModal } from "@/components/payments/PayoutDetailModal";
 import { PayoutMethodModal } from "@/components/payments/PayoutMethodModal";
 import { TransactionDetailModal } from "@/components/payments/TransactionDetailModal";
+import { PLAN_PRICE_SEED } from "@/lib/billing/pricing-seed";
 import type { BalanceTransaction, Payout, PayoutMethod } from "@/lib/payments/types";
 import { inAMonth, STAND_IN_DELAY_MS, wait } from "../../pricing/fixtures";
 import type { Specimen } from "./types";
@@ -24,22 +26,26 @@ function CancelPlan({ onClose, done = false }: { onClose: () => void; done?: boo
     return () => clearTimeout(timer);
   }, [done]);
   return (
-    <CancelPlanDialog
-      open
-      onClose={onClose}
-      plan="starter"
-      periodEnd={periodEnd}
-      actions={{
-        cancelPlan: async () => {
-          await wait(done ? 0 : STAND_IN_DELAY_MS);
-          return { ok: true, endsAt: periodEnd };
-        },
-        resumePlan: async () => {
-          await wait(STAND_IN_DELAY_MS);
-          return { ok: true };
-        },
-      }}
-    />
+    // The dialog lists what the plan adds over Free, fee included, so it
+    // needs the prices its page would provide.
+    <PlanPricesProvider prices={PLAN_PRICE_SEED}>
+      <CancelPlanDialog
+        open
+        onClose={onClose}
+        plan="starter"
+        periodEnd={periodEnd}
+        actions={{
+          cancelPlan: async () => {
+            await wait(done ? 0 : STAND_IN_DELAY_MS);
+            return { ok: true, endsAt: periodEnd };
+          },
+          resumePlan: async () => {
+            await wait(STAND_IN_DELAY_MS);
+            return { ok: true };
+          },
+        }}
+      />
+    </PlanPricesProvider>
   );
 }
 
@@ -112,17 +118,19 @@ export const BILLING: readonly Specimen[] = [
     group: "Payments",
     label: "Payout",
     kind: "dialog",
-    render: ({ onClose }) => <PayoutDetailModal open onClose={onClose} payout={PAYOUT} />,
+    render: ({ onClose }) => <PayoutDetailModal open onClose={onClose} payout={PAYOUT} method={METHOD} />,
   },
-  {
-    id: "payments-payout-failed",
-    group: "Payments",
-    label: "Payout (failed)",
-    kind: "dialog",
-    render: ({ onClose }) => (
-      <PayoutDetailModal open onClose={onClose} payout={{ ...PAYOUT, status: "failed" }} />
-    ),
-  },
+  ...(["in_transit", "pending", "failed", "canceled"] as const).map(
+    (status): Specimen => ({
+      id: `payments-payout-${status.replace("_", "-")}`,
+      group: "Payments",
+      label: `Payout (${status.replace("_", " ")})`,
+      kind: "dialog",
+      render: ({ onClose }) => (
+        <PayoutDetailModal open onClose={onClose} payout={{ ...PAYOUT, status }} method={METHOD} />
+      ),
+    }),
+  ),
   {
     id: "payments-transaction",
     group: "Payments",

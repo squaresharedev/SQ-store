@@ -136,7 +136,7 @@
   "danger": {
     "export": {
       "cardTitle": "Exportar mis datos",
-      "cardDescription": "Todo lo que tenemos sobre ti: perfil, productos, configuración del escaparate, todo junto en un único archivo JSON. Son tus datos, y son tuyos.",
+      "cardDescription": "Todo lo que tenemos sobre ti: perfil, productos, escaparates, los pedidos que has vendido, tus notificaciones y el registro de seguridad, todo en un único archivo JSON. Son tus datos, y son tuyos.",
       "downloadButton": "Descargar mis datos",
       "stepUpDescription": "Tu exportación contiene toda tu cuenta. Introduce el código actual de tu aplicación de autenticación para descargarla."
     },
@@ -781,10 +781,20 @@
       "cardDescription": "Acepta una invitación para unirte al equipo de esa tienda."
     },
     "success": {
-      "inviteCreated": "Invitación creada. La verán cuando inicien sesión con ese correo. (El envío de correos aún no está activado.)",
+      "inviteCreated": "Invitación creada, pero no hemos podido enviar el correo. Avísales tú: la verán cuando inicien sesión con ese correo.",
+      "inviteEmailed": "Invitación enviada. Les hemos explicado por correo cómo aceptarla.",
       "inviteAccepted": "Bienvenido al equipo.",
       "roleUpdated": "Rol actualizado.",
       "memberRemoved": "Miembro eliminado."
+    },
+    "inviteEmail": {
+      "subject": "{store} te ha invitado a su equipo en Square Share",
+      "subjectUnnamed": "Te han invitado a un equipo en Square Share",
+      "intro": "{store} te ha invitado a unirte a su equipo en Square Share.",
+      "introUnnamed": "Una tienda de Square Share te ha invitado a unirte a su equipo.",
+      "role": "Tu rol: {role}",
+      "how": "Para aceptar, inicia sesión con esta dirección de correo ({email}) o crea una cuenta con ella. La invitación te estará esperando en Configuración, en Equipo y acceso.",
+      "ignore": "¿No lo esperabas? Puedes ignorar este correo. No pasa nada a menos que aceptes."
     }
   }
 }

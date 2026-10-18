@@ -390,6 +390,8 @@
     "noTerms": "No shipping terms written yet.",
     "profile": "Shipping profile",
     "edit": "Edit",
+    "unpriced": "Delivery has no price in {currency}, so buyers can't pay for this product at checkout.",
+    "unpricedAction": "Set delivery prices",
     "modalTitle": "Shipping & returns"
   },
   "optionsField": {

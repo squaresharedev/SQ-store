@@ -82,7 +82,7 @@ function ZoomReadout({ viewport }: { viewport: CanvasViewport }) {
  *  `group/btn` lets the icon pop on hover/focus (see iconPopClass below);
  *  `group/tip relative` hosts a <ToolbarTip> child. */
 const INSERT_BTN =
-  `group/btn group/tip relative inline-flex h-11 shrink-0 items-center gap-1.5 rounded-none px-2.5 text-xs font-medium sm:h-9 ` +
+  `group/btn group/tip relative inline-flex h-11 min-w-0 items-center justify-center gap-1.5 rounded-none px-2.5 text-xs font-medium sm:h-9 sm:shrink-0 ` +
   `text-muted-foreground hover:bg-accent hover:text-foreground ` +
   `disabled:pointer-events-none disabled:opacity-50 ${TRANSITION} ${FOCUS_RING}`;
 
@@ -90,7 +90,7 @@ const INSERT_BTN =
 const INSERT_ICON = `size-4 ${iconPopClass}`;
 
 const ICON_BTN_BASE =
-  `group/tip relative inline-flex shrink-0 items-center justify-center rounded-none sm:size-9 ` +
+  `group/tip relative inline-flex min-w-0 items-center justify-center rounded-none sm:size-9 sm:shrink-0 ` +
   `text-muted-foreground hover:bg-accent hover:text-foreground ` +
   `disabled:pointer-events-none disabled:opacity-50 ${TRANSITION} ${FOCUS_RING}`;
 
@@ -291,7 +291,7 @@ export function EditorToolbar({
       // No overflow clipping here: the shape menu pops out above the bar.
       className={cn(
         overlaySurfaceClass,
-        "fixed bottom-4 left-1/2 z-40 -translate-x-1/2 flex max-w-[calc(100vw-2rem)] items-center gap-1 bg-background/95 p-1.5 backdrop-blur",
+        "fixed bottom-4 left-1/2 z-40 -translate-x-1/2 flex w-max max-w-[calc(100vw-2rem)] items-center gap-1 bg-background/95 p-1.5 backdrop-blur",
       )}
     >
       {/* -- Group 1: INSERT tools -- */}
@@ -326,7 +326,7 @@ export function EditorToolbar({
           full library lives in the left panel, one click away. */}
       <div
         ref={shapeRef}
-        className="group/shape relative"
+        className="group/shape relative flex min-w-0"
         onMouseLeave={() => setShapeMenuOpen(false)}
       >
         <button
@@ -622,7 +622,7 @@ export function EditorToolbar({
             end of the row that was hanging out of the pill. They sit
             flush now, which reads as the pair they are and, with the narrower
             buttons, is what brings the row back inside its surface. -- */}
-      <div className="flex items-center lg:hidden">
+      <div className="flex min-w-0 items-center lg:hidden">
         <Divider />
         <button
           type="button"
@@ -642,7 +642,7 @@ export function EditorToolbar({
         </button>
 
       {/* Phone only: everything the bar had to give up. */}
-      <div ref={moreRef} className="relative sm:hidden">
+      <div ref={moreRef} className="relative flex min-w-0 sm:hidden">
         <button
           type="button"
           suppressHydrationWarning

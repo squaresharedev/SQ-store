@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Truck } from "lucide-react";
+import Link from "next/link";
+import { Info, Truck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ShippingChoices } from "@/lib/storefront/queries";
-import type { SellerShippingPolicy } from "@/types/shipping-policy";
+import { SHIPPING_RATES_HREF, type SellerShippingPolicy } from "@/types/shipping-policy";
+import type { Currency } from "@/types/product";
 import { Select, type SelectOption } from "@/components/ui/select";
-import { labelClass } from "@/components/ui/control-styles";
+import { infoTextClass, labelClass } from "@/components/ui/control-styles";
+import { cn } from "@/lib/utils";
+import { canQuoteShipping } from "@/lib/shipping/rates";
+import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { ShippingTermsModal } from "./ShippingTermsModal";
 
 /**
@@ -27,6 +32,11 @@ import { ShippingTermsModal } from "./ShippingTermsModal";
  * line to confirm what buyers will actually see. Editing those terms happens
  * in `ShippingTermsModal` — the same account-level form Settings › Shipping
  * uses, opened on top of this one rather than navigating away from it.
+ *
+ * AND ONE THING IT SAYS UNASKED: when delivery has no price in this product's
+ * currency, checkout cannot show a total, so the product page has no Pay
+ * button (lib/checkout/availability.ts). Nothing else on screen would tell the
+ * seller why. Only where buyers can pay through checkout at all.
  */
 
 /** The select's value for "no profile", which is what the store default is. */
@@ -37,9 +47,12 @@ export function ShippingField({
   value,
   choices,
   policy,
+  currency,
   onChange,
 }: {
   inputId: string;
+  /** The product's currency: delivery has to be priced in the same one. */
+  currency: Currency;
   /** The chosen profile id, or null for the store's default terms. */
   value: string | null;
   choices: ShippingChoices;
@@ -63,6 +76,7 @@ export function ShippingField({
   // what is ALREADY true — and it keeps the stored value untouched, so simply
   // opening the form does not count as an edit.
   const orphaned = value !== null && chosen === null;
+  const unpriced = STRIPE_CONNECT_AVAILABLE && !canQuoteShipping(policy, currency);
 
   const options: SelectOption<string>[] = [
     {
@@ -129,6 +143,18 @@ export function ShippingField({
           {t("edit")}
         </button>
       </div>
+
+      {unpriced && (
+        <p className={cn(infoTextClass, "flex items-start gap-1.5")} data-product-delivery-unpriced="">
+          <Info className="mt-0.5 size-3.5 shrink-0" strokeWidth={2} aria-hidden="true" />
+          <span>
+            {t("unpriced", { currency })}{" "}
+            <Link href={SHIPPING_RATES_HREF} className="font-medium text-foreground underline underline-offset-2">
+              {t("unpricedAction")}
+            </Link>
+          </span>
+        </p>
+      )}
 
       <ShippingTermsModal
         open={editing}

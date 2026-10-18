@@ -26,6 +26,8 @@ import { STEP_UP_FIELDS, requireStepUpState } from "@/lib/auth/mfa";
 import { createNotification, resolveUserIdByEmail } from "@/lib/notifications/create";
 import type { StoredNotificationAction } from "@/lib/notifications/inline-actions";
 import { acceptTeamInvite } from "@/lib/team/accept";
+import { sendTeamInviteEmail } from "@/lib/team/emails";
+import { SETTINGS_TEAM_PATH } from "@/lib/team/paths";
 import { can, canGrant } from "@/lib/team/permissions";
 import {
   getActorRole,
@@ -54,6 +56,8 @@ import {
   type ActionState,
 } from "@/lib/errors";
 import { msg } from "@/i18n/types";
+import { DEFAULT_LOCALE, parseLocale } from "@/i18n/locales";
+import { getLocale } from "next-intl/server";
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
@@ -89,7 +93,6 @@ const MEMBERSHIP_RATE_LIMITED: ActionState = failed(
   actionError("rate_limited", msg("Errors.team.membershipRateLimited")),
 );
 
-const SETTINGS_TEAM_PATH = "/settings/team";
 
 // ---------------------------------------------------------------------------
 // Actions
@@ -99,8 +102,11 @@ const SETTINGS_TEAM_PATH = "/settings/team";
  * Invite a new member to the team.
  *
  * The invite record is inserted immediately; the invitee sees it under
- * "Invites for you" after signing in with the invited address. Email delivery
- * is not yet wired up — see the stub comment below.
+ * "Invites for you" after signing in with the invited address. They are told
+ * twice where that is possible: a notification when they already have an
+ * account, and an email either way (lib/team/emails.ts). The success message
+ * says whether the email went, so the inviter knows when to pass the word on
+ * themselves.
  */
 export async function inviteMember(
   _prev: ActionState,
@@ -183,19 +189,27 @@ export async function inviteMember(
     return failed(actionError("server_error", msg("Errors.team.inviteFailed")));
   }
 
+  // Who the invite is from, as the invitee reads it. Its own guarded read:
+  // the invite is already written, and a failure here costs a name, nothing more.
+  let store: string | null = null;
+  try {
+    store = (await getProfile())?.username?.trim() || null;
+  } catch (err) {
+    console.error(
+      "[team] store name read failed (non-blocking):",
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+
   // In-app notification: if the invitee already has an account, drop a
   // notification into their bell now so they discover the invite immediately
   // (and can deep-link to this page to accept). If they haven't signed up yet
-  // there is no account to notify — the email path (stubbed below) covers that
-  // case once it exists. Best-effort: the whole block is guarded so nothing here
-  // — resolver, getProfile, or the insert — can throw out and break the invite
-  // that was already written.
-  let notifiedExistingUser = false;
+  // there is no account to notify: the email below covers that case.
+  // Best-effort: the whole block is guarded so nothing here (the resolver or
+  // the insert) can throw out and break the invite that was already written.
   try {
     const inviteeUserId = await resolveUserIdByEmail(invited_email);
     if (inviteeUserId) {
-      const inviterProfile = await getProfile();
-      const store = inviterProfile?.username?.trim();
       // The invite's id makes the notification ACTIONABLE: an Accept button
       // on the row itself (lib/notifications/inline-actions.ts). Read back
       // here rather than with insert(...).select(), so that a read problem
@@ -230,7 +244,6 @@ export async function inviteMember(
             : {}),
         },
       });
-      notifiedExistingUser = true;
     }
   } catch (err) {
     console.error(
@@ -239,18 +252,30 @@ export async function inviteMember(
     );
   }
 
-  // TODO(email): send the invite email once the email system exists. The
-  // invite record is live; the invitee sees it under "Invites for you" after
-  // signing in with this address (and in their bell if they already have an
-  // account, per the block above).
-  console.info("[team] invite email stub — no email sent", {
-    account: account_owner_id,
-    role,
-    notifiedExistingUser,
-  });
+  // The email. Awaited, so the message below can be truthful about it: where
+  // mail is off, or the send fails, the inviter is told to pass the word on
+  // rather than left to assume an invitation went out. Guarded like the
+  // notification: the invite stands whatever happens here.
+  let emailed = false;
+  try {
+    const result = await sendTeamInviteEmail({
+      to: invited_email,
+      store,
+      role,
+      locale: parseLocale(await getLocale()) ?? DEFAULT_LOCALE,
+    });
+    emailed = result.sent;
+  } catch (err) {
+    console.error(
+      "[team] invite email failed (non-blocking):",
+      err instanceof Error ? err.message : String(err),
+    );
+  }
 
   revalidatePath(SETTINGS_TEAM_PATH);
-  return succeeded(msg("Settings.team.success.inviteCreated"));
+  return succeeded(
+    msg(emailed ? "Settings.team.success.inviteEmailed" : "Settings.team.success.inviteCreated"),
+  );
 }
 
 /**

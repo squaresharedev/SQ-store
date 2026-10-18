@@ -141,8 +141,18 @@ export async function checkoutViewDedupeKey(
   return pageViewDedupeKey("checkout_view", productId, hash);
 }
 
+/** And for a product opened from an embed tile (a click, counted where it
+ *  lands: see the hosted product page). Its own kind in the key, so it never
+ *  collides with the product page view written in the same request. */
+export async function productClickDedupeKey(
+  productId: string,
+  hash: string | null,
+): Promise<string | null> {
+  return pageViewDedupeKey("product_click", productId, hash);
+}
+
 async function pageViewDedupeKey(
-  kind: "product_view" | "checkout_view",
+  kind: "product_view" | "checkout_view" | "product_click",
   productId: string,
   hash: string | null,
 ): Promise<string | null> {

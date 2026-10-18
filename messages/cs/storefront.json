@@ -146,9 +146,12 @@
       "thankYouMessage": "Zpráva s poděkováním",
       "thankYouCelebration": "Oslava po nákupu",
       "checkoutPayButton": "Tlačítko Zaplatit",
+      "saleChip": "Štítek akce",
+      "salePrice": "Cena v akci",
       "productPagePhoto": "Fotka produktové stránky",
       "checkoutPhoto": "Fotka pokladny",
-      "thanksPhoto": "Fotka stránky s poděkováním"
+      "thanksPhoto": "Fotka stránky s poděkováním",
+      "chipScale": "Stejná velikost štítků na všech kartách"
     }
   },
   "editorSearch": {
@@ -206,11 +209,23 @@
     "snippetLabel": "Kód pro vložení",
     "snippetReadyHint": "Vložte tento kód do HTML svého webu.",
     "snippetLockedHint": "Zapněte vložení na web a přidejte alespoň jednu doménu, pak se odemkne tlačítko Kopírovat.",
+    "snippetSaveHint": "Uložte nastavení, pak se odemkne tlačítko Kopírovat.",
+    "pagesOffHint": "Nejdřív v editoru zapněte produktové stránky. Kliknutí na produkt otevře jeho stránku.",
+    "notShowingLabel": "Když se výloha nezobrazuje",
+    "notShowingTip": "Adresa vašeho webu musí být v Povolených doménách a web musí používat https. Nástroje pro tvorbu webu, které vlastní HTML vkládají do vlastního rámce (Wix, Google Sites), zatím nejsou podporovány.",
     "copySnippet": {
       "copy": "Kopírovat kód pro vložení",
       "copied": "Kód pro vložení zkopírován",
       "failed": "Kód pro vložení se nepodařilo zkopírovat. Označte ho a zkopírujte ručně.",
       "cannotCopyYet": "kód pro vložení zatím nelze zkopírovat"
+    },
+    "privacyLabel": "Do vašich zásad ochrany osobních údajů",
+    "privacyHint": "Váš web teď načítá výlohu ze Squareshare, a tak by to měly uvádět i jeho zásady ochrany osobních údajů. Můžete vložit tento text:",
+    "privacyText": "Tento web zobrazuje výlohu, kterou poskytuje Squareshare. Při jejím načtení se IP adresa a údaje o prohlížeči návštěvníka odešlou službě Squareshare, aby mohla zobrazit produkty a počítat návštěvy. Squareshare k tomu neukládá žádné soubory cookie ani nic jiného do zařízení návštěvníka. Podrobnosti: {policy}",
+    "copyPrivacy": {
+      "copy": "Kopírovat text o soukromí",
+      "copied": "Text o soukromí zkopírován",
+      "failed": "Text se nepodařilo zkopírovat. Označte ho a zkopírujte ručně."
     },
     "snippetKeyLabel": "Klíč kódu pro vložení",
     "rotateConfirmText": "Výměnou vznikne nový klíč. Všechny kopie starého kódu okamžitě přestanou fungovat, i ty na webech, kde je chcete dál mít: nový kód pak budete muset vložit všude znovu.",
@@ -222,6 +237,19 @@
     "saved": "Nastavení vložení na web uloženo.",
     "newKeyIssued": "Nový klíč pro vložení na web vytvořen.",
     "newKeyDetail": "Vložte kód znovu všude, kde je tato výloha vložená."
+  },
+  "share": {
+    "title": "Odkaz na výlohu",
+    "live": "Vaše výloha má vlastní stránku. Kdokoli s tímto odkazem si ji může prohlédnout, web nepotřebujete.",
+    "pagesOff": "Zapněte v editoru produktové stránky a tato výloha získá odkaz, který můžete sdílet.",
+    "detailsMissing": "Tato výloha získá odkaz ke sdílení, jakmile doplníte údaje prodejce.",
+    "open": "Otevřít",
+    "openDesigner": "Otevřít editor",
+    "copy": {
+      "copy": "Zkopírovat odkaz na výlohu",
+      "copied": "Odkaz na výlohu zkopírován",
+      "failed": "Odkaz se nepodařilo zkopírovat. Označte ho a zkopírujte ručně."
+    }
   },
   "wizard": {
     "category": {
@@ -559,6 +587,27 @@
     "spotBottomCenter": "Cenovka dole uprostřed",
     "spotBottomRight": "Cenovka vpravo dole"
   },
+  "saleBadge": {
+    "title": "Štítek akce",
+    "says": "Zobrazit",
+    "hint": "Zobrazuje se u produktu, dokud jeho cenu snižuje akce.",
+    "percent": "Procenta",
+    "amount": "Částka",
+    "hidden": "Skrytý",
+    "lookLabel": "Styl",
+    "look": {
+      "pill": "Ovál",
+      "sticker": "Nálepka",
+      "flag": "Vlajka",
+      "ribbon": "Stuha"
+    },
+    "spot": "Štítek akce {spot, select, top_left {vlevo nahoře} top_center {nahoře uprostřed} top_right {vpravo nahoře} middle_center {uprostřed} bottom_left {vlevo dole} bottom_center {dole uprostřed} bottom_right {vpravo dole} other {}}"
+  },
+  "chipScale": {
+    "label": "Na větších kartách",
+    "tile": "Zvětšit",
+    "cell": "Stejná velikost"
+  },
   "layout": {
     "canvasWidth": "Šířka plátna",
     "canvasWidthAriaLabel": "Šířka plátna v blocích",
@@ -750,6 +799,11 @@
         "plusShipping": "Doprava zvlášť",
         "freeShipping": "Doprava zdarma",
         "none": "Žádná"
+      },
+      "saleStyle": {
+        "label": "Cena v akci",
+        "strike": "Čára",
+        "slash": "Šikmo"
       },
       "useStorefrontAccent": "Použít zvýraznění obchodu",
       "useButtonTextColor": "Použít barvu textu tlačítka"

@@ -40,12 +40,23 @@ export type TopProduct = {
   sales: number;
 };
 
+/** One product's share of a weekday's paid sales. A null `title` is every
+ *  product outside the named few (AnalyticsData.weekdayProducts), summed. */
+export type WeekdayProduct = { title: string | null; sales: number };
+
 /** Paid sales bucketed by day of week (Mon..Sun, always 7 entries). */
 export type WeekdaySlice = {
   /** Short label, "Mon".."Sun". */
   weekday: string;
   sales: number;
   revenueCents: number;
+  /**
+   * The same sales split by product, named ones first in rank order, then the
+   * rest. They always add up to `sales`. EMPTY when the split is not
+   * available (it is a separate read, and may fail or not exist yet): that is
+   * "not broken down", never "nothing sold". Added 2026-10-07.
+   */
+  products: WeekdayProduct[];
 };
 
 /** Order count for one status — the range's full order mix. */
@@ -93,6 +104,9 @@ export type AnalyticsData = {
   topProducts: TopProduct[];
   /** Always 7 entries, Mon..Sun, zeros included (paid orders). */
   weekdays: WeekdaySlice[];
+  /** The products the weekday split names, best seller first (by number of
+   *  sales in the range). Empty when there is no split. Added 2026-10-07. */
+  weekdayProducts: string[];
   /** Always all four statuses, fixed order, zeros included (all orders). */
   statuses: StatusSlice[];
 };
@@ -182,6 +196,55 @@ export type SignalsData = {
 export const TOP_STOREFRONTS_LIMIT = 5;
 
 /**
+ * The buyer funnel for the range: from a storefront shown on the seller's own
+ * site to a paid order. Counts of events, never of people. Where each comes
+ * from, and which are the embed's and which the whole store's, is in
+ * lib/analytics/funnel/summary.ts. The rates are not stored: they are worked
+ * out from these (same file), so a reader of the snapshot can check them.
+ * Added 2026-10-10.
+ */
+export type FunnelData = {
+  /** False when the two checkout counts could not be read (the daily table is
+   *  not there yet, or the read failed). They are then 0 and mean "unknown". */
+  checkoutsAvailable: boolean;
+  /** Storefront views filed under the embed. */
+  embedViews: number;
+  /** Products opened from an embed. */
+  productOpens: number;
+  /** Paid orders filed under the embed. */
+  embedOrders: number;
+  /** Payment pages opened, every channel. */
+  checkoutsStarted: number;
+  /** Payment pages closed unpaid, every channel. */
+  checkoutsExpired: number;
+};
+
+/**
+ * The period immediately before the range, the same length, for the charts
+ * that draw "this versus the previous period". Only what those charts read:
+ * it is a yardstick, not a second report.
+ *
+ * A series is EMPTY when that period held none of the thing (no paid order,
+ * no signal of that kind), and a chart then draws no comparison at all. A
+ * store that did not exist yet is not a store that earned nothing.
+ */
+export type PreviousPeriod = {
+  /** The dates it covers, inclusive. */
+  range: { from: string; to: string };
+  sales: {
+    revenueCents: number;
+    sales: number;
+    /** Rounded integer cents; 0 when there were no sales. */
+    aovCents: number;
+    /** Bucketed by the same rules as the range's own series. */
+    series: RevenuePoint[];
+  };
+  signals: Record<SignalKind, { count: number; series: SignalPoint[] }>;
+  /** The same funnel, for the period before. Added 2026-10-10. */
+  funnel: FunnelData;
+};
+
+/**
  * THE PAGE'S WHOLE PAYLOAD, in one object.
  *
  * This is also the machine-readable contract: it is serialised verbatim into
@@ -198,6 +261,13 @@ export type AnalyticsSnapshot = {
   currency: string;
   sales: AnalyticsData;
   signals: SignalsData;
+  /** The buyer funnel, from the two reads above and the daily funnel table.
+   *  Added 2026-10-10. */
+  funnel: FunnelData;
+  /** The period before the range, for comparisons. Null when the range has no
+   *  start (all time), or when that read failed: a comparison is garnish, and
+   *  its absence must never cost the page its figures. Added 2026-10-04. */
+  previous: PreviousPeriod | null;
   /** When the payload was generated, ISO 8601. */
   generatedAt: string;
 };

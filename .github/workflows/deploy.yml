@@ -12,6 +12,11 @@
 # Optional secrets (override the committed values):
 #   NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY
 #
+# Recommended secret (the schema gate below is skipped, loudly, without it):
+#   SUPABASE_DB_URL              Postgres connection URI of a role that can log
+#                                in and nothing else. `pnpm check:schema` reads
+#                                pg_catalog only, so it needs no table grants.
+#
 # NEXT_PUBLIC_* values are baked into the client bundle at build time, so they
 # must be present during the BUILD step, not just at deploy. They now come from
 # the committed .env.production, so a missing secret can no longer white-screen
@@ -42,6 +47,8 @@ jobs:
       # run named after the file path with zero jobs and conclusion "failure",
       # which is how every deploy since that line landed silently died.
       GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+      # Job level for the same reason: the schema gate's `if` tests it.
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -85,6 +92,25 @@ jobs:
       - name: Database integration tests
         run: pnpm test:db
 
+      # THE SCHEMA GATE. Migrations are applied to production by hand, and the
+      # app selects new columns on every order read, so a build that deploys
+      # ahead of its migration takes the Orders page and every buyer order
+      # page down with it. This asks production whether it has what this
+      # build needs (scripts/lib/prod-schema.ts) and refuses to deploy when it
+      # does not, naming the migration to apply.
+      #
+      # Without the secret it cannot ask, and says so as a warning rather than
+      # failing: a gate that blocks every deploy until someone adds a secret
+      # gets deleted, not configured.
+      - name: Check production has this build's schema
+        if: ${{ env.SUPABASE_DB_URL != '' }}
+        run: pnpm check:schema
+
+      - name: Warn that the schema gate did not run
+        if: ${{ env.SUPABASE_DB_URL == '' }}
+        run: |
+          echo "::warning::SUPABASE_DB_URL is not set, so this deploy was NOT checked against production's schema. Run 'pnpm check:schema' locally before pushing a migration-dependent change, and add the secret (see the top of this file)."
+
       - name: Build
         run: npx opennextjs-cloudflare build
         env:
@@ -116,3 +142,40 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # SMOKE CHECK. Everything above proves the build; nothing proved the
+      # deployed Worker answers. Three requests, each a different layer:
+      #   /login            the Worker boots and renders (200)
+      #   a product page    the public route reaches the database and answers
+      #                     "no such product" (404). A Worker that cannot read
+      #                     (a bad service-role key, the database down) renders
+      #                     the buyer's "could not load this" page instead,
+      #                     which is not a 404 and fails this step.
+      #   billing webhook   the route handlers are mounted (404 while Stripe
+      #                     is unconfigured, 400 for the unsigned body once it
+      #                     is). A 5xx means the handler crashed.
+      # The origin is read from the committed .env.production, the same value
+      # the build inlined. A red run here means production is ALREADY live
+      # with this build: roll back in the Cloudflare dashboard.
+      - name: Smoke check the deployed app
+        run: |
+          set -euo pipefail
+          APP_URL=$(grep '^NEXT_PUBLIC_APP_URL=' .env.production | cut -d= -f2- | tr -d '"')
+          NOBODY=00000000-0000-4000-8000-000000000000
+
+          expect() {
+            local want="$1" method="$2" path="$3" got=""
+            # A new version takes a few seconds to reach every edge location.
+            for attempt in 1 2 3 4 5; do
+              got=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 -X "$method" "$APP_URL$path" || true)
+              case " $want " in *" $got "*) echo "ok   $got $method $path"; return 0 ;; esac
+              sleep 5
+            done
+            echo "::error::Smoke check failed: $method $path answered $got, expected one of: $want"
+            return 1
+          }
+
+          expect "200" GET /login
+          expect "404" GET "/s/$NOBODY/p/$NOBODY"
+          expect "400 404" POST /api/billing/webhook
+          echo "Deployed app answers."

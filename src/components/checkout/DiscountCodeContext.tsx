@@ -20,8 +20,16 @@ type DiscountCodeState = {
 
 const DiscountCodeContext = createContext<DiscountCodeState | null>(null);
 
-export function DiscountCodeProvider({ children }: { children: ReactNode }) {
-  const [terms, setTerms] = useState<CodeTerms | null>(null);
+export function DiscountCodeProvider({
+  initialTerms = null,
+  children,
+}: {
+  /** A code the checkout opens with already applied. No buyer's page passes
+   *  one today; the dev gallery does, to draw the applied state. */
+  initialTerms?: CodeTerms | null;
+  children: ReactNode;
+}) {
+  const [terms, setTerms] = useState<CodeTerms | null>(initialTerms);
   const value = useMemo(() => ({ terms, setTerms }), [terms]);
   return <DiscountCodeContext.Provider value={value}>{children}</DiscountCodeContext.Provider>;
 }

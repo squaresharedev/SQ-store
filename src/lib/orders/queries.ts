@@ -10,7 +10,7 @@ import { orderPhotoKey } from "@/lib/orders/photo";
 import { presignGetUrl } from "@/lib/r2";
 import { isContentVisible } from "@/lib/moderation/removal";
 import type { OrderExportRow } from "@/lib/orders/csv";
-import { ORDER_CHANNELS } from "@/types/order-view";
+import { ORDER_CHANNELS, REFUND_REASONS } from "@/types/order-view";
 import type {
   OrderView,
   OrderDiscount,
@@ -80,7 +80,24 @@ function toOrderView(row: Record<string, unknown>): OrderView {
     withdrawalRequestedAt:
       row.withdrawal_requested_at != null ? String(row.withdrawal_requested_at) : null,
     discount: toOrderDiscount(row),
+    refund: toOrderRefund(row),
+    stockReserved: Number.isInteger(Number(row.stock_reserved)) ? Math.max(0, Number(row.stock_reserved)) : 0,
+    paidThroughProvider: isProviderPayment(row.payment_ref),
   };
+}
+
+/** Whether orders.payment_ref names a payment a provider can refund (a Stripe
+ *  PaymentIntent). The id itself never leaves the server. */
+export function isProviderPayment(paymentRef: unknown): boolean {
+  return typeof paymentRef === "string" && paymentRef.startsWith(PROVIDER_PAYMENT_PREFIX);
+}
+
+/** When and why an order was taken back, or null for one that stands. A
+ *  reason outside REFUND_REASONS reads as "no reason given", never as an error. */
+function toOrderRefund(row: Record<string, unknown>): OrderView["refund"] {
+  if (row.refunded_at == null) return null;
+  const reason = REFUND_REASONS.find((known) => known === row.refund_reason) ?? null;
+  return { at: String(row.refunded_at), reason };
 }
 
 /** The orders.discount_* snapshot, or null when no discount touched the order. */
@@ -98,7 +115,10 @@ function toOrderDiscount(row: Record<string, unknown>): OrderDiscount | null {
 
 /** The column list every order read selects — one contract, one place. */
 const ORDER_COLUMNS =
-  "id, product_title, selected_options, quantity, ship_to, fulfilment_status, shipped_at, tracking_number, tracking_carrier, amount_cents, platform_fee_cents, platform_fee_bps, currency, channel, status, buyer_email, created_at, gift_message, withdrawal_requested_at, discount_id, discount_cents, discount_code_id, discount_code";
+  "id, product_title, selected_options, quantity, ship_to, fulfilment_status, shipped_at, tracking_number, tracking_carrier, amount_cents, platform_fee_cents, platform_fee_bps, currency, channel, status, buyer_email, created_at, gift_message, withdrawal_requested_at, discount_id, discount_cents, discount_code_id, discount_code, refunded_at, refund_reason, stock_reserved, payment_ref";
+
+/** How a Stripe PaymentIntent id starts: the one payment_ref a refund can name. */
+export const PROVIDER_PAYMENT_PREFIX = "pi_";
 
 /**
  * The To ship rule (lib/orders/fulfilment.ts isToShip) as a query filter, so

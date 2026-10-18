@@ -17,14 +17,14 @@ import { PlansFaq } from "@/components/billing/PlansFaq";
 import { PortalButton } from "@/components/billing/PortalButton";
 import { CancelPlanButton } from "@/components/billing/CancelPlanDialog";
 import { KeepPlanButton } from "@/components/billing/KeepPlanButton";
+import { PlanPricesProvider } from "@/components/billing/plan-context";
 import { SERVER_BILLING_ACTIONS, navigateOf, type BillingActions } from "@/components/billing/billing-actions";
 import { cn } from "@/lib/utils";
 import { formatLongDate } from "@/lib/format/date";
 import type { PricingContext } from "@/lib/billing/pricing-context";
-import { launchDiscountPercent, yearlyFreeMonths } from "@/lib/billing/fees";
+import { launchDiscountPercent, soldIntervals, yearlyFreeMonths } from "@/lib/billing/fees";
 import type { PricingSource } from "@/lib/billing/paths";
 import {
-  BILLING_INTERVALS,
   PLAN_IDS,
   isPaidPlan,
   type BillingInterval,
@@ -32,14 +32,6 @@ import {
   type PlanId,
 } from "@/lib/billing/plans";
 import type { ActionError } from "@/lib/errors";
-
-/** The whole months a year on the yearly price gives away, on every paid
- *  plan: the figure on the Yearly option's green chip. Zero shows no chip. */
-const YEARLY_FREE_MONTHS = yearlyFreeMonths();
-
-/** Any plan is on a launch price (shown beside its struck-through regular
- *  price), so the fine print says what that means. */
-const HAS_LAUNCH_PRICE = PLAN_IDS.some((plan) => launchDiscountPercent(plan, "month") > 0);
 
 /** The promises under the headline, each with its glyph. */
 const TRUST = [
@@ -60,21 +52,41 @@ const TRUST = [
  *   plan ending      Keep my plan     -> resumePlan, beside the "ends on" notice
  *   a teammate       nothing          -> "only the owner can change the plan"
  *   not set up here  "Soon"           -> the plans, with nothing to press
+ *
+ * Every price and fee on the page is read from `context.prices`, the plan
+ * prices in force in the database. The Monthly | Yearly choice only appears
+ * once yearly prices exist there.
  */
-export function PlansPage({
-  context,
-  source,
-  actions = SERVER_BILLING_ACTIONS,
-}: {
+export function PlansPage(props: PlansPageProps) {
+  return (
+    <PlanPricesProvider prices={props.context.prices}>
+      <PlansPageBody {...props} />
+    </PlanPricesProvider>
+  );
+}
+
+type PlansPageProps = {
   context: PricingContext;
   /** Where the seller came from (?from=), passed on to checkout for the funnel. */
   source: PricingSource | null;
   actions?: BillingActions;
-}) {
+};
+
+function PlansPageBody({ context, source, actions = SERVER_BILLING_ACTIONS }: PlansPageProps) {
   const t = useTranslations("Billing");
   const locale = useLocale();
   const navigate = navigateOf(actions);
-  const [interval, setInterval] = React.useState<BillingInterval>(context.interval ?? "month");
+  const { prices } = context;
+  const intervals = soldIntervals(prices);
+  // The whole months a year on the yearly price gives away, on every paid
+  // plan: the figure on the Yearly option's green chip. Zero shows no chip.
+  const yearlyFree = yearlyFreeMonths(prices);
+  // Any plan is on a launch price (shown beside its struck-through regular
+  // price), so the fine print says what that means.
+  const hasLaunchPrice = PLAN_IDS.some((plan) => launchDiscountPercent(prices, plan, "month") > 0);
+  const [interval, setInterval] = React.useState<BillingInterval>(
+    context.interval && intervals.includes(context.interval) ? context.interval : "month",
+  );
   const [checkoutError, setCheckoutError] = React.useState<ActionError | null>(null);
   const [leavingFor, setLeavingFor] = React.useState<PaidPlanId | null>(null);
   const [, startTransition] = React.useTransition();
@@ -102,30 +114,34 @@ export function PlansPage({
           title={t("page.title")}
           subtitle={t("page.lead")}
           action={
-            <SegmentedControl
-              value={interval}
-              onChange={setInterval}
-              ariaLabel={t("page.intervalLabel")}
-              options={BILLING_INTERVALS.map((value) => ({
-                value,
-                // What yearly saves rides ON the Yearly choice, in green: a
-                // reason to press it, not a note beside the control.
-                label:
-                  value === "year" && YEARLY_FREE_MONTHS > 0 ? (
-                    <>
-                      {t("page.year")}
-                      <span
-                        data-yearly-saving
-                        className={cn(interval === "year" ? savingBadgeOnInkClass : savingBadgeClass, "px-1.5 py-0")}
-                      >
-                        {t("page.yearlyFree", { count: YEARLY_FREE_MONTHS })}
-                      </span>
-                    </>
-                  ) : (
-                    t(`page.${value}`)
-                  ),
-              }))}
-            />
+            // One way to pay is not a choice: the control appears with the
+            // second (yearly prices in plan_prices).
+            intervals.length > 1 ? (
+              <SegmentedControl
+                value={interval}
+                onChange={setInterval}
+                ariaLabel={t("page.intervalLabel")}
+                options={intervals.map((value) => ({
+                  value,
+                  // What yearly saves rides ON the Yearly choice, in green: a
+                  // reason to press it, not a note beside the control.
+                  label:
+                    value === "year" && yearlyFree > 0 ? (
+                      <>
+                        {t("page.year")}
+                        <span
+                          data-yearly-saving
+                          className={cn(interval === "year" ? savingBadgeOnInkClass : savingBadgeClass, "px-1.5 py-0")}
+                        >
+                          {t("page.yearlyFree", { count: yearlyFree })}
+                        </span>
+                      </>
+                    ) : (
+                      t(`page.${value}`)
+                    ),
+                }))}
+              />
+            ) : undefined
           }
         />
 
@@ -173,13 +189,13 @@ export function PlansPage({
         </ul>
       </div>
 
-      <CostExplorer interval={interval} salesSubtotal30dCents={context.salesSubtotal30dCents} />
+      <CostExplorer interval={interval} directSales30dCents={context.directSales30dCents} />
       <PlanComparison interval={interval} currentPlan={context.plan} />
       <PlansFaq />
       <p className={cn(infoTextClass, "mx-auto max-w-3xl text-center")}>
         {t("page.finePrint")}
         {/* What a struck-through price is, wherever one is shown. */}
-        {HAS_LAUNCH_PRICE && <> {t("page.launchNote")}</>}
+        {hasLaunchPrice && <> {t("page.launchNote")}</>}
       </p>
     </div>
   );

@@ -54,6 +54,34 @@ const STOREFRONT_COLUMNS = "id, name, config, brief, created_at, updated_at";
 // The seller's own words and the plan they ended; the row id is bookkeeping.
 const CANCELLATION_COLUMNS = "plan, billing_interval, reason, detail, ends_at, created_at, resumed_at";
 
+// What the seller sold, as a record of THEIR trading: what, how much, our fee,
+// and what became of it. The buyer's email and address are deliberately not
+// here: they are another person's data, and the seller already has them where
+// they are needed (the order itself, and the Orders page's own CSV export).
+const ORDER_COLUMNS =
+  "id, product_title, selected_options, quantity, amount_cents, shipping_cents, discount_cents, " +
+  "platform_fee_cents, platform_fee_bps, currency, channel, status, fulfilment_status, " +
+  "created_at, shipped_at, tracking_carrier, refunded_at, refund_reason";
+
+// What we told them, and whether they read it.
+const NOTIFICATION_COLUMNS = "type, title, body, read, created_at";
+
+// The security log Settings shows them: what happened and when. The salted IP
+// digest stays out (it identifies nothing to its owner, and is ours to rotate).
+const SECURITY_EVENT_COLUMNS = "event, created_at";
+
+// Who they invited to their store (the address is one THEY typed), and the
+// stores they were invited to.
+const OWN_TEAM_COLUMNS = "invited_email, role, status, invited_at, accepted_at";
+const MEMBERSHIP_COLUMNS = "role, status, invited_at, accepted_at";
+
+/**
+ * The most rows of any one list in the file. Every list is newest first, so a
+ * longer history loses its oldest entries, and the file says so
+ * (`truncated`) rather than pass a part off as the whole.
+ */
+const EXPORT_ROWS_MAX = 1000;
+
 export async function GET() {
   // Through the shared session gate, not a bare auth.getUser(): a session that
   // still owes its second factor reads as signed out here like everywhere else.
@@ -89,7 +117,8 @@ export async function GET() {
     );
   }
 
-  const [profile, products, storefronts, billing, cancellations] = await Promise.all([
+  const admin = createAdminClient();
+  const [profile, products, storefronts, billing, cancellations, orders, notifications, securityEvents, ownTeam, memberships] = await Promise.all([
     supabase.from("profiles").select(PROFILE_COLUMNS).eq("id", user.id).maybeSingle(),
     supabase.from("products").select(PRODUCT_COLUMNS).eq("owner_id", user.id),
     // A user can own MANY storefronts; export all of them, not just one.
@@ -99,13 +128,48 @@ export async function GET() {
     readAccountBilling(user.id),
     // What they told us when they cancelled a plan: their words, so theirs to
     // export. Service-role read keyed on the session's user id, like billing.
-    createAdminClient()
+    admin
       .from("plan_cancellations")
       .select(CANCELLATION_COLUMNS)
       .eq("owner_id", user.id)
       .order("created_at", { ascending: true }),
+    // The rest is read with the service role too, each keyed on the session's
+    // user id and never on a parameter: the row-level rules on these tables
+    // answer for the store being VIEWED (a teammate's included), and this file
+    // is about the person holding the session and nobody else.
+    admin
+      .from("orders")
+      .select(ORDER_COLUMNS)
+      .eq("seller_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(EXPORT_ROWS_MAX),
+    admin
+      .from("notifications")
+      .select(NOTIFICATION_COLUMNS)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(EXPORT_ROWS_MAX),
+    admin
+      .from("security_events")
+      .select(SECURITY_EVENT_COLUMNS)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(EXPORT_ROWS_MAX),
+    admin.from("team_members").select(OWN_TEAM_COLUMNS).eq("account_owner_id", user.id).limit(EXPORT_ROWS_MAX),
+    admin.from("team_members").select(MEMBERSHIP_COLUMNS).eq("member_user_id", user.id).limit(EXPORT_ROWS_MAX),
   ]);
-  if (profile.error || products.error || storefronts.error || !billing.ok || cancellations.error) {
+  if (
+    profile.error ||
+    products.error ||
+    storefronts.error ||
+    !billing.ok ||
+    cancellations.error ||
+    orders.error ||
+    notifications.error ||
+    securityEvents.error ||
+    ownTeam.error ||
+    memberships.error
+  ) {
     return NextResponse.json(
       { error: "Export failed. Try again in a minute." },
       { status: 500 },
@@ -136,6 +200,16 @@ export async function GET() {
       cancel_at_period_end: billing.billing.cancelAtPeriodEnd,
     },
     plan_cancellations: cancellations.data,
+    orders: orders.data,
+    notifications: notifications.data,
+    security_events: securityEvents.data,
+    team: { invited: ownTeam.data, member_of: memberships.data },
+    // Which of the lists above stopped at the newest EXPORT_ROWS_MAX rows.
+    truncated: {
+      orders: (orders.data?.length ?? 0) >= EXPORT_ROWS_MAX,
+      notifications: (notifications.data?.length ?? 0) >= EXPORT_ROWS_MAX,
+      security_events: (securityEvents.data?.length ?? 0) >= EXPORT_ROWS_MAX,
+    },
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {

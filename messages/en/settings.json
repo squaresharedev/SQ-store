@@ -136,7 +136,7 @@
   "danger": {
     "export": {
       "cardTitle": "Export my data",
-      "cardDescription": "Everything we hold about you: profile, products, storefront config, all bundled into one JSON file. It's your data, yours to keep.",
+      "cardDescription": "Everything we hold about you: your profile, products, storefronts, the orders you sold, your notifications and security log, all in one JSON file. It's your data, yours to keep.",
       "downloadButton": "Download my data",
       "stepUpDescription": "Your export contains your whole account. Enter the current code from your authenticator app to download it."
     },
@@ -781,10 +781,20 @@
       "cardDescription": "Accept an invite to join that store's team."
     },
     "success": {
-      "inviteCreated": "Invite created. They'll see it when they sign in with that email. (Email sending isn't wired up yet.)",
+      "inviteCreated": "Invite created, but we couldn't email them. Let them know yourself: they'll see it when they sign in with that email.",
+      "inviteEmailed": "Invite sent. We've emailed them how to accept.",
       "inviteAccepted": "Welcome to the team.",
       "roleUpdated": "Role updated.",
       "memberRemoved": "Member removed."
+    },
+    "inviteEmail": {
+      "subject": "{store} invited you to their team on Square Share",
+      "subjectUnnamed": "You've been invited to a team on Square Share",
+      "intro": "{store} has invited you to join their team on Square Share.",
+      "introUnnamed": "A store on Square Share has invited you to join its team.",
+      "role": "Your role: {role}",
+      "how": "To accept, sign in with this email address ({email}), or create an account with it. The invite will be waiting in Settings, under Team & access.",
+      "ignore": "Not expecting this? You can ignore this email. Nothing happens unless you accept."
     }
   }
 }

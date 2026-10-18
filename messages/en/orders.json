@@ -48,7 +48,8 @@
     "date": "Date",
     "shipping": "Shipping",
     "shipTo": "Ship to",
-    "noAddress": "No address"
+    "noAddress": "No address",
+    "feeLine": "Fee {amount}"
   },
   "toolbar": {
     "region": "order filters",
@@ -149,16 +150,29 @@
     "discountCodeOutdone": "Code {code} used, but the sale price was lower"
   },
   "actions": {
-    "refundNeedsStripe": "Refunds require Stripe to be connected.",
-    "connectStripe": "Connect Stripe to enable refunds",
-    "refundConfirm": "Refund this order? This cannot be undone once Stripe is connected.",
-    "confirmRefund": "Confirm refund",
-    "refundOrder": "Refund order",
     "disputeInStripe": "Disputes are handled in your Stripe dashboard once Stripe is connected.",
-    "disputeConfirm": "Open dispute handling for this order?",
-    "handleDispute": "Handle dispute",
-    "none": "No actions are available for this order.",
-    "refundManual": "You can't refund from Square Share yet. To refund this order, pay the buyer back yourself and tell them."
+    "none": "No actions are available for this order."
+  },
+  "refund": {
+    "open": "Refund or cancel",
+    "manual": "This payment didn't go through Square Share. Pay the buyer back yourself, then record it here.",
+    "viaProvider": "The full amount goes back to the buyer's card through Stripe. This can't be undone.",
+    "reasonLabel": "Reason",
+    "reasons": {
+      "cancelled": "Cancelled before sending",
+      "returned": "Returned by the buyer",
+      "other": "Something else"
+    },
+    "restock": "{count, plural, one {Put it back in stock} other {Put all # back in stock}}",
+    "confirm": "Record refund of {amount}",
+    "confirmProvider": "Refund {amount}",
+    "recorded": "Refund recorded.",
+    "refunded": "Refund sent.",
+    "buyerEmailed": "The buyer has been emailed.",
+    "buyerNotEmailed": "The buyer was not emailed. Tell them yourself.",
+    "refundedOn": "Refunded {date}",
+    "refundedOnReason": "{reason, select, cancelled {Cancelled and refunded {date}} returned {Returned and refunded {date}} other {Refunded {date}}}",
+    "ownerOnly": "Only the store's owner can refund or cancel an order."
   },
   "skeleton": {
     "loading": "loading orders"
@@ -230,6 +244,13 @@
       "shipTo": "It's going to:",
       "questions": "Questions about your order? Reply to this email to reach {store}.",
       "footer": "Sent by Square Share on behalf of {store}."
+    },
+    "refund": {
+      "subject": "Your order from {store} has been refunded",
+      "intro": "{reason, select, cancelled {{store} has cancelled your order and refunded it.} returned {{store} has received your return and refunded your order.} other {{store} has refunded your order.}}",
+      "amount": "Refunded: {amount}",
+      "howManual": "{store} is paying you back directly. If it hasn't reached you within 14 days, reply to this email.",
+      "howCard": "It goes back the way you paid, which usually takes 5 to 10 days."
     },
     "confirmation": {
       "subject": "Your order from {store}: {title}",

@@ -33,6 +33,7 @@
     "emptyDefault": "Geen verkopen in deze periode"
   },
   "sales": {
+    "untitledProduct": "Product zonder titel",
     "label": "Verkopen",
     "description": "Betaalde bestellingen via de kassa van Square Share.",
     "revenue": {
@@ -71,6 +72,28 @@
       "empty": "Geen bestellingen in deze periode",
       "ariaLabel": "Mix van bestelstatussen"
     }
+  },
+  "compare": {
+    "previous": "Vorige periode",
+    "vsPrevious": "{change} ten opzichte van de vorige periode"
+  },
+  "funnel": {
+    "label": "Storefront-trechter",
+    "description": "Van het tonen van je storefront op je eigen site tot een betaalde bestelling. Er worden gebeurtenissen geteld, geen personen.",
+    "views": "Weergaven op je site",
+    "viewsEmpty": "Geen weergaven in deze periode",
+    "opens": "Geopende producten",
+    "opensEmpty": "Geen geopend in deze periode",
+    "started": "Gestarte betalingen",
+    "startedEmpty": "Geen betalingen in deze periode",
+    "expired": "Onbetaald verlaten",
+    "expiredEmpty": "Geen onbetaald verlaten",
+    "conversion": "Bestellingen per 100 weergaven",
+    "conversionCounts": "Bestellingen: {orders}, weergaven: {views}",
+    "abandonment": "Afgebroken betalingen",
+    "abandonmentCounts": "Onbetaald: {expired}, gestart: {started}",
+    "notEnough": "Nog niet genoeg gegevens",
+    "notEnoughHint": "Percentages verschijnen zodra deze periode {min} weergaven telt."
   },
   "tiles": {
     "revenue": "Omzet",
@@ -142,9 +165,7 @@
       "acrossRange": "Productkliks in de geselecteerde periode.",
       "byChannel": "Productkliks per kanaal",
       "byWeekday": "Productkliks per weekdag",
-      "byStorefront": "Productkliks per etalage",
-      "awaiting": "Komt binnen zodra de insluitingswidget productopeningen doorgeeft.",
-      "readyToChart": "Klaar om weer te geven zodra de eerste kliks binnenkomen."
+      "byStorefront": "Productkliks per etalage"
     },
     "product_view": {
       "label": "Productpaginaweergaven",

@@ -140,6 +140,11 @@ export const DESTINATION_COST_MAX = 40;
  *  and may still come from there; values may not. */
 export const SHIPPING_SETTINGS_HREF = "/settings/shipping";
 
+/** The delivery-prices card on that page, and the link straight to it: where a
+ *  seller gives checkout the numbers it quotes a total from. */
+export const SHIPPING_RATES_ANCHOR = "checkout-rates";
+export const SHIPPING_RATES_HREF = `${SHIPPING_SETTINGS_HREF}#${SHIPPING_RATES_ANCHOR}`;
+
 /** An account that has said nothing at all. Its own constant rather than a
  *  literal at each call site, so "empty" means one thing everywhere. */
 export const EMPTY_SHIPPING_POLICY: SellerShippingPolicy = {};

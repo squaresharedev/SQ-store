@@ -54,10 +54,7 @@ export function decideEmbedAccess(options: {
   if (!parsed) {
     return { allowed: false, status: 403, reason: "unparsable Origin" };
   }
-  // Exact host match only. No suffix matching: allowing "example.com" to cover
-  // "evil-example.com" (or any attacker-registered "*example.com") is the
-  // classic allowlist bug, and subdomains are listed explicitly instead.
-  if (!settings.domains.includes(parsed.host)) {
+  if (!embedDomainsInclude(settings.domains, parsed.host)) {
     return { allowed: false, status: 403, reason: "origin not allowed" };
   }
   // The CANONICAL origin, rebuilt from the parse — never the raw header.
@@ -67,6 +64,37 @@ export function decideEmbedAccess(options: {
   // round-trips through this unchanged; a malformed one comes out normalized
   // and simply fails the browser's own CORS comparison.
   return { allowed: true, origin: parsed.origin };
+}
+
+/** A site's name without a leading "www.", for comparing two spellings of it. */
+function withoutWww(host: string): string {
+  return host.startsWith("www.") ? host.slice(4) : host;
+}
+
+/**
+ * Is this hostname one of the listed sites?
+ *
+ * Whole-host match only. No suffix matching: allowing "example.com" to cover
+ * "evil-example.com" (or any attacker-registered "*example.com") is the
+ * classic allowlist bug, and subdomains are listed explicitly instead.
+ *
+ * ONE EXCEPTION: a leading "www." is ignored on both sides. "example.com" and
+ * "www.example.com" are one site to the person who owns it, and they answer
+ * to the same owner in DNS, so a seller who typed one is not refused on the
+ * other. That is the single most common reason an embed "does not show".
+ */
+export function embedDomainsInclude(domains: readonly string[], hostname: string): boolean {
+  const wanted = withoutWww(hostname);
+  return domains.some((domain) => withoutWww(domain) === wanted);
+}
+
+/**
+ * May this storefront's embed frame be drawn on this site? The frame's form of
+ * decideEmbedAccess: same two rules (switched on, and listed), asked about a
+ * hostname the browser has been told to enforce rather than an Origin header.
+ */
+export function isEmbedSiteAllowed(settings: EmbedSettings | undefined, hostname: string): boolean {
+  return Boolean(settings?.enabled) && embedDomainsInclude(settings?.domains ?? [], hostname);
 }
 
 /** Canonical `{ origin, host }` for an http(s) Origin header, or null. */
@@ -118,21 +146,3 @@ export function embedCorsHeaders(origin: string): Record<string, string> {
   };
 }
 
-/**
- * CORS headers for the analytics SIGNAL route, which takes a JSON POST.
- *
- * Separate from embedCorsHeaders rather than widening it: the read route
- * should keep advertising GET only, or every embed preflight would start
- * telling the world that POST is available on a path where it is not. Same
- * echoed origin and same `Vary` for the same reasons; `Content-Type` has to be
- * allowed explicitly because a JSON body makes the request non-simple.
- */
-export function embedSignalCorsHeaders(origin: string): Record<string, string> {
-  return {
-    "Access-Control-Allow-Origin": origin,
-    Vary: "Origin",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Max-Age": "600",
-  };
-}

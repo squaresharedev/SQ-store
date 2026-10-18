@@ -10,6 +10,8 @@ import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { ghostButtonClass } from "@/components/ui/control-styles";
 import { planRoom } from "@/lib/billing/limits";
 import { PlanLimitNotice } from "@/components/billing/PlanLimitNotice";
+import { requireUser } from "@/lib/auth/session";
+import { PRODUCTS_PATH } from "@/lib/products/paths";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Products.metadata.import");
@@ -20,6 +22,9 @@ export async function generateMetadata(): Promise<Metadata> {
 // reason /products/new is: a read-only member of the active store cannot
 // create products, so there is nothing here for them to do.
 export default async function ImportProductsPage() {
+  // The layout's session gate does not run again on a move between sections
+  // (see ../layout.tsx, or ../../layout.tsx from a nested page): a page asks.
+  await requireUser(PRODUCTS_PATH);
   const account = await getActiveAccount();
   if (!can(account?.role, "products.write")) redirect("/products");
 

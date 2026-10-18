@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { PAGE_BUSY } from "@/lib/public/busy";
 import { DEFAULT_PRODUCT_PAGE_CONFIG, DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 
 // The public product read is the one place that decides what a buyer may see
@@ -20,10 +21,16 @@ vi.mock("@/lib/rate-limit", () => ({
 }));
 
 /** A tiny chainable stand-in for the admin client: records every filter and
- *  answers from `rows` by table. */
+ *  answers from `rows` by table, or with `errors[table]` when a read is
+ *  meant to fail. */
 type Row = Record<string, unknown> | null;
-const state: { rows: Record<string, Row>; filters: Record<string, [string, unknown][]> } = {
+const state: {
+  rows: Record<string, Row>;
+  errors: Record<string, { message: string } | null>;
+  filters: Record<string, [string, unknown][]>;
+} = {
   rows: {},
+  errors: {},
   filters: {},
 };
 function builder(table: string) {
@@ -33,7 +40,10 @@ function builder(table: string) {
       (state.filters[table] ??= []).push([column, value]);
       return chain;
     },
-    maybeSingle: async () => ({ data: state.rows[table] ?? null, error: null }),
+    maybeSingle: async () =>
+      state.errors[table]
+        ? { data: null, error: state.errors[table] }
+        : { data: state.rows[table] ?? null, error: null },
   };
   return chain;
 }
@@ -44,7 +54,7 @@ vi.mock("@/lib/supabase/admin", () => ({
 
 // The discount reads have their own tests (discount-public); here they only
 // decide what the page is told about a sale.
-const readActiveSales = vi.fn(async (): Promise<unknown[]> => []);
+const readActiveSales = vi.fn(async (): Promise<unknown[] | null> => []);
 const loadProductSale = vi.fn(async (_admin: unknown, input: { regularPriceCents: number }) => ({
   priceCents: input.regularPriceCents,
   sale: null as unknown,
@@ -52,6 +62,15 @@ const loadProductSale = vi.fn(async (_admin: unknown, input: { regularPriceCents
 vi.mock("@/lib/discounts/public", () => ({
   readActiveSales: (...args: unknown[]) => readActiveSales(...(args as [])),
   loadProductSale: (...args: [unknown, { regularPriceCents: number }]) => loadProductSale(...args),
+  // The real one: it is pure, and the page's countdown to a sale's end is part
+  // of what these tests hold the loader to.
+  msUntilSaleEnds: (
+    pricing: Iterable<{ sale: { endsAt: string | null } | null }>,
+    now: Date,
+  ): number | null => {
+    const ends = [...pricing].flatMap(({ sale }) => (sale?.endsAt ? [Date.parse(sale.endsAt)] : []));
+    return ends.length === 0 ? null : Math.max(0, Math.min(...ends) - now.getTime());
+  },
   findCodeFor: vi.fn(async () => null),
 }));
 
@@ -92,6 +111,7 @@ const productRow = {
   ],
   purchase_url: "https://shop.example.com/lamp",
   shipping_profile_id: null,
+  created_at: "2026-01-01T00:00:00Z",
   track_stock: true,
   stock_quantity: 3,
   low_stock_threshold: 5,
@@ -134,10 +154,13 @@ beforeEach(() => {
     products: productRow,
     profiles: profileRow,
   };
+  state.errors = {};
   state.filters = {};
   from.mockClear();
   rateLimitKey.mockClear();
   rateLimitKey.mockResolvedValue(true);
+  readActiveSales.mockClear();
+  loadProductSale.mockClear();
 });
 
 describe("buildProductPageProduct", () => {
@@ -200,6 +223,13 @@ describe("buildProductPageProduct", () => {
   });
 });
 
+/** The page a test expects to exist, narrowed past both "no" and "not right now". */
+async function loadedPage() {
+  const result = await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID);
+  if (!result || result === PAGE_BUSY) throw new Error(`expected a page, got ${String(result)}`);
+  return result;
+}
+
 describe("getPublicProductPage gates", () => {
   it("refuses non-UUID ids before touching anything", async () => {
     expect(await getPublicProductPage("not-a-uuid", PRODUCT_ID)).toBeNull();
@@ -210,8 +240,18 @@ describe("getPublicProductPage gates", () => {
 
   it("spends the rate limit before the first read and stops when it is out", async () => {
     rateLimitKey.mockResolvedValueOnce(false);
-    expect(await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID)).toBeNull();
+    // "Not right now", never "not found": a throttled buyer is looking at a
+    // product that exists, and the answer is the same for one that does not.
+    expect(await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID)).toBe(PAGE_BUSY);
     expect(from).not.toHaveBeenCalled();
+  });
+
+  it("answers 'not right now' rather than 'not found' when a read fails", async () => {
+    state.errors.storefronts = { message: "connection reset" };
+    expect(await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID)).toBe(PAGE_BUSY);
+    state.errors.storefronts = null;
+    state.errors.products = { message: "connection reset" };
+    expect(await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID)).toBe(PAGE_BUSY);
   });
 
   it("answers null for a missing storefront, a switched-off page and a product not on the board", async () => {
@@ -230,7 +270,7 @@ describe("getPublicProductPage gates", () => {
   });
 
   it("reads the product scoped to the owner and to active status, and keeps the owner off the page", async () => {
-    const result = await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID);
+    const result = await loadedPage();
     expect(result).not.toBeNull();
     expect(state.filters.products).toEqual(
       expect.arrayContaining([
@@ -255,9 +295,9 @@ describe("getPublicProductPage gates", () => {
     ]);
     loadProductSale.mockResolvedValueOnce({
       priceCents: 10320,
-      sale: { regularPriceCents: 12900, priorPriceCents: 12900, percentOff: 20, endsAt: null },
+      sale: { regularPriceCents: 12900, priorPriceCents: 12900, percentOff: 20, offerPercent: 20, endsAt: null },
     });
-    const result = await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID);
+    const result = await loadedPage();
 
     // The sale read is the gate's, scoped to this storefront's owner and this product.
     expect(readActiveSales).toHaveBeenCalledWith(expect.anything(), OWNER_ID, PRODUCT_ID, expect.any(Date));
@@ -270,18 +310,50 @@ describe("getPublicProductPage gates", () => {
       regularPriceCents: 12900,
       priorPriceCents: 12900,
       percentOff: 20,
+      offerPercent: 20,
       endsAt: null,
     });
     expect(JSON.stringify(result?.page)).not.toContain(SALE_ID);
     // One rate-limit token for the whole page, sale included.
     expect(rateLimitKey).toHaveBeenCalledTimes(1);
+    // No end, so nothing for the page to read again for.
+    expect(result?.saleEndsInMs).toBeNull();
+  });
+
+  it("is 'not right now' when the store's sales cannot be read: the regular price is not a safe guess", async () => {
+    // readActiveSales answers null for 'could not be read' (it has its own
+    // tests). A page drawn at the listed price then would show, and the quote
+    // behind it charge, more than the seller is advertising.
+    readActiveSales.mockResolvedValueOnce(null);
+    expect(await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID)).toBe(PAGE_BUSY);
+    expect(loadProductSale).not.toHaveBeenCalled();
+  });
+
+  it("still refuses plainly a product that is not for sale, whatever the sales read did", async () => {
+    readActiveSales.mockResolvedValueOnce(null);
+    state.rows.products = null;
+    expect(await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID)).toBeNull();
+  });
+
+  it("tells the page how long its sale price has left, so an open tab reads it again", async () => {
+    const endsAt = new Date(Date.now() + 90_000).toISOString();
+    readActiveSales.mockResolvedValueOnce([
+      { id: "99999999-9999-4999-8999-999999999999", value: { type: "percent", percentOff: 20 }, startsAt: "2026-01-01T00:00:00Z", endsAt },
+    ]);
+    loadProductSale.mockResolvedValueOnce({
+      priceCents: 10320,
+      sale: { regularPriceCents: 12900, priorPriceCents: null, percentOff: null, offerPercent: 20, endsAt },
+    });
+    const result = await loadedPage();
+    expect(result.saleEndsInMs).toBeGreaterThan(80_000);
+    expect(result.saleEndsInMs).toBeLessThanOrEqual(90_000);
   });
 
   it("marks the page sold out from the tile's flag", async () => {
     state.rows.storefronts = storefrontRow({
       blocks: [{ type: "product", productId: PRODUCT_ID, x: 0, y: 0, w: 2, h: 2, soldOut: true }],
     });
-    const result = await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID);
+    const result = await loadedPage();
     expect(result?.page.product.soldOut).toBe(true);
   });
 
@@ -315,7 +387,7 @@ describe("getPublicProductPage gates", () => {
       tax_vat_id: null,
       tax_country: null,
     };
-    const result = await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID);
+    const result = await loadedPage();
     expect(result).not.toBeNull();
     expect(result?.page.storefront.seller.phone).toBeUndefined();
   });

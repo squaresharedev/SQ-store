@@ -17,6 +17,16 @@ export function formatPrice(amount: number, currency: Currency, locale: Locale):
   }).format(amount);
 }
 
+/** A price as short as it can be said exactly: a whole amount without its
+ *  cents ("€5", but "€74.50"). For a spot with room for little, like a sale chip. */
+export function formatPriceShort(amount: number, currency: Currency, locale: Locale): string {
+  return numberFormat(intlTag(locale, ENGLISH_PRICE_LOCALE), {
+    style: "currency",
+    currency,
+    ...(Number.isInteger(amount) ? { minimumFractionDigits: 0, maximumFractionDigits: 0 } : {}),
+  }).format(amount);
+}
+
 /** Human-readable file size for upload previews, e.g. "1.4 MB" ("1,4 MB" in Czech). */
 export function formatBytes(bytes: number, locale: Locale): string {
   if (bytes < 1024) return `${bytes} B`;

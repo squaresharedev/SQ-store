@@ -26,9 +26,10 @@ function StatusDot({ ok, label }: { ok: boolean; label: string }) {
 
 /**
  * Connection state for the seller's Stripe account. Not-connected renders the
- * onboarding CTA; connected renders a verified summary. Both CTAs only open
- * the info modal / stub — the actual connect flow is a redirect to STRIPE'S
- * hosted onboarding (never an in-app form).
+ * onboarding CTA; connected renders a verified summary, and, while Stripe will
+ * not yet take payments on the account, the way back into its onboarding.
+ * Both CTAs open the info modal: the connect flow itself is a redirect to
+ * STRIPE'S hosted onboarding (never an in-app form).
  */
 export function ConnectionStatusCard({
   account,
@@ -115,6 +116,19 @@ export function ConnectionStatusCard({
           <StatusDot ok={account.detailsSubmitted} label={t("connection.verified")} />
         </div>
       </div>
+      {/* Connected is not yet "can be paid": Stripe still wants something. */}
+      {!account.chargesEnabled && (
+        <div
+          className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3"
+          data-connect-unfinished=""
+        >
+          <p className="max-w-md font-inter text-sm text-muted-foreground">{t("connection.finish")}</p>
+          <Button variant="secondary" onClick={onConnect}>
+            {t("connection.finishButton")}
+            <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden />
+          </Button>
+        </div>
+      )}
       {account.requirementsDue.length > 0 && (
         <p className="mt-3 border-t border-border pt-3 font-inter text-sm text-danger-strong">
           {t("connection.requirementsDue")}

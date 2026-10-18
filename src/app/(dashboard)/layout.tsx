@@ -6,12 +6,21 @@ import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
 import { NavigationBlockerProvider } from "@/lib/hooks/useNavigationBlocker";
 
 /**
- * PROTECTED — single auth gate for the whole route group. Layouts persist
+ * PROTECTED: the auth gate for arriving in the route group. Layouts persist
  * across sibling navigations (Next.js does not re-render an unchanged parent
- * segment), so checking auth here — instead of in every page — means the
- * Supabase auth round-trip happens once per visit to the section, not on
- * every click between /products, /storefront, etc. Pages still get RLS as
- * the real ownership boundary; they no longer need to re-verify the session.
+ * segment), so this runs once per visit to the section, not on every click
+ * between /products, /orders, etc.
+ *
+ * WHICH IS WHY EVERY PAGE BELOW ALSO CALLS requireUser. With the gate here
+ * alone, a session that ended elsewhere (a password changed on another device,
+ * two-factor switched on, a sign-out in another tab) was never noticed on a
+ * move between sections: RLS answered every read with nothing, and the seller
+ * was shown "No orders yet" where the truth was "you are signed out". A page
+ * does render on each move, so the page asks. It costs no extra round trip:
+ * its own reads already go through the same cached session lookup in the same
+ * request. (A template.tsx here does NOT work: its server half renders with
+ * this layout, not with the page. tests/e2e/85-dead-ends.spec.ts pins it.)
+ * A NEW PAGE IN THIS GROUP MUST DO THE SAME.
  *
  * force-dynamic: relying on cookies() (inside requireUser) to auto-opt this
  * route into dynamic rendering is not reliable here — the Supabase client

@@ -449,12 +449,13 @@ test.describe("hosted product page", () => {
     const section = page.locator("[data-product-section='shipping']");
     await expect(section).toBeVisible();
     // The section asks for a CHOICE, never for prose: no textarea to fill in,
-    // and the store's own terms shown so "uses your store's terms" is
-    // something the seller can check rather than take on faith.
+    // and one line of the store's own terms (dispatch time first) so "uses
+    // your store's terms" is something the seller can check rather than take
+    // on faith. The rest, and editing it, is one press away without leaving
+    // the form.
     await expect(section.locator("textarea")).toHaveCount(0);
-    await expect(section.getByText("Ships in 3 days.")).toBeVisible();
     await expect(section.getByText("Ships within 24 hours")).toBeVisible();
-    await expect(section.getByRole("link", { name: /edit your shipping terms/i })).toBeVisible();
+    await expect(section.getByRole("button", { name: "Edit" })).toBeVisible();
 
     // The header summarises it as a real answer, not as "Empty".
     await expect(section.getByText("Store terms")).toBeVisible();
@@ -463,7 +464,9 @@ test.describe("hosted product page", () => {
     // across a save.
     await section.getByRole("combobox").click();
     await page.getByRole("option", { name: /Bulky items/ }).click();
-    await expect(section.getByText(/pallet courier/)).toBeVisible();
+    // The line now quotes the profile's own terms.
+    await expect(section.getByText("Made to order, allow 3 weeks")).toBeVisible();
+    await expect(section.getByText("Ships within 24 hours")).toHaveCount(0);
     await page.getByRole("button", { name: /save changes/i }).click();
     await expectToast(page, /was saved/i);
 
@@ -635,7 +638,8 @@ test.describe("hosted product page", () => {
         editorFooter.getByRole("link", { name }).click(),
       ]);
       await popup.waitForLoadState("domcontentloaded");
-      expect(popup.url()).toBe(href);
+      // As the browser writes it: an address with no path gains its slash.
+      expect(popup.url()).toBe(new URL(href).href);
       await popup.close();
     }
     // The board is still exactly where it was: every click opened a new tab,
@@ -732,7 +736,8 @@ test.describe("hosted product page", () => {
     const section = page.locator("[data-product-section='shipping']");
     await section.getByRole("combobox").click();
     await page.getByRole("option", { name: /Fragile glass/ }).click();
-    await expect(section.getByText("Double-boxed and signed for.")).toBeVisible();
+    // Its dispatch line, exactly as it was typed in Settings.
+    await expect(section.getByText("Packed by hand, 2-4 days")).toBeVisible();
     await expect(page.locator("[data-product-field='shippingProfile']")).toHaveAttribute(
       "data-product-value",
       fragile.id,

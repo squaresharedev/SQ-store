@@ -47,7 +47,10 @@ export interface BarChartProps {
   valueFormatter?: (value: number) => string;
   axisValueFormatter?: (value: number) => string;
   xFormatter?: (value: string) => string;
-  yAxisWidth?: number;
+  /** The values are counts (sales, views): the value axis steps in whole
+   *  numbers. Without it a week with one sale gets gridlines at 0.25, 0.5 and
+   *  0.75 of a sale. */
+  whole?: boolean;
   animate?: boolean;
   ariaLabel?: string;
   className?: string;
@@ -64,7 +67,7 @@ export function BarChart({
   valueFormatter: valueFormatterProp,
   axisValueFormatter: axisValueFormatterProp,
   xFormatter,
-  yAxisWidth = 44,
+  whole = false,
   animate = true,
   ariaLabel: ariaLabelProp,
   className,
@@ -109,7 +112,10 @@ export function BarChart({
         tickLine={false}
         tick={CHART.axisTick}
         tickMargin={8}
-        width={yAxisWidth}
+        // As wide as its widest label (see LineChart): labels differ in
+        // length by language, and a fixed column cuts the long ones off.
+        width="auto"
+        allowDecimals={!whole}
         tickFormatter={axisValueFormatter}
       />
       <Tooltip
@@ -119,7 +125,10 @@ export function BarChart({
         content={({ active, payload, label }) => (
           <ChartTooltipContent
             active={active}
-            payload={payload}
+            // A stack's readout lists what the bar is MADE of. A segment that
+            // is not in this bar has nothing to report here (the table twin
+            // still lists its zero).
+            payload={stacked ? payload?.filter((entry) => entry.value !== 0) : payload}
             label={label}
             valueFormatter={valueFormatter}
             labelFormatter={xFormatter}

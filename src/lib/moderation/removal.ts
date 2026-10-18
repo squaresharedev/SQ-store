@@ -13,6 +13,7 @@ import type { Locale } from "@/i18n/locales";
 import { msg, type MessageRef } from "@/i18n/types";
 import { dateTimeFormat, intlTag } from "@/lib/format/intl";
 import { fixFieldsFor, type FixTarget } from "@/lib/moderation/fix-fields";
+import { SUPPORT_EMAIL } from "@/lib/site";
 //
 // MIRROR OF @squaresharedev/moderation. That package is the cross-repo
 // contract (the admin panel writes these values, the marketplace reads them);
@@ -244,7 +245,7 @@ export function formatTakedownDate(iso: string, locale: Locale): string {
 /** Where a seller writes when the dashboard is not enough: a question about a
  *  decision, or one the in-app appeal cannot take. The statement of reasons
  *  prints it. Mirror of APPEAL_EMAIL in the admin panel. */
-export const REMOVAL_APPEAL_EMAIL = "support@squareshare.eu";
+export const REMOVAL_APPEAL_EMAIL = SUPPORT_EMAIL;
 
 /**
  * A decision's reference, as the statement, the banner and staff all quote

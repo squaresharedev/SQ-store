@@ -16,6 +16,12 @@ describe("sanitizeFilename", () => {
     expect(sanitizeFilename("/absolute/path/file.zip")).toBe("file.zip");
   });
 
+  it("keeps the extension of a name with no Latin letter in it", () => {
+    expect(sanitizeFilename("🏺.pdf")).toBe("file.pdf");
+    expect(sanitizeFilename("Ελληνικό βιβλίο.epub")).toBe("file.epub");
+    expect(sanitizeFilename("Vase 🏺.pdf")).toBe("Vase-.pdf");
+  });
+
   it("never emits a leading dot (no hidden/relative segments)", () => {
     expect(sanitizeFilename(".htaccess")).toBe("htaccess");
     expect(sanitizeFilename("..")).toBe("file");

@@ -12,44 +12,58 @@ import {
   parsePlanId,
   planForLookupKey,
 } from "@/lib/billing/plans";
+import { PLAN_PRICE_SEED } from "@/lib/billing/pricing-seed";
+import { findPlanPrice } from "@/lib/pricing";
+
+/** A plan's seeded monthly price row. */
+const seeded = (plan: (typeof PLAN_IDS)[number]) => {
+  const price = findPlanPrice(PLAN_PRICE_SEED, plan);
+  if (!price) throw new Error(`no seeded price for ${plan}`);
+  return price;
+};
 
 /**
- * The catalog's own consistency. Whatever the final numbers are, these hold,
- * or the pricing modal would tell a seller something that is not true.
+ * The catalog's own consistency, and the seeded prices' (what plan_prices
+ * starts with). Whatever the final numbers are, these hold, or the plans page
+ * would tell a seller something that is not true.
  */
 describe("the plan catalog", () => {
   it("starts everyone on a Free plan that costs nothing", () => {
     expect(DEFAULT_PLAN).toBe("free");
-    expect(PLANS.free.priceCents).toEqual({ month: 0, year: 0 });
-    expect(PLANS.free.lookupKey).toBeNull();
+    expect(seeded("free").priceCents).toBe(0);
+    expect(seeded("free").stripeLookupKey).toBeNull();
   });
 
-  it("gives every paid plan a price and a Stripe lookup key per interval", () => {
+  it("gives every paid plan a price and a Stripe lookup key that names it", () => {
     for (const plan of PAID_PLAN_IDS) {
-      for (const interval of BILLING_INTERVALS) {
-        expect(PLANS[plan].priceCents[interval]).toBeGreaterThan(0);
-        expect(PLANS[plan].lookupKey?.[interval]).toMatch(new RegExp(`^${plan}_${interval}_[a-z]{3}_v\\d+$`));
-      }
+      const price = seeded(plan);
+      expect(price.priceCents).toBeGreaterThan(0);
+      expect(price.stripeLookupKey).toMatch(new RegExp(`^${plan}_${price.interval}_[a-z]{3}_v\\d+$`));
+      // The webhook reads the plan back out of this key.
+      expect(planForLookupKey(price.stripeLookupKey!)).toEqual({ plan, interval: price.interval });
     }
   });
 
-  it("never uses one lookup key twice", () => {
-    const keys = PAID_PLAN_IDS.flatMap((plan) => BILLING_INTERVALS.map((i) => PLANS[plan].lookupKey![i]));
+  it("never uses one lookup key twice, and seeds one row per plan", () => {
+    const keys = PLAN_PRICE_SEED.flatMap((price) => (price.stripeLookupKey ? [price.stripeLookupKey] : []));
     expect(new Set(keys).size).toBe(keys.length);
+    expect(PLAN_PRICE_SEED.map((price) => price.planId)).toEqual([...PLAN_IDS]);
+    for (const price of PLAN_PRICE_SEED) expect(BILLING_INTERVALS).toContain(price.interval);
   });
 
-  it("never charges more for a year than for twelve months", () => {
-    for (const plan of PLAN_IDS) {
-      expect(PLANS[plan].priceCents.year).toBeLessThanOrEqual(PLANS[plan].priceCents.month * 12);
+  it("gets cheaper per sale as the subscription gets dearer, through either door", () => {
+    for (let i = 1; i < PLAN_IDS.length; i += 1) {
+      const lower = seeded(PLAN_IDS[i - 1]!);
+      const upper = seeded(PLAN_IDS[i]!);
+      expect(upper.priceCents).toBeGreaterThan(lower.priceCents);
+      expect(upper.directFeeBps).toBeLessThan(lower.directFeeBps);
+      expect(upper.marketplaceFeeBps).toBeLessThan(lower.marketplaceFeeBps);
     }
   });
 
-  it("gets cheaper per sale as the subscription gets dearer", () => {
-    for (let i = 1; i < PLAN_IDS.length; i += 1) {
-      const lower = PLANS[PLAN_IDS[i - 1]!];
-      const upper = PLANS[PLAN_IDS[i]!];
-      expect(upper.priceCents.month).toBeGreaterThan(lower.priceCents.month);
-      expect(upper.feeBps).toBeLessThan(lower.feeBps);
+  it("charges more for a sale the marketplace brought than for the seller's own", () => {
+    for (const plan of PLAN_IDS) {
+      expect(seeded(plan).marketplaceFeeBps, plan).toBeGreaterThan(seeded(plan).directFeeBps);
     }
   });
 
@@ -64,9 +78,11 @@ describe("the plan catalog", () => {
 
   it("keeps fees within a whole sale", () => {
     for (const plan of PLAN_IDS) {
-      expect(Number.isInteger(PLANS[plan].feeBps)).toBe(true);
-      expect(PLANS[plan].feeBps).toBeGreaterThanOrEqual(0);
-      expect(PLANS[plan].feeBps).toBeLessThanOrEqual(10_000);
+      for (const bps of [seeded(plan).directFeeBps, seeded(plan).marketplaceFeeBps]) {
+        expect(Number.isInteger(bps)).toBe(true);
+        expect(bps).toBeGreaterThanOrEqual(0);
+        expect(bps).toBeLessThanOrEqual(10_000);
+      }
     }
   });
 

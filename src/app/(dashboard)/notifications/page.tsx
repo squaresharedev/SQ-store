@@ -3,6 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { NotificationsPageClient } from "@/components/notifications/NotificationsPageClient";
 import { notificationFilterQuery, parseNotificationFilter } from "@/lib/notifications/filters";
 import { getNotificationFacets, getNotificationPage } from "@/lib/notifications/queries";
+import { requireUser } from "@/lib/auth/session";
+import { NOTIFICATIONS_PATH } from "@/lib/dashboard/paths";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Notifications.metadata.notifications");
@@ -25,6 +27,9 @@ export default async function NotificationsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  // The layout's session gate does not run again on a move between sections
+  // (see ../layout.tsx, or ../../layout.tsx from a nested page): a page asks.
+  await requireUser(NOTIFICATIONS_PATH);
   const filter = parseNotificationFilter(await searchParams);
   const [{ notifications, nextCursor }, facets] = await Promise.all([
     getNotificationPage({ filter }),

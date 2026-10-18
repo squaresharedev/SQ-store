@@ -390,6 +390,8 @@
     "noTerms": "Ancora nessuna condizione di spedizione scritta.",
     "profile": "Profilo di spedizione",
     "edit": "Modifica",
+    "unpriced": "La spedizione non ha un prezzo in {currency}, quindi gli acquirenti non possono pagare questo prodotto al checkout.",
+    "unpricedAction": "Imposta i prezzi di spedizione",
     "modalTitle": "Spedizioni e resi"
   },
   "optionsField": {

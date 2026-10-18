@@ -89,6 +89,15 @@ export type BuyerOrder = {
   /** The seller's own dispatch line for this product, if any. */
   dispatch: string | null;
   withdrawal: BuyerWithdrawal;
+  /** Where the MONEY stands, as a buyer needs to know it: still being
+   *  confirmed, paid, or given back. (A dispute is between the buyer and their
+   *  bank and reads as paid.) */
+  payment: "pending" | "paid" | "refunded";
+  /** When the seller refunded the order, if they have. */
+  refundedAt: string | null;
+  /** Whether the confirmation email was actually sent. The page says "on its
+   *  way to j***@..." only then. */
+  confirmationSent: boolean;
 };
 
 export type OrderPageData = {

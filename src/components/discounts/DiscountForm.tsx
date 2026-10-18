@@ -8,15 +8,13 @@ import { CheckboxListPanel } from "@/components/ui/CheckboxListPanel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
-import { Switch } from "@/components/ui/switch";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { useToast } from "@/components/ui/Toast";
-import { helpTextClass, secondaryButtonClass } from "@/components/ui/control-styles";
+import { helpTextClass, quietLinkClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { SettingsCard } from "@/components/settings/SettingsCard";
-import { PriceField } from "@/components/products/PriceField";
 import { cn } from "@/lib/utils";
-import { formatCents } from "@/lib/format/money";
+import { currencySymbol, formatCents } from "@/lib/format/money";
 import {
   fromLocalInstant,
   localTimeZone,
@@ -26,13 +24,13 @@ import {
 } from "@/lib/format/calendar";
 import { parseFormPriceCents } from "@/lib/products/price";
 import { generateDiscountCode } from "@/lib/discounts/code";
-import { priceOrder, saleUnitPriceCents } from "@/lib/discounts/pricing";
+import { priceOfOne } from "@/lib/discounts/pricing";
 import { saleHasStarted } from "@/lib/discounts/status";
 import { createDiscount, updateDiscount } from "@/lib/discounts/actions";
 import { DISCOUNTS_PATH } from "@/lib/discounts/paths";
 import { useNow } from "@/lib/hooks/useNow";
 import type { ActionError } from "@/lib/errors";
-import type { Currency } from "@/types/product";
+import { CURRENCIES, type Currency } from "@/types/product";
 import {
   DISCOUNT_CODE_MAX,
   DISCOUNT_PERCENT_MAX,
@@ -45,6 +43,7 @@ import {
   type DiscountValue,
   type DiscountView,
 } from "@/types/discount";
+import { DiscountExample } from "./DiscountExample";
 import { DiscountFormSectionsSkeleton } from "./DiscountsSkeleton";
 import { ScheduleField, type ScheduleValue } from "./ScheduleField";
 import { useDiscountWording } from "./useDiscountWording";
@@ -73,10 +72,16 @@ type FormState = {
   productIds: string[];
   start: ScheduleValue;
   end: ScheduleValue;
-  limitOn: boolean;
+  /** Empty for no limit. */
   usageLimit: string;
+  /** A code's on/off switch, which lives on its row in the list. The form
+   *  sends it back as it found it. */
   enabled: boolean;
 };
+
+/** The quiet panel the form speaks in: the summary at its foot, and the note
+ *  at the top of a sale that has started. */
+const PANEL = "flex flex-col gap-1 border border-border bg-secondary/40 p-4";
 
 /** An instant as the form holds it: the local date and time a picker shows. */
 function at(iso: string | null): ScheduleValue {
@@ -86,8 +91,9 @@ function at(iso: string | null): ScheduleValue {
 
 function initialState(discount: DiscountView | null, products: readonly DiscountProductChoice[]): FormState {
   if (!discount) {
+    // A sale first: the discount most sellers come here to make.
     return {
-      kind: "code",
+      kind: "automatic",
       code: "",
       shareChannel: "",
       valueType: "percent",
@@ -98,7 +104,6 @@ function initialState(discount: DiscountView | null, products: readonly Discount
       productIds: [],
       start: { mode: "open" },
       end: { mode: "open" },
-      limitOn: false,
       usageLimit: "",
       enabled: true,
     };
@@ -116,10 +121,17 @@ function initialState(discount: DiscountView | null, products: readonly Discount
     productIds: discount.productIds,
     start: at(discount.startsAt),
     end: at(discount.endsAt),
-    limitOn: discount.usageLimit !== null,
     usageLimit: discount.usageLimit !== null ? String(discount.usageLimit) : "",
     enabled: discount.enabled,
   };
+}
+
+/** The currencies an amount off can be in: the catalogue's, plus the one a
+ *  discount being edited already uses, in CURRENCIES order. A catalogue in
+ *  one currency gets one, and so no choice to make. */
+function amountCurrencies(products: readonly DiscountProductChoice[], current: Currency): Currency[] {
+  const used = new Set<Currency>([current, ...products.map((product) => product.currency)]);
+  return CURRENCIES.filter((currency) => used.has(currency));
 }
 
 /** The value as typed, or null while it is not one yet. */
@@ -161,9 +173,16 @@ function tomorrowMorning(): ScheduleValue {
 
 /**
  * THE DISCOUNT FORM: one short page for a sale or a code, top to bottom in
- * the order a seller decides them: what kind, how much, on what, when, and
- * (for a code) where it will be shared and how often it may be used. A live
- * summary at the foot says it back in one sentence with an example price.
+ * the order a seller decides them: what kind (a sale unless they say
+ * otherwise), the code (filled in for them, with where it will be shared and
+ * an optional limit), how much, on what, when. A live summary at the foot says
+ * it back in one sentence and shows what it does to one product
+ * (DiscountExample); for a sale it also leads to how sales look on the
+ * storefront.
+ *
+ * Simple first: how much is ONE box with its unit beside it (%, or the
+ * catalogue's currency, or currencies), and a sale that has started shows only
+ * what can still change, its end.
  *
  * The server decides everything (lib/discounts/actions.ts re-parses the
  * whole input); this form only gathers it. Once a discount has started its
@@ -184,15 +203,18 @@ type DiscountFormProps = {
   /** The discount being edited, or null for a new one. */
   discount: DiscountView | null;
   products: readonly DiscountProductChoice[];
+  /** The storefront designer's Sale chip section, for the seller's most
+   *  recent storefront (null without one). */
+  chipHref?: string | null;
 };
 
-function DiscountFormFields({ discount, products, now }: DiscountFormProps & { now: Date }) {
+function DiscountFormFields({ discount, products, chipHref = null, now }: DiscountFormProps & { now: Date }) {
   const t = useTranslations("Discounts.form");
   const words = useDiscountWording();
   const locale = useLocale();
   const router = useRouter();
   const toast = useToast();
-  const ids = { code: useId(), channel: useId(), percent: useId(), amount: useId(), limit: useId(), enabled: useId() };
+  const ids = { code: useId(), channel: useId(), value: useId(), limit: useId() };
   const [state, setState] = useState<FormState>(() => initialState(discount, products));
   const [error, setError] = useState<ActionError | null>(null);
   const [saving, startSaving] = useTransition();
@@ -210,6 +232,10 @@ function DiscountFormFields({ discount, products, now }: DiscountFormProps & { n
   const startIso = instantOf(state.start, discount?.startsAt ?? null);
   const endIso = instantOf(state.end, discount?.endsAt ?? null);
   const today = toISODate(now);
+  const currencies = amountCurrencies(products, state.currency);
+  const unit = state.valueType === "percent" ? "percent" : state.currency;
+  // Only worth saying once a date is in play.
+  const datePicked = state.start.mode === "at" || state.end.mode === "at";
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -231,7 +257,7 @@ function DiscountFormFields({ discount, products, now }: DiscountFormProps & { n
         ? {
             code: state.code,
             shareChannel: state.shareChannel,
-            usageLimit: state.limitOn ? Number(state.usageLimit) : null,
+            usageLimit: state.usageLimit.trim() === "" ? null : Number(state.usageLimit),
             enabled: state.enabled,
           }
         : {}),
@@ -250,51 +276,46 @@ function DiscountFormFields({ discount, products, now }: DiscountFormProps & { n
   // THE SUMMARY: what the discount does, on what, and one worked example.
   const sample = products.find((product) => state.productIds.includes(product.id)) ?? products[0];
   const example =
-    value && sample
-      ? state.kind === "automatic"
-        ? saleUnitPriceCents(value, sample.priceCents, sample.currency)
-        : priceOrder({
-            regularUnitCents: sample.priceCents,
-            currency: sample.currency,
-            quantity: 1,
-            saleUnitCents: null,
-            code: value,
-          }).itemsCents
-      : null;
+    value && sample ? priceOfOne(state.kind, value, sample.priceCents, sample.currency) : null;
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-6" data-discount-form="">
-      <SettingsCard title={t("kind.title")}>
-        {discount ? (
-          // A sale cannot turn into a code or back: the two keep different
-          // histories (see the migration's EU price rule).
-          <p className="text-sm text-foreground" data-discount-kind-fixed={discount.kind}>
-            {words.kind(discount.kind)}
-            <span className={cn(helpTextClass, "block")}>{t("kind.fixed")}</span>
-          </p>
-        ) : (
+      {/* Asked once, when the discount is made. A sale cannot turn into a
+          code or back (the two keep different histories, see the migration's
+          EU price rule), so an edit says which it is in its heading instead
+          (DiscountFormView). */}
+      {!discount && (
+        <SettingsCard title={t("kind.title")}>
           <ChoiceCards
             name="discount-kind"
             legend={<span className="sr-only">{t("kind.title")}</span>}
             value={state.kind}
-            onChange={(kind) => set({ kind })}
+            // A code arrives filled in; the seller can type their own over it.
+            onChange={(kind) => set(kind === "code" && !state.code ? { kind, code: generateDiscountCode() } : { kind })}
             optionDataAttribute="data-discount-kind-option"
             options={[
-              { value: "code", label: t("kind.code"), hint: t("kind.codeHint") },
               { value: "automatic", label: t("kind.automatic"), hint: t("kind.automaticHint") },
+              { value: "code", label: t("kind.code"), hint: t("kind.codeHint") },
             ]}
           />
-        )}
-      </SettingsCard>
+        </SettingsCard>
+      )}
+
+      {/* What can still change, said before anything else on the page. */}
+      {locked && (
+        <p className={cn(PANEL, "text-sm text-foreground")} data-discount-locked="">
+          {t("locked")}
+        </p>
+      )}
 
       {isCode && (
         <SettingsCard title={t("code.title")} description={t("code.description")}>
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor={ids.code}>{t("code.label")}</Label>
               <div className="flex gap-2">
                 <Input
                   id={ids.code}
+                  aria-label={t("code.label")}
                   value={state.code}
                   onChange={(event) => set({ code: event.target.value.toUpperCase() })}
                   maxLength={DISCOUNT_CODE_MAX}
@@ -335,30 +356,34 @@ function DiscountFormFields({ discount, products, now }: DiscountFormProps & { n
                   </button>
                 ))}
               </div>
-              <p className={helpTextClass}>{t("channel.hint")}</p>
+            </div>
+            <div className="flex max-w-48 flex-col gap-1.5">
+              <Label htmlFor={ids.limit}>{t("limit.label")}</Label>
+              <Input
+                id={ids.limit}
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={DISCOUNT_USAGE_LIMIT_MAX}
+                step={1}
+                placeholder={t("limit.none")}
+                value={state.usageLimit}
+                onChange={(event) => set({ usageLimit: event.target.value })}
+              />
             </div>
           </div>
         </SettingsCard>
       )}
 
-      <SettingsCard title={t("value.title")} description={isCode ? t("value.order") : t("value.each")}>
-        <div className="flex flex-col gap-4">
-          <SegmentedControl
-            ariaLabel={t("value.title")}
-            value={state.valueType}
-            disabled={locked}
-            options={[
-              { value: "percent", label: t("value.percent") },
-              { value: "amount", label: t("value.amount") },
-            ]}
-            onChange={(valueType) => set({ valueType })}
-          />
-          {state.valueType === "percent" ? (
-            <div className="flex max-w-48 flex-col gap-1.5">
-              <Label htmlFor={ids.percent}>{t("value.percentLabel")}</Label>
-              <div className="flex items-center gap-2">
+      {!locked && (
+        <SettingsCard title={t("value.title")} description={isCode ? t("value.order") : t("value.each")}>
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap items-stretch gap-3">
+              {state.valueType === "percent" ? (
                 <Input
-                  id={ids.percent}
+                  key="percent"
+                  id={ids.value}
+                  aria-label={t("value.percentLabel")}
                   type="number"
                   inputMode="numeric"
                   min={DISCOUNT_PERCENT_MIN}
@@ -366,35 +391,48 @@ function DiscountFormFields({ discount, products, now }: DiscountFormProps & { n
                   step={1}
                   value={state.percent}
                   onChange={(event) => set({ percent: event.target.value })}
-                  disabled={locked}
+                  className="w-28"
                 />
-                <span className="text-sm text-muted-foreground">%</span>
-              </div>
-            </div>
-          ) : (
-            <div className="flex max-w-xs flex-col gap-1.5">
-              <PriceField
-                id={ids.amount}
-                errorId={`${ids.amount}-error`}
-                label={t("value.amountLabel")}
-                datapoints={false}
-                price={state.amount}
-                currency={state.currency}
-                onPriceChange={(amount) => set({ amount })}
-                onCurrencyChange={(currency) => set({ currency })}
+              ) : (
+                <Input
+                  key="amount"
+                  id={ids.value}
+                  aria-label={t("value.amountLabel")}
+                  inputMode="decimal"
+                  autoComplete="off"
+                  placeholder="0.00"
+                  value={state.amount}
+                  onChange={(event) => set({ amount: event.target.value })}
+                  className="w-28"
+                />
+              )}
+              {/* The unit IS the choice between a percentage and an amount,
+                  and, for an amount, its currency. */}
+              <SegmentedControl
+                ariaLabel={t("value.unit")}
+                value={unit}
+                options={[
+                  { value: "percent", label: "%" },
+                  ...currencies.map((currency) => ({ value: currency, label: currencySymbol(currency, locale) })),
+                ]}
+                onChange={(next) =>
+                  set(next === "percent" ? { valueType: "percent" } : { valueType: "amount", currency: next })
+                }
               />
-              <p className={helpTextClass}>{t("value.currencyHint")}</p>
             </div>
-          )}
-        </div>
-      </SettingsCard>
+            {state.valueType === "amount" && currencies.length > 1 && (
+              <p className={helpTextClass}>{t("value.currencyHint")}</p>
+            )}
+          </div>
+        </SettingsCard>
+      )}
 
+      {!locked && (
       <SettingsCard title={t("products.title")}>
         <div className="flex flex-col gap-4">
           <SegmentedControl
             ariaLabel={t("products.title")}
             value={state.appliesTo}
-            disabled={locked}
             options={[
               { value: "all", label: t("products.all") },
               { value: "products", label: t("products.some") },
@@ -411,15 +449,18 @@ function DiscountFormFields({ discount, products, now }: DiscountFormProps & { n
               value={state.productIds}
               onChange={(productIds) => set({ productIds })}
               summaryLabel={t("products.summary", { count: state.productIds.length })}
-              disabled={locked}
               filter={{ label: t("products.search") }}
               emptyLabel={t("products.none")}
             />
           )}
         </div>
       </SettingsCard>
+      )}
 
-      <SettingsCard title={t("schedule.title")} description={t("schedule.timeZone", { zone: localTimeZone() })}>
+      <SettingsCard
+        title={t("schedule.title")}
+        description={datePicked ? t("schedule.timeZone", { zone: localTimeZone() }) : undefined}
+      >
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
             <span className="text-sm font-medium text-foreground">{t("schedule.starts")}</span>
@@ -467,53 +508,7 @@ function DiscountFormFields({ discount, products, now }: DiscountFormProps & { n
         </div>
       </SettingsCard>
 
-      {isCode && (
-        <SettingsCard title={t("limit.title")}>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <Switch
-                id={ids.limit}
-                checked={state.limitOn}
-                onCheckedChange={(limitOn) => set({ limitOn, usageLimit: state.usageLimit || "100" })}
-                aria-labelledby={`${ids.limit}-label`}
-              />
-              <span id={`${ids.limit}-label`} className="text-sm text-foreground">
-                {t("limit.label")}
-              </span>
-            </div>
-            {state.limitOn && (
-              <div className="flex max-w-48 flex-col gap-1.5">
-                <Label htmlFor={`${ids.limit}-count`}>{t("limit.count")}</Label>
-                <Input
-                  id={`${ids.limit}-count`}
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  max={DISCOUNT_USAGE_LIMIT_MAX}
-                  step={1}
-                  value={state.usageLimit}
-                  onChange={(event) => set({ usageLimit: event.target.value })}
-                />
-              </div>
-            )}
-            <div className="flex items-center gap-3">
-              <Switch
-                id={ids.enabled}
-                checked={state.enabled}
-                onCheckedChange={(enabled) => set({ enabled })}
-                aria-labelledby={`${ids.enabled}-label`}
-              />
-              <span id={`${ids.enabled}-label`} className="text-sm text-foreground">
-                {t("enabled")}
-              </span>
-            </div>
-          </div>
-        </SettingsCard>
-      )}
-
-      {locked && <p className={helpTextClass}>{t("locked")}</p>}
-
-      <section className="flex flex-col gap-1 border border-border bg-secondary/40 p-4" aria-label={t("summary.title")} data-discount-summary="">
+      <section className={PANEL} aria-label={t("summary.title")} data-discount-summary="">
         <p className="text-sm font-medium text-foreground">
           {[
             isCode && state.code ? state.code : null,
@@ -533,14 +528,15 @@ function DiscountFormFields({ discount, products, now }: DiscountFormProps & { n
             endIso ? t("summary.ends", { date: words.when(endIso) }) : t("summary.noEnd"),
           ].join(" · ")}
         </p>
-        {example !== null && sample && example < sample.priceCents && (
-          <p className={helpTextClass} data-discount-example={example}>
-            {t("summary.example", {
-              title: sample.title,
-              regular: formatCents(sample.priceCents, sample.currency, locale),
-              now: formatCents(example, sample.currency, locale),
-            })}
-          </p>
+        {value && example !== null && sample && example < sample.priceCents && (
+          <DiscountExample product={sample} value={value} nowCents={example} />
+        )}
+        {/* Where a buyer meets a sale first: its chip on the storefront. In a
+            new tab, so the form keeps what has been typed. */}
+        {!isCode && chipHref && (
+          <a href={chipHref} target="_blank" rel="noopener" className={cn(quietLinkClass, "mt-2 self-start")} data-discount-chip-link="">
+            {t("summary.chipLink")}
+          </a>
         )}
       </section>
 

@@ -155,6 +155,12 @@ const REGISTRY: Record<string, Classification> = {
   // Marking an order shipped mails the BUYER, so it is bounded like every
   // other action that can put mail in a stranger's inbox.
   "lib/orders/actions.ts::markOrderShipped": limited(),
+  // Taking an order back mails the buyer too, and for an order a provider
+  // charged it moves money: its own budget (orderRefund).
+  "lib/orders/actions.ts::refundOrder": limited(),
+  // Creates a connected account at Stripe and a link into its onboarding, on
+  // the platform's key: the billing write budget, like starting a checkout.
+  "lib/payments/connect/actions.ts::startStripeOnboarding": limited(),
   "lib/discounts/actions.ts::createDiscount": limited(),
   "lib/discounts/actions.ts::updateDiscount": limited(),
   "lib/discounts/actions.ts::setCodeEnabled": limited(),

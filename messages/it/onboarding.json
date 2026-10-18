@@ -38,6 +38,22 @@
       "actionOpen": "Apri editor",
       "cta": "Pubblica il tuo prodotto",
       "ctaPagesOff": "Attiva le pagine prodotto"
+    },
+    "payments": {
+      "label": "Ricevi pagamenti",
+      "detail": "Collega Stripe affinché gli acquirenti possano pagare con carta sulle tue pagine prodotto.",
+      "detailUnfinished": "Stripe ha ancora bisogno di alcuni dati prima che gli acquirenti possano pagare.",
+      "detailDone": "Gli acquirenti possono pagare con carta.",
+      "action": "Collega Stripe",
+      "actionFinish": "Completa su Stripe",
+      "cta": "Collega Stripe per ricevere pagamenti"
+    },
+    "delivery": {
+      "label": "Imposta i prezzi di spedizione",
+      "detail": "Senza un prezzo di spedizione, i prodotti da spedire non hanno il pulsante di acquisto.",
+      "detailDone": "Gli acquirenti vedono il totale completo prima di pagare.",
+      "action": "Imposta i prezzi",
+      "cta": "Imposta i tuoi prezzi di spedizione"
     }
   },
   "checklist": {
@@ -198,7 +214,10 @@
         "title": "Incorpora una vetrina nel tuo sito",
         "body": "Ogni vetrina ha un pulsante di incorporamento che ti dà uno snippet come questo. Il widget è ancora in sviluppo e non compare ancora sugli altri siti.",
         "bodyButton": "Questo pulsante ti dà uno snippet come quello qui sotto da incollare nel tuo sito. Il widget è ancora in sviluppo e non compare ancora sugli altri siti.",
-        "fallbackBody": "Quando avrai una vetrina, il pulsante di incorporamento sulla sua scheda ti darà uno snippet come questo. Il widget è ancora in sviluppo e non compare ancora sugli altri siti."
+        "fallbackBody": "Quando avrai una vetrina, il pulsante di incorporamento sulla sua scheda ti darà uno snippet come questo. Il widget è ancora in sviluppo e non compare ancora sugli altri siti.",
+        "bodyLive": "Ogni vetrina ha un pulsante di incorporamento che ti dà uno snippet come questo. Incollalo nel tuo sito e la vetrina compare lì.",
+        "bodyButtonLive": "Questo pulsante ti dà uno snippet come quello qui sotto. Incollalo nel tuo sito e la vetrina compare lì.",
+        "fallbackBodyLive": "Quando avrai una vetrina, il pulsante di incorporamento sulla sua scheda ti darà uno snippet come questo da incollare nel tuo sito."
       },
       "ordersSearch": {
         "title": "Trova un ordine",

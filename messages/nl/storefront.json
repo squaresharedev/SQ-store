@@ -146,9 +146,12 @@
       "thankYouMessage": "Bedankbericht",
       "thankYouCelebration": "Bedankanimatie",
       "checkoutPayButton": "Betaalknop",
+      "saleChip": "Actielabel",
+      "salePrice": "Actieprijs",
       "productPagePhoto": "Foto van de productpagina",
       "checkoutPhoto": "Foto van afrekenen",
-      "thanksPhoto": "Foto van de bedankpagina"
+      "thanksPhoto": "Foto van de bedankpagina",
+      "chipScale": "Even grote labels op alle kaarten"
     }
   },
   "editorSearch": {
@@ -206,11 +209,23 @@
     "snippetLabel": "Insluitcode",
     "snippetReadyHint": "Plak deze insluitcode in de HTML van je site.",
     "snippetLockedHint": "Schakel insluiten in en voeg minstens één domein toe om de knop Kopiëren te ontgrendelen.",
+    "snippetSaveHint": "Sla je instellingen op om de knop Kopiëren te ontgrendelen.",
+    "pagesOffHint": "Zet eerst productpagina's aan in de editor. Een klik op een product opent de pagina ervan.",
+    "notShowingLabel": "Als de etalage niet verschijnt",
+    "notShowingTip": "Het adres van je site moet bij Toegestane domeinen staan en de site moet https gebruiken. Sitebouwers die eigen HTML in een eigen frame plaatsen (Wix, Google Sites) worden nog niet ondersteund.",
     "copySnippet": {
       "copy": "Insluitcode kopiëren",
       "copied": "Insluitcode gekopieerd",
       "failed": "Kopiëren van de insluitcode is mislukt. Selecteer en kopieer hem handmatig.",
       "cannotCopyYet": "insluitcode kan nog niet worden gekopieerd"
+    },
+    "privacyLabel": "Voor je privacybeleid",
+    "privacyHint": "Je site laadt de etalage nu van Squareshare, dus dat hoort in het privacybeleid te staan. Je kunt deze tekst plakken:",
+    "privacyText": "Deze site toont een etalage die door Squareshare wordt geleverd. Bij het laden worden het IP-adres en de browsergegevens van de bezoeker naar Squareshare gestuurd om de producten te tonen en bezoeken te tellen. Squareshare plaatst hiervoor geen cookies en slaat niets op het apparaat van de bezoeker op. Meer informatie: {policy}",
+    "copyPrivacy": {
+      "copy": "Privacytekst kopiëren",
+      "copied": "Privacytekst gekopieerd",
+      "failed": "Kopiëren van de tekst is mislukt. Selecteer en kopieer hem handmatig."
     },
     "snippetKeyLabel": "Insluitingssleutel",
     "rotateConfirmText": "Vernieuwen genereert een nieuwe sleutel. Elke kopie van de oude insluitcode stopt onmiddellijk met werken, ook op sites die je nog wilt gebruiken: je moet de nieuwe insluitcode overal opnieuw plakken.",
@@ -222,6 +237,19 @@
     "saved": "Insluitingsinstellingen opgeslagen.",
     "newKeyIssued": "Nieuwe insluitingssleutel gegenereerd.",
     "newKeyDetail": "Plak de insluitcode overnieuw op elke plek waar deze etalage is ingesloten."
+  },
+  "share": {
+    "title": "Link naar de etalage",
+    "live": "Je etalage heeft een eigen pagina. Iedereen met deze link kan rondkijken, een website is niet nodig.",
+    "pagesOff": "Zet productpagina's aan in de editor en deze etalage krijgt een link om te delen.",
+    "detailsMissing": "Deze etalage krijgt een link om te delen zodra je verkopersgegevens compleet zijn.",
+    "open": "Openen",
+    "openDesigner": "Editor openen",
+    "copy": {
+      "copy": "Link naar de etalage kopiëren",
+      "copied": "Link naar de etalage gekopieerd",
+      "failed": "Kopiëren van de link is mislukt. Selecteer en kopieer hem handmatig."
+    }
   },
   "wizard": {
     "category": {
@@ -559,6 +587,27 @@
     "spotBottomCenter": "Prijslabel ondermidden",
     "spotBottomRight": "Prijslabel rechtsonder"
   },
+  "saleBadge": {
+    "title": "Actielabel",
+    "says": "Weergave",
+    "hint": "Staat op het product zolang een actie de prijs verlaagt.",
+    "percent": "Percentage",
+    "amount": "Bedrag",
+    "hidden": "Verborgen",
+    "lookLabel": "Stijl",
+    "look": {
+      "pill": "Pil",
+      "sticker": "Sticker",
+      "flag": "Vaantje",
+      "ribbon": "Lint"
+    },
+    "spot": "Actielabel {spot, select, top_left {linksboven} top_center {bovenmidden} top_right {rechtsboven} middle_center {midden} bottom_left {linksonder} bottom_center {ondermidden} bottom_right {rechtsonder} other {}}"
+  },
+  "chipScale": {
+    "label": "Op grotere kaarten",
+    "tile": "Meegroeien",
+    "cell": "Even groot"
+  },
   "layout": {
     "canvasWidth": "Canvasbreedte",
     "canvasWidthAriaLabel": "Canvasbreedte in blokken",
@@ -750,6 +799,11 @@
         "plusShipping": "Plus verzendkosten",
         "freeShipping": "Gratis verzending",
         "none": "Geen"
+      },
+      "saleStyle": {
+        "label": "Actieprijs",
+        "strike": "Lijn",
+        "slash": "Schuin"
       },
       "useStorefrontAccent": "Etalage-accent gebruiken",
       "useButtonTextColor": "Knoptekstkleur gebruiken"

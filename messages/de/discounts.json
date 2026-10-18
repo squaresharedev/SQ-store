@@ -20,7 +20,7 @@
     "allProducts": "Alle Produkte",
     "someProducts": "{count, plural, one {# Produkt} other {# Produkte}}",
     "kindCode": "Rabattcode",
-    "kindAutomatic": "Automatische Aktion",
+    "kindAutomatic": "Aktion",
     "status": {
       "scheduled": "Geplant",
       "active": "Aktiv",
@@ -80,14 +80,15 @@
   "form": {
     "newTitle": "Neuer Rabatt",
     "editTitle": "Rabatt bearbeiten",
+    "editSale": "Aktion bearbeiten",
+    "editCode": "Rabattcode bearbeiten",
     "back": "Zurück zu Rabatten",
     "kind": {
       "title": "Welche Art von Rabatt?",
       "code": "Rabattcode",
-      "codeHint": "Käufer geben ihn beim Checkout ein. Teile ihn auf Instagram, in einem Newsletter oder mit einem Creator und sieh, welcher Kanal verkauft.",
-      "automatic": "Automatische Aktion",
-      "automaticHint": "Alle sehen den günstigeren Preis auf deinen Produktseiten. Kein Code erforderlich.",
-      "fixed": "Die Art eines Rabatts kann nicht geändert werden. Erstelle einen neuen, um zu wechseln."
+      "codeHint": "Käufer geben ihn an der Kasse ein, und Sie sehen, über welchen Kanal sie kamen.",
+      "automatic": "Aktion",
+      "automaticHint": "Senkt Ihre Preise für alle. Ohne Code."
     },
     "code": {
       "title": "Code",
@@ -97,24 +98,22 @@
       "hint": "3 bis 24 Buchstaben oder Ziffern. Käufer können ihn groß oder klein eingeben."
     },
     "channel": {
-      "label": "Kanal (optional)",
-      "hint": "Wo du diesen Code teilen wirst, damit du siehst, welcher Kanal Bestellungen bringt.",
+      "label": "Geteilt auf (optional)",
       "suggestions": "Vorgeschlagene Kanäle",
       "newsletter": "Newsletter",
       "creator": "Creator"
     },
     "value": {
-      "title": "Rabatt",
+      "title": "Wie viel Rabatt?",
       "each": "Wird vom Preis jedes Artikels abgezogen.",
       "order": "Wird von den Artikelpreisen der Bestellung abgezogen. Versand wird nicht rabattiert.",
-      "percent": "Prozentsatz",
-      "amount": "Fester Betrag",
+      "unit": "Prozent oder Betrag",
       "percentLabel": "Prozentualer Rabatt",
       "amountLabel": "Rabattbetrag",
       "currencyHint": "Gilt nur für Produkte, die in dieser Währung angeboten werden."
     },
     "products": {
-      "title": "Gilt für",
+      "title": "Für welche Produkte?",
       "all": "Alle Produkte",
       "some": "Bestimmte Produkte",
       "summary": "{count, plural, =0 {Produkte auswählen} one {# Produkt ausgewählt} other {# Produkte ausgewählt}}",
@@ -122,7 +121,7 @@
       "none": "Keine Produkte gefunden."
     },
     "schedule": {
-      "title": "Wann",
+      "title": "Wann?",
       "timeZone": "Zeiten sind in deiner Zeitzone ({zone}).",
       "starts": "Startet",
       "ends": "Endet",
@@ -142,11 +141,9 @@
       }
     },
     "limit": {
-      "title": "Begrenzung",
-      "label": "Bestellanzahl begrenzen",
-      "count": "Anzahl der Bestellungen"
+      "label": "Höchstens Bestellungen (optional)",
+      "none": "Kein Limit"
     },
-    "enabled": "Code ist eingeschaltet",
     "locked": "Diese Aktion hat bereits begonnen, daher kann nur ihr Ende geändert werden. Um etwas anderes zu ändern, beende sie und erstelle eine neue Aktion.",
     "summary": {
       "title": "Zusammenfassung",
@@ -154,7 +151,9 @@
       "starts": "Startet {date}",
       "ends": "Endet {date}",
       "noEnd": "Kein Enddatum",
-      "example": "Beispiel: {title} für {regular} kostet {now}."
+      "exampleLabel": "Beispiel",
+      "example": "Beispiel: {title} für {regular} kostet {now}.",
+      "chipLink": "Ändern, wie Aktionen in Ihrem Shop aussehen"
     },
     "create": "Rabatt erstellen",
     "save": "Änderungen speichern",

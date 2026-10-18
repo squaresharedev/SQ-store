@@ -53,6 +53,14 @@
       "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} kan bestellingen niet als verzonden markeren in deze winkel.",
       "noRole": "Je hebt geen toestemming om bestellingen als verzonden te markeren in deze winkel."
     },
+    "refundOrders": {
+      "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} staat niet toe bestellingen in deze winkel terug te betalen of te annuleren.",
+      "noRole": "Je hebt geen toestemming om bestellingen in deze winkel terug te betalen of te annuleren."
+    },
+    "connectPayments": {
+      "withRole": "Je rol als {role, select, owner {Eigenaar} editor {Bewerker} viewer {Lezer} other {{role}}} staat niet toe een betaalaccount voor deze winkel te verbinden.",
+      "noRole": "Je hebt geen toestemming om een betaalaccount voor deze winkel te verbinden."
+    },
     "manageBilling": {
       "withRole": "Met je rol {role, select, owner {Eigenaar} editor {Bewerker} viewer {Lezer} other {{role}}} kun je het abonnement van deze winkel niet wijzigen.",
       "noRole": "Je hebt geen toestemming om het abonnement van deze winkel te wijzigen."
@@ -86,6 +94,8 @@
     "requestReview": "Je hebt in korte tijd te vaak om een beoordeling gevraagd.",
     "fileAppeal": "Te veel pogingen om een bezwaar in korte tijd in te dienen.",
     "fulfilOrders": "Te veel pogingen om bestellingen als verzonden te markeren in korte tijd.",
+    "refundOrders": "Te veel terugbetalingen in korte tijd.",
+    "connectPayments": "Te veel pogingen om Stripe in korte tijd te koppelen.",
     "readCheckoutSettings": "Te veel pogingen om afrekeneinstellingen te lezen in korte tijd.",
     "changePlan": "Je hebt in korte tijd te veel abonnementswijzigingen gestart.",
     "saveDiscounts": "Te veel kortingswijzigingen in korte tijd."
@@ -117,6 +127,8 @@
     "sendForReview": "Dit kon niet ter beoordeling worden verstuurd vanwege een probleem aan onze kant.",
     "fileAppeal": "Je bezwaar kon niet worden verstuurd vanwege een probleem aan onze kant.",
     "markOrderShipped": "De bestelling kon niet als verzonden worden gemarkeerd door een probleem aan onze kant.",
+    "refundOrder": "De terugbetaling kon niet worden vastgelegd vanwege een probleem aan onze kant.",
+    "connectPayments": "Stripe kon niet worden geopend vanwege een probleem aan onze kant.",
     "loadCheckoutSettings": "Je afrekeneinstellingen konden niet worden geladen door een probleem aan onze kant.",
     "saveCheckoutSettings": "Je afrekeneinstellingen konden niet worden opgeslagen door een probleem aan onze kant.",
     "loadPlans": "Je abonnement kon niet worden geladen door een probleem aan onze kant.",
@@ -596,6 +608,14 @@
     "notShippable": {
       "message": "Deze bestelling kan niet als verzonden worden gemarkeerd.",
       "fix": "Alleen betaalde bestellingen met iets te verzenden kunnen worden verzonden. Vernieuw de pagina om te zien hoe het staat met deze bestelling."
+    },
+    "notRefundable": {
+      "message": "Deze bestelling kan niet worden terugbetaald.",
+      "fix": "Alleen een betaalde bestelling kan worden terugbetaald. Vernieuw de pagina om de huidige status te zien."
+    },
+    "refundRefused": {
+      "message": "Stripe kon deze terugbetaling niet verwerken.",
+      "fix": "Er is niets gewijzigd. Probeer het over een moment opnieuw of maak de terugbetaling via je Stripe-dashboard."
     }
   },
   "checkoutPageApi": {

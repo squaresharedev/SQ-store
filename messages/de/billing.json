@@ -30,7 +30,7 @@
     "ownerOnly": "Nur der Inhaber des Shops kann den Tarif ändern.",
     "soon": "Bald",
     "soonTitle": "Kostenpflichtige Tarife starten bald. Alles in Free funktioniert in der Zwischenzeit weiter.",
-    "finePrint": "Die Preise verstehen sich zzgl. MwSt. Die Gebühr pro Verkauf gilt für Verkäufe über den Checkout von Square Share und wird auf den Artikelpreis erhoben, nie auf den Versand. Die eigenen Kartengebühren von Stripe kommen hinzu. Jederzeit kündbar: Du behältst deinen Tarif bis zum Ende des bezahlten Zeitraums.",
+    "finePrint": "Die Preise verstehen sich zzgl. MwSt. Die Gebühr pro Verkauf gilt für Verkäufe über den Checkout von Square Share und wird auf den gesamten Betrag erhoben, den der Käufer zahlt, einschließlich Versand. Die eigenen Kartengebühren von Stripe kommen hinzu. Jederzeit kündbar: Du behältst deinen Tarif bis zum Ende des bezahlten Zeitraums.",
     "unavailable": "Die Tarife können gerade nicht angezeigt werden. Lade die Seite gleich neu.",
     "yearlyFree": "{count, plural, one {# Monat gratis} other {# Monate gratis}}",
     "launchNote": "Ein Einführungspreis ist ein Preis zum Start: Der reguläre Preis ist der durchgestrichene."
@@ -132,11 +132,11 @@
       },
       "fee": {
         "q": "Worauf wird die Gebühr pro Verkauf erhoben?",
-        "a": "Auf den Artikelpreis jedes Verkaufs über den Checkout von Square Share, nie auf den Versand. Die eigenen Kartengebühren von Stripe kommen separat hinzu."
+        "a": "Auf den gesamten Betrag, den der Käufer bei jedem Verkauf über den Checkout von Square Share zahlt, einschließlich Versand. Die eigenen Kartengebühren von Stripe kommen separat hinzu."
       },
       "switch": {
         "q": "Kann ich den Tarif später wechseln?",
-        "a": "Jederzeit, nach oben oder unten, monatlich oder jährlich. Stripe zeigt dir genau, was du zahlst, bevor du bestätigst."
+        "a": "Jederzeit, nach oben oder unten. Stripe zeigt dir genau, was du zahlst, bevor du bestätigst."
       }
     }
   },
@@ -176,7 +176,8 @@
     "renews": "Verlängert sich am {date}.",
     "ends": "Endet am {date}. Dein Shop wechselt dann zu Free, und nichts wird offline genommen.",
     "pastDue": "Zahlung fehlgeschlagen. Stripe versucht es mit deiner Karte erneut; aktualisiere sie, um {plan} zu behalten.",
-    "feeLine": "Gebühr pro Verkauf: {rate} des Artikelpreises.",
+    "feeLine": "Gebühr pro Verkauf: {rate} des Betrags, den der Käufer zahlt.",
+    "feeWaivedLine": "Keine Gebühr auf deine Verkäufe: Sie ist für deinen Shop erlassen.",
     "memberNote": "Nur der Inhaber des Shops kann den Tarif ändern oder seine Rechnungen sehen.",
     "usageTitle": "Was du nutzt",
     "usageDescription": "Die Grenzen deines Tarifs gelten nur für neue Ergänzungen. Nichts, was du hast, wird je entfernt.",

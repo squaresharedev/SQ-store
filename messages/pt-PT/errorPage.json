@@ -9,6 +9,11 @@
     "description": "Não foi possível carregar esta página. Normalmente, é um problema de ligação temporário: a sua conta está bem e continua com sessão iniciada.",
     "reference": "Referência: {digest}"
   },
+  "outdated": {
+    "title": "Esta página foi atualizada",
+    "description": "Foi lançada uma versão mais recente do Square Share enquanto esta página estava aberta, por isso não consegue concluir o que pediu. Recarregue a página e tente novamente.",
+    "cta": "Recarregar a página"
+  },
   "footer": {
     "legal": "Informação legal",
     "contact": "Contacto",

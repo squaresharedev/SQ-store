@@ -24,6 +24,7 @@ import {
 } from "@/lib/storefront/tile-spots";
 import { cn } from "@/lib/utils";
 import { BlockFace } from "./BlockFace";
+import { TILE_FACE_CLASS, tileFrameClass } from "./config-maps";
 import type {
   InlineFormatKey,
   TextEditSource,
@@ -606,18 +607,9 @@ export const BlockTile = memo(function BlockTile({
       onDoubleClick={framable || (typable && !isTyping) ? handleDoubleClick : undefined}
       onKeyDown={selectable ? handleKeyDown : undefined}
       className={cn(
-        "relative h-full w-full",
-        // The tile fills its cell exactly, so inheriting the cell's corner
-        // radius makes the card border and the selection ring CURVE with the
-        // roundness setting instead of being sliced square by the cell's clip.
-        // Inherited (not passed in) so the grid and the drag overlay stay in
-        // sync for free.
-        "rounded-[inherit]",
-        // Product blocks are bordered cards; text and shape blocks sit
-        // chrome-less on the canvas, so the kinds never read as the same thing.
-        block.type === "product"
-          ? "border border-border bg-card"
-          : "bg-transparent",
+        // Fills its cell, inherits its corners, and is a bordered card only
+        // for a product: shared with the hosted storefront (config-maps).
+        tileFrameClass(block),
         // Inset ring so the "being edited" state reads clearly without being
         // clipped by the grid cell's overflow.
         isEditing && !isFraming && "ring-2 ring-inset ring-ring",
@@ -700,7 +692,7 @@ export const BlockTile = memo(function BlockTile({
           the same cells (see blockTileClipStyle): it pulls this face in just
           past the product's antialiased edge, so no rim of it shows. The
           variable is unset everywhere else, which leaves no clip-path at all. */}
-      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[inherit] [contain:paint] [clip-path:var(--tile-cover-clip,none)]">
+      <div className={TILE_FACE_CLASS}>
         <BlockFace
           block={block}
           product={product}

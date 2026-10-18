@@ -48,6 +48,15 @@ export type ActiveSale = {
   endsAt: string | null;
 };
 
+/** A running sale together with what it covers: how a store's sales are read
+ *  ONCE and then matched to each product (lib/discounts/public.ts
+ *  salesCovering). Server-side, like ActiveSale. */
+export type StoreSale = ActiveSale & {
+  appliesTo: DiscountScope;
+  /** When appliesTo is "products". */
+  productIds: string[];
+};
+
 /** A code the checkout found valid for this order. Server-side (it has the id). */
 export type ResolvedCode = {
   id: string;
@@ -109,4 +118,7 @@ export type DiscountProductChoice = {
   title: string;
   priceCents: number;
   currency: Currency;
+  /** The cover photo, signed for the dashboard (dashboard-only, short-lived),
+   *  or null/absent for a product without one. */
+  imageUrl?: string | null;
 };

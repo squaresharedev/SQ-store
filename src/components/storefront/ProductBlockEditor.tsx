@@ -31,6 +31,7 @@ import { HeroMark } from "@/components/ui/HeroMark";
 import { ProductThumb } from "@/components/ui/ProductThumb";
 import { CardStyleControls } from "./CardStyleControls";
 import { PriceTagControls } from "./PriceTagControls";
+import { SaleBadgeControls } from "./SaleBadgeControls";
 
 /** Decimal input string -> integer cents, or null when not a finite number. */
 function centsOf(input: string): number | null {
@@ -366,6 +367,20 @@ export function ProductBlockEditor({
             overrides={block.style ?? {}}
             onChange={onStyleChange}
             scope={{ blockKey: blockKey(block) }}
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          title={t("saleBadge.title")}
+          collapsible
+          defaultOpen={false}
+          summon={summoned === "saleChip"}
+        >
+          <SaleBadgeControls
+            theme={theme}
+            overrides={block.style ?? {}}
+            onChange={onStyleChange}
+            product={product}
           />
         </CollapsibleSection>
       </div>

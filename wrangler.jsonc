@@ -30,11 +30,12 @@
     // passkeys exist: every one registered would stop working. Its sealing
     // key is a secret: `wrangler secret put MFA_PASSKEY_KEY`.
     "WEBAUTHN_RP_ID": "squareshare.eu"
-    // NEXT_PUBLIC_TURNSTILE_SITE_KEY: intentionally NOT set here yet. Add it
-    // (plus `wrangler secret put TURNSTILE_SECRET_KEY`) once a Turnstile
-    // widget exists in the Cloudflare dashboard for this zone — see
-    // lib/turnstile.ts. Until then the sign-up bot check is off in
-    // production, same as it is in local dev.
+    // NEXT_PUBLIC_TURNSTILE_SITE_KEY does NOT belong here, ever. The forms
+    // that render the widget are client components, so the site key is
+    // inlined at BUILD time and has to be in .env.production; a var in this
+    // object only reaches the server at runtime. See LAUNCH SWITCHES below
+    // for the order. Until then the bot check is off in production, same as
+    // it is in local dev.
   }
   // CONTENT MODERATION needs no binding. The automatic check
   // (lib/moderation/auto) calls its classifier over HTTPS with a secret:
@@ -42,6 +43,38 @@
   // can be approved once migration 20261012_auto_moderation is applied, so set
   // the secret BEFORE that migration. The sweep that settles what no save did
   // is .github/workflows/moderation-sweep.yml, behind CRON_SECRET.
+  // LAUNCH SWITCHES, IN ORDER. Everything described below ships OFF. The order
+  // matters, and two of the steps lock people out when taken out of turn.
+  // `wrangler deploy` wipes any var not listed in `vars` above, so a var set in
+  // the dashboard lasts until the next deploy: add it HERE.
+  //
+  //   1. Secrets (`wrangler secret put <NAME>`). None changes behaviour alone:
+  //        ORDER_LINK_SECRET         the buyer's order links. Without it no
+  //                                  checkout provider is offered at all
+  //                                  (lib/checkout/availability.ts).
+  //        MFA_PASSKEY_KEY           passkeys, unavailable without it.
+  //        BREVO_API_KEY, CONTACT_VERIFICATION_KEY
+  //                                  see CONTACT VERIFICATION below.
+  //        ANALYTICS_VISITOR_SALT, MODERATION_REPORTER_SALT
+  //                                  optional, see .env.example.
+  //   2. The bot check. Add NEXT_PUBLIC_TURNSTILE_SITE_KEY to .env.production
+  //      and deploy, THEN `wrangler secret put TURNSTILE_SECRET_KEY`. Secret
+  //      first means the server demands a token no browser was asked to
+  //      solve, and every sign-up fails.
+  //   3. Mail: TRANSACTIONAL_EMAIL_FROM and TRANSACTIONAL_EMAIL_ENABLED in
+  //      `vars` above. THIS ONE CHANGES WHO CAN SELL. From that deploy a
+  //      proven contact email is a condition of publishing, so every seller
+  //      who has not confirmed theirs has their product pages answer 404
+  //      until they do (lib/products/purchasable.ts). Count them first
+  //      (profiles with seller_email set and seller_email_verified_at null)
+  //      and tell them.
+  //   4. Buyer payments (Stripe Connect) need 1, 2 and 3: the checkout gate
+  //      reads all of them (lib/checkout/availability.ts). See BUYER PAYMENTS
+  //      below for its own secrets and switch.
+  //   5. `pnpm check:schema` passes before every deploy that carries a
+  //      migration (the workflow runs it once SUPABASE_DB_URL is a repo
+  //      secret).
+  //
   // CONTACT VERIFICATION: a code emailed or texted to the seller's buyer-facing
   // contact email and phone, typed back to prove they own them (see
   // lib/contact-verification). Mail and texts go out through Brevo's REST API
@@ -82,6 +115,77 @@
   // Stripe Tax, the Customer Portal) is set up first; a price that does not
   // match plans.ts refuses checkout rather than charge it.
   //
+  // BUYER PAYMENTS (Stripe Connect, lib/payments/connect and
+  // lib/checkout/stripe-provider.ts). A buyer pays the SELLER: a direct charge
+  // on the seller's own connected (Express) account, our cut as an application
+  // fee. OFF until all of these are true, in this order:
+  //   a. Connect is enabled on the Stripe platform account, with Express
+  //      accounts and the platform's branding and terms filled in.
+  //   b. The migration 20261008_seller_payment_accounts is applied
+  //      (`pnpm check:schema` says so).
+  //   c. Secrets (`wrangler secret put <NAME>`, never in this file):
+  //        STRIPE_SECRET_KEY              the same key seller plans use. For
+  //                                       Connect it needs, in addition, write
+  //                                       access to Connect Accounts, Account
+  //                                       Links, Checkout Sessions and Refunds,
+  //                                       and read access to Balance, Payouts
+  //                                       and Balance Transactions.
+  //        STRIPE_CONNECT_WEBHOOK_SECRET  signing secret of a SECOND endpoint,
+  //                                       https://<host>/api/payments/webhook,
+  //                                       created with "Listen to events on
+  //                                       Connected accounts" and subscribed to
+  //                                       CONNECT_EVENT_TYPES
+  //                                       (lib/payments/connect/webhook.ts).
+  //   d. NEXT_PUBLIC_STRIPE_CONNECT_ENABLED="true" in .env.production (it is
+  //      read by client components, so it is a build-time value), then deploy.
+  //   e. Launch switches 1, 2 and 3 above: a real payment is never taken
+  //      without order links, the bot check and working mail.
+  // Optional: OPS_ALERT_EMAIL in `vars` above, a mailbox for the alerts nobody
+  // using the app would report (a payment that matches no order,
+  // lib/ops/alert.ts). They are always logged with an "[ops alert]" prefix.
+  // The fee rates in lib/billing/plans.ts are still marked DRAFT: settle them
+  // before step d, because every sale from then on is charged one.
+  //
+  // STOREFRONT EMBED (the storefront on a seller's own website: public/widget.js
+  // and the frame at /e/[key]/[site]; see src/lib/storefront/embed-frame.ts).
+  // OFF until it has a host of its own: without NEXT_PUBLIC_EMBED_URL the
+  // snippet cannot be copied, the frame answers 404 and the rule that lets it
+  // be framed is not emitted. In this order:
+  //   a. DNS: a PROXIED record for embed.squareshare.eu (AAAA 100:: is the
+  //      usual placeholder; the Worker answers, nothing is ever sent there).
+  //   b. Worker ROUTES for this Worker. DONE 2026-10-10, through the API:
+  //        embed.squareshare.eu/widget.js
+  //        embed.squareshare.eu/e/*
+  //        embed.squareshare.eu/_next/static/*
+  //      Routes, not a Custom Domain (which is how dashboard.squareshare.eu is
+  //      attached): a custom domain would serve the whole dashboard on the
+  //      embed's hostname. They live in Cloudflare, not as `routes` in this
+  //      file: declared here, every deploy would replace them with exactly
+  //      what is listed.
+  //   c. The R2 bucket's CORS allowlist gains https://embed.squareshare.eu
+  //      (GET only), or a typeface a seller uploaded falls back inside the
+  //      embed. DONE 2026-10-10.
+  //   d. NEXT_PUBLIC_EMBED_URL="https://embed.squareshare.eu" in
+  //      .env.production (read by client components AND by next.config.ts,
+  //      so it is a build-time value), then deploy.
+  //   e. Check production, before telling anyone:
+  //        curl -sI https://embed.squareshare.eu/e/<any uuid>/example.com
+  //          must show  content-security-policy: frame-ancestors example.com
+  //          (the literal text ":site" there means the worker did not
+  //          substitute it, and every embed is blank)
+  //        curl -sI https://dashboard.squareshare.eu/e/<any uuid>/example.com
+  //          must show x-frame-options: DENY and NO content-security-policy
+  // To take the embed down again, remove the variable and deploy.
+  //
+  // KNOWING WHEN IT BREAKS. Every unhandled server error is one JSON log line
+  // behind "[server error]" (src/instrumentation.ts), and the alerts nobody
+  // would report are behind "[ops alert]": point a Workers Logs alert at both
+  // prefixes. Optional, to send them somewhere a person looks:
+  //   ERROR_REPORT_URL    in `vars` above: a collector that takes a JSON POST
+  //   ERROR_REPORT_TOKEN  `wrangler secret put`: its bearer token, if any
+  // BACKUPS: the Supabase project is on the Free plan, which keeps none. See
+  // .github/workflows/backup.yml for the nightly stopgap and what it needs.
+  //
   // ACCOUNT DELETIONS (src/lib/account-deletion). A request made in Settings
   // is carried out by a scheduled job 14 days later, once the seller owes no
   // buyer anything. OFF until one secret exists in two places:
@@ -90,6 +194,31 @@
   //                 .github/workflows/scheduled.yml calls the job with daily.
   // Without it the job's route answers 404 and requests simply wait. The
   // migration 20261010_account_deletion_requests must be applied first.
+  //
+  // STOREFRONT FUNNEL (src/lib/analytics/funnel). The steps a buyer takes on
+  // the way to paying are written to Workers Analytics Engine, and a daily job
+  // stores each finished day's counts in Supabase, where the analytics page
+  // reads them. OFF until the binding below exists: without it nothing is
+  // written and nothing fails. In this order:
+  //   a. Analytics Engine is enabled on the Cloudflare account (once, in the
+  //      dashboard: Workers & Pages > Analytics Engine). A deploy that carries
+  //      the binding before that is refused.
+  //   b. The migration 20261012_storefront_funnel_daily is applied
+  //      (`pnpm check:schema` says so).
+  //   c. Add this beside "ai" above, and deploy:
+  //        "analytics_engine_datasets": [
+  //          { "binding": "FUNNEL_EVENTS", "dataset": "storefront_funnel" }
+  //        ]
+  //      The two names are FUNNEL_BINDING and FUNNEL_DATASET in
+  //      src/lib/analytics/funnel/record.ts.
+  //   d. For the daily job: CLOUDFLARE_ACCOUNT_ID in `vars` above (32 hex
+  //      characters, not a secret), and
+  //      `wrangler secret put FUNNEL_ANALYTICS_TOKEN`: an API token with
+  //      Account > Account Analytics > Read and nothing else. The job also
+  //      needs CRON_SECRET (see ACCOUNT DELETIONS above);
+  //      .github/workflows/scheduled.yml calls it daily.
+  // Analytics Engine keeps 90 days, and the job rolls the last three finished
+  // days on every run, so it can be down for two nights without losing one.
   //
   // Bindings (KV/R2/D1/Hyperdrive/secrets) get added here as the dashboard
   // grows. Secrets for the Workers runtime go in `.dev.vars` (local) and

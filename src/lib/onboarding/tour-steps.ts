@@ -1,5 +1,6 @@
 import type { MessageKey } from "@/i18n/types";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
+import { isEmbedAvailable } from "@/lib/storefront/embed-snippet";
 import { can, type TeamAction, type TeamRole } from "@/lib/team/permissions";
 
 /**
@@ -18,13 +19,17 @@ import { can, type TeamAction, type TeamRole } from "@/lib/team/permissions";
  * and the phone's menu button, the top bar's search and the header's.
  *
  * Copy is short on purpose (one idea per stop), and honest about what is not
- * built: checkout, Stripe payouts and the embed widget are all said to be
- * coming rather than implied to work. It is message keys, resolved by the
- * overlay in the reader's language.
+ * built or not switched on yet: checkout and Stripe payouts are said to be
+ * coming rather than implied to work, and so is the embed for as long as it
+ * has no host to be served from. It is message keys, resolved by the overlay
+ * in the reader's language.
  *
  * Nothing here is stored: the tour's position is session state
  * (tour-store.ts), and this module stays pure so it can be tested in node.
  */
+
+/** Read once: the embed's host is fixed when the app is built. */
+const EMBED_AVAILABLE = isEmbedAvailable();
 
 export const TOUR_STEP_IDS = [
   "overview-nav",
@@ -191,17 +196,25 @@ export const TOUR_STEPS: readonly TourStep[] = [
     path: "/storefront",
     page: "storefront",
     title: "Onboarding.guidedTour.steps.storefrontEmbed.title",
-    body: "Onboarding.guidedTour.steps.storefrontEmbed.body",
+    // Says what is true right now, like the payments stop: the embed is either
+    // something to paste today or something still on its way.
+    body: EMBED_AVAILABLE
+      ? "Onboarding.guidedTour.steps.storefrontEmbed.bodyLive"
+      : "Onboarding.guidedTour.steps.storefrontEmbed.body",
     targets: [
       {
         selector: 'main [data-tour="storefront-embed"]',
-        body: "Onboarding.guidedTour.steps.storefrontEmbed.bodyButton",
+        body: EMBED_AVAILABLE
+          ? "Onboarding.guidedTour.steps.storefrontEmbed.bodyButtonLive"
+          : "Onboarding.guidedTour.steps.storefrontEmbed.bodyButton",
         extra: "embed-snippet",
       },
     ],
     // The first of the seller's own cards. A new seller has none (the sample is
     // a link, not a card), so they get the fallback, snippet and all.
-    fallbackBody: "Onboarding.guidedTour.steps.storefrontEmbed.fallbackBody",
+    fallbackBody: EMBED_AVAILABLE
+      ? "Onboarding.guidedTour.steps.storefrontEmbed.fallbackBodyLive"
+      : "Onboarding.guidedTour.steps.storefrontEmbed.fallbackBody",
     fallbackExtra: "embed-snippet",
     // The create button renders with the list, so its presence means "no card"
     // really is no card rather than a list still on its way.

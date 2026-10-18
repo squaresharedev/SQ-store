@@ -16,6 +16,11 @@ export function checkoutDiscountApiPath(storefrontId: string, productId: string)
 /** POST: the withdrawal function on an order page (CRD art. 11a). */
 export const ORDER_WITHDRAW_API_PATH = "/api/orders/withdraw";
 
+/** Where a buyer who backs out of the payment page is sent, and the query
+ *  parameter naming their checkout (app/api/checkout/cancel). */
+export const CHECKOUT_CANCEL_API_PATH = "/api/checkout/cancel";
+export const CHECKOUT_CANCEL_PARAM = "c";
+
 /** POST: "email me my order link", for a buyer without the email. */
 export const ORDER_LOOKUP_API_PATH = "/api/orders/lookup";
 

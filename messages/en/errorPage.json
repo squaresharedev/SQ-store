@@ -9,6 +9,11 @@
     "description": "We couldn't load this page. This is usually a temporary connection problem: your account is fine and you're still signed in.",
     "reference": "Reference: {digest}"
   },
+  "outdated": {
+    "title": "This page has been updated",
+    "description": "A newer version of Square Share was released while this page was open, so it can't finish what you asked. Reload the page and try again.",
+    "cta": "Reload page"
+  },
   "footer": {
     "legal": "Legal",
     "contact": "Contact",

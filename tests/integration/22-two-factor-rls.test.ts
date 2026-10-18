@@ -297,6 +297,8 @@ describe("SECURITY DEFINER functions (RLS does not reach inside them)", () => {
       "mfa_session_ok",
       // Guarded; its aal1 refusal is proven in 28-order-fulfilment.
       "order_mark_shipped",
+      // Guarded, and the owner's alone; both proven in 33-order-lifecycle.
+      "order_refund",
       "rl_take",
       "team_accept_invite",
       "team_actor_role",

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { AccountPlanProvider } from "@/components/billing/plan-context";
+import { AccountPlanProvider, PlanPricesProvider } from "@/components/billing/plan-context";
 import { PlanChip } from "@/components/billing/PlanChip";
 import { PlanLimitNotice } from "@/components/billing/PlanLimitNotice";
 import { PlansPage } from "@/components/billing/PlansPage";
@@ -12,7 +12,7 @@ import { OrdersExportButton } from "@/components/orders/OrdersExportButton";
 import type { PricingContext } from "@/lib/billing/pricing-context";
 import { planHas } from "@/lib/billing/features";
 import { PLANS } from "@/lib/billing/plans";
-import { FREE_CONTEXT, inAMonth, paidContext, standInBillingActions } from "./fixtures";
+import { FREE_CONTEXT, PRICES_WITH_YEARLY, inAMonth, paidContext, standInBillingActions } from "./fixtures";
 import { DevOptionGroup, GallerySection } from "./DevControls";
 
 const IN_A_MONTH = inAMonth();
@@ -24,7 +24,17 @@ const SCENARIOS: { value: string; label: string; context: PricingContext }[] = [
   {
     value: "free-selling",
     label: "Free owner selling €1,800 a month",
-    context: { ...FREE_CONTEXT, salesSubtotal30dCents: 180_000, usage: { storefronts: 3, teamSeats: 2, products: 23 } },
+    context: { ...FREE_CONTEXT, directSales30dCents: 180_000, usage: { storefronts: 3, teamSeats: 2, products: 23 } },
+  },
+  {
+    value: "free-waived",
+    label: "Free owner, fee waived (closed beta)",
+    context: { ...FREE_CONTEXT, feeWaived: true, directSales30dCents: 60_000 },
+  },
+  {
+    value: "free-yearly",
+    label: "Free owner, once yearly prices are sold",
+    context: { ...FREE_CONTEXT, prices: PRICES_WITH_YEARLY, directSales30dCents: 90_000 },
   },
   {
     value: "free-over",
@@ -34,7 +44,7 @@ const SCENARIOS: { value: string; label: string; context: PricingContext }[] = [
   {
     value: "starter",
     label: "Starter, monthly",
-    context: paidContext("starter", "month", IN_A_MONTH, { salesSubtotal30dCents: 160_000 }),
+    context: paidContext("starter", "month", IN_A_MONTH, { directSales30dCents: 260_000 }),
   },
   {
     value: "pro-ending",
@@ -92,7 +102,10 @@ export function PricingGallery({ banners }: { banners: React.ReactNode }) {
 
         <GallerySection title="Upsell card alone (owner)">
           <div className="max-w-3xl">
-            <UpgradeCard context={{ ...context, canManage: true }} actions={actions} />
+            {/* On its own it needs the prices the pages above provide themselves. */}
+            <PlanPricesProvider prices={context.prices}>
+              <UpgradeCard context={{ ...context, canManage: true }} actions={actions} />
+            </PlanPricesProvider>
           </div>
         </GallerySection>
 

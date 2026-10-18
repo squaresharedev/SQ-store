@@ -10,13 +10,16 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { recordPaidOrder, type RecordResult } from "@/lib/orders/record";
-import { readAccountBilling } from "@/lib/billing/account-plan";
-import { saleFee } from "@/lib/billing/fees";
+import { noSaleFee } from "@/lib/billing/fees";
 import { DEFAULT_PLAN } from "@/lib/billing/plans";
+import { sellerSaleFee } from "@/lib/billing/sale-fee";
 import { optionSummaryRows } from "@/lib/products/option-details";
 import { parseOptionGroups } from "@/lib/products/detail";
 import type { ProductOption } from "@/types/product";
-import type { ShipTo } from "@/types/order-view";
+import type { OrderChannel, ShipTo } from "@/types/order-view";
+
+/** Where a pretend sale says it came from: the embed, like most real ones. */
+const SIMULATED_CHANNEL: OrderChannel = "embed";
 
 /** Buyers on the reserved .test domain, so nothing here can reach a real
  *  inbox even if a message escaped the dev outbox. */
@@ -97,10 +100,12 @@ export async function simulateSale(
         : Math.floor(Math.random() * BUYERS.length)
     ]!;
   const amountCents = product.price_cents * quantity;
-  // Charged the way a real sale is: the store's own plan rate on the items
-  // (there is no delivery on a pretend sale, so that is the whole amount).
-  const billing = await readAccountBilling(accountId);
-  const fee = saleFee(billing.ok ? billing.billing.plan : DEFAULT_PLAN, amountCents);
+  // Charged the way a real sale is, by the same function: the store's own
+  // plan rate on the whole amount, nothing while fees are switched off or the
+  // store's fee is waived. A pretend sale is never refused over a fee that
+  // cannot be read; it is recorded as owing nothing.
+  const fee =
+    (await sellerSaleFee({ sellerId: accountId, amountCents, channel: SIMULATED_CHANNEL })) ?? noSaleFee(DEFAULT_PLAN);
 
   return recordPaidOrder({
     checkoutSessionId:
@@ -108,7 +113,7 @@ export async function simulateSale(
     productId: product.id,
     sellerId: accountId,
     storefrontId: null,
-    channel: "embed",
+    channel: SIMULATED_CHANNEL,
     quantity,
     selection: optionSummaryRows(groups, chosen),
     amountCents,

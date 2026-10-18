@@ -101,7 +101,7 @@ export interface BillingProvider {
 
 /**
  * A configuration fault: a Stripe price that is missing, inactive, or does not
- * charge what plans.ts says it does. Logged loudly; the seller is only told
+ * charge what plan_prices says it does, or a plan not sold by that interval. Logged loudly; the seller is only told
  * the upgrade is unavailable right now. Charging a price the plans page did not
  * show would be worse than not charging at all.
  */

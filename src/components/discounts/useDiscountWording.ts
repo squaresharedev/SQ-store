@@ -1,6 +1,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { formatCents } from "@/lib/format/money";
 import { formatOrderDateTime } from "@/lib/format/date";
+import { formatPercent } from "@/lib/format/intl";
 import type { Locale } from "@/i18n/locales";
 import type {
   DiscountKind,
@@ -27,6 +28,13 @@ export function useDiscountWording() {
       }
       const amount = formatCents(value.amountOffCents, value.currency, locale);
       return t(kind === "automatic" ? "amountEach" : "amountOrder", { amount });
+    },
+    /** The figure alone, "20%" or "€5.00", for a place that draws it large
+     *  beside the words. */
+    figure(value: DiscountValue): string {
+      return value.type === "percent"
+        ? formatPercent(value.percentOff, locale)
+        : formatCents(value.amountOffCents, value.currency, locale);
     },
     /** "All products" or "3 products". */
     scope(appliesTo: DiscountScope, count: number): string {

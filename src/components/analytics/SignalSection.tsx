@@ -4,7 +4,7 @@ import { formatCents } from "@/lib/format/money";
 import { formatNumber } from "@/components/charts";
 import type { AnalyticsSource, SourcePanel } from "@/lib/analytics/sources";
 import { resolveSourceState } from "@/lib/analytics/sources";
-import type { SignalBreakdown } from "@/lib/analytics/types";
+import type { SignalBreakdown, SignalPoint } from "@/lib/analytics/types";
 import { AnalyticsSection } from "@/components/analytics/AnalyticsSection";
 import { TONE } from "@/components/analytics/palette";
 import { ChartCard } from "@/components/analytics/ChartCard";
@@ -41,9 +41,12 @@ export function SignalSection({
   source,
   breakdown,
   currency,
+  previous,
 }: {
   source: AnalyticsSource;
   breakdown: SignalBreakdown;
+  /** This source's trend for the period before the range, for the comparison. */
+  previous?: SignalPoint[];
   /** Only read when the source carries money. */
   currency: string;
 }) {
@@ -151,6 +154,7 @@ export function SignalSection({
               panel={panel}
               source={source}
               breakdown={breakdown}
+              previous={previous}
               emptyText={emptyText}
               hasData={hasData}
               // The trend is the section's headline and reads best across the
@@ -169,6 +173,7 @@ function SignalPanel({
   panel,
   source,
   breakdown,
+  previous,
   emptyText,
   hasData,
   className,
@@ -176,6 +181,7 @@ function SignalPanel({
   panel: SourcePanel;
   source: AnalyticsSource;
   breakdown: SignalBreakdown;
+  previous?: SignalPoint[];
   emptyText: string;
   hasData: boolean;
   className?: string;
@@ -204,6 +210,7 @@ function SignalPanel({
           series={breakdown.series}
           kind={source.id}
           tone={tone}
+          previous={previous}
         />
       </ChartCard>
     );

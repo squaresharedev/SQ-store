@@ -120,7 +120,9 @@ export function ReportDialog({
   scopes = NO_WIDER_SCOPES,
   preview = false,
 }: {
-  product: { id: string; title: string };
+  /** The product this page is about. Absent on a storefront's own page, where
+   *  the report is about the storefront (or the seller behind it). */
+  product?: { id: string; title: string };
   /** The storefront this page hangs off, as its buyers know it. */
   storefront: { id: string; name: string };
   /** Who the buyer is contracting with, as the page names them. */
@@ -131,7 +133,9 @@ export function ReportDialog({
   preview?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
-  const [scope, setScope] = React.useState<ReportScope>("product");
+  // What this page is: the narrowest thing a report from it can be about.
+  const primary: ReportScope = product ? "product" : "storefront";
+  const [scope, setScope] = React.useState<ReportScope>(primary);
   const [reason, setReason] = React.useState<ReportReason | "">("");
   const [details, setDetails] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -144,13 +148,13 @@ export function ReportDialog({
   const tActions = useTranslations("Common.actions");
   const resolve = (ref: MessageRef) => tAll(ref.key, ref.values);
   const available: ReportScope[] = [
-    "product",
-    ...(scopes.storefront ? (["storefront"] as const) : []),
+    primary,
+    ...(product && scopes.storefront ? (["storefront"] as const) : []),
     ...(scopes.seller ? (["seller"] as const) : []),
   ];
   const choosing = available.length > 1;
   const scopeHints: Record<ReportScope, string> = {
-    product: t("scopes.product.hint", { title: product.title }),
+    product: product ? t("scopes.product.hint", { title: product.title }) : "",
     storefront: t("scopes.storefront.hint", { name: storefront.name }),
     seller: t("scopes.seller.hint", { name: sellerName }),
   };
@@ -160,7 +164,7 @@ export function ReportDialog({
     // Reset a beat later so the fields do not visibly empty during the close
     // transition. A reporter who reopens starts clean either way.
     window.setTimeout(() => {
-      setScope("product");
+      setScope(primary);
       setReason("");
       setDetails("");
       setEmail("");
@@ -183,7 +187,7 @@ export function ReportDialog({
           targetType: scope,
           // The storefront names both the storefront and, resolved on the
           // server, the seller behind it.
-          targetId: scope === "product" ? product.id : storefront.id,
+          targetId: scope === "product" && product ? product.id : storefront.id,
           reason,
           details,
           reporterEmail: email,
@@ -215,10 +219,10 @@ export function ReportDialog({
         // link exactly where a buyer will.
         aria-disabled={preview || undefined}
         className="inline-flex items-center gap-1.5 underline-offset-2 hover:underline"
-        data-report-trigger="product"
+        data-report-trigger={primary}
       >
         <Flag aria-hidden="true" className="size-3" />
-        {choosing ? t("triggerAny") : t("trigger", { target: "product" })}
+        {choosing ? t("triggerAny") : t("trigger", { target: primary })}
       </button>
 
       <Modal

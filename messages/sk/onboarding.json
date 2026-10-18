@@ -38,6 +38,22 @@
       "actionOpen": "Otvoriť editor",
       "cta": "Zverejniť produkt",
       "ctaPagesOff": "Zapnúť produktové stránky"
+    },
+    "payments": {
+      "label": "Prijímať platby",
+      "detail": "Prepojte Stripe, aby kupujúci mohli platiť kartou na vašich produktových stránkach.",
+      "detailUnfinished": "Stripe ešte potrebuje niekoľko údajov, kým kupujúci budú môcť platiť.",
+      "detailDone": "Kupujúci môžu platiť kartou.",
+      "action": "Prepojiť Stripe",
+      "actionFinish": "Dokončiť u Stripe",
+      "cta": "Prepojte Stripe a prijímajte platby"
+    },
+    "delivery": {
+      "label": "Nastaviť cenu dopravy",
+      "detail": "Bez ceny dopravy nemajú produkty s doručením žiadne tlačidlo nákupu.",
+      "detailDone": "Kupujúci vidia celkovú cenu pred zaplatením.",
+      "action": "Nastaviť ceny",
+      "cta": "Nastavte ceny dopravy"
     }
   },
   "checklist": {
@@ -198,7 +214,10 @@
         "title": "Vložte výklad na svoj web",
         "body": "Každý výklad má tlačidlo vloženia na web, ktoré vám dá kód ako tento. Widget je zatiaľ vo vývoji a na iných weboch sa ešte nezobrazuje.",
         "bodyButton": "Toto tlačidlo vám dá kód ako ten nižšie, ktorý vložíte na svoj web. Widget je zatiaľ vo vývoji a na iných weboch sa ešte nezobrazuje.",
-        "fallbackBody": "Keď budete mať výklad, tlačidlo vloženia na web na jeho karte vám dá kód ako tento. Widget je zatiaľ vo vývoji a na iných weboch sa ešte nezobrazuje."
+        "fallbackBody": "Keď budete mať výklad, tlačidlo vloženia na web na jeho karte vám dá kód ako tento. Widget je zatiaľ vo vývoji a na iných weboch sa ešte nezobrazuje.",
+        "bodyLive": "Každý výklad má tlačidlo vloženia na web, ktoré vám dá kód ako tento. Vložte ho na svoj web a výklad sa tam zobrazí.",
+        "bodyButtonLive": "Toto tlačidlo vám dá kód ako ten nižšie. Vložte ho na svoj web a výklad sa tam zobrazí.",
+        "fallbackBodyLive": "Keď budete mať výklad, tlačidlo vloženia na web na jeho karte vám dá kód ako tento, ktorý vložíte na svoj web."
       },
       "ordersSearch": {
         "title": "Nájdite objednávku",

@@ -43,6 +43,17 @@ function secret(): string {
   return process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 }
 
+/**
+ * Whether an order link can be issued and accepted at all in this process.
+ *
+ * Checkout asks before it takes a payment (lib/checkout/availability.ts): a
+ * buyer who has paid and cannot be handed their order has no receipt, no
+ * download and no way to withdraw, so with no key there is no checkout.
+ */
+export function orderLinksAvailable(): boolean {
+  return secret() !== "";
+}
+
 async function mac(orderId: string): Promise<Uint8Array | null> {
   const keyMaterial = secret();
   if (!keyMaterial) return null;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
@@ -60,9 +60,23 @@ export function RangeSelector({
     setDraft(preset);
   }
 
+  // The same echo for the dates themselves. The picker's value used to be the
+  // URL's alone, so a picked day showed nothing (no highlight, no label) until
+  // the server had re-queried the whole page, which reads as a click that did
+  // not register. The pick is shown at once and the page catches up.
+  const [picked, setPicked] = useState<AnalyticsRange>(range);
+  const [syncedRange, setSyncedRange] = useState(range);
+  if (syncedRange.from !== range.from || syncedRange.to !== range.to) {
+    setSyncedRange(range);
+    setPicked(range);
+  }
+  const [pending, startTransition] = useTransition();
+
   function navigate(nextPreset: RangePreset, nextRange: AnalyticsRange) {
-    router.replace(`${pathname}${buildQuery(nextPreset, nextRange)}`, {
-      scroll: false,
+    startTransition(() => {
+      router.replace(`${pathname}${buildQuery(nextPreset, nextRange)}`, {
+        scroll: false,
+      });
     });
   }
 
@@ -73,7 +87,11 @@ export function RangeSelector({
   }
 
   return (
-    <div data-tour="analytics-range" className="flex flex-wrap items-center gap-3">
+    <div
+      data-tour="analytics-range"
+      aria-busy={pending || undefined}
+      className="flex flex-wrap items-center gap-3"
+    >
       <SegmentedControl
         value={draft}
         options={presetOptions}
@@ -84,8 +102,11 @@ export function RangeSelector({
         <div className="w-64">
           <DatePicker
             mode="range"
-            value={range}
-            onChange={(next) => navigate("custom", next)}
+            value={picked}
+            onChange={(next) => {
+              setPicked(next);
+              navigate("custom", next);
+            }}
             placeholder={t("placeholder")}
           />
         </div>

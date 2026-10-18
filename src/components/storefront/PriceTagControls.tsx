@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo } from "react";
+import { useId, useMemo, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import {
   CORNER_SPOT_LIMIT,
@@ -14,7 +14,6 @@ import {
   titleBandRow,
   type CardStyle,
   type CardStyleOverrides,
-  type PriceTagFont,
   type StorefrontTheme,
 } from "@/types/storefront";
 import {
@@ -50,6 +49,7 @@ export function PriceTagControls({
   overrides,
   onChange,
   scope,
+  afterSize,
 }: {
   theme: StorefrontTheme;
   /** The tile override being edited. Absent = editing the theme itself. */
@@ -62,6 +62,9 @@ export function PriceTagControls({
    * popovers, which is a supported state.
    */
   scope: "theme" | "many" | { blockKey: string };
+  /** Shown under the Size slider: the theme's own chip scale
+   *  (ChipScaleControl), which a single tile has no say in. */
+  afterSize?: ReactNode;
 }) {
   const t = useTranslations("Storefront.priceTag");
   const tRoot = useTranslations();
@@ -196,6 +199,7 @@ export function PriceTagControls({
         unit="px"
         tip={t("sizeTip")}
       />
+      {afterSize}
 
       {colorField("fill")}
       {colorField("text")}

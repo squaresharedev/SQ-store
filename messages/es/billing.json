@@ -30,7 +30,7 @@
     "ownerOnly": "Solo el propietario de la tienda puede cambiar el plan.",
     "soon": "Próximamente",
     "soonTitle": "Los planes de pago abren pronto. Mientras tanto, todo en Free sigue funcionando.",
-    "finePrint": "Precios sin IVA. La comisión por venta se aplica a las ventas a través del proceso de pago de Square Share y se calcula sobre el precio del artículo, nunca sobre el envío. Las tarifas de procesamiento de tarjeta del propio Stripe se añaden aparte. Cancela cuando quieras: conservas tu plan hasta el final del período pagado.",
+    "finePrint": "Precios sin IVA. La comisión por venta se aplica a las ventas a través del proceso de pago de Square Share y se calcula sobre todo lo que paga el comprador, envío incluido. Las tarifas de procesamiento de tarjeta del propio Stripe se añaden aparte. Cancela cuando quieras: conservas tu plan hasta el final del período pagado.",
     "unavailable": "Ahora mismo no se pueden mostrar los planes. Recarga la página en un momento.",
     "yearlyFree": "{count, plural, one {# mes gratis} other {# meses gratis}}",
     "launchNote": "Un precio de lanzamiento es un precio introductorio: el precio habitual es el que aparece tachado."
@@ -132,11 +132,11 @@
       },
       "fee": {
         "q": "¿Sobre qué se cobra la comisión por venta?",
-        "a": "Sobre el precio del artículo de cada venta hecha a través del proceso de pago de Square Share, nunca sobre el envío. Las tarifas de procesamiento de tarjeta del propio Stripe son aparte."
+        "a": "Sobre todo lo que paga el comprador en cada venta hecha a través del proceso de pago de Square Share, envío incluido. Las tarifas de procesamiento de tarjeta del propio Stripe son aparte."
       },
       "switch": {
         "q": "¿Puedo cambiar de plan más adelante?",
-        "a": "Cuando quieras, a uno superior o inferior, mensual o anual. Stripe te muestra exactamente lo que pagarás antes de confirmar."
+        "a": "Cuando quieras, a uno superior o inferior. Stripe te muestra exactamente lo que pagarás antes de confirmar."
       }
     }
   },
@@ -176,7 +176,8 @@
     "renews": "Se renueva el {date}.",
     "ends": "Termina el {date}. Tu tienda pasa a Free en ese momento y nada se elimina.",
     "pastDue": "Pago fallido. Stripe volverá a intentarlo; actualiza la tarjeta para conservar {plan}.",
-    "feeLine": "Comisión en cada venta: {rate} del precio del artículo.",
+    "feeLine": "Comisión en cada venta: {rate} de lo que paga el comprador.",
+    "feeWaivedLine": "Sin comisión en tus ventas: tu tienda está exenta.",
     "memberNote": "Solo el propietario de la tienda puede cambiar el plan o ver sus facturas.",
     "usageTitle": "Lo que estás usando",
     "usageDescription": "Los límites de tu plan solo se aplican al añadir más. Nada de lo que ya tienes se elimina jamás.",

@@ -9,6 +9,11 @@
     "description": "Tuto stránku se nepodařilo načíst. Obvykle jde o dočasný problém s připojením: váš účet je v pořádku a přihlášení stále platí.",
     "reference": "Kód chyby: {digest}"
   },
+  "outdated": {
+    "title": "Tato stránka byla aktualizována",
+    "description": "Zatímco jste měli tuto stránku otevřenou, vyšla novější verze Square Share, takže stránka nemůže dokončit, o co jste požádali. Načtěte ji znovu a zkuste to ještě jednou.",
+    "cta": "Načíst znovu"
+  },
   "footer": {
     "legal": "Právní informace",
     "contact": "Kontakt",

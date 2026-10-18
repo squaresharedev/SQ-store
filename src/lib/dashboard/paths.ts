@@ -12,5 +12,7 @@ export const ANALYTICS_PATH = "/analytics";
 
 export const PAYMENTS_PATH = "/payments";
 
+export const NOTIFICATIONS_PATH = "/notifications";
+
 /** The settings area; each section is a sub-path of it. */
 export const SETTINGS_PATH = "/settings";

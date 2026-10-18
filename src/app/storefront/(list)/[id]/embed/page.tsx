@@ -9,7 +9,10 @@ import { PRODUCTS_PATH } from "@/lib/products/paths";
 import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { EmbedSettings } from "@/components/storefront/EmbedSettings";
-import { listAllProducts } from "@/lib/products/queries";
+import { StorefrontLinkCard } from "@/components/storefront/StorefrontLinkCard";
+import { resolveProductPage } from "@/lib/storefront/product-page";
+import { storefrontPageUrl } from "@/lib/storefront/product-page-url";
+import { listStorefrontProducts } from "@/lib/discounts/storefront-preview";
 import { getStorefrontSummary } from "@/lib/storefront/queries";
 import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
 import { getActiveAccount } from "@/lib/team/account-context";
@@ -39,12 +42,21 @@ export default async function StorefrontEmbedPage({
     getTranslations("Storefront.designer.header"),
     getTranslations("Products.buyButton"),
     getStorefrontSummary(id),
-    listAllProducts(),
+    listStorefrontProducts(),
     account
       ? getTraderIdentityStatus(account.accountId)
       : Promise.resolve({ ok: true as const, missing: [] }),
   ]);
   if (!storefront) notFound();
+
+  // Whether the storefront has a page of its own right now, by the same two
+  // facts its public loader asks for (lib/storefront/storefront-page.ts). An
+  // identity that could not be read withholds the link, like the page would.
+  const pageState = !resolveProductPage(storefront.config).enabled
+    ? "pages-off"
+    : identity.ok && identity.missing.length === 0
+      ? "live"
+      : "details-missing";
 
   return (
     <main className={pageShellClass}>
@@ -66,10 +78,20 @@ export default async function StorefrontEmbedPage({
             <ArrowRight className={cn("size-3.5", iconNudgeRightClass)} strokeWidth={2} aria-hidden />
           </Link>
         </aside>
+        {/* The storefront as a page of its own: no website needed. Above the
+            embed setup, because it is the way to share that works today. */}
+        <div className="mb-5">
+          <StorefrontLinkCard
+            storefrontId={storefront.id}
+            url={storefrontPageUrl(storefront.id)}
+            state={pageState}
+          />
+        </div>
         <EmbedSettings
           storefront={storefront}
           products={products}
           missingTraderDetails={identity.ok ? identity.missing : []}
+          productPagesOn={pageState !== "pages-off"}
         />
       </div>
     </main>

@@ -9,23 +9,20 @@
 //   - "test": development only (see lib/checkout/availability.ts for the
 //     double gate). Records the order the moment Pay is pressed, with no money
 //     moving, so the whole flow can be exercised end to end.
-//   - "stripe": TODO(stripe). Creates a Checkout Session (ui_mode "elements")
-//     on the seller's CONNECTED account from the quote, with
-//     application_fee_amount as our cut (sellerFee below: the seller's plan
-//     rate on the items after discounts) and the quote in its metadata,
-//     including the discount fields recordPaidOrder takes (unit price,
-//     discount, credit) and the buyer's channel; the buyer confirms payment in
-//     the Payment Element;
-//     the webhook (and the return route, idempotently) hand the paid session
-//     to the order writer. Discounts need nothing from Stripe: the quote's
-//     total is already discounted. See the header of lib/orders/record.ts
-//     for what the webhook owes it.
+//   - "stripe": a direct charge on the seller's CONNECTED account
+//     (lib/checkout/stripe-provider.ts). The order is written first, as
+//     pending and holding its stock; the buyer pays on Stripe's hosted page;
+//     the webhook turns the order into a paid one. So this provider answers
+//     with a place to send the browser rather than a finished order.
+//     Discounts need nothing from Stripe: the quote's total is already
+//     discounted.
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recordPaidOrder } from "@/lib/orders/record";
-import { readAccountBilling } from "@/lib/billing/account-plan";
-import { saleFee, type SaleFee } from "@/lib/billing/fees";
+import type { SaleFee } from "@/lib/billing/fees";
+import { sellerSaleFee } from "@/lib/billing/sale-fee";
 import { testPaymentsEnabled, type CheckoutProviderId } from "@/lib/checkout/availability";
+import { placeStripeOrder } from "@/lib/checkout/stripe-provider";
 import type { CheckoutQuote } from "@/lib/checkout/quote";
 import type { OrderChannel, ShipTo } from "@/types/order-view";
 
@@ -37,29 +34,34 @@ export type CheckoutBuyer = {
   giftMessage: string | null;
   supplyConsent: boolean;
   /** Where they arrived from (the seller's buy button, the embed, or
-   *  `direct`). A label on the order only: nothing here prices it. */
+   *  `direct`). Attribution: all three pay the same fee, and the one channel
+   *  that pays another (`marketplace`) cannot be claimed by a request (see
+   *  lib/billing/origin.ts). */
   channel: OrderChannel;
 };
 
 export type PlaceResult =
-  | { ok: true; orderId: string }
-  | { ok: false; reason: "unavailable" | "failed" };
+  // `redirectUrl`: the payment is still to be made, on the provider's own page.
+  // Absent when the order is already paid (the test provider), and the buyer
+  // goes straight to their order.
+  | { ok: true; orderId: string; redirectUrl?: string }
+  // `sold_out`: the last units went to someone else between the quote and the
+  // order. Refused by the order writer before anything was charged.
+  | { ok: false; reason: "unavailable" | "failed" | "sold_out" };
 
 /** The test provider's checkout ids. Its own prefix, so one can never be
  *  mistaken for a real Stripe test-mode session (`cs_test_...`). */
 const TEST_SESSION_PREFIX = "cs_sstest_";
 
 /**
- * Our cut of this sale: the seller's plan rate (lib/billing/plans.ts) on what
- * the buyer pays for the items, after discounts, shipping excluded. A seller
- * is never charged a fee on money they gave away. Null when the seller's plan
+ * Our cut of this sale (lib/billing/sale-fee.ts): the seller's plan rate on
+ * everything the buyer pays, after discounts, delivery included. A seller is
+ * never charged a fee on money they gave away. Null when what sets the fee
  * cannot be read, and the sale is then refused rather than charged a guessed
- * rate: the fee is part of the seller's contract, and a buyer retrying a
- * moment later loses nothing.
+ * rate.
  */
-async function sellerFee(quote: CheckoutQuote): Promise<SaleFee | null> {
-  const billing = await readAccountBilling(quote.gate.ownerId);
-  return billing.ok ? saleFee(billing.billing.plan, quote.itemsCents) : null;
+function sellerFee(quote: CheckoutQuote, buyer: CheckoutBuyer): Promise<SaleFee | null> {
+  return sellerSaleFee({ sellerId: quote.gate.ownerId, amountCents: quote.totalCents, channel: buyer.channel });
 }
 
 /**
@@ -78,10 +80,11 @@ export async function placeOrder(
   switch (provider) {
     case "test":
       return placeTestOrder(quote, buyer, attemptId);
-    case "stripe":
-      // TODO(stripe): create the Checkout Session here and return its client
-      // secret for the Payment Element instead of an order.
-      return { ok: false, reason: "unavailable" };
+    case "stripe": {
+      const fee = await sellerFee(quote, buyer);
+      if (!fee) return { ok: false, reason: "failed" };
+      return placeStripeOrder(quote, buyer, attemptId, fee);
+    }
   }
 }
 
@@ -95,7 +98,7 @@ async function placeTestOrder(
   // impossible to reach in a deployed build however the request got here.
   if (!testPaymentsEnabled()) return { ok: false, reason: "unavailable" };
 
-  const fee = await sellerFee(quote);
+  const fee = await sellerFee(quote, buyer);
   if (!fee) return { ok: false, reason: "failed" };
 
   const checkoutSessionId = `${TEST_SESSION_PREFIX}${attemptId.replace(/-/g, "")}`;
@@ -120,7 +123,7 @@ async function placeTestOrder(
     giftMessage: buyer.giftMessage,
     supplyConsent: buyer.supplyConsent,
   });
-  if (!result.ok) return { ok: false, reason: "failed" };
+  if (!result.ok) return { ok: false, reason: result.reason === "sold_out" ? "sold_out" : "failed" };
   if (!result.duplicate) return { ok: true, orderId: result.orderId };
 
   // A REPEAT of an attempt answers with its order only for the same buyer

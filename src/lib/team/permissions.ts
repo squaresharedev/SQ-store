@@ -33,6 +33,9 @@ export const TEAM_ACTIONS = [
   // Marking an order shipped (public.order_mark_shipped). Editors pack parcels
   // too; viewers see the queue but do not change it.
   "orders.fulfil",
+  // Taking an order back (public.order_refund). The owner's alone: an editor
+  // packs parcels, but giving money back is the owner's decision.
+  "orders.refund",
   // Choosing, paying for and cancelling the store's plan (lib/billing). The
   // owner's alone: a plan is a contract the owner pays for. Teammates see the
   // plan, never change it.
@@ -52,6 +55,7 @@ export const TEAM_PERMISSIONS: Record<TeamRole, readonly TeamAction[]> = {
     "products.write",
     "storefront.write",
     "orders.fulfil",
+    "orders.refund",
     "billing.manage",
   ],
   editor: [

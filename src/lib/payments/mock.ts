@@ -9,13 +9,26 @@
 //   HOSTED onboarding + Express dashboard, reached by redirect. This app never
 //   renders a form that collects financial data.
 //
-// MOCK FLAG. Set PAYMENTS_MOCK_DATA=true in the environment to enable the
-// sample account, balance and payout history below. Off by default so a real
-// seller never sees fabricated financial figures as if they were their own.
-// The /payments page and the overview's Needs-attention module both read from
-// getAccountStatus(), so the two can never disagree about whether Stripe is
-// connected.
+// MOCK FLAG. Set PAYMENTS_MOCK_DATA in the environment to enable simulated
+// account, balance, payout and transaction data (the stories live in
+// ./scenarios.ts):
+//   PAYMENTS_MOCK_DATA=true       the `healthy` scenario
+//   PAYMENTS_MOCK_DATA=<scenario> that scenario (busy, new, action-needed, ...)
+// With the flag on, /payments?mock=<scenario> switches story per request.
+// Off by default so a real seller never sees fabricated financial figures as
+// if they were their own, and IGNORED IN A PRODUCTION BUILD whatever it is set
+// to: a deployed Worker with the variable left on would otherwise show every
+// seller invented balances. The /payments page and the overview's Needs-attention
+// module both read from getAccountStatus(), so the two can never disagree
+// about whether Stripe is connected.
 
+import { getActiveAccount } from "@/lib/team/account-context";
+import { realAccountStatus, realPaymentsOverview } from "@/lib/payments/connect/overview";
+import {
+  buildScenario,
+  parseScenario,
+  type PaymentsScenario,
+} from "./scenarios";
 import type {
   AccountStatus,
   Balance,
@@ -26,160 +39,52 @@ import type {
   UpcomingPayout,
 } from "./types";
 
+/** What PAYMENTS_MOCK_DATA=true stands for. */
+const DEFAULT_SCENARIO: PaymentsScenario = "healthy";
+
 /**
+ * The scenario to simulate, or null for the real (empty, disconnected) state.
  * Reads the flag at call time (not at import time) so tests can stub
  * `process.env.PAYMENTS_MOCK_DATA` with `vi.stubEnv()` without needing to
- * reset and re-import the module. Off by default.
+ * reset and re-import the module. `override` (the page's ?mock= param) only
+ * counts while the flag is on, so it can never turn data on by itself.
+ * Never in a production build: see MOCK FLAG above.
  */
-function isMockEnabled(): boolean {
-  return process.env.PAYMENTS_MOCK_DATA === "true";
+export function activeScenario(override?: string | null): PaymentsScenario | null {
+  if (process.env.NODE_ENV === "production") return null;
+  const flag = process.env.PAYMENTS_MOCK_DATA;
+  if (!flag || flag === "false") return null;
+  return parseScenario(override) ?? parseScenario(flag) ?? DEFAULT_SCENARIO;
 }
 
-const MOCK_BALANCE: Balance = {
-  available: [{ amountCents: 48250, currency: "EUR" }],
-  pending: [{ amountCents: 12600, currency: "EUR" }],
-};
+/** The overview for the active scenario, or the real empty one. */
+function overviewFor(override?: string | null): PaymentsOverview {
+  return buildScenario(activeScenario(override) ?? "disconnected");
+}
 
-const MOCK_UPCOMING: UpcomingPayout = {
-  amountCents: 48250,
-  currency: "EUR",
-  expectedAt: "2026-07-08T00:00:00Z",
-};
-
-const MOCK_METHOD: PayoutMethod = {
-  id: "ba_demo_1XyzAb",
-  type: "bank_account",
-  bankName: "AIB",
-  last4: "1234",
-  currency: "EUR",
-  country: "IE",
-  isDefault: true,
-};
-
-const MOCK_PAYOUTS: Payout[] = [
-  {
-    id: "po_demo_9QrTuV",
-    amountCents: 32400,
-    currency: "EUR",
-    status: "in_transit",
-    arrivalDate: "2026-07-06T00:00:00Z",
-    createdAt: "2026-07-03T09:15:00Z",
-    method: "standard",
-    destinationLast4: "1234",
-    automatic: true,
-    statementDescriptor: "SQUARESHARE PAYOUT",
-  },
-  {
-    id: "po_demo_7MnOpQ",
-    amountCents: 51900,
-    currency: "EUR",
-    status: "paid",
-    arrivalDate: "2026-06-29T00:00:00Z",
-    createdAt: "2026-06-26T09:15:00Z",
-    method: "standard",
-    destinationLast4: "1234",
-    automatic: true,
-    statementDescriptor: "SQUARESHARE PAYOUT",
-  },
-  {
-    id: "po_demo_5IjKlM",
-    amountCents: 18750,
-    currency: "EUR",
-    status: "paid",
-    arrivalDate: "2026-06-22T00:00:00Z",
-    createdAt: "2026-06-19T09:15:00Z",
-    method: "standard",
-    destinationLast4: "1234",
-    automatic: true,
-    statementDescriptor: "SQUARESHARE PAYOUT",
-  },
-  {
-    id: "po_demo_3EfGhI",
-    amountCents: 9900,
-    currency: "EUR",
-    status: "failed",
-    arrivalDate: "2026-06-15T00:00:00Z",
-    createdAt: "2026-06-12T09:15:00Z",
-    method: "standard",
-    destinationLast4: "1234",
-    automatic: true,
-    statementDescriptor: "SQUARESHARE PAYOUT",
-  },
-];
-
-const MOCK_TRANSACTIONS: BalanceTransaction[] = [
-  {
-    id: "txn_demo_8StUvW",
-    type: "charge",
-    amountCents: 4500,
-    feeCents: 450,
-    netCents: 4050,
-    currency: "EUR",
-    description: "Sale · Riso print 'Night swim'",
-    createdAt: "2026-07-04T16:42:00Z",
-    status: "pending",
-  },
-  {
-    id: "txn_demo_6OpQrS",
-    type: "charge",
-    amountCents: 8100,
-    feeCents: 810,
-    netCents: 7290,
-    currency: "EUR",
-    description: "Sale · Ceramic mug (embed)",
-    createdAt: "2026-07-03T11:08:00Z",
-    status: "pending",
-  },
-  {
-    id: "txn_demo_4KlMnO",
-    type: "payout",
-    amountCents: -32400,
-    feeCents: 0,
-    netCents: -32400,
-    currency: "EUR",
-    description: "Payout to bank ····1234",
-    createdAt: "2026-07-03T09:15:00Z",
-    status: "available",
-  },
-  {
-    id: "txn_demo_2GhIjK",
-    type: "refund",
-    amountCents: -2500,
-    feeCents: 0,
-    netCents: -2500,
-    currency: "EUR",
-    description: "Refund · Sticker pack",
-    createdAt: "2026-07-01T19:30:00Z",
-    status: "available",
-  },
-];
-
-/** TODO(stripe): replace with `stripe.accounts.retrieve(...)` for the seller. */
+/**
+ * Where the ACTIVE store's Stripe connection stands. The simulated scenario's
+ * when one is switched on (development only), otherwise the real one, from the
+ * store's own connected account (lib/payments/connect/overview.ts).
+ */
 export async function getAccountStatus(): Promise<AccountStatus> {
-  const connected = isMockEnabled();
-  return {
-    connected,
-    accountId: connected ? "acct_demo_2K9fLpQ" : null,
-    chargesEnabled: connected,
-    payoutsEnabled: connected,
-    detailsSubmitted: connected,
-    requirementsDue: [],
-  };
+  if (activeScenario()) return overviewFor().account;
+  return realAccountStatus((await getActiveAccount())?.accountId ?? null);
 }
 
 /** TODO(stripe): replace with `stripe.balance.retrieve(...)` on the connected account. */
 export async function getBalance(): Promise<Balance> {
-  return isMockEnabled() ? MOCK_BALANCE : { available: [], pending: [] };
+  return overviewFor().balance;
 }
 
 /** TODO(stripe): derive from `stripe.payouts.list({ status: "pending" })` + schedule. */
 export async function getUpcomingPayout(): Promise<UpcomingPayout> {
-  return isMockEnabled() ? MOCK_UPCOMING : null;
+  return overviewFor().upcomingPayout;
 }
 
 /** TODO(stripe): replace with `stripe.accounts.listExternalAccounts(...)`. */
 export async function getPayoutMethod(): Promise<PayoutMethod | null> {
-  return isMockEnabled() ? MOCK_METHOD : null;
+  return overviewFor().payoutMethod;
 }
 
 /** TODO(stripe): replace with `stripe.payouts.list(...)` on the connected account. */
@@ -191,24 +96,19 @@ export async function listPayouts(): Promise<Payout[]> {
   //     title: "A payout failed", body: "Your bank rejected a payout. Check your details.",
   //     data: { href: "/payments" } });
   // (from "@/lib/notifications/create"). Not wired: payouts are still mock data.
-  return isMockEnabled() ? MOCK_PAYOUTS : [];
+  return overviewFor().payouts;
 }
 
 /** TODO(stripe): replace with `stripe.balanceTransactions.list(...)`. */
 export async function listBalanceTransactions(): Promise<BalanceTransaction[]> {
-  return isMockEnabled() ? MOCK_TRANSACTIONS : [];
+  return overviewFor().transactions;
 }
 
-/** One fetch for the whole page. Swapping the functions above swaps this too. */
-export async function getPaymentsOverview(): Promise<PaymentsOverview> {
-  const [account, balance, upcomingPayout, payoutMethod, payouts, transactions] =
-    await Promise.all([
-      getAccountStatus(),
-      getBalance(),
-      getUpcomingPayout(),
-      getPayoutMethod(),
-      listPayouts(),
-      listBalanceTransactions(),
-    ]);
-  return { account, balance, upcomingPayout, payoutMethod, payouts, transactions };
+/**
+ * One fetch for the whole page. Swapping the functions above swaps this too.
+ * `scenario` is the page's ?mock= param; the real implementation ignores it.
+ */
+export async function getPaymentsOverview(scenario?: string | null): Promise<PaymentsOverview> {
+  if (activeScenario(scenario)) return overviewFor(scenario);
+  return realPaymentsOverview((await getActiveAccount())?.accountId ?? null);
 }

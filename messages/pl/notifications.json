@@ -176,6 +176,18 @@
         "body": "Stripe spróbuje ponownie. Zaktualizuj kartę w sekcji Plan i rozliczenia, aby zachować swój plan."
       }
     },
+    "stock": {
+      "low": {
+        "title": "Niski stan magazynowy: {title}",
+        "body": "{count, plural, =0 {Brak na stanie.} one {Zostało tylko #.} few {Zostało tylko #.} many {Zostało tylko #.} other {Zostało tylko #.}} Uzupełnij stan lub wyłącz śledzenie stanu, jeśli produkujesz na zamówienie."
+      }
+    },
+    "payment": {
+      "dispute": {
+        "title": "Kupujący zakwestionował płatność za: {title}",
+        "body": "Bank kupującego otworzył spór. Odpowiedz na niego w panelu Stripe przed upływem terminu."
+      }
+    },
     "policy": {
       "autoPaused": {
         "title": "Wymagane działanie: {target, select, product {twój produkt „{title}” jest wstrzymany} other {twoja witryna „{title}” jest wstrzymana}}",

@@ -326,7 +326,9 @@ describe("orders and what a discount did", () => {
     const rows = await performance(viewer);
     const byId = Object.fromEntries(rows.map((row) => [row.discount_id, row]));
     expect(byId[sale]).toMatchObject({ uses: 1, orders: 1, discount_cents: "480" });
-    expect(byId[code]).toMatchObject({ uses: 3, orders: 2, discount_cents: "1200" });
+    // An order that was taken back gives its use back (20261008_order_lifecycle):
+    // the refunded one counts for nothing, as a use or as a sale.
+    expect(byId[code]).toMatchObject({ uses: 2, orders: 2, discount_cents: "1200" });
     // RLS answers nothing for a store the caller is not in, whatever id it names.
     expect(await performance(stranger)).toEqual([]);
   });

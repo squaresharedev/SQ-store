@@ -38,6 +38,22 @@
       "actionOpen": "Designer öffnen",
       "cta": "Dein Produkt veröffentlichen",
       "ctaPagesOff": "Produktseiten einschalten"
+    },
+    "payments": {
+      "label": "Zahlungen erhalten",
+      "detail": "Verbinde Stripe, damit Käufer auf deinen Produktseiten mit Karte bezahlen können.",
+      "detailUnfinished": "Stripe benötigt noch einige Angaben, bevor Käufer bezahlen können.",
+      "detailDone": "Käufer können mit Karte bezahlen.",
+      "action": "Stripe verbinden",
+      "actionFinish": "Bei Stripe abschließen",
+      "cta": "Stripe verbinden und Zahlungen erhalten"
+    },
+    "delivery": {
+      "label": "Versandkosten festlegen",
+      "detail": "Ohne Versandkosten haben Produkte mit Versand keinen Kauf-Button.",
+      "detailDone": "Käufer sehen den Gesamtbetrag, bevor sie bezahlen.",
+      "action": "Preise festlegen",
+      "cta": "Lege deine Versandkosten fest"
     }
   },
   "checklist": {
@@ -198,7 +214,10 @@
         "title": "Ein Schaufenster auf deiner Website einbetten",
         "body": "Jedes Schaufenster hat einen Einbetten-Button, der dir einen Code wie diesen gibt. Das Widget ist noch in Entwicklung und wird auf anderen Websites noch nicht angezeigt.",
         "bodyButton": "Dieser Button gibt dir einen Code wie den darunter, den du in deine Website einfügst. Das Widget ist noch in Entwicklung und wird auf anderen Websites noch nicht angezeigt.",
-        "fallbackBody": "Sobald du ein Schaufenster hast, gibt dir der Einbetten-Button auf seiner Kachel einen Code wie diesen. Das Widget ist noch in Entwicklung und wird auf anderen Websites noch nicht angezeigt."
+        "fallbackBody": "Sobald du ein Schaufenster hast, gibt dir der Einbetten-Button auf seiner Kachel einen Code wie diesen. Das Widget ist noch in Entwicklung und wird auf anderen Websites noch nicht angezeigt.",
+        "bodyLive": "Jedes Schaufenster hat einen Einbetten-Button, der dir einen Code wie diesen gibt. Füge ihn in deine eigene Website ein, und das Schaufenster erscheint dort.",
+        "bodyButtonLive": "Dieser Button gibt dir einen Code wie den darunter. Füge ihn in deine eigene Website ein, und das Schaufenster erscheint dort.",
+        "fallbackBodyLive": "Sobald du ein Schaufenster hast, gibt dir der Einbetten-Button auf seiner Kachel einen Code wie diesen, den du in deine eigene Website einfügst."
       },
       "ordersSearch": {
         "title": "Eine Bestellung finden",

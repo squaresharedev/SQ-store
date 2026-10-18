@@ -30,7 +30,7 @@
     "ownerOnly": "Seul le propriétaire de la boutique peut changer de forfait.",
     "soon": "Bientôt",
     "soonTitle": "Les forfaits payants ouvriront bientôt. En attendant, tout ce qui est sur Free continue de fonctionner.",
-    "finePrint": "Prix hors TVA. La commission par vente s'applique aux ventes via le paiement Square Share et porte sur le prix de l'article, jamais sur la livraison. Les frais de traitement de carte de Stripe s'ajoutent. Annulation à tout moment : vous conservez votre forfait jusqu'à la fin de la période payée.",
+    "finePrint": "Prix hors TVA. La commission par vente s'applique aux ventes via le paiement Square Share et porte sur tout ce que paie l'acheteur, livraison comprise. Les frais de traitement de carte de Stripe s'ajoutent. Annulation à tout moment : vous conservez votre forfait jusqu'à la fin de la période payée.",
     "unavailable": "Les forfaits ne peuvent pas être affichés pour l'instant. Actualisez la page dans un moment.",
     "yearlyFree": "{count, plural, one {# mois offert} other {# mois offerts}}",
     "launchNote": "Un prix de lancement est un prix introductif : le prix habituel est celui affiché barré."
@@ -132,11 +132,11 @@
       },
       "fee": {
         "q": "Sur quoi porte la commission par vente ?",
-        "a": "Sur le prix de l'article de chaque vente réalisée via le paiement Square Share, jamais sur la livraison. Les frais de traitement de carte de Stripe sont distincts."
+        "a": "Sur tout ce que paie l'acheteur pour chaque vente réalisée via le paiement Square Share, livraison comprise. Les frais de traitement de carte de Stripe sont distincts."
       },
       "switch": {
         "q": "Puis-je changer de forfait plus tard ?",
-        "a": "À tout moment, à la hausse comme à la baisse, en mensuel ou en annuel. Stripe affiche exactement ce que vous paierez avant que vous confirmiez."
+        "a": "À tout moment, à la hausse comme à la baisse. Stripe affiche exactement ce que vous paierez avant que vous confirmiez."
       }
     }
   },
@@ -176,7 +176,8 @@
     "renews": "Renouvellement le {date}.",
     "ends": "Se termine le {date}. Votre boutique passe à Free à ce moment-là, et rien n'est supprimé.",
     "pastDue": "Paiement échoué. Stripe va réessayer votre carte ; mettez-la à jour pour conserver {plan}.",
-    "feeLine": "Commission sur chaque vente : {rate} du prix de l'article.",
+    "feeLine": "Commission sur chaque vente : {rate} de ce que paie l'acheteur.",
+    "feeWaivedLine": "Aucune commission sur vos ventes : votre boutique en est exonérée.",
     "memberNote": "Seul le propriétaire de la boutique peut changer de forfait ou consulter ses factures.",
     "usageTitle": "Ce que vous utilisez",
     "usageDescription": "Les limites de votre forfait s'appliquent uniquement à l'ajout de nouveaux éléments. Rien de ce que vous avez n'est jamais supprimé.",

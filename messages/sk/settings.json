@@ -136,7 +136,7 @@
   "danger": {
     "export": {
       "cardTitle": "Exportovať moje údaje",
-      "cardDescription": "Všetko, čo o vás uchovávame: profil, produkty, konfigurácia výkladu, všetko zbalené do jedného súboru JSON. Sú to vaše údaje, vaše na uchovanie.",
+      "cardDescription": "Všetko, čo o vás uchovávame: profil, produkty, výklady, objednávky, ktoré ste predali, oznámenia a bezpečnostný záznam, všetko v jednom súbore JSON. Sú to vaše údaje, vaše na uchovanie.",
       "downloadButton": "Stiahnuť moje údaje",
       "stepUpDescription": "Váš export obsahuje celý váš účet. Ak si ho chcete stiahnuť, zadajte aktuálny kód z overovacej aplikácie."
     },
@@ -781,10 +781,20 @@
       "cardDescription": "Prijmite pozvánku a vstúpte do tímu príslušného obchodu."
     },
     "success": {
-      "inviteCreated": "Pozvánka vytvorená. Zobrazí sa po prihlásení s daným e-mailom. (Odosielanie e-mailov ešte nie je nastavené.)",
+      "inviteCreated": "Pozvánka je vytvorená, ale e-mail sa nepodarilo odoslať. Dajte im vedieť sami: uvidia ju po prihlásení s daným e-mailom.",
+      "inviteEmailed": "Pozvánka odoslaná. Poslali sme im e-mail s postupom, ako ju prijať.",
       "inviteAccepted": "Vitajte v tíme.",
       "roleUpdated": "Rola aktualizovaná.",
       "memberRemoved": "Člen odstránený."
+    },
+    "inviteEmail": {
+      "subject": "{store} vás pozýva do svojho tímu na Square Share",
+      "subjectUnnamed": "Máte pozvánku do tímu na Square Share",
+      "intro": "{store} vás pozýva do svojho tímu na Square Share.",
+      "introUnnamed": "Jeden z obchodov na Square Share vás pozýva do svojho tímu.",
+      "role": "Vaša rola: {role}",
+      "how": "Pozvánku prijmete tak, že sa prihlásite touto e-mailovou adresou ({email}) alebo si s ňou vytvoríte účet. Pozvánka na vás bude čakať v Nastaveniach, v časti Tím a prístup.",
+      "ignore": "Nečakali ste to? Tento e-mail môžete ignorovať. Kým pozvánku neprijmete, nič sa nestane."
     }
   }
 }

@@ -26,6 +26,7 @@ import { helpTextClass } from "@/components/ui/control-styles";
 import { PlanFeatureList } from "@/components/billing/PlanFeatureList";
 import { KeepPlanButton } from "@/components/billing/KeepPlanButton";
 import { PlanWordmark } from "@/components/billing/PlanWordmark";
+import { usePlanPrices } from "@/components/billing/plan-context";
 import type { BillingActions } from "@/components/billing/billing-actions";
 import { formatLongDate } from "@/lib/format/date";
 import { gainsOver } from "@/lib/billing/features";
@@ -121,6 +122,7 @@ export function CancelPlanDialog({
 }: CancelPlanProps & { open: boolean; onClose: () => void }) {
   const t = useTranslations("Billing");
   const locale = useLocale();
+  const prices = usePlanPrices();
   const router = useRouter();
   const [reason, setReason] = React.useState<CancellationReason | null>(null);
   const [detail, setDetail] = React.useState("");
@@ -197,7 +199,7 @@ export function CancelPlanDialog({
           <Disclosure summary={t("cancel.loseLegend")} className={helpTextClass}>
             <PlanFeatureList
               plan={plan}
-              features={gainsOver("free", plan)}
+              features={gainsOver(prices, "free", plan)}
               className="sm:grid sm:grid-cols-2 sm:gap-x-4 sm:gap-y-2.5 sm:space-y-0"
             />
           </Disclosure>

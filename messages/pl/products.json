@@ -390,6 +390,8 @@
     "noTerms": "Nie wpisano jeszcze warunków wysyłki.",
     "profile": "Profil wysyłki",
     "edit": "Edytuj",
+    "unpriced": "Wysyłka nie ma ceny w {currency}, więc kupujący nie mogą zapłacić za ten produkt przy kasie.",
+    "unpricedAction": "Ustaw ceny wysyłki",
     "modalTitle": "Wysyłka i zwroty"
   },
   "optionsField": {

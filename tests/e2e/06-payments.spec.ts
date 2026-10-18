@@ -10,6 +10,13 @@ import { freshUser, gotoApp, signUp } from "./helpers";
  */
 test.describe("payments (mock layer)", () => {
   test("no external network traffic, no sensitive inputs", async ({ page }) => {
+    // Signed up FIRST, with the network open: the contract below is about the
+    // Payments page, and sign-up may load the bot check from Cloudflare when a
+    // developer's .env.local has its keys (blocking that leaves the sign-up
+    // button disabled, and nothing here would ever reach Payments).
+    const user = freshUser("payments");
+    await signUp(page, user);
+
     const external: string[] = [];
     await page.route("**/*", async (route) => {
       const url = new URL(route.request().url());
@@ -22,8 +29,6 @@ test.describe("payments (mock layer)", () => {
       return route.fallback();
     });
 
-    const user = freshUser("payments");
-    await signUp(page, user);
     await gotoApp(page, "/payments");
 
     await expect(page.getByText(/available/i).first()).toBeVisible();

@@ -3,13 +3,17 @@ import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { after } from "next/server";
+import { BuyerBusy } from "@/components/product-page/BuyerNotice";
+import { PriceRefresh } from "@/components/product-page/PriceRefresh";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
 import {
+  productClickDedupeKey,
   productViewDedupeKey,
   recordSignal,
   visitorHash,
 } from "@/lib/analytics/record";
 import { getPublicProductPage, resolveDisplayName } from "@/lib/products/public";
+import { PAGE_BUSY } from "@/lib/public/busy";
 import { QUANTITY_QUERY_PARAM, requestedQuantity } from "@/lib/products/quantity";
 import { clientKey } from "@/lib/rate-limit";
 import { requestedOptions, requestedVia, type SearchParams } from "@/lib/storefront/product-page-url";
@@ -22,7 +26,8 @@ import { collectOptionIds } from "@/lib/validation/product";
  * Everything that decides whether this page exists lives in
  * getPublicProductPage (lib/products/public.ts): ids, rate limit, storefront,
  * placement, product status and ownership. This file only turns its `null`
- * into the segment's not-found and its result into markup. The loader is
+ * into the segment's not-found, its "not right now" into a try-again, and its
+ * result into markup. The loader is
  * React-cached, so generateMetadata and the body share one read.
  *
  * `?o=<id>,<id>` preselects one option per group, and the older single-colour
@@ -43,11 +48,20 @@ import { collectOptionIds } from "@/lib/validation/product";
 
 type Params = { storefrontId: string; productId: string };
 
+/**
+ * The first `max` characters of a line, never ending on half an emoji: a
+ * surrogate pair cut in two prints as a broken glyph in a share card and is
+ * not valid JSON for a search engine to read.
+ */
+function clip(text: string, max: number): string {
+  return text.slice(0, max).replace(/[\ud800-\udbff]$/, "");
+}
+
 /** Description for search and share cards: first 160 characters, one line. */
 function summary(text: string, fallback: string): string {
   const flat = text.replace(/\s+/g, " ").trim();
   if (!flat) return fallback;
-  return flat.length > 160 ? `${flat.slice(0, 159).trimEnd()}…` : flat;
+  return flat.length > 160 ? `${clip(flat, 159).trimEnd()}…` : flat;
 }
 
 export async function generateMetadata({
@@ -57,7 +71,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { storefrontId, productId } = await params;
   const result = await getPublicProductPage(storefrontId, productId);
-  if (!result) return { robots: { index: false, follow: false } };
+  if (!result || result === PAGE_BUSY) return { robots: { index: false, follow: false } };
   const { page } = result;
   const { product, storefront } = page;
   const allow = storefront.productPage.allowIndexing;
@@ -116,8 +130,9 @@ export default async function ProductPage({
 }) {
   const [{ storefrontId, productId }, query] = await Promise.all([params, searchParams]);
   const result = await getPublicProductPage(storefrontId, productId);
+  if (result === PAGE_BUSY) return <BuyerBusy />;
   if (!result) notFound();
-  const { page, ownerId } = result;
+  const { page, ownerId, saleEndsInMs } = result;
   const via = requestedVia(query);
 
   // A served page is a product view. Recorded after the response so a counter
@@ -138,6 +153,24 @@ export default async function ProductPage({
       visitorHash: hash,
       dedupeKey: await productViewDedupeKey(page.product.id, hash),
     });
+    // A CLICK ON AN EMBED TILE, counted where it lands. The tile is a plain
+    // link to this page carrying `via=embed`, so the request the buyer asked
+    // for IS the click: nothing on the seller's site has to report it, which
+    // is what lets the embed run there with no beacon, no cookie and nothing
+    // kept on the visitor's device. Deduped like the view beside it. The
+    // marker is attribution and anyone can type it, so read the figure as a
+    // guide, like the channel split it belongs to.
+    if (via === "embed") {
+      await recordSignal({
+        accountId: ownerId,
+        kind: "product_click",
+        storefrontId: page.storefront.id,
+        channel: "embed",
+        blockId: `p_${page.product.id}`,
+        visitorHash: hash,
+        dedupeKey: await productClickDedupeKey(page.product.id, hash),
+      });
+    }
   });
 
   // BUY-07: Product + Offer JSON-LD, emitted from the same data that fills the
@@ -160,7 +193,7 @@ export default async function ProductPage({
     "@type": "Product",
     name: page.product.title,
     ...(page.product.description
-      ? { description: page.product.description.replace(/\s+/g, " ").trim().slice(0, 500) }
+      ? { description: clip(page.product.description.replace(/\s+/g, " ").trim(), 500) }
       : {}),
     ...(page.product.images.length > 0 ? { image: ogImageUrl } : {}),
     offers: {
@@ -207,6 +240,9 @@ export default async function ProductPage({
           )}
         />
       </main>
+      {/* The sale price stops being true when the sale ends: read the page
+          again then, rather than leave an open tab advertising it. */}
+      {saleEndsInMs !== null && <PriceRefresh inMs={saleEndsInMs} />}
     </>
   );
 }

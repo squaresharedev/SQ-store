@@ -4,6 +4,7 @@ import {
   embedSettingsSchema,
   isStrictHexColor,
   parseStoredStorefrontConfig,
+  productPageSchema,
   storefrontConfigSchema,
   storefrontIdSchema,
   storefrontNameSchema,
@@ -201,6 +202,75 @@ describe("storefrontConfigSchema — happy path", () => {
     const wrongKind = validConfig();
     (wrongKind.blocks[1] as Record<string, unknown>).style = { cornerRadius: 4 };
     expect(storefrontConfigSchema.safeParse(wrongKind).success).toBe(false);
+  });
+
+  it("takes a sale chip on the theme and on one tile: two closed lists, a spot and a strict hex, nothing typed", () => {
+    const chip = { saleBadge: "amount", saleBadgeLook: "ribbon", saleBadgePosition: "bottom-right", saleBadgeColor: "#dc2626" };
+    const themed = validConfig();
+    Object.assign(themed.theme, chip);
+    expect(storefrontConfigSchema.safeParse(themed).success).toBe(true);
+    const tiled = validConfig();
+    (tiled.blocks[0] as Record<string, unknown>).style = chip;
+    expect(storefrontConfigSchema.safeParse(tiled).success).toBe(true);
+    // A storefront saved before the chip existed carries none of it and still parses.
+    expect(storefrontConfigSchema.safeParse(validConfig()).success).toBe(true);
+
+    // What it says is one of four choices. A seller's own words (and with them
+    // a percentage nobody checked, markup, or a link) have nowhere to go.
+    for (const bad of [
+      { saleBadge: "-70%" },
+      { saleBadge: "<b>Sale</b>" },
+      { saleBadge: "" },
+      { saleBadge: "offer" },
+      { saleBadgeLook: "starburst" },
+      { saleBadgeLook: "<svg onload=x>" },
+      { saleBadgeText: "Everything must go" },
+      { saleBadgePosition: "middle-right" },
+      { saleBadgePosition: "below" },
+      { saleBadgeColor: "red" },
+      { saleBadgeColor: "#dc2626; background:url(x)" },
+      { saleBadgeColor: "#DC2626FF" },
+    ]) {
+      const onTheme = validConfig();
+      Object.assign(onTheme.theme, bad);
+      expect(storefrontConfigSchema.safeParse(onTheme).success, JSON.stringify(bad)).toBe(false);
+      const onTile = validConfig();
+      (onTile.blocks[0] as Record<string, unknown>).style = bad;
+      expect(storefrontConfigSchema.safeParse(onTile).success, JSON.stringify(bad)).toBe(false);
+    }
+  });
+
+  it("takes the board's chip size from a closed list, on the theme only", () => {
+    const themed = validConfig();
+    Object.assign(themed.theme, { chipScale: "cell" });
+    expect(storefrontConfigSchema.safeParse(themed).success).toBe(true);
+    const wrong = validConfig();
+    Object.assign(wrong.theme, { chipScale: "huge" });
+    expect(storefrontConfigSchema.safeParse(wrong).success).toBe(false);
+    // A promise about the whole board: one tile cannot set it.
+    const tiled = validConfig();
+    (tiled.blocks[0] as Record<string, unknown>).style = { chipScale: "cell" };
+    expect(storefrontConfigSchema.safeParse(tiled).success).toBe(false);
+  });
+
+  it("takes one of two sale looks on the product page, and nothing else there", () => {
+    const page = {
+      enabled: true,
+      imageFit: "contain",
+      ctaLabel: "Buy now",
+      priceNote: "incl-vat",
+      shippingNote: "plus-shipping",
+      showStock: true,
+      showSeller: true,
+      allowIndexing: false,
+      sections: [],
+    };
+    expect(productPageSchema.safeParse(page).success).toBe(true);
+    expect(productPageSchema.safeParse({ ...page, saleStyle: "strike" }).success).toBe(true);
+    expect(productPageSchema.safeParse({ ...page, saleStyle: "slash" }).success).toBe(true);
+    for (const saleStyle of ["neon", "", "line-through; color:red", 1, null]) {
+      expect(productPageSchema.safeParse({ ...page, saleStyle }).success, String(saleStyle)).toBe(false);
+    }
   });
 
   it("accepts shape geometry params and rejects out-of-range values", () => {

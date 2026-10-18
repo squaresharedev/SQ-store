@@ -13,6 +13,7 @@
 import { cache } from "react";
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { PAGE_BUSY, type PageBusy } from "@/lib/public/busy";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 import { uuidField } from "@/lib/validation/inputs";
 import { buyerFacingStorefront } from "@/lib/storefront/buyer-face";
@@ -38,7 +39,7 @@ const idSchema = uuidField();
 /** The order columns an order page reads. Named, so a new column is never
  *  shown to a buyer by accident. */
 const ORDER_PAGE_SELECT =
-  "id, storefront_id, seller_id, product_id, product_title, quantity, selected_options, amount_cents, currency, status, buyer_email, ship_to, fulfilment_status, shipped_at, tracking_number, tracking_carrier, created_at, withdrawal_requested_at, supply_consent_at, digital_file_key" as const;
+  "id, storefront_id, seller_id, product_id, product_title, quantity, selected_options, amount_cents, currency, status, buyer_email, ship_to, fulfilment_status, shipped_at, tracking_number, tracking_carrier, created_at, withdrawal_requested_at, supply_consent_at, digital_file_key, refunded_at, confirmation_sent_at" as const;
 
 export type OrderRow = {
   id: string;
@@ -58,6 +59,8 @@ export type OrderRow = {
   tracking_number: string | null;
   tracking_carrier: string | null;
   created_at: string;
+  refunded_at: string | null;
+  confirmation_sent_at: string | null;
   withdrawal_requested_at: string | null;
   supply_consent_at: string | null;
   digital_file_key: string | null;
@@ -84,6 +87,17 @@ function formatFromKey(key: string | null): string | null {
  * rate-limit token.
  */
 export async function readOrderByRef(ref: string): Promise<OrderRow | null> {
+  const order = await lookUpOrderByRef(ref);
+  return order === PAGE_BUSY ? null : order;
+}
+
+/**
+ * The read itself. PAGE_BUSY when the database did not answer, which the order
+ * PAGE shows as "try again" (lib/public/busy.ts): a buyer who has just paid
+ * must not be told their order does not exist because of a blip. The routes
+ * that ACT on an order keep readOrderByRef, where a failed read is a refusal.
+ */
+async function lookUpOrderByRef(ref: string): Promise<OrderRow | PageBusy | null> {
   const orderId = await verifyOrderRef(ref);
   if (!orderId) return null;
   const { data, error } = await createAdminClient()
@@ -93,18 +107,19 @@ export async function readOrderByRef(ref: string): Promise<OrderRow | null> {
     .maybeSingle();
   if (error) {
     console.error("[order-page] order read failed", error);
-    return null;
+    return PAGE_BUSY;
   }
   return (data as OrderRow | null) ?? null;
 }
 
 export const getOrderPage = cache(
-  async (storefrontId: string, ref: string): Promise<OrderPageData | null> => {
+  async (storefrontId: string, ref: string): Promise<OrderPageData | PageBusy | null> => {
     if (!idSchema.safeParse(storefrontId).success) return null;
     const key = await clientKey(await headers());
-    if (!(await rateLimitKey(key, "order_page", RATE_LIMITS.orderPage))) return null;
+    if (!(await rateLimitKey(key, "order_page", RATE_LIMITS.orderPage))) return PAGE_BUSY;
 
-    const order = await readOrderByRef(ref);
+    const order = await lookUpOrderByRef(ref);
+    if (order === PAGE_BUSY) return PAGE_BUSY;
     if (!order || order.storefront_id !== storefrontId) return null;
 
     const admin = createAdminClient();
@@ -199,6 +214,9 @@ export const getOrderPage = cache(
         trackingLink: trackingLinkFor(fulfilment, shipTo),
         dispatch: dispatch || null,
         withdrawal: buyerWithdrawal(order, shippingPolicy),
+        payment: order.status === "refunded" ? "refunded" : order.status === "pending" ? "pending" : "paid",
+        refundedAt: order.refunded_at,
+        confirmationSent: order.confirmation_sent_at !== null,
       },
     };
   },

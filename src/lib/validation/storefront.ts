@@ -46,6 +46,7 @@ import {
   PRODUCT_PAGE_CTA_RADIUS_MAX,
   PRODUCT_PAGE_PRICE_NOTES,
   PRODUCT_PAGE_SECTION_IDS,
+  PRODUCT_PAGE_SALE_STYLES,
   PRODUCT_PAGE_SHIPPING_NOTES,
   SHIPPING_DISPATCH_MAX,
   SHIPPING_PROFILES_MAX,
@@ -72,6 +73,9 @@ import {
   TEXT_SIZE_MIN,
   TEXT_SPANS_MAX,
   TEXT_VARIANTS,
+  SALE_BADGES,
+  SALE_BADGE_LOOKS,
+  CHIP_SCALES,
   TILE_SPOTS,
   TITLE_DISPLAYS,
   TITLE_INSET_MAX,
@@ -206,6 +210,18 @@ const priceTagAppearanceFields = {
 };
 
 /**
+ * The sale chip, identical on the theme and on a per-tile override, spread
+ * into both so the two can never drift. A closed list, a spot from the shared
+ * board and a strict hex: there is no seller text here to moderate or escape.
+ */
+const saleBadgeFields = {
+  saleBadge: z.enum(SALE_BADGES).optional(),
+  saleBadgeLook: z.enum(SALE_BADGE_LOOKS).optional(),
+  saleBadgePosition: z.enum(TILE_SPOTS).optional(),
+  saleBadgeColor: hexColorSchema.optional(),
+};
+
+/**
  * Hover-reveal transition speed for the title band and the price tag —
  * identical on the theme and on a per-tile override, spread into both so the
  * two can never drift. Absent = HOVER_TRANSITION_MS_DEFAULT, the design
@@ -284,6 +300,8 @@ const themeObjectSchema = z.strictObject({
   ),
   ...priceTagAppearanceFields,
   ...hoverTimingFields,
+  ...saleBadgeFields,
+  chipScale: z.enum(CHIP_SCALES).optional(),
   showTitle: z.boolean(),
   gridGap: z.number().int().min(0).max(GRID_GAP_MAX),
   soldOutBadge: z.boolean(),
@@ -513,6 +531,8 @@ export const productPageSchema = z.preprocess(
     ctaBorderColor: hexColorSchema.optional(),
     priceNote: z.enum(PRODUCT_PAGE_PRICE_NOTES),
     shippingNote: z.enum(PRODUCT_PAGE_SHIPPING_NOTES),
+    // Absent = the default look, so an untouched page never grows a key.
+    saleStyle: z.enum(PRODUCT_PAGE_SALE_STYLES).optional(),
     showStock: z.boolean(),
     showSeller: z.boolean(),
     allowIndexing: z.boolean(),
@@ -674,6 +694,7 @@ const cardStyleOverridesSchema = z.preprocess((value) => {
   priceTagPosition: z.enum(PRICE_TAG_POSITIONS).optional(),
   ...priceTagAppearanceFields,
   ...hoverTimingFields,
+  ...saleBadgeFields,
 }));
 
 /** Focal point + zoom for an image inside a frame. The same bounded ints the

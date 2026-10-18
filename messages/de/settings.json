@@ -136,7 +136,7 @@
   "danger": {
     "export": {
       "cardTitle": "Meine Daten exportieren",
-      "cardDescription": "Alles, was wir über dich speichern: Profil, Produkte, Schaufenster-Konfiguration, alles in einer JSON-Datei gebündelt. Das sind deine Daten, die dir gehören.",
+      "cardDescription": "Alles, was wir über dich speichern: Profil, Produkte, Schaufenster, deine verkauften Bestellungen, Benachrichtigungen und Sicherheitsprotokoll, alles in einer JSON-Datei. Das sind deine Daten, die dir gehören.",
       "downloadButton": "Meine Daten herunterladen",
       "stepUpDescription": "Dein Export enthält dein gesamtes Konto. Gib den aktuellen Code aus deiner Authenticator-App ein, um ihn herunterzuladen."
     },
@@ -781,10 +781,20 @@
       "cardDescription": "Akzeptiere eine Einladung, um dem Team dieses Shops beizutreten."
     },
     "success": {
-      "inviteCreated": "Einladung erstellt. Die Person sieht sie, wenn sie sich mit dieser E-Mail anmeldet. (E-Mail-Versand ist noch nicht eingerichtet.)",
+      "inviteCreated": "Einladung erstellt, aber die E-Mail konnte nicht gesendet werden. Sag der Person selbst Bescheid: Sie sieht die Einladung, wenn sie sich mit dieser E-Mail anmeldet.",
+      "inviteEmailed": "Einladung gesendet. Wir haben der Person per E-Mail erklärt, wie sie annimmt.",
       "inviteAccepted": "Willkommen im Team.",
       "roleUpdated": "Rolle aktualisiert.",
       "memberRemoved": "Mitglied entfernt."
+    },
+    "inviteEmail": {
+      "subject": "{store} hat dich in sein Team bei Square Share eingeladen",
+      "subjectUnnamed": "Du wurdest in ein Team bei Square Share eingeladen",
+      "intro": "{store} hat dich eingeladen, dem Team bei Square Share beizutreten.",
+      "introUnnamed": "Ein Shop bei Square Share hat dich in sein Team eingeladen.",
+      "role": "Deine Rolle: {role}",
+      "how": "Um anzunehmen, melde dich mit dieser E-Mail-Adresse ({email}) an oder erstelle damit ein Konto. Die Einladung wartet in den Einstellungen unter „Team und Zugriff“.",
+      "ignore": "Nicht erwartet? Du kannst diese E-Mail ignorieren. Es passiert nichts, solange du nicht annimmst."
     }
   }
 }

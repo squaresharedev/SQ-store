@@ -176,6 +176,18 @@
         "body": "O Stripe vai tentar novamente. Atualize o seu cartão em Plano e faturação para manter o plano."
       }
     },
+    "stock": {
+      "low": {
+        "title": "Stock baixo: {title}",
+        "body": "{count, plural, =0 {Sem stock.} one {Só resta #.} many {Só restam # artigos.} other {Só restam #.}} Reabasteça o stock ou desative o controlo de stock se produz por encomenda."
+      }
+    },
+    "payment": {
+      "dispute": {
+        "title": "Um comprador contestou o pagamento de {title}",
+        "body": "O banco do comprador abriu uma disputa. Responda no seu painel Stripe antes do prazo."
+      }
+    },
     "policy": {
       "autoPaused": {
         "title": "Ação necessária: {target, select, product {o seu produto «{title}» está pausado} other {a sua montra «{title}» está pausada}}",

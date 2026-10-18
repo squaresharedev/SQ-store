@@ -1,18 +1,18 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { Ticket, TimerOff, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { HeroMark } from "@/components/ui/HeroMark";
 import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
-import { emptyStateClass } from "@/components/ui/surface-styles";
-import { helpTextClass, primaryButtonClass } from "@/components/ui/control-styles";
+import { helpTextClass } from "@/components/ui/control-styles";
 import { deleteDiscount, endSale, setCodeEnabled, type DiscountActionResult } from "@/lib/discounts/actions";
-import { NEW_DISCOUNT_PATH } from "@/lib/discounts/paths";
+import { coveredProducts } from "@/lib/discounts/covered";
 import type { DiscountsSummary } from "@/lib/discounts/summary";
+import type { DiscountProductChoice } from "@/types/discount";
+import { DiscountEmptyState } from "./DiscountEmptyState";
 import { DiscountPerformance } from "./DiscountPerformance";
 import { DiscountRow } from "./DiscountRow";
 
@@ -23,15 +23,30 @@ type Pending = { kind: "delete" | "end"; id: string } | null;
  * THE DISCOUNTS PAGE: what the discounts brought in, then every discount with
  * its controls. Composition only: the figures arrive worked out
  * (lib/discounts/summary.ts) and every write is a server action that re-checks
- * the role, so a viewer simply sees no controls.
+ * the role, so a viewer simply sees no controls. `products` is the store's
+ * catalogue, which each row opens to show the part of it the discount covers.
  */
-export function DiscountsPage({ summary, canWrite }: { summary: DiscountsSummary; canWrite: boolean }) {
+export function DiscountsPage({
+  summary,
+  products,
+  canWrite,
+}: {
+  summary: DiscountsSummary;
+  products: readonly DiscountProductChoice[];
+  canWrite: boolean;
+}) {
   const t = useTranslations("Discounts");
   const toast = useToast();
   const showError = useActionErrorToast();
   const [pending, setPending] = useState<Pending>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+  // Each discount's products, worked out once per data change rather than on
+  // every keystroke of a confirm dialog.
+  const covered = useMemo(
+    () => new Map(summary.items.map((item) => [item.discount.id, coveredProducts(item.discount, products)])),
+    [summary.items, products],
+  );
 
   function run(id: string, action: () => Promise<DiscountActionResult>, done: string) {
     setBusyId(id);
@@ -45,17 +60,7 @@ export function DiscountsPage({ summary, canWrite }: { summary: DiscountsSummary
   }
 
   if (summary.items.length === 0 && summary.orders === 0) {
-    return (
-      <div className={emptyStateClass} data-discounts-empty="">
-        <h2 className="text-lg font-semibold text-foreground">{t("empty.title")}</h2>
-        <p className={`${helpTextClass} mt-2 max-w-md`}>{canWrite ? t("empty.hint") : t("empty.hintReadOnly")}</p>
-        {canWrite && (
-          <Link href={NEW_DISCOUNT_PATH} className={`${primaryButtonClass} mt-6`}>
-            {t("page.create")}
-          </Link>
-        )}
-      </div>
-    );
+    return <DiscountEmptyState canWrite={canWrite} />;
   }
 
   const pendingItem = pending ? summary.items.find((item) => item.discount.id === pending.id) : null;
@@ -76,6 +81,7 @@ export function DiscountsPage({ summary, canWrite }: { summary: DiscountsSummary
               <DiscountRow
                 key={item.discount.id}
                 item={item}
+                products={covered.get(item.discount.id) ?? []}
                 canWrite={canWrite}
                 busy={busyId === item.discount.id}
                 onToggle={(enabled) =>

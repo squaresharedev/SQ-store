@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { unstable_isUnrecognizedActionError as isOutdatedPage } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ErrorScreen } from "@/components/error/ErrorScreen";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,13 @@ import { Button } from "@/components/ui/button";
  * Deliberately message-agnostic: Next.js redacts server-error messages in
  * production (only `digest` survives), so the copy must be right without
  * knowing which error landed here.
+ *
+ * ONE ERROR IS RECOGNISED, because "try again" cannot fix it. A Server Action
+ * is addressed by an id the build generates, so a tab left open across a
+ * deploy holds ids the new server has never heard of: its next save throws
+ * here, and retrying replays the same dead id for as long as the tab lives.
+ * Only loading the new build helps, so that case is offered a reload and told
+ * why. It happens to every open tab after every deploy.
  */
 export default function ErrorBoundary({
   error,
@@ -30,10 +38,32 @@ export default function ErrorBoundary({
   reset: () => void;
 }) {
   const t = useTranslations("ErrorPage.boundary");
+  const tOutdated = useTranslations("ErrorPage.outdated");
   const tCommon = useTranslations("Common.actions");
   useEffect(() => {
     console.error("[error boundary]", error);
   }, [error]);
+
+  // Asked of `unknown`: the guard's type is structurally any Error, so asked of
+  // `error` itself it would narrow every other error below to `never`.
+  if (isOutdatedPage(error as unknown)) {
+    return (
+      <ErrorScreen
+        code="409"
+        readout="err_page_outdated"
+        title={tOutdated("title")}
+        description={tOutdated("description")}
+        action={
+          <Button
+            onClick={() => window.location.reload()}
+            className="bg-foreground text-background hover:bg-foreground/90"
+          >
+            {tOutdated("cta")}
+          </Button>
+        }
+      />
+    );
+  }
 
   return (
     <ErrorScreen

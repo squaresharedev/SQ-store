@@ -5,6 +5,20 @@ import { defineConfig, devices } from "@playwright/test";
  * (embedded Postgres + PostgREST + mock GoTrue gateway + next dev) —
  * see tests/e2e/stack/server.mjs. No external Supabase project is touched.
  */
+/**
+ * The one command that boots the stack, named so the checkout run
+ * (playwright.checkout.config.ts) starts the SAME stack with its own switches
+ * rather than restating how.
+ */
+export const STACK_SERVER = {
+  command: "node tests/e2e/stack/server.mjs",
+  url: "http://localhost:3100",
+  reuseExistingServer: true,
+  timeout: 240_000,
+  stdout: "pipe",
+  stderr: "pipe",
+} as const;
+
 export default defineConfig({
   testDir: "tests/e2e",
   testIgnore: ["**/stack/**"],
@@ -30,12 +44,5 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-  webServer: {
-    command: "node tests/e2e/stack/server.mjs",
-    url: "http://localhost:3100",
-    reuseExistingServer: true,
-    timeout: 240_000,
-    stdout: "pipe",
-    stderr: "pipe",
-  },
+  webServer: STACK_SERVER,
 });

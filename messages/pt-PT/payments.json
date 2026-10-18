@@ -16,6 +16,11 @@
       "label": "Próxima transferência",
       "zero": "Nenhuma transferência agendada",
       "hint": "Prevista para {date}"
+    },
+    "fees": {
+      "label": "Taxas este mês",
+      "zero": "Sem taxas este mês",
+      "hint": "A parte do Square Share nas suas vendas, após reembolsos"
     }
   },
   "connection": {
@@ -29,6 +34,8 @@
     "charges": "Cobranças",
     "payouts": "Transferências",
     "verified": "Verificado",
+    "finish": "O Stripe ainda precisa de mais alguns dados. Enquanto não os tiver, os compradores não podem pagar.",
+    "finishButton": "Concluir no Stripe",
     "requirementsDue": "O Stripe precisa de mais informações para as transferências poderem continuar."
   },
   "connectModal": {
@@ -106,6 +113,7 @@
     "sentTo": "Enviado para",
     "bankAccount": "Conta bancária ···· {last4}",
     "arrives": "Chega",
+    "arrived": "Chegou",
     "initiated": "Iniciada",
     "type": "Tipo",
     "typeValue": "{method, select, instant {Instantânea} other {Normal}} · {automatic, select, true {Automática} other {Manual}}",

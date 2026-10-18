@@ -55,6 +55,22 @@ const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
 const CONTROL_CHARS_EXCEPT_NEWLINE = /[\u0000-\u0009\u000b-\u001f\u007f]/;
 
 /**
+ * Invisible direction controls (embeddings, overrides, isolates). They ride
+ * along when a name or a number is pasted from a chat app, and one can reverse
+ * how the rest of a line reads on an address label or in an email. Dropped
+ * rather than refused: nobody can see the character an error would be about.
+ * Direction MARKS and joiners stay: right-to-left text and emoji are made of them.
+ */
+const BIDI_CONTROLS = /[\u202a-\u202e\u2066-\u2069]/g;
+
+/** Where every free-text field starts: direction controls dropped, then trimmed. */
+const cleanString = () =>
+  z
+    .string()
+    .overwrite((value) => value.replace(BIDI_CONTROLS, ""))
+    .trim();
+
+/**
  * A single-line, control-character-free string. Trimmed before every check, so
  * a field of pure whitespace fails `min` instead of passing it.
  */
@@ -66,9 +82,7 @@ export function singleLineText(options: {
   min?: number;
 }) {
   const { field, max, min = 1 } = options;
-  return z
-    .string()
-    .trim()
+  return cleanString()
     .min(min, min > 1 ? tooShortKey(field) : issueKey(`Validation.text.${field}.required`))
     .max(max, issueKey(`Validation.text.${field}.tooLong`))
     .refine((value) => !CONTROL_CHARS.test(value), {
@@ -96,9 +110,7 @@ export function multiLineText(options: {
   min?: number;
 }) {
   const { field, max, min = 0 } = options;
-  return z
-    .string()
-    .trim()
+  return cleanString()
     .min(min, issueKey(`Validation.text.${field}.required`))
     .max(max, issueKey(`Validation.text.${field}.tooLong`))
     .refine((value) => !CONTROL_CHARS_EXCEPT_NEWLINE.test(value), {

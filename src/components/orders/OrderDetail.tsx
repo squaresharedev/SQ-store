@@ -449,7 +449,7 @@ export function OrderDetail({
           they could press and be refused by, and read-only means no controls. */}
       {canFulfil && (
         <div className="mt-auto border-t border-border px-4 py-3">
-          <OrderActions order={order} />
+          <OrderActions order={order} onOrderChange={onOrderChange} />
         </div>
       )}
     </div>

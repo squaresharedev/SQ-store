@@ -14,6 +14,13 @@
 // PURE ON PURPOSE, like lib/dashboard/attention.ts beside it, so every branch
 // and every destination can be asserted without a database.
 //
+// BUYABLE, NOT JUST VISIBLE. Where a payment account can be connected, two
+// more steps follow the four that put a page online: connecting it, and (for a
+// store with something that ships) pricing delivery. Without them a page is
+// live and has no Pay button, and "set up" would be a tick that lies. Where no
+// account can be connected yet, neither step exists: a step nobody can take is
+// not a step.
+//
 // "LIVE" MIRRORS THE PUBLIC READ GATE (lib/products/public.ts): a product page
 // answers only when its storefront has product pages switched on, the product
 // has a block on that storefront, the product is active, and the trader
@@ -26,11 +33,21 @@ import {
   traderIdentityHref,
   type TraderIdentityField,
 } from "@/lib/settings/trader-identity";
+import { PAYMENTS_PATH } from "@/lib/dashboard/paths";
+import { SHIPPING_RATES_HREF } from "@/types/shipping-policy";
 import { resolveProductPage } from "@/lib/storefront/product-page";
 import { productPagePath } from "@/lib/storefront/product-page-url";
 
-/** The steps, in the order a seller takes them. */
-export const SETUP_STEP_IDS = ["seller-details", "product", "storefront", "publish"] as const;
+/** The steps, in the order a seller takes them. The last two are about being
+ *  PAID, and only appear where that is possible (SetupFacts.checkout). */
+export const SETUP_STEP_IDS = [
+  "seller-details",
+  "product",
+  "storefront",
+  "publish",
+  "payments",
+  "delivery",
+] as const;
 export type SetupStepId = (typeof SETUP_STEP_IDS)[number];
 
 /** Every piece of copy on a step is a MessageRef, resolved where it renders. */
@@ -55,6 +72,10 @@ export type SetupStep = {
  *  email is unconfirmed, or complete. */
 export type SellerSetupState = "done" | "missing" | "unconfirmed";
 
+/** Where the store's payment account stands: none yet, started but not
+ *  cleared to take payments, or taking them. */
+export type PaymentsSetupState = "none" | "unfinished" | "ready";
+
 export type SetupFacts = {
   /** getTraderIdentityStatus(accountId).missing: the gate's own answer. */
   traderMissing: readonly TraderIdentityField[];
@@ -68,6 +89,18 @@ export type SetupFacts = {
     id: string;
     config: Pick<StorefrontConfig, "blocks" | "productPage">;
   }[];
+  /**
+   * Being paid through checkout. Present only where a payment account can be
+   * connected at all (lib/payments/availability.ts); absent, the checklist
+   * ends at a page a buyer can open.
+   */
+  checkout?: {
+    payments: PaymentsSetupState;
+    /** Whether delivery is priced, for a store with something that ships.
+     *  Null when nothing ships, or it could not be read: no step, rather than
+     *  a false alarm. */
+    deliveryPriced: boolean | null;
+  };
 };
 
 export type LivePage = { storefrontId: string; productId: string; path: string };
@@ -128,6 +161,10 @@ export function buildSetupSteps(facts: SetupFacts): SetupChecklistData {
     productStep(facts.productCount),
     storefrontStep(placed.length > 0, facts.storefronts[0]?.id ?? null),
     publishStep({ seller, live: live !== undefined, placed, placedActive }),
+    ...(facts.checkout ? [paymentsStep(facts.checkout.payments)] : []),
+    ...(facts.checkout && facts.checkout.deliveryPriced !== null
+      ? [deliveryStep(facts.checkout.deliveryPriced)]
+      : []),
   ];
   const doneCount = steps.filter((step) => step.done).length;
 
@@ -303,5 +340,49 @@ function publishStep({
       label: msg("Onboarding.steps.publish.actionOpen"),
     },
     cta: msg("Onboarding.steps.publish.ctaPagesOff"),
+  };
+}
+
+function paymentsStep(payments: PaymentsSetupState): SetupStep {
+  const base = {
+    id: "payments",
+    label: msg("Onboarding.steps.payments.label"),
+    cta: msg("Onboarding.steps.payments.cta"),
+  } as const;
+  if (payments === "ready") {
+    return { ...base, done: true, detail: msg("Onboarding.steps.payments.detailDone") };
+  }
+  // Started is not finished: the payment provider still wants something, and
+  // the same page is the way back into its onboarding.
+  const unfinished = payments === "unfinished";
+  return {
+    ...base,
+    done: false,
+    detail: msg(
+      unfinished ? "Onboarding.steps.payments.detailUnfinished" : "Onboarding.steps.payments.detail",
+    ),
+    action: {
+      href: PAYMENTS_PATH,
+      label: msg(
+        unfinished ? "Onboarding.steps.payments.actionFinish" : "Onboarding.steps.payments.action",
+      ),
+    },
+  };
+}
+
+function deliveryStep(priced: boolean): SetupStep {
+  const base = {
+    id: "delivery",
+    label: msg("Onboarding.steps.delivery.label"),
+    cta: msg("Onboarding.steps.delivery.cta"),
+  } as const;
+  if (priced) {
+    return { ...base, done: true, detail: msg("Onboarding.steps.delivery.detailDone") };
+  }
+  return {
+    ...base,
+    done: false,
+    detail: msg("Onboarding.steps.delivery.detail"),
+    action: { href: SHIPPING_RATES_HREF, label: msg("Onboarding.steps.delivery.action") },
   };
 }

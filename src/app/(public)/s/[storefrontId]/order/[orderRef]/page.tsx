@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { OrderStatusView } from "@/components/checkout/OrderStatusView";
+import { BuyerBusy } from "@/components/product-page/BuyerNotice";
 import { getOrderPage } from "@/lib/orders/order-page";
+import { PAGE_BUSY } from "@/lib/public/busy";
 import { PLACED_QUERY_PARAM, firstValue, type SearchParams } from "@/lib/storefront/product-page-url";
 
 /**
@@ -13,7 +15,8 @@ import { PLACED_QUERY_PARAM, firstValue, type SearchParams } from "@/lib/storefr
  * `orderRef` is the order's credential (lib/orders/order-link.ts), checked in
  * getOrderPage after a rate-limit token is spent; anything that does not prove
  * an order of THIS storefront is the same not-found as a page that never
- * existed.
+ * existed. A read that failed is NOT that: the buyer is told the page could
+ * not be loaded and that their order is safe (lib/public/busy.ts).
  *
  * Never indexed, never cached, and no referrer leaves it: the URL is a
  * credential, and a click on the seller's email address or a policy link must
@@ -26,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const { storefrontId, orderRef } = await params;
   const page = await getOrderPage(storefrontId, orderRef);
   const base: Metadata = { robots: { index: false, follow: false }, referrer: "no-referrer" };
-  if (!page) return base;
+  if (!page || page === PAGE_BUSY) return base;
   const t = await getTranslations("ProductPage.order.metadata");
   const store = page.storefront.seller.businessName || page.storefront.name;
   return { ...base, title: { absolute: t("title", { store }) } };
@@ -41,6 +44,7 @@ export default async function OrderPage({
 }) {
   const [{ storefrontId, orderRef }, query] = await Promise.all([params, searchParams]);
   const page = await getOrderPage(storefrontId, orderRef);
+  if (page === PAGE_BUSY) return <BuyerBusy order />;
   if (!page) notFound();
   return (
     <main>

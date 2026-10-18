@@ -7,6 +7,20 @@
     "body": "Es wurde möglicherweise entfernt, oder der Link ist veraltet. Geh zurück zum Shop, um zu sehen, was jetzt angeboten wird.",
     "back": "Zurück"
   },
+  "unavailable": {
+    "title": "Diese Seite konnte nicht geladen werden",
+    "body": "Das Problem liegt bei uns und ist meist gleich vorbei.",
+    "orderBody": "Deine Bestellung ist sicher. Nur diese Seite konnte gerade nicht geladen werden, was meist gleich vorbei ist."
+  },
+  "pageNotFound": {
+    "title": "Diese Seite ist nicht verfügbar",
+    "body": "Der Link ist möglicherweise veraltet oder unvollständig. Geh zurück und versuche es erneut."
+  },
+  "storefront": {
+    "gridLabel": "Was {store} verkauft",
+    "empty": "{store} hat gerade nichts im Schaufenster.",
+    "description": "Das Angebot von {store} ansehen."
+  },
   "sections": {
     "description": "Beschreibung",
     "specs": "Technische Daten",
@@ -29,6 +43,11 @@
     "warnings": "Warnhinweise"
   },
   "priceNotes": "{price, select, incl {{shipping, select, plus {inkl. MwSt., zzgl. Versandkosten} free {inkl. MwSt., versandkostenfrei} other {inkl. MwSt.}}} excl {{shipping, select, plus {zzgl. Steuern, zzgl. Versandkosten} free {zzgl. Steuern, versandkostenfrei} other {zzgl. Steuern}}} other {{shipping, select, plus {zzgl. Versandkosten} free {versandkostenfrei} other {}}}}",
+  "delivery": {
+    "free": "Kostenloser Versand",
+    "flat": "Versand {amount}",
+    "from": "Versand ab {amount}"
+  },
   "stock": {
     "digitalDownload": "Digitaler Download",
     "digitalDownloadFormat": "Digitaler Download ({format})"
@@ -190,6 +209,8 @@
       "label": "Was passiert als Nächstes",
       "paid": "Bestellung aufgegeben",
       "paidDetail": "Bezahlt am {date}",
+      "confirming": "Zahlung wird bestätigt",
+      "confirmingDetail": "Das dauert normalerweise nur einen Moment. Lade die Seite neu, falls sich nichts ändert.",
       "preparing": "Wird vorbereitet",
       "preparingDetail": "{seller} bereitet deine Bestellung vor.",
       "shipped": "Unterwegs",
@@ -198,7 +219,10 @@
       "track": "Bei {carrier} verfolgen",
       "notYet": "Du erhältst eine E-Mail, wenn es versandt wurde.",
       "ready": "Bereit zum Herunterladen",
-      "readyDetail": "Deine Datei ist unten bereit, und der Link ist auch in deiner E-Mail."
+      "readyDetail": "Deine Datei ist unten bereit, und der Link ist auch in deiner E-Mail.",
+      "refunded": "Erstattet",
+      "refundedDetail": "{seller} hat diese Bestellung am {date} erstattet.",
+      "refundedDetailNoDate": "{seller} hat diese Bestellung erstattet."
     },
     "download": "Herunterladen ({format})",
     "downloadPlain": "Datei herunterladen",
@@ -295,6 +319,8 @@
     "payment": {
       "testTitle": "Testzahlung",
       "testBody": "Dies ist ein Entwicklungs-Checkout. Es wird keine Karte belastet und kein Geld bewegt.",
+      "stripeTitle": "Sicher mit Stripe bezahlen",
+      "stripeBody": "Deine Kartendaten gibst du im nächsten Schritt auf der sicheren Seite von Stripe ein.",
       "previewTitle": "Kartendetails",
       "previewBody": "Karte, Apple Pay und Google Pay erscheinen hier in deinen Farben, sobald Stripe verbunden ist.",
       "cardNumber": "Kartennummer",
@@ -331,7 +357,8 @@
       "failed": "Etwas ist schiefgelaufen und es wurde nichts belastet. Versuche es erneut.",
       "invalid": "Einige Details müssen überprüft werden. Prüfe die hervorgehobenen Felder.",
       "discount_invalid": "Dieser Rabattcode kann nicht mehr verwendet werden. Entferne ihn, um den vollen Preis zu zahlen.",
-      "price_changed": "Der Preis hat sich geändert, während diese Seite geöffnet war, daher wurde nichts berechnet. Prüfe den neuen Gesamtbetrag und zahle dann."
+      "price_changed": "Der Preis hat sich geändert, während diese Seite geöffnet war, daher wurde nichts berechnet. Prüfe den neuen Gesamtbetrag und zahle dann.",
+      "turnstile": "Die Sicherheitsprüfung wurde nicht abgeschlossen, daher wurde nichts belastet. Sie läuft jetzt erneut: Warte einen Moment und versuche es dann noch einmal."
     },
     "editHeadline": "Überschrift der Kasse",
     "discount": {
@@ -350,7 +377,11 @@
   "sale": {
     "wasNow": "War {was}, jetzt {now}",
     "percentOff": "-{percent}%",
+    "amountOff": "-{amount}",
     "priorNote": "Durchgestrichener Preis: niedrigster Gesamtpreis der letzten 30 Tage vor der Preisermäßigung.",
+    "regularNote": "Durchgestrichener Preis: der reguläre Preis.",
+    "lowestNote": "Durchgestrichener Preis: der reguläre Preis. Niedrigster Gesamtpreis der letzten 30 Tage vor der Preisermäßigung: {price}.",
+    "badgeSale": "Aktion",
     "endsOn": "Aktion endet {date}"
   }
 }

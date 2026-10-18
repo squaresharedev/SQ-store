@@ -30,7 +30,7 @@
     "ownerOnly": "Only the store owner can change its plan.",
     "soon": "Soon",
     "soonTitle": "Paid plans open soon. Everything on Free keeps working in the meantime.",
-    "finePrint": "Prices exclude VAT. The per-sale fee applies to sales through Square Share checkout and is charged on the item price, never on delivery. Stripe's own card processing fees come on top. Cancel any time: you keep your plan until the end of the period you paid for.",
+    "finePrint": "Prices exclude VAT. The per-sale fee applies to sales through Square Share checkout and is charged on everything the buyer pays, delivery included. Stripe's own card processing fees come on top. Cancel any time: you keep your plan until the end of the period you paid for.",
     "unavailable": "Plans can't be shown right now. Refresh the page in a moment.",
     "yearlyFree": "{count, plural, one {# month free} other {# months free}}",
     "launchNote": "A launch price is an introductory price: the regular price is the one shown struck through."
@@ -132,11 +132,11 @@
       },
       "fee": {
         "q": "What is the per-sale fee charged on?",
-        "a": "On the item price of each sale made through Square Share checkout, never on delivery. Stripe's own card processing fees are separate."
+        "a": "On everything the buyer pays for each sale made through Square Share checkout, delivery included. Stripe's own card processing fees are separate."
       },
       "switch": {
         "q": "Can I switch plans later?",
-        "a": "Any time, up or down, monthly or yearly. Stripe shows exactly what you'll pay before you confirm."
+        "a": "Any time, up or down. Stripe shows exactly what you'll pay before you confirm."
       }
     }
   },
@@ -176,7 +176,8 @@
     "renews": "Renews on {date}.",
     "ends": "Ends on {date}. Your store moves to Free then, and nothing is taken down.",
     "pastDue": "Payment failed. Stripe will try your card again; update it to keep {plan}.",
-    "feeLine": "Fee on each sale: {rate} of the item price.",
+    "feeLine": "Fee on each sale: {rate} of what the buyer pays.",
+    "feeWaivedLine": "No fee on your sales: it is waived for your store.",
     "memberNote": "Only the store owner can change the plan or see its invoices.",
     "usageTitle": "What you're using",
     "usageDescription": "Your plan's limits only apply to adding more. Nothing you have is ever removed.",

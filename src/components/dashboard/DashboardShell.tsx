@@ -24,6 +24,8 @@ import { countOrdersToShip } from "@/lib/orders/queries";
 import { ORDERS_PATH } from "@/lib/dashboard/paths";
 import { emailSendingEnabled } from "@/lib/email/send";
 import { OrderMailProvider } from "@/components/orders/OrderMailProvider";
+import { OrderRefundProvider } from "@/components/orders/OrderRefundProvider";
+import { can } from "@/lib/team/permissions";
 import { SkipLink } from "@/components/ui/SkipLink";
 
 /** Where the seller-details banner stands down for owners: the setup checklist
@@ -164,7 +166,9 @@ export async function DashboardShell({
               {/* Where "Skip to main content" lands. A plain wrapper: each page
                   brings its own <main>, and this only has to take focus. */}
               <div id={MAIN_CONTENT_ID} tabIndex={-1} className="outline-none">
-                <OrderMailProvider enabled={emailSendingEnabled()}>{children}</OrderMailProvider>
+                <OrderMailProvider enabled={emailSendingEnabled()}>
+                  <OrderRefundProvider allowed={can(account?.role, "orders.refund")}>{children}</OrderRefundProvider>
+                </OrderMailProvider>
               </div>
             </div>
           </div>

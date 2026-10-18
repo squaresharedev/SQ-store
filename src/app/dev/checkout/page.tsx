@@ -8,7 +8,7 @@ import { CheckoutGallery } from "./CheckoutGallery";
 // panel from the storefront designer, so the design and every one of its
 // settings can be judged without a sign-in, a database or a product page.
 // `?w=390` draws that width (320 to 1440, default 1280), `?kind=digital` a
-// download, `?view=thanks` the thank-you page, `?q=3` three of it, `?scroll=1`
+// download, `?sale=1` the product on sale (a struck price and its percent), `?view=thanks` the thank-you page, `?q=3` three of it, `?scroll=1`
 // the page inside a phone-height window it scrolls in (as the editor shows it
 // on a phone), `?view=thanks&buyer=1` the thank-you in the buyer's mode
 // (screen-wide confetti), and `?layout=` / `?bg=` (a hex without the #) / `?photo=1` (with `&overlay=0` for a photo shown as it is) start
@@ -33,7 +33,7 @@ export default async function CheckoutDevPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   if (process.env.NODE_ENV === "production") notFound();
-  const { w, kind, view, q, layout, bg, scroll, buyer, photo, overlay } = await searchParams;
+  const { w, kind, sale, view, q, layout, bg, scroll, buyer, photo, overlay } = await searchParams;
   const harnessPhoto = { key: HARNESS_PHOTO_KEY, ...(overlay === "0" ? { overlay: false } : {}) };
   const initial = checkoutPageSchema.safeParse({
     ...DEFAULT_CHECKOUT_PAGE_CONFIG,
@@ -46,6 +46,7 @@ export default async function CheckoutDevPage({
     <CheckoutGallery
       width={Number.isInteger(width) ? Math.min(Math.max(width, WIDTH_MIN), WIDTH_MAX) : WIDTH_DEFAULT}
       digital={kind === "digital"}
+      sale={sale === "1"}
       view={view === "thanks" ? "thanks" : "checkout"}
       quantity={Math.min(Math.max(Number(q) || 1, 1), 5)}
       scroll={scroll === "1"}

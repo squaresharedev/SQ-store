@@ -47,7 +47,7 @@ export const CLIENT_SCOPES = {
     "Settings.security.success",
     "Settings.sellerDetails.fields",
   ],
-  /** The hosted product page. Deliberately the smallest: it is the coldest visit. */
+  /** The hosted pages a buyer opens. Deliberately the smallest: it is the coldest visit. */
   public: [
     "ProductPage",
     // A removed product's notice, and the font and text-style names the page
@@ -55,11 +55,23 @@ export const CLIENT_SCOPES = {
     "Products.removal",
     "Storefront.fonts",
     "Storefront.textVariants",
+    // The hosted storefront (/s/[storefrontId]) draws the board with the
+    // designer's own tile faces and masthead, so it carries the few words
+    // those can say: about a kilobyte, against the 44 the designer has.
+    "Storefront.masthead",
+    "Storefront.blockFace",
+    "Storefront.tiles",
+    "Storefront.inlineText",
+    "Storefront.spotDrag",
+    "Storefront.colors.fields",
+    "Storefront.colors.inherit",
   ],
   /**
    * The dashboard and settings. Not the designer's copy, apart from what the
-   * global search lists (its settings and colour names) and the policy and
-   * shipping wording that settings previews exactly as buyers read it.
+   * global search lists (its settings and colour names), the policy and
+   * shipping wording that settings previews exactly as buyers read it, and how
+   * a sale's price is said ("Was X, now Y"), which a discount's product list
+   * says the same way.
    */
   app: [
     "Analytics",
@@ -76,6 +88,7 @@ export const CLIENT_SCOPES = {
     "Search",
     "Settings",
     "ProductPage.footer.policies",
+    "ProductPage.sale",
     "ProductPage.shippingProse",
     "Storefront.colors.presets",
     "Storefront.settings",

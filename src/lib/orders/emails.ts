@@ -13,6 +13,8 @@
 //   4. The two halves of a WITHDRAWAL (CRD art. 11a): the acknowledgement to
 //      the buyer, and the notice to the seller who has to act on it.
 //   5. The order link, again, to a buyer who asked for it by email.
+//   6. "Your order was refunded" to the BUYER when the seller takes it back
+//      (lib/orders/actions.ts refundOrder).
 //
 // PLAIN TEXT, like every other mail this app sends (lib/security/events.ts):
 // an order email is read on a phone next to a pile of boxes, and it has to
@@ -39,7 +41,7 @@ import { formatOrderSelection } from "@/lib/orders/selection";
 import { formatShipTo } from "@/lib/orders/ship-to";
 import { translatorFor, type Translate } from "@/i18n/translator";
 import type { Locale } from "@/i18n/locales";
-import type { CarrierId, OrderSelection, ShipTo } from "@/types/order-view";
+import type { CarrierId, OrderSelection, RefundReason, ShipTo } from "@/types/order-view";
 import type { StorefrontSeller } from "@/types/storefront";
 
 /** What both emails say about the goods. */
@@ -243,6 +245,67 @@ export async function sendShippedEmail(
     return result;
   } catch (error) {
     console.error("[orders] shipped email threw:", error instanceof Error ? error.message : error);
+    return { sent: false, reason: "failed" };
+  }
+}
+
+// ── 2b. The refund, to the buyer ──────────────────────────────────────────
+
+export type RefundEmail = Goods & {
+  /** Why the seller took it back; picks the opening line. Null = not said. */
+  reason: RefundReason | null;
+  amountCents: number;
+  currency: string;
+  /** The seller is paying the buyer back themselves (no payment provider moved
+   *  the money), so the mail says the seller will, not that a card was. */
+  manual: boolean;
+  /** The buyer's order page, where the refund is shown. Null where there is none. */
+  orderUrl: string | null;
+  store: { name: string; contactEmail: string | null };
+};
+
+/**
+ * "Your order was refunded", to the buyer, on the seller's behalf. Never
+ * throws; the result says whether it went, so the seller can be told honestly
+ * whether the buyer was emailed.
+ */
+export async function sendRefundEmail(
+  to: string,
+  locale: Locale,
+  order: RefundEmail,
+): Promise<SendResult> {
+  try {
+    const t = await translatorFor(locale);
+    const store = order.store.name;
+    const lines: string[] = [
+      t("Orders.email.refund.intro", { store, reason: order.reason ?? "other" }),
+      "",
+      ...packLines(t, order),
+      "",
+      t("Orders.email.refund.amount", {
+        amount: formatCents(order.amountCents, order.currency, locale),
+      }),
+      t(order.manual ? "Orders.email.refund.howManual" : "Orders.email.refund.howCard", { store }),
+    ];
+    if (order.orderUrl) {
+      lines.push("", t("Orders.email.confirmation.orderPageDigital", { url: order.orderUrl }));
+    }
+    if (order.store.contactEmail) {
+      lines.push("", t("Orders.email.shipped.questions", { store }));
+    }
+    lines.push("", t("Orders.email.shipped.footer", { store }));
+
+    const result = await sendEmail({
+      to,
+      subject: t("Orders.email.refund.subject", { store }),
+      text: lines.join("\n"),
+      fromName: t("Orders.email.fromName", { store }),
+      ...(order.store.contactEmail ? { replyTo: order.store.contactEmail } : {}),
+    });
+    reportFailure("refund", result);
+    return result;
+  } catch (error) {
+    console.error("[orders] refund email threw:", error instanceof Error ? error.message : error);
     return { sent: false, reason: "failed" };
   }
 }

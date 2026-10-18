@@ -136,7 +136,7 @@
   "danger": {
     "export": {
       "cardTitle": "Mijn gegevens exporteren",
-      "cardDescription": "Alles wat we over je hebben: profiel, producten, etalageconfiguratie, allemaal gebundeld in één JSON-bestand. Het zijn jouw gegevens, om te bewaren.",
+      "cardDescription": "Alles wat we over je hebben: profiel, producten, etalages, de bestellingen die je hebt verkocht, je meldingen en het beveiligingslogboek, allemaal in één JSON-bestand. Het zijn jouw gegevens, om te bewaren.",
       "downloadButton": "Mijn gegevens downloaden",
       "stepUpDescription": "Je export bevat je hele account. Vul de huidige code uit je authenticator-app in om hem te downloaden."
     },
@@ -781,10 +781,20 @@
       "cardDescription": "Accepteer een uitnodiging om lid te worden van het team van die winkel."
     },
     "success": {
-      "inviteCreated": "Uitnodiging aangemaakt. Ze zien het zodra ze inloggen met dat e-mailadres. (E-mail versturen is nog niet gekoppeld.)",
+      "inviteCreated": "Uitnodiging aangemaakt, maar we konden geen e-mail sturen. Laat het ze zelf weten: ze zien de uitnodiging zodra ze inloggen met dat e-mailadres.",
+      "inviteEmailed": "Uitnodiging verstuurd. We hebben ze gemaild hoe ze kunnen accepteren.",
       "inviteAccepted": "Welkom bij het team.",
       "roleUpdated": "Rol bijgewerkt.",
       "memberRemoved": "Lid verwijderd."
+    },
+    "inviteEmail": {
+      "subject": "{store} nodigt je uit voor het team op Square Share",
+      "subjectUnnamed": "Je bent uitgenodigd voor een team op Square Share",
+      "intro": "{store} nodigt je uit om lid te worden van het team op Square Share.",
+      "introUnnamed": "Een winkel op Square Share nodigt je uit voor het team.",
+      "role": "Jouw rol: {role}",
+      "how": "Om te accepteren log je in met dit e-mailadres ({email}), of maak je er een account mee aan. De uitnodiging staat voor je klaar in Instellingen, onder Team en toegang.",
+      "ignore": "Had je dit niet verwacht? Je kunt deze e-mail negeren. Er gebeurt niets tenzij je accepteert."
     }
   }
 }

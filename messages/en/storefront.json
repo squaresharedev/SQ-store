@@ -146,9 +146,12 @@
       "thankYouMessage": "Thank-you message",
       "thankYouCelebration": "Thank-you celebration",
       "checkoutPayButton": "Pay button",
+      "saleChip": "Sale chip",
+      "salePrice": "Sale price",
       "productPagePhoto": "Product page photo",
       "checkoutPhoto": "Checkout photo",
-      "thanksPhoto": "Thank-you page photo"
+      "thanksPhoto": "Thank-you page photo",
+      "chipScale": "Same chip size on every card"
     }
   },
   "editorSearch": {
@@ -206,11 +209,23 @@
     "snippetLabel": "Snippet",
     "snippetReadyHint": "Paste this snippet into your site''s HTML.",
     "snippetLockedHint": "Enable embedding and add at least one domain to unlock the Copy button.",
+    "snippetSaveHint": "Save your settings to unlock the Copy button.",
+    "pagesOffHint": "Turn on product pages in the designer first. A click on a product opens its page.",
+    "notShowingLabel": "If the storefront does not show",
+    "notShowingTip": "The address of your site must be in Allowed domains, and the site must use https. Site builders that put custom HTML in a frame of their own (Wix, Google Sites) are not supported yet.",
     "copySnippet": {
       "copy": "Copy embed snippet",
       "copied": "Copied embed snippet",
       "failed": "Couldn't copy embed snippet. Select and copy it manually.",
       "cannotCopyYet": "embed snippet cannot be copied yet"
+    },
+    "privacyLabel": "For your privacy policy",
+    "privacyHint": "Your site now loads the storefront from Squareshare, so its privacy policy should say so. You can paste this text:",
+    "privacyText": "This site shows a storefront provided by Squareshare. When it loads, the visitor's IP address and browser details are sent to Squareshare to display the products and to count visits. Squareshare sets no cookies and stores nothing on the visitor's device for this. Details: {policy}",
+    "copyPrivacy": {
+      "copy": "Copy privacy text",
+      "copied": "Copied privacy text",
+      "failed": "Couldn't copy the text. Select and copy it manually."
     },
     "snippetKeyLabel": "Snippet key",
     "rotateConfirmText": "Rotating issues a new key. Every copy of the old snippet stops working immediately, including ones on sites you still want -- you''ll need to paste the new snippet everywhere.",
@@ -222,6 +237,19 @@
     "saved": "Embed settings saved.",
     "newKeyIssued": "New embed key issued.",
     "newKeyDetail": "Re-paste the snippet everywhere this storefront is embedded."
+  },
+  "share": {
+    "title": "Storefront link",
+    "live": "Your storefront has a page of its own. Anyone with this link can browse it, no website needed.",
+    "pagesOff": "Turn on product pages in the designer and this storefront gets a link you can share.",
+    "detailsMissing": "This storefront gets a link you can share once your seller details are complete.",
+    "open": "Open",
+    "openDesigner": "Open designer",
+    "copy": {
+      "copy": "Copy storefront link",
+      "copied": "Copied storefront link",
+      "failed": "Couldn't copy the link. Select and copy it manually."
+    }
   },
   "wizard": {
     "category": {
@@ -559,6 +587,27 @@
     "spotBottomCenter": "Price tag bottom center",
     "spotBottomRight": "Price tag bottom right"
   },
+  "saleBadge": {
+    "title": "Sale chip",
+    "says": "Shows",
+    "hint": "Shown on a product while a sale lowers its price.",
+    "percent": "Percentage",
+    "amount": "Amount",
+    "hidden": "Hidden",
+    "lookLabel": "Style",
+    "look": {
+      "pill": "Pill",
+      "sticker": "Sticker",
+      "flag": "Flag",
+      "ribbon": "Ribbon"
+    },
+    "spot": "Sale chip {spot, select, top_left {top left} top_center {top center} top_right {top right} middle_center {middle} bottom_left {bottom left} bottom_center {bottom center} bottom_right {bottom right} other {}}"
+  },
+  "chipScale": {
+    "label": "On bigger cards",
+    "tile": "Grow",
+    "cell": "Stay the same"
+  },
   "layout": {
     "canvasWidth": "Canvas width",
     "canvasWidthAriaLabel": "Canvas width in blocks",
@@ -750,6 +799,11 @@
         "plusShipping": "Plus shipping",
         "freeShipping": "Free shipping",
         "none": "None"
+      },
+      "saleStyle": {
+        "label": "Sale price",
+        "strike": "Line",
+        "slash": "Slash"
       },
       "useStorefrontAccent": "Use Storefront accent",
       "useButtonTextColor": "Use Button text color"

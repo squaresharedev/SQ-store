@@ -7,6 +7,8 @@ import { CheckoutView } from "@/components/checkout/CheckoutView";
 import { checkoutViewDedupeKey, recordSignal, visitorHash } from "@/lib/analytics/record";
 import { checkoutProviderFor } from "@/lib/checkout/availability";
 import { getCheckoutPage } from "@/lib/checkout/page";
+import { PAGE_BUSY } from "@/lib/public/busy";
+import { BuyerBusy } from "@/components/product-page/BuyerNotice";
 import { strictSelection } from "@/lib/checkout/selection";
 import { QUANTITY_QUERY_PARAM, requestedQuantity } from "@/lib/products/quantity";
 import { clientKey } from "@/lib/rate-limit";
@@ -49,7 +51,7 @@ type Params = { storefrontId: string; productId: string };
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { storefrontId, productId } = await params;
   const result = await getCheckoutPage(storefrontId, productId);
-  if (!result) return { robots: { index: false, follow: false } };
+  if (!result || result === PAGE_BUSY) return { robots: { index: false, follow: false } };
   const { storefront } = result.page;
   const t = await getTranslations("ProductPage.checkout.metadata");
   const store = storefront.seller.businessName || storefront.name;
@@ -68,6 +70,7 @@ export default async function CheckoutPage({
 }) {
   const [{ storefrontId, productId }, query] = await Promise.all([params, searchParams]);
   const result = await getCheckoutPage(storefrontId, productId);
+  if (result === PAGE_BUSY) return <BuyerBusy />;
   if (!result) notFound();
   const { page, ownerId } = result;
   const { product } = page;
@@ -118,7 +121,7 @@ export default async function CheckoutPage({
         // key from it, so a double click (or a retried request) records one
         // order, not two.
         attemptId={crypto.randomUUID()}
-        provider={checkoutProviderFor(ownerId)}
+        provider={await checkoutProviderFor(ownerId)}
         initialCountry={country}
         via={via}
       />

@@ -1,7 +1,7 @@
 import type { Locale } from "@/i18n/locales";
 import { formatCents, toCurrency } from "@/lib/format/money";
 import { numberFormat } from "@/lib/format/intl";
-import { formatNumber } from "@/components/charts";
+import { compactNumber } from "@/components/charts";
 
 // Money formatters for the chart kit, in the two tiers the kit expects:
 // `valueFormatter` (tooltips, legends, the sr-only data table) is EXACT, and
@@ -16,7 +16,8 @@ export function moneyExact(currency: string, locale: Locale) {
   return (cents: number) => formatCents(cents, currency, locale);
 }
 
-/** Compact money for axis ticks: 120450 → "€1.2k" ("1,2 tis. €" in Czech). Display-only rounding. */
+/** Compact money for axis ticks: 120450 → "€1.2k", 150000000 → "€1.5M"
+ *  ("1,2 tis. €" in Czech). Display-only rounding. */
 export function moneyCompact(currency: string, locale: Locale) {
   const code = toCurrency(currency);
   if (locale !== "en") {
@@ -38,10 +39,7 @@ export function moneyCompact(currency: string, locale: Locale) {
     };
   }
   const symbol = code === "USD" ? "$" : "€";
-  return (cents: number) => {
-    const units = Math.round(cents / 100);
-    if (Math.abs(units) < 1000) return `${symbol}${formatNumber(units, locale)}`;
-    const thousands = Math.round(units / 100) / 10;
-    return `${symbol}${thousands}k`;
-  };
+  // The kit's own compaction (k, M, B), so an axis in the millions reads
+  // "€1.5M" and not "€1500k", which no label column is wide enough for.
+  return (cents: number) => `${symbol}${compactNumber(Math.round(cents / 100), locale)}`;
 }

@@ -28,6 +28,9 @@ export function sanitizeFilename(filename: string): string {
   const base = filename.split(/[\\/]/).pop() ?? "";
   const cleaned = base
     .replace(/[^A-Za-z0-9._-]+/g, "-")
+    // A name with nothing left of it (an emoji or non-Latin title) keeps its
+    // extension: "file.pdf", never a bare "pdf" no device knows how to open.
+    .replace(/^-+(?=\.[A-Za-z0-9]+$)/, "file")
     .replace(/^[.-]+/, "")
     .slice(0, 120);
   return cleaned || "file";

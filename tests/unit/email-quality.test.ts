@@ -42,6 +42,8 @@ describe("isPlaceholderEmail", () => {
       "asdf@studio-builderboy.at",
       "noreply@studio-builderboy.at",
       "no-reply@studio-builderboy.at",
+      "no.reply@studio-builderboy.at",
+      "do.not.reply@studio-builderboy.at",
       "placeholder@studio-builderboy.at",
     ]) {
       expect(isPlaceholderEmail(address), address).toBe(true);

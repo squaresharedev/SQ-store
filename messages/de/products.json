@@ -390,6 +390,8 @@
     "noTerms": "Noch keine Versandbedingungen geschrieben.",
     "profile": "Versandprofil",
     "edit": "Bearbeiten",
+    "unpriced": "Der Versand hat keinen Preis in {currency}, daher können Käufer dieses Produkt nicht an der Kasse bezahlen.",
+    "unpricedAction": "Versandkosten festlegen",
     "modalTitle": "Versand und Rücksendungen"
   },
   "optionsField": {

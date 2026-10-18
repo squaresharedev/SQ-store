@@ -27,6 +27,7 @@ JSON.parse(document.getElementById("analytics-snapshot").textContent)
   "currency": "EUR",                 // every *Cents field below is in this
   "sales":   { /* AnalyticsData */ },
   "signals": { /* SignalsData   */ },
+  "previous": { /* PreviousPeriod, or null */ },
   "generatedAt": "2026-08-30T17:12:04.881Z"
 }
 ```
@@ -45,6 +46,24 @@ Three things worth knowing before consuming it:
   rows, no embed keys, no visitor digests. Everything in it is already on the
   screen for the same signed-in reader. Anything added to `AnalyticsSnapshot`
   inherits that rule.
+
+**`previous` is the period immediately before the range**, the same number of
+days long (added 2026-10-04). It carries only what the "versus" charts draw:
+its `range`, the sales totals and series, and each signal kind's count and
+series, bucketed by the same rules. It is `null` when the range has no start
+(all time has nothing before it) or when that read failed. A series inside it
+is EMPTY when that period held none of the thing, and the page then draws no
+comparison: a store that did not exist yet is not a store that earned zero, so
+do not read an empty previous series as a 100% rise.
+
+**`sales.weekdays[].products` splits each weekday's sales by product** (added
+2026-10-07), and `sales.weekdayProducts` names the products it splits by, best
+seller first by number of sales in the range (at most four). Each entry is
+`{ "title": "Lamp", "sales": 3 }`; a `null` title is every product outside the
+named few, summed. The entries of a day always add up to that day's `sales`.
+Both are EMPTY when the split is not available (it is a separate read, from
+`analytics_weekday_products`, and the page falls back to plain bars without
+it): read empty as "not broken down", never as "nothing sold".
 
 The TypeScript shapes are the specification:
 [`src/lib/analytics/types.ts`](../src/lib/analytics/types.ts).
@@ -109,7 +128,7 @@ with a locale and a symbol baked into it; `120450` is a fact. (The rendered
 text also animates on mount, so it is briefly wrong on purpose.)
 
 **`sales.revenue` is not a tile.** Revenue is the page's headline: the figure
-sits over the revenue chart, which runs the full width of the page at the top
+sits over the revenue chart, which stands in a frame of four corner marks at the top
 of the sales section (`RevenueHero`). It carries the same six attributes as a
 tile, on the element that shows the figure, so select it by
 `data-analytics-metric` like any other and never by position. That element
@@ -129,7 +148,22 @@ sales.fees             currency_cents
 <kind>.count            count
 <kind>.unique_visitors  count
 <kind>.value            currency_cents   money-carrying kinds only
+
+funnel.embed_views            count
+funnel.product_opens          count
+funnel.checkouts_started      count     absent while the daily table cannot be read
+funnel.checkouts_expired      count     absent while the daily table cannot be read
+funnel.orders_per_100_views   percent   full precision; absent below 50 views
+funnel.checkout_abandonment   percent   full precision; absent below 50 views
 ```
+
+The `funnel.*` tiles sit in a section of their own
+(`data-analytics-section="funnel"`), present only when the range holds some
+embed activity, and the snapshot carries the same six facts as
+`snapshot.funnel` (`FunnelData`: the five counts and `checkoutsAvailable`).
+The two rates are not in the snapshot: they are worked out from the counts
+(`src/lib/analytics/funnel/summary.ts`), and a consumer should do the same.
+A rate that is absent is "not enough data", never zero.
 
 The Discounts page (`/discounts`) draws its figures with the same tile and card,
 so it publishes the same attributes with `data-analytics-source="discounts"`:
@@ -146,6 +180,12 @@ snapshot; [agent-surface.md](./agent-surface.md) says what each one counts.
 The sales `trend` panel is the revenue hero, which is not a card, and it
 publishes the same attributes as one. The `sales.revenue` metric element is
 inside it.
+
+When the previous period sold anything, the hero also states the change, on an
+element carrying `data-analytics-change`: the ratio at full precision (`0.25`
+is up a quarter, `-0.084` is down 8.4%). Absent when there is nothing to
+compare against. The trend charts draw the previous period as a dashed grey
+line under the current one; their `sr-only` tables list it as a second column.
 
 Charts also render an `sr-only` table twin carrying every plotted value, so the
 series are reachable without parsing SVG. Prefer the snapshot.
@@ -200,20 +240,36 @@ did I earn".
 | Source | Producer | Status |
 |---|---|---|
 | `sales` | The orders table, via `analytics_aggregate` | live |
-| `storefront_view` | `GET /api/embed/[key]` serving a payload to an allowed origin | live |
-| `product_click` | `POST /api/embed/[key]/signal` from the embed widget | route live, widget pending |
+| `storefront_view` | the embed frame (`/e/[key]/[site]`) or the hosted storefront (`/s/[storefrontId]`) serving a visitor, recorded server-side after the response; also `GET /api/embed/[key]` serving a payload to an allowed origin | live |
+| `product_click` | the hosted product page serving a buyer who arrived from an embed tile (`?via=embed`), recorded server-side beside its `product_view` | live |
 | `product_view` | the hosted product page (`/s/[storefrontId]/p/[productId]`) serving a buyer, recorded server-side after the response | live |
 | `checkout_view` | the hosted checkout (`/s/[storefrontId]/p/[productId]/checkout`) serving a buyer, recorded the same way | live |
 | `email_signup` | The email signup block's server handler | not built |
 | `booking` | The calendar booking block's server handler | not built |
+| `funnel` views, opens | the `storefront_view` and `product_click` rows above, the embed channel's share | live |
+| `funnel` orders | paid orders filed under the embed (`orders.channel`) | live |
+| `funnel` checkouts started, expired | Workers Analytics Engine data points written where a Stripe Checkout Session is created and where its `checkout.session.expired` event arrives (`src/lib/analytics/funnel/record.ts`), rolled into `storefront_funnel_daily` once a day (`rollup.ts`) | built, off until its binding and migration are in place (wrangler.jsonc, STOREFRONT FUNNEL) |
+
+The funnel's two checkout counts are every checkout of the store's, whatever
+brought the buyer: a data point carries the seller, store, product, event, a
+site hostname and a placement id, and nothing else, so it has no channel. They
+are also a day behind: today's are not rolled up until tomorrow.
 
 Two caveats a consumer should carry:
 
 - **Views are deduped to one per visitor per storefront per hour**, so the
   figure is a visit rather than a raw payload fetch.
-- **Views undercount.** The embed response is CDN-cacheable for five minutes,
-  and a cached hit never reaches the server. The bias is downward, which is the
-  safe direction for a number someone makes decisions on.
+- **Payload views undercount.** The `/api/embed/[key]` response is CDN-cacheable
+  for five minutes, and a cached hit never reaches the server. The bias is
+  downward, which is the safe direction for a number someone makes decisions
+  on. The embed frame and the hosted storefront are rendered per request and
+  do not have this gap.
+- **A click is a visit that landed.** Nothing on a seller's website reports a
+  click: a tile is a plain link, and the click is counted when the product
+  page it leads to is served. So no cookie, no beacon and nothing stored on a
+  visitor's device, and one click per visitor per product per hour, like the
+  view written beside it. It rests on the `via` marker, so the last sentence
+  of the next section applies to it too.
 
 ### Channels
 

@@ -24,6 +24,17 @@ export type OrderChannel = (typeof ORDER_CHANNELS)[number];
 export type OrderStatus = "paid" | "refunded" | "disputed" | "pending";
 
 /**
+ * WHY A SELLER TOOK AN ORDER BACK. Mirrors the orders.refund_reason CHECK
+ * (20261008_order_lifecycle): add an id here AND there, in one change.
+ *
+ *   cancelled  before it was sent (out of stock after all, the buyer asked)
+ *   returned   it came back (a withdrawal, a fault)
+ *   other      anything else
+ */
+export const REFUND_REASONS = ["cancelled", "returned", "other"] as const;
+export type RefundReason = (typeof REFUND_REASONS)[number];
+
+/**
  * Whether the parcel has gone. Mirrors the orders.fulfilment_status CHECK.
  * Separate from OrderStatus, which is about the MONEY: a paid order can still
  * be waiting to ship, and a shipped one can later be refunded.
@@ -172,6 +183,16 @@ export type OrderView = {
   withdrawalRequestedAt: string | null;
   /** What a discount did to this order. Null when none touched it. */
   discount: OrderDiscount | null;
+  /** When and why the seller took the order back. Null for one that stands.
+   *  `reason` is null on a refunded row nobody recorded a reason for. */
+  refund: { at: string; reason: RefundReason | null } | null;
+  /** Units this order is still holding off the shelf: what "put them back in
+   *  stock" would return. 0 when the product does not track stock. */
+  stockReserved: number;
+  /** A payment provider took the money, so a refund goes back through it.
+   *  False for an order no provider charged: the seller pays the buyer back
+   *  themselves and the refund is only recorded. */
+  paidThroughProvider: boolean;
 };
 
 /** A discount on one order (the orders.discount_* snapshot). */

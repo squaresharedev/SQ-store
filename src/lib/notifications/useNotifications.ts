@@ -8,12 +8,11 @@ import type {
 } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import {
-  fetchNotificationSnapshot,
   fetchUnreadCount,
-  getRealtimeToken,
   markAllNotificationsRead,
   markNotificationRead,
 } from "@/lib/notifications/actions";
+import { loadBellBootstrap } from "@/lib/notifications/bootstrap";
 import { storedNotificationAction } from "@/lib/notifications/inline-actions";
 import type { Notification } from "@/lib/notifications/types";
 import type { Tables } from "@/types";
@@ -21,7 +20,10 @@ import type { Tables } from "@/types";
 /**
  * THE single source of truth for realtime notifications (client). One instance
  * (mounted by NotificationsProvider) owns:
- *   - initial load: recent list + authoritative unread count (server action).
+ *   - initial load: recent list + authoritative unread count, and the token
+ *     the subscription needs, in ONE plain request (./bootstrap.ts). Not a
+ *     server action: those share a queue with navigations, and a link pressed
+ *     while the bell was starting used to do nothing.
  *   - a Realtime subscription to postgres_changes on `notifications`, filtered
  *     to the current user, for INSERT + UPDATE. RLS is enforced on the
  *     subscription too, so only the user's own rows ever arrive.
@@ -152,7 +154,7 @@ export function useNotifications(): UseNotifications {
   );
 
   const refresh = React.useCallback(() => {
-    void fetchNotificationSnapshot().then((snap) => {
+    void loadBellBootstrap().then(({ snapshot: snap }) => {
       if (!mountedRef.current || !snap) return;
       setNotifications(snap.notifications);
       setUnreadCount(snap.unreadCount);
@@ -169,7 +171,7 @@ export function useNotifications(): UseNotifications {
     let refreshTimer: ReturnType<typeof setInterval> | null = null;
 
     async function start() {
-      const snap = await fetchNotificationSnapshot();
+      const { snapshot: snap, token } = await loadBellBootstrap();
       if (!active) return;
       if (!snap) {
         setLoading(false);
@@ -180,8 +182,6 @@ export function useNotifications(): UseNotifications {
       setUnreadCount(snap.unreadCount);
       setLoading(false);
 
-      const token = await getRealtimeToken();
-      if (!active) return;
       if (!token) {
         // No token → cannot authorize an RLS-filtered subscription. Keep the
         // static snapshot rather than opening an unauthenticated stream.
@@ -217,7 +217,7 @@ export function useNotifications(): UseNotifications {
       // Keep the realtime auth token fresh so a long-lived tab keeps receiving
       // events after a token rotation.
       refreshTimer = setInterval(async () => {
-        const fresh = await getRealtimeToken();
+        const { token: fresh } = await loadBellBootstrap();
         if (active && fresh) await supabase.realtime.setAuth(fresh);
       }, TOKEN_REFRESH_MS);
     }

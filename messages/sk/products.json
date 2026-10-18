@@ -390,6 +390,8 @@
     "noTerms": "Zatiaľ nie sú napísané žiadne podmienky dopravy.",
     "profile": "Profil dopravy",
     "edit": "Upraviť",
+    "unpriced": "Doprava nemá v mene {currency} nastavenú cenu, takže kupujúci nemôžu za tento produkt zaplatiť pri pokladni.",
+    "unpricedAction": "Nastaviť ceny dopravy",
     "modalTitle": "Doprava a vrátenie tovaru"
   },
   "optionsField": {

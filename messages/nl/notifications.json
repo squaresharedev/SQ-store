@@ -176,6 +176,18 @@
         "body": "Stripe probeert het opnieuw. Werk je kaart bij onder Abonnement en facturering om je abonnement te behouden."
       }
     },
+    "stock": {
+      "low": {
+        "title": "Lage voorraad: {title}",
+        "body": "{count, plural, =0 {Geen voorraad meer.} one {Nog maar # over.} other {Nog maar # over.}} Vul bij of schakel voorraadregistratie uit als je op bestelling maakt."
+      }
+    },
+    "payment": {
+      "dispute": {
+        "title": "Een koper heeft de betaling voor {title} betwist",
+        "body": "Hun bank heeft een geschil geopend. Beantwoord het in je Stripe-dashboard vóór de deadline."
+      }
+    },
     "policy": {
       "autoPaused": {
         "title": "Actie vereist: {target, select, product {je product \"{title}\" is gepauzeerd} other {je etalage \"{title}\" is gepauzeerd}}",

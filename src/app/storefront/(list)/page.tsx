@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { listAllProducts } from "@/lib/products/queries";
+import { listStorefrontProducts } from "@/lib/discounts/storefront-preview";
 import { listStorefronts } from "@/lib/storefront/queries";
 import { getSampleStorefrontFlags } from "@/lib/onboarding/queries";
 import { StorefrontsList } from "@/components/storefront/StorefrontsList";
@@ -29,7 +29,7 @@ export default async function StorefrontsPage({
   // Products feed the cards' live grid previews (image tiles).
   const [storefronts, products, account, sampleFlags] = await Promise.all([
     previewEmpty ? { rows: [], total: 0 } : listStorefronts(),
-    listAllProducts(),
+    listStorefrontProducts(),
     getActiveAccount(),
     // The person's own flag, not the store's: see getSampleStorefrontFlags.
     getSampleStorefrontFlags(),

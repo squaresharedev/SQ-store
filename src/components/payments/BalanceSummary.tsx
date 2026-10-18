@@ -55,21 +55,28 @@ function Tile({
 }
 
 /**
- * The three headline money tiles: available now, pending clearance, and the
- * next scheduled payout. All amounts arrive as integer cents and go through
- * the shared formatter; empty buckets render calm zero states, never €0.00.
+ * The headline money tiles: available now, pending clearance, the next
+ * scheduled payout and, where the store's fees are known, what Square Share
+ * took this month. All amounts arrive as integer cents and go through the
+ * shared formatter; empty buckets render calm zero states, never €0.00.
  */
 export function BalanceSummary({
   balance,
   upcomingPayout,
+  feesThisMonth,
 }: {
   balance: Balance;
   upcomingPayout: UpcomingPayout;
+  /** What the store paid Square Share this month, per currency, after
+   *  refunds (the fee ledger). Null or absent when it is not known, and the
+   *  tile is then left out rather than drawn empty. */
+  feesThisMonth?: MoneyAmount[] | null;
 }) {
   const t = useTranslations("Payments.balance");
   const locale = useLocale();
+  const showFees = feesThisMonth != null;
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className={cn("grid grid-cols-1 gap-4 sm:grid-cols-2", showFees ? "lg:grid-cols-4" : "lg:grid-cols-3")}>
       {/* A hint explains a figure. Under a zero state it contradicts it
           ("Nothing to pay out yet" over "Ready for your next payout"), so it
           only appears when there is a figure to explain. */}
@@ -100,6 +107,16 @@ export function BalanceSummary({
             : undefined
         }
       />
+      {showFees && (
+        <div data-fees-this-month="">
+          <Tile
+            label={t("fees.label")}
+            value={formatBuckets(feesThisMonth, locale)}
+            zeroText={t("fees.zero")}
+            hint={feesThisMonth.length > 0 ? t("fees.hint") : undefined}
+          />
+        </div>
+      )}
     </div>
   );
 }

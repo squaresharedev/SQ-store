@@ -110,6 +110,21 @@ export function rangeDayCount(
   return span < 0 ? 0 : span + 1;
 }
 
+/**
+ * The period immediately before a range, the same number of days long: what
+ * "versus the previous period" compares against.
+ *
+ * Null for a range with no start. "All time" has nothing before it, and a
+ * comparison invented for it would be a number about nothing.
+ */
+export function previousRange(range: AnalyticsRange): { from: string; to: string } | null {
+  if (!range.from) return null;
+  const days = rangeDayCount(range, null);
+  if (days === 0) return null;
+  const to = dayStartUtc(range.from) - DAY_MS;
+  return { from: toIsoDay(to - (days - 1) * DAY_MS), to: toIsoDay(to) };
+}
+
 const MONTHS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",

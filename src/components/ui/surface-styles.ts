@@ -46,6 +46,15 @@ export const iconTileClass =
   "flex shrink-0 items-center justify-center rounded-sm bg-secondary text-foreground";
 
 /**
+ * The track and fill of every thin bar that measures something: ProgressBar
+ * (work under way) and Meter (a standing fact, like a limit half used). Width
+ * is the caller's; the fill's is set inline from the value.
+ */
+export const meterTrackClass = "h-1 w-full overflow-hidden rounded-full bg-muted";
+export const meterFillClass =
+  "h-full rounded-full bg-primary transition-[width] duration-base ease-standard motion-reduce:transition-none";
+
+/**
  * A greyed bar standing in for a line of content in a DRAWN page (the embed
  * hero, the buy button story). Give it a width at the call site.
  */
@@ -118,18 +127,8 @@ export const bannerStripClass =
 export const attentionCountClass =
   "inline-flex min-w-5 items-center justify-center rounded-full bg-foreground px-1.5 font-inter text-xs font-medium leading-5 tabular-nums text-background";
 
-/** The page column on its own: centred, capped, with the page gutters. */
-export const pageGutterClass = "mx-auto max-w-7xl px-6";
-
-/**
- * The shell of a page that lets one band run edge to edge (the analytics
- * revenue hero): the page's top and bottom air and nothing at the sides.
- * Everything else on such a page wraps itself in `pageGutterClass`.
- */
-export const pageBleedShellClass = "py-8";
-
 /** Dashboard page column: centred, capped, with the page gutters. */
-export const pageShellClass = `${pageGutterClass} ${pageBleedShellClass}`;
+export const pageShellClass = "mx-auto max-w-7xl px-6 py-8";
 
 /** Page `<h1>`. */
 export const pageTitleClass =

@@ -191,6 +191,11 @@ export function sampleOrder(
     dispatch: product.isDigital
       ? null
       : (findShippingProfile(policy.profiles, product.shippingProfileId)?.dispatch ?? policy.dispatch ?? null),
+    // The sample order is a paid one whose confirmation went out: the page a
+    // buyer sees in the ordinary case.
+    payment: "paid",
+    refundedAt: null,
+    confirmationSent: true,
     withdrawal: buyerWithdrawal(
       {
         status: "paid",

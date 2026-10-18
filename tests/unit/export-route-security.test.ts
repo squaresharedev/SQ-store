@@ -29,6 +29,16 @@ function stripComments(source: string): string {
   return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 }
 
+/** The same, line by line, for a file whose STRINGS contain comment markers:
+ *  next.config.ts names "https://*.r2..." hosts, where the pattern above reads
+ *  the slash and star as a comment opening and eats the code after it. */
+function codeLines(source: string): string {
+  return source
+    .split("\n")
+    .filter((line) => !/^\s*(\/\/|\/\*|\*)/.test(line))
+    .join("\n");
+}
+
 const ROUTE = stripComments(
   readFileSync(
     join(process.cwd(), "src", "app", "settings", "export", "route.ts"),
@@ -111,7 +121,20 @@ describe("security headers", () => {
       // defence is X-Frame-Options DENY (asserted above); the directive joins
       // the CSP only when the policy flips to enforcement. Comments are
       // stripped first: the prose explaining this legitimately names it.
-      expect(stripComments(CONFIG)).not.toContain("frame-ancestors");
+      const reportOnly = codeLines(
+        CONFIG.slice(CONFIG.indexOf("const csp = ["), CONFIG.indexOf('.join("; ");')),
+      );
+      expect(reportOnly).toContain("default-src 'self'");
+      expect(reportOnly).not.toContain("frame-ancestors");
+    });
+
+    it("names frame-ancestors once, for the storefront embed's frame alone", () => {
+      // The one response that may be framed, and only by the site its address
+      // names (tests/unit/embed-frame-headers.test.ts). A second occurrence
+      // would be a second way to frame something, so it is counted.
+      const code = codeLines(CONFIG);
+      expect(code.match(/frame-ancestors/g) ?? []).toHaveLength(1);
+      expect(code).toContain("frame-ancestors :site");
     });
 
     it("allows the Supabase realtime socket", () => {

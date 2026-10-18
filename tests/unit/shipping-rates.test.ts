@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canQuoteShipping,
+  deliveryPriceRange,
   quoteShipping,
   shippingCountries,
 } from "@/lib/shipping/rates";
@@ -343,5 +344,45 @@ describe("quoteShipping", () => {
       currency: "EUR",
     });
     expect(result).toEqual({ ok: true, rateCents: 800, free: false, area: "Rest of EU" });
+  });
+});
+
+// ── deliveryPriceRange ─────────────────────────────────────────────────────────
+
+describe("deliveryPriceRange", () => {
+  const request = { profileId: null, subtotalCents: 2400, currency: "EUR" as const };
+
+  it("says nothing when checkout could not quote at all", () => {
+    expect(deliveryPriceRange({}, request)).toBeNull();
+    expect(deliveryPriceRange({ destinations: [irelandRow] }, { ...request, currency: "USD" })).toBeNull();
+  });
+
+  it("is one price when every destination pays the same", () => {
+    expect(deliveryPriceRange({ destinations: [irelandRow] }, request)).toEqual({ fromCents: 450, uniform: true });
+  });
+
+  it("is the lowest rate, marked as a starting price, when destinations differ", () => {
+    expect(deliveryPriceRange({ destinations: [euRow, irelandRow, anywhereRow] }, request)).toEqual({
+      fromCents: 450,
+      uniform: false,
+    });
+  });
+
+  it("follows the same rules as a quote: a profile's rate, then the free threshold", () => {
+    const policy: SellerShippingPolicy = {
+      destinations: [irelandRow, euRow],
+      profiles: [{ id: "bulky", name: "Bulky", body: "", rateCents: 2000 }],
+      freeOverCents: 5000,
+    };
+    expect(deliveryPriceRange(policy, { ...request, profileId: "bulky" })).toEqual({ fromCents: 2000, uniform: true });
+    // An unknown profile is no profile.
+    expect(deliveryPriceRange(policy, { ...request, profileId: "gone" })).toEqual({ fromCents: 450, uniform: false });
+    expect(deliveryPriceRange(policy, { ...request, profileId: "bulky", subtotalCents: 5000 })).toEqual({
+      fromCents: 0,
+      uniform: true,
+    });
+    // Whatever it says, the quote agrees.
+    const quote = quoteShipping(policy, { profileId: "bulky", country: "IE", subtotalCents: 2400, currency: "EUR" });
+    expect(quote).toMatchObject({ ok: true, rateCents: 2000 });
   });
 });

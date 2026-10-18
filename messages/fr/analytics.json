@@ -33,6 +33,7 @@
     "emptyDefault": "Aucune vente sur cette période"
   },
   "sales": {
+    "untitledProduct": "Produit sans titre",
     "label": "Ventes",
     "description": "Commandes payées passées via le paiement Square Share.",
     "revenue": {
@@ -71,6 +72,28 @@
       "empty": "Aucune commande sur cette période",
       "ariaLabel": "Répartition des statuts de commande"
     }
+  },
+  "compare": {
+    "previous": "Période précédente",
+    "vsPrevious": "{change} par rapport à la période précédente"
+  },
+  "funnel": {
+    "label": "Entonnoir de la vitrine",
+    "description": "De l'affichage de votre vitrine sur votre propre site jusqu'à la commande payée. Ce sont des événements qui sont comptés, pas des personnes.",
+    "views": "Vues sur votre site",
+    "viewsEmpty": "Aucune vue sur cette période",
+    "opens": "Produits ouverts",
+    "opensEmpty": "Aucun ouvert sur cette période",
+    "started": "Paiements commencés",
+    "startedEmpty": "Aucun paiement sur cette période",
+    "expired": "Paiements non aboutis",
+    "expiredEmpty": "Aucun non abouti",
+    "conversion": "Commandes pour 100 vues",
+    "conversionCounts": "Commandes : {orders}, vues : {views}",
+    "abandonment": "Abandon au paiement",
+    "abandonmentCounts": "Non aboutis : {expired}, commencés : {started}",
+    "notEnough": "Pas encore assez de données",
+    "notEnoughHint": "Les taux apparaissent dès que cette période compte {min} vues."
   },
   "tiles": {
     "revenue": "Chiffre d’affaires",
@@ -142,9 +165,7 @@
       "acrossRange": "Clics sur les produits sur la période sélectionnée.",
       "byChannel": "Clics sur les produits par canal",
       "byWeekday": "Clics sur les produits par jour de la semaine",
-      "byStorefront": "Clics sur les produits par vitrine",
-      "awaiting": "Arrive dès que le widget d’intégration signale des ouvertures de produit.",
-      "readyToChart": "Prêt à afficher dès que les clics commencent à arriver."
+      "byStorefront": "Clics sur les produits par vitrine"
     },
     "product_view": {
       "label": "Vues des pages produit",

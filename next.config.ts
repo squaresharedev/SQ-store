@@ -43,6 +43,19 @@ const supabaseOrigin = (() => {
  * `style-src` keeps 'unsafe-inline' regardless: app/global-error.tsx styles
  * itself with inline `style` props, and a nonce does not cover style ATTRIBUTES.
  */
+/**
+ * The one third-party origin a page of ours loads from: Cloudflare Turnstile,
+ * the bot check on sign-up and checkout (components/auth/Turnstile.tsx). Its
+ * script, the frame the challenge runs in, and the calls that frame makes.
+ * Listed whether or not the widget is switched on yet, so the day this policy
+ * is enforced is not the day sign-up breaks.
+ *
+ * NO STRIPE ORIGIN, and none is needed: a buyer pays on Stripe's own hosted
+ * page, reached by an ordinary navigation (lib/checkout/stripe-provider.ts).
+ * No Stripe script, frame or request ever runs on a page of ours.
+ */
+const TURNSTILE_ORIGIN = "https://challenges.cloudflare.com";
+
 /** Reporting API group name, shared by the `report-to` directive and the
  *  Reporting-Endpoints header that declares where the group points. */
 const CSP_REPORT_GROUP = "csp-endpoint";
@@ -50,7 +63,7 @@ const CSP_REPORT_GROUP = "csp-endpoint";
 const csp = [
   "default-src 'self'",
   // 'unsafe-eval' is React's dev-time requirement only; it never ships to prod.
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} ${TURNSTILE_ORIGIN}`,
   "style-src 'self' 'unsafe-inline'",
   // blob: covers client-side image previews before an upload is committed;
   // R2 serves presigned product images, Supabase Storage serves avatars.
@@ -64,6 +77,7 @@ const csp = [
   // socket, and omitting it silently kills live notifications.
   [
     "connect-src 'self'",
+    TURNSTILE_ORIGIN,
     supabaseOrigin,
     supabaseOrigin?.replace(/^https:/, "wss:"),
     // Turbopack's HMR socket.
@@ -78,6 +92,8 @@ const csp = [
   // the actual work. Put this directive back the moment the header below is
   // renamed to the enforcing "Content-Security-Policy", where it supersedes
   // X-Frame-Options and is the stronger of the two.
+  // The bot check's challenge is the only thing ever framed here.
+  `frame-src ${TURNSTILE_ORIGIN}`,
   "base-uri 'self'",
   // Stops an injected form from posting a session-authenticated request offsite.
   "form-action 'self'",
@@ -100,6 +116,36 @@ const csp = [
 ]
   .filter(Boolean)
   .join("; ");
+
+/**
+ * THE STOREFRONT EMBED'S FRAME: the one response in the app that may be shown
+ * inside another site, and only on the host the embed is served from.
+ *
+ * A page cannot set a response header on this stack and there is no middleware
+ * (see the nonce note above), so the embedding site's name travels in the PATH
+ * (/e/<embed key>/<site>) and the rule below writes it into `frame-ancestors`.
+ * The browser then refuses to draw the frame on any other site, and the route
+ * itself only serves the board when <site> is on the seller's allowlist. The
+ * whole arrangement is described in src/lib/storefront/embed-frame.ts, whose
+ * patterns and policy these literals repeat; tests/unit/embed-frame-headers
+ * .test.ts holds the two together and runs the rule through both the matcher
+ * Next uses and the one the deployed worker uses.
+ *
+ * The hostname the embed is served from, or null when it has none yet: then
+ * the rule is not emitted and nothing here can be framed anywhere.
+ */
+const embedHost = (() => {
+  const raw =
+    process.env.NEXT_PUBLIC_EMBED_URL ??
+    // Development alone borrows the app's own origin (lib/app-url.ts).
+    (isDev ? (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000") : undefined);
+  if (!raw) return null;
+  try {
+    return new URL(raw).hostname;
+  } catch {
+    return null;
+  }
+})();
 
 const nextConfig: NextConfig = {
   // OpenNext runs the Node runtime on Workers. Never set
@@ -146,9 +192,8 @@ const nextConfig: NextConfig = {
 
   // Baseline security headers on every response. The dashboard is a private,
   // session-cookie-authenticated app with no legitimate reason to be framed,
-  // so denying framing closes the clickjacking surface outright. (The future
-  // public embed widget is a SEPARATE origin serving its own script; it is not
-  // affected by the dashboard's frame policy.)
+  // so denying framing closes the clickjacking surface outright. (The one
+  // exception is the storefront embed's frame, the last entry below.)
   async headers() {
     return [
       {
@@ -200,6 +245,26 @@ const nextConfig: NextConfig = {
       { source: "/s/:storefrontId/p/:productId/checkout", headers: PURCHASE_PAGE_HEADERS },
       { source: "/api/orders/:path*", headers: PURCHASE_PAGE_HEADERS },
       { source: "/api/checkout/:path*", headers: PURCHASE_PAGE_HEADERS },
+      // THE EMBED FRAME (see embedHost above). Everything this entry does not
+      // match keeps X-Frame-Options: DENY and nothing else, which is what
+      // makes a malformed address, the dashboard's own hostname and a build
+      // with no embed host all fail closed.
+      //
+      // - `:site`, never `:host`: a `has` item of type "host" sets a param of
+      //   that name and would overwrite the path's.
+      // - A port is admitted in development only, where a test site has one.
+      // - The same header names, letter for letter, as the entry at the top:
+      //   the worker treats a differently cased name as a second header and
+      //   sends both.
+      ...(embedHost
+        ? [
+            {
+              source: `/e/:key([0-9a-f-]{36})/:site(${isDev ? "[a-z0-9.-]+(?::[0-9]{1,5})?" : "[a-z0-9.-]+"})`,
+              has: [{ type: "host" as const, value: embedHost.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") }],
+              headers: EMBED_FRAME_HEADERS,
+            },
+          ]
+        : []),
     ];
   },
 };
@@ -208,6 +273,29 @@ const PURCHASE_PAGE_HEADERS = [
   { key: "Referrer-Policy", value: "no-referrer" },
   { key: "Cache-Control", value: "private, no-store, max-age=0" },
   { key: "X-Robots-Tag", value: "noindex, nofollow" },
+];
+
+const EMBED_FRAME_HEADERS = [
+  // ENFORCED, unlike the policy above, and deliberately tiny. Once a response
+  // carries an enforced frame-ancestors, browsers ignore X-Frame-Options on it,
+  // so this line is what lifts DENY for the one named site. Keep the value
+  // plain: see EMBED_FRAME_CSP in src/lib/storefront/embed-frame.ts for what
+  // one stray character does in production.
+  {
+    key: "Content-Security-Policy",
+    value: "frame-ancestors :site; base-uri 'none'; form-action 'none'; object-src 'none'",
+  },
+  // The frame's address names the seller's site and embed key: it goes nowhere.
+  { key: "Referrer-Policy", value: "no-referrer" },
+  { key: "X-Robots-Tag", value: "noindex, nofollow" },
+  // The embed host is a sibling of the dashboard's, and passkeys are bound to
+  // the parent domain: a frame has no business asking for one, or for any
+  // device at all.
+  {
+    key: "Permissions-Policy",
+    value:
+      "publickey-credentials-get=(), publickey-credentials-create=(), camera=(), microphone=(), geolocation=(), payment=()",
+  },
 ];
 
 // UI translations. Points next-intl at the per-request config, which resolves

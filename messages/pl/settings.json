@@ -136,7 +136,7 @@
   "danger": {
     "export": {
       "cardTitle": "Eksportuj moje dane",
-      "cardDescription": "Wszystko, co o tobie przechowujemy: profil, produkty, konfiguracja witryny, w jednym pliku JSON. To twoje dane, należą do ciebie.",
+      "cardDescription": "Wszystko, co o tobie przechowujemy: profil, produkty, witryny, sprzedane zamówienia, powiadomienia i dziennik zabezpieczeń, w jednym pliku JSON. To twoje dane, należą do ciebie.",
       "downloadButton": "Pobierz moje dane",
       "stepUpDescription": "Eksport zawiera całe twoje konto. Wpisz aktualny kod z aplikacji uwierzytelniającej, aby go pobrać."
     },
@@ -781,10 +781,20 @@
       "cardDescription": "Zaakceptuj zaproszenie, aby dołączyć do zespołu tego sklepu."
     },
     "success": {
-      "inviteCreated": "Utworzono zaproszenie. Osoba zobaczy je po zalogowaniu tym adresem e-mail. (Wysyłka e-maili nie jest jeszcze podłączona.)",
+      "inviteCreated": "Utworzono zaproszenie, ale nie udało się wysłać e-maila. Daj znać tej osobie: zobaczy zaproszenie po zalogowaniu tym adresem e-mail.",
+      "inviteEmailed": "Zaproszenie wysłane. W e-mailu wyjaśniliśmy, jak je przyjąć.",
       "inviteAccepted": "Witaj w zespole.",
       "roleUpdated": "Zaktualizowano rolę.",
       "memberRemoved": "Usunięto członka."
+    },
+    "inviteEmail": {
+      "subject": "{store} zaprasza Cię do swojego zespołu w Square Share",
+      "subjectUnnamed": "Masz zaproszenie do zespołu w Square Share",
+      "intro": "{store} zaprasza Cię do swojego zespołu w Square Share.",
+      "introUnnamed": "Jeden ze sklepów w Square Share zaprasza Cię do swojego zespołu.",
+      "role": "Twoja rola: {role}",
+      "how": "Aby przyjąć zaproszenie, zaloguj się tym adresem e-mail ({email}) albo załóż na niego konto. Zaproszenie będzie czekać w Ustawieniach, w sekcji Zespół i dostęp.",
+      "ignore": "Nie spodziewasz się tej wiadomości? Możesz ją zignorować. Nic się nie stanie, dopóki nie przyjmiesz zaproszenia."
     }
   }
 }

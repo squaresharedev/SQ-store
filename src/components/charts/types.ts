@@ -17,6 +17,13 @@ export interface ChartSeries {
   colorIndex?: number;
   /** Explicit CSS colour override — prefer colorIndex so slots stay validated. */
   color?: string;
+  /**
+   * A reference series: something the others are read AGAINST (the previous
+   * period, a target), not one more thing being measured. Line charts draw it
+   * dashed, thinner, without a wash and behind the rest, so "this versus
+   * that" reads at a glance and the two are never mistaken for each other.
+   */
+  reference?: boolean;
 }
 
 /** One part of a whole — a pie slice or a composition-bar segment. */

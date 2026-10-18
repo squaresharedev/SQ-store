@@ -2,6 +2,8 @@ import { LEGAL_VERSION } from "@/lib/settings/constants";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { msg, type MessageRef } from "@/i18n/types";
 import { ordersViewPath } from "@/lib/orders/paths";
+import { SHIPPING_RATES_HREF } from "@/types/shipping-policy";
+import { PAYMENTS_PATH } from "./paths";
 import type { DashboardOrdersData, ProductsSummary, ProfileSummary } from "./queries";
 
 /**
@@ -158,13 +160,14 @@ export function buildAttentionItems({
   // and has not been. /payments is where the connection lives; settings has
   // nothing to say about payouts. Until Connect ships there is nothing there to
   // press, and a row whose one action lands on a disabled button is worse than
-  // no row at all.
-  if (stripeConnectAvailable && !stripeConnected) {
+  // no row at all. Stands down while the setup checklist is showing: getting
+  // paid is one of its steps, with the same destination.
+  if (stripeConnectAvailable && !stripeConnected && !setupVisible) {
     items.push({
       key: "stripe",
       label: msg("Dashboard.attention.stripe.label"),
       description: msg("Dashboard.attention.stripe.description"),
-      href: "/payments",
+      href: PAYMENTS_PATH,
       actionLabel: msg("Dashboard.attention.stripe.action"),
     });
   }
@@ -235,8 +238,11 @@ export function buildAttentionItems({
   // button (lib/checkout/availability.ts checkoutAvailableFor): it quietly
   // falls back to the seller's own link or an enquiry, and nothing on screen
   // says why. Not when there are no terms at all: the row above already asks
-  // for those, and two rows for one page would read as two problems.
+  // for those, and two rows for one page would read as two problems. Nor
+  // while the setup checklist carries it as a step (it does wherever a payment
+  // account can be connected).
   if (
+    !(setupVisible && stripeConnectAvailable) &&
     checkoutOpen &&
     products.hasPhysicalProducts &&
     profile &&
@@ -247,7 +253,7 @@ export function buildAttentionItems({
       key: "checkout-rates",
       label: msg("Dashboard.attention.checkoutRates.label"),
       description: msg("Dashboard.attention.checkoutRates.description"),
-      href: "/settings/shipping#checkout-rates",
+      href: SHIPPING_RATES_HREF,
       actionLabel: msg("Dashboard.attention.checkoutRates.action"),
     });
   }

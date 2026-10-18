@@ -30,6 +30,9 @@ const LONG_DATE: Intl.DateTimeFormatOptions = {
   year: "numeric",
 };
 
+/** What a date that cannot be read prints as, in every locale. */
+const NO_DATE = "—";
+
 function valid(isoDate: string): Date | null {
   const date = new Date(isoDate);
   return Number.isNaN(date.getTime()) ? null : date;
@@ -38,13 +41,13 @@ function valid(isoDate: string): Date | null {
 /** `"2026-07-02T14:05:00Z"` -> `"2 Jul 2026"` in English. */
 export function formatOrderDate(isoDate: string, locale: Locale): string {
   const date = valid(isoDate);
-  return date ? dateTimeFormat(intlTag(locale, "en-IE"), ORDER_DATE).format(date) : "—";
+  return date ? dateTimeFormat(intlTag(locale, "en-IE"), ORDER_DATE).format(date) : NO_DATE;
 }
 
 /** `"2026-07-02T14:05:00Z"` -> `"2 Jul 2026, 14:05"` in English (viewer's timezone). */
 export function formatOrderDateTime(isoDate: string, locale: Locale): string {
   const date = valid(isoDate);
-  return date ? dateTimeFormat(intlTag(locale, "en-IE"), ORDER_DATE_TIME).format(date) : "—";
+  return date ? dateTimeFormat(intlTag(locale, "en-IE"), ORDER_DATE_TIME).format(date) : NO_DATE;
 }
 
 const MINUTE_MS = 60_000;
@@ -72,8 +75,7 @@ export function formatAge(isoDate: string, locale: Locale, now: Date = new Date(
 /** `"2026-07-02T14:05:00Z"` -> `"2 July 2026"` in English (en-GB, month spelled out). */
 export function formatLongDate(isoDate: string, locale: Locale): string {
   const date = valid(isoDate);
-  // An unparseable value prints what toLocaleDateString always printed for one.
-  return date ? dateTimeFormat(intlTag(locale, "en-GB"), LONG_DATE).format(date) : String(new Date(NaN));
+  return date ? dateTimeFormat(intlTag(locale, "en-GB"), LONG_DATE).format(date) : NO_DATE;
 }
 
 /**
@@ -83,5 +85,5 @@ export function formatLongDate(isoDate: string, locale: Locale): string {
  */
 export function formatNumericDate(isoDate: string, locale: Locale): string {
   const date = valid(isoDate);
-  return date ? dateTimeFormat(intlTag(locale, "en-US")).format(date) : String(new Date(NaN));
+  return date ? dateTimeFormat(intlTag(locale, "en-US")).format(date) : NO_DATE;
 }

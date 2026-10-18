@@ -124,8 +124,8 @@ export async function POST(request: Request, { params }: { params: Promise<Param
   // Checkout must still be open for this product: a provider can take the
   // money, and delivery is priced. The page asked the same question when it
   // rendered; the answer can change between the two.
-  const provider = checkoutProviderFor(quote.gate.ownerId);
-  if (!provider || !checkoutAvailableFor(quote.gate)) return refuse("unavailable", 409);
+  const provider = await checkoutProviderFor(quote.gate.ownerId);
+  if (!provider || !(await checkoutAvailableFor(quote.gate))) return refuse("unavailable", 409);
 
   // What the kind of product demands of the body. A parcel needs an address;
   // a download needs the buyer's consent to have it straight away (and gives
@@ -148,8 +148,17 @@ export async function POST(request: Request, { params }: { params: Promise<Param
     },
     order.attemptId,
   );
-  if (!placed.ok) return refuse(placed.reason, placed.reason === "unavailable" ? 409 : 502);
+  // "sold_out" here is the order writer's answer: the quote above saw stock,
+  // and someone else took it before this order could. Nothing was charged.
+  if (!placed.ok) return refuse(placed.reason, placed.reason === "failed" ? 502 : 409);
 
+  // Still to be paid, on the provider's own page: that is where the browser
+  // goes next, and the provider sends the buyer on to their order afterwards.
+  if (placed.redirectUrl) return answer({ ok: true, orderUrl: placed.redirectUrl }, 201);
+
+  // Null only when no order link can be issued at all, and checkoutProviderFor
+  // above offers no provider in that case (lib/checkout/availability.ts), so
+  // an order is never recorded and then answered as "nothing was charged".
   const path = await orderLinkPath(storefrontId, placed.orderId);
   if (!path) return refuse("failed", 500);
   return answer({ ok: true, orderUrl: `${path}?${PLACED_QUERY_PARAM}=1` }, 201);

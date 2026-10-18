@@ -43,8 +43,13 @@ export type ConfirmationInput = {
   placedAt: Date;
 };
 
-export async function sendBuyerConfirmation(order: ConfirmationInput): Promise<void> {
-  if (!order.buyerEmail) return;
+/**
+ * True when the confirmation was actually SENT. The order writer records that
+ * on the order (confirmation_sent_at), which is what lets it try again later
+ * and what the order page reads before it says "on its way".
+ */
+export async function sendBuyerConfirmation(order: ConfirmationInput): Promise<boolean> {
+  if (!order.buyerEmail) return false;
   try {
     const admin = createAdminClient();
     const [seller, policy, { data: storefront }, ref] = await Promise.all([
@@ -64,7 +69,7 @@ export async function sendBuyerConfirmation(order: ConfirmationInput): Promise<v
       : (findShippingProfile(policy.profiles, order.shippingProfileId)?.dispatch ?? policy.dispatch ?? null);
     const shippingCents = order.isDigital ? null : order.shippingCents;
 
-    await sendOrderConfirmation(order.buyerEmail, parseLocale(order.buyerLocale) ?? DEFAULT_LOCALE, {
+    const result = await sendOrderConfirmation(order.buyerEmail, parseLocale(order.buyerLocale) ?? DEFAULT_LOCALE, {
       productTitle: order.productTitle,
       quantity: order.quantity,
       selection: order.selection,
@@ -84,7 +89,9 @@ export async function sendBuyerConfirmation(order: ConfirmationInput): Promise<v
       isEu: isEuSeller(seller),
       supplyConsent: order.supplyConsent,
     });
+    return result.sent;
   } catch (error) {
     console.error("[orders] buyer confirmation failed:", error instanceof Error ? error.message : error);
+    return false;
   }
 }

@@ -87,9 +87,11 @@ export function SliceLegend({
             className={legendSwatchClass}
             style={{ backgroundColor: colors[i] }}
           />
-          <div className="flex min-w-0 flex-1 items-baseline justify-between gap-3">
+          {/* Wraps: a long value on a narrow card drops under its label
+              (still at the right) instead of pushing out of the card. */}
+          <div className="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-3">
             <span className={legendLabelClass}>{slice.label}</span>
-            <span className="font-inter text-sm whitespace-nowrap tabular-nums">
+            <span className="ml-auto font-inter text-sm whitespace-nowrap tabular-nums">
               <span className="font-semibold text-foreground">
                 {valueFormatter(slice.value)}
               </span>

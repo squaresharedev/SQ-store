@@ -32,6 +32,7 @@ import { CATALOG } from "./catalog.ts";
 // and the plan catalog are import-free on purpose, so a seeded order is
 // charged exactly what a real one on the same plan would be.
 import { saleFee } from "../../src/lib/billing/fees.ts";
+import { PLAN_PRICE_SEED } from "../../src/lib/billing/pricing-seed.ts";
 import type { OrderChannel as AppOrderChannel } from "../../src/types/order-view.ts";
 
 // ---------------------------------------------------------------------------
@@ -1021,8 +1022,11 @@ function makeOrder(
   // Mostly one unit, sometimes two or three: the same split as the simulator.
   const quantity = weightedPick<number>(rng, [[1, 82], [2, 14], [3, 4]]);
   const amount_cents = product.price_cents * quantity; // gross
-  // Seeded sellers are on Free, the plan every account starts on.
-  const fee = saleFee("free", amount_cents);
+  // Seeded sellers are on Free, the plan every account starts on. A sale the
+  // marketplace brought pays its fee, not the plan's direct one.
+  const fee = saleFee(PLAN_PRICE_SEED, "free", amount_cents, {
+    origin: channel === "marketplace" ? "marketplace" : "embed",
+  });
   // Embed sales flow through the seller's storefront widget; marketplace sales
   // come from the (future) discovery feed and aren't tied to a storefront.
   const storefront_id = channel === "embed" ? storefrontId : null;

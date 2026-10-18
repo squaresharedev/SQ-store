@@ -4,9 +4,9 @@ import { StepUpProvider } from "@/components/auth/StepUp";
 import { PlansPage } from "@/components/billing/PlansPage";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import { stepUpFreshUntil } from "@/lib/auth/assurance";
-import { getAssurance } from "@/lib/auth/session";
+import { getAssurance, requireUser } from "@/lib/auth/session";
 import { getPricingContext } from "@/lib/billing/pricing-context";
-import { PLANS_SOURCE_PARAM, parsePricingSource } from "@/lib/billing/paths";
+import { PLANS_SOURCE_PARAM, parsePricingSource, PLANS_PATH } from "@/lib/billing/paths";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Billing.page");
@@ -29,6 +29,9 @@ export default async function PlansRoutePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  // The layout's session gate does not run again on a move between sections
+  // (see ../layout.tsx, or ../../layout.tsx from a nested page): a page asks.
+  await requireUser(PLANS_PATH);
   const source = parsePricingSource((await searchParams)[PLANS_SOURCE_PARAM]);
   const [result, assurance] = await Promise.all([getPricingContext(source), getAssurance()]);
 

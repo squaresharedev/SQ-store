@@ -317,6 +317,17 @@ function cell(row: readonly string[], index: number | null): string {
 }
 
 /**
+ * A stock cell as a whole number of units, or null when it does not open with
+ * one ("N/A", "Unlimited", ""): untracked, never a guess at zero, which would
+ * list the product as sold out. Grouped thousands ("10,000", "1.000") are one
+ * number, "12 pcs" is 12, and a fraction ("1.5") counts its whole units.
+ */
+function parseStock(raw: string): number | null {
+  const whole = /^\d+/.exec(raw.replace(/(\d)[.,' ](?=\d{3}(?!\d))/g, "$1"))?.[0];
+  return whole === undefined ? null : Number(whole);
+}
+
+/**
  * Turn parsed CSV into the rows an import would write.
  *
  * Every row comes back, including the bad ones, each carrying its own
@@ -370,8 +381,6 @@ export function buildImportPlan(
     const rawDescription = cell(raw, columns.description);
     const description = htmlToText(rawDescription);
     const priceCents = parsePriceCents(cell(raw, columns.price));
-    const stockRaw = cell(raw, columns.stock);
-    const stockValue = stockRaw === "" ? null : Number(stockRaw.replace(/[^\d-]/g, ""));
 
     // THE SELLER'S CHOICE, for every row. The file's own status column is
     // deliberately not read: the importer offers one "import as drafts or
@@ -396,10 +405,7 @@ export function buildImportPlan(
       description,
       priceCents,
       sku: cell(raw, columns.sku),
-      stock:
-        stockValue === null || !Number.isFinite(stockValue) || stockValue < 0
-          ? null
-          : Math.floor(stockValue),
+      stock: parseStock(cell(raw, columns.stock)),
       status,
       problem,
     });

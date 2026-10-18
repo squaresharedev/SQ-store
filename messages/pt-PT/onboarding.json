@@ -38,6 +38,22 @@
       "actionOpen": "Abrir editor",
       "cta": "Publique o seu produto",
       "ctaPagesOff": "Ativar páginas de produto"
+    },
+    "payments": {
+      "label": "Receber pagamentos",
+      "detail": "Ligue o Stripe para que os compradores possam pagar com cartão nas páginas dos produtos.",
+      "detailUnfinished": "O Stripe ainda precisa de mais alguns dados antes de os compradores poderem pagar.",
+      "detailDone": "Os compradores podem pagar com cartão.",
+      "action": "Ligar o Stripe",
+      "actionFinish": "Concluir no Stripe",
+      "cta": "Ligue o Stripe para receber pagamentos"
+    },
+    "delivery": {
+      "label": "Definir preços de envio",
+      "detail": "Sem preço de envio, os produtos com envio não têm botão de compra.",
+      "detailDone": "Os compradores veem o total completo antes de pagar.",
+      "action": "Definir preços",
+      "cta": "Defina os seus preços de envio"
     }
   },
   "checklist": {
@@ -198,7 +214,10 @@
         "title": "Incorpore uma montra no seu site",
         "body": "Cada montra tem um botão de incorporação que lhe dá um código como este. O widget ainda está em desenvolvimento e ainda não aparece noutros sites.",
         "bodyButton": "Este botão dá-lhe um código como o que se vê abaixo para colar no seu site. O widget ainda está em desenvolvimento e ainda não aparece noutros sites.",
-        "fallbackBody": "Quando tiver uma montra, o botão de incorporação no respetivo cartão dá-lhe um código como este. O widget ainda está em desenvolvimento e ainda não aparece noutros sites."
+        "fallbackBody": "Quando tiver uma montra, o botão de incorporação no respetivo cartão dá-lhe um código como este. O widget ainda está em desenvolvimento e ainda não aparece noutros sites.",
+        "bodyLive": "Cada montra tem um botão de incorporação que lhe dá um código como este. Cole-o no seu próprio site e a montra aparece lá.",
+        "bodyButtonLive": "Este botão dá-lhe um código como o que se vê abaixo. Cole-o no seu próprio site e a montra aparece lá.",
+        "fallbackBodyLive": "Quando tiver uma montra, o botão de incorporação no respetivo cartão dá-lhe um código como este para colar no seu próprio site."
       },
       "ordersSearch": {
         "title": "Encontre uma encomenda",

@@ -56,6 +56,26 @@ export interface Product {
    * could reach a buyer.
    */
   removal?: ProductRemoval;
+  /**
+   * The running sale on this product, as a TILE draws it. Set only where a
+   * storefront is drawn (the hosted board, the designer and its previews) and
+   * only while a sale lowers the price; absent everywhere else, where `price`
+   * is the listed price and the only one.
+   */
+  sale?: ProductTileSale;
+}
+
+/**
+ * A running sale, as a storefront tile shows it. The tile strikes the
+ * product's own `price` (the regular price) through and prints this one.
+ */
+export interface ProductTileSale {
+  /** What one costs while the sale runs, in major currency units. */
+  price: number;
+  /** What the sale takes off the struck regular price, in whole percent, for
+   *  the tile's sale chip (ProductSale.offerPercent). Null under 1%, where the
+   *  chip gives the amount instead. */
+  offerPercent: number | null;
 }
 
 /** What a seller is told about their own content while it is not public. */
@@ -376,22 +396,32 @@ export interface ProductPageProduct {
 }
 
 /**
- * A sale on one product, as a buyer's page may show it.
+ * A sale on one product, as a buyer's page shows it.
  *
- * `priorPriceCents` and `percentOff` are the ANNOUNCEMENT, and they are null
- * whenever the reduction cannot be shown lawfully: EU law (Price Indication
- * Directive art. 6a) lets a shop show a "was" price only if it is the lowest
- * price it charged in the 30 days before the sale (lib/discounts/prior-price.ts).
- * Without one the sale price is simply the price.
+ * The page strikes `regularPriceCents` through beside the sale price. What
+ * keeps that honest is priorPriceCents and percentOff (EU Price Indication
+ * Directive art. 6a, lib/discounts/prior-price.ts): the lowest price of the 30
+ * days before the sale, said in words wherever it is not the regular price,
+ * and a percentage measured against it and nothing else.
+ *
+ * offerPercent is a different figure for a different place: the sale's own
+ * reduction off the regular price, which a storefront tile's sale chip prints.
  */
 export interface ProductSale {
-  /** The price without the sale. The checkout compares a code against it. */
+  /** The price without the sale: what the page strikes through, and what the
+   *  checkout compares a code against. */
   regularPriceCents: number;
-  /** The lowest price of the 30 days before the sale, when it is higher than
-   *  the sale price and the history proves it. */
+  /** The lowest price of the 30 days before the sale, or null when the history
+   *  does not prove one. Can be lower than the regular price (an earlier sale),
+   *  and as low as the sale price itself. */
   priorPriceCents: number | null;
-  /** Measured against priorPriceCents, rounded down. Null below 1%. */
+  /** Measured against priorPriceCents, rounded down. Null when that is unknown,
+   *  not above the sale price, or the difference is under 1%. */
   percentOff: number | null;
+  /** What the sale takes off the regular price, in whole percent
+   *  (offerPercentOff in lib/discounts/pricing.ts): what a storefront tile's
+   *  sale chip says. Null under 1%. */
+  offerPercent: number | null;
   /** When the sale ends, or null for no set end. */
   endsAt: string | null;
 }

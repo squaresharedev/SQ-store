@@ -293,3 +293,24 @@ export async function classifyMedia(
     true,
   );
 }
+
+/**
+ * Judge an image or a PDF handed over as base64 bytes. The deployed check
+ * never does this (it passes a URL: classifyMedia); it is the same question
+ * for the live media eval, whose files cannot be served from this project's
+ * storage.
+ */
+export async function classifyMediaBytes(
+  file: { kind: "image"; mediaType: "image/jpeg" | "image/png"; data: string } | { kind: "pdf"; data: string },
+): Promise<ClassifyResult> {
+  return ask(
+    [
+      file.kind === "image"
+        ? { type: "image", source: { type: "base64", media_type: file.mediaType, data: file.data } }
+        : { type: "document", source: { type: "base64", media_type: "application/pdf", data: file.data } },
+      { type: "text", text: mediaInstruction(file.kind) },
+    ],
+    [],
+    true,
+  );
+}

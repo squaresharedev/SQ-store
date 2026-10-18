@@ -20,7 +20,7 @@
     "allProducts": "Alle producten",
     "someProducts": "{count, plural, one {# product} other {# producten}}",
     "kindCode": "Kortingscode",
-    "kindAutomatic": "Automatische actie",
+    "kindAutomatic": "Actie",
     "status": {
       "scheduled": "Gepland",
       "active": "Actief",
@@ -80,14 +80,15 @@
   "form": {
     "newTitle": "Nieuwe korting",
     "editTitle": "Korting bewerken",
+    "editSale": "Actie bewerken",
+    "editCode": "Kortingscode bewerken",
     "back": "Terug naar kortingen",
     "kind": {
       "title": "Wat voor korting?",
       "code": "Kortingscode",
-      "codeHint": "Kopers typen hem in bij het afrekenen. Deel hem op Instagram, in een nieuwsbrief of via een creator, en zie welk kanaal verkoopt.",
-      "automatic": "Automatische actie",
-      "automaticHint": "Iedereen ziet de lagere prijs op je productpagina's. Geen code nodig.",
-      "fixed": "Het type van een korting kan niet worden gewijzigd. Maak een nieuwe aan om te wisselen."
+      "codeHint": "Kopers vullen hem in bij het afrekenen, en jij ziet via welk kanaal ze kwamen.",
+      "automatic": "Actie",
+      "automaticHint": "Verlaagt je prijzen voor iedereen. Zonder code."
     },
     "code": {
       "title": "Code",
@@ -97,24 +98,22 @@
       "hint": "3 tot 24 letters of cijfers. Kopers kunnen hem in hoofd- of kleine letters invoeren."
     },
     "channel": {
-      "label": "Kanaal (optioneel)",
-      "hint": "Waar je deze code deelt, zodat je kunt zien welk kanaal bestellingen oplevert.",
+      "label": "Gedeeld op (optioneel)",
       "suggestions": "Voorgestelde kanalen",
       "newsletter": "Nieuwsbrief",
       "creator": "Creator"
     },
     "value": {
-      "title": "Korting",
+      "title": "Hoeveel korting?",
       "each": "Afgetrokken van de prijs van elk artikel.",
       "order": "Afgetrokken van de artikelen in de bestelling. Verzending wordt niet gekort.",
-      "percent": "Percentage",
-      "amount": "Vast bedrag",
+      "unit": "Percentage of bedrag",
       "percentLabel": "Kortingspercentage",
       "amountLabel": "Kortingsbedrag",
       "currencyHint": "Geldt alleen voor producten geprijsd in deze valuta."
     },
     "products": {
-      "title": "Van toepassing op",
+      "title": "Welke producten?",
       "all": "Alle producten",
       "some": "Specifieke producten",
       "summary": "{count, plural, =0 {Kies producten} one {# product gekozen} other {# producten gekozen}}",
@@ -122,7 +121,7 @@
       "none": "Geen producten gevonden."
     },
     "schedule": {
-      "title": "Wanneer",
+      "title": "Wanneer?",
       "timeZone": "Tijden zijn in je tijdzone ({zone}).",
       "starts": "Start",
       "ends": "Einde",
@@ -142,11 +141,9 @@
       }
     },
     "limit": {
-      "title": "Limieten",
-      "label": "Beperk hoeveel bestellingen er gebruik van kunnen maken",
-      "count": "Aantal bestellingen"
+      "label": "Maximaal aantal bestellingen (optioneel)",
+      "none": "Geen limiet"
     },
-    "enabled": "Code staat aan",
     "locked": "Deze actie is al begonnen, dus alleen het einde kan worden gewijzigd. Beëindig hem en maak een nieuwe actie om iets anders te wijzigen.",
     "summary": {
       "title": "Samenvatting",
@@ -154,7 +151,9 @@
       "starts": "Start op {date}",
       "ends": "Eindigt op {date}",
       "noEnd": "Geen einddatum",
-      "example": "Voorbeeld: {title} voor {regular} kost nu {now}."
+      "exampleLabel": "Voorbeeld",
+      "example": "Voorbeeld: {title} voor {regular} kost nu {now}.",
+      "chipLink": "Wijzig hoe acties eruitzien in je winkel"
     },
     "create": "Korting aanmaken",
     "save": "Wijzigingen opslaan",

@@ -14,10 +14,13 @@ R2_ACCESS_KEY_ID="paste-r2-access-key-id-here"
 R2_SECRET_ACCESS_KEY="paste-r2-secret-access-key-here"
 R2_BUCKET_NAME="squareshare-products"
 
-# Cloudflare Turnstile secret (bot protection on sign-up, see lib/turnstile.ts).
-# The public NEXT_PUBLIC_TURNSTILE_SITE_KEY companion goes in wrangler.jsonc's
-# `vars` (it's not a secret), not here. In production: `wrangler secret put
-# TURNSTILE_SECRET_KEY` / the CF dashboard, never committed.
+# Cloudflare Turnstile secret (bot protection on sign-up and checkout, see
+# lib/turnstile.ts). The public NEXT_PUBLIC_TURNSTILE_SITE_KEY companion is
+# read by client components, so it is inlined at BUILD time: it goes in
+# .env.production (or .env.local), NOT in wrangler.jsonc's `vars`, which only
+# reach the server at runtime. In production: `wrangler secret put
+# TURNSTILE_SECRET_KEY` / the CF dashboard, never committed, and only AFTER a
+# build carrying the site key is live (see .env.example).
 # TURNSTILE_SECRET_KEY="paste-turnstile-secret-key-here"
 
 # Contact verification (lib/contact-verification): the HMAC key codes are

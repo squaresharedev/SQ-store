@@ -53,6 +53,14 @@
       "withRole": "Twoja rola {role, select, owner {Właściciel} editor {Edytor} viewer {Przeglądający} other {{role}}} nie pozwala oznaczać zamówień jako wysłane w tym sklepie.",
       "noRole": "Nie masz uprawnień, aby oznaczać zamówień jako wysłane w tym sklepie."
     },
+    "refundOrders": {
+      "withRole": "Twoja rola {role, select, owner {Właściciel} editor {Edytor} viewer {Przeglądający} other {{role}}} nie pozwala na zwrot środków ani anulowanie zamówień w tym sklepie.",
+      "noRole": "Nie masz uprawnień do zwrotu środków ani anulowania zamówień w tym sklepie."
+    },
+    "connectPayments": {
+      "withRole": "Twoja rola {role, select, owner {Właściciel} editor {Edytor} viewer {Przeglądający} other {{role}}} nie pozwala na połączenie konta płatniczego dla tego sklepu.",
+      "noRole": "Nie masz uprawnień do połączenia konta płatniczego dla tego sklepu."
+    },
     "manageBilling": {
       "withRole": "Twoja rola {role, select, owner {Właściciel} editor {Edytor} viewer {Przeglądający} other {{role}}} nie pozwala zmieniać planu tego sklepu.",
       "noRole": "Nie masz uprawnień, aby zmieniać plan tego sklepu."
@@ -86,6 +94,8 @@
     "requestReview": "Zbyt wiele próśb o ponowne sprawdzenie w krótkim czasie.",
     "fileAppeal": "Zbyt wiele prób wysłania odwołania w krótkim czasie.",
     "fulfilOrders": "Zbyt wiele prób oznaczania zamówień jako wysłane w krótkim czasie.",
+    "refundOrders": "Zbyt wiele zwrotów środków w krótkim czasie.",
+    "connectPayments": "Zbyt wiele prób połączenia ze Stripe w krótkim czasie.",
     "readCheckoutSettings": "Zbyt wiele prób odczytania ustawień kasy w krótkim czasie.",
     "changePlan": "Za dużo zmian planu w krótkim czasie.",
     "saveDiscounts": "Zbyt wiele zmian rabatów w krótkim czasie."
@@ -117,6 +127,8 @@
     "sendForReview": "Nie udało się wysłać tego do sprawdzenia z powodu problemu po naszej stronie.",
     "fileAppeal": "Nie udało się wysłać odwołania z powodu błędu po naszej stronie.",
     "markOrderShipped": "Nie udało się oznaczyć zamówienia jako wysłane z powodu problemu po naszej stronie.",
+    "refundOrder": "Nie udało się zapisać zwrotu środków z powodu problemu po naszej stronie.",
+    "connectPayments": "Nie udało się otworzyć Stripe z powodu problemu po naszej stronie.",
     "loadCheckoutSettings": "Nie udało się wczytać ustawień kasy z powodu problemu po naszej stronie.",
     "saveCheckoutSettings": "Nie udało się zapisać ustawień kasy z powodu problemu po naszej stronie.",
     "loadPlans": "Nie udało się wczytać twojego planu z powodu błędu po naszej stronie.",
@@ -596,6 +608,14 @@
     "notShippable": {
       "message": "Tego zamówienia nie można oznaczyć jako wysłane.",
       "fix": "Wysłać można tylko opłacone zamówienia zawierające produkty do wysłania. Odśwież stronę, aby sprawdzić status tego zamówienia."
+    },
+    "notRefundable": {
+      "message": "To zamówienie nie może zostać zwrócone.",
+      "fix": "Zwrot środków jest możliwy tylko dla opłaconego zamówienia. Odśwież stronę, aby sprawdzić status tego zamówienia."
+    },
+    "refundRefused": {
+      "message": "Stripe nie mógł zrealizować tego zwrotu środków.",
+      "fix": "Nic nie zostało zmienione. Spróbuj ponownie za chwilę lub zrób zwrot bezpośrednio z panelu Stripe."
     }
   },
   "checkoutPageApi": {

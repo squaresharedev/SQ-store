@@ -387,16 +387,22 @@ export type Database = {
       }
       billing_switches: {
         Row: {
+          entitlements_enforced: boolean
+          fees_enabled: boolean
           id: boolean
           plan_limits_enforced: boolean
           updated_at: string
         }
         Insert: {
+          entitlements_enforced?: boolean
+          fees_enabled?: boolean
           id?: boolean
           plan_limits_enforced?: boolean
           updated_at?: string
         }
         Update: {
+          entitlements_enforced?: boolean
+          fees_enabled?: boolean
           id?: boolean
           plan_limits_enforced?: boolean
           updated_at?: string
@@ -547,6 +553,53 @@ export type Database = {
           value_type?: string
         }
         Relationships: []
+      }
+      fee_ledger: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          entry_key: string
+          id: string
+          kind: Database["public"]["Enums"]["fee_entry_kind"]
+          livemode: boolean
+          order_id: string | null
+          seller_id: string | null
+          stripe_application_fee_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency: string
+          entry_key: string
+          id?: string
+          kind: Database["public"]["Enums"]["fee_entry_kind"]
+          livemode?: boolean
+          order_id?: string | null
+          seller_id?: string | null
+          stripe_application_fee_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          entry_key?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["fee_entry_kind"]
+          livemode?: boolean
+          order_id?: string | null
+          seller_id?: string | null
+          stripe_application_fee_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_ledger_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       follows: {
         Row: {
@@ -974,11 +1027,15 @@ export type Database = {
       }
       orders: {
         Row: {
+          ad_fee_cents: number
+          ad_rate_bps: number | null
           amount_cents: number
+          application_fee_cents: number | null
           buyer_email: string | null
           buyer_locale: string | null
           channel: string
           checkout_session_id: string | null
+          confirmation_sent_at: string | null
           created_at: string
           currency: string
           digital_file_key: string | null
@@ -989,19 +1046,26 @@ export type Database = {
           fulfilment_status: string
           gift_message: string | null
           id: string
+          payment_ref: string | null
+          pending_expires_at: string | null
+          fee_capped: boolean
           platform_fee_bps: number | null
           platform_fee_cents: number
           product_id: string | null
           product_price_cents: number
           product_title: string
           quantity: number
+          refund_reason: string | null
+          refunded_at: string | null
           selected_options: Json
           seller_id: string
+          seller_notified_at: string | null
           seller_plan: string | null
           ship_to: Json | null
           shipped_at: string | null
           shipping_cents: number | null
           status: string
+          stock_reserved: number
           storefront_id: string | null
           supply_consent_at: string | null
           tracking_carrier: string | null
@@ -1009,11 +1073,15 @@ export type Database = {
           withdrawal_requested_at: string | null
         }
         Insert: {
+          ad_fee_cents?: number
+          ad_rate_bps?: number | null
           amount_cents: number
+          application_fee_cents?: number | null
           buyer_email?: string | null
           buyer_locale?: string | null
           channel: string
           checkout_session_id?: string | null
+          confirmation_sent_at?: string | null
           created_at?: string
           currency?: string
           digital_file_key?: string | null
@@ -1024,19 +1092,26 @@ export type Database = {
           fulfilment_status?: string
           gift_message?: string | null
           id?: string
+          payment_ref?: string | null
+          pending_expires_at?: string | null
+          fee_capped?: boolean
           platform_fee_bps?: number | null
           platform_fee_cents?: number
           product_id?: string | null
           product_price_cents: number
           product_title: string
           quantity?: number
+          refund_reason?: string | null
+          refunded_at?: string | null
           selected_options?: Json
           seller_id: string
+          seller_notified_at?: string | null
           seller_plan?: string | null
           ship_to?: Json | null
           shipped_at?: string | null
           shipping_cents?: number | null
           status?: string
+          stock_reserved?: number
           storefront_id?: string | null
           supply_consent_at?: string | null
           tracking_carrier?: string | null
@@ -1044,11 +1119,15 @@ export type Database = {
           withdrawal_requested_at?: string | null
         }
         Update: {
+          ad_fee_cents?: number
+          ad_rate_bps?: number | null
           amount_cents?: number
+          application_fee_cents?: number | null
           buyer_email?: string | null
           buyer_locale?: string | null
           channel?: string
           checkout_session_id?: string | null
+          confirmation_sent_at?: string | null
           created_at?: string
           currency?: string
           digital_file_key?: string | null
@@ -1059,19 +1138,26 @@ export type Database = {
           fulfilment_status?: string
           gift_message?: string | null
           id?: string
+          payment_ref?: string | null
+          pending_expires_at?: string | null
+          fee_capped?: boolean
           platform_fee_bps?: number | null
           platform_fee_cents?: number
           product_id?: string | null
           product_price_cents?: number
           product_title?: string
           quantity?: number
+          refund_reason?: string | null
+          refunded_at?: string | null
           selected_options?: Json
           seller_id?: string
+          seller_notified_at?: string | null
           seller_plan?: string | null
           ship_to?: Json | null
           shipped_at?: string | null
           shipping_cents?: number | null
           status?: string
+          stock_reserved?: number
           storefront_id?: string | null
           supply_consent_at?: string | null
           tracking_carrier?: string | null
@@ -1115,6 +1201,106 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plan_entitlements: {
+        Row: {
+          feature: Database["public"]["Enums"]["feature_key"]
+          limit_int: number | null
+          plan_id: Database["public"]["Enums"]["plan_id"]
+        }
+        Insert: {
+          feature: Database["public"]["Enums"]["feature_key"]
+          limit_int?: number | null
+          plan_id: Database["public"]["Enums"]["plan_id"]
+        }
+        Update: {
+          feature?: Database["public"]["Enums"]["feature_key"]
+          limit_int?: number | null
+          plan_id?: Database["public"]["Enums"]["plan_id"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_entitlements_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_prices: {
+        Row: {
+          billing_interval: string
+          created_at: string
+          currency: string
+          direct_fee_bps: number
+          effective_from: string
+          effective_to: string | null
+          id: string
+          list_price_cents: number | null
+          marketplace_fee_bps: number
+          plan_id: Database["public"]["Enums"]["plan_id"]
+          price_cents: number
+          stripe_lookup_key: string | null
+          version: number
+        }
+        Insert: {
+          billing_interval?: string
+          created_at?: string
+          currency?: string
+          direct_fee_bps: number
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          list_price_cents?: number | null
+          marketplace_fee_bps: number
+          plan_id: Database["public"]["Enums"]["plan_id"]
+          price_cents: number
+          stripe_lookup_key?: string | null
+          version: number
+        }
+        Update: {
+          billing_interval?: string
+          created_at?: string
+          currency?: string
+          direct_fee_bps?: number
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          list_price_cents?: number | null
+          marketplace_fee_bps?: number
+          plan_id?: Database["public"]["Enums"]["plan_id"]
+          price_cents?: number
+          stripe_lookup_key?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_prices_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          id: Database["public"]["Enums"]["plan_id"]
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          id: Database["public"]["Enums"]["plan_id"]
+          name: string
+          sort_order: number
+        }
+        Update: {
+          id?: Database["public"]["Enums"]["plan_id"]
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
       }
       plan_cancellations: {
         Row: {
@@ -1701,6 +1887,47 @@ export type Database = {
           },
         ]
       }
+      storefront_funnel_daily: {
+        Row: {
+          day: string
+          event: string
+          events: number
+          placement_id: string
+          product_id: string
+          referrer_host: string
+          seller_id: string
+          store_id: string
+        }
+        Insert: {
+          day: string
+          event: string
+          events: number
+          placement_id?: string
+          product_id: string
+          referrer_host?: string
+          seller_id: string
+          store_id: string
+        }
+        Update: {
+          day?: string
+          event?: string
+          events?: number
+          placement_id?: string
+          product_id?: string
+          referrer_host?: string
+          seller_id?: string
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storefront_funnel_daily_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       storefront_signals: {
         Row: {
           account_id: string
@@ -1852,6 +2079,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      seller_fee_waivers: {
+        Row: {
+          granted_at: string
+          owner_id: string
+          reason: string
+        }
+        Insert: {
+          granted_at?: string
+          owner_id: string
+          reason?: string
+        }
+        Update: {
+          granted_at?: string
+          owner_id?: string
+          reason?: string
+        }
+        Relationships: []
+      }
+      seller_payment_accounts: {
+        Row: {
+          charges_enabled: boolean
+          created_at: string
+          details_submitted: boolean
+          livemode: boolean
+          owner_id: string
+          payouts_enabled: boolean
+          stripe_account_id: string
+          updated_at: string
+        }
+        Insert: {
+          charges_enabled?: boolean
+          created_at?: string
+          details_submitted?: boolean
+          livemode?: boolean
+          owner_id: string
+          payouts_enabled?: boolean
+          stripe_account_id: string
+          updated_at?: string
+        }
+        Update: {
+          charges_enabled?: boolean
+          created_at?: string
+          details_submitted?: boolean
+          livemode?: boolean
+          owner_id?: string
+          payouts_enabled?: boolean
+          stripe_account_id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       stripe_events: {
         Row: {
@@ -2073,6 +2351,15 @@ export type Database = {
           previous_plan: string | null
         }[]
       }
+      billing_sales_30d: {
+        Args: { p_now?: string; p_seller_id: string }
+        Returns: {
+          direct_cents: number
+          fees_cents: number
+          marketplace_cents: number
+          sales: number
+        }[]
+      }
       billing_sales_summary: {
         Args: { p_now?: string; p_seller_id: string }
         Returns: {
@@ -2148,6 +2435,14 @@ export type Database = {
         }
         Returns: Json
       }
+      order_apply_refund: {
+        Args: { p_order_id: string; p_reason: string; p_restock?: boolean }
+        Returns: string
+      }
+      order_confirm_paid: {
+        Args: { p_checkout_session_id: string; p_payment_ref?: string }
+        Returns: Json
+      }
       order_mark_shipped: {
         Args: {
           p_carrier?: string | null
@@ -2156,6 +2451,36 @@ export type Database = {
         }
         Returns: string
       }
+      fee_ledger_record: {
+        Args: {
+          p_amount_cents: number
+          p_entry_key: string
+          p_kind: Database["public"]["Enums"]["fee_entry_kind"]
+          p_livemode?: boolean
+          p_order_id: string
+          p_stripe_application_fee_id?: string | null
+        }
+        Returns: boolean
+      }
+      fee_ledger_summary: {
+        Args: { p_from: string; p_seller_id: string; p_to: string }
+        Returns: {
+          charged_cents: number
+          currency: string
+          net_cents: number
+          refunded_cents: number
+        }[]
+      }
+      order_place: { Args: { p_order: Json }; Returns: Json }
+      order_refund: {
+        Args: { p_order_id: string; p_reason: string; p_restock?: boolean }
+        Returns: string
+      }
+      order_release_pending: {
+        Args: { p_checkout_session_id: string }
+        Returns: boolean
+      }
+      orders_release_expired: { Args: { p_now?: string }; Returns: number }
       plan_limit: { Args: { p_key: string; p_plan: string }; Returns: number }
       product_sales_aggregate: { Args: { p_seller_id: string }; Returns: Json }
       products_ranked_by_metric: {
@@ -2194,6 +2519,14 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      storefront_funnel_aggregate: {
+        Args: { p_account_id: string; p_from?: string; p_to?: string }
+        Returns: Json
+      }
+      storefront_funnel_roll_day: {
+        Args: { p_day: string; p_rows: Json }
+        Returns: number
+      }
       storefront_signals_aggregate: {
         Args: { p_account_id: string; p_from?: string; p_to?: string }
         Returns: Json
@@ -2253,6 +2586,16 @@ export type Database = {
       }
     }
     Enums: {
+      feature_key:
+        | "freeform_editor"
+        | "custom_fonts"
+        | "remove_badge"
+        | "discount_codes"
+        | "multiple_storefronts"
+        | "analytics"
+        | "priority_support"
+      fee_entry_kind: "platform_fee" | "ad_fee" | "platform_fee_refund" | "ad_fee_refund"
+      plan_id: "free" | "starter" | "pro"
       team_member_status: "invited" | "active" | "revoked"
       team_role: "owner" | "editor" | "viewer"
     }
@@ -2382,6 +2725,17 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      feature_key: [
+        "freeform_editor",
+        "custom_fonts",
+        "remove_badge",
+        "discount_codes",
+        "multiple_storefronts",
+        "analytics",
+        "priority_support",
+      ],
+      fee_entry_kind: ["platform_fee", "ad_fee", "platform_fee_refund", "ad_fee_refund"],
+      plan_id: ["free", "starter", "pro"],
       team_member_status: ["invited", "active", "revoked"],
       team_role: ["owner", "editor", "viewer"],
     },

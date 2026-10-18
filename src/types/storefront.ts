@@ -466,6 +466,110 @@ export function titleBandRow(card: {
   );
 }
 
+/**
+ * THE SALE CHIP: what a product tile wears while a sale lowers its price, so
+ * a board says "this one is on sale" before anyone reads a number.
+ *
+ * What it SAYS is a closed list, never the seller's own text:
+ *   - `percent`: how much the sale takes off the regular price struck through
+ *     beside it ("-20%"): a percent sale's own figure, an amount's share
+ *     rounded down (ProductSale.offerPercent), so it never claims more than
+ *     came off. Under 1% it gives the amount instead;
+ *   - `amount`: the same reduction in money ("-€5.00");
+ *   - `sale`: the word, in the buyer's own language;
+ *   - `hidden`: no chip.
+ * Both figures are worked out from the prices, so there is no number to get
+ * wrong; the product page states the lowest price of the 30 days before the
+ * sale beside them (ProductPrice). A typed label would be a place to write a
+ * figure the prices do not bear out and one more piece of public text to
+ * moderate, and it would not translate.
+ *
+ * How it is DRAWN is SALE_BADGE_LOOKS.
+ */
+export const SALE_BADGES = ["percent", "amount", "sale", "hidden"] as const;
+export type SaleBadge = (typeof SALE_BADGES)[number];
+/** On by default: a sale that does not show on the board is a sale buyers
+ *  walk past. */
+export const DEFAULT_SALE_BADGE: SaleBadge = "percent";
+/** Top left, where the price tag is not by default (it sits in the title
+ *  band). A sold-out tile wears no sale chip, so the two never meet there. */
+export const DEFAULT_SALE_BADGE_POSITION: TileSpot = "top-left";
+
+/**
+ * How the sale chip is DRAWN: a closed set of looks the seller picks from
+ * pictures of them (SaleBadgeControls), each made for a product photo at any
+ * tile size (components/storefront/SaleChip):
+ *   - `pill`: a rounded capsule;
+ *   - `sticker`: a round sticker, put on at a tilt;
+ *   - `flag`: a pennant hanging from the photo's edge, notched at its tail;
+ *   - `ribbon`: a sash across the photo's corner. It needs a corner, so on a
+ *     middle spot (or a tile too round to have corners) it hangs as a flag.
+ * Every look takes the price tag's typeface and size, so the two on a tile
+ * stay a pair; the fill and the spot are the chip's own.
+ */
+export const SALE_BADGE_LOOKS = ["pill", "sticker", "flag", "ribbon"] as const;
+export type SaleBadgeLook = (typeof SALE_BADGE_LOOKS)[number];
+/** The quietest of them, at home on any board. */
+export const DEFAULT_SALE_BADGE_LOOK: SaleBadgeLook = "pill";
+
+/**
+ * The rows of a tile's picture the sale chip may not use: the one an overlaid
+ * title band holds, and the one a floated price tag sits in.
+ *
+ * A whole ROW for the price, not just its spot. Two chips side by side fit a
+ * desktop tile and collide on a phone-size one (each is as wide as its words,
+ * whatever the tile), and which of those a buyer has is not something a config
+ * can know. Rows are a tile apart from each other at any size.
+ */
+export function saleBadgeTakenRows(opts: {
+  titleBand: SpotRow | null;
+  /** Where the price tag really is (resolvePriceTagPosition). */
+  priceTag: PriceTagPosition;
+}): ReadonlySet<SpotRow> {
+  const taken = new Set<SpotRow>();
+  if (opts.titleBand) taken.add(opts.titleBand);
+  if (opts.priceTag !== "below" && opts.priceTag !== "hidden") taken.add(spotRow(opts.priceTag));
+  return taken;
+}
+
+/**
+ * Where the sale chip ACTUALLY renders. On the row the seller chose when it is
+ * free (see saleBadgeTakenRows), otherwise on the opposite edge, keeping its
+ * column; a heavily rounded tile has no corners for it either
+ * (coerceCornerSpot).
+ *
+ * ONE CASE HAS NO FREE EDGE: the price floated along one and an overlaid title
+ * along the other. The middle of the picture is free, and is the last place a
+ * chip belongs, so there it SHARES the price's row from the far corner, and
+ * gives way on a tile too narrow for both (saleBadgeStyle; the renderer knows
+ * it is sharing because the two rows are the same). Only a price that sits in
+ * the middle of its row leaves no far corner, and then the chip takes the
+ * middle.
+ *
+ * Storage keeps the seller's choice, so the chip goes back where they put it
+ * once the price or the title moves away.
+ */
+export function resolveSaleBadgePosition(
+  position: TileSpot,
+  opts: { cornerRadius: number; titleBand: SpotRow | null; priceTag: PriceTagPosition },
+): TileSpot {
+  const taken = saleBadgeTakenRows(opts);
+  const wanted = spotRow(position);
+  const edges: SpotRow[] =
+    wanted === "middle" ? ["middle", "top", "bottom"] : [wanted, wanted === "top" ? "bottom" : "top"];
+  const free = edges.find((row) => !taken.has(row));
+  if (free) {
+    const spot = free === "middle" ? "middle-center" : (`${free}-${spotColumn(position)}` as TileSpot);
+    return coerceCornerSpot(spot, opts.cornerRadius);
+  }
+  // Both edges held. `taken` only ever holds a floated price's row, so the
+  // price is a spot here.
+  const price = opts.priceTag as TileSpot;
+  const column = spotColumn(price);
+  if (column === "center") return "middle-center";
+  return `${spotRow(price)}-${column === "left" ? "right" : "left"}` as TileSpot;
+}
+
 /** The three faces a price tag may take. Deliberately its own list rather
  *  than a slice of STOREFRONT_FONTS: a chip is read at 10px, where display
  *  and handwritten faces stop being legible. */
@@ -512,6 +616,22 @@ export const TILE_LABEL_AUTO_SCALE = {
   min: 0.75,
   max: 2.5,
 } as const;
+
+/**
+ * HOW BIG A TILE'S CHIPS ARE (the price tag and the sale chip), for the whole
+ * board:
+ *   - `tile`: they grow with their tile (TILE_LABEL_AUTO_SCALE), so a 3x3 hero
+ *     wears a bigger chip than a 1x1;
+ *   - `cell`: every tile wears the chips a single cell would, so the board's
+ *     chips all match. They still follow the board itself, smaller on a phone,
+ *     because they are sized from the grid's cell (`--ss-cell`, globals.css).
+ * Theme-only: a promise about the whole board that one tile could not keep.
+ * The product name is not a chip and keeps growing with its tile.
+ */
+export const CHIP_SCALES = ["tile", "cell"] as const;
+export type ChipScale = (typeof CHIP_SCALES)[number];
+/** As every storefront drew its chips before there was a choice. */
+export const DEFAULT_CHIP_SCALE: ChipScale = "tile";
 
 /** The product name's size on that same reference tile, and the floor it may
  *  not scale below. Was a flat `text-xs`, which is where the 12 comes from:
@@ -781,6 +901,19 @@ export type ProductPagePriceNote = (typeof PRODUCT_PAGE_PRICE_NOTES)[number];
 export const PRODUCT_PAGE_SHIPPING_NOTES = ["plus-shipping", "free-shipping", "none"] as const;
 export type ProductPageShippingNote = (typeof PRODUCT_PAGE_SHIPPING_NOTES)[number];
 
+/**
+ * How the product page crosses out the regular price while a sale runs.
+ *   - `strike`: the sale price leads, the regular price follows it, smaller,
+ *     with a line through it. Quiet; what the page has always drawn.
+ *   - `slash`: the regular price leads at nearly full size with a diagonal
+ *     stroke across it, and the sale price lands after it. Louder.
+ * Two looks of one fact: what is shown and what it may claim are the same in
+ * both (components/product-page/SalePrice).
+ */
+export const PRODUCT_PAGE_SALE_STYLES = ["strike", "slash"] as const;
+export type ProductPageSaleStyle = (typeof PRODUCT_PAGE_SALE_STYLES)[number];
+export const DEFAULT_PRODUCT_PAGE_SALE_STYLE: ProductPageSaleStyle = "strike";
+
 /** The collapsible sections below the fold, in their default order. The seller
  *  reorders and hides them; the set itself is fixed. New ids are appended, not
  *  inserted, and the schema (lib/validation/storefront.ts) accepts a stored
@@ -900,6 +1033,9 @@ export type ProductPageConfig = {
   ctaBorderColor?: string;
   priceNote: ProductPagePriceNote;
   shippingNote: ProductPageShippingNote;
+  /** How a sale's regular price is crossed out. Absent =
+   *  DEFAULT_PRODUCT_PAGE_SALE_STYLE, so an untouched page never grows a key. */
+  saleStyle?: ProductPageSaleStyle;
   showStock: boolean;
   /** "Sold by {business}" beside the title. The legal block is the `seller`
    *  SECTION; this is only the byline. */
@@ -1254,7 +1390,22 @@ export type StorefrontTheme = {
   /** Hover-reveal transition speed in ms, HOVER_TRANSITION_MS_MIN..MAX.
    *  Absent = HOVER_TRANSITION_MS_DEFAULT. */
   priceHoverMs?: number;
+  /**
+   * The sale chip (SALE_BADGES, SALE_BADGE_LOOKS). All optional, so a config
+   * saved before it existed parses untouched: absent is DEFAULT_SALE_BADGE in
+   * the DEFAULT_SALE_BADGE_LOOK at DEFAULT_SALE_BADGE_POSITION, filled with
+   * the accent.
+   */
+  saleBadge?: SaleBadge;
+  saleBadgeLook?: SaleBadgeLook;
+  saleBadgePosition?: TileSpot;
+  /** Chip fill, strict #rrggbb. Absent follows the theme accent. Its text is
+   *  always whichever ink reads on the fill. */
+  saleBadgeColor?: string;
   showTitle: boolean;
+  /** How big chips are on bigger tiles (CHIP_SCALES). Absent is
+   *  DEFAULT_CHIP_SCALE. Theme-only, so not part of CardStyle. */
+  chipScale?: ChipScale;
   /** Grid gutter in px, 0..GRID_GAP_MAX (smaller = denser). */
   gridGap: number;
   /** Show a badge on blocks the seller marked sold out. */
@@ -1310,6 +1461,12 @@ export type CardStyle = {
   priceTagBorderColor?: string;
   /** Always resolves to a concrete value, same reasoning as titleHoverMs. */
   priceHoverMs: number;
+  saleBadge: SaleBadge;
+  saleBadgeLook: SaleBadgeLook;
+  saleBadgePosition: TileSpot;
+  /** Stays OPTIONAL after resolution, like the price tag's colors: "follow
+   *  the accent" is a state the picker's inherit dot has to be able to show. */
+  saleBadgeColor?: string;
 };
 
 /** Per-block card styling: an absent field means "follow the theme", so a
@@ -1350,6 +1507,11 @@ export function resolveCardStyle(
       overrides?.priceTagBorderColor ?? theme.priceTagBorderColor,
     priceHoverMs:
       overrides?.priceHoverMs ?? theme.priceHoverMs ?? HOVER_TRANSITION_MS_DEFAULT,
+    saleBadge: overrides?.saleBadge ?? theme.saleBadge ?? DEFAULT_SALE_BADGE,
+    saleBadgeLook: overrides?.saleBadgeLook ?? theme.saleBadgeLook ?? DEFAULT_SALE_BADGE_LOOK,
+    saleBadgePosition:
+      overrides?.saleBadgePosition ?? theme.saleBadgePosition ?? DEFAULT_SALE_BADGE_POSITION,
+    saleBadgeColor: overrides?.saleBadgeColor ?? theme.saleBadgeColor,
   };
 }
 
@@ -1368,6 +1530,20 @@ export function mergeCardStyleOverrides(
     if (merged[key] === undefined) delete merged[key];
   }
   return Object.keys(merged).length > 0 ? merged : undefined;
+}
+
+/**
+ * A card-style patch laid onto the THEME itself (the theme's side of
+ * mergeCardStyleOverrides). A field set to `undefined` is dropped rather than
+ * kept holding nothing, so a theme whose color was set and cleared is
+ * indistinguishable from one that never had it.
+ */
+export function patchThemeCardStyle(theme: StorefrontTheme, patch: CardStyleOverrides): StorefrontTheme {
+  const next: Record<string, unknown> = { ...theme, ...patch };
+  for (const key of Object.keys(patch)) {
+    if (next[key] === undefined) delete next[key];
+  }
+  return next as StorefrontTheme;
 }
 
 /** Effective corner roundness for ANY block: product blocks may override the

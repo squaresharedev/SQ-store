@@ -1,15 +1,19 @@
 // @vitest-environment node
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { MODERATION_CASES, OWN_STORAGE, type ModerationCase } from "../moderation/cases";
+import { EDGE_CASES } from "../moderation/edge";
 import { HOLDOUT_CASES } from "../moderation/holdout";
+import { assertScore, describeScore, score, scoreTable } from "../moderation/score";
 
-/** Which cases to run: the tuned set (default), the held-out set, or both. */
-const CASES: ModerationCase[] =
-  process.env.MODERATION_SET === "holdout"
-    ? HOLDOUT_CASES
-    : process.env.MODERATION_SET === "all"
-      ? [...MODERATION_CASES, ...HOLDOUT_CASES]
-      : MODERATION_CASES;
+/** Which cases to run: the tuned set (default), one of the sets written after
+ *  tuning (holdout, edge), or every set at once (all). */
+const SETS: Record<string, ModerationCase[]> = {
+  tuned: MODERATION_CASES,
+  holdout: HOLDOUT_CASES,
+  edge: EDGE_CASES,
+  all: [...MODERATION_CASES, ...HOLDOUT_CASES, ...EDGE_CASES],
+};
+const CASES: ModerationCase[] = SETS[process.env.MODERATION_SET ?? "tuned"] ?? MODERATION_CASES;
 
 /**
  * THE REAL CLASSIFIER, AGAINST LABELLED CASES. Opt-in: it calls the model and
@@ -21,25 +25,15 @@ const CASES: ModerationCase[] =
  * Every other moderation test proves the plumbing with the classifier faked.
  * This is the one that says whether the policy in
  * src/lib/moderation/auto/policy.ts actually sorts content the way it claims
- * to, and it is how a different model is judged before it replaces this one:
+ * to, and gives the seller the right reason, and it is how a different model
+ * is judged before it replaces this one:
  *
  *   MODERATION_EVAL_MODEL=claude-opus-5-5   (same cases, another model)
  *
- * TWO NUMBERS, with different weights:
- *
- *   leaks        prohibited or must-hold content answered "clean". Asserted to
- *                be ZERO: a leak is the one failure the system exists to stop.
- *   false holds  ordinary listings not answered "clean". Reported, and only
- *                loosely bounded: each one costs a seller a wait and staff a
- *                look, which is the price of erring towards a person.
- *
- * "No answer" (the provider down, a refused key) fails the run rather than
- * being counted either way: a measurement with holes in it is not one.
+ * What is counted, and what is asserted: tests/moderation/score.ts. The image
+ * check has its own eval: auto-moderation-media.live.test.ts.
  */
 const LIVE = process.env.MODERATION_LIVE_TEST === "1" && Boolean(process.env.ANTHROPIC_API_KEY);
-
-/** How many ordinary listings may be held before the policy is too jumpy to ship. */
-const FALSE_HOLD_CEILING = 0.02;
 
 /** Calls in flight at once: enough to finish in a minute, few enough not to
  *  trip a new key's rate limit. */
@@ -62,7 +56,7 @@ if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
 
 describe.skipIf(!LIVE)("the classifier on labelled cases (live)", () => {
   it(
-    "leaks nothing, and holds few ordinary listings",
+    "leaks nothing, holds few ordinary listings, and gives the right reason",
     async () => {
       const model = process.env.MODERATION_EVAL_MODEL;
       if (model) {
@@ -79,54 +73,16 @@ describe.skipIf(!LIVE)("the classifier on labelled cases (live)", () => {
         item,
         answer: await classifyText(item.lines[0]?.startsWith("name=") ? "storefront" : "product", item.lines),
       }));
-
-      const unanswered = answers.filter(({ answer }) => answer === null);
-      // "report" cases are shown in the table and never asserted.
-      const leaks = answers.filter(
-        ({ item, answer }) =>
-          (item.expect === "held" || item.expect === "block") && answer?.verdict === "clean",
-      );
-      const clean = answers.filter(({ item }) => item.expect === "clean");
-      const falseHolds = clean.filter(({ answer }) => answer?.verdict !== "clean");
-      const softBlocks = answers.filter(
-        ({ item, answer }) => item.expect === "block" && answer?.verdict === "unsure",
-      );
-
-      console.log(
-        [
-          `model: ${MODERATION_MODEL}`,
-          `cases: ${answers.length}`,
-          `leaks: ${leaks.length}${leaks.map(({ item }) => `\n  LEAK  ${item.name}`).join("")}`,
-          `false holds: ${falseHolds.length} of ${clean.length}${falseHolds
-            .map(({ item, answer }) => `\n  held  ${item.name} (${answer?.verdict}, ${answer?.ground ?? "no ground"})`)
-            .join("")}`,
-          `prohibited but only "unsure" (a person catches these): ${softBlocks.length}${softBlocks
-            .map(({ item }) => `\n  soft  ${item.name}`)
-            .join("")}`,
-        ].join("\n"),
-      );
+      const result = score(answers);
+      console.log(describeScore(MODERATION_MODEL, answers.length, result));
 
       // Every verdict, for a human to read: MODERATION_TABLE_FILE=<path>.
       if (process.env.MODERATION_TABLE_FILE) {
         const { writeFileSync } = await import("node:fs");
-        writeFileSync(
-          process.env.MODERATION_TABLE_FILE,
-          JSON.stringify(
-            answers.map(({ item, answer }) => ({
-              name: item.name,
-              expect: item.expect,
-              verdict: answer?.verdict ?? "no answer",
-              ground: answer?.ground ?? null,
-            })),
-            null,
-            1,
-          ),
-        );
+        writeFileSync(process.env.MODERATION_TABLE_FILE, JSON.stringify(scoreTable(answers), null, 1));
       }
 
-      expect(unanswered.map(({ item }) => item.name)).toEqual([]);
-      expect(leaks.map(({ item }) => item.name)).toEqual([]);
-      expect(falseHolds.length / clean.length).toBeLessThanOrEqual(FALSE_HOLD_CEILING);
+      assertScore(result);
     },
     300_000,
   );

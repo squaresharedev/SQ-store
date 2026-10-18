@@ -18,12 +18,13 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 import { cardClass, eyebrowClass } from "@/components/ui/surface-styles";
 import { PLAN_FEATURE_ICON } from "@/components/billing/PlanFeatureList";
+import { usePlanPrices } from "@/components/billing/plan-context";
 import { cn } from "@/lib/utils";
 import { formatBytes } from "@/lib/format";
 import { formatCents } from "@/lib/format/money";
 import { formatFeeRate } from "@/lib/billing/format";
 import { COMPARE_GROUPS, planHas, type CompareRowKey, type IncludedFeatureKey } from "@/lib/billing/features";
-import { monthlyListPriceCents, monthlyPriceCents } from "@/lib/billing/fees";
+import { directFeeBps, monthlyListPriceCents, monthlyPriceCents } from "@/lib/billing/fees";
 import { BILLING_CURRENCY, PLANS, PLAN_IDS, type BillingInterval, type PlanId } from "@/lib/billing/plans";
 import { DIGITAL_FILE_MAX_BYTES } from "@/lib/validation/product";
 
@@ -54,7 +55,8 @@ const RECOMMENDED_COLUMN_CLASS = "bg-accent";
  * before choosing. Most rows are ticks on every plan, which is the point:
  * it shows how much Free already includes, and where the paid plans add.
  * The recommended plan's column is shaded. Read from the catalog
- * (lib/billing/features.ts), like the cards: nothing here is typed twice.
+ * (lib/billing/features.ts) and the plan prices in force, like the cards:
+ * nothing here is typed twice.
  *
  * On a narrow screen the table scrolls sideways inside its own box; the page
  * itself never does.
@@ -62,6 +64,7 @@ const RECOMMENDED_COLUMN_CLASS = "bg-accent";
 export function PlanComparison({ interval, currentPlan }: { interval: BillingInterval; currentPlan: PlanId }) {
   const t = useTranslations("Billing");
   const locale = useLocale();
+  const prices = usePlanPrices();
   const number = new Intl.NumberFormat(locale);
 
   const label = (key: CompareRowKey): string =>
@@ -73,7 +76,7 @@ export function PlanComparison({ interval, currentPlan }: { interval: BillingInt
     const definition = PLANS[plan];
     switch (key) {
       case "fee":
-        return formatFeeRate(definition.feeBps, locale);
+        return formatFeeRate(directFeeBps(prices, plan), locale);
       case "products":
       case "storefronts":
       case "teamSeats":
@@ -125,7 +128,7 @@ export function PlanComparison({ interval, currentPlan }: { interval: BillingInt
                 {t("compare.price")}
               </th>
               {PLAN_IDS.map((plan) => {
-                const listPrice = monthlyListPriceCents(plan, interval);
+                const listPrice = monthlyListPriceCents(prices, plan, interval);
                 return (
                   <td key={plan} className={cn(columnClass(plan), "py-3 tabular-nums text-foreground")}>
                     {listPrice !== null && (
@@ -134,7 +137,7 @@ export function PlanComparison({ interval, currentPlan }: { interval: BillingInt
                         {formatCents(listPrice, BILLING_CURRENCY, locale, { wholeUnits: true })}
                       </s>
                     )}
-                    {formatCents(monthlyPriceCents(plan, interval), BILLING_CURRENCY, locale, { wholeUnits: true })}
+                    {formatCents(monthlyPriceCents(prices, plan, interval), BILLING_CURRENCY, locale, { wholeUnits: true })}
                     <span className="text-muted-foreground"> {t("card.perMonth")}</span>
                   </td>
                 );

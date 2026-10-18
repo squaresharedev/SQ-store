@@ -223,6 +223,96 @@ test.describe("orders + analytics (seeded)", () => {
     await expect(page.getByText(/marketplace/i).first()).toBeVisible();
   });
 
+  test("sales by weekday: each bar is a stack of the products sold that day", async ({ page }, testInfo) => {
+    const user = freshUser("weekdays");
+    await signUp(page, user);
+    const sellerId = await userIdByEmail(user.email);
+
+    // Noon UTC on the most recent Monday and Saturday that are already over,
+    // so every order sits squarely inside one UTC weekday and the last 30 days.
+    const lastOn = (isoWeekday: number) => {
+      const day = new Date();
+      day.setUTCHours(12, 0, 0, 0);
+      do day.setUTCDate(day.getUTCDate() - 1);
+      while ((day.getUTCDay() || 7) !== isoWeekday);
+      return day.toISOString();
+    };
+    const monday = lastOn(1);
+    const saturday = lastOn(6);
+    const sold = (title: string, created_at: string, times: number) =>
+      Array.from({ length: times }, () => ({ amount_cents: 2_000, product_title: title, created_at }));
+    await seedOrders(sellerId, [
+      // Six products. The four that sold most are named, best seller first
+      // (a tie goes to the title that sorts first); the last two are "Other".
+      ...sold("Lamp", monday, 3),
+      ...sold("Lamp", saturday, 2),
+      ...sold("Vase", monday, 1),
+      ...sold("Vase", saturday, 2),
+      ...sold("Bowl", saturday, 2),
+      ...sold("Mug", monday, 2),
+      ...sold("Spoon", saturday, 1),
+      ...sold("Fork", saturday, 1),
+    ]);
+
+    await page.goto("/analytics");
+    const card = page.locator('[data-analytics-section="sales"] [data-analytics-panel="weekdays"]');
+    await expect(card).toHaveAttribute("data-analytics-state", "live", { timeout: 30_000 });
+
+    // One stack layer per named product and one for the rest, named in the legend.
+    await expect(card.locator(".recharts-bar")).toHaveCount(5);
+    await expect(card.locator("ul li")).toHaveText(["Lamp", "Vase", "Bowl", "Mug", "Other"]);
+
+    // The table twin says what each day's bar is made of.
+    const row = (weekday: string) => card.getByRole("row", { name: new RegExp(`^${weekday}\\b`) });
+    await expect(row("Mon").getByRole("cell")).toHaveText(["3 sales", "1 sale", "0 sales", "2 sales", "0 sales"]);
+    await expect(row("Sat").getByRole("cell")).toHaveText(["2 sales", "2 sales", "2 sales", "0 sales", "2 sales"]);
+    await expect(row("Wed").getByRole("cell")).toHaveText(Array(5).fill("0 sales"));
+
+    // The stack is exactly the bar it replaced: Saturday's four segments reach
+    // as high as eight sales, and the tallest day sets the axis.
+    // (Polled: the bars grow in. Segments are grouped by where they stand,
+    // since a day draws no rectangle for a product it did not sell.)
+    await expect(async () => {
+      const stacks = await card.evaluate((node) => {
+        const columns = new Map<number, number>();
+        for (const segment of node.querySelectorAll(".recharts-bar-rectangle path")) {
+          const box = segment.getBoundingClientRect();
+          if (box.height === 0) continue;
+          const column = Math.round(box.left + box.width / 2);
+          columns.set(column, (columns.get(column) ?? 0) + box.height);
+        }
+        return [...columns.entries()].sort((a, b) => a[0] - b[0]).map(([, height]) => height);
+      });
+      // Two days sold anything: Monday (six sales), then Saturday (eight).
+      expect(stacks).toHaveLength(2);
+      expect(stacks[1] / stacks[0]).toBeCloseTo(8 / 6, 1);
+    }).toPass({ timeout: 10_000 });
+
+    // The published payload carries the same split, and it adds up.
+    const snapshot = JSON.parse((await page.locator("#analytics-snapshot").textContent())!) as {
+      sales: {
+        weekdayProducts: string[];
+        weekdays: { weekday: string; sales: number; products: { title: string | null; sales: number }[] }[];
+      };
+    };
+    expect(snapshot.sales.weekdayProducts).toEqual(["Lamp", "Vase", "Bowl", "Mug"]);
+    for (const day of snapshot.sales.weekdays) {
+      expect(day.products.reduce((sum, part) => sum + part.sales, 0)).toBe(day.sales);
+    }
+    expect(snapshot.sales.weekdays[5].products).toEqual([
+      { title: "Lamp", sales: 2 },
+      { title: "Vase", sales: 2 },
+      { title: "Bowl", sales: 2 },
+      { title: null, sales: 2 },
+    ]);
+
+    await card.scrollIntoViewIfNeeded();
+    const box = (await card.boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.78, box.y + box.height * 0.6);
+    await expect(card.locator(".recharts-tooltip-wrapper")).toContainText("Bowl");
+    await card.screenshot({ path: testInfo.outputPath("weekday-products.png") });
+  });
+
   test("empty state renders for a fresh account", async ({ page }) => {
     const user = freshUser("noorders");
     await signUp(page, user);

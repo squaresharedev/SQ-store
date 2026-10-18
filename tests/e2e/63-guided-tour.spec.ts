@@ -184,7 +184,11 @@ test.describe("guided tour", () => {
     await expectSpotlightOn(page, page.locator('main button[aria-label="Embed Tour studio"]'));
     const layer = page.locator(TOUR_LAYER);
     await expect(layer).toContainText("This button gives you a snippet");
-    await expect(layer).toContainText("still in development");
+    // The test stack serves the embed (NEXT_PUBLIC_EMBED_URL in
+    // tests/e2e/stack/server.mjs), so the tour says it works, not that it is
+    // on its way.
+    await expect(layer).toContainText("Paste it into your own site");
+    await expect(layer).not.toContainText("still in development");
 
     // Back walks the same page without a navigation, to the sample's link
     // after their own card.

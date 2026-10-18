@@ -10,9 +10,11 @@
 // caller names the bucket, and cannot skip it); the storefront must exist, not
 // be taken down, and have its product page switched on; the product must be
 // PLACED on that storefront, `active`, owned by the storefront's owner and not
-// taken down; and the seller must have disclosed who they are. Every failure
+// taken down; and the seller must have disclosed who they are. Every refusal
 // is the same `null`, which each route turns into the same 404, so nothing
-// here is enumerable.
+// here is enumerable. (A spent rate limit or a failed read is not a refusal:
+// see gatePurchasable and lib/public/busy.ts. That includes the read of the
+// store's running sales, without which nothing here has a price.)
 //
 // What this returns is RAW (the row, the parsed config). Deciding what a buyer
 // may SEE of it stays with each surface's own builder (buildProductPageProduct
@@ -36,6 +38,7 @@ import {
   type ShippingPolicyRow,
 } from "@/lib/settings/shipping-policy";
 import { MODERATION_GATE_SELECT, isContentVisible } from "@/lib/moderation/removal";
+import { PAGE_BUSY, type PageBusy } from "@/lib/public/busy";
 import { clientKey, rateLimitKey, type RateLimitBudget } from "@/lib/rate-limit";
 import { uuidField } from "@/lib/validation/inputs";
 import { parseStoredStorefrontConfig } from "@/lib/validation/storefront";
@@ -58,7 +61,7 @@ import type {
  * drift onto a column that seam has not admitted.
  */
 export const PUBLIC_PRODUCT_SELECT =
-  `id, title, description, price_cents, currency, image_key, digital_file_key, gallery, option_groups, details, documents, purchase_url, shipping_profile_id, max_per_order, ${MODERATION_GATE_SELECT}, ${PUBLIC_STOCK_SELECT}` as const;
+  `id, title, description, price_cents, currency, image_key, digital_file_key, gallery, option_groups, details, documents, purchase_url, shipping_profile_id, max_per_order, created_at, ${MODERATION_GATE_SELECT}, ${PUBLIC_STOCK_SELECT}` as const;
 
 export type PublicProductRow = {
   id: string;
@@ -75,6 +78,9 @@ export type PublicProductRow = {
   purchase_url: string | null;
   shipping_profile_id: string | null;
   max_per_order: number | null;
+  /** When it was listed. Read by the sale's pricing only (a product younger
+   *  than the 30 days a sale is measured against), never by a payload builder. */
+  created_at: string | null;
   /** Takedown state. Read by the gate, never by a payload builder: nothing
    *  about a removal is buyer-facing. */
   moderation_status: string | null;
@@ -120,6 +126,11 @@ const idSchema = uuidField();
  *
  * Not cached here: each surface wraps its own loader in React's `cache`, so
  * metadata and body share one read and one rate-limit token per request.
+ *
+ * A caller that renders a PAGE asks gatePurchasable instead, which also says
+ * when the answer is "not right now" rather than "no" (lib/public/busy.ts).
+ * Everything that acts on the answer (the quote, the code check) treats the
+ * two alike, so they keep this one.
  */
 export async function loadPurchasable<Extra = undefined>(
   storefrontId: string,
@@ -127,13 +138,28 @@ export async function loadPurchasable<Extra = undefined>(
   limit: GateBudget,
   alongside?: (admin: ReturnType<typeof createAdminClient>, ownerId: string) => Promise<Extra>,
 ): Promise<(Purchasable & { extra: Extra }) | null> {
+  const gate = await gatePurchasable(storefrontId, productId, limit, alongside);
+  return gate === PAGE_BUSY ? null : gate;
+}
+
+/**
+ * The gate itself. As loadPurchasable, except that the two outcomes that are
+ * nobody's refusal (the visitor's rate limit is spent, or a read failed) come
+ * back as PAGE_BUSY, so a page can offer "try again" instead of a 404.
+ */
+export async function gatePurchasable<Extra = undefined>(
+  storefrontId: string,
+  productId: string,
+  limit: GateBudget,
+  alongside?: (admin: ReturnType<typeof createAdminClient>, ownerId: string) => Promise<Extra>,
+): Promise<(Purchasable & { extra: Extra }) | PageBusy | null> {
   if (!idSchema.safeParse(storefrontId).success) return null;
   if (!idSchema.safeParse(productId).success) return null;
 
   // The budget is spent before the first read, so a scan pays before it learns
   // anything. rateLimitKey fails closed.
   const key = await clientKey(await headers());
-  if (!(await rateLimitKey(key, limit.action, limit.budget))) return null;
+  if (!(await rateLimitKey(key, limit.action, limit.budget))) return PAGE_BUSY;
 
   const admin = createAdminClient();
   const { data: storefront, error: storefrontError } = await admin
@@ -143,7 +169,7 @@ export async function loadPurchasable<Extra = undefined>(
     .maybeSingle();
   if (storefrontError) {
     console.error("[purchasable] storefront read failed", storefrontError);
-    return null;
+    return PAGE_BUSY;
   }
   if (!storefront) return null;
 
@@ -191,7 +217,7 @@ export async function loadPurchasable<Extra = undefined>(
     ]);
   if (productError) {
     console.error("[purchasable] product read failed", productError);
-    return null;
+    return PAGE_BUSY;
   }
   if (!row) return null;
 
@@ -223,6 +249,14 @@ export async function loadPurchasable<Extra = undefined>(
   ) {
     return null;
   }
+
+  // THE PRICE. Which sales are running decides what this product costs, so
+  // sales that could not be read are a price that is not known: "not right
+  // now", never the regular price. A buyer shown (or charged) the full price
+  // while the seller is advertising a sale is the one mistake a blip here
+  // could otherwise make. Asked last, so a product that is not for sale at all
+  // is still the plain refusal above.
+  if (sales === null) return PAGE_BUSY;
 
   return {
     ownerId: storefront.owner_id,

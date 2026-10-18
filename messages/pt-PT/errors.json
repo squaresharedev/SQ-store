@@ -53,6 +53,14 @@
       "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite marcar encomendas como enviadas nesta loja.",
       "noRole": "Não tem permissão para marcar encomendas como enviadas nesta loja."
     },
+    "refundOrders": {
+      "withRole": "A sua função {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite reembolsar ou cancelar encomendas nesta loja.",
+      "noRole": "Não tem permissão para reembolsar ou cancelar encomendas nesta loja."
+    },
+    "connectPayments": {
+      "withRole": "A sua função {role, select, owner {Proprietário} editor {Editor} viewer {Leitor} other {{role}}} não permite ligar uma conta de pagamento a esta loja.",
+      "noRole": "Não tem permissão para ligar uma conta de pagamento a esta loja."
+    },
     "manageBilling": {
       "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite alterar o plano desta loja.",
       "noRole": "Não tem permissão para alterar o plano desta loja."
@@ -86,6 +94,8 @@
     "requestReview": "Demasiadas tentativas de pedir uma revisão num curto espaço de tempo.",
     "fileAppeal": "Demasiadas tentativas de enviar um recurso num curto espaço de tempo.",
     "fulfilOrders": "Demasiadas tentativas de marcar encomendas como enviadas num curto espaço de tempo.",
+    "refundOrders": "Demasiados reembolsos em pouco tempo.",
+    "connectPayments": "Demasiadas tentativas de ligação ao Stripe em pouco tempo.",
     "readCheckoutSettings": "Demasiadas tentativas de ler as definições de pagamento num curto espaço de tempo.",
     "changePlan": "Demasiadas alterações de plano iniciadas num curto espaço de tempo.",
     "saveDiscounts": "Demasiadas alterações de descontos num curto espaço de tempo."
@@ -117,6 +127,8 @@
     "sendForReview": "Não foi possível enviar isto para revisão devido a um problema do nosso lado.",
     "fileAppeal": "Não foi possível enviar o seu recurso devido a um problema do nosso lado.",
     "markOrderShipped": "Não foi possível marcar a encomenda como enviada devido a um problema do nosso lado.",
+    "refundOrder": "Não foi possível registar o reembolso devido a um problema do nosso lado.",
+    "connectPayments": "Não foi possível abrir o Stripe devido a um problema do nosso lado.",
     "loadCheckoutSettings": "Não foi possível carregar as definições de pagamento devido a um problema do nosso lado.",
     "saveCheckoutSettings": "Não foi possível guardar as definições de pagamento devido a um problema do nosso lado.",
     "loadPlans": "Não foi possível carregar o seu plano devido a um problema da nossa parte.",
@@ -596,6 +608,14 @@
     "notShippable": {
       "message": "Esta encomenda não pode ser marcada como enviada.",
       "fix": "Só as encomendas pagas com algo para enviar podem ser marcadas como enviadas. Atualize a página para ver o estado desta encomenda."
+    },
+    "notRefundable": {
+      "message": "Esta encomenda não pode ser reembolsada.",
+      "fix": "Só é possível reembolsar uma encomenda paga. Recarregue a página para ver o estado desta encomenda."
+    },
+    "refundRefused": {
+      "message": "O Stripe não conseguiu processar este reembolso.",
+      "fix": "Nada foi alterado. Tente novamente daqui a pouco ou faça o reembolso a partir do seu painel Stripe."
     }
   },
   "checkoutPageApi": {

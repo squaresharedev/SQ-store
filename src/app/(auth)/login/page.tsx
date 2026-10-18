@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { LocaleSelect } from "@/components/layout/LocaleSelect";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import { readSignInMethod } from "@/lib/auth/last-method";
+import { signUpPath } from "@/lib/auth/paths";
 import { getSessionState, twoFactorChallengePath } from "@/lib/auth/session";
-import { MARKETPLACE_URL } from "@/lib/site";
 import { safeInternalPath } from "@/lib/utils/safe-path";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -43,7 +44,7 @@ function linkErrorKey(value: string | undefined) {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; next?: string }>;
+  searchParams: Promise<{ error?: string; next?: string; mode?: string }>;
 }) {
   // Already signed in? Skip the form. Half signed in (password done, 2FA code
   // still owed)? Straight to the challenge rather than asking for the
@@ -55,6 +56,10 @@ export default async function LoginPage({
   const next = sanitizeNext(sp.next);
   if (session.kind === "signed_in") redirect(next);
   if (session.kind === "needs_mfa") redirect(twoFactorChallengePath(next));
+
+  // `?mode=signup` opens the form on its sign-up tab. Anything else is
+  // sign-in: the param picks a tab, it never grants anything.
+  const initialMode = sp.mode === "signup" ? "signup" : "signin";
 
   const errorKey = linkErrorKey(sp.error);
   const linkError = errorKey ? t(`login.linkErrors.${errorKey}`) : null;
@@ -107,22 +112,28 @@ export default async function LoginPage({
               {linkError}
             </p>
           )}
-          <LoginForm next={next} lastUsed={lastUsed} />
+          {/* Keyed on the mode so following the link below remounts the form
+              on the other tab rather than leaving its state where it was. */}
+          <LoginForm key={initialMode} next={next} lastUsed={lastUsed} initialMode={initialMode} />
         </div>
 
-        {/* Access note — creators onboard via the marketplace waitlist. */}
-        <p className="mt-4 text-center text-sm text-muted-foreground">
-          {t.rich("login.noAccount", {
-            link: (chunks) => (
-              <a
-                href={MARKETPLACE_URL}
-                className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none"
-              >
-                {chunks}
-              </a>
-            ),
-          })}
-        </p>
+        {/* The way in for someone new. Sign-up is open and lives on this same
+            form, so the link opens its other tab. (It used to say "Request
+            access" and leave for a waitlist on another domain.) */}
+        {initialMode === "signin" && (
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            {t.rich("login.noAccount", {
+              link: (chunks) => (
+                <Link
+                  href={signUpPath(sp.next ? next : undefined)}
+                  className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none"
+                >
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
+        )}
 
         {/* The first screen a new seller sees, and signed out, so the account
             menu's language list is out of reach. Writes the cookie only; sign-in

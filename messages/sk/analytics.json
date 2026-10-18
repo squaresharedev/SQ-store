@@ -33,6 +33,7 @@
     "emptyDefault": "V tomto období neboli žiadne predaje"
   },
   "sales": {
+    "untitledProduct": "Produkt bez názvu",
     "label": "Predaje",
     "description": "Zaplatené objednávky cez pokladňu Square Share.",
     "revenue": {
@@ -71,6 +72,28 @@
       "empty": "V tomto období neboli žiadne objednávky",
       "ariaLabel": "Prehľad stavov objednávok"
     }
+  },
+  "compare": {
+    "previous": "Predchádzajúce obdobie",
+    "vsPrevious": "{change} oproti predchádzajúcemu obdobiu"
+  },
+  "funnel": {
+    "label": "Lievik výkladu",
+    "description": "Od zobrazenia výkladu na vašom vlastnom webe po zaplatenú objednávku. Počítajú sa udalosti, nie ľudia.",
+    "views": "Zobrazenia na vašom webe",
+    "viewsEmpty": "V tomto období žiadne zobrazenia",
+    "opens": "Otvorené produkty",
+    "opensEmpty": "V tomto období žiadny neotvorený",
+    "started": "Začaté platby",
+    "startedEmpty": "V tomto období žiadne platby",
+    "expired": "Nedokončené platby",
+    "expiredEmpty": "Žiadne nedokončené",
+    "conversion": "Objednávky na 100 zobrazení",
+    "conversionCounts": "Objednávky: {orders}, zobrazenia: {views}",
+    "abandonment": "Opustené platby",
+    "abandonmentCounts": "Nedokončené: {expired}, začaté: {started}",
+    "notEnough": "Zatiaľ málo dát",
+    "notEnoughHint": "Miery sa zobrazia, keď bude v tomto období {min} zobrazení."
   },
   "tiles": {
     "revenue": "Tržby",
@@ -142,9 +165,7 @@
       "acrossRange": "Kliknutia na produkt v zvolenom období.",
       "byChannel": "Kliknutia na produkt podľa kanála",
       "byWeekday": "Kliknutia na produkt podľa dňa v týždni",
-      "byStorefront": "Kliknutia na produkt podľa výkladu",
-      "awaiting": "Zobrazí sa, keď začne vložený widget hlásať otvorenia produktov.",
-      "readyToChart": "Pripravené na zobrazenie, keď začnú prichádzať kliknutia."
+      "byStorefront": "Kliknutia na produkt podľa výkladu"
     },
     "product_view": {
       "label": "Zobrazenia produktovej stránky",

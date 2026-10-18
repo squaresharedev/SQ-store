@@ -14,9 +14,11 @@ import {
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { iconTileClass } from "@/components/ui/surface-styles";
+import { usePlanPrices } from "@/components/billing/plan-context";
 import { cn } from "@/lib/utils";
 import { formatFeeRate } from "@/lib/billing/format";
 import type { PlanFeatureKey } from "@/lib/billing/features";
+import { directFeeBps } from "@/lib/billing/fees";
 import { PLANS, type PlanId } from "@/lib/billing/plans";
 
 /** The glyph for each feature, the same wherever a plan is described. */
@@ -32,15 +34,17 @@ export const PLAN_FEATURE_ICON: Record<PlanFeatureKey, LucideIcon> = {
   prioritySupport: LifeBuoy,
 };
 
-/** One feature of one plan as a sentence ("3% fee per sale", "10 storefronts"). */
+/** One feature of one plan as a sentence ("2% fee per sale", "10 storefronts").
+ *  The fee is the plan price in force, so it needs a PlanPricesProvider. */
 export function usePlanFeatureLabel(): (plan: PlanId, key: PlanFeatureKey) => string {
   const t = useTranslations("Billing.features");
   const locale = useLocale();
+  const prices = usePlanPrices();
   return (plan, key) => {
     const definition = PLANS[plan];
     switch (key) {
       case "fee":
-        return t("fee", { rate: formatFeeRate(definition.feeBps, locale) });
+        return t("fee", { rate: formatFeeRate(directFeeBps(prices, plan), locale) });
       case "storefronts":
         return definition.limits.storefronts === null
           ? t("storefrontsUnlimited")

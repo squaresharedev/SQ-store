@@ -7,6 +7,20 @@
     "body": "Mógł zostać usunięty albo link, w który kliknięto, jest nieaktualny. Wróć do sklepu, aby zobaczyć aktualną ofertę.",
     "back": "Wróć"
   },
+  "unavailable": {
+    "title": "Nie udało się wczytać tej strony",
+    "body": "Problem leży po naszej stronie i zwykle mija po chwili.",
+    "orderBody": "Twoje zamówienie jest bezpieczne. Po prostu tej strony nie udało się teraz wczytać, co zwykle mija po chwili."
+  },
+  "pageNotFound": {
+    "title": "Ta strona jest niedostępna",
+    "body": "Link może być nieaktualny albo niepełny. Wróć i spróbuj ponownie."
+  },
+  "storefront": {
+    "gridLabel": "Co sprzedaje {store}",
+    "empty": "{store} nie ma teraz nic na wystawie.",
+    "description": "Zobacz, co sprzedaje {store}."
+  },
   "sections": {
     "description": "Opis",
     "specs": "Specyfikacja",
@@ -29,6 +43,11 @@
     "warnings": "Ostrzeżenia"
   },
   "priceNotes": "{price, select, incl {{shipping, select, plus {z VAT, plus wysyłka} free {z VAT, darmowa wysyłka} other {z VAT}}} excl {{shipping, select, plus {bez podatku, plus wysyłka} free {bez podatku, darmowa wysyłka} other {bez podatku}}} other {{shipping, select, plus {plus wysyłka} free {darmowa wysyłka} other {}}}}",
+  "delivery": {
+    "free": "Darmowa dostawa",
+    "flat": "Dostawa {amount}",
+    "from": "Dostawa od {amount}"
+  },
   "stock": {
     "digitalDownload": "Pobranie cyfrowe",
     "digitalDownloadFormat": "Pobranie cyfrowe ({format})"
@@ -190,6 +209,8 @@
       "label": "Co dalej",
       "paid": "Zamówienie złożone",
       "paidDetail": "Zapłacono {date}",
+      "confirming": "Potwierdzanie płatności",
+      "confirmingDetail": "Zwykle chwilę to trwa. Odśwież stronę, jeśli status się nie zmienia.",
       "preparing": "W przygotowaniu",
       "preparingDetail": "{seller} przygotowuje Twoje zamówienie.",
       "shipped": "W drodze",
@@ -198,7 +219,10 @@
       "track": "Śledź u przewoźnika {carrier}",
       "notYet": "Otrzymasz e-mail, gdy zostanie wysłane.",
       "ready": "Gotowe do pobrania",
-      "readyDetail": "Twój plik jest gotowy poniżej, a link jest też w Twoim e-mailu."
+      "readyDetail": "Twój plik jest gotowy poniżej, a link jest też w Twoim e-mailu.",
+      "refunded": "Zwrócono",
+      "refundedDetail": "{seller} zwrócił środki za to zamówienie {date}.",
+      "refundedDetailNoDate": "{seller} zwrócił środki za to zamówienie."
     },
     "download": "Pobierz ({format})",
     "downloadPlain": "Pobierz plik",
@@ -295,6 +319,8 @@
     "payment": {
       "testTitle": "Płatność testowa",
       "testBody": "To jest kasa deweloperska. Żadna karta nie zostaje obciążona i żadne pieniądze nie są przenoszone.",
+      "stripeTitle": "Bezpieczna płatność przez Stripe",
+      "stripeBody": "Dane karty wpisujesz na bezpiecznej stronie Stripe w następnym kroku.",
       "previewTitle": "Dane karty",
       "previewBody": "Karta, Apple Pay i Google Pay pojawią się tutaj w Twoich kolorach po połączeniu ze Stripe.",
       "cardNumber": "Numer karty",
@@ -331,7 +357,8 @@
       "failed": "Coś poszło nie tak i nic nie zostało obciążone. Spróbuj ponownie.",
       "invalid": "Niektóre dane wymagają sprawdzenia. Sprawdź wyróżnione pola.",
       "discount_invalid": "Ten kod rabatowy nie może być już użyty. Usuń go, aby zapłacić pełną cenę.",
-      "price_changed": "Cena zmieniła się, gdy ta strona była otwarta, więc nic nie zostało pobrane. Sprawdź nową kwotę i zapłać."
+      "price_changed": "Cena zmieniła się, gdy ta strona była otwarta, więc nic nie zostało pobrane. Sprawdź nową kwotę i zapłać.",
+      "turnstile": "Kontrola bezpieczeństwa nie została ukończona, więc nic nie zostało obciążone. Właśnie uruchamia się ponownie: poczekaj chwilę i spróbuj jeszcze raz."
     },
     "editHeadline": "Nagłówek kasy",
     "discount": {
@@ -350,7 +377,11 @@
   "sale": {
     "wasNow": "Było {was}, teraz {now}",
     "percentOff": "-{percent}%",
+    "amountOff": "-{amount}",
     "priorNote": "Przekreślona cena: najniższa cena z 30 dni przed obniżką.",
+    "regularNote": "Przekreślona cena: cena regularna.",
+    "lowestNote": "Przekreślona cena: cena regularna. Najniższa cena z 30 dni przed obniżką: {price}.",
+    "badgeSale": "Obniżka",
     "endsOn": "Obniżka kończy się {date}"
   }
 }

@@ -9,15 +9,21 @@
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
-import { readAccountBilling, readSalesSubtotal30d } from "@/lib/billing/account-plan";
+import { readAccountBilling, readDirectSales30d } from "@/lib/billing/account-plan";
 import { billingProvider } from "@/lib/billing/availability";
+import { getPlanPrices } from "@/lib/billing/catalog";
+import type { PlanPrices } from "@/lib/billing/fees";
 import { isLiveSubscription, type SubscriptionStatus } from "@/lib/billing/entitlement";
 import { recordFunnelEvent } from "@/lib/billing/funnel";
 import { countPlanUsage } from "@/lib/billing/limits";
+import { readFeeWaiver } from "@/lib/billing/sale-fee";
 import type { PricingSource } from "@/lib/billing/paths";
 import type { BillingInterval, PlanId, PlanLimitKey } from "@/lib/billing/plans";
 
 export type PricingContext = {
+  /** The plan prices in force (plan_prices): what every price and fee on the
+   *  page is read from. Always holds a monthly row for every plan. */
+  prices: PlanPrices;
   /** The plan in force now. */
   plan: PlanId;
   interval: BillingInterval | null;
@@ -37,9 +43,12 @@ export type PricingContext = {
   canManage: boolean;
   /** Plans can be bought in this deployment (a billing provider is set up). */
   available: boolean;
-  /** The last 30 days of item sales, for the calculator and the upsell; null
+  /** The last 30 days of sales through the store's own doors (what buyers
+   *  paid, delivery included), for the calculator and the upgrade hint; null
    *  when unreadable. */
-  salesSubtotal30dCents: number | null;
+  directSales30dCents: number | null;
+  /** The store's per-sale fee is waived (closed beta, founding sellers). */
+  feeWaived: boolean;
   /** What the store has of each capped thing now; null when uncounted. */
   usage: Record<PlanLimitKey, number | null>;
 };
@@ -59,11 +68,13 @@ export async function getPricingContext(source?: PricingSource | null): Promise<
   // Every member can see the plan their store is on (store.read is every role).
   if (!can(account.role, "store.read")) return { ok: false, reason: "signed_out" };
 
-  const billing = await readAccountBilling(account.accountId);
-  if (!billing.ok) return { ok: false, reason: "unavailable" };
+  const [billing, prices] = await Promise.all([readAccountBilling(account.accountId), getPlanPrices()]);
+  // No prices, no page: a plan shown at a guessed price is worse than none.
+  if (!billing.ok || !prices) return { ok: false, reason: "unavailable" };
 
-  const [salesSubtotal30dCents, storefronts, teamSeats, products] = await Promise.all([
-    readSalesSubtotal30d(account.accountId),
+  const [directSales30dCents, feeWaived, storefronts, teamSeats, products] = await Promise.all([
+    readDirectSales30d(account.accountId),
+    readFeeWaiver(account.accountId),
     countPlanUsage(account.accountId, "storefronts"),
     countPlanUsage(account.accountId, "teamSeats"),
     countPlanUsage(account.accountId, "products"),
@@ -84,6 +95,7 @@ export async function getPricingContext(source?: PricingSource | null): Promise<
   return {
     ok: true,
     context: {
+      prices,
       plan: b.plan,
       interval: b.interval,
       status: b.status,
@@ -95,7 +107,9 @@ export async function getPricingContext(source?: PricingSource | null): Promise<
       hasBillingAccount: b.customerId !== null,
       canManage,
       available: billingProvider() !== null,
-      salesSubtotal30dCents,
+      directSales30dCents,
+      // Unreadable reads as not waived: the page then shows the plan's rate.
+      feeWaived: feeWaived === true,
       usage: { storefronts, teamSeats, products },
     },
   };

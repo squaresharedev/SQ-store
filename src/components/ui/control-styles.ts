@@ -58,6 +58,12 @@ export const destructiveButtonClass = `${BUTTON_BASE} rounded-none border border
 /** Square icon-only button (styles.md §8.4). */
 export const iconButtonClass = `group/btn inline-flex size-9 items-center justify-center rounded-none border border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground ${TRANSITION} ${FOCUS_RING}`;
 
+/** The icon button for a CONSEQUENTIAL action on a row (delete, end): neutral
+ *  at rest, destructive on hover/focus, the icon-only ghostDangerButtonClass.
+ *  Spelled whole rather than composed onto iconButtonClass, whose own hover
+ *  colours a plain string cannot override. */
+export const iconDangerButtonClass = `group/btn inline-flex size-9 items-center justify-center rounded-none border border-border bg-background text-muted-foreground hover:border-destructive/40 hover:bg-destructive/5 hover:text-destructive focus-visible:text-destructive disabled:pointer-events-none disabled:opacity-50 ${TRANSITION} ${FOCUS_RING}`;
+
 /* --- Overlays: modal, popover, dropdown, listbox, menu, toast ----------
    Every floating surface is the SAME panel — sharp corners, hairline border,
    popover surface, lifted shadow — so a dropdown opened over a modal reads as

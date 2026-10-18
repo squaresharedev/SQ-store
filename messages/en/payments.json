@@ -16,6 +16,11 @@
       "label": "Next payout",
       "zero": "No payout scheduled",
       "hint": "Expected {date}"
+    },
+    "fees": {
+      "label": "Fees this month",
+      "zero": "No fees this month",
+      "hint": "Square Share's cut of your sales, after refunds"
     }
   },
   "connection": {
@@ -29,6 +34,8 @@
     "charges": "Charges",
     "payouts": "Payouts",
     "verified": "Verified",
+    "finish": "Stripe still needs a few details from you. Until it has them, buyers can't pay.",
+    "finishButton": "Finish on Stripe",
     "requirementsDue": "Stripe needs more information before payouts can continue."
   },
   "connectModal": {
@@ -106,6 +113,7 @@
     "sentTo": "Sent to",
     "bankAccount": "Bank account ···· {last4}",
     "arrives": "Arrives",
+    "arrived": "Arrived",
     "initiated": "Initiated",
     "type": "Type",
     "typeValue": "{method, select, instant {Instant} other {Standard}} · {automatic, select, true {Automatic} other {Manual}}",

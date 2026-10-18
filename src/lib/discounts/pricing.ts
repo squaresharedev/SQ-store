@@ -1,6 +1,6 @@
 import { lineTotalCents } from "@/lib/products/quantity";
 import type { Currency } from "@/types/product";
-import type { DiscountValue } from "@/types/discount";
+import type { DiscountKind, DiscountValue } from "@/types/discount";
 
 /**
  * DISCOUNT ARITHMETIC, pure and client-safe.
@@ -39,6 +39,22 @@ export function reductionCents(value: DiscountValue, amountCents: number, curren
   return Math.max(0, Math.min(wanted, room));
 }
 
+/**
+ * How much a sale takes off a product's regular price, in whole percent, as a
+ * buyer reads it beside that price struck through: a percent sale's own figure
+ * where it applied in full, otherwise the share that came off rounded down, so
+ * it never says more came off than did. Null under 1%, or when nothing does.
+ */
+export function offerPercentOff(value: DiscountValue, regularCents: number, currency: Currency): number | null {
+  const reduction = reductionCents(value, regularCents, currency);
+  if (reduction <= 0 || regularCents <= 0) return null;
+  if (value.type === "percent" && reduction === Math.floor((regularCents * value.percentOff) / 100)) {
+    return value.percentOff;
+  }
+  const percent = Math.floor((reduction * 100) / regularCents);
+  return percent >= 1 ? percent : null;
+}
+
 /** One item's price under a sale. */
 export function saleUnitPriceCents(value: DiscountValue, regularCents: number, currency: Currency): number {
   return regularCents - reductionCents(value, regularCents, currency);
@@ -62,6 +78,25 @@ export function bestSale<T extends { value: DiscountValue }>(
     }
   }
   return best;
+}
+
+/**
+ * What ONE of a product costs under a discount, bought on its own: a sale's
+ * price for the item, or a code applied to an order of just that item. This is
+ * what the dashboard tells a SELLER ("this costs that": the form's example, a
+ * discount's product list). It is never what an order is charged, which
+ * priceOrder decides from the real quantity and whichever discount wins.
+ */
+export function priceOfOne(
+  kind: DiscountKind,
+  value: DiscountValue,
+  regularCents: number,
+  currency: Currency,
+): number {
+  return kind === "automatic"
+    ? saleUnitPriceCents(value, regularCents, currency)
+    : priceOrder({ regularUnitCents: regularCents, currency, quantity: 1, saleUnitCents: null, code: value })
+        .itemsCents;
 }
 
 export type PricedOrder = {

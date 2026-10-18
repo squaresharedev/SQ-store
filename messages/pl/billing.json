@@ -30,7 +30,7 @@
     "ownerOnly": "Tylko właściciel sklepu może zmieniać jego plan.",
     "soon": "Wkrótce",
     "soonTitle": "Płatne plany otworzą się wkrótce. W międzyczasie wszystko na Free działa bez zmian.",
-    "finePrint": "Ceny nie zawierają VAT. Opłata od sprzedaży dotyczy zakupów przez realizację zakupu Square Share i jest naliczana od ceny produktu, nigdy od dostawy. Do tego dochodzą własne opłaty Stripe za obsługę kart. Anuluj w dowolnym momencie: zachowujesz plan do końca opłaconego okresu.",
+    "finePrint": "Ceny nie zawierają VAT. Opłata od sprzedaży dotyczy zakupów przez realizację zakupu Square Share i jest naliczana od całej kwoty, którą płaci kupujący, łącznie z dostawą. Do tego dochodzą własne opłaty Stripe za obsługę kart. Anuluj w dowolnym momencie: zachowujesz plan do końca opłaconego okresu.",
     "unavailable": "Plany nie mogą być teraz wyświetlone. Odśwież stronę za chwilę.",
     "yearlyFree": "{count, plural, one {# miesiąc gratis} few {# miesiące gratis} many {# miesięcy gratis} other {# miesiąca gratis}}",
     "launchNote": "Cena startowa to cena promocyjna na początek: zwykła cena jest ta przekreślona."
@@ -132,11 +132,11 @@
       },
       "fee": {
         "q": "Od czego naliczana jest opłata od sprzedaży?",
-        "a": "Od ceny produktu w każdej sprzedaży przez realizację zakupu Square Share, nigdy od dostawy. Własne opłaty Stripe za obsługę kart są osobne."
+        "a": "Od całej kwoty, którą płaci kupujący w każdej sprzedaży przez realizację zakupu Square Share, łącznie z dostawą. Własne opłaty Stripe za obsługę kart są osobne."
       },
       "switch": {
         "q": "Czy mogę później zmienić plan?",
-        "a": "W dowolnym momencie, na wyższy lub niższy, miesięczny lub roczny. Stripe pokaże dokładnie, ile zapłacisz, zanim potwierdzisz."
+        "a": "W dowolnym momencie, na wyższy lub niższy. Stripe pokaże dokładnie, ile zapłacisz, zanim potwierdzisz."
       }
     }
   },
@@ -176,7 +176,8 @@
     "renews": "Odnawia się {date}.",
     "ends": "Kończy się {date}. Sklep przechodzi wtedy na Free i nic nie jest usuwane.",
     "pastDue": "Płatność nie powiodła się. Stripe ponowi próbę; zaktualizuj kartę, aby zachować {plan}.",
-    "feeLine": "Opłata od każdej sprzedaży: {rate} ceny produktu.",
+    "feeLine": "Opłata od każdej sprzedaży: {rate} kwoty, którą płaci kupujący.",
+    "feeWaivedLine": "Brak opłaty od twojej sprzedaży: twój sklep jest z niej zwolniony.",
     "memberNote": "Tylko właściciel sklepu może zmieniać plan lub przeglądać jego faktury.",
     "usageTitle": "Z czego korzystasz",
     "usageDescription": "Limity twojego planu dotyczą tylko dodawania nowych. Nic, co już masz, nie zostanie usunięte.",

@@ -2,8 +2,7 @@ import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { InfoTip } from "@/components/ui/InfoTip";
-import { pageGutterClass } from "@/components/ui/surface-styles";
-import { cn } from "@/lib/utils";
+import { leadLaneClass } from "@/components/analytics/chart-layout";
 
 /**
  * One band of the analytics page: a source's heading, then its cards.
@@ -17,11 +16,6 @@ import { cn } from "@/lib/utils";
  * `data-analytics-section` is the anchor a machine reader uses to scope a
  * query to one source ("every metric under storefront_view"), which is why the
  * id is the source id verbatim. See docs/analytics-datapoints.md.
- *
- * THE SECTION BRINGS ITS OWN PAGE GUTTERS. The analytics page has none at the
- * sides (pageBleedShellClass), so that a section's `lead` can run from one
- * edge of the screen to the other; the heading and the cards are put back in
- * the page column here, once, instead of by every caller.
  */
 export function AnalyticsSection({
   id,
@@ -38,8 +32,9 @@ export function AnalyticsSection({
   icon: LucideIcon;
   /** live = real figures. awaiting = registered, nothing produces it yet. */
   state: "live" | "awaiting";
-  /** The section's headline, drawn edge to edge between the heading and the
-   *  cards. It fills the full width: no gutters are applied to it. */
+  /** The section's headline, between the heading and the cards, with extra
+   *  air above and below so it reads as the headline and not as the first
+   *  card. */
   lead?: ReactNode;
   children: ReactNode;
 }) {
@@ -51,7 +46,7 @@ export function AnalyticsSection({
       data-analytics-state={state}
       className="space-y-4"
     >
-      <div className={cn(pageGutterClass, "flex items-center gap-3")}>
+      <div className="flex items-center gap-3">
         <span
           aria-hidden="true"
           className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-sm bg-secondary text-secondary-foreground"
@@ -72,8 +67,8 @@ export function AnalyticsSection({
           <InfoTip label={t("whatMeasures", { title })}>{description}</InfoTip>
         </div>
       </div>
-      {lead}
-      <div className={cn(pageGutterClass, "space-y-4")}>{children}</div>
+      {lead && <div className={leadLaneClass}>{lead}</div>}
+      {children}
     </section>
   );
 }

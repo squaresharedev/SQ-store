@@ -59,6 +59,12 @@ export const RATE_LIMITS = {
    */
   productPage: { max: 600, windowSeconds: 60 * 60 },
   /**
+   * A hosted storefront page (/s/[storefrontId]), per client IP. Three
+   * service-role reads and a signature per tile; the same ceiling as the
+   * product pages its tiles lead to. Fails closed.
+   */
+  storefrontPage: { max: 600, windowSeconds: 60 * 60 },
+  /**
    * The stable og-image redirect (api/og/p/[productId]): one service-role
    * lookup and one presign per hit. Social crawlers re-scrape cards repeatedly,
    * so the ceiling matches productPage; what it stops is a scanner walking
@@ -139,20 +145,6 @@ export const RATE_LIMITS = {
    * brake, not an access control. The origin allowlist is the access control.
    */
   embedFetch: { max: 600, windowSeconds: 60 * 60 },
-  /**
-   * Analytics signals reported by the embed widget, keyed on the CLIENT.
-   *
-   * Its own budget rather than sharing embedFetch's, in both directions: a
-   * visitor clicking around one storefront legitimately sends several of these
-   * per payload fetch, so sharing would let interaction lock out rendering;
-   * and this one causes a WRITE, so it should never be spendable by a read.
-   *
-   * Sized as a rough ceiling on real interaction (a click every couple of
-   * seconds, sustained for an hour) rather than on abuse: the row that lands
-   * is already deduped, origin-gated and limited to one non-conversion kind,
-   * so what this bounds is database writes, not the honesty of the figure.
-   */
-  embedSignal: { max: 1200, windowSeconds: 60 * 60 },
   /** Avatar uploads (pre-existing budget, unchanged). */
   avatarUpload: { max: 5, windowSeconds: 60 * 60 },
   /**
@@ -252,6 +244,9 @@ export const RATE_LIMITS = {
    * for a seller clearing a busy day's queue in one sitting.
    */
   orderFulfil: { max: 240, windowSeconds: 60 * 60 },
+  // Taking orders back. Far rarer than shipping them, and each one mails a
+  // buyer, so the budget is a fraction of the fulfil one.
+  orderRefund: { max: 60, windowSeconds: 60 * 60 },
   /** Creating, changing, switching off and deleting discounts, per seller. */
   discountWrite: { max: 120, windowSeconds: 60 * 60 },
   /** Profile / tax / notification-preference writes. */

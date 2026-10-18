@@ -53,6 +53,14 @@
       "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě označovat objednávky jako odeslané.",
       "noRole": "Nemáte oprávnění označovat objednávky jako odeslané v tomto obchodě."
     },
+    "refundOrders": {
+      "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě vracet peníze ani rušit objednávky.",
+      "noRole": "Nemáte oprávnění vracet peníze ani rušit objednávky v tomto obchodě."
+    },
+    "connectPayments": {
+      "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje propojit platební účet pro tento obchod.",
+      "noRole": "Nemáte oprávnění propojit platební účet pro tento obchod."
+    },
     "manageBilling": {
       "withRole": "Vaše role {role, select, owner {vlastník} editor {editor} viewer {čtenář} other {{role}}} nemůže měnit plán tohoto obchodu.",
       "noRole": "Nemáte oprávnění měnit plán tohoto obchodu."
@@ -86,6 +94,8 @@
     "requestReview": "Příliš mnoho žádostí o kontrolu během krátké doby.",
     "fileAppeal": "Příliš mnoho pokusů o odeslání odvolání za krátkou dobu.",
     "fulfilOrders": "Příliš mnoho pokusů o označení objednávek jako odeslaných v krátké době.",
+    "refundOrders": "Příliš mnoho vrácení peněz za krátkou dobu.",
+    "connectPayments": "Příliš mnoho pokusů o propojení Stripe v krátké době.",
     "readCheckoutSettings": "Příliš mnoho pokusů o načtení nastavení pokladny v krátké době.",
     "changePlan": "Příliš mnoho změn plánu za krátkou dobu.",
     "saveDiscounts": "Příliš mnoho změn slev za krátkou dobu."
@@ -117,6 +127,8 @@
     "sendForReview": "Kontrolu se nepodařilo odeslat kvůli chybě na naší straně.",
     "fileAppeal": "Odvolání nebylo možné odeslat kvůli problému na naší straně.",
     "markOrderShipped": "Objednávku se nepodařilo označit jako odeslanou kvůli problému na naší straně.",
+    "refundOrder": "Vrácení peněz se kvůli problému na naší straně nepodařilo zaznamenat.",
+    "connectPayments": "Stripe se kvůli problému na naší straně nepodařilo otevřít.",
     "loadCheckoutSettings": "Nastavení pokladny se kvůli problému na naší straně nepodařilo načíst.",
     "saveCheckoutSettings": "Nastavení pokladny se kvůli problému na naší straně nepodařilo uložit.",
     "loadPlans": "Váš plán se nepodařilo načíst kvůli chybě na naší straně.",
@@ -596,6 +608,14 @@
     "notShippable": {
       "message": "Tuto objednávku nelze označit jako odeslanou.",
       "fix": "Odesílat lze jen zaplacené objednávky s položkou k odeslání. Obnovte stránku a zjistěte, v jakém je tato objednávka stavu."
+    },
+    "notRefundable": {
+      "message": "Tato objednávka nemůže být vrácena.",
+      "fix": "Vrátit peníze lze jen u zaplacené objednávky. Obnovte stránku, abyste viděli, v jakém stavu tato objednávka je."
+    },
+    "refundRefused": {
+      "message": "Stripe toto vrácení peněz nemohl provést.",
+      "fix": "Nic se nezměnilo. Zkuste to za chvíli znovu nebo vraťte peníze přímo ze svého Stripe dashboardu."
     }
   },
   "checkoutPageApi": {

@@ -146,9 +146,12 @@
       "thankYouMessage": "Mensaje de agradecimiento",
       "thankYouCelebration": "Celebración de agradecimiento",
       "checkoutPayButton": "Botón de pago",
+      "saleChip": "Etiqueta de rebaja",
+      "salePrice": "Precio rebajado",
       "productPagePhoto": "Foto de la página de producto",
       "checkoutPhoto": "Foto del pago",
-      "thanksPhoto": "Foto de la página de agradecimiento"
+      "thanksPhoto": "Foto de la página de agradecimiento",
+      "chipScale": "Mismo tamaño de etiqueta en todas las tarjetas"
     }
   },
   "editorSearch": {
@@ -206,11 +209,23 @@
     "snippetLabel": "Fragmento de código",
     "snippetReadyHint": "Pega este fragmento de código en el HTML de tu sitio.",
     "snippetLockedHint": "Activa la incorporación y añade al menos un dominio para desbloquear el botón Copiar.",
+    "snippetSaveHint": "Guarda los ajustes para desbloquear el botón Copiar.",
+    "pagesOffHint": "Activa primero las páginas de producto en el editor. Al hacer clic en un producto se abre su página.",
+    "notShowingLabel": "Si el escaparate no aparece",
+    "notShowingTip": "La dirección de tu sitio debe estar en Dominios permitidos y el sitio debe usar https. Los creadores de sitios que colocan el HTML personalizado en un marco propio (Wix, Google Sites) aún no son compatibles.",
     "copySnippet": {
       "copy": "Copiar fragmento de incorporación",
       "copied": "Fragmento de incorporación copiado",
       "failed": "No se ha podido copiar el fragmento de incorporación. Selecciónalo y cópialo a mano.",
       "cannotCopyYet": "el fragmento de incorporación todavía no se puede copiar"
+    },
+    "privacyLabel": "Para tu política de privacidad",
+    "privacyHint": "Tu sitio ahora carga el escaparate desde Squareshare, así que su política de privacidad debería decirlo. Puedes pegar este texto:",
+    "privacyText": "Este sitio muestra un escaparate proporcionado por Squareshare. Al cargarse, la dirección IP y los datos del navegador del visitante se envían a Squareshare para mostrar los productos y contar las visitas. Squareshare no instala cookies ni guarda nada en el dispositivo del visitante para ello. Más información: {policy}",
+    "copyPrivacy": {
+      "copy": "Copiar texto de privacidad",
+      "copied": "Texto de privacidad copiado",
+      "failed": "No se ha podido copiar el texto. Selecciónalo y cópialo a mano."
     },
     "snippetKeyLabel": "Clave del fragmento",
     "rotateConfirmText": "Al renovarla se emite una clave nueva. Todas las copias del fragmento anterior dejan de funcionar de inmediato, incluidas las de sitios que sigues queriendo usar: tendrás que volver a pegar el nuevo fragmento en todas partes.",
@@ -222,6 +237,19 @@
     "saved": "Ajustes de incorporación guardados.",
     "newKeyIssued": "Se ha emitido una nueva clave de incorporación.",
     "newKeyDetail": "Vuelve a pegar el fragmento en todos los sitios donde esté incorporado este escaparate."
+  },
+  "share": {
+    "title": "Enlace del escaparate",
+    "live": "Tu escaparate tiene su propia página. Cualquiera con este enlace puede verlo, sin necesidad de web.",
+    "pagesOff": "Activa las páginas de producto en el editor y este escaparate tendrá un enlace para compartir.",
+    "detailsMissing": "Este escaparate tendrá un enlace para compartir cuando completes tus datos de vendedor.",
+    "open": "Abrir",
+    "openDesigner": "Abrir editor",
+    "copy": {
+      "copy": "Copiar enlace del escaparate",
+      "copied": "Enlace del escaparate copiado",
+      "failed": "No se ha podido copiar el enlace. Selecciónalo y cópialo a mano."
+    }
   },
   "wizard": {
     "category": {
@@ -559,6 +587,27 @@
     "spotBottomCenter": "Etiqueta de precio abajo al centro",
     "spotBottomRight": "Etiqueta de precio abajo a la derecha"
   },
+  "saleBadge": {
+    "title": "Etiqueta de rebaja",
+    "says": "Mostrar",
+    "hint": "Se muestra en el producto mientras una rebaja reduce su precio.",
+    "percent": "Porcentaje",
+    "amount": "Importe",
+    "hidden": "Oculta",
+    "lookLabel": "Estilo",
+    "look": {
+      "pill": "Píldora",
+      "sticker": "Pegatina",
+      "flag": "Banderín",
+      "ribbon": "Cinta"
+    },
+    "spot": "Etiqueta de rebaja {spot, select, top_left {arriba a la izquierda} top_center {arriba al centro} top_right {arriba a la derecha} middle_center {en el medio} bottom_left {abajo a la izquierda} bottom_center {abajo al centro} bottom_right {abajo a la derecha} other {}}"
+  },
+  "chipScale": {
+    "label": "En tarjetas más grandes",
+    "tile": "Crecer",
+    "cell": "Mismo tamaño"
+  },
   "layout": {
     "canvasWidth": "Ancho del lienzo",
     "canvasWidthAriaLabel": "Ancho del lienzo en bloques",
@@ -750,6 +799,11 @@
         "plusShipping": "Más gastos de envío",
         "freeShipping": "Envío gratis",
         "none": "Ninguna"
+      },
+      "saleStyle": {
+        "label": "Precio rebajado",
+        "strike": "Línea",
+        "slash": "Diagonal"
       },
       "useStorefrontAccent": "Usar el acento del escaparate",
       "useButtonTextColor": "Usar el color del texto del botón"

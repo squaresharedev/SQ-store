@@ -38,6 +38,22 @@
       "actionOpen": "Ouvrir l’éditeur",
       "cta": "Publiez votre produit",
       "ctaPagesOff": "Activer les pages produit"
+    },
+    "payments": {
+      "label": "Recevoir des paiements",
+      "detail": "Connectez Stripe pour que les acheteurs puissent payer par carte sur vos pages produit.",
+      "detailUnfinished": "Stripe a encore besoin de quelques informations avant que les acheteurs puissent payer.",
+      "detailDone": "Les acheteurs peuvent payer par carte.",
+      "action": "Connecter Stripe",
+      "actionFinish": "Terminer sur Stripe",
+      "cta": "Connectez Stripe pour recevoir des paiements"
+    },
+    "delivery": {
+      "label": "Tarifer la livraison",
+      "detail": "Sans prix de livraison, les produits à expédier n'ont pas de bouton d'achat.",
+      "detailDone": "Les acheteurs voient le total complet avant de payer.",
+      "action": "Définir les prix",
+      "cta": "Définissez vos prix de livraison"
     }
   },
   "checklist": {
@@ -198,7 +214,10 @@
         "title": "Intégrez une vitrine à votre site",
         "body": "Chaque vitrine a un bouton d’intégration qui vous donne un code comme celui-ci. Le widget est encore en développement et ne s’affiche pas encore sur d’autres sites.",
         "bodyButton": "Ce bouton vous donne un code comme celui ci-dessous, à coller dans votre site. Le widget est encore en développement et ne s’affiche pas encore sur d’autres sites.",
-        "fallbackBody": "Une fois que vous avez une vitrine, le bouton d’intégration de sa carte vous donne un code comme celui-ci. Le widget est encore en développement et ne s’affiche pas encore sur d’autres sites."
+        "fallbackBody": "Une fois que vous avez une vitrine, le bouton d’intégration de sa carte vous donne un code comme celui-ci. Le widget est encore en développement et ne s’affiche pas encore sur d’autres sites.",
+        "bodyLive": "Chaque vitrine a un bouton d’intégration qui vous donne un code comme celui-ci. Collez-le dans votre propre site et la vitrine s’y affiche.",
+        "bodyButtonLive": "Ce bouton vous donne un code comme celui ci-dessous. Collez-le dans votre propre site et la vitrine s’y affiche.",
+        "fallbackBodyLive": "Une fois que vous avez une vitrine, le bouton d’intégration de sa carte vous donne un code comme celui-ci, à coller dans votre propre site."
       },
       "ordersSearch": {
         "title": "Retrouvez une commande",

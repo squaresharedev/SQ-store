@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getProfile, getUser } from "@/lib/auth/session";
 import { createNotification } from "@/lib/notifications/create";
+import { SETTINGS_TEAM_PATH } from "@/lib/team/paths";
 import { actionError, invalidInput, type ActionError } from "@/lib/errors";
 import { msg } from "@/i18n/types";
 
@@ -23,7 +24,6 @@ import { msg } from "@/i18n/types";
  * Postgres exception if something is off.
  */
 
-const SETTINGS_TEAM_PATH = "/settings/team";
 
 export type AcceptInviteResult =
   | { ok: true; accountOwnerId: string }

@@ -30,6 +30,7 @@ export function PageShell({
   ink,
   preview,
   padForStickyBar = false,
+  shopHref,
   rootAttributes,
   headerAside,
   footer,
@@ -58,6 +59,10 @@ export function PageShell({
   preview: boolean;
   /** Room at the foot for a mobile sticky bar, so it never covers the footer. */
   padForStickyBar?: boolean;
+  /** The shop's own page (/s/[storefrontId]): the store's name in the bar is
+   *  then the way back to everything else it sells. Absent in the editor's
+   *  preview, where a link would leave the designer. */
+  shopHref?: string;
   /** `data-*` attributes the page publishes on its root, for tests and agents. */
   rootAttributes?: Record<`data-${string}`, string>;
   /** Something small at the far end of the store's bar ("Secure checkout"). */
@@ -89,7 +94,10 @@ export function PageShell({
       <div
         className={cn(
           // `isolate` keeps the photo layer's negative z-index inside this page.
-          "@container relative isolate flex w-full flex-col",
+          // `wrap-anywhere` is inherited by every word on it: a title, shop
+          // name or address with no space to break at wraps instead of
+          // widening the page past a phone's screen.
+          "@container relative isolate flex w-full flex-col wrap-anywhere",
           presentation.className,
           preview ? "min-h-full" : "min-h-screen",
           padForStickyBar && "pb-24 @3xl:pb-0",
@@ -122,7 +130,15 @@ export function PageShell({
           data-setting-hotspot="header"
         >
           <div className="mx-auto flex w-full max-w-[76rem] items-center gap-4 px-4 py-3 @md:px-6 @3xl:px-10">
-            <p className="min-w-0 flex-1 truncate text-sm font-medium">{storeName}</p>
+            <p className="min-w-0 flex-1 truncate text-sm font-medium">
+              {shopHref ? (
+                <a href={shopHref} className="underline-offset-2 hover:underline" data-shop-link="">
+                  {storeName}
+                </a>
+              ) : (
+                storeName
+              )}
+            </p>
             {headerAside}
           </div>
         </header>

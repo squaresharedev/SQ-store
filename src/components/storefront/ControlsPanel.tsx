@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   DEFAULT_CHECKOUT_PAGE_CONFIG,
+  patchThemeCardStyle,
   type CheckoutPageConfig,
   type ProductPageConfig,
   type StorefrontHeader,
@@ -28,6 +29,8 @@ import { ThemePanel } from "./ThemePanel";
 import { HeaderSection } from "./HeaderSection";
 import { CardsSection } from "./CardsSection";
 import { PriceTagSection } from "./PriceTagSection";
+import { SaleBadgeControls } from "./SaleBadgeControls";
+import { ChipScaleControl } from "./ChipScaleControl";
 import { LayoutSection } from "./LayoutSection";
 import { TypographySection } from "./TypographySection";
 import { SoldOutSection } from "./SoldOutSection";
@@ -290,6 +293,18 @@ export function ControlsPanel({
             summon={summoned === "priceTag"}
           >
             <PriceTagSection theme={theme} onChange={onThemeChange} />
+          </CollapsibleSection>
+          <CollapsibleSection
+            title={tKey("Storefront.saleBadge.title")}
+            collapsible
+            defaultOpen={false}
+            summon={summoned === "saleChip"}
+          >
+            <SaleBadgeControls
+              theme={theme}
+              onChange={(patch) => onThemeChange(patchThemeCardStyle(theme, patch))}
+              afterLook={<ChipScaleControl theme={theme} onChange={onThemeChange} />}
+            />
           </CollapsibleSection>
         </>
       ) : group === "productPage" ? (

@@ -390,6 +390,8 @@
     "noTerms": "Ainda não foram escritas condições de envio.",
     "profile": "Perfil de envio",
     "edit": "Editar",
+    "unpriced": "O envio não tem preço em {currency}, por isso os compradores não podem pagar este produto no checkout.",
+    "unpricedAction": "Definir preços de envio",
     "modalTitle": "Envios e devoluções"
   },
   "optionsField": {

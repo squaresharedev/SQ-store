@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useLocale } from "next-intl";
 import {
   tooltipLabelClass,
@@ -46,6 +47,24 @@ export function ChartTooltipContent({
   const locale = useLocale();
   const valueFormatter =
     valueFormatterProp ?? ((value: number) => formatNumber(value, locale));
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const shown = Boolean(active && payload && payload.length > 0);
+
+  // Lets the readout glide between points, but only once it has been placed.
+  // The mark goes on a frame AFTER it appears, so its first position is taken
+  // outright and never travelled to; it comes off when the readout goes, so
+  // the next hover starts placed again. The glide itself is CSS (globals.css).
+  useEffect(() => {
+    if (!shown) return;
+    const wrapper = bodyRef.current?.closest<HTMLElement>(".recharts-tooltip-wrapper");
+    if (!wrapper) return;
+    const frame = requestAnimationFrame(() => wrapper.setAttribute("data-settled", ""));
+    return () => {
+      cancelAnimationFrame(frame);
+      wrapper.removeAttribute("data-settled");
+    };
+  }, [shown]);
+
   if (!active || !payload || payload.length === 0) return null;
   const heading =
     label === undefined
@@ -54,7 +73,7 @@ export function ChartTooltipContent({
         ? labelFormatter(String(label))
         : String(label);
   return (
-    <div className={tooltipWrapperClass}>
+    <div ref={bodyRef} className={tooltipWrapperClass}>
       {heading !== null && <p className={tooltipLabelClass}>{heading}</p>}
       <ul className="mt-0.5 flex flex-col gap-0.5">
         {payload.map((entry, i) => {

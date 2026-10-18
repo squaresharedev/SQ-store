@@ -7,6 +7,20 @@
     "body": "Mohl být odstraněn, nebo je odkaz zastaralý. Vraťte se do obchodu a podívejte se, co je teď v nabídce.",
     "back": "Zpět"
   },
+  "unavailable": {
+    "title": "Tuto stránku se nepodařilo načíst",
+    "body": "Chyba je na naší straně a obvykle za chvíli pomine.",
+    "orderBody": "Vaše objednávka je v pořádku. Tuto stránku se jen teď nepodařilo načíst, což obvykle za chvíli pomine."
+  },
+  "pageNotFound": {
+    "title": "Tato stránka není dostupná",
+    "body": "Odkaz může být zastaralý nebo neúplný. Vraťte se zpět a zkuste to znovu."
+  },
+  "storefront": {
+    "gridLabel": "Co prodává {store}",
+    "empty": "{store} teď nemá nic vystaveno.",
+    "description": "Prohlédněte si, co prodává {store}."
+  },
   "sections": {
     "description": "Popis",
     "specs": "Specifikace",
@@ -29,6 +43,11 @@
     "warnings": "Upozornění"
   },
   "priceNotes": "{price, select, incl {{shipping, select, plus {vč. DPH, doprava zvlášť} free {vč. DPH, doprava zdarma} other {vč. DPH}}} excl {{shipping, select, plus {bez daně, doprava zvlášť} free {bez daně, doprava zdarma} other {bez daně}}} other {{shipping, select, plus {doprava zvlášť} free {doprava zdarma} other {}}}}",
+  "delivery": {
+    "free": "Doprava zdarma",
+    "flat": "Doprava {amount}",
+    "from": "Doprava od {amount}"
+  },
   "stock": {
     "digitalDownload": "Ke stažení",
     "digitalDownloadFormat": "Ke stažení ({format})"
@@ -190,6 +209,8 @@
       "label": "Co bude dál",
       "paid": "Objednávka zadána",
       "paidDetail": "Zaplaceno {date}",
+      "confirming": "Potvrzování platby",
+      "confirmingDetail": "Obvykle to chvíli trvá. Pokud se stav nezmění, obnovte stránku.",
       "preparing": "Připravuje se",
       "preparingDetail": "{seller} připravuje vaši objednávku.",
       "shipped": "Na cestě",
@@ -198,7 +219,10 @@
       "track": "Sledovat u dopravce {carrier}",
       "notYet": "E-mail dostanete, až bude odesláno.",
       "ready": "Připraveno ke stažení",
-      "readyDetail": "Váš soubor je připraven níže a odkaz je také v e-mailu."
+      "readyDetail": "Váš soubor je připraven níže a odkaz je také v e-mailu.",
+      "refunded": "Vráceno",
+      "refundedDetail": "{seller} vrátil peníze za tuto objednávku dne {date}.",
+      "refundedDetailNoDate": "{seller} vrátil peníze za tuto objednávku."
     },
     "download": "Stáhnout ({format})",
     "downloadPlain": "Stáhnout soubor",
@@ -295,6 +319,8 @@
     "payment": {
       "testTitle": "Testovací platba",
       "testBody": "Toto je vývojová pokladna. Žádná karta není účtována a žádné peníze se nepřesouvají.",
+      "stripeTitle": "Bezpečná platba přes Stripe",
+      "stripeBody": "Údaje karty zadáte na zabezpečené stránce Stripe v dalším kroku.",
       "previewTitle": "Údaje karty",
       "previewBody": "Karta, Apple Pay a Google Pay se zobrazí zde ve vašich barvách, jakmile propojíte Stripe.",
       "cardNumber": "Číslo karty",
@@ -331,7 +357,8 @@
       "failed": "Něco se pokazilo a nic nebylo účtováno. Zkuste to znovu.",
       "invalid": "Některé údaje vyžadují kontrolu. Zkontrolujte zvýrazněná pole.",
       "discount_invalid": "Tento slevový kód již nelze použít. Odeberte ho a zaplaťte plnou cenu.",
-      "price_changed": "Cena se během otevřené stránky změnila, takže nic nebylo účtováno. Zkontrolujte nový součet a pak zaplaťte."
+      "price_changed": "Cena se během otevřené stránky změnila, takže nic nebylo účtováno. Zkontrolujte nový součet a pak zaplaťte.",
+      "turnstile": "Bezpečnostní kontrola neproběhla, takže nic nebylo účtováno. Právě běží znovu: chvíli počkejte a zkuste to znovu."
     },
     "editHeadline": "Nadpis pokladny",
     "discount": {
@@ -350,7 +377,11 @@
   "sale": {
     "wasNow": "Bylo {was}, nyní {now}",
     "percentOff": "-{percent}%",
+    "amountOff": "-{amount}",
     "priorNote": "Přeškrtnutá cena: nejnižší cena za posledních 30 dní před slevou.",
+    "regularNote": "Přeškrtnutá cena: běžná cena.",
+    "lowestNote": "Přeškrtnutá cena: běžná cena. Nejnižší cena za posledních 30 dní před slevou: {price}.",
+    "badgeSale": "Akce",
     "endsOn": "Akce končí {date}"
   }
 }

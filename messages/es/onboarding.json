@@ -38,6 +38,22 @@
       "actionOpen": "Abrir editor",
       "cta": "Publica tu producto",
       "ctaPagesOff": "Activar páginas de producto"
+    },
+    "payments": {
+      "label": "Recibir pagos",
+      "detail": "Conecta Stripe para que los compradores puedan pagar con tarjeta en tus páginas de producto.",
+      "detailUnfinished": "Stripe aún necesita algunos datos antes de que los compradores puedan pagar.",
+      "detailDone": "Los compradores pueden pagar con tarjeta.",
+      "action": "Conectar Stripe",
+      "actionFinish": "Finalizar en Stripe",
+      "cta": "Conecta Stripe para recibir pagos"
+    },
+    "delivery": {
+      "label": "Tarifar el envío",
+      "detail": "Sin precio de envío, los productos que se envían no tienen botón de compra.",
+      "detailDone": "Los compradores ven el total completo antes de pagar.",
+      "action": "Establecer precios",
+      "cta": "Establece tus precios de envío"
     }
   },
   "checklist": {
@@ -198,7 +214,10 @@
         "title": "Incorpora un escaparate a tu web",
         "body": "Cada escaparate tiene un botón de incorporación que te da un fragmento como este. El widget aún está en desarrollo y todavía no se muestra en otros sitios.",
         "bodyButton": "Este botón te da un fragmento como el de abajo para pegarlo en tu web. El widget aún está en desarrollo y todavía no se muestra en otros sitios.",
-        "fallbackBody": "Cuando tengas un escaparate, el botón de incorporación de su tarjeta te dará un fragmento como este. El widget aún está en desarrollo y todavía no se muestra en otros sitios."
+        "fallbackBody": "Cuando tengas un escaparate, el botón de incorporación de su tarjeta te dará un fragmento como este. El widget aún está en desarrollo y todavía no se muestra en otros sitios.",
+        "bodyLive": "Cada escaparate tiene un botón de incorporación que te da un fragmento como este. Pégalo en tu propio sitio y el escaparate aparecerá allí.",
+        "bodyButtonLive": "Este botón te da un fragmento como el de abajo. Pégalo en tu propio sitio y el escaparate aparecerá allí.",
+        "fallbackBodyLive": "Cuando tengas un escaparate, el botón de incorporación de su tarjeta te dará un fragmento como este para pegarlo en tu propio sitio."
       },
       "ordersSearch": {
         "title": "Encuentra un pedido",

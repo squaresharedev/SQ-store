@@ -3,13 +3,14 @@ import { useLocale, useTranslations } from "next-intl";
 import { formatList } from "@/lib/format/intl";
 import { TrendingUp } from "lucide-react";
 import { secondaryButtonClass } from "@/components/ui/control-styles";
-import { emptyStateClass, pageGutterClass } from "@/components/ui/surface-styles";
+import { emptyStateClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import {
   SIGNAL_SOURCES,
   SALES_SOURCE,
   isSourceRelevant,
 } from "@/lib/analytics/sources";
+import { funnelHasActivity } from "@/lib/analytics/funnel/summary";
 import type { AnalyticsRange, AnalyticsSnapshot } from "@/lib/analytics/types";
 import { AnalyticsSection } from "./AnalyticsSection";
 import { AnalyticsSnapshotScript } from "./AnalyticsSnapshotScript";
@@ -17,6 +18,7 @@ import { AnalyticsTiles } from "./AnalyticsTiles";
 import { AovTrendChart } from "./AovTrendChart";
 import { ChartCard } from "./ChartCard";
 import { ChannelSplitChart } from "./ChannelSplitChart";
+import { FunnelSection } from "./FunnelSection";
 import { RangeSelector } from "./RangeSelector";
 import { RevenueHero } from "./RevenueHero";
 import { SignalSection } from "./SignalSection";
@@ -34,11 +36,6 @@ import { WeekdayChart } from "./WeekdayChart";
 // a status lifecycle, so its panels genuinely differ from every other source's.
 // Everything after it is generated from SIGNAL_SOURCES, so shipping a new
 // measurable surface adds a section here without touching this file.
-//
-// NO GUTTERS AT THE SIDES. The route's shell is pageBleedShellClass, so the
-// revenue hero can run from one edge of the screen to the other. Sections put
-// themselves back in the page column (AnalyticsSection); the few things here
-// that are not a section wrap themselves in pageGutterClass.
 
 /**
  * The analytics page body: range selector, the sales section, then one section
@@ -71,7 +68,7 @@ export function AnalyticsPage({
 }) {
   const t = useTranslations("Analytics");
   const locale = useLocale();
-  const { sales, signals, range, currency } = snapshot;
+  const { sales, signals, funnel, range, currency, previous } = snapshot;
   const hasSales = sales.totals.sales > 0;
   const hasOrders = sales.statuses.some((slice) => slice.count > 0);
 
@@ -84,7 +81,7 @@ export function AnalyticsPage({
 
   if (firstRun) {
     return (
-      <div className={cn(pageGutterClass, "space-y-10")} {...rootData} data-analytics-first-run="1">
+      <div className="space-y-10" {...rootData} data-analytics-first-run="1">
         <AnalyticsSnapshotScript snapshot={snapshot} />
         <div className={cn(emptyStateClass, "bg-background")}>
           <div className="flex size-12 items-center justify-center rounded-full bg-muted">
@@ -115,9 +112,7 @@ export function AnalyticsPage({
           hydrates. */}
       <AnalyticsSnapshotScript snapshot={snapshot} />
 
-      <div className={pageGutterClass}>
-        <RangeSelector preset={range.preset} range={custom} />
-      </div>
+      <RangeSelector preset={range.preset} range={custom} />
 
       <AnalyticsSection
         id={SALES_SOURCE.id}
@@ -125,9 +120,10 @@ export function AnalyticsPage({
         description={t("sales.description")}
         icon={SALES_SOURCE.icon}
         state="live"
-        // Revenue leads, edge to edge, as the page's one headline figure. It
-        // is the Revenue tile and the revenue trend in a single piece, so
-        // neither appears again among the tiles and cards below.
+        // Revenue leads, as the page's one headline figure, in a frame no
+        // card on the page has. It is the Revenue tile and the revenue trend
+        // in a single piece, so neither appears again among the tiles and
+        // cards below.
         lead={
           <RevenueHero
             series={sales.series}
@@ -136,6 +132,7 @@ export function AnalyticsPage({
             netRevenueCents={sales.totals.netRevenueCents}
             currency={currency}
             empty={!hasSales || sales.series.length === 0}
+            previous={previous?.sales}
           />
         }
       >
@@ -150,7 +147,11 @@ export function AnalyticsPage({
             source="sales"
             headingLevel="h3"
           >
-            <AovTrendChart series={sales.series} currency={currency} />
+            <AovTrendChart
+              series={sales.series}
+              currency={currency}
+              previous={previous?.sales.series}
+            />
           </ChartCard>
           <ChartCard
             title={t("sales.channels.title")}
@@ -173,7 +174,7 @@ export function AnalyticsPage({
             source="sales"
             headingLevel="h3"
           >
-            <WeekdayChart weekdays={sales.weekdays} />
+            <WeekdayChart weekdays={sales.weekdays} products={sales.weekdayProducts} />
           </ChartCard>
           <ChartCard
             title={t("sales.topProducts.title")}
@@ -205,13 +206,18 @@ export function AnalyticsPage({
         </ChartCard>
       </AnalyticsSection>
 
+      {/* The funnel between the two: sales above it, the views it starts from
+          below. Only for a seller with something in it. A store nobody has
+          embedded has no funnel, and a row of empty tiles saying so is the
+          placeholder this page does not show (see the sources below). It
+          reads the signals, so it waits on them like the sections under it. */}
+      {signals.available && funnelHasActivity(funnel) && (
+        <FunnelSection funnel={funnel} previous={previous?.funnel} />
+      )}
+
       {/* One read failing must not take the page with it: revenue is still
           right above, so the signal sections say so and stop. */}
-      {!signals.available && (
-        <div className={pageGutterClass}>
-          <SignalsUnavailableNotice />
-        </div>
-      )}
+      {!signals.available && <SignalsUnavailableNotice />}
 
       {/* Only the sources this seller actually runs. A registered kind with no
           block placed and no history is a feature they have not adopted, and
@@ -249,11 +255,12 @@ export function AnalyticsPage({
                   key={source.id}
                   source={source}
                   breakdown={signals.byKind[source.id]}
+                  previous={previous?.signals[source.id].series}
                   currency={currency}
                 />
               ))}
               {upcomingSources.length > 0 && (
-                <p className={cn(pageGutterClass, "text-sm text-muted-foreground")}>
+                <p className="text-sm text-muted-foreground">
                   {upcomingNeedProducts
                     ? t("upcoming.needProducts", { labels: upcomingLabels })
                     : t("upcoming.needBlocks", { labels: upcomingLabels })}

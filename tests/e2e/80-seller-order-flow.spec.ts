@@ -112,8 +112,8 @@ test("1. clearing the To ship queue, start to finish", async ({ page }) => {
   await expect(panel(page).locator("[data-order-number]")).toHaveText(`Order ${numberOf(await id("Oldest vase"))}`);
   const mail = await panel(page).getByRole("link", { name: "Email the buyer" }).first().getAttribute("href");
   expect(mail).toBe(`mailto:old@example.test?subject=Your%20order%20${numberOf(await id("Oldest vase"))}`);
-  await expect(panel(page).getByRole("button", { name: "Refund order" })).toHaveCount(0);
-  await expect(panel(page)).toContainText("You can't refund from Square Share yet");
+  // The owner can take an order back (86-order-lifecycle drives that through).
+  await expect(panel(page).getByRole("button", { name: "Refund or cancel" })).toBeVisible();
 
   await panel(page).getByRole("button", { name: "Mark as shipped" }).click();
   await expect(panel(page).getByRole("button", { name: /We'll email the buyer/ })).toBeVisible();
@@ -130,7 +130,7 @@ test("1. clearing the To ship queue, start to finish", async ({ page }) => {
   const opener = panel(page).getByRole("button", { name: "Mark as shipped" });
   await opener.click();
   await expect(panel(page)).toContainText("Ship it only if you've agreed that with them");
-  await panel(page).getByRole("button", { name: "Cancel" }).click();
+  await panel(page).getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(opener).toBeFocused();
 
   // Ship it anyway, then the middle one, then the one with no address.
@@ -307,7 +307,7 @@ test("5. skip link, notification settings, and what a viewer is spared", async (
   await expect(panel(vp)).toBeVisible();
   await expect(panel(vp).getByRole("button", { name: "Mark as shipped" })).toHaveCount(0);
   await expect(panel(vp).getByRole("button", { name: /Refund|dispute/i })).toHaveCount(0);
-  await expect(panel(vp)).not.toContainText("You can't refund from Square Share yet");
+  await expect(panel(vp)).not.toContainText(/refund or cancel/i);
   await expect(panel(vp).locator("[data-order-number]")).toBeVisible();
   await ctx.close();
 });

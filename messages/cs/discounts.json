@@ -20,7 +20,7 @@
     "allProducts": "Všechny produkty",
     "someProducts": "{count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktů}}",
     "kindCode": "Slevový kód",
-    "kindAutomatic": "Automatická akce",
+    "kindAutomatic": "Akce",
     "status": {
       "scheduled": "Naplánováno",
       "active": "Aktivní",
@@ -80,14 +80,15 @@
   "form": {
     "newTitle": "Nová sleva",
     "editTitle": "Upravit slevu",
+    "editSale": "Upravit akci",
+    "editCode": "Upravit slevový kód",
     "back": "Zpět na slevy",
     "kind": {
       "title": "Jaký druh slevy?",
       "code": "Slevový kód",
-      "codeHint": "Kupující ho zadají při pokladně. Sdílejte ho na Instagramu, v newsletteru nebo s tvůrcem a zjistěte, který kanál prodává.",
-      "automatic": "Automatická akce",
-      "automaticHint": "Každý vidí nižší cenu na stránkách vašich produktů. Žádný kód není potřeba.",
-      "fixed": "Druh slevy nelze změnit. Chcete-li ho změnit, vytvořte novou."
+      "codeHint": "Kupující ho zadají při placení a vy uvidíte, odkud přišli.",
+      "automatic": "Akce",
+      "automaticHint": "Sníží ceny pro všechny. Bez kódu."
     },
     "code": {
       "title": "Kód",
@@ -97,24 +98,22 @@
       "hint": "3 až 24 písmen nebo číslic. Kupující ho mohou zadat velkými i malými písmeny."
     },
     "channel": {
-      "label": "Kanál (nepovinné)",
-      "hint": "Kde budete tento kód sdílet, abyste viděli, který kanál přináší objednávky.",
+      "label": "Kde ho sdílíte (nepovinné)",
       "suggestions": "Doporučené kanály",
       "newsletter": "Newsletter",
       "creator": "Tvůrce"
     },
     "value": {
-      "title": "Sleva",
+      "title": "Kolik slevit?",
       "each": "Odečteno z ceny každé položky.",
       "order": "Odečteno z položek objednávky. Doprava se neslevuje.",
-      "percent": "Procento",
-      "amount": "Pevná částka",
+      "unit": "Procenta nebo částka",
       "percentLabel": "Procentuální sleva",
       "amountLabel": "Sleva částkou",
       "currencyHint": "Platí pouze pro produkty oceněné v této měně."
     },
     "products": {
-      "title": "Platí pro",
+      "title": "Na které produkty?",
       "all": "Všechny produkty",
       "some": "Konkrétní produkty",
       "summary": "{count, plural, =0 {Vyberte produkty} one {# produkt vybrán} few {# produkty vybrány} many {# produktu vybráno} other {# produktů vybráno}}",
@@ -122,7 +121,7 @@
       "none": "Žádné produkty neodpovídají."
     },
     "schedule": {
-      "title": "Kdy",
+      "title": "Kdy?",
       "timeZone": "Časy jsou ve vašem časovém pásmu ({zone}).",
       "starts": "Začíná",
       "ends": "Končí",
@@ -142,11 +141,9 @@
       }
     },
     "limit": {
-      "title": "Limity",
-      "label": "Omezit počet objednávek, které ho mohou použít",
-      "count": "Počet objednávek"
+      "label": "Nejvýše objednávek (nepovinné)",
+      "none": "Bez omezení"
     },
-    "enabled": "Kód je zapnutý",
     "locked": "Tato akce již začala, takže lze měnit pouze její konec. Chcete-li změnit cokoli jiného, ukončete ji a vytvořte novou akci.",
     "summary": {
       "title": "Přehled",
@@ -154,7 +151,9 @@
       "starts": "Začíná {date}",
       "ends": "Končí {date}",
       "noEnd": "Bez data ukončení",
-      "example": "Příklad: {title} za {regular} stojí nyní {now}."
+      "exampleLabel": "Příklad",
+      "example": "Příklad: {title} za {regular} stojí nyní {now}.",
+      "chipLink": "Změnit, jak akce vypadá na vašem obchodě"
     },
     "create": "Vytvořit slevu",
     "save": "Uložit změny",

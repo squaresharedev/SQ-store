@@ -7,6 +7,20 @@
     "body": "Het is mogelijk verwijderd, of de link die je volgde is verouderd. Ga terug naar de winkel om te zien wat er nu te koop is.",
     "back": "Terug"
   },
+  "unavailable": {
+    "title": "Deze pagina kon niet worden geladen",
+    "body": "Het probleem ligt bij ons en is meestal zo voorbij.",
+    "orderBody": "Je bestelling is veilig. Alleen deze pagina kon nu even niet worden geladen, en dat is meestal zo voorbij."
+  },
+  "pageNotFound": {
+    "title": "Deze pagina is niet beschikbaar",
+    "body": "De link die je volgde is mogelijk verouderd of onvolledig. Ga terug en probeer het opnieuw."
+  },
+  "storefront": {
+    "gridLabel": "Wat {store} verkoopt",
+    "empty": "{store} heeft nu niets in de etalage.",
+    "description": "Bekijk wat {store} verkoopt."
+  },
   "sections": {
     "description": "Beschrijving",
     "specs": "Specificaties",
@@ -29,6 +43,11 @@
     "warnings": "Waarschuwingen"
   },
   "priceNotes": "{price, select, incl {{shipping, select, plus {incl. btw, plus verzendkosten} free {incl. btw, gratis verzending} other {incl. btw}}} excl {{shipping, select, plus {excl. belasting, plus verzendkosten} free {excl. belasting, gratis verzending} other {excl. belasting}}} other {{shipping, select, plus {plus verzendkosten} free {gratis verzending} other {}}}}",
+  "delivery": {
+    "free": "Gratis verzending",
+    "flat": "Verzending {amount}",
+    "from": "Verzending vanaf {amount}"
+  },
   "stock": {
     "digitalDownload": "Digitale download",
     "digitalDownloadFormat": "Digitale download ({format})"
@@ -190,6 +209,8 @@
       "label": "Wat er nu gebeurt",
       "paid": "Bestelling geplaatst",
       "paidDetail": "Betaald op {date}",
+      "confirming": "Betaling bevestigen",
+      "confirmingDetail": "Dit duurt gewoonlijk even. Vernieuw de pagina als er niets verandert.",
       "preparing": "Wordt voorbereid",
       "preparingDetail": "{seller} bereidt jouw bestelling voor.",
       "shipped": "Onderweg",
@@ -198,7 +219,10 @@
       "track": "Volgen bij {carrier}",
       "notYet": "Je ontvangt een e-mail zodra het verzonden is.",
       "ready": "Klaar om te downloaden",
-      "readyDetail": "Je bestand staat hieronder klaar en de link staat ook in je e-mail."
+      "readyDetail": "Je bestand staat hieronder klaar en de link staat ook in je e-mail.",
+      "refunded": "Terugbetaald",
+      "refundedDetail": "{seller} heeft deze bestelling terugbetaald op {date}.",
+      "refundedDetailNoDate": "{seller} heeft deze bestelling terugbetaald."
     },
     "download": "Downloaden ({format})",
     "downloadPlain": "Download je bestand",
@@ -295,6 +319,8 @@
     "payment": {
       "testTitle": "Testbetaling",
       "testBody": "Dit is een ontwikkelingsafrekening. Er wordt geen kaart belast en er gaat geen geld over.",
+      "stripeTitle": "Veilig betalen met Stripe",
+      "stripeBody": "Je vult je kaartgegevens in op de beveiligde pagina van Stripe in de volgende stap.",
       "previewTitle": "Kaartgegevens",
       "previewBody": "Kaart, Apple Pay en Google Pay verschijnen hier in jouw kleuren zodra Stripe is verbonden.",
       "cardNumber": "Kaartnummer",
@@ -331,7 +357,8 @@
       "failed": "Er is iets misgegaan en er is niets in rekening gebracht. Probeer het opnieuw.",
       "invalid": "Sommige gegevens moeten worden nagekeken. Controleer de gemarkeerde velden.",
       "discount_invalid": "Deze kortingscode kan niet meer worden gebruikt. Verwijder hem om de volle prijs te betalen.",
-      "price_changed": "De prijs is gewijzigd terwijl deze pagina open was, dus er is niets in rekening gebracht. Bekijk het nieuwe totaal en betaal dan."
+      "price_changed": "De prijs is gewijzigd terwijl deze pagina open was, dus er is niets in rekening gebracht. Bekijk het nieuwe totaal en betaal dan.",
+      "turnstile": "De beveiligingscontrole is niet afgerond, dus er is niets in rekening gebracht. Hij loopt nu opnieuw: wacht even en probeer het dan nog eens."
     },
     "editHeadline": "Koptekst van afrekenen",
     "discount": {
@@ -350,7 +377,11 @@
   "sale": {
     "wasNow": "Was {was}, nu {now}",
     "percentOff": "-{percent}%",
+    "amountOff": "-{amount}",
     "priorNote": "Doorgestreepte prijs: laagste prijs in de 30 dagen voor deze kortingsactie.",
+    "regularNote": "Doorgestreepte prijs: de normale prijs.",
+    "lowestNote": "Doorgestreepte prijs: de normale prijs. Laagste prijs in de 30 dagen voor deze kortingsactie: {price}.",
+    "badgeSale": "Actie",
     "endsOn": "Actie eindigt op {date}"
   }
 }

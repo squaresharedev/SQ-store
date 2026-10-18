@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   decideEmbedAccess,
   embedCorsHeaders,
+  isEmbedSiteAllowed,
   originHostname,
 } from "@/lib/storefront/embed";
 import type { EmbedSettings } from "@/types/storefront";
@@ -82,6 +83,29 @@ describe("decideEmbedAccess - the allowlist", () => {
     }
   });
 
+  it("treats a site with and without www. as the same site", () => {
+    // To its owner they are one website, and "I listed example.com but my site
+    // answers on www" is the most common reason an embed does not show.
+    const bare = settings({ domains: ["example.com"] });
+    const www = settings({ domains: ["www.example.com"] });
+    expect(decideEmbedAccess({ settings: bare, origin: "https://www.example.com" })).toMatchObject({
+      allowed: true,
+    });
+    expect(decideEmbedAccess({ settings: www, origin: "https://example.com" })).toMatchObject({
+      allowed: true,
+    });
+    // Only that one label, and only at the front.
+    expect(decideEmbedAccess({ settings: bare, origin: "https://shop.example.com" })).toMatchObject({
+      allowed: false,
+    });
+    expect(decideEmbedAccess({ settings: bare, origin: "https://www.www.example.com" })).toMatchObject({
+      allowed: false,
+    });
+    expect(decideEmbedAccess({ settings: bare, origin: "https://wwwexample.com" })).toMatchObject({
+      allowed: false,
+    });
+  });
+
   it("ignores port and path noise on an otherwise allowed origin", () => {
     // A browser sends scheme+host+port; the stored list is bare hosts.
     expect(
@@ -117,6 +141,25 @@ describe("decideEmbedAccess - the allowlist", () => {
         decideEmbedAccess({ settings: settings(), origin }),
         origin,
       ).toMatchObject({ allowed: false });
+    }
+  });
+});
+
+describe("isEmbedSiteAllowed - the frame's form of the same two rules", () => {
+  it("allows a listed site while embedding is on", () => {
+    expect(isEmbedSiteAllowed(settings(), "shop.example.com")).toBe(true);
+    expect(isEmbedSiteAllowed(settings({ domains: ["example.com"] }), "www.example.com")).toBe(true);
+  });
+
+  it("refuses everything while embedding is off, or was never set up", () => {
+    expect(isEmbedSiteAllowed(settings({ enabled: false }), "shop.example.com")).toBe(false);
+    expect(isEmbedSiteAllowed(undefined, "shop.example.com")).toBe(false);
+  });
+
+  it("refuses an empty list and an unlisted site", () => {
+    expect(isEmbedSiteAllowed(settings({ domains: [] }), "shop.example.com")).toBe(false);
+    for (const host of ["example.com", "evil.com", "shop.example.com.evil.com", "notshop.example.com"]) {
+      expect(isEmbedSiteAllowed(settings(), host), host).toBe(false);
     }
   });
 });

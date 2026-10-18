@@ -75,6 +75,28 @@ describe("resolveCardStyle", () => {
       priceTagTextColor: undefined,
       priceTagBorderColor: undefined,
       priceHoverMs: HOVER_TRANSITION_MS_DEFAULT,
+      // The sale chip: on, saying the percentage, top left, in the accent
+      // (its fill stays absent for the same reason the tag's colors do).
+      saleBadge: "percent",
+      saleBadgeLook: "pill",
+      saleBadgePosition: "top-left",
+      saleBadgeColor: undefined,
+    });
+  });
+
+  it("lets one tile set its own sale chip over the theme's", () => {
+    const t = theme({ saleBadge: "amount", saleBadgeLook: "ribbon", saleBadgePosition: "bottom-right", saleBadgeColor: "#dc2626" });
+    expect(resolveCardStyle(t)).toMatchObject({
+      saleBadge: "amount",
+      saleBadgeLook: "ribbon",
+      saleBadgePosition: "bottom-right",
+      saleBadgeColor: "#dc2626",
+    });
+    expect(resolveCardStyle(t, { saleBadge: "hidden" })).toMatchObject({
+      saleBadge: "hidden",
+      // The fields the tile did not set keep following the theme.
+      saleBadgePosition: "bottom-right",
+      saleBadgeColor: "#dc2626",
     });
   });
 

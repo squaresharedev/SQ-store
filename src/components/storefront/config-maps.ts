@@ -8,16 +8,19 @@ import {
   readableInkOn,
 } from "@/lib/format/color";
 import { isStrictHexColor } from "@/lib/validation/storefront";
+import { cn } from "@/lib/utils";
 import {
   PRICE_TAG_DEFAULT_BORDER,
   TITLE_SHADOW_DEFAULT_COLOR,
   PRICE_TAG_SIZE_MIN,
+  DEFAULT_CHIP_SCALE,
   TILE_LABEL_AUTO_SCALE,
   TILE_TITLE_SIZE,
   TILE_TITLE_SIZE_MIN,
   TITLE_INSET_AUTO,
   blockCornerRadius,
   blockKey,
+  type ChipScale,
   type PriceTagFont,
   type SpotRow,
   type StorefrontBlock,
@@ -329,6 +332,8 @@ export const PRICE_TAG_FONT_LABELS: Record<PriceTagFont, MessageKey> = {
  *  the per-tile override model to say so. */
 type PriceTagChip = {
   priceTagSize: number;
+  /** The theme's chip scale (CHIP_SCALES). Absent grows with the tile. */
+  chipScale?: ChipScale;
   priceTagBorderWidth: number;
   priceTagRadius: number;
   priceTagColor?: string;
@@ -339,7 +344,7 @@ type PriceTagChip = {
 /** Rounded to hundredths: these numbers go straight into a CSS expression, and
  *  a full float there is noise in the inspector for a difference under a
  *  hundredth of a pixel. */
-function roundForCss(value: number): string {
+export function roundForCss(value: number): string {
   return String(Math.round(value * 100) / 100);
 }
 
@@ -359,13 +364,21 @@ function roundForCss(value: number): string {
  * but cq units fall back to the viewport rather than failing) is why the clamp
  * matters here as well: the worst case is a label at `max` times its size, not
  * one sized off the whole window.
+ *
+ * `scale` "cell" (CHIP_SCALES) measures against ONE GRID CELL instead of the
+ * tile, so every tile on the board gets the label a 1x1 tile would: the grid
+ * hands its cell's side down as `--ss-cell` (globals.css). Outside a grid
+ * `--ss-in-grid` is 0 and the tile's own size is used, as before.
  */
-export function tileLabelSize(size: number, floorPx: number): string {
+export function tileLabelSize(size: number, floorPx: number, scale: ChipScale = DEFAULT_CHIP_SCALE): string {
   const { referencePx, min, max } = TILE_LABEL_AUTO_SCALE;
   const floor = Math.max(floorPx, size * min);
-  return `clamp(${roundForCss(floor)}px, ${roundForCss(
-    (size * 100) / referencePx,
-  )}cqmin, ${roundForCss(size * max)}px)`;
+  const tile = `${roundForCss((size * 100) / referencePx)}cqmin`;
+  const preferred =
+    scale === "cell"
+      ? `calc(var(--ss-cell) * ${roundForCss(size / referencePx)} * var(--ss-in-grid) + ${tile} * (1 - var(--ss-in-grid)))`
+      : tile;
+  return `clamp(${roundForCss(floor)}px, ${preferred}, ${roundForCss(size * max)}px)`;
 }
 
 /**
@@ -417,7 +430,7 @@ export function priceTagChipStyle(
   const size = card.priceTagSize;
   const border = card.priceTagBorderWidth;
   return {
-    "--tag-font-size": tileLabelSize(size, PRICE_TAG_SIZE_MIN),
+    "--tag-font-size": tileLabelSize(size, PRICE_TAG_SIZE_MIN, card.chipScale),
     fontSize: "var(--tag-font-size)",
     lineHeight: 1.25,
     paddingInline: "max(2px, calc(var(--tag-font-size) * 0.5))",
@@ -435,6 +448,89 @@ export function priceTagChipStyle(
         }
       : {}),
   } as CSSProperties;
+}
+
+/** The struck-through earlier price, as a share of the price's own type size. */
+const PRICE_WAS_SCALE = 0.8;
+/** The space between the earlier price and the price, in the price's type size. */
+const PRICE_WAS_GAP = 0.4;
+/** The widest a character of a price runs, as a share of its type size, in any
+ *  of the three chip faces (mono is exactly 0.6; a digit in the others is
+ *  narrower still). An upper bound on purpose: see priceTagWasStyle. */
+const PRICE_CHAR_WIDTH = 0.65;
+/** How much of a title band the two prices may take between them. The rest is
+ *  the product's name, which gives way to the chip and would otherwise be
+ *  squeezed out entirely. */
+const PRICE_WAS_BAND_SHARE = 60;
+
+/**
+ * The earlier price a running sale strikes through, inside the chip and ahead
+ * of the price: a step smaller and quieter than the price it stands beside,
+ * sized and spaced from the chip's own `--tag-font-size` so the pair scales
+ * with the tile as one.
+ *
+ * IT GIVES WAY WHEN THE TILE HAS NO ROOM FOR BOTH. Two prices are twice the
+ * chip, and a chip wider than its tile is clipped by the cell, which on a
+ * small tile cut the price a buyer actually pays (see legiblePriceInk: that is
+ * the one thing a tile may never lose). So the earlier price is drawn only
+ * where the whole chip fits: its type size is that test, written as a CSS
+ * expression the browser resolves against the tile as it really came out. The
+ * room is the tile's width (`cqw`: the face is the size container) less the
+ * chip's own inset for a floated tag, or the band's share for one in the title
+ * band; what the chip needs is counted from the characters it will print.
+ * Where it does not fit the size resolves to zero, and the earlier price and
+ * its gap (an `em` of that size) take up nothing: the tile shows the sale
+ * price alone, which is always a price it may show.
+ *
+ * Through a custom property, like the chip's own size: see titleBandFontStyle.
+ */
+export function priceTagWasStyle(chip: {
+  /** How many characters the earlier price and the price are printed in. */
+  wasLength: number;
+  nowLength: number;
+  /** In the title band, or floated over the picture. */
+  inBand: boolean;
+  borderWidth: number;
+  /** The sale chip's width, in the tag's type size (saleChipWidth), when it
+   *  shares this row (see sharedRowRoom): the earlier price gives way to it,
+   *  before it gives way to the price. */
+  besideWidth?: number;
+}): CSSProperties {
+  const size = "var(--tag-font-size)";
+  // In units of the chip's type size: both prices, the gap between them, and
+  // the chip's horizontal padding (half the type on each side).
+  const needed = roundForCss(
+    (chip.wasLength * PRICE_WAS_SCALE + chip.nowLength) * PRICE_CHAR_WIDTH + PRICE_WAS_GAP + 1,
+  );
+  const room = chip.inBand
+    ? `${PRICE_WAS_BAND_SHARE}cqw`
+    : chip.besideWidth
+      ? sharedRowRoom(chip.besideWidth)
+      : "(100cqw - 2 * var(--tag-inset, 8px))";
+  return {
+    // Zero when there is no room, the earlier price's own size when there is:
+    // the difference is scaled so far up that nothing in between is ever seen.
+    "--tag-was-size": `clamp(0px, calc((${room} - ${size} * ${needed} - ${chip.borderWidth * 2}px) * 9999), calc(${size} * ${PRICE_WAS_SCALE}))`,
+    fontSize: "var(--tag-was-size)",
+    marginInlineEnd: `${roundForCss(PRICE_WAS_GAP / PRICE_WAS_SCALE)}em`,
+    opacity: 0.7,
+  } as CSSProperties;
+}
+
+/** What a price chip of `length` characters takes of its row, in units of
+ *  the tag's type size: its words, and half the type of padding either side. */
+export function chipWidth(length: number): number {
+  return length * PRICE_CHAR_WIDTH + 1;
+}
+
+/**
+ * The room one chip has in a row it shares with another `besideWidth` wide (in
+ * the tag's type size): the tile's width less both edge insets, the gap
+ * between the two (one more inset) and the other chip. A CSS length, for the
+ * give-way rules of the struck price above and of the sale chip (SaleChip).
+ */
+export function sharedRowRoom(besideWidth: number): string {
+  return `(100cqw - 3 * var(--tag-inset, 8px) - var(--tag-font-size) * ${roundForCss(besideWidth)})`;
 }
 
 /**
@@ -473,3 +569,28 @@ export const TEXT_ALIGN_CLASSES: Record<TextAlign, string> = {
   center: "text-center",
   right: "text-right",
 };
+
+/**
+ * A TILE'S FRAME: the box a block's face sits in, on the designer's canvas and
+ * on the hosted storefront alike (BlockTile, StorefrontPageView). It fills its
+ * cell exactly and inherits the cell's corner radius, so the card border
+ * curves with the roundness setting instead of being sliced square by the
+ * cell's clip. Product blocks are bordered cards; text, shape and image blocks
+ * sit chrome-less, so the kinds never read as the same thing.
+ */
+export function tileFrameClass(block: Pick<StorefrontBlock, "type">): string {
+  return cn(
+    "relative h-full w-full rounded-[inherit]",
+    block.type === "product" ? "border border-border bg-card" : "bg-transparent",
+  );
+}
+
+/**
+ * A TILE'S FACE: the layer inside the frame that clips ITSELF to the corner
+ * radius (the cell deliberately does not), with contain:paint for the per-cell
+ * paint isolation the grid used to provide. The clip-path is set only on a
+ * block that sits under a product on the same cells (blockTileClipStyle); the
+ * variable is unset everywhere else, which leaves no clip-path at all.
+ */
+export const TILE_FACE_CLASS =
+  "flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[inherit] [contain:paint] [clip-path:var(--tile-cover-clip,none)]";

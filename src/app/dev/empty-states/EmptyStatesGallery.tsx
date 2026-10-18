@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { DiscountEmptyState } from "@/components/discounts/DiscountEmptyState";
 import { ProductEmptyState } from "@/components/products/ProductEmptyState";
 import { StorefrontsList } from "@/components/storefront/StorefrontsList";
 import { pageShellClass } from "@/components/ui/surface-styles";
@@ -30,7 +31,15 @@ export function EmptyStatesGallery() {
         <ProductEmptyState canWrite={false} />
       </Fixture>
 
-      <Fixture id="storefronts-sample" name="Storefronts, new seller (with the sample link)">
+      <Fixture id="discounts-writer" name="Discounts, can add">
+        <DiscountEmptyState canWrite />
+      </Fixture>
+
+      <Fixture id="discounts-reader" name="Discounts, read-only">
+        <DiscountEmptyState canWrite={false} />
+      </Fixture>
+
+      <Fixture id="storefronts-sample"name="Storefronts, new seller (with the sample link)">
         <StorefrontsList storefronts={[]} total={0} products={[]} canWrite sample="shown" />
       </Fixture>
 

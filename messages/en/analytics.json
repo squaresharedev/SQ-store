@@ -33,6 +33,7 @@
     "emptyDefault": "No sales in this range"
   },
   "sales": {
+    "untitledProduct": "Untitled product",
     "label": "Sales",
     "description": "Paid orders placed through Square Share checkout.",
     "revenue": {
@@ -71,6 +72,28 @@
       "empty": "No orders in this range",
       "ariaLabel": "Order status mix"
     }
+  },
+  "compare": {
+    "previous": "Previous period",
+    "vsPrevious": "{change} vs previous period"
+  },
+  "funnel": {
+    "label": "Storefront funnel",
+    "description": "From your storefront being shown on your own site to a paid order. These count events, not people.",
+    "views": "Views on your site",
+    "viewsEmpty": "No views in this range",
+    "opens": "Products opened",
+    "opensEmpty": "None opened in this range",
+    "started": "Checkouts started",
+    "startedEmpty": "No checkouts in this range",
+    "expired": "Checkouts left unpaid",
+    "expiredEmpty": "None left unpaid",
+    "conversion": "Orders per 100 views",
+    "conversionCounts": "Orders: {orders}, views: {views}",
+    "abandonment": "Checkout abandonment",
+    "abandonmentCounts": "Left unpaid: {expired}, started: {started}",
+    "notEnough": "Not enough data yet",
+    "notEnoughHint": "Rates appear once this range holds {min} views."
   },
   "tiles": {
     "revenue": "Revenue",
@@ -142,9 +165,7 @@
       "acrossRange": "Product clicks across the selected range.",
       "byChannel": "Product clicks by channel",
       "byWeekday": "Product clicks by weekday",
-      "byStorefront": "Product clicks by storefront",
-      "awaiting": "Arrives once the embed widget reports product opens.",
-      "readyToChart": "Ready to chart as soon as clicks start arriving."
+      "byStorefront": "Product clicks by storefront"
     },
     "product_view": {
       "label": "Product page views",

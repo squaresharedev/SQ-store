@@ -39,6 +39,9 @@ const BASE: OrderView = {
   giftMessage: null,
   withdrawalRequestedAt: null,
   discount: null,
+  refund: null,
+  stockReserved: 0,
+  paidThroughProvider: false,
 };
 
 const SPECIMENS: { key: string; title: string; order: OrderView; mail?: boolean }[] = [

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   MIN_PAYABLE_CENTS,
   bestSale,
+  offerPercentOff,
   priceOrder,
   reductionCents,
   saleUnitPriceCents,
@@ -38,6 +39,41 @@ describe("reductionCents", () => {
 
   it("caps an amount at the same ceiling as a price", () => {
     expect(DISCOUNT_AMOUNT_MAX_CENTS).toBe(PRICE_CENTS_MAX);
+  });
+});
+
+describe("offerPercentOff: what a sale chip says comes off", () => {
+  it("is a percent sale's own figure wherever it applied in full, the cent rounding included", () => {
+    expect(offerPercentOff(percent(10), 74500, "EUR")).toBe(10);
+    // 15% of 10.01 is 1.5015, of which 1.50 comes off: still the 15% sale.
+    expect(offerPercentOff(percent(15), 1001, "EUR")).toBe(15);
+  });
+
+  it("is an amount's share, rounded DOWN: 5.00 off 24.00 is 20%, never 21%", () => {
+    expect(offerPercentOff(euros(500), 2400, "EUR")).toBe(20);
+  });
+
+  it("is what really came off where the floor stopped a sale short", () => {
+    // 50% of 0.60 would leave 0.30; the floor keeps 0.50, so 0.10 (16%) comes off.
+    expect(offerPercentOff(percent(50), 60, "EUR")).toBe(16);
+  });
+
+  it("is nothing under 1%, or when nothing comes off at all", () => {
+    expect(offerPercentOff(euros(10), 74500, "EUR")).toBeNull();
+    expect(offerPercentOff(euros(500), 2400, "USD")).toBeNull();
+    expect(offerPercentOff(percent(20), 50, "EUR")).toBeNull();
+  });
+
+  it("never says more came off than did, for any price and any sale", () => {
+    for (let regular = 1; regular <= 5000; regular += 7) {
+      for (const value of [percent(1), percent(15), percent(33), percent(90), euros(1), euros(499), euros(2400)]) {
+        const claimed = offerPercentOff(value, regular, "EUR");
+        if (claimed === null) continue;
+        expect(Math.floor((regular * claimed) / 100), `${JSON.stringify(value)} on ${regular}`).toBeLessThanOrEqual(
+          reductionCents(value, regular, "EUR"),
+        );
+      }
+    }
   });
 });
 

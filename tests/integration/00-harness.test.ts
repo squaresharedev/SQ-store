@@ -46,6 +46,9 @@ describe("embedded supabase replica", () => {
       // Automatic sales and discount codes (20261004_discounts). The store's
       // team reads them, owners and editors write them; nobody deletes.
       "discounts",
+      // What Square Share collected and returned, a row each
+      // (20261011_pricing_config). Insert-only; a store's team reads its own.
+      "fee_ledger",
       "follows",
       // Sign-in approval from a signed-in device: its sealed factor secret,
       // the off switch, and the requests (20260927_sign_in_approvals).
@@ -77,6 +80,12 @@ describe("embedded supabase replica", () => {
       // Why sellers cancelled a paid plan, for the admin panel
       // (20261003_plan_cancellations). Service-role only.
       "plan_cancellations",
+      // The pricing config: which features a plan switches on, what it costs
+      // and charges per sale, and the plans themselves (20261011_pricing_config).
+      // Read by any signed-in user, written by the service role only.
+      "plan_entitlements",
+      "plan_prices",
+      "plans",
       // Every price a product has had, for the 30-day prior-price rule on
       // sales (20261004_discounts). Trigger-written, service-role only.
       "product_price_history",
@@ -92,7 +101,17 @@ describe("embedded supabase replica", () => {
       // A store's plan as Stripe last reported it, and what happens around
       // the plans page (20260930_seller_plans). Service-role only.
       "seller_billing",
+      // Sellers who pay no per-sale fee: the closed beta and founding sellers
+      // (20261011_pricing_config). Service-role only.
+      "seller_fee_waivers",
       "seller_funnel_events",
+      // Which Stripe account is whose (20261008_seller_payment_accounts).
+      // Service-role only.
+      "seller_payment_accounts",
+      // Daily counts of buyer funnel events, rolled up from Workers Analytics
+      // Engine (20261012_storefront_funnel_daily). A store's team reads its
+      // own; written by the service role only.
+      "storefront_funnel_daily",
       "storefront_signals",
       "storefronts",
       // Stripe webhook events already handled, so a redelivery is a no-op

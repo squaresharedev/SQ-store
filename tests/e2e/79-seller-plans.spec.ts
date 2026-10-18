@@ -94,6 +94,14 @@ async function openPlansFromRail(page: Page) {
 }
 
 test.describe("seller plans", () => {
+  // The per-sale fee ships switched off (billing_switches.fees_enabled). These
+  // tests are about a plan changing what a sale pays, so they switch it on,
+  // and back off for the specs after.
+  const setFees = (on: boolean) =>
+    serviceRest("/billing_switches?id=eq.true", { method: "PATCH", body: { fees_enabled: on } });
+  test.beforeAll(() => setFees(true));
+  test.afterAll(() => setFees(false));
+
   test("Free -> Pro through checkout, a sale at Pro's rate, then back to Free at period end", async ({ page }) => {
     const seller = freshUser("plans");
     await signUp(page, seller);
@@ -123,14 +131,15 @@ test.describe("seller plans", () => {
     expect(billing).toMatchObject({ plan: "pro", status: "active", billing_interval: "month" });
     expect(new Date(billing.paid_until).getTime()).toBeGreaterThan(Date.now());
 
-    // A sale now is charged Pro's rate on the items, and the order says so.
+    // A sale now is charged Pro's rate (0.5%) on what the buyer paid, and the
+    // order says so.
     await seedProducts(sellerId, [{ title: "Pro lamp", price_cents: 2500 }]);
     const sale = await page.request.post("/dev/simulate-sale", { data: { quantity: 2 } });
     expect(sale.ok()).toBe(true);
     const [order] = (await serviceRest(
       `/orders?seller_id=eq.${sellerId}&select=amount_cents,platform_fee_cents,platform_fee_bps,seller_plan`,
     )) as Array<Record<string, number | string>>;
-    expect(order).toEqual({ amount_cents: 5000, platform_fee_cents: 50, platform_fee_bps: 100, seller_plan: "pro" });
+    expect(order).toEqual({ amount_cents: 5000, platform_fee_cents: 25, platform_fee_bps: 50, seller_plan: "pro" });
 
     // Pro's analytics report: the range's figures as a CSV, matching the page.
     await page.goto("/analytics?range=all");
@@ -245,7 +254,7 @@ test.describe("seller plans", () => {
     const upsell = page.locator("[data-upsell='starter']");
     await expect(upsell).toContainText("Best value");
     await expect(upsell.locator("[data-upsell-fee]")).toContainText("5%");
-    await expect(upsell.locator("[data-upsell-fee]")).toContainText("3%");
+    await expect(upsell.locator("[data-upsell-fee]")).toContainText("2%");
     await expect(upsell).toContainText("60 products");
     await expect(page.getByRole("button", { name: /^See plans$|^Change plan$/ })).toHaveCount(0);
 

@@ -4,6 +4,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { isEuSeller, MANDATORY_PRODUCT_PAGE_SECTION_IDS } from "@/lib/storefront/product-page";
 import type { ProseResolver } from "@/lib/shipping/policy-prose";
 import { resolveProductShipping, resolveReturns } from "@/lib/storefront/shipping";
+import { deliveryPriceRange } from "@/lib/shipping/rates";
+import { formatCents, toCurrency } from "@/lib/format/money";
+import type { Locale } from "@/i18n/locales";
 import { SECTION_SETTING } from "@/lib/storefront/setting-ref";
 import type { ProductPageData } from "@/types/product-page";
 import type { ProductPageSectionId } from "@/types/storefront";
@@ -24,11 +27,12 @@ import { OptionPicker } from "./OptionPicker";
 import { QuantityProvider } from "./QuantityContext";
 import { QuantityPicker } from "./QuantityPicker";
 import { PageShell } from "./PageShell";
-import { orderLookupPath, type LinkChannel } from "@/lib/storefront/product-page-url";
+import { orderLookupPath, storefrontPagePath, type LinkChannel } from "@/lib/storefront/product-page-url";
 import { StickyBar } from "./StickyBar";
 import { TrustList, buildTrustLines } from "./TrustList";
 import {
   DARK_INK,
+  controlRadius,
   paragraphs,
   resolveCta,
   resolveInk,
@@ -108,7 +112,28 @@ export function ProductPageView({
   // shipping cost, so we suppress it rather than printing a note that may be
   // wrong.
   const effectivePriceNote = seller.vatId && isEuSeller(seller) ? productPage.priceNote : "none" as const;
-  const effectiveShippingNote = !product.isDigital && shipping !== null ? productPage.shippingNote : "none" as const;
+  // WHAT DELIVERY COSTS, where checkout will charge it: the number itself
+  // rather than "plus shipping", so the total is no surprise on the next page
+  // (EU CRD art. 6(1)(e)). Only where this product can be bought through
+  // checkout; anywhere else nobody here charges for delivery, and the seller's
+  // own note stands.
+  const delivery =
+    storefront.checkout && !product.isDigital
+      ? deliveryPriceRange(shippingPolicy, {
+          profileId: product.shippingProfileId,
+          subtotalCents: product.priceCents,
+          currency: toCurrency(product.currency),
+        })
+      : null;
+  const deliveryLine = !delivery
+    ? null
+    : delivery.fromCents === 0 && delivery.uniform
+      ? t("delivery.free")
+      : t(delivery.uniform ? "delivery.flat" : "delivery.from", {
+          amount: formatCents(delivery.fromCents, product.currency, locale as Locale),
+        });
+  const effectiveShippingNote =
+    !product.isDigital && shipping !== null && !deliveryLine ? productPage.shippingNote : ("none" as const);
 
   const ink = resolveInk(theme, productPage);
   // The buy button's fill, roundness and outline, resolved ONCE for both the
@@ -287,6 +312,7 @@ export function ProductPageView({
       >
         <PageShell
           storefront={storefront}
+          shopHref={preview ? undefined : storefrontPagePath(storefront.id)}
           // The page's own backdrop when it has one, otherwise the storefront's
           // whole background. The page's font falls back to the storefront's
           // too: the product page is part of the shop, not a publication of its
@@ -342,9 +368,11 @@ export function ProductPageView({
                       priceCents={product.priceCents}
                       currency={product.currency}
                       sale={product.sale}
+                      saleStyle={productPage.saleStyle}
                       priceNote={effectivePriceNote}
                       shippingNote={effectiveShippingNote}
                       isDigital={product.isDigital}
+                      ink={DARK_INK}
                       size="sm"
                     />
                   </div>
@@ -407,10 +435,18 @@ export function ProductPageView({
                       priceCents={product.priceCents}
                       currency={product.currency}
                       sale={product.sale}
+                      saleStyle={productPage.saleStyle}
                       priceNote={effectivePriceNote}
                       shippingNote={effectiveShippingNote}
                       isDigital={product.isDigital}
+                      ink={ink}
+                      radius={controlRadius(theme.cornerRadius)}
                     />
+                    {deliveryLine && (
+                      <p className="mt-1 text-sm opacity-70" data-product-delivery={delivery?.fromCents}>
+                        {deliveryLine}
+                      </p>
+                    )}
                   </div>
                   {productPage.showStock && (
                     <div data-setting-hotspot="sections">

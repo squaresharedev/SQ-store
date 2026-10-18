@@ -1,12 +1,17 @@
 "use client";
 
+import { useTransition } from "react";
 import { ArrowUpRight, Landmark, ShieldCheck, Timer } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
+import { leaveForStripe } from "@/components/billing/billing-actions";
 import { Disclosure } from "@/components/ui/Disclosure";
 import { Modal, ModalActions } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { stubBadgeClass } from "@/components/ui/control-styles";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
+import { startStripeOnboarding, type ConnectStripeResult } from "@/lib/payments/connect/actions";
 import { CardSwipe } from "./CardSwipe";
 
 /** Each point's icon, and where its copy lives under Payments.connectModal.points. */
@@ -17,9 +22,9 @@ const POINTS = [
 ] as const;
 
 /**
- * Explains the Stripe Connect flow before redirecting. The CTA is a stub:
- * connecting NEVER happens in-app, it is a redirect to Stripe's hosted
- * onboarding.
+ * Explains the Stripe Connect flow before leaving for it. Connecting NEVER
+ * happens in-app: the button asks the server for a link into Stripe's hosted
+ * onboarding (lib/payments/connect/actions.ts) and the browser goes there.
  *
  * The card going through the reader says what this is. Under it, three
  * reassurances as one line each, their detail one tap away for whoever wants
@@ -28,18 +33,27 @@ const POINTS = [
 export function ConnectStripeModal({
   open,
   onClose,
+  start = startStripeOnboarding,
 }: {
   open: boolean;
   onClose: () => void;
+  /** The server call that answers with Stripe's onboarding link. Injectable,
+   *  so the dev gallery can show the dialog without a session or Stripe. */
+  start?: () => Promise<ConnectStripeResult>;
 }) {
   const t = useTranslations("Payments");
-  // TODO(stripe): when Connect ships, this becomes a server call that creates
-  // an Account Link (stripe.accountLinks.create, type "account_onboarding")
-  // and redirects to the returned Stripe-hosted URL. No financial data is
-  // ever collected in-app. Until then the CTA is DISABLED: a clickable button
-  // that does nothing reads as broken, not as "coming soon". The switch is the
-  // app-wide one (lib/payments/availability.ts), so the dashboard stops asking
-  // for a connection on the same day this button starts making one.
+  const raise = useActionErrorToast();
+  const [leaving, startLeaving] = useTransition();
+  // While Connect is switched off (lib/payments/availability.ts) the CTA is
+  // DISABLED: a clickable button that does nothing reads as broken, not as
+  // "coming soon". The switch is the app-wide one, so the dashboard starts
+  // asking for a connection on the same day this button starts making one.
+  const connect = () =>
+    startLeaving(async () => {
+      const result = await start();
+      if (!result.ok) return raise(result.error);
+      leaveForStripe(result.url);
+    });
 
   return (
     <Modal
@@ -69,9 +83,13 @@ export function ConnectStripeModal({
           {t("connectModal.notNow")}
         </Button>
         <Button
-          disabled={!STRIPE_CONNECT_AVAILABLE}
+          onClick={connect}
+          disabled={!STRIPE_CONNECT_AVAILABLE || leaving}
+          aria-busy={leaving || undefined}
           title={STRIPE_CONNECT_AVAILABLE ? undefined : t("connectModal.comingSoonTitle")}
+          data-connect-stripe=""
         >
+          {leaving && <Spinner />}
           {t("connectModal.continue")}
           <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden />
           {!STRIPE_CONNECT_AVAILABLE && <span className={stubBadgeClass}>{t("soon")}</span>}

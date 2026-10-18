@@ -1,7 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
+  PUBLISHABLE_SELLER,
   anonRest,
   freshUser,
+  seedSellerIdentity,
   seedSignals,
   seedStorefronts,
   serviceRest,
@@ -273,6 +275,9 @@ test.describe("analytics, signal sources", () => {
     const user = freshUser("embedview");
     await signUp(page, user);
     const sellerId = await userIdByEmail(user.email);
+    // Serving a storefront publishes it, so the route asks for the seller's
+    // trader details like every other public surface does.
+    await seedSellerIdentity(sellerId, PUBLISHABLE_SELLER);
     await seedStorefrontFor(sellerId, "Embedded shop");
 
     const stored = (await serviceRest(
@@ -325,13 +330,13 @@ test.describe("analytics, signal sources", () => {
     ).toHaveAttribute("data-analytics-value", "1", { timeout: 20_000 });
   });
 
-  test("the widget signal route takes clicks, and refuses everything else", async ({
-    page,
-  }) => {
-    // The seam a future embed block reports through. What it accepts is an
-    // allowlist of ONE kind, and the refusals are the point of the test:
-    // storefront_view is server-produced, and conversions get written next to
-    // the row they create, not instead of it.
+  test("there is no public route for reporting a click any more", async ({ page }) => {
+    // Clicks used to be posted by the embed widget to /api/embed/[key]/signal:
+    // an unauthenticated write, there so a script on a seller's site could say
+    // what happened on it. The embed now sends nothing. A click on a tile is a
+    // visit to the hosted product page, counted where it lands
+    // (tests/e2e/89-embed-frame.spec.ts), so the route is gone, and this keeps
+    // it gone: nothing a stranger posts may become a seller's number.
     const user = freshUser("sigingest");
     await signUp(page, user);
     const sellerId = await userIdByEmail(user.email);
@@ -350,33 +355,16 @@ test.describe("analytics, signal sources", () => {
       },
     });
 
-    const post = (body: unknown, origin = "https://example.com") =>
-      page.request.post(`/api/embed/${stored[0].embed_key}/signal`, {
-        headers: { origin },
-        data: body,
-      });
-
-    expect((await post({ kind: "product_click", blockId: "b1" })).status()).toBe(204);
-
-    // Not a view: the server counts those itself, and a client that could post
-    // one could post ten thousand.
-    expect((await post({ kind: "storefront_view" })).status()).toBe(400);
-    // Not a conversion either.
-    expect((await post({ kind: "email_signup" })).status()).toBe(400);
-    expect((await post({ kind: "booking", valueCents: 999_999 })).status()).toBe(400);
-    // Unknown fields are refused outright rather than quietly dropped.
-    expect((await post({ kind: "product_click", accountId: sellerId })).status()).toBe(400);
-    // And the origin allowlist gates it exactly like the read route.
-    expect(
-      (await post({ kind: "product_click" }, "https://not-allowed.example")).status(),
-    ).toBe(403);
+    const response = await page.request.post(`/api/embed/${stored[0].embed_key}/signal`, {
+      headers: { origin: "https://example.com" },
+      data: { kind: "product_click", blockId: "b1" },
+    });
+    expect(response.status()).toBe(404);
 
     const rows = (await serviceRest(
-      `/storefront_signals?account_id=eq.${sellerId}&select=kind,block_id,metadata`,
-    )) as { kind: string; block_id: string | null }[];
-    expect(rows.length).toBe(1);
-    expect(rows[0].kind).toBe("product_click");
-    expect(rows[0].block_id).toBe("b1");
+      `/storefront_signals?account_id=eq.${sellerId}&kind=eq.product_click&select=kind`,
+    )) as { kind: string }[];
+    expect(rows).toEqual([]);
   });
 
   test("the hover readout lands at the pointer and paints over its neighbours", async ({

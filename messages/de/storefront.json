@@ -146,9 +146,12 @@
       "thankYouMessage": "Dankesnachricht",
       "thankYouCelebration": "Dankes-Effekt",
       "checkoutPayButton": "Bezahlknopf",
+      "saleChip": "Aktionslabel",
+      "salePrice": "Aktionspreis",
       "productPagePhoto": "Foto der Produktseite",
       "checkoutPhoto": "Foto der Kasse",
-      "thanksPhoto": "Foto der Dankeseite"
+      "thanksPhoto": "Foto der Dankeseite",
+      "chipScale": "Gleiche Labelgröße auf allen Karten"
     }
   },
   "editorSearch": {
@@ -206,11 +209,23 @@
     "snippetLabel": "Einbettungscode",
     "snippetReadyHint": "Füge diesen Einbettungscode in das HTML deiner Website ein.",
     "snippetLockedHint": "Aktiviere die Einbettung und füge mindestens eine Domain hinzu, um die Schaltfläche „Kopieren“ freizuschalten.",
+    "snippetSaveHint": "Speichere deine Einstellungen, um die Schaltfläche „Kopieren“ freizuschalten.",
+    "pagesOffHint": "Schalte zuerst im Designer die Produktseiten ein. Ein Klick auf ein Produkt öffnet seine Seite.",
+    "notShowingLabel": "Wenn das Schaufenster nicht erscheint",
+    "notShowingTip": "Die Adresse deiner Website muss unter „Zugelassene Domains“ stehen, und die Website muss https verwenden. Website-Baukästen, die eigenes HTML in einen eigenen Frame setzen (Wix, Google Sites), werden noch nicht unterstützt.",
     "copySnippet": {
       "copy": "Einbettungscode kopieren",
       "copied": "Einbettungscode kopiert",
       "failed": "Einbettungscode konnte nicht kopiert werden. Wähle ihn aus und kopiere ihn manuell.",
       "cannotCopyYet": "Einbettungscode kann noch nicht kopiert werden"
+    },
+    "privacyLabel": "Für deine Datenschutzerklärung",
+    "privacyHint": "Deine Website lädt das Schaufenster jetzt von Squareshare, also sollte das in ihrer Datenschutzerklärung stehen. Du kannst diesen Text einfügen:",
+    "privacyText": "Diese Website zeigt ein Schaufenster, das von Squareshare bereitgestellt wird. Beim Laden werden die IP-Adresse und Browserangaben der Besucher an Squareshare übermittelt, um die Produkte anzuzeigen und Besuche zu zählen. Squareshare setzt dafür keine Cookies und speichert nichts auf dem Gerät der Besucher. Details: {policy}",
+    "copyPrivacy": {
+      "copy": "Datenschutztext kopieren",
+      "copied": "Datenschutztext kopiert",
+      "failed": "Der Text konnte nicht kopiert werden. Wähle ihn aus und kopiere ihn manuell."
     },
     "snippetKeyLabel": "Schlüssel",
     "rotateConfirmText": "Beim Erneuern wird ein neuer Schlüssel ausgestellt. Jede Kopie des alten Einbettungscodes hört sofort auf zu funktionieren, auch Kopien auf Websites, die du noch nutzt: Du musst den neuen Einbettungscode überall einfügen.",
@@ -222,6 +237,19 @@
     "saved": "Einbettungseinstellungen gespeichert.",
     "newKeyIssued": "Neuer Schlüssel ausgestellt.",
     "newKeyDetail": "Füge den Einbettungscode überall neu ein, wo dieses Schaufenster eingebettet ist."
+  },
+  "share": {
+    "title": "Schaufenster-Link",
+    "live": "Dein Schaufenster hat eine eigene Seite. Jeder mit diesem Link kann es ansehen, ganz ohne Website.",
+    "pagesOff": "Schalte im Designer die Produktseiten ein, dann bekommt dieses Schaufenster einen Link zum Teilen.",
+    "detailsMissing": "Dieses Schaufenster bekommt einen Link zum Teilen, sobald deine Verkäuferangaben vollständig sind.",
+    "open": "Öffnen",
+    "openDesigner": "Designer öffnen",
+    "copy": {
+      "copy": "Schaufenster-Link kopieren",
+      "copied": "Schaufenster-Link kopiert",
+      "failed": "Der Link konnte nicht kopiert werden. Wähle ihn aus und kopiere ihn manuell."
+    }
   },
   "wizard": {
     "category": {
@@ -559,6 +587,27 @@
     "spotBottomCenter": "Preisschild unten Mitte",
     "spotBottomRight": "Preisschild unten rechts"
   },
+  "saleBadge": {
+    "title": "Aktionslabel",
+    "says": "Anzeige",
+    "hint": "Wird am Produkt angezeigt, solange eine Aktion seinen Preis senkt.",
+    "percent": "Prozent",
+    "amount": "Betrag",
+    "hidden": "Verborgen",
+    "lookLabel": "Stil",
+    "look": {
+      "pill": "Kapsel",
+      "sticker": "Sticker",
+      "flag": "Wimpel",
+      "ribbon": "Banderole"
+    },
+    "spot": "Aktionslabel {spot, select, top_left {oben links} top_center {oben Mitte} top_right {oben rechts} middle_center {Mitte} bottom_left {unten links} bottom_center {unten Mitte} bottom_right {unten rechts} other {}}"
+  },
+  "chipScale": {
+    "label": "Auf größeren Karten",
+    "tile": "Mitwachsen",
+    "cell": "Gleich bleiben"
+  },
   "layout": {
     "canvasWidth": "Breite der Arbeitsfläche",
     "canvasWidthAriaLabel": "Breite der Arbeitsfläche in Blöcken",
@@ -750,6 +799,11 @@
         "plusShipping": "Zzgl. Versand",
         "freeShipping": "Kostenloser Versand",
         "none": "Kein"
+      },
+      "saleStyle": {
+        "label": "Aktionspreis",
+        "strike": "Linie",
+        "slash": "Schräg"
       },
       "useStorefrontAccent": "Akzentfarbe des Schaufensters verwenden",
       "useButtonTextColor": "Textfarbe des Buttons verwenden"

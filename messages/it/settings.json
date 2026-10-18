@@ -136,7 +136,7 @@
   "danger": {
     "export": {
       "cardTitle": "Esporta i miei dati",
-      "cardDescription": "Tutto ciò che conserviamo su di te: profilo, prodotti, configurazione della vetrina, tutto in un unico file JSON. Sono i tuoi dati, e restano tuoi.",
+      "cardDescription": "Tutto ciò che conserviamo su di te: profilo, prodotti, vetrine, gli ordini che hai venduto, le notifiche e il registro di sicurezza, tutto in un unico file JSON. Sono i tuoi dati, e restano tuoi.",
       "downloadButton": "Scarica i miei dati",
       "stepUpDescription": "L’esportazione contiene tutto il tuo account. Inserisci il codice attuale della tua app di autenticazione per scaricarla."
     },
@@ -781,10 +781,20 @@
       "cardDescription": "Accetta un invito per unirti al team di quel negozio."
     },
     "success": {
-      "inviteCreated": "Invito creato. Lo vedrà quando accederà con quell’indirizzo email. (L’invio di email non è ancora attivo.)",
+      "inviteCreated": "Invito creato, ma non siamo riusciti a inviare l’email. Avvisa tu la persona: lo vedrà quando accederà con quell’indirizzo email.",
+      "inviteEmailed": "Invito inviato. Le abbiamo spiegato via email come accettarlo.",
       "inviteAccepted": "Ora fai parte del team.",
       "roleUpdated": "Ruolo aggiornato.",
       "memberRemoved": "Membro rimosso."
+    },
+    "inviteEmail": {
+      "subject": "{store} ti ha invitato nel suo team su Square Share",
+      "subjectUnnamed": "Hai ricevuto un invito a un team su Square Share",
+      "intro": "{store} ti ha invitato a far parte del suo team su Square Share.",
+      "introUnnamed": "Un negozio su Square Share ti ha invitato a far parte del suo team.",
+      "role": "Il tuo ruolo: {role}",
+      "how": "Per accettare, accedi con questo indirizzo email ({email}) oppure crea un account con lo stesso indirizzo. L’invito ti aspetta in Impostazioni, alla voce Team e accessi.",
+      "ignore": "Non te lo aspettavi? Puoi ignorare questa email. Non succede nulla finché non accetti."
     }
   }
 }

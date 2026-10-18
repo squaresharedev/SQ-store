@@ -146,9 +146,12 @@
       "thankYouMessage": "Message de remerciement",
       "thankYouCelebration": "Animation de remerciement",
       "checkoutPayButton": "Bouton de paiement",
+      "saleChip": "Étiquette promo",
+      "salePrice": "Prix en promotion",
       "productPagePhoto": "Photo de la page produit",
       "checkoutPhoto": "Photo du paiement",
-      "thanksPhoto": "Photo de la page de remerciement"
+      "thanksPhoto": "Photo de la page de remerciement",
+      "chipScale": "Même taille d'étiquette sur toutes les cartes"
     }
   },
   "editorSearch": {
@@ -206,11 +209,23 @@
     "snippetLabel": "Code d’intégration",
     "snippetReadyHint": "Collez ce code dans le HTML de votre site.",
     "snippetLockedHint": "Activez l’intégration et ajoutez au moins un domaine pour débloquer le bouton Copier.",
+    "snippetSaveHint": "Enregistrez vos paramètres pour débloquer le bouton Copier.",
+    "pagesOffHint": "Activez d’abord les pages produit dans l’éditeur. Un clic sur un produit ouvre sa page.",
+    "notShowingLabel": "Si la vitrine ne s’affiche pas",
+    "notShowingTip": "L’adresse de votre site doit figurer dans les Domaines autorisés et le site doit utiliser https. Les créateurs de sites qui placent le HTML personnalisé dans leur propre cadre (Wix, Google Sites) ne sont pas encore pris en charge.",
     "copySnippet": {
       "copy": "Copier le code d’intégration",
       "copied": "Code d’intégration copié",
       "failed": "Impossible de copier le code d’intégration. Sélectionnez-le et copiez-le manuellement.",
       "cannotCopyYet": "le code d’intégration ne peut pas encore être copié"
+    },
+    "privacyLabel": "Pour votre politique de confidentialité",
+    "privacyHint": "Votre site charge désormais la vitrine depuis Squareshare, sa politique de confidentialité devrait donc l’indiquer. Vous pouvez coller ce texte :",
+    "privacyText": "Ce site affiche une vitrine fournie par Squareshare. Lors de son chargement, l’adresse IP et les informations du navigateur du visiteur sont transmises à Squareshare afin d’afficher les produits et de compter les visites. Squareshare ne dépose aucun cookie et ne stocke rien sur l’appareil du visiteur à cette fin. En savoir plus : {policy}",
+    "copyPrivacy": {
+      "copy": "Copier le texte de confidentialité",
+      "copied": "Texte de confidentialité copié",
+      "failed": "Impossible de copier le texte. Sélectionnez-le et copiez-le manuellement."
     },
     "snippetKeyLabel": "Clé du code d’intégration",
     "rotateConfirmText": "Renouveler la clé en émet une nouvelle. Chaque copie de l’ancien code cesse immédiatement de fonctionner, y compris sur les sites que vous voulez garder : vous devrez coller le nouveau code partout.",
@@ -222,6 +237,19 @@
     "saved": "Paramètres d’intégration enregistrés.",
     "newKeyIssued": "Nouvelle clé d’intégration émise.",
     "newKeyDetail": "Recollez le code partout où cette vitrine est intégrée."
+  },
+  "share": {
+    "title": "Lien de la vitrine",
+    "live": "Votre vitrine a sa propre page. Toute personne disposant de ce lien peut la parcourir, sans site web.",
+    "pagesOff": "Activez les pages produit dans l’éditeur et cette vitrine aura un lien à partager.",
+    "detailsMissing": "Cette vitrine aura un lien à partager une fois vos informations vendeur complétées.",
+    "open": "Ouvrir",
+    "openDesigner": "Ouvrir l’éditeur",
+    "copy": {
+      "copy": "Copier le lien de la vitrine",
+      "copied": "Lien de la vitrine copié",
+      "failed": "Impossible de copier le lien. Sélectionnez-le et copiez-le manuellement."
+    }
   },
   "wizard": {
     "category": {
@@ -559,6 +587,27 @@
     "spotBottomCenter": "Étiquette de prix en bas au centre",
     "spotBottomRight": "Étiquette de prix en bas à droite"
   },
+  "saleBadge": {
+    "title": "Étiquette promo",
+    "says": "Afficher",
+    "hint": "S'affiche sur le produit tant qu'une promotion réduit son prix.",
+    "percent": "Pourcentage",
+    "amount": "Montant",
+    "hidden": "Masquée",
+    "lookLabel": "Style",
+    "look": {
+      "pill": "Capsule",
+      "sticker": "Pastille",
+      "flag": "Fanion",
+      "ribbon": "Ruban"
+    },
+    "spot": "Étiquette promo {spot, select, top_left {en haut à gauche} top_center {en haut au centre} top_right {en haut à droite} middle_center {au milieu} bottom_left {en bas à gauche} bottom_center {en bas au centre} bottom_right {en bas à droite} other {}}"
+  },
+  "chipScale": {
+    "label": "Sur les grandes cartes",
+    "tile": "Agrandir",
+    "cell": "Même taille"
+  },
   "layout": {
     "canvasWidth": "Largeur du canevas",
     "canvasWidthAriaLabel": "Largeur du canevas en blocs",
@@ -750,6 +799,11 @@
         "plusShipping": "Livraison en sus",
         "freeShipping": "Livraison gratuite",
         "none": "Aucune"
+      },
+      "saleStyle": {
+        "label": "Prix en promotion",
+        "strike": "Ligne",
+        "slash": "Diagonale"
       },
       "useStorefrontAccent": "Utiliser l’accent de la vitrine",
       "useButtonTextColor": "Utiliser la couleur du texte du bouton"

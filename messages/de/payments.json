@@ -16,6 +16,11 @@
       "label": "Nächste Auszahlung",
       "zero": "Keine Auszahlung geplant",
       "hint": "Erwartet am {date}"
+    },
+    "fees": {
+      "label": "Gebühren diesen Monat",
+      "zero": "Keine Gebühren diesen Monat",
+      "hint": "Der Anteil von Square Share an deinen Verkäufen, nach Rückerstattungen"
     }
   },
   "connection": {
@@ -29,6 +34,8 @@
     "charges": "Zahlungsannahme",
     "payouts": "Auszahlungen",
     "verified": "Verifiziert",
+    "finish": "Stripe benötigt noch einige Angaben von dir. Bis diese vorliegen, können Käufer nicht bezahlen.",
+    "finishButton": "Bei Stripe abschließen",
     "requirementsDue": "Stripe benötigt weitere Informationen, bevor Auszahlungen fortgesetzt werden können."
   },
   "connectModal": {
@@ -106,6 +113,7 @@
     "sentTo": "Gesendet an",
     "bankAccount": "Bankkonto ···· {last4}",
     "arrives": "Eingang",
+    "arrived": "Eingegangen",
     "initiated": "Initiiert",
     "type": "Typ",
     "typeValue": "{method, select, instant {Sofort} other {Standard}} · {automatic, select, true {Automatisch} other {Manuell}}",

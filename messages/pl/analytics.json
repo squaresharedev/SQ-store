@@ -33,6 +33,7 @@
     "emptyDefault": "Brak sprzedaży w tym zakresie"
   },
   "sales": {
+    "untitledProduct": "Produkt bez nazwy",
     "label": "Sprzedaż",
     "description": "Opłacone zamówienia złożone przez realizację zakupu Square Share.",
     "revenue": {
@@ -71,6 +72,28 @@
       "empty": "Brak zamówień w tym zakresie",
       "ariaLabel": "Rozkład statusów zamówień"
     }
+  },
+  "compare": {
+    "previous": "Poprzedni okres",
+    "vsPrevious": "{change} względem poprzedniego okresu"
+  },
+  "funnel": {
+    "label": "Lejek witryny",
+    "description": "Od wyświetlenia witryny na Twojej stronie do opłaconego zamówienia. Liczone są zdarzenia, nie osoby.",
+    "views": "Wyświetlenia na Twojej stronie",
+    "viewsEmpty": "Brak wyświetleń w tym okresie",
+    "opens": "Otwarte produkty",
+    "opensEmpty": "Żadnego nie otwarto w tym okresie",
+    "started": "Rozpoczęte płatności",
+    "startedEmpty": "Brak płatności w tym okresie",
+    "expired": "Płatności nieukończone",
+    "expiredEmpty": "Brak nieukończonych",
+    "conversion": "Zamówienia na 100 wyświetleń",
+    "conversionCounts": "Zamówienia: {orders}, wyświetlenia: {views}",
+    "abandonment": "Porzucone płatności",
+    "abandonmentCounts": "Nieukończone: {expired}, rozpoczęte: {started}",
+    "notEnough": "Jeszcze za mało danych",
+    "notEnoughHint": "Wskaźniki pojawią się, gdy w tym okresie będzie {min} wyświetleń."
   },
   "tiles": {
     "revenue": "Przychód",
@@ -142,9 +165,7 @@
       "acrossRange": "Kliknięcia produktów w wybranym zakresie.",
       "byChannel": "Kliknięcia produktów według kanału",
       "byWeekday": "Kliknięcia produktów według dnia tygodnia",
-      "byStorefront": "Kliknięcia produktów według witryny",
-      "awaiting": "Pojawi się, gdy widget osadzenia zacznie zgłaszać otwarcia produktów.",
-      "readyToChart": "Gotowe do wykresu, gdy tylko zaczną napływać kliknięcia."
+      "byStorefront": "Kliknięcia produktów według witryny"
     },
     "product_view": {
       "label": "Wyświetlenia stron produktów",

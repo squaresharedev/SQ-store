@@ -6,6 +6,7 @@ import { Cell, Pie, PieChart as RPieChart, Sector, Tooltip } from "recharts";
 import type { PieSectorDataItem } from "recharts";
 import { infoTextClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
+import { FitText } from "@/components/ui/FitText";
 import {
   CHART,
   CHART_ANIMATION,
@@ -123,7 +124,10 @@ export function PieChart({
   return (
     <div
       className={cn(
-        "flex flex-col items-center gap-6 sm:flex-row sm:justify-center",
+        // Wraps by the room the CARD has, not the screen: beside the pie when
+        // the legend fits there, under it when a long name or a six-figure
+        // value does not (half a laptop's width is narrower than a phone).
+        "flex flex-wrap items-center justify-center gap-6",
         className,
       )}
       role="group"
@@ -183,8 +187,11 @@ export function PieChart({
             {center ?? (
               <>
                 <span className={infoTextClass}>{t("total")}</span>
-                <span className="text-lg font-semibold text-foreground">
-                  {valueFormatter(total)}
+                {/* Half the chart wide, which is what the hole has room for at
+                    its middle, and shrunk to fit: a nine-digit total would
+                    otherwise run out over the ring on both sides. */}
+                <span className="w-1/2 text-center text-lg font-semibold text-foreground">
+                  <FitText measure={valueFormatter(total)}>{valueFormatter(total)}</FitText>
                 </span>
               </>
             )}

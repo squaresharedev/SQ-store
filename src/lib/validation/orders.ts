@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { referenceCode } from "@/lib/validation/inputs";
-import { CARRIER_IDS, TRACKING_NUMBER_MAX, TRACKING_NUMBER_MIN } from "@/types/order-view";
+import { CARRIER_IDS, REFUND_REASONS, TRACKING_NUMBER_MAX, TRACKING_NUMBER_MIN } from "@/types/order-view";
 
 /**
  * THE WRITE BOUNDARY for what a seller types about an order.
@@ -24,3 +24,10 @@ export const trackingNumberSchema = referenceCode({
  * and it is refused rather than stored.
  */
 export const carrierSchema = z.enum(CARRIER_IDS).nullable();
+
+/**
+ * Why an order is being taken back: one of REFUND_REASONS. Picked from a list,
+ * so anything else is a forged request and is refused rather than stored (the
+ * database function refuses it too).
+ */
+export const refundReasonSchema = z.enum(REFUND_REASONS);

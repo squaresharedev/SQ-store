@@ -12,12 +12,15 @@ import type { OrderView } from "@/types/order-view";
 // after each step and how a queue is cleared.
 
 const markOrderShippedMock = vi.fn();
+const refundOrderMock = vi.fn();
 vi.mock("@/lib/orders/actions", () => ({
   markOrderShipped: (...args: unknown[]) => markOrderShippedMock(...args),
+  refundOrder: (...args: unknown[]) => refundOrderMock(...args),
 }));
 
 import { OrderDetail } from "@/components/orders/OrderDetail";
 import { OrderMailProvider } from "@/components/orders/OrderMailProvider";
+import { OrderRefundProvider } from "@/components/orders/OrderRefundProvider";
 import { OrderRow } from "@/components/orders/OrderRow";
 
 afterEach(cleanup);
@@ -45,10 +48,22 @@ function shippedFrom(order: OrderView): OrderView {
 
 function renderDetail(
   order: OrderView,
-  props: { canFulfil?: boolean; onNext?: () => void; queueDone?: boolean } = {},
+  { canRefund = false, ...props }: { canFulfil?: boolean; canRefund?: boolean; onNext?: () => void; queueDone?: boolean } = {},
 ) {
   return render(
-    <OrderDetail order={order} onClose={vi.fn()} canFulfil={props.canFulfil ?? true} {...props} />,
+    <OrderRefundProvider allowed={canRefund}>
+      <OrderDetail order={order} onClose={vi.fn()} canFulfil={props.canFulfil ?? true} {...props} />
+    </OrderRefundProvider>,
+  );
+}
+
+/** As the page holds it, for an owner: a refund updates the panel. */
+function RefundHarness({ initial }: { initial: OrderView }) {
+  const [order, setOrder] = useState(initial);
+  return (
+    <OrderRefundProvider allowed>
+      <OrderDetail order={order} onClose={vi.fn()} canFulfil onOrderChange={setOrder} />
+    </OrderRefundProvider>
   );
 }
 
@@ -106,12 +121,62 @@ describe("writing to the buyer", () => {
   });
 });
 
-describe("refunds, while Stripe is not connected", () => {
-  it("says how to refund today instead of offering a button that cannot work", () => {
-    renderDetail({ ...waiting, fulfilment: shippedFrom(waiting).fulfilment });
-    expect(screen.getByText(/can't refund from Square Share yet/)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Refund order" })).toBeNull();
-    expect(screen.queryByRole("link", { name: /Connect Stripe/ })).toBeNull();
+describe("taking an order back", () => {
+  beforeEach(() => refundOrderMock.mockReset());
+
+  it("is one button for the owner, and says first that the money is theirs to send", async () => {
+    const user = userEvent.setup();
+    renderDetail(waiting, { canRefund: true });
+    await user.click(screen.getByRole("button", { name: "Refund or cancel" }));
+
+    // No payment provider is connected: this RECORDS a refund, and says so
+    // before anything can be pressed.
+    expect(screen.getByText(/didn't go through Square Share/)).toBeInTheDocument();
+    // An order that never left is being cancelled.
+    expect(screen.getByLabelText("Reason")).toHaveTextContent("Cancelled before sending");
+    expect(screen.getByRole("button", { name: /^Record refund of/ })).toBeInTheDocument();
+  });
+
+  it("offers to restock only an order that is holding units", async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderDetail(waiting, { canRefund: true });
+    await user.click(screen.getByRole("button", { name: "Refund or cancel" }));
+    expect(screen.queryByRole("switch")).toBeNull();
+    unmount();
+
+    renderDetail({ ...waiting, quantity: 2, stockReserved: 2 }, { canRefund: true });
+    await user.click(screen.getByRole("button", { name: "Refund or cancel" }));
+    // Never sent, so back on the shelf by default.
+    expect(screen.getByRole("switch", { name: "Put all 2 back in stock" })).toBeChecked();
+  });
+
+  it("records it, says whether the buyer was told, and shows the order as refunded", async () => {
+    const user = userEvent.setup();
+    const held = { ...waiting, stockReserved: 1 };
+    const refunded: OrderView = {
+      ...held,
+      status: "refunded",
+      stockReserved: 0,
+      refund: { at: "2026-10-08T09:00:00.000Z", reason: "cancelled" },
+    };
+    refundOrderMock.mockResolvedValue({ ok: true, order: refunded, buyerEmailed: false });
+    render(<RefundHarness initial={held} />);
+
+    await user.click(screen.getByRole("button", { name: "Refund or cancel" }));
+    await user.click(screen.getByRole("button", { name: /^Record refund of/ }));
+
+    expect(refundOrderMock).toHaveBeenCalledWith(held.id, "cancelled", true);
+    expect(await screen.findByText("Refund recorded.")).toBeInTheDocument();
+    // Honest about the email, exactly as marking shipped is.
+    expect(screen.getByText("The buyer was not emailed. Tell them yourself.")).toBeInTheDocument();
+    expect(await screen.findByText(/^Cancelled and refunded/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Refund or cancel" })).toBeNull();
+  });
+
+  it("is the owner's: an editor is told who can, with nothing to press", () => {
+    renderDetail(waiting, { canRefund: false });
+    expect(screen.getByText("Only the store's owner can refund or cancel an order.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Refund or cancel" })).toBeNull();
   });
 
   it("says where a dispute is handled, with nothing to press", () => {
@@ -122,7 +187,7 @@ describe("refunds, while Stripe is not connected", () => {
 
   it("spares a member who cannot fulfil the whole footer", () => {
     renderDetail(waiting, { canFulfil: false });
-    expect(screen.queryByText(/can't refund from Square Share yet/)).toBeNull();
+    expect(screen.queryByText(/refund or cancel/i)).toBeNull();
     expect(screen.queryByText("No actions are available for this order.")).toBeNull();
   });
 });

@@ -91,8 +91,10 @@ const PLACEHOLDER_LOCAL_PARTS = new Set([
   "noreply",
   "no-reply",
   "no_reply",
+  "no.reply",
   "donotreply",
   "do-not-reply",
+  "do.not.reply",
   "dontreply",
   "unsubscribe",
 ]);

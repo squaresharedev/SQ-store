@@ -18,9 +18,11 @@ import { missingTraderIdentity } from "@/lib/settings/trader-identity";
 import type { ProductPagePanelSection } from "@/lib/storefront/setting-ref";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import {
+  DEFAULT_PRODUCT_PAGE_SALE_STYLE,
   PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX,
   PRODUCT_PAGE_CTA_MAX,
   PRODUCT_PAGE_CTA_RADIUS_MAX,
+  PRODUCT_PAGE_SALE_STYLES,
   STOREFRONT_FONTS,
   type ProductPageConfig,
   type StorefrontBackground,
@@ -31,7 +33,9 @@ import {
   resolveCta,
   storefrontBackdropHex,
 } from "@/components/product-page/product-page-maps";
+import { SalePrice } from "@/components/product-page/SalePrice";
 import { FONT_LABELS } from "./config-maps";
+import { OptionCardPicker } from "./OptionCardPicker";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { InfoTip } from "@/components/ui/InfoTip";
@@ -86,9 +90,17 @@ const INHERIT_FONT = "";
  * the saved jsonb (isDefaultProductPage compares against the defaults field
  * for field), so a stored `undefined` would be a byte the store never had.
  */
+/** The sale each look is drawn on in its picker: a round price with a fifth
+ *  off, so the two tiles differ only in how the regular price is crossed out. */
+const SALE_LOOK_SAMPLE = {
+  priceCents: 1920,
+  currency: "EUR",
+  sale: { regularPriceCents: 2400, priorPriceCents: null, percentOff: null, offerPercent: 20, endsAt: null },
+} as const;
+
 function withoutKey(
   config: ProductPageConfig,
-  key: "backgroundColor" | "backgroundImage" | "ctaColor" | "ctaRadius" | "ctaBorderWidth" | "ctaBorderColor",
+  key: "backgroundColor" | "backgroundImage" | "ctaColor" | "ctaRadius" | "ctaBorderWidth" | "ctaBorderColor" | "saleStyle",
 ): ProductPageConfig {
   const next = { ...config };
   delete next[key];
@@ -449,6 +461,31 @@ export function ProductPageSection({
                   { value: "none", label: t("productPage.cta.shippingNote.none") },
                 ]}
                 onChange={(shippingNote) => onProductPageChange({ ...productPage, shippingNote })}
+              />
+            </PanelField>
+            {/* How a sale's regular price is crossed out. The picture IS the
+                choice: each tile draws the real price line in that look. The
+                default is stored as no key, like every other inherit here. */}
+            <PanelField label={t("productPage.cta.saleStyle.label")}>
+              <OptionCardPicker
+                ariaLabel={t("productPage.cta.saleStyle.label")}
+                value={productPage.saleStyle ?? DEFAULT_PRODUCT_PAGE_SALE_STYLE}
+                options={PRODUCT_PAGE_SALE_STYLES.map((saleStyle) => ({
+                  value: saleStyle,
+                  label: t(`productPage.cta.saleStyle.${saleStyle}`),
+                  glyph: (
+                    <span className="text-sm text-foreground">
+                      <SalePrice {...SALE_LOOK_SAMPLE} size="sm" saleStyle={saleStyle} priceClassName="font-semibold" />
+                    </span>
+                  ),
+                }))}
+                onChange={(saleStyle) =>
+                  onProductPageChange(
+                    saleStyle === DEFAULT_PRODUCT_PAGE_SALE_STYLE
+                      ? withoutKey(productPage, "saleStyle")
+                      : { ...productPage, saleStyle },
+                  )
+                }
               />
             </PanelField>
           </PanelGroup>

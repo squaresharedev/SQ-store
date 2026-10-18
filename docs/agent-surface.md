@@ -5,8 +5,7 @@ an MCP server expose it to an assistant that helps a creator **set up** and
 **run** their shop?
 
 Scope note: there is no MCP server for Store today. The only HTTP surface is
-`/api/embed/[key]` (public, buyer-facing), `/api/embed/[key]/signal` (public,
-analytics ingest), `/api/uploads/*`, `/api/search` + `/api/search/snapshot`,
+`/api/embed/[key]` (public, buyer-facing), `/api/uploads/*`, `/api/search` + `/api/search/snapshot`,
 `/api/settings/username-available`, and — new, see the 2026-09-08 update below —
 `/api/storefronts/[id]/product-page`. This document is the catalogue and the
 contract that server has to satisfy — not a description of something shipped.

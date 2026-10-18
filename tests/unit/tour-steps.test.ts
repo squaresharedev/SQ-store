@@ -3,6 +3,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { english } from "../setup/translate";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
+import { isEmbedAvailable } from "@/lib/storefront/embed-snippet";
 import { EDITOR_TOUR_STEPS } from "@/lib/onboarding/editor-tour-steps";
 import { MAIN_NAV, SETTINGS_LINK } from "@/lib/search/nav-constants";
 import {
@@ -191,12 +192,29 @@ describe("tour steps", () => {
     }
   });
 
-  it("says the embed widget is still in development, with or without a storefront", () => {
+  it("says what is true of the embed today, with or without a storefront", () => {
+    // Like the payments stop: either something to paste now, or something
+    // still on its way (it has no host until NEXT_PUBLIC_EMBED_URL is set,
+    // which a test run, like production before launch, does not have).
     const embed = tourStep("storefront-embed")!;
-    expect(english(embed.targets[0].body!)).toMatch(/still in development/i);
-    expect(english(embed.fallbackBody!)).toMatch(/still in development/i);
+    for (const key of [embed.body, embed.targets[0].body!, embed.fallbackBody!]) {
+      if (isEmbedAvailable()) {
+        expect(english(key)).toMatch(/your own site/i);
+        expect(english(key)).not.toMatch(/still in development/i);
+      } else {
+        expect(english(key)).toMatch(/still in development/i);
+      }
+    }
     expect(embed.targets[0].extra).toBe("embed-snippet");
     expect(embed.fallbackExtra).toBe("embed-snippet");
+  });
+
+  it("has live wording ready for the day the embed has a host", () => {
+    for (const key of ["bodyLive", "bodyButtonLive", "fallbackBodyLive"] as const) {
+      const text = english(`Onboarding.guidedTour.steps.storefrontEmbed.${key}`);
+      expect(text).toMatch(/your own site/i);
+      expect(text).not.toMatch(/in development/i);
+    }
   });
 
   it("shows the Orders toolbar only on the orders stops", () => {

@@ -33,6 +33,7 @@
     "emptyDefault": "Nessuna vendita in questo intervallo"
   },
   "sales": {
+    "untitledProduct": "Prodotto senza titolo",
     "label": "Vendite",
     "description": "Ordini pagati effettuati tramite il checkout di Square Share.",
     "revenue": {
@@ -71,6 +72,28 @@
       "empty": "Nessun ordine in questo intervallo",
       "ariaLabel": "Mix di stato degli ordini"
     }
+  },
+  "compare": {
+    "previous": "Periodo precedente",
+    "vsPrevious": "{change} rispetto al periodo precedente"
+  },
+  "funnel": {
+    "label": "Funnel della vetrina",
+    "description": "Da quando la tua vetrina viene mostrata sul tuo sito fino a un ordine pagato. Si contano eventi, non persone.",
+    "views": "Visualizzazioni sul tuo sito",
+    "viewsEmpty": "Nessuna visualizzazione in questo periodo",
+    "opens": "Prodotti aperti",
+    "opensEmpty": "Nessuno aperto in questo periodo",
+    "started": "Pagamenti avviati",
+    "startedEmpty": "Nessun pagamento in questo periodo",
+    "expired": "Pagamenti non completati",
+    "expiredEmpty": "Nessuno non completato",
+    "conversion": "Ordini ogni 100 visualizzazioni",
+    "conversionCounts": "Ordini: {orders}, visualizzazioni: {views}",
+    "abandonment": "Abbandono al pagamento",
+    "abandonmentCounts": "Non completati: {expired}, avviati: {started}",
+    "notEnough": "Dati non ancora sufficienti",
+    "notEnoughHint": "I tassi compaiono quando questo periodo contiene {min} visualizzazioni."
   },
   "tiles": {
     "revenue": "Ricavi",
@@ -142,9 +165,7 @@
       "acrossRange": "Clic sui prodotti nell’intervallo selezionato.",
       "byChannel": "Clic sui prodotti per canale",
       "byWeekday": "Clic sui prodotti per giorno della settimana",
-      "byStorefront": "Clic sui prodotti per vetrina",
-      "awaiting": "Arriva quando il widget di incorporamento segnala l’apertura dei prodotti.",
-      "readyToChart": "Pronto per il grafico non appena arrivano i clic."
+      "byStorefront": "Clic sui prodotti per vetrina"
     },
     "product_view": {
       "label": "Visualizzazioni pagina prodotto",

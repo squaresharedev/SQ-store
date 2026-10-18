@@ -207,6 +207,38 @@ export function quoteShipping(
 }
 
 /**
+ * What delivery will cost, said BEFORE the buyer has named a country: the
+ * lowest rate any destination pays for this product, and whether every
+ * destination pays that same rate ("Delivery €4.50" rather than "from").
+ *
+ * The same three rules `quoteShipping` applies, in the same order (the row's
+ * rate, a profile's override, the free threshold), so the product page can
+ * never promise a price checkout would not give. Null when checkout could not
+ * quote at all, and the page then says nothing rather than guess.
+ */
+export function deliveryPriceRange(
+  policy: SellerShippingPolicy,
+  request: { profileId: string | null; subtotalCents: number; currency: Currency },
+): { fromCents: number; uniform: boolean } | null {
+  if (!canQuoteShipping(policy, request.currency)) return null;
+
+  const threshold = policy.freeOverCents;
+  if (typeof threshold === "number" && threshold > 0 && request.subtotalCents >= threshold) {
+    return { fromCents: 0, uniform: true };
+  }
+  // A profile's rate replaces every row's: one price wherever it goes.
+  const profile = request.profileId
+    ? (policy.profiles ?? []).find((entry) => entry.id === request.profileId)
+    : undefined;
+  if (profile && typeof profile.rateCents === "number") {
+    return { fromCents: profile.rateCents, uniform: true };
+  }
+  const rates = (policy.destinations ?? []).filter(isPriced).map((row) => row.rateCents);
+  const fromCents = Math.min(...rates);
+  return { fromCents, uniform: rates.every((rate) => rate === fromCents) };
+}
+
+/**
  * How much more the buyer would have to spend for delivery to become free,
  * in cents, or null when that is not a thing worth saying: delivery is
  * already free (or was never charged), the seller set no threshold, or the

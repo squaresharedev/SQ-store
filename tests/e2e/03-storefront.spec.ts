@@ -5,6 +5,7 @@ import {
   createStorefrontViaUI,
   expectToast,
   freshUser,
+  PUBLISHABLE_SELLER,
   gotoApp,
   seedSellerIdentity,
   signUp,
@@ -79,9 +80,10 @@ test.describe("storefront designer", () => {
     // its settings, so the seller arrives having already filled them in rather
     // than reaching a switch it cannot move.
     await seedSellerIdentity(await userIdByEmail(user.email), {
+      // The shared fixture's contact email: the gate asks for one on a domain
+      // that takes mail, which a placeholder domain does not.
+      ...PUBLISHABLE_SELLER,
       businessName: "Grid Goods",
-      address: "1 Test Way, Testville",
-      email: "grid-goods@example.com",
     });
 
     // Create a product so the designer has something to place.
@@ -123,7 +125,9 @@ test.describe("storefront designer", () => {
     // Publishing the id would make the embed impossible to revoke without
     // deleting the storefront, and would leak the dashboard's own identifier
     // into every page that embeds it.
-    await expect(snippet).toContainText("embed.squareshare.to/widget.js");
+    // It loads the embed's loader from the embed's own origin (this server, in
+    // the test stack: NEXT_PUBLIC_EMBED_URL in tests/e2e/stack/server.mjs).
+    await expect(snippet).toContainText('src="http://localhost:3100/widget.js"');
     await expect(snippet).toContainText(
       /data-squareshare-storefront="[0-9a-f-]{36}"/,
     );

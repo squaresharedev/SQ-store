@@ -16,6 +16,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { BackLink } from "@/components/ui/BackLink";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
+import { requireUser } from "@/lib/auth/session";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Products.metadata.new");
@@ -30,6 +31,9 @@ export default async function NewProductPage({
 }: {
   searchParams: Promise<{ next?: string | string[] }>;
 }) {
+  // The layout's session gate does not run again on a move between sections
+  // (see ../layout.tsx, or ../../layout.tsx from a nested page): a page asks.
+  await requireUser(PRODUCTS_PATH);
   // Overlapped: the shipping read is scoped to the active account on its own
   // (and RLS backs that up), and nothing is rendered before the role check.
   const [account, shippingChoices, params] = await Promise.all([

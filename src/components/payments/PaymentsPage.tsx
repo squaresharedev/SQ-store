@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import type {
   BalanceTransaction,
+  MoneyAmount,
   PaymentsOverview,
   Payout,
 } from "@/lib/payments/types";
@@ -32,7 +33,14 @@ type ActiveModal =
  * modal state. Everything is read-only display, the only actions are stubs
  * that will become redirects to Stripe-hosted surfaces.
  */
-export function PaymentsPage({ overview }: { overview: PaymentsOverview }) {
+export function PaymentsPage({
+  overview,
+  feesThisMonth,
+}: {
+  overview: PaymentsOverview;
+  /** What the store paid Square Share this month (see BalanceSummary). */
+  feesThisMonth?: MoneyAmount[] | null;
+}) {
   const t = useTranslations("Payments");
   const [modal, setModal] = useState<ActiveModal>({ kind: "none" });
   const close = () => setModal({ kind: "none" });
@@ -56,6 +64,7 @@ export function PaymentsPage({ overview }: { overview: PaymentsOverview }) {
         <BalanceSummary
           balance={overview.balance}
           upcomingPayout={overview.upcomingPayout}
+          feesThisMonth={feesThisMonth}
         />
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -89,7 +98,12 @@ export function PaymentsPage({ overview }: { overview: PaymentsOverview }) {
         />
       )}
       {modal.kind === "payout" && (
-        <PayoutDetailModal open onClose={close} payout={modal.payout} />
+        <PayoutDetailModal
+          open
+          onClose={close}
+          payout={modal.payout}
+          method={overview.payoutMethod}
+        />
       )}
       {modal.kind === "transaction" && (
         <TransactionDetailModal

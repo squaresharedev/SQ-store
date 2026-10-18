@@ -11,15 +11,10 @@ describe.skip("checkout / order creation (STUB — no checkout exists)", () => {
   it.todo("a decrement crossing low_stock_threshold fires a 'stock' notification");
 });
 
-describe.skip("public embed API (STUB — widget served from embed.squareshare.to, endpoint not in this repo)", () => {
-  it.todo("public config payload strips config.embed before serialization");
-  it.todo("public payload NEVER contains owner_id, email, digital_file_key, buyer_email, or raw stock numbers");
-  it.todo("blocks hidden by theme.hideSoldOut are dropped server-side, not client-side");
-  it.todo("requests from origins outside embed.domains are refused when enabled=false");
-  // NOTE: the stock-badge whitelist helpers that endpoint MUST use are already
-  // tested for real in tests/unit/stock-badge.test.ts (PUBLIC_STOCK_SELECT +
-  // toPublicStockBadge).
-});
+// The storefront embed is no longer a stub: what it sends, and to whom, is
+// tested for real in tests/unit/embed-frame-loader.test.ts (the payload and
+// the allowlist), embed-frame-headers.test.ts (the browser-enforced half) and
+// tests/e2e/89-embed-frame.spec.ts (a real page framing it).
 
 describe.skip("image proxy (STUB — no proxy route exists in this repo)", () => {
   it.todo("a files/ key is rejected with 403 (digital products must never be servable)");

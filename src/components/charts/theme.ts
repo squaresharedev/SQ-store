@@ -62,15 +62,17 @@ export const CHART_ANIMATION = {
 } as const;
 
 /**
- * Tooltip presentation. It does NOT animate, and that is the whole point.
+ * Tooltip presentation. RECHARTS' OWN animation stays off, and the readout's
+ * motion is ours instead (globals.css, "Chart readouts ARRIVE IN PLACE").
  *
  * Recharts' position animation tweens the readout from the container's own
  * origin to the pointer, so the first hover of a session visibly launches a
  * card from the chart's top-left corner and flies it to the cursor. There is
  * no reading of that which is correct: a tooltip belongs at the pointer the
- * instant the pointer is somewhere, and a 100ms flight across the card is time
- * spent looking at travel instead of at the number. `isAnimationActive={false}`
- * on every Tooltip, and no entrance keyframe on the body either.
+ * instant the pointer is somewhere. So `isAnimationActive={false}` on every
+ * Tooltip, always. What makes the readout feel smooth instead of snappy is an
+ * entrance played where it already stands (`chart-tip-enter`, on the body),
+ * and a short glide between points that only begins once it has been placed.
  *
  * `wrapperStyle` carries the stacking. Recharts renders the readout as a
  * positioned sibling of the plot, so without a z-index it competes with
@@ -95,12 +97,28 @@ export const MARK = {
   maxBarSize: 24,
   /** Rounded data-end radius; the baseline end stays square. */
   barRadius: 4,
+  /** The least a bar with ANY value is drawn at, in px. Beside a bar a
+   *  million times its size, a real value would otherwise round to no bar at
+   *  all and read as "nothing". A zero still draws nothing. */
+  minBar: 2,
   /** Line stroke width. */
   lineWidth: 2,
   /** Gap between touching fills (stacked segments, pie slices), in px. */
   surfaceGap: 2,
   /** Opacity of an area's wash where it meets its line; it fades to nothing. */
   areaWash: 0.12,
+  /** The opacity the wash as a whole is drawn at (Recharts' own default for
+   *  an area, pinned here so anything drawn to MATCH a wash can match it). */
+  areaFillOpacity: 0.6,
+  /** A reference series (ChartSeries.reference): thinner than a measured line
+   *  and dashed, so it reads as context. */
+  referenceWidth: 1.5,
+  referenceDash: "4 4",
+  /** A series with ONE value has no line to draw. Its point is marked, and a
+   *  faint dotted level runs through it so the value can be read off the axis. */
+  loneDotRadius: 5,
+  loneLevelDash: "2 4",
+  loneLevelOpacity: 0.5,
 } as const;
 
 /** Plot geometry the cartesian charts share, in px. */
@@ -116,7 +134,14 @@ export const PLOT = {
 /**
  * Edge-to-edge ("bleed") plots: a chart drawn on the page itself, running the
  * full width of its box, with no card around it and no axis column beside it.
- * The value labels move INSIDE the plot and sit on their gridlines.
+ * The value labels move INSIDE the plot and sit on their gridlines, and the
+ * plot dissolves at both ends instead of being cut off by the box's edges.
+ *
+ * WHAT DISSOLVES IS NOT DATA. The first and last values stand clear of both
+ * ends, drawn at full strength. From each of them a TAIL runs on, level, to
+ * the edge of the box, and it is the tail that blurs away. So the graph still
+ * reaches from one side of the screen to the other, and nothing a reader
+ * needs is ever in the blur.
  */
 export const BLEED = {
   /** How far labels stand in from the box's edges. The page gutter (px-6), so
@@ -127,16 +152,32 @@ export const BLEED = {
   top: 20,
   /** How far a value label is lifted to sit on its gridline. */
   labelLift: 6,
+  /** The width given to the value axis. It takes no room (it is drawn inside
+   *  the plot), but Recharts draws no labels at all for an axis of no width. */
+  axisBox: 44,
   /** Page-coloured outline around a value label, so the line can pass behind
    *  it and the label still reads. */
   labelHalo: 4,
-  /** Extra room between x labels: the two end labels are tucked inward, so
-   *  each takes more of the axis than a centred one. */
-  tickGap: 24,
   /** A stronger wash than MARK.areaWash: with no card to frame it, the fill
    *  is what gives the chart its body. */
   areaWash: 0.2,
+  /** How much of the width each end's tail takes, as a share of it, and the
+   *  least and most that may come to in px (a phone still needs a visible
+   *  tail; a wide monitor does not need a huge one). */
+  fade: 0.08,
+  fadeMin: 32,
+  fadeMax: 112,
+  /** How far along a tail its sharp copy has given way to its blurred one,
+   *  as a share of the tail: the line goes out of focus first, then away. */
+  blurBy: 0.5,
+  /** The blur's radius, in px. */
+  blur: 4,
 } as const;
+
+/** The width of each end's tail, in px, for a bled plot `width` px wide. */
+export function bleedFade(width: number): number {
+  return Math.round(Math.min(BLEED.fadeMax, Math.max(BLEED.fadeMin, width * BLEED.fade)));
+}
 
 /** Where a bled plot sits inside a chart of `height`: its top edge and its own
  *  height, in px. For a caller laying something over the plot. */
@@ -149,7 +190,7 @@ export function bleedPlot(height: number): { top: number; height: number } {
 // soft shadow.
 
 export const tooltipWrapperClass =
-  "bg-popover border border-border rounded-md shadow-md px-3 py-2";
+  "chart-tip-enter bg-popover border border-border rounded-md shadow-md px-3 py-2";
 export const tooltipLabelClass = "font-inter text-xs text-muted-foreground";
 /** tabular-nums: digits keep their width while the tooltip glides across
  *  points, so values tick over without jitter. */
@@ -161,5 +202,7 @@ export const tooltipValueClass = "text-sm font-semibold text-foreground tabular-
 
 export const legendRowClass = "flex items-center gap-2";
 export const legendSwatchClass = "size-2 shrink-0 rounded-full";
-export const legendLabelClass = "font-inter text-sm text-foreground";
+/** `wrap-anywhere`: a label is a product's or a shop's own name, and one with
+ *  no space in it has to give way to the value beside it, not push it out. */
+export const legendLabelClass = "font-inter text-sm text-foreground wrap-anywhere";
 export const legendMetaClass = "font-inter text-sm text-muted-foreground";

@@ -10,6 +10,7 @@ import {
   planHas,
 } from "@/lib/billing/features";
 import { PLAN_IDS, PLAN_LIMIT_KEYS, PLAN_PERK_KEYS, PLANS, RECOMMENDED_PLAN, nextPlanUp } from "@/lib/billing/plans";
+import { PLAN_PRICE_SEED } from "@/lib/billing/pricing-seed";
 
 /** A cap as a comparable number: unlimited ranks above any count. */
 const rank = (cap: number | null) => (cap === null ? Number.POSITIVE_INFINITY : cap);
@@ -41,12 +42,12 @@ describe("plan features", () => {
   });
 
   it("lists what each paid plan adds over the one below it", () => {
-    expect(planCardFeatures("free")).toEqual({ below: null, features: planFeatures("free") });
-    expect(planCardFeatures("starter")).toEqual({
+    expect(planCardFeatures(PLAN_PRICE_SEED, "free")).toEqual({ below: null, features: planFeatures("free") });
+    expect(planCardFeatures(PLAN_PRICE_SEED, "starter")).toEqual({
       below: "free",
       features: ["fee", "products", "storefronts", "teamSeats", "earlyAccess"],
     });
-    expect(planCardFeatures("pro")).toEqual({
+    expect(planCardFeatures(PLAN_PRICE_SEED, "pro")).toEqual({
       below: "starter",
       features: ["fee", "products", "storefronts", "teamSeats", "analyticsExport", "prioritySupport"],
     });
@@ -55,9 +56,15 @@ describe("plan features", () => {
   it("gives the upsell a reason on every step up", () => {
     for (const plan of PLAN_IDS) {
       const next = nextPlanUp(plan);
-      if (next) expect(gainsOver(plan, next).length, `${plan} -> ${next}`).toBeGreaterThan(0);
+      if (next) expect(gainsOver(PLAN_PRICE_SEED, plan, next).length, `${plan} -> ${next}`).toBeGreaterThan(0);
     }
     expect(nextPlanUp("pro")).toBeNull();
+  });
+
+  it("only counts the fee as a gain where the prices in force make it lower", () => {
+    const flat = PLAN_PRICE_SEED.map((price) => ({ ...price, directFeeBps: 500 }));
+    expect(gainsOver(PLAN_PRICE_SEED, "free", "starter")).toContain("fee");
+    expect(gainsOver(flat, "free", "starter")).not.toContain("fee");
   });
 
   it("names the cheapest plan with a perk, for a locked button", () => {

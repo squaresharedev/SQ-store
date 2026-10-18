@@ -6,6 +6,12 @@ export function signInPath(next: string): string {
   return `/login?next=${encodeURIComponent(next)}`;
 }
 
+/** The sign-in page opened on its sign-up tab, optionally carrying on to
+ *  `next` (an internal path) once the account exists. */
+export function signUpPath(next?: string): string {
+  return `/login?mode=signup${next ? `&next=${encodeURIComponent(next)}` : ""}`;
+}
+
 /** Settings › Security, where 2FA is managed and its activity is listed. */
 export const SECURITY_SETTINGS_PATH = "/settings/security";
 
