@@ -25,10 +25,7 @@ import { PLAN_IDS, type BillingInterval, type PaidPlanId } from "@/lib/billing/p
 import type { PlanPrices } from "@/lib/billing/fees";
 import { PLAN_PRICE_SEED } from "@/lib/billing/pricing-seed";
 import { activePlanPrices, findPlanPrice, planPriceSchema, type PlanPrice } from "@/lib/pricing";
-
-/** "No such table": Postgres' own code, and PostgREST's for a table missing
- *  from its schema cache. The database has not had 20261011_pricing_config. */
-const MISSING_TABLE_CODES = ["42P01", "PGRST205"];
+import { isMissingTableError } from "@/lib/supabase/errors";
 
 const PLAN_PRICE_SELECT =
   "plan_id, version, billing_interval, price_cents, list_price_cents, currency, direct_fee_bps, marketplace_fee_bps, stripe_lookup_key, effective_from, effective_to" as const;
@@ -47,7 +44,8 @@ export async function readPlanPrices(now: Date = new Date()): Promise<PlanPrices
       .select(PLAN_PRICE_SELECT)
       .lte("effective_from", now.toISOString());
     if (error) {
-      if (MISSING_TABLE_CODES.includes(error.code)) {
+      // The database has not had 20261011_pricing_config.
+      if (isMissingTableError(error)) {
         console.warn("[billing] plan_prices does not exist yet (apply 20261011_pricing_config); using the seed");
         return activePlanPrices(PLAN_PRICE_SEED, now);
       }

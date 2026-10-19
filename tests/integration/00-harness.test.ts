@@ -84,6 +84,9 @@ describe("embedded supabase replica", () => {
       // and charges per sale, and the plans themselves (20261011_pricing_config).
       // Read by any signed-in user, written by the service role only.
       "plan_entitlements",
+      // A paid plan staff gave an account, without Stripe
+      // (20261019_plan_grants). Service-role only.
+      "plan_grants",
       "plan_prices",
       "plans",
       // Every price a product has had, for the 30-day prior-price rule on

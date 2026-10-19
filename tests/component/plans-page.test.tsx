@@ -88,6 +88,7 @@ const FREE: PricingContext = {
   available: true,
   directSales30dCents: 0,
   feeWaived: false,
+  grant: null,
   usage: { storefronts: 1, teamSeats: 1, products: 4 },
 };
 
@@ -108,6 +109,15 @@ const STARTER: PricingContext = {
 
 /** How the dialogs write STARTER's period end. */
 const PERIOD_END = formatLongDate(STARTER.currentPeriodEnd!, "en");
+
+/** A Free store Square Share gave Starter until GRANT_END: no subscription,
+ *  nothing on file at Stripe. */
+const GRANTED_STARTER: PricingContext = {
+  ...FREE,
+  plan: "starter",
+  grant: { plan: "starter", endsAt: "2027-01-19T12:00:00.000Z" },
+};
+const GRANT_END = formatLongDate(GRANTED_STARTER.grant!.endsAt!, "en");
 
 function stubActions(overrides: Partial<BillingActions> = {}): BillingActions {
   return {
@@ -253,6 +263,25 @@ describe("PlansPage", () => {
     expect(notice.textContent).toContain(`Your Starter plan ends on ${PERIOD_END}`);
     expect(within(notice).getByRole("button", { name: "Keep my plan" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Move to Free/ })).toBeNull();
+  });
+
+  it("says a plan Square Share gave is on us, and sells only what is above it", () => {
+    render(<PlansPage context={GRANTED_STARTER} source={null} actions={stubActions()} />);
+    expect(screen.getByRole("status").textContent).toContain(`Your Starter plan is on us until ${GRANT_END}.`);
+    expect(screen.queryByRole("button", { name: /Upgrade to Starter/ })).toBeNull();
+    expect(screen.getByRole("button", { name: /Upgrade to Pro/ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Move to Free|Switch/ })).toBeNull();
+    cleanup();
+    // The top plan with no end date: nothing left to buy.
+    render(
+      <PlansPage
+        context={{ ...GRANTED_STARTER, plan: "pro", grant: { plan: "pro", endsAt: null } }}
+        source={null}
+        actions={stubActions()}
+      />,
+    );
+    expect(screen.getByRole("status").textContent).toContain("Your Pro plan is on us, with no end date.");
+    expect(screen.queryByRole("button", { name: /Upgrade to/ })).toBeNull();
   });
 
   it("gives a teammate the plans to read and nothing to press", () => {
@@ -451,6 +480,24 @@ describe("BillingSection", () => {
     // Free has nothing to cancel.
     render(<BillingSection context={FREE} returned={null} actions={stubActions()} />);
     expect(document.querySelector("[data-plan-controls]")).toBeNull();
+  });
+
+  it("shows a plan Square Share gave as on us, until its end date, with nothing to cancel", () => {
+    render(<BillingSection context={GRANTED_STARTER} returned={null} actions={stubActions()} />);
+    expect(document.querySelector("[data-billing-plan]")?.getAttribute("data-billing-plan")).toBe("starter");
+    expect(screen.getByText("On us: Square Share gave your store this plan.")).toBeTruthy();
+    expect(screen.getByText(`Until ${GRANT_END}. Nothing is taken down when it ends.`)).toBeTruthy();
+    expect(screen.queryByText("No subscription.")).toBeNull();
+    expect(document.querySelector("[data-plan-controls]")).toBeNull();
+    cleanup();
+    render(
+      <BillingSection
+        context={{ ...GRANTED_STARTER, grant: { plan: "starter", endsAt: null } }}
+        returned={null}
+        actions={stubActions()}
+      />,
+    );
+    expect(screen.getByText("No end date.")).toBeTruthy();
   });
 
   it("while a plan is ending, says when and offers Keep my plan in one click", async () => {

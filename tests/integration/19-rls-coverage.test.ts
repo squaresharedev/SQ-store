@@ -98,6 +98,10 @@ const POLICY_FREE_BY_DESIGN = new Set([
   // cancel action, read by the admin panel, both through the service role.
   // A seller's note is staff-only reading.
   "plan_cancellations",
+  // A paid plan staff gave an account (20261019_plan_grants): written by the
+  // admin panel, read by the server, both through the service role. A client
+  // that could write it could give itself Pro.
+  "plan_grants",
   // Price history for the EU 30-day rule on sales (20261004_discounts):
   // written by a trigger on products, read by the server when it decides
   // whether a sale may show a "was" price. A client that could write it could

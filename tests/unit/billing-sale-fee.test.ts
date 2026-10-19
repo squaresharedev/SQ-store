@@ -64,6 +64,8 @@ const onPlan = (plan: "free" | "starter" | "pro"): AccountBillingResult => ({
   ok: true,
   billing: {
     plan,
+    planSource: plan === "free" ? "free" : "paid",
+    grant: null,
     storedPlan: plan === "free" ? null : plan,
     status: plan === "free" ? "none" : "active",
     interval: plan === "free" ? null : "month",

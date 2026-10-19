@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { CalendarClock, CreditCard, Percent, TriangleAlert, Wallet, type LucideIcon } from "lucide-react";
+import { CalendarClock, CreditCard, Gift, Percent, TriangleAlert, Wallet, type LucideIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { AnimatedCheck } from "@/components/ui/animated-check";
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
@@ -68,13 +68,19 @@ export function YourPlanCard({
 }) {
   const t = useTranslations("Billing");
   const locale = useLocale();
-  const { plan, interval, status, priceCents, currency, currentPeriodEnd, cancelAtPeriodEnd, canManage } = context;
+  const { plan, interval, status, priceCents, currency, currentPeriodEnd, cancelAtPeriodEnd, canManage, grant } = context;
   const planName = t(`plans.${plan}.name`);
   const paid = isPaidPlan(plan);
 
+  // A plan Square Share gave the store costs nothing and does not renew: it
+  // runs to the date staff set, or has none.
   const renewal = !paid
     ? null
-    : status === "past_due"
+    : grant
+      ? grant.endsAt
+        ? t("settings.grantUntil", { date: formatLongDate(grant.endsAt, locale) })
+        : t("settings.grantNoEnd")
+      : status === "past_due"
       ? t("settings.pastDue", { plan: planName })
       : currentPeriodEnd && cancelAtPeriodEnd
         ? t("settings.ends", { date: formatLongDate(currentPeriodEnd, locale) })
@@ -91,16 +97,18 @@ export function YourPlanCard({
         <PlanWordmark plan={plan} name={planName} className="sm:w-52 sm:shrink-0" />
         <div className="flex min-w-0 flex-1 flex-col justify-center gap-4">
           <div className="space-y-2">
-            <PlanFact icon={paid ? CreditCard : Wallet} emphasis>
-              {paid && priceCents !== null && interval
-                ? t("settings.priceLine", {
-                    price: formatCents(priceCents, currency ?? BILLING_CURRENCY, locale),
-                    interval,
-                  })
-                : t("settings.freeLine")}
+            <PlanFact icon={grant ? Gift : paid ? CreditCard : Wallet} emphasis>
+              {grant
+                ? t("settings.grantLine")
+                : paid && priceCents !== null && interval
+                  ? t("settings.priceLine", {
+                      price: formatCents(priceCents, currency ?? BILLING_CURRENCY, locale),
+                      interval,
+                    })
+                  : t("settings.freeLine")}
             </PlanFact>
             {renewal && (
-              <PlanFact icon={CalendarClock} danger={status === "past_due"}>
+              <PlanFact icon={CalendarClock} danger={!grant && status === "past_due"}>
                 {renewal}
               </PlanFact>
             )}

@@ -1,6 +1,10 @@
 // SERVER ONLY. Reading an account's billing row: the plan it is on, and what
 // the settings page and the plans page show about it.
 //
+// THE PLAN IN FORCE is the higher of the paid plan and a plan staff granted
+// (plan_grants, lib/billing/grants.ts): every reader that asks which plan an
+// account is on gets the grant through here, the fee at checkout included.
+//
 // SERVICE ROLE, and so NOT an access check. seller_billing has no client
 // policy (see the migration), so every read goes through here. A caller must
 // already know it is entitled to ask about `accountId`: the dashboard passes
@@ -18,6 +22,8 @@ import {
   parseSubscriptionStatus,
   type SubscriptionStatus,
 } from "@/lib/billing/entitlement";
+import { GRANT_SELECT, activeGrant, grantedPlan, type ActiveGrant, type PlanSource } from "@/lib/billing/grants";
+import { isMissingTableError } from "@/lib/supabase/errors";
 import {
   parseBillingInterval,
   parsePaidPlanId,
@@ -28,8 +34,14 @@ import {
 
 /** An account's billing as the server holds it. */
 export type AccountBilling = {
-  /** The plan in force NOW: Free unless a paid plan is paid up. */
+  /** The plan in force NOW: the higher of a paid-up plan and an active grant,
+   *  Free with neither. */
   plan: PlanId;
+  /** What sets `plan`: a subscription, a grant from staff, or nothing. */
+  planSource: PlanSource;
+  /** The plan staff granted, while it applies (whether or not it is the
+   *  higher of the two). */
+  grant: ActiveGrant | null;
   /** The paid plan on file, even if it has lapsed (to say "Pro ended"). */
   storedPlan: PaidPlanId | null;
   status: SubscriptionStatus | "none";
@@ -49,6 +61,8 @@ export type AccountBilling = {
 /** An account that has never been to checkout: Free, nothing on file. */
 export const FREE_BILLING: AccountBilling = {
   plan: "free",
+  planSource: "free",
+  grant: null,
   storedPlan: null,
   status: "none",
   interval: null,
@@ -67,26 +81,49 @@ const BILLING_SELECT =
   "plan, paid_until, status, billing_interval, price_cents, currency, current_period_end, cancel_at_period_end, stripe_customer_id, stripe_subscription_id" as const;
 
 /**
- * The billing row for `accountId`, or Free when it has none. `{ ok: false }`
- * on a read error: callers decide which way to fail (the checkout refuses to
- * price a sale; the shell simply shows no plan chip).
+ * The plan staff granted `accountId`, if one applies at `now`. `undefined` on
+ * a read error. A database without the table (20261019_plan_grants not
+ * applied yet) has no grants, which is not an error.
+ */
+async function readActiveGrant(accountId: string, now: Date): Promise<ActiveGrant | null | undefined> {
+  const { data, error } = await createAdminClient()
+    .from("plan_grants")
+    .select(GRANT_SELECT)
+    .eq("owner_id", accountId)
+    .maybeSingle();
+  if (error) {
+    if (isMissingTableError(error)) return null;
+    console.error("[billing] reading the plan grant failed:", error.message);
+    return undefined;
+  }
+  return activeGrant(data, now);
+}
+
+/**
+ * The billing row for `accountId` with any plan staff granted it, or Free
+ * when it has neither. `{ ok: false }` on a read error: callers decide which
+ * way to fail (the checkout refuses to price a sale; the shell simply shows
+ * no plan chip).
  */
 export async function readAccountBilling(accountId: string, now: Date = new Date()): Promise<AccountBillingResult> {
   try {
-    const { data, error } = await createAdminClient()
-      .from("seller_billing")
-      .select(BILLING_SELECT)
-      .eq("owner_id", accountId)
-      .maybeSingle();
+    const [{ data, error }, grant] = await Promise.all([
+      createAdminClient().from("seller_billing").select(BILLING_SELECT).eq("owner_id", accountId).maybeSingle(),
+      readActiveGrant(accountId, now),
+    ]);
     if (error) {
       console.error("[billing] reading the billing row failed:", error.message);
       return { ok: false };
     }
-    if (!data) return { ok: true, billing: FREE_BILLING };
+    if (grant === undefined) return { ok: false };
+    const inForce = grantedPlan(effectivePlan(data, now), grant);
+    if (!data) return { ok: true, billing: { ...FREE_BILLING, plan: inForce.plan, planSource: inForce.source, grant } };
     return {
       ok: true,
       billing: {
-        plan: effectivePlan(data, now),
+        plan: inForce.plan,
+        planSource: inForce.source,
+        grant,
         storedPlan: parsePaidPlanId(data.plan),
         status: parseSubscriptionStatus(data.status) ?? "none",
         interval: parseBillingInterval(data.billing_interval),

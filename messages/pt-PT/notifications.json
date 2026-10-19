@@ -174,6 +174,18 @@
       "paymentFailed": {
         "title": "O pagamento do seu plano {plan, select, starter {Starter} pro {Pro} other {pago}} falhou",
         "body": "O Stripe vai tentar novamente. Atualize o seu cartão em Plano e faturação para manter o plano."
+      },
+      "granted": {
+        "title": "A Square Share ofereceu {plan, select, starter {o Starter} pro {o Pro} other {um plano pago}} à sua loja",
+        "until": "É oferta nossa até {until, date, long}.",
+        "noEnd": "É oferta nossa, sem data de fim."
+      },
+      "grantChanged": {
+        "title": "{plan, select, starter {O seu plano Starter} pro {O seu plano Pro} other {O seu plano}} da Square Share foi alterado"
+      },
+      "grantEnded": {
+        "title": "{plan, select, starter {O seu plano Starter} pro {O seu plano Pro} other {O seu plano}} da Square Share terminou",
+        "body": "Tudo o que tem continua a funcionar e nada é removido."
       }
     },
     "stock": {

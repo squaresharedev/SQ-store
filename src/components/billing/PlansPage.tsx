@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { formatLongDate } from "@/lib/format/date";
 import type { PricingContext } from "@/lib/billing/pricing-context";
 import { launchDiscountPercent, soldIntervals, yearlyFreeMonths } from "@/lib/billing/fees";
+import { planRank } from "@/lib/billing/grants";
 import type { PricingSource } from "@/lib/billing/paths";
 import {
   PLAN_IDS,
@@ -229,6 +230,9 @@ function planAction({
   const name = t(`plans.${plan}.name`);
   const sameInterval = context.interval === null || context.interval === interval;
   if (plan === context.plan && (!isPaidPlan(plan) || !context.hasSubscription || sameInterval)) return null;
+  // Nothing to buy that the store already has for free: only a plan above
+  // the one Square Share gave it is an upgrade.
+  if (context.grant && !context.hasSubscription && planRank(plan) <= planRank(context.grant.plan)) return null;
 
   if (!context.available) {
     if (!isPaidPlan(plan)) return null;
@@ -290,6 +294,11 @@ function planAction({
 function statusNotice(context: PricingContext, t: Translate, locale: ReturnType<typeof useLocale>): string | null {
   if (!isPaidPlan(context.plan)) return null;
   const plan = t(`plans.${context.plan}.name`);
+  if (context.grant) {
+    return context.grant.endsAt
+      ? t("page.grantUntil", { plan, date: formatLongDate(context.grant.endsAt, locale) })
+      : t("page.grantNoEnd", { plan });
+  }
   if (context.status === "past_due") return t("page.pastDue", { plan });
   if (context.cancelAtPeriodEnd && context.currentPeriodEnd) {
     return t("page.endsOn", { plan, date: formatLongDate(context.currentPeriodEnd, locale) });

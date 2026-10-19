@@ -174,6 +174,18 @@
       "paymentFailed": {
         "title": "Die Zahlung für {plan, select, starter {deinen Starter-Tarif} pro {deinen Pro-Tarif} other {deinen kostenpflichtigen Tarif}} ist fehlgeschlagen",
         "body": "Stripe versucht es erneut. Aktualisiere deine Karte unter Tarif und Abrechnung, damit du deinen Tarif behältst."
+      },
+      "granted": {
+        "title": "Square Share schenkt deinem Shop {plan, select, starter {Starter} pro {Pro} other {einen kostenpflichtigen Tarif}}",
+        "until": "Bis zum {until, date, long} geht er auf uns.",
+        "noEnd": "Er geht auf uns, ohne Enddatum."
+      },
+      "grantChanged": {
+        "title": "{plan, select, starter {Dein Starter-Tarif} pro {Dein Pro-Tarif} other {Dein Tarif}} von Square Share wurde geändert"
+      },
+      "grantEnded": {
+        "title": "{plan, select, starter {Dein Starter-Tarif} pro {Dein Pro-Tarif} other {Dein Tarif}} von Square Share ist beendet",
+        "body": "Alles, was du hast, funktioniert weiter, und nichts wird offline genommen."
       }
     },
     "stock": {

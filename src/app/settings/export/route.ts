@@ -198,6 +198,10 @@ export async function GET() {
       currency: billing.billing.currency,
       current_period_end: billing.billing.currentPeriodEnd,
       cancel_at_period_end: billing.billing.cancelAtPeriodEnd,
+      // A plan Square Share gave the account, while it applies.
+      plan_grant: billing.billing.grant
+        ? { plan: billing.billing.grant.plan, starts_at: billing.billing.grant.startsAt, ends_at: billing.billing.grant.endsAt }
+        : null,
     },
     plan_cancellations: cancellations.data,
     orders: orders.data,

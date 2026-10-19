@@ -33,7 +33,9 @@
     "finePrint": "Die Preise verstehen sich zzgl. MwSt. Die Gebühr pro Verkauf gilt für Verkäufe über den Checkout von Square Share und wird auf den gesamten Betrag erhoben, den der Käufer zahlt, einschließlich Versand. Die eigenen Kartengebühren von Stripe kommen hinzu. Jederzeit kündbar: Du behältst deinen Tarif bis zum Ende des bezahlten Zeitraums.",
     "unavailable": "Die Tarife können gerade nicht angezeigt werden. Lade die Seite gleich neu.",
     "yearlyFree": "{count, plural, one {# Monat gratis} other {# Monate gratis}}",
-    "launchNote": "Ein Einführungspreis ist ein Preis zum Start: Der reguläre Preis ist der durchgestrichene."
+    "launchNote": "Ein Einführungspreis ist ein Preis zum Start: Der reguläre Preis ist der durchgestrichene.",
+    "grantUntil": "Dein {plan}-Tarif geht bis zum {date} auf uns. Wenn er endet, wird nichts offline genommen.",
+    "grantNoEnd": "Dein {plan}-Tarif geht auf uns, ohne Enddatum."
   },
   "card": {
     "perMonth": "/ Monat",
@@ -200,7 +202,10 @@
     "confirmed": "Du hast jetzt {plan}. Danke, dass du Square Share unterstützt.",
     "pending": "Wir bestätigen deine Zahlung bei Stripe. Lade die Seite gleich neu, falls sich dein Tarif nicht geändert hat.",
     "unavailable": "Dein Tarif kann gerade nicht angezeigt werden. Lade die Seite gleich neu.",
-    "cancelPlan": "Tarif kündigen"
+    "cancelPlan": "Tarif kündigen",
+    "grantLine": "Geht auf uns: Square Share schenkt deinem Shop diesen Tarif.",
+    "grantUntil": "Bis zum {date}. Wenn er endet, wird nichts offline genommen.",
+    "grantNoEnd": "Ohne Enddatum."
   },
   "cancel": {
     "title": "{plan} kündigen?",

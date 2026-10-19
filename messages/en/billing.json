@@ -33,7 +33,9 @@
     "finePrint": "Prices exclude VAT. The per-sale fee applies to sales through Square Share checkout and is charged on everything the buyer pays, delivery included. Stripe's own card processing fees come on top. Cancel any time: you keep your plan until the end of the period you paid for.",
     "unavailable": "Plans can't be shown right now. Refresh the page in a moment.",
     "yearlyFree": "{count, plural, one {# month free} other {# months free}}",
-    "launchNote": "A launch price is an introductory price: the regular price is the one shown struck through."
+    "launchNote": "A launch price is an introductory price: the regular price is the one shown struck through.",
+    "grantUntil": "Your {plan} plan is on us until {date}. Nothing is taken down when it ends.",
+    "grantNoEnd": "Your {plan} plan is on us, with no end date."
   },
   "card": {
     "perMonth": "/ month",
@@ -200,7 +202,10 @@
     "confirmed": "You're on {plan}. Thanks for backing Square Share.",
     "pending": "We're confirming your payment with Stripe. Refresh in a moment if your plan hasn't changed.",
     "unavailable": "Your plan can't be shown right now. Refresh the page in a moment.",
-    "cancelPlan": "Cancel plan"
+    "cancelPlan": "Cancel plan",
+    "grantLine": "On us: Square Share gave your store this plan.",
+    "grantUntil": "Until {date}. Nothing is taken down when it ends.",
+    "grantNoEnd": "No end date."
   },
   "cancel": {
     "title": "Cancel {plan}?",

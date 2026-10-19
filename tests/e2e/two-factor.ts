@@ -74,7 +74,11 @@ export function wrongCode(app: Authenticator): string {
  * Before the name is filled: switching method resets the suggested name.
  */
 export async function chooseAuthenticatorApp(dialog: Locator) {
-  await dialog.getByRole("radio", { name: /Authenticator app/ }).check();
+  // The choice is there only when the server has passkeys configured
+  // (passkeysConfigured); without them the dialog opens straight on the app.
+  // Server-rendered either way, so it is present on the first paint or never.
+  const app = dialog.getByRole("radio", { name: /Authenticator app/ });
+  if (await app.count()) await app.check();
 }
 
 /**

@@ -1346,6 +1346,50 @@ export type Database = {
           },
         ]
       }
+      plan_grants: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          granted_by: string | null
+          note: string | null
+          owner_id: string
+          plan: string
+          reason: string
+          starts_at: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          granted_by?: string | null
+          note?: string | null
+          owner_id: string
+          plan: string
+          reason: string
+          starts_at?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          granted_by?: string | null
+          note?: string | null
+          owner_id?: string
+          plan?: string
+          reason?: string
+          starts_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_grants_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_price_history: {
         Row: {
           currency: string
@@ -2481,6 +2525,30 @@ export type Database = {
         Returns: boolean
       }
       orders_release_expired: { Args: { p_now?: string }; Returns: number }
+      plan_grant_end: {
+        Args: { p_actor: string; p_owners: string[] }
+        Returns: {
+          owner_id: string
+          previous_ends_at: string | null
+          previous_plan: string
+        }[]
+      }
+      plan_grant_set: {
+        Args: {
+          p_actor: string
+          p_ends_at: string | null
+          p_note: string | null
+          p_owners: string[]
+          p_plan: string
+          p_reason: string
+        }
+        Returns: {
+          owner_id: string
+          previous_ends_at: string | null
+          previous_plan: string | null
+          was_active: boolean
+        }[]
+      }
       plan_limit: { Args: { p_key: string; p_plan: string }; Returns: number }
       product_sales_aggregate: { Args: { p_seller_id: string }; Returns: Json }
       products_ranked_by_metric: {

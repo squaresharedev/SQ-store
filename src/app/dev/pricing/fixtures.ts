@@ -50,6 +50,7 @@ export const FREE_CONTEXT: PricingContext = {
   available: true,
   directSales30dCents: 0,
   feeWaived: false,
+  grant: null,
   usage: { storefronts: 1, teamSeats: 1, products: 4 },
 };
 

@@ -33,7 +33,9 @@
     "finePrint": "Ceny jsou bez DPH. Poplatek za prodej se vztahuje na prodeje přes pokladnu Square Share a účtuje se z celé částky, kterou kupující zaplatí, včetně dopravy. Vlastní poplatky Stripe za zpracování karty se přičítají. Zrušit můžete kdykoli: plán si ponecháte do konce zaplaceného období.",
     "unavailable": "Plány se teď nedají zobrazit. Za chvíli stránku obnovte.",
     "yearlyFree": "{count, plural, one {# měsíc zdarma} few {# měsíce zdarma} many {# měsíce zdarma} other {# měsíců zdarma}}",
-    "launchNote": "Úvodní cena je zvýhodněná cena na začátku: běžná cena je ta přeškrtnutá."
+    "launchNote": "Úvodní cena je zvýhodněná cena na začátku: běžná cena je ta přeškrtnutá.",
+    "grantUntil": "Váš plán {plan} je na naše náklady do {date}. Až skončí, nic se neodstraní.",
+    "grantNoEnd": "Váš plán {plan} je na naše náklady, bez data ukončení."
   },
   "card": {
     "perMonth": "/ měsíc",
@@ -200,7 +202,10 @@
     "confirmed": "Máte plán {plan}. Děkujeme, že podporujete Square Share.",
     "pending": "Potvrzujeme vaši platbu se Stripe. Pokud se plán nezměnil, za chvíli stránku obnovte.",
     "unavailable": "Váš plán se teď nedá zobrazit. Za chvíli stránku obnovte.",
-    "cancelPlan": "Zrušit plán"
+    "cancelPlan": "Zrušit plán",
+    "grantLine": "Na naše náklady: Square Share daroval vašemu obchodu tento plán.",
+    "grantUntil": "Do {date}. Až skončí, nic se neodstraní.",
+    "grantNoEnd": "Bez data ukončení."
   },
   "cancel": {
     "title": "Zrušit plán {plan}?",

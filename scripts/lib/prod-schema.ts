@@ -96,6 +96,9 @@ export const SCHEMA_REQUIREMENTS: readonly SchemaRequirement[] = [
   { kind: "relation", name: "storefront_funnel_daily", migration: "20261012_storefront_funnel_daily.sql" },
   { kind: "function", signature: "storefront_funnel_roll_day(date,jsonb)", migration: "20261012_storefront_funnel_daily.sql" },
   { kind: "function", signature: "storefront_funnel_aggregate(uuid,date,date)", migration: "20261012_storefront_funnel_daily.sql" },
+  { kind: "relation", name: "plan_grants", migration: "20261019_plan_grants.sql" },
+  { kind: "function", signature: "plan_grant_set(uuid[],text,timestamp with time zone,text,text,uuid)", migration: "20261019_plan_grants.sql" },
+  { kind: "function", signature: "plan_grant_end(uuid[],uuid)", migration: "20261019_plan_grants.sql" },
 ];
 
 /** A SQL string literal. Every value below is a constant from this file, and

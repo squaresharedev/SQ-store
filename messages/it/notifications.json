@@ -174,6 +174,18 @@
       "paymentFailed": {
         "title": "Il pagamento del tuo piano {plan, select, starter {Starter} pro {Pro} other {a pagamento}} non è riuscito",
         "body": "Stripe riproverà. Aggiorna la carta in Piano e fatturazione per mantenere il tuo piano."
+      },
+      "granted": {
+        "title": "Square Share ha regalato {plan, select, starter {Starter} pro {Pro} other {un piano a pagamento}} al tuo negozio",
+        "until": "È offerto da noi fino al {until, date, long}.",
+        "noEnd": "È offerto da noi, senza data di fine."
+      },
+      "grantChanged": {
+        "title": "{plan, select, starter {Il tuo piano Starter} pro {Il tuo piano Pro} other {Il tuo piano}} di Square Share è stato modificato"
+      },
+      "grantEnded": {
+        "title": "{plan, select, starter {Il tuo piano Starter} pro {Il tuo piano Pro} other {Il tuo piano}} di Square Share è terminato",
+        "body": "Tutto ciò che hai continua a funzionare e non viene rimosso nulla."
       }
     },
     "stock": {

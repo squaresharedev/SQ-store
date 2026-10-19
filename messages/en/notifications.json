@@ -174,6 +174,18 @@
       "paymentFailed": {
         "title": "The payment for your {plan, select, starter {Starter} pro {Pro} other {paid}} plan failed",
         "body": "Stripe will try again. Update your card in Plan & billing to keep your plan."
+      },
+      "granted": {
+        "title": "Square Share gave your store {plan, select, starter {Starter} pro {Pro} other {a paid plan}}",
+        "until": "It's on us until {until, date, long}.",
+        "noEnd": "It's on us, with no end date."
+      },
+      "grantChanged": {
+        "title": "{plan, select, starter {Your Starter plan} pro {Your Pro plan} other {Your plan}} from Square Share was updated"
+      },
+      "grantEnded": {
+        "title": "{plan, select, starter {Your Starter plan} pro {Your Pro plan} other {Your plan}} from Square Share has ended",
+        "body": "Everything you have keeps working, and nothing is taken down."
       }
     },
     "stock": {

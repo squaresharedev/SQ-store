@@ -33,7 +33,9 @@
     "finePrint": "Precios sin IVA. La comisión por venta se aplica a las ventas a través del proceso de pago de Square Share y se calcula sobre todo lo que paga el comprador, envío incluido. Las tarifas de procesamiento de tarjeta del propio Stripe se añaden aparte. Cancela cuando quieras: conservas tu plan hasta el final del período pagado.",
     "unavailable": "Ahora mismo no se pueden mostrar los planes. Recarga la página en un momento.",
     "yearlyFree": "{count, plural, one {# mes gratis} other {# meses gratis}}",
-    "launchNote": "Un precio de lanzamiento es un precio introductorio: el precio habitual es el que aparece tachado."
+    "launchNote": "Un precio de lanzamiento es un precio introductorio: el precio habitual es el que aparece tachado.",
+    "grantUntil": "Tu plan {plan} corre por nuestra cuenta hasta el {date}. Cuando termine, nada se elimina.",
+    "grantNoEnd": "Tu plan {plan} corre por nuestra cuenta, sin fecha de fin."
   },
   "card": {
     "perMonth": "/ mes",
@@ -200,7 +202,10 @@
     "confirmed": "Estás en {plan}. Gracias por apoyar Square Share.",
     "pending": "Estamos confirmando tu pago con Stripe. Recarga la página en un momento si el plan no ha cambiado.",
     "unavailable": "Tu plan no puede mostrarse ahora mismo. Recarga la página en un momento.",
-    "cancelPlan": "Cancelar plan"
+    "cancelPlan": "Cancelar plan",
+    "grantLine": "Corre por nuestra cuenta: Square Share le ha regalado este plan a tu tienda.",
+    "grantUntil": "Hasta el {date}. Cuando termine, nada se elimina.",
+    "grantNoEnd": "Sin fecha de fin."
   },
   "cancel": {
     "title": "¿Cancelar {plan}?",

@@ -33,7 +33,9 @@
     "finePrint": "Prix hors TVA. La commission par vente s'applique aux ventes via le paiement Square Share et porte sur tout ce que paie l'acheteur, livraison comprise. Les frais de traitement de carte de Stripe s'ajoutent. Annulation à tout moment : vous conservez votre forfait jusqu'à la fin de la période payée.",
     "unavailable": "Les forfaits ne peuvent pas être affichés pour l'instant. Actualisez la page dans un moment.",
     "yearlyFree": "{count, plural, one {# mois offert} other {# mois offerts}}",
-    "launchNote": "Un prix de lancement est un prix introductif : le prix habituel est celui affiché barré."
+    "launchNote": "Un prix de lancement est un prix introductif : le prix habituel est celui affiché barré.",
+    "grantUntil": "Votre forfait {plan} vous est offert jusqu'au {date}. Rien n'est supprimé quand il prend fin.",
+    "grantNoEnd": "Votre forfait {plan} vous est offert, sans date de fin."
   },
   "card": {
     "perMonth": "/ mois",
@@ -200,7 +202,10 @@
     "confirmed": "Vous êtes sur {plan}. Merci de soutenir Square Share.",
     "pending": "Nous confirmons votre paiement avec Stripe. Actualisez dans un moment si votre forfait n'a pas changé.",
     "unavailable": "Votre forfait ne peut pas être affiché pour l'instant. Actualisez la page dans un moment.",
-    "cancelPlan": "Annuler le forfait"
+    "cancelPlan": "Annuler le forfait",
+    "grantLine": "Offert : Square Share a offert ce forfait à votre boutique.",
+    "grantUntil": "Jusqu'au {date}. Rien n'est supprimé quand il prend fin.",
+    "grantNoEnd": "Sans date de fin."
   },
   "cancel": {
     "title": "Annuler {plan} ?",

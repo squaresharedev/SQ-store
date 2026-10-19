@@ -18,7 +18,7 @@ import { recordFunnelEvent } from "@/lib/billing/funnel";
 import { countPlanUsage } from "@/lib/billing/limits";
 import { readFeeWaiver } from "@/lib/billing/sale-fee";
 import type { PricingSource } from "@/lib/billing/paths";
-import type { BillingInterval, PlanId, PlanLimitKey } from "@/lib/billing/plans";
+import type { BillingInterval, PaidPlanId, PlanId, PlanLimitKey } from "@/lib/billing/plans";
 
 export type PricingContext = {
   /** The plan prices in force (plan_prices): what every price and fee on the
@@ -49,6 +49,10 @@ export type PricingContext = {
   directSales30dCents: number | null;
   /** The store's per-sale fee is waived (closed beta, founding sellers). */
   feeWaived: boolean;
+  /** The plan is one Square Share gave the store (a staff grant), not one it
+   *  pays for: which plan, and until when (null = no end date). Null when the
+   *  plan in force is paid for, or Free. */
+  grant: { plan: PaidPlanId; endsAt: string | null } | null;
   /** What the store has of each capped thing now; null when uncounted. */
   usage: Record<PlanLimitKey, number | null>;
 };
@@ -110,6 +114,7 @@ export async function getPricingContext(source?: PricingSource | null): Promise<
       directSales30dCents,
       // Unreadable reads as not waived: the page then shows the plan's rate.
       feeWaived: feeWaived === true,
+      grant: b.planSource === "granted" && b.grant ? { plan: b.grant.plan, endsAt: b.grant.endsAt } : null,
       usage: { storefronts, teamSeats, products },
     },
   };

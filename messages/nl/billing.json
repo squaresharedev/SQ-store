@@ -33,7 +33,9 @@
     "finePrint": "Prijzen zijn excl. btw. De kosten per verkoop gelden voor verkopen via de afrekenpagina van Square Share en worden berekend over alles wat de koper betaalt, inclusief verzending. De eigen kosten van Stripe voor kaartverwerking komen daar nog bij. Je kunt op elk moment opzeggen: je houdt je abonnement tot het einde van de periode die je hebt betaald.",
     "unavailable": "Abonnementen kunnen nu niet worden getoond. Vernieuw de pagina over een moment.",
     "yearlyFree": "{count, plural, one {# maand gratis} other {# maanden gratis}}",
-    "launchNote": "Een lanceringsprijs is een introductieprijs: de normale prijs is de doorgestreepte prijs."
+    "launchNote": "Een lanceringsprijs is een introductieprijs: de normale prijs is de doorgestreepte prijs.",
+    "grantUntil": "Je {plan}-abonnement krijg je van ons tot {date}. Als het afloopt, wordt er niets verwijderd.",
+    "grantNoEnd": "Je {plan}-abonnement krijg je van ons, zonder einddatum."
   },
   "card": {
     "perMonth": "/ maand",
@@ -200,7 +202,10 @@
     "confirmed": "Je zit op {plan}. Bedankt voor je steun aan Square Share.",
     "pending": "We bevestigen je betaling bij Stripe. Vernieuw de pagina over een moment als je abonnement nog niet is gewijzigd.",
     "unavailable": "Je abonnement kan nu niet worden getoond. Vernieuw de pagina over een moment.",
-    "cancelPlan": "Abonnement opzeggen"
+    "cancelPlan": "Abonnement opzeggen",
+    "grantLine": "Van ons: Square Share geeft je winkel dit abonnement cadeau.",
+    "grantUntil": "Tot {date}. Als het afloopt, wordt er niets verwijderd.",
+    "grantNoEnd": "Zonder einddatum."
   },
   "cancel": {
     "title": "{plan} opzeggen?",

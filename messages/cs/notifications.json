@@ -174,6 +174,18 @@
       "paymentFailed": {
         "title": "Platba za {plan, select, starter {plán Starter} pro {plán Pro} other {placený plán}} selhala",
         "body": "Stripe to zkusí znovu. Aktualizujte kartu v sekci Plán a fakturace, abyste si plán ponechali."
+      },
+      "granted": {
+        "title": "Square Share daroval vašemu obchodu {plan, select, starter {plán Starter} pro {plán Pro} other {placený plán}}",
+        "until": "Do {until, date, long} je na naše náklady.",
+        "noEnd": "Je na naše náklady, bez data ukončení."
+      },
+      "grantChanged": {
+        "title": "{plan, select, starter {Váš plán Starter} pro {Váš plán Pro} other {Váš plán}} od Square Share byl změněn"
+      },
+      "grantEnded": {
+        "title": "{plan, select, starter {Váš plán Starter} pro {Váš plán Pro} other {Váš plán}} od Square Share skončil",
+        "body": "Vše, co máte, funguje dál a nic se neodstraní."
       }
     },
     "stock": {

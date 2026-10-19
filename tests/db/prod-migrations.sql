@@ -9663,3 +9663,351 @@ create trigger collections_guard_name
 revoke execute on function public.guard_collection_name() from public, anon, authenticated;
 
 notify pgrst, 'reload schema';
+
+-- =============================================================================
+-- ===== (applied) plan_grants ==================================================
+-- supabase/migrations/20261019_plan_grants.sql, replayed
+-- verbatim. Applied to prod 2026-10-20 through the Management API query
+-- endpoint, which records no migration version. `pnpm check:schema` is what
+-- confirms it is there.
+-- =============================================================================
+-- Plan grants: staff put an account on a paid plan, for as long as they choose,
+-- without Stripe.
+--
+-- WHY. Until now the only way onto Starter or Pro was paying for it
+-- (seller_billing, written from Stripe's webhook). During the beta, and
+-- after it, staff need to give a plan away: to beta testers, founding
+-- sellers, partners, a seller support wants to make good to, or a test
+-- account. A grant is that, and nothing a seller can do or see changes it.
+--
+-- WHAT THIS ADDS
+--   1. plan_grants: one row per account, the grant it has (or last had). The
+--      plan, when it started, when it ends (null = until staff end it), why,
+--      and which staff member set it. History (every grant, extension and end)
+--      is the admin panel's audit log; this row is only the current state.
+--   2. account_plan() now answers the HIGHER of the paid plan and an active
+--      grant. It is what the plan-limit triggers ask. Its TypeScript twin is
+--      readAccountBilling (src/lib/billing/account-plan.ts), which applies
+--      the same rule through grantedPlan() (src/lib/billing/grants.ts).
+--   3. plan_grant_set() and plan_grant_end(): the admin panel's two writes,
+--      for one account or many at once.
+--
+-- WHY NOT A ROW IN seller_billing. That table is a mirror of Stripe: the
+-- webhook overwrites it from a fresh fetch, its customer id must be a real
+-- cus_..., and the admin panel counts it as revenue. A granted plan is none
+-- of those things, so it lives apart and is combined only when read.
+--
+-- WRITES. Service role only, like seller_billing: RLS on, no policy, every
+-- client grant revoked. A seller who could write here could give themselves
+-- Pro. The admin panel writes through the two functions below.
+--
+-- MIRRORS, each to be edited in the same change as its twin
+-- (tests/integration/39-plan-grants.test.ts compares them):
+--   plan_grants_reason_check <-> GRANT_REASONS in src/lib/billing/grants.ts
+--                                and the admin panel's lib/plans/grants.ts
+--
+-- DEPLOY ORDER: either way round. The app reads this table and treats a
+-- missing one as "no grants"; the old app never reads it. Apply this, then
+-- the admin panel's 0009_plan_directory.sql, which reads it.
+--
+-- Apply via the Management API query endpoint or the SQL editor.
+
+-- ---- 1. plan_grants -----------------------------------------------------------------
+
+create table if not exists public.plan_grants (
+  owner_id   uuid primary key references public.profiles (id) on delete cascade,
+  plan       text not null,
+  reason     text not null,
+  -- For staff only: the seller never sees it.
+  note       text,
+  starts_at  timestamptz not null default now(),
+  -- Null: no end date, the grant holds until staff end it.
+  ends_at    timestamptz,
+  -- The staff member's auth user id. No foreign key: staff come and go, and
+  -- the audit log is the record of who did what.
+  granted_by uuid,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+
+  -- Free is the absence of a grant, never a stored value.
+  constraint plan_grants_plan_check check (plan in ('starter', 'pro')),
+  -- MIRROR of GRANT_REASONS in src/lib/billing/grants.ts.
+  constraint plan_grants_reason_check
+    check (reason in ('beta_tester', 'founding_seller', 'support', 'partner', 'promotion', 'internal', 'other')),
+  constraint plan_grants_note_length check (note is null or char_length(note) <= 500),
+  constraint plan_grants_period check (ends_at is null or ends_at >= starts_at)
+);
+
+comment on table public.plan_grants is
+  'A paid plan given by staff, without Stripe: one row per account, the grant it has or last had. Active while starts_at <= now() and (ends_at is null or ends_at > now()). Combined with seller_billing by account_plan() and readAccountBilling: the higher plan wins. Written only through plan_grant_set / plan_grant_end. Service role only.';
+comment on column public.plan_grants.ends_at is
+  'When the grant stops applying. Null = no end date (until staff end it). Ending a grant early sets this to the moment it was ended.';
+comment on column public.plan_grants.note is
+  'Staff-only context for the grant. Never shown to the seller.';
+
+alter table public.plan_grants enable row level security;
+revoke all on table public.plan_grants from public, anon, authenticated;
+grant all on table public.plan_grants to service_role;
+
+-- ---- 2. The plan in force -------------------------------------------------------------
+
+-- The SQL twin of readAccountBilling's plan: the higher of the paid plan
+-- (until paid_until) and an active grant, Free with neither. Same signature
+-- and grants as 20260930_seller_plans; only the body changes.
+create or replace function public.account_plan(p_owner uuid)
+returns text
+language sql stable security definer
+set search_path = ''
+as $$
+  select case greatest(
+      (select case b.plan when 'pro' then 2 when 'starter' then 1 else 0 end
+         from public.seller_billing b
+        where b.owner_id = p_owner
+          and b.plan is not null
+          and b.paid_until > now()),
+      (select case g.plan when 'pro' then 2 when 'starter' then 1 else 0 end
+         from public.plan_grants g
+        where g.owner_id = p_owner
+          and g.starts_at <= now()
+          and (g.ends_at is null or g.ends_at > now())),
+      0)
+    when 2 then 'pro'
+    when 1 then 'starter'
+    else 'free'
+  end
+$$;
+
+revoke execute on function public.account_plan(uuid) from public, anon, authenticated;
+grant execute on function public.account_plan(uuid) to service_role;
+
+comment on function public.account_plan(uuid) is
+  'free | starter | pro: the plan an account is on now, the higher of its paid plan (until paid_until) and an active plan grant. Service role only.';
+
+-- ---- 3. The admin panel's writes ---------------------------------------------------------
+
+-- Give `p_plan` to every account in `p_owners`, until `p_ends_at` (null = no
+-- end date). An account with an ACTIVE grant keeps its start date (this is an
+-- extension or a change of plan); any other account starts now. Ids with no
+-- profile are skipped, so the caller compares what comes back with what it
+-- sent. Returns, per account written, the grant as it was before, for the
+-- audit log.
+--
+-- Plain SECURITY INVOKER: only the service role may execute it, and the
+-- service role already bypasses RLS. The row lock serialises two staff
+-- members writing the same account.
+create or replace function public.plan_grant_set(
+  p_owners uuid[],
+  p_plan text,
+  p_ends_at timestamptz,
+  p_reason text,
+  p_note text,
+  p_actor uuid
+)
+returns table (owner_id uuid, previous_plan text, previous_ends_at timestamptz, was_active boolean)
+language plpgsql
+set search_path = ''
+as $$
+declare
+  target uuid;
+  before_row public.plan_grants%rowtype;
+  active boolean;
+begin
+  if p_ends_at is not null and p_ends_at <= now() then
+    raise exception 'plan_grant_ends_in_past' using errcode = '22023';
+  end if;
+  if coalesce(array_length(p_owners, 1), 0) > 500 then
+    raise exception 'plan_grant_too_many' using errcode = '22023';
+  end if;
+
+  for target in select distinct o from unnest(p_owners) as o where o is not null loop
+    if not exists (select 1 from public.profiles p where p.id = target) then
+      continue;
+    end if;
+
+    select * into before_row from public.plan_grants g where g.owner_id = target for update;
+    active := found
+      and before_row.starts_at <= now()
+      and (before_row.ends_at is null or before_row.ends_at > now());
+
+    insert into public.plan_grants as g (owner_id, plan, reason, note, starts_at, ends_at, granted_by, updated_at)
+    values (target, p_plan, p_reason, nullif(btrim(p_note), ''), now(), p_ends_at, p_actor, now())
+    on conflict on constraint plan_grants_pkey do update set
+      plan       = excluded.plan,
+      reason     = excluded.reason,
+      note       = excluded.note,
+      starts_at  = case when active then g.starts_at else now() end,
+      ends_at    = excluded.ends_at,
+      granted_by = excluded.granted_by,
+      updated_at = now();
+
+    owner_id := target;
+    previous_plan := case when active then before_row.plan end;
+    previous_ends_at := case when active then before_row.ends_at end;
+    was_active := active;
+    return next;
+  end loop;
+end
+$$;
+
+revoke execute on function public.plan_grant_set(uuid[], text, timestamptz, text, text, uuid)
+  from public, anon, authenticated;
+grant execute on function public.plan_grant_set(uuid[], text, timestamptz, text, text, uuid) to service_role;
+
+comment on function public.plan_grant_set(uuid[], text, timestamptz, text, text, uuid) is
+  'Admin panel write: give a plan to one or more accounts until a date (null = no end date). Keeps the start of an active grant. Returns the grant each account had before. Service role only.';
+
+-- End the active grant of every account in `p_owners` now. Accounts with no
+-- active grant are left alone and not returned. The row stays, ended, so the
+-- seller's page can say when it stopped.
+create or replace function public.plan_grant_end(p_owners uuid[], p_actor uuid)
+returns table (owner_id uuid, previous_plan text, previous_ends_at timestamptz)
+language sql
+set search_path = ''
+as $$
+  with ended as (
+    select g.owner_id, g.plan, g.ends_at
+      from public.plan_grants g
+     where g.owner_id = any (p_owners)
+       and g.starts_at <= now()
+       and (g.ends_at is null or g.ends_at > now())
+       for update
+  )
+  update public.plan_grants g
+     set ends_at = now(), granted_by = p_actor, updated_at = now()
+    from ended e
+   where g.owner_id = e.owner_id
+  returning e.owner_id, e.plan, e.ends_at
+$$;
+
+revoke execute on function public.plan_grant_end(uuid[], uuid) from public, anon, authenticated;
+grant execute on function public.plan_grant_end(uuid[], uuid) to service_role;
+
+comment on function public.plan_grant_end(uuid[], uuid) is
+  'Admin panel write: end the active plan grant of one or more accounts now. Returns the grants it ended. Service role only.';
+
+notify pgrst, 'reload schema';
+
+-- =============================================================================
+-- ===== (applied) admin_plan_directory =========================================
+-- Admin repo: supabase/migrations/0009_plan_directory.sql, replayed
+-- verbatim. The admin panel's read model over plan_grants. Applied to prod
+-- 2026-10-20 through the Management API query endpoint, after plan_grants.
+-- =============================================================================
+-- Prod's admin_user_directory, as the admin panel's 0004_admin_directory_avatar
+-- and 0005_admin_directory_activity left it (checked against prod 2026-10-19).
+-- This replica never replayed those two, and the view below reads both columns.
+create or replace view public.admin_user_directory as
+  select
+    u.id,
+    u.email::text as email,
+    coalesce(
+      p.username,
+      u.raw_user_meta_data ->> 'username',
+      u.raw_user_meta_data ->> 'name',
+      u.raw_user_meta_data ->> 'full_name'
+    ) as username,
+    u.created_at,
+    u.banned_until,
+    u.email_confirmed_at,
+    p.id is not null as is_seller,
+    coalesce(
+      p.avatar_url,
+      u.raw_user_meta_data ->> 'avatar_url',
+      u.raw_user_meta_data ->> 'picture'
+    ) as avatar_url,
+    u.last_sign_in_at
+  from auth.users u
+  left join public.profiles p on p.id = u.id;
+
+-- ====================================================================
+-- Plans: every account's plan in one list, for the admin's /plans page.
+--
+-- One row per account (admin_user_directory), with:
+--   - what it pays for, from seller_billing (Stripe's mirror);
+--   - what staff gave it, from plan_grants (SQ-store's
+--     20261019_plan_grants.sql, which must be applied first);
+--   - the plan in force now and where it comes from, by the SAME rule as the
+--     store's account_plan() and readAccountBilling: the higher of the paid
+--     plan (until paid_until) and an active grant. A tie goes to "paid":
+--     the seller is paying for it, and the grant is then only a safety net;
+--   - how much of the store there is (storefronts, products), so staff can
+--     see who is actually using what they were given.
+--
+-- plan_until is when the plan in force stops: paid_until for a paid plan,
+-- the grant's end for a granted one (null = no end date), null on Free.
+--
+-- SECURITY. security_invoker, so it reads with the caller's rights, and
+-- SELECT for service_role only: PostgREST grants every new view to anon and
+-- authenticated (with write rights, on a simple view), so both revokes are
+-- required. The rows include every account's email address.
+--
+-- Read-only and additive: safe to re-run.
+-- ====================================================================
+
+create or replace view public.admin_plan_directory
+with (security_invoker = true) as
+  select
+    d.id,
+    d.email,
+    d.username,
+    d.avatar_url,
+    d.created_at,
+    d.last_sign_in_at,
+    d.banned_until,
+    d.is_seller,
+    -- Paid (Stripe).
+    b.plan                 as paid_plan,
+    b.status               as paid_status,
+    b.billing_interval     as paid_interval,
+    b.price_cents          as paid_price_cents,
+    b.currency             as paid_currency,
+    b.paid_until,
+    b.cancel_at_period_end as paid_cancel_at_period_end,
+    b.livemode             as paid_livemode,
+    -- Granted (staff).
+    g.plan                 as grant_plan,
+    g.reason               as grant_reason,
+    g.note                 as grant_note,
+    g.starts_at            as grant_starts_at,
+    g.ends_at              as grant_ends_at,
+    g.granted_by           as grant_granted_by,
+    g.updated_at           as grant_updated_at,
+    r.grant_rank > 0       as grant_active,
+    -- In force now.
+    case greatest(r.paid_rank, r.grant_rank) when 2 then 'pro' when 1 then 'starter' else 'free' end
+                           as effective_plan,
+    case
+      when r.paid_rank = 0 and r.grant_rank = 0 then 'free'
+      when r.paid_rank >= r.grant_rank then 'paid'
+      else 'granted'
+    end                    as plan_source,
+    case
+      when r.paid_rank = 0 and r.grant_rank = 0 then null
+      when r.paid_rank >= r.grant_rank then b.paid_until
+      else g.ends_at
+    end                    as plan_until,
+    -- The store.
+    (select count(*) from public.storefronts s
+      where s.owner_id = d.id and s.moderation_status is distinct from 'removed')::integer as storefront_count,
+    (select count(*) from public.products p
+      where p.owner_id = d.id and p.moderation_status is distinct from 'removed')::integer as product_count
+  from public.admin_user_directory d
+  left join public.seller_billing b on b.owner_id = d.id
+  left join public.plan_grants g on g.owner_id = d.id
+  cross join lateral (
+    select
+      case when b.plan is not null and b.paid_until > now()
+           then case b.plan when 'pro' then 2 when 'starter' then 1 else 0 end
+           else 0 end as paid_rank,
+      case when g.owner_id is not null and g.starts_at <= now() and (g.ends_at is null or g.ends_at > now())
+           then case g.plan when 'pro' then 2 when 'starter' then 1 else 0 end
+           else 0 end as grant_rank
+  ) r;
+
+revoke all on table public.admin_plan_directory from public, anon, authenticated;
+grant select on table public.admin_plan_directory to service_role;
+
+comment on view public.admin_plan_directory is
+  'Admin /plans: every account with its paid plan, its staff grant, the plan in force now (the higher of the two) and where it comes from. Service role only.';
+
+notify pgrst, 'reload schema';

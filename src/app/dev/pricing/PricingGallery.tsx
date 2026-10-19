@@ -56,6 +56,16 @@ const SCENARIOS: { value: string; label: string; context: PricingContext }[] = [
     label: "Pro, payment failed",
     context: paidContext("pro", "month", IN_A_MONTH, { status: "past_due" }),
   },
+  {
+    value: "granted",
+    label: "Starter given by Square Share, for a month",
+    context: { ...FREE_CONTEXT, plan: "starter", grant: { plan: "starter", endsAt: IN_A_MONTH } },
+  },
+  {
+    value: "granted-open",
+    label: "Pro given by Square Share, no end date",
+    context: { ...FREE_CONTEXT, plan: "pro", grant: { plan: "pro", endsAt: null } },
+  },
   { value: "member", label: "Teammate (read only)", context: { ...FREE_CONTEXT, plan: "starter", canManage: false } },
   { value: "unavailable", label: "Billing not set up here", context: { ...FREE_CONTEXT, available: false } },
 ];
