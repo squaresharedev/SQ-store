@@ -12,15 +12,18 @@
 //     cascades), and with them the buyer's order page, their download and the
 //     withdrawal form on it. So the deletion holds while a parcel is owed, a
 //     payment is in flight or in dispute, and for ORDER_AFTERCARE_DAYS after
-//     the last sale.
+//     the last sale or the last dispatch, whichever is later.
 
 /** Days between asking and deletion, in which the seller can change their mind. */
 export const ACCOUNT_DELETION_GRACE_DAYS = 14;
 
 /**
- * Days after a seller's last sale in which their account is kept. Longer than
- * the 14-day withdrawal period plus a delivery, so a buyer's order page
- * outlives every right they exercise on it.
+ * Days after a seller's last sale or last dispatch, whichever is later, in
+ * which their account is kept. Longer than the 14-day withdrawal period plus
+ * a delivery, so a buyer's order page outlives every right they exercise on
+ * it. Counted from the dispatch too because the withdrawal period starts when
+ * the goods arrive: a made-to-order piece shipped three weeks after the sale
+ * would otherwise leave its buyer a few days of the fourteen.
  */
 export const ORDER_AFTERCARE_DAYS = 30;
 
@@ -49,6 +52,8 @@ export type DeletionOrderFacts = {
   disputed: number;
   /** ISO time of the newest paid order, or null when there is none. */
   lastSaleAt: string | null;
+  /** ISO time of the newest dispatch of a paid order, or null when there is none. */
+  lastShippedAt: string | null;
 };
 
 export type DeletionOutlook = {
@@ -74,8 +79,12 @@ export function deletionOutlook(
   now: Date = new Date(),
 ): DeletionOutlook {
   const dueAt = deletionDueAt(requestedAt);
-  const aftercareEndsAt = facts.lastSaleAt
-    ? new Date(new Date(facts.lastSaleAt).getTime() + ORDER_AFTERCARE_DAYS * DAY_MS)
+  const lastAftercareStart = Math.max(
+    facts.lastSaleAt ? new Date(facts.lastSaleAt).getTime() : -Infinity,
+    facts.lastShippedAt ? new Date(facts.lastShippedAt).getTime() : -Infinity,
+  );
+  const aftercareEndsAt = Number.isFinite(lastAftercareStart)
+    ? new Date(lastAftercareStart + ORDER_AFTERCARE_DAYS * DAY_MS)
     : null;
   const recent = aftercareEndsAt !== null && aftercareEndsAt.getTime() > now.getTime();
 
@@ -109,7 +118,7 @@ export function deletionResting(lastAttemptAt: string | null, lastError: string 
   return now.getTime() - new Date(lastAttemptAt).getTime() < DELETION_RETRY_HOURS * HOUR_MS;
 }
 
-/** The oldest sale time that still holds a deletion as of `now`. */
+/** The oldest sale or dispatch time that still holds a deletion as of `now`. */
 export function aftercareCutoff(now: Date = new Date()): Date {
   return new Date(now.getTime() - ORDER_AFTERCARE_DAYS * DAY_MS);
 }

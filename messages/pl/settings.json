@@ -149,7 +149,7 @@
         "toShip": "Masz jeszcze zamówienia do wysłania.",
         "paymentPending": "Płatność kupującego jest jeszcze potwierdzana.",
         "disputed": "Jedna z płatności jest przedmiotem sporu.",
-        "recentSale": "Twoje konto zostanie zachowane do {date}, czyli {days} dni po ostatniej sprzedaży, aby kupujący nadal mieli dostęp do swoich zamówień."
+        "recentSale": "Twoje konto zostanie zachowane do {date}, czyli {days} dni po ostatniej sprzedaży lub wysyłce, aby kupujący nadal mieli dostęp do swoich zamówień."
       },
       "cancelling": "Anulowanie…",
       "keepButton": "Zachowaj moje konto",

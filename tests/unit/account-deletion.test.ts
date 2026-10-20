@@ -25,7 +25,7 @@ import {
 import { collectObjectKeys, isObjectKey } from "@/lib/account-deletion/object-keys";
 import { cronAuthorized } from "@/lib/ops/cron";
 
-const NOTHING_OWED: DeletionOrderFacts = { toShip: 0, pending: 0, disputed: 0, lastSaleAt: null };
+const NOTHING_OWED: DeletionOrderFacts = { toShip: 0, pending: 0, disputed: 0, lastSaleAt: null, lastShippedAt: null };
 const REQUESTED = "2026-10-01T12:00:00.000Z";
 const day = (iso: string) => new Date(iso);
 
@@ -61,10 +61,28 @@ describe("when an account is deleted", () => {
     expect(after.ready).toBe(true);
   });
 
+  it("counts the 30 days from the dispatch when that came later, so a made-to-order buyer keeps their whole withdrawal period", () => {
+    // Sold on 1 October, shipped three weeks later: the window runs from the
+    // dispatch, not from the sale.
+    const facts = { ...NOTHING_OWED, lastSaleAt: "2026-10-01T09:00:00.000Z", lastShippedAt: "2026-10-22T15:00:00.000Z" };
+    const pastTheSale = deletionOutlook(REQUESTED, facts, day("2026-11-05T00:00:00Z"));
+    expect(pastTheSale.holds).toEqual(["recentSale"]);
+    expect(pastTheSale.aftercareEndsAt?.toISOString()).toBe("2026-11-21T15:00:00.000Z");
+
+    expect(deletionOutlook(REQUESTED, facts, day("2026-11-21T15:00:00Z")).ready).toBe(true);
+  });
+
+  it("counts from the sale when a dispatch came before a newer sale", () => {
+    const facts = { ...NOTHING_OWED, lastSaleAt: "2026-10-12T00:00:00.000Z", lastShippedAt: "2026-10-05T00:00:00.000Z" };
+    expect(deletionOutlook(REQUESTED, facts, day("2026-10-20T00:00:00Z")).aftercareEndsAt?.toISOString()).toBe(
+      "2026-11-11T00:00:00.000Z",
+    );
+  });
+
   it("names every hold at once, most pressing first", () => {
     const outlook = deletionOutlook(
       REQUESTED,
-      { toShip: 3, pending: 1, disputed: 1, lastSaleAt: "2026-10-14T00:00:00Z" },
+      { toShip: 3, pending: 1, disputed: 1, lastSaleAt: "2026-10-14T00:00:00Z", lastShippedAt: null },
       day("2026-10-16T00:00:00Z"),
     );
     expect(outlook.holds).toEqual(["toShip", "paymentPending", "disputed", "recentSale"]);

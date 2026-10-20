@@ -149,7 +149,7 @@
         "toShip": "Stále máte objednávky k odeslání.",
         "paymentPending": "Platba kupujícího se ještě potvrzuje.",
         "disputed": "Jedna platba je předmětem sporu.",
-        "recentSale": "Váš účet zůstane zachován do {date}, tedy {days} dní po posledním prodeji, aby se kupující stále dostali ke svým objednávkám."
+        "recentSale": "Váš účet zůstane zachován do {date}, tedy {days} dní po posledním prodeji nebo odeslání, aby se kupující stále dostali ke svým objednávkám."
       },
       "cancelling": "Rušení…",
       "keepButton": "Ponechat účet",

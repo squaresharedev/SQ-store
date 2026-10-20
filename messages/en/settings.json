@@ -149,7 +149,7 @@
         "toShip": "You still have orders to ship.",
         "paymentPending": "A buyer's payment is still being confirmed.",
         "disputed": "A payment is in dispute.",
-        "recentSale": "Your account is kept until {date}, {days} days after your last sale, so buyers can still reach their orders."
+        "recentSale": "Your account is kept until {date}, {days} days after your last sale or shipment, so buyers can still reach their orders."
       },
       "cancelling": "Cancelling…",
       "keepButton": "Keep my account",

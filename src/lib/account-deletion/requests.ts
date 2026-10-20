@@ -94,22 +94,26 @@ export async function readDeletionOrderFacts(
 ): Promise<DeletionOrderFacts | null> {
   const count = (status: string) =>
     admin.from("orders").select("id", { count: "exact", head: true }).eq("seller_id", userId).eq("status", status);
-  const [toShip, pending, disputed, lastSale] = await Promise.all([
+  // The newest paid order by `column`, when it is recent enough to hold the
+  // deletion (anything older is of no interest).
+  const newestPaid = (column: "created_at" | "shipped_at") =>
+    admin
+      .from("orders")
+      .select(column)
+      .eq("seller_id", userId)
+      .eq("status", "paid")
+      .gte(column, aftercareCutoff(now).toISOString())
+      .order(column, { ascending: false })
+      .limit(1)
+      .maybeSingle();
+  const [toShip, pending, disputed, lastSale, lastShipped] = await Promise.all([
     count("paid").eq("fulfilment_status", "unfulfilled"),
     count("pending"),
     count("disputed"),
-    admin
-      .from("orders")
-      .select("created_at")
-      .eq("seller_id", userId)
-      .eq("status", "paid")
-      // Only a sale recent enough to hold the deletion is of interest.
-      .gte("created_at", aftercareCutoff(now).toISOString())
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+    newestPaid("created_at"),
+    newestPaid("shipped_at"),
   ]);
-  const failed = toShip.error ?? pending.error ?? disputed.error ?? lastSale.error;
+  const failed = toShip.error ?? pending.error ?? disputed.error ?? lastSale.error ?? lastShipped.error;
   if (failed) {
     console.error("[account deletion] order facts read failed:", failed.message);
     return null;
@@ -118,7 +122,8 @@ export async function readDeletionOrderFacts(
     toShip: toShip.count ?? 0,
     pending: pending.count ?? 0,
     disputed: disputed.count ?? 0,
-    lastSaleAt: lastSale.data?.created_at ?? null,
+    lastSaleAt: (lastSale.data as { created_at?: string } | null)?.created_at ?? null,
+    lastShippedAt: (lastShipped.data as { shipped_at?: string | null } | null)?.shipped_at ?? null,
   };
 }
 
@@ -146,6 +151,7 @@ export async function getDeletionStatus(userId: string): Promise<DeletionStatus 
     pending: 0,
     disputed: 0,
     lastSaleAt: null,
+    lastShippedAt: null,
   };
   const outlook = deletionOutlook(request.requestedAt, facts, now);
   return {

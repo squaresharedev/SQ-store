@@ -149,7 +149,7 @@
         "toShip": "Hai ancora ordini da spedire.",
         "paymentPending": "Il pagamento di un acquirente è ancora in fase di conferma.",
         "disputed": "Un pagamento è in contestazione.",
-        "recentSale": "Il tuo account viene conservato fino al {date}, {days} giorni dopo l’ultima vendita, così gli acquirenti possono ancora raggiungere i loro ordini."
+        "recentSale": "Il tuo account viene conservato fino al {date}, {days} giorni dopo l’ultima vendita o spedizione, così gli acquirenti possono ancora raggiungere i loro ordini."
       },
       "cancelling": "Annullamento…",
       "keepButton": "Mantieni il mio account",

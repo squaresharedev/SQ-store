@@ -149,7 +149,7 @@
         "toShip": "Je hebt nog bestellingen te verzenden.",
         "paymentPending": "De betaling van een koper wordt nog bevestigd.",
         "disputed": "Er loopt een geschil over een betaling.",
-        "recentSale": "Je account blijft bestaan tot {date}, {days} dagen na je laatste verkoop, zodat kopers nog bij hun bestellingen kunnen."
+        "recentSale": "Je account blijft bestaan tot {date}, {days} dagen na je laatste verkoop of verzending, zodat kopers nog bij hun bestellingen kunnen."
       },
       "cancelling": "Annuleren…",
       "keepButton": "Mijn account behouden",

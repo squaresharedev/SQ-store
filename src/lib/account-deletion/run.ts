@@ -112,6 +112,7 @@ async function screenHeld(admin: Admin, userIds: string[], now: Date): Promise<S
           "status.in.(pending,disputed)",
           "and(status.eq.paid,fulfilment_status.eq.unfulfilled)",
           `and(status.eq.paid,created_at.gte.${aftercareCutoff(now).toISOString()})`,
+          `and(status.eq.paid,shipped_at.gte.${aftercareCutoff(now).toISOString()})`,
         ].join(","),
       )
       .limit(SCREEN_ROWS),

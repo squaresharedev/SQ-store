@@ -149,7 +149,7 @@
         "toShip": "Aún tienes pedidos por enviar.",
         "paymentPending": "El pago de un comprador aún se está confirmando.",
         "disputed": "Hay un pago en disputa.",
-        "recentSale": "Tu cuenta se conserva hasta el {date}, {days} días después de tu última venta, para que los compradores puedan seguir accediendo a sus pedidos."
+        "recentSale": "Tu cuenta se conserva hasta el {date}, {days} días después de tu última venta o envío, para que los compradores puedan seguir accediendo a sus pedidos."
       },
       "cancelling": "Cancelando…",
       "keepButton": "Conservar mi cuenta",

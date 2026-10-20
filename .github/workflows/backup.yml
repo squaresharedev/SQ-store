@@ -7,24 +7,30 @@
 # account outside the live database. It is a stopgap, not a substitute: a
 # Supabase plan with daily backups (or PITR) is the real fix.
 #
-# NOT YET RUN. It was written without access to a runner or the secrets below.
-# Before relying on it: run it once by hand (Actions, "Database backup", Run
-# workflow), download the artifact, and restore it into a scratch database.
-# A backup nobody has restored is a hope, not a backup.
+# RESTORED ONCE, 2026-10-20: run 39488676049 was downloaded, decrypted and
+# restored into a scratch Postgres 17, and all 77 tables of public and auth
+# matched production row for row. Repeat that now and then: a backup nobody
+# has restored is a hope, not a backup.
 #
 # Required repository secrets (the job is skipped, loudly, without both):
-#   BACKUP_DB_URL        Postgres connection URI for the project (Supabase
-#                        dashboard, Connect, "Session pooler"), with the
-#                        database password. This one reads every table, so it
-#                        is NOT the login-only role the schema gate uses.
+#   BACKUP_DB_URL        Session pooler URI (port 5432) for the role
+#                        backup_reader: LOGIN, BYPASSRLS and pg_read_all_data,
+#                        nothing else. It reads every table, so it is NOT the
+#                        login-only role the schema gate uses. To change its
+#                        password: `alter role backup_reader password '...'`
+#                        and update the secret.
 #   BACKUP_PASSPHRASE    A long random passphrase. The dump is encrypted with
 #                        it before it leaves the runner, because it holds
-#                        buyers' names and addresses. Keep a copy somewhere
-#                        that is not GitHub: without it the backups are noise.
+#                        buyers' names and addresses. A copy is kept outside
+#                        GitHub: without it the backups are noise.
 #
 # To restore:
 #   gpg --decrypt squareshare-<stamp>.dump.gpg > squareshare.dump
 #   pg_restore --no-owner --no-privileges --dbname "<target uri>" squareshare.dump
+# Into anything but a Supabase project, first create the roles anon,
+# authenticated and service_role, and the extensions pgcrypto, uuid-ossp and
+# citext in a schema named extensions, and pg_trgm in public (its search
+# indexes fail without it). Delete the decrypted dump when done.
 name: Database backup
 
 on:

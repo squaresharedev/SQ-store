@@ -149,7 +149,7 @@
         "toShip": "Vous avez encore des commandes à expédier.",
         "paymentPending": "Le paiement d’un acheteur est encore en cours de confirmation.",
         "disputed": "Un paiement fait l’objet d’un litige.",
-        "recentSale": "Votre compte est conservé jusqu’au {date}, {days} jours après votre dernière vente, pour que les acheteurs puissent encore accéder à leurs commandes."
+        "recentSale": "Votre compte est conservé jusqu’au {date}, {days} jours après votre dernière vente ou expédition, pour que les acheteurs puissent encore accéder à leurs commandes."
       },
       "cancelling": "Annulation…",
       "keepButton": "Garder mon compte",
