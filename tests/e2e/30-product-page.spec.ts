@@ -676,8 +676,11 @@ test.describe("hosted product page", () => {
     await expect(artboard.locator("[data-product-description]")).toBeVisible();
 
     // Save, reload, and the toolbar's own node brings the page back as saved.
+    // The seeded board holds a draft tile ("Hidden draft"), so the save is
+    // confirmed with the drafts warning, naming it, not "Storefront saved."
     await page.getByRole("button", { name: /^save$/i }).click();
-    await expectToast(page, /storefront saved/i, 15_000);
+    await expectToast(page, /saved, but some products are still drafts/i, 15_000);
+    await expectToast(page, /hidden draft is a draft and buyers cannot reach it yet/i);
     await page.reload();
     await page.getByRole("button", { name: /^show the product page$/i }).click();
     // The saved change (the description switched off, then back on) survived.
