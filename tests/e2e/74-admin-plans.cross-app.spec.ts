@@ -140,6 +140,18 @@ test("give, extend, change and end plans; the sellers see it", async ({ browser 
   await giveDialog.locator('[data-choice="beta_tester"]').click();
   await giveDialog.getByLabel("Note (optional, staff only)").fill("Spring beta cohort");
   await expect(giveDialog.locator("[data-grant-summary]")).toContainText("Pro for 2 accounts, until");
+  // The email starts as the standard words; writing over either part makes it
+  // staff's own, and both parts are then needed.
+  const emailBox = giveDialog.locator("[data-grant-email]");
+  await expect(emailBox).toContainText("The standard wording");
+  await expect(giveDialog.getByLabel("Email subject")).toHaveValue("Square Share gave your store Pro");
+  await expect(giveDialog.getByLabel("Email message")).toHaveValue(/^It's on us until /);
+  await giveDialog.getByLabel("Email subject").fill("Welcome to the Spring beta");
+  await expect(emailBox).toContainText("Sent as written to everyone you chose");
+  await giveDialog.getByLabel("Email message").fill("");
+  await giveDialog.getByRole("button", { name: "Give Pro to 2 accounts" }).click();
+  await expect(giveDialog.getByRole("alert")).toContainText("Give the email a message", { timeout: 30_000 });
+  await giveDialog.getByLabel("Email message").fill("Thanks for joining the beta. Pro is yours for three months.");
   await giveDialog.getByRole("button", { name: "Give Pro to 2 accounts" }).click();
   await expect(giveDialog.getByRole("status")).toContainText("Pro given to 2 accounts until", { timeout: 30_000 });
   await expect(giveDialog.getByRole("status")).toContainText("Told in their dashboard.");
@@ -155,6 +167,12 @@ test("give, extend, change and end plans; the sellers see it", async ({ browser 
     expect(days).toBeLessThan(95);
   }
   expect((await billingNotices(a.id)).map((n) => n.title)).toEqual(["Square Share gave your store Pro"]);
+  // The audit log keeps the email's subject and that it was edited, not the message.
+  const [audit] = (await serviceRest(`/admin_audit_log?action=eq.plan.grant&target=eq.${a.id}&select=meta`)) as {
+    meta: Record<string, unknown>;
+  }[];
+  expect(audit!.meta).toMatchObject({ email_customised: true, email_subject: "Welcome to the Spring beta" });
+  expect(JSON.stringify(audit!.meta)).not.toContain("Thanks for joining");
 
   // --- Extend the first seller's plan by a month ------------------------------
   const before = (await grantOf(a.id))!;
