@@ -37,6 +37,9 @@ export function PlanChip({ className, onNavigate }: { className?: string; onNavi
         </>
       ) : (
         <>
+          {/* An empty icon slot, so "Upgrade" starts where the labels of the items
+              around it (Settings below) start, not under their icons. */}
+          <span aria-hidden className="size-5 shrink-0" />
           {t("chip.upgrade")}
           <ArrowUpRight
             className={cn("ml-auto size-4 shrink-0 text-muted-foreground/60 group-hover/btn:text-foreground", iconNudgeRightClass)}
