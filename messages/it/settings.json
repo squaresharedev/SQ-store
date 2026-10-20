@@ -169,6 +169,7 @@
       "scheduled": {
         "subject": "Il tuo account Square Share sta per essere eliminato",
         "body": "Ci hai chiesto di eliminare il tuo account Square Share. Verrà eliminato definitivamente il {date}, con prodotti, vetrine, ordini e file.",
+        "export": "Fino ad allora puoi scaricare una copia dei tuoi dati, ordini compresi, dalle Impostazioni.",
         "undo": "Hai cambiato idea? Accedi e scegli Mantieni il mio account: {url}"
       },
       "notYou": "Se non l’hai chiesto tu, scrivi subito a {email}.",

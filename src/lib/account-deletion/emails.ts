@@ -39,6 +39,8 @@ export async function sendDeletionScheduledEmail(
   const t = await translatorFor(locale);
   return deliver("scheduled", to, t("Settings.danger.email.scheduled.subject"), [
     t("Settings.danger.email.scheduled.body", { date: formatLongDate(deleteOn, locale) }),
+    // Their sales records go with the account: say where to take a copy first.
+    t("Settings.danger.email.scheduled.export"),
     "",
     t("Settings.danger.email.scheduled.undo", { url: appUrl(DANGER_SETTINGS_PATH) }),
     "",

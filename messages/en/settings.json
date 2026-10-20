@@ -169,6 +169,7 @@
       "scheduled": {
         "subject": "Your Square Share account is scheduled for deletion",
         "body": "You asked us to delete your Square Share account. It will be permanently deleted on {date}, with its products, storefronts, orders and files.",
+        "export": "Before then you can download a copy of your data, orders included, from Settings.",
         "undo": "Changed your mind? Sign in and choose Keep my account: {url}"
       },
       "notYou": "If you didn't ask for this, write to {email} right away.",

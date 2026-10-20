@@ -169,6 +169,7 @@
       "scheduled": {
         "subject": "Twoje konto Square Share zostanie usunięte",
         "body": "Poprosiłeś nas o usunięcie konta Square Share. Zostanie ono trwale usunięte {date}, razem z produktami, witrynami, zamówieniami i plikami.",
+        "export": "Do tego czasu możesz pobrać kopię swoich danych, łącznie z zamówieniami, w Ustawieniach.",
         "undo": "Zmieniasz zdanie? Zaloguj się i wybierz Zachowaj moje konto: {url}"
       },
       "notYou": "Jeśli to nie ty o to prosiłeś, napisz od razu na {email}.",

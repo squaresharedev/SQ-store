@@ -169,6 +169,7 @@
       "scheduled": {
         "subject": "Je Square Share-account wordt verwijderd",
         "body": "Je hebt ons gevraagd je Square Share-account te verwijderen. Het wordt op {date} definitief verwijderd, met de producten, etalages, bestellingen en bestanden.",
+        "export": "Tot die tijd kun je in Instellingen een kopie van je gegevens downloaden, inclusief je bestellingen.",
         "undo": "Bedacht? Log in en kies Mijn account behouden: {url}"
       },
       "notYou": "Heb je hier niet om gevraagd? Schrijf dan meteen naar {email}.",

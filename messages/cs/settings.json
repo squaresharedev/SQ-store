@@ -169,6 +169,7 @@
       "scheduled": {
         "subject": "Váš účet Square Share bude smazán",
         "body": "Požádali jste nás o smazání svého účtu Square Share. Trvale smazán bude {date}, včetně produktů, výloh, objednávek a souborů.",
+        "export": "Do té doby si můžete v Nastavení stáhnout kopii svých dat včetně objednávek.",
         "undo": "Rozmysleli jste si to? Přihlaste se a zvolte Ponechat můj účet: {url}"
       },
       "notYou": "Pokud jste o to nežádali, napište ihned na {email}.",

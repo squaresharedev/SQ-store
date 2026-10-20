@@ -169,6 +169,7 @@
       "scheduled": {
         "subject": "Dein Square Share Konto wird gelöscht",
         "body": "Du hast uns gebeten, dein Square Share Konto zu löschen. Es wird am {date} endgültig gelöscht, samt Produkten, Schaufenstern, Bestellungen und Dateien.",
+        "export": "Bis dahin kannst du in den Einstellungen eine Kopie deiner Daten herunterladen, Bestellungen eingeschlossen.",
         "undo": "Hast du es dir anders überlegt? Melde dich an und wähle Mein Konto behalten: {url}"
       },
       "notYou": "Wenn du das nicht angefragt hast, schreib sofort an {email}.",
