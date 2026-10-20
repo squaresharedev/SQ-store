@@ -161,7 +161,8 @@
   },
   "chip": {
     "label": "Forfait : {plan}",
-    "upgrade": "Mettre à niveau"
+    "upgrade": "Mettre à niveau",
+    "pro": "Forfait Pro"
   },
   "banner": {
     "label": "Paiement du forfait",

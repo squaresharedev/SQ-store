@@ -161,7 +161,8 @@
   },
   "chip": {
     "label": "Tarif: {plan}",
-    "upgrade": "Upgraden"
+    "upgrade": "Upgraden",
+    "pro": "Pro-Tarif"
   },
   "banner": {
     "label": "Tarifzahlung",

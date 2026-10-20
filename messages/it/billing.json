@@ -161,7 +161,8 @@
   },
   "chip": {
     "label": "Piano: {plan}",
-    "upgrade": "Potenzia"
+    "upgrade": "Potenzia",
+    "pro": "Piano Pro"
   },
   "banner": {
     "label": "Pagamento del piano",

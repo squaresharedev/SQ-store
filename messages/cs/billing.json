@@ -161,7 +161,8 @@
   },
   "chip": {
     "label": "Plán: {plan}",
-    "upgrade": "Upgradovat"
+    "upgrade": "Upgradovat",
+    "pro": "Plán Pro"
   },
   "banner": {
     "label": "Platba za plán",

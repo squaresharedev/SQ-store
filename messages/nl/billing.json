@@ -161,7 +161,8 @@
   },
   "chip": {
     "label": "Abonnement: {plan}",
-    "upgrade": "Upgraden"
+    "upgrade": "Upgraden",
+    "pro": "Pro-abonnement"
   },
   "banner": {
     "label": "Betaling abonnement",

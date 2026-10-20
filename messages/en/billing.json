@@ -161,7 +161,8 @@
   },
   "chip": {
     "label": "Plan: {plan}",
-    "upgrade": "Upgrade"
+    "upgrade": "Upgrade",
+    "pro": "Pro plan"
   },
   "banner": {
     "label": "Plan payment",
