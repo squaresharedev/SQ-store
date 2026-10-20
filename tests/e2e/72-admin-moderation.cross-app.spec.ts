@@ -38,7 +38,7 @@ import { enableTwoFactor } from "./two-factor";
  *   2. Start SQ-admin against it (its .env.e2e plus the four below; the
  *      empty mail key keeps its .env.local one from sending real email):
  *        NOTIFY_SCAN_SECRET=e2e-scan STORE_APP_URL=http://localhost:3100 \
- *          NEXT_PUBLIC_APP_URL=http://localhost:3201 RESEND_API_KEY= \
+ *          NEXT_PUBLIC_APP_URL=http://localhost:3201 BREVO_SMTP_KEY= \
  *          next dev -p 3201
  *   3. E2E_ADMIN_URL=http://localhost:3201 E2E_ADMIN_SCAN_SECRET=e2e-scan \
  *        npx playwright test 72-admin-moderation

@@ -24,7 +24,7 @@ import { enableTwoFactor } from "./two-factor";
  *   2. Start SQ-admin against it (its .env.e2e, plus an empty mail key so its
  *      .env.local one never sends real email):
  *        STORE_APP_URL=http://localhost:3100 NEXT_PUBLIC_APP_URL=http://localhost:3201 \
- *          RESEND_API_KEY= next dev -p 3201
+ *          BREVO_SMTP_KEY= next dev -p 3201
  *   3. E2E_ADMIN_URL=http://localhost:3201 npx playwright test 74-admin-plans
  *      (E2E_ADMIN_REPO points at SQ-admin when this checkout is not beside it.)
  *
@@ -218,7 +218,15 @@ test("give, extend, change and end plans; the sellers see it", async ({ browser 
   await expect(a.page.getByText("On us: Square Share gave your store this plan.")).toBeVisible();
   await expect(a.page.getByText("No end date.")).toBeVisible();
   await a.page.goto("/plans");
-  await expect(a.page.getByRole("status").filter({ hasText: "Your Starter plan is on us, with no end date." })).toBeVisible();
+  const banner = a.page.locator('[data-grant-banner="starter"]');
+  await expect(banner).toContainText("Starter is on us");
+  await expect(banner).toContainText("No end date.");
+  // Closed, it stays closed.
+  await banner.getByRole("button", { name: "Close" }).click();
+  await expect(banner).toHaveCount(0);
+  await a.page.reload();
+  await expect(a.page.getByRole("heading", { name: "Choose your plan" })).toBeVisible();
+  await expect(banner).toHaveCount(0);
   await expect(a.page.getByRole("button", { name: /Upgrade to Starter/ })).toHaveCount(0);
   await a.page.goto("/notifications");
   await expect(a.page.getByText("Square Share gave your store Pro").first()).toBeVisible({ timeout: 30_000 });

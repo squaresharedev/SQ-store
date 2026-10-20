@@ -34,8 +34,7 @@
     "unavailable": "Les forfaits ne peuvent pas être affichés pour l'instant. Actualisez la page dans un moment.",
     "yearlyFree": "{count, plural, one {# mois offert} other {# mois offerts}}",
     "launchNote": "Un prix de lancement est un prix introductif : le prix habituel est celui affiché barré.",
-    "grantUntil": "Votre forfait {plan} vous est offert jusqu'au {date}. Rien n'est supprimé quand il prend fin.",
-    "grantNoEnd": "Votre forfait {plan} vous est offert, sans date de fin."
+    "grantTitle": "{plan} vous est offert"
   },
   "card": {
     "perMonth": "/ mois",

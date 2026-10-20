@@ -34,8 +34,7 @@
     "unavailable": "Não é possível mostrar os planos agora. Atualize a página num momento.",
     "yearlyFree": "{count, plural, one {# mês grátis} many {# de meses grátis} other {# meses grátis}}",
     "launchNote": "Um preço de lançamento é um preço introdutório: o preço normal é o que aparece riscado.",
-    "grantUntil": "O seu plano {plan} é oferta nossa até {date}. Quando terminar, nada é removido.",
-    "grantNoEnd": "O seu plano {plan} é oferta nossa, sem data de fim."
+    "grantTitle": "{plan} é oferta nossa"
   },
   "card": {
     "perMonth": "/ mês",

@@ -34,8 +34,7 @@
     "unavailable": "Plány sa momentálne nedajú zobraziť. Za chvíľu obnovte stránku.",
     "yearlyFree": "{count, plural, one {# mesiac zadarmo} few {# mesiace zadarmo} many {# mesiaca zadarmo} other {# mesiacov zadarmo}}",
     "launchNote": "Úvodná cena je zvýhodnená cena na začiatok: bežná cena je tá, ktorá je prečiarknutá.",
-    "grantUntil": "Váš plán {plan} je na naše náklady do {date}. Keď skončí, nič sa neodstráni.",
-    "grantNoEnd": "Váš plán {plan} je na naše náklady, bez dátumu ukončenia."
+    "grantTitle": "{plan} je na naše náklady"
   },
   "card": {
     "perMonth": "/ mesiac",

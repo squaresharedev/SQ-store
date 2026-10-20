@@ -34,8 +34,7 @@
     "unavailable": "Abonnementen kunnen nu niet worden getoond. Vernieuw de pagina over een moment.",
     "yearlyFree": "{count, plural, one {# maand gratis} other {# maanden gratis}}",
     "launchNote": "Een lanceringsprijs is een introductieprijs: de normale prijs is de doorgestreepte prijs.",
-    "grantUntil": "Je {plan}-abonnement krijg je van ons tot {date}. Als het afloopt, wordt er niets verwijderd.",
-    "grantNoEnd": "Je {plan}-abonnement krijg je van ons, zonder einddatum."
+    "grantTitle": "{plan} krijg je van ons"
   },
   "card": {
     "perMonth": "/ maand",

@@ -34,8 +34,7 @@
     "unavailable": "Plany nie mogą być teraz wyświetlone. Odśwież stronę za chwilę.",
     "yearlyFree": "{count, plural, one {# miesiąc gratis} few {# miesiące gratis} many {# miesięcy gratis} other {# miesiąca gratis}}",
     "launchNote": "Cena startowa to cena promocyjna na początek: zwykła cena jest ta przekreślona.",
-    "grantUntil": "Twój plan {plan} jest na nasz koszt do {date}. Gdy się skończy, nic nie zostanie usunięte.",
-    "grantNoEnd": "Twój plan {plan} jest na nasz koszt, bez daty zakończenia."
+    "grantTitle": "{plan} na nasz koszt"
   },
   "card": {
     "perMonth": "/ miesiąc",

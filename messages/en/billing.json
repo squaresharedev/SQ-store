@@ -34,8 +34,7 @@
     "unavailable": "Plans can't be shown right now. Refresh the page in a moment.",
     "yearlyFree": "{count, plural, one {# month free} other {# months free}}",
     "launchNote": "A launch price is an introductory price: the regular price is the one shown struck through.",
-    "grantUntil": "Your {plan} plan is on us until {date}. Nothing is taken down when it ends.",
-    "grantNoEnd": "Your {plan} plan is on us, with no end date."
+    "grantTitle": "{plan} is on us"
   },
   "card": {
     "perMonth": "/ month",

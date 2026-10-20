@@ -267,7 +267,10 @@ describe("PlansPage", () => {
 
   it("says a plan Square Share gave is on us, and sells only what is above it", () => {
     render(<PlansPage context={GRANTED_STARTER} source={null} actions={stubActions()} />);
-    expect(screen.getByRole("status").textContent).toContain(`Your Starter plan is on us until ${GRANT_END}.`);
+    const banner = screen.getByRole("status");
+    expect(banner.getAttribute("data-grant-banner")).toBe("starter");
+    expect(banner.textContent).toContain("Starter is on us");
+    expect(banner.textContent).toContain(`Until ${GRANT_END}. Nothing is taken down when it ends.`);
     expect(screen.queryByRole("button", { name: /Upgrade to Starter/ })).toBeNull();
     expect(screen.getByRole("button", { name: /Upgrade to Pro/ })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Move to Free|Switch/ })).toBeNull();
@@ -280,8 +283,32 @@ describe("PlansPage", () => {
         actions={stubActions()}
       />,
     );
-    expect(screen.getByRole("status").textContent).toContain("Your Pro plan is on us, with no end date.");
+    expect(screen.getByRole("status").textContent).toContain("Pro is on us");
+    expect(screen.getByRole("status").textContent).toContain("No end date.");
     expect(screen.queryByRole("button", { name: /Upgrade to/ })).toBeNull();
+  });
+
+  it("closes the on-us banner for good on this device, until the grant changes", async () => {
+    const user = userEvent.setup();
+    localStorage.clear();
+    render(<PlansPage context={GRANTED_STARTER} source={null} actions={stubActions()} />);
+    await user.click(within(screen.getByRole("status")).getByRole("button", { name: "Close" }));
+    expect(document.querySelector("[data-grant-banner]")).toBeNull();
+    cleanup();
+    // Coming back: still closed.
+    render(<PlansPage context={GRANTED_STARTER} source={null} actions={stubActions()} />);
+    expect(document.querySelector("[data-grant-banner]")).toBeNull();
+    cleanup();
+    // A longer grant is news again.
+    render(
+      <PlansPage
+        context={{ ...GRANTED_STARTER, grant: { plan: "starter", endsAt: "2027-06-19T12:00:00.000Z" } }}
+        source={null}
+        actions={stubActions()}
+      />,
+    );
+    expect(document.querySelector("[data-grant-banner]")).not.toBeNull();
+    localStorage.clear();
   });
 
   it("gives a teammate the plans to read and nothing to press", () => {

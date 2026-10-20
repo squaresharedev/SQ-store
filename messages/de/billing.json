@@ -34,8 +34,7 @@
     "unavailable": "Die Tarife können gerade nicht angezeigt werden. Lade die Seite gleich neu.",
     "yearlyFree": "{count, plural, one {# Monat gratis} other {# Monate gratis}}",
     "launchNote": "Ein Einführungspreis ist ein Preis zum Start: Der reguläre Preis ist der durchgestrichene.",
-    "grantUntil": "Dein {plan}-Tarif geht bis zum {date} auf uns. Wenn er endet, wird nichts offline genommen.",
-    "grantNoEnd": "Dein {plan}-Tarif geht auf uns, ohne Enddatum."
+    "grantTitle": "{plan} geht auf uns"
   },
   "card": {
     "perMonth": "/ Monat",

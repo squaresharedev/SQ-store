@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { pageShellClass, savingBadgeClass, savingBadgeOnInkClass } from "@/components/ui/surface-styles";
 import { helpTextClass, iconNudgeRightClass, infoTextClass, stubBadgeClass } from "@/components/ui/control-styles";
 import { PlanCard } from "@/components/billing/PlanCard";
+import { GrantBanner } from "@/components/billing/GrantBanner";
 import { CostExplorer } from "@/components/billing/CostExplorer";
 import { PlanComparison } from "@/components/billing/PlanComparison";
 import { PlansFaq } from "@/components/billing/PlansFaq";
@@ -146,6 +147,7 @@ function PlansPageBody({ context, source, actions = SERVER_BILLING_ACTIONS }: Pl
           }
         />
 
+        {context.grant && <GrantBanner grant={context.grant} />}
         {notice && (
           <div role="status" className="mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-3 border-l-2 border-foreground pl-3">
             <p className={helpTextClass}>{notice}</p>
@@ -294,11 +296,8 @@ function planAction({
 function statusNotice(context: PricingContext, t: Translate, locale: ReturnType<typeof useLocale>): string | null {
   if (!isPaidPlan(context.plan)) return null;
   const plan = t(`plans.${context.plan}.name`);
-  if (context.grant) {
-    return context.grant.endsAt
-      ? t("page.grantUntil", { plan, date: formatLongDate(context.grant.endsAt, locale) })
-      : t("page.grantNoEnd", { plan });
-  }
+  // A plan Square Share gave has its own banner (GrantBanner).
+  if (context.grant) return null;
   if (context.status === "past_due") return t("page.pastDue", { plan });
   if (context.cancelAtPeriodEnd && context.currentPeriodEnd) {
     return t("page.endsOn", { plan, date: formatLongDate(context.currentPeriodEnd, locale) });
