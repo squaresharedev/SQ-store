@@ -407,6 +407,7 @@
       "label": "Wohin du versendest und wie lange es dauert",
       "tipLabel": "Wie viel Detail anzugeben ist",
       "tipBody": "Gruppiere Lieferziele so, wie du wirklich versendest: eine Zeile für dein Land, eine für den Rest der EU, eine für alles andere reicht. Lasse die Kosten leer, wenn sie variieren.",
+      "flatRate": "Ein Tarif wird einmal pro Bestellung berechnet, unabhängig von Menge und Gewicht. Käufer bestellen ein Produkt auf einmal: Einen Warenkorb gibt es noch nicht.",
       "empty": "Noch nichts eingetragen. Käufer sehen keine Lieferzeiten, bis du eine Zeile hinzufügst.",
       "areaLabel": "Lieferziel {number}",
       "areaPlaceholder": "z. B. Rest der EU",

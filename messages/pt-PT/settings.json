@@ -407,6 +407,7 @@
       "label": "Para onde envia e quanto tempo demora",
       "tipLabel": "Que nível de detalhe indicar",
       "tipBody": "Agrupe os destinos consoante a forma como realmente envia: uma linha para o seu país, uma para o resto da UE e uma para o resto do mundo já chega. Deixe o custo em branco se este variar.",
+      "flatRate": "Cada tarifa é cobrada uma vez por encomenda, seja qual for a quantidade ou o peso. Os compradores encomendam um produto de cada vez: ainda não há carrinho.",
       "empty": "Ainda não há nada indicado. Os compradores não veem prazos de entrega até adicionar uma linha.",
       "areaLabel": "Destino {number}",
       "areaPlaceholder": "p. ex. Resto da UE",

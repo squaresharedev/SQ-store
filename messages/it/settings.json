@@ -407,6 +407,7 @@
       "label": "Dove spedisci, e quanto tempo ci vuole",
       "tipLabel": "Quanto dettaglio dare",
       "tipBody": "Raggruppa le destinazioni come spedisci davvero: una riga per il tuo paese, una per il resto dell’UE, una per tutto il resto può bastare. Lascia vuoto il costo se varia.",
+      "flatRate": "Ogni tariffa si applica una volta per ordine, qualunque siano quantità e peso. Gli acquirenti ordinano un prodotto alla volta: il carrello non c’è ancora.",
       "empty": "Non c’è ancora nulla. Gli acquirenti non vedono tempi di consegna finché non aggiungi una riga.",
       "areaLabel": "Destinazione {number}",
       "areaPlaceholder": "es. Resto dell’UE",

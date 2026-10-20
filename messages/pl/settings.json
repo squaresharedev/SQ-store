@@ -407,6 +407,7 @@
       "label": "Dokąd wysyłasz i ile to trwa",
       "tipLabel": "Ile szczegółów podać",
       "tipBody": "Grupuj kierunki tak, jak faktycznie wysyłasz: jeden wiersz dla kraju, jeden dla reszty UE, jeden dla wszystkiego innego zwykle wystarczy. Zostaw koszt pusty, jeśli się zmienia.",
+      "flatRate": "Stawka jest naliczana raz za zamówienie, niezależnie od liczby sztuk i wagi. Kupujący zamawiają jeden produkt naraz: koszyka jeszcze nie ma.",
       "empty": "Nic tu jeszcze nie ma. Kupujący nie zobaczą czasu dostawy, dopóki nie dodasz wiersza.",
       "areaLabel": "Kierunek {number}",
       "areaPlaceholder": "np. Reszta UE",

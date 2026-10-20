@@ -407,6 +407,7 @@
       "label": "Where you ship, and how long it takes",
       "tipLabel": "How much detail to give",
       "tipBody": "Group destinations however you actually ship: one row for home, one for the rest of the EU, one for everywhere else is plenty. Leave the cost blank if it varies.",
+      "flatRate": "A rate is charged once per order, whatever the quantity or weight. Buyers order one product at a time: there is no cart yet.",
       "empty": "Nothing listed yet. Buyers see no delivery times until you add a row.",
       "areaLabel": "Destination {number}",
       "areaPlaceholder": "e.g. Rest of EU",

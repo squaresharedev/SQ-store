@@ -407,6 +407,7 @@
       "label": "Waar je naartoe verzendt, en hoe lang het duurt",
       "tipLabel": "Hoeveel detail je moet geven",
       "tipBody": "Groepeer bestemmingen zoals je daadwerkelijk verzendt: één rij voor thuis, één voor de rest van de EU, één voor de rest van de wereld is meestal genoeg. Laat de kosten leeg als ze variëren.",
+      "flatRate": "Een tarief geldt één keer per bestelling, ongeacht aantal of gewicht. Kopers bestellen één product tegelijk: er is nog geen winkelwagen.",
       "empty": "Nog niets vermeld. Kopers zien geen levertijden totdat je een rij toevoegt.",
       "areaLabel": "Bestemming {number}",
       "areaPlaceholder": "bijv. Rest van de EU",

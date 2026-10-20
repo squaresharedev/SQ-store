@@ -407,6 +407,7 @@
       "label": "Kam posíláte a jak dlouho to trvá",
       "tipLabel": "Jak podrobně to uvést",
       "tipBody": "Oblasti doručení seskupte podle toho, jak skutečně posíláte: jeden řádek pro domácí zásilky, jeden pro zbytek EU a jeden pro ostatní svět úplně stačí. Pokud se cena liší, nechte ji prázdnou.",
+      "flatRate": "Sazba se účtuje jednou za objednávku bez ohledu na množství či hmotnost. Kupující objednávají vždy jeden produkt: košík zatím není.",
       "empty": "Zatím nic. Dokud nepřidáte řádek, kupující neuvidí žádné doby doručení.",
       "areaLabel": "Oblast doručení {number}",
       "areaPlaceholder": "např. Zbytek EU",

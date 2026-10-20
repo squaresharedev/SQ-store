@@ -407,6 +407,7 @@
       "label": "Kam doručujete a ako dlho to trvá",
       "tipLabel": "Koľko detailov uviesť",
       "tipBody": "Zoskupte cieľové miesta podľa toho, ako skutočne posielate: jeden riadok pre domácich, jeden pre zvyšok EÚ, jeden pre celý svet je dosť. Cenu nechajte prázdnu, ak sa mení.",
+      "flatRate": "Sadzba sa účtuje raz za objednávku bez ohľadu na množstvo či hmotnosť. Kupujúci objednávajú vždy jeden produkt: košík zatiaľ nie je.",
       "empty": "Zatiaľ nič nie je uvedené. Kupujúci neuvidia doby doručenia, kým nepridáte riadok.",
       "areaLabel": "Oblasť doručenia {number}",
       "areaPlaceholder": "napr. Zvyšok EÚ",

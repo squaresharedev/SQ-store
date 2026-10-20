@@ -388,6 +388,9 @@ export function ShippingSection({
                 {t("shipping.destinations.tipBody")}
               </InfoTip>
             </span>
+            {/* Said where the rate is set, not in a tip: a seller who expects
+                a per-item or per-kilo rate undercharges on every order. */}
+            <p className={helpTextClass}>{t("shipping.destinations.flatRate")}</p>
             {destinations.length === 0 ? (
               <p className={helpTextClass}>{t("shipping.destinations.empty")}</p>
             ) : (

@@ -407,6 +407,7 @@
       "label": "Où vous livrez, et en combien de temps",
       "tipLabel": "Quel niveau de détail donner",
       "tipBody": "Regroupez les destinations comme vous expédiez réellement : une ligne pour votre pays, une pour le reste de l’UE, une pour tout le reste suffit largement. Laissez le coût vide s’il varie.",
+      "flatRate": "Un tarif est facturé une fois par commande, quels que soient la quantité ou le poids. Les acheteurs commandent un produit à la fois : il n’y a pas encore de panier.",
       "empty": "Rien n’est encore renseigné. Les acheteurs ne voient aucun délai de livraison tant que vous n’ajoutez pas de ligne.",
       "areaLabel": "Destination {number}",
       "areaPlaceholder": "p. ex. Reste de l’UE",

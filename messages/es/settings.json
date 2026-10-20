@@ -407,6 +407,7 @@
       "label": "Adónde envías y cuánto tarda",
       "tipLabel": "Cuánto detalle dar",
       "tipBody": "Agrupa los destinos como envíes de verdad: una fila para tu país, otra para el resto de la UE y otra para el resto del mundo suele bastar. Deja el coste en blanco si varía.",
+      "flatRate": "Cada tarifa se cobra una vez por pedido, sea cual sea la cantidad o el peso. Los compradores piden un producto cada vez: todavía no hay carrito.",
       "empty": "Nada añadido todavía. Los compradores no verán plazos de entrega hasta que añadas una fila.",
       "areaLabel": "Destino {number}",
       "areaPlaceholder": "p. ej. Resto de la UE",
