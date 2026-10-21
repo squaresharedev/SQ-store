@@ -39,7 +39,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     env:
       # Exposed at JOB level so the auth step's `if` can test it: the `secrets`
       # context is NOT available inside a step-level `if` expression, and using
@@ -137,45 +137,58 @@ jobs:
           fi
           echo "Supabase config present in the client bundle."
 
-      - name: Deploy
-        run: pnpm run deploy
+      # STAGED DEPLOY. The build is uploaded as a VERSION that serves nobody,
+      # put beside the live version at 0%, and smoke-checked on the real
+      # hostname through Cloudflare's version-override header
+      # (scripts/smoke-check.sh --version). Only a version that passes is
+      # promoted to 100%, so a build that boots but answers 500 everywhere
+      # (2026-09-24) never reaches a user. If the check fails, the 0% version
+      # is taken back out, and production never changed.
+      #
+      # `wrangler versions` does not apply routes or cron triggers the way
+      # `wrangler deploy` did, so they are applied after the promotion.
+      - name: Upload the new version (it serves no traffic yet)
+        id: upload
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      # SMOKE CHECK. Everything above proves the build; nothing proved the
-      # deployed Worker answers. Three requests, each a different layer:
-      #   /login            the Worker boots and renders (200)
-      #   a product page    the public route reaches the database and answers
-      #                     "no such product" (404). A Worker that cannot read
-      #                     (a bad service-role key, the database down) renders
-      #                     the buyer's "could not load this" page instead,
-      #                     which is not a 404 and fails this step.
-      #   billing webhook   the route handlers are mounted (404 while Stripe
-      #                     is unconfigured, 400 for the unsigned body once it
-      #                     is). A 5xx means the handler crashed.
-      # The origin is read from the committed .env.production, the same value
-      # the build inlined. A red run here means production is ALREADY live
-      # with this build: roll back in the Cloudflare dashboard.
-      - name: Smoke check the deployed app
         run: |
           set -euo pipefail
-          APP_URL=$(grep '^NEXT_PUBLIC_APP_URL=' .env.production | cut -d= -f2- | tr -d '"')
-          NOBODY=00000000-0000-4000-8000-000000000000
+          LIVE=$(npx wrangler deployments status --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const v=JSON.parse(s).versions.sort((a,b)=>b.percentage-a.percentage);console.log(v[0].version_id)})')
+          export WRANGLER_OUTPUT_FILE_PATH="$RUNNER_TEMP/wrangler-upload.ndjson"
+          npx wrangler versions upload --message "${GITHUB_SHA::7}" | tee "$RUNNER_TEMP/upload.log"
+          NEW=$(node -e 'const fs=require("fs");const rows=fs.readFileSync(process.argv[1],"utf8").trim().split("\n").map(l=>JSON.parse(l));const up=rows.find(r=>r.type==="version-upload");if(!up||!up.version_id)process.exit(1);console.log(up.version_id)' "$WRANGLER_OUTPUT_FILE_PATH" \
+            || grep -oE 'Worker Version ID: [0-9a-f-]{36}' "$RUNNER_TEMP/upload.log" | grep -oE '[0-9a-f-]{36}')
+          echo "live=$LIVE" >> "$GITHUB_OUTPUT"
+          echo "new=$NEW" >> "$GITHUB_OUTPUT"
+          echo "Live: $LIVE  New: $NEW"
 
-          expect() {
-            local want="$1" method="$2" path="$3" got=""
-            # A new version takes a few seconds to reach every edge location.
-            for attempt in 1 2 3 4 5; do
-              got=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 -X "$method" "$APP_URL$path" || true)
-              case " $want " in *" $got "*) echo "ok   $got $method $path"; return 0 ;; esac
-              sleep 5
-            done
-            echo "::error::Smoke check failed: $method $path answered $got, expected one of: $want"
-            return 1
-          }
+      - name: Put the new version beside the live one at 0%
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler versions deploy "${{ steps.upload.outputs.live }}@100%" "${{ steps.upload.outputs.new }}@0%" --yes --message "check ${GITHUB_SHA::7}"
 
-          expect "200" GET /login
-          expect "404" GET "/s/$NOBODY/p/$NOBODY"
-          expect "400 404" POST /api/billing/webhook
-          echo "Deployed app answers."
+      - name: Smoke check the new version before anyone gets it
+        run: bash scripts/smoke-check.sh --version "${{ steps.upload.outputs.new }}" --build-id "$(cat .next/BUILD_ID)"
+
+      - name: Promote the new version to all traffic
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          npx wrangler versions deploy "${{ steps.upload.outputs.new }}@100%" --yes --message "${GITHUB_SHA::7}"
+          npx wrangler triggers deploy
+
+      # The same checks against production, now that it is live. A failure here
+      # rolls production back to the version that was live before this run.
+      - name: Smoke check production
+        run: bash scripts/smoke-check.sh
+
+      - name: Take a failed version back out
+        if: ${{ failure() && steps.upload.outputs.live != '' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler versions deploy "${{ steps.upload.outputs.live }}@100%" --yes --message "back out ${GITHUB_SHA::7}"
