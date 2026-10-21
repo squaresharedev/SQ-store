@@ -21,6 +21,13 @@
   // Secrets (SUPABASE_SERVICE_ROLE_KEY, STRIPE_SECRET_KEY, R2 keys, etc.) do
   // NOT go here — set those with `wrangler secret put` / the CF dashboard.
   "vars": {
+    // Where the alerts nobody using the app would report go (lib/ops/alert.ts),
+    // once mail is on: the company mailbox.
+    "OPS_ALERT_EMAIL": "office@squareshare.eu",
+    // The address app mail is sent from: the sender Brevo already relays
+    // Supabase Auth's mail as. Sending stays OFF until
+    // TRANSACTIONAL_EMAIL_ENABLED is "true" (LAUNCH SWITCHES, step 3).
+    "TRANSACTIONAL_EMAIL_FROM": "info@squareshare.eu",
     "NEXT_PUBLIC_SUPABASE_URL": "https://vnyfndqpdllwhvhinjoi.supabase.co",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZueWZuZHFwZGxsd2h2aGluam9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMDExNTYsImV4cCI6MjA5ODg3NzE1Nn0.y_SUEDhSU6fmx2HU8r-DHe4XolwAo7JevqBTLtn6ebI",
     "NEXT_PUBLIC_APP_URL": "https://dashboard.squareshare.eu",
@@ -68,6 +75,11 @@
   //      until they do (lib/products/purchasable.ts). Count them first
   //      (profiles with seller_email set and seller_email_verified_at null)
   //      and tell them.
+  //      STATE 2026-10-21: BREVO_API_KEY is on the Worker and the sender is
+  //      set, so step 3 is the one var. It is BLOCKED by Brevo's Authorised
+  //      IPs lock (Brevo > Settings > Security > Authorised IPs): the REST
+  //      API refuses every address not on that list, and a Worker has no
+  //      fixed address, so every send would fail. Deactivate the lock first.
   //   4. Buyer payments (Stripe Connect) need 1, 2 and 3: the checkout gate
   //      reads all of them (lib/checkout/availability.ts). See BUYER PAYMENTS
   //      below for its own secrets and switch.
@@ -181,8 +193,12 @@
   // behind "[server error]" (src/instrumentation.ts), and the alerts nobody
   // would report are behind "[ops alert]": point a Workers Logs alert at both
   // prefixes. Optional, to send them somewhere a person looks:
-  //   ERROR_REPORT_URL    in `vars` above: a collector that takes a JSON POST
-  //   ERROR_REPORT_TOKEN  `wrangler secret put`: its bearer token, if any
+  //   ERROR_REPORT_URL    a collector that takes a JSON POST
+  //   ERROR_REPORT_TOKEN  its bearer token, if any
+  // Both are Worker SECRETS since 2026-10-21, pointing at /report on the
+  // squareshare-uptime Worker (ops/uptime), which emails each error, at
+  // most one every 15 minutes. The same Worker checks every public surface
+  // once a minute and emails when one is down and when it is back.
   // BACKUPS: the Supabase project is on the Free plan, which keeps none. See
   // .github/workflows/backup.yml for the nightly stopgap and what it needs.
   //

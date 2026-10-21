@@ -1,0 +1,31 @@
+// squareshare-uptime: the down detector and error collector (src/index.ts).
+// Deployed on its own, from the repo root:
+//   npx wrangler deploy --config ops/uptime/wrangler.jsonc
+// It is a plain Worker (no OpenNext), so a deploy from Windows is fine.
+//
+// Secrets (`npx wrangler secret put <NAME> --config ops/uptime/wrangler.jsonc`):
+//   SMTP_USER, SMTP_PASS  a Brevo SMTP login (smtp-relay.brevo.com:587)
+//   REPORT_TOKEN          32+ random characters; the dashboard holds the same
+//                         value as ERROR_REPORT_TOKEN, and /status, /check and
+//                         /test-alert want it as a bearer token too
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "squareshare-uptime",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  // The /report endpoint the dashboard posts errors to lives on workers.dev.
+  "workers_dev": true,
+  // Every minute. A check is called down after two failed runs in a row.
+  "triggers": { "crons": ["* * * * *"] },
+  "kv_namespaces": [{ "binding": "STATE", "id": "e882aaca98534fa1841eaf5b13bf8deb" }],
+  "vars": {
+    "ALERT_TO": "edwardsadrianj@gmail.com,office@squareshare.eu",
+    // The sender Brevo already sends Supabase Auth's mail as.
+    "ALERT_FROM": "info@squareshare.eu",
+    "ALERT_FROM_NAME": "Square Share monitor",
+    // Public by design (it is in .env.production): only to ask Supabase's
+    // health endpoint whether the project is up.
+    "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZueWZuZHFwZGxsd2h2aGluam9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMDExNTYsImV4cCI6MjA5ODg3NzE1Nn0.y_SUEDhSU6fmx2HU8r-DHe4XolwAo7JevqBTLtn6ebI"
+  },
+  "observability": { "enabled": true }
+}
