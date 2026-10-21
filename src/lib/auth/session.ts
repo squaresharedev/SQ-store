@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { headers } from "next/headers";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { isAuthRetryableFetchError, type User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
@@ -7,6 +8,7 @@ import {
   needsSecondFactor,
   type SessionAssurance,
 } from "@/lib/auth/assurance";
+import { REQUESTED_PATH_HEADER, returnPathFrom } from "@/lib/auth/requested-path";
 import type { Profile } from "@/types";
 
 /**
@@ -326,8 +328,23 @@ export const requireProfile = cache(async (): Promise<Profile> => {
 });
 
 /**
- * Require an authenticated user or redirect to /login. Pass the current path so
- * the user is returned there after signing in.
+ * The page this request asked for, as src/middleware.ts recorded it, when it is
+ * a signed-in dashboard page; otherwise null (lib/auth/requested-path.ts).
+ */
+async function requestedReturnPath(): Promise<string | null> {
+  try {
+    return returnPathFrom((await headers()).get(REQUESTED_PATH_HEADER));
+  } catch {
+    // Outside a request (a script, a test): there is no page to return to.
+    return null;
+  }
+}
+
+/**
+ * Require an authenticated user or redirect to /login, carrying where to come
+ * back to. That is the page actually requested (src/middleware.ts records it,
+ * query included, so a link to one order or one filtered list survives sign-in);
+ * `nextPath` is only the fallback for a request the middleware did not see.
  */
 export async function requireUser(nextPath?: string): Promise<User> {
   const { user, unreachable } = await loadUser();
@@ -338,12 +355,11 @@ export async function requireUser(nextPath?: string): Promise<User> {
   // the session cookie intact.
   if (unreachable) throw new AuthUnreachableError(unreachable);
   const state = await getSessionState();
+  if (user && state.kind === "signed_in") return user;
+  const returnTo = (await requestedReturnPath()) ?? nextPath;
   // Signed in, second factor still owed: the challenge, not the sign-in form.
   // Sending them back to /login would ask for a password they just gave.
-  if (state.kind === "needs_mfa") redirect(twoFactorChallengePath(nextPath));
-  if (!user || state.kind !== "signed_in") {
-    const query = nextPath ? `?next=${encodeURIComponent(nextPath)}` : "";
-    redirect(`/login${query}`);
-  }
-  return user;
+  if (state.kind === "needs_mfa") redirect(twoFactorChallengePath(returnTo));
+  const query = returnTo ? `?next=${encodeURIComponent(returnTo)}` : "";
+  redirect(`/login${query}`);
 }

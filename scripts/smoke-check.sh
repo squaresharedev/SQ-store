@@ -88,4 +88,7 @@ expect_redirect() {
 expect "200" GET /login
 expect "404" GET "/s/$NOBODY/p/$NOBODY"
 expect "400 404" POST /api/billing/webhook
+# Signed out, a deep link is sent to sign-in carrying the page AND its query
+# (src/middleware.ts + requireUser), not to the dashboard home.
+expect_redirect "/orders?view=all" "/login?next=%2Forders%3Fview%3Dall"
 echo "The app answers."
