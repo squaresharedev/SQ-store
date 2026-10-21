@@ -185,6 +185,8 @@ jobs:
         run: npx wrangler versions deploy "${{ steps.upload.outputs.live }}@100%" "${{ steps.upload.outputs.new }}@0%" --yes --message "check ${GITHUB_SHA::7}"
 
       - name: Smoke check the new version before anyone gets it
+        env:
+          ERROR_REPORT_TOKEN: ${{ secrets.ERROR_REPORT_TOKEN }}
         run: bash scripts/smoke-check.sh --version "${{ steps.upload.outputs.new }}" --build-id "$(cat .next/BUILD_ID)"
 
       - name: Promote the new version to all traffic
@@ -199,6 +201,8 @@ jobs:
       # The same checks against production, now that it is live. A failure here
       # rolls production back to the version that was live before this run.
       - name: Smoke check production
+        env:
+          ERROR_REPORT_TOKEN: ${{ secrets.ERROR_REPORT_TOKEN }}
         run: bash scripts/smoke-check.sh
 
       - name: Take a failed version back out

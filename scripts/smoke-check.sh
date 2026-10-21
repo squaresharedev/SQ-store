@@ -91,4 +91,20 @@ expect "400 404" POST /api/billing/webhook
 # Signed out, a deep link is sent to sign-in carrying the page AND its query
 # (src/middleware.ts + requireUser), not to the dashboard home.
 expect_redirect "/orders?view=all" "/login?next=%2Forders%3Fview%3Dall"
+
+# Mail: the build's SMTP client runs on Workers and Brevo accepts the login.
+# Sends nothing (api/ops/mail-test without ?send=1). Needs the ops token; without
+# it the check is skipped LOUDLY, since a build that cannot reach the relay
+# would otherwise only be found out by the first email that fails.
+if [ -n "${ERROR_REPORT_TOKEN:-}" ]; then
+  got=""
+  for attempt in 1 2 3 4 5; do
+    got=$(curl -s --max-time 30 "${HEADERS[@]}" -X POST -H "Authorization: Bearer ${ERROR_REPORT_TOKEN}" "$APP_URL/api/ops/mail-test" || true)
+    case "$got" in *'"relay":"ok"'*) echo "ok   mail relay accepts the login"; break ;; esac
+    [ "$attempt" = 5 ] && { echo "::error::Mail check failed: $got"; exit 1; }
+    sleep 5
+  done
+else
+  echo "::warning::ERROR_REPORT_TOKEN is not set, so the mail relay was NOT checked."
+fi
 echo "The app answers."

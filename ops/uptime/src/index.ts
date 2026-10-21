@@ -3,7 +3,7 @@
 // stays down. Also the dashboard's error collector (ERROR_REPORT_URL): one
 // email per server error, at most one per quarter hour.
 //
-// Mail goes through Brevo's SMTP relay (smtp.ts). State lives in one KV key,
+// Mail goes through Brevo's SMTP relay (src/lib/email/smtp.ts, shared with the app). State lives in one KV key,
 // written only when it changes, so a long outage costs no writes.
 //
 // Deploy: `npx wrangler deploy --config ops/uptime/wrangler.jsonc` from the
@@ -22,7 +22,7 @@ import {
   type Email,
   type MonitorState,
 } from "./monitor";
-import { sendMail } from "./smtp";
+import { BREVO_SMTP_HOST, BREVO_SMTP_PORT, sendMail } from "../../../src/lib/email/smtp";
 import type { ExecutionContext, KVNamespace, ScheduledController } from "./worker-types";
 
 type Env = {
@@ -42,7 +42,7 @@ const REPORT_MAX_BYTES = 4096;
 
 async function mail(env: Env, email: Email): Promise<void> {
   await sendMail(
-    { host: "smtp-relay.brevo.com", port: 587, user: env.SMTP_USER, pass: env.SMTP_PASS },
+    { host: BREVO_SMTP_HOST, port: BREVO_SMTP_PORT, user: env.SMTP_USER, pass: env.SMTP_PASS },
     {
       fromName: env.ALERT_FROM_NAME,
       fromAddress: env.ALERT_FROM,

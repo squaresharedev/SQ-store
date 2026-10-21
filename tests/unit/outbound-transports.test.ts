@@ -4,6 +4,13 @@ import { sendEmail, emailSendingEnabled } from "@/lib/email/send";
 import { isGsm7, sendSms, smsSendingEnabled } from "@/lib/sms/send";
 import { readDevMessages } from "@/lib/outbound/dev-outbox";
 
+// Email leaves over SMTP (lib/email/smtp.ts), SMS over Brevo's REST API.
+const sendMailMock = vi.hoisted(() => vi.fn(async (_cfg: unknown, _message: unknown) => "250 queued"));
+vi.mock("@/lib/email/smtp", async (importActual) => ({
+  ...(await importActual<typeof import("@/lib/email/smtp")>()),
+  sendMail: sendMailMock,
+}));
+
 // The two ways a message leaves the app. What matters: nothing is sent unless
 // a deployment is switched on for it, development NEVER sends (it records to
 // the dev outbox instead), a misconfigured deployment fails loudly, and the
@@ -14,12 +21,15 @@ const fetchMock = vi.fn(async (_url: string, _init: RequestInit) => new Response
 beforeEach(() => {
   vi.stubGlobal("fetch", fetchMock);
   fetchMock.mockClear();
+  sendMailMock.mockClear();
   vi.stubEnv("NODE_ENV", "production");
   vi.stubEnv("TRANSACTIONAL_EMAIL_FROM", "info@squareshare.eu");
   vi.stubEnv("TRANSACTIONAL_EMAIL_ENABLED", "true");
   vi.stubEnv("SMS_SENDER", "Squareshare");
   vi.stubEnv("SMS_ENABLED", "true");
   vi.stubEnv("BREVO_API_KEY", "xkeysib-test");
+  vi.stubEnv("BREVO_SMTP_USER", "login@smtp-brevo.com");
+  vi.stubEnv("BREVO_SMTP_KEY", "xsmtpsib-test");
 });
 
 afterEach(() => {
@@ -52,23 +62,35 @@ describe("switching on", () => {
 
   it("refuses loudly when switched on without the key", async () => {
     vi.stubEnv("BREVO_API_KEY", "");
-    await expect(sendEmail({ to: "a@b.eu", subject: "s", text: "t" })).rejects.toThrow(/BREVO_API_KEY/);
+    vi.stubEnv("BREVO_SMTP_KEY", "");
+    await expect(sendEmail({ to: "a@b.eu", subject: "s", text: "t" })).rejects.toThrow(/BREVO_SMTP_KEY/);
+    expect(sendMailMock).not.toHaveBeenCalled();
     await expect(sendSms({ to: "+353871234567", text: "t" })).rejects.toThrow(/BREVO_API_KEY/);
   });
 });
 
 describe("Brevo requests", () => {
-  it("email: the documented transactional shape, key in the api-key header", async () => {
+  it("email: handed to the relay with the login, the sender and the message", async () => {
     expect(await sendEmail({ to: "hello@shop.eu", subject: "Hi", text: "Body" })).toEqual({ sent: true });
-    const request = lastRequest();
-    expect(request.url).toBe("https://api.brevo.com/v3/smtp/email");
-    expect(request.headers["api-key"]).toBe("xkeysib-test");
-    expect(request.body).toEqual({
-      sender: { email: "info@squareshare.eu", name: "Squareshare" },
-      to: [{ email: "hello@shop.eu" }],
-      subject: "Hi",
-      textContent: "Body",
-    });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(sendMailMock).toHaveBeenCalledWith(
+      { host: "smtp-relay.brevo.com", port: 587, user: "login@smtp-brevo.com", pass: "xsmtpsib-test" },
+      { fromName: "Squareshare", fromAddress: "info@squareshare.eu", to: ["hello@shop.eu"], subject: "Hi", text: "Body" },
+    );
+  });
+
+  it("email: a seller's reply-to and an HTML part travel with it", async () => {
+    await sendEmail({ to: "buyer@shop.eu", subject: "Shipped", text: "t", html: "<p>t</p>", replyTo: "seller@shop.eu" });
+    expect(sendMailMock.mock.calls[0][1]).toMatchObject({ replyTo: "seller@shop.eu", html: "<p>t</p>" });
+  });
+
+  it("email: a refusal from the relay is a result, and the message body is never logged", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    sendMailMock.mockRejectedValueOnce(new Error("SMTP expected 250, got: 554 rejected"));
+    const result = await sendEmail({ to: "a@b.eu", subject: "s", text: "SECRET-CODE 12345678" });
+    expect(result).toMatchObject({ sent: false, reason: "failed" });
+    expect(JSON.stringify(log.mock.calls)).not.toContain("SECRET-CODE");
+    log.mockRestore();
   });
 
   it("sms: transactional, GSM-7 when it can be, Unicode when it must", async () => {

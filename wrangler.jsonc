@@ -60,7 +60,7 @@
   //                                  checkout provider is offered at all
   //                                  (lib/checkout/availability.ts).
   //        MFA_PASSKEY_KEY           passkeys, unavailable without it.
-  //        BREVO_API_KEY, CONTACT_VERIFICATION_KEY
+  //        BREVO_SMTP_USER, BREVO_SMTP_KEY, CONTACT_VERIFICATION_KEY
   //                                  see CONTACT VERIFICATION below.
   //        ANALYTICS_VISITOR_SALT, MODERATION_REPORTER_SALT
   //                                  optional, see .env.example.
@@ -75,11 +75,13 @@
   //      until they do (lib/products/purchasable.ts). Count them first
   //      (profiles with seller_email set and seller_email_verified_at null)
   //      and tell them.
-  //      STATE 2026-10-21: BREVO_API_KEY is on the Worker and the sender is
-  //      set, so step 3 is the one var. It is BLOCKED by Brevo's Authorised
-  //      IPs lock (Brevo > Settings > Security > Authorised IPs): the REST
-  //      API refuses every address not on that list, and a Worker has no
-  //      fixed address, so every send would fail. Deactivate the lock first.
+  //      MAIL GOES OVER BREVO'S SMTP RELAY (lib/email/smtp.ts), not its REST
+  //      API: the account's Authorised IPs lock refuses every address a Worker
+  //      could send from, and the relay's login can only send. So the lock
+  //      stays on. Before the var: BREVO_SMTP_USER and BREVO_SMTP_KEY are
+  //      Worker secrets, and `POST /api/ops/mail-test` with the ops token
+  //      (ERROR_REPORT_TOKEN) sends one test email to OPS_ALERT_EMAIL
+  //      whatever the switch says: it must say {"sent":true} first.
   //   4. Buyer payments (Stripe Connect) need 1, 2 and 3: the checkout gate
   //      reads all of them (lib/checkout/availability.ts). See BUYER PAYMENTS
   //      below for its own secrets and switch.
@@ -95,8 +97,11 @@
   //
   // OFF until switched on, and switching it on is deliberate:
   //   Secrets (`wrangler secret put <NAME>`, never in this file):
-  //     BREVO_API_KEY             a Brevo REST API key (xkeysib-...), NOT the
-  //                               SMTP key the Auth relay uses
+  //     BREVO_SMTP_USER, BREVO_SMTP_KEY
+  //                               Brevo's SMTP login (the relay that already
+  //                               carries Supabase Auth's mail). Email only:
+  //                               SMS needs the REST key, BREVO_API_KEY, and
+  //                               that API is locked to listed IPs.
   //     CONTACT_VERIFICATION_KEY  32 random bytes, base64url: the HMAC key
   //                               codes are stored under. Rotating it only
   //                               voids codes in flight (15 minutes' worth).

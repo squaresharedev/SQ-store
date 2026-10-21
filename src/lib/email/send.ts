@@ -1,16 +1,20 @@
 // SERVER ONLY. The ONE place outbound transactional mail leaves this app.
 //
-// THE PROVIDER is Brevo's transactional API (lib/outbound/brevo.ts), the same
-// account and verified sender domain that already relays Supabase Auth's mail
-// for this project. A plain HTTPS call, so it runs on Workers without SMTP. If
-// it is ever swapped out, replace {@link deliver} and nothing else changes.
+// THE PROVIDER is Brevo's SMTP relay (lib/email/smtp.ts), the same account and
+// verified sender domain that already relays Supabase Auth's mail for this
+// project. SMTP and not Brevo's REST API: the account locks that API to listed
+// IP addresses, which a Worker does not have, and the relay's login can only
+// send mail (see smtp.ts). If it is ever swapped out, replace {@link deliver}
+// and nothing else changes.
 //
 // OFF UNLESS CONFIGURED, exactly like lib/turnstile.ts, lib/moderation and
 // lib/sms/send.ts. Production needs all three of:
 //
 //   TRANSACTIONAL_EMAIL_FROM     an address on the domain verified in Brevo
 //   TRANSACTIONAL_EMAIL_ENABLED  "true"
-//   BREVO_API_KEY                Worker secret (wrangler secret put)
+//   BREVO_SMTP_USER, BREVO_SMTP_KEY
+//                                Worker secrets (wrangler secret put): Brevo's
+//                                SMTP login, not an API key
 //
 // Until the first two are set, {@link emailSendingEnabled} is false everywhere
 // and callers fall back to whatever they do without mail.
@@ -19,7 +23,7 @@
 //
 //   not configured         -> `{ sent: false, reason: "disabled" }`. The caller
 //                             decides; nothing is silently swallowed.
-//   enabled, no API key    -> throws. "Told to send and unable to" is a
+//   enabled, no SMTP login -> throws. "Told to send and unable to" is a
 //                             deployment fault and must surface, not be absorbed.
 //   configured, send fails -> `{ sent: false, reason }`. The caller reports it.
 //   development            -> NEVER sent. The message is printed and kept in
@@ -28,7 +32,8 @@
 //                             the e2e stack without mailing a stranger. Gated on
 //                             NODE_ENV so it can never become a production leak.
 
-import { OutboundMisconfiguredError, brevoPost } from "@/lib/outbound/brevo";
+import { BREVO_SMTP_HOST, BREVO_SMTP_PORT, checkRelay, sendMail, type SmtpConfig } from "@/lib/email/smtp";
+import { OutboundMisconfiguredError } from "@/lib/outbound/brevo";
 import { printDevMessage, recordDevMessage } from "@/lib/outbound/dev-outbox";
 
 export type OutboundEmail = {
@@ -79,6 +84,18 @@ export function emailSendingEnabled(): boolean {
   return process.env.TRANSACTIONAL_EMAIL_ENABLED === "true";
 }
 
+/** The relay login, or the loud failure a deployment told to send without one deserves. */
+function smtpConfig(): SmtpConfig {
+  const user = process.env.BREVO_SMTP_USER?.trim();
+  const pass = process.env.BREVO_SMTP_KEY?.trim();
+  if (!user || !pass) {
+    throw new OutboundMisconfiguredError(
+      "Outbound delivery is enabled but BREVO_SMTP_USER / BREVO_SMTP_KEY are not set. Add them with `wrangler secret put`.",
+    );
+  }
+  return { host: BREVO_SMTP_HOST, port: BREVO_SMTP_PORT, user, pass };
+}
+
 /** The one call that reaches the provider. Swap this to change providers. */
 async function deliver(message: OutboundEmail, from: string): Promise<void> {
   if (process.env.NODE_ENV === "development") {
@@ -88,13 +105,41 @@ async function deliver(message: OutboundEmail, from: string): Promise<void> {
     return;
   }
 
-  await brevoPost("/smtp/email", {
-    sender: { email: from, name: message.fromName ?? SENDER_NAME },
-    to: [{ email: message.to }],
-    ...(message.replyTo ? { replyTo: { email: message.replyTo } } : {}),
+  await sendMail(smtpConfig(), {
+    fromName: message.fromName ?? SENDER_NAME,
+    fromAddress: from,
+    to: [message.to],
+    ...(message.replyTo ? { replyTo: message.replyTo } : {}),
     subject: message.subject,
-    textContent: message.text,
-    ...(message.html ? { htmlContent: message.html } : {}),
+    text: message.text,
+    ...(message.html ? { html: message.html } : {}),
+  });
+}
+
+/**
+ * Logs in to the real relay and says nothing else: no message is sent. What the
+ * deploy's smoke check asks (api/ops/mail-test), so every build proves its SMTP
+ * client runs on Workers and the login is accepted. Throws on any failure.
+ */
+export async function checkMailRelay(): Promise<void> {
+  await checkRelay(smtpConfig());
+}
+
+/**
+ * One test message to `to`, through the real relay, regardless of the
+ * TRANSACTIONAL_EMAIL_ENABLED switch: "does production mail work?" has to be
+ * answerable BEFORE the switch is turned on. Never used for a user's mail
+ * (api/ops/mail-test sends it to the ops mailbox only). Throws on any failure.
+ */
+export async function sendTestEmail(to: string): Promise<void> {
+  const from = senderAddress();
+  if (!from) throw new OutboundMisconfiguredError("TRANSACTIONAL_EMAIL_FROM is not set.");
+  await sendMail(smtpConfig(), {
+    fromName: SENDER_NAME,
+    fromAddress: from,
+    to: [to],
+    subject: "[Square Share] Mail test from the dashboard",
+    text: "This is a test sent by the dashboard through Brevo's SMTP relay. Nothing is wrong, and no user's mail goes through this check.",
   });
 }
 
