@@ -813,8 +813,12 @@ test.describe("hosted product page", () => {
     await page.getByRole("option", { name: "Handwritten" }).click();
     await expect(root).toHaveClass(/font-hand/);
 
-    // And a buyer gets it too.
+    // And a buyer gets it too. Wait for the save to be confirmed before
+    // leaving: clearing the cookies while it is in flight drops it (seen on
+    // the slower CI runner). The board holds a draft tile, so the
+    // confirmation is the drafts warning.
     await page.getByRole("button", { name: /^save$/i }).click();
+    await expectToast(page, /saved, but some products are still drafts/i, 15_000);
     await expect(page.getByText("Unsaved changes")).toHaveCount(0);
     await page.context().clearCookies();
     await page.goto(pagePath(s, s.active));

@@ -95,24 +95,31 @@ const pool = new pg.Pool({ connectionString: DB_URL, max: 5 });
 // PostgREST's Windows build dynamically links libpq — put the embedded
 // Postgres bin dir (which ships libpq.dll + friends) on PATH. Resolve the
 // platform package THROUGH embedded-postgres (pnpm strict node_modules).
+// The Linux build (CI, tests/e2e/stack/fetch-postgrest.mjs) is static and
+// needs nothing.
+const IS_WINDOWS = process.platform === "win32";
 const require = createRequire(import.meta.url);
-const epgMain = require.resolve("embedded-postgres"); // …/node_modules/embedded-postgres/dist/…
-let probe = dirname(epgMain);
-let pgBinDir = "";
-while (probe !== dirname(probe)) {
-  const candidate = join(probe, "node_modules", "@embedded-postgres", "windows-x64", "native", "bin");
-  if (existsSync(candidate)) {
-    pgBinDir = candidate;
-    break;
+let pathWithLibpq = process.env.PATH;
+if (IS_WINDOWS) {
+  const epgMain = require.resolve("embedded-postgres"); // …/node_modules/embedded-postgres/dist/…
+  let probe = dirname(epgMain);
+  let pgBinDir = "";
+  while (probe !== dirname(probe)) {
+    const candidate = join(probe, "node_modules", "@embedded-postgres", "windows-x64", "native", "bin");
+    if (existsSync(candidate)) {
+      pgBinDir = candidate;
+      break;
+    }
+    probe = dirname(probe);
   }
-  probe = dirname(probe);
+  if (!pgBinDir) throw new Error("could not locate @embedded-postgres/windows-x64 native/bin for libpq");
+  pathWithLibpq = `${pgBinDir};${process.env.PATH}`;
 }
-if (!pgBinDir) throw new Error("could not locate @embedded-postgres/windows-x64 native/bin for libpq");
 
-const postgrest = spawn(join(REPO, "tools", "postgrest", "postgrest.exe"), [], {
+const postgrest = spawn(join(REPO, "tools", "postgrest", IS_WINDOWS ? "postgrest.exe" : "postgrest"), [], {
   env: {
     ...process.env,
-    PATH: `${pgBinDir};${process.env.PATH}`,
+    PATH: pathWithLibpq,
     PGRST_DB_URI: `postgres://authenticator:postgres@localhost:${PG_PORT}/${DB_NAME}`,
     PGRST_DB_SCHEMAS: "public",
     PGRST_DB_ANON_ROLE: "anon",

@@ -37,7 +37,15 @@ permissions:
   contents: read
 
 jobs:
+  # The end-to-end gate (e2e.yml): checkout, the order lifecycle, the hosted
+  # product page and deep-link sign-in, in a browser against the local stack.
+  # The deploy waits for it, so a push that breaks one never ships.
+  e2e:
+    uses: ./.github/workflows/e2e.yml
+    secrets: inherit
+
   deploy:
+    needs: e2e
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
@@ -88,6 +96,13 @@ jobs:
 
       - name: Unit and component tests
         run: pnpm test:unit
+
+      # Until 2026-10-21 the database suite never ran here: the embedded
+      # Postgres could not start without ICU 60 ("libicuuc.so.60"), vitest
+      # found no tests, and the step still passed. With ICU installed, 521
+      # tests run.
+      - name: Install ICU 60 for the embedded Postgres
+        run: bash scripts/ci-install-icu60.sh
 
       - name: Database integration tests
         run: pnpm test:db

@@ -1,0 +1,76 @@
+# THE END-TO-END GATE: the paths nobody may lose without noticing, driven in a
+# real browser against the local stack (tests/e2e/stack: embedded Postgres,
+# the real PostgREST, a mock GoTrue, next dev). It touches nothing live.
+#
+#   checkout and the order lifecycle   78-checkout, 80-seller-order-flow,
+#                                      86-order-lifecycle (test payments on)
+#   the hosted product page            30-product-page
+#   sign-in returning to a deep link   97-deep-link-sign-in
+#
+# Called by deploy.yml, whose deploy job waits for it, so a push that breaks
+# one of these never reaches production. A push to a ci/** branch runs it on
+# its own, to try a change to the suite without deploying anything.
+name: End-to-end
+
+on:
+  workflow_call: {}
+  workflow_dispatch: {}
+  push:
+    branches: ["ci/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Authenticate GitHub Packages registry
+        if: ${{ env.GH_PACKAGES_TOKEN != '' }}
+        run: pnpm config set "//npm.pkg.github.com/:_authToken" "$GH_PACKAGES_TOKEN"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install ICU 60 for the embedded Postgres
+        run: bash scripts/ci-install-icu60.sh
+
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Fetch PostgREST
+        run: node tests/e2e/stack/fetch-postgrest.mjs
+
+      # One retry: a spec that passes on its second run is reported as flaky,
+      # not hidden, and a real break still fails twice.
+      - name: Checkout and the order lifecycle
+        run: npx playwright test --config playwright.checkout.config.ts 78-checkout.spec.ts 80-seller-order-flow.spec.ts 86-order-lifecycle.spec.ts --retries=1 --reporter=line
+
+      - name: Product page and deep links
+        run: npx playwright test 30-product-page.spec.ts 97-deep-link-sign-in.spec.ts --retries=1 --reporter=line
+
+      - name: Keep screenshots and traces of a failure
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-${{ github.run_id }}
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore
