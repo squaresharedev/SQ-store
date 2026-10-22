@@ -303,6 +303,7 @@
   "tax": {
     "cardTitle": "Business & seller details",
     "cardDescription": "Set once for your whole account. Shown to buyers on every product page you sell on, and used for invoices and VAT.",
+    "memberScope": "These are your own seller details. The ones buyers see on {store} belong to its owner, who sets them in their own settings.",
     "gate": {
       "required": "<strong>Your trader name, address and contact email are required before you can publish or sell anything.</strong> Buyers have to be able to see who they are buying from and how to reach you before they order.",
       "privacyNoteLinked": "These details appear publicly on your product pages for that reason alone. We never use them for marketing, and never sell or share them. The only message we send to your contact email or phone is the code that confirms it. See the <link>Squareshare Privacy Policy</link>."

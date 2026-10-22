@@ -51,6 +51,9 @@ export type ImportResult =
   | {
       ok: true;
       imported: number;
+      /** Imported as active but not approved by the automatic check yet, so
+       *  buyers cannot see them for now. Zero for a draft import. */
+      checking: number;
       /** Rows that could not be written, each with the reason. */
       skipped: { line: number; title: string; reason: MessageRef }[];
     }
@@ -239,6 +242,9 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
   // RLS re-checks the caller's permission on every row here, exactly as it
   // does for a single create.
   const supabase = await createClient();
+  // When this import's rows began: what is still waiting on the check is
+  // counted among rows created from here, not looked up id by id.
+  const startedAt = new Date().toISOString();
   const { data: written, error } = await supabase
     .from("products")
     .insert(inserts)
@@ -259,5 +265,29 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
   await checkMany("product", (written ?? []).map((row) => row.id));
 
   revalidatePath("/products");
-  return { ok: true, imported: written?.length ?? inserts.length, skipped };
+  return {
+    ok: true,
+    imported: written?.length ?? inserts.length,
+    checking: status === "active" ? await countStillChecking(supabase, account.accountId, startedAt) : 0,
+    skipped,
+  };
+}
+
+/**
+ * How many of an account's products created since `since` are still waiting
+ * on the automatic check (or a person). Best effort: an unknown count is 0,
+ * which only costs the import's toast a line.
+ */
+async function countStillChecking(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  accountId: string,
+  since: string,
+): Promise<number> {
+  const { count, error } = await supabase
+    .from("products")
+    .select("id", { count: "exact", head: true })
+    .eq("owner_id", accountId)
+    .gte("created_at", since)
+    .in("moderation_status", ["pending", "review"]);
+  return error ? 0 : (count ?? 0);
 }

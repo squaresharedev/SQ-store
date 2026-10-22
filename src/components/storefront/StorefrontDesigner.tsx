@@ -10,7 +10,7 @@ import {
 } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Search, Sparkles, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ExternalLink, Search, Sparkles, Users, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatList } from "@/lib/format/intl";
 import type { Product, ProductRemoval } from "@/types/product";
@@ -73,6 +73,8 @@ import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
 import { UnsavedChangesDialog } from "@/components/ui/UnsavedChangesDialog";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { HeroMark } from "@/components/ui/HeroMark";
 import {
   ghostButtonClass,
   helpTextClass,
@@ -347,6 +349,9 @@ export function StorefrontDesigner({
   shippingPolicy = {},
   sample = null,
   takedown = null,
+  publicPagePath = null,
+  headerActions = null,
+  initialVersion = null,
 }: {
   /**
    * Set when this is the SAMPLE storefront (lib/storefront/sample.ts), never a
@@ -389,6 +394,23 @@ export function StorefrontDesigner({
   accountId?: string | null;
   /** Set while staff have this storefront paused or removed. */
   takedown?: ProductRemoval | null;
+  /**
+   * Where buyers open this storefront, when its SAVED state is public (the
+   * server's answer: product pages on, seller details complete, nothing
+   * holding it). Null while it is not. The header links to it, so the page a
+   * seller just made is one tap away instead of behind the Embed screen.
+   */
+  publicPagePath?: string | null;
+  /**
+   * Controls the route adds to the header, beside search: the notification
+   * bell, so an order that comes in during an hour of design work is not
+   * missed. Passed in rather than built here, so the editor itself (and its
+   * tests) never starts a notifications subscription of its own.
+   */
+  headerActions?: React.ReactNode;
+  /** The saved copy's fingerprint (lib/storefront/version.ts), sent back with
+   *  every save so one from elsewhere in between is asked about, not lost. */
+  initialVersion?: string | null;
 }) {
   const t = useTranslations("Storefront.designer");
   const locale = useLocale();
@@ -464,6 +486,10 @@ export function StorefrontDesigner({
   // Bumped by the panel's "Play it" to replay the thank-you celebration.
   const [celebrationPlays, setCelebrationPlays] = useState(0);
   const [saving, setSaving] = useState(false);
+  // The saved copy this editor last loaded or wrote, and whether a save just
+  // found a newer one (another tab, another team member) in its place.
+  const savedVersion = useRef(initialVersion);
+  const [savedElsewhere, setSavedElsewhere] = useState(false);
   // Unsaved-edits flag. The header shows exactly one thing — whether there is
   // work not yet written — while the OUTCOME of a save (done / dropped blocks
   // / failed) is a toast, so it reaches the eye even in the full-screen editor
@@ -2667,7 +2693,8 @@ export function StorefrontDesigner({
   }
 
   /**
-   * The title or the price, dropped somewhere new on its own tile.
+   * The title, the price or the sale chip, dropped somewhere new on its own
+   * tile.
    *
    * Writes through the SAME per-tile override mutator the panel's controls use,
    * so a drag and a click on the board produce the same document, land in the
@@ -2680,7 +2707,12 @@ export function StorefrontDesigner({
       [key],
       token === "title"
         ? { titlePosition: drop === "below" ? undefined : drop }
-        : { priceTagPosition: drop },
+        : token === "sale"
+          ? // The band is the price's home only; the chip never offers it.
+            drop === "below"
+            ? {}
+            : { saleBadgePosition: drop }
+          : { priceTagPosition: drop },
     );
   }
 
@@ -2704,7 +2736,7 @@ export function StorefrontDesigner({
     setSettingTarget(
       freshSettingRef({
         kind: "cards",
-        section: token === "price" ? "priceTag" : "cardStyle",
+        section: token === "price" ? "priceTag" : token === "sale" ? "saleChip" : "cardStyle",
       }),
     );
     setSettingsOpen(false);
@@ -3500,7 +3532,7 @@ export function StorefrontDesigner({
 
   /** Returns whether the save succeeded, so callers (e.g. save-then-leave) can
    *  branch on it without re-reading async state. */
-  async function handleSave(): Promise<boolean> {
+  async function handleSave(overwrite = false): Promise<boolean> {
     // The sample has no Save button, and nothing else may write it either.
     if (isSample) return false;
     setSaving(true);
@@ -3544,12 +3576,23 @@ export function StorefrontDesigner({
         return p?.status === "draft" ? [p.title] : [];
       });
 
-    const result = await saveStorefront(storefrontId, { name, config });
+    const result = await saveStorefront(
+      storefrontId,
+      { name, config },
+      { expectedVersion: savedVersion.current, overwrite },
+    );
     setSaving(false);
     if (!result.ok) {
+      // Not an error to read and dismiss: a choice between two people's work.
+      if ("conflict" in result && result.conflict) {
+        setSavedElsewhere(true);
+        return false;
+      }
       showActionError(result.error);
       return false;
     }
+    if (result.version) savedVersion.current = result.version;
+    setSavedElsewhere(false);
     if (result.droppedBlocks > 0) {
       // Server dropped refs to deleted products; mirror that locally.
       setBlocks((current) =>
@@ -3748,6 +3791,7 @@ export function StorefrontDesigner({
             </div>
           ) : (
           <div className="flex items-center gap-3">
+            {headerActions}
             <DesignerSearchButton />
             {/* The one thing the header says is whether there is work not yet
                 written. What HAPPENED when Save was pressed is a toast, which
@@ -3775,7 +3819,22 @@ export function StorefrontDesigner({
                 button is 40px tall (py-2.5 + text-sm) against that button's
                 36px, and two controls of different heights sitting side by side
                 in the same bar look like a mistake rather than a hierarchy. */}
-            <Button onClick={handleSave} disabled={saving} className="h-9 py-0">
+            {/* What buyers see, once there is something saved to see: not
+                while edits are pending (the page would not show them yet),
+                and not with product pages switched off here. */}
+            {publicPagePath && productPage.enabled && !dirty && (
+              <a
+                href={publicPagePath}
+                target="_blank"
+                rel="noopener"
+                className={cn(ghostButtonClass, "h-9 shrink-0 gap-1.5 px-3 py-0 text-sm")}
+                data-designer-view-page=""
+              >
+                <ExternalLink className="size-4" strokeWidth={2} aria-hidden="true" />
+                <span className="max-sm:sr-only">{t("header.viewPage")}</span>
+              </a>
+            )}
+            <Button onClick={() => void handleSave()} disabled={saving} className="h-9 py-0">
               {saving ? tCommon("saving") : tCommon("save")}
             </Button>
           </div>
@@ -4273,6 +4332,7 @@ export function StorefrontDesigner({
                       onProductSaved={applyProductUpdate}
                       pageOpen={openPages.includes(selectedBlock.productId)}
                       onDesignPage={() => togglePageForProduct(selectedBlock.productId)}
+                      onThemeChange={updateTheme}
                     />
                   ) : selectedBlock?.type === "shape" ? (
                     <ShapeBlockEditor
@@ -4369,6 +4429,21 @@ export function StorefrontDesigner({
         onTogglePages={toggleProductPages}
         checkoutOpen={checkoutOpen}
         onToggleCheckout={toggleDefaultCheckout}
+      />
+
+      <ConfirmDialog
+        open={savedElsewhere}
+        onClose={() => {
+          if (!saving) setSavedElsewhere(false);
+        }}
+        visual={<HeroMark icon={Users} />}
+        title={t("conflict.title")}
+        description={t("conflict.description")}
+        confirmLabel={t("conflict.overwrite")}
+        pendingLabel={tCommon("saving")}
+        cancelLabel={t("conflict.keepEditing")}
+        pending={saving}
+        onConfirm={() => void handleSave(true)}
       />
 
       <UnsavedChangesDialog

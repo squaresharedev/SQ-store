@@ -49,6 +49,22 @@ function photo(overrides: Partial<GalleryFormImage> = {}): GalleryFormImage {
 
 const file = (name: string) => new File(["x"], name, { type: "image/png" });
 
+describe("GalleryField — an iPhone photo", () => {
+  it("is named as one, with the way round it, and is not added", async () => {
+    // applyAccept off: a drag-and-drop ignores the picker's accept list, which
+    // is exactly how a HEIC file off a Mac arrives.
+    const user = userEvent.setup({ applyAccept: false });
+    const onChange = vi.fn();
+    render(<GalleryField inputId="gallery" images={[]} optionGroups={[]} onChange={onChange} />);
+
+    const input = document.getElementById("gallery-general") as HTMLInputElement;
+    await user.upload(input, new File(["x"], "IMG_0042.HEIC", { type: "image/heic" }));
+
+    expect(screen.getByText(/That is an iPhone photo \(HEIC\), which browsers cannot show/)).toBeInTheDocument();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+});
+
 describe("GalleryField — grouping and upload", () => {
   it("with no options yet, uploads land in one plain bucket", async () => {
     const user = userEvent.setup();

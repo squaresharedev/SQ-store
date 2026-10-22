@@ -122,7 +122,35 @@ describe("EmbedSettings - once the embed has a host", () => {
   it("unlocks Copy for settings that are saved, on, and name a domain", () => {
     renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
     expect(copySnippet()).toBeEnabled();
-    expect(document.body).toHaveTextContent(/paste this snippet into your site/i);
+    expect(document.body).toHaveTextContent(/sizes itself to your storefront/i);
+  });
+
+  it("offers a plain iframe for a site that removes scripts, naming the saved sites", async () => {
+    const user = userEvent.setup();
+    renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
+    await user.click(screen.getByRole("button", { name: /iframe only/i }));
+    // The site and its www. twin, as the frame will check them, sandboxed
+    // as the loader would sandbox it.
+    expect(document.body).toHaveTextContent(
+      `src="https://embed.test/e/${EMBED_KEY}/shop.example.com/www.shop.example.com"`,
+    );
+    expect(document.body).toHaveTextContent(/sandbox="allow-scripts allow-same-origin/);
+    expect(document.body).not.toHaveTextContent("widget.js");
+    expect(document.body).toHaveTextContent(/removes scripts/i);
+    expect(copySnippet()).toBeEnabled();
+    await user.click(screen.getByRole("button", { name: /^script$/i }));
+    expect(document.body).toHaveTextContent('src="https://embed.test/widget.js"');
+  });
+
+  it("says where the paste goes, for the builder the seller picks", async () => {
+    const user = userEvent.setup();
+    renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
+    const picker = screen.getByRole("combobox", { name: /your site builder/i });
+    expect(document.body).toHaveTextContent(/paste it into your page's html/i);
+    await user.click(picker);
+    await user.click(screen.getByRole("option", { name: "Wix" }));
+    expect(document.body).toHaveTextContent(/embed html/i);
+    expect(document.body).not.toHaveTextContent(/paste it into your page's html/i);
   });
 
   it("keeps Copy locked for settings that are only typed, until they are saved", async () => {
@@ -138,6 +166,72 @@ describe("EmbedSettings - once the embed has a host", () => {
     await user.click(screen.getByRole("button", { name: /save settings/i }));
     await waitFor(() => expect(copySnippet()).toBeEnabled());
     expect(document.body).not.toHaveTextContent(/save your settings to unlock/i);
+  });
+
+  it("the switch alone locks and unlocks Copy, and saves as it is flipped", async () => {
+    const user = userEvent.setup();
+    renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
+    expect(copySnippet()).toBeEnabled();
+
+    // Off: Copy locks at once, and the server is told the same moment, over
+    // the domains it already holds.
+    await user.click(screen.getByRole("switch", { name: /embed enabled/i }));
+    expect(copySnippet()).toBeDisabled();
+    await waitFor(() =>
+      expect(updateEmbedSettingsMock).toHaveBeenLastCalledWith(STOREFRONT_ID, {
+        enabled: false,
+        domains: ["shop.example.com"],
+      }),
+    );
+
+    // On again: Copy unlocks, no Save needed.
+    await user.click(screen.getByRole("switch", { name: /embed enabled/i }));
+    expect(copySnippet()).toBeEnabled();
+    await waitFor(() =>
+      expect(updateEmbedSettingsMock).toHaveBeenLastCalledWith(STOREFRONT_ID, {
+        enabled: true,
+        domains: ["shop.example.com"],
+      }),
+    );
+  });
+
+  it("flipping the switch does not publish a domain list that is only typed", async () => {
+    const user = userEvent.setup();
+    renderSettings(storefront({ enabled: false, domains: ["shop.example.com"] }));
+    const field = screen.getByLabelText(/allowed domains/i);
+    await user.clear(field);
+    await user.type(field, "typed.example.com");
+    await user.click(screen.getByRole("switch", { name: /embed enabled/i }));
+    await waitFor(() =>
+      expect(updateEmbedSettingsMock).toHaveBeenLastCalledWith(STOREFRONT_ID, {
+        enabled: true,
+        domains: ["shop.example.com"],
+      }),
+    );
+  });
+
+  it("puts the switch back, and Copy with it, when the server refuses it", async () => {
+    updateEmbedSettingsMock.mockResolvedValue({ ok: false, error: permissionDenied("viewer", "editStorefronts") });
+    const user = userEvent.setup();
+    renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
+    await user.click(screen.getByRole("switch", { name: /embed enabled/i }));
+    await waitFor(() => expect(screen.getByRole("switch", { name: /embed enabled/i })).toBeChecked());
+    expect(copySnippet()).toBeEnabled();
+  });
+
+  it("a save that lands late never takes back what the seller typed meanwhile", async () => {
+    let finish: (value: { ok: true }) => void = () => {};
+    updateEmbedSettingsMock.mockImplementation(() => new Promise((resolve) => (finish = resolve)));
+    const user = userEvent.setup();
+    renderSettings(storefront({ enabled: true, domains: [] }));
+    const field = screen.getByLabelText(/allowed domains/i);
+    await user.type(field, "https://first.example.com/shop");
+    await user.click(screen.getByRole("button", { name: /save settings/i }));
+    await user.clear(field);
+    await user.type(field, "second.example.com");
+    finish({ ok: true });
+    await waitFor(() => expect(updateEmbedSettingsMock).toHaveBeenCalled());
+    await waitFor(() => expect(field).toHaveValue("second.example.com"));
   });
 
   it("says what is missing when nothing is set up yet", () => {

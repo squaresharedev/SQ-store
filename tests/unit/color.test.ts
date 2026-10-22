@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clamp, hexToHsv, hsvToHex, isLightColor, mixHex } from "@/lib/format/color";
+import { clamp, hexToHsv, hsvToHex, isLightColor, legibleInkOn, mixHex } from "@/lib/format/color";
 import { isStrictHexColor } from "@/lib/validation/storefront";
 
 const STRICT_HEX = /^#[0-9a-f]{6}$/;
@@ -129,5 +129,15 @@ describe("clamp", () => {
     expect(clamp(-1, 0, 10)).toBe(0);
     expect(clamp(11, 0, 10)).toBe(10);
     expect(clamp(5, 0, 10)).toBe(5);
+  });
+});
+
+describe("legibleInkOn", () => {
+  it("keeps a pick that carries, quiet ones included, and replaces only one that vanishes", () => {
+    expect(legibleInkOn("#fde047", "#1f4d3a")).toBe("#fde047");
+    // Grey on white is low contrast but still there: a look, not a mistake.
+    expect(legibleInkOn("#737373", "#ffffff")).toBe("#737373");
+    expect(legibleInkOn("#fde047", "#fde047")).toBe("#171717");
+    expect(legibleInkOn("#1f1f1f", "#171717")).toBe("#ffffff");
   });
 });

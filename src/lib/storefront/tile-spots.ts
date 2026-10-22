@@ -1,9 +1,11 @@
 import {
   TILE_SPOTS,
   coerceCornerSpot,
+  saleBadgeTakenRows,
   spotColumn,
   spotRow,
   titleOverlaysImage,
+  type PriceTagPosition,
   type SpotRow,
   type TileSpot,
   type TitleStyle,
@@ -182,5 +184,26 @@ export function priceSpots(
 ): readonly TileSpot[] {
   return unclippedSpots(TILE_SPOTS, cornerRadius).filter(
     (spot) => spotRow(spot) !== titleBand,
+  );
+}
+
+/**
+ * Where the SALE CHIP may go, mirroring resolveSaleBadgePosition: the corners
+ * go on a heavily rounded tile, and so do the rows the title band and a
+ * floated price hold (saleBadgeTakenRows), except the chip's own spot when it
+ * has had to share the price's row, so the spot it is in is always on offer.
+ * ONE list for the drag on the tile and the picker in the panel.
+ */
+export function saleChipSpots(opts: {
+  cornerRadius: number;
+  titleBand: SpotRow | null;
+  /** Where the price tag really is (resolvePriceTagPosition). */
+  priceTag: PriceTagPosition;
+  /** Where the chip really is (resolveSaleBadgePosition). */
+  current: TileSpot;
+}): readonly TileSpot[] {
+  const taken = saleBadgeTakenRows(opts);
+  return unclippedSpots(TILE_SPOTS, opts.cornerRadius).filter(
+    (spot) => spot === opts.current || !taken.has(spotRow(spot)),
   );
 }

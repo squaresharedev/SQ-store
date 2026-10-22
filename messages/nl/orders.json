@@ -30,7 +30,9 @@
     "toShipTitle": "Niets te verzenden",
     "toShipHint": "Je bent helemaal bij. Betaalde bestellingen die wachten om te worden verstuurd, verschijnen hier, oudste eerst.",
     "seeAllOrders": "Alle bestellingen bekijken",
-    "hintOpen": "Zodra iemand iets koopt in je winkel, verschijnt de bestelling hier en krijg je direct bericht."
+    "hintOpen": "Zodra iemand iets koopt in je winkel, verschijnt de bestelling hier en krijg je direct bericht.",
+    "productTitle": "Nog geen bestellingen voor dit product",
+    "productHint": "Zodra het verkocht wordt, verschijnen de bestellingen hier."
   },
   "list": {
     "updating": "Bijwerken…",
@@ -55,7 +57,7 @@
     "region": "bestelfilters",
     "channel": "kanaal",
     "buyerEmail": "e-mail koper",
-    "searchPlaceholder": "zoek e-mail koper",
+    "searchPlaceholder": "zoek e-mail, naam, plaats, product of zending",
     "status": "status",
     "statusAriaLabel": "Filter op status",
     "allStatuses": "Alle statussen",
@@ -151,6 +153,7 @@
   },
   "actions": {
     "disputeInStripe": "Geschillen worden afgehandeld in je Stripe-dashboard zodra Stripe is gekoppeld.",
+    "pendingPayment": "De betaling van de koper wordt nog bevestigd. Verstuur nog niets: de bestelling staat als betaald zodra die doorkomt, en sluit vanzelf als dat niet gebeurt.",
     "none": "Er zijn geen acties beschikbaar voor deze bestelling."
   },
   "refund": {
@@ -171,6 +174,7 @@
     "refundedOn": "Terugbetaald op {date}",
     "refundedOnReason": "{reason, select, cancelled {Geannuleerd en terugbetaald op {date}} returned {Teruggestuurd en terugbetaald op {date}} other {Terugbetaald op {date}}}",
     "ownerOnly": "Alleen de eigenaar van de winkel kan een bestelling terugbetalen of annuleren.",
+    "ownerOnlyNamed": "Alleen de eigenaar van {store} kan een bestelling terugbetalen of annuleren. Vraag de eigenaar om het te doen.",
     "manual": "Deze betaling is niet via Square Share verlopen. Betaal de koper zelf terug en leg het hier vast.",
     "viaProvider": "Het volledige bedrag gaat via Stripe terug naar de kaart van de koper. Dit kan niet ongedaan worden gemaakt."
   },
@@ -186,6 +190,11 @@
     "label": "Welke bestellingen weergeven",
     "toShip": "Te verzenden",
     "all": "Alle bestellingen"
+  },
+  "productScope": {
+    "label": "Bestellingen voor",
+    "clear": "Alle producten",
+    "clearLabel": "Toon bestellingen van alle producten, niet alleen {title}"
   },
   "fulfilment": {
     "unfulfilled": "Te verzenden",

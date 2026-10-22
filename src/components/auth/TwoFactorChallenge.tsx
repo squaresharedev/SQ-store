@@ -17,6 +17,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { SETTLE } from "@/components/ui/motion-tokens";
 import { helpTextClass, infoTextClass, quietLinkClass } from "@/components/ui/control-styles";
+import { SUPPORT_EMAIL } from "@/lib/site";
 import { authHeadingClass } from "@/components/ui/surface-styles";
 import { AnimatedFingerprint, FingerprintGlyph } from "@/components/auth/AnimatedFingerprint";
 import { ApproveFromDevice } from "@/components/auth/ApproveFromDevice";
@@ -627,6 +628,19 @@ function RecoveryForm({ next }: { next: string }) {
           t("continue")
         )}
       </Button>
+
+      {/* The last way in. Without a working device or a single code left this
+          screen was a wall; a person can still check who it is and help. */}
+      <p className={cn(infoTextClass, "text-center")} data-recovery-locked-out="">
+        {t.rich("lockedOut", {
+          email: SUPPORT_EMAIL,
+          mail: (chunks) => (
+            <a href={`mailto:${SUPPORT_EMAIL}`} className={quietLinkClass}>
+              {chunks}
+            </a>
+          ),
+        })}
+      </p>
     </form>
   );
 }

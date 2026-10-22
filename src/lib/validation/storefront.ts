@@ -211,14 +211,15 @@ const priceTagAppearanceFields = {
 
 /**
  * The sale chip, identical on the theme and on a per-tile override, spread
- * into both so the two can never drift. A closed list, a spot from the shared
- * board and a strict hex: there is no seller text here to moderate or escape.
+ * into both so the two can never drift. Closed lists, a spot from the shared
+ * board and strict hex: there is no seller text here to moderate or escape.
  */
 const saleBadgeFields = {
   saleBadge: z.enum(SALE_BADGES).optional(),
   saleBadgeLook: z.enum(SALE_BADGE_LOOKS).optional(),
   saleBadgePosition: z.enum(TILE_SPOTS).optional(),
   saleBadgeColor: hexColorSchema.optional(),
+  saleBadgeTextColor: hexColorSchema.optional(),
 };
 
 /**

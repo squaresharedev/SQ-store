@@ -183,12 +183,13 @@
     "loadMoreError": "Non è stato possibile caricare altre vetrine. Riprova.",
     "loadMore": "Carica altre ({remaining} rimanenti)",
     "deleteTitle": "Eliminare la vetrina?",
-    "deleteDesc": "«{name}» e la sua griglia verranno rimossi definitivamente. Questa azione non può essere annullata.",
+    "deleteDesc": "«{name}» e la sua griglia verranno rimossi definitivamente. Questa azione non può essere annullata. Gli ordini fatti tramite essa restano, così come le pagine d’ordine dei loro acquirenti.",
     "deleteToast": "«{name}» è stata eliminata."
   },
   "card": {
     "editAriaLabel": "Modifica {name}",
-    "embedAriaLabel": "Incorpora {name}",
+    "embedAriaLabel": "Condividi o incorpora {name}",
+    "viewPageAriaLabel": "Apri {name} come la vedono gli acquirenti",
     "deleteAriaLabel": "Elimina {name}",
     "blockCount": "{count, plural, one {# blocco} many {# di blocchi} other {# blocchi}}",
     "updatedLabel": " · aggiornata il {date}",
@@ -199,28 +200,52 @@
   },
   "embed": {
     "inDevNotice": "Il widget di incorporamento è in sviluppo e non viene ancora visualizzato sui siti esterni. Configura le tue impostazioni qui sotto, così sarai pronto a incollare lo snippet non appena sarà disponibile.",
-    "title": "Incorpora questa vetrina",
-    "description": "Incolla questo snippet in qualsiasi sito per mostrare lì «{name}».",
+    "title": "Condividi questa vetrina",
+    "description": "Manda a chi vuoi un link a «{name}», oppure incolla uno snippet nel tuo sito per mostrarla lì.",
+    "steps": {
+      "site": "Scegli i siti in cui compare",
+      "snippet": "Incolla lo snippet nel tuo sito",
+      "privacy": "Aggiungi questo alla tua informativa sulla privacy"
+    },
+    "required": "Obbligatorio",
     "enabledLabel": "Incorporamento attivo",
     "domainsLabel": "Domini consentiti",
     "domainsPlaceholder": "iltuosito.com, blog.iltuosito.com",
     "domainsHint": "Fino a {max}, separati da virgola. Incolla un URL e lo ridurremo al dominio.",
     "emptyDomainsWarning": "Aggiungi almeno un dominio. Finché è vuoto, la vetrina non si caricherà da nessuna parte, anche se l’incorporamento è attivo.",
-    "snippetLabel": "Snippet",
-    "snippetReadyHint": "Incolla questo snippet nell’HTML del tuo sito.",
+    "builderLabel": "Il tuo costruttore di siti",
+    "builderOther": "Altro sito",
+    "builderSteps": {
+      "other": "Incollalo nell’HTML della tua pagina, dove vuoi che compaia la vetrina.",
+      "wordpress": "Aggiungi un blocco «HTML personalizzato» dove vuoi che compaia la vetrina e incollaci il codice.",
+      "squarespace": "Aggiungi un blocco «Code» e incollaci il codice. Se la vetrina compare solo dopo aver ricaricato la pagina, passa a «Solo iframe».",
+      "wix": "Aggiungi «Embed Code», poi «Embed HTML», e incollaci il codice. Poi allunga il riquadro fino all’altezza della vetrina.",
+      "webflow": "Aggiungi un elemento «Code Embed» e incollaci il codice. Compare sul sito pubblicato.",
+      "shopify": "Nell’editor del tema, aggiungi una sezione «Custom Liquid» e incollaci il codice.",
+      "google": "Scegli «Insert», poi «Embed», poi «Embed code», e incolla il codice.",
+      "framer": "Aggiungi un componente «Embed», impostalo su HTML e incollaci il codice.",
+      "carrd": "Aggiungi un elemento «Embed», imposta il tipo su «Code» e incollaci il codice."
+    },
+    "snippetKinds": {
+      "label": "Tipo di snippet",
+      "script": "Script",
+      "iframe": "Solo iframe"
+    },
+    "snippetReadyHint": "Basta incollarlo una volta. Si adatta alla vetrina e segue ciò che modifichi qui.",
+    "iframeHint": "Per i siti che rimuovono gli script. È alto {height} pixel e scorre all’interno. Copialo di nuovo dopo aver modificato i domini.",
     "snippetLockedHint": "Attiva l’incorporamento e aggiungi almeno un dominio per sbloccare il pulsante Copia.",
     "snippetSaveHint": "Salva le impostazioni per sbloccare il pulsante Copia.",
     "pagesOffHint": "Attiva prima le pagine prodotto nell’editor. Un clic su un prodotto apre la sua pagina.",
     "notShowingLabel": "Se la vetrina non compare",
-    "notShowingTip": "L’indirizzo del tuo sito deve essere tra i Domini consentiti e il sito deve usare https. I costruttori di siti che inseriscono l’HTML personalizzato in un proprio riquadro (Wix, Google Sites) non sono ancora supportati.",
+    "notShowingTip": "L’indirizzo del tuo sito deve essere tra i Domini consentiti e il sito deve usare https. Il codice incollato compare sul sito pubblicato, non nell’editor del costruttore di siti. Per vederlo su un indirizzo di anteprima (come tuosito.webflow.io), aggiungi anche quell’indirizzo.",
     "copySnippet": {
       "copy": "Copia snippet di incorporamento",
       "copied": "Snippet di incorporamento copiato",
       "failed": "Non è stato possibile copiare lo snippet di incorporamento. Selezionalo e copialo manualmente.",
       "cannotCopyYet": "lo snippet di incorporamento non può ancora essere copiato"
     },
-    "privacyLabel": "Per la tua informativa sulla privacy",
-    "privacyHint": "Il tuo sito ora carica la vetrina da Squareshare, quindi la sua informativa sulla privacy dovrebbe dirlo. Puoi incollare questo testo:",
+    "privacyHint": "Il tuo sito ora carica questa vetrina da Squareshare, quindi la sua informativa sulla privacy deve dirlo. Incollaci questo testo:",
+    "privacyTextLabel": "Testo sulla privacy",
     "privacyText": "Questo sito mostra una vetrina fornita da Squareshare. Al caricamento, l’indirizzo IP e i dati del browser del visitatore vengono inviati a Squareshare per mostrare i prodotti e contare le visite. A questo scopo Squareshare non imposta cookie e non salva nulla sul dispositivo del visitatore. Dettagli: {policy}",
     "copyPrivacy": {
       "copy": "Copia testo sulla privacy",
@@ -606,7 +631,8 @@
   "chipScale": {
     "label": "Sulle schede più grandi",
     "tile": "Ingrandisci",
-    "cell": "Stessa misura"
+    "cell": "Stessa misura",
+    "everyCard": "Vale per tutte le schede di questo negozio."
   },
   "layout": {
     "canvasWidth": "Larghezza dell’area di lavoro",
@@ -737,8 +763,8 @@
       "showPage": {
         "label": "Mostra una pagina prodotto",
         "infoLabel": "Cosa fa questo interruttore",
-        "infoOn": "Toccare un riquadro prodotto apre la sua pagina.",
-        "infoOff": "I riquadri prodotto non hanno una pagina da aprire."
+        "infoOn": "Toccare un riquadro prodotto apre la sua pagina, e la vetrina ha una pagina tutta sua da condividere.",
+        "infoOff": "I riquadri prodotto non hanno una pagina da aprire, e anche il link della vetrina stessa smette di funzionare."
       },
       "pageColor": "Colore della pagina",
       "storefrontBackground": "Sfondo della vetrina",
@@ -1103,7 +1129,7 @@
     "imageUnavailable": "Immagine non disponibile"
   },
   "spotDrag": {
-    "tokenLabel": "{token, select, title {Titolo} other {Prezzo}} {drop, select, below {nella barra del titolo} top_left {in alto a sinistra} top_center {in alto al centro} top_right {in alto a destra} middle_center {al centro} bottom_left {in basso a sinistra} bottom_center {in basso al centro} bottom_right {in basso a destra} other {}}. Premi per aprire le sue impostazioni, oppure trascina (o usa le frecce direzionali) per spostarlo."
+    "tokenLabel": "{token, select, title {Titolo} sale {Etichetta promo} other {Prezzo}} {drop, select, below {nella barra del titolo} top_left {in alto a sinistra} top_center {in alto al centro} top_right {in alto a destra} middle_center {al centro} bottom_left {in basso a sinistra} bottom_center {in basso al centro} bottom_right {in basso a destra} other {}}. Premi per aprire le sue impostazioni, oppure trascina (o usa le frecce direzionali) per spostarlo."
   },
   "autoFit": {},
   "designer": {
@@ -1112,6 +1138,7 @@
       "nameLabel": "Nome della vetrina",
       "namePlaceholder": "Vetrina senza titolo",
       "unsaved": "Modifiche non salvate",
+      "viewPage": "Vedi la pagina",
       "search": "Cerca"
     },
     "mobileNotice": {
@@ -1154,6 +1181,12 @@
       "description": "Hai modifiche non salvate su questa vetrina. Salvale prima di uscire, oppure scartale.",
       "save": "Salva modifiche",
       "discard": "Scarta modifiche",
+      "keepEditing": "Continua a modificare"
+    },
+    "conflict": {
+      "title": "Qualcun altro ha salvato questa vetrina",
+      "description": "È cambiata da quando l’hai aperta, in un’altra scheda o da qualcuno del tuo team. Se salvi ora, la tua versione sostituisce la loro.",
+      "overwrite": "Salva la mia al suo posto",
       "keepEditing": "Continua a modificare"
     },
     "defaults": {
@@ -1255,6 +1288,10 @@
       "blockColor": {
         "label": "il colore del blocco",
         "use": "Usa il colore del blocco"
+      },
+      "auto": {
+        "label": "Automatico",
+        "use": "Usa il colore automatico"
       }
     },
     "presets": {

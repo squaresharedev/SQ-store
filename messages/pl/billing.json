@@ -199,6 +199,7 @@
     "invoicesDescription": "Twoja karta, adres rozliczeniowy, NIP i wszystkie faktury na bezpiecznej stronie Stripe.",
     "manage": "Zarządzaj rozliczeniami i fakturami",
     "noBilling": "Faktury i dane płatnicze pojawią się tutaj po przejściu na plan płatny.",
+    "noBillingYet": "Faktury i dane płatnicze pojawią się tutaj, gdy otworzą się płatne plany.",
     "confirmed": "Jesteś na planie {plan}. Dziękujemy za wsparcie Square Share.",
     "pending": "Potwierdzamy twoją płatność ze Stripe. Odśwież za chwilę, jeśli plan się nie zmienił.",
     "unavailable": "Twój plan nie może być teraz wyświetlony. Odśwież stronę za chwilę.",

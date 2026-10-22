@@ -1,6 +1,7 @@
 {
   "pageTitle": "Betalingen",
   "soon": "Binnenkort",
+  "bankOnFile": "Je bankrekening",
   "balance": {
     "available": {
       "label": "Beschikbaar",

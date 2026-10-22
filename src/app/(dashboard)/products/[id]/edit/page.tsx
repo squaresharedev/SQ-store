@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { getProduct } from "@/lib/products/queries";
+import { checkMany } from "@/lib/moderation/auto/check";
+import { after } from "next/server";
 import { ProductFormView } from "@/components/products/ProductFormView";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
@@ -40,6 +42,13 @@ export default async function EditProductPage({
   ]);
   if (!can(account?.role, "products.write")) redirect("/products");
   if (!product) notFound();
+  // Opened while the automatic check has not judged it yet: ask now, after
+  // this page is sent, rather than leave it to the sweep. The notice on the
+  // page says to reload, and the reload is then usually the answer.
+  if (product.removal?.kind === "pending") {
+    const productId = product.id;
+    after(() => checkMany("product", [productId]));
+  }
 
   // See the create route: the form disables "Active" for a store that may not
   // publish yet, and says why.

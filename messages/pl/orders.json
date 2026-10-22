@@ -30,7 +30,9 @@
     "toShipTitle": "Nic do wysłania",
     "toShipHint": "Wszystko na bieżąco. Opłacone zamówienia czekające na wysłanie pojawiają się tutaj, od najstarszego.",
     "seeAllOrders": "Zobacz wszystkie zamówienia",
-    "hintOpen": "Gdy ktoś kupi w twoim sklepie, zamówienie pojawi się tutaj, a ty od razu dostaniesz powiadomienie."
+    "hintOpen": "Gdy ktoś kupi w twoim sklepie, zamówienie pojawi się tutaj, a ty od razu dostaniesz powiadomienie.",
+    "productTitle": "Ten produkt nie ma jeszcze zamówień",
+    "productHint": "Gdy się sprzeda, jego zamówienia pojawią się tutaj."
   },
   "list": {
     "updating": "Aktualizowanie…",
@@ -55,7 +57,7 @@
     "region": "filtry zamówień",
     "channel": "kanał",
     "buyerEmail": "e-mail kupującego",
-    "searchPlaceholder": "szukaj e-maila kupującego",
+    "searchPlaceholder": "szukaj e-maila, imienia, miasta, produktu lub przesyłki",
     "status": "status",
     "statusAriaLabel": "Filtruj według statusu",
     "allStatuses": "Wszystkie statusy",
@@ -151,6 +153,7 @@
   },
   "actions": {
     "disputeInStripe": "Spory obsługujesz w panelu Stripe po połączeniu ze Stripe.",
+    "pendingPayment": "Płatność kupującego jest jeszcze potwierdzana. Nie wysyłaj jeszcze niczego: zamówienie pokaże się jako opłacone, gdy płatność przejdzie, a jeśli nie przejdzie, zamknie się samo.",
     "none": "Dla tego zamówienia nie ma dostępnych żadnych akcji."
   },
   "refund": {
@@ -171,6 +174,7 @@
     "refundedOn": "Zwrot środków: {date}",
     "refundedOnReason": "{reason, select, cancelled {Anulowano i zwrócono środki {date}} returned {Zwrócono towar i środki {date}} other {Zwrócono środki {date}}}",
     "ownerOnly": "Tylko właściciel sklepu może zwrócić środki lub anulować zamówienie.",
+    "ownerOnlyNamed": "Tylko właściciel sklepu {store} może zwrócić środki lub anulować zamówienie. Poproś go o to.",
     "manual": "Ta płatność nie przeszła przez Square Share. Sam zwróć kupującemu środki, a następnie odnotuj to tutaj.",
     "viaProvider": "Pełna kwota wraca na kartę kupującego przez Stripe. Tej operacji nie można cofnąć."
   },
@@ -186,6 +190,11 @@
     "label": "Które zamówienia pokazać",
     "toShip": "Do wysłania",
     "all": "Wszystkie zamówienia"
+  },
+  "productScope": {
+    "label": "Zamówienia produktu",
+    "clear": "Wszystkie produkty",
+    "clearLabel": "Pokaż zamówienia wszystkich produktów, nie tylko {title}"
   },
   "fulfilment": {
     "unfulfilled": "Do wysłania",

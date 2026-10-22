@@ -896,3 +896,150 @@ describe("ProductPageView", () => {
     expect(document.querySelector("[data-product-section='shipping']")).toBeNull();
   });
 });
+
+describe("ProductPageView: the seller's badges", () => {
+  const BADGES = [
+    { icon: "heart" as const, label: "Loved by 1,000+ people" },
+    { icon: "leaf" as const, label: "Eco friendly" },
+    { icon: "hand-heart" as const, label: "Handmade" },
+  ];
+
+  it("prints them under the title, in the seller's order, each with its icon", () => {
+    render(<ProductPageView page={data({ product: { details: { badges: BADGES } } })} mode="public" />);
+    const list = screen.getByRole("list", { name: "Highlights" });
+    const items = within(list).getAllByRole("listitem");
+    expect(items.map((item) => item.textContent)).toEqual(BADGES.map((badge) => badge.label));
+    expect(items.map((item) => item.getAttribute("data-product-badge"))).toEqual(["heart", "leaf", "hand-heart"]);
+    expect(list.getAttribute("data-product-badges")).toBe("3");
+    // Read with the title: after the heading, before the description.
+    const title = screen.getByRole("heading", { level: 1 });
+    const description = screen.getByText("Warm light for long evenings.");
+    expect(title.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(list.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // The PRODUCT's words: a click on them opens no page setting.
+    expect(list.closest("[data-setting-skip]")).not.toBeNull();
+  });
+
+  it("draws them in the page's own ink and corners, on a dark page too", () => {
+    render(
+      <ProductPageView
+        page={data({
+          product: { details: { badges: BADGES.slice(0, 1) } },
+          productPage: { backgroundColor: "#111111" },
+          theme: { cornerRadius: 30 },
+        })}
+        mode="public"
+      />,
+    );
+    const pill = within(screen.getByRole("list", { name: "Highlights" })).getByRole("listitem");
+    expect(pill.style.color).toBe("rgb(255, 255, 255)");
+    // Corners follow the theme, capped like every other control on the page.
+    expect(pill.style.borderRadius).toBe("16px");
+  });
+
+  it("prints nothing at all for a product without badges", () => {
+    render(<ProductPageView page={data()} mode="public" />);
+    expect(screen.queryByRole("list", { name: "Highlights" })).toBeNull();
+    expect(document.querySelector("[data-product-badges]")).toBeNull();
+  });
+
+  it("shows the same badges in the editor's preview", () => {
+    render(<ProductPageView page={data({ product: { details: { badges: BADGES } } })} mode="preview" />);
+    expect(within(screen.getByRole("list", { name: "Highlights" })).getAllByRole("listitem")).toHaveLength(3);
+  });
+
+  it("keeps a long badge's words inside the page", () => {
+    const long = { icon: "star" as const, label: "Ausgezeichnet mit dem Bundespreis Handwerk" };
+    render(<ProductPageView page={data({ product: { details: { badges: [long] } } })} mode="public" />);
+    const label = screen.getByText(long.label);
+    expect(label.className).toContain("break-words");
+    expect(label.className).toContain("min-w-0");
+  });
+});
+
+describe("ProductPageView: badge colours and the photo", () => {
+  const MIXED = [
+    { icon: "leaf" as const, label: "Eco friendly", color: "green" as const },
+    { icon: "heart" as const, label: "Loved by 250+ people", color: "red" as const, placement: "photo-top-left" as const },
+    { icon: "truck" as const, label: "Free shipping", color: "blue" as const, placement: "photo-bottom-right" as const },
+    { icon: "star" as const, label: "Top rated", placement: "photo-bottom-right" as const },
+  ];
+  const iconColor = (item: Element) => (item.querySelector("svg") as SVGElement).style.color;
+
+  it("lays the photo's badges over the photo, by corner, and keeps the rest under the title", () => {
+    render(<ProductPageView page={data({ product: { details: { badges: MIXED } } })} mode="public" />);
+    const photo = screen.getByRole("list", { name: "Highlights on the photo" });
+    // Inside the main frame, not beside it.
+    expect(photo.closest("figure")).not.toBeNull();
+    expect(within(photo).getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "Loved by 250+ people",
+      "Free shipping",
+      "Top rated",
+    ]);
+    expect(photo.querySelector('[data-badge-corner="photo-top-left"]')!.textContent).toBe("Loved by 250+ people");
+    expect(photo.querySelector('[data-badge-corner="photo-bottom-right"]')!.textContent).toBe("Free shippingTop rated");
+    expect(photo.querySelector('[data-badge-corner="photo-top-right"]')).toBeNull();
+    // Never in the way of the photo itself.
+    expect(photo.className).toContain("pointer-events-none");
+    expect(photo.closest("[data-setting-skip]")).not.toBeNull();
+
+    const beside = screen.getByRole("list", { name: "Highlights" });
+    expect(within(beside).getAllByRole("listitem").map((item) => item.textContent)).toEqual(["Eco friendly"]);
+  });
+
+  it("gives each corner the edge to itself, or half of it when the facing corner is used", () => {
+    const facing = [
+      { icon: "star" as const, label: "Left", placement: "photo-top-left" as const },
+      { icon: "star" as const, label: "Right", placement: "photo-top-right" as const },
+      { icon: "star" as const, label: "Alone", placement: "photo-bottom-left" as const },
+    ];
+    render(<ProductPageView page={data({ product: { details: { badges: facing } } })} mode="public" />);
+    const corner = (name: string) => document.querySelector(`[data-badge-corner="${name}"]`)!.className;
+    expect(corner("photo-top-left")).toContain("max-w-[calc(50%-1rem)]");
+    expect(corner("photo-top-right")).toContain("max-w-[calc(50%-1rem)]");
+    expect(corner("photo-bottom-left")).toContain("max-w-[calc(100%-1.5rem)]");
+  });
+
+  it("prints no empty list beside the product when every badge is on the photo", () => {
+    const onPhoto = MIXED.filter((badge) => badge.placement);
+    render(<ProductPageView page={data({ product: { details: { badges: onPhoto } } })} mode="public" />);
+    expect(screen.queryByRole("list", { name: "Highlights" })).toBeNull();
+    expect(document.querySelector("[data-product-badges]")).toBeNull();
+    expect(screen.getByRole("list", { name: "Highlights on the photo" })).toBeInTheDocument();
+  });
+
+  it("still shows them on a product with no photo yet", () => {
+    render(
+      <ProductPageView
+        page={data({ product: { images: [], details: { badges: MIXED } } })}
+        mode="public"
+      />,
+    );
+    const empty = document.querySelector('[data-product-gallery="empty"]')!;
+    expect(within(empty as HTMLElement).getByRole("list", { name: "Highlights on the photo" })).toBeInTheDocument();
+  });
+
+  it("draws icon colours in the page's shade, and the photo's pills dark on light whatever the page", () => {
+    const { unmount } = render(
+      <ProductPageView page={data({ product: { details: { badges: MIXED } } })} mode="public" />,
+    );
+    const light = within(screen.getByRole("list", { name: "Highlights" })).getByRole("listitem");
+    expect(iconColor(light)).toBe("rgb(22, 163, 74)"); // green-600 on a light page
+    expect(light.getAttribute("data-badge-color")).toBe("green");
+    unmount();
+
+    render(
+      <ProductPageView
+        page={data({ product: { details: { badges: MIXED } }, productPage: { backgroundColor: "#111111" } })}
+        mode="public"
+      />,
+    );
+    const dark = within(screen.getByRole("list", { name: "Highlights" })).getByRole("listitem");
+    expect(iconColor(dark)).toBe("rgb(74, 222, 128)"); // green-400 on a dark page
+    const photo = within(screen.getByRole("list", { name: "Highlights on the photo" })).getAllByRole("listitem");
+    // A light pill on any picture: dark words, the light-page shade, "ink" dark too.
+    expect((photo[0] as HTMLElement).style.color).toBe("rgb(23, 23, 23)");
+    expect(iconColor(photo[0]!)).toBe("rgb(220, 38, 38)");
+    expect(iconColor(photo[2]!)).toBe("rgb(23, 23, 23)");
+  });
+});

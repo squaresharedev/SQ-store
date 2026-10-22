@@ -111,6 +111,10 @@ describe("embedded supabase replica", () => {
       // Which Stripe account is whose (20261008_seller_payment_accounts).
       // Service-role only.
       "seller_payment_accounts",
+      // Single-use permissions to create an email account, written by the app
+      // after its sign-up guards pass and spent by the Before User Created
+      // hook (20261021_signup_intents). Service-role only.
+      "signup_intents",
       // Daily counts of buyer funnel events, rolled up from Workers Analytics
       // Engine (20261012_storefront_funnel_daily). A store's team reads its
       // own; written by the service role only.

@@ -1,34 +1,56 @@
 // @vitest-environment node
-import { describe, expect, it } from "vitest";
-import { readFileSync, realpathSync } from "node:fs";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { realpathSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import {
-  EMBED_FRAME_CSP,
   EMBED_KEY_PATTERN,
+  EMBED_MAX_SITES,
   EMBED_SITE_PATTERN,
   EMBED_SITE_PATTERN_DEV,
+  embedFramePolicy,
 } from "@/lib/storefront/embed-frame";
 
 /**
- * THE EMBED FRAME'S HEADER RULE, in both places it runs.
+ * THE EMBED FRAME'S HEADER RULES, in both places they run.
  *
- * The rule in next.config.ts writes a path segment into `frame-ancestors`. It
- * is applied by two different pieces of code: Next's own router under
+ * The rules in next.config.ts write path segments into `frame-ancestors`. They
+ * are applied by two different pieces of code: Next's own router under
  * `next dev`, and the OpenNext worker's matcher in production, which
  * re-implements custom headers with path-to-regexp and, when that library
  * cannot compile a value, SENDS THE VALUE AS WRITTEN. So a policy that works on
  * every developer's machine can reach production as the literal text
- * "frame-ancestors :site", which no browser matches: every embed goes blank
- * and nothing local notices.
+ * "frame-ancestors :s1", which no browser matches: every embed goes blank and
+ * nothing local notices.
  *
- * These tests run the rule through both, so that failure is caught here. They
- * also hold the literals in next.config.ts to the ones the route itself reads
- * (lib/storefront/embed-frame.ts): the config cannot import app code.
+ * These tests load the real rules from next.config.ts and run them through
+ * both, so that failure is caught here. They also hold the rules to the
+ * patterns and policy the route itself reads (lib/storefront/embed-frame.ts):
+ * the config cannot import app code, so it repeats them.
  */
 
+// Loading the config in development would otherwise open a Cloudflare session.
+vi.mock("@opennextjs/cloudflare", () => ({ initOpenNextCloudflareForDev: () => {} }));
+
 const require = createRequire(import.meta.url);
-const CONFIG = readFileSync(join(process.cwd(), "next.config.ts"), "utf8");
+
+type Rule = { source: string; has?: { type: string; value?: string }[]; headers: { key: string; value: string }[] };
+
+const EMBED_HOST = "embed.squareshare.eu";
+
+/** next.config.ts's header rules, as a build with this environment makes them. */
+async function loadRules(env: { embedUrl: string; nodeEnv: "production" | "development" }): Promise<Rule[]> {
+  vi.resetModules();
+  vi.stubEnv("NEXT_PUBLIC_EMBED_URL", env.embedUrl);
+  vi.stubEnv("NODE_ENV", env.nodeEnv);
+  const config = (await import("../../next.config")).default;
+  return (await config.headers!()) as Rule[];
+}
+
+const embedRules = (rules: Rule[]) => rules.filter((rule) => rule.source.startsWith("/e/"));
+const policyOf = (rule: Rule) => rule.headers.find((header) => header.key === "Content-Security-Policy")!.value;
+
+afterEach(() => vi.unstubAllEnvs());
 
 type PathToRegexp = {
   match: (source: string) => (path: string) => { params: Record<string, string> } | false;
@@ -74,61 +96,124 @@ function nextHeader(source: string, value: string, path: string): string | null 
   return compileNonPath(value, params);
 }
 
+/** Every policy a path is given, by every rule, in one runtime. */
+function policies(rules: Rule[], path: string, run: typeof nextHeader): string[] {
+  return embedRules(rules)
+    .map((rule) => run(rule.source, policyOf(rule), path))
+    .filter((value): value is string => value !== null);
+}
+
 const KEY = "3f2b6c1e-9a4d-4e8b-b1c2-0a1b2c3d4e5f";
-const SOURCE = `/e/:key(${EMBED_KEY_PATTERN})/:site(${EMBED_SITE_PATTERN})`;
-const SOURCE_DEV = `/e/:key(${EMBED_KEY_PATTERN})/:site(${EMBED_SITE_PATTERN_DEV})`;
-const policyFor = (site: string) => EMBED_FRAME_CSP.replace(":site", site);
+const framePath = (...sites: string[]) => `/e/${KEY}/${sites.join("/")}`;
+const prodRules = () => loadRules({ embedUrl: `https://${EMBED_HOST}`, nodeEnv: "production" });
 
-describe("next.config.ts repeats the frame's own rules", () => {
-  it("matches the path with the same two patterns", () => {
-    expect(CONFIG).toContain(`/e/:key(${EMBED_KEY_PATTERN})/:site(`);
-    expect(CONFIG).toContain(`"${EMBED_SITE_PATTERN}"`);
-    expect(CONFIG).toContain(`"${EMBED_SITE_PATTERN_DEV}"`);
+describe("next.config.ts", () => {
+  it("frames nothing at all while the embed has no host", async () => {
+    expect(embedRules(await loadRules({ embedUrl: "", nodeEnv: "production" }))).toEqual([]);
   });
 
-  it("sends the same policy", () => {
-    expect(CONFIG).toContain(`"${EMBED_FRAME_CSP}"`);
+  it("writes one rule per number of sites, with the frame's own patterns and policy", async () => {
+    const rules = embedRules(await prodRules());
+    expect(rules).toHaveLength(EMBED_MAX_SITES);
+    rules.forEach((rule, index) => {
+      const params = Array.from({ length: index + 1 }, (_, n) => `s${n + 1}`);
+      expect(rule.source).toBe(
+        `/e/:key(${EMBED_KEY_PATTERN})/${params.map((param) => `:${param}(${EMBED_SITE_PATTERN})`).join("/")}`,
+      );
+      expect(policyOf(rule)).toBe(embedFramePolicy(params.map((param) => `:${param}`)));
+    });
   });
 
-  it("only on the embed's own host, and only when there is one", () => {
-    expect(CONFIG).toMatch(/has:\s*\[\{\s*type:\s*"host"/);
-    expect(CONFIG).toMatch(/\.\.\.\(embedHost\s*\?/);
+  it("admits a port in development alone", async () => {
+    const rules = embedRules(await loadRules({ embedUrl: "http://localhost:3100", nodeEnv: "development" }));
+    expect(rules[0].source).toBe(`/e/:key(${EMBED_KEY_PATTERN})/:s1(${EMBED_SITE_PATTERN_DEV})`);
+  });
+
+  it("only on the embed's own host", async () => {
+    for (const rule of embedRules(await prodRules())) {
+      const [has] = rule.has ?? [];
+      expect(has?.type).toBe("host");
+      const host = new RegExp(`^${has!.value}$`);
+      expect(host.test(EMBED_HOST)).toBe(true);
+      for (const other of ["dashboard.squareshare.eu", "embedxsquareshare.eu", `${EMBED_HOST}.evil.com`]) {
+        expect(host.test(other), other).toBe(false);
+      }
+    }
+  });
+
+  it("spells every header it shares with the global entry the same way", async () => {
+    // The worker treats a differently cased name as a second header and sends
+    // both, so a frame would get two Referrer-Policy values.
+    const rules = await prodRules();
+    const global = new Set(rules[0].headers.map((header) => header.key));
+    const globalLower = new Map([...global].map((key) => [key.toLowerCase(), key]));
+    for (const rule of embedRules(rules)) {
+      for (const { key } of rule.headers) {
+        const twin = globalLower.get(key.toLowerCase());
+        if (twin) expect(key).toBe(twin);
+      }
+    }
   });
 });
 
-describe("the policy reaches the browser with the site written in", () => {
+describe("the policy reaches the browser with the sites written in", () => {
   it("is still read by the worker's path-to-regexp 6", () => {
     // A major bump changes the syntax this whole file is about. Fail here so
     // someone re-reads it, rather than on a seller's website.
     expect(workerPathToRegexp().version).toMatch(/^6\./);
   });
 
-  for (const site of ["www.example.com", "example.com", "my-shop.example.co.uk", "xn--bcher-kva.example"]) {
-    it(`for ${site}, in development and in production alike`, () => {
-      const path = `/e/${KEY}/${site}`;
-      expect(nextHeader(SOURCE, EMBED_FRAME_CSP, path)).toBe(policyFor(site));
-      expect(workerHeader(SOURCE, EMBED_FRAME_CSP, path)).toBe(policyFor(site));
+  const lists = [
+    ["www.example.com"],
+    ["my-shop.example.co.uk"],
+    ["xn--bcher-kva.example"],
+    // Wix: the builder's frame for the site, then the site.
+    ["www-example-com.filesusr.com", "www.example.com"],
+    // Google Sites: two frames of its own above the embed.
+    ["abc123-atari-embeds.googleusercontent.com", "www.gstatic.com", "example.com"],
+    ["a.example", "b.example", "c.example", "d.example"],
+  ];
+
+  for (const sites of lists) {
+    it(`for ${sites.join(" ")}, in development and in production alike`, async () => {
+      const rules = await prodRules();
+      const want = [embedFramePolicy(sites)];
+      expect(policies(rules, framePath(...sites), nextHeader)).toEqual(want);
+      expect(policies(rules, framePath(...sites), workerHeader)).toEqual(want);
     });
   }
 
-  it("never as the unsubstituted text", () => {
+  it("never as the unsubstituted text", async () => {
     // The failure this file exists for: a value the worker's compile() rejects
     // comes out as written. Proven against a value that DOES break it, so the
-    // check below is known to be able to fail.
-    const broken = "frame-ancestors https://:site";
-    expect(workerHeader(SOURCE, broken, `/e/${KEY}/www.example.com`)).toBe(broken);
-    expect(workerHeader(SOURCE, EMBED_FRAME_CSP, `/e/${KEY}/www.example.com`)).not.toContain(":site");
+    // checks above are known to be able to fail.
+    const [rule] = embedRules(await prodRules());
+    const broken = "frame-ancestors https://:s1";
+    expect(workerHeader(rule.source, broken, framePath("www.example.com"))).toBe(broken);
+    for (const value of policies(await prodRules(), framePath("a.example", "b.example"), workerHeader)) {
+      expect(value).not.toMatch(/:s\d/);
+    }
   });
 
-  it("with a port, in development only", () => {
-    const path = `/e/${KEY}/shop.localhost:3100`;
-    expect(nextHeader(SOURCE_DEV, EMBED_FRAME_CSP, path)).toBe(policyFor("shop.localhost:3100"));
-    expect(nextHeader(SOURCE, EMBED_FRAME_CSP, path)).toBeNull();
-    expect(workerHeader(SOURCE, EMBED_FRAME_CSP, path)).toBeNull();
+  it("for no more sites than the frame may name", async () => {
+    const rules = await prodRules();
+    const tooMany = framePath("a.example", "b.example", "c.example", "d.example", "e.example");
+    expect(policies(rules, tooMany, nextHeader)).toEqual([]);
+    expect(policies(rules, tooMany, workerHeader)).toEqual([]);
+  });
+
+  it("with a port, in development only", async () => {
+    const path = framePath("shop.localhost:3100", "shop-localhost.filesusr.com:3100");
+    const dev = await loadRules({ embedUrl: "http://localhost:3100", nodeEnv: "development" });
+    expect(policies(dev, path, nextHeader)).toEqual([
+      embedFramePolicy(["shop.localhost:3100", "shop-localhost.filesusr.com:3100"]),
+    ]);
+    expect(policies(await prodRules(), path, nextHeader)).toEqual([]);
+    expect(policies(await prodRules(), path, workerHeader)).toEqual([]);
   });
 });
 
-describe("nothing but a bare host can be written into the policy", () => {
+describe("nothing but bare hosts can be written into the policy", () => {
   // Each of these would end the directive, add a source or name a scheme if it
   // were let through. No match means no enforced policy at all, which leaves
   // the response under X-Frame-Options: DENY.
@@ -141,25 +226,28 @@ describe("nothing but a bare host can be written into the policy", () => {
     "data:",
     "*",
     "'none'",
-    "www.example.com/extra",
     "www.example.com%2Fextra",
   ];
 
   for (const site of hostile) {
-    it(JSON.stringify(site), () => {
-      const path = `/e/${KEY}/${site}`;
-      expect(nextHeader(SOURCE, EMBED_FRAME_CSP, path)).toBeNull();
-      expect(workerHeader(SOURCE, EMBED_FRAME_CSP, path)).toBeNull();
-      // The development pattern is looser by a port and nothing else.
-      expect(nextHeader(SOURCE_DEV, EMBED_FRAME_CSP, path)).toBeNull();
+    it(`${JSON.stringify(site)}, wherever it stands in the list`, async () => {
+      const prod = await prodRules();
+      const dev = await loadRules({ embedUrl: "http://localhost:3100", nodeEnv: "development" });
+      for (const path of [framePath(site), framePath("www.example.com", site), framePath(site, "www.example.com")]) {
+        expect(policies(prod, path, nextHeader), path).toEqual([]);
+        expect(policies(prod, path, workerHeader), path).toEqual([]);
+        // The development pattern is looser by a port and nothing else.
+        expect(policies(dev, path, nextHeader), path).toEqual([]);
+      }
     });
   }
 
-  it("and nothing but an embed key can stand before it", () => {
+  it("and nothing but an embed key can stand before them", async () => {
+    const rules = await prodRules();
     for (const key of ["not-a-key", "3f2b6c1e", `${KEY}x`, "../.."]) {
       const path = `/e/${key}/www.example.com`;
-      expect(nextHeader(SOURCE, EMBED_FRAME_CSP, path), key).toBeNull();
-      expect(workerHeader(SOURCE, EMBED_FRAME_CSP, path), key).toBeNull();
+      expect(policies(rules, path, nextHeader), key).toEqual([]);
+      expect(policies(rules, path, workerHeader), key).toEqual([]);
     }
   });
 });

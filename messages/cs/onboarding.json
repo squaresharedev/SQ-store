@@ -33,6 +33,8 @@
       "detailNeedsSeller": "Dokončete údaje prodejce a pak můžete stránku zveřejnit.",
       "detailNeedsStorefront": "Jakmile bude produkt ve výloze, můžete jeho stránku zveřejnit.",
       "detailNeedsActive": "Nastavte produktu stav Aktivní, aby se jeho stránka zveřejnila.",
+      "detailChecking": "Vaše stránka se zveřejní, až automatická kontrola produkt schválí.",
+      "detailPaused": "Automatická kontrola ten produkt pozastavila. Otevřete ho a uvidíte, co změnit.",
       "detailPagesOff": "Produktové stránky jsou v této výloze vypnuté. Zapněte je v editoru.",
       "actionEdit": "Upravit produkt",
       "actionOpen": "Otevřít editor",
@@ -129,7 +131,8 @@
       "emailTipLabel": "O tomto e-mailu"
     },
     "confirm": {
-      "goLive": "Vaše produktové stránky se zveřejní, jakmile ho potvrdíte."
+      "goLive": "Vaše produktové stránky se zveřejní, jakmile ho potvrdíte.",
+      "wrongAddress": "Špatná adresa? Změňte ji"
     },
     "tour": {
       "mobileMenu": "Na telefonu otevřete nabídku vlevo nahoře.",
@@ -145,7 +148,6 @@
       "getStarted": "Začít",
       "skipForNow": "Teď přeskočit",
       "saveAndContinue": "Uložit a pokračovat",
-      "changeDetails": "Změnit údaje",
       "continue": "Pokračovat",
       "exploreOnMyOwn": "Prozkoumat na vlastní pěst",
       "notNow": "Teď ne"

@@ -199,6 +199,7 @@
     "invoicesDescription": "Your card, billing address, VAT ID and every invoice, on Stripe's secure page.",
     "manage": "Manage billing & invoices",
     "noBilling": "Invoices and payment details appear here once you're on a paid plan.",
+    "noBillingYet": "Invoices and payment details will appear here once paid plans open.",
     "confirmed": "You're on {plan}. Thanks for backing Square Share.",
     "pending": "We're confirming your payment with Stripe. Refresh in a moment if your plan hasn't changed.",
     "unavailable": "Your plan can't be shown right now. Refresh the page in a moment.",

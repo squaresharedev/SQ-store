@@ -30,7 +30,9 @@
     "toShipTitle": "Nic k odeslání",
     "toShipHint": "Máte vše vyřízeno. Zaplacené objednávky k odeslání se tu zobrazí od nejstarší.",
     "seeAllOrders": "Zobrazit všechny objednávky",
-    "hintOpen": "Když někdo nakoupí ve vašem obchodě, objednávka se zobrazí tady a hned se to dozvíte."
+    "hintOpen": "Když někdo nakoupí ve vašem obchodě, objednávka se zobrazí tady a hned se to dozvíte.",
+    "productTitle": "Tento produkt zatím nemá žádné objednávky",
+    "productHint": "Až se prodá, jeho objednávky se zobrazí zde."
   },
   "list": {
     "updating": "Aktualizace…",
@@ -55,7 +57,7 @@
     "region": "filtry objednávek",
     "channel": "kanál",
     "buyerEmail": "e-mail kupujícího",
-    "searchPlaceholder": "hledat e-mail kupujícího",
+    "searchPlaceholder": "hledat e-mail, jméno, město, produkt nebo zásilku",
     "status": "stav",
     "statusAriaLabel": "Filtrovat podle stavu",
     "allStatuses": "Všechny stavy",
@@ -151,6 +153,7 @@
   },
   "actions": {
     "disputeInStripe": "Spory se po propojení Stripe řeší v panelu Stripe.",
+    "pendingPayment": "Platba kupujícího se ještě potvrzuje. Zatím nic neposílejte: jakmile projde, objednávka se zobrazí jako zaplacená, a pokud neprojde, sama se uzavře.",
     "none": "K této objednávce nejsou dostupné žádné akce."
   },
   "refund": {
@@ -171,6 +174,7 @@
     "refundedOn": "Vráceno {date}",
     "refundedOnReason": "{reason, select, cancelled {Zrušeno a vráceno {date}} returned {Vráceno zboží a peníze {date}} other {Vráceno {date}}}",
     "ownerOnly": "Vrátit peníze nebo zrušit objednávku může jen vlastník obchodu.",
+    "ownerOnlyNamed": "Vrátit peníze nebo zrušit objednávku může jen vlastník obchodu {store}. Požádejte ho o to.",
     "manual": "Tato platba neproběhla přes Square Share. Vraťte kupujícímu peníze sami a poté to zaznamenejte zde.",
     "viaProvider": "Plná částka se přes Stripe vrátí na kartu kupujícího. Tuto akci nelze vrátit zpět."
   },
@@ -186,6 +190,11 @@
     "label": "Které objednávky zobrazit",
     "toShip": "K odeslání",
     "all": "Všechny objednávky"
+  },
+  "productScope": {
+    "label": "Objednávky produktu",
+    "clear": "Všechny produkty",
+    "clearLabel": "Zobrazit objednávky všech produktů, nejen {title}"
   },
   "fulfilment": {
     "unfulfilled": "K odeslání",

@@ -34,6 +34,7 @@ import { PRODUCTS_PATH } from "@/lib/products/paths";
 import { DISCOUNTS_PATH } from "@/lib/discounts/paths";
 import { BILLING_SETTINGS_PATH } from "@/lib/billing/paths";
 import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
+import { TRADER_IDENTITY_HREF } from "@/lib/settings/trader-identity";
 
 /**
  * THE APP'S NAVIGATION MAP: declared once, consumed three times.
@@ -95,7 +96,7 @@ export const SETTINGS_NAV: SettingsNavEntry[] = [
   // The store's plan, its fee per sale and its invoices (lib/billing).
   { href: BILLING_SETTINGS_PATH, label: "Nav.settings.billing", icon: Gem },
   { href: "/settings/legal", label: "Nav.settings.legal", icon: ScrollText },
-  { href: "/settings/tax", label: "Nav.settings.tax", icon: Receipt },
+  { href: TRADER_IDENTITY_HREF, label: "Nav.settings.tax", icon: Receipt },
   // Beside Tax, not off in the storefront designer where these terms used to
   // be written: both are account-level facts about the business that every
   // storefront and every product reads (20260905_shipping_policy_on_profile).

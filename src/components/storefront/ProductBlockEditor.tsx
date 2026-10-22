@@ -32,6 +32,7 @@ import { ProductThumb } from "@/components/ui/ProductThumb";
 import { CardStyleControls } from "./CardStyleControls";
 import { PriceTagControls } from "./PriceTagControls";
 import { SaleBadgeControls } from "./SaleBadgeControls";
+import { ChipScaleControl } from "./ChipScaleControl";
 
 /** Decimal input string -> integer cents, or null when not a finite number. */
 function centsOf(input: string): number | null {
@@ -67,9 +68,13 @@ export function ProductBlockEditor({
   onProductSaved,
   onDesignPage,
   pageOpen = false,
+  onThemeChange,
 }: {
   block: ProductBlock;
   theme: StorefrontTheme;
+  /** Change the whole storefront's theme: only for the board-wide chip size
+   *  (ChipScaleControl), offered here because this is where sellers look. */
+  onThemeChange?: (theme: StorefrontTheme) => void;
   product: Product | null;
   /** Merge a card-style patch into this block's overrides. */
   onStyleChange: (patch: CardStyleOverrides) => void;
@@ -367,6 +372,7 @@ export function ProductBlockEditor({
             overrides={block.style ?? {}}
             onChange={onStyleChange}
             scope={{ blockKey: blockKey(block) }}
+            afterSize={onThemeChange && <ChipScaleControl theme={theme} onChange={onThemeChange} onEveryCard />}
           />
         </CollapsibleSection>
 
@@ -381,6 +387,7 @@ export function ProductBlockEditor({
             overrides={block.style ?? {}}
             onChange={onStyleChange}
             product={product}
+            afterLook={onThemeChange && <ChipScaleControl theme={theme} onChange={onThemeChange} onEveryCard />}
           />
         </CollapsibleSection>
       </div>

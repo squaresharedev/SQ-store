@@ -199,6 +199,7 @@
     "invoicesDescription": "Vaša karta, fakturačná adresa, IČ DPH a všetky faktúry na zabezpečenej stránke Stripe.",
     "manage": "Spravovať fakturáciu a faktúry",
     "noBilling": "Faktúry a platobné údaje sa zobrazia, keď prejdete na platený plán.",
+    "noBillingYet": "Faktúry a platobné údaje sa tu zobrazia, keď sa otvoria platené plány.",
     "confirmed": "Ste na pláne {plan}. Ďakujeme za podporu Square Share.",
     "pending": "Potvrdzujeme vašu platbu so Stripe. Ak sa plán nezmenil, za chvíľu obnovte stránku.",
     "unavailable": "Váš plán sa momentálne nedá zobraziť. Za chvíľu obnovte stránku.",

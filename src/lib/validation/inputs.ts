@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { Messages } from "@/i18n/messages";
 import { issueKey, isValidationKey } from "@/lib/validation/messages";
+import { dropHiddenCharacters } from "@/lib/validation/hidden-characters";
 import { isDiscountCode, normalizeDiscountCode } from "@/lib/discounts/code";
 import { DISCOUNT_CODE_MAX, DISCOUNT_CODE_MIN } from "@/types/discount";
 
@@ -55,19 +56,21 @@ const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
 const CONTROL_CHARS_EXCEPT_NEWLINE = /[\u0000-\u0009\u000b-\u001f\u007f]/;
 
 /**
- * Invisible direction controls (embeddings, overrides, isolates). They ride
- * along when a name or a number is pasted from a chat app, and one can reverse
- * how the rest of a line reads on an address label or in an email. Dropped
- * rather than refused: nobody can see the character an error would be about.
- * Direction MARKS and joiners stay: right-to-left text and emoji are made of them.
+ * Where every free-text field starts: hidden characters dropped, then trimmed.
+ *
+ * Direction controls ride along when a name or a number is pasted from a chat
+ * app, and one can reverse how the rest of a line reads on an address label or
+ * in an email. Tag characters, zero-width spaces and smuggled variation
+ * selectors are invisible to people but read by language models, so text
+ * carrying them can address an AI that reads the page (security review
+ * 2026-10-21). Dropped rather than refused: nobody can see the character an
+ * error would be about. Direction MARKS and joiners stay: right-to-left text
+ * and emoji are made of them. See lib/validation/hidden-characters.ts.
  */
-const BIDI_CONTROLS = /[\u202a-\u202e\u2066-\u2069]/g;
-
-/** Where every free-text field starts: direction controls dropped, then trimmed. */
 const cleanString = () =>
   z
     .string()
-    .overwrite((value) => value.replace(BIDI_CONTROLS, ""))
+    .overwrite(dropHiddenCharacters)
     .trim();
 
 /**

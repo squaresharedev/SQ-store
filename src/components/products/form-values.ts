@@ -1,14 +1,19 @@
 import {
+  BADGES_ON_PHOTO_MAX,
   DIMENSION_UNITS,
   WEIGHT_UNITS,
+  type BadgeColor,
+  type BadgeIcon,
+  type BadgePlacement,
   type DimensionUnit,
+  type ProductBadge,
   type ProductDetails,
   type ProductOptionDetails,
   type ProductOptionGroup,
   type ProductSafety,
   type WeightUnit,
 } from "@/types/product";
-import type { ProductDetailsInput } from "@/lib/validation/product";
+import { badgeLabelKey, isOnPhoto, type ProductDetailsInput } from "@/lib/validation/product";
 import type { useTranslations } from "next-intl";
 
 /** The seller-side translator the form validators write their messages with. */
@@ -335,6 +340,81 @@ export function optionDetailsToInput(
   if (specs.length > 0) details.specs = specs;
 
   return Object.keys(details).length > 0 ? details : undefined;
+}
+
+// ── Badges ──────────────────────────────────────────────────────────────
+//
+// Held by the form apart from `details`, like the gallery: a row needs a key
+// of its own that survives its words being edited, and the key must never be
+// part of what the dirty check or the save compares.
+
+/** One badge in the form. `localId` keys the row and is never saved. */
+export interface BadgeFormValue {
+  localId: string;
+  icon: BadgeIcon;
+  label: string;
+  /** Always set in the form (`ink` by default); left out of what is saved
+   *  when it is the default, so an untouched badge stores what it always did. */
+  color: BadgeColor;
+  placement: BadgePlacement;
+}
+
+/** Stored badges to form rows. Ids are positional so the pristine copy the
+ *  dirty check builds matches the live one. */
+export function initialBadges(details?: ProductDetails): BadgeFormValue[] {
+  return (details?.badges ?? []).map((badge, index) => ({
+    localId: `stored-${index}`,
+    icon: badge.icon,
+    label: badge.label,
+    color: badge.color ?? "ink",
+    placement: badge.placement ?? "beside",
+  }));
+}
+
+/** What the dirty check and the fix-progress check compare: the badges with
+ *  their row keys left out. */
+export function badgesSnapshot(badges: readonly BadgeFormValue[]): ProductBadge[] {
+  return badges.map(({ icon, label, color, placement }) => storedBadge(icon, label, color, placement));
+}
+
+/** One badge as it is stored: its colour and place only when not the default. */
+function storedBadge(
+  icon: BadgeIcon,
+  label: string,
+  color: BadgeColor,
+  placement: BadgePlacement,
+): ProductBadge {
+  return {
+    icon,
+    label,
+    ...(color !== "ink" ? { color } : {}),
+    ...(placement !== "beside" ? { placement } : {}),
+  };
+}
+
+/** Rows to the stored shape. An emptied row is dropped rather than refused,
+ *  the way an empty spec row is: it says nothing a buyer could read. */
+export function badgesToInput(badges: readonly BadgeFormValue[]): ProductBadge[] {
+  return badges
+    .map(({ icon, label, color, placement }) => storedBadge(icon, label.trim(), color, placement))
+    .filter((badge) => badge.label !== "");
+}
+
+/** UX-only checks (the server re-parses with Zod): two rows saying the same
+ *  thing, or more on the photo than it holds, which the schema refuses and a
+ *  seller would want named. */
+export function validateBadges(badges: readonly BadgeFormValue[], t: ProductsTranslator): string | undefined {
+  if (badges.filter(isOnPhoto).length > BADGES_ON_PHOTO_MAX) {
+    return t("form.errors.badgesOnPhoto", { max: BADGES_ON_PHOTO_MAX });
+  }
+  const seen = new Set<string>();
+  for (const badge of badges) {
+    const key = badgeLabelKey(badge.label);
+    if (!key) continue;
+    if (seen.has(key)) return t("form.errors.badgeDuplicate");
+    seen.add(key);
+  }
+  return undefined;
 }
 
 /** A photo in the form: either already stored (has a key) or freshly picked

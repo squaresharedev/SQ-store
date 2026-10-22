@@ -56,12 +56,30 @@ const text = (value: unknown): string | null => (typeof value === "string" && va
 async function orderForCheckout(admin: Admin, checkoutSessionId: string, sellerId: string) {
   const { data, error } = await admin
     .from("orders")
-    .select("id, seller_id, status")
+    .select("id, seller_id, status, amount_cents, currency")
     .eq("checkout_session_id", checkoutSessionId)
     .maybeSingle();
   if (error) throw new Error(`reading the order failed: ${error.message}`);
   if (!data) return { order: null, foreign: false };
   return data.seller_id === sellerId ? { order: data, foreign: false } : { order: null, foreign: true };
+}
+
+/**
+ * Whether a completed session took exactly what the pending order was quoted:
+ * Stripe's amount_total (minor units, items and delivery) against
+ * orders.amount_cents, and its currency against the order's (Stripe writes it
+ * lower-case).
+ */
+export function paidAsQuoted(
+  session: Record<string, unknown>,
+  order: { amount_cents: number; currency: string },
+): boolean {
+  return (
+    typeof session.amount_total === "number" &&
+    session.amount_total === order.amount_cents &&
+    typeof session.currency === "string" &&
+    session.currency.toUpperCase() === order.currency.toUpperCase()
+  );
 }
 
 /** A refund or dispute names the PAYMENT (orders.payment_ref). */
@@ -172,6 +190,20 @@ async function apply(admin: Admin, event: StripeEvent, sellerId: string, stripeA
           payment: text(object.payment_intent),
         });
         return foreign ? "foreign order" : "no order";
+      }
+      // The money must be the order's money. A seller's own Stripe account can
+      // complete a session it created itself that names this order: without
+      // this, a cheaper payment confirmed the full order (and set our fee from
+      // that session). Left pending, the order expires and its stock returns.
+      if (!paidAsQuoted(object, order)) {
+        await alertOps("A payment did not match its order", {
+          event: event.id,
+          account: stripeAccountId,
+          order: order.id,
+          paid: `${String(object.amount_total)} ${String(object.currency)}`,
+          expected: `${order.amount_cents} ${order.currency}`,
+        });
+        return "amount mismatch";
       }
       const confirmed = await confirmPendingOrder(checkoutSessionId, text(object.payment_intent));
       if (!confirmed.ok) throw new Error("confirming the order failed");

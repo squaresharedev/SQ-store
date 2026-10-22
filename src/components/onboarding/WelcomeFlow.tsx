@@ -20,6 +20,7 @@ import {
   iconNudgeLeftClass,
   iconNudgeRightClass,
   infoTextClass,
+  quietLinkClass,
 } from "@/components/ui/control-styles";
 import { STEP_SWAP } from "@/components/ui/motion-tokens";
 import { TermsSummary } from "@/components/legal/TermsSummary";
@@ -164,6 +165,10 @@ export function WelcomeFlow({
   const termsHintId = useId();
   const fieldId = useId();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const emailFieldRef = useRef<HTMLInputElement>(null);
+  // Set by "Wrong address? Change it": the details come back with the email
+  // field focused rather than the step. Cleared by any other step change.
+  const focusEmailRef = useRef(false);
 
   const [steps, setSteps] = useState(() => stepsFor(includeTermsStep, includeSellerStep));
   const [stepIndex, setStepIndex] = useState(0);
@@ -176,16 +181,24 @@ export function WelcomeFlow({
   const [businessName, setBusinessName] = useState(seller.businessName);
   const [address, setAddress] = useState(seller.address);
   const [email, setEmail] = useState(seller.email);
-  // The address on file when the dialog opened. Frozen, like the steps: the
-  // save refreshes the page, so by the time its result is handled the
-  // `seller` prop already holds the NEW address and could not say whether
-  // it changed.
-  const [emailAtOpen, setEmailAtOpen] = useState(seller.email);
+  // The address on file as far as this dialog knows: the one it opened with,
+  // then each one it saves, which is what the save compares against too. Not
+  // read from `seller`: the save refreshes the page, so by the time its result
+  // is handled the prop already holds the NEW address and could not say
+  // whether it changed.
+  const [emailOnFile, setEmailOnFile] = useState(seller.email);
+  // Where this dialog's saves last sent a code, so going back and saving the
+  // same address again still opens on the code box it is waiting for.
+  const [codeSentTo, setCodeSentTo] = useState<string | null>(null);
   // The address waiting to be proven once the details are saved, and whether
   // the save already sent it a code (it does when the address is new).
   const [confirming, setConfirming] = useState<{ email: string; codeSent: boolean } | null>(
     null,
   );
+  // The save that led to the code, once the seller has gone back from it: the
+  // form's button is mounted afresh then, and must not greet them with that
+  // save's "Saved" as if the edit they came back to make were already in.
+  const [saveStateLeft, setSaveStateLeft] = useState<ActionState | null>(null);
   // A save that needs no confirmation is the end of the dialog.
   const [finished, setFinished] = useState(false);
 
@@ -215,13 +228,16 @@ export function WelcomeFlow({
       setBusinessName(seller.businessName);
       setAddress(seller.address);
       setEmail(seller.email);
-      setEmailAtOpen(seller.email);
+      setEmailOnFile(seller.email);
+      setCodeSentTo(null);
       setConfirming(null);
+      setSaveStateLeft(null);
       setFinished(false);
     }
   }
 
   const goTo = (index: number) => {
+    focusEmailRef.current = false;
     setBack(index < stepIndex);
     setStepIndex(Math.max(0, Math.min(index, steps.length - 1)));
   };
@@ -257,9 +273,13 @@ export function WelcomeFlow({
     setHandledSave(saveState);
     if (saveState.success) {
       const saved = email.trim();
-      const changed = saved !== emailAtOpen.trim();
+      // A changed address has lost any proof it had (guard_contact_proof), so
+      // a stale `emailVerified` must not wave it through.
+      const changed = saved !== emailOnFile.trim();
+      setEmailOnFile(saved);
+      if (changed && verificationOn) setCodeSentTo(saved);
       const needsProof = verificationOn && saved !== "" && (changed || !emailVerified);
-      if (needsProof) setConfirming({ email: saved, codeSent: changed });
+      if (needsProof) setConfirming({ email: saved, codeSent: changed || codeSentTo === saved });
       else setFinished(true);
     }
   }
@@ -272,7 +292,7 @@ export function WelcomeFlow({
     if (finished) onStartTour();
   }, [finished, onStartTour]);
 
-  // saveTaxInfo revalidates /settings/tax only. The page this dialog sits on
+  // saveTaxInfo revalidates /settings/business only. The page this dialog sits on
   // renders the checklist and the gate on the server, so it asks for a fresh
   // render itself; client state (this dialog, its step) survives a refresh.
   useEffect(() => {
@@ -300,8 +320,26 @@ export function WelcomeFlow({
   const focusStep = useCallback((node: HTMLDivElement | null) => {
     if (!node) return;
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    // Back from the code to fix the address: straight into the field, its
+    // text selected. Children attach their refs first, so the field is there.
+    // The flag is not spent here: a ref can be attached twice in one mount
+    // (Strict Mode), and the second must not take focus back. goTo clears it.
+    const emailField = emailFieldRef.current;
+    if (focusEmailRef.current && emailField) {
+      emailField.focus();
+      emailField.select();
+      return;
+    }
     node.focus({ preventScroll: true });
   }, []);
+
+  /** From the code back to the details, the way every other step goes back. */
+  const backToDetails = (toEmail: boolean) => {
+    focusEmailRef.current = toEmail;
+    setSaveStateLeft(saveState);
+    setBack(true);
+    setConfirming(null);
+  };
 
   const step = steps[stepIndex] ?? "welcome";
   const stepCopy = STEP_COPY[step];
@@ -458,6 +496,7 @@ export function WelcomeFlow({
                     </InfoTip>
                   </div>
                   <Input
+                    ref={emailFieldRef}
                     id={`${fieldId}-email`}
                     name="seller_email"
                     type="email"
@@ -494,6 +533,16 @@ export function WelcomeFlow({
                   confirmAction={confirmCodeAction}
                   onConfirmed={finish}
                 />
+                {/* Beside the address it fixes, not only in the footer: a
+                    typo is noticed while reading "we emailed …". Indented to
+                    the box's text column (its icon tile and gap). */}
+                <button
+                  type="button"
+                  className={cn("ml-12", quietLinkClass)}
+                  onClick={() => backToDetails(true)}
+                >
+                  {t("Onboarding.welcome.confirm.wrongAddress")}
+                </button>
               </div>
             )}
           </motion.div>
@@ -571,7 +620,7 @@ export function WelcomeFlow({
               <SaveButton
                 form={formId}
                 pending={savePending}
-                state={saveResult}
+                state={saveState === saveStateLeft ? undefined : saveResult}
                 disabled={!ready}
               >
                 {t("Onboarding.welcome.nav.saveAndContinue")}
@@ -582,8 +631,9 @@ export function WelcomeFlow({
 
         {step === "seller" && confirming && (
           <>
-            <Button variant="ghost" onClick={() => setConfirming(null)}>
-              {t("Onboarding.welcome.nav.changeDetails")}
+            <Button variant="ghost" onClick={() => backToDetails(false)}>
+              <ArrowLeft className={cn("size-4", iconNudgeLeftClass)} aria-hidden />
+              {t("Common.actions.back")}
             </Button>
             <Button onClick={onStartTour}>
               {t("Onboarding.welcome.nav.continue")}

@@ -81,19 +81,28 @@ describe("resolveCardStyle", () => {
       saleBadgeLook: "pill",
       saleBadgePosition: "top-left",
       saleBadgeColor: undefined,
+      saleBadgeTextColor: undefined,
     });
   });
 
   it("lets one tile set its own sale chip over the theme's", () => {
-    const t = theme({ saleBadge: "amount", saleBadgeLook: "ribbon", saleBadgePosition: "bottom-right", saleBadgeColor: "#dc2626" });
+    const t = theme({
+      saleBadge: "amount",
+      saleBadgeLook: "ribbon",
+      saleBadgePosition: "bottom-right",
+      saleBadgeColor: "#dc2626",
+      saleBadgeTextColor: "#fde047",
+    });
     expect(resolveCardStyle(t)).toMatchObject({
       saleBadge: "amount",
       saleBadgeLook: "ribbon",
       saleBadgePosition: "bottom-right",
       saleBadgeColor: "#dc2626",
+      saleBadgeTextColor: "#fde047",
     });
-    expect(resolveCardStyle(t, { saleBadge: "hidden" })).toMatchObject({
+    expect(resolveCardStyle(t, { saleBadge: "hidden", saleBadgeTextColor: "#ffffff" })).toMatchObject({
       saleBadge: "hidden",
+      saleBadgeTextColor: "#ffffff",
       // The fields the tile did not set keep following the theme.
       saleBadgePosition: "bottom-right",
       saleBadgeColor: "#dc2626",

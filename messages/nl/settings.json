@@ -303,6 +303,7 @@
   "tax": {
     "cardTitle": "Bedrijfs- en verkopersgegevens",
     "cardDescription": "Eenmalig ingesteld voor je hele account. Wordt getoond aan kopers op elke productpagina waarop je verkoopt, en gebruikt voor facturen en btw.",
+    "memberScope": "Dit zijn je eigen verkopersgegevens. De gegevens die kopers bij {store} zien, zijn van de eigenaar, die ze in de eigen instellingen invult.",
     "gate": {
       "required": "<strong>Je handelsnaam, adres en contact-e-mailadres zijn verplicht voordat je iets kunt publiceren of verkopen.</strong> Kopers moeten kunnen zien van wie ze kopen en hoe ze je kunnen bereiken voordat ze bestellen.",
       "privacyNoteLinked": "Deze gegevens verschijnen alleen daarom openbaar op je productpagina's. We gebruiken ze nooit voor marketing, en verkopen of delen ze nooit. Het enige bericht dat we naar je contact-e-mailadres of telefoonnummer sturen, is de code die het bevestigt. Zie het <link>Squareshare-privacybeleid</link>."

@@ -92,7 +92,11 @@ export function storefrontSurface(page: StorefrontPageData): {
   const presentation = fontPresentation(theme.font);
   return {
     ink,
-    className: presentation.className,
+    // `wrap-anywhere`, inherited by every word on the page (a shop name, a
+    // business name, a link pasted into a text block): one unbroken word wider
+    // than a phone otherwise pushes the page sideways, and in the embed frame,
+    // which clips, it is cut off. The product page does the same (PageShell).
+    className: cn("wrap-anywhere", presentation.className),
     style: {
       ...resolveBackgroundStyle(theme.background, page.backgroundImageUrl),
       ...gridGapStyle(theme.gridGap),
@@ -196,7 +200,11 @@ export function StorefrontBoard({
                 {...(tilesOpenNewTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 className={cn(
                   tileFrameClass(block),
-                  "block outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                  // The ring is the board's own ink, not the dashboard's grey:
+                  // the ink is chosen to read on the seller's background, and
+                  // the grey is 2.3:1 on a cream one, short of the 3:1 a focus
+                  // indicator needs.
+                  "block outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-current",
                 )}
                 data-storefront-tile={block.type === "product" ? block.productId : undefined}
               >

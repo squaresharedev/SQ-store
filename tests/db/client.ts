@@ -113,8 +113,9 @@ export async function asSuper<T>(fn: Runner<T>): Promise<T> {
 export async function createUser(
   email?: string,
   meta: Record<string, unknown> = {},
+  /** A fixed id, for a test whose storage keys must name this user as uploader. */
+  id: string = randomUUID(),
 ): Promise<TestUser> {
-  const id = randomUUID();
   const resolvedEmail =
     email ?? `user-${id.slice(0, 8)}@test.squareshare.to`;
   await asSuper((q) =>

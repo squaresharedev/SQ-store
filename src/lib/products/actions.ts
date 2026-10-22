@@ -9,6 +9,7 @@ import type { TablesInsert, TablesUpdate } from "@/types";
 import type { Json } from "@/types/supabase";
 import { parseDocuments, parseGallery, parseOptionGroups } from "@/lib/products/detail";
 import {
+  actionError,
   failure,
   invalidInput,
   notFound,
@@ -21,7 +22,9 @@ import {
   type ServerErrorOperation,
 } from "@/lib/errors";
 import { publishBlockedError } from "@/lib/settings/seller-identity";
-import { precheck, settleAfterWrite } from "@/lib/moderation/auto/check";
+import { precheck, settleAfterWrite, type AutoOutcome } from "@/lib/moderation/auto/check";
+import { badgeRefusal } from "@/lib/products/badge-moderation";
+import { countToShipForProduct } from "@/lib/orders/queries";
 import { planLimitError, planLimitErrorFromTrigger, planLimitKeyOf } from "@/lib/billing/limits";
 import { msg } from "@/i18n/types";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
@@ -45,6 +48,12 @@ function toJson(value: unknown): Json {
   return JSON.parse(JSON.stringify(value)) as Json;
 }
 
+/** The words of every badge a write carries, for the badge check. Absent
+ *  details leave the stored badges alone, so there is nothing new to judge. */
+function badgeLabels(data: ProductWriteInput): string[] {
+  return (data.details?.badges ?? []).map((badge) => badge.label);
+}
+
 // Product CRUD for the ACTIVE account's store (your own, or one you can edit as
 // an owner/editor). Every write: resolve + authorize the active account
 // (products.write) -> Zod parse (the security boundary; client validation is UX
@@ -54,8 +63,21 @@ function toJson(value: unknown): Json {
 // Failures are structured ActionErrors (lib/errors.ts): message + how to fix.
 
 export type ProductActionResult =
-  | { ok: true; id: string }
+  | {
+      ok: true;
+      id: string;
+      /** The save landed but the automatic check has not approved it yet
+       *  (still checking, or waiting for a person), so buyers cannot see it.
+       *  The form says so; the list's badge alone was easy to misread. */
+      checking?: boolean;
+    }
   | { ok: false; error: ActionError };
+
+/** Whether a save's check outcome keeps the product out of buyers' sight for
+ *  now, as opposed to approved, or paused for a reason the form shows. */
+function stillChecking(outcome: AutoOutcome): boolean {
+  return outcome === "pending" || outcome === "review";
+}
 
 /**
  * Parse + authorize a write payload. Returns the validated input or an error
@@ -349,6 +371,8 @@ export async function createProduct(
   if (!galleryMatchesOptions(data, new Set())) return failure(STALE_OPTION_ERROR);
   const verified = await verifyNewKeys(account.userId, data, new Set(), new Set());
   if (!verified.ok) return failure(verified.error);
+  const badgeProblem = await badgeRefusal(badgeLabels(data));
+  if (badgeProblem) return failure(badgeProblem);
 
   const insert: TablesInsert<"products"> = {
     owner_id: account.accountId,
@@ -394,9 +418,9 @@ export async function createProduct(
     console.error("[products] create failed", error);
     return failure(serverError("createProduct"));
   }
-  await settleAfterWrite("product", row.id, row.moderation_status);
+  const outcome = await settleAfterWrite("product", row.id, row.moderation_status);
   revalidatePath("/products");
-  return { ok: true, id: row.id };
+  return { ok: true, id: row.id, checking: stillChecking(outcome) };
 }
 
 export async function updateProduct(
@@ -472,6 +496,8 @@ export async function updateProduct(
   if (!galleryMatchesOptions(data, storedOptionIds)) return failure(STALE_OPTION_ERROR);
   const verified = await verifyNewKeys(account.userId, data, storedGalleryKeys, storedDocumentKeys);
   if (!verified.ok) return failure(verified.error);
+  const badgeProblem = await badgeRefusal(badgeLabels(data));
+  if (badgeProblem) return failure(badgeProblem);
 
   const update: TablesUpdate<"products"> = {
     title: data.title,
@@ -555,12 +581,17 @@ export async function updateProduct(
     await evictObjects(stale);
   }
 
-  await settleAfterWrite("product", row.id, row.moderation_status);
+  const outcome = await settleAfterWrite("product", row.id, row.moderation_status);
   revalidatePath("/products");
-  return { ok: true, id: row.id };
+  return { ok: true, id: row.id, checking: stillChecking(outcome) };
 }
 
-export async function deleteProduct(id: string): Promise<ProductActionResult> {
+export async function deleteProduct(
+  id: string,
+  /** How many orders still to ship the seller was warned about in the dialog.
+   *  More than that now means one came in since: they are asked again. */
+  acknowledgedToShip: number = 0,
+): Promise<ProductActionResult> {
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
   if (!can(account.role, "products.write")) {
@@ -571,6 +602,27 @@ export async function deleteProduct(id: string): Promise<ProductActionResult> {
   }
   if (!productIdSchema.safeParse(id).success) {
     return failure(notFound("product"));
+  }
+
+  // Parcels still owed for it. The orders themselves survive the delete (they
+  // keep the product's name and price), but a seller who deletes a product
+  // with buyers waiting should have been told so first, by THIS count rather
+  // than whatever the page showed when it loaded. Unknown counts as "ask".
+  const toShip = await countToShipForProduct(account.accountId, id);
+  const acknowledged =
+    Number.isInteger(acknowledgedToShip) && acknowledgedToShip > 0 ? acknowledgedToShip : 0;
+  if (toShip === null) return failure(serverError("deleteProduct"));
+  if (toShip > acknowledged) {
+    // The list's counts are stale: refresh them, so the dialog the seller
+    // opens next carries the warning this refusal is about.
+    revalidatePath("/products");
+    return failure(
+      actionError(
+        "invalid_input",
+        msg("Errors.products.ordersToShip", { count: toShip }),
+        msg("Errors.products.ordersToShipFix"),
+      ),
+    );
   }
 
   const supabase = await createClient();

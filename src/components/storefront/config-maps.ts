@@ -1,12 +1,7 @@
 import type { CSSProperties } from "react";
 import type { MessageKey } from "@/i18n/types";
 import type { GridPlacement } from "@/components/grid/gridConstants";
-import {
-  contrastRatio,
-  MIN_LEGIBLE_CONTRAST,
-  mixHex,
-  readableInkOn,
-} from "@/lib/format/color";
+import { legibleInkOn, mixHex, readableInkOn } from "@/lib/format/color";
 import { isStrictHexColor } from "@/lib/validation/storefront";
 import { cn } from "@/lib/utils";
 import {
@@ -553,9 +548,7 @@ export function sharedRowRoom(besideWidth: number): string {
  * not rest on every future caller getting the same thing right.
  */
 function legiblePriceInk(ink: string, backdrop: string): string {
-  return contrastRatio(ink, backdrop) >= MIN_LEGIBLE_CONTRAST
-    ? ink
-    : readableInkOn(backdrop);
+  return legibleInkOn(ink, backdrop);
 }
 
 export const TEXT_VARIANT_LABELS: Record<TextVariant, MessageKey> = {

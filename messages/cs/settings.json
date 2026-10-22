@@ -303,6 +303,7 @@
   "tax": {
     "cardTitle": "Firma a údaje prodejce",
     "cardDescription": "Nastavíte jednou pro celý účet. Zobrazují se kupujícím na každé produktové stránce, přes kterou prodáváte, a používají se pro faktury a DPH.",
+    "memberScope": "Toto jsou vaše vlastní údaje prodejce. Ty, které kupující vidí u obchodu {store}, patří jeho vlastníkovi a ten si je nastavuje ve svém nastavení.",
     "gate": {
       "required": "<strong>Bez obchodního jména, adresy a kontaktního e-mailu nemůžete nic zveřejnit ani prodat.</strong> Kupující musí před objednávkou vidět, od koho kupují a jak vás kontaktovat.",
       "privacyNoteLinked": "Tyto údaje se zobrazují veřejně na vašich produktových stránkách, a to jen z tohoto důvodu. Nikdy je nepoužíváme k marketingu ani je neprodáváme či nesdílíme. Jediná zpráva, kterou posíláme na váš kontaktní e-mail nebo telefon, je kód, který ho potvrzuje. Viz <link>Zásady ochrany osobních údajů Squareshare</link>."

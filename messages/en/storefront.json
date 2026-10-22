@@ -183,12 +183,13 @@
     "loadMoreError": "Couldn''t load more storefronts. Try again.",
     "loadMore": "Load more ({remaining} remaining)",
     "deleteTitle": "Delete storefront?",
-    "deleteDesc": "\"{name}\" and its grid will be permanently removed. This cannot be undone.",
+    "deleteDesc": "\"{name}\" and its grid will be permanently removed. This cannot be undone. Orders placed through it stay, and so do their buyers' order pages.",
     "deleteToast": "\"{name}\" was deleted."
   },
   "card": {
     "editAriaLabel": "Edit {name}",
-    "embedAriaLabel": "Embed {name}",
+    "embedAriaLabel": "Share or embed {name}",
+    "viewPageAriaLabel": "Open {name} as buyers see it",
     "deleteAriaLabel": "Delete {name}",
     "blockCount": "{count, plural, one {# block} other {# blocks}}",
     "updatedLabel": " · updated {date}",
@@ -199,28 +200,52 @@
   },
   "embed": {
     "inDevNotice": "The embed widget is in development and not yet rendering on external sites. Configure your settings below so you are ready to paste the snippet the moment it ships.",
-    "title": "Embed this storefront",
-    "description": "Paste this snippet into any site to show \"{name}\" there.",
+    "title": "Share this storefront",
+    "description": "Send people a link to \"{name}\", or paste a snippet into your own site to show it there.",
+    "steps": {
+      "site": "Choose the sites it shows on",
+      "snippet": "Paste the snippet into your site",
+      "privacy": "Add this to your privacy policy"
+    },
+    "required": "Required",
     "enabledLabel": "Embed enabled",
     "domainsLabel": "Allowed domains",
     "domainsPlaceholder": "yoursite.com, blog.yoursite.com",
     "domainsHint": "Up to {max}, comma-separated. Paste a URL and we''ll trim it to the domain.",
     "emptyDomainsWarning": "Add at least one domain. While this is empty the storefront won''t load anywhere, even though embedding is on.",
-    "snippetLabel": "Snippet",
-    "snippetReadyHint": "Paste this snippet into your site''s HTML.",
+    "builderLabel": "Your site builder",
+    "builderOther": "Another site",
+    "builderSteps": {
+      "other": "Paste it into your page''s HTML where the storefront should appear.",
+      "wordpress": "Add a Custom HTML block where the storefront should appear, and paste it in.",
+      "squarespace": "Add a Code block and paste it in. If the storefront only appears after a reload, switch to Iframe only.",
+      "wix": "Add Embed Code, then Embed HTML, and paste it in. Then drag the box as tall as your storefront.",
+      "webflow": "Add a Code Embed element and paste it in. It shows on your published site.",
+      "shopify": "In the theme editor, add a Custom Liquid section and paste it in.",
+      "google": "Choose Insert, then Embed, then Embed code, and paste it in.",
+      "framer": "Add an Embed component, set it to HTML, and paste it in.",
+      "carrd": "Add an Embed element, set its type to Code, and paste it in."
+    },
+    "snippetKinds": {
+      "label": "Snippet type",
+      "script": "Script",
+      "iframe": "Iframe only"
+    },
+    "snippetReadyHint": "Paste it once. It sizes itself to your storefront and keeps up with what you change here.",
+    "iframeHint": "For a site that removes scripts. It is {height} pixels tall and scrolls inside. Copy it again after you change your domains.",
     "snippetLockedHint": "Enable embedding and add at least one domain to unlock the Copy button.",
     "snippetSaveHint": "Save your settings to unlock the Copy button.",
     "pagesOffHint": "Turn on product pages in the designer first. A click on a product opens its page.",
     "notShowingLabel": "If the storefront does not show",
-    "notShowingTip": "The address of your site must be in Allowed domains, and the site must use https. Site builders that put custom HTML in a frame of their own (Wix, Google Sites) are not supported yet.",
+    "notShowingTip": "Your site''s address must be in Allowed domains, and the site must use https. Pasted code shows on your published site, not in a builder''s editor. To see it on a preview address (such as yoursite.webflow.io), add that address too.",
     "copySnippet": {
       "copy": "Copy embed snippet",
       "copied": "Copied embed snippet",
       "failed": "Couldn't copy embed snippet. Select and copy it manually.",
       "cannotCopyYet": "embed snippet cannot be copied yet"
     },
-    "privacyLabel": "For your privacy policy",
-    "privacyHint": "Your site now loads the storefront from Squareshare, so its privacy policy should say so. You can paste this text:",
+    "privacyHint": "Your site now loads this storefront from Squareshare, so its privacy policy has to say so. Paste this into it:",
+    "privacyTextLabel": "Privacy text",
     "privacyText": "This site shows a storefront provided by Squareshare. When it loads, the visitor's IP address and browser details are sent to Squareshare to display the products and to count visits. Squareshare sets no cookies and stores nothing on the visitor's device for this. Details: {policy}",
     "copyPrivacy": {
       "copy": "Copy privacy text",
@@ -606,7 +631,8 @@
   "chipScale": {
     "label": "On bigger cards",
     "tile": "Grow",
-    "cell": "Stay the same"
+    "cell": "Stay the same",
+    "everyCard": "Applies to every card on this storefront."
   },
   "layout": {
     "canvasWidth": "Canvas width",
@@ -737,8 +763,8 @@
       "showPage": {
         "label": "Show a product page",
         "infoLabel": "What this switch does",
-        "infoOn": "Tapping a product tile opens its page.",
-        "infoOff": "Product tiles have no page to open."
+        "infoOn": "Tapping a product tile opens its page, and the storefront has a page of its own to share.",
+        "infoOff": "Product tiles have no page to open, and the storefront's own link stops working too."
       },
       "pageColor": "Page color",
       "storefrontBackground": "Storefront background",
@@ -1103,7 +1129,7 @@
     "imageUnavailable": "Image unavailable"
   },
   "spotDrag": {
-    "tokenLabel": "{token, select, title {Title} other {Price}} {drop, select, below {in the title bar} top_left {at top left} top_center {at top center} top_right {at top right} middle_center {at middle} bottom_left {at bottom left} bottom_center {at bottom center} bottom_right {at bottom right} other {}}. Press to open its settings, or drag (or use the arrow keys) to move it."
+    "tokenLabel": "{token, select, title {Title} sale {Sale chip} other {Price}} {drop, select, below {in the title bar} top_left {at top left} top_center {at top center} top_right {at top right} middle_center {at middle} bottom_left {at bottom left} bottom_center {at bottom center} bottom_right {at bottom right} other {}}. Press to open its settings, or drag (or use the arrow keys) to move it."
   },
   "autoFit": {},
   "designer": {
@@ -1112,6 +1138,7 @@
       "nameLabel": "Storefront name",
       "namePlaceholder": "Untitled storefront",
       "unsaved": "Unsaved changes",
+      "viewPage": "View page",
       "search": "Search"
     },
     "mobileNotice": {
@@ -1154,6 +1181,12 @@
       "description": "You have unsaved changes to this storefront. Save them before leaving, or discard them.",
       "save": "Save changes",
       "discard": "Discard changes",
+      "keepEditing": "Keep editing"
+    },
+    "conflict": {
+      "title": "Someone else saved this storefront",
+      "description": "It changed since you opened it, in another tab or by someone on your team. Saving now replaces their version with yours.",
+      "overwrite": "Save mine over it",
       "keepEditing": "Keep editing"
     },
     "defaults": {
@@ -1255,6 +1288,10 @@
       "blockColor": {
         "label": "the block's color",
         "use": "Use the block's color"
+      },
+      "auto": {
+        "label": "Auto",
+        "use": "Use Auto"
       }
     },
     "presets": {

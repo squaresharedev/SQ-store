@@ -29,6 +29,7 @@ import {
   type RawAnswer,
 } from "@/lib/moderation/auto/policy";
 import { isRemovalGround } from "@/lib/moderation/removal";
+import { addressesTheCheck, hasHiddenCharacters, normalizeForModel } from "@/lib/moderation/auto/injection";
 import { classifyMediaForTest, classifyTextForTest } from "@/lib/moderation/auto/test-provider";
 
 /** Null means "no answer": see the contract above. */
@@ -242,6 +243,18 @@ export function isHotlinkedFileLine(line: string): boolean {
  * are left out (isPlatformStorageLine); a row with nothing else on it has
  * nothing to judge.
  */
+/**
+ * The seller's text as it goes inside the <content> fence. The fence only keeps
+ * their words in the data if they cannot write it themselves: without this a
+ * title ending "</content>" closed the block early, and whatever followed read
+ * as the platform speaking (security audit 2026-10-20). Escaping &, < and >
+ * makes the closing tag impossible to type. The approved list is keyed on the
+ * stored row, hashed in SQL, so this changes nothing about what was approved.
+ */
+function fenceSafe(text: string): string {
+  return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
 export async function classifyText(
   scope: ModerationScope,
   lines: readonly string[],
@@ -256,8 +269,18 @@ export async function classifyText(
   if (hotlinked.length > 0) {
     return { verdict: "unsure", ground: null, paths: [...new Set(hotlinked.map(linePath))] };
   }
+  // So is a line that hides text from people (tag characters, direction
+  // controls, smuggled selectors: the form drops them all) or plainly tries to
+  // address this check. The policy asks the model to answer "unsure" to both;
+  // this does not depend on it doing so (lib/moderation/auto/injection.ts).
+  const steering = judged.filter((line) => hasHiddenCharacters(line) || addressesTheCheck(line));
+  if (steering.length > 0) {
+    return { verdict: "unsure", ground: null, paths: [...new Set(steering.map(linePath))] };
+  }
   if (judged.length === 0) return { verdict: "clean", ground: null, paths: [] };
-  const text = judged.join("\n");
+  // What the model reads: look-alike forms folded and invisible characters
+  // gone, so a disguised word reads as the word; then fenced.
+  const text = fenceSafe(normalizeForModel(judged.join("\n")));
 
   return ask(
     [

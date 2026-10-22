@@ -4,7 +4,9 @@ import { join } from "node:path";
 import {
   EMBED_FRAME_MAX_HEIGHT,
   EMBED_FRAME_PREFIX,
+  EMBED_FRAME_SANDBOX,
   EMBED_FRAME_TITLE_MAX,
+  EMBED_MAX_SITES,
   EMBED_MESSAGE_SOURCE,
 } from "@/lib/storefront/embed-frame";
 import { EMBED_LOADER_PATH } from "@/lib/storefront/embed-snippet";
@@ -45,6 +47,13 @@ function slot(key: string): HTMLElement {
 
 const frames = () => [...document.querySelectorAll("iframe")];
 
+/** Put this page inside others, as a site builder's frames would: the
+ *  origins a browser lists in location.ancestorOrigins, nearest first. jsdom
+ *  has no such list, which is also what an older browser looks like. */
+function under(...origins: string[]) {
+  Object.defineProperty(window.location, "ancestorOrigins", { configurable: true, value: origins });
+}
+
 /** A message as a browser would deliver it from a given window and origin. */
 function post(data: unknown, from: { source: unknown; origin: string }) {
   window.dispatchEvent(new MessageEvent("message", { data, origin: from.origin, source: from.source as Window }));
@@ -61,12 +70,15 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.useRealTimers();
+  delete (window.location as { ancestorOrigins?: unknown }).ancestorOrigins;
 });
 
 describe("the loader repeats the app's own values", () => {
   it("for the frame's address, its one message and its limits", () => {
     expect(SOURCE).toContain(`var FRAME_PREFIX = "${EMBED_FRAME_PREFIX}";`);
     expect(SOURCE).toContain(`var MESSAGE_SOURCE = "${EMBED_MESSAGE_SOURCE}";`);
+    expect(SOURCE).toContain(`var SANDBOX = "${EMBED_FRAME_SANDBOX}";`);
+    expect(SOURCE).toContain(`var MAX_SITES = ${EMBED_MAX_SITES};`);
     expect(SOURCE).toContain(`var MAX_HEIGHT = ${EMBED_FRAME_MAX_HEIGHT};`);
     expect(SOURCE).toContain(`var TITLE_MAX = ${EMBED_FRAME_TITLE_MAX};`);
   });
@@ -92,11 +104,13 @@ describe("the frame it makes", () => {
     load();
     const [frame] = frames();
     const sandbox = (frame.getAttribute("sandbox") ?? "").split(" ").sort();
+    // allow-forms is for the product page that tab opens, inside a builder's
+    // own sandbox (see EMBED_FRAME_SANDBOX); the frame has no form.
     expect(sandbox).toEqual(
-      ["allow-popups", "allow-popups-to-escape-sandbox", "allow-same-origin", "allow-scripts"].sort(),
+      ["allow-forms", "allow-popups", "allow-popups-to-escape-sandbox", "allow-same-origin", "allow-scripts"].sort(),
     );
     // Not these, by name: each is a way for a frame to act on the page around it.
-    for (const never of ["allow-top-navigation", "allow-forms", "allow-modals", "allow-downloads"]) {
+    for (const never of ["allow-top-navigation", "allow-modals", "allow-downloads", "allow-pointer-lock"]) {
       expect(frame.getAttribute("sandbox"), never).not.toContain(never);
     }
     expect(frame.getAttribute("referrerpolicy")).toBe("no-referrer");
@@ -130,6 +144,79 @@ describe("the frame it makes", () => {
     slot(KEY);
     load({ tag: false });
     expect(frames()).toHaveLength(0);
+  });
+});
+
+describe("the sites it names", () => {
+  const src = () => frames()[0]?.src;
+  const here = () => window.location.host;
+
+  it("this page and every page above it, nearest first: a builder's frame, then the site", () => {
+    under("https://www.shop.example");
+    slot(KEY);
+    load();
+    expect(src()).toBe(`${ORIGIN}${EMBED_FRAME_PREFIX}${KEY}/${here()}/www.shop.example`);
+  });
+
+  it("each one once, and never one with no host (a sandboxed or blank page)", () => {
+    under(`http://${here()}`, "null", "https://www.shop.example", "https://www.shop.example");
+    slot(KEY);
+    load();
+    expect(src()).toBe(`${ORIGIN}${EMBED_FRAME_PREFIX}${KEY}/${here()}/www.shop.example`);
+  });
+
+  it("not where the visitor came from, on a page that is not in a frame", () => {
+    Object.defineProperty(document, "referrer", { configurable: true, value: "https://www.search.example/?q=lamps" });
+    slot(KEY);
+    load();
+    expect(src()).toBe(`${ORIGIN}${EMBED_FRAME_PREFIX}${KEY}/${here()}`);
+    delete (document as { referrer?: string }).referrer;
+  });
+
+  it("makes no frame under a plain-http page, and says so", () => {
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
+    under("http://shop.example");
+    slot(KEY);
+    load();
+    expect(frames()).toHaveLength(0);
+    expect(info).toHaveBeenCalledTimes(1);
+    info.mockRestore();
+  });
+
+  it("but does under https pages, and under a site on its owner's machine", () => {
+    under("https://shop.example", "http://shop.localhost:3100");
+    slot(KEY);
+    load();
+    expect(frames()).toHaveLength(1);
+  });
+
+  it("makes no frame at all under more pages than any builder nests, and says so", () => {
+    vi.useFakeTimers();
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
+    under(...Array.from({ length: EMBED_MAX_SITES }, (_, n) => `https://level${n}.example`));
+    slot(KEY);
+    load();
+    expect(frames()).toHaveLength(0);
+    expect(info).toHaveBeenCalledTimes(1);
+    info.mockRestore();
+  });
+});
+
+describe("a slot that arrives after the loader has run", () => {
+  it("gets its frame too: a site builder or app draws its page after load", async () => {
+    load();
+    expect(frames()).toHaveLength(0);
+    slot(KEY);
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    expect(frames()).toHaveLength(1);
+  });
+
+  it("is not framed twice when the page keeps changing around it", async () => {
+    slot(KEY);
+    load();
+    for (let i = 0; i < 5; i++) document.body.appendChild(document.createElement("p"));
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    expect(frames()).toHaveLength(1);
   });
 });
 

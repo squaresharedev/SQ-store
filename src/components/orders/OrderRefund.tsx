@@ -18,7 +18,7 @@ import { formatCents } from "@/lib/format/money";
 import type { ActionError } from "@/lib/errors";
 import type { Locale } from "@/i18n/locales";
 import { REFUND_REASONS, type OrderView, type RefundReason } from "@/types/order-view";
-import { useCanRefundOrders } from "./OrderRefundProvider";
+import { useCanRefundOrders, useRefundStoreName } from "./OrderRefundProvider";
 
 /**
  * TAKING AN ORDER BACK: the seller's second write on an order, after shipping.
@@ -53,6 +53,7 @@ export function OrderRefund({
   const locale = useLocale() as Locale;
   const toast = useToast();
   const canRefund = useCanRefundOrders();
+  const storeName = useRefundStoreName();
   const reasonId = useId();
   const restockId = useId();
   const openerRef = useRef<HTMLButtonElement>(null);
@@ -90,7 +91,13 @@ export function OrderRefund({
     );
   }
   if (order.status !== "paid") return null;
-  if (!canRefund) return <p className={helpTextClass}>{t("ownerOnly")}</p>;
+  if (!canRefund) {
+    return (
+      <p className={helpTextClass}>
+        {storeName ? t("ownerOnlyNamed", { store: storeName }) : t("ownerOnly")}
+      </p>
+    );
+  }
 
   const amount = formatCents(order.amountCents, order.currency, locale);
   const reasonOptions: SelectOption<RefundReason>[] = REFUND_REASONS.map((value) => ({

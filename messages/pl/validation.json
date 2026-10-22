@@ -306,6 +306,11 @@
       "required": "Podaj nazwę kanału lub zostaw puste.",
       "tooLong": "Nazwa kanału może mieć maksymalnie {maximum} znaków.",
       "unsupported": "Nazwa kanału zawiera nieobsługiwane znaki."
+    },
+    "badgeLabel": {
+      "required": "Odznaka musi mieć jakiś tekst.",
+      "tooLong": "Odznaka może mieć co najwyżej {maximum} znaków.",
+      "unsupported": "Odznaka zawiera nieobsługiwane znaki."
     }
   },
   "email": {
@@ -485,7 +490,10 @@
     "documentsTooMany": "Produkt może mieć maksymalnie {maximum} dokumentów.",
     "optionDuplicate": "Każda opcja może wystąpić tylko raz.",
     "optionsTotalTooMany": "Produkt może mieć maksymalnie {maximum} opcji łącznie.",
-    "galleryStaleOption": "Zdjęcie wskazuje na opcję, która już nie istnieje."
+    "galleryStaleOption": "Zdjęcie wskazuje na opcję, która już nie istnieje.",
+    "badgesTooMany": "Produkt może mieć co najwyżej {maximum} odznak.",
+    "badgeDuplicate": "Każda odznaka może być użyta tylko raz.",
+    "badgesOnPhotoTooMany": "Produkt może wyświetlić do {maximum} odznak na zdjęciu."
   },
   "productImport": {
     "noTitle": "Brak nazwy.",

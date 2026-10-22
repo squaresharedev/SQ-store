@@ -238,7 +238,7 @@ export function TaxSection({
         </p>
       </div>
       {/* The ids on each field wrapper are universal search's landing points
-          (/settings/tax#vat and friends); scroll-mt clears the sticky top bar
+          (/settings/business#vat and friends); scroll-mt clears the sticky top bar
           so the anchor doesn't land under it. */}
       <form
         action={formAction}

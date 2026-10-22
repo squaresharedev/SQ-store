@@ -502,8 +502,9 @@ export const DEFAULT_SALE_BADGE_POSITION: TileSpot = "top-left";
  *   - `pill`: a rounded capsule;
  *   - `sticker`: a round sticker, put on at a tilt;
  *   - `flag`: a pennant hanging from the photo's edge, notched at its tail;
- *   - `ribbon`: a sash across the photo's corner. It needs a corner, so on a
- *     middle spot (or a tile too round to have corners) it hangs as a flag.
+ *   - `ribbon`: a sash across the photo's corner; on a middle spot (or a tile
+ *     too round to have corners) a ribbon banner, the band in front and its
+ *     swallowtail ends folded behind it.
  * Every look takes the price tag's typeface and size, so the two on a tile
  * stay a pair; the fill and the spot are the chip's own.
  */
@@ -1399,9 +1400,11 @@ export type StorefrontTheme = {
   saleBadge?: SaleBadge;
   saleBadgeLook?: SaleBadgeLook;
   saleBadgePosition?: TileSpot;
-  /** Chip fill, strict #rrggbb. Absent follows the theme accent. Its text is
-   *  always whichever ink reads on the fill. */
+  /** Chip fill, strict #rrggbb. Absent follows the theme accent. */
   saleBadgeColor?: string;
+  /** Chip words, strict #rrggbb. Absent is whichever ink reads on the fill;
+   *  a pick that would vanish into it is replaced the same way (legibleInkOn). */
+  saleBadgeTextColor?: string;
   showTitle: boolean;
   /** How big chips are on bigger tiles (CHIP_SCALES). Absent is
    *  DEFAULT_CHIP_SCALE. Theme-only, so not part of CardStyle. */
@@ -1467,6 +1470,8 @@ export type CardStyle = {
   /** Stays OPTIONAL after resolution, like the price tag's colors: "follow
    *  the accent" is a state the picker's inherit dot has to be able to show. */
   saleBadgeColor?: string;
+  /** Optional for the same reason: "whichever ink reads" is a state too. */
+  saleBadgeTextColor?: string;
 };
 
 /** Per-block card styling: an absent field means "follow the theme", so a
@@ -1512,6 +1517,7 @@ export function resolveCardStyle(
     saleBadgePosition:
       overrides?.saleBadgePosition ?? theme.saleBadgePosition ?? DEFAULT_SALE_BADGE_POSITION,
     saleBadgeColor: overrides?.saleBadgeColor ?? theme.saleBadgeColor,
+    saleBadgeTextColor: overrides?.saleBadgeTextColor ?? theme.saleBadgeTextColor,
   };
 }
 

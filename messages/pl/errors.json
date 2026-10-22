@@ -496,6 +496,16 @@
     "staleOption": {
       "message": "Zdjęcie wskazuje na opcję, która już nie istnieje.",
       "fix": "Przypisz zdjęcie do innej opcji albo usuń oznaczenie, a potem zapisz ponownie."
+    },
+    "ordersToShip": "{count, plural, one {Jedno zamówienie na ten produkt czeka jeszcze na wysyłkę.} few {{count} zamówienia na ten produkt czekają jeszcze na wysyłkę.} many {{count} zamówień na ten produkt czeka jeszcze na wysyłkę.} other {{count} zamówienia na ten produkt czeka jeszcze na wysyłkę.}}",
+    "ordersToShipFix": "Nic nie zostało usunięte. Spróbuj ponownie, aby najpierw zobaczyć je w ostrzeżeniu.",
+    "badgeRefused": {
+      "message": "Odznaka „{label}” narusza zasady platformy i nie może zostać użyta.",
+      "fix": "Zmień jej tekst lub wybierz inną odznakę. Jeśli uważasz, że to pomyłka, napisz do {email}."
+    },
+    "badgeNotApproved": {
+      "message": "Odznaka „{label}” nie mogła zostać zatwierdzona automatycznie i nie może zostać użyta.",
+      "fix": "Spróbuj innych słów albo napisz do {email}, a zajmie się tym człowiek."
     }
   },
   "productImport": {
@@ -540,6 +550,10 @@
     "nameRequired": {
       "message": "Witryna wymaga nazwy.",
       "fix": "Wpisz nazwę (od 1 do 80 znaków) w polu na górze edytora, a potem zapisz ponownie."
+    },
+    "savedElsewhere": {
+      "message": "Ta witryna została zapisana gdzie indziej, odkąd ją otworzyłeś.",
+      "fix": "Odśwież stronę, aby zobaczyć tamtą wersję, albo zapisz ponownie, aby ją zastąpić."
     },
     "invalidLayout": {
       "message": "Dane układu witryny są nieprawidłowe.",

@@ -183,12 +183,13 @@
     "loadMoreError": "Não foi possível carregar mais montras. Tente novamente.",
     "loadMore": "Carregar mais ({remaining} restantes)",
     "deleteTitle": "Eliminar montra?",
-    "deleteDesc": "«{name}» e a sua grelha serão removidos permanentemente. Esta ação não pode ser anulada.",
+    "deleteDesc": "«{name}» e a sua grelha serão removidos permanentemente. Esta ação não pode ser anulada. As encomendas feitas através dela mantêm-se, tal como as páginas de encomenda dos compradores.",
     "deleteToast": "«{name}» foi eliminada."
   },
   "card": {
     "editAriaLabel": "Editar {name}",
-    "embedAriaLabel": "Incorporar {name}",
+    "embedAriaLabel": "Partilhar ou incorporar {name}",
+    "viewPageAriaLabel": "Abrir {name} como os compradores a veem",
     "deleteAriaLabel": "Eliminar {name}",
     "blockCount": "{count, plural, one {# bloco} many {# de blocos} other {# blocos}}",
     "updatedLabel": " · atualizado em {date}",
@@ -199,28 +200,52 @@
   },
   "embed": {
     "inDevNotice": "O widget de incorporação está em desenvolvimento e ainda não é apresentado em sites externos. Configure as definições abaixo para estar pronto a colar o código assim que for lançado.",
-    "title": "Incorporar esta montra",
-    "description": "Cole este código em qualquer site para mostrar «{name}» lá.",
+    "title": "Partilhar esta montra",
+    "description": "Envie um link para «{name}» ou cole um código no seu próprio site para a mostrar lá.",
+    "steps": {
+      "site": "Escolha os sites onde aparece",
+      "snippet": "Cole o código no seu site",
+      "privacy": "Acrescente isto à sua política de privacidade"
+    },
+    "required": "Obrigatório",
     "enabledLabel": "Incorporação ativada",
     "domainsLabel": "Domínios permitidos",
     "domainsPlaceholder": "oseusite.com, blog.oseusite.com",
     "domainsHint": "Até {max}, separados por vírgulas. Cole um URL e nós reduzimo-lo ao domínio.",
     "emptyDomainsWarning": "Adicione pelo menos um domínio. Enquanto isto estiver vazio, a montra não carrega em lado nenhum, mesmo com a incorporação ativada.",
-    "snippetLabel": "Código",
-    "snippetReadyHint": "Cole este código no HTML do seu site.",
+    "builderLabel": "O seu construtor de sites",
+    "builderOther": "Outro site",
+    "builderSteps": {
+      "other": "Cole-o no HTML da sua página, onde a montra deve aparecer.",
+      "wordpress": "Adicione um bloco «HTML personalizado» onde a montra deve aparecer e cole lá o código.",
+      "squarespace": "Adicione um bloco «Code» e cole lá o código. Se a montra só aparecer depois de recarregar, mude para «Só iframe».",
+      "wix": "Adicione «Embed Code» e depois «Embed HTML», e cole o código. Depois estique a caixa até à altura da montra.",
+      "webflow": "Adicione um elemento «Code Embed» e cole lá o código. Aparece no site publicado.",
+      "shopify": "No editor de temas, adicione uma secção «Custom Liquid» e cole lá o código.",
+      "google": "Escolha «Insert», depois «Embed», depois «Embed code», e cole o código.",
+      "framer": "Adicione um componente «Embed», defina-o como HTML e cole o código.",
+      "carrd": "Adicione um elemento «Embed», escolha o tipo «Code» e cole o código."
+    },
+    "snippetKinds": {
+      "label": "Tipo de código",
+      "script": "Script",
+      "iframe": "Só iframe"
+    },
+    "snippetReadyHint": "Basta colá-lo uma vez. Ajusta-se à montra e acompanha o que alterar aqui.",
+    "iframeHint": "Para sites que removem scripts. Tem {height} píxeis de altura e desloca-se por dentro. Copie-o de novo depois de alterar os seus domínios.",
     "snippetLockedHint": "Ative a incorporação e adicione pelo menos um domínio para desbloquear o botão Copiar.",
     "snippetSaveHint": "Guarde as definições para desbloquear o botão Copiar.",
     "pagesOffHint": "Ative primeiro as páginas de produto no editor. Um clique num produto abre a respetiva página.",
     "notShowingLabel": "Se a montra não aparecer",
-    "notShowingTip": "O endereço do seu site tem de estar em Domínios permitidos e o site tem de usar https. Os construtores de sites que colocam o HTML personalizado numa moldura própria (Wix, Google Sites) ainda não são suportados.",
+    "notShowingTip": "O endereço do seu site tem de estar em Domínios permitidos e o site tem de usar https. O código colado aparece no site publicado, não no editor do construtor de sites. Para o ver num endereço de pré-visualização (como oseusite.webflow.io), adicione também esse endereço.",
     "copySnippet": {
       "copy": "Copiar código de incorporação",
       "copied": "Código de incorporação copiado",
       "failed": "Não foi possível copiar o código de incorporação. Selecione-o e copie-o manualmente.",
       "cannotCopyYet": "o código de incorporação ainda não pode ser copiado"
     },
-    "privacyLabel": "Para a sua política de privacidade",
-    "privacyHint": "O seu site passa a carregar a montra a partir da Squareshare, pelo que a política de privacidade deve indicá-lo. Pode colar este texto:",
+    "privacyHint": "O seu site passa a carregar esta montra a partir da Squareshare, pelo que a política de privacidade tem de o indicar. Cole nela este texto:",
+    "privacyTextLabel": "Texto de privacidade",
     "privacyText": "Este site apresenta uma montra fornecida pela Squareshare. Ao carregar, o endereço IP e os dados do navegador do visitante são enviados à Squareshare para apresentar os produtos e contar as visitas. Para este efeito, a Squareshare não define cookies nem guarda nada no dispositivo do visitante. Mais informações: {policy}",
     "copyPrivacy": {
       "copy": "Copiar texto de privacidade",
@@ -606,7 +631,8 @@
   "chipScale": {
     "label": "Em cartões maiores",
     "tile": "Aumentar",
-    "cell": "Mesmo tamanho"
+    "cell": "Mesmo tamanho",
+    "everyCard": "Aplica-se a todos os cartões desta loja."
   },
   "layout": {
     "canvasWidth": "Largura da tela",
@@ -737,8 +763,8 @@
       "showPage": {
         "label": "Mostrar uma página de produto",
         "infoLabel": "O que este interruptor faz",
-        "infoOn": "Tocar num cartão de produto abre a sua página.",
-        "infoOff": "Os cartões de produto não têm página para abrir."
+        "infoOn": "Tocar num cartão de produto abre a sua página, e a montra tem uma página própria para partilhar.",
+        "infoOff": "Os cartões de produto não têm página para abrir, e o link da própria montra também deixa de funcionar."
       },
       "pageColor": "Cor da página",
       "storefrontBackground": "Fundo da montra",
@@ -1103,7 +1129,7 @@
     "imageUnavailable": "Imagem indisponível"
   },
   "spotDrag": {
-    "tokenLabel": "{token, select, title {Título} other {Preço}} {drop, select, below {na barra de título} top_left {no canto superior esquerdo} top_center {no topo ao centro} top_right {no canto superior direito} middle_center {ao centro} bottom_left {no canto inferior esquerdo} bottom_center {na base ao centro} bottom_right {no canto inferior direito} other {}}. Prima para abrir as suas definições, ou arraste (ou utilize as teclas de seta) para o mover."
+    "tokenLabel": "{token, select, title {Título} sale {Etiqueta de promoção} other {Preço}} {drop, select, below {na barra de título} top_left {no canto superior esquerdo} top_center {no topo ao centro} top_right {no canto superior direito} middle_center {ao centro} bottom_left {no canto inferior esquerdo} bottom_center {na base ao centro} bottom_right {no canto inferior direito} other {}}. Prima para abrir as suas definições, ou arraste (ou utilize as teclas de seta) para o mover."
   },
   "autoFit": {},
   "designer": {
@@ -1112,6 +1138,7 @@
       "nameLabel": "Nome da montra",
       "namePlaceholder": "Montra sem título",
       "unsaved": "Alterações não guardadas",
+      "viewPage": "Ver página",
       "search": "Pesquisar"
     },
     "mobileNotice": {
@@ -1154,6 +1181,12 @@
       "description": "Tem alterações não guardadas nesta montra. Guarde-as antes de sair, ou descarte-as.",
       "save": "Guardar alterações",
       "discard": "Descartar alterações",
+      "keepEditing": "Continuar a editar"
+    },
+    "conflict": {
+      "title": "Outra pessoa guardou esta montra",
+      "description": "Mudou desde que a abriu, noutro separador ou por alguém da sua equipa. Guardar agora substitui a versão dessa pessoa pela sua.",
+      "overwrite": "Guardar a minha por cima",
       "keepEditing": "Continuar a editar"
     },
     "defaults": {
@@ -1255,6 +1288,10 @@
       "blockColor": {
         "label": "a cor do bloco",
         "use": "Utilizar a cor do bloco"
+      },
+      "auto": {
+        "label": "Automática",
+        "use": "Utilizar a cor automática"
       }
     },
     "presets": {

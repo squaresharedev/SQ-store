@@ -1,54 +1,65 @@
-import { useState } from "react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
-import { Copy, ExternalLink, Image as ImageIcon, MoreVertical, MousePointerClick, Pencil, Trash2, TrendingUp } from "lucide-react";
+import { ArrowRight, Image as ImageIcon, Pencil, TrendingUp } from "lucide-react";
 import type { Product, ProductSales } from "@/types/product";
 import { cn } from "@/lib/utils";
 import { productEditPath } from "@/lib/products/paths";
+import { ordersViewPath } from "@/lib/orders/paths";
+import { focusRingClass, iconButtonClass, iconNudgeRightClass, photoControlClass } from "@/components/ui/control-styles";
 import {
-  hoverLiftClass,
-  iconButtonClass,
-  infoTextClass,
-  overlayItemClass,
-} from "@/components/ui/control-styles";
-import { Popover } from "@/components/ui/Popover";
+  attentionCountClass,
+  onPhotoMutedTextClass,
+  onPhotoTextClass,
+  posterCardClass,
+  posterMediaClass,
+  posterPhotoClass,
+  posterScrimClass,
+} from "@/components/ui/surface-styles";
 import { formatPrice } from "@/lib/format";
 import { formatCents } from "@/lib/format/money";
-import { StockBadge } from "@/components/ui/StockBadge";
 import { deriveStockBadge } from "@/lib/stock/badge";
-import { StatusBadge } from "./StatusBadge";
+import { ProductCardMenu } from "./ProductCardMenu";
 import { RemovalBadge } from "./RemovalNotice";
+import { StatusBadge, UnplacedBadge } from "./StatusBadge";
 
 // Presentational card (styles.md §8.7). Interactive handlers come from the
-// parent list, which owns product state; edit is a plain route link.
+// parent list, which owns product state.
 //
-// SHARP corners throughout (card + image tile), matching the CTA brand rule in
-// control-styles.ts. Sized to sit four-up on a laptop, so the type scale and
-// padding are one step down from the old three-up card.
+// A POSTER, in two zones on one 12px inset. TOP: why buyers can't see it (one
+// chip, only when that is true) on the left, every control (Ship, the menu) on
+// the right. BOTTOM: the facts as one left-aligned column on a dark fade:
+// bestseller, name, price, sales, stock. Nothing hangs off the right edge to
+// line up against. The whole card opens the editor (the title is the link,
+// stretched over it); everything else sits above that link.
 export function ProductCard({
   product,
   canWrite,
   sales,
   isBestseller,
   storefrontCount,
+  toShip = 0,
   onDelete,
   onCopyLink,
   onOpenPage,
   onBuyButton,
 }: {
   product: Product;
-  /** Hide edit/delete controls when the active role is read-only. */
+  /** Read-only members get no editor link and no delete: the card is inert. */
   canWrite: boolean;
   /** Paid-order rollup; undefined when this product has never sold. */
   sales?: ProductSales;
-  /** Highest-revenue product in the list — earns the bestseller tag. */
+  /** Highest-revenue product in the list: earns the bestseller line. */
   isBestseller: boolean;
   /**
    * Number of storefronts this product is placed on, from `getProductPlacements`.
    * Drives the copy-link and open affordances: 0 = not placed anywhere, 1 = act
-   * directly, 2+ = show a chooser. Shown as a hint on the button when 0.
+   * directly, 2+ = show a chooser. At 0 an active product also says so on its photo.
    */
   storefrontCount: number;
+  /** Orders of this product still to ship. Above zero, the card carries a Ship
+   *  link to the queue narrowed to this product: it is the one number on the
+   *  card someone is waiting on. */
+  toShip?: number;
   onDelete: () => void;
   /** Called when the seller asks to copy the product's hosted page link. */
   onCopyLink: () => void;
@@ -59,211 +70,137 @@ export function ProductCard({
 }) {
   const { id, title, price, currency, status, imageUrl, trackStock, stockQuantity, lowStockThreshold, removal } = product;
   const stockBadge = deriveStockBadge({ trackStock, stockQuantity, lowStockThreshold });
-  const [menuOpen, setMenuOpen] = useState(false);
   const t = useTranslations("Products.card");
   const tStock = useTranslations("Common.stock");
-  const tCommon = useTranslations("Common.actions");
+  const tOrders = useTranslations("Orders");
   const locale = useLocale();
 
-  // Footer stock: the count in plain prose, colour-coded by urgency. Only
-  // shown when the seller is tracking stock on this product. Untracked
-  // products show nothing (unlimited is the quiet default).
-  const stockFooter =
-    trackStock && stockQuantity !== null ? (
-      stockQuantity <= 0 ? (
-        <span className="font-inter text-xs font-medium text-destructive tabular-nums">
-          {tStock("soldOut")}
-        </span>
-      ) : stockQuantity <= lowStockThreshold ? (
-        <span className="font-inter text-xs font-medium text-foreground tabular-nums">
-          {t("inStock", { count: stockQuantity })}
-        </span>
-      ) : (
-        <span className={cn(infoTextClass, "tabular-nums")}>
-          {t("inStock", { count: stockQuantity })}
-        </span>
-      )
-    ) : null;
+  // Stock, as the line under the sales: plenty is quiet, few is white, none is
+  // white with a red dot (red type on a photo does not read). Unlimited is
+  // stated, not left blank, so every card carries the same four lines.
+  const stockLine =
+    stockBadge === null ? (
+      <span className={onPhotoMutedTextClass}>{t("unlimited")}</span>
+    ) : stockBadge.state === "sold_out" ? (
+      <span className={cn(onPhotoTextClass, "inline-flex items-center gap-1.5 font-medium")}>
+        <span className="size-1.5 shrink-0 rounded-full bg-destructive" aria-hidden="true" />
+        {tStock("soldOut")}
+      </span>
+    ) : stockBadge.state === "low_stock" ? (
+      <span className={cn(onPhotoTextClass, "font-medium tabular-nums")}>
+        {tStock("lowStock", { remaining: stockBadge.remaining })}
+      </span>
+    ) : (
+      <span className={cn(onPhotoMutedTextClass, "tabular-nums")}>{t("inStock", { count: stockQuantity ?? 0 })}</span>
+    );
 
-  // Link button hint: when the product is not on any storefront, the seller
-  // needs a nudge rather than a silent no-op from the copy/open buttons.
-  const linkTitle =
-    storefrontCount === 0
-      ? t("notPlaced")
-      : storefrontCount === 1
-        ? t("copyLinkTitle")
-        : t("chooseStorefront", { count: storefrontCount });
+  const titleNode = canWrite ? (
+    <Link
+      href={productEditPath(id)}
+      data-card-link=""
+      className="outline-none after:absolute after:inset-0 after:content-['']"
+    >
+      {title}
+    </Link>
+  ) : (
+    title
+  );
 
   return (
-    <div
-      className={cn(
-        "flex flex-col rounded-none border border-border bg-card p-3 shadow-sm",
-        hoverLiftClass,
-      )}
-    >
-      <div className="relative aspect-[4/3] overflow-hidden rounded-none bg-muted">
+    <div data-product-card={id} className={posterCardClass}>
+      <div className={posterMediaClass}>
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
-          <img
-            src={imageUrl}
-            alt=""
-            className="size-full object-cover"
-          />
+          <img src={imageUrl} alt="" draggable={false} className={posterPhotoClass} />
         ) : (
-          <div className="flex size-full items-center justify-center">
-            <ImageIcon
-              className="size-7 text-muted-foreground"
-              strokeWidth={1.5}
-              aria-hidden="true"
-            />
+          <div className="flex size-full items-center justify-center bg-muted">
+            <ImageIcon className="size-7 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
           </div>
         )}
-        {/* Removed outranks Draft in the one badge slot: a seller looking at a
-            removed product does not also need to be told it is a draft, and
-            the two stacked would compete for the same corner. */}
-        {removal ? (
-          <RemovalBadge kind={removal.kind} className="absolute left-2 top-2" />
-        ) : (
-          <StatusBadge status={status} className="absolute left-2 top-2" />
-        )}
-        {isBestseller && (
-          // Inverted chip so it reads as an accolade against the image without
-          // introducing a hue — chrome stays greyscale (styles.md §1).
-          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-none bg-primary px-1.5 py-0.5 text-xs font-medium text-primary-foreground">
-            <TrendingUp className="size-3" strokeWidth={2} aria-hidden="true" />
-            {t("bestseller")}
-          </span>
-        )}
+        <div className={posterScrimClass} aria-hidden="true" />
       </div>
 
-      <div className="mt-2.5 flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <h3 className="truncate text-sm font-semibold text-foreground">
-            {title}
-          </h3>
-          <p className="mt-0.5 font-inter text-xs text-muted-foreground">
-            {formatPrice(price, currency, locale)}
-          </p>
-          {stockBadge !== null && (
-            <div className="mt-1.5">
-              <StockBadge badge={stockBadge} />
-            </div>
-          )}
+      <div className="absolute inset-x-3 top-3 flex items-center justify-between gap-2">
+        {/* One chip, the most serious reason first: a takedown outranks a draft
+            (fixing the draft would not make it visible), and a draft outranks
+            being on no storefront (it has no page either way). */}
+        <div className="flex min-w-0 items-center">
+          {removal ? (
+            <RemovalBadge kind={removal.kind} />
+          ) : status === "draft" ? (
+            <StatusBadge status={status} />
+          ) : storefrontCount === 0 ? (
+            <UnplacedBadge />
+          ) : null}
         </div>
-
-        {/* Edit is write-only and hidden for read-only members. Copy-link, open,
-            and delete all live behind the menu button next to it — copy/open
-            stay available regardless of role (viewing the product page is not
-            a write operation); delete only appears there for writers. */}
         <div className="flex shrink-0 items-center gap-1">
+          {toShip > 0 && (
+            <Link
+              href={ordersViewPath("to-ship", id)}
+              data-card-to-ship={toShip}
+              aria-label={tOrders("toShipCount", { count: toShip })}
+              className={cn(
+                "group/btn relative z-10 inline-flex shrink-0 items-center gap-1.5 px-2 font-inter text-xs font-medium",
+                photoControlClass,
+                focusRingClass,
+              )}
+            >
+              {t("ship")}
+              <span className={attentionCountClass}>{toShip}</span>
+              <ArrowRight className={cn("size-3.5 shrink-0", iconNudgeRightClass)} strokeWidth={2} aria-hidden="true" />
+            </Link>
+          )}
+          {/* The editor, as a button of its own as well as the whole card: the
+              one control a seller looks for. Writers only. */}
           {canWrite && (
             <Link
               href={productEditPath(id)}
               aria-label={t("edit", { title })}
-              className={cn(iconButtonClass, "size-8")}
+              className={cn(iconButtonClass, photoControlClass, "relative z-10 size-7")}
             >
               <Pencil className="size-3.5" strokeWidth={2} aria-hidden="true" />
             </Link>
           )}
-          <Popover
-            open={menuOpen}
-            onOpenChange={setMenuOpen}
-            variant="anchored"
-            placement="above"
-            label={t("actions", { title })}
-            rootClassName="w-auto shrink-0"
-            panelClassName="w-56 p-1"
-            trigger={
-              <button
-                type="button"
-                aria-label={t("moreActions", { title })}
-                aria-haspopup="dialog"
-                aria-expanded={menuOpen}
-                onClick={() => setMenuOpen((open) => !open)}
-                className={cn(iconButtonClass, "size-8")}
-              >
-                <MoreVertical className="size-3.5" strokeWidth={2} aria-hidden="true" />
-              </button>
-            }
-          >
-            <div className="py-1">
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onCopyLink();
-                }}
-                title={linkTitle}
-                className={cn(overlayItemClass, storefrontCount === 0 && "opacity-40")}
-              >
-                <Copy className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                {t("copyLink")}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onOpenPage();
-                }}
-                title={storefrontCount === 0 ? t("notPlaced") : t("openPage")}
-                className={cn(overlayItemClass, storefrontCount === 0 && "opacity-40")}
-              >
-                <ExternalLink className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                {t("openPage")}
-              </button>
-              {/* Every role: the dialog only hands out a link. It explains
-                  for itself when there is nothing to link to yet. */}
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onBuyButton();
-                }}
-                className={overlayItemClass}
-              >
-                <MousePointerClick className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                {t("addToWebsite")}
-              </button>
-              {canWrite && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onDelete();
-                  }}
-                  className={cn(overlayItemClass, "hover:text-destructive")}
-                >
-                  <Trash2 className="size-4 shrink-0" aria-hidden="true" />
-                  {tCommon("delete")}
-                </button>
-              )}
-            </div>
-          </Popover>
+          <ProductCardMenu
+            title={title}
+            canWrite={canWrite}
+            storefrontCount={storefrontCount}
+            onCopyLink={onCopyLink}
+            onOpenPage={onOpenPage}
+            onBuyButton={onBuyButton}
+            onDelete={onDelete}
+          />
         </div>
       </div>
 
-      {/* Sales metrics. Zero-sale products keep the row (a quiet dash) so every
-          card in the grid stays the same height. Stock count replaces the dash
-          when the seller is tracking stock but has not made a sale yet, so the
-          two most useful pieces of status are always in the footer. When a sale
-          has been made the count moves to a second line to avoid crowding the
-          revenue. */}
-      <div className="mt-2.5 flex items-baseline justify-between gap-2 border-t border-border pt-2">
-        <span className={infoTextClass}>
-          {sales ? t("unitsSold", { count: sales.unitsSold }) : t("noSales")}
-        </span>
-        <span className="font-inter text-xs font-semibold text-foreground tabular-nums">
-          {sales ? formatCents(sales.revenueCents, sales.currency, locale) : (stockFooter ?? "—")}
-        </span>
-      </div>
-      {/* When the seller has both sales and stock tracking, show the count on
-          its own line so revenue stays visible and the stock level is still
-          findable at a glance. */}
-      {sales && stockFooter && (
-        <div className="flex items-baseline justify-end pt-0.5">
-          {stockFooter}
+      <div className="flex flex-col p-3">
+        {isBestseller && (
+          // A fact about the product, so it heads the facts rather than
+          // taking a chip: the top row stays one chip and the controls.
+          <span className={cn("mb-1 inline-flex items-center gap-1 font-inter text-xs font-medium", onPhotoTextClass)}>
+            <TrendingUp className="size-3.5 shrink-0" strokeWidth={2} aria-hidden="true" />
+            {t("bestseller")}
+          </span>
+        )}
+        <h3 className={cn("line-clamp-2 text-sm font-semibold leading-snug", onPhotoTextClass)}>{titleNode}</h3>
+        <p className={cn("text-lg font-semibold leading-tight tabular-nums", onPhotoTextClass)}>
+          {formatPrice(price, currency, locale)}
+        </p>
+        <div className="mt-1.5 flex flex-col gap-0.5 font-inter text-xs leading-4">
+          <span className={cn("truncate tabular-nums", onPhotoMutedTextClass)}>
+            {sales ? (
+              <>
+                <span>{t("unitsSold", { count: sales.unitsSold })}</span>
+                {" · "}
+                <span>{formatCents(sales.revenueCents, sales.currency, locale)}</span>
+              </>
+            ) : (
+              t("noSales")
+            )}
+          </span>
+          {stockLine}
         </div>
-      )}
+      </div>
     </div>
   );
 }

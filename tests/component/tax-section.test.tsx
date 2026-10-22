@@ -33,7 +33,7 @@ vi.mock("@/lib/contact-verification/actions", () => ({
 const mockRefresh = vi.hoisted(() => vi.fn());
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: mockRefresh }),
-  usePathname: () => "/settings/tax",
+  usePathname: () => "/settings/business",
   useSearchParams: () => new URLSearchParams(),
 }));
 

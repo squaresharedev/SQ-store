@@ -199,6 +199,7 @@
     "invoicesDescription": "Je kaart, factuuradres, btw-nummer en alle facturen, op de beveiligde pagina van Stripe.",
     "manage": "Facturering en facturen beheren",
     "noBilling": "Facturen en betaalgegevens verschijnen hier zodra je een betaald abonnement hebt.",
+    "noBillingYet": "Facturen en betaalgegevens verschijnen hier zodra de betaalde abonnementen beschikbaar zijn.",
     "confirmed": "Je zit op {plan}. Bedankt voor je steun aan Square Share.",
     "pending": "We bevestigen je betaling bij Stripe. Vernieuw de pagina over een moment als je abonnement nog niet is gewijzigd.",
     "unavailable": "Je abonnement kan nu niet worden getoond. Vernieuw de pagina over een moment.",

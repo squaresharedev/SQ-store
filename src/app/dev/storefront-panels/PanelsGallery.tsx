@@ -14,6 +14,7 @@ import { PlacementSection } from "@/components/storefront/PlacementSection";
 import { SettingTargetProvider } from "@/lib/storefront/setting-context";
 import type { SettingRef } from "@/lib/storefront/setting-ref";
 import { ProductBlockEditor } from "@/components/storefront/ProductBlockEditor";
+import { ProductPageArtboard } from "@/components/storefront/ProductPageArtboard";
 import { ShapeBlockEditor } from "@/components/storefront/ShapeBlockEditor";
 import { TextBlockEditor } from "@/components/storefront/TextBlockEditor";
 import { DEFAULT_PRODUCT_PAGE_CONFIG as PRODUCT_PAGE_DEFAULTS } from "@/types/storefront";
@@ -159,6 +160,10 @@ export function PanelsGallery() {
   // settings are gated on the page being on screen, and both halves of that
   // gate have to be readable side by side to be worth anything.
   const [pageOpen, setPageOpen] = useState(false);
+  // The product page's own settings, live: the design panel edits them and
+  // the artboard below draws them.
+  const [productPage, setProductPage] = useState(PRODUCT_PAGE_DEFAULTS);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const tKey = useTranslations();
 
   // The editor's search index over the SAME fixtures the inspectors below use,
@@ -230,8 +235,8 @@ export function PanelsGallery() {
             onCustomFontUrlChange={() => {}}
             showGrid={showGrid}
             onShowGridChange={setShowGrid}
-            productPage={PRODUCT_PAGE_DEFAULTS}
-            onProductPageChange={() => {}}
+            productPage={productPage}
+            onProductPageChange={setProductPage}
             shippingPolicy={{}}
             sellerIdentity={{}}
             searchEntries={searchEntries}
@@ -265,6 +270,7 @@ export function PanelsGallery() {
               onProductSaved={() => {}}
               pageOpen={pageOpen}
               onDesignPage={() => setPageOpen((open) => !open)}
+              onThemeChange={setTheme}
             />
           </div>
         </Panel>
@@ -334,6 +340,38 @@ export function PanelsGallery() {
             />
           </div>
         </Panel>
+
+        <section className="space-y-2" data-gallery-artboard="">
+          <h2 className="font-inter text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            Product page artboard
+          </h2>
+          <p className={helpTextClass}>
+            Drawn from the design panel&apos;s product page settings above (try Availability under
+            &quot;What the page shows&quot;). The Checkout button in its header opens the checkout beside it in
+            the designer.
+          </p>
+          <div className="max-w-3xl">
+            <ProductPageArtboard
+              product={PRODUCT}
+              soldOut={false}
+              storefrontId="00000000-0000-4000-8000-000000000000"
+              storefrontName={HEADER.name}
+              theme={theme}
+              header={header}
+              productPage={productPage}
+              shippingPolicy={{}}
+              seller={{}}
+              backgroundImageUrl={null}
+              customFontUrl={null}
+              pagePhoto={null}
+              onClose={() => {}}
+              widths={{ desktop: 760, mobile: 390 }}
+              initialDevice="desktop"
+              checkoutOpen={checkoutOpen}
+              onToggleCheckout={() => setCheckoutOpen((open) => !open)}
+            />
+          </div>
+        </section>
 
         <Panel title="Image inspector" note="Six controls, flat.">
           <div className="p-4">

@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils";
 import { TILE_SPOT_CLASSES } from "./config-maps";
 
 /**
- * Dragging the title or the price to a new spot, on the tile itself.
+ * Dragging the title, the price or the sale chip to a new spot, on the tile
+ * itself.
  *
  * The panel's board answers "where can these go"; this answers the question a
  * seller asks first, which is "can I just move it". Both write the same two
@@ -20,8 +21,8 @@ import { TILE_SPOT_CLASSES } from "./config-maps";
  * what it has always done: select it, or drag the block.
  */
 
-/** The two things on a product tile that can be placed. */
-export type SpotToken = "title" | "price";
+/** The three things on a product tile that can be placed. */
+export type SpotToken = "title" | "price" | "sale";
 
 /**
  * Where a dragged token wants to land. `below` is the price's own extra home,
@@ -40,6 +41,8 @@ export type TileSpotDrag = {
    *  does for a buyer, with no handlers and no affordance. */
   title: boolean;
   price: boolean;
+  /** The sale chip: armed where the tile draws one (a product on sale). */
+  sale: boolean;
   /** The token in flight and where it currently wants to land, so the tile can
    *  draw the move as it happens rather than on release. */
   active: { token: SpotToken; drop: SpotDrop } | null;

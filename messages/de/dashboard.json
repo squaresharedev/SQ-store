@@ -122,6 +122,11 @@
       "description": "Käufer warten auf diese Bestellungen. Packe sie ein und markiere sie als versandt.",
       "action": "Bestellungen versenden"
     },
+    "withdrawals": {
+      "label": "{count, plural, one {{count} Käufer hat widerrufen} other {{count} Käufer haben widerrufen}}",
+      "description": "Ihnen steht innerhalb von 14 Tagen nach dem Widerruf eine Erstattung zu. Kläre die Rücksendung und erstatte dann die Bestellung.",
+      "action": "Widerrufe ansehen"
+    },
     "checkoutRates": {
       "label": "Lege deine Versandtarife fest",
       "description": "Käufer können ein physisches Produkt erst kaufen, wenn ein Lieferziel sowohl einen Tarif als auch ein Land hat.",

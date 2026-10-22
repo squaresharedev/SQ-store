@@ -211,6 +211,7 @@
       "paidDetail": "Pago em {date}",
       "confirming": "A confirmar o pagamento",
       "confirmingDetail": "Normalmente demora um momento. Recarregue a página se não mudar.",
+      "checkAgain": "Verificar de novo",
       "preparing": "Em preparação",
       "preparingDetail": "{seller} está a preparar a sua encomenda.",
       "shipped": "A caminho",
@@ -383,5 +384,7 @@
     "lowestNote": "Preço riscado: o preço habitual. Preço mais baixo praticado nos 30 dias anteriores à redução: {price}.",
     "badgeSale": "Promoção",
     "endsOn": "Promoção termina em {date}"
-  }
+  },
+  "badges": "Destaques",
+  "badgesOnPhoto": "Destaques na fotografia"
 }

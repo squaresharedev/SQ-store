@@ -30,7 +30,9 @@
     "toShipTitle": "Nichts zu versenden",
     "toShipHint": "Du bist auf dem neuesten Stand. Bezahlte Bestellungen, die noch nicht versendet wurden, erscheinen hier, älteste zuerst.",
     "seeAllOrders": "Alle Bestellungen anzeigen",
-    "hintOpen": "Wenn jemand in deinem Shop kauft, erscheint die Bestellung hier und du wirst sofort benachrichtigt."
+    "hintOpen": "Wenn jemand in deinem Shop kauft, erscheint die Bestellung hier und du wirst sofort benachrichtigt.",
+    "productTitle": "Noch keine Bestellungen für dieses Produkt",
+    "productHint": "Sobald es verkauft wird, erscheinen seine Bestellungen hier."
   },
   "list": {
     "updating": "Wird aktualisiert…",
@@ -55,7 +57,7 @@
     "region": "Bestellfilter",
     "channel": "Kanal",
     "buyerEmail": "Käufer-E-Mail",
-    "searchPlaceholder": "Käufer-E-Mail suchen",
+    "searchPlaceholder": "E-Mail, Name, Ort, Produkt oder Sendung suchen",
     "status": "Status",
     "statusAriaLabel": "Nach Status filtern",
     "allStatuses": "Alle Status",
@@ -151,6 +153,7 @@
   },
   "actions": {
     "disputeInStripe": "Zahlungsanfechtungen werden in deinem Stripe-Dashboard bearbeitet, sobald Stripe verbunden ist.",
+    "pendingPayment": "Die Zahlung des Käufers wird noch bestätigt. Verschick noch nichts: Die Bestellung wird als bezahlt angezeigt, sobald sie durchgeht, und schließt sich von selbst, wenn nicht.",
     "none": "Für diese Bestellung sind keine Aktionen verfügbar."
   },
   "refund": {
@@ -171,6 +174,7 @@
     "refundedOn": "Erstattet am {date}",
     "refundedOnReason": "{reason, select, cancelled {Storniert und erstattet am {date}} returned {Zurückgegeben und erstattet am {date}} other {Erstattet am {date}}}",
     "ownerOnly": "Nur der Inhaber des Shops kann eine Bestellung erstatten oder stornieren.",
+    "ownerOnlyNamed": "Nur der Inhaber von {store} kann eine Bestellung erstatten oder stornieren. Wende dich dafür an den Inhaber.",
     "manual": "Diese Zahlung lief nicht über Square Share. Erstatte dem Käufer das Geld selbst und erfasse es dann hier.",
     "viaProvider": "Der volle Betrag wird über Stripe auf die Karte des Käufers zurückgebucht. Das kann nicht rückgängig gemacht werden."
   },
@@ -186,6 +190,11 @@
     "label": "Welche Bestellungen anzeigen",
     "toShip": "Zu versenden",
     "all": "Alle Bestellungen"
+  },
+  "productScope": {
+    "label": "Bestellungen für",
+    "clear": "Alle Produkte",
+    "clearLabel": "Bestellungen aller Produkte zeigen, nicht nur {title}"
   },
   "fulfilment": {
     "unfulfilled": "Zu versenden",

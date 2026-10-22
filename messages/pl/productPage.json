@@ -211,6 +211,7 @@
       "paidDetail": "Zapłacono {date}",
       "confirming": "Potwierdzanie płatności",
       "confirmingDetail": "Zwykle chwilę to trwa. Odśwież stronę, jeśli status się nie zmienia.",
+      "checkAgain": "Sprawdź ponownie",
       "preparing": "W przygotowaniu",
       "preparingDetail": "{seller} przygotowuje Twoje zamówienie.",
       "shipped": "W drodze",
@@ -383,5 +384,7 @@
     "lowestNote": "Przekreślona cena: cena regularna. Najniższa cena z 30 dni przed obniżką: {price}.",
     "badgeSale": "Obniżka",
     "endsOn": "Obniżka kończy się {date}"
-  }
+  },
+  "badges": "Wyróżnienia",
+  "badgesOnPhoto": "Wyróżnienia na zdjęciu"
 }

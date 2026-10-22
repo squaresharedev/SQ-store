@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import type {
   BalanceTransaction,
@@ -10,8 +9,8 @@ import type {
   Payout,
 } from "@/lib/payments/types";
 import { BalanceSummary } from "./BalanceSummary";
-import { ConnectionStatusCard } from "./ConnectionStatusCard";
 import { ConnectStripeModal } from "./ConnectStripeModal";
+import { PaymentsHeader } from "./PaymentsHeader";
 import { PayoutDetailModal } from "./PayoutDetailModal";
 import { PayoutHistory } from "./PayoutHistory";
 import { PayoutMethodCard } from "./PayoutMethodCard";
@@ -28,10 +27,15 @@ type ActiveModal =
   | { kind: "transaction"; transaction: BalanceTransaction };
 
 /**
- * Composition for /payments. All data arrives as Stripe-shaped props from the
- * mock layer (lib/payments); this component only lays modules out and hosts
- * modal state. Everything is read-only display, the only actions are stubs
- * that will become redirects to Stripe-hosted surfaces.
+ * Composition for /payments, balance first. The title carries the Stripe
+ * connection (a one-line chip when it is in order, the full card under it when
+ * it is not). Then the balance as one card. Then what happened, activity by
+ * day, as the main column, beside where the money goes: payouts and the bank.
+ *
+ * All data arrives as Stripe-shaped props from the mock layer (lib/payments);
+ * this component only lays modules out and hosts modal state. Everything is
+ * read-only display, the only actions are stubs that will become redirects to
+ * Stripe-hosted surfaces.
  */
 export function PaymentsPage({
   overview,
@@ -41,7 +45,6 @@ export function PaymentsPage({
   /** What the store paid Square Share this month (see BalanceSummary). */
   feesThisMonth?: MoneyAmount[] | null;
 }) {
-  const t = useTranslations("Payments");
   const [modal, setModal] = useState<ActiveModal>({ kind: "none" });
   const close = () => setModal({ kind: "none" });
 
@@ -50,13 +53,7 @@ export function PaymentsPage({
       <BackgroundArrow side="right" />
 
       <main className="relative mx-auto max-w-7xl space-y-6 px-6 py-8">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
-            {t("pageTitle")}
-          </h1>
-        </div>
-
-        <ConnectionStatusCard
+        <PaymentsHeader
           account={overview.account}
           onConnect={() => setModal({ kind: "connect" })}
         />
@@ -68,22 +65,20 @@ export function PaymentsPage({
         />
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <div className="space-y-4 lg:col-span-2">
+          <div className="lg:col-span-2">
+            <RecentActivity
+              transactions={overview.transactions}
+              onSelect={(transaction) => setModal({ kind: "transaction", transaction })}
+            />
+          </div>
+          <div className="space-y-4">
             <PayoutHistory
               payouts={overview.payouts}
               onSelect={(payout) => setModal({ kind: "payout", payout })}
             />
-          </div>
-          <div className="space-y-4">
             <PayoutMethodCard
               method={overview.payoutMethod}
               onManage={() => setModal({ kind: "method" })}
-            />
-            <RecentActivity
-              transactions={overview.transactions}
-              onSelect={(transaction) =>
-                setModal({ kind: "transaction", transaction })
-              }
             />
           </div>
         </div>

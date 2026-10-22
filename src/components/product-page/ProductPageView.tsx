@@ -9,9 +9,11 @@ import { formatCents, toCurrency } from "@/lib/format/money";
 import type { Locale } from "@/i18n/locales";
 import { SECTION_SETTING } from "@/lib/storefront/setting-ref";
 import type { ProductPageData } from "@/types/product-page";
+import { isOnPhoto } from "@/lib/validation/product";
 import type { ProductPageSectionId } from "@/types/storefront";
 import { resolveCtaTarget } from "./cta-target";
 import { DocumentsList } from "./DocumentsList";
+import { PhotoBadges, ProductBadges } from "./ProductBadges";
 import { ProductCta } from "./ProductCta";
 import { ProductDescription } from "./ProductDescription";
 import { ProductGallery } from "./ProductGallery";
@@ -134,6 +136,12 @@ export function ProductPageView({
         });
   const effectiveShippingNote =
     !product.isDigital && shipping !== null && !deliveryLine ? productPage.shippingNote : ("none" as const);
+
+  // The seller's badges, split by where they asked for each: under the
+  // title, or on the photo.
+  const badges = product.details.badges ?? [];
+  const besideBadges = badges.filter((badge) => !isOnPhoto(badge));
+  const photoBadges = badges.filter(isOnPhoto);
 
   const ink = resolveInk(theme, productPage);
   // The buy button's fill, roundness and outline, resolved ONCE for both the
@@ -408,6 +416,19 @@ export function ProductPageView({
                     fit={productPage.imageFit}
                     radius={radius}
                     ink={ink}
+                    overlay={
+                      photoBadges.length > 0 && (
+                        // The PRODUCT's words, not a page setting: a click on
+                        // them in the editor opens nothing.
+                        <div data-setting-skip="" className="contents">
+                          <PhotoBadges
+                            badges={photoBadges}
+                            label={t("badgesOnPhoto")}
+                            cornerRadius={theme.cornerRadius}
+                          />
+                        </div>
+                      )
+                    }
                   />
                 </div>
                 {/* Sticky beside a tall gallery: scrolling the photos must not
@@ -423,6 +444,19 @@ export function ProductPageView({
                       </p>
                     )}
                   </div>
+                  {/* The seller's highlights, read with the title. Opted out of
+                      the hotspots like the version picker: badges are the
+                      PRODUCT's words, set on its form, not a page setting. */}
+                  {besideBadges.length > 0 && (
+                    <div data-setting-skip="">
+                      <ProductBadges
+                        badges={besideBadges}
+                        label={t("badges")}
+                        ink={ink}
+                        cornerRadius={theme.cornerRadius}
+                      />
+                    </div>
+                  )}
                   {descriptionInInfo && (
                     <div data-setting-hotspot="sections">
                       <ProductDescription text={product.description} />

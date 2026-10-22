@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getAccessibleAccounts, getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import {
@@ -251,11 +252,19 @@ export async function refundOrder(
     return failure(REFUND_REFUSED);
   }
 
-  const { data, error } = await supabase.rpc("order_refund", {
+  // Recorded by the service role once the provider has refunded it: the
+  // client-callable order_refund refuses an order a provider charged, so a
+  // seller calling it directly can never mark one refunded over money that
+  // stayed put (20261021_order_refund_provider_first). Who may refund, and
+  // that this is an order of THIS store, was settled above.
+  const refundArgs = {
     p_order_id: id.data,
     p_reason: why.data,
     p_restock: restock === true,
-  });
+  };
+  const { data, error } = before.paidThroughProvider
+    ? await createAdminClient().rpc("order_apply_refund", refundArgs)
+    : await supabase.rpc("order_refund", refundArgs);
   if (error) {
     console.error("[orders] order_refund failed", error.message);
     return failure(serverError("refundOrder"));

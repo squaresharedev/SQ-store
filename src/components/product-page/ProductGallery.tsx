@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { ProductPageImage } from "@/types/product";
@@ -26,6 +26,7 @@ export function ProductGallery({
   fit,
   radius,
   ink,
+  overlay,
 }: {
   images: ProductPageImage[];
   title: string;
@@ -33,6 +34,9 @@ export function ProductGallery({
   /** Surface radius in px, from the theme's corner radius. */
   radius: number;
   ink: string;
+  /** Laid over the main frame (the badges a seller put on the photo). It
+   *  follows whichever photo is showing, and the empty frame too. */
+  overlay?: ReactNode;
 }) {
   const t = useTranslations("ProductPage.gallery");
   const { selectedIds } = useOptionSelection();
@@ -69,11 +73,12 @@ export function ProductGallery({
   if (visible.length === 0) {
     return (
       <div
-        className="flex aspect-square w-full items-center justify-center text-sm opacity-60"
+        className="relative flex aspect-square w-full items-center justify-center text-sm"
         style={frameStyle}
         data-product-gallery="empty"
       >
-        {t("noPhoto")}
+        <span className="opacity-60">{t("noPhoto")}</span>
+        {overlay}
       </div>
     );
   }
@@ -83,7 +88,7 @@ export function ProductGallery({
   // and thumbnails read any number of them.
   return (
     <div className="flex flex-col gap-3" data-product-gallery="thumbnails">
-      <figure className="aspect-square w-full overflow-hidden" style={frameStyle}>
+      <figure className="relative aspect-square w-full overflow-hidden" style={frameStyle}>
         {current && (
           /* eslint-disable-next-line @next/next/no-img-element -- signed R2 URL */
           <img
@@ -94,6 +99,7 @@ export function ProductGallery({
             decoding="async"
           />
         )}
+        {overlay}
       </figure>
       {visible.length > 1 && (
         <div

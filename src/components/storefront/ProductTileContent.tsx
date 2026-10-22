@@ -186,6 +186,7 @@ export function ProductTileContent({
   const draggedTitle =
     flying?.token === "title" && flying.drop !== "below" ? flying.drop : null;
   const draggedPrice = flying?.token === "price" ? flying.drop : null;
+  const draggedSale = flying?.token === "sale" && flying.drop !== "below" ? flying.drop : null;
 
   // Overlay + shadow render the title band over the image; bar is a row of its
   // own, above or below it.
@@ -257,13 +258,16 @@ export function ProductTileContent({
   // THE SALE CHIP, on a product a sale lowers (see SALE_BADGES). Not on one
   // that is sold out here: there is nothing to sell at the lower price, and
   // that corner is the sold-out badge's.
+  // A chip being dragged is drawn where it is going (the drag only offers
+  // spots it may take, saleChipSpots).
   const saleBadgeSpot =
     product.sale && card.saleBadge !== "hidden" && !soldOut
-      ? resolveSaleBadgePosition(card.saleBadgePosition, {
+      ? (draggedSale ??
+        resolveSaleBadgePosition(card.saleBadgePosition, {
           cornerRadius: card.cornerRadius,
           titleBand: bandRow,
           priceTag: priceHidden ? "hidden" : tagPosition,
-        })
+        }))
       : null;
   // What it says: how much this sale takes off the price struck beside it,
   // in percent or in money, or the word. Worked out from the two prices, so
@@ -283,13 +287,21 @@ export function ProductTileContent({
     saleBadgeSpot !== null && !priceHidden && tagPosition !== "below" && tagPosition !== "hidden"
       ? spotRow(saleBadgeSpot) === spotRow(tagPosition)
       : false;
+  // On the canvas it is a token like the title and the price: drag it, arrow
+  // it, or press it for its own settings.
+  const saleToken =
+    spotDrag?.sale && saleBadgeSpot
+      ? tileSpotTokenProps("sale", spotDrag, tileSpotTokenLabel("sale", saleBadgeSpot, t))
+      : null;
   const saleBadge = saleBadgeSpot && (
     <SaleChip
+      token={saleToken ?? undefined}
       look={card.saleBadgeLook}
       says={card.saleBadge}
       label={saleBadgeLabel}
       spot={saleBadgeSpot}
       fill={card.saleBadgeColor ?? theme.accent}
+      textColor={card.saleBadgeTextColor}
       fontClass={chipFontClass}
       size={tileLabelSize(card.priceTagSize, PRICE_TAG_SIZE_MIN, theme.chipScale)}
       besidePrice={

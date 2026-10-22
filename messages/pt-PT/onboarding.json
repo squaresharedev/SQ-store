@@ -33,6 +33,8 @@
       "detailNeedsSeller": "Complete os seus dados de vendedor para poder publicar a página.",
       "detailNeedsStorefront": "Assim que um produto estiver numa montra, a página pode ser publicada.",
       "detailNeedsActive": "Defina esse produto como Ativo para publicar a página.",
+      "detailChecking": "A sua página fica publicada assim que a verificação automática aprovar o produto.",
+      "detailPaused": "A verificação automática colocou esse produto em pausa. Abra-o para ver o que alterar.",
       "detailPagesOff": "As páginas de produto estão desativadas nessa montra. Ative-as no editor.",
       "actionEdit": "Editar produto",
       "actionOpen": "Abrir editor",
@@ -129,7 +131,8 @@
       "emailTipLabel": "Sobre este e-mail"
     },
     "confirm": {
-      "goLive": "As suas páginas de produto ficam publicadas assim que o confirmar."
+      "goLive": "As suas páginas de produto ficam publicadas assim que o confirmar.",
+      "wrongAddress": "Endereço errado? Altere-o"
     },
     "tour": {
       "mobileMenu": "No telemóvel, abra o menu no canto superior esquerdo.",
@@ -145,7 +148,6 @@
       "getStarted": "Começar",
       "skipForNow": "Saltar por agora",
       "saveAndContinue": "Guardar e continuar",
-      "changeDetails": "Alterar dados",
       "continue": "Continuar",
       "exploreOnMyOwn": "Explorar por conta própria",
       "notNow": "Agora não"

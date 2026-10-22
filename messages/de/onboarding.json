@@ -33,6 +33,8 @@
       "detailNeedsSeller": "Vervollständige deine Verkäuferangaben, damit deine Seite online gehen kann.",
       "detailNeedsStorefront": "Sobald ein Produkt auf einem Schaufenster ist, kann seine Seite online gehen.",
       "detailNeedsActive": "Setze dieses Produkt auf Aktiv, damit seine Seite online geht.",
+      "detailChecking": "Deine Seite geht online, sobald die automatische Prüfung das Produkt freigibt.",
+      "detailPaused": "Die automatische Prüfung hat dieses Produkt pausiert. Öffne es, um zu sehen, was du ändern musst.",
       "detailPagesOff": "Produktseiten sind auf diesem Schaufenster deaktiviert. Schalte sie im Designer ein.",
       "actionEdit": "Produkt bearbeiten",
       "actionOpen": "Designer öffnen",
@@ -129,7 +131,8 @@
       "emailTipLabel": "Zu dieser E-Mail-Adresse"
     },
     "confirm": {
-      "goLive": "Deine Produktseiten gehen online, sobald sie bestätigt ist."
+      "goLive": "Deine Produktseiten gehen online, sobald sie bestätigt ist.",
+      "wrongAddress": "Falsche Adresse? Ändere sie"
     },
     "tour": {
       "mobileMenu": "Öffne auf deinem Telefon das Menü oben links.",
@@ -145,7 +148,6 @@
       "getStarted": "Loslegen",
       "skipForNow": "Vorerst überspringen",
       "saveAndContinue": "Speichern und fortfahren",
-      "changeDetails": "Details ändern",
       "continue": "Weiter",
       "exploreOnMyOwn": "Selbst erkunden",
       "notNow": "Nicht jetzt"

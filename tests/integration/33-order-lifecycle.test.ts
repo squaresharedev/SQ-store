@@ -469,6 +469,28 @@ describe("order_refund", () => {
     ).toMatch(/permission denied/);
     expect((await orderOf(placed.order_id))?.status).toBe("paid");
   });
+
+  // REGRESSION (security review 2026-10-21): called straight through
+  // PostgREST, order_refund marked an order Stripe charged as refunded with the
+  // buyer's money never returned. Such an order is recorded only by the server
+  // after the provider refund (order_apply_refund), as the order panel and the
+  // Connect webhook do.
+  it("refuses an order a payment provider charged, which only the server records", async () => {
+    const product = await seedProduct(5);
+    const placed = await place({ productId: product });
+    await asSuper((q) =>
+      q.query(`update public.orders set payment_ref = 'pi_3Charged' where id = $1`, [placed.order_id]),
+    );
+
+    expect(await refund(owner, placed.order_id, "cancelled", true)).toBe("not_refundable");
+    expect(await orderOf(placed.order_id)).toMatchObject({ status: "paid" });
+
+    const recorded = await asService(async (q) =>
+      (await q.query(`select public.order_apply_refund($1, 'cancelled') as outcome`, [placed.order_id]))
+        .rows[0].outcome,
+    );
+    expect(recorded).toBe("refunded");
+  });
 });
 
 describe("a code's uses", () => {

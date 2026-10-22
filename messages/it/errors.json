@@ -496,6 +496,16 @@
     "staleOption": {
       "message": "Una foto fa riferimento a un’opzione che non esiste più.",
       "fix": "Riassegna o rimuovi il tag da quella foto, poi salva di nuovo."
+    },
+    "ordersToShip": "{count, plural, one {Un ordine di questo prodotto è ancora da spedire.} many {{count} di ordini di questo prodotto sono ancora da spedire.} other {{count} ordini di questo prodotto sono ancora da spedire.}}",
+    "ordersToShipFix": "Non è stato eliminato nulla. Riprova per vederli prima nell’avviso.",
+    "badgeRefused": {
+      "message": "Il badge «{label}» viola le regole della piattaforma e non può essere usato.",
+      "fix": "Cambia le parole o scegli un altro badge. Se pensi che sia un errore, scrivi a {email}."
+    },
+    "badgeNotApproved": {
+      "message": "Il badge «{label}» non è stato approvato automaticamente e non può essere usato.",
+      "fix": "Prova con parole diverse, o scrivi a {email} e una persona controllerà."
     }
   },
   "productImport": {
@@ -540,6 +550,10 @@
     "nameRequired": {
       "message": "La vetrina ha bisogno di un nome.",
       "fix": "Digita un nome (da 1 a 80 caratteri) nel campo in alto nell’editor, poi salva di nuovo."
+    },
+    "savedElsewhere": {
+      "message": "Questa vetrina è stata salvata altrove da quando l’hai aperta.",
+      "fix": "Ricarica la pagina per vedere quella versione, oppure salva di nuovo per sostituirla."
     },
     "invalidLayout": {
       "message": "I dati del layout della vetrina non sono validi.",

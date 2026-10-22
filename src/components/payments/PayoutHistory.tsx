@@ -14,7 +14,9 @@ const HEADER_CELL =
 /**
  * Table of past payouts. Rows are keyboard-focusable (same interaction as the
  * Orders table) and open the read-only payout detail modal. Only masked
- * destination info (last4) is ever shown.
+ * destination info is ever shown, and not here at all: the table sits in a
+ * narrow column right above the Payout method card, which says where payouts
+ * go, so a bank column would only repeat it.
  */
 export function PayoutHistory({
   payouts,
@@ -46,7 +48,6 @@ export function PayoutHistory({
               <tr className="border-b border-border">
                 <th className={HEADER_CELL}>{t("columns.amount")}</th>
                 <th className={HEADER_CELL}>{t("columns.status")}</th>
-                <th className={`hidden sm:table-cell ${HEADER_CELL}`}>{t("columns.bank")}</th>
                 <th className={HEADER_CELL}>{t("columns.arrives")}</th>
               </tr>
             </thead>
@@ -72,9 +73,6 @@ export function PayoutHistory({
                   </td>
                   <td className="px-3 py-2.5">
                     <PayoutStatusBadge status={payout.status} />
-                  </td>
-                  <td className="hidden whitespace-nowrap px-3 py-2.5 font-inter text-sm text-muted-foreground sm:table-cell">
-                    ···· {payout.destinationLast4}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 font-inter text-sm text-muted-foreground">
                     {formatOrderDate(payout.arrivalDate, locale)}

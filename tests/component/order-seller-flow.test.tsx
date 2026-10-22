@@ -48,10 +48,14 @@ function shippedFrom(order: OrderView): OrderView {
 
 function renderDetail(
   order: OrderView,
-  { canRefund = false, ...props }: { canFulfil?: boolean; canRefund?: boolean; onNext?: () => void; queueDone?: boolean } = {},
+  {
+    canRefund = false,
+    storeName = null,
+    ...props
+  }: { canFulfil?: boolean; canRefund?: boolean; storeName?: string | null; onNext?: () => void; queueDone?: boolean } = {},
 ) {
   return render(
-    <OrderRefundProvider allowed={canRefund}>
+    <OrderRefundProvider allowed={canRefund} storeName={storeName}>
       <OrderDetail order={order} onClose={vi.fn()} canFulfil={props.canFulfil ?? true} {...props} />
     </OrderRefundProvider>,
   );
@@ -179,10 +183,24 @@ describe("taking an order back", () => {
     expect(screen.queryByRole("button", { name: "Refund or cancel" })).toBeNull();
   });
 
+  it("names the store whose owner can, for a member working in it", () => {
+    renderDetail(waiting, { canRefund: false, storeName: "Clay & Co" });
+    expect(
+      screen.getByText("Only the owner of Clay & Co can refund or cancel an order. Ask them to do it."),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Refund or cancel" })).toBeNull();
+  });
+
   it("says where a dispute is handled, with nothing to press", () => {
     renderDetail(orderView({ status: "disputed" }));
     expect(screen.getByText(/Disputes are handled in your Stripe dashboard/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Handle dispute" })).toBeNull();
+  });
+
+  it("says what a payment still being confirmed means, and what to do (nothing yet)", () => {
+    renderDetail(orderView({ status: "pending" }));
+    expect(screen.getByText(/The buyer's payment is still being confirmed\. Don't send anything yet/)).toBeInTheDocument();
+    expect(screen.queryByText("No actions are available for this order.")).toBeNull();
   });
 
   it("spares a member who cannot fulfil the whole footer", () => {

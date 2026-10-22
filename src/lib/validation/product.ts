@@ -8,7 +8,15 @@ import {
   uuidField,
 } from "@/lib/validation/inputs";
 import { issueKey } from "@/lib/validation/messages";
+import { fold } from "@/lib/search/vocabulary";
 import {
+  BADGE_COLORS,
+  BADGE_ICONS,
+  BADGE_LABEL_MAX,
+  BADGE_PLACEMENTS,
+  BADGES_MAX,
+  BADGES_ON_PHOTO_MAX,
+  type BadgePlacement,
   CURRENCIES,
   DIMENSION_UNITS,
   DOCUMENT_LABEL_MAX,
@@ -350,7 +358,44 @@ export const documentSchema = z.strictObject({
   label: singleLineText({ field: "documentName", max: DOCUMENT_LABEL_MAX }),
 });
 
+/**
+ * The comparison key for a badge's words: case and accents folded, runs of
+ * space collapsed. Two badges with the same key say the same thing to a buyer,
+ * however they were typed. Shared by the schema, the read side and the form.
+ */
+export function badgeLabelKey(label: string): string {
+  return fold(label).replace(/\s+/g, " ");
+}
+
+/** A badge's words alone: what the form checks before it adds one, and what
+ *  the badge check action is handed. */
+export const badgeLabelSchema = singleLineText({ field: "badgeLabel", max: BADGE_LABEL_MAX });
+
+export const badgeSchema = z.strictObject({
+  icon: z.enum(BADGE_ICONS),
+  label: badgeLabelSchema,
+  color: z.enum(BADGE_COLORS).optional(),
+  placement: z.enum(BADGE_PLACEMENTS).optional(),
+});
+
+/** True for a badge drawn on the photo rather than beside the product. */
+export function isOnPhoto(badge: { placement?: BadgePlacement }): boolean {
+  return badge.placement !== undefined && badge.placement !== "beside";
+}
+
+export const badgesSchema = z
+  .array(badgeSchema)
+  .max(BADGES_MAX, issueKey("Validation.product.badgesTooMany"))
+  .refine(
+    (badges) => new Set(badges.map((badge) => badgeLabelKey(badge.label))).size === badges.length,
+    { error: issueKey("Validation.product.badgeDuplicate") },
+  )
+  .refine((badges) => badges.filter(isOnPhoto).length <= BADGES_ON_PHOTO_MAX, {
+    error: issueKey("Validation.product.badgesOnPhotoTooMany"),
+  });
+
 export const productDetailsSchema = z.strictObject({
+  badges: badgesSchema.optional(),
   dimensions: dimensionsSchema.optional(),
   weight: weightSchema.optional(),
   materials: multiLineText({ field: "materials", max: 300 }).optional(),

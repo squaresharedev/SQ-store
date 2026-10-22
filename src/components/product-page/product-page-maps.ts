@@ -47,12 +47,13 @@ export const SHIPPING_NOTE_TOKENS: Record<ProductPageShippingNote, "plus" | "fre
  * How each sale look crosses out the regular price, at the buy box's size
  * (`lg`) and the sticky bar's and checkout card's (`sm`). The <del> follows the
  * price in the markup either way; `slash` moves it in front (`order-first`)
- * and trades the line-through for a diagonal stroke (`.ss-price-slash`,
- * globals.css).
+ * and trades the line-through for a diagonal stroke, an SVG line drawn by
+ * SalePrice (a CSS gradient cannot anti-alias a diagonal, so it came out
+ * jagged).
  */
 export const SALE_PRICE_LOOKS: Record<ProductPageSaleStyle, Record<"lg" | "sm", string>> = {
   strike: { lg: "text-base opacity-60", sm: "text-sm opacity-60" },
-  slash: { lg: "ss-price-slash order-first text-xl opacity-70", sm: "ss-price-slash order-first text-sm opacity-70" },
+  slash: { lg: "relative order-first text-xl no-underline opacity-70", sm: "relative order-first text-sm no-underline opacity-70" },
 };
 
 export const DARK_INK = "#171717";
@@ -213,6 +214,17 @@ export function chipStyle(ink: string, cornerRadius: number): CSSProperties {
   return {
     backgroundColor: ink === LIGHT_INK ? "rgba(255,255,255,0.14)" : "rgba(23,23,23,0.06)",
     color: ink,
+    borderRadius: `${controlRadius(cornerRadius)}px`,
+  };
+}
+
+/** A badge laid on the product's photo: a near-white pill in dark ink whatever
+ *  the page's own colours, because it sits on a picture rather than on the
+ *  page, and has to read on any picture. Cornered like the page's controls. */
+export function photoChipStyle(cornerRadius: number): CSSProperties {
+  return {
+    backgroundColor: "rgba(255,255,255,0.94)",
+    color: DARK_INK,
     borderRadius: `${controlRadius(cornerRadius)}px`,
   };
 }

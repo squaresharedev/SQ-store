@@ -1,3 +1,5 @@
+import { after } from "next/server";
+import { settleWaitingProducts } from "@/lib/products/settle-waiting";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
@@ -8,7 +10,12 @@ import {
   getExistingProductIds,
 } from "@/lib/dashboard/queries";
 import { listStorefronts } from "@/lib/storefront/queries";
-import { countOrdersToShip, getOrderGlances, getOrdersByIds } from "@/lib/orders/queries";
+import {
+  countOrdersToShip,
+  countWithdrawalsToSettle,
+  getOrderGlances,
+  getOrdersByIds,
+} from "@/lib/orders/queries";
 import { checkoutProviderFor } from "@/lib/checkout/availability";
 import { getAccountStatus } from "@/lib/payments/mock";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
@@ -41,8 +48,19 @@ export default async function DashboardOverviewPage({
   // The layout's session gate does not run again on a move between sections
   // (see ../layout.tsx, or ../../layout.tsx from a nested page): a page asks.
   await requireUser(OVERVIEW_PATH);
-  const [orders, products, storefronts, profile, payments, account, ownProfile, params, assurance, toShipCount] =
-    await Promise.all([
+  const [
+    orders,
+    products,
+    storefronts,
+    profile,
+    payments,
+    account,
+    ownProfile,
+    params,
+    assurance,
+    toShipCount,
+    withdrawalsToSettle,
+  ] = await Promise.all([
       getDashboardOrders(),
       getProductsSummary(),
       listStorefronts(),
@@ -58,7 +76,16 @@ export default async function DashboardOverviewPage({
       getAssurance(),
       // Shared with the sidebar's count in the same render (cached).
       countOrdersToShip(),
+      countWithdrawalsToSettle(),
     ]);
+
+  // A product the setup checklist is waiting on ("goes live once the check
+  // approves it") gets asked about after this page is sent, so the next
+  // visit is usually the one that says it is live.
+  if (account && products.checkingProductIds.length > 0) {
+    const ownerId = account.accountId;
+    after(() => settleWaitingProducts(ownerId));
+  }
 
   // Collect all product IDs referenced by storefront blocks so we can detect
   // dead blocks (blocks whose product was deleted) in ONE query, not N per block.
@@ -124,6 +151,8 @@ export default async function DashboardOverviewPage({
           traderMissing: identity.missing,
           productCount: products.total,
           activeProductIds: products.activeProductIds,
+          checkingProductIds: products.checkingProductIds,
+          pausedProductIds: products.pausedProductIds,
           existingProductIds: existingIds,
           storefronts: storefronts.rows,
           // Only where a payment account can be connected: see SetupFacts.
@@ -201,6 +230,7 @@ export default async function DashboardOverviewPage({
         recentOrderDetails={recentOrderDetails}
         recentOrderGlances={recentOrderGlances}
         toShipCount={toShipCount}
+        withdrawalsToSettle={withdrawalsToSettle}
         canFulfil={can(account?.role, "orders.fulfil")}
         checkoutOpen={account ? (await checkoutProviderFor(account.accountId)) !== null : false}
       />

@@ -24,13 +24,19 @@ import type { StorefrontPageData, StorefrontTileProduct } from "@/types/storefro
 // sample reveals its labels on hover, so on sale they are shown always;
 // `&tag=<price tag position>` and `&title=<title style>` move the price
 // through every place a seller can put it, and `&chip=<what it shows>`,
-// `&look=<sale chip look>`, `&chipAt=<spot>` and `&chipColor=<rrggbb>` do
-// the same for the chip. `&chips=cell` gives every tile the chips of one cell.
+// `&look=<sale chip look>`, `&chipAt=<spot>`, `&chipColor=<rrggbb>` and
+// `&chipText=<rrggbb>` do the same for the chip. `&chips=cell` gives every
+// tile the chips of one cell.
 
 export const metadata = { title: "Embed frame: dev gallery" };
 
 /** What the harness's sale takes off, in percent. */
 const SALE_PERCENT = 20;
+
+/** A colour from the query, given without its `#`: strict hex or nothing. */
+function hexParam(value: string | undefined): string | undefined {
+  return /^[0-9a-f]{6}$/.test(value ?? "") ? `#${value}` : undefined;
+}
 
 export default async function EmbedFrameDevPage({
   searchParams,
@@ -44,6 +50,7 @@ export default async function EmbedFrameDevPage({
     chips?: string;
     chipAt?: string;
     chipColor?: string;
+    chipText?: string;
   }>;
 }) {
   if (process.env.NODE_ENV === "production") notFound();
@@ -56,7 +63,8 @@ export default async function EmbedFrameDevPage({
   const look = SALE_BADGE_LOOKS.find((candidate) => candidate === query.look);
   const chips = CHIP_SCALES.find((scale) => scale === query.chips);
   const chipAt = TILE_SPOTS.find((spot) => spot === query.chipAt);
-  const chipColor = /^[0-9a-f]{6}$/.test(query.chipColor ?? "") ? `#${query.chipColor}` : undefined;
+  const chipColor = hexParam(query.chipColor);
+  const chipText = hexParam(query.chipText);
 
   const page: StorefrontPageData = {
     id: "sample",
@@ -73,6 +81,7 @@ export default async function EmbedFrameDevPage({
           ...(chips ? { chipScale: chips } : {}),
           ...(chipAt ? { saleBadgePosition: chipAt } : {}),
           ...(chipColor ? { saleBadgeColor: chipColor } : {}),
+          ...(chipText ? { saleBadgeTextColor: chipText } : {}),
         }
       : sample.config.theme,
     ...(sample.config.header ? { header: sample.config.header } : {}),
@@ -103,7 +112,7 @@ export default async function EmbedFrameDevPage({
   // scrolling box around it here.
   return (
     <div className="h-screen overflow-y-auto">
-      <EmbedFrameView page={page} site="localhost" />
+      <EmbedFrameView page={page} />
     </div>
   );
 }

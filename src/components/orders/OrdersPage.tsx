@@ -8,7 +8,12 @@ import { PageTabs } from "@/components/ui/PageTabs";
 import { Spinner } from "@/components/ui/spinner";
 import { useTourReveal } from "@/lib/onboarding/tour-store";
 import { isToShip } from "@/lib/orders/fulfilment";
-import { ORDERS_VIEW_PARAM, ordersViewPath } from "@/lib/orders/paths";
+import {
+  ORDERS_PRODUCT_PARAM,
+  ORDERS_STATUS_PARAM,
+  ORDERS_VIEW_PARAM,
+  ordersViewPath,
+} from "@/lib/orders/paths";
 import { cn } from "@/lib/utils";
 import { TYPING_DEBOUNCE_MS } from "@/lib/typing-debounce";
 import type {
@@ -18,8 +23,10 @@ import type {
   OrdersView,
   Paginated,
 } from "@/types/order-view";
+import type { Product } from "@/types/product";
 import { OrderDetailSheet } from "./OrderDetailSheet";
 import { OrdersEmptyState } from "./OrdersEmptyState";
+import { OrdersProductScope } from "./OrdersProductScope";
 import { OrdersTable } from "./OrdersTable";
 import { OrdersToolbar, type SortValue } from "./OrdersToolbar";
 
@@ -40,17 +47,20 @@ function hasAnyFilter(filters: OrderFilters): boolean {
 
 /** The URL for a list state. The view is always named once the seller has
  *  moved, so a refresh stays on the list they chose rather than on the page's
- *  own default; filters and sort only exist in the full list. */
+ *  own default; filters and sort only exist in the full list. The product
+ *  scope belongs to both lists, so it rides along whichever is showing. */
 function buildQuery(
   view: OrdersView,
   filters: OrderFilters,
   sort: OrderSort,
   page: number,
+  productId: string | null,
 ): string {
   const params = new URLSearchParams();
   params.set(ORDERS_VIEW_PARAM, view);
+  if (productId) params.set(ORDERS_PRODUCT_PARAM, productId);
   if (view === "all") {
-    if (filters.status) params.set("status", filters.status);
+    if (filters.status) params.set(ORDERS_STATUS_PARAM, filters.status);
     if (filters.channel) params.set("channel", filters.channel);
     if (filters.dateFrom) params.set("from", filters.dateFrom);
     if (filters.dateTo) params.set("to", filters.dateTo);
@@ -73,6 +83,7 @@ export function OrdersPage({
   checkoutOpen = false,
   data,
   filters,
+  product = null,
   sort,
   deepLinkedOrder = null,
   highlightId = null,
@@ -88,6 +99,8 @@ export function OrdersPage({
   checkoutOpen?: boolean;
   data: Paginated<OrderView>;
   filters: OrderFilters;
+  /** The one product both lists are narrowed to (`?product=<id>`), or null. */
+  product?: Pick<Product, "id" | "title" | "imageUrl"> | null;
   sort: OrderSort;
   /** Order named by `?order=<id>`; its detail panel opens on arrival. */
   deepLinkedOrder?: OrderView | null;
@@ -170,11 +183,12 @@ export function OrdersPage({
 
   /** Filters, sort and page all belong to the full list, so any of them
    *  lands there: filtering from the To ship queue is asking about history. */
+  const productId = product?.id ?? null;
   const navigate = useCallback(
     (next: OrderFilters, nextSort: OrderSort, page: number, nextView: OrdersView = "all") => {
-      go(`${pathname}${buildQuery(nextView, next, nextSort, page)}`);
+      go(`${pathname}${buildQuery(nextView, next, nextSort, page, productId)}`);
     },
-    [go, pathname],
+    [go, pathname, productId],
   );
 
   /** Close the panel, and drop `?order=` with it — otherwise a refresh (or the
@@ -223,7 +237,9 @@ export function OrdersPage({
   // filters rather than the draft, so a filter being typed into never makes
   // the toolbar vanish under the cursor.
   const toShip = view === "to-ship";
-  const accountEmpty = !toShip && toShipCount === 0 && data.total === 0 && !hasAnyFilter(filters);
+  // A product with no orders yet is not an account without any.
+  const accountEmpty =
+    !toShip && toShipCount === 0 && data.total === 0 && !hasAnyFilter(filters) && !product;
   // Except while the guided tour is pointing at it: a new seller has no orders,
   // and a tour stop about search and filters needs the real ones on screen
   // (lib/onboarding/tour-steps.ts). It hides again when the tour moves on.
@@ -252,14 +268,22 @@ export function OrdersPage({
           onNavigate={go}
           tabs={[
             {
-              href: ordersViewPath("to-ship"),
+              href: ordersViewPath("to-ship", productId),
               label: t("views.toShip"),
               active: toShip,
               count: toShipCount,
               countLabel: t("toShipCount", { count: toShipCount }),
             },
-            { href: ordersViewPath("all"), label: t("views.all"), active: !toShip },
+            { href: ordersViewPath("all", productId), label: t("views.all"), active: !toShip },
           ]}
+        />
+      )}
+
+      {product && (
+        <OrdersProductScope
+          product={product}
+          clearHref={`${pathname}${buildQuery(view, toShip ? {} : draft, sort, 1, null)}`}
+          onNavigate={go}
         />
       )}
 
@@ -297,7 +321,8 @@ export function OrdersPage({
             filtered={filtered}
             onClear={() => handleFilters({})}
             toShip={toShip}
-            onSeeAll={() => go(ordersViewPath("all"))}
+            scoped={product !== null}
+            onSeeAll={() => go(ordersViewPath("all", productId))}
             checkoutOpen={checkoutOpen}
           />
         ) : (

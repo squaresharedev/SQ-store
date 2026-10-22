@@ -88,6 +88,7 @@ export function ProductsBrowser({
   canWrite,
   sales,
   placements = {},
+  toShip = {},
   missingTraderDetails = [],
   heading,
 }: {
@@ -105,6 +106,8 @@ export function ProductsBrowser({
    * link affordances degrade gracefully to count 0 in that case.
    */
   placements?: Record<string, StorefrontPlacement[]>;
+  /** Orders still to ship, by product id (lib/orders/queries.ts toShipByProduct). */
+  toShip?: Record<string, number>;
   /** Trader details the store still owes buyers (for the buy button dialog). */
   missingTraderDetails?: readonly TraderIdentityField[];
   /** Server-rendered page title block, kept out of this client boundary. */
@@ -280,6 +283,7 @@ export function ProductsBrowser({
           canWrite={canWrite}
           sales={sales}
           placements={placements}
+          toShip={toShip}
           missingTraderDetails={missingTraderDetails}
           filtered={filtered}
           onClearFilters={handleClear}

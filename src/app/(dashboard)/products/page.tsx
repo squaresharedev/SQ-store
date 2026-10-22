@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { after } from "next/server";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import {
   PRODUCTS_DEFAULT_PAGE_SIZE,
@@ -15,6 +16,8 @@ import { can } from "@/lib/team/permissions";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { DEV_PREVIEW_PARAM, previewsEmptyList } from "@/lib/dev/preview";
 import { requireUser } from "@/lib/auth/session";
+import { toShipByProduct } from "@/lib/orders/queries";
+import { settleWaitingProducts } from "@/lib/products/settle-waiting";
 import { PRODUCTS_PATH } from "@/lib/products/paths";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -74,15 +77,25 @@ export default async function ProductsPage({
   // Placements ride along in the same round trip as the list itself: the card
   // needs them for the copy-link action, and the delete dialog needs them to
   // say which storefronts still carry a block for the product being removed.
-  const [data, account, sales, placements] = await Promise.all([
+  const [data, account, sales, placements, toShip] = await Promise.all([
     previewEmpty
       ? { rows: [], total: 0, page: 1, pageSize: PRODUCTS_DEFAULT_PAGE_SIZE }
       : listProducts({ filters, sort, page, pageSize: PRODUCTS_DEFAULT_PAGE_SIZE }),
     getActiveAccount(),
     getProductSales(),
     getProductPlacements(),
+    // Orders still to ship per product: on each card, and in the delete
+    // dialog's warning before a product with parcels owed is removed.
+    toShipByProduct(),
   ]);
   const canWrite = can(account?.role, "products.write");
+  // Products the automatic check has not judged yet get a few more asked
+  // about after this page is sent, so a list of "Checking" badges catches up
+  // as the seller looks at it instead of waiting for the sweep.
+  if (account && !previewEmpty) {
+    const ownerId = account.accountId;
+    after(() => settleWaitingProducts(ownerId));
+  }
   // React-cached, and the dashboard shell has already asked it this request,
   // so the buy button dialog's "seller details missing" state costs no read.
   const identity = account
@@ -101,6 +114,7 @@ export default async function ProductsPage({
         canWrite={canWrite}
         sales={sales}
         placements={placements}
+        toShip={toShip}
         missingTraderDetails={identity.ok ? identity.missing : []}
         heading={
           <div>

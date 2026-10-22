@@ -126,7 +126,6 @@ describe("getEmbedFrame - what a listed site is given", () => {
   it("the board, with each tile leading to its hosted product page, marked as from the embed", async () => {
     const result = await getEmbedFrame(EMBED_KEY, SITE);
     if (!result || result === PAGE_BUSY) throw new Error("expected a frame");
-    expect(result.site).toEqual({ site: SITE, hostname: SITE });
     expect(result.page.products).toEqual([
       {
         id: PRODUCT_ID,
@@ -158,6 +157,12 @@ describe("getEmbedFrame - what a listed site is given", () => {
 
   it("treats the site with and without www. as one", async () => {
     expect(await getEmbedFrame(EMBED_KEY, `www.${SITE}`)).not.toBeNull();
+  });
+
+  it("is served under a site builder's own frame for the site", async () => {
+    // The sites arrive as the address spells them: nearest page first.
+    expect(await getEmbedFrame(EMBED_KEY, `shop-example-com.filesusr.com/${SITE}`)).not.toBeNull();
+    expect(await getEmbedFrame(EMBED_KEY, `1a2b-atari-embeds.googleusercontent.com/www.gstatic.com/${SITE}`)).not.toBeNull();
   });
 });
 
@@ -236,6 +241,11 @@ describe("getEmbedFrame - a store with a sale on", () => {
 });
 
 describe("getEmbedFrame - every refusal is the same nothing", () => {
+  it("a site that is not on the list, alone or beside one that is", async () => {
+    expect(await getEmbedFrame(EMBED_KEY, `${SITE}/evil.example.com`)).toBeNull();
+    expect(await getEmbedFrame(EMBED_KEY, `www-evil-com.filesusr.com/${SITE}`)).toBeNull();
+  });
+
   it("a site that is not on the list, before anything is read about the seller", async () => {
     expect(await getEmbedFrame(EMBED_KEY, "evil.example.com")).toBeNull();
     expect(tablesRead()).toEqual(["storefronts"]);
@@ -284,6 +294,10 @@ describe("getEmbedFrame - every refusal is the same nothing", () => {
       [EMBED_KEY, "evil.com;script-src"],
       // A port is a development convenience; the header rule has none outside it.
       [EMBED_KEY, `${SITE}:8443`],
+      // No header rule covers an empty segment or more sites than this.
+      [EMBED_KEY, `${SITE}//${SITE}`],
+      [EMBED_KEY, ["a", "b", "c", "d", SITE].join("/")],
+      [EMBED_KEY, ""],
     ]) {
       expect(await getEmbedFrame(key, site), `${key} ${site}`).toBeNull();
     }

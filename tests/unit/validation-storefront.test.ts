@@ -205,7 +205,13 @@ describe("storefrontConfigSchema — happy path", () => {
   });
 
   it("takes a sale chip on the theme and on one tile: two closed lists, a spot and a strict hex, nothing typed", () => {
-    const chip = { saleBadge: "amount", saleBadgeLook: "ribbon", saleBadgePosition: "bottom-right", saleBadgeColor: "#dc2626" };
+    const chip = {
+      saleBadge: "amount",
+      saleBadgeLook: "ribbon",
+      saleBadgePosition: "bottom-right",
+      saleBadgeColor: "#dc2626",
+      saleBadgeTextColor: "#fde047",
+    };
     const themed = validConfig();
     Object.assign(themed.theme, chip);
     expect(storefrontConfigSchema.safeParse(themed).success).toBe(true);
@@ -230,6 +236,9 @@ describe("storefrontConfigSchema — happy path", () => {
       { saleBadgeColor: "red" },
       { saleBadgeColor: "#dc2626; background:url(x)" },
       { saleBadgeColor: "#DC2626FF" },
+      { saleBadgeTextColor: "white" },
+      { saleBadgeTextColor: "#fff; font-size:99px" },
+      { saleBadgeTextColor: "#ffffff80" },
     ]) {
       const onTheme = validConfig();
       Object.assign(onTheme.theme, bad);

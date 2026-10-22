@@ -46,6 +46,10 @@ export async function planLimitsEnforced(): Promise<boolean> {
   return (await readBillingSwitches()).planLimitsEnforced;
 }
 
+/** The moderation state that frees a plan place: a removal, which only staff
+ *  can undo (see countPlanUsage). */
+const REMOVED = "removed";
+
 /** How many of `key` the account has now. Null when it could not be counted. */
 export async function countPlanUsage(accountId: string, key: PlanLimitKey): Promise<number | null> {
   try {
@@ -57,9 +61,16 @@ export async function countPlanUsage(accountId: string, key: PlanLimitKey): Prom
             .select("id", { count: "exact", head: true })
             .eq("account_owner_id", accountId)
             .in("status", [...LIVE_SEAT_STATUSES])
-        : // Storefronts and products are both counted whole, whatever their
-          // status: a draft product takes a place like a live one.
-          admin.from(key).select("id", { count: "exact", head: true }).eq("owner_id", accountId);
+        : // Storefronts and products both count whatever their status (a
+          // draft takes a place like a live one), except what moderation has
+          // REMOVED: that is final for the seller, so it frees its place. The
+          // database trigger counts the same way
+          // (20261019_removed_content_frees_plan_room).
+          admin
+            .from(key)
+            .select("id", { count: "exact", head: true })
+            .eq("owner_id", accountId)
+            .neq("moderation_status", REMOVED);
     const { count, error } = await query;
     if (error) {
       console.error(`[billing] counting ${key} failed:`, error.message);

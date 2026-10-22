@@ -122,6 +122,11 @@
       "description": "Kupujący czekają na przesyłki. Zapakuj i oznacz jako wysłane.",
       "action": "Wyślij zamówienia"
     },
+    "withdrawals": {
+      "label": "{count, plural, one {{count} kupujący odstąpił od umowy} few {{count} kupujących odstąpiło od umowy} many {{count} kupujących odstąpiło od umowy} other {{count} kupującego odstąpiło od umowy}}",
+      "description": "Należy im się zwrot pieniędzy w ciągu 14 dni od odstąpienia. Ustal zwrot towaru, a potem zwróć pieniądze za zamówienie.",
+      "action": "Zobacz odstąpienia"
+    },
     "checkoutRates": {
       "label": "Ustaw stawki dostawy",
       "description": "Kupujący nie mogą sfinalizować zakupu fizycznego produktu, dopóki kierunek nie ma zarówno stawki, jak i kraju.",

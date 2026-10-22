@@ -306,6 +306,11 @@
       "required": "Pojmenujte kanál, nebo ho nechte prázdný.",
       "tooLong": "Název kanálu musí mít nejvýše {maximum} znaků.",
       "unsupported": "Název kanálu obsahuje nepodporované znaky."
+    },
+    "badgeLabel": {
+      "required": "Odznak musí mít text.",
+      "tooLong": "Odznak může mít nejvýše {maximum} znaků.",
+      "unsupported": "Odznak obsahuje nepodporované znaky."
     }
   },
   "email": {
@@ -485,7 +490,10 @@
     "documentsTooMany": "Produkt může mít nejvýše {maximum} dokumentů.",
     "optionDuplicate": "Každá možnost smí být uvedena jen jednou.",
     "optionsTotalTooMany": "Produkt může mít celkem nejvýše {maximum} možností.",
-    "galleryStaleOption": "Jedna z fotek je přiřazená k možnosti, která už neexistuje."
+    "galleryStaleOption": "Jedna z fotek je přiřazená k možnosti, která už neexistuje.",
+    "badgesTooMany": "Produkt může mít nejvýše {maximum} odznaků.",
+    "badgeDuplicate": "Každý odznak může být uveden jen jednou.",
+    "badgesOnPhotoTooMany": "Produkt může na fotce zobrazit nejvýše {maximum} odznaky."
   },
   "productImport": {
     "noTitle": "Chybí název.",

@@ -132,6 +132,12 @@ describe("PayoutDetailModal", () => {
     expect(screen.getByText("Bank account ···· 4821")).toBeInTheDocument();
   });
 
+  it("says it went to the bank account on file when the digits are not known, never a bare mask", () => {
+    open({ ...PAYOUT, destinationLast4: "" }, null);
+    expect(screen.getByText("Your bank account")).toBeInTheDocument();
+    expect(screen.queryByText(/····/)).toBeNull();
+  });
+
   it("ends on one button, which closes it", () => {
     const onClose = vi.fn();
     render(<PayoutDetailModal open onClose={onClose} payout={PAYOUT} />);

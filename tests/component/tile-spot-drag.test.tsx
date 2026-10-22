@@ -45,6 +45,7 @@ function dragBag(over: Partial<TileSpotDrag> = {}): TileSpotDrag {
   return {
     title: true,
     price: true,
+    sale: true,
     active: null,
     onGrab: vi.fn(),
     onCancel: vi.fn(),
@@ -132,6 +133,47 @@ describe("grabbing a token", () => {
   });
 });
 
+describe("the sale chip as a token", () => {
+  const onSale = { ...PRODUCT, sale: { price: 10, offerPercent: 20 } };
+  const chip = () => document.querySelector<HTMLElement>("[data-tile-sale-badge]")!;
+
+  it("takes no pointer at all for a buyer, and is a token on the canvas", () => {
+    render(<ProductTileContent product={onSale} theme={theme()} />);
+    expect(chip()).toHaveClass("pointer-events-none");
+    expect(chip()).not.toHaveAttribute("role");
+    cleanup();
+
+    render(<ProductTileContent product={onSale} theme={theme()} spotDrag={dragBag()} />);
+    expect(chip()).not.toHaveClass("pointer-events-none");
+    expect(chip()).toHaveAttribute("role", "button");
+    expect(chip()).toHaveAttribute("tabindex", "0");
+    expect(chip()).toHaveAccessibleName(/^Sale chip at top left\. Press to open its settings/);
+  });
+
+  it("is grabbed, arrowed and pressed like the title and the price, never moving the block", () => {
+    const drag = dragBag();
+    const onCellPointerDown = vi.fn();
+    render(
+      <div onPointerDown={onCellPointerDown}>
+        <ProductTileContent product={onSale} theme={theme()} spotDrag={drag} />
+      </div>,
+    );
+    fireEvent.pointerDown(chip(), { button: 0 });
+    expect(drag.onGrab).toHaveBeenCalledWith("sale", expect.anything());
+    expect(onCellPointerDown).not.toHaveBeenCalled();
+    fireEvent.keyDown(chip(), { key: "ArrowDown" });
+    expect(drag.onArrow).toHaveBeenCalledWith("sale", "ArrowDown");
+    // A press is the chip's own: the owner opens its settings unless it dragged.
+    fireEvent.click(chip());
+    expect(drag.onTokenClick).toHaveBeenCalledWith("sale", expect.anything());
+  });
+
+  it("stays read-only when the bag does not arm it", () => {
+    render(<ProductTileContent product={onSale} theme={theme()} spotDrag={dragBag({ sale: false })} />);
+    expect(chip()).not.toHaveAttribute("role");
+  });
+});
+
 describe("a token in flight", () => {
   it("draws the title where it is going, not where it is stored", () => {
     // The stored spot is the default bottom-left; the drag says top-right.
@@ -166,6 +208,19 @@ describe("a token in flight", () => {
     expect(price).not.toHaveClass("absolute");
     expect(price.parentElement).toContainElement(screen.getByText("Enamel mug"));
     expect(price.parentElement).toHaveClass("ring-primary");
+  });
+
+  it("draws a sale chip being dragged where it is going", () => {
+    render(
+      <ProductTileContent
+        product={{ ...PRODUCT, sale: { price: 10, offerPercent: 20 } }}
+        theme={theme()}
+        spotDrag={dragBag({ active: { token: "sale", drop: "bottom-right" } })}
+      />,
+    );
+    // Stored at the default top left; drawn at the drop.
+    expect(document.querySelector("[data-tile-sale-badge]")).toHaveClass("bottom-[var(--tag-inset,8px)]");
+    expect(document.querySelector("[data-tile-sale-badge]")).toHaveClass("right-[var(--tag-inset,8px)]");
   });
 
   it("writes nothing while it flies, so a cancel needs no restore", () => {

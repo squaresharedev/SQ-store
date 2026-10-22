@@ -28,6 +28,7 @@ export function PayoutDetailModal({
   method?: PayoutMethod | null;
 }) {
   const t = useTranslations("Payments.payoutModal");
+  const tPayments = useTranslations("Payments");
   const actions = useTranslations("Common.actions");
   const locale = useLocale();
   const bankName = method?.last4 === payout.destinationLast4 ? method.bankName : undefined;
@@ -50,9 +51,11 @@ export function PayoutDetailModal({
       <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-border pt-6">
         <DetailRow label={t("sentTo")}>
           <span className="text-sm text-foreground">
-            {bankName
-              ? `${bankName} ···· ${payout.destinationLast4}`
-              : t("bankAccount", { last4: payout.destinationLast4 })}
+            {!payout.destinationLast4
+              ? tPayments("bankOnFile")
+              : bankName
+                ? `${bankName} ···· ${payout.destinationLast4}`
+                : t("bankAccount", { last4: payout.destinationLast4 })}
           </span>
         </DetailRow>
         <DetailRow label={t("type")}>

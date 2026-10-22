@@ -496,6 +496,16 @@
     "staleOption": {
       "message": "Een foto verwijst naar een optie die niet meer bestaat.",
       "fix": "Wijs de foto opnieuw toe of ontkoppel de tag, en sla dan opnieuw op."
+    },
+    "ordersToShip": "{count, plural, one {Er moet nog een bestelling van dit product worden verzonden.} other {Er moeten nog {count} bestellingen van dit product worden verzonden.}}",
+    "ordersToShipFix": "Er is niets verwijderd. Probeer het opnieuw om ze eerst in de waarschuwing te zien.",
+    "badgeRefused": {
+      "message": "De badge “{label}” is in strijd met de platformregels en kan niet worden gebruikt.",
+      "fix": "Pas de tekst aan of kies een andere badge. Als je denkt dat dit een vergissing is, schrijf dan naar {email}."
+    },
+    "badgeNotApproved": {
+      "message": "De badge “{label}” kon niet automatisch worden goedgekeurd en kan niet worden gebruikt.",
+      "fix": "Probeer andere woorden, of schrijf naar {email} en een medewerker kijkt ernaar."
     }
   },
   "productImport": {
@@ -540,6 +550,10 @@
     "nameRequired": {
       "message": "De etalage heeft een naam nodig.",
       "fix": "Typ een naam (1 tot 80 tekens) in het veld bovenaan de editor en sla dan opnieuw op."
+    },
+    "savedElsewhere": {
+      "message": "Deze etalage is ergens anders opgeslagen sinds je hem opende.",
+      "fix": "Laad de pagina opnieuw om die versie te zien, of sla opnieuw op om hem te vervangen."
     },
     "invalidLayout": {
       "message": "De lay-outgegevens van de etalage zijn ongeldig.",

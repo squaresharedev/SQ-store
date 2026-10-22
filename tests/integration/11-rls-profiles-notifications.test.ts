@@ -284,6 +284,59 @@ describe("rate_limits table + rl_take()", () => {
     expect(rows[0].n).toBe(2);
   });
 
+  // REGRESSION (security audit 2026-10-20): rl_take is callable straight from
+  // PostgREST and takes its window from the caller. It used to persist the log
+  // pruned to THAT window, so one call with a 1-second window erased the
+  // history and the server's next check found an empty log.
+  it("a caller-chosen window cannot erase the log a real budget counts", async () => {
+    const take = () =>
+      asUser(alice, (q) =>
+        q.query(`select public.rl_take('reset_action', 3, 3600) as ok`),
+      ).then((r) => r.rows[0].ok as boolean);
+
+    expect([await take(), await take(), await take()]).toEqual([true, true, true]);
+    expect(await take()).toBe(false);
+
+    // Age the hits past any short window but well inside the real one.
+    await asSuper((q) =>
+      q.query(
+        `update public.rate_limits
+            set hits = array(select now() - interval '10 minutes' from unnest(hits))
+          where user_id = $1 and action = 'reset_action'`,
+        [alice.id],
+      ),
+    );
+
+    // The direct call a client could make, with any budget it likes.
+    await asUser(alice, (q) =>
+      q.query(`select public.rl_take('reset_action', 1000000, 1)`),
+    );
+
+    expect(await take()).toBe(false);
+  });
+
+  it("caps the stored log however large a budget a direct call names", async () => {
+    await asSuper((q) =>
+      q.query(
+        `insert into public.rate_limits (user_id, action, hits)
+         values ($1, 'cap_action', array(select now() - interval '1 minute' from generate_series(1, 5000)))
+         on conflict (user_id, action) do update set hits = excluded.hits`,
+        [alice.id],
+      ),
+    );
+    await asUser(alice, (q) =>
+      q.query(`select public.rl_take('cap_action', 1000000, 3600)`),
+    );
+    const { rows } = await asSuper((q) =>
+      q.query(
+        `select array_length(hits, 1) as n
+           from public.rate_limits where user_id = $1 and action = 'cap_action'`,
+        [alice.id],
+      ),
+    );
+    expect(rows[0].n).toBe(5000);
+  });
+
   it("anon rl_take is denied outright", async () => {
     const msg = await expectDbError(
       asAnon((q) => q.query(`select public.rl_take('x', 1, 60)`)),

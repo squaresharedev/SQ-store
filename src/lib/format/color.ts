@@ -98,6 +98,16 @@ export function readableInkOn(hex: string): string {
 }
 
 /**
+ * `ink` wherever it carries on `backdrop` (MIN_LEGIBLE_CONTRAST), and the ink
+ * that does where it would vanish. A seller's quiet pairing is kept; only one
+ * nobody could read is replaced. What the price tag and the sale chip print
+ * their words through.
+ */
+export function legibleInkOn(ink: string, backdrop: string): string {
+  return contrastRatio(ink, backdrop) >= MIN_LEGIBLE_CONTRAST ? ink : readableInkOn(backdrop);
+}
+
+/**
  * Blend two strict hex colors channel by channel in sRGB space. `amount` 0
  * returns `a`, 1 returns `b`. Used to build a tint (`b = "#ffffff"`) or a
  * shade (`b = "#000000"`) of a color without leaving hex. Either input

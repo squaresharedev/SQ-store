@@ -146,6 +146,23 @@ export const pageSubtitleClass = "mt-1 font-inter text-sm text-muted-foreground"
  *  for one thing). Sits inside `pageShellClass`, so the gutters still apply. */
 export const pageColumnNarrowClass = "mx-auto w-full max-w-2xl";
 
+/** A page's working column from the page's own left edge, like every list
+ *  page: for settings with pictures beside them (the embed page). Capped so a
+ *  field never runs the width of a wide screen. Inside `pageShellClass`. */
+export const pageColumnClass = "w-full max-w-5xl";
+
+/** A section's controls with their picture beside them: stacked on a phone,
+ *  the picture in a fixed column on the right from `md` up. */
+export const withPictureClass = "grid gap-6 md:grid-cols-[minmax(0,1fr)_18rem] md:items-start";
+
+/** The `<h2>` of a section inside a page. */
+export const sectionTitleClass = "text-base font-semibold text-foreground";
+
+/** The number of a step in a short how-to (the embed page): an ink disc, so
+ *  the order, and that every step is part of the job, read at a glance. */
+export const stepNumberClass =
+  "inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground font-inter text-sm font-semibold text-background";
+
 /**
  * Code the seller copies (the embed snippet, the buy button's link, HTML and AI
  * prompt): a white slab inside a thick border of light green shades that flows slowly
@@ -160,6 +177,15 @@ export const pageColumnNarrowClass = "mx-auto w-full max-w-2xl";
  * site that sets its own padding replaces it. Lay out the inside yourself.
  */
 export const codeSurfaceClass = "code-surface rounded-none p-1 text-foreground";
+
+/** `codeSurfaceClass` with the ring in reds: the same slab and the same flow,
+ *  for text the seller is required to use (the embed's privacy line), where
+ *  green would say "optional, take it if you like". */
+export const codeSurfaceDangerClass = `${codeSurfaceClass} code-surface-danger`;
+
+/** A snippet's text inside it: wrapped, never scrolled sideways, so a phone
+ *  shows all of it and there is no scroll region a keyboard cannot reach. */
+export const codeTextClass = "whitespace-pre-wrap break-all font-mono text-xs leading-relaxed";
 
 /**
  * Something SquareShare staff asked the seller to change (a paused product's
@@ -178,3 +204,55 @@ export const flaggedFieldClass =
  *  the same ink chip as the list card's "Paused" badge. */
 export const flagChipClass =
   "inline-flex items-center gap-1 rounded-sm bg-foreground px-1.5 py-0.5 font-inter text-xs font-medium text-background";
+
+/**
+ * The product grid: as many columns as fit at 14rem or wider, so a card is
+ * 14 to about 18rem wide at every screen and never the 9rem the viewport
+ * breakpoints give beside the sidebar on a small laptop.
+ */
+export const productGridClass = "grid gap-3 grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]";
+
+/**
+ * A PRODUCT AS A POSTER: the photo fills the card and everything else sits on
+ * it. The card is its own link target (a stretched link inside), so it lifts
+ * on hover and draws the focus ring when that link has keyboard focus.
+ * `isolate` plus the media layer at -z-10 keep the text in normal flow, which
+ * is what lets the title's link span the whole card, photo included.
+ *
+ * NO `overflow-hidden` HERE: the card's menu opens over its own edge, and a
+ * clip on the card would cut it off. Only the media layer clips (the photo's
+ * hover zoom). While the menu is open the card is raised over its neighbours,
+ * which would otherwise paint across the panel.
+ */
+export const posterCardClass =
+  "group/card relative isolate flex aspect-[4/5] flex-col justify-end border border-border bg-card shadow-xs " +
+  "transition-[transform,box-shadow] duration-base ease-standard " +
+  "hover:-translate-y-0.5 hover:shadow-md has-[[data-card-link]:focus-visible]:-translate-y-0.5 " +
+  "has-[[data-card-link]:focus-visible]:ring-2 has-[[data-card-link]:focus-visible]:ring-ring " +
+  "has-[[data-card-link]:focus-visible]:ring-offset-2 has-[[data-card-link]:focus-visible]:ring-offset-background " +
+  "has-[[role=dialog]]:z-20 motion-reduce:transition-none motion-reduce:hover:translate-y-0";
+
+/** The poster's media layer: the photo and its scrim, clipped to the card so
+ *  the photo can zoom without leaving it. Everything else on the card is free
+ *  to overhang. */
+export const posterMediaClass = "absolute inset-0 -z-10 overflow-hidden";
+
+/** The photo in that layer, easing in a touch on card hover (still under reduced motion). */
+export const posterPhotoClass =
+  "size-full object-cover transition-transform duration-slow ease-standard " +
+  "group-hover/card:scale-105 motion-reduce:transition-none motion-reduce:group-hover/card:scale-100";
+
+/** Darkens the foot of a photo so white type on it reads on any picture. Fixed
+ *  black like overlayScrimClass: its job is the same on either theme. */
+export const posterScrimClass =
+  "pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-linear-to-t from-black/85 via-black/60 via-45% to-transparent";
+
+/** Ink on a scrimmed photo: white holds on any picture; the muted step is for
+ *  the quieter lines under the name. */
+export const onPhotoTextClass = "text-white";
+export const onPhotoMutedTextClass = "text-white/75";
+
+/** A chip laid over a product photo, lifted off the picture by its own
+ *  surface and a shadow. The tone is the caller's. */
+export const photoChipClass =
+  "inline-flex max-w-full items-center gap-1 truncate rounded-sm px-1.5 py-0.5 font-inter text-xs font-medium shadow-sm";

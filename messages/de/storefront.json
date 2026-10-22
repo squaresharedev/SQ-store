@@ -183,12 +183,13 @@
     "loadMoreError": "Weitere Schaufenster konnten nicht geladen werden. Versuche es erneut.",
     "loadMore": "Mehr laden ({remaining} verbleibend)",
     "deleteTitle": "Schaufenster löschen?",
-    "deleteDesc": "„{name}“ und sein Raster werden dauerhaft entfernt. Dies kann nicht rückgängig gemacht werden.",
+    "deleteDesc": "„{name}“ und sein Raster werden dauerhaft entfernt. Dies kann nicht rückgängig gemacht werden. Bestellungen darüber bleiben erhalten, ebenso die Bestellseiten der Käufer.",
     "deleteToast": "„{name}“ wurde gelöscht."
   },
   "card": {
     "editAriaLabel": "{name} bearbeiten",
-    "embedAriaLabel": "{name} einbetten",
+    "embedAriaLabel": "{name} teilen oder einbetten",
+    "viewPageAriaLabel": "{name} so öffnen, wie Käufer es sehen",
     "deleteAriaLabel": "{name} löschen",
     "blockCount": "{count, plural, one {# Block} other {# Blöcke}}",
     "updatedLabel": " · aktualisiert {date}",
@@ -199,28 +200,52 @@
   },
   "embed": {
     "inDevNotice": "Das Einbettungs-Widget befindet sich in der Entwicklung und wird noch nicht auf externen Websites angezeigt. Konfiguriere deine Einstellungen unten, damit du den Einbettungscode einfügen kannst, sobald er verfügbar ist.",
-    "title": "Dieses Schaufenster einbetten",
-    "description": "Füge diesen Einbettungscode in eine beliebige Website ein, um „{name}“ dort anzuzeigen.",
+    "title": "Dieses Schaufenster teilen",
+    "description": "Schick Leuten einen Link zu „{name}“, oder füge einen Code in deine eigene Website ein, um es dort zu zeigen.",
+    "steps": {
+      "site": "Wähle die Websites, auf denen es erscheint",
+      "snippet": "Füge den Code in deine Website ein",
+      "privacy": "Ergänze das in deiner Datenschutzerklärung"
+    },
+    "required": "Pflicht",
     "enabledLabel": "Einbettung aktiviert",
     "domainsLabel": "Zugelassene Domains",
     "domainsPlaceholder": "yoursite.com, blog.yoursite.com",
     "domainsHint": "Bis zu {max}, kommagetrennt. Füge eine URL ein, und wir kürzen sie auf die Domain.",
     "emptyDomainsWarning": "Füge mindestens eine Domain hinzu. Solange dies leer ist, wird das Schaufenster nirgendwo geladen, auch wenn die Einbettung aktiviert ist.",
-    "snippetLabel": "Einbettungscode",
-    "snippetReadyHint": "Füge diesen Einbettungscode in das HTML deiner Website ein.",
+    "builderLabel": "Dein Website-Baukasten",
+    "builderOther": "Andere Website",
+    "builderSteps": {
+      "other": "Füge den Code in das HTML deiner Seite ein, dort, wo das Schaufenster erscheinen soll.",
+      "wordpress": "Füge einen Block „Individuelles HTML“ dort ein, wo das Schaufenster erscheinen soll, und füge den Code hinein.",
+      "squarespace": "Füge einen „Code“-Block hinzu und füge den Code hinein. Erscheint das Schaufenster erst nach dem Neuladen, wechsle zu „Nur Iframe“.",
+      "wix": "Füge „Embed Code“ und dann „Embed HTML“ hinzu und füge den Code hinein. Zieh das Feld danach so hoch wie dein Schaufenster.",
+      "webflow": "Füge ein „Code Embed“-Element hinzu und füge den Code hinein. Es erscheint auf deiner veröffentlichten Website.",
+      "shopify": "Füge im Theme-Editor einen Abschnitt „Custom Liquid“ hinzu und füge den Code hinein.",
+      "google": "Wähle „Insert“, dann „Embed“, dann „Embed code“ und füge den Code hinein.",
+      "framer": "Füge eine „Embed“-Komponente hinzu, stelle sie auf HTML und füge den Code hinein.",
+      "carrd": "Füge ein „Embed“-Element hinzu, stelle den Typ auf „Code“ und füge den Code hinein."
+    },
+    "snippetKinds": {
+      "label": "Art des Codes",
+      "script": "Skript",
+      "iframe": "Nur Iframe"
+    },
+    "snippetReadyHint": "Einmal einfügen genügt. Der Code passt sich deinem Schaufenster an und übernimmt, was du hier änderst.",
+    "iframeHint": "Für Websites, die Skripte entfernen. Er ist {height} Pixel hoch und scrollt innen. Kopiere ihn neu, wenn du deine Domains änderst.",
     "snippetLockedHint": "Aktiviere die Einbettung und füge mindestens eine Domain hinzu, um die Schaltfläche „Kopieren“ freizuschalten.",
     "snippetSaveHint": "Speichere deine Einstellungen, um die Schaltfläche „Kopieren“ freizuschalten.",
     "pagesOffHint": "Schalte zuerst im Designer die Produktseiten ein. Ein Klick auf ein Produkt öffnet seine Seite.",
     "notShowingLabel": "Wenn das Schaufenster nicht erscheint",
-    "notShowingTip": "Die Adresse deiner Website muss unter „Zugelassene Domains“ stehen, und die Website muss https verwenden. Website-Baukästen, die eigenes HTML in einen eigenen Frame setzen (Wix, Google Sites), werden noch nicht unterstützt.",
+    "notShowingTip": "Die Adresse deiner Website muss unter „Zugelassene Domains“ stehen, und die Website muss https verwenden. Eingefügter Code erscheint auf deiner veröffentlichten Website, nicht im Editor eines Baukastens. Um ihn auf einer Vorschauadresse (etwa deineseite.webflow.io) zu sehen, füge auch diese Adresse hinzu.",
     "copySnippet": {
       "copy": "Einbettungscode kopieren",
       "copied": "Einbettungscode kopiert",
       "failed": "Einbettungscode konnte nicht kopiert werden. Wähle ihn aus und kopiere ihn manuell.",
       "cannotCopyYet": "Einbettungscode kann noch nicht kopiert werden"
     },
-    "privacyLabel": "Für deine Datenschutzerklärung",
-    "privacyHint": "Deine Website lädt das Schaufenster jetzt von Squareshare, also sollte das in ihrer Datenschutzerklärung stehen. Du kannst diesen Text einfügen:",
+    "privacyHint": "Deine Website lädt dieses Schaufenster jetzt von Squareshare, deshalb muss deine Datenschutzerklärung das erwähnen. Füge diesen Text ein:",
+    "privacyTextLabel": "Datenschutztext",
     "privacyText": "Diese Website zeigt ein Schaufenster, das von Squareshare bereitgestellt wird. Beim Laden werden die IP-Adresse und Browserangaben der Besucher an Squareshare übermittelt, um die Produkte anzuzeigen und Besuche zu zählen. Squareshare setzt dafür keine Cookies und speichert nichts auf dem Gerät der Besucher. Details: {policy}",
     "copyPrivacy": {
       "copy": "Datenschutztext kopieren",
@@ -606,7 +631,8 @@
   "chipScale": {
     "label": "Auf größeren Karten",
     "tile": "Mitwachsen",
-    "cell": "Gleich bleiben"
+    "cell": "Gleich bleiben",
+    "everyCard": "Gilt für alle Karten in diesem Shop."
   },
   "layout": {
     "canvasWidth": "Breite der Arbeitsfläche",
@@ -737,8 +763,8 @@
       "showPage": {
         "label": "Produktseite anzeigen",
         "infoLabel": "Was dieser Schalter bewirkt",
-        "infoOn": "Ein Tippen auf eine Produktkachel öffnet deren Seite.",
-        "infoOff": "Produktkacheln haben keine Seite zum Öffnen."
+        "infoOn": "Ein Tippen auf eine Produktkachel öffnet deren Seite, und das Schaufenster hat eine eigene Seite zum Teilen.",
+        "infoOff": "Produktkacheln haben keine Seite zum Öffnen, und auch der Link zum Schaufenster selbst funktioniert nicht mehr."
       },
       "pageColor": "Seitenfarbe",
       "storefrontBackground": "Schaufenster-Hintergrund",
@@ -1103,7 +1129,7 @@
     "imageUnavailable": "Bild nicht verfügbar"
   },
   "spotDrag": {
-    "tokenLabel": "{token, select, title {Titel} other {Preis}} {drop, select, below {in der Titelleiste} top_left {oben links} top_center {oben mitte} top_right {oben rechts} middle_center {in der Mitte} bottom_left {unten links} bottom_center {unten mitte} bottom_right {unten rechts} other {}}. Drücken zum Öffnen der Einstellungen oder ziehen (oder Pfeiltasten verwenden) zum Verschieben."
+    "tokenLabel": "{token, select, title {Titel} sale {Aktionslabel} other {Preis}} {drop, select, below {in der Titelleiste} top_left {oben links} top_center {oben mitte} top_right {oben rechts} middle_center {in der Mitte} bottom_left {unten links} bottom_center {unten mitte} bottom_right {unten rechts} other {}}. Drücken zum Öffnen der Einstellungen oder ziehen (oder Pfeiltasten verwenden) zum Verschieben."
   },
   "autoFit": {},
   "designer": {
@@ -1112,6 +1138,7 @@
       "nameLabel": "Schaufenster-Name",
       "namePlaceholder": "Unbenanntes Schaufenster",
       "unsaved": "Nicht gespeicherte Änderungen",
+      "viewPage": "Seite ansehen",
       "search": "Suche"
     },
     "mobileNotice": {
@@ -1154,6 +1181,12 @@
       "description": "Du hast nicht gespeicherte Änderungen an diesem Schaufenster. Speichere sie vor dem Verlassen oder verwerfe sie.",
       "save": "Änderungen speichern",
       "discard": "Änderungen verwerfen",
+      "keepEditing": "Weiter bearbeiten"
+    },
+    "conflict": {
+      "title": "Jemand anderes hat dieses Schaufenster gespeichert",
+      "description": "Es wurde geändert, seit du es geöffnet hast, in einem anderen Tab oder von jemandem aus deinem Team. Wenn du jetzt speicherst, ersetzt deine Version die andere.",
+      "overwrite": "Meine darüber speichern",
       "keepEditing": "Weiter bearbeiten"
     },
     "defaults": {
@@ -1255,6 +1288,10 @@
       "blockColor": {
         "label": "die Blockfarbe",
         "use": "Blockfarbe verwenden"
+      },
+      "auto": {
+        "label": "Auto",
+        "use": "Auto verwenden"
       }
     },
     "presets": {

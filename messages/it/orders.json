@@ -30,7 +30,9 @@
     "toShipTitle": "Niente da spedire",
     "toShipHint": "Sei in pari. Gli ordini pagati in attesa di essere inviati compaiono qui, i più vecchi prima.",
     "seeAllOrders": "Vedi tutti gli ordini",
-    "hintOpen": "Quando qualcuno acquista dal tuo negozio, l’ordine compare qui e ricevi subito un avviso."
+    "hintOpen": "Quando qualcuno acquista dal tuo negozio, l’ordine compare qui e ricevi subito un avviso.",
+    "productTitle": "Ancora nessun ordine per questo prodotto",
+    "productHint": "Quando verrà venduto, i suoi ordini appariranno qui."
   },
   "list": {
     "updating": "Aggiornamento…",
@@ -55,7 +57,7 @@
     "region": "filtri ordini",
     "channel": "canale",
     "buyerEmail": "email acquirente",
-    "searchPlaceholder": "cerca email acquirente",
+    "searchPlaceholder": "cerca email, nome, città, prodotto o spedizione",
     "status": "stato",
     "statusAriaLabel": "Filtra per stato",
     "allStatuses": "Tutti gli stati",
@@ -151,6 +153,7 @@
   },
   "actions": {
     "disputeInStripe": "Le contestazioni si gestiscono dalla tua dashboard Stripe una volta collegato Stripe.",
+    "pendingPayment": "Il pagamento dell’acquirente è ancora in conferma. Non spedire ancora nulla: l’ordine risulterà pagato quando va a buon fine, e si chiuderà da solo se non ci va.",
     "none": "Nessuna azione disponibile per questo ordine."
   },
   "refund": {
@@ -171,6 +174,7 @@
     "refundedOn": "Rimborsato il {date}",
     "refundedOnReason": "{reason, select, cancelled {Annullato e rimborsato il {date}} returned {Restituito e rimborsato il {date}} other {Rimborsato il {date}}}",
     "ownerOnly": "Solo il proprietario del negozio può rimborsare o annullare un ordine.",
+    "ownerOnlyNamed": "Solo il proprietario di {store} può rimborsare o annullare un ordine. Chiediglielo.",
     "manual": "Questo pagamento non è passato tramite Square Share. Rimborsa tu stesso l'acquirente, poi registralo qui.",
     "viaProvider": "L'intero importo torna sulla carta dell'acquirente tramite Stripe. L'operazione non può essere annullata."
   },
@@ -186,6 +190,11 @@
     "label": "Quali ordini mostrare",
     "toShip": "Da spedire",
     "all": "Tutti gli ordini"
+  },
+  "productScope": {
+    "label": "Ordini per",
+    "clear": "Tutti i prodotti",
+    "clearLabel": "Mostra gli ordini di tutti i prodotti, non solo {title}"
   },
   "fulfilment": {
     "unfulfilled": "Da spedire",

@@ -2,6 +2,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest
 import { cleanup, render, screen } from "../setup/render";
 import type { Product } from "@/types/product";
 import {
+  DEFAULT_PRODUCT_PAGE_CONFIG,
   DEFAULT_STOREFRONT_CONFIG,
   type StorefrontBlock,
   type StorefrontConfig,
@@ -62,12 +63,13 @@ function summary(config: StorefrontConfig): StorefrontSummary {
   };
 }
 
-function renderCard(config: StorefrontConfig, canWrite = true) {
+function renderCard(config: StorefrontConfig, canWrite = true, sellerDetailsComplete = false) {
   return render(
     <StorefrontCard
       storefront={summary(config)}
       productsById={new Map([[PRODUCT_ID, product()]])}
       canWrite={canWrite}
+      sellerDetailsComplete={sellerDetailsComplete}
       onEmbed={() => {}}
       onDelete={() => {}}
     />,
@@ -99,6 +101,35 @@ const soldOutProduct: StorefrontBlock = {
 // "you have no products at all" to a seller who had four — the grid just
 // had none on it.
 const EMPTY_LABEL = "This grid is empty";
+
+describe("StorefrontCard page link", () => {
+  const VIEW = /as buyers see it/;
+
+  it("opens the page buyers see, straight from the list, once it is live", () => {
+    renderCard({ ...DEFAULT_STOREFRONT_CONFIG, blocks: [] }, true, true);
+    const link = screen.getByRole("link", { name: VIEW });
+    expect(link.getAttribute("href")).toMatch(/^\/s\//);
+    expect(link).toHaveAttribute("target", "_blank");
+  });
+
+  it("is there for a read-only member too: looking is not editing", () => {
+    renderCard({ ...DEFAULT_STOREFRONT_CONFIG, blocks: [] }, false, true);
+    expect(screen.getByRole("link", { name: VIEW })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Share or embed/ })).toBeNull();
+  });
+
+  it("is not offered while the seller details are missing or product pages are off", () => {
+    renderCard({ ...DEFAULT_STOREFRONT_CONFIG, blocks: [] }, true, false);
+    expect(screen.queryByRole("link", { name: VIEW })).toBeNull();
+    cleanup();
+    renderCard(
+      { ...DEFAULT_STOREFRONT_CONFIG, blocks: [], productPage: { ...DEFAULT_PRODUCT_PAGE_CONFIG, enabled: false } },
+      true,
+      true,
+    );
+    expect(screen.queryByRole("link", { name: VIEW })).toBeNull();
+  });
+});
 
 describe("StorefrontCard empty preview", () => {
   it("explains the blank box when the storefront has no blocks", () => {
@@ -143,33 +174,24 @@ describe("StorefrontCard empty decoration", () => {
     return container.querySelector("svg[viewBox='0 0 200 150']");
   }
 
-  it("paints itself in the storefront's own accent", () => {
-    const { container } = renderCard({
-      ...DEFAULT_STOREFRONT_CONFIG,
-      theme: { ...DEFAULT_STOREFRONT_CONFIG.theme, accent: "#c9a227" },
-      blocks: [],
-    });
-    // One `color` on the root; every shape is currentColor beneath it.
-    expect(decoration(container)).toHaveStyle({ color: "#c9a227" });
-  });
-
-  // The render path re-gates hex rather than trusting the stored value, so a
-  // legacy row cannot put a junk value into a paint attribute. Falling through
-  // to inherited ink keeps the shapes visible instead of blanking them.
-  it("inherits ink rather than painting an accent that is not strict hex", () => {
+  // One look for every empty card: the storefront's own accent and canvas are
+  // deliberately ignored, so a dark or tinted empty storefront reads the same
+  // as a white one.
+  it("ignores the storefront's accent and canvas", () => {
     const { container } = renderCard({
       ...DEFAULT_STOREFRONT_CONFIG,
       theme: {
         ...DEFAULT_STOREFRONT_CONFIG.theme,
-        accent: "red" as unknown as string,
+        accent: "#c9a227",
+        background: { kind: "solid", color: "#171717" },
       },
       blocks: [],
     });
     const svg = decoration(container) as SVGElement | null;
     expect(svg).not.toBeNull();
-    // Only the colour is withheld. The group opacity still applies, otherwise
-    // the fallback would paint the shapes at full strength.
     expect(svg!.style.color).toBe("");
     expect(svg!.style.opacity).not.toBe("");
+    expect(svg).toHaveClass("text-foreground");
+    expect(svg!.parentElement).toHaveClass("bg-background");
   });
 });

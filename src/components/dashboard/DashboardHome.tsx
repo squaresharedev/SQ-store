@@ -32,6 +32,7 @@ export function DashboardHome({
   recentOrderDetails = [],
   recentOrderGlances,
   toShipCount = 0,
+  withdrawalsToSettle = 0,
   canFulfil = false,
   checkoutOpen = false,
 }: {
@@ -42,6 +43,8 @@ export function DashboardHome({
   recentOrderGlances?: Record<string, OrderGlance>;
   /** Paid orders waiting to be shipped; above zero adds the row that says so. */
   toShipCount?: number;
+  /** Recent withdrawals still waiting for their refund; above zero adds a row. */
+  withdrawalsToSettle?: number;
   /** Whether the viewer may mark orders shipped from an opened order. */
   canFulfil?: boolean;
   /** Whether a buyer can pay through Square Share checkout right now. */
@@ -126,6 +129,7 @@ export function DashboardHome({
               setupVisible,
               twoFactorEnabled,
               toShipCount,
+              withdrawalsToSettle,
               checkoutOpen,
             })}
           />

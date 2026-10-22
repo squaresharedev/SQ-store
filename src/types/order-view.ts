@@ -217,15 +217,25 @@ export type OrderDiscount = {
  */
 export const ORDERS_SEARCH_MAX_LENGTH = 254;
 
+/**
+ * The status filter's one value that is not a database status: paid orders a
+ * buyer has withdrawn from, waiting for their refund (lib/orders/queries.ts).
+ */
+export const WITHDRAWN_STATUS_FILTER = "withdrawn";
+
+/** What the Orders status filter can ask for. */
+export type OrderStatusFilter = OrderStatus | typeof WITHDRAWN_STATUS_FILTER;
+
 /** Toolbar output = query input. All fields optional; absent = no filter. */
 export type OrderFilters = {
-  status?: OrderStatus;
+  status?: OrderStatusFilter;
   channel?: OrderChannel;
   /** Inclusive ISO date (YYYY-MM-DD) lower bound on createdAt. */
   dateFrom?: string;
   /** Inclusive ISO date (YYYY-MM-DD) upper bound on createdAt. */
   dateTo?: string;
-  /** Case-insensitive substring match on buyerEmail, capped at
+  /** Case-insensitive substring match on the buyer's email and name, the
+   *  delivery city, the product and the tracking number, capped at
    *  ORDERS_SEARCH_MAX_LENGTH by whoever populates it. */
   search?: string;
 };

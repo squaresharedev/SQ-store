@@ -7,6 +7,7 @@ import {
   DEFAULT_IMAGE_PLACEMENT,
   resolveCardStyle,
   resolvePriceTagPosition,
+  resolveSaleBadgePosition,
   resolveTitlePosition,
   titleBandRow,
   type ImagePlacement,
@@ -18,6 +19,7 @@ import {
 import {
   nearestTileSpot,
   priceSpots,
+  saleChipSpots,
   spotAfterArrow,
   titleSpots,
   type SpotArrow,
@@ -304,6 +306,15 @@ export const BlockTile = memo(function BlockTile({
       cornerRadius: card.cornerRadius,
       titleBand: bandRow,
     });
+  // And the sale chip, which keeps off the rows those two hold.
+  const saleAt =
+    card && priceAt
+      ? resolveSaleBadgePosition(card.saleBadgePosition, {
+          cornerRadius: card.cornerRadius,
+          titleBand: bandRow,
+          priceTag: priceAt,
+        })
+      : null;
 
   type Flight = {
     token: SpotToken;
@@ -335,6 +346,11 @@ export const BlockTile = memo(function BlockTile({
 
   function spotsFor(token: SpotToken): readonly TileSpot[] {
     if (!card) return [];
+    if (token === "sale") {
+      return priceAt && saleAt
+        ? saleChipSpots({ cornerRadius: card.cornerRadius, titleBand: bandRow, priceTag: priceAt, current: saleAt })
+        : [];
+    }
     return token === "title"
       ? titleSpots(card.titleStyle, card.cornerRadius)
       : priceSpots(card.cornerRadius, bandRow);
@@ -379,14 +395,17 @@ export const BlockTile = memo(function BlockTile({
     ? {
         title: card!.showTitle,
         price: card!.priceTagPosition !== "hidden",
+        sale: card!.saleBadge !== "hidden",
         active: flying ? { token: flying.token, drop: flying.drop } : null,
         onGrab: (token) => {
           const from: SpotDrop =
             token === "title"
               ? (titleAt ?? "middle-center")
-              : priceAt === "below" || priceAt === "hidden"
-                ? "below"
-                : (priceAt ?? "middle-center");
+              : token === "sale"
+                ? (saleAt ?? "middle-center")
+                : priceAt === "below" || priceAt === "hidden"
+                  ? "below"
+                  : (priceAt ?? "middle-center");
           setFlight({
             token,
             drop: from,
@@ -451,9 +470,13 @@ export const BlockTile = memo(function BlockTile({
           const lifting =
             token === "price" && (priceAt === "below" || priceAt === "hidden");
           const from =
-            token === "title" ? (titleAt ?? available[0]) : lifting
-              ? available[0]
-              : ((priceAt as TileSpot | null) ?? available[0]);
+            token === "title"
+              ? (titleAt ?? available[0])
+              : token === "sale"
+                ? (saleAt ?? available[0])
+                : lifting
+                  ? available[0]
+                  : ((priceAt as TileSpot | null) ?? available[0]);
           const next = lifting ? from : spotAfterArrow(from, key, available);
           // Nothing to write when the token is already against that edge.
           if (lifting || next !== from) onSpotChange?.(blockKey, token, next);

@@ -3,8 +3,9 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
-import { infoTextClass } from "@/components/ui/control-styles";
+import { infoTextClass, quietLinkClass } from "@/components/ui/control-styles";
 import { authenticate } from "@/lib/auth/actions";
+import { SIGNUP_CHECK_EMAIL_KEY } from "@/lib/auth/signup";
 import type { ActionState } from "@/lib/errors";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,7 @@ export function LoginForm({
   const [state, formAction, isPending] = useActionState(authenticate, INITIAL);
   const resolveMessage = useResolveMessage();
   const formRef = React.useRef<HTMLFormElement>(null);
+  const submittedIdentifier = React.useRef("");
   const [resetOpen, setResetOpen] = React.useState(false);
   const [resetEmail, setResetEmail] = React.useState("");
   const [turnstileToken, setTurnstileToken] = React.useState("");
@@ -137,6 +139,11 @@ export function LoginForm({
       <form
         ref={formRef}
         action={formAction}
+        // The address as sent: React clears the fields once the action answers,
+        // and the "didn't get the email?" way round puts it back.
+        onSubmit={(event) => {
+          submittedIdentifier.current = String(new FormData(event.currentTarget).get("identifier") ?? "");
+        }}
         className="flex flex-col gap-5"
         noValidate
       >
@@ -293,6 +300,24 @@ export function LoginForm({
               <p className="text-sm font-medium text-foreground">
                 {resolveMessage(state.success)}
               </p>
+            )}
+            {/* A confirmation that never arrives (spam, a typo'd filter) was a
+                dead end: the form had nothing more to offer. A sign-in link
+                to the same address confirms it as well, and the address just
+                sent is put back in the box. */}
+            {state.success?.key === SIGNUP_CHECK_EMAIL_KEY && !isMagic && (
+              <button
+                type="button"
+                onClick={() => {
+                  changeMode("magic");
+                  const field = formRef.current?.querySelector<HTMLInputElement>("#identifier");
+                  if (field && !field.value) field.value = submittedIdentifier.current;
+                }}
+                className={`${quietLinkClass} mt-2`}
+                data-signup-no-email=""
+              >
+                {t("noConfirmationEmail")}
+              </button>
             )}
           </div>
         )}

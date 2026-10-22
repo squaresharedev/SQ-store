@@ -52,8 +52,14 @@ vi.mock("@/lib/supabase/server", () => ({
 /** The service-role client, which is the ONLY way to reach email_by_username
  *  and username_taken: neither is granted to anon or authenticated. */
 const adminRpc = vi.fn();
+/** Table writes through the service role: today only the signup intent. */
+const adminInsert = vi.fn();
+const adminFrom = vi.fn((table: string) => ({
+  insert: (row: unknown) => adminInsert(table, row),
+  delete: () => ({ lt: async () => ({ error: null }) }),
+}));
 vi.mock("@/lib/supabase/admin", () => ({
-  createAdminClient: () => ({ rpc: adminRpc }),
+  createAdminClient: () => ({ rpc: adminRpc, from: adminFrom }),
 }));
 
 // ---- imports -------------------------------------------------------------
@@ -110,6 +116,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   rateLimitKeyMock.mockResolvedValue(true);
   adminRpc.mockResolvedValue({ data: null, error: null });
+  adminInsert.mockResolvedValue({ error: null });
+  auth.signInWithOtp.mockResolvedValue({ data: {}, error: null });
   auth.resetPasswordForEmail.mockResolvedValue({ error: null });
   // Shaped like a real success: Supabase always returns the user with it.
   auth.signInWithPassword.mockResolvedValue({
@@ -442,6 +450,81 @@ describe("auth rate limits", () => {
     }
   });
 
+});
+
+// ==========================================================================
+// Sign-up only through the app: the intent the Before User Created hook spends
+// ==========================================================================
+describe("sign-up intent", () => {
+  const sha256 = async (text: string) => {
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+  };
+
+  it("is written once every guard has passed, before GoTrue is asked", async () => {
+    await authenticate({}, signUpForm({ identifier: "New@User.com" }));
+
+    expect(adminInsert).toHaveBeenCalledTimes(1);
+    const [table, row] = adminInsert.mock.calls[0];
+    expect(table).toBe("signup_intents");
+    // The hash the hook recomputes in SQL: of the trimmed, lower-cased address.
+    expect((row as { email_hash: string }).email_hash).toBe(await sha256("new@user.com"));
+    expect(adminInsert.mock.invocationCallOrder[0]).toBeLessThan(
+      auth.signUp.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("is never written for a sign-up a guard refuses", async () => {
+    await authenticate({}, signUpForm({ identifier: "someone@mailinator.com" }));
+    denyOnly("auth_signup_client");
+    await authenticate({}, signUpForm());
+    await authenticate({}, signUpForm({ username: "support" }));
+
+    expect(adminInsert).not.toHaveBeenCalled();
+    expect(auth.signUp).not.toHaveBeenCalled();
+  });
+
+  it("does not block the sign-up when the write fails (the hook decides)", async () => {
+    adminInsert.mockResolvedValue({ error: { message: "down" } });
+    const result = await authenticate({}, signUpForm());
+    expect(auth.signUp).toHaveBeenCalled();
+    expect(errorText(result)).toBeUndefined();
+  });
+});
+
+// ==========================================================================
+// Magic link: signs in, never signs up
+// ==========================================================================
+describe("magic link", () => {
+  const MAGIC_REPLY = "If that email has an account, a sign-in link is on its way.";
+
+  it("never creates an account", async () => {
+    await authenticate({}, form({ intent: "magic", email: "a@b.com" }));
+    const [args] = auth.signInWithOtp.mock.calls[0];
+    expect(args.options.shouldCreateUser).toBe(false);
+  });
+
+  it("gives the same reply whether or not the address has an account", async () => {
+    const sent = await authenticate({}, form({ intent: "magic", email: "a@b.com" }));
+    expect(successText(sent)).toBe(MAGIC_REPLY);
+
+    // What GoTrue answers for an unknown address once it may not create one.
+    auth.signInWithOtp.mockResolvedValue({
+      data: {},
+      error: { code: "otp_disabled", message: "Signups not allowed for otp" },
+    });
+    const unknown = await authenticate({}, form({ intent: "magic", email: "a@b.com" }));
+    expect(successText(unknown)).toBe(MAGIC_REPLY);
+    expect(errorText(unknown)).toBeUndefined();
+
+    // Its per-address throttle only trips on real accounts: same reply.
+    auth.signInWithOtp.mockResolvedValue({
+      data: {},
+      error: { code: "over_email_send_rate_limit", message: "too soon" },
+    });
+    const throttled = await authenticate({}, form({ intent: "magic", email: "a@b.com" }));
+    expect(successText(throttled)).toBe(MAGIC_REPLY);
+  });
 });
 
 // ==========================================================================

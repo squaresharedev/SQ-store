@@ -72,10 +72,11 @@ export async function DashboardShell({
   const avatarUrl = profile?.avatar_url ?? null;
 
   const viewingOther = account && !account.isOwner ? account : null;
-  const viewingStoreName = viewingOther
-    ? accounts.find((a) => a.accountId === viewingOther.accountId)?.storeName ??
-      t("anotherStore")
+  // The store's own name when it is known; the chrome falls back to words.
+  const viewingStoreKnownName = viewingOther
+    ? (accounts.find((a) => a.accountId === viewingOther.accountId)?.storeName ?? null)
     : null;
+  const viewingStoreName = viewingOther ? (viewingStoreKnownName ?? t("anotherStore")) : null;
 
   // The publish gate, stated once in the chrome so it is visible from whatever
   // page the seller is on rather than only from the one they happen to be
@@ -167,7 +168,9 @@ export async function DashboardShell({
                   brings its own <main>, and this only has to take focus. */}
               <div id={MAIN_CONTENT_ID} tabIndex={-1} className="outline-none">
                 <OrderMailProvider enabled={emailSendingEnabled()}>
-                  <OrderRefundProvider allowed={can(account?.role, "orders.refund")}>{children}</OrderRefundProvider>
+                  <OrderRefundProvider allowed={can(account?.role, "orders.refund")} storeName={viewingStoreKnownName}>
+                    {children}
+                  </OrderRefundProvider>
                 </OrderMailProvider>
               </div>
             </div>

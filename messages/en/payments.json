@@ -1,6 +1,7 @@
 {
   "pageTitle": "Payments",
   "soon": "Soon",
+  "bankOnFile": "Your bank account",
   "balance": {
     "available": {
       "label": "Available",

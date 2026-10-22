@@ -4,7 +4,10 @@ import { useCallback, useState } from "react";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import { secondaryButtonClass } from "@/components/ui/control-styles";
 import {
+  DEFAULT_SALE_BADGE_LOOK,
   DEFAULT_STOREFRONT_CONFIG,
+  SALE_BADGE_LOOKS,
+  type SaleBadgeLook,
   blockKey,
   mergeCardStyleOverrides,
   type CardStyleOverrides,
@@ -93,6 +96,10 @@ const PRODUCT: Product = {
   maxPerOrder: 10,
 };
 
+/** The same product while a sale takes a fifth off: the regular price struck
+ *  through and the sale chip, which is a token like the title and the price. */
+const SALE_PRODUCT: Product = { ...PRODUCT, sale: { price: 10, offerPercent: 20 } };
+
 /** The catalogue, as the toolbar wants it: one product, by id. */
 const PRODUCTS_BY_ID = new Map([[PRODUCT.id, PRODUCT]]);
 
@@ -145,6 +152,11 @@ const INITIAL_BLOCKS: StorefrontBlock[] = [
 export function GridPlayground() {
   const [blocks, setBlocks] = useState(INITIAL_BLOCKS);
   const [round, setRound] = useState(false);
+  /** Whether the product is on sale, which is what puts a sale chip on it. */
+  const [onSale, setOnSale] = useState(false);
+  /** Which look the sale chip wears, cycled by a button, so each one can be
+   *  judged as the canvas draws it (a draggable token). */
+  const [chipLook, setChipLook] = useState<SaleBadgeLook>(DEFAULT_SALE_BADGE_LOOK);
   /** Whether blocks may share cells, as the designer's own board allows. Off by
    *  default (the grid's own default), so both of the grid's drop rules can be
    *  driven here: the stacking one the designer uses, and the packed one. */
@@ -190,6 +202,7 @@ export function GridPlayground() {
     // The roundness toggle still wins: it is testing the circle clip, not the
     // look. Off, the look's own radius applies (sharp, or Classic's 8).
     cornerRadius: round ? 100 : base.cornerRadius,
+    saleBadgeLook: chipLook,
     columns: COLUMNS,
     rows: ROWS,
   };
@@ -241,6 +254,24 @@ export function GridPlayground() {
           className={secondaryButtonClass}
         >
           {round ? "Sharp corners" : "Round corners (circle)"}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOnSale((on) => !on)}
+          aria-pressed={onSale}
+          className={secondaryButtonClass}
+        >
+          {onSale ? "End the sale" : "Put the mug on sale"}
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            setChipLook((look) => SALE_BADGE_LOOKS[(SALE_BADGE_LOOKS.indexOf(look) + 1) % SALE_BADGE_LOOKS.length])
+          }
+          className={secondaryButtonClass}
+          data-chip-look={chipLook}
+        >
+          Chip look: {chipLook}
         </button>
         <button
           type="button"
@@ -392,7 +423,7 @@ export function GridPlayground() {
                   blockKey={gridBlock.key}
                   block={gridBlock.data}
                   product={
-                    gridBlock.data.type === "product" ? PRODUCT : null
+                    gridBlock.data.type === "product" ? (onSale ? SALE_PRODUCT : PRODUCT) : null
                   }
                   theme={theme}
                   editable={state.editable}
@@ -431,9 +462,16 @@ export function GridPlayground() {
                       key,
                       token === "title"
                         ? { titlePosition: drop === "below" ? undefined : drop }
-                        : { priceTagPosition: drop },
+                        : token === "sale"
+                          ? drop === "below"
+                            ? {}
+                            : { saleBadgePosition: drop }
+                          : { priceTagPosition: drop },
                     )
                   }
+                  // The designer opens the pressed label's own settings; the
+                  // harness has no inspector, so it records which.
+                  onOpenSpotSetting={(key, token) => setLastPanel(`setting:${token}:${key}`)}
                 />
               )}
             />

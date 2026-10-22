@@ -30,7 +30,9 @@
     "toShipTitle": "Rien à expédier",
     "toShipHint": "Vous êtes à jour. Les commandes payées en attente d'envoi apparaissent ici, les plus anciennes en premier.",
     "seeAllOrders": "Voir toutes les commandes",
-    "hintOpen": "Quand quelqu’un achète dans votre boutique, la commande apparaît ici et vous êtes prévenu tout de suite."
+    "hintOpen": "Quand quelqu’un achète dans votre boutique, la commande apparaît ici et vous êtes prévenu tout de suite.",
+    "productTitle": "Pas encore de commandes pour ce produit",
+    "productHint": "Quand il se vendra, ses commandes apparaîtront ici."
   },
   "list": {
     "updating": "Mise à jour…",
@@ -55,7 +57,7 @@
     "region": "filtres de commande",
     "channel": "canal",
     "buyerEmail": "e-mail de l’acheteur",
-    "searchPlaceholder": "rechercher l’e-mail de l’acheteur",
+    "searchPlaceholder": "rechercher e-mail, nom, ville, produit ou suivi",
     "status": "statut",
     "statusAriaLabel": "Filtrer par statut",
     "allStatuses": "Tous les statuts",
@@ -151,6 +153,7 @@
   },
   "actions": {
     "disputeInStripe": "Les litiges se gèrent depuis votre tableau de bord Stripe une fois Stripe connecté.",
+    "pendingPayment": "Le paiement de l’acheteur est encore en cours de confirmation. N’envoyez rien pour l’instant : la commande apparaîtra comme payée dès qu’il aboutit, et se fermera d’elle-même sinon.",
     "none": "Aucune action n’est disponible pour cette commande."
   },
   "refund": {
@@ -171,6 +174,7 @@
     "refundedOn": "Remboursé le {date}",
     "refundedOnReason": "{reason, select, cancelled {Annulé et remboursé le {date}} returned {Retourné et remboursé le {date}} other {Remboursé le {date}}}",
     "ownerOnly": "Seul le propriétaire de la boutique peut rembourser ou annuler une commande.",
+    "ownerOnlyNamed": "Seul le propriétaire de {store} peut rembourser ou annuler une commande. Demandez-lui de le faire.",
     "manual": "Ce paiement n'est pas passé par Square Share. Remboursez l'acheteur directement, puis enregistrez-le ici.",
     "viaProvider": "La totalité du montant est remboursée sur la carte de l'acheteur via Stripe. Cette action est irréversible."
   },
@@ -186,6 +190,11 @@
     "label": "Commandes à afficher",
     "toShip": "À expédier",
     "all": "Toutes les commandes"
+  },
+  "productScope": {
+    "label": "Commandes pour",
+    "clear": "Tous les produits",
+    "clearLabel": "Afficher les commandes de tous les produits, pas seulement {title}"
   },
   "fulfilment": {
     "unfulfilled": "À expédier",

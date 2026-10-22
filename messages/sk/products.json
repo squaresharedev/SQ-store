@@ -76,7 +76,9 @@
     "deleteDialog": {
       "title": "Zmazať tento produkt?",
       "description": "{storefronts, plural, =0 {„{title}“ a k nemu nahraný obrázok a súbor budú trvalo odstránené. Existujúce objednávky si zachovajú záznam o predaji.} one {„{title}“ a k nemu nahraný obrázok a súbor budú trvalo odstránené. Existujúce objednávky si zachovajú záznam o predaji. Je v {storefronts} výklade. Blok zostane, kým ho neodstránite.} few {„{title}“ a k nemu nahraný obrázok a súbor budú trvalo odstránené. Existujúce objednávky si zachovajú záznam o predaji. Je v {storefronts} výkladoch. Bloky zostanú, kým ich neodstránite.} many {„{title}“ a k nemu nahraný obrázok a súbor budú trvalo odstránené. Existujúce objednávky si zachovajú záznam o predaji. Je v {storefronts} výkladu. Bloky zostanú, kým ich neodstránite.} other {„{title}“ a k nemu nahraný obrázok a súbor budú trvalo odstránené. Existujúce objednávky si zachovajú záznam o predaji. Je v {storefronts} výkladoch. Bloky zostanú, kým ich neodstránite.}}",
-      "confirm": "Zmazať produkt"
+      "toShip": "{count, plural, one {{count} objednávka tohto produktu ešte čaká na odoslanie.} few {{count} objednávky tohto produktu ešte čakajú na odoslanie.} many {{count} objednávky tohto produktu ešte čaká na odoslanie.} other {{count} objednávok tohto produktu ešte čaká na odoslanie.}} Zostanú v Objednávkach aj s jeho názvom a cenou, takže ich môžete ďalej odoslať.",
+      "confirm": "Zmazať produkt",
+      "confirmAnyway": "Napriek tomu zmazať"
     },
     "chooser": {
       "openTitle": "Otvoriť v ktorom výklade?",
@@ -98,7 +100,26 @@
     "openPage": "Otvoriť stránku produktu",
     "unitsSold": "{count, plural, one {{count} predaný kus} few {{count} predané kusy} many {{count} predaného kusa} other {{count} predaných kusov}}",
     "noSales": "Zatiaľ žiadny predaj",
-    "addToWebsite": "Pridať na váš web"
+    "addToWebsite": "Pridať na váš web",
+    "unlimited": "Neobmedzené",
+    "noStorefront": "Bez výkladu",
+    "ship": "Odoslať"
+  },
+  "shareCard": {
+    "scanToShop": "Naskenujte a nakúpte",
+    "templates": {
+      "masthead": "Titulka",
+      "echo": "Ozvena",
+      "numerals": "Veľká cena",
+      "popout": "Z rámu",
+      "orbit": "Prstenec",
+      "sticker": "Nálepka"
+    },
+    "formats": {
+      "square": "Štvorcový príspevok",
+      "portrait": "Príspevok na výšku",
+      "story": "Príbeh"
+    }
   },
   "removal": {
     "badge": "Odstránené",
@@ -130,7 +151,7 @@
     "concerned": "Čoho sa to týkalo",
     "showField": "Zobraziť {field} na tejto stránke",
     "fields": {
-      "product": "{field, select, title {Názov} description {Popis} price {Cena} image {Hlavný obrázok} file {Digitálny súbor} purchaseLink {Odkaz na nákup} shipping {Doprava} options {Možnosti} photos {Fotky} specs {Špecifikácie} documents {Dokumenty} safety {Bezpečnosť a zhoda} other {Niečo iné}}",
+      "product": "{field, select, title {Názov} description {Popis} price {Cena} image {Hlavný obrázok} file {Digitálny súbor} purchaseLink {Odkaz na nákup} shipping {Doprava} options {Možnosti} photos {Fotky} specs {Odznaky a špecifikácie} documents {Dokumenty} safety {Bezpečnosť a zhoda} other {Niečo iné}}",
       "storefront": "{field, select, name {Názov výkladu} header {Hlavička} text {Text} images {Obrázky} products {Zobrazené produkty} background {Pozadie} productPage {Stránky produktov} other {Niečo iné}}"
     },
     "reference": "Referencia",
@@ -154,7 +175,9 @@
     },
     "editorDetails": "Prečo a čo robiť ďalej",
     "badgePending": "Kontroluje sa",
+    "badgePendingHint": "Kupujúci ho uvidia, keď ho automatická kontrola schváli.",
     "badgeReview": "V posudzovaní",
+    "badgeReviewHint": "Kontroluje ho človek. Kupujúci ho uvidia, keď bude schválený.",
     "titlePending": "{kind, select, product {Tento produkt sa práve kontroluje} other {Tento výklad sa práve kontroluje}}",
     "titleReview": "{kind, select, product {Tento produkt kontroluje človek} other {Tento výklad kontroluje človek}}",
     "hiddenPending": "Kupujúci ho neuvidia, kým sa neskončí automatická kontrola. Zvyčajne to trvá pár sekúnd: načítajte stránku znova a uvidíte, ako to dopadlo.",
@@ -175,6 +198,7 @@
     "fileEmpty": "Tento súbor je prázdny.",
     "imported": "{count, plural, one {{count} produkt bol naimportovaný.} few {{count} produkty boli naimportované.} many {{count} produktu bolo naimportovaných.} other {{count} produktov bolo naimportovaných.}}",
     "skippedRows": "{count, plural, one {{count} riadok bol preskočený.} few {{count} riadky boli preskočené.} many {{count} riadku bolo preskočených.} other {{count} riadkov bolo preskočených.}}",
+    "checkingRows": "{count, plural, one {{count} produkt sa ešte kontroluje: kupujúci ho uvidia, keď ho automatická kontrola schváli.} few {{count} produkty sa ešte kontrolujú: kupujúci ich uvidia, keď ich automatická kontrola schváli.} many {{count} produktu sa ešte kontroluje: kupujúci ich uvidia, keď ich automatická kontrola schváli.} other {{count} produktov sa ešte kontroluje: kupujúci ich uvidia, keď ich automatická kontrola schváli.}}",
     "dropPrompt": "Presuňte sem CSV alebo kliknutím vyberte súbor",
     "fileMeta": "{size} · vyberte iný na začatie odznova",
     "rowsLimit": "{max, plural, one {Až {max} produkt na súbor} few {Až {max} produkty na súbor} many {Až {max} produktu na súbor} other {Až {max} produktov na súbor}}",
@@ -258,6 +282,11 @@
         "label": "Viditeľnosť",
         "description": "Aktívny znamená zverejnený: kupujúci ho môžu okamžite vidieť a kúpiť. Koncept je skrytý pred kupujúcimi, kým ho neprepnete.",
         "about": "Na čo slúži sekcia Viditeľnosť"
+      },
+      "badges": {
+        "label": "Odznaky",
+        "description": "Niekoľko slov na stránke produktu: dôvod dôverovať vám alebo skutočnosť, ktorá zaujme na prvý pohľad. Vyberte hotový odznak alebo napíšte vlastný, dajte ikone farbu a umiestnite ho vedľa produktu alebo na fotku.",
+        "about": "Na čo slúžia odznaky"
       }
     },
     "summary": {
@@ -283,7 +312,8 @@
       "documents": "{count, plural, one {{count} dokument} few {{count} dokumenty} many {{count} dokumentu} other {{count} dokumentov}}",
       "started": "Začaté",
       "active": "Aktívny",
-      "draft": "Koncept"
+      "draft": "Koncept",
+      "badges": "{count, plural, one {{count} odznak} few {{count} odznaky} many {{count} odznaku} other {{count} odznakov}}"
     },
     "errors": {
       "titleRequired": "Dajte produktu názov, kupujúci ho uvidia ako prvé.",
@@ -309,7 +339,9 @@
         "notPositive": "Cena musí byť číslo väčšie ako nula.",
         "tooManyDecimals": "Ceny môžu mať najviac dve desatinné miesta.",
         "tooHigh": "Cena nesmie presiahnuť {currency} {max}."
-      }
+      },
+      "badgeDuplicate": "Dva odznaky hovoria to isté. Zmeňte text jedného z nich alebo ho odstráňte.",
+      "badgesOnPhoto": "Na fotku sa zmestia len {max} odznaky. Presuňte jeden vedľa produktu."
     },
     "title": "Názov",
     "titlePlaceholder": "napr. Ambient Loops Vol. 1",
@@ -337,6 +369,7 @@
     "saveProduct": "Uložiť produkt",
     "savedToast": "Produkt „{title}“ bol uložený.",
     "addedToast": "Produkt „{title}“ bol pridaný k vašim produktom.",
+    "checkingToast": "Kupujúci ho uvidia, keď ho automatická kontrola schváli.",
     "documentFallbackLabel": "Dokument",
     "discard": {
       "title": "Zahodiť zmeny?",
@@ -574,6 +607,9 @@
     "hint": "PNG, JPG, WEBP, GIF alebo AVIF, najviac {max} MB",
     "remove": "Odobrať hlavný obrázok"
   },
+  "photoFormat": {
+    "heic": "To je fotka z iPhonu (HEIC), ktorú prehliadače nevedia zobraziť. Vyberte ju radšej z fotiek v telefóne, odkiaľ sa odošle ako JPEG, alebo ju najprv exportujte ako JPEG."
+  },
   "fileDropzone": {
     "currentFile": "Aktuálny súbor",
     "dropPrompt": "Presuňte sem súbor alebo kliknutím nahrajte",
@@ -718,6 +754,233 @@
       "card": "Číslo karty",
       "total": "Spolu",
       "pay": "Zaplatiť {price}"
+    }
+  },
+  "badgesField": {
+    "listLabel": "Odznaky",
+    "labelFor": "Text odznaku {position}",
+    "iconFor": "Ikona a farba odznaku {position}",
+    "labelPlaceholder": "Čo odznak hovorí",
+    "moveEarlier": "Posunutť odznak {position} vyššie",
+    "moveLater": "Posunutť odznak {position} nižšie",
+    "remove": "Odstrániť odznak {position}",
+    "addFirst": "Pridať odznak",
+    "addAnother": "Pridať ďalší",
+    "full": "To je {max} odznakov, najviac čo môže jeden produkt zobrazovať. Odstráňte jeden, aby ste mohli pridať ďalší.",
+    "iconPicker": "Vybrať ikonu",
+    "icons": {
+      "badge-check": "Odznak so zaškrtnutím",
+      "heart": "Srdce",
+      "star": "Hviezda",
+      "award": "Rozeta",
+      "trophy": "Pohár",
+      "thumbs-up": "Palec hore",
+      "users": "Ľudia",
+      "sparkles": "Iskierky",
+      "gem": "Drahokam",
+      "gift": "Darček",
+      "truck": "Kamión",
+      "zap": "Blesk",
+      "clock": "Hodiny",
+      "rotate-ccw": "Šípka vrátenia",
+      "shield-check": "Štít",
+      "lock": "Zámok",
+      "leaf": "List",
+      "recycle": "Recyklácia",
+      "sprout": "Výhonok",
+      "trees": "Stromy",
+      "package": "Balík",
+      "vegan": "Vegán",
+      "rabbit": "Zajac",
+      "paw-print": "Odtlačok labky",
+      "wheat-off": "Bez pšenice",
+      "droplets": "Kvapky",
+      "sun": "Slnko",
+      "snowflake": "Snehoá vločka",
+      "hand-heart": "Ruka so srdcom",
+      "hammer": "Kladivo",
+      "pen-tool": "Pero",
+      "map-pin": "Špendlík",
+      "store": "Obchod",
+      "handshake": "Podanie ruky",
+      "globe": "Zemeguľa",
+      "flame": "Plameň"
+    },
+    "picker": {
+      "open": "Vyhľadať alebo napísať vlastný",
+      "label": "Pridať odznak",
+      "search": "Vyhľadať odznaky",
+      "placeholder": "Vyhľadajte alebo napíšte vlastné slová",
+      "results": "Odznaky",
+      "groups": {
+        "trust": "Dôvera a servis",
+        "product": "O produkte"
+      },
+      "create": "Pridať „{label}“",
+      "checking": "Kontroluje sa…",
+      "added": "Pridané",
+      "alreadyOn": "Tento produkt už tento odznak má.",
+      "noMatches": "Žiadny hotový odznak nezodpovedá."
+    },
+    "stylePicker": "Ikona a farba",
+    "iconHeading": "Ikona",
+    "colorHeading": "Farba",
+    "colorPicker": "Vyberte farbu",
+    "colors": {
+      "ink": "Ako text",
+      "red": "Červená",
+      "orange": "Oranžová",
+      "amber": "Jantárová",
+      "green": "Zelená",
+      "teal": "Tyrkysová",
+      "blue": "Modrá",
+      "purple": "Fialová",
+      "pink": "Ružová"
+    },
+    "placementFor": "Kde je odznak {position}",
+    "placementPicker": "Kde bude",
+    "placements": {
+      "beside": "Vedľa produktu",
+      "photo-top-left": "Na fotke, vľvo hore",
+      "photo-top-right": "Na fotke, vpravo hore",
+      "photo-bottom-left": "Na fotke, vľvo dole",
+      "photo-bottom-right": "Na fotke, vpravo dole"
+    },
+    "photo": "Fotka",
+    "beside": "Vedľa produktu",
+    "photoFull": "Na fotke je miesto pre {max} odznaky. Najprv presuňte jeden vedľa produktu.",
+    "preview": {
+      "label": "Na stránke vášho produktu",
+      "hint": "Potiáhnite odznak na fotku alebo vedľa produktu.",
+      "titlePlaceholder": "Váš produkt"
+    }
+  },
+  "badges": {
+    "presets": {
+      "lovedBy": {
+        "label": "{count, plural, one {Páči sa #+ zákazníkovi} few {Páči sa #+ zákazníkom} many {Páči sa #+ zákazníka} other {Páči sa #+ zákazníkom}}",
+        "keywords": "zákazníci, obľúbený, populárny, recenzie, sociálny dôkaz"
+      },
+      "bestseller": {
+        "label": "Bestseller",
+        "keywords": "najpredávanejší, obľúbený, top, najžiadanejší"
+      },
+      "topRated": {
+        "label": "Najlepšie hodnotený",
+        "keywords": "hodnotenie, recenzie, hviezdy, päť hviezdičiek, najlepšie hodnotený"
+      },
+      "freeShipping": {
+        "label": "Doprava zdarma",
+        "keywords": "doprava zadarmo, bezplatná doprava, poštovné zadarmo, doručenie zadarmo"
+      },
+      "fastDispatch": {
+        "label": "{count, plural, one {Odosielame do # hodiny} few {Odosielame do # hodín} many {Odosielame do # hodiny} other {Odosielame do # hodín}}",
+        "keywords": "rýchle odoslanie, expresné doručenie, odoslanie v ten deň, rýchla doprava"
+      },
+      "moneyBack": {
+        "label": "{count, plural, one {Vrátenie penází do # dňa} few {Vrátenie penází do # dní} many {Vrátenie penází do # dňa} other {Vrátenie penází do # dní}}",
+        "keywords": "vrátenie penází, vrátenie tovaru, záruka, bez rizika"
+      },
+      "freeReturns": {
+        "label": "Vrátenie tovaru zdarma",
+        "keywords": "vrátenie tovaru, výmena, vrátenie zdarma, bezplatné vrátenie"
+      },
+      "warranty": {
+        "label": "{count, plural, one {Záruka # rok} few {Záruka # roky} many {Záruka # roka} other {Záruka # rokov}}",
+        "keywords": "záruka, oprava, ochrana, servis"
+      },
+      "securePayment": {
+        "label": "Bezpečná platba",
+        "keywords": "bezpečná platba, šifrovanie, chránené, platobná karta"
+      },
+      "satisfaction": {
+        "label": "Spokojnosť zaručená",
+        "keywords": "spokojnosť, kvalita, záruka, sľub"
+      },
+      "giftReady": {
+        "label": "Pripravené ako darček",
+        "keywords": "darček, balenie, narodeninový darček, darčekové balenie"
+      },
+      "limitedEdition": {
+        "label": "Limitovaná edícia",
+        "keywords": "limitovaná edícia, vzácne, exkluzívne, zberateľské"
+      },
+      "newArrival": {
+        "label": "Novinka",
+        "keywords": "novinka, nové, čerstvé, práve dorazilo"
+      },
+      "smallBusiness": {
+        "label": "Malý podnik",
+        "keywords": "malý podnik, nezávislý, rodinný podnik, miestný"
+      },
+      "awardWinning": {
+        "label": "Ocenený produkt",
+        "keywords": "ocenenie, vítäz, cena, vyznamenaný"
+      },
+      "ecoFriendly": {
+        "label": "Ekologický",
+        "keywords": "ekologický, udržateľný, životné prostredie, zelený, príroda"
+      },
+      "handmade": {
+        "label": "Ručná práca",
+        "keywords": "ručná práca, remeselné, ručne vyrobené, ručná výroba"
+      },
+      "recycled": {
+        "label": "Z recyklovaných materiálov",
+        "keywords": "recyklovaný, druhotný, znovu použitý, obehový"
+      },
+      "plasticFree": {
+        "label": "Obal bez plastov",
+        "keywords": "bez plastov, obal, kompostovateľný, zero waste"
+      },
+      "organic": {
+        "label": "Organický",
+        "keywords": "organický, prírdný, bio, bez pesticídov"
+      },
+      "vegan": {
+        "label": "Vegánsky",
+        "keywords": "vegánsky, rastlinný, bez živočišných produktov"
+      },
+      "crueltyFree": {
+        "label": "Bez testovania na zvieratách",
+        "keywords": "netestované na zvieratách, šetorné k zvieratám, bez krutosti"
+      },
+      "madeLocally": {
+        "label": "Miestná výroba",
+        "keywords": "miestná výroba, lokálne, regionálne, domáce"
+      },
+      "fairTrade": {
+        "label": "Spravodlivý obchod",
+        "keywords": "spravodlivý obchod, etické, spravodlivo získané"
+      },
+      "sustainablySourced": {
+        "label": "Zodpovedný pôvod",
+        "keywords": "zodpovedný pôvod, udržateľné zdroje, les, drevo, sledovateľné"
+      },
+      "glutenFree": {
+        "label": "Bez lepku",
+        "keywords": "bez lepku, celiakia, bez pšenice, alergia"
+      },
+      "waterproof": {
+        "label": "Vodotebný",
+        "keywords": "vodotebný, odolý voči vode, daždu, vhodný do exteriéru"
+      },
+      "builtToLast": {
+        "label": "Odolý a dlhotrvácny",
+        "keywords": "odolý, pevný, kvalitý, dlhotrvácny, robustný"
+      },
+      "personalised": {
+        "label": "Personalizované",
+        "keywords": "personalizované, gravírované, na mieru, monogram, zákazkové"
+      },
+      "petFriendly": {
+        "label": "Vhodné pre zvieratá",
+        "keywords": "domáce zvieratá, psy, mačky, bezpečné pre zvieratá"
+      },
+      "qualityChecked": {
+        "label": "Preverená kvalita",
+        "keywords": "testované, skontrolované, overené, schlávené"
+      }
     }
   }
 }

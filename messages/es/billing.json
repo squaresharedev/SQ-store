@@ -199,6 +199,7 @@
     "invoicesDescription": "Tu tarjeta, dirección de facturación, NIF/CIF y todas las facturas, en la página segura de Stripe.",
     "manage": "Gestionar facturación y facturas",
     "noBilling": "Las facturas y los datos de pago aparecen aquí cuando tengas un plan de pago.",
+    "noBillingYet": "Las facturas y los datos de pago aparecerán aquí cuando abran los planes de pago.",
     "confirmed": "Estás en {plan}. Gracias por apoyar Square Share.",
     "pending": "Estamos confirmando tu pago con Stripe. Recarga la página en un momento si el plan no ha cambiado.",
     "unavailable": "Tu plan no puede mostrarse ahora mismo. Recarga la página en un momento.",

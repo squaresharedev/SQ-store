@@ -3,9 +3,13 @@ import { getTranslations } from "next-intl/server";
 import { listStorefrontProducts } from "@/lib/discounts/storefront-preview";
 import { getStorefront } from "@/lib/storefront/queries";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { NotificationsProvider } from "@/components/notifications/NotificationsProvider";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { getSellerIdentity } from "@/lib/settings/seller-identity";
+import { getSellerIdentity, getTraderIdentityStatus } from "@/lib/settings/seller-identity";
+import { resolveProductPage } from "@/lib/storefront/product-page";
+import { storefrontPagePath } from "@/lib/storefront/product-page-url";
 import { getShippingPolicy } from "@/lib/settings/shipping-policy";
 import { presignGetUrl } from "@/lib/r2";
 import { blockKey, type StorefrontConfig } from "@/types/storefront";
@@ -73,13 +77,15 @@ export default async function StorefrontEditorPage({
   // scoped to whichever account is active (the store being edited, which for
   // a team member is not necessarily their own). See
   // lib/settings/seller-identity.ts for why this is a service-role read.
-  const [storefront, products, sellerIdentity, shippingPolicy] = await Promise.all([
+  const [storefront, products, sellerIdentity, shippingPolicy, identity] = await Promise.all([
     getStorefront(id),
     // The catalogue as a storefront draws it: a running sale's price on the
     // tile, exactly as the published page shows it to buyers.
     listStorefrontProducts(),
     account ? getSellerIdentity(account.accountId) : Promise.resolve({}),
     account ? getShippingPolicy(account.accountId) : Promise.resolve({}),
+    // Whether the publish gate would let this storefront's page answer.
+    account ? getTraderIdentityStatus(account.accountId) : Promise.resolve(null),
   ]);
   if (!storefront) notFound();
 
@@ -116,6 +122,20 @@ export default async function StorefrontEditorPage({
       role={account?.role ?? null}
       accountId={account?.accountId ?? null}
       takedown={storefront.removal ?? null}
+      initialVersion={storefront.version ?? null}
+      // The bell the rest of the app wears, so an order that arrives while the
+      // seller designs is seen here too.
+      headerActions={
+        <NotificationsProvider>
+          <NotificationBell />
+        </NotificationsProvider>
+      }
+      publicPagePath={
+        // The same three conditions the public page itself asks.
+        !storefront.removal && resolveProductPage(storefront.config).enabled && identity?.ok && identity.missing.length === 0
+          ? storefrontPagePath(storefront.id)
+          : null
+      }
     />
   );
 }

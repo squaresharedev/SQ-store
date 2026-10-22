@@ -33,6 +33,8 @@
       "detailNeedsSeller": "Terminez vos informations vendeur, votre page pourra alors passer en ligne.",
       "detailNeedsStorefront": "Une fois un produit sur une vitrine, sa page peut passer en ligne.",
       "detailNeedsActive": "Passez ce produit en Actif pour que sa page soit en ligne.",
+      "detailChecking": "Votre page sera en ligne dès que la vérification automatique aura approuvé le produit.",
+      "detailPaused": "La vérification automatique a mis ce produit en pause. Ouvrez-le pour voir quoi modifier.",
       "detailPagesOff": "Les pages produit sont désactivées sur cette vitrine. Activez-les dans l’éditeur.",
       "actionEdit": "Modifier le produit",
       "actionOpen": "Ouvrir l’éditeur",
@@ -129,7 +131,8 @@
       "emailTipLabel": "À propos de cet e-mail"
     },
     "confirm": {
-      "goLive": "Vos pages produit pourront être mises en ligne une fois confirmé."
+      "goLive": "Vos pages produit pourront être mises en ligne une fois confirmé.",
+      "wrongAddress": "Mauvaise adresse ? Modifiez-la"
     },
     "tour": {
       "mobileMenu": "Sur votre téléphone, ouvrez le menu en haut à gauche.",
@@ -145,7 +148,6 @@
       "getStarted": "Commencer",
       "skipForNow": "Passer pour l’instant",
       "saveAndContinue": "Enregistrer et continuer",
-      "changeDetails": "Modifier les informations",
       "continue": "Continuer",
       "exploreOnMyOwn": "Explorer par moi-même",
       "notNow": "Pas maintenant"

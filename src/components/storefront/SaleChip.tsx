@@ -1,9 +1,10 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import type { tileSpotTokenProps } from "./TileSpotDragLayer";
 import { useLocale, useTranslations } from "next-intl";
 import { formatPriceShort } from "@/lib/format";
-import { readableInkOn } from "@/lib/format/color";
+import { legibleInkOn, readableInkOn } from "@/lib/format/color";
 import { cn } from "@/lib/utils";
 import type { Currency } from "@/types/product";
 import {
@@ -35,6 +36,12 @@ const FLAG = { inline: 0.6, edge: 0.55, tail: 1.05, notch: 0.5 };
 const RIBBON = { lineHeight: 1.1, padding: 0.3, margin: 0.8 };
 const RIBBON_BAND = RIBBON.lineHeight + 2 * RIBBON.padding;
 
+/** A ribbon BANNER, a ribbon where there is no corner to cross: the band's
+ *  padding, then its two ends, each `tail` long, sticking out `overhang`
+ *  past the band, hung `drop` below it and cut `notch` deep (a swallowtail).
+ *  The part of an end tucked under the band shows as a darker fold. */
+const RIBBON_BANNER = { inline: 0.7, tail: 1.15, overhang: 0.75, drop: 0.32, notch: 0.42 };
+
 /** Where a flag hangs: flush against the photo's edge in its spot's row, its
  *  column kept (a middle flag hangs from nothing, so it keeps the spot). */
 const FLAG_SPOT_CLASSES: Record<TileSpot, string> = {
@@ -47,7 +54,8 @@ const FLAG_SPOT_CLASSES: Record<TileSpot, string> = {
   "bottom-right": "bottom-0 right-[var(--tag-inset,8px)]",
 };
 
-/** A ribbon's box: flush in its corner. Only corners ever get one (drawnLook). */
+/** A ribbon's box: flush in its corner. A middle spot gets the banner instead
+ *  (ribbonBanner). */
 const RIBBON_CORNER_CLASSES: Partial<Record<TileSpot, string>> = {
   "top-left": "top-0 left-0",
   "top-right": "top-0 right-0",
@@ -55,10 +63,10 @@ const RIBBON_CORNER_CLASSES: Partial<Record<TileSpot, string>> = {
   "bottom-right": "bottom-0 right-0",
 };
 
-/** The look a chip is really drawn in: a ribbon needs a corner, and hangs as a
- *  flag anywhere else (see SALE_BADGE_LOOKS). */
-function drawnLook(look: SaleBadgeLook, spot: TileSpot): SaleBadgeLook {
-  return look === "ribbon" && spotColumn(spot) === "center" ? "flag" : look;
+/** Whether a ribbon at `spot` is the BANNER: a middle spot has no corner for
+ *  the band to cross (see SALE_BADGE_LOOKS). */
+function ribbonBanner(spot: TileSpot): boolean {
+  return spotColumn(spot) === "center";
 }
 
 /**
@@ -80,7 +88,7 @@ function ribbonGeometry(words: number): { offset: number; box: number; length: n
  */
 export function saleChipWidth(look: SaleBadgeLook, spot: TileSpot, label: string): number {
   const words = [...label].length * CHIP_CHAR_WIDTH;
-  switch (drawnLook(look, spot)) {
+  switch (look) {
     case "pill":
       return words + 2 * PILL.inline;
     case "sticker":
@@ -88,7 +96,9 @@ export function saleChipWidth(look: SaleBadgeLook, spot: TileSpot, label: string
     case "flag":
       return words + 2 * FLAG.inline;
     case "ribbon":
-      return ribbonGeometry(words).box;
+      return ribbonBanner(spot)
+        ? words + 2 * (RIBBON_BANNER.inline + RIBBON_BANNER.overhang)
+        : ribbonGeometry(words).box;
   }
 }
 
@@ -116,8 +126,9 @@ export function useSaleChipWords(): (says: Exclude<SaleBadge, "hidden">, offer: 
  * a buyer sees.
  *
  * Sized from `size` (the price tag's own type size on a tile), every measure
- * in it a share of that, so it scales with its tile. Its ink is whichever
- * reads on its fill.
+ * in it a share of that, so it scales with its tile. Its words are the
+ * seller's colour where it carries on the fill, and whichever ink reads on it
+ * otherwise (legibleInkOn): a chip whose words vanish says nothing.
  *
  * `besidePrice` is given when it SHARES ITS ROW with the floated price (see
  * resolveSaleBadgePosition). Side by side the two fit a desktop tile and
@@ -132,10 +143,12 @@ export function SaleChip({
   label,
   spot,
   fill,
+  textColor,
   fontClass,
   size,
   besidePrice,
   style,
+  token,
 }: {
   look: SaleBadgeLook;
   /** What it says, for the data attribute tests and agents read. */
@@ -145,6 +158,8 @@ export function SaleChip({
   /** Where it renders (resolveSaleBadgePosition). */
   spot: TileSpot;
   fill: string;
+  /** Its words' colour, strict hex. Absent is whichever ink reads on the fill. */
+  textColor?: string;
   /** The price tag's typeface (PRICE_TAG_FONT_CLASSES). */
   fontClass: string;
   /** Its type size, a CSS length. */
@@ -154,9 +169,11 @@ export function SaleChip({
   besidePrice?: { width: number; borderWidth: number };
   /** The tile's inset variable (priceTagInsetStyle). */
   style?: CSSProperties;
+  /** On the designer's canvas: what makes the chip a draggable, pressable
+   *  token (tileSpotTokenProps). Absent, it takes no pointer at all. */
+  token?: ReturnType<typeof tileSpotTokenProps>;
 }) {
-  const drawn = drawnLook(look, spot);
-  const ink = readableInkOn(fill);
+  const ink = legibleInkOn(textColor ?? readableInkOn(fill), fill);
   const words = [...label].length * CHIP_CHAR_WIDTH;
   // Zero when the row cannot hold both chips, unbounded when it can.
   const room = besidePrice
@@ -169,13 +186,71 @@ export function SaleChip({
     fontSize: "var(--tag-font-size)",
     ...style,
   } as CSSProperties;
+  // The token's own classes come first, so a look's shape wins over the
+  // token's hover ring radius: rounded-full on a pill and a sticker, and
+  // SHARP (rounded-none) on a flag and a ribbon, which are cut, not rounded.
   const shared = cn(
-    "pointer-events-none absolute z-10 whitespace-nowrap font-bold uppercase tracking-wide",
+    "absolute z-10 whitespace-nowrap font-bold uppercase tracking-wide",
+    token ? token.className : "pointer-events-none",
     fontClass,
   );
-  const data = { "data-tile-sale-badge": says, "data-sale-chip-look": drawn };
+  const data = { ...token, className: undefined, "data-tile-sale-badge": says, "data-sale-chip-look": look };
 
-  if (drawn === "ribbon") {
+  if (look === "ribbon" && ribbonBanner(spot)) {
+    const { inline, tail, overhang, drop, notch } = RIBBON_BANNER;
+    // The ends are the fill in shadow, and the fold where each tucks under
+    // the band deeper still: the seller's colour, never a second one.
+    const shade = `color-mix(in srgb, ${fill} 70%, black)`;
+    const fold = `color-mix(in srgb, ${fill} 45%, black)`;
+    const tucked = `${roundForCss(tail - overhang)}em`;
+    return (
+      <span
+        {...data}
+        className={cn(shared, "isolate rounded-none drop-shadow-sm", TILE_SPOT_CLASSES[spot])}
+        style={{ ...sized, lineHeight: RIBBON.lineHeight }}
+      >
+        {(["left", "right"] as const).map((side) => (
+          <span key={side} aria-hidden="true">
+            <span
+              className="absolute -z-10"
+              style={{
+                top: `${drop}em`,
+                height: "100%",
+                width: `${tail}em`,
+                left: side === "left" ? `-${overhang}em` : undefined,
+                right: side === "right" ? `-${overhang}em` : undefined,
+                backgroundColor: shade,
+                clipPath:
+                  side === "left"
+                    ? `polygon(0 0, 100% 0, 100% 100%, 0 100%, ${notch}em 50%)`
+                    : `polygon(0 0, 100% 0, calc(100% - ${notch}em) 50%, 100% 100%, 0 100%)`,
+              }}
+            />
+            <span
+              className="absolute -z-10"
+              style={{
+                top: "100%",
+                height: `${drop}em`,
+                width: tucked,
+                left: side === "left" ? 0 : undefined,
+                right: side === "right" ? 0 : undefined,
+                backgroundColor: fold,
+                clipPath: side === "left" ? "polygon(0 0, 100% 0, 100% 100%)" : "polygon(0 0, 100% 0, 0 100%)",
+              }}
+            />
+          </span>
+        ))}
+        <span
+          className="relative block"
+          style={{ paddingInline: `${inline}em`, paddingBlock: `${RIBBON.padding}em`, backgroundColor: fill, color: ink }}
+        >
+          {label}
+        </span>
+      </span>
+    );
+  }
+
+  if (look === "ribbon") {
     const { offset, box, length } = ribbonGeometry(words);
     const row = spotRow(spot) === "top" ? "top" : "bottom";
     const column = spotColumn(spot) === "left" ? "left" : "right";
@@ -185,7 +260,7 @@ export function SaleChip({
     return (
       <span
         {...data}
-        className={cn(shared, "overflow-hidden", RIBBON_CORNER_CLASSES[spot])}
+        className={cn(shared, "overflow-hidden rounded-none", RIBBON_CORNER_CLASSES[spot])}
         style={{ ...sized, width: fit(`${roundForCss(box)}em`), height: fit(`${roundForCss(box)}em`) }}
       >
         <span
@@ -210,7 +285,7 @@ export function SaleChip({
     );
   }
 
-  if (drawn === "sticker") {
+  if (look === "sticker") {
     return (
       <span
         {...data}
@@ -236,7 +311,7 @@ export function SaleChip({
     );
   }
 
-  if (drawn === "flag") {
+  if (look === "flag") {
     // Hangs from the top edge (or from nothing, in the middle) with its tail
     // notched below; from the bottom edge it stands up, notched above.
     const fromTop = spotRow(spot) !== "bottom";
@@ -244,7 +319,7 @@ export function SaleChip({
     return (
       <span
         {...data}
-        className={cn(shared, "overflow-hidden", FLAG_SPOT_CLASSES[spot])}
+        className={cn(shared, "overflow-hidden rounded-none", FLAG_SPOT_CLASSES[spot])}
         style={{
           ...sized,
           lineHeight: 1.1,

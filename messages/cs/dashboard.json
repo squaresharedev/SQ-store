@@ -122,6 +122,11 @@
       "description": "Kupující čekají na zásilky. Zabalte je a označte jako odeslané.",
       "action": "Odeslat objednávky"
     },
+    "withdrawals": {
+      "label": "{count, plural, one {{count} kupující odstoupil} few {{count} kupující odstoupili} many {{count} kupujícího odstoupilo} other {{count} kupujících odstoupilo}}",
+      "description": "Do 14 dnů od odstoupení jim máte vrátit peníze. Domluvte s nimi vrácení zboží a pak peníze vraťte.",
+      "action": "Zobrazit odstoupení"
+    },
     "checkoutRates": {
       "label": "Nastavte ceny doručení",
       "description": "Kupující nemohou fyzický produkt zaplatit v pokladně, dokud destinace nemá sazbu i zemi.",

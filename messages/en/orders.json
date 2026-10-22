@@ -30,7 +30,9 @@
     "toShipTitle": "Nothing to ship",
     "toShipHint": "You're all caught up. Paid orders waiting to be sent show up here, oldest first.",
     "seeAllOrders": "See all orders",
-    "hintOpen": "When someone buys from your store, the order shows up here and you're told straight away."
+    "hintOpen": "When someone buys from your store, the order shows up here and you're told straight away.",
+    "productTitle": "No orders for this product yet",
+    "productHint": "When it sells, its orders show up here."
   },
   "list": {
     "updating": "Updating…",
@@ -55,7 +57,7 @@
     "region": "order filters",
     "channel": "channel",
     "buyerEmail": "buyer email",
-    "searchPlaceholder": "search buyer email",
+    "searchPlaceholder": "search email, name, city, product or tracking",
     "status": "status",
     "statusAriaLabel": "Filter by status",
     "allStatuses": "All statuses",
@@ -151,6 +153,7 @@
   },
   "actions": {
     "disputeInStripe": "Disputes are handled in your Stripe dashboard once Stripe is connected.",
+    "pendingPayment": "The buyer's payment is still being confirmed. Don't send anything yet: this order shows as paid once it goes through, and closes by itself if it doesn't.",
     "none": "No actions are available for this order."
   },
   "refund": {
@@ -172,7 +175,8 @@
     "buyerNotEmailed": "The buyer was not emailed. Tell them yourself.",
     "refundedOn": "Refunded {date}",
     "refundedOnReason": "{reason, select, cancelled {Cancelled and refunded {date}} returned {Returned and refunded {date}} other {Refunded {date}}}",
-    "ownerOnly": "Only the store's owner can refund or cancel an order."
+    "ownerOnly": "Only the store's owner can refund or cancel an order.",
+    "ownerOnlyNamed": "Only the owner of {store} can refund or cancel an order. Ask them to do it."
   },
   "skeleton": {
     "loading": "loading orders"
@@ -186,6 +190,11 @@
     "label": "Which orders to show",
     "toShip": "To ship",
     "all": "All orders"
+  },
+  "productScope": {
+    "label": "Showing orders for",
+    "clear": "All products",
+    "clearLabel": "Show orders for all products, not only {title}"
   },
   "fulfilment": {
     "unfulfilled": "To ship",

@@ -183,12 +183,13 @@
     "loadMoreError": "Meer etalages laden is mislukt. Probeer het opnieuw.",
     "loadMore": "Meer laden ({remaining} resterend)",
     "deleteTitle": "Etalage verwijderen?",
-    "deleteDesc": "\"{name}\" en het bijbehorende raster worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.",
+    "deleteDesc": "\"{name}\" en het bijbehorende raster worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt. Bestellingen die erlangs zijn geplaatst blijven, net als de bestelpagina's van hun kopers.",
     "deleteToast": "\"{name}\" is verwijderd."
   },
   "card": {
     "editAriaLabel": "{name} bewerken",
-    "embedAriaLabel": "{name} insluiten",
+    "embedAriaLabel": "{name} delen of insluiten",
+    "viewPageAriaLabel": "{name} openen zoals kopers die zien",
     "deleteAriaLabel": "{name} verwijderen",
     "blockCount": "{count, plural, one {# blok} other {# blokken}}",
     "updatedLabel": " · bijgewerkt {date}",
@@ -199,28 +200,52 @@
   },
   "embed": {
     "inDevNotice": "De insluitingswidget is in ontwikkeling en wordt nog niet weergegeven op externe sites. Stel je instellingen hieronder in, zodat je klaar bent om de insluitcode te plakken zodra die beschikbaar is.",
-    "title": "Deze etalage insluiten",
-    "description": "Plak deze insluitcode op een willekeurige site om \"{name}\" daar te tonen.",
+    "title": "Deze etalage delen",
+    "description": "Stuur mensen een link naar \"{name}\", of plak een insluitcode op je eigen site om hem daar te tonen.",
+    "steps": {
+      "site": "Kies de sites waarop hij verschijnt",
+      "snippet": "Plak de insluitcode in je site",
+      "privacy": "Zet dit in je privacybeleid"
+    },
+    "required": "Verplicht",
     "enabledLabel": "Insluiten ingeschakeld",
     "domainsLabel": "Toegestane domeinen",
     "domainsPlaceholder": "jouwsite.com, blog.jouwsite.com",
     "domainsHint": "Tot {max}, gescheiden door komma's. Plak een URL en we knippen die terug tot het domein.",
     "emptyDomainsWarning": "Voeg minstens één domein toe. Zolang dit leeg is, laadt de etalage nergens, ook al staat insluiten aan.",
-    "snippetLabel": "Insluitcode",
-    "snippetReadyHint": "Plak deze insluitcode in de HTML van je site.",
+    "builderLabel": "Je sitebouwer",
+    "builderOther": "Andere site",
+    "builderSteps": {
+      "other": "Plak de code in de HTML van je pagina, op de plek waar de etalage moet verschijnen.",
+      "wordpress": "Voeg een blok “Aangepaste HTML” toe waar de etalage moet verschijnen en plak de code erin.",
+      "squarespace": "Voeg een “Code”-blok toe en plak de code erin. Verschijnt de etalage pas na herladen, kies dan “Alleen iframe”.",
+      "wix": "Voeg “Embed Code” en daarna “Embed HTML” toe en plak de code erin. Sleep het vak daarna zo hoog als je etalage.",
+      "webflow": "Voeg een “Code Embed”-element toe en plak de code erin. Het verschijnt op je gepubliceerde site.",
+      "shopify": "Voeg in de thema-editor een sectie “Custom Liquid” toe en plak de code erin.",
+      "google": "Kies “Insert”, dan “Embed”, dan “Embed code”, en plak de code erin.",
+      "framer": "Voeg een “Embed”-component toe, zet die op HTML en plak de code erin.",
+      "carrd": "Voeg een “Embed”-element toe, kies het type “Code” en plak de code erin."
+    },
+    "snippetKinds": {
+      "label": "Soort code",
+      "script": "Script",
+      "iframe": "Alleen iframe"
+    },
+    "snippetReadyHint": "Eén keer plakken is genoeg. De code past zich aan je etalage aan en volgt wat je hier wijzigt.",
+    "iframeHint": "Voor een site die scripts verwijdert. Dit is {height} pixels hoog en scrolt vanbinnen. Kopieer het opnieuw nadat je je domeinen hebt gewijzigd.",
     "snippetLockedHint": "Schakel insluiten in en voeg minstens één domein toe om de knop Kopiëren te ontgrendelen.",
     "snippetSaveHint": "Sla je instellingen op om de knop Kopiëren te ontgrendelen.",
     "pagesOffHint": "Zet eerst productpagina's aan in de editor. Een klik op een product opent de pagina ervan.",
     "notShowingLabel": "Als de etalage niet verschijnt",
-    "notShowingTip": "Het adres van je site moet bij Toegestane domeinen staan en de site moet https gebruiken. Sitebouwers die eigen HTML in een eigen frame plaatsen (Wix, Google Sites) worden nog niet ondersteund.",
+    "notShowingTip": "Het adres van je site moet bij Toegestane domeinen staan en de site moet https gebruiken. Geplakte code verschijnt op je gepubliceerde site, niet in de editor van een sitebouwer. Wil je hem zien op een voorbeeldadres (zoals jouwsite.webflow.io), voeg dat adres dan ook toe.",
     "copySnippet": {
       "copy": "Insluitcode kopiëren",
       "copied": "Insluitcode gekopieerd",
       "failed": "Kopiëren van de insluitcode is mislukt. Selecteer en kopieer hem handmatig.",
       "cannotCopyYet": "insluitcode kan nog niet worden gekopieerd"
     },
-    "privacyLabel": "Voor je privacybeleid",
-    "privacyHint": "Je site laadt de etalage nu van Squareshare, dus dat hoort in het privacybeleid te staan. Je kunt deze tekst plakken:",
+    "privacyHint": "Je site laadt deze etalage nu van Squareshare, dus je privacybeleid moet dat vermelden. Plak deze tekst erin:",
+    "privacyTextLabel": "Privacytekst",
     "privacyText": "Deze site toont een etalage die door Squareshare wordt geleverd. Bij het laden worden het IP-adres en de browsergegevens van de bezoeker naar Squareshare gestuurd om de producten te tonen en bezoeken te tellen. Squareshare plaatst hiervoor geen cookies en slaat niets op het apparaat van de bezoeker op. Meer informatie: {policy}",
     "copyPrivacy": {
       "copy": "Privacytekst kopiëren",
@@ -606,7 +631,8 @@
   "chipScale": {
     "label": "Op grotere kaarten",
     "tile": "Meegroeien",
-    "cell": "Even groot"
+    "cell": "Even groot",
+    "everyCard": "Geldt voor alle kaarten in deze winkel."
   },
   "layout": {
     "canvasWidth": "Canvasbreedte",
@@ -737,8 +763,8 @@
       "showPage": {
         "label": "Een productpagina tonen",
         "infoLabel": "Wat deze schakelaar doet",
-        "infoOn": "Tikken op een producttegel opent de pagina ervan.",
-        "infoOff": "Producttegels hebben geen pagina om te openen."
+        "infoOn": "Tikken op een producttegel opent de pagina ervan, en de etalage heeft een eigen pagina om te delen.",
+        "infoOff": "Producttegels hebben geen pagina om te openen, en ook de link naar de etalage zelf werkt dan niet meer."
       },
       "pageColor": "Paginakleur",
       "storefrontBackground": "Achtergrond van de etalage",
@@ -1103,7 +1129,7 @@
     "imageUnavailable": "Afbeelding niet beschikbaar"
   },
   "spotDrag": {
-    "tokenLabel": "{token, select, title {Titel} other {Prijs}} {drop, select, below {in de titelbalk} top_left {linksboven} top_center {bovenmidden} top_right {rechtsboven} middle_center {in het midden} bottom_left {linksonder} bottom_center {ondermidden} bottom_right {rechtsonder} other {}}. Druk om de instellingen te openen, of sleep (of gebruik de pijltoetsen) om het te verplaatsen."
+    "tokenLabel": "{token, select, title {Titel} sale {Actielabel} other {Prijs}} {drop, select, below {in de titelbalk} top_left {linksboven} top_center {bovenmidden} top_right {rechtsboven} middle_center {in het midden} bottom_left {linksonder} bottom_center {ondermidden} bottom_right {rechtsonder} other {}}. Druk om de instellingen te openen, of sleep (of gebruik de pijltoetsen) om het te verplaatsen."
   },
   "autoFit": {},
   "designer": {
@@ -1112,6 +1138,7 @@
       "nameLabel": "Etalagenaam",
       "namePlaceholder": "Naamloze etalage",
       "unsaved": "Niet-opgeslagen wijzigingen",
+      "viewPage": "Pagina bekijken",
       "search": "Zoeken"
     },
     "mobileNotice": {
@@ -1154,6 +1181,12 @@
       "description": "Je hebt niet-opgeslagen wijzigingen aan deze etalage. Sla ze op voordat je weggaat, of gooi ze weg.",
       "save": "Wijzigingen opslaan",
       "discard": "Wijzigingen negeren",
+      "keepEditing": "Doorgaan met bewerken"
+    },
+    "conflict": {
+      "title": "Iemand anders heeft deze etalage opgeslagen",
+      "description": "Hij is veranderd sinds je hem opende, in een ander tabblad of door iemand van je team. Als je nu opslaat, vervangt jouw versie die van hen.",
+      "overwrite": "Mijn versie opslaan",
       "keepEditing": "Doorgaan met bewerken"
     },
     "defaults": {
@@ -1255,6 +1288,10 @@
       "blockColor": {
         "label": "de kleur van het blok",
         "use": "De kleur van het blok gebruiken"
+      },
+      "auto": {
+        "label": "Automatisch",
+        "use": "Automatische kleur gebruiken"
       }
     },
     "presets": {

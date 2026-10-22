@@ -1,3 +1,4 @@
+import { storefrontVersion } from "@/lib/storefront/version";
 import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAccount } from "@/lib/team/account-context";
@@ -33,6 +34,10 @@ export type StorefrontRecord = {
   /** Set while staff have it paused or removed, so the editor can say what
    *  to change where the change is made. */
   removal?: ProductRemoval;
+  /** A fingerprint of the saved name and design (lib/storefront/version.ts):
+   *  the editor sends it back with its next save, so a save from elsewhere in
+   *  between is noticed rather than overwritten. */
+  version?: string;
 };
 
 /** A storefront as it appears in the list. */
@@ -288,5 +293,6 @@ export async function getStorefront(
     config:
       parseStoredStorefrontConfig(data.config) ?? DEFAULT_STOREFRONT_CONFIG,
     ...(takedown ? { removal: takedown } : {}),
+    version: await storefrontVersion(data.name, data.config),
   };
 }

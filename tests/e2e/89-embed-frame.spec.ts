@@ -1,15 +1,19 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import {
-  PUBLISHABLE_SELLER,
-  freshUser,
-  seedProducts,
-  seedSellerIdentity,
-  seedStorefronts,
-  serviceRest,
-  signUp,
-  userIdByEmail,
-} from "./helpers";
+  APP,
+  PRODUCT_PAGE,
+  SECRET_STOCK,
+  SELLER_SITE,
+  SLOT_FRAME,
+  frameHeight,
+  frameStatuses,
+  hostPage,
+  saveConfig,
+  seedShop,
+  visitor,
+} from "./embed-shop";
+import { serviceRest } from "./helpers";
 
 /**
  * THE STOREFRONT EMBED, end to end: a seller's board drawn inside their own
@@ -34,125 +38,12 @@ import {
  *   - A product opened from a tile is a click, counted where it lands.
  */
 
-const APP = "http://localhost:3100";
-const SELLER_SITE = "shop.localhost";
-const hostPage = (site: string, key: string, extra = "") => `http://${site}:3100/dev/embed-host?key=${key}${extra}`;
-
-const THEME = {
-  background: { kind: "solid", color: "#f6f1e7" },
-  accent: "#1f4d3a",
-  font: "sans",
-  columns: 6,
-  rows: 6,
-  cornerRadius: 12,
-  titleStyle: "bar",
-  titleDisplay: "always",
-  priceDisplay: "always",
-  priceTagPosition: "below",
-  showTitle: true,
-  gridGap: 8,
-  soldOutBadge: true,
-  hideSoldOut: false,
-};
-
-const PRODUCT_PAGE = {
-  enabled: true,
-  imageFit: "contain",
-  ctaLabel: "Buy now",
-  priceNote: "incl-vat",
-  shippingNote: "plus-shipping",
-  showStock: true,
-  showSeller: true,
-  allowIndexing: false,
-  sections: ["description", "specs", "documents", "shipping", "returns", "safety", "seller"].map((id) => ({
-    id,
-    show: true,
-  })),
-};
-
-/** A stock count that appears nowhere else in the fixture, so finding it in
- *  the frame would mean the frame was sent it. */
-const SECRET_STOCK = 6173;
-
-type Shop = { sellerId: string; storefrontId: string; embedKey: string; store: string; vase: string };
-
-async function saveConfig(shop: Pick<Shop, "storefrontId" | "vase">, over: Record<string, unknown> = {}) {
-  await serviceRest(`/storefronts?id=eq.${shop.storefrontId}`, {
-    method: "PATCH",
-    body: {
-      config: {
-        theme: THEME,
-        productPage: PRODUCT_PAGE,
-        header: { show: true, name: "Clay House", bio: "Thrown by hand in Galway." },
-        embed: { enabled: true, domains: [SELLER_SITE] },
-        blocks: [
-          { type: "product", productId: shop.vase, x: 0, y: 0, w: 2, h: 2 },
-          {
-            type: "text",
-            id: "11111111-1111-4111-8111-111111111111",
-            text: "New pieces every Friday",
-            variant: "heading",
-            align: "left",
-            x: 0,
-            y: 2,
-            w: 4,
-            h: 1,
-          },
-        ],
-        ...over,
-      },
-    },
-  });
-}
-
-/** A seller with one live product on a storefront that is embedded on
- *  shop.localhost: product pages on, trader details complete. */
-async function seedShop(page: Page, tag: string): Promise<Shop> {
-  const user = freshUser(tag);
-  await signUp(page, user);
-  const sellerId = await userIdByEmail(user.email);
-  const store = `Clay House ${user.email.split("@")[0]}`;
-  await seedSellerIdentity(sellerId, { ...PUBLISHABLE_SELLER, businessName: store });
-  await seedStorefronts(sellerId, [{ name: "Clay house" }]);
-  const [{ id: storefrontId, embed_key: embedKey }] = (await serviceRest(
-    `/storefronts?owner_id=eq.${sellerId}&select=id,embed_key`,
-  )) as { id: string; embed_key: string }[];
-  await seedProducts(sellerId, [
-    { title: "Stoneware vase", price_cents: 2400, track_stock: true, stock_quantity: SECRET_STOCK },
-  ]);
-  const [{ id: vase }] = (await serviceRest(`/products?owner_id=eq.${sellerId}&select=id`)) as { id: string }[];
-  await saveConfig({ storefrontId, vase });
-  return { sellerId, storefrontId, embedKey, store, vase };
-}
-
-/**
- * A visitor to the seller's site: no session, and a browser identity of their
- * own, because views are deduped per visitor (IP and user agent) per hour.
- */
-async function visitor(browser: Browser, name: string): Promise<{ context: BrowserContext; page: Page }> {
-  const context = await browser.newContext({ userAgent: `e2e-embed-${name}` });
-  return { context, page: await context.newPage() };
-}
-
 async function signalChannels(sellerId: string, kind: string): Promise<string[]> {
   const rows = (await serviceRest(
     `/storefront_signals?account_id=eq.${sellerId}&kind=eq.${kind}&select=channel`,
   )) as { channel: string }[];
   return rows.map((row) => row.channel);
 }
-
-/** Every response to a frame address, by status, as the page loads. */
-function frameStatuses(page: Page): number[] {
-  const statuses: number[] = [];
-  page.on("response", (response) => {
-    if (new URL(response.url()).pathname.startsWith("/e/")) statuses.push(response.status());
-  });
-  return statuses;
-}
-
-const SLOT_FRAME = "[data-embed-slot] iframe";
-const frameHeight = (page: Page) =>
-  page.locator(SLOT_FRAME).evaluate((frame) => (frame as HTMLIFrameElement).getBoundingClientRect().height);
 
 test.describe("the storefront embed", () => {
   test("on the seller's own site: the board, sized to fit, with tiles that open their product page", async ({
@@ -203,7 +94,7 @@ test.describe("the storefront embed", () => {
     // What the frame may do is fixed by the page that made it.
     const sandbox = (await site.locator(SLOT_FRAME).getAttribute("sandbox")) ?? "";
     expect(sandbox.split(" ").sort()).toEqual(
-      ["allow-popups", "allow-popups-to-escape-sandbox", "allow-same-origin", "allow-scripts"].sort(),
+      ["allow-forms", "allow-popups", "allow-popups-to-escape-sandbox", "allow-same-origin", "allow-scripts"].sort(),
     );
 
     // One line at the foot: who sells, whose software, our privacy notice, and
@@ -254,6 +145,40 @@ test.describe("the storefront embed", () => {
     ]);
     expect(new URL(tab.url()).searchParams.get("via")).toBe("embed");
     expect(new URL(site.url()).hostname).toBe(SELLER_SITE);
+    await context.close();
+  });
+
+  test("keeps inside a narrow column, and its focus ring can be seen", async ({ page, browser }) => {
+    test.setTimeout(240_000);
+    const shop = await seedShop(page, "embed-narrow");
+    // One unbroken word wider than the column, in the footer's "Sold by".
+    await serviceRest(`/profiles?id=eq.${shop.sellerId}`, {
+      method: "PATCH",
+      body: { tax_business_name: `Handwerk${"x".repeat(48)}GmbH` },
+    });
+    const { context, page: site } = await visitor(browser, "narrow");
+    await site.setViewportSize({ width: 320, height: 800 });
+    await site.goto(hostPage(SELLER_SITE, shop.embedKey));
+    await expect(site.frameLocator(SLOT_FRAME).locator("[data-embed-frame]")).toBeVisible({ timeout: 90_000 });
+    await expect.poll(() => frameHeight(site), { timeout: 20_000 }).toBeGreaterThan(150);
+    const frame = site.frames().find((child) => child.url().includes("/e/"))!;
+    const width = await frame.evaluate(() => ({
+      client: document.documentElement.clientWidth,
+      scroll: document.documentElement.scrollWidth,
+    }));
+    expect(width.scroll).toBeLessThanOrEqual(width.client);
+
+    // From the keyboard, the ring is the board's own ink, which reads on its
+    // background (the dashboard's grey is 2.3:1 on a cream one).
+    await frame.evaluate(() => (document.querySelector("[data-storefront-tile]") as HTMLElement).focus());
+    await site.keyboard.press("Tab");
+    await site.keyboard.press("Shift+Tab");
+    const ring = await frame.evaluate(() => {
+      const tile = document.querySelector("[data-storefront-tile]") as HTMLElement;
+      const style = getComputedStyle(tile);
+      return { shadow: style.boxShadow, ink: style.color };
+    });
+    expect(ring.shadow).toContain(ring.ink);
     await context.close();
   });
 

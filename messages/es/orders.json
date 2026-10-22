@@ -30,7 +30,9 @@
     "toShipTitle": "Nada por enviar",
     "toShipHint": "Estás al día. Los pedidos pagados a la espera de ser enviados aparecen aquí, del más antiguo al más reciente.",
     "seeAllOrders": "Ver todos los pedidos",
-    "hintOpen": "Cuando alguien compre en tu tienda, el pedido aparecerá aquí y te avisaremos de inmediato."
+    "hintOpen": "Cuando alguien compre en tu tienda, el pedido aparecerá aquí y te avisaremos de inmediato.",
+    "productTitle": "Este producto todavía no tiene pedidos",
+    "productHint": "Cuando se venda, sus pedidos aparecerán aquí."
   },
   "list": {
     "updating": "Actualizando…",
@@ -55,7 +57,7 @@
     "region": "filtros de pedidos",
     "channel": "canal",
     "buyerEmail": "correo del comprador",
-    "searchPlaceholder": "buscar correo del comprador",
+    "searchPlaceholder": "buscar correo, nombre, ciudad, producto o envío",
     "status": "estado",
     "statusAriaLabel": "Filtrar por estado",
     "allStatuses": "Todos los estados",
@@ -151,6 +153,7 @@
   },
   "actions": {
     "disputeInStripe": "Las disputas se gestionan en tu panel de Stripe una vez que Stripe esté conectado.",
+    "pendingPayment": "El pago del comprador aún se está confirmando. No envíes nada todavía: el pedido aparecerá como pagado cuando se complete, y se cerrará solo si no se completa.",
     "none": "No hay acciones disponibles para este pedido."
   },
   "refund": {
@@ -171,6 +174,7 @@
     "refundedOn": "Reembolsado el {date}",
     "refundedOnReason": "{reason, select, cancelled {Cancelado y reembolsado el {date}} returned {Devuelto y reembolsado el {date}} other {Reembolsado el {date}}}",
     "ownerOnly": "Solo el propietario de la tienda puede reembolsar o cancelar un pedido.",
+    "ownerOnlyNamed": "Solo el propietario de {store} puede reembolsar o cancelar un pedido. Pídeselo.",
     "manual": "Este pago no se realizó a través de Square Share. Devuelve el importe al comprador tú mismo y regístralo aquí.",
     "viaProvider": "El importe total vuelve a la tarjeta del comprador a través de Stripe. Esto no se puede deshacer."
   },
@@ -186,6 +190,11 @@
     "label": "Pedidos a mostrar",
     "toShip": "Por enviar",
     "all": "Todos los pedidos"
+  },
+  "productScope": {
+    "label": "Pedidos de",
+    "clear": "Todos los productos",
+    "clearLabel": "Mostrar los pedidos de todos los productos, no solo {title}"
   },
   "fulfilment": {
     "unfulfilled": "Por enviar",

@@ -13,6 +13,17 @@
 
 export type SniffedImage = { mime: string; ext: string };
 
+/** Every type sniffImage can name: raster formats only, so bytes of one of
+ *  these can be served from our own origin without ever running as markup
+ *  (an SVG would). */
+export const RASTER_IMAGE_TYPES: readonly string[] = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/avif",
+];
+
 /** The 12 bytes every signature below fits inside. */
 const MIN_SNIFF_BYTES = 12;
 

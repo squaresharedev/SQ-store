@@ -202,6 +202,11 @@ export const stepperFieldClass = `h-9 w-20 shrink-0 rounded-none border-y border
  *  border to the destructive token; an inline message is always shown too. */
 export const fieldBaseClass = `w-full rounded-sm border border-input bg-background px-3 py-2.5 text-base text-foreground placeholder:text-muted-foreground disabled:opacity-50 aria-[invalid=true]:border-destructive ${TRANSITION} ${FOCUS_RING}`;
 
+/** A list row's own text field (an option's name, a badge's words):
+ *  borderless until pointed at or focused, so a list of five reads as five
+ *  words rather than five boxes. The caller adds the text size and weight. */
+export const rowFieldClass = `min-w-0 flex-1 rounded-sm border border-transparent bg-transparent px-2 py-1 font-inter text-foreground placeholder:text-muted-foreground hover:border-input focus:border-input focus:bg-background aria-[invalid=true]:border-destructive ${TRANSITION} ${FOCUS_RING}`;
+
 /** The exact-value number field beside a slider (SliderField, FontSizeField).
  *  Narrow — three or four digits, never prose — so defined on its own rather
  *  than composed onto fieldBaseClass: that class's `w-full` can't be beaten by
@@ -254,6 +259,15 @@ export const infoTextClass = "font-inter text-xs text-muted-foreground";
 
 /** Inline validation message. */
 export const errorTextClass = "font-inter text-sm text-destructive";
+
+/** A quiet note against a left rule: context the page wants read first, not a
+ *  warning (a plan that is ending, whose details a settings page edits). */
+export const noteStripClass = "border-l-2 border-foreground pl-3";
+
+/** Something not ready yet, said once above the controls it holds back (the
+ *  embed while it has no host). Amber: a wait, not an error. */
+export const cautionNoticeClass =
+  "rounded-md border border-amber-200 bg-amber-50 px-3 py-2 font-inter text-xs font-medium text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300";
 
 /** A square-cornered warning strip in a settings card: icon then words, for
  *  something the person must act on (2FA off after recovery, an unknown factor). */
@@ -339,3 +353,8 @@ export const hoverLiftClass =
   "has-[:focus-visible]:-translate-y-0.5 has-[:focus-visible]:shadow-md " +
   "motion-reduce:transition-none motion-reduce:hover:translate-y-0 " +
   "motion-reduce:focus-visible:translate-y-0 motion-reduce:has-[:focus-visible]:translate-y-0";
+
+/** A BUTTON ON A PHOTO (the product card's Ship link and menu): one height,
+ *  one surface, sharp like every button, so controls side by side read as one
+ *  set. Width and padding are the caller's. */
+export const photoControlClass = `h-7 rounded-none border-transparent bg-background text-foreground shadow-sm hover:bg-accent ${transitionClass}`;

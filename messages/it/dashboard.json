@@ -122,6 +122,11 @@
       "description": "Gli acquirenti li stanno aspettando. Imballali e segnali come spediti.",
       "action": "Spedisci gli ordini"
     },
+    "withdrawals": {
+      "label": "{count, plural, one {{count} acquirente ha esercitato il recesso} many {{count} di acquirenti hanno esercitato il recesso} other {{count} acquirenti hanno esercitato il recesso}}",
+      "description": "Hanno diritto al rimborso entro 14 giorni dal recesso. Organizza il reso, poi rimborsa l’ordine.",
+      "action": "Vedi i recessi"
+    },
     "checkoutRates": {
       "label": "Imposta i prezzi di consegna",
       "description": "Gli acquirenti non possono completare l’acquisto di un prodotto fisico finché una destinazione non ha sia una tariffa sia un paese.",

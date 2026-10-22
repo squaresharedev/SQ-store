@@ -76,7 +76,9 @@
     "deleteDialog": {
       "title": "Dieses Produkt löschen?",
       "description": "{storefronts, plural, =0 {„{title}“ sowie das hochgeladene Bild und die hochgeladene Datei werden dauerhaft entfernt. Bestehende Bestellungen behalten ihren Verkaufsnachweis.} one {„{title}“ sowie das hochgeladene Bild und die hochgeladene Datei werden dauerhaft entfernt. Bestehende Bestellungen behalten ihren Verkaufsnachweis. Es ist auf {storefronts} Schaufenster. Der Block bleibt, bis du ihn entfernst.} other {„{title}“ sowie das hochgeladene Bild und die hochgeladene Datei werden dauerhaft entfernt. Bestehende Bestellungen behalten ihren Verkaufsnachweis. Es ist auf {storefronts} Schaufenstern. Die Blöcke bleiben, bis du sie entfernst.}}",
-      "confirm": "Produkt löschen"
+      "toShip": "{count, plural, one {{count} Bestellung für dieses Produkt ist noch zu versenden.} other {{count} Bestellungen für dieses Produkt sind noch zu versenden.}} Sie bleiben mit Name und Preis unter Bestellungen, du kannst sie also weiterhin versenden.",
+      "confirm": "Produkt löschen",
+      "confirmAnyway": "Trotzdem löschen"
     },
     "chooser": {
       "openTitle": "Auf welchem Schaufenster öffnen?",
@@ -98,7 +100,26 @@
     "openPage": "Produktseite öffnen",
     "unitsSold": "{count, plural, one {{count} verkauft} other {{count} verkauft}}",
     "noSales": "Noch keine Verkäufe",
-    "addToWebsite": "Zu deiner Website hinzufügen"
+    "addToWebsite": "Zu deiner Website hinzufügen",
+    "unlimited": "Unbegrenzt",
+    "noStorefront": "Kein Schaufenster",
+    "ship": "Versenden"
+  },
+  "shareCard": {
+    "scanToShop": "Scannen und kaufen",
+    "templates": {
+      "masthead": "Titelseite",
+      "echo": "Echo",
+      "numerals": "Großer Preis",
+      "popout": "Aus dem Rahmen",
+      "orbit": "Orbit",
+      "sticker": "Sticker"
+    },
+    "formats": {
+      "square": "Quadratischer Beitrag",
+      "portrait": "Hochformat-Beitrag",
+      "story": "Story"
+    }
   },
   "removal": {
     "badge": "Entfernt",
@@ -130,7 +151,7 @@
     "concerned": "Worum es geht",
     "showField": "Zeige {field} auf dieser Seite",
     "fields": {
-      "product": "{field, select, title {Titel} description {Beschreibung} price {Preis} image {Titelbild} file {Digitale Datei} purchaseLink {Kauflink} shipping {Versand} options {Optionen} photos {Fotos} specs {Technische Daten} documents {Dokumente} safety {Sicherheit und Konformität} other {Sonstiges}}",
+      "product": "{field, select, title {Titel} description {Beschreibung} price {Preis} image {Titelbild} file {Digitale Datei} purchaseLink {Kauflink} shipping {Versand} options {Optionen} photos {Fotos} specs {Badges und technische Daten} documents {Dokumente} safety {Sicherheit und Konformität} other {Sonstiges}}",
       "storefront": "{field, select, name {Schaufenstername} header {Kopfbereich} text {Text} images {Bilder} products {Angezeigte Produkte} background {Hintergrund} productPage {Produktseiten} other {Sonstiges}}"
     },
     "reference": "Referenz",
@@ -154,7 +175,9 @@
     },
     "editorDetails": "Warum, und wie es weitergeht",
     "badgePending": "Wird geprüft",
+    "badgePendingHint": "Käufer sehen es, sobald die automatische Prüfung es freigibt.",
     "badgeReview": "In Prüfung",
+    "badgeReviewHint": "Ein Mensch prüft es. Käufer sehen es, sobald es freigegeben ist.",
     "titlePending": "{kind, select, product {Dieses Produkt wird gerade geprüft} other {Dieses Schaufenster wird gerade geprüft}}",
     "titleReview": "{kind, select, product {Eine Person prüft dieses Produkt} other {Eine Person prüft dieses Schaufenster}}",
     "hiddenPending": "Käufer können es erst sehen, wenn die automatische Prüfung abgeschlossen ist. Das dauert meist nur ein paar Sekunden: Lade die Seite neu, um den Stand zu sehen.",
@@ -175,6 +198,7 @@
     "fileEmpty": "Diese Datei ist leer.",
     "imported": "{count, plural, one {{count} Produkt wurde importiert.} other {{count} Produkte wurden importiert.}}",
     "skippedRows": "{count, plural, one {{count} Zeile wurde übersprungen.} other {{count} Zeilen wurden übersprungen.}}",
+    "checkingRows": "{count, plural, one {{count} Produkt wird noch geprüft: Käufer sehen es, sobald die automatische Prüfung es freigibt.} other {{count} Produkte werden noch geprüft: Käufer sehen sie, sobald die automatische Prüfung sie freigibt.}}",
     "dropPrompt": "CSV ablegen oder klicken, um eine auszuwählen",
     "fileMeta": "{size} · weitere auswählen, um von vorne zu beginnen",
     "rowsLimit": "{max, plural, one {Bis zu {max} Produkt pro Datei} other {Bis zu {max} Produkte pro Datei}}",
@@ -258,6 +282,11 @@
         "label": "Sichtbarkeit",
         "description": "Aktiv bedeutet online: Käufer können es sehen und sofort kaufen. Entwurf ist vor Käufern verborgen, bis du es umschaltest.",
         "about": "Wozu Sichtbarkeit dient"
+      },
+      "badges": {
+        "label": "Badges",
+        "description": "Ein paar Wörter auf der Produktseite: ein Grund, dir zu vertrauen, oder eine Tatsache auf einen Blick. Wähle ein fertiges aus oder schreibe dein eigenes, gib seinem Symbol eine Farbe und platziere es neben dem Produkt oder auf dem Foto.",
+        "about": "Wozu Badges dient"
       }
     },
     "summary": {
@@ -283,7 +312,8 @@
       "documents": "{count, plural, one {{count} Dokument} other {{count} Dokumente}}",
       "started": "Gestartet",
       "active": "Aktiv",
-      "draft": "Entwurf"
+      "draft": "Entwurf",
+      "badges": "{count, plural, one {{count} Badge} other {{count} Badges}}"
     },
     "errors": {
       "titleRequired": "Gib deinem Produkt einen Titel, Käufer sehen ihn zuerst.",
@@ -309,7 +339,9 @@
         "notPositive": "Der Preis muss eine Zahl größer als null sein.",
         "tooManyDecimals": "Preise können höchstens zwei Dezimalstellen haben.",
         "tooHigh": "Der Preis darf {currency} {max} nicht überschreiten."
-      }
+      },
+      "badgeDuplicate": "Zwei Badges sagen dasselbe. Ändere den Text eines Badges, oder entferne es.",
+      "badgesOnPhoto": "Auf dem Foto haben nur {max} Badges Platz. Verschiebe eines neben das Produkt."
     },
     "title": "Titel",
     "titlePlaceholder": "z. B. Ambient Loops Vol. 1",
@@ -337,6 +369,7 @@
     "saveProduct": "Produkt speichern",
     "savedToast": "„{title}“ wurde gespeichert.",
     "addedToast": "„{title}“ wurde zu deinen Produkten hinzugefügt.",
+    "checkingToast": "Käufer sehen es, sobald die automatische Prüfung es freigibt.",
     "documentFallbackLabel": "Dokument",
     "discard": {
       "title": "Änderungen verwerfen?",
@@ -574,6 +607,9 @@
     "hint": "PNG, JPG, WEBP, GIF oder AVIF, bis zu {max} MB",
     "remove": "Titelbild entfernen"
   },
+  "photoFormat": {
+    "heic": "Das ist ein iPhone-Foto (HEIC), das Browser nicht anzeigen können. Wähle es stattdessen aus der Fotomediathek deines Telefons, dann wird es als JPEG gesendet, oder exportiere es vorher als JPEG."
+  },
   "fileDropzone": {
     "currentFile": "Aktuelle Datei",
     "dropPrompt": "Datei ablegen oder klicken, um hochzuladen",
@@ -718,6 +754,233 @@
       "card": "Kartennummer",
       "total": "Gesamt",
       "pay": "{price} zahlen"
+    }
+  },
+  "badgesField": {
+    "listLabel": "Badges",
+    "labelFor": "Text für Badge {position}",
+    "iconFor": "Symbol und Farbe für Badge {position}",
+    "labelPlaceholder": "Was das Badge sagt",
+    "moveEarlier": "Badge {position} nach vorne verschieben",
+    "moveLater": "Badge {position} nach hinten verschieben",
+    "remove": "Badge {position} entfernen",
+    "addFirst": "Badge hinzufügen",
+    "addAnother": "Weiteres hinzufügen",
+    "full": "Das sind {max} Badges, so viele kann ein Produkt anzeigen. Entferne eines, um ein weiteres hinzuzufügen.",
+    "iconPicker": "Symbol auswählen",
+    "icons": {
+      "badge-check": "Häkchen-Badge",
+      "heart": "Herz",
+      "star": "Stern",
+      "award": "Rosette",
+      "trophy": "Pokal",
+      "thumbs-up": "Daumen hoch",
+      "users": "Personen",
+      "sparkles": "Funkeln",
+      "gem": "Edelstein",
+      "gift": "Geschenk",
+      "truck": "Lieferwagen",
+      "zap": "Blitz",
+      "clock": "Uhr",
+      "rotate-ccw": "Zurück-Pfeil",
+      "shield-check": "Schild",
+      "lock": "Vorhängeschloss",
+      "leaf": "Blatt",
+      "recycle": "Recycling",
+      "sprout": "Sprössling",
+      "trees": "Bäume",
+      "package": "Paket",
+      "vegan": "Vegan",
+      "rabbit": "Hase",
+      "paw-print": "Tatzenabdruck",
+      "wheat-off": "Kein Weizen",
+      "droplets": "Tropfen",
+      "sun": "Sonne",
+      "snowflake": "Schneeflocke",
+      "hand-heart": "Hand mit Herz",
+      "hammer": "Hammer",
+      "pen-tool": "Stift",
+      "map-pin": "Kartennadel",
+      "store": "Laden",
+      "handshake": "Handschlag",
+      "globe": "Globus",
+      "flame": "Flamme"
+    },
+    "picker": {
+      "open": "Suchen oder selbst schreiben",
+      "label": "Badge hinzufügen",
+      "search": "Badges suchen",
+      "placeholder": "Suchen oder eigene Wörter eingeben",
+      "results": "Badges",
+      "groups": {
+        "trust": "Vertrauen und Service",
+        "product": "Über das Produkt"
+      },
+      "create": "„{label}“ hinzufügen",
+      "checking": "Wird geprüft…",
+      "added": "Hinzugefügt",
+      "alreadyOn": "Dieses Produkt hat dieses Badge bereits.",
+      "noMatches": "Kein fertiges Badge passt dazu."
+    },
+    "stylePicker": "Symbol und Farbe",
+    "iconHeading": "Symbol",
+    "colorHeading": "Farbe",
+    "colorPicker": "Farbe wählen",
+    "colors": {
+      "ink": "Wie der Text",
+      "red": "Rot",
+      "orange": "Orange",
+      "amber": "Bernstein",
+      "green": "Grün",
+      "teal": "Blaugrün",
+      "blue": "Blau",
+      "purple": "Lila",
+      "pink": "Pink"
+    },
+    "placementFor": "Position von Badge {position}",
+    "placementPicker": "Position",
+    "placements": {
+      "beside": "Neben dem Produkt",
+      "photo-top-left": "Auf dem Foto, oben links",
+      "photo-top-right": "Auf dem Foto, oben rechts",
+      "photo-bottom-left": "Auf dem Foto, unten links",
+      "photo-bottom-right": "Auf dem Foto, unten rechts"
+    },
+    "photo": "Foto",
+    "beside": "Neben dem Produkt",
+    "photoFull": "Das Foto fasst bis zu {max} Badges. Verschiebe zuerst eines neben das Produkt.",
+    "preview": {
+      "label": "Auf deiner Produktseite",
+      "hint": "Ziehe ein Badge auf das Foto oder neben das Produkt.",
+      "titlePlaceholder": "Dein Produkt"
+    }
+  },
+  "badges": {
+    "presets": {
+      "lovedBy": {
+        "label": "{count, plural, one {Von #+ Person geliebt} other {Von #+ Personen geliebt}}",
+        "keywords": "Kunden, beliebt, Fans, zufrieden, Bewertungen, Social Proof"
+      },
+      "bestseller": {
+        "label": "Bestseller",
+        "keywords": "Bestseller, beliebt, meistverkauft, Top-Produkt, Favorit"
+      },
+      "topRated": {
+        "label": "Top-bewertet",
+        "keywords": "Bewertungen, Sterne, Fünf-Sterne-Bewertung, bestbewertet"
+      },
+      "freeShipping": {
+        "label": "Kostenloser Versand",
+        "keywords": "Versand, Lieferung, kostenlose Lieferung, portofrei"
+      },
+      "fastDispatch": {
+        "label": "{count, plural, one {Versand in # Stunde} other {Versand in # Stunden}}",
+        "keywords": "schnell, Expressversand, Blitzversand, Same-Day, gleicher Tag"
+      },
+      "moneyBack": {
+        "label": "{count, plural, one {# Tag Geld-zurück-Garantie} other {# Tage Geld-zurück-Garantie}}",
+        "keywords": "Rückerstattung, Rücksendung, Garantie, risikolos, Geld zurück"
+      },
+      "freeReturns": {
+        "label": "Kostenlose Rücksendung",
+        "keywords": "Rücksendung, Rückerstattung, Umtausch, kostenfrei zurücksenden"
+      },
+      "warranty": {
+        "label": "{count, plural, one {# Jahr Garantie} other {# Jahre Garantie}}",
+        "keywords": "Garantie, Reparatur, Schutz, Gewährleistung"
+      },
+      "securePayment": {
+        "label": "Sichere Zahlung",
+        "keywords": "sicher, Bezahlung, Zahlung, geschützt, Kreditkarte, SSL"
+      },
+      "satisfaction": {
+        "label": "Zufriedenheit garantiert",
+        "keywords": "Zufriedenheit, Garantie, Qualität, Versprechen"
+      },
+      "giftReady": {
+        "label": "Fertig zum Verschenken",
+        "keywords": "Geschenk, Verpackung, Geschenkverpackung, Geburtstag"
+      },
+      "limitedEdition": {
+        "label": "Limitierte Auflage",
+        "keywords": "selten, exklusiv, limitiert, Kleinauflage, Sammler, Limited Edition"
+      },
+      "newArrival": {
+        "label": "Neu",
+        "keywords": "Neuankömmling, neu eingetroffen, aktuell, frisch"
+      },
+      "smallBusiness": {
+        "label": "Kleines Unternehmen",
+        "keywords": "unabhängig, lokales Geschäft, Familienbetrieb, indie"
+      },
+      "awardWinning": {
+        "label": "Preisgekrönt",
+        "keywords": "Preis, Gewinner, Auszeichnung, Award"
+      },
+      "ecoFriendly": {
+        "label": "Umweltfreundlich",
+        "keywords": "umweltfreundlich, nachhaltig, grün, Umwelt, eco"
+      },
+      "handmade": {
+        "label": "Handgemacht",
+        "keywords": "handgefertigt, Handarbeit, Kunsthandwerk, von Hand gemacht"
+      },
+      "recycled": {
+        "label": "Aus recycelten Materialien",
+        "keywords": "recycelt, Upcycling, wiederverwendet, Kreislauf"
+      },
+      "plasticFree": {
+        "label": "Plastikfreie Verpackung",
+        "keywords": "Zero Waste, Verpackung, kompostierbar, kein Plastik"
+      },
+      "organic": {
+        "label": "Bio",
+        "keywords": "natürlich, bio, pestizidfrei, ohne Chemie, organisch"
+      },
+      "vegan": {
+        "label": "Vegan",
+        "keywords": "pflanzlich, keine tierischen Produkte, laktosefrei, veganes Produkt"
+      },
+      "crueltyFree": {
+        "label": "Ohne Tierversuche",
+        "keywords": "nicht an Tieren getestet, tierfreundlich, cruelty free"
+      },
+      "madeLocally": {
+        "label": "Lokal hergestellt",
+        "keywords": "lokal, hergestellt in, regional, regional erzeugt"
+      },
+      "fairTrade": {
+        "label": "Fair Trade",
+        "keywords": "ethisch, fair, fairer Handel, ethisch beschafft, Fairness"
+      },
+      "sustainablySourced": {
+        "label": "Nachhaltig beschafft",
+        "keywords": "nachhaltig, Beschaffung, Wald, Holz, rückverfolgbar"
+      },
+      "glutenFree": {
+        "label": "Glutenfrei",
+        "keywords": "Zöliakie, weizenfrei, Allergie, gluten free"
+      },
+      "waterproof": {
+        "label": "Wasserdicht",
+        "keywords": "wasserresistent, Regen, spritzwassergeschützt, outdoor"
+      },
+      "builtToLast": {
+        "label": "Langlebig",
+        "keywords": "langlebig, stabil, robust, Qualität, beständig"
+      },
+      "personalised": {
+        "label": "Personalisiert",
+        "keywords": "individuell, graviert, Monogramm, auf Bestellung, anpassen"
+      },
+      "petFriendly": {
+        "label": "Haustierfreundlich",
+        "keywords": "Haustiere, Hunde, Katzen, tierverträglich"
+      },
+      "qualityChecked": {
+        "label": "Qualitätsgeprüft",
+        "keywords": "getestet, geprüft, überprüft, genehmigt"
+      }
     }
   }
 }

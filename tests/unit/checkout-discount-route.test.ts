@@ -39,8 +39,10 @@ vi.mock("@/lib/products/purchasable", () => ({
       : null;
   }),
 }));
+// Async like the real one: a synchronous stand-in hid a missing `await` in the
+// route, where a Promise (always truthy) let a closed checkout through.
 vi.mock("@/lib/checkout/availability", () => ({
-  checkoutAvailableFor: () => state.available,
+  checkoutAvailableFor: async () => state.available,
 }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => ({}) }));
 vi.mock("@/lib/discounts/public", () => ({

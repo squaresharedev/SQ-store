@@ -120,3 +120,11 @@ one whole class of real bugs found was accessibility contrast + a missing label.
   by text.
 - Component tests needed explicit `afterEach(cleanup)` (vitest `globals` off),
   a `matchMedia` stub, and `useFakeTimers({ toFake: ["Date"] })`.
+- Site builders (spec 97-embed-builders): the browser is launched with
+  `--host-resolver-rules` mapping `*.filesusr.com` and `*.googleusercontent.com`
+  to localhost, so the one dev server plays Wix's and Google's wrapper hosts
+  (`/dev/embed-host?wrap=wix|google|srcdoc`). That stand-in page sends
+  `frame-ancestors *`: the app's global `X-Frame-Options: DENY` otherwise
+  refuses to show it inside the stand-in site, and the run fails on the
+  harness, not the embed. Helpers shared with spec 89 live in
+  `tests/e2e/embed-shop.ts`.

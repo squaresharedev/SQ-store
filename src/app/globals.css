@@ -257,6 +257,10 @@
      and not on the motion scale above; kept here beside the other long
      durations so every timing the app can retune is in one place. */
   --duration-flow: 8s;
+
+  /* One full flow of the add-colour button's rim (.color-wheel below), shown
+     only while it is hovered. Each colour's drift is a fraction of this. */
+  --duration-wheel-flow: 6s;
 }
 
 /* Two selectors, one palette.
@@ -336,23 +340,6 @@
    gesture bar. The 0px fallback makes it a no-op everywhere else. */
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-/*
- * A PRICE CROSSED OUT WITH A DIAGONAL STROKE: the product page's `slash` sale
- * look (SALE_PRICE_LOOKS, components/product-page/product-page-maps.ts). The
- * stroke runs corner to corner of the price's own box in the text's colour, so
- * it follows the page's ink on any backdrop, and its weight follows the type.
- */
-.ss-price-slash {
-  text-decoration: none;
-  background-image: linear-gradient(
-    to bottom right,
-    transparent calc(50% - 0.045em),
-    currentColor calc(50% - 0.045em),
-    currentColor calc(50% + 0.045em),
-    transparent calc(50% + 0.045em)
-  );
 }
 
 /* ============================================================
@@ -516,13 +503,15 @@ html {
 }
 
 /* The storefront embed's frame (app/(public)/e) is sized by the page that
-   holds it to exactly the height of its content. The root layout's
-   min-h-screen on <body> would be measured against that same frame, and a
-   scrollbar appearing while the height is on its way would change the width
-   the board reflows to. Unlayered, so it outranks the utility. */
+   holds it to exactly the height of its content, and the root layout's
+   min-h-screen on <body> would be measured against that same frame.
+   Unlayered, so it outranks the utility. It still scrolls: pasted as a plain
+   iframe of fixed height (no loader to size it), a tall board has to. The
+   loader's frame never shows a scrollbar because the loader says
+   scrolling="no", so a bar cannot appear mid-resize and change the width the
+   board reflows to. */
 html:has([data-embed-frame]) body {
   min-height: 0;
-  overflow: hidden;
 }
 
 /* A themed surface paints a full-viewport panel, but the page CANVAS takes its
@@ -670,6 +659,187 @@ textarea {
   display: none;
   width: 0;
   height: 0;
+}
+
+/* Edge fade for a horizontal scroller that SHOULD keep a scrollbar (a mouse has
+   no other way to scroll sideways): the content dissolves toward whichever
+   side still has more of it. The component sets `data-fade-start` /
+   `data-fade-end` from the scroll position (ColorPicker's scrolling row), so
+   an edge with nothing beyond it stays crisp and, with neither set, there is no
+   mask at all. The size is a px custom property because the component reads it
+   back to keep a revealed item clear of the fade. */
+.scroll-fade-x {
+  --scroll-fade-size: 24px;
+  --scroll-fade-start: 0px;
+  --scroll-fade-end: 0px;
+}
+.scroll-fade-x[data-fade-start] {
+  --scroll-fade-start: var(--scroll-fade-size);
+}
+.scroll-fade-x[data-fade-end] {
+  --scroll-fade-end: var(--scroll-fade-size);
+}
+.scroll-fade-x[data-fade-start],
+.scroll-fade-x[data-fade-end] {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--scroll-fade-start),
+    #000 calc(100% - var(--scroll-fade-end)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--scroll-fade-start),
+    #000 calc(100% - var(--scroll-fade-end)),
+    transparent 100%
+  );
+}
+
+/* A scrollbar that stays out of the way: 4px, invisible until the pointer is
+   over the scroller, then a faint capsule. Same two-engine split as the global
+   bar above (the standard properties outrank the pseudo-elements in Chrome, so
+   they sit behind the same guard). */
+.scrollbar-subtle::-webkit-scrollbar {
+  height: 4px;
+}
+.scrollbar-subtle::-webkit-scrollbar-thumb {
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+}
+.scrollbar-subtle:hover::-webkit-scrollbar-thumb {
+  background: rgb(0 0 0 / 0.18);
+}
+.scrollbar-subtle:hover::-webkit-scrollbar-thumb:hover {
+  background: rgb(0 0 0 / 0.32);
+}
+@supports not selector(::-webkit-scrollbar) {
+  .scrollbar-subtle {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .scrollbar-subtle:hover {
+    scrollbar-color: rgb(0 0 0 / 0.25) transparent;
+  }
+}
+
+/* The add-colour button's rim (ColorPicker): a pastel hue circle that flows
+   while the pointer (or keyboard focus) is on it. The flow is deliberately
+   UNEVEN, and it morphs rather than merely spins: the whole circle turns on
+   eased, lingering steps (--wheel-spin), and each colour's stop drifts inside
+   its own lane at its own pace (--wheel-s1..5), so bands swell and thin as they
+   travel. The five lanes (10-23%, 27-40%, 44-57%, 61-74%, 78-91%) never overlap,
+   which keeps the colours in order however the timings drift against each other.
+   Every keyframe set starts and ends on the even circle, so it reads as the
+   plain pastel ring at rest. The animations are always attached and PAUSED, and
+   hover only runs them: leaving stops the ring where it was instead of
+   snapping it back. Where @property is not supported (Firefox before 128) the
+   ring is simply still; reduced motion removes the animation. */
+@property --wheel-spin {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@property --wheel-s1 {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 16.67%;
+}
+@property --wheel-s2 {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 33.33%;
+}
+@property --wheel-s3 {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 50%;
+}
+@property --wheel-s4 {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 66.67%;
+}
+@property --wheel-s5 {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 83.33%;
+}
+@keyframes color-wheel-spin {
+  0% {
+    --wheel-spin: 0deg;
+    animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1);
+  }
+  28% {
+    --wheel-spin: 110deg;
+    animation-timing-function: ease-in-out;
+  }
+  46% {
+    --wheel-spin: 150deg;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.1, 1);
+  }
+  80% {
+    --wheel-spin: 305deg;
+    animation-timing-function: ease-in-out;
+  }
+  100% {
+    --wheel-spin: 360deg;
+  }
+}
+@keyframes color-wheel-s1 {
+  0%, 100% { --wheel-s1: 16.67%; }
+  35% { --wheel-s1: 10%; }
+  70% { --wheel-s1: 23%; }
+}
+@keyframes color-wheel-s2 {
+  0%, 100% { --wheel-s2: 33.33%; }
+  30% { --wheel-s2: 40%; }
+  65% { --wheel-s2: 27%; }
+}
+@keyframes color-wheel-s3 {
+  0%, 100% { --wheel-s3: 50%; }
+  40% { --wheel-s3: 44%; }
+  75% { --wheel-s3: 57%; }
+}
+@keyframes color-wheel-s4 {
+  0%, 100% { --wheel-s4: 66.67%; }
+  25% { --wheel-s4: 74%; }
+  60% { --wheel-s4: 61%; }
+}
+@keyframes color-wheel-s5 {
+  0%, 100% { --wheel-s5: 83.33%; }
+  45% { --wheel-s5: 78%; }
+  80% { --wheel-s5: 91%; }
+}
+.color-wheel {
+  background: conic-gradient(
+    from var(--wheel-spin),
+    #fca5a5 0%,
+    #fde68a var(--wheel-s1),
+    #bbf7d0 var(--wheel-s2),
+    #a5f3fc var(--wheel-s3),
+    #c7d2fe var(--wheel-s4),
+    #f5d0fe var(--wheel-s5),
+    #fca5a5 100%
+  );
+  animation:
+    color-wheel-spin var(--duration-wheel-flow) linear infinite paused,
+    color-wheel-s1 calc(var(--duration-wheel-flow) * 0.78) ease-in-out infinite paused,
+    color-wheel-s2 calc(var(--duration-wheel-flow) * 0.65) ease-in-out infinite paused,
+    color-wheel-s3 calc(var(--duration-wheel-flow) * 0.88) ease-in-out infinite paused,
+    color-wheel-s4 calc(var(--duration-wheel-flow) * 0.72) ease-in-out infinite paused,
+    color-wheel-s5 calc(var(--duration-wheel-flow) * 0.58) ease-in-out infinite paused;
+}
+.color-wheel:hover,
+.color-wheel:focus-visible {
+  animation-play-state: running;
+}
+@media (prefers-reduced-motion: reduce) {
+  .color-wheel {
+    animation: none;
+  }
 }
 
 /* ============================================================
@@ -838,6 +1008,11 @@ textarea {
     var(--color-success-dark) 75%, #22c55e; /* green-500, 400, 200 */
   position: relative;
   isolation: isolate;
+}
+/* The same ring in light reds, for a block the seller has to act on and not
+   just copy from (the embed's privacy text). Only the palette changes. */
+.code-surface-danger {
+  --flow-stops: #ef4444, #f87171 25%, #fecaca 50%, #f87171 75%, #ef4444; /* red-500, 400, 200 */
 }
 .code-surface::before {
   content: "";

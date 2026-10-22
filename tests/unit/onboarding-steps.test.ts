@@ -160,7 +160,7 @@ describe("buildSetupSteps", () => {
     const seller = step(data, "seller-details");
     // The gate's own deep link: the first field that is actually blank.
     expect(action(seller.action)).toEqual({
-      href: "/settings/tax#business-name",
+      href: "/settings/business#business-name",
       label: "Add details",
     });
     expect(data.next?.id).toBe("seller-details");
@@ -176,7 +176,7 @@ describe("buildSetupSteps", () => {
     expect(data.seller).toBe("unconfirmed");
     expect(seller.done).toBe(false);
     expect(action(seller.action)).toEqual({
-      href: "/settings/tax#confirm-contact",
+      href: "/settings/business#confirm-contact",
       label: "Confirm email",
     });
     expect(text(seller.cta)).toBe("Confirm your email");
@@ -217,6 +217,35 @@ describe("buildSetupSteps", () => {
       }),
     );
     expect(step(data, "storefront").done).toBe(false);
+  });
+
+  it("never calls a page live while the automatic check still holds its product", () => {
+    const checking = buildSetupSteps(placedSeller({ checkingProductIds: ["p-1"] }));
+    const publish = step(checking, "publish");
+    expect(publish.done).toBe(false);
+    expect(checking.livePage).toBeNull();
+    expect(text(publish.detail)).toBe(
+      "Your page goes live once the automatic check approves the product.",
+    );
+    expect(action(publish.action)).toEqual({ href: "/products/p-1/edit", label: "Edit product" });
+
+    const paused = step(buildSetupSteps(placedSeller({ pausedProductIds: ["p-1"] })), "publish");
+    expect(paused.done).toBe(false);
+    expect(text(paused.detail)).toBe(
+      "The automatic check paused that product. Open it to see what to change.",
+    );
+
+    // One approved placement is enough for a live page.
+    const both = buildSetupSteps(
+      placedSeller({
+        activeProductIds: ["p-1", "p-2"],
+        existingProductIds: ["p-1", "p-2"],
+        checkingProductIds: ["p-1"],
+        storefronts: [storefront("sf-1", [productBlock("p-1"), productBlock("p-2")], true)],
+      }),
+    );
+    expect(step(both, "publish").done).toBe(true);
+    expect(both.livePage?.productId).toBe("p-2");
   });
 
   it("points a placed draft at its editor to publish it", () => {

@@ -252,9 +252,13 @@ export async function presignGetUrl(key: string): Promise<string | null> {
   //
   // This is NOT a user-reachable path: every app write validates image_key
   // against OBJECT_KEY_PATTERN (lib/validation/product.ts), which only admits
-  // `images/<uuid>/<uuid>-<name>` — a URL can never survive it. Only
-  // service_role seed scripts can put one here. https only: a plaintext http
-  // URL would be mixed content on a secure page.
+  // `images/<uuid>/<uuid>-<name>` — a URL can never survive it — and a write
+  // made around the app, straight through PostgREST, is refused by the
+  // guard_object_keys trigger (20261021_object_key_ownership), which admits a
+  // new key only when it is the writer's own upload. That trigger is what
+  // keeps /api/products/[id]/photo from fetching an address a seller chose.
+  // Only service_role seed scripts can put one here. https only: a plaintext
+  // http URL would be mixed content on a secure page.
   if (key.startsWith("https://")) {
     return key;
   }

@@ -1,6 +1,7 @@
 {
   "pageTitle": "Zahlungen",
   "soon": "Bald",
+  "bankOnFile": "Dein Bankkonto",
   "balance": {
     "available": {
       "label": "Verfügbar",

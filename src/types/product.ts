@@ -298,7 +298,115 @@ export interface ProductSafety {
   warnings?: string;
 }
 
+// ── Badges ──────────────────────────────────────────────────────────────
+//
+// A few short words at the top of the product page: a sign of trust ("Loved by
+// 1,000+ people", "30-day money-back guarantee") or a fact worth seeing at a
+// glance ("Eco friendly", "Handmade"). The seller picks a ready-made one
+// (lib/products/badges.ts) or writes their own, and either way the words are
+// theirs to edit, so what is stored is the words, never a preset id.
+//
+// Stored inside `details`, which is a moderated column: every badge is part of
+// the text the moderation wall fingerprints (20261012_auto_moderation), so no
+// write path, however it reaches the row, can publish one unchecked.
+
+/** How many badges one product may carry. A row of six is already a lot to
+ *  read beside a title; more stops being a highlight. */
+export const BADGES_MAX = 6;
+/** Room for "Aus recycelten Materialien hergestellt" and no more: a badge is a
+ *  phrase, not a sentence. */
+export const BADGE_LABEL_MAX = 48;
+
+/** The drawings a badge can lead with, a closed list so the page never draws
+ *  something nobody chose. Ids are stable (they are stored); the pictures are
+ *  mapped in components/product-page/badge-icons.ts. Append, never rename. */
+export const BADGE_ICONS = [
+  "badge-check",
+  "heart",
+  "star",
+  "award",
+  "trophy",
+  "thumbs-up",
+  "users",
+  "sparkles",
+  "gem",
+  "gift",
+  "truck",
+  "zap",
+  "clock",
+  "rotate-ccw",
+  "shield-check",
+  "lock",
+  "leaf",
+  "recycle",
+  "sprout",
+  "trees",
+  "package",
+  "vegan",
+  "rabbit",
+  "paw-print",
+  "wheat-off",
+  "droplets",
+  "sun",
+  "snowflake",
+  "hand-heart",
+  "hammer",
+  "pen-tool",
+  "map-pin",
+  "store",
+  "handshake",
+  "globe",
+  "flame",
+] as const;
+export type BadgeIcon = (typeof BADGE_ICONS)[number];
+
+/** What colour a badge's icon is drawn in. `ink` is the page's own text colour
+ *  (the default); the rest are named, not hex, because each has a shade for a
+ *  light page and one for a dark page (BADGE_COLOR_SHADES). Append, never
+ *  rename: the ids are stored. */
+export const BADGE_COLORS = [
+  "ink",
+  "red",
+  "orange",
+  "amber",
+  "green",
+  "teal",
+  "blue",
+  "purple",
+  "pink",
+] as const;
+export type BadgeColor = (typeof BADGE_COLORS)[number];
+
+/** Where a badge sits on the product page: beside the product, under its
+ *  title (the default), or on the photo itself, in one of its corners. */
+export const BADGE_PLACEMENTS = [
+  "beside",
+  "photo-top-left",
+  "photo-top-right",
+  "photo-bottom-left",
+  "photo-bottom-right",
+] as const;
+export type BadgePlacement = (typeof BADGE_PLACEMENTS)[number];
+export type BadgePhotoPlacement = Exclude<BadgePlacement, "beside">;
+
+/** How many badges the photo carries at most, across its four corners: past
+ *  that they stop being a highlight and start hiding the product. */
+export const BADGES_ON_PHOTO_MAX = 3;
+
+/** One badge as stored and as a buyer's page draws it. */
+export interface ProductBadge {
+  icon: BadgeIcon;
+  /** The seller's words, trimmed, 1..BADGE_LABEL_MAX characters. */
+  label: string;
+  /** Absent = `ink`, the page's own text colour. */
+  color?: BadgeColor;
+  /** Absent = `beside`. */
+  placement?: BadgePlacement;
+}
+
 export interface ProductDetails {
+  /** In the seller's order; absent = none, which is most products. */
+  badges?: ProductBadge[];
   dimensions?: ProductDimensions;
   weight?: ProductWeight;
   materials?: string;

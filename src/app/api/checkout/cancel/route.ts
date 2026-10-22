@@ -1,3 +1,5 @@
+import { optionIdsForSelection, parseOrderSelection } from "@/lib/orders/selection";
+import { parseOptionGroups } from "@/lib/products/detail";
 import { headers } from "next/headers";
 import { appUrl } from "@/lib/app-url";
 import { StripeApiError, stripeRequest } from "@/lib/billing/stripe-api";
@@ -46,7 +48,7 @@ export async function GET(request: Request) {
 
   const { data: order, error } = await createAdminClient()
     .from("orders")
-    .select("seller_id, storefront_id, product_id, status, payment_ref")
+    .select("seller_id, storefront_id, product_id, status, payment_ref, selected_options, quantity")
     .eq("checkout_session_id", checkoutSessionId)
     .maybeSingle();
   if (error) console.error("[checkout] cancel could not read the order:", error.message);
@@ -66,5 +68,28 @@ export async function GET(request: Request) {
     }
   }
 
-  return Response.redirect(appUrl(checkoutPath(order.storefront_id, order.product_id)), 303);
+  // Back to the same checkout, with the version and quantity the buyer chose:
+  // without them a product with options bounced them to its page to choose
+  // again, and everything they had typed was gone with it.
+  const choice = await choiceOf(order.product_id, order.selected_options, order.quantity);
+  return Response.redirect(appUrl(checkoutPath(order.storefront_id, order.product_id, choice)), 303);
+}
+
+/** The option ids and quantity of the order, as the checkout link carries
+ *  them. Best effort: an unreadable product just means no preselection. */
+async function choiceOf(
+  productId: string,
+  selectedOptions: unknown,
+  quantity: number | null,
+): Promise<{ optionIds: string[]; quantity?: number }> {
+  const selection = parseOrderSelection(selectedOptions);
+  const amount = quantity && quantity > 1 ? { quantity } : {};
+  if (selection.length === 0) return { optionIds: [], ...amount };
+  const { data: product, error } = await createAdminClient()
+    .from("products")
+    .select("option_groups")
+    .eq("id", productId)
+    .maybeSingle();
+  if (error || !product) return { optionIds: [], ...amount };
+  return { optionIds: optionIdsForSelection(parseOptionGroups(product.option_groups), selection), ...amount };
 }

@@ -93,7 +93,7 @@ describe("ActionError factories: English is unchanged", () => {
     expect(english(error.message)).toBe(
       "You can't publish or sell until your seller details are complete.",
     );
-    expect(error.action?.href).toBe("/settings/tax#address");
+    expect(error.action?.href).toBe("/settings/business#address");
     expect(english(error.action!.label)).toBe("Add seller details");
   });
 });

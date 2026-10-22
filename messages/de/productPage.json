@@ -211,6 +211,7 @@
       "paidDetail": "Bezahlt am {date}",
       "confirming": "Zahlung wird bestätigt",
       "confirmingDetail": "Das dauert normalerweise nur einen Moment. Lade die Seite neu, falls sich nichts ändert.",
+      "checkAgain": "Erneut prüfen",
       "preparing": "Wird vorbereitet",
       "preparingDetail": "{seller} bereitet deine Bestellung vor.",
       "shipped": "Unterwegs",
@@ -383,5 +384,7 @@
     "lowestNote": "Durchgestrichener Preis: der reguläre Preis. Niedrigster Gesamtpreis der letzten 30 Tage vor der Preisermäßigung: {price}.",
     "badgeSale": "Aktion",
     "endsOn": "Aktion endet {date}"
-  }
+  },
+  "badges": "Highlights",
+  "badgesOnPhoto": "Highlights auf dem Foto"
 }

@@ -59,7 +59,7 @@ export async function POST(request: Request, { params }: { params: Promise<Param
     action: "checkout_page",
     budget: RATE_LIMITS.checkoutPage,
   });
-  if (!gate || !checkoutAvailableFor(gate)) return answer({ ok: false, error: "unavailable" }, 404);
+  if (!gate || !(await checkoutAvailableFor(gate))) return answer({ ok: false, error: "unavailable" }, 404);
 
   const code = await findCodeFor(createAdminClient(), {
     ownerId: gate.ownerId,

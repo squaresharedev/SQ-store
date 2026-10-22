@@ -122,6 +122,11 @@
       "description": "Kupujúci to čakajú. Zabaľte to a potom označte ako odoslané.",
       "action": "Odoslať objednávky"
     },
+    "withdrawals": {
+      "label": "{count, plural, one {{count} kupujúci odstúpil} few {{count} kupujúci odstúpili} many {{count} kupujúceho odstúpilo} other {{count} kupujúcich odstúpilo}}",
+      "description": "Do 14 dní od odstúpenia im máte vrátiť peniaze. Dohodnite vrátenie tovaru a potom peniaze vráťte.",
+      "action": "Zobraziť odstúpenia"
+    },
     "checkoutRates": {
       "label": "Nastavte ceny doručenia",
       "description": "Kupujúci nemôžu dokončiť nákup fyzického produktu, kým destinácia nemá sadzbu aj krajinu.",

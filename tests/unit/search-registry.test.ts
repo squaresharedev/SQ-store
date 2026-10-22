@@ -69,7 +69,7 @@ describe("local search registry — matching by intent", () => {
     ["change language", "/settings/language"],
     ["translate", "/settings/language"],
     ["locale", "/settings/language"],
-    ["vat", "/settings/tax#vat"],
+    ["vat", "/settings/business#vat"],
     ["gdpr export", "/settings/danger#export"],
     ["close account", "/settings/danger#delete"],
     ["add product", "/products/new"],

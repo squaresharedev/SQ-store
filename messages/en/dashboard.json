@@ -122,6 +122,11 @@
       "description": "Buyers are waiting on these. Pack them, then mark them shipped.",
       "action": "Ship orders"
     },
+    "withdrawals": {
+      "label": "{count, plural, one {{count} buyer withdrew} other {{count} buyers withdrew}}",
+      "description": "They are owed a refund within 14 days of withdrawing. Arrange the return, then refund the order.",
+      "action": "See withdrawals"
+    },
     "checkoutRates": {
       "label": "Set your delivery prices",
       "description": "Buyers can't check out a physical product until a destination has both a rate and a country.",

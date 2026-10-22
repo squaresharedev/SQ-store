@@ -8,6 +8,7 @@ import { getAssurance, getProfile, getUser } from "@/lib/auth/session";
 import { STEP_UP_FIELDS, requireStepUpState } from "@/lib/auth/mfa";
 import { checkPassword } from "@/lib/auth/reauth";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
+import { TRADER_IDENTITY_HREF } from "@/lib/settings/trader-identity";
 import { RATE_LIMITS, clientKey, rateLimit, rateLimitKey } from "@/lib/rate-limit";
 import { alertSecurityEvent } from "@/lib/security/events";
 import { accountHasPassword } from "@/lib/auth/has-password";
@@ -543,7 +544,7 @@ export async function saveTaxInfo(
   );
 
   if (!(await updateOwnProfile(user.id, update))) return SAVE_FAILED;
-  revalidatePath("/settings/tax");
+  revalidatePath(TRADER_IDENTITY_HREF);
 
   // A code goes out for each changed detail this deployment can prove. The
   // DETAILS ARE SAVED either way: reporting a failed send as a failed save

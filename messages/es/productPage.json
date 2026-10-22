@@ -211,6 +211,7 @@
       "paidDetail": "Pagado el {date}",
       "confirming": "Confirmando tu pago",
       "confirmingDetail": "Suele tardar un momento. Recarga la página si no cambia.",
+      "checkAgain": "Comprobar de nuevo",
       "preparing": "En preparación",
       "preparingDetail": "{seller} está preparando tu pedido.",
       "shipped": "En camino",
@@ -383,5 +384,7 @@
     "lowestNote": "Precio tachado: el precio habitual. Precio más bajo en los 30 días anteriores al inicio de esta rebaja: {price}.",
     "badgeSale": "Rebajas",
     "endsOn": "La rebaja termina el {date}"
-  }
+  },
+  "badges": "Destacados",
+  "badgesOnPhoto": "Destacados en la foto"
 }

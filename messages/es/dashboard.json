@@ -122,6 +122,11 @@
       "description": "Los compradores están esperando. Empaquétalos y márcalos como enviados.",
       "action": "Enviar pedidos"
     },
+    "withdrawals": {
+      "label": "{count, plural, one {{count} comprador ha desistido} many {{count} de compradores han desistido} other {{count} compradores han desistido}}",
+      "description": "Tienen derecho a un reembolso en los 14 días siguientes a su desistimiento. Organiza la devolución y luego reembolsa el pedido.",
+      "action": "Ver desistimientos"
+    },
     "checkoutRates": {
       "label": "Fija tus precios de entrega",
       "description": "Los compradores no pueden pagar un producto físico hasta que un destino tenga tanto una tarifa como un país.",

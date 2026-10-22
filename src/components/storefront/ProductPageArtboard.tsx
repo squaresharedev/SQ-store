@@ -1,8 +1,9 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { iconNudgeRightClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
-import { CheckoutNodeIcon } from "./page-node-icons";
 import { ArtboardFrame } from "./ArtboardFrame";
 import type { PreviewDevice } from "./DeviceSizeSwitch";
 import { usePreviewProduct } from "./usePreviewProduct";
@@ -110,15 +111,16 @@ export function ProductPageArtboard({
             aria-label={t("openCheckoutAriaLabel", { title: product.title })}
             title={t("openCheckoutAriaLabel", { title: product.title })}
             className={cn(
-              "flex h-7 shrink-0 items-center gap-1.5 rounded-sm border px-2 font-inter text-xs font-medium transition-colors duration-base ease-standard",
+              // A trailing arrow, nudged on hover: this opens something.
+              "group/btn flex h-7 shrink-0 items-center gap-1.5 rounded-sm border px-2 font-inter text-xs font-medium transition-colors duration-base ease-standard",
               checkoutOpen
                 ? "border-foreground bg-foreground text-background"
                 : "border-border bg-background text-muted-foreground hover:text-foreground",
             )}
             data-checkout-node={checkoutOpen ? "open" : "closed"}
           >
-            <CheckoutNodeIcon className="size-3.5" strokeWidth={2} aria-hidden="true" />
             {t("openCheckout")}
+            <ArrowRight className={cn("size-3.5", iconNudgeRightClass)} strokeWidth={2} aria-hidden="true" />
           </button>
         )
       }

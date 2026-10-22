@@ -7,10 +7,17 @@ import { checkoutProviderFor } from "@/lib/checkout/availability";
 import {
   DEFAULT_PAGE_SIZE,
   countOrdersToShip,
+  countToShipForProduct,
   getOrderById,
   listOrders,
 } from "@/lib/orders/queries";
-import { ORDER_DETAIL_PARAM, ORDERS_VIEW_PARAM } from "@/lib/orders/paths";
+import {
+  ORDER_DETAIL_PARAM,
+  ORDERS_PRODUCT_PARAM,
+  ORDERS_STATUS_PARAM,
+  ORDERS_VIEW_PARAM,
+} from "@/lib/orders/paths";
+import { getProductLabel } from "@/lib/products/queries";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { OrdersPage } from "@/components/orders/OrdersPage";
@@ -21,10 +28,11 @@ import {
   ORDER_CHANNELS,
   ORDERS_SEARCH_MAX_LENGTH,
   ORDERS_VIEWS,
+  WITHDRAWN_STATUS_FILTER,
   type OrderChannel,
   type OrderFilters,
   type OrderSort,
-  type OrderStatus,
+  type OrderStatusFilter,
   type OrdersView,
 } from "@/types/order-view";
 import { requireUser } from "@/lib/auth/session";
@@ -54,10 +62,16 @@ export async function generateMetadata(): Promise<Metadata> {
 // `?view=to-ship|all` picks the list (see resolveView). With no view named, the
 // page opens on what needs doing: the To ship queue when anything is waiting,
 // the full list when nothing is.
+//
+// `?product=<id>` narrows both lists, and the To ship count, to one product (a
+// product card's "N orders to ship" link). A scope rather than a toolbar
+// filter: it survives switching tabs and clearing the filters, and only its own
+// chip removes it. An id that is not one of this store's products is dropped.
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
-const STATUSES: OrderStatus[] = ["paid", "refunded", "disputed", "pending"];
+/** What `?status=` may ask for: the database statuses, and "withdrawn". */
+const STATUSES: OrderStatusFilter[] = ["paid", "refunded", "disputed", "pending", WITHDRAWN_STATUS_FILTER];
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 function first(value: string | string[] | undefined): string | undefined {
@@ -72,9 +86,9 @@ function parseParams(params: SearchParams): {
 } {
   const filters: OrderFilters = {};
 
-  const status = first(params.status);
-  if (STATUSES.includes(status as OrderStatus)) {
-    filters.status = status as OrderStatus;
+  const status = first(params[ORDERS_STATUS_PARAM]);
+  if (STATUSES.includes(status as OrderStatusFilter)) {
+    filters.status = status as OrderStatusFilter;
   }
   const channel = first(params.channel);
   if ((ORDER_CHANNELS as readonly (string | undefined)[]).includes(channel)) {
@@ -142,11 +156,22 @@ export default async function OrdersRoutePage({
   const deepLinkedId = first(params[ORDER_DETAIL_PARAM]);
   const t = await getTranslations("Orders.page");
 
-  const [toShipCount, account] = await Promise.all([countOrdersToShip(), getActiveAccount()]);
+  const scopeId = first(params[ORDERS_PRODUCT_PARAM]);
+  const [storeToShip, account, product] = await Promise.all([
+    countOrdersToShip(),
+    getActiveAccount(),
+    scopeId ? getProductLabel(scopeId) : Promise.resolve(null),
+  ]);
+  // Narrowed to one product, the tab counts that product's parcels: the count
+  // beside the tab and the rows under it answer the same question.
+  const toShipCount =
+    product && account
+      ? ((await countToShipForProduct(account.accountId, product.id)) ?? 0)
+      : storeToShip;
   const view = resolveView(params, filters, toShipCount);
 
   const [data, deepLinked, billing] = await Promise.all([
-    listOrders({ view, filters, sort, page, pageSize: DEFAULT_PAGE_SIZE }),
+    listOrders({ view, filters, productId: product?.id, sort, page, pageSize: DEFAULT_PAGE_SIZE }),
     // A stale or foreign id resolves to null: the list still renders, just
     // without a detail panel.
     deepLinkedId ? getOrderById(deepLinkedId) : Promise.resolve(null),
@@ -169,6 +194,7 @@ export default async function OrdersRoutePage({
         checkoutOpen={account ? (await checkoutProviderFor(account.accountId)) !== null : false}
         data={data}
         filters={view === "all" ? filters : {}}
+        product={product}
         sort={sort}
         deepLinkedOrder={deepLinked}
         highlightId={first(params.highlight) ?? null}

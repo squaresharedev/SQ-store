@@ -1,7 +1,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import type { Locale } from "@/i18n/locales";
 import { cn } from "@/lib/utils";
-import { cardClass } from "@/components/ui/surface-styles";
+import { cardClass, eyebrowClass } from "@/components/ui/surface-styles";
 import { formatCents } from "@/lib/format/money";
 import { formatOrderDate } from "@/lib/format/date";
 import type { Balance, MoneyAmount, UpcomingPayout } from "@/lib/payments/types";
@@ -14,51 +14,45 @@ function formatBuckets(buckets: MoneyAmount[], locale: Locale): string | null {
     .join(" · ");
 }
 
-function Tile({
+/** A secondary figure beside the headline: its name and what it means, and the amount. */
+function FigureRow({
   label,
   value,
   zeroText,
   hint,
-  emphasis = false,
+  ...rest
 }: {
   label: string;
   value: string | null;
   zeroText: string;
+  /** Explains a figure, so only given when there is one: under a zero state it would contradict it. */
   hint?: string;
-  emphasis?: boolean;
-}) {
+} & React.ComponentProps<"div">) {
   return (
-    <div className={cn(cardClass, "p-4")}>
-      <span className="font-inter text-xs font-medium uppercase tracking-widest text-muted-foreground">
-        {label}
-      </span>
-      <div className="mt-2">
-        {value ? (
-          <p
-            className={
-              emphasis
-                ? "truncate text-3xl font-bold text-foreground sm:text-4xl"
-                : "truncate text-2xl font-semibold text-foreground"
-            }
-          >
-            {value}
-          </p>
-        ) : (
-          <p className="text-base font-medium text-muted-foreground">{zeroText}</p>
-        )}
-        {hint && (
-          <p className="mt-1 font-inter text-xs text-muted-foreground">{hint}</p>
-        )}
+    <div {...rest} className="flex items-baseline justify-between gap-4 px-4 py-3">
+      <div className="min-w-0">
+        <p className={eyebrowClass}>{label}</p>
+        {hint && <p className="mt-0.5 font-inter text-xs text-muted-foreground">{hint}</p>}
       </div>
+      <p
+        className={cn(
+          "shrink-0 text-lg font-semibold",
+          value ? "text-foreground" : "text-sm font-medium text-muted-foreground",
+        )}
+      >
+        {value ?? zeroText}
+      </p>
     </div>
   );
 }
 
 /**
- * The headline money tiles: available now, pending clearance, the next
- * scheduled payout and, where the store's fees are known, what Square Share
- * took this month. All amounts arrive as integer cents and go through the
- * shared formatter; empty buckets render calm zero states, never €0.00.
+ * The balance, first and as one card. What can be taken out leads: the
+ * available figure large, with the next payout under it. What is still
+ * clearing and, where the store's fees are known, what Square Share took this
+ * month sit beside it as a quiet ledger. All amounts arrive as integer cents
+ * and go through the shared formatter; empty buckets render calm zero states,
+ * never €0.00.
  */
 export function BalanceSummary({
   balance,
@@ -69,54 +63,52 @@ export function BalanceSummary({
   upcomingPayout: UpcomingPayout;
   /** What the store paid Square Share this month, per currency, after
    *  refunds (the fee ledger). Null or absent when it is not known, and the
-   *  tile is then left out rather than drawn empty. */
+   *  row is then left out rather than drawn empty. */
   feesThisMonth?: MoneyAmount[] | null;
 }) {
   const t = useTranslations("Payments.balance");
   const locale = useLocale();
-  const showFees = feesThisMonth != null;
+  const available = formatBuckets(balance.available, locale);
   return (
-    <div className={cn("grid grid-cols-1 gap-4 sm:grid-cols-2", showFees ? "lg:grid-cols-4" : "lg:grid-cols-3")}>
-      {/* A hint explains a figure. Under a zero state it contradicts it
-          ("Nothing to pay out yet" over "Ready for your next payout"), so it
-          only appears when there is a figure to explain. */}
-      <Tile
-        label={t("available.label")}
-        value={formatBuckets(balance.available, locale)}
-        zeroText={t("available.zero")}
-        hint={balance.available.length > 0 ? t("available.hint") : undefined}
-        emphasis
-      />
-      <Tile
-        label={t("pending.label")}
-        value={formatBuckets(balance.pending, locale)}
-        zeroText={t("pending.zero")}
-        hint={balance.pending.length > 0 ? t("pending.hint") : undefined}
-      />
-      <Tile
-        label={t("nextPayout.label")}
-        value={
-          upcomingPayout
-            ? formatCents(upcomingPayout.amountCents, upcomingPayout.currency, locale)
-            : null
-        }
-        zeroText={t("nextPayout.zero")}
-        hint={
-          upcomingPayout
-            ? t("nextPayout.hint", { date: formatOrderDate(upcomingPayout.expectedAt, locale) })
-            : undefined
-        }
-      />
-      {showFees && (
-        <div data-fees-this-month="">
-          <Tile
+    <section className={cn(cardClass, "grid grid-cols-1 lg:grid-cols-[3fr_2fr]")}>
+      <div className="p-5 sm:p-6">
+        <p className={cn(eyebrowClass, "tracking-widest")}>{t("available.label")}</p>
+        {available ? (
+          <p className="mt-2 truncate text-4xl font-bold text-foreground sm:text-5xl">{available}</p>
+        ) : (
+          <p className="mt-2 text-base font-medium text-muted-foreground">{t("available.zero")}</p>
+        )}
+        <p className="mt-3 font-inter text-sm text-muted-foreground">
+          {upcomingPayout ? (
+            <>
+              {t("nextPayout.label")}:{" "}
+              <span className="font-medium text-foreground">
+                {formatCents(upcomingPayout.amountCents, upcomingPayout.currency, locale)}
+              </span>{" "}
+              · {t("nextPayout.hint", { date: formatOrderDate(upcomingPayout.expectedAt, locale) })}
+            </>
+          ) : (
+            t("nextPayout.zero")
+          )}
+        </p>
+      </div>
+      <div className="divide-y divide-border border-t border-border lg:border-l lg:border-t-0">
+        <FigureRow
+          label={t("pending.label")}
+          value={formatBuckets(balance.pending, locale)}
+          zeroText={t("pending.zero")}
+          hint={balance.pending.length > 0 ? t("pending.hint") : undefined}
+        />
+        {feesThisMonth != null && (
+          <FigureRow
+            data-fees-this-month=""
             label={t("fees.label")}
             value={formatBuckets(feesThisMonth, locale)}
             zeroText={t("fees.zero")}
             hint={feesThisMonth.length > 0 ? t("fees.hint") : undefined}
           />
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </section>
   );
 }

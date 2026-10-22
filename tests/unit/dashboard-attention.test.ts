@@ -78,6 +78,8 @@ const NO_PRODUCTS: ProductsSummary = {
   noBuyPathCount: 0,
   hasPhysicalProducts: false,
   activeProductIds: [],
+  checkingProductIds: [],
+  pausedProductIds: [],
 };
 
 const NO_STOREFRONTS: StorefrontAttentionInfo = {
@@ -109,6 +111,7 @@ function build(overrides: {
   stripeConnectAvailable?: boolean;
   setupVisible?: boolean;
   toShipCount?: number;
+  withdrawalsToSettle?: number;
   checkoutOpen?: boolean;
 } = {}) {
   const items = buildAttentionItems({
@@ -120,6 +123,7 @@ function build(overrides: {
     stripeConnectAvailable: overrides.stripeConnectAvailable,
     setupVisible: overrides.setupVisible,
     toShipCount: overrides.toShipCount,
+    withdrawalsToSettle: overrides.withdrawalsToSettle,
     checkoutOpen: overrides.checkoutOpen,
   });
   return new Map(items.map((item) => [item.key, item]));
@@ -129,6 +133,8 @@ function build(overrides: {
 const ALL_BRANCHES = [
   // Orders waiting to ship
   build({ toShipCount: 3 }),
+  // Buyers who withdrew and are owed a refund
+  build({ withdrawalsToSettle: 2 }),
   // Stripe not connected, on the day connecting is possible
   build({ stripeConnected: false, stripeConnectAvailable: true }),
   // Legal not accepted
@@ -214,6 +220,16 @@ describe("needs-attention destinations", () => {
   it("says nothing about shipping when nothing is waiting", () => {
     expect(build({ toShipCount: 0 }).has("to-ship")).toBe(false);
     expect(build().has("to-ship")).toBe(false);
+  });
+
+  it("follows the parcels with the refunds owed to buyers who withdrew, on their own filtered list", () => {
+    const items = build({ toShipCount: 1, withdrawalsToSettle: 2 });
+    expect([...items.keys()].slice(0, 2)).toEqual(["to-ship", "withdrawals"]);
+    const row = items.get("withdrawals");
+    expect(row?.href).toBe("/orders?status=withdrawn");
+    expect(text(row?.label)).toBe("2 buyers withdrew");
+    expect(text(row?.actionLabel)).toBe("See withdrawals");
+    expect(build().has("withdrawals")).toBe(false);
   });
 
   it("sends the Stripe row to /payments, where the connection lives", () => {
@@ -566,6 +582,8 @@ describe("route resolver", () => {
     expect(routeExists("/orders?status=disputed")).toBe(true);
     expect(routeExists("/products/anything/edit")).toBe(true); // [id]
     expect(routeExists("/storefront/anything")).toBe(true);
+    expect(routeExists("/settings/business")).toBe(true);
+    // The old address still answers, as a redirect to the new one.
     expect(routeExists("/settings/tax")).toBe(true);
     expect(routeExists("/settings/shipping")).toBe(true);
     expect(routeExists("/settings/legal")).toBe(true);

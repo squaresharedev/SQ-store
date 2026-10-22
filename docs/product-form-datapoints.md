@@ -58,6 +58,11 @@ JSON.parse(document.getElementById("product-form-snapshot").textContent)
   "galleryTiedCount": 2,           // photos tied to one option
   "documentLabels": ["CE Certificate"],
   "documentCount": 1,
+  // badges as the page will print them, in order; rows with no words left out.
+  // color: an id from BADGE_COLORS ("ink" = the page's own text colour);
+  // placement: "beside" (under the title) or a corner of the photo
+  "badges": [{ "icon": "heart", "label": "Loved by 250+ people",
+               "color": "red", "placement": "photo-top-left" }],
   "specs":  { "hasDimensions": true, "hasWeight": false, "hasMaterials": true,
               "hasCare": false, "includedCount": 3, "specCount": 2,
               "hasOrigin": true,
@@ -130,7 +135,7 @@ section shows no "?" at all, for one whose own fields already explain it
 Section ids, in render order:
 
 ```
-basics  stock  media  options  photos  specs  documents  safety  visibility
+basics  stock  media  options  photos  badges  specs  documents  safety  visibility
 ```
 
 **`safety` is absent for a download**, in the DOM and in the snapshot alike.
@@ -154,7 +159,9 @@ title              description        price (+value in cents)   currency
 trackStock         stockQuantity      lowStockThreshold      maxPerOrder
 coverImage         digitalFile        purchaseUrl
 shippingProfile (+value: a profile id, or "default" for the store's terms)
-optionGroups       gallery            documents
+optionGroups       gallery            documents          badges (+value: how many)
+badge.<n>.label    badge.<n>.icon (+value: the icon id)
+badge.<n>.color (+value: the colour id)   badge.<n>.placement (+value: where it sits)
 length  width  height  dimensionUnit  weight  weightUnit
 materials  origin  care  included     spec.<n>.label  spec.<n>.value
 safety.manufacturerName     safety.manufacturerAddress
@@ -166,7 +173,8 @@ status (+value)
 
 A few of these sit on the control's WRAPPER rather than the control:
 `currency`, `status`, `dimensionUnit`, `weightUnit`, `shippingProfile`,
-`optionGroups` and `gallery`. Several of those (`SegmentedControl`, `Select`)
+`optionGroups`, `gallery`, `badges`, `badge.<n>.icon`, `badge.<n>.color` and
+`badge.<n>.placement`. Several of those (`SegmentedControl`, `Select`)
 take a closed set of
 props and spread nothing onto the DOM, so an attribute handed to them would be
 dropped silently — and a datapoint that is quietly absent is worse than one
@@ -184,6 +192,10 @@ The option and gallery editors were already addressable and stay so:
 | `data-gallery-bucket="<optionId>\|general"` | One photo bucket |
 | `data-gallery-photo="<localId>"` | One picked or stored photo |
 | `data-product-spec-row="<index>"` | One specification row |
+| `data-product-badge-row="<index>"` | One badge row (its words input carries `data-product-badge-label`) |
+| `data-badge-suggestion="<presetId>"` | A one-click ready-made badge |
+| `[data-product-badge-picker]` | The search that finds a ready-made badge or writes a new one |
+| `[data-badge-preview]` | The product page in miniature where badges are dragged (`[data-badge-zone="photo"|"beside"]`); hidden from assistive technology, the row's placement control is the accessible way |
 
 ### The index rail
 

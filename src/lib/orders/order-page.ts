@@ -17,6 +17,7 @@ import { PAGE_BUSY, type PageBusy } from "@/lib/public/busy";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 import { uuidField } from "@/lib/validation/inputs";
 import { buyerFacingStorefront } from "@/lib/storefront/buyer-face";
+import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 import { presignGetUrl } from "@/lib/r2";
 import { signPagePhoto } from "@/lib/storefront/uploads";
 import { resolveProductPage } from "@/lib/storefront/product-page";
@@ -120,15 +121,23 @@ export const getOrderPage = cache(
 
     const order = await lookUpOrderByRef(ref);
     if (order === PAGE_BUSY) return PAGE_BUSY;
-    if (!order || order.storefront_id !== storefrontId) return null;
+    if (!order) return null;
+    // A storefront the seller deleted detaches its orders (storefront_id is set
+    // null), and the buyer's page must outlive it: the order, the download and
+    // the withdrawal form are theirs. The ref is what proves the link, so the
+    // address they were given keeps answering.
+    const detached = order.storefront_id === null;
+    if (!detached && order.storefront_id !== storefrontId) return null;
 
     const admin = createAdminClient();
     const [{ data: storefront }, seller, shippingPolicy, { data: product }] = await Promise.all([
-      admin
-        .from("storefronts")
-        .select("id, name, config, moderation_status")
-        .eq("id", storefrontId)
-        .maybeSingle(),
+      detached
+        ? Promise.resolve({ data: null })
+        : admin
+            .from("storefronts")
+            .select("id, name, config, moderation_status")
+            .eq("id", storefrontId)
+            .maybeSingle(),
       getSellerIdentity(order.seller_id),
       getShippingPolicy(order.seller_id),
       order.product_id
@@ -139,10 +148,12 @@ export const getOrderPage = cache(
             .maybeSingle()
         : Promise.resolve({ data: null }),
     ]);
-    if (!storefront) return null;
-    // The order outlives the shop's moderation state; the shop's own name and
-    // design on this page do not (lib/storefront/buyer-face.ts).
-    const face = buyerFacingStorefront(storefront, seller.businessName);
+    if (!storefront && !detached) return null;
+    // The order outlives the shop's moderation state, and the shop itself; the
+    // shop's own name and design on this page do not (lib/storefront/buyer-face.ts).
+    const face = storefront
+      ? buyerFacingStorefront(storefront, seller.businessName)
+      : { name: seller.businessName ?? "", config: DEFAULT_STOREFRONT_CONFIG };
     if (!face) return null;
     const { config } = face;
 
@@ -178,7 +189,8 @@ export const getOrderPage = cache(
 
     return {
       storefront: {
-        id: storefront.id,
+        id: storefrontId,
+        ...(detached ? { detached: true } : {}),
         name: face.name,
         theme,
         ...(config.header ? { header: config.header } : {}),

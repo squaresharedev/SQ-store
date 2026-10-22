@@ -14,31 +14,27 @@ import { EMBED_MESSAGE_SOURCE, type EmbedFrameMessage } from "@/lib/storefront/e
  * told, which is also why a frame that was refused, and so never runs this,
  * stays invisible instead of leaving a blank box on a seller's website.
  *
- * ADDRESSED, not broadcast: the message is posted to `site`, the one origin
- * the server already checked against the seller's allowlist, never to "*".
- * The browser drops it if the page holding the frame is anything else.
+ * TO WHOEVER HOLDS THE FRAME ("*"), and that is safe for two reasons. Only a
+ * page the browser has already checked can be holding it: the frame is drawn
+ * at all only where every page above it is one the seller allowed, or a site
+ * builder's frame for one (lib/storefront/embed-frame.ts). And what it says is
+ * public: a height, and a title that is already the board's own label. Naming
+ * one origin instead is not possible: the holder is one of several allowed
+ * sites, and the frame cannot tell which.
  */
-export function useEmbedFrameReport(
-  rootRef: RefObject<HTMLElement | null>,
-  /** The embedding site's host, as the frame's address named it. */
-  site: string,
-  title: string,
-) {
+export function useEmbedFrameReport(rootRef: RefObject<HTMLElement | null>, title: string) {
   useEffect(() => {
     const root = rootRef.current;
     // Not in a frame (the dev gallery, a test render): nobody to tell.
     if (!root || window.parent === window) return;
 
-    // The frame is only ever drawn on a site with its own scheme: the policy
-    // it is served under names no other.
-    const target = `${window.location.protocol}//${site}`;
     const report = () => {
       const message: EmbedFrameMessage = {
         source: EMBED_MESSAGE_SOURCE,
         height: Math.ceil(root.getBoundingClientRect().height),
         title,
       };
-      window.parent.postMessage(message, target);
+      window.parent.postMessage(message, "*");
     };
 
     // Once now, measured directly: an observer may not fire for a frame that
@@ -49,5 +45,5 @@ export function useEmbedFrameReport(
     const observer = new ResizeObserver(report);
     observer.observe(root);
     return () => observer.disconnect();
-  }, [rootRef, site, title]);
+  }, [rootRef, title]);
 }

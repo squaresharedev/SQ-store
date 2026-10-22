@@ -10,16 +10,18 @@ import { storefrontDisplayName } from "@/lib/storefront/display-name";
 import { getEmbedFrame } from "@/lib/storefront/embed-frame-loader";
 
 /**
- * /e/[key]/[site]: THE STOREFRONT EMBED'S FRAME. A seller's board, drawn inside
- * their own website by the loader they pasted (public/widget.js).
+ * /e/[key]/[...sites]: THE STOREFRONT EMBED'S FRAME. A seller's board, drawn
+ * inside their own website by the loader they pasted (public/widget.js).
  *
- * THE ONE RESPONSE IN THE APP THAT MAY BE FRAMED, and only by [site]: the rule
- * in next.config.ts answers this address with `frame-ancestors [site]`, so the
- * browser will not draw it anywhere else. Everything that decides whether
- * there is anything to draw lives in getEmbedFrame (lib/storefront/
- * embed-frame-loader.ts): the key, the visitor's rate limit, embedding being
- * on, [site] being on the seller's list, and the hosted storefront's own gate.
- * The two halves are described together in lib/storefront/embed-frame.ts.
+ * THE ONE RESPONSE IN THE APP THAT MAY BE FRAMED, and only under [sites]: the
+ * rules in next.config.ts answer this address with `frame-ancestors [sites]`,
+ * so the browser will not draw it unless every page above it is one of them.
+ * [sites] is the seller's site, plus the host of any frame a site builder
+ * wraps pasted code in. Everything that decides whether there is anything to
+ * draw lives in getEmbedFrame (lib/storefront/embed-frame-loader.ts): the key,
+ * the visitor's rate limit, embedding being on, every site being allowed, and
+ * the hosted storefront's own gate. The two halves are described together in
+ * lib/storefront/embed-frame.ts.
  *
  * EVERY REFUSAL DRAWS NOTHING. Not a message: this document is shown inside
  * someone's website, and "this storefront is unavailable" in the middle of a
@@ -29,7 +31,7 @@ import { getEmbedFrame } from "@/lib/storefront/embed-frame-loader";
  * files beside this one are empty for the same reason.
  */
 
-type Params = { key: string; site: string };
+type Params = { key: string; sites: string[] };
 
 /** A frame, never a page of its own. Opened directly it would be a hosted
  *  storefront by another address, and one no policy could keep to its site:
@@ -40,23 +42,28 @@ async function isOpenedDirectly(): Promise<boolean> {
 }
 
 /**
- * The [site] segment as it stands in the address. The router hands a page its
- * params percent-encoded, which turns the colon before a development port
- * into %3A; a real site's host has nothing in it to encode. Whatever this
- * yields is still only a claim, checked in full by getEmbedFrame.
+ * The [sites] segments as they stand in the address, joined as the address
+ * joins them. The router hands a page its params percent-encoded, which turns
+ * the colon before a development port into %3A; a real site's host has nothing
+ * in it to encode. Whatever this yields is still only a claim, checked in full
+ * by getEmbedFrame.
  */
-function siteSegment(raw: string): string {
-  try {
-    return decodeURIComponent(raw);
-  } catch {
-    return raw;
-  }
+function sitesSegment(raw: string[]): string {
+  return raw
+    .map((segment) => {
+      try {
+        return decodeURIComponent(segment);
+      } catch {
+        return segment;
+      }
+    })
+    .join("/");
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   if (await isOpenedDirectly()) return {};
-  const { key, site } = await params;
-  const result = await getEmbedFrame(key, siteSegment(site));
+  const { key, sites } = await params;
+  const result = await getEmbedFrame(key, sitesSegment(sites));
   if (!result || result === PAGE_BUSY) return {};
   // Never indexed: the (public) layout already says so, and so does the
   // X-Robots-Tag this address is served with.
@@ -65,8 +72,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 export default async function EmbedFramePage({ params }: { params: Promise<Params> }) {
   if (await isOpenedDirectly()) notFound();
-  const { key, site } = await params;
-  const result = await getEmbedFrame(key, siteSegment(site));
+  const { key, sites } = await params;
+  const result = await getEmbedFrame(key, sitesSegment(sites));
   // Busy is refused like everything else: a try-again notice has no reader in
   // a frame, and the next visitor's load is the retry.
   if (!result || result === PAGE_BUSY) notFound();
@@ -92,5 +99,5 @@ export default async function EmbedFramePage({ params }: { params: Promise<Param
     });
   });
 
-  return <EmbedFrameView page={page} site={result.site.site} />;
+  return <EmbedFrameView page={page} />;
 }

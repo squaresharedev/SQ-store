@@ -211,6 +211,7 @@
       "paidDetail": "Betaald op {date}",
       "confirming": "Betaling bevestigen",
       "confirmingDetail": "Dit duurt gewoonlijk even. Vernieuw de pagina als er niets verandert.",
+      "checkAgain": "Opnieuw controleren",
       "preparing": "Wordt voorbereid",
       "preparingDetail": "{seller} bereidt jouw bestelling voor.",
       "shipped": "Onderweg",
@@ -383,5 +384,7 @@
     "lowestNote": "Doorgestreepte prijs: de normale prijs. Laagste prijs in de 30 dagen voor deze kortingsactie: {price}.",
     "badgeSale": "Actie",
     "endsOn": "Actie eindigt op {date}"
-  }
+  },
+  "badges": "Uitgelicht",
+  "badgesOnPhoto": "Highlights op de foto"
 }

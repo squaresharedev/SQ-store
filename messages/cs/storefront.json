@@ -183,12 +183,13 @@
     "loadMoreError": "Další výlohy se nepodařilo načíst. Zkuste to znovu.",
     "loadMore": "Načíst další (zbývá {remaining})",
     "deleteTitle": "Smazat výlohu?",
-    "deleteDesc": "Výloha „{name}“ bude i s mřížkou trvale odstraněna. Tuto akci nelze vrátit zpět.",
+    "deleteDesc": "Výloha „{name}“ bude i s mřížkou trvale odstraněna. Tuto akci nelze vrátit zpět. Objednávky z ní zůstanou, stejně jako stránky objednávek jejich kupujících.",
     "deleteToast": "Výloha „{name}“ byla smazána."
   },
   "card": {
     "editAriaLabel": "Upravit výlohu {name}",
-    "embedAriaLabel": "Vložit výlohu {name} na web",
+    "embedAriaLabel": "Sdílet nebo vložit výlohu {name}",
+    "viewPageAriaLabel": "Otevřít výlohu {name} tak, jak ji vidí kupující",
     "deleteAriaLabel": "Smazat výlohu {name}",
     "blockCount": "{count, plural, one {# blok} few {# bloky} many {# bloku} other {# bloků}}",
     "updatedLabel": " · aktualizováno {date}",
@@ -199,28 +200,52 @@
   },
   "embed": {
     "inDevNotice": "Widget pro vložení na web je ve vývoji a na cizích webech se zatím nezobrazuje. Nastavte si vše níže, ať můžete kód pro vložení použít hned, jak bude hotový.",
-    "title": "Vložit výlohu na web",
-    "description": "Vložte tento kód na jakýkoli web a zobrazí se na něm výloha „{name}“.",
+    "title": "Sdílet výlohu",
+    "description": "Pošlete lidem odkaz na výlohu „{name}“, nebo vložte kód na svůj web a zobrazte ji tam.",
+    "steps": {
+      "site": "Vyberte weby, kde se zobrazí",
+      "snippet": "Vložte kód na svůj web",
+      "privacy": "Doplňte to do zásad ochrany osobních údajů"
+    },
+    "required": "Povinné",
     "enabledLabel": "Vložení na web zapnuto",
     "domainsLabel": "Povolené domény",
     "domainsPlaceholder": "vasweb.cz, blog.vasweb.cz",
     "domainsHint": "Nejvýše {max}, oddělené čárkou. Když vložíte adresu URL, zkrátíme ji na doménu.",
     "emptyDomainsWarning": "Přidejte alespoň jednu doménu. Dokud je seznam prázdný, výloha se nikde nenačte, i když je vložení na web zapnuté.",
-    "snippetLabel": "Kód pro vložení",
-    "snippetReadyHint": "Vložte tento kód do HTML svého webu.",
+    "builderLabel": "Váš nástroj pro tvorbu webu",
+    "builderOther": "Jiný web",
+    "builderSteps": {
+      "other": "Vložte ho do HTML stránky na místo, kde se má výloha zobrazit.",
+      "wordpress": "Přidejte blok „Vlastní HTML“ tam, kde se má výloha zobrazit, a vložte do něj kód.",
+      "squarespace": "Přidejte blok „Code“ a vložte do něj kód. Pokud se výloha zobrazí až po obnovení stránky, přepněte na „Jen iframe“.",
+      "wix": "Přidejte „Embed Code“, potom „Embed HTML“, a vložte kód. Pak roztáhněte rámeček na výšku výlohy.",
+      "webflow": "Přidejte prvek „Code Embed“ a vložte do něj kód. Zobrazí se na zveřejněném webu.",
+      "shopify": "V editoru motivu přidejte sekci „Custom Liquid“ a vložte do ní kód.",
+      "google": "Zvolte „Insert“, potom „Embed“, potom „Embed code“ a vložte kód.",
+      "framer": "Přidejte komponentu „Embed“, nastavte ji na HTML a vložte kód.",
+      "carrd": "Přidejte prvek „Embed“, zvolte typ „Code“ a vložte kód."
+    },
+    "snippetKinds": {
+      "label": "Typ kódu",
+      "script": "Skript",
+      "iframe": "Jen iframe"
+    },
+    "snippetReadyHint": "Stačí ho vložit jednou. Přizpůsobí se výloze a promítne, co zde změníte.",
+    "iframeHint": "Pro weby, které odstraňují skripty. Má výšku {height} pixelů a posouvá se uvnitř. Po změně domén ho zkopírujte znovu.",
     "snippetLockedHint": "Zapněte vložení na web a přidejte alespoň jednu doménu, pak se odemkne tlačítko Kopírovat.",
     "snippetSaveHint": "Uložte nastavení, pak se odemkne tlačítko Kopírovat.",
     "pagesOffHint": "Nejdřív v editoru zapněte produktové stránky. Kliknutí na produkt otevře jeho stránku.",
     "notShowingLabel": "Když se výloha nezobrazuje",
-    "notShowingTip": "Adresa vašeho webu musí být v Povolených doménách a web musí používat https. Nástroje pro tvorbu webu, které vlastní HTML vkládají do vlastního rámce (Wix, Google Sites), zatím nejsou podporovány.",
+    "notShowingTip": "Adresa vašeho webu musí být v Povolených doménách a web musí používat https. Vložený kód se zobrazí na zveřejněném webu, ne v editoru nástroje pro tvorbu webu. Chcete-li ho vidět na adrese náhledu (třeba vasweb.webflow.io), přidejte i tuto adresu.",
     "copySnippet": {
       "copy": "Kopírovat kód pro vložení",
       "copied": "Kód pro vložení zkopírován",
       "failed": "Kód pro vložení se nepodařilo zkopírovat. Označte ho a zkopírujte ručně.",
       "cannotCopyYet": "kód pro vložení zatím nelze zkopírovat"
     },
-    "privacyLabel": "Do vašich zásad ochrany osobních údajů",
-    "privacyHint": "Váš web teď načítá výlohu ze Squareshare, a tak by to měly uvádět i jeho zásady ochrany osobních údajů. Můžete vložit tento text:",
+    "privacyHint": "Váš web teď načítá tuto výlohu ze Squareshare, a jeho zásady ochrany osobních údajů to proto musí uvádět. Vložte do nich tento text:",
+    "privacyTextLabel": "Text o soukromí",
     "privacyText": "Tento web zobrazuje výlohu, kterou poskytuje Squareshare. Při jejím načtení se IP adresa a údaje o prohlížeči návštěvníka odešlou službě Squareshare, aby mohla zobrazit produkty a počítat návštěvy. Squareshare k tomu neukládá žádné soubory cookie ani nic jiného do zařízení návštěvníka. Podrobnosti: {policy}",
     "copyPrivacy": {
       "copy": "Kopírovat text o soukromí",
@@ -606,7 +631,8 @@
   "chipScale": {
     "label": "Na větších kartách",
     "tile": "Zvětšit",
-    "cell": "Stejná velikost"
+    "cell": "Stejná velikost",
+    "everyCard": "Platí pro všechny karty v tomto obchodě."
   },
   "layout": {
     "canvasWidth": "Šířka plátna",
@@ -737,8 +763,8 @@
       "showPage": {
         "label": "Zobrazit produktovou stránku",
         "infoLabel": "Co dělá tento přepínač",
-        "infoOn": "Klepnutím na dlaždici produktu se otevře jeho stránka.",
-        "infoOff": "Dlaždice produktů nemají žádnou stránku k otevření."
+        "infoOn": "Klepnutím na dlaždici produktu se otevře jeho stránka a výloha má vlastní stránku ke sdílení.",
+        "infoOff": "Dlaždice produktů nemají žádnou stránku k otevření a přestane fungovat i odkaz na samotnou výlohu."
       },
       "pageColor": "Barva stránky",
       "storefrontBackground": "Pozadí výlohy",
@@ -1103,7 +1129,7 @@
     "imageUnavailable": "Obrázek není k dispozici"
   },
   "spotDrag": {
-    "tokenLabel": "{token, select, title {Název} other {Cena}} {drop, select, below {v pruhu s názvem} top_left {vlevo nahoře} top_center {nahoře uprostřed} top_right {vpravo nahoře} middle_center {uprostřed} bottom_left {vlevo dole} bottom_center {dole uprostřed} bottom_right {vpravo dole} other {}}. Stisknutím otevřete nastavení, přetažením (nebo šipkami) popisek přesunete."
+    "tokenLabel": "{token, select, title {Název} sale {Štítek akce} other {Cena}} {drop, select, below {v pruhu s názvem} top_left {vlevo nahoře} top_center {nahoře uprostřed} top_right {vpravo nahoře} middle_center {uprostřed} bottom_left {vlevo dole} bottom_center {dole uprostřed} bottom_right {vpravo dole} other {}}. Stisknutím otevřete nastavení, přetažením (nebo šipkami) popisek přesunete."
   },
   "autoFit": {},
   "designer": {
@@ -1112,6 +1138,7 @@
       "nameLabel": "Název výlohy",
       "namePlaceholder": "Výloha bez názvu",
       "unsaved": "Neuložené změny",
+      "viewPage": "Zobrazit stránku",
       "search": "Vyhledávání"
     },
     "mobileNotice": {
@@ -1154,6 +1181,12 @@
       "description": "V této výloze máte neuložené změny. Před odchodem je uložte, nebo je zahoďte.",
       "save": "Uložit změny",
       "discard": "Zahodit změny",
+      "keepEditing": "Pokračovat v úpravách"
+    },
+    "conflict": {
+      "title": "Výlohu mezitím uložil někdo jiný",
+      "description": "Od chvíle, kdy jste ji otevřeli, se změnila, v jiné kartě nebo někým z vašeho týmu. Když ji teď uložíte, jejich verzi nahradí ta vaše.",
+      "overwrite": "Uložit tu moji",
       "keepEditing": "Pokračovat v úpravách"
     },
     "defaults": {
@@ -1255,6 +1288,10 @@
       "blockColor": {
         "label": "barva bloku",
         "use": "Použít barvu bloku"
+      },
+      "auto": {
+        "label": "Automaticky",
+        "use": "Použít automatickou barvu"
       }
     },
     "presets": {

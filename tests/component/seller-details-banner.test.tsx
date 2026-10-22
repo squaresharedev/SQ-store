@@ -40,7 +40,7 @@ describe("SellerDetailsBanner", () => {
     expect(note).toHaveTextContent("business address and contact email");
     expect(screen.getByRole("link", { name: "Add seller details" })).toHaveAttribute(
       "href",
-      "/settings/tax#address",
+      "/settings/business#address",
     );
   });
 

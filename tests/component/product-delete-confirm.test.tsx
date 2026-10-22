@@ -4,8 +4,13 @@ import userEvent from "@testing-library/user-event";
 import { permissionDenied } from "@/lib/errors";
 
 const deleteProductMock = vi.fn();
+// What the dialog told the action it had warned about (its second argument).
+const acknowledgedMock = vi.fn();
 vi.mock("@/lib/products/actions", () => ({
-  deleteProduct: (id: string) => deleteProductMock(id),
+  deleteProduct: (id: string, acknowledgedToShip?: number) => {
+    acknowledgedMock(acknowledgedToShip);
+    return deleteProductMock(id);
+  },
 }));
 
 import { ProductList } from "@/components/products/ProductList";
@@ -191,6 +196,51 @@ describe("product delete confirmation", () => {
     await user.click(screen.getByRole("button", { name: "More actions for Blue Hoodie" }));
     expect(screen.getByRole("button", { name: /copy product link/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^delete$/i })).not.toBeInTheDocument();
+  });
+});
+
+describe("a product with orders still to ship", () => {
+  function renderWaiting(count: number) {
+    return render(
+      <ProductList
+        products={[product("p1", "Blue Hoodie")]}
+        canWrite
+        sales={NO_SALES}
+        toShip={{ p1: count }}
+      />,
+    );
+  }
+
+  it("says so on its card, as a way to the queue", () => {
+    renderWaiting(2);
+    const waiting = screen.getByRole("link", { name: "2 orders to ship" });
+    // Narrowed to this product: the parcels waiting on it, not every product's.
+    expect(waiting).toHaveAttribute("href", "/orders?view=to-ship&product=p1");
+  });
+
+  it("is warned about before it is deleted, and the action is told what the warning said", async () => {
+    renderWaiting(2);
+    const user = userEvent.setup();
+    await chooseDelete(user, "Blue Hoodie");
+
+    expect(within(dialog()).getByText(/2 orders for this product are still to ship\./)).toBeInTheDocument();
+    expect(within(dialog()).getByText(/They stay in Orders with its name and price/)).toBeInTheDocument();
+    expect(within(dialog()).queryByRole("button", { name: "Delete product" })).not.toBeInTheDocument();
+
+    await user.click(within(dialog()).getByRole("button", { name: "Delete anyway" }));
+    await waitFor(() => expect(deleteProductMock).toHaveBeenCalledWith("p1"));
+    expect(acknowledgedMock).toHaveBeenCalledWith(2);
+  });
+
+  it("carries no warning, and tells the action so, when nothing is waiting", async () => {
+    renderWaiting(0);
+    expect(screen.queryByRole("link", { name: /to ship/ })).not.toBeInTheDocument();
+    const user = userEvent.setup();
+    await chooseDelete(user, "Blue Hoodie");
+    expect(within(dialog()).queryByText(/still to ship/)).not.toBeInTheDocument();
+
+    await user.click(within(dialog()).getByRole("button", { name: "Delete product" }));
+    await waitFor(() => expect(acknowledgedMock).toHaveBeenCalledWith(0));
   });
 });
 

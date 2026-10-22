@@ -33,6 +33,8 @@
       "detailNeedsSeller": "Rond je verkopersgegevens af, dan kan je pagina online gaan.",
       "detailNeedsStorefront": "Zodra een product op een etalage staat, kan de pagina online gaan.",
       "detailNeedsActive": "Zet dat product op Actief zodat de pagina online gaat.",
+      "detailChecking": "Je pagina gaat online zodra de automatische controle het product goedkeurt.",
+      "detailPaused": "De automatische controle heeft dat product gepauzeerd. Open het om te zien wat je moet aanpassen.",
       "detailPagesOff": "Productpagina's staan uit voor die etalage. Zet ze aan in de editor.",
       "actionEdit": "Product bewerken",
       "actionOpen": "Editor openen",
@@ -129,7 +131,8 @@
       "emailTipLabel": "Over dit e-mailadres"
     },
     "confirm": {
-      "goLive": "Je productpagina's kunnen online gaan zodra het is bevestigd."
+      "goLive": "Je productpagina's kunnen online gaan zodra het is bevestigd.",
+      "wrongAddress": "Verkeerd adres? Pas het aan"
     },
     "tour": {
       "mobileMenu": "Open op je telefoon het menu linksboven.",
@@ -145,7 +148,6 @@
       "getStarted": "Aan de slag",
       "skipForNow": "Voorlopig overslaan",
       "saveAndContinue": "Opslaan en doorgaan",
-      "changeDetails": "Gegevens wijzigen",
       "continue": "Doorgaan",
       "exploreOnMyOwn": "Zelf verkennen",
       "notNow": "Niet nu"

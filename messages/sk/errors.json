@@ -496,6 +496,16 @@
     "staleOption": {
       "message": "Fotografia odkazuje na možnosť, ktorá už neexistuje.",
       "fix": "Priraďte fotografiu k inej možnosti alebo odstráňte značku a potom znova uložte."
+    },
+    "ordersToShip": "{count, plural, one {Objednávka tohto produktu ešte čaká na odoslanie.} few {{count} objednávky tohto produktu ešte čakajú na odoslanie.} many {{count} objednávky tohto produktu ešte čaká na odoslanie.} other {{count} objednávok tohto produktu ešte čaká na odoslanie.}}",
+    "ordersToShipFix": "Nič sa nezmazalo. Skúste to znova a najprv ich uvidíte vo varovaní.",
+    "badgeRefused": {
+      "message": "Odznak „{label}“ porušuje pravidlá platformy, takže ho nemožno použiť.",
+      "fix": "Zmeňte jeho text alebo vyberte iný odznak. Ak si myslíte, že ide o omyl, napíšte nám na {email}."
+    },
+    "badgeNotApproved": {
+      "message": "Odznak „{label}“ sa nepodarilo automaticky schláviť, takže ho nemožno použiť.",
+      "fix": "Skúste iné slová alebo napíšte na {email} a pozrie sa na to človek."
     }
   },
   "productImport": {
@@ -540,6 +550,10 @@
     "nameRequired": {
       "message": "Výklad potrebuje názov.",
       "fix": "Zadajte názov (1 až 80 znakov) do poľa v hornej časti editora výkladu a potom uložte znova."
+    },
+    "savedElsewhere": {
+      "message": "Tento výklad bol medzitým uložený inde.",
+      "fix": "Načítajte stránku znova a uvidíte tú verziu, alebo uložte znova a nahraďte ju."
     },
     "invalidLayout": {
       "message": "Dáta rozloženia výkladu sú neplatné.",

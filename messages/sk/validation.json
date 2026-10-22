@@ -306,6 +306,11 @@
       "required": "Pomenujte kanál alebo ho nechajte prázdne.",
       "tooLong": "Názov kanála musí mať najviac {maximum} znakov.",
       "unsupported": "Názov kanála obsahuje nepodporované znaky."
+    },
+    "badgeLabel": {
+      "required": "Odznak potrebuje nejaký text.",
+      "tooLong": "Odznak môže mať najviac {maximum} znakov.",
+      "unsupported": "Odznak obsahuje nepodporované znaky."
     }
   },
   "email": {
@@ -485,7 +490,10 @@
     "documentsTooMany": "Produkt môže mať najviac {maximum} dokumentov.",
     "optionDuplicate": "Každá možnosť môže byť uvedená iba raz.",
     "optionsTotalTooMany": "Produkt môže mať celkovo najviac {maximum} možností.",
-    "galleryStaleOption": "Fotografia odkazuje na možnosť, ktorá už neexistuje."
+    "galleryStaleOption": "Fotografia odkazuje na možnosť, ktorá už neexistuje.",
+    "badgesTooMany": "Produkt môže mať najviac {maximum} odznakov.",
+    "badgeDuplicate": "Každý odznak môže byť uvedený iba raz.",
+    "badgesOnPhotoTooMany": "Produkt môže na fotke zobraziť najviac {maximum} odznaky."
   },
   "productImport": {
     "noTitle": "Chýba názov.",

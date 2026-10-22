@@ -439,6 +439,37 @@ export async function getProductPlacements(): Promise<Record<string, StorefrontP
   return result;
 }
 
+/**
+ * A product's name and photo, nothing else: what another page needs to say
+ * WHICH product it is showing (the Orders page narrowed to one product). Owner-
+ * scoped to the active store; null for a malformed, foreign or deleted id, so a
+ * stale link reads as "no product" rather than an error.
+ */
+export async function getProductLabel(
+  id: string,
+): Promise<Pick<Product, "id" | "title" | "imageUrl"> | null> {
+  if (!productIdSchema.safeParse(id).success) return null;
+  const account = await getActiveAccount();
+  if (!account) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select("id, title, image_key")
+    .eq("id", id)
+    .eq("owner_id", account.accountId)
+    .maybeSingle();
+  if (error) {
+    console.error("[products] label read failed", error.message);
+    return null;
+  }
+  if (!data) return null;
+  return {
+    id: data.id,
+    title: data.title,
+    imageUrl: data.image_key ? await presignGetUrl(data.image_key) : null,
+  };
+}
+
 export async function getProduct(id: string): Promise<ProductDetail | null> {
   // Guard before querying so a garbage URL param 404s instead of erroring.
   if (!productIdSchema.safeParse(id).success) return null;

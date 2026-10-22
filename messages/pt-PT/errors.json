@@ -496,6 +496,16 @@
     "staleOption": {
       "message": "Uma fotografia aponta para uma opção que já não existe.",
       "fix": "Reatribua ou remova a marcação dessa fotografia e depois guarde novamente."
+    },
+    "ordersToShip": "{count, plural, one {Ainda falta enviar uma encomenda deste produto.} many {Ainda falta enviar {count} de encomendas deste produto.} other {Ainda falta enviar {count} encomendas deste produto.}}",
+    "ordersToShipFix": "Nada foi eliminado. Tente de novo para as ver primeiro no aviso.",
+    "badgeRefused": {
+      "message": "O emblema «{label}» viola as regras da plataforma e não pode ser utilizado.",
+      "fix": "Altere as palavras ou escolha outro emblema. Se considera que é um erro, escreva para {email}."
+    },
+    "badgeNotApproved": {
+      "message": "O emblema «{label}» não pôde ser aprovado automaticamente e não pode ser utilizado.",
+      "fix": "Tente outras palavras, ou escreva para {email} e uma pessoa irá analisar."
     }
   },
   "productImport": {
@@ -540,6 +550,10 @@
     "nameRequired": {
       "message": "A montra precisa de um nome.",
       "fix": "Escreva um nome (entre 1 e 80 carateres) no campo no topo do editor e guarde novamente."
+    },
+    "savedElsewhere": {
+      "message": "Esta montra foi guardada noutro lado desde que a abriu.",
+      "fix": "Recarregue a página para ver essa versão, ou guarde de novo para a substituir."
     },
     "invalidLayout": {
       "message": "Os dados de esquema da montra não são válidos.",

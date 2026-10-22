@@ -496,6 +496,16 @@
     "staleOption": {
       "message": "Une photo pointe vers une option qui n’existe plus.",
       "fix": "Réattribuez ou détaguez cette photo, puis enregistrez à nouveau."
+    },
+    "ordersToShip": "{count, plural, one {Une commande de ce produit reste à expédier.} many {{count} commandes de ce produit restent à expédier.} other {{count} commandes de ce produit restent à expédier.}}",
+    "ordersToShipFix": "Rien n’a été supprimé. Réessayez pour les voir d’abord dans l’avertissement.",
+    "badgeRefused": {
+      "message": "Le badge « {label} » enfreint les règles de la plateforme et ne peut pas être utilisé.",
+      "fix": "Changez son texte ou choisissez un autre badge. Si vous pensez qu’il s’agit d’une erreur, écrivez à {email}."
+    },
+    "badgeNotApproved": {
+      "message": "Le badge « {label} » n’a pas pu être approuvé automatiquement et ne peut pas être utilisé.",
+      "fix": "Essayez d’autres mots, ou écrivez à {email} et une personne examinera."
     }
   },
   "productImport": {
@@ -540,6 +550,10 @@
     "nameRequired": {
       "message": "La vitrine a besoin d’un nom.",
       "fix": "Saisissez un nom (1 à 80 caractères) dans le champ en haut de l’éditeur, puis enregistrez à nouveau."
+    },
+    "savedElsewhere": {
+      "message": "Cette vitrine a été enregistrée ailleurs depuis que vous l’avez ouverte.",
+      "fix": "Rechargez la page pour voir cette version, ou enregistrez à nouveau pour la remplacer."
     },
     "invalidLayout": {
       "message": "Les données de mise en page de la vitrine ne sont pas valides.",

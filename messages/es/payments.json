@@ -1,6 +1,7 @@
 {
   "pageTitle": "Pagos",
   "soon": "Próximamente",
+  "bankOnFile": "Tu cuenta bancaria",
   "balance": {
     "available": {
       "label": "Disponible",

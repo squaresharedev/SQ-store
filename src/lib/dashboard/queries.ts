@@ -217,6 +217,11 @@ export type ProductsSummary = {
    * productId is absent from this set references a deleted product.
    */
   activeProductIds: string[];
+  /** Active products the automatic check has not approved yet (checking, or
+   *  with a person): set live by the seller, not yet visible to buyers. */
+  checkingProductIds: string[];
+  /** Active products the check paused or removed: hidden until changed. */
+  pausedProductIds: string[];
 };
 
 /** The needs-attention module lists a handful of items; reading every
@@ -247,6 +252,8 @@ export async function getProductsSummary(): Promise<ProductsSummary> {
     noBuyPathCount: 0,
     hasPhysicalProducts: false,
     activeProductIds: [],
+    checkingProductIds: [],
+    pausedProductIds: [],
   };
   const supabase = await createClient();
   const [counted, missing, active] = await Promise.all([
@@ -267,7 +274,7 @@ export async function getProductsSummary(): Promise<ProductsSummary> {
     // `digital_file_key` null = a physical item that needs shipping terms.
     supabase
       .from("products")
-      .select("id, purchase_url, digital_file_key")
+      .select("id, purchase_url, digital_file_key, moderation_status")
       .eq("owner_id", account.accountId)
       .eq("status", "active")
       .limit(ACTIVE_PRODUCTS_LIMIT),
@@ -289,6 +296,12 @@ export async function getProductsSummary(): Promise<ProductsSummary> {
     noBuyPathCount: activeRows.filter((row) => !row.purchase_url).length,
     hasPhysicalProducts: activeRows.some((row) => !row.digital_file_key),
     activeProductIds: activeRows.map((row) => row.id),
+    checkingProductIds: activeRows
+      .filter((row) => row.moderation_status === "pending" || row.moderation_status === "review")
+      .map((row) => row.id),
+    pausedProductIds: activeRows
+      .filter((row) => row.moderation_status === "paused" || row.moderation_status === "removed")
+      .map((row) => row.id),
   };
 }
 

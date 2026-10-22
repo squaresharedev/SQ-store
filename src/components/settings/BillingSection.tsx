@@ -267,7 +267,12 @@ function BillingSectionBody({ context, returned, actions = SERVER_BILLING_ACTION
               />
             </div>
           ) : (
-            <p className={helpTextClass}>{t("settings.noBilling")}</p>
+            // Two different reasons, two different sentences: "once you're on
+            // a paid plan" reads as something to do, which is untrue while
+            // paid plans cannot be bought at all.
+            <p className={helpTextClass}>
+              {context.available ? t("settings.noBilling") : t("settings.noBillingYet")}
+            </p>
           )}
         </SettingsCard>
       )}

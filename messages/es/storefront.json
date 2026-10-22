@@ -183,12 +183,13 @@
     "loadMoreError": "No se han podido cargar más escaparates. Inténtalo de nuevo.",
     "loadMore": "Cargar más ({remaining} restantes)",
     "deleteTitle": "¿Eliminar el escaparate?",
-    "deleteDesc": "«{name}» y su cuadrícula se eliminarán permanentemente. Esto no se puede deshacer.",
+    "deleteDesc": "«{name}» y su cuadrícula se eliminarán permanentemente. Esto no se puede deshacer. Los pedidos hechos a través de él se mantienen, y también las páginas de pedido de sus compradores.",
     "deleteToast": "«{name}» se ha eliminado."
   },
   "card": {
     "editAriaLabel": "Editar {name}",
-    "embedAriaLabel": "Incorporar {name}",
+    "embedAriaLabel": "Compartir o incorporar {name}",
+    "viewPageAriaLabel": "Abrir {name} como lo ven los compradores",
     "deleteAriaLabel": "Eliminar {name}",
     "blockCount": "{count, plural, one {# bloque} many {# bloques} other {# bloques}}",
     "updatedLabel": " · actualizado el {date}",
@@ -199,28 +200,52 @@
   },
   "embed": {
     "inDevNotice": "El widget de incorporación está en desarrollo y todavía no se muestra en sitios externos. Configura tus ajustes a continuación para tenerlo todo listo y pegar el fragmento de código en cuanto esté disponible.",
-    "title": "Incorpora este escaparate",
-    "description": "Pega este fragmento de código en cualquier sitio para mostrar «{name}» allí.",
+    "title": "Comparte este escaparate",
+    "description": "Envía a la gente un enlace a «{name}», o pega un fragmento de código en tu propio sitio para mostrarlo allí.",
+    "steps": {
+      "site": "Elige los sitios donde aparece",
+      "snippet": "Pega el fragmento en tu sitio",
+      "privacy": "Añade esto a tu política de privacidad"
+    },
+    "required": "Obligatorio",
     "enabledLabel": "Incorporación activada",
     "domainsLabel": "Dominios permitidos",
     "domainsPlaceholder": "tusitio.com, blog.tusitio.com",
     "domainsHint": "Hasta {max}, separados por comas. Pega una URL y la recortaremos al dominio.",
     "emptyDomainsWarning": "Añade al menos un dominio. Mientras esté vacío, el escaparate no se cargará en ningún sitio, aunque la incorporación esté activada.",
-    "snippetLabel": "Fragmento de código",
-    "snippetReadyHint": "Pega este fragmento de código en el HTML de tu sitio.",
+    "builderLabel": "Tu creador de sitios",
+    "builderOther": "Otro sitio",
+    "builderSteps": {
+      "other": "Pégalo en el HTML de tu página, donde quieras que aparezca el escaparate.",
+      "wordpress": "Añade un bloque «HTML personalizado» donde quieras que aparezca el escaparate y pega el código.",
+      "squarespace": "Añade un bloque «Code» y pega el código. Si el escaparate solo aparece al recargar, cambia a «Solo iframe».",
+      "wix": "Añade «Embed Code» y luego «Embed HTML», y pega el código. Después estira el recuadro hasta la altura de tu escaparate.",
+      "webflow": "Añade un elemento «Code Embed» y pega el código. Aparece en tu sitio publicado.",
+      "shopify": "En el editor de temas, añade una sección «Custom Liquid» y pega el código.",
+      "google": "Elige «Insert», luego «Embed» y luego «Embed code», y pega el código.",
+      "framer": "Añade un componente «Embed», ponlo en HTML y pega el código.",
+      "carrd": "Añade un elemento «Embed», elige el tipo «Code» y pega el código."
+    },
+    "snippetKinds": {
+      "label": "Tipo de código",
+      "script": "Script",
+      "iframe": "Solo iframe"
+    },
+    "snippetReadyHint": "Pégalo una sola vez. Se ajusta a tu escaparate y sigue lo que cambies aquí.",
+    "iframeHint": "Para sitios que eliminan los scripts. Mide {height} píxeles de alto y se desplaza por dentro. Vuelve a copiarlo cuando cambies tus dominios.",
     "snippetLockedHint": "Activa la incorporación y añade al menos un dominio para desbloquear el botón Copiar.",
     "snippetSaveHint": "Guarda los ajustes para desbloquear el botón Copiar.",
     "pagesOffHint": "Activa primero las páginas de producto en el editor. Al hacer clic en un producto se abre su página.",
     "notShowingLabel": "Si el escaparate no aparece",
-    "notShowingTip": "La dirección de tu sitio debe estar en Dominios permitidos y el sitio debe usar https. Los creadores de sitios que colocan el HTML personalizado en un marco propio (Wix, Google Sites) aún no son compatibles.",
+    "notShowingTip": "La dirección de tu sitio debe estar en Dominios permitidos y el sitio debe usar https. El código pegado aparece en tu sitio publicado, no en el editor del creador de sitios. Para verlo en una dirección de vista previa (como tusitio.webflow.io), añade también esa dirección.",
     "copySnippet": {
       "copy": "Copiar fragmento de incorporación",
       "copied": "Fragmento de incorporación copiado",
       "failed": "No se ha podido copiar el fragmento de incorporación. Selecciónalo y cópialo a mano.",
       "cannotCopyYet": "el fragmento de incorporación todavía no se puede copiar"
     },
-    "privacyLabel": "Para tu política de privacidad",
-    "privacyHint": "Tu sitio ahora carga el escaparate desde Squareshare, así que su política de privacidad debería decirlo. Puedes pegar este texto:",
+    "privacyHint": "Tu sitio carga ahora este escaparate desde Squareshare, así que su política de privacidad tiene que decirlo. Pega este texto en ella:",
+    "privacyTextLabel": "Texto de privacidad",
     "privacyText": "Este sitio muestra un escaparate proporcionado por Squareshare. Al cargarse, la dirección IP y los datos del navegador del visitante se envían a Squareshare para mostrar los productos y contar las visitas. Squareshare no instala cookies ni guarda nada en el dispositivo del visitante para ello. Más información: {policy}",
     "copyPrivacy": {
       "copy": "Copiar texto de privacidad",
@@ -606,7 +631,8 @@
   "chipScale": {
     "label": "En tarjetas más grandes",
     "tile": "Crecer",
-    "cell": "Mismo tamaño"
+    "cell": "Mismo tamaño",
+    "everyCard": "Se aplica a todas las tarjetas de esta tienda."
   },
   "layout": {
     "canvasWidth": "Ancho del lienzo",
@@ -737,8 +763,8 @@
       "showPage": {
         "label": "Mostrar una página de producto",
         "infoLabel": "Qué hace este interruptor",
-        "infoOn": "Al tocar una tarjeta de producto se abre su página.",
-        "infoOff": "Las tarjetas de producto no tienen página que abrir."
+        "infoOn": "Al tocar una tarjeta de producto se abre su página, y el escaparate tiene su propia página para compartir.",
+        "infoOff": "Las tarjetas de producto no tienen página que abrir, y el enlace del propio escaparate también deja de funcionar."
       },
       "pageColor": "Color de la página",
       "storefrontBackground": "Fondo del escaparate",
@@ -1103,7 +1129,7 @@
     "imageUnavailable": "Imagen no disponible"
   },
   "spotDrag": {
-    "tokenLabel": "{token, select, title {Título} other {Precio}} {drop, select, below {en la barra del título} top_left {arriba a la izquierda} top_center {arriba al centro} top_right {arriba a la derecha} middle_center {en el medio} bottom_left {abajo a la izquierda} bottom_center {abajo al centro} bottom_right {abajo a la derecha} other {}}. Pulsa para abrir sus ajustes, o arrastra (o usa las teclas de flecha) para moverlo."
+    "tokenLabel": "{token, select, title {Título} sale {Etiqueta de rebaja} other {Precio}} {drop, select, below {en la barra del título} top_left {arriba a la izquierda} top_center {arriba al centro} top_right {arriba a la derecha} middle_center {en el medio} bottom_left {abajo a la izquierda} bottom_center {abajo al centro} bottom_right {abajo a la derecha} other {}}. Pulsa para abrir sus ajustes, o arrastra (o usa las teclas de flecha) para moverlo."
   },
   "autoFit": {},
   "designer": {
@@ -1112,6 +1138,7 @@
       "nameLabel": "Nombre del escaparate",
       "namePlaceholder": "Escaparate sin título",
       "unsaved": "Cambios sin guardar",
+      "viewPage": "Ver página",
       "search": "Buscar"
     },
     "mobileNotice": {
@@ -1154,6 +1181,12 @@
       "description": "Tienes cambios sin guardar en este escaparate. Guárdalos antes de salir, o descártalos.",
       "save": "Guardar cambios",
       "discard": "Descartar cambios",
+      "keepEditing": "Seguir editando"
+    },
+    "conflict": {
+      "title": "Otra persona ha guardado este escaparate",
+      "description": "Ha cambiado desde que lo abriste, en otra pestaña o por alguien de tu equipo. Si guardas ahora, tu versión sustituye a la suya.",
+      "overwrite": "Guardar la mía encima",
       "keepEditing": "Seguir editando"
     },
     "defaults": {
@@ -1255,6 +1288,10 @@
       "blockColor": {
         "label": "el color del bloque",
         "use": "Usar el color del bloque"
+      },
+      "auto": {
+        "label": "Automático",
+        "use": "Usar Automático"
       }
     },
     "presets": {

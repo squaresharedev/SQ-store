@@ -1,9 +1,9 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import {
+  areEmbedSitesAllowed,
   decideEmbedAccess,
   embedCorsHeaders,
-  isEmbedSiteAllowed,
   originHostname,
 } from "@/lib/storefront/embed";
 import type { EmbedSettings } from "@/types/storefront";
@@ -145,22 +145,69 @@ describe("decideEmbedAccess - the allowlist", () => {
   });
 });
 
-describe("isEmbedSiteAllowed - the frame's form of the same two rules", () => {
+describe("areEmbedSitesAllowed - the frame's form of the same rules", () => {
+  const allowed = (hosts: string[], over: Partial<EmbedSettings> = {}) => areEmbedSitesAllowed(settings(over), hosts);
+
   it("allows a listed site while embedding is on", () => {
-    expect(isEmbedSiteAllowed(settings(), "shop.example.com")).toBe(true);
-    expect(isEmbedSiteAllowed(settings({ domains: ["example.com"] }), "www.example.com")).toBe(true);
+    expect(allowed(["shop.example.com"])).toBe(true);
+    expect(allowed(["www.example.com"], { domains: ["example.com"] })).toBe(true);
   });
 
   it("refuses everything while embedding is off, or was never set up", () => {
-    expect(isEmbedSiteAllowed(settings({ enabled: false }), "shop.example.com")).toBe(false);
-    expect(isEmbedSiteAllowed(undefined, "shop.example.com")).toBe(false);
+    expect(allowed(["shop.example.com"], { enabled: false })).toBe(false);
+    expect(areEmbedSitesAllowed(undefined, ["shop.example.com"])).toBe(false);
   });
 
-  it("refuses an empty list and an unlisted site", () => {
-    expect(isEmbedSiteAllowed(settings({ domains: [] }), "shop.example.com")).toBe(false);
+  it("refuses an empty list, no sites, and an unlisted site", () => {
+    expect(allowed(["shop.example.com"], { domains: [] })).toBe(false);
+    expect(allowed([])).toBe(false);
     for (const host of ["example.com", "evil.com", "shop.example.com.evil.com", "notshop.example.com"]) {
-      expect(isEmbedSiteAllowed(settings(), host), host).toBe(false);
+      expect(allowed([host]), host).toBe(false);
     }
+  });
+
+  it("refuses the whole list for one site that is not allowed, wherever it stands", () => {
+    expect(allowed(["shop.example.com", "evil.com"])).toBe(false);
+    expect(allowed(["evil.com", "shop.example.com"])).toBe(false);
+  });
+
+  describe("under Wix, whose HTML element is served from the site's host with dashes", () => {
+    const wix = { domains: ["www.shop.com"] };
+
+    it("allows the frame Wix makes for a listed site, with or without www.", () => {
+      expect(allowed(["www-shop-com.filesusr.com", "www.shop.com"], wix)).toBe(true);
+      expect(allowed(["shop-com.filesusr.com", "shop.com"], wix)).toBe(true);
+      expect(allowed(["www-shop-com.filesusr.com", "www.shop.com"], { domains: ["shop.com"] })).toBe(true);
+      // A free Wix address follows the same rule.
+      expect(allowed(["studio-wixsite-com.filesusr.com", "studio.wixsite.com"], { domains: ["studio.wixsite.com"] })).toBe(true);
+    });
+
+    it("refuses another site's Wix frame, and a look-alike of the seller's", () => {
+      for (const frame of ["www-evil-com.filesusr.com", "www-shop-com-evil.filesusr.com", "www-shop-com.filesusr.com.evil.com", "www-shop-com.usrfiles.com"]) {
+        expect(allowed([frame, "www.shop.com"], wix), frame).toBe(false);
+      }
+    });
+  });
+
+  describe("under Google Sites, whose embed code is served from a per-embed Google host", () => {
+    const google = { domains: ["shop.com"] };
+
+    it("allows Google's frames above a listed site", () => {
+      expect(allowed(["1a2b3c-atari-embeds.googleusercontent.com", "shop.com"], google)).toBe(true);
+      expect(allowed(["1a2b3c-atari-embeds.googleusercontent.com", "www.gstatic.com", "shop.com"], google)).toBe(true);
+    });
+
+    it("refuses other Google hosts, and look-alikes", () => {
+      for (const frame of ["lh3.googleusercontent.com", "atari-embeds.googleusercontent.com", "x-atari-embeds.googleusercontent.com.evil.com", "gstatic.com", "evil.gstatic.com.evil.com"]) {
+        expect(allowed([frame, "shop.com"], google), frame).toBe(false);
+      }
+    });
+  });
+
+  it("never on builder frames alone: one of the seller's own sites must be named", () => {
+    expect(allowed(["1a2b3c-atari-embeds.googleusercontent.com"])).toBe(false);
+    expect(allowed(["www-shop-example-com.filesusr.com"])).toBe(false);
+    expect(allowed(["1a2b3c-atari-embeds.googleusercontent.com", "www.gstatic.com"])).toBe(false);
   });
 });
 

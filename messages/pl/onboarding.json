@@ -33,6 +33,8 @@
       "detailNeedsSeller": "Uzupełnij dane sprzedawcy, aby móc opublikować stronę.",
       "detailNeedsStorefront": "Gdy produkt znajdzie się w witrynie, jego strona będzie mogła zostać opublikowana.",
       "detailNeedsActive": "Ustaw ten produkt jako Aktywny, aby jego strona została opublikowana.",
+      "detailChecking": "Twoja strona zostanie opublikowana, gdy automatyczne sprawdzanie zatwierdzi produkt.",
+      "detailPaused": "Automatyczne sprawdzanie wstrzymało ten produkt. Otwórz go, aby zobaczyć, co zmienić.",
       "detailPagesOff": "Strony produktów są wyłączone w tej witrynie. Włącz je w edytorze.",
       "actionEdit": "Edytuj produkt",
       "actionOpen": "Otwórz edytor",
@@ -129,7 +131,8 @@
       "emailTipLabel": "O tym adresie e-mail"
     },
     "confirm": {
-      "goLive": "Strony twoich produktów zostaną opublikowane po jego potwierdzeniu."
+      "goLive": "Strony twoich produktów zostaną opublikowane po jego potwierdzeniu.",
+      "wrongAddress": "Zły adres? Zmień go"
     },
     "tour": {
       "mobileMenu": "Na telefonie otwórz menu w lewym górnym rogu.",
@@ -145,7 +148,6 @@
       "getStarted": "Zacznij",
       "skipForNow": "Pomiń na razie",
       "saveAndContinue": "Zapisz i kontynuuj",
-      "changeDetails": "Zmień dane",
       "continue": "Kontynuuj",
       "exploreOnMyOwn": "Zbadam to samodzielnie",
       "notNow": "Nie teraz"

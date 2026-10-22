@@ -88,6 +88,10 @@ const POLICY_FREE_BY_DESIGN = new Set([
   // Pricing-modal funnel events, produced server-side only (lib/billing/
   // funnel.ts). Nothing here is a seller's to read or forge.
   "seller_funnel_events",
+  // Sign-up intents (20261021_signup_intents), spent by the Before User
+  // Created hook. A client that could write one could create an account past
+  // every sign-up guard.
+  "signup_intents",
   // The launch switches for plan limits, the per-sale fee and feature gating.
   // A client that could write them could switch its own limits or fees off.
   "billing_switches",

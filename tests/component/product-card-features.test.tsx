@@ -119,15 +119,28 @@ describe("stock count in card footer (PRD-08)", () => {
     expect(screen.getByText("12 in stock")).toBeInTheDocument();
   });
 
-  it("shows the count for a tracked product at the low-stock threshold", () => {
+  // One stock fact per card: at or under the threshold the badge under the
+  // price says it, and the footer does not say it again.
+  it("says low stock once, on the badge, at the low-stock threshold", () => {
     renderList([makeProduct({ trackStock: true, stockQuantity: 3, lowStockThreshold: 5 })]);
-    expect(screen.getByText("3 in stock")).toBeInTheDocument();
+    expect(screen.getAllByText("Only 3 left")).toHaveLength(1);
+    expect(screen.queryByText("3 in stock")).not.toBeInTheDocument();
   });
 
-  it("shows 'Sold out' for a zero-quantity tracked product", () => {
+  it("says 'Sold out' exactly once for a zero-quantity tracked product", () => {
     renderList([makeProduct({ trackStock: true, stockQuantity: 0, lowStockThreshold: 5 })]);
-    // Sold out text appears at least once (footer; badge area may also show it).
-    expect(screen.getAllByText(/sold out/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/sold out/i)).toHaveLength(1);
+  });
+
+  it("says 'Sold out' once even when the product has sales in the footer", () => {
+    const product = makeProduct({ trackStock: true, stockQuantity: 0, lowStockThreshold: 5 });
+    const sales: ProductSalesSummary = {
+      byProduct: { [product.id]: { unitsSold: 60, revenueCents: 7_392_000, currency: "EUR" } },
+      bestsellerId: null,
+    };
+    render(<ProductList products={[product]} canWrite sales={sales} placements={{}} />);
+    expect(screen.getByText("60 sold")).toBeInTheDocument();
+    expect(screen.getAllByText(/sold out/i)).toHaveLength(1);
   });
 });
 

@@ -306,6 +306,11 @@
       "required": "Ponle un nombre al canal o déjalo en blanco.",
       "tooLong": "El nombre del canal debe tener como máximo {maximum} caracteres.",
       "unsupported": "El nombre del canal contiene caracteres no admitidos."
+    },
+    "badgeLabel": {
+      "required": "La insignia necesita algún texto.",
+      "tooLong": "Una insignia puede tener como máximo {maximum} caracteres.",
+      "unsupported": "La insignia contiene caracteres no admitidos."
     }
   },
   "email": {
@@ -485,7 +490,10 @@
     "documentsTooMany": "Un producto puede tener hasta {maximum} documentos.",
     "optionDuplicate": "Cada opción solo puede aparecer una vez.",
     "optionsTotalTooMany": "Un producto puede tener hasta {maximum} opciones en total.",
-    "galleryStaleOption": "Una foto apunta a una opción que ya no existe."
+    "galleryStaleOption": "Una foto apunta a una opción que ya no existe.",
+    "badgesTooMany": "Un producto puede tener hasta {maximum} insignias.",
+    "badgeDuplicate": "Cada insignia solo puede aparecer una vez.",
+    "badgesOnPhotoTooMany": "Un producto puede mostrar hasta {maximum} insignias en su foto."
   },
   "productImport": {
     "noTitle": "Sin título.",

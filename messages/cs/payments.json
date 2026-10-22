@@ -1,6 +1,7 @@
 {
   "pageTitle": "Platby",
   "soon": "Brzy",
+  "bankOnFile": "Váš bankovní účet",
   "balance": {
     "available": {
       "label": "K dispozici",

@@ -89,12 +89,64 @@ export function embedDomainsInclude(domains: readonly string[], hostname: string
 }
 
 /**
- * May this storefront's embed frame be drawn on this site? The frame's form of
- * decideEmbedAccess: same two rules (switched on, and listed), asked about a
- * hostname the browser has been told to enforce rather than an Origin header.
+ * The frame a SITE BUILDER puts pasted code in, for one of the seller's sites.
+ *
+ * Some builders never place a seller's HTML on the page itself: they serve it
+ * from a host of their own, in a frame, so the embed sits one or two frames
+ * down and every one of those hosts has to be in its `frame-ancestors`. These
+ * are the ones we know to recognise, each as narrow as its builder allows:
+ *
+ * - WIX serves an HTML element from the site's own host with its dots turned
+ *   to dashes, under filesusr.com: www.shop.com's is www-shop-com.filesusr.com,
+ *   shop.wixsite.com's is shop-wixsite-com.filesusr.com. Derived from a listed
+ *   site, so it admits that seller's wrapper and no one else's.
+ * - GOOGLE SITES serves embed code from a per-embed host under
+ *   googleusercontent.com (`<id>-atari-embeds`), sometimes through Google's
+ *   own www.gstatic.com. The id cannot be derived from anything, so any such
+ *   host is admitted.
+ *
+ * WHAT THE GOOGLE CASE COSTS, stated so nobody has to rediscover it:
+ * `frame-ancestors` is a set, and anyone can make a Google Site. So someone
+ * could open their own atari-embeds page directly and show a seller's board
+ * on it. They gain nothing a visitor to the seller's site does not already
+ * see: the board is public, and a click only opens the product's own page in a
+ * new tab. What it cannot do is put the board on their OWN site: the top page
+ * is always above the frame, and only the seller's sites are listed.
  */
-export function isEmbedSiteAllowed(settings: EmbedSettings | undefined, hostname: string): boolean {
-  return Boolean(settings?.enabled) && embedDomainsInclude(settings?.domains ?? [], hostname);
+function isBuilderFrame(domains: readonly string[], hostname: string): boolean {
+  if (GOOGLE_SITES_FRAME.test(hostname) || hostname === GOOGLE_STATIC_HOST) return true;
+  if (!hostname.endsWith(WIX_FRAME_SUFFIX)) return false;
+  const label = hostname.slice(0, -WIX_FRAME_SUFFIX.length);
+  return domains.some((domain) => {
+    const bare = withoutWww(domain);
+    return [bare, `www.${bare}`].some((host) => host.replaceAll(".", "-") === label);
+  });
+}
+
+/** Where Wix serves a site's HTML elements (see isBuilderFrame). */
+const WIX_FRAME_SUFFIX = ".filesusr.com";
+/** Where Google Sites serves embed code (see isBuilderFrame). */
+const GOOGLE_SITES_FRAME = /^[a-z0-9-]+-atari-embeds\.googleusercontent\.com$/;
+const GOOGLE_STATIC_HOST = "www.gstatic.com";
+
+/**
+ * May this storefront's embed frame be drawn under these sites? The frame's
+ * form of decideEmbedAccess, asked about the hostnames the browser has been
+ * told to enforce (every page above the frame must be one of them) rather than
+ * an Origin header.
+ *
+ * Embedding must be switched on; EVERY name must be one of the seller's sites
+ * or a site builder's frame for one (isBuilderFrame); and at least one must be
+ * the seller's own, so a list of builder frames alone is never enough.
+ */
+export function areEmbedSitesAllowed(settings: EmbedSettings | undefined, hostnames: readonly string[]): boolean {
+  if (!settings?.enabled || hostnames.length === 0) return false;
+  let listed = false;
+  for (const hostname of hostnames) {
+    if (embedDomainsInclude(settings.domains, hostname)) listed = true;
+    else if (!isBuilderFrame(settings.domains, hostname)) return false;
+  }
+  return listed;
 }
 
 /** Canonical `{ origin, host }` for an http(s) Origin header, or null. */

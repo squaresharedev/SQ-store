@@ -31,7 +31,10 @@ export type SchemaRequirement =
   // "order_mark_shipped(uuid,text,text)".
   | { kind: "function"; signature: string; migration: string }
   // A CHECK constraint that must accept `allows` (a widened vocabulary).
-  | { kind: "check"; constraint: string; allows: string; migration: string };
+  | { kind: "check"; constraint: string; allows: string; migration: string }
+  /** A function whose body says `includes`: for a migration that only
+   *  replaces a function, where the signature alone proves nothing. */
+  | { kind: "body"; signature: string; includes: string; migration: string };
 
 /**
  * The first migration applied without a ledger row. Everything older is what
@@ -96,9 +99,16 @@ export const SCHEMA_REQUIREMENTS: readonly SchemaRequirement[] = [
   { kind: "relation", name: "storefront_funnel_daily", migration: "20261012_storefront_funnel_daily.sql" },
   { kind: "function", signature: "storefront_funnel_roll_day(date,jsonb)", migration: "20261012_storefront_funnel_daily.sql" },
   { kind: "function", signature: "storefront_funnel_aggregate(uuid,date,date)", migration: "20261012_storefront_funnel_daily.sql" },
+  { kind: "body", signature: "enforce_plan_limit()", includes: "is distinct from 'removed'", migration: "20261019_removed_content_frees_plan_room.sql" },
   { kind: "relation", name: "plan_grants", migration: "20261019_plan_grants.sql" },
   { kind: "function", signature: "plan_grant_set(uuid[],text,timestamp with time zone,text,text,uuid)", migration: "20261019_plan_grants.sql" },
   { kind: "function", signature: "plan_grant_end(uuid[],uuid)", migration: "20261019_plan_grants.sql" },
+  { kind: "body", signature: "rl_take(text,integer,integer)", includes: "retention_seconds", migration: "20261021_rl_take_keeps_history.sql" },
+  { kind: "function", signature: "username_is_reserved(text)", migration: "20261021_reserved_usernames.sql" },
+  { kind: "relation", name: "signup_intents", migration: "20261021_signup_intents.sql" },
+  { kind: "function", signature: "signup_intent_gate(jsonb)", migration: "20261021_signup_intents.sql" },
+  { kind: "function", signature: "guard_object_keys()", migration: "20261021_object_key_ownership.sql" },
+  { kind: "body", signature: "order_refund(uuid,text,boolean)", includes: "o.payment_ref into owner_id, ref", migration: "20261021_order_refund_provider_first.sql" },
 ];
 
 /** A SQL string literal. Every value below is a constant from this file, and
@@ -133,6 +143,12 @@ function probeExpression(requirement: SchemaRequirement): string {
         `and c.conname = ${literal(requirement.constraint)} ` +
         `and pg_get_constraintdef(c.oid) like ${literal(`%'${requirement.allows}'%`)})`
       );
+    case "body":
+      // strpos, not LIKE: the text is matched as written, wildcards and all.
+      return (
+        `coalesce(strpos(pg_catalog.pg_get_functiondef(to_regprocedure(${literal(`public.${requirement.signature}`)})), ` +
+        `${literal(requirement.includes)}), 0) > 0`
+      );
   }
 }
 
@@ -160,6 +176,8 @@ export function describeRequirement(requirement: SchemaRequirement): string {
       return `function public.${requirement.signature}`;
     case "check":
       return `constraint ${requirement.constraint} accepting '${requirement.allows}'`;
+    case "body":
+      return `function public.${requirement.signature} containing "${requirement.includes}"`;
   }
 }
 

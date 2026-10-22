@@ -10,6 +10,8 @@ import { REPORT_ISSUE_KEYS, reportSchema } from "@/lib/validation/reports";
 import { isValidationKey, issueMessage } from "@/lib/validation/messages";
 import { reporterHash } from "@/lib/moderation/reporter-hash";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
+import { isSameOriginRequest } from "@/lib/security/same-origin";
+import { readBoundedJson } from "@/lib/security/read-json";
 
 /**
  * POST /api/report: a buyer telling us something is wrong with a listing.
@@ -51,6 +53,10 @@ function accepted(message: string) {
 
 /** Refusals that are about the REQUEST rather than the content, so the client
  *  can show the person what to fix. */
+/** A report is a reason, a short note, an id and maybe an address: a few
+ *  hundred bytes. Room for a 1,000-character note in any script. */
+const BODY_MAX_BYTES = 8 * 1024;
+
 function badRequest(message: string) {
   return Response.json({ error: message }, { status: 400 });
 }
@@ -125,12 +131,18 @@ async function reportableTarget(
 export async function POST(request: Request): Promise<Response> {
   const t = await getTranslations("ProductPage.report.api");
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return badRequest(t("unreadable"));
+  // Only the product page files reports. A request another site's page makes
+  // a visitor's browser send would spend THAT visitor's per-client budget and
+  // reporter identity on a report they never wrote, letting one page flood the
+  // staff queue from every visitor's address (security review 2026-10-21).
+  if (!isSameOriginRequest(request)) {
+    return Response.json({ error: t("unreadable") }, { status: 403 });
   }
+  // Read with a cap: request.json() would buffer whatever was sent before the
+  // schema could refuse it.
+  const read = await readBoundedJson(request, BODY_MAX_BYTES);
+  if (!read.ok) return badRequest(t("unreadable"));
+  const body: unknown = read.value;
 
   const parsed = reportSchema.safeParse(body);
   if (!parsed.success) {

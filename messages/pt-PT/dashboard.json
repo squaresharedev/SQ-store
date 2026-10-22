@@ -122,6 +122,11 @@
       "description": "Os compradores estão à espera. Embale-as e marque-as como enviadas.",
       "action": "Enviar encomendas"
     },
+    "withdrawals": {
+      "label": "{count, plural, one {{count} comprador desistiu} many {{count} de compradores desistiram} other {{count} compradores desistiram}}",
+      "description": "Têm direito ao reembolso no prazo de 14 dias após a desistência. Combine a devolução e depois reembolse a encomenda.",
+      "action": "Ver desistências"
+    },
     "checkoutRates": {
       "label": "Defina os preços de entrega",
       "description": "Os compradores não podem finalizar a compra de um produto físico até um destino ter taxa e país.",

@@ -3,6 +3,7 @@ import { render, screen, waitFor, cleanup } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { failed, invalidInput, succeeded } from "@/lib/errors";
 import { msg } from "@/i18n/types";
+import { SIGNUP_CHECK_EMAIL_KEY } from "@/lib/auth/signup";
 
 afterEach(cleanup);
 
@@ -137,6 +138,23 @@ describe("LoginForm", () => {
 
   // --- Sign-up mode ---
 
+  it("offers a sign-in link for a confirmation email that never arrives", async () => {
+    // "Check your email" used to be where the form ended. A link to the same
+    // address confirms the account too, and needs nothing retyped.
+    mockAuthenticate.mockResolvedValue(succeeded(msg(SIGNUP_CHECK_EMAIL_KEY)));
+    const user = userEvent.setup();
+    render(<LoginForm />);
+    await user.click(screen.getByRole("button", { name: /^sign up$/i }));
+    await user.type(screen.getByLabelText("Email"), "new@shop.test");
+    await user.click(screen.getByTestId("login-submit"));
+
+    const way = await screen.findByRole("button", { name: "Didn't get the email? Send me a sign-in link instead" });
+    await user.click(way);
+    expect(screen.getByTestId("login-submit")).toHaveTextContent("Send magic link");
+    expect(screen.getByLabelText("Email")).toHaveValue("new@shop.test");
+    expect(screen.queryByRole("button", { name: /Didn't get the email/ })).not.toBeInTheDocument();
+  });
+
   it("switching to sign-up shows confirm_password field", async () => {
     const user = userEvent.setup();
     render(<LoginForm />);
@@ -238,7 +256,9 @@ describe("LoginForm", () => {
     await user.click(screen.getByRole("button", { name: /send magic link/i }));
 
     await waitFor(() => {
-      expect(screen.getByText("Check your email for a link to sign in.")).toBeInTheDocument();
+      expect(
+        screen.getByText("If that email has an account, a sign-in link is on its way."),
+      ).toBeInTheDocument();
     });
   });
 

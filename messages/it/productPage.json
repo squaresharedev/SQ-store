@@ -211,6 +211,7 @@
       "paidDetail": "Pagato il {date}",
       "confirming": "Conferma del pagamento",
       "confirmingDetail": "Di solito richiede un momento. Ricarica la pagina se non cambia nulla.",
+      "checkAgain": "Controlla di nuovo",
       "preparing": "In preparazione",
       "preparingDetail": "{seller} sta preparando il tuo ordine.",
       "shipped": "In viaggio",
@@ -383,5 +384,7 @@
     "lowestNote": "Prezzo barrato: il prezzo abituale. Prezzo più basso applicato nei 30 giorni precedenti la riduzione: {price}.",
     "badgeSale": "Promo",
     "endsOn": "Promozione fino al {date}"
-  }
+  },
+  "badges": "In evidenza",
+  "badgesOnPhoto": "In evidenza sulla foto"
 }

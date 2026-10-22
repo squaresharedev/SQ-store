@@ -320,6 +320,101 @@ describe("the team-seat limit", () => {
   });
 });
 
+describe("removed content frees its place (20261019_removed_content_frees_plan_room)", () => {
+  let owner: TestUser;
+  const cap = PLANS.free.limits.products as number;
+  const storefrontCap = PLANS.free.limits.storefronts as number;
+
+  const createProducts = (count: number, label: string) =>
+    asUser(owner, (q) =>
+      q.query(
+        `insert into public.products (owner_id, title, price_cents)
+         select $1, $2 || ' ' || n, 100 from generate_series(1, $3::int) as n`,
+        [owner.id, label, count],
+      ),
+    );
+  /** What staff (or the automatic check) decide: a trusted write. */
+  const moderate = (title: string, status: "removed" | "paused" | "ok") =>
+    asService((q) =>
+      q.query(`update public.products set moderation_status = $3 where owner_id = $1 and title = $2`, [
+        owner.id,
+        title,
+        status,
+      ]),
+    );
+  const statusOf = (title: string) =>
+    asSuper(async (q) =>
+      (
+        await q.query(`select moderation_status from public.products where owner_id = $1 and title = $2`, [
+          owner.id,
+          title,
+        ])
+      ).rows[0]?.moderation_status as string | undefined,
+    );
+
+  beforeAll(async () => {
+    await setLimitsEnforced(true);
+    owner = await createUser(email("removed-owner"));
+    await createProducts(cap, "Product");
+  });
+
+  it("gives back the place of a product moderation removed", async () => {
+    expect(await expectDbError(createProducts(1, "Full"))).toMatch(/plan_limit_reached:products/);
+    await moderate("Product 1", "removed");
+    await createProducts(1, "In its place");
+    expect(await expectDbError(createProducts(1, "And one more"))).toMatch(/plan_limit_reached:products/);
+  });
+
+  it("does not give back the place of a paused one: the seller can bring that back", async () => {
+    await moderate("Product 2", "paused");
+    expect(await expectDbError(createProducts(1, "Not for a pause"))).toMatch(/plan_limit_reached:products/);
+  });
+
+  it("cannot be had by the seller marking their own product removed", async () => {
+    const attempt = asUser(owner, (q) =>
+      q.query(`update public.products set moderation_status = 'removed' where owner_id = $1 and title = 'Product 3'`, [
+        owner.id,
+      ]),
+    );
+    expect(await expectDbError(attempt)).toMatch(/Moderation state is set by SquareShare staff/);
+    expect(await statusOf("Product 3")).not.toBe("removed");
+  });
+
+  it("cannot be undone by the seller editing the removed product back", async () => {
+    // Whether the edit is refused outright or lands, the product stays removed.
+    await asUser(owner, (q) =>
+      q.query(`update public.products set description = 'All clean now' where owner_id = $1 and title = 'Product 1'`, [
+        owner.id,
+      ]),
+    ).catch(() => undefined);
+    expect(await statusOf("Product 1")).toBe("removed");
+    // Still removed, so still no room taken, and none given twice either.
+    expect(await expectDbError(createProducts(1, "Second place"))).toMatch(/plan_limit_reached:products/);
+  });
+
+  it("counts a product staff restore on appeal again, so the account cannot add more", async () => {
+    await moderate("Product 1", "ok");
+    // Over the cap by one now: nothing new until something goes.
+    expect(await expectDbError(createProducts(1, "After the appeal"))).toMatch(/plan_limit_reached:products/);
+    await asUser(owner, (q) => q.query(`delete from public.products where owner_id = $1 and title = 'In its place'`, [owner.id]));
+    expect(await expectDbError(createProducts(1, "Still full"))).toMatch(/plan_limit_reached:products/);
+  });
+
+  it("works the same for storefronts", async () => {
+    const shopOwner = await createUser(email("removed-shops"));
+    const createShop = (name: string) =>
+      asUser(shopOwner, (q) => q.query(`insert into public.storefronts (owner_id, name) values ($1, $2)`, [shopOwner.id, name]));
+    for (let i = 1; i <= storefrontCap; i += 1) await createShop(`Shop ${i}`);
+    expect(await expectDbError(createShop("One too many"))).toMatch(/plan_limit_reached:storefronts/);
+    await asService((q) =>
+      q.query(`update public.storefronts set moderation_status = 'removed' where owner_id = $1 and name = 'Shop 1'`, [
+        shopOwner.id,
+      ]),
+    );
+    await createShop("In its place");
+  });
+});
+
 describe("the product limit (20261002_product_limits)", () => {
   let owner: TestUser;
   const cap = PLANS.free.limits.products as number;

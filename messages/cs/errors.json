@@ -496,6 +496,16 @@
     "staleOption": {
       "message": "Jedna z fotek je přiřazená k možnosti, která už neexistuje.",
       "fix": "Přiřaďte fotku jinam nebo přiřazení zrušte a pak znovu uložte."
+    },
+    "ordersToShip": "{count, plural, one {Objednávka tohoto produktu ještě čeká na odeslání.} few {{count} objednávky tohoto produktu ještě čekají na odeslání.} many {{count} objednávky tohoto produktu ještě čeká na odeslání.} other {{count} objednávek tohoto produktu ještě čeká na odeslání.}}",
+    "ordersToShipFix": "Nic se nesmazalo. Zkuste to znovu a nejdřív je uvidíte ve varování.",
+    "badgeRefused": {
+      "message": "Odznak „{label}“ porušuje pravidla platformy, a proto ho nelze použít.",
+      "fix": "Upravte jeho text nebo zvolte jiný odznak. Pokud si myslíte, že jde o omyl, napište na adresu {email}."
+    },
+    "badgeNotApproved": {
+      "message": "Odznak „{label}“ nebylo možné automaticky schválit, a proto ho nelze použít.",
+      "fix": "Zkuste jiná slova, nebo napište na adresu {email} a podívá se na to člověk."
     }
   },
   "productImport": {
@@ -540,6 +550,10 @@
     "nameRequired": {
       "message": "Výloha potřebuje název.",
       "fix": "Zadejte název (1 až 80 znaků) do pole v horní části editoru a znovu uložte."
+    },
+    "savedElsewhere": {
+      "message": "Tato výloha byla mezitím uložena jinde.",
+      "fix": "Načtěte stránku znovu a uvidíte tu verzi, nebo uložte znovu a nahraďte ji."
     },
     "invalidLayout": {
       "message": "Data rozvržení výlohy jsou neplatná.",

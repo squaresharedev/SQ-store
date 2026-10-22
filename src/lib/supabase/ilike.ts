@@ -39,3 +39,17 @@ export function escapeIlike(term: string): string {
     .replace(/%/g, "\\%")
     .replace(/_/g, "\\_");
 }
+
+/**
+ * A PostgREST `or` filter that matches `term` as a substring of ANY of the
+ * columns: `query.or(ilikeAny(["buyer_email", "ship_to->>city"], term))`.
+ *
+ * The value is double-quoted, with `"` and `\` escaped inside the quotes, so a
+ * comma, a parenthesis or a quote in what the person typed is part of the
+ * search and not the filter's own syntax. Wildcards are escaped as above.
+ */
+export function ilikeAny(columns: readonly string[], term: string): string {
+  const pattern = `%${escapeIlike(term)}%`;
+  const quoted = `"${pattern.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+  return columns.map((column) => `${column}.ilike.${quoted}`).join(",");
+}

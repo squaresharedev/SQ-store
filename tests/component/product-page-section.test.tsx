@@ -113,8 +113,8 @@ describe("ProductPageSection", () => {
     // Each tile is the real price line in that look: the same two prices,
     // crossed out the two different ways.
     expect(line.querySelector("del")).toHaveTextContent("€24.00");
-    expect(line.querySelector("del")?.className).not.toContain("ss-price-slash");
-    expect(slash.querySelector("del")?.className).toContain("ss-price-slash");
+    expect(line.querySelector("del [data-product-sale-slash]")).toBeNull();
+    expect(slash.querySelector("del svg[data-product-sale-slash]")).not.toBeNull();
 
     await user.click(slash);
     expect(onProductPageChange).toHaveBeenLastCalledWith(expect.objectContaining({ saleStyle: "slash" }));
@@ -407,7 +407,7 @@ describe("ProductPageSection", () => {
     // Deep-links to the first blank field, and opens in a new tab so unsaved
     // canvas work is never at risk.
     const fix = screen.getByRole("link", { name: /add seller details/i });
-    expect(fix).toHaveAttribute("href", "/settings/tax#business-name");
+    expect(fix).toHaveAttribute("href", "/settings/business#business-name");
     expect(fix).toHaveAttribute("target", "_blank");
   });
 

@@ -36,6 +36,8 @@ import {
 } from "@/lib/errors";
 import { firstIssue } from "@/lib/validation/messages";
 import { msg } from "@/i18n/types";
+import { SIGNUP_CHECK_EMAIL_KEY } from "@/lib/auth/signup";
+import { recordSignupIntent } from "@/lib/auth/signup-intent";
 
 export type { AuthIntent } from "@/lib/validation/auth";
 
@@ -64,10 +66,13 @@ const emailSchema = emailAddress("generic");
  * existing account) never comes. Naming both paths tells them exactly what to
  * do next while telling an attacker nothing, because everyone reads it.
  */
-const SIGNUP_CHECK_EMAIL: ActionState = succeeded(msg("Auth.success.signUpCheckEmail"));
+const SIGNUP_CHECK_EMAIL: ActionState = succeeded(msg(SIGNUP_CHECK_EMAIL_KEY));
 
 /** One reply for "a reset link may be on its way", sent or throttled alike. */
 const RESET_LINK_ON_ITS_WAY: ActionState = succeeded(msg("Auth.success.resetLinkOnItsWay"));
+
+/** One reply for "a sign-in link may be on its way", account or not. */
+const MAGIC_LINK_ON_ITS_WAY: ActionState = succeeded(msg("Auth.success.magicLinkSent"));
 
 /** Only allow internal, absolute paths as post-login redirect targets. */
 function sanitizeNext(next: FormDataEntryValue | null): string {
@@ -281,6 +286,12 @@ export async function authenticate(
         // the callback might equally be a signup confirmation or a recovery,
         // and those are not a choice of sign-in method.
         options: {
+          // A link signs in an account that already exists, never opens a new
+          // one: a new account goes through the sign-up branch below, the only
+          // path with the disposable-address block, the bot check and the
+          // sign-up budget (an account that signed up but never got its
+          // confirmation mail already exists, so its fallback link still works).
+          shouldCreateUser: false,
           emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}&method=magic`,
         },
       });
@@ -288,8 +299,13 @@ export async function authenticate(
       console.error("[auth] magic link failed:", err instanceof Error ? err.message : String(err));
       return failed(actionError("unexpected", msg("Errors.auth.magicLinkFailed")));
     }
-    if (result.error) return failed(friendly(result.error));
-    return succeeded(msg("Auth.success.magicLinkSent"));
+    // Supabase's reply is NOT surfaced, for the same reason as the reset mail:
+    // with shouldCreateUser off it refuses an unknown address outright, so an
+    // error here would tell anyone probing which addresses hold an account.
+    if (result.error) {
+      console.warn("[auth] magic link not sent:", result.error.code, result.error.message);
+    }
+    return MAGIC_LINK_ON_ITS_WAY;
   }
 
   // --- Password reset ---
@@ -388,6 +404,11 @@ export async function authenticate(
     if (await passwordIsBreached(password)) {
       return failed(invalidInput(msg("Validation.password.breached")));
     }
+    // Every guard above has passed: this is the app's permission for GoTrue to
+    // create the account. Without it the Before User Created hook refuses the
+    // sign-up, which is what stops a script calling Supabase's sign-up
+    // endpoint directly from skipping every check above.
+    await recordSignupIntent(email);
     const origin = appOrigin();
     let result;
     try {

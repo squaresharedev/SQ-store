@@ -6,6 +6,35 @@ import { DEFAULT_PRODUCT_PAGE_SALE_STYLE, type ProductPageSaleStyle } from "@/ty
 import { SALE_PRICE_LOOKS } from "./product-page-maps";
 
 /**
+ * The stroke of the `slash` look: one smooth line from the price's lower left
+ * to its upper right, in the text's own colour (so it follows the page's ink on
+ * any backdrop). Stretched over the price's box, with a stroke that stays a
+ * constant width however the box scales, and round ends.
+ */
+function PriceSlash() {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 size-full overflow-visible"
+      data-product-sale-slash=""
+    >
+      <line
+        x1="3"
+        y1="80"
+        x2="97"
+        y2="20"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+}
+
+/**
  * A price, and the sale behind it: the product page's buy box and sticky bar,
  * and the checkout's item card all draw it here, so a sale reads the same
  * everywhere a buyer sees it.
@@ -54,6 +83,7 @@ export function SalePrice({
       </span>
       <del aria-hidden="true" className={cn(SALE_PRICE_LOOKS[saleStyle][size])} data-product-sale-was={sale.regularPriceCents}>
         {was}
+        {saleStyle === "slash" && <PriceSlash />}
       </del>
       {size === "sm" && sale.percentOff != null && (
         <span

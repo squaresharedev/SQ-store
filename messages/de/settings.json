@@ -303,6 +303,7 @@
   "tax": {
     "cardTitle": "Unternehmen und Verkäuferangaben",
     "cardDescription": "Einmal für dein gesamtes Konto festgelegt. Wird Käufern auf jeder Produktseite angezeigt und für Rechnungen und MwSt. verwendet.",
+    "memberScope": "Das sind deine eigenen Verkäuferangaben. Die Angaben, die Käufer bei {store} sehen, gehören dem Inhaber, der sie in seinen eigenen Einstellungen festlegt.",
     "gate": {
       "required": "<strong>Dein Händlername, deine Adresse und deine Kontakt-E-Mail sind erforderlich, bevor du etwas veröffentlichen oder verkaufen kannst.</strong> Käufer müssen sehen können, von wem sie kaufen und wie sie dich erreichen können, bevor sie bestellen.",
       "privacyNoteLinked": "Diese Angaben erscheinen aus diesem Grund allein öffentlich auf deinen Produktseiten. Wir nutzen sie nie für Marketing und verkaufen oder teilen sie nie. Die einzige Nachricht, die wir an deine Kontakt-E-Mail oder Telefonnummer senden, ist der Code, der sie bestätigt. Siehe die <link>Squareshare Datenschutzerklärung</link>."

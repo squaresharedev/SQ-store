@@ -306,6 +306,11 @@
       "required": "Benenne den Kanal oder lass das Feld leer.",
       "tooLong": "Der Kanalname darf höchstens {maximum} Zeichen lang sein.",
       "unsupported": "Der Kanalname enthält nicht unterstützte Zeichen."
+    },
+    "badgeLabel": {
+      "required": "Ein Badge braucht einen Text.",
+      "tooLong": "Ein Badge darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Ein Badge enthält nicht unterstützte Zeichen."
     }
   },
   "email": {
@@ -485,7 +490,10 @@
     "documentsTooMany": "Ein Produkt kann bis zu {maximum} Dokumente haben.",
     "optionDuplicate": "Jede Option darf nur einmal eingetragen werden.",
     "optionsTotalTooMany": "Ein Produkt kann insgesamt bis zu {maximum} Optionen haben.",
-    "galleryStaleOption": "Ein Foto verweist auf eine Option, die nicht mehr existiert."
+    "galleryStaleOption": "Ein Foto verweist auf eine Option, die nicht mehr existiert.",
+    "badgesTooMany": "Ein Produkt kann bis zu {maximum} Badges haben.",
+    "badgeDuplicate": "Jedes Badge kann nur einmal angegeben werden.",
+    "badgesOnPhotoTooMany": "Ein Produkt kann bis zu {maximum} Badges auf dem Foto anzeigen."
   },
   "productImport": {
     "noTitle": "Kein Titel.",

@@ -129,12 +129,13 @@ describe("security headers", () => {
     });
 
     it("names frame-ancestors once, for the storefront embed's frame alone", () => {
-      // The one response that may be framed, and only by the site its address
-      // names (tests/unit/embed-frame-headers.test.ts). A second occurrence
-      // would be a second way to frame something, so it is counted.
+      // The one response that may be framed, and only under the sites its
+      // address names (tests/unit/embed-frame-headers.test.ts, which runs the
+      // rules). A second occurrence would be a second way to frame something,
+      // so it is counted.
       const code = codeLines(CONFIG);
       expect(code.match(/frame-ancestors/g) ?? []).toHaveLength(1);
-      expect(code).toContain("frame-ancestors :site");
+      expect(code).toContain('`frame-ancestors ${sites.join(" ")};');
     });
 
     it("allows the Supabase realtime socket", () => {

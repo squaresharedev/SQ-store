@@ -76,7 +76,9 @@
     "deleteDialog": {
       "title": "Eliminar este produto?",
       "description": "{storefronts, plural, =0 {«{title}» e a sua imagem e ficheiro carregados serão removidos permanentemente. As encomendas existentes mantêm o registo da venda.} one {«{title}» e a sua imagem e ficheiro carregados serão removidos permanentemente. As encomendas existentes mantêm o registo da venda. Está em {storefronts} montra. O bloco mantém-se até o remover.} many {«{title}» e a sua imagem e ficheiro carregados serão removidos permanentemente. As encomendas existentes mantêm o registo da venda. Está em {storefronts} montras. Os blocos mantêm-se até os remover.} other {«{title}» e a sua imagem e ficheiro carregados serão removidos permanentemente. As encomendas existentes mantêm o registo da venda. Está em {storefronts} montras. Os blocos mantêm-se até os remover.}}",
-      "confirm": "Eliminar produto"
+      "toShip": "{count, plural, one {Ainda falta enviar {count} encomenda deste produto.} many {Ainda falta enviar {count} de encomendas deste produto.} other {Ainda falta enviar {count} encomendas deste produto.}} Ficam em Encomendas com o nome e o preço, por isso ainda as pode enviar.",
+      "confirm": "Eliminar produto",
+      "confirmAnyway": "Eliminar mesmo assim"
     },
     "chooser": {
       "openTitle": "Abrir em que montra?",
@@ -98,7 +100,26 @@
     "openPage": "Abrir página de produto",
     "unitsSold": "{count, plural, one {{count} vendido} many {{count} vendidos} other {{count} vendidos}}",
     "noSales": "Ainda sem vendas",
-    "addToWebsite": "Adicionar ao seu site"
+    "addToWebsite": "Adicionar ao seu site",
+    "unlimited": "Ilimitado",
+    "noStorefront": "Sem montra",
+    "ship": "Enviar"
+  },
+  "shareCard": {
+    "scanToShop": "Digitalize para comprar",
+    "templates": {
+      "masthead": "Capa",
+      "echo": "Eco",
+      "numerals": "Preço grande",
+      "popout": "Fora da moldura",
+      "orbit": "Órbita",
+      "sticker": "Autocolante"
+    },
+    "formats": {
+      "square": "Publicação quadrada",
+      "portrait": "Publicação vertical",
+      "story": "História"
+    }
   },
   "removal": {
     "badge": "Removido",
@@ -130,7 +151,7 @@
     "concerned": "O que foi visado",
     "showField": "Mostrar {field} nesta página",
     "fields": {
-      "product": "{field, select, title {Título} description {Descrição} price {Preço} image {Imagem principal} file {Ficheiro digital} purchaseLink {Link de compra} shipping {Envio} options {Opções} photos {Fotografias} specs {Especificações} documents {Documentos} safety {Segurança e conformidade} other {Outra coisa}}",
+      "product": "{field, select, title {Título} description {Descrição} price {Preço} image {Imagem principal} file {Ficheiro digital} purchaseLink {Link de compra} shipping {Envio} options {Opções} photos {Fotografias} specs {Emblemas e especificações} documents {Documentos} safety {Segurança e conformidade} other {Outra coisa}}",
       "storefront": "{field, select, name {Nome da montra} header {Cabeçalho} text {Texto} images {Imagens} products {Produtos apresentados} background {Fundo} productPage {Páginas de produto} other {Outra coisa}}"
     },
     "reference": "Referência",
@@ -154,7 +175,9 @@
     },
     "editorDetails": "Porquê e o que fazer a seguir",
     "badgePending": "Em verificação",
+    "badgePendingHint": "Os compradores vão vê-lo assim que a verificação automática o aprovar.",
     "badgeReview": "Em análise",
+    "badgeReviewHint": "Está a ser analisado por uma pessoa. Os compradores vão vê-lo assim que for aprovado.",
     "titlePending": "{kind, select, product {Este produto está a ser verificado} other {Esta montra está a ser verificada}}",
     "titleReview": "{kind, select, product {Uma pessoa está a verificar este produto} other {Uma pessoa está a verificar esta montra}}",
     "hiddenPending": "Os compradores só o conseguem ver quando a verificação automática terminar. Normalmente demora alguns segundos: recarregue a página para ver em que ponto está.",
@@ -175,6 +198,7 @@
     "fileEmpty": "Esse ficheiro está vazio.",
     "imported": "{count, plural, one {{count} produto foi importado.} many {{count} de produtos foram importados.} other {{count} produtos foram importados.}}",
     "skippedRows": "{count, plural, one {{count} linha foi ignorada.} many {{count} de linhas foram ignoradas.} other {{count} linhas foram ignoradas.}}",
+    "checkingRows": "{count, plural, one {{count} produto ainda está em verificação: os compradores vão vê-lo assim que a verificação automática o aprovar.} many {{count} de produtos ainda estão em verificação: os compradores vão vê-los assim que a verificação automática os aprovar.} other {{count} produtos ainda estão em verificação: os compradores vão vê-los assim que a verificação automática os aprovar.}}",
     "dropPrompt": "Largue um CSV ou clique para escolher um",
     "fileMeta": "{size} · escolha outro para recomeçar",
     "rowsLimit": "{max, plural, one {Até {max} produto por ficheiro} many {Até {max} de produtos por ficheiro} other {Até {max} produtos por ficheiro}}",
@@ -258,6 +282,11 @@
         "label": "Visibilidade",
         "description": "Ativo significa publicado: os compradores conseguem vê-lo e comprá-lo de imediato. Rascunho fica escondido dos compradores até o mudar.",
         "about": "Para que serve Visibilidade"
+      },
+      "badges": {
+        "label": "Emblemas",
+        "description": "Algumas palavras na página de produto: um motivo para confiar em si, ou um facto relevante de ver de relance. Escolha um predefinido ou escreva o seu, escolha uma cor para o ícone e coloque-o ao lado do produto ou sobre a fotografia.",
+        "about": "Para que serve Emblemas"
       }
     },
     "summary": {
@@ -283,7 +312,8 @@
       "documents": "{count, plural, one {{count} documento} many {{count} de documentos} other {{count} documentos}}",
       "started": "Iniciado",
       "active": "Ativo",
-      "draft": "Rascunho"
+      "draft": "Rascunho",
+      "badges": "{count, plural, one {{count} emblema} many {{count} de emblemas} other {{count} emblemas}}"
     },
     "errors": {
       "titleRequired": "Dê um título ao seu produto: é a primeira coisa que os compradores veem.",
@@ -309,7 +339,9 @@
         "notPositive": "O preço deve ser um número maior do que zero.",
         "tooManyDecimals": "Os preços podem ter no máximo duas casas decimais.",
         "tooHigh": "O preço não pode exceder {currency} {max}."
-      }
+      },
+      "badgeDuplicate": "Dois emblemas dizem a mesma coisa. Altere as palavras de um, ou remova-o.",
+      "badgesOnPhoto": "Só {max} emblemas cabem na fotografia. Mova um para ao lado do produto."
     },
     "title": "Título",
     "titlePlaceholder": "p. ex. Ambient Loops Vol. 1",
@@ -337,6 +369,7 @@
     "saveProduct": "Guardar produto",
     "savedToast": "«{title}» foi guardado.",
     "addedToast": "«{title}» foi adicionado aos seus produtos.",
+    "checkingToast": "Os compradores vão vê-lo assim que a verificação automática o aprovar.",
     "documentFallbackLabel": "Documento",
     "discard": {
       "title": "Descartar as suas alterações?",
@@ -574,6 +607,9 @@
     "hint": "PNG, JPG, WEBP, GIF ou AVIF, até {max} MB",
     "remove": "Remover imagem principal"
   },
+  "photoFormat": {
+    "heic": "É uma fotografia de iPhone (HEIC), que os navegadores não conseguem mostrar. Escolha-a antes a partir da fototeca do telemóvel, que a envia em JPEG, ou exporte-a primeiro em JPEG."
+  },
   "fileDropzone": {
     "currentFile": "Ficheiro atual",
     "dropPrompt": "Largue um ficheiro ou clique para carregar",
@@ -718,6 +754,233 @@
       "card": "Número do cartão",
       "total": "Total",
       "pay": "Pagar {price}"
+    }
+  },
+  "badgesField": {
+    "listLabel": "Emblemas",
+    "labelFor": "Palavras do emblema {position}",
+    "iconFor": "Ícone e cor do emblema {position}",
+    "labelPlaceholder": "O que diz o emblema",
+    "moveEarlier": "Mover o emblema {position} para cima",
+    "moveLater": "Mover o emblema {position} para baixo",
+    "remove": "Remover emblema {position}",
+    "addFirst": "Adicionar um emblema",
+    "addAnother": "Adicionar outro",
+    "full": "São {max} emblemas, o máximo de um produto. Remova um para adicionar outro.",
+    "iconPicker": "Escolher um ícone",
+    "icons": {
+      "badge-check": "Emblema de verificação",
+      "heart": "Coração",
+      "star": "Estrela",
+      "award": "Roseta",
+      "trophy": "Troféu",
+      "thumbs-up": "Polegar para cima",
+      "users": "Pessoas",
+      "sparkles": "Brilhos",
+      "gem": "Gema",
+      "gift": "Presente",
+      "truck": "Camião",
+      "zap": "Raio",
+      "clock": "Relógio",
+      "rotate-ccw": "Seta de retorno",
+      "shield-check": "Escudo",
+      "lock": "Cadeado",
+      "leaf": "Folha",
+      "recycle": "Reciclagem",
+      "sprout": "Broto",
+      "trees": "Árvores",
+      "package": "Encomenda",
+      "vegan": "Vegano",
+      "rabbit": "Coelho",
+      "paw-print": "Pegada",
+      "wheat-off": "Sem trigo",
+      "droplets": "Gotas",
+      "sun": "Sol",
+      "snowflake": "Floco de neve",
+      "hand-heart": "Mão com coração",
+      "hammer": "Martelo",
+      "pen-tool": "Caneta",
+      "map-pin": "Marcador de mapa",
+      "store": "Loja",
+      "handshake": "Aperto de mão",
+      "globe": "Globo",
+      "flame": "Chama"
+    },
+    "picker": {
+      "open": "Pesquisar ou escrever o seu próprio",
+      "label": "Adicionar um emblema",
+      "search": "Pesquisar emblemas",
+      "placeholder": "Pesquise, ou escreva as suas próprias palavras",
+      "results": "Emblemas",
+      "groups": {
+        "trust": "Confiança e serviço",
+        "product": "Sobre o produto"
+      },
+      "create": "Adicionar «{label}»",
+      "checking": "A verificar…",
+      "added": "Adicionado",
+      "alreadyOn": "Este produto já tem este emblema.",
+      "noMatches": "Nenhum emblema predefinido corresponde."
+    },
+    "stylePicker": "Ícone e cor",
+    "iconHeading": "Ícone",
+    "colorHeading": "Cor",
+    "colorPicker": "Escolha uma cor",
+    "colors": {
+      "ink": "Igual ao texto",
+      "red": "Vermelho",
+      "orange": "Laranja",
+      "amber": "Âmbar",
+      "green": "Verde",
+      "teal": "Verde-azulado",
+      "blue": "Azul",
+      "purple": "Roxo",
+      "pink": "Rosa"
+    },
+    "placementFor": "Posição do emblema {position}",
+    "placementPicker": "Onde fica",
+    "placements": {
+      "beside": "Ao lado do produto",
+      "photo-top-left": "Na fotografia, canto superior esquerdo",
+      "photo-top-right": "Na fotografia, canto superior direito",
+      "photo-bottom-left": "Na fotografia, canto inferior esquerdo",
+      "photo-bottom-right": "Na fotografia, canto inferior direito"
+    },
+    "photo": "Fotografia",
+    "beside": "Ao lado do produto",
+    "photoFull": "A fotografia suporta até {max} emblemas. Mova primeiro um para ao lado do produto.",
+    "preview": {
+      "label": "Na sua página de produto",
+      "hint": "Arraste um emblema para a fotografia ou para ao lado do produto.",
+      "titlePlaceholder": "O seu produto"
+    }
+  },
+  "badges": {
+    "presets": {
+      "lovedBy": {
+        "label": "{count, plural, one {Adorado por #+ pessoa} many {Adorado por #+ de pessoas} other {Adorado por #+ pessoas}}",
+        "keywords": "clientes, popular, fãs, avaliações, prova social"
+      },
+      "bestseller": {
+        "label": "Mais vendido",
+        "keywords": "bestseller, popular, topo, favorito, produto mais vendido"
+      },
+      "topRated": {
+        "label": "Mais bem avaliado",
+        "keywords": "avaliações, classificação, estrelas, cinco estrelas, muito bem avaliado"
+      },
+      "freeShipping": {
+        "label": "Envio grátis",
+        "keywords": "entrega, portes, envio gratuito, entrega gratuita"
+      },
+      "fastDispatch": {
+        "label": "{count, plural, one {Enviado em # hora} many {Enviado em # de horas} other {Enviado em # horas}}",
+        "keywords": "rápido, expedição, entrega, mesmo dia, dia seguinte, envio rápido"
+      },
+      "moneyBack": {
+        "label": "{count, plural, one {Garantia de devolução de # dia} many {Garantia de devolução de # de dias} other {Garantia de devolução de # dias}}",
+        "keywords": "reembolso, devoluções, garantia, sem risco"
+      },
+      "freeReturns": {
+        "label": "Devoluções grátis",
+        "keywords": "devoluções, reembolso, troca, devolver"
+      },
+      "warranty": {
+        "label": "{count, plural, one {Garantia de # ano} many {Garantia de # de anos} other {Garantia de # anos}}",
+        "keywords": "garantia, cobertura, reparação, proteção"
+      },
+      "securePayment": {
+        "label": "Pagamento seguro",
+        "keywords": "seguro, checkout, pagamento, protegido, cartão"
+      },
+      "satisfaction": {
+        "label": "Satisfação garantida",
+        "keywords": "satisfação, garantia, qualidade, promessa"
+      },
+      "giftReady": {
+        "label": "Pronto para oferta",
+        "keywords": "presente, embalagem de presente, oferta, aniversário"
+      },
+      "limitedEdition": {
+        "label": "Edição limitada",
+        "keywords": "raro, exclusivo, pequena série, colecionador"
+      },
+      "newArrival": {
+        "label": "Novidade",
+        "keywords": "novo, nova chegada, recente, acabou de chegar"
+      },
+      "smallBusiness": {
+        "label": "Pequeno negócio",
+        "keywords": "independente, loja local, negócio familiar, artesão"
+      },
+      "awardWinning": {
+        "label": "Premiado",
+        "keywords": "prémio, galardão, distinção, vencedor"
+      },
+      "ecoFriendly": {
+        "label": "Amigo do ambiente",
+        "keywords": "verde, sustentável, ambiente, planeta, ecológico"
+      },
+      "handmade": {
+        "label": "Feito à mão",
+        "keywords": "artesanal, feito manualmente, craftado, artesanato"
+      },
+      "recycled": {
+        "label": "Feito com materiais reciclados",
+        "keywords": "reciclado, reutilizado, economia circular, upcycling"
+      },
+      "plasticFree": {
+        "label": "Embalagem sem plástico",
+        "keywords": "zero resíduos, embalagem, compostável, sem plástico"
+      },
+      "organic": {
+        "label": "Orgânico",
+        "keywords": "natural, bio, sem pesticidas, sem químicos"
+      },
+      "vegan": {
+        "label": "Vegan",
+        "keywords": "à base de plantas, sem produtos animais, sem laticínios"
+      },
+      "crueltyFree": {
+        "label": "Não testado em animais",
+        "keywords": "crueldade zero, amigo dos animais, sem testes em animais"
+      },
+      "madeLocally": {
+        "label": "Produção local",
+        "keywords": "local, feito em, regional, produção nacional"
+      },
+      "fairTrade": {
+        "label": "Comércio justo",
+        "keywords": "ético, justo, aprovisionamento ético, trabalhadores"
+      },
+      "sustainablySourced": {
+        "label": "Proveniência sustentável",
+        "keywords": "responsável, aprovisionamento, floresta, madeira, rastreável"
+      },
+      "glutenFree": {
+        "label": "Sem glúten",
+        "keywords": "celíaco, intolerância ao glúten, sem trigo, alergia"
+      },
+      "waterproof": {
+        "label": "Impermeável",
+        "keywords": "resistente à água, chuva, à prova de salpicos, exterior"
+      },
+      "builtToLast": {
+        "label": "Feito para durar",
+        "keywords": "durável, resistente, qualidade, longa duração, robusto"
+      },
+      "personalised": {
+        "label": "Personalizado",
+        "keywords": "personalização, gravado, monograma, feito por encomenda, customizado"
+      },
+      "petFriendly": {
+        "label": "Amigo dos animais de estimação",
+        "keywords": "animais de estimação, cães, gatos, seguro para animais"
+      },
+      "qualityChecked": {
+        "label": "Verificado",
+        "keywords": "testado, inspecionado, controlado, aprovado"
+      }
     }
   }
 }

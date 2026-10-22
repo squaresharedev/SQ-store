@@ -305,6 +305,91 @@ describe("WelcomeFlow", () => {
     ).toBeInTheDocument();
   });
 
+  it("fixes a mistyped address from beside the code box, and sends the code to the fixed one", async () => {
+    const user = userEvent.setup();
+    const props = renderFlow({ verificationOn: true });
+    await toSellerStep(user);
+    const dialog = screen.getByRole("dialog", { name: "Add your seller details" });
+    await user.type(within(dialog).getByLabelText("Trader name"), "Welcome Studio");
+    await user.type(within(dialog).getByLabelText("Business address"), "12 Market Street");
+    await user.type(within(dialog).getByLabelText("Contact email"), "hello@studoi.eu");
+    await user.click(screen.getByRole("button", { name: "Save and continue" }));
+    expect(
+      await within(dialog).findByText("Enter the 8-digit code we emailed to hello@studoi.eu."),
+    ).toBeInTheDocument();
+
+    // Straight into the field, the typo selected, so typing replaces it. (An
+    // email input reports no selection offsets, so what is checked is that
+    // the field selected itself.)
+    const select = vi.spyOn(HTMLInputElement.prototype, "select");
+    await user.click(within(dialog).getByRole("button", { name: "Wrong address? Change it" }));
+    const field = within(dialog).getByLabelText<HTMLInputElement>("Contact email");
+    expect(field).toHaveFocus();
+    expect(select.mock.contexts).toEqual([field]);
+    select.mockRestore();
+    expect(field).toHaveValue("hello@studoi.eu");
+    // Everything else typed is still there.
+    expect(within(dialog).getByLabelText("Trader name")).toHaveValue("Welcome Studio");
+
+    await user.clear(field);
+    await user.type(field, "hello@studio.eu");
+    await user.click(screen.getByRole("button", { name: "Save and continue" }));
+    expect(
+      await within(dialog).findByText("Enter the 8-digit code we emailed to hello@studio.eu."),
+    ).toBeInTheDocument();
+    expect(vi.mocked(props.saveAction!).mock.calls[1]![1].get("seller_email")).toBe("hello@studio.eu");
+    expect(props.onStartTour).not.toHaveBeenCalled();
+  });
+
+  it("goes Back from the code like every other step, and a save with the same address still waits for its code", async () => {
+    const user = userEvent.setup();
+    renderFlow({ verificationOn: true });
+    await toSellerStep(user);
+    await fillSellerDetails(user);
+    await user.click(screen.getByRole("button", { name: "Save and continue" }));
+    const dialog = screen.getByRole("dialog", { name: "Add your seller details" });
+    await within(dialog).findByText("Enter the 8-digit code we emailed to hello@studio.eu.");
+
+    await user.click(within(dialog).getByRole("button", { name: "Back" }));
+    await user.type(within(dialog).getByLabelText("Business address"), ", Ghent");
+    await user.click(screen.getByRole("button", { name: "Save and continue" }));
+    // The code the first save sent is still the one to type: no "Send code".
+    expect(
+      await within(dialog).findByText("Enter the 8-digit code we emailed to hello@studio.eu."),
+    ).toBeInTheDocument();
+    expect(within(dialog).getByLabelText("Confirmation code")).toBeInTheDocument();
+  });
+
+  it("asks again for proof of a proven address changed and then changed back", async () => {
+    // Changing it dropped the proof on the server, even though this dialog's
+    // `emailVerified` (from when it opened) still says it is proven.
+    const user = userEvent.setup();
+    const props = renderFlow({
+      verificationOn: true,
+      includeTermsStep: false,
+      seller: { businessName: "Welcome Studio", address: "12 Market Street", email: "hello@studio.eu" },
+      emailVerified: true,
+    });
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Get started" }));
+    const dialog = screen.getByRole("dialog", { name: "Add your seller details" });
+    const email = within(dialog).getByLabelText("Contact email");
+    await user.clear(email);
+    await user.type(email, "hello@studoi.eu");
+    await user.click(screen.getByRole("button", { name: "Save and continue" }));
+    await within(dialog).findByText("Enter the 8-digit code we emailed to hello@studoi.eu.");
+
+    await user.click(within(dialog).getByRole("button", { name: "Wrong address? Change it" }));
+    const field = within(dialog).getByLabelText("Contact email");
+    await user.clear(field);
+    await user.type(field, "hello@studio.eu");
+    await user.click(screen.getByRole("button", { name: "Save and continue" }));
+    expect(
+      await within(dialog).findByText("Enter the 8-digit code we emailed to hello@studio.eu."),
+    ).toBeInTheDocument();
+    expect(props.onStartTour).not.toHaveBeenCalled();
+  });
+
   it("lets a seller carry on without the code, with a new one a click away", async () => {
     const user = userEvent.setup();
     const props = renderFlow({ verificationOn: true });

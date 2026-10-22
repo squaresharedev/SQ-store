@@ -128,7 +128,7 @@ showing a hex, nothing to open for the common case:
 wheel  drop   custom   white · grey · black
 ```
 
-1. **Wheel** (rainbow ring + `+`) — "more colors". Always first. Where it GOES
+1. **Wheel** (a pastel rainbow ring around a white disc, with a `+`) — "more colors". Always first. Where it GOES
    depends on `target`; see below.
 2. **Eyedropper** — samples the screen directly, no overlay. Only present where
    the browser has the API.
@@ -142,8 +142,21 @@ Exactly one dot is ever ringed. The wheel deliberately never takes the ring:
 whenever a custom color is live the custom dot is present and rings itself, so
 ringing both would read as two selections.
 
-The row sizes its columns to however many circles it has, so it is always
-exactly one line.
+Every circle is a fixed 32px. The row is always exactly one line: the wheel and
+the eyedropper stay pinned at the start, and when the swatches after them are
+more than fit (a narrow panel, or a field with many quick picks) they scroll
+sideways. An edge that has more beyond it fades out (`.scroll-fade-x`), the
+scrollbar is a 4px capsule that only shows on hover (`.scrollbar-subtle`), and
+a chosen swatch that is out of view is scrolled into place (clear of the fade).
+The chosen swatch grows slightly and lifts, with a hairline, instead of taking
+an offset ring.
+
+The wheel's pastel rim (`.color-wheel`) flows while hovered or focused, and
+unevenly: the whole circle turns on eased, lingering steps while each colour's
+stop drifts in its own lane, so the bands swell and thin. It pauses where it
+was when the pointer leaves, and is still under reduced motion. The dots' class
+strings live in `ui/color-row-styles.ts`; the ColorPanel's grids use the same
+`ColorDot` in its stretching grid shape.
 
 ### Where the wheel goes: `target`
 

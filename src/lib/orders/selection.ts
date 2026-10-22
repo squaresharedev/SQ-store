@@ -46,3 +46,27 @@ export function parseOrderSelection(raw: unknown): OrderSelection[] {
 export function formatOrderSelection(selection: readonly OrderSelection[]): string {
   return selection.map((entry) => `${entry.label}: ${entry.value}`).join(" · ");
 }
+
+/**
+ * The option ids a stored selection was made of, read back against the
+ * product's current option groups: each "Size: Large" pair is the option named
+ * "Large" in the group named "Size". For a buyer sent back to checkout (a
+ * payment page they cancelled), so the version they picked is still picked.
+ *
+ * All or nothing: if any pair no longer matches (the seller renamed it in the
+ * meantime), no ids, and the checkout sends the buyer to choose again rather
+ * than guessing.
+ */
+export function optionIdsForSelection(
+  groups: readonly { name: string; options: readonly { id: string; name: string }[] }[],
+  selection: readonly OrderSelection[],
+): string[] {
+  const ids: string[] = [];
+  for (const pair of selection) {
+    const group = groups.find((candidate) => candidate.name.trim() === pair.label);
+    const option = group?.options.find((candidate) => candidate.name.trim() === pair.value);
+    if (!option) return [];
+    ids.push(option.id);
+  }
+  return ids;
+}

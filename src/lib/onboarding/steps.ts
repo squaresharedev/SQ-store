@@ -82,6 +82,13 @@ export type SetupFacts = {
   /** Every product the account owns, drafts included. */
   productCount: number;
   activeProductIds: readonly string[];
+  /**
+   * Active products the automatic check has not approved yet, and ones it
+   * paused or removed (lib/moderation). Their page answers 404 until it does,
+   * so neither is a live page, whatever the seller set. Absent: none.
+   */
+  checkingProductIds?: readonly string[];
+  pausedProductIds?: readonly string[];
   /** The product ids referenced by storefront blocks that still exist. */
   existingProductIds: readonly string[];
   /** Newest edited first, as listStorefronts returns them. */
@@ -153,14 +160,32 @@ export function buildSetupSteps(facts: SetupFacts): SetupChecklistData {
     );
   });
   const placedActive = placed.filter((placement) => active.has(placement.productId));
+  // A page buyers can open needs the check's approval too (lib/products/
+  // public.ts asks for it): claiming "live" before it would hand the seller a
+  // link that answers 404.
+  const held = new Set([...(facts.checkingProductIds ?? []), ...(facts.pausedProductIds ?? [])]);
   const live =
-    seller === "done" ? placedActive.find((placement) => placement.pagesOn) : undefined;
+    seller === "done"
+      ? placedActive.find((placement) => placement.pagesOn && !held.has(placement.productId))
+      : undefined;
+  const checking = new Set(facts.checkingProductIds ?? []);
+  const paused = new Set(facts.pausedProductIds ?? []);
+  const shown = placedActive.filter((placement) => placement.pagesOn);
+  const firstChecking = shown.find((placement) => checking.has(placement.productId));
+  const firstPaused = shown.find((placement) => paused.has(placement.productId));
+  const hold: PublishHold | null = live
+    ? null
+    : firstChecking
+      ? { kind: "checking", productId: firstChecking.productId }
+      : firstPaused
+        ? { kind: "paused", productId: firstPaused.productId }
+        : null;
 
   const steps: SetupStep[] = [
     sellerStep(seller, facts.traderMissing),
     productStep(facts.productCount),
     storefrontStep(placed.length > 0, facts.storefronts[0]?.id ?? null),
-    publishStep({ seller, live: live !== undefined, placed, placedActive }),
+    publishStep({ seller, live: live !== undefined, placed, placedActive, hold }),
     ...(facts.checkout ? [paymentsStep(facts.checkout.payments)] : []),
     ...(facts.checkout && facts.checkout.deliveryPriced !== null
       ? [deliveryStep(facts.checkout.deliveryPriced)]
@@ -285,16 +310,22 @@ function storefrontStep(anyPlaced: boolean, newestStorefrontId: string | null): 
   };
 }
 
+/** Why a page that is set live is not open to buyers yet: the automatic
+ *  check has not approved it, or it paused it. */
+type PublishHold = { kind: "checking" | "paused"; productId: string };
+
 function publishStep({
   seller,
   live,
   placed,
   placedActive,
+  hold,
 }: {
   seller: SellerSetupState;
   live: boolean;
   placed: readonly Placement[];
   placedActive: readonly Placement[];
+  hold: PublishHold | null;
 }): SetupStep {
   const base = { id: "publish", label: msg("Onboarding.steps.publish.label") } as const;
   const cta = msg("Onboarding.steps.publish.cta");
@@ -316,6 +347,24 @@ function publishStep({
       ...base,
       done: false,
       detail: msg("Onboarding.steps.publish.detailNeedsStorefront"),
+      cta,
+    };
+  }
+  // Everything set, and the page waiting on the content check: it goes live
+  // by itself once approved, or needs a change if it was paused.
+  if (hold) {
+    return {
+      ...base,
+      done: false,
+      detail: msg(
+        hold.kind === "checking"
+          ? "Onboarding.steps.publish.detailChecking"
+          : "Onboarding.steps.publish.detailPaused",
+      ),
+      action: {
+        href: `/products/${hold.productId}/edit`,
+        label: msg("Onboarding.steps.publish.actionEdit"),
+      },
       cta,
     };
   }

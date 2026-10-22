@@ -6,12 +6,9 @@ import type { Product } from "@/types/product";
 import {
   SALE_BADGES,
   SALE_BADGE_LOOKS,
-  TILE_SPOTS,
   resolveCardStyle,
   resolvePriceTagPosition,
   resolveSaleBadgePosition,
-  saleBadgeTakenRows,
-  spotRow,
   titleBandRow,
   type CardStyleOverrides,
   type SaleBadge,
@@ -22,11 +19,13 @@ import {
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { infoTextClass, strongLabelClass } from "@/components/ui/control-styles";
+import { readableInkOn } from "@/lib/format/color";
+import { saleChipSpots } from "@/lib/storefront/tile-spots";
 import { cn } from "@/lib/utils";
 import { PRICE_TAG_FONT_CLASSES } from "./config-maps";
 import { OptionCardPicker, optionGlyphFrameClass } from "./OptionCardPicker";
 import { SaleChip, useSaleChipWords, type SaleChipOffer } from "./SaleChip";
-import { TileSpotPicker, unclippedSpots } from "./TileSpotPicker";
+import { TileSpotPicker } from "./TileSpotPicker";
 
 /** What the pictures say where there is no real sale to show: a fifth off, or
  *  five of the currency. */
@@ -37,12 +36,13 @@ const GLYPH_CHIP_SIZE = "7px";
 
 /**
  * THE SALE CHIP'S CONTROLS: what a product on sale wears on its tile, in which
- * look, where, and in which fill (SALE_BADGES, SALE_BADGE_LOOKS).
+ * look, where, and in which fill and ink (SALE_BADGES, SALE_BADGE_LOOKS).
  *
  * The price tag's patch contract and its two scopes: the theme's own setting
  * under Product cards, and one tile's override in its inspector, from the same
- * component. It takes both layers for the reason PriceTagControls does: the
- * fill is optional, and its inherit dot has to say whether THIS layer sets it.
+ * component. It takes both layers for the reason PriceTagControls does: both
+ * colours are optional, and each inherit dot has to say whether THIS layer
+ * sets it.
  *
  * The looks are picked from pictures of the real chip (SaleChip), saying what
  * it will say, in the fill and spot chosen below, so the picture a seller
@@ -103,17 +103,19 @@ export function SaleBadgeControls({
   });
   // The free rows, and the chip's own spot when it has had to share the
   // price's row (the one layout with no free edge), so the dot shown selected
-  // is always on the board.
-  const taken = saleBadgeTakenRows({ titleBand, priceTag });
-  const available = unclippedSpots(TILE_SPOTS, value.cornerRadius).filter(
-    (candidate) => candidate === spot || !taken.has(spotRow(candidate)),
-  );
+  // is always on the board. The same list a drag on the tile offers.
+  const available = saleChipSpots({ cornerRadius: value.cornerRadius, titleBand, priceTag, current: spot });
 
   // Whether the layer being edited sets the fill, and what it falls back to.
   const editingTile = overrides !== undefined;
   const stored = editingTile ? overrides.saleBadgeColor : theme.saleBadgeColor;
   const inherited = editingTile ? (theme.saleBadgeColor ?? theme.accent) : theme.accent;
   const fill = stored ?? inherited;
+  // The words the same way, except that what nothing sets is not a colour but
+  // whichever ink reads on that fill ("Auto"), as the chip itself resolves it.
+  const storedText = editingTile ? overrides.saleBadgeTextColor : theme.saleBadgeTextColor;
+  const themeText = editingTile ? theme.saleBadgeTextColor : undefined;
+  const inheritedText = themeText ?? readableInkOn(fill);
 
   // What the pictures say: this product's own sale where there is one.
   const offer: SaleChipOffer = product?.sale
@@ -155,6 +157,7 @@ export function SaleBadgeControls({
                       label={label}
                       spot={spot}
                       fill={fill}
+                      textColor={storedText ?? themeText}
                       fontClass={PRICE_TAG_FONT_CLASSES[value.priceTagFont]}
                       size={GLYPH_CHIP_SIZE}
                       style={GLYPH_CHIP_STYLE}
@@ -189,6 +192,26 @@ export function SaleBadgeControls({
               value: inherited,
               active: stored === undefined,
               onSelect: () => onChange({ saleBadgeColor: undefined }),
+            }}
+          />
+          <ColorPicker
+            label={tRoot("Storefront.colors.fields.textColor")}
+            value={storedText ?? inheritedText}
+            onChange={(saleBadgeTextColor) => onChange({ saleBadgeTextColor })}
+            inherit={{
+              label: tRoot(
+                themeText === undefined
+                  ? "Storefront.colors.inherit.auto.label"
+                  : "Storefront.colors.inherit.themeColor.label",
+              ),
+              useLabel: tRoot(
+                themeText === undefined
+                  ? "Storefront.colors.inherit.auto.use"
+                  : "Storefront.colors.inherit.themeColor.use",
+              ),
+              value: inheritedText,
+              active: storedText === undefined,
+              onSelect: () => onChange({ saleBadgeTextColor: undefined }),
             }}
           />
         </>

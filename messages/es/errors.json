@@ -496,6 +496,16 @@
     "staleOption": {
       "message": "Una foto apunta a una opción que ya no existe.",
       "fix": "Reasigna o quita la etiqueta de esa foto y guarda de nuevo."
+    },
+    "ordersToShip": "{count, plural, one {Aún queda un pedido de este producto por enviar.} many {Aún quedan {count} de pedidos de este producto por enviar.} other {Aún quedan {count} pedidos de este producto por enviar.}}",
+    "ordersToShipFix": "No se ha eliminado nada. Vuelve a intentarlo para verlos antes en el aviso.",
+    "badgeRefused": {
+      "message": "La insignia «{label}» infringe las normas de la plataforma y no se puede usar.",
+      "fix": "Cambia su texto o elige otra insignia. Si crees que es un error, escribe a {email}."
+    },
+    "badgeNotApproved": {
+      "message": "La insignia «{label}» no ha podido aprobarse automáticamente y no se puede usar.",
+      "fix": "Prueba con otras palabras o escribe a {email} y una persona lo revisará."
     }
   },
   "productImport": {
@@ -540,6 +550,10 @@
     "nameRequired": {
       "message": "El escaparate necesita un nombre.",
       "fix": "Escribe un nombre (de 1 a 80 caracteres) en el campo de arriba del editor y guarda de nuevo."
+    },
+    "savedElsewhere": {
+      "message": "Este escaparate se ha guardado en otro lugar desde que lo abriste.",
+      "fix": "Recarga la página para ver esa versión, o vuelve a guardar para sustituirla."
     },
     "invalidLayout": {
       "message": "Los datos de diseño del escaparate no son válidos.",

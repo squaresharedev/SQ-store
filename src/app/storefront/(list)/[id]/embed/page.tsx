@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { cardClass, pageColumnNarrowClass, pageShellClass } from "@/components/ui/surface-styles";
+import { cardClass, pageColumnClass, pageShellClass } from "@/components/ui/surface-styles";
 import { bannerActionClass, helpTextClass, iconNudgeRightClass } from "@/components/ui/control-styles";
 import { PRODUCTS_PATH } from "@/lib/products/paths";
 import { BackLink } from "@/components/ui/BackLink";
@@ -59,40 +59,36 @@ export default async function StorefrontEmbedPage({
       : "details-missing";
 
   return (
-    <main className={pageShellClass}>
-      <div className={pageColumnNarrowClass}>
-        <BackLink href={STOREFRONT_LIST_PATH}>{tDesigner("back")}</BackLink>
-        <PageHeader
-          className="mb-6 mt-4 text-center"
-          title={t("title")}
-          subtitle={t("description", { name: storefront.name })}
+    // A page like the others in the dashboard, from its left edge: back link,
+    // title, then the work, capped so the fields stay a readable width.
+    <main className={cn(pageShellClass, "space-y-6")}>
+      <BackLink href={STOREFRONT_LIST_PATH}>{tDesigner("back")}</BackLink>
+      <PageHeader title={t("title")} subtitle={t("description", { name: storefront.name })} />
+      <div className={cn(pageColumnClass, "space-y-6")}>
+        {/* The storefront as a page of its own: no website needed. First on
+            the page, because it is the way to share that works today, and
+            the one a seller who asked "how do I share my store?" is after. */}
+        <StorefrontLinkCard
+          storefrontId={storefront.id}
+          url={storefrontPageUrl(storefront.id)}
+          state={pageState}
         />
-        {/* The other way onto a seller's own site, for someone selling one
-            product: the buy button lives on the product, so this points there.
-            First on the page, because that seller should not have to read
-            the whole embed setup to learn they do not need it. */}
-        <aside className={cn(cardClass, "mb-5 flex flex-wrap items-center justify-between gap-3 p-4")}>
-          <p className={helpTextClass}>{tButton("embedPointer")}</p>
-          <Link href={PRODUCTS_PATH} className={bannerActionClass}>
-            {tButton("embedPointerLink")}
-            <ArrowRight className={cn("size-3.5", iconNudgeRightClass)} strokeWidth={2} aria-hidden />
-          </Link>
-        </aside>
-        {/* The storefront as a page of its own: no website needed. Above the
-            embed setup, because it is the way to share that works today. */}
-        <div className="mb-5">
-          <StorefrontLinkCard
-            storefrontId={storefront.id}
-            url={storefrontPageUrl(storefront.id)}
-            state={pageState}
-          />
-        </div>
         <EmbedSettings
           storefront={storefront}
           products={products}
           missingTraderDetails={identity.ok ? identity.missing : []}
           productPagesOn={pageState !== "pages-off"}
         />
+        {/* The other way onto a seller's own site, for someone selling one
+            product: the buy button lives on the product, so this points there.
+            Last, as a footnote: the link above is what most sellers came for. */}
+        <aside className={cn(cardClass, "flex flex-wrap items-center justify-between gap-3 p-4")}>
+          <p className={helpTextClass}>{tButton("embedPointer")}</p>
+          <Link href={PRODUCTS_PATH} className={bannerActionClass}>
+            {tButton("embedPointerLink")}
+            <ArrowRight className={cn("size-3.5", iconNudgeRightClass)} strokeWidth={2} aria-hidden />
+          </Link>
+        </aside>
       </div>
     </main>
   );

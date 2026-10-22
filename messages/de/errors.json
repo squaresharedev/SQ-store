@@ -496,6 +496,16 @@
     "staleOption": {
       "message": "Ein Foto verweist auf eine Option, die nicht mehr existiert.",
       "fix": "Ordne dieses Foto neu zu oder entferne das Tag und speichere dann erneut."
+    },
+    "ordersToShip": "{count, plural, one {Für dieses Produkt ist noch eine Bestellung zu versenden.} other {Für dieses Produkt sind noch {count} Bestellungen zu versenden.}}",
+    "ordersToShipFix": "Es wurde nichts gelöscht. Versuch es noch einmal, dann siehst du sie zuerst im Hinweis.",
+    "badgeRefused": {
+      "message": "Das Badge „{label}“ verstößt gegen die Plattformregeln und kann daher nicht verwendet werden.",
+      "fix": "Ändere den Text oder wähle ein anderes Badge. Wenn du denkst, dass das ein Fehler ist, schreibe an {email}."
+    },
+    "badgeNotApproved": {
+      "message": "Das Badge „{label}“ konnte nicht automatisch genehmigt werden und kann daher nicht verwendet werden.",
+      "fix": "Versuche andere Wörter, oder schreibe an {email}, dann schaut sich eine Person das an."
     }
   },
   "productImport": {
@@ -540,6 +550,10 @@
     "nameRequired": {
       "message": "Das Schaufenster benötigt einen Namen.",
       "fix": "Gib einen Namen (1 bis 80 Zeichen) in das Feld oben im Editor ein und speichere dann erneut."
+    },
+    "savedElsewhere": {
+      "message": "Dieses Schaufenster wurde inzwischen woanders gespeichert.",
+      "fix": "Lade die Seite neu, um diese Version zu sehen, oder speichere erneut, um sie zu ersetzen."
     },
     "invalidLayout": {
       "message": "Die Layout-Daten des Schaufensters sind ungültig.",

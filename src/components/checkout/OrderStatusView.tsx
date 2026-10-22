@@ -143,7 +143,8 @@ export function OrderStatusView({
   return (
     <PageShell
       storefront={storefront}
-      shopHref={preview ? undefined : storefrontPagePath(storefront.id)}
+      // No way back to a shop the seller has since deleted.
+      shopHref={preview || storefront.detached ? undefined : storefrontPagePath(storefront.id)}
       backgroundColor={theme.surface}
       photo={storefront.pagePhoto ? { ...storefront.pagePhoto, tint: theme.surface } : null}
       font={productPage.font}

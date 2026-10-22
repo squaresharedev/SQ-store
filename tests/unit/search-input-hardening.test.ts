@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { ilikeAny } from "@/lib/supabase/ilike";
 
 /**
  * HARDENING INVARIANTS for the search surfaces.
@@ -189,13 +190,30 @@ describe("search — the SQL surface", () => {
     // `or=` takes a PARSED expression, so a comma, period or parenthesis in
     // the term corrupts it — the one place in this stack where user text
     // really does reach a query language. /api/search runs two ilike queries
-    // instead, and this is what keeps it that way.
+    // instead. The one way in is lib/supabase/ilike.ts `ilikeAny`, which
+    // double-quotes and escapes the term (its own test below proves it); a
+    // hand-built `.or(` anywhere in these paths is still refused.
     const offenders = ALL_SOURCES.filter(
       ({ path, source }) =>
         /\/(search|orders|products)\//.test(`/${path}`) &&
-        /\.or\(/.test(code(source)),
+        /\.or\((?!\s*ilikeAny\()/.test(code(source)),
     ).map(({ path }) => path);
     expect(offenders).toEqual([]);
+  });
+
+  it("ilikeAny keeps whatever was typed inside one quoted value", () => {
+    // Each column gets the same quoted pattern; a comma, parenthesis, quote or
+    // backslash in the term stays inside the quotes instead of ending them.
+    const filter = ilikeAny(["buyer_email", "ship_to->>city"], 'a,b) "c" \\d 50%');
+    expect(filter).toBe(
+      [
+        'buyer_email.ilike."%a,b) \\"c\\" \\\\\\\\d 50\\\\%%"',
+        'ship_to->>city.ilike."%a,b) \\"c\\" \\\\\\\\d 50\\\\%%"',
+      ].join(","),
+    );
+    // Splitting on commas OUTSIDE quotes finds exactly the two conditions.
+    const conditions = filter.match(/(?:[^,"]|"(?:\\.|[^"\\])*")+/g) ?? [];
+    expect(conditions).toHaveLength(2);
   });
 });
 

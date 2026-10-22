@@ -199,6 +199,7 @@
     "invoicesDescription": "Deine Karte, Rechnungsadresse, USt-IdNr. und alle Rechnungen, auf der sicheren Seite von Stripe.",
     "manage": "Abrechnung und Rechnungen verwalten",
     "noBilling": "Rechnungen und Zahlungsdaten erscheinen hier, sobald du einen kostenpflichtigen Tarif hast.",
+    "noBillingYet": "Rechnungen und Zahlungsdaten erscheinen hier, sobald kostenpflichtige Tarife starten.",
     "confirmed": "Du hast jetzt {plan}. Danke, dass du Square Share unterstützt.",
     "pending": "Wir bestätigen deine Zahlung bei Stripe. Lade die Seite gleich neu, falls sich dein Tarif nicht geändert hat.",
     "unavailable": "Dein Tarif kann gerade nicht angezeigt werden. Lade die Seite gleich neu.",

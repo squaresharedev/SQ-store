@@ -25,6 +25,7 @@ export function OrdersEmptyState({
   filtered,
   onClear,
   toShip = false,
+  scoped = false,
   onSeeAll,
   checkoutOpen = false,
 }: {
@@ -32,6 +33,9 @@ export function OrdersEmptyState({
   onClear?: () => void;
   /** The To ship queue is empty: a finished job, not a missing feature. */
   toShip?: boolean;
+  /** The list is narrowed to one product (OrdersProductScope), which simply
+   *  has no orders yet: the store may well have others. */
+  scoped?: boolean;
   /** Switch to the full list (shown with `toShip`). */
   onSeeAll?: () => void;
   /** A buyer can pay through Square Share checkout right now. */
@@ -69,6 +73,11 @@ export function OrdersEmptyState({
               {t("clearFilters")}
             </button>
           )}
+        </>
+      ) : scoped ? (
+        <>
+          <p className="text-base font-semibold text-foreground">{t("productTitle")}</p>
+          <p className={cn(helpTextClass, "mx-auto mt-1 max-w-md")}>{t("productHint")}</p>
         </>
       ) : (
         <>

@@ -3,6 +3,7 @@ import {
   SPOT_FRACTIONS,
   nearestTileSpot,
   orderedSpots,
+  saleChipSpots,
   spotAfterArrow,
   spotLabel,
 } from "@/lib/storefront/tile-spots";
@@ -153,5 +154,38 @@ describe("spotLabel", () => {
     expect(spotLabel("bottom-center")).toBe("bottom center");
     // Not "middle center": there is only one middle, so the column adds nothing.
     expect(spotLabel("middle-center")).toBe("middle");
+  });
+});
+
+describe("saleChipSpots", () => {
+  it("offers the rows nothing else holds, the same list the drag and the picker use", () => {
+    // The price floated top left: its whole row is out (two chips side by side collide).
+    expect(saleChipSpots({ cornerRadius: 0, titleBand: null, priceTag: "top-left", current: "bottom-left" })).toEqual([
+      "middle-center",
+      "bottom-left",
+      "bottom-center",
+      "bottom-right",
+    ]);
+    // An overlaid title band's row is out too.
+    expect(saleChipSpots({ cornerRadius: 0, titleBand: "bottom", priceTag: "below", current: "top-left" })).toEqual([
+      "top-left",
+      "top-center",
+      "top-right",
+      "middle-center",
+    ]);
+  });
+
+  it("keeps the chip's own spot on offer when it has had to share the price's row", () => {
+    expect(
+      saleChipSpots({ cornerRadius: 0, titleBand: "bottom", priceTag: "top-left", current: "top-right" }),
+    ).toEqual(["top-right", "middle-center"]);
+  });
+
+  it("loses the corners on a tile too round to have them", () => {
+    expect(saleChipSpots({ cornerRadius: 100, titleBand: null, priceTag: "below", current: "top-center" })).toEqual([
+      "top-center",
+      "middle-center",
+      "bottom-center",
+    ]);
   });
 });

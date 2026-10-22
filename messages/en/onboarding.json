@@ -33,6 +33,8 @@
       "detailNeedsSeller": "Finish your seller details, then your page can go live.",
       "detailNeedsStorefront": "Once a product is on a storefront, its page can go live.",
       "detailNeedsActive": "Set that product to Active so its page goes live.",
+      "detailChecking": "Your page goes live once the automatic check approves the product.",
+      "detailPaused": "The automatic check paused that product. Open it to see what to change.",
       "detailPagesOff": "Product pages are off on that storefront. Turn them on in the designer.",
       "actionEdit": "Edit product",
       "actionOpen": "Open designer",
@@ -129,7 +131,8 @@
       "emailTipLabel": "About this email"
     },
     "confirm": {
-      "goLive": "Your product pages can go live once it's confirmed."
+      "goLive": "Your product pages can go live once it's confirmed.",
+      "wrongAddress": "Wrong address? Change it"
     },
     "tour": {
       "mobileMenu": "On your phone, open the menu at the top left.",
@@ -145,7 +148,6 @@
       "getStarted": "Get started",
       "skipForNow": "Skip for now",
       "saveAndContinue": "Save and continue",
-      "changeDetails": "Change details",
       "continue": "Continue",
       "exploreOnMyOwn": "Explore on my own",
       "notNow": "Not now"

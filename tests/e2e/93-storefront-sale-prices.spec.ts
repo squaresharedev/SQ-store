@@ -414,15 +414,14 @@ test.describe("a sale on the storefront", () => {
     const [vase, apron] = shop.items;
     await seedSale(shop, { percent_off: 10, starts_at: at(-5 * DAY) });
 
-    // ON THE CANVAS: the vase's own chip, in its inspector's Sale chip
-    // section. Pressing a tile's price opens its inspector.
+    // ON THE CANVAS: the vase's own chip. Selected, the tile arms it like its
+    // title and price, and pressing it opens its own settings.
     await gotoApp(page, `/storefront/${shop.storefrontId}`);
     const tile = page.locator(`[data-grid-key='p_${vase.id}']`).first();
     await expect(tile.locator("[data-tile-sale-badge]")).toHaveText("-10%");
     await tile.click();
     await canvasStill(page);
-    await tile.getByRole("button", { name: /^Price / }).first().click();
-    await page.getByRole("button", { name: "Sale chip", exact: true }).first().click();
+    await tile.getByRole("button", { name: /^Sale chip at top left/ }).click();
     const chip = page.locator("[data-sale-badge-controls]").first();
     await expect(chip).toBeVisible();
     // Four things it can show, and nowhere to type.

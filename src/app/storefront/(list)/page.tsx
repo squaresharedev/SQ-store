@@ -5,6 +5,7 @@ import { listStorefrontProducts } from "@/lib/discounts/storefront-preview";
 import { listStorefronts } from "@/lib/storefront/queries";
 import { getSampleStorefrontFlags } from "@/lib/onboarding/queries";
 import { StorefrontsList } from "@/components/storefront/StorefrontsList";
+import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { DEV_PREVIEW_PARAM, previewsEmptyList } from "@/lib/dev/preview";
@@ -36,6 +37,9 @@ export default async function StorefrontsPage({
   ]);
   const canWrite = can(account?.role, "storefront.write");
   const { rows: storefrontRows, total: storefrontTotal } = storefronts;
+  // The publish gate's answer for this store: with it, a live storefront's
+  // card links straight to its page.
+  const identity = account ? await getTraderIdentityStatus(account.accountId) : null;
 
   return (
     <main className={pageShellClass}>
@@ -50,6 +54,7 @@ export default async function StorefrontsPage({
         total={storefrontTotal}
         products={products}
         canWrite={canWrite}
+        sellerDetailsComplete={identity?.ok === true && identity.missing.length === 0}
         // Offered to anyone who can build a storefront, and only on a flag we
         // could actually read: no answer means no sample, not a sample that
         // cannot be hidden.

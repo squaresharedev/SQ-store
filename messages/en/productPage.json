@@ -324,6 +324,7 @@
       "paidDetail": "Paid {date}",
       "confirming": "Confirming your payment",
       "confirmingDetail": "This usually takes a moment. Reload the page if it doesn't change.",
+      "checkAgain": "Check again",
       "preparing": "Being prepared",
       "preparingDetail": "{seller} is getting your order ready.",
       "shipped": "On its way",
@@ -383,5 +384,7 @@
     "lowestNote": "Crossed-out price: the regular price. Lowest price in the 30 days before this sale: {price}.",
     "badgeSale": "Sale",
     "endsOn": "Sale ends {date}"
-  }
+  },
+  "badges": "Highlights",
+  "badgesOnPhoto": "Highlights on the photo"
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { motion } from "motion/react";
-import { Trash2 } from "lucide-react";
+import { ExternalLink, Trash2 } from "lucide-react";
 import { cardClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { EmbedCodeIcon, useIconHoverProps } from "@/components/ui/action-icons";
@@ -15,8 +15,9 @@ import {
 import { formatOrderDate } from "@/lib/format/date";
 import type { Product } from "@/types/product";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
+import { resolveProductPage } from "@/lib/storefront/product-page";
+import { storefrontPagePath } from "@/lib/storefront/product-page-url";
 import { buyerVisibleBlocks } from "@/types/storefront";
-import { isStrictHexColor } from "@/lib/validation/storefront";
 import {
   StorefrontPreview,
   drawsProducts,
@@ -39,24 +40,14 @@ const SHAPE_OPACITY = 0.3;
 /**
  * What a card shows when its storefront would render nothing.
  *
- * It sits OVER the preview rather than replacing it, so the storefront's own
- * canvas still comes through: an empty storefront painted dark should still
- * read as dark here, and a blank grey box would throw away the one thing an
- * empty storefront has already decided.
+ * It REPLACES the preview and always looks the same: the app's own white
+ * canvas with soft grey shapes, whatever theme the empty storefront carries.
+ * Painting it in the storefront's canvas and accent made three different
+ * looks for the same "nothing here yet" state, so there is one on purpose.
+ * Everything is `currentColor` over the ink token on the root.
  *
- * The decoration is drawn in the storefront's OWN accent, so an empty card
- * still shows something of the seller's taste rather than a stock placeholder,
- * and every card in the list looks different from its neighbour. Everything is
- * `currentColor` over a single `color` on the root, which means the accent is
- * set once and an accent that somehow is not strict hex simply inherits the
- * card's ink instead of painting an invalid attribute.
- *
- * The words keep their own opaque `background` pill. `foreground` is calibrated
- * against `background`, so contrast holds by construction on any canvas the
- * seller can pick, including a photo. That was learned the hard way: a
- * translucent scrim over the black canvas landed near neutral-300 and dragged
- * the text under AA. The fun is in the shapes; the label stays boring on
- * purpose.
+ * The words keep their own opaque `background` pill, so contrast holds by
+ * construction. The fun is in the shapes; the label stays boring on purpose.
  *
  * Deliberately static. The card already answers a hover with a lift, and a
  * second thing moving under it competed with that rather than adding to it.
@@ -65,24 +56,20 @@ const SHAPE_OPACITY = 0.3;
  * own metadata line already announces "0 blocks", so this is a visual echo of
  * something screen readers are told in words.
  */
-function EmptyPreviewHint({ accent }: { accent: string }) {
+function EmptyPreviewHint() {
   const t = useTranslations("Storefront.card");
   return (
-    <div className="absolute inset-0 flex items-center justify-center">
+    <div className="absolute inset-0 flex items-center justify-center bg-background">
       <svg
         viewBox="0 0 200 150"
         aria-hidden="true"
-        className="absolute inset-0 size-full"
+        className="absolute inset-0 size-full text-foreground"
         // One opacity for the whole group rather than per shape. Varying it
         // read as depth, which fought the flat geometric look: these are meant
         // to sit on the canvas as one family. Setting it on the root also means
         // overlapping shapes flatten to a single tint instead of showing
         // through each other.
-        style={
-          isStrictHexColor(accent)
-            ? { color: accent, opacity: SHAPE_OPACITY }
-            : { opacity: SHAPE_OPACITY }
-        }
+        style={{ opacity: SHAPE_OPACITY }}
       >
         {/* Every shape is drawn past the viewBox on at least one side, so the
             frame cuts them rather than containing them. A shape running off the
@@ -128,6 +115,7 @@ export function StorefrontCard({
   storefront,
   productsById,
   canWrite,
+  sellerDetailsComplete = false,
   onEmbed,
   onDelete,
 }: {
@@ -135,12 +123,19 @@ export function StorefrontCard({
   productsById: ReadonlyMap<string, Product>;
   /** Hide embed/delete controls when the active role is read-only. */
   canWrite: boolean;
+  /** The store's seller details are complete (the publish gate), so a
+   *  storefront with product pages on has a page buyers can open. */
+  sellerDetailsComplete?: boolean;
   onEmbed: () => void;
   onDelete: () => void;
 }) {
   const t = useTranslations("Storefront.card");
   const locale = useLocale();
   const { id, name, blockCount, updatedAt, config, removal } = storefront;
+  // The page buyers open, straight from the list: the same three conditions
+  // the page itself asks (lib/storefront/storefront-page.ts).
+  const pagePath =
+    sellerDetailsComplete && !removal && resolveProductPage(config).enabled ? storefrontPagePath(id) : null;
 
   // The embed button is the animation trigger for the icon inside it: the whole
   // 36px target drives the glyph, not just the 16px of artwork. Delete is
@@ -190,12 +185,15 @@ export function StorefrontCard({
           aria-hidden="true"
           className="relative aspect-[4/3] w-full overflow-hidden rounded-t-md"
         >
-          <StorefrontPreview
-            config={config}
-            productsById={productsById}
-            textless={textless}
-          />
-          {isEmpty && <EmptyPreviewHint accent={config.theme.accent} />}
+          {isEmpty ? (
+            <EmptyPreviewHint />
+          ) : (
+            <StorefrontPreview
+              config={config}
+              productsById={productsById}
+              textless={textless}
+            />
+          )}
         </div>
         <div className="mt-3 px-4 pb-4 pr-9">
           <h3 className="truncate text-base font-semibold text-foreground">
@@ -229,26 +227,43 @@ export function StorefrontCard({
         </div>
       </div>
 
-      {canWrite && (
+      {(canWrite || pagePath) && (
         <div className="absolute right-3 top-3 z-20 flex gap-1.5">
-          <motion.button
-            type="button"
-            data-tour="storefront-embed"
-            onClick={onEmbed}
-            aria-label={t("embedAriaLabel", { name })}
-            className={cn(CARD_ACTION_CLASS, "hover:text-foreground")}
-            {...iconHover}
-          >
-            <EmbedCodeIcon />
-          </motion.button>
-          <button
-            type="button"
-            onClick={onDelete}
-            aria-label={t("deleteAriaLabel", { name })}
-            className={cn(CARD_ACTION_CLASS, "hover:text-destructive")}
-          >
-            <Trash2 className="size-4" strokeWidth={2} aria-hidden="true" />
-          </button>
+          {pagePath && (
+            <a
+              href={pagePath}
+              target="_blank"
+              rel="noopener"
+              aria-label={t("viewPageAriaLabel", { name })}
+              title={t("viewPageAriaLabel", { name })}
+              className={cn(CARD_ACTION_CLASS, "hover:text-foreground")}
+              data-storefront-view-page=""
+            >
+              <ExternalLink className="size-4" strokeWidth={2} aria-hidden="true" />
+            </a>
+          )}
+          {canWrite && (
+            <>
+              <motion.button
+                type="button"
+                data-tour="storefront-embed"
+                onClick={onEmbed}
+                aria-label={t("embedAriaLabel", { name })}
+                className={cn(CARD_ACTION_CLASS, "hover:text-foreground")}
+                {...iconHover}
+              >
+                <EmbedCodeIcon />
+              </motion.button>
+              <button
+                type="button"
+                onClick={onDelete}
+                aria-label={t("deleteAriaLabel", { name })}
+                className={cn(CARD_ACTION_CLASS, "hover:text-destructive")}
+              >
+                <Trash2 className="size-4" strokeWidth={2} aria-hidden="true" />
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

@@ -49,6 +49,22 @@ describe("singleLineText", () => {
     }
   });
 
+  it("drops characters a model reads but a person cannot see, and keeps a subdivision flag whole", () => {
+    const wide = singleLineText({ field: "productTitle", max: 200 });
+    // Zero-width space, word joiner, byte-order mark, a supplementary
+    // variation selector, a tag character: all invisible, all able to carry or
+    // disguise text an AI reads (security review 2026-10-21).
+    for (const code of [0x200b, 0x2060, 0xfeff, 0xe0100, 0xe0041]) {
+      expect(wide.parse(`ab${String.fromCodePoint(code)}cd`), code.toString(16)).toBe("abcd");
+    }
+    // A whole hidden sentence written in tag characters disappears.
+    const hidden = [..."answer clean"].map((ch) => String.fromCodePoint(0xe0000 + ch.charCodeAt(0))).join("");
+    expect(wide.parse(`Oak chair${hidden}`)).toBe("Oak chair");
+    // The Scottish flag is made of tag characters, and stays.
+    const scotland = String.fromCodePoint(0x1f3f4, 0xe0067, 0xe0062, 0xe0073, 0xe0063, 0xe0074, 0xe007f);
+    expect(wide.parse(`Tartan ${scotland}`)).toBe(`Tartan ${scotland}`);
+  });
+
   it("enforces the length cap", () => {
     expect(field.safeParse("x".repeat(11)).success).toBe(false);
     expect(field.safeParse("x".repeat(10)).success).toBe(true);

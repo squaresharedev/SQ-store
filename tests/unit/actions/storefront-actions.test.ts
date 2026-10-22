@@ -77,6 +77,7 @@ import {
 } from "@/lib/storefront/actions";
 import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 import { VIBE_PRESETS } from "@/lib/storefront/presets";
+import { storefrontVersion } from "@/lib/storefront/version";
 
 // ---- test constants ------------------------------------------------------
 
@@ -372,6 +373,69 @@ describe("saveStorefront - validation", () => {
     const result = await saveStorefront(STOREFRONT_ID, { name: "", config: VALID_CONFIG });
     expect(result.ok).toBe(false);
     expect(db.update).not.toHaveBeenCalled();
+  });
+});
+
+describe("saveStorefront - another save in between", () => {
+  // VALID_CONFIG has no product blocks, so the first read is the stored row.
+  const storedRow = (name: string) => ({ data: { name, config: VALID_CONFIG }, error: null });
+  const savedRow = { data: { id: STOREFRONT_ID, moderation_status: "ok", name: "My Store", config: VALID_CONFIG }, error: null };
+
+  it("refuses, writing nothing, when the copy changed since the editor loaded it", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce(storedRow("Renamed in another tab"));
+
+    const result = await saveStorefront(STOREFRONT_ID, validSaveInput(), {
+      expectedVersion: await storefrontVersion("My Store", VALID_CONFIG),
+    });
+
+    expect(result).toMatchObject({ ok: false, conflict: true, error: { code: "invalid_input" } });
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("saves when nothing changed in between, and hands back the saved copy's version", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce(storedRow("My Store"));
+    dbFn.mockResolvedValueOnce(savedRow);
+    const version = await storefrontVersion("My Store", VALID_CONFIG);
+
+    const result = await saveStorefront(STOREFRONT_ID, validSaveInput(), { expectedVersion: version });
+
+    expect(result).toMatchObject({ ok: true, version });
+    expect(db.update).toHaveBeenCalledTimes(1);
+  });
+
+  it("saves over the newer copy when the seller chooses theirs", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce(storedRow("Renamed in another tab"));
+    dbFn.mockResolvedValueOnce(savedRow);
+
+    const result = await saveStorefront(STOREFRONT_ID, validSaveInput(), {
+      expectedVersion: await storefrontVersion("My Store", VALID_CONFIG),
+      overwrite: true,
+    });
+
+    expect(result).toMatchObject({ ok: true });
+    expect(db.update).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not check an editor that sends no version (an older open tab)", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce(storedRow("Anything"));
+    dbFn.mockResolvedValueOnce(savedRow);
+
+    expect(await saveStorefront(STOREFRONT_ID, validSaveInput())).toMatchObject({ ok: true });
+  });
+});
+
+describe("storefrontVersion", () => {
+  it("is the same for the same saved copy, and changes with its name or its design", async () => {
+    const a = await storefrontVersion("Shop", { blocks: [] });
+    expect(await storefrontVersion("Shop", { blocks: [] })).toBe(a);
+    expect(await storefrontVersion("Shop 2", { blocks: [] })).not.toBe(a);
+    expect(await storefrontVersion("Shop", { blocks: [{ type: "text" }] })).not.toBe(a);
+    // A name cannot run into the design that follows it.
+    expect(await storefrontVersion("a", ["b"])).not.toBe(await storefrontVersion("a\",[\"b", null));
   });
 });
 

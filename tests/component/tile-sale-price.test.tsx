@@ -156,6 +156,20 @@ describe("the sale chip on a tile", () => {
     expect(badge()!.style.color).not.toBe("rgb(255, 255, 255)");
   });
 
+  it("prints its words in the seller's colour, unless that colour would vanish into the fill", () => {
+    tile(ON_SALE, { accent: "#1f4d3a", saleBadgeTextColor: "#fde047" });
+    expect(badge()!.style.color).toBe("rgb(253, 224, 71)");
+    cleanup();
+    // One tile over the storefront's pick.
+    tile(ON_SALE, { accent: "#1f4d3a", saleBadgeTextColor: "#fde047" }, { overrides: { saleBadgeTextColor: "#ffffff" } });
+    expect(badge()!.style.color).toBe("rgb(255, 255, 255)");
+    cleanup();
+    // The fill's own colour for its words would leave a blank chip: the ink
+    // that reads on it is used instead, as it is for the price.
+    tile(ON_SALE, { accent: "#1f4d3a", saleBadgeColor: "#fde047", saleBadgeTextColor: "#fde047" });
+    expect(badge()!.style.color).toBe("rgb(23, 23, 23)");
+  });
+
   it("can be set for one tile alone, over the storefront's own choice", () => {
     tile(
       ON_SALE,
@@ -207,13 +221,27 @@ describe("the sale chip's looks", () => {
     ]);
   });
 
-  it("hangs a ribbon as a flag where it has no corner to cross", () => {
+  it("draws a ribbon BANNER where it has no corner to cross, never a flag", () => {
+    const banner = () => {
+      expect(badge()).toHaveAttribute("data-sale-chip-look", "ribbon");
+      // A band in front with the words, and two swallowtail ends behind it.
+      const ends = [...badge()!.querySelectorAll<HTMLElement>("[aria-hidden='true'] > span")].filter((part) =>
+        part.style.clipPath.includes("50%"),
+      );
+      expect(ends).toHaveLength(2);
+      expect(badge()).toHaveTextContent("-10%");
+      // Not the corner sash: nothing turned across a corner.
+      expect(badge()!.querySelector<HTMLElement>("span[style*='rotate']")).toBeNull();
+    };
     tile(ON_SALE, { saleBadgeLook: "ribbon", saleBadgePosition: "top-center" });
-    expect(badge()).toHaveAttribute("data-sale-chip-look", "flag");
+    banner();
     cleanup();
-    // A tile too round to have corners moves the chip off them, and with it the ribbon.
+    tile(ON_SALE, { saleBadgeLook: "ribbon", saleBadgePosition: "middle-center" });
+    banner();
+    cleanup();
+    // A tile too round to have corners moves the chip off them, and the ribbon follows.
     tile(ON_SALE, { saleBadgeLook: "ribbon", cornerRadius: 100 });
-    expect(badge()).toHaveAttribute("data-sale-chip-look", "flag");
+    banner();
   });
 
   it("gives way, in every look, when it shares the price's row on a tile too narrow for both", () => {
@@ -306,6 +334,7 @@ describe("where the sale chip sits", () => {
       saleBadgeLook: "pill",
       saleBadgePosition: "top-left",
       saleBadgeColor: undefined,
+      saleBadgeTextColor: undefined,
     });
   });
 });
@@ -378,12 +407,12 @@ describe("a sale on the product page", () => {
   it("offers two looks of the same fact: a line through it, or a stroke across it", () => {
     price(sale());
     expect(document.querySelector("[data-product-sale]")).toHaveAttribute("data-product-sale", "strike");
-    expect(struck()!.className).not.toContain("ss-price-slash");
+    expect(struck()!.querySelector("[data-product-sale-slash]")).toBeNull();
     cleanup();
     price(sale(), "slash");
     expect(document.querySelector("[data-product-sale]")).toHaveAttribute("data-product-sale", "slash");
     // The stroke replaces the line, and the regular price moves in front.
-    expect(struck()!.className).toContain("ss-price-slash");
+    expect(struck()!.querySelector("svg[data-product-sale-slash]")).not.toBeNull();
     expect(struck()!.className).toContain("order-first");
     // Same words either way, and the same sentence for a screen reader.
     expect(struck()).toHaveTextContent("€24.00");

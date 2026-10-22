@@ -562,6 +562,30 @@ export async function checkSellerText(fields: Record<string, string>): Promise<S
 }
 
 /**
+ * The path a badge's words sit at inside a product row, exactly as the
+ * database names it (moderation_leaves drops array positions). The standalone
+ * check sends the same path, so the classifier reads a badge the way it reads
+ * one in the whole listing, and a flagged path maps to the same fix field.
+ */
+export const BADGE_TEXT_PATH = "details.badges[].label";
+
+/**
+ * Judge one badge's words on their own, before the product carrying them is
+ * saved. Recorded against the words themselves, so a preset is judged once
+ * per language for every seller, and the form's check when a badge is added
+ * is what the save finds already answered. Null means no answer could be
+ * obtained; the save then goes on, and the wall holds the row until one is.
+ */
+export async function checkBadgeText(label: string): Promise<StandaloneVerdict> {
+  const words = label.trim();
+  if (words === "") return { verdict: "clean", ground: null, paths: [] };
+  // Its own namespace, like the seller's profile text: a row's fingerprint is
+  // worked out by the database, this one here.
+  const subject = `text:badge:${await sha256(words)}`;
+  return remembered(subject, () => classifyText("product", [`${BADGE_TEXT_PATH}=${words}`]));
+}
+
+/**
  * Judge a handle. Recorded against the handle itself, lowercased, which is the
  * subject the public profile directory looks up before it lists a profile
  * (sync_profile_directory, 20261013_marketplace_moderation): an approval is

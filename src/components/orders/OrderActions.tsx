@@ -58,6 +58,10 @@ export function OrderActions({
   if (order.status === "disputed") {
     return <p className={helpTextClass}>{t("disputeInStripe")}</p>;
   }
-  // Still waiting on its payment: nothing to do until that is settled.
+  // Still waiting on its payment: nothing to do until that is settled, and
+  // the seller is told what happens next instead of "no actions available".
+  if (order.status === "pending") {
+    return <p className={helpTextClass}>{t("pendingPayment")}</p>;
+  }
   return <p className={helpTextClass}>{t("none")}</p>;
 }

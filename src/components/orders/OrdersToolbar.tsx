@@ -11,6 +11,7 @@ import {
   TrendingDown,
   TrendingUp,
   TriangleAlert,
+  Undo2,
   X,
 } from "lucide-react";
 import { fieldBaseClass, ghostButtonClass } from "@/components/ui/control-styles";
@@ -18,10 +19,11 @@ import { DatePicker } from "@/components/ui/DatePicker";
 import { cn } from "@/lib/utils";
 import {
   ORDERS_SEARCH_MAX_LENGTH,
+  WITHDRAWN_STATUS_FILTER,
   type OrderChannel,
   type OrderFilters,
   type OrderSort,
-  type OrderStatus,
+  type OrderStatusFilter,
 } from "@/types/order-view";
 import { useTranslations } from "next-intl";
 import { CHANNEL_ICONS } from "./channel-icons";
@@ -37,13 +39,16 @@ interface OrdersToolbarProps {
 }
 
 /** Status options with icon + colour tone reused from the status-badge palette
- *  (paid→success, disputed→destructive, refunded→muted). `""` is "no filter". */
-const STATUS_OPTIONS: Omit<FilterOption<OrderStatus | "">, "label">[] = [
+ *  (paid→success, disputed→destructive, refunded→muted). `""` is "no filter".
+ *  "Withdrawn" is not a database status: paid orders a buyer withdrew from,
+ *  waiting for their refund (lib/orders/queries.ts). */
+const STATUS_OPTIONS: Omit<FilterOption<OrderStatusFilter | "">, "label">[] = [
   { value: "", icon: ListFilter },
   { value: "paid", icon: CircleCheck, tone: "text-success" },
   { value: "pending", icon: Clock, tone: "text-foreground" },
   { value: "disputed", icon: TriangleAlert, tone: "text-destructive" },
   { value: "refunded", icon: RotateCcw, tone: "text-muted-foreground" },
+  { value: WITHDRAWN_STATUS_FILTER, icon: Undo2, tone: "text-foreground" },
 ];
 
 const SORT_OPTIONS = [
@@ -75,9 +80,14 @@ export function OrdersToolbar({
   onSortChange,
 }: OrdersToolbarProps) {
   const t = useTranslations("Orders");
-  const statusOptions: FilterOption<OrderStatus | "">[] = STATUS_OPTIONS.map((option) => ({
+  const statusOptions: FilterOption<OrderStatusFilter | "">[] = STATUS_OPTIONS.map((option) => ({
     ...option,
-    label: option.value === "" ? t("toolbar.allStatuses") : t(`status.${option.value}`),
+    label:
+      option.value === ""
+        ? t("toolbar.allStatuses")
+        : option.value === WITHDRAWN_STATUS_FILTER
+          ? t("list.withdrawn")
+          : t(`status.${option.value}`),
   }));
   const sortOptions: FilterOption<SortValue>[] = SORT_OPTIONS.map(({ labelKey, ...option }) => ({
     ...option,
@@ -97,7 +107,7 @@ export function OrdersToolbar({
     onChange(next);
   }
 
-  function handleStatus(v: OrderStatus | "") {
+  function handleStatus(v: OrderStatusFilter | "") {
     emit({ status: v === "" ? undefined : v });
   }
 

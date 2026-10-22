@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { DragEvent } from "react";
 import { Image as ImageIcon, UploadCloud, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { isHeicPhoto } from "@/lib/uploads/heic";
 import { cn } from "@/lib/utils";
 import { iconButtonClass, infoTextClass } from "@/components/ui/control-styles";
 import {
@@ -30,6 +31,7 @@ export function ImageDropzone({
   onFileChange: (file: File | null) => void;
 }) {
   const t = useTranslations("Products.imageDropzone");
+  const tPhoto = useTranslations("Products.photoFormat");
   const [preview, setPreview] = useState<string | null>(initialPreviewUrl);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +54,7 @@ export function ImageDropzone({
 
   function selectFile(file: File) {
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      setError(t("wrongType"));
+      setError(isHeicPhoto(file) ? tPhoto("heic") : t("wrongType"));
       return;
     }
     if (file.size > MAX_MB * 1024 * 1024) {

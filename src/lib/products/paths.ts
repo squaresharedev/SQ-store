@@ -7,3 +7,10 @@ export const PRODUCTS_PATH = "/products";
 export function productEditPath(id: string): string {
   return `${PRODUCTS_PATH}/${id}/edit`;
 }
+
+/** A product's main photo, from our own origin, for the store's own members
+ *  (app/api/products/[id]/photo): pixels a page can read, which a presigned
+ *  R2 URL on another origin are not. */
+export function productPhotoPath(id: string): string {
+  return `/api${PRODUCTS_PATH}/${encodeURIComponent(id)}/photo`;
+}

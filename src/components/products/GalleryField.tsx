@@ -10,6 +10,7 @@ import {
 } from "react";
 import { ChevronDown, ChevronUp, ImagePlus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { isHeicPhoto } from "@/lib/uploads/heic";
 import { cn } from "@/lib/utils";
 import {
   fieldBaseClass,
@@ -79,6 +80,7 @@ export function GalleryField({
   onChange: (images: GalleryFormImage[]) => void;
 }) {
   const t = useTranslations("Products.galleryField");
+  const tPhoto = useTranslations("Products.photoFormat");
   const [error, setError] = useState<string | null>(null);
   // Object URLs this field minted, revoked on unmount.
   const owned = useRef<string[]>([]);
@@ -101,7 +103,7 @@ export function GalleryField({
     let problem: string | null = null;
     for (const file of files.slice(0, room)) {
       if (!ACCEPTED.includes(file.type)) {
-        problem = t("wrongType");
+        problem = isHeicPhoto(file) ? tPhoto("heic") : t("wrongType");
         continue;
       }
       if (file.size > IMAGE_MAX_BYTES) {

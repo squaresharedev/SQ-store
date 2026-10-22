@@ -19,6 +19,10 @@ import {
   type TestUser,
 } from "../db/client";
 
+/** The seller's id, and so the uploader segment of every key below: a key new
+ *  to a row must be the writer's own upload (20261021_object_key_ownership). */
+const SELLER_ID = "11111111-1111-4111-8111-111111111111";
+
 const IMAGE_KEY =
   "images/11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222-mug.jpg";
 const OTHER_IMAGE_KEY =
@@ -115,7 +119,7 @@ async function approve(type: string, id: string) {
 }
 
 beforeAll(async () => {
-  seller = await createUser("seller-wall@test.squareshare.to");
+  seller = await createUser("seller-wall@test.squareshare.to", {}, SELLER_ID);
   other = await createUser("other-wall@test.squareshare.to");
 });
 

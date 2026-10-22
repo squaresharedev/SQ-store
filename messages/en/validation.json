@@ -306,6 +306,11 @@
       "required": "Name the channel, or leave it empty.",
       "tooLong": "The channel name must be {maximum} characters or fewer.",
       "unsupported": "The channel name contains unsupported characters."
+    },
+    "badgeLabel": {
+      "required": "A badge needs some words.",
+      "tooLong": "A badge must be {maximum} characters or fewer.",
+      "unsupported": "A badge contains unsupported characters."
     }
   },
   "email": {
@@ -485,7 +490,10 @@
     "documentsTooMany": "A product can have up to {maximum} documents.",
     "optionDuplicate": "Each option can only be listed once.",
     "optionsTotalTooMany": "A product can have up to {maximum} options in total.",
-    "galleryStaleOption": "A photo points at an option that no longer exists."
+    "galleryStaleOption": "A photo points at an option that no longer exists.",
+    "badgesTooMany": "A product can have up to {maximum} badges.",
+    "badgeDuplicate": "Each badge can only be listed once.",
+    "badgesOnPhotoTooMany": "A product can show up to {maximum} badges on its photo."
   },
   "productImport": {
     "noTitle": "No title.",

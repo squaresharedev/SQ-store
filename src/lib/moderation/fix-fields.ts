@@ -89,6 +89,9 @@ const PATH_FIX_FIELDS: Record<FixTarget, readonly (readonly [string, string])[]>
     ["option_groups", "options"],
     ["variants", "options"],
     ["details.safety", "safety"],
+    // Badges are stored in the details, so they share its field; see
+    // PRODUCT_FIX_FIELD_ALSO for how the form shows both.
+    ["details.badges", "specs"],
     ["details", "specs"],
     ["documents", "documents"],
     ["purchase_url", "purchaseLink"],
@@ -138,13 +141,32 @@ export const PRODUCT_FIX_FIELD_SECTION: Record<ProductFixField, ProductFormSecti
   other: null,
 };
 
+/**
+ * Sections a flagged field lights up BESIDES its own, listed before it in form
+ * order. Badges are stored inside the specifications (the `details` column),
+ * so "specs" is the field a pause names for either, whether a person picked it
+ * or the automatic check pointed at `details.badges[].label`. Its label says
+ * both ("Badges and specifications"), and both sections are outlined. A
+ * stored "badges" field of its own would need the fix-field vocabulary changed
+ * in four places (see the header), including two CHECK constraints.
+ */
+export const PRODUCT_FIX_FIELD_ALSO: Partial<Record<ProductFixField, readonly ProductFormSectionId[]>> = {
+  specs: ["badges"],
+};
+
+/** Every section one field lights up, in form order. */
+function sectionsOf(field: ProductFixField): ProductFormSectionId[] {
+  const home = PRODUCT_FIX_FIELD_SECTION[field];
+  return [...(PRODUCT_FIX_FIELD_ALSO[field] ?? []), ...(home ? [home] : [])];
+}
+
 /** The sections a set of product fields touches, in form order (the field
  *  list is itself in form order, so walking it gives the sections in order). */
 export function flaggedProductSections(fields: readonly string[]): ProductFormSectionId[] {
   const sections = new Set<ProductFormSectionId>();
   for (const field of PRODUCT_FIX_FIELDS) {
-    const section = PRODUCT_FIX_FIELD_SECTION[field];
-    if (section && fields.includes(field)) sections.add(section);
+    if (!fields.includes(field)) continue;
+    for (const section of sectionsOf(field)) sections.add(section);
   }
   return [...sections];
 }
@@ -164,6 +186,6 @@ export function flaggedFieldsIn(
   fields: readonly string[],
 ): ProductFixField[] {
   return PRODUCT_FIX_FIELDS.filter(
-    (field) => fields.includes(field) && PRODUCT_FIX_FIELD_SECTION[field] === section,
+    (field) => fields.includes(field) && sectionsOf(field).includes(section),
   );
 }

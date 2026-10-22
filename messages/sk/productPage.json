@@ -211,6 +211,7 @@
       "paidDetail": "Zaplatené {date}",
       "confirming": "Potvrdzovanie platby",
       "confirmingDetail": "Zvyčajne to chvíľu trvá. Obnovte stránku, ak sa stav nezmení.",
+      "checkAgain": "Skontrolovať znova",
       "preparing": "Pripravuje sa",
       "preparingDetail": "{seller} pripravuje vašu objednávku.",
       "shipped": "Na ceste",
@@ -383,5 +384,7 @@
     "lowestNote": "Prečiarknutá cena: bežná cena. Najnižšia cena za posledných 30 dní pred touto zľavou: {price}.",
     "badgeSale": "Akcia",
     "endsOn": "Akcia končí {date}"
-  }
+  },
+  "badges": "Prednosti",
+  "badgesOnPhoto": "Zvýraznenía na fotke"
 }

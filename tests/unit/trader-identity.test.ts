@@ -110,10 +110,10 @@ describe("missingTraderIdentity", () => {
 
 describe("the copy the gate hands every surface", () => {
   it("deep-links to the first field still to fill in", () => {
-    expect(traderIdentityHref(["address", "email"])).toBe("/settings/tax#address");
-    expect(traderIdentityHref(["email"])).toBe("/settings/tax#contact-email");
+    expect(traderIdentityHref(["address", "email"])).toBe("/settings/business#address");
+    expect(traderIdentityHref(["email"])).toBe("/settings/business#contact-email");
     // Nothing missing: the page itself, not a dangling anchor.
-    expect(traderIdentityHref([])).toBe("/settings/tax");
+    expect(traderIdentityHref([])).toBe("/settings/business");
   });
 
   it("every field's anchor exists on the settings page", () => {

@@ -76,7 +76,9 @@
     "deleteDialog": {
       "title": "Usunąć ten produkt?",
       "description": "{storefronts, plural, =0 {Produkt „{title}” oraz jego przesłane zdjęcie i plik zostaną trwale usunięte. Istniejące zamówienia zachowują zapis tej sprzedaży.} one {Produkt „{title}” oraz jego przesłane zdjęcie i plik zostaną trwale usunięte. Istniejące zamówienia zachowują zapis tej sprzedaży. Znajduje się w {storefronts} witrynie. Blok pozostanie, dopóki go nie usuniesz.} few {Produkt „{title}” oraz jego przesłane zdjęcie i plik zostaną trwale usunięte. Istniejące zamówienia zachowują zapis tej sprzedaży. Znajduje się w {storefronts} witrynach. Bloki pozostaną, dopóki ich nie usuniesz.} many {Produkt „{title}” oraz jego przesłane zdjęcie i plik zostaną trwale usunięte. Istniejące zamówienia zachowują zapis tej sprzedaży. Znajduje się w {storefronts} witrynach. Bloki pozostaną, dopóki ich nie usuniesz.} other {Produkt „{title}” oraz jego przesłane zdjęcie i plik zostaną trwale usunięte. Istniejące zamówienia zachowują zapis tej sprzedaży. Znajduje się w {storefronts} witryny. Bloki pozostaną, dopóki ich nie usuniesz.}}",
-      "confirm": "Usuń produkt"
+      "toShip": "{count, plural, one {{count} zamówienie na ten produkt czeka jeszcze na wysyłkę.} few {{count} zamówienia na ten produkt czekają jeszcze na wysyłkę.} many {{count} zamówień na ten produkt czeka jeszcze na wysyłkę.} other {{count} zamówienia na ten produkt czeka jeszcze na wysyłkę.}} Zostaną w Zamówieniach z jego nazwą i ceną, więc nadal możesz je wysłać.",
+      "confirm": "Usuń produkt",
+      "confirmAnyway": "Usuń mimo to"
     },
     "chooser": {
       "openTitle": "Na której witrynie otworzyć?",
@@ -98,7 +100,26 @@
     "openPage": "Otwórz stronę produktu",
     "unitsSold": "{count, plural, one {{count} sprzedana} few {{count} sprzedane} many {{count} sprzedanych} other {{count} sprzedanej}}",
     "noSales": "Jeszcze brak sprzedaży",
-    "addToWebsite": "Dodaj do swojej strony"
+    "addToWebsite": "Dodaj do swojej strony",
+    "unlimited": "Bez limitu",
+    "noStorefront": "Bez witryny",
+    "ship": "Wyślij"
+  },
+  "shareCard": {
+    "scanToShop": "Zeskanuj, aby kupić",
+    "templates": {
+      "masthead": "Okładka",
+      "echo": "Echo",
+      "numerals": "Duża cena",
+      "popout": "Poza ramą",
+      "orbit": "Orbita",
+      "sticker": "Naklejka"
+    },
+    "formats": {
+      "square": "Post kwadratowy",
+      "portrait": "Post pionowy",
+      "story": "Relacja"
+    }
   },
   "removal": {
     "badge": "Usunięto",
@@ -130,7 +151,7 @@
     "concerned": "Czego dotyczyło",
     "showField": "Pokaż {field} na tej stronie",
     "fields": {
-      "product": "{field, select, title {Nazwa} description {Opis} price {Cena} image {Zdjęcie główne} file {Plik cyfrowy} purchaseLink {Link zakupu} shipping {Wysyłka} options {Opcje} photos {Zdjęcia} specs {Specyfikacje} documents {Dokumenty} safety {Bezpieczeństwo i zgodność} other {Coś innego}}",
+      "product": "{field, select, title {Nazwa} description {Opis} price {Cena} image {Zdjęcie główne} file {Plik cyfrowy} purchaseLink {Link zakupu} shipping {Wysyłka} options {Opcje} photos {Zdjęcia} specs {Odznaki i specyfikacje} documents {Dokumenty} safety {Bezpieczeństwo i zgodność} other {Coś innego}}",
       "storefront": "{field, select, name {Nazwa witryny} header {Nagłówek} text {Tekst} images {Zdjęcia} products {Wyświetlane produkty} background {Tło} productPage {Strony produktów} other {Coś innego}}"
     },
     "reference": "Numer referencyjny",
@@ -154,7 +175,9 @@
     },
     "editorDetails": "Dlaczego i co zrobić dalej",
     "badgePending": "Sprawdzanie",
+    "badgePendingHint": "Kupujący zobaczą go, gdy automatyczne sprawdzanie go zatwierdzi.",
     "badgeReview": "W ocenie",
+    "badgeReviewHint": "Sprawdza go człowiek. Kupujący zobaczą go, gdy zostanie zatwierdzony.",
     "titlePending": "{kind, select, product {Ten produkt jest właśnie sprawdzany} other {Ta witryna jest właśnie sprawdzana}}",
     "titleReview": "{kind, select, product {Ten produkt sprawdza człowiek} other {Tę witrynę sprawdza człowiek}}",
     "hiddenPending": "Kupujący nie zobaczą tego, dopóki nie zakończy się automatyczne sprawdzanie. Zwykle trwa to kilka sekund: odśwież stronę, żeby zobaczyć wynik.",
@@ -175,6 +198,7 @@
     "fileEmpty": "Ten plik jest pusty.",
     "imported": "{count, plural, one {Zaimportowano {count} produkt.} few {Zaimportowano {count} produkty.} many {Zaimportowano {count} produktów.} other {Zaimportowano {count} produktu.}}",
     "skippedRows": "{count, plural, one {Pominięto {count} wiersz.} few {Pominięto {count} wiersze.} many {Pominięto {count} wierszy.} other {Pominięto {count} wiersza.}}",
+    "checkingRows": "{count, plural, one {{count} produkt jest jeszcze sprawdzany: kupujący zobaczą go, gdy automatyczne sprawdzanie go zatwierdzi.} few {{count} produkty są jeszcze sprawdzane: kupujący zobaczą je, gdy automatyczne sprawdzanie je zatwierdzi.} many {{count} produktów jest jeszcze sprawdzanych: kupujący zobaczą je, gdy automatyczne sprawdzanie je zatwierdzi.} other {{count} produktu jest jeszcze sprawdzane: kupujący zobaczą je, gdy automatyczne sprawdzanie je zatwierdzi.}}",
     "dropPrompt": "Upuść plik CSV albo kliknij, aby go wybrać",
     "fileMeta": "{size} · wybierz inny, aby zacząć od nowa",
     "rowsLimit": "{max, plural, one {Do {max} produktu na plik} few {Do {max} produktów na plik} many {Do {max} produktów na plik} other {Do {max} produktu na plik}}",
@@ -258,6 +282,11 @@
         "label": "Widoczność",
         "description": "Aktywny oznacza opublikowany: kupujący widzą produkt i mogą go od razu kupić. Wersja robocza jest ukryta przed kupującymi, dopóki nie zmienisz statusu.",
         "about": "Do czego służy sekcja Widoczność"
+      },
+      "badges": {
+        "label": "Odznaki",
+        "description": "Kilka słów na stronie produktu: powód, by Ci zaufać, albo fakt wart uwagi na pierwszy rzut oka. Wybierz gotową odznakę lub napisz własną, nadaj ikonie kolor i umieść ją obok produktu albo na zdjęciu.",
+        "about": "Do czego służą odznaki"
       }
     },
     "summary": {
@@ -283,7 +312,8 @@
       "documents": "{count, plural, one {{count} dokument} few {{count} dokumenty} many {{count} dokumentów} other {{count} dokumentu}}",
       "started": "Rozpoczęto",
       "active": "Aktywny",
-      "draft": "Wersja robocza"
+      "draft": "Wersja robocza",
+      "badges": "{count, plural, one {{count} odznaka} few {{count} odznaki} many {{count} odznak} other {{count} odznaki}}"
     },
     "errors": {
       "titleRequired": "Nadaj produktowi nazwę: kupujący widzą ją jako pierwszą.",
@@ -309,7 +339,9 @@
         "notPositive": "Cena musi być liczbą większą od zera.",
         "tooManyDecimals": "Cena może mieć maksymalnie dwa miejsca po przecinku.",
         "tooHigh": "Cena nie może przekraczać {currency} {max}."
-      }
+      },
+      "badgeDuplicate": "Dwie odznaki mówią to samo. Zmień słowa jednej z nich albo ją usuń.",
+      "badgesOnPhoto": "Na zdjęciu mieszczą się tylko {max} odznaki. Przesuń jedną obok produktu."
     },
     "title": "Nazwa",
     "titlePlaceholder": "np. Ambient Loops Vol. 1",
@@ -337,6 +369,7 @@
     "saveProduct": "Zapisz produkt",
     "savedToast": "Produkt „{title}” został zapisany.",
     "addedToast": "Produkt „{title}” został dodany do twoich produktów.",
+    "checkingToast": "Kupujący zobaczą go, gdy automatyczne sprawdzanie go zatwierdzi.",
     "documentFallbackLabel": "Dokument",
     "discard": {
       "title": "Odrzucić zmiany?",
@@ -574,6 +607,9 @@
     "hint": "PNG, JPG, WEBP, GIF lub AVIF, maks. {max} MB",
     "remove": "Usuń zdjęcie główne"
   },
+  "photoFormat": {
+    "heic": "To zdjęcie z iPhone’a (HEIC), którego przeglądarki nie potrafią wyświetlić. Wybierz je z biblioteki zdjęć w telefonie, który wyśle je jako JPEG, albo najpierw wyeksportuj je jako JPEG."
+  },
   "fileDropzone": {
     "currentFile": "Aktualny plik",
     "dropPrompt": "Upuść plik albo kliknij, aby przesłać",
@@ -718,6 +754,233 @@
       "card": "Numer karty",
       "total": "Razem",
       "pay": "Zapłać {price}"
+    }
+  },
+  "badgesField": {
+    "listLabel": "Odznaki",
+    "labelFor": "Tekst odznaki {position}",
+    "iconFor": "Ikona i kolor odznaki {position}",
+    "labelPlaceholder": "Treść odznaki",
+    "moveEarlier": "Przesuń odznakę {position} wcześniej",
+    "moveLater": "Przesuń odznakę {position} później",
+    "remove": "Usuń odznakę {position}",
+    "addFirst": "Dodaj odznakę",
+    "addAnother": "Dodaj kolejną",
+    "full": "To {max} odznak, tyle ile może mieć jeden produkt. Usuń jedną, aby dodać kolejną.",
+    "iconPicker": "Wybierz ikonę",
+    "icons": {
+      "badge-check": "Odznaka z ptaszkiem",
+      "heart": "Serce",
+      "star": "Gwiazdka",
+      "award": "Rozetka",
+      "trophy": "Trofeum",
+      "thumbs-up": "Kciuk w górę",
+      "users": "Ludzie",
+      "sparkles": "Błyski",
+      "gem": "Klejnot",
+      "gift": "Prezent",
+      "truck": "Ciężarówka",
+      "zap": "Błyskawica",
+      "clock": "Zegar",
+      "rotate-ccw": "Strzałka zwrotu",
+      "shield-check": "Tarcza",
+      "lock": "Kłódka",
+      "leaf": "Liść",
+      "recycle": "Recykling",
+      "sprout": "Kiełek",
+      "trees": "Drzewa",
+      "package": "Paczka",
+      "vegan": "Wegański",
+      "rabbit": "Królik",
+      "paw-print": "Łapa",
+      "wheat-off": "Bez pszenicy",
+      "droplets": "Krople",
+      "sun": "Słońce",
+      "snowflake": "Płatek śniegu",
+      "hand-heart": "Dłoń z sercem",
+      "hammer": "Młotek",
+      "pen-tool": "Pióro",
+      "map-pin": "Pinezka",
+      "store": "Sklep",
+      "handshake": "Uścisk dłoni",
+      "globe": "Globus",
+      "flame": "Płomień"
+    },
+    "picker": {
+      "open": "Wyszukaj lub wpisz własny tekst",
+      "label": "Dodaj odznakę",
+      "search": "Szukaj odznak",
+      "placeholder": "Szukaj albo wpisz własne słowa",
+      "results": "Odznaki",
+      "groups": {
+        "trust": "Zaufanie i obsługa",
+        "product": "O produkcie"
+      },
+      "create": "Dodaj „{label}”",
+      "checking": "Sprawdzanie…",
+      "added": "Dodano",
+      "alreadyOn": "Ten produkt ma już tę odznakę.",
+      "noMatches": "Brak pasujących gotowych odznak."
+    },
+    "stylePicker": "Ikona i kolor",
+    "iconHeading": "Ikona",
+    "colorHeading": "Kolor",
+    "colorPicker": "Wybierz kolor",
+    "colors": {
+      "ink": "Jak tekst",
+      "red": "Czerwony",
+      "orange": "Pomarańczowy",
+      "amber": "Bursztynowy",
+      "green": "Zielony",
+      "teal": "Morski",
+      "blue": "Niebieski",
+      "purple": "Fioletowy",
+      "pink": "Różowy"
+    },
+    "placementFor": "Gdzie jest odznaka {position}",
+    "placementPicker": "Gdzie trafi",
+    "placements": {
+      "beside": "Obok produktu",
+      "photo-top-left": "Na zdjęciu, lewy górny",
+      "photo-top-right": "Na zdjęciu, prawy górny",
+      "photo-bottom-left": "Na zdjęciu, lewy dolny",
+      "photo-bottom-right": "Na zdjęciu, prawy dolny"
+    },
+    "photo": "Zdjęcie",
+    "beside": "Obok produktu",
+    "photoFull": "Na zdjęciu mieszczą się do {max} odznak. Najpierw przesuń jedną obok produktu.",
+    "preview": {
+      "label": "Na Twojej stronie produktu",
+      "hint": "Przeciągnij odznakę na zdjęcie albo obok produktu.",
+      "titlePlaceholder": "Twój produkt"
+    }
+  },
+  "badges": {
+    "presets": {
+      "lovedBy": {
+        "label": "{count, plural, one {#+ osoba to poleca} few {#+ osoby to polecają} many {#+ osób to poleca} other {#+ osoby to polecają}}",
+        "keywords": "klienci, popularny, fani, zadowoleni, recenzje, dowód społeczny"
+      },
+      "bestseller": {
+        "label": "Bestseller",
+        "keywords": "bestseller, popularny, topowy, ulubiony, najlepiej sprzedający się"
+      },
+      "topRated": {
+        "label": "Najwyżej oceniany",
+        "keywords": "recenzje, oceny, gwiazdki, pięć gwiazdek, wysoko oceniany"
+      },
+      "freeShipping": {
+        "label": "Bezpłatna dostawa",
+        "keywords": "dostawa, przesyłka, darmowa dostawa, darmowa przesyłka"
+      },
+      "fastDispatch": {
+        "label": "{count, plural, one {Wysyłka w # godzinę} few {Wysyłka w # godziny} many {Wysyłka w # godzin} other {Wysyłka w # godziny}}",
+        "keywords": "szybko, ekspresowo, czas wysyłki, tego samego dnia, następnego dnia"
+      },
+      "moneyBack": {
+        "label": "{count, plural, one {#-dniowa gwarancja zwrotu środków} few {#-dniowa gwarancja zwrotu środków} many {#-dniowa gwarancja zwrotu środków} other {#-dniowa gwarancja zwrotu środków}}",
+        "keywords": "zwrot pieniędzy, gwarancja, bez ryzyka, satysfakcja"
+      },
+      "freeReturns": {
+        "label": "Bezpłatne zwroty",
+        "keywords": "zwroty, zwrot pieniędzy, wymiana, odesłanie"
+      },
+      "warranty": {
+        "label": "{count, plural, one {#-letnia gwarancja} few {#-letnia gwarancja} many {#-letnia gwarancja} other {#-letnia gwarancja}}",
+        "keywords": "gwarancja, ochrona, naprawa, serwis"
+      },
+      "securePayment": {
+        "label": "Bezpieczna płatność",
+        "keywords": "bezpieczny, płatność, ochrona, karta, checkout"
+      },
+      "satisfaction": {
+        "label": "Satysfakcja gwarantowana",
+        "keywords": "zadowolenie, gwarancja, jakość, obietnica"
+      },
+      "giftReady": {
+        "label": "Gotowe do pakowania",
+        "keywords": "prezent, pakowanie, owijanie, urodziny"
+      },
+      "limitedEdition": {
+        "label": "Edycja limitowana",
+        "keywords": "rzadki, ekskluzywny, mała partia, kolekcjonerski"
+      },
+      "newArrival": {
+        "label": "Nowość",
+        "keywords": "nowy, nowa kolekcja, świeżość, właśnie dostępny"
+      },
+      "smallBusiness": {
+        "label": "Mały biznes",
+        "keywords": "niezależny, lokalny sklep, rodzinny biznes, indie"
+      },
+      "awardWinning": {
+        "label": "Nagradzany",
+        "keywords": "nagroda, wyróżnienie, zwycięzca, laureat"
+      },
+      "ecoFriendly": {
+        "label": "Przyjazny środowisku",
+        "keywords": "zielony, zrównoważony, środowisko, planeta, eko"
+      },
+      "handmade": {
+        "label": "Ręcznie wykonane",
+        "keywords": "rękodzieło, artysanat, robione ręcznie, rzemieślniczy"
+      },
+      "recycled": {
+        "label": "Z materiałów z recyklingu",
+        "keywords": "recykling, upcycling, wtórne użycie, obieg zamknięty"
+      },
+      "plasticFree": {
+        "label": "Opakowanie bez plastiku",
+        "keywords": "zero odpadów, opakowanie, kompostowalny, bez plastiku"
+      },
+      "organic": {
+        "label": "Organiczny",
+        "keywords": "naturalny, bio, bez pestycydów, bez chemii"
+      },
+      "vegan": {
+        "label": "Wegański",
+        "keywords": "roślinny, bez produktów zwierzęcych, bez nabiału"
+      },
+      "crueltyFree": {
+        "label": "Nie testowany na zwierzętach",
+        "keywords": "bez testów na zwierzętach, przyjazny zwierzętom"
+      },
+      "madeLocally": {
+        "label": "Produkt lokalny",
+        "keywords": "lokalny, wyprodukowany lokalnie, regionalny, swojski"
+      },
+      "fairTrade": {
+        "label": "Uczciwy handel",
+        "keywords": "etyczny, sprawiedliwy, etyczne pozyskanie, pracownicy"
+      },
+      "sustainablySourced": {
+        "label": "Odpowiedzialne pozyskanie",
+        "keywords": "odpowiedzialny, pozyskanie, las, drewno, identyfikowalny"
+      },
+      "glutenFree": {
+        "label": "Bez glutenu",
+        "keywords": "celiakia, bez pszenicy, alergia, dieta bezglutenowa"
+      },
+      "waterproof": {
+        "label": "Wodoodporny",
+        "keywords": "odporny na wodę, deszcz, odpryski, outdoor"
+      },
+      "builtToLast": {
+        "label": "Zbudowany na lata",
+        "keywords": "trwały, solidny, jakość, długotrwały, odporny"
+      },
+      "personalised": {
+        "label": "Na zamówienie",
+        "keywords": "spersonalizowany, grawerowany, monogram, dedykowany"
+      },
+      "petFriendly": {
+        "label": "Przyjazny zwierzętom",
+        "keywords": "zwierzęta, psy, koty, bezpieczny dla zwierząt"
+      },
+      "qualityChecked": {
+        "label": "Sprawdzony jakościowo",
+        "keywords": "testowany, skontrolowany, zatwierdzony, certyfikowany"
+      }
     }
   }
 }

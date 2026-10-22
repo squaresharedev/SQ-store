@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { Locale } from "@/i18n/locales";
 import {
+  BadgeCheck,
   Boxes,
   Eye,
   FileText,
@@ -32,13 +33,19 @@ import { OptionSpecsField } from "./OptionSpecsField";
 import { DetailsFields } from "./DetailsFields";
 import { SafetyFields } from "./SafetyFields";
 import { DocumentsField } from "./DocumentsField";
+import { BadgesField } from "./BadgesField";
 import {
+  badgesSnapshot,
+  badgesToInput,
   detailsToInput,
+  initialBadges,
   initialDetailsValues,
   initialOptionDetails,
   optionDetailsToInput,
+  validateBadges,
   validateDetails,
   validateOptionDetails,
+  type BadgeFormValue,
   type DetailsFieldErrors,
   type DetailsFormValues,
   type DocumentFormValue,
@@ -53,6 +60,7 @@ import { SaveButton, type SaveResult } from "@/components/ui/SaveButton";
 import { useToast } from "@/components/ui/Toast";
 import type { MessageRef } from "@/i18n/types";
 import {
+  badgeLabelKey,
   collectOptionIds,
   type ProductWriteInput,
   MAX_PER_ORDER_DEFAULT,
@@ -97,6 +105,7 @@ import { moderationNoticeId } from "@/lib/moderation/paths";
 import { requestModerationReview } from "@/lib/moderation/review-request";
 import { formatList } from "@/lib/format/intl";
 import { productEditPath } from "@/lib/products/paths";
+import { refusedBadgeLabel } from "@/lib/products/badges";
 import { FormSection, type SectionFlag } from "./FormSection";
 import { useFixProgress } from "./useFixProgress";
 import { FormSectionNav } from "./FormSectionNav";
@@ -149,7 +158,8 @@ type FieldErrors = Partial<
     | "lowStockThreshold"
     | "maxPerOrder"
     | "purchaseUrl"
-    | "optionGroups",
+    | "optionGroups"
+    | "badges",
     string
   >
 >;
@@ -275,9 +285,12 @@ function validate(
 function validatePage(
   purchaseUrl: string,
   optionGroups: ProductOptionGroup[],
+  badges: readonly BadgeFormValue[],
   t: ProductsTranslator,
 ): FieldErrors {
   const errors: FieldErrors = {};
+  const badgeProblem = validateBadges(badges, t);
+  if (badgeProblem) errors.badges = badgeProblem;
   const link = purchaseUrl.trim();
   if (link && !/^https:\/\/[^\s/$.?#].[^\s]*$/i.test(link)) {
     errors.purchaseUrl = t("form.errors.purchaseUrl");
@@ -320,6 +333,7 @@ const FIELD_SECTIONS: Record<string, ProductFormSectionId> = {
   maxPerOrder: "stock",
   purchaseUrl: "media",
   optionGroups: "options",
+  badges: "badges",
   length: "specs",
   width: "specs",
   height: "specs",
@@ -395,6 +409,19 @@ function focusProductField(field: string) {
         break;
       }
     }
+  } else if (field === "badges") {
+    // The only badge message is two rows saying the same thing: land on the
+    // second of them, which is the one to change.
+    const seen = new Set<string>();
+    for (const input of document.querySelectorAll<HTMLInputElement>("[data-product-badge-label]")) {
+      const key = badgeLabelKey(input.value);
+      if (key && seen.has(key)) {
+        target = input;
+        break;
+      }
+      seen.add(key);
+    }
+    target ??= focusableWithin(document.querySelector('[data-product-field="badges"]'));
   } else if (field === "optionGroups") {
     const wrapper = document.querySelector<HTMLElement>('[data-product-field="optionGroups"]');
     if (wrapper) {
@@ -411,13 +438,28 @@ function focusProductField(field: string) {
     target = focusableWithin(document.querySelector(`[data-product-field="${selector}"]`));
   }
 
-  if (!target) return;
-  const control = target;
+  if (target) focusControl(target);
+}
+
+/** Scroll one control into the middle of the screen and focus it. */
+function focusControl(control: HTMLElement, select = false) {
   control.scrollIntoView({ behavior: "smooth", block: "center" });
   // Focus after the scroll starts rather than instantly: an immediate focus
   // triggers the browser's OWN scroll-into-view too, which fights the smooth
   // one above and jump-cuts straight to the field.
-  window.setTimeout(() => control.focus({ preventScroll: true }), 300);
+  window.setTimeout(() => {
+    control.focus({ preventScroll: true });
+    if (select && control instanceof HTMLInputElement) control.select();
+  }, 300);
+}
+
+/** The row of the badge a save was refused over, its words selected so the
+ *  seller can type better ones straight away. */
+function focusBadgeLabel(label: string) {
+  const input = [...document.querySelectorAll<HTMLInputElement>("[data-product-badge-label]")].find(
+    (candidate) => candidate.value.trim() === label,
+  );
+  if (input) focusControl(input, true);
 }
 
 export function ProductForm({
@@ -468,6 +510,9 @@ export function ProductForm({
   const [details, setDetails] = useState<DetailsFormValues>(() =>
     initialDetailsValues(product?.details),
   );
+  // Stored inside the details, held apart here like the gallery: each row has
+  // a key of its own that the dirty check and the save leave out.
+  const [badges, setBadges] = useState<BadgeFormValue[]>(() => initialBadges(product?.details));
   // What each VERSION measures, keyed by option id. Kept beside the options
   // rather than on them so a half-typed number survives being typed (see
   // form-values.ts); an entry whose option is gone is simply never read.
@@ -484,6 +529,13 @@ export function ProductForm({
   /** One message per option id, shown on the version that carries it. */
   const [optionDetailErrors, setOptionDetailErrors] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
+  // The cover as the badge preview shows it: a newly picked file, else the
+  // stored one. Its own object URL, released when the file changes.
+  const pickedCover = useMemo(() => (imageFile ? URL.createObjectURL(imageFile) : null), [imageFile]);
+  useEffect(() => {
+    if (!pickedCover) return;
+    return () => URL.revokeObjectURL(pickedCover);
+  }, [pickedCover]);
   const [digitalFile, setDigitalFile] = useState<File | null>(null);
   // Whether the seller interacted with the digital-file picker at all. Needed
   // to tell "left the stored file alone" (keep) apart from "removed it" (clear).
@@ -546,6 +598,7 @@ export function ProductForm({
         gallery: initialGallery(product).map(({ key, alt, optionId }) => ({ key, alt, optionId })),
         documents: initialDocuments(product).map(({ key, label }) => ({ key, label })),
         optionGroups: product?.optionGroups ?? [],
+        badges: badgesSnapshot(initialBadges(product?.details)),
         details: initialDetailsValues(product?.details),
         optionDetails: initialOptionDetails(product?.optionGroups ?? []),
         purchaseUrl: product?.purchaseUrl ?? "",
@@ -557,6 +610,7 @@ export function ProductForm({
     gallery: gallery.map(({ key, alt, optionId }) => ({ key, alt, optionId })),
     documents: documents.map(({ key, label }) => ({ key, label })),
     optionGroups,
+    badges: badgesSnapshot(badges),
     details,
     optionDetails,
     purchaseUrl,
@@ -600,6 +654,7 @@ export function ProductForm({
     optionGroups,
     gallery,
     documents,
+    badges,
     details,
     optionDetails,
     purchaseUrl,
@@ -677,7 +732,13 @@ export function ProductForm({
         const { safety: _then, ...specsThen } = initialPage.details as DetailsFormValues;
         void _now;
         void _then;
-        return !same(specsNow, specsThen) || !same(optionDetails, initialPage.optionDetails);
+        // The badges share this field (they are stored in the details), so
+        // changing them answers a flag on it too.
+        return (
+          !same(specsNow, specsThen) ||
+          !same(optionDetails, initialPage.optionDetails) ||
+          !same(badgesSnapshot(badges), initialPage.badges)
+        );
       }
       case "safety":
         return !same(details.safety, (initialPage.details as DetailsFormValues).safety);
@@ -727,7 +788,7 @@ export function ProductForm({
       if (submitAttempted) {
         setErrors({
           ...validate(next, t, resolveMessage, locale),
-          ...validatePage(purchaseUrl, optionGroups, t),
+          ...validatePage(purchaseUrl, optionGroups, badges, t),
         });
       }
       return next;
@@ -737,14 +798,24 @@ export function ProductForm({
   function updateOptionGroups(next: ProductOptionGroup[]) {
     setOptionGroups(next);
     if (submitAttempted) {
-      setErrors({ ...validate(values, t, resolveMessage, locale), ...validatePage(purchaseUrl, next, t) });
+      setErrors({ ...validate(values, t, resolveMessage, locale), ...validatePage(purchaseUrl, next, badges, t) });
     }
   }
 
   function updatePurchaseUrl(next: string) {
     setPurchaseUrl(next);
     if (submitAttempted) {
-      setErrors({ ...validate(values, t, resolveMessage, locale), ...validatePage(next, optionGroups, t) });
+      setErrors({ ...validate(values, t, resolveMessage, locale), ...validatePage(next, optionGroups, badges, t) });
+    }
+  }
+
+  function updateBadges(next: BadgeFormValue[]) {
+    setBadges(next);
+    if (submitAttempted) {
+      setErrors({
+        ...validate(values, t, resolveMessage, locale),
+        ...validatePage(purchaseUrl, optionGroups, next, t),
+      });
     }
   }
 
@@ -799,7 +870,7 @@ export function ProductForm({
 
     const foundErrors = {
       ...validate(values, t, resolveMessage, locale),
-      ...validatePage(purchaseUrl, optionGroups, t),
+      ...validatePage(purchaseUrl, optionGroups, badges, t),
     };
     setErrors(foundErrors);
     const found = detailErrorsFor(details, optionDetails);
@@ -903,7 +974,15 @@ export function ProductForm({
             };
           }),
         })),
-        details: detailsToInput(details, isDigital),
+        details: (() => {
+          // Only when there are some, so an untouched product still saves
+          // the same details it always did.
+          const badgeInput = badgesToInput(badges);
+          return {
+            ...(badgeInput.length > 0 ? { badges: badgeInput } : {}),
+            ...detailsToInput(details, isDigital),
+          };
+        })(),
         purchaseUrl: purchaseUrl.trim() || null,
         // A download has no shipping, so a profile chosen before the file was
         // added is dropped rather than stored where nothing will read it —
@@ -943,6 +1022,14 @@ export function ProductForm({
         setSubmitError(result.error);
         setSaveResult({ error: resolveMessage(result.error.message) });
         showActionError(result.error);
+        // A badge the check refused: the Badges section says so and the
+        // seller lands on that badge, rather than hunting for it from a
+        // message at the foot of the page.
+        const refused = refusedBadgeLabel(result.error);
+        if (refused !== null) {
+          setErrors((previous) => ({ ...previous, badges: resolveMessage(result.error.message) }));
+          focusBadgeLabel(refused);
+        }
         return false;
       }
 
@@ -977,6 +1064,14 @@ export function ProductForm({
         product
           ? t("form.savedToast", { title: input.title })
           : t("form.addedToast", { title: input.title }),
+        {
+          // Saved as active but not approved yet: the list will say "Checking",
+          // and this says what that means before the seller goes looking.
+          lines:
+            result.checking && input.status === "active"
+              ? [t("form.checkingToast")]
+              : undefined,
+        },
       );
       redirectTimer.current = window.setTimeout(() => {
         // No router.refresh() alongside this: both server actions already
@@ -1204,7 +1299,7 @@ export function ProductForm({
                 if (submitAttempted) {
                   setErrors({
                     ...validate(next, t, resolveMessage, locale),
-                    ...validatePage(purchaseUrl, optionGroups, t),
+                    ...validatePage(purchaseUrl, optionGroups, badges, t),
                   });
                 }
                 return next;
@@ -1342,6 +1437,23 @@ export function ProductForm({
           images={gallery}
           optionGroups={optionGroups}
           onChange={setGallery}
+        />
+      </FormSection>
+
+      {/* BADGES BEFORE THE SPECIFICATIONS, and after the photos: they are
+          the first words a buyer reads under the title, the highlights of
+          the facts that follow. */}
+      <FormSection
+        {...section("badges")}
+        icon={BadgeCheck}
+      >
+        <BadgesField
+          inputId={`${fieldId}-badges`}
+          badges={badges}
+          onChange={updateBadges}
+          error={errors.badges}
+          previewImageUrl={pickedCover ?? product?.imageUrl ?? null}
+          previewTitle={values.title}
         />
       </FormSection>
 

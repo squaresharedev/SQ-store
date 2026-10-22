@@ -9,7 +9,7 @@ import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { pageShellClass, savingBadgeClass, savingBadgeOnInkClass } from "@/components/ui/surface-styles";
-import { helpTextClass, iconNudgeRightClass, infoTextClass, stubBadgeClass } from "@/components/ui/control-styles";
+import { helpTextClass, iconNudgeRightClass, infoTextClass, noteStripClass, stubBadgeClass } from "@/components/ui/control-styles";
 import { PlanCard } from "@/components/billing/PlanCard";
 import { GrantBanner } from "@/components/billing/GrantBanner";
 import { CostExplorer } from "@/components/billing/CostExplorer";
@@ -149,7 +149,7 @@ function PlansPageBody({ context, source, actions = SERVER_BILLING_ACTIONS }: Pl
 
         {context.grant && <GrantBanner grant={context.grant} />}
         {notice && (
-          <div role="status" className="mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-3 border-l-2 border-foreground pl-3">
+          <div role="status" className={cn(noteStripClass, "mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-3")}>
             <p className={helpTextClass}>{notice}</p>
             {/* Ending, not past due: the owner can still change their mind. */}
             {context.canManage && context.cancelAtPeriodEnd && context.status !== "past_due" && isPaidPlan(context.plan) && (
@@ -160,6 +160,14 @@ function PlansPageBody({ context, source, actions = SERVER_BILLING_ACTIONS }: Pl
         {!context.canManage && (
           <p role="note" className={cn(helpTextClass, "text-center")}>
             {t("page.ownerOnly")}
+          </p>
+        )}
+        {/* Said once, in words, above buttons that cannot be pressed: the
+            "Soon" badge alone read as broken, and its tooltip never reaches a
+            phone. */}
+        {context.canManage && !context.available && (
+          <p role="note" className={cn(helpTextClass, "text-center")} data-plans-soon="">
+            {t("page.soonTitle")}
           </p>
         )}
         {checkoutError && <ActionErrorNotice error={checkoutError} className="mx-auto max-w-2xl" />}

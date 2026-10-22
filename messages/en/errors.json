@@ -496,6 +496,16 @@
     "staleOption": {
       "message": "A photo points at an option that no longer exists.",
       "fix": "Reassign or untag that photo, then save again."
+    },
+    "ordersToShip": "{count, plural, one {An order for this product is still to ship.} other {{count} orders for this product are still to ship.}}",
+    "ordersToShipFix": "Nothing was deleted. Try again to see them in the warning first.",
+    "badgeRefused": {
+      "message": "The badge “{label}” breaks the platform rules, so it can't be used.",
+      "fix": "Change its words or choose another badge. If you think this is a mistake, write to {email}."
+    },
+    "badgeNotApproved": {
+      "message": "The badge “{label}” could not be approved automatically, so it can't be used.",
+      "fix": "Try different words, or write to {email} and a person will look."
     }
   },
   "productImport": {
@@ -540,6 +550,10 @@
     "nameRequired": {
       "message": "The storefront needs a name.",
       "fix": "Type a name (1 to 80 characters) in the field at the top of the editor, then save again."
+    },
+    "savedElsewhere": {
+      "message": "This storefront was saved somewhere else since you opened it.",
+      "fix": "Reload the page to see that version, or save again to replace it."
     },
     "invalidLayout": {
       "message": "The storefront layout data is invalid.",

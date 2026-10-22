@@ -122,6 +122,11 @@
       "description": "Kopers wachten hierop. Pak ze in en markeer ze dan als verzonden.",
       "action": "Bestellingen verzenden"
     },
+    "withdrawals": {
+      "label": "{count, plural, one {{count} koper heeft herroepen} other {{count} kopers hebben herroepen}}",
+      "description": "Ze krijgen binnen 14 dagen na de herroeping hun geld terug. Regel de retour en betaal de bestelling dan terug.",
+      "action": "Herroepingen bekijken"
+    },
     "checkoutRates": {
       "label": "Stel je bezorgprijzen in",
       "description": "Kopers kunnen een fysiek product pas afrekenen als een bestemming zowel een tarief als een land heeft.",

@@ -211,6 +211,7 @@
       "paidDetail": "Payée le {date}",
       "confirming": "Confirmation du paiement",
       "confirmingDetail": "Cela prend généralement un instant. Actualisez la page si rien ne change.",
+      "checkAgain": "Vérifier à nouveau",
       "preparing": "En préparation",
       "preparingDetail": "{seller} prépare votre commande.",
       "shipped": "En route",
@@ -383,5 +384,7 @@
     "lowestNote": "Prix barré : le prix habituel. Prix le plus bas pratiqué dans les 30 jours précédant cette réduction : {price}.",
     "badgeSale": "Promo",
     "endsOn": "Promo jusqu'au {date}"
-  }
+  },
+  "badges": "Points forts",
+  "badgesOnPhoto": "Points forts sur la photo"
 }

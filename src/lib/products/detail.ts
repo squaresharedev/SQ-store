@@ -1,5 +1,8 @@
 import { z } from "zod";
 import {
+  badgeLabelKey,
+  badgeSchema,
+  isOnPhoto,
   collectOptionIds,
   documentSchema,
   galleryImageSchema,
@@ -8,11 +11,16 @@ import {
   productOptionSchema,
 } from "@/lib/validation/product";
 import {
+  BADGE_COLORS,
+  BADGE_PLACEMENTS,
+  BADGES_MAX,
+  BADGES_ON_PHOTO_MAX,
   DOCUMENTS_MAX,
   GALLERY_MAX,
   OPTION_GROUPS_MAX,
   OPTIONS_PER_GROUP_MAX,
   type GalleryImage,
+  type ProductBadge,
   type ProductDetails,
   type ProductDocument,
   type ProductOptionGroup,
@@ -80,9 +88,59 @@ export function parseOptionGroups(raw: unknown): ProductOptionGroup[] {
   return groups;
 }
 
+/**
+ * The write schema with its two settings made forgiving: a colour or a place
+ * this build does not know (a later build's, a hand edit) is dropped back to
+ * its default rather than costing the badge. The words and the icon stay
+ * strict, because without them there is nothing to draw.
+ */
+const readBadgeSchema = badgeSchema.extend({
+  color: z.enum(BADGE_COLORS).optional().catch(undefined),
+  placement: z.enum(BADGE_PLACEMENTS).optional().catch(undefined),
+});
+
+/**
+ * The product's badges, read one at a time.
+ *
+ * Kept apart from the rest of the details on purpose. The details schema is
+ * strict and all-or-nothing, so a single malformed badge (an icon this build
+ * no longer draws, a hand-edited row) would otherwise cost the seller every
+ * measurement and spec on the page. Here a bad badge costs only itself; a
+ * repeat of an earlier one's words is dropped; the list is capped like the
+ * others, for the same reason.
+ */
+export function parseBadges(raw: unknown): ProductBadge[] {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set<string>();
+  const badges: ProductBadge[] = [];
+  let onPhoto = 0;
+  for (const entry of raw) {
+    const parsed = readBadgeSchema.safeParse(entry);
+    if (!parsed.success) continue;
+    const key = badgeLabelKey(parsed.data.label);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const { color, placement, ...badge } = parsed.data;
+    // Past the photo's cap a badge still shows, beside the product.
+    const photo = placement !== undefined && isOnPhoto({ placement }) && onPhoto < BADGES_ON_PHOTO_MAX;
+    if (photo) onPhoto += 1;
+    badges.push({
+      ...badge,
+      ...(color && color !== "ink" ? { color } : {}),
+      ...(photo ? { placement } : {}),
+    });
+    if (badges.length === BADGES_MAX) break;
+  }
+  return badges;
+}
+
 export function parseDetails(raw: unknown): ProductDetails {
-  const parsed = productDetailsSchema.safeParse(raw);
-  return parsed.success ? parsed.data : {};
+  const { badges: rawBadges, ...rest } =
+    raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
+  const parsed = productDetailsSchema.safeParse(rest);
+  const details: ProductDetails = parsed.success ? parsed.data : {};
+  const badges = parseBadges(rawBadges);
+  return badges.length > 0 ? { badges, ...details } : details;
 }
 
 export function parseDocuments(raw: unknown): ProductDocument[] {

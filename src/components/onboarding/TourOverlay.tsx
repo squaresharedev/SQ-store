@@ -14,7 +14,7 @@ import {
   overlaySurfaceClass,
 } from "@/components/ui/control-styles";
 import { EASE_STANDARD, STEP_SWAP } from "@/components/ui/motion-tokens";
-import { codeSurfaceClass } from "@/components/ui/surface-styles";
+import { codeSurfaceClass, codeTextClass } from "@/components/ui/surface-styles";
 import { useFocusTrap } from "@/lib/hooks/useFocusTrap";
 import { useIsMacPlatform } from "@/lib/hooks/useIsMacPlatform";
 import {
@@ -632,7 +632,7 @@ function ActiveTour({
             {extra === "embed-snippet" && (
               // Wraps rather than scrolls: a scroll region inside a dialog needs
               // its own keyboard access, and two lines do not earn one.
-              <pre className={cn(codeSurfaceClass, "mt-3 whitespace-pre-wrap break-all p-3 font-mono text-xs")}>
+              <pre className={cn(codeSurfaceClass, codeTextClass, "mt-3 p-3")}>
                 {embedSnippet(SAMPLE_EMBED_KEY)}
               </pre>
             )}

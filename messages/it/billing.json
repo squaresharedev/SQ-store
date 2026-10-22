@@ -199,6 +199,7 @@
     "invoicesDescription": "La tua carta, l’indirizzo di fatturazione, la partita IVA e tutte le fatture, nella pagina sicura di Stripe.",
     "manage": "Gestisci fatturazione e fatture",
     "noBilling": "Fatture e dati di pagamento compariranno qui quando passerai a un piano a pagamento.",
+    "noBillingYet": "Fatture e dati di pagamento compariranno qui quando arriveranno i piani a pagamento.",
     "confirmed": "Sei su {plan}. Grazie per il tuo sostegno a Square Share.",
     "pending": "Stiamo confermando il tuo pagamento con Stripe. Se il tuo piano non è cambiato, aggiorna la pagina tra un istante.",
     "unavailable": "Al momento non è possibile mostrare il tuo piano. Aggiorna la pagina tra un istante.",

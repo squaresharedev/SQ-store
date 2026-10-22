@@ -222,6 +222,13 @@ export const RATE_LIMITS = {
    * dozen attempts in an hour is a loop, not a person.
    */
   productImport: { max: 12, windowSeconds: 60 * 60 },
+  /**
+   * Checking a badge the seller wrote before it is added to the form
+   * (lib/products/badge-actions.ts). Each new wording is a classifier call, so
+   * this bounds what a script typing badge after badge can spend. A person
+   * adds a handful per product; sixty an hour is a long afternoon of them.
+   */
+  badgeCheck: { max: 60, windowSeconds: 60 * 60 },
   /** Storefront saves: the heaviest write path (multi-query + R2 verify). */
   storefrontWrite: { max: 240, windowSeconds: 60 * 60 },
   /**

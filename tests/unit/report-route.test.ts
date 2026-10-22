@@ -83,11 +83,15 @@ const { POST } = await import("@/app/api/report/route");
 
 const VALID = { targetType: "product", targetId: TARGET, reason: "scam" };
 
-function post(body: unknown): Promise<Response> {
+/** A report as the product page sends it: same-origin, as browsers say so. */
+function post(
+  body: unknown,
+  headers: Record<string, string> = { "Sec-Fetch-Site": "same-origin" },
+): Promise<Response> {
   return POST(
     new Request("http://localhost/api/report", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...headers },
       body: typeof body === "string" ? body : JSON.stringify(body),
     }),
   );
@@ -126,6 +130,27 @@ describe("POST /api/report", () => {
     db.inserts.length = 0;
     db.target = { id: TARGET, moderation_status: "removed" };
     expect(await answer(await post(VALID))).toEqual(first);
+    expect(db.inserts).toHaveLength(0);
+  });
+
+  // REGRESSION (security review 2026-10-21): any page could make its visitors'
+  // browsers file reports here, each from their own address.
+  it("refuses a report another site's page sent, before reading anything", async () => {
+    const senders: Record<string, string>[] = [
+      { "Sec-Fetch-Site": "cross-site" },
+      { "Sec-Fetch-Site": "same-site" },
+      {},
+    ];
+    for (const headers of senders) {
+      const res = await post(VALID, headers);
+      expect(res.status).toBe(403);
+    }
+    expect(db.inserts).toHaveLength(0);
+  });
+
+  it("refuses a body far larger than any report", async () => {
+    const res = await post({ ...VALID, details: "x".repeat(20_000) });
+    expect(await answer(res)).toEqual({ status: 400, body: { error: "That request could not be read." } });
     expect(db.inserts).toHaveLength(0);
   });
 

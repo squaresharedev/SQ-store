@@ -164,7 +164,7 @@
   // before step d, because every sale from then on is charged one.
   //
   // STOREFRONT EMBED (the storefront on a seller's own website: public/widget.js
-  // and the frame at /e/[key]/[site]; see src/lib/storefront/embed-frame.ts).
+  // and the frame at /e/[key]/[...sites]; see src/lib/storefront/embed-frame.ts).
   // OFF until it has a host of its own: without NEXT_PUBLIC_EMBED_URL the
   // snippet cannot be copied, the frame answers 404 and the rule that lets it
   // be framed is not emitted. In this order:
@@ -188,11 +188,30 @@
   //   e. Check production, before telling anyone:
   //        curl -sI https://embed.squareshare.eu/e/<any uuid>/example.com
   //          must show  content-security-policy: frame-ancestors example.com
-  //          (the literal text ":site" there means the worker did not
+  //          (the literal text ":s1" there means the worker did not
   //          substitute it, and every embed is blank)
+  //        curl -sI https://embed.squareshare.eu/e/<any uuid>/www-example-com.filesusr.com/example.com
+  //          must show  frame-ancestors www-example-com.filesusr.com example.com
+  //          (a site builder's frame above the embed, as Wix makes one)
   //        curl -sI https://dashboard.squareshare.eu/e/<any uuid>/example.com
   //          must show x-frame-options: DENY and NO content-security-policy
   // To take the embed down again, remove the variable and deploy.
+  //
+  // SIGN-UP GATE (src/lib/auth/signup-intent.ts). Supabase's own sign-up
+  // endpoint answers anyone holding the public anon key, so the app's sign-up
+  // guards only bind once GoTrue refuses email sign-ups the app did not
+  // approve. Migration 20261021_signup_intents is APPLIED (2026-10-21); the
+  // hook is OFF until this build is live. In this order:
+  //   a. Deploy a build that writes signup intents (any build from 2026-10-21).
+  //   b. Supabase Auth > Hooks > Before User Created: Postgres function
+  //      public.signup_intent_gate (Management API PATCH config/auth:
+  //      hook_before_user_created_enabled=true,
+  //      hook_before_user_created_uri=
+  //      "pg-functions://postgres/public/signup_intent_gate").
+  //   c. Sign up once with a fresh address on production: the confirmation
+  //      mail must arrive. Then a direct POST to /auth/v1/signup with the anon
+  //      key must answer 403 "Sign up on Square Share."
+  // Switching the hook off is the kill switch. Google sign-up is never gated.
   //
   // KNOWING WHEN IT BREAKS. Every unhandled server error is one JSON log line
   // behind "[server error]" (src/instrumentation.ts), and the alerts nobody

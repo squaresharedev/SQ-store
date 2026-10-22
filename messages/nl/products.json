@@ -76,7 +76,9 @@
     "deleteDialog": {
       "title": "Dit product verwijderen?",
       "description": "{storefronts, plural, =0 {\"{title}\" en de geüploade afbeelding en het bestand worden definitief verwijderd. Bestaande bestellingen behouden hun registratie van de verkoop.} one {\"{title}\" en de geüploade afbeelding en het bestand worden definitief verwijderd. Bestaande bestellingen behouden hun registratie van de verkoop. Het staat op {storefronts} etalage. Het blok blijft staan totdat je het verwijdert.} other {\"{title}\" en de geüploade afbeelding en het bestand worden definitief verwijderd. Bestaande bestellingen behouden hun registratie van de verkoop. Het staat op {storefronts} etalages. De blokken blijven staan totdat je ze verwijdert.}}",
-      "confirm": "Product verwijderen"
+      "toShip": "{count, plural, one {{count} bestelling van dit product moet nog worden verzonden.} other {{count} bestellingen van dit product moeten nog worden verzonden.}} Ze blijven met naam en prijs in Bestellingen staan, dus je kunt ze nog steeds versturen.",
+      "confirm": "Product verwijderen",
+      "confirmAnyway": "Toch verwijderen"
     },
     "chooser": {
       "openTitle": "Op welke etalage openen?",
@@ -98,7 +100,26 @@
     "openPage": "Productpagina openen",
     "unitsSold": "{count, plural, one {{count} verkocht} other {{count} verkocht}}",
     "noSales": "Nog geen verkopen",
-    "addToWebsite": "Toevoegen aan je website"
+    "addToWebsite": "Toevoegen aan je website",
+    "unlimited": "Onbeperkt",
+    "noStorefront": "Geen etalage",
+    "ship": "Verzenden"
+  },
+  "shareCard": {
+    "scanToShop": "Scan om te kopen",
+    "templates": {
+      "masthead": "Voorpagina",
+      "echo": "Echo",
+      "numerals": "Grote prijs",
+      "popout": "Uit de lijst",
+      "orbit": "Baan",
+      "sticker": "Sticker"
+    },
+    "formats": {
+      "square": "Vierkante post",
+      "portrait": "Staande post",
+      "story": "Story"
+    }
   },
   "removal": {
     "badge": "Verwijderd",
@@ -130,7 +151,7 @@
     "concerned": "Waar het over ging",
     "showField": "Toon {field} op deze pagina",
     "fields": {
-      "product": "{field, select, title {Titel} description {Beschrijving} price {Prijs} image {Hoofdafbeelding} file {Digitaal bestand} purchaseLink {Aankooplink} shipping {Verzending} options {Opties} photos {Foto's} specs {Specificaties} documents {Documenten} safety {Veiligheid en conformiteit} other {Iets anders}}",
+      "product": "{field, select, title {Titel} description {Beschrijving} price {Prijs} image {Hoofdafbeelding} file {Digitaal bestand} purchaseLink {Aankooplink} shipping {Verzending} options {Opties} photos {Foto's} specs {Badges en specificaties} documents {Documenten} safety {Veiligheid en conformiteit} other {Iets anders}}",
       "storefront": "{field, select, name {Naam van de etalage} header {Koptekst} text {Tekst} images {Afbeeldingen} products {Getoonde producten} background {Achtergrond} productPage {Productpagina's} other {Iets anders}}"
     },
     "reference": "Referentie",
@@ -154,7 +175,9 @@
     },
     "editorDetails": "Waarom, en wat je nu kunt doen",
     "badgePending": "Wordt gecontroleerd",
+    "badgePendingHint": "Kopers zien het zodra de automatische controle het goedkeurt.",
     "badgeReview": "In beoordeling",
+    "badgeReviewHint": "Een persoon bekijkt het. Kopers zien het zodra het is goedgekeurd.",
     "titlePending": "{kind, select, product {Dit product wordt gecontroleerd} other {Deze etalage wordt gecontroleerd}}",
     "titleReview": "{kind, select, product {Iemand controleert dit product} other {Iemand controleert deze etalage}}",
     "hiddenPending": "Kopers kunnen het pas zien als de automatische controle klaar is. Dat duurt meestal een paar seconden: laad de pagina opnieuw om te zien hoe het ervoor staat.",
@@ -175,6 +198,7 @@
     "fileEmpty": "Dat bestand is leeg.",
     "imported": "{count, plural, one {{count} product is geïmporteerd.} other {{count} producten zijn geïmporteerd.}}",
     "skippedRows": "{count, plural, one {{count} rij is overgeslagen.} other {{count} rijen zijn overgeslagen.}}",
+    "checkingRows": "{count, plural, one {{count} product wordt nog gecontroleerd: kopers zien het zodra de automatische controle het goedkeurt.} other {{count} producten worden nog gecontroleerd: kopers zien ze zodra de automatische controle ze goedkeurt.}}",
     "dropPrompt": "Sleep een CSV hierheen of klik om er een te kiezen",
     "fileMeta": "{size} · kies een ander bestand om opnieuw te beginnen",
     "rowsLimit": "{max, plural, one {Tot {max} product per bestand} other {Tot {max} producten per bestand}}",
@@ -258,6 +282,11 @@
         "label": "Zichtbaarheid",
         "description": "Actief is online: kopers kunnen het meteen zien en kopen. Concept is verborgen voor kopers totdat je het omzet.",
         "about": "Waar Zichtbaarheid voor is"
+      },
+      "badges": {
+        "label": "Badges",
+        "description": "Een paar woorden op de productpagina: een reden om je te vertrouwen, of iets wat meteen opvalt. Kies een kant-en-klare badge of schrijf je eigen, geef het pictogram een kleur en zet hem naast het product of op de foto.",
+        "about": "Waar Badges voor is"
       }
     },
     "summary": {
@@ -283,7 +312,8 @@
       "documents": "{count, plural, one {{count} document} other {{count} documenten}}",
       "started": "Gestart",
       "active": "Actief",
-      "draft": "Concept"
+      "draft": "Concept",
+      "badges": "{count, plural, one {{count} badge} other {{count} badges}}"
     },
     "errors": {
       "titleRequired": "Geef je product een titel, kopers zien die als eerste.",
@@ -309,7 +339,9 @@
         "notPositive": "De prijs moet een getal groter dan nul zijn.",
         "tooManyDecimals": "Prijzen mogen maximaal twee decimalen hebben.",
         "tooHigh": "De prijs mag niet hoger zijn dan {currency} {max}."
-      }
+      },
+      "badgeDuplicate": "Twee badges zeggen hetzelfde. Pas de tekst van een van de twee aan, of verwijder hem.",
+      "badgesOnPhoto": "Er passen maar {max} badges op de foto. Verplaats er een naast het product."
     },
     "title": "Titel",
     "titlePlaceholder": "bijv. Ambient Loops Vol. 1",
@@ -337,6 +369,7 @@
     "saveProduct": "Product opslaan",
     "savedToast": "\"{title}\" is opgeslagen.",
     "addedToast": "\"{title}\" is toegevoegd aan je producten.",
+    "checkingToast": "Kopers zien het zodra de automatische controle het goedkeurt.",
     "documentFallbackLabel": "Document",
     "discard": {
       "title": "Wijzigingen negeren?",
@@ -574,6 +607,9 @@
     "hint": "PNG, JPG, WEBP, GIF of AVIF, tot {max} MB",
     "remove": "Hoofdafbeelding verwijderen"
   },
+  "photoFormat": {
+    "heic": "Dat is een iPhone-foto (HEIC), die browsers niet kunnen tonen. Kies hem liever uit de fotobibliotheek van je telefoon, dan wordt hij als JPEG verstuurd, of exporteer hem eerst als JPEG."
+  },
   "fileDropzone": {
     "currentFile": "Huidig bestand",
     "dropPrompt": "Sleep een bestand hierheen of klik om te uploaden",
@@ -718,6 +754,233 @@
       "card": "Kaartnummer",
       "total": "Totaal",
       "pay": "Betaal {price}"
+    }
+  },
+  "badgesField": {
+    "listLabel": "Badges",
+    "labelFor": "Tekst voor badge {position}",
+    "iconFor": "Pictogram en kleur van badge {position}",
+    "labelPlaceholder": "Wat er op de badge staat",
+    "moveEarlier": "Badge {position} naar voren verplaatsen",
+    "moveLater": "Badge {position} naar achteren verplaatsen",
+    "remove": "Badge {position} verwijderen",
+    "addFirst": "Badge toevoegen",
+    "addAnother": "Nog een toevoegen",
+    "full": "Dat zijn {max} badges, het maximum voor één product. Verwijder er een om een andere toe te voegen.",
+    "iconPicker": "Kies een pictogram",
+    "icons": {
+      "badge-check": "Vinkje",
+      "heart": "Hart",
+      "star": "Ster",
+      "award": "Rozet",
+      "trophy": "Trofee",
+      "thumbs-up": "Duim omhoog",
+      "users": "Mensen",
+      "sparkles": "Fonkelingen",
+      "gem": "Edelsteen",
+      "gift": "Cadeau",
+      "truck": "Vrachtwagen",
+      "zap": "Bliksem",
+      "clock": "Klok",
+      "rotate-ccw": "Terugpijl",
+      "shield-check": "Schild",
+      "lock": "Hangslot",
+      "leaf": "Blad",
+      "recycle": "Recycling",
+      "sprout": "Spruit",
+      "trees": "Bomen",
+      "package": "Pakket",
+      "vegan": "Vegan",
+      "rabbit": "Konijn",
+      "paw-print": "Pootafdruk",
+      "wheat-off": "Geen tarwe",
+      "droplets": "Druppels",
+      "sun": "Zon",
+      "snowflake": "Sneeuwvlok",
+      "hand-heart": "Hand met hart",
+      "hammer": "Hamer",
+      "pen-tool": "Pen",
+      "map-pin": "Locatiespeld",
+      "store": "Winkel",
+      "handshake": "Handdruk",
+      "globe": "Wereldbol",
+      "flame": "Vlam"
+    },
+    "picker": {
+      "open": "Zoeken of zelf schrijven",
+      "label": "Badge toevoegen",
+      "search": "Badges zoeken",
+      "placeholder": "Zoek, of typ je eigen tekst",
+      "results": "Badges",
+      "groups": {
+        "trust": "Vertrouwen en service",
+        "product": "Over het product"
+      },
+      "create": "“{label}” toevoegen",
+      "checking": "Controleren…",
+      "added": "Toegevoegd",
+      "alreadyOn": "Dit product heeft die badge al.",
+      "noMatches": "Geen kant-en-klaar badge gevonden."
+    },
+    "stylePicker": "Pictogram en kleur",
+    "iconHeading": "Pictogram",
+    "colorHeading": "Kleur",
+    "colorPicker": "Kies een kleur",
+    "colors": {
+      "ink": "Zoals de tekst",
+      "red": "Rood",
+      "orange": "Oranje",
+      "amber": "Amber",
+      "green": "Groen",
+      "teal": "Petrol",
+      "blue": "Blauw",
+      "purple": "Paars",
+      "pink": "Roze"
+    },
+    "placementFor": "Positie van badge {position}",
+    "placementPicker": "Waar het staat",
+    "placements": {
+      "beside": "Naast het product",
+      "photo-top-left": "Op de foto, linksboven",
+      "photo-top-right": "Op de foto, rechtsboven",
+      "photo-bottom-left": "Op de foto, linksonder",
+      "photo-bottom-right": "Op de foto, rechtsonder"
+    },
+    "photo": "Foto",
+    "beside": "Naast het product",
+    "photoFull": "De foto heeft ruimte voor maximaal {max} badges. Verplaats er eerst een naast het product.",
+    "preview": {
+      "label": "Op je productpagina",
+      "hint": "Sleep een badge op de foto of naast het product.",
+      "titlePlaceholder": "Je product"
+    }
+  },
+  "badges": {
+    "presets": {
+      "lovedBy": {
+        "label": "{count, plural, one {Geliefd bij #+ koper} other {Geliefd bij #+ kopers}}",
+        "keywords": "klanten, populair, fans, blij, beoordelingen, sociale bewijskracht"
+      },
+      "bestseller": {
+        "label": "Bestseller",
+        "keywords": "bestseller, populair, top, favoriet, meest verkocht"
+      },
+      "topRated": {
+        "label": "Best beoordeeld",
+        "keywords": "beoordelingen, waardering, sterren, vijf sterren, topkwaliteit"
+      },
+      "freeShipping": {
+        "label": "Gratis verzending",
+        "keywords": "bezorging, porto, gratis levering, gratis bezorging"
+      },
+      "fastDispatch": {
+        "label": "{count, plural, one {Verstuurd binnen # uur} other {Verstuurd binnen # uur}}",
+        "keywords": "snel, vlug, verzending, levering, dezelfde dag, volgende dag"
+      },
+      "moneyBack": {
+        "label": "{count, plural, one {#-daagse geld-terug-garantie} other {#-daagse geld-terug-garantie}}",
+        "keywords": "retour, restitutie, garantie, risicovrij"
+      },
+      "freeReturns": {
+        "label": "Gratis retourneren",
+        "keywords": "retour, restitutie, ruilen, terugsturen"
+      },
+      "warranty": {
+        "label": "{count, plural, one {# jaar garantie} other {# jaar garantie}}",
+        "keywords": "garantie, dekking, reparatie, bescherming"
+      },
+      "securePayment": {
+        "label": "Veilig betalen",
+        "keywords": "veilig, afrekenen, betaling, beschermd, kaart"
+      },
+      "satisfaction": {
+        "label": "Tevredenheid gegarandeerd",
+        "keywords": "tevreden, garantie, kwaliteit, belofte"
+      },
+      "giftReady": {
+        "label": "Cadeau-klaar",
+        "keywords": "cadeau, geschenkverpakking, ingepakt, verjaardag"
+      },
+      "limitedEdition": {
+        "label": "Limited edition",
+        "keywords": "exclusief, zeldzaam, kleine oplage, collector"
+      },
+      "newArrival": {
+        "label": "Nieuw",
+        "keywords": "nieuw, nieuw binnen, laatste, vers"
+      },
+      "smallBusiness": {
+        "label": "Kleine onderneming",
+        "keywords": "onafhankelijk, lokale winkel, familiebedrijf, indie"
+      },
+      "awardWinning": {
+        "label": "Bekroond",
+        "keywords": "prijs, winnaar, award"
+      },
+      "ecoFriendly": {
+        "label": "Milieuvriendelijk",
+        "keywords": "groen, duurzaam, milieu, planeet, eco"
+      },
+      "handmade": {
+        "label": "Handgemaakt",
+        "keywords": "handgemaakt, ambachtelijk, met de hand gemaakt, vakwerk"
+      },
+      "recycled": {
+        "label": "Gemaakt van gerecycled materiaal",
+        "keywords": "gerecycled, upcycled, hergebruikt, circulair"
+      },
+      "plasticFree": {
+        "label": "Plasticvrije verpakking",
+        "keywords": "zero waste, verpakking, composteerbaar, geen plastic"
+      },
+      "organic": {
+        "label": "Biologisch",
+        "keywords": "natuurlijk, bio, pesticidevrij, zonder chemicaliën"
+      },
+      "vegan": {
+        "label": "Vegan",
+        "keywords": "plantaardig, geen dierlijke producten, zuivelvrij"
+      },
+      "crueltyFree": {
+        "label": "Niet getest op dieren",
+        "keywords": "niet getest op dieren, diervriendelijk"
+      },
+      "madeLocally": {
+        "label": "Lokaal gemaakt",
+        "keywords": "lokaal, gemaakt in, regionaal, eigen land"
+      },
+      "fairTrade": {
+        "label": "Fairtrade",
+        "keywords": "eerlijk, ethisch, eerlijk ingekocht, arbeiders"
+      },
+      "sustainablySourced": {
+        "label": "Duurzaam ingekocht",
+        "keywords": "verantwoord, inkoop, bos, hout, traceerbaar"
+      },
+      "glutenFree": {
+        "label": "Glutenvrij",
+        "keywords": "coeliakie, tarwevrij, allergie"
+      },
+      "waterproof": {
+        "label": "Waterdicht",
+        "keywords": "waterbestendig, regen, spatwaterdicht, buiten"
+      },
+      "builtToLast": {
+        "label": "Gebouwd om te blijven",
+        "keywords": "duurzaam, stevig, kwaliteit, lang meegaan, robuust"
+      },
+      "personalised": {
+        "label": "Gepersonaliseerd",
+        "keywords": "op maat, gegraveerd, monogram, op bestelling, aanpasbaar"
+      },
+      "petFriendly": {
+        "label": "Huisdiervriendelijk",
+        "keywords": "huisdieren, honden, katten, veilig voor dieren"
+      },
+      "qualityChecked": {
+        "label": "Kwaliteitsgecontroleerd",
+        "keywords": "getest, geïnspecteerd, gecontroleerd, goedgekeurd"
+      }
     }
   }
 }

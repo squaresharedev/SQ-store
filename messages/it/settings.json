@@ -303,6 +303,7 @@
   "tax": {
     "cardTitle": "Attività e dati del venditore",
     "cardDescription": "Da impostare una volta sola per tutto il tuo account. Mostrato agli acquirenti su ogni pagina prodotto in cui vendi, e usato per le fatture e l’IVA.",
+    "memberScope": "Questi sono i tuoi dati di venditore. Quelli che gli acquirenti vedono su {store} sono del proprietario, che li imposta nelle sue impostazioni.",
     "gate": {
       "required": "<strong>La tua ragione sociale (o il tuo nome), l’indirizzo e l’email di contatto sono obbligatori prima di poter pubblicare o vendere qualsiasi cosa.</strong> Gli acquirenti devono poter vedere da chi stanno comprando e come contattarti prima di ordinare.",
       "privacyNoteLinked": "Questi dati compaiono pubblicamente sulle tue pagine prodotto solo per questo motivo. Non li usiamo mai per il marketing e non li vendiamo né li condividiamo. L'unico messaggio che inviamo alla tua email di contatto o al tuo telefono è il codice che li conferma. Consulta la <link>Informativa sulla privacy di Squareshare</link>."

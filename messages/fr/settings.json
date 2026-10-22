@@ -303,6 +303,7 @@
   "tax": {
     "cardTitle": "Entreprise et informations vendeur",
     "cardDescription": "À définir une seule fois pour tout votre compte. Affiché aux acheteurs sur chaque page produit où vous vendez, et utilisé pour les factures et la TVA.",
+    "memberScope": "Ce sont vos propres informations de vendeur. Celles que les acheteurs voient sur {store} appartiennent à son propriétaire, qui les règle dans ses propres paramètres.",
     "gate": {
       "required": "<strong>Votre raison sociale, votre adresse et votre e-mail de contact sont obligatoires avant de pouvoir publier ou vendre quoi que ce soit.</strong> Les acheteurs doivent pouvoir voir à qui ils achètent et comment vous contacter avant de commander.",
       "privacyNoteLinked": "Ces informations apparaissent publiquement sur vos pages produit pour cette seule raison. Nous ne les utilisons jamais pour le marketing, et ne les vendons ni ne les partageons jamais. Le seul message que nous envoyons à votre e-mail de contact ou à votre téléphone est le code qui le confirme. Voir la <link>Politique de confidentialité de Squareshare</link>."

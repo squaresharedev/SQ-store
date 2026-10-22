@@ -766,6 +766,27 @@ export type Database = {
         }
         Relationships: []
       }
+      signup_intents: {
+        Row: {
+          created_at: string
+          email_hash: string
+          expires_at: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email_hash: string
+          expires_at: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email_hash?: string
+          expires_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       mfa_approval_opt_outs: {
         Row: {
           created_at: string

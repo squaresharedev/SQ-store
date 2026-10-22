@@ -1,5 +1,6 @@
 import { embedOrigin } from "@/lib/app-url";
 import { escapeHtml } from "@/lib/format/html";
+import { EMBED_FRAME_SANDBOX, EMBED_MAX_SITES, embedFramePath } from "@/lib/storefront/embed-frame";
 
 /**
  * Whether the embed can be put on a website yet. ONE answer, like
@@ -44,6 +45,45 @@ export function embedSnippet(embedKey: string): string {
   return [
     `<div data-squareshare-storefront="${embedKey}"></div>`,
     `<script async src="${embedOrigin() ?? PLANNED_EMBED_ORIGIN}${EMBED_LOADER_PATH}"></script>`,
+  ].join("\n");
+}
+
+/**
+ * How tall the plain-iframe snippet is, in CSS pixels. Without the loader
+ * nothing can size the frame to its board, so it gets one fixed height that
+ * shows a couple of rows and scrolls the rest; the seller can change it in the
+ * code.
+ */
+export const EMBED_IFRAME_HEIGHT = 640;
+
+/**
+ * The sites a plain-iframe snippet names, from the seller's saved domains: each
+ * domain as saved, then its www. twin, up to as many as one address may carry.
+ * The loader works this out from the page it runs on; a pasted iframe cannot,
+ * so it names the sites the seller listed. The domains come first, so a seller
+ * with several still has each one named before any twin is.
+ */
+export function embedFrameSites(domains: readonly string[]): string[] {
+  const twin = (domain: string) => (domain.startsWith("www.") ? domain.slice(4) : `www.${domain}`);
+  const sites = [...domains, ...domains.map(twin)];
+  return [...new Set(sites)].slice(0, EMBED_MAX_SITES);
+}
+
+/**
+ * The snippet for a site that cannot run the loader: a site builder that strips
+ * script tags, or one that loads its pages in a way that never runs them
+ * (Squarespace's Ajax page loading). The same frame, sandboxed exactly as the
+ * loader would, with a fixed height in place of the loader's fitted one.
+ *
+ * Frozen to the sites it names when copied: a domain added later needs a
+ * fresh copy, and one removed stops it showing, which is the point.
+ */
+export function embedFrameSnippet(embedKey: string, sites: readonly string[]): string {
+  const src = `${embedOrigin() ?? PLANNED_EMBED_ORIGIN}${embedFramePath(embedKey, sites)}`;
+  return [
+    `<iframe src="${escapeHtml(src)}" title="Shop" loading="lazy"`,
+    `  sandbox="${EMBED_FRAME_SANDBOX}" referrerpolicy="no-referrer"`,
+    `  style="display:block;width:100%;height:${EMBED_IFRAME_HEIGHT}px;border:0"></iframe>`,
   ].join("\n");
 }
 

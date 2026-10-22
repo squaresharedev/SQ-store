@@ -78,7 +78,7 @@ describe("SetupChecklist", () => {
     expect(seller).toHaveAttribute("data-setup-state", "todo");
     expect(within(seller).getByRole("link", { name: /add details/i })).toHaveAttribute(
       "href",
-      "/settings/tax#business-name",
+      "/settings/business#business-name",
     );
     // Publishing waits on the details, so its row offers no link of its own.
     const publish = container.querySelector('[data-setup-step="publish"]') as HTMLElement;

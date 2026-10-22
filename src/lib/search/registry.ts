@@ -1,3 +1,4 @@
+import { TRADER_IDENTITY_HREF } from "@/lib/settings/trader-identity";
 import {
   allowedFor,
   searchCatalog,
@@ -296,7 +297,7 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     type: "settings",
     title: "Search.fields.vat",
     section: BUSINESS,
-    href: "/settings/tax#vat",
+    href: `${TRADER_IDENTITY_HREF}#vat`,
     synonyms: ["tax number", "vat number", "tax id", "eu vat"],
   },
   {
@@ -304,7 +305,7 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     type: "settings",
     title: "Search.fields.businessName",
     section: BUSINESS,
-    href: "/settings/tax#business-name",
+    href: `${TRADER_IDENTITY_HREF}#business-name`,
     synonyms: ["business name", "company name", "legal name", "trading name", "seller details", "tax"],
   },
   {
@@ -312,7 +313,7 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     type: "settings",
     title: "Search.fields.country",
     section: BUSINESS,
-    href: "/settings/tax#country",
+    href: `${TRADER_IDENTITY_HREF}#country`,
     synonyms: ["tax country", "eu", "residence", "jurisdiction"],
   },
   {
@@ -320,7 +321,7 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     type: "settings",
     title: "Search.fields.address",
     section: BUSINESS,
-    href: "/settings/tax#address",
+    href: `${TRADER_IDENTITY_HREF}#address`,
     synonyms: ["seller address", "postal address", "trader address", "who is selling"],
   },
   {
@@ -328,7 +329,7 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     type: "settings",
     title: "Search.fields.contactEmail",
     section: BUSINESS,
-    href: "/settings/tax#contact-email",
+    href: `${TRADER_IDENTITY_HREF}#contact-email`,
     synonyms: ["seller email", "buyer contact", "support email"],
   },
   {
@@ -336,7 +337,7 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     type: "settings",
     title: "Search.fields.phone",
     section: BUSINESS,
-    href: "/settings/tax#phone",
+    href: `${TRADER_IDENTITY_HREF}#phone`,
     synonyms: ["phone number", "contact number", "seller phone"],
   },
   {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatOrderSelection, parseOrderSelection } from "@/lib/orders/selection";
+import { formatOrderSelection, optionIdsForSelection, parseOrderSelection } from "@/lib/orders/selection";
 import {
   ORDER_SELECTION_LABEL_MAX,
   ORDER_SELECTION_MAX,
@@ -72,5 +72,35 @@ describe("formatOrderSelection", () => {
 
   it("is empty for a product sold in one version", () => {
     expect(formatOrderSelection([])).toBe("");
+  });
+});
+
+describe("optionIdsForSelection", () => {
+  const groups = [
+    { name: "Size", options: [{ id: "s", name: "Small" }, { id: "l", name: "Large" }] },
+    { name: "Finish", options: [{ id: "w", name: "Walnut" }, { id: "o", name: "Oak" }] },
+  ];
+
+  it("reads a stored choice back as the ids a checkout link carries", () => {
+    expect(
+      optionIdsForSelection(groups, [
+        { label: "Size", value: "Large" },
+        { label: "Finish", value: "Oak" },
+      ]),
+    ).toEqual(["l", "o"]);
+  });
+
+  it("gives nothing rather than a guess when any part no longer matches", () => {
+    expect(
+      optionIdsForSelection(groups, [
+        { label: "Size", value: "Large" },
+        { label: "Finish", value: "Cherry" },
+      ]),
+    ).toEqual([]);
+    expect(optionIdsForSelection([], [{ label: "Size", value: "Large" }])).toEqual([]);
+  });
+
+  it("is empty for a product sold in one version", () => {
+    expect(optionIdsForSelection(groups, [])).toEqual([]);
   });
 });

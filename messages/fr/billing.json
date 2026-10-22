@@ -199,6 +199,7 @@
     "invoicesDescription": "Votre carte, adresse de facturation, numéro de TVA et toutes vos factures, sur la page sécurisée de Stripe.",
     "manage": "Gérer la facturation et les factures",
     "noBilling": "Les factures et les informations de paiement apparaissent ici une fois que vous êtes sur un forfait payant.",
+    "noBillingYet": "Les factures et les informations de paiement apparaîtront ici dès l’ouverture des forfaits payants.",
     "confirmed": "Vous êtes sur {plan}. Merci de soutenir Square Share.",
     "pending": "Nous confirmons votre paiement avec Stripe. Actualisez dans un moment si votre forfait n'a pas changé.",
     "unavailable": "Votre forfait ne peut pas être affiché pour l'instant. Actualisez la page dans un moment.",

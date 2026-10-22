@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { SearchX, Store, Trash2 } from "lucide-react";
+import { SearchX, Store, Trash2, Truck } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { emptyStateClass } from "@/components/ui/surface-styles";
+import { emptyStateClass, productGridClass } from "@/components/ui/surface-styles";
 import type { Product, ProductSalesSummary } from "@/types/product";
 import { deleteProduct } from "@/lib/products/actions";
 import { useToast } from "@/components/ui/Toast";
@@ -13,6 +13,7 @@ import { HeroMark } from "@/components/ui/HeroMark";
 import { Modal, ModalActions } from "@/components/ui/modal";
 import { ProductThumb } from "@/components/ui/ProductThumb";
 import {
+  dangerNoticeClass,
   ghostButtonClass,
   infoTextClass,
   secondaryButtonClass,
@@ -36,6 +37,7 @@ export function ProductList({
   canWrite,
   sales,
   placements = {},
+  toShip = {},
   missingTraderDetails = [],
   filtered = false,
   onClearFilters,
@@ -51,6 +53,9 @@ export function ProductList({
    * and open affordances.
    */
   placements?: Record<string, StorefrontPlacement[]>;
+  /** Orders still to ship, by product id: on each card, and the delete
+   *  dialog's warning (the delete action checks again for itself). */
+  toShip?: Record<string, number>;
   /** Trader details the store still owes buyers: the buy button dialog says
    *  so instead of handing out a link the page would refuse. */
   missingTraderDetails?: readonly TraderIdentityField[];
@@ -95,11 +100,15 @@ export function ProductList({
     // Optimistic: the card goes as soon as the seller confirms, and comes back
     // with an explanation if the server refuses.
     setProducts((current) => current.filter((product) => product.id !== target.id));
-    const result = await deleteProduct(target.id);
+    // The count the dialog warned about: the action refuses if more orders
+    // than that are now waiting, so a newer one is never deleted past unseen.
+    const result = await deleteProduct(target.id, toShip[target.id] ?? 0);
     setDeleting(false);
     setPendingDelete(null);
     if (!result.ok) {
       setProducts(previous);
+      // When the refusal was a newer order, the action has refreshed the
+      // page, so the next attempt's dialog shows the right warning.
       showActionError(result.error);
       return;
     }
@@ -193,6 +202,9 @@ export function ProductList({
   const deleteStorefronts = pendingDelete
     ? (placements[pendingDelete.id] ?? [])
     : [];
+  // Buyers still waiting on this product. Their orders stay (with its name
+  // and price), but deleting it then is a decision, so it is said first.
+  const deleteToShip = pendingDelete ? (toShip[pendingDelete.id] ?? 0) : 0;
 
   // Build the storefront chooser description.
   const linkTargetStorefronts = linkTarget
@@ -201,8 +213,9 @@ export function ProductList({
 
   return (
     <>
-      {/* Four-up from the laptop breakpoint (lg): the smaller card carries it. */}
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {/* As many 14rem+ columns as fit, not viewport breakpoints: beside the
+          sidebar those gave a laptop cards under 10rem wide. */}
+      <ul className={productGridClass}>
         {products.map((product) => (
           <li key={product.id}>
             <ProductCard
@@ -211,6 +224,7 @@ export function ProductList({
               sales={sales.byProduct[product.id]}
               isBestseller={sales.bestsellerId === product.id}
               storefrontCount={placements[product.id]?.length ?? 0}
+              toShip={toShip[product.id] ?? 0}
               onDelete={() => setPendingDelete(product)}
               onCopyLink={() => handleLinkAction(product, "copy")}
               onOpenPage={() => handleLinkAction(product, "open")}
@@ -241,11 +255,20 @@ export function ProductList({
               })
             : undefined
         }
-        confirmLabel={t("deleteDialog.confirm")}
+        confirmLabel={deleteToShip > 0 ? t("deleteDialog.confirmAnyway") : t("deleteDialog.confirm")}
         pendingLabel={tCommon("deleting")}
         pending={deleting}
         onConfirm={handleConfirmDelete}
-      />
+      >
+        {deleteToShip > 0 && (
+          <div role="status" className={dangerNoticeClass} data-delete-to-ship={deleteToShip}>
+            <Truck className="mt-0.5 size-4 shrink-0 text-destructive" strokeWidth={2} aria-hidden="true" />
+            <p className="font-inter text-sm text-foreground">
+              {t("deleteDialog.toShip", { count: deleteToShip })}
+            </p>
+          </div>
+        )}
+      </ConfirmDialog>
 
       {/* Storefront chooser: shown when a link action targets a product that is
           on more than one storefront. The seller picks which URL to copy or

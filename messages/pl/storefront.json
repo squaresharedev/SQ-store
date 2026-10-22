@@ -183,12 +183,13 @@
     "loadMoreError": "Nie udało się wczytać kolejnych witryn. Spróbuj ponownie.",
     "loadMore": "Wczytaj więcej (pozostało: {remaining})",
     "deleteTitle": "Usunąć witrynę?",
-    "deleteDesc": "Witryna „{name}” i jej siatka zostaną trwale usunięte. Tej operacji nie można cofnąć.",
+    "deleteDesc": "Witryna „{name}” i jej siatka zostaną trwale usunięte. Tej operacji nie można cofnąć. Złożone przez nią zamówienia zostaną, podobnie jak strony zamówień ich kupujących.",
     "deleteToast": "Witryna „{name}” została usunięta."
   },
   "card": {
     "editAriaLabel": "Edytuj: {name}",
-    "embedAriaLabel": "Osadź: {name}",
+    "embedAriaLabel": "Udostępnij lub osadź: {name}",
+    "viewPageAriaLabel": "Otwórz {name} tak, jak widzą ją kupujący",
     "deleteAriaLabel": "Usuń: {name}",
     "blockCount": "{count, plural, one {# blok} few {# bloki} many {# bloków} other {# bloku}}",
     "updatedLabel": " · zaktualizowano {date}",
@@ -199,28 +200,52 @@
   },
   "embed": {
     "inDevNotice": "Widget osadzenia jest w trakcie tworzenia i nie renderuje się jeszcze na zewnętrznych stronach. Skonfiguruj ustawienia poniżej, aby być gotowym wkleić kod, gdy tylko zostanie wdrożony.",
-    "title": "Osadź tę witrynę",
-    "description": "Wklej ten kod na dowolną stronę, aby wyświetlić tam witrynę „{name}”.",
+    "title": "Udostępnij tę witrynę",
+    "description": "Wyślij link do witryny „{name}” albo wklej kod na swoją stronę, aby ją tam wyświetlić.",
+    "steps": {
+      "site": "Wybierz strony, na których się wyświetla",
+      "snippet": "Wklej kod na swojej stronie",
+      "privacy": "Dodaj to do swojej polityki prywatności"
+    },
+    "required": "Wymagane",
     "enabledLabel": "Osadzenie włączone",
     "domainsLabel": "Dozwolone domeny",
     "domainsPlaceholder": "twojastrona.com, blog.twojastrona.com",
     "domainsHint": "Maksymalnie {max}, oddzielone przecinkami. Wklej adres URL, a przytniemy go do samej domeny.",
     "emptyDomainsWarning": "Dodaj co najmniej jedną domenę. Dopóki lista jest pusta, witryna nie wczyta się nigdzie, mimo że osadzenie jest włączone.",
-    "snippetLabel": "Kod",
-    "snippetReadyHint": "Wklej ten kod do kodu HTML swojej strony.",
+    "builderLabel": "Twój kreator stron",
+    "builderOther": "Inna strona",
+    "builderSteps": {
+      "other": "Wklej go do kodu HTML strony w miejscu, w którym ma się pojawić witryna.",
+      "wordpress": "Dodaj blok „Własny HTML” w miejscu, w którym ma się pojawić witryna, i wklej do niego kod.",
+      "squarespace": "Dodaj blok „Code” i wklej do niego kod. Jeśli witryna pojawia się dopiero po odświeżeniu, przełącz na „Tylko iframe”.",
+      "wix": "Dodaj „Embed Code”, a potem „Embed HTML”, i wklej kod. Następnie rozciągnij pole na wysokość witryny.",
+      "webflow": "Dodaj element „Code Embed” i wklej do niego kod. Pojawi się na opublikowanej stronie.",
+      "shopify": "W edytorze motywu dodaj sekcję „Custom Liquid” i wklej do niej kod.",
+      "google": "Wybierz „Insert”, potem „Embed”, potem „Embed code” i wklej kod.",
+      "framer": "Dodaj komponent „Embed”, ustaw go na HTML i wklej kod.",
+      "carrd": "Dodaj element „Embed”, wybierz typ „Code” i wklej kod."
+    },
+    "snippetKinds": {
+      "label": "Rodzaj kodu",
+      "script": "Skrypt",
+      "iframe": "Tylko iframe"
+    },
+    "snippetReadyHint": "Wystarczy wkleić go raz. Dopasowuje się do witryny i uwzględnia zmiany, które wprowadzasz tutaj.",
+    "iframeHint": "Dla stron, które usuwają skrypty. Ma {height} pikseli wysokości i przewija się wewnątrz. Skopiuj go ponownie po zmianie domen.",
     "snippetLockedHint": "Włącz osadzenie i dodaj co najmniej jedną domenę, aby odblokować przycisk Kopiuj.",
     "snippetSaveHint": "Zapisz ustawienia, aby odblokować przycisk Kopiuj.",
     "pagesOffHint": "Najpierw włącz strony produktów w edytorze. Kliknięcie produktu otwiera jego stronę.",
     "notShowingLabel": "Jeśli witryna się nie wyświetla",
-    "notShowingTip": "Adres twojej strony musi być na liście Dozwolone domeny, a strona musi używać https. Kreatory stron, które umieszczają własny kod HTML we własnej ramce (Wix, Google Sites), nie są jeszcze obsługiwane.",
+    "notShowingTip": "Adres twojej strony musi być na liście Dozwolone domeny, a strona musi używać https. Wklejony kod pojawia się na opublikowanej stronie, a nie w edytorze kreatora. Aby zobaczyć go pod adresem podglądu (np. twojastrona.webflow.io), dodaj również ten adres.",
     "copySnippet": {
       "copy": "Kopiuj kod do osadzenia",
       "copied": "Skopiowano kod do osadzenia",
       "failed": "Nie udało się skopiować kodu do osadzenia. Zaznacz i skopiuj ręcznie.",
       "cannotCopyYet": "kodu do osadzenia nie można jeszcze skopiować"
     },
-    "privacyLabel": "Do twojej polityki prywatności",
-    "privacyHint": "Twoja strona wczytuje teraz witrynę ze Squareshare, więc jej polityka prywatności powinna o tym mówić. Możesz wkleić ten tekst:",
+    "privacyHint": "Twoja strona wczytuje teraz tę witrynę ze Squareshare, więc jej polityka prywatności musi o tym mówić. Wklej do niej ten tekst:",
+    "privacyTextLabel": "Tekst o prywatności",
     "privacyText": "Ta strona wyświetla witrynę sklepową dostarczaną przez Squareshare. Podczas jej wczytywania adres IP i dane przeglądarki odwiedzającego są przesyłane do Squareshare w celu wyświetlenia produktów i zliczania wizyt. Squareshare nie zapisuje w tym celu plików cookie ani niczego innego na urządzeniu odwiedzającego. Szczegóły: {policy}",
     "copyPrivacy": {
       "copy": "Kopiuj tekst o prywatności",
@@ -606,7 +631,8 @@
   "chipScale": {
     "label": "Na większych kartach",
     "tile": "Powiększ",
-    "cell": "Ten sam rozmiar"
+    "cell": "Ten sam rozmiar",
+    "everyCard": "Dotyczy wszystkich kart w tym sklepie."
   },
   "layout": {
     "canvasWidth": "Szerokość obszaru roboczego",
@@ -737,8 +763,8 @@
       "showPage": {
         "label": "Pokaż stronę produktu",
         "infoLabel": "Co robi ten przełącznik",
-        "infoOn": "Stuknięcie w kafelek produktu otwiera jego stronę.",
-        "infoOff": "Kafelki produktów nie mają strony do otwarcia."
+        "infoOn": "Stuknięcie w kafelek produktu otwiera jego stronę, a witryna ma własną stronę do udostępnienia.",
+        "infoOff": "Kafelki produktów nie mają strony do otwarcia, a link do samej witryny też przestaje działać."
       },
       "pageColor": "Kolor strony",
       "storefrontBackground": "Tło witryny",
@@ -1103,7 +1129,7 @@
     "imageUnavailable": "Obraz niedostępny"
   },
   "spotDrag": {
-    "tokenLabel": "{token, select, title {Tytuł} other {Cena}} {drop, select, below {na pasku tytułu} top_left {w lewym górnym rogu} top_center {na górnym środku} top_right {w prawym górnym rogu} middle_center {na środku} bottom_left {w lewym dolnym rogu} bottom_center {na dolnym środku} bottom_right {w prawym dolnym rogu} other {}}. Naciśnij, aby otworzyć ustawienia, albo przeciągnij (lub użyj klawiszy strzałek), aby to przesunąć."
+    "tokenLabel": "{token, select, title {Tytuł} sale {Etykieta obniżki} other {Cena}} {drop, select, below {na pasku tytułu} top_left {w lewym górnym rogu} top_center {na górnym środku} top_right {w prawym górnym rogu} middle_center {na środku} bottom_left {w lewym dolnym rogu} bottom_center {na dolnym środku} bottom_right {w prawym dolnym rogu} other {}}. Naciśnij, aby otworzyć ustawienia, albo przeciągnij (lub użyj klawiszy strzałek), aby to przesunąć."
   },
   "autoFit": {},
   "designer": {
@@ -1112,6 +1138,7 @@
       "nameLabel": "Nazwa witryny",
       "namePlaceholder": "Witryna bez nazwy",
       "unsaved": "Niezapisane zmiany",
+      "viewPage": "Zobacz stronę",
       "search": "Szukaj"
     },
     "mobileNotice": {
@@ -1154,6 +1181,12 @@
       "description": "Masz niezapisane zmiany w tej witrynie. Zapisz je przed wyjściem albo je odrzuć.",
       "save": "Zapisz zmiany",
       "discard": "Odrzuć zmiany",
+      "keepEditing": "Kontynuuj edycję"
+    },
+    "conflict": {
+      "title": "Ktoś inny zapisał tę witrynę",
+      "description": "Zmieniła się, odkąd ją otworzyłeś, w innej karcie albo przez kogoś z twojego zespołu. Zapisanie teraz zastąpi ich wersję twoją.",
+      "overwrite": "Zapisz moją zamiast niej",
       "keepEditing": "Kontynuuj edycję"
     },
     "defaults": {
@@ -1255,6 +1288,10 @@
       "blockColor": {
         "label": "kolor bloku",
         "use": "Użyj: kolor bloku"
+      },
+      "auto": {
+        "label": "Automatycznie",
+        "use": "Użyj: automatycznie"
       }
     },
     "presets": {

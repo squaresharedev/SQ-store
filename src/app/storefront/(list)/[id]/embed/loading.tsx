@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
-import { pageColumnNarrowClass, pageShellClass } from "@/components/ui/surface-styles";
+import { pageShellClass } from "@/components/ui/surface-styles";
+import { cn } from "@/lib/utils";
 import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
@@ -10,11 +11,9 @@ export default function StorefrontEmbedLoading() {
   const t = useTranslations("Storefront.embed");
   const tDesigner = useTranslations("Storefront.designer.header");
   return (
-    <main className={pageShellClass}>
-      <div className={pageColumnNarrowClass}>
-        <BackLink href={STOREFRONT_LIST_PATH}>{tDesigner("back")}</BackLink>
-        <PageHeader className="mb-6 mt-4 text-center" title={t("title")} />
-      </div>
+    <main className={cn(pageShellClass, "space-y-6")}>
+      <BackLink href={STOREFRONT_LIST_PATH}>{tDesigner("back")}</BackLink>
+      <PageHeader title={t("title")} />
     </main>
   );
 }

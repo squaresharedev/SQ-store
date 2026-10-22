@@ -101,7 +101,10 @@ export type BuyerOrder = {
 };
 
 export type OrderPageData = {
-  storefront: CheckoutStorefront;
+  /** `detached`: the seller has deleted the storefront this was bought
+   *  from. The order page still answers, in the default design, with no
+   *  link back to a shop that is gone. */
+  storefront: CheckoutStorefront & { detached?: boolean };
   order: BuyerOrder;
 };
 

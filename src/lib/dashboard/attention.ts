@@ -1,9 +1,10 @@
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { msg, type MessageRef } from "@/i18n/types";
-import { ordersViewPath } from "@/lib/orders/paths";
+import { ordersStatusPath, ordersViewPath } from "@/lib/orders/paths";
+import { WITHDRAWN_STATUS_FILTER } from "@/types/order-view";
 import { SHIPPING_RATES_HREF } from "@/types/shipping-policy";
-import { PAYMENTS_PATH } from "./paths";
+import { ORDERS_PATH, PAYMENTS_PATH } from "./paths";
 import type { DashboardOrdersData, ProductsSummary, ProfileSummary } from "./queries";
 
 /**
@@ -81,6 +82,7 @@ export function buildAttentionItems({
   setupVisible = false,
   twoFactorEnabled = true,
   toShipCount = 0,
+  withdrawalsToSettle = 0,
   checkoutOpen = false,
 }: {
   orders: DashboardOrdersData;
@@ -114,6 +116,9 @@ export function buildAttentionItems({
   twoFactorEnabled?: boolean;
   /** Paid orders waiting to be shipped (lib/orders/queries.ts countOrdersToShip). */
   toShipCount?: number;
+  /** Recent withdrawals not refunded yet (lib/orders/queries.ts
+   *  countWithdrawalsToSettle). */
+  withdrawalsToSettle?: number;
   /**
    * A buyer can pay through Square Share checkout right now
    * (lib/checkout/availability.ts). Only then does an unpriced delivery policy
@@ -136,6 +141,18 @@ export function buildAttentionItems({
       description: msg("Dashboard.attention.toShip.description"),
       href: ordersViewPath("to-ship"),
       actionLabel: msg("Dashboard.attention.toShip.action"),
+    });
+  }
+
+  // Right after it: a buyer who withdrew is owed a refund within 14 days, and
+  // those orders are deliberately not in the To ship count above.
+  if (withdrawalsToSettle > 0) {
+    items.push({
+      key: "withdrawals",
+      label: msg("Dashboard.attention.withdrawals.label", { count: withdrawalsToSettle }),
+      description: msg("Dashboard.attention.withdrawals.description"),
+      href: ordersStatusPath(WITHDRAWN_STATUS_FILTER),
+      actionLabel: msg("Dashboard.attention.withdrawals.action"),
     });
   }
 
@@ -339,7 +356,7 @@ export function buildAttentionItems({
             : msg("Dashboard.attention.flaggedOrders.descriptionRefunded", {
                 count: orders.refundedCount,
               }),
-      href: status ? `/orders?status=${status}` : "/orders",
+      href: status ? ordersStatusPath(status) : ORDERS_PATH,
       actionLabel: msg("Dashboard.attention.flaggedOrders.action"),
     });
   }

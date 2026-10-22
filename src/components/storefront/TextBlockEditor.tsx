@@ -238,7 +238,7 @@ export function TextBlockEditor({
         // picker is writing to every selected block at once.
         target={multi ? undefined : { kind: "text-color", blockKey: blockKey(block) }}
       />
-      {selectedWords && (
+      {selectedWords > 0 && (
         <p className={helpTextClass}>
           {t("textBlock.colouringSelected", { count: selectedWords })}
         </p>

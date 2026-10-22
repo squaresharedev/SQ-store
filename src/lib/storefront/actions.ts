@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { storefrontVersion } from "@/lib/storefront/version";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { createClient } from "@/lib/supabase/server";
@@ -73,8 +74,35 @@ export type SaveStorefrontResult =
       ok: true;
       /** Blocks removed because their product no longer exists / isn't owned. */
       droppedBlocks: number;
+      /** The saved copy's fingerprint, for the editor's next save. */
+      version?: string;
     }
-  | ActionFailure;
+  | ActionFailure
+  /** Someone saved it since this editor loaded or last saved it: nothing was
+   *  written, and the editor asks before saving over their work. */
+  | (ActionFailure & { conflict: true });
+
+/** What the editor knows about the copy it is saving over. */
+export type SaveStorefrontOptions = {
+  /** The fingerprint of the copy the editor loaded or last saved
+   *  (lib/storefront/version.ts). Absent: no check (an older open tab, or a
+   *  caller that does not track it). */
+  expectedVersion?: string | null;
+  /** Save over a newer copy anyway: the seller chose theirs. */
+  overwrite?: boolean;
+};
+
+function savedElsewhere(): ActionFailure & { conflict: true } {
+  return {
+    ...failure(
+      invalidInput(
+        msg("Errors.storefront.savedElsewhere.message"),
+        msg("Errors.storefront.savedElsewhere.fix"),
+      ),
+    ),
+    conflict: true,
+  };
+}
 
 export type DeleteStorefrontResult = { ok: true } | ActionFailure;
 
@@ -207,6 +235,7 @@ export async function createStorefront(
 export async function saveStorefront(
   id: string,
   input: unknown,
+  options: SaveStorefrontOptions = {},
 ): Promise<SaveStorefrontResult> {
   const account = await getActiveAccount();
   if (!account) return failure(sessionExpired());
@@ -296,7 +325,7 @@ export async function saveStorefront(
   const nextFontKey = config.theme.customFont?.key ?? null;
   const { data: existingRow, error: existingError } = await supabase
     .from("storefronts")
-    .select("config")
+    .select("name, config")
     .eq("id", id)
     .eq("owner_id", account.accountId)
     .maybeSingle();
@@ -305,6 +334,18 @@ export async function saveStorefront(
     return failure(serverError("saveStorefront"));
   }
   if (!existingRow) return failure(notFound("storefront"));
+  // Two people (or two tabs) on one storefront: the later save used to win
+  // silently and the earlier one's work was gone. Now it is asked about.
+  // Compared on what the seller edits (name and design), not on updated_at:
+  // the content check and staff decisions touch the row too, and must not
+  // read as someone else's save.
+  if (
+    typeof options.expectedVersion === "string" &&
+    options.overwrite !== true &&
+    (await storefrontVersion(existingRow.name, existingRow.config)) !== options.expectedVersion
+  ) {
+    return savedElsewhere();
+  }
   const previousBackgroundKey = storedBackgroundKey(existingRow.config);
   const previousFontKey = storedFontKey(existingRow.config);
   if (nextBackgroundKey && nextBackgroundKey !== previousBackgroundKey) {
@@ -351,7 +392,7 @@ export async function saveStorefront(
 
   await precheck("storefront", id, { name: parsedName.data, config });
 
-  const { data: row, error } = await supabase
+  const write = supabase
     .from("storefronts")
     .update({
       name: parsedName.data,
@@ -359,9 +400,8 @@ export async function saveStorefront(
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
-    .eq("owner_id", account.accountId)
-    .select("id, moderation_status")
-    .maybeSingle();
+    .eq("owner_id", account.accountId);
+  const { data: row, error } = await write.select("id, moderation_status, name, config").maybeSingle();
 
   if (error) {
     console.error("[storefront] save failed", error);
@@ -387,6 +427,9 @@ export async function saveStorefront(
   return {
     ok: true,
     droppedBlocks: parsed.data.blocks.length - config.blocks.length,
+    // Of the row as stored, not of what was sent: the database orders a
+    // design's keys its own way, and the next comparison reads it from there.
+    version: await storefrontVersion(row.name, row.config),
   };
 }
 

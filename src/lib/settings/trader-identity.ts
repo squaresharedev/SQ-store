@@ -52,8 +52,9 @@ export type TraderIdentityInput = StorefrontSeller & {
   emailVerified?: boolean;
 };
 
-/** Where a seller fills these in. Every warning links here. */
-export const TRADER_IDENTITY_HREF = "/settings/tax";
+/** Where a seller fills these in: Settings, Business & seller details. Every
+ *  warning links here. (The old /settings/tax redirects to it.) */
+export const TRADER_IDENTITY_HREF = "/settings/business";
 
 /**
  * Each required field, with the anchor on the settings page that lands on it

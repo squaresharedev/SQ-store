@@ -9665,6 +9665,131 @@ revoke execute on function public.guard_collection_name() from public, anon, aut
 notify pgrst, 'reload schema';
 
 -- =============================================================================
+-- ===== (applied) removed_content_frees_plan_room ============================
+-- supabase/migrations/20261019_removed_content_frees_plan_room.sql, replayed
+-- verbatim. Applied to prod 2026-10-19 through the Management API query
+-- endpoint, which records no migration version. `pnpm check:schema` is what
+-- confirms it is there.
+-- =============================================================================
+-- Products and storefronts that moderation has REMOVED stop counting against
+-- the plan's cap.
+--
+-- WHY. A removal is final for the seller: the moderation gate
+-- (20261012_auto_moderation, moderation_gate) leaves a removed row removed
+-- whatever the seller saves, and only a trusted writer (staff deciding an
+-- appeal) can put it back. Yet the cap counted it, so a Free seller with three
+-- removed products had 17 places for 20, and nothing to do about it but delete
+-- the evidence of a decision they might be appealing.
+--
+-- WHY THIS CANNOT BE GAMED.
+--   - A seller cannot mark anything removed: every seller write to a
+--     moderation_* column is refused by moderation_gate (errcode 42501), and an
+--     INSERT has its moderation state reset to 'pending'.
+--   - A removed row cannot come back by the seller's hand: editing it keeps it
+--     removed (the gate returns early for 'removed').
+--   - Only removal frees a place. A draft, a row still being checked, one
+--     waiting for a person ('review') and a PAUSED one all still count: the
+--     seller can bring a paused row back by changing it.
+--   - If staff restore a row on appeal while the account is at its cap, the
+--     account is over the cap until it deletes something: the count includes
+--     the row again, so nothing new can be created meanwhile.
+--
+-- Same function as 20261002_product_limits, with the two counts changed; the
+-- triggers that call it are unchanged. Mirrored in src/lib/billing/limits.ts
+-- (countPlanUsage), which the app asks before writing.
+
+create or replace function public.enforce_plan_limit()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  limit_key text := tg_argv[0];
+  owner uuid;
+  cap integer;
+  used integer;
+begin
+  -- The owner's own seat is always there (it is seeded at signup); only a seat
+  -- for someone else, and only one that is live (invited or active), takes
+  -- one of the plan's. Decided first: it needs no claims at all. (Nested, not
+  -- ANDed: plpgsql does not short-circuit, and other tables have no role.)
+  if tg_table_name = 'team_members' then
+    if new.role = 'owner' or new.status not in ('invited', 'active') then
+      return new;
+    end if;
+  end if;
+
+  if coalesce((select auth.role()), '') <> 'authenticated' then
+    return new;
+  end if;
+
+  -- Off until paid plans can be bought (see billing_switches).
+  if not coalesce((select s.plan_limits_enforced from public.billing_switches s where s.id), false) then
+    return new;
+  end if;
+
+  if tg_table_name in ('storefronts', 'products') then
+    -- An UPDATE only reaches here when owner_id changed (see the triggers):
+    -- a row moved INTO an account counts against that account.
+    if tg_op = 'UPDATE' then
+      if new.owner_id is not distinct from old.owner_id then
+        return new;
+      end if;
+    end if;
+    owner := new.owner_id;
+  elsif tg_table_name = 'team_members' then
+    -- Re-activating a revoked row adds a seat, and so does moving a live row
+    -- to another account; editing a live row in place does not.
+    -- (Nested, not ANDed: OLD only exists for an UPDATE.)
+    if tg_op = 'UPDATE' then
+      if old.status in ('invited', 'active')
+         and new.account_owner_id is not distinct from old.account_owner_id then
+        return new;
+      end if;
+    end if;
+    owner := new.account_owner_id;
+  else
+    raise exception 'enforce_plan_limit: unsupported table %', tg_table_name;
+  end if;
+
+  cap := public.plan_limit(public.account_plan(owner), limit_key);
+  if cap is null then
+    return new;
+  end if;
+
+  perform pg_advisory_xact_lock(hashtextextended('plan_limit:' || limit_key || ':' || owner::text, 0));
+
+  -- What moderation has removed for good takes no place (see the top of
+  -- 20261019_removed_content_frees_plan_room). Everything else does, drafts
+  -- and paused rows included.
+  if tg_table_name = 'storefronts' then
+    select count(*) into used from public.storefronts s
+     where s.owner_id = owner and s.moderation_status is distinct from 'removed';
+  elsif tg_table_name = 'products' then
+    select count(*) into used from public.products p
+     where p.owner_id = owner and p.moderation_status is distinct from 'removed';
+  else
+    select count(*) into used
+      from public.team_members tm
+     where tm.account_owner_id = owner
+       and tm.status in ('invited', 'active');
+  end if;
+
+  if used >= cap then
+    raise exception 'plan_limit_reached:%', limit_key using errcode = '23514';
+  end if;
+  return new;
+end
+$$;
+
+-- Unchanged, and restated: a function's privileges are its own, and this one
+-- is only ever run by its triggers.
+revoke execute on function public.enforce_plan_limit() from public, anon, authenticated;
+
+notify pgrst, 'reload schema';
+
+-- =============================================================================
 -- ===== (applied) plan_grants ==================================================
 -- supabase/migrations/20261019_plan_grants.sql, replayed
 -- verbatim. Applied to prod 2026-10-20 through the Management API query
@@ -10009,5 +10134,591 @@ grant select on table public.admin_plan_directory to service_role;
 
 comment on view public.admin_plan_directory is
   'Admin /plans: every account with its paid plan, its staff grant, the plan in force now (the higher of the two) and where it comes from. Service role only.';
+
+notify pgrst, 'reload schema';
+
+-- =============================================================================
+-- ===== (applied) rl_take keeps history =======================================
+-- supabase/migrations/20261021_rl_take_keeps_history.sql, replayed verbatim. Applied to prod 2026-10-21 through the
+-- Management API query endpoint.
+-- Security audit 2026-10-20: a caller-chosen window can no longer erase the stored log.
+-- =============================================================================
+-- rl_take: a caller can no longer erase their own rate-limit history.
+--
+-- THE HOLE (security audit 2026-10-20). rl_take is callable by `authenticated`
+-- straight through PostgREST (POST /rest/v1/rpc/rl_take), and it took the
+-- WINDOW from its caller. It pruned the stored hits to that window and wrote
+-- the pruned array back. So one direct call with p_window_seconds = 1 deleted
+-- every hit older than a second, and the server's own next check (which passes
+-- the real budget from lib/rate-limit.ts RATE_LIMITS) found an empty log.
+-- Every per-user limit built on rateLimit() could be reset at will: team
+-- invites (mail to arbitrary addresses), badge checks (paid classifier calls),
+-- password re-checks, email changes, contact-code sends, imports, uploads,
+-- exports. Keyed limits (rl_take_key, service role only) were never affected.
+--
+-- THE FIX. Counting still uses the caller's window, exactly as before, so every
+-- existing call behaves the same. What changes is what is STORED:
+--   - hits are kept for at least RETENTION (24 h, the longest per-user window
+--     in RATE_LIMITS: contactCodeSendDaily, mfaVerifyPerUserDaily), or for the
+--     caller's window when that is longer, so no window a caller names can
+--     forget a hit a real budget still needs;
+--   - the stored log is capped at the MAX_KEPT most recent hits, so a caller
+--     who passes an enormous p_max to a direct call can only grow their own
+--     log so far (and every hit they add counts against them, never for them).
+-- A direct call can therefore only ever ADD to the caller's own count.
+--
+-- If a budget with a window longer than 24 h is ever added to RATE_LIMITS,
+-- raise RETENTION here to match (tests/integration/11 pins the reset case).
+-- Same signature and grants as before, so this applies safely ahead of any
+-- deploy and needs no code change.
+
+create or replace function public.rl_take(p_action text, p_max integer, p_window_seconds integer)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  -- How long a hit is remembered no matter what window a caller names.
+  retention_seconds constant integer := 86400;
+  -- The most hits a log may hold. Far above any per-user budget's max.
+  max_kept constant integer := 5000;
+  uid    uuid := (select auth.uid());
+  cutoff timestamptz;
+  keep_after timestamptz;
+  kept   timestamptz[];
+  counted integer;
+  allowed boolean;
+begin
+  -- Anonymous callers get nothing: this limiter is identity-scoped by design.
+  -- Unauthenticated surfaces must use rl_take_key() instead.
+  if uid is null then
+    return false;
+  end if;
+
+  -- Nor does a session that still owes its second factor. Otherwise someone
+  -- holding only the password could drain the account's budgets (and deny
+  -- the owner the very actions they reach for when they see the alert).
+  if not public.mfa_session_ok() then
+    return false;
+  end if;
+
+  -- Reject nonsense budgets rather than failing open.
+  if p_max is null or p_max < 1 then
+    return false;
+  end if;
+  if p_window_seconds is null or p_window_seconds < 1 then
+    return false;
+  end if;
+
+  cutoff := now() - make_interval(secs => p_window_seconds);
+  keep_after := now() - make_interval(secs => greatest(p_window_seconds, retention_seconds));
+
+  -- Ensure a row exists so the lock below always has one to take.
+  insert into public.rate_limits (user_id, action)
+  values (uid, p_action)
+  on conflict (user_id, action) do nothing;
+
+  -- Serialize concurrent takes for this (user, action) so two requests can
+  -- never both read "4 hits" and both append a 5th.
+  perform 1
+  from public.rate_limits
+  where user_id = uid and action = p_action
+  for update;
+
+  -- Prune to the RETENTION horizon (never to the caller's window), then count
+  -- only the hits inside the caller's window.
+  select coalesce(
+           array(
+             select t
+             from unnest(r.hits) as t
+             where t > keep_after
+             order by t
+           ),
+           '{}'::timestamptz[]
+         )
+  into kept
+  from public.rate_limits r
+  where r.user_id = uid and r.action = p_action;
+
+  select count(*) into counted from unnest(kept) as t where t > cutoff;
+  allowed := counted < p_max;
+
+  -- Only an ALLOWED take is recorded. Denied attempts must not extend the
+  -- window, or a caller hammering the endpoint could lock themselves out
+  -- indefinitely (and grow the array without bound).
+  if allowed then
+    kept := kept || now();
+  end if;
+
+  -- Keep the newest MAX_KEPT. Dropping the oldest can only ever lower a count
+  -- that is already far past every budget.
+  if coalesce(array_length(kept, 1), 0) > max_kept then
+    kept := kept[array_length(kept, 1) - max_kept + 1 : array_length(kept, 1)];
+  end if;
+
+  update public.rate_limits
+  set hits = kept
+  where user_id = uid and action = p_action;
+
+  return allowed;
+end
+$$;
+
+-- CREATE OR REPLACE keeps existing grants, but restate them: this schema
+-- auto-grants new functions to anon, and the limiter must never be anon's.
+revoke execute on function public.rl_take(text, integer, integer) from public, anon;
+grant execute on function public.rl_take(text, integer, integer) to authenticated, service_role;
+
+notify pgrst, 'reload schema';
+
+-- =============================================================================
+-- ===== (applied) reserved usernames ==========================================
+-- supabase/migrations/20261021_reserved_usernames.sql, replayed verbatim. Applied to prod 2026-10-21 through the
+-- Management API query endpoint.
+-- Security audit 2026-10-20: reserved handles refused by a CHECK; handle_new_user drops a reserved slug.
+-- =============================================================================
+-- Reserved handles are refused by the database, not only by the sign-up form.
+--
+-- THE HOLE (security audit 2026-10-20). RESERVED_USERNAMES
+-- (src/lib/validation/auth.ts) was enforced only by usernameSchema in the app.
+-- Two writers reach profiles.username without it:
+--   - the owner's own UPDATE through PostgREST ("Users can update their own
+--     profile" allows every column of their row), and
+--   - handle_new_user, which copies whatever username/name the signer put in
+--     the signup metadata (a direct call to Supabase's signup endpoint picks
+--     its own).
+-- So anyone could hold `support`, `security` or `squareshare`, the phishing
+-- head start the list exists to deny.
+--
+-- THE FIX. One SQL predicate, public.username_is_reserved, used by
+--   - a CHECK on profiles.username, which every writer meets, and
+--   - handle_new_user, which now drops a reserved slug (the account is created
+--     without a handle, as for a slug under 3 characters) instead of letting
+--     the CHECK abort the signup. That matters for Google sign-up: a Google
+--     profile named "Admin" must still get an account.
+--
+-- KEEP IN STEP with RESERVED_USERNAMES: tests/unit/reserved-usernames-sql.test.ts
+-- reads the list below and fails when the two differ.
+-- No production row held a reserved handle when this was written (checked
+-- 2026-10-21), so the constraint validates immediately.
+
+create or replace function public.username_is_reserved(p_username text)
+returns boolean
+language sql
+immutable
+set search_path = ''
+as $$
+  select lower(p_username) = any (array[
+    'admin',
+    'administrator',
+    'api',
+    'auth',
+    'billing',
+    'checkout',
+    'dashboard',
+    'help',
+    'login',
+    'logout',
+    'moderator',
+    'orders',
+    'owner',
+    'products',
+    'root',
+    'security',
+    'settings',
+    'signin',
+    'signup',
+    'squareshare',
+    'storefront',
+    'support',
+    'system',
+    'team'
+  ])
+$$;
+
+comment on function public.username_is_reserved(text) is
+  'True for handles no account may hold. Mirrors RESERVED_USERNAMES in src/lib/validation/auth.ts (unit test keeps them equal).';
+
+-- The CHECK below runs as whoever writes the row, so the roles that write
+-- profiles need EXECUTE. anon never writes a profile.
+revoke execute on function public.username_is_reserved(text) from public, anon;
+grant execute on function public.username_is_reserved(text) to authenticated, service_role;
+
+alter table public.profiles
+  drop constraint if exists profiles_username_not_reserved;
+alter table public.profiles
+  add constraint profiles_username_not_reserved
+  check (username is null or not public.username_is_reserved(username));
+
+-- handle_new_user as live on 2026-10-21, with one change: a reserved slug is
+-- dropped like a too-short one.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  raw text;
+  slug text;
+begin
+  raw := coalesce(
+    new.raw_user_meta_data ->> 'username',
+    new.raw_user_meta_data ->> 'display_name',
+    new.raw_user_meta_data ->> 'full_name',
+    new.raw_user_meta_data ->> 'name'
+  );
+  slug := btrim(regexp_replace(lower(btrim(coalesce(raw, ''))), '[^a-z0-9_]+', '_', 'g'), '_');
+  if length(slug) < 3 then
+    slug := null;
+  else
+    slug := left(slug, 30);
+  end if;
+  -- A reserved handle is never claimed, whoever asked for it.
+  if slug is not null and public.username_is_reserved(slug) then
+    slug := null;
+  end if;
+
+  insert into public.profiles (id, username, avatar_url)
+  values (
+    new.id,
+    slug,
+    coalesce(
+      new.raw_user_meta_data ->> 'avatar_url',
+      new.raw_user_meta_data ->> 'picture'
+    )
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+-- Recreating a function re-opens it to client roles in this schema. A trigger
+-- function is never called directly.
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+
+notify pgrst, 'reload schema';
+
+-- =============================================================================
+-- ===== (applied) signup intents ==============================================
+-- supabase/migrations/20261021_signup_intents.sql, replayed verbatim. Applied to prod 2026-10-21 through the
+-- Management API query endpoint.
+-- Security audit 2026-10-20: single-use sign-up intents and the Before User Created hook function. The hook itself is enabled separately, after the deploy.
+-- =============================================================================
+-- =============================================================================
+-- Sign-up only through the app (security audit 2026-10-20)
+-- =============================================================================
+-- THE HOLE. Every sign-up guard (the disposable-address block, the Turnstile
+-- bot check, the per-client sign-up budget, the breached-password check) runs
+-- in the app's authenticate() action before it calls supabase.auth.signUp. But
+-- that same GoTrue endpoint (/auth/v1/signup, and /auth/v1/otp with
+-- create_user) answers anyone holding the public anon key, with no captcha and
+-- no leaked-password check of its own. A script could skip all four guards and
+-- open as many accounts on throwaway addresses as it liked, choosing its own
+-- signup metadata.
+--
+-- THE FIX, the same shape as mfa_access_token_gate (20260930): the app writes a
+-- single-use INTENT (service role) only after its guards pass, just before it
+-- calls signUp, keyed on a hash of the address. GoTrue's Before User Created
+-- hook, public.signup_intent_gate, runs before any new user row exists and
+-- refuses an email sign-up that has no fresh intent for that address. A sign-up
+-- sent to GoTrue by anything other than the app creates nothing.
+--
+-- What it does NOT gate:
+--   - OAuth sign-ups (Google): the provider vouches for the address, and the
+--     app's bot check never applied to them.
+--   - Existing accounts signing in: the hook only runs when a user is about to
+--     be CREATED.
+--
+-- ROLLOUT, in this order (the hook demands what only the new build writes):
+--   1. Apply this migration. Inert on its own: nothing calls the function yet.
+--   2. Deploy the app that writes intents (src/lib/auth/signup-intent.ts).
+--   3. Enable the hook: Auth > Hooks > Before User Created, Postgres function
+--      public.signup_intent_gate (Management API: hook_before_user_created_
+--      enabled=true, hook_before_user_created_uri=
+--      pg-functions://postgres/public/signup_intent_gate).
+--   Disabling the hook there is the kill switch.
+--
+-- Anything else that ever creates EMAIL users (an admin tool calling
+-- auth.admin.createUser, a seed script against production) must write an
+-- intent first, or switch the hook off for the run.
+-- =============================================================================
+
+create table if not exists public.signup_intents (
+  id          uuid primary key default gen_random_uuid(),
+  -- sha256 of the lower-cased address, hex. The address itself is never kept.
+  email_hash  text not null check (email_hash ~ '^[0-9a-f]{64}$'),
+  created_at  timestamptz not null default now(),
+  expires_at  timestamptz not null
+);
+
+comment on table public.signup_intents is
+  'Single-use permissions to create an email account, written by the app (service role) after its sign-up guards pass and spent by the before-user-created hook (signup_intent_gate). Keyed on sha256(lower(email)). Service role only.';
+
+create index if not exists signup_intents_lookup_idx
+  on public.signup_intents (email_hash, expires_at);
+
+alter table public.signup_intents enable row level security;
+revoke all on public.signup_intents from public, anon, authenticated;
+grant all on public.signup_intents to service_role;
+
+-- The hook. SECURITY DEFINER so it can spend an intent under RLS without a
+-- policy for GoTrue's role; callable by GoTrue only.
+create or replace function public.signup_intent_gate(event jsonb)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  provider text := lower(coalesce(event -> 'user' -> 'app_metadata' ->> 'provider', 'email'));
+  email    text := lower(btrim(coalesce(event -> 'user' ->> 'email', '')));
+  spent    uuid;
+begin
+  -- Anonymous users are switched off for this project; never create one here.
+  if coalesce((event -> 'user' ->> 'is_anonymous')::boolean, false) then
+    return jsonb_build_object('error', jsonb_build_object(
+      'http_code', 403, 'message', 'Sign up on Square Share.'));
+  end if;
+
+  -- An OAuth provider vouches for its own users.
+  if provider not in ('email', 'phone') then
+    return '{}'::jsonb;
+  end if;
+
+  if email <> '' then
+    delete from public.signup_intents
+     where id = (
+       select i.id
+         from public.signup_intents i
+        where i.email_hash = encode(sha256(convert_to(email, 'UTF8')), 'hex')
+          and i.expires_at > now()
+        order by i.created_at
+        limit 1
+        for update skip locked
+     )
+    returning id into spent;
+  end if;
+
+  if spent is not null then
+    return '{}'::jsonb;
+  end if;
+
+  return jsonb_build_object('error', jsonb_build_object(
+    'http_code', 403, 'message', 'Sign up on Square Share.'));
+end;
+$$;
+
+comment on function public.signup_intent_gate(jsonb) is
+  'Before User Created hook: an email account is created only against a fresh single-use intent the app wrote after its sign-up guards passed (signup_intents). OAuth sign-ups pass through.';
+
+revoke all on function public.signup_intent_gate(jsonb) from public, anon, authenticated;
+do $$
+begin
+  if exists (select 1 from pg_roles where rolname = 'supabase_auth_admin') then
+    grant usage on schema public to supabase_auth_admin;
+    grant execute on function public.signup_intent_gate(jsonb) to supabase_auth_admin;
+  end if;
+end
+$$;
+
+notify pgrst, 'reload schema';
+
+-- =============================================================================
+-- ===== (applied) object key ownership ========================================
+-- supabase/migrations/20261021_object_key_ownership.sql, replayed verbatim. Applied to prod 2026-10-21
+-- through the Management API query endpoint.
+-- Security review 2026-10-21: a storage key new to a product or storefront must be the writer's own upload.
+-- =============================================================================
+-- =============================================================================
+-- A storage key on a product or storefront must be the writer's own upload
+-- (security review 2026-10-21)
+-- =============================================================================
+-- THE HOLE. Products and storefronts reference R2 objects by key
+-- (`{images|files|fonts|elements|documents}/{uploader id}/{uuid}-{name}`): a
+-- product's image_key, digital_file_key, gallery[].key and documents[].key,
+-- and every `key` inside a storefront's config (background, custom font,
+-- element and image blocks, product-page photos). The app only accepts a key
+-- the saving user uploaded (isOwnedObjectKey in lib/validation/product.ts),
+-- but owners and editors may also UPDATE these rows straight through PostgREST,
+-- where that check never runs. A seller could therefore write ANOTHER seller's
+-- key (readable in any presigned URL on a public page) into their own product,
+-- then delete the product: the app evicts the row's objects with the service
+-- role and destroyed the other seller's file. They could also write an
+-- arbitrary https:// address, which /api/products/[id]/photo fetched from the
+-- Worker.
+--
+-- THE FIX, at the one place every writer meets: a trigger on both tables.
+-- For an `authenticated` writer, every key that is NEW to the row (not already
+-- on it before this write) must have the object-key shape and the writer's own
+-- user id as its second segment. Keys already on the row stay valid whoever
+-- uploaded them (a teammate's photo, the seeded catalog's platform-storage
+-- URLs), so saving, reordering and removing work as before. The service role
+-- (seeding, admin tools, the deletion job) is not gated, like the other
+-- triggers on these tables.
+--
+-- No production row held a key foreign to its store when this was written
+-- (checked 2026-10-21), so nothing existing is affected.
+-- =============================================================================
+
+-- Every string at a `key` property anywhere in a document: the gallery,
+-- documents and storefront config all name their object keys `key`.
+create or replace function public.object_keys_in(p_doc jsonb)
+returns setof text
+language sql
+immutable
+set search_path = ''
+as $$
+  select v #>> '{}'
+    from jsonb_path_query(coalesce(p_doc, 'null'::jsonb), 'lax $.**.key') as v
+   where jsonb_typeof(v) = 'string'
+$$;
+
+revoke execute on function public.object_keys_in(jsonb) from public, anon;
+grant execute on function public.object_keys_in(jsonb) to authenticated, service_role;
+
+create or replace function public.guard_object_keys()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+declare
+  uid      uuid := (select auth.uid());
+  new_keys text[];
+  old_keys text[] := '{}';
+  k        text;
+begin
+  if coalesce((select auth.role()), '') <> 'authenticated' then
+    return new;
+  end if;
+
+  if tg_table_name = 'products' then
+    new_keys := array(
+      select x from (
+        select new.image_key as x
+        union all select new.digital_file_key
+        union all select public.object_keys_in(new.gallery)
+        union all select public.object_keys_in(new.documents)
+      ) s where x is not null
+    );
+    if tg_op = 'UPDATE' then
+      old_keys := array(
+        select x from (
+          select old.image_key as x
+          union all select old.digital_file_key
+          union all select public.object_keys_in(old.gallery)
+          union all select public.object_keys_in(old.documents)
+        ) s where x is not null
+      );
+    end if;
+  else
+    new_keys := array(select public.object_keys_in(new.config));
+    if tg_op = 'UPDATE' then
+      old_keys := array(select public.object_keys_in(old.config));
+    end if;
+  end if;
+
+  foreach k in array new_keys loop
+    continue when k = any (old_keys);
+    if uid is null
+       or k !~ '^(images|files|fonts|elements|documents)/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[A-Za-z0-9._-]{1,200}$'
+       or split_part(k, '/', 2) <> uid::text then
+      raise exception 'A file is added by uploading it, not by naming it (%).', left(k, 120)
+        using errcode = '42501';
+    end if;
+  end loop;
+
+  return new;
+end
+$$;
+
+-- A trigger function is never called directly.
+revoke execute on function public.guard_object_keys() from public, anon, authenticated;
+
+drop trigger if exists guard_object_keys on public.products;
+create trigger guard_object_keys
+  before insert or update of image_key, digital_file_key, gallery, documents on public.products
+  for each row execute function public.guard_object_keys();
+
+drop trigger if exists guard_object_keys on public.storefronts;
+create trigger guard_object_keys
+  before insert or update of config on public.storefronts
+  for each row execute function public.guard_object_keys();
+
+notify pgrst, 'reload schema';
+
+-- =============================================================================
+-- ===== (applied) order_refund provider first =================================
+-- supabase/migrations/20261021_order_refund_provider_first.sql, replayed verbatim. Applied to prod
+-- 2026-10-21 through the Management API query endpoint.
+-- Security review 2026-10-21: order_refund refuses an order a payment provider charged.
+-- =============================================================================
+-- order_refund refuses an order a payment provider charged (security review
+-- 2026-10-21).
+--
+-- THE HOLE. order_refund is the seller's client-callable refund write
+-- (EXECUTE to authenticated, self-gated on owner / orders.refund). The order
+-- panel calls it only AFTER refunding with the provider (refundOrder in
+-- src/lib/orders/actions.ts: "a row saying refunded over money that never went
+-- back is the one outcome a buyer cannot be left with"). But a seller can also
+-- call it straight through PostgREST, and for an order Stripe charged that
+-- marked it refunded with the buyer's money never returned (and stock put
+-- back, and the code's use given back).
+--
+-- THE FIX. For an order with a provider payment (payment_ref 'pi_...', mirror
+-- of PROVIDER_PAYMENT_PREFIX in src/lib/orders/queries.ts) order_refund now
+-- answers not_refundable. Such an order is recorded refunded only by the
+-- service role: by refundOrder once the provider has refunded it, and by the
+-- Connect webhook (charge.refunded), both through order_apply_refund. Orders no
+-- provider charged are unchanged: the seller pays the buyer back themselves and
+-- records it here, as before.
+
+create or replace function public.order_refund(
+  p_order_id uuid,
+  p_reason text,
+  p_restock boolean default false
+)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  owner_id uuid;
+  ref text;
+begin
+  if not public.mfa_session_ok() then
+    return 'not_found';
+  end if;
+
+  select o.seller_id, o.payment_ref into owner_id, ref
+    from public.orders o
+   where o.id = p_order_id;
+
+  if not found
+     or not (
+       owner_id = (select auth.uid())
+       or public.team_role_can(public.team_actor_role(owner_id), 'orders.refund')
+     ) then
+    return 'not_found';
+  end if;
+
+  -- Money a provider took goes back through the provider first; the record
+  -- follows from the server (service role), never from a client call.
+  if ref like 'pi\_%' then
+    return 'not_refundable';
+  end if;
+
+  return public.order_apply_refund(p_order_id, p_reason, p_restock);
+end
+$$;
+
+-- Recreating a function re-opens it to anon in this schema: restate both ways.
+revoke execute on function public.order_refund(uuid, text, boolean) from public, anon;
+grant execute on function public.order_refund(uuid, text, boolean) to authenticated, service_role;
+
+comment on function public.order_refund(uuid, text, boolean) is
+  'The seller takes a paid order back (cancelled before it was sent, returned, or other), optionally restocking it. Self-gated: 2FA session bar, owner or orders.refund. An order a payment provider charged answers not_refundable: it is recorded by the server after the provider refund (order_apply_refund). Returns refunded | not_refundable | not_found.';
 
 notify pgrst, 'reload schema';

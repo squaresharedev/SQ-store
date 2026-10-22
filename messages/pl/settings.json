@@ -303,6 +303,7 @@
   "tax": {
     "cardTitle": "Firma i dane sprzedawcy",
     "cardDescription": "Ustawiane raz dla całego konta. Widoczne dla kupujących na każdej stronie produktu, na której sprzedajesz, i używane do faktur oraz VAT.",
+    "memberScope": "To są twoje własne dane sprzedawcy. Te, które kupujący widzą w sklepie {store}, należą do jego właściciela, który ustawia je we własnych ustawieniach.",
     "gate": {
       "required": "<strong>Twoja nazwa przedsiębiorcy, adres i e-mail kontaktowy są wymagane, aby móc cokolwiek opublikować lub sprzedać.</strong> Kupujący muszą wiedzieć, od kogo kupują, i jak się z tobą skontaktować, zanim złożą zamówienie.",
       "privacyNoteLinked": "Te dane są publicznie widoczne na stronach twoich produktów wyłącznie z tego powodu. Nigdy nie używamy ich do marketingu i nigdy ich nie sprzedajemy ani nie udostępniamy. Jedyna wiadomość, jaką wysyłamy na twój e-mail kontaktowy lub telefon, to kod potwierdzający. Zobacz <link>Politykę prywatności Squareshare</link>."

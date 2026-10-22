@@ -240,7 +240,7 @@ did I earn".
 | Source | Producer | Status |
 |---|---|---|
 | `sales` | The orders table, via `analytics_aggregate` | live |
-| `storefront_view` | the embed frame (`/e/[key]/[site]`) or the hosted storefront (`/s/[storefrontId]`) serving a visitor, recorded server-side after the response; also `GET /api/embed/[key]` serving a payload to an allowed origin | live |
+| `storefront_view` | the embed frame (`/e/[key]/[...sites]`) or the hosted storefront (`/s/[storefrontId]`) serving a visitor, recorded server-side after the response; also `GET /api/embed/[key]` serving a payload to an allowed origin | live |
 | `product_click` | the hosted product page serving a buyer who arrived from an embed tile (`?via=embed`), recorded server-side beside its `product_view` | live |
 | `product_view` | the hosted product page (`/s/[storefrontId]/p/[productId]`) serving a buyer, recorded server-side after the response | live |
 | `checkout_view` | the hosted checkout (`/s/[storefrontId]/p/[productId]/checkout`) serving a buyer, recorded the same way | live |

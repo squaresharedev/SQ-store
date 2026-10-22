@@ -115,7 +115,7 @@ test.describe("storefront designer", () => {
     // never compiled is dropped by the Fast Refresh its compile triggers (the
     // second click lands). Dev-only; a production build compiles nothing here.
     await expect(async () => {
-      await page.getByRole("button", { name: /^Embed / }).first().click();
+      await page.getByRole("button", { name: /^Share or embed / }).first().click();
       await expect(page).toHaveURL(/\/storefront\/[0-9a-f-]{36}\/embed$/, {
         timeout: 8_000,
       });

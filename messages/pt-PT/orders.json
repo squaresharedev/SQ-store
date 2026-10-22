@@ -30,7 +30,9 @@
     "toShipTitle": "Nada para enviar",
     "toShipHint": "Está tudo em dia. As encomendas pagas à espera de envio aparecem aqui, da mais antiga para a mais recente.",
     "seeAllOrders": "Ver todas as encomendas",
-    "hintOpen": "Quando alguém comprar na sua loja, a encomenda aparece aqui e é avisado de imediato."
+    "hintOpen": "Quando alguém comprar na sua loja, a encomenda aparece aqui e é avisado de imediato.",
+    "productTitle": "Ainda sem encomendas deste produto",
+    "productHint": "Quando for vendido, as encomendas aparecem aqui."
   },
   "list": {
     "updating": "A atualizar…",
@@ -55,7 +57,7 @@
     "region": "filtros de encomendas",
     "channel": "canal",
     "buyerEmail": "e-mail do comprador",
-    "searchPlaceholder": "pesquisar e-mail do comprador",
+    "searchPlaceholder": "pesquisar e-mail, nome, cidade, produto ou envio",
     "status": "estado",
     "statusAriaLabel": "Filtrar por estado",
     "allStatuses": "Todos os estados",
@@ -151,6 +153,7 @@
   },
   "actions": {
     "disputeInStripe": "As disputas são geridas no seu painel do Stripe assim que o Stripe estiver ligado.",
+    "pendingPayment": "O pagamento do comprador ainda está a ser confirmado. Não envie nada para já: a encomenda aparece como paga quando for concluído, e fecha-se sozinha se não for.",
     "none": "Não há ações disponíveis para esta encomenda."
   },
   "refund": {
@@ -171,6 +174,7 @@
     "refundedOn": "Reembolsado em {date}",
     "refundedOnReason": "{reason, select, cancelled {Cancelado e reembolsado em {date}} returned {Devolvido e reembolsado em {date}} other {Reembolsado em {date}}}",
     "ownerOnly": "Só o proprietário da loja pode reembolsar ou cancelar uma encomenda.",
+    "ownerOnlyNamed": "Só o proprietário de {store} pode reembolsar ou cancelar uma encomenda. Peça-lhe que o faça.",
     "manual": "Este pagamento não passou pelo Square Share. Reembolse o comprador diretamente e registe-o aqui.",
     "viaProvider": "O valor total é devolvido para o cartão do comprador via Stripe. Esta operação não pode ser desfeita."
   },
@@ -186,6 +190,11 @@
     "label": "Que encomendas mostrar",
     "toShip": "Para enviar",
     "all": "Todas as encomendas"
+  },
+  "productScope": {
+    "label": "Encomendas de",
+    "clear": "Todos os produtos",
+    "clearLabel": "Mostrar as encomendas de todos os produtos, não só {title}"
   },
   "fulfilment": {
     "unfulfilled": "Para enviar",

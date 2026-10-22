@@ -172,11 +172,14 @@ export function ProductImport({
         return;
       }
       setSaveResult({ success: t("importedLabel") });
+      const lines = [
+        ...(result.skipped.length > 0 ? [t("skippedRows", { count: result.skipped.length })] : []),
+        // Most of a big import is still waiting on the automatic check when
+        // the list loads: said here, so a row of "Checking" badges is expected.
+        ...(result.checking > 0 ? [t("checkingRows", { count: result.checking })] : []),
+      ];
       toast.success(t("imported", { count: result.imported }), {
-        lines:
-          result.skipped.length > 0
-            ? [t("skippedRows", { count: result.skipped.length })]
-            : undefined,
+        lines: lines.length > 0 ? lines : undefined,
       });
       router.push("/products");
     } finally {
@@ -223,6 +226,12 @@ export function ProductImport({
         </span>
       </label>
 
+      {/* Said before a file is picked: for a big shop, adding every photo by
+          hand afterwards is the real cost of an import, so it is known first. */}
+      <p className={infoTextClass} data-import-photos-note="">
+        {t("photosNotImported")}
+      </p>
+
       {error && (
         <p className={errorTextClass} role="alert">
           {error}
@@ -265,10 +274,6 @@ export function ProductImport({
               )}
             </ul>
           )}
-
-          <p className={infoTextClass}>
-            {t("photosNotImported")}
-          </p>
 
           <div className="grid gap-4 @md:grid-cols-2">
             <div className="space-y-1.5">

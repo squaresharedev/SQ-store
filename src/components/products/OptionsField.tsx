@@ -5,7 +5,6 @@ import {
   useState,
   type ClipboardEvent,
   type KeyboardEvent,
-  type ReactNode,
 } from "react";
 import { AlertTriangle, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -13,16 +12,16 @@ import { formatList } from "@/lib/format/intl";
 import { cn } from "@/lib/utils";
 import {
   fieldBaseClass,
-  focusRingClass,
   infoTextClass,
   labelClass,
+  rowFieldClass,
   secondaryButtonClass,
-  transitionClass,
 } from "@/components/ui/control-styles";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Switch } from "@/components/ui/switch";
+import { RowButton } from "./RowButton";
 import {
   OPTION_GROUP_PRESETS,
   addOptions,
@@ -202,59 +201,6 @@ export function OptionsField({
   );
 }
 
-/**
- * A row's own control: reorder, remove.
- *
- * Borderless, and dimmed until the row is hovered or something in it takes
- * focus. Three bordered boxes per row, times five options, times two groups is
- * thirty little squares competing with the five names that are the actual
- * content — but they still have to be reachable by keyboard the moment they
- * are tabbed to, which is what `group-has-[:focus-visible]` buys that a plain
- * hover rule would not.
- */
-function RowButton({
-  label,
-  onClick,
-  disabled,
-  destructive,
-  groupName = "row",
-  children,
-}: {
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
-  destructive?: boolean;
-  /** Which named group reveals it: an option `row`, or the whole `group` card.
-   *  Both class strings are spelled out because Tailwind cannot see a computed
-   *  `group-hover/${name}`. */
-  groupName?: "row" | "group";
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={label}
-      title={label}
-      className={cn(
-        "flex size-7 items-center justify-center rounded-sm text-muted-foreground",
-        "focus-visible:opacity-100 disabled:pointer-events-none disabled:opacity-0",
-        groupName === "row"
-          ? "opacity-0 group-hover/row:opacity-100 group-has-[:focus-visible]/row:opacity-100"
-          : "opacity-0 group-hover/group:opacity-100 group-has-[:focus-visible]/group:opacity-100",
-        destructive
-          ? "hover:bg-destructive/10 hover:text-destructive"
-          : "hover:bg-accent hover:text-foreground",
-        transitionClass,
-        focusRingClass,
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
 /** One axis: its name, how it draws, and its choices. */
 function OptionGroupEditor({
   inputId,
@@ -411,12 +357,7 @@ function OptionGroupEditor({
               ...(displayTouched.current ? {} : { display: defaultDisplayFor(name) }),
             });
           }}
-          className={cn(
-            "min-w-0 flex-1 rounded-sm border border-transparent bg-transparent px-2 py-1 font-inter text-base font-semibold text-foreground",
-            "placeholder:font-normal placeholder:text-muted-foreground hover:border-input focus:border-input focus:bg-background",
-            transitionClass,
-            focusRingClass,
-          )}
+          className={cn(rowFieldClass, "text-base font-semibold placeholder:font-normal")}
         />
         <span className={cn(infoTextClass, "shrink-0 tabular-nums")}>
           {t("optionCount", { count: group.options.length })}
@@ -577,10 +518,8 @@ function OptionGroupEditor({
                   placeholder={preset?.placeholder ?? t("optionPlaceholder", { position: index + 1 })}
                   onChange={(event) => updateOption(option.id, { name: event.target.value })}
                   className={cn(
-                    "min-w-0 flex-1 rounded-sm border border-transparent bg-transparent px-2 py-1 font-inter text-sm text-foreground",
-                    "placeholder:text-muted-foreground hover:border-input focus:border-input focus:bg-background",
-                    transitionClass,
-                    focusRingClass,
+                    rowFieldClass,
+                    "text-sm",
                     !option.available && "line-through decoration-muted-foreground/50",
                   )}
                 />

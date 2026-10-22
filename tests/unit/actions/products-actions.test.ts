@@ -53,10 +53,23 @@ vi.mock("@/lib/supabase/server", () => ({
 // specs can assert WHEN a save calls it: before the write, and after.
 const precheckMock = vi.fn(async (..._args: unknown[]) => {});
 const settleMock = vi.fn(async (..._args: unknown[]) => "ok");
+// A badge's own verdict, keyed by its words; clean unless a spec says not.
+const badgeVerdicts = new Map<string, unknown>();
+const badgeTextMock = vi.fn(async (label: string) =>
+  badgeVerdicts.has(label) ? badgeVerdicts.get(label) : { verdict: "clean", ground: null, paths: [] },
+);
 vi.mock("@/lib/moderation/auto/check", () => ({
   precheck: (...args: unknown[]) => precheckMock(...args),
   settleAfterWrite: (...args: unknown[]) => settleMock(...args),
   checkMany: vi.fn(async () => {}),
+  checkBadgeText: (label: string) => badgeTextMock(label),
+}));
+
+// Orders still to ship for the product being deleted: none, unless a spec
+// says otherwise. The count itself is a query of its own (lib/orders).
+const toShipMock = vi.fn(async (..._args: unknown[]): Promise<number | null> => 0);
+vi.mock("@/lib/orders/queries", () => ({
+  countToShipForProduct: (...args: unknown[]) => toShipMock(...args),
 }));
 
 
@@ -81,6 +94,8 @@ vi.mock("@/lib/settings/seller-identity", async (importOriginal) => ({
 // ---- imports -------------------------------------------------------------
 
 import { createProduct, updateProduct, deleteProduct } from "@/lib/products/actions";
+import { checkBadgeLabel } from "@/lib/products/badge-actions";
+import { refusedBadgeLabel } from "@/lib/products/badges";
 import { IMAGE_MAX_BYTES } from "@/lib/validation/product";
 
 // ---- test constants ------------------------------------------------------
@@ -115,6 +130,7 @@ function validInput(overrides: Record<string, unknown> = {}) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  badgeVerdicts.clear();
   rateLimitMock.mockResolvedValue(true);
   publishBlockedMock.mockResolvedValue(null);
   dbFn.mockResolvedValue({ data: null, error: null });
@@ -266,6 +282,23 @@ describe("the automatic content check", () => {
     expect(precheckMock).not.toHaveBeenCalled();
     expect(settleMock).not.toHaveBeenCalled();
   });
+
+  it("says when the check has not approved the save yet, so the form can tell the seller", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({ data: { id: PRODUCT_ID, moderation_status: "pending" }, error: null });
+    settleMock.mockResolvedValueOnce("pending");
+
+    expect(await createProduct(validInput())).toEqual({ ok: true, id: PRODUCT_ID, checking: true });
+
+    // A person looking at it is still "not yet"; a pause is the form's own
+    // notice, not this one.
+    dbFn.mockResolvedValueOnce({ data: { id: PRODUCT_ID, moderation_status: "pending" }, error: null });
+    settleMock.mockResolvedValueOnce("review");
+    expect(await createProduct(validInput())).toMatchObject({ checking: true });
+    dbFn.mockResolvedValueOnce({ data: { id: PRODUCT_ID, moderation_status: "pending" }, error: null });
+    settleMock.mockResolvedValueOnce("paused");
+    expect(await createProduct(validInput())).toMatchObject({ checking: false });
+  });
 });
 
 describe("createProduct - happy path", () => {
@@ -275,7 +308,7 @@ describe("createProduct - happy path", () => {
 
     const result = await createProduct(validInput({ imageKey: ownedImageKey }));
 
-    expect(result).toEqual({ ok: true, id: PRODUCT_ID });
+    expect(result).toEqual({ ok: true, id: PRODUCT_ID, checking: false });
     const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
     expect(insertPayload.owner_id).toBe(OWNER_ID);
   });
@@ -339,7 +372,7 @@ describe("the publish gate", () => {
 
     const result = await createProduct(validInput({ status: "draft" }));
 
-    expect(result).toEqual({ ok: true, id: PRODUCT_ID });
+    expect(result).toEqual({ ok: true, id: PRODUCT_ID, checking: false });
     // Never even asked: a draft is not a publish.
     expect(publishBlockedMock).not.toHaveBeenCalled();
   });
@@ -373,7 +406,7 @@ describe("updateProduct - three-state image key", () => {
 
     const result = await updateProduct(PRODUCT_ID, validInput());
 
-    expect(result).toEqual({ ok: true, id: PRODUCT_ID });
+    expect(result).toEqual({ ok: true, id: PRODUCT_ID, checking: false });
     const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
     expect(updatePayload).not.toHaveProperty("image_key");
   });
@@ -386,7 +419,7 @@ describe("updateProduct - three-state image key", () => {
 
     const result = await updateProduct(PRODUCT_ID, validInput({ imageKey: null }));
 
-    expect(result).toEqual({ ok: true, id: PRODUCT_ID });
+    expect(result).toEqual({ ok: true, id: PRODUCT_ID, checking: false });
     const updatePayload = db.update.mock.calls[0][0] as Record<string, unknown>;
     expect(updatePayload).toHaveProperty("image_key", null);
   });
@@ -401,7 +434,7 @@ describe("updateProduct - three-state image key", () => {
 
     const result = await updateProduct(PRODUCT_ID, validInput({ imageKey: ownedImageKey }));
 
-    expect(result).toEqual({ ok: true, id: PRODUCT_ID });
+    expect(result).toEqual({ ok: true, id: PRODUCT_ID, checking: false });
     expect(deleteObjectMock).toHaveBeenCalledWith(oldImageKey);
     expect(deleteObjectMock).not.toHaveBeenCalledWith(ownedImageKey);
   });
@@ -480,6 +513,43 @@ describe("deleteProduct", () => {
     expect(deleteObjectMock).toHaveBeenCalledTimes(2);
   });
 
+  it("refuses while more orders are still to ship than the seller was warned about", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    toShipMock.mockResolvedValueOnce(2);
+
+    const result = await deleteProduct(PRODUCT_ID, 1);
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: { code: "invalid_input", message: { key: "Errors.products.ordersToShip", values: { count: 2 } } },
+    });
+    expect(toShipMock).toHaveBeenCalledWith(OWNER_ID, PRODUCT_ID);
+    expect(db.delete).not.toHaveBeenCalled();
+  });
+
+  it("deletes once the seller has been warned about every order still to ship", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    toShipMock.mockResolvedValueOnce(2);
+    dbFn.mockResolvedValueOnce({
+      data: { id: PRODUCT_ID, image_key: null, digital_file_key: null },
+      error: null,
+    });
+
+    const result = await deleteProduct(PRODUCT_ID, 2);
+
+    expect(result).toEqual({ ok: true, id: PRODUCT_ID });
+  });
+
+  it("refuses when it cannot tell whether orders are still to ship", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    toShipMock.mockResolvedValueOnce(null);
+
+    const result = await deleteProduct(PRODUCT_ID, 5);
+
+    expect(result).toMatchObject({ ok: false, error: { code: "server_error" } });
+    expect(db.delete).not.toHaveBeenCalled();
+  });
+
   it("null stored keys are not passed to deleteObject", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
     dbFn.mockResolvedValueOnce({
@@ -490,5 +560,196 @@ describe("deleteProduct", () => {
     await deleteProduct(PRODUCT_ID);
 
     expect(deleteObjectMock).not.toHaveBeenCalled();
+  });
+});
+
+// ==========================================================================
+// Badges: judged on their own before the product carrying them is saved
+// ==========================================================================
+
+const VIOLATION = { verdict: "violation", ground: "illegal", paths: ["details.badges[].label"] };
+const UNSURE = { verdict: "unsure", ground: null, paths: ["details.badges[].label"] };
+
+function withBadges(...labels: string[]) {
+  return validInput({ details: { badges: labels.map((label) => ({ icon: "star", label })) } });
+}
+
+describe("badges on a save", () => {
+  it("refuses a create carrying a badge that breaks the rules, naming it, before anything is written", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    badgeVerdicts.set("Best weed in town", VIOLATION);
+
+    const result = await createProduct(withBadges("Handmade", "Best weed in town"));
+
+    expect(result).toMatchObject({ ok: false, error: { code: "invalid_input" } });
+    const error = (result as { error: ActionError }).error;
+    expect(english(error.message)).toBe(
+      "The badge “Best weed in town” breaks the platform rules, so it can't be used.",
+    );
+    expect(english(error.fix!)).toMatch(/support@squareshare\.eu/);
+    // The form can tell which badge it was, and put the seller on it.
+    expect(refusedBadgeLabel(error)).toBe("Best weed in town");
+    expect(precheckMock).not.toHaveBeenCalled();
+    expect(db.insert).not.toHaveBeenCalled();
+  });
+
+  it("refuses a badge the check is unsure about, with its own words", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    badgeVerdicts.set("Cures anxiety", UNSURE);
+
+    const result = await createProduct(withBadges("Cures anxiety"));
+
+    expect(english((result as { error: ActionError }).error.message)).toMatch(
+      /“Cures anxiety” could not be approved automatically/,
+    );
+    expect(db.insert).not.toHaveBeenCalled();
+  });
+
+  it("leaves a LIVE product untouched when an edit adds a bad badge", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    badgeVerdicts.set("18+ only", VIOLATION);
+
+    const result = await updateProduct(PRODUCT_ID, withBadges("Eco friendly", "18+ only"));
+
+    expect(result).toMatchObject({ ok: false, error: { code: "invalid_input" } });
+    expect(db.update).not.toHaveBeenCalled();
+    expect(precheckMock).not.toHaveBeenCalled();
+  });
+
+  it("names the FIRST refused badge in the seller's order", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    badgeVerdicts.set("Second bad", VIOLATION);
+    badgeVerdicts.set("First bad", UNSURE);
+
+    const result = await updateProduct(PRODUCT_ID, withBadges("Fine", "First bad", "Second bad"));
+
+    expect(english((result as { error: ActionError }).error.message)).toMatch(/“First bad”/);
+  });
+
+  it("saves clean badges into the details, judging each one once", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({ data: { id: PRODUCT_ID, moderation_status: "ok" }, error: null });
+
+    const result = await updateProduct(PRODUCT_ID, withBadges("Handmade", "Vegan"));
+
+    expect(result).toEqual({ ok: true, id: PRODUCT_ID, checking: false });
+    expect(badgeTextMock.mock.calls.map(([label]) => label)).toEqual(["Handmade", "Vegan"]);
+    const payload = db.update.mock.calls[0][0] as { details: { badges: unknown[] } };
+    expect(payload.details.badges).toEqual([
+      { icon: "star", label: "Handmade" },
+      { icon: "star", label: "Vegan" },
+    ]);
+    // The wall still sees them: the precheck gets the same details.
+    expect(precheckMock).toHaveBeenCalledWith("product", PRODUCT_ID, payload);
+  });
+
+  it("goes on with the save when no answer can be had, and leaves it to the wall", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    badgeVerdicts.set("Handmade", null);
+    dbFn.mockResolvedValueOnce({ data: { id: PRODUCT_ID, moderation_status: "pending" }, error: null });
+    settleMock.mockResolvedValueOnce("pending");
+
+    const result = await createProduct(withBadges("Handmade"));
+
+    expect(result).toEqual({ ok: true, id: PRODUCT_ID, checking: true });
+    expect(db.insert).toHaveBeenCalled();
+  });
+
+  it("asks nothing about a product with no badges, or a write that leaves the details alone", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValue({ data: { id: PRODUCT_ID, moderation_status: "ok" }, error: null });
+
+    await createProduct(validInput({ details: { materials: "Oak" } }));
+    await updateProduct(PRODUCT_ID, validInput());
+
+    expect(badgeTextMock).not.toHaveBeenCalled();
+  });
+
+  it("refuses badges the schema does not allow before asking anyone about them", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+
+    const duplicate = await createProduct(withBadges("Vegan", "VEGAN"));
+    const tooMany = await createProduct(withBadges("a", "b", "c", "d", "e", "f", "g"));
+    const badIcon = await createProduct(
+      validInput({ details: { badges: [{ icon: "skull", label: "Spooky" }] } }),
+    );
+    const badColor = await createProduct(
+      validInput({ details: { badges: [{ icon: "star", label: "Neon", color: "#39ff14" }] } }),
+    );
+    const crowdedPhoto = await createProduct(
+      validInput({
+        details: {
+          badges: ["a", "b", "c", "d"].map((label) => ({ icon: "star", label, placement: "photo-top-left" })),
+        },
+      }),
+    );
+
+    for (const result of [duplicate, tooMany, badIcon, badColor, crowdedPhoto]) {
+      expect(result).toMatchObject({ ok: false, error: { code: "invalid_input" } });
+    }
+    expect(badgeTextMock).not.toHaveBeenCalled();
+    expect(db.insert).not.toHaveBeenCalled();
+  });
+
+  it("stores a badge's colour and place as given, judging only its words", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    dbFn.mockResolvedValueOnce({ data: { id: PRODUCT_ID, moderation_status: "ok" }, error: null });
+    const badges = [
+      { icon: "leaf", label: "Eco friendly", color: "green", placement: "photo-top-right" },
+      { icon: "truck", label: "Free shipping", color: "blue" },
+    ];
+
+    const result = await updateProduct(PRODUCT_ID, validInput({ details: { badges } }));
+
+    expect(result).toMatchObject({ ok: true });
+    expect((db.update.mock.calls[0][0] as { details: { badges: unknown } }).details.badges).toEqual(badges);
+    expect(badgeTextMock.mock.calls.map(([label]) => label)).toEqual(["Eco friendly", "Free shipping"]);
+  });
+});
+
+describe("checkBadgeLabel: the check before a written badge is added", () => {
+  it("answers ok for clean words, and for words no answer could be had about", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    expect(await checkBadgeLabel("Hand-poured in Lisbon")).toEqual({ ok: true });
+    badgeVerdicts.set("Ships fast", null);
+    expect(await checkBadgeLabel("Ships fast")).toEqual({ ok: true });
+    expect(rateLimitMock).toHaveBeenCalledWith("badge_check", expect.objectContaining({ max: 60 }));
+  });
+
+  it("refuses words that break the rules, with the same reason a save would give", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    badgeVerdicts.set("Buy followers here", VIOLATION);
+
+    const result = await checkBadgeLabel("  Buy followers here  ");
+
+    expect(result).toMatchObject({ ok: false, error: { code: "invalid_input" } });
+    expect(english((result as { error: ActionError }).error.message)).toMatch(/“Buy followers here” breaks/);
+    expect(badgeTextMock).toHaveBeenCalledWith("Buy followers here");
+  });
+
+  it("refuses a signed-out caller, a viewer and a spent budget before judging anything", async () => {
+    getActiveAccountMock.mockResolvedValue(null);
+    expect(await checkBadgeLabel("Vegan")).toMatchObject({ ok: false, error: { code: "session_expired" } });
+
+    getActiveAccountMock.mockResolvedValue(viewerAccount());
+    expect(await checkBadgeLabel("Vegan")).toMatchObject({ ok: false, error: { code: "permission_denied" } });
+    expect(rateLimitMock).not.toHaveBeenCalled();
+
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    rateLimitMock.mockResolvedValue(false);
+    expect(await checkBadgeLabel("Vegan")).toMatchObject({ ok: false, error: { code: "rate_limited" } });
+
+    expect(badgeTextMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["nothing", ""],
+    ["a number", 42],
+    ["too many characters", "x".repeat(49)],
+    ["a line break", "Eco\nfriendly"],
+  ])("refuses %s without asking the classifier", async (_name, label) => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    expect(await checkBadgeLabel(label)).toMatchObject({ ok: false, error: { code: "invalid_input" } });
+    expect(badgeTextMock).not.toHaveBeenCalled();
   });
 });

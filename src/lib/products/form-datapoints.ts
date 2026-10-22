@@ -5,12 +5,17 @@ import type {
   ProductStatus,
 } from "@/types/product";
 import type {
+  BadgeFormValue,
   DetailsFormValues,
   DocumentFormValue,
   GalleryFormImage,
   OptionDetailsFormValues,
 } from "@/components/products/form-values";
-import { optionDetailsEmpty, safetyStarted } from "@/components/products/form-values";
+import {
+  badgesToInput,
+  optionDetailsEmpty,
+  safetyStarted,
+} from "@/components/products/form-values";
 import { parseFormPriceCents } from "@/lib/products/price";
 import { createTranslator } from "next-intl";
 import { msg, type MessageRef } from "@/i18n/types";
@@ -70,6 +75,7 @@ export const PRODUCT_FORM_SECTIONS = [
   { id: "shipping", required: false },
   { id: "options", required: false },
   { id: "photos", required: false },
+  { id: "badges", required: false },
   { id: "specs", required: false },
   { id: "documents", required: false },
   { id: "safety", required: false },
@@ -152,6 +158,10 @@ export type ProductFormSnapshot = {
   /** Seller labels only — never the object keys behind them (B6). */
   documentLabels: string[];
   documentCount: number;
+  /** The badges as the page will print them, in order: words, icon id, icon
+   *  colour id and where each sits, defaults spelled out ("ink", "beside"),
+   *  rows with no words left out (exactly the badges a save would store). */
+  badges: { icon: string; label: string; color: string; placement: string }[];
   specs: {
     hasDimensions: boolean;
     hasWeight: boolean;
@@ -189,6 +199,7 @@ export type ProductFormStateInput = {
   optionGroups: ProductOptionGroup[];
   gallery: GalleryFormImage[];
   documents: DocumentFormValue[];
+  badges: BadgeFormValue[];
   details: DetailsFormValues;
   /** Per-version measurements, keyed by option id. Entries whose option is
    *  gone are ignored, exactly as the save path ignores them. */
@@ -307,6 +318,7 @@ export function sectionSummaries(
 
   const title = values.title.trim();
   const manufacturer = details.safety.manufacturerName.trim();
+  const savedBadges = badgesToInput(input.badges);
 
   return {
     basics: title ? [title] : [],
@@ -360,6 +372,10 @@ export function sectionSummaries(
       input.gallery.length === 0
         ? []
         : [msg("Products.form.summary.photos", { count: input.gallery.length })],
+    badges:
+      savedBadges.length === 0
+        ? []
+        : [msg("Products.form.summary.badges", { count: savedBadges.length })],
     specs: specParts,
     documents:
       input.documents.length === 0
@@ -457,6 +473,12 @@ export function buildProductFormSnapshot(
     galleryTiedCount: input.gallery.filter((image) => image.optionId).length,
     documentLabels: input.documents.map((document) => document.label.trim()).filter(Boolean),
     documentCount: input.documents.length,
+    badges: badgesToInput(input.badges).map((badge) => ({
+      icon: badge.icon,
+      label: badge.label,
+      color: badge.color ?? "ink",
+      placement: badge.placement ?? "beside",
+    })),
     specs: {
       hasDimensions: Boolean(
         details.length.trim() || details.width.trim() || details.height.trim(),

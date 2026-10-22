@@ -14,7 +14,7 @@ import { StorefrontBoard, storefrontSurface } from "./StorefrontBoard";
 import { useEmbedFrameReport } from "./useEmbedFrameReport";
 
 /**
- * A STOREFRONT INSIDE A SELLER'S OWN WEBSITE: the embed frame (/e/[key]/[site]).
+ * A STOREFRONT INSIDE A SELLER'S OWN WEBSITE: the embed frame (/e/[key]/[...sites]).
  *
  * The same board as the hosted page (StorefrontBoard), in a frame the seller's
  * page sizes to fit. A product tile opens that product's hosted page in a tab
@@ -34,14 +34,7 @@ import { useEmbedFrameReport } from "./useEmbedFrameReport";
  * hosted page's own report link. The sentence about who is party to a sale is
  * on the product page and the checkout, where a sale is made.
  */
-export function EmbedFrameView({
-  page,
-  site,
-}: {
-  page: StorefrontPageData;
-  /** The embedding site's host: where the frame's one message is addressed. */
-  site: string;
-}) {
+export function EmbedFrameView({ page }: { page: StorefrontPageData }) {
   const t = useTranslations("ProductPage");
   const rootRef = useRef<HTMLDivElement>(null);
   const { theme } = page;
@@ -51,7 +44,7 @@ export function EmbedFrameView({
 
   // The frame's title on the seller's page says what the board's own label
   // says: one sentence, already in every language.
-  useEmbedFrameReport(rootRef, site, t("storefront.gridLabel", { store: displayName }));
+  useEmbedFrameReport(rootRef, t("storefront.gridLabel", { store: displayName }));
 
   return (
     <div

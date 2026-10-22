@@ -13,9 +13,9 @@ import { StorefrontPreview } from "./StorefrontPreview";
 const STAND_IN_TILES = [0, 1, 2, 3] as const;
 
 /**
- * The picture of what this page does: the seller's real storefront sitting in a
- * slot on someone else's website. It answers the settings below it live: dim
- * and locked until embedding is on with at least one domain, then lit, with the
+ * The picture of what the embed does: the seller's real storefront sitting in
+ * a slot on their own website. It sits beside the switch and the domains it
+ * answers, live: dim and locked until the embed would show, then lit, with the
  * first allowed domain in the address bar.
  *
  * Purely illustrative, so the whole thing is `aria-hidden`; the switch and the
@@ -50,7 +50,7 @@ export function EmbedHero({
       </BrowserChrome>
 
       {/* The host page: a few stand-in lines around the embed slot. */}
-      <div className="space-y-4 bg-muted/40 px-6 py-6">
+      <div className="space-y-4 bg-muted/40 p-4">
         <div className="space-y-2">
           <span className={cn(placeholderBarClass, "block w-1/3")} />
           <span className={cn(placeholderBarClass, "block w-2/3")} />

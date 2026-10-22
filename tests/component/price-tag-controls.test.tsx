@@ -154,6 +154,16 @@ describe("PriceTagControls", () => {
     // Back to following the accent clears the field rather than storing it.
     await user.click(chip.getByRole("button", { name: "Use Theme color" }));
     expect(onChange).toHaveBeenLastCalledWith({ saleBadgeColor: undefined });
+
+    // Its words take a colour of their own, and give it back to "Auto": the
+    // ink that reads on the fill.
+    await user.click(
+      chip.getByRole("group", { name: "Text color swatches" }).querySelector<HTMLButtonElement>('[aria-label^="Grey"]')!,
+    );
+    expect(Object.keys(onChange.mock.lastCall![0])).toEqual(["saleBadgeTextColor"]);
+    expect(onChange.mock.lastCall![0].saleBadgeTextColor).toMatch(/^#[0-9a-f]{6}$/);
+    await user.click(chip.getByRole("button", { name: "Use Auto" }));
+    expect(onChange).toHaveBeenLastCalledWith({ saleBadgeTextColor: undefined });
   });
 
   it("pictures a tile's own sale in its inspector: what that product's chip will really say", () => {
@@ -176,6 +186,19 @@ describe("PriceTagControls", () => {
     expect(within(screen.getByRole("group", { name: "Style" })).getAllByText("-€74.50")).toHaveLength(4);
   });
 
+  it("lets a tile's chip words follow the storefront's own pick, and says which they follow", () => {
+    render(
+      <SaleBadgeControls theme={{ ...themed(), saleBadgeTextColor: "#fde047" }} overrides={{}} onChange={vi.fn()} />,
+    );
+    const chip = within(document.querySelector<HTMLElement>("[data-sale-badge-controls]")!);
+    // The fill and the words both follow the storefront: neither is "Auto" here.
+    expect(chip.getAllByRole("button", { name: "Use Theme color" })).toHaveLength(2);
+    expect(chip.queryByRole("button", { name: "Use Auto" })).toBeNull();
+    // The pictures wear it too, so the look a seller picks is the chip they get.
+    const look = chip.getByRole("group", { name: "Style" }).querySelector<HTMLElement>("[data-tile-sale-badge]")!;
+    expect(look.style.color).toBe("rgb(253, 224, 71)");
+  });
+
   it("offers the sale chip no spot on the price's row, and none of its controls once hidden", () => {
     renderChip({ priceTagPosition: "top-left" });
     const chip = within(document.querySelector<HTMLElement>("[data-sale-badge-controls]")!);
@@ -190,6 +213,7 @@ describe("PriceTagControls", () => {
     expect(hidden.queryByRole("group", { name: "Style" })).toBeNull();
     expect(hidden.queryByRole("button", { name: /^Sale chip / })).toBeNull();
     expect(hidden.queryByRole("group", { name: "Fill swatches" })).toBeNull();
+    expect(hidden.queryByRole("group", { name: "Text color swatches" })).toBeNull();
   });
 
   it("sets each of the three colors independently", async () => {

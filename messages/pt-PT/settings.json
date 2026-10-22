@@ -303,6 +303,7 @@
   "tax": {
     "cardTitle": "Empresa e dados do vendedor",
     "cardDescription": "Definido uma vez para toda a sua conta. Mostrado aos compradores em todas as páginas de produto onde vende, e utilizado para faturas e IVA.",
+    "memberScope": "Estes são os seus próprios dados de vendedor. Os que os compradores veem em {store} pertencem ao proprietário, que os define nas suas próprias definições.",
     "gate": {
       "required": "<strong>O seu nome ou denominação social, morada e e-mail de contacto são obrigatórios antes de poder publicar ou vender o que quer que seja.</strong> Os compradores têm de conseguir ver a quem estão a comprar e como o contactar antes de encomendarem.",
       "privacyNoteLinked": "Estes dados aparecem publicamente nas suas páginas de produto apenas por esse motivo. Nunca os utilizamos para marketing, nem os vendemos ou partilhamos. A única mensagem que enviamos para o seu e-mail de contacto ou telefone é o código que os confirma. Consulte a <link>Política de Privacidade da Squareshare</link>."

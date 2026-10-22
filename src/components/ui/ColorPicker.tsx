@@ -19,6 +19,12 @@ import type { ColorTargetRef } from "@/lib/theme/color-target";
 import { recordRecentColor } from "@/lib/theme/recent-colors";
 import { Popover } from "./Popover";
 import { ColorArea } from "./ColorArea";
+import {
+  COLOR_GRID_DOT,
+  COLOR_ROW,
+  COLOR_ROW_DOT,
+  COLOR_ROW_SCROLLER,
+} from "./color-row-styles";
 
 /**
  * `EyeDropper` is Chromium-only (no Safari/Firefox as of 2026) and absent from
@@ -41,28 +47,17 @@ const readEyeDropper = () =>
   typeof window !== "undefined" && "EyeDropper" in window;
 const readEyeDropperOnServer = () => false;
 
-/** The rainbow ring on the "custom color" button. Values, not chrome. */
-const COLOR_WHEEL_GRADIENT =
-  "conic-gradient(#ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)";
-
-/** Every circle in a swatch row is the same size and shape. Exported with
- *  ColorDot so the ColorPanel's grids size their circles identically. */
-export const DOT_BASE =
-  "flex aspect-square w-full items-center justify-center rounded-full";
-
 /**
- * The row sizes its columns to however many circles it actually has, so it is
- * always exactly ONE line — a fixed column count leaves an optional field that
- * shows both an inherit dot and a custom dot wrapping a single lonely swatch
- * onto a second row. Static class strings, because Tailwind cannot see a
- * computed `grid-cols-${n}`.
+ * Mark which edges of a scrolling row still have more beyond them. The
+ * `.scroll-fade-x` CSS fades exactly those edges (globals.css). Written
+ * straight onto the element: it is presentation of a scroll position, so it
+ * should not cost a render per scroll event.
  */
-const ROW_COLUMNS: Record<number, string> = {
-  4: "grid-cols-4",
-  5: "grid-cols-5",
-  6: "grid-cols-6",
-  7: "grid-cols-7",
-};
+function syncScrollerFade(scroller: HTMLElement) {
+  const { scrollLeft, clientWidth, scrollWidth } = scroller;
+  scroller.toggleAttribute("data-fade-start", scrollLeft > 1);
+  scroller.toggleAttribute("data-fade-end", scrollLeft + clientWidth < scrollWidth - 1);
+}
 
 /**
  * A "follow the theme" option, offered as its own dot in the inline row for
@@ -89,19 +84,23 @@ export type ColorInheritOption = {
  *
  * Exported because the ColorPanel renders hundreds of these and must not
  * re-implement the selection ring, the hairline that gives white and pale tints
- * a visible edge, or the `isLightColor` check-mark flip.
+ * a visible edge, or the `isLightColor` check-mark flip. `inRow` draws the
+ * picker's own fixed-size, lifting dot instead of a grid dot.
  */
 export function ColorDot({
   color,
   label,
   active,
   onSelect,
+  inRow = false,
 }: {
   color: string;
   label: string;
   active: boolean;
   onSelect: () => void;
+  inRow?: boolean;
 }) {
+  const dot = inRow ? COLOR_ROW_DOT : COLOR_GRID_DOT;
   return (
     <button
       type="button"
@@ -111,14 +110,10 @@ export function ColorDot({
       title={label}
       style={{ backgroundColor: color }}
       className={cn(
-        DOT_BASE,
-        "transition-[transform,box-shadow] duration-base ease-standard motion-reduce:transition-none",
+        dot.cell,
+        "transition-[transform,box-shadow,filter] duration-base ease-standard motion-reduce:transition-none",
         focusRingClass,
-        // The selection ring sits OUTSIDE the dot, so it can't be confused with
-        // the hairline that merely gives white and pale tints a visible edge.
-        active
-          ? "ring-2 ring-ring ring-offset-2 ring-offset-background"
-          : "ring-1 ring-inset ring-black/10 hover:scale-110 hover:shadow-md motion-reduce:hover:scale-100",
+        active ? dot.active : cn(dot.idle, dot.hover),
       )}
     >
       {active && (
@@ -144,7 +139,8 @@ function preserveHue(next: Hsv, prev: Hsv): Hsv {
  *
  * SHAPE: a single row of circles, inline. The first two are actions — a wheel
  * for "more colors", and an eyedropper — followed by the three fixed neutrals.
- * The common case is one tap and no overlay at all.
+ * The common case is one tap and no overlay at all. The row is always one line:
+ * swatches that outgrow the width scroll sideways (color-row-styles.ts).
  *
  * WHERE THE WHEEL GOES depends on `target`. Inside the storefront designer it
  * aims the left-hand ColorPanel (the standard grid, palettes, recents, and the
@@ -206,6 +202,8 @@ export function ColorPicker({
    */
   compact?: boolean;
 }) {
+  // The swatch scroller, which keeps the chosen swatch in view.
+  const scrollerRef = useRef<HTMLDivElement>(null);
   const hexId = useId();
   const errorId = `${hexId}-error`;
   const t = useTranslations("Common.colorPicker");
@@ -343,13 +341,35 @@ export function ColorPicker({
   // Presets already have one, and an inherited field has no override to show.
   const showCustomDot = !inheriting && !isPreset && isStrictHexColor(current);
 
-  // wheel + eyedropper? + inherit? + custom? + the fixed swatches.
-  const dotCount =
-    1 +
-    (hasEyeDropper ? 1 : 0) +
-    (inherit ? 1 : 0) +
-    (showCustomDot ? 1 : 0) +
-    presets.length;
+  // In a scrolling row the chosen swatch can sit past the edge (a typed hex, an
+  // external change). Scroll the row itself, never the page: scrollIntoView
+  // would also drag every scrollable ancestor to it.
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    const chosen = scroller?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (!scroller) return;
+    if (chosen) {
+      // Keep it clear of the edge fade, not merely inside the box, or the
+      // swatch that was just chosen would be half dissolved.
+      const fade = parseFloat(getComputedStyle(scroller).getPropertyValue("--scroll-fade-size")) || 0;
+      const start = chosen.offsetLeft;
+      const end = start + chosen.offsetWidth;
+      if (start < scroller.scrollLeft + fade) scroller.scrollLeft = start - fade;
+      else if (end > scroller.scrollLeft + scroller.clientWidth - fade)
+        scroller.scrollLeft = end - scroller.clientWidth + fade;
+    }
+    syncScrollerFade(scroller);
+  }, [current, inheriting]);
+
+  // The row's width can change under it (the panel docks, the window resizes),
+  // which moves the point where it starts to overflow.
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => syncScrollerFade(scroller));
+    observer.observe(scroller);
+    return () => observer.disconnect();
+  }, []);
 
   /**
    * Everything the popover offers: the area, the hex field, the eyedropper —
@@ -476,6 +496,43 @@ export function ColorPicker({
   );
 
 
+  // Every swatch after the two action cells. In a scrolling row these (and only
+  // these) go inside the scroller.
+  const swatches = (
+    <>
+      {inherit && (
+        <ColorDot
+          color={inherit.value}
+          label={inherit.useLabel}
+          active={inheriting}
+          onSelect={inherit.onSelect}
+          inRow
+        />
+      )}
+
+      {showCustomDot && (
+        <ColorDot
+          color={current}
+          label={t("currentColor", { color: current })}
+          active
+          onSelect={() => handleOpenChange(true)}
+          inRow
+        />
+      )}
+
+      {presets.map((preset) => (
+        <ColorDot
+          key={preset.value}
+          color={preset.value}
+          label={tKey(preset.label, { value: preset.value })}
+          active={!inheriting && current === preset.value}
+          onSelect={() => commitHex(preset.value)}
+          inRow
+        />
+      ))}
+    </>
+  );
+
   if (compact) {
     return (
       <Popover
@@ -533,7 +590,7 @@ export function ColorPicker({
       <div
         role="group"
         aria-label={label ? t("swatchesFor", { label }) : t("swatches")}
-        className={cn("grid gap-1.5", ROW_COLUMNS[dotCount] ?? "grid-cols-7")}
+        className={COLOR_ROW}
       >
         <Popover
           // Never open when the panel is doing this field's job: the wheel
@@ -543,6 +600,9 @@ export function ColorPicker({
           onOpenChange={handleOpenChange}
           label={label ? t("pickerFor", { label }) : t("picker")}
           panelClassName="sm:w-[17rem]"
+          // The wheel's wrapper is `w-full` by default, which would swallow
+          // the line in a flex row.
+          rootClassName="w-auto shrink-0"
           trigger={
             <button
               id={id}
@@ -554,15 +614,17 @@ export function ColorPicker({
               data-testid="color-picker-trigger"
               onClick={handleWheel}
               className={cn(
-                DOT_BASE,
-                "relative transition-transform duration-base ease-standard motion-reduce:transition-none",
+                // `color-wheel` draws the pastel rim and flows it on hover
+                // (globals.css). Deliberately never carries the selection ring:
+                // whenever a custom color is live the custom dot is rendered
+                // and rings itself, and ringing both would read as two
+                // selections.
+                "color-wheel relative",
+                COLOR_ROW_DOT.cell,
+                "transition-transform duration-base ease-standard motion-reduce:transition-none",
                 focusRingClass,
-                "hover:scale-110",
-                // Deliberately never carries the selection ring: whenever a
-                // custom color is live the custom dot is rendered and rings
-                // itself, and ringing both would read as two selections.
+                COLOR_ROW_DOT.hover,
               )}
-              style={{ background: COLOR_WHEEL_GRADIENT }}
             >
               <span className="absolute inset-[3px] flex items-center justify-center rounded-full bg-background">
                 <Plus className="size-4 text-foreground" strokeWidth={2.5} aria-hidden="true" />
@@ -580,44 +642,24 @@ export function ColorPicker({
             aria-label={t("pickFromScreen")}
             title={t("pickFromScreenTitle")}
             className={cn(
-              DOT_BASE,
+              COLOR_ROW_DOT.cell,
               "border border-border bg-background text-foreground",
               "transition-transform duration-base ease-standard motion-reduce:transition-none",
               focusRingClass,
-              "hover:scale-110",
+              COLOR_ROW_DOT.hover,
             )}
           >
             <Pipette className="size-4" strokeWidth={2} aria-hidden="true" />
           </button>
         )}
 
-        {inherit && (
-          <ColorDot
-            color={inherit.value}
-            label={inherit.useLabel}
-            active={inheriting}
-            onSelect={inherit.onSelect}
-          />
-        )}
-
-        {showCustomDot && (
-          <ColorDot
-            color={current}
-            label={t("currentColor", { color: current })}
-            active
-            onSelect={() => handleOpenChange(true)}
-          />
-        )}
-
-        {presets.map((preset) => (
-          <ColorDot
-            key={preset.value}
-            color={preset.value}
-            label={tKey(preset.label, { value: preset.value })}
-            active={!inheriting && current === preset.value}
-            onSelect={() => commitHex(preset.value)}
-          />
-        ))}
+        <div
+          ref={scrollerRef}
+          className={COLOR_ROW_SCROLLER}
+          onScroll={(event) => syncScrollerFade(event.currentTarget)}
+        >
+          {swatches}
+        </div>
       </div>
     </div>
   );

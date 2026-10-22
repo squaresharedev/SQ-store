@@ -306,6 +306,11 @@
       "required": "Geef het kanaal een naam, of laat het leeg.",
       "tooLong": "De kanaalnaam mag maximaal {maximum} tekens bevatten.",
       "unsupported": "De kanaalnaam bevat niet-ondersteunde tekens."
+    },
+    "badgeLabel": {
+      "required": "Een badge heeft tekst nodig.",
+      "tooLong": "Een badge mag maximaal {maximum} tekens hebben.",
+      "unsupported": "Een badge bevat niet-ondersteunde tekens."
     }
   },
   "email": {
@@ -485,7 +490,10 @@
     "documentsTooMany": "Een product kan maximaal {maximum} documenten hebben.",
     "optionDuplicate": "Elke optie mag maar één keer voorkomen.",
     "optionsTotalTooMany": "Een product kan in totaal maximaal {maximum} opties hebben.",
-    "galleryStaleOption": "Een foto verwijst naar een optie die niet meer bestaat."
+    "galleryStaleOption": "Een foto verwijst naar een optie die niet meer bestaat.",
+    "badgesTooMany": "Een product kan maximaal {maximum} badges hebben.",
+    "badgeDuplicate": "Elke badge kan maar één keer worden toegevoegd.",
+    "badgesOnPhotoTooMany": "Een product kan maximaal {maximum} badges op de foto tonen."
   },
   "productImport": {
     "noTitle": "Geen titel.",

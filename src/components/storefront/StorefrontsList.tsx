@@ -51,6 +51,7 @@ export function StorefrontsList({
   total,
   products,
   canWrite,
+  sellerDetailsComplete = false,
   sample = null,
 }: {
   /**
@@ -67,6 +68,9 @@ export function StorefrontsList({
   products: Product[];
   /** Hide create/delete/embed controls when the active role is read-only. */
   canWrite: boolean;
+  /** The store's seller details are complete, so live storefronts get a
+   *  link to their page on the card. */
+  sellerDetailsComplete?: boolean;
 }) {
   const t = useTranslations("Storefront.list");
   const tSample = useTranslations("Storefront.sample.card");
@@ -208,6 +212,7 @@ export function StorefrontsList({
                 storefront={storefront}
                 productsById={productsById}
                 canWrite={canWrite}
+                sellerDetailsComplete={sellerDetailsComplete}
                 onEmbed={() => router.push(storefrontEmbedPath(storefront.id))}
                 onDelete={() => setPendingDelete(storefront)}
               />

@@ -122,14 +122,15 @@ const csp = [
  * inside another site, and only on the host the embed is served from.
  *
  * A page cannot set a response header on this stack and there is no middleware
- * (see the nonce note above), so the embedding site's name travels in the PATH
- * (/e/<embed key>/<site>) and the rule below writes it into `frame-ancestors`.
- * The browser then refuses to draw the frame on any other site, and the route
- * itself only serves the board when <site> is on the seller's allowlist. The
- * whole arrangement is described in src/lib/storefront/embed-frame.ts, whose
- * patterns and policy these literals repeat; tests/unit/embed-frame-headers
- * .test.ts holds the two together and runs the rule through both the matcher
- * Next uses and the one the deployed worker uses.
+ * (see the nonce note above), so the embedding sites' names travel in the PATH
+ * (/e/<embed key>/<site>/...) and the rules below write them into
+ * `frame-ancestors`. The browser then refuses to draw the frame unless every
+ * page above it is one of them, and the route itself only serves the board
+ * when every one is allowed for that storefront. The whole arrangement is
+ * described in src/lib/storefront/embed-frame.ts, whose patterns and policy
+ * these literals repeat; tests/unit/embed-frame-headers.test.ts loads these
+ * rules and runs them through both the matcher Next uses and the one the
+ * deployed worker uses.
  *
  * The hostname the embed is served from, or null when it has none yet: then
  * the rule is not emitted and nothing here can be framed anywhere.
@@ -245,29 +246,45 @@ const nextConfig: NextConfig = {
       { source: "/s/:storefrontId/p/:productId/checkout", headers: PURCHASE_PAGE_HEADERS },
       { source: "/api/orders/:path*", headers: PURCHASE_PAGE_HEADERS },
       { source: "/api/checkout/:path*", headers: PURCHASE_PAGE_HEADERS },
-      // THE EMBED FRAME (see embedHost above). Everything this entry does not
-      // match keeps X-Frame-Options: DENY and nothing else, which is what
-      // makes a malformed address, the dashboard's own hostname and a build
-      // with no embed host all fail closed.
-      //
-      // - `:site`, never `:host`: a `has` item of type "host" sets a param of
-      //   that name and would overwrite the path's.
-      // - A port is admitted in development only, where a test site has one.
-      // - The same header names, letter for letter, as the entry at the top:
-      //   the worker treats a differently cased name as a second header and
-      //   sends both.
-      ...(embedHost
-        ? [
-            {
-              source: `/e/:key([0-9a-f-]{36})/:site(${isDev ? "[a-z0-9.-]+(?::[0-9]{1,5})?" : "[a-z0-9.-]+"})`,
-              has: [{ type: "host" as const, value: embedHost.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") }],
-              headers: EMBED_FRAME_HEADERS,
-            },
-          ]
-        : []),
+      // THE SHARE CARD GALLERY, cross-origin isolated, so the background-
+      // removal model (src/lib/share-card/cutout/engine.ts), where it falls
+      // back from the GPU to the CPU, runs on several threads instead of one.
+      { source: "/dev/share-cards", headers: CROSS_ORIGIN_ISOLATED_HEADERS },
+      // THE EMBED FRAME (see embedHost above): one entry per number of sites
+      // the address names. Everything these do not match keeps
+      // X-Frame-Options: DENY and nothing else, which is what makes a
+      // malformed address, too many sites, the dashboard's own hostname and a
+      // build with no embed host all fail closed.
+      ...(embedHost ? embedFrameRules(embedHost) : []),
     ];
   },
 };
+
+/** How many sites one embed frame's address may name (EMBED_MAX_SITES). */
+const EMBED_MAX_SITES = 4;
+
+/**
+ * `/e/<key>/<site>` up to `/e/<key>/<site>/<site>/<site>/<site>`, each sent
+ * `frame-ancestors` with exactly the sites its address names. One entry per
+ * count, not one with optional segments: the worker cannot fill in a param a
+ * path did not have, and sends the raw value when it cannot.
+ *
+ * - `:s1`..`:s4`, never `:host`: a `has` item of type "host" sets a param of
+ *   that name and would overwrite the path's.
+ * - A port is admitted in development only, where a test site has one.
+ */
+function embedFrameRules(host: string) {
+  const site = isDev ? "[a-z0-9.-]+(?::[0-9]{1,5})?" : "[a-z0-9.-]+";
+  const has = [{ type: "host" as const, value: host.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") }];
+  return Array.from({ length: EMBED_MAX_SITES }, (_, index) => {
+    const params = Array.from({ length: index + 1 }, (_, n) => `s${n + 1}`);
+    return {
+      source: `/e/:key([0-9a-f-]{36})/${params.map((param) => `:${param}(${site})`).join("/")}`,
+      has,
+      headers: embedFrameHeaders(params.map((param) => `:${param}`)),
+    };
+  });
+}
 
 const PURCHASE_PAGE_HEADERS = [
   { key: "Referrer-Policy", value: "no-referrer" },
@@ -275,15 +292,32 @@ const PURCHASE_PAGE_HEADERS = [
   { key: "X-Robots-Tag", value: "noindex, nofollow" },
 ];
 
-const EMBED_FRAME_HEADERS = [
+/**
+ * What makes a page cross-origin isolated, the condition for
+ * SharedArrayBuffer and so for WebAssembly on more than one thread.
+ * `credentialless`, not `require-corp`: the page loads photos and the model's
+ * files from origins that send no Cross-Origin-Resource-Policy header, and
+ * credentialless lets those in, only without cookies.
+ */
+const CROSS_ORIGIN_ISOLATED_HEADERS = [
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
+];
+
+/**
+ * What an embed frame is sent, for the sites its address names. The same
+ * header names, letter for letter, as the entry at the top of headers(): the
+ * worker treats a differently cased name as a second header and sends both.
+ */
+const embedFrameHeaders = (sites: readonly string[]) => [
   // ENFORCED, unlike the policy above, and deliberately tiny. Once a response
   // carries an enforced frame-ancestors, browsers ignore X-Frame-Options on it,
-  // so this line is what lifts DENY for the one named site. Keep the value
-  // plain: see EMBED_FRAME_CSP in src/lib/storefront/embed-frame.ts for what
-  // one stray character does in production.
+  // so this line is what lifts DENY for the named sites. Keep the value plain:
+  // see embedFramePolicy in src/lib/storefront/embed-frame.ts for what one
+  // stray character does in production.
   {
     key: "Content-Security-Policy",
-    value: "frame-ancestors :site; base-uri 'none'; form-action 'none'; object-src 'none'",
+    value: `frame-ancestors ${sites.join(" ")}; base-uri 'none'; form-action 'none'; object-src 'none'`,
   },
   // The frame's address names the seller's site and embed key: it goes nowhere.
   { key: "Referrer-Policy", value: "no-referrer" },

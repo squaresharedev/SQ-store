@@ -43,6 +43,11 @@ export function parseFulfilment(row: {
  * shipment. The query (lib/orders/queries.ts), the count on the sidebar and the
  * overview row, the order panel's "Mark as shipped" and public.order_mark_shipped
  * all apply this same rule; the SQL spelling of it lives beside the query.
+ *
+ * The queue and its count go one step further and leave out an order the buyer
+ * has withdrawn from: that is a refund to arrange, and it waits under
+ * "Withdrawn" instead. The panel still offers "Mark as shipped" on it, with a
+ * warning, for a seller who has agreed otherwise with the buyer.
  */
 export function isToShip(order: {
   status: OrderStatus;

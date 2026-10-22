@@ -1,7 +1,7 @@
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { escapeIlike } from "@/lib/supabase/ilike";
+import { ilikeAny } from "@/lib/supabase/ilike";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { parseOrderSelection } from "@/lib/orders/selection";
 import { parseShipTo } from "@/lib/orders/ship-to";
@@ -10,7 +10,7 @@ import { orderPhotoKey } from "@/lib/orders/photo";
 import { presignGetUrl } from "@/lib/r2";
 import { isContentVisible } from "@/lib/moderation/removal";
 import type { OrderExportRow } from "@/lib/orders/csv";
-import { ORDER_CHANNELS, REFUND_REASONS } from "@/types/order-view";
+import { ORDER_CHANNELS, REFUND_REASONS, WITHDRAWN_STATUS_FILTER } from "@/types/order-view";
 import type {
   OrderView,
   OrderDiscount,
@@ -126,6 +126,57 @@ export const PROVIDER_PAYMENT_PREFIX = "pi_";
  * partial index orders_seller_to_ship_idx.
  */
 const TO_SHIP_MATCH = { status: "paid", fulfilment_status: "unfulfilled" } as const;
+
+/** The column a buyer's withdrawal is recorded in. */
+const WITHDRAWN_AT = "withdrawal_requested_at";
+
+/** What the Orders search box matches, each as a case-insensitive substring. */
+const ORDER_SEARCH_COLUMNS = [
+  "buyer_email",
+  "ship_to->>name",
+  "ship_to->>city",
+  "product_title",
+  "tracking_number",
+] as const;
+
+/** The query methods the order filters below are written against: a PostgREST
+ *  filter builder, each method returning the builder. */
+type OrderFilterable = {
+  match(query: Record<string, unknown>): OrderFilterable;
+  is(column: string, value: null): OrderFilterable;
+  not(column: string, operator: string, value: unknown): OrderFilterable;
+  eq(column: string, value: unknown): OrderFilterable;
+};
+
+/**
+ * The queue and its count: to ship, and not withdrawn from. A buyer who has
+ * withdrawn is owed a refund, not a parcel, so their order waits under
+ * "Withdrawn" instead of being counted as one more thing to send. The order
+ * panel still offers "Mark as shipped" on it, with a warning, for the seller
+ * who has agreed otherwise with the buyer.
+ */
+function onlyToShip<T>(query: T): T {
+  // Cast through a minimal shape: checking a PostgREST builder against a
+  // generic constraint is too deep for the compiler on some selects.
+  return (query as unknown as OrderFilterable).match(TO_SHIP_MATCH).is(WITHDRAWN_AT, null) as unknown as T;
+}
+
+/**
+ * Days a withdrawal keeps asking for the seller's attention. The refund is due
+ * within 14 days of it; past a month the matter has been settled with the
+ * buyer one way or another, and a row that can never be cleared would be one
+ * the seller learns to ignore.
+ */
+const WITHDRAWAL_ATTENTION_DAYS = 30;
+
+/**
+ * The "Withdrawn" status filter: still paid (no refund recorded yet) and
+ * withdrawn from by the buyer. A pseudo status, beside the database's own
+ * statuses in the Orders toolbar, because that is where a seller looks.
+ */
+function onlyWithdrawn<T>(query: T): T {
+  return (query as unknown as OrderFilterable).eq("status", "paid").not(WITHDRAWN_AT, "is", null) as unknown as T;
+}
 
 /** Postgres would error on a malformed uuid, so a bad id is filtered out here
  *  rather than surfaced as "orders are unavailable". */
@@ -256,17 +307,99 @@ export const countOrdersToShip = cache(async (): Promise<number> => {
   if (!account) return 0;
 
   const supabase = await createClient();
-  const { count, error } = await (supabase as SupabaseClient)
-    .from("orders")
-    .select("id", { count: "exact", head: true })
-    .eq("seller_id", account.accountId)
-    .match(TO_SHIP_MATCH);
+  const { count, error } = await onlyToShip(
+    (supabase as SupabaseClient)
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("seller_id", account.accountId),
+  );
   if (error) {
     console.error("[orders] to-ship count failed", error.message);
     return 0;
   }
   return count ?? 0;
 });
+
+/**
+ * Buyers who withdrew from an order in the last WITHDRAWAL_ATTENTION_DAYS and
+ * have not been refunded yet, in the ACTIVE store: the overview's "refund
+ * owed" row. Soft-fails to 0, like the to-ship count.
+ */
+export const countWithdrawalsToSettle = cache(async (): Promise<number> => {
+  const account = await getActiveAccount();
+  if (!account) return 0;
+
+  const since = new Date(Date.now() - WITHDRAWAL_ATTENTION_DAYS * 24 * 60 * 60 * 1000);
+  const supabase = await createClient();
+  const { count, error } = await onlyWithdrawn(
+    (supabase as SupabaseClient)
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("seller_id", account.accountId),
+  ).gte(WITHDRAWN_AT, since.toISOString());
+  if (error) {
+    console.error("[orders] withdrawal count failed", error.message);
+    return 0;
+  }
+  return count ?? 0;
+});
+
+/** The most to-ship rows the per-product tally reads. Far past any real queue;
+ *  past it a card says "to ship" without the exact count being right. */
+const TO_SHIP_TALLY_LIMIT = 1000;
+
+/**
+ * Orders still to ship, per product, in the ACTIVE store: the products list
+ * says on each card how many are waiting, and its delete dialog warns before
+ * a product with parcels still owed is removed. Soft-fails to {}: the delete
+ * action asks again for itself (countToShipForProduct) before it deletes.
+ */
+export async function toShipByProduct(): Promise<Record<string, number>> {
+  const account = await getActiveAccount();
+  if (!account) return {};
+
+  const supabase = await createClient();
+  const { data, error } = await onlyToShip(
+    (supabase as SupabaseClient)
+      .from("orders")
+      .select("product_id")
+      .eq("seller_id", account.accountId)
+      .not("product_id", "is", null)
+      .limit(TO_SHIP_TALLY_LIMIT),
+  );
+  if (error) {
+    console.error("[orders] to-ship tally failed", error.message);
+    return {};
+  }
+  const tally: Record<string, number> = {};
+  for (const row of (data ?? []) as { product_id: string }[]) {
+    tally[row.product_id] = (tally[row.product_id] ?? 0) + 1;
+  }
+  return tally;
+}
+
+/**
+ * How many orders of one product are still to ship in the given store, or
+ * null when that could not be read. The delete action's own check, so a
+ * warning the page showed before an order came in is not taken as consent.
+ */
+export async function countToShipForProduct(
+  accountId: string,
+  productId: string,
+): Promise<number | null> {
+  const supabase = await createClient();
+  const { count, error } = await onlyToShip(
+    (supabase as SupabaseClient)
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("seller_id", accountId),
+  ).eq("product_id", productId);
+  if (error) {
+    console.error("[orders] product to-ship count failed", error.message);
+    return null;
+  }
+  return count ?? 0;
+}
 
 /** PostgREST hands back at most this many rows a request, so the export
  *  reads in pages of it. */
@@ -325,6 +458,9 @@ export async function listOrdersForExport(
 export async function listOrders(options?: {
   view?: OrdersView;
   filters?: OrderFilters;
+  /** One product's orders only. Unlike `filters` it narrows the To ship queue
+   *  too: "this product's parcels" is a question about work, not history. */
+  productId?: string;
   sort?: OrderSort;
   page?: number;
   pageSize?: number;
@@ -354,10 +490,13 @@ export async function listOrders(options?: {
     .from("orders")
     .select(ORDER_COLUMNS, { count: "exact" })
     .eq("seller_id", account.accountId);
-  if (toShip) query = query.match(TO_SHIP_MATCH);
+  if (toShip) query = onlyToShip(query);
+  if (options?.productId) query = query.eq("product_id", options.productId);
 
   // --- Filters ---
-  if (filters?.status) {
+  if (filters?.status === WITHDRAWN_STATUS_FILTER) {
+    query = onlyWithdrawn(query);
+  } else if (filters?.status) {
     query = query.eq("status", filters.status);
   }
   if (filters?.channel) {
@@ -370,8 +509,9 @@ export async function listOrders(options?: {
     query = query.lte("created_at", `${filters.dateTo}T23:59:59.999Z`);
   }
   if (filters?.search && filters.search.trim() !== "") {
-    const escaped = escapeIlike(filters.search.trim());
-    query = query.ilike("buyer_email", `%${escaped}%`);
+    // Whatever a seller remembers about an order: who bought it, where it
+    // went, what it was, or the tracking number on the parcel.
+    query = query.or(ilikeAny(ORDER_SEARCH_COLUMNS, filters.search.trim()));
   }
 
   // --- Sort ---

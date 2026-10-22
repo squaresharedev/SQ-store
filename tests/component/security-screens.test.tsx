@@ -140,6 +140,12 @@ describe("TwoFactorChallenge", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Not you? Sign out" })).toBeInTheDocument();
+    // With no device and no code left, the screen still names a way back in.
+    const support = screen.getByRole("link", { name: "support@squareshare.eu" });
+    expect(support).toHaveAttribute("href", "mailto:support@squareshare.eu");
+    expect(document.querySelector("[data-recovery-locked-out]")?.textContent).toBe(
+      "Lost your device and every code? Write to support@squareshare.eu and we will help you back in.",
+    );
     await user.click(screen.getByRole("button", { name: "Use your authenticator app instead" }));
     expect(screen.getByLabelText("Authentication code")).toBeInTheDocument();
   });
