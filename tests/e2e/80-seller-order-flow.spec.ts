@@ -94,17 +94,19 @@ test("1. clearing the To ship queue, start to finish", async ({ page }) => {
   await gotoApp(page, "/orders");
   await expect.poll(() => new URL(page.url()).searchParams.get("view")).toBe("to-ship");
 
+  // A buyer who withdrew is owed a refund, not a parcel: that order waits under
+  // "Withdrawn" (below), not in the queue.
   const rows = page.locator("tbody tr");
-  await expect(rows).toHaveCount(4);
+  await expect(rows).toHaveCount(3);
   await expect(rows.nth(0)).toContainText("Oldest vase");
-  await expect(rows.nth(3)).toContainText("Newest vase");
+  await expect(rows.nth(2)).toContainText("Newest vase");
   await expect(page.locator("tbody")).not.toContainText("Pending vase");
   await expect(page.locator("tbody")).not.toContainText("Disputed vase");
+  await expect(page.locator("tbody")).not.toContainText("Withdrawn vase");
   // How long each has waited; only the forgotten one is called out.
   await expect(rows.nth(0).locator("[data-order-waiting]")).toHaveAttribute("data-order-waiting", "overdue");
   await expect(rows.nth(0).locator("[data-order-waiting]")).toContainText("10 days ago");
-  await expect(rows.nth(3).locator("[data-order-waiting]")).toHaveAttribute("data-order-waiting", "ok");
-  await expect(rows.nth(1).locator("[data-order-withdrawn]")).toHaveText("Withdrawn");
+  await expect(rows.nth(2).locator("[data-order-waiting]")).toHaveAttribute("data-order-waiting", "ok");
 
   // First parcel: the number the buyer quotes, a way to write to them, honest refund copy.
   await rows.nth(0).click();
@@ -121,22 +123,7 @@ test("1. clearing the To ship queue, start to finish", async ({ page }) => {
   await panel(page).getByRole("button", { name: /^Mark shipped/ }).click();
   await expect(panel(page).locator("[data-order-shipped-status]")).toBeFocused({ timeout: 25_000 });
 
-  // Next: the withdrawn one. The panel is fresh, with its own number and warning.
-  await panel(page).getByRole("button", { name: "Next order to ship" }).click();
-  await expect(panel(page).locator("[data-order-number]")).toHaveText(`Order ${numberOf(await id("Withdrawn vase"))}`);
-  await expect(panel(page).getByRole("alert")).toContainText("withdraw");
-  await expect(panel(page).getByRole("alert").getByRole("link", { name: "Email the buyer" })).toBeVisible();
-  await expect(panel(page).getByLabel(/Tracking number/)).toHaveCount(0);
-  const opener = panel(page).getByRole("button", { name: "Mark as shipped" });
-  await opener.click();
-  await expect(panel(page)).toContainText("Ship it only if you've agreed that with them");
-  await panel(page).getByRole("button", { name: "Cancel", exact: true }).click();
-  await expect(opener).toBeFocused();
-
-  // Ship it anyway, then the middle one, then the one with no address.
-  await opener.click();
-  await panel(page).getByRole("button", { name: /^Mark shipped/ }).click();
-  await expect(panel(page).locator("[data-order-shipped-status]")).toBeFocused({ timeout: 25_000 });
+  // Next: the middle one, then the one with no address.
   await panel(page).getByRole("button", { name: "Next order to ship" }).click();
   await expect(panel(page).locator("[data-order-number]")).toHaveText(`Order ${numberOf(await id("Middle vase"))}`);
   await panel(page).getByRole("button", { name: "Mark as shipped" }).click();
@@ -165,6 +152,28 @@ test("1. clearing the To ship queue, start to finish", async ({ page }) => {
   // The buyer of the first parcel was emailed the tracking number.
   const buyerMail = await devEmails("old@example.test");
   expect(buyerMail.some((m) => m.text.includes("RR123456789IE"))).toBe(true);
+
+  // The withdrawn order is under "Withdrawn", marked as such. Its panel is
+  // fresh, with its own number and warning, and shipping it stays possible for
+  // a seller who has agreed that with the buyer.
+  await gotoApp(page, "/orders?view=all&status=withdrawn");
+  const withdrawnRows = page.locator("tbody tr");
+  await expect(withdrawnRows).toHaveCount(1);
+  await expect(withdrawnRows.first()).toContainText("Withdrawn vase");
+  await expect(withdrawnRows.first().locator("[data-order-withdrawn]")).toHaveText("Withdrawn");
+  await withdrawnRows.first().click();
+  await expect(panel(page).locator("[data-order-number]")).toHaveText(`Order ${numberOf(await id("Withdrawn vase"))}`);
+  await expect(panel(page).getByRole("alert")).toContainText("withdraw");
+  await expect(panel(page).getByRole("alert").getByRole("link", { name: "Email the buyer" })).toBeVisible();
+  await expect(panel(page).getByLabel(/Tracking number/)).toHaveCount(0);
+  const opener = panel(page).getByRole("button", { name: "Mark as shipped" });
+  await opener.click();
+  await expect(panel(page)).toContainText("Ship it only if you've agreed that with them");
+  await panel(page).getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(opener).toBeFocused();
+  await opener.click();
+  await panel(page).getByRole("button", { name: /^Mark shipped/ }).click();
+  await expect(panel(page).locator("[data-order-shipped-status]")).toBeFocused({ timeout: 25_000 });
 });
 
 test("2. the seller's email link opens the order, signed out or not", async ({ page, browser }) => {
