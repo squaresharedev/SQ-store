@@ -249,6 +249,15 @@ describe("product form — the machine-readable contract", () => {
     }
   });
 
+  it("says which shipping terms apply, inside the Delivery card", () => {
+    render(<ProductForm product={PRODUCT} />);
+    const shipping = document.querySelector('[data-product-section="shipping"]')!;
+    expect(shipping.closest('[data-product-section="media"]')).not.toBeNull();
+    expect(shipping.querySelector("[data-product-section-summary]")!.textContent).toBe(
+      "Store terms",
+    );
+  });
+
   it("asks physical or digital, and a download shows its file in place of shipping", async () => {
     const user = userEvent.setup();
     render(<ProductForm product={PRODUCT} />);
