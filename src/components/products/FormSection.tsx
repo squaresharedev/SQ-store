@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Check, Flag, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { CutoffGlyph, cutoffGlyphGroupClass } from "@/components/ui/CutoffGlyph";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { cn } from "@/lib/utils";
 import {
@@ -90,8 +91,17 @@ export function FormSection({
       // `scroll-mt` clears the sticky TopBar (h-14) when the index rail
       // jumps here; without it the anchor lands underneath the bar and the
       // heading you asked for is the one thing you cannot see.
-      className={cn(cardClass, "scroll-mt-20 p-5", flag && flaggedSurfaceClass)}
+      className={cn(
+        cardClass,
+        cutoffGlyphGroupClass.card,
+        "scroll-mt-20 p-5",
+        flag && flaggedSurfaceClass,
+      )}
     >
+      {/* The section's own glyph again, big and cut off by the top-right
+          corner: on a page of stacked cards, the picture is what tells them
+          apart before a heading is read. */}
+      <CutoffGlyph icon={Icon} scope="card" corner="top-right" size="lg" tone="faint" />
       <div className="mb-4 flex items-center gap-3">
         <span className={cn(iconTileClass, "size-9")}>
           <Icon className="size-4" strokeWidth={2} aria-hidden="true" />

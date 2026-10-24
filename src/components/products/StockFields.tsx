@@ -1,11 +1,10 @@
 "use client";
 
 import { useId } from "react";
-import { Boxes, Hash, Infinity as InfinityIcon, Minus, Plus, SlidersHorizontal } from "lucide-react";
+import { Boxes, Infinity as InfinityIcon, Minus, Plus, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ChoiceCards } from "@/components/ui/ChoiceCards";
 import { Disclosure } from "@/components/ui/Disclosure";
-import { HeroMark } from "@/components/ui/HeroMark";
 import {
   errorTextClass,
   fieldBaseClass,
@@ -86,7 +85,7 @@ export function StockFields({ values, errors, onChange }: Props) {
         name={`${fieldId}-stock-mode`}
         legend={t("trackStock")}
         legendHidden
-        variant="tiles"
+        variant="showcase"
         columns={2}
         value={values.trackStock ? "counted" : "unlimited"}
         onChange={(mode) => onChange("trackStock", mode === "counted")}
@@ -99,13 +98,13 @@ export function StockFields({ values, errors, onChange }: Props) {
             value: "unlimited",
             label: t("unlimited"),
             hint: t("unlimitedHint"),
-            icon: <HeroMark icon={InfinityIcon} />,
+            glyph: InfinityIcon,
           },
           {
             value: "counted",
             label: t("counted"),
             hint: t("countedHint"),
-            icon: <HeroMark icon={Boxes} badge={Hash} />,
+            glyph: Boxes,
           },
         ]}
       />

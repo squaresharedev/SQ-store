@@ -16,14 +16,12 @@ import {
   Layers,
   Link2,
   Package,
-  Pencil,
   Plus,
   Ruler,
   Send,
   ShieldCheck,
   Store,
   Truck,
-  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -1451,7 +1449,7 @@ export function ProductForm({
           name={`${fieldId}-kind`}
           legend={t("form.kind.legend")}
           legendHidden
-          variant="tiles"
+          variant="showcase"
           columns={2}
           value={kind}
           onChange={chooseKind}
@@ -1462,13 +1460,13 @@ export function ProductForm({
               value: "physical",
               label: t("form.kind.physical"),
               hint: t("form.kind.physicalHint"),
-              icon: <HeroMark icon={Package} badge={Truck} />,
+              glyph: Package,
             },
             {
               value: "digital",
               label: t("form.kind.digital"),
               hint: t("form.kind.digitalHint"),
-              icon: <HeroMark icon={FileDown} badge={Zap} />,
+              glyph: FileDown,
             },
           ]}
         />
@@ -1743,7 +1741,7 @@ export function ProductForm({
             name={`${fieldId}-status`}
             legend={t("form.statusLabel")}
             legendHidden
-            variant="tiles"
+            variant="showcase"
             columns={2}
             value={values.status}
             onChange={(status) => updateField("status", status)}
@@ -1753,12 +1751,7 @@ export function ProductForm({
               value: status,
               label: t(`status.${status}`),
               hint: t(`form.visibility.${status}Hint`),
-              icon:
-                status === "active" ? (
-                  <HeroMark icon={Store} badge={Check} tone="success" />
-                ) : (
-                  <HeroMark icon={EyeOff} badge={Pencil} />
-                ),
+              glyph: status === "active" ? Store : EyeOff,
               ...(status === "active" && !canPublish ? { disabled: true } : {}),
             }))}
           />

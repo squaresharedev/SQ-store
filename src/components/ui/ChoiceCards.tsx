@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { transitionClass } from "@/components/ui/control-styles";
+import { Check, type LucideIcon } from "lucide-react";
+import { hoverLiftClass, transitionClass } from "@/components/ui/control-styles";
+import { CutoffGlyph, cutoffGlyphGroupClass } from "@/components/ui/CutoffGlyph";
 import { cn } from "@/lib/utils";
 
 /** One choosable card: the whole card is the hit area, and the chosen one
@@ -15,8 +17,18 @@ const CHOICE_CARD_CLASS =
  *  the radio itself, and the tile wears the focus ring and the chosen state. */
 const CHOICE_TILE_CLASS = `relative flex cursor-pointer flex-col items-center gap-2 rounded-md border border-border px-2 py-3 text-center hover:bg-muted/40 has-[:checked]:border-foreground has-[:checked]:bg-muted/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background ${transitionClass}`;
 
+/** One SHOWCASE tile: the words top-left and a big glyph bleeding off the
+ *  bottom-right corner (CutoffGlyph), for a choice that deserves a picture.
+ *  Lifts on hover; the chosen one takes the ink border and a check. */
+const CHOICE_SHOWCASE_CLASS = `${cutoffGlyphGroupClass.tile} flex min-h-28 cursor-pointer flex-col justify-end rounded-md border border-border bg-background p-4 text-left hover:border-foreground/40 has-[:checked]:border-foreground has-[:checked]:bg-muted/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background ${hoverLiftClass}`;
+
+/** The chosen showcase tile's check: pops in, top-right. */
+const SHOWCASE_CHECK_CLASS =
+  "absolute right-3 top-3 grid size-6 place-items-center rounded-full bg-foreground text-background opacity-0 scale-50 transition-[opacity,scale] duration-base ease-entrance group-has-[:checked]/tile-glyph:opacity-100 group-has-[:checked]/tile-glyph:scale-100 motion-reduce:transition-none";
+
 /** A choice that is shown but cannot be picked right now. */
-const CHOICE_DISABLED_CLASS = "cursor-not-allowed opacity-50 hover:bg-transparent";
+const CHOICE_DISABLED_CLASS =
+  "cursor-not-allowed opacity-50 hover:translate-y-0 hover:border-border hover:bg-transparent hover:shadow-none";
 
 /** A tile's radio: the size of the tile, invisible, on top. */
 const TILE_RADIO_CLASS = "absolute inset-0 m-0 size-full cursor-pointer opacity-0";
@@ -44,6 +56,8 @@ export type ChoiceCardOption<T extends string> = {
   badge?: React.ReactNode;
   /** Shown, but not pickable right now (the reason is the caller's to say). */
   disabled?: boolean;
+  /** The showcase variant's picture, cut off by the tile's corner. */
+  glyph?: LucideIcon;
 };
 
 /**
@@ -56,6 +70,9 @@ export type ChoiceCardOption<T extends string> = {
  *   tiles  a glyph over a few words, for choices that can be told apart at a
  *          glance (a way to sign in, a reason to leave). Give every option an
  *          `icon`, and keep the label to a few words.
+ *   showcase  a roomier tile with a big glyph cut off by its corner, for the
+ *          few headline choices a page is built around (physical or digital,
+ *          live or draft). Give every option a `glyph`.
  *
  * `columns` sets short options side by side (cards: two to a row from sm up;
  * tiles: a grid at every width), so the list stays one screen tall.
@@ -90,7 +107,7 @@ export function ChoiceCards<T extends string>({
   required?: boolean;
   /** One line per hint, ellipsised (for hints that are names, not prose). */
   truncateHints?: boolean;
-  variant?: "cards" | "tiles";
+  variant?: "cards" | "tiles" | "showcase";
   columns?: 1 | 2 | 3;
   /**
    * Keep the radios out of the form around them: for a choice that decides
@@ -102,7 +119,9 @@ export function ChoiceCards<T extends string>({
   /** Data attributes on the group itself. */
   fieldsetData?: Record<`data-${string}`, string>;
 }) {
-  const tiles = variant === "tiles";
+  // Showcase tiles share the tile grid and the see-through radio.
+  const showcase = variant === "showcase";
+  const tiles = variant !== "cards";
   return (
     <fieldset className={className} {...fieldsetData}>
       <legend className={legendHidden ? "sr-only" : "pb-2 text-sm font-medium"}>{legend}</legend>
@@ -120,7 +139,7 @@ export function ChoiceCards<T extends string>({
           <label
             key={option.value}
             className={cn(
-              tiles ? CHOICE_TILE_CLASS : CHOICE_CARD_CLASS,
+              showcase ? CHOICE_SHOWCASE_CLASS : tiles ? CHOICE_TILE_CLASS : CHOICE_CARD_CLASS,
               option.disabled && CHOICE_DISABLED_CLASS,
             )}
             {...(optionDataAttribute
@@ -142,11 +161,24 @@ export function ChoiceCards<T extends string>({
               // An id that matches no form: the radio belongs to none.
               form={detached ? "__none__" : undefined}
             />
+            {showcase && (
+              <>
+                {option.glyph && <CutoffGlyph icon={option.glyph} scope="tile" />}
+                <span className={SHOWCASE_CHECK_CLASS} aria-hidden="true">
+                  <Check className="size-3.5" strokeWidth={3} />
+                </span>
+              </>
+            )}
             {option.icon && <span className="shrink-0 text-foreground">{option.icon}</span>}
-            <span className={cn("flex min-w-0 flex-col gap-0.5", tiles && "items-center")}>
+            <span
+              className={cn(
+                "flex min-w-0 flex-col gap-0.5",
+                showcase ? "pr-8" : tiles && "items-center",
+              )}
+            >
               <span
                 className={cn(
-                  "text-sm font-medium",
+                  showcase ? "text-base font-semibold" : "text-sm font-medium",
                   tiles && "leading-tight",
                   // Only with a chip to set beside it: a label is free to be
                   // rich inline text otherwise.

@@ -3,8 +3,13 @@
 import { Plus, Sparkles, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { focusRingClass, hoverLiftClass, iconPopClass } from "@/components/ui/control-styles";
-import { cardClass, iconTileClass } from "@/components/ui/surface-styles";
+import {
+  focusRingClass,
+  hoverLiftClass,
+  iconPopClass,
+  transitionClass,
+} from "@/components/ui/control-styles";
+import { CutoffGlyph, cutoffGlyphGroupClass } from "@/components/ui/CutoffGlyph";
 import type { ProductFormSectionId } from "@/lib/products/form-datapoints";
 
 /** The sections offered as optional extras, in form order. Each has a
@@ -53,50 +58,48 @@ export function FormExtrasPicker({
   if (extras.length === 0) return null;
 
   return (
+    // Dashed, on the muted surface: a tray of things still to add, not one
+    // more card of answers. Its glyph bleeds off the corner like the cards'.
     <section
       aria-labelledby="product-extras-heading"
-      className={cn(cardClass, "p-5")}
+      className={cn(cutoffGlyphGroupClass.card, "rounded-md border border-dashed border-border bg-muted/30 p-5")}
       data-product-extras=""
     >
-      <div className="mb-4 flex items-center gap-3">
-        <span className={cn(iconTileClass, "size-9")}>
-          <Sparkles className="size-4" strokeWidth={2} aria-hidden="true" />
-        </span>
-        <div className="min-w-0">
-          <h2 id="product-extras-heading" className="text-base font-semibold text-foreground">
-            {t("heading")}
-          </h2>
-          <p className="font-inter text-xs text-muted-foreground">{t("subheading")}</p>
-        </div>
+      <CutoffGlyph icon={Sparkles} scope="card" corner="top-right" size="lg" tone="faint" />
+      <div className="mb-4">
+        <h2 id="product-extras-heading" className="text-base font-semibold text-foreground">
+          {t("heading")}
+        </h2>
+        <p className="font-inter text-xs text-muted-foreground">{t("subheading")}</p>
       </div>
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {extras.map(({ id, icon: Icon, label }) => (
+        {extras.map(({ id, icon, label }) => (
           <li key={id}>
             <button
               type="button"
               onClick={() => onOpen(id)}
               data-product-extra={id}
               className={cn(
-                "group/btn flex size-full flex-col items-start gap-3 rounded-md border border-border bg-background p-3 text-left hover:border-foreground",
+                cutoffGlyphGroupClass.tile,
+                "group/btn flex min-h-28 size-full flex-col items-start justify-between gap-4 rounded-md border border-border bg-background p-3 text-left hover:border-foreground/40",
                 hoverLiftClass,
                 focusRingClass,
               )}
             >
-              <span className="flex w-full items-start justify-between gap-2">
-                <span className={cn(iconTileClass, "size-10 rounded-md")}>
-                  <Icon className="size-5" strokeWidth={1.75} aria-hidden="true" />
-                </span>
-                <Plus
-                  className={cn("size-4 text-muted-foreground", iconPopClass)}
-                  strokeWidth={2}
-                  aria-hidden="true"
-                />
+              <CutoffGlyph icon={icon} scope="tile" />
+              <span className="flex flex-col gap-0.5 pr-6">
+                <span className="text-sm font-semibold text-foreground">{label}</span>
+                <span className="font-inter text-xs text-muted-foreground">{t(id)}</span>
               </span>
-              <span className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium text-foreground">{label}</span>
-                <span className="font-inter text-xs text-muted-foreground">
-                  {t(id)}
-                </span>
+              {/* The way in: a plus that fills with ink as the tile lifts. */}
+              <span
+                className={cn(
+                  "grid size-7 place-items-center rounded-full border border-border bg-background text-foreground",
+                  "group-hover/btn:border-foreground group-hover/btn:bg-foreground group-hover/btn:text-background",
+                  transitionClass,
+                )}
+              >
+                <Plus className={cn("size-4", iconPopClass)} strokeWidth={2} aria-hidden="true" />
               </span>
             </button>
           </li>
