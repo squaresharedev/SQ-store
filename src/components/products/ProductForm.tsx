@@ -1520,6 +1520,14 @@ export function ProductForm({
               <InfoTip label={t("form.sections.shipping.about")}>
                 {t("form.sections.shipping.description")}
               </InfoTip>
+              {/* The same summary a section header carries ("Store terms"),
+                  so the block says which terms apply at a glance. */}
+              <span
+                className="min-w-0 truncate font-inter text-xs text-muted-foreground"
+                data-product-section-summary=""
+              >
+                {section("shipping").summary}
+              </span>
               {fixMark("shipping")}
             </div>
             <ShippingField
