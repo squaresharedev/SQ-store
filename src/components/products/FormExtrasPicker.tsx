@@ -1,15 +1,8 @@
 "use client";
 
-import { Plus, type LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
-import {
-  focusRingClass,
-  hoverLiftClass,
-  iconPopClass,
-  transitionClass,
-} from "@/components/ui/control-styles";
-import { CutoffGlyph, cutoffGlyphGroupClass } from "@/components/ui/CutoffGlyph";
+import { AddTile } from "@/components/ui/AddTile";
 import type { ProductFormSectionId } from "@/lib/products/form-datapoints";
 
 /** The sections offered as optional extras, in form order. Each has a
@@ -74,33 +67,13 @@ export function FormExtrasPicker({
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {extras.map(({ id, icon, label }) => (
           <li key={id}>
-            <button
-              type="button"
+            <AddTile
+              icon={icon}
+              label={label}
+              hint={t(id)}
               onClick={() => onOpen(id)}
               data-product-extra={id}
-              className={cn(
-                cutoffGlyphGroupClass,
-                "group/btn flex min-h-28 size-full flex-col items-start justify-between gap-4 border border-border bg-background p-3 text-left hover:border-foreground/40",
-                hoverLiftClass,
-                focusRingClass,
-              )}
-            >
-              <CutoffGlyph icon={icon} />
-              <span className="flex flex-col gap-0.5 pr-6">
-                <span className="text-sm font-semibold text-foreground">{label}</span>
-                <span className="font-inter text-xs text-muted-foreground">{t(id)}</span>
-              </span>
-              {/* The way in: a square plus that fills with ink as the tile lifts. */}
-              <span
-                className={cn(
-                  "grid size-7 place-items-center border border-border bg-background text-foreground",
-                  "group-hover/btn:border-foreground group-hover/btn:bg-foreground group-hover/btn:text-background",
-                  transitionClass,
-                )}
-              >
-                <Plus className={cn("size-4", iconPopClass)} strokeWidth={2} aria-hidden="true" />
-              </span>
-            </button>
+            />
           </li>
         ))}
       </ul>

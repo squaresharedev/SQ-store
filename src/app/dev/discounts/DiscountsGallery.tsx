@@ -12,7 +12,9 @@ import { ProductPrice } from "@/components/product-page/ProductPrice";
 import { readableOn, storefrontOverlayVars } from "@/components/product-page/product-page-maps";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { ToastProvider } from "@/components/ui/Toast";
-import { secondaryButtonClass } from "@/components/ui/control-styles";
+import {
+  chipButtonClass,
+} from "@/components/ui/control-styles";
 import { eyebrowClass } from "@/components/ui/surface-styles";
 import { coveredProducts } from "@/lib/discounts/covered";
 import { priceOfOne } from "@/lib/discounts/pricing";
@@ -229,7 +231,7 @@ export function DiscountsGallery({ fixtures, now }: { fixtures: DiscountFixtures
             />
             <button
               type="button"
-              className={cn(secondaryButtonClass, "px-3 py-1.5 text-xs")}
+              className={chipButtonClass}
               onClick={() => setDiscounts(fixtures.discounts)}
             >
               Reset

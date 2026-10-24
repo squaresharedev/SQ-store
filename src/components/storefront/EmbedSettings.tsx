@@ -30,13 +30,13 @@ import {
 } from "@/components/ui/surface-styles";
 import {
   cautionNoticeClass,
+  chipButtonClass,
   destructiveButtonClass,
   errorTextClass,
   fieldBaseClass,
   helpTextClass,
   labelClass,
   primaryButtonClass,
-  secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { invalidInput } from "@/lib/errors";
 import { firstIssue } from "@/lib/validation/messages";
@@ -502,7 +502,7 @@ export function EmbedSettings({
                 <button
                   type="button"
                   onClick={() => setRotateState({ status: "idle" })}
-                  className={cn(secondaryButtonClass, "px-3 py-1.5 text-xs")}
+                  className={chipButtonClass}
                 >
                   {tCommon("actions.cancel")}
                 </button>
@@ -516,7 +516,7 @@ export function EmbedSettings({
                   type="button"
                   onClick={() => setRotateState({ status: "confirming" })}
                   disabled={rotateState.status === "rotating"}
-                  className={cn(secondaryButtonClass, "px-3 py-1.5 text-xs")}
+                  className={chipButtonClass}
                   {...iconHover}
                 >
                   {/* In flight the ring keeps turning on its own: this button

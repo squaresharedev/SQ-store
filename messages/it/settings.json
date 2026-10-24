@@ -402,7 +402,12 @@
       "label": "Tempi di spedizione",
       "tipLabel": "Perché questo è un campo a parte",
       "tipBody": "Una riga, mostrata accanto al pulsante di acquisto. «Quando parte?» è la prima cosa che si chiedono gli acquirenti, e non dovrebbe servire leggere un paragrafo per saperlo.",
-      "placeholder": "es. Spedito entro 1-3 giorni lavorativi"
+      "placeholder": "es. Spedito entro 1-3 giorni lavorativi",
+      "presets": {
+        "sameDay": "Spedito in giornata",
+        "days": "Spedito entro 1–2 giorni lavorativi",
+        "week": "Spedito entro 3–5 giorni lavorativi"
+      }
     },
     "destinations": {
       "label": "Dove spedisci, e quanto tempo ci vuole",
@@ -426,7 +431,15 @@
       "removeNumbered": "Rimuovi la destinazione {number}",
       "add": "Aggiungi una destinazione",
       "limitReached": "{max, plural, one {È il massimo: # destinazione. Rimuovine una per aggiungerne un’altra.} many {È il massimo: # destinazioni. Rimuovine una per aggiungerne un’altra.} other {È il massimo: # destinazioni. Rimuovine una per aggiungerne un’altra.}}",
-      "needsRate": "Il checkout non può usare questa riga finché non ha sia una tariffa sia un paese. Gli acquirenti la leggono comunque nella pagina prodotto."
+      "needsRate": "Il checkout non può usare questa riga finché non ha sia una tariffa sia un paese. Gli acquirenti la leggono comunque nella pagina prodotto.",
+      "presets": {
+        "home": "Il tuo paese",
+        "homeHint": "Vicino, di solito il più economico",
+        "eu": "Resto dell’UE",
+        "euHint": "Gli altri paesi dell’UE",
+        "worldHint": "Ovunque non elencato",
+        "customHint": "Dai un nome alla tua zona"
+      }
     },
     "rates": {
       "title": "Tariffe di spedizione",

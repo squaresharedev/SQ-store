@@ -402,7 +402,12 @@
       "label": "Doba odoslania",
       "tipLabel": "Prečo je to samostatné pole",
       "tipBody": "Jeden riadok, zobrazený vedľa tlačidla nákupu. Kupujúci sa vždy ako prvé pýtajú, kedy tovar odíde, a odpoveď by nemali hľadať v celom odseku.",
-      "placeholder": "napr. Odošleme do 1–3 pracovných dní"
+      "placeholder": "napr. Odošleme do 1–3 pracovných dní",
+      "presets": {
+        "sameDay": "Odosielame v ten istý deň",
+        "days": "Odosielame do 1–2 pracovných dní",
+        "week": "Odosielame do 3–5 pracovných dní"
+      }
     },
     "destinations": {
       "label": "Kam doručujete a ako dlho to trvá",
@@ -426,7 +431,15 @@
       "removeNumbered": "Odstrániť oblasť doručenia {number}",
       "add": "Pridať oblasť doručenia",
       "limitReached": "{max, plural, one {Môžete pridať najviac # oblasť doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.} few {Môžete pridať najviac # oblasti doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.} many {Môžete pridať najviac # oblasti doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.} other {Môžete pridať najviac # oblastí doručenia. Jednu odstráňte, aby ste mohli pridať ďalšiu.}}",
-      "needsRate": "Pokladňa nemôže použiť tento riadok, kým nemá sadzbu aj krajinu. Kupujúci si ho stále prečítajú na stránke produktu."
+      "needsRate": "Pokladňa nemôže použiť tento riadok, kým nemá sadzbu aj krajinu. Kupujúci si ho stále prečítajú na stránke produktu.",
+      "presets": {
+        "home": "Vaša krajina",
+        "homeHint": "Blízko, zvyčajne najlacnejšie",
+        "eu": "Zvyšok EÚ",
+        "euHint": "Ostatné krajiny EÚ",
+        "worldHint": "Kamkoľvek inam",
+        "customHint": "Pomenujte vlastnú oblasť"
+      }
     },
     "rates": {
       "title": "Sadzby za dopravu",

@@ -2,7 +2,17 @@
 
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Plus, Trash2 } from "lucide-react";
+import {
+  ArrowRight,
+  Earth,
+  Globe,
+  House,
+  MapPin,
+  Plus,
+  RotateCcw,
+  Trash2,
+  Truck,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { SaveButton } from "@/components/ui/SaveButton";
@@ -12,11 +22,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, type SelectOption } from "@/components/ui/select";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { AddTile } from "@/components/ui/AddTile";
+import { ChoiceCards } from "@/components/ui/ChoiceCards";
+import { eyebrowClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import {
+  chipButtonClass,
   helpTextClass,
   iconButtonClass,
   iconNudgeRightClass,
+  labelClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { saveShippingPolicy } from "@/lib/settings/shipping-actions";
@@ -26,16 +41,15 @@ import { CountryPicker, countryPickerSummary } from "@/components/settings/Count
 import { buildShippingProse } from "@/lib/shipping/policy-prose";
 import { isPriced } from "@/lib/shipping/rates";
 import { useResolveMessage as useResolveProse } from "@/components/ui/ActionErrorNotice";
-import {
-  canAddShippingProfile,
-  newShippingProfileId,
-} from "@/lib/storefront/shipping";
+import { canAddShippingProfile, newShippingProfileId } from "@/lib/storefront/shipping";
 import {
   DESTINATION_AREA_MAX,
   DESTINATION_COST_MAX,
   DESTINATION_TIME_MAX,
   RETURNS_WINDOW_DEFAULT_DAYS,
   RETURNS_WINDOW_MAX_DAYS,
+  RETURNS_PAID_BY,
+  SHIP_ANYWHERE,
   SHIPPING_DESTINATIONS_MAX,
   SHIPPING_RATE_MAX_CENTS,
   SHIPPING_RATES_ANCHOR,
@@ -64,6 +78,13 @@ const INITIAL: ActionState = {};
  * field blank. "Custom" is the escape hatch for the rest.
  */
 const WINDOW_CHOICES = ["0", "14", "30", "custom"] as const;
+
+/** The dispatch times most sellers would type, offered as one-tap answers
+ *  (each a phrase in the catalogue under `shipping.dispatch.presets`). */
+const DISPATCH_PRESETS = ["sameDay", "days", "week"] as const;
+
+/** The small caption over each field of a destination card. */
+const destinationCaptionClass = "font-inter text-xs text-muted-foreground";
 
 /**
  * SHIPPING & RETURNS, set once for the whole account.
@@ -109,32 +130,12 @@ export function ShippingSection({
   const fromOptions: readonly SelectOption<string>[] = useMemo(
     () => [
       { value: "", label: t("shipping.shipsFrom.notSet") },
-      ...countries.map((country) => ({ value: country.code, label: country.name })),
+      ...countries.map((country) => ({
+        value: country.code,
+        label: country.name,
+      })),
     ],
     [countries, t],
-  );
-  const windowOptions: readonly SelectOption<string>[] = useMemo(
-    () =>
-      WINDOW_CHOICES.map((value) => {
-        if (value === "0") return { value, label: t("shipping.returnsWindow.none") };
-        if (value === "custom") return { value, label: t("shipping.returnsWindow.custom") };
-        const days = Number(value);
-        return days === 14
-          ? {
-              value,
-              label: t("shipping.returnsWindow.days", { days }),
-              description: t("shipping.returnsWindow.statutoryMinimum"),
-            }
-          : { value, label: t("shipping.returnsWindow.days", { days }) };
-      }),
-    [t],
-  );
-  const paidByOptions: readonly SelectOption<string>[] = useMemo(
-    () => [
-      { value: "buyer", label: t("shipping.returnsPaidBy.buyer") },
-      { value: "seller", label: t("shipping.returnsPaidBy.seller") },
-    ],
-    [t],
   );
   const currencyOptions: readonly SelectOption<string>[] = useMemo(
     () => CURRENCIES.map((c) => ({ value: c, label: c })),
@@ -188,9 +189,7 @@ export function ShippingSection({
   // arrays of text inputs for destination/profile rate fields. String state
   // lets a seller type "4.50" freely; it is only parsed on save (via the
   // compactShippingPolicy/schema pipeline).
-  const [ratesCurrency, setRatesCurrency] = useState<Currency>(
-    policy.ratesCurrency ?? "EUR",
-  );
+  const [ratesCurrency, setRatesCurrency] = useState<Currency>(policy.ratesCurrency ?? "EUR");
   const [freeOverInput, setFreeOverInput] = useState(
     typeof policy.freeOverCents === "number" && policy.freeOverCents > 0
       ? String(policy.freeOverCents / 100)
@@ -332,6 +331,53 @@ export function ShippingSection({
     });
   }
 
+  function addDestination(row: ShippingDestination) {
+    setDestinations((current) => [...current, row]);
+    setDestinationRateInputs((current) => [...current, ""]);
+  }
+
+  // THE THREE ROWS NEARLY EVERY SELLER NEEDS, one tap each: home, the rest of
+  // the EU, everywhere else. Each arrives named and with its countries picked
+  // (home from "Ships from"), so all that is left is the time and the rate.
+  // A preset already on the list is not offered twice.
+  const homeName = shipsFrom ? countryName(shipsFrom) : "";
+  const listed = (area: string) => destinations.some((row) => row.area.trim() === area);
+  const presets = [
+    {
+      key: "home",
+      icon: House,
+      label: homeName || t("shipping.destinations.presets.home"),
+      hint: t("shipping.destinations.presets.homeHint"),
+      row: {
+        area: homeName,
+        time: "",
+        countries: shipsFrom ? [shipsFrom] : [],
+      },
+    },
+    {
+      key: "eu",
+      icon: Earth,
+      label: t("shipping.destinations.presets.eu"),
+      hint: t("shipping.destinations.presets.euHint"),
+      row: {
+        area: t("shipping.destinations.presets.eu"),
+        time: "",
+        countries: countries.map((country) => country.code).filter((code) => code !== shipsFrom),
+      },
+    },
+    {
+      key: "world",
+      icon: Globe,
+      label: t("shipping.destinations.everywhereElse"),
+      hint: t("shipping.destinations.presets.worldHint"),
+      row: {
+        area: t("shipping.destinations.everywhereElse"),
+        time: "",
+        countries: [SHIP_ANYWHERE],
+      },
+    },
+  ].filter((preset) => !preset.row.area || !listed(preset.row.area));
+
   return (
     <form action={formAction} className="flex flex-col gap-6" noValidate>
       {/* The whole policy, as one document. See saveShippingPolicy: the two
@@ -348,40 +394,62 @@ export function ShippingSection({
         decoration="grid"
       >
         <div className="flex flex-col gap-4 [&>div]:scroll-mt-20">
-          <div id="ships-from" className="flex flex-col gap-1.5">
-            <Label htmlFor="ships_from">{t("shipping.shipsFrom.label")}</Label>
-            <Select
-              id="ships_from"
-              value={shipsFrom}
-              options={fromOptions}
-              onChange={setShipsFrom}
-              disabled={isPending}
-            />
+          {/* WHERE IT LEAVES FROM AND WHEN, side by side: the two facts a
+              buyer asks first, and the two a seller answers without thinking. */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div id="ships-from" className="flex flex-col gap-1.5">
+              <Label htmlFor="ships_from">{t("shipping.shipsFrom.label")}</Label>
+              <Select
+                id="ships_from"
+                value={shipsFrom}
+                options={fromOptions}
+                onChange={setShipsFrom}
+                disabled={isPending}
+              />
+            </div>
+
+            <div id="dispatch-time" className="flex flex-col gap-1.5">
+              <span className="flex items-center gap-1.5">
+                <Label htmlFor="dispatch">{t("shipping.dispatch.label")}</Label>
+                <InfoTip label={t("shipping.dispatch.tipLabel")}>
+                  {t("shipping.dispatch.tipBody")}
+                </InfoTip>
+              </span>
+              <Input
+                id="dispatch"
+                value={dispatch}
+                onChange={(event) => setDispatch(event.target.value)}
+                placeholder={t("shipping.dispatch.placeholder")}
+                maxLength={SHIPPING_DISPATCH_MAX}
+              />
+            </div>
           </div>
 
-          <div id="dispatch-time" className="flex flex-col gap-1.5">
-            <span className="flex items-center gap-1.5">
-              <Label htmlFor="dispatch">{t("shipping.dispatch.label")}</Label>
-              <InfoTip label={t("shipping.dispatch.tipLabel")}>
-                {t("shipping.dispatch.tipBody")}
-              </InfoTip>
-            </span>
-            <Input
-              id="dispatch"
-              value={dispatch}
-              onChange={(event) => setDispatch(event.target.value)}
-              placeholder={t("shipping.dispatch.placeholder")}
-              maxLength={SHIPPING_DISPATCH_MAX}
-            />
+          {/* The usual answers, one tap each. They fill the field rather than
+              replace it with a picker: the seller's own words still win. */}
+          <div className="-mt-2 flex flex-wrap gap-2" data-dispatch-presets="">
+            {DISPATCH_PRESETS.map((key) => {
+              const phrase = t(`shipping.dispatch.presets.${key}`);
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setDispatch(phrase)}
+                  aria-pressed={dispatch === phrase}
+                  className={chipButtonClass}
+                >
+                  {phrase}
+                </button>
+              );
+            })}
           </div>
 
-          {/* WHERE AND HOW LONG, as rows rather than a paragraph. This is the
-              part sellers reliably know and reliably never write down, and it
-              is the part buyers scan for. Times are words, not numbers:
-              sellers do not agree on whether the count includes dispatch, and
-              a number field would make the page state something they did not
-              mean. */}
-          <div id="destinations" className="flex flex-col gap-2">
+          {/* WHERE AND HOW LONG, one card per destination. This is the part
+              sellers reliably know and reliably never write down, and the part
+              buyers scan for. Times are words, not numbers: sellers do not
+              agree on whether the count includes dispatch, and a number field
+              would make the page state something they did not mean. */}
+          <div id="destinations" className="flex flex-col gap-3">
             <span className="flex items-center gap-1.5">
               <Label>{t("shipping.destinations.label")}</Label>
               <InfoTip label={t("shipping.destinations.tipLabel")}>
@@ -391,75 +459,122 @@ export function ShippingSection({
             {/* Said where the rate is set, not in a tip: a seller who expects
                 a per-item or per-kilo rate undercharges on every order. */}
             <p className={helpTextClass}>{t("shipping.destinations.flatRate")}</p>
-            {destinations.length === 0 ? (
-              <p className={helpTextClass}>{t("shipping.destinations.empty")}</p>
-            ) : (
+            {destinations.length > 0 && (
               <ul className="flex flex-col gap-3">
                 {destinations.map((row, index) => {
-                  const pickerSummary = countryPickerSummary(
-                    row.countries ?? [],
-                    {
-                      noneLabel: t("shipping.destinations.countriesNone"),
-                      anywhereLabel: t("shipping.destinations.everywhereElse"),
-                      countryName,
-                    },
-                  );
+                  const pickerSummary = countryPickerSummary(row.countries ?? [], {
+                    noneLabel: t("shipping.destinations.countriesNone"),
+                    anywhereLabel: t("shipping.destinations.everywhereElse"),
+                    countryName,
+                  });
                   return (
-                  <li key={index} className="flex items-start gap-2">
-                    <div className="flex min-w-0 flex-1 flex-col gap-2">
-                      <div className="grid gap-2 sm:grid-cols-[1fr_1fr_0.6fr]">
+                    <li
+                      key={index}
+                      className="flex flex-col gap-3 border border-border bg-background p-3"
+                      data-destination-row=""
+                    >
+                      <div className="flex items-center gap-2">
+                        <MapPin
+                          className="size-4 shrink-0 text-muted-foreground"
+                          strokeWidth={2}
+                          aria-hidden="true"
+                        />
                         <Input
-                          aria-label={t("shipping.destinations.areaLabel", { number: index + 1 })}
+                          aria-label={t("shipping.destinations.areaLabel", {
+                            number: index + 1,
+                          })}
                           value={row.area}
                           onChange={(event) => setDestination(index, { area: event.target.value })}
                           placeholder={t("shipping.destinations.areaPlaceholder")}
                           maxLength={DESTINATION_AREA_MAX}
+                          className="font-medium"
                         />
-                        <Input
-                          aria-label={t("shipping.destinations.timeLabel", { number: index + 1 })}
-                          value={row.time}
-                          onChange={(event) => setDestination(index, { time: event.target.value })}
-                          placeholder={t("shipping.destinations.timePlaceholder")}
-                          maxLength={DESTINATION_TIME_MAX}
-                        />
-                        <Input
-                          aria-label={t("shipping.destinations.costLabel", { number: index + 1 })}
-                          value={row.cost ?? ""}
-                          onChange={(event) => setDestination(index, { cost: event.target.value })}
-                          placeholder={t("shipping.destinations.costPlaceholder")}
-                          maxLength={DESTINATION_COST_MAX}
-                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDestinations((current) =>
+                              current.filter((_, position) => position !== index),
+                            );
+                            setDestinationRateInputs((current) =>
+                              current.filter((_, position) => position !== index),
+                            );
+                          }}
+                          aria-label={
+                            row.area.trim()
+                              ? t("shipping.destinations.removeNamed", {
+                                  area: row.area.trim(),
+                                })
+                              : t("shipping.destinations.removeNumbered", {
+                                  number: index + 1,
+                                })
+                          }
+                          className={cn(iconButtonClass, "shrink-0")}
+                        >
+                          <Trash2 className="size-4" aria-hidden="true" />
+                        </button>
                       </div>
-                      {/* Rate and country fields for machine-readable checkout quoting */}
-                      <div className="grid gap-2 sm:grid-cols-[0.6fr_1fr]">
-                        <div className="flex flex-col gap-1">
-                          <label
-                            htmlFor={`dest-rate-${index}`}
-                            className="font-inter text-xs text-muted-foreground"
-                          >
-                            {t("shipping.destinations.rateLabel", { number: index + 1 })}
-                          </label>
+                      <div className="grid gap-2 sm:grid-cols-[1fr_0.6fr_0.8fr]">
+                        <label className="flex flex-col gap-1">
+                          <span className={destinationCaptionClass}>
+                            {t("shipping.destinations.timeLabel", {
+                              number: index + 1,
+                            })}
+                          </span>
                           <Input
-                            id={`dest-rate-${index}`}
-                            value={destinationRateInputs[index] ?? ""}
+                            value={row.time}
                             onChange={(event) =>
-                              setDestinationRateInput(index, event.target.value)
+                              setDestination(index, {
+                                time: event.target.value,
+                              })
                             }
+                            placeholder={t("shipping.destinations.timePlaceholder")}
+                            maxLength={DESTINATION_TIME_MAX}
+                          />
+                        </label>
+                        {/* The rate checkout charges, in the store's rate currency. */}
+                        <label className="flex flex-col gap-1">
+                          <span className={destinationCaptionClass}>
+                            {t("shipping.destinations.rateLabel", {
+                              number: index + 1,
+                            })}
+                          </span>
+                          <Input
+                            value={destinationRateInputs[index] ?? ""}
+                            onChange={(event) => setDestinationRateInput(index, event.target.value)}
                             placeholder={t("shipping.destinations.ratePlaceholder")}
                             inputMode="decimal"
                           />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="font-inter text-xs text-muted-foreground">
-                            {t("shipping.destinations.countriesLabel", { number: index + 1 })}
+                        </label>
+                        <label className="flex flex-col gap-1">
+                          <span className={destinationCaptionClass}>
+                            {t("shipping.destinations.costLabel", {
+                              number: index + 1,
+                            })}
                           </span>
-                          <CountryPicker
-                            value={row.countries ?? []}
-                            onChange={(next) => setDestination(index, { countries: next })}
-                            summaryLabel={pickerSummary}
-                            disabled={isPending}
+                          <Input
+                            value={row.cost ?? ""}
+                            onChange={(event) =>
+                              setDestination(index, {
+                                cost: event.target.value,
+                              })
+                            }
+                            placeholder={t("shipping.destinations.costPlaceholder")}
+                            maxLength={DESTINATION_COST_MAX}
                           />
-                        </div>
+                        </label>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className={destinationCaptionClass}>
+                          {t("shipping.destinations.countriesLabel", {
+                            number: index + 1,
+                          })}
+                        </span>
+                        <CountryPicker
+                          value={row.countries ?? []}
+                          onChange={(next) => setDestination(index, { countries: next })}
+                          summaryLabel={pickerSummary}
+                          disabled={isPending}
+                        />
                       </div>
                       {/* A row that is only words (no rate, or no country) still
                           prints on the product page but cannot be quoted at
@@ -472,48 +587,78 @@ export function ShippingSection({
                           {t("shipping.destinations.needsRate")}
                         </p>
                       )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDestinations((current) =>
-                          current.filter((_, position) => position !== index),
-                        );
-                        setDestinationRateInputs((current) =>
-                          current.filter((_, position) => position !== index),
-                        );
-                      }}
-                      aria-label={
-                        row.area.trim()
-                          ? t("shipping.destinations.removeNamed", { area: row.area.trim() })
-                          : t("shipping.destinations.removeNumbered", { number: index + 1 })
-                      }
-                      className={cn(iconButtonClass, "mt-6 shrink-0")}
-                    >
-                      <Trash2 className="size-4" aria-hidden="true" />
-                    </button>
-                  </li>
+                    </li>
                   );
                 })}
               </ul>
             )}
             {destinations.length < SHIPPING_DESTINATIONS_MAX ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setDestinations((current) => [...current, { area: "", time: "" }]);
-                  setDestinationRateInputs((current) => [...current, ""]);
-                }}
-                className={cn(secondaryButtonClass, "w-fit")}
-              >
-                <Plus className="size-4" aria-hidden="true" />
-                {t("shipping.destinations.add")}
-              </button>
+              <ul className="grid grid-cols-2 gap-3">
+                {presets.map((preset) => (
+                  <li key={preset.key}>
+                    <AddTile
+                      icon={preset.icon}
+                      label={preset.label}
+                      hint={preset.hint}
+                      onClick={() => addDestination(preset.row)}
+                      data-destination-preset={preset.key}
+                    />
+                  </li>
+                ))}
+                <li>
+                  <AddTile
+                    icon={MapPin}
+                    label={t("shipping.destinations.add")}
+                    hint={t("shipping.destinations.presets.customHint")}
+                    onClick={() => addDestination({ area: "", time: "" })}
+                  />
+                </li>
+              </ul>
             ) : (
               <p className={helpTextClass}>
-                {t("shipping.destinations.limitReached", { max: SHIPPING_DESTINATIONS_MAX })}
+                {t("shipping.destinations.limitReached", {
+                  max: SHIPPING_DESTINATIONS_MAX,
+                })}
               </p>
             )}
+          </div>
+
+          {/* CHECKOUT RATES: the currency the rates above are in, and the
+              free-delivery line. Machine-readable, so checkout can quote a
+              delivery total before the buyer pays (EU CRD art. 6(1)(e)). The
+              anchor is where the product form sends a seller whose rates are
+              missing. */}
+          <div
+            id={SHIPPING_RATES_ANCHOR}
+            className="flex scroll-mt-20 flex-col gap-3 border-t border-border pt-4"
+          >
+            <div>
+              <h3 className={eyebrowClass}>{t("shipping.rates.title")}</h3>
+              <p className={cn(helpTextClass, "mt-1")}>{t("shipping.rates.description")}</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="rates_currency">{t("shipping.rates.currencyLabel")}</Label>
+                <Select
+                  id="rates_currency"
+                  value={ratesCurrency}
+                  options={currencyOptions}
+                  onChange={(v) => setRatesCurrency(v as Currency)}
+                  disabled={isPending}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="free_over">{t("shipping.rates.freeOverLabel")}</Label>
+                <Input
+                  id="free_over"
+                  value={freeOverInput}
+                  onChange={(event) => setFreeOverInput(event.target.value)}
+                  placeholder={t("shipping.rates.freeOverPlaceholder")}
+                  inputMode="decimal"
+                />
+                <p className={helpTextClass}>{t("shipping.rates.freeOverHint")}</p>
+              </div>
+            </div>
           </div>
 
           <div id="shipping-notes" className="flex flex-col gap-1.5">
@@ -530,68 +675,52 @@ export function ShippingSection({
         </div>
       </SettingsCard>
 
-      {/* CHECKOUT RATES: the machine-readable numbers checkout uses to quote a
-          delivery total before the buyer pays (EU CRD art. 6(1)(e)). Optional:
-          a seller who leaves this blank still gets the display-only prose from
-          the destination rows above. The card is separate so it stays out of
-          the way of sellers who do not need it yet. */}
-      <SettingsCard
-        id={SHIPPING_RATES_ANCHOR}
-        fold={compact ? "closed" : undefined}
-        title={t("shipping.rates.title")}
-        description={t("shipping.rates.description")}
-      >
-        <div className="flex flex-col gap-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="rates_currency">{t("shipping.rates.currencyLabel")}</Label>
-              <Select
-                id="rates_currency"
-                value={ratesCurrency}
-                options={currencyOptions}
-                onChange={(v) => setRatesCurrency(v as Currency)}
-                disabled={isPending}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="free_over">{t("shipping.rates.freeOverLabel")}</Label>
-              <Input
-                id="free_over"
-                value={freeOverInput}
-                onChange={(event) => setFreeOverInput(event.target.value)}
-                placeholder={t("shipping.rates.freeOverPlaceholder")}
-                inputMode="decimal"
-              />
-              <p className={helpTextClass}>{t("shipping.rates.freeOverHint")}</p>
-            </div>
-          </div>
-          <p className={helpTextClass}>{t("shipping.rates.hint")}</p>
-        </div>
-      </SettingsCard>
-
       <SettingsCard
         id="returns"
         fold={compact ? "closed" : undefined}
         title={t("shipping.returnsCard.title")}
         description={t("shipping.returnsCard.description")}
       >
-        <div className="flex flex-col gap-4 [&>div]:scroll-mt-20">
-          <div id="returns-window" className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-5 [&>div]:scroll-mt-20">
+          {/* The window as four answers on tiles, not a dropdown: "nothing
+              beyond the law" is a real, common answer and reads as one here. */}
+          <div id="returns-window" className="flex flex-col gap-2">
             <span className="flex items-center gap-1.5">
-              <Label htmlFor="returns_window">{t("shipping.returnsWindow.label")}</Label>
+              <span className={labelClass}>{t("shipping.returnsWindow.label")}</span>
               <InfoTip label={t("shipping.returnsWindow.tipLabel")}>
                 {t("shipping.returnsWindow.tipBody")}
               </InfoTip>
             </span>
-            <Select
-              id="returns_window"
+            <ChoiceCards
+              name="returns_window"
+              legend={t("shipping.returnsWindow.label")}
+              legendHidden
+              variant="showcase"
+              columns={2}
               value={windowChoice}
-              options={windowOptions}
               onChange={setWindowChoice}
-              disabled={isPending}
+              detached
+              optionDataAttribute="data-returns-window"
+              options={WINDOW_CHOICES.map((value) =>
+                value === "0"
+                  ? { value, label: t("shipping.returnsWindow.none") }
+                  : value === "custom"
+                    ? { value, label: t("shipping.returnsWindow.custom") }
+                    : {
+                        value,
+                        label: t("shipping.returnsWindow.days", {
+                          days: Number(value),
+                        }),
+                        ...(Number(value) === RETURNS_WINDOW_DEFAULT_DAYS
+                          ? {
+                              hint: t("shipping.returnsWindow.statutoryMinimum"),
+                            }
+                          : {}),
+                      },
+              )}
             />
             {windowChoice === "custom" && (
-              <div className="mt-2 flex items-center gap-2 sm:max-w-40">
+              <div className="flex items-center gap-2 sm:max-w-40">
                 <Input
                   aria-label={t("shipping.returnsWindow.customLabel")}
                   value={customDays}
@@ -616,14 +745,22 @@ export function ShippingSection({
               window nobody has is not a fact about anything, and the save
               drops it for the same reason. */}
           {returnsWindowDays !== undefined && returnsWindowDays > 0 && (
-            <div id="returns-postage" className="flex flex-col gap-1.5">
-              <Label htmlFor="returns_paid_by">{t("shipping.returnsPaidBy.label")}</Label>
-              <Select
-                id="returns_paid_by"
+            <div id="returns-postage" className="flex flex-col gap-2">
+              <span className={labelClass}>{t("shipping.returnsPaidBy.label")}</span>
+              <ChoiceCards
+                name="returns_paid_by"
+                legend={t("shipping.returnsPaidBy.label")}
+                legendHidden
+                variant="showcase"
+                columns={2}
                 value={paidBy}
-                options={paidByOptions}
                 onChange={(value) => setPaidBy(value as "buyer" | "seller")}
-                disabled={isPending}
+                detached
+                optionDataAttribute="data-returns-paid-by"
+                options={RETURNS_PAID_BY.map((value) => ({
+                  value,
+                  label: t(`shipping.returnsPaidBy.${value}`),
+                }))}
               />
             </div>
           )}
@@ -661,7 +798,8 @@ export function ShippingSection({
           <div className="flex flex-col gap-4">
             {preview.shipping && (
               <div>
-                <h3 className="font-inter text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <h3 className={cn(eyebrowClass, "flex items-center gap-1.5")}>
+                  <Truck className="size-3.5" strokeWidth={2} aria-hidden="true" />
                   {t("shipping.preview.shippingHeading")}
                 </h3>
                 <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-foreground">
@@ -671,7 +809,8 @@ export function ShippingSection({
             )}
             {preview.returns && (
               <div>
-                <h3 className="font-inter text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <h3 className={cn(eyebrowClass, "flex items-center gap-1.5")}>
+                  <RotateCcw className="size-3.5" strokeWidth={2} aria-hidden="true" />
                   {t("shipping.preview.returnsHeading")}
                 </h3>
                 <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-foreground">
@@ -693,7 +832,9 @@ export function ShippingSection({
           being three empty boxes nobody filled in. */}
       <SettingsCard
         id="own-words"
-        fold={compact ? "closed" : undefined}
+        // Folded while it is empty, on the page too: it overrides everything
+        // above, so it should never look like the normal way through.
+        fold={compact || (!shippingText && !returnsText) ? "closed" : undefined}
         title={t("shipping.ownWords.title")}
         description={t("shipping.ownWords.description")}
       >
@@ -772,7 +913,9 @@ export function ShippingSection({
                       }}
                       aria-label={
                         profile.name.trim()
-                          ? t("shipping.profiles.removeNamed", { name: profile.name.trim() })
+                          ? t("shipping.profiles.removeNamed", {
+                              name: profile.name.trim(),
+                            })
                           : t("shipping.profiles.removeUnnamed")
                       }
                       className={cn(iconButtonClass, "mt-7 shrink-0")}
@@ -845,7 +988,9 @@ export function ShippingSection({
             </button>
           ) : (
             <p className={helpTextClass}>
-              {t("shipping.profiles.limitReached", { max: SHIPPING_PROFILES_MAX })}
+              {t("shipping.profiles.limitReached", {
+                max: SHIPPING_PROFILES_MAX,
+              })}
             </p>
           )}
         </div>
@@ -861,11 +1006,7 @@ export function ShippingSection({
         {justSaved && continueHref && (
           <Link href={continueHref} className={cn(secondaryButtonClass, "w-fit")}>
             {t("continueToStorefront")}
-            <ArrowRight
-              className={cn("size-4", iconNudgeRightClass)}
-              strokeWidth={2}
-              aria-hidden
-            />
+            <ArrowRight className={cn("size-4", iconNudgeRightClass)} strokeWidth={2} aria-hidden />
           </Link>
         )}
       </div>

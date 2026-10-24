@@ -5,10 +5,10 @@ import { Check, Plus, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
+  chipButtonClass,
   fieldBaseClass,
   infoTextClass,
   panelEyebrowClass,
-  secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { Popover } from "@/components/ui/Popover";
@@ -254,7 +254,7 @@ export function BadgePicker({
           disabled={disabled}
           onClick={() => (open ? close() : setOpen(true))}
           data-product-badge-picker=""
-          className={cn(secondaryButtonClass, "px-3 py-1.5 text-xs")}
+          className={chipButtonClass}
         >
           <Search className="size-3.5" strokeWidth={2} aria-hidden="true" />
           {t("open")}

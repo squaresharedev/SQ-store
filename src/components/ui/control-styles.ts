@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 // Shared control class strings for the product UI (dashboard features import
 // these, never per-feature copies). Every value is a token: radius from the
 // styles.md scale (globals.css @theme), motion from the motion scale
@@ -41,6 +43,14 @@ export const primaryButtonClass = `${BUTTON_BASE} rounded-none bg-primary text-p
 /** Secondary / neutral action: bordered surface (styles.md §8.4). Sharp
  *  corners like every other button, only nav/menu items stay rounded. */
 export const secondaryButtonClass = `${BUTTON_BASE} rounded-none border border-border bg-background text-foreground hover:bg-accent`;
+
+/** The small secondary button for a one-tap suggestion ("+ Colour", "Ships
+ *  the same day"). Set `aria-pressed` on one that stands for the current
+ *  answer and it takes the ink border. */
+export const chipButtonClass = cn(
+  secondaryButtonClass,
+  "px-3 py-1.5 text-xs aria-pressed:border-foreground aria-pressed:bg-accent",
+);
 
 /** Quiet text button. */
 export const ghostButtonClass = `${BUTTON_BASE} rounded-none text-muted-foreground hover:bg-accent hover:text-foreground`;

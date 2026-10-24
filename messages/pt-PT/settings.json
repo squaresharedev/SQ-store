@@ -402,7 +402,12 @@
       "label": "Prazo de expedição",
       "tipLabel": "Porque é que isto tem um campo próprio",
       "tipBody": "Uma linha, apresentada junto ao botão de compra. «Quando é que é enviado?» é a primeira pergunta dos compradores, e não deve ser preciso ler um parágrafo para responder.",
-      "placeholder": "p. ex. Envio em 1–3 dias úteis"
+      "placeholder": "p. ex. Envio em 1–3 dias úteis",
+      "presets": {
+        "sameDay": "Enviado no próprio dia",
+        "days": "Enviado em 1–2 dias úteis",
+        "week": "Enviado em 3–5 dias úteis"
+      }
     },
     "destinations": {
       "label": "Para onde envia e quanto tempo demora",
@@ -426,7 +431,15 @@
       "removeNumbered": "Remover o destino {number}",
       "add": "Adicionar um destino",
       "limitReached": "{max, plural, one {É o máximo: # destino. Remova um para adicionar outro.} many {É o máximo: # destinos. Remova um para adicionar outro.} other {É o máximo: # destinos. Remova um para adicionar outro.}}",
-      "needsRate": "A finalização de compra não pode usar esta linha até ter taxa e país. Os compradores continuam a vê-la na página de produto."
+      "needsRate": "A finalização de compra não pode usar esta linha até ter taxa e país. Os compradores continuam a vê-la na página de produto.",
+      "presets": {
+        "home": "O seu país",
+        "homeHint": "Perto, normalmente o mais barato",
+        "eu": "Resto da UE",
+        "euHint": "Os restantes países da UE",
+        "worldHint": "Qualquer outro lugar",
+        "customHint": "Dê nome à sua própria zona"
+      }
     },
     "rates": {
       "title": "Taxas de envio",

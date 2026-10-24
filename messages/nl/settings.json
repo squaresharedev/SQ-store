@@ -402,7 +402,12 @@
       "label": "Verzendtermijn",
       "tipLabel": "Waarom dit een apart veld is",
       "tipBody": "Eén regel, getoond naast de koopknop. “Wanneer gaat het de deur uit?” is het eerste wat kopers vragen, en daar hoeft geen hele alinea voor gelezen te worden.",
-      "placeholder": "bijv. Verzonden binnen 1–3 werkdagen"
+      "placeholder": "bijv. Verzonden binnen 1–3 werkdagen",
+      "presets": {
+        "sameDay": "Zelfde dag verzonden",
+        "days": "Verzonden binnen 1–2 werkdagen",
+        "week": "Verzonden binnen 3–5 werkdagen"
+      }
     },
     "destinations": {
       "label": "Waar je naartoe verzendt, en hoe lang het duurt",
@@ -426,7 +431,15 @@
       "removeNumbered": "Bestemming {number} verwijderen",
       "add": "Bestemming toevoegen",
       "limitReached": "{max, plural, one {Dat is de enige # bestemming. Verwijder er een om een andere toe te voegen.} other {Dat zijn alle # bestemmingen. Verwijder er een om een andere toe te voegen.}}",
-      "needsRate": "De kassa kan deze rij pas gebruiken als die zowel een tarief als een land heeft. Kopers zien hem nog wel op de productpagina."
+      "needsRate": "De kassa kan deze rij pas gebruiken als die zowel een tarief als een land heeft. Kopers zien hem nog wel op de productpagina.",
+      "presets": {
+        "home": "Je eigen land",
+        "homeHint": "Dichtbij, meestal het goedkoopst",
+        "eu": "Rest van de EU",
+        "euHint": "De andere EU-landen",
+        "worldHint": "Overal elders",
+        "customHint": "Geef je eigen gebied een naam"
+      }
     },
     "rates": {
       "title": "Verzendtarieven",
