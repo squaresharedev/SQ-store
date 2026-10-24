@@ -23,13 +23,24 @@ import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
  * (which never fires `popstate`) keeps the same jump-to-section behaviour
  * without feeding the guard a false signal.
  */
-function handleNavClick(event: MouseEvent<HTMLAnchorElement>, id: string) {
+function handleNavClick(
+  event: MouseEvent<HTMLAnchorElement>,
+  id: string,
+  onBeforeJump?: (id: string) => void,
+) {
   // Leave modified/non-primary clicks (open in new tab, etc.) to the browser.
   if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
     return;
   }
   event.preventDefault();
-  jumpToSection(id);
+  if (!onBeforeJump) {
+    jumpToSection(id);
+    return;
+  }
+  // The section may not be on the page yet (a folded extra the caller is
+  // about to open), so the jump waits for the render that puts it there.
+  onBeforeJump(id);
+  window.setTimeout(() => jumpToSection(id), 0);
 }
 
 /**
@@ -65,9 +76,16 @@ export function jumpToSection(id: string): void {
 export function FormSectionNav({
   sections,
   flagged,
+  onBeforeJump,
+  rendered = "",
   className,
 }: {
   sections: ProductFormSectionSnapshot[];
+  /** Runs before a jump, to reveal a section that is folded away. */
+  onBeforeJump?: (id: string) => void;
+  /** Changes whenever a section is opened or folded, so the highlight starts
+   *  watching a section that was not on the page when it began. */
+  rendered?: string;
   /** Sections staff asked the seller to change (a paused product). A
    *  validation problem still wins the icon: it is what blocks the save. */
   flagged?: ReadonlySet<string>;
@@ -76,7 +94,7 @@ export function FormSectionNav({
   const t = useTranslations("Products.form.nav");
   const tFlag = useTranslations("Products.form.moderation");
   const resolve = useResolveMessage();
-  const active = useActiveSection(sections.map((section) => section.id));
+  const active = useActiveSection(sections.map((section) => section.id), rendered);
 
   return (
     <nav aria-label={t("label")} className={className} data-product-form-nav="">
@@ -90,7 +108,7 @@ export function FormSectionNav({
             <li key={section.id}>
               <a
                 href={`#${sectionAnchorId(section.id)}`}
-                onClick={(event) => handleNavClick(event, section.id)}
+                onClick={(event) => handleNavClick(event, section.id, onBeforeJump)}
                 aria-current={current ? "true" : undefined}
                 data-product-form-nav-item={section.id}
                 data-product-section-state={section.state}
@@ -150,7 +168,7 @@ export function FormSectionNav({
  * which reads as the previous section still being "current" for most of the
  * scroll through the next one).
  */
-function useActiveSection(ids: string[]): string | null {
+function useActiveSection(ids: string[], rendered: string): string | null {
   const [active, setActive] = useState<string | null>(null);
   // Depend on the JOINED ids, not the array: the caller rebuilds it every
   // render, and re-running the observer each time would tear down and rebuild
@@ -179,7 +197,7 @@ function useActiveSection(ids: string[]): string | null {
     );
     for (const element of elements) observer.observe(element);
     return () => observer.disconnect();
-  }, [key]);
+  }, [key, rendered]);
 
   return active;
 }

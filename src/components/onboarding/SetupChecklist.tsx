@@ -8,9 +8,9 @@ import { ModuleCard } from "@/components/dashboard/ModuleCard";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/CopyButton";
 import {
+  chipButtonClass,
   iconNudgeRightClass,
   infoTextClass,
-  secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { useStoredFlag } from "@/lib/hooks/useStoredFlag";
 import type { SetupChecklistData, SetupStepId } from "@/lib/onboarding/steps";
@@ -177,7 +177,7 @@ export function SetupChecklist({
                     href={livePageUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={cn(secondaryButtonClass, "px-3 py-1.5 text-xs")}
+                    className={chipButtonClass}
                   >
                     {t("Onboarding.checklist.openPage")}
                     <ExternalLink className="size-3.5" strokeWidth={2} aria-hidden="true" />

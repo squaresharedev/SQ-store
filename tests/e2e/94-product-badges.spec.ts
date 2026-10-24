@@ -3,6 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   freshUser,
   gotoApp,
+  openProductExtra,
   PUBLISHABLE_SELLER,
   seedProducts,
   seedSellerIdentity,
@@ -132,6 +133,9 @@ const search = (page: Page) => page.getByRole("combobox", { name: "Search badges
 
 async function openEdit(page: Page, seeded: Seeded) {
   await gotoApp(page, `/products/${seeded.productId}/edit`);
+  // A product with no badges yet shows Badges as an extra's tile; one with
+  // some has the section open already.
+  await openProductExtra(page, "badges");
   await badgesSection(page).scrollIntoViewIfNeeded();
 }
 

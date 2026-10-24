@@ -246,7 +246,7 @@
         "about": "What Stock is for"
       },
       "media": {
-        "label": "Media and delivery"
+        "label": "Delivery"
       },
       "shipping": {
         "label": "Shipping",
@@ -313,7 +313,8 @@
       "started": "Started",
       "active": "Active",
       "draft": "Draft",
-      "badges": "{count, plural, one {{count} badge} other {{count} badges}}"
+      "badges": "{count, plural, one {{count} badge} other {{count} badges}}",
+      "physical": "Physical"
     },
     "errors": {
       "titleRequired": "Give your product a title — buyers see it first.",
@@ -341,7 +342,8 @@
         "tooHigh": "Price cannot exceed {currency} {max}."
       },
       "badgeDuplicate": "Two badges say the same thing. Change the words of one, or remove it.",
-      "badgesOnPhoto": "Only {max} badges fit on the photo. Move one beside the product."
+      "badgesOnPhoto": "Only {max} badges fit on the photo. Move one beside the product.",
+      "digitalFileRequired": "Add the file buyers will download."
     },
     "title": "Title",
     "titlePlaceholder": "e.g. Ambient Loops Vol. 1",
@@ -397,7 +399,39 @@
         "keepEditing": "Keep editing",
         "send": "Send for review"
       }
-    }
+    },
+    "coverPrompt": "Drop your best photo here",
+    "kind": {
+      "legend": "What are you selling?",
+      "physical": "Something I post",
+      "physicalHint": "A physical item, shipped to the buyer",
+      "digital": "A download",
+      "digitalHint": "A file buyers get right after paying"
+    },
+    "purchaseLinkAdd": "Selling through your own checkout? Add its link",
+    "extras": {
+      "heading": "Make it shine",
+      "subheading": "All optional. Add whatever helps buyers decide.",
+      "options": "Sizes, colours, versions",
+      "photos": "More angles and close-ups",
+      "badges": "Handmade, free shipping…",
+      "specs": "Size, weight, materials",
+      "documents": "Manuals and certificates",
+      "safety": "Maker details for EU rules"
+    },
+    "visibility": {
+      "activeHint": "Buyers can see it and buy it now",
+      "draftHint": "Only you can see it until you are ready"
+    },
+    "preview": {
+      "heading": "Live preview",
+      "noPhoto": "Your photo goes here",
+      "titlePlaceholder": "Your product name",
+      "download": "Instant download",
+      "ships": "Ships under your store terms"
+    },
+    "ready": "Ready to save",
+    "stillNeeded": "Still needed: {fields}"
   },
   "stockFields": {
     "trackStock": "Track stock",
@@ -406,7 +440,13 @@
     "increase": "Increase stock",
     "lowStockAlert": "Low-stock alert at",
     "maxPerOrder": "Maximum per order",
-    "maxPerOrderHint": "How many one buyer can take at once. Buyers pick from a list that stops here, and the limit is checked again when they order. Up to {max}; 1 sells them one at a time."
+    "maxPerOrderHint": "How many one buyer can take at once. Buyers pick from a list that stops here, and the limit is checked again when they order. Up to {max}; 1 sells them one at a time.",
+    "unlimited": "Unlimited",
+    "unlimitedHint": "Made to order, or never runs out",
+    "counted": "A set number",
+    "countedHint": "Counts down and stops at zero",
+    "fineTune": "Order limit",
+    "fineTuneTracked": "Order limit and low-stock alert"
   },
   "priceField": {
     "label": "Price",

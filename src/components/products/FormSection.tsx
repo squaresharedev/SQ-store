@@ -4,10 +4,10 @@ import { useTranslations } from "next-intl";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { cn } from "@/lib/utils";
 import {
-  cardClass,
   flagChipClass,
   flaggedSurfaceClass,
   iconTileClass,
+  sharpCardClass,
 } from "@/components/ui/surface-styles";
 import type {
   ProductFormSectionId,
@@ -90,7 +90,7 @@ export function FormSection({
       // `scroll-mt` clears the sticky TopBar (h-14) when the index rail
       // jumps here; without it the anchor lands underneath the bar and the
       // heading you asked for is the one thing you cannot see.
-      className={cn(cardClass, "scroll-mt-20 p-5", flag && flaggedSurfaceClass)}
+      className={cn(sharpCardClass, "scroll-mt-20 p-5", flag && flaggedSurfaceClass)}
     >
       <div className="mb-4 flex items-center gap-3">
         <span className={cn(iconTileClass, "size-9")}>

@@ -61,8 +61,12 @@ export const PRODUCT_FORM_SNAPSHOT_ID = "product-form-snapshot";
  * and the entry in the snapshot. Labels and copy can change freely; an id
  * cannot, so append rather than rename. The copy (label, the "?" explanation)
  * lives in the catalogue under `Products.form.sections.<id>`. The Stock
- * explanation also covers the alert; Media has none (its three fields carry
- * their own), and an empty explanation is what suppresses its "?".
+ * explanation also covers the alert; Media (shown as Delivery: physical or
+ * digital, the file or the shipping terms, the buy link) has none, since its
+ * fields carry their own, and an empty explanation is what suppresses its "?".
+ * The cover photo leads Basics, beside the title and price. Shipping renders
+ * INSIDE the Delivery card for a physical product, but keeps its own anchor
+ * and entry here.
  *
  * `required` marks a section the product cannot be saved without — which is
  * what lets the rail show a seller the two things standing between them and a
@@ -70,9 +74,9 @@ export const PRODUCT_FORM_SNAPSHOT_ID = "product-form-snapshot";
  */
 export const PRODUCT_FORM_SECTIONS = [
   { id: "basics", required: true },
-  { id: "stock", required: false },
   { id: "media", required: false },
   { id: "shipping", required: false },
+  { id: "stock", required: false },
   { id: "options", required: false },
   { id: "photos", required: false },
   { id: "badges", required: false },
@@ -321,7 +325,10 @@ export function sectionSummaries(
   const savedBadges = badgesToInput(input.badges);
 
   return {
-    basics: title ? [title] : [],
+    basics: [
+      ...(title ? [title] : []),
+      ...when(input.hasCoverImage, msg("Products.form.summary.image")),
+    ],
     // BOTH answers, because the section now holds two independent ones and a
     // summary that reported only the shelf would call a product with a limit
     // of 1 "Unlimited". The order limit is always stated, default or not: the
@@ -342,9 +349,12 @@ export function sectionSummaries(
         msg("Products.form.summary.maxPerOrder", { max: values.maxPerOrder.trim() }),
       ),
     ],
+    // Always an answer: physical or digital is asked with a default, so the
+    // section is never "empty". A download says so only once it has a file.
     media: [
-      ...when(input.hasCoverImage, msg("Products.form.summary.image")),
-      ...when(input.hasDigitalFile, msg("Products.form.summary.download")),
+      ...(input.isDigital
+        ? when(input.hasDigitalFile, msg("Products.form.summary.download"))
+        : [msg("Products.form.summary.physical")]),
       ...when(input.purchaseUrl.trim(), msg("Products.form.summary.buyLink")),
     ],
     // NEVER EMPTY, unlike every other summary here. "Store terms" is a real

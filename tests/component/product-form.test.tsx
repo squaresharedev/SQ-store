@@ -5,6 +5,7 @@ import { ToastProvider } from "@/components/ui/Toast";
 import { NavigationBlockerProvider } from "@/lib/hooks/useNavigationBlocker";
 import userEvent from "@testing-library/user-event";
 import { permissionDenied } from "@/lib/errors";
+import type { Product } from "@/types/product";
 
 afterEach(cleanup);
 
@@ -91,6 +92,22 @@ function render(ui: ReactElement) {
     </ToastProvider>,
   );
 }
+
+/** A stored product, for the tests that need one to edit. */
+const BASE_PRODUCT_FOR_FOLD: Product = {
+  id: "00000000-0000-4000-8000-000000000001",
+  title: "Desk lamp",
+  description: "",
+  price: 40,
+  currency: "EUR",
+  status: "active",
+  imageUrl: null,
+  digitalFileName: null,
+  trackStock: false,
+  stockQuantity: null,
+  lowStockThreshold: 5,
+  maxPerOrder: 10,
+};
 
 /** The inline, field-level messages. */
 const inForm = () => within(document.querySelector("form") as HTMLElement);
@@ -222,8 +239,7 @@ describe("ProductForm", () => {
 
     await fillRequiredFields(user);
 
-    const trackSwitch = screen.getByRole("switch", { name: /track stock/i });
-    await user.click(trackSwitch);
+    await user.click(screen.getByRole("radio", { name: /a set number/i }));
 
     // The toggle seeds "1" — clear it to get the empty-quantity error.
     const qtyInput = screen.getByLabelText(/^in stock/i);
@@ -241,12 +257,54 @@ describe("ProductForm", () => {
 
     await fillRequiredFields(user);
 
-    const trackSwitch = screen.getByRole("switch", { name: /track stock/i });
-    await user.click(trackSwitch);
+    await user.click(screen.getByRole("radio", { name: /a set number/i }));
 
     // No manual entry needed: the seeded "1" is already a valid stock level.
     await user.click(screen.getByRole("button", { name: /save product/i }));
     expect(inForm().queryByText(/how many units are in stock/i)).not.toBeInTheDocument();
+  });
+
+  // --- Educated guesses ---
+
+  describe("the cover photo", () => {
+    const original = { create: URL.createObjectURL, revoke: URL.revokeObjectURL };
+    beforeEach(() => {
+      URL.createObjectURL = vi.fn(() => "blob:preview");
+      URL.revokeObjectURL = vi.fn();
+    });
+    afterEach(() => {
+      URL.createObjectURL = original.create;
+      URL.revokeObjectURL = original.revoke;
+    });
+    const photo = (name: string) => new File(["x"], name, { type: "image/webp" });
+    const cover = () =>
+      document.querySelector<HTMLInputElement>('[data-product-field="coverImage"]')!;
+
+    it("names an untitled product after a photo with a real name", async () => {
+      const user = userEvent.setup();
+      render(<ProductForm />);
+      await user.upload(cover(), photo("oak-side-table.webp"));
+      expect(screen.getByLabelText(/^title/i)).toHaveValue("Oak side table");
+    });
+
+    it("never replaces a title the seller typed, nor guesses from a camera name", async () => {
+      const user = userEvent.setup();
+      render(<ProductForm />);
+      await user.upload(cover(), photo("IMG_2041.webp"));
+      expect(screen.getByLabelText(/^title/i)).toHaveValue("");
+      await user.type(screen.getByLabelText(/^title/i), "Desk lamp");
+      await user.upload(cover(), photo("oak-side-table.webp"));
+      expect(screen.getByLabelText(/^title/i)).toHaveValue("Desk lamp");
+    });
+  });
+
+  it("keeps the stock fine print folded until a number in it is not the default", async () => {
+    const { unmount } = render(<ProductForm />);
+    const fold = () => document.querySelector<HTMLDetailsElement>("[data-stock-fine-tune]")!;
+    expect(fold().open).toBe(false);
+    unmount();
+    render(<ProductForm product={{ ...BASE_PRODUCT_FOR_FOLD, maxPerOrder: 2 }} />);
+    expect(fold().open).toBe(true);
   });
 
   // --- Successful submit — priceCents mapping ---

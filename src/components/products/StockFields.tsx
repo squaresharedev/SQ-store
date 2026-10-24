@@ -1,9 +1,10 @@
 "use client";
 
 import { useId } from "react";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Switch } from "@/components/ui/switch";
+import { ChoiceCards } from "@/components/ui/ChoiceCards";
+import { Disclosure } from "@/components/ui/Disclosure";
 import {
   errorTextClass,
   fieldBaseClass,
@@ -12,7 +13,14 @@ import {
   stepperFieldClass,
 } from "@/components/ui/control-styles";
 import { RequiredMark } from "@/components/ui/RequiredMark";
-import { PURCHASE_QUANTITY_MAX, STOCK_QUANTITY_MAX } from "@/lib/validation/product";
+import {
+  LOW_STOCK_THRESHOLD_DEFAULT,
+  MAX_PER_ORDER_DEFAULT,
+  PURCHASE_QUANTITY_MAX,
+  STOCK_QUANTITY_MAX,
+} from "@/lib/validation/product";
+
+type StockMode = "unlimited" | "counted";
 
 export interface StockFieldValues {
   trackStock: boolean;
@@ -40,7 +48,6 @@ export function StockFields({ values, errors, onChange }: Props) {
   const t = useTranslations("Products.stockFields");
   const fieldId = useId();
 
-  const switchId = `${fieldId}-track-stock`;
   const stockQtyId = `${fieldId}-stock-qty`;
   const stockQtyErrorId = `${fieldId}-stock-qty-error`;
   const thresholdId = `${fieldId}-threshold`;
@@ -53,6 +60,13 @@ export function StockFields({ values, errors, onChange }: Props) {
   const parsedQuantity = parseInt(values.stockQuantity, 10);
   const currentQuantity = Number.isFinite(parsedQuantity) ? parsedQuantity : 0;
 
+  // Open from the start whenever a number in the fold is not the one it
+  // starts on, or is wrong: nothing the seller set is ever hidden from them.
+  const fineTuneOpen =
+    Boolean(errors.lowStockThreshold || errors.maxPerOrder) ||
+    values.maxPerOrder.trim() !== String(MAX_PER_ORDER_DEFAULT) ||
+    (values.trackStock && values.lowStockThreshold.trim() !== String(LOW_STOCK_THRESHOLD_DEFAULT));
+
   function stepQuantity(delta: 1 | -1) {
     const next = Math.max(
       0,
@@ -63,24 +77,35 @@ export function StockFields({ values, errors, onChange }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Track stock toggle */}
-      <div className="flex items-center justify-between gap-3">
-        {/* NO "?" ANYWHERE IN THIS SECTION'S FIELDS. The toggle and the alert
-            each had one, and between them they said what the Stock heading's
-            own "?" already says: three info buttons on a card with two
-            controls. The heading keeps the single explanation (it now names
-            the alert too); see PRODUCT_FORM_SECTIONS. */}
-        <label htmlFor={switchId} className={labelClass}>
-          {t("trackStock")}
-        </label>
-        <Switch
-          id={switchId}
-          checked={values.trackStock}
-          onCheckedChange={(checked) => onChange("trackStock", checked)}
-          data-product-field="trackStock"
-          data-product-value={values.trackStock ? "true" : "false"}
-        />
-      </div>
+      {/* TWO ANSWERS, NOT A SWITCH. "Track stock: off" asked the seller to
+          work out what off means; the tiles say both answers outright, and
+          the common one (nothing to count) is already chosen. No "?" on the
+          fields below: the Stock heading's own "?" explains all of them. */}
+      <ChoiceCards<StockMode>
+        name={`${fieldId}-stock-mode`}
+        legend={t("trackStock")}
+        legendHidden
+        variant="showcase"
+        columns={2}
+        value={values.trackStock ? "counted" : "unlimited"}
+        onChange={(mode) => onChange("trackStock", mode === "counted")}
+        fieldsetData={{
+          "data-product-field": "trackStock",
+          "data-product-value": values.trackStock ? "true" : "false",
+        }}
+        options={[
+          {
+            value: "unlimited",
+            label: t("unlimited"),
+            hint: t("unlimitedHint"),
+          },
+          {
+            value: "counted",
+            label: t("counted"),
+            hint: t("countedHint"),
+          },
+        ]}
+      />
 
       {/* Quantity fields — only rendered when tracking is on */}
       {values.trackStock && (
@@ -144,70 +169,89 @@ export function StockFields({ values, errors, onChange }: Props) {
               </p>
             )}
           </div>
+        </div>
+      )}
 
-          {/* Low-stock threshold */}
+      {/* THE FINE PRINT, FOLDED. Both numbers start on a sensible answer
+          (an alert at a handful left, a per-order cap shoppers never hit), so
+          most sellers never need to see them; a changed or refused one keeps
+          the fold open. */}
+      <Disclosure
+        icon={SlidersHorizontal}
+        open={fineTuneOpen}
+        className="border-t border-border pt-4"
+        attributes={{ "data-stock-fine-tune": "" }}
+        summary={
+          <span className="font-inter text-sm text-muted-foreground">
+            {values.trackStock ? t("fineTuneTracked") : t("fineTune")}
+          </span>
+        }
+      >
+        <div className="space-y-4 pt-2">
+          {/* Low-stock threshold: only a counted shelf can run low. */}
+          {values.trackStock && (
+            <div className="space-y-1.5 sm:max-w-xs">
+              <label htmlFor={thresholdId} className={labelClass}>
+                {t("lowStockAlert")}
+              </label>
+              <input
+                id={thresholdId}
+                type="text"
+                inputMode="numeric"
+                value={values.lowStockThreshold}
+                onChange={(event) =>
+                  onChange("lowStockThreshold", event.target.value)
+                }
+                aria-invalid={errors.lowStockThreshold ? true : undefined}
+                aria-describedby={errors.lowStockThreshold ? thresholdErrorId : undefined}
+                data-product-field="lowStockThreshold"
+                data-product-value={values.lowStockThreshold.trim() || undefined}
+                data-product-unit="count"
+                className={fieldBaseClass}
+              />
+              {errors.lowStockThreshold && (
+                <p id={thresholdErrorId} className={errorTextClass}>
+                  {errors.lowStockThreshold}
+                </p>
+              )}
+            </div>
+          )}
+          {/* OUTSIDE the tracking condition, deliberately. A per-order limit
+              is not a fact about the shelf: an unlimited, made-to-order or
+              digital product still has a number of them a seller is willing to
+              sell in one go, and hiding this behind counting would mean the
+              only way to cap an order is to count inventory you do not count. */}
           <div className="space-y-1.5 sm:max-w-xs">
-            <label htmlFor={thresholdId} className={labelClass}>
-              {t("lowStockAlert")}
+            <label htmlFor={maxPerOrderId} className={labelClass}>
+              {t("maxPerOrder")}
             </label>
             <input
-              id={thresholdId}
+              id={maxPerOrderId}
               type="text"
               inputMode="numeric"
-              value={values.lowStockThreshold}
-              onChange={(event) =>
-                onChange("lowStockThreshold", event.target.value)
+              value={values.maxPerOrder}
+              onChange={(event) => onChange("maxPerOrder", event.target.value)}
+              aria-invalid={errors.maxPerOrder ? true : undefined}
+              aria-describedby={
+                errors.maxPerOrder ? maxPerOrderErrorId : `${maxPerOrderId}-hint`
               }
-              aria-invalid={errors.lowStockThreshold ? true : undefined}
-              aria-describedby={errors.lowStockThreshold ? thresholdErrorId : undefined}
-              data-product-field="lowStockThreshold"
-              data-product-value={values.lowStockThreshold.trim() || undefined}
+              data-product-field="maxPerOrder"
+              data-product-value={values.maxPerOrder.trim() || undefined}
               data-product-unit="count"
               className={fieldBaseClass}
             />
-            {errors.lowStockThreshold && (
-              <p id={thresholdErrorId} className={errorTextClass}>
-                {errors.lowStockThreshold}
+            {errors.maxPerOrder ? (
+              <p id={maxPerOrderErrorId} className={errorTextClass}>
+                {errors.maxPerOrder}
+              </p>
+            ) : (
+              <p id={`${maxPerOrderId}-hint`} className="font-inter text-xs text-muted-foreground">
+                {t("maxPerOrderHint", { max: PURCHASE_QUANTITY_MAX })}
               </p>
             )}
           </div>
         </div>
-      )}
-
-      {/* OUTSIDE the tracking block, deliberately. A per-order limit is not a
-          fact about the shelf: an unlimited, made-to-order or digital product
-          still has a number of them a seller is willing to sell in one go, and
-          hiding this behind Track stock would mean the only way to cap an
-          order is to start counting inventory you do not count. */}
-      <div className="space-y-1.5 border-t border-border pt-4 sm:max-w-xs">
-        <label htmlFor={maxPerOrderId} className={labelClass}>
-          {t("maxPerOrder")}
-        </label>
-        <input
-          id={maxPerOrderId}
-          type="text"
-          inputMode="numeric"
-          value={values.maxPerOrder}
-          onChange={(event) => onChange("maxPerOrder", event.target.value)}
-          aria-invalid={errors.maxPerOrder ? true : undefined}
-          aria-describedby={
-            errors.maxPerOrder ? maxPerOrderErrorId : `${maxPerOrderId}-hint`
-          }
-          data-product-field="maxPerOrder"
-          data-product-value={values.maxPerOrder.trim() || undefined}
-          data-product-unit="count"
-          className={fieldBaseClass}
-        />
-        {errors.maxPerOrder ? (
-          <p id={maxPerOrderErrorId} className={errorTextClass}>
-            {errors.maxPerOrder}
-          </p>
-        ) : (
-          <p id={`${maxPerOrderId}-hint`} className="font-inter text-xs text-muted-foreground">
-            {t("maxPerOrderHint", { max: PURCHASE_QUANTITY_MAX })}
-          </p>
-        )}
-      </div>
+      </Disclosure>
     </div>
   );
 }

@@ -90,7 +90,7 @@ test.describe("the publish gate", () => {
     await gotoApp(page, "/products/new");
     const status = page.locator('[data-product-field="status"]');
     await expect(status).toHaveAttribute("data-product-value", "draft");
-    await expect(status.getByRole("button", { name: "Active" })).toBeDisabled();
+    await expect(status.getByRole("radio", { name: /^Active/ })).toBeDisabled();
     await expect(
       page.getByText(/can't put this product on sale until your seller details/i),
     ).toBeVisible();
@@ -130,7 +130,7 @@ test.describe("the publish gate", () => {
     // code: an address nobody reads is not a contact.
     await gotoApp(page, "/products/new");
     await expect(
-      page.locator('[data-product-field="status"]').getByRole("button", { name: "Active" }),
+      page.locator('[data-product-field="status"]').getByRole("radio", { name: /^Active/ }),
     ).toBeDisabled();
 
     // The settings page reopens on the code box: the code the save sent is
@@ -172,7 +172,7 @@ test.describe("the publish gate", () => {
     ).toHaveCount(0);
     const status = page.locator('[data-product-field="status"]');
     await expect(status).toHaveAttribute("data-product-value", "active");
-    await expect(status.getByRole("button", { name: "Active" })).toBeEnabled();
+    await expect(status.getByRole("radio", { name: /^Active/ })).toBeEnabled();
 
     // --- a live page, built the normal way ---
     await seedStorefronts(sellerId, [{ name: "Gate studio" }]);
