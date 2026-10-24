@@ -433,9 +433,10 @@ export function msUntilSaleEnds(pricing: Iterable<ProductPricing>, now: Date): n
  *
  * The usage limit is counted from orders that still stand: one that was taken
  * back (refunded) gives its use back, and one still waiting on its payment
- * holds it (the same rule as discount_performance.uses, 20261008). Two buyers
- * reaching for the last use at the same moment can both get it: the count is
- * read, not locked.
+ * holds it (the same rule as discount_performance.uses, 20261008). This read is
+ * the quote's answer, not the guarantee: order_place re-counts under a row lock
+ * when the order is written (20261022), so two buyers reaching for the last use
+ * cannot both be charged for it.
  */
 export async function findCodeFor(
   admin: Admin,

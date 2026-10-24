@@ -90,7 +90,10 @@ export async function DashboardShell({
   // welcome is exactly the first impression that checklist replaced. A read
   // failure shows nothing: the write paths still refuse, and a banner that
   // appears because a query blipped is worse than no banner at all.
-  const identity = account ? await getTraderIdentityStatus(account.accountId) : null;
+  // Both reads are independent, so they run together (one round trip, not two).
+  const [identity, billing] = account
+    ? await Promise.all([getTraderIdentityStatus(account.accountId), getAccountBilling(account.accountId)])
+    : [null, null];
   const missingTraderDetails = identity?.ok ? identity.missing : [];
   const sellerDetailsBanner = (
     <SellerDetailsBanner
@@ -102,7 +105,6 @@ export async function DashboardShell({
   // The ACTIVE store's plan: the rail's chip and the profile menu's row
   // describe the store being worked on, which for a teammate is the
   // owner's. A read failure shows no plan at all rather than a guessed one.
-  const billing = account ? await getAccountBilling(account.accountId) : null;
   const plan = billing?.ok ? billing.billing.plan : null;
   const pastDuePlan =
     billing?.ok && billing.billing.status === "past_due" && billing.billing.plan !== "free"

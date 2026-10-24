@@ -17,13 +17,23 @@ export type BoundedText =
   | { ok: false; reason: "too_large" | "not_text" };
 
 /**
+ * True when the request DECLARES a body over `maxBytes`. Cheap and advisory: a
+ * client can omit or lie about Content-Length, so a route that buffers the body
+ * (formData, arrayBuffer) must still check the real size after it has read it.
+ * This only spares the read when the caller is honest about being too big.
+ */
+export function declaredLengthExceeds(request: Request, maxBytes: number): boolean {
+  const declared = Number(request.headers.get("content-length"));
+  return Number.isFinite(declared) && declared > maxBytes;
+}
+
+/**
  * The body as UTF-8 text, exactly as sent. For a route that must see the RAW
  * bytes (a signed webhook, whose signature covers the body verbatim), where
  * parsing first and re-serialising would break the signature.
  */
 export async function readBoundedText(request: Request, maxBytes: number): Promise<BoundedText> {
-  const declared = Number(request.headers.get("content-length"));
-  if (Number.isFinite(declared) && declared > maxBytes) return { ok: false, reason: "too_large" };
+  if (declaredLengthExceeds(request, maxBytes)) return { ok: false, reason: "too_large" };
 
   const reader = request.body?.getReader();
   if (!reader) return { ok: false, reason: "not_text" };

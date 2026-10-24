@@ -9,6 +9,7 @@ import {
 import { classifierCanSee, sniffImage, sniffSvg } from "@/lib/uploads/sniff";
 import { holdForPerson } from "@/lib/moderation/auto/check";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
+import { declaredLengthExceeds } from "@/lib/security/read-json";
 
 /**
  * POST /api/uploads/element — upload a seller's own artwork for the storefront
@@ -69,6 +70,12 @@ export async function POST(request: Request) {
     return bad(503, t("notConfigured.element"));
   }
 
+  // Refuse an honest oversized body before formData() buffers it all.
+  if (declaredLengthExceeds(request, ELEMENT_MAX_BYTES)) {
+    const maxMb = Math.round(ELEMENT_MAX_BYTES / 1024 / 1024);
+    return bad(413, t("tooLarge.image"), t("tooLargeFix.image", { maxMb }));
+  }
+
   let form: FormData;
   try {
     form = await request.formData();
@@ -85,7 +92,8 @@ export async function POST(request: Request) {
   const file = form.get(FIELD);
   if (!(file instanceof File)) return bad(400, t("missing.image"));
 
-  // Cheap rejection before reading the body into memory.
+  // Real size check: the body is already buffered here. The declared-length
+  // check above is what saves the read for an honest oversized caller.
   if (file.size <= 0) return bad(400, t("empty.file"), t("fix.pickFile"));
   const maxMb = Math.round(ELEMENT_MAX_BYTES / 1024 / 1024);
   if (file.size > ELEMENT_MAX_BYTES) {

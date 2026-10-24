@@ -2,7 +2,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
-import { cleanup, render, screen, within } from "../setup/render";
+import { cleanup, render, screen, waitFor, within } from "../setup/render";
 import { msg } from "@/i18n/types";
 import messages from "../../messages/en";
 import { invalidInput } from "@/lib/errors";
@@ -449,7 +449,7 @@ describe("the discounts page", () => {
     expect(screen.queryByRole("link", { name: "Create discount" })).toBeNull();
   });
 
-  it("shows what each discount is, where it stands and what it sold", () => {
+  it("shows what each discount is, where it stands and what it sold", async () => {
     render(<DiscountsPage products={PRODUCTS} summary={summary()} canWrite />);
 
     expect(row(code.id)).toHaveAttribute("data-discount-status", "active");
@@ -467,6 +467,8 @@ describe("the discounts page", () => {
     expect(row(over.id)).toHaveTextContent("No orders yet");
 
     // Totals across every discount, and the channels that brought them.
+    // The chart loads on demand (next/dynamic), so wait for it to arrive.
+    await waitFor(() => expect(document.querySelector("[data-discount-performance]")).not.toBeNull());
     const performance = document.querySelector<HTMLElement>("[data-discount-performance]")!;
     expect(within(performance).getByText("Orders with a discount")).toBeInTheDocument();
     expect(performance).toHaveTextContent("€84.00");

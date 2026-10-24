@@ -109,6 +109,7 @@ export const SCHEMA_REQUIREMENTS: readonly SchemaRequirement[] = [
   { kind: "function", signature: "signup_intent_gate(jsonb)", migration: "20261021_signup_intents.sql" },
   { kind: "function", signature: "guard_object_keys()", migration: "20261021_object_key_ownership.sql" },
   { kind: "body", signature: "order_refund(uuid,text,boolean)", includes: "o.payment_ref into owner_id, ref", migration: "20261021_order_refund_provider_first.sql" },
+  { kind: "body", signature: "order_place(jsonb)", includes: "discount_exhausted", migration: "20261022_order_place_code_limit.sql" },
 ];
 
 /** A SQL string literal. Every value below is a constant from this file, and
