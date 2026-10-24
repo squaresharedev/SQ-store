@@ -24,11 +24,17 @@ export function ImageDropzone({
   describedById,
   initialPreviewUrl = null,
   onFileChange,
+  prompt,
+  frameClassName = "aspect-[4/3]",
 }: {
   inputId: string;
   describedById?: string;
   initialPreviewUrl?: string | null;
   onFileChange: (file: File | null) => void;
+  /** The big line in the empty frame; defaults to the generic "drop an image". */
+  prompt?: string;
+  /** The frame's shape: 4:3 by default, square where it leads a page. */
+  frameClassName?: string;
 }) {
   const t = useTranslations("Products.imageDropzone");
   const tPhoto = useTranslations("Products.photoFormat");
@@ -96,9 +102,10 @@ export function ImageDropzone({
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
           className={cn(
-            "flex aspect-[4/3] w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-sm border border-dashed bg-background text-center transition-colors duration-base ease-standard motion-reduce:transition-none",
+            "flex w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-sm border border-dashed bg-background text-center transition-colors duration-base ease-standard motion-reduce:transition-none",
             "has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-ring has-[input:focus-visible]:ring-offset-2 has-[input:focus-visible]:ring-offset-background",
             dragging ? "border-foreground bg-accent" : "border-border hover:bg-accent",
+            frameClassName,
           )}
         >
           <input
@@ -121,7 +128,7 @@ export function ImageDropzone({
             <span className="flex flex-col items-center gap-2 px-4 py-6">
               <UploadCloud className="size-6 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
               <span className="font-inter text-sm text-foreground">
-                {t("dropPrompt")}
+                {prompt ?? t("dropPrompt")}
               </span>
               <span className={infoTextClass}>
                 {t("hint", { max: MAX_MB })}

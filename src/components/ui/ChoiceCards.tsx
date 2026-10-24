@@ -15,6 +15,9 @@ const CHOICE_CARD_CLASS =
  *  the radio itself, and the tile wears the focus ring and the chosen state. */
 const CHOICE_TILE_CLASS = `relative flex cursor-pointer flex-col items-center gap-2 rounded-md border border-border px-2 py-3 text-center hover:bg-muted/40 has-[:checked]:border-foreground has-[:checked]:bg-muted/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background ${transitionClass}`;
 
+/** A choice that is shown but cannot be picked right now. */
+const CHOICE_DISABLED_CLASS = "cursor-not-allowed opacity-50 hover:bg-transparent";
+
 /** A tile's radio: the size of the tile, invisible, on top. */
 const TILE_RADIO_CLASS = "absolute inset-0 m-0 size-full cursor-pointer opacity-0";
 
@@ -39,6 +42,8 @@ export type ChoiceCardOption<T extends string> = {
   icon?: React.ReactNode;
   /** A small chip with the label ("Recommended"). */
   badge?: React.ReactNode;
+  /** Shown, but not pickable right now (the reason is the caller's to say). */
+  disabled?: boolean;
 };
 
 /**
@@ -114,7 +119,10 @@ export function ChoiceCards<T extends string>({
         {options.map((option) => (
           <label
             key={option.value}
-            className={tiles ? CHOICE_TILE_CLASS : CHOICE_CARD_CLASS}
+            className={cn(
+              tiles ? CHOICE_TILE_CLASS : CHOICE_CARD_CLASS,
+              option.disabled && CHOICE_DISABLED_CLASS,
+            )}
             {...(optionDataAttribute
               ? { [optionDataAttribute]: option.value }
               : {})}
@@ -125,7 +133,11 @@ export function ChoiceCards<T extends string>({
               value={option.value}
               checked={value === option.value}
               onChange={() => onChange(option.value)}
-              className={tiles ? TILE_RADIO_CLASS : "mt-0.5 size-4 shrink-0 accent-foreground"}
+              disabled={option.disabled}
+              className={cn(
+                tiles ? TILE_RADIO_CLASS : "mt-0.5 size-4 shrink-0 accent-foreground",
+                option.disabled && "cursor-not-allowed",
+              )}
               required={required}
               // An id that matches no form: the radio belongs to none.
               form={detached ? "__none__" : undefined}

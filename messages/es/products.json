@@ -246,7 +246,7 @@
         "about": "Para qué sirve Stock"
       },
       "media": {
-        "label": "Multimedia y entrega"
+        "label": "Entrega"
       },
       "shipping": {
         "label": "Envío",
@@ -313,7 +313,8 @@
       "started": "Empezado",
       "active": "Activo",
       "draft": "Borrador",
-      "badges": "{count, plural, one {{count} insignia} many {{count} de insignias} other {{count} insignias}}"
+      "badges": "{count, plural, one {{count} insignia} many {{count} de insignias} other {{count} insignias}}",
+      "physical": "Físico"
     },
     "errors": {
       "titleRequired": "Ponle un título a tu producto: es lo primero que ven los compradores.",
@@ -341,7 +342,8 @@
         "tooHigh": "El precio no puede superar {currency} {max}."
       },
       "badgeDuplicate": "Dos insignias dicen lo mismo. Cambia las palabras de una o elimínala.",
-      "badgesOnPhoto": "En la foto solo caben {max} insignias. Mueve una junto al producto."
+      "badgesOnPhoto": "En la foto solo caben {max} insignias. Mueve una junto al producto.",
+      "digitalFileRequired": "Añade el archivo que descargarán los compradores."
     },
     "title": "Título",
     "titlePlaceholder": "p. ej. Ambient Loops Vol. 1",
@@ -397,7 +399,39 @@
         "keepEditing": "Seguir editando",
         "send": "Enviar a revisión"
       }
-    }
+    },
+    "coverPrompt": "Suelta aquí tu mejor foto",
+    "kind": {
+      "legend": "¿Qué vendes?",
+      "physical": "Algo que envío",
+      "physicalHint": "Un artículo físico que se envía al comprador",
+      "digital": "Una descarga",
+      "digitalHint": "Un archivo que el comprador recibe justo después de pagar"
+    },
+    "purchaseLinkAdd": "¿Vendes con tu propio pago? Añade su enlace",
+    "extras": {
+      "heading": "Hazlo brillar",
+      "subheading": "Todo es opcional. Añade lo que ayude a decidir a los compradores.",
+      "options": "Tallas, colores, versiones",
+      "photos": "Más ángulos y detalles",
+      "badges": "Hecho a mano, envío gratis…",
+      "specs": "Tamaño, peso, materiales",
+      "documents": "Manuales y certificados",
+      "safety": "Datos del fabricante para la UE"
+    },
+    "visibility": {
+      "activeHint": "Los compradores lo ven y pueden comprarlo ya",
+      "draftHint": "Solo tú lo ves hasta que esté listo"
+    },
+    "preview": {
+      "heading": "Vista previa en directo",
+      "noPhoto": "Aquí irá tu foto",
+      "titlePlaceholder": "El nombre de tu producto",
+      "download": "Descarga inmediata",
+      "ships": "Se envía según las condiciones de tu tienda"
+    },
+    "ready": "Listo para guardar",
+    "stillNeeded": "Falta: {fields}"
   },
   "stockFields": {
     "trackStock": "Controlar stock",
@@ -406,7 +440,13 @@
     "increase": "Aumentar stock",
     "lowStockAlert": "Alerta de stock bajo en",
     "maxPerOrder": "Máximo por pedido",
-    "maxPerOrderHint": "Cuántas unidades puede llevarse un comprador de una vez. Los compradores eligen de una lista que se detiene aquí, y el límite se vuelve a comprobar al pedir. Hasta {max}; con 1 se venden de una en una."
+    "maxPerOrderHint": "Cuántas unidades puede llevarse un comprador de una vez. Los compradores eligen de una lista que se detiene aquí, y el límite se vuelve a comprobar al pedir. Hasta {max}; con 1 se venden de una en una.",
+    "unlimited": "Ilimitado",
+    "unlimitedHint": "Hecho por encargo, o nunca se agota",
+    "counted": "Una cantidad fija",
+    "countedHint": "Cuenta hacia atrás y se detiene en cero",
+    "fineTune": "Límite por pedido",
+    "fineTuneTracked": "Límite por pedido y aviso de stock bajo"
   },
   "priceField": {
     "label": "Precio",

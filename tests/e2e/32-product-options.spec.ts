@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { freshUser, gotoApp, serviceRest, signUp } from "./helpers";
+import { freshUser, gotoApp, openProductExtra, serviceRest, signUp } from "./helpers";
 
 /**
  * Product options in the seller's hands: naming the axes a product varies
@@ -25,8 +25,10 @@ test.describe("product options", () => {
     await page.getByLabel(/price/i).fill("129.00");
 
     // Nothing until the seller says the product varies: a product sold in one
-    // version must not be made to think about options at all.
+    // version must not be made to think about options at all — Options is a
+    // folded extra until its tile is pressed.
     await expect(page.locator("[data-option-group]")).toHaveCount(0);
+    await openProductExtra(page, "options");
 
     // GESTURE ONE: a preset names the axis and picks its display.
     await page.getByRole("button", { name: "Colour", exact: true }).click();
@@ -73,8 +75,9 @@ test.describe("product options", () => {
     // One option marked unavailable, which is what the buy button reads.
     await colour.getByRole("switch").first().click();
 
-    // The Photos section grew a bucket per option, across BOTH axes, without
-    // the seller going anywhere: that is why Options sits above Photos.
+    // Opened, the Photos section already has a bucket per option, across BOTH
+    // axes: that is why Options sits above Photos.
+    await openProductExtra(page, "photos");
     await expect(page.locator("[data-gallery-bucket]")).toHaveCount(6); // 5 options + shared
     await expect(page.locator("[data-gallery-bucket]", { hasText: "750 W" })).toBeVisible();
 
@@ -123,6 +126,7 @@ test.describe("product options", () => {
     // An axis with no values would print an empty picker on the page. The
     // schema refuses it; the form has to say which one and why, because
     // "didn't pass validation" is not something a seller can act on.
+    await openProductExtra(page, "options");
     await page.getByRole("button", { name: "Material", exact: true }).click();
     await page.getByRole("button", { name: /save product/i }).click();
 

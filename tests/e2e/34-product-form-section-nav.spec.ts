@@ -99,6 +99,11 @@ test.describe("product form section nav vs. the unsaved-changes guard", () => {
     const nav = page.getByRole("navigation", { name: "Form sections" });
     await expect(nav).toBeVisible();
 
+    // A section under Stock to land in: Options, opened from its tile (the
+    // extras below Stock start folded, and the tile grid is not a section).
+    await page.locator('[data-product-extra="options"]').click();
+    await expect(page.locator('[data-product-section="options"]')).toBeVisible();
+
     await page.locator('[data-product-section="stock"]').scrollIntoViewIfNeeded();
     await page.evaluate(() => {
       document

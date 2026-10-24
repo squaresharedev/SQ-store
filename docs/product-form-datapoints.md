@@ -124,7 +124,7 @@ the "?" beside the heading reveals — the form does not print it. One copy, so
 the explanation a person is shown and the one a reader gets from
 `PRODUCT_FORM_SECTIONS` cannot drift. An **empty** `description` means the
 section shows no "?" at all, for one whose own fields already explain it
-(`media`).
+(`media`, shown as Delivery).
 
 | State | Means |
 |---|---|
@@ -135,13 +135,36 @@ section shows no "?" at all, for one whose own fields already explain it
 Section ids, in render order:
 
 ```
-basics  stock  media  options  photos  badges  specs  documents  safety  visibility
+basics  media  shipping  stock  options  photos  badges  specs  documents  safety  visibility
 ```
 
-**`safety` is absent for a download**, in the DOM and in the snapshot alike.
-Shipping and product-safety law do not apply to a file, so the form hides the
-section rather than storing values nobody will read — do not read its absence
-as "empty".
+`media` is shown to the seller as **Delivery**: a physical-or-digital choice
+(`data-product-field="kind"`, `physical` | `digital`), then the download for a
+digital product or the shipping terms for a physical one, then the optional
+buy link. **`shipping` renders inside the Delivery card**, as a block that
+still carries its own `data-product-section="shipping"` and anchor. The cover
+photo leads `basics`, beside the title and price.
+
+**`safety` and `shipping` are absent for a download**, in the DOM and in the
+snapshot alike. Shipping and product-safety law do not apply to a file, so the
+form hides those sections rather than storing values nobody will read — do not
+read their absence as "empty". A product marked `digital` cannot be saved
+until it has its file (`requiredMissing` does not list it; the save says
+"Add the file buyers will download.").
+
+**The optional extras start folded.** `options`, `photos`, `badges`, `specs`,
+`documents` and `safety` are each a tile (`[data-product-extra="<id>"]`) in a
+"Make it shine" grid until pressed; pressing one renders the section in its
+place in the order above. A section that already holds something, carries a
+problem, or was flagged by staff is open from the start, so a folded section is
+always an empty one. To fill a folded section, press its tile (or its entry in
+the index rail, which opens it too), then address its fields as below. The
+snapshot reports every section either way.
+
+Two more folds, for answers that start on a default: the stock fine print
+(`[data-stock-fine-tune]`, a `<details>` holding `lowStockThreshold` and
+`maxPerOrder`; open whenever either is not its default) and the buy link
+(`[data-product-reveal="purchaseUrl"]` until pressed or set).
 
 Each section also anchors at `id="product-section-<id>"`, which is what the
 index rail links to, so `#product-section-photos` is a valid deep link.

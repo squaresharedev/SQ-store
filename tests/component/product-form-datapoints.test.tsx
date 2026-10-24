@@ -58,6 +58,16 @@ function snapshot(): ProductFormSnapshot {
   return JSON.parse(raw) as ProductFormSnapshot;
 }
 
+/** Opens every optional extra (and the folded buy link) from its tile, the
+ *  way a seller or an assistant reaches a section that starts folded. */
+async function openEverything(user: ReturnType<typeof userEvent.setup>) {
+  for (const tile of [...document.querySelectorAll<HTMLElement>("[data-product-extra]")]) {
+    await user.click(tile);
+  }
+  const reveal = document.querySelector<HTMLElement>('[data-product-reveal="purchaseUrl"]');
+  if (reveal) await user.click(reveal);
+}
+
 const fields = () =>
   [...document.querySelectorAll("[data-product-field]")].map(
     (node) => node.getAttribute("data-product-field")!,
@@ -112,9 +122,20 @@ describe("product form — the machine-readable contract", () => {
     expect(snapshot().hasCoverImage).toBe(true);
   });
 
-  it("gives every section an addressable anchor, id and state", () => {
+  it("gives every section an addressable anchor, id and state", async () => {
+    const user = userEvent.setup();
     render(<ProductForm product={PRODUCT} />);
-    // A physical product shows all nine; safety is dropped for a download.
+    // An optional extra with nothing in it starts as a tile, which is its
+    // address until it is opened.
+    for (const section of PRODUCT_FORM_SECTIONS) {
+      const rendered = document.querySelector(`[data-product-section="${section.id}"]`);
+      const tile = document.querySelector(`[data-product-extra="${section.id}"]`);
+      expect(rendered ?? tile, section.id).not.toBeNull();
+    }
+    await openEverything(user);
+    expect(document.querySelector("[data-product-extra]")).toBeNull();
+    // Opened, a physical product shows every section; safety is dropped for a
+    // download.
     for (const section of PRODUCT_FORM_SECTIONS) {
       const node = document.querySelector(`[data-product-section="${section.id}"]`);
       expect(node, section.id).not.toBeNull();
@@ -152,6 +173,7 @@ describe("product form — the machine-readable contract", () => {
     // because both read the one snapshot.
     const optionsNav = document.querySelector('[data-product-form-nav-item="options"]')!;
     expect(optionsNav.getAttribute("data-product-section-state")).toBe("empty");
+    await user.click(document.querySelector<HTMLElement>('[data-product-extra="options"]')!);
 
     await user.click(screen.getByRole("button", { name: /^Size$/ }));
     const filled = snapshot().sections.find((section) => section.id === "options")!;
@@ -184,8 +206,10 @@ describe("product form — the machine-readable contract", () => {
     ).toBe("invalid");
   });
 
-  it("addresses every field a seller can edit", () => {
+  it("addresses every field a seller can edit", async () => {
+    const user = userEvent.setup();
     render(<ProductForm product={PRODUCT} />);
+    await openEverything(user);
     // The contract, spelled out. A field losing its datapoint is a silent
     // regression for anything reading the form, so the list is asserted rather
     // than sampled.
@@ -198,7 +222,8 @@ describe("product form — the machine-readable contract", () => {
       "stockQuantity",
       "lowStockThreshold",
       "coverImage",
-      "digitalFile",
+      "kind",
+      "shippingProfile",
       "purchaseUrl",
       "optionGroups",
       "gallery",
@@ -222,6 +247,22 @@ describe("product form — the machine-readable contract", () => {
     ]) {
       expect(fields(), field).toContain(field);
     }
+  });
+
+  it("asks physical or digital, and a download shows its file in place of shipping", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm product={PRODUCT} />);
+    expect(fields()).not.toContain("digitalFile");
+    await user.click(screen.getByRole("radio", { name: /a download/i }));
+    expect(fields()).toContain("digitalFile");
+    expect(fields()).not.toContain("shippingProfile");
+    expect(snapshot().isDigital).toBe(true);
+    expect(snapshot().hasDigitalFile).toBe(false);
+
+    // Saying "digital" without the file is the one thing that then blocks Save.
+    await user.click(screen.getByRole("button", { name: /save changes/i }));
+    expect(screen.getByText("Add the file buyers will download.")).toBeInTheDocument();
+    expect(snapshot().sections.find((section) => section.id === "media")!.state).toBe("invalid");
   });
 
   it("is a pure function of the form's state", () => {
