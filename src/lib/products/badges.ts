@@ -228,6 +228,27 @@ export function canPlaceBadge(
   return badges.filter(isOnPhoto).length < BADGES_ON_PHOTO_MAX;
 }
 
+/**
+ * The badges with the one carrying these words moved to `placement`, the rest
+ * untouched. `beside` is stored as no placement at all, as the product form
+ * saves it. Shared by the editor's drag and the action that saves it, so the
+ * page drawn at once and the row written after can never disagree.
+ */
+export function withBadgePlacement(
+  badges: readonly ProductBadge[],
+  label: string,
+  placement: BadgePlacement,
+): ProductBadge[] {
+  const key = badgeLabelKey(label);
+  return badges.map((badge) => {
+    if (badgeLabelKey(badge.label) !== key) return badge;
+    const moved: ProductBadge = { icon: badge.icon, label: badge.label };
+    if (badge.color) moved.color = badge.color;
+    if (placement !== "beside") moved.placement = placement;
+    return moved;
+  });
+}
+
 /** True while the product has room for another badge. */
 export function roomForBadge(count: number): boolean {
   return count < BADGES_MAX;

@@ -27,6 +27,19 @@ export const PHOTO_CORNER_CLASS: Record<BadgePhotoPlacement, string> = {
   "photo-bottom-right": "bottom-3 right-3 items-end",
 };
 
+/** How far a press on a badge must travel before it is a drag rather than a
+ *  click, wherever a badge can be dragged (the product form, the editor). */
+export const BADGE_DRAG_THRESHOLD_PX = 4;
+
+/** The corner of a photo a point is over, by which quarter of it the point is
+ *  in, or null when the point is off the photo. */
+export function photoCornerAt(photo: DOMRect, x: number, y: number): BadgePhotoPlacement | null {
+  if (x < photo.left || x > photo.right || y < photo.top || y > photo.bottom) return null;
+  const top = y < photo.top + photo.height / 2;
+  const left = x < photo.left + photo.width / 2;
+  return `photo-${top ? "top" : "bottom"}-${left ? "left" : "right"}`;
+}
+
 /** The corner across the same edge, which shares that edge's width. */
 const FACING_CORNER: Record<BadgePhotoPlacement, BadgePhotoPlacement> = {
   "photo-top-left": "photo-top-right",
@@ -82,6 +95,8 @@ export function BadgePill({
       style={style}
       data-product-badge={badge.icon}
       data-badge-color={badge.color ?? "ink"}
+      // What the editor's drag finds a badge by: its words, unique per product.
+      data-badge-label={badge.label}
       {...rest}
     >
       <Icon
