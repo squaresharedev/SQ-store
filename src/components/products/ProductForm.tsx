@@ -16,6 +16,7 @@ import {
   Layers,
   Link2,
   Package,
+  Pencil,
   Plus,
   Ruler,
   Send,
@@ -1363,7 +1364,7 @@ export function ProductForm({
               initialPreviewUrl={product?.imageUrl ?? null}
               onFileChange={changeCover}
               prompt={t("form.coverPrompt")}
-              frameClassName="aspect-[4/3] sm:aspect-square"
+              frameClassName="aspect-[4/3] rounded-none sm:aspect-square"
             />
           </div>
 
@@ -1741,7 +1742,8 @@ export function ProductForm({
             name={`${fieldId}-status`}
             legend={t("form.statusLabel")}
             legendHidden
-            variant="showcase"
+            variant="tiles"
+            sharp
             columns={2}
             value={values.status}
             onChange={(status) => updateField("status", status)}
@@ -1751,7 +1753,12 @@ export function ProductForm({
               value: status,
               label: t(`status.${status}`),
               hint: t(`form.visibility.${status}Hint`),
-              glyph: status === "active" ? Store : EyeOff,
+              icon:
+                status === "active" ? (
+                  <HeroMark icon={Store} badge={Check} tone="success" />
+                ) : (
+                  <HeroMark icon={EyeOff} badge={Pencil} />
+                ),
               ...(status === "active" && !canPublish ? { disabled: true } : {}),
             }))}
           />

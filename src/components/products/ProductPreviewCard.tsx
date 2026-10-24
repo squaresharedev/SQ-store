@@ -7,7 +7,7 @@ import type { Currency, ProductStatus } from "@/types/product";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/format/money";
 import { deriveStockBadge } from "@/lib/stock/badge";
-import { badgeClass, cardClass, eyebrowClass } from "@/components/ui/surface-styles";
+import { badgeClass, eyebrowClass, sharpCardClass } from "@/components/ui/surface-styles";
 
 /**
  * THE PRODUCT AS A BUYER WILL MEET IT, drawn while the seller is still typing.
@@ -59,7 +59,7 @@ export function ProductPreviewCard({
   return (
     <div aria-hidden="true" className={className} data-product-preview="">
       <p className={cn(eyebrowClass, "mb-2 px-1")}>{t("heading")}</p>
-      <div className={cn(cardClass, "overflow-hidden")}>
+      <div className={cn(sharpCardClass, "overflow-hidden")}>
         <div className="relative aspect-square bg-secondary">
           {imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- a local object URL or an already-signed one.
@@ -75,7 +75,7 @@ export function ProductPreviewCard({
           <span
             className={cn(
               badgeClass,
-              "absolute left-2 top-2 shadow-xs",
+              "absolute left-2 top-2 rounded-none shadow-xs",
               status === "active" ? "bg-background text-success" : "bg-background text-muted-foreground",
             )}
           >

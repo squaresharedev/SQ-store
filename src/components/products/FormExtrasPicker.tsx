@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Sparkles, type LucideIcon } from "lucide-react";
+import { Plus, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
@@ -59,13 +59,12 @@ export function FormExtrasPicker({
 
   return (
     // Dashed, on the muted surface: a tray of things still to add, not one
-    // more card of answers. Its glyph bleeds off the corner like the cards'.
+    // more card of answers.
     <section
       aria-labelledby="product-extras-heading"
-      className={cn(cutoffGlyphGroupClass.card, "rounded-md border border-dashed border-border bg-muted/30 p-5")}
+      className="border border-dashed border-border bg-muted/30 p-5"
       data-product-extras=""
     >
-      <CutoffGlyph icon={Sparkles} scope="card" corner="top-right" size="lg" tone="faint" />
       <div className="mb-4">
         <h2 id="product-extras-heading" className="text-base font-semibold text-foreground">
           {t("heading")}
@@ -80,21 +79,21 @@ export function FormExtrasPicker({
               onClick={() => onOpen(id)}
               data-product-extra={id}
               className={cn(
-                cutoffGlyphGroupClass.tile,
-                "group/btn flex min-h-28 size-full flex-col items-start justify-between gap-4 rounded-md border border-border bg-background p-3 text-left hover:border-foreground/40",
+                cutoffGlyphGroupClass,
+                "group/btn flex min-h-28 size-full flex-col items-start justify-between gap-4 border border-border bg-background p-3 text-left hover:border-foreground/40",
                 hoverLiftClass,
                 focusRingClass,
               )}
             >
-              <CutoffGlyph icon={icon} scope="tile" />
+              <CutoffGlyph icon={icon} />
               <span className="flex flex-col gap-0.5 pr-6">
                 <span className="text-sm font-semibold text-foreground">{label}</span>
                 <span className="font-inter text-xs text-muted-foreground">{t(id)}</span>
               </span>
-              {/* The way in: a plus that fills with ink as the tile lifts. */}
+              {/* The way in: a square plus that fills with ink as the tile lifts. */}
               <span
                 className={cn(
-                  "grid size-7 place-items-center rounded-full border border-border bg-background text-foreground",
+                  "grid size-7 place-items-center border border-border bg-background text-foreground",
                   "group-hover/btn:border-foreground group-hover/btn:bg-foreground group-hover/btn:text-background",
                   transitionClass,
                 )}

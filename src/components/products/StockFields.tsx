@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import { Boxes, Infinity as InfinityIcon, Minus, Plus, SlidersHorizontal } from "lucide-react";
+import { Minus, Plus, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ChoiceCards } from "@/components/ui/ChoiceCards";
 import { Disclosure } from "@/components/ui/Disclosure";
@@ -77,7 +77,7 @@ export function StockFields({ values, errors, onChange }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* TWO PICTURES, NOT A SWITCH. "Track stock: off" asked the seller to
+      {/* TWO ANSWERS, NOT A SWITCH. "Track stock: off" asked the seller to
           work out what off means; the tiles say both answers outright, and
           the common one (nothing to count) is already chosen. No "?" on the
           fields below: the Stock heading's own "?" explains all of them. */}
@@ -98,13 +98,11 @@ export function StockFields({ values, errors, onChange }: Props) {
             value: "unlimited",
             label: t("unlimited"),
             hint: t("unlimitedHint"),
-            glyph: InfinityIcon,
           },
           {
             value: "counted",
             label: t("counted"),
             hint: t("countedHint"),
-            glyph: Boxes,
           },
         ]}
       />

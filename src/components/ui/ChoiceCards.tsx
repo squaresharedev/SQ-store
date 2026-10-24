@@ -17,14 +17,18 @@ const CHOICE_CARD_CLASS =
  *  the radio itself, and the tile wears the focus ring and the chosen state. */
 const CHOICE_TILE_CLASS = `relative flex cursor-pointer flex-col items-center gap-2 rounded-md border border-border px-2 py-3 text-center hover:bg-muted/40 has-[:checked]:border-foreground has-[:checked]:bg-muted/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background ${transitionClass}`;
 
-/** One SHOWCASE tile: the words top-left and a big glyph bleeding off the
- *  bottom-right corner (CutoffGlyph), for a choice that deserves a picture.
- *  Lifts on hover; the chosen one takes the ink border and a check. */
-const CHOICE_SHOWCASE_CLASS = `${cutoffGlyphGroupClass.tile} flex min-h-28 cursor-pointer flex-col justify-end rounded-md border border-border bg-background p-4 text-left hover:border-foreground/40 has-[:checked]:border-foreground has-[:checked]:bg-muted/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background ${hoverLiftClass}`;
+/** One SHOWCASE tile: square, the words at the bottom-left and, when the
+ *  option has one, a big glyph bleeding off the bottom-right corner
+ *  (CutoffGlyph) with the room to show it. Lifts on hover; the chosen one
+ *  takes the ink border and a check. */
+const CHOICE_SHOWCASE_CLASS = `${cutoffGlyphGroupClass} flex cursor-pointer flex-col justify-end border border-border bg-background p-4 text-left hover:border-foreground/40 has-[:checked]:border-foreground has-[:checked]:bg-muted/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background ${hoverLiftClass}`;
 
-/** The chosen showcase tile's check: pops in, top-right. */
+/** The room a showcase tile keeps for its glyph. */
+const SHOWCASE_GLYPH_ROOM_CLASS = "min-h-28";
+
+/** The chosen showcase tile's check: a square that pops in, top-right. */
 const SHOWCASE_CHECK_CLASS =
-  "absolute right-3 top-3 grid size-6 place-items-center rounded-full bg-foreground text-background opacity-0 scale-50 transition-[opacity,scale] duration-base ease-entrance group-has-[:checked]/tile-glyph:opacity-100 group-has-[:checked]/tile-glyph:scale-100 motion-reduce:transition-none";
+  "absolute right-3 top-3 grid size-6 place-items-center bg-foreground text-background opacity-0 scale-50 transition-[opacity,scale] duration-base ease-entrance group-has-[:checked]/glyph:opacity-100 group-has-[:checked]/glyph:scale-100 motion-reduce:transition-none";
 
 /** A choice that is shown but cannot be picked right now. */
 const CHOICE_DISABLED_CLASS =
@@ -44,6 +48,14 @@ const TILE_COLUMNS = {
 /** Three or fewer tiles asked for three across are ONE row, and stay one on a
  *  phone too: two and an orphan under them reads as a different question. */
 const TILE_SINGLE_ROW = "grid-cols-3";
+
+/** Showcase tiles carry a sentence, not a word, so a phone gets one per row:
+ *  two across broke their labels mid-word. */
+const SHOWCASE_COLUMNS = {
+  1: "grid-cols-1",
+  2: "grid-cols-1 sm:grid-cols-2",
+  3: "grid-cols-1 sm:grid-cols-3",
+} as const;
 
 export type ChoiceCardOption<T extends string> = {
   value: T;
@@ -90,6 +102,7 @@ export function ChoiceCards<T extends string>({
   required = false,
   truncateHints = false,
   variant = "cards",
+  sharp = false,
   columns = 1,
   detached = false,
   optionDataAttribute,
@@ -108,6 +121,8 @@ export function ChoiceCards<T extends string>({
   /** One line per hint, ellipsised (for hints that are names, not prose). */
   truncateHints?: boolean;
   variant?: "cards" | "tiles" | "showcase";
+  /** Square corners on every card or tile (showcase tiles always are). */
+  sharp?: boolean;
   columns?: 1 | 2 | 3;
   /**
    * Keep the radios out of the form around them: for a choice that decides
@@ -127,7 +142,9 @@ export function ChoiceCards<T extends string>({
       <legend className={legendHidden ? "sr-only" : "pb-2 text-sm font-medium"}>{legend}</legend>
       <div
         className={
-          tiles
+          showcase
+            ? cn("grid gap-2", SHOWCASE_COLUMNS[columns])
+            : tiles
             ? cn(
                 "grid gap-2",
                 columns === 3 && options.length === 3 ? TILE_SINGLE_ROW : TILE_COLUMNS[columns],
@@ -140,6 +157,8 @@ export function ChoiceCards<T extends string>({
             key={option.value}
             className={cn(
               showcase ? CHOICE_SHOWCASE_CLASS : tiles ? CHOICE_TILE_CLASS : CHOICE_CARD_CLASS,
+              showcase && option.glyph && SHOWCASE_GLYPH_ROOM_CLASS,
+              sharp && "rounded-none",
               option.disabled && CHOICE_DISABLED_CLASS,
             )}
             {...(optionDataAttribute
@@ -163,7 +182,7 @@ export function ChoiceCards<T extends string>({
             />
             {showcase && (
               <>
-                {option.glyph && <CutoffGlyph icon={option.glyph} scope="tile" />}
+                {option.glyph && <CutoffGlyph icon={option.glyph} />}
                 <span className={SHOWCASE_CHECK_CLASS} aria-hidden="true">
                   <Check className="size-3.5" strokeWidth={3} />
                 </span>
