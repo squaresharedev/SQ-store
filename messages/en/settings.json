@@ -402,12 +402,7 @@
       "label": "Dispatch time",
       "tipLabel": "Why this is its own field",
       "tipBody": "One line, printed beside the buy button. “When does it leave?” is the first thing buyers ask, and it should not need reading a paragraph to answer.",
-      "placeholder": "e.g. Ships within 1-3 business days",
-      "presets": {
-        "sameDay": "Ships the same day",
-        "days": "Ships within 1–2 working days",
-        "week": "Ships within 3–5 working days"
-      }
+      "placeholder": "e.g. Ships within 1-3 business days"
     },
     "destinations": {
       "label": "Where you ship, and how long it takes",
@@ -431,15 +426,7 @@
       "removeNumbered": "Remove destination {number}",
       "add": "Add a destination",
       "limitReached": "{max, plural, one {That is all # destination. Remove one to add another.} other {That is all # destinations. Remove one to add another.}}",
-      "needsRate": "Checkout can't use this row until it has both a rate and a country. Buyers still read it on the product page.",
-      "presets": {
-        "home": "Your country",
-        "homeHint": "Close by, usually cheapest",
-        "eu": "Rest of the EU",
-        "euHint": "The other EU countries",
-        "worldHint": "Anywhere not listed",
-        "customHint": "Name your own area"
-      }
+      "needsRate": "Checkout can't use this row until it has both a rate and a country. Buyers still read it on the product page."
     },
     "rates": {
       "title": "Checkout rates",

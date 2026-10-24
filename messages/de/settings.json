@@ -402,12 +402,7 @@
       "label": "Bearbeitungszeit",
       "tipLabel": "Warum das ein eigenes Feld ist",
       "tipBody": "Eine Zeile, neben dem Kauf-Button angezeigt. „Wann wird es versendet?“ ist das Erste, was Käufer fragen, und die Antwort sollte sich nicht erst durch einen ganzen Absatz erschließen.",
-      "placeholder": "z. B. Versand innerhalb von 1–3 Werktagen",
-      "presets": {
-        "sameDay": "Versand am selben Tag",
-        "days": "Versand innerhalb von 1–2 Werktagen",
-        "week": "Versand innerhalb von 3–5 Werktagen"
-      }
+      "placeholder": "z. B. Versand innerhalb von 1–3 Werktagen"
     },
     "destinations": {
       "label": "Wohin du versendest und wie lange es dauert",
@@ -431,15 +426,7 @@
       "removeNumbered": "Lieferziel {number} entfernen",
       "add": "Lieferziel hinzufügen",
       "limitReached": "{max, plural, one {Das ist das einzige # Lieferziel. Entferne es, um ein weiteres hinzuzufügen.} other {Das sind alle # Lieferziele. Entferne eines, um ein weiteres hinzuzufügen.}}",
-      "needsRate": "Der Checkout kann diese Zeile erst verwenden, wenn sie sowohl einen Tarif als auch ein Land hat. Käufer sehen sie weiterhin auf der Produktseite.",
-      "presets": {
-        "home": "Dein Land",
-        "homeHint": "In der Nähe, meist am günstigsten",
-        "eu": "Restliche EU",
-        "euHint": "Die übrigen EU-Länder",
-        "worldHint": "Überall sonst",
-        "customHint": "Benenne dein eigenes Gebiet"
-      }
+      "needsRate": "Der Checkout kann diese Zeile erst verwenden, wenn sie sowohl einen Tarif als auch ein Land hat. Käufer sehen sie weiterhin auf der Produktseite."
     },
     "rates": {
       "title": "Versandtarife",

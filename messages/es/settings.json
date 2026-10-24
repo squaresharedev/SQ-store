@@ -402,12 +402,7 @@
       "label": "Plazo de envío",
       "tipLabel": "Por qué esto tiene su propio campo",
       "tipBody": "Una línea, junto al botón de compra. «¿Cuándo sale?» es lo primero que preguntan los compradores, y no debería hacer falta leer un párrafo para responder.",
-      "placeholder": "p. ej. Se envía en 1-3 días laborables",
-      "presets": {
-        "sameDay": "Se envía el mismo día",
-        "days": "Se envía en 1–2 días laborables",
-        "week": "Se envía en 3–5 días laborables"
-      }
+      "placeholder": "p. ej. Se envía en 1-3 días laborables"
     },
     "destinations": {
       "label": "Adónde envías y cuánto tarda",
@@ -431,15 +426,7 @@
       "removeNumbered": "Quitar el destino {number}",
       "add": "Añadir un destino",
       "limitReached": "{max, plural, one {Ese es el límite: # destino. Quita uno para añadir otro.} many {Ese es el límite: # destinos. Quita uno para añadir otro.} other {Ese es el límite: # destinos. Quita uno para añadir otro.}}",
-      "needsRate": "El proceso de pago no puede usar esta fila hasta que tenga tanto una tarifa como un país. Los compradores la siguen viendo en la página de producto.",
-      "presets": {
-        "home": "Tu país",
-        "homeHint": "Cerca, normalmente lo más barato",
-        "eu": "Resto de la UE",
-        "euHint": "Los demás países de la UE",
-        "worldHint": "Cualquier otro lugar",
-        "customHint": "Pon nombre a tu propia zona"
-      }
+      "needsRate": "El proceso de pago no puede usar esta fila hasta que tenga tanto una tarifa como un país. Los compradores la siguen viendo en la página de producto."
     },
     "rates": {
       "title": "Tarifas de envío",

@@ -402,12 +402,7 @@
       "label": "Délai d’expédition",
       "tipLabel": "Pourquoi ce champ existe à part",
       "tipBody": "Une ligne, affichée à côté du bouton d’achat. « Quand est-ce que ça part ? » est la première question que se posent les acheteurs, elle ne devrait pas nécessiter de lire tout un paragraphe.",
-      "placeholder": "p. ex. Expédié sous 1 à 3 jours ouvrés",
-      "presets": {
-        "sameDay": "Expédié le jour même",
-        "days": "Expédié sous 1 à 2 jours ouvrés",
-        "week": "Expédié sous 3 à 5 jours ouvrés"
-      }
+      "placeholder": "p. ex. Expédié sous 1 à 3 jours ouvrés"
     },
     "destinations": {
       "label": "Où vous livrez, et en combien de temps",
@@ -431,15 +426,7 @@
       "removeNumbered": "Supprimer la destination {number}",
       "add": "Ajouter une destination",
       "limitReached": "{max, plural, one {C’est la limite : # destination. Retirez-en une pour en ajouter une autre.} many {C’est la limite : # destinations. Retirez-en une pour en ajouter une autre.} other {C’est la limite : # destinations. Retirez-en une pour en ajouter une autre.}}",
-      "needsRate": "La caisse ne peut pas utiliser cette ligne tant qu’elle n’a pas à la fois un tarif et un pays. Les acheteurs la lisent quand même sur la page produit.",
-      "presets": {
-        "home": "Votre pays",
-        "homeHint": "Tout proche, souvent le moins cher",
-        "eu": "Reste de l’UE",
-        "euHint": "Les autres pays de l’UE",
-        "worldHint": "Partout ailleurs",
-        "customHint": "Nommez votre propre zone"
-      }
+      "needsRate": "La caisse ne peut pas utiliser cette ligne tant qu’elle n’a pas à la fois un tarif et un pays. Les acheteurs la lisent quand même sur la page produit."
     },
     "rates": {
       "title": "Tarifs de livraison",

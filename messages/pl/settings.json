@@ -402,12 +402,7 @@
       "label": "Czas wysyłki",
       "tipLabel": "Dlaczego to osobne pole",
       "tipBody": "Jedna linijka, wyświetlana obok przycisku zakupu. „Kiedy to wyjedzie?” to pierwsze pytanie kupujących i nie powinno wymagać czytania akapitu, żeby na nie odpowiedzieć.",
-      "placeholder": "np. Wysyłka w ciągu 1-3 dni roboczych",
-      "presets": {
-        "sameDay": "Wysyłka tego samego dnia",
-        "days": "Wysyłka w ciągu 1–2 dni roboczych",
-        "week": "Wysyłka w ciągu 3–5 dni roboczych"
-      }
+      "placeholder": "np. Wysyłka w ciągu 1-3 dni roboczych"
     },
     "destinations": {
       "label": "Dokąd wysyłasz i ile to trwa",
@@ -431,15 +426,7 @@
       "removeNumbered": "Usuń kierunek {number}",
       "add": "Dodaj kierunek",
       "limitReached": "{max, plural, one {To wszystkie # kierunek. Usuń jeden, aby dodać kolejny.} few {To wszystkie # kierunki. Usuń jeden, aby dodać kolejny.} many {To wszystkie # kierunków. Usuń jeden, aby dodać kolejny.} other {To wszystkie # kierunku. Usuń jeden, aby dodać kolejny.}}",
-      "needsRate": "Kasa nie może użyć tego wiersza, dopóki nie ma zarówno stawki, jak i kraju. Kupujący nadal widzą go na stronie produktu.",
-      "presets": {
-        "home": "Twój kraj",
-        "homeHint": "Blisko, zwykle najtaniej",
-        "eu": "Reszta UE",
-        "euHint": "Pozostałe kraje UE",
-        "worldHint": "Wszędzie indziej",
-        "customHint": "Nazwij własny obszar"
-      }
+      "needsRate": "Kasa nie może użyć tego wiersza, dopóki nie ma zarówno stawki, jak i kraju. Kupujący nadal widzą go na stronie produktu."
     },
     "rates": {
       "title": "Stawki wysyłki",

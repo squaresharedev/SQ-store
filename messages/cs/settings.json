@@ -402,12 +402,7 @@
       "label": "Doba odeslání",
       "tipLabel": "Proč je to samostatné pole",
       "tipBody": "Jeden řádek vedle tlačítka nákupu. „Kdy to odejde?“ je první, na co se kupující ptají, a odpověď by neměla vyžadovat čtení celého odstavce.",
-      "placeholder": "např. Odesíláme do 1–3 pracovních dnů",
-      "presets": {
-        "sameDay": "Odesíláme týž den",
-        "days": "Odesíláme do 1–2 pracovních dnů",
-        "week": "Odesíláme do 3–5 pracovních dnů"
-      }
+      "placeholder": "např. Odesíláme do 1–3 pracovních dnů"
     },
     "destinations": {
       "label": "Kam posíláte a jak dlouho to trvá",
@@ -431,15 +426,7 @@
       "removeNumbered": "Odebrat oblast doručení {number}",
       "add": "Přidat oblast doručení",
       "limitReached": "{max, plural, one {Maximum je # oblast doručení. Pokud chcete přidat další, nějakou odeberte.} few {Maximum jsou # oblasti doručení. Pokud chcete přidat další, nějakou odeberte.} many {Maximum je # oblasti doručení. Pokud chcete přidat další, nějakou odeberte.} other {Maximum je # oblastí doručení. Pokud chcete přidat další, nějakou odeberte.}}",
-      "needsRate": "Pokladna tento řádek nemůže použít, dokud nemá sazbu i zemi. Kupující si ho přesto přečtou na stránce produktu.",
-      "presets": {
-        "home": "Vaše země",
-        "homeHint": "Blízko, obvykle nejlevnější",
-        "eu": "Zbytek EU",
-        "euHint": "Ostatní země EU",
-        "worldHint": "Kamkoli jinam",
-        "customHint": "Pojmenujte vlastní oblast"
-      }
+      "needsRate": "Pokladna tento řádek nemůže použít, dokud nemá sazbu i zemi. Kupující si ho přesto přečtou na stránce produktu."
     },
     "rates": {
       "title": "Sazby za dopravu",
