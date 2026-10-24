@@ -110,6 +110,9 @@ export const SCHEMA_REQUIREMENTS: readonly SchemaRequirement[] = [
   { kind: "function", signature: "guard_object_keys()", migration: "20261021_object_key_ownership.sql" },
   { kind: "body", signature: "order_refund(uuid,text,boolean)", includes: "o.payment_ref into owner_id, ref", migration: "20261021_order_refund_provider_first.sql" },
   { kind: "body", signature: "order_place(jsonb)", includes: "discount_exhausted", migration: "20261022_order_place_code_limit.sql" },
+  { kind: "relation", name: "orders_tracking_number_trgm_idx", migration: "20261022_order_search_trgm_indexes.sql" },
+  { kind: "relation", name: "orders_ship_to_name_trgm_idx", migration: "20261022_order_search_trgm_indexes.sql" },
+  { kind: "relation", name: "orders_ship_to_city_trgm_idx", migration: "20261022_order_search_trgm_indexes.sql" },
 ];
 
 /** A SQL string literal. Every value below is a constant from this file, and

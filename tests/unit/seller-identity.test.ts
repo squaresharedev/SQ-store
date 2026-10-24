@@ -25,7 +25,7 @@ describe("buildSellerIdentity", () => {
   it("answers an empty object for a missing row", () => {
     // The public product page and the storefront designer both treat this
     // as "nothing set yet", never as an error — see the callers in
-    // lib/products/public.ts and app/storefront/[id]/page.tsx.
+    // lib/products/public.ts and app/storefront/(designer)/[id]/page.tsx.
     expect(buildSellerIdentity(null)).toEqual({});
   });
 

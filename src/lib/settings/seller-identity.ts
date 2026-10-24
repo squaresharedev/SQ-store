@@ -28,7 +28,7 @@
 // gates nothing itself. The caller must have already established the right to
 // see this: the public product page's own rate-limit + existence gate
 // (lib/products/public.ts), or `can(account.role, "storefront.write")` behind
-// an active-account check (app/storefront/[id]/page.tsx).
+// an active-account check (app/storefront/(designer)/[id]/page.tsx).
 
 import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
 import { getProfile, getUser } from "@/lib/auth/session";
 
 /**
@@ -38,5 +39,9 @@ export default async function StorefrontListLayout({
   const username =
     profile?.username || user?.email?.split("@")[0] || t("accountFallback");
 
-  return <DashboardShell username={username}>{children}</DashboardShell>;
+  return (
+    <ScopedIntlProvider scope="storefrontList">
+      <DashboardShell username={username}>{children}</DashboardShell>
+    </ScopedIntlProvider>
+  );
 }
