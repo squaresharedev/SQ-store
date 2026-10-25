@@ -76,6 +76,7 @@ test.describe("guided tour", () => {
     });
     await openSellerStep(page);
     await page.getByRole("dialog").getByRole("button", { name: "Skip for now" }).click();
+    await page.locator("[data-setup-tour]").click();
 
     for (const [index, stop] of NEW_SELLER_STOPS.entries()) {
       await expectTourStep(page, stop.id, stop.state ?? "anchored");

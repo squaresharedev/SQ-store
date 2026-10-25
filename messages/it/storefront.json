@@ -189,6 +189,7 @@
   "card": {
     "editAriaLabel": "Modifica {name}",
     "embedAriaLabel": "Condividi o incorpora {name}",
+    "share": "Condividi",
     "viewPageAriaLabel": "Apri {name} come la vedono gli acquirenti",
     "deleteAriaLabel": "Elimina {name}",
     "blockCount": "{count, plural, one {# blocco} many {# di blocchi} other {# blocchi}}",
@@ -277,14 +278,6 @@
     }
   },
   "wizard": {
-    "category": {
-      "title": "Cosa vendi?",
-      "description": "È l’indizio più importante per capire quali layout ti si addicono."
-    },
-    "fulfilment": {
-      "title": "Come lo ricevono gli acquirenti?",
-      "description": "Determina cosa dicono le tue pagine prodotto sulla consegna."
-    },
     "vibe": {
       "title": "Scegli un aspetto",
       "description": "Il tuo punto di partenza. Tutto resta modificabile nell’editor."
@@ -296,33 +289,13 @@
     "stepOf": "Passaggio {current} di {total}",
     "nameLabel": "Nome della vetrina",
     "nameHint": "Lascialo vuoto e la chiameremo Vetrina senza titolo.",
-    "otherCategoryLabel": "Cosa vendi?",
-    "otherCategoryPlaceholder": "es. modellismo",
     "noProductsHint": "Non hai ancora prodotti? Aggiungili dopo la configurazione.",
     "skipSetup": "Salta la configurazione",
-    "skip": "Salta",
     "creating": "Creazione…",
     "create": "Crea vetrina"
   },
   "createOptions": {
-    "categoryGroupLabel": "Cosa vendi",
-    "fulfilmentGroupLabel": "Come lo ricevono gli acquirenti",
     "vibeGroupLabel": "L’aspetto che vuoi",
-    "category": {
-      "fashion": "Abbigliamento",
-      "art": "Arte e stampe",
-      "jewellery": "Gioielli",
-      "handmade": "Fatto a mano",
-      "home": "Casa e arredamento",
-      "beauty": "Bellezza",
-      "food": "Cibo e bevande",
-      "music": "Musica",
-      "photography": "Fotografia",
-      "books": "Libri e zine",
-      "digital": "Prodotti digitali",
-      "vintage": "Vintage",
-      "other": "Qualcos’altro"
-    },
     "categoryPlaceholder": {
       "fashion": "Il mio negozio di abbigliamento",
       "art": "Il mio negozio d’arte",
@@ -338,18 +311,6 @@
       "vintage": "Il mio negozio vintage",
       "other": "Il mio negozio",
       "default": "La mia vetrina"
-    },
-    "fulfilment": {
-      "physical": "Lo spedisco",
-      "digital": "Lo scaricano",
-      "services": "Mi prenotano",
-      "mixed": "Un po’ di tutto"
-    },
-    "fulfilmentHint": {
-      "physical": "Prodotti fisici",
-      "digital": "File, preset, musica",
-      "services": "Sessioni, commissioni",
-      "mixed": "Più di uno di questi"
     },
     "vibe": {
       "minimal": "Minimal",

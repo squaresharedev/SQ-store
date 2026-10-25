@@ -20,34 +20,24 @@ import {
 import { STEP_SWAP } from "@/components/ui/motion-tokens";
 import { createStorefront } from "@/lib/storefront/actions";
 import { STOREFRONT_NAME_MAX } from "@/lib/validation/storefront";
-import { BRIEF_OTHER_CATEGORY_MAX } from "@/types/storefront-brief";
-import type {
-  StorefrontBrief,
-  StorefrontCategory,
-  StorefrontFulfilment,
-  StorefrontVibe,
-} from "@/types/storefront-brief";
-import {
-  CategoryGrid,
-  FulfilmentGrid,
-  VibeGrid,
-} from "./create-options";
+import type { StorefrontBrief, StorefrontVibe } from "@/types/storefront-brief";
+import { VibeGrid } from "./create-options";
 
 /**
- * The four questions asked before a seller reaches the designer.
+ * The two questions asked before a seller reaches the designer: the look, and
+ * the name.
  *
- * WHY IT IS THIS SHORT. Every extra field past about five costs roughly twice
- * what the ones before it did, and this is not a signup: sellers do it again
- * for every storefront they make, so annoyance compounds where drop-off would
- * not. Two questions the research would normally ask are missing on purpose.
- * Catalogue size is derived from the seller's real product count instead of
- * asked, and the name is left until last with a placeholder already filled in,
- * because a blank text box is the most expensive input on the screen.
+ * WHY ONLY THESE. Each is a question that does immediate work: the look picks
+ * the theme the storefront starts on, so the seller lands on a board that
+ * already resembles what they chose, and the name heads the page. What the
+ * store sells and how it delivers were asked too, for a template recommender
+ * that does not exist yet (lib/storefront/templates.ts); a question with no
+ * visible effect is one a seller pays for and never gets back. Answers an
+ * earlier storefront gave to those are carried over unseen, so nothing a
+ * future recommender could read is lost.
  *
- * WHY IT IS WORTH ASKING AT ALL. The look question does immediate work: it
- * picks the theme the storefront starts on, so the seller lands on a board that
- * already resembles what they chose. The rest is stored for the template
- * recommender (lib/storefront/templates.ts), which does not exist yet.
+ * The name comes last with a placeholder already filled in, because a blank
+ * text box is the most expensive input on the screen.
  *
  * NOTHING HERE IS REQUIRED. Skip creates the storefront now with whatever has
  * been answered so far; closing the dialog creates nothing at all. Those are
@@ -56,7 +46,7 @@ import {
  * "Untitled storefront" behind.
  */
 
-const STEPS = ["category", "fulfilment", "vibe", "name"] as const;
+const STEPS = ["vibe", "name"] as const;
 type Step = (typeof STEPS)[number];
 
 
@@ -74,8 +64,8 @@ export function CreateStorefrontWizard({
   /** The seller's real product count. Used for a hint, never as a gate: the
    *  recommender reads the live count rather than a number captured here. */
   productCount: number;
-  /** Answers from their last storefront, so a returning seller confirms rather
-   *  than re-answers. Undefined for the first one. */
+  /** Answers from their last storefront, carried into this one's brief.
+   *  Undefined for the first one. */
   previousBrief?: StorefrontBrief;
 }) {
   const t = useTranslations("Storefront.wizard");
@@ -88,16 +78,11 @@ export function CreateStorefrontWizard({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const STEP_COPY = useMemo<Record<Step, { title: string; description: string }>>(() => ({
-    category: { title: t("category.title"), description: t("category.description") },
-    fulfilment: { title: t("fulfilment.title"), description: t("fulfilment.description") },
     vibe: { title: t("vibe.title"), description: t("vibe.description") },
     name: { title: t("name.title"), description: t("name.description") },
   }), [t]);
 
   const [stepIndex, setStepIndex] = useState(0);
-  const [category, setCategory] = useState<StorefrontCategory | null>(null);
-  const [otherCategory, setOtherCategory] = useState("");
-  const [fulfilment, setFulfilment] = useState<StorefrontFulfilment | null>(null);
   const [vibe, setVibe] = useState<StorefrontVibe | null>(null);
   const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -108,17 +93,12 @@ export function CreateStorefrontWizard({
   const step = STEPS[stepIndex];
   const isLastStep = stepIndex === STEPS.length - 1;
 
-  // Reset on every open, and seed the two store-level answers from the previous
-  // storefront: what someone sells has not changed since they last made one, so
-  // the flow confirms rather than re-asks. The look is deliberately NOT seeded.
-  // A seller making a second storefront usually wants a different one, and
-  // pre-selecting it would quietly skip the only question that changes what
-  // they are about to see.
+  // Reset on every open. The look is deliberately NOT seeded from the previous
+  // storefront: a seller making a second one usually wants a different one.
   //
   // Adjusted during render rather than in an effect (the pattern StorefrontsList
   // uses to adopt fresh props): an effect would render the stale answers for a
-  // frame first, and `previousBrief` is a fresh object on every parent render,
-  // so it can never be a stable dependency.
+  // frame first.
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
     setWasOpen(open);
@@ -126,9 +106,6 @@ export function CreateStorefrontWizard({
       setStepIndex(0);
       setBack(false);
       setSubmitting(false);
-      setCategory(previousBrief?.category ?? null);
-      setOtherCategory(previousBrief?.otherCategory ?? "");
-      setFulfilment(previousBrief?.fulfilment ?? null);
       setVibe(null);
       setName("");
     }
@@ -148,10 +125,8 @@ export function CreateStorefrontWizard({
    * the new question instead of a button whose label says nothing about what
    * just changed.
    *
-   * The scroll region persists across steps, so it is rewound here too:
-   * arriving at a four-tile step already scrolled past its only row, because
-   * the thirteen-tile step before it was scrolled down, reads as an empty
-   * dialog.
+   * The scroll region persists across steps, so it is rewound here too: a step
+   * that arrives already scrolled down reads as an empty dialog.
    */
   const focusStep = useCallback((node: HTMLDivElement | null) => {
     if (!node) return;
@@ -164,14 +139,13 @@ export function CreateStorefrontWizard({
     setStepIndex(next);
   }
 
-  /** Everything answered so far. Partial by design: skipping is allowed at any
-   *  point, so this is whatever exists when the seller stops. */
+  /** The previous storefront's store-level answers, plus the look picked
+   *  here. Partial by design: skipping is allowed at any point. */
   function collectBrief(): StorefrontBrief {
+    const { category, otherCategory, fulfilment } = previousBrief ?? {};
     return {
       ...(category ? { category } : {}),
-      ...(category === "other" && otherCategory.trim()
-        ? { otherCategory: otherCategory.trim() }
-        : {}),
+      ...(otherCategory ? { otherCategory } : {}),
       ...(fulfilment ? { fulfilment } : {}),
       ...(vibe ? { vibe } : {}),
     };
@@ -248,28 +222,9 @@ export function CreateStorefrontWizard({
             exit={reducedMotion ? {} : { opacity: 0, x: back ? 12 : -12 }}
             transition={STEP_SWAP}
           >
-            {step === "category" && (
+            {step === "vibe" && (
               <>
-                <CategoryGrid value={category} onChange={setCategory} />
-                {category === "other" && (
-                  <div className="mt-3 space-y-1.5">
-                    <label
-                      htmlFor={`${fieldId}-other`}
-                      className={labelClass}
-                    >
-                      {t("otherCategoryLabel")}
-                    </label>
-                    <input
-                      id={`${fieldId}-other`}
-                      type="text"
-                      value={otherCategory}
-                      onChange={(event) => setOtherCategory(event.target.value)}
-                      maxLength={BRIEF_OTHER_CATEGORY_MAX}
-                      placeholder={t("otherCategoryPlaceholder")}
-                      className={fieldBaseClass}
-                    />
-                  </div>
-                )}
+                <VibeGrid value={vibe} onChange={setVibe} />
                 {productCount === 0 && (
                   <p className={cn(helpTextClass, "mt-3")}>
                     {t("noProductsHint")}
@@ -277,12 +232,6 @@ export function CreateStorefrontWizard({
                 )}
               </>
             )}
-
-            {step === "fulfilment" && (
-              <FulfilmentGrid value={fulfilment} onChange={setFulfilment} />
-            )}
-
-            {step === "vibe" && <VibeGrid value={vibe} onChange={setVibe} />}
 
             {step === "name" && (
               <div className="space-y-1.5">
@@ -301,9 +250,9 @@ export function CreateStorefrontWizard({
                     }
                   }}
                   maxLength={STOREFRONT_NAME_MAX}
-                  placeholder={category
-                    ? tOptions(`categoryPlaceholder.${category}`)
-                    : tOptions("categoryPlaceholder.default")}
+                  placeholder={tOptions(
+                    `categoryPlaceholder.${previousBrief?.category ?? "default"}`,
+                  )}
                   className={fieldBaseClass}
                 />
                 <p className={helpTextClass}>
@@ -337,11 +286,6 @@ export function CreateStorefrontWizard({
         )}
 
         <div className="flex items-center gap-2">
-          {stepIndex > 0 && !isLastStep && (
-            <Button variant="ghost" onClick={create} disabled={submitting}>
-              {t("skip")}
-            </Button>
-          )}
           {isLastStep ? (
             <Button onClick={create} disabled={submitting}>
               {submitting ? t("creating") : t("create")}

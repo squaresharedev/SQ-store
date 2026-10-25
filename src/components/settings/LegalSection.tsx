@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useId, useState, type ReactNode } from "react";
+import { useActionState, useId, type ReactNode } from "react";
 import { Check } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { infoTextClass } from "@/components/ui/control-styles";
@@ -21,8 +21,8 @@ const INITIAL: ActionState = {};
  * welcome before it asked, or Terms that changed since).
  *
  * The SAME summary and the same rule as the welcome flow's terms step
- * (components/onboarding/WelcomeFlow.tsx): read to the end, then "I have read
- * and agree to the Terms", recorded by acceptLegal with the time and version.
+ * (components/onboarding/WelcomeFlow.tsx): the summary, then "I have read and
+ * agree to the Terms", recorded by acceptLegal with the time and version.
  * Two places that record one agreement must ask for it the same way.
  */
 export function LegalSection({
@@ -40,7 +40,6 @@ export function LegalSection({
   );
   useActionStateToast(state);
   const saveResult = useSaveResult(state);
-  const [read, setRead] = useState(false);
   const hintId = useId();
   const isCurrent = acceptedAt !== null && acceptedVersion === LEGAL_VERSION;
   const isOutdated = acceptedAt !== null && !isCurrent;
@@ -51,7 +50,7 @@ export function LegalSection({
       description={t("termsDescription")}
     >
       <div className="flex flex-col gap-4">
-        <TermsSummary onReadToEnd={() => setRead(true)} />
+        <TermsSummary />
 
         {isCurrent ? (
           <p
@@ -84,18 +83,15 @@ export function LegalSection({
                 pending={isPending}
                 state={saveResult}
                 pendingLabel={t("recording")}
-                disabled={!read}
                 aria-describedby={hintId}
               >
                 {t("agreeButton")}
               </SaveButton>
               <p id={hintId} className={infoTextClass} aria-live="polite">
-                {read
-                  ? t.rich("agreeNote", {
-                      version: LEGAL_VERSION,
-                      code: (chunks) => <span className="font-mono">{chunks}</span>,
-                    })
-                  : t("scrollToAgree")}
+                {t.rich("agreeNote", {
+                  version: LEGAL_VERSION,
+                  code: (chunks) => <span className="font-mono">{chunks}</span>,
+                })}
               </p>
             </div>
           </form>

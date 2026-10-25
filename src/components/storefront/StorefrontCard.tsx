@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
-import { motion } from "motion/react";
-import { ExternalLink, Trash2 } from "lucide-react";
+import { ExternalLink, Share2, Trash2 } from "lucide-react";
 import { cardClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
-import { EmbedCodeIcon, useIconHoverProps } from "@/components/ui/action-icons";
 import {
+  chipButtonClass,
   focusRingClass,
   hoverLiftClass,
   iconButtonClass,
@@ -138,11 +137,6 @@ export function StorefrontCard({
   const pagePath =
     sellerDetailsComplete && !removal && resolveProductPage(config).enabled ? storefrontPagePath(id) : null;
 
-  // The embed button is the animation trigger for the icon inside it: the whole
-  // 36px target drives the glyph, not just the 16px of artwork. Delete is
-  // deliberately static — its icon stays plain lucide.
-  const iconHover = useIconHoverProps();
-
   // A storefront with something to sell is previewed exactly as designed,
   // words and all — the text is part of how that shop looks. One with no
   // product tiles is previewed without them: with nothing else in the box, its
@@ -249,16 +243,18 @@ export function StorefrontCard({
           )}
           {canWrite && (
             <>
-              <motion.button
+              {/* Worded, not a code glyph: sharing the link is what most
+                  sellers come here for, and an icon alone hid it. */}
+              <button
                 type="button"
                 data-tour="storefront-embed"
                 onClick={onEmbed}
                 aria-label={t("embedAriaLabel", { name })}
-                className={cn(CARD_ACTION_CLASS, "hover:text-foreground")}
-                {...iconHover}
+                className={cn(chipButtonClass, "h-9")}
               >
-                <EmbedCodeIcon />
-              </motion.button>
+                <Share2 className="size-4" strokeWidth={2} aria-hidden="true" />
+                {t("share")}
+              </button>
               <button
                 type="button"
                 onClick={onDelete}

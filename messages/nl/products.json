@@ -369,6 +369,7 @@
     "uploadingLabel": "{what, select, image {Afbeelding uploaden} photo {Foto uploaden} document {Document uploaden} other {Bestand uploaden}}",
     "processingLabel": "{what, select, image {Afbeelding verwerken} photo {Foto verwerken} document {Document verwerken} other {Bestand verwerken}}",
     "saveChanges": "Wijzigingen opslaan",
+    "saveDraft": "Opslaan als concept",
     "saveProduct": "Product opslaan",
     "savedToast": "\"{title}\" is opgeslagen.",
     "addedToast": "\"{title}\" is toegevoegd aan je producten.",

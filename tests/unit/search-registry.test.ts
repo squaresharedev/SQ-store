@@ -65,12 +65,12 @@ describe("local search registry — matching by intent", () => {
     ["logout", "/settings/account#sign-out"],
     ["change password", "/settings/account#password"],
     ["avatar", "/settings/account#avatar"],
-    // The language picker has its own tab, not a card on Account.
-    ["change language", "/settings/language"],
-    ["translate", "/settings/language"],
-    ["locale", "/settings/language"],
+    // The language picker is a card on Account, not a tab of its own.
+    ["change language", "/settings/account#language"],
+    ["translate", "/settings/account#language"],
+    ["locale", "/settings/account#language"],
     ["vat", "/settings/business#vat"],
-    ["gdpr export", "/settings/danger#export"],
+    ["gdpr export", "/settings/account#export"],
     ["close account", "/settings/danger#delete"],
     ["add product", "/products/new"],
     ["sell something", "/products/new"],
@@ -113,7 +113,7 @@ describe("local search registry — searching the way people type", () => {
     ["where is the price", "/storefront?setting=price-position"],
     ["make my store name bigger", "/storefront?setting=header"],
     ["how do i change my password", "/settings/account#password"],
-    ["download my data", "/settings/danger#export"],
+    ["download my data", "/settings/account#export"],
 
     // MISSPELLED, in the label, in a synonym, and across a whole sentence.
     ["bacground", "/storefront?setting=background"],
@@ -186,7 +186,7 @@ describe("local search registry — empty query", () => {
     // people open search FOR — the sidebar already shows the pages.
     const suggested = hrefs(searchLocalRegistry("", AS_OWNER));
     expect(suggested).toContain("/settings/account#password");
-    expect(suggested).toContain("/settings/danger#export");
+    expect(suggested).toContain("/settings/account#export");
     expect(suggested).toContain("/settings/account#username");
     expect(suggested).toContain("/products/new");
   });

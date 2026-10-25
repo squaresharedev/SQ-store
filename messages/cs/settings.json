@@ -10,9 +10,6 @@
     "notifications": {
       "title": "Nastavení oznámení"
     },
-    "language": {
-      "title": "Nastavení jazyka"
-    },
     "danger": {
       "title": "Nebezpečná zóna"
     },
@@ -233,7 +230,6 @@
     "agreeButton": "Beru Podmínky na vědomí a souhlasím s nimi",
     "acceptNote": "Přijetím se k vašemu účtu uloží datum a verze <code>{version}</code>.",
     "agreeNote": "Souhlasem se k vašemu účtu uloží datum a verze <code>{version}</code>.",
-    "scrollToAgree": "Chcete-li souhlasit, přejděte na konec shrnutí.",
     "success": {
       "legalAccepted": "Přijato. Díky, že čtete i drobné písmo.",
       "termsAgreed": "Podmínky služby byly odsouhlaseny."

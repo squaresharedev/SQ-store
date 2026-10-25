@@ -83,9 +83,6 @@
         "title": "Bienvenue sur Square Share",
         "description": "Quatre étapes vers une page produit que vous pourrez partager."
       },
-      "path": {
-        "title": "Quatre étapes jusqu’à votre première page"
-      },
       "seller": {
         "title": "Ajoutez vos informations vendeur",
         "description": "Les acheteurs les voient sur vos pages produit, et la loi les exige avant que vous puissiez vendre. Nous ne les utilisons jamais pour le marketing.",
@@ -156,12 +153,6 @@
       "buyNow": "Acheter",
       "live": "En ligne",
       "linkCopied": "Lien copié"
-    },
-    "setupPath": {
-      "details": "Ajoutez vos informations",
-      "product": "Ajoutez un produit",
-      "storefront": "Concevez une vitrine",
-      "share": "Partagez sa page"
     },
     "terms": {
       "agreed": "Vous avez accepté ces Conditions. Merci de les avoir lues.",

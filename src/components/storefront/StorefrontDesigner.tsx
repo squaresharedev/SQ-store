@@ -10,7 +10,7 @@ import {
 } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, ExternalLink, Search, Sparkles, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ExternalLink, Search, Share2, Sparkles, Users, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatList } from "@/lib/format/intl";
 import type { Product, ProductRemoval } from "@/types/product";
@@ -65,6 +65,7 @@ import { clampOntoBoard } from "@/lib/geometry/rotated-box";
 import { MAX_BLOCKS, STOREFRONT_NAME_MAX } from "@/lib/validation/storefront";
 import { saveStorefront } from "@/lib/storefront/actions";
 import { sampleObjectKey } from "@/lib/storefront/sample";
+import { storefrontEmbedPath } from "@/lib/storefront/paths";
 import { SampleModeProvider } from "@/lib/storefront/sample-mode";
 import { EditorTour, startEditorTour } from "@/components/onboarding/EditorTour";
 import { CreateStorefrontWizard } from "./CreateStorefrontWizard";
@@ -850,14 +851,26 @@ export function StorefrontDesigner({
   // latest handlers through a ref, so renders never churn add/removeListener.
   // Skipped while typing (text fields keep their native undo) and while a
   // custom Select dropdown is open (its trigger is a button, not an input).
-  const historyActions = useRef({ undo, redo });
+  // Save mirrors the button: nothing while a save is already under way.
+  const shortcutSave = () => {
+    if (!saving) void handleSave();
+  };
+  const historyActions = useRef({ undo, redo, save: shortcutSave });
   useEffect(() => {
-    historyActions.current = { undo, redo };
+    historyActions.current = { undo, redo, save: shortcutSave };
   });
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (!(event.ctrlKey || event.metaKey)) return;
       const key = event.key.toLowerCase();
+      // Save is the one shortcut that works from inside a field too: it is
+      // where a seller who has just typed reaches for it, and the browser's
+      // own "save page" is never what they mean here.
+      if (key === "s") {
+        event.preventDefault();
+        historyActions.current.save();
+        return;
+      }
       if (key !== "z" && key !== "y") return;
       const target = event.target as HTMLElement | null;
       if (
@@ -3834,6 +3847,17 @@ export function StorefrontDesigner({
                 <span className="max-sm:sr-only">{t("header.viewPage")}</span>
               </a>
             )}
+            {/* Where its link and embed live, one click from the design. Through
+                the leave guard, so unsaved work is never dropped on the way. */}
+            <button
+              type="button"
+              onClick={() => leaveGuard.requestLeave(storefrontEmbedPath(storefrontId))}
+              className={cn(ghostButtonClass, "h-9 shrink-0 gap-1.5 px-3 py-0 text-sm")}
+              data-designer-share=""
+            >
+              <Share2 className="size-4" strokeWidth={2} aria-hidden="true" />
+              <span className="max-sm:sr-only">{tKey("Storefront.card.share")}</span>
+            </button>
             <Button onClick={() => void handleSave()} disabled={saving} className="h-9 py-0">
               {saving ? tCommon("saving") : tCommon("save")}
             </Button>

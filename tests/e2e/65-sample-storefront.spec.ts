@@ -134,7 +134,7 @@ test.describe("sample storefront", () => {
     const flow = page.getByRole("dialog");
     await expect(async () => {
       await create.click();
-      await expect(flow).toContainText("Step 1 of 4", { timeout: 2_000 });
+      await expect(flow).toContainText("Step 1 of 2", { timeout: 2_000 });
     }).toPass({ timeout: 30_000 });
     await expect(page).toHaveURL(/\/storefront\/sample$/);
     // Opening it creates nothing; finishing it does.

@@ -83,9 +83,6 @@
         "title": "Welkom bij Square Share",
         "description": "Vier stappen naar een productpagina die je kunt delen."
       },
-      "path": {
-        "title": "Vier stappen naar je eerste pagina"
-      },
       "seller": {
         "title": "Voeg je verkopersgegevens toe",
         "description": "Kopers zien deze op je productpagina's, en de wet vereist ze voordat je kunt verkopen. We gebruiken ze nooit voor marketing.",
@@ -156,12 +153,6 @@
       "buyNow": "Nu kopen",
       "live": "Online",
       "linkCopied": "Link gekopieerd"
-    },
-    "setupPath": {
-      "details": "Vul je gegevens in",
-      "product": "Voeg een product toe",
-      "storefront": "Ontwerp een etalage",
-      "share": "Deel de pagina"
     },
     "terms": {
       "agreed": "Je bent akkoord gegaan met deze voorwaarden. Bedankt voor het lezen.",

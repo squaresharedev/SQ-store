@@ -10,9 +10,6 @@
     "notifications": {
       "title": "Paramètres de notifications"
     },
-    "language": {
-      "title": "Paramètres de langue"
-    },
     "danger": {
       "title": "Zone de danger"
     },
@@ -233,7 +230,6 @@
     "agreeButton": "J’ai lu les Conditions et je les accepte",
     "acceptNote": "Accepter enregistre la date et la version <code>{version}</code> sur votre compte.",
     "agreeNote": "En les acceptant, la date et la version <code>{version}</code> sont enregistrées sur votre compte.",
-    "scrollToAgree": "Faites défiler jusqu’à la fin du résumé pour accepter.",
     "success": {
       "legalAccepted": "Accepté. Merci d’avoir lu les petites lignes.",
       "termsAgreed": "Vous avez accepté les Conditions d’utilisation."

@@ -189,6 +189,7 @@
   "card": {
     "editAriaLabel": "{name} bewerken",
     "embedAriaLabel": "{name} delen of insluiten",
+    "share": "Delen",
     "viewPageAriaLabel": "{name} openen zoals kopers die zien",
     "deleteAriaLabel": "{name} verwijderen",
     "blockCount": "{count, plural, one {# blok} other {# blokken}}",
@@ -277,14 +278,6 @@
     }
   },
   "wizard": {
-    "category": {
-      "title": "Wat verkoop je?",
-      "description": "Dit is de belangrijkste aanwijzing voor welke lay-outs bij je passen."
-    },
-    "fulfilment": {
-      "title": "Hoe krijgen kopers het?",
-      "description": "Dit bepaalt wat je productpagina's vertellen over levering."
-    },
     "vibe": {
       "title": "Kies een uitstraling",
       "description": "Je startpunt. Alles blijft aanpasbaar in de editor."
@@ -296,33 +289,13 @@
     "stepOf": "Stap {current} van {total}",
     "nameLabel": "Etalagenaam",
     "nameHint": "Laat leeg en we noemen het Naamloze etalage.",
-    "otherCategoryLabel": "Wat verkoop je?",
-    "otherCategoryPlaceholder": "bijv. modelbouw",
     "noProductsHint": "Nog geen producten? Voeg ze toe na het instellen.",
     "skipSetup": "Instellen overslaan",
-    "skip": "Overslaan",
     "creating": "Aanmaken…",
     "create": "Etalage maken"
   },
   "createOptions": {
-    "categoryGroupLabel": "Wat je verkoopt",
-    "fulfilmentGroupLabel": "Hoe kopers het krijgen",
     "vibeGroupLabel": "De uitstraling die je wilt",
-    "category": {
-      "fashion": "Kleding",
-      "art": "Kunst en prints",
-      "jewellery": "Sieraden",
-      "handmade": "Handgemaakt",
-      "home": "Wonen",
-      "beauty": "Beauty",
-      "food": "Eten en drinken",
-      "music": "Muziek",
-      "photography": "Fotografie",
-      "books": "Boeken en zines",
-      "digital": "Digitale producten",
-      "vintage": "Vintage",
-      "other": "Iets anders"
-    },
     "categoryPlaceholder": {
       "fashion": "Mijn kledingwinkel",
       "art": "Mijn kunstwinkel",
@@ -338,18 +311,6 @@
       "vintage": "Mijn vintagewinkel",
       "other": "Mijn winkel",
       "default": "Mijn etalage"
-    },
-    "fulfilment": {
-      "physical": "Ik verzend het",
-      "digital": "Ze downloaden het",
-      "services": "Ze boeken mij",
-      "mixed": "Een beetje van alles"
-    },
-    "fulfilmentHint": {
-      "physical": "Fysieke producten",
-      "digital": "Bestanden, presets, muziek",
-      "services": "Sessies, opdrachten",
-      "mixed": "Meer dan één van deze"
     },
     "vibe": {
       "minimal": "Minimaal",

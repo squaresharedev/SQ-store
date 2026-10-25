@@ -189,6 +189,7 @@
   "card": {
     "editAriaLabel": "Upraviť {name}",
     "embedAriaLabel": "Zdieľať alebo vložiť na web {name}",
+    "share": "Zdieľať",
     "viewPageAriaLabel": "Otvoriť výklad {name} tak, ako ho vidia kupujúci",
     "deleteAriaLabel": "Zmazať {name}",
     "blockCount": "{count, plural, one {# blok} few {# bloky} many {# bloku} other {# blokov}}",
@@ -277,14 +278,6 @@
     }
   },
   "wizard": {
-    "category": {
-      "title": "Čo predávate?",
-      "description": "Podľa toho sa najlepšie určí, ktoré rozvrhnutia vám budú vyhovovať."
-    },
-    "fulfilment": {
-      "title": "Ako to zákazníci dostanú?",
-      "description": "Toto určuje, čo vaše produktové stránky hovoria o doručení."
-    },
     "vibe": {
       "title": "Vyberte si vzhľad",
       "description": "Váš východiskový bod. Všetko zostáva upraviteľné v editore výkladu."
@@ -296,33 +289,13 @@
     "stepOf": "Krok {current} z {total}",
     "nameLabel": "Názov výkladu",
     "nameHint": "Nechajte prázdne a nazveme ho Výklad bez názvu.",
-    "otherCategoryLabel": "Čo predávate?",
-    "otherCategoryPlaceholder": "napr. modelárske súpravy",
     "noProductsHint": "Ešte nemáte žiadne produkty? Pridajte ich po nastavení.",
     "skipSetup": "Preskočiť nastavenie",
-    "skip": "Preskočiť",
     "creating": "Vytvára sa…",
     "create": "Vytvoriť výklad"
   },
   "createOptions": {
-    "categoryGroupLabel": "Čo predávate",
-    "fulfilmentGroupLabel": "Ako to zákazníci dostanú",
     "vibeGroupLabel": "Vzhľad, aký chcete",
-    "category": {
-      "fashion": "Oblečenie",
-      "art": "Umenie a tlačoviny",
-      "jewellery": "Šperky",
-      "handmade": "Ručne vyrábané",
-      "home": "Domácnosť a bývanie",
-      "beauty": "Krása",
-      "food": "Jedlo a nápoje",
-      "music": "Hudba",
-      "photography": "Fotografia",
-      "books": "Knihy a ziny",
-      "digital": "Digitálny tovar",
-      "vintage": "Vintage",
-      "other": "Niečo iné"
-    },
     "categoryPlaceholder": {
       "fashion": "Môj obchod s oblečením",
       "art": "Môj výtvarný obchod",
@@ -338,18 +311,6 @@
       "vintage": "Môj vintage obchod",
       "other": "Môj obchod",
       "default": "Môj výklad"
-    },
-    "fulfilment": {
-      "physical": "Odosielam ho",
-      "digital": "Sťahujú si ho",
-      "services": "Rezervujú si ma",
-      "mixed": "Kombinácia"
-    },
-    "fulfilmentHint": {
-      "physical": "Fyzické produkty",
-      "digital": "Súbory, predvoľby, hudba",
-      "services": "Sedenia, zákazky",
-      "mixed": "Viac ako jedna z týchto možností"
     },
     "vibe": {
       "minimal": "Minimalistický",

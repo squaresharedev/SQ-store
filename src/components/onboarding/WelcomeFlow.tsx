@@ -34,7 +34,7 @@ import {
   type TraderIdentityField,
 } from "@/lib/settings/trader-identity";
 import { cn } from "@/lib/utils";
-import { SetupPath, WelcomeHero } from "./WelcomeVisuals";
+import { WelcomeHero } from "./WelcomeVisuals";
 
 /**
  * THE WELCOME FLOW: what a new seller meets on their first visit to Overview,
@@ -44,24 +44,22 @@ import { SetupPath, WelcomeHero } from "./WelcomeVisuals";
  *   1. Welcome. What they are about to make (a product page, live, its link
  *      shared), as an animation rather than a description.
  *   2. The Terms. The short version of the Terms of Service in a scroll box,
- *      the full Terms one click away, and "I have read and agree to the Terms",
- *      which only opens once the summary has been scrolled to its end. Agreeing
- *      goes through the SAME action as Settings › Legal (acceptLegal), which
- *      records the time and LEGAL_VERSION. Left out when the current version
- *      is already agreed to.
- *   3. The path. The four steps as a timeline that fills in and checks off,
- *      with a label each and nothing more.
- *   4. Seller details. The three trader-identity fields the publish gate needs
+ *      the full Terms one click away, and "I have read and agree to the Terms".
+ *      Agreeing goes through the SAME action as Settings › Legal (acceptLegal),
+ *      which records the time and LEGAL_VERSION. Left out when the current
+ *      version is already agreed to.
+ *   3. Seller details. The three trader-identity fields the publish gate needs
  *      (lib/settings/trader-identity.ts), asked as an ordinary setup step.
  *      Saved through the SAME action as Settings (saveTaxInfo), so every check
  *      and the confirmation code apply unchanged; the action writes only the
  *      fields it is sent. Skippable: drafts never need these, and the checklist
  *      keeps the step. Left out when the details are already on file.
- * Every way FORWARD out of the dialog starts the guided tour
- * (components/onboarding/TourOverlay.tsx).
+ * Every way FORWARD out of the dialog lands on Overview's setup checklist,
+ * whose next step is the thing to do now. The guided tour is offered there,
+ * not started on the seller's behalf.
  *
- * "Skip onboarding" is there for someone who already knows the app: it skips
- * all of it, tour included. The dialog's close button and Esc mean the same.
+ * "Skip onboarding" is there for someone who already knows the app. The
+ * dialog's close button and Esc mean the same.
  * Skipping skips the guidance, not the legal gate: the checklist on Overview
  * stays until the seller details are really there.
  *
@@ -75,12 +73,11 @@ import { SetupPath, WelcomeHero } from "./WelcomeVisuals";
  * sliding step with a reduced-motion fallback, focus moved onto each step) so
  * the app's multi-step dialogs read as one control.
  *
- * Skipping and starting the tour are the SAME fact to the server: the person has
- * seen the welcome (lib/onboarding/actions.ts). The caller records that; this
- * component only reports which way out was taken.
+ * Every way out is the SAME fact to the server: the person has seen the
+ * welcome (lib/onboarding/actions.ts). The caller records that.
  */
 
-export type WelcomeStepId = "welcome" | "terms" | "path" | "seller";
+export type WelcomeStepId = "welcome" | "terms" | "seller";
 
 /** Prefill for the seller step: whatever the profile already holds. */
 export type SellerPrefill = { businessName: string; address: string; email: string };
@@ -96,7 +93,6 @@ const STEP_COPY: Record<WelcomeStepId, { title: MessageKey; description?: Messag
     title: "Onboarding.welcome.steps.terms.title",
     description: "Onboarding.welcome.steps.terms.description",
   },
-  path: { title: "Onboarding.welcome.steps.path.title" },
   seller: {
     title: "Onboarding.welcome.steps.seller.title",
     description: "Onboarding.welcome.steps.seller.lawNote",
@@ -113,7 +109,6 @@ function fieldLabel(key: TraderIdentityField): MessageKey {
 function stepsFor(includeTermsStep: boolean, includeSellerStep: boolean): WelcomeStepId[] {
   const steps: WelcomeStepId[] = ["welcome"];
   if (includeTermsStep) steps.push("terms");
-  steps.push("path");
   if (includeSellerStep) steps.push("seller");
   return steps;
 }
@@ -121,7 +116,6 @@ function stepsFor(includeTermsStep: boolean, includeSellerStep: boolean): Welcom
 export function WelcomeFlow({
   open,
   onClose,
-  onStartTour,
   includeTermsStep,
   includeSellerStep,
   seller,
@@ -133,13 +127,10 @@ export function WelcomeFlow({
   confirmCodeAction = confirmContactCode,
 }: {
   open: boolean;
-  /** Skip everything: "Skip onboarding", the close button, Esc. Must be
-   *  referentially stable: Modal re-runs its focus effect whenever the handler
-   *  changes, which would yank focus back to the close button. */
+  /** Every way out: finishing, "Skip onboarding", the close button, Esc. Must
+   *  be referentially stable: Modal re-runs its focus effect whenever the
+   *  handler changes, and a finished save calls it from an effect. */
   onClose: () => void;
-  /** Leave the dialog forwards: close it and start the guided tour. Stable, for
-   *  the same reason as onClose (it is called from an effect after a save). */
-  onStartTour: () => void;
   /** Whether the current Terms (LEGAL_VERSION) still need agreeing to. Frozen
    *  when the flow opens, like the seller step. */
   includeTermsStep: boolean;
@@ -172,8 +163,6 @@ export function WelcomeFlow({
 
   const [steps, setSteps] = useState(() => stepsFor(includeTermsStep, includeSellerStep));
   const [stepIndex, setStepIndex] = useState(0);
-  // The summary has been scrolled to its end: only then may it be agreed to.
-  const [termsRead, setTermsRead] = useState(false);
   // The agreement is on file (the action succeeded), so the gate is open.
   const [termsAgreed, setTermsAgreed] = useState(false);
   // Direction only drives which way the step slides.
@@ -223,7 +212,6 @@ export function WelcomeFlow({
       setSteps(stepsFor(includeTermsStep, includeSellerStep));
       setStepIndex(0);
       setBack(false);
-      setTermsRead(false);
       setTermsAgreed(false);
       setBusinessName(seller.businessName);
       setAddress(seller.address);
@@ -264,10 +252,10 @@ export function WelcomeFlow({
   }, [termsPending]);
 
   // A settled save moves the flow on: to the code box when the address still
-  // has to be proven, otherwise out to the tour. Adjusted during render
-  // against the state object itself, so each save is handled once. The tour
-  // itself starts from an effect below: a parent's callback has no business
-  // running in the middle of this component's render.
+  // has to be proven, otherwise out of the dialog. Adjusted during render
+  // against the state object itself, so each save is handled once. Leaving
+  // happens in an effect below: a parent's callback has no business running
+  // in the middle of this component's render.
   const [handledSave, setHandledSave] = useState(saveState);
   if (saveState !== handledSave) {
     setHandledSave(saveState);
@@ -289,8 +277,8 @@ export function WelcomeFlow({
   const finish = useCallback(() => setFinished(true), []);
 
   useEffect(() => {
-    if (finished) onStartTour();
-  }, [finished, onStartTour]);
+    if (finished) onClose();
+  }, [finished, onClose]);
 
   // saveTaxInfo revalidates /settings/business only. The page this dialog sits on
   // renders the checklist and the gate on the server, so it asks for a fresh
@@ -348,7 +336,9 @@ export function WelcomeFlow({
     description: stepCopy.description ? t(stepCopy.description) : undefined,
   };
   const ready = Boolean(businessName.trim() && address.trim() && email.trim());
-  const hasSellerStep = steps.includes("seller");
+  // The last slide's way forward is the way out; earlier ones move on.
+  const isLast = stepIndex === steps.length - 1;
+  const forward = isLast ? close : () => goTo(stepIndex + 1);
 
   return (
     <Modal
@@ -431,21 +421,13 @@ export function WelcomeFlow({
                 {/* The version the reader was shown. The action refuses any
                     other, so an agreement always names the Terms on screen. */}
                 <input type="hidden" name="version" value={LEGAL_VERSION} />
-                <TermsSummary onReadToEnd={() => setTermsRead(true)} />
+                <TermsSummary />
                 <p id={termsHintId} className={infoTextClass} aria-live="polite">
                   {termsAgreed
                     ? t("Onboarding.welcome.terms.agreed")
-                    : termsRead
-                      ? t("Onboarding.welcome.terms.agreeNote")
-                      : t("Settings.legal.scrollToAgree")}
+                    : t("Onboarding.welcome.terms.agreeNote")}
                 </p>
               </form>
-            )}
-
-            {step === "path" && (
-              <div className="pb-2 pt-3">
-                <SetupPath />
-              </div>
             )}
 
             {step === "seller" && !confirming && (
@@ -552,8 +534,8 @@ export function WelcomeFlow({
       {/* A plain flex item, not sticky (see CreateStorefrontWizard). */}
       <div className="-mx-6 mt-3 flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-border px-6 pt-2.5">
         {step === "welcome" && (
-          <Button className="ml-auto" onClick={() => goTo(stepIndex + 1)}>
-            {t("Onboarding.welcome.nav.next")}
+          <Button className="ml-auto" onClick={forward}>
+            {isLast ? t("Onboarding.welcome.nav.getStarted") : t("Onboarding.welcome.nav.next")}
             <ArrowRight className={cn("size-4", iconNudgeRightClass)} aria-hidden />
           </Button>
         )}
@@ -569,7 +551,7 @@ export function WelcomeFlow({
               {t("Common.actions.back")}
             </Button>
             {termsAgreed ? (
-              <Button onClick={() => goTo(stepIndex + 1)}>
+              <Button onClick={forward}>
                 {t("Onboarding.welcome.nav.continue")}
                 <ArrowRight className={cn("size-4", iconNudgeRightClass)} aria-hidden />
               </Button>
@@ -579,27 +561,11 @@ export function WelcomeFlow({
                 pending={acceptPending}
                 state={acceptResult}
                 pendingLabel={t("Settings.legal.recording")}
-                disabled={!termsRead}
                 aria-describedby={termsHintId}
               >
                 {t("Settings.legal.agreeButton")}
               </SaveButton>
             )}
-          </>
-        )}
-
-        {step === "path" && (
-          <>
-            <Button variant="ghost" onClick={() => goTo(stepIndex - 1)}>
-              <ArrowLeft className={cn("size-4", iconNudgeLeftClass)} aria-hidden />
-              {t("Common.actions.back")}
-            </Button>
-            <Button onClick={hasSellerStep ? () => goTo(stepIndex + 1) : onStartTour}>
-              {hasSellerStep
-                ? t("Onboarding.welcome.nav.getStarted")
-                : t("Onboarding.welcome.nav.showMeAround")}
-              <ArrowRight className={cn("size-4", iconNudgeRightClass)} aria-hidden />
-            </Button>
           </>
         )}
 
@@ -614,7 +580,7 @@ export function WelcomeFlow({
               {t("Common.actions.back")}
             </Button>
             <div className="flex flex-wrap items-center gap-2">
-              <Button variant="ghost" onClick={onStartTour} disabled={savePending}>
+              <Button variant="ghost" onClick={close} disabled={savePending}>
                 {t("Onboarding.welcome.nav.skipForNow")}
               </Button>
               <SaveButton
@@ -635,7 +601,7 @@ export function WelcomeFlow({
               <ArrowLeft className={cn("size-4", iconNudgeLeftClass)} aria-hidden />
               {t("Common.actions.back")}
             </Button>
-            <Button onClick={onStartTour}>
+            <Button onClick={close}>
               {t("Onboarding.welcome.nav.continue")}
               <ArrowRight className={cn("size-4", iconNudgeRightClass)} aria-hidden />
             </Button>

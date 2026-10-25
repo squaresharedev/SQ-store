@@ -189,6 +189,7 @@
   "card": {
     "editAriaLabel": "Modifier {name}",
     "embedAriaLabel": "Partager ou intégrer {name}",
+    "share": "Partager",
     "viewPageAriaLabel": "Ouvrir {name} comme les acheteurs la voient",
     "deleteAriaLabel": "Supprimer {name}",
     "blockCount": "{count, plural, one {# bloc} many {# blocs} other {# blocs}}",
@@ -277,14 +278,6 @@
     }
   },
   "wizard": {
-    "category": {
-      "title": "Que vendez-vous ?",
-      "description": "C’est le meilleur indice pour savoir quelles dispositions vous conviendront."
-    },
-    "fulfilment": {
-      "title": "Comment les acheteurs le reçoivent-ils ?",
-      "description": "Cela détermine ce que vos pages produit indiquent sur la livraison."
-    },
     "vibe": {
       "title": "Choisissez un aspect",
       "description": "Votre point de départ. Tout reste modifiable dans l’éditeur."
@@ -296,33 +289,13 @@
     "stepOf": "Étape {current} sur {total}",
     "nameLabel": "Nom de la vitrine",
     "nameHint": "Laissez vide et nous l’appellerons Vitrine sans titre.",
-    "otherCategoryLabel": "Que vendez-vous ?",
-    "otherCategoryPlaceholder": "p. ex. maquettes",
     "noProductsHint": "Pas encore de produits ? Ajoutez-les après la configuration.",
     "skipSetup": "Passer la configuration",
-    "skip": "Passer",
     "creating": "Création…",
     "create": "Créer une vitrine"
   },
   "createOptions": {
-    "categoryGroupLabel": "Ce que vous vendez",
-    "fulfilmentGroupLabel": "Comment les acheteurs le reçoivent",
     "vibeGroupLabel": "L’aspect que vous voulez",
-    "category": {
-      "fashion": "Vêtements",
-      "art": "Art et estampes",
-      "jewellery": "Bijoux",
-      "handmade": "Fait main",
-      "home": "Maison et décoration",
-      "beauty": "Beauté",
-      "food": "Alimentation et boissons",
-      "music": "Musique",
-      "photography": "Photographie",
-      "books": "Livres et fanzines",
-      "digital": "Produits numériques",
-      "vintage": "Vintage",
-      "other": "Autre chose"
-    },
     "categoryPlaceholder": {
       "fashion": "Ma boutique de vêtements",
       "art": "Ma boutique d’art",
@@ -338,18 +311,6 @@
       "vintage": "Ma boutique vintage",
       "other": "Ma boutique",
       "default": "Ma vitrine"
-    },
-    "fulfilment": {
-      "physical": "Je l’expédie",
-      "digital": "Ils le téléchargent",
-      "services": "Ils me réservent",
-      "mixed": "Un peu des deux"
-    },
-    "fulfilmentHint": {
-      "physical": "Produits physiques",
-      "digital": "Fichiers, préréglages, musique",
-      "services": "Séances, commandes personnalisées",
-      "mixed": "Plusieurs de ces options"
     },
     "vibe": {
       "minimal": "Minimal",

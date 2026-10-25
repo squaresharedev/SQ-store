@@ -369,6 +369,7 @@
     "uploadingLabel": "{what, select, image {Uploading image} photo {Uploading photo} document {Uploading document} other {Uploading file}}",
     "processingLabel": "{what, select, image {Processing image} photo {Processing photo} document {Processing document} other {Processing file}}",
     "saveChanges": "Save changes",
+    "saveDraft": "Save as draft",
     "saveProduct": "Save product",
     "savedToast": "\"{title}\" was saved.",
     "addedToast": "\"{title}\" was added to your products.",

@@ -189,6 +189,7 @@
   "card": {
     "editAriaLabel": "Edit {name}",
     "embedAriaLabel": "Share or embed {name}",
+    "share": "Share",
     "viewPageAriaLabel": "Open {name} as buyers see it",
     "deleteAriaLabel": "Delete {name}",
     "blockCount": "{count, plural, one {# block} other {# blocks}}",
@@ -277,14 +278,6 @@
     }
   },
   "wizard": {
-    "category": {
-      "title": "What do you sell?",
-      "description": "This is the biggest clue for which layouts will suit you."
-    },
-    "fulfilment": {
-      "title": "How do buyers get it?",
-      "description": "It shapes what your product pages say about delivery."
-    },
     "vibe": {
       "title": "Pick a look",
       "description": "Your starting point. Everything stays editable in the designer."
@@ -296,33 +289,13 @@
     "stepOf": "Step {current} of {total}",
     "nameLabel": "Storefront name",
     "nameHint": "Leave it blank and we will call it Untitled storefront.",
-    "otherCategoryLabel": "What do you sell?",
-    "otherCategoryPlaceholder": "e.g. model kits",
     "noProductsHint": "No products yet? Add them after setup.",
     "skipSetup": "Skip setup",
-    "skip": "Skip",
     "creating": "Creating…",
     "create": "Create storefront"
   },
   "createOptions": {
-    "categoryGroupLabel": "What you sell",
-    "fulfilmentGroupLabel": "How buyers get it",
     "vibeGroupLabel": "The look you want",
-    "category": {
-      "fashion": "Clothing",
-      "art": "Art & prints",
-      "jewellery": "Jewellery",
-      "handmade": "Handmade",
-      "home": "Home & living",
-      "beauty": "Beauty",
-      "food": "Food & drink",
-      "music": "Music",
-      "photography": "Photography",
-      "books": "Books & zines",
-      "digital": "Digital goods",
-      "vintage": "Vintage",
-      "other": "Something else"
-    },
     "categoryPlaceholder": {
       "fashion": "My clothing shop",
       "art": "My art shop",
@@ -338,18 +311,6 @@
       "vintage": "My vintage shop",
       "other": "My shop",
       "default": "My storefront"
-    },
-    "fulfilment": {
-      "physical": "I ship it",
-      "digital": "They download it",
-      "services": "They book me",
-      "mixed": "A bit of each"
-    },
-    "fulfilmentHint": {
-      "physical": "Physical products",
-      "digital": "Files, presets, music",
-      "services": "Sessions, commissions",
-      "mixed": "More than one of these"
     },
     "vibe": {
       "minimal": "Minimal",

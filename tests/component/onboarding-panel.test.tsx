@@ -170,20 +170,31 @@ describe("OnboardingPanel", () => {
     await waitFor(() => expect(actions.completeOnboarding).toHaveBeenCalledTimes(1));
   });
 
-  it("records the welcome and starts the tour carrying the next setup step", async () => {
+  it("records the welcome and lands on the checklist without starting the tour", async () => {
     const user = userEvent.setup();
-    const setup = buildSetupSteps(NEW_SELLER);
     render(
       <>
-        <OnboardingPanel {...data({ setup })} />
+        <OnboardingPanel {...data()} />
         <TourProbe />
       </>,
     );
     await user.click(screen.getByRole("button", { name: "Next" }));
-    await user.click(screen.getByRole("button", { name: "Get started" }));
     await user.click(screen.getByRole("button", { name: "Skip for now" }));
 
     await waitFor(() => expect(actions.completeOnboarding).toHaveBeenCalledTimes(1));
+    expect(tourState()).toMatchObject({ status: "idle" });
+  });
+
+  it("offers the tour from the checklist, carrying the next setup step", async () => {
+    const user = userEvent.setup();
+    const setup = buildSetupSteps(NEW_SELLER);
+    render(
+      <>
+        <OnboardingPanel {...data({ setup, welcomePending: false })} />
+        <TourProbe />
+      </>,
+    );
+    await user.click(screen.getByRole("button", { name: "Show me around" }));
     expect(tourState()).toEqual({
       status: "active",
       stepId: "overview-nav",

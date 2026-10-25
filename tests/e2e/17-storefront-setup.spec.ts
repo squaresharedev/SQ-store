@@ -2,7 +2,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { freshUser, gotoApp, signUp } from "./helpers";
 
 /**
- * The four questions asked before a seller reaches the designer.
+ * The two questions asked before a seller reaches the designer.
  *
  * The invariants worth guarding are not the copy, which will move around, but
  * the three promises the flow makes:
@@ -43,25 +43,15 @@ test.describe("storefront setup flow", () => {
     await gotoApp(page, "/storefront");
     await openWizard(page);
 
-    // 1 of 4: what you sell.
-    await expect(wizard(page)).toContainText("Step 1 of 4");
-    await step(page, "Art & prints").click();
-    await step(page, "Next").click();
-
-    // 2 of 4: how buyers get it.
-    await expect(wizard(page)).toContainText("Step 2 of 4");
-    await step(page, /I ship it/).click();
-    await step(page, "Next").click();
-
-    // 3 of 4: the look. "Classic" is the one preset that does not paint the
+    // 1 of 2: the look. "Classic" is the one preset that does not paint the
     // canvas white, so it is the cheapest to verify actually reached the
     // designer.
-    await expect(wizard(page)).toContainText("Step 3 of 4");
+    await expect(wizard(page)).toContainText("Step 1 of 2");
     await step(page, "Classic").click();
     await step(page, "Next").click();
 
-    // 4 of 4: the name.
-    await expect(wizard(page)).toContainText("Step 4 of 4");
+    // 2 of 2: the name.
+    await expect(wizard(page)).toContainText("Step 2 of 2");
     await wizard(page).getByLabel("Storefront name").fill("Gilt & Grain");
     await step(page, "Create storefront").click();
 
@@ -110,42 +100,13 @@ test.describe("storefront setup flow", () => {
 
     // Get an answer in first: abandoning partway is the case that would
     // otherwise leave an orphan row behind.
-    await step(page, "Clothing").click();
+    await step(page, "Classic").click();
     await step(page, "Next").click();
-    await expect(wizard(page)).toContainText("Step 2 of 4");
+    await expect(wizard(page)).toContainText("Step 2 of 2");
     await page.keyboard.press("Escape");
 
     await expect(wizard(page)).toBeHidden();
     await expect(page).toHaveURL(/\/storefront$/);
     await expect(page.getByText(/no storefronts yet/i)).toBeVisible();
-  });
-
-  test("a second storefront opens with the first one's answers already in", async ({
-    page,
-  }) => {
-    await signUp(page, freshUser("setupagain"));
-    await gotoApp(page, "/storefront");
-
-    await openWizard(page);
-    await step(page, "Food & drink").click();
-    await step(page, "Next").click();
-    await step(page, /They download it/).click();
-    await step(page, /^Skip$/).click();
-    await page.waitForURL(/\/storefront\/[0-9a-f-]{36}/, { timeout: 30_000 });
-
-    await gotoApp(page, "/storefront");
-    await openWizard(page);
-
-    // What they sell has not changed since five minutes ago, so the flow
-    // confirms rather than re-asks.
-    await expect(step(page, "Food & drink")).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-    await step(page, "Next").click();
-    await expect(step(page, /They download it/)).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
   });
 });

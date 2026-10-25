@@ -83,9 +83,6 @@
         "title": "Te damos la bienvenida a Square Share",
         "description": "Cuatro pasos para tener una página de producto que puedas compartir."
       },
-      "path": {
-        "title": "Cuatro pasos hasta tu primera página"
-      },
       "seller": {
         "title": "Añade tus datos de vendedor",
         "description": "Los compradores los ven en tus páginas de producto, y la ley los exige antes de poder vender. Nunca los usamos para marketing.",
@@ -156,12 +153,6 @@
       "buyNow": "Comprar ahora",
       "live": "Publicado",
       "linkCopied": "Enlace copiado"
-    },
-    "setupPath": {
-      "details": "Añade tus datos",
-      "product": "Añade un producto",
-      "storefront": "Diseña un escaparate",
-      "share": "Comparte su página"
     },
     "terms": {
       "agreed": "Has aceptado estas Condiciones. Gracias por leerlas.",

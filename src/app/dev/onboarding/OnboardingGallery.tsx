@@ -90,15 +90,10 @@ export function OnboardingGallery({
   // Remounts the checklists, so the "just done" fixtures play again.
   const [replay, setReplay] = useState(0);
   // The last way out of the dialog, published for scripts driving this page.
-  const [exit, setExit] = useState<"none" | "skipped" | "tour">("none");
+  const [exit, setExit] = useState<"none" | "closed">("none");
   const skip = useCallback(() => {
-    console.info("[dev/onboarding] skipped onboarding");
-    setExit("skipped");
-    setActive(null);
-  }, []);
-  const startTour = useCallback(() => {
-    console.info("[dev/onboarding] would start the guided tour");
-    setExit("tour");
+    console.info("[dev/onboarding] left onboarding");
+    setExit("closed");
     setActive(null);
   }, []);
   const celebrated = useCallback(() => {
@@ -192,7 +187,6 @@ export function OnboardingGallery({
       <WelcomeFlow
         open={active !== null}
         onClose={skip}
-        onStartTour={startTour}
         includeTermsStep={active?.includeTermsStep ?? false}
         includeSellerStep={active?.includeSellerStep ?? false}
         seller={{ businessName: "", address: "", email: "" }}

@@ -10,9 +10,6 @@
     "notifications": {
       "title": "Meldingsinstellingen"
     },
-    "language": {
-      "title": "Taalinstellingen"
-    },
     "danger": {
       "title": "Gevarenzone"
     },
@@ -233,7 +230,6 @@
     "agreeButton": "Ik heb de voorwaarden gelezen en ga ermee akkoord",
     "acceptNote": "Accepteren legt de datum en versie <code>{version}</code> vast bij je account.",
     "agreeNote": "Als je akkoord gaat, worden de datum en versie <code>{version}</code> op je account vastgelegd.",
-    "scrollToAgree": "Scroll naar het einde van de samenvatting om akkoord te gaan.",
     "success": {
       "legalAccepted": "Geaccepteerd. Bedankt voor het lezen van de kleine lettertjes.",
       "termsAgreed": "Je bent akkoord gegaan met de Servicevoorwaarden."

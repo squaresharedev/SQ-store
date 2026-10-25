@@ -10,9 +10,6 @@
     "notifications": {
       "title": "Impostazioni notifiche"
     },
-    "language": {
-      "title": "Impostazioni lingua"
-    },
     "danger": {
       "title": "Zona pericolosa"
     },
@@ -233,7 +230,6 @@
     "agreeButton": "Ho letto i Termini e li accetto",
     "acceptNote": "Accettando, registriamo la data e la versione <code>{version}</code> nel tuo account.",
     "agreeNote": "Accettando, sul tuo account vengono registrate la data e la versione <code>{version}</code>.",
-    "scrollToAgree": "Scorri fino alla fine del riepilogo per accettare.",
     "success": {
       "legalAccepted": "Accettato. Grazie per aver letto le condizioni.",
       "termsAgreed": "Hai accettato i Termini di servizio."

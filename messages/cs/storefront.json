@@ -189,6 +189,7 @@
   "card": {
     "editAriaLabel": "Upravit výlohu {name}",
     "embedAriaLabel": "Sdílet nebo vložit výlohu {name}",
+    "share": "Sdílet",
     "viewPageAriaLabel": "Otevřít výlohu {name} tak, jak ji vidí kupující",
     "deleteAriaLabel": "Smazat výlohu {name}",
     "blockCount": "{count, plural, one {# blok} few {# bloky} many {# bloku} other {# bloků}}",
@@ -277,14 +278,6 @@
     }
   },
   "wizard": {
-    "category": {
-      "title": "Co prodáváte?",
-      "description": "Podle toho nejlépe poznáme, jaká rozvržení se vám budou hodit."
-    },
-    "fulfilment": {
-      "title": "Jak se zboží dostane ke kupujícím?",
-      "description": "Ovlivní to, co vaše produktové stránky uvedou o doručení."
-    },
     "vibe": {
       "title": "Vyberte vzhled",
       "description": "Výchozí bod. V editoru půjde upravit úplně všechno."
@@ -296,33 +289,13 @@
     "stepOf": "Krok {current} z {total}",
     "nameLabel": "Název výlohy",
     "nameHint": "Když pole necháte prázdné, pojmenujeme ji Výloha bez názvu.",
-    "otherCategoryLabel": "Co prodáváte?",
-    "otherCategoryPlaceholder": "např. modely ke slepení",
     "noProductsHint": "Ještě nemáte produkty? Přidejte je po nastavení.",
     "skipSetup": "Přeskočit nastavení",
-    "skip": "Přeskočit",
     "creating": "Vytváření…",
     "create": "Vytvořit výlohu"
   },
   "createOptions": {
-    "categoryGroupLabel": "Co prodáváte",
-    "fulfilmentGroupLabel": "Jak se zboží dostane ke kupujícím",
     "vibeGroupLabel": "Jaký vzhled chcete",
-    "category": {
-      "fashion": "Oblečení",
-      "art": "Umění a tisky",
-      "jewellery": "Šperky",
-      "handmade": "Ruční výroba",
-      "home": "Domov a bydlení",
-      "beauty": "Kosmetika",
-      "food": "Jídlo a pití",
-      "music": "Hudba",
-      "photography": "Fotografie",
-      "books": "Knihy a ziny",
-      "digital": "Digitální produkty",
-      "vintage": "Vintage",
-      "other": "Něco jiného"
-    },
     "categoryPlaceholder": {
       "fashion": "Můj obchod s oblečením",
       "art": "Můj obchod s uměním",
@@ -338,18 +311,6 @@
       "vintage": "Můj vintage obchod",
       "other": "Můj obchod",
       "default": "Moje výloha"
-    },
-    "fulfilment": {
-      "physical": "Posílám ho poštou",
-      "digital": "Stáhnou si ho",
-      "services": "Rezervují si termín",
-      "mixed": "Od všeho trochu"
-    },
-    "fulfilmentHint": {
-      "physical": "Fyzické produkty",
-      "digital": "Soubory, presety, hudba",
-      "services": "Lekce, zakázky",
-      "mixed": "Víc možností najednou"
     },
     "vibe": {
       "minimal": "Minimalistický",

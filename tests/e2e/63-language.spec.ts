@@ -2,9 +2,9 @@ import { expect, test } from "@playwright/test";
 import { freshUser, gotoApp, serviceRest, signUp, userIdByEmail } from "./helpers";
 
 /**
- * THE LANGUAGE TAB.
+ * THE LANGUAGE CARD.
  *
- * The UI language has its own tab in Settings. Switching it has to do four
+ * The UI language is a card on Settings › Account. Switching it has to do four
  * things at once, and a regression in any one is invisible from the others:
  * the page re-renders in the new language, <html lang> follows it, this
  * browser remembers the choice (the ss_locale cookie), and the account
@@ -12,27 +12,19 @@ import { freshUser, gotoApp, serviceRest, signUp, userIdByEmail } from "./helper
  * browser at their next sign-in.
  */
 
-test("Settings has a Language tab that switches the whole UI and is remembered", async ({
+test("Account has a Language card that switches the whole UI and is remembered", async ({
   page,
   context,
 }) => {
   const user = freshUser("language");
   await signUp(page, user);
 
-  // The picker is its own tab, not a card on Account.
-  await gotoApp(page, "/settings/account");
-  await expect(page.getByRole("heading", { level: 2, name: "Language" })).toHaveCount(0);
-
-  // Located by href, not by the rail's accessible name: that name is itself
-  // translated ("Sekce nastavení" in Czech), so a name match would only work in
-  // English.
-  const languageTab = page.locator('aside nav a[href="/settings/language"]');
-  await expect(languageTab).toHaveText("Language");
-  await languageTab.click();
-  await expect(page).toHaveURL(/\/settings\/language$/);
-  await expect(page.getByRole("heading", { level: 1, name: "Language" })).toBeVisible();
+  // Old links to the Language tab land on the card.
+  await gotoApp(page, "/settings/language");
+  await expect(page).toHaveURL(/\/settings\/account#language$/);
+  await expect(page.getByRole("heading", { level: 2, name: "Language" })).toBeVisible();
+  await expect(page.locator('aside nav a[href="/settings/language"]')).toHaveCount(0);
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page).toHaveTitle(/Language settings/);
 
   // Switch to Czech.
   await page.locator("#language").click();
@@ -45,9 +37,7 @@ test("Settings has a Language tab that switches the whole UI and is remembered",
   await expect(overlay).toHaveCount(0, { timeout: 20_000 });
 
   await expect(page.locator("html")).toHaveAttribute("lang", "cs", { timeout: 20_000 });
-  await expect(page.getByRole("heading", { level: 1, name: "Jazyk" })).toBeVisible();
-  await expect(page).toHaveTitle(/Nastavení jazyka/);
-  await expect(languageTab).toHaveText("Jazyk");
+  await expect(page.getByRole("heading", { level: 2, name: "Jazyk" })).toBeVisible();
 
   // This browser remembers it...
   const cookie = (await context.cookies()).find((c) => c.name === "ss_locale");
@@ -66,9 +56,9 @@ test("Settings has a Language tab that switches the whole UI and is remembered",
   await expect(page.locator("html")).toHaveAttribute("lang", "cs");
 
   // Back to English through the same control.
-  await gotoApp(page, "/settings/language");
+  await gotoApp(page, "/settings/account");
   await page.locator("#language").click();
   await page.getByRole("option", { name: "English" }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "en", { timeout: 20_000 });
-  await expect(page.getByRole("heading", { level: 1, name: "Language" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Language" })).toBeVisible();
 });

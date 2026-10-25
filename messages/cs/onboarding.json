@@ -83,9 +83,6 @@
         "title": "Vítejte na Square Share",
         "description": "Čtyři kroky k produktové stránce, kterou můžete sdílet."
       },
-      "path": {
-        "title": "Čtyři kroky k první stránce"
-      },
       "seller": {
         "title": "Doplňte údaje prodejce",
         "description": "Kupující je uvidí na vašich produktových stránkách a zákon je vyžaduje dřív, než začnete prodávat. K marketingu je nikdy nepoužíváme.",
@@ -156,12 +153,6 @@
       "buyNow": "Koupit",
       "live": "Zveřejněno",
       "linkCopied": "Odkaz zkopírován"
-    },
-    "setupPath": {
-      "details": "Doplňte své údaje",
-      "product": "Přidejte produkt",
-      "storefront": "Navrhněte výlohu",
-      "share": "Sdílejte její stránku"
     },
     "terms": {
       "agreed": "S těmito Podmínkami souhlasíte. Děkujeme za přečtení.",

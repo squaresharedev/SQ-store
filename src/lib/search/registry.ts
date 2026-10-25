@@ -139,18 +139,12 @@ const PAGES: EntrySpec[] = [...MAIN_NAV, SETTINGS_LINK].map((link) => ({
   synonyms: PAGE_SYNONYMS[link.href] ?? [],
 }));
 
-/** Extra words a settings section answers to, beyond its own name. */
-const SECTION_SYNONYMS: Record<string, string[]> = {
-  "/settings/language": ["change language", "locale", "translate", "translation", "english", "czech"],
-};
-
 const SETTINGS_SECTIONS: EntrySpec[] = SETTINGS_NAV.map((link) => ({
   id: `settings:${link.href}`,
   type: "settings",
   title: link.label,
   subtitle: SETTINGS_LINK.label,
   href: link.href,
-  synonyms: SECTION_SYNONYMS[link.href],
 }));
 
 /** The settings sections the fields below sit in, by the rail's own labels. */
@@ -373,11 +367,19 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     synonyms: ["seller agreement", "terms of use", "terms", "privacy policy", "gdpr", "contract"],
   },
   {
+    id: "field:language",
+    type: "settings",
+    title: "Nav.settings.language",
+    section: ACCOUNT,
+    href: "/settings/account#language",
+    synonyms: ["change language", "locale", "translate", "translation", "english", "czech"],
+  },
+  {
     id: "field:export",
     type: "settings",
     title: "Search.fields.exportData",
-    section: DANGER,
-    href: "/settings/danger#export",
+    section: ACCOUNT,
+    href: "/settings/account#export",
     synonyms: ["download my data", "gdpr export", "backup", "data dump"],
   },
   {

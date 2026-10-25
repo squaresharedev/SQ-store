@@ -189,6 +189,7 @@
   "card": {
     "editAriaLabel": "{name} bearbeiten",
     "embedAriaLabel": "{name} teilen oder einbetten",
+    "share": "Teilen",
     "viewPageAriaLabel": "{name} so öffnen, wie Käufer es sehen",
     "deleteAriaLabel": "{name} löschen",
     "blockCount": "{count, plural, one {# Block} other {# Blöcke}}",
@@ -277,14 +278,6 @@
     }
   },
   "wizard": {
-    "category": {
-      "title": "Was verkaufst du?",
-      "description": "Das ist der größte Anhaltspunkt dafür, welche Layouts zu dir passen."
-    },
-    "fulfilment": {
-      "title": "Wie erhalten Käufer das Produkt?",
-      "description": "Das beeinflusst, was deine Produktseiten über die Lieferung sagen."
-    },
     "vibe": {
       "title": "Wähle einen Look",
       "description": "Dein Ausgangspunkt. Alles bleibt im Schaufenster-Editor bearbeitbar."
@@ -296,33 +289,13 @@
     "stepOf": "Schritt {current} von {total}",
     "nameLabel": "Name des Schaufensters",
     "nameHint": "Lasse es leer, und wir nennen es Unbenanntes Schaufenster.",
-    "otherCategoryLabel": "Was verkaufst du?",
-    "otherCategoryPlaceholder": "z. B. Modellbausätze",
     "noProductsHint": "Noch keine Produkte? Füge sie nach der Einrichtung hinzu.",
     "skipSetup": "Einrichtung überspringen",
-    "skip": "Überspringen",
     "creating": "Wird erstellt…",
     "create": "Schaufenster erstellen"
   },
   "createOptions": {
-    "categoryGroupLabel": "Was du verkaufst",
-    "fulfilmentGroupLabel": "Wie Käufer es erhalten",
     "vibeGroupLabel": "Der Look, den du möchtest",
-    "category": {
-      "fashion": "Kleidung",
-      "art": "Kunst & Drucke",
-      "jewellery": "Schmuck",
-      "handmade": "Handgemacht",
-      "home": "Wohnen & Leben",
-      "beauty": "Beauty",
-      "food": "Essen & Trinken",
-      "music": "Musik",
-      "photography": "Fotografie",
-      "books": "Bücher & Zines",
-      "digital": "Digitale Produkte",
-      "vintage": "Vintage",
-      "other": "Etwas anderes"
-    },
     "categoryPlaceholder": {
       "fashion": "Mein Kleidungsshop",
       "art": "Mein Kunstshop",
@@ -338,18 +311,6 @@
       "vintage": "Mein Vintage-Shop",
       "other": "Mein Shop",
       "default": "Mein Schaufenster"
-    },
-    "fulfilment": {
-      "physical": "Ich versende es",
-      "digital": "Sie laden es herunter",
-      "services": "Sie buchen mich",
-      "mixed": "Eine Mischung aus allem"
-    },
-    "fulfilmentHint": {
-      "physical": "Physische Produkte",
-      "digital": "Dateien, Presets, Musik",
-      "services": "Sitzungen, Auftragsarbeiten",
-      "mixed": "Mehr als eine dieser Optionen"
     },
     "vibe": {
       "minimal": "Minimalistisch",

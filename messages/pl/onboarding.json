@@ -83,9 +83,6 @@
         "title": "Witaj w Square Share",
         "description": "Cztery kroki do strony produktu, którą możesz udostępnić."
       },
-      "path": {
-        "title": "Cztery kroki do pierwszej strony"
-      },
       "seller": {
         "title": "Dodaj dane sprzedawcy",
         "description": "Kupujący widzą je na stronach twoich produktów, a prawo wymaga ich podania, zanim zaczniesz sprzedawać. Nigdy nie używamy ich do marketingu.",
@@ -156,12 +153,6 @@
       "buyNow": "Kup teraz",
       "live": "Opublikowano",
       "linkCopied": "Skopiowano link"
-    },
-    "setupPath": {
-      "details": "Dodaj swoje dane",
-      "product": "Dodaj produkt",
-      "storefront": "Zaprojektuj witrynę",
-      "share": "Udostępnij jej stronę"
     },
     "terms": {
       "agreed": "Zaakceptowano te Warunki. Dzięki za przeczytanie.",

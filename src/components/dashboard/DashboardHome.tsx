@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
+import { cn } from "@/lib/utils";
+import { iconPopClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { BackgroundArrow } from "@/components/ui/BackgroundArrow";
 import type { DashboardOrdersData, ProductsSummary } from "@/lib/dashboard/queries";
 import {
@@ -63,6 +64,9 @@ export function DashboardHome({
   const locale = useLocale();
   const { last30d } = orders;
   const setupVisible = Boolean(onboarding?.setup && !onboarding.setup.complete);
+  // Three zeros say nothing to a seller still setting up: the numbers appear
+  // with the first sale, and setup has the page until then.
+  const showMetrics = !setupVisible || last30d.sales > 0;
 
   return (
     <div className="relative overflow-hidden">
@@ -77,7 +81,9 @@ export function DashboardHome({
               {t("title")}
             </h1>
           </div>
-          <Link href="/products/new" className={primaryButtonClass}>
+          {/* Secondary while setup is on screen: its next step is the one
+              primary action on the page. */}
+          <Link href="/products/new" className={setupVisible ? secondaryButtonClass : primaryButtonClass}>
             <Plus
               className={`size-4 ${iconPopClass}`}
               strokeWidth={2}
@@ -87,35 +93,42 @@ export function DashboardHome({
           </Link>
         </div>
 
-        <MobileRevenueHero value={formatMoney(last30d.revenue, locale)} />
+        {showMetrics && <MobileRevenueHero value={formatMoney(last30d.revenue, locale)} />}
 
         {/* On mobile everything below the hero rides a white sheet with a
             rounded top that overlaps the glow (same radius family as the
             Modal bottom sheet). From md up the wrapper is invisible. */}
-        <div className="relative -mx-6 -mt-14 space-y-6 rounded-t-lg bg-background px-6 pt-6 md:mx-0 md:mt-0 md:rounded-none md:bg-transparent md:p-0">
+        <div
+          className={cn(
+            "relative -mx-6 space-y-6 rounded-t-lg bg-background px-6 pt-6 md:mx-0 md:mt-0 md:rounded-none md:bg-transparent md:p-0",
+            showMetrics && "-mt-14",
+          )}
+        >
         <OnboardingSlot onboarding={onboarding} />
 
         {/* Headline metrics: last 30 days only — all-time and per-channel/click trends live in Analytics. */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Mobile shows revenue as the hero above instead of this cell. */}
-          <div className="hidden md:block">
+        {showMetrics && (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Mobile shows revenue as the hero above instead of this cell. */}
+            <div className="hidden md:block">
+              <MetricTile
+                label={t("revenue30d")}
+                value={formatMoney(last30d.revenue, locale)}
+                emphasis
+              />
+            </div>
             <MetricTile
-              label={t("revenue30d")}
-              value={formatMoney(last30d.revenue, locale)}
-              emphasis
+              label={t("sales30d")}
+              value={last30d.sales > 0 ? String(last30d.sales) : null}
+              trend={orders.salesTrend}
+            />
+            <MetricTile
+              label={t("avgOrder30d")}
+              value={formatMoney(last30d.aov, locale)}
+              trend={orders.aovTrend}
             />
           </div>
-          <MetricTile
-            label={t("sales30d")}
-            value={last30d.sales > 0 ? String(last30d.sales) : null}
-            trend={orders.salesTrend}
-          />
-          <MetricTile
-            label={t("avgOrder30d")}
-            value={formatMoney(last30d.aov, locale)}
-            trend={orders.aovTrend}
-          />
-        </div>
+        )}
 
         {/* Status modules. */}
         <div className="space-y-4">

@@ -1,77 +1,17 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { LucideIcon } from "lucide-react";
-import {
-  BookOpen,
-  Camera,
-  CalendarClock,
-  Clock,
-  Coffee,
-  Download,
-  FileDown,
-  Gem,
-  Lamp,
-  Layers,
-  Music,
-  Package,
-  Palette,
-  Scissors,
-  Shapes,
-  Shirt,
-  Sparkles,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VIBE_PRESETS } from "@/lib/storefront/presets";
 import { FONT_CLASSES } from "@/components/storefront/config-maps";
-import {
-  STOREFRONT_CATEGORIES,
-  STOREFRONT_FULFILMENTS,
-  STOREFRONT_VIBES,
-  type StorefrontCategory,
-  type StorefrontFulfilment,
-  type StorefrontVibe,
-} from "@/types/storefront-brief";
+import { STOREFRONT_VIBES, type StorefrontVibe } from "@/types/storefront-brief";
 
-// Presentation for the creation flow's answers: the copy, the glyphs, and the
-// tile grid they sit in. The values themselves live in types/storefront-brief.
+// Presentation for the creation flow's look question: the swatches and the
+// tile grid they sit in. The values themselves live in types/storefront-brief,
+// and the rendered order comes from that enum array.
 //
-// Each set is a Record keyed by its enum, so adding a value to the enum without
-// giving it a label is a TYPE error rather than a tile that silently goes
-// missing. The rendered order comes from the enum array, which is therefore the
-// one place order is decided.
-//
-// Every step is a grid of the same tile, so the flow reads as one control the
-// seller learns once. The tile borrows its look from OptionCardPicker (the
-// designer's visual pickers) rather than inventing a second selected-state
-// treatment.
-
-// ── Categories ──────────────────────────────────────────────────────────
-
-const CATEGORY_ICONS: Record<StorefrontCategory, LucideIcon> = {
-  fashion: Shirt,
-  art: Palette,
-  jewellery: Gem,
-  handmade: Scissors,
-  home: Lamp,
-  beauty: Sparkles,
-  food: Coffee,
-  music: Music,
-  photography: Camera,
-  books: BookOpen,
-  digital: FileDown,
-  vintage: Clock,
-  other: Shapes,
-};
-
-// ── Fulfilment ──────────────────────────────────────────────────────────
-
-const FULFILMENT_ICONS: Record<StorefrontFulfilment, LucideIcon> = {
-  physical: Package,
-  digital: Download,
-  services: CalendarClock,
-  mixed: Layers,
-};
+// The tile borrows its look from OptionCardPicker (the designer's visual
+// pickers) rather than inventing a second selected-state treatment.
 
 /**
  * A miniature of what the vibe actually does: its canvas colour, its accent,
@@ -165,73 +105,6 @@ function ChoiceTile({
         </span>
       )}
     </button>
-  );
-}
-
-function TileIcon({ icon: Icon }: { icon: LucideIcon }) {
-  return (
-    <Icon
-      className="size-5 text-foreground"
-      strokeWidth={1.5}
-      aria-hidden="true"
-    />
-  );
-}
-
-export function CategoryGrid({
-  value,
-  onChange,
-}: {
-  value: StorefrontCategory | null;
-  onChange: (value: StorefrontCategory) => void;
-}) {
-  const t = useTranslations("Storefront.createOptions");
-  return (
-    <div
-      role="group"
-      aria-label={t("categoryGroupLabel")}
-      className="grid grid-cols-2 gap-2 sm:grid-cols-3"
-    >
-      {STOREFRONT_CATEGORIES.map((category) => (
-        <ChoiceTile
-          key={category}
-          selected={value === category}
-          onSelect={() => onChange(category)}
-          label={t(`category.${category}`)}
-        >
-          <TileIcon icon={CATEGORY_ICONS[category]} />
-        </ChoiceTile>
-      ))}
-    </div>
-  );
-}
-
-export function FulfilmentGrid({
-  value,
-  onChange,
-}: {
-  value: StorefrontFulfilment | null;
-  onChange: (value: StorefrontFulfilment) => void;
-}) {
-  const t = useTranslations("Storefront.createOptions");
-  return (
-    <div
-      role="group"
-      aria-label={t("fulfilmentGroupLabel")}
-      className="grid grid-cols-2 gap-2"
-    >
-      {STOREFRONT_FULFILMENTS.map((fulfilment) => (
-        <ChoiceTile
-          key={fulfilment}
-          selected={value === fulfilment}
-          onSelect={() => onChange(fulfilment)}
-          label={t(`fulfilment.${fulfilment}`)}
-          hint={t(`fulfilmentHint.${fulfilment}`)}
-        >
-          <TileIcon icon={FULFILMENT_ICONS[fulfilment]} />
-        </ChoiceTile>
-      ))}
-    </div>
   );
 }
 

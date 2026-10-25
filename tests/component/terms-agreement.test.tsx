@@ -1,12 +1,12 @@
 /**
- * The Terms of Service agreement outside the welcome flow: TermsSummary's
- * "read to the end" signal, and Settings › Legal, which records the same
- * agreement the same way (button shut until read, exactly the version shown).
+ * The Terms of Service agreement outside the welcome flow: TermsSummary, and
+ * Settings › Legal, which records the same agreement the same way (no scroll
+ * gate, exactly the version shown).
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
-import { cleanup, fireEvent, render, screen, waitFor, within } from "../setup/render";
+import { cleanup, render, screen, waitFor, within } from "../setup/render";
 import { english } from "../setup/translate";
 import { TERMS_LAST_UPDATED, TERMS_SUMMARY } from "@/lib/legal/terms-summary";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
@@ -24,40 +24,9 @@ beforeEach(() => vi.clearAllMocks());
 
 const AGREE = "I have read and agree to the Terms";
 
-/** jsdom lays nothing out, so the summary box is given its geometry. */
-function layOut(box: HTMLElement, { client, content, top }: { client: number; content: number; top: number }) {
-  Object.defineProperty(box, "clientHeight", { configurable: true, value: client });
-  Object.defineProperty(box, "scrollHeight", { configurable: true, value: content });
-  Object.defineProperty(box, "scrollTop", { configurable: true, value: top });
-}
-
-const summaryBox = () => document.querySelector<HTMLElement>("[data-terms-summary]")!;
-
 describe("TermsSummary", () => {
-  it("reports once, when the box is scrolled to its end", () => {
-    const onReadToEnd = vi.fn();
-    render(<TermsSummary onReadToEnd={onReadToEnd} />);
-
-    layOut(summaryBox(), { client: 300, content: 900, top: 200 });
-    fireEvent.scroll(summaryBox());
-    expect(onReadToEnd).not.toHaveBeenCalled();
-
-    layOut(summaryBox(), { client: 300, content: 900, top: 600 });
-    fireEvent.scroll(summaryBox());
-    fireEvent.scroll(summaryBox());
-    expect(onReadToEnd).toHaveBeenCalledTimes(1);
-  });
-
-  it("never counts a box that has not laid out (zero height) as read", () => {
-    const onReadToEnd = vi.fn();
-    render(<TermsSummary onReadToEnd={onReadToEnd} />);
-    // jsdom's own geometry: everything 0, which would otherwise read as "at the end".
-    fireEvent.scroll(summaryBox());
-    expect(onReadToEnd).not.toHaveBeenCalled();
-  });
-
   it("is a keyboard-scrollable region with the full Terms and Privacy Policy linked", () => {
-    render(<TermsSummary onReadToEnd={() => {}} />);
+    render(<TermsSummary />);
     const region = screen.getByRole("region", { name: "Terms of Service, short version" });
     expect(region).toHaveAttribute("tabindex", "0");
     const links = screen.getAllByRole("link").map((link) => link.getAttribute("href"));
@@ -133,7 +102,7 @@ describe("TermsSummary English copy", () => {
   });
 
   it("renders each heading and point exactly", () => {
-    render(<TermsSummary onReadToEnd={() => {}} />);
+    render(<TermsSummary />);
     const region = screen.getByRole("region", { name: "Terms of Service, short version" });
     const sections = region.querySelectorAll("section");
     expect(sections).toHaveLength(ENGLISH_SUMMARY.length);
@@ -146,7 +115,7 @@ describe("TermsSummary English copy", () => {
   });
 
   it("prints the last-updated line and the links around the summary", () => {
-    render(<TermsSummary onReadToEnd={() => {}} />);
+    render(<TermsSummary />);
     const intro = document.querySelector("[data-terms-full-link]")!.closest("p")!;
     expect(intro.textContent).toBe(
       "The short version, in plain language. Last updated 11 October 2026. Read the full Terms of Service (opens in a new tab)",
@@ -170,17 +139,13 @@ describe("TermsSummary English copy", () => {
 });
 
 describe("LegalSection (Settings › Legal)", () => {
-  it("asks for the agreement the same way as onboarding: shut until read, then the version shown", async () => {
+  it("asks for the agreement the same way as onboarding: no scrolling first, the version shown", async () => {
     const user = userEvent.setup();
     render(<LegalSection acceptedAt={null} acceptedVersion={null} />);
 
-    const agree = () => screen.getByRole("button", { name: AGREE });
-    expect(agree()).toBeDisabled();
-
-    layOut(summaryBox(), { client: 300, content: 900, top: 600 });
-    fireEvent.scroll(summaryBox());
-    expect(agree()).toBeEnabled();
-    await user.click(agree());
+    const agree = screen.getByRole("button", { name: AGREE });
+    expect(agree).toBeEnabled();
+    await user.click(agree);
 
     await waitFor(() => expect(acceptLegalMock).toHaveBeenCalledTimes(1));
     const formData = (acceptLegalMock.mock.calls[0] as unknown as [unknown, FormData])[1];
@@ -199,6 +164,6 @@ describe("LegalSection (Settings › Legal)", () => {
   it("asks again when the Terms changed since the agreement on file", () => {
     render(<LegalSection acceptedAt="2026-09-01T10:00:00.000Z" acceptedVersion="2026-09-draft.2" />);
     expect(screen.getByText(/have changed since/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: AGREE })).toBeDisabled();
+    expect(screen.getByRole("button", { name: AGREE })).toBeEnabled();
   });
 });

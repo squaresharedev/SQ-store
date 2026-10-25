@@ -59,8 +59,9 @@ let celebratedInThisTab = false;
  * sign-up lands here through a server action's redirect, a soft navigation, and
  * an effect-opened dialog would flash the page it covers first.
  *
- * Whichever way the welcome is left (skipped, closed, or on into the tour), the
- * fact is recorded once.
+ * Whichever way the welcome is left (finished, skipped or closed), the fact is
+ * recorded once. The tour is never started for the seller: the checklist
+ * offers it.
  *
  * The finished card is LATCHED for the visit: once shown it stays up even after
  * the server has recorded it, because the welcome's own write revalidates this
@@ -110,8 +111,8 @@ export function OnboardingPanel({
     openRef.current = open;
   }, [open]);
 
-  // `?tour=1` (the search action). Never over the welcome, which starts the
-  // tour itself; the query is dropped either way, or a refresh would restart it.
+  // `?tour=1` (the search action). Never over the welcome; the query is dropped
+  // either way, or a refresh would restart it.
   useEffect(() => {
     if (!tourRequested) return;
     if (!openRef.current) startTour({ next: nextRef.current });
@@ -129,11 +130,9 @@ export function OnboardingPanel({
     void record();
   }, [record]);
 
-  const beginTour = useCallback(() => {
-    setOpen(false);
-    void record();
-    startTour({ next: nextRef.current });
-  }, [record]);
+  // The tour is the seller's choice, from the checklist; it hands over to the
+  // next setup step when it ends.
+  const beginTour = useCallback(() => startTour({ next: nextRef.current }), []);
 
   // Steps done since this device last looked animate on the card. The "before"
   // is LATCHED for the visit, not re-read from each server render: the cookie
@@ -180,12 +179,12 @@ export function OnboardingPanel({
           freshSteps={freshSteps}
           paused={open}
           onStepsSeen={stepsSeen}
+          onTour={beginTour}
         />
       )}
       <WelcomeFlow
         open={open}
         onClose={close}
-        onStartTour={beginTour}
         includeTermsStep={!termsAccepted}
         includeSellerStep={seller !== null && setup?.seller === "missing"}
         seller={seller ?? EMPTY_SELLER}

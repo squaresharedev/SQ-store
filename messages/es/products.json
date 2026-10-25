@@ -369,6 +369,7 @@
     "uploadingLabel": "{what, select, image {Subiendo imagen} photo {Subiendo foto} document {Subiendo documento} other {Subiendo archivo}}",
     "processingLabel": "{what, select, image {Procesando imagen} photo {Procesando foto} document {Procesando documento} other {Procesando archivo}}",
     "saveChanges": "Guardar cambios",
+    "saveDraft": "Guardar como borrador",
     "saveProduct": "Guardar producto",
     "savedToast": "«{title}» se ha guardado.",
     "addedToast": "«{title}» se ha añadido a tus productos.",

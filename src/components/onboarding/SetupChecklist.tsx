@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ArrowRight, CheckCircle2, ChevronDown, ExternalLink } from "lucide-react";
 import { ModuleCard } from "@/components/dashboard/ModuleCard";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClassName } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/CopyButton";
 import {
   chipButtonClass,
@@ -32,6 +32,10 @@ const ROW_LINK_CLASS =
   "group/btn inline-flex items-center gap-1 font-inter text-xs font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none";
 
 const HEADER_BUTTON_CLASS = "px-2 py-1.5 text-xs";
+
+/** The next step's action: the one real button on the card, so the thing to
+ *  do now is never one quiet link among several. */
+const NEXT_BUTTON_CLASS = buttonClassName("primary", "px-3 py-1.5 text-xs");
 
 /**
  * "GET SET UP": Overview's checklist from a new account to a live product page.
@@ -61,6 +65,7 @@ export function SetupChecklist({
   freshSteps = [],
   paused = false,
   onStepsSeen,
+  onTour,
 }: {
   setup: SetupChecklistData;
   /** The live product page as an absolute URL, when there is one. */
@@ -79,6 +84,8 @@ export function SetupChecklist({
   /** The steps have been on screen, unfolded and uncovered: what they show now
    *  counts as seen. Called again whenever that changes while on screen. */
   onStepsSeen?: () => void;
+  /** Start the guided tour: offered here rather than started for the seller. */
+  onTour?: () => void;
 }) {
   const t = useTranslations();
   const listId = useId();
@@ -196,12 +203,19 @@ export function SetupChecklist({
           </div>
         ) : (
           <>
-            <p className={cn(infoTextClass, "mb-3")}>
-              {t("Onboarding.checklist.progress", {
-                done: setup.doneCount,
-                total: setup.total,
-              })}
-            </p>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p className={infoTextClass}>
+                {t("Onboarding.checklist.progress", {
+                  done: setup.doneCount,
+                  total: setup.total,
+                })}
+              </p>
+              {onTour && (
+                <button type="button" onClick={onTour} className={ROW_LINK_CLASS} data-setup-tour="">
+                  {t("Onboarding.welcome.nav.showMeAround")}
+                </button>
+              )}
+            </div>
             <div id={listId} hidden={collapsed} className="@container">
               <div className={cn("relative", MAP_WIDTH_CLASS)}>
                 <ol className="relative">
@@ -252,7 +266,10 @@ export function SetupChecklist({
                           </div>
                         </div>
                         {!step.done && step.action && (
-                          <Link href={step.action.href} className={ROW_LINK_CLASS}>
+                          <Link
+                            href={step.action.href}
+                            className={step.id === setup.next?.id ? NEXT_BUTTON_CLASS : ROW_LINK_CLASS}
+                          >
                             {t(step.action.label.key, step.action.label.values)}
                             <ArrowRight
                               className={cn("size-3", iconNudgeRightClass)}

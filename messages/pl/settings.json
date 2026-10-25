@@ -10,9 +10,6 @@
     "notifications": {
       "title": "Ustawienia powiadomień"
     },
-    "language": {
-      "title": "Ustawienia języka"
-    },
     "danger": {
       "title": "Strefa niebezpieczna"
     },
@@ -233,7 +230,6 @@
     "agreeButton": "Akceptuję Warunki po zapoznaniu się z nimi",
     "acceptNote": "Akceptacja zapisuje na twoim koncie datę i wersję <code>{version}</code>.",
     "agreeNote": "Akceptacja zapisuje na twoim koncie datę i wersję <code>{version}</code>.",
-    "scrollToAgree": "Przewiń do końca podsumowania, aby zaakceptować.",
     "success": {
       "legalAccepted": "Zaakceptowano. Dziękujemy za przeczytanie drobnego druku.",
       "termsAgreed": "Warunki korzystania z usługi zostały zaakceptowane."

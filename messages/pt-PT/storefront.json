@@ -189,6 +189,7 @@
   "card": {
     "editAriaLabel": "Editar {name}",
     "embedAriaLabel": "Partilhar ou incorporar {name}",
+    "share": "Partilhar",
     "viewPageAriaLabel": "Abrir {name} como os compradores a veem",
     "deleteAriaLabel": "Eliminar {name}",
     "blockCount": "{count, plural, one {# bloco} many {# de blocos} other {# blocos}}",
@@ -277,14 +278,6 @@
     }
   },
   "wizard": {
-    "category": {
-      "title": "O que vende?",
-      "description": "Esta é a maior pista sobre que esquemas lhe vão servir melhor."
-    },
-    "fulfilment": {
-      "title": "Como é que os compradores o recebem?",
-      "description": "Isto molda o que as suas páginas de produto dizem sobre a entrega."
-    },
     "vibe": {
       "title": "Escolha um aspeto",
       "description": "O seu ponto de partida. Tudo continua editável no editor."
@@ -296,33 +289,13 @@
     "stepOf": "Passo {current} de {total}",
     "nameLabel": "Nome da montra",
     "nameHint": "Deixe em branco e vamos chamar-lhe Montra sem título.",
-    "otherCategoryLabel": "O que vende?",
-    "otherCategoryPlaceholder": "p. ex. kits de modelismo",
     "noProductsHint": "Ainda sem produtos? Adicione-os depois da configuração.",
     "skipSetup": "Saltar configuração",
-    "skip": "Saltar",
     "creating": "A criar…",
     "create": "Criar montra"
   },
   "createOptions": {
-    "categoryGroupLabel": "O que vende",
-    "fulfilmentGroupLabel": "Como o recebem",
     "vibeGroupLabel": "O aspeto que quer",
-    "category": {
-      "fashion": "Roupa",
-      "art": "Arte e impressões",
-      "jewellery": "Joalharia",
-      "handmade": "Artesanato",
-      "home": "Casa e decoração",
-      "beauty": "Beleza",
-      "food": "Comida e bebidas",
-      "music": "Música",
-      "photography": "Fotografia",
-      "books": "Livros e fanzines",
-      "digital": "Produtos digitais",
-      "vintage": "Vintage",
-      "other": "Outra coisa"
-    },
     "categoryPlaceholder": {
       "fashion": "A minha loja de roupa",
       "art": "A minha loja de arte",
@@ -338,18 +311,6 @@
       "vintage": "A minha loja vintage",
       "other": "A minha loja",
       "default": "A minha montra"
-    },
-    "fulfilment": {
-      "physical": "Eu envio",
-      "digital": "Eles transferem",
-      "services": "Eles reservam comigo",
-      "mixed": "Um pouco de cada"
-    },
-    "fulfilmentHint": {
-      "physical": "Produtos físicos",
-      "digital": "Ficheiros, predefinições, música",
-      "services": "Sessões, encomendas personalizadas",
-      "mixed": "Mais do que uma destas opções"
     },
     "vibe": {
       "minimal": "Minimalista",

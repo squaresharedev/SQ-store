@@ -83,9 +83,6 @@
         "title": "Boas-vindas ao Square Share",
         "description": "Quatro passos até uma página de produto que pode partilhar."
       },
-      "path": {
-        "title": "Quatro passos até à sua primeira página"
-      },
       "seller": {
         "title": "Adicione os seus dados de vendedor",
         "description": "Os compradores veem estes dados nas suas páginas de produto, e a lei exige-os antes de poder vender. Nunca os utilizamos para marketing.",
@@ -156,12 +153,6 @@
       "buyNow": "Comprar agora",
       "live": "Publicado",
       "linkCopied": "Link copiado"
-    },
-    "setupPath": {
-      "details": "Adicione os seus dados",
-      "product": "Adicione um produto",
-      "storefront": "Desenhe uma montra",
-      "share": "Partilhe a sua página"
     },
     "terms": {
       "agreed": "Aceitou estes Termos. Obrigado por ler.",

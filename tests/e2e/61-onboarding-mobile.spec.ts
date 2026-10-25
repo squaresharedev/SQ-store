@@ -59,14 +59,13 @@ test.describe("onboarding on a phone", () => {
     expect(summary.y, "summary top edge").toBeGreaterThanOrEqual(0);
     expect(summary.x + summary.width, "summary right edge").toBeLessThanOrEqual(viewport.width);
     await agreeToTerms(page);
-    await expectOnScreen("Skip onboarding");
-    await dialog.getByRole("button", { name: "Get started" }).click();
-    await expect(page.getByRole("dialog", { name: "Add your seller details" })).toBeVisible();
     await expectOnScreen("Save and continue");
     await expectOnScreen("Skip for now");
     await expectOnScreen("Skip onboarding");
 
     await dialog.getByRole("button", { name: "Skip for now" }).click();
+    // The welcome lands on the checklist; the tour is the seller's to start.
+    await page.locator("[data-setup-tour]").click();
 
     // The tour's first stop on a phone is the menu button, not the off-screen rail.
     await expectTourStep(page, "overview-nav");

@@ -369,6 +369,7 @@
     "uploadingLabel": "{what, select, image {Nahrávání obrázku} photo {Nahrávání fotky} document {Nahrávání dokumentu} other {Nahrávání souboru}}",
     "processingLabel": "{what, select, image {Zpracování obrázku} photo {Zpracování fotky} document {Zpracování dokumentu} other {Zpracování souboru}}",
     "saveChanges": "Uložit změny",
+    "saveDraft": "Uložit jako koncept",
     "saveProduct": "Uložit produkt",
     "savedToast": "Produkt „{title}“ byl uložen.",
     "addedToast": "Produkt „{title}“ byl přidán mezi vaše produkty.",

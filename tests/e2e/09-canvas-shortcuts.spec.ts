@@ -179,4 +179,27 @@ test.describe("storefront canvas shortcuts", () => {
     await page.keyboard.press("Delete");
     await expect(tile).toBeHidden();
   });
+
+  test("Ctrl+S saves, even from inside the text being typed", async () => {
+    const tile = await addTextBlock();
+    await expect(page.getByText("Unsaved changes")).toBeVisible();
+    await tile.click(); // the caret goes in
+    await expect(canvasText()).toBeFocused();
+    await page.keyboard.press("Control+s");
+    await expect(page.getByText("Unsaved changes")).toBeHidden({ timeout: 15_000 });
+
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Delete");
+    await expect(tile).toBeHidden();
+    await page.keyboard.press("Control+s");
+    await expect(page.getByText("Unsaved changes")).toBeHidden({ timeout: 15_000 });
+  });
+
+  test("Share is one click from the design", async () => {
+    await page.locator("[data-designer-share]").click();
+    await page.waitForURL(/\/storefront\/[0-9a-f-]{36}\/embed$/, { timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: "Share this storefront" })).toBeVisible();
+    await page.goBack();
+    await expect(page.getByRole("toolbar", { name: "Editor tools" })).toBeVisible();
+  });
 });

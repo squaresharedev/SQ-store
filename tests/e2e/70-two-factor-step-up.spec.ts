@@ -53,7 +53,7 @@ test.describe("two-factor step-up", () => {
     await page.waitForLoadState("networkidle").catch(() => {});
     await page.getByRole("button", { name: "Delete my account" }).click();
     await page.getByLabel(/to confirm/i).fill("delete my account");
-    // Scoped: the export card above asks for its own code too.
+    // Scoped to the deletion form, the one control on this page.
     const code = page.locator("#delete").getByLabel("Authenticator code");
     await expect(code).toBeVisible({ timeout: 10_000 });
     await code.fill(await nextCode(app));
@@ -109,12 +109,13 @@ test.describe("two-factor step-up", () => {
     const stale = await page.request.get("/settings/export");
     expect(stale.status()).toBe(403);
 
-    // The Danger zone asks for the code first, then downloads.
-    await page.goto("/settings/danger");
+    // Account asks for the code first, then downloads.
+    await page.goto("/settings/account");
     await page.waitForLoadState("networkidle").catch(() => {});
-    await page.getByLabel("Authenticator code").fill(await nextCode(app));
+    const exportCard = page.locator("#export");
+    await exportCard.getByLabel("Authenticator code").fill(await nextCode(app));
     const download = page.waitForEvent("download", { timeout: 30_000 });
-    await page.getByRole("button", { name: "Download my data" }).click();
+    await exportCard.getByRole("button", { name: "Download my data" }).click();
     expect((await download).suggestedFilename()).toMatch(/^square-share-export-.*\.json$/);
     await context.close();
   });

@@ -141,24 +141,16 @@ test.describe("accessibility", () => {
         .toBe("1");
     }
 
-    // The tile grid: 13 toggle buttons, each an icon over a label.
-    await settled();
-    await expectNoSeriousViolations(page, "setup flow (categories)");
-
-    // And the swatch step, where the only thing separating the tiles is
-    // colour, so the text label has to carry the meaning.
-    await dialog.getByRole("button", { name: "Art & prints" }).click();
-    await dialog.getByRole("button", { name: "Next" }).click();
-    await dialog.getByRole("button", { name: /I ship it/ }).click();
-    await dialog.getByRole("button", { name: "Next" }).click();
-    await expect(dialog).toContainText("Step 3 of 4");
+    // The swatch step, where the only thing separating the tiles is colour,
+    // so the text label has to carry the meaning.
+    await expect(dialog).toContainText("Step 1 of 2");
     await settled();
     await expectNoSeriousViolations(page, "setup flow (looks)");
   });
 
   test("welcome flow and guided tour", async ({ page }) => {
     // The first thing a new seller meets, so each part is scanned: the welcome
-    // (icon tiles), the Terms (a scroll region, a gated button), the seller
+    // (icon tiles), the Terms (a scroll region), the seller
     // details form, then the tour it hands over to at
     // an anchored stop, a stop on another page, and a fallback stop.
     test.setTimeout(180_000);
@@ -203,23 +195,17 @@ test.describe("accessibility", () => {
     await settled();
     await expectNoSeriousViolations(page, "welcome flow (welcome picture)");
 
-    // The Terms, with the agree button still shut (a real state to scan), then
-    // read and agreed to.
+    // The Terms, then agreed to.
     await openTermsStep(page);
     await settled();
     await expectNoSeriousViolations(page, "welcome flow (terms of service)");
     await agreeToTerms(page);
 
-    const pathSlide = page.getByRole("dialog", { name: "Four steps to your first page" });
-    await settled();
-    await expectNoSeriousViolations(page, "welcome flow (four-step timeline)");
-
-    await pathSlide.getByRole("button", { name: "Get started" }).click();
-    await expect(page.getByRole("dialog", { name: "Add your seller details" })).toBeVisible();
     await settled();
     await expectNoSeriousViolations(page, "welcome flow (seller details)");
 
     await dialog.getByRole("button", { name: "Skip for now" }).click();
+    await page.locator("[data-setup-tour]").click();
 
     /** The tour's card fades in once placed; scan it at full opacity. */
     async function tourSettled() {

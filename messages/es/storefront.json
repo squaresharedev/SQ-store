@@ -189,6 +189,7 @@
   "card": {
     "editAriaLabel": "Editar {name}",
     "embedAriaLabel": "Compartir o incorporar {name}",
+    "share": "Compartir",
     "viewPageAriaLabel": "Abrir {name} como lo ven los compradores",
     "deleteAriaLabel": "Eliminar {name}",
     "blockCount": "{count, plural, one {# bloque} many {# bloques} other {# bloques}}",
@@ -277,14 +278,6 @@
     }
   },
   "wizard": {
-    "category": {
-      "title": "¿Qué vendes?",
-      "description": "Es la pista más importante para saber qué diseños te van bien."
-    },
-    "fulfilment": {
-      "title": "¿Cómo lo reciben los compradores?",
-      "description": "Define qué dicen tus páginas de producto sobre la entrega."
-    },
     "vibe": {
       "title": "Elige un aspecto",
       "description": "Tu punto de partida. Todo se puede seguir editando en el editor."
@@ -296,33 +289,13 @@
     "stepOf": "Paso {current} de {total}",
     "nameLabel": "Nombre del escaparate",
     "nameHint": "Déjalo en blanco y lo llamaremos Escaparate sin título.",
-    "otherCategoryLabel": "¿Qué vendes?",
-    "otherCategoryPlaceholder": "p. ej. maquetas",
     "noProductsHint": "¿Todavía no tienes productos? Añádelos después de la configuración.",
     "skipSetup": "Saltar configuración",
-    "skip": "Saltar",
     "creating": "Creando…",
     "create": "Crear escaparate"
   },
   "createOptions": {
-    "categoryGroupLabel": "Qué vendes",
-    "fulfilmentGroupLabel": "Cómo lo reciben los compradores",
     "vibeGroupLabel": "El aspecto que quieres",
-    "category": {
-      "fashion": "Ropa",
-      "art": "Arte y láminas",
-      "jewellery": "Joyería",
-      "handmade": "Hecho a mano",
-      "home": "Hogar",
-      "beauty": "Belleza",
-      "food": "Comida y bebida",
-      "music": "Música",
-      "photography": "Fotografía",
-      "books": "Libros y fanzines",
-      "digital": "Productos digitales",
-      "vintage": "Vintage",
-      "other": "Otra cosa"
-    },
     "categoryPlaceholder": {
       "fashion": "Mi tienda de ropa",
       "art": "Mi tienda de arte",
@@ -338,18 +311,6 @@
       "vintage": "Mi tienda vintage",
       "other": "Mi tienda",
       "default": "Mi escaparate"
-    },
-    "fulfilment": {
-      "physical": "Yo lo envío",
-      "digital": "Lo descargan",
-      "services": "Me reservan",
-      "mixed": "Un poco de cada"
-    },
-    "fulfilmentHint": {
-      "physical": "Productos físicos",
-      "digital": "Archivos, presets, música",
-      "services": "Sesiones, encargos",
-      "mixed": "Más de uno de estos"
     },
     "vibe": {
       "minimal": "Minimalista",

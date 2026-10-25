@@ -10,9 +10,6 @@
     "notifications": {
       "title": "Notification settings"
     },
-    "language": {
-      "title": "Language settings"
-    },
     "danger": {
       "title": "Danger zone"
     },
@@ -233,7 +230,6 @@
     "agreeButton": "I have read and agree to the Terms",
     "acceptNote": "Accepting records the date and version <code>{version}</code> to your account.",
     "agreeNote": "Agreeing records the date and version <code>{version}</code> on your account.",
-    "scrollToAgree": "Scroll to the end of the summary to agree.",
     "success": {
       "legalAccepted": "Accepted. Thanks for reading the fine print.",
       "termsAgreed": "You've agreed to the Terms of Service."

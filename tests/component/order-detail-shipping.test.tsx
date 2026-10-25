@@ -121,7 +121,8 @@ describe("marking it shipped", () => {
     await user.type(field, "RR123456789IE");
     await user.click(screen.getByRole("button", { name: "Mark shipped" }));
 
-    expect(markOrderShippedMock).toHaveBeenCalledWith(waiting.id, "RR123456789IE", null);
+    // The number names its post (S10, "…IE"), so the carrier came with it.
+    expect(markOrderShippedMock).toHaveBeenCalledWith(waiting.id, "RR123456789IE", "an-post");
     await playOut();
     expect(onOrderChange).toHaveBeenCalledWith(after);
     expect(await screen.findByText("Marked as shipped. We've emailed the buyer.")).toBeInTheDocument();
@@ -169,6 +170,42 @@ describe("marking it shipped", () => {
     await user.click(screen.getByRole("button", { name: "Mark shipped" }));
     expect(markOrderShippedMock).toHaveBeenCalledWith(waiting.id, "", null);
     await playOut();
+  });
+
+  it("picks the carrier a number names, and opens on the last one used", async () => {
+    const user = userEvent.setup();
+    localStorage.clear();
+    markOrderShippedMock.mockResolvedValue({ ok: true, order: waiting, buyerEmailed: true });
+    renderDetail(waiting);
+
+    await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
+    await user.type(screen.getByLabelText("Tracking number (optional)"), "RR123456789IE");
+    // No trip to the list: an S10 number ends in the post that issued it.
+    expect(screen.getByRole("combobox", { name: "Carrier (optional)" })).toHaveTextContent("An Post");
+    await user.click(screen.getByRole("button", { name: "Mark shipped" }));
+    expect(markOrderShippedMock).toHaveBeenCalledWith(waiting.id, "RR123456789IE", "an-post");
+    await playOut();
+
+    // The next parcel opens on the same carrier, waiting for its number.
+    cleanup();
+    renderDetail(orderView({ ...waiting, id: "next-order" }));
+    await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
+    await user.type(screen.getByLabelText("Tracking number (optional)"), "123456");
+    expect(screen.getByRole("combobox", { name: "Carrier (optional)" })).toHaveTextContent("An Post");
+    localStorage.clear();
+  });
+
+  it("never overrides a carrier the seller picked", async () => {
+    const user = userEvent.setup();
+    localStorage.clear();
+    renderDetail(waiting);
+    await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
+    const field = screen.getByLabelText("Tracking number (optional)");
+    await user.type(field, "1");
+    await user.click(screen.getByRole("combobox", { name: "Carrier (optional)" }));
+    await user.click(screen.getByRole("option", { name: "DHL" }));
+    await user.type(field, "Z999AA10123456784");
+    expect(screen.getByRole("combobox", { name: "Carrier (optional)" })).toHaveTextContent("DHL");
   });
 
   it("does not claim the buyer was told when they were not", async () => {
@@ -308,7 +345,7 @@ describe("a shipped order", () => {
     await user.clear(field);
     await user.type(field, "RR000000001IE");
     await user.click(screen.getByRole("button", { name: "Save tracking number" }));
-    expect(markOrderShippedMock).toHaveBeenCalledWith(sent.id, "RR000000001IE", null);
+    expect(markOrderShippedMock).toHaveBeenCalledWith(sent.id, "RR000000001IE", "an-post");
     expect(
       await screen.findByText("Tracking number saved. We've sent it to the buyer."),
     ).toBeInTheDocument();

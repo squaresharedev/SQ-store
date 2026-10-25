@@ -369,6 +369,7 @@
     "uploadingLabel": "{what, select, image {Import de l’image} photo {Import de la photo} document {Import du document} other {Import du fichier}}",
     "processingLabel": "{what, select, image {Traitement de l’image} photo {Traitement de la photo} document {Traitement du document} other {Traitement du fichier}}",
     "saveChanges": "Enregistrer les modifications",
+    "saveDraft": "Enregistrer comme brouillon",
     "saveProduct": "Enregistrer le produit",
     "savedToast": "« {title} » a été enregistré.",
     "addedToast": "« {title} » a été ajouté à vos produits.",

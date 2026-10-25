@@ -165,6 +165,8 @@ export const WELCOME_DIALOG = "Welcome to Square Share";
 
 /** The welcome flow's Terms step, as named by its title. */
 export const TERMS_DIALOG = "Our Terms of Service";
+/** The welcome's seller details slide, by its accessible name. */
+export const SELLER_DIALOG = "Add your seller details";
 
 /**
  * Sign up through the real UI; lands on the dashboard.
@@ -237,18 +239,13 @@ export async function openTermsStep(page: Page) {
 }
 
 /**
- * On the Terms step: scroll the summary to its end (which is what opens the
- * button) and agree. Lands on the four-step path.
+ * On the Terms step: agree. Lands on the seller details, which every new
+ * account still has to fill in.
  */
 export async function agreeToTerms(page: Page) {
   const terms = page.getByRole("dialog", { name: TERMS_DIALOG });
-  await terms.locator("[data-terms-summary]").evaluate((box) => {
-    box.scrollTop = box.scrollHeight;
-  });
-  const agree = terms.getByRole("button", { name: "I have read and agree to the Terms" });
-  await expect(agree).toBeEnabled();
-  await agree.click();
-  await expect(page.getByRole("dialog", { name: "Four steps to your first page" })).toBeVisible({
+  await terms.getByRole("button", { name: "I have read and agree to the Terms" }).click();
+  await expect(page.getByRole("dialog", { name: SELLER_DIALOG })).toBeVisible({
     timeout: 20_000,
   });
 }
@@ -307,14 +304,11 @@ export async function expectSpotlightOn(page: Page, target: Locator) {
     .toBe("on target");
 }
 
-/** The welcome's slides up to its seller details form: Next, agree to the
- *  Terms, then Get started. */
+/** The welcome's slides up to its seller details form: Next, then agree to
+ *  the Terms. */
 export async function openSellerStep(page: Page) {
   await openTermsStep(page);
   await agreeToTerms(page);
-  const path = page.getByRole("dialog", { name: "Four steps to your first page" });
-  await path.getByRole("button", { name: "Get started" }).click();
-  await expect(page.getByRole("dialog", { name: "Add your seller details" })).toBeVisible();
 }
 
 /** Sign in through the real UI. */

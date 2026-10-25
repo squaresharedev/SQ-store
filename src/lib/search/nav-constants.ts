@@ -12,7 +12,6 @@ import {
 import {
   Bell,
   Gem,
-  Languages,
   Receipt,
   ScrollText,
   ShieldCheck,
@@ -90,19 +89,19 @@ export const SETTINGS_LINK: NavEntry = {
 
 export const SETTINGS_NAV: SettingsNavEntry[] = [
   { href: "/settings/account", label: "Nav.settings.account", icon: User },
-  // Straight after Account: two-factor, recovery codes and the security
-  // activity log. The rail marks it "Recommended" while 2FA is off.
+  // Second: the one page a seller has to fill in before they can sell.
+  { href: TRADER_IDENTITY_HREF, label: "Nav.settings.tax", icon: Receipt },
+  // Beside Business, not off in the storefront designer where these terms used
+  // to be written: both are account-level facts about the business that every
+  // storefront and every product reads (20260905_shipping_policy_on_profile).
+  { href: "/settings/shipping", label: "Nav.settings.shipping", icon: Truck },
+  // Two-factor, recovery codes and the security activity log. The rail marks
+  // it "Recommended" while 2FA is off.
   { href: "/settings/security", label: "Nav.settings.security", icon: ShieldCheck },
   // The store's plan, its fee per sale and its invoices (lib/billing).
   { href: BILLING_SETTINGS_PATH, label: "Nav.settings.billing", icon: Gem },
   { href: "/settings/legal", label: "Nav.settings.legal", icon: ScrollText },
-  { href: TRADER_IDENTITY_HREF, label: "Nav.settings.tax", icon: Receipt },
-  // Beside Tax, not off in the storefront designer where these terms used to
-  // be written: both are account-level facts about the business that every
-  // storefront and every product reads (20260905_shipping_policy_on_profile).
-  { href: "/settings/shipping", label: "Nav.settings.shipping", icon: Truck },
   { href: "/settings/notifications", label: "Nav.settings.notifications", icon: Bell },
-  { href: "/settings/language", label: "Nav.settings.language", icon: Languages },
   { href: "/settings/team", label: "Nav.settings.team", icon: Users },
   {
     href: "/settings/danger",

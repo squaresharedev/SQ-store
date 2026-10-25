@@ -189,6 +189,7 @@
   "card": {
     "editAriaLabel": "Edytuj: {name}",
     "embedAriaLabel": "Udostępnij lub osadź: {name}",
+    "share": "Udostępnij",
     "viewPageAriaLabel": "Otwórz {name} tak, jak widzą ją kupujący",
     "deleteAriaLabel": "Usuń: {name}",
     "blockCount": "{count, plural, one {# blok} few {# bloki} many {# bloków} other {# bloku}}",
@@ -277,14 +278,6 @@
     }
   },
   "wizard": {
-    "category": {
-      "title": "Co sprzedajesz?",
-      "description": "To największa wskazówka, jakie układy będą dla ciebie odpowiednie."
-    },
-    "fulfilment": {
-      "title": "Jak kupujący to otrzymują?",
-      "description": "To wpływa na to, co strony twoich produktów mówią o dostawie."
-    },
     "vibe": {
       "title": "Wybierz wygląd",
       "description": "Twój punkt wyjścia. Wszystko pozostaje edytowalne w edytorze."
@@ -296,33 +289,13 @@
     "stepOf": "Krok {current} z {total}",
     "nameLabel": "Nazwa witryny",
     "nameHint": "Zostaw puste, a nazwiemy ją Witryna bez nazwy.",
-    "otherCategoryLabel": "Co sprzedajesz?",
-    "otherCategoryPlaceholder": "np. modele do sklejania",
     "noProductsHint": "Nie masz jeszcze produktów? Dodaj je po konfiguracji.",
     "skipSetup": "Pomiń konfigurację",
-    "skip": "Pomiń",
     "creating": "Tworzenie…",
     "create": "Utwórz witrynę"
   },
   "createOptions": {
-    "categoryGroupLabel": "Co sprzedajesz",
-    "fulfilmentGroupLabel": "Jak kupujący to otrzymują",
     "vibeGroupLabel": "Wygląd, jaki chcesz",
-    "category": {
-      "fashion": "Odzież",
-      "art": "Sztuka i grafiki",
-      "jewellery": "Biżuteria",
-      "handmade": "Rękodzieło",
-      "home": "Dom i wnętrza",
-      "beauty": "Uroda",
-      "food": "Jedzenie i napoje",
-      "music": "Muzyka",
-      "photography": "Fotografia",
-      "books": "Książki i ziny",
-      "digital": "Produkty cyfrowe",
-      "vintage": "Vintage",
-      "other": "Coś innego"
-    },
     "categoryPlaceholder": {
       "fashion": "Mój sklep odzieżowy",
       "art": "Mój sklep z sztuką",
@@ -338,18 +311,6 @@
       "vintage": "Mój sklep vintage",
       "other": "Mój sklep",
       "default": "Moja witryna"
-    },
-    "fulfilment": {
-      "physical": "Wysyłam to",
-      "digital": "Pobierają to",
-      "services": "Rezerwują mnie",
-      "mixed": "Po trochu każdego"
-    },
-    "fulfilmentHint": {
-      "physical": "Produkty fizyczne",
-      "digital": "Pliki, presety, muzyka",
-      "services": "Sesje, zlecenia",
-      "mixed": "Więcej niż jedno z powyższych"
     },
     "vibe": {
       "minimal": "Minimalistyczny",
