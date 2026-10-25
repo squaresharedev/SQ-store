@@ -195,7 +195,9 @@ test.describe("storefront canvas shortcuts", () => {
     await page.keyboard.press("Delete");
     await expect(tile).toBeHidden();
     await page.keyboard.press("Control+s");
-    await expectToast(page, "Storefront saved.");
+    // Done when Save is back from "Saving…": the first save's toast may still
+    // be up, so a toast alone does not prove this one landed.
+    await expect(page.locator("header").getByRole("button", { name: "Save", exact: true })).toBeEnabled({ timeout: 15_000 });
     await expect(page.getByText("Unsaved changes")).toBeHidden();
   });
 
