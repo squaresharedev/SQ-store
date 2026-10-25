@@ -108,10 +108,10 @@
     "noOrders": "Zatím žádné objednávky"
   },
   "channels": {
-    "embed": "Výloha na vašem webu",
+    "embed": "Na vašem webu",
     "marketplace": "Tržiště",
-    "direct": "Stránka na Square Share",
-    "button": "Tlačítko nákupu na webu"
+    "direct": "Vaše stránka",
+    "button": "Tlačítko nákupu"
   },
   "signalsUnavailable": {
     "title": "Zobrazení a přihlášení k odběru teď nejsou k dispozici",

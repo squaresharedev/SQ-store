@@ -15,10 +15,10 @@
     "pending": "In sospeso"
   },
   "channel": {
-    "embed": "Vetrina sul tuo sito",
+    "embed": "Sul tuo sito",
     "marketplace": "Marketplace",
-    "direct": "Pagina su Square Share",
-    "button": "Pulsante di acquisto sul tuo sito"
+    "direct": "La tua pagina",
+    "button": "Pulsante di acquisto"
   },
   "empty": {
     "filteredTitle": "Nessun ordine corrisponde a questi filtri",

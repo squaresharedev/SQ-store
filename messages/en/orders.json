@@ -15,10 +15,10 @@
     "pending": "Pending"
   },
   "channel": {
-    "embed": "Storefront on your site",
+    "embed": "On your site",
     "marketplace": "Marketplace",
-    "direct": "Square Share page",
-    "button": "Buy button on your site"
+    "direct": "Your page",
+    "button": "Buy button"
   },
   "empty": {
     "filteredTitle": "No orders match these filters",

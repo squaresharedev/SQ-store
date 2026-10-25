@@ -778,7 +778,7 @@
       "exact": "Es ist kein Skript, SDK oder API-Aufruf nötig. Lass die URL genau so, wie sie ist, einschließlich allem nach dem Fragezeichen."
     },
     "tryIt": "Button testen",
-    "tracking": "Erscheint in Analysen als „Kauf-Button auf deiner Website“.",
+    "tracking": "Erscheint in Analysen als „Kauf-Button“.",
     "blocked": {
       "removed": "Dieses Produkt wurde offline genommen. Öffne es, um zu sehen, warum.",
       "draft": "Dieses Produkt ist ein Entwurf. Stelle es zuerst auf Aktiv.",

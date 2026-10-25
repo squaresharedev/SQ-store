@@ -108,10 +108,10 @@
     "noOrders": "Ainda sem encomendas"
   },
   "channels": {
-    "embed": "Montra no seu site",
+    "embed": "No seu site",
     "marketplace": "Marketplace",
-    "direct": "Página na Square Share",
-    "button": "Botão de compra no seu site"
+    "direct": "A sua página",
+    "button": "Botão de compra"
   },
   "signalsUnavailable": {
     "title": "As visualizações e subscrições estão indisponíveis de momento",

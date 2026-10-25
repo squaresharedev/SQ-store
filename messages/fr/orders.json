@@ -15,10 +15,10 @@
     "pending": "En attente"
   },
   "channel": {
-    "embed": "Vitrine sur votre site",
+    "embed": "Sur votre site",
     "marketplace": "Marketplace",
-    "direct": "Page Square Share",
-    "button": "Bouton d’achat sur votre site"
+    "direct": "Votre page",
+    "button": "Bouton d’achat"
   },
   "empty": {
     "filteredTitle": "Aucune commande ne correspond à ces filtres",

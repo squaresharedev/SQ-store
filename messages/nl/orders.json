@@ -15,10 +15,10 @@
     "pending": "In behandeling"
   },
   "channel": {
-    "embed": "Etalage op je website",
+    "embed": "Op je website",
     "marketplace": "Marketplace",
-    "direct": "Square Share-pagina",
-    "button": "Koopknop op je website"
+    "direct": "Jouw pagina",
+    "button": "Koopknop"
   },
   "empty": {
     "filteredTitle": "Geen bestellingen komen overeen met deze filters",

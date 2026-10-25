@@ -392,7 +392,7 @@ test.describe("hosted product page", () => {
 
     // The attribution keeps its own words as its name, and stays the only
     // claim Squareshare makes on this page.
-    await expect(footer.getByRole("link", { name: /powered by squareshare/i })).toHaveAttribute(
+    await expect(footer.getByRole("link", { name: /powered by square share/i })).toHaveAttribute(
       "href",
       "https://squareshare.eu",
     );
@@ -629,7 +629,7 @@ test.describe("hosted product page", () => {
     // real page rather than open a panel.
     const editorFooter = artboard.locator("[data-product-page-footer]");
     for (const [name, href] of [
-      [/^powered by squareshare$/i, "https://squareshare.eu"],
+      [/^powered by square share$/i, "https://squareshare.eu"],
       ["Square Share Privacy Policy", "https://squareshare.eu/legal/privacy-policy/"],
       ["Square Share Terms of Use", "https://squareshare.eu/terms/"],
     ] as const) {

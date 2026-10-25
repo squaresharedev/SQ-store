@@ -778,7 +778,7 @@
       "exact": "Non servono script, SDK o chiamate API. Lascia l’URL esattamente com’è, compreso tutto ciò che segue il punto interrogativo."
     },
     "tryIt": "Prova il tuo pulsante",
-    "tracking": "Compare in Statistiche come «Pulsante di acquisto sul tuo sito».",
+    "tracking": "Compare in Statistiche come «Pulsante di acquisto».",
     "blocked": {
       "removed": "Questo prodotto è stato rimosso. Aprilo per vedere perché.",
       "draft": "Questo prodotto è una bozza. Impostalo prima su Attivo.",

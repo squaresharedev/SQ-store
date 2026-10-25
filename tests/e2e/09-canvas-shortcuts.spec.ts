@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
   createStorefrontViaUI,
+  expectToast,
   freshUser,
   gotoApp,
   signUp,
@@ -186,13 +187,16 @@ test.describe("storefront canvas shortcuts", () => {
     await tile.click(); // the caret goes in
     await expect(canvasText()).toBeFocused();
     await page.keyboard.press("Control+s");
-    await expect(page.getByText("Unsaved changes")).toBeHidden({ timeout: 15_000 });
+    // The toast, not the indicator: "Unsaved changes" also hides mid-save.
+    await expectToast(page, "Storefront saved.");
+    await expect(page.getByText("Unsaved changes")).toBeHidden();
 
     await page.keyboard.press("Escape");
     await page.keyboard.press("Delete");
     await expect(tile).toBeHidden();
     await page.keyboard.press("Control+s");
-    await expect(page.getByText("Unsaved changes")).toBeHidden({ timeout: 15_000 });
+    await expectToast(page, "Storefront saved.");
+    await expect(page.getByText("Unsaved changes")).toBeHidden();
   });
 
   test("Share is one click from the design", async () => {

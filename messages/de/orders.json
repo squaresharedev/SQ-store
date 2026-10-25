@@ -15,10 +15,10 @@
     "pending": "Ausstehend"
   },
   "channel": {
-    "embed": "Schaufenster auf deiner Website",
+    "embed": "Auf deiner Website",
     "marketplace": "Marktplatz",
-    "direct": "Square-Share-Seite",
-    "button": "Kauf-Button auf deiner Website"
+    "direct": "Deine Seite",
+    "button": "Kauf-Button"
   },
   "empty": {
     "filteredTitle": "Keine Bestellungen entsprechen diesen Filtern",

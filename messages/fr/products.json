@@ -778,7 +778,7 @@
       "exact": "Aucun script, SDK ou appel d’API n’est nécessaire. Garde l’URL exactement telle quelle, y compris tout ce qui suit le point d’interrogation."
     },
     "tryIt": "Tester votre bouton",
-    "tracking": "Apparaît dans Statistiques sous « Bouton d’achat sur votre site ».",
+    "tracking": "Apparaît dans Statistiques sous « Bouton d’achat ».",
     "blocked": {
       "removed": "Ce produit a été retiré. Ouvrez-le pour savoir pourquoi.",
       "draft": "Ce produit est un brouillon. Passez-le d’abord en Actif.",

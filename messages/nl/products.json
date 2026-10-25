@@ -778,7 +778,7 @@
       "exact": "Er is geen script, SDK of API-aanroep nodig. Laat de URL precies zoals hij is, inclusief alles na het vraagteken."
     },
     "tryIt": "Probeer je knop",
-    "tracking": "Staat in Statistieken als \"Koopknop op je website\".",
+    "tracking": "Staat in Statistieken als \"Koopknop\".",
     "blocked": {
       "removed": "Dit product is offline gehaald. Open het om te zien waarom.",
       "draft": "Dit product is een concept. Zet het eerst op Actief.",

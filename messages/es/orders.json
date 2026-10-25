@@ -15,10 +15,10 @@
     "pending": "Pendiente"
   },
   "channel": {
-    "embed": "Escaparate en tu web",
+    "embed": "En tu web",
     "marketplace": "Marketplace",
-    "direct": "Página en Square Share",
-    "button": "Botón de compra en tu web"
+    "direct": "Tu página",
+    "button": "Botón de compra"
   },
   "empty": {
     "filteredTitle": "Ningún pedido coincide con estos filtros",

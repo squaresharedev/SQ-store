@@ -778,7 +778,7 @@
       "exact": "No script, SDK or API call is needed. Keep the URL exactly as it is, including everything after the question mark."
     },
     "tryIt": "Try your button",
-    "tracking": "Shows in Analytics as “Buy button on your site”.",
+    "tracking": "Shows in Analytics as “Buy button”.",
     "blocked": {
       "removed": "This product was taken offline. Open it to see why.",
       "draft": "This product is a draft. Make it Active first.",

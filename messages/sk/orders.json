@@ -15,10 +15,10 @@
     "pending": "Čakajúca"
   },
   "channel": {
-    "embed": "Výklad na vašom webe",
+    "embed": "Na vašom webe",
     "marketplace": "Trhovisko",
-    "direct": "Stránka na Square Share",
-    "button": "Tlačidlo nákupu na webe"
+    "direct": "Vaša stránka",
+    "button": "Tlačidlo nákupu"
   },
   "empty": {
     "filteredTitle": "Žiadne objednávky nevyhovujú týmto filtrom",

@@ -778,7 +778,7 @@
       "exact": "Nie je potrebný žiadny skript, SDK ani volanie API. Adresu ponechaj presne takú, aká je, vrátane všetkého za otáznikom."
     },
     "tryIt": "Vyskúšať tlačidlo",
-    "tracking": "V Analytike sa zobrazí ako „Tlačidlo nákupu na webe“.",
+    "tracking": "V Analytike sa zobrazí ako „Tlačidlo nákupu“.",
     "blocked": {
       "removed": "Tento produkt bol stiahnutý. Otvorte ho a uvidíte prečo.",
       "draft": "Tento produkt je koncept. Najprv ho nastavte ako Aktívny.",

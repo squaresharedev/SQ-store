@@ -108,10 +108,10 @@
     "noOrders": "Todavía sin pedidos"
   },
   "channels": {
-    "embed": "Escaparate en tu web",
+    "embed": "En tu web",
     "marketplace": "Marketplace",
-    "direct": "Página en Square Share",
-    "button": "Botón de compra en tu web"
+    "direct": "Tu página",
+    "button": "Botón de compra"
   },
   "signalsUnavailable": {
     "title": "Las visualizaciones y las suscripciones no están disponibles ahora mismo",

@@ -108,10 +108,10 @@
     "noOrders": "Noch keine Bestellungen"
   },
   "channels": {
-    "embed": "Schaufenster auf deiner Website",
+    "embed": "Auf deiner Website",
     "marketplace": "Marktplatz",
-    "direct": "Square-Share-Seite",
-    "button": "Kauf-Button auf deiner Website"
+    "direct": "Deine Seite",
+    "button": "Kauf-Button"
   },
   "signalsUnavailable": {
     "title": "Aufrufe und Anmeldungen sind gerade nicht verfügbar",

@@ -778,7 +778,7 @@
       "exact": "Não é necessário nenhum script, SDK nem chamada a uma API. Mantém o URL exatamente como está, incluindo tudo o que vem depois do ponto de interrogação."
     },
     "tryIt": "Experimentar o botão",
-    "tracking": "Aparece em Estatísticas como «Botão de compra no seu site».",
+    "tracking": "Aparece em Estatísticas como «Botão de compra».",
     "blocked": {
       "removed": "Este produto foi retirado. Abra-o para saber porquê.",
       "draft": "Este produto é um rascunho. Defina-o primeiro como Ativo.",

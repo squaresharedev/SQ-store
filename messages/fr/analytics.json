@@ -108,10 +108,10 @@
     "noOrders": "Pas encore de commandes"
   },
   "channels": {
-    "embed": "Vitrine sur votre site",
+    "embed": "Sur votre site",
     "marketplace": "Marketplace",
-    "direct": "Page Square Share",
-    "button": "Bouton d’achat sur votre site"
+    "direct": "Votre page",
+    "button": "Bouton d’achat"
   },
   "signalsUnavailable": {
     "title": "Les vues et inscriptions sont indisponibles pour le moment",

@@ -108,10 +108,10 @@
     "noOrders": "No orders yet"
   },
   "channels": {
-    "embed": "Storefront on your site",
+    "embed": "On your site",
     "marketplace": "Marketplace",
-    "direct": "Square Share page",
-    "button": "Buy button on your site"
+    "direct": "Your page",
+    "button": "Buy button"
   },
   "signalsUnavailable": {
     "title": "Views and signups are unavailable right now",

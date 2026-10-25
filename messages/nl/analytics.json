@@ -108,10 +108,10 @@
     "noOrders": "Nog geen bestellingen"
   },
   "channels": {
-    "embed": "Etalage op je website",
+    "embed": "Op je website",
     "marketplace": "Marketplace",
-    "direct": "Square Share-pagina",
-    "button": "Koopknop op je website"
+    "direct": "Jouw pagina",
+    "button": "Koopknop"
   },
   "signalsUnavailable": {
     "title": "Weergaven en aanmeldingen zijn nu niet beschikbaar",

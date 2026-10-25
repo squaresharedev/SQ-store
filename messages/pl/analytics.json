@@ -108,10 +108,10 @@
     "noOrders": "Jeszcze brak zamówień"
   },
   "channels": {
-    "embed": "Witryna na twojej stronie",
+    "embed": "Na twojej stronie",
     "marketplace": "Marketplace",
-    "direct": "Strona na Square Share",
-    "button": "Przycisk zakupu na twojej stronie"
+    "direct": "Twoja strona",
+    "button": "Przycisk zakupu"
   },
   "signalsUnavailable": {
     "title": "Wyświetlenia i zapisy są teraz niedostępne",
