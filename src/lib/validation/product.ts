@@ -237,6 +237,10 @@ export const PURCHASE_QUANTITY_MAX = 100;
  */
 export const MAX_PER_ORDER_DEFAULT = 10;
 
+/** Where the "Only N left" badge starts when the seller has not said: a
+ *  handful, the column's DB default. */
+export const LOW_STOCK_THRESHOLD_DEFAULT = 5;
+
 // ── Product page detail (gallery, options, details, purchase link) ─────
 //
 // Stored as jsonb on the row. Every object is `strictObject` so nothing rides

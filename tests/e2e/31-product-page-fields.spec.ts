@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { freshUser, gotoApp, serviceRest, signUp } from "./helpers";
+import { freshUser, gotoApp, openProductExtra, serviceRest, signUp } from "./helpers";
 
 /**
  * The product form's Options/Photos/Documents fields, end to end: name an
@@ -43,6 +43,7 @@ test.describe("product form: options, photos, documents", () => {
     // The Colour preset names the axis and picks swatches in one click; the
     // values are the seller's own, pasted in as a list rather than typed one
     // at a time. That pair IS the ease claim, so it is what the test does.
+    await openProductExtra(page, "options");
     await page.getByRole("button", { name: "Colour", exact: true }).click();
     await page.getByLabel("Add options").fill("Red, Blue, Green");
     await page.keyboard.press("Enter");
@@ -56,6 +57,7 @@ test.describe("product form: options, photos, documents", () => {
     await expect(page.locator("[data-option-row]")).toHaveCount(9);
 
     // The OPTION's own upload tile, not the general one.
+    await openProductExtra(page, "photos");
     const redBucket = page.locator("[data-gallery-bucket]", { hasText: "Red" });
     await redBucket.locator('input[type="file"]').setInputFiles({
       name: "red.png",
@@ -65,6 +67,7 @@ test.describe("product form: options, photos, documents", () => {
     await expect(redBucket.getByText("1 photo")).toBeVisible();
 
     // A compliance document, pre-labelled from its filename.
+    await openProductExtra(page, "documents");
     await page.locator('input[type="file"][accept*="pdf"]').setInputFiles({
       name: "ce_certificate.pdf",
       mimeType: "application/pdf",

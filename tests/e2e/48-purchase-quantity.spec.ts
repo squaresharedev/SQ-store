@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   freshUser,
   gotoApp,
+  openStockFineTune,
   seedProducts,
   PUBLISHABLE_SELLER,
   seedSellerIdentity,
@@ -187,9 +188,10 @@ test.describe("purchase quantity", () => {
     await page.getByLabel("Title").fill("Limited candle");
     await page.getByLabel(/price/i).fill("12.50");
 
-    // The field is in Stock but OUTSIDE the tracking block: it must be usable
-    // without turning Track stock on, because a made-to-order product still
-    // has a number the seller will sell in one go.
+    // The field is in Stock's fine print but OUTSIDE the tracking block: it
+    // must be usable on an unlimited product, because a made-to-order product
+    // still has a number the seller will sell in one go.
+    await openStockFineTune(page);
     const limit = page.getByLabel("Maximum per order");
     await expect(limit).toBeVisible();
     await expect(limit).toHaveValue("10"); // the default every product starts on
@@ -209,6 +211,7 @@ test.describe("purchase quantity", () => {
     await page.getByLabel("Title").fill("Bad limit");
     await page.getByLabel(/price/i).fill("5.00");
 
+    await openStockFineTune(page);
     await page.getByLabel("Maximum per order").fill("999");
     await page.getByRole("button", { name: /^Add product$|^Save/ }).click();
     await expect(page.getByText(/maximum per order must be a whole number/i)).toBeVisible();

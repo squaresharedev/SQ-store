@@ -144,7 +144,7 @@ test.describe("products CRUD", () => {
     await gotoApp(page, "/products/new");
     await page.getByLabel("Title").fill("Draft thing");
     await page.getByLabel(/price/i).fill("5");
-    await page.getByRole("button", { name: "Draft" }).click();
+    await page.getByRole("radio", { name: /^Draft/ }).check();
     await page.getByRole("button", { name: /save product/i }).click();
     await page.waitForURL(/\/products$/);
     await expect(page.getByRole("heading", { name: "Draft thing" })).toBeVisible();

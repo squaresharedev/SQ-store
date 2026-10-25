@@ -14,6 +14,10 @@
  */
 export const cardClass = "rounded-md border border-border bg-card shadow-xs";
 
+/** `cardClass` with square corners, like the buttons and the product posters:
+ *  for a page built of cards that should read crisp (the product editor). */
+export const sharpCardClass = "border border-border bg-card shadow-xs";
+
 /**
  * "Nothing here yet" box: a dashed outline, so it reads as a slot waiting to be
  * filled rather than as a card that failed to load.

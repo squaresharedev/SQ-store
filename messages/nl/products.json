@@ -246,7 +246,7 @@
         "about": "Waar Voorraad voor is"
       },
       "media": {
-        "label": "Media en levering"
+        "label": "Levering"
       },
       "shipping": {
         "label": "Verzending",
@@ -313,7 +313,8 @@
       "started": "Gestart",
       "active": "Actief",
       "draft": "Concept",
-      "badges": "{count, plural, one {{count} badge} other {{count} badges}}"
+      "badges": "{count, plural, one {{count} badge} other {{count} badges}}",
+      "physical": "Fysiek"
     },
     "errors": {
       "titleRequired": "Geef je product een titel, kopers zien die als eerste.",
@@ -341,7 +342,8 @@
         "tooHigh": "De prijs mag niet hoger zijn dan {currency} {max}."
       },
       "badgeDuplicate": "Twee badges zeggen hetzelfde. Pas de tekst van een van de twee aan, of verwijder hem.",
-      "badgesOnPhoto": "Er passen maar {max} badges op de foto. Verplaats er een naast het product."
+      "badgesOnPhoto": "Er passen maar {max} badges op de foto. Verplaats er een naast het product.",
+      "digitalFileRequired": "Voeg het bestand toe dat kopers downloaden."
     },
     "title": "Titel",
     "titlePlaceholder": "bijv. Ambient Loops Vol. 1",
@@ -397,7 +399,39 @@
         "keepEditing": "Blijven bewerken",
         "send": "Ter beoordeling versturen"
       }
-    }
+    },
+    "coverPrompt": "Zet hier je beste foto neer",
+    "kind": {
+      "legend": "Wat verkoop je?",
+      "physical": "Iets wat ik verstuur",
+      "physicalHint": "Een fysiek product dat naar de koper wordt gestuurd",
+      "digital": "Een download",
+      "digitalHint": "Een bestand dat kopers direct na betaling krijgen"
+    },
+    "purchaseLinkAdd": "Verkoop je via je eigen afrekenpagina? Voeg de link toe",
+    "extras": {
+      "heading": "Laat het stralen",
+      "subheading": "Alles is optioneel. Voeg toe wat kopers helpt kiezen.",
+      "options": "Maten, kleuren, versies",
+      "photos": "Meer hoeken en close-ups",
+      "badges": "Handgemaakt, gratis verzending…",
+      "specs": "Afmetingen, gewicht, materialen",
+      "documents": "Handleidingen en certificaten",
+      "safety": "Fabrikantgegevens voor EU-regels"
+    },
+    "visibility": {
+      "activeHint": "Kopers zien het en kunnen het nu kopen",
+      "draftHint": "Alleen jij ziet het, tot je er klaar voor bent"
+    },
+    "preview": {
+      "heading": "Live voorbeeld",
+      "noPhoto": "Hier komt je foto",
+      "titlePlaceholder": "De naam van je product",
+      "download": "Direct downloaden",
+      "ships": "Verzonden volgens je winkelvoorwaarden"
+    },
+    "ready": "Klaar om op te slaan",
+    "stillNeeded": "Nog nodig: {fields}"
   },
   "stockFields": {
     "trackStock": "Voorraad bijhouden",
@@ -406,7 +440,13 @@
     "increase": "Voorraad verhogen",
     "lowStockAlert": "Waarschuwing lage voorraad bij",
     "maxPerOrder": "Maximum per bestelling",
-    "maxPerOrderHint": "Hoeveel één koper tegelijk kan afnemen. Kopers kiezen uit een lijst die hier stopt, en de limiet wordt bij het bestellen opnieuw gecontroleerd. Tot {max}; bij 1 verkoop je ze één voor één."
+    "maxPerOrderHint": "Hoeveel één koper tegelijk kan afnemen. Kopers kiezen uit een lijst die hier stopt, en de limiet wordt bij het bestellen opnieuw gecontroleerd. Tot {max}; bij 1 verkoop je ze één voor één.",
+    "unlimited": "Onbeperkt",
+    "unlimitedHint": "Op bestelling gemaakt, of raakt nooit op",
+    "counted": "Een vast aantal",
+    "countedHint": "Telt af en stopt bij nul",
+    "fineTune": "Bestellimiet",
+    "fineTuneTracked": "Bestellimiet en melding bij lage voorraad"
   },
   "priceField": {
     "label": "Prijs",

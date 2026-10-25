@@ -157,6 +157,8 @@ describe("the product form's badges", { timeout: 30_000 }, () => {
     render(<ProductForm />);
     await user.type(screen.getByLabelText("Title"), "Candle");
     await user.type(screen.getByLabelText("Price"), "18.00");
+    // Badges is an optional extra: a new product shows it as a tile first.
+    await user.click(document.querySelector<HTMLElement>('[data-product-extra="badges"]')!);
     await user.click(screen.getByRole("button", { name: "Handmade" }));
     await user.click(screen.getByRole("button", { name: /save product/i }));
 

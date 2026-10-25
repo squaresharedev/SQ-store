@@ -37,11 +37,11 @@ export function ProductFormView({
 }) {
   const t = useTranslations("Products.page");
   return (
-    // Widens only at `lg`, and only by exactly the room the section index in
-    // ProductForm needs. Below that the reading column stays where it was —
+    // Widens only at `lg`, and only by the room the preview and section index
+    // in ProductForm need. Below that the reading column stays where it was —
     // a form that got wider on a medium screen would be a worse form, not a
     // better one.
-    <main className="mx-auto max-w-3xl px-6 py-8 lg:max-w-5xl">
+    <main className="mx-auto max-w-3xl px-6 py-8 lg:max-w-6xl">
       <BackLink href={returnTo ?? "/products"}>
         {returnTo ? t("backToStorefront") : t("back")}
       </BackLink>

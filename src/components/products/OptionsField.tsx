@@ -11,11 +11,11 @@ import { useLocale, useTranslations } from "next-intl";
 import { formatList } from "@/lib/format/intl";
 import { cn } from "@/lib/utils";
 import {
+  chipButtonClass,
   fieldBaseClass,
   infoTextClass,
   labelClass,
   rowFieldClass,
-  secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { InfoTip } from "@/components/ui/InfoTip";
@@ -165,7 +165,7 @@ export function OptionsField({
               <button
                 key={preset.name}
                 type="button"
-                className={cn(secondaryButtonClass, "px-3 py-1.5 text-xs")}
+                className={chipButtonClass}
                 onClick={() => addPreset(preset)}
               >
                 <Plus className="size-3.5" strokeWidth={2} aria-hidden="true" />
@@ -174,7 +174,7 @@ export function OptionsField({
             ))}
             <button
               type="button"
-              className={cn(secondaryButtonClass, "px-3 py-1.5 text-xs")}
+              className={chipButtonClass}
               onClick={() =>
                 addPreset({ name: "", display: "chip", values: [] })
               }
@@ -629,7 +629,7 @@ function OptionGroupEditor({
         </div>
         <button
           type="button"
-          className={cn(secondaryButtonClass, "px-3 py-1.5 text-xs")}
+          className={chipButtonClass}
           disabled={full || splitOptionInput(draft).length === 0}
           onClick={commitDraft}
         >

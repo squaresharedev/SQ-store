@@ -246,7 +246,7 @@
         "about": "Na čo slúži sekcia Zásoby"
       },
       "media": {
-        "label": "Médiá a doručenie"
+        "label": "Doručenie"
       },
       "shipping": {
         "label": "Doprava",
@@ -313,7 +313,8 @@
       "started": "Začaté",
       "active": "Aktívny",
       "draft": "Koncept",
-      "badges": "{count, plural, one {{count} odznak} few {{count} odznaky} many {{count} odznaku} other {{count} odznakov}}"
+      "badges": "{count, plural, one {{count} odznak} few {{count} odznaky} many {{count} odznaku} other {{count} odznakov}}",
+      "physical": "Fyzický"
     },
     "errors": {
       "titleRequired": "Dajte produktu názov, kupujúci ho uvidia ako prvé.",
@@ -341,7 +342,8 @@
         "tooHigh": "Cena nesmie presiahnuť {currency} {max}."
       },
       "badgeDuplicate": "Dva odznaky hovoria to isté. Zmeňte text jedného z nich alebo ho odstráňte.",
-      "badgesOnPhoto": "Na fotku sa zmestia len {max} odznaky. Presuňte jeden vedľa produktu."
+      "badgesOnPhoto": "Na fotku sa zmestia len {max} odznaky. Presuňte jeden vedľa produktu.",
+      "digitalFileRequired": "Pridajte súbor, ktorý si kupujúci stiahnu."
     },
     "title": "Názov",
     "titlePlaceholder": "napr. Ambient Loops Vol. 1",
@@ -397,7 +399,39 @@
         "keepEditing": "Pokračovať v úpravách",
         "send": "Odoslať na kontrolu"
       }
-    }
+    },
+    "coverPrompt": "Sem pretiahnite svoju najlepšiu fotku",
+    "kind": {
+      "legend": "Čo predávate?",
+      "physical": "Niečo, čo posielam",
+      "physicalHint": "Fyzický predmet zaslaný kupujúcemu",
+      "digital": "Súbor na stiahnutie",
+      "digitalHint": "Súbor, ktorý kupujúci dostane hneď po zaplatení"
+    },
+    "purchaseLinkAdd": "Predávate cez vlastnú pokladňu? Pridajte odkaz",
+    "extras": {
+      "heading": "Nech vynikne",
+      "subheading": "Všetko je voliteľné. Pridajte, čo kupujúcim pomôže rozhodnúť sa.",
+      "options": "Veľkosti, farby, varianty",
+      "photos": "Ďalšie pohľady a detaily",
+      "badges": "Ručná výroba, doprava zadarmo…",
+      "specs": "Rozmery, hmotnosť, materiály",
+      "documents": "Návody a certifikáty",
+      "safety": "Údaje o výrobcovi pre pravidlá EÚ"
+    },
+    "visibility": {
+      "activeHint": "Kupujúci ho vidia a môžu ho hneď kúpiť",
+      "draftHint": "Vidíte ho len vy, kým nebudete pripravení"
+    },
+    "preview": {
+      "heading": "Živý náhľad",
+      "noPhoto": "Sem príde vaša fotka",
+      "titlePlaceholder": "Názov vášho produktu",
+      "download": "Okamžité stiahnutie",
+      "ships": "Odosiela sa podľa podmienok obchodu"
+    },
+    "ready": "Pripravené na uloženie",
+    "stillNeeded": "Ešte chýba: {fields}"
   },
   "stockFields": {
     "trackStock": "Sledovať zásoby",
@@ -406,7 +440,13 @@
     "increase": "Zvýšiť zásoby",
     "lowStockAlert": "Upozornenie na dochádzajúce zásoby pri",
     "maxPerOrder": "Maximum na objednávku",
-    "maxPerOrderHint": "Koľko kusov môže naraz vziať jeden kupujúci. Kupujúci si vyberá zo zoznamu, ktorý tu končí, a limit sa overí aj pri objednaní. Najviac {max}; hodnota 1 predáva vždy po jednom kuse."
+    "maxPerOrderHint": "Koľko kusov môže naraz vziať jeden kupujúci. Kupujúci si vyberá zo zoznamu, ktorý tu končí, a limit sa overí aj pri objednaní. Najviac {max}; hodnota 1 predáva vždy po jednom kuse.",
+    "unlimited": "Neobmedzene",
+    "unlimitedHint": "Na zákazku, alebo nikdy nedôjde",
+    "counted": "Pevný počet",
+    "countedHint": "Odpočítava sa a zastaví na nule",
+    "fineTune": "Limit na objednávku",
+    "fineTuneTracked": "Limit na objednávku a upozornenie na nízke zásoby"
   },
   "priceField": {
     "label": "Cena",

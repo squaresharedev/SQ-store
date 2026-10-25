@@ -7,15 +7,21 @@ import type { Locale } from "@/i18n/locales";
 import {
   BadgeCheck,
   Boxes,
+  Check,
   Eye,
+  EyeOff,
+  FileDown,
   FileText,
-  ImageIcon,
   Images,
   Layers,
+  Link2,
   Package,
+  Pencil,
+  Plus,
   Ruler,
   Send,
   ShieldCheck,
+  Store,
   Truck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -63,6 +69,7 @@ import {
   badgeLabelKey,
   collectOptionIds,
   type ProductWriteInput,
+  LOW_STOCK_THRESHOLD_DEFAULT,
   MAX_PER_ORDER_DEFAULT,
   PRICE_CENTS_MAX,
   PURCHASE_QUANTITY_MAX,
@@ -76,7 +83,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { HeroMark } from "@/components/ui/HeroMark";
 import { Modal, ModalActions } from "@/components/ui/modal";
 import { UnsavedChangesDialog } from "@/components/ui/UnsavedChangesDialog";
-import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { ChoiceCards } from "@/components/ui/ChoiceCards";
 import { useUnsavedChangesGuard } from "@/lib/hooks/useUnsavedChangesGuard";
 import { useNavigationBlocker } from "@/lib/hooks/useNavigationBlocker";
 import { parseFormPriceCents, priceErrorMessage } from "@/lib/products/price";
@@ -88,6 +95,7 @@ import {
   helpTextClass,
   labelClass,
   primaryButtonClass,
+  quietLinkClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { InfoTip } from "@/components/ui/InfoTip";
@@ -106,9 +114,12 @@ import { requestModerationReview } from "@/lib/moderation/review-request";
 import { formatList } from "@/lib/format/intl";
 import { productEditPath } from "@/lib/products/paths";
 import { refusedBadgeLabel } from "@/lib/products/badges";
-import { FormSection, type SectionFlag } from "./FormSection";
+import { FormSection, sectionAnchorId, type SectionFlag } from "./FormSection";
+import { EXTRA_SECTIONS, FormExtrasPicker, type ExtraSectionId } from "./FormExtrasPicker";
+import { ProductPreviewCard } from "./ProductPreviewCard";
+import { titleFromFileName } from "@/lib/products/title-guess";
 import { useFixProgress } from "./useFixProgress";
-import { FormSectionNav } from "./FormSectionNav";
+import { FormSectionNav, jumpToSection } from "./FormSectionNav";
 import { ProductFormSnapshotScript } from "./ProductFormSnapshotScript";
 import {
   buildProductFormSnapshot,
@@ -144,6 +155,20 @@ const NO_SHIPPING_CHOICES: ShippingChoices = {
 // product almost always wants it on sale immediately.
 const STATUS_ORDER: readonly ProductStatus[] = ["active", "draft"];
 
+/** What a product is, as the seller answers it: a thing posted to the buyer,
+ *  or a file they download. Decides which half of Delivery shows. */
+type ProductKind = "physical" | "digital";
+
+/** The glyph each optional extra wears on its tile. */
+const EXTRA_ICONS: Record<ExtraSectionId, typeof Package> = {
+  options: Layers,
+  photos: Images,
+  badges: BadgeCheck,
+  specs: Ruler,
+  documents: FileText,
+  safety: ShieldCheck,
+};
+
 /** Long enough to read the green check before the list replaces the form. */
 const SAVED_HOLD_MS = 1100;
 
@@ -154,6 +179,7 @@ type FieldErrors = Partial<
   Record<
     | "title"
     | "price"
+    | "digitalFile"
     | "stockQuantity"
     | "lowStockThreshold"
     | "maxPerOrder"
@@ -215,7 +241,7 @@ function initialValues(product?: Product, canPublish = true): ProductFormValues 
     trackStock: product?.trackStock ?? false,
     stockQuantity:
       product?.stockQuantity != null ? String(product.stockQuantity) : "",
-    lowStockThreshold: String(product?.lowStockThreshold ?? 5),
+    lowStockThreshold: String(product?.lowStockThreshold ?? LOW_STOCK_THRESHOLD_DEFAULT),
     maxPerOrder: String(product?.maxPerOrder ?? MAX_PER_ORDER_DEFAULT),
   };
 }
@@ -287,8 +313,13 @@ function validatePage(
   optionGroups: ProductOptionGroup[],
   badges: readonly BadgeFormValue[],
   t: ProductsTranslator,
+  needsFile = false,
 ): FieldErrors {
   const errors: FieldErrors = {};
+  // A download with nothing to download: the seller said "digital" and has
+  // not added the file yet. Without this the save would quietly store a
+  // physical product with no shipping section on screen.
+  if (needsFile) errors.digitalFile = t("form.errors.digitalFileRequired");
   const badgeProblem = validateBadges(badges, t);
   if (badgeProblem) errors.badges = badgeProblem;
   const link = purchaseUrl.trim();
@@ -326,12 +357,13 @@ function validatePage(
 const FIELD_SECTIONS: Record<string, ProductFormSectionId> = {
   title: "basics",
   price: "basics",
+  digitalFile: "media",
+  purchaseUrl: "media",
   // Nothing here can be invalid — the shipping section is a choice from a
   // closed list, and its default answer is always available.
   stockQuantity: "stock",
   lowStockThreshold: "stock",
   maxPerOrder: "stock",
-  purchaseUrl: "media",
   optionGroups: "options",
   badges: "badges",
   length: "specs",
@@ -540,6 +572,20 @@ export function ProductForm({
   // Whether the seller interacted with the digital-file picker at all. Needed
   // to tell "left the stored file alone" (keep) apart from "removed it" (clear).
   const [digitalTouched, setDigitalTouched] = useState(false);
+  // Physical or digital, asked up front with two pictures. An existing
+  // product answers from what is stored; a new one starts physical, which is
+  // what most of what is sold here is.
+  const [kind, setKind] = useState<ProductKind>(
+    product?.digitalFileName ? "digital" : "physical",
+  );
+  // Extras the seller opened from their tiles this visit. Ones that already
+  // held something when the form loaded are open from the start (below).
+  const [openedExtras, setOpenedExtras] = useState<ReadonlySet<ExtraSectionId>>(
+    () => new Set(),
+  );
+  // The seller's own checkout link is rare, so it waits behind one line
+  // until asked for — or until there is one to show.
+  const [buyLinkShown, setBuyLinkShown] = useState(Boolean(product?.purchaseUrl));
   const [submitting, setSubmitting] = useState(false);
   // Which upload is in flight and how far along, or null when none is.
   // `fraction: null` means the bytes are all sent and we are waiting on the
@@ -639,8 +685,12 @@ export function ProductForm({
 
   // A download has no shipping and no product-safety block: those sections
   // hide, and their values are dropped on save rather than stored unseen.
-  const isDigital =
+  // The seller's answer decides it; the file is what a save then requires.
+  const isDigital = kind === "digital";
+  const hasDigitalFile =
     digitalFile !== null || (Boolean(product?.digitalFileName) && !digitalTouched);
+  /** A digital product still waiting on the file buyers will download. */
+  const needsFile = isDigital && !hasDigitalFile;
 
   // THE FORM AS ONE OBJECT, built from the state above and used twice: by the
   // section headers and the index rail a seller scans, and by the JSON island
@@ -662,7 +712,7 @@ export function ProductForm({
     shippingProfileName:
       shippingChoices.profiles.find((profile) => profile.id === shippingProfileId)?.name ?? null,
     hasCoverImage: imageFile !== null || Boolean(product?.imageUrl),
-    hasDigitalFile: isDigital,
+    hasDigitalFile,
     isDigital,
     dirty,
     invalidSections,
@@ -788,7 +838,7 @@ export function ProductForm({
       if (submitAttempted) {
         setErrors({
           ...validate(next, t, resolveMessage, locale),
-          ...validatePage(purchaseUrl, optionGroups, badges, t),
+          ...validatePage(purchaseUrl, optionGroups, badges, t, needsFile),
         });
       }
       return next;
@@ -798,14 +848,14 @@ export function ProductForm({
   function updateOptionGroups(next: ProductOptionGroup[]) {
     setOptionGroups(next);
     if (submitAttempted) {
-      setErrors({ ...validate(values, t, resolveMessage, locale), ...validatePage(purchaseUrl, next, badges, t) });
+      setErrors({ ...validate(values, t, resolveMessage, locale), ...validatePage(purchaseUrl, next, badges, t, needsFile) });
     }
   }
 
   function updatePurchaseUrl(next: string) {
     setPurchaseUrl(next);
     if (submitAttempted) {
-      setErrors({ ...validate(values, t, resolveMessage, locale), ...validatePage(next, optionGroups, badges, t) });
+      setErrors({ ...validate(values, t, resolveMessage, locale), ...validatePage(next, optionGroups, badges, t, needsFile) });
     }
   }
 
@@ -814,7 +864,7 @@ export function ProductForm({
     if (submitAttempted) {
       setErrors({
         ...validate(values, t, resolveMessage, locale),
-        ...validatePage(purchaseUrl, optionGroups, next, t),
+        ...validatePage(purchaseUrl, optionGroups, next, t, needsFile),
       });
     }
   }
@@ -853,6 +903,69 @@ export function ProductForm({
     return { flat, byOption };
   }
 
+  /** Physical or digital, picked. Going physical drops the download (a stored
+   *  one is cleared on save, as its own Remove does); going back to digital
+   *  brings a stored file back, since nothing has been saved in between. */
+  function chooseKind(next: ProductKind) {
+    setKind(next);
+    if (next === "physical") {
+      setDigitalFile(null);
+      setDigitalTouched(Boolean(product?.digitalFileName));
+    } else {
+      setDigitalTouched(false);
+    }
+    if (submitAttempted) {
+      setErrors({
+        ...validate(values, t, resolveMessage, locale),
+        ...validatePage(
+          purchaseUrl,
+          optionGroups,
+          badges,
+          t,
+          next === "digital" && !product?.digitalFileName,
+        ),
+      });
+    }
+  }
+
+  function changeDigitalFile(file: File | null) {
+    setDigitalFile(file);
+    setDigitalTouched(true);
+    if (submitAttempted) {
+      setErrors((previous) => {
+        const next = { ...previous };
+        if (file) delete next.digitalFile;
+        else next.digitalFile = t("form.errors.digitalFileRequired");
+        return next;
+      });
+    }
+  }
+
+  /** The cover photo, picked or removed. A first photo with a real name
+   *  ("oak-side-table.jpg") also fills in an empty title, which the seller
+   *  can simply type over. */
+  function changeCover(file: File | null) {
+    setImageFile(file);
+    if (!file || values.title.trim()) return;
+    const guess = titleFromFileName(file.name);
+    if (guess) updateField("title", guess);
+  }
+
+  function openExtra(id: ExtraSectionId) {
+    setOpenedExtras((previous) => new Set(previous).add(id));
+    // After the render that puts the section on the page.
+    // Focus lands on the section's first real control, never on the header's
+    // "?" (which would pop its explanation open uninvited).
+    window.setTimeout(() => {
+      jumpToSection(id);
+      const card = document.getElementById(sectionAnchorId(id));
+      const first = [
+        ...(card?.querySelectorAll<HTMLElement>("input:not([type='file']), textarea, select, button") ?? []),
+      ].find((control) => !card?.firstElementChild?.contains(control));
+      first?.focus({ preventScroll: true });
+    }, 0);
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     await performSave();
@@ -870,7 +983,7 @@ export function ProductForm({
 
     const foundErrors = {
       ...validate(values, t, resolveMessage, locale),
-      ...validatePage(purchaseUrl, optionGroups, badges, t),
+      ...validatePage(purchaseUrl, optionGroups, badges, t, needsFile),
     };
     setErrors(foundErrors);
     const found = detailErrorsFor(details, optionDetails);
@@ -882,8 +995,10 @@ export function ProductForm({
       // The sticky action bar shows the count and a "Jump to first" button.
       // Auto-scroll to the first problem on submit so the seller lands on it
       // without needing to click; the bar stays visible for subsequent jumps.
+      // Deferred a tick: a problem inside a fold (the stock fine print)
+      // opens it in the render this triggers, and only then can it focus.
       const firstField = firstErroredField(foundErrors, foundDetailErrors);
-      if (firstField) focusProductField(firstField);
+      if (firstField) window.setTimeout(() => focusProductField(firstField), 0);
       return false;
     }
 
@@ -1137,6 +1252,7 @@ export function ProductForm({
   const titleErrorId = `${fieldId}-title-error`;
   const priceErrorId = `${fieldId}-price-error`;
   const purchaseErrorId = `${fieldId}-purchase-error`;
+  const digitalFileErrorId = `${fieldId}-file-error`;
   const uploadNoun =
     upload?.what === "image"
       ? "image"
@@ -1155,6 +1271,42 @@ export function ProductForm({
     ? firstErroredField(errors, detailsErrors)
     : undefined;
 
+  /** The delivery line the preview prints: the chosen profile's, else the
+   *  store's usual terms. */
+  const shippingDispatch =
+    shippingChoices.profiles.find((profile) => profile.id === shippingProfileId)?.dispatch ||
+    shippingChoices.fallback.dispatch;
+
+  /** The required answers not given yet, named as their fields are. */
+  const requiredLabels: Record<string, string> = {
+    title: t("form.title"),
+    price: t("priceField.label"),
+    stockQuantity: t("stockFields.inStock"),
+    maxPerOrder: t("stockFields.maxPerOrder"),
+  };
+  const stillNeeded = [
+    ...snapshot.requiredMissing.map((field) => requiredLabels[field] ?? field),
+    ...(needsFile ? [t("form.digitalFile")] : []),
+  ];
+
+  /** The extras that apply to this product: a download has no safety block. */
+  const extrasHere = EXTRA_SECTIONS.filter((id) => !(id === "safety" && isDigital));
+  // Open from the start: whatever already held something when the form loaded,
+  // so an edit never hides what the product has. Fixed at first render, so a
+  // section a seller empties stays where they are working.
+  const [startedOpen] = useState<ReadonlySet<ExtraSectionId>>(
+    () => new Set(EXTRA_SECTIONS.filter((id) => summaries[id].length > 0)),
+  );
+  /** Open: started open, opened from its tile, flagged by staff, or holding a
+   *  problem. Anything with something in it is therefore always on screen. */
+  const extraOpen = (id: ExtraSectionId) =>
+    extrasHere.includes(id) &&
+    (startedOpen.has(id) ||
+      openedExtras.has(id) ||
+      flaggedSections.has(id) ||
+      sectionInfo[id]?.state === "invalid");
+  const closedExtras = extrasHere.filter((id) => !extraOpen(id));
+
   /** Every section card gets its id, its live summary and its state from the
    *  one snapshot, so a header and the rail can never say different things. */
   const section = (id: ProductFormSectionId) => ({
@@ -1171,7 +1323,7 @@ export function ProductForm({
 
   return (
     <div
-      className="lg:grid lg:grid-cols-[minmax(0,1fr)_12.5rem] lg:items-start lg:gap-8"
+      className="lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-start lg:gap-8"
       data-product-form={product ? "edit" : "create"}
       data-product-id={product?.id}
       data-product-form-dirty={dirty ? "1" : "0"}
@@ -1184,6 +1336,10 @@ export function ProductForm({
           has a "Jump to first" button; the fields still carry their own
           inline messages. */}
 
+      {/* THE ESSENTIALS, AS ONE PICTURE. The photo leads because it is the
+          first thing a buyer sees and the quickest thing a seller can give:
+          one drop and the preview beside the form is already a product. Title
+          and price, the only two answers a save needs, sit right next to it. */}
       <FormSection
         {...section("basics")}
         icon={Package}
@@ -1192,76 +1348,250 @@ export function ProductForm({
         // two sections with the same accessible name. On a page you scan by
         // heading, that is the worst possible collision.
       >
-        <div className="space-y-5">
-          <div className={cn("space-y-1.5", fieldFlagClass("title"))} data-fix-field-block="title">
-            <div className="flex items-center">
-              <label htmlFor={`${fieldId}-title`} className={labelClass}>
-                {t("form.title")}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)]">
+          <div className={cn("space-y-1.5", fieldFlagClass("image"))} data-fix-field-block="image">
+            <div className="flex items-center gap-1.5">
+              <label htmlFor={`${fieldId}-image`} className={labelClass}>
+                {t("form.displayImage")}
+              </label>
+              <InfoTip label={t("form.displayImageAbout")}>
+                {t("form.displayImageHelp")}
+              </InfoTip>
+              {fixMark("image")}
+            </div>
+            <ImageDropzone
+              inputId={`${fieldId}-image`}
+              initialPreviewUrl={product?.imageUrl ?? null}
+              onFileChange={changeCover}
+              prompt={t("form.coverPrompt")}
+              frameClassName="aspect-[4/3] rounded-none sm:aspect-square"
+            />
+          </div>
+
+          <div className="space-y-5">
+            <div className={cn("space-y-1.5", fieldFlagClass("title"))} data-fix-field-block="title">
+              <div className="flex items-center">
+                <label htmlFor={`${fieldId}-title`} className={labelClass}>
+                  {t("form.title")}
+                </label>
+                <RequiredMark />
+                {fixMark("title")}
+              </div>
+              {/* The one field every product needs — visually the biggest. */}
+              <input
+                id={`${fieldId}-title`}
+                type="text"
+                value={values.title}
+                onChange={(event) => updateField("title", event.target.value)}
+                placeholder={t("form.titlePlaceholder")}
+                required
+                aria-invalid={errors.title ? true : undefined}
+                aria-describedby={errors.title ? titleErrorId : undefined}
+                data-product-field="title"
+                className={cn(fieldBaseClass, "py-3 text-lg font-medium")}
+              />
+              {errors.title && (
+                <p id={titleErrorId} className={errorTextClass}>
+                  {errors.title}
+                </p>
+              )}
+            </div>
+
+            {/* Price beside the title rather than in a section of its own:
+                the two are what every product needs before it can be saved. */}
+            <div className={cn("space-y-1.5", fieldFlagClass("price"))} data-fix-field-block="price">
+              <PriceField
+                id={`${fieldId}-price`}
+                errorId={priceErrorId}
+                price={values.price}
+                currency={values.currency}
+                error={errors.price}
+                onPriceChange={(price) => updateField("price", price)}
+                onCurrencyChange={(currency) => updateField("currency", currency)}
+              />
+            </div>
+
+            <div
+              className={cn("space-y-1.5", fieldFlagClass("description"))}
+              data-fix-field-block="description"
+            >
+              <label htmlFor={`${fieldId}-description`} className={labelClass}>
+                {t("form.description")}{" "}
+                <span className="font-normal text-muted-foreground">
+                  {t("form.optional")}
+                </span>
+                {fixMark("description")}
+              </label>
+              <textarea
+                id={`${fieldId}-description`}
+                value={values.description}
+                onChange={(event) => updateField("description", event.target.value)}
+                rows={3}
+                placeholder={t("form.descriptionPlaceholder")}
+                data-product-field="description"
+                className={cn(fieldBaseClass, "resize-y")}
+              />
+            </div>
+          </div>
+        </div>
+      </FormSection>
+
+      {/* HOW IT REACHES THE BUYER, as one question with two pictures. The
+          answer decides the rest of the card: a parcel brings its shipping
+          terms (already written once for the store, so usually nothing to
+          do), a download brings the file. Nobody has to know that a file
+          field and a shipping section are mutually exclusive; they just pick
+          what they sell. */}
+      <FormSection
+        {...section("media")}
+        icon={Truck}
+      >
+        <ChoiceCards<ProductKind>
+          name={`${fieldId}-kind`}
+          legend={t("form.kind.legend")}
+          legendHidden
+          variant="showcase"
+          columns={2}
+          value={kind}
+          onChange={chooseKind}
+          optionDataAttribute="data-product-kind"
+          fieldsetData={{ "data-product-field": "kind", "data-product-value": kind }}
+          options={[
+            {
+              value: "physical",
+              label: t("form.kind.physical"),
+              hint: t("form.kind.physicalHint"),
+              glyph: Package,
+            },
+            {
+              value: "digital",
+              label: t("form.kind.digital"),
+              hint: t("form.kind.digitalHint"),
+              glyph: FileDown,
+            },
+          ]}
+        />
+
+        {isDigital ? (
+          <div
+            className={cn("mt-5 space-y-1.5", fieldFlagClass("file"))}
+            data-fix-field-block="file"
+          >
+            <div className="flex items-center gap-1.5">
+              <label htmlFor={`${fieldId}-file`} className={labelClass}>
+                {t("form.digitalFile")}
               </label>
               <RequiredMark />
-              {fixMark("title")}
+              <InfoTip label={t("form.digitalFileAbout")}>
+                {t("form.digitalFileHelp")}
+              </InfoTip>
+              {fixMark("file")}
             </div>
-            {/* The one field every product needs — visually the biggest. */}
-            <input
-              id={`${fieldId}-title`}
-              type="text"
-              value={values.title}
-              onChange={(event) => updateField("title", event.target.value)}
-              placeholder={t("form.titlePlaceholder")}
-              required
-              aria-invalid={errors.title ? true : undefined}
-              aria-describedby={errors.title ? titleErrorId : undefined}
-              data-product-field="title"
-              className={cn(fieldBaseClass, "py-3 text-lg font-medium")}
+            <FileDropzone
+              inputId={`${fieldId}-file`}
+              describedById={errors.digitalFile ? digitalFileErrorId : undefined}
+              initialFileName={digitalTouched ? null : (product?.digitalFileName ?? null)}
+              onFileChange={changeDigitalFile}
             />
-            {errors.title && (
-              <p id={titleErrorId} className={errorTextClass}>
-                {errors.title}
+            {errors.digitalFile && (
+              <p id={digitalFileErrorId} className={errorTextClass}>
+                {errors.digitalFile}
               </p>
             )}
           </div>
-
+        ) : (
+          /* SHIPPING IS A CHOICE, NOT A TEXT BOX, and it lives here because
+             it is the other half of "a parcel": the terms are the store's, so
+             the usual answer is already filled in. Its own anchor and section
+             datapoints stay, so the index and an assistant still find it. */
           <div
-            className={cn("space-y-1.5", fieldFlagClass("description"))}
-            data-fix-field-block="description"
+            id={sectionAnchorId("shipping")}
+            data-product-section="shipping"
+            data-product-section-state={sectionInfo.shipping?.state ?? "empty"}
+            data-fix-flag={sectionFlag("shipping")?.state}
+            className={cn(
+              "mt-5 scroll-mt-20 space-y-2",
+              fieldFlagClass("shipping"),
+            )}
+            data-fix-field-block="shipping"
           >
-            <label htmlFor={`${fieldId}-description`} className={labelClass}>
-              {t("form.description")}{" "}
-              <span className="font-normal text-muted-foreground">
-                {t("form.optional")}
+            <div className="flex items-center gap-1.5">
+              <h3 className={labelClass}>{resolveMessage(sectionLabel("shipping"))}</h3>
+              <InfoTip label={t("form.sections.shipping.about")}>
+                {t("form.sections.shipping.description")}
+              </InfoTip>
+              {/* The same summary a section header carries ("Store terms"),
+                  so the block says which terms apply at a glance. */}
+              <span
+                className="min-w-0 truncate font-inter text-xs text-muted-foreground"
+                data-product-section-summary=""
+              >
+                {section("shipping").summary}
               </span>
-              {fixMark("description")}
-            </label>
-            <textarea
-              id={`${fieldId}-description`}
-              value={values.description}
-              onChange={(event) => updateField("description", event.target.value)}
-              rows={4}
-              placeholder={t("form.descriptionPlaceholder")}
-              data-product-field="description"
-              className={cn(fieldBaseClass, "resize-y")}
-            />
-          </div>
-
-          {/* Price lives here rather than in a section of its own: title,
-              description and price are the three things every product needs
-              before it can be saved, and splitting them put one field behind
-              its own heading. */}
-          <div
-            className={cn("space-y-1.5 sm:max-w-sm", fieldFlagClass("price"))}
-            data-fix-field-block="price"
-          >
-            <PriceField
-              id={`${fieldId}-price`}
-              errorId={priceErrorId}
-              price={values.price}
+              {fixMark("shipping")}
+            </div>
+            <ShippingField
+              inputId={`${fieldId}-shipping`}
+              value={shippingProfileId}
+              choices={shippingChoices}
+              policy={shippingPolicy}
               currency={values.currency}
-              error={errors.price}
-              onPriceChange={(price) => updateField("price", price)}
-              onCurrencyChange={(currency) => updateField("currency", currency)}
+              onChange={setShippingProfileId}
             />
           </div>
-        </div>
+        )}
+
+        {/* Where the product page's buy button goes, when it is the seller's
+            own checkout, payment link or marketplace listing rather than
+            ours. Rare, so it is one quiet line until asked for. https only;
+            the page prints the destination host beside the button. */}
+        {buyLinkShown || purchaseUrl || errors.purchaseUrl || fixFields.includes("purchaseLink") ? (
+          <div
+            className={cn("mt-5 space-y-1.5", fieldFlagClass("purchaseLink"))}
+            data-fix-field-block="purchaseLink"
+          >
+            <div className="flex items-center gap-1.5">
+              <label htmlFor={`${fieldId}-purchase`} className={labelClass}>
+                {t("form.purchaseLink")}
+              </label>
+              <InfoTip label={t("form.purchaseLinkAbout")}>
+                {t("form.purchaseLinkHelp")}
+              </InfoTip>
+              {fixMark("purchaseLink")}
+            </div>
+            <input
+              id={`${fieldId}-purchase`}
+              type="url"
+              inputMode="url"
+              value={purchaseUrl}
+              onChange={(event) => updatePurchaseUrl(event.target.value)}
+              placeholder={t("form.purchaseLinkPlaceholder")}
+              spellCheck={false}
+              aria-invalid={errors.purchaseUrl ? true : undefined}
+              aria-describedby={errors.purchaseUrl ? purchaseErrorId : undefined}
+              data-product-field="purchaseUrl"
+              className={fieldBaseClass}
+            />
+            {errors.purchaseUrl && (
+              <p id={purchaseErrorId} className={errorTextClass}>
+                {errors.purchaseUrl}
+              </p>
+            )}
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setBuyLinkShown(true);
+              window.setTimeout(() => document.getElementById(`${fieldId}-purchase`)?.focus(), 0);
+            }}
+            className={cn(quietLinkClass, "mt-4 inline-flex items-center gap-1.5")}
+            data-product-reveal="purchaseUrl"
+          >
+            <Link2 className="size-3.5" strokeWidth={2} aria-hidden="true" />
+            {t("form.purchaseLinkAdd")}
+          </button>
+        )}
       </FormSection>
 
       <FormSection
@@ -1299,7 +1629,7 @@ export function ProductForm({
                 if (submitAttempted) {
                   setErrors({
                     ...validate(next, t, resolveMessage, locale),
-                    ...validatePage(purchaseUrl, optionGroups, badges, t),
+                    ...validatePage(purchaseUrl, optionGroups, badges, t, needsFile),
                   });
                 }
                 return next;
@@ -1311,192 +1641,79 @@ export function ProductForm({
         />
       </FormSection>
 
-      <FormSection
-        {...section("media")}
-        icon={ImageIcon}
-      >
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div className={cn("space-y-1.5", fieldFlagClass("image"))} data-fix-field-block="image">
-            <div className="flex items-center gap-1.5">
-              <label htmlFor={`${fieldId}-image`} className={labelClass}>
-                {t("form.displayImage")}
-              </label>
-              <InfoTip label={t("form.displayImageAbout")}>
-                {t("form.displayImageHelp")}
-              </InfoTip>
-              {fixMark("image")}
-            </div>
-            <ImageDropzone
-              inputId={`${fieldId}-image`}
-              initialPreviewUrl={product?.imageUrl ?? null}
-              onFileChange={setImageFile}
-            />
-          </div>
-
-          <div className={cn("space-y-1.5", fieldFlagClass("file"))} data-fix-field-block="file">
-            <div className="flex items-center gap-1.5">
-              <label htmlFor={`${fieldId}-file`} className={labelClass}>
-                {t("form.digitalFile")}
-              </label>
-              <InfoTip label={t("form.digitalFileAbout")}>
-                {t("form.digitalFileHelp")}
-              </InfoTip>
-              {fixMark("file")}
-            </div>
-            <FileDropzone
-              inputId={`${fieldId}-file`}
-              initialFileName={product?.digitalFileName ?? null}
-              onFileChange={(file) => {
-                setDigitalFile(file);
-                setDigitalTouched(true);
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Where the product page's buy button goes. There is no in-house
-            checkout yet, so this is the one way a page can sell: the seller's
-            own checkout, payment link or marketplace listing. https only; the
-            page prints the destination host beside the button. */}
-        <div
-          className={cn("mt-6 space-y-1.5", fieldFlagClass("purchaseLink"))}
-          data-fix-field-block="purchaseLink"
-        >
-          <div className="flex items-center gap-1.5">
-            <label htmlFor={`${fieldId}-purchase`} className={labelClass}>
-              {t("form.purchaseLink")}
-            </label>
-            <InfoTip label={t("form.purchaseLinkAbout")}>
-              {t("form.purchaseLinkHelp")}
-            </InfoTip>
-            {fixMark("purchaseLink")}
-          </div>
-          <input
-            id={`${fieldId}-purchase`}
-            type="url"
-            inputMode="url"
-            value={purchaseUrl}
-            onChange={(event) => updatePurchaseUrl(event.target.value)}
-            placeholder={t("form.purchaseLinkPlaceholder")}
-            spellCheck={false}
-            aria-invalid={errors.purchaseUrl ? true : undefined}
-            aria-describedby={errors.purchaseUrl ? purchaseErrorId : undefined}
-            data-product-field="purchaseUrl"
-            className={fieldBaseClass}
-          />
-          {errors.purchaseUrl && (
-            <p id={purchaseErrorId} className={errorTextClass}>
-              {errors.purchaseUrl}
-            </p>
-          )}
-        </div>
-      </FormSection>
-
-      {/* SHIPPING IS A CHOICE, NOT A TEXT BOX, and it sits right after
-          delivery because that is what it is the other half of: the section
-          above says what a buyer receives, this one says how it reaches them.
-          Hidden for downloads, which nobody posts. */}
-      {!isDigital && (
-        <FormSection
-          {...section("shipping")}
-          icon={Truck}
-        >
-          <ShippingField
-            inputId={`${fieldId}-shipping`}
-            value={shippingProfileId}
-            choices={shippingChoices}
-            policy={shippingPolicy}
-            currency={values.currency}
-            onChange={setShippingProfileId}
+      {/* THE EXTRAS. Open ones render in form order — options before photos
+          (the photo buckets are one per option), badges before the
+          specifications they headline — and the rest wait as tiles below. */}
+      {extraOpen("options") && (
+        <FormSection {...section("options")} icon={EXTRA_ICONS.options}>
+          <OptionsField
+            inputId={`${fieldId}-options`}
+            groups={optionGroups}
+            onChange={updateOptionGroups}
+            error={errors.optionGroups}
           />
         </FormSection>
       )}
 
-      {/* OPTIONS BEFORE PHOTOS, deliberately. The photo buckets below are one
-          per option, so a seller who meets Photos first has nowhere to drop a
-          colour's shots and has to come back. Naming what varies first makes
-          the next section already know about it. */}
-      <FormSection
-        {...section("options")}
-        icon={Layers}
-      >
-        <OptionsField
-          inputId={`${fieldId}-options`}
-          groups={optionGroups}
-          onChange={updateOptionGroups}
-          error={errors.optionGroups}
-        />
-      </FormSection>
+      {extraOpen("photos") && (
+        <FormSection {...section("photos")} icon={EXTRA_ICONS.photos}>
+          <GalleryField
+            inputId={`${fieldId}-gallery`}
+            images={gallery}
+            optionGroups={optionGroups}
+            onChange={setGallery}
+          />
+        </FormSection>
+      )}
 
-      <FormSection
-        {...section("photos")}
-        icon={Images}
-      >
-        <GalleryField
-          inputId={`${fieldId}-gallery`}
-          images={gallery}
-          optionGroups={optionGroups}
-          onChange={setGallery}
-        />
-      </FormSection>
+      {extraOpen("badges") && (
+        <FormSection {...section("badges")} icon={EXTRA_ICONS.badges}>
+          <BadgesField
+            inputId={`${fieldId}-badges`}
+            badges={badges}
+            onChange={updateBadges}
+            error={errors.badges}
+            previewImageUrl={pickedCover ?? product?.imageUrl ?? null}
+            previewTitle={values.title}
+          />
+        </FormSection>
+      )}
 
-      {/* BADGES BEFORE THE SPECIFICATIONS, and after the photos: they are
-          the first words a buyer reads under the title, the highlights of
-          the facts that follow. */}
-      <FormSection
-        {...section("badges")}
-        icon={BadgeCheck}
-      >
-        <BadgesField
-          inputId={`${fieldId}-badges`}
-          badges={badges}
-          onChange={updateBadges}
-          error={errors.badges}
-          previewImageUrl={pickedCover ?? product?.imageUrl ?? null}
-          previewTitle={values.title}
-        />
-      </FormSection>
+      {extraOpen("specs") && (
+        <FormSection {...section("specs")} icon={EXTRA_ICONS.specs}>
+          <DetailsFields
+            inputId={`${fieldId}-details`}
+            values={details}
+            errors={detailsErrors}
+            onChange={updateDetails}
+          />
+          {optionGroups.length > 0 && (
+            <div className="mt-6 border-t border-border pt-5">
+              <OptionSpecsField
+                inputId={`${fieldId}-option-details`}
+                optionGroups={optionGroups}
+                byOption={optionDetails}
+                units={{ dimensionUnit: details.dimensionUnit, weightUnit: details.weightUnit }}
+                errors={optionDetailErrors}
+                onChange={updateOptionDetails}
+              />
+            </div>
+          )}
+        </FormSection>
+      )}
 
-      <FormSection
-        {...section("specs")}
-        icon={Ruler}
-      >
-        <DetailsFields
-          inputId={`${fieldId}-details`}
-          values={details}
-          errors={detailsErrors}
-          onChange={updateDetails}
-        />
-        {optionGroups.length > 0 && (
-          <div className="mt-6 border-t border-border pt-5">
-            <OptionSpecsField
-              inputId={`${fieldId}-option-details`}
-              optionGroups={optionGroups}
-              byOption={optionDetails}
-              units={{ dimensionUnit: details.dimensionUnit, weightUnit: details.weightUnit }}
-              errors={optionDetailErrors}
-              onChange={updateOptionDetails}
-            />
-          </div>
-        )}
-      </FormSection>
+      {extraOpen("documents") && (
+        <FormSection {...section("documents")} icon={EXTRA_ICONS.documents}>
+          <DocumentsField
+            inputId={`${fieldId}-documents`}
+            documents={documents}
+            onChange={setDocuments}
+          />
+        </FormSection>
+      )}
 
-      <FormSection
-        {...section("documents")}
-        icon={FileText}
-      >
-        <DocumentsField
-          inputId={`${fieldId}-documents`}
-          documents={documents}
-          onChange={setDocuments}
-        />
-      </FormSection>
-
-      {!isDigital && (
-        <FormSection
-          {...section("safety")}
-          icon={ShieldCheck}
-        >
+      {extraOpen("safety") && (
+        <FormSection {...section("safety")} icon={EXTRA_ICONS.safety}>
           <SafetyFields
             inputId={`${fieldId}-safety`}
             values={details.safety}
@@ -1506,40 +1723,55 @@ export function ProductForm({
         </FormSection>
       )}
 
+      <FormExtrasPicker
+        extras={closedExtras.map((id) => ({
+          id,
+          icon: EXTRA_ICONS[id],
+          label: resolveMessage(sectionLabel(id)),
+        }))}
+        onOpen={openExtra}
+      />
+
       <FormSection
         {...section("visibility")}
         icon={Eye}
       >
-        {/* The datapoint sits on the WRAPPER, not on SegmentedControl:
-            that component takes a closed set of props and spreads nothing
-            onto the DOM, so an attribute handed to it would be dropped
-            silently — and a datapoint that is quietly absent is worse than
-            one that was never claimed. */}
+        {/* The datapoint sits on the fieldset, which ChoiceCards spreads
+            `fieldsetData` onto, so it is never silently dropped.
+
+            Only ACTIVE is barred, never the whole choice. Draft has to stay
+            reachable: a product that went live before the store's details
+            lapsed is one the seller may well want to take down, and that is
+            the single remedial move available to them here. The tile stays
+            visible rather than disappearing, so the choice is seen to exist
+            and the notice below can explain it. */}
         <div className="space-y-3">
-          <div
-            className="space-y-2 sm:max-w-xs"
-            data-product-field="status"
-            data-product-value={values.status}
-          >
-            {/* Only ACTIVE is barred, never the whole control. Draft has to
-                stay reachable: a product that went live before the store's
-                details lapsed is one the seller may well want to take down,
-                and that is the single remedial move available to them here.
-                The segment stays visible rather than disappearing, so the
-                choice is seen to exist and the notice below can explain it. */}
-            <SegmentedControl
-              value={values.status}
-              options={STATUS_ORDER.map((status) => ({
-                value: status,
-                label: t(`status.${status}`),
-                ...(status === "active" && !canPublish ? { disabled: true } : {}),
-              }))}
-              onChange={(status) => updateField("status", status)}
-              ariaLabel={t("form.statusLabel")}
-            />
-          </div>
+          <ChoiceCards<ProductStatus>
+            name={`${fieldId}-status`}
+            legend={t("form.statusLabel")}
+            legendHidden
+            variant="tiles"
+            sharp
+            columns={2}
+            value={values.status}
+            onChange={(status) => updateField("status", status)}
+            optionDataAttribute="data-product-status"
+            fieldsetData={{ "data-product-field": "status", "data-product-value": values.status }}
+            options={STATUS_ORDER.map((status) => ({
+              value: status,
+              label: t(`status.${status}`),
+              hint: t(`form.visibility.${status}Hint`),
+              icon:
+                status === "active" ? (
+                  <HeroMark icon={Store} badge={Check} tone="success" />
+                ) : (
+                  <HeroMark icon={EyeOff} badge={Pencil} />
+                ),
+              ...(status === "active" && !canPublish ? { disabled: true } : {}),
+            }))}
+          />
           {/* Not `detailed`: the banner in the chrome has already made the
-              case, and this one is here to explain why the control above is
+              case, and this one is here to explain why the tile above is
               dead. The button still goes to the field that revives it. */}
           <SellerDetailsNotice
             missing={missingTraderDetails}
@@ -1621,7 +1853,31 @@ export function ProductForm({
           </div>
         )}
 
-        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+          {/* WHAT STANDS BETWEEN THE SELLER AND DONE, in one line: the
+              required answers still missing, or a check when there are none.
+              Quiet until a save is tried, when the problem list above takes
+              over the shouting. */}
+          <p
+            className="flex min-w-0 items-center gap-1.5 font-inter text-sm text-muted-foreground sm:mr-auto"
+            data-product-readiness={stillNeeded.length === 0 ? "ready" : "missing"}
+          >
+            {stillNeeded.length === 0 ? (
+              <>
+                <Check className="size-4 shrink-0 text-success" strokeWidth={2.5} aria-hidden="true" />
+                {t("form.ready")}
+              </>
+            ) : (
+              <>
+                <Plus className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+                <span className="truncate">
+                  {t("form.stillNeeded", {
+                    fields: formatList(stillNeeded, locale, { englishSeparator: ", " }),
+                  })}
+                </span>
+              </>
+            )}
+          </p>
           {/* A button, not a Link: leaving has to run through the guard so
               half-written work isn't dropped on a stray click. */}
           <button
@@ -1691,16 +1947,36 @@ export function ProductForm({
       />
       </form>
 
-      {/* The index, in the margin. Sticky so it stays with the reader on a
-          form several screens tall, and hidden below `lg` where there is no
-          margin to put it in — the section headers carry the same summaries,
-          so nothing lives only here. */}
-      <FormSectionNav
-        sections={snapshot.sections}
-        flagged={flaggedSections}
-        // Below the sticky TopBar (h-14), not under it.
-        className="sticky top-20 hidden lg:block"
-      />
+      {/* The margin: the product as buyers will see it, then the index.
+          Sticky so both stay with the reader on a form several screens tall
+          (below the sticky TopBar, h-14, not under it), and hidden below `lg`
+          where there is no margin to put them in — the photo leads the form
+          itself there, and the section headers carry the same summaries, so
+          nothing lives only here. */}
+      <div className="sticky top-20 hidden space-y-6 lg:block">
+        <ProductPreviewCard
+          imageUrl={pickedCover ?? product?.imageUrl ?? null}
+          title={values.title}
+          priceCents={snapshot.priceCents}
+          currency={values.currency}
+          isDigital={isDigital}
+          dispatch={shippingDispatch}
+          trackStock={values.trackStock}
+          stockQuantity={snapshot.stockQuantity}
+          lowStockThreshold={snapshot.lowStockThreshold ?? LOW_STOCK_THRESHOLD_DEFAULT}
+          status={values.status}
+        />
+        <FormSectionNav
+          sections={snapshot.sections}
+          flagged={flaggedSections}
+          rendered={closedExtras.join(",")}
+          onBeforeJump={(id) => {
+            if ((EXTRA_SECTIONS as readonly string[]).includes(id)) {
+              setOpenedExtras((previous) => new Set(previous).add(id as ExtraSectionId));
+            }
+          }}
+        />
+      </div>
 
       <ProductFormSnapshotScript snapshot={snapshot} />
     </div>

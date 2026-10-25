@@ -467,8 +467,12 @@ describe("the discounts page", () => {
     expect(row(over.id)).toHaveTextContent("No orders yet");
 
     // Totals across every discount, and the channels that brought them.
-    // The chart loads on demand (next/dynamic), so wait for it to arrive.
-    await waitFor(() => expect(document.querySelector("[data-discount-performance]")).not.toBeNull());
+    // The chart loads on demand (next/dynamic), so wait for it to arrive. The
+    // first import compiles recharts in jsdom, which can pass waitFor's default
+    // second when the whole suite runs at once.
+    await waitFor(() => expect(document.querySelector("[data-discount-performance]")).not.toBeNull(), {
+      timeout: 10_000,
+    });
     const performance = document.querySelector<HTMLElement>("[data-discount-performance]")!;
     expect(within(performance).getByText("Orders with a discount")).toBeInTheDocument();
     expect(performance).toHaveTextContent("€84.00");
