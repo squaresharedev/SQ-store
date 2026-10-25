@@ -16,7 +16,6 @@
   "page": {
     "metaTitle": "Forfaits",
     "title": "Choisissez votre forfait",
-    "lead": "Commencez gratuitement et restez-y aussi longtemps que vous voulez. Passez à un forfait supérieur quand une commission réduite s'en justifie.",
     "trust": {
       "secure": "Paiement sécurisé par Stripe",
       "cancel": "Annulation à tout moment",

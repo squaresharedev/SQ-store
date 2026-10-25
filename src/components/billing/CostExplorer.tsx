@@ -7,6 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { CountUp } from "@/components/ui/CountUp";
 import { cardClass, inkBadgeClass } from "@/components/ui/surface-styles";
 import { usePlanPrices } from "@/components/billing/plan-context";
+import { MarkedPlanName } from "@/components/billing/PlanWordmark";
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/format/money";
@@ -114,7 +115,7 @@ export function CostExplorer({
                 <li key={plan} data-pricing-cost={plan} data-cheapest={isCheapest || undefined}>
                   <div className="flex items-center justify-between gap-3">
                     <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 font-inter text-sm font-medium text-foreground">
-                      {t(`plans.${plan}.name`)}
+                      <MarkedPlanName plan={plan} name={t(`plans.${plan}.name`)} />
                       {isCheapest && <span className={inkBadgeClass}>{t("calculator.cheapestTag")}</span>}
                     </span>
                     {/* The total stays on one line; a narrow column wraps the

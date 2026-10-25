@@ -16,7 +16,6 @@
   "page": {
     "metaTitle": "Plans",
     "title": "Choose your plan",
-    "lead": "Start free and stay free for as long as you like. Upgrade when a lower fee pays for itself.",
     "trust": {
       "secure": "Secure checkout by Stripe",
       "cancel": "Cancel any time",

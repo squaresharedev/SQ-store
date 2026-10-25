@@ -19,6 +19,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { cardClass, eyebrowClass } from "@/components/ui/surface-styles";
 import { PLAN_FEATURE_ICON } from "@/components/billing/PlanFeatureList";
 import { usePlanPrices } from "@/components/billing/plan-context";
+import { MarkedPlanName } from "@/components/billing/PlanWordmark";
 import { cn } from "@/lib/utils";
 import { formatBytes } from "@/lib/format";
 import { formatCents } from "@/lib/format/money";
@@ -114,7 +115,7 @@ export function PlanComparison({ interval, currentPlan }: { interval: BillingInt
                   scope="col"
                   className={cn(columnClass(plan), "rounded-t-md py-3 font-semibold text-foreground")}
                 >
-                  {t(`plans.${plan}.name`)}
+                  <MarkedPlanName plan={plan} name={t(`plans.${plan}.name`)} />
                   {plan === currentPlan && (
                     <span className="block font-normal text-muted-foreground">{t("card.current")}</span>
                   )}

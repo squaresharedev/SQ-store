@@ -16,7 +16,6 @@
   "page": {
     "metaTitle": "Tarife",
     "title": "Wähle deinen Tarif",
-    "lead": "Starte kostenlos und bleib es, so lange du willst. Wechsle, wenn sich eine niedrigere Gebühr lohnt.",
     "trust": {
       "secure": "Sicherer Checkout mit Stripe",
       "cancel": "Jederzeit kündbar",
