@@ -298,7 +298,7 @@
     "signInFailed": "Nie udało się zalogować. Sprawdź połączenie i spróbuj ponownie.",
     "badCredentials": "Nieprawidłowy e-mail lub hasło.",
     "emailNotConfirmed": "Najpierw potwierdź e-mail: sprawdź skrzynkę odbiorczą, aby znaleźć link.",
-    "weakPassword": "To hasło jest zbyt słabe. Użyj co najmniej 8 znaków.",
+    "weakPassword": "To hasło jest zbyt słabe. Co najmniej 8 znaków, wielkie i małe litery, cyfry lub symbole (albo fraza o długości 16 znaków lub więcej).",
     "rateLimited": "Zbyt wiele prób. Odczekaj minutę i spróbuj ponownie.",
     "accountNotCreated": "Nie udało się utworzyć tego konta. Spróbuj innej nazwy użytkownika.",
     "providerMessage": "{message}",

@@ -97,7 +97,7 @@
   },
   "tiles": {
     "revenue": "Receita",
-    "afterFees": "{amount} após taxas",
+    "afterFees": "{amount} após as taxas da Square Share",
     "sales": "Vendas",
     "perDay": "{rate} por dia, em média",
     "avgOrder": "Encomenda média",

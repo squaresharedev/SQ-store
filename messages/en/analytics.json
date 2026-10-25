@@ -97,7 +97,7 @@
   },
   "tiles": {
     "revenue": "Revenue",
-    "afterFees": "{amount} after fees",
+    "afterFees": "{amount} after Square Share fees",
     "sales": "Sales",
     "perDay": "{rate} per day on average",
     "avgOrder": "Avg. order",

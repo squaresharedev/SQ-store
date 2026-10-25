@@ -34,7 +34,7 @@
   },
   "emptyState": {
     "title": "Noch keine Produkte",
-    "descriptionWriter": "Füge dein erstes Produkt hinzu. Es kann als Entwurf bleiben, bis du bereit bist, ihm eine Seite zu geben.",
+    "descriptionWriter": "Füge dein erstes Produkt hinzu. Ein Titel und ein Preis reichen.",
     "descriptionReadOnly": "Dieser Shop hat noch keine Produkte.",
     "add": "Produkt hinzufügen"
   },
@@ -144,7 +144,8 @@
       "button": "Ich habe die Änderungen vorgenommen, bitte prüfen",
       "sent": "Am <time>{date}</time> zur Prüfung gesendet. Eine Person sieht sich deine Änderungen an, und du hörst hier und per E-Mail von uns.",
       "failed": "Das konnte nicht gesendet werden.",
-      "failedFix": "Versuche es gleich noch einmal."
+      "failedFix": "Versuche es gleich noch einmal.",
+      "saveFirst": "Speichere zuerst deine Änderungen. Beim Speichern wirst du gefragt, ob du sie zur Prüfung schicken willst."
     },
     "why": "Warum",
     "whatToChange": "Was zu ändern ist",
@@ -280,7 +281,7 @@
       },
       "visibility": {
         "label": "Sichtbarkeit",
-        "description": "Aktiv bedeutet online: Käufer können es sehen und sofort kaufen. Entwurf ist vor Käufern verborgen, bis du es umschaltest.",
+        "description": "Aktiv: Käufer können es kaufen, sobald es in einem Schaufenster ist. Entwurf: vor Käufern verborgen, bis du es umschaltest.",
         "about": "Wozu Sichtbarkeit dient"
       },
       "badges": {
@@ -358,7 +359,7 @@
     "digitalFileHelp": "Die Datei, die dein Käufer nach dem Kauf herunterlädt. Wenn du eine hinzufügst, wird dies ein Download, sodass Versand und Produktsicherheit nicht mehr gelten.",
     "purchaseLink": "Kauflink",
     "purchaseLinkAbout": "Wohin der Kauf-Button Käufer leitet",
-    "purchaseLinkHelp": "Der Kauf-Button der Produktseite folgt diesem Link. Ohne einen wird stattdessen eine E-Mail an die Kontaktadresse deines Shops gesendet.",
+    "purchaseLinkHelp": "Lass es leer, dann bezahlen Käufer über den Square-Share-Checkout oder schreiben dir eine E-Mail, wo der Checkout noch nicht aktiv ist. Ein Link hier ersetzt beides.",
     "purchaseLinkPlaceholder": "z. B. https://dein-shop.example/checkout/dieses-produkt",
     "statusLabel": "Produktstatus",
     "problems": "{count, plural, one {{count} Problem muss vor dem Speichern behoben werden} other {{count} Probleme müssen vor dem Speichern behoben werden}}",
@@ -420,7 +421,7 @@
       "safety": "Herstellerangaben für EU-Regeln"
     },
     "visibility": {
-      "activeHint": "Käufer sehen es und können es sofort kaufen",
+      "activeHint": "Käufer können es kaufen, sobald es in einem Schaufenster ist",
       "draftHint": "Nur du siehst es, bis du bereit bist"
     },
     "preview": {

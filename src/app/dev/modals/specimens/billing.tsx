@@ -5,7 +5,6 @@ import { CancelPlanDialog } from "@/components/billing/CancelPlanDialog";
 import { PlanPricesProvider } from "@/components/billing/plan-context";
 import { ConnectStripeModal } from "@/components/payments/ConnectStripeModal";
 import { PayoutDetailModal } from "@/components/payments/PayoutDetailModal";
-import { PayoutMethodModal } from "@/components/payments/PayoutMethodModal";
 import { TransactionDetailModal } from "@/components/payments/TransactionDetailModal";
 import { PLAN_PRICE_SEED } from "@/lib/billing/pricing-seed";
 import type { BalanceTransaction, Payout, PayoutMethod } from "@/lib/payments/types";
@@ -105,13 +104,6 @@ export const BILLING: readonly Specimen[] = [
     label: "Connect with Stripe",
     kind: "dialog",
     render: ({ onClose }) => <ConnectStripeModal open onClose={onClose} />,
-  },
-  {
-    id: "payments-method",
-    group: "Payments",
-    label: "Payout method",
-    kind: "dialog",
-    render: ({ onClose }) => <PayoutMethodModal open onClose={onClose} method={METHOD} />,
   },
   {
     id: "payments-payout",

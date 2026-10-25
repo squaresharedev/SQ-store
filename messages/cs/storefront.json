@@ -291,7 +291,7 @@
     },
     "name": {
       "title": "Pojmenujte výlohu",
-      "description": "Jen pro vás. Přejmenovat ji můžete kdykoli."
+      "description": "Kupující ho uvidí v horní části výlohy. Přejmenovat ji můžete kdykoli."
     },
     "stepOf": "Krok {current} z {total}",
     "nameLabel": "Název výlohy",

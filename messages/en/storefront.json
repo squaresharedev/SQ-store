@@ -291,7 +291,7 @@
     },
     "name": {
       "title": "Name your storefront",
-      "description": "Just for you. You can rename it any time."
+      "description": "Buyers see it at the top of your storefront. You can rename it any time."
     },
     "stepOf": "Step {current} of {total}",
     "nameLabel": "Storefront name",

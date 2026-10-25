@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { infoTextClass, quietLinkClass } from "@/components/ui/control-styles";
 import { authenticate } from "@/lib/auth/actions";
-import { SIGNUP_CHECK_EMAIL_KEY } from "@/lib/auth/signup";
+import { EMAIL_NOT_CONFIRMED_KEY, SIGNUP_CHECK_EMAIL_KEY } from "@/lib/auth/signup";
 import type { ActionState } from "@/lib/errors";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
@@ -302,16 +302,21 @@ export function LoginForm({
               </p>
             )}
             {/* A confirmation that never arrives (spam, a typo'd filter) was a
-                dead end: the form had nothing more to offer. A sign-in link
-                to the same address confirms it as well, and the address just
-                sent is put back in the box. */}
-            {state.success?.key === SIGNUP_CHECK_EMAIL_KEY && !isMagic && (
+                dead end: the form had nothing more to offer, right after
+                sign-up or at a later "confirm your email first". A sign-in
+                link to the same address confirms it as well, and the address
+                just sent is put back in the box. */}
+            {(state.success?.key === SIGNUP_CHECK_EMAIL_KEY ||
+              state.error?.message.key === EMAIL_NOT_CONFIRMED_KEY) &&
+              !isMagic && (
               <button
                 type="button"
                 onClick={() => {
                   changeMode("magic");
                   const field = formRef.current?.querySelector<HTMLInputElement>("#identifier");
-                  if (field && !field.value) field.value = submittedIdentifier.current;
+                  // Only an address: a username cannot be sent a link.
+                  const sent = submittedIdentifier.current;
+                  if (field && !field.value && sent.includes("@")) field.value = sent;
                 }}
                 className={`${quietLinkClass} mt-2`}
                 data-signup-no-email=""

@@ -298,7 +298,7 @@
     "signInFailed": "Non è stato possibile accedere. Controlla la connessione e riprova.",
     "badCredentials": "Email o password errati.",
     "emailNotConfirmed": "Conferma prima la tua email: controlla il link nella tua casella di posta.",
-    "weakPassword": "Quella password è troppo debole. Usa almeno 8 caratteri.",
+    "weakPassword": "Quella password è troppo debole. Almeno 8 caratteri, tra maiuscole, minuscole, numeri o simboli (oppure una passphrase di 16 o più).",
     "rateLimited": "Troppi tentativi. Attendi un minuto e riprova.",
     "accountNotCreated": "Non è stato possibile creare quell’account. Prova un nome utente diverso.",
     "providerMessage": "{message}",

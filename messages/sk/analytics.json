@@ -97,7 +97,7 @@
   },
   "tiles": {
     "revenue": "Tržby",
-    "afterFees": "{amount} po poplatkoch",
+    "afterFees": "{amount} po poplatkoch Square Share",
     "sales": "Predaje",
     "perDay": "priemerne {rate} za deň",
     "avgOrder": "Priem. objednávka",

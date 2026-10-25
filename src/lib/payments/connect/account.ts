@@ -187,3 +187,16 @@ export async function onboardingLink(stripeAccountId: string): Promise<string> {
   });
   return link.url;
 }
+
+/**
+ * A one-use link into the seller's own Stripe Express dashboard, where they
+ * change their bank account and see their payouts. Same link type as
+ * onboarding: Stripe's to make, ours only to hand over.
+ */
+export async function dashboardLink(stripeAccountId: string): Promise<string> {
+  const link = await stripeRequest<StripeAccountLink>(
+    "POST",
+    `/accounts/${encodeURIComponent(stripeAccountId)}/login_links`,
+  );
+  return link.url;
+}

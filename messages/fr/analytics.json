@@ -97,7 +97,7 @@
   },
   "tiles": {
     "revenue": "Chiffre d’affaires",
-    "afterFees": "{amount} après frais",
+    "afterFees": "{amount} après les frais Square Share",
     "sales": "Ventes",
     "perDay": "{rate} par jour en moyenne",
     "avgOrder": "Panier moyen",

@@ -291,7 +291,7 @@
     },
     "name": {
       "title": "Benenne dein Schaufenster",
-      "description": "Nur für dich. Du kannst es jederzeit umbenennen."
+      "description": "Käufer sehen ihn oben in deinem Schaufenster. Du kannst ihn jederzeit umbenennen."
     },
     "stepOf": "Schritt {current} von {total}",
     "nameLabel": "Name des Schaufensters",

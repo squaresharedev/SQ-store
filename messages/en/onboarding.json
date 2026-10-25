@@ -12,7 +12,7 @@
     },
     "product": {
       "label": "Add a product",
-      "detail": "A title and a price are enough. It can stay a draft for now.",
+      "detail": "A title and a price are enough.",
       "detailDone": "{count, plural, one {You have {count} product.} other {You have {count} products.}}",
       "action": "Add product",
       "cta": "Add your first product"
@@ -197,7 +197,7 @@
       },
       "productsAdd": {
         "title": "Add a product",
-        "body": "A title and a price are enough to start. It can stay a draft until you're ready."
+        "body": "A title and a price are enough to start."
       },
       "productsImport": {
         "title": "Or import your catalogue",

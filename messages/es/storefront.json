@@ -291,7 +291,7 @@
     },
     "name": {
       "title": "Ponle nombre a tu escaparate",
-      "description": "Solo para ti. Puedes cambiarlo cuando quieras."
+      "description": "Los compradores lo ven en la parte superior de tu escaparate. Puedes cambiarlo cuando quieras."
     },
     "stepOf": "Paso {current} de {total}",
     "nameLabel": "Nombre del escaparate",

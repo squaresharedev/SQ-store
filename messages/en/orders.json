@@ -85,6 +85,7 @@
     "amount": "Amount",
     "platformFee": "Platform fee",
     "youReceive": "You receive",
+    "youReceiveHint": "Before Stripe's card fee",
     "buyerEmail": "Buyer email",
     "copyBuyerEmail": {
       "copy": "Copy buyer email",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Code {code} used, but the sale price was lower"
   },
   "actions": {
-    "disputeInStripe": "Disputes are handled in your Stripe dashboard once Stripe is connected.",
+    "disputeInStripe": "The buyer's bank opened a dispute. Answer it in your Stripe dashboard before its deadline.",
+    "answerInStripe": "Answer in Stripe",
     "pendingPayment": "The buyer's payment is still being confirmed. Don't send anything yet: this order shows as paid once it goes through, and closes by itself if it doesn't.",
     "none": "No actions are available for this order."
   },

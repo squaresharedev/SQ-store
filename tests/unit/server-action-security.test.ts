@@ -162,6 +162,8 @@ const REGISTRY: Record<string, Classification> = {
   // Creates a connected account at Stripe and a link into its onboarding, on
   // the platform's key: the billing write budget, like starting a checkout.
   "lib/payments/connect/actions.ts::startStripeOnboarding": limited(),
+  // The same budget for the link into the seller's own Stripe dashboard.
+  "lib/payments/connect/actions.ts::openStripeDashboard": limited(),
   "lib/discounts/actions.ts::createDiscount": limited(),
   "lib/discounts/actions.ts::updateDiscount": limited(),
   "lib/discounts/actions.ts::setCodeEnabled": limited(),

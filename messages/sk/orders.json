@@ -85,6 +85,7 @@
     "amount": "Suma",
     "platformFee": "Poplatok platformy",
     "youReceive": "Dostanete",
+    "youReceiveHint": "Pred poplatkom Stripe za kartu",
     "buyerEmail": "E-mail kupujúceho",
     "copyBuyerEmail": {
       "copy": "Kopírovať e-mail kupujúceho",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Kód {code} bol použitý, no cena z akcie bola nižšia"
   },
   "actions": {
-    "disputeInStripe": "Spory sa riešia vo vašom paneli Stripe po jeho prepojení.",
+    "disputeInStripe": "Banka kupujúceho otvorila spor. Odpovedzte naň v paneli Stripe pred jeho termínom.",
+    "answerInStripe": "Odpovedať v Stripe",
     "pendingPayment": "Platba kupujúceho sa ešte potvrdzuje. Zatiaľ nič neposielajte: keď prejde, objednávka sa zobrazí ako zaplatená, a ak neprejde, sama sa uzavrie.",
     "none": "Pre túto objednávku nie sú k dispozícii žiadne akcie."
   },

@@ -291,7 +291,7 @@
     },
     "name": {
       "title": "Dê um nome à sua montra",
-      "description": "Só para si. Pode mudar o nome quando quiser."
+      "description": "Os compradores veem-no no topo da sua montra. Pode mudar o nome quando quiser."
     },
     "stepOf": "Passo {current} de {total}",
     "nameLabel": "Nome da montra",

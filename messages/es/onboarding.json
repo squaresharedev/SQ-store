@@ -12,7 +12,7 @@
     },
     "product": {
       "label": "Añade un producto",
-      "detail": "Con un nombre y un precio basta. Puede quedarse como borrador por ahora.",
+      "detail": "Con un nombre y un precio basta.",
       "detailDone": "{count, plural, one {Tienes {count} producto.} many {Tienes {count} productos.} other {Tienes {count} productos.}}",
       "action": "Añadir producto",
       "cta": "Añade tu primer producto"
@@ -197,7 +197,7 @@
       },
       "productsAdd": {
         "title": "Añade un producto",
-        "body": "Con un título y un precio basta para empezar. Puede quedarse en borrador hasta que estés listo."
+        "body": "Con un título y un precio basta para empezar."
       },
       "productsImport": {
         "title": "O importa tu catálogo",

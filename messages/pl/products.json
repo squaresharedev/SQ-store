@@ -34,7 +34,7 @@
   },
   "emptyState": {
     "title": "Jeszcze brak produktów",
-    "descriptionWriter": "Dodaj swój pierwszy produkt. Może pozostać wersją roboczą, dopóki nie zdecydujesz się nadać mu strony.",
+    "descriptionWriter": "Dodaj swój pierwszy produkt. Wystarczy nazwa i cena.",
     "descriptionReadOnly": "Ten sklep nie ma jeszcze produktów.",
     "add": "Dodaj produkt"
   },
@@ -144,7 +144,8 @@
       "button": "Zmiany wprowadzone, wyślij do sprawdzenia",
       "sent": "Wysłano do sprawdzenia dnia <time>{date}</time>. Człowiek przejrzy twoje zmiany, a odpowiedź dostaniesz tutaj i e-mailem.",
       "failed": "Nie udało się tego wysłać.",
-      "failedFix": "Spróbuj ponownie za chwilę."
+      "failedFix": "Spróbuj ponownie za chwilę.",
+      "saveFirst": "Najpierw zapisz zmiany. Po zapisaniu pojawi się pytanie, czy wysłać je do sprawdzenia."
     },
     "why": "Dlaczego",
     "whatToChange": "Co zmienić",
@@ -280,7 +281,7 @@
       },
       "visibility": {
         "label": "Widoczność",
-        "description": "Aktywny oznacza opublikowany: kupujący widzą produkt i mogą go od razu kupić. Wersja robocza jest ukryta przed kupującymi, dopóki nie zmienisz statusu.",
+        "description": "Aktywny: kupujący mogą go kupić, gdy tylko trafi do witryny. Wersja robocza: ukryta przed kupującymi, dopóki jej nie przełączysz.",
         "about": "Do czego służy sekcja Widoczność"
       },
       "badges": {
@@ -358,7 +359,7 @@
     "digitalFileHelp": "Plik, który kupujący pobiera po zakupie. Dodanie go zmienia produkt w pobranie cyfrowe, więc wysyłka i bezpieczeństwo produktu przestają mieć zastosowanie.",
     "purchaseLink": "Link do zakupu",
     "purchaseLinkAbout": "Dokąd przycisk zakupu kieruje kupujących",
-    "purchaseLinkHelp": "Przycisk zakupu na stronie produktu prowadzi pod ten link. Bez niego wysyła zamiast tego e-mail na adres kontaktowy twojego sklepu.",
+    "purchaseLinkHelp": "Zostaw puste, a kupujący zapłacą przez realizację zakupu w Square Share albo napiszą do ciebie e-mail, gdzie nie jest jeszcze włączona. Link tutaj zastępuje oba sposoby.",
     "purchaseLinkPlaceholder": "np. https://twojsklep.example/checkout/ten-produkt",
     "statusLabel": "Status produktu",
     "problems": "{count, plural, one {{count} rzecz do poprawienia przed zapisaniem} few {{count} rzeczy do poprawienia przed zapisaniem} many {{count} rzeczy do poprawienia przed zapisaniem} other {{count} rzeczy do poprawienia przed zapisaniem}}",
@@ -420,7 +421,7 @@
       "safety": "Dane producenta wymagane w UE"
     },
     "visibility": {
-      "activeHint": "Kupujący widzą go i mogą kupić od razu",
+      "activeHint": "Kupujący mogą go kupić, gdy tylko trafi do witryny",
       "draftHint": "Widzisz go tylko ty, dopóki nie będziesz gotowy"
     },
     "preview": {

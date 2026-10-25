@@ -291,7 +291,7 @@
     },
     "name": {
       "title": "Dai un nome alla tua vetrina",
-      "description": "Solo per te. Puoi rinominarla in qualsiasi momento."
+      "description": "Gli acquirenti lo vedono in cima alla tua vetrina. Puoi rinominarla in qualsiasi momento."
     },
     "stepOf": "Passaggio {current} di {total}",
     "nameLabel": "Nome della vetrina",

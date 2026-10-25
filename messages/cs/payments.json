@@ -76,22 +76,11 @@
   "payoutStatus": "{status, select, paid {Vyplaceno} pending {Čekající} in_transit {Na cestě} canceled {Zrušeno} failed {Nezdařilo se} other {Čekající}}",
   "payoutMethod": {
     "title": "Způsob výplaty",
-    "manage": "Spravovat",
+    "manage": "Spravovat ve Stripe",
     "detail": "{currency} · {country}",
     "detailDefault": "{currency} · {country} · Výchozí",
     "emptyConnectable": "Zatím žádný způsob výplaty. Propojte Stripe a přidejte tam bankovní účet, tady se pak zobrazí automaticky.",
     "empty": "Zatím žádný způsob výplaty."
-  },
-  "payoutMethodModal": {
-    "title": "Způsob výplaty",
-    "description": "Kam se posílají vaše výplaty.",
-    "bankAccountDetail": "Bankovní účet · {currency} · {country}",
-    "defaultLabel": "Výchozí pro výplaty",
-    "yes": "Ano",
-    "no": "Ne",
-    "referenceLabel": "Reference",
-    "securityNote": "Z bezpečnostních důvodů se bankovní údaje mění u Stripe, nikdy ne tady.",
-    "manageInStripe": "Spravovat ve Stripe"
   },
   "recentActivity": {
     "label": "Nedávná aktivita",

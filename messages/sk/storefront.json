@@ -291,7 +291,7 @@
     },
     "name": {
       "title": "Pomenujte váš výklad",
-      "description": "Len pre vás. Môžete ho kedykoľvek premenovať."
+      "description": "Kupujúci ho uvidia v hornej časti výkladu. Môžete ho kedykoľvek premenovať."
     },
     "stepOf": "Krok {current} z {total}",
     "nameLabel": "Názov výkladu",

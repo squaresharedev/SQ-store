@@ -34,7 +34,7 @@
   },
   "emptyState": {
     "title": "Zatím žádné produkty",
-    "descriptionWriter": "Přidejte svůj první produkt. Může zůstat jako koncept, dokud mu nebudete chtít dát vlastní stránku.",
+    "descriptionWriter": "Přidejte svůj první produkt. Stačí název a cena.",
     "descriptionReadOnly": "Tento obchod zatím nemá žádné produkty.",
     "add": "Přidat produkt"
   },
@@ -144,7 +144,8 @@
       "button": "Změny jsou hotové, zkontrolujte je",
       "sent": "Odesláno k posouzení dne <time>{date}</time>. Vaše změny zkontroluje člověk a odpověď dostanete tady i e-mailem.",
       "failed": "Odeslání se nepodařilo.",
-      "failedFix": "Zkuste to za chvíli znovu."
+      "failedFix": "Zkuste to za chvíli znovu.",
+      "saveFirst": "Nejdřív uložte změny. Po uložení se zobrazí dotaz, zda je odeslat k posouzení."
     },
     "why": "Proč",
     "whatToChange": "Co změnit",
@@ -280,7 +281,7 @@
       },
       "visibility": {
         "label": "Viditelnost",
-        "description": "Aktivní znamená zveřejněný: kupující ho hned uvidí a mohou ho koupit. Koncept je před kupujícími skrytý, dokud stav nezměníte.",
+        "description": "Aktivní: kupující ho mohou koupit, jakmile je ve výloze. Koncept: skrytý před kupujícími, dokud ho nepřepnete.",
         "about": "K čemu slouží sekce Viditelnost"
       },
       "badges": {
@@ -358,7 +359,7 @@
     "digitalFileHelp": "Soubor, který si kupující po nákupu stáhne. Když ho přidáte, stane se z produktu obsah ke stažení a doprava ani bezpečnost výrobků se na něj nevztahují.",
     "purchaseLink": "Odkaz na nákup",
     "purchaseLinkAbout": "Kam tlačítko nákupu kupující pošle",
-    "purchaseLinkHelp": "Tlačítko nákupu na produktové stránce vede na tento odkaz. Bez něj místo toho otevře e-mail na kontaktní adresu vašeho obchodu.",
+    "purchaseLinkHelp": "Když ho necháte prázdný, kupující zaplatí přes pokladnu Square Share, nebo vám napíší e-mail, kde pokladna ještě není zapnutá. Odkaz zde nahradí obojí.",
     "purchaseLinkPlaceholder": "např. https://vas-obchod.example/pokladna/tento-produkt",
     "statusLabel": "Stav produktu",
     "problems": "{count, plural, one {Před uložením je potřeba opravit {count} věc} few {Před uložením je potřeba opravit {count} věci} many {Před uložením je potřeba opravit {count} věci} other {Před uložením je potřeba opravit {count} věcí}}",
@@ -420,7 +421,7 @@
       "safety": "Údaje o výrobci pro pravidla EU"
     },
     "visibility": {
-      "activeHint": "Kupující ho vidí a mohou ho hned koupit",
+      "activeHint": "Kupující ho mohou koupit, jakmile je ve výloze",
       "draftHint": "Vidíte ho jen vy, dokud nebudete připraveni"
     },
     "preview": {

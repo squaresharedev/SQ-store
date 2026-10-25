@@ -36,7 +36,7 @@ import {
 } from "@/lib/errors";
 import { firstIssue } from "@/lib/validation/messages";
 import { msg } from "@/i18n/types";
-import { SIGNUP_CHECK_EMAIL_KEY } from "@/lib/auth/signup";
+import { EMAIL_NOT_CONFIRMED_KEY, SIGNUP_CHECK_EMAIL_KEY } from "@/lib/auth/signup";
 import { recordSignupIntent } from "@/lib/auth/signup-intent";
 
 export type { AuthIntent } from "@/lib/validation/auth";
@@ -192,7 +192,7 @@ function friendly(error: AuthError): ActionError {
     case "invalid_credentials":
       return BAD_CREDENTIALS;
     case "email_not_confirmed":
-      return invalidInput(msg("Errors.auth.emailNotConfirmed"));
+      return invalidInput(msg(EMAIL_NOT_CONFIRMED_KEY));
     // NOTE: user_already_exists / email_exists are deliberately absent. They are
     // intercepted at the signup branch and answered with SIGNUP_CHECK_EMAIL,
     // the same copy a new address gets. Adding a case for them here would

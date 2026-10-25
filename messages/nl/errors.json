@@ -298,7 +298,7 @@
     "signInFailed": "Inloggen is mislukt. Controleer je verbinding en probeer het opnieuw.",
     "badCredentials": "Onjuist e-mailadres of wachtwoord.",
     "emailNotConfirmed": "Bevestig eerst je e-mailadres: controleer je inbox voor de link.",
-    "weakPassword": "Dat wachtwoord is te zwak. Gebruik minstens 8 tekens.",
+    "weakPassword": "Dat wachtwoord is te zwak. Minstens 8 tekens, met een mix van hoofd- en kleine letters, cijfers of symbolen (of een wachtwoordzin van 16+ tekens).",
     "rateLimited": "Te veel pogingen. Wacht een minuut en probeer het opnieuw.",
     "accountNotCreated": "Dat account kon niet worden aangemaakt. Probeer een andere gebruikersnaam.",
     "providerMessage": "{message}",

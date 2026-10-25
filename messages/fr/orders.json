@@ -85,6 +85,7 @@
     "amount": "Montant",
     "platformFee": "Frais de plateforme",
     "youReceive": "Vous recevez",
+    "youReceiveHint": "Avant les frais de carte Stripe",
     "buyerEmail": "E-mail de l’acheteur",
     "copyBuyerEmail": {
       "copy": "Copier l’e-mail de l’acheteur",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Code {code} utilisé, mais le prix promotionnel était plus bas"
   },
   "actions": {
-    "disputeInStripe": "Les litiges se gèrent depuis votre tableau de bord Stripe une fois Stripe connecté.",
+    "disputeInStripe": "La banque de l’acheteur a ouvert un litige. Répondez-y dans votre tableau de bord Stripe avant la date limite.",
+    "answerInStripe": "Répondre dans Stripe",
     "pendingPayment": "Le paiement de l’acheteur est encore en cours de confirmation. N’envoyez rien pour l’instant : la commande apparaîtra comme payée dès qu’il aboutit, et se fermera d’elle-même sinon.",
     "none": "Aucune action n’est disponible pour cette commande."
   },

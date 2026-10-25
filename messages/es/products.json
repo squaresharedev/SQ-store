@@ -34,7 +34,7 @@
   },
   "emptyState": {
     "title": "Todavía no hay productos",
-    "descriptionWriter": "Añade tu primer producto. Puede quedarse como borrador hasta que quieras darle una página.",
+    "descriptionWriter": "Añade tu primer producto. Con un nombre y un precio basta.",
     "descriptionReadOnly": "Esta tienda todavía no tiene productos.",
     "add": "Añadir producto"
   },
@@ -144,7 +144,8 @@
       "button": "He hecho los cambios, revisadlo",
       "sent": "Enviado a revisión el <time>{date}</time>. Una persona revisará tus cambios y recibirás la respuesta aquí y por correo.",
       "failed": "No se ha podido enviar.",
-      "failedFix": "Inténtalo de nuevo en unos instantes."
+      "failedFix": "Inténtalo de nuevo en unos instantes.",
+      "saveFirst": "Guarda primero tus cambios. Al guardar se te preguntará si quieres enviarlos a revisión."
     },
     "why": "Por qué",
     "whatToChange": "Qué hay que cambiar",
@@ -280,7 +281,7 @@
       },
       "visibility": {
         "label": "Visibilidad",
-        "description": "Activo está publicado: los compradores pueden verlo y comprarlo al momento. Borrador queda oculto para los compradores hasta que lo cambies.",
+        "description": "Activo: los compradores pueden comprarlo en cuanto esté en un escaparate. Borrador: oculto a los compradores hasta que lo cambies.",
         "about": "Para qué sirve Visibilidad"
       },
       "badges": {
@@ -358,7 +359,7 @@
     "digitalFileHelp": "El archivo que descarga el comprador tras la compra. Añadir uno convierte esto en una descarga, así que dejan de aplicarse el envío y la seguridad del producto.",
     "purchaseLink": "Enlace de compra",
     "purchaseLinkAbout": "Adónde lleva el botón de compra",
-    "purchaseLinkHelp": "El botón de compra de la página de producto sigue este enlace. Si no hay ninguno, escribe en su lugar a la dirección de contacto de tu tienda.",
+    "purchaseLinkHelp": "Déjalo vacío y los compradores pagan con el proceso de pago de Square Share, o te escriben un correo donde aún no está activo. Un enlace aquí sustituye a ambos.",
     "purchaseLinkPlaceholder": "p. ej. https://tu-tienda.example/checkout/este-producto",
     "statusLabel": "Estado del producto",
     "problems": "{count, plural, one {{count} cosa por corregir antes de guardar} many {{count} cosas por corregir antes de guardar} other {{count} cosas por corregir antes de guardar}}",
@@ -420,7 +421,7 @@
       "safety": "Datos del fabricante para la UE"
     },
     "visibility": {
-      "activeHint": "Los compradores lo ven y pueden comprarlo ya",
+      "activeHint": "Los compradores pueden comprarlo en cuanto esté en un escaparate",
       "draftHint": "Solo tú lo ves hasta que esté listo"
     },
     "preview": {

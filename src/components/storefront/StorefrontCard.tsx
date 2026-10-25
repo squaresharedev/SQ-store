@@ -130,6 +130,7 @@ export function StorefrontCard({
   onDelete: () => void;
 }) {
   const t = useTranslations("Storefront.card");
+  const tRemoval = useTranslations("Products.removal");
   const locale = useLocale();
   const { id, name, blockCount, updatedAt, config, removal } = storefront;
   // The page buyers open, straight from the list: the same three conditions
@@ -213,15 +214,19 @@ export function StorefrontCard({
             <p
               className={cn(
                 "mt-1.5 font-inter text-sm font-medium",
-                removal.kind === "paused" ? "text-foreground" : "text-destructive",
+                removal.kind === "removed" ? "text-destructive" : "text-foreground",
               )}
               data-storefront-removed={removal.kind}
             >
-              {removal.kind === "paused"
-                ? removal.reviewRequestedAt
-                  ? t("pausedInReview")
-                  : t("pausedNeedsChanges")
-                : t("removed")}
+              {removal.kind === "pending"
+                ? tRemoval("badgePending")
+                : removal.kind === "review"
+                  ? tRemoval("badgeReview")
+                  : removal.kind === "paused"
+                    ? removal.reviewRequestedAt
+                      ? t("pausedInReview")
+                      : t("pausedNeedsChanges")
+                    : t("removed")}
             </p>
           )}
         </div>

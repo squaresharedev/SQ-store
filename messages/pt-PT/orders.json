@@ -85,6 +85,7 @@
     "amount": "Valor",
     "platformFee": "Taxa da plataforma",
     "youReceive": "Recebe",
+    "youReceiveHint": "Antes da comissão de cartão da Stripe",
     "buyerEmail": "E-mail do comprador",
     "copyBuyerEmail": {
       "copy": "Copiar e-mail do comprador",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Código {code} utilizado, mas o preço da promoção era inferior"
   },
   "actions": {
-    "disputeInStripe": "As disputas são geridas no seu painel do Stripe assim que o Stripe estiver ligado.",
+    "disputeInStripe": "O banco do comprador abriu uma disputa. Responda-lhe no seu painel Stripe antes do prazo.",
+    "answerInStripe": "Responder na Stripe",
     "pendingPayment": "O pagamento do comprador ainda está a ser confirmado. Não envie nada para já: a encomenda aparece como paga quando for concluído, e fecha-se sozinha se não for.",
     "none": "Não há ações disponíveis para esta encomenda."
   },

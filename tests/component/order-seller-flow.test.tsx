@@ -191,10 +191,10 @@ describe("taking an order back", () => {
     expect(screen.queryByRole("button", { name: "Refund or cancel" })).toBeNull();
   });
 
-  it("says where a dispute is handled, with nothing to press", () => {
-    renderDetail(orderView({ status: "disputed" }));
-    expect(screen.getByText(/Disputes are handled in your Stripe dashboard/)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Handle dispute" })).toBeNull();
+  it("says where a dispute is answered, with nothing to press while Stripe is off", () => {
+    renderDetail(orderView({ status: "disputed" }), { canRefund: true });
+    expect(screen.getByText(/Answer it in your Stripe dashboard/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Answer in Stripe" })).toBeNull();
   });
 
   it("says what a payment still being confirmed means, and what to do (nothing yet)", () => {

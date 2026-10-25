@@ -298,7 +298,7 @@
     "signInFailed": "Could not sign in. Please check your connection and try again.",
     "badCredentials": "Incorrect email or password.",
     "emailNotConfirmed": "Confirm your email first — check your inbox for the link.",
-    "weakPassword": "That password is too weak. Use at least 8 characters.",
+    "weakPassword": "That password is too weak. At least 8 characters, mixing cases, numbers or symbols (or a passphrase of 16+).",
     "rateLimited": "Too many attempts. Wait a minute and try again.",
     "accountNotCreated": "Could not create that account. Try a different username.",
     "providerMessage": "{message}",

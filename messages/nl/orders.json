@@ -85,6 +85,7 @@
     "amount": "Bedrag",
     "platformFee": "Platformkosten",
     "youReceive": "Jij ontvangt",
+    "youReceiveHint": "Vóór de kaartkosten van Stripe",
     "buyerEmail": "E-mail koper",
     "copyBuyerEmail": {
       "copy": "E-mail koper kopiëren",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Code {code} gebruikt, maar de actieprijs was lager"
   },
   "actions": {
-    "disputeInStripe": "Geschillen worden afgehandeld in je Stripe-dashboard zodra Stripe is gekoppeld.",
+    "disputeInStripe": "De bank van de koper heeft een geschil geopend. Reageer erop in je Stripe-dashboard vóór de deadline.",
+    "answerInStripe": "Reageren in Stripe",
     "pendingPayment": "De betaling van de koper wordt nog bevestigd. Verstuur nog niets: de bestelling staat als betaald zodra die doorkomt, en sluit vanzelf als dat niet gebeurt.",
     "none": "Er zijn geen acties beschikbaar voor deze bestelling."
   },

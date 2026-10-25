@@ -12,7 +12,7 @@
     },
     "product": {
       "label": "Pridajte produkt",
-      "detail": "Postačí názov a cena. Produkt môže zostať ako koncept.",
+      "detail": "Postačí názov a cena.",
       "detailDone": "{count, plural, one {Máte {count} produkt.} few {Máte {count} produkty.} many {Máte {count} produktu.} other {Máte {count} produktov.}}",
       "action": "Pridať produkt",
       "cta": "Pridať prvý produkt"
@@ -197,7 +197,7 @@
       },
       "productsAdd": {
         "title": "Pridajte produkt",
-        "body": "Na začiatok stačí názov a cena. Môže zostať konceptom, kým nebudete pripravení."
+        "body": "Na začiatok stačí názov a cena."
       },
       "productsImport": {
         "title": "Alebo importujte svoj katalóg",

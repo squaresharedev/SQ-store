@@ -5,3 +5,7 @@
  * lib/auth/actions.ts sends it.
  */
 export const SIGNUP_CHECK_EMAIL_KEY = "Auth.success.signUpCheckEmail" as const;
+
+/** The sign-in refusal for an account whose email was never confirmed. The
+ *  form offers the same sign-in link under it: that link confirms it too. */
+export const EMAIL_NOT_CONFIRMED_KEY = "Errors.auth.emailNotConfirmed" as const;

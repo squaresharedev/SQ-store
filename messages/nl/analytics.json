@@ -97,7 +97,7 @@
   },
   "tiles": {
     "revenue": "Omzet",
-    "afterFees": "{amount} na kosten",
+    "afterFees": "{amount} na Square Share-kosten",
     "sales": "Verkopen",
     "perDay": "{rate} per dag gemiddeld",
     "avgOrder": "Gem. bestelling",

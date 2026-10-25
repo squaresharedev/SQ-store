@@ -72,11 +72,14 @@ function DetailRow({
 function LedgerLine({
   label,
   strong = false,
+  hint,
   children,
 }: {
   label: string;
   /** The line that matters: what the seller is left with. */
   strong?: boolean;
+  /** A quiet note under the amount, about what the figure leaves out. */
+  hint?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -87,7 +90,10 @@ function LedgerLine({
       )}
     >
       <dt className={cn(!strong && "text-muted-foreground")}>{label}</dt>
-      <dd className="text-right tabular-nums">{children}</dd>
+      <dd className="text-right tabular-nums">
+        {children}
+        {hint && <span className="block font-inter text-xs font-normal text-muted-foreground">{hint}</span>}
+      </dd>
     </div>
   );
 }
@@ -185,6 +191,9 @@ export function OrderDetail({
 }) {
   const t = useTranslations("Orders");
   const locale = useLocale();
+  // A refund sends the whole payment back, our fee included, so a refunded
+  // order's last line is what went back, not money the seller still has.
+  const refunded = order.status === "refunded";
   const youReceiveCents = order.amountCents - order.platformFeeCents;
   const ships = order.fulfilment.status !== "not_required";
   const packLine = t("detail.packLine", { quantity: order.quantity, title: order.productTitle });
@@ -376,7 +385,8 @@ export function OrderDetail({
           </DetailRow>
 
           {/* THE MONEY, as a ledger: what was paid, what came off, what the
-              platform kept, and what is yours, on one line each. */}
+              platform kept, and what is yours (or, once refunded, what went
+              back), on one line each. */}
           <DetailRow icon={Wallet}>
             <dl className="flex flex-col gap-1.5 text-sm">
               <LedgerLine label={t("detail.amount")}>
@@ -420,9 +430,17 @@ export function OrderDetail({
               >
                 {formatCents(order.platformFeeCents, order.currency, locale)}
               </LedgerLine>
-              <LedgerLine label={t("detail.youReceive")} strong>
-                {formatCents(youReceiveCents, order.currency, locale)}
-              </LedgerLine>
+              {refunded ? (
+                <LedgerLine label={t("status.refunded")} strong>
+                  {formatCents(order.amountCents, order.currency, locale)}
+                </LedgerLine>
+              ) : (
+                // Stripe's card fee is Stripe's to take and is not on the
+                // order, so say it is still to come rather than hide it.
+                <LedgerLine label={t("detail.youReceive")} strong hint={t("detail.youReceiveHint")}>
+                  {formatCents(youReceiveCents, order.currency, locale)}
+                </LedgerLine>
+              )}
             </dl>
           </DetailRow>
 

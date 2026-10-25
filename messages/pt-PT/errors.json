@@ -298,7 +298,7 @@
     "signInFailed": "Não foi possível iniciar sessão. Verifique a sua ligação e tente novamente.",
     "badCredentials": "E-mail ou palavra-passe incorretos.",
     "emailNotConfirmed": "Confirme primeiro o seu e-mail: verifique a sua caixa de entrada para encontrar o link.",
-    "weakPassword": "Essa palavra-passe é demasiado fraca. Utilize pelo menos 8 carateres.",
+    "weakPassword": "Essa palavra-passe é demasiado fraca. Pelo menos 8 carateres, combinando maiúsculas e minúsculas, números ou símbolos (ou uma frase-passe de 16 ou mais).",
     "rateLimited": "Demasiadas tentativas. Aguarde um minuto e tente novamente.",
     "accountNotCreated": "Não foi possível criar essa conta. Experimente um nome de utilizador diferente.",
     "providerMessage": "{message}",

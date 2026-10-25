@@ -298,7 +298,7 @@
     "signInFailed": "Prihlásenie sa nepodarilo. Skontrolujte pripojenie a skúste to znova.",
     "badCredentials": "Nesprávny e-mail alebo heslo.",
     "emailNotConfirmed": "Najskôr potvrďte e-mail, odkaz nájdete v doručenej pošte.",
-    "weakPassword": "Toto heslo je príliš slabé. Použite aspoň 8 znakov.",
+    "weakPassword": "Toto heslo je príliš slabé. Aspoň 8 znakov: veľké a malé písmená, číslice alebo symboly (alebo fráza s aspoň 16 znakmi).",
     "rateLimited": "Príliš veľa pokusov. Minútu počkajte a skúste to znova.",
     "accountNotCreated": "Tento účet sa nepodarilo vytvoriť. Skúste iné používateľské meno.",
     "providerMessage": "{message}",

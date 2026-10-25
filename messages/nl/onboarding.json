@@ -12,7 +12,7 @@
     },
     "product": {
       "label": "Voeg een product toe",
-      "detail": "Een titel en een prijs zijn genoeg. Het mag voorlopig een concept blijven.",
+      "detail": "Een titel en een prijs zijn genoeg.",
       "detailDone": "{count, plural, one {Je hebt {count} product.} other {Je hebt {count} producten.}}",
       "action": "Product toevoegen",
       "cta": "Voeg je eerste product toe"
@@ -197,7 +197,7 @@
       },
       "productsAdd": {
         "title": "Voeg een product toe",
-        "body": "Een titel en een prijs zijn genoeg om te beginnen. Het kan een concept blijven tot je er klaar voor bent."
+        "body": "Een titel en een prijs zijn genoeg om te beginnen."
       },
       "productsImport": {
         "title": "Of importeer je catalogus",

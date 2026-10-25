@@ -291,7 +291,7 @@
     },
     "name": {
       "title": "Nazwij swoją witrynę",
-      "description": "Tylko dla ciebie. Możesz zmienić nazwę w każdej chwili."
+      "description": "Kupujący widzą ją na górze witryny. Możesz zmienić nazwę w każdej chwili."
     },
     "stepOf": "Krok {current} z {total}",
     "nameLabel": "Nazwa witryny",

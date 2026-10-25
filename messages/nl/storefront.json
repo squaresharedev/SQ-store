@@ -291,7 +291,7 @@
     },
     "name": {
       "title": "Geef je etalage een naam",
-      "description": "Alleen voor jezelf. Je kunt het altijd hernoemen."
+      "description": "Kopers zien hem bovenaan je etalage. Je kunt hem altijd hernoemen."
     },
     "stepOf": "Stap {current} van {total}",
     "nameLabel": "Etalagenaam",

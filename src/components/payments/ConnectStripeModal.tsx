@@ -1,10 +1,7 @@
 "use client";
 
-import { useTransition } from "react";
 import { ArrowUpRight, Landmark, ShieldCheck, Timer } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
-import { leaveForStripe } from "@/components/billing/billing-actions";
 import { Disclosure } from "@/components/ui/Disclosure";
 import { Modal, ModalActions } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
@@ -13,6 +10,7 @@ import { stubBadgeClass } from "@/components/ui/control-styles";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { startStripeOnboarding, type ConnectStripeResult } from "@/lib/payments/connect/actions";
 import { CardSwipe } from "./CardSwipe";
+import { useLeaveForStripe } from "./useLeaveForStripe";
 
 /** Each point's icon, and where its copy lives under Payments.connectModal.points. */
 const POINTS = [
@@ -42,18 +40,11 @@ export function ConnectStripeModal({
   start?: () => Promise<ConnectStripeResult>;
 }) {
   const t = useTranslations("Payments");
-  const raise = useActionErrorToast();
-  const [leaving, startLeaving] = useTransition();
   // While Connect is switched off (lib/payments/availability.ts) the CTA is
   // DISABLED: a clickable button that does nothing reads as broken, not as
   // "coming soon". The switch is the app-wide one, so the dashboard starts
   // asking for a connection on the same day this button starts making one.
-  const connect = () =>
-    startLeaving(async () => {
-      const result = await start();
-      if (!result.ok) return raise(result.error);
-      leaveForStripe(result.url);
-    });
+  const [connect, leaving] = useLeaveForStripe(start);
 
   return (
     <Modal

@@ -298,7 +298,7 @@
     "signInFailed": "Anmeldung fehlgeschlagen. Bitte überprüfe deine Verbindung und versuche es erneut.",
     "badCredentials": "Falsche E-Mail-Adresse oder falsches Passwort.",
     "emailNotConfirmed": "Bestätige zuerst deine E-Mail-Adresse: Prüfe deinen Posteingang auf den Link.",
-    "weakPassword": "Dieses Passwort ist zu schwach. Verwende mindestens 8 Zeichen.",
+    "weakPassword": "Dieses Passwort ist zu schwach. Mindestens 8 Zeichen, Groß- und Kleinbuchstaben, Zahlen oder Symbole gemischt (oder eine Passphrase mit 16+ Zeichen).",
     "rateLimited": "Zu viele Versuche. Warte eine Minute und versuche es erneut.",
     "accountNotCreated": "Dieses Konto konnte nicht erstellt werden. Versuche einen anderen Benutzernamen.",
     "providerMessage": "{message}",

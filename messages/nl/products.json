@@ -34,7 +34,7 @@
   },
   "emptyState": {
     "title": "Nog geen producten",
-    "descriptionWriter": "Voeg je eerste product toe. Het mag een concept blijven totdat je klaar bent om er een pagina voor te maken.",
+    "descriptionWriter": "Voeg je eerste product toe. Een titel en een prijs zijn genoeg.",
     "descriptionReadOnly": "Deze winkel heeft nog geen producten.",
     "add": "Product toevoegen"
   },
@@ -144,7 +144,8 @@
       "button": "Ik heb de aanpassingen gedaan, beoordeel het",
       "sent": "Ter beoordeling ingestuurd op <time>{date}</time>. Iemand kijkt naar je aanpassingen en je hoort het hier en per e-mail.",
       "failed": "Dat kon niet worden verstuurd.",
-      "failedFix": "Probeer het zo meteen opnieuw."
+      "failedFix": "Probeer het zo meteen opnieuw.",
+      "saveFirst": "Sla je wijzigingen eerst op. Bij het opslaan wordt gevraagd of je ze ter beoordeling wilt insturen."
     },
     "why": "Waarom",
     "whatToChange": "Wat er moet veranderen",
@@ -280,7 +281,7 @@
       },
       "visibility": {
         "label": "Zichtbaarheid",
-        "description": "Actief is online: kopers kunnen het meteen zien en kopen. Concept is verborgen voor kopers totdat je het omzet.",
+        "description": "Actief: kopers kunnen het kopen zodra het in een etalage staat. Concept: verborgen voor kopers tot je het omzet.",
         "about": "Waar Zichtbaarheid voor is"
       },
       "badges": {
@@ -358,7 +359,7 @@
     "digitalFileHelp": "Het bestand dat je koper na aankoop downloadt. Als je er een toevoegt, wordt dit een download, waardoor verzending en productveiligheid niet meer van toepassing zijn.",
     "purchaseLink": "Aankooplink",
     "purchaseLinkAbout": "Waarheen de koopknop kopers stuurt",
-    "purchaseLinkHelp": "De koopknop op de productpagina volgt deze link. Zonder link stuurt hij in plaats daarvan een e-mail naar het contactadres van je winkel.",
+    "purchaseLinkHelp": "Laat het leeg en kopers rekenen af via Square Share, of mailen je waar afrekenen nog niet aan staat. Een link hier vervangt beide.",
     "purchaseLinkPlaceholder": "bijv. https://jouw-winkel.example/checkout/dit-product",
     "statusLabel": "Productstatus",
     "problems": "{count, plural, one {{count} ding om op te lossen voor je opslaat} other {{count} dingen om op te lossen voor je opslaat}}",
@@ -420,7 +421,7 @@
       "safety": "Fabrikantgegevens voor EU-regels"
     },
     "visibility": {
-      "activeHint": "Kopers zien het en kunnen het nu kopen",
+      "activeHint": "Kopers kunnen het kopen zodra het in een etalage staat",
       "draftHint": "Alleen jij ziet het, tot je er klaar voor bent"
     },
     "preview": {

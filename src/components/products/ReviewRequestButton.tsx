@@ -11,6 +11,7 @@ import {
   type ReviewRequestTarget,
 } from "@/lib/moderation/review-request";
 import { formatTakedownDate } from "@/lib/moderation/removal";
+import { useNavigationBlocker } from "@/lib/hooks/useNavigationBlocker";
 
 /**
  * "I've made the changes": the one thing a seller can do about a pause.
@@ -18,6 +19,10 @@ import { formatTakedownDate } from "@/lib/moderation/removal";
  * Once pressed it turns into a sentence rather than a disabled button. A
  * greyed-out button reads as "you cannot do this", when what the seller needs
  * to know is that they already did and it is now with a person.
+ *
+ * Not while the form below holds unsaved edits: the request would send the
+ * version the seller has not fixed yet. They are told to save instead, and the
+ * save itself asks whether to send it.
  *
  * The server half (lib/moderation/review-request.ts) re-checks everything this
  * component assumes: that the item is still paused, that this person may edit
@@ -36,6 +41,7 @@ export function ReviewRequestButton({
   const tCommon = useTranslations("Common.actions");
   const locale = useLocale();
   const resolve = useResolveMessage();
+  const navBlocker = useNavigationBlocker();
   const [pending, startTransition] = useTransition();
   const [sentAt, setSentAt] = useState<string | null>(requestedAt);
   const [error, setError] = useState<{ message: MessageRef; fix?: MessageRef } | null>(null);
@@ -52,6 +58,10 @@ export function ReviewRequestButton({
   }
 
   function submit() {
+    if (navBlocker?.hasUnsavedChanges()) {
+      setError({ message: msg("Products.removal.reviewRequest.saveFirst") });
+      return;
+    }
     setError(null);
     startTransition(async () => {
       const result = await requestModerationReview(kind, id).catch(() => null);

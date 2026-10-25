@@ -298,7 +298,7 @@
     "signInFailed": "Impossible de se connecter. Vérifiez votre connexion et réessayez.",
     "badCredentials": "E-mail ou mot de passe incorrect.",
     "emailNotConfirmed": "Confirmez d’abord votre e-mail : consultez votre boîte de réception pour trouver le lien.",
-    "weakPassword": "Ce mot de passe est trop faible. Utilisez au moins 8 caractères.",
+    "weakPassword": "Ce mot de passe est trop faible. Au moins 8 caractères, en mélangeant majuscules, minuscules, chiffres ou symboles (ou une phrase de passe de 16 caractères ou plus).",
     "rateLimited": "Trop de tentatives. Attendez une minute et réessayez.",
     "accountNotCreated": "Impossible de créer ce compte. Essayez un autre nom d’utilisateur.",
     "providerMessage": "{message}",

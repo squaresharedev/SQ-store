@@ -12,7 +12,7 @@
     },
     "product": {
       "label": "Aggiungi un prodotto",
-      "detail": "Bastano un titolo e un prezzo. Per ora può restare una bozza.",
+      "detail": "Bastano un titolo e un prezzo.",
       "detailDone": "{count, plural, one {Hai {count} prodotto.} many {Hai {count} di prodotti.} other {Hai {count} prodotti.}}",
       "action": "Aggiungi prodotto",
       "cta": "Aggiungi il tuo primo prodotto"
@@ -197,7 +197,7 @@
       },
       "productsAdd": {
         "title": "Aggiungi un prodotto",
-        "body": "Bastano un titolo e un prezzo per iniziare. Può restare una bozza finché non vuoi pubblicarlo."
+        "body": "Bastano un titolo e un prezzo per iniziare."
       },
       "productsImport": {
         "title": "Oppure importa il tuo catalogo",

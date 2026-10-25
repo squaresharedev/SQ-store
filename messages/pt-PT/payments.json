@@ -76,22 +76,11 @@
   "payoutStatus": "{status, select, paid {Paga} pending {Pendente} in_transit {Em trânsito} canceled {Cancelada} failed {Falhou} other {Pendente}}",
   "payoutMethod": {
     "title": "Método de transferência",
-    "manage": "Gerir",
+    "manage": "Gerir no Stripe",
     "detail": "{currency} · {country}",
     "detailDefault": "{currency} · {country} · Predefinido",
     "emptyConnectable": "Ainda sem método de transferência. Ligue o Stripe e adicione o seu banco lá, aparece aqui automaticamente.",
     "empty": "Ainda sem método de transferência."
-  },
-  "payoutMethodModal": {
-    "title": "Método de transferência",
-    "description": "Para onde são enviadas as suas transferências.",
-    "bankAccountDetail": "Conta bancária · {currency} · {country}",
-    "defaultLabel": "Predefinição para transferências",
-    "yes": "Sim",
-    "no": "Não",
-    "referenceLabel": "Referência",
-    "securityNote": "Para sua segurança, os dados bancários são alterados no Stripe, nunca aqui.",
-    "manageInStripe": "Gerir no Stripe"
   },
   "recentActivity": {
     "label": "Atividade recente",

@@ -34,7 +34,7 @@
   },
   "emptyState": {
     "title": "Zatiaľ žiadne produkty",
-    "descriptionWriter": "Pridajte prvý produkt. Môže zostať ako koncept, kým mu nebudete chcieť dať stránku.",
+    "descriptionWriter": "Pridajte prvý produkt. Postačí názov a cena.",
     "descriptionReadOnly": "Tento obchod ešte nemá žiadne produkty.",
     "add": "Pridať produkt"
   },
@@ -144,7 +144,8 @@
       "button": "Zmeny sú hotové, skontrolovať",
       "sent": "Odoslané na kontrolu dňa <time>{date}</time>. Vaše zmeny si pozrie človek a odpoveď dostanete tu aj e-mailom.",
       "failed": "Toto sa nepodarilo odoslať.",
-      "failedFix": "O chvíľu to skúste znova."
+      "failedFix": "O chvíľu to skúste znova.",
+      "saveFirst": "Najprv uložte zmeny. Po uložení sa zobrazí otázka, či ich odoslať na kontrolu."
     },
     "why": "Prečo",
     "whatToChange": "Čo zmeniť",
@@ -280,7 +281,7 @@
       },
       "visibility": {
         "label": "Viditeľnosť",
-        "description": "Aktívny znamená zverejnený: kupujúci ho môžu okamžite vidieť a kúpiť. Koncept je skrytý pred kupujúcimi, kým ho neprepnete.",
+        "description": "Aktívny: kupujúci ho môžu kúpiť, hneď ako je vo výklade. Koncept: skrytý pred kupujúcimi, kým ho neprepnete.",
         "about": "Na čo slúži sekcia Viditeľnosť"
       },
       "badges": {
@@ -358,7 +359,7 @@
     "digitalFileHelp": "Súbor, ktorý kupujúci stiahne po kúpe. Jeho pridaním sa produkt stane digitálnou položkou na stiahnutie, takže doprava a bezpečnosť výrobku sa na neho prestanú vzťahovať.",
     "purchaseLink": "Odkaz na nákup",
     "purchaseLinkAbout": "Kam tlačidlo na nákup presmeruje kupujúcich",
-    "purchaseLinkHelp": "Tlačidlo na nákup na stránke produktu sleduje tento odkaz. Bez neho pošle e-mail na kontaktnú adresu vášho obchodu.",
+    "purchaseLinkHelp": "Ak ho necháte prázdny, kupujúci zaplatia cez pokladňu Square Share, alebo vám napíšu e-mail, kde pokladňa ešte nie je zapnutá. Odkaz tu nahradí oboje.",
     "purchaseLinkPlaceholder": "napr. https://your-shop.example/checkout/this-product",
     "statusLabel": "Stav produktu",
     "problems": "{count, plural, one {{count} vec na opravu pred uložením} few {{count} veci na opravu pred uložením} many {{count} veci na opravu pred uložením} other {{count} vecí na opravu pred uložením}}",
@@ -420,7 +421,7 @@
       "safety": "Údaje o výrobcovi pre pravidlá EÚ"
     },
     "visibility": {
-      "activeHint": "Kupujúci ho vidia a môžu ho hneď kúpiť",
+      "activeHint": "Kupujúci ho môžu kúpiť, hneď ako je vo výklade",
       "draftHint": "Vidíte ho len vy, kým nebudete pripravení"
     },
     "preview": {

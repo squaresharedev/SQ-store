@@ -34,7 +34,7 @@
   },
   "emptyState": {
     "title": "Ancora nessun prodotto",
-    "descriptionWriter": "Aggiungi il tuo primo prodotto. Può restare una bozza finché non sei pronto a dargli una pagina.",
+    "descriptionWriter": "Aggiungi il tuo primo prodotto. Bastano un titolo e un prezzo.",
     "descriptionReadOnly": "Questo negozio non ha ancora prodotti.",
     "add": "Aggiungi prodotto"
   },
@@ -144,7 +144,8 @@
       "button": "Ho fatto le modifiche, rivedilo",
       "sent": "Inviato per la revisione il <time>{date}</time>. Una persona esaminerà le tue modifiche e riceverai una risposta qui e per email.",
       "failed": "Non è stato possibile inviarlo.",
-      "failedFix": "Riprova tra poco."
+      "failedFix": "Riprova tra poco.",
+      "saveFirst": "Salva prima le modifiche. Al salvataggio ti verrà chiesto se inviarle per la revisione."
     },
     "why": "Perché",
     "whatToChange": "Cosa cambiare",
@@ -280,7 +281,7 @@
       },
       "visibility": {
         "label": "Visibilità",
-        "description": "Attivo è pubblicato: gli acquirenti possono vederlo e comprarlo subito. Bozza è nascosto agli acquirenti finché non lo cambi.",
+        "description": "Attivo: gli acquirenti possono comprarlo appena è in una vetrina. Bozza: nascosto agli acquirenti finché non lo cambi.",
         "about": "A cosa serve la Visibilità"
       },
       "badges": {
@@ -358,7 +359,7 @@
     "digitalFileHelp": "Il file che l’acquirente scarica dopo l’acquisto. Aggiungerne uno rende questo un download, quindi spedizione e sicurezza dei prodotti non si applicano più.",
     "purchaseLink": "Link di acquisto",
     "purchaseLinkAbout": "Dove porta il pulsante di acquisto",
-    "purchaseLinkHelp": "Il pulsante di acquisto della pagina prodotto segue questo link. Senza, invia invece un’email all’indirizzo di contatto del tuo negozio.",
+    "purchaseLinkHelp": "Lascialo vuoto e gli acquirenti pagano con il checkout di Square Share, o ti scrivono un’e-mail dove il checkout non è ancora attivo. Un link qui sostituisce entrambi.",
     "purchaseLinkPlaceholder": "es. https://il-tuo-negozio.example/checkout/questo-prodotto",
     "statusLabel": "Stato del prodotto",
     "problems": "{count, plural, one {{count} cosa da correggere prima di salvare} many {{count} di cose da correggere prima di salvare} other {{count} cose da correggere prima di salvare}}",
@@ -420,7 +421,7 @@
       "safety": "Dati del produttore per le regole UE"
     },
     "visibility": {
-      "activeHint": "Gli acquirenti lo vedono e possono comprarlo subito",
+      "activeHint": "Gli acquirenti possono comprarlo appena è in una vetrina",
       "draftHint": "Lo vedi solo tu finché non sei pronto"
     },
     "preview": {

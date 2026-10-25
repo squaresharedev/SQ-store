@@ -85,6 +85,7 @@
     "amount": "Importo",
     "platformFee": "Commissione della piattaforma",
     "youReceive": "Ricevi",
+    "youReceiveHint": "Prima della commissione carta di Stripe",
     "buyerEmail": "Email dell’acquirente",
     "copyBuyerEmail": {
       "copy": "Copia email acquirente",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Codice {code} usato, ma il prezzo della promozione era più basso"
   },
   "actions": {
-    "disputeInStripe": "Le contestazioni si gestiscono dalla tua dashboard Stripe una volta collegato Stripe.",
+    "disputeInStripe": "La banca dell’acquirente ha aperto una contestazione. Rispondi nella tua dashboard Stripe prima della scadenza.",
+    "answerInStripe": "Rispondi in Stripe",
     "pendingPayment": "Il pagamento dell’acquirente è ancora in conferma. Non spedire ancora nulla: l’ordine risulterà pagato quando va a buon fine, e si chiuderà da solo se non ci va.",
     "none": "Nessuna azione disponibile per questo ordine."
   },

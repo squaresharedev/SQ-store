@@ -291,7 +291,7 @@
     },
     "name": {
       "title": "Nommez votre vitrine",
-      "description": "Juste pour vous. Vous pouvez la renommer à tout moment."
+      "description": "Les acheteurs le voient en haut de votre vitrine. Vous pouvez la renommer à tout moment."
     },
     "stepOf": "Étape {current} sur {total}",
     "nameLabel": "Nom de la vitrine",

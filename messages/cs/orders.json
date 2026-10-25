@@ -85,6 +85,7 @@
     "amount": "Částka",
     "platformFee": "Poplatek platformy",
     "youReceive": "Obdržíte",
+    "youReceiveHint": "Před poplatkem Stripe za kartu",
     "buyerEmail": "E-mail kupujícího",
     "copyBuyerEmail": {
       "copy": "Kopírovat e-mail kupujícího",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Kód {code} použit, ale akční cena byla nižší"
   },
   "actions": {
-    "disputeInStripe": "Spory se po propojení Stripe řeší v panelu Stripe.",
+    "disputeInStripe": "Banka kupujícího otevřela spor. Odpovězte na něj v panelu Stripe před jeho termínem.",
+    "answerInStripe": "Odpovědět ve Stripe",
     "pendingPayment": "Platba kupujícího se ještě potvrzuje. Zatím nic neposílejte: jakmile projde, objednávka se zobrazí jako zaplacená, a pokud neprojde, sama se uzavře.",
     "none": "K této objednávce nejsou dostupné žádné akce."
   },

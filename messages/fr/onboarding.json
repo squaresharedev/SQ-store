@@ -12,7 +12,7 @@
     },
     "product": {
       "label": "Ajoutez un produit",
-      "detail": "Un titre et un prix suffisent. Il peut rester en brouillon pour l’instant.",
+      "detail": "Un titre et un prix suffisent.",
       "detailDone": "{count, plural, one {Vous avez {count} produit.} many {Vous avez {count} produits.} other {Vous avez {count} produits.}}",
       "action": "Ajouter un produit",
       "cta": "Ajoutez votre premier produit"
@@ -197,7 +197,7 @@
       },
       "productsAdd": {
         "title": "Ajoutez un produit",
-        "body": "Un titre et un prix suffisent pour commencer. Il peut rester en brouillon jusqu’à ce que vous soyez prêt."
+        "body": "Un titre et un prix suffisent pour commencer."
       },
       "productsImport": {
         "title": "Ou importez votre catalogue",

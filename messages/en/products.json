@@ -34,7 +34,7 @@
   },
   "emptyState": {
     "title": "No products yet",
-    "descriptionWriter": "Add your first product. It can stay a draft until you're ready to give it a page.",
+    "descriptionWriter": "Add your first product. A title and a price are enough.",
     "descriptionReadOnly": "This store has no products yet.",
     "add": "Add product"
   },
@@ -144,7 +144,8 @@
       "button": "I've made the changes, review it",
       "sent": "Sent for review on <time>{date}</time>. A person will look at your changes, and you will hear back here and by email.",
       "failed": "That could not be sent.",
-      "failedFix": "Try again in a moment."
+      "failedFix": "Try again in a moment.",
+      "saveFirst": "Save your changes first. Saving asks whether to send them for review."
     },
     "why": "Why",
     "whatToChange": "What to change",
@@ -280,7 +281,7 @@
       },
       "visibility": {
         "label": "Visibility",
-        "description": "Active is live: buyers can see it and buy it right away. Draft is hidden from buyers until you switch it.",
+        "description": "Active: buyers can buy it once it is on a storefront. Draft: hidden from buyers until you switch it.",
         "about": "What Visibility is for"
       },
       "badges": {
@@ -358,7 +359,7 @@
     "digitalFileHelp": "The file your buyer downloads after purchase. Adding one makes this a download, so shipping and product-safety stop applying.",
     "purchaseLink": "Purchase link",
     "purchaseLinkAbout": "Where the buy button sends buyers",
-    "purchaseLinkHelp": "The product page's buy button follows this link. Without one, it emails your store's contact address instead.",
+    "purchaseLinkHelp": "Leave it empty and buyers pay through Square Share checkout, or email you where checkout isn't on yet. A link here replaces both.",
     "purchaseLinkPlaceholder": "e.g. https://your-shop.example/checkout/this-product",
     "statusLabel": "Product status",
     "problems": "{count, plural, one {{count} thing to fix before saving} other {{count} things to fix before saving}}",
@@ -420,7 +421,7 @@
       "safety": "Maker details for EU rules"
     },
     "visibility": {
-      "activeHint": "Buyers can see it and buy it now",
+      "activeHint": "Buyers can buy it once it is on a storefront",
       "draftHint": "Only you can see it until you are ready"
     },
     "preview": {
