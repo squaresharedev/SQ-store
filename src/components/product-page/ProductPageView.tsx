@@ -13,6 +13,7 @@ import { isOnPhoto } from "@/lib/validation/product";
 import type { ProductPageSectionId } from "@/types/storefront";
 import { resolveCtaTarget } from "./cta-target";
 import { DocumentsList } from "./DocumentsList";
+import { BadgeDropZone } from "./BadgeDrag";
 import { PhotoBadges, ProductBadges } from "./ProductBadges";
 import { ProductCta } from "./ProductCta";
 import { ProductDescription } from "./ProductDescription";
@@ -142,6 +143,10 @@ export function ProductPageView({
   const badges = product.details.badges ?? [];
   const besideBadges = badges.filter((badge) => !isOnPhoto(badge));
   const photoBadges = badges.filter(isOnPhoto);
+  // In the editor each of the two places is also where a dragged badge can
+  // land (BadgeDrag); a buyer's page draws the badges and nothing else.
+  const movable = (kind: "photo" | "beside", node: ReactNode) =>
+    preview ? <BadgeDropZone kind={kind}>{node || null}</BadgeDropZone> : node;
 
   const ink = resolveInk(theme, productPage);
   // The buy button's fill, roundness and outline, resolved ONCE for both the
@@ -417,15 +422,22 @@ export function ProductPageView({
                     radius={radius}
                     ink={ink}
                     overlay={
-                      photoBadges.length > 0 && (
+                      // In the editor the photo is also a place to drop a
+                      // badge, so it is there whenever the product has any.
+                      (photoBadges.length > 0 || (preview && badges.length > 0)) && (
                         // The PRODUCT's words, not a page setting: a click on
                         // them in the editor opens nothing.
                         <div data-setting-skip="" className="contents">
-                          <PhotoBadges
-                            badges={photoBadges}
-                            label={t("badgesOnPhoto")}
-                            cornerRadius={theme.cornerRadius}
-                          />
+                          {movable(
+                            "photo",
+                            photoBadges.length > 0 && (
+                              <PhotoBadges
+                                badges={photoBadges}
+                                label={t("badgesOnPhoto")}
+                                cornerRadius={theme.cornerRadius}
+                              />
+                            ),
+                          )}
                         </div>
                       )
                     }
@@ -447,14 +459,21 @@ export function ProductPageView({
                   {/* The seller's highlights, read with the title. Opted out of
                       the hotspots like the version picker: badges are the
                       PRODUCT's words, set on its form, not a page setting. */}
-                  {besideBadges.length > 0 && (
-                    <div data-setting-skip="">
-                      <ProductBadges
-                        badges={besideBadges}
-                        label={t("badges")}
-                        ink={ink}
-                        cornerRadius={theme.cornerRadius}
-                      />
+                  {(besideBadges.length > 0 || (preview && badges.length > 0)) && (
+                    // `contents` in the editor: the drop zone inside is the
+                    // column's item, so an empty one takes no gap.
+                    <div data-setting-skip="" className={preview ? "contents" : undefined}>
+                      {movable(
+                        "beside",
+                        besideBadges.length > 0 && (
+                          <ProductBadges
+                            badges={besideBadges}
+                            label={t("badges")}
+                            ink={ink}
+                            cornerRadius={theme.cornerRadius}
+                          />
+                        ),
+                      )}
                     </div>
                   )}
                   {descriptionInInfo && (

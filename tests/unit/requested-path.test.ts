@@ -50,14 +50,14 @@ describe("where sign-in returns a signed-out visitor to", () => {
 describe("src/middleware.ts", () => {
   const forwarded = (response: Response) => response.headers.get(`x-middleware-request-${REQUESTED_PATH_HEADER}`);
 
-  it("records the requested path and query on the request", () => {
-    const response = middleware(new NextRequest("https://dashboard.squareshare.eu/orders?view=to-ship&_rsc=9"));
+  it("records the requested path and query on the request", async () => {
+    const response = await middleware(new NextRequest("https://dashboard.squareshare.eu/orders?view=to-ship&_rsc=9"));
     expect(forwarded(response)).toBe("/orders?view=to-ship");
     expect(response.headers.get("x-middleware-override-headers")).toContain(REQUESTED_PATH_HEADER);
   });
 
-  it("overwrites a value a client tried to send", () => {
-    const response = middleware(
+  it("overwrites a value a client tried to send", async () => {
+    const response = await middleware(
       new NextRequest("https://dashboard.squareshare.eu/settings/team", {
         headers: { [REQUESTED_PATH_HEADER]: "//evil.example" },
       }),
@@ -65,13 +65,20 @@ describe("src/middleware.ts", () => {
     expect(forwarded(response)).toBe("/settings/team");
   });
 
-  it("never redirects or answers by itself", () => {
-    const response = middleware(new NextRequest("https://dashboard.squareshare.eu/products"));
+  it("never redirects or answers a well-formed request by itself", async () => {
+    const response = await middleware(new NextRequest("https://dashboard.squareshare.eu/products"));
     expect(response.headers.get("x-middleware-next")).toBe("1");
     expect(response.headers.get("location")).toBeNull();
   });
 
   it("matches exactly the signed-in areas (the literal matcher mirrors SIGNED_IN_PREFIXES)", () => {
-    expect(config.matcher).toEqual(["/", ...SIGNED_IN_PREFIXES.map((prefix) => `${prefix}/:path*`)]);
+    const paths = config.matcher.filter((entry) => typeof entry === "string");
+    expect(paths).toEqual(["/", ...SIGNED_IN_PREFIXES.map((prefix) => `${prefix}/:path*`)]);
+  });
+
+  it("leaves a public page alone, without the requested-path header", async () => {
+    const response = await middleware(new NextRequest("https://dashboard.squareshare.eu/s/abc", { method: "POST" }));
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+    expect(forwarded(response)).toBeNull();
   });
 });

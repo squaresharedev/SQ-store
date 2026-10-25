@@ -5,10 +5,12 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { infoTextClass, panelEyebrowClass } from "@/components/ui/control-styles";
 import {
+  BADGE_DRAG_THRESHOLD_PX,
   BadgePill,
   PHOTO_CORNER_CLASS,
   PHOTO_PLACEMENTS,
   badgesByCorner,
+  photoCornerAt,
   photoCornerWidth,
 } from "@/components/product-page/ProductBadges";
 import { DARK_INK, chipStyle, photoChipStyle } from "@/components/product-page/product-page-maps";
@@ -19,9 +21,6 @@ import type { BadgeFormValue } from "./form-values";
 /** The corners of the preview, drawn at a middling roundness: the form does
  *  not know which storefront's theme the page will wear. */
 const PREVIEW_RADIUS = 8;
-
-/** How far a press must travel before it is a drag rather than a click. */
-const DRAG_THRESHOLD_PX = 4;
 
 type Drag = {
   localId: string;
@@ -75,11 +74,8 @@ export function BadgePlacementPreview({
    *  point is in), beside the product, or nowhere. */
   function placeAt(x: number, y: number): BadgePlacement | null {
     const photo = photoZone.current?.getBoundingClientRect();
-    if (photo && x >= photo.left && x <= photo.right && y >= photo.top && y <= photo.bottom) {
-      const top = y < photo.top + photo.height / 2;
-      const left = x < photo.left + photo.width / 2;
-      return `photo-${top ? "top" : "bottom"}-${left ? "left" : "right"}`;
-    }
+    const corner = photo ? photoCornerAt(photo, x, y) : null;
+    if (corner) return corner;
     const beside = besideZone.current?.getBoundingClientRect();
     if (beside && x >= beside.left && x <= beside.right && y >= beside.top && y <= beside.bottom) {
       return "beside";
@@ -111,7 +107,7 @@ export function BadgePlacementPreview({
     if (!drag) return;
     const moved =
       drag.moved ||
-      Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > DRAG_THRESHOLD_PX;
+      Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > BADGE_DRAG_THRESHOLD_PX;
     setDrag({ ...drag, x: event.clientX, y: event.clientY, moved, target: moved ? placeAt(event.clientX, event.clientY) : null });
   }
 

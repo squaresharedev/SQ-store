@@ -132,6 +132,7 @@ const REGISTRY: Record<string, Classification> = {
 
   // --- products / stock / storefront --------------------------------------
   "lib/products/badge-actions.ts::checkBadgeLabel": limited(),
+  "lib/products/badge-actions.ts::moveProductBadge": limited(),
   "lib/products/actions.ts::createProduct": limited(),
   "lib/products/actions.ts::updateProduct": limited(),
   "lib/products/actions.ts::deleteProduct": limited(),
