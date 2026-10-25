@@ -138,9 +138,7 @@ export function PlanCard({
 
         <div className="mt-6 border-t border-border pt-5">
           <p className={cn(eyebrowClass, "mb-3")}>
-            {below
-              ? t.rich("card.everythingIn", { plan: <MarkedPlanName plan={below} name={t(`plans.${below}.name`)} /> })
-              : t("card.includes")}
+            {below ? t("card.everythingIn", { plan: t(`plans.${below}.name`) }) : t("card.includes")}
           </p>
           <PlanFeatureList plan={plan} features={features} tone={recommended ? "strong" : "quiet"} />
         </div>

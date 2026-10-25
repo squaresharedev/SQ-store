@@ -59,15 +59,33 @@ function post(data: unknown, from: { source: unknown; origin: string }) {
   window.dispatchEvent(new MessageEvent("message", { data, origin: from.origin, source: from.source as Window }));
 }
 
+/** Every page-watcher a loader started, so none outlives its test. */
+const watchers: MutationObserver[] = [];
+const PageMutationObserver = MutationObserver;
+
 beforeEach(() => {
   document.head.innerHTML = "";
   document.body.innerHTML = "";
   // jsdom has no IntersectionObserver: the loader then makes its frame at
   // once, which is the path these tests want.
   vi.stubGlobal("IntersectionObserver", undefined);
+  // The loader watches the page for slots that arrive later and never stops.
+  // Left running, a watcher from an earlier test queues a real timer when the
+  // next test clears the page, and that timer can fire after jsdom is gone
+  // ("document is not defined", an unhandled error that fails the whole run).
+  vi.stubGlobal(
+    "MutationObserver",
+    class extends PageMutationObserver {
+      constructor(callback: MutationCallback) {
+        super(callback);
+        watchers.push(this);
+      }
+    },
+  );
 });
 
 afterEach(() => {
+  for (const watcher of watchers.splice(0)) watcher.disconnect();
   vi.unstubAllGlobals();
   vi.useRealTimers();
   delete (window.location as { ancestorOrigins?: unknown }).ancestorOrigins;

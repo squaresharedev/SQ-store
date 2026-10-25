@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { checksFor, failureNote, runCheck } from "../../ops/uptime/src/checks";
 import {
   EMPTY_STATE,
   ERROR_EMAIL_WINDOW_MS,
@@ -130,5 +131,39 @@ describe("uptime monitor", () => {
     const email = composeErrorEmail(cleaned!);
     expect(email.subject).toBe("[Square Share] Server error: TypeError on GET /orders");
     expect(email.text).toContain("Digest: abc123");
+  });
+});
+
+describe("what the checks call healthy", () => {
+  const CLOUDFLARE_1102 = "<title>Worker exceeded resource limits | Cloudflare</title> Error 1102";
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  const answer = (status: number, body = "") => vi.stubGlobal("fetch", vi.fn(async () => new Response(body, { status })));
+  const appCheck = () => checksFor("anon").find((check) => check.name === "Dashboard app")!;
+
+  it("watches a signed-in page as a signed-out visitor, healthy when it sends them to sign-in", async () => {
+    answer(307);
+    expect(await runCheck(appCheck())).toMatchObject({ ok: true, detail: expect.stringMatching(/^307 in /) });
+  });
+
+  it("calls a Worker that ran out of resources down, and says so", async () => {
+    answer(503, CLOUDFLARE_1102);
+    const result = await runCheck(appCheck());
+    expect(result.ok).toBe(false);
+    expect(result.detail).toContain("Cloudflare 1102");
+  });
+
+  it("keeps 200 as the healthy answer for a check that names no other", async () => {
+    answer(200);
+    expect((await runCheck(checksFor("anon")[1])).ok).toBe(true);
+    answer(307);
+    expect((await runCheck(checksFor("anon")[1])).ok).toBe(false);
+  });
+
+  it("names Cloudflare's own error pages and nothing else", () => {
+    expect(failureNote(CLOUDFLARE_1102)).toContain("1102");
+    expect(failureNote("Error 1101 Worker threw exception")).toContain("1101");
+    expect(failureNote("<html>Bad gateway</html>")).toBe("");
   });
 });
