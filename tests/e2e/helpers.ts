@@ -710,3 +710,26 @@ export async function seedOrders(
     }),
   });
 }
+
+/**
+ * Opens one of the product form's optional extras (Options, Photos, Badges,
+ * Specifications, Documents, Safety) from its tile. An extra with nothing in
+ * it starts folded away as a tile; one that already holds something is open
+ * from the start, and then this only checks that it is.
+ */
+export async function openProductExtra(
+  page: Page,
+  id: "options" | "photos" | "badges" | "specs" | "documents" | "safety",
+) {
+  const tile = page.locator(`[data-product-extra="${id}"]`);
+  if (await tile.count()) await tile.click();
+  await expect(page.locator(`[data-product-section="${id}"]`)).toBeVisible();
+}
+
+/** Unfolds the Stock section's fine print (order limit, low-stock alert). */
+export async function openStockFineTune(page: Page) {
+  const fold = page.locator("[data-stock-fine-tune]");
+  if (!(await fold.evaluate((node) => (node as HTMLDetailsElement).open))) {
+    await fold.locator("summary").click();
+  }
+}

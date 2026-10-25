@@ -130,7 +130,7 @@ export function ShippingField({
       {/* THE ONE LINE A SELLER ACTUALLY SCANS FOR: what buyers will read,
           without leaving the form to find out. Full terms — and editing them
           — are one click away in the modal, not repeated here. */}
-      <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/40 px-3 py-2.5">
+      <div className="flex items-center justify-between gap-3 border border-border bg-muted/40 px-3 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
           <Truck className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
           <p className="truncate text-xs text-foreground">{summary}</p>

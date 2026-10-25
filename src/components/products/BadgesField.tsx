@@ -5,11 +5,11 @@ import { ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
+  chipButtonClass,
   errorTextClass,
   infoTextClass,
   labelClass,
   rowFieldClass,
-  secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import {
   BADGE_PRESETS,
@@ -293,7 +293,7 @@ export function BadgesField({
               <button
                 key={preset.id}
                 type="button"
-                className={cn(secondaryButtonClass, "px-3 py-1.5 text-xs")}
+                className={chipButtonClass}
                 onClick={() =>
                   add({ icon: preset.icon, label: preset.label, color: preset.color }, preset, "suggestion")
                 }

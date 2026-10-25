@@ -246,7 +246,7 @@
         "about": "Para que serve Stock"
       },
       "media": {
-        "label": "Multimédia e entrega"
+        "label": "Entrega"
       },
       "shipping": {
         "label": "Envio",
@@ -313,7 +313,8 @@
       "started": "Iniciado",
       "active": "Ativo",
       "draft": "Rascunho",
-      "badges": "{count, plural, one {{count} emblema} many {{count} de emblemas} other {{count} emblemas}}"
+      "badges": "{count, plural, one {{count} emblema} many {{count} de emblemas} other {{count} emblemas}}",
+      "physical": "Físico"
     },
     "errors": {
       "titleRequired": "Dê um título ao seu produto: é a primeira coisa que os compradores veem.",
@@ -341,7 +342,8 @@
         "tooHigh": "O preço não pode exceder {currency} {max}."
       },
       "badgeDuplicate": "Dois emblemas dizem a mesma coisa. Altere as palavras de um, ou remova-o.",
-      "badgesOnPhoto": "Só {max} emblemas cabem na fotografia. Mova um para ao lado do produto."
+      "badgesOnPhoto": "Só {max} emblemas cabem na fotografia. Mova um para ao lado do produto.",
+      "digitalFileRequired": "Adicione o ficheiro que os compradores vão transferir."
     },
     "title": "Título",
     "titlePlaceholder": "p. ex. Ambient Loops Vol. 1",
@@ -397,7 +399,39 @@
         "keepEditing": "Continuar a editar",
         "send": "Enviar para análise"
       }
-    }
+    },
+    "coverPrompt": "Largue aqui a sua melhor foto",
+    "kind": {
+      "legend": "O que está a vender?",
+      "physical": "Algo que envio",
+      "physicalHint": "Um artigo físico, enviado ao comprador",
+      "digital": "Uma transferência",
+      "digitalHint": "Um ficheiro que o comprador recebe logo após pagar"
+    },
+    "purchaseLinkAdd": "Vende através do seu próprio checkout? Adicione a ligação",
+    "extras": {
+      "heading": "Dê-lhe brilho",
+      "subheading": "Tudo opcional. Adicione o que ajuda os compradores a decidir.",
+      "options": "Tamanhos, cores, versões",
+      "photos": "Mais ângulos e pormenores",
+      "badges": "Feito à mão, portes grátis…",
+      "specs": "Tamanho, peso, materiais",
+      "documents": "Manuais e certificados",
+      "safety": "Dados do fabricante para a UE"
+    },
+    "visibility": {
+      "activeHint": "Os compradores veem-no e podem comprá-lo já",
+      "draftHint": "Só você o vê até estar pronto"
+    },
+    "preview": {
+      "heading": "Pré-visualização ao vivo",
+      "noPhoto": "A sua foto aparece aqui",
+      "titlePlaceholder": "O nome do seu produto",
+      "download": "Transferência imediata",
+      "ships": "Enviado segundo as condições da sua loja"
+    },
+    "ready": "Pronto a guardar",
+    "stillNeeded": "Ainda falta: {fields}"
   },
   "stockFields": {
     "trackStock": "Controlar stock",
@@ -406,7 +440,13 @@
     "increase": "Aumentar stock",
     "lowStockAlert": "Alerta de stock baixo em",
     "maxPerOrder": "Máximo por encomenda",
-    "maxPerOrderHint": "Quantas unidades um comprador pode levar de uma vez. Os compradores escolhem numa lista que para aqui, e o limite é verificado novamente quando encomendam. Até {max}; com 1, vendem-se uma de cada vez."
+    "maxPerOrderHint": "Quantas unidades um comprador pode levar de uma vez. Os compradores escolhem numa lista que para aqui, e o limite é verificado novamente quando encomendam. Até {max}; com 1, vendem-se uma de cada vez.",
+    "unlimited": "Ilimitado",
+    "unlimitedHint": "Feito por encomenda, ou nunca esgota",
+    "counted": "Uma quantidade definida",
+    "countedHint": "Desconta a cada venda e para no zero",
+    "fineTune": "Limite por encomenda",
+    "fineTuneTracked": "Limite por encomenda e alerta de stock baixo"
   },
   "priceField": {
     "label": "Preço",

@@ -129,7 +129,7 @@ export const PRODUCT_FIX_FIELD_SECTION: Record<ProductFixField, ProductFormSecti
   title: "basics",
   description: "basics",
   price: "basics",
-  image: "media",
+  image: "basics",
   file: "media",
   purchaseLink: "media",
   shipping: "shipping",
