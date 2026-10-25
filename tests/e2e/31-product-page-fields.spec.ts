@@ -83,7 +83,7 @@ test.describe("product form: options, photos, documents", () => {
         request.url().includes("/api/uploads/document") && request.method() === "POST",
       { timeout: 30_000 },
     );
-    await page.getByRole("button", { name: /save product/i }).click();
+    await page.getByRole("button", { name: /save product|save as draft/i }).click();
     await documentUpload;
     await page.waitForURL(/\/products$/, { timeout: 30_000 });
 

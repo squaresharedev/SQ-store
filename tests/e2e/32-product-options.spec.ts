@@ -81,7 +81,7 @@ test.describe("product options", () => {
     await expect(page.locator("[data-gallery-bucket]")).toHaveCount(6); // 5 options + shared
     await expect(page.locator("[data-gallery-bucket]", { hasText: "750 W" })).toBeVisible();
 
-    await page.getByRole("button", { name: /save product/i }).click();
+    await page.getByRole("button", { name: /save product|save as draft/i }).click();
     await page.waitForURL(/\/products$/, { timeout: 30_000 });
 
     // Stored as the seller authored them: order, display and availability.
@@ -128,7 +128,7 @@ test.describe("product options", () => {
     // "didn't pass validation" is not something a seller can act on.
     await openProductExtra(page, "options");
     await page.getByRole("button", { name: "Material", exact: true }).click();
-    await page.getByRole("button", { name: /save product/i }).click();
+    await page.getByRole("button", { name: /save product|save as draft/i }).click();
 
     await expect(page.getByText(/add at least one material option/i).first()).toBeVisible();
     await expect(page).toHaveURL(/\/products\/new$/);
@@ -136,7 +136,7 @@ test.describe("product options", () => {
     // Fixing exactly what it named lets the save through.
     await page.getByLabel("Add options").fill("Solid oak");
     await page.keyboard.press("Enter");
-    await page.getByRole("button", { name: /save product/i }).click();
+    await page.getByRole("button", { name: /save product|save as draft/i }).click();
     await page.waitForURL(/\/products$/, { timeout: 30_000 });
   });
 });

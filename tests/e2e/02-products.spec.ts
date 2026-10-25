@@ -25,7 +25,7 @@ test.describe("products CRUD", () => {
 
     await page.getByLabel("Title").fill("E2E Print");
     await page.getByLabel(/price/i).fill("14.00");
-    await page.getByRole("button", { name: /save product/i }).click();
+    await page.getByRole("button", { name: /save product|save as draft/i }).click();
 
     await page.waitForURL(/\/products$/, { timeout: 20_000 });
     // The CARD, by its heading. Bare text would also match the "saved" toast
@@ -62,12 +62,12 @@ test.describe("products CRUD", () => {
     await signUp(page, user);
     await page.goto("/products/new");
 
-    await page.getByRole("button", { name: /save product/i }).click();
+    await page.getByRole("button", { name: /save product|save as draft/i }).click();
     await expect(page.getByText(/give your product a title|title/i).first()).toBeVisible();
 
     await page.getByLabel("Title").fill("Priced wrong");
     await page.getByLabel(/price/i).fill("0");
-    await page.getByRole("button", { name: /save product/i }).click();
+    await page.getByRole("button", { name: /save product|save as draft/i }).click();
 
     // A blocked save is still said in BOTH places, and that is still the
     // point: the field says which one is wrong, and the action bar says how
@@ -105,7 +105,7 @@ test.describe("products CRUD", () => {
 
     // Leave everything empty and try to save: both fields are wrong, so the
     // summary should count both and offer a route to whichever comes first.
-    await page.getByRole("button", { name: /save product/i }).click();
+    await page.getByRole("button", { name: /save product|save as draft/i }).click();
 
     const summary = page.getByRole("alert");
     await expect(summary.getByText(/2 things to fix before saving/i)).toBeVisible();
@@ -131,7 +131,7 @@ test.describe("products CRUD", () => {
     await gotoApp(page, "/products/new");
     await page.getByLabel("Title").fill("Active thing");
     await page.getByLabel(/price/i).fill("5");
-    await page.getByRole("button", { name: /save product/i }).click();
+    await page.getByRole("button", { name: /save product|save as draft/i }).click();
     await page.waitForURL(/\/products$/);
     await expect(page.getByRole("heading", { name: "Active thing" })).toBeVisible();
     // The badge is the WORD, not a dot with a title attribute (StatusBadge.tsx
@@ -145,7 +145,7 @@ test.describe("products CRUD", () => {
     await page.getByLabel("Title").fill("Draft thing");
     await page.getByLabel(/price/i).fill("5");
     await page.getByRole("radio", { name: /^Draft/ }).check();
-    await page.getByRole("button", { name: /save product/i }).click();
+    await page.getByRole("button", { name: /save product|save as draft/i }).click();
     await page.waitForURL(/\/products$/);
     await expect(page.getByRole("heading", { name: "Draft thing" })).toBeVisible();
     // Exactly one badge: the draft card's. The active card still has none.

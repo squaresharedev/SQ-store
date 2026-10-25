@@ -355,7 +355,7 @@ test.describe("onboarding", () => {
 
     await fillStable(page, "Title", "Walnut stool");
     await fillStable(page, /price/i, "85.00");
-    await page.getByRole("button", { name: /save product/i }).click();
+    await page.getByRole("button", { name: /save product|save as draft/i }).click();
     await page.waitForURL(new RegExp(`/storefront/${storefrontId}$`), {
       timeout: 30_000,
     });

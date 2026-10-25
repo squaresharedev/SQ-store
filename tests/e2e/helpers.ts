@@ -91,7 +91,7 @@ export async function createProductViaUI(
   await gotoApp(page, "/products/new");
   await fillStable(page, "Title", title);
   await fillStable(page, /price/i, price);
-  await page.getByRole("button", { name: /save product/i }).click();
+  await page.getByRole("button", { name: /save product|save as draft/i }).click();
   await page.waitForURL(/\/products$/, { timeout: 30_000 });
 }
 
