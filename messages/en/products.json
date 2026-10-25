@@ -11,6 +11,9 @@
     },
     "import": {
       "title": "Import products"
+    },
+    "importReviews": {
+      "title": "Import reviews"
     }
   },
   "page": {
@@ -28,9 +31,14 @@
     },
     "import": {
       "heading": "Import products",
-      "description": "Bring a catalogue over from Shopify, or any tool that exports a CSV. You will see exactly what lands before anything is saved."
+      "description": "Bring a catalogue over from Shopify, or any tool that exports a CSV. You will see exactly what lands before anything is saved.",
+      "reviewsLink": "Moving your reviews too? Import reviews"
     },
-    "formLoading": "Loading the product form"
+    "formLoading": "Loading the product form",
+    "importReviews": {
+      "heading": "Import reviews",
+      "description": "Bring your reviews over from Judge.me, Loox, Yotpo or Shopify Product Reviews. Export them as a CSV there, drop the file here, and check which product each one belongs to before anything is saved."
+    }
   },
   "emptyState": {
     "title": "No products yet",
@@ -1021,6 +1029,55 @@
         "label": "Quality checked",
         "keywords": "tested, inspected, checked, approved"
       }
+    }
+  },
+  "reviewImport": {
+    "dropPrompt": "Drop your review export here, or choose a CSV file",
+    "rowsLimit": "{max, plural, one {Up to {max} review per file} other {Up to {max} reviews per file}}",
+    "fileTooLarge": "That file is too large. The limit is {max}.",
+    "fileEmpty": "That file is empty.",
+    "badgeNote": "Imported reviews show where they were first written, such as \"Imported from Shopify (Judge.me)\". Only reviews buyers write from a Square Share order are marked as from a verified buyer.",
+    "missingColumns": "This file has no column for: {fields}. Export your reviews from your review app again, as a CSV.",
+    "fields": {
+      "rating": "rating",
+      "title": "title",
+      "body": "review",
+      "author": "reviewer name",
+      "date": "date",
+      "product": "product",
+      "status": "status"
+    },
+    "summary": "{ready, plural, one {<count>{ready}</count> review ready} other {<count>{ready}</count> reviews ready}}{skipped, plural, =0 {.} other {, {skipped} left out.}}",
+    "hiddenRows": "{count, plural, one {{count} review was hidden or marked as spam on your old store, so it is left out.} other {{count} reviews were hidden or marked as spam on your old store, so they are left out.}}",
+    "droppedRows": "{count, plural, one {{count} review is past the {max} a file can carry, so it is left out.} other {{count} reviews are past the {max} a file can carry, so they are left out.}}",
+    "source": "Imported from",
+    "sourceUnknown": "Choose the app",
+    "sourceHelp": "Shown on each review, so buyers know where it was first written.",
+    "sources": {
+      "judgeme": "Judge.me",
+      "loox": "Loox",
+      "yotpo": "Yotpo",
+      "shopify": "Shopify Product Reviews"
+    },
+    "mappingHeading": "Match products",
+    "mappingHelp": "Each product in the file, and the product here its reviews go to. Matched by name where possible. Anything set to \"Don't import\" is left out.",
+    "mappingFileProduct": "In the file",
+    "mappingReviews": "Reviews",
+    "mappingProduct": "Product here",
+    "mappingSelect": "Product for {key}",
+    "skipProduct": "Don't import",
+    "skippedHeading": "Rows that will be left out",
+    "skippedRow": "Line {line}: {problem}",
+    "run": "{count, plural, one {Import {count} review} other {Import {count} reviews}}",
+    "imported": "{count, plural, one {{count} review was imported.} other {{count} reviews were imported.}}",
+    "duplicates": "{count, plural, one {{count} was already here.} other {{count} were already here.}}",
+    "skippedRows": "{count, plural, one {{count} row was left out.} other {{count} rows were left out.}}",
+    "errors": {
+      "rateLimited": "Too many imports in the last hour. Try again later.",
+      "tooLarge": "That file is too large to import.",
+      "unrecognised": "This file is not a review export we can read.",
+      "nothing": "Nothing to import. Match at least one product.",
+      "failed": "The import did not go through, and nothing was saved. Try again."
     }
   }
 }

@@ -11,6 +11,9 @@
     },
     "import": {
       "title": "Producten importeren"
+    },
+    "importReviews": {
+      "title": "Reviews importeren"
     }
   },
   "page": {
@@ -28,9 +31,14 @@
     },
     "import": {
       "heading": "Producten importeren",
-      "description": "Breng een catalogus over vanuit Shopify, of een andere tool die een CSV exporteert. Je ziet precies wat er binnenkomt voordat er iets wordt opgeslagen."
+      "description": "Breng een catalogus over vanuit Shopify, of een andere tool die een CSV exporteert. Je ziet precies wat er binnenkomt voordat er iets wordt opgeslagen.",
+      "reviewsLink": "Verhuis je ook je reviews? Reviews importeren"
     },
-    "formLoading": "Het productformulier laden"
+    "formLoading": "Het productformulier laden",
+    "importReviews": {
+      "heading": "Reviews importeren",
+      "description": "Haal je reviews op uit Judge.me, Loox, Yotpo of Shopify Product Reviews. Exporteer ze daar als CSV, zet het bestand hier neer en controleer bij welk product elke review hoort voordat er iets wordt opgeslagen."
+    }
   },
   "emptyState": {
     "title": "Nog geen producten",
@@ -1021,6 +1029,55 @@
         "label": "Kwaliteitsgecontroleerd",
         "keywords": "getest, geïnspecteerd, gecontroleerd, goedgekeurd"
       }
+    }
+  },
+  "reviewImport": {
+    "dropPrompt": "Zet je review-export hier neer of kies een CSV-bestand",
+    "rowsLimit": "{max, plural, one {Maximaal {max} review per bestand} other {Maximaal {max} reviews per bestand}}",
+    "fileTooLarge": "Dat bestand is te groot. De limiet is {max}.",
+    "fileEmpty": "Dat bestand is leeg.",
+    "badgeNote": "Geïmporteerde reviews laten zien waar ze eerst zijn geschreven, zoals “Geïmporteerd uit Shopify (Judge.me)”. Alleen reviews die kopers bij een Square Share-bestelling schrijven, worden gemarkeerd als van een geverifieerde koper.",
+    "missingColumns": "Dit bestand heeft geen kolom voor: {fields}. Exporteer je reviews opnieuw uit je review-app, als CSV.",
+    "fields": {
+      "rating": "beoordeling",
+      "title": "titel",
+      "body": "review",
+      "author": "naam van de schrijver",
+      "date": "datum",
+      "product": "product",
+      "status": "status"
+    },
+    "summary": "{ready, plural, one {<count>{ready}</count> review klaar} other {<count>{ready}</count> reviews klaar}}{skipped, plural, =0 {.} other {, {skipped} weggelaten.}}",
+    "hiddenRows": "{count, plural, one {{count} review was verborgen of als spam gemarkeerd in je oude winkel en wordt weggelaten.} other {{count} reviews waren verborgen of als spam gemarkeerd in je oude winkel en worden weggelaten.}}",
+    "droppedRows": "{count, plural, one {{count} review valt buiten de {max} die een bestand kan bevatten en wordt weggelaten.} other {{count} reviews vallen buiten de {max} die een bestand kan bevatten en worden weggelaten.}}",
+    "source": "Geïmporteerd uit",
+    "sourceUnknown": "Kies de app",
+    "sourceHelp": "Wordt bij elke review getoond, zodat kopers weten waar hij eerst is geschreven.",
+    "sources": {
+      "judgeme": "Judge.me",
+      "loox": "Loox",
+      "yotpo": "Yotpo",
+      "shopify": "Shopify Product Reviews"
+    },
+    "mappingHeading": "Producten koppelen",
+    "mappingHelp": "Elk product in het bestand, en het product hier waar de reviews bij horen. Waar mogelijk op naam gekoppeld. Alles op “Niet importeren” wordt weggelaten.",
+    "mappingFileProduct": "In het bestand",
+    "mappingReviews": "Reviews",
+    "mappingProduct": "Product hier",
+    "mappingSelect": "Product voor {key}",
+    "skipProduct": "Niet importeren",
+    "skippedHeading": "Rijen die worden weggelaten",
+    "skippedRow": "Regel {line}: {problem}",
+    "run": "{count, plural, one {{count} review importeren} other {{count} reviews importeren}}",
+    "imported": "{count, plural, one {{count} review is geïmporteerd.} other {{count} reviews zijn geïmporteerd.}}",
+    "duplicates": "{count, plural, one {{count} stond er al.} other {{count} stonden er al.}}",
+    "skippedRows": "{count, plural, one {{count} rij is weggelaten.} other {{count} rijen zijn weggelaten.}}",
+    "errors": {
+      "rateLimited": "Te veel imports in het afgelopen uur. Probeer het later opnieuw.",
+      "tooLarge": "Dat bestand is te groot om te importeren.",
+      "unrecognised": "Dit bestand is geen review-export die we kunnen lezen.",
+      "nothing": "Niets te importeren. Koppel minstens één product.",
+      "failed": "De import is niet gelukt en er is niets opgeslagen. Probeer het opnieuw."
     }
   }
 }

@@ -11,6 +11,9 @@
     },
     "import": {
       "title": "Produkte importieren"
+    },
+    "importReviews": {
+      "title": "Bewertungen importieren"
     }
   },
   "page": {
@@ -28,9 +31,14 @@
     },
     "import": {
       "heading": "Produkte importieren",
-      "description": "Bringe einen Katalog aus Shopify oder einem anderen Tool, das eine CSV exportiert. Du siehst genau, was ankommen wird, bevor etwas gespeichert wird."
+      "description": "Bringe einen Katalog aus Shopify oder einem anderen Tool, das eine CSV exportiert. Du siehst genau, was ankommen wird, bevor etwas gespeichert wird.",
+      "reviewsLink": "Ziehst du auch deine Bewertungen um? Bewertungen importieren"
     },
-    "formLoading": "Produktformular wird geladen"
+    "formLoading": "Produktformular wird geladen",
+    "importReviews": {
+      "heading": "Bewertungen importieren",
+      "description": "Hol deine Bewertungen von Judge.me, Loox, Yotpo oder Shopify Product Reviews. Exportiere sie dort als CSV, zieh die Datei hierher und prüfe, zu welchem Produkt jede gehört, bevor etwas gespeichert wird."
+    }
   },
   "emptyState": {
     "title": "Noch keine Produkte",
@@ -1021,6 +1029,55 @@
         "label": "Qualitätsgeprüft",
         "keywords": "getestet, geprüft, überprüft, genehmigt"
       }
+    }
+  },
+  "reviewImport": {
+    "dropPrompt": "Zieh deinen Bewertungsexport hierher oder wähle eine CSV-Datei",
+    "rowsLimit": "{max, plural, one {Bis zu {max} Bewertung pro Datei} other {Bis zu {max} Bewertungen pro Datei}}",
+    "fileTooLarge": "Die Datei ist zu groß. Die Grenze liegt bei {max}.",
+    "fileEmpty": "Die Datei ist leer.",
+    "badgeNote": "Importierte Bewertungen zeigen, wo sie ursprünglich geschrieben wurden, z. B. „Von Shopify importiert (Judge.me)“. Nur Bewertungen, die Käufer zu einer Square Share-Bestellung schreiben, gelten als Bewertungen verifizierter Käufer.",
+    "missingColumns": "Diese Datei hat keine Spalte für: {fields}. Exportiere deine Bewertungen noch einmal als CSV aus deiner Bewertungs-App.",
+    "fields": {
+      "rating": "Bewertung",
+      "title": "Titel",
+      "body": "Bewertungstext",
+      "author": "Name des Bewertenden",
+      "date": "Datum",
+      "product": "Produkt",
+      "status": "Status"
+    },
+    "summary": "{ready, plural, one {<count>{ready}</count> Bewertung bereit} other {<count>{ready}</count> Bewertungen bereit}}{skipped, plural, =0 {.} other {, {skipped} ausgelassen.}}",
+    "hiddenRows": "{count, plural, one {{count} Bewertung war in deinem alten Shop ausgeblendet oder als Spam markiert und wird ausgelassen.} other {{count} Bewertungen waren in deinem alten Shop ausgeblendet oder als Spam markiert und werden ausgelassen.}}",
+    "droppedRows": "{count, plural, one {{count} Bewertung liegt über den {max}, die eine Datei enthalten kann, und wird ausgelassen.} other {{count} Bewertungen liegen über den {max}, die eine Datei enthalten kann, und werden ausgelassen.}}",
+    "source": "Importiert von",
+    "sourceUnknown": "App auswählen",
+    "sourceHelp": "Wird bei jeder Bewertung angezeigt, damit Käufer wissen, wo sie ursprünglich geschrieben wurde.",
+    "sources": {
+      "judgeme": "Judge.me",
+      "loox": "Loox",
+      "yotpo": "Yotpo",
+      "shopify": "Shopify Product Reviews"
+    },
+    "mappingHeading": "Produkte zuordnen",
+    "mappingHelp": "Jedes Produkt in der Datei und das Produkt hier, zu dem seine Bewertungen gehören. Wo möglich nach Namen zugeordnet. Alles auf „Nicht importieren“ wird ausgelassen.",
+    "mappingFileProduct": "In der Datei",
+    "mappingReviews": "Bewertungen",
+    "mappingProduct": "Produkt hier",
+    "mappingSelect": "Produkt für {key}",
+    "skipProduct": "Nicht importieren",
+    "skippedHeading": "Zeilen, die ausgelassen werden",
+    "skippedRow": "Zeile {line}: {problem}",
+    "run": "{count, plural, one {{count} Bewertung importieren} other {{count} Bewertungen importieren}}",
+    "imported": "{count, plural, one {{count} Bewertung wurde importiert.} other {{count} Bewertungen wurden importiert.}}",
+    "duplicates": "{count, plural, one {{count} war schon da.} other {{count} waren schon da.}}",
+    "skippedRows": "{count, plural, one {{count} Zeile wurde ausgelassen.} other {{count} Zeilen wurden ausgelassen.}}",
+    "errors": {
+      "rateLimited": "Zu viele Importe in der letzten Stunde. Versuch es später noch einmal.",
+      "tooLarge": "Die Datei ist zu groß für einen Import.",
+      "unrecognised": "Diese Datei ist kein Bewertungsexport, den wir lesen können.",
+      "nothing": "Nichts zu importieren. Ordne mindestens ein Produkt zu.",
+      "failed": "Der Import hat nicht geklappt, es wurde nichts gespeichert. Versuch es noch einmal."
     }
   }
 }

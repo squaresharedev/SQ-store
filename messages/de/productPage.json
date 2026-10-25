@@ -260,7 +260,31 @@
     "footerLink": "Von einem Kauf zurücktreten",
     "total": "Gesamtbetrag",
     "quantity": "Menge {quantity}",
-    "editHeadline": "Überschrift der Dankes-Seite"
+    "editHeadline": "Überschrift der Dankes-Seite",
+    "review": {
+      "title": "Wie war’s?",
+      "body": "Erzähl anderen Käufern, wie du {product} findest.",
+      "open": "Bewertung schreiben",
+      "done": "Danke für deine Bewertung. Sie steht jetzt auf der Produktseite.",
+      "dialogTitle": "Bewertung schreiben",
+      "sentTitle": "Danke für deine Bewertung",
+      "sentBody": "Sie steht jetzt auf der Produktseite, als Bewertung eines verifizierten Käufers.",
+      "ratingLegend": "Deine Sterne",
+      "ratingOption": "{rating, plural, one {{rating} Stern} other {{rating} Sterne}}",
+      "ratingPrompt": "Wähle die Anzahl der Sterne.",
+      "ratingWords": "{rating, select, 1 {Schlecht} 2 {Geht so} 3 {Gut} 4 {Sehr gut} other {Ausgezeichnet}}",
+      "bodyLabel": "Deine Bewertung",
+      "bodyPlaceholder": "Was hat dir gefallen? Was könnte besser sein?",
+      "titleLabel": "Titel (optional)",
+      "nameLabel": "Angezeigter Name",
+      "nameHelp": "Wird mit deiner Bewertung angezeigt. Deine E-Mail-Adresse und deine Bestellung bleiben privat.",
+      "send": "Bewertung veröffentlichen",
+      "errors": {
+        "notEligible": "Diese Bestellung kann nicht mehr bewertet werden.",
+        "rateLimited": "Zu viele Bewertungen von dieser Verbindung. Versuch es in einer Stunde noch einmal.",
+        "failed": "Deine Bewertung konnte nicht veröffentlicht werden. Versuch es noch einmal."
+      }
+    }
   },
   "checkout": {
     "metadata": {
@@ -386,5 +410,23 @@
     "endsOn": "Aktion endet {date}"
   },
   "badges": "Highlights",
-  "badgesOnPhoto": "Highlights auf dem Foto"
+  "badgesOnPhoto": "Highlights auf dem Foto",
+  "reviews": {
+    "heading": "Bewertungen",
+    "average": "{average} von 5 Sternen",
+    "count": "{count, plural, one {Basierend auf {count} Bewertung} other {Basierend auf {count} Bewertungen}}",
+    "stars": "{rating, plural, one {Mit {rating} von 5 Sternen bewertet} other {Mit {rating} von 5 Sternen bewertet}}",
+    "starsShort": "{rating, plural, one {{rating} Stern} other {{rating} Sterne}}",
+    "verified": "Verifizierter Käufer",
+    "imported": "{source, select, judgeme {Von Shopify importiert (Judge.me)} loox {Von Shopify importiert (Loox)} yotpo {Von Shopify importiert (Yotpo)} other {Von Shopify importiert}}",
+    "sortLabel": "Bewertungen sortieren",
+    "sorts": {
+      "newest": "Neueste zuerst",
+      "highest": "Beste zuerst",
+      "lowest": "Schlechteste zuerst"
+    },
+    "more": "Weitere Bewertungen anzeigen",
+    "loading": "Wird geladen…",
+    "loadFailed": "Weitere Bewertungen konnten nicht geladen werden. Versuch es noch einmal."
+  }
 }

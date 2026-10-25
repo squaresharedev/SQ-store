@@ -74,7 +74,7 @@ export type PlaceOrderInput = z.infer<typeof placeOrderSchema>;
 
 /** An order's credential or short number, as typed or carried by a page. The
  *  route proves it (lib/orders/order-link.ts); this only bounds it. */
-const orderReference = singleLineText({ field: "orderReference", max: 100 });
+export const orderReference = singleLineText({ field: "orderReference", max: 100 });
 
 /** The withdrawal function's form (CRD art. 11a): who, which order, and the
  *  email it was placed with. */

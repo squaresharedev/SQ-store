@@ -260,7 +260,31 @@
     "footerLink": "Recedi da un acquisto",
     "total": "Totale pagato",
     "quantity": "Quantità: {quantity}",
-    "editHeadline": "Titolo del ringraziamento"
+    "editHeadline": "Titolo del ringraziamento",
+    "review": {
+      "title": "Com’è andata?",
+      "body": "Racconta agli altri acquirenti cosa pensi di {product}.",
+      "open": "Scrivi una recensione",
+      "done": "Grazie per la tua recensione. Ora è sulla pagina del prodotto.",
+      "dialogTitle": "Scrivi una recensione",
+      "sentTitle": "Grazie per la tua recensione",
+      "sentBody": "Ora è sulla pagina del prodotto, indicata come di un acquirente verificato.",
+      "ratingLegend": "Il tuo voto",
+      "ratingOption": "{rating, plural, one {{rating} stella} other {{rating} stelle}}",
+      "ratingPrompt": "Scegli un voto.",
+      "ratingWords": "{rating, select, 1 {Scarso} 2 {Discreto} 3 {Buono} 4 {Molto buono} other {Eccellente}}",
+      "bodyLabel": "La tua recensione",
+      "bodyPlaceholder": "Cosa ti è piaciuto? Cosa si potrebbe migliorare?",
+      "titleLabel": "Titolo (facoltativo)",
+      "nameLabel": "Nome da mostrare",
+      "nameHelp": "Mostrato con la tua recensione. Il tuo indirizzo email e il tuo ordine restano privati.",
+      "send": "Pubblica recensione",
+      "errors": {
+        "notEligible": "Questo ordine non può più essere recensito.",
+        "rateLimited": "Troppe recensioni da questa connessione. Riprova tra un’ora.",
+        "failed": "Non è stato possibile pubblicare la tua recensione. Riprova."
+      }
+    }
   },
   "checkout": {
     "metadata": {
@@ -386,5 +410,23 @@
     "endsOn": "Promozione fino al {date}"
   },
   "badges": "In evidenza",
-  "badgesOnPhoto": "In evidenza sulla foto"
+  "badgesOnPhoto": "In evidenza sulla foto",
+  "reviews": {
+    "heading": "Recensioni",
+    "average": "{average} su 5 stelle",
+    "count": "{count, plural, one {Basato su {count} recensione} other {Basato su {count} recensioni}}",
+    "stars": "{rating, plural, one {Valutato {rating} stella su 5} other {Valutato {rating} stelle su 5}}",
+    "starsShort": "{rating, plural, one {{rating} stella} other {{rating} stelle}}",
+    "verified": "Acquirente verificato",
+    "imported": "{source, select, judgeme {Importata da Shopify (Judge.me)} loox {Importata da Shopify (Loox)} yotpo {Importata da Shopify (Yotpo)} other {Importata da Shopify}}",
+    "sortLabel": "Ordina recensioni",
+    "sorts": {
+      "newest": "Più recenti",
+      "highest": "Voto più alto",
+      "lowest": "Voto più basso"
+    },
+    "more": "Mostra altre recensioni",
+    "loading": "Caricamento…",
+    "loadFailed": "Non è stato possibile caricare altre recensioni. Riprova."
+  }
 }

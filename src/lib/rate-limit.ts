@@ -423,6 +423,24 @@ export const RATE_LIMITS = {
    * an address is not proof of anything, so this stays small.
    */
   orderLookup: { max: 5, windowSeconds: 60 * 60 },
+  // --- Reviews (lib/reviews) -----------------------------------------------
+  /**
+   * Pages of a product's review feed, per client IP. One indexed read each;
+   * the same ceiling as the product page they are read from.
+   */
+  reviewRead: { max: 600, windowSeconds: 60 * 60 },
+  /**
+   * Buyer reviews, per client IP. Each needs a paid order's link and an order
+   * takes one review, so this is not what stops spam (the purchase is); it
+   * bounds a script walking guessed links through the write path.
+   */
+  reviewSubmit: { max: 10, windowSeconds: 60 * 60 },
+  /**
+   * Review imports, per signed-in user. One call parses a file and writes up
+   * to REVIEW_IMPORT_ROWS_MAX rows, so it is priced like the product import:
+   * a handful of tries while the mapping is right, not a loop.
+   */
+  reviewImport: { max: 12, windowSeconds: 60 * 60 },
 } as const;
 
 export type RateLimitBudget = { max: number; windowSeconds: number };

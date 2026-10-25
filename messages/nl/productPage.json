@@ -260,7 +260,31 @@
     "footerLink": "Herroep een aankoop",
     "total": "Totaal betaald",
     "quantity": "Aantal: {quantity}",
-    "editHeadline": "Koptekst van de bedankpagina"
+    "editHeadline": "Koptekst van de bedankpagina",
+    "review": {
+      "title": "Hoe was het?",
+      "body": "Vertel andere kopers wat je van {product} vindt.",
+      "open": "Review schrijven",
+      "done": "Bedankt voor je review. Hij staat nu op de productpagina.",
+      "dialogTitle": "Review schrijven",
+      "sentTitle": "Bedankt voor je review",
+      "sentBody": "Hij staat nu op de productpagina, gemarkeerd als review van een geverifieerde koper.",
+      "ratingLegend": "Je beoordeling",
+      "ratingOption": "{rating, plural, one {{rating} ster} other {{rating} sterren}}",
+      "ratingPrompt": "Kies een beoordeling.",
+      "ratingWords": "{rating, select, 1 {Slecht} 2 {Matig} 3 {Goed} 4 {Heel goed} other {Uitstekend}}",
+      "bodyLabel": "Je review",
+      "bodyPlaceholder": "Wat vond je goed? Wat kan beter?",
+      "titleLabel": "Titel (optioneel)",
+      "nameLabel": "Naam die getoond wordt",
+      "nameHelp": "Wordt bij je review getoond. Je e-mailadres en je bestelling blijven privé.",
+      "send": "Review plaatsen",
+      "errors": {
+        "notEligible": "Deze bestelling kan niet meer worden beoordeeld.",
+        "rateLimited": "Te veel reviews vanaf deze verbinding. Probeer het over een uur opnieuw.",
+        "failed": "Je review kon niet worden geplaatst. Probeer het opnieuw."
+      }
+    }
   },
   "checkout": {
     "metadata": {
@@ -386,5 +410,23 @@
     "endsOn": "Actie eindigt op {date}"
   },
   "badges": "Uitgelicht",
-  "badgesOnPhoto": "Highlights op de foto"
+  "badgesOnPhoto": "Highlights op de foto",
+  "reviews": {
+    "heading": "Reviews",
+    "average": "{average} van 5 sterren",
+    "count": "{count, plural, one {Op basis van {count} review} other {Op basis van {count} reviews}}",
+    "stars": "{rating, plural, one {Beoordeeld met {rating} van 5 sterren} other {Beoordeeld met {rating} van 5 sterren}}",
+    "starsShort": "{rating, plural, one {{rating} ster} other {{rating} sterren}}",
+    "verified": "Geverifieerde koper",
+    "imported": "{source, select, judgeme {Geïmporteerd uit Shopify (Judge.me)} loox {Geïmporteerd uit Shopify (Loox)} yotpo {Geïmporteerd uit Shopify (Yotpo)} other {Geïmporteerd uit Shopify}}",
+    "sortLabel": "Reviews sorteren",
+    "sorts": {
+      "newest": "Nieuwste eerst",
+      "highest": "Hoogst beoordeeld",
+      "lowest": "Laagst beoordeeld"
+    },
+    "more": "Meer reviews tonen",
+    "loading": "Laden…",
+    "loadFailed": "Meer reviews konden niet worden geladen. Probeer het opnieuw."
+  }
 }

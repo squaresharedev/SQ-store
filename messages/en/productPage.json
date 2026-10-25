@@ -373,7 +373,31 @@
     "footerLink": "Withdraw from a purchase",
     "total": "Total paid",
     "quantity": "Quantity {quantity}",
-    "editHeadline": "Thank-you headline"
+    "editHeadline": "Thank-you headline",
+    "review": {
+      "title": "How was it?",
+      "body": "Tell other buyers what you think of {product}.",
+      "open": "Write a review",
+      "done": "Thanks for your review. It is on the product page now.",
+      "dialogTitle": "Write a review",
+      "sentTitle": "Thanks for your review",
+      "sentBody": "It is on the product page now, marked as from a verified buyer.",
+      "ratingLegend": "Your rating",
+      "ratingOption": "{rating, plural, one {{rating} star} other {{rating} stars}}",
+      "ratingPrompt": "Choose a rating.",
+      "ratingWords": "{rating, select, 1 {Poor} 2 {Fair} 3 {Good} 4 {Very good} other {Excellent}}",
+      "bodyLabel": "Your review",
+      "bodyPlaceholder": "What did you like? What could be better?",
+      "titleLabel": "Title (optional)",
+      "nameLabel": "Name to show",
+      "nameHelp": "Shown with your review. Your email address and order stay private.",
+      "send": "Post review",
+      "errors": {
+        "notEligible": "This order can no longer be reviewed.",
+        "rateLimited": "Too many reviews from this connection. Try again in an hour.",
+        "failed": "Your review could not be posted. Try again."
+      }
+    }
   },
   "sale": {
     "wasNow": "Was {was}, now {now}",
@@ -386,5 +410,23 @@
     "endsOn": "Sale ends {date}"
   },
   "badges": "Highlights",
-  "badgesOnPhoto": "Highlights on the photo"
+  "badgesOnPhoto": "Highlights on the photo",
+  "reviews": {
+    "heading": "Reviews",
+    "average": "{average} out of 5 stars",
+    "count": "{count, plural, one {Based on {count} review} other {Based on {count} reviews}}",
+    "stars": "{rating, plural, one {Rated {rating} star out of 5} other {Rated {rating} stars out of 5}}",
+    "starsShort": "{rating, plural, one {{rating} star} other {{rating} stars}}",
+    "verified": "Verified buyer",
+    "imported": "{source, select, judgeme {Imported from Shopify (Judge.me)} loox {Imported from Shopify (Loox)} yotpo {Imported from Shopify (Yotpo)} other {Imported from Shopify}}",
+    "sortLabel": "Sort reviews",
+    "sorts": {
+      "newest": "Newest first",
+      "highest": "Highest rated",
+      "lowest": "Lowest rated"
+    },
+    "more": "Show more reviews",
+    "loading": "Loading…",
+    "loadFailed": "More reviews could not be loaded. Try again."
+  }
 }

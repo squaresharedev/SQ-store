@@ -260,7 +260,31 @@
     "footerLink": "Odstúpiť od nákupu",
     "total": "Celkom zaplatené",
     "quantity": "Množstvo {quantity}",
-    "editHeadline": "Nadpis poďakovania"
+    "editHeadline": "Nadpis poďakovania",
+    "review": {
+      "title": "Aké to bolo?",
+      "body": "Napíšte ostatným kupujúcim, ako hodnotíte produkt {product}.",
+      "open": "Napísať recenziu",
+      "done": "Ďakujeme za recenziu. Už je na stránke produktu.",
+      "dialogTitle": "Napísať recenziu",
+      "sentTitle": "Ďakujeme za recenziu",
+      "sentBody": "Už je na stránke produktu, označená ako recenzia od overeného kupujúceho.",
+      "ratingLegend": "Vaše hodnotenie",
+      "ratingOption": "{rating, plural, one {{rating} hviezdička} few {{rating} hviezdičky} many {{rating} hviezdičky} other {{rating} hviezdičiek}}",
+      "ratingPrompt": "Zvoľte hodnotenie.",
+      "ratingWords": "{rating, select, 1 {Zlé} 2 {Ujde to} 3 {Dobré} 4 {Veľmi dobré} other {Vynikajúce}}",
+      "bodyLabel": "Vaša recenzia",
+      "bodyPlaceholder": "Čo sa vám páčilo? Čo by mohlo byť lepšie?",
+      "titleLabel": "Nadpis (nepovinné)",
+      "nameLabel": "Zobrazované meno",
+      "nameHelp": "Zobrazí sa pri vašej recenzii. Váš e-mail a objednávka zostanú súkromné.",
+      "send": "Zverejniť recenziu",
+      "errors": {
+        "notEligible": "Túto objednávku už nie je možné hodnotiť.",
+        "rateLimited": "Z tohto pripojenia prišlo príliš veľa recenzií. Skúste to znova o hodinu.",
+        "failed": "Recenziu sa nepodarilo zverejniť. Skúste to znova."
+      }
+    }
   },
   "checkout": {
     "metadata": {
@@ -386,5 +410,23 @@
     "endsOn": "Akcia končí {date}"
   },
   "badges": "Prednosti",
-  "badgesOnPhoto": "Zvýraznenía na fotke"
+  "badgesOnPhoto": "Zvýraznenía na fotke",
+  "reviews": {
+    "heading": "Recenzie",
+    "average": "{average} z 5 hviezdičiek",
+    "count": "{count, plural, one {Na základe {count} recenzie} few {Na základe {count} recenzií} many {Na základe {count} recenzie} other {Na základe {count} recenzií}}",
+    "stars": "{rating, plural, one {Hodnotenie {rating} hviezdička z 5} few {Hodnotenie {rating} hviezdičky z 5} many {Hodnotenie {rating} hviezdičky z 5} other {Hodnotenie {rating} hviezdičiek z 5}}",
+    "starsShort": "{rating, plural, one {{rating} hviezdička} few {{rating} hviezdičky} many {{rating} hviezdičky} other {{rating} hviezdičiek}}",
+    "verified": "Overený kupujúci",
+    "imported": "{source, select, judgeme {Importované zo Shopify (Judge.me)} loox {Importované zo Shopify (Loox)} yotpo {Importované zo Shopify (Yotpo)} other {Importované zo Shopify}}",
+    "sortLabel": "Zoradiť recenzie",
+    "sorts": {
+      "newest": "Najnovšie",
+      "highest": "Najlepšie hodnotené",
+      "lowest": "Najhoršie hodnotené"
+    },
+    "more": "Zobraziť ďalšie recenzie",
+    "loading": "Načítava sa…",
+    "loadFailed": "Ďalšie recenzie sa nepodarilo načítať. Skúste to znova."
+  }
 }

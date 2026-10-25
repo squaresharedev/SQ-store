@@ -11,6 +11,9 @@
     },
     "import": {
       "title": "Importuj produkty"
+    },
+    "importReviews": {
+      "title": "Importuj opinie"
     }
   },
   "page": {
@@ -28,9 +31,14 @@
     },
     "import": {
       "heading": "Importuj produkty",
-      "description": "Przenieś katalog z Shopify albo z dowolnego narzędzia eksportującego CSV. Zobaczysz dokładnie, co trafi do sklepu, zanim cokolwiek zostanie zapisane."
+      "description": "Przenieś katalog z Shopify albo z dowolnego narzędzia eksportującego CSV. Zobaczysz dokładnie, co trafi do sklepu, zanim cokolwiek zostanie zapisane.",
+      "reviewsLink": "Przenosisz też opinie? Importuj opinie"
     },
-    "formLoading": "Wczytywanie formularza produktu"
+    "formLoading": "Wczytywanie formularza produktu",
+    "importReviews": {
+      "heading": "Importuj opinie",
+      "description": "Przenieś opinie z Judge.me, Loox, Yotpo lub Shopify Product Reviews. Wyeksportuj je tam jako CSV, upuść plik tutaj i sprawdź, do którego produktu należy każda z nich, zanim cokolwiek zostanie zapisane."
+    }
   },
   "emptyState": {
     "title": "Jeszcze brak produktów",
@@ -1021,6 +1029,55 @@
         "label": "Sprawdzony jakościowo",
         "keywords": "testowany, skontrolowany, zatwierdzony, certyfikowany"
       }
+    }
+  },
+  "reviewImport": {
+    "dropPrompt": "Upuść tutaj eksport opinii lub wybierz plik CSV",
+    "rowsLimit": "{max, plural, one {Do {max} opinii w pliku} few {Do {max} opinii w pliku} many {Do {max} opinii w pliku} other {Do {max} opinii w pliku}}",
+    "fileTooLarge": "Ten plik jest za duży. Limit to {max}.",
+    "fileEmpty": "Ten plik jest pusty.",
+    "badgeNote": "Zaimportowane opinie pokazują, gdzie zostały napisane, np. „Zaimportowano z Shopify (Judge.me)”. Jako opinie zweryfikowanego kupującego oznaczane są tylko opinie napisane przez kupujących do zamówienia w Square Share.",
+    "missingColumns": "W tym pliku brakuje kolumny: {fields}. Wyeksportuj opinie ponownie ze swojej aplikacji do opinii jako CSV.",
+    "fields": {
+      "rating": "ocena",
+      "title": "tytuł",
+      "body": "treść opinii",
+      "author": "imię autora",
+      "date": "data",
+      "product": "produkt",
+      "status": "status"
+    },
+    "summary": "{ready, plural, one {<count>{ready}</count> opinia gotowa} few {<count>{ready}</count> opinie gotowe} many {<count>{ready}</count> opinii gotowych} other {<count>{ready}</count> opinii gotowych}}{skipped, plural, =0 {.} other {, pominięte: {skipped}.}}",
+    "hiddenRows": "{count, plural, one {{count} opinia była ukryta lub oznaczona jako spam w twoim poprzednim sklepie, więc zostanie pominięta.} few {{count} opinie były ukryte lub oznaczone jako spam w twoim poprzednim sklepie, więc zostaną pominięte.} many {{count} opinii było ukrytych lub oznaczonych jako spam w twoim poprzednim sklepie, więc zostaną pominięte.} other {{count} opinii było ukrytych lub oznaczonych jako spam w twoim poprzednim sklepie, więc zostaną pominięte.}}",
+    "droppedRows": "{count, plural, one {{count} opinia przekracza limit {max} na plik, więc zostanie pominięta.} few {{count} opinie przekraczają limit {max} na plik, więc zostaną pominięte.} many {{count} opinii przekracza limit {max} na plik, więc zostaną pominięte.} other {{count} opinii przekracza limit {max} na plik, więc zostaną pominięte.}}",
+    "source": "Zaimportowano z",
+    "sourceUnknown": "Wybierz aplikację",
+    "sourceHelp": "Widoczne przy każdej opinii, aby kupujący wiedzieli, gdzie została napisana.",
+    "sources": {
+      "judgeme": "Judge.me",
+      "loox": "Loox",
+      "yotpo": "Yotpo",
+      "shopify": "Shopify Product Reviews"
+    },
+    "mappingHeading": "Przypisz produkty",
+    "mappingHelp": "Każdy produkt z pliku i produkt tutaj, do którego trafią jego opinie. W miarę możliwości przypisane według nazwy. Wszystko ustawione na „Nie importuj” zostanie pominięte.",
+    "mappingFileProduct": "W pliku",
+    "mappingReviews": "Opinie",
+    "mappingProduct": "Produkt tutaj",
+    "mappingSelect": "Produkt dla {key}",
+    "skipProduct": "Nie importuj",
+    "skippedHeading": "Wiersze, które zostaną pominięte",
+    "skippedRow": "Wiersz {line}: {problem}",
+    "run": "{count, plural, one {Importuj {count} opinię} few {Importuj {count} opinie} many {Importuj {count} opinii} other {Importuj {count} opinii}}",
+    "imported": "{count, plural, one {Zaimportowano {count} opinię.} few {Zaimportowano {count} opinie.} many {Zaimportowano {count} opinii.} other {Zaimportowano {count} opinii.}}",
+    "duplicates": "{count, plural, one {{count} już tu była.} few {{count} już tu były.} many {{count} już tu było.} other {{count} już tu było.}}",
+    "skippedRows": "{count, plural, one {Pominięto {count} wiersz.} few {Pominięto {count} wiersze.} many {Pominięto {count} wierszy.} other {Pominięto {count} wiersza.}}",
+    "errors": {
+      "rateLimited": "Za dużo importów w ciągu ostatniej godziny. Spróbuj później.",
+      "tooLarge": "Ten plik jest za duży, aby go zaimportować.",
+      "unrecognised": "Ten plik nie jest eksportem opinii, który potrafimy odczytać.",
+      "nothing": "Nie ma czego importować. Przypisz co najmniej jeden produkt.",
+      "failed": "Import się nie powiódł i nic nie zostało zapisane. Spróbuj ponownie."
     }
   }
 }

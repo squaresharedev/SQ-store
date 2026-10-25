@@ -311,6 +311,21 @@
       "required": "Um emblema precisa de ter palavras.",
       "tooLong": "Um emblema deve ter {maximum} carateres ou menos.",
       "unsupported": "Um emblema contém carateres não suportados."
+    },
+    "reviewTitle": {
+      "required": "O título da avaliação é obrigatório.",
+      "tooLong": "O título de uma avaliação pode ter no máximo {maximum} caracteres.",
+      "unsupported": "O título da avaliação contém caracteres não suportados."
+    },
+    "reviewBody": {
+      "required": "Escreva algumas palavras sobre o produto.",
+      "tooLong": "Uma avaliação pode ter no máximo {maximum} caracteres.",
+      "unsupported": "A avaliação contém caracteres não suportados."
+    },
+    "reviewAuthor": {
+      "required": "Adicione o nome a mostrar com a avaliação.",
+      "tooLong": "Um nome pode ter no máximo {maximum} caracteres.",
+      "unsupported": "O nome contém caracteres não suportados."
     }
   },
   "email": {
@@ -426,6 +441,11 @@
       "whole": "O limite tem de ser um número inteiro.",
       "tooSmall": "O limite tem de ser pelo menos {minimum}.",
       "tooBig": "O limite pode ser no máximo {maximum}."
+    },
+    "reviewRating": {
+      "whole": "Uma classificação tem de ser um número inteiro de estrelas.",
+      "tooSmall": "Uma classificação tem de ter pelo menos {minimum} estrela.",
+      "tooBig": "Uma classificação pode ter no máximo {maximum} estrelas."
     }
   },
   "list": {
@@ -534,5 +554,13 @@
     "endBeforeStart": "O fim tem de ser depois do início.",
     "startInPast": "O início não pode ser no passado. Escolha um horário posterior ou inicie de imediato.",
     "endInPast": "O fim não pode ser no passado."
+  },
+  "reviewImport": {
+    "rating": "Sem classificação de 1 a 5.",
+    "title": "O título é demasiado longo.",
+    "body": "A avaliação é demasiado longa ou contém caracteres não suportados.",
+    "author": "Sem nome do autor.",
+    "date": "Sem uma data legível.",
+    "product": "Sem produto."
   }
 }

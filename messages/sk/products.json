@@ -11,6 +11,9 @@
     },
     "import": {
       "title": "Import produktov"
+    },
+    "importReviews": {
+      "title": "Importovať recenzie"
     }
   },
   "page": {
@@ -28,9 +31,14 @@
     },
     "import": {
       "heading": "Import produktov",
-      "description": "Preneste katalóg zo Shopify alebo z ľubovoľného nástroja exportujúceho CSV. Pred uložením uvidíte presne, čo sa naimportuje."
+      "description": "Preneste katalóg zo Shopify alebo z ľubovoľného nástroja exportujúceho CSV. Pred uložením uvidíte presne, čo sa naimportuje.",
+      "reviewsLink": "Sťahujete aj recenzie? Importovať recenzie"
     },
-    "formLoading": "Načítava sa formulár produktu"
+    "formLoading": "Načítava sa formulár produktu",
+    "importReviews": {
+      "heading": "Importovať recenzie",
+      "description": "Preneste si recenzie z Judge.me, Loox, Yotpo alebo Shopify Product Reviews. Vyexportujte ich tam ako CSV, presuňte súbor sem a pred uložením skontrolujte, ku ktorému produktu každá patrí."
+    }
   },
   "emptyState": {
     "title": "Zatiaľ žiadne produkty",
@@ -1021,6 +1029,55 @@
         "label": "Preverená kvalita",
         "keywords": "testované, skontrolované, overené, schlávené"
       }
+    }
+  },
+  "reviewImport": {
+    "dropPrompt": "Presuňte sem export recenzií alebo vyberte súbor CSV",
+    "rowsLimit": "{max, plural, one {Až {max} recenzia na súbor} few {Až {max} recenzie na súbor} many {Až {max} recenzie na súbor} other {Až {max} recenzií na súbor}}",
+    "fileTooLarge": "Súbor je príliš veľký. Limit je {max}.",
+    "fileEmpty": "Súbor je prázdny.",
+    "badgeNote": "Importované recenzie ukazujú, kde boli pôvodne napísané, napr. „Importované zo Shopify (Judge.me)“. Ako recenzie od overeného kupujúceho sa označujú len tie, ktoré kupujúci napíšu k objednávke zo Square Share.",
+    "missingColumns": "V tomto súbore chýba stĺpec pre: {fields}. Vyexportujte recenzie z aplikácie na recenzie znova ako CSV.",
+    "fields": {
+      "rating": "hodnotenie",
+      "title": "nadpis",
+      "body": "text recenzie",
+      "author": "meno autora",
+      "date": "dátum",
+      "product": "produkt",
+      "status": "stav"
+    },
+    "summary": "{ready, plural, one {<count>{ready}</count> recenzia pripravená} few {<count>{ready}</count> recenzie pripravené} many {<count>{ready}</count> recenzie pripravené} other {<count>{ready}</count> recenzií pripravených}}{skipped, plural, =0 {.} other {, {skipped} vynechaných.}}",
+    "hiddenRows": "{count, plural, one {{count} recenzia bola vo vašom pôvodnom obchode skrytá alebo označená ako spam, preto sa vynechá.} few {{count} recenzie boli vo vašom pôvodnom obchode skryté alebo označené ako spam, preto sa vynechajú.} many {{count} recenzie bolo vo vašom pôvodnom obchode skrytých alebo označených ako spam, preto sa vynechajú.} other {{count} recenzií bolo vo vašom pôvodnom obchode skrytých alebo označených ako spam, preto sa vynechajú.}}",
+    "droppedRows": "{count, plural, one {{count} recenzia presahuje {max}, ktoré súbor pojme, preto sa vynechá.} few {{count} recenzie presahujú {max}, ktoré súbor pojme, preto sa vynechajú.} many {{count} recenzie presahuje {max}, ktoré súbor pojme, preto sa vynechajú.} other {{count} recenzií presahuje {max}, ktoré súbor pojme, preto sa vynechajú.}}",
+    "source": "Importované z",
+    "sourceUnknown": "Vyberte aplikáciu",
+    "sourceHelp": "Zobrazuje sa pri každej recenzii, aby kupujúci vedeli, kde bola pôvodne napísaná.",
+    "sources": {
+      "judgeme": "Judge.me",
+      "loox": "Loox",
+      "yotpo": "Yotpo",
+      "shopify": "Shopify Product Reviews"
+    },
+    "mappingHeading": "Priradiť produkty",
+    "mappingHelp": "Každý produkt zo súboru a produkt tu, ku ktorému patria jeho recenzie. Kde sa dá, priradené podľa názvu. Všetko nastavené na „Neimportovať“ sa vynechá.",
+    "mappingFileProduct": "V súbore",
+    "mappingReviews": "Recenzie",
+    "mappingProduct": "Produkt tu",
+    "mappingSelect": "Produkt pre {key}",
+    "skipProduct": "Neimportovať",
+    "skippedHeading": "Riadky, ktoré sa vynechajú",
+    "skippedRow": "Riadok {line}: {problem}",
+    "run": "{count, plural, one {Importovať {count} recenziu} few {Importovať {count} recenzie} many {Importovať {count} recenzie} other {Importovať {count} recenzií}}",
+    "imported": "{count, plural, one {Importovaná {count} recenzia.} few {Importované {count} recenzie.} many {Importovaných {count} recenzie.} other {Importovaných {count} recenzií.}}",
+    "duplicates": "{count, plural, one {{count} tu už bola.} few {{count} tu už boli.} many {{count} tu už bolo.} other {{count} tu už bolo.}}",
+    "skippedRows": "{count, plural, one {Vynechaný {count} riadok.} few {Vynechané {count} riadky.} many {Vynechaných {count} riadka.} other {Vynechaných {count} riadkov.}}",
+    "errors": {
+      "rateLimited": "Za poslednú hodinu príliš veľa importov. Skúste to neskôr.",
+      "tooLarge": "Súbor je na import príliš veľký.",
+      "unrecognised": "Tento súbor nie je export recenzií, ktorý vieme prečítať.",
+      "nothing": "Nie je čo importovať. Priraďte aspoň jeden produkt.",
+      "failed": "Import sa nepodaril a nič sa neuložilo. Skúste to znova."
     }
   }
 }

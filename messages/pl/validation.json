@@ -311,6 +311,21 @@
       "required": "Odznaka musi mieć jakiś tekst.",
       "tooLong": "Odznaka może mieć co najwyżej {maximum} znaków.",
       "unsupported": "Odznaka zawiera nieobsługiwane znaki."
+    },
+    "reviewTitle": {
+      "required": "Tytuł opinii jest wymagany.",
+      "tooLong": "Tytuł opinii może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Tytuł opinii zawiera nieobsługiwane znaki."
+    },
+    "reviewBody": {
+      "required": "Napisz kilka słów o produkcie.",
+      "tooLong": "Opinia może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Opinia zawiera nieobsługiwane znaki."
+    },
+    "reviewAuthor": {
+      "required": "Dodaj imię, które będzie widoczne przy opinii.",
+      "tooLong": "Imię może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Imię zawiera nieobsługiwane znaki."
     }
   },
   "email": {
@@ -426,6 +441,11 @@
       "whole": "Limit musi być liczbą całkowitą.",
       "tooSmall": "Limit musi wynosić co najmniej {minimum}.",
       "tooBig": "Limit może wynosić co najwyżej {maximum}."
+    },
+    "reviewRating": {
+      "whole": "Ocena musi być pełną liczbą gwiazdek.",
+      "tooSmall": "Ocena musi wynosić co najmniej {minimum}.",
+      "tooBig": "Ocena może wynosić maksymalnie {maximum}."
     }
   },
   "list": {
@@ -534,5 +554,13 @@
     "endBeforeStart": "Koniec musi być późniejszy od początku.",
     "startInPast": "Początek nie może być w przeszłości. Wybierz późniejszy czas lub zacznij teraz.",
     "endInPast": "Koniec nie może być w przeszłości."
+  },
+  "reviewImport": {
+    "rating": "Brak oceny od 1 do 5.",
+    "title": "Tytuł jest za długi.",
+    "body": "Opinia jest za długa lub zawiera nieobsługiwane znaki.",
+    "author": "Brak imienia autora.",
+    "date": "Brak czytelnej daty.",
+    "product": "Brak produktu."
   }
 }

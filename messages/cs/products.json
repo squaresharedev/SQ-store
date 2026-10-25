@@ -11,6 +11,9 @@
     },
     "import": {
       "title": "Import produktů"
+    },
+    "importReviews": {
+      "title": "Importovat recenze"
     }
   },
   "page": {
@@ -28,9 +31,14 @@
     },
     "import": {
       "heading": "Import produktů",
-      "description": "Přeneste katalog ze Shopify nebo z jakéhokoli nástroje, který umí export do CSV. Před uložením přesně uvidíte, co se naimportuje."
+      "description": "Přeneste katalog ze Shopify nebo z jakéhokoli nástroje, který umí export do CSV. Před uložením přesně uvidíte, co se naimportuje.",
+      "reviewsLink": "Stěhujete i recenze? Importovat recenze"
     },
-    "formLoading": "Načítání formuláře produktu"
+    "formLoading": "Načítání formuláře produktu",
+    "importReviews": {
+      "heading": "Importovat recenze",
+      "description": "Přeneste si recenze z Judge.me, Loox, Yotpo nebo Shopify Product Reviews. Vyexportujte je tam jako CSV, přetáhněte soubor sem a před uložením zkontrolujte, ke kterému produktu každá patří."
+    }
   },
   "emptyState": {
     "title": "Zatím žádné produkty",
@@ -1021,6 +1029,55 @@
         "label": "Prověřená kvalita",
         "keywords": "prověřená kvalita, testováno, schváleno, kontrola kvality"
       }
+    }
+  },
+  "reviewImport": {
+    "dropPrompt": "Přetáhněte sem export recenzí, nebo vyberte soubor CSV",
+    "rowsLimit": "{max, plural, one {Až {max} recenze na soubor} few {Až {max} recenze na soubor} many {Až {max} recenze na soubor} other {Až {max} recenzí na soubor}}",
+    "fileTooLarge": "Soubor je příliš velký. Limit je {max}.",
+    "fileEmpty": "Soubor je prázdný.",
+    "badgeNote": "Importované recenze ukazují, kde byly původně napsány, např. „Importováno ze Shopify (Judge.me)“. Jako recenze od ověřeného kupujícího se označují jen ty, které kupující napíší k objednávce ze Square Share.",
+    "missingColumns": "V tomto souboru chybí sloupec pro: {fields}. Vyexportujte recenze z aplikace na recenze znovu jako CSV.",
+    "fields": {
+      "rating": "hodnocení",
+      "title": "nadpis",
+      "body": "text recenze",
+      "author": "jméno autora",
+      "date": "datum",
+      "product": "produkt",
+      "status": "stav"
+    },
+    "summary": "{ready, plural, one {<count>{ready}</count> recenze připravena} few {<count>{ready}</count> recenze připraveny} many {<count>{ready}</count> recenze připraveno} other {<count>{ready}</count> recenzí připraveno}}{skipped, plural, =0 {.} other {, {skipped} vynecháno.}}",
+    "hiddenRows": "{count, plural, one {{count} recenze byla ve vašem původním obchodě skrytá nebo označená jako spam, proto se vynechá.} few {{count} recenze byly ve vašem původním obchodě skryté nebo označené jako spam, proto se vynechají.} many {{count} recenze bylo ve vašem původním obchodě skrytých nebo označených jako spam, proto se vynechají.} other {{count} recenzí bylo ve vašem původním obchodě skrytých nebo označených jako spam, proto se vynechají.}}",
+    "droppedRows": "{count, plural, one {{count} recenze přesahuje {max}, které soubor pojme, proto se vynechá.} few {{count} recenze přesahují {max}, které soubor pojme, proto se vynechají.} many {{count} recenze přesahuje {max}, které soubor pojme, proto se vynechají.} other {{count} recenzí přesahuje {max}, které soubor pojme, proto se vynechají.}}",
+    "source": "Importováno z",
+    "sourceUnknown": "Vyberte aplikaci",
+    "sourceHelp": "Zobrazuje se u každé recenze, aby kupující věděli, kde byla původně napsána.",
+    "sources": {
+      "judgeme": "Judge.me",
+      "loox": "Loox",
+      "yotpo": "Yotpo",
+      "shopify": "Shopify Product Reviews"
+    },
+    "mappingHeading": "Přiřadit produkty",
+    "mappingHelp": "Každý produkt ze souboru a produkt tady, ke kterému patří jeho recenze. Kde to jde, přiřazeno podle názvu. Vše nastavené na „Neimportovat“ se vynechá.",
+    "mappingFileProduct": "V souboru",
+    "mappingReviews": "Recenze",
+    "mappingProduct": "Produkt tady",
+    "mappingSelect": "Produkt pro {key}",
+    "skipProduct": "Neimportovat",
+    "skippedHeading": "Řádky, které se vynechají",
+    "skippedRow": "Řádek {line}: {problem}",
+    "run": "{count, plural, one {Importovat {count} recenzi} few {Importovat {count} recenze} many {Importovat {count} recenze} other {Importovat {count} recenzí}}",
+    "imported": "{count, plural, one {Importována {count} recenze.} few {Importovány {count} recenze.} many {Importováno {count} recenze.} other {Importováno {count} recenzí.}}",
+    "duplicates": "{count, plural, one {{count} už tu byla.} few {{count} už tu byly.} many {{count} už tu bylo.} other {{count} už tu bylo.}}",
+    "skippedRows": "{count, plural, one {Vynechán {count} řádek.} few {Vynechány {count} řádky.} many {Vynecháno {count} řádku.} other {Vynecháno {count} řádků.}}",
+    "errors": {
+      "rateLimited": "Za poslední hodinu příliš mnoho importů. Zkuste to později.",
+      "tooLarge": "Soubor je na import příliš velký.",
+      "unrecognised": "Tento soubor není export recenzí, který umíme přečíst.",
+      "nothing": "Není co importovat. Přiřaďte alespoň jeden produkt.",
+      "failed": "Import se nepodařil a nic se neuložilo. Zkuste to znovu."
     }
   }
 }
