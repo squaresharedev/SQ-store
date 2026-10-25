@@ -98,17 +98,17 @@
     "guarantee": "Volgens EU-recht heb je recht op minstens 2 jaar wettelijke garantie dat de goederen overeenkomen met wat er is verkocht."
   },
   "footer": {
-    "disclosure": "<seller>{name}</seller> is de verkoper voor deze bestelling en is verantwoordelijk voor het product, de levering ervan en eventuele retouren of terugbetalingen. Squareshare levert de technologie achter deze pagina en is geen partij bij de koopovereenkomst.",
-    "poweredBy": "Mogelijk gemaakt door <brand>Squareshare</brand>",
-    "policiesLabel": "Squareshare-beleid",
+    "disclosure": "<seller>{name}</seller> is de verkoper voor deze bestelling en is verantwoordelijk voor het product, de levering ervan en eventuele retouren of terugbetalingen. Square Share levert de technologie achter deze pagina en is geen partij bij de koopovereenkomst.",
+    "poweredBy": "Mogelijk gemaakt door <brand>Square Share</brand>",
+    "policiesLabel": "Square Share-beleid",
     "policies": {
       "privacy": {
         "label": "Privacy",
-        "name": "Squareshare-privacybeleid"
+        "name": "Square Share-privacybeleid"
       },
       "terms": {
         "label": "Voorwaarden",
-        "name": "Squareshare-gebruiksvoorwaarden"
+        "name": "Square Share-gebruiksvoorwaarden"
       }
     }
   },

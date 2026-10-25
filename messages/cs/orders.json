@@ -15,10 +15,10 @@
     "pending": "Čekající"
   },
   "channel": {
-    "embed": "Vložení",
+    "embed": "Výloha na vašem webu",
     "marketplace": "Tržiště",
-    "direct": "Vaše stránky",
-    "button": "Tlačítko na webu"
+    "direct": "Stránka na Square Share",
+    "button": "Tlačítko nákupu na webu"
   },
   "empty": {
     "filteredTitle": "Filtrům neodpovídají žádné objednávky",
@@ -56,7 +56,7 @@
   "toolbar": {
     "region": "filtry objednávek",
     "channel": "kanál",
-    "buyerEmail": "e-mail kupujícího",
+    "search": "hledat",
     "searchPlaceholder": "hledat e-mail, jméno, město, produkt nebo zásilku",
     "status": "stav",
     "statusAriaLabel": "Filtrovat podle stavu",
@@ -182,10 +182,6 @@
   },
   "skeleton": {
     "loading": "načítání objednávek"
-  },
-  "loading": {
-    "title": "Objednávky",
-    "subtitle": "Všechny prodeje přes vložení na web i tržiště."
   },
   "toShipCount": "{count, plural, one {{count} objednávka k odeslání} few {{count} objednávky k odeslání} many {{count} objednávky k odeslání} other {{count} objednávek k odeslání}}",
   "views": {

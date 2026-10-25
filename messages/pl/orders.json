@@ -15,10 +15,10 @@
     "pending": "Oczekujące"
   },
   "channel": {
-    "embed": "Osadzenie",
+    "embed": "Witryna na twojej stronie",
     "marketplace": "Marketplace",
-    "direct": "Twoje strony",
-    "button": "Przycisk WWW"
+    "direct": "Strona na Square Share",
+    "button": "Przycisk zakupu na twojej stronie"
   },
   "empty": {
     "filteredTitle": "Żadne zamówienie nie pasuje do tych filtrów",
@@ -56,8 +56,8 @@
   "toolbar": {
     "region": "filtry zamówień",
     "channel": "kanał",
-    "buyerEmail": "e-mail kupującego",
     "searchPlaceholder": "szukaj e-maila, imienia, miasta, produktu lub przesyłki",
+    "search": "szukaj",
     "status": "status",
     "statusAriaLabel": "Filtruj według statusu",
     "allStatuses": "Wszystkie statusy",
@@ -182,10 +182,6 @@
   },
   "skeleton": {
     "loading": "wczytywanie zamówień"
-  },
-  "loading": {
-    "title": "Zamówienia",
-    "subtitle": "Każda sprzedaż z twojego osadzenia i marketplace."
   },
   "toShipCount": "{count, plural, one {{count} zamówienie do wysłania} few {{count} zamówienia do wysłania} many {{count} zamówień do wysłania} other {{count} zamówienia do wysłania}}",
   "views": {

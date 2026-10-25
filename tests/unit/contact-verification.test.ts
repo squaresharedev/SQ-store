@@ -182,7 +182,7 @@ describe("issueContactCode", () => {
     expect(result).toEqual({ ok: true, status: "sent", target: "+353 87 123 4567" });
     const text = sendSms.mock.calls[0]![0];
     expect(text.to).toBe(PHONE);
-    expect(text.text).toMatch(/^\d{8} is your Squareshare code/);
+    expect(text.text).toMatch(/^\d{8} is your Square Share code/);
   });
 
   it("spends the account's own budgets before it even reads the profile", async () => {

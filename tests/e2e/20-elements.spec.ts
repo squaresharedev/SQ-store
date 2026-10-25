@@ -226,7 +226,7 @@ test.describe("an image block on the canvas", () => {
       "aria-pressed",
       "true",
     );
-    await expect(page.getByRole("button", { name: "Reposition image" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Crop & position" })).toHaveCount(0);
   });
 
   test("edits survive a save and a reload", async ({ page }) => {

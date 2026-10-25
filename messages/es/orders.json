@@ -15,10 +15,10 @@
     "pending": "Pendiente"
   },
   "channel": {
-    "embed": "Incorporación",
+    "embed": "Escaparate en tu web",
     "marketplace": "Marketplace",
-    "direct": "Tus páginas",
-    "button": "Botón de tu web"
+    "direct": "Página en Square Share",
+    "button": "Botón de compra en tu web"
   },
   "empty": {
     "filteredTitle": "Ningún pedido coincide con estos filtros",
@@ -56,8 +56,8 @@
   "toolbar": {
     "region": "filtros de pedidos",
     "channel": "canal",
-    "buyerEmail": "correo del comprador",
     "searchPlaceholder": "buscar correo, nombre, ciudad, producto o envío",
+    "search": "buscar",
     "status": "estado",
     "statusAriaLabel": "Filtrar por estado",
     "allStatuses": "Todos los estados",
@@ -182,10 +182,6 @@
   },
   "skeleton": {
     "loading": "cargando pedidos"
-  },
-  "loading": {
-    "title": "Pedidos",
-    "subtitle": "Todas las ventas de tu incorporación y del marketplace."
   },
   "toShipCount": "{count, plural, one {{count} pedido por enviar} many {{count} de pedidos por enviar} other {{count} pedidos por enviar}}",
   "views": {

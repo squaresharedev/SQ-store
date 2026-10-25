@@ -33,7 +33,7 @@
     "title": "Como estão os seus descontos",
     "orders": "Encomendas com desconto",
     "revenue": "Receita dessas encomendas",
-    "given": "Concedido em descontos",
+    "given": "Total descontado",
     "none": "Ainda nada",
     "channelsTitle": "Encomendas por canal",
     "channelsDescription": "Os códigos contam no canal onde os partilhou, ou no próprio código quando não nomeou um canal.",
@@ -43,7 +43,7 @@
   },
   "list": {
     "title": "Os seus descontos",
-    "none": "Sem descontos neste momento. Os descontos eliminados continuam a contar as suas encomendas acima.",
+    "none": "Não há descontos ativos.",
     "channel": "Partilhado em {channel}",
     "startsOn": "Inicia em {date}",
     "endsOn": "Termina em {date}",

@@ -6,7 +6,9 @@ import { AnalyticsSkeleton } from "@/components/analytics/AnalyticsSkeleton";
 
 /** Route-level loading state while the server aggregates orders. */
 export default function AnalyticsLoading() {
-  const t = useTranslations("Analytics.loading");
+  // The page's own heading, so nothing changes under the seller's eyes when
+  // the data lands.
+  const t = useTranslations("Analytics.page");
   return (
     <main className={cn(pageShellClass, "space-y-6")}>
       <PageHeader

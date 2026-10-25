@@ -69,7 +69,7 @@
     "teamInvite": {
       "title": "Tienes una invitación de equipo",
       "body": "{role, select, owner {{store} te invitó a unirte como propietario. Abre Equipo y acceso para aceptar.} editor {{store} te invitó a unirte como editor. Abre Equipo y acceso para aceptar.} viewer {{store} te invitó a unirte como lector. Abre Equipo y acceso para aceptar.} other {{store} te invitó a unirte a su equipo. Abre Equipo y acceso para aceptar.}}",
-      "bodyUnnamedStore": "{role, select, owner {Una tienda de SquareShare te invitó a unirte como propietario. Abre Equipo y acceso para aceptar.} editor {Una tienda de SquareShare te invitó a unirte como editor. Abre Equipo y acceso para aceptar.} viewer {Una tienda de SquareShare te invitó a unirte como lector. Abre Equipo y acceso para aceptar.} other {Una tienda de SquareShare te invitó a unirte a su equipo. Abre Equipo y acceso para aceptar.}}"
+      "bodyUnnamedStore": "{role, select, owner {Una tienda de Square Share te invitó a unirte como propietario. Abre Equipo y acceso para aceptar.} editor {Una tienda de Square Share te invitó a unirte como editor. Abre Equipo y acceso para aceptar.} viewer {Una tienda de Square Share te invitó a unirte como lector. Abre Equipo y acceso para aceptar.} other {Una tienda de Square Share te invitó a unirte a su equipo. Abre Equipo y acceso para aceptar.}}"
     },
     "teamJoined": {
       "title": "{name} se unió a tu equipo",

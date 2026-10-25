@@ -195,9 +195,9 @@
     "blockCount": "{count, plural, one {# blok} other {# blokken}}",
     "updatedLabel": " · bijgewerkt {date}",
     "emptyHint": "Dit raster is leeg",
-    "removed": "Verwijderd door SquareShare",
-    "pausedInReview": "Gepauzeerd · bij SquareShare ter beoordeling",
-    "pausedNeedsChanges": "Gepauzeerd door SquareShare · aanpassingen nodig"
+    "removed": "Verwijderd door Square Share",
+    "pausedInReview": "Gepauzeerd · bij Square Share ter beoordeling",
+    "pausedNeedsChanges": "Gepauzeerd door Square Share · aanpassingen nodig"
   },
   "embed": {
     "inDevNotice": "De insluitingswidget is in ontwikkeling en wordt nog niet weergegeven op externe sites. Stel je instellingen hieronder in, zodat je klaar bent om de insluitcode te plakken zodra die beschikbaar is.",
@@ -209,7 +209,8 @@
       "privacy": "Zet dit in je privacybeleid"
     },
     "required": "Verplicht",
-    "enabledLabel": "Insluiten ingeschakeld",
+    "enabledLabel": "Tonen op mijn website",
+    "showingLabel": "Zichtbaar op je website",
     "domainsLabel": "Toegestane domeinen",
     "domainsPlaceholder": "jouwsite.com, blog.jouwsite.com",
     "domainsHint": "Tot {max}, gescheiden door komma's. Plak een URL en we knippen die terug tot het domein.",
@@ -245,9 +246,9 @@
       "failed": "Kopiëren van de insluitcode is mislukt. Selecteer en kopieer hem handmatig.",
       "cannotCopyYet": "insluitcode kan nog niet worden gekopieerd"
     },
-    "privacyHint": "Je site laadt deze etalage nu van Squareshare, dus je privacybeleid moet dat vermelden. Plak deze tekst erin:",
+    "privacyHint": "Je site laadt deze etalage nu van Square Share, dus je privacybeleid moet dat vermelden. Plak deze tekst erin:",
     "privacyTextLabel": "Privacytekst",
-    "privacyText": "Deze site toont een etalage die door Squareshare wordt geleverd. Bij het laden worden het IP-adres en de browsergegevens van de bezoeker naar Squareshare gestuurd om de producten te tonen en bezoeken te tellen. Squareshare plaatst hiervoor geen cookies en slaat niets op het apparaat van de bezoeker op. Meer informatie: {policy}",
+    "privacyText": "Deze site toont een etalage die door Square Share wordt geleverd. Bij het laden worden het IP-adres en de browsergegevens van de bezoeker naar Square Share gestuurd om de producten te tonen en bezoeken te tellen. Square Share plaatst hiervoor geen cookies en slaat niets op het apparaat van de bezoeker op. Meer informatie: {policy}",
     "copyPrivacy": {
       "copy": "Privacytekst kopiëren",
       "copied": "Privacytekst gekopieerd",
@@ -915,7 +916,7 @@
       "fillHint": "Vult het blok, en snijdt het overtollige deel af.",
       "fitHint": "Toont de hele afbeelding binnen het blok."
     },
-    "reposition": "Afbeelding herpositioneren",
+    "reposition": "Bijsnijden en plaatsen",
     "opacity": {
       "label": "Dekking",
       "ariaLabel": "Dekking afbeelding",
@@ -1036,14 +1037,14 @@
     "editTextOf": "De tekst van {name} bewerken",
     "color": "Kleur",
     "changeColorOf": "De kleur van {name} wijzigen",
-    "stroke": "Lijn",
-    "editStrokeOf": "De lijn van {name} bewerken",
+    "stroke": "Rand",
+    "editStrokeOf": "Rand van {name} bewerken",
     "corners": "Hoeken",
     "editCornersOf": "De hoekafronding van {name} bewerken",
     "opacity": "Dekking",
     "editOpacityOf": "De dekking van {name} bewerken",
-    "frame": "Kader",
-    "frameImageFor": "De afbeelding voor {name} kaderen",
+    "frame": "Bijsnijden en plaatsen",
+    "frameImageFor": "Afbeelding voor {name} bijsnijden en plaatsen",
     "duplicate": "Dupliceren",
     "duplicateNamed": "{name} dupliceren",
     "duplicateN": "{count, plural, one {# element} other {# elementen}} dupliceren",

@@ -15,10 +15,10 @@
     "pending": "Čakajúca"
   },
   "channel": {
-    "embed": "Vloženie na web",
+    "embed": "Výklad na vašom webe",
     "marketplace": "Trhovisko",
-    "direct": "Vaše stránky",
-    "button": "Tlačidlo na webe"
+    "direct": "Stránka na Square Share",
+    "button": "Tlačidlo nákupu na webe"
   },
   "empty": {
     "filteredTitle": "Žiadne objednávky nevyhovujú týmto filtrom",
@@ -56,8 +56,8 @@
   "toolbar": {
     "region": "filtre objednávok",
     "channel": "kanál",
-    "buyerEmail": "e-mail kupujúceho",
     "searchPlaceholder": "vyhľadať e-mail, meno, mesto, produkt alebo zásielku",
+    "search": "hľadať",
     "status": "stav",
     "statusAriaLabel": "Filtrovať podľa stavu",
     "allStatuses": "Všetky stavy",
@@ -182,10 +182,6 @@
   },
   "skeleton": {
     "loading": "načítavajú sa objednávky"
-  },
-  "loading": {
-    "title": "Objednávky",
-    "subtitle": "Každý predaj cez vloženie na web a trhovisko."
   },
   "toShipCount": "{count, plural, one {{count} objednávka na odoslanie} few {{count} objednávky na odoslanie} many {{count} objednávky na odoslanie} other {{count} objednávok na odoslanie}}",
   "views": {

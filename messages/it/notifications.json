@@ -69,7 +69,7 @@
     "teamInvite": {
       "title": "Hai un invito al team",
       "body": "{role, select, owner {{store} ti ha invitato a unirti come proprietario. Apri Team e accessi per accettare.} editor {{store} ti ha invitato a unirti come editor. Apri Team e accessi per accettare.} viewer {{store} ti ha invitato a unirti come visualizzatore. Apri Team e accessi per accettare.} other {{store} ti ha invitato a unirti al suo team. Apri Team e accessi per accettare.}}",
-      "bodyUnnamedStore": "{role, select, owner {Un negozio SquareShare ti ha invitato a unirti come proprietario. Apri Team e accessi per accettare.} editor {Un negozio SquareShare ti ha invitato a unirti come editor. Apri Team e accessi per accettare.} viewer {Un negozio SquareShare ti ha invitato a unirti come visualizzatore. Apri Team e accessi per accettare.} other {Un negozio SquareShare ti ha invitato a unirti al suo team. Apri Team e accessi per accettare.}}"
+      "bodyUnnamedStore": "{role, select, owner {Un negozio Square Share ti ha invitato a unirti come proprietario. Apri Team e accessi per accettare.} editor {Un negozio Square Share ti ha invitato a unirti come editor. Apri Team e accessi per accettare.} viewer {Un negozio Square Share ti ha invitato a unirti come visualizzatore. Apri Team e accessi per accettare.} other {Un negozio Square Share ti ha invitato a unirti al suo team. Apri Team e accessi per accettare.}}"
     },
     "teamJoined": {
       "title": "{name} ora fa parte del tuo team",

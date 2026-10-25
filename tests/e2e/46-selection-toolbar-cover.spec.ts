@@ -102,7 +102,7 @@ test("a summoned control lands in the middle of the panel", async ({ page }) => 
 
   await page
     .locator("[data-selection-toolbar]")
-    .getByRole("button", { name: /edit the stroke/i })
+    .getByRole("button", { name: /edit the border/i })
     .click();
   await expect(
     page.locator("[data-block-field='stroke'] [role='slider'][data-highlighted]"),

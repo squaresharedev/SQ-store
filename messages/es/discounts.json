@@ -43,7 +43,7 @@
   },
   "list": {
     "title": "Tus descuentos",
-    "none": "Ningún descuento ahora mismo. Los descuentos eliminados siguen contando sus pedidos arriba.",
+    "none": "No hay descuentos activos.",
     "channel": "Compartido en {channel}",
     "startsOn": "Empieza el {date}",
     "endsOn": "Termina el {date}",

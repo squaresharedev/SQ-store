@@ -146,7 +146,7 @@
       "thankYouMessage": "Thank-you message",
       "thankYouCelebration": "Thank-you celebration",
       "checkoutPayButton": "Pay button",
-      "saleChip": "Sale chip",
+      "saleChip": "Sale badge",
       "salePrice": "Sale price",
       "productPagePhoto": "Product page photo",
       "checkoutPhoto": "Checkout photo",
@@ -195,9 +195,9 @@
     "blockCount": "{count, plural, one {# block} other {# blocks}}",
     "updatedLabel": " · updated {date}",
     "emptyHint": "This grid is empty",
-    "removed": "Removed by SquareShare",
-    "pausedInReview": "Paused · with SquareShare for review",
-    "pausedNeedsChanges": "Paused by SquareShare · needs changes"
+    "removed": "Removed by Square Share",
+    "pausedInReview": "Paused · with Square Share for review",
+    "pausedNeedsChanges": "Paused by Square Share · needs changes"
   },
   "embed": {
     "inDevNotice": "The embed widget is in development and not yet rendering on external sites. Configure your settings below so you are ready to paste the snippet the moment it ships.",
@@ -209,7 +209,8 @@
       "privacy": "Add this to your privacy policy"
     },
     "required": "Required",
-    "enabledLabel": "Embed enabled",
+    "enabledLabel": "Show on my website",
+    "showingLabel": "Showing on your website",
     "domainsLabel": "Allowed domains",
     "domainsPlaceholder": "yoursite.com, blog.yoursite.com",
     "domainsHint": "Up to {max}, comma-separated. Paste a URL and we''ll trim it to the domain.",
@@ -245,9 +246,9 @@
       "failed": "Couldn't copy embed snippet. Select and copy it manually.",
       "cannotCopyYet": "embed snippet cannot be copied yet"
     },
-    "privacyHint": "Your site now loads this storefront from Squareshare, so its privacy policy has to say so. Paste this into it:",
+    "privacyHint": "Your site now loads this storefront from Square Share, so its privacy policy has to say so. Paste this into it:",
     "privacyTextLabel": "Privacy text",
-    "privacyText": "This site shows a storefront provided by Squareshare. When it loads, the visitor's IP address and browser details are sent to Squareshare to display the products and to count visits. Squareshare sets no cookies and stores nothing on the visitor's device for this. Details: {policy}",
+    "privacyText": "This site shows a storefront provided by Square Share. When it loads, the visitor's IP address and browser details are sent to Square Share to display the products and to count visits. Square Share sets no cookies and stores nothing on the visitor's device for this. Details: {policy}",
     "copyPrivacy": {
       "copy": "Copy privacy text",
       "copied": "Copied privacy text",
@@ -574,7 +575,7 @@
     "spotBottomRight": "Price tag bottom right"
   },
   "saleBadge": {
-    "title": "Sale chip",
+    "title": "Sale badge",
     "says": "Shows",
     "hint": "Shown on a product while a sale lowers its price.",
     "percent": "Percentage",
@@ -587,7 +588,7 @@
       "flag": "Flag",
       "ribbon": "Ribbon"
     },
-    "spot": "Sale chip {spot, select, top_left {top left} top_center {top center} top_right {top right} middle_center {middle} bottom_left {bottom left} bottom_center {bottom center} bottom_right {bottom right} other {}}"
+    "spot": "Sale badge {spot, select, top_left {top left} top_center {top center} top_right {top right} middle_center {middle} bottom_left {bottom left} bottom_center {bottom center} bottom_right {bottom right} other {}}"
   },
   "chipScale": {
     "label": "On bigger cards",
@@ -915,7 +916,7 @@
       "fillHint": "Fills the block, cropping the overflow.",
       "fitHint": "Shows the whole image inside the block."
     },
-    "reposition": "Reposition image",
+    "reposition": "Crop & position",
     "opacity": {
       "label": "Opacity",
       "ariaLabel": "Image opacity",
@@ -1036,14 +1037,14 @@
     "editTextOf": "Edit the text of {name}",
     "color": "Color",
     "changeColorOf": "Change the colour of {name}",
-    "stroke": "Stroke",
-    "editStrokeOf": "Edit the stroke of {name}",
+    "stroke": "Border",
+    "editStrokeOf": "Edit the border of {name}",
     "corners": "Corners",
     "editCornersOf": "Edit the corner roundness of {name}",
     "opacity": "Opacity",
     "editOpacityOf": "Edit the opacity of {name}",
-    "frame": "Frame",
-    "frameImageFor": "Frame the image for {name}",
+    "frame": "Crop & position",
+    "frameImageFor": "Crop and position the image for {name}",
     "duplicate": "Duplicate",
     "duplicateNamed": "Duplicate {name}",
     "duplicateN": "Duplicate {count, plural, one {# element} other {# elements}}",
@@ -1090,7 +1091,7 @@
     "imageUnavailable": "Image unavailable"
   },
   "spotDrag": {
-    "tokenLabel": "{token, select, title {Title} sale {Sale chip} other {Price}} {drop, select, below {in the title bar} top_left {at top left} top_center {at top center} top_right {at top right} middle_center {at middle} bottom_left {at bottom left} bottom_center {at bottom center} bottom_right {at bottom right} other {}}. Press to open its settings, or drag (or use the arrow keys) to move it."
+    "tokenLabel": "{token, select, title {Title} sale {Sale badge} other {Price}} {drop, select, below {in the title bar} top_left {at top left} top_center {at top center} top_right {at top right} middle_center {at middle} bottom_left {at bottom left} bottom_center {at bottom center} bottom_right {at bottom right} other {}}. Press to open its settings, or drag (or use the arrow keys) to move it."
   },
   "autoFit": {},
   "designer": {

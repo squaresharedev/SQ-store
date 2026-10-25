@@ -195,9 +195,9 @@
     "blockCount": "{count, plural, one {# blocco} many {# di blocchi} other {# blocchi}}",
     "updatedLabel": " · aggiornata il {date}",
     "emptyHint": "Questa griglia è vuota",
-    "removed": "Rimosso da SquareShare",
-    "pausedInReview": "In pausa · in revisione da SquareShare",
-    "pausedNeedsChanges": "In pausa per decisione di SquareShare · servono modifiche"
+    "removed": "Rimosso da Square Share",
+    "pausedInReview": "In pausa · in revisione da Square Share",
+    "pausedNeedsChanges": "In pausa per decisione di Square Share · servono modifiche"
   },
   "embed": {
     "inDevNotice": "Il widget di incorporamento è in sviluppo e non viene ancora visualizzato sui siti esterni. Configura le tue impostazioni qui sotto, così sarai pronto a incollare lo snippet non appena sarà disponibile.",
@@ -209,7 +209,8 @@
       "privacy": "Aggiungi questo alla tua informativa sulla privacy"
     },
     "required": "Obbligatorio",
-    "enabledLabel": "Incorporamento attivo",
+    "enabledLabel": "Mostra sul mio sito",
+    "showingLabel": "Visibile sul tuo sito",
     "domainsLabel": "Domini consentiti",
     "domainsPlaceholder": "iltuosito.com, blog.iltuosito.com",
     "domainsHint": "Fino a {max}, separati da virgola. Incolla un URL e lo ridurremo al dominio.",
@@ -245,9 +246,9 @@
       "failed": "Non è stato possibile copiare lo snippet di incorporamento. Selezionalo e copialo manualmente.",
       "cannotCopyYet": "lo snippet di incorporamento non può ancora essere copiato"
     },
-    "privacyHint": "Il tuo sito ora carica questa vetrina da Squareshare, quindi la sua informativa sulla privacy deve dirlo. Incollaci questo testo:",
+    "privacyHint": "Il tuo sito ora carica questa vetrina da Square Share, quindi la sua informativa sulla privacy deve dirlo. Incollaci questo testo:",
     "privacyTextLabel": "Testo sulla privacy",
-    "privacyText": "Questo sito mostra una vetrina fornita da Squareshare. Al caricamento, l’indirizzo IP e i dati del browser del visitatore vengono inviati a Squareshare per mostrare i prodotti e contare le visite. A questo scopo Squareshare non imposta cookie e non salva nulla sul dispositivo del visitatore. Dettagli: {policy}",
+    "privacyText": "Questo sito mostra una vetrina fornita da Square Share. Al caricamento, l’indirizzo IP e i dati del browser del visitatore vengono inviati a Square Share per mostrare i prodotti e contare le visite. A questo scopo Square Share non imposta cookie e non salva nulla sul dispositivo del visitatore. Dettagli: {policy}",
     "copyPrivacy": {
       "copy": "Copia testo sulla privacy",
       "copied": "Testo sulla privacy copiato",
@@ -915,7 +916,7 @@
       "fillHint": "Riempie il blocco, ritagliando l’eccedenza.",
       "fitHint": "Mostra l’intera immagine dentro il blocco."
     },
-    "reposition": "Riposiziona immagine",
+    "reposition": "Ritaglia e posiziona",
     "opacity": {
       "label": "Opacità",
       "ariaLabel": "Opacità dell’immagine",
@@ -1036,14 +1037,14 @@
     "editTextOf": "Modifica il testo di {name}",
     "color": "Colore",
     "changeColorOf": "Cambia il colore di {name}",
-    "stroke": "Tratto",
-    "editStrokeOf": "Modifica il tratto di {name}",
+    "stroke": "Bordo",
+    "editStrokeOf": "Modifica il bordo di {name}",
     "corners": "Angoli",
     "editCornersOf": "Modifica l’arrotondamento degli angoli di {name}",
     "opacity": "Opacità",
     "editOpacityOf": "Modifica l’opacità di {name}",
-    "frame": "Inquadra",
-    "frameImageFor": "Inquadra l’immagine per {name}",
+    "frame": "Ritaglia e posiziona",
+    "frameImageFor": "Ritaglia e posiziona l’immagine di {name}",
     "duplicate": "Duplica",
     "duplicateNamed": "Duplica {name}",
     "duplicateN": "Duplica {count, plural, one {# elemento} many {# di elementi} other {# elementi}}",

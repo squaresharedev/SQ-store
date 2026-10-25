@@ -124,7 +124,7 @@
   "removal": {
     "badge": "Rimosso",
     "badgePaused": "In pausa",
-    "title": "{kind, select, product {Questo prodotto è stato rimosso da SquareShare} other {Questa vetrina è stata rimossa da SquareShare}}",
+    "title": "{kind, select, product {Questo prodotto è stato rimosso da Square Share} other {Questa vetrina è stata rimossa da Square Share}}",
     "titlePaused": "{kind, select, product {Questo prodotto è in pausa finché non lo modifichi} other {Questa vetrina è in pausa finché non la modifichi}}",
     "hidden": "Non è più visibile agli acquirenti da nessuna parte: né sulla sua pagina, né in un incorporamento, né in un link condiviso.",
     "hiddenPaused": "Al momento gli acquirenti non possono vederlo: né sulla sua pagina, né in un embed, né in un link condiviso. Non è stato eliminato e torna visibile dopo che una persona avrà controllato le tue modifiche.",
@@ -356,7 +356,7 @@
     "displayImageHelp": "Mostrata sulla tua vetrina e negli incorporamenti.",
     "digitalFile": "File digitale",
     "digitalFileAbout": "Cos’è il file digitale",
-    "digitalFileHelp": "Il file che l’acquirente scarica dopo l’acquisto. Aggiungerne uno rende questo un download, quindi spedizione e sicurezza dei prodotti non si applicano più.",
+    "digitalFileHelp": "Il file che gli acquirenti scaricano subito dopo il pagamento. Un download non richiede dati di spedizione né di sicurezza del prodotto.",
     "purchaseLink": "Link di acquisto",
     "purchaseLinkAbout": "Dove porta il pulsante di acquisto",
     "purchaseLinkHelp": "Lascialo vuoto e gli acquirenti pagano con il checkout di Square Share, o ti scrivono un’e-mail dove il checkout non è ancora attivo. Un link qui sostituisce entrambi.",
@@ -390,14 +390,14 @@
     "moderation": {
       "badge": "Da modificare",
       "changed": "Modificato",
-      "callout": "SquareShare ti ha chiesto di modificare {fields} qui.",
+      "callout": "Square Share ti ha chiesto di modificare {fields} qui.",
       "seeWhy": "Vedi perché",
       "fieldBadge": "Modifica questo",
       "navHint": "da modificare",
       "inReview": "Inviato per la revisione",
       "reviewPrompt": {
         "title": "Salvato. Inviarlo per la revisione?",
-        "body": "Se hai modificato tutto ciò che SquareShare ti ha chiesto, inviacelo ora e una persona lo esaminerà. Altrimenti, continua a modificare e invialo quando hai finito.",
+        "body": "Se hai modificato tutto ciò che Square Share ti ha chiesto, inviacelo ora e una persona lo esaminerà. Altrimenti, continua a modificare e invialo quando hai finito.",
         "keepEditing": "Continua a modificare",
         "send": "Invia per la revisione"
       }
@@ -405,7 +405,7 @@
     "coverPrompt": "Trascina qui la tua foto migliore",
     "kind": {
       "legend": "Cosa vendi?",
-      "physical": "Qualcosa da spedire",
+      "physical": "Qualcosa che spedisco",
       "physicalHint": "Un articolo fisico, spedito all’acquirente",
       "digital": "Un download",
       "digitalHint": "Un file che l’acquirente riceve subito dopo il pagamento"
@@ -662,7 +662,7 @@
     "fileTitle": "Dichiarazione delle motivazioni {reference}",
     "title": "Dichiarazione delle motivazioni",
     "subtitle": "{action, select, paused {{target, select, product {Abbiamo messo in pausa il tuo prodotto} other {Abbiamo messo in pausa la tua vetrina}}} other {{target, select, product {Abbiamo rimosso il tuo prodotto} other {Abbiamo rimosso la tua vetrina}}}}",
-    "intro": "Questa dichiarazione illustra una decisione da noi adottata in merito a contenuti da te pubblicati su SquareShare, le ragioni di tale decisione e le modalità con cui puoi contestarla. Ne hai diritto ai sensi dell'articolo 17 del regolamento sui servizi digitali (Regolamento (UE) 2022/2065).",
+    "intro": "Questa dichiarazione illustra una decisione da noi adottata in merito a contenuti da te pubblicati su Square Share, le ragioni di tale decisione e le modalità con cui puoi contestarla. Ne hai diritto ai sensi dell'articolo 17 del regolamento sui servizi digitali (Regolamento (UE) 2022/2065).",
     "sections": {
       "decision": "La decisione",
       "reasons": "Perché l'abbiamo adottata",
@@ -692,7 +692,7 @@
       "removed": "Rimosso. Il contenuto non è più disponibile per gli acquirenti. La decisione è definitiva, salvo che una contestazione la modifichi.",
       "pausedAutomated": "In pausa. Il contenuto è nascosto agli acquirenti finché non lo modifichi. Viene controllato di nuovo appena salvi una modifica."
     },
-    "scope": "Ovunque SquareShare lo mostri: sulla sua pagina, negli incorporamenti su altri siti web e nei link condivisi, in ogni paese.",
+    "scope": "Ovunque Square Share lo mostri: sulla sua pagina, negli incorporamenti su altri siti web e nei link condivisi, in ogni paese.",
     "duration": {
       "paused": "Fino all'approvazione delle tue modifiche.",
       "removed": "Indeterminata.",
@@ -705,13 +705,13 @@
       "deleted": "Il contenuto è stato eliminato."
     },
     "facts": {
-      "notices": "{count, plural, =0 {Lo abbiamo rilevato autonomamente, senza alcuna segnalazione da parte di soggetti esterni a SquareShare.} one {Questo ha fatto seguito a # segnalazione proveniente da un soggetto esterno a SquareShare, riguardante: {reasons}.} other {Questo ha fatto seguito a # segnalazioni provenienti da soggetti esterni a SquareShare, riguardanti: {reasons}.}}",
-      "review": "Un membro dello staff di SquareShare ha esaminato il contenuto stesso prima di decidere. Non comunichiamo chi ha inviato una segnalazione.",
-      "automated": "Il nostro controllo automatico lo ha rilevato al salvataggio del contenuto. Nessuno al di fuori di SquareShare lo ha segnalato e nessun membro dello staff lo ha esaminato."
+      "notices": "{count, plural, =0 {Lo abbiamo rilevato autonomamente, senza alcuna segnalazione da parte di soggetti esterni a Square Share.} one {Questo ha fatto seguito a # segnalazione proveniente da un soggetto esterno a Square Share, riguardante: {reasons}.} other {Questo ha fatto seguito a # segnalazioni provenienti da soggetti esterni a Square Share, riguardanti: {reasons}.}}",
+      "review": "Un membro dello staff di Square Share ha esaminato il contenuto stesso prima di decidere. Non comunichiamo chi ha inviato una segnalazione.",
+      "automated": "Il nostro controllo automatico lo ha rilevato al salvataggio del contenuto. Nessuno al di fuori di Square Share lo ha segnalato e nessun membro dello staff lo ha esaminato."
     },
     "automated": "Non sono stati utilizzati mezzi automatizzati per rilevare questo contenuto o per adottare questa decisione.",
     "legalBasis": {
-      "contract": "Contrattuale: le Condizioni d'uso di SquareShare, che non consentono contenuti di questo tipo ({url}).",
+      "contract": "Contrattuale: le Condizioni d'uso di Square Share, che non consentono contenuti di questo tipo ({url}).",
       "illegal": "Legale: abbiamo ritenuto il contenuto illegale ai sensi della normativa applicabile."
     },
     "noNote": "Nessuna.",
@@ -729,7 +729,7 @@
       "answer": "La nostra risposta: {note}",
       "message": "Quello che hai scritto: {message}"
     },
-    "footer": "SquareShare · {reference} · Pagina {page} di {total}",
+    "footer": "Square Share · {reference} · Pagina {page} di {total}",
     "generated": "Generato il {date}.",
     "automatedYes": "Sono stati utilizzati mezzi automatizzati sia per rilevare questo contenuto sia per adottare questa decisione, senza l'intervento di alcuna persona. Se contesti la decisione, la esaminerà un membro dello staff."
   },
@@ -778,7 +778,7 @@
       "exact": "Non servono script, SDK o chiamate API. Lascia l’URL esattamente com’è, compreso tutto ciò che segue il punto interrogativo."
     },
     "tryIt": "Prova il tuo pulsante",
-    "tracking": "Compare in Statistiche come «Pulsante sul tuo sito».",
+    "tracking": "Compare in Statistiche come «Pulsante di acquisto sul tuo sito».",
     "blocked": {
       "removed": "Questo prodotto è stato rimosso. Aprilo per vedere perché.",
       "draft": "Questo prodotto è una bozza. Impostalo prima su Attivo.",

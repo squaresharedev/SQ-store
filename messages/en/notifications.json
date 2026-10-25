@@ -69,7 +69,7 @@
     "teamInvite": {
       "title": "You have a team invite",
       "body": "{role, select, owner {{store} invited you to join as Owner. Open Team & access to accept.} editor {{store} invited you to join as Editor. Open Team & access to accept.} viewer {{store} invited you to join as Viewer. Open Team & access to accept.} other {{store} invited you to join their team. Open Team & access to accept.}}",
-      "bodyUnnamedStore": "{role, select, owner {A SquareShare store invited you to join as Owner. Open Team & access to accept.} editor {A SquareShare store invited you to join as Editor. Open Team & access to accept.} viewer {A SquareShare store invited you to join as Viewer. Open Team & access to accept.} other {A SquareShare store invited you to join their team. Open Team & access to accept.}}"
+      "bodyUnnamedStore": "{role, select, owner {A Square Share store invited you to join as Owner. Open Team & access to accept.} editor {A Square Share store invited you to join as Editor. Open Team & access to accept.} viewer {A Square Share store invited you to join as Viewer. Open Team & access to accept.} other {A Square Share store invited you to join their team. Open Team & access to accept.}}"
     },
     "teamJoined": {
       "title": "{name} joined your team",

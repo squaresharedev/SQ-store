@@ -15,10 +15,10 @@
     "pending": "In behandeling"
   },
   "channel": {
-    "embed": "Insluiting",
+    "embed": "Etalage op je website",
     "marketplace": "Marketplace",
-    "direct": "Jouw pagina's",
-    "button": "Websiteknop"
+    "direct": "Square Share-pagina",
+    "button": "Koopknop op je website"
   },
   "empty": {
     "filteredTitle": "Geen bestellingen komen overeen met deze filters",
@@ -56,8 +56,8 @@
   "toolbar": {
     "region": "bestelfilters",
     "channel": "kanaal",
-    "buyerEmail": "e-mail koper",
     "searchPlaceholder": "zoek e-mail, naam, plaats, product of zending",
+    "search": "zoeken",
     "status": "status",
     "statusAriaLabel": "Filter op status",
     "allStatuses": "Alle statussen",
@@ -182,10 +182,6 @@
   },
   "skeleton": {
     "loading": "bestellingen laden"
-  },
-  "loading": {
-    "title": "Bestellingen",
-    "subtitle": "Elke verkoop via je insluiting en de marketplace."
   },
   "toShipCount": "{count, plural, one {{count} bestelling te verzenden} other {{count} bestellingen te verzenden}}",
   "views": {

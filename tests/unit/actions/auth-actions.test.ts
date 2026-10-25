@@ -202,7 +202,7 @@ describe("username sign-in - handle enumeration", () => {
     const unknownHandle = await authenticate({}, signInForm("nobodyhasthis"));
 
     expect(errorText(unknownHandle)).toBe(errorText(wrongPassword));
-    expect(errorText(unknownHandle)).toBe("Incorrect email or password.");
+    expect(errorText(unknownHandle)).toBe("Incorrect email, username or password.");
   });
 
   it("answers a failed LOOKUP the same way too, so an outage is not a signal", async () => {
@@ -210,7 +210,7 @@ describe("username sign-in - handle enumeration", () => {
 
     const result = await authenticate({}, signInForm("builderboy"));
 
-    expect(errorText(result)).toBe("Incorrect email or password.");
+    expect(errorText(result)).toBe("Incorrect email, username or password.");
   });
 
   it("still spends a full password round trip on a handle nobody holds", async () => {
@@ -245,7 +245,7 @@ describe("username sign-in - handle enumeration", () => {
     const result = await authenticate({}, signInForm("ab"));
 
     expect(adminRpc).not.toHaveBeenCalled();
-    expect(errorText(result)).toBe("Incorrect email or password.");
+    expect(errorText(result)).toBe("Incorrect email, username or password.");
   });
 });
 
@@ -377,7 +377,7 @@ describe("username sign-up - claiming the handle", () => {
     const result = await authenticate({}, signUpForm());
 
     expect(errorText(result)).not.toMatch(/profiles_username_lower_idx/);
-    expect(errorText(result)).toMatch(/different username/i);
+    expect(errorText(result)).toMatch(/pick another one/i);
   });
 });
 

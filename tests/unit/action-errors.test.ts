@@ -57,7 +57,7 @@ describe("ActionError factories: English is unchanged", () => {
   it("notFound, rateLimited, serverError", () => {
     expect(english(notFound("storefront").message)).toBe("That storefront could not be found.");
     expect(english(rateLimited("rotateEmbedKeys").message)).toBe(
-      "Too many attempts to rotate embed keys in a short time.",
+      "Too many embed code resets in a short time.",
     );
     expect(english(serverError("verifyImageUpload").message)).toBe(
       "Could not verify your image upload because of a problem on our side.",

@@ -124,7 +124,7 @@
   "removal": {
     "badge": "Usunięto",
     "badgePaused": "Wstrzymane",
-    "title": "{kind, select, product {Ten produkt został usunięty przez SquareShare} other {Ta witryna została usunięta przez SquareShare}}",
+    "title": "{kind, select, product {Ten produkt został usunięty przez Square Share} other {Ta witryna została usunięta przez Square Share}}",
     "titlePaused": "{kind, select, product {Ten produkt jest wstrzymany, dopóki go nie zmienisz} other {Ta witryna jest wstrzymana, dopóki jej nie zmienisz}}",
     "hidden": "Nie jest już nigdzie widoczny dla kupujących: ani na swojej stronie, ani w osadzeniu, ani pod udostępnionym linkiem.",
     "hiddenPaused": "Kupujący nie mogą tego teraz zobaczyć: ani na stronie, ani we wbudowanym widżecie, ani przez udostępniony link. Nic nie zostało usunięte, a widoczność wróci, gdy człowiek sprawdzi twoje zmiany.",
@@ -356,7 +356,7 @@
     "displayImageHelp": "Widoczne w twojej witrynie i osadzeniach.",
     "digitalFile": "Plik cyfrowy",
     "digitalFileAbout": "Czym jest plik cyfrowy",
-    "digitalFileHelp": "Plik, który kupujący pobiera po zakupie. Dodanie go zmienia produkt w pobranie cyfrowe, więc wysyłka i bezpieczeństwo produktu przestają mieć zastosowanie.",
+    "digitalFileHelp": "Plik, który kupujący pobierają zaraz po zapłacie. Produkt do pobrania nie wymaga danych o wysyłce ani bezpieczeństwie produktu.",
     "purchaseLink": "Link do zakupu",
     "purchaseLinkAbout": "Dokąd przycisk zakupu kieruje kupujących",
     "purchaseLinkHelp": "Zostaw puste, a kupujący zapłacą przez realizację zakupu w Square Share albo napiszą do ciebie e-mail, gdzie nie jest jeszcze włączona. Link tutaj zastępuje oba sposoby.",
@@ -390,14 +390,14 @@
     "moderation": {
       "badge": "Wymaga zmian",
       "changed": "Zmieniono",
-      "callout": "SquareShare prosi cię o zmianę {fields} tutaj.",
+      "callout": "Square Share prosi cię o zmianę {fields} tutaj.",
       "seeWhy": "Sprawdź dlaczego",
       "fieldBadge": "Zmień to",
       "navHint": "wymaga zmian",
       "inReview": "Wysłano do sprawdzenia",
       "reviewPrompt": {
         "title": "Zapisano. Wysłać do ponownego sprawdzenia?",
-        "body": "Jeśli zmieniłeś wszystko, o co prosił SquareShare, wyślij to teraz, a człowiek to sprawdzi. Jeśli nie, kontynuuj edycję i wyślij, gdy skończysz.",
+        "body": "Jeśli zmieniłeś wszystko, o co prosił Square Share, wyślij to teraz, a człowiek to sprawdzi. Jeśli nie, kontynuuj edycję i wyślij, gdy skończysz.",
         "keepEditing": "Kontynuuj edycję",
         "send": "Wyślij do sprawdzenia"
       }
@@ -662,7 +662,7 @@
     "fileTitle": "Uzasadnienie decyzji {reference}",
     "title": "Uzasadnienie decyzji",
     "subtitle": "{action, select, paused {Wstrzymaliśmy {target, select, product {twój produkt} other {twoją witrynę}}} other {Usunęliśmy {target, select, product {twój produkt} other {twoją witrynę}}}}",
-    "intro": "Niniejsze uzasadnienie wyjaśnia decyzję, którą podjęliśmy w sprawie treści opublikowanych przez ciebie w SquareShare, powody jej podjęcia oraz sposób jej zaskarżenia. Przysługuje ci ono na podstawie artykułu 17 aktu o usługach cyfrowych (rozporządzenie (UE) 2022/2065).",
+    "intro": "Niniejsze uzasadnienie wyjaśnia decyzję, którą podjęliśmy w sprawie treści opublikowanych przez ciebie w Square Share, powody jej podjęcia oraz sposób jej zaskarżenia. Przysługuje ci ono na podstawie artykułu 17 aktu o usługach cyfrowych (rozporządzenie (UE) 2022/2065).",
     "sections": {
       "decision": "Decyzja",
       "reasons": "Dlaczego ją podjęliśmy",
@@ -692,7 +692,7 @@
       "removed": "Usunięte. Treść nie jest już dostępna dla kupujących. Decyzja jest ostateczna, chyba że zmieni ją odwołanie.",
       "pausedAutomated": "Wstrzymane. Treść jest ukryta przed kupującymi, dopóki jej nie zmienisz. Zostanie sprawdzona ponownie, gdy tylko zapiszesz zmianę."
     },
-    "scope": "Wszędzie tam, gdzie SquareShare to wyświetla: na własnej stronie, w osadzeniach na innych stronach internetowych i udostępnionych linkach, we wszystkich krajach.",
+    "scope": "Wszędzie tam, gdzie Square Share to wyświetla: na własnej stronie, w osadzeniach na innych stronach internetowych i udostępnionych linkach, we wszystkich krajach.",
     "duration": {
       "paused": "Do zatwierdzenia twoich zmian przez nas.",
       "removed": "Bezterminowo.",
@@ -705,13 +705,13 @@
       "deleted": "Treść została od tamtego czasu usunięta."
     },
     "facts": {
-      "notices": "{count, plural, =0 {Stwierdziliśmy to sami, bez zgłoszenia od kogokolwiek spoza SquareShare.} one {Nastąpiło to po # zgłoszeniu od osoby spoza SquareShare, dotyczącym: {reasons}.} few {Nastąpiło to po # zgłoszeniach od osób spoza SquareShare, dotyczących: {reasons}.} many {Nastąpiło to po # zgłoszeniach od osób spoza SquareShare, dotyczących: {reasons}.} other {Nastąpiło to po # zgłoszeniu od osoby spoza SquareShare, dotyczącym: {reasons}.}}",
-      "review": "Członek personelu SquareShare zapoznał się z treścią przed podjęciem decyzji. Nie ujawniamy, kto wysłał zgłoszenie.",
-      "automated": "Nasze automatyczne sprawdzanie wykryło to przy zapisywaniu treści. Nikt spoza SquareShare tego nie zgłosił i żaden członek personelu nie zapoznał się z treścią."
+      "notices": "{count, plural, =0 {Stwierdziliśmy to sami, bez zgłoszenia od kogokolwiek spoza Square Share.} one {Nastąpiło to po # zgłoszeniu od osoby spoza Square Share, dotyczącym: {reasons}.} few {Nastąpiło to po # zgłoszeniach od osób spoza Square Share, dotyczących: {reasons}.} many {Nastąpiło to po # zgłoszeniach od osób spoza Square Share, dotyczących: {reasons}.} other {Nastąpiło to po # zgłoszeniu od osoby spoza Square Share, dotyczącym: {reasons}.}}",
+      "review": "Członek personelu Square Share zapoznał się z treścią przed podjęciem decyzji. Nie ujawniamy, kto wysłał zgłoszenie.",
+      "automated": "Nasze automatyczne sprawdzanie wykryło to przy zapisywaniu treści. Nikt spoza Square Share tego nie zgłosił i żaden członek personelu nie zapoznał się z treścią."
     },
     "automated": "Do wykrycia tej treści ani do podjęcia tej decyzji nie użyto żadnych środków automatycznych.",
     "legalBasis": {
-      "contract": "Umowna: Regulamin usługi SquareShare, który nie zezwala na takie treści ({url}).",
+      "contract": "Umowna: Regulamin usługi Square Share, który nie zezwala na takie treści ({url}).",
       "illegal": "Prawna: uznaliśmy tę treść za niezgodną z prawem mającym do niej zastosowanie."
     },
     "noNote": "Brak.",
@@ -729,7 +729,7 @@
       "answer": "Nasza odpowiedź: {note}",
       "message": "Twoja wiadomość: {message}"
     },
-    "footer": "SquareShare · {reference} · Strona {page} z {total}",
+    "footer": "Square Share · {reference} · Strona {page} z {total}",
     "generated": "Wygenerowano {date}.",
     "automatedYes": "Zarówno do wykrycia tej treści, jak i do podjęcia tej decyzji użyto środków automatycznych, bez udziału człowieka. Jeśli się odwołasz, treść oceni członek personelu."
   },
@@ -778,7 +778,7 @@
       "exact": "Nie potrzeba żadnego skryptu, SDK ani wywołania API. Zostaw adres URL dokładnie taki, jaki jest, razem ze wszystkim po znaku zapytania."
     },
     "tryIt": "Wypróbuj przycisk",
-    "tracking": "W Analityce widoczne jako „Przycisk WWW”.",
+    "tracking": "W Analityce widoczne jako „Przycisk zakupu na twojej stronie”.",
     "blocked": {
       "removed": "Ten produkt został wycofany. Otwórz go, aby zobaczyć dlaczego.",
       "draft": "Ten produkt to wersja robocza. Najpierw ustaw go jako Aktywny.",

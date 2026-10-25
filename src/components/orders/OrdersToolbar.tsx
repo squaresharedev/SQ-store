@@ -196,7 +196,7 @@ export function OrdersToolbar({
           the field's label, not just the input. */}
       <div data-tour="orders-search" className="flex flex-col gap-1.5">
         <label htmlFor="orders-search" className={fieldLabelClass}>
-          {t("toolbar.buyerEmail")}
+          {t("toolbar.search")}
         </label>
         <div className="relative flex items-center">
           <Search
@@ -204,11 +204,11 @@ export function OrdersToolbar({
             className="pointer-events-none absolute left-3 size-4 text-muted-foreground"
           />
           <input
-            type="text"
-            inputMode="email"
+            type="search"
             id="orders-search"
-            // The column this matches is an email address, so the RFC's own
-            // maximum is the natural bound — see ORDERS_SEARCH_MAX_LENGTH.
+            // Bounded by the longest thing it matches, an email address (the
+            // RFC's own maximum) — see ORDERS_SEARCH_MAX_LENGTH. Not an email
+            // keyboard: names, cities and order numbers are searched as often.
             maxLength={ORDERS_SEARCH_MAX_LENGTH}
             placeholder={t("toolbar.searchPlaceholder")}
             value={filters.search ?? ""}

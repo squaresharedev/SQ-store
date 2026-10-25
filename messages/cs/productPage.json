@@ -98,17 +98,17 @@
     "guarantee": "Podle práva EU odpovídá prodávající nejméně 2 roky za to, že je zboží v souladu s kupní smlouvou."
   },
   "footer": {
-    "disclosure": "Prodávajícím u této objednávky je <seller>{name}</seller> a odpovídá za produkt, jeho doručení i případné vrácení zboží nebo peněz. Squareshare poskytuje technologii, na které tato stránka běží, a není smluvní stranou kupní smlouvy.",
-    "poweredBy": "Běží na platformě <brand>Squareshare</brand>",
-    "policiesLabel": "Zásady Squareshare",
+    "disclosure": "Prodávajícím u této objednávky je <seller>{name}</seller> a odpovídá za produkt, jeho doručení i případné vrácení zboží nebo peněz. Square Share poskytuje technologii, na které tato stránka běží, a není smluvní stranou kupní smlouvy.",
+    "poweredBy": "Běží na platformě <brand>Square Share</brand>",
+    "policiesLabel": "Zásady Square Share",
     "policies": {
       "privacy": {
         "label": "Ochrana soukromí",
-        "name": "Zásady ochrany osobních údajů Squareshare"
+        "name": "Zásady ochrany osobních údajů Square Share"
       },
       "terms": {
         "label": "Podmínky",
-        "name": "Podmínky služby Squareshare"
+        "name": "Podmínky služby Square Share"
       }
     }
   },

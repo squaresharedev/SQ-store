@@ -99,7 +99,7 @@ describe("LoginForm", () => {
     const user = userEvent.setup();
     render(<LoginForm />);
 
-    for (const open of [/^sign up$/i, /email me a magic link/i]) {
+    for (const open of [/^sign up$/i, /email me a sign-in link/i]) {
       await user.click(screen.getByRole("button", { name: open }));
       const field = screen.getByLabelText("Email");
       expect(field).toHaveAttribute("type", "email");
@@ -150,7 +150,7 @@ describe("LoginForm", () => {
 
     const way = await screen.findByRole("button", { name: "Didn't get the email? Send me a sign-in link instead" });
     await user.click(way);
-    expect(screen.getByTestId("login-submit")).toHaveTextContent("Send magic link");
+    expect(screen.getByTestId("login-submit")).toHaveTextContent("Send sign-in link");
     expect(screen.getByLabelText("Email")).toHaveValue("new@shop.test");
     expect(screen.queryByRole("button", { name: /Didn't get the email/ })).not.toBeInTheDocument();
   });
@@ -166,7 +166,7 @@ describe("LoginForm", () => {
     await user.click(screen.getByTestId("login-submit"));
 
     await user.click(await screen.findByRole("button", { name: /Didn't get the email/ }));
-    expect(screen.getByTestId("login-submit")).toHaveTextContent("Send magic link");
+    expect(screen.getByTestId("login-submit")).toHaveTextContent("Send sign-in link");
     expect(screen.getByLabelText("Email")).toHaveValue("late@shop.test");
   });
 
@@ -217,7 +217,7 @@ describe("LoginForm", () => {
     const user = userEvent.setup();
     render(<LoginForm />);
     await user.click(
-      screen.getByRole("button", { name: /email me a magic link/i }),
+      screen.getByRole("button", { name: /email me a sign-in link/i }),
     );
     expect(screen.queryByLabelText("Password")).not.toBeInTheDocument();
   });
@@ -226,10 +226,10 @@ describe("LoginForm", () => {
     const user = userEvent.setup();
     render(<LoginForm />);
     await user.click(
-      screen.getByRole("button", { name: /email me a magic link/i }),
+      screen.getByRole("button", { name: /email me a sign-in link/i }),
     );
     expect(
-      screen.getByRole("button", { name: /send magic link/i }),
+      screen.getByRole("button", { name: /send sign-in link/i }),
     ).toBeInTheDocument();
   });
 
@@ -237,7 +237,7 @@ describe("LoginForm", () => {
     const user = userEvent.setup();
     render(<LoginForm />);
     await user.click(
-      screen.getByRole("button", { name: /email me a magic link/i }),
+      screen.getByRole("button", { name: /email me a sign-in link/i }),
     );
     // The tabs should not be present in magic mode.
     expect(screen.queryByRole("button", { name: /^sign in$/i })).not.toBeInTheDocument();
@@ -247,7 +247,7 @@ describe("LoginForm", () => {
     const user = userEvent.setup();
     render(<LoginForm />);
     await user.click(
-      screen.getByRole("button", { name: /email me a magic link/i }),
+      screen.getByRole("button", { name: /email me a sign-in link/i }),
     );
     await user.click(
       screen.getByRole("button", { name: /use a password instead/i }),
@@ -267,7 +267,7 @@ describe("LoginForm", () => {
     await user.click(screen.getByTestId("login-submit"));
 
     const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent("Incorrect email or password.");
+    expect(alert).toHaveTextContent("Incorrect email, username or password.");
   });
 
   it("confirmation message renders when action returns a message", async () => {
@@ -277,10 +277,10 @@ describe("LoginForm", () => {
 
     // Switch to magic link mode first so the intent matches.
     await user.click(
-      screen.getByRole("button", { name: /email me a magic link/i }),
+      screen.getByRole("button", { name: /email me a sign-in link/i }),
     );
     await user.type(screen.getByLabelText(/email/i), "test@example.com");
-    await user.click(screen.getByRole("button", { name: /send magic link/i }));
+    await user.click(screen.getByRole("button", { name: /send sign-in link/i }));
 
     await waitFor(() => {
       expect(

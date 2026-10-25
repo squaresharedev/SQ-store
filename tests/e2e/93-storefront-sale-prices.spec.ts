@@ -421,7 +421,7 @@ test.describe("a sale on the storefront", () => {
     await expect(tile.locator("[data-tile-sale-badge]")).toHaveText("-10%");
     await tile.click();
     await canvasStill(page);
-    await tile.getByRole("button", { name: /^Sale chip at top left/ }).click();
+    await tile.getByRole("button", { name: /^Sale badge at top left/ }).click();
     const chip = page.locator("[data-sale-badge-controls]").first();
     await expect(chip).toBeVisible();
     // Four things it can show, and nowhere to type.
@@ -433,7 +433,7 @@ test.describe("a sale on the storefront", () => {
     await expect(looks.getByRole("button")).toHaveText(["-10%Pill", "-10%Sticker", "-10%Flag", "-10%Ribbon"]);
     await shows.getByRole("button", { name: "Amount" }).click();
     await looks.getByRole("button", { name: "Ribbon" }).click();
-    await chip.getByRole("button", { name: "Sale chip bottom right" }).click();
+    await chip.getByRole("button", { name: "Sale badge bottom right" }).click();
     // The canvas shows it at once: this tile's chip changed, its neighbour's did not.
     await expect(tile.locator("[data-tile-sale-badge]")).toHaveText("-€2.40");
     await expect(tile.locator("[data-tile-sale-badge]")).toHaveAttribute("data-sale-chip-look", "ribbon");

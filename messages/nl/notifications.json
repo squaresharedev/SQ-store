@@ -69,7 +69,7 @@
     "teamInvite": {
       "title": "Je hebt een teamuitnodiging",
       "body": "{role, select, owner {{store} heeft je uitgenodigd om lid te worden als eigenaar. Open Team en toegang om te accepteren.} editor {{store} heeft je uitgenodigd om lid te worden als bewerker. Open Team en toegang om te accepteren.} viewer {{store} heeft je uitgenodigd om lid te worden als lezer. Open Team en toegang om te accepteren.} other {{store} heeft je uitgenodigd voor hun team. Open Team en toegang om te accepteren.}}",
-      "bodyUnnamedStore": "{role, select, owner {Een SquareShare-winkel heeft je uitgenodigd om lid te worden als eigenaar. Open Team en toegang om te accepteren.} editor {Een SquareShare-winkel heeft je uitgenodigd om lid te worden als bewerker. Open Team en toegang om te accepteren.} viewer {Een SquareShare-winkel heeft je uitgenodigd om lid te worden als lezer. Open Team en toegang om te accepteren.} other {Een SquareShare-winkel heeft je uitgenodigd voor hun team. Open Team en toegang om te accepteren.}}"
+      "bodyUnnamedStore": "{role, select, owner {Een Square Share-winkel heeft je uitgenodigd om lid te worden als eigenaar. Open Team en toegang om te accepteren.} editor {Een Square Share-winkel heeft je uitgenodigd om lid te worden als bewerker. Open Team en toegang om te accepteren.} viewer {Een Square Share-winkel heeft je uitgenodigd om lid te worden als lezer. Open Team en toegang om te accepteren.} other {Een Square Share-winkel heeft je uitgenodigd voor hun team. Open Team en toegang om te accepteren.}}"
     },
     "teamJoined": {
       "title": "{name} is toegetreden tot je team",

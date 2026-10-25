@@ -185,7 +185,7 @@
         "blurb": "Mail me als er iets wordt verkocht, met wat je moet inpakken en waar je het naartoe stuurt."
       },
       "productUpdates": {
-        "label": "Productupdates",
+        "label": "Nieuws en functies van Square Share",
         "blurb": "Nieuwe dashboardfuncties en verbeteringen, zodra ze klaar zijn om uit te brengen."
       },
       "marketing": {
@@ -302,7 +302,7 @@
     "memberScope": "Dit zijn je eigen verkopersgegevens. De gegevens die kopers bij {store} zien, zijn van de eigenaar, die ze in de eigen instellingen invult.",
     "gate": {
       "required": "<strong>Je handelsnaam, adres en contact-e-mailadres zijn verplicht voordat je iets kunt publiceren of verkopen.</strong> Kopers moeten kunnen zien van wie ze kopen en hoe ze je kunnen bereiken voordat ze bestellen.",
-      "privacyNoteLinked": "Deze gegevens verschijnen alleen daarom openbaar op je productpagina's. We gebruiken ze nooit voor marketing, en verkopen of delen ze nooit. Het enige bericht dat we naar je contact-e-mailadres of telefoonnummer sturen, is de code die het bevestigt. Zie het <link>Squareshare-privacybeleid</link>."
+      "privacyNoteLinked": "Deze gegevens verschijnen alleen daarom openbaar op je productpagina's. We gebruiken ze nooit voor marketing, en verkopen of delen ze nooit. Het enige bericht dat we naar je contact-e-mailadres of telefoonnummer sturen, is de code die het bevestigt. Zie het <link>Square Share-privacybeleid</link>."
     },
     "countryNotEu": "Niet in de EU / geef ik liever niet aan",
     "vatAdvisory": {
@@ -314,7 +314,7 @@
         "label": "Handelsnaam",
         "tipLabel": "Wat je hier invult",
         "tipBody": "De naam waarmee kopers een overeenkomst aangaan. Je geregistreerde bedrijfsnaam als je via een bedrijf verkoopt; je volledige naam als je als particulier verkoopt. De naam van je etalage is een winkelnaam, en dat is niet hetzelfde en kan dit niet vervangen.",
-        "placeholder": "bijv. Studio Builderboy e.U."
+        "placeholder": "bijv. Sanne de Vries of Sannes Keramiek"
       },
       "address": {
         "label": "Adres",
@@ -380,9 +380,9 @@
       "confirmed": "{channel, select, email {Contact-e-mailadres bevestigd. Kopers kunnen je daar bereiken.} other {Telefoonnummer bevestigd. Kopers kunnen het nu zien.}}"
     },
     "message": {
-      "emailSubject": "{code} is je Squareshare-bevestigingscode",
-      "emailBody": "Je code om dit adres te bevestigen als je Squareshare contact-e-mailadres:\n\n{code}\n\nVoer hem in bij Instellingen › Bedrijfs- en verkopersgegevens. De code werkt eenmalig, {minutes} minuten lang.\n\nDeel deze code nooit. Niemand van Squareshare zal je er ooit om vragen.\n\nAls je hier niet om hebt gevraagd, heeft iemand je adres mogelijk per ongeluk ingetypt. Negeer deze e-mail: er gebeurt niets tenzij de code wordt ingevoerd.\n\nSquareshare",
-      "sms": "{code} is je Squareshare-code om dit nummer te bevestigen. Verloopt over {minutes} min. Deel hem nooit."
+      "emailSubject": "{code} is je Square Share-bevestigingscode",
+      "emailBody": "Je code om dit adres te bevestigen als je Square Share contact-e-mailadres:\n\n{code}\n\nVoer hem in bij Instellingen › Bedrijfs- en verkopersgegevens. De code werkt eenmalig, {minutes} minuten lang.\n\nDeel deze code nooit. Niemand van Square Share zal je er ooit om vragen.\n\nAls je hier niet om hebt gevraagd, heeft iemand je adres mogelijk per ongeluk ingetypt. Negeer deze e-mail: er gebeurt niets tenzij de code wordt ingevoerd.\n\nSquare Share",
+      "sms": "{code} is je Square Share-code om dit nummer te bevestigen. Verloopt over {minutes} min. Deel hem nooit."
     }
   },
   "shipping": {
@@ -426,7 +426,7 @@
     },
     "rates": {
       "title": "Verzendtarieven",
-      "description": "Stel machineleesbare tarieven in zodat de kassa een bezorgingstotaal kan tonen voordat de koper betaalt, zoals vereist door de EU-richtlijn consumentenrechten.",
+      "description": "De verzendprijzen die bij het afrekenen worden gerekend, zodat kopers het totaal zien voordat ze betalen.",
       "currencyLabel": "Tariefvaluta",
       "freeOverLabel": "Gratis verzending boven",
       "freeOverPlaceholder": "bijv. 50,00",
@@ -601,7 +601,7 @@
       "nameHint": "Zodat je je apps later uit elkaar kunt houden, bijv. “Pixel 8”.",
       "stepUpDescription": "Vul een code in van een authenticator die je al gebruikt, om te bevestigen dat jij het bent.",
       "passwordLabel": "Huidig wachtwoord",
-      "squareSharePasswordLabel": "Squareshare-wachtwoord",
+      "squareSharePasswordLabel": "Square Share-wachtwoord",
       "passwordHint": "Zodat niemand die je ingelogde laptop vindt je kan buitensluiten met zijn eigen telefoon.",
       "notYourGooglePassword": "Niet je Google-wachtwoord. Ken je het niet? Bevestig dan hieronder met Google.",
       "or": "of",
@@ -677,8 +677,8 @@
         "emailChangeRequested": "E-mailwijziging aangevraagd",
         "twoFactorEnabled": "Tweestapsverificatie aangezet",
         "twoFactorDisabled": "Tweestapsverificatie uitgezet",
-        "factorAdded": "Authenticator-app toegevoegd",
-        "factorRemoved": "Authenticator-app verwijderd",
+        "factorAdded": "Inlogmethode toegevoegd",
+        "factorRemoved": "Inlogmethode verwijderd",
         "recoveryCodesRegenerated": "Nieuwe herstelcodes gemaakt",
         "recoveryCodeUsed": "Herstelcode gebruikt om in te loggen",
         "challengeFailed": "Verkeerde tweestapscode ingevoerd bij het inloggen",

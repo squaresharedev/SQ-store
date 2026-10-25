@@ -9,8 +9,6 @@
     "subtitle": "Ventas, visualizaciones del escaparate y todo lo demás que hace tu tienda."
   },
   "loading": {
-    "title": "Estadísticas",
-    "subtitle": "El rendimiento de tu tienda entre la incorporación y el marketplace.",
     "srLoading": "cargando estadísticas"
   },
   "firstRun": {
@@ -90,7 +88,7 @@
     "expiredEmpty": "Ninguno sin completar",
     "conversion": "Pedidos por cada 100 vistas",
     "conversionCounts": "Pedidos: {orders}, vistas: {views}",
-    "abandonment": "Abandono en el pago",
+    "abandonment": "Pagos sin terminar",
     "abandonmentCounts": "Sin completar: {expired}, iniciados: {started}",
     "notEnough": "Aún no hay datos suficientes",
     "notEnoughHint": "Las tasas aparecen cuando este periodo tiene {min} vistas."
@@ -110,10 +108,10 @@
     "noOrders": "Todavía sin pedidos"
   },
   "channels": {
-    "embed": "Incorporación",
+    "embed": "Escaparate en tu web",
     "marketplace": "Marketplace",
-    "direct": "Directo",
-    "button": "Botón de tu web"
+    "direct": "Página en Square Share",
+    "button": "Botón de compra en tu web"
   },
   "signalsUnavailable": {
     "title": "Las visualizaciones y las suscripciones no están disponibles ahora mismo",

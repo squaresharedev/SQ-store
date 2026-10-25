@@ -185,7 +185,7 @@
         "blurb": "Schick mir eine E-Mail, wenn etwas verkauft wird, mit Packliste und Versandadresse."
       },
       "productUpdates": {
-        "label": "Produkt-Updates",
+        "label": "Neuigkeiten und Funktionen von Square Share",
         "blurb": "Neue Dashboard-Funktionen und Verbesserungen, sobald sie bereit sind."
       },
       "marketing": {
@@ -302,7 +302,7 @@
     "memberScope": "Das sind deine eigenen Verkäuferangaben. Die Angaben, die Käufer bei {store} sehen, gehören dem Inhaber, der sie in seinen eigenen Einstellungen festlegt.",
     "gate": {
       "required": "<strong>Dein Händlername, deine Adresse und deine Kontakt-E-Mail sind erforderlich, bevor du etwas veröffentlichen oder verkaufen kannst.</strong> Käufer müssen sehen können, von wem sie kaufen und wie sie dich erreichen können, bevor sie bestellen.",
-      "privacyNoteLinked": "Diese Angaben erscheinen aus diesem Grund allein öffentlich auf deinen Produktseiten. Wir nutzen sie nie für Marketing und verkaufen oder teilen sie nie. Die einzige Nachricht, die wir an deine Kontakt-E-Mail oder Telefonnummer senden, ist der Code, der sie bestätigt. Siehe die <link>Squareshare Datenschutzerklärung</link>."
+      "privacyNoteLinked": "Diese Angaben erscheinen aus diesem Grund allein öffentlich auf deinen Produktseiten. Wir nutzen sie nie für Marketing und verkaufen oder teilen sie nie. Die einzige Nachricht, die wir an deine Kontakt-E-Mail oder Telefonnummer senden, ist der Code, der sie bestätigt. Siehe die <link>Square Share Datenschutzerklärung</link>."
     },
     "countryNotEu": "Nicht in der EU / keine Angabe",
     "vatAdvisory": {
@@ -314,7 +314,7 @@
         "label": "Händlername",
         "tipLabel": "Was hier einzutragen ist",
         "tipBody": "Der Name, mit dem Käufer einen Vertrag abschließen. Dein eingetragener Unternehmensname, wenn du über ein Unternehmen verkaufst, oder dein vollständiger Name, wenn du als Einzelperson verkaufst. Der Name deines Schaufensters ist ein Shopname, das ist nicht dasselbe und kann diesen nicht ersetzen.",
-        "placeholder": "z. B. Studio Builderboy e.U."
+        "placeholder": "z. B. Lena Schmidt oder Lenas Keramik"
       },
       "address": {
         "label": "Adresse",
@@ -380,9 +380,9 @@
       "confirmed": "{channel, select, email {Kontakt-E-Mail bestätigt. Käufer können dich dort erreichen.} other {Telefonnummer bestätigt. Käufer können sie jetzt sehen.}}"
     },
     "message": {
-      "emailSubject": "{code} ist dein Squareshare Bestätigungscode",
-      "emailBody": "Dein Code, um diese Adresse als deine Squareshare Kontakt-E-Mail zu bestätigen:\n\n{code}\n\nGib ihn unter Einstellungen › Unternehmen und Verkäuferangaben ein. Er ist einmalig gültig, für {minutes} Minuten.\n\nTeile diesen Code niemals. Niemand von Squareshare wird dich je danach fragen.\n\nWenn du das nicht angefordert hast, hat jemand möglicherweise deine Adresse versehentlich eingegeben. Ignoriere diese E-Mail: Es passiert nichts, solange der Code nicht eingegeben wird.\n\nSquareshare",
-      "sms": "{code} ist dein Squareshare Code zur Bestätigung dieser Nummer. Er läuft in {minutes} Min. ab. Nie teilen."
+      "emailSubject": "{code} ist dein Square Share Bestätigungscode",
+      "emailBody": "Dein Code, um diese Adresse als deine Square Share Kontakt-E-Mail zu bestätigen:\n\n{code}\n\nGib ihn unter Einstellungen › Unternehmen und Verkäuferangaben ein. Er ist einmalig gültig, für {minutes} Minuten.\n\nTeile diesen Code niemals. Niemand von Square Share wird dich je danach fragen.\n\nWenn du das nicht angefordert hast, hat jemand möglicherweise deine Adresse versehentlich eingegeben. Ignoriere diese E-Mail: Es passiert nichts, solange der Code nicht eingegeben wird.\n\nSquare Share",
+      "sms": "{code} ist dein Square Share Code zur Bestätigung dieser Nummer. Er läuft in {minutes} Min. ab. Nie teilen."
     }
   },
   "shipping": {
@@ -426,7 +426,7 @@
     },
     "rates": {
       "title": "Versandtarife",
-      "description": "Fügen Sie maschinenlesbare Tarife hinzu, damit der Checkout vor dem Kauf eine Liefergesamtsumme anzeigen kann, wie von der EU-Verbraucherrechterichtlinie vorgeschrieben.",
+      "description": "Die Versandpreise, die der Checkout berechnet, damit Käufer den Gesamtbetrag sehen, bevor sie bezahlen.",
       "currencyLabel": "Tarifwährung",
       "freeOverLabel": "Kostenloser Versand ab",
       "freeOverPlaceholder": "z.B. 50,00",
@@ -677,8 +677,8 @@
         "emailChangeRequested": "E-Mail-Änderung angefordert",
         "twoFactorEnabled": "Zwei-Faktor-Authentifizierung eingeschaltet",
         "twoFactorDisabled": "Zwei-Faktor-Authentifizierung ausgeschaltet",
-        "factorAdded": "Authenticator-App hinzugefügt",
-        "factorRemoved": "Authenticator-App entfernt",
+        "factorAdded": "Anmeldemethode hinzugefügt",
+        "factorRemoved": "Anmeldemethode entfernt",
         "recoveryCodesRegenerated": "Neue Wiederherstellungscodes erstellt",
         "recoveryCodeUsed": "Wiederherstellungscode zur Anmeldung verwendet",
         "challengeFailed": "Falscher Zwei-Faktor-Code bei der Anmeldung eingegeben",

@@ -39,7 +39,7 @@ test.describe("products CRUD", () => {
     await page.waitForURL(/\/edit/);
     await page.getByLabel("Title").fill("E2E Print v2");
     await page.getByLabel(/price/i).fill("21.50");
-    await page.getByRole("button", { name: /save changes/i }).click();
+    await page.getByRole("button", { name: /save changes|save as draft/i }).click();
     await page.waitForURL(/\/products$/, { timeout: 20_000 });
     await expect(page.getByRole("heading", { name: "E2E Print v2" })).toBeVisible();
     await expect(page.getByText("€21.50")).toBeVisible();

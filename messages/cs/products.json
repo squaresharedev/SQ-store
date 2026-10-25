@@ -124,7 +124,7 @@
   "removal": {
     "badge": "Odstraněno",
     "badgePaused": "Pozastaveno",
-    "title": "{kind, select, product {Tento produkt odstranila společnost SquareShare} other {Tuto výlohu odstranila společnost SquareShare}}",
+    "title": "{kind, select, product {Tento produkt odstranila společnost Square Share} other {Tuto výlohu odstranila společnost Square Share}}",
     "titlePaused": "{kind, select, product {Tento produkt je pozastaven, dokud ho neupravíte} other {Tato výloha je pozastavena, dokud ji neupravíte}}",
     "hidden": "Kupujícím už není nikde viditelný: ani na své stránce, ani ve vloženém widgetu, ani ve sdíleném odkazu.",
     "hiddenPaused": "Kupující ho teď nevidí: ani na své stránce, ani ve vloženém widgetu, ani ve sdíleném odkazu. Nic nebylo smazáno a po kontrole vašich úprav člověkem se zase objeví.",
@@ -356,7 +356,7 @@
     "displayImageHelp": "Zobrazuje se ve výloze a ve vložení na web.",
     "digitalFile": "Digitální soubor",
     "digitalFileAbout": "Co je digitální soubor",
-    "digitalFileHelp": "Soubor, který si kupující po nákupu stáhne. Když ho přidáte, stane se z produktu obsah ke stažení a doprava ani bezpečnost výrobků se na něj nevztahují.",
+    "digitalFileHelp": "Soubor, který si kupující stáhnou hned po zaplacení. Stahovaný produkt nepotřebuje údaje o dopravě ani bezpečnosti produktu.",
     "purchaseLink": "Odkaz na nákup",
     "purchaseLinkAbout": "Kam tlačítko nákupu kupující pošle",
     "purchaseLinkHelp": "Když ho necháte prázdný, kupující zaplatí přes pokladnu Square Share, nebo vám napíší e-mail, kde pokladna ještě není zapnutá. Odkaz zde nahradí obojí.",
@@ -390,14 +390,14 @@
     "moderation": {
       "badge": "Vyžaduje úpravy",
       "changed": "Změněno",
-      "callout": "Společnost SquareShare vás požádala, abyste zde upravili {fields}.",
+      "callout": "Společnost Square Share vás požádala, abyste zde upravili {fields}.",
       "seeWhy": "Zobrazit důvod",
       "fieldBadge": "Upravte toto",
       "navHint": "vyžaduje úpravy",
       "inReview": "Odesláno k posouzení",
       "reviewPrompt": {
         "title": "Uloženo. Odeslat zpět k posouzení?",
-        "body": "Pokud jste změnili vše, o co vás SquareShare požádal, odešlete to teď a člověk si to prohlédne. Pokud ne, pokračujte v úpravách a odešlete to, až budete hotovi.",
+        "body": "Pokud jste změnili vše, o co vás Square Share požádal, odešlete to teď a člověk si to prohlédne. Pokud ne, pokračujte v úpravách a odešlete to, až budete hotovi.",
         "keepEditing": "Pokračovat v úpravách",
         "send": "Odeslat k posouzení"
       }
@@ -662,7 +662,7 @@
     "fileTitle": "Odůvodnění rozhodnutí {reference}",
     "title": "Odůvodnění rozhodnutí",
     "subtitle": "{action, select, paused {{target, select, product {Váš produkt byl pozastaven} other {Vaše výloha byla pozastavena}}} other {{target, select, product {Váš produkt byl odstraněn} other {Vaše výloha byla odstraněna}}}}",
-    "intro": "Toto odůvodnění vysvětluje rozhodnutí, které jsme přijali ohledně obsahu zveřejněného na platformě SquareShare, proč jsme ho přijali a jak ho můžete napadnout. Máte na něj nárok podle článku 17 aktu o digitálních službách (nařízení (EU) 2022/2065).",
+    "intro": "Toto odůvodnění vysvětluje rozhodnutí, které jsme přijali ohledně obsahu zveřejněného na platformě Square Share, proč jsme ho přijali a jak ho můžete napadnout. Máte na něj nárok podle článku 17 aktu o digitálních službách (nařízení (EU) 2022/2065).",
     "sections": {
       "decision": "Rozhodnutí",
       "reasons": "Proč jsme ho přijali",
@@ -692,7 +692,7 @@
       "removed": "Odstraněno. Obsah již není kupujícím dostupný. Toto rozhodnutí je konečné, pokud ho odvolání nezmění.",
       "pausedAutomated": "Pozastaveno. Obsah je kupujícím skrytý, dokud ho neupravíte. Zkontroluje se znovu, jakmile úpravu uložíte."
     },
-    "scope": "Všude, kde ho SquareShare zobrazuje: na vlastní stránce, ve vložených widgetech na jiných webech a ve sdílených odkazech, ve všech zemích.",
+    "scope": "Všude, kde ho Square Share zobrazuje: na vlastní stránce, ve vložených widgetech na jiných webech a ve sdílených odkazech, ve všech zemích.",
     "duration": {
       "paused": "Dokud neschválíme vaše úpravy.",
       "removed": "Na dobu neurčitou.",
@@ -705,13 +705,13 @@
       "deleted": "Obsah byl od té doby smazán."
     },
     "facts": {
-      "notices": "{count, plural, =0 {Toto jsme zjistili sami, bez podnětu od kohokoli mimo SquareShare.} one {Toto následovalo po # podnětu od osoby mimo SquareShare, ve věci: {reasons}.} few {Toto následovalo po # podnětech od osob mimo SquareShare, ve věci: {reasons}.} many {Toto následovalo po # podnětech od osob mimo SquareShare, ve věci: {reasons}.} other {Toto následovalo po # podnětech od osob mimo SquareShare, ve věci: {reasons}.}}",
-      "review": "Obsah samotný před rozhodnutím posoudil člen týmu SquareShare. Neprozrazujeme, kdo podnět zaslal.",
-      "automated": "Na tento obsah přišla naše automatická kontrola při jeho uložení. Nikdo mimo SquareShare ho nenahlásil a žádný člen týmu ho neposuzoval."
+      "notices": "{count, plural, =0 {Toto jsme zjistili sami, bez podnětu od kohokoli mimo Square Share.} one {Toto následovalo po # podnětu od osoby mimo Square Share, ve věci: {reasons}.} few {Toto následovalo po # podnětech od osob mimo Square Share, ve věci: {reasons}.} many {Toto následovalo po # podnětech od osob mimo Square Share, ve věci: {reasons}.} other {Toto následovalo po # podnětech od osob mimo Square Share, ve věci: {reasons}.}}",
+      "review": "Obsah samotný před rozhodnutím posoudil člen týmu Square Share. Neprozrazujeme, kdo podnět zaslal.",
+      "automated": "Na tento obsah přišla naše automatická kontrola při jeho uložení. Nikdo mimo Square Share ho nenahlásil a žádný člen týmu ho neposuzoval."
     },
     "automated": "K odhalení tohoto obsahu ani k přijetí tohoto rozhodnutí nebyly použity žádné automatizované prostředky.",
     "legalBasis": {
-      "contract": "Smluvní: Podmínky služby SquareShare, které takový obsah nedovolují ({url}).",
+      "contract": "Smluvní: Podmínky služby Square Share, které takový obsah nedovolují ({url}).",
       "illegal": "Právní: obsah jsme považovali za protiprávní podle práva, které se na něj vztahuje."
     },
     "noNote": "Žádná.",
@@ -729,7 +729,7 @@
       "answer": "Naše odpověď: {note}",
       "message": "Co jste napsali: {message}"
     },
-    "footer": "SquareShare · {reference} · Strana {page} z {total}",
+    "footer": "Square Share · {reference} · Strana {page} z {total}",
     "generated": "Vygenerováno dne {date}.",
     "automatedYes": "K odhalení tohoto obsahu i k přijetí tohoto rozhodnutí byly použity automatizované prostředky a nepodílel se na něm žádný člověk. Pokud se odvoláte, posoudí ho člen týmu."
   },
@@ -778,7 +778,7 @@
       "exact": "Není potřeba žádný skript, SDK ani volání API. Adresu ponech přesně tak, jak je, včetně všeho za otazníkem."
     },
     "tryIt": "Vyzkoušet tlačítko",
-    "tracking": "V Analytice se zobrazí jako „Tlačítko na webu“.",
+    "tracking": "V Analytice se zobrazí jako „Tlačítko nákupu na webu“.",
     "blocked": {
       "removed": "Tento produkt byl stažen. Otevřete ho a uvidíte proč.",
       "draft": "Tento produkt je koncept. Nejdřív ho nastavte jako Aktivní.",

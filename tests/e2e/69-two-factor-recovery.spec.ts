@@ -144,7 +144,7 @@ test.describe("two-factor recovery", () => {
     await page.goto("/login");
     await page.waitForLoadState("networkidle").catch(() => {});
     await page.locator('input[name="identifier"]').fill(user.email);
-    await page.getByRole("button", { name: "Forgot?" }).click();
+    await page.getByRole("button", { name: "Forgot password?" }).click();
     const resetDialog = page.getByRole("dialog");
     await expect(resetDialog).toBeVisible();
     await resetDialog.getByLabel("Email").fill(user.email);

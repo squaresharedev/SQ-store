@@ -185,7 +185,7 @@
         "blurb": "Envie-me um e-mail quando algo for vendido, com o que embalar e para onde enviar."
       },
       "productUpdates": {
-        "label": "Atualizações do produto",
+        "label": "Novidades e funcionalidades da Square Share",
         "blurb": "Novas funcionalidades e melhorias do painel, assim que estiverem prontas para lançar."
       },
       "marketing": {
@@ -302,7 +302,7 @@
     "memberScope": "Estes são os seus próprios dados de vendedor. Os que os compradores veem em {store} pertencem ao proprietário, que os define nas suas próprias definições.",
     "gate": {
       "required": "<strong>O seu nome ou denominação social, morada e e-mail de contacto são obrigatórios antes de poder publicar ou vender o que quer que seja.</strong> Os compradores têm de conseguir ver a quem estão a comprar e como o contactar antes de encomendarem.",
-      "privacyNoteLinked": "Estes dados aparecem publicamente nas suas páginas de produto apenas por esse motivo. Nunca os utilizamos para marketing, nem os vendemos ou partilhamos. A única mensagem que enviamos para o seu e-mail de contacto ou telefone é o código que os confirma. Consulte a <link>Política de Privacidade da Squareshare</link>."
+      "privacyNoteLinked": "Estes dados aparecem publicamente nas suas páginas de produto apenas por esse motivo. Nunca os utilizamos para marketing, nem os vendemos ou partilhamos. A única mensagem que enviamos para o seu e-mail de contacto ou telefone é o código que os confirma. Consulte a <link>Política de Privacidade da Square Share</link>."
     },
     "countryNotEu": "Fora da UE / prefiro não dizer",
     "vatAdvisory": {
@@ -314,7 +314,7 @@
         "label": "Nome ou denominação social",
         "tipLabel": "O que colocar aqui",
         "tipBody": "O nome com quem os compradores estão a contratar. A denominação social registada, se vender através de uma empresa, ou o seu nome completo, se vender a título individual. O nome da sua montra é um nome de loja, o que não é a mesma coisa e não pode substituir isto.",
-        "placeholder": "p. ex. Studio Builderboy e.U."
+        "placeholder": "p. ex., Ana Silva ou Cerâmica Ana"
       },
       "address": {
         "label": "Morada",
@@ -380,9 +380,9 @@
       "confirmed": "{channel, select, email {E-mail de contacto confirmado. Os compradores podem contactá-lo lá.} other {Número de telefone confirmado. Os compradores já o podem ver.}}"
     },
     "message": {
-      "emailSubject": "{code} é o seu código de confirmação da Squareshare",
-      "emailBody": "O seu código para confirmar este endereço como o seu e-mail de contacto na Squareshare:\n\n{code}\n\nIntroduza-o em Definições › Empresa e dados do vendedor. Funciona uma vez, durante {minutes} minutos.\n\nNunca partilhe este código. Ninguém da Squareshare alguma vez lho pedirá.\n\nSe não pediu isto, alguém pode ter escrito o seu endereço por engano. Ignore este e-mail: nada acontece a não ser que o código seja introduzido.\n\nSquareshare",
-      "sms": "{code} é o seu código Squareshare para confirmar este número. Expira em {minutes} min. Nunca o partilhe."
+      "emailSubject": "{code} é o seu código de confirmação da Square Share",
+      "emailBody": "O seu código para confirmar este endereço como o seu e-mail de contacto na Square Share:\n\n{code}\n\nIntroduza-o em Definições › Empresa e dados do vendedor. Funciona uma vez, durante {minutes} minutos.\n\nNunca partilhe este código. Ninguém da Square Share alguma vez lho pedirá.\n\nSe não pediu isto, alguém pode ter escrito o seu endereço por engano. Ignore este e-mail: nada acontece a não ser que o código seja introduzido.\n\nSquare Share",
+      "sms": "{code} é o seu código Square Share para confirmar este número. Expira em {minutes} min. Nunca o partilhe."
     }
   },
   "shipping": {
@@ -426,7 +426,7 @@
     },
     "rates": {
       "title": "Taxas de envio",
-      "description": "Defina taxas legíveis por máquina para que o checkout possa indicar o total de entrega antes do pagamento, conforme exigido pela Diretiva dos Direitos dos Consumidores da UE.",
+      "description": "Os preços de envio cobrados na finalização da compra, para que os compradores vejam o total antes de pagar.",
       "currencyLabel": "Moeda da taxa",
       "freeOverLabel": "Envio gratuito acima de",
       "freeOverPlaceholder": "ex. 50,00",
@@ -677,8 +677,8 @@
         "emailChangeRequested": "Alteração de e-mail pedida",
         "twoFactorEnabled": "Autenticação de dois fatores ativada",
         "twoFactorDisabled": "Autenticação de dois fatores desativada",
-        "factorAdded": "Aplicação de autenticação adicionada",
-        "factorRemoved": "Aplicação de autenticação removida",
+        "factorAdded": "Método de início de sessão adicionado",
+        "factorRemoved": "Método de início de sessão removido",
         "recoveryCodesRegenerated": "Novos códigos de recuperação gerados",
         "recoveryCodeUsed": "Código de recuperação utilizado para iniciar sessão",
         "challengeFailed": "Código de dois fatores errado introduzido no início de sessão",

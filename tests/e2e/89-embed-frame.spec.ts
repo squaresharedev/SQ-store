@@ -101,7 +101,7 @@ test.describe("the storefront embed", () => {
     // a way to report it that lands on the hosted page's own report link.
     const foot = frame.locator("[data-embed-frame-footer]");
     await expect(foot).toContainText(`Sold by ${shop.store}`);
-    await expect(foot.getByRole("link", { name: "Squareshare Privacy Policy" })).toHaveAttribute(
+    await expect(foot.getByRole("link", { name: "Square Share Privacy Policy" })).toHaveAttribute(
       "href",
       "https://squareshare.eu/legal/privacy-policy/",
     );

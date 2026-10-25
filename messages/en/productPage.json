@@ -98,17 +98,17 @@
     "guarantee": "EU law gives you at least a 2-year guarantee that goods conform to what was sold."
   },
   "footer": {
-    "disclosure": "<seller>{name}</seller> is the seller for this order and is responsible for the product, its delivery, and any returns or refunds. Squareshare provides the technology behind this page and is not a party to the sale.",
-    "poweredBy": "Powered by <brand>Squareshare</brand>",
-    "policiesLabel": "Squareshare policies",
+    "disclosure": "<seller>{name}</seller> is the seller for this order and is responsible for the product, its delivery, and any returns or refunds. Square Share provides the technology behind this page and is not a party to the sale.",
+    "poweredBy": "Powered by <brand>Square Share</brand>",
+    "policiesLabel": "Square Share policies",
     "policies": {
       "privacy": {
         "label": "Privacy",
-        "name": "Squareshare Privacy Policy"
+        "name": "Square Share Privacy Policy"
       },
       "terms": {
         "label": "Terms",
-        "name": "Squareshare Terms of Use"
+        "name": "Square Share Terms of Use"
       }
     }
   },

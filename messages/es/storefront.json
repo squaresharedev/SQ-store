@@ -195,9 +195,9 @@
     "blockCount": "{count, plural, one {# bloque} many {# bloques} other {# bloques}}",
     "updatedLabel": " · actualizado el {date}",
     "emptyHint": "Esta cuadrícula está vacía",
-    "removed": "Retirado por SquareShare",
-    "pausedInReview": "En pausa · en revisión por SquareShare",
-    "pausedNeedsChanges": "En pausa por SquareShare · requiere cambios"
+    "removed": "Retirado por Square Share",
+    "pausedInReview": "En pausa · en revisión por Square Share",
+    "pausedNeedsChanges": "En pausa por Square Share · requiere cambios"
   },
   "embed": {
     "inDevNotice": "El widget de incorporación está en desarrollo y todavía no se muestra en sitios externos. Configura tus ajustes a continuación para tenerlo todo listo y pegar el fragmento de código en cuanto esté disponible.",
@@ -209,7 +209,8 @@
       "privacy": "Añade esto a tu política de privacidad"
     },
     "required": "Obligatorio",
-    "enabledLabel": "Incorporación activada",
+    "enabledLabel": "Mostrar en mi web",
+    "showingLabel": "Se muestra en tu web",
     "domainsLabel": "Dominios permitidos",
     "domainsPlaceholder": "tusitio.com, blog.tusitio.com",
     "domainsHint": "Hasta {max}, separados por comas. Pega una URL y la recortaremos al dominio.",
@@ -245,9 +246,9 @@
       "failed": "No se ha podido copiar el fragmento de incorporación. Selecciónalo y cópialo a mano.",
       "cannotCopyYet": "el fragmento de incorporación todavía no se puede copiar"
     },
-    "privacyHint": "Tu sitio carga ahora este escaparate desde Squareshare, así que su política de privacidad tiene que decirlo. Pega este texto en ella:",
+    "privacyHint": "Tu sitio carga ahora este escaparate desde Square Share, así que su política de privacidad tiene que decirlo. Pega este texto en ella:",
     "privacyTextLabel": "Texto de privacidad",
-    "privacyText": "Este sitio muestra un escaparate proporcionado por Squareshare. Al cargarse, la dirección IP y los datos del navegador del visitante se envían a Squareshare para mostrar los productos y contar las visitas. Squareshare no instala cookies ni guarda nada en el dispositivo del visitante para ello. Más información: {policy}",
+    "privacyText": "Este sitio muestra un escaparate proporcionado por Square Share. Al cargarse, la dirección IP y los datos del navegador del visitante se envían a Square Share para mostrar los productos y contar las visitas. Square Share no instala cookies ni guarda nada en el dispositivo del visitante para ello. Más información: {policy}",
     "copyPrivacy": {
       "copy": "Copiar texto de privacidad",
       "copied": "Texto de privacidad copiado",
@@ -915,7 +916,7 @@
       "fillHint": "Rellena el bloque, recortando lo que sobre.",
       "fitHint": "Muestra la imagen completa dentro del bloque."
     },
-    "reposition": "Reposicionar imagen",
+    "reposition": "Recortar y colocar",
     "opacity": {
       "label": "Opacidad",
       "ariaLabel": "Opacidad de la imagen",
@@ -1036,14 +1037,14 @@
     "editTextOf": "Editar el texto de {name}",
     "color": "Color",
     "changeColorOf": "Cambiar el color de {name}",
-    "stroke": "Trazo",
-    "editStrokeOf": "Editar el trazo de {name}",
+    "stroke": "Borde",
+    "editStrokeOf": "Editar el borde de {name}",
     "corners": "Esquinas",
     "editCornersOf": "Editar la redondez de las esquinas de {name}",
     "opacity": "Opacidad",
     "editOpacityOf": "Editar la opacidad de {name}",
-    "frame": "Encuadre",
-    "frameImageFor": "Encuadrar la imagen de {name}",
+    "frame": "Recortar y colocar",
+    "frameImageFor": "Recortar y colocar la imagen de {name}",
     "duplicate": "Duplicar",
     "duplicateNamed": "Duplicar {name}",
     "duplicateN": "Duplicar {count, plural, one {# elemento} many {# elementos} other {# elementos}}",

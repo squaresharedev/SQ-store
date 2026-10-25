@@ -98,17 +98,17 @@
     "guarantee": "Le droit européen vous accorde une garantie légale de conformité d’au moins 2 ans, garantissant que les biens sont conformes à ce qui a été vendu."
   },
   "footer": {
-    "disclosure": "<seller>{name}</seller> est le vendeur de cette commande et est responsable du produit, de sa livraison, ainsi que de tout retour ou remboursement. Squareshare fournit la technologie derrière cette page et n’est pas partie au contrat de vente.",
-    "poweredBy": "Propulsé par <brand>Squareshare</brand>",
-    "policiesLabel": "Politiques Squareshare",
+    "disclosure": "<seller>{name}</seller> est le vendeur de cette commande et est responsable du produit, de sa livraison, ainsi que de tout retour ou remboursement. Square Share fournit la technologie derrière cette page et n’est pas partie au contrat de vente.",
+    "poweredBy": "Propulsé par <brand>Square Share</brand>",
+    "policiesLabel": "Politiques Square Share",
     "policies": {
       "privacy": {
         "label": "Confidentialité",
-        "name": "Politique de confidentialité de Squareshare"
+        "name": "Politique de confidentialité de Square Share"
       },
       "terms": {
         "label": "Conditions",
-        "name": "Conditions d’utilisation de Squareshare"
+        "name": "Conditions d’utilisation de Square Share"
       }
     }
   },

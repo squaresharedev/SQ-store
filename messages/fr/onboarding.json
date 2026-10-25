@@ -119,7 +119,7 @@
       }
     },
     "seller": {
-      "namePlaceholder": "p. ex. Studio Builderboy e.U.",
+      "namePlaceholder": "ex. : Claire Martin ou Céramiques Claire",
       "nameHelp": "Votre raison sociale, ou votre nom complet si vous vendez en votre nom propre.",
       "nameAlternative": "Ou votre nom complet, si vous vendez en votre nom propre.",
       "addressPlaceholder": "p. ex. 12 rue du Marché\n75001 Paris\nFrance",

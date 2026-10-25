@@ -15,10 +15,10 @@
     "pending": "Ausstehend"
   },
   "channel": {
-    "embed": "Einbettung",
+    "embed": "Schaufenster auf deiner Website",
     "marketplace": "Marktplatz",
-    "direct": "Deine Seiten",
-    "button": "Website-Button"
+    "direct": "Square-Share-Seite",
+    "button": "Kauf-Button auf deiner Website"
   },
   "empty": {
     "filteredTitle": "Keine Bestellungen entsprechen diesen Filtern",
@@ -56,8 +56,8 @@
   "toolbar": {
     "region": "Bestellfilter",
     "channel": "Kanal",
-    "buyerEmail": "Käufer-E-Mail",
     "searchPlaceholder": "E-Mail, Name, Ort, Produkt oder Sendung suchen",
+    "search": "Suche",
     "status": "Status",
     "statusAriaLabel": "Nach Status filtern",
     "allStatuses": "Alle Status",
@@ -182,10 +182,6 @@
   },
   "skeleton": {
     "loading": "Bestellungen werden geladen"
-  },
-  "loading": {
-    "title": "Bestellungen",
-    "subtitle": "Alle Verkäufe über deine Einbettung und den Marktplatz."
   },
   "toShipCount": "{count, plural, one {{count} Bestellung zum Versenden} other {{count} Bestellungen zum Versenden}}",
   "views": {

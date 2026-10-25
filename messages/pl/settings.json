@@ -185,7 +185,7 @@
         "blurb": "Wyślij mi e-mail, gdy coś się sprzeda, z informacją, co zapakować i dokąd wysłać."
       },
       "productUpdates": {
-        "label": "Nowości w produkcie",
+        "label": "Nowości i funkcje Square Share",
         "blurb": "Nowe funkcje i ulepszenia panelu, gdy tylko są gotowe do wdrożenia."
       },
       "marketing": {
@@ -302,7 +302,7 @@
     "memberScope": "To są twoje własne dane sprzedawcy. Te, które kupujący widzą w sklepie {store}, należą do jego właściciela, który ustawia je we własnych ustawieniach.",
     "gate": {
       "required": "<strong>Twoja nazwa przedsiębiorcy, adres i e-mail kontaktowy są wymagane, aby móc cokolwiek opublikować lub sprzedać.</strong> Kupujący muszą wiedzieć, od kogo kupują, i jak się z tobą skontaktować, zanim złożą zamówienie.",
-      "privacyNoteLinked": "Te dane są publicznie widoczne na stronach twoich produktów wyłącznie z tego powodu. Nigdy nie używamy ich do marketingu i nigdy ich nie sprzedajemy ani nie udostępniamy. Jedyna wiadomość, jaką wysyłamy na twój e-mail kontaktowy lub telefon, to kod potwierdzający. Zobacz <link>Politykę prywatności Squareshare</link>."
+      "privacyNoteLinked": "Te dane są publicznie widoczne na stronach twoich produktów wyłącznie z tego powodu. Nigdy nie używamy ich do marketingu i nigdy ich nie sprzedajemy ani nie udostępniamy. Jedyna wiadomość, jaką wysyłamy na twój e-mail kontaktowy lub telefon, to kod potwierdzający. Zobacz <link>Politykę prywatności Square Share</link>."
     },
     "countryNotEu": "Poza UE / wolę nie podawać",
     "vatAdvisory": {
@@ -314,7 +314,7 @@
         "label": "Nazwa przedsiębiorcy",
         "tipLabel": "Co tu wpisać",
         "tipBody": "Nazwa, z którą kupujący zawierają umowę. Twoja zarejestrowana nazwa firmy, jeśli sprzedajesz jako firma; twoje pełne imię i nazwisko, jeśli sprzedajesz jako osoba prywatna. Nazwa twojej witryny to nazwa sklepu, co nie jest tym samym i nie może jej zastąpić.",
-        "placeholder": "np. Studio Builderboy e.U."
+        "placeholder": "np. Anna Kowalska lub Ceramika Anny"
       },
       "address": {
         "label": "Adres",
@@ -380,9 +380,9 @@
       "confirmed": "{channel, select, email {E-mail kontaktowy potwierdzony. Kupujący mogą się tam z tobą skontaktować.} other {Numer telefonu potwierdzony. Kupujący mogą go teraz zobaczyć.}}"
     },
     "message": {
-      "emailSubject": "{code} to twój kod potwierdzający Squareshare",
-      "emailBody": "Twój kod do potwierdzenia tego adresu jako e-maila kontaktowego Squareshare:\n\n{code}\n\nWpisz go w sekcji Ustawienia › Firma i dane sprzedawcy. Działa raz, przez {minutes} minut.\n\nNigdy nie udostępniaj tego kodu. Nikt ze Squareshare nigdy cię o niego nie poprosi.\n\nJeśli nie prosiłeś o ten kod, ktoś mógł wpisać twój adres przez pomyłkę. Zignoruj tę wiadomość: nic się nie stanie, dopóki kod nie zostanie wpisany.\n\nSquareshare",
-      "sms": "{code} to kod Squareshare do potwierdzenia tego numeru. Wygasa za {minutes} min. Nie udostępniaj."
+      "emailSubject": "{code} to twój kod potwierdzający Square Share",
+      "emailBody": "Twój kod do potwierdzenia tego adresu jako e-maila kontaktowego Square Share:\n\n{code}\n\nWpisz go w sekcji Ustawienia › Firma i dane sprzedawcy. Działa raz, przez {minutes} minut.\n\nNigdy nie udostępniaj tego kodu. Nikt ze Square Share nigdy cię o niego nie poprosi.\n\nJeśli nie prosiłeś o ten kod, ktoś mógł wpisać twój adres przez pomyłkę. Zignoruj tę wiadomość: nic się nie stanie, dopóki kod nie zostanie wpisany.\n\nSquare Share",
+      "sms": "{code} to kod Square Share do potwierdzenia tego numeru. Wygasa za {minutes} min. Nie udostępniaj."
     }
   },
   "shipping": {
@@ -426,7 +426,7 @@
     },
     "rates": {
       "title": "Stawki wysyłki",
-      "description": "Ustaw stawki czytelne maszynowo, aby kasa mogła podać łączną kwotę dostawy przed zapłatą, zgodnie z wymogami dyrektywy UE o prawach konsumentów.",
+      "description": "Ceny dostawy naliczane przy realizacji zakupu, aby kupujący widzieli całą kwotę przed zapłatą.",
       "currencyLabel": "Waluta stawki",
       "freeOverLabel": "Darmowa wysyłka powyżej",
       "freeOverPlaceholder": "np. 50,00",
@@ -677,8 +677,8 @@
         "emailChangeRequested": "Zażądano zmiany adresu e-mail",
         "twoFactorEnabled": "Włączono uwierzytelnianie dwuskładnikowe",
         "twoFactorDisabled": "Wyłączono uwierzytelnianie dwuskładnikowe",
-        "factorAdded": "Dodano aplikację uwierzytelniającą",
-        "factorRemoved": "Usunięto aplikację uwierzytelniającą",
+        "factorAdded": "Dodano metodę logowania",
+        "factorRemoved": "Usunięto metodę logowania",
         "recoveryCodesRegenerated": "Wygenerowano nowe kody odzyskiwania",
         "recoveryCodeUsed": "Do logowania użyto kodu odzyskiwania",
         "challengeFailed": "Podano błędny kod dwuskładnikowy przy logowaniu",

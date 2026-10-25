@@ -69,7 +69,7 @@
     "teamInvite": {
       "title": "Du hast eine Team-Einladung",
       "body": "{role, select, owner {{store} hat dich eingeladen, als Inhaber beizutreten. Öffne Team und Zugriff zum Akzeptieren.} editor {{store} hat dich eingeladen, als Bearbeiter beizutreten. Öffne Team und Zugriff zum Akzeptieren.} viewer {{store} hat dich eingeladen, als Betrachter beizutreten. Öffne Team und Zugriff zum Akzeptieren.} other {{store} hat dich eingeladen, dem Team beizutreten. Öffne Team und Zugriff zum Akzeptieren.}}",
-      "bodyUnnamedStore": "{role, select, owner {Ein SquareShare-Shop hat dich eingeladen, als Inhaber beizutreten. Öffne Team und Zugriff zum Akzeptieren.} editor {Ein SquareShare-Shop hat dich eingeladen, als Bearbeiter beizutreten. Öffne Team und Zugriff zum Akzeptieren.} viewer {Ein SquareShare-Shop hat dich eingeladen, als Betrachter beizutreten. Öffne Team und Zugriff zum Akzeptieren.} other {Ein SquareShare-Shop hat dich eingeladen, dem Team beizutreten. Öffne Team und Zugriff zum Akzeptieren.}}"
+      "bodyUnnamedStore": "{role, select, owner {Ein Square Share-Shop hat dich eingeladen, als Inhaber beizutreten. Öffne Team und Zugriff zum Akzeptieren.} editor {Ein Square Share-Shop hat dich eingeladen, als Bearbeiter beizutreten. Öffne Team und Zugriff zum Akzeptieren.} viewer {Ein Square Share-Shop hat dich eingeladen, als Betrachter beizutreten. Öffne Team und Zugriff zum Akzeptieren.} other {Ein Square Share-Shop hat dich eingeladen, dem Team beizutreten. Öffne Team und Zugriff zum Akzeptieren.}}"
     },
     "teamJoined": {
       "title": "{name} ist deinem Team beigetreten",

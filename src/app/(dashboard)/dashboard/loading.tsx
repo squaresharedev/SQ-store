@@ -11,7 +11,7 @@ export default function DashboardOverviewLoading() {
     <div className={cn(pageShellClass, "space-y-6")}>
       <Skeleton className="h-9 w-40" />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }, (_, index) => (
+        {Array.from({ length: 3 }, (_, index) => (
           <Skeleton key={index} className="h-28 rounded-md" />
         ))}
       </div>

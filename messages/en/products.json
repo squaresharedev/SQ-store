@@ -124,7 +124,7 @@
   "removal": {
     "badge": "Removed",
     "badgePaused": "Paused",
-    "title": "{kind, select, product {This product was removed by SquareShare} other {This storefront was removed by SquareShare}}",
+    "title": "{kind, select, product {This product was removed by Square Share} other {This storefront was removed by Square Share}}",
     "titlePaused": "{kind, select, product {This product is paused until you change it} other {This storefront is paused until you change it}}",
     "hidden": "It is no longer visible to buyers anywhere: not on its page, not in an embed, not in a shared link.",
     "hiddenPaused": "Buyers cannot see it right now: not on its page, not in an embed, not in a shared link. Nothing has been deleted, and it comes back once a person has checked your changes.",
@@ -356,7 +356,7 @@
     "displayImageHelp": "Shown on your storefront and embeds.",
     "digitalFile": "Digital file",
     "digitalFileAbout": "What the digital file is",
-    "digitalFileHelp": "The file your buyer downloads after purchase. Adding one makes this a download, so shipping and product-safety stop applying.",
+    "digitalFileHelp": "The file buyers download right after paying. A download needs no shipping or product-safety details.",
     "purchaseLink": "Purchase link",
     "purchaseLinkAbout": "Where the buy button sends buyers",
     "purchaseLinkHelp": "Leave it empty and buyers pay through Square Share checkout, or email you where checkout isn't on yet. A link here replaces both.",
@@ -390,14 +390,14 @@
     "moderation": {
       "badge": "Needs changes",
       "changed": "Changed",
-      "callout": "SquareShare asked you to change {fields} here.",
+      "callout": "Square Share asked you to change {fields} here.",
       "seeWhy": "See why",
       "fieldBadge": "Change this",
       "navHint": "needs changes",
       "inReview": "Sent for review",
       "reviewPrompt": {
         "title": "Saved. Send it back for review?",
-        "body": "If you have changed everything SquareShare asked for, send it back now and a person will look at it. If not, keep editing and send it when you are done.",
+        "body": "If you have changed everything Square Share asked for, send it back now and a person will look at it. If not, keep editing and send it when you are done.",
         "keepEditing": "Keep editing",
         "send": "Send for review"
       }
@@ -405,7 +405,7 @@
     "coverPrompt": "Drop your best photo here",
     "kind": {
       "legend": "What are you selling?",
-      "physical": "Something I post",
+      "physical": "Something I ship",
       "physicalHint": "A physical item, shipped to the buyer",
       "digital": "A download",
       "digitalHint": "A file buyers get right after paying"
@@ -662,7 +662,7 @@
     "fileTitle": "Statement of reasons {reference}",
     "title": "Statement of reasons",
     "subtitle": "{action, select, paused {We paused your {target, select, product {product} other {storefront}}} other {We removed your {target, select, product {product} other {storefront}}}}",
-    "intro": "This statement explains a decision we took about content you published on SquareShare, why we took it, and how you can challenge it. You are entitled to it under Article 17 of the EU Digital Services Act (Regulation (EU) 2022/2065).",
+    "intro": "This statement explains a decision we took about content you published on Square Share, why we took it, and how you can challenge it. You are entitled to it under Article 17 of the EU Digital Services Act (Regulation (EU) 2022/2065).",
     "sections": {
       "decision": "The decision",
       "reasons": "Why we took it",
@@ -692,7 +692,7 @@
       "removed": "Removed. The content is no longer available to buyers. This decision is final unless an appeal changes it.",
       "pausedAutomated": "Paused. The content is hidden from buyers until you change it. It is checked again as soon as you save a change."
     },
-    "scope": "Everywhere SquareShare shows it: its own page, embeds on other websites and shared links, in every country.",
+    "scope": "Everywhere Square Share shows it: its own page, embeds on other websites and shared links, in every country.",
     "duration": {
       "paused": "Until we approve your changes.",
       "removed": "Indefinite.",
@@ -705,13 +705,13 @@
       "deleted": "The content has since been deleted."
     },
     "facts": {
-      "notices": "{count, plural, =0 {We found this ourselves, without a notice from anyone outside SquareShare.} one {This followed # notice from someone outside SquareShare, about: {reasons}.} other {This followed # notices from people outside SquareShare, about: {reasons}.}}",
-      "review": "A member of SquareShare staff reviewed the content itself before deciding. We do not share who sent a notice.",
-      "automated": "Our automatic check found this when the content was saved. Nobody outside SquareShare reported it, and no member of staff has reviewed it."
+      "notices": "{count, plural, =0 {We found this ourselves, without a notice from anyone outside Square Share.} one {This followed # notice from someone outside Square Share, about: {reasons}.} other {This followed # notices from people outside Square Share, about: {reasons}.}}",
+      "review": "A member of Square Share staff reviewed the content itself before deciding. We do not share who sent a notice.",
+      "automated": "Our automatic check found this when the content was saved. Nobody outside Square Share reported it, and no member of staff has reviewed it."
     },
     "automated": "No automated means were used to detect this content or to take this decision.",
     "legalBasis": {
-      "contract": "Contractual: the SquareShare Terms of Service, which do not allow content like this ({url}).",
+      "contract": "Contractual: the Square Share Terms of Service, which do not allow content like this ({url}).",
       "illegal": "Legal: we considered the content illegal under the law that applies to it."
     },
     "noNote": "None.",
@@ -729,7 +729,7 @@
       "answer": "Our answer: {note}",
       "message": "What you wrote: {message}"
     },
-    "footer": "SquareShare · {reference} · Page {page} of {total}",
+    "footer": "Square Share · {reference} · Page {page} of {total}",
     "generated": "Generated on {date}.",
     "automatedYes": "Automated means were used both to detect this content and to take this decision, and no person was involved. If you appeal, a member of staff reviews it."
   },
@@ -778,7 +778,7 @@
       "exact": "No script, SDK or API call is needed. Keep the URL exactly as it is, including everything after the question mark."
     },
     "tryIt": "Try your button",
-    "tracking": "Shows in Analytics as “Website button”.",
+    "tracking": "Shows in Analytics as “Buy button on your site”.",
     "blocked": {
       "removed": "This product was taken offline. Open it to see why.",
       "draft": "This product is a draft. Make it Active first.",

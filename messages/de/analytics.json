@@ -9,8 +9,6 @@
     "subtitle": "Verkäufe, Schaufenster-Aufrufe und alles andere, was dein Shop tut."
   },
   "loading": {
-    "title": "Analysen",
-    "subtitle": "Wie dein Shop über die Einbettung und den Marktplatz abschneidet.",
     "srLoading": "Analysen werden geladen"
   },
   "firstRun": {
@@ -90,7 +88,7 @@
     "expiredEmpty": "Keiner unbezahlt verlassen",
     "conversion": "Bestellungen pro 100 Aufrufe",
     "conversionCounts": "Bestellungen: {orders}, Aufrufe: {views}",
-    "abandonment": "Abbruchquote im Bezahlvorgang",
+    "abandonment": "Nicht abgeschlossene Checkouts",
     "abandonmentCounts": "Unbezahlt: {expired}, begonnen: {started}",
     "notEnough": "Noch nicht genug Daten",
     "notEnoughHint": "Quoten erscheinen, sobald dieser Zeitraum {min} Aufrufe enthält."
@@ -110,10 +108,10 @@
     "noOrders": "Noch keine Bestellungen"
   },
   "channels": {
-    "embed": "Einbettung",
+    "embed": "Schaufenster auf deiner Website",
     "marketplace": "Marktplatz",
-    "direct": "Direkt",
-    "button": "Website-Button"
+    "direct": "Square-Share-Seite",
+    "button": "Kauf-Button auf deiner Website"
   },
   "signalsUnavailable": {
     "title": "Aufrufe und Anmeldungen sind gerade nicht verfügbar",

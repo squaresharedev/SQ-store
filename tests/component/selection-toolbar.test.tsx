@@ -157,7 +157,7 @@ describe("SelectionToolbar", () => {
   it("offers a product its page, its crop, and removal", () => {
     renderToolbar([productBlock]);
     expect(button(/open the product page/i)).not.toBeNull();
-    expect(button(/frame the image/i)).not.toBeNull();
+    expect(button(/crop and position the image/i)).not.toBeNull();
     expect(button(/remove .* from grid/i)).not.toBeNull();
     expect(button(/edit the text/i)).toBeNull();
   });
@@ -165,7 +165,7 @@ describe("SelectionToolbar", () => {
   it("offers text its editor, and no crop", () => {
     renderToolbar([textBlock]);
     expect(button(/edit the text/i)).not.toBeNull();
-    expect(button(/frame the image/i)).toBeNull();
+    expect(button(/crop and position the image/i)).toBeNull();
     expect(button(/product page/i)).toBeNull();
   });
 
@@ -179,12 +179,12 @@ describe("SelectionToolbar", () => {
       .filter((name) => !/remove|duplicate/i.test(name));
     expect(offered).toEqual([
       "Change the colour of Square",
-      "Edit the stroke of Square",
+      "Edit the border of Square",
       "Edit the corner roundness of Square",
       "Edit the opacity of Square",
     ]);
     // Not a product and not text: nothing to crop, nothing to type.
-    expect(button(/frame the image/i)).toBeNull();
+    expect(button(/crop and position the image/i)).toBeNull();
     expect(button(/edit the text/i)).toBeNull();
     expect(button(/product page/i)).toBeNull();
   });
@@ -193,7 +193,7 @@ describe("SelectionToolbar", () => {
     // A circle has none to round, so the control would do nothing.
     renderToolbar([{ ...shapeBlock, kind: "circle" }]);
     expect(button(/corner roundness/i)).toBeNull();
-    expect(button(/edit the stroke/i)).not.toBeNull();
+    expect(button(/edit the border/i)).not.toBeNull();
     expect(button(/edit the opacity/i)).not.toBeNull();
   });
 
@@ -201,11 +201,11 @@ describe("SelectionToolbar", () => {
     // An image element carries no colour and no border in its schema — the
     // artwork is the artwork — so offering either would be a dead button.
     renderToolbar([imageBlock]);
-    expect(button(/frame the image/i)).not.toBeNull();
+    expect(button(/crop and position the image/i)).not.toBeNull();
     expect(button(/edit the opacity/i)).not.toBeNull();
     expect(button(/remove .* from grid/i)).not.toBeNull();
     expect(button(/change the colour/i)).toBeNull();
-    expect(button(/edit the stroke/i)).toBeNull();
+    expect(button(/edit the border/i)).toBeNull();
     expect(button(/corner roundness/i)).toBeNull();
   });
 
@@ -222,7 +222,7 @@ describe("SelectionToolbar", () => {
     const { onOpenSetting } = renderToolbar([shapeBlock]);
 
     const keys = [blockKey(shapeBlock)];
-    fireEvent.click(button(/edit the stroke/i)!);
+    fireEvent.click(button(/edit the border/i)!);
     expect(onOpenSetting).toHaveBeenLastCalledWith(keys, "stroke");
 
     fireEvent.click(button(/corner roundness/i)!);
@@ -270,7 +270,7 @@ describe("SelectionToolbar", () => {
     // The button used to be decided by the block's type alone; a product whose
     // photo is missing has nothing to move inside the frame.
     renderToolbar([{ ...productBlock, productId: PHOTOLESS.id }]);
-    expect(button(/frame the image/i)).toBeNull();
+    expect(button(/crop and position the image/i)).toBeNull();
   });
 
   it("reads as a toggle while the product's page is out", () => {
@@ -287,7 +287,7 @@ describe("SelectionToolbar", () => {
     // are settings the inspector has always edited together.
     renderToolbar([productBlock, textBlock, shapeBlock]);
     expect(button(/remove 3 elements from grid/i)).not.toBeNull();
-    expect(button(/frame the image/i)).toBeNull();
+    expect(button(/crop and position the image/i)).toBeNull();
     expect(button(/edit the text/i)).toBeNull();
   });
 
@@ -348,7 +348,7 @@ describe("SelectionToolbar", () => {
     // The page is opened by PRODUCT, not by block key: one page per product,
     // however many tiles point at it.
     expect(product.onOpenPages).toHaveBeenCalledWith([PRODUCT.id]);
-    fireEvent.click(button(/frame the image/i)!);
+    fireEvent.click(button(/crop and position the image/i)!);
     expect(product.onFrame).toHaveBeenCalledTimes(1);
   });
 
@@ -411,7 +411,7 @@ describe("SelectionToolbar", () => {
         .filter((name) => !/remove|duplicate/i.test(name));
       expect(offered).toEqual([
         "Change the colour of 2 elements",
-        "Edit the stroke of 2 elements",
+        "Edit the border of 2 elements",
         "Edit the corner roundness of 2 elements",
         "Edit the opacity of 2 elements",
       ]);
@@ -429,7 +429,7 @@ describe("SelectionToolbar", () => {
       fireEvent.click(button(/change the colour/i)!);
       expect(onOpenColor).toHaveBeenCalledWith(keys, "fill");
 
-      fireEvent.click(button(/edit the stroke/i)!);
+      fireEvent.click(button(/edit the border/i)!);
       expect(onOpenSetting).toHaveBeenLastCalledWith(keys, "stroke");
 
       fireEvent.click(button(/edit the opacity/i)!);
@@ -449,7 +449,7 @@ describe("SelectionToolbar", () => {
       // One text block among the shapes and the shape group is gone entirely.
       renderToolbar([shapeBlock, secondShape, textBlock]);
       expect(button(/change the colour/i)).toBeNull();
-      expect(button(/edit the stroke/i)).toBeNull();
+      expect(button(/edit the border/i)).toBeNull();
       expect(button(/edit the opacity/i)).toBeNull();
     });
 

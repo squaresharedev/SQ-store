@@ -21,7 +21,7 @@ import {
  * your website") and puts it on their own site's button. A buyer who follows
  * it lands on the hosted product page, then the checkout, and pays; the visit,
  * the checkout view and the order are all filed under the `button` channel
- * ("Website button"), which is what the seller then sees in Orders and
+ * ("Buy button on your site"), which is what the seller then sees in Orders and
  * Analytics. The marker survives the buyer changing their mind on the page and
  * the checkout sending them back, and a forged one is filed as `direct`.
  *
@@ -143,7 +143,7 @@ async function checkoutOffered(page: Page, s: Seeded): Promise<boolean> {
 }
 
 test.describe("the website buy button", () => {
-  test("a seller's button link sells, and the sale is filed under Website button", async ({
+  test("a seller's button link sells, and the sale is filed under Buy button on your site", async ({
     page,
     browser,
     baseURL,
@@ -256,10 +256,10 @@ test.describe("the website buy button", () => {
       "direct",
     ]);
 
-    // 4. The seller sees it as Website button in Orders...
+    // 4. The seller sees it as Buy button on your site in Orders...
     await page.goto("/orders?view=all&channel=button");
-    await expect(page.getByRole("button", { name: "Website button" })).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByRole("row").filter({ hasText: "Oak lamp" })).toContainText("Website button");
+    await expect(page.getByRole("button", { name: "Buy button on your site" })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("row").filter({ hasText: "Oak lamp" })).toContainText("Buy button on your site");
 
     // ...and in Analytics: the revenue split and the product page views split.
     await page.goto("/analytics");
@@ -271,7 +271,7 @@ test.describe("the website buy button", () => {
     expect(snapshot.sales.channels.find((c) => c.channel === "button")?.revenueCents).toBe(4350);
     expect(snapshot.signals.byKind.product_view.channels.find((c) => c.channel === "button")?.count).toBe(1);
     expect(snapshot.signals.byKind.checkout_view.channels.find((c) => c.channel === "button")?.count).toBe(1);
-    await expect(page.getByText("Website button").first()).toBeVisible();
+    await expect(page.getByText("Buy button on your site").first()).toBeVisible();
   });
 
   test("the marker survives the checkout sending a buyer back, and a forged one counts as direct", async ({

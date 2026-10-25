@@ -55,12 +55,12 @@ describe("StorefrontCard moderation line", () => {
     const line = renderWith(kind);
     expect(line).toHaveTextContent(label);
     expect(line).not.toHaveClass("text-destructive");
-    expect(screen.queryByText("Removed by SquareShare")).toBeNull();
+    expect(screen.queryByText("Removed by Square Share")).toBeNull();
   });
 
   it("a removed storefront still says so, in red", () => {
     const line = renderWith("removed");
-    expect(line).toHaveTextContent("Removed by SquareShare");
+    expect(line).toHaveTextContent("Removed by Square Share");
     expect(line).toHaveClass("text-destructive");
   });
 });

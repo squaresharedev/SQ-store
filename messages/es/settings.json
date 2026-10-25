@@ -185,7 +185,7 @@
         "blurb": "Avísame por correo cuando se venda algo, con lo que hay que empaquetar y adónde enviarlo."
       },
       "productUpdates": {
-        "label": "Novedades del producto",
+        "label": "Novedades y funciones de Square Share",
         "blurb": "Nuevas funciones y mejoras del panel, en cuanto estén listas."
       },
       "marketing": {
@@ -302,7 +302,7 @@
     "memberScope": "Estos son tus propios datos de vendedor. Los que ven los compradores en {store} son de su propietario, que los configura en sus propios ajustes.",
     "gate": {
       "required": "<strong>Tu nombre o razón social, dirección y correo de contacto son obligatorios antes de poder publicar o vender nada.</strong> Los compradores tienen que poder ver a quién le compran y cómo contactarte antes de hacer el pedido.",
-      "privacyNoteLinked": "Estos datos aparecen públicamente en tus páginas de producto solo por ese motivo. Nunca los usamos para marketing ni los vendemos o compartimos. El único mensaje que enviamos a tu correo de contacto o teléfono es el código que lo confirma. Consulta la <link>Política de privacidad de Squareshare</link>."
+      "privacyNoteLinked": "Estos datos aparecen públicamente en tus páginas de producto solo por ese motivo. Nunca los usamos para marketing ni los vendemos o compartimos. El único mensaje que enviamos a tu correo de contacto o teléfono es el código que lo confirma. Consulta la <link>Política de privacidad de Square Share</link>."
     },
     "countryNotEu": "Fuera de la UE / prefiero no decirlo",
     "vatAdvisory": {
@@ -314,7 +314,7 @@
         "label": "Nombre o razón social",
         "tipLabel": "Qué poner aquí",
         "tipBody": "El nombre con el que contratan los compradores. Tu razón social registrada si vendes a través de una, o tu nombre completo si vendes como particular. El nombre de tu escaparate es un nombre comercial y no es lo mismo, así que no sirve para esto.",
-        "placeholder": "p. ej. Studio Builderboy e.U."
+        "placeholder": "p. ej., Lucía García o Cerámica Lucía"
       },
       "address": {
         "label": "Dirección",
@@ -380,9 +380,9 @@
       "confirmed": "{channel, select, email {Correo de contacto confirmado. Los compradores pueden escribirte allí.} other {Número de teléfono confirmado. Los compradores ya pueden verlo.}}"
     },
     "message": {
-      "emailSubject": "{code} es tu código de confirmación de Squareshare",
-      "emailBody": "Tu código para confirmar esta dirección como tu correo de contacto de Squareshare:\n\n{code}\n\nIntrodúcelo en Configuración › Empresa y datos del vendedor. Es válido una vez, durante {minutes} minutos.\n\nNunca compartas este código. Nadie de Squareshare te lo pedirá nunca.\n\nSi no lo has pedido tú, alguien puede haber escrito tu dirección por error. Ignora este correo: no pasa nada a menos que se introduzca el código.\n\nSquareshare",
-      "sms": "{code} es tu código de Squareshare para confirmar este número. Caduca en {minutes} min. Nunca lo compartas."
+      "emailSubject": "{code} es tu código de confirmación de Square Share",
+      "emailBody": "Tu código para confirmar esta dirección como tu correo de contacto de Square Share:\n\n{code}\n\nIntrodúcelo en Configuración › Empresa y datos del vendedor. Es válido una vez, durante {minutes} minutos.\n\nNunca compartas este código. Nadie de Square Share te lo pedirá nunca.\n\nSi no lo has pedido tú, alguien puede haber escrito tu dirección por error. Ignora este correo: no pasa nada a menos que se introduzca el código.\n\nSquare Share",
+      "sms": "{code} es tu código de Square Share para confirmar este número. Caduca en {minutes} min. Nunca lo compartas."
     }
   },
   "shipping": {
@@ -426,7 +426,7 @@
     },
     "rates": {
       "title": "Tarifas de envío",
-      "description": "Establezca tarifas legibles por máquina para que el proceso de pago pueda mostrar el total de entrega antes de que el comprador pague, según lo exige la Directiva de Derechos del Consumidor de la UE.",
+      "description": "Los precios de envío que cobra el proceso de pago, para que los compradores vean el total antes de pagar.",
       "currencyLabel": "Moneda de tarifa",
       "freeOverLabel": "Envío gratuito a partir de",
       "freeOverPlaceholder": "p.ej. 50,00",
@@ -677,8 +677,8 @@
         "emailChangeRequested": "Cambio de correo solicitado",
         "twoFactorEnabled": "Verificación en dos pasos activada",
         "twoFactorDisabled": "Verificación en dos pasos desactivada",
-        "factorAdded": "Aplicación de autenticación añadida",
-        "factorRemoved": "Aplicación de autenticación quitada",
+        "factorAdded": "Método de inicio de sesión añadido",
+        "factorRemoved": "Método de inicio de sesión eliminado",
         "recoveryCodesRegenerated": "Códigos de recuperación nuevos generados",
         "recoveryCodeUsed": "Código de recuperación usado para iniciar sesión",
         "challengeFailed": "Código de verificación en dos pasos incorrecto al iniciar sesión",

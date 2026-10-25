@@ -33,7 +33,7 @@
     "title": "Hoe je kortingen presteren",
     "orders": "Bestellingen met korting",
     "revenue": "Omzet uit die bestellingen",
-    "given": "Aan kortingen gegeven",
+    "given": "Totaal aan korting",
     "none": "Nog niets",
     "channelsTitle": "Bestellingen per kanaal",
     "channelsDescription": "Codes tellen mee onder het kanaal waarop je ze hebt gedeeld, of onder de code zelf als je geen kanaal hebt opgegeven.",
@@ -43,7 +43,7 @@
   },
   "list": {
     "title": "Je kortingen",
-    "none": "Op dit moment geen kortingen. Verwijderde kortingen blijven hun bestellingen hierboven meetellen.",
+    "none": "Geen actieve kortingen.",
     "channel": "Gedeeld op {channel}",
     "startsOn": "Start op {date}",
     "endsOn": "Eindigt op {date}",

@@ -641,7 +641,7 @@ Copy these exactly, including capitalisation and spacing.
 
 | Category | Literals |
 |---|---|
-| Brand and company names | `Square Share`, `Squareshare`, `SquareShare` (all three occur; keep whichever the English string uses, see section 7), `Stripe`, `Stripe Connect`, `Shopify`, `Google`, `Root Labs` |
+| Brand and company names | `Square Share` (always two words, in every language), `Stripe`, `Stripe Connect`, `Shopify`, `Google`, `Root Labs` |
 | Font names | `Inter`, `Montserrat`, and the category labels `Sans`, `Serif`, `Mono`, `Display`. Translate `Handwritten` and `Uploaded font`. |
 | File formats | `CSV`, `PNG`, `JPG`, `JPEG`, `WEBP`/`WebP`, `GIF`, `AVIF`, `SVG`, `PDF`, `ZIP`, `EPUB`, `MP3`, `WAV`, `MP4`, `TXT`, `WOFF2`, `WOFF`, `TTF`, `OTF`, `JSON`, `HTML` (keep the source's casing) |
 | Keyboard keys and shortcuts | `Ctrl`, `Cmd`, `Shift`, `Alt`, `Enter`, `Esc`, `Escape`, `Ctrl+Z`, `Ctrl+Shift+Z`, `Ctrl -`, `Ctrl +`, `Ctrl 0`, `Ctrl+V`, `Cmd+V`, `[` `]`, `{mod}`, `<kbd>{shortcut}</kbd>`. Translate the words around them ("arrow keys", "plus and minus", "Alt-click" becomes `Alt + kliknutí`, `Alt-Klick`, `Alt + clic`). German keyboards print `Strg`, but `{mod}` is rendered by code as `Ctrl`, so stay consistent with it. |
@@ -670,7 +670,6 @@ genuinely ambiguous. Handle them as stated; do not edit the English.
 |---|---|---|
 | Em dashes and `--` in English | products, settings, search, storefront, errors, validation, auth | Rewrite with comma, colon or parentheses. The test rejects U+2014. |
 | `''` doubled apostrophes | `Storefront.list.loadMoreError`, `embed.*`, `picker.*` | ICU for one apostrophe. Write ’. |
-| Three brand spellings | `Square Share` (most), `Squareshare` (`ProductPage.footer`, `ErrorPage.footer.credit`), `SquareShare` (`Notifications.messages.teamInvite.bodyUnnamedStore`) | Keep each as written. Normalising is a product decision, not a translation one. |
 | Synonym pairs | tile/card, buy link/purchase link, designer/editor, log out/sign out, version/variant | One term each (section 4). |
 | Identical plural branches | `{count} in stock`, `# pixels`, `{count} sold` | Your language may need different forms. Write them. |
 | `many` / `other` swap | cs, sk versus pl | cs/sk `many` is decimals; pl `many` is 5+. See 3.3. |

@@ -9,8 +9,6 @@
     "subtitle": "Sprzedaż, wyświetlenia witryny i wszystko inne, co dzieje się w twoim sklepie."
   },
   "loading": {
-    "title": "Analityka",
-    "subtitle": "Jak radzi sobie twój sklep w osadzeniu i na marketplace.",
     "srLoading": "wczytywanie analityki"
   },
   "firstRun": {
@@ -90,7 +88,7 @@
     "expiredEmpty": "Brak nieukończonych",
     "conversion": "Zamówienia na 100 wyświetleń",
     "conversionCounts": "Zamówienia: {orders}, wyświetlenia: {views}",
-    "abandonment": "Porzucone płatności",
+    "abandonment": "Niedokończone zakupy",
     "abandonmentCounts": "Nieukończone: {expired}, rozpoczęte: {started}",
     "notEnough": "Jeszcze za mało danych",
     "notEnoughHint": "Wskaźniki pojawią się, gdy w tym okresie będzie {min} wyświetleń."
@@ -110,10 +108,10 @@
     "noOrders": "Jeszcze brak zamówień"
   },
   "channels": {
-    "embed": "Osadzenie",
+    "embed": "Witryna na twojej stronie",
     "marketplace": "Marketplace",
-    "direct": "Bezpośrednio",
-    "button": "Przycisk WWW"
+    "direct": "Strona na Square Share",
+    "button": "Przycisk zakupu na twojej stronie"
   },
   "signalsUnavailable": {
     "title": "Wyświetlenia i zapisy są teraz niedostępne",

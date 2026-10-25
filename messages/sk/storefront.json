@@ -195,9 +195,9 @@
     "blockCount": "{count, plural, one {# blok} few {# bloky} many {# bloku} other {# blokov}}",
     "updatedLabel": " · aktualizované {date}",
     "emptyHint": "Táto mriežka je prázdna",
-    "removed": "Odstránené SquareShare",
-    "pausedInReview": "Pozastavené · SquareShare ho kontroluje",
-    "pausedNeedsChanges": "Pozastavené službou SquareShare · treba zmeny"
+    "removed": "Odstránené Square Share",
+    "pausedInReview": "Pozastavené · Square Share ho kontroluje",
+    "pausedNeedsChanges": "Pozastavené službou Square Share · treba zmeny"
   },
   "embed": {
     "inDevNotice": "Widget vloženia na web je vo vývoji a na externých stránkach sa zatiaľ nezobrazuje. Nakonfigurujte nastavenia nižšie, aby ste boli pripravení vložiť kód v momente, keď bude k dispozícii.",
@@ -209,7 +209,8 @@
       "privacy": "Doplňte to do zásad ochrany osobných údajov"
     },
     "required": "Povinné",
-    "enabledLabel": "Vloženie na web povolené",
+    "enabledLabel": "Zobraziť na mojom webe",
+    "showingLabel": "Zobrazuje sa na vašom webe",
     "domainsLabel": "Povolené domény",
     "domainsPlaceholder": "vasastranka.sk, blog.vasastranka.sk",
     "domainsHint": "Najviac {max}, oddelené čiarkou. Vložte URL a automaticky sa orezá na doménu.",
@@ -245,9 +246,9 @@
       "failed": "Kód na vloženie sa nepodarilo skopírovať. Vyberte ho a skopírujte ručne.",
       "cannotCopyYet": "kód na vloženie sa zatiaľ nedá skopírovať"
     },
-    "privacyHint": "Váš web teraz načítava tento výklad zo Squareshare, a jeho zásady ochrany osobných údajov to preto musia uvádzať. Vložte do nich tento text:",
+    "privacyHint": "Váš web teraz načítava tento výklad zo Square Share, a jeho zásady ochrany osobných údajov to preto musia uvádzať. Vložte do nich tento text:",
     "privacyTextLabel": "Text o súkromí",
-    "privacyText": "Táto stránka zobrazuje výklad, ktorý poskytuje Squareshare. Pri jeho načítaní sa IP adresa a údaje o prehliadači návštevníka odošlú službe Squareshare, aby mohla zobraziť produkty a počítať návštevy. Squareshare na tento účel neukladá žiadne súbory cookie ani nič iné do zariadenia návštevníka. Podrobnosti: {policy}",
+    "privacyText": "Táto stránka zobrazuje výklad, ktorý poskytuje Square Share. Pri jeho načítaní sa IP adresa a údaje o prehliadači návštevníka odošlú službe Square Share, aby mohla zobraziť produkty a počítať návštevy. Square Share na tento účel neukladá žiadne súbory cookie ani nič iné do zariadenia návštevníka. Podrobnosti: {policy}",
     "copyPrivacy": {
       "copy": "Kopírovať text o súkromí",
       "copied": "Text o súkromí skopírovaný",
@@ -915,7 +916,7 @@
       "fillHint": "Vyplní blok a oreže prebytok.",
       "fitHint": "Zobrazí celý obrázok v bloku."
     },
-    "reposition": "Premiestiť obrázok",
+    "reposition": "Orezať a umiestniť",
     "opacity": {
       "label": "Priehľadnosť",
       "ariaLabel": "Priehľadnosť obrázka",
@@ -1036,14 +1037,14 @@
     "editTextOf": "Upraviť text: {name}",
     "color": "Farba",
     "changeColorOf": "Zmeniť farbu: {name}",
-    "stroke": "Ťah",
-    "editStrokeOf": "Upraviť ťah: {name}",
+    "stroke": "Okraj",
+    "editStrokeOf": "Upraviť okraj prvku {name}",
     "corners": "Rohy",
     "editCornersOf": "Upraviť zaoblenie rohov: {name}",
     "opacity": "Priehľadnosť",
     "editOpacityOf": "Upraviť priehľadnosť: {name}",
-    "frame": "Orámovanie",
-    "frameImageFor": "Orámovať obrázok: {name}",
+    "frame": "Orezať a umiestniť",
+    "frameImageFor": "Orezať a umiestniť obrázok pre {name}",
     "duplicate": "Duplikovať",
     "duplicateNamed": "Duplikovať: {name}",
     "duplicateN": "Duplikovať {count, plural, one {# prvok} few {# prvky} many {# prvku} other {# prvkov}}",

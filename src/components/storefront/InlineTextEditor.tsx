@@ -234,6 +234,8 @@ export function InlineTextEditor({
   }, []);
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLParagraphElement>) {
+    // Save is the designer's, from inside the words too (StorefrontDesigner).
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") return;
     // Arrows, Enter and Space are the caret's here — the grid cell would move
     // the block, and the tile would toggle its own selection.
     event.stopPropagation();

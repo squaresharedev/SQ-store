@@ -15,10 +15,10 @@
     "pending": "In sospeso"
   },
   "channel": {
-    "embed": "Incorporamento",
+    "embed": "Vetrina sul tuo sito",
     "marketplace": "Marketplace",
-    "direct": "Le tue pagine",
-    "button": "Pulsante sul tuo sito"
+    "direct": "Pagina su Square Share",
+    "button": "Pulsante di acquisto sul tuo sito"
   },
   "empty": {
     "filteredTitle": "Nessun ordine corrisponde a questi filtri",
@@ -56,8 +56,8 @@
   "toolbar": {
     "region": "filtri ordini",
     "channel": "canale",
-    "buyerEmail": "email acquirente",
     "searchPlaceholder": "cerca email, nome, città, prodotto o spedizione",
+    "search": "cerca",
     "status": "stato",
     "statusAriaLabel": "Filtra per stato",
     "allStatuses": "Tutti gli stati",
@@ -182,10 +182,6 @@
   },
   "skeleton": {
     "loading": "caricamento ordini"
-  },
-  "loading": {
-    "title": "Ordini",
-    "subtitle": "Ogni vendita tra il tuo incorporamento e il marketplace."
   },
   "toShipCount": "{count, plural, one {{count} ordine da spedire} many {{count} di ordini da spedire} other {{count} ordini da spedire}}",
   "views": {

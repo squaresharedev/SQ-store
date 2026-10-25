@@ -1,4 +1,5 @@
 import type { MessageKeys, NestedKeyOf } from "next-intl";
+import { BRAND_NAME } from "@/lib/brand";
 import type { Locale } from "@/i18n/locales";
 import type { Messages } from "@/i18n/messages";
 import { msg, type MessageRef, type MessageValues } from "@/i18n/types";
@@ -97,7 +98,7 @@ export function renderStatement(input: StatementInput, resolve: Resolve): Uint8A
     {
       title: t("fileTitle", { reference }),
       lang: locale,
-      author: "SquareShare",
+      author: BRAND_NAME,
       subject: t("subtitle", { action: decision.action, target }),
       createdAt: input.generatedAt,
     },
@@ -105,7 +106,7 @@ export function renderStatement(input: StatementInput, resolve: Resolve): Uint8A
   );
 
   // ── Heading ──────────────────────────────────────────────────────────
-  pdf.text("SquareShare", { size: 9, weight: "bold", grey: PDF_MUTED, after: 10 });
+  pdf.text(BRAND_NAME, { size: 9, weight: "bold", grey: PDF_MUTED, after: 10 });
   pdf.text(t("title"), { size: 22, weight: "bold", after: 2 });
   pdf.text(t("subtitle", { action: decision.action, target }), { size: 12, after: 10 });
   pdf.text(t("intro"), { size: 9.5, grey: PDF_MUTED, after: 4 });

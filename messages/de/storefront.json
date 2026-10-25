@@ -195,9 +195,9 @@
     "blockCount": "{count, plural, one {# Block} other {# Blöcke}}",
     "updatedLabel": " · aktualisiert {date}",
     "emptyHint": "Dieses Raster ist leer",
-    "removed": "Von SquareShare entfernt",
-    "pausedInReview": "Pausiert · bei SquareShare in Prüfung",
-    "pausedNeedsChanges": "Von SquareShare pausiert · Änderungen nötig"
+    "removed": "Von Square Share entfernt",
+    "pausedInReview": "Pausiert · bei Square Share in Prüfung",
+    "pausedNeedsChanges": "Von Square Share pausiert · Änderungen nötig"
   },
   "embed": {
     "inDevNotice": "Das Einbettungs-Widget befindet sich in der Entwicklung und wird noch nicht auf externen Websites angezeigt. Konfiguriere deine Einstellungen unten, damit du den Einbettungscode einfügen kannst, sobald er verfügbar ist.",
@@ -209,7 +209,8 @@
       "privacy": "Ergänze das in deiner Datenschutzerklärung"
     },
     "required": "Pflicht",
-    "enabledLabel": "Einbettung aktiviert",
+    "enabledLabel": "Auf meiner Website zeigen",
+    "showingLabel": "Wird auf deiner Website gezeigt",
     "domainsLabel": "Zugelassene Domains",
     "domainsPlaceholder": "yoursite.com, blog.yoursite.com",
     "domainsHint": "Bis zu {max}, kommagetrennt. Füge eine URL ein, und wir kürzen sie auf die Domain.",
@@ -245,9 +246,9 @@
       "failed": "Einbettungscode konnte nicht kopiert werden. Wähle ihn aus und kopiere ihn manuell.",
       "cannotCopyYet": "Einbettungscode kann noch nicht kopiert werden"
     },
-    "privacyHint": "Deine Website lädt dieses Schaufenster jetzt von Squareshare, deshalb muss deine Datenschutzerklärung das erwähnen. Füge diesen Text ein:",
+    "privacyHint": "Deine Website lädt dieses Schaufenster jetzt von Square Share, deshalb muss deine Datenschutzerklärung das erwähnen. Füge diesen Text ein:",
     "privacyTextLabel": "Datenschutztext",
-    "privacyText": "Diese Website zeigt ein Schaufenster, das von Squareshare bereitgestellt wird. Beim Laden werden die IP-Adresse und Browserangaben der Besucher an Squareshare übermittelt, um die Produkte anzuzeigen und Besuche zu zählen. Squareshare setzt dafür keine Cookies und speichert nichts auf dem Gerät der Besucher. Details: {policy}",
+    "privacyText": "Diese Website zeigt ein Schaufenster, das von Square Share bereitgestellt wird. Beim Laden werden die IP-Adresse und Browserangaben der Besucher an Square Share übermittelt, um die Produkte anzuzeigen und Besuche zu zählen. Square Share setzt dafür keine Cookies und speichert nichts auf dem Gerät der Besucher. Details: {policy}",
     "copyPrivacy": {
       "copy": "Datenschutztext kopieren",
       "copied": "Datenschutztext kopiert",
@@ -915,7 +916,7 @@
       "fillHint": "Füllt den Block und schneidet den Überlauf ab.",
       "fitHint": "Zeigt das gesamte Bild innerhalb des Blocks."
     },
-    "reposition": "Bild neu positionieren",
+    "reposition": "Zuschneiden und positionieren",
     "opacity": {
       "label": "Deckkraft",
       "ariaLabel": "Bild-Deckkraft",
@@ -1036,14 +1037,14 @@
     "editTextOf": "Text von {name} bearbeiten",
     "color": "Farbe",
     "changeColorOf": "Farbe von {name} ändern",
-    "stroke": "Kontur",
-    "editStrokeOf": "Kontur von {name} bearbeiten",
+    "stroke": "Rand",
+    "editStrokeOf": "Rand von {name} bearbeiten",
     "corners": "Ecken",
     "editCornersOf": "Eckenrundung von {name} bearbeiten",
     "opacity": "Deckkraft",
     "editOpacityOf": "Deckkraft von {name} bearbeiten",
-    "frame": "Einrahmen",
-    "frameImageFor": "Bild für {name} einrahmen",
+    "frame": "Zuschneiden und positionieren",
+    "frameImageFor": "Bild für {name} zuschneiden und positionieren",
     "duplicate": "Duplizieren",
     "duplicateNamed": "{name} duplizieren",
     "duplicateN": "{count, plural, one {# Element duplizieren} other {# Elemente duplizieren}}",

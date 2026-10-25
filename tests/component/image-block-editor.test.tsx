@@ -81,18 +81,18 @@ describe("ImageBlockEditor — framing", () => {
   it("offers repositioning while the image is cropped to fill", async () => {
     const user = userEvent.setup();
     const { onFrame } = renderEditor();
-    await user.click(screen.getByRole("button", { name: "Reposition image" }));
+    await user.click(screen.getByRole("button", { name: "Crop & position" }));
     expect(onFrame).toHaveBeenCalledTimes(1);
   });
 
   it("hides repositioning under Fit — nothing is cropped, so there is no crop to move", () => {
     renderEditor(imageBlock({ fit: "contain" }));
-    expect(screen.queryByRole("button", { name: "Reposition image" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Crop & position" })).toBeNull();
   });
 
   it("disables repositioning while there is no artwork loaded to frame", () => {
     renderEditor(imageBlock(), false);
-    expect(screen.getByRole("button", { name: "Reposition image" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Crop & position" })).toBeDisabled();
   });
 });
 

@@ -185,7 +185,7 @@
         "blurb": "Pošlite mi e-mail, keď sa niečo predá, s informáciou, čo zbaliť a kam to poslať."
       },
       "productUpdates": {
-        "label": "Aktualizácie produktu",
+        "label": "Novinky a funkcie Square Share",
         "blurb": "Nové funkcie a vylepšenia panela, hneď keď sú pripravené."
       },
       "marketing": {
@@ -302,7 +302,7 @@
     "memberScope": "Toto sú vaše vlastné údaje predajcu. Tie, ktoré kupujúci vidia v obchode {store}, patria jeho vlastníkovi a ten si ich nastavuje vo svojich nastaveniach.",
     "gate": {
       "required": "<strong>Pred zverejnením alebo predajom čohokoľvek je povinné uviesť obchodné meno, adresu a kontaktný e-mail.</strong> Kupujúci musia vedieť, od koho nakupujú a ako vás kontaktovať pred objednávkou.",
-      "privacyNoteLinked": "Tieto údaje sa na stránkach vašich produktov zobrazujú verejne iba z tohto dôvodu. Nikdy ich nepoužívame na marketing a nikdy ich nepredávame ani neposkytujeme ďalej. Jediná správa, ktorú posielame na váš kontaktný e-mail alebo telefón, je kód na jeho potvrdenie. Pozrite si <link>Zásady ochrany osobných údajov Squareshare</link>."
+      "privacyNoteLinked": "Tieto údaje sa na stránkach vašich produktov zobrazujú verejne iba z tohto dôvodu. Nikdy ich nepoužívame na marketing a nikdy ich nepredávame ani neposkytujeme ďalej. Jediná správa, ktorú posielame na váš kontaktný e-mail alebo telefón, je kód na jeho potvrdenie. Pozrite si <link>Zásady ochrany osobných údajov Square Share</link>."
     },
     "countryNotEu": "Mimo EÚ / radšej neuvádzam",
     "vatAdvisory": {
@@ -314,7 +314,7 @@
         "label": "Obchodné meno",
         "tipLabel": "Čo sem zadať",
         "tipBody": "Meno, s ktorým kupujúci uzatvárajú zmluvu. Vaše registrované obchodné meno, ak predávate prostredníctvom firmy; vaše vlastné meno a priezvisko, ak predávate ako fyzická osoba. Názov výkladu je názov obchodu, čo nie je to isté a nemôže ho nahradiť.",
-        "placeholder": "napr. Studio Builderboy e.U."
+        "placeholder": "napr. Jana Nováková alebo Keramika Jany"
       },
       "address": {
         "label": "Adresa",
@@ -380,9 +380,9 @@
       "confirmed": "{channel, select, email {Kontaktný e-mail potvrdený. Kupujúci vás tam môžu kontaktovať.} other {Telefónne číslo potvrdené. Kupujúci ho teraz vidia.}}"
     },
     "message": {
-      "emailSubject": "{code} je váš potvrdzovací kód Squareshare",
-      "emailBody": "Váš kód na potvrdenie tejto adresy ako kontaktného e-mailu Squareshare:\n\n{code}\n\nZadajte ho v sekcii Nastavenia › Firma a údaje predajcu. Funguje raz, po dobu {minutes} minút.\n\nTento kód nikomu neposielajte. Nikto zo Squareshare ho od vás nikdy nebude žiadať.\n\nAk ste o toto nepožiadali, niekto mohol omylom zadať vašu adresu. Ignorujte tento e-mail: nič sa nestane, kým nebude kód zadaný.\n\nSquareshare",
-      "sms": "{code} je kód Squareshare pre toto číslo. Platí {minutes} min. Nikomu ho neposkytujte."
+      "emailSubject": "{code} je váš potvrdzovací kód Square Share",
+      "emailBody": "Váš kód na potvrdenie tejto adresy ako kontaktného e-mailu Square Share:\n\n{code}\n\nZadajte ho v sekcii Nastavenia › Firma a údaje predajcu. Funguje raz, po dobu {minutes} minút.\n\nTento kód nikomu neposielajte. Nikto zo Square Share ho od vás nikdy nebude žiadať.\n\nAk ste o toto nepožiadali, niekto mohol omylom zadať vašu adresu. Ignorujte tento e-mail: nič sa nestane, kým nebude kód zadaný.\n\nSquare Share",
+      "sms": "{code} je kód Square Share pre toto číslo. Platí {minutes} min. Nikomu ho neposkytujte."
     }
   },
   "shipping": {
@@ -426,7 +426,7 @@
     },
     "rates": {
       "title": "Sadzby za dopravu",
-      "description": "Nastavte strojovo čitateľné sadzby, aby pokladňa mohla pred platbou uviesť celkovú sumu doručenia, ako to vyžaduje smernica EÚ o právach spotrebiteľov.",
+      "description": "Ceny dopravy, ktoré účtuje pokladňa, aby kupujúci videli celkovú sumu ešte pred zaplatením.",
       "currencyLabel": "Mena sadzieb",
       "freeOverLabel": "Doprava zadarmo nad",
       "freeOverPlaceholder": "napr. 50,00",
@@ -677,8 +677,8 @@
         "emailChangeRequested": "Bola vyžiadaná zmena e-mailu",
         "twoFactorEnabled": "Dvojfaktorové overenie bolo zapnuté",
         "twoFactorDisabled": "Dvojfaktorové overenie bolo vypnuté",
-        "factorAdded": "Overovacia aplikácia bola pridaná",
-        "factorRemoved": "Overovacia aplikácia bola odobratá",
+        "factorAdded": "Pridaný spôsob prihlásenia",
+        "factorRemoved": "Odstránený spôsob prihlásenia",
         "recoveryCodesRegenerated": "Boli vytvorené nové záložné kódy",
         "recoveryCodeUsed": "Na prihlásenie sa použil záložný kód",
         "challengeFailed": "Pri prihlásení bol zadaný nesprávny kód dvojfaktorového overenia",

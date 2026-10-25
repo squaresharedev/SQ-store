@@ -58,7 +58,7 @@ describe("RecentOrders", () => {
     render(<RecentOrders orders={[order({ product_title: "Lamp" })]} />);
     const link = screen.getByRole("link");
     expect(link).toHaveTextContent("Lamp");
-    expect(link).toHaveTextContent("Embed");
+    expect(link).toHaveTextContent("Storefront on your site");
     expect(link).toHaveTextContent("Paid");
     expect(link).toHaveTextContent("25");
   });

@@ -244,6 +244,9 @@ export async function openTermsStep(page: Page) {
  */
 export async function agreeToTerms(page: Page) {
   const terms = page.getByRole("dialog", { name: TERMS_DIALOG });
+  // The button submits the form inside the slide, which mounts once the
+  // slide has swapped in: wait for its summary rather than clicking early.
+  await expect(terms.locator("[data-terms-summary]")).toBeVisible();
   await terms.getByRole("button", { name: "I have read and agree to the Terms" }).click();
   await expect(page.getByRole("dialog", { name: SELLER_DIALOG })).toBeVisible({
     timeout: 20_000,
