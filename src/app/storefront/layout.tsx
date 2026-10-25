@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
 import { requireUser } from "@/lib/auth/session";
 
 /**
@@ -12,7 +11,9 @@ import { requireUser } from "@/lib/auth/session";
  * here; pages still get RLS as the real ownership boundary.
  *
  * Keep this layout free of chrome. Anything rendered here would also wrap the
- * full-screen editor.
+ * full-screen editor. That includes the client message provider: the list
+ * ((list)/layout.tsx) and the editor ((designer)/layout.tsx) each ship their
+ * own scope, so neither carries the other's copy.
  *
  * force-dynamic: see (dashboard)/layout.tsx — requireUser()'s cookies() call
  * happens after an env-var guard that can throw first, so implicit dynamic
@@ -25,5 +26,5 @@ export default async function StorefrontLayout({
   children: ReactNode;
 }) {
   await requireUser("/storefront");
-  return <ScopedIntlProvider scope="full">{children}</ScopedIntlProvider>;
+  return children;
 }

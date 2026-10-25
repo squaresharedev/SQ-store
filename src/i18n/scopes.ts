@@ -33,6 +33,46 @@ const SHELL = [
 
 const ALL_NAMESPACES = null;
 
+/** What the dashboard and settings ship (scope `app`, and inside `storefrontList`). */
+const APP = [
+  "Analytics",
+  "Auth",
+  "Billing",
+  "Dashboard",
+  "Discounts",
+  "Nav",
+  "Notifications",
+  "Onboarding",
+  "Orders",
+  "Payments",
+  "Products",
+  "Search",
+  "Settings",
+  "ProductPage.footer.policies",
+  "ProductPage.sale",
+  "ProductPage.shippingProse",
+  "Storefront.colors.presets",
+  "Storefront.settings",
+] as const;
+
+/** What the storefront editor ships (scope `designer`). */
+const DESIGNER = [
+  "Storefront",
+  "ProductPage",
+  // The editor carries the dashboard's search, bell, tour and product form, but
+  // not the pages those link to: the rest of Settings, Orders, Billing, and so on.
+  "Search",
+  "Nav",
+  "Notifications",
+  "Onboarding",
+  "Products",
+  // Team roles and invite wording, the seller-details notice a publish can raise,
+  // and the security events the activity wording names.
+  "Settings.team",
+  "Settings.sellerDetails",
+  "Settings.security.activity",
+] as const;
+
 export const CLIENT_SCOPES = {
   /** The root layout alone: enough for anything outside a route group. */
   shell: [],
@@ -73,27 +113,22 @@ export const CLIENT_SCOPES = {
    * a sale's price is said ("Was X, now Y"), which a discount's product list
    * says the same way.
    */
-  app: [
-    "Analytics",
-    "Auth",
-    "Billing",
-    "Dashboard",
-    "Discounts",
-    "Nav",
-    "Notifications",
-    "Onboarding",
-    "Orders",
-    "Payments",
-    "Products",
-    "Search",
-    "Settings",
-    "ProductPage.footer.policies",
-    "ProductPage.sale",
-    "ProductPage.shippingProse",
-    "Storefront.colors.presets",
-    "Storefront.settings",
-  ],
-  /** The storefront list and designer, and the /dev harness pages. */
+  app: APP,
+  /**
+   * The storefront editor (/storefront/[id]), full-screen with no dashboard
+   * chrome: the designer's own copy and the product page it previews, and none
+   * of the dashboard's.
+   */
+  designer: DESIGNER,
+  /**
+   * The storefront list (/storefront), which wears the dashboard shell and so
+   * needs the app's copy, plus the whole Storefront namespace its previews are
+   * drawn with (the designer's tile faces). One scope, not `app` nested over
+   * `designer`: a nested scope replaces a namespace it shares (ExtendMessages),
+   * and `app` carries only part of "Storefront".
+   */
+  storefrontList: [...APP, "Storefront"],
+  /** The /dev harness pages, which show everything. */
   full: ALL_NAMESPACES,
 } as const satisfies Record<string, readonly string[] | null>;
 
@@ -126,7 +161,11 @@ export function pickShell(messages: Messages): Partial<Messages> {
 /** Copy just the named branches (dotted paths) out of the catalogue. */
 function pick(messages: Messages, entries: readonly string[]): Partial<Messages> {
   const out: Record<string, unknown> = {};
-  for (const entry of entries) {
+  // "Storefront.settings" beside "Storefront" (a scope built from two lists)
+  // adds nothing, and copying it into the whole namespace's own object would
+  // write into the catalogue itself.
+  const distinct = entries.filter((entry) => !entries.some((other) => entry.startsWith(`${other}.`)));
+  for (const entry of distinct) {
     const parts = entry.split(".");
     let from: unknown = messages;
     let to = out;

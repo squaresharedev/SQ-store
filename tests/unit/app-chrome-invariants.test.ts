@@ -60,7 +60,7 @@ describe("dashboard chrome placement", () => {
       // Add a route here only if it genuinely renders without the sidebar.
       // The storefront EDITOR is full-screen: no sidebar exists on the real
       // page, so its skeleton must not pretend otherwise.
-      "storefront/[id]/loading.tsx",
+      "storefront/(designer)/[id]/loading.tsx",
     ]);
 
     const unwrapped: string[] = [];

@@ -50,6 +50,7 @@ export function StorefrontsList({
   storefronts: initial,
   total,
   products,
+  productCount = products.length,
   canWrite,
   sellerDetailsComplete = false,
   sample = null,
@@ -66,6 +67,10 @@ export function StorefrontsList({
    *  first page is truncated, and the list must say so. */
   total: number;
   products: Product[];
+  /** How many products the store has, when `products` is only the ones these
+   *  storefronts place (the wizard's "no products yet" hint is about the store).
+   *  Defaults to `products.length`. */
+  productCount?: number;
   /** Hide create/delete/embed controls when the active role is read-only. */
   canWrite: boolean;
   /** The store's seller details are complete, so live storefronts get a
@@ -269,7 +274,7 @@ export function StorefrontsList({
         // finishes or skips, so nothing is left behind here.
         onClose={() => setWizardOpen(false)}
         onCreated={handleCreated}
-        productCount={products.length}
+        productCount={productCount}
         // Newest-edited first, so [0] is the storefront they last worked on and
         // the likeliest source of answers that still hold.
         previousBrief={storefronts[0]?.brief}

@@ -5,6 +5,7 @@ import { buildObjectKey, hasR2Credentials, putObject } from "@/lib/r2";
 import { FONT_CONTENT_TYPES, FONT_MAX_BYTES } from "@/lib/validation/product";
 import { sniffFont } from "@/lib/uploads/sniff";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
+import { declaredLengthExceeds } from "@/lib/security/read-json";
 
 /**
  * POST /api/uploads/font: upload a storefront's own typeface THROUGH the
@@ -49,6 +50,12 @@ export async function POST(request: Request) {
     return bad(503, t("notConfigured.font"));
   }
 
+  // Refuse an honest oversized body before formData() buffers it all.
+  if (declaredLengthExceeds(request, FONT_MAX_BYTES)) {
+    const maxMb = Math.round(FONT_MAX_BYTES / 1024 / 1024);
+    return bad(413, t("tooLarge.font"), t("tooLargeFix.font", { maxMb }));
+  }
+
   let form: FormData;
   try {
     form = await request.formData();
@@ -65,7 +72,8 @@ export async function POST(request: Request) {
   const file = form.get(FIELD);
   if (!(file instanceof File)) return bad(400, t("missing.font"));
 
-  // Cheap rejection before reading the body into memory.
+  // Real size check: the body is already buffered here. The declared-length
+  // check above is what saves the read for an honest oversized caller.
   if (file.size <= 0) return bad(400, t("empty.font"), t("fix.pickFile"));
   const maxMb = Math.round(FONT_MAX_BYTES / 1024 / 1024);
   if (file.size > FONT_MAX_BYTES) {

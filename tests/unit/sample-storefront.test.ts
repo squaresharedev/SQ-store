@@ -67,7 +67,7 @@ describe("sample storefront", () => {
 
   it("lives at a path no storefront id can take", () => {
     expect(SAMPLE_STOREFRONT_PATH).toBe("/storefront/sample");
-    expect(existsSync(join(process.cwd(), "src/app/storefront/sample/page.tsx"))).toBe(true);
+    expect(existsSync(join(process.cwd(), "src/app/storefront/(designer)/sample/page.tsx"))).toBe(true);
   });
 
   it("gives files added inside it keys shaped like real ones, under a nil uploader", () => {

@@ -3,6 +3,7 @@ import { pageShellClass } from "@/components/ui/surface-styles";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { listStorefrontProducts } from "@/lib/discounts/storefront-preview";
 import { listStorefronts } from "@/lib/storefront/queries";
+import { placedProductIds } from "@/lib/storefront/placed-products";
 import { getSampleStorefrontFlags } from "@/lib/onboarding/queries";
 import { StorefrontsList } from "@/components/storefront/StorefrontsList";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
@@ -37,6 +38,9 @@ export default async function StorefrontsPage({
   ]);
   const canWrite = can(account?.role, "storefront.write");
   const { rows: storefrontRows, total: storefrontTotal } = storefronts;
+  // The previews draw only the products placed on these storefronts, so only
+  // those travel to the browser; the wizard still gets the store's real count.
+  const placed = placedProductIds(storefrontRows);
   // The publish gate's answer for this store: with it, a live storefront's
   // card links straight to its page.
   const identity = account ? await getTraderIdentityStatus(account.accountId) : null;
@@ -52,7 +56,8 @@ export default async function StorefrontsPage({
       <StorefrontsList
         storefronts={storefrontRows}
         total={storefrontTotal}
-        products={products}
+        products={products.filter((product) => placed.has(product.id))}
+        productCount={products.length}
         canWrite={canWrite}
         sellerDetailsComplete={identity?.ok === true && identity.missing.length === 0}
         // Offered to anyone who can build a storefront, and only on a flag we

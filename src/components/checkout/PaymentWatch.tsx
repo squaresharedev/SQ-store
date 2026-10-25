@@ -38,7 +38,9 @@ export function PaymentWatch() {
         window.clearInterval(timer);
         setStopped(true);
       }
-      router.refresh();
+      // A hidden tab has nobody to show the result to: the attempt still counts,
+      // so the page still stops and offers "Check again", but it spends no ask.
+      if (!document.hidden) router.refresh();
     }, WATCH_INTERVAL_MS);
     return () => window.clearInterval(timer);
   }, [router, round]);

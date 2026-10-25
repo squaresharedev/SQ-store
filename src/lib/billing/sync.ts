@@ -99,7 +99,8 @@ export function normalizeSubscription(subscription: StripeSubscription, now: Dat
  * The subscription that decides a customer's plan: the newest LIVE one, or,
  * with none live, the newest of any status (so a cancelled plan still shows as
  * cancelled). A customer should never hold two live subscriptions (the
- * checkout action refuses to open a second), but if Stripe reports two, the
+ * checkout action refuses to open a second, and the provider closes any other
+ * open Checkout page before creating one), but if Stripe reports two, the
  * newest wins and the other is logged for support to refund.
  */
 export function pickCurrentSubscription(subscriptions: readonly StripeSubscription[]): StripeSubscription | null {
