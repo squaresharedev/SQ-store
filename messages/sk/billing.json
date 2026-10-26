@@ -16,7 +16,6 @@
   "page": {
     "metaTitle": "Plány",
     "title": "Vyberte si plán",
-    "lead": "Začnite zadarmo a zostaňte zadarmo, ako dlho chcete. Prejdite na vyšší plán, keď sa nižší poplatok vyplatí.",
     "trust": {
       "secure": "Zabezpečená platba cez Stripe",
       "cancel": "Zrušiť môžete kedykoľvek",

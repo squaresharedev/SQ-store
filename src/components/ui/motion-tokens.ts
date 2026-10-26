@@ -2,7 +2,7 @@
  * The JS mirror of the motion tokens in globals.css. Choreography needs
  * per-keyframe timing that CSS transitions cannot express, so the curves are
  * restated here instead of consumed as Tailwind utilities. Keep these in sync
- * with --ease-standard / --ease-entrance.
+ * with --ease-standard / --ease-entrance / --ease-exit.
  *
  * Lives in ui/ rather than beside any one icon set: the nav rail and the
  * in-page action buttons both animate against these, and two mirrors of the
@@ -11,6 +11,10 @@
 export const EASE_STANDARD: [number, number, number, number] = [0.4, 0, 0.2, 1];
 export const EASE_ENTRANCE: [number, number, number, number] = [
   0.16, 1, 0.3, 1,
+];
+/** Accelerating away: something picking up speed as it leaves. */
+export const EASE_EXIT: [number, number, number, number] = [
+  0.55, 0.085, 0.68, 0.53,
 ];
 
 /** Seconds, mirroring --transition-duration-fast/base/slow. */

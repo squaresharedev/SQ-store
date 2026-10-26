@@ -110,6 +110,8 @@ const GROUPS: Record<string, { scope: ClientScope; dirs: string[] }> = {
   public: { scope: "public", dirs: ["app/(public)"] },
   auth: { scope: "auth", dirs: ["app/(auth)"] },
   app: { scope: "app", dirs: ["app/(dashboard)", "app/settings"] },
+  designer: { scope: "designer", dirs: ["app/storefront/(designer)"] },
+  storefrontList: { scope: "storefrontList", dirs: ["app/storefront/(list)"] },
 };
 
 describe("client message scopes", () => {

@@ -337,6 +337,8 @@ function ProductList({
                 <img
                   src={product.imageUrl}
                   alt=""
+                  loading="lazy"
+                  decoding="async"
                   draggable={false}
                   className="size-full object-cover"
                 />

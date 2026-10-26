@@ -16,7 +16,6 @@
   "page": {
     "metaTitle": "Plány",
     "title": "Vyberte si plán",
-    "lead": "Začněte zdarma a zůstaňte na Free, jak dlouho chcete. Přejděte na vyšší plán, až se nižší poplatek vyplatí.",
     "trust": {
       "secure": "Zabezpečená platba přes Stripe",
       "cancel": "Zrušit můžete kdykoli",

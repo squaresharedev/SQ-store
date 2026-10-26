@@ -14,6 +14,7 @@ import { resolveProductPage } from "@/lib/storefront/product-page";
 import { storefrontPageUrl } from "@/lib/storefront/product-page-url";
 import { listStorefrontProducts } from "@/lib/discounts/storefront-preview";
 import { getStorefrontSummary } from "@/lib/storefront/queries";
+import { placedProductIds } from "@/lib/storefront/placed-products";
 import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
@@ -48,6 +49,9 @@ export default async function StorefrontEmbedPage({
       : Promise.resolve({ ok: true as const, missing: [] }),
   ]);
   if (!storefront) notFound();
+  // The hero draws this storefront's own products; the rest of the catalogue
+  // has no business in the page.
+  const placed = placedProductIds([storefront]);
 
   // Whether the storefront has a page of its own right now, by the same two
   // facts its public loader asks for (lib/storefront/storefront-page.ts). An
@@ -75,7 +79,7 @@ export default async function StorefrontEmbedPage({
         />
         <EmbedSettings
           storefront={storefront}
-          products={products}
+          products={products.filter((product) => placed.has(product.id))}
           missingTraderDetails={identity.ok ? identity.missing : []}
           productPagesOn={pageState !== "pages-off"}
         />

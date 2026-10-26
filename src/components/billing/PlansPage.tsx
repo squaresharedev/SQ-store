@@ -114,7 +114,6 @@ function PlansPageBody({ context, source, actions = SERVER_BILLING_ACTIONS }: Pl
       <div className="space-y-6">
         <PageHeader
           title={t("page.title")}
-          subtitle={t("page.lead")}
           action={
             // One way to pay is not a choice: the control appears with the
             // second (yearly prices in plan_prices).
@@ -160,14 +159,6 @@ function PlansPageBody({ context, source, actions = SERVER_BILLING_ACTIONS }: Pl
         {!context.canManage && (
           <p role="note" className={cn(helpTextClass, "text-center")}>
             {t("page.ownerOnly")}
-          </p>
-        )}
-        {/* Said once, in words, above buttons that cannot be pressed: the
-            "Soon" badge alone read as broken, and its tooltip never reaches a
-            phone. */}
-        {context.canManage && !context.available && (
-          <p role="note" className={cn(helpTextClass, "text-center")} data-plans-soon="">
-            {t("page.soonTitle")}
           </p>
         )}
         {checkoutError && <ActionErrorNotice error={checkoutError} className="mx-auto max-w-2xl" />}
@@ -247,7 +238,7 @@ function planAction({
   if (!context.available) {
     if (!isPaidPlan(plan)) return null;
     return (
-      <Button disabled className="w-full" title={t("page.soonTitle")}>
+      <Button disabled className="w-full">
         {t("card.upgrade", { plan: name })}
         <span className={stubBadgeClass}>{t("page.soon")}</span>
       </Button>

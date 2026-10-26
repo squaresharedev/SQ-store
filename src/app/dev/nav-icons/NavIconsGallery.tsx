@@ -47,13 +47,14 @@ const ICONS: Array<{
   },
   {
     name: "Discounts",
-    story: "The % scrolls up out of the badge and a price tag rolls in from below, then swings from its hole.",
+    story:
+      "The price tag jiggles in place and settles.",
     icon: DiscountsIcon,
   },
   {
     name: "Analytics",
     story:
-      "The arrow surges up its slope without going anywhere; wind tears back past it, then thins out.",
+      "The arrow threads out of the top-right along its own zigzag, speeding up, then weaves back in from the bottom-left and slows to a stop.",
     icon: AnalyticsIcon,
   },
   {

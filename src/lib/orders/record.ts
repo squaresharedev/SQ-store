@@ -158,6 +158,8 @@ type Placed = {
 
 /** The exception public.order_place raises when a tracked product has too few. */
 const INSUFFICIENT_STOCK = "insufficient_stock";
+/** The exception public.order_place raises when a limited code has no use left. */
+const DISCOUNT_EXHAUSTED = "discount_exhausted";
 
 /** Mirrors the orders.checkout_session_id CHECK. */
 const CHECKOUT_SESSION_ID = /^[A-Za-z0-9_]{1,255}$/;
@@ -386,6 +388,9 @@ async function placeOrder(
       // order and nothing was reserved. The one refusal that is the buyer's to
       // hear, and they hear it before paying.
       if (error.message.includes(INSUFFICIENT_STOCK)) return { ok: false, reason: "sold_out" };
+      // The code's last use went to someone else after the quote. Nothing was
+      // written or charged; the buyer is told the checkout cannot take it.
+      if (error.message.includes(DISCOUNT_EXHAUSTED)) return { ok: false, reason: "invalid" };
       throw error;
     }
 

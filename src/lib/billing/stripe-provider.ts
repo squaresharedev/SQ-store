@@ -89,6 +89,32 @@ async function catalogPrice(plan: PaidPlanId, interval: BillingInterval): Promis
   return price;
 }
 
+/**
+ * Close the customer's other open subscription Checkout pages, so only the page
+ * about to be created can take a payment. Two tabs (or two plans) that each
+ * passed the "no live subscription" check would otherwise both be payable, and
+ * the seller would hold two subscriptions. The newest click wins; the older
+ * tab's page says it has expired.
+ *
+ * A failure is not swallowed: a page that could not be closed (it was paid a
+ * moment ago) must not be followed by a second one. The seller retries and is
+ * told they are already subscribed.
+ */
+async function closeOpenCheckouts(customerId: string): Promise<void> {
+  const open = await stripeRequest<StripeList<StripeCheckoutSession>>("GET", "/checkout/sessions", {
+    customer: customerId,
+    status: "open",
+    limit: 10,
+  });
+  await Promise.all(
+    open.data
+      .filter((session) => session.mode === "subscription")
+      .map((session) =>
+        stripeRequest<StripeCheckoutSession>("POST", `/checkout/sessions/${encodeURIComponent(session.id)}/expire`),
+      ),
+  );
+}
+
 /** Every subscription a customer has, newest first as Stripe lists them. */
 async function customerSubscriptions(customerId: string): Promise<StripeSubscription[]> {
   const list = await stripeRequest<StripeList<StripeSubscription>>("GET", "/subscriptions", {
@@ -149,6 +175,7 @@ export const stripeBillingProvider: BillingProvider = {
 
   async createCheckout(request: CheckoutRequest): Promise<string> {
     const price = await catalogPrice(request.plan, request.interval);
+    await closeOpenCheckouts(request.customerId);
     const session = await stripeRequest<StripeCheckoutSession>("POST", "/checkout/sessions", {
       mode: "subscription",
       customer: request.customerId,

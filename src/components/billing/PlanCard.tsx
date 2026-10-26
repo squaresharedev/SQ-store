@@ -12,6 +12,7 @@ import {
 import { helpTextClass, infoTextClass, lastUsedBadgeClass } from "@/components/ui/control-styles";
 import { PlanFeatureList } from "@/components/billing/PlanFeatureList";
 import { PlanVisual } from "@/components/billing/PlanVisual";
+import { MarkedPlanName } from "@/components/billing/PlanWordmark";
 import { usePlanPrices } from "@/components/billing/plan-context";
 import { cn } from "@/lib/utils";
 import { formatPercent } from "@/lib/format/intl";
@@ -77,7 +78,9 @@ export function PlanCard({
 
       <div className="flex flex-1 flex-col px-4 pt-5 pb-4">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-lg font-semibold text-foreground">{t(`plans.${plan}.name`)}</h3>
+          <h3 className="text-lg font-semibold text-foreground">
+            <MarkedPlanName plan={plan} name={t(`plans.${plan}.name`)} />
+          </h3>
           {recommended && (
             <span className={inkBadgeClass}>
               <Star className="size-3" strokeWidth={2.5} aria-hidden />

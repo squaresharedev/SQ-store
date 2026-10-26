@@ -111,7 +111,9 @@ async function requestLocale() {
  *
  * Refuses when the store already has a live subscription: a change of plan
  * goes through the Customer Portal (openBillingPortal), so a double click can
- * never leave a seller paying for two plans.
+ * never leave a seller paying for two plans. Two tabs that both pass that check
+ * are covered by the provider, which closes the customer's other open Checkout
+ * before opening this one.
  */
 export async function startCheckout(input: unknown): Promise<CheckoutResult> {
   const owner = await billingOwner();

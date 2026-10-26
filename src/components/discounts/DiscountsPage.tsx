@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import dynamic from "next/dynamic";
 import { Ticket, TimerOff, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -13,8 +14,13 @@ import { coveredProducts } from "@/lib/discounts/covered";
 import type { DiscountsSummary } from "@/lib/discounts/summary";
 import type { DiscountProductChoice } from "@/types/discount";
 import { DiscountEmptyState } from "./DiscountEmptyState";
-import { DiscountPerformance } from "./DiscountPerformance";
 import { DiscountRow } from "./DiscountRow";
+
+/** The performance chart pulls in recharts, and only a page with orders needs
+ *  it: loaded on demand, not on every visit to the discounts page. */
+const DiscountPerformance = dynamic(
+  () => import("./DiscountPerformance").then((module) => module.DiscountPerformance),
+);
 
 /** A confirm before the two writes that cannot be taken back. */
 type Pending = { kind: "delete" | "end"; id: string } | null;

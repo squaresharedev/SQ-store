@@ -9,6 +9,7 @@ import { CopyButton } from "@/components/ui/CopyButton";
 import { Spinner } from "@/components/ui/spinner";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { signInPath } from "@/lib/auth/paths";
+import { APPROVAL_POLL_FAST_MS, approvalPollDelayMs } from "@/lib/auth/approval-poll";
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { authHeadingClass } from "@/components/ui/surface-styles";
 import { QrTile } from "@/components/auth/QrTile";
@@ -21,11 +22,6 @@ import {
 } from "@/lib/auth/sign-in-approval-actions";
 import type { ActionError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
-
-/** How often the page asks whether the phone has answered. */
-const POLL_MS = 2000;
-/** The same while the tab is in the background (the browser throttles it anyway). */
-const POLL_HIDDEN_MS = 6000;
 
 type ShownRequest = NonNullable<StartApprovalResult["request"]>;
 
@@ -41,7 +37,8 @@ type Phase =
  * where the person is already signed in, and a quiet wait until they tap
  * Approve there (lib/auth/sign-in-approval.ts has the design).
  *
- * The page asks the server every couple of seconds. The answer that lets the
+ * The page asks the server every couple of seconds at first, then less often
+ * (lib/auth/approval-poll.ts). The answer that lets the
  * person through is also the request that completes the sign-in: its cookies
  * make this session aal2, and `onVerified` hands over to the moment of success.
  * Leaving (another method, a new code) withdraws the request, so a QR code
@@ -95,6 +92,7 @@ export function ApproveFromDevice({
     if (!requestId) return;
     let live = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    const startedAt = Date.now();
     const ask = async () => {
       const answer: ApprovalPoll = await checkSignInApproval(requestId, next).catch(() => ({
         waiting: true,
@@ -116,9 +114,9 @@ export function ApproveFromDevice({
         setPhase(answer.error ? { kind: "failed", error: answer.error } : { kind: "lapsed" });
         return;
       }
-      timer = setTimeout(ask, document.hidden ? POLL_HIDDEN_MS : POLL_MS);
+      timer = setTimeout(ask, approvalPollDelayMs(Date.now() - startedAt, document.hidden));
     };
-    timer = setTimeout(ask, POLL_MS);
+    timer = setTimeout(ask, APPROVAL_POLL_FAST_MS);
     return () => {
       live = false;
       clearTimeout(timer);

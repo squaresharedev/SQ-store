@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { iconNudgeRightClass } from "@/components/ui/control-styles";
@@ -8,8 +9,15 @@ import { ArtboardFrame } from "./ArtboardFrame";
 import type { PreviewDevice } from "./DeviceSizeSwitch";
 import { usePreviewProduct } from "./usePreviewProduct";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
+import { BadgeMoveProvider } from "@/components/product-page/BadgeDrag";
+import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
+import { useToast } from "@/components/ui/Toast";
+import { canPlaceBadge, withBadgePlacement } from "@/lib/products/badges";
+import { moveProductBadge } from "@/lib/products/badge-actions";
+import { useSampleMode } from "@/lib/storefront/sample-mode";
+import { badgeLabelKey } from "@/lib/validation/product";
 import { PRODUCT_PAGE_HOTSPOTS, isProductPageHotspot } from "@/lib/storefront/setting-ref";
-import type { Product } from "@/types/product";
+import { BADGES_ON_PHOTO_MAX, type BadgePlacement, type Product, type ProductBadge } from "@/types/product";
 import type { PagePhotoView, ProductPageData } from "@/types/product-page";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import type {
@@ -73,7 +81,45 @@ export function ProductPageArtboard({
   onToggleCheckout?: () => void;
 }) {
   const t = useTranslations("Storefront.artboard");
-  const previewed = usePreviewProduct(product, productPage.showStock, soldOut);
+  const tBadges = useTranslations("Products.badgesField");
+  const toast = useToast();
+  const showActionError = useActionErrorToast();
+  const sample = useSampleMode();
+  const loaded = usePreviewProduct(product, productPage.showStock, soldOut);
+
+  // THE BADGES, MOVABLE HERE. A badge dragged to another place on this page
+  // moves at once and is saved behind it (the product's own field, the same
+  // one the product form's drag writes); a refused save puts it back. The
+  // sample storefront's products exist only in code, so there it only moves.
+  const [movedBadges, setMovedBadges] = useState<ProductBadge[] | null>(null);
+  const badges = movedBadges ?? loaded.details.badges ?? [];
+  const previewed = movedBadges
+    ? { ...loaded, details: { ...loaded.details, badges: movedBadges } }
+    : loaded;
+  const byLabel = (label: string) => badges.find((badge) => badgeLabelKey(badge.label) === badgeLabelKey(label));
+
+  function canPlace(label: string, placement: BadgePlacement) {
+    const badge = byLabel(label);
+    return badge ? canPlaceBadge(badges, badge, placement) : false;
+  }
+
+  const badgeCopy = useMemo(
+    () => ({ hint: tBadges("preview.hint"), beside: tBadges("beside") }),
+    [tBadges],
+  );
+
+  async function placeBadge(label: string, placement: BadgePlacement) {
+    const before = badges;
+    setMovedBadges(withBadgePlacement(before, label, placement));
+    if (sample) return;
+    const result = await moveProductBadge(product.id, label, placement).catch(() => null);
+    if (result?.ok) {
+      setMovedBadges(result.badges);
+      return;
+    }
+    setMovedBadges(before);
+    if (result) showActionError(result.error);
+  }
 
   const page: ProductPageData = {
     storefront: {
@@ -125,7 +171,14 @@ export function ProductPageArtboard({
         )
       }
     >
-      <ProductPageView page={page} mode="preview" />
+      <BadgeMoveProvider
+        canPlace={canPlace}
+        onPlace={placeBadge}
+        onRefused={() => toast.error(tBadges("photoFull", { max: BADGES_ON_PHOTO_MAX }))}
+        copy={badgeCopy}
+      >
+        <ProductPageView page={page} mode="preview" />
+      </BadgeMoveProvider>
     </ArtboardFrame>
   );
 }

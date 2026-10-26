@@ -111,7 +111,14 @@ export function ProductCard({
       <div className={posterMediaClass}>
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
-          <img src={imageUrl} alt="" draggable={false} className={posterPhotoClass} />
+          <img
+            src={imageUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+            className={posterPhotoClass}
+          />
         ) : (
           <div className="flex size-full items-center justify-center bg-muted">
             <ImageIcon className="size-7 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />

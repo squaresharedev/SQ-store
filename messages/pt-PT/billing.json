@@ -16,7 +16,6 @@
   "page": {
     "metaTitle": "Planos",
     "title": "Escolha o seu plano",
-    "lead": "Comece gratuitamente e fique no plano gratuito pelo tempo que quiser. Mude de plano quando uma taxa mais baixa se pagar a si própria.",
     "trust": {
       "secure": "Finalização de compra segura pelo Stripe",
       "cancel": "Cancele quando quiser",
