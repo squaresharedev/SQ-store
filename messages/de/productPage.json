@@ -28,6 +28,7 @@
     "shipping": "Versand",
     "returns": "Rücksendungen",
     "safety": "Sicherheit und Konformität",
+    "reviews": "Bewertungen",
     "seller": "Verkäufer"
   },
   "soldBy": "Verkauft von {seller}",
@@ -428,6 +429,14 @@
     "more": "Weitere Bewertungen anzeigen",
     "loading": "Wird geladen…",
     "loadFailed": "Weitere Bewertungen konnten nicht geladen werden. Versuch es noch einmal.",
-    "about": "Bewertungen mit „Verifizierter Käufer“ stammen aus Bestellungen auf Square Share. Jede Bewertung wird vor dem Erscheinen automatisch auf Missbrauch geprüft, und Verkäufer können eine Bewertung nur ausblenden, wenn sie Spam ist, beleidigend ist, persönliche Daten enthält oder nichts mit dem Produkt zu tun hat."
+    "about": "Bewertungen mit „Verifizierter Käufer“ stammen aus Bestellungen auf Square Share. Jede Bewertung wird vor dem Erscheinen automatisch auf Missbrauch geprüft, und Verkäufer können eine Bewertung nur ausblenden, wenn sie Spam ist, beleidigend ist, persönliche Daten enthält oder nichts mit dem Produkt zu tun hat.",
+    "empty": {
+      "title": "Noch keine Bewertungen",
+      "body": "Wer dieses Produkt bestellt, kann es auf der eigenen Bestellseite bewerten."
+    },
+    "breakdownLabel": "Bewertungen nach Sternen",
+    "filterStars": "{stars, plural, one {Bewertungen mit {stars} Stern zeigen ({count})} other {Bewertungen mit {stars} Sternen zeigen ({count})}}",
+    "showing": "{rating, plural, one {Bewertungen mit {rating} Stern} other {Bewertungen mit {rating} Sternen}}",
+    "showAll": "Alle Bewertungen zeigen"
   }
 }

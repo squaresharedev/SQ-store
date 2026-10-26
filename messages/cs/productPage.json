@@ -28,6 +28,7 @@
     "shipping": "Doprava",
     "returns": "Vrácení zboží",
     "safety": "Bezpečnost a shoda",
+    "reviews": "Recenze",
     "seller": "Prodejce"
   },
   "soldBy": "Prodává {seller}",
@@ -428,6 +429,14 @@
     "more": "Zobrazit další recenze",
     "loading": "Načítání…",
     "loadFailed": "Další recenze se nepodařilo načíst. Zkuste to znovu.",
-    "about": "Recenze označené „Ověřený kupující“ pocházejí z objednávek na Square Share. Každá recenze se před zveřejněním automaticky kontroluje a prodejci mohou recenzi skrýt jen tehdy, když jde o spam, je urážlivá, obsahuje osobní údaje nebo se netýká produktu."
+    "about": "Recenze označené „Ověřený kupující“ pocházejí z objednávek na Square Share. Každá recenze se před zveřejněním automaticky kontroluje a prodejci mohou recenzi skrýt jen tehdy, když jde o spam, je urážlivá, obsahuje osobní údaje nebo se netýká produktu.",
+    "empty": {
+      "title": "Zatím žádné recenze",
+      "body": "Kupující, kteří si produkt objednají, ho mohou ohodnotit na stránce své objednávky."
+    },
+    "breakdownLabel": "Recenze podle počtu hvězdiček",
+    "filterStars": "{stars, plural, one {Zobrazit recenze s {stars} hvězdičkou ({count})} few {Zobrazit recenze se {stars} hvězdičkami ({count})} other {Zobrazit recenze s {stars} hvězdičkami ({count})}}",
+    "showing": "{rating, plural, one {Recenze s {rating} hvězdičkou} few {Recenze se {rating} hvězdičkami} other {Recenze s {rating} hvězdičkami}}",
+    "showAll": "Zobrazit všechny recenze"
   }
 }

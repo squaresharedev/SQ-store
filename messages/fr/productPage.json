@@ -28,6 +28,7 @@
     "shipping": "Livraison",
     "returns": "Retours",
     "safety": "Sécurité et conformité",
+    "reviews": "Avis",
     "seller": "Vendeur"
   },
   "soldBy": "Vendu par {seller}",
@@ -428,6 +429,14 @@
     "more": "Afficher plus d’avis",
     "loading": "Chargement…",
     "loadFailed": "Impossible de charger plus d’avis. Réessayez.",
-    "about": "Les avis marqués « Acheteur vérifié » proviennent de commandes passées sur Square Share. Chaque avis est vérifié automatiquement avant de paraître, et les vendeurs ne peuvent masquer un avis que s’il s’agit de spam, s’il est injurieux, s’il contient des informations personnelles ou s’il ne concerne pas le produit."
+    "about": "Les avis marqués « Acheteur vérifié » proviennent de commandes passées sur Square Share. Chaque avis est vérifié automatiquement avant de paraître, et les vendeurs ne peuvent masquer un avis que s’il s’agit de spam, s’il est injurieux, s’il contient des informations personnelles ou s’il ne concerne pas le produit.",
+    "empty": {
+      "title": "Aucun avis pour l’instant",
+      "body": "Les acheteurs qui commandent ce produit peuvent le noter depuis la page de leur commande."
+    },
+    "breakdownLabel": "Avis par nombre d’étoiles",
+    "filterStars": "{stars, plural, one {Afficher les avis à {stars} étoile ({count})} other {Afficher les avis à {stars} étoiles ({count})}}",
+    "showing": "{rating, plural, one {Avis à {rating} étoile} other {Avis à {rating} étoiles}}",
+    "showAll": "Afficher tous les avis"
   }
 }

@@ -28,6 +28,7 @@
     "shipping": "Spedizione",
     "returns": "Resi",
     "safety": "Sicurezza e conformità",
+    "reviews": "Recensioni",
     "seller": "Venditore"
   },
   "soldBy": "Venduto da {seller}",
@@ -428,6 +429,14 @@
     "more": "Mostra altre recensioni",
     "loading": "Caricamento…",
     "loadFailed": "Non è stato possibile caricare altre recensioni. Riprova.",
-    "about": "Le recensioni contrassegnate come «Acquirente verificato» provengono da ordini effettuati su Square Share. Ogni recensione viene controllata automaticamente prima di apparire, e i venditori possono nascondere una recensione solo se è spam, è offensiva, contiene dati personali o non riguarda il prodotto."
+    "about": "Le recensioni contrassegnate come «Acquirente verificato» provengono da ordini effettuati su Square Share. Ogni recensione viene controllata automaticamente prima di apparire, e i venditori possono nascondere una recensione solo se è spam, è offensiva, contiene dati personali o non riguarda il prodotto.",
+    "empty": {
+      "title": "Ancora nessuna recensione",
+      "body": "Chi ordina questo prodotto può recensirlo dalla pagina del proprio ordine."
+    },
+    "breakdownLabel": "Recensioni per stelle",
+    "filterStars": "{stars, plural, one {Mostra le recensioni da {stars} stella ({count})} other {Mostra le recensioni da {stars} stelle ({count})}}",
+    "showing": "{rating, plural, one {Recensioni da {rating} stella} other {Recensioni da {rating} stelle}}",
+    "showAll": "Mostra tutte le recensioni"
   }
 }

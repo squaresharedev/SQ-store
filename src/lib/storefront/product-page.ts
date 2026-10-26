@@ -31,6 +31,7 @@ export const PRODUCT_PAGE_SECTION_LABELS: Record<ProductPageSectionId, string> =
   shipping: "Shipping",
   returns: "Returns",
   safety: "Safety and compliance",
+  reviews: "Reviews",
   seller: "Seller",
 };
 
@@ -51,6 +52,17 @@ export const MANDATORY_PRODUCT_PAGE_SECTION_IDS: readonly ProductPageSectionId[]
 ];
 
 /**
+ * Sections that come back SHOWN when a stored list does not mention them,
+ * rather than hidden like every other newcomer.
+ *
+ * `reviews` showed on every product page that had any before it was a
+ * section a seller could switch, so a config saved before then has no entry
+ * for it and must keep showing it: hiding it would take reviews down from
+ * every live page that already had them.
+ */
+export const PRODUCT_PAGE_SECTIONS_SHOWN_WHEN_UNSET: readonly ProductPageSectionId[] = ["reviews"];
+
+/**
  * Every section exactly once, in the FIXED order of PRODUCT_PAGE_SECTION_IDS.
  *
  * The stored order is deliberately ignored. That list runs from what a buyer
@@ -62,7 +74,9 @@ export const MANDATORY_PRODUCT_PAGE_SECTION_IDS: readonly ProductPageSectionId[]
  *
  * Unknown ids are dropped, duplicates keep their first appearance, and a
  * section the stored list lacks comes back HIDDEN, so a config saved before a
- * section existed does not suddenly grow a block the seller never chose.
+ * section existed does not suddenly grow a block the seller never chose
+ * (except PRODUCT_PAGE_SECTIONS_SHOWN_WHEN_UNSET, which were never optional
+ * before and so default to what the page already did).
  *
  * MANDATORY_PRODUCT_PAGE_SECTION_IDS is the one exception: those always come
  * back shown, regardless of what (or whether anything) was stored for them.
@@ -82,8 +96,19 @@ export function normalizeSections(
   }
   return PRODUCT_PAGE_SECTION_IDS.map((id) => ({
     id,
-    show: MANDATORY_PRODUCT_PAGE_SECTION_IDS.includes(id) ? true : (shown.get(id) ?? false),
+    show: MANDATORY_PRODUCT_PAGE_SECTION_IDS.includes(id)
+      ? true
+      : (shown.get(id) ?? PRODUCT_PAGE_SECTIONS_SHOWN_WHEN_UNSET.includes(id)),
   }));
+}
+
+/** Whether a section shows, read through normalizeSections so a stored list
+ *  that predates the section answers with its default. */
+export function isProductPageSectionShown(
+  productPage: Pick<ProductPageConfig, "sections">,
+  id: ProductPageSectionId,
+): boolean {
+  return normalizeSections(productPage.sections).find((entry) => entry.id === id)?.show ?? false;
 }
 
 /** The effective product page options for a config: stored values over the

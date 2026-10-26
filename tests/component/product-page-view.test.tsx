@@ -1,10 +1,11 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
 import { DEFAULT_PRODUCT_PAGE_CONFIG, DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 import type { ProductPageData } from "@/types/product-page";
 import type { ProductPageProduct } from "@/types/product";
+import type { ProductReviews, PublicReview } from "@/types/review";
 
 afterEach(cleanup);
 
@@ -1041,5 +1042,122 @@ describe("ProductPageView: badge colours and the photo", () => {
     expect((photo[0] as HTMLElement).style.color).toBe("rgb(23, 23, 23)");
     expect(iconColor(photo[0]!)).toBe("rgb(220, 38, 38)");
     expect(iconColor(photo[2]!)).toBe("rgb(23, 23, 23)");
+  });
+});
+
+// ── Reviews ──────────────────────────────────────────────────────────────
+// A section the seller switches on or off like the others, open at the foot
+// of the page. On, it shows the product's rating and lets a buyer narrow the
+// reviews to one star rating; with no reviews yet it says so; and a failed
+// read leaves it out rather than claiming there are none.
+
+function publicReview(id: string, rating: number): PublicReview {
+  return {
+    id,
+    rating,
+    title: `Review ${id}`,
+    body: "Exactly as described.",
+    authorName: "Aoife N.",
+    verified: true,
+    source: "native",
+    reviewedAt: "2026-10-01T10:00:00.000Z",
+  };
+}
+
+const REVIEWS: ProductReviews = {
+  summary: { count: 3, average: 3.67, breakdown: [1, 0, 0, 1, 1] },
+  firstPage: {
+    rows: [publicReview("r5", 5), publicReview("r4", 4), publicReview("r1", 1)],
+    total: 3,
+    page: 1,
+    pageSize: 10,
+  },
+};
+
+const NO_REVIEWS: ProductReviews = {
+  summary: { count: 0, average: null, breakdown: [0, 0, 0, 0, 0] },
+  firstPage: { rows: [], total: 0, page: 1, pageSize: 10 },
+};
+
+const reviewsSection = () => document.querySelector('[data-product-section="reviews"]');
+const withReviews = (show: boolean) => ({
+  productPage: {
+    sections: DEFAULT_PRODUCT_PAGE_CONFIG.sections.map((entry) => (entry.id === "reviews" ? { ...entry, show } : entry)),
+  },
+});
+
+describe("ProductPageView reviews", () => {
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
+
+  it("shows the rating and the reviews when the section is on", () => {
+    render(<ProductPageView page={data()} mode="public" reviews={REVIEWS} />);
+    const section = reviewsSection() as HTMLElement;
+    expect(section).not.toBeNull();
+    expect(within(section).getByText("3.7")).toBeInTheDocument();
+    expect(within(section).getAllByRole("article")).toHaveLength(3);
+    // Not folded into "More details": it is read, not looked up.
+    expect(section.closest("details")).toBeNull();
+  });
+
+  it("is left out when the seller switches it off, reviews or not", () => {
+    render(<ProductPageView page={data(withReviews(false))} mode="public" reviews={REVIEWS} />);
+    expect(reviewsSection()).toBeNull();
+  });
+
+  it("keeps showing for a page saved before the switch existed", () => {
+    const legacy = { productPage: { sections: [{ id: "specs" as const, show: true }] } };
+    render(<ProductPageView page={data(legacy)} mode="public" reviews={REVIEWS} />);
+    expect(reviewsSection()).not.toBeNull();
+  });
+
+  it("says plainly when there are no reviews yet, and how one gets written", () => {
+    render(<ProductPageView page={data()} mode="public" reviews={NO_REVIEWS} />);
+    const section = reviewsSection() as HTMLElement;
+    expect(within(section).getByText("No reviews yet")).toBeInTheDocument();
+    expect(within(section).getByText(/review it from their order page/)).toBeInTheDocument();
+    // Nothing to sort, filter or disclose about checking: there is nothing shown.
+    expect(within(section).queryByRole("button")).toBeNull();
+    expect(section.querySelector("[data-reviews-about]")).toBeNull();
+  });
+
+  it("is left out when the reviews could not be read", () => {
+    render(<ProductPageView page={data()} mode="public" reviews={null} />);
+    expect(reviewsSection()).toBeNull();
+  });
+
+  it("narrows to one star rating from the breakdown, and lets go again", async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL) =>
+      Response.json({ ok: true, page: { rows: [publicReview("r1", 1)], total: 1, page: 1, pageSize: 10 } }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const user = userEvent.setup();
+    render(<ProductPageView page={data()} mode="public" reviews={REVIEWS} />);
+    const section = reviewsSection() as HTMLElement;
+
+    await user.click(within(section).getByRole("button", { name: "Show 1-star reviews (1)" }));
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("rating=1");
+    expect(await within(section).findByText("Showing 1-star reviews")).toBeInTheDocument();
+    expect(within(section).getAllByRole("article")).toHaveLength(1);
+    expect(within(section).getByRole("button", { name: "Show 1-star reviews (1)" })).toHaveAttribute("aria-pressed", "true");
+
+    await user.click(within(section).getByRole("button", { name: "Show all reviews" }));
+    expect(within(section).queryByText("Showing 1-star reviews")).toBeNull();
+    expect(within(section).getAllByRole("article")).toHaveLength(3);
+  });
+
+  it("does not offer a star rating nobody gave", () => {
+    render(<ProductPageView page={data()} mode="public" reviews={REVIEWS} />);
+    expect(screen.getByRole("button", { name: "Show 2-star reviews (0)" })).toBeDisabled();
+  });
+
+  it("says so when a filtered read fails, without losing the page", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("nope", { status: 503 })));
+    const user = userEvent.setup();
+    render(<ProductPageView page={data()} mode="public" reviews={REVIEWS} />);
+    await user.click(screen.getByRole("button", { name: "Show 5-star reviews (1)" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("More reviews could not be loaded");
   });
 });

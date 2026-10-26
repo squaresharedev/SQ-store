@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { productReviewsApiPath } from "@/lib/reviews/paths";
-import { REVIEW_SORTS, DEFAULT_REVIEW_SORT, type ReviewSort } from "@/lib/reviews/limits";
+import { REVIEW_PAGE_SIZE, REVIEW_SORTS, DEFAULT_REVIEW_SORT, type ReviewSort } from "@/lib/reviews/limits";
 import type { ReviewPage } from "@/types/review";
 import { PageSelect } from "./PageSelect";
 import { ReviewItem } from "./ReviewItem";
@@ -14,54 +14,91 @@ import { CTA_BUTTON_CLASS, ctaGhostStyle, surfaceRadius, type CtaAppearance } fr
  * The review list: the first page arrives with the product page, the rest a
  * page at a time from GET /api/products/[id]/reviews. Changing the order
  * starts again from the first page of that order.
+ *
+ * Narrowed to one star rating (`rating`), the feed has no first page handed
+ * to it and reads its own on mount; the section remounts it (keyed by the
+ * rating) whenever the buyer picks another, so each rating starts clean.
  */
 export function ReviewFeed({
   productId,
   initial,
+  rating,
   ink,
   rule,
   cta,
   cornerRadius,
 }: {
   productId: string;
-  initial: ReviewPage;
+  /** The first page, newest first; null to read it on mount (a filtered view). */
+  initial: ReviewPage | null;
+  /** Only reviews with this many stars. */
+  rating?: number;
   ink: string;
   rule: string;
   cta: CtaAppearance;
   cornerRadius: number;
 }) {
   const t = useTranslations("ProductPage.reviews");
-  const [rows, setRows] = useState(initial.rows);
-  const [page, setPage] = useState(initial.page);
+  const [rows, setRows] = useState(initial?.rows ?? []);
+  const [page, setPage] = useState(initial?.page ?? 0);
+  const [total, setTotal] = useState(initial?.total ?? 0);
   const [sort, setSort] = useState<ReviewSort>(DEFAULT_REVIEW_SORT);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(initial === null);
   const [failed, setFailed] = useState(false);
-  const hasMore = page * initial.pageSize < initial.total;
+  const pageSize = initial?.pageSize ?? REVIEW_PAGE_SIZE;
+  const hasMore = page * pageSize < total;
+
+  /** One page of this view from the API; null when it could not be read. */
+  async function fetchPage(nextSort: ReviewSort, nextPage: number): Promise<ReviewPage | null> {
+    const query = new URLSearchParams({ sort: nextSort, page: String(nextPage), pageSize: String(pageSize) });
+    if (rating) query.set("rating", String(rating));
+    try {
+      const response = await fetch(`${productReviewsApiPath(productId)}?${query}`);
+      const result = (await response.json().catch(() => null)) as { ok: true; page: ReviewPage } | { ok: false } | null;
+      return result?.ok ? result.page : null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Take in a page that answered (or note that none did). */
+  function apply(result: ReviewPage | null, nextSort: ReviewSort, nextPage: number) {
+    setLoading(false);
+    if (!result) {
+      setFailed(true);
+      return;
+    }
+    setRows((current) => (nextPage === 1 ? result.rows : [...current, ...result.rows]));
+    setPage(nextPage);
+    setTotal(result.total);
+    setSort(nextSort);
+  }
 
   async function load(nextSort: ReviewSort, nextPage: number) {
     setLoading(true);
     setFailed(false);
-    try {
-      const query = new URLSearchParams({ sort: nextSort, page: String(nextPage), pageSize: String(initial.pageSize) });
-      const response = await fetch(`${productReviewsApiPath(productId)}?${query}`);
-      const result = (await response.json().catch(() => null)) as { ok: true; page: ReviewPage } | { ok: false } | null;
-      if (!result?.ok) {
-        setFailed(true);
-        return;
-      }
-      setRows((current) => (nextPage === 1 ? result.page.rows : [...current, ...result.page.rows]));
-      setPage(nextPage);
-      setSort(nextSort);
-    } catch {
-      setFailed(true);
-    } finally {
-      setLoading(false);
-    }
+    apply(await fetchPage(nextSort, nextPage), nextSort, nextPage);
   }
+
+  // A filtered view has no first page of its own: read it once, on mount
+  // (`loading` already starts true for it). State is written only when the
+  // read answers, and never after the feed has gone.
+  useEffect(() => {
+    if (initial !== null) return;
+    let gone = false;
+    void fetchPage(DEFAULT_REVIEW_SORT, 1).then((result) => {
+      if (!gone) apply(result, DEFAULT_REVIEW_SORT, 1);
+    });
+    return () => {
+      gone = true;
+    };
+    // Mount only: the section remounts the feed for each rating.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="flex flex-col" aria-busy={loading}>
-      {initial.total > 1 && (
+      {total > 1 && (
         <div className="flex justify-end pb-2">
           <PageSelect
             id={`reviews-sort-${productId}`}

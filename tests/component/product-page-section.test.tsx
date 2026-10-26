@@ -269,6 +269,33 @@ describe("ProductPageSection", () => {
     );
   });
 
+  it("switches reviews on and off like any other section", async () => {
+    const user = userEvent.setup();
+    const { onProductPageChange } = mount({ summoned: "sections" });
+    const reviews = screen.getByRole("switch", { name: "Reviews" });
+    expect(reviews).toBeChecked();
+    await user.click(reviews);
+    expect(onProductPageChange.mock.lastCall?.[0].sections).toContainEqual({ id: "reviews", show: false });
+  });
+
+  // A page saved before the Reviews switch existed has no entry for it. The
+  // switch must still read as on (the page shows reviews) and still work:
+  // toggling over the stored list alone would find nothing to change.
+  it("works on a page saved before the Reviews switch existed", async () => {
+    const user = userEvent.setup();
+    const { onProductPageChange } = mount({
+      summoned: "sections",
+      productPage: {
+        ...DEFAULT_PRODUCT_PAGE_CONFIG,
+        sections: DEFAULT_PRODUCT_PAGE_CONFIG.sections.filter((entry) => entry.id !== "reviews"),
+      },
+    });
+    const reviews = screen.getByRole("switch", { name: "Reviews" });
+    expect(reviews).toBeChecked();
+    await user.click(reviews);
+    expect(onProductPageChange.mock.lastCall?.[0].sections).toContainEqual({ id: "reviews", show: false });
+  });
+
   it("pins the description: no arrows, but it keeps the switch that hides it", async () => {
     const user = userEvent.setup();
     const { onProductPageChange } = mount({ summoned: "sections" });

@@ -931,6 +931,8 @@ export const PRODUCT_PAGE_SECTION_IDS = [
   "shipping",
   "returns",
   "safety",
+  // What other buyers said: open at the foot of the page, above the seller.
+  "reviews",
   "seller",
 ] as const;
 export type ProductPageSectionId = (typeof PRODUCT_PAGE_SECTION_IDS)[number];

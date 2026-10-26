@@ -28,6 +28,7 @@
     "shipping": "Envio",
     "returns": "Devoluções",
     "safety": "Segurança e conformidade",
+    "reviews": "Avaliações",
     "seller": "Vendedor"
   },
   "soldBy": "Vendido por {seller}",
@@ -428,6 +429,14 @@
     "more": "Mostrar mais avaliações",
     "loading": "A carregar…",
     "loadFailed": "Não foi possível carregar mais avaliações. Tente novamente.",
-    "about": "As avaliações marcadas como «Comprador verificado» vêm de encomendas feitas na Square Share. Cada avaliação é verificada automaticamente antes de aparecer, e os vendedores só podem ocultar uma avaliação se for spam, for ofensiva, partilhar dados pessoais ou não for sobre o produto."
+    "about": "As avaliações marcadas como «Comprador verificado» vêm de encomendas feitas na Square Share. Cada avaliação é verificada automaticamente antes de aparecer, e os vendedores só podem ocultar uma avaliação se for spam, for ofensiva, partilhar dados pessoais ou não for sobre o produto.",
+    "empty": {
+      "title": "Ainda não há avaliações",
+      "body": "Quem encomendar este produto pode avaliá-lo na página da sua encomenda."
+    },
+    "breakdownLabel": "Avaliações por estrelas",
+    "filterStars": "{stars, plural, one {Mostrar avaliações de {stars} estrela ({count})} other {Mostrar avaliações de {stars} estrelas ({count})}}",
+    "showing": "{rating, plural, one {Avaliações de {rating} estrela} other {Avaliações de {rating} estrelas}}",
+    "showAll": "Mostrar todas as avaliações"
   }
 }

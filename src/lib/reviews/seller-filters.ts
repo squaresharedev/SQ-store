@@ -1,4 +1,5 @@
 import { REVIEW_RATING_MAX, REVIEW_RATING_MIN } from "@/lib/reviews/limits";
+import { uuidField } from "@/lib/validation/inputs";
 import { REVIEW_MODERATION_FILTERS, type ReviewModerationFilter } from "@/lib/reviews/moderation-rules";
 import {
   REVIEWS_FILTER_PARAM,
@@ -48,7 +49,7 @@ export type SellerReviewFilters = {
 
 export const DEFAULT_REVIEW_FILTERS: SellerReviewFilters = { status: "all", sort: "newest" };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const productIdSchema = uuidField("product");
 
 type Params = Record<string, string | string[] | undefined>;
 
@@ -73,7 +74,7 @@ export function parseSellerReviewFilters(params: Params): { filters: SellerRevie
       search: search ? search : undefined,
       rating:
         Number.isInteger(rating) && rating >= REVIEW_RATING_MIN && rating <= REVIEW_RATING_MAX ? rating : undefined,
-      productId: productId && UUID.test(productId) ? productId : undefined,
+      productId: productId && productIdSchema.safeParse(productId).success ? productId : undefined,
       origin: oneOf(REVIEW_ORIGIN_FILTERS, first(params[REVIEWS_SOURCE_PARAM])),
       sort: oneOf(SELLER_REVIEW_SORTS, first(params[REVIEWS_SORT_PARAM])) ?? "newest",
     },

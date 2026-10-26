@@ -28,6 +28,7 @@
     "shipping": "Doprava",
     "returns": "Vrátenie tovaru",
     "safety": "Bezpečnosť a zhoda",
+    "reviews": "Recenzie",
     "seller": "Predajca"
   },
   "soldBy": "Predáva {seller}",
@@ -428,6 +429,14 @@
     "more": "Zobraziť ďalšie recenzie",
     "loading": "Načítava sa…",
     "loadFailed": "Ďalšie recenzie sa nepodarilo načítať. Skúste to znova.",
-    "about": "Recenzie označené „Overený kupujúci“ pochádzajú z objednávok na Square Share. Každá recenzia sa pred zverejnením automaticky kontroluje a predajcovia môžu recenziu skryť, len ak ide o spam, je urážlivá, obsahuje osobné údaje alebo sa netýka produktu."
+    "about": "Recenzie označené „Overený kupujúci“ pochádzajú z objednávok na Square Share. Každá recenzia sa pred zverejnením automaticky kontroluje a predajcovia môžu recenziu skryť, len ak ide o spam, je urážlivá, obsahuje osobné údaje alebo sa netýka produktu.",
+    "empty": {
+      "title": "Zatiaľ žiadne recenzie",
+      "body": "Kupujúci, ktorí si produkt objednajú, ho môžu ohodnotiť na stránke svojej objednávky."
+    },
+    "breakdownLabel": "Recenzie podľa počtu hviezdičiek",
+    "filterStars": "{stars, plural, one {Zobraziť recenzie s {stars} hviezdičkou ({count})} few {Zobraziť recenzie s {stars} hviezdičkami ({count})} other {Zobraziť recenzie s {stars} hviezdičkami ({count})}}",
+    "showing": "{rating, plural, one {Recenzie s {rating} hviezdičkou} few {Recenzie s {rating} hviezdičkami} other {Recenzie s {rating} hviezdičkami}}",
+    "showAll": "Zobraziť všetky recenzie"
   }
 }

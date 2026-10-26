@@ -15,7 +15,7 @@ import { getRatingSummary, isReviewableProduct, listReviews } from "@/lib/review
  * /api/products/[id]/reviews: a product's reviews.
  *
  * GET, public: the rating summary and one page of approved reviews
- * (`?sort=newest|highest|lowest&page=&pageSize=`). Behind the same kind of
+ * (`?sort=newest|highest|lowest&page=&pageSize=&rating=1..5`). Behind the same kind of
  * gate as the product page: a per-IP rate limit, and a product that is live
  * and not taken down. Anything else is the same 404.
  *
@@ -64,7 +64,10 @@ export async function GET(request: Request, { params }: Params): Promise<Respons
 
   const summary = await getRatingSummary(id);
   if (!summary) return reply({ ok: false, error: "failed" }, 503);
-  const page = await listReviews(id, parseReviewQuery(new URL(request.url).searchParams), summary.count);
+  const query = parseReviewQuery(new URL(request.url).searchParams);
+  // The summary already counts each rating, so a filtered page needs no COUNT of its own.
+  const total = query.rating ? summary.breakdown[query.rating - 1] : summary.count;
+  const page = await listReviews(id, query, total);
   if (!page) return reply({ ok: false, error: "failed" }, 503);
 
   return reply({ ok: true, summary, page }, 200, "private, max-age=30");

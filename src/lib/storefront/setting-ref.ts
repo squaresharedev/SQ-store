@@ -163,6 +163,7 @@ export const SECTION_SETTING: Record<ProductPageSectionId, ProductPageHotspot> =
   shipping: "policies",
   returns: "policies",
   safety: "sections",
+  reviews: "sections",
   seller: "seller",
 };
 

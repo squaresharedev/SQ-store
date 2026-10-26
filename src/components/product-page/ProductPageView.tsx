@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { isEuSeller, MANDATORY_PRODUCT_PAGE_SECTION_IDS } from "@/lib/storefront/product-page";
+import { isEuSeller, isProductPageSectionShown, MANDATORY_PRODUCT_PAGE_SECTION_IDS } from "@/lib/storefront/product-page";
 import type { ProseResolver } from "@/lib/shipping/policy-prose";
 import { resolveProductShipping, resolveReturns } from "@/lib/storefront/shipping";
 import { deliveryPriceRange } from "@/lib/shipping/rates";
@@ -78,8 +78,10 @@ export function ProductPageView({
   /** From `?q=`, already clamped against this product's own limit by the
    *  server. The provider re-clamps anyway; neither is what authorizes a sale. */
   initialQuantity?: number;
-  /** The product's reviews (lib/reviews/queries.ts). The public page only:
-   *  the editor's preview has none to show. */
+  /** The product's reviews (lib/reviews/queries.ts on the public page; the
+   *  editor's preview reads the same through the reviews API). Null while
+   *  unknown or unreadable, which leaves the section out rather than showing
+   *  an empty state that might not be true. */
   reviews?: ProductReviews | null;
 }) {
   const { storefront, product } = page;
@@ -203,6 +205,14 @@ export function ProductPageView({
   // stale or hand-built config gets no more say over it than the panel does.
   const sellerShown = hasSellerDetails(seller) || productPage.showSeller;
 
+  // REVIEWS ARE THE SELLER'S CALL, and open at the foot of the page rather
+  // than folded into "More details" (see ReviewsSection). Shown with no
+  // reviews yet too: the seller chose to show them, and the section says how
+  // the first one gets written.
+  // Normalised here, not trusted: the editor hands over its stored config,
+  // which may predate the switch and so not name it (it then reads as on).
+  const reviewsShown = isProductPageSectionShown(productPage, "reviews");
+
   // Which sections have anything to say, in the seller's order. `safety` is
   // also mandatory (GPSR), so it is let through here whatever its stored show
   // flag says; its own case below is what decides whether there is anything
@@ -210,7 +220,7 @@ export function ProductPageView({
   // reach, both print nothing, same as always).
   const sections = productPage.sections
     .filter((entry) => entry.show || MANDATORY_PRODUCT_PAGE_SECTION_IDS.includes(entry.id))
-    .filter((entry) => entry.id !== "description" && entry.id !== "seller")
+    .filter((entry) => entry.id !== "description" && entry.id !== "seller" && entry.id !== "reviews")
     .map((entry) => ({ id: entry.id, body: sectionBody(entry.id) }))
     .filter((entry): entry is { id: ProductPageSectionId; body: ReactNode } => entry.body !== null);
 
@@ -224,6 +234,9 @@ export function ProductPageView({
       // Filtered out above too, and for a stronger reason: it is printed open
       // at the foot of the page (see `sellerShown`).
       case "seller":
+        return null;
+      // And this one: it stands open below the accordion (see `reviewsShown`).
+      case "reviews":
         return null;
       case "specs":
         return hasSpecs(product.details, product.optionGroups) ? (
@@ -589,7 +602,7 @@ export function ProductPageView({
                 </div>
               )}
 
-              {reviews && (
+              {reviewsShown && reviews && (
                 <ReviewsSection
                   productId={product.id}
                   reviews={reviews}
