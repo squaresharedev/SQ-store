@@ -1087,10 +1087,12 @@
     },
     "story": {
       "product": "Kubek ceramiczny",
+      "customerReviews": "Opinie klientów",
       "reviews": {
         "a": "„Piękne szkliwo, kawa długo trzyma ciepło.”",
         "b": "„Na żywo jeszcze ładniejszy.”",
-        "c": "„Przyszedł szybko i dobrze zapakowany.”"
+        "c": "„Przyszedł szybko i dobrze zapakowany.”",
+        "d": "„Kupiłem drugi na prezent.”"
       }
     }
   },

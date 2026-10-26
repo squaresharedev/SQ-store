@@ -1087,10 +1087,12 @@
     },
     "story": {
       "product": "Ceramic mug",
+      "customerReviews": "Customer reviews",
       "reviews": {
         "a": "“Lovely glaze, keeps my coffee hot.”",
         "b": "“Even nicer in person.”",
-        "c": "“Arrived fast and well packed.”"
+        "c": "“Arrived fast and well packed.”",
+        "d": "“Bought a second one as a gift.”"
       }
     }
   },

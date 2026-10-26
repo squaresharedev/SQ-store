@@ -1087,10 +1087,12 @@
     },
     "story": {
       "product": "Keramický hrnek",
+      "customerReviews": "Hodnocení zákazníků",
       "reviews": {
         "a": "„Krásná glazura, kafe dlouho drží teplé.“",
         "b": "„Naživo ještě hezčí.“",
-        "c": "„Přišel rychle a dobře zabalený.“"
+        "c": "„Přišel rychle a dobře zabalený.“",
+        "d": "„Koupil jsem druhý jako dárek.“"
       }
     }
   },

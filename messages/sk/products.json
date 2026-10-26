@@ -1087,10 +1087,12 @@
     },
     "story": {
       "product": "Keramický hrnček",
+      "customerReviews": "Hodnotenia zákazníkov",
       "reviews": {
         "a": "„Krásna glazúra, káva dlho drží teplo.“",
         "b": "„Naživo ešte krajší.“",
-        "c": "„Prišiel rýchlo a dobre zabalený.“"
+        "c": "„Prišiel rýchlo a dobre zabalený.“",
+        "d": "„Kúpil som druhý ako darček.“"
       }
     }
   },

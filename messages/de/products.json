@@ -1087,10 +1087,12 @@
     },
     "story": {
       "product": "Keramikbecher",
+      "customerReviews": "Kundenbewertungen",
       "reviews": {
         "a": "„Schöne Glasur, hält den Kaffee lange warm.“",
         "b": "„In echt noch schöner.“",
-        "c": "„Schnell da und gut verpackt.“"
+        "c": "„Schnell da und gut verpackt.“",
+        "d": "„Gleich noch einen zum Verschenken gekauft.“"
       }
     }
   },

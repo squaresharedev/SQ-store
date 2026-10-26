@@ -1087,10 +1087,12 @@
     },
     "story": {
       "product": "Taza de cerámica",
+      "customerReviews": "Opiniones de clientes",
       "reviews": {
         "a": "«Esmalte precioso, mantiene el café caliente.»",
         "b": "«Aún más bonita en persona.»",
-        "c": "«Llegó rápido y bien embalada.»"
+        "c": "«Llegó rápido y bien embalada.»",
+        "d": "«Compré otra para regalar.»"
       }
     }
   },

@@ -1087,10 +1087,12 @@
     },
     "story": {
       "product": "Tasse en céramique",
+      "customerReviews": "Avis clients",
       "reviews": {
         "a": "« Bel émail, garde mon café bien chaud. »",
         "b": "« Encore plus belle en vrai. »",
-        "c": "« Arrivée vite et bien emballée. »"
+        "c": "« Arrivée vite et bien emballée. »",
+        "d": "« J’en ai acheté une deuxième à offrir. »"
       }
     }
   },

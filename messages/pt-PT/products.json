@@ -1087,10 +1087,12 @@
     },
     "story": {
       "product": "Caneca de cerâmica",
+      "customerReviews": "Avaliações de clientes",
       "reviews": {
         "a": "«Vidrado lindo, mantém o café quente.»",
         "b": "«Ainda mais bonita ao vivo.»",
-        "c": "«Chegou depressa e bem embalada.»"
+        "c": "«Chegou depressa e bem embalada.»",
+        "d": "«Comprei outra para oferecer.»"
       }
     }
   },

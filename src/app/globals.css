@@ -51,6 +51,15 @@
      own. Decorative: the plan's name is always the text right under it. */
   --color-plan-gold: #ca8a04; /* amber-600 on light surfaces */
   --color-plan-gold-dark: #fbbf24; /* amber-400 on black cards */
+
+  /* Illustrations only (components/products/ReviewImportStory): a review's
+     stars in the yellow every review site uses, and the window controls of a
+     drawn browser. Never product UI: a buyer's page draws stars in the
+     seller's own ink. */
+  --color-rating: #f59e0b; /* amber-500 */
+  --color-window-close: #ff5f57;
+  --color-window-minimize: #febc2e;
+  --color-window-zoom: #28c840;
 }
 
 /* Font utilities map to the next/font local faces set on <html> in layout.tsx.

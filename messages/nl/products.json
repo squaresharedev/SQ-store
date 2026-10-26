@@ -1087,10 +1087,12 @@
     },
     "story": {
       "product": "Keramische mok",
+      "customerReviews": "Klantbeoordelingen",
       "reviews": {
         "a": "“Prachtig glazuur, houdt mijn koffie warm.”",
         "b": "“In het echt nog mooier.”",
-        "c": "“Snel geleverd en goed verpakt.”"
+        "c": "“Snel geleverd en goed verpakt.”",
+        "d": "“Meteen een tweede als cadeau gekocht.”"
       }
     }
   },
