@@ -260,7 +260,31 @@
     "footerLink": "Desistir de una compra",
     "total": "Total pagado",
     "quantity": "Cantidad {quantity}",
-    "editHeadline": "Titular de agradecimiento"
+    "editHeadline": "Titular de agradecimiento",
+    "review": {
+      "title": "¿Qué te ha parecido?",
+      "body": "Cuéntales a otros compradores qué te parece {product}.",
+      "open": "Escribir una reseña",
+      "done": "Ya has valorado este producto. ¡Gracias!",
+      "dialogTitle": "Escribir una reseña",
+      "sentTitle": "Gracias por tu reseña",
+      "sentBody": "Aparecerá en la página del producto en un minuto aproximadamente, cuando nuestra revisión automática la haya leído, marcada como de un comprador verificado.",
+      "ratingLegend": "Tu valoración",
+      "ratingOption": "{rating, plural, one {{rating} estrella} other {{rating} estrellas}}",
+      "ratingPrompt": "Elige una valoración.",
+      "ratingWords": "{rating, select, 1 {Mala} 2 {Regular} 3 {Buena} 4 {Muy buena} other {Excelente}}",
+      "bodyLabel": "Tu reseña",
+      "bodyPlaceholder": "¿Qué te ha gustado? ¿Qué podría mejorar?",
+      "titleLabel": "Título (opcional)",
+      "nameLabel": "Nombre visible",
+      "nameHelp": "Se muestra con tu reseña. Tu correo electrónico y tu pedido siguen siendo privados.",
+      "send": "Publicar reseña",
+      "errors": {
+        "notEligible": "Este pedido ya no se puede valorar.",
+        "rateLimited": "Demasiadas reseñas desde esta conexión. Inténtalo de nuevo dentro de una hora.",
+        "failed": "No se ha podido publicar tu reseña. Inténtalo de nuevo."
+      }
+    }
   },
   "checkout": {
     "metadata": {
@@ -386,5 +410,24 @@
     "endsOn": "La rebaja termina el {date}"
   },
   "badges": "Destacados",
-  "badgesOnPhoto": "Destacados en la foto"
+  "badgesOnPhoto": "Destacados en la foto",
+  "reviews": {
+    "heading": "Reseñas",
+    "average": "{average} de 5 estrellas",
+    "count": "{count, plural, one {Basado en {count} reseña} other {Basado en {count} reseñas}}",
+    "stars": "{rating, plural, one {Valorado con {rating} estrella de 5} other {Valorado con {rating} estrellas de 5}}",
+    "starsShort": "{rating, plural, one {{rating} estrella} other {{rating} estrellas}}",
+    "verified": "Comprador verificado",
+    "imported": "{source, select, judgeme {Importada de Shopify (Judge.me)} loox {Importada de Shopify (Loox)} yotpo {Importada de Shopify (Yotpo)} other {Importada de Shopify}}",
+    "sortLabel": "Ordenar reseñas",
+    "sorts": {
+      "newest": "Más recientes",
+      "highest": "Mejor valoradas",
+      "lowest": "Peor valoradas"
+    },
+    "more": "Ver más reseñas",
+    "loading": "Cargando…",
+    "loadFailed": "No se han podido cargar más reseñas. Inténtalo de nuevo.",
+    "about": "Las reseñas marcadas como «Comprador verificado» proceden de pedidos realizados en Square Share. Cada reseña se revisa automáticamente antes de publicarse, y los vendedores solo pueden ocultar una reseña si es spam, es ofensiva, comparte datos personales o no trata del producto."
+  }
 }

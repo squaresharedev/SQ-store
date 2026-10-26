@@ -13,6 +13,8 @@ import {
   visitorHash,
 } from "@/lib/analytics/record";
 import { getPublicProductPage, resolveDisplayName } from "@/lib/products/public";
+import { getProductReviews } from "@/lib/reviews/queries";
+import { REVIEW_RATING_MAX, REVIEW_RATING_MIN } from "@/lib/reviews/limits";
 import { PAGE_BUSY } from "@/lib/public/busy";
 import { QUANTITY_QUERY_PARAM, requestedQuantity } from "@/lib/products/quantity";
 import { clientKey } from "@/lib/rate-limit";
@@ -134,6 +136,9 @@ export default async function ProductPage({
   if (!result) notFound();
   const { page, ownerId, saleEndsInMs } = result;
   const via = requestedVia(query);
+  // Read after the gate above, never before it: a product the page refuses
+  // has no reviews to show. Null (a failed read) just leaves the section out.
+  const reviews = await getProductReviews(page.product.id);
 
   // A served page is a product view. Recorded after the response so a counter
   // can never slow a buyer down, deduped per visitor per product per hour, and
@@ -196,6 +201,18 @@ export default async function ProductPage({
       ? { description: clip(page.product.description.replace(/\s+/g, " ").trim(), 500) }
       : {}),
     ...(page.product.images.length > 0 ? { image: ogImageUrl } : {}),
+    // The same approved reviews the page shows, from the same summary row.
+    ...(reviews && reviews.summary.count > 0 && reviews.summary.average !== null
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: reviews.summary.average.toFixed(2),
+            reviewCount: reviews.summary.count,
+            bestRating: REVIEW_RATING_MAX,
+            worstRating: REVIEW_RATING_MIN,
+          },
+        }
+      : {}),
     offers: {
       "@type": "Offer",
       // What it costs today: the sale price while a sale runs, valid until the
@@ -227,6 +244,7 @@ export default async function ProductPage({
           page={page}
           mode="public"
           via={via}
+          reviews={reviews}
           initialOptionIds={requestedOptions(query, collectOptionIds(page.product.optionGroups))}
           // `?q=` is read exactly the way `?o=` above is: whatever the address
           // bar says, measured against what THIS product allows, with anything

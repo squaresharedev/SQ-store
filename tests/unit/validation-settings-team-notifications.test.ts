@@ -279,6 +279,7 @@ describe("notificationsSchema", () => {
     expect(
       notificationsSchema.safeParse({
         notify_sales: true,
+        notify_reviews: true,
         notify_product_updates: false,
         notify_marketing: false,
       }).success,
@@ -286,6 +287,7 @@ describe("notificationsSchema", () => {
     expect(
       notificationsSchema.safeParse({
         notify_sales: "on",
+        notify_reviews: true,
         notify_product_updates: false,
         notify_marketing: false,
       }).success,

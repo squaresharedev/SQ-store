@@ -11,6 +11,12 @@
     },
     "import": {
       "title": "Importar produtos"
+    },
+    "importReviews": {
+      "title": "Importar avaliações"
+    },
+    "reviews": {
+      "title": "Avaliações"
     }
   },
   "page": {
@@ -28,9 +34,14 @@
     },
     "import": {
       "heading": "Importar produtos",
-      "description": "Traga um catálogo do Shopify, ou de qualquer ferramenta que exporte um CSV. Vai ver exatamente o que vai ser importado antes de guardar seja o que for."
+      "description": "Traga um catálogo do Shopify, ou de qualquer ferramenta que exporte um CSV. Vai ver exatamente o que vai ser importado antes de guardar seja o que for.",
+      "reviewsLink": "Também vai trazer as suas avaliações? Importar avaliações"
     },
-    "formLoading": "A carregar o formulário do produto"
+    "formLoading": "A carregar o formulário do produto",
+    "importReviews": {
+      "heading": "Importar avaliações",
+      "description": "Traga as suas avaliações do Judge.me, Loox, Yotpo ou Shopify Product Reviews. Exporte-as aí em CSV, largue o ficheiro aqui e confirme a que produto pertence cada uma antes de guardar."
+    }
   },
   "emptyState": {
     "title": "Ainda sem produtos",
@@ -60,7 +71,8 @@
     "import": "Importar",
     "add": "Adicionar produto",
     "updating": "A atualizar…",
-    "pagination": "{total, plural, one {{total} produto · página {page} de {pages}} many {{total} de produtos · página {page} de {pages}} other {{total} produtos · página {page} de {pages}}}"
+    "pagination": "{total, plural, one {{total} produto · página {page} de {pages}} many {{total} de produtos · página {page} de {pages}} other {{total} produtos · página {page} de {pages}}}",
+    "reviews": "Avaliações"
   },
   "list": {
     "noMatch": {
@@ -1023,6 +1035,146 @@
         "label": "Verificado",
         "keywords": "testado, inspecionado, controlado, aprovado"
       }
+    }
+  },
+  "reviewImport": {
+    "dropPrompt": "Largue aqui a exportação de avaliações ou escolha um ficheiro CSV",
+    "rowsLimit": "{max, plural, one {Até {max} avaliação por ficheiro} other {Até {max} avaliações por ficheiro}}",
+    "fileTooLarge": "Esse ficheiro é demasiado grande. O limite é {max}.",
+    "fileEmpty": "Esse ficheiro está vazio.",
+    "badgeNote": "As avaliações importadas mostram onde foram escritas, como «Importada do Shopify (Judge.me)». Só as avaliações que os compradores escrevem a partir de uma encomenda Square Share são marcadas como de comprador verificado. Cada avaliação importada aparece depois de lida pela nossa verificação automática.",
+    "missingColumns": "Este ficheiro não tem coluna para: {fields}. Exporte novamente as avaliações a partir da sua app de avaliações, em CSV.",
+    "fields": {
+      "rating": "classificação",
+      "title": "título",
+      "body": "avaliação",
+      "author": "nome do autor",
+      "date": "data",
+      "product": "produto",
+      "status": "estado"
+    },
+    "summary": "{ready, plural, one {<count>{ready}</count> avaliação pronta} other {<count>{ready}</count> avaliações prontas}}{skipped, plural, =0 {.} other {, {skipped} deixadas de fora.}}",
+    "hiddenRows": "{count, plural, one {{count} avaliação estava oculta ou marcada como spam na sua loja anterior, por isso fica de fora.} other {{count} avaliações estavam ocultas ou marcadas como spam na sua loja anterior, por isso ficam de fora.}}",
+    "droppedRows": "{count, plural, one {{count} avaliação ultrapassa as {max} que um ficheiro pode ter, por isso fica de fora.} other {{count} avaliações ultrapassam as {max} que um ficheiro pode ter, por isso ficam de fora.}}",
+    "source": "Importadas de",
+    "sourceUnknown": "Escolha a app",
+    "sourceHelp": "Mostrado em cada avaliação, para que os compradores saibam onde foi escrita.",
+    "sources": {
+      "judgeme": "Judge.me",
+      "loox": "Loox",
+      "yotpo": "Yotpo",
+      "shopify": "Shopify Product Reviews"
+    },
+    "mappingHeading": "Associar produtos",
+    "mappingHelp": "Cada produto do ficheiro e o produto daqui a que pertencem as suas avaliações. Associados pelo nome sempre que possível. O que estiver em «Não importar» fica de fora.",
+    "mappingFileProduct": "No ficheiro",
+    "mappingReviews": "Avaliações",
+    "mappingProduct": "Produto aqui",
+    "mappingSelect": "Produto para {key}",
+    "skipProduct": "Não importar",
+    "skippedHeading": "Linhas que ficam de fora",
+    "skippedRow": "Linha {line}: {problem}",
+    "run": "{count, plural, one {Importar {count} avaliação} other {Importar {count} avaliações}}",
+    "imported": "{count, plural, one {Foi importada {count} avaliação.} other {Foram importadas {count} avaliações.}}",
+    "duplicates": "{count, plural, one {{count} já estava cá.} other {{count} já estavam cá.}}",
+    "skippedRows": "{count, plural, one {{count} linha ficou de fora.} other {{count} linhas ficaram de fora.}}",
+    "errors": {
+      "rateLimited": "Demasiadas importações na última hora. Tente novamente mais tarde.",
+      "tooLarge": "Esse ficheiro é demasiado grande para importar.",
+      "unrecognised": "Este ficheiro não é uma exportação de avaliações que consigamos ler.",
+      "nothing": "Nada para importar. Associe pelo menos um produto.",
+      "failed": "A importação não foi concluída e nada foi guardado. Tente novamente."
+    }
+  },
+  "reviewModeration": {
+    "heading": "Avaliações",
+    "description": "O que os compradores dizem dos seus produtos. Cada avaliação é verificada automaticamente antes de aparecer, e as que deixaram a verificação com dúvidas esperam aqui pela sua decisão.",
+    "importLink": "Vem do Shopify? Importe as suas avaliações",
+    "filtersLabel": "Filtrar avaliações",
+    "filters": {
+      "all": "Todas",
+      "held": "À sua espera",
+      "hidden": "Ocultas"
+    },
+    "heldCount": "{count, plural, one {{count} avaliação à sua espera} other {{count} avaliações à sua espera}}",
+    "loadFailed": "Não foi possível carregar as suas avaliações. Atualize a página para tentar novamente.",
+    "empty": {
+      "all": {
+        "title": "Ainda sem avaliações",
+        "body": "Quando um comprador avaliar um produto a partir da página da encomenda, a avaliação aparece aqui."
+      },
+      "held": {
+        "title": "Nada à sua espera",
+        "body": "As avaliações sobre as quais a verificação automática tem dúvidas esperam aqui pela sua decisão."
+      },
+      "hidden": {
+        "title": "Sem avaliações ocultas",
+        "body": "As avaliações que ocultar aparecem aqui, e pode voltar a mostrá-las a qualquer momento."
+      }
+    },
+    "pagination": "{total, plural, one {{total} avaliação · página {page} de {pages}} other {{total} avaliações · página {page} de {pages}}}",
+    "status": {
+      "pending": "Em verificação",
+      "held": "À sua espera",
+      "blocked": "Bloqueada pela verificação"
+    },
+    "grounds": {
+      "illegal": "conteúdo ilegal",
+      "sexual": "conteúdo sexual",
+      "violence": "ameaças ou violência",
+      "hate": "ódio ou assédio",
+      "counterfeit": "contrafação",
+      "scam": "burla",
+      "spam": "spam ou publicidade",
+      "other": "viola as regras"
+    },
+    "hiddenBecause": "Oculta: {reason}",
+    "reasons": {
+      "spam": {
+        "label": "Spam ou publicidade",
+        "hint": "Promove outra loja ou outro produto, ou não é uma avaliação verdadeira."
+      },
+      "offensive": {
+        "label": "Abusiva ou ofensiva",
+        "hint": "Insulta pessoas, usa insultos de ódio ou assedia alguém."
+      },
+      "personal_info": {
+        "label": "Partilha dados pessoais",
+        "hint": "Contém um número de telefone, morada, email ou outra informação privada."
+      },
+      "unrelated": {
+        "label": "Não é sobre o produto",
+        "hint": "Fala de outra coisa, como outra encomenda ou outro produto."
+      }
+    },
+    "hide": {
+      "title": "Ocultar esta avaliação",
+      "description": "Os compradores deixam de a ver e não conta para a classificação.",
+      "legend": "Porque a está a ocultar?",
+      "legal": "As avaliações negativas ficam visíveis. Ocultar uma avaliação por ser crítica engana os compradores e não é permitido pelo direito do consumidor da UE, por isso uma avaliação só pode ser ocultada por um destes motivos.",
+      "confirm": "Ocultar avaliação"
+    },
+    "actions": {
+      "publish": "Publicar",
+      "show": "Mostrar novamente",
+      "hide": "Ocultar"
+    },
+    "done": {
+      "hide": "Avaliação ocultada.",
+      "show": "Avaliação visível novamente.",
+      "publish": "Avaliação publicada."
+    },
+    "email": {
+      "new": {
+        "subject": "{rating, plural, one {Nova avaliação de {rating} estrela} other {Nova avaliação de {rating} estrelas}}: {title}",
+        "intro": "{rating, plural, one {Um comprador deu {rating} estrela a {title}.} other {Um comprador deu {rating} estrelas a {title}.}} Leia a avaliação na sua página de avaliações."
+      },
+      "held": {
+        "subject": "Uma avaliação de {title} está à sua espera",
+        "intro": "A nossa verificação automática não teve a certeza de que uma avaliação de {title} cumpre as regras, por isso está oculta até decidir. Publique-a ou oculte-a na sua página de avaliações."
+      },
+      "open": "Abrir as suas avaliações: {url}",
+      "settings": "Pode desativar estes emails em Definições › Notificações."
     }
   }
 }

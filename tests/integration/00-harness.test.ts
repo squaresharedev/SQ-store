@@ -92,6 +92,9 @@ describe("embedded supabase replica", () => {
       // Every price a product has had, for the 30-day prior-price rule on
       // sales (20261004_discounts). Trigger-written, service-role only.
       "product_price_history",
+      // Each product's review count, average and 1..5 breakdown, kept by
+      // triggers on reviews (20261025_reviews). A store's team reads its own.
+      "product_rating_summaries",
       "products",
       // The public part of opted-in profiles, behind the public_profiles view
       // (20260924_public_profiles_invoker). Trigger-written, client read-only.
@@ -100,6 +103,10 @@ describe("embedded supabase replica", () => {
       "rate_limit_keys",
       "rate_limits",
       "reports",
+      // Review import runs, and the reviews themselves, native or imported
+      // (20261025_reviews). A store's team reads its own; service-role writes.
+      "review_imports",
+      "reviews",
       "security_events",
       // A store's plan as Stripe last reported it, and what happens around
       // the plans page (20260930_seller_plans). Service-role only.

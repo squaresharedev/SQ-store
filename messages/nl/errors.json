@@ -68,6 +68,10 @@
     "manageDiscounts": {
       "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} kan geen kortingen beheren in deze winkel.",
       "noRole": "Je hebt geen toestemming om kortingen te beheren in deze winkel."
+    },
+    "moderateReviews": {
+      "withRole": "Je rol als {role, select, owner {eigenaar} editor {bewerker} viewer {lezer} other {{role}}} kan geen reviews verbergen of publiceren in deze winkel.",
+      "noRole": "Je hebt geen toestemming om reviews te verbergen of te publiceren in deze winkel."
     }
   },
   "notFound": {
@@ -76,7 +80,8 @@
     "storefront": "Die etalage kon niet worden gevonden.",
     "item": "Dat item is niet gevonden.",
     "order": "Die bestelling kon niet worden gevonden.",
-    "discount": "Die korting kon niet worden gevonden."
+    "discount": "Die korting kon niet worden gevonden.",
+    "review": "Die review is niet gevonden."
   },
   "rateLimited": {
     "fix": "Wacht een paar minuten en probeer het opnieuw. Als er niets op de achtergrond opnieuw wordt geprobeerd, laad de pagina dan eerst opnieuw.",
@@ -98,7 +103,8 @@
     "connectPayments": "Te veel pogingen om Stripe in korte tijd te koppelen.",
     "readCheckoutSettings": "Te veel pogingen om afrekeneinstellingen te lezen in korte tijd.",
     "changePlan": "Je hebt in korte tijd te veel abonnementswijzigingen gestart.",
-    "saveDiscounts": "Te veel kortingswijzigingen in korte tijd."
+    "saveDiscounts": "Te veel kortingswijzigingen in korte tijd.",
+    "moderateReviews": "Te veel wijzigingen aan reviews in korte tijd."
   },
   "serverError": {
     "fix": "Dit is meestal tijdelijk. Wacht even en probeer het opnieuw; als het blijft mislukken, vernieuw dan de pagina.",
@@ -136,7 +142,8 @@
     "openBillingPortal": "Je factureringsgegevens konden niet worden geopend door een probleem aan onze kant.",
     "cancelPlan": "Je abonnement kon niet worden opgezegd door een probleem aan onze kant.",
     "resumePlan": "Je abonnement kon niet worden behouden door een probleem aan onze kant.",
-    "saveDiscount": "De korting kon niet worden opgeslagen door een probleem aan onze kant."
+    "saveDiscount": "De korting kon niet worden opgeslagen door een probleem aan onze kant.",
+    "moderateReview": "De review kon niet worden gewijzigd door een probleem bij ons."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Dit product is verwijderd, niet gepauzeerd.} storefront {Deze etalage is verwijderd, niet gepauzeerd.} other {Dit item is verwijderd, niet gepauzeerd.}}",
@@ -684,6 +691,16 @@
     "tooMany": {
       "message": "Deze winkel heeft het maximum aantal kortingen bereikt.",
       "fix": "Verwijder kortingen die je niet meer gebruikt en probeer het opnieuw."
+    }
+  },
+  "reviews": {
+    "blocked": {
+      "message": "De automatische controle heeft deze review geblokkeerd, dus hij kan niet worden gepubliceerd.",
+      "fix": "Hij overtreedt een regel, bijvoorbeeld door haat, bedreigingen of seksuele inhoud, en blijft verborgen."
+    },
+    "noReason": {
+      "message": "Kies waarom je deze review verbergt.",
+      "fix": "Een review kan alleen om een van de genoemde redenen worden verborgen."
     }
   }
 }

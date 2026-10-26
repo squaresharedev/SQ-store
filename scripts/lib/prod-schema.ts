@@ -113,6 +113,14 @@ export const SCHEMA_REQUIREMENTS: readonly SchemaRequirement[] = [
   { kind: "relation", name: "orders_tracking_number_trgm_idx", migration: "20261022_order_search_trgm_indexes.sql" },
   { kind: "relation", name: "orders_ship_to_name_trgm_idx", migration: "20261022_order_search_trgm_indexes.sql" },
   { kind: "relation", name: "orders_ship_to_city_trgm_idx", migration: "20261022_order_search_trgm_indexes.sql" },
+  { kind: "relation", name: "reviews", migration: "20261025_reviews.sql" },
+  { kind: "relation", name: "review_imports", migration: "20261025_reviews.sql" },
+  { kind: "relation", name: "product_rating_summaries", migration: "20261025_reviews.sql" },
+  { kind: "function", signature: "review_summaries_refresh(uuid[])", migration: "20261025_reviews.sql" },
+  { kind: "function", signature: "review_set_visibility(uuid,text,text)", migration: "20261025_reviews.sql" },
+  { kind: "column", table: "reviews", column: "is_public", migration: "20261025_reviews.sql" },
+  { kind: "column", table: "profiles", column: "notify_reviews", migration: "20261025_reviews.sql" },
+  { kind: "check", constraint: "notifications_type_check", allows: "review", migration: "20261025_reviews.sql" },
 ];
 
 /** A SQL string literal. Every value below is a constant from this file, and

@@ -57,7 +57,8 @@
     "system": "System",
     "security": "Sicherheit",
     "policy": "Richtlinie",
-    "billing": "Abrechnung"
+    "billing": "Abrechnung",
+    "review": "Bewertung"
   },
   "time": {
     "justNow": "gerade eben",
@@ -204,6 +205,16 @@
       "autoPaused": {
         "title": "Handlung nötig: {target, select, product {Dein Produkt „{title}“ ist pausiert} other {Dein Schaufenster „{title}“ ist pausiert}}",
         "body": "Eine automatische Prüfung hat es für Käufer verborgen, weil es anscheinend gegen die Regeln verstößt. Ändere es, dann wird es sofort erneut geprüft, oder bitte darum, dass eine Person die Entscheidung überprüft."
+      }
+    },
+    "review": {
+      "new": {
+        "title": "{rating, plural, one {Neue {rating}-Sterne-Bewertung} other {Neue {rating}-Sterne-Bewertung}} zu {title}",
+        "body": "Lies sie auf deiner Bewertungsseite."
+      },
+      "held": {
+        "title": "Eine Bewertung zu {title} wartet auf dich",
+        "body": "Die automatische Prüfung war unsicher. Veröffentliche sie oder blende sie aus."
       }
     }
   }

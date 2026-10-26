@@ -57,7 +57,8 @@
     "system": "Système",
     "security": "Sécurité",
     "policy": "Règles",
-    "billing": "Facturation"
+    "billing": "Facturation",
+    "review": "Avis"
   },
   "time": {
     "justNow": "à l’instant",
@@ -204,6 +205,16 @@
       "autoPaused": {
         "title": "Action requise : {target, select, product {votre produit « {title} » est en pause} other {votre vitrine « {title} » est en pause}}",
         "body": "Une vérification automatique l’a masqué aux acheteurs, car il semble enfreindre les règles. Modifiez-le et il sera vérifié à nouveau aussitôt, ou demandez qu’une personne réexamine la décision."
+      }
+    },
+    "review": {
+      "new": {
+        "title": "{rating, plural, one {Nouvel avis {rating} étoile} other {Nouvel avis {rating} étoiles}} sur {title}",
+        "body": "Lisez-le sur votre page d’avis."
+      },
+      "held": {
+        "title": "Un avis sur {title} vous attend",
+        "body": "La vérification automatique a eu un doute. Publiez-le ou masquez-le."
       }
     }
   }

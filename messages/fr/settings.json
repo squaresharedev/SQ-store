@@ -191,6 +191,10 @@
       "marketing": {
         "label": "Astuces et actualités du marketplace",
         "blurb": "Des idées occasionnelles pour vous aider à vendre plus. On reste léger, pas de spam."
+      },
+      "reviews": {
+        "label": "Avis",
+        "blurb": "M’envoyer un e-mail quand un acheteur évalue l’un de mes produits."
       }
     },
     "success": {

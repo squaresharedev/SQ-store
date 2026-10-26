@@ -191,6 +191,10 @@
       "marketing": {
         "label": "Consejos y noticias del marketplace",
         "blurb": "Ideas ocasionales para ayudarte a vender más. Sin agobiar, sin spam."
+      },
+      "reviews": {
+        "label": "Reseñas",
+        "blurb": "Enviarme un correo cuando un comprador valore uno de mis productos."
       }
     },
     "success": {

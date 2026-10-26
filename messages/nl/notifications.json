@@ -57,7 +57,8 @@
     "system": "Systeem",
     "security": "Beveiliging",
     "policy": "Beleid",
-    "billing": "Facturering"
+    "billing": "Facturering",
+    "review": "Review"
   },
   "time": {
     "justNow": "zojuist",
@@ -204,6 +205,16 @@
       "autoPaused": {
         "title": "Actie vereist: {target, select, product {je product \"{title}\" is gepauzeerd} other {je etalage \"{title}\" is gepauzeerd}}",
         "body": "Een automatische controle heeft het voor kopers verborgen omdat het in strijd lijkt met de regels. Pas het aan en het wordt meteen opnieuw gecontroleerd, of vraag of iemand de beslissing wil beoordelen."
+      }
+    },
+    "review": {
+      "new": {
+        "title": "{rating, plural, one {Nieuwe review met {rating} ster} other {Nieuwe review met {rating} sterren}} voor {title}",
+        "body": "Lees hem op je reviewpagina."
+      },
+      "held": {
+        "title": "Een review van {title} wacht op jou",
+        "body": "De automatische controle twijfelde. Publiceer of verberg hem."
       }
     }
   }

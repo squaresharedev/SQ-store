@@ -68,6 +68,10 @@
     "manageDiscounts": {
       "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě spravovat slevy.",
       "noRole": "Nemáte oprávnění spravovat slevy v tomto obchodě."
+    },
+    "moderateReviews": {
+      "withRole": "Vaše role {role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}} neumožňuje v tomto obchodě skrývat nebo zveřejňovat recenze.",
+      "noRole": "Nemáte oprávnění skrývat nebo zveřejňovat recenze v tomto obchodě."
     }
   },
   "notFound": {
@@ -76,7 +80,8 @@
     "storefront": "Tuto výlohu se nepodařilo najít.",
     "item": "Tuto položku se nepodařilo najít.",
     "order": "Tuto objednávku se nepodařilo najít.",
-    "discount": "Tuto slevu se nepodařilo najít."
+    "discount": "Tuto slevu se nepodařilo najít.",
+    "review": "Tuto recenzi se nepodařilo najít."
   },
   "rateLimited": {
     "fix": "Počkejte pár minut a zkuste to znovu. Pokud se nic nezkouší znovu na pozadí, nejdřív obnovte stránku.",
@@ -98,7 +103,8 @@
     "connectPayments": "Příliš mnoho pokusů o propojení Stripe v krátké době.",
     "readCheckoutSettings": "Příliš mnoho pokusů o načtení nastavení pokladny v krátké době.",
     "changePlan": "Příliš mnoho změn plánu za krátkou dobu.",
-    "saveDiscounts": "Příliš mnoho změn slev za krátkou dobu."
+    "saveDiscounts": "Příliš mnoho změn slev za krátkou dobu.",
+    "moderateReviews": "Příliš mnoho změn recenzí v krátké době."
   },
   "serverError": {
     "fix": "Obvykle jde o dočasný problém. Chvíli počkejte a zkuste to znovu; pokud to stále nejde, obnovte stránku.",
@@ -136,7 +142,8 @@
     "openBillingPortal": "Fakturační údaje se nepodařilo otevřít kvůli chybě na naší straně.",
     "cancelPlan": "Plán se nepodařilo zrušit kvůli problému na naší straně.",
     "resumePlan": "Plán se nepodařilo ponechat kvůli problému na naší straně.",
-    "saveDiscount": "Slevu se kvůli problému na naší straně nepodařilo uložit."
+    "saveDiscount": "Slevu se kvůli problému na naší straně nepodařilo uložit.",
+    "moderateReview": "Recenzi se kvůli problému na naší straně nepodařilo změnit."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Tento produkt byl odstraněn, nikoli pozastaven.} storefront {Tato výloha byla odstraněna, nikoli pozastavena.} other {Tato položka byla odstraněna, nikoli pozastavena.}}",
@@ -684,6 +691,16 @@
     "tooMany": {
       "message": "Tento obchod má maximální počet slev.",
       "fix": "Odstraňte slevy, které již nevyužíváte, a zkuste to znovu."
+    }
+  },
+  "reviews": {
+    "blocked": {
+      "message": "Automatická kontrola tuto recenzi zablokovala, proto ji nelze zveřejnit.",
+      "fix": "Porušuje pravidlo, například nenávistí, výhrůžkami nebo sexuálním obsahem, a zůstane skrytá."
+    },
+    "noReason": {
+      "message": "Zvolte, proč tuto recenzi skrýváte.",
+      "fix": "Recenzi lze skrýt jen z jednoho z uvedených důvodů."
     }
   }
 }

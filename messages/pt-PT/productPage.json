@@ -260,7 +260,31 @@
     "footerLink": "Desistir de uma compra",
     "total": "Total pago",
     "quantity": "Quantidade {quantity}",
-    "editHeadline": "Título do agradecimento"
+    "editHeadline": "Título do agradecimento",
+    "review": {
+      "title": "O que achou?",
+      "body": "Diga a outros compradores o que pensa de {product}.",
+      "open": "Escrever uma avaliação",
+      "done": "Já avaliou este produto. Obrigado!",
+      "dialogTitle": "Escrever uma avaliação",
+      "sentTitle": "Obrigado pela sua avaliação",
+      "sentBody": "Vai aparecer na página do produto dentro de cerca de um minuto, depois de lida pela nossa verificação automática, marcada como de um comprador verificado.",
+      "ratingLegend": "A sua classificação",
+      "ratingOption": "{rating, plural, one {{rating} estrela} other {{rating} estrelas}}",
+      "ratingPrompt": "Escolha uma classificação.",
+      "ratingWords": "{rating, select, 1 {Fraco} 2 {Razoável} 3 {Bom} 4 {Muito bom} other {Excelente}}",
+      "bodyLabel": "A sua avaliação",
+      "bodyPlaceholder": "O que gostou? O que podia ser melhor?",
+      "titleLabel": "Título (opcional)",
+      "nameLabel": "Nome a mostrar",
+      "nameHelp": "Mostrado com a sua avaliação. O seu email e a sua encomenda continuam privados.",
+      "send": "Publicar avaliação",
+      "errors": {
+        "notEligible": "Esta encomenda já não pode ser avaliada.",
+        "rateLimited": "Demasiadas avaliações a partir desta ligação. Tente novamente dentro de uma hora.",
+        "failed": "Não foi possível publicar a sua avaliação. Tente novamente."
+      }
+    }
   },
   "checkout": {
     "metadata": {
@@ -386,5 +410,24 @@
     "endsOn": "Promoção termina em {date}"
   },
   "badges": "Destaques",
-  "badgesOnPhoto": "Destaques na fotografia"
+  "badgesOnPhoto": "Destaques na fotografia",
+  "reviews": {
+    "heading": "Avaliações",
+    "average": "{average} de 5 estrelas",
+    "count": "{count, plural, one {Com base em {count} avaliação} other {Com base em {count} avaliações}}",
+    "stars": "{rating, plural, one {Avaliado com {rating} estrela de 5} other {Avaliado com {rating} estrelas de 5}}",
+    "starsShort": "{rating, plural, one {{rating} estrela} other {{rating} estrelas}}",
+    "verified": "Comprador verificado",
+    "imported": "{source, select, judgeme {Importada do Shopify (Judge.me)} loox {Importada do Shopify (Loox)} yotpo {Importada do Shopify (Yotpo)} other {Importada do Shopify}}",
+    "sortLabel": "Ordenar avaliações",
+    "sorts": {
+      "newest": "Mais recentes",
+      "highest": "Melhor avaliadas",
+      "lowest": "Pior avaliadas"
+    },
+    "more": "Mostrar mais avaliações",
+    "loading": "A carregar…",
+    "loadFailed": "Não foi possível carregar mais avaliações. Tente novamente.",
+    "about": "As avaliações marcadas como «Comprador verificado» vêm de encomendas feitas na Square Share. Cada avaliação é verificada automaticamente antes de aparecer, e os vendedores só podem ocultar uma avaliação se for spam, for ofensiva, partilhar dados pessoais ou não for sobre o produto."
+  }
 }

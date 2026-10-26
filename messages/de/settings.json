@@ -191,6 +191,10 @@
       "marketing": {
         "label": "Tipps und Marktplatz-Neuigkeiten",
         "blurb": "Gelegentliche Ideen, die dir helfen, mehr zu verkaufen. Wir halten es leicht, kein Spam."
+      },
+      "reviews": {
+        "label": "Bewertungen",
+        "blurb": "Schick mir eine E-Mail, wenn ein Käufer eines meiner Produkte bewertet."
       }
     },
     "success": {

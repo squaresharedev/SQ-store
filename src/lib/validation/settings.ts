@@ -153,6 +153,7 @@ export const bioSchema = z.strictObject({
 
 export const notificationsSchema = z.strictObject({
   notify_sales: z.boolean(),
+  notify_reviews: z.boolean(),
   notify_product_updates: z.boolean(),
   notify_marketing: z.boolean(),
 });

@@ -68,6 +68,10 @@
     "manageDiscounts": {
       "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite gerir descontos nesta loja.",
       "noRole": "Não tem permissão para gerir descontos nesta loja."
+    },
+    "moderateReviews": {
+      "withRole": "A sua função de {role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}} não permite ocultar nem publicar avaliações nesta loja.",
+      "noRole": "Não tem permissão para ocultar nem publicar avaliações nesta loja."
     }
   },
   "notFound": {
@@ -76,7 +80,8 @@
     "storefront": "Essa montra não foi encontrada.",
     "item": "Não foi possível encontrar esse item.",
     "order": "Essa encomenda não foi encontrada.",
-    "discount": "Esse desconto não foi encontrado."
+    "discount": "Esse desconto não foi encontrado.",
+    "review": "Não foi possível encontrar essa avaliação."
   },
   "rateLimited": {
     "fix": "Aguarde alguns minutos e tente novamente. Se nada estiver a repetir a tentativa em segundo plano, recarregue primeiro a página.",
@@ -98,7 +103,8 @@
     "connectPayments": "Demasiadas tentativas de ligação ao Stripe em pouco tempo.",
     "readCheckoutSettings": "Demasiadas tentativas de ler as definições de pagamento num curto espaço de tempo.",
     "changePlan": "Demasiadas alterações de plano iniciadas num curto espaço de tempo.",
-    "saveDiscounts": "Demasiadas alterações de descontos num curto espaço de tempo."
+    "saveDiscounts": "Demasiadas alterações de descontos num curto espaço de tempo.",
+    "moderateReviews": "Demasiadas alterações a avaliações em pouco tempo."
   },
   "serverError": {
     "fix": "Isto costuma ser temporário. Aguarde um momento e tente novamente; se continuar a falhar, atualize a página.",
@@ -136,7 +142,8 @@
     "openBillingPortal": "Não foi possível abrir os dados de faturação devido a um problema da nossa parte.",
     "cancelPlan": "Não foi possível cancelar o seu plano devido a um problema do nosso lado.",
     "resumePlan": "Não foi possível manter o seu plano devido a um problema do nosso lado.",
-    "saveDiscount": "Não foi possível guardar o desconto devido a um problema do nosso lado."
+    "saveDiscount": "Não foi possível guardar o desconto devido a um problema do nosso lado.",
+    "moderateReview": "Não foi possível alterar a avaliação devido a um problema do nosso lado."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Este produto foi removido, não pausado.} storefront {Esta montra foi removida, não pausada.} other {Este item foi removido, não pausado.}}",
@@ -684,6 +691,16 @@
     "tooMany": {
       "message": "Esta loja atingiu o número máximo de descontos.",
       "fix": "Elimine descontos que já não usa e tente novamente."
+    }
+  },
+  "reviews": {
+    "blocked": {
+      "message": "A verificação automática bloqueou esta avaliação, por isso não pode ser publicada.",
+      "fix": "Viola uma regra, por exemplo com ódio, ameaças ou conteúdo sexual, e continua oculta."
+    },
+    "noReason": {
+      "message": "Escolha porque está a ocultar esta avaliação.",
+      "fix": "Uma avaliação só pode ser ocultada por um dos motivos indicados."
     }
   }
 }

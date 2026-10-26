@@ -311,6 +311,21 @@
       "required": "Un badge ha bisogno di alcune parole.",
       "tooLong": "Un badge deve avere al massimo {maximum} caratteri.",
       "unsupported": "Un badge contiene caratteri non supportati."
+    },
+    "reviewTitle": {
+      "required": "Il titolo della recensione è obbligatorio.",
+      "tooLong": "Il titolo di una recensione può avere al massimo {maximum} caratteri.",
+      "unsupported": "Il titolo della recensione contiene caratteri non supportati."
+    },
+    "reviewBody": {
+      "required": "Scrivi qualche parola sul prodotto.",
+      "tooLong": "Una recensione può avere al massimo {maximum} caratteri.",
+      "unsupported": "La recensione contiene caratteri non supportati."
+    },
+    "reviewAuthor": {
+      "required": "Aggiungi il nome da mostrare con la recensione.",
+      "tooLong": "Un nome può avere al massimo {maximum} caratteri.",
+      "unsupported": "Il nome contiene caratteri non supportati."
     }
   },
   "email": {
@@ -426,6 +441,11 @@
       "whole": "Il limite deve essere un numero intero.",
       "tooSmall": "Il limite deve essere almeno {minimum}.",
       "tooBig": "Il limite può essere al massimo {maximum}."
+    },
+    "reviewRating": {
+      "whole": "Un voto deve essere un numero intero di stelle.",
+      "tooSmall": "Un voto deve essere di almeno {minimum} stella.",
+      "tooBig": "Un voto può essere al massimo di {maximum} stelle."
     }
   },
   "list": {
@@ -534,5 +554,13 @@
     "endBeforeStart": "La fine deve essere successiva all'inizio.",
     "startInPast": "L'inizio non può essere nel passato. Scegli un momento più tardi, o avvialo subito.",
     "endInPast": "La fine non può essere nel passato."
+  },
+  "reviewImport": {
+    "rating": "Nessun voto da 1 a 5.",
+    "title": "Il titolo è troppo lungo.",
+    "body": "La recensione è troppo lunga o contiene caratteri non supportati.",
+    "author": "Nessun nome dell’autore.",
+    "date": "Nessuna data leggibile.",
+    "product": "Nessun prodotto."
   }
 }

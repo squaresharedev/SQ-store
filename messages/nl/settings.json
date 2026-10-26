@@ -191,6 +191,10 @@
       "marketing": {
         "label": "Tips en marketplace-nieuws",
         "blurb": "Af en toe ideeën om je te helpen meer te verkopen. We houden het luchtig, geen spam."
+      },
+      "reviews": {
+        "label": "Reviews",
+        "blurb": "Mail me als een koper een van mijn producten beoordeelt."
       }
     },
     "success": {

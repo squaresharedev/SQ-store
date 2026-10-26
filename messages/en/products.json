@@ -11,6 +11,12 @@
     },
     "import": {
       "title": "Import products"
+    },
+    "importReviews": {
+      "title": "Import reviews"
+    },
+    "reviews": {
+      "title": "Reviews"
     }
   },
   "page": {
@@ -28,9 +34,14 @@
     },
     "import": {
       "heading": "Import products",
-      "description": "Bring a catalogue over from Shopify, or any tool that exports a CSV. You will see exactly what lands before anything is saved."
+      "description": "Bring a catalogue over from Shopify, or any tool that exports a CSV. You will see exactly what lands before anything is saved.",
+      "reviewsLink": "Moving your reviews too? Import reviews"
     },
-    "formLoading": "Loading the product form"
+    "formLoading": "Loading the product form",
+    "importReviews": {
+      "heading": "Import reviews",
+      "description": "Bring your reviews over from Judge.me, Loox, Yotpo or Shopify Product Reviews. Export them as a CSV there, drop the file here, and check which product each one belongs to before anything is saved."
+    }
   },
   "emptyState": {
     "title": "No products yet",
@@ -60,7 +71,8 @@
     "import": "Import",
     "add": "Add product",
     "updating": "Updating…",
-    "pagination": "{total, plural, one {{total} product · page {page} of {pages}} other {{total} products · page {page} of {pages}}}"
+    "pagination": "{total, plural, one {{total} product · page {page} of {pages}} other {{total} products · page {page} of {pages}}}",
+    "reviews": "Reviews"
   },
   "list": {
     "noMatch": {
@@ -1023,6 +1035,146 @@
         "label": "Quality checked",
         "keywords": "tested, inspected, checked, approved"
       }
+    }
+  },
+  "reviewImport": {
+    "dropPrompt": "Drop your review export here, or choose a CSV file",
+    "rowsLimit": "{max, plural, one {Up to {max} review per file} other {Up to {max} reviews per file}}",
+    "fileTooLarge": "That file is too large. The limit is {max}.",
+    "fileEmpty": "That file is empty.",
+    "badgeNote": "Imported reviews show where they were first written, such as \"Imported from Shopify (Judge.me)\". Only reviews buyers write from a Square Share order are marked as from a verified buyer. Each imported review appears once our automatic check has read it.",
+    "missingColumns": "This file has no column for: {fields}. Export your reviews from your review app again, as a CSV.",
+    "fields": {
+      "rating": "rating",
+      "title": "title",
+      "body": "review",
+      "author": "reviewer name",
+      "date": "date",
+      "product": "product",
+      "status": "status"
+    },
+    "summary": "{ready, plural, one {<count>{ready}</count> review ready} other {<count>{ready}</count> reviews ready}}{skipped, plural, =0 {.} other {, {skipped} left out.}}",
+    "hiddenRows": "{count, plural, one {{count} review was hidden or marked as spam on your old store, so it is left out.} other {{count} reviews were hidden or marked as spam on your old store, so they are left out.}}",
+    "droppedRows": "{count, plural, one {{count} review is past the {max} a file can carry, so it is left out.} other {{count} reviews are past the {max} a file can carry, so they are left out.}}",
+    "source": "Imported from",
+    "sourceUnknown": "Choose the app",
+    "sourceHelp": "Shown on each review, so buyers know where it was first written.",
+    "sources": {
+      "judgeme": "Judge.me",
+      "loox": "Loox",
+      "yotpo": "Yotpo",
+      "shopify": "Shopify Product Reviews"
+    },
+    "mappingHeading": "Match products",
+    "mappingHelp": "Each product in the file, and the product here its reviews go to. Matched by name where possible. Anything set to \"Don't import\" is left out.",
+    "mappingFileProduct": "In the file",
+    "mappingReviews": "Reviews",
+    "mappingProduct": "Product here",
+    "mappingSelect": "Product for {key}",
+    "skipProduct": "Don't import",
+    "skippedHeading": "Rows that will be left out",
+    "skippedRow": "Line {line}: {problem}",
+    "run": "{count, plural, one {Import {count} review} other {Import {count} reviews}}",
+    "imported": "{count, plural, one {{count} review was imported.} other {{count} reviews were imported.}}",
+    "duplicates": "{count, plural, one {{count} was already here.} other {{count} were already here.}}",
+    "skippedRows": "{count, plural, one {{count} row was left out.} other {{count} rows were left out.}}",
+    "errors": {
+      "rateLimited": "Too many imports in the last hour. Try again later.",
+      "tooLarge": "That file is too large to import.",
+      "unrecognised": "This file is not a review export we can read.",
+      "nothing": "Nothing to import. Match at least one product.",
+      "failed": "The import did not go through, and nothing was saved. Try again."
+    }
+  },
+  "reviewModeration": {
+    "heading": "Reviews",
+    "description": "What buyers said about your products. Every review is checked automatically before it appears, and the ones the check was unsure about wait here for you.",
+    "importLink": "Moving from Shopify? Import your reviews",
+    "filtersLabel": "Filter reviews",
+    "filters": {
+      "all": "All",
+      "held": "Waiting for you",
+      "hidden": "Hidden"
+    },
+    "heldCount": "{count, plural, one {{count} review waiting for you} other {{count} reviews waiting for you}}",
+    "loadFailed": "Your reviews could not be loaded. Refresh the page to try again.",
+    "empty": {
+      "all": {
+        "title": "No reviews yet",
+        "body": "When a buyer reviews a product from their order page, it shows up here."
+      },
+      "held": {
+        "title": "Nothing waiting for you",
+        "body": "Reviews the automatic check is unsure about wait here until you decide."
+      },
+      "hidden": {
+        "title": "No hidden reviews",
+        "body": "Reviews you hide show up here, and you can show them again at any time."
+      }
+    },
+    "pagination": "{total, plural, one {{total} review · page {page} of {pages}} other {{total} reviews · page {page} of {pages}}}",
+    "status": {
+      "pending": "Being checked",
+      "held": "Waiting for you",
+      "blocked": "Blocked by the check"
+    },
+    "grounds": {
+      "illegal": "illegal content",
+      "sexual": "sexual content",
+      "violence": "threats or violence",
+      "hate": "hate or harassment",
+      "counterfeit": "counterfeit goods",
+      "scam": "scam",
+      "spam": "spam or advertising",
+      "other": "breaks the rules"
+    },
+    "hiddenBecause": "Hidden: {reason}",
+    "reasons": {
+      "spam": {
+        "label": "Spam or advertising",
+        "hint": "Promotes another shop or product, or is not a real review."
+      },
+      "offensive": {
+        "label": "Abusive or offensive",
+        "hint": "Insults people, uses slurs or harasses someone."
+      },
+      "personal_info": {
+        "label": "Shares personal details",
+        "hint": "Contains a phone number, address, email or other private information."
+      },
+      "unrelated": {
+        "label": "Not about the product",
+        "hint": "About something else entirely, such as another order or product."
+      }
+    },
+    "hide": {
+      "title": "Hide this review",
+      "description": "Buyers won't see it, and it won't count towards the rating.",
+      "legend": "Why are you hiding it?",
+      "legal": "Negative reviews stay up. Hiding a review because it is critical misleads buyers and isn't allowed under EU consumer law, so a review can only be hidden for one of these reasons.",
+      "confirm": "Hide review"
+    },
+    "actions": {
+      "publish": "Publish",
+      "show": "Show again",
+      "hide": "Hide"
+    },
+    "done": {
+      "hide": "Review hidden.",
+      "show": "Review shown again.",
+      "publish": "Review published."
+    },
+    "email": {
+      "new": {
+        "subject": "{rating, plural, one {New {rating}-star review} other {New {rating}-star review}}: {title}",
+        "intro": "{rating, plural, one {A buyer gave {title} {rating} star.} other {A buyer gave {title} {rating} stars.}} Read what they wrote on your reviews page."
+      },
+      "held": {
+        "subject": "A review of {title} is waiting for you",
+        "intro": "Our automatic check wasn't sure whether a review of {title} breaks the rules, so it is hidden until you decide. Publish it or hide it from your reviews page."
+      },
+      "open": "Open your reviews: {url}",
+      "settings": "You can turn these emails off in Settings › Notifications."
     }
   }
 }

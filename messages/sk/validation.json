@@ -311,6 +311,21 @@
       "required": "Odznak potrebuje nejaký text.",
       "tooLong": "Odznak môže mať najviac {maximum} znakov.",
       "unsupported": "Odznak obsahuje nepodporované znaky."
+    },
+    "reviewTitle": {
+      "required": "Nadpis recenzie je povinný.",
+      "tooLong": "Nadpis recenzie môže mať najviac {maximum} znakov.",
+      "unsupported": "Nadpis recenzie obsahuje nepodporované znaky."
+    },
+    "reviewBody": {
+      "required": "Napíšte pár slov o produkte.",
+      "tooLong": "Recenzia môže mať najviac {maximum} znakov.",
+      "unsupported": "Recenzia obsahuje nepodporované znaky."
+    },
+    "reviewAuthor": {
+      "required": "Doplňte meno, ktoré sa zobrazí pri recenzii.",
+      "tooLong": "Meno môže mať najviac {maximum} znakov.",
+      "unsupported": "Meno obsahuje nepodporované znaky."
     }
   },
   "email": {
@@ -426,6 +441,11 @@
       "whole": "Limit musí byť celé číslo.",
       "tooSmall": "Limit musí byť aspoň {minimum}.",
       "tooBig": "Limit môže byť najviac {maximum}."
+    },
+    "reviewRating": {
+      "whole": "Hodnotenie musí byť celý počet hviezdičiek.",
+      "tooSmall": "Hodnotenie musí byť aspoň {minimum}.",
+      "tooBig": "Hodnotenie môže byť najviac {maximum}."
     }
   },
   "list": {
@@ -534,5 +554,13 @@
     "endBeforeStart": "Koniec musí byť po začiatku.",
     "startInPast": "Začiatok nemôže byť v minulosti. Zvoľte neskorší čas alebo spusťte hneď.",
     "endInPast": "Koniec nemôže byť v minulosti."
+  },
+  "reviewImport": {
+    "rating": "Chýba hodnotenie od 1 do 5.",
+    "title": "Nadpis je príliš dlhý.",
+    "body": "Recenzia je príliš dlhá alebo obsahuje nepodporované znaky.",
+    "author": "Chýba meno autora.",
+    "date": "Chýba čitateľný dátum.",
+    "product": "Chýba produkt."
   }
 }

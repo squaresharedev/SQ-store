@@ -9,6 +9,7 @@ import {
   Package,
   ShieldAlert,
   ShoppingBag,
+  Star,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -30,6 +31,7 @@ const TYPE_ICON: Record<NotificationType, { icon: LucideIcon; tone?: string }> =
   security: { icon: ShieldAlert, tone: "text-destructive" },
   policy: { icon: Flag, tone: "text-destructive" },
   billing: { icon: Gem },
+  review: { icon: Star },
 };
 
 /**

@@ -33,6 +33,7 @@ import { parseFulfilment } from "@/lib/orders/fulfilment";
 import { trackingLinkFor } from "@/lib/orders/carriers";
 import { buyerWithdrawal } from "@/lib/orders/withdrawal";
 import { orderPhotoKey } from "@/lib/orders/photo";
+import { isReviewableOrder } from "@/lib/reviews/eligibility";
 import type { OrderPageData } from "@/types/checkout";
 
 const idSchema = uuidField();
@@ -130,7 +131,7 @@ export const getOrderPage = cache(
     if (!detached && order.storefront_id !== storefrontId) return null;
 
     const admin = createAdminClient();
-    const [{ data: storefront }, seller, shippingPolicy, { data: product }] = await Promise.all([
+    const [{ data: storefront }, seller, shippingPolicy, { data: product }, { data: review }] = await Promise.all([
       detached
         ? Promise.resolve({ data: null })
         : admin
@@ -143,10 +144,11 @@ export const getOrderPage = cache(
       order.product_id
         ? admin
             .from("products")
-            .select("image_key, gallery, option_groups, shipping_profile_id, moderation_status")
+            .select("image_key, gallery, option_groups, shipping_profile_id, status, moderation_status")
             .eq("id", order.product_id)
             .maybeSingle()
         : Promise.resolve({ data: null }),
+      admin.from("reviews").select("id").eq("order_id", order.id).maybeSingle(),
     ]);
     if (!storefront && !detached) return null;
     // The order outlives the shop's moderation state, and the shop itself; the
@@ -229,6 +231,13 @@ export const getOrderPage = cache(
         payment: order.status === "refunded" ? "refunded" : order.status === "pending" ? "pending" : "paid",
         refundedAt: order.refunded_at,
         confirmationSent: order.confirmation_sent_at !== null,
+        // The same rules the review route applies, so the button is offered
+        // exactly when pressing it can work.
+        review: review
+          ? "done"
+          : isReviewableOrder(order) && product?.status === "active" && isContentVisible(product.moderation_status)
+            ? "open"
+            : "closed",
       },
     };
   },

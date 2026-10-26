@@ -1,7 +1,7 @@
 import { useId } from "react";
 import { cubicBezier, motion, type Variants } from "motion/react";
 import { IconSvg } from "./IconSvg";
-import { EASE_ENTRANCE, EASE_EXIT } from "./motion-tokens";
+import { EASE_ENTRANCE, EASE_EXIT, EASE_STANDARD } from "./motion-tokens";
 import type { NavIconProps } from "./types";
 
 /**
@@ -21,7 +21,7 @@ import type { NavIconProps } from "./types";
  * entry decelerates) so the head, the line and the fade all stay in step. The
  * icon box is a clip, so what is past its edge simply is not drawn.
  *
- * Wind streaks sit at zero opacity at rest, so the icon is untouched until
+ * Wind streaks (a set at the take-off, a set at the arrival) sit at zero opacity at rest, so the icon is untouched until
  * hover. Their keyframes are evenly spaced on purpose: motion runs plain
  * opacity on the browser's animation engine and transforms on its own, and
  * only the latter honours a custom `times` array, so a streak with custom
@@ -88,7 +88,7 @@ const SAMPLES = 72;
 /** Fractions of the run: the exit, a hidden beat, then the entry. */
 const EXIT_END = 0.38;
 const ENTRY_START = 0.44;
-const DURATION = 1.1;
+const DURATION = 0.75;
 
 const exitCurve = cubicBezier(...EASE_EXIT);
 const entryCurve = cubicBezier(...EASE_ENTRANCE);
@@ -195,15 +195,23 @@ const HEAD: Variants = {
   },
 };
 
-/** One gust trailing down the slope, timed to the arrow's take-off. */
-function streak(delay: number, distance: number): Variants {
+/**
+ * One gust trailing down the slope. Each streak flies once, so the take-off
+ * and the arrival each get their own set rather than one set flying twice.
+ */
+function streak(
+  delay: number,
+  distance: number,
+  duration = 0.22,
+  ease: [number, number, number, number] = EASE_ENTRANCE,
+): Variants {
   return {
     idle: { x: 0, y: 0, opacity: 0, transition: { duration: 0.1 } },
     hover: {
       x: [0, -distance * 0.4, -distance],
       y: [0, distance * 0.4, distance],
       opacity: [0, 0.95, 0],
-      transition: { delay, duration: 0.32, ease: EASE_ENTRANCE },
+      transition: { delay, duration, ease },
     },
   };
 }
@@ -212,14 +220,33 @@ function streak(delay: number, distance: number): Variants {
 const dash = (x: number, y: number, length = 1.7) =>
   `M${x} ${y}l-${length} ${length}`;
 
-const STREAKS: Array<{ d: string; variants: Variants }> = [
-  { d: dash(22.5, 11.5), variants: streak(0.1, 7) },
-  { d: dash(21, 15, 2.1), variants: streak(0.14, 8) },
-  { d: dash(12, 3, 2.1), variants: streak(0.16, 8) },
-  { d: dash(23, 16), variants: streak(0.2, 7) },
-  { d: dash(8.5, 5.5), variants: streak(0.22, 7) },
-  { d: dash(18.5, 16), variants: streak(0.26, 7) },
+/** Wind off the arrow as it takes off and leaves through the top-right. */
+const TAKE_OFF: Array<{ d: string; variants: Variants }> = [
+  { d: dash(22.5, 11.5), variants: streak(0.07, 7) },
+  { d: dash(21, 15, 2.1), variants: streak(0.1, 8) },
+  { d: dash(12, 3, 2.1), variants: streak(0.11, 8) },
+  { d: dash(23, 16), variants: streak(0.14, 7) },
+  { d: dash(8.5, 5.5), variants: streak(0.15, 7) },
+  { d: dash(18.5, 16), variants: streak(0.18, 7) },
 ];
+
+/**
+ * Wind off the line as it feeds back in: dense and quick while it is flying,
+ * then fewer, shorter and slower as it eases to its stop. These sit in the
+ * empty corners either side of the zigzag, where the line is about to pass.
+ */
+const ARRIVAL: Array<{ d: string; variants: Variants }> = [
+  { d: dash(7, 21, 2.1), variants: streak(0.34, 7) },
+  { d: dash(14, 22), variants: streak(0.36, 8) },
+  { d: dash(5.5, 9), variants: streak(0.37, 7) },
+  { d: dash(18, 19, 2.1), variants: streak(0.4, 7) },
+  { d: dash(10, 7), variants: streak(0.42, 6, 0.26) },
+  { d: dash(21, 12), variants: streak(0.46, 5, 0.3, EASE_STANDARD) },
+  { d: dash(12, 20), variants: streak(0.5, 4, 0.34, EASE_STANDARD) },
+  { d: dash(6, 6), variants: streak(0.54, 3, 0.36, EASE_STANDARD) },
+];
+
+const STREAKS = [...TAKE_OFF, ...ARRIVAL];
 
 const TRACK_PATH = TRACK.map(
   ([x, y], i) => `${i === 0 ? "M" : "L"}${x} ${y}`,

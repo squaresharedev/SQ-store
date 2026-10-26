@@ -18,6 +18,7 @@ import { CHECKOUT_HEADLINE_MAX, CHECKOUT_THANKS_MESSAGE_MAX } from "@/types/stor
 import { QuantityMark } from "./QuantityMark";
 import { VersionChips } from "./VersionChips";
 import { WithdrawalPanel } from "./WithdrawalPanel";
+import { ReviewPanel } from "./ReviewPanel";
 import { PaymentWatch } from "./PaymentWatch";
 import { resolveCheckoutTheme } from "./checkout-theme";
 
@@ -356,6 +357,20 @@ export function OrderStatusView({
             orderRef={order.ref}
             withdrawal={order.withdrawal}
             sellerName={sellerName}
+            ink={theme.ink}
+            rule={theme.rule}
+            cta={theme.cta}
+            preview={preview}
+          />
+        )}
+
+        {order.productId && (order.review === "open" || order.review === "done") && (
+          <ReviewPanel
+            orderRef={order.ref}
+            productId={order.productId}
+            productTitle={order.productTitle}
+            defaultName={order.firstName}
+            state={order.review}
             ink={theme.ink}
             rule={theme.rule}
             cta={theme.cta}

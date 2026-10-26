@@ -60,13 +60,16 @@ describe("nav icons", () => {
     }
   });
 
-  it("DiscountsIcon is the plain lucide tag: no badge, nothing extra", () => {
+  it("DiscountsIcon rests as the plain lucide tag, nothing more", () => {
     const { container } = render(<DiscountsIcon />);
-    expect(container.querySelectorAll("path")).toHaveLength(1);
-    expect(container.querySelectorAll("circle")).toHaveLength(1);
-    expect(container.querySelector("path")?.getAttribute("d")).toContain(
-      "M12.586 2.586",
+    // The motion-blur copies carry opacity 0 on the element itself, so even
+    // without a hover (or with reduced motion) the only thing drawn is the tag.
+    const visible = [...container.querySelectorAll("path")].filter(
+      (path) => path.getAttribute("opacity") !== "0",
     );
+    expect(visible).toHaveLength(1);
+    expect(visible[0].getAttribute("d")).toContain("M12.586 2.586");
+    expect(container.querySelectorAll("circle")).toHaveLength(1);
   });
 
   it("ProductsIcon keeps the lucide package silhouette", () => {

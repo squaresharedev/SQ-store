@@ -191,6 +191,10 @@
       "marketing": {
         "label": "Porady i nowości z rynku",
         "blurb": "Od czasu do czasu pomysły, jak sprzedawać więcej. Bez spamu, bez przesady."
+      },
+      "reviews": {
+        "label": "Opinie",
+        "blurb": "Wyślij mi e-mail, gdy kupujący oceni jeden z moich produktów."
       }
     },
     "success": {

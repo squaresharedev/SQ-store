@@ -57,7 +57,8 @@
     "system": "System",
     "security": "Bezpieczeństwo",
     "policy": "Zasady",
-    "billing": "Rozliczenia"
+    "billing": "Rozliczenia",
+    "review": "Opinia"
   },
   "time": {
     "justNow": "przed chwilą",
@@ -204,6 +205,16 @@
       "autoPaused": {
         "title": "Wymagane działanie: {target, select, product {twój produkt „{title}” jest wstrzymany} other {twoja witryna „{title}” jest wstrzymana}}",
         "body": "Automatyczne sprawdzanie ukryło to przed kupującymi, ponieważ wygląda na naruszenie zasad. Zmień to, a zostanie od razu sprawdzone ponownie, albo poproś, aby decyzję ocenił człowiek."
+      }
+    },
+    "review": {
+      "new": {
+        "title": "{rating, plural, one {Nowa opinia ({rating} na 5) o produkcie {title}} few {Nowa opinia ({rating} na 5) o produkcie {title}} many {Nowa opinia ({rating} na 5) o produkcie {title}} other {Nowa opinia ({rating} na 5) o produkcie {title}}}",
+        "body": "Przeczytaj ją na stronie opinii."
+      },
+      "held": {
+        "title": "Opinia o produkcie {title} czeka na ciebie",
+        "body": "Automatyczne sprawdzanie miało wątpliwości. Opublikuj ją lub ukryj."
       }
     }
   }

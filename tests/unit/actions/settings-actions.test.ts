@@ -824,6 +824,8 @@ describe("saveNotifications", () => {
     expect(result.success).toBeTruthy();
     const updatePayload = writtenProfile();
     expect(updatePayload).toHaveProperty("notify_sales", true);
+    // A switch left off (no field posted) saves as off.
+    expect(updatePayload).toHaveProperty("notify_reviews", false);
     expect(updatePayload).toHaveProperty("notify_product_updates", false);
     expect(updatePayload).toHaveProperty("notify_marketing", false);
   });

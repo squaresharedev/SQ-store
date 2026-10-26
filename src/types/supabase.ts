@@ -1443,6 +1443,56 @@ export type Database = {
           },
         ]
       }
+      product_rating_summaries: {
+        Row: {
+          average: number | null
+          product_id: string
+          rating_1: number
+          rating_2: number
+          rating_3: number
+          rating_4: number
+          rating_5: number
+          rating_sum: number
+          review_count: number
+          seller_id: string
+          updated_at: string
+        }
+        Insert: {
+          average?: never
+          product_id: string
+          rating_1?: number
+          rating_2?: number
+          rating_3?: number
+          rating_4?: number
+          rating_5?: number
+          rating_sum?: number
+          review_count?: number
+          seller_id: string
+          updated_at?: string
+        }
+        Update: {
+          average?: never
+          product_id?: string
+          rating_1?: number
+          rating_2?: number
+          rating_3?: number
+          rating_4?: number
+          rating_5?: number
+          rating_sum?: number
+          review_count?: number
+          seller_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_rating_summaries_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           created_at: string
@@ -1607,6 +1657,7 @@ export type Database = {
           locale: string | null
           notify_marketing: boolean
           notify_product_updates: boolean
+          notify_reviews: boolean
           notify_sales: boolean
           onboarding_completed_at: string | null
           sample_storefront_hidden_at: string | null
@@ -1637,6 +1688,7 @@ export type Database = {
           locale?: string | null
           notify_marketing?: boolean
           notify_product_updates?: boolean
+          notify_reviews?: boolean
           notify_sales?: boolean
           onboarding_completed_at?: string | null
           sample_storefront_hidden_at?: string | null
@@ -1667,6 +1719,7 @@ export type Database = {
           locale?: string | null
           notify_marketing?: boolean
           notify_product_updates?: boolean
+          notify_reviews?: boolean
           notify_sales?: boolean
           onboarding_completed_at?: string | null
           sample_storefront_hidden_at?: string | null
@@ -1800,6 +1853,148 @@ export type Database = {
             columns: ["resolved_by"]
             isOneToOne: false
             referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_imports: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          file_name: string | null
+          id: string
+          imported_count: number
+          row_count: number
+          seller_id: string
+          skipped_count: number
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          file_name?: string | null
+          id?: string
+          imported_count?: number
+          row_count?: number
+          seller_id: string
+          skipped_count?: number
+          source: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          file_name?: string | null
+          id?: string
+          imported_count?: number
+          row_count?: number
+          seller_id?: string
+          skipped_count?: number
+          source?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          author_name: string
+          body: string
+          created_at: string
+          external_id: string | null
+          hidden_at: string | null
+          hidden_by: string | null
+          hidden_reason: string | null
+          id: string
+          import_id: string | null
+          is_approved: boolean
+          is_imported: boolean
+          is_public: boolean
+          is_verified_buyer: boolean
+          moderated_at: string | null
+          moderation_ground: string | null
+          moderation_status: string
+          order_id: string | null
+          product_id: string
+          rating: number
+          released_by: string | null
+          reviewed_at: string
+          seller_id: string
+          source: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_name: string
+          body?: string
+          created_at?: string
+          external_id?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
+          id?: string
+          import_id?: string | null
+          is_approved?: boolean
+          is_imported?: never
+          is_public?: never
+          is_verified_buyer?: boolean
+          moderated_at?: string | null
+          moderation_ground?: string | null
+          moderation_status?: string
+          order_id?: string | null
+          product_id: string
+          rating: number
+          released_by?: string | null
+          reviewed_at?: string
+          seller_id: string
+          source?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          body?: string
+          created_at?: string
+          external_id?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
+          id?: string
+          import_id?: string | null
+          is_approved?: boolean
+          is_imported?: never
+          is_public?: never
+          is_verified_buyer?: boolean
+          moderated_at?: string | null
+          moderation_ground?: string | null
+          moderation_status?: string
+          order_id?: string | null
+          product_id?: string
+          rating?: number
+          released_by?: string | null
+          reviewed_at?: string
+          seller_id?: string
+          source?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "review_imports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -2582,6 +2777,14 @@ export type Database = {
           p_status?: string
         }
         Returns: Json
+      }
+      review_set_visibility: {
+        Args: { p_action: string; p_reason?: string; p_review_id: string }
+        Returns: string
+      }
+      review_summaries_refresh: {
+        Args: { p_product_ids: string[] }
+        Returns: undefined
       }
       redeem_contact_verification: {
         Args: {

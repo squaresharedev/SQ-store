@@ -9,6 +9,7 @@ import { formatCents, toCurrency } from "@/lib/format/money";
 import type { Locale } from "@/i18n/locales";
 import { SECTION_SETTING } from "@/lib/storefront/setting-ref";
 import type { ProductPageData } from "@/types/product-page";
+import type { ProductReviews } from "@/types/review";
 import { isOnPhoto } from "@/lib/validation/product";
 import type { ProductPageSectionId } from "@/types/storefront";
 import { resolveCtaTarget } from "./cta-target";
@@ -19,6 +20,7 @@ import { ProductCta } from "./ProductCta";
 import { ProductDescription } from "./ProductDescription";
 import { ProductGallery } from "./ProductGallery";
 import { ProductPrice } from "./ProductPrice";
+import { ReviewsSection } from "./ReviewsSection";
 import { PoweredByFooter } from "./PoweredByFooter";
 import { SellerBlock, hasSellerDetails } from "./SellerBlock";
 import { SpecsSection } from "./SpecsSection";
@@ -64,6 +66,7 @@ export function ProductPageView({
   initialOptionIds = NO_OPTIONS,
   initialQuantity = 1,
   via = null,
+  reviews = null,
 }: {
   page: ProductPageData;
   mode: "public" | "preview";
@@ -75,6 +78,9 @@ export function ProductPageView({
   /** From `?q=`, already clamped against this product's own limit by the
    *  server. The provider re-clamps anyway; neither is what authorizes a sale. */
   initialQuantity?: number;
+  /** The product's reviews (lib/reviews/queries.ts). The public page only:
+   *  the editor's preview has none to show. */
+  reviews?: ProductReviews | null;
 }) {
   const { storefront, product } = page;
   const { theme, productPage, shippingPolicy, seller } = storefront;
@@ -581,6 +587,17 @@ export function ProductPageView({
                     </details>
                   ))}
                 </div>
+              )}
+
+              {reviews && (
+                <ReviewsSection
+                  productId={product.id}
+                  reviews={reviews}
+                  ink={ink}
+                  rule={rule}
+                  cta={cta}
+                  cornerRadius={theme.cornerRadius}
+                />
               )}
 
               {/* THE FOOT OF THE PAGE, open. Not a section in the accordion

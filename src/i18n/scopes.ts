@@ -49,6 +49,9 @@ const APP = [
   "Search",
   "Settings",
   "ProductPage.footer.policies",
+  // The reviews page draws each review's stars and badges in the product
+  // page's own words.
+  "ProductPage.reviews",
   "ProductPage.sale",
   "ProductPage.shippingProse",
   "Storefront.colors.presets",

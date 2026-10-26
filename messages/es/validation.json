@@ -311,6 +311,21 @@
       "required": "La insignia necesita algún texto.",
       "tooLong": "Una insignia puede tener como máximo {maximum} caracteres.",
       "unsupported": "La insignia contiene caracteres no admitidos."
+    },
+    "reviewTitle": {
+      "required": "El título de la reseña es obligatorio.",
+      "tooLong": "El título de una reseña debe tener {maximum} caracteres como máximo.",
+      "unsupported": "El título de la reseña contiene caracteres no admitidos."
+    },
+    "reviewBody": {
+      "required": "Escribe unas palabras sobre el producto.",
+      "tooLong": "Una reseña debe tener {maximum} caracteres como máximo.",
+      "unsupported": "La reseña contiene caracteres no admitidos."
+    },
+    "reviewAuthor": {
+      "required": "Añade el nombre que se mostrará con la reseña.",
+      "tooLong": "Un nombre debe tener {maximum} caracteres como máximo.",
+      "unsupported": "El nombre contiene caracteres no admitidos."
     }
   },
   "email": {
@@ -426,6 +441,11 @@
       "whole": "El límite debe ser un número entero.",
       "tooSmall": "El límite debe ser como mínimo {minimum}.",
       "tooBig": "El límite puede ser como máximo {maximum}."
+    },
+    "reviewRating": {
+      "whole": "Una valoración debe ser un número entero de estrellas.",
+      "tooSmall": "Una valoración debe tener al menos {minimum} estrella.",
+      "tooBig": "Una valoración puede tener como máximo {maximum} estrellas."
     }
   },
   "list": {
@@ -534,5 +554,13 @@
     "endBeforeStart": "El fin tiene que ser posterior al inicio.",
     "startInPast": "El inicio no puede ser en el pasado. Elige una hora posterior o empiézalo ahora.",
     "endInPast": "El fin no puede ser en el pasado."
+  },
+  "reviewImport": {
+    "rating": "Sin valoración de 1 a 5.",
+    "title": "El título es demasiado largo.",
+    "body": "La reseña es demasiado larga o contiene caracteres no admitidos.",
+    "author": "Sin nombre de quien la escribió.",
+    "date": "Sin una fecha legible.",
+    "product": "Sin producto."
   }
 }

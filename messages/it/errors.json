@@ -68,6 +68,10 @@
     "manageDiscounts": {
       "withRole": "Il tuo ruolo {role, select, owner {Proprietario} editor {Editor} viewer {Visualizzatore} other {{role}}} non può gestire gli sconti in questo negozio.",
       "noRole": "Non hai il permesso di gestire gli sconti in questo negozio."
+    },
+    "moderateReviews": {
+      "withRole": "Il tuo ruolo {role, select, owner {Proprietario} editor {Editor} viewer {Visualizzatore} other {{role}}} non può nascondere o pubblicare recensioni in questo negozio.",
+      "noRole": "Non hai il permesso di nascondere o pubblicare recensioni in questo negozio."
     }
   },
   "notFound": {
@@ -76,7 +80,8 @@
     "storefront": "Non è stato possibile trovare quella vetrina.",
     "item": "Non è stato possibile trovare questo elemento.",
     "order": "Non è stato possibile trovare quell'ordine.",
-    "discount": "Sconto non trovato."
+    "discount": "Sconto non trovato.",
+    "review": "Impossibile trovare questa recensione."
   },
   "rateLimited": {
     "fix": "Attendi qualche minuto e riprova. Se non c’è nulla che si sta ritentando in background, aggiorna prima la pagina.",
@@ -98,7 +103,8 @@
     "connectPayments": "Troppi tentativi di collegamento a Stripe in poco tempo.",
     "readCheckoutSettings": "Troppi tentativi di leggere le impostazioni del checkout in poco tempo.",
     "changePlan": "Hai avviato troppe modifiche di piano in poco tempo.",
-    "saveDiscounts": "Troppe modifiche agli sconti in poco tempo."
+    "saveDiscounts": "Troppe modifiche agli sconti in poco tempo.",
+    "moderateReviews": "Troppe modifiche alle recensioni in poco tempo."
   },
   "serverError": {
     "fix": "Di solito è temporaneo. Attendi un momento e riprova; se continua a non funzionare, aggiorna la pagina.",
@@ -136,7 +142,8 @@
     "openBillingPortal": "Non è stato possibile aprire i tuoi dati di fatturazione a causa di un problema da parte nostra.",
     "cancelPlan": "Non è stato possibile annullare il tuo piano a causa di un problema da parte nostra.",
     "resumePlan": "Non è stato possibile mantenere il tuo piano a causa di un problema da parte nostra.",
-    "saveDiscount": "Non è stato possibile salvare lo sconto per un problema dalla nostra parte."
+    "saveDiscount": "Non è stato possibile salvare lo sconto per un problema dalla nostra parte.",
+    "moderateReview": "Non è stato possibile modificare la recensione per un problema da parte nostra."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Questo prodotto è stato rimosso, non messo in pausa.} storefront {Questa vetrina è stata rimossa, non messa in pausa.} other {Questo elemento è stato rimosso, non messo in pausa.}}",
@@ -684,6 +691,16 @@
     "tooMany": {
       "message": "Questo negozio ha raggiunto il numero massimo di sconti consentiti.",
       "fix": "Elimina gli sconti che non usi più, poi riprova."
+    }
+  },
+  "reviews": {
+    "blocked": {
+      "message": "Il controllo automatico ha bloccato questa recensione, quindi non può essere pubblicata.",
+      "fix": "Viola una regola, per esempio con odio, minacce o contenuti sessuali, e resta nascosta."
+    },
+    "noReason": {
+      "message": "Scegli perché nascondi questa recensione.",
+      "fix": "Una recensione può essere nascosta solo per uno dei motivi elencati."
     }
   }
 }

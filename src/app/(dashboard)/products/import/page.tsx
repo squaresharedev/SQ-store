@@ -7,11 +7,12 @@ import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { ProductImport } from "@/components/products/ProductImport";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
-import { ghostButtonClass } from "@/components/ui/control-styles";
+import { ghostButtonClass, quietLinkClass } from "@/components/ui/control-styles";
 import { planRoom } from "@/lib/billing/limits";
 import { PlanLimitNotice } from "@/components/billing/PlanLimitNotice";
 import { requireUser } from "@/lib/auth/session";
 import { PRODUCTS_PATH } from "@/lib/products/paths";
+import { REVIEWS_IMPORT_PATH } from "@/lib/reviews/paths";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Products.metadata.import");
@@ -55,6 +56,11 @@ export default async function ImportProductsPage() {
           <p className="mt-1 font-inter text-sm text-muted-foreground">
             {t("import.description")}
           </p>
+          {/* Moving a store is products AND their reviews; the second import
+              is found where the first one is done. */}
+          <Link href={REVIEWS_IMPORT_PATH} className={`${quietLinkClass} mt-2 inline-block`}>
+            {t("import.reviewsLink")}
+          </Link>
         </div>
       </div>
       {room && room.left === 0 ? (

@@ -311,6 +311,21 @@
       "required": "A badge needs some words.",
       "tooLong": "A badge must be {maximum} characters or fewer.",
       "unsupported": "A badge contains unsupported characters."
+    },
+    "reviewTitle": {
+      "required": "A review title is required.",
+      "tooLong": "A review title must be {maximum} characters or fewer.",
+      "unsupported": "A review title contains unsupported characters."
+    },
+    "reviewBody": {
+      "required": "Write a few words about the product.",
+      "tooLong": "A review must be {maximum} characters or fewer.",
+      "unsupported": "A review contains unsupported characters."
+    },
+    "reviewAuthor": {
+      "required": "Add the name to show with the review.",
+      "tooLong": "A name must be {maximum} characters or fewer.",
+      "unsupported": "A name contains unsupported characters."
     }
   },
   "email": {
@@ -426,6 +441,11 @@
       "whole": "The limit must be a whole number.",
       "tooSmall": "The limit must be at least {minimum}.",
       "tooBig": "The limit can be at most {maximum}."
+    },
+    "reviewRating": {
+      "whole": "A rating must be a whole number of stars.",
+      "tooSmall": "A rating must be {minimum} star or more.",
+      "tooBig": "A rating must be {maximum} stars or fewer."
     }
   },
   "list": {
@@ -534,5 +554,13 @@
     "endBeforeStart": "The end has to be after the start.",
     "startInPast": "The start can't be in the past. Choose a later time, or start it now.",
     "endInPast": "The end can't be in the past."
+  },
+  "reviewImport": {
+    "rating": "No rating from 1 to 5.",
+    "title": "The title is too long.",
+    "body": "The review is too long, or has unsupported characters.",
+    "author": "No reviewer name.",
+    "date": "No date that can be read.",
+    "product": "No product."
   }
 }

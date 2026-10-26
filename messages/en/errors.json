@@ -68,6 +68,10 @@
     "manageDiscounts": {
       "withRole": "Your {role, select, owner {Owner} editor {Editor} viewer {Viewer} other {{role}}} role can't manage discounts in this store.",
       "noRole": "You don't have permission to manage discounts in this store."
+    },
+    "moderateReviews": {
+      "withRole": "Your {role, select, owner {Owner} editor {Editor} viewer {Viewer} other {{role}}} role can't hide or publish reviews in this store.",
+      "noRole": "You don't have permission to hide or publish reviews in this store."
     }
   },
   "notFound": {
@@ -76,7 +80,8 @@
     "storefront": "That storefront could not be found.",
     "item": "That item could not be found.",
     "order": "That order could not be found.",
-    "discount": "That discount could not be found."
+    "discount": "That discount could not be found.",
+    "review": "That review could not be found."
   },
   "rateLimited": {
     "fix": "Wait a few minutes and try again. If nothing is retrying in the background, reload the page first.",
@@ -98,7 +103,8 @@
     "connectPayments": "Too many attempts to connect Stripe in a short time.",
     "readCheckoutSettings": "Too many attempts to read checkout settings in a short time.",
     "changePlan": "Too many plan changes started in a short time.",
-    "saveDiscounts": "Too many discount changes in a short time."
+    "saveDiscounts": "Too many discount changes in a short time.",
+    "moderateReviews": "Too many review changes in a short time."
   },
   "serverError": {
     "fix": "This is usually temporary. Wait a moment and try again; if it keeps failing, refresh the page.",
@@ -136,7 +142,8 @@
     "openBillingPortal": "Could not open your billing details because of a problem on our side.",
     "cancelPlan": "Could not cancel your plan because of a problem on our side.",
     "resumePlan": "Could not keep your plan because of a problem on our side.",
-    "saveDiscount": "Could not save the discount because of a problem on our side."
+    "saveDiscount": "Could not save the discount because of a problem on our side.",
+    "moderateReview": "Could not change the review because of a problem on our side."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {This product was removed, not paused.} storefront {This storefront was removed, not paused.} other {This item was removed, not paused.}}",
@@ -684,6 +691,16 @@
     "tooMany": {
       "message": "This store has the most discounts it can have.",
       "fix": "Delete discounts you no longer use, then try again."
+    }
+  },
+  "reviews": {
+    "blocked": {
+      "message": "The automatic check blocked this review, so it can't be published.",
+      "fix": "It broke a rule, such as hate, threats or sexual content, and stays hidden."
+    },
+    "noReason": {
+      "message": "Choose why you're hiding this review.",
+      "fix": "A review can only be hidden for one of the listed reasons."
     }
   }
 }

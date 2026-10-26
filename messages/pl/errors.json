@@ -68,6 +68,10 @@
     "manageDiscounts": {
       "withRole": "Twoja rola ({role, select, owner {Właściciel} editor {Edytor} viewer {Przeglądający} other {{role}}}) nie pozwala zarządzać rabatami w tym sklepie.",
       "noRole": "Nie masz uprawnień, aby zarządzać rabatami w tym sklepie."
+    },
+    "moderateReviews": {
+      "withRole": "Twoja rola {role, select, owner {Właściciel} editor {Edytor} viewer {Przeglądający} other {{role}}} nie pozwala ukrywać ani publikować opinii w tym sklepie.",
+      "noRole": "Nie masz uprawnień do ukrywania ani publikowania opinii w tym sklepie."
     }
   },
   "notFound": {
@@ -76,7 +80,8 @@
     "storefront": "Nie znaleziono tej witryny.",
     "item": "Nie znaleziono tego elementu.",
     "order": "Nie znaleziono tego zamówienia.",
-    "discount": "Nie znaleziono tego rabatu."
+    "discount": "Nie znaleziono tego rabatu.",
+    "review": "Nie znaleziono tej opinii."
   },
   "rateLimited": {
     "fix": "Odczekaj kilka minut i spróbuj ponownie. Jeśli nic nie ponawia próby w tle, najpierw odśwież stronę.",
@@ -98,7 +103,8 @@
     "connectPayments": "Zbyt wiele prób połączenia ze Stripe w krótkim czasie.",
     "readCheckoutSettings": "Zbyt wiele prób odczytania ustawień kasy w krótkim czasie.",
     "changePlan": "Za dużo zmian planu w krótkim czasie.",
-    "saveDiscounts": "Zbyt wiele zmian rabatów w krótkim czasie."
+    "saveDiscounts": "Zbyt wiele zmian rabatów w krótkim czasie.",
+    "moderateReviews": "Za dużo zmian w opiniach w krótkim czasie."
   },
   "serverError": {
     "fix": "Zwykle jest to problem tymczasowy. Odczekaj chwilę i spróbuj ponownie; jeśli nadal się nie udaje, odśwież stronę.",
@@ -136,7 +142,8 @@
     "openBillingPortal": "Nie udało się otworzyć danych rozliczeniowych z powodu błędu po naszej stronie.",
     "cancelPlan": "Nie udało się anulować twojego planu z powodu problemu po naszej stronie.",
     "resumePlan": "Nie udało się zachować twojego planu z powodu problemu po naszej stronie.",
-    "saveDiscount": "Nie udało się zapisać rabatu z powodu problemu po naszej stronie."
+    "saveDiscount": "Nie udało się zapisać rabatu z powodu problemu po naszej stronie.",
+    "moderateReview": "Nie udało się zmienić opinii z powodu problemu po naszej stronie."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Ten produkt został usunięty, a nie wstrzymany.} storefront {Ta witryna została usunięta, a nie wstrzymana.} other {Ten element został usunięty, a nie wstrzymany.}}",
@@ -684,6 +691,16 @@
     "tooMany": {
       "message": "Ten sklep ma już maksymalną liczbę rabatów.",
       "fix": "Usuń rabaty, których już nie używasz, i spróbuj ponownie."
+    }
+  },
+  "reviews": {
+    "blocked": {
+      "message": "Automatyczne sprawdzanie zablokowało tę opinię, dlatego nie można jej opublikować.",
+      "fix": "Łamie zasadę, np. przez nienawiść, groźby lub treści seksualne, i pozostanie ukryta."
+    },
+    "noReason": {
+      "message": "Wybierz, dlaczego ukrywasz tę opinię.",
+      "fix": "Opinię można ukryć tylko z jednego z podanych powodów."
     }
   }
 }

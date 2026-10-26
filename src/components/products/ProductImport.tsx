@@ -1,14 +1,15 @@
 "use client";
 
-import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { AlertTriangle, FileSpreadsheet, Upload } from "lucide-react";
+import { AlertTriangle, FileSpreadsheet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast, useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { SaveButton, type SaveResult } from "@/components/ui/SaveButton";
+import { FileDropzone } from "@/components/ui/FileDropzone";
 import { Select } from "@/components/ui/select";
 import { iconTileClass } from "@/components/ui/surface-styles";
 import {
@@ -89,7 +90,6 @@ export function ProductImport({
   const toast = useToast();
   const showActionError = useActionErrorToast();
   const resolveMessage = useResolveMessage();
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const [file, setFile] = useState<Loaded | null>(null);
   const [overrides, setOverrides] = useState<Partial<ColumnMap>>({});
@@ -102,7 +102,6 @@ export function ProductImport({
   const canImportLive = missingTraderDetails.length === 0;
   const importStatus: ProductStatus = canImportLive ? status : "draft";
   const [error, setError] = useState<string | null>(null);
-  const [dragging, setDragging] = useState(false);
   const [busy, setBusy] = useState(false);
   const [saveResult, setSaveResult] = useState<SaveResult | null>(null);
 
@@ -138,18 +137,6 @@ export function ProductImport({
     // file's columns would silently point at the wrong ones here.
     setOverrides({});
     setFile({ name: picked.name, size: picked.size, text });
-  }
-
-  function handleDrop(event: DragEvent<HTMLLabelElement>) {
-    event.preventDefault();
-    setDragging(false);
-    void load(event.dataTransfer.files?.[0]);
-  }
-
-  function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    const picked = event.target.files?.[0];
-    event.target.value = "";
-    void load(picked);
   }
 
   async function run() {
@@ -189,42 +176,17 @@ export function ProductImport({
 
   return (
     <div className="space-y-5">
-      <label
-        htmlFor="import-file"
-        onDragOver={(event) => {
-          event.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={handleDrop}
-        className={cn(
-          "flex w-full cursor-pointer items-center gap-3 rounded-sm border border-dashed bg-background px-4 py-5 transition-colors duration-base ease-standard motion-reduce:transition-none",
-          "has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-ring has-[input:focus-visible]:ring-offset-2 has-[input:focus-visible]:ring-offset-background",
-          dragging ? "border-foreground bg-accent" : "border-border hover:bg-accent",
-        )}
-      >
-        <input
-          ref={inputRef}
-          id="import-file"
-          type="file"
-          accept=".csv,text/csv"
-          className="sr-only"
-          onChange={handleChange}
-        />
-        <span className={cn(iconTileClass, "size-10")}>
-          <Upload className="size-5 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block font-inter text-sm text-foreground">
-            {file ? file.name : t("dropPrompt")}
-          </span>
-          <span className="block font-inter text-xs text-muted-foreground">
-            {file
-              ? t("fileMeta", { size: formatBytes(file.size, locale) })
-              : t(cappedByPlan ? "planRoom" : "rowsLimit", { max: maxRows })}
-          </span>
-        </span>
-      </label>
+      <FileDropzone
+        id="import-file"
+        accept=".csv,text/csv"
+        label={file ? file.name : t("dropPrompt")}
+        meta={
+          file
+            ? t("fileMeta", { size: formatBytes(file.size, locale) })
+            : t(cappedByPlan ? "planRoom" : "rowsLimit", { max: maxRows })
+        }
+        onFile={(picked) => void load(picked)}
+      />
 
       {/* Said before a file is picked: for a big shop, adding every photo by
           hand afterwards is the real cost of an import, so it is known first. */}
