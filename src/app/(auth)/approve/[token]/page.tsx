@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { redirect } from "next/navigation";
 import { History, LogIn, TimerOff, UserX } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";

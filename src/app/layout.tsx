@@ -5,6 +5,7 @@ import "./globals.css";
 import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
 import { LocaleSwitchProvider } from "@/i18n/LocaleSwitchProvider";
 import { ToastProvider } from "@/components/ui/Toast";
+import { NavigationProgress } from "@/components/layout/NavigationProgress";
 import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
 import { BRAND_NAME, BRAND_SURFACE, BRAND_TITLE_TEMPLATE } from "@/lib/brand";
 import { THEME_BOOTSTRAP } from "@/lib/theme-mode";
@@ -166,6 +167,7 @@ export default async function RootLayout({
             <LocaleSwitchProvider>{children}</LocaleSwitchProvider>
           </ToastProvider>
           <ServiceWorkerRegistrar />
+          <NavigationProgress />
         </ScopedIntlProvider>
       </body>
     </html>

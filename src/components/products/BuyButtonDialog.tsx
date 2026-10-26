@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { ArrowRight, Code2, ExternalLink, Link2, Sparkles, TrendingUp, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";

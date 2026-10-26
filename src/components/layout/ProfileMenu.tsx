@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Check, ChevronRight, Gem, Languages, LogOut, Store, User } from "lucide-react";
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/control-styles";
 import { setActiveAccount } from "@/lib/team/actions";
 import { signOut } from "@/lib/auth/actions";
+import { useProgressWhile } from "@/lib/hooks/useProgressWhile";
 import { ROLE_LABELS } from "@/lib/team/permissions";
 import type { AccountOption } from "@/lib/team/account-context";
 
@@ -47,6 +48,9 @@ export function ProfileMenu({
   const [showAccounts, setShowAccounts] = React.useState(false);
   const [showLanguages, setShowLanguages] = React.useState(false);
   const [pending, startTransition] = React.useTransition();
+  // The menu has already closed by the time a store switch is slow, so the
+  // wait is shown by the page-wide bar rather than on a button.
+  useProgressWhile(pending);
   const canSwitch = accounts.length > 1;
   const locale = useLocale();
   const { switchLocale } = useLocaleSwitch();

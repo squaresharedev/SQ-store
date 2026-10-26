@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { ProductThumb } from "@/components/ui/ProductThumb";

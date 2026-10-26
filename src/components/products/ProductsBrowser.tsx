@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useTransition } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import {

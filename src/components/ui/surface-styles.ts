@@ -42,6 +42,18 @@ export const skeletonClass =
   "animate-pulse rounded-sm bg-secondary motion-reduce:animate-none";
 
 /**
+ * The thin bar across the top of the window while a page change is slow
+ * (components/layout/NavigationProgress). Above every overlay and toast, and
+ * click-through, so it never blocks the page it is waiting on.
+ */
+export const navProgressClass =
+  "pointer-events-none fixed inset-x-0 top-0 z-[90] h-0.5 overflow-hidden";
+
+/** The bar itself: it crawls toward the far edge and slows as it nears it
+ *  (globals.css, "Navigation progress"); a still bar under reduced motion. */
+export const navProgressBarClass = "nav-progress-bar h-full w-full origin-left bg-primary";
+
+/**
  * The small square that fronts a section heading or a list row. Size it at the
  * call site (`size-8`/`size-9`/`size-10`); everything else is fixed so the
  * tiles read as one family wherever they appear.

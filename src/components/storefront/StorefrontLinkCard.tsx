@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { ArrowUpRight, Link2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { CopyButton } from "@/components/ui/CopyButton";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { ArrowRight, Plus, Trash2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";

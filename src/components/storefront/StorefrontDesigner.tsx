@@ -8,7 +8,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { ArrowLeft, ArrowRight, ExternalLink, Search, Share2, Sparkles, Users, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatList } from "@/lib/format/intl";

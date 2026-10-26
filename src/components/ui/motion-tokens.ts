@@ -31,3 +31,16 @@ export const POP = { type: "spring", stiffness: 420, damping: 18 } as const;
 
 /** The scale a button sinks to while it is held down; POP brings it back with a little bounce. */
 export const PRESS_SCALE = 0.95;
+
+/**
+ * How long a click may take before it earns a loading state. Under this the
+ * result lands before anyone could read a spinner, so showing one is flicker,
+ * not feedback. Every loading indicator that answers a click (the Button's
+ * `pending`, the navigation bar) waits this long; change it here to change
+ * them all.
+ */
+export const PENDING_DELAY_MS = 300;
+
+/** Once a loading state shows, the least time it stays, so a result arriving
+ *  just after PENDING_DELAY_MS reads as a moment, not a flash. */
+export const PENDING_MIN_SHOW_MS = 400;

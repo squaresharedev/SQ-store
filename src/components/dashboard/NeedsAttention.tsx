@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { useTranslations } from "next-intl";
 import { AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
 import { iconNudgeRightClass, infoTextClass } from "@/components/ui/control-styles";

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { useRouter } from "next/navigation";
 import { Fingerprint, KeyRound, MonitorSmartphone, Smartphone } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";

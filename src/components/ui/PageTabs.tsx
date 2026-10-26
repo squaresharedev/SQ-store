@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { attentionCountClass } from "@/components/ui/surface-styles";
 import { focusRingInsetClass, transitionClass } from "@/components/ui/control-styles";
 import { isModifiedClick } from "@/lib/utils/modified-click";

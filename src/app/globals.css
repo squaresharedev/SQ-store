@@ -1772,3 +1772,25 @@ textarea {
 
 /* The checkout thank-you's confetti is drawn on a canvas now
    (components/checkout/confetti.ts), so it has no CSS here. */
+
+/* Navigation progress (components/layout/NavigationProgress): a bar that
+   crawls across the top while a page change is slow. It decelerates and never
+   quite arrives, so it reads as "still working" however long the wait is; the
+   bar leaves when the page does. */
+@keyframes nav-progress-crawl {
+  from {
+    transform: scaleX(0.04);
+  }
+  to {
+    transform: scaleX(0.92);
+  }
+}
+.nav-progress-bar {
+  animation: nav-progress-crawl 12s cubic-bezier(0.1, 0.7, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-progress-bar {
+    animation: none;
+    transform: scaleX(0.6);
+  }
+}

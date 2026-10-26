@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { Button } from "@/components/ui/button";
 import { SellerDetailsBanner } from "@/components/settings/SellerDetailsNotice";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";

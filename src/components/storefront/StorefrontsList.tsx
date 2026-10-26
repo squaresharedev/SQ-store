@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import Link from "@/components/ui/AppLink";
+import { usePendingRouter } from "@/lib/hooks/usePendingRouter";
 import { ArrowRight, Plus, Store, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -75,7 +75,7 @@ export function StorefrontsList({
   const t = useTranslations("Storefront.list");
   const tSample = useTranslations("Storefront.sample.card");
   const tCommon = useTranslations("Common");
-  const router = useRouter();
+  const router = usePendingRouter();
   const toast = useToast();
   const showActionError = useActionErrorToast();
   const [storefronts, setStorefronts] = useState(initial);

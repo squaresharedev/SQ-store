@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { RotateCcw } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";

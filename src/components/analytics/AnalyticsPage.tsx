@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { useLocale, useTranslations } from "next-intl";
 import { formatList } from "@/lib/format/intl";
 import { TrendingUp } from "lucide-react";

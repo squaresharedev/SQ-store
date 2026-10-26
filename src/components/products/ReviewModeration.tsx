@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { EyeOff, MessageSquareQuote } from "lucide-react";
@@ -70,20 +70,28 @@ export function ReviewModeration({
   const toast = useToast();
   const showActionError = useActionErrorToast();
   const [pending, startTransition] = useTransition();
+  // Which review and action is under way, so the clicked button (not every
+  // button on the page) carries the spinner.
+  const [acting, setActing] = useState<{ id: string; action: ReviewVisibilityAction } | null>(null);
   const [hiding, setHiding] = useState<SellerReview | null>(null);
   const [reason, setReason] = useState<ReviewHideReason | null>(null);
 
   function act(review: SellerReview, action: ReviewVisibilityAction, hideReason: ReviewHideReason | null = null) {
+    setActing({ id: review.id, action });
     startTransition(async () => {
-      const result = await setReviewVisibility(review.id, action, hideReason);
-      if (!result.ok) {
-        showActionError(result.error);
-        return;
+      try {
+        const result = await setReviewVisibility(review.id, action, hideReason);
+        if (!result.ok) {
+          showActionError(result.error);
+          return;
+        }
+        toast.success(t(`done.${action}`));
+        setHiding(null);
+        setReason(null);
+        router.refresh();
+      } finally {
+        setActing(null);
       }
-      toast.success(t(`done.${action}`));
-      setHiding(null);
-      setReason(null);
-      router.refresh();
     });
   }
 
@@ -121,6 +129,7 @@ export function ReviewModeration({
                 review={review}
                 canModerate={canModerate}
                 busy={pending}
+                acting={acting?.id === review.id ? acting.action : null}
                 onHide={() => setHiding(review)}
                 onAct={(action) => act(review, action)}
               />
@@ -179,7 +188,8 @@ export function ReviewModeration({
             </Button>
             <Button
               type="button"
-              disabled={!reason || pending}
+              disabled={!reason}
+              pending={acting?.action === "hide"}
               onClick={() => hiding && reason && act(hiding, "hide", reason)}
             >
               {t("hide.confirm")}
@@ -195,12 +205,16 @@ function ReviewCard({
   review,
   canModerate,
   busy,
+  acting,
   onHide,
   onAct,
 }: {
   review: SellerReview;
   canModerate: boolean;
+  /** Some review's action is under way: every action waits for it. */
   busy: boolean;
+  /** The action under way on THIS review, if any. */
+  acting: ReviewVisibilityAction | null;
   onHide: () => void;
   onAct: (action: ReviewVisibilityAction) => void;
 }) {
@@ -262,19 +276,19 @@ function ReviewCard({
       {canModerate && (
         <div className="flex flex-wrap gap-2 pt-1">
           {review.moderation === "held" && (
-            <button type="button" className={secondaryButtonClass} disabled={busy} onClick={() => onAct("publish")}>
+            <Button variant="secondary" disabled={busy} pending={acting === "publish"} onClick={() => onAct("publish")}>
               {t("actions.publish")}
-            </button>
+            </Button>
           )}
           {hidden ? (
-            <button type="button" className={secondaryButtonClass} disabled={busy} onClick={() => onAct("show")}>
+            <Button variant="secondary" disabled={busy} pending={acting === "show"} onClick={() => onAct("show")}>
               {t("actions.show")}
-            </button>
+            </Button>
           ) : (
             review.moderation !== "blocked" && (
-              <button type="button" className={secondaryButtonClass} disabled={busy} onClick={onHide}>
+              <Button variant="secondary" disabled={busy} onClick={onHide}>
                 {t("actions.hide")}
-              </button>
+              </Button>
             )
           )}
         </div>

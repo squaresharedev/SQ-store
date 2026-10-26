@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { ArrowRight, ArrowUpRight, Crown } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, buttonClassName } from "@/components/ui/button";
