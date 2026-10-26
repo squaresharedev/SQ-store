@@ -32,7 +32,6 @@ function renderWith(kind: ProductRemoval["kind"]) {
     updatedAt: "2026-08-09T00:00:00.000Z",
     config: { ...DEFAULT_STOREFRONT_CONFIG, blocks: [] },
     embedKey: "70000000-0000-4000-8000-000000000007",
-    brief: {},
     removal: { kind, automated: true, reviewRequestedAt: null } as ProductRemoval,
   };
   render(

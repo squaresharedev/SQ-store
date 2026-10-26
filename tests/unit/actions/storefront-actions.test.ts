@@ -76,7 +76,6 @@ import {
   deleteStorefront,
 } from "@/lib/storefront/actions";
 import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
-import { VIBE_PRESETS } from "@/lib/storefront/presets";
 import { storefrontVersion } from "@/lib/storefront/version";
 
 // ---- test constants ------------------------------------------------------
@@ -104,10 +103,6 @@ const VALID_THEME = {
 };
 
 const VALID_CONFIG = { theme: VALID_THEME, blocks: [] };
-
-/** Read from the shipped preset so the assertion tracks the design, not a copy
- *  of it that would keep passing after someone retunes the vibe. */
-const VIBE_BOLD = VIBE_PRESETS.bold;
 
 function validSaveInput(overrides: Record<string, unknown> = {}) {
   return { name: "My Store", config: VALID_CONFIG, ...overrides };
@@ -139,7 +134,7 @@ describe("createStorefront - auth gates", () => {
 
   it("viewer role returns permission error with no DB call", async () => {
     getActiveAccountMock.mockResolvedValue(viewerAccount());
-    const result = await createStorefront({ name: "My Store" });
+    const result = await createStorefront();
     expect(result.ok).toBe(false);
     expect((result as { error: { code: string } }).error.code).toBe("permission_denied");
     expect(db.insert).not.toHaveBeenCalled();
@@ -147,167 +142,40 @@ describe("createStorefront - auth gates", () => {
 });
 
 describe("createStorefront - happy path", () => {
-  it("inserts with owner_id = accountId and returns the new id", async () => {
+  it("inserts the default storefront for the account and returns its id", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
     // SF-03: first dbFn call is the name-dedup SELECT (db.then); second is insert .single().
     dbFn.mockResolvedValueOnce({ data: [], error: null }); // name check: no duplicates
     dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null }); // insert
 
-    const result = await createStorefront({ name: "My Store" });
+    const result = await createStorefront();
 
     expect(result).toEqual({ ok: true, id: STOREFRONT_ID });
     const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
     expect(insertPayload.owner_id).toBe(OWNER_ID);
-    expect(insertPayload.name).toBe("My Store");
-  });
-
-  it("falls back to 'Untitled storefront' when no input is given", async () => {
-    getActiveAccountMock.mockResolvedValue(ownerAccount());
-    // SF-03: name dedup check returns no duplicates, then insert succeeds.
-    dbFn.mockResolvedValueOnce({ data: [], error: null }); // name check
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null }); // insert
-
-    await createStorefront(undefined);
-
-    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
     expect(insertPayload.name).toBe("Untitled storefront");
-    // Skipping the setup flow is a first-class outcome, not an error.
-    expect(insertPayload.brief).toEqual({});
-    // SF-02/SF-03/SF-04: The initial config differs from DEFAULT_STOREFRONT_CONFIG:
-    // it carries the wizard name in header.name and allowIndexing:true.
+    // Nothing is asked first, so nothing is stored about the store.
+    expect(insertPayload).not.toHaveProperty("brief");
+    // SF-02/SF-03/SF-04: the default look, the name in the header, and
+    // indexing on for a storefront created from now on.
     const config = insertPayload.config as Record<string, unknown>;
     expect(config.theme).toMatchObject(DEFAULT_STOREFRONT_CONFIG.theme);
     expect((config.header as Record<string, unknown>).show).toBe(true);
+    expect((config.header as Record<string, unknown>).name).toBe("Untitled storefront");
     expect((config.productPage as Record<string, unknown>).allowIndexing).toBe(true);
   });
 
-  it("SF-03: auto-suffixes name when a duplicate already exists", async () => {
+  it("SF-03: auto-suffixes the name when one already exists", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
-    // Name check returns one match with the same name.
-    dbFn.mockResolvedValueOnce({ data: [{ name: "My Store" }], error: null });
+    dbFn.mockResolvedValueOnce({ data: [{ name: "Untitled storefront" }], error: null });
     dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
 
-    await createStorefront({ name: "My Store" });
+    await createStorefront();
 
     const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
-    expect(insertPayload.name).toBe("My Store 2");
-  });
-
-  it("SF-03: seeds header.name from the wizard name", async () => {
-    getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: [], error: null });
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
-
-    await createStorefront({ name: "Craft Goods" });
-
-    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
+    expect(insertPayload.name).toBe("Untitled storefront 2");
     const header = insertPayload.config as { header: { name: string } };
-    expect(header.header.name).toBe("Craft Goods");
-  });
-
-  it("SF-04: new storefronts have allowIndexing:true", async () => {
-    getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: [], error: null });
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
-
-    await createStorefront({ name: "My Store" });
-
-    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
-    const config = insertPayload.config as { productPage: { allowIndexing: boolean } };
-    expect(config.productPage.allowIndexing).toBe(true);
-  });
-
-  it("SF-06: digital fulfilment sets shippingNote to free-shipping", async () => {
-    getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: [], error: null });
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
-
-    await createStorefront({ name: "My Store", brief: { fulfilment: "digital" } });
-
-    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
-    const config = insertPayload.config as { productPage: { shippingNote: string } };
-    expect(config.productPage.shippingNote).toBe("free-shipping");
-  });
-
-  it("SF-06: physical fulfilment keeps default shippingNote", async () => {
-    getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: [], error: null });
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
-
-    await createStorefront({ name: "My Store", brief: { fulfilment: "physical" } });
-
-    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
-    const config = insertPayload.config as { productPage: { shippingNote: string } };
-    // Physical = shipping costs money; keep the default so buyers are not misled.
-    expect(config.productPage.shippingNote).not.toBe("free-shipping");
-  });
-});
-
-describe("createStorefront - the setup brief", () => {
-  it("stores the answers and starts the storefront on the chosen vibe's theme", async () => {
-    getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: [], error: null }); // name check
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null }); // insert
-
-    await createStorefront({
-      name: "Bold Store",
-      brief: { category: "art", fulfilment: "physical", vibe: "bold" },
-    });
-
-    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
-    expect(insertPayload.brief).toEqual({
-      category: "art",
-      fulfilment: "physical",
-      vibe: "bold",
-    });
-    // The one answer that does work immediately: the seller lands in a designer
-    // already wearing the look they picked.
-    const config = insertPayload.config as { theme: typeof VIBE_BOLD };
-    expect(config.theme).toMatchObject(VIBE_BOLD);
-  });
-
-  it("keeps otherCategory only alongside category 'other'", async () => {
-    getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: [], error: null }); // name check
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null }); // insert
-
-    await createStorefront({
-      brief: { category: "art", otherCategory: "model kits" },
-    });
-
-    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
-    expect(insertPayload.brief).toEqual({ category: "art" });
-  });
-
-  it("degrades a tampered brief to empty rather than failing the create", async () => {
-    getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: [], error: null }); // name check
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null }); // insert
-
-    const result = await createStorefront({
-      brief: { vibe: "NOT_A_VIBE", category: "<script>" },
-    });
-
-    expect(result).toEqual({ ok: true, id: STOREFRONT_ID });
-    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
-    expect(insertPayload.brief).toEqual({});
-    // Config now carries header + productPage even with an empty brief.
-    const config = insertPayload.config as Record<string, unknown>;
-    expect(config.theme).toMatchObject(DEFAULT_STOREFRONT_CONFIG.theme);
-    expect((config.productPage as Record<string, unknown>).allowIndexing).toBe(true);
-  });
-
-  it("ignores a non-object input instead of throwing", async () => {
-    getActiveAccountMock.mockResolvedValue(ownerAccount());
-    dbFn.mockResolvedValueOnce({ data: [], error: null }); // name check
-    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null }); // insert
-
-    const result = await createStorefront("My Store");
-
-    expect(result).toEqual({ ok: true, id: STOREFRONT_ID });
-    const insertPayload = db.insert.mock.calls[0][0] as Record<string, unknown>;
-    expect(insertPayload.name).toBe("Untitled storefront");
-    expect(insertPayload.brief).toEqual({});
+    expect(header.header.name).toBe("Untitled storefront 2");
   });
 });
 

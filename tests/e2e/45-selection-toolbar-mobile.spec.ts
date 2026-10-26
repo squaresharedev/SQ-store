@@ -21,7 +21,6 @@ async function createStorefrontOnAPhone(page: Page) {
     .getByRole("button", { name: /new storefront|create storefront/i })
     .first()
     .click();
-  await page.getByRole("button", { name: /skip setup/i }).click({ force: true });
   await page.waitForURL(/\/storefront\/[0-9a-f-]{36}/, { timeout: 30_000 });
 }
 

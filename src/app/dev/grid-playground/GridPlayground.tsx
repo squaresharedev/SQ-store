@@ -18,8 +18,7 @@ import {
 import type { Product } from "@/types/product";
 import { cn } from "@/lib/utils";
 import { fontPresentation } from "@/lib/theme/storefront-fonts";
-import { themeForVibe } from "@/lib/storefront/presets";
-import { STOREFRONT_VIBES, type StorefrontVibe } from "@/types/storefront-brief";
+import { STOREFRONT_VIBES, themeForVibe, type StorefrontVibe } from "@/lib/storefront/presets";
 import type { GridPlacement } from "@/components/grid/gridConstants";
 import { Grid } from "@/components/grid/Grid";
 import { BlockTile } from "@/components/storefront/BlockTile";

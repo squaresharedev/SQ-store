@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
-import { countActiveAccountProducts, getSampleStorefrontFlags } from "@/lib/onboarding/queries";
+import { getSampleStorefrontFlags } from "@/lib/onboarding/queries";
 import { buildSampleStorefront } from "@/lib/storefront/sample";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
@@ -17,9 +17,8 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * A static segment beside `[id]`, so "sample" never reaches the storefront
  * lookup. Everything the designer is handed comes from code: no storefront row,
- * no catalogue rows, no signed URLs (the pictures are static files). The reads
- * are the person's own "has the designer tour started" flag and a head count of
- * the store's products, for the setup flow "Create your own" opens in place.
+ * no catalogue rows, no signed URLs (the pictures are static files). The one
+ * read is the person's own "has the designer tour started" flag.
  *
  * Auth is the layout's (storefront/layout.tsx). Read-only members go back to the
  * list for the same reason as on a real storefront: this is an editing surface,
@@ -37,16 +36,12 @@ export default async function SampleStorefrontPage({
   const account = await getActiveAccount();
   if (!can(account?.role, "storefront.write")) redirect("/storefront");
 
-  const [flags, productCount, t] = await Promise.all([
-    getSampleStorefrontFlags(),
-    countActiveAccountProducts(),
-    getTranslations(),
-  ]);
+  const [flags, t] = await Promise.all([getSampleStorefrontFlags(), getTranslations()]);
   const sample = buildSampleStorefront(t);
 
   return (
     <StorefrontDesigner
-      sample={{ autoStartTour: flags?.editorTourPending === true, productCount }}
+      sample={{ autoStartTour: flags?.editorTourPending === true }}
       storefrontId="sample"
       initialName={sample.name}
       initialConfig={sample.config}

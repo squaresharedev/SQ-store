@@ -84,17 +84,13 @@ vi.mock("@/components/search/SearchProvider", () => ({
   }),
 }));
 
-// The storefront list's server actions and its setup flow, which only need to
-// exist here.
+// The storefront list's server actions, which only need to exist here.
 vi.mock("@/lib/storefront/actions", () => ({
   deleteStorefront: vi.fn(),
   fetchStorefrontsPage: vi.fn(),
   createStorefront: vi.fn(),
   rotateEmbedKey: vi.fn(),
   updateEmbedSettings: vi.fn(),
-}));
-vi.mock("@/components/storefront/CreateStorefrontWizard", () => ({
-  CreateStorefrontWizard: () => null,
 }));
 
 afterEach(cleanup);
@@ -141,7 +137,6 @@ const OWN_STOREFRONT: StorefrontSummary = {
   updatedAt: "2026-09-01T00:00:00.000Z",
   config: DEFAULT_STOREFRONT_CONFIG,
   embedKey: "70000000-0000-4000-8000-000000000007",
-  brief: {},
 };
 
 function Toolbar({ pagesOpen = false }: { pagesOpen?: boolean }) {

@@ -278,52 +278,6 @@
       "failed": "Der Link konnte nicht kopiert werden. Wähle ihn aus und kopiere ihn manuell."
     }
   },
-  "wizard": {
-    "vibe": {
-      "title": "Wähle einen Look",
-      "description": "Dein Ausgangspunkt. Alles bleibt im Schaufenster-Editor bearbeitbar."
-    },
-    "name": {
-      "title": "Benenne dein Schaufenster",
-      "description": "Käufer sehen ihn oben in deinem Schaufenster. Du kannst ihn jederzeit umbenennen."
-    },
-    "stepOf": "Schritt {current} von {total}",
-    "nameLabel": "Name des Schaufensters",
-    "nameHint": "Lasse es leer, und wir nennen es Unbenanntes Schaufenster.",
-    "noProductsHint": "Noch keine Produkte? Füge sie nach der Einrichtung hinzu.",
-    "skipSetup": "Einrichtung überspringen",
-    "creating": "Wird erstellt…",
-    "create": "Schaufenster erstellen"
-  },
-  "createOptions": {
-    "vibeGroupLabel": "Der Look, den du möchtest",
-    "categoryPlaceholder": {
-      "fashion": "Mein Kleidungsshop",
-      "art": "Mein Kunstshop",
-      "jewellery": "Mein Schmuckshop",
-      "handmade": "Mein Handmade-Shop",
-      "home": "Mein Einrichtungsshop",
-      "beauty": "Mein Beauty-Shop",
-      "food": "Mein Lebensmittelshop",
-      "music": "Mein Musikshop",
-      "photography": "Mein Fotoshop",
-      "books": "Mein Buchshop",
-      "digital": "Mein digitaler Shop",
-      "vintage": "Mein Vintage-Shop",
-      "other": "Mein Shop",
-      "default": "Mein Schaufenster"
-    },
-    "vibe": {
-      "minimal": "Minimalistisch",
-      "classic": "Klassisch",
-      "bold": "Kräftig"
-    },
-    "vibeHint": {
-      "minimal": "Name und Preis beim Mouseover",
-      "classic": "Name und Preis immer sichtbar",
-      "bold": "Preis immer sichtbar, Name beim Mouseover"
-    }
-  },
   "picker": {
     "addFirst": "Füge dein erstes Produkt hinzu",
     "noProducts": "Du hast noch keine Produkte. Füge eines hinzu, und du kommst direkt hierher zurück, um es zu platzieren.",

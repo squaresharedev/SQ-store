@@ -278,52 +278,6 @@
       "failed": "Kopiëren van de link is mislukt. Selecteer en kopieer hem handmatig."
     }
   },
-  "wizard": {
-    "vibe": {
-      "title": "Kies een uitstraling",
-      "description": "Je startpunt. Alles blijft aanpasbaar in de editor."
-    },
-    "name": {
-      "title": "Geef je etalage een naam",
-      "description": "Kopers zien hem bovenaan je etalage. Je kunt hem altijd hernoemen."
-    },
-    "stepOf": "Stap {current} van {total}",
-    "nameLabel": "Etalagenaam",
-    "nameHint": "Laat leeg en we noemen het Naamloze etalage.",
-    "noProductsHint": "Nog geen producten? Voeg ze toe na het instellen.",
-    "skipSetup": "Instellen overslaan",
-    "creating": "Aanmaken…",
-    "create": "Etalage maken"
-  },
-  "createOptions": {
-    "vibeGroupLabel": "De uitstraling die je wilt",
-    "categoryPlaceholder": {
-      "fashion": "Mijn kledingwinkel",
-      "art": "Mijn kunstwinkel",
-      "jewellery": "Mijn sieradenwinkel",
-      "handmade": "Mijn handgemaakte winkel",
-      "home": "Mijn woonwinkel",
-      "beauty": "Mijn beautywinkel",
-      "food": "Mijn eetwinkel",
-      "music": "Mijn muziekwinkel",
-      "photography": "Mijn fotowinkel",
-      "books": "Mijn boekwinkel",
-      "digital": "Mijn digitale winkel",
-      "vintage": "Mijn vintagewinkel",
-      "other": "Mijn winkel",
-      "default": "Mijn etalage"
-    },
-    "vibe": {
-      "minimal": "Minimaal",
-      "classic": "Klassiek",
-      "bold": "Gedurfd"
-    },
-    "vibeHint": {
-      "minimal": "Naam en prijs bij hover",
-      "classic": "Naam en prijs altijd zichtbaar",
-      "bold": "Prijs altijd, naam bij hover"
-    }
-  },
   "picker": {
     "addFirst": "Voeg je eerste product toe",
     "noProducts": "Je hebt nog geen producten. Voeg er een toe en je komt direct hier terug om het te plaatsen.",

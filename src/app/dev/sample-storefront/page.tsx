@@ -21,7 +21,7 @@ export default async function SampleStorefrontDevPage({
   const sample = buildSampleStorefront(await getTranslations());
   return (
     <StorefrontDesigner
-      sample={{ autoStartTour: tour !== "0", productCount: 0 }}
+      sample={{ autoStartTour: tour !== "0" }}
       storefrontId="sample"
       initialName={sample.name}
       initialConfig={sample.config}

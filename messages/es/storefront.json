@@ -278,52 +278,6 @@
       "failed": "No se ha podido copiar el enlace. Selecciónalo y cópialo a mano."
     }
   },
-  "wizard": {
-    "vibe": {
-      "title": "Elige un aspecto",
-      "description": "Tu punto de partida. Todo se puede seguir editando en el editor."
-    },
-    "name": {
-      "title": "Ponle nombre a tu escaparate",
-      "description": "Los compradores lo ven en la parte superior de tu escaparate. Puedes cambiarlo cuando quieras."
-    },
-    "stepOf": "Paso {current} de {total}",
-    "nameLabel": "Nombre del escaparate",
-    "nameHint": "Déjalo en blanco y lo llamaremos Escaparate sin título.",
-    "noProductsHint": "¿Todavía no tienes productos? Añádelos después de la configuración.",
-    "skipSetup": "Saltar configuración",
-    "creating": "Creando…",
-    "create": "Crear escaparate"
-  },
-  "createOptions": {
-    "vibeGroupLabel": "El aspecto que quieres",
-    "categoryPlaceholder": {
-      "fashion": "Mi tienda de ropa",
-      "art": "Mi tienda de arte",
-      "jewellery": "Mi tienda de joyería",
-      "handmade": "Mi tienda de hecho a mano",
-      "home": "Mi tienda de hogar",
-      "beauty": "Mi tienda de belleza",
-      "food": "Mi tienda de comida",
-      "music": "Mi tienda de música",
-      "photography": "Mi tienda de fotos",
-      "books": "Mi tienda de libros",
-      "digital": "Mi tienda digital",
-      "vintage": "Mi tienda vintage",
-      "other": "Mi tienda",
-      "default": "Mi escaparate"
-    },
-    "vibe": {
-      "minimal": "Minimalista",
-      "classic": "Clásico",
-      "bold": "Llamativo"
-    },
-    "vibeHint": {
-      "minimal": "Nombre y precio al pasar el ratón",
-      "classic": "Nombre y precio siempre visibles",
-      "bold": "Precio siempre visible, nombre al pasar el ratón"
-    }
-  },
   "picker": {
     "addFirst": "Añade tu primer producto",
     "noProducts": "Todavía no tienes productos. Añade uno y volverás aquí directamente para colocarlo.",

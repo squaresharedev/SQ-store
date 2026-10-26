@@ -278,52 +278,6 @@
       "failed": "Impossible de copier le lien. Sélectionnez-le et copiez-le manuellement."
     }
   },
-  "wizard": {
-    "vibe": {
-      "title": "Choisissez un aspect",
-      "description": "Votre point de départ. Tout reste modifiable dans l’éditeur."
-    },
-    "name": {
-      "title": "Nommez votre vitrine",
-      "description": "Les acheteurs le voient en haut de votre vitrine. Vous pouvez la renommer à tout moment."
-    },
-    "stepOf": "Étape {current} sur {total}",
-    "nameLabel": "Nom de la vitrine",
-    "nameHint": "Laissez vide et nous l’appellerons Vitrine sans titre.",
-    "noProductsHint": "Pas encore de produits ? Ajoutez-les après la configuration.",
-    "skipSetup": "Passer la configuration",
-    "creating": "Création…",
-    "create": "Créer une vitrine"
-  },
-  "createOptions": {
-    "vibeGroupLabel": "L’aspect que vous voulez",
-    "categoryPlaceholder": {
-      "fashion": "Ma boutique de vêtements",
-      "art": "Ma boutique d’art",
-      "jewellery": "Ma boutique de bijoux",
-      "handmade": "Ma boutique d’artisanat",
-      "home": "Ma boutique déco",
-      "beauty": "Ma boutique beauté",
-      "food": "Ma boutique gourmande",
-      "music": "Ma boutique de musique",
-      "photography": "Ma boutique photo",
-      "books": "Ma boutique de livres",
-      "digital": "Ma boutique numérique",
-      "vintage": "Ma boutique vintage",
-      "other": "Ma boutique",
-      "default": "Ma vitrine"
-    },
-    "vibe": {
-      "minimal": "Minimal",
-      "classic": "Classique",
-      "bold": "Audacieux"
-    },
-    "vibeHint": {
-      "minimal": "Nom et prix au survol",
-      "classic": "Nom et prix toujours affichés",
-      "bold": "Prix toujours affiché, nom au survol"
-    }
-  },
   "picker": {
     "addFirst": "Ajoutez votre premier produit",
     "noProducts": "Vous n’avez pas encore de produits. Ajoutez-en un et vous reviendrez directement ici pour le placer.",

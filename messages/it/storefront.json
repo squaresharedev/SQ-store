@@ -278,52 +278,6 @@
       "failed": "Non è stato possibile copiare il link. Selezionalo e copialo manualmente."
     }
   },
-  "wizard": {
-    "vibe": {
-      "title": "Scegli un aspetto",
-      "description": "Il tuo punto di partenza. Tutto resta modificabile nell’editor."
-    },
-    "name": {
-      "title": "Dai un nome alla tua vetrina",
-      "description": "Gli acquirenti lo vedono in cima alla tua vetrina. Puoi rinominarla in qualsiasi momento."
-    },
-    "stepOf": "Passaggio {current} di {total}",
-    "nameLabel": "Nome della vetrina",
-    "nameHint": "Lascialo vuoto e la chiameremo Vetrina senza titolo.",
-    "noProductsHint": "Non hai ancora prodotti? Aggiungili dopo la configurazione.",
-    "skipSetup": "Salta la configurazione",
-    "creating": "Creazione…",
-    "create": "Crea vetrina"
-  },
-  "createOptions": {
-    "vibeGroupLabel": "L’aspetto che vuoi",
-    "categoryPlaceholder": {
-      "fashion": "Il mio negozio di abbigliamento",
-      "art": "Il mio negozio d’arte",
-      "jewellery": "Il mio negozio di gioielli",
-      "handmade": "Il mio negozio di artigianato",
-      "home": "Il mio negozio di casa",
-      "beauty": "Il mio negozio di bellezza",
-      "food": "Il mio negozio di cibo",
-      "music": "Il mio negozio di musica",
-      "photography": "Il mio negozio di foto",
-      "books": "Il mio negozio di libri",
-      "digital": "Il mio negozio digitale",
-      "vintage": "Il mio negozio vintage",
-      "other": "Il mio negozio",
-      "default": "La mia vetrina"
-    },
-    "vibe": {
-      "minimal": "Minimal",
-      "classic": "Classico",
-      "bold": "Deciso"
-    },
-    "vibeHint": {
-      "minimal": "Nome e prezzo al passaggio del mouse",
-      "classic": "Nome e prezzo sempre visibili",
-      "bold": "Prezzo sempre visibile, nome al passaggio del mouse"
-    }
-  },
   "picker": {
     "addFirst": "Aggiungi il tuo primo prodotto",
     "noProducts": "Non hai ancora prodotti. Aggiungine uno e tornerai qui direttamente per posizionarlo.",

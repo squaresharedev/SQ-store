@@ -9,7 +9,6 @@ import {
   useSyncExternalStore,
 } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, ExternalLink, Search, Share2, Sparkles, Users, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatList } from "@/lib/format/intl";
@@ -68,7 +67,7 @@ import { sampleObjectKey } from "@/lib/storefront/sample";
 import { storefrontEmbedPath } from "@/lib/storefront/paths";
 import { SampleModeProvider } from "@/lib/storefront/sample-mode";
 import { EditorTour, startEditorTour } from "@/components/onboarding/EditorTour";
-import { CreateStorefrontWizard } from "./CreateStorefrontWizard";
+import { useCreateStorefront } from "./useCreateStorefront";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
@@ -358,10 +357,9 @@ export function StorefrontDesigner({
    * Set when this is the SAMPLE storefront (lib/storefront/sample.ts), never a
    * row: nothing saves, nothing uploads, no product is edited, the header offers
    * "Create your own" instead of Save, and the designer tour runs here.
-   * `autoStartTour` is the person's `editor_tour_seen_at` still being null;
-   * `productCount` is the real store's, for the setup flow's hint.
+   * `autoStartTour` is the person's `editor_tour_seen_at` still being null.
    */
-  sample?: { autoStartTour: boolean; productCount: number } | null;
+  sample?: { autoStartTour: boolean } | null;
   storefrontId: string;
   initialName: string;
   initialConfig: StorefrontConfig;
@@ -419,12 +417,9 @@ export function StorefrontDesigner({
   const tKey = useTranslations();
   const toast = useToast();
   const showActionError = useActionErrorToast();
-  const router = useRouter();
   const isSample = sample !== null;
-  // The sample's "Create your own" opens the storefront setup flow right here,
-  // and a finished one goes straight to the new storefront's designer.
-  const [createOpen, setCreateOpen] = useState(false);
-  const [creating, setCreating] = useState(false);
+  // The sample's "Create your own" makes a storefront and opens its designer.
+  const [createStorefrontNow, creating] = useCreateStorefront();
   const [name, setName] = useState(initialName);
   // Display URL for the image background: server-signed at load; replaced by
   // a local object URL right after an in-session upload. NOT part of the
@@ -3787,13 +3782,12 @@ export function StorefrontDesigner({
             <div className="flex items-center gap-3">
               <DesignerSearchButton />
               {/* In place of Save, the way out of the sample and into a real
-                  storefront: the same setup flow the list opens, over this
-                  page, so the seller never has to go and find it. */}
+                  storefront, so the seller never has to go and find it. */}
               <button
                 type="button"
                 data-sample-create=""
                 aria-label={tKey("Storefront.sample.designer.createAriaLabel")}
-                onClick={() => setCreateOpen(true)}
+                onClick={() => void createStorefrontNow()}
                 disabled={creating}
                 className={cn(primaryButtonClass, "group/btn h-9 shrink-0 py-0")}
               >
@@ -4485,19 +4479,6 @@ export function StorefrontDesigner({
       />
       {/* Inside the search provider on purpose: opening search ends the tour. */}
       {sample && <EditorTour autoStart={sample.autoStartTour} />}
-      {sample && (
-        <CreateStorefrontWizard
-          open={createOpen}
-          onClose={() => setCreateOpen(false)}
-          onCreated={(id) => {
-            // Left set: the page is on its way to the new storefront.
-            setCreating(true);
-            setCreateOpen(false);
-            router.push(`/storefront/${id}`);
-          }}
-          productCount={sample.productCount}
-        />
-      )}
       </div>
     </SearchProvider>
     </SettingTargetProvider>

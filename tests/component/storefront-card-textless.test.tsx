@@ -72,7 +72,6 @@ function summary(config: StorefrontConfig): StorefrontSummary {
     updatedAt: "2026-08-09T00:00:00.000Z",
     config,
     embedKey: "70000000-0000-4000-8000-000000000007",
-    brief: {},
   };
 }
 

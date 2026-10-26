@@ -95,20 +95,12 @@ export async function createProductViaUI(
   await page.waitForURL(/\/products$/, { timeout: 30_000 });
 }
 
-/**
- * Create a storefront through the UI and land in its designer.
- *
- * "New storefront" opens the setup flow rather than inserting a row, so every
- * spec that just needs A storefront takes the skip path. The flow itself is
- * covered by 09-storefront-setup.spec.ts; repeating it here would only make
- * unrelated specs fail when the questions change.
- */
+/** Create a storefront through the UI and land in its designer. */
 export async function createStorefrontViaUI(page: Page) {
   await page
     .getByRole("button", { name: /new storefront|create storefront/i })
     .first()
     .click();
-  await page.getByRole("button", { name: /skip setup/i }).click();
   await page.waitForURL(/\/storefront\/[0-9a-f-]{36}/, { timeout: 30_000 });
 }
 

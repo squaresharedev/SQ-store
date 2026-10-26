@@ -278,52 +278,6 @@
       "failed": "Não foi possível copiar a ligação. Selecione-a e copie-a manualmente."
     }
   },
-  "wizard": {
-    "vibe": {
-      "title": "Escolha um aspeto",
-      "description": "O seu ponto de partida. Tudo continua editável no editor."
-    },
-    "name": {
-      "title": "Dê um nome à sua montra",
-      "description": "Os compradores veem-no no topo da sua montra. Pode mudar o nome quando quiser."
-    },
-    "stepOf": "Passo {current} de {total}",
-    "nameLabel": "Nome da montra",
-    "nameHint": "Deixe em branco e vamos chamar-lhe Montra sem título.",
-    "noProductsHint": "Ainda sem produtos? Adicione-os depois da configuração.",
-    "skipSetup": "Saltar configuração",
-    "creating": "A criar…",
-    "create": "Criar montra"
-  },
-  "createOptions": {
-    "vibeGroupLabel": "O aspeto que quer",
-    "categoryPlaceholder": {
-      "fashion": "A minha loja de roupa",
-      "art": "A minha loja de arte",
-      "jewellery": "A minha loja de joalharia",
-      "handmade": "A minha loja de artesanato",
-      "home": "A minha loja de casa e decoração",
-      "beauty": "A minha loja de beleza",
-      "food": "A minha loja de comida",
-      "music": "A minha loja de música",
-      "photography": "A minha loja de fotografia",
-      "books": "A minha loja de livros",
-      "digital": "A minha loja digital",
-      "vintage": "A minha loja vintage",
-      "other": "A minha loja",
-      "default": "A minha montra"
-    },
-    "vibe": {
-      "minimal": "Minimalista",
-      "classic": "Clássico",
-      "bold": "Marcante"
-    },
-    "vibeHint": {
-      "minimal": "Nome e preço ao passar o rato",
-      "classic": "Nome e preço sempre visíveis",
-      "bold": "Preço sempre visível, nome ao passar o rato"
-    }
-  },
   "picker": {
     "addFirst": "Adicione o seu primeiro produto",
     "noProducts": "Ainda não tem produtos. Adicione um e volta logo aqui para o colocar.",

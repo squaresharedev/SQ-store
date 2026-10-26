@@ -34,7 +34,7 @@ function Fixture({ id, name, children }: { id: string; name: string; children: R
   );
 }
 
-// Creating opens the real setup flow; finishing it would need an account.
+// Creating calls the real action, which needs an account.
 export function EmptyStatesGallery() {
   return (
     <main className={`${pageShellClass} space-y-12`}>
@@ -80,7 +80,6 @@ export function EmptyStatesGallery() {
                 updatedAt: "2026-10-11T00:00:00.000Z",
                 config: { ...DEFAULT_STOREFRONT_CONFIG, theme: { ...DEFAULT_STOREFRONT_CONFIG.theme, ...theme }, blocks: [] },
                 embedKey: id,
-                brief: {},
               }}
               productsById={new Map()}
               canWrite

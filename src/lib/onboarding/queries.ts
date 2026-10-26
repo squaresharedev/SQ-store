@@ -40,27 +40,6 @@ export async function getSampleStorefrontFlags(): Promise<{
 }
 
 /**
- * How many products the active store has, for the storefront setup flow's
- * "no products yet" hint when it is opened from the sample storefront (which
- * otherwise reads nothing from the catalogue). A head count, no rows. Zero on a
- * failed read: the number only decides whether a hint shows.
- */
-export async function countActiveAccountProducts(): Promise<number> {
-  const account = await getActiveAccount();
-  if (!account) return 0;
-  const supabase = await createClient();
-  const { count, error } = await supabase
-    .from("products")
-    .select("id", { count: "exact", head: true })
-    .eq("owner_id", account.accountId);
-  if (error) {
-    console.warn("[onboarding] product count read failed:", error.message);
-    return 0;
-  }
-  return count ?? 0;
-}
-
-/**
  * Has this store EVER had an order, and does it have a storefront?
  *
  * Two existence checks, one row each at most, for pages that should look

@@ -69,9 +69,8 @@ import { WelcomeHero } from "./WelcomeVisuals";
  * it on the way out) without an agreement on file. Leaving the page instead
  * just brings the welcome back on the next visit to Overview.
  *
- * Built on CreateStorefrontWizard's pattern (steps feeding the Modal's title, a
- * sliding step with a reduced-motion fallback, focus moved onto each step) so
- * the app's multi-step dialogs read as one control.
+ * Steps feed the Modal's title, each slides in with a reduced-motion fallback,
+ * and focus moves onto each step as it arrives.
  *
  * Every way out is the SAME fact to the server: the person has seen the
  * welcome (lib/onboarding/actions.ts). The caller records that.
@@ -203,8 +202,8 @@ export function WelcomeFlow({
   const acceptResult = useSaveResult(acceptState);
   const saveResult = useSaveResult(saveState);
 
-  // Reset on every open, adjusted during render like CreateStorefrontWizard:
-  // an effect would paint the previous visit's step for a frame first.
+  // Reset on every open, adjusted during render: an effect would paint the
+  // previous visit's step for a frame first.
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
     setWasOpen(open);
@@ -300,8 +299,8 @@ export function WelcomeFlow({
 
   /**
    * Move focus onto each step as it arrives, and rewind the scroll region.
-   * Same reasoning as CreateStorefrontWizard.focusStep: AnimatePresence runs
-   * `mode="wait"`, so only a callback ref fires when the new step exists, and
+   * AnimatePresence runs `mode="wait"`, so only a callback ref fires when the
+   * new step exists, and
    * the container (not its first control) takes focus so the new question is
    * what assistive tech announces.
    */
@@ -348,7 +347,7 @@ export function WelcomeFlow({
       description={copy.description}
       dismissible={!termsPending}
       // A column, so only the step's content scrolls and the progress and the
-      // controls stay on screen (the storefront wizard's layout).
+      // controls stay on screen.
       size="xl"
       className="flex flex-col overflow-y-hidden pb-3"
     >
@@ -531,7 +530,8 @@ export function WelcomeFlow({
         </AnimatePresence>
       </div>
 
-      {/* A plain flex item, not sticky (see CreateStorefrontWizard). */}
+      {/* A plain flex item, not sticky: sticky lifted it out of flow, over the
+          last row of the step, and padded it twice. */}
       <div className="-mx-6 mt-3 flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-border px-6 pt-2.5">
         {step === "welcome" && (
           <Button className="ml-auto" onClick={forward}>

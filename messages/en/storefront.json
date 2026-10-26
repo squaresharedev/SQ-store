@@ -278,52 +278,6 @@
       "failed": "Couldn't copy the link. Select and copy it manually."
     }
   },
-  "wizard": {
-    "vibe": {
-      "title": "Pick a look",
-      "description": "Your starting point. Everything stays editable in the designer."
-    },
-    "name": {
-      "title": "Name your storefront",
-      "description": "Buyers see it at the top of your storefront. You can rename it any time."
-    },
-    "stepOf": "Step {current} of {total}",
-    "nameLabel": "Storefront name",
-    "nameHint": "Leave it blank and we will call it Untitled storefront.",
-    "noProductsHint": "No products yet? Add them after setup.",
-    "skipSetup": "Skip setup",
-    "creating": "Creating…",
-    "create": "Create storefront"
-  },
-  "createOptions": {
-    "vibeGroupLabel": "The look you want",
-    "categoryPlaceholder": {
-      "fashion": "My clothing shop",
-      "art": "My art shop",
-      "jewellery": "My jewellery shop",
-      "handmade": "My handmade shop",
-      "home": "My home shop",
-      "beauty": "My beauty shop",
-      "food": "My food shop",
-      "music": "My music shop",
-      "photography": "My photo shop",
-      "books": "My book shop",
-      "digital": "My digital shop",
-      "vintage": "My vintage shop",
-      "other": "My shop",
-      "default": "My storefront"
-    },
-    "vibe": {
-      "minimal": "Minimal",
-      "classic": "Classic",
-      "bold": "Bold"
-    },
-    "vibeHint": {
-      "minimal": "Name and price on hover",
-      "classic": "Name and price always shown",
-      "bold": "Price always, name on hover"
-    }
-  },
   "picker": {
     "addFirst": "Add your first product",
     "noProducts": "You have no products yet. Add one and you''ll come straight back here to place it.",

@@ -278,52 +278,6 @@
       "failed": "Odkaz sa nepodarilo skopírovať. Vyberte ho a skopírujte ručne."
     }
   },
-  "wizard": {
-    "vibe": {
-      "title": "Vyberte si vzhľad",
-      "description": "Váš východiskový bod. Všetko zostáva upraviteľné v editore výkladu."
-    },
-    "name": {
-      "title": "Pomenujte váš výklad",
-      "description": "Kupujúci ho uvidia v hornej časti výkladu. Môžete ho kedykoľvek premenovať."
-    },
-    "stepOf": "Krok {current} z {total}",
-    "nameLabel": "Názov výkladu",
-    "nameHint": "Nechajte prázdne a nazveme ho Výklad bez názvu.",
-    "noProductsHint": "Ešte nemáte žiadne produkty? Pridajte ich po nastavení.",
-    "skipSetup": "Preskočiť nastavenie",
-    "creating": "Vytvára sa…",
-    "create": "Vytvoriť výklad"
-  },
-  "createOptions": {
-    "vibeGroupLabel": "Vzhľad, aký chcete",
-    "categoryPlaceholder": {
-      "fashion": "Môj obchod s oblečením",
-      "art": "Môj výtvarný obchod",
-      "jewellery": "Môj obchod so šperkami",
-      "handmade": "Môj obchod s ručnými výrobkami",
-      "home": "Môj obchod s domácimi potrebami",
-      "beauty": "Môj obchod s kozmetikou",
-      "food": "Môj potravinársky obchod",
-      "music": "Môj hudobný obchod",
-      "photography": "Môj fotografický obchod",
-      "books": "Moje kníhkupectvo",
-      "digital": "Môj digitálny obchod",
-      "vintage": "Môj vintage obchod",
-      "other": "Môj obchod",
-      "default": "Môj výklad"
-    },
-    "vibe": {
-      "minimal": "Minimalistický",
-      "classic": "Klasický",
-      "bold": "Odvážny"
-    },
-    "vibeHint": {
-      "minimal": "Názov a cena pri prejdení myšou",
-      "classic": "Názov a cena sa vždy zobrazujú",
-      "bold": "Cena vždy, názov pri prejdení myšou"
-    }
-  },
   "picker": {
     "addFirst": "Pridajte svoj prvý produkt",
     "noProducts": "Zatiaľ nemáte žiadne produkty. Pridajte jeden a hneď sa vrátite sem, aby ste ho umiestnili.",

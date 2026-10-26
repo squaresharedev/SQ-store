@@ -278,52 +278,6 @@
       "failed": "Nie udało się skopiować linku. Zaznacz i skopiuj ręcznie."
     }
   },
-  "wizard": {
-    "vibe": {
-      "title": "Wybierz wygląd",
-      "description": "Twój punkt wyjścia. Wszystko pozostaje edytowalne w edytorze."
-    },
-    "name": {
-      "title": "Nazwij swoją witrynę",
-      "description": "Kupujący widzą ją na górze witryny. Możesz zmienić nazwę w każdej chwili."
-    },
-    "stepOf": "Krok {current} z {total}",
-    "nameLabel": "Nazwa witryny",
-    "nameHint": "Zostaw puste, a nazwiemy ją Witryna bez nazwy.",
-    "noProductsHint": "Nie masz jeszcze produktów? Dodaj je po konfiguracji.",
-    "skipSetup": "Pomiń konfigurację",
-    "creating": "Tworzenie…",
-    "create": "Utwórz witrynę"
-  },
-  "createOptions": {
-    "vibeGroupLabel": "Wygląd, jaki chcesz",
-    "categoryPlaceholder": {
-      "fashion": "Mój sklep odzieżowy",
-      "art": "Mój sklep z sztuką",
-      "jewellery": "Mój sklep z biżuterią",
-      "handmade": "Mój sklep z rękodziełem",
-      "home": "Mój sklep wnętrzarski",
-      "beauty": "Mój sklep kosmetyczny",
-      "food": "Mój sklep spożywczy",
-      "music": "Mój sklep muzyczny",
-      "photography": "Mój sklep fotograficzny",
-      "books": "Mój sklep z książkami",
-      "digital": "Mój sklep cyfrowy",
-      "vintage": "Mój sklep vintage",
-      "other": "Mój sklep",
-      "default": "Moja witryna"
-    },
-    "vibe": {
-      "minimal": "Minimalistyczny",
-      "classic": "Klasyczny",
-      "bold": "Odważny"
-    },
-    "vibeHint": {
-      "minimal": "Nazwa i cena po najechaniu kursorem",
-      "classic": "Nazwa i cena zawsze widoczne",
-      "bold": "Cena zawsze, nazwa po najechaniu kursorem"
-    }
-  },
   "picker": {
     "addFirst": "Dodaj swój pierwszy produkt",
     "noProducts": "Nie masz jeszcze produktów. Dodaj jeden, a od razu wrócisz tutaj, aby go umieścić.",

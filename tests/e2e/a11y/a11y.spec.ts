@@ -115,39 +115,6 @@ test.describe("accessibility", () => {
     await expectNoSeriousViolations(page, "search palette (empty)");
   });
 
-  test("storefront setup flow", async ({ page }) => {
-    const user = freshUser("a11y-setup");
-    await signUp(page, user);
-    await gotoApp(page, "/storefront");
-    await page
-      .getByRole("button", { name: /new storefront|create storefront/i })
-      .first()
-      .click();
-
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
-
-    /**
-     * Wait out a step's entrance fade before scanning. axe measures what is on
-     * screen at that instant, and a label caught mid-fade reports a contrast
-     * ratio the settled control never has (muted text at 6% opacity reads as
-     * #f0f0f0 on white). The step container is the one focusable-by-script
-     * element in the dialog, which is what makes it findable here.
-     */
-    async function settled() {
-      const step = dialog.locator('[tabindex="-1"]');
-      await expect
-        .poll(() => step.evaluate((el) => getComputedStyle(el).opacity))
-        .toBe("1");
-    }
-
-    // The swatch step, where the only thing separating the tiles is colour,
-    // so the text label has to carry the meaning.
-    await expect(dialog).toContainText("Step 1 of 2");
-    await settled();
-    await expectNoSeriousViolations(page, "setup flow (looks)");
-  });
-
   test("welcome flow and guided tour", async ({ page }) => {
     // The first thing a new seller meets, so each part is scanned: the welcome
     // (icon tiles), the Terms (a scroll region), the seller
@@ -160,7 +127,7 @@ test.describe("accessibility", () => {
     });
     const dialog = page.getByRole("dialog");
 
-    /** Same reason as the setup flow's settle: axe reads text at whatever
+    /** Wait out the entrance fades before scanning: axe reads text at whatever
      *  opacity it has reached. The slides' pictures animate in after the slide
      *  itself, so wait until every piece of text INSIDE THE SLIDE, and
      *  everything around it, is fully opaque.

@@ -278,52 +278,6 @@
       "failed": "Odkaz se nepodařilo zkopírovat. Označte ho a zkopírujte ručně."
     }
   },
-  "wizard": {
-    "vibe": {
-      "title": "Vyberte vzhled",
-      "description": "Výchozí bod. V editoru půjde upravit úplně všechno."
-    },
-    "name": {
-      "title": "Pojmenujte výlohu",
-      "description": "Kupující ho uvidí v horní části výlohy. Přejmenovat ji můžete kdykoli."
-    },
-    "stepOf": "Krok {current} z {total}",
-    "nameLabel": "Název výlohy",
-    "nameHint": "Když pole necháte prázdné, pojmenujeme ji Výloha bez názvu.",
-    "noProductsHint": "Ještě nemáte produkty? Přidejte je po nastavení.",
-    "skipSetup": "Přeskočit nastavení",
-    "creating": "Vytváření…",
-    "create": "Vytvořit výlohu"
-  },
-  "createOptions": {
-    "vibeGroupLabel": "Jaký vzhled chcete",
-    "categoryPlaceholder": {
-      "fashion": "Můj obchod s oblečením",
-      "art": "Můj obchod s uměním",
-      "jewellery": "Můj obchod se šperky",
-      "handmade": "Můj obchod s ruční výrobou",
-      "home": "Můj obchod s bytovými doplňky",
-      "beauty": "Můj obchod s kosmetikou",
-      "food": "Můj obchod s jídlem",
-      "music": "Můj hudební obchod",
-      "photography": "Můj obchod s fotografiemi",
-      "books": "Moje knihkupectví",
-      "digital": "Můj digitální obchod",
-      "vintage": "Můj vintage obchod",
-      "other": "Můj obchod",
-      "default": "Moje výloha"
-    },
-    "vibe": {
-      "minimal": "Minimalistický",
-      "classic": "Klasický",
-      "bold": "Výrazný"
-    },
-    "vibeHint": {
-      "minimal": "Název a cena při najetí myší",
-      "classic": "Název a cena vždy viditelné",
-      "bold": "Cena vždy, název při najetí myší"
-    }
-  },
   "picker": {
     "addFirst": "Přidejte svůj první produkt",
     "noProducts": "Zatím nemáte žádné produkty. Přidejte nějaký a vrátíte se rovnou sem, kde ho umístíte.",
