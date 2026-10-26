@@ -152,6 +152,20 @@ function BrowserWindow({
 /** The product photo: a real one, a hand-painted mug (CC0, WordPress Photo Directory). */
 const PRODUCT_PHOTO = "/review-import/mug.webp";
 
+/** The mug's photo, as both stores show it. */
+function ProductPhoto() {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- decorative, inside an aria-hidden stage
+    <img
+      src={PRODUCT_PHOTO}
+      alt=""
+      width={80}
+      height={80}
+      className="size-16 shrink-0 rounded-sm bg-secondary object-cover @md:size-20"
+    />
+  );
+}
+
 /** One review: who (with their photo), how many stars, what they said. */
 function ReviewCard({ name, photo, rating, quote }: { name: string; photo: string; rating: number; quote: string }) {
   return (
@@ -197,8 +211,9 @@ function ReviewRows({ refs, className }: { refs: RefObject<(HTMLDivElement | nul
  * settle into the page's review list and its rating fills in.
  *
  * Two websites side by side, each in a browser window with its own tab and
- * address: a made-up shop in its own colours, and Square Share. Loops while
- * the page is open; under reduced motion it is the landed frame, still.
+ * address: the same mug on a made-up shop the seller is leaving, and on
+ * Square Share. Loops while the page is open; under reduced motion it is the
+ * landed frame, still.
  * Illustrative, so all of it is hidden from assistive tech. Same choreography
  * as BuyButtonStory.
  */
@@ -303,13 +318,23 @@ export function ReviewImportStory() {
               <span className={cn(placeholderBarClass, "h-1 w-6")} />
             </span>
           </div>
-          <div className="flex flex-col gap-2 p-3">
-            <span className="flex items-center gap-1.5">
-              <span className="truncate font-inter text-xs font-semibold text-foreground">{t("customerReviews")}</span>
-              <span className="text-rating">
-                <StarRating value={AVERAGE} label="" />
-              </span>
-            </span>
+          {/* The same mug, as the old store sells it, with its reviews under it. */}
+          <div className="flex flex-col p-3">
+            <div className="flex gap-3">
+              <ProductPhoto />
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="truncate font-display text-xs font-semibold uppercase tracking-wide text-foreground">
+                  {t("product")}
+                </span>
+                <span className="font-inter text-xs text-muted-foreground">{formatPrice(PRODUCT_PRICE, "EUR", locale)}</span>
+                <span className={cn(placeholderBarClass, "mt-1 w-full")} />
+                <span className={cn(placeholderBarClass, "w-2/3")} />
+                <span className="mt-1 w-fit max-w-full truncate whitespace-nowrap border border-foreground px-2 py-1 @md:px-3 font-inter text-xs font-medium uppercase tracking-wide text-foreground">
+                  {t("addToCart")}
+                </span>
+              </div>
+            </div>
+            <span className="mb-2 mt-3 font-inter text-xs font-semibold text-foreground">{t("customerReviews")}</span>
             <ReviewRows refs={rowRefs} />
           </div>
         </BrowserWindow>
@@ -330,14 +355,7 @@ export function ReviewImportStory() {
         >
           <div className="flex flex-col p-3">
             <div className="flex gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element -- decorative, inside an aria-hidden stage */}
-              <img
-                src={PRODUCT_PHOTO}
-                alt=""
-                width={80}
-                height={80}
-                className="size-16 shrink-0 rounded-sm bg-secondary object-cover @md:size-20"
-              />
+              <ProductPhoto />
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <span className="truncate font-inter text-xs font-semibold text-foreground">{t("product")}</span>
                 <span className="font-inter text-xs text-muted-foreground">{formatPrice(PRODUCT_PRICE, "EUR", locale)}</span>
@@ -363,7 +381,7 @@ export function ReviewImportStory() {
                 </span>
                 <span className={cn(placeholderBarClass, "mt-1 w-full")} />
                 <span className={cn(placeholderBarClass, "w-3/4")} />
-                <span className="mt-1 w-fit whitespace-nowrap bg-primary px-3 py-1 font-inter text-xs font-medium text-primary-foreground">
+                <span className="mt-1 w-fit max-w-full truncate whitespace-nowrap bg-primary px-2 py-1 @md:px-3 font-inter text-xs font-medium text-primary-foreground">
                   {tBuy("snippetText")}
                 </span>
               </div>
