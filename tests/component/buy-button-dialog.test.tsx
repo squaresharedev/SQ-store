@@ -125,7 +125,7 @@ describe("BuyButtonDialog, ready", () => {
     // The sentence the picture replaces is still there for a screen reader.
     expect(within(dialog).getByText(/takes buyers to the page and checkout for "Oak lamp"/)).toHaveClass("sr-only");
     expect(dialog).toHaveTextContent("Paste it into your button's link setting.");
-    expect(dialog).toHaveTextContent("Shows in Analytics as “Website button”.");
+    expect(dialog).toHaveTextContent("Shows in Analytics as “Buy button”.");
   });
 
   it("swaps the one box for a line of HTML: a plain link, nothing that runs", async () => {

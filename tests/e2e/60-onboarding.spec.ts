@@ -17,6 +17,7 @@ import {
   seedStorefronts,
   serviceRest,
   signUp,
+  SELLER_DIALOG,
   TERMS_DIALOG,
   TOUR_LAYER,
   tourButton,
@@ -74,7 +75,7 @@ async function profile(sellerId: string): Promise<ProfileRow> {
 }
 
 test.describe("onboarding", () => {
-  test("a new seller is welcomed, adds their seller details and is handed to the tour", async ({
+  test("a new seller is welcomed, adds their seller details and lands on the checklist", async ({
     page,
   }) => {
     test.setTimeout(120_000);
@@ -112,8 +113,12 @@ test.describe("onboarding", () => {
     // Not typed yet: a seller can carry on and prove it later from Settings.
     await dialog.getByRole("button", { name: "Continue" }).click();
 
-    // Forward out of the welcome is into the guided tour, starting on this page.
+    // Forward out of the welcome is onto the checklist, not into a tour the
+    // seller did not ask for. The tour is one click away there.
     await expect(page.getByRole("dialog", { name: WELCOME_DIALOG })).toHaveCount(0);
+    await expect(page.locator(TOUR_LAYER)).toHaveCount(0);
+    await expect(page.locator("[data-setup-checklist]")).toBeVisible();
+    await page.locator("[data-setup-tour]").click();
     await expectTourStep(page, "overview-nav");
     await expect(page).toHaveURL(/\/dashboard$/);
     await tourButton(page, "Skip tour");
@@ -171,20 +176,14 @@ test.describe("onboarding", () => {
       terms.getByRole("link", { name: /read the full terms of service/i }),
     ).toHaveAttribute("href", "https://squareshare.eu/terms/");
 
-    // Shut until the summary has been scrolled to its end, by a real wheel.
+    // Ready to agree without scrolling first. Nothing is recorded until then.
     const agree = terms.getByRole("button", { name: "I have read and agree to the Terms" });
-    await expect(agree).toBeDisabled();
-    await summary.hover();
-    await expect(async () => {
-      await page.mouse.wheel(0, 2_000);
-      await expect(agree).toBeEnabled({ timeout: 1_000 });
-    }).toPass({ timeout: 15_000 });
-    // Nothing is recorded by reading alone.
+    await expect(agree).toBeEnabled();
     expect((await profile(sellerId)).legal_accepted_at).toBeNull();
 
     await agree.click();
-    const path = page.getByRole("dialog", { name: "Four steps to your first page" });
-    await expect(path).toBeVisible({ timeout: 20_000 });
+    const next = page.getByRole("dialog", { name: SELLER_DIALOG });
+    await expect(next).toBeVisible({ timeout: 20_000 });
     const agreed = await profile(sellerId);
     expect(agreed.legal_accepted_at).not.toBeNull();
     expect(agreed.legal_accepted_version).toMatch(/^tos-\d{4}-\d{2}-\d{2}$/);
@@ -193,7 +192,7 @@ test.describe("onboarding", () => {
 
     // Agreed, the ways out open: Esc now closes it, and closing counts as seen.
     await page.keyboard.press("Escape");
-    await expect(path).toBeHidden();
+    await expect(next).toBeHidden();
     await expect(page.locator(TOUR_LAYER)).toHaveCount(0);
     await expect
       .poll(async () => (await profile(sellerId)).onboarding_completed_at, {
@@ -238,9 +237,9 @@ test.describe("onboarding", () => {
 
     await openTermsStep(page);
     await agreeToTerms(page);
-    const path = page.getByRole("dialog", { name: "Four steps to your first page" });
-    await path.getByRole("button", { name: "Skip onboarding" }).click();
-    await expect(path).toBeHidden();
+    const seller = page.getByRole("dialog", { name: SELLER_DIALOG });
+    await seller.getByRole("button", { name: "Skip onboarding" }).click();
+    await expect(seller).toBeHidden();
     await expect(page.getByRole("dialog", { name: TERMS_DIALOG })).toHaveCount(0);
     await expect(page.locator(TOUR_LAYER)).toHaveCount(0);
 
@@ -356,7 +355,7 @@ test.describe("onboarding", () => {
 
     await fillStable(page, "Title", "Walnut stool");
     await fillStable(page, /price/i, "85.00");
-    await page.getByRole("button", { name: /save product/i }).click();
+    await page.getByRole("button", { name: /save product|save as draft/i }).click();
     await page.waitForURL(new RegExp(`/storefront/${storefrontId}$`), {
       timeout: 30_000,
     });

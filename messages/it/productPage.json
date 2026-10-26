@@ -98,17 +98,17 @@
     "guarantee": "La legge dell’UE ti garantisce almeno 2 anni di garanzia legale di conformità dei beni rispetto a quanto venduto."
   },
   "footer": {
-    "disclosure": "<seller>{name}</seller> è il venditore di questo ordine ed è responsabile del prodotto, della sua consegna e di eventuali resi o rimborsi. Squareshare fornisce la tecnologia alla base di questa pagina e non è parte del contratto di vendita.",
-    "poweredBy": "Realizzato con <brand>Squareshare</brand>",
-    "policiesLabel": "Norme di Squareshare",
+    "disclosure": "<seller>{name}</seller> è il venditore di questo ordine ed è responsabile del prodotto, della sua consegna e di eventuali resi o rimborsi. Square Share fornisce la tecnologia alla base di questa pagina e non è parte del contratto di vendita.",
+    "poweredBy": "Realizzato con <brand>Square Share</brand>",
+    "policiesLabel": "Norme di Square Share",
     "policies": {
       "privacy": {
         "label": "Privacy",
-        "name": "Informativa sulla privacy di Squareshare"
+        "name": "Informativa sulla privacy di Square Share"
       },
       "terms": {
         "label": "Termini",
-        "name": "Termini di utilizzo di Squareshare"
+        "name": "Termini di utilizzo di Square Share"
       }
     }
   },

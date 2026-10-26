@@ -33,7 +33,7 @@
     "title": "How your discounts are doing",
     "orders": "Orders with a discount",
     "revenue": "Revenue from those orders",
-    "given": "Given in discounts",
+    "given": "Total discounted",
     "none": "Nothing yet",
     "channelsTitle": "Orders by channel",
     "channelsDescription": "Codes count under the channel you shared them on, or under the code itself when you didn't name one.",
@@ -43,7 +43,7 @@
   },
   "list": {
     "title": "Your discounts",
-    "none": "No discounts right now. Deleted discounts keep counting their orders above.",
+    "none": "No active discounts.",
     "channel": "Shared on {channel}",
     "startsOn": "Starts {date}",
     "endsOn": "Ends {date}",

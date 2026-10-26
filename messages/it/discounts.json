@@ -33,7 +33,7 @@
     "title": "Come stanno andando i tuoi sconti",
     "orders": "Ordini con uno sconto",
     "revenue": "Ricavi da quegli ordini",
-    "given": "Sconti concessi",
+    "given": "Totale scontato",
     "none": "Ancora nulla",
     "channelsTitle": "Ordini per canale",
     "channelsDescription": "I codici vengono conteggiati sotto il canale su cui li hai condivisi, oppure sotto il codice stesso quando non hai indicato un canale.",
@@ -43,7 +43,7 @@
   },
   "list": {
     "title": "I tuoi sconti",
-    "none": "Nessuno sconto al momento. Gli sconti eliminati continuano a contare i loro ordini in alto.",
+    "none": "Nessuno sconto attivo.",
     "channel": "Condiviso su {channel}",
     "startsOn": "Inizia il {date}",
     "endsOn": "Termina il {date}",

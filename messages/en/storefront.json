@@ -146,7 +146,7 @@
       "thankYouMessage": "Thank-you message",
       "thankYouCelebration": "Thank-you celebration",
       "checkoutPayButton": "Pay button",
-      "saleChip": "Sale chip",
+      "saleChip": "Sale badge",
       "salePrice": "Sale price",
       "productPagePhoto": "Product page photo",
       "checkoutPhoto": "Checkout photo",
@@ -189,14 +189,15 @@
   "card": {
     "editAriaLabel": "Edit {name}",
     "embedAriaLabel": "Share or embed {name}",
+    "share": "Share",
     "viewPageAriaLabel": "Open {name} as buyers see it",
     "deleteAriaLabel": "Delete {name}",
     "blockCount": "{count, plural, one {# block} other {# blocks}}",
     "updatedLabel": " · updated {date}",
     "emptyHint": "This grid is empty",
-    "removed": "Removed by SquareShare",
-    "pausedInReview": "Paused · with SquareShare for review",
-    "pausedNeedsChanges": "Paused by SquareShare · needs changes"
+    "removed": "Removed by Square Share",
+    "pausedInReview": "Paused · with Square Share for review",
+    "pausedNeedsChanges": "Paused by Square Share · needs changes"
   },
   "embed": {
     "inDevNotice": "The embed widget is in development and not yet rendering on external sites. Configure your settings below so you are ready to paste the snippet the moment it ships.",
@@ -208,7 +209,8 @@
       "privacy": "Add this to your privacy policy"
     },
     "required": "Required",
-    "enabledLabel": "Embed enabled",
+    "enabledLabel": "Show on my website",
+    "showingLabel": "Showing on your website",
     "domainsLabel": "Allowed domains",
     "domainsPlaceholder": "yoursite.com, blog.yoursite.com",
     "domainsHint": "Up to {max}, comma-separated. Paste a URL and we''ll trim it to the domain.",
@@ -244,9 +246,9 @@
       "failed": "Couldn't copy embed snippet. Select and copy it manually.",
       "cannotCopyYet": "embed snippet cannot be copied yet"
     },
-    "privacyHint": "Your site now loads this storefront from Squareshare, so its privacy policy has to say so. Paste this into it:",
+    "privacyHint": "Your site now loads this storefront from Square Share, so its privacy policy has to say so. Paste this into it:",
     "privacyTextLabel": "Privacy text",
-    "privacyText": "This site shows a storefront provided by Squareshare. When it loads, the visitor's IP address and browser details are sent to Squareshare to display the products and to count visits. Squareshare sets no cookies and stores nothing on the visitor's device for this. Details: {policy}",
+    "privacyText": "This site shows a storefront provided by Square Share. When it loads, the visitor's IP address and browser details are sent to Square Share to display the products and to count visits. Square Share sets no cookies and stores nothing on the visitor's device for this. Details: {policy}",
     "copyPrivacy": {
       "copy": "Copy privacy text",
       "copied": "Copied privacy text",
@@ -274,92 +276,6 @@
       "copy": "Copy storefront link",
       "copied": "Copied storefront link",
       "failed": "Couldn't copy the link. Select and copy it manually."
-    }
-  },
-  "wizard": {
-    "category": {
-      "title": "What do you sell?",
-      "description": "This is the biggest clue for which layouts will suit you."
-    },
-    "fulfilment": {
-      "title": "How do buyers get it?",
-      "description": "It shapes what your product pages say about delivery."
-    },
-    "vibe": {
-      "title": "Pick a look",
-      "description": "Your starting point. Everything stays editable in the designer."
-    },
-    "name": {
-      "title": "Name your storefront",
-      "description": "Just for you. You can rename it any time."
-    },
-    "stepOf": "Step {current} of {total}",
-    "nameLabel": "Storefront name",
-    "nameHint": "Leave it blank and we will call it Untitled storefront.",
-    "otherCategoryLabel": "What do you sell?",
-    "otherCategoryPlaceholder": "e.g. model kits",
-    "noProductsHint": "No products yet? Add them after setup.",
-    "skipSetup": "Skip setup",
-    "skip": "Skip",
-    "creating": "Creating…",
-    "create": "Create storefront"
-  },
-  "createOptions": {
-    "categoryGroupLabel": "What you sell",
-    "fulfilmentGroupLabel": "How buyers get it",
-    "vibeGroupLabel": "The look you want",
-    "category": {
-      "fashion": "Clothing",
-      "art": "Art & prints",
-      "jewellery": "Jewellery",
-      "handmade": "Handmade",
-      "home": "Home & living",
-      "beauty": "Beauty",
-      "food": "Food & drink",
-      "music": "Music",
-      "photography": "Photography",
-      "books": "Books & zines",
-      "digital": "Digital goods",
-      "vintage": "Vintage",
-      "other": "Something else"
-    },
-    "categoryPlaceholder": {
-      "fashion": "My clothing shop",
-      "art": "My art shop",
-      "jewellery": "My jewellery shop",
-      "handmade": "My handmade shop",
-      "home": "My home shop",
-      "beauty": "My beauty shop",
-      "food": "My food shop",
-      "music": "My music shop",
-      "photography": "My photo shop",
-      "books": "My book shop",
-      "digital": "My digital shop",
-      "vintage": "My vintage shop",
-      "other": "My shop",
-      "default": "My storefront"
-    },
-    "fulfilment": {
-      "physical": "I ship it",
-      "digital": "They download it",
-      "services": "They book me",
-      "mixed": "A bit of each"
-    },
-    "fulfilmentHint": {
-      "physical": "Physical products",
-      "digital": "Files, presets, music",
-      "services": "Sessions, commissions",
-      "mixed": "More than one of these"
-    },
-    "vibe": {
-      "minimal": "Minimal",
-      "classic": "Classic",
-      "bold": "Bold"
-    },
-    "vibeHint": {
-      "minimal": "Name and price on hover",
-      "classic": "Name and price always shown",
-      "bold": "Price always, name on hover"
     }
   },
   "picker": {
@@ -613,7 +529,7 @@
     "spotBottomRight": "Price tag bottom right"
   },
   "saleBadge": {
-    "title": "Sale chip",
+    "title": "Sale badge",
     "says": "Shows",
     "hint": "Shown on a product while a sale lowers its price.",
     "percent": "Percentage",
@@ -626,7 +542,7 @@
       "flag": "Flag",
       "ribbon": "Ribbon"
     },
-    "spot": "Sale chip {spot, select, top_left {top left} top_center {top center} top_right {top right} middle_center {middle} bottom_left {bottom left} bottom_center {bottom center} bottom_right {bottom right} other {}}"
+    "spot": "Sale badge {spot, select, top_left {top left} top_center {top center} top_right {top right} middle_center {middle} bottom_left {bottom left} bottom_center {bottom center} bottom_right {bottom right} other {}}"
   },
   "chipScale": {
     "label": "On bigger cards",
@@ -954,7 +870,7 @@
       "fillHint": "Fills the block, cropping the overflow.",
       "fitHint": "Shows the whole image inside the block."
     },
-    "reposition": "Reposition image",
+    "reposition": "Crop & position",
     "opacity": {
       "label": "Opacity",
       "ariaLabel": "Image opacity",
@@ -1075,14 +991,14 @@
     "editTextOf": "Edit the text of {name}",
     "color": "Color",
     "changeColorOf": "Change the colour of {name}",
-    "stroke": "Stroke",
-    "editStrokeOf": "Edit the stroke of {name}",
+    "stroke": "Border",
+    "editStrokeOf": "Edit the border of {name}",
     "corners": "Corners",
     "editCornersOf": "Edit the corner roundness of {name}",
     "opacity": "Opacity",
     "editOpacityOf": "Edit the opacity of {name}",
-    "frame": "Frame",
-    "frameImageFor": "Frame the image for {name}",
+    "frame": "Crop & position",
+    "frameImageFor": "Crop and position the image for {name}",
     "duplicate": "Duplicate",
     "duplicateNamed": "Duplicate {name}",
     "duplicateN": "Duplicate {count, plural, one {# element} other {# elements}}",
@@ -1129,7 +1045,7 @@
     "imageUnavailable": "Image unavailable"
   },
   "spotDrag": {
-    "tokenLabel": "{token, select, title {Title} sale {Sale chip} other {Price}} {drop, select, below {in the title bar} top_left {at top left} top_center {at top center} top_right {at top right} middle_center {at middle} bottom_left {at bottom left} bottom_center {at bottom center} bottom_right {at bottom right} other {}}. Press to open its settings, or drag (or use the arrow keys) to move it."
+    "tokenLabel": "{token, select, title {Title} sale {Sale badge} other {Price}} {drop, select, below {in the title bar} top_left {at top left} top_center {at top center} top_right {at top right} middle_center {at middle} bottom_left {at bottom left} bottom_center {at bottom center} bottom_right {at bottom right} other {}}. Press to open its settings, or drag (or use the arrow keys) to move it."
   },
   "autoFit": {},
   "designer": {

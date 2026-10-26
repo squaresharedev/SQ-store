@@ -15,10 +15,10 @@
     "pending": "Čakajúca"
   },
   "channel": {
-    "embed": "Vloženie na web",
+    "embed": "Na vašom webe",
     "marketplace": "Trhovisko",
-    "direct": "Vaše stránky",
-    "button": "Tlačidlo na webe"
+    "direct": "Vaša stránka",
+    "button": "Tlačidlo nákupu"
   },
   "empty": {
     "filteredTitle": "Žiadne objednávky nevyhovujú týmto filtrom",
@@ -56,8 +56,8 @@
   "toolbar": {
     "region": "filtre objednávok",
     "channel": "kanál",
-    "buyerEmail": "e-mail kupujúceho",
     "searchPlaceholder": "vyhľadať e-mail, meno, mesto, produkt alebo zásielku",
+    "search": "hľadať",
     "status": "stav",
     "statusAriaLabel": "Filtrovať podľa stavu",
     "allStatuses": "Všetky stavy",
@@ -85,6 +85,7 @@
     "amount": "Suma",
     "platformFee": "Poplatok platformy",
     "youReceive": "Dostanete",
+    "youReceiveHint": "Pred poplatkom Stripe za kartu",
     "buyerEmail": "E-mail kupujúceho",
     "copyBuyerEmail": {
       "copy": "Kopírovať e-mail kupujúceho",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Kód {code} bol použitý, no cena z akcie bola nižšia"
   },
   "actions": {
-    "disputeInStripe": "Spory sa riešia vo vašom paneli Stripe po jeho prepojení.",
+    "disputeInStripe": "Banka kupujúceho otvorila spor. Odpovedzte naň v paneli Stripe pred jeho termínom.",
+    "answerInStripe": "Odpovedať v Stripe",
     "pendingPayment": "Platba kupujúceho sa ešte potvrdzuje. Zatiaľ nič neposielajte: keď prejde, objednávka sa zobrazí ako zaplatená, a ak neprejde, sama sa uzavrie.",
     "none": "Pre túto objednávku nie sú k dispozícii žiadne akcie."
   },
@@ -180,10 +182,6 @@
   },
   "skeleton": {
     "loading": "načítavajú sa objednávky"
-  },
-  "loading": {
-    "title": "Objednávky",
-    "subtitle": "Každý predaj cez vloženie na web a trhovisko."
   },
   "toShipCount": "{count, plural, one {{count} objednávka na odoslanie} few {{count} objednávky na odoslanie} many {{count} objednávky na odoslanie} other {{count} objednávok na odoslanie}}",
   "views": {

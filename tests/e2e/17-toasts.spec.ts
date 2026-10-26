@@ -107,7 +107,7 @@ test.describe("toasts", () => {
     await gotoApp(page, "/products/new");
     await fillStable(page, "Title", "Toasted Print");
     await fillStable(page, /price/i, "11.00");
-    await page.getByRole("button", { name: /save product/i }).click();
+    await page.getByRole("button", { name: /save product|save as draft/i }).click();
 
     // The form redirects to /products on success. The provider lives at the
     // root layout precisely so the confirmation lands on the page the seller

@@ -33,7 +33,7 @@
     "title": "Jak se vám slevy daří",
     "orders": "Objednávky se slevou",
     "revenue": "Příjmy z těchto objednávek",
-    "given": "Poskytnuto na slevách",
+    "given": "Celkem zlevněno",
     "none": "Zatím nic",
     "channelsTitle": "Objednávky podle kanálu",
     "channelsDescription": "Kódy se počítají pod kanálem, na kterém byly sdíleny, nebo přímo pod kódem, pokud kanál není pojmenován.",
@@ -43,7 +43,7 @@
   },
   "list": {
     "title": "Vaše slevy",
-    "none": "Momentálně žádné slevy. Odstraněné slevy se dále počítají v přehledu výše.",
+    "none": "Žádné aktivní slevy.",
     "channel": "Sdíleno na {channel}",
     "startsOn": "Začíná {date}",
     "endsOn": "Končí {date}",

@@ -76,22 +76,11 @@
   "payoutStatus": "{status, select, paid {Betaald} pending {In behandeling} in_transit {Onderweg} canceled {Geannuleerd} failed {Mislukt} other {In behandeling}}",
   "payoutMethod": {
     "title": "Uitbetalingsmethode",
-    "manage": "Beheren",
+    "manage": "Beheren in Stripe",
     "detail": "{currency} · {country}",
     "detailDefault": "{currency} · {country} · Standaard",
     "emptyConnectable": "Nog geen uitbetalingsmethode. Koppel Stripe en voeg daar je bank toe, die verschijnt dan automatisch hier.",
     "empty": "Nog geen uitbetalingsmethode."
-  },
-  "payoutMethodModal": {
-    "title": "Uitbetalingsmethode",
-    "description": "Waar je uitbetalingen naartoe worden gestuurd.",
-    "bankAccountDetail": "Bankrekening · {currency} · {country}",
-    "defaultLabel": "Standaard voor uitbetalingen",
-    "yes": "Ja",
-    "no": "Nee",
-    "referenceLabel": "Referentie",
-    "securityNote": "Voor je veiligheid worden bankgegevens gewijzigd op Stripe, nooit hier.",
-    "manageInStripe": "Beheren in Stripe"
   },
   "recentActivity": {
     "label": "Recente activiteit",

@@ -2,34 +2,18 @@
 
 import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
-import {
-  BadgeCheck,
-  Check,
-  LayoutGrid,
-  Link2,
-  Package,
-  type LucideIcon,
-} from "lucide-react";
+import { Check, Link2, Package } from "lucide-react";
 import { EASE_ENTRANCE, EASE_STANDARD } from "@/components/ui/motion-tokens";
-import type { MessageKey } from "@/i18n/types";
 
 /**
- * The welcome flow's pictures: what a seller is about to make, and the four
- * steps to it, shown rather than written out.
+ * The welcome flow's picture: what a seller is about to make, shown rather
+ * than written out.
  *
  * Built from the product's own parts (sharp surfaces, the black action colour,
  * monochrome marks, Square Share's squares) and animated with transforms and
- * opacity only, on the shared motion curves. Under reduced motion both render
- * straight in their finished state: nothing slides, pops or pulses.
+ * opacity only, on the shared motion curves. Under reduced motion it renders
+ * straight in its finished state: nothing slides, pops or pulses.
  */
-
-/** The four steps, in the order the setup checklist tracks them. */
-export const SETUP_PATH: readonly { icon: LucideIcon; label: MessageKey }[] = [
-  { icon: BadgeCheck, label: "Onboarding.welcome.setupPath.details" },
-  { icon: Package, label: "Onboarding.welcome.setupPath.product" },
-  { icon: LayoutGrid, label: "Onboarding.welcome.setupPath.storefront" },
-  { icon: Link2, label: "Onboarding.welcome.setupPath.share" },
-];
 
 /**
  * The first slide's picture: a product page assembling itself, then going live
@@ -127,94 +111,5 @@ export function WelcomeHero() {
         </motion.span>
       </motion.div>
     </div>
-  );
-}
-
-/** When the track has drawn up to step `index`. */
-const TRACK_DELAY = 0.2;
-const TRACK_DURATION = 1.2;
-const reachedAt = (index: number) =>
-  TRACK_DELAY + (TRACK_DURATION * index) / (SETUP_PATH.length - 1);
-
-/**
- * The second slide's picture: the four steps as a timeline. The track draws
- * across, and each step fills and takes its check as the line reaches it, the
- * last one pulsing once it is live. A real list, so the steps are read out in
- * order; the line, fills and checks are decoration.
- */
-export function SetupPath() {
-  const t = useTranslations();
-  const reduced = useReducedMotion();
-  const last = SETUP_PATH.length - 1;
-
-  return (
-    <ol className="relative grid grid-cols-4 gap-2 pt-2">
-      {/* Track and progress, through the centres of the first and last tiles
-          (tiles are size-12, under the list's pt-2). */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-[12.5%] top-8 h-0.5 -translate-y-1/2 bg-border"
-      />
-      <motion.span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-[12.5%] top-8 h-0.5 origin-left -translate-y-1/2 bg-primary"
-        initial={reduced ? false : { scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ delay: TRACK_DELAY, duration: TRACK_DURATION, ease: EASE_STANDARD }}
-      />
-
-      {SETUP_PATH.map((step, index) => (
-        <li key={step.label} className="relative flex flex-col items-center gap-2.5 text-center">
-          <div className="relative size-12">
-            <div
-              aria-hidden
-              className="absolute inset-0 flex items-center justify-center border border-border bg-background text-muted-foreground"
-            >
-              <step.icon className="size-5" strokeWidth={1.75} />
-            </div>
-            <motion.div
-              aria-hidden
-              className="absolute inset-0 flex items-center justify-center bg-primary text-primary-foreground"
-              initial={reduced ? false : { scale: 0.4, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: reachedAt(index), duration: 0.35, ease: EASE_ENTRANCE }}
-            >
-              <step.icon className="size-5" strokeWidth={1.75} />
-            </motion.div>
-            <motion.span
-              aria-hidden
-              className="absolute -right-2 -top-2 flex size-5 items-center justify-center border-2 border-background bg-foreground text-background"
-              initial={reduced ? false : { scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: reachedAt(index) + 0.2, duration: 0.3, ease: EASE_ENTRANCE }}
-            >
-              <Check className="size-3" strokeWidth={3} />
-            </motion.span>
-            {index === last && !reduced && (
-              <motion.span
-                aria-hidden
-                className="absolute inset-0 border-2 border-primary"
-                initial={{ scale: 1, opacity: 0 }}
-                animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
-                transition={{
-                  delay: reachedAt(index) + 0.4,
-                  duration: 1.1,
-                  repeat: 2,
-                  ease: EASE_STANDARD,
-                }}
-              />
-            )}
-          </div>
-          <motion.span
-            className="font-inter text-xs font-medium leading-snug text-foreground sm:text-sm"
-            initial={reduced ? false : { opacity: 0.45 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: reachedAt(index), duration: 0.3, ease: EASE_STANDARD }}
-          >
-            {t(step.label)}
-          </motion.span>
-        </li>
-      ))}
-    </ol>
   );
 }

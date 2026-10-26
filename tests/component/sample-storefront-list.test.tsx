@@ -15,6 +15,8 @@ import userEvent from "@testing-library/user-event";
 import { cleanup, render, screen } from "../setup/render";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
 import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
+import { createStorefront } from "@/lib/storefront/actions";
+import { storefrontEditorPath } from "@/lib/storefront/paths";
 // Static, so its (large) import is paid once before the tests start rather than
 // inside the first test's time limit. vi.mock calls are hoisted above it.
 import { StorefrontsList } from "@/components/storefront/StorefrontsList";
@@ -72,13 +74,6 @@ vi.mock("@/lib/storefront/actions", () => ({
   updateEmbedSettings: vi.fn(),
 }));
 
-// The setup flow is its own component with its own tests; here it only has to
-// say whether it is open.
-vi.mock("@/components/storefront/CreateStorefrontWizard", () => ({
-  CreateStorefrontWizard: ({ open }: { open: boolean }) =>
-    open ? <div role="dialog" aria-label="Create storefront setup" /> : null,
-}));
-
 beforeEach(() => vi.clearAllMocks());
 afterEach(cleanup);
 
@@ -90,7 +85,6 @@ function storefront(name: string): StorefrontSummary {
     updatedAt: "2026-09-01T00:00:00.000Z",
     config: DEFAULT_STOREFRONT_CONFIG,
     embedKey: "70000000-0000-4000-8000-000000000007",
-    brief: {},
   };
 }
 
@@ -128,11 +122,14 @@ describe("sample storefront in the list", () => {
     expect(screen.queryByText("0 storefronts")).toBeNull();
   });
 
-  it("opens the setup flow from the empty state's create card", async () => {
+  it("creates a storefront and opens its designer from the empty state's create card", async () => {
+    const id = "80000000-0000-4000-8000-000000000008";
+    vi.mocked(createStorefront).mockResolvedValue({ ok: true, id });
     const user = userEvent.setup();
     await renderList({ sample: "shown" });
     await user.click(screen.getByRole("button", { name: "Create storefront" }));
-    expect(await screen.findByRole("dialog", { name: "Create storefront setup" })).toBeInTheDocument();
+    expect(createStorefront).toHaveBeenCalledTimes(1);
+    expect(router.push).toHaveBeenCalledWith(storefrontEditorPath(id));
   });
 
   it("goes away while the list holds a live storefront", async () => {

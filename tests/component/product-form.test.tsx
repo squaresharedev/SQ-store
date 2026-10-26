@@ -120,6 +120,18 @@ describe("ProductForm", () => {
     mockRefresh.mockClear();
   });
 
+  // --- Save button ---
+
+  it("names the save by status: a draft is never saved by a button that sounds like a publish", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm />);
+    expect(screen.getByRole("button", { name: "Save product" })).toBeInTheDocument();
+
+    await user.click(document.querySelector<HTMLElement>('[data-product-status="draft"]')!);
+    expect(screen.getByRole("button", { name: "Save as draft" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Save product" })).toBeNull();
+  });
+
   // --- Title validation ---
 
   it("submit with empty title shows inline error with aria-invalid", async () => {

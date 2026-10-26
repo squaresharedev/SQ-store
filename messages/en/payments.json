@@ -76,22 +76,11 @@
   "payoutStatus": "{status, select, paid {Paid} pending {Pending} in_transit {In transit} canceled {Canceled} failed {Failed} other {Pending}}",
   "payoutMethod": {
     "title": "Payout method",
-    "manage": "Manage",
+    "manage": "Manage in Stripe",
     "detail": "{currency} · {country}",
     "detailDefault": "{currency} · {country} · Default",
     "emptyConnectable": "No payout method yet. Connect Stripe and add your bank there, it shows up here automatically.",
     "empty": "No payout method yet."
-  },
-  "payoutMethodModal": {
-    "title": "Payout method",
-    "description": "Where your payouts are sent.",
-    "bankAccountDetail": "Bank account · {currency} · {country}",
-    "defaultLabel": "Default for payouts",
-    "yes": "Yes",
-    "no": "No",
-    "referenceLabel": "Reference",
-    "securityNote": "For your security, bank details are changed on Stripe, never here.",
-    "manageInStripe": "Manage in Stripe"
   },
   "recentActivity": {
     "label": "Recent activity",

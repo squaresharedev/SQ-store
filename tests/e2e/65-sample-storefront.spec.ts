@@ -114,7 +114,7 @@ test.describe("sample storefront", () => {
     await expect(page.locator("main [data-storefront-sample]")).toHaveCount(0);
   });
 
-  test("Create your own opens the setup flow over the sample, and lands in a real storefront", async ({
+  test("Create your own makes a real storefront and opens it", async ({
     page,
   }) => {
     test.setTimeout(150_000);
@@ -130,18 +130,12 @@ test.describe("sample storefront", () => {
     const create = page.locator("[data-sample-create]");
     await expect(create).toBeVisible({ timeout: 30_000 });
     await expect(page.locator(TOUR_LAYER)).toHaveCount(0);
+    expect(await storefrontRows(user.email)).toHaveLength(0);
     // Retried: a click that lands before hydration does nothing.
-    const flow = page.getByRole("dialog");
     await expect(async () => {
       await create.click();
-      await expect(flow).toContainText("Step 1 of 4", { timeout: 2_000 });
-    }).toPass({ timeout: 30_000 });
-    await expect(page).toHaveURL(/\/storefront\/sample$/);
-    // Opening it creates nothing; finishing it does.
-    expect(await storefrontRows(user.email)).toHaveLength(0);
-
-    await flow.getByRole("button", { name: /skip setup/i }).click();
-    await page.waitForURL(/\/storefront\/[0-9a-f-]{36}$/, { timeout: 30_000 });
+      await expect(page).toHaveURL(/\/storefront\/[0-9a-f-]{36}$/, { timeout: 5_000 });
+    }).toPass({ timeout: 45_000 });
     expect(await storefrontRows(user.email)).toHaveLength(1);
     // A real storefront saves, so Save is back and the sample notice is gone.
     await expect(page.getByRole("button", { name: "Save", exact: true })).toBeVisible();

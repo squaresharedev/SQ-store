@@ -12,7 +12,7 @@
     },
     "product": {
       "label": "Adicione um produto",
-      "detail": "Um título e um preço já chegam. Pode ficar como rascunho, para já.",
+      "detail": "Um título e um preço já chegam.",
       "detailDone": "{count, plural, one {Tem {count} produto.} many {Tem {count} de produtos.} other {Tem {count} produtos.}}",
       "action": "Adicionar produto",
       "cta": "Adicione o seu primeiro produto"
@@ -83,9 +83,6 @@
         "title": "Boas-vindas ao Square Share",
         "description": "Quatro passos até uma página de produto que pode partilhar."
       },
-      "path": {
-        "title": "Quatro passos até à sua primeira página"
-      },
       "seller": {
         "title": "Adicione os seus dados de vendedor",
         "description": "Os compradores veem estes dados nas suas páginas de produto, e a lei exige-os antes de poder vender. Nunca os utilizamos para marketing.",
@@ -122,7 +119,7 @@
       }
     },
     "seller": {
-      "namePlaceholder": "p. ex. Studio Builderboy e.U.",
+      "namePlaceholder": "p. ex., Ana Silva ou Cerâmica Ana",
       "nameHelp": "A sua denominação social, ou o seu nome completo, se vender a título individual.",
       "nameAlternative": "Ou o seu nome completo, se vende em nome próprio.",
       "addressPlaceholder": "p. ex. Rua do Mercado, 12\n1200-109 Lisboa\nPortugal",
@@ -156,12 +153,6 @@
       "buyNow": "Comprar agora",
       "live": "Publicado",
       "linkCopied": "Link copiado"
-    },
-    "setupPath": {
-      "details": "Adicione os seus dados",
-      "product": "Adicione um produto",
-      "storefront": "Desenhe uma montra",
-      "share": "Partilhe a sua página"
     },
     "terms": {
       "agreed": "Aceitou estes Termos. Obrigado por ler.",
@@ -197,7 +188,7 @@
       },
       "productsAdd": {
         "title": "Adicione um produto",
-        "body": "Um título e um preço chegam para começar. Pode ficar como rascunho até estar pronto."
+        "body": "Um título e um preço chegam para começar."
       },
       "productsImport": {
         "title": "Ou importe o seu catálogo",

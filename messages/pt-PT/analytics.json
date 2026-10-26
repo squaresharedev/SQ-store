@@ -9,8 +9,6 @@
     "subtitle": "Vendas, visualizações da montra e tudo o resto que a sua loja está a fazer."
   },
   "loading": {
-    "title": "Estatísticas",
-    "subtitle": "O desempenho da sua loja na incorporação e no marketplace.",
     "srLoading": "a carregar estatísticas"
   },
   "firstRun": {
@@ -90,14 +88,14 @@
     "expiredEmpty": "Nenhum por concluir",
     "conversion": "Encomendas por 100 visualizações",
     "conversionCounts": "Encomendas: {orders}, visualizações: {views}",
-    "abandonment": "Abandono no pagamento",
+    "abandonment": "Compras não concluídas",
     "abandonmentCounts": "Por concluir: {expired}, iniciados: {started}",
     "notEnough": "Ainda sem dados suficientes",
     "notEnoughHint": "As taxas aparecem quando este período tiver {min} visualizações."
   },
   "tiles": {
     "revenue": "Receita",
-    "afterFees": "{amount} após taxas",
+    "afterFees": "{amount} após as taxas da Square Share",
     "sales": "Vendas",
     "perDay": "{rate} por dia, em média",
     "avgOrder": "Encomenda média",
@@ -110,10 +108,10 @@
     "noOrders": "Ainda sem encomendas"
   },
   "channels": {
-    "embed": "Incorporação",
+    "embed": "No seu site",
     "marketplace": "Marketplace",
-    "direct": "Direto",
-    "button": "Botão no seu site"
+    "direct": "A sua página",
+    "button": "Botão de compra"
   },
   "signalsUnavailable": {
     "title": "As visualizações e subscrições estão indisponíveis de momento",

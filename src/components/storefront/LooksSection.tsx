@@ -1,8 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { VIBE_PRESETS, themeMatchesVibe } from "@/lib/storefront/presets";
-import { STOREFRONT_VIBES, type StorefrontVibe } from "@/types/storefront-brief";
+import {
+  STOREFRONT_VIBES,
+  VIBE_PRESETS,
+  themeMatchesVibe,
+  type StorefrontVibe,
+} from "@/lib/storefront/presets";
 import type { StorefrontTheme } from "@/types/storefront";
 import { cn } from "@/lib/utils";
 import { strongLabelClass } from "@/components/ui/control-styles";
@@ -11,11 +15,10 @@ import { InfoTip } from "@/components/ui/InfoTip";
 /**
  * The three starting looks, brought inside the editor.
  *
- * They already existed, and a seller could only ever meet them once: in the
- * creation wizard, before they had seen their own products on the board. That
- * is the worst possible moment to choose a look. Here they are a way back to a
- * coherent storefront at any point, which is what makes the rest of the panel
- * safe to explore.
+ * A look is chosen here, with the seller's own products on the board, rather
+ * than before the storefront exists. They are a way back to a coherent
+ * storefront at any point, which is what makes the rest of the panel safe to
+ * explore.
  *
  * A look writes the fields in VibePreset: canvas, accent, typeface, roundness,
  * gutter, and what a product tile shows — the title band's style and whether it

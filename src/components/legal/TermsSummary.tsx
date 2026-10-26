@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
 import { ExternalLink } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { focusRingInsetClass, helpTextClass } from "@/components/ui/control-styles";
@@ -9,10 +8,6 @@ import { LEGAL_LINKS } from "@/lib/legal/links";
 import { TERMS_LAST_UPDATED, TERMS_SUMMARY } from "@/lib/legal/terms-summary";
 import { cn } from "@/lib/utils";
 
-/** Slack for "at the end": zoom and subpixel layout rarely put scrollTop on
- *  the very last pixel. */
-const END_SLACK_PX = 4;
-
 const linkClass =
   "font-medium text-foreground underline underline-offset-2 hover:no-underline";
 
@@ -20,51 +15,17 @@ const linkClass =
  * The short version of the Terms of Service in a scroll box, with the full
  * Terms one click away above it and again at its end.
  *
- * Reports once, through `onReadToEnd`, when the reader has reached the bottom:
- * the place that records agreement keeps its button shut until then, so "I
- * have read" follows the reading rather than preceding it. A box that already
- * fits without scrolling (a tall screen, small text) counts as read as soon as
- * it has laid out; one that has not laid out yet (zero height) does not.
+ * Agreeing is never held back until the box has been scrolled: a seller
+ * reads as much as they choose, and the agreement records which version was on
+ * screen either way.
  *
  * The box is a focusable region so a keyboard can scroll it (and axe's
- * scrollable-region-focusable holds). Tabbing to the links at its end scrolls
- * them into view, which reaches the end the same way a wheel does.
+ * scrollable-region-focusable holds).
  */
-export function TermsSummary({
-  onReadToEnd,
-  className,
-}: {
-  onReadToEnd: () => void;
-  className?: string;
-}) {
+export function TermsSummary({ className }: { className?: string }) {
   const t = useTranslations("Settings.legal.termsSummary");
   const tKey = useTranslations();
   const locale = useLocale();
-  const boxRef = useRef<HTMLDivElement>(null);
-  const reportedRef = useRef(false);
-  // The latest callback, so the observer below is set up once per mount.
-  const onReadToEndRef = useRef(onReadToEnd);
-  useEffect(() => {
-    onReadToEndRef.current = onReadToEnd;
-  });
-
-  const check = useCallback(() => {
-    const box = boxRef.current;
-    if (!box || reportedRef.current || box.clientHeight === 0) return;
-    if (box.scrollTop + box.clientHeight >= box.scrollHeight - END_SLACK_PX) {
-      reportedRef.current = true;
-      onReadToEndRef.current();
-    }
-  }, []);
-
-  useEffect(() => {
-    check();
-    const box = boxRef.current;
-    if (!box || typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(check);
-    observer.observe(box);
-    return () => observer.disconnect();
-  }, [check]);
 
   return (
     <div className={cn("flex flex-col gap-3", className)}>
@@ -84,8 +45,6 @@ export function TermsSummary({
       </p>
 
       <div
-        ref={boxRef}
-        onScroll={check}
         role="region"
         aria-label={t("regionLabel")}
         tabIndex={0}

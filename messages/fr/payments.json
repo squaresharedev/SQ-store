@@ -76,22 +76,11 @@
   "payoutStatus": "{status, select, paid {Payé} pending {En attente} in_transit {En transit} canceled {Annulé} failed {Échoué} other {En attente}}",
   "payoutMethod": {
     "title": "Mode de virement",
-    "manage": "Gérer",
+    "manage": "Gérer dans Stripe",
     "detail": "{currency} · {country}",
     "detailDefault": "{currency} · {country} · Par défaut",
     "emptyConnectable": "Pas encore de mode de virement. Connectez Stripe et ajoutez-y votre compte bancaire, il apparaîtra ici automatiquement.",
     "empty": "Pas encore de mode de virement."
-  },
-  "payoutMethodModal": {
-    "title": "Mode de virement",
-    "description": "Où sont envoyés vos virements.",
-    "bankAccountDetail": "Compte bancaire · {currency} · {country}",
-    "defaultLabel": "Par défaut pour les virements",
-    "yes": "Oui",
-    "no": "Non",
-    "referenceLabel": "Référence",
-    "securityNote": "Pour votre sécurité, les coordonnées bancaires se modifient sur Stripe, jamais ici.",
-    "manageInStripe": "Gérer dans Stripe"
   },
   "recentActivity": {
     "label": "Activité récente",

@@ -1,27 +1,33 @@
 "use client";
 
-import { Landmark } from "lucide-react";
+import { ArrowUpRight, Landmark } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { infoTextClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 import { cardClass, iconTileClass } from "@/components/ui/surface-styles";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
+import { openStripeDashboard } from "@/lib/payments/connect/actions";
 import type { PayoutMethod } from "@/lib/payments/types";
+import { useLeaveForStripe } from "./useLeaveForStripe";
 
 /**
- * Where payouts land. Displays MASKED info only (bank name + last4). "Manage"
- * opens a read-only modal, editing bank details happens on Stripe's hosted
- * dashboard, never here.
+ * Where payouts land. Displays MASKED info only (bank name + last4). "Manage
+ * in Stripe" goes straight to the seller's Stripe dashboard: bank details are
+ * changed there, never here.
  */
 export function PayoutMethodCard({
   method,
-  onManage,
+  manage = openStripeDashboard,
 }: {
   method: PayoutMethod | null;
-  onManage: () => void;
+  /** The server call that answers with the dashboard link. Injectable for the
+   *  dev gallery, like ConnectStripeModal's `start`. */
+  manage?: typeof openStripeDashboard;
 }) {
   const t = useTranslations("Payments.payoutMethod");
+  const [open, leaving] = useLeaveForStripe(manage);
   return (
     <section
       aria-label={t("title")}
@@ -30,8 +36,10 @@ export function PayoutMethodCard({
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-foreground">{t("title")}</h2>
         {method && (
-          <Button variant="secondary" onClick={onManage}>
+          <Button variant="secondary" onClick={open} disabled={leaving} aria-busy={leaving || undefined}>
+            {leaving && <Spinner />}
             {t("manage")}
+            <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden />
           </Button>
         )}
       </div>

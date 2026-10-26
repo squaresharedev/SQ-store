@@ -33,7 +33,7 @@
     "title": "Jak idą twoje rabaty",
     "orders": "Zamówienia z rabatem",
     "revenue": "Przychód z tych zamówień",
-    "given": "Udzielone rabaty",
+    "given": "Łącznie rabatów",
     "none": "Jeszcze nic",
     "channelsTitle": "Zamówienia według kanałów",
     "channelsDescription": "Kody są liczone pod kanałem, na którym je udostępniono, albo pod samym kodem, jeśli nie podano nazwy kanału.",
@@ -43,7 +43,7 @@
   },
   "list": {
     "title": "Twoje rabaty",
-    "none": "Teraz brak rabatów. Usunięte rabaty nadal wliczają się do statystyk powyżej.",
+    "none": "Brak aktywnych rabatów.",
     "channel": "Udostępniono na {channel}",
     "startsOn": "Zaczyna się {date}",
     "endsOn": "Kończy się {date}",

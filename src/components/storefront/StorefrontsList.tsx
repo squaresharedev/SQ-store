@@ -27,7 +27,7 @@ import {
 import type { StorefrontSummary } from "@/lib/storefront/queries";
 import type { Product } from "@/types/product";
 import { StorefrontCard } from "./StorefrontCard";
-import { CreateStorefrontWizard } from "./CreateStorefrontWizard";
+import { useCreateStorefront } from "./useCreateStorefront";
 import { StorefrontEmptyState } from "./StorefrontEmptyState";
 import { RemovalNotice } from "@/components/products/RemovalNotice";
 
@@ -50,7 +50,6 @@ export function StorefrontsList({
   storefronts: initial,
   total,
   products,
-  productCount = products.length,
   canWrite,
   sellerDetailsComplete = false,
   sample = null,
@@ -67,10 +66,6 @@ export function StorefrontsList({
    *  first page is truncated, and the list must say so. */
   total: number;
   products: Product[];
-  /** How many products the store has, when `products` is only the ones these
-   *  storefronts place (the wizard's "no products yet" hint is about the store).
-   *  Defaults to `products.length`. */
-  productCount?: number;
   /** Hide create/delete/embed controls when the active role is read-only. */
   canWrite: boolean;
   /** The store's seller details are complete, so live storefronts get a
@@ -84,12 +79,11 @@ export function StorefrontsList({
   const toast = useToast();
   const showActionError = useActionErrorToast();
   const [storefronts, setStorefronts] = useState(initial);
-  const [wizardOpen, setWizardOpen] = useState(false);
   const hasLiveStorefront = storefronts.some((storefront) => !storefront.removal);
   const sampleLink = canWrite && sample === "shown" && !hasLiveStorefront;
-  // Stays true from the moment the wizard hands back an id until the route
-  // change lands, so the create buttons can't fire a second time behind it.
-  const [creating, setCreating] = useState(false);
+  // One press makes the storefront and opens it; `creating` holds until the
+  // route change lands, so the buttons can't fire a second time behind it.
+  const [create, creating] = useCreateStorefront();
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadMoreFailed, setLoadMoreFailed] = useState(false);
   // Deletes shrink the true count locally between server revalidations.
@@ -132,13 +126,6 @@ export function StorefrontsList({
     setStorefronts(initial);
     setRemoved(0);
   }
-  function handleCreated(id: string) {
-    // Leave `creating` true: we're navigating away to the new editor.
-    setCreating(true);
-    setWizardOpen(false);
-    router.push(`/storefront/${id}`);
-  }
-
   async function confirmDelete() {
     if (!pendingDelete) return;
     const target = pendingDelete;
@@ -170,7 +157,7 @@ export function StorefrontsList({
         {canWrite && (
           <Button
             data-tour="storefront-create"
-            onClick={() => setWizardOpen(true)}
+            onClick={() => void create()}
             disabled={creating}
           >
             <Plus
@@ -206,7 +193,7 @@ export function StorefrontsList({
         <StorefrontEmptyState
           canWrite={canWrite}
           data-tour="storefront-create"
-          onCreate={() => setWizardOpen(true)}
+          onCreate={() => void create()}
           creating={creating}
         />
       ) : (
@@ -267,18 +254,6 @@ export function StorefrontsList({
           </span>
         </div>
       )}
-
-      <CreateStorefrontWizard
-        open={wizardOpen}
-        // Dismissing is a cancel: the wizard only inserts a row when the seller
-        // finishes or skips, so nothing is left behind here.
-        onClose={() => setWizardOpen(false)}
-        onCreated={handleCreated}
-        productCount={productCount}
-        // Newest-edited first, so [0] is the storefront they last worked on and
-        // the likeliest source of answers that still hold.
-        previousBrief={storefronts[0]?.brief}
-      />
 
       <ConfirmDialog
         open={pendingDelete !== null}

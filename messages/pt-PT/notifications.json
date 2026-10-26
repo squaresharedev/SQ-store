@@ -70,7 +70,7 @@
     "teamInvite": {
       "title": "Tem um convite de equipa",
       "body": "{role, select, owner {{store} enviou-lhe um convite para se juntar como proprietário. Abra Equipa e acesso para aceitar.} editor {{store} enviou-lhe um convite para se juntar como editor. Abra Equipa e acesso para aceitar.} viewer {{store} enviou-lhe um convite para se juntar como leitor. Abra Equipa e acesso para aceitar.} other {{store} enviou-lhe um convite para se juntar à equipa. Abra Equipa e acesso para aceitar.}}",
-      "bodyUnnamedStore": "{role, select, owner {Uma loja SquareShare enviou-lhe um convite para se juntar como proprietário. Abra Equipa e acesso para aceitar.} editor {Uma loja SquareShare enviou-lhe um convite para se juntar como editor. Abra Equipa e acesso para aceitar.} viewer {Uma loja SquareShare enviou-lhe um convite para se juntar como leitor. Abra Equipa e acesso para aceitar.} other {Uma loja SquareShare enviou-lhe um convite para se juntar à equipa. Abra Equipa e acesso para aceitar.}}"
+      "bodyUnnamedStore": "{role, select, owner {Uma loja Square Share enviou-lhe um convite para se juntar como proprietário. Abra Equipa e acesso para aceitar.} editor {Uma loja Square Share enviou-lhe um convite para se juntar como editor. Abra Equipa e acesso para aceitar.} viewer {Uma loja Square Share enviou-lhe um convite para se juntar como leitor. Abra Equipa e acesso para aceitar.} other {Uma loja Square Share enviou-lhe um convite para se juntar à equipa. Abra Equipa e acesso para aceitar.}}"
     },
     "teamJoined": {
       "title": "{name} juntou-se à sua equipa",

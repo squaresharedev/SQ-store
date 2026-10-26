@@ -3,14 +3,19 @@ import { TourReplayCard } from "@/components/onboarding/TourReplayCard";
 import { AvatarUpload } from "@/components/settings/AvatarUpload";
 import { BioForm } from "@/components/settings/BioForm";
 import { EmailChangeForm } from "@/components/settings/EmailChangeForm";
+import { ExportDataButton } from "@/components/settings/ExportDataButton";
+import { LanguageCard } from "@/components/settings/LanguageCard";
 import { PasswordCard } from "@/components/settings/PasswordCard";
+import { SettingsCard } from "@/components/settings/SettingsCard";
 import { SignOutSection } from "@/components/settings/SignOutSection";
 import { TwoFactorPrompt } from "@/components/settings/TwoFactorPrompt";
 import { UsernameForm } from "@/components/settings/UsernameForm";
 
 /**
  * Account section: profile photo, username, bio, email (Supabase
- * re-verification flow) and password.
+ * re-verification flow), password, language and a copy of your data. Each
+ * used to be a page of its own where it was a single card; one page is one
+ * place to look.
  *
  * ONE name. The username is both what buyers see and what you sign in with;
  * there is no separate display name, so the two can never disagree and "is this
@@ -42,6 +47,7 @@ export function AccountSection({
   twoFactorEnabled?: boolean;
 }) {
   const t = useTranslations("Settings.account");
+  const tExport = useTranslations("Settings.danger.export");
   const name = username || email.split("@")[0] || t("fallbackName");
   // The ids are universal search's landing points: the registry maps "handle",
   // "log out", "change my email" and friends to /settings/account#<id>, so a
@@ -71,11 +77,18 @@ export function AccountSection({
       {/* Right under the password, where people are already thinking about
           how they sign in. Gone once 2FA is on. */}
       <TwoFactorPrompt enabled={twoFactorEnabled} />
+      {/* No wrapper id: the select itself is #language, like the username. */}
+      <LanguageCard />
       {/* Also the guided tour's last stop, which points here so a seller knows
           where to find it again. */}
       <div id="tour">
         <TourReplayCard />
       </div>
+      {/* A copy of your data is not dangerous: it sits with the rest of the
+          account, and only deleting it is kept apart in the Danger zone. */}
+      <SettingsCard id="export" title={tExport("cardTitle")} description={tExport("cardDescription")}>
+        <ExportDataButton />
+      </SettingsCard>
       <div id="sign-out">
         <SignOutSection />
       </div>

@@ -131,7 +131,7 @@ test.describe("tools for a multiple selection", () => {
         ),
     ).resolves.toEqual([
       "Change the colour of 2 elements",
-      "Edit the stroke of 2 elements",
+      "Edit the border of 2 elements",
       "Edit the corner roundness of 2 elements",
       "Edit the opacity of 2 elements",
     ]);

@@ -378,9 +378,9 @@ test.describe("hosted product page", () => {
     // OUR policies, and unmistakably ours: the visible word is short, the
     // accessible name says whose they are, so a screen reader never hears
     // "Terms" in a shop footer and takes them for the shop's.
-    const privacy = footer.getByRole("link", { name: "Squareshare Privacy Policy" });
+    const privacy = footer.getByRole("link", { name: "Square Share Privacy Policy" });
     await expect(privacy).toHaveAttribute("href", "https://squareshare.eu/legal/privacy-policy/");
-    const terms = footer.getByRole("link", { name: "Squareshare Terms of Use" });
+    const terms = footer.getByRole("link", { name: "Square Share Terms of Use" });
     // Trailing slash: the marketing site is trailingSlash:true, so the
     // slashless form is a 308 and would cost a buyer an extra round trip.
     await expect(terms).toHaveAttribute("href", "https://squareshare.eu/terms/");
@@ -392,7 +392,7 @@ test.describe("hosted product page", () => {
 
     // The attribution keeps its own words as its name, and stays the only
     // claim Squareshare makes on this page.
-    await expect(footer.getByRole("link", { name: /powered by squareshare/i })).toHaveAttribute(
+    await expect(footer.getByRole("link", { name: /powered by square share/i })).toHaveAttribute(
       "href",
       "https://squareshare.eu",
     );
@@ -412,7 +412,7 @@ test.describe("hosted product page", () => {
         const max = document.documentElement.scrollHeight - window.innerHeight;
         return Math.abs(window.scrollY - max) < 2;
       });
-      for (const name of ["Squareshare Privacy Policy", "Squareshare Terms of Use"]) {
+      for (const name of ["Square Share Privacy Policy", "Square Share Terms of Use"]) {
         const link = footer.getByRole("link", { name });
         await expect(link).toBeVisible();
         const hit = await link.evaluate((node) => {
@@ -467,7 +467,7 @@ test.describe("hosted product page", () => {
     // The line now quotes the profile's own terms.
     await expect(section.getByText("Made to order, allow 3 weeks")).toBeVisible();
     await expect(section.getByText("Ships within 24 hours")).toHaveCount(0);
-    await page.getByRole("button", { name: /save changes/i }).click();
+    await page.getByRole("button", { name: /save changes|save as draft/i }).click();
     await expectToast(page, /was saved/i);
 
     await gotoApp(page, `/products/${s.plain}/edit`);
@@ -629,9 +629,9 @@ test.describe("hosted product page", () => {
     // real page rather than open a panel.
     const editorFooter = artboard.locator("[data-product-page-footer]");
     for (const [name, href] of [
-      [/^powered by squareshare$/i, "https://squareshare.eu"],
-      ["Squareshare Privacy Policy", "https://squareshare.eu/legal/privacy-policy/"],
-      ["Squareshare Terms of Use", "https://squareshare.eu/terms/"],
+      [/^powered by square share$/i, "https://squareshare.eu"],
+      ["Square Share Privacy Policy", "https://squareshare.eu/legal/privacy-policy/"],
+      ["Square Share Terms of Use", "https://squareshare.eu/terms/"],
     ] as const) {
       const [popup] = await Promise.all([
         page.waitForEvent("popup"),

@@ -12,7 +12,7 @@
     },
     "product": {
       "label": "Ein Produkt hinzufügen",
-      "detail": "Ein Titel und ein Preis reichen. Es kann vorerst ein Entwurf bleiben.",
+      "detail": "Ein Titel und ein Preis reichen.",
       "detailDone": "{count, plural, one {Du hast {count} Produkt.} other {Du hast {count} Produkte.}}",
       "action": "Produkt hinzufügen",
       "cta": "Dein erstes Produkt hinzufügen"
@@ -83,9 +83,6 @@
         "title": "Willkommen bei Square Share",
         "description": "Vier Schritte zu einer Produktseite, die du teilen kannst."
       },
-      "path": {
-        "title": "Vier Schritte bis zu deiner ersten Seite"
-      },
       "seller": {
         "title": "Verkäuferangaben hinzufügen",
         "description": "Käufer sehen diese auf deinen Produktseiten, und das Gesetz verlangt sie, bevor du verkaufen kannst. Wir nutzen sie nie für Marketing.",
@@ -122,7 +119,7 @@
       }
     },
     "seller": {
-      "namePlaceholder": "z. B. Studio Builderboy e.U.",
+      "namePlaceholder": "z. B. Lena Schmidt oder Lenas Keramik",
       "nameHelp": "Dein Firmenname oder dein vollständiger Name, wenn du als Privatperson verkaufst.",
       "nameAlternative": "Oder dein vollständiger Name, wenn du unter eigenem Namen verkaufst.",
       "addressPlaceholder": "z. B. Musterstraße 12\n10115 Berlin\nDeutschland",
@@ -156,12 +153,6 @@
       "buyNow": "Jetzt kaufen",
       "live": "Online",
       "linkCopied": "Link kopiert"
-    },
-    "setupPath": {
-      "details": "Deine Angaben ergänzen",
-      "product": "Ein Produkt hinzufügen",
-      "storefront": "Ein Schaufenster gestalten",
-      "share": "Seite teilen"
     },
     "terms": {
       "agreed": "Du hast diesen Bedingungen zugestimmt. Danke fürs Lesen.",
@@ -197,7 +188,7 @@
       },
       "productsAdd": {
         "title": "Ein Produkt hinzufügen",
-        "body": "Ein Titel und ein Preis reichen zum Start. Es kann ein Entwurf bleiben, bis du bereit bist."
+        "body": "Ein Titel und ein Preis reichen zum Start."
       },
       "productsImport": {
         "title": "Oder importiere deinen Katalog",

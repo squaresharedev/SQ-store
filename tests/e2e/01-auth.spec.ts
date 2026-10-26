@@ -21,7 +21,7 @@ test.describe("auth", () => {
     await page.locator('input[name="identifier"]').fill(user.email);
     await page.locator('input[name="password"]').fill("not-the-password");
     await page.locator('button[name="intent"]').click();
-    await expect(page.getByRole("alert").filter({ hasText: /incorrect email or password/i })).toBeVisible();
+    await expect(page.getByRole("alert").filter({ hasText: /incorrect email, username or password/i })).toBeVisible();
     await expect(page).toHaveURL(/\/login/);
   });
 
@@ -143,7 +143,7 @@ test.describe("auth", () => {
     await page.locator('input[name="password"]').fill(second.password);
     await page.locator('button[name="intent"]').click();
     await expect(
-      page.getByRole("alert").filter({ hasText: /incorrect email or password/i }),
+      page.getByRole("alert").filter({ hasText: /incorrect email, username or password/i }),
     ).toBeVisible();
   });
 

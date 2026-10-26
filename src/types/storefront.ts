@@ -755,9 +755,12 @@ export type StorefrontHeader = {
  * New storefronts are "shown but empty" so the seller can discover the field in
  * the editor; legacy configs with no header at all use the empty-show-false form.
  *
- * The wizard seeds `name` from the storefront's display name (SF-03), so a new
- * storefront created via the wizard may never be empty here in practice.
+ * A new storefront's `name` is seeded from its display name (SF-03), so it is
+ * not empty here in practice.
  */
+/** The name a new storefront starts with, until the seller renames it. */
+export const DEFAULT_STOREFRONT_NAME = "Untitled storefront";
+
 export const DEFAULT_STOREFRONT_HEADER: StorefrontHeader = {
   show: true,
   name: "",

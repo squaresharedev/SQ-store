@@ -2,15 +2,12 @@ import {
   DEFAULT_STOREFRONT_CONFIG,
   type StorefrontTheme,
 } from "@/types/storefront";
-import type { StorefrontVibe } from "@/types/storefront-brief";
 
-// The three starting looks: the creation flow's "pick a look" step, and the
-// Looks row inside the editor's Theme panel.
-//
-// This is what makes the flow worth a seller's time before templates exist:
-// the look they pick is applied to the config on insert, so they land in a
-// designer that already looks like the tile they chose instead of on a blank
-// white board.
+/** The three looks, in the order the picker shows them (see below). */
+export const STOREFRONT_VIBES = ["minimal", "classic", "bold"] as const;
+export type StorefrontVibe = (typeof STOREFRONT_VIBES)[number];
+
+// The three starting looks: the Looks row inside the editor's Theme panel.
 //
 // WHAT SEPARATES THEM IS WHAT A TILE SHOWS, not what colour it is. There used
 // to be six of these and they were six palettes — same tile, same always-on

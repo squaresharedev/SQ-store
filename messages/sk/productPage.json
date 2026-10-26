@@ -98,17 +98,17 @@
     "guarantee": "Podľa práva EÚ zodpovedá predávajúci za súlad tovaru so zmluvou po dobu najmenej 2 rokov od prevzatia."
   },
   "footer": {
-    "disclosure": "<seller>{name}</seller> je predajca pre túto objednávku a zodpovedá za produkt, jeho doručenie a akékoľvek vrátenie tovaru alebo vrátenie peňazí. Squareshare poskytuje technológiu za touto stránkou a nie je zmluvnou stranou kúpnej zmluvy.",
-    "poweredBy": "Na technológii <brand>Squareshare</brand>",
-    "policiesLabel": "Zásady Squareshare",
+    "disclosure": "<seller>{name}</seller> je predajca pre túto objednávku a zodpovedá za produkt, jeho doručenie a akékoľvek vrátenie tovaru alebo vrátenie peňazí. Square Share poskytuje technológiu za touto stránkou a nie je zmluvnou stranou kúpnej zmluvy.",
+    "poweredBy": "Na technológii <brand>Square Share</brand>",
+    "policiesLabel": "Zásady Square Share",
     "policies": {
       "privacy": {
         "label": "Ochrana súkromia",
-        "name": "Zásady ochrany osobných údajov Squareshare"
+        "name": "Zásady ochrany osobných údajov Square Share"
       },
       "terms": {
         "label": "Podmienky",
-        "name": "Podmienky používania Squareshare"
+        "name": "Podmienky používania Square Share"
       }
     }
   },

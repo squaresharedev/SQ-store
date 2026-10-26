@@ -45,7 +45,7 @@
   },
   "emptyState": {
     "title": "Nog geen producten",
-    "descriptionWriter": "Voeg je eerste product toe. Het mag een concept blijven totdat je klaar bent om er een pagina voor te maken.",
+    "descriptionWriter": "Voeg je eerste product toe. Een titel en een prijs zijn genoeg.",
     "descriptionReadOnly": "Deze winkel heeft nog geen producten.",
     "add": "Product toevoegen"
   },
@@ -136,7 +136,7 @@
   "removal": {
     "badge": "Verwijderd",
     "badgePaused": "Gepauzeerd",
-    "title": "{kind, select, product {Dit product is door SquareShare verwijderd} other {Deze etalage is door SquareShare verwijderd}}",
+    "title": "{kind, select, product {Dit product is door Square Share verwijderd} other {Deze etalage is door Square Share verwijderd}}",
     "titlePaused": "{kind, select, product {Dit product is gepauzeerd totdat je het aanpast} other {Deze etalage is gepauzeerd totdat je hem aanpast}}",
     "hidden": "Kopers zien het nergens meer: niet op de bijbehorende pagina, niet in een insluiting en niet via een gedeelde link.",
     "hiddenPaused": "Kopers kunnen het nu niet zien: niet op de pagina zelf, niet in een embed en niet via een gedeelde link. Er is niets verwijderd, en het komt terug zodra iemand je aanpassingen heeft gecontroleerd.",
@@ -156,7 +156,8 @@
       "button": "Ik heb de aanpassingen gedaan, beoordeel het",
       "sent": "Ter beoordeling ingestuurd op <time>{date}</time>. Iemand kijkt naar je aanpassingen en je hoort het hier en per e-mail.",
       "failed": "Dat kon niet worden verstuurd.",
-      "failedFix": "Probeer het zo meteen opnieuw."
+      "failedFix": "Probeer het zo meteen opnieuw.",
+      "saveFirst": "Sla je wijzigingen eerst op. Bij het opslaan wordt gevraagd of je ze ter beoordeling wilt insturen."
     },
     "why": "Waarom",
     "whatToChange": "Wat er moet veranderen",
@@ -292,7 +293,7 @@
       },
       "visibility": {
         "label": "Zichtbaarheid",
-        "description": "Actief is online: kopers kunnen het meteen zien en kopen. Concept is verborgen voor kopers totdat je het omzet.",
+        "description": "Actief: kopers kunnen het kopen zodra het in een etalage staat. Concept: verborgen voor kopers tot je het omzet.",
         "about": "Waar Zichtbaarheid voor is"
       },
       "badges": {
@@ -367,10 +368,10 @@
     "displayImageHelp": "Wordt getoond in je etalage en in insluitingen.",
     "digitalFile": "Digitaal bestand",
     "digitalFileAbout": "Wat het digitale bestand is",
-    "digitalFileHelp": "Het bestand dat je koper na aankoop downloadt. Als je er een toevoegt, wordt dit een download, waardoor verzending en productveiligheid niet meer van toepassing zijn.",
+    "digitalFileHelp": "Het bestand dat kopers direct na het betalen downloaden. Een download heeft geen verzend- of productveiligheidsgegevens nodig.",
     "purchaseLink": "Aankooplink",
     "purchaseLinkAbout": "Waarheen de koopknop kopers stuurt",
-    "purchaseLinkHelp": "De koopknop op de productpagina volgt deze link. Zonder link stuurt hij in plaats daarvan een e-mail naar het contactadres van je winkel.",
+    "purchaseLinkHelp": "Laat het leeg en kopers rekenen af via Square Share, of mailen je waar afrekenen nog niet aan staat. Een link hier vervangt beide.",
     "purchaseLinkPlaceholder": "bijv. https://jouw-winkel.example/checkout/dit-product",
     "statusLabel": "Productstatus",
     "problems": "{count, plural, one {{count} ding om op te lossen voor je opslaat} other {{count} dingen om op te lossen voor je opslaat}}",
@@ -380,6 +381,7 @@
     "uploadingLabel": "{what, select, image {Afbeelding uploaden} photo {Foto uploaden} document {Document uploaden} other {Bestand uploaden}}",
     "processingLabel": "{what, select, image {Afbeelding verwerken} photo {Foto verwerken} document {Document verwerken} other {Bestand verwerken}}",
     "saveChanges": "Wijzigingen opslaan",
+    "saveDraft": "Opslaan als concept",
     "saveProduct": "Product opslaan",
     "savedToast": "\"{title}\" is opgeslagen.",
     "addedToast": "\"{title}\" is toegevoegd aan je producten.",
@@ -400,14 +402,14 @@
     "moderation": {
       "badge": "Aanpassingen vereist",
       "changed": "Gewijzigd",
-      "callout": "SquareShare heeft je gevraagd {fields} hier te wijzigen.",
+      "callout": "Square Share heeft je gevraagd {fields} hier te wijzigen.",
       "seeWhy": "Zie waarom",
       "fieldBadge": "Pas dit aan",
       "navHint": "aanpassingen vereist",
       "inReview": "Ter beoordeling verstuurd",
       "reviewPrompt": {
         "title": "Opgeslagen. Terugsturen voor beoordeling?",
-        "body": "Als je alles hebt aangepast wat SquareShare heeft gevraagd, stuur het dan nu terug en een medewerker kijkt ernaar. Zo niet, blijf dan bewerken en stuur het als je klaar bent.",
+        "body": "Als je alles hebt aangepast wat Square Share heeft gevraagd, stuur het dan nu terug en een medewerker kijkt ernaar. Zo niet, blijf dan bewerken en stuur het als je klaar bent.",
         "keepEditing": "Blijven bewerken",
         "send": "Ter beoordeling versturen"
       }
@@ -432,7 +434,7 @@
       "safety": "Fabrikantgegevens voor EU-regels"
     },
     "visibility": {
-      "activeHint": "Kopers zien het en kunnen het nu kopen",
+      "activeHint": "Kopers kunnen het kopen zodra het in een etalage staat",
       "draftHint": "Alleen jij ziet het, tot je er klaar voor bent"
     },
     "preview": {
@@ -672,7 +674,7 @@
     "fileTitle": "Motiveringsverklaring {reference}",
     "title": "Motiveringsverklaring",
     "subtitle": "{action, select, paused {We hebben je {target, select, product {product} other {etalage}} gepauzeerd} other {We hebben je {target, select, product {product} other {etalage}} verwijderd}}",
-    "intro": "Deze verklaring legt een beslissing uit die we hebben genomen over content die je op SquareShare hebt gepubliceerd, waarom we die beslissing hebben genomen en hoe je die kunt aanvechten. Je hebt er recht op krachtens artikel 17 van de EU-digitaledienstenverordening (verordening (EU) 2022/2065).",
+    "intro": "Deze verklaring legt een beslissing uit die we hebben genomen over content die je op Square Share hebt gepubliceerd, waarom we die beslissing hebben genomen en hoe je die kunt aanvechten. Je hebt er recht op krachtens artikel 17 van de EU-digitaledienstenverordening (verordening (EU) 2022/2065).",
     "sections": {
       "decision": "De beslissing",
       "reasons": "Waarom we haar hebben genomen",
@@ -702,7 +704,7 @@
       "removed": "Verwijderd. De content is niet langer beschikbaar voor kopers. Deze beslissing is definitief, tenzij een bezwaar haar wijzigt.",
       "pausedAutomated": "Gepauzeerd. De content is voor kopers verborgen totdat je die aanpast. De content wordt opnieuw gecontroleerd zodra je een wijziging opslaat."
     },
-    "scope": "Overal waar SquareShare het toont: op de eigen pagina, via insluitingen op andere websites en via gedeelde links, in alle landen.",
+    "scope": "Overal waar Square Share het toont: op de eigen pagina, via insluitingen op andere websites en via gedeelde links, in alle landen.",
     "duration": {
       "paused": "Totdat we je wijzigingen hebben goedgekeurd.",
       "removed": "Voor onbepaalde tijd.",
@@ -715,13 +717,13 @@
       "deleted": "De content is nadien verwijderd."
     },
     "facts": {
-      "notices": "{count, plural, =0 {We hebben dit zelf gevonden, zonder een melding van buiten SquareShare.} one {Dit volgde op # melding van buiten SquareShare, over: {reasons}.} other {Dit volgde op # meldingen van buiten SquareShare, over: {reasons}.}}",
-      "review": "Een medewerker van SquareShare heeft de content zelf bekeken voordat er een beslissing werd genomen. We delen niet mee wie een melding heeft ingediend.",
-      "automated": "Onze automatische controle heeft dit ontdekt toen de content werd opgeslagen. Niemand buiten SquareShare heeft er melding van gemaakt en geen medewerker heeft de content bekeken."
+      "notices": "{count, plural, =0 {We hebben dit zelf gevonden, zonder een melding van buiten Square Share.} one {Dit volgde op # melding van buiten Square Share, over: {reasons}.} other {Dit volgde op # meldingen van buiten Square Share, over: {reasons}.}}",
+      "review": "Een medewerker van Square Share heeft de content zelf bekeken voordat er een beslissing werd genomen. We delen niet mee wie een melding heeft ingediend.",
+      "automated": "Onze automatische controle heeft dit ontdekt toen de content werd opgeslagen. Niemand buiten Square Share heeft er melding van gemaakt en geen medewerker heeft de content bekeken."
     },
     "automated": "Er zijn geen geautomatiseerde middelen gebruikt om deze content op te sporen of om deze beslissing te nemen.",
     "legalBasis": {
-      "contract": "Contractueel: de Servicevoorwaarden van SquareShare, die dergelijke content niet toestaan ({url}).",
+      "contract": "Contractueel: de Servicevoorwaarden van Square Share, die dergelijke content niet toestaan ({url}).",
       "illegal": "Juridisch: we hebben geoordeeld dat de content illegaal is op grond van het toepasselijke recht."
     },
     "noNote": "Geen.",
@@ -739,7 +741,7 @@
       "answer": "Ons antwoord: {note}",
       "message": "Wat je hebt geschreven: {message}"
     },
-    "footer": "SquareShare · {reference} · Pagina {page} van {total}",
+    "footer": "Square Share · {reference} · Pagina {page} van {total}",
     "generated": "Gegenereerd op {date}.",
     "automatedYes": "Er zijn geautomatiseerde middelen gebruikt om deze content op te sporen en om deze beslissing te nemen, zonder dat er een persoon bij betrokken was. Als je bezwaar aantekent, beoordeelt een medewerker de beslissing."
   },
@@ -788,7 +790,7 @@
       "exact": "Er is geen script, SDK of API-aanroep nodig. Laat de URL precies zoals hij is, inclusief alles na het vraagteken."
     },
     "tryIt": "Probeer je knop",
-    "tracking": "Staat in Statistieken als \"Websiteknop\".",
+    "tracking": "Staat in Statistieken als \"Koopknop\".",
     "blocked": {
       "removed": "Dit product is offline gehaald. Open het om te zien waarom.",
       "draft": "Dit product is een concept. Zet het eerst op Actief.",

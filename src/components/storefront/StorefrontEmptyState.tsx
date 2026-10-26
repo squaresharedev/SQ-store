@@ -210,7 +210,7 @@ export function StorefrontEmptyState({
 }: {
   canWrite: boolean;
   onCreate: () => void;
-  /** The setup flow has handed back an id and the route change is under way. */
+  /** The storefront is being made and the route change is under way. */
   creating?: boolean;
   "data-tour"?: string;
 }) {

@@ -1892,7 +1892,12 @@ export function ProductForm({
             state={saveResult ?? undefined}
             pendingLabel={tCommon("saving")}
           >
-            {product ? t("form.saveChanges") : t("form.saveProduct")}
+            {/* A draft says so on the button: Save is never a silent publish. */}
+            {values.status === "draft"
+              ? t("form.saveDraft")
+              : product
+                ? t("form.saveChanges")
+                : t("form.saveProduct")}
           </SaveButton>
         </div>
       </div>

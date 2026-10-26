@@ -559,11 +559,11 @@ describe("ProductPageView", () => {
     expect(within(label).getByText("Red")).toBeInTheDocument();
   });
 
-  it("attributes the page to Squareshare without implying it is the seller", () => {
+  it("attributes the page to Square Share without implying it is the seller", () => {
     render(<ProductPageView page={data()} mode="public" />);
     const footer = document.querySelector("[data-product-page-footer]")!;
     // A real, navigable link on the public page...
-    const link = within(footer as HTMLElement).getByRole("link", { name: /powered by squareshare/i });
+    const link = within(footer as HTMLElement).getByRole("link", { name: /powered by square share/i });
     expect(link).toHaveAttribute("href", "https://squareshare.eu");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link.getAttribute("rel")).toContain("noopener");
@@ -579,13 +579,13 @@ describe("ProductPageView", () => {
     // This footer is the ONE region where preview does not neutralise links:
     // none of it is design chrome a seller is composing, so there is nothing
     // here for a click to open a setting for.
-    const attribution = within(footer).getByRole("link", { name: /powered by squareshare/i });
+    const attribution = within(footer).getByRole("link", { name: /powered by square share/i });
     expect(attribution).toHaveAttribute("href", "https://squareshare.eu");
     expect(attribution).toHaveAttribute("target", "_blank");
-    const privacy = within(footer).getByRole("link", { name: "Squareshare Privacy Policy" });
+    const privacy = within(footer).getByRole("link", { name: "Square Share Privacy Policy" });
     expect(privacy).toHaveAttribute("href", "https://squareshare.eu/legal/privacy-policy/");
     expect(privacy).toHaveAttribute("target", "_blank");
-    const terms = within(footer).getByRole("link", { name: "Squareshare Terms of Use" });
+    const terms = within(footer).getByRole("link", { name: "Square Share Terms of Use" });
     expect(terms).toHaveAttribute("href", "https://squareshare.eu/terms/");
     expect(terms).toHaveAttribute("target", "_blank");
     // The escape hatch that makes them reachable at all inside the editor:
@@ -597,7 +597,7 @@ describe("ProductPageView", () => {
     expect(privacy.closest("[data-setting-skip]")).toBe(attribution.closest("[data-setting-skip]"));
   });
 
-  it("names the seller, not Squareshare, as the party responsible for the sale", () => {
+  it("names the seller, not Square Share, as the party responsible for the sale", () => {
     render(<ProductPageView page={data()} mode="public" />);
     const disclosure = document.querySelector("[data-product-sale-disclosure]")! as HTMLElement;
     // The trader is named, and named FIRST, because a buyer must be able to
@@ -645,19 +645,19 @@ describe("ProductPageView", () => {
     expect(document.querySelector("[data-product-section='seller']")).not.toBeNull();
     const footer = document.querySelector("[data-product-page-footer]")! as HTMLElement;
     expect(within(footer).getByText(/not a party to the sale/i)).toBeInTheDocument();
-    expect(within(footer).getByRole("link", { name: /powered by squareshare/i })).toBeInTheDocument();
-    expect(within(footer).getByRole("link", { name: "Squareshare Privacy Policy" })).toBeInTheDocument();
-    expect(within(footer).getByRole("link", { name: "Squareshare Terms of Use" })).toBeInTheDocument();
+    expect(within(footer).getByRole("link", { name: /powered by square share/i })).toBeInTheDocument();
+    expect(within(footer).getByRole("link", { name: "Square Share Privacy Policy" })).toBeInTheDocument();
+    expect(within(footer).getByRole("link", { name: "Square Share Terms of Use" })).toBeInTheDocument();
   });
 
-  it("links Squareshare's privacy and terms, labelled so they cannot read as the seller's", () => {
+  it("links Square Share's privacy and terms, labelled so they cannot read as the seller's", () => {
     render(<ProductPageView page={data()} mode="public" />);
     const footer = document.querySelector("[data-product-page-footer]")! as HTMLElement;
-    // The accessible name carries "Squareshare" even though the visible text
+    // The accessible name carries "Square Share" even though the visible text
     // is one word: an unqualified "Terms" in a shop footer reads as the shop's.
-    const privacy = within(footer).getByRole("link", { name: "Squareshare Privacy Policy" });
+    const privacy = within(footer).getByRole("link", { name: "Square Share Privacy Policy" });
     expect(privacy).toHaveAttribute("href", "https://squareshare.eu/legal/privacy-policy/");
-    const terms = within(footer).getByRole("link", { name: "Squareshare Terms of Use" });
+    const terms = within(footer).getByRole("link", { name: "Square Share Terms of Use" });
     // Trailing slash on both: the marketing site is trailingSlash:true, so the
     // slashless form is a 308 and would cost a buyer an extra round trip.
     expect(terms).toHaveAttribute("href", "https://squareshare.eu/terms/");

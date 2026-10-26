@@ -82,7 +82,7 @@ test.describe("team & access + notifications", () => {
     await gotoApp(ownerPage, "/products/new");
     await fillStable(ownerPage, "Title", "Team-visible product");
     await fillStable(ownerPage, /price/i, "12.00");
-    await ownerPage.getByRole("button", { name: /save product/i }).click();
+    await ownerPage.getByRole("button", { name: /save product|save as draft/i }).click();
     await ownerPage.waitForURL(/\/products$/);
 
     // Member signs up (invite will target an existing account).

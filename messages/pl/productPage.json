@@ -98,17 +98,17 @@
     "guarantee": "Prawo UE zapewnia ci co najmniej dwuletnią odpowiedzialność sprzedawcy za brak zgodności towaru z umową."
   },
   "footer": {
-    "disclosure": "<seller>{name}</seller> jest sprzedawcą w tym zamówieniu i odpowiada za produkt, jego dostawę oraz wszelkie zwroty towaru lub zwroty środków. Squareshare dostarcza technologię, na której działa ta strona, i nie jest stroną umowy sprzedaży.",
-    "poweredBy": "Obsługiwane przez <brand>Squareshare</brand>",
-    "policiesLabel": "Zasady Squareshare",
+    "disclosure": "<seller>{name}</seller> jest sprzedawcą w tym zamówieniu i odpowiada za produkt, jego dostawę oraz wszelkie zwroty towaru lub zwroty środków. Square Share dostarcza technologię, na której działa ta strona, i nie jest stroną umowy sprzedaży.",
+    "poweredBy": "Obsługiwane przez <brand>Square Share</brand>",
+    "policiesLabel": "Zasady Square Share",
     "policies": {
       "privacy": {
         "label": "Prywatność",
-        "name": "Polityka prywatności Squareshare"
+        "name": "Polityka prywatności Square Share"
       },
       "terms": {
         "label": "Warunki",
-        "name": "Warunki korzystania z usługi Squareshare"
+        "name": "Warunki korzystania z usługi Square Share"
       }
     }
   },

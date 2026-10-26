@@ -123,7 +123,7 @@ describe("entering frame mode", () => {
     fireEvent.dblClick(tile());
     expect(onFrame).not.toHaveBeenCalled();
     expect(
-      screen.queryByRole("button", { name: /frame the image/i }),
+      screen.queryByRole("button", { name: /crop and position the image/i }),
     ).not.toBeInTheDocument();
   });
 

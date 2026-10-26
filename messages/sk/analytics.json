@@ -9,8 +9,6 @@
     "subtitle": "Predaje, zobrazenia výkladu a všetko ostatné, čo váš obchod robí."
   },
   "loading": {
-    "title": "Analytika",
-    "subtitle": "Výkonnosť vášho obchodu cez vloženie na web a trhovisko.",
     "srLoading": "načítava sa analytika"
   },
   "firstRun": {
@@ -90,14 +88,14 @@
     "expiredEmpty": "Žiadne nedokončené",
     "conversion": "Objednávky na 100 zobrazení",
     "conversionCounts": "Objednávky: {orders}, zobrazenia: {views}",
-    "abandonment": "Opustené platby",
+    "abandonment": "Nedokončené pokladne",
     "abandonmentCounts": "Nedokončené: {expired}, začaté: {started}",
     "notEnough": "Zatiaľ málo dát",
     "notEnoughHint": "Miery sa zobrazia, keď bude v tomto období {min} zobrazení."
   },
   "tiles": {
     "revenue": "Tržby",
-    "afterFees": "{amount} po poplatkoch",
+    "afterFees": "{amount} po poplatkoch Square Share",
     "sales": "Predaje",
     "perDay": "priemerne {rate} za deň",
     "avgOrder": "Priem. objednávka",
@@ -110,10 +108,10 @@
     "noOrders": "Zatiaľ žiadne objednávky"
   },
   "channels": {
-    "embed": "Vloženie",
+    "embed": "Na vašom webe",
     "marketplace": "Trhovisko",
-    "direct": "Priamy",
-    "button": "Tlačidlo na webe"
+    "direct": "Vaša stránka",
+    "button": "Tlačidlo nákupu"
   },
   "signalsUnavailable": {
     "title": "Zobrazenia a prihlásenia na odber sú momentálne nedostupné",

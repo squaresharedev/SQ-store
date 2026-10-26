@@ -321,7 +321,6 @@ test.describe("seller plans", () => {
       // The app says why and takes the seller to the plans, named as the source.
       await page.goto("/storefront");
       await page.getByRole("button", { name: /new storefront|create storefront/i }).first().click();
-      await page.getByRole("button", { name: /skip setup/i }).click();
       await page.waitForURL(/\/plans\?from=storefront_limit/);
       await expect(page.locator("[data-plans-page][data-plans-source='storefront_limit']")).toBeVisible();
 

@@ -17,7 +17,7 @@ import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { helpTextClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 import { markOrderShipped } from "@/lib/orders/actions";
-import { CARRIER_OPTIONS, trackingLinkFor } from "@/lib/orders/carriers";
+import { CARRIER_OPTIONS, detectCarrier, parseCarrier, trackingLinkFor } from "@/lib/orders/carriers";
 import { formatOrderDateTime } from "@/lib/format/date";
 import type { ActionError } from "@/lib/errors";
 import { TRACKING_NUMBER_MAX, type CarrierId, type OrderView } from "@/types/order-view";
@@ -39,6 +39,26 @@ const pause = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 const NO_CARRIER = "";
 type CarrierChoice = CarrierId | typeof NO_CARRIER;
 
+/** This browser's last-used carrier: most sellers ship everything one way, so
+ *  the picker opens on it. A per-device convenience, nothing more. */
+const LAST_CARRIER_KEY = "sq.orders.last-carrier";
+
+function lastCarrier(): CarrierChoice {
+  try {
+    return parseCarrier(localStorage.getItem(LAST_CARRIER_KEY)) ?? NO_CARRIER;
+  } catch {
+    return NO_CARRIER;
+  }
+}
+
+function rememberCarrier(carrier: CarrierId) {
+  try {
+    localStorage.setItem(LAST_CARRIER_KEY, carrier);
+  } catch {
+    // Storage off: the next form simply opens on "Other" again.
+  }
+}
+
 /** The tracking number as it reads in the panel, linked or not. */
 const trackingValueClass = "min-w-0 break-all font-mono text-sm text-foreground";
 
@@ -56,7 +76,8 @@ const trackingValueClass = "min-w-0 break-all font-mono text-sm text-foreground"
  * The carrier is a PICK, never a typed link: with a number beside it, the
  * buyer's order page links to that carrier's own tracking page
  * (lib/orders/carriers.ts). It waits for a number, because that is all it
- * describes.
+ * describes. It opens on the last carrier used here, and a number that names
+ * its carrier picks it, until the seller picks one themselves.
  *
  * The confirm click gets an ending: the truck spins its wheels while the server
  * works, then drives across the button into a "Shipped" state (ShipConfirmButton).
@@ -102,6 +123,9 @@ export function OrderShipping({
   const [editing, setEditing] = useState(false);
   const [tracking, setTracking] = useState(order.fulfilment.trackingNumber ?? "");
   const [carrier, setCarrier] = useState<CarrierChoice>(order.fulfilment.carrier ?? NO_CARRIER);
+  // The seller chose the carrier in this form: a number typed after that no
+  // longer picks one for them.
+  const [carrierChosen, setCarrierChosen] = useState(false);
   const [error, setError] = useState<ActionError | null>(null);
   const [pending, startTransition] = useTransition();
   const [shipState, setShipState] = useState<ShipState>("idle");
@@ -152,7 +176,8 @@ export function OrderShipping({
 
   function open() {
     setTracking(fulfilment.trackingNumber ?? "");
-    setCarrier(fulfilment.carrier ?? NO_CARRIER);
+    setCarrier(fulfilment.carrier ?? lastCarrier());
+    setCarrierChosen(fulfilment.carrier !== null);
     setError(null);
     setEditing(true);
   }
@@ -165,9 +190,10 @@ export function OrderShipping({
     // Only the first ship gets the truck.
     const drives = !shipped;
     if (drives) setShipState("working");
+    const sentCarrier = hasTracking && carrier !== NO_CARRIER ? carrier : null;
     startTransition(async () => {
       const [result] = await Promise.all([
-        markOrderShipped(order.id, tracking, hasTracking && carrier !== NO_CARRIER ? carrier : null),
+        markOrderShipped(order.id, tracking, sentCarrier),
         drives ? pause(sequence.revMs) : undefined,
       ]);
       if (!result.ok) {
@@ -175,6 +201,7 @@ export function OrderShipping({
         setError(result.error);
         return;
       }
+      if (sentCarrier) rememberCarrier(sentCarrier);
       if (drives) {
         setShipState("delivered");
         await pause(sequence.rollMs);
@@ -206,7 +233,11 @@ export function OrderShipping({
           ref={inputRef}
           id={inputId}
           value={tracking}
-          onChange={(event) => setTracking(event.target.value)}
+          onChange={(event) => {
+            setTracking(event.target.value);
+            const detected = carrierChosen ? null : detectCarrier(event.target.value);
+            if (detected) setCarrier(detected);
+          }}
           placeholder={t("ship.trackingPlaceholder")}
           maxLength={TRACKING_NUMBER_MAX}
           autoComplete="off"
@@ -239,7 +270,10 @@ export function OrderShipping({
           id={carrierId}
           value={hasTracking ? carrier : NO_CARRIER}
           options={carrierOptions}
-          onChange={setCarrier}
+          onChange={(choice) => {
+            setCarrier(choice);
+            setCarrierChosen(true);
+          }}
           disabled={pending || !hasTracking}
         />
       </div>

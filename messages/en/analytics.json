@@ -9,8 +9,6 @@
     "subtitle": "Sales, storefront views and everything else your store is doing."
   },
   "loading": {
-    "title": "Analytics",
-    "subtitle": "How your store is performing across the embed and the marketplace.",
     "srLoading": "loading analytics"
   },
   "firstRun": {
@@ -90,14 +88,14 @@
     "expiredEmpty": "None left unpaid",
     "conversion": "Orders per 100 views",
     "conversionCounts": "Orders: {orders}, views: {views}",
-    "abandonment": "Checkout abandonment",
+    "abandonment": "Checkouts not finished",
     "abandonmentCounts": "Left unpaid: {expired}, started: {started}",
     "notEnough": "Not enough data yet",
     "notEnoughHint": "Rates appear once this range holds {min} views."
   },
   "tiles": {
     "revenue": "Revenue",
-    "afterFees": "{amount} after fees",
+    "afterFees": "{amount} after Square Share fees",
     "sales": "Sales",
     "perDay": "{rate} per day on average",
     "avgOrder": "Avg. order",
@@ -110,10 +108,10 @@
     "noOrders": "No orders yet"
   },
   "channels": {
-    "embed": "Embed",
+    "embed": "On your site",
     "marketplace": "Marketplace",
-    "direct": "Direct",
-    "button": "Website button"
+    "direct": "Your page",
+    "button": "Buy button"
   },
   "signalsUnavailable": {
     "title": "Views and signups are unavailable right now",

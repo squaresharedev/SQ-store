@@ -12,7 +12,7 @@
     },
     "product": {
       "label": "Add a product",
-      "detail": "A title and a price are enough. It can stay a draft for now.",
+      "detail": "A title and a price are enough.",
       "detailDone": "{count, plural, one {You have {count} product.} other {You have {count} products.}}",
       "action": "Add product",
       "cta": "Add your first product"
@@ -83,9 +83,6 @@
         "title": "Welcome to Square Share",
         "description": "Four steps to a product page you can share."
       },
-      "path": {
-        "title": "Four steps to your first page"
-      },
       "seller": {
         "title": "Add your seller details",
         "description": "Buyers see these on your product pages, and the law asks for them before you can sell. We never use them for marketing.",
@@ -122,7 +119,7 @@
       }
     },
     "seller": {
-      "namePlaceholder": "e.g. Studio Builderboy e.U.",
+      "namePlaceholder": "e.g. Jane Doe or Jane's Ceramics",
       "nameHelp": "Your business name, or your full name if you sell as yourself.",
       "nameAlternative": "Or your full name, if you sell as yourself.",
       "addressPlaceholder": "e.g. 12 Market Street\nDublin, D02 X285\nIreland",
@@ -156,12 +153,6 @@
       "buyNow": "Buy now",
       "live": "Live",
       "linkCopied": "Link copied"
-    },
-    "setupPath": {
-      "details": "Add your details",
-      "product": "Add a product",
-      "storefront": "Design a storefront",
-      "share": "Share its page"
     },
     "terms": {
       "agreed": "You've agreed to these Terms. Thanks for reading.",
@@ -197,7 +188,7 @@
       },
       "productsAdd": {
         "title": "Add a product",
-        "body": "A title and a price are enough to start. It can stay a draft until you're ready."
+        "body": "A title and a price are enough to start."
       },
       "productsImport": {
         "title": "Or import your catalogue",

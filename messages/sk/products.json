@@ -45,7 +45,7 @@
   },
   "emptyState": {
     "title": "Zatiaľ žiadne produkty",
-    "descriptionWriter": "Pridajte prvý produkt. Môže zostať ako koncept, kým mu nebudete chcieť dať stránku.",
+    "descriptionWriter": "Pridajte prvý produkt. Postačí názov a cena.",
     "descriptionReadOnly": "Tento obchod ešte nemá žiadne produkty.",
     "add": "Pridať produkt"
   },
@@ -136,7 +136,7 @@
   "removal": {
     "badge": "Odstránené",
     "badgePaused": "Pozastavené",
-    "title": "{kind, select, product {Tento produkt odstránil SquareShare} other {Tento výklad odstránil SquareShare}}",
+    "title": "{kind, select, product {Tento produkt odstránil Square Share} other {Tento výklad odstránil Square Share}}",
     "titlePaused": "{kind, select, product {Tento produkt je pozastavený, kým ho nezmeníte} other {Tento výklad je pozastavený, kým ho nezmeníte}}",
     "hidden": "Kupujúci ho už nikde nevidia: ani na jeho stránke, ani vo vložení na web, ani v zdieľanom odkaze.",
     "hiddenPaused": "Kupujúci ho teraz nevidia: ani na jeho stránke, ani vo vložení na web, ani v zdieľanom odkaze. Nič sa nezmazalo a vráti sa, keď človek skontroluje vaše zmeny.",
@@ -156,7 +156,8 @@
       "button": "Zmeny sú hotové, skontrolovať",
       "sent": "Odoslané na kontrolu dňa <time>{date}</time>. Vaše zmeny si pozrie človek a odpoveď dostanete tu aj e-mailom.",
       "failed": "Toto sa nepodarilo odoslať.",
-      "failedFix": "O chvíľu to skúste znova."
+      "failedFix": "O chvíľu to skúste znova.",
+      "saveFirst": "Najprv uložte zmeny. Po uložení sa zobrazí otázka, či ich odoslať na kontrolu."
     },
     "why": "Prečo",
     "whatToChange": "Čo zmeniť",
@@ -292,7 +293,7 @@
       },
       "visibility": {
         "label": "Viditeľnosť",
-        "description": "Aktívny znamená zverejnený: kupujúci ho môžu okamžite vidieť a kúpiť. Koncept je skrytý pred kupujúcimi, kým ho neprepnete.",
+        "description": "Aktívny: kupujúci ho môžu kúpiť, hneď ako je vo výklade. Koncept: skrytý pred kupujúcimi, kým ho neprepnete.",
         "about": "Na čo slúži sekcia Viditeľnosť"
       },
       "badges": {
@@ -367,10 +368,10 @@
     "displayImageHelp": "Zobrazuje sa vo vašom výklade a vo vloženiach na web.",
     "digitalFile": "Digitálny súbor",
     "digitalFileAbout": "Čo je digitálny súbor",
-    "digitalFileHelp": "Súbor, ktorý kupujúci stiahne po kúpe. Jeho pridaním sa produkt stane digitálnou položkou na stiahnutie, takže doprava a bezpečnosť výrobku sa na neho prestanú vzťahovať.",
+    "digitalFileHelp": "Súbor, ktorý si kupujúci stiahnu hneď po zaplatení. Produkt na stiahnutie nepotrebuje údaje o doprave ani bezpečnosti produktu.",
     "purchaseLink": "Odkaz na nákup",
     "purchaseLinkAbout": "Kam tlačidlo na nákup presmeruje kupujúcich",
-    "purchaseLinkHelp": "Tlačidlo na nákup na stránke produktu sleduje tento odkaz. Bez neho pošle e-mail na kontaktnú adresu vášho obchodu.",
+    "purchaseLinkHelp": "Ak ho necháte prázdny, kupujúci zaplatia cez pokladňu Square Share, alebo vám napíšu e-mail, kde pokladňa ešte nie je zapnutá. Odkaz tu nahradí oboje.",
     "purchaseLinkPlaceholder": "napr. https://your-shop.example/checkout/this-product",
     "statusLabel": "Stav produktu",
     "problems": "{count, plural, one {{count} vec na opravu pred uložením} few {{count} veci na opravu pred uložením} many {{count} veci na opravu pred uložením} other {{count} vecí na opravu pred uložením}}",
@@ -380,6 +381,7 @@
     "uploadingLabel": "{what, select, image {Nahrávanie obrázka} photo {Nahrávanie fotky} document {Nahrávanie dokumentu} other {Nahrávanie súboru}}",
     "processingLabel": "{what, select, image {Spracovanie obrázka} photo {Spracovanie fotky} document {Spracovanie dokumentu} other {Spracovanie súboru}}",
     "saveChanges": "Uložiť zmeny",
+    "saveDraft": "Uložiť ako koncept",
     "saveProduct": "Uložiť produkt",
     "savedToast": "Produkt „{title}“ bol uložený.",
     "addedToast": "Produkt „{title}“ bol pridaný k vašim produktom.",
@@ -400,14 +402,14 @@
     "moderation": {
       "badge": "Vyžaduje zmeny",
       "changed": "Zmenené",
-      "callout": "SquareShare vás požiadal, aby ste tu zmenili {fields}.",
+      "callout": "Square Share vás požiadal, aby ste tu zmenili {fields}.",
       "seeWhy": "Zistiť prečo",
       "fieldBadge": "Zmeniť toto",
       "navHint": "vyžaduje zmeny",
       "inReview": "Odoslané na kontrolu",
       "reviewPrompt": {
         "title": "Uložené. Poslať späť na kontrolu?",
-        "body": "Ak ste zmenili všetko, o čo SquareShare požiadal, pošlite to teraz späť a pozrie sa na to človek. Ak nie, upravujte ďalej a pošlite to, keď budete hotoví.",
+        "body": "Ak ste zmenili všetko, o čo Square Share požiadal, pošlite to teraz späť a pozrie sa na to človek. Ak nie, upravujte ďalej a pošlite to, keď budete hotoví.",
         "keepEditing": "Pokračovať v úpravách",
         "send": "Odoslať na kontrolu"
       }
@@ -432,7 +434,7 @@
       "safety": "Údaje o výrobcovi pre pravidlá EÚ"
     },
     "visibility": {
-      "activeHint": "Kupujúci ho vidia a môžu ho hneď kúpiť",
+      "activeHint": "Kupujúci ho môžu kúpiť, hneď ako je vo výklade",
       "draftHint": "Vidíte ho len vy, kým nebudete pripravení"
     },
     "preview": {
@@ -672,7 +674,7 @@
     "fileTitle": "Odôvodnenie rozhodnutia {reference}",
     "title": "Odôvodnenie rozhodnutia",
     "subtitle": "{action, select, paused {Pozastavili sme váš {target, select, product {produkt} other {výklad}}} other {Odstránili sme váš {target, select, product {produkt} other {výklad}}}}",
-    "intro": "Toto odôvodnenie vysvetľuje rozhodnutie, ktoré sme prijali v súvislosti s obsahom zverejneným vami na SquareShare, prečo sme ho prijali a ako ho môžete napadnúť. Máte naň nárok podľa článku 17 aktu o digitálnych službách (nariadenie (EÚ) 2022/2065).",
+    "intro": "Toto odôvodnenie vysvetľuje rozhodnutie, ktoré sme prijali v súvislosti s obsahom zverejneným vami na Square Share, prečo sme ho prijali a ako ho môžete napadnúť. Máte naň nárok podľa článku 17 aktu o digitálnych službách (nariadenie (EÚ) 2022/2065).",
     "sections": {
       "decision": "Rozhodnutie",
       "reasons": "Prečo sme ho prijali",
@@ -702,7 +704,7 @@
       "removed": "Odstránené. Obsah už nie je kupujúcim dostupný. Toto rozhodnutie je konečné, pokiaľ ho nezmení odvolanie.",
       "pausedAutomated": "Pozastavené. Obsah je skrytý pred kupujúcimi, kým ho nezmeníte. Skontroluje sa znova, hneď ako zmenu uložíte."
     },
-    "scope": "Všade, kde ho SquareShare zobrazuje: na jeho vlastnej stránke, vo vloženiach na iných webových stránkach a v zdieľaných odkazoch, vo všetkých krajinách.",
+    "scope": "Všade, kde ho Square Share zobrazuje: na jeho vlastnej stránke, vo vloženiach na iných webových stránkach a v zdieľaných odkazoch, vo všetkých krajinách.",
     "duration": {
       "paused": "Kým neschválime vaše zmeny.",
       "removed": "Na neurčito.",
@@ -715,13 +717,13 @@
       "deleted": "Obsah bol odvtedy zmazaný."
     },
     "facts": {
-      "notices": "{count, plural, =0 {Toto sme zistili sami, bez podnetu od niekoho mimo SquareShare.} one {Tomuto predchádzal # podnet od niekoho mimo SquareShare, vo veci: {reasons}.} few {Tomuto predchádzali # podnety od ľudí mimo SquareShare, vo veci: {reasons}.} many {Tomuto predchádzalo # podnetov od ľudí mimo SquareShare, vo veci: {reasons}.} other {Tomuto predchádzalo # podnetov od ľudí mimo SquareShare, vo veci: {reasons}.}}",
-      "review": "Pred rozhodnutím obsah preskúmal člen tímu SquareShare. Nezverejňujeme, kto podnet zaslal.",
-      "automated": "Na tento obsah prišla naša automatická kontrola pri jeho uložení. Nikto mimo SquareShare ho nenahlásil a žiadny člen tímu ho nepreskúmal."
+      "notices": "{count, plural, =0 {Toto sme zistili sami, bez podnetu od niekoho mimo Square Share.} one {Tomuto predchádzal # podnet od niekoho mimo Square Share, vo veci: {reasons}.} few {Tomuto predchádzali # podnety od ľudí mimo Square Share, vo veci: {reasons}.} many {Tomuto predchádzalo # podnetov od ľudí mimo Square Share, vo veci: {reasons}.} other {Tomuto predchádzalo # podnetov od ľudí mimo Square Share, vo veci: {reasons}.}}",
+      "review": "Pred rozhodnutím obsah preskúmal člen tímu Square Share. Nezverejňujeme, kto podnet zaslal.",
+      "automated": "Na tento obsah prišla naša automatická kontrola pri jeho uložení. Nikto mimo Square Share ho nenahlásil a žiadny člen tímu ho nepreskúmal."
     },
     "automated": "Na zistenie tohto obsahu ani na prijatie tohto rozhodnutia sa nepoužili žiadne automatizované prostriedky.",
     "legalBasis": {
-      "contract": "Zmluvné: Podmienky používania SquareShare, ktoré nepovoľujú takýto obsah ({url}).",
+      "contract": "Zmluvné: Podmienky používania Square Share, ktoré nepovoľujú takýto obsah ({url}).",
       "illegal": "Právne: obsah sme považovali za nezákonný podľa príslušného práva."
     },
     "noNote": "Žiadna.",
@@ -739,7 +741,7 @@
       "answer": "Naša odpoveď: {note}",
       "message": "Čo ste napísali: {message}"
     },
-    "footer": "SquareShare · {reference} · Strana {page} z {total}",
+    "footer": "Square Share · {reference} · Strana {page} z {total}",
     "generated": "Vygenerované dňa {date}.",
     "automatedYes": "Na zistenie tohto obsahu aj na prijatie tohto rozhodnutia sa použili automatizované prostriedky a nepodieľal sa na ňom žiadny človek. Ak sa odvoláte, preskúma ho člen tímu."
   },
@@ -788,7 +790,7 @@
       "exact": "Nie je potrebný žiadny skript, SDK ani volanie API. Adresu ponechaj presne takú, aká je, vrátane všetkého za otáznikom."
     },
     "tryIt": "Vyskúšať tlačidlo",
-    "tracking": "V Analytike sa zobrazí ako „Tlačidlo na webe“.",
+    "tracking": "V Analytike sa zobrazí ako „Tlačidlo nákupu“.",
     "blocked": {
       "removed": "Tento produkt bol stiahnutý. Otvorte ho a uvidíte prečo.",
       "draft": "Tento produkt je koncept. Najprv ho nastavte ako Aktívny.",

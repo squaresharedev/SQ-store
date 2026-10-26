@@ -14,7 +14,6 @@ import { PaymentsHeader } from "./PaymentsHeader";
 import { PayoutDetailModal } from "./PayoutDetailModal";
 import { PayoutHistory } from "./PayoutHistory";
 import { PayoutMethodCard } from "./PayoutMethodCard";
-import { PayoutMethodModal } from "./PayoutMethodModal";
 import { RecentActivity } from "./RecentActivity";
 import { TransactionDetailModal } from "./TransactionDetailModal";
 
@@ -22,7 +21,6 @@ import { TransactionDetailModal } from "./TransactionDetailModal";
 type ActiveModal =
   | { kind: "none" }
   | { kind: "connect" }
-  | { kind: "method" }
   | { kind: "payout"; payout: Payout }
   | { kind: "transaction"; transaction: BalanceTransaction };
 
@@ -34,8 +32,7 @@ type ActiveModal =
  *
  * All data arrives as Stripe-shaped props from the mock layer (lib/payments);
  * this component only lays modules out and hosts modal state. Everything is
- * read-only display, the only actions are stubs that will become redirects to
- * Stripe-hosted surfaces.
+ * read-only display; the only actions are links into Stripe-hosted pages.
  */
 export function PaymentsPage({
   overview,
@@ -76,22 +73,12 @@ export function PaymentsPage({
               payouts={overview.payouts}
               onSelect={(payout) => setModal({ kind: "payout", payout })}
             />
-            <PayoutMethodCard
-              method={overview.payoutMethod}
-              onManage={() => setModal({ kind: "method" })}
-            />
+            <PayoutMethodCard method={overview.payoutMethod} />
           </div>
         </div>
       </main>
 
       <ConnectStripeModal open={modal.kind === "connect"} onClose={close} />
-      {overview.payoutMethod && (
-        <PayoutMethodModal
-          open={modal.kind === "method"}
-          onClose={close}
-          method={overview.payoutMethod}
-        />
-      )}
       {modal.kind === "payout" && (
         <PayoutDetailModal
           open

@@ -27,7 +27,7 @@ const google = () => screen.getByRole("button", { name: /continue with google/i 
 const signInTab = () =>
   screen.getAllByRole("button", { name: /^sign in/i })[0];
 const magicToggle = () =>
-  screen.getByRole("button", { name: /magic link/i });
+  screen.getByRole("button", { name: /sign-in link/i });
 /** The label row above the identifier input, where the badge now lives. */
 const identifierRow = () => screen.getByText("Email or username").parentElement!;
 

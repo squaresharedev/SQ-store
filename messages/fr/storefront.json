@@ -189,14 +189,15 @@
   "card": {
     "editAriaLabel": "Modifier {name}",
     "embedAriaLabel": "Partager ou intégrer {name}",
+    "share": "Partager",
     "viewPageAriaLabel": "Ouvrir {name} comme les acheteurs la voient",
     "deleteAriaLabel": "Supprimer {name}",
     "blockCount": "{count, plural, one {# bloc} many {# blocs} other {# blocs}}",
     "updatedLabel": " · mis à jour le {date}",
     "emptyHint": "Cette grille est vide",
-    "removed": "Retiré par SquareShare",
-    "pausedInReview": "En pause · en cours d’examen par SquareShare",
-    "pausedNeedsChanges": "Mise en pause par SquareShare · modifications requises"
+    "removed": "Retiré par Square Share",
+    "pausedInReview": "En pause · en cours d’examen par Square Share",
+    "pausedNeedsChanges": "Mise en pause par Square Share · modifications requises"
   },
   "embed": {
     "inDevNotice": "Le widget d’intégration est en développement et ne s’affiche pas encore sur les sites externes. Configurez vos paramètres ci-dessous pour être prêt à coller le code dès sa sortie.",
@@ -208,7 +209,8 @@
       "privacy": "Ajoutez ceci à votre politique de confidentialité"
     },
     "required": "Obligatoire",
-    "enabledLabel": "Intégration activée",
+    "enabledLabel": "Afficher sur mon site",
+    "showingLabel": "Affiché sur votre site",
     "domainsLabel": "Domaines autorisés",
     "domainsPlaceholder": "votresite.com, blog.votresite.com",
     "domainsHint": "Jusqu’à {max}, séparés par des virgules. Collez une URL, nous la réduirons au domaine.",
@@ -244,9 +246,9 @@
       "failed": "Impossible de copier le code d’intégration. Sélectionnez-le et copiez-le manuellement.",
       "cannotCopyYet": "le code d’intégration ne peut pas encore être copié"
     },
-    "privacyHint": "Votre site charge désormais cette vitrine depuis Squareshare, sa politique de confidentialité doit donc le mentionner. Collez-y ce texte :",
+    "privacyHint": "Votre site charge désormais cette vitrine depuis Square Share, sa politique de confidentialité doit donc le mentionner. Collez-y ce texte :",
     "privacyTextLabel": "Texte de confidentialité",
-    "privacyText": "Ce site affiche une vitrine fournie par Squareshare. Lors de son chargement, l’adresse IP et les informations du navigateur du visiteur sont transmises à Squareshare afin d’afficher les produits et de compter les visites. Squareshare ne dépose aucun cookie et ne stocke rien sur l’appareil du visiteur à cette fin. En savoir plus : {policy}",
+    "privacyText": "Ce site affiche une vitrine fournie par Square Share. Lors de son chargement, l’adresse IP et les informations du navigateur du visiteur sont transmises à Square Share afin d’afficher les produits et de compter les visites. Square Share ne dépose aucun cookie et ne stocke rien sur l’appareil du visiteur à cette fin. En savoir plus : {policy}",
     "copyPrivacy": {
       "copy": "Copier le texte de confidentialité",
       "copied": "Texte de confidentialité copié",
@@ -274,92 +276,6 @@
       "copy": "Copier le lien de la vitrine",
       "copied": "Lien de la vitrine copié",
       "failed": "Impossible de copier le lien. Sélectionnez-le et copiez-le manuellement."
-    }
-  },
-  "wizard": {
-    "category": {
-      "title": "Que vendez-vous ?",
-      "description": "C’est le meilleur indice pour savoir quelles dispositions vous conviendront."
-    },
-    "fulfilment": {
-      "title": "Comment les acheteurs le reçoivent-ils ?",
-      "description": "Cela détermine ce que vos pages produit indiquent sur la livraison."
-    },
-    "vibe": {
-      "title": "Choisissez un aspect",
-      "description": "Votre point de départ. Tout reste modifiable dans l’éditeur."
-    },
-    "name": {
-      "title": "Nommez votre vitrine",
-      "description": "Juste pour vous. Vous pouvez la renommer à tout moment."
-    },
-    "stepOf": "Étape {current} sur {total}",
-    "nameLabel": "Nom de la vitrine",
-    "nameHint": "Laissez vide et nous l’appellerons Vitrine sans titre.",
-    "otherCategoryLabel": "Que vendez-vous ?",
-    "otherCategoryPlaceholder": "p. ex. maquettes",
-    "noProductsHint": "Pas encore de produits ? Ajoutez-les après la configuration.",
-    "skipSetup": "Passer la configuration",
-    "skip": "Passer",
-    "creating": "Création…",
-    "create": "Créer une vitrine"
-  },
-  "createOptions": {
-    "categoryGroupLabel": "Ce que vous vendez",
-    "fulfilmentGroupLabel": "Comment les acheteurs le reçoivent",
-    "vibeGroupLabel": "L’aspect que vous voulez",
-    "category": {
-      "fashion": "Vêtements",
-      "art": "Art et estampes",
-      "jewellery": "Bijoux",
-      "handmade": "Fait main",
-      "home": "Maison et décoration",
-      "beauty": "Beauté",
-      "food": "Alimentation et boissons",
-      "music": "Musique",
-      "photography": "Photographie",
-      "books": "Livres et fanzines",
-      "digital": "Produits numériques",
-      "vintage": "Vintage",
-      "other": "Autre chose"
-    },
-    "categoryPlaceholder": {
-      "fashion": "Ma boutique de vêtements",
-      "art": "Ma boutique d’art",
-      "jewellery": "Ma boutique de bijoux",
-      "handmade": "Ma boutique d’artisanat",
-      "home": "Ma boutique déco",
-      "beauty": "Ma boutique beauté",
-      "food": "Ma boutique gourmande",
-      "music": "Ma boutique de musique",
-      "photography": "Ma boutique photo",
-      "books": "Ma boutique de livres",
-      "digital": "Ma boutique numérique",
-      "vintage": "Ma boutique vintage",
-      "other": "Ma boutique",
-      "default": "Ma vitrine"
-    },
-    "fulfilment": {
-      "physical": "Je l’expédie",
-      "digital": "Ils le téléchargent",
-      "services": "Ils me réservent",
-      "mixed": "Un peu des deux"
-    },
-    "fulfilmentHint": {
-      "physical": "Produits physiques",
-      "digital": "Fichiers, préréglages, musique",
-      "services": "Séances, commandes personnalisées",
-      "mixed": "Plusieurs de ces options"
-    },
-    "vibe": {
-      "minimal": "Minimal",
-      "classic": "Classique",
-      "bold": "Audacieux"
-    },
-    "vibeHint": {
-      "minimal": "Nom et prix au survol",
-      "classic": "Nom et prix toujours affichés",
-      "bold": "Prix toujours affiché, nom au survol"
     }
   },
   "picker": {
@@ -954,7 +870,7 @@
       "fillHint": "Remplit le bloc, en recadrant le surplus.",
       "fitHint": "Affiche l’image entière à l’intérieur du bloc."
     },
-    "reposition": "Repositionner l’image",
+    "reposition": "Recadrer et placer",
     "opacity": {
       "label": "Opacité",
       "ariaLabel": "Opacité de l’image",
@@ -1075,14 +991,14 @@
     "editTextOf": "Modifier le texte de {name}",
     "color": "Couleur",
     "changeColorOf": "Changer la couleur de {name}",
-    "stroke": "Trait",
-    "editStrokeOf": "Modifier le trait de {name}",
+    "stroke": "Bordure",
+    "editStrokeOf": "Modifier la bordure de {name}",
     "corners": "Coins",
     "editCornersOf": "Modifier l’arrondi des coins de {name}",
     "opacity": "Opacité",
     "editOpacityOf": "Modifier l’opacité de {name}",
-    "frame": "Cadrer",
-    "frameImageFor": "Cadrer l’image de {name}",
+    "frame": "Recadrer et placer",
+    "frameImageFor": "Recadrer et placer l’image de {name}",
     "duplicate": "Dupliquer",
     "duplicateNamed": "Dupliquer {name}",
     "duplicateN": "Dupliquer {count, plural, one {# élément} many {# éléments} other {# éléments}}",

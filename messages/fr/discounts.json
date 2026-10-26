@@ -33,7 +33,7 @@
     "title": "Résultats de vos réductions",
     "orders": "Commandes avec une réduction",
     "revenue": "Chiffre d'affaires de ces commandes",
-    "given": "Accordé en réductions",
+    "given": "Total des remises",
     "none": "Rien pour l'instant",
     "channelsTitle": "Commandes par canal",
     "channelsDescription": "Les codes comptent sous le canal où vous les avez partagés, ou sous le code lui-même si vous n'en avez pas nommé un.",
@@ -43,7 +43,7 @@
   },
   "list": {
     "title": "Vos réductions",
-    "none": "Pas de réductions pour l'instant. Les réductions supprimées continuent de comptabiliser leurs commandes ci-dessus.",
+    "none": "Aucune remise active.",
     "channel": "Partagé sur {channel}",
     "startsOn": "Démarre le {date}",
     "endsOn": "Se termine le {date}",

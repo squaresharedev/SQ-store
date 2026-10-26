@@ -44,7 +44,7 @@ test.describe("product display image", () => {
       buffer: PNG,
     });
 
-    await page.getByRole("button", { name: /save product/i }).click();
+    await page.getByRole("button", { name: /save product|save as draft/i }).click();
     await page.waitForURL(/\/products$/, { timeout: 30_000 });
 
     expect(failures, "upload requests must all succeed").toEqual([]);

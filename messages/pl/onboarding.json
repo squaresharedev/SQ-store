@@ -12,7 +12,7 @@
     },
     "product": {
       "label": "Dodaj produkt",
-      "detail": "Wystarczy nazwa i cena. Na razie może zostać wersją roboczą.",
+      "detail": "Wystarczy nazwa i cena.",
       "detailDone": "{count, plural, one {Masz {count} produkt.} few {Masz {count} produkty.} many {Masz {count} produktów.} other {Masz {count} produktu.}}",
       "action": "Dodaj produkt",
       "cta": "Dodaj swój pierwszy produkt"
@@ -83,9 +83,6 @@
         "title": "Witaj w Square Share",
         "description": "Cztery kroki do strony produktu, którą możesz udostępnić."
       },
-      "path": {
-        "title": "Cztery kroki do pierwszej strony"
-      },
       "seller": {
         "title": "Dodaj dane sprzedawcy",
         "description": "Kupujący widzą je na stronach twoich produktów, a prawo wymaga ich podania, zanim zaczniesz sprzedawać. Nigdy nie używamy ich do marketingu.",
@@ -122,7 +119,7 @@
       }
     },
     "seller": {
-      "namePlaceholder": "np. Studio Builderboy e.U.",
+      "namePlaceholder": "np. Anna Kowalska lub Ceramika Anny",
       "nameHelp": "Nazwa twojej firmy albo twoje pełne imię i nazwisko, jeśli sprzedajesz jako osoba prywatna.",
       "nameAlternative": "Albo swoje imię i nazwisko, jeśli sprzedajesz jako osoba prywatna.",
       "addressPlaceholder": "np. ul. Rynek 12\nWarszawa, 00-001\nPolska",
@@ -156,12 +153,6 @@
       "buyNow": "Kup teraz",
       "live": "Opublikowano",
       "linkCopied": "Skopiowano link"
-    },
-    "setupPath": {
-      "details": "Dodaj swoje dane",
-      "product": "Dodaj produkt",
-      "storefront": "Zaprojektuj witrynę",
-      "share": "Udostępnij jej stronę"
     },
     "terms": {
       "agreed": "Zaakceptowano te Warunki. Dzięki za przeczytanie.",
@@ -197,7 +188,7 @@
       },
       "productsAdd": {
         "title": "Dodaj produkt",
-        "body": "Na początek wystarczy nazwa i cena. Produkt może zostać wersją roboczą, dopóki go nie opublikujesz."
+        "body": "Na początek wystarczy nazwa i cena."
       },
       "productsImport": {
         "title": "Albo zaimportuj katalog",

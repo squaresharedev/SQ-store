@@ -70,7 +70,7 @@
     "teamInvite": {
       "title": "Máte pozvánku do týmu",
       "body": "{role, select, owner {Obchod {store} vás zve do týmu v roli vlastníka. Přijmout ji můžete v sekci Tým a přístup.} editor {Obchod {store} vás zve do týmu v roli editora. Přijmout ji můžete v sekci Tým a přístup.} viewer {Obchod {store} vás zve do týmu v roli čtenáře. Přijmout ji můžete v sekci Tým a přístup.} other {Obchod {store} vás zve do svého týmu. Přijmout ji můžete v sekci Tým a přístup.}}",
-      "bodyUnnamedStore": "{role, select, owner {Obchod na SquareShare vás zve do týmu v roli vlastníka. Přijmout ji můžete v sekci Tým a přístup.} editor {Obchod na SquareShare vás zve do týmu v roli editora. Přijmout ji můžete v sekci Tým a přístup.} viewer {Obchod na SquareShare vás zve do týmu v roli čtenáře. Přijmout ji můžete v sekci Tým a přístup.} other {Obchod na SquareShare vás zve do svého týmu. Přijmout ji můžete v sekci Tým a přístup.}}"
+      "bodyUnnamedStore": "{role, select, owner {Obchod na Square Share vás zve do týmu v roli vlastníka. Přijmout ji můžete v sekci Tým a přístup.} editor {Obchod na Square Share vás zve do týmu v roli editora. Přijmout ji můžete v sekci Tým a přístup.} viewer {Obchod na Square Share vás zve do týmu v roli čtenáře. Přijmout ji můžete v sekci Tým a přístup.} other {Obchod na Square Share vás zve do svého týmu. Přijmout ji můžete v sekci Tým a přístup.}}"
     },
     "teamJoined": {
       "title": "Nový člen vašeho týmu: {name}",

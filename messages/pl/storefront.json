@@ -189,14 +189,15 @@
   "card": {
     "editAriaLabel": "Edytuj: {name}",
     "embedAriaLabel": "Udostępnij lub osadź: {name}",
+    "share": "Udostępnij",
     "viewPageAriaLabel": "Otwórz {name} tak, jak widzą ją kupujący",
     "deleteAriaLabel": "Usuń: {name}",
     "blockCount": "{count, plural, one {# blok} few {# bloki} many {# bloków} other {# bloku}}",
     "updatedLabel": " · zaktualizowano {date}",
     "emptyHint": "Ta siatka jest pusta",
-    "removed": "Usunięto przez SquareShare",
-    "pausedInReview": "Wstrzymane · w SquareShare do sprawdzenia",
-    "pausedNeedsChanges": "Wstrzymane przez SquareShare · wymaga zmian"
+    "removed": "Usunięto przez Square Share",
+    "pausedInReview": "Wstrzymane · w Square Share do sprawdzenia",
+    "pausedNeedsChanges": "Wstrzymane przez Square Share · wymaga zmian"
   },
   "embed": {
     "inDevNotice": "Widget osadzenia jest w trakcie tworzenia i nie renderuje się jeszcze na zewnętrznych stronach. Skonfiguruj ustawienia poniżej, aby być gotowym wkleić kod, gdy tylko zostanie wdrożony.",
@@ -208,7 +209,8 @@
       "privacy": "Dodaj to do swojej polityki prywatności"
     },
     "required": "Wymagane",
-    "enabledLabel": "Osadzenie włączone",
+    "enabledLabel": "Pokaż na mojej stronie internetowej",
+    "showingLabel": "Widoczne na twojej stronie",
     "domainsLabel": "Dozwolone domeny",
     "domainsPlaceholder": "twojastrona.com, blog.twojastrona.com",
     "domainsHint": "Maksymalnie {max}, oddzielone przecinkami. Wklej adres URL, a przytniemy go do samej domeny.",
@@ -244,9 +246,9 @@
       "failed": "Nie udało się skopiować kodu do osadzenia. Zaznacz i skopiuj ręcznie.",
       "cannotCopyYet": "kodu do osadzenia nie można jeszcze skopiować"
     },
-    "privacyHint": "Twoja strona wczytuje teraz tę witrynę ze Squareshare, więc jej polityka prywatności musi o tym mówić. Wklej do niej ten tekst:",
+    "privacyHint": "Twoja strona wczytuje teraz tę witrynę ze Square Share, więc jej polityka prywatności musi o tym mówić. Wklej do niej ten tekst:",
     "privacyTextLabel": "Tekst o prywatności",
-    "privacyText": "Ta strona wyświetla witrynę sklepową dostarczaną przez Squareshare. Podczas jej wczytywania adres IP i dane przeglądarki odwiedzającego są przesyłane do Squareshare w celu wyświetlenia produktów i zliczania wizyt. Squareshare nie zapisuje w tym celu plików cookie ani niczego innego na urządzeniu odwiedzającego. Szczegóły: {policy}",
+    "privacyText": "Ta strona wyświetla witrynę sklepową dostarczaną przez Square Share. Podczas jej wczytywania adres IP i dane przeglądarki odwiedzającego są przesyłane do Square Share w celu wyświetlenia produktów i zliczania wizyt. Square Share nie zapisuje w tym celu plików cookie ani niczego innego na urządzeniu odwiedzającego. Szczegóły: {policy}",
     "copyPrivacy": {
       "copy": "Kopiuj tekst o prywatności",
       "copied": "Skopiowano tekst o prywatności",
@@ -274,92 +276,6 @@
       "copy": "Kopiuj link do witryny",
       "copied": "Skopiowano link do witryny",
       "failed": "Nie udało się skopiować linku. Zaznacz i skopiuj ręcznie."
-    }
-  },
-  "wizard": {
-    "category": {
-      "title": "Co sprzedajesz?",
-      "description": "To największa wskazówka, jakie układy będą dla ciebie odpowiednie."
-    },
-    "fulfilment": {
-      "title": "Jak kupujący to otrzymują?",
-      "description": "To wpływa na to, co strony twoich produktów mówią o dostawie."
-    },
-    "vibe": {
-      "title": "Wybierz wygląd",
-      "description": "Twój punkt wyjścia. Wszystko pozostaje edytowalne w edytorze."
-    },
-    "name": {
-      "title": "Nazwij swoją witrynę",
-      "description": "Tylko dla ciebie. Możesz zmienić nazwę w każdej chwili."
-    },
-    "stepOf": "Krok {current} z {total}",
-    "nameLabel": "Nazwa witryny",
-    "nameHint": "Zostaw puste, a nazwiemy ją Witryna bez nazwy.",
-    "otherCategoryLabel": "Co sprzedajesz?",
-    "otherCategoryPlaceholder": "np. modele do sklejania",
-    "noProductsHint": "Nie masz jeszcze produktów? Dodaj je po konfiguracji.",
-    "skipSetup": "Pomiń konfigurację",
-    "skip": "Pomiń",
-    "creating": "Tworzenie…",
-    "create": "Utwórz witrynę"
-  },
-  "createOptions": {
-    "categoryGroupLabel": "Co sprzedajesz",
-    "fulfilmentGroupLabel": "Jak kupujący to otrzymują",
-    "vibeGroupLabel": "Wygląd, jaki chcesz",
-    "category": {
-      "fashion": "Odzież",
-      "art": "Sztuka i grafiki",
-      "jewellery": "Biżuteria",
-      "handmade": "Rękodzieło",
-      "home": "Dom i wnętrza",
-      "beauty": "Uroda",
-      "food": "Jedzenie i napoje",
-      "music": "Muzyka",
-      "photography": "Fotografia",
-      "books": "Książki i ziny",
-      "digital": "Produkty cyfrowe",
-      "vintage": "Vintage",
-      "other": "Coś innego"
-    },
-    "categoryPlaceholder": {
-      "fashion": "Mój sklep odzieżowy",
-      "art": "Mój sklep z sztuką",
-      "jewellery": "Mój sklep z biżuterią",
-      "handmade": "Mój sklep z rękodziełem",
-      "home": "Mój sklep wnętrzarski",
-      "beauty": "Mój sklep kosmetyczny",
-      "food": "Mój sklep spożywczy",
-      "music": "Mój sklep muzyczny",
-      "photography": "Mój sklep fotograficzny",
-      "books": "Mój sklep z książkami",
-      "digital": "Mój sklep cyfrowy",
-      "vintage": "Mój sklep vintage",
-      "other": "Mój sklep",
-      "default": "Moja witryna"
-    },
-    "fulfilment": {
-      "physical": "Wysyłam to",
-      "digital": "Pobierają to",
-      "services": "Rezerwują mnie",
-      "mixed": "Po trochu każdego"
-    },
-    "fulfilmentHint": {
-      "physical": "Produkty fizyczne",
-      "digital": "Pliki, presety, muzyka",
-      "services": "Sesje, zlecenia",
-      "mixed": "Więcej niż jedno z powyższych"
-    },
-    "vibe": {
-      "minimal": "Minimalistyczny",
-      "classic": "Klasyczny",
-      "bold": "Odważny"
-    },
-    "vibeHint": {
-      "minimal": "Nazwa i cena po najechaniu kursorem",
-      "classic": "Nazwa i cena zawsze widoczne",
-      "bold": "Cena zawsze, nazwa po najechaniu kursorem"
     }
   },
   "picker": {
@@ -954,7 +870,7 @@
       "fillHint": "Wypełnia blok, przycinając nadmiar.",
       "fitHint": "Pokazuje cały obraz wewnątrz bloku."
     },
-    "reposition": "Zmień pozycję obrazu",
+    "reposition": "Przytnij i ustaw",
     "opacity": {
       "label": "Przezroczystość",
       "ariaLabel": "Przezroczystość obrazu",
@@ -1075,14 +991,14 @@
     "editTextOf": "Edytuj tekst: {name}",
     "color": "Kolor",
     "changeColorOf": "Zmień kolor: {name}",
-    "stroke": "Obrys",
-    "editStrokeOf": "Edytuj obrys: {name}",
+    "stroke": "Obramowanie",
+    "editStrokeOf": "Edytuj obramowanie: {name}",
     "corners": "Rogi",
     "editCornersOf": "Edytuj zaokrąglenie rogów: {name}",
     "opacity": "Przezroczystość",
     "editOpacityOf": "Edytuj przezroczystość: {name}",
-    "frame": "Kadrowanie",
-    "frameImageFor": "Kadruj obraz: {name}",
+    "frame": "Przytnij i ustaw",
+    "frameImageFor": "Przytnij i ustaw obraz: {name}",
     "duplicate": "Duplikuj",
     "duplicateNamed": "Duplikuj: {name}",
     "duplicateN": "Duplikuj {count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}",

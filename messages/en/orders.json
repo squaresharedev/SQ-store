@@ -15,10 +15,10 @@
     "pending": "Pending"
   },
   "channel": {
-    "embed": "Embed",
+    "embed": "On your site",
     "marketplace": "Marketplace",
-    "direct": "Your pages",
-    "button": "Website button"
+    "direct": "Your page",
+    "button": "Buy button"
   },
   "empty": {
     "filteredTitle": "No orders match these filters",
@@ -56,7 +56,7 @@
   "toolbar": {
     "region": "order filters",
     "channel": "channel",
-    "buyerEmail": "buyer email",
+    "search": "search",
     "searchPlaceholder": "search email, name, city, product or tracking",
     "status": "status",
     "statusAriaLabel": "Filter by status",
@@ -85,6 +85,7 @@
     "amount": "Amount",
     "platformFee": "Platform fee",
     "youReceive": "You receive",
+    "youReceiveHint": "Before Stripe's card fee",
     "buyerEmail": "Buyer email",
     "copyBuyerEmail": {
       "copy": "Copy buyer email",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Code {code} used, but the sale price was lower"
   },
   "actions": {
-    "disputeInStripe": "Disputes are handled in your Stripe dashboard once Stripe is connected.",
+    "disputeInStripe": "The buyer's bank opened a dispute. Answer it in your Stripe dashboard before its deadline.",
+    "answerInStripe": "Answer in Stripe",
     "pendingPayment": "The buyer's payment is still being confirmed. Don't send anything yet: this order shows as paid once it goes through, and closes by itself if it doesn't.",
     "none": "No actions are available for this order."
   },
@@ -180,10 +182,6 @@
   },
   "skeleton": {
     "loading": "loading orders"
-  },
-  "loading": {
-    "title": "Orders",
-    "subtitle": "Every sale across your embed and the marketplace."
   },
   "toShipCount": "{count, plural, one {{count} order to ship} other {{count} orders to ship}}",
   "views": {

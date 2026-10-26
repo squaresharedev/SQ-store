@@ -97,7 +97,8 @@ describe("renderStatement", () => {
       "Remove the brand logo from the main photo.",
       "Title",
       "Photos",
-      "This followed 2 notices from people outside SquareShare, about: Counterfeit or stolen, Scam or fraud.",
+      // Up to where the PDF wraps the line.
+      "This followed 2 notices from people outside Square Share, about: Counterfeit or stolen, Scam or",
       "No automated means were used",
       "Out-of-court dispute settlement",
       "support@squareshare.eu",
@@ -127,7 +128,7 @@ describe("renderStatement", () => {
     }
     for (const forbidden of [
       "No automated means were used",
-      "A member of SquareShare staff reviewed the content",
+      "A member of Square Share staff reviewed the content",
       "Note from our reviewer",
       "until you make the changes listed below and we approve them",
     ]) {

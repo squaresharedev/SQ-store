@@ -15,10 +15,10 @@
     "pending": "In sospeso"
   },
   "channel": {
-    "embed": "Incorporamento",
+    "embed": "Sul tuo sito",
     "marketplace": "Marketplace",
-    "direct": "Le tue pagine",
-    "button": "Pulsante sul tuo sito"
+    "direct": "La tua pagina",
+    "button": "Pulsante di acquisto"
   },
   "empty": {
     "filteredTitle": "Nessun ordine corrisponde a questi filtri",
@@ -56,8 +56,8 @@
   "toolbar": {
     "region": "filtri ordini",
     "channel": "canale",
-    "buyerEmail": "email acquirente",
     "searchPlaceholder": "cerca email, nome, città, prodotto o spedizione",
+    "search": "cerca",
     "status": "stato",
     "statusAriaLabel": "Filtra per stato",
     "allStatuses": "Tutti gli stati",
@@ -85,6 +85,7 @@
     "amount": "Importo",
     "platformFee": "Commissione della piattaforma",
     "youReceive": "Ricevi",
+    "youReceiveHint": "Prima della commissione carta di Stripe",
     "buyerEmail": "Email dell’acquirente",
     "copyBuyerEmail": {
       "copy": "Copia email acquirente",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Codice {code} usato, ma il prezzo della promozione era più basso"
   },
   "actions": {
-    "disputeInStripe": "Le contestazioni si gestiscono dalla tua dashboard Stripe una volta collegato Stripe.",
+    "disputeInStripe": "La banca dell’acquirente ha aperto una contestazione. Rispondi nella tua dashboard Stripe prima della scadenza.",
+    "answerInStripe": "Rispondi in Stripe",
     "pendingPayment": "Il pagamento dell’acquirente è ancora in conferma. Non spedire ancora nulla: l’ordine risulterà pagato quando va a buon fine, e si chiuderà da solo se non ci va.",
     "none": "Nessuna azione disponibile per questo ordine."
   },
@@ -180,10 +182,6 @@
   },
   "skeleton": {
     "loading": "caricamento ordini"
-  },
-  "loading": {
-    "title": "Ordini",
-    "subtitle": "Ogni vendita tra il tuo incorporamento e il marketplace."
   },
   "toShipCount": "{count, plural, one {{count} ordine da spedire} many {{count} di ordini da spedire} other {{count} ordini da spedire}}",
   "views": {

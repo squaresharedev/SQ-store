@@ -12,7 +12,7 @@
     },
     "product": {
       "label": "Pridajte produkt",
-      "detail": "Postačí názov a cena. Produkt môže zostať ako koncept.",
+      "detail": "Postačí názov a cena.",
       "detailDone": "{count, plural, one {Máte {count} produkt.} few {Máte {count} produkty.} many {Máte {count} produktu.} other {Máte {count} produktov.}}",
       "action": "Pridať produkt",
       "cta": "Pridať prvý produkt"
@@ -83,9 +83,6 @@
         "title": "Vitajte v Square Share",
         "description": "Štyri kroky k produktovej stránke, ktorú môžete zdieľať."
       },
-      "path": {
-        "title": "Štyri kroky k vašej prvej stránke"
-      },
       "seller": {
         "title": "Pridajte údaje predajcu",
         "description": "Kupujúci ich uvidia na vašich produktových stránkach a zákon ich vyžaduje pred začatím predaja. Nikdy ich nepoužívame na marketing.",
@@ -122,7 +119,7 @@
       }
     },
     "seller": {
-      "namePlaceholder": "napr. Studio Builderboy e.U.",
+      "namePlaceholder": "napr. Jana Nováková alebo Keramika Jany",
       "nameHelp": "Vaše obchodné meno alebo celé meno, ak predávate ako fyzická osoba.",
       "nameAlternative": "Alebo vaše celé meno, ak predávate ako fyzická osoba.",
       "addressPlaceholder": "napr. Hlavná 12\nBratislava, 811 01\nSlovensko",
@@ -156,12 +153,6 @@
       "buyNow": "Kúpiť teraz",
       "live": "Zverejnené",
       "linkCopied": "Odkaz skopírovaný"
-    },
-    "setupPath": {
-      "details": "Doplňte svoje údaje",
-      "product": "Pridajte produkt",
-      "storefront": "Navrhnite výklad",
-      "share": "Zdieľajte jeho stránku"
     },
     "terms": {
       "agreed": "Tieto Podmienky ste prijali. Ďakujeme, že ste si ich prečítali.",
@@ -197,7 +188,7 @@
       },
       "productsAdd": {
         "title": "Pridajte produkt",
-        "body": "Na začiatok stačí názov a cena. Môže zostať konceptom, kým nebudete pripravení."
+        "body": "Na začiatok stačí názov a cena."
       },
       "productsImport": {
         "title": "Alebo importujte svoj katalóg",

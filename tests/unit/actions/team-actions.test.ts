@@ -337,7 +337,7 @@ describe("team notifications are stored as message keys", () => {
     const { body } = sent();
     expect(body?.key).toBe("Notifications.messages.teamInvite.bodyUnnamedStore");
     expect(body && english(body.key, body.values)).toBe(
-      "A SquareShare store invited you to join as Viewer. Open Team & access to accept.",
+      "A Square Share store invited you to join as Viewer. Open Team & access to accept.",
     );
   });
 

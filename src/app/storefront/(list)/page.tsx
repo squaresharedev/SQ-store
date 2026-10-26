@@ -39,7 +39,7 @@ export default async function StorefrontsPage({
   const canWrite = can(account?.role, "storefront.write");
   const { rows: storefrontRows, total: storefrontTotal } = storefronts;
   // The previews draw only the products placed on these storefronts, so only
-  // those travel to the browser; the wizard still gets the store's real count.
+  // those travel to the browser.
   const placed = placedProductIds(storefrontRows);
   // The publish gate's answer for this store: with it, a live storefront's
   // card links straight to its page.
@@ -57,7 +57,6 @@ export default async function StorefrontsPage({
         storefronts={storefrontRows}
         total={storefrontTotal}
         products={products.filter((product) => placed.has(product.id))}
-        productCount={products.length}
         canWrite={canWrite}
         sellerDetailsComplete={identity?.ok === true && identity.missing.length === 0}
         // Offered to anyone who can build a storefront, and only on a flag we

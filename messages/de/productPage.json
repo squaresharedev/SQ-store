@@ -98,17 +98,17 @@
     "guarantee": "Das EU-Recht räumt dir mindestens eine 2-jährige gesetzliche Gewährleistung ein, dass die Waren der Vertragsmäßigkeit entsprechen."
   },
   "footer": {
-    "disclosure": "<seller>{name}</seller> ist der Verkäufer dieser Bestellung und verantwortlich für das Produkt, seine Lieferung sowie etwaige Rücksendungen oder Erstattungen. Squareshare stellt die Technologie hinter dieser Seite bereit und ist nicht Vertragspartei des Kaufvertrags.",
-    "poweredBy": "Bereitgestellt von <brand>Squareshare</brand>",
-    "policiesLabel": "Squareshare-Richtlinien",
+    "disclosure": "<seller>{name}</seller> ist der Verkäufer dieser Bestellung und verantwortlich für das Produkt, seine Lieferung sowie etwaige Rücksendungen oder Erstattungen. Square Share stellt die Technologie hinter dieser Seite bereit und ist nicht Vertragspartei des Kaufvertrags.",
+    "poweredBy": "Bereitgestellt von <brand>Square Share</brand>",
+    "policiesLabel": "Square Share-Richtlinien",
     "policies": {
       "privacy": {
         "label": "Datenschutz",
-        "name": "Squareshare Datenschutzerklärung"
+        "name": "Square Share Datenschutzerklärung"
       },
       "terms": {
         "label": "Nutzungsbedingungen",
-        "name": "Squareshare Nutzungsbedingungen"
+        "name": "Square Share Nutzungsbedingungen"
       }
     }
   },

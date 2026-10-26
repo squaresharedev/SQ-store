@@ -15,10 +15,10 @@
     "pending": "In behandeling"
   },
   "channel": {
-    "embed": "Insluiting",
+    "embed": "Op je website",
     "marketplace": "Marketplace",
-    "direct": "Jouw pagina's",
-    "button": "Websiteknop"
+    "direct": "Jouw pagina",
+    "button": "Koopknop"
   },
   "empty": {
     "filteredTitle": "Geen bestellingen komen overeen met deze filters",
@@ -56,8 +56,8 @@
   "toolbar": {
     "region": "bestelfilters",
     "channel": "kanaal",
-    "buyerEmail": "e-mail koper",
     "searchPlaceholder": "zoek e-mail, naam, plaats, product of zending",
+    "search": "zoeken",
     "status": "status",
     "statusAriaLabel": "Filter op status",
     "allStatuses": "Alle statussen",
@@ -85,6 +85,7 @@
     "amount": "Bedrag",
     "platformFee": "Platformkosten",
     "youReceive": "Jij ontvangt",
+    "youReceiveHint": "Vóór de kaartkosten van Stripe",
     "buyerEmail": "E-mail koper",
     "copyBuyerEmail": {
       "copy": "E-mail koper kopiëren",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Code {code} gebruikt, maar de actieprijs was lager"
   },
   "actions": {
-    "disputeInStripe": "Geschillen worden afgehandeld in je Stripe-dashboard zodra Stripe is gekoppeld.",
+    "disputeInStripe": "De bank van de koper heeft een geschil geopend. Reageer erop in je Stripe-dashboard vóór de deadline.",
+    "answerInStripe": "Reageren in Stripe",
     "pendingPayment": "De betaling van de koper wordt nog bevestigd. Verstuur nog niets: de bestelling staat als betaald zodra die doorkomt, en sluit vanzelf als dat niet gebeurt.",
     "none": "Er zijn geen acties beschikbaar voor deze bestelling."
   },
@@ -180,10 +182,6 @@
   },
   "skeleton": {
     "loading": "bestellingen laden"
-  },
-  "loading": {
-    "title": "Bestellingen",
-    "subtitle": "Elke verkoop via je insluiting en de marketplace."
   },
   "toShipCount": "{count, plural, one {{count} bestelling te verzenden} other {{count} bestellingen te verzenden}}",
   "views": {

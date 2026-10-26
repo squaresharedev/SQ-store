@@ -156,3 +156,35 @@ export function trackingLinkFor(
   if (!trackingNumber || !carrier) return null;
   return { carrier: carrierName(carrier), url: trackingUrl(carrier, trackingNumber, to) };
 }
+
+/**
+ * The national posts that issue international (UPU S10) numbers, by the
+ * two-letter country an S10 number ends in: "RR123456789IE" is An Post's.
+ */
+const S10_POSTS: Partial<Record<string, CarrierId>> = {
+  CZ: "ceska-posta",
+  ES: "correos",
+  FR: "colissimo",
+  GB: "royal-mail",
+  IE: "an-post",
+  IT: "poste-italiane",
+  NL: "postnl",
+  PL: "poczta-polska",
+  PT: "ctt",
+  SK: "slovenska-posta",
+};
+
+const S10_PATTERN = /^[A-Z]{2}\d{9}([A-Z]{2})$/;
+const UPS_PATTERN = /^1Z[0-9A-Z]{16}$/;
+
+/**
+ * The carrier a tracking number unmistakably belongs to, or null. Only the
+ * formats that name their carrier are read (S10 by its country, UPS by its
+ * "1Z"): a guess the seller has to notice and undo is worse than no guess.
+ */
+export function detectCarrier(trackingNumber: string): CarrierId | null {
+  const code = trackingNumber.replace(/\s+/g, "").toUpperCase();
+  if (UPS_PATTERN.test(code)) return "ups";
+  const s10 = S10_PATTERN.exec(code);
+  return (s10 && S10_POSTS[s10[1]]) ?? null;
+}

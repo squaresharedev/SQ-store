@@ -76,22 +76,11 @@
   "payoutStatus": "{status, select, paid {Opłacona} pending {Oczekująca} in_transit {W drodze} canceled {Anulowana} failed {Nieudana} other {Oczekująca}}",
   "payoutMethod": {
     "title": "Metoda wypłaty",
-    "manage": "Zarządzaj",
+    "manage": "Zarządzaj w Stripe",
     "detail": "{currency} · {country}",
     "detailDefault": "{currency} · {country} · Domyślna",
     "emptyConnectable": "Jeszcze brak metody wypłaty. Połącz Stripe i dodaj tam swoje konto bankowe, pojawi się tu automatycznie.",
     "empty": "Jeszcze brak metody wypłaty."
-  },
-  "payoutMethodModal": {
-    "title": "Metoda wypłaty",
-    "description": "Dokąd trafiają twoje wypłaty.",
-    "bankAccountDetail": "Konto bankowe · {currency} · {country}",
-    "defaultLabel": "Domyślna dla wypłat",
-    "yes": "Tak",
-    "no": "Nie",
-    "referenceLabel": "Numer referencyjny",
-    "securityNote": "Dla twojego bezpieczeństwa dane bankowe zmienia się na Stripe, nigdy tutaj.",
-    "manageInStripe": "Zarządzaj w Stripe"
   },
   "recentActivity": {
     "label": "Ostatnia aktywność",

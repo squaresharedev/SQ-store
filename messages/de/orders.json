@@ -15,10 +15,10 @@
     "pending": "Ausstehend"
   },
   "channel": {
-    "embed": "Einbettung",
+    "embed": "Auf deiner Website",
     "marketplace": "Marktplatz",
-    "direct": "Deine Seiten",
-    "button": "Website-Button"
+    "direct": "Deine Seite",
+    "button": "Kauf-Button"
   },
   "empty": {
     "filteredTitle": "Keine Bestellungen entsprechen diesen Filtern",
@@ -56,8 +56,8 @@
   "toolbar": {
     "region": "Bestellfilter",
     "channel": "Kanal",
-    "buyerEmail": "Käufer-E-Mail",
     "searchPlaceholder": "E-Mail, Name, Ort, Produkt oder Sendung suchen",
+    "search": "Suche",
     "status": "Status",
     "statusAriaLabel": "Nach Status filtern",
     "allStatuses": "Alle Status",
@@ -85,6 +85,7 @@
     "amount": "Betrag",
     "platformFee": "Plattformgebühr",
     "youReceive": "Du erhältst",
+    "youReceiveHint": "Vor Stripes Kartengebühr",
     "buyerEmail": "Käufer-E-Mail",
     "copyBuyerEmail": {
       "copy": "Käufer-E-Mail kopieren",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Code {code} verwendet, aber der Aktionspreis war günstiger"
   },
   "actions": {
-    "disputeInStripe": "Zahlungsanfechtungen werden in deinem Stripe-Dashboard bearbeitet, sobald Stripe verbunden ist.",
+    "disputeInStripe": "Die Bank des Käufers hat eine Zahlungsanfechtung eröffnet. Beantworte sie vor Ablauf der Frist in deinem Stripe-Dashboard.",
+    "answerInStripe": "In Stripe beantworten",
     "pendingPayment": "Die Zahlung des Käufers wird noch bestätigt. Verschick noch nichts: Die Bestellung wird als bezahlt angezeigt, sobald sie durchgeht, und schließt sich von selbst, wenn nicht.",
     "none": "Für diese Bestellung sind keine Aktionen verfügbar."
   },
@@ -180,10 +182,6 @@
   },
   "skeleton": {
     "loading": "Bestellungen werden geladen"
-  },
-  "loading": {
-    "title": "Bestellungen",
-    "subtitle": "Alle Verkäufe über deine Einbettung und den Marktplatz."
   },
   "toShipCount": "{count, plural, one {{count} Bestellung zum Versenden} other {{count} Bestellungen zum Versenden}}",
   "views": {

@@ -78,7 +78,7 @@ describe("empty discounts list", () => {
 });
 
 describe("empty storefront list", () => {
-  it("opens the setup flow from the create card, which keeps the tour hook", async () => {
+  it("creates a storefront from the create card, which keeps the tour hook", async () => {
     const onCreate = vi.fn();
     render(<StorefrontEmptyState canWrite onCreate={onCreate} data-tour="storefront-create" />);
     const card = screen.getByRole("button", { name: "Create storefront" });

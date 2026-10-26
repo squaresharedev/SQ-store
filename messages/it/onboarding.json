@@ -12,7 +12,7 @@
     },
     "product": {
       "label": "Aggiungi un prodotto",
-      "detail": "Bastano un titolo e un prezzo. Per ora può restare una bozza.",
+      "detail": "Bastano un titolo e un prezzo.",
       "detailDone": "{count, plural, one {Hai {count} prodotto.} many {Hai {count} di prodotti.} other {Hai {count} prodotti.}}",
       "action": "Aggiungi prodotto",
       "cta": "Aggiungi il tuo primo prodotto"
@@ -83,9 +83,6 @@
         "title": "Benvenuto su Square Share",
         "description": "Quattro passaggi per una pagina prodotto da condividere."
       },
-      "path": {
-        "title": "Quattro passaggi per la tua prima pagina"
-      },
       "seller": {
         "title": "Aggiungi i tuoi dati venditore",
         "description": "Gli acquirenti li vedono sulle tue pagine prodotto, e la legge li richiede prima che tu possa vendere. Non li usiamo mai per il marketing.",
@@ -122,7 +119,7 @@
       }
     },
     "seller": {
-      "namePlaceholder": "es. Studio Builderboy e.U.",
+      "namePlaceholder": "es. Giulia Rossi o Ceramiche Giulia",
       "nameHelp": "La tua ragione sociale, o il tuo nome completo se vendi come persona fisica.",
       "nameAlternative": "Oppure il tuo nome e cognome, se vendi a titolo personale.",
       "addressPlaceholder": "es. Via del Mercato 12\n20100 Milano\nItalia",
@@ -156,12 +153,6 @@
       "buyNow": "Acquista ora",
       "live": "Pubblicato",
       "linkCopied": "Link copiato"
-    },
-    "setupPath": {
-      "details": "Aggiungi i tuoi dati",
-      "product": "Aggiungi un prodotto",
-      "storefront": "Progetta una vetrina",
-      "share": "Condividi la sua pagina"
     },
     "terms": {
       "agreed": "Hai accettato questi Termini. Grazie per aver letto.",
@@ -197,7 +188,7 @@
       },
       "productsAdd": {
         "title": "Aggiungi un prodotto",
-        "body": "Bastano un titolo e un prezzo per iniziare. Può restare una bozza finché non vuoi pubblicarlo."
+        "body": "Bastano un titolo e un prezzo per iniziare."
       },
       "productsImport": {
         "title": "Oppure importa il tuo catalogo",

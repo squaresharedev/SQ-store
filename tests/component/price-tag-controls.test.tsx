@@ -142,7 +142,7 @@ describe("PriceTagControls", () => {
     await user.click(looks.getByRole("button", { name: "Ribbon" }));
     expect(onChange).toHaveBeenLastCalledWith({ saleBadgeLook: "ribbon" });
 
-    await user.click(chip.getByRole("button", { name: "Sale chip bottom right" }));
+    await user.click(chip.getByRole("button", { name: "Sale badge bottom right" }));
     expect(onChange).toHaveBeenLastCalledWith({ saleBadgePosition: "bottom-right" });
 
     await user.click(
@@ -203,15 +203,15 @@ describe("PriceTagControls", () => {
     renderChip({ priceTagPosition: "top-left" });
     const chip = within(document.querySelector<HTMLElement>("[data-sale-badge-controls]")!);
     // The whole top row is the price's: side by side they collide on a small tile.
-    expect(chip.queryByRole("button", { name: /^Sale chip top / })).toBeNull();
+    expect(chip.queryByRole("button", { name: /^Sale badge top / })).toBeNull();
     // Asked for the price's corner, it is shown where it will really be drawn.
-    expect(chip.getByRole("button", { name: "Sale chip bottom left" })).toHaveAttribute("aria-pressed", "true");
+    expect(chip.getByRole("button", { name: "Sale badge bottom left" })).toHaveAttribute("aria-pressed", "true");
     cleanup();
 
     renderChip({ saleBadge: "hidden" });
     const hidden = within(document.querySelector<HTMLElement>("[data-sale-badge-controls]")!);
     expect(hidden.queryByRole("group", { name: "Style" })).toBeNull();
-    expect(hidden.queryByRole("button", { name: /^Sale chip / })).toBeNull();
+    expect(hidden.queryByRole("button", { name: /^Sale badge / })).toBeNull();
     expect(hidden.queryByRole("group", { name: "Fill swatches" })).toBeNull();
     expect(hidden.queryByRole("group", { name: "Text color swatches" })).toBeNull();
   });

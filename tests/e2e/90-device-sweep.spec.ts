@@ -66,7 +66,6 @@ const SELLER_PAGES = (s: Seeded) => [
   "/settings/account",
   "/settings/billing",
   "/settings/danger",
-  "/settings/language",
   "/settings/legal",
   "/settings/notifications",
   "/settings/security",

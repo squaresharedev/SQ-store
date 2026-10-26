@@ -45,7 +45,7 @@
   },
   "emptyState": {
     "title": "Ainda sem produtos",
-    "descriptionWriter": "Adicione o seu primeiro produto. Pode ficar como rascunho até estar pronto para lhe dar uma página.",
+    "descriptionWriter": "Adicione o seu primeiro produto. Um título e um preço já chegam.",
     "descriptionReadOnly": "Esta loja ainda não tem produtos.",
     "add": "Adicionar produto"
   },
@@ -136,7 +136,7 @@
   "removal": {
     "badge": "Removido",
     "badgePaused": "Pausado",
-    "title": "{kind, select, product {Este produto foi removido pela SquareShare} other {Esta montra foi removida pela SquareShare}}",
+    "title": "{kind, select, product {Este produto foi removido pela Square Share} other {Esta montra foi removida pela Square Share}}",
     "titlePaused": "{kind, select, product {Este produto está pausado até ser alterado} other {Esta montra está pausada até ser alterada}}",
     "hidden": "Já não está visível para os compradores em lado nenhum: nem na respetiva página, nem numa incorporação, nem num link partilhado.",
     "hiddenPaused": "Os compradores não o conseguem ver neste momento: nem na respetiva página, nem numa incorporação, nem num link partilhado. Nada foi eliminado e volta a ficar visível depois de uma pessoa verificar as alterações.",
@@ -156,7 +156,8 @@
       "button": "Fiz as alterações, enviar para análise",
       "sent": "Enviado para análise em <time>{date}</time>. Uma pessoa vai analisar as suas alterações e receberá resposta aqui e por e-mail.",
       "failed": "Não foi possível enviar.",
-      "failedFix": "Tente novamente daqui a pouco."
+      "failedFix": "Tente novamente daqui a pouco.",
+      "saveFirst": "Guarde primeiro as alterações. Ao guardar, é-lhe perguntado se as quer enviar para análise."
     },
     "why": "Porquê",
     "whatToChange": "O que alterar",
@@ -292,7 +293,7 @@
       },
       "visibility": {
         "label": "Visibilidade",
-        "description": "Ativo significa publicado: os compradores conseguem vê-lo e comprá-lo de imediato. Rascunho fica escondido dos compradores até o mudar.",
+        "description": "Ativo: os compradores podem comprá-lo assim que estiver numa montra. Rascunho: oculto aos compradores até o mudar.",
         "about": "Para que serve Visibilidade"
       },
       "badges": {
@@ -367,10 +368,10 @@
     "displayImageHelp": "Mostrada na sua montra e nas incorporações.",
     "digitalFile": "Ficheiro digital",
     "digitalFileAbout": "O que é o ficheiro digital",
-    "digitalFileHelp": "O ficheiro que o comprador transfere após a compra. Ao adicionar um, este produto passa a ser uma transferência digital, pelo que o envio e a segurança do produto deixam de se aplicar.",
+    "digitalFileHelp": "O ficheiro que os compradores transferem logo após pagar. Uma transferência não precisa de dados de envio nem de segurança do produto.",
     "purchaseLink": "Link de compra",
     "purchaseLinkAbout": "Para onde o botão de compra envia os compradores",
-    "purchaseLinkHelp": "O botão de compra da página de produto segue este link. Sem um, envia antes um e-mail para o endereço de contacto da sua loja.",
+    "purchaseLinkHelp": "Deixe vazio e os compradores pagam pela finalização da compra da Square Share, ou enviam-lhe um e-mail onde ainda não está ativa. Uma ligação aqui substitui ambos.",
     "purchaseLinkPlaceholder": "p. ex. https://asualoja.example/checkout/este-produto",
     "statusLabel": "Estado do produto",
     "problems": "{count, plural, one {{count} coisa a corrigir antes de guardar} many {{count} de coisas a corrigir antes de guardar} other {{count} coisas a corrigir antes de guardar}}",
@@ -380,6 +381,7 @@
     "uploadingLabel": "{what, select, image {A carregar imagem} photo {A carregar fotografia} document {A carregar documento} other {A carregar ficheiro}}",
     "processingLabel": "{what, select, image {A processar imagem} photo {A processar fotografia} document {A processar documento} other {A processar ficheiro}}",
     "saveChanges": "Guardar alterações",
+    "saveDraft": "Guardar como rascunho",
     "saveProduct": "Guardar produto",
     "savedToast": "«{title}» foi guardado.",
     "addedToast": "«{title}» foi adicionado aos seus produtos.",
@@ -400,14 +402,14 @@
     "moderation": {
       "badge": "Precisa de alterações",
       "changed": "Alterado",
-      "callout": "A SquareShare pediu-lhe que alterasse {fields} aqui.",
+      "callout": "A Square Share pediu-lhe que alterasse {fields} aqui.",
       "seeWhy": "Ver porquê",
       "fieldBadge": "Alterar isto",
       "navHint": "precisa de alterações",
       "inReview": "Enviado para análise",
       "reviewPrompt": {
         "title": "Guardado. Enviá-lo novamente para análise?",
-        "body": "Se alterou tudo o que a SquareShare pediu, envie agora e uma pessoa vai analisar. Se não, continue a editar e envie quando terminar.",
+        "body": "Se alterou tudo o que a Square Share pediu, envie agora e uma pessoa vai analisar. Se não, continue a editar e envie quando terminar.",
         "keepEditing": "Continuar a editar",
         "send": "Enviar para análise"
       }
@@ -432,7 +434,7 @@
       "safety": "Dados do fabricante para a UE"
     },
     "visibility": {
-      "activeHint": "Os compradores veem-no e podem comprá-lo já",
+      "activeHint": "Os compradores podem comprá-lo assim que estiver numa montra",
       "draftHint": "Só você o vê até estar pronto"
     },
     "preview": {
@@ -672,7 +674,7 @@
     "fileTitle": "Declaração de fundamentação {reference}",
     "title": "Declaração de fundamentação",
     "subtitle": "{action, select, paused {Pausámos {target, select, product {o seu produto} other {a sua montra}}} other {Removemos {target, select, product {o seu produto} other {a sua montra}}}}",
-    "intro": "Esta declaração explica uma decisão que tomámos sobre um conteúdo que publicou na SquareShare, os motivos pelos quais a tomámos e como pode contestá-la. Tem direito a recebê-la ao abrigo do artigo 17.º do Regulamento dos Serviços Digitais ((UE) 2022/2065).",
+    "intro": "Esta declaração explica uma decisão que tomámos sobre um conteúdo que publicou na Square Share, os motivos pelos quais a tomámos e como pode contestá-la. Tem direito a recebê-la ao abrigo do artigo 17.º do Regulamento dos Serviços Digitais ((UE) 2022/2065).",
     "sections": {
       "decision": "A decisão",
       "reasons": "Por que motivo a tomámos",
@@ -702,7 +704,7 @@
       "removed": "Removido. O conteúdo já não está disponível para os compradores. Esta decisão é definitiva, salvo se um recurso a alterar.",
       "pausedAutomated": "Pausado. O conteúdo está oculto para os compradores até ser alterado. É verificado de novo assim que guardar uma alteração."
     },
-    "scope": "Em todos os locais onde a SquareShare o apresenta: na respetiva página, em incorporações noutros sítios web e em links partilhados, em todos os países.",
+    "scope": "Em todos os locais onde a Square Share o apresenta: na respetiva página, em incorporações noutros sítios web e em links partilhados, em todos os países.",
     "duration": {
       "paused": "Até aprovarmos as suas alterações.",
       "removed": "Indefinido.",
@@ -715,13 +717,13 @@
       "deleted": "O conteúdo foi entretanto eliminado."
     },
     "facts": {
-      "notices": "{count, plural, =0 {Identificámos esta situação por conta própria, sem qualquer denúncia de terceiros exteriores à SquareShare.} one {Esta decisão resultou de # denúncia de um terceiro exterior à SquareShare, sobre: {reasons}.} other {Esta decisão resultou de # denúncias de terceiros exteriores à SquareShare, sobre: {reasons}.}}",
-      "review": "Um membro da equipa da SquareShare analisou o próprio conteúdo antes de decidir. Não revelamos a identidade de quem enviou uma denúncia.",
-      "automated": "A nossa verificação automática detetou-o quando o conteúdo foi guardado. Ninguém fora da SquareShare o denunciou e nenhum membro da equipa o analisou."
+      "notices": "{count, plural, =0 {Identificámos esta situação por conta própria, sem qualquer denúncia de terceiros exteriores à Square Share.} one {Esta decisão resultou de # denúncia de um terceiro exterior à Square Share, sobre: {reasons}.} other {Esta decisão resultou de # denúncias de terceiros exteriores à Square Share, sobre: {reasons}.}}",
+      "review": "Um membro da equipa da Square Share analisou o próprio conteúdo antes de decidir. Não revelamos a identidade de quem enviou uma denúncia.",
+      "automated": "A nossa verificação automática detetou-o quando o conteúdo foi guardado. Ninguém fora da Square Share o denunciou e nenhum membro da equipa o analisou."
     },
     "automated": "Não foram utilizados meios automatizados para detetar este conteúdo nem para tomar esta decisão.",
     "legalBasis": {
-      "contract": "Contratual: os Termos de Serviço da SquareShare, que não permitem conteúdo como este ({url}).",
+      "contract": "Contratual: os Termos de Serviço da Square Share, que não permitem conteúdo como este ({url}).",
       "illegal": "Legal: considerámos o conteúdo ilegal ao abrigo da lei que lhe é aplicável."
     },
     "noNote": "Nenhuma.",
@@ -739,7 +741,7 @@
       "answer": "A nossa resposta: {note}",
       "message": "O que escreveu: {message}"
     },
-    "footer": "SquareShare · {reference} · Página {page} de {total}",
+    "footer": "Square Share · {reference} · Página {page} de {total}",
     "generated": "Gerado em {date}.",
     "automatedYes": "Foram utilizados meios automatizados tanto para detetar este conteúdo como para tomar esta decisão, sem intervenção de qualquer pessoa. Se apelar, um membro da equipa irá analisá-lo."
   },
@@ -788,7 +790,7 @@
       "exact": "Não é necessário nenhum script, SDK nem chamada a uma API. Mantém o URL exatamente como está, incluindo tudo o que vem depois do ponto de interrogação."
     },
     "tryIt": "Experimentar o botão",
-    "tracking": "Aparece em Estatísticas como «Botão no seu site».",
+    "tracking": "Aparece em Estatísticas como «Botão de compra».",
     "blocked": {
       "removed": "Este produto foi retirado. Abra-o para saber porquê.",
       "draft": "Este produto é um rascunho. Defina-o primeiro como Ativo.",

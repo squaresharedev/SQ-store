@@ -189,14 +189,15 @@
   "card": {
     "editAriaLabel": "Editar {name}",
     "embedAriaLabel": "Partilhar ou incorporar {name}",
+    "share": "Partilhar",
     "viewPageAriaLabel": "Abrir {name} como os compradores a veem",
     "deleteAriaLabel": "Eliminar {name}",
     "blockCount": "{count, plural, one {# bloco} many {# de blocos} other {# blocos}}",
     "updatedLabel": " · atualizado em {date}",
     "emptyHint": "Esta grelha está vazia",
-    "removed": "Removido pela SquareShare",
-    "pausedInReview": "Pausado · na SquareShare para análise",
-    "pausedNeedsChanges": "Pausado pela SquareShare · requer alterações"
+    "removed": "Removido pela Square Share",
+    "pausedInReview": "Pausado · na Square Share para análise",
+    "pausedNeedsChanges": "Pausado pela Square Share · requer alterações"
   },
   "embed": {
     "inDevNotice": "O widget de incorporação está em desenvolvimento e ainda não é apresentado em sites externos. Configure as definições abaixo para estar pronto a colar o código assim que for lançado.",
@@ -208,7 +209,8 @@
       "privacy": "Acrescente isto à sua política de privacidade"
     },
     "required": "Obrigatório",
-    "enabledLabel": "Incorporação ativada",
+    "enabledLabel": "Mostrar no meu site",
+    "showingLabel": "Visível no seu site",
     "domainsLabel": "Domínios permitidos",
     "domainsPlaceholder": "oseusite.com, blog.oseusite.com",
     "domainsHint": "Até {max}, separados por vírgulas. Cole um URL e nós reduzimo-lo ao domínio.",
@@ -244,9 +246,9 @@
       "failed": "Não foi possível copiar o código de incorporação. Selecione-o e copie-o manualmente.",
       "cannotCopyYet": "o código de incorporação ainda não pode ser copiado"
     },
-    "privacyHint": "O seu site passa a carregar esta montra a partir da Squareshare, pelo que a política de privacidade tem de o indicar. Cole nela este texto:",
+    "privacyHint": "O seu site passa a carregar esta montra a partir da Square Share, pelo que a política de privacidade tem de o indicar. Cole nela este texto:",
     "privacyTextLabel": "Texto de privacidade",
-    "privacyText": "Este site apresenta uma montra fornecida pela Squareshare. Ao carregar, o endereço IP e os dados do navegador do visitante são enviados à Squareshare para apresentar os produtos e contar as visitas. Para este efeito, a Squareshare não define cookies nem guarda nada no dispositivo do visitante. Mais informações: {policy}",
+    "privacyText": "Este site apresenta uma montra fornecida pela Square Share. Ao carregar, o endereço IP e os dados do navegador do visitante são enviados à Square Share para apresentar os produtos e contar as visitas. Para este efeito, a Square Share não define cookies nem guarda nada no dispositivo do visitante. Mais informações: {policy}",
     "copyPrivacy": {
       "copy": "Copiar texto de privacidade",
       "copied": "Texto de privacidade copiado",
@@ -274,92 +276,6 @@
       "copy": "Copiar ligação da montra",
       "copied": "Ligação da montra copiada",
       "failed": "Não foi possível copiar a ligação. Selecione-a e copie-a manualmente."
-    }
-  },
-  "wizard": {
-    "category": {
-      "title": "O que vende?",
-      "description": "Esta é a maior pista sobre que esquemas lhe vão servir melhor."
-    },
-    "fulfilment": {
-      "title": "Como é que os compradores o recebem?",
-      "description": "Isto molda o que as suas páginas de produto dizem sobre a entrega."
-    },
-    "vibe": {
-      "title": "Escolha um aspeto",
-      "description": "O seu ponto de partida. Tudo continua editável no editor."
-    },
-    "name": {
-      "title": "Dê um nome à sua montra",
-      "description": "Só para si. Pode mudar o nome quando quiser."
-    },
-    "stepOf": "Passo {current} de {total}",
-    "nameLabel": "Nome da montra",
-    "nameHint": "Deixe em branco e vamos chamar-lhe Montra sem título.",
-    "otherCategoryLabel": "O que vende?",
-    "otherCategoryPlaceholder": "p. ex. kits de modelismo",
-    "noProductsHint": "Ainda sem produtos? Adicione-os depois da configuração.",
-    "skipSetup": "Saltar configuração",
-    "skip": "Saltar",
-    "creating": "A criar…",
-    "create": "Criar montra"
-  },
-  "createOptions": {
-    "categoryGroupLabel": "O que vende",
-    "fulfilmentGroupLabel": "Como o recebem",
-    "vibeGroupLabel": "O aspeto que quer",
-    "category": {
-      "fashion": "Roupa",
-      "art": "Arte e impressões",
-      "jewellery": "Joalharia",
-      "handmade": "Artesanato",
-      "home": "Casa e decoração",
-      "beauty": "Beleza",
-      "food": "Comida e bebidas",
-      "music": "Música",
-      "photography": "Fotografia",
-      "books": "Livros e fanzines",
-      "digital": "Produtos digitais",
-      "vintage": "Vintage",
-      "other": "Outra coisa"
-    },
-    "categoryPlaceholder": {
-      "fashion": "A minha loja de roupa",
-      "art": "A minha loja de arte",
-      "jewellery": "A minha loja de joalharia",
-      "handmade": "A minha loja de artesanato",
-      "home": "A minha loja de casa e decoração",
-      "beauty": "A minha loja de beleza",
-      "food": "A minha loja de comida",
-      "music": "A minha loja de música",
-      "photography": "A minha loja de fotografia",
-      "books": "A minha loja de livros",
-      "digital": "A minha loja digital",
-      "vintage": "A minha loja vintage",
-      "other": "A minha loja",
-      "default": "A minha montra"
-    },
-    "fulfilment": {
-      "physical": "Eu envio",
-      "digital": "Eles transferem",
-      "services": "Eles reservam comigo",
-      "mixed": "Um pouco de cada"
-    },
-    "fulfilmentHint": {
-      "physical": "Produtos físicos",
-      "digital": "Ficheiros, predefinições, música",
-      "services": "Sessões, encomendas personalizadas",
-      "mixed": "Mais do que uma destas opções"
-    },
-    "vibe": {
-      "minimal": "Minimalista",
-      "classic": "Clássico",
-      "bold": "Marcante"
-    },
-    "vibeHint": {
-      "minimal": "Nome e preço ao passar o rato",
-      "classic": "Nome e preço sempre visíveis",
-      "bold": "Preço sempre visível, nome ao passar o rato"
     }
   },
   "picker": {
@@ -954,7 +870,7 @@
       "fillHint": "Preenche o bloco, recortando o excedente.",
       "fitHint": "Mostra a imagem inteira dentro do bloco."
     },
-    "reposition": "Reposicionar imagem",
+    "reposition": "Recortar e posicionar",
     "opacity": {
       "label": "Opacidade",
       "ariaLabel": "Opacidade da imagem",
@@ -1075,14 +991,14 @@
     "editTextOf": "Editar o texto de {name}",
     "color": "Cor",
     "changeColorOf": "Alterar a cor de {name}",
-    "stroke": "Traço",
-    "editStrokeOf": "Editar o traço de {name}",
+    "stroke": "Contorno",
+    "editStrokeOf": "Editar o contorno de {name}",
     "corners": "Cantos",
     "editCornersOf": "Editar o arredondamento dos cantos de {name}",
     "opacity": "Opacidade",
     "editOpacityOf": "Editar a opacidade de {name}",
-    "frame": "Moldura",
-    "frameImageFor": "Enquadrar a imagem de {name}",
+    "frame": "Recortar e posicionar",
+    "frameImageFor": "Recortar e posicionar a imagem de {name}",
     "duplicate": "Duplicar",
     "duplicateNamed": "Duplicar {name}",
     "duplicateN": "Duplicar {count, plural, one {# elemento} many {# de elementos} other {# elementos}}",

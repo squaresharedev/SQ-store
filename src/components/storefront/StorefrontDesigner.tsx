@@ -9,8 +9,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, ExternalLink, Search, Sparkles, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ExternalLink, Search, Share2, Sparkles, Users, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatList } from "@/lib/format/intl";
 import type { Product, ProductRemoval } from "@/types/product";
@@ -65,9 +64,10 @@ import { clampOntoBoard } from "@/lib/geometry/rotated-box";
 import { MAX_BLOCKS, STOREFRONT_NAME_MAX } from "@/lib/validation/storefront";
 import { saveStorefront } from "@/lib/storefront/actions";
 import { sampleObjectKey } from "@/lib/storefront/sample";
+import { storefrontEmbedPath } from "@/lib/storefront/paths";
 import { SampleModeProvider } from "@/lib/storefront/sample-mode";
 import { EditorTour, startEditorTour } from "@/components/onboarding/EditorTour";
-import { CreateStorefrontWizard } from "./CreateStorefrontWizard";
+import { useCreateStorefront } from "./useCreateStorefront";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
@@ -357,10 +357,9 @@ export function StorefrontDesigner({
    * Set when this is the SAMPLE storefront (lib/storefront/sample.ts), never a
    * row: nothing saves, nothing uploads, no product is edited, the header offers
    * "Create your own" instead of Save, and the designer tour runs here.
-   * `autoStartTour` is the person's `editor_tour_seen_at` still being null;
-   * `productCount` is the real store's, for the setup flow's hint.
+   * `autoStartTour` is the person's `editor_tour_seen_at` still being null.
    */
-  sample?: { autoStartTour: boolean; productCount: number } | null;
+  sample?: { autoStartTour: boolean } | null;
   storefrontId: string;
   initialName: string;
   initialConfig: StorefrontConfig;
@@ -418,12 +417,9 @@ export function StorefrontDesigner({
   const tKey = useTranslations();
   const toast = useToast();
   const showActionError = useActionErrorToast();
-  const router = useRouter();
   const isSample = sample !== null;
-  // The sample's "Create your own" opens the storefront setup flow right here,
-  // and a finished one goes straight to the new storefront's designer.
-  const [createOpen, setCreateOpen] = useState(false);
-  const [creating, setCreating] = useState(false);
+  // The sample's "Create your own" makes a storefront and opens its designer.
+  const [createStorefrontNow, creating] = useCreateStorefront();
   const [name, setName] = useState(initialName);
   // Display URL for the image background: server-signed at load; replaced by
   // a local object URL right after an in-session upload. NOT part of the
@@ -850,14 +846,26 @@ export function StorefrontDesigner({
   // latest handlers through a ref, so renders never churn add/removeListener.
   // Skipped while typing (text fields keep their native undo) and while a
   // custom Select dropdown is open (its trigger is a button, not an input).
-  const historyActions = useRef({ undo, redo });
+  // Save mirrors the button: nothing while a save is already under way.
+  const shortcutSave = () => {
+    if (!saving) void handleSave();
+  };
+  const historyActions = useRef({ undo, redo, save: shortcutSave });
   useEffect(() => {
-    historyActions.current = { undo, redo };
+    historyActions.current = { undo, redo, save: shortcutSave };
   });
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (!(event.ctrlKey || event.metaKey)) return;
       const key = event.key.toLowerCase();
+      // Save is the one shortcut that works from inside a field too: it is
+      // where a seller who has just typed reaches for it, and the browser's
+      // own "save page" is never what they mean here.
+      if (key === "s") {
+        event.preventDefault();
+        historyActions.current.save();
+        return;
+      }
       if (key !== "z" && key !== "y") return;
       const target = event.target as HTMLElement | null;
       if (
@@ -3774,13 +3782,12 @@ export function StorefrontDesigner({
             <div className="flex items-center gap-3">
               <DesignerSearchButton />
               {/* In place of Save, the way out of the sample and into a real
-                  storefront: the same setup flow the list opens, over this
-                  page, so the seller never has to go and find it. */}
+                  storefront, so the seller never has to go and find it. */}
               <button
                 type="button"
                 data-sample-create=""
                 aria-label={tKey("Storefront.sample.designer.createAriaLabel")}
-                onClick={() => setCreateOpen(true)}
+                onClick={() => void createStorefrontNow()}
                 disabled={creating}
                 className={cn(primaryButtonClass, "group/btn h-9 shrink-0 py-0")}
               >
@@ -3834,6 +3841,17 @@ export function StorefrontDesigner({
                 <span className="max-sm:sr-only">{t("header.viewPage")}</span>
               </a>
             )}
+            {/* Where its link and embed live, one click from the design. Through
+                the leave guard, so unsaved work is never dropped on the way. */}
+            <button
+              type="button"
+              onClick={() => leaveGuard.requestLeave(storefrontEmbedPath(storefrontId))}
+              className={cn(ghostButtonClass, "h-9 shrink-0 gap-1.5 px-3 py-0 text-sm")}
+              data-designer-share=""
+            >
+              <Share2 className="size-4" strokeWidth={2} aria-hidden="true" />
+              <span className="max-sm:sr-only">{tKey("Storefront.card.share")}</span>
+            </button>
             <Button onClick={() => void handleSave()} disabled={saving} className="h-9 py-0">
               {saving ? tCommon("saving") : tCommon("save")}
             </Button>
@@ -4461,19 +4479,6 @@ export function StorefrontDesigner({
       />
       {/* Inside the search provider on purpose: opening search ends the tour. */}
       {sample && <EditorTour autoStart={sample.autoStartTour} />}
-      {sample && (
-        <CreateStorefrontWizard
-          open={createOpen}
-          onClose={() => setCreateOpen(false)}
-          onCreated={(id) => {
-            // Left set: the page is on its way to the new storefront.
-            setCreating(true);
-            setCreateOpen(false);
-            router.push(`/storefront/${id}`);
-          }}
-          productCount={sample.productCount}
-        />
-      )}
       </div>
     </SearchProvider>
     </SettingTargetProvider>

@@ -139,7 +139,7 @@ test("a version states its own measurements, and the page shows them", async ({ 
   await row.getByLabel(/specification 1 name/i).fill("Seats");
   await row.getByLabel(/specification 1 value/i).fill("6");
 
-  await page.getByRole("button", { name: /save changes/i }).click();
+  await page.getByRole("button", { name: /save changes|save as draft/i }).click();
   await expectToast(page, /oak table/i);
 
   // --- the row carries it ---

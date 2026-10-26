@@ -15,10 +15,10 @@
     "pending": "Pendente"
   },
   "channel": {
-    "embed": "Incorporação",
+    "embed": "No seu site",
     "marketplace": "Marketplace",
-    "direct": "As suas páginas",
-    "button": "Botão no seu site"
+    "direct": "A sua página",
+    "button": "Botão de compra"
   },
   "empty": {
     "filteredTitle": "Nenhuma encomenda corresponde a estes filtros",
@@ -56,8 +56,8 @@
   "toolbar": {
     "region": "filtros de encomendas",
     "channel": "canal",
-    "buyerEmail": "e-mail do comprador",
     "searchPlaceholder": "pesquisar e-mail, nome, cidade, produto ou envio",
+    "search": "pesquisar",
     "status": "estado",
     "statusAriaLabel": "Filtrar por estado",
     "allStatuses": "Todos os estados",
@@ -85,6 +85,7 @@
     "amount": "Valor",
     "platformFee": "Taxa da plataforma",
     "youReceive": "Recebe",
+    "youReceiveHint": "Antes da comissão de cartão da Stripe",
     "buyerEmail": "E-mail do comprador",
     "copyBuyerEmail": {
       "copy": "Copiar e-mail do comprador",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Código {code} utilizado, mas o preço da promoção era inferior"
   },
   "actions": {
-    "disputeInStripe": "As disputas são geridas no seu painel do Stripe assim que o Stripe estiver ligado.",
+    "disputeInStripe": "O banco do comprador abriu uma disputa. Responda-lhe no seu painel Stripe antes do prazo.",
+    "answerInStripe": "Responder na Stripe",
     "pendingPayment": "O pagamento do comprador ainda está a ser confirmado. Não envie nada para já: a encomenda aparece como paga quando for concluído, e fecha-se sozinha se não for.",
     "none": "Não há ações disponíveis para esta encomenda."
   },
@@ -180,10 +182,6 @@
   },
   "skeleton": {
     "loading": "a carregar encomendas"
-  },
-  "loading": {
-    "title": "Encomendas",
-    "subtitle": "Todas as vendas através da sua incorporação e do marketplace."
   },
   "toShipCount": "{count, plural, one {{count} encomenda para enviar} many {{count} de encomendas para enviar} other {{count} encomendas para enviar}}",
   "views": {

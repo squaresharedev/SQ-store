@@ -280,6 +280,12 @@ export async function startStripeMock(): Promise<StripeMock> {
       return answer({ object: "account_link", url: `${STRIPE_MOCK_ORIGIN}/connect/onboarding?account=${account}&return=${back}` });
     }
 
+    const loginLinkMatch = /^\/accounts\/(acct_[A-Za-z0-9]+)\/login_links$/.exec(path);
+    if (request.method === "POST" && loginLinkMatch) {
+      if (!accounts.has(loginLinkMatch[1])) return stripeError(response, 404, "resource_missing", "No such account");
+      return answer({ object: "login_link", url: `${STRIPE_MOCK_ORIGIN}/express/${loginLinkMatch[1]}` });
+    }
+
     if (request.method === "POST" && path === "/checkout/sessions") {
       if (!onAccount || !accounts.get(onAccount)?.charges_enabled) {
         return stripeError(response, 400, "account_invalid", "This account cannot take payments");

@@ -9,8 +9,6 @@
     "subtitle": "Vendite, visualizzazioni della vetrina e tutto il resto che succede nel tuo negozio."
   },
   "loading": {
-    "title": "Statistiche",
-    "subtitle": "Come sta andando il tuo negozio tra incorporamento e marketplace.",
     "srLoading": "caricamento statistiche"
   },
   "firstRun": {
@@ -90,14 +88,14 @@
     "expiredEmpty": "Nessuno non completato",
     "conversion": "Ordini ogni 100 visualizzazioni",
     "conversionCounts": "Ordini: {orders}, visualizzazioni: {views}",
-    "abandonment": "Abbandono al pagamento",
+    "abandonment": "Checkout non completati",
     "abandonmentCounts": "Non completati: {expired}, avviati: {started}",
     "notEnough": "Dati non ancora sufficienti",
     "notEnoughHint": "I tassi compaiono quando questo periodo contiene {min} visualizzazioni."
   },
   "tiles": {
     "revenue": "Ricavi",
-    "afterFees": "{amount} al netto delle commissioni",
+    "afterFees": "{amount} al netto delle commissioni Square Share",
     "sales": "Vendite",
     "perDay": "{rate} al giorno in media",
     "avgOrder": "Ordine medio",
@@ -110,10 +108,10 @@
     "noOrders": "Ancora nessun ordine"
   },
   "channels": {
-    "embed": "Incorporamento",
+    "embed": "Sul tuo sito",
     "marketplace": "Marketplace",
-    "direct": "Diretto",
-    "button": "Pulsante sul tuo sito"
+    "direct": "La tua pagina",
+    "button": "Pulsante di acquisto"
   },
   "signalsUnavailable": {
     "title": "Visualizzazioni e iscrizioni non sono disponibili al momento",

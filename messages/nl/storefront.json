@@ -189,14 +189,15 @@
   "card": {
     "editAriaLabel": "{name} bewerken",
     "embedAriaLabel": "{name} delen of insluiten",
+    "share": "Delen",
     "viewPageAriaLabel": "{name} openen zoals kopers die zien",
     "deleteAriaLabel": "{name} verwijderen",
     "blockCount": "{count, plural, one {# blok} other {# blokken}}",
     "updatedLabel": " · bijgewerkt {date}",
     "emptyHint": "Dit raster is leeg",
-    "removed": "Verwijderd door SquareShare",
-    "pausedInReview": "Gepauzeerd · bij SquareShare ter beoordeling",
-    "pausedNeedsChanges": "Gepauzeerd door SquareShare · aanpassingen nodig"
+    "removed": "Verwijderd door Square Share",
+    "pausedInReview": "Gepauzeerd · bij Square Share ter beoordeling",
+    "pausedNeedsChanges": "Gepauzeerd door Square Share · aanpassingen nodig"
   },
   "embed": {
     "inDevNotice": "De insluitingswidget is in ontwikkeling en wordt nog niet weergegeven op externe sites. Stel je instellingen hieronder in, zodat je klaar bent om de insluitcode te plakken zodra die beschikbaar is.",
@@ -208,7 +209,8 @@
       "privacy": "Zet dit in je privacybeleid"
     },
     "required": "Verplicht",
-    "enabledLabel": "Insluiten ingeschakeld",
+    "enabledLabel": "Tonen op mijn website",
+    "showingLabel": "Zichtbaar op je website",
     "domainsLabel": "Toegestane domeinen",
     "domainsPlaceholder": "jouwsite.com, blog.jouwsite.com",
     "domainsHint": "Tot {max}, gescheiden door komma's. Plak een URL en we knippen die terug tot het domein.",
@@ -244,9 +246,9 @@
       "failed": "Kopiëren van de insluitcode is mislukt. Selecteer en kopieer hem handmatig.",
       "cannotCopyYet": "insluitcode kan nog niet worden gekopieerd"
     },
-    "privacyHint": "Je site laadt deze etalage nu van Squareshare, dus je privacybeleid moet dat vermelden. Plak deze tekst erin:",
+    "privacyHint": "Je site laadt deze etalage nu van Square Share, dus je privacybeleid moet dat vermelden. Plak deze tekst erin:",
     "privacyTextLabel": "Privacytekst",
-    "privacyText": "Deze site toont een etalage die door Squareshare wordt geleverd. Bij het laden worden het IP-adres en de browsergegevens van de bezoeker naar Squareshare gestuurd om de producten te tonen en bezoeken te tellen. Squareshare plaatst hiervoor geen cookies en slaat niets op het apparaat van de bezoeker op. Meer informatie: {policy}",
+    "privacyText": "Deze site toont een etalage die door Square Share wordt geleverd. Bij het laden worden het IP-adres en de browsergegevens van de bezoeker naar Square Share gestuurd om de producten te tonen en bezoeken te tellen. Square Share plaatst hiervoor geen cookies en slaat niets op het apparaat van de bezoeker op. Meer informatie: {policy}",
     "copyPrivacy": {
       "copy": "Privacytekst kopiëren",
       "copied": "Privacytekst gekopieerd",
@@ -274,92 +276,6 @@
       "copy": "Link naar de etalage kopiëren",
       "copied": "Link naar de etalage gekopieerd",
       "failed": "Kopiëren van de link is mislukt. Selecteer en kopieer hem handmatig."
-    }
-  },
-  "wizard": {
-    "category": {
-      "title": "Wat verkoop je?",
-      "description": "Dit is de belangrijkste aanwijzing voor welke lay-outs bij je passen."
-    },
-    "fulfilment": {
-      "title": "Hoe krijgen kopers het?",
-      "description": "Dit bepaalt wat je productpagina's vertellen over levering."
-    },
-    "vibe": {
-      "title": "Kies een uitstraling",
-      "description": "Je startpunt. Alles blijft aanpasbaar in de editor."
-    },
-    "name": {
-      "title": "Geef je etalage een naam",
-      "description": "Alleen voor jezelf. Je kunt het altijd hernoemen."
-    },
-    "stepOf": "Stap {current} van {total}",
-    "nameLabel": "Etalagenaam",
-    "nameHint": "Laat leeg en we noemen het Naamloze etalage.",
-    "otherCategoryLabel": "Wat verkoop je?",
-    "otherCategoryPlaceholder": "bijv. modelbouw",
-    "noProductsHint": "Nog geen producten? Voeg ze toe na het instellen.",
-    "skipSetup": "Instellen overslaan",
-    "skip": "Overslaan",
-    "creating": "Aanmaken…",
-    "create": "Etalage maken"
-  },
-  "createOptions": {
-    "categoryGroupLabel": "Wat je verkoopt",
-    "fulfilmentGroupLabel": "Hoe kopers het krijgen",
-    "vibeGroupLabel": "De uitstraling die je wilt",
-    "category": {
-      "fashion": "Kleding",
-      "art": "Kunst en prints",
-      "jewellery": "Sieraden",
-      "handmade": "Handgemaakt",
-      "home": "Wonen",
-      "beauty": "Beauty",
-      "food": "Eten en drinken",
-      "music": "Muziek",
-      "photography": "Fotografie",
-      "books": "Boeken en zines",
-      "digital": "Digitale producten",
-      "vintage": "Vintage",
-      "other": "Iets anders"
-    },
-    "categoryPlaceholder": {
-      "fashion": "Mijn kledingwinkel",
-      "art": "Mijn kunstwinkel",
-      "jewellery": "Mijn sieradenwinkel",
-      "handmade": "Mijn handgemaakte winkel",
-      "home": "Mijn woonwinkel",
-      "beauty": "Mijn beautywinkel",
-      "food": "Mijn eetwinkel",
-      "music": "Mijn muziekwinkel",
-      "photography": "Mijn fotowinkel",
-      "books": "Mijn boekwinkel",
-      "digital": "Mijn digitale winkel",
-      "vintage": "Mijn vintagewinkel",
-      "other": "Mijn winkel",
-      "default": "Mijn etalage"
-    },
-    "fulfilment": {
-      "physical": "Ik verzend het",
-      "digital": "Ze downloaden het",
-      "services": "Ze boeken mij",
-      "mixed": "Een beetje van alles"
-    },
-    "fulfilmentHint": {
-      "physical": "Fysieke producten",
-      "digital": "Bestanden, presets, muziek",
-      "services": "Sessies, opdrachten",
-      "mixed": "Meer dan één van deze"
-    },
-    "vibe": {
-      "minimal": "Minimaal",
-      "classic": "Klassiek",
-      "bold": "Gedurfd"
-    },
-    "vibeHint": {
-      "minimal": "Naam en prijs bij hover",
-      "classic": "Naam en prijs altijd zichtbaar",
-      "bold": "Prijs altijd, naam bij hover"
     }
   },
   "picker": {
@@ -954,7 +870,7 @@
       "fillHint": "Vult het blok, en snijdt het overtollige deel af.",
       "fitHint": "Toont de hele afbeelding binnen het blok."
     },
-    "reposition": "Afbeelding herpositioneren",
+    "reposition": "Bijsnijden en plaatsen",
     "opacity": {
       "label": "Dekking",
       "ariaLabel": "Dekking afbeelding",
@@ -1075,14 +991,14 @@
     "editTextOf": "De tekst van {name} bewerken",
     "color": "Kleur",
     "changeColorOf": "De kleur van {name} wijzigen",
-    "stroke": "Lijn",
-    "editStrokeOf": "De lijn van {name} bewerken",
+    "stroke": "Rand",
+    "editStrokeOf": "Rand van {name} bewerken",
     "corners": "Hoeken",
     "editCornersOf": "De hoekafronding van {name} bewerken",
     "opacity": "Dekking",
     "editOpacityOf": "De dekking van {name} bewerken",
-    "frame": "Kader",
-    "frameImageFor": "De afbeelding voor {name} kaderen",
+    "frame": "Bijsnijden en plaatsen",
+    "frameImageFor": "Afbeelding voor {name} bijsnijden en plaatsen",
     "duplicate": "Dupliceren",
     "duplicateNamed": "{name} dupliceren",
     "duplicateN": "{count, plural, one {# element} other {# elementen}} dupliceren",

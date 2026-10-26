@@ -45,7 +45,7 @@
   },
   "emptyState": {
     "title": "Noch keine Produkte",
-    "descriptionWriter": "Füge dein erstes Produkt hinzu. Es kann als Entwurf bleiben, bis du bereit bist, ihm eine Seite zu geben.",
+    "descriptionWriter": "Füge dein erstes Produkt hinzu. Ein Titel und ein Preis reichen.",
     "descriptionReadOnly": "Dieser Shop hat noch keine Produkte.",
     "add": "Produkt hinzufügen"
   },
@@ -136,7 +136,7 @@
   "removal": {
     "badge": "Entfernt",
     "badgePaused": "Pausiert",
-    "title": "{kind, select, product {Dieses Produkt wurde von SquareShare entfernt} other {Dieses Schaufenster wurde von SquareShare entfernt}}",
+    "title": "{kind, select, product {Dieses Produkt wurde von Square Share entfernt} other {Dieses Schaufenster wurde von Square Share entfernt}}",
     "titlePaused": "{kind, select, product {Dieses Produkt ist pausiert, bis du es änderst} other {Dieses Schaufenster ist pausiert, bis du es änderst}}",
     "hidden": "Es ist für Käufer nirgends mehr sichtbar: nicht auf seiner Seite, nicht in einer Einbettung, nicht in einem geteilten Link.",
     "hiddenPaused": "Käufer können es im Moment nicht sehen: nicht auf seiner Seite, nicht in einer Einbettung, nicht über einen geteilten Link. Nichts wurde gelöscht, und es kehrt zurück, sobald eine Person deine Änderungen geprüft hat.",
@@ -156,7 +156,8 @@
       "button": "Ich habe die Änderungen vorgenommen, bitte prüfen",
       "sent": "Am <time>{date}</time> zur Prüfung gesendet. Eine Person sieht sich deine Änderungen an, und du hörst hier und per E-Mail von uns.",
       "failed": "Das konnte nicht gesendet werden.",
-      "failedFix": "Versuche es gleich noch einmal."
+      "failedFix": "Versuche es gleich noch einmal.",
+      "saveFirst": "Speichere zuerst deine Änderungen. Beim Speichern wirst du gefragt, ob du sie zur Prüfung schicken willst."
     },
     "why": "Warum",
     "whatToChange": "Was zu ändern ist",
@@ -292,7 +293,7 @@
       },
       "visibility": {
         "label": "Sichtbarkeit",
-        "description": "Aktiv bedeutet online: Käufer können es sehen und sofort kaufen. Entwurf ist vor Käufern verborgen, bis du es umschaltest.",
+        "description": "Aktiv: Käufer können es kaufen, sobald es in einem Schaufenster ist. Entwurf: vor Käufern verborgen, bis du es umschaltest.",
         "about": "Wozu Sichtbarkeit dient"
       },
       "badges": {
@@ -367,10 +368,10 @@
     "displayImageHelp": "Wird auf deinem Schaufenster und in Einbettungen angezeigt.",
     "digitalFile": "Digitale Datei",
     "digitalFileAbout": "Was die digitale Datei ist",
-    "digitalFileHelp": "Die Datei, die dein Käufer nach dem Kauf herunterlädt. Wenn du eine hinzufügst, wird dies ein Download, sodass Versand und Produktsicherheit nicht mehr gelten.",
+    "digitalFileHelp": "Die Datei, die Käufer direkt nach dem Bezahlen herunterladen. Ein Download braucht keine Versand- oder Produktsicherheitsangaben.",
     "purchaseLink": "Kauflink",
     "purchaseLinkAbout": "Wohin der Kauf-Button Käufer leitet",
-    "purchaseLinkHelp": "Der Kauf-Button der Produktseite folgt diesem Link. Ohne einen wird stattdessen eine E-Mail an die Kontaktadresse deines Shops gesendet.",
+    "purchaseLinkHelp": "Lass es leer, dann bezahlen Käufer über den Square-Share-Checkout oder schreiben dir eine E-Mail, wo der Checkout noch nicht aktiv ist. Ein Link hier ersetzt beides.",
     "purchaseLinkPlaceholder": "z. B. https://dein-shop.example/checkout/dieses-produkt",
     "statusLabel": "Produktstatus",
     "problems": "{count, plural, one {{count} Problem muss vor dem Speichern behoben werden} other {{count} Probleme müssen vor dem Speichern behoben werden}}",
@@ -380,6 +381,7 @@
     "uploadingLabel": "{what, select, image {Bild wird hochgeladen} photo {Foto wird hochgeladen} document {Dokument wird hochgeladen} other {Datei wird hochgeladen}}",
     "processingLabel": "{what, select, image {Bild wird verarbeitet} photo {Foto wird verarbeitet} document {Dokument wird verarbeitet} other {Datei wird verarbeitet}}",
     "saveChanges": "Änderungen speichern",
+    "saveDraft": "Als Entwurf speichern",
     "saveProduct": "Produkt speichern",
     "savedToast": "„{title}“ wurde gespeichert.",
     "addedToast": "„{title}“ wurde zu deinen Produkten hinzugefügt.",
@@ -400,14 +402,14 @@
     "moderation": {
       "badge": "Änderungen erforderlich",
       "changed": "Geändert",
-      "callout": "SquareShare hat dich gebeten, {fields} hier zu ändern.",
+      "callout": "Square Share hat dich gebeten, {fields} hier zu ändern.",
       "seeWhy": "Warum erfahren",
       "fieldBadge": "Dies ändern",
       "navHint": "Änderungen erforderlich",
       "inReview": "Zur Prüfung gesendet",
       "reviewPrompt": {
         "title": "Gespeichert. Zur Prüfung zurücksenden?",
-        "body": "Wenn du alles geändert hast, was SquareShare verlangt hat, sende es jetzt zurück und eine Person prüft es. Falls nicht, bearbeite es weiter und sende es, wenn du fertig bist.",
+        "body": "Wenn du alles geändert hast, was Square Share verlangt hat, sende es jetzt zurück und eine Person prüft es. Falls nicht, bearbeite es weiter und sende es, wenn du fertig bist.",
         "keepEditing": "Weiter bearbeiten",
         "send": "Zur Prüfung senden"
       }
@@ -415,7 +417,7 @@
     "coverPrompt": "Leg hier dein bestes Foto ab",
     "kind": {
       "legend": "Was verkaufst du?",
-      "physical": "Etwas zum Versenden",
+      "physical": "Etwas, das ich verschicke",
       "physicalHint": "Ein physischer Artikel, der zum Käufer geschickt wird",
       "digital": "Ein Download",
       "digitalHint": "Eine Datei, die Käufer direkt nach dem Bezahlen erhalten"
@@ -432,7 +434,7 @@
       "safety": "Herstellerangaben für EU-Regeln"
     },
     "visibility": {
-      "activeHint": "Käufer sehen es und können es sofort kaufen",
+      "activeHint": "Käufer können es kaufen, sobald es in einem Schaufenster ist",
       "draftHint": "Nur du siehst es, bis du bereit bist"
     },
     "preview": {
@@ -672,7 +674,7 @@
     "fileTitle": "Begründungsschreiben {reference}",
     "title": "Begründungsschreiben",
     "subtitle": "{action, select, paused {Wir haben dein {target, select, product {Produkt} other {Schaufenster}} pausiert} other {Wir haben dein {target, select, product {Produkt} other {Schaufenster}} entfernt}}",
-    "intro": "Dieses Schreiben erläutert eine Entscheidung, die wir über Inhalte getroffen haben, die du auf SquareShare veröffentlicht hast, warum wir sie getroffen haben und wie du sie anfechten kannst. Du hast darauf einen Anspruch nach Artikel 17 des Gesetzes über digitale Dienste (Verordnung (EU) 2022/2065).",
+    "intro": "Dieses Schreiben erläutert eine Entscheidung, die wir über Inhalte getroffen haben, die du auf Square Share veröffentlicht hast, warum wir sie getroffen haben und wie du sie anfechten kannst. Du hast darauf einen Anspruch nach Artikel 17 des Gesetzes über digitale Dienste (Verordnung (EU) 2022/2065).",
     "sections": {
       "decision": "Die Entscheidung",
       "reasons": "Warum wir sie getroffen haben",
@@ -702,7 +704,7 @@
       "removed": "Entfernt. Der Inhalt ist für Käufer nicht mehr verfügbar. Diese Entscheidung ist endgültig, sofern ein Einspruch sie nicht ändert.",
       "pausedAutomated": "Pausiert. Der Inhalt ist für Käufer verborgen, bis du ihn änderst. Er wird erneut geprüft, sobald du eine Änderung speicherst."
     },
-    "scope": "Überall, wo SquareShare es anzeigt: auf seiner eigenen Seite, in Einbettungen auf anderen Websites und in geteilten Links, in jedem Land.",
+    "scope": "Überall, wo Square Share es anzeigt: auf seiner eigenen Seite, in Einbettungen auf anderen Websites und in geteilten Links, in jedem Land.",
     "duration": {
       "paused": "Bis wir deine Änderungen genehmigt haben.",
       "removed": "Unbefristet.",
@@ -715,13 +717,13 @@
       "deleted": "Der Inhalt wurde inzwischen gelöscht."
     },
     "facts": {
-      "notices": "{count, plural, =0 {Wir haben das selbst festgestellt, ohne einen Hinweis von außerhalb von SquareShare.} one {Diesem ist # Hinweis von außerhalb von SquareShare vorausgegangen, mit folgendem Inhalt: {reasons}.} other {Diesem sind # Hinweise von außerhalb von SquareShare vorausgegangen, mit folgendem Inhalt: {reasons}.}}",
-      "review": "Ein Mitglied des SquareShare-Teams hat den Inhalt selbst geprüft, bevor eine Entscheidung getroffen wurde. Wir geben nicht bekannt, wer einen Hinweis gesendet hat.",
-      "automated": "Unsere automatische Prüfung hat dies beim Speichern des Inhalts festgestellt. Niemand außerhalb von SquareShare hat ihn gemeldet, und kein Mitglied des Teams hat ihn geprüft."
+      "notices": "{count, plural, =0 {Wir haben das selbst festgestellt, ohne einen Hinweis von außerhalb von Square Share.} one {Diesem ist # Hinweis von außerhalb von Square Share vorausgegangen, mit folgendem Inhalt: {reasons}.} other {Diesem sind # Hinweise von außerhalb von Square Share vorausgegangen, mit folgendem Inhalt: {reasons}.}}",
+      "review": "Ein Mitglied des Square Share-Teams hat den Inhalt selbst geprüft, bevor eine Entscheidung getroffen wurde. Wir geben nicht bekannt, wer einen Hinweis gesendet hat.",
+      "automated": "Unsere automatische Prüfung hat dies beim Speichern des Inhalts festgestellt. Niemand außerhalb von Square Share hat ihn gemeldet, und kein Mitglied des Teams hat ihn geprüft."
     },
     "automated": "Es wurden keine automatisierten Mittel eingesetzt, um diesen Inhalt zu erkennen oder diese Entscheidung zu treffen.",
     "legalBasis": {
-      "contract": "Vertraglich: die SquareShare Nutzungsbedingungen, die Inhalte dieser Art nicht erlauben ({url}).",
+      "contract": "Vertraglich: die Square Share Nutzungsbedingungen, die Inhalte dieser Art nicht erlauben ({url}).",
       "illegal": "Rechtlich: Wir haben den Inhalt nach dem anwendbaren Recht als rechtswidrig eingestuft."
     },
     "noNote": "Keine.",
@@ -739,7 +741,7 @@
       "answer": "Unsere Antwort: {note}",
       "message": "Was du geschrieben hast: {message}"
     },
-    "footer": "SquareShare · {reference} · Seite {page} von {total}",
+    "footer": "Square Share · {reference} · Seite {page} von {total}",
     "generated": "Erstellt am {date}.",
     "automatedYes": "Sowohl zur Erkennung dieses Inhalts als auch für diese Entscheidung wurden automatisierte Mittel eingesetzt, und es war keine Person beteiligt. Wenn du die Entscheidung anfichtst, prüft sie ein Mitglied des Teams."
   },
@@ -788,7 +790,7 @@
       "exact": "Es ist kein Skript, SDK oder API-Aufruf nötig. Lass die URL genau so, wie sie ist, einschließlich allem nach dem Fragezeichen."
     },
     "tryIt": "Button testen",
-    "tracking": "Erscheint in Analysen als „Website-Button“.",
+    "tracking": "Erscheint in Analysen als „Kauf-Button“.",
     "blocked": {
       "removed": "Dieses Produkt wurde offline genommen. Öffne es, um zu sehen, warum.",
       "draft": "Dieses Produkt ist ein Entwurf. Stelle es zuerst auf Aktiv.",

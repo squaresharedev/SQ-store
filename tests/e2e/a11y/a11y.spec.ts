@@ -115,50 +115,9 @@ test.describe("accessibility", () => {
     await expectNoSeriousViolations(page, "search palette (empty)");
   });
 
-  test("storefront setup flow", async ({ page }) => {
-    const user = freshUser("a11y-setup");
-    await signUp(page, user);
-    await gotoApp(page, "/storefront");
-    await page
-      .getByRole("button", { name: /new storefront|create storefront/i })
-      .first()
-      .click();
-
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
-
-    /**
-     * Wait out a step's entrance fade before scanning. axe measures what is on
-     * screen at that instant, and a label caught mid-fade reports a contrast
-     * ratio the settled control never has (muted text at 6% opacity reads as
-     * #f0f0f0 on white). The step container is the one focusable-by-script
-     * element in the dialog, which is what makes it findable here.
-     */
-    async function settled() {
-      const step = dialog.locator('[tabindex="-1"]');
-      await expect
-        .poll(() => step.evaluate((el) => getComputedStyle(el).opacity))
-        .toBe("1");
-    }
-
-    // The tile grid: 13 toggle buttons, each an icon over a label.
-    await settled();
-    await expectNoSeriousViolations(page, "setup flow (categories)");
-
-    // And the swatch step, where the only thing separating the tiles is
-    // colour, so the text label has to carry the meaning.
-    await dialog.getByRole("button", { name: "Art & prints" }).click();
-    await dialog.getByRole("button", { name: "Next" }).click();
-    await dialog.getByRole("button", { name: /I ship it/ }).click();
-    await dialog.getByRole("button", { name: "Next" }).click();
-    await expect(dialog).toContainText("Step 3 of 4");
-    await settled();
-    await expectNoSeriousViolations(page, "setup flow (looks)");
-  });
-
   test("welcome flow and guided tour", async ({ page }) => {
     // The first thing a new seller meets, so each part is scanned: the welcome
-    // (icon tiles), the Terms (a scroll region, a gated button), the seller
+    // (icon tiles), the Terms (a scroll region), the seller
     // details form, then the tour it hands over to at
     // an anchored stop, a stop on another page, and a fallback stop.
     test.setTimeout(180_000);
@@ -168,7 +127,7 @@ test.describe("accessibility", () => {
     });
     const dialog = page.getByRole("dialog");
 
-    /** Same reason as the setup flow's settle: axe reads text at whatever
+    /** Wait out the entrance fades before scanning: axe reads text at whatever
      *  opacity it has reached. The slides' pictures animate in after the slide
      *  itself, so wait until every piece of text INSIDE THE SLIDE, and
      *  everything around it, is fully opaque.
@@ -203,23 +162,17 @@ test.describe("accessibility", () => {
     await settled();
     await expectNoSeriousViolations(page, "welcome flow (welcome picture)");
 
-    // The Terms, with the agree button still shut (a real state to scan), then
-    // read and agreed to.
+    // The Terms, then agreed to.
     await openTermsStep(page);
     await settled();
     await expectNoSeriousViolations(page, "welcome flow (terms of service)");
     await agreeToTerms(page);
 
-    const pathSlide = page.getByRole("dialog", { name: "Four steps to your first page" });
-    await settled();
-    await expectNoSeriousViolations(page, "welcome flow (four-step timeline)");
-
-    await pathSlide.getByRole("button", { name: "Get started" }).click();
-    await expect(page.getByRole("dialog", { name: "Add your seller details" })).toBeVisible();
     await settled();
     await expectNoSeriousViolations(page, "welcome flow (seller details)");
 
     await dialog.getByRole("button", { name: "Skip for now" }).click();
+    await page.locator("[data-setup-tour]").click();
 
     /** The tour's card fades in once placed; scan it at full opacity. */
     async function tourSettled() {

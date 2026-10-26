@@ -22,6 +22,8 @@ export function ResetPasswordForm({ email }: { email?: string }) {
   const [state, formAction, isPending] = useActionState(resetPassword, INITIAL);
   const resolveMessage = useResolveMessage();
   const t = useTranslations("Auth.resetPassword");
+  // The one statement of the password rule, shared with sign-up.
+  const tLogin = useTranslations("Auth.login");
 
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
@@ -45,7 +47,7 @@ export function ResetPasswordForm({ email }: { email?: string }) {
           placeholder="••••••••"
           required
         />
-        <p className={infoTextClass}>{t("passwordHint")}</p>
+        <p className={infoTextClass}>{tLogin("passwordHint")}</p>
       </div>
 
       <div className="flex flex-col gap-1.5">

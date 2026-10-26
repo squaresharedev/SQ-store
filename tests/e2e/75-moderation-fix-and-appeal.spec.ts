@@ -250,7 +250,7 @@ test.describe("a paused product", () => {
       );
     }
     await expect(page.locator('[data-product-section="basics"] [data-fix-callout]')).toContainText(
-      "SquareShare asked you to change Title here.",
+      "Square Share asked you to change Title here.",
     );
     await expect(page.locator('[data-product-section="media"] [data-fix-callout]')).toContainText(
       "Purchase link",

@@ -10,9 +10,6 @@
     "notifications": {
       "title": "Impostazioni notifiche"
     },
-    "language": {
-      "title": "Impostazioni lingua"
-    },
     "danger": {
       "title": "Zona pericolosa"
     },
@@ -188,7 +185,7 @@
         "blurb": "Inviami un’email quando vendo qualcosa, con cosa imballare e dove spedire."
       },
       "productUpdates": {
-        "label": "Novità della piattaforma",
+        "label": "Novità e funzioni di Square Share",
         "blurb": "Nuove funzionalità e miglioramenti della dashboard, non appena sono pronti."
       },
       "marketing": {
@@ -237,7 +234,6 @@
     "agreeButton": "Ho letto i Termini e li accetto",
     "acceptNote": "Accettando, registriamo la data e la versione <code>{version}</code> nel tuo account.",
     "agreeNote": "Accettando, sul tuo account vengono registrate la data e la versione <code>{version}</code>.",
-    "scrollToAgree": "Scorri fino alla fine del riepilogo per accettare.",
     "success": {
       "legalAccepted": "Accettato. Grazie per aver letto le condizioni.",
       "termsAgreed": "Hai accettato i Termini di servizio."
@@ -310,7 +306,7 @@
     "memberScope": "Questi sono i tuoi dati di venditore. Quelli che gli acquirenti vedono su {store} sono del proprietario, che li imposta nelle sue impostazioni.",
     "gate": {
       "required": "<strong>La tua ragione sociale (o il tuo nome), l’indirizzo e l’email di contatto sono obbligatori prima di poter pubblicare o vendere qualsiasi cosa.</strong> Gli acquirenti devono poter vedere da chi stanno comprando e come contattarti prima di ordinare.",
-      "privacyNoteLinked": "Questi dati compaiono pubblicamente sulle tue pagine prodotto solo per questo motivo. Non li usiamo mai per il marketing e non li vendiamo né li condividiamo. L'unico messaggio che inviamo alla tua email di contatto o al tuo telefono è il codice che li conferma. Consulta la <link>Informativa sulla privacy di Squareshare</link>."
+      "privacyNoteLinked": "Questi dati compaiono pubblicamente sulle tue pagine prodotto solo per questo motivo. Non li usiamo mai per il marketing e non li vendiamo né li condividiamo. L'unico messaggio che inviamo alla tua email di contatto o al tuo telefono è il codice che li conferma. Consulta la <link>Informativa sulla privacy di Square Share</link>."
     },
     "countryNotEu": "Fuori dall’UE / preferisco non specificare",
     "vatAdvisory": {
@@ -322,7 +318,7 @@
         "label": "Ragione sociale o nome",
         "tipLabel": "Cosa scrivere qui",
         "tipBody": "Il nome con cui gli acquirenti stipulano il contratto. La tua ragione sociale registrata, se vendi tramite un’attività; il tuo nome completo, se vendi come persona fisica. Il nome della tua vetrina è il nome del negozio, cosa diversa che non può sostituire questo campo.",
-        "placeholder": "es. Studio Builderboy e.U."
+        "placeholder": "es. Giulia Rossi o Ceramiche Giulia"
       },
       "address": {
         "label": "Indirizzo",
@@ -388,9 +384,9 @@
       "confirmed": "{channel, select, email {Email di contatto confermata. Gli acquirenti possono contattarti lì.} other {Numero di telefono confermato. Gli acquirenti possono vederlo ora.}}"
     },
     "message": {
-      "emailSubject": "{code} è il tuo codice di conferma Squareshare",
-      "emailBody": "Il tuo codice per confermare questo indirizzo come email di contatto Squareshare:\n\n{code}\n\nInseriscilo in Impostazioni › Attività e dati del venditore. Vale una sola volta, per {minutes} minuti.\n\nNon condividere mai questo codice. Nessuno di Squareshare te lo chiederà mai.\n\nSe non hai richiesto questo, qualcuno potrebbe aver inserito il tuo indirizzo per errore. Ignora questa email: non succede nulla a meno che il codice non venga inserito.\n\nSquareshare",
-      "sms": "{code} è il tuo codice Squareshare per confermare questo numero. Scade tra {minutes} min. Non condividerlo."
+      "emailSubject": "{code} è il tuo codice di conferma Square Share",
+      "emailBody": "Il tuo codice per confermare questo indirizzo come email di contatto Square Share:\n\n{code}\n\nInseriscilo in Impostazioni › Attività e dati del venditore. Vale una sola volta, per {minutes} minuti.\n\nNon condividere mai questo codice. Nessuno di Square Share te lo chiederà mai.\n\nSe non hai richiesto questo, qualcuno potrebbe aver inserito il tuo indirizzo per errore. Ignora questa email: non succede nulla a meno che il codice non venga inserito.\n\nSquare Share",
+      "sms": "{code} è il tuo codice Square Share per confermare questo numero. Scade tra {minutes} min. Non condividerlo."
     }
   },
   "shipping": {
@@ -434,7 +430,7 @@
     },
     "rates": {
       "title": "Tariffe di spedizione",
-      "description": "Imposta tariffe leggibili dalla macchina in modo che il checkout possa indicare il totale di consegna prima del pagamento, come richiesto dalla Direttiva UE sui diritti dei consumatori.",
+      "description": "I prezzi di spedizione applicati al checkout, così gli acquirenti vedono il totale prima di pagare.",
       "currencyLabel": "Valuta delle tariffe",
       "freeOverLabel": "Spedizione gratuita oltre",
       "freeOverPlaceholder": "es. 50,00",
@@ -685,8 +681,8 @@
         "emailChangeRequested": "Richiesto il cambio di email",
         "twoFactorEnabled": "Autenticazione a due fattori attivata",
         "twoFactorDisabled": "Autenticazione a due fattori disattivata",
-        "factorAdded": "App di autenticazione aggiunta",
-        "factorRemoved": "App di autenticazione rimossa",
+        "factorAdded": "Metodo di accesso aggiunto",
+        "factorRemoved": "Metodo di accesso rimosso",
         "recoveryCodesRegenerated": "Generati nuovi codici di recupero",
         "recoveryCodeUsed": "Codice di recupero usato per accedere",
         "challengeFailed": "Codice a due fattori sbagliato inserito all’accesso",

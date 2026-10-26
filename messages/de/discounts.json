@@ -33,7 +33,7 @@
     "title": "So laufen deine Rabatte",
     "orders": "Bestellungen mit Rabatt",
     "revenue": "Umsatz aus diesen Bestellungen",
-    "given": "Als Rabatt gewährt",
+    "given": "Insgesamt rabattiert",
     "none": "Noch nichts",
     "channelsTitle": "Bestellungen nach Kanal",
     "channelsDescription": "Codes werden dem Kanal zugeordnet, auf dem du sie geteilt hast, oder dem Code selbst, wenn du keinen Kanal angegeben hast.",
@@ -43,7 +43,7 @@
   },
   "list": {
     "title": "Deine Rabatte",
-    "none": "Aktuell keine Rabatte. Gelöschte Rabatte werden in der Übersicht oben weiterhin gezählt.",
+    "none": "Keine aktiven Rabatte.",
     "channel": "Geteilt auf {channel}",
     "startsOn": "Startet {date}",
     "endsOn": "Endet {date}",

@@ -147,7 +147,7 @@ describe("the sale chip as a token", () => {
     expect(chip()).not.toHaveClass("pointer-events-none");
     expect(chip()).toHaveAttribute("role", "button");
     expect(chip()).toHaveAttribute("tabindex", "0");
-    expect(chip()).toHaveAccessibleName(/^Sale chip at top left\. Press to open its settings/);
+    expect(chip()).toHaveAccessibleName(/^Sale badge at top left\. Press to open its settings/);
   });
 
   it("is grabbed, arrowed and pressed like the title and the price, never moving the block", () => {

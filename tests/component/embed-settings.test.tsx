@@ -158,7 +158,7 @@ describe("EmbedSettings - once the embed has a host", () => {
     // is the easiest way to paste a snippet that shows nothing.
     const user = userEvent.setup();
     renderSettings();
-    await user.click(screen.getByRole("switch", { name: /embed enabled/i }));
+    await user.click(screen.getByRole("switch", { name: /show on my website/i }));
     await user.type(screen.getByLabelText(/allowed domains/i), "shop.example.com");
     expect(copySnippet()).toBeDisabled();
     expect(document.body).toHaveTextContent(/save your settings to unlock/i);
@@ -175,7 +175,7 @@ describe("EmbedSettings - once the embed has a host", () => {
 
     // Off: Copy locks at once, and the server is told the same moment, over
     // the domains it already holds.
-    await user.click(screen.getByRole("switch", { name: /embed enabled/i }));
+    await user.click(screen.getByRole("switch", { name: /show on my website/i }));
     expect(copySnippet()).toBeDisabled();
     await waitFor(() =>
       expect(updateEmbedSettingsMock).toHaveBeenLastCalledWith(STOREFRONT_ID, {
@@ -185,7 +185,7 @@ describe("EmbedSettings - once the embed has a host", () => {
     );
 
     // On again: Copy unlocks, no Save needed.
-    await user.click(screen.getByRole("switch", { name: /embed enabled/i }));
+    await user.click(screen.getByRole("switch", { name: /show on my website/i }));
     expect(copySnippet()).toBeEnabled();
     await waitFor(() =>
       expect(updateEmbedSettingsMock).toHaveBeenLastCalledWith(STOREFRONT_ID, {
@@ -201,7 +201,7 @@ describe("EmbedSettings - once the embed has a host", () => {
     const field = screen.getByLabelText(/allowed domains/i);
     await user.clear(field);
     await user.type(field, "typed.example.com");
-    await user.click(screen.getByRole("switch", { name: /embed enabled/i }));
+    await user.click(screen.getByRole("switch", { name: /show on my website/i }));
     await waitFor(() =>
       expect(updateEmbedSettingsMock).toHaveBeenLastCalledWith(STOREFRONT_ID, {
         enabled: true,
@@ -214,8 +214,8 @@ describe("EmbedSettings - once the embed has a host", () => {
     updateEmbedSettingsMock.mockResolvedValue({ ok: false, error: permissionDenied("viewer", "editStorefronts") });
     const user = userEvent.setup();
     renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
-    await user.click(screen.getByRole("switch", { name: /embed enabled/i }));
-    await waitFor(() => expect(screen.getByRole("switch", { name: /embed enabled/i })).toBeChecked());
+    await user.click(screen.getByRole("switch", { name: /show on my website/i }));
+    await waitFor(() => expect(screen.getByRole("switch", { name: /show on my website/i })).toBeChecked());
     expect(copySnippet()).toBeEnabled();
   });
 
@@ -256,7 +256,7 @@ describe("EmbedSettings - once the embed has a host", () => {
 
   it("hands over the words for the seller's own privacy policy, naming ours", () => {
     renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
-    expect(document.body).toHaveTextContent(/storefront provided by squareshare/i);
+    expect(document.body).toHaveTextContent(/storefront provided by square share/i);
     expect(document.body).toHaveTextContent("https://squareshare.eu/legal/privacy-policy/");
     expect(within(document.body).getByRole("button", { name: /copy privacy text/i })).toBeEnabled();
   });
@@ -462,7 +462,7 @@ describe("EmbedSettings - key rotation", () => {
       expect(
         screen.getByText(/can't embed this storefront until your seller details/i),
       ).toBeInTheDocument();
-      expect(screen.getByRole("switch", { name: /embed enabled/i })).toBeDisabled();
+      expect(screen.getByRole("switch", { name: /show on my website/i })).toBeDisabled();
       // The snippet would call an endpoint that refuses it, so it is not
       // offered either — even though a domain is configured.
       expect(screen.queryByRole("button", { name: /copy/i })).toBeNull();
@@ -478,13 +478,13 @@ describe("EmbedSettings - key rotation", () => {
           missingTraderDetails={["email"]}
         />,
       );
-      expect(screen.getByRole("switch", { name: /embed enabled/i })).toBeEnabled();
+      expect(screen.getByRole("switch", { name: /show on my website/i })).toBeEnabled();
     });
 
     it("says nothing when the store may publish", () => {
       renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
       expect(screen.queryByText(/until your seller details/i)).toBeNull();
-      expect(screen.getByRole("switch", { name: /embed enabled/i })).toBeEnabled();
+      expect(screen.getByRole("switch", { name: /show on my website/i })).toBeEnabled();
     });
   });
 });

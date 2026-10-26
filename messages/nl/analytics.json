@@ -9,8 +9,6 @@
     "subtitle": "Verkopen, weergaven van je etalage en al het andere wat er in je winkel gebeurt."
   },
   "loading": {
-    "title": "Statistieken",
-    "subtitle": "Hoe je winkel presteert via de insluiting en de marketplace.",
     "srLoading": "statistieken laden"
   },
   "firstRun": {
@@ -90,14 +88,14 @@
     "expiredEmpty": "Geen onbetaald verlaten",
     "conversion": "Bestellingen per 100 weergaven",
     "conversionCounts": "Bestellingen: {orders}, weergaven: {views}",
-    "abandonment": "Afgebroken betalingen",
+    "abandonment": "Niet afgeronde afrekeningen",
     "abandonmentCounts": "Onbetaald: {expired}, gestart: {started}",
     "notEnough": "Nog niet genoeg gegevens",
     "notEnoughHint": "Percentages verschijnen zodra deze periode {min} weergaven telt."
   },
   "tiles": {
     "revenue": "Omzet",
-    "afterFees": "{amount} na kosten",
+    "afterFees": "{amount} na Square Share-kosten",
     "sales": "Verkopen",
     "perDay": "{rate} per dag gemiddeld",
     "avgOrder": "Gem. bestelling",
@@ -110,10 +108,10 @@
     "noOrders": "Nog geen bestellingen"
   },
   "channels": {
-    "embed": "Insluiting",
+    "embed": "Op je website",
     "marketplace": "Marketplace",
-    "direct": "Direct",
-    "button": "Websiteknop"
+    "direct": "Jouw pagina",
+    "button": "Koopknop"
   },
   "signalsUnavailable": {
     "title": "Weergaven en aanmeldingen zijn nu niet beschikbaar",

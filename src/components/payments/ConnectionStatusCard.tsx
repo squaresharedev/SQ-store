@@ -6,9 +6,12 @@ import { cardClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { stubBadgeClass } from "@/components/ui/control-styles";
+import { Spinner } from "@/components/ui/spinner";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
+import { startStripeOnboarding } from "@/lib/payments/connect/actions";
 import type { AccountStatus } from "@/lib/payments/types";
 import { CardSwipe } from "./CardSwipe";
+import { useLeaveForStripe } from "./useLeaveForStripe";
 
 function StatusDot({ ok, label }: { ok: boolean; label: string }) {
   return (
@@ -26,10 +29,10 @@ function StatusDot({ ok, label }: { ok: boolean; label: string }) {
 
 /**
  * Connection state for the seller's Stripe account. Not-connected renders the
- * onboarding CTA; connected renders a verified summary, and, while Stripe will
- * not yet take payments on the account, the way back into its onboarding.
- * Both CTAs open the info modal: the connect flow itself is a redirect to
- * STRIPE'S hosted onboarding (never an in-app form).
+ * onboarding CTA; connected renders a verified summary, and, while Stripe still
+ * wants something, the way back into its onboarding. Connecting first opens
+ * the info modal; finishing goes straight to Stripe, since the seller has
+ * already read it. Either way the form is STRIPE'S hosted one, never in-app.
  */
 export function ConnectionStatusCard({
   account,
@@ -39,6 +42,7 @@ export function ConnectionStatusCard({
   onConnect: () => void;
 }) {
   const t = useTranslations("Payments");
+  const [finish, leaving] = useLeaveForStripe(startStripeOnboarding);
   // Until Stripe Connect ships, a "Connect with Stripe" button only opens a
   // modal whose continue button is disabled. Say what is true instead, and how
   // buyers pay in the meantime (lib/payments/availability.ts).
@@ -116,23 +120,22 @@ export function ConnectionStatusCard({
           <StatusDot ok={account.detailsSubmitted} label={t("connection.verified")} />
         </div>
       </div>
-      {/* Connected is not yet "can be paid": Stripe still wants something. */}
-      {!account.chargesEnabled && (
+      {/* Connected is not yet "can be paid", or Stripe wants more before it
+          pays out: either way the answer is the same trip back to Stripe. */}
+      {(!account.chargesEnabled || account.requirementsDue.length > 0) && (
         <div
           className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3"
           data-connect-unfinished=""
         >
-          <p className="max-w-md font-inter text-sm text-muted-foreground">{t("connection.finish")}</p>
-          <Button variant="secondary" onClick={onConnect}>
+          <p className="max-w-md font-inter text-sm text-muted-foreground">
+            {account.chargesEnabled ? t("connection.requirementsDue") : t("connection.finish")}
+          </p>
+          <Button variant="secondary" onClick={finish} disabled={leaving} aria-busy={leaving || undefined}>
+            {leaving && <Spinner />}
             {t("connection.finishButton")}
             <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden />
           </Button>
         </div>
-      )}
-      {account.requirementsDue.length > 0 && (
-        <p className="mt-3 border-t border-border pt-3 font-inter text-sm text-danger-strong">
-          {t("connection.requirementsDue")}
-        </p>
       )}
     </section>
   );

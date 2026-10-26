@@ -230,7 +230,7 @@ describe("RemovalNotice", () => {
     const notice = document.querySelector<HTMLElement>("[data-removal-notice]")!;
 
     expect(within(notice).getByRole("heading").textContent).toBe(
-      "This product was removed by SquareShare",
+      "This product was removed by Square Share",
     );
     expect(
       within(notice).getByText(
@@ -275,7 +275,7 @@ describe("RemovalNotice", () => {
     );
     const notice = document.querySelector<HTMLElement>("[data-removal-notice]")!;
     expect(within(notice).getByRole("heading").textContent).toBe(
-      "This storefront was removed by SquareShare",
+      "This storefront was removed by Square Share",
     );
     expect([...notice.querySelectorAll("dd")].map((dd) => dd.textContent)).toEqual([
       "It broke the platform rules.",

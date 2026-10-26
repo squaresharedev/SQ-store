@@ -1,14 +1,6 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { LanguageCard } from "@/components/settings/LanguageCard";
-import { requireUser } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("Settings.metadata.language");
-  return { title: t("title") };
-}
-
-export default async function LanguageSettingsPage() {
-  await requireUser("/settings/language");
-  return <LanguageCard />;
+/** The language picker is a card on Account now; old links land on it. */
+export default function LanguageSettingsPage() {
+  redirect("/settings/account#language");
 }

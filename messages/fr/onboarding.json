@@ -12,7 +12,7 @@
     },
     "product": {
       "label": "Ajoutez un produit",
-      "detail": "Un titre et un prix suffisent. Il peut rester en brouillon pour l’instant.",
+      "detail": "Un titre et un prix suffisent.",
       "detailDone": "{count, plural, one {Vous avez {count} produit.} many {Vous avez {count} produits.} other {Vous avez {count} produits.}}",
       "action": "Ajouter un produit",
       "cta": "Ajoutez votre premier produit"
@@ -83,9 +83,6 @@
         "title": "Bienvenue sur Square Share",
         "description": "Quatre étapes vers une page produit que vous pourrez partager."
       },
-      "path": {
-        "title": "Quatre étapes jusqu’à votre première page"
-      },
       "seller": {
         "title": "Ajoutez vos informations vendeur",
         "description": "Les acheteurs les voient sur vos pages produit, et la loi les exige avant que vous puissiez vendre. Nous ne les utilisons jamais pour le marketing.",
@@ -122,7 +119,7 @@
       }
     },
     "seller": {
-      "namePlaceholder": "p. ex. Studio Builderboy e.U.",
+      "namePlaceholder": "ex. : Claire Martin ou Céramiques Claire",
       "nameHelp": "Votre raison sociale, ou votre nom complet si vous vendez en votre nom propre.",
       "nameAlternative": "Ou votre nom complet, si vous vendez en votre nom propre.",
       "addressPlaceholder": "p. ex. 12 rue du Marché\n75001 Paris\nFrance",
@@ -156,12 +153,6 @@
       "buyNow": "Acheter",
       "live": "En ligne",
       "linkCopied": "Lien copié"
-    },
-    "setupPath": {
-      "details": "Ajoutez vos informations",
-      "product": "Ajoutez un produit",
-      "storefront": "Concevez une vitrine",
-      "share": "Partagez sa page"
     },
     "terms": {
       "agreed": "Vous avez accepté ces Conditions. Merci de les avoir lues.",
@@ -197,7 +188,7 @@
       },
       "productsAdd": {
         "title": "Ajoutez un produit",
-        "body": "Un titre et un prix suffisent pour commencer. Il peut rester en brouillon jusqu’à ce que vous soyez prêt."
+        "body": "Un titre et un prix suffisent pour commencer."
       },
       "productsImport": {
         "title": "Ou importez votre catalogue",

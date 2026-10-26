@@ -3,7 +3,7 @@ import { render, screen, waitFor, cleanup } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { failed, invalidInput, succeeded } from "@/lib/errors";
 import { msg } from "@/i18n/types";
-import { SIGNUP_CHECK_EMAIL_KEY } from "@/lib/auth/signup";
+import { EMAIL_NOT_CONFIRMED_KEY, SIGNUP_CHECK_EMAIL_KEY } from "@/lib/auth/signup";
 
 afterEach(cleanup);
 
@@ -99,7 +99,7 @@ describe("LoginForm", () => {
     const user = userEvent.setup();
     render(<LoginForm />);
 
-    for (const open of [/^sign up$/i, /email me a magic link/i]) {
+    for (const open of [/^sign up$/i, /email me a sign-in link/i]) {
       await user.click(screen.getByRole("button", { name: open }));
       const field = screen.getByLabelText("Email");
       expect(field).toHaveAttribute("type", "email");
@@ -150,9 +150,36 @@ describe("LoginForm", () => {
 
     const way = await screen.findByRole("button", { name: "Didn't get the email? Send me a sign-in link instead" });
     await user.click(way);
-    expect(screen.getByTestId("login-submit")).toHaveTextContent("Send magic link");
+    expect(screen.getByTestId("login-submit")).toHaveTextContent("Send sign-in link");
     expect(screen.getByLabelText("Email")).toHaveValue("new@shop.test");
     expect(screen.queryByRole("button", { name: /Didn't get the email/ })).not.toBeInTheDocument();
+  });
+
+  it("offers the same sign-in link when signing in to an unconfirmed account", async () => {
+    // "Confirm your email first" on a later sign-in was a dead end too: the
+    // resend way round only appeared right after sign-up.
+    mockAuthenticate.mockResolvedValue(failed(invalidInput(msg(EMAIL_NOT_CONFIRMED_KEY))));
+    const user = userEvent.setup();
+    render(<LoginForm />);
+    await user.type(screen.getByLabelText("Email or username"), "late@shop.test");
+    await user.type(screen.getByLabelText("Password"), "secret123");
+    await user.click(screen.getByTestId("login-submit"));
+
+    await user.click(await screen.findByRole("button", { name: /Didn't get the email/ }));
+    expect(screen.getByTestId("login-submit")).toHaveTextContent("Send sign-in link");
+    expect(screen.getByLabelText("Email")).toHaveValue("late@shop.test");
+  });
+
+  it("does not put a username in the box a sign-in link is sent to", async () => {
+    mockAuthenticate.mockResolvedValue(failed(invalidInput(msg(EMAIL_NOT_CONFIRMED_KEY))));
+    const user = userEvent.setup();
+    render(<LoginForm />);
+    await user.type(screen.getByLabelText("Email or username"), "potter");
+    await user.type(screen.getByLabelText("Password"), "secret123");
+    await user.click(screen.getByTestId("login-submit"));
+
+    await user.click(await screen.findByRole("button", { name: /Didn't get the email/ }));
+    expect(screen.getByLabelText("Email")).toHaveValue("");
   });
 
   it("switching to sign-up shows confirm_password field", async () => {
@@ -190,7 +217,7 @@ describe("LoginForm", () => {
     const user = userEvent.setup();
     render(<LoginForm />);
     await user.click(
-      screen.getByRole("button", { name: /email me a magic link/i }),
+      screen.getByRole("button", { name: /email me a sign-in link/i }),
     );
     expect(screen.queryByLabelText("Password")).not.toBeInTheDocument();
   });
@@ -199,10 +226,10 @@ describe("LoginForm", () => {
     const user = userEvent.setup();
     render(<LoginForm />);
     await user.click(
-      screen.getByRole("button", { name: /email me a magic link/i }),
+      screen.getByRole("button", { name: /email me a sign-in link/i }),
     );
     expect(
-      screen.getByRole("button", { name: /send magic link/i }),
+      screen.getByRole("button", { name: /send sign-in link/i }),
     ).toBeInTheDocument();
   });
 
@@ -210,7 +237,7 @@ describe("LoginForm", () => {
     const user = userEvent.setup();
     render(<LoginForm />);
     await user.click(
-      screen.getByRole("button", { name: /email me a magic link/i }),
+      screen.getByRole("button", { name: /email me a sign-in link/i }),
     );
     // The tabs should not be present in magic mode.
     expect(screen.queryByRole("button", { name: /^sign in$/i })).not.toBeInTheDocument();
@@ -220,7 +247,7 @@ describe("LoginForm", () => {
     const user = userEvent.setup();
     render(<LoginForm />);
     await user.click(
-      screen.getByRole("button", { name: /email me a magic link/i }),
+      screen.getByRole("button", { name: /email me a sign-in link/i }),
     );
     await user.click(
       screen.getByRole("button", { name: /use a password instead/i }),
@@ -240,7 +267,7 @@ describe("LoginForm", () => {
     await user.click(screen.getByTestId("login-submit"));
 
     const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent("Incorrect email or password.");
+    expect(alert).toHaveTextContent("Incorrect email, username or password.");
   });
 
   it("confirmation message renders when action returns a message", async () => {
@@ -250,10 +277,10 @@ describe("LoginForm", () => {
 
     // Switch to magic link mode first so the intent matches.
     await user.click(
-      screen.getByRole("button", { name: /email me a magic link/i }),
+      screen.getByRole("button", { name: /email me a sign-in link/i }),
     );
     await user.type(screen.getByLabelText(/email/i), "test@example.com");
-    await user.click(screen.getByRole("button", { name: /send magic link/i }));
+    await user.click(screen.getByRole("button", { name: /send sign-in link/i }));
 
     await waitFor(() => {
       expect(

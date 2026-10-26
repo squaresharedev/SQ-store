@@ -76,22 +76,11 @@
   "payoutStatus": "{status, select, paid {Bezahlt} pending {Ausstehend} in_transit {Unterwegs} canceled {Abgebrochen} failed {Fehlgeschlagen} other {Ausstehend}}",
   "payoutMethod": {
     "title": "Auszahlungsmethode",
-    "manage": "Verwalten",
+    "manage": "In Stripe verwalten",
     "detail": "{currency} · {country}",
     "detailDefault": "{currency} · {country} · Standard",
     "emptyConnectable": "Noch keine Auszahlungsmethode. Verbinde Stripe und füge deine Bank dort hinzu, sie erscheint hier automatisch.",
     "empty": "Noch keine Auszahlungsmethode."
-  },
-  "payoutMethodModal": {
-    "title": "Auszahlungsmethode",
-    "description": "Wohin deine Auszahlungen gesendet werden.",
-    "bankAccountDetail": "Bankkonto · {currency} · {country}",
-    "defaultLabel": "Standard für Auszahlungen",
-    "yes": "Ja",
-    "no": "Nein",
-    "referenceLabel": "Referenz",
-    "securityNote": "Zu deiner Sicherheit werden Bankdaten bei Stripe geändert, nicht hier.",
-    "manageInStripe": "In Stripe verwalten"
   },
   "recentActivity": {
     "label": "Aktuelle Aktivität",

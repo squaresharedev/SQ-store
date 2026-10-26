@@ -121,19 +121,22 @@ const accountOf = async (shop: Shop) =>
   )) as AccountRow[])[0] ?? null;
 
 /** The owner goes through "Connect with Stripe" on the Payments page and
- *  lands back on it. */
+ *  lands back on it. Connecting explains itself in a dialog first; finishing
+ *  goes straight to Stripe. */
 async function connectFromPayments(page: Page, opener: string) {
   await gotoApp(page, "/payments");
-  await page.getByRole("button", { name: opener }).click();
-  const dialog = page.getByRole("dialog", { name: "Connect with Stripe" });
-  await expect(dialog).toBeVisible();
   // Out to the provider's onboarding and back through our return route. The
   // return is what is waited for: the page is on /payments before it leaves,
   // too, so its address alone says nothing.
   const returned = page.waitForResponse((response) => response.url().includes("/api/payments/connect/return"), {
     timeout: 30_000,
   });
-  await dialog.locator("[data-connect-stripe]").click();
+  await page.getByRole("button", { name: opener }).click();
+  const dialog = page.getByRole("dialog", { name: "Connect with Stripe" });
+  if (opener === "Connect with Stripe") {
+    await expect(dialog).toBeVisible();
+    await dialog.locator("[data-connect-stripe]").click();
+  }
   await returned;
   await page.waitForURL(/\/payments$/, { timeout: 30_000 });
   await expect(page.getByText("Stripe account connected")).toBeVisible();

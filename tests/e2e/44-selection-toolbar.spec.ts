@@ -125,7 +125,7 @@ test.describe("the selection toolbar", () => {
 
     const bar = page.locator("[data-selection-toolbar]");
     await expect(bar.getByRole("button", { name: /open the product page/i })).toBeVisible();
-    await expect(bar.getByRole("button", { name: /frame the image/i })).toBeVisible();
+    await expect(bar.getByRole("button", { name: /crop and position the image/i })).toBeVisible();
     await expect(bar.getByRole("button", { name: /remove .* from grid/i })).toBeVisible();
     // The block's name is in the accessible names, not drawn on the bar: it
     // was the widest thing on it, and the bar has to fit over its own tile.
@@ -169,7 +169,7 @@ test.describe("the selection toolbar", () => {
       ),
     ).resolves.toEqual([
       "Change the colour of Square",
-      "Edit the stroke of Square",
+      "Edit the border of Square",
       "Edit the corner roundness of Square",
       "Edit the opacity of Square",
     ]);
@@ -177,7 +177,7 @@ test.describe("the selection toolbar", () => {
     await expect(bar).not.toContainText("Square");
     // And nothing that belongs to a product.
     await expect(bar.getByRole("button", { name: /product page/i })).toHaveCount(0);
-    await expect(bar.getByRole("button", { name: /frame the image/i })).toHaveCount(0);
+    await expect(bar.getByRole("button", { name: /crop and position the image/i })).toHaveCount(0);
 
     // EACH ONE POINTS AT THE PANEL rather than opening a slider over the
     // block. A popover here covers the very shape whose number is being
@@ -185,7 +185,7 @@ test.describe("the selection toolbar", () => {
     // Stroke, corners and opacity are all slider fields: no wash on the row
     // around them, the slider itself lights up in the accent (see
     // SummonedField's "slider" variant and `.ss-slider[data-highlighted]`).
-    await bar.getByRole("button", { name: /edit the stroke/i }).click();
+    await bar.getByRole("button", { name: /edit the border/i }).click();
     await expect(
       page.locator("[data-block-field='stroke'] [role='slider'][data-highlighted]"),
     ).toBeVisible();

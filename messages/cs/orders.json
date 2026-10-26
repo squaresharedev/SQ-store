@@ -15,10 +15,10 @@
     "pending": "Čekající"
   },
   "channel": {
-    "embed": "Vložení",
+    "embed": "Na vašem webu",
     "marketplace": "Tržiště",
-    "direct": "Vaše stránky",
-    "button": "Tlačítko na webu"
+    "direct": "Vaše stránka",
+    "button": "Tlačítko nákupu"
   },
   "empty": {
     "filteredTitle": "Filtrům neodpovídají žádné objednávky",
@@ -56,7 +56,7 @@
   "toolbar": {
     "region": "filtry objednávek",
     "channel": "kanál",
-    "buyerEmail": "e-mail kupujícího",
+    "search": "hledat",
     "searchPlaceholder": "hledat e-mail, jméno, město, produkt nebo zásilku",
     "status": "stav",
     "statusAriaLabel": "Filtrovat podle stavu",
@@ -85,6 +85,7 @@
     "amount": "Částka",
     "platformFee": "Poplatek platformy",
     "youReceive": "Obdržíte",
+    "youReceiveHint": "Před poplatkem Stripe za kartu",
     "buyerEmail": "E-mail kupujícího",
     "copyBuyerEmail": {
       "copy": "Kopírovat e-mail kupujícího",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Kód {code} použit, ale akční cena byla nižší"
   },
   "actions": {
-    "disputeInStripe": "Spory se po propojení Stripe řeší v panelu Stripe.",
+    "disputeInStripe": "Banka kupujícího otevřela spor. Odpovězte na něj v panelu Stripe před jeho termínem.",
+    "answerInStripe": "Odpovědět ve Stripe",
     "pendingPayment": "Platba kupujícího se ještě potvrzuje. Zatím nic neposílejte: jakmile projde, objednávka se zobrazí jako zaplacená, a pokud neprojde, sama se uzavře.",
     "none": "K této objednávce nejsou dostupné žádné akce."
   },
@@ -180,10 +182,6 @@
   },
   "skeleton": {
     "loading": "načítání objednávek"
-  },
-  "loading": {
-    "title": "Objednávky",
-    "subtitle": "Všechny prodeje přes vložení na web i tržiště."
   },
   "toShipCount": "{count, plural, one {{count} objednávka k odeslání} few {{count} objednávky k odeslání} many {{count} objednávky k odeslání} other {{count} objednávek k odeslání}}",
   "views": {

@@ -9,12 +9,10 @@ import {
   parseStoredStorefrontConfig,
   storefrontIdSchema,
 } from "@/lib/validation/storefront";
-import { parseStorefrontBrief } from "@/lib/validation/storefront-brief";
 import {
   DEFAULT_STOREFRONT_CONFIG,
   type StorefrontConfig,
 } from "@/types/storefront";
-import type { StorefrontBrief } from "@/types/storefront-brief";
 import { MODERATION_DETAIL_SELECT, takedownFromRow } from "@/lib/moderation/removal";
 import { appealsByDecision, withAppeal } from "@/lib/moderation/appeals-read";
 import type { ProductRemoval } from "@/types/product";
@@ -52,10 +50,6 @@ export type StorefrontSummary = {
   config: StorefrontConfig;
   /** Public, rotatable identifier used by the embed snippet. */
   embedKey: string;
-  /** Creation-flow answers. Empty when the flow was skipped or predates it.
-   *  Carried so the NEXT storefront's flow can arrive pre-answered instead of
-   *  asking the same seller the same questions again. */
-  brief: StorefrontBrief;
   /** Set ONLY when staff have taken this storefront down, so its presence
    *  is the whole test. Carries the statement of reasons the seller is
    *  entitled to; the card renders it in place of the usual actions. */
@@ -78,7 +72,7 @@ const STOREFRONT_LIST_LIMIT = 100;
  * find out about from a buyer.
  */
 const MODERATION_LIST_SELECT =
-  `id, name, config, updated_at, embed_key, brief, ${MODERATION_DETAIL_SELECT}` as const;
+  `id, name, config, updated_at, embed_key, ${MODERATION_DETAIL_SELECT}` as const;
 
 /** The list page's read: one bounded page of summaries plus the EXACT total,
  *  so truncation is visible instead of silent. */
@@ -141,7 +135,6 @@ function toStorefrontSummary(
     config: unknown;
     updated_at: string;
     embed_key: string;
-    brief: unknown;
   },
 ): StorefrontSummary {
   const config =
@@ -154,7 +147,6 @@ function toStorefrontSummary(
     updatedAt: row.updated_at,
     config,
     embedKey: row.embed_key,
-    brief: parseStorefrontBrief(row.brief),
     ...(takedown ? { removal: takedown } : {}),
   };
 }

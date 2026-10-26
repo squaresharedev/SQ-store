@@ -19,6 +19,11 @@ type NavigationBlockerContextValue = {
    * `navigate` function when no blocker is registered.
    */
   request: (href: string, navigate: (href: string) => void) => void;
+  /**
+   * Whether an editor with unsaved changes is armed right now. Read it in an
+   * event handler, not during render: arming does not re-render the tree.
+   */
+  hasUnsavedChanges: () => boolean;
 };
 
 const NavigationBlockerContext =
@@ -133,9 +138,11 @@ export function NavigationBlockerProvider({
     [],
   );
 
+  const hasUnsavedChanges = React.useCallback(() => blockerRef.current !== null, []);
+
   const value = React.useMemo(
-    () => ({ register, request }),
-    [register, request],
+    () => ({ register, request, hasUnsavedChanges }),
+    [register, request, hasUnsavedChanges],
   );
 
   return React.createElement(

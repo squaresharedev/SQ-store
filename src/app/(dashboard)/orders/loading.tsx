@@ -6,7 +6,8 @@ import { OrdersSkeleton } from "@/components/orders/OrdersSkeleton";
 
 /** Route-level loading state while the server queries orders. */
 export default function OrdersLoading() {
-  const t = useTranslations("Orders.loading");
+  // The page's own heading, so nothing changes when the data lands.
+  const t = useTranslations("Orders.page");
   return (
     <main className={cn(pageShellClass, "space-y-6")}>
       <PageHeader

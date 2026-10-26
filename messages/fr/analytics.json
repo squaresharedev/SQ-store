@@ -9,8 +9,6 @@
     "subtitle": "Ventes, vues de vitrine et tout ce qui se passe dans votre boutique."
   },
   "loading": {
-    "title": "Statistiques",
-    "subtitle": "Les performances de votre boutique sur l’intégration et la marketplace.",
     "srLoading": "chargement des statistiques"
   },
   "firstRun": {
@@ -90,14 +88,14 @@
     "expiredEmpty": "Aucun non abouti",
     "conversion": "Commandes pour 100 vues",
     "conversionCounts": "Commandes : {orders}, vues : {views}",
-    "abandonment": "Abandon au paiement",
+    "abandonment": "Paiements non terminés",
     "abandonmentCounts": "Non aboutis : {expired}, commencés : {started}",
     "notEnough": "Pas encore assez de données",
     "notEnoughHint": "Les taux apparaissent dès que cette période compte {min} vues."
   },
   "tiles": {
     "revenue": "Chiffre d’affaires",
-    "afterFees": "{amount} après frais",
+    "afterFees": "{amount} après les frais Square Share",
     "sales": "Ventes",
     "perDay": "{rate} par jour en moyenne",
     "avgOrder": "Panier moyen",
@@ -110,10 +108,10 @@
     "noOrders": "Pas encore de commandes"
   },
   "channels": {
-    "embed": "Intégration",
+    "embed": "Sur votre site",
     "marketplace": "Marketplace",
-    "direct": "Direct",
-    "button": "Bouton sur votre site"
+    "direct": "Votre page",
+    "button": "Bouton d’achat"
   },
   "signalsUnavailable": {
     "title": "Les vues et inscriptions sont indisponibles pour le moment",

@@ -70,7 +70,7 @@
     "teamInvite": {
       "title": "Masz zaproszenie do zespołu",
       "body": "{role, select, owner {{store} zaprasza cię do dołączenia jako właściciel. Otwórz Zespół i dostęp, aby zaakceptować.} editor {{store} zaprasza cię do dołączenia jako edytor. Otwórz Zespół i dostęp, aby zaakceptować.} viewer {{store} zaprasza cię do dołączenia jako przeglądający. Otwórz Zespół i dostęp, aby zaakceptować.} other {{store} zaprasza cię do dołączenia do swojego zespołu. Otwórz Zespół i dostęp, aby zaakceptować.}}",
-      "bodyUnnamedStore": "{role, select, owner {Sklep na SquareShare zaprasza cię do dołączenia jako właściciel. Otwórz Zespół i dostęp, aby zaakceptować.} editor {Sklep na SquareShare zaprasza cię do dołączenia jako edytor. Otwórz Zespół i dostęp, aby zaakceptować.} viewer {Sklep na SquareShare zaprasza cię do dołączenia jako przeglądający. Otwórz Zespół i dostęp, aby zaakceptować.} other {Sklep na SquareShare zaprasza cię do dołączenia do jego zespołu. Otwórz Zespół i dostęp, aby zaakceptować.}}"
+      "bodyUnnamedStore": "{role, select, owner {Sklep na Square Share zaprasza cię do dołączenia jako właściciel. Otwórz Zespół i dostęp, aby zaakceptować.} editor {Sklep na Square Share zaprasza cię do dołączenia jako edytor. Otwórz Zespół i dostęp, aby zaakceptować.} viewer {Sklep na Square Share zaprasza cię do dołączenia jako przeglądający. Otwórz Zespół i dostęp, aby zaakceptować.} other {Sklep na Square Share zaprasza cię do dołączenia do jego zespołu. Otwórz Zespół i dostęp, aby zaakceptować.}}"
     },
     "teamJoined": {
       "title": "{name} w twoim zespole",

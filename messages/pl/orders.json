@@ -15,10 +15,10 @@
     "pending": "Oczekujące"
   },
   "channel": {
-    "embed": "Osadzenie",
+    "embed": "Na twojej stronie",
     "marketplace": "Marketplace",
-    "direct": "Twoje strony",
-    "button": "Przycisk WWW"
+    "direct": "Twoja strona",
+    "button": "Przycisk zakupu"
   },
   "empty": {
     "filteredTitle": "Żadne zamówienie nie pasuje do tych filtrów",
@@ -56,8 +56,8 @@
   "toolbar": {
     "region": "filtry zamówień",
     "channel": "kanał",
-    "buyerEmail": "e-mail kupującego",
     "searchPlaceholder": "szukaj e-maila, imienia, miasta, produktu lub przesyłki",
+    "search": "szukaj",
     "status": "status",
     "statusAriaLabel": "Filtruj według statusu",
     "allStatuses": "Wszystkie statusy",
@@ -85,6 +85,7 @@
     "amount": "Kwota",
     "platformFee": "Opłata platformy",
     "youReceive": "Otrzymujesz",
+    "youReceiveHint": "Przed opłatą Stripe za kartę",
     "buyerEmail": "E-mail kupującego",
     "copyBuyerEmail": {
       "copy": "Kopiuj e-mail kupującego",
@@ -152,7 +153,8 @@
     "discountCodeOutdone": "Użyto kodu {code}, ale cena promocyjna była niższa"
   },
   "actions": {
-    "disputeInStripe": "Spory obsługujesz w panelu Stripe po połączeniu ze Stripe.",
+    "disputeInStripe": "Bank kupującego otworzył spór. Odpowiedz na niego w panelu Stripe przed terminem.",
+    "answerInStripe": "Odpowiedz w Stripe",
     "pendingPayment": "Płatność kupującego jest jeszcze potwierdzana. Nie wysyłaj jeszcze niczego: zamówienie pokaże się jako opłacone, gdy płatność przejdzie, a jeśli nie przejdzie, zamknie się samo.",
     "none": "Dla tego zamówienia nie ma dostępnych żadnych akcji."
   },
@@ -180,10 +182,6 @@
   },
   "skeleton": {
     "loading": "wczytywanie zamówień"
-  },
-  "loading": {
-    "title": "Zamówienia",
-    "subtitle": "Każda sprzedaż z twojego osadzenia i marketplace."
   },
   "toShipCount": "{count, plural, one {{count} zamówienie do wysłania} few {{count} zamówienia do wysłania} many {{count} zamówień do wysłania} other {{count} zamówienia do wysłania}}",
   "views": {

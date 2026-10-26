@@ -91,24 +91,16 @@ export async function createProductViaUI(
   await gotoApp(page, "/products/new");
   await fillStable(page, "Title", title);
   await fillStable(page, /price/i, price);
-  await page.getByRole("button", { name: /save product/i }).click();
+  await page.getByRole("button", { name: /save product|save as draft/i }).click();
   await page.waitForURL(/\/products$/, { timeout: 30_000 });
 }
 
-/**
- * Create a storefront through the UI and land in its designer.
- *
- * "New storefront" opens the setup flow rather than inserting a row, so every
- * spec that just needs A storefront takes the skip path. The flow itself is
- * covered by 09-storefront-setup.spec.ts; repeating it here would only make
- * unrelated specs fail when the questions change.
- */
+/** Create a storefront through the UI and land in its designer. */
 export async function createStorefrontViaUI(page: Page) {
   await page
     .getByRole("button", { name: /new storefront|create storefront/i })
     .first()
     .click();
-  await page.getByRole("button", { name: /skip setup/i }).click();
   await page.waitForURL(/\/storefront\/[0-9a-f-]{36}/, { timeout: 30_000 });
 }
 
@@ -165,6 +157,8 @@ export const WELCOME_DIALOG = "Welcome to Square Share";
 
 /** The welcome flow's Terms step, as named by its title. */
 export const TERMS_DIALOG = "Our Terms of Service";
+/** The welcome's seller details slide, by its accessible name. */
+export const SELLER_DIALOG = "Add your seller details";
 
 /**
  * Sign up through the real UI; lands on the dashboard.
@@ -237,18 +231,16 @@ export async function openTermsStep(page: Page) {
 }
 
 /**
- * On the Terms step: scroll the summary to its end (which is what opens the
- * button) and agree. Lands on the four-step path.
+ * On the Terms step: agree. Lands on the seller details, which every new
+ * account still has to fill in.
  */
 export async function agreeToTerms(page: Page) {
   const terms = page.getByRole("dialog", { name: TERMS_DIALOG });
-  await terms.locator("[data-terms-summary]").evaluate((box) => {
-    box.scrollTop = box.scrollHeight;
-  });
-  const agree = terms.getByRole("button", { name: "I have read and agree to the Terms" });
-  await expect(agree).toBeEnabled();
-  await agree.click();
-  await expect(page.getByRole("dialog", { name: "Four steps to your first page" })).toBeVisible({
+  // The button submits the form inside the slide, which mounts once the
+  // slide has swapped in: wait for its summary rather than clicking early.
+  await expect(terms.locator("[data-terms-summary]")).toBeVisible();
+  await terms.getByRole("button", { name: "I have read and agree to the Terms" }).click();
+  await expect(page.getByRole("dialog", { name: SELLER_DIALOG })).toBeVisible({
     timeout: 20_000,
   });
 }
@@ -307,14 +299,11 @@ export async function expectSpotlightOn(page: Page, target: Locator) {
     .toBe("on target");
 }
 
-/** The welcome's slides up to its seller details form: Next, agree to the
- *  Terms, then Get started. */
+/** The welcome's slides up to its seller details form: Next, then agree to
+ *  the Terms. */
 export async function openSellerStep(page: Page) {
   await openTermsStep(page);
   await agreeToTerms(page);
-  const path = page.getByRole("dialog", { name: "Four steps to your first page" });
-  await path.getByRole("button", { name: "Get started" }).click();
-  await expect(page.getByRole("dialog", { name: "Add your seller details" })).toBeVisible();
 }
 
 /** Sign in through the real UI. */

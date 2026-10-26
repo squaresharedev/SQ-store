@@ -12,7 +12,7 @@
     },
     "product": {
       "label": "Přidejte produkt",
-      "detail": "Stačí název a cena. Zatím může zůstat jako koncept.",
+      "detail": "Stačí název a cena.",
       "detailDone": "{count, plural, one {Máte {count} produkt.} few {Máte {count} produkty.} many {Máte {count} produktu.} other {Máte {count} produktů.}}",
       "action": "Přidat produkt",
       "cta": "Přidejte svůj první produkt"
@@ -83,9 +83,6 @@
         "title": "Vítejte na Square Share",
         "description": "Čtyři kroky k produktové stránce, kterou můžete sdílet."
       },
-      "path": {
-        "title": "Čtyři kroky k první stránce"
-      },
       "seller": {
         "title": "Doplňte údaje prodejce",
         "description": "Kupující je uvidí na vašich produktových stránkách a zákon je vyžaduje dřív, než začnete prodávat. K marketingu je nikdy nepoužíváme.",
@@ -122,7 +119,7 @@
       }
     },
     "seller": {
-      "namePlaceholder": "např. Studio Builderboy e.U.",
+      "namePlaceholder": "např. Jana Nováková nebo Keramika Jana",
       "nameHelp": "Obchodní jméno vaší firmy, nebo vaše celé jméno, pokud prodáváte jako fyzická osoba.",
       "nameAlternative": "Nebo své celé jméno, pokud prodáváte jako fyzická osoba.",
       "addressPlaceholder": "např. Tržní 12\n110 00 Praha 1\nČeská republika",
@@ -156,12 +153,6 @@
       "buyNow": "Koupit",
       "live": "Zveřejněno",
       "linkCopied": "Odkaz zkopírován"
-    },
-    "setupPath": {
-      "details": "Doplňte své údaje",
-      "product": "Přidejte produkt",
-      "storefront": "Navrhněte výlohu",
-      "share": "Sdílejte její stránku"
     },
     "terms": {
       "agreed": "S těmito Podmínkami souhlasíte. Děkujeme za přečtení.",
@@ -197,7 +188,7 @@
       },
       "productsAdd": {
         "title": "Přidejte produkt",
-        "body": "Na začátek stačí název a cena. Produkt může zůstat konceptem, dokud nebudete připraveni."
+        "body": "Na začátek stačí název a cena."
       },
       "productsImport": {
         "title": "Nebo naimportujte svůj katalog",

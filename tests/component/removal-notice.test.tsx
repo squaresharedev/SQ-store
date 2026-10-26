@@ -69,7 +69,7 @@ describe("RemovalNotice", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: /was removed by SquareShare/i }),
+      screen.getByRole("heading", { name: /was removed by Square Share/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/This is final/)).toBeInTheDocument();
     expect(screen.queryByRole("button")).toBeNull();

@@ -86,7 +86,7 @@ export function EmbedHero({
               )}
             >
               <span className="size-1.5 rounded-full bg-success" />
-              {t("enabledLabel")}
+              {t("showingLabel")}
             </span>
           ) : (
             <span className="absolute inset-0 flex items-center justify-center">
