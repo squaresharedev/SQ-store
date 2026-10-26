@@ -10,7 +10,7 @@ import { iconTileClass } from "@/components/ui/surface-styles";
  * line saying what to drop (or the picked file's name) and a muted line under
  * it. Shared by the product and review importers. `bold` is for a page where
  * dropping the file is THE step (the review import), so the outline is a
- * heavy dotted black instead of a hairline.
+ * bold dashed black instead of a hairline.
  */
 export function FileDropzone({
   id,
@@ -56,7 +56,7 @@ export function FileDropzone({
       className={cn(
         "flex w-full cursor-pointer items-center gap-3 rounded-sm bg-background px-4 py-5 transition-colors duration-base ease-standard motion-reduce:transition-none",
         "has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-ring has-[input:focus-visible]:ring-offset-2 has-[input:focus-visible]:ring-offset-background",
-        bold ? "border-3 border-dotted" : "border border-dashed",
+        bold ? "border-2 border-dashed" : "border border-dashed",
         dragging ? "border-foreground bg-accent" : bold ? "border-foreground hover:bg-accent" : "border-border hover:bg-accent",
       )}
     >
