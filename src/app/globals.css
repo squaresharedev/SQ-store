@@ -1144,6 +1144,130 @@ textarea {
   animation: swipe-sheen 3s cubic-bezier(0.5, 0, 0.2, 1) infinite;
 }
 
+/* Review import: a cursor grabs a review export in another store's window,
+   drags it into SquareShare, and the reviews land as five stars, looping
+   (components/products/ReviewImportMotion). One 5s story on one clock; the
+   offsets are SVG user units, so the drawing scales with its box. The sheet
+   travels +176,-8 from its tile to the drop, and the cursor rides with it. */
+@keyframes review-move-cursor {
+  0%,
+  6% {
+    opacity: 0;
+    transform: translate(82px, 44px);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(82px, 44px);
+  }
+  26% {
+    transform: translate(0, 0);
+  }
+  30% {
+    transform: translate(0, -3px) scale(0.9);
+  }
+  58% {
+    transform: translate(176px, -11px) scale(0.9);
+  }
+  62% {
+    opacity: 1;
+    transform: translate(176px, -8px);
+  }
+  78% {
+    opacity: 0;
+    transform: translate(216px, 42px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(216px, 42px);
+  }
+}
+@keyframes review-move-file {
+  0%,
+  26% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  30% {
+    transform: translate(0, -3px) scale(1.08);
+  }
+  58% {
+    transform: translate(176px, -11px) scale(1.08);
+  }
+  62% {
+    opacity: 1;
+    transform: translate(176px, -8px) scale(1);
+  }
+  68% {
+    opacity: 0;
+    transform: translate(176px, -8px) scale(0.5);
+  }
+  /* Out of sight, it goes home and fades back in for the next take. */
+  88% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+@keyframes review-move-target {
+  0%,
+  54% {
+    opacity: 0;
+  }
+  60%,
+  84% {
+    opacity: 1;
+  }
+  94%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes review-move-star {
+  0%,
+  64% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  69% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+  73%,
+  86% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  94%,
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+.review-move-cursor,
+.review-move-file,
+.review-move-star {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.review-move-cursor {
+  /* Scaled from its tip, so a press does not shift where it points. */
+  transform-origin: top left;
+  animation: review-move-cursor 5s var(--ease-standard) infinite;
+}
+.review-move-file {
+  animation: review-move-file 5s var(--ease-standard) infinite;
+}
+.review-move-target {
+  animation: review-move-target 5s var(--ease-standard) infinite;
+}
+.review-move-star {
+  /* Backwards too: the stagger delay must not show the stars before their beat. */
+  animation: review-move-star 5s var(--ease-standard) infinite both;
+}
+
 /* Payments: the road a payout travels (components/payments/PayoutTrack), drawn
    as a row of square pixels, the brand's grid motif, in the element's own
    colour. The row sizes ITSELF to a whole number of pixels (round() down to
@@ -1626,6 +1750,20 @@ textarea {
   .animate-check-draw {
     animation: none;
     stroke-dashoffset: 0;
+  }
+  /* Review import rests as a static "imported" tableau: the stars landed in
+     SquareShare, the sheet still in the other store, no cursor. */
+  .review-move-cursor {
+    animation: none;
+    opacity: 0;
+  }
+  .review-move-file,
+  .review-move-star {
+    animation: none;
+  }
+  .review-move-target {
+    animation: none;
+    opacity: 1;
   }
   /* Card swipe rests as a static "approved at the reader" tableau. */
   .animate-card-swipe {

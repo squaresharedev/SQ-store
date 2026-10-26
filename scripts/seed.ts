@@ -30,6 +30,11 @@
 // (see lib/catalog.ts). Each is one design language shot one way, so a seeded
 // store reads as a single shop rather than a stock-photo grab bag.
 //
+// Reviews in every state the review system has: verified ones from the
+// orders just written, imported ones from Shopify review apps, and one each
+// held, blocked, hidden and awaiting the check (lib/fake-reviews.ts). Add a
+// batch to an already-seeded store with `pnpm seed-reviews`.
+//
 // Storefront views and product clicks are seeded ONLY when the test seller
 // already has a storefront (a fresh account gets none, same as production —
 // there is no embed widget to serve views through without one), and only for
@@ -64,6 +69,7 @@ import {
   type SeededProduct,
   type SignalInsert,
 } from "./lib/fake-data.ts";
+import { reviewSummaryLines, seedReviews } from "./lib/fake-reviews.ts";
 
 const DAYS = 90;
 const INSERT_CHUNK = 500;
@@ -345,6 +351,9 @@ async function main(): Promise<void> {
     if (error) fail(`Failed to insert signals (chunk at ${i}): ${error.message}`);
   }
 
+  // 5) Reviews, written after the orders they are about.
+  const reviews = await seedReviews(supabase, config.testSellerId, rng, now);
+
   printSummary({
     seed,
     theme: theme.label,
@@ -354,6 +363,7 @@ async function main(): Promise<void> {
     signals,
     uploadedDocuments,
     storeFactsFilled,
+    reviewLines: reviewSummaryLines(reviews),
   });
 }
 
@@ -366,9 +376,10 @@ function printSummary(args: {
   signals: SignalInsert[];
   uploadedDocuments: number;
   storeFactsFilled: string[];
+  reviewLines: string[];
 }): void {
   const { seed, theme, storefrontId, products, orders, signals } = args;
-  const { uploadedDocuments, storeFactsFilled } = args;
+  const { uploadedDocuments, storeFactsFilled, reviewLines } = args;
 
   const byStatus = new Map<string, number>();
   const byChannel = new Map<string, number>();
@@ -473,6 +484,7 @@ function printSummary(args: {
     );
     console.log(line("Distinct visitors", String(visitors.size)));
   }
+  for (const reviewLine of reviewLines) console.log(reviewLine);
   console.log("");
 }
 

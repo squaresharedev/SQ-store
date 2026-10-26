@@ -17,6 +17,7 @@
     "test:e2e:connect": "playwright test --config playwright.connect.config.ts",
     "test:a11y": "playwright test tests/e2e/a11y",
     "seed": "node --env-file-if-exists=.env.local scripts/seed.ts",
+    "seed-reviews": "node --env-file-if-exists=.env.local scripts/seed-reviews.ts",
     "reset-seed": "node --env-file-if-exists=.env.local scripts/reset-seed.ts",
     "reset-seeded-products": "node --env-file-if-exists=.env.local scripts/reset-seeded-products.ts",
     "build-catalog": "node scripts/build-catalog.ts",

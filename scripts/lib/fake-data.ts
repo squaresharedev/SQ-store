@@ -677,7 +677,7 @@ export function findCatalogProduct(title: string): CatalogProduct | undefined {
 export const STORE_CURRENCY = "EUR";
 
 /** Fisher-Yates, drawing from the seeded RNG so shuffles stay reproducible. */
-function shuffled<T>(rng: Rng, items: readonly T[]): T[] {
+export function shuffled<T>(rng: Rng, items: readonly T[]): T[] {
   const out = [...items];
   for (let i = out.length - 1; i > 0; i -= 1) {
     const j = Math.floor(rng() * (i + 1));

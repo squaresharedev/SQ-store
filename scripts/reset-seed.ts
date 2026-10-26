@@ -1,7 +1,7 @@
-// Dev reset: delete ALL orders, products AND storefront signals belonging to
-// the TEST seller, via the service_role key. Scoped strictly to
-// TEST_SELLER_ID and gated behind an explicit --yes so it can never wipe data
-// by accident.
+// Dev reset: delete ALL orders, products (with their reviews), review imports
+// AND storefront signals belonging to the TEST seller, via the service_role
+// key. Scoped strictly to TEST_SELLER_ID and gated behind an explicit --yes so
+// it can never wipe data by accident.
 //
 //   pnpm reset-seed --yes
 //
@@ -31,7 +31,7 @@
 import { parseArgs } from "node:util";
 import { createServiceClient, fail, requireDevConfig } from "./lib/env.ts";
 
-type SeedTable = "orders" | "products" | "storefront_signals";
+type SeedTable = "orders" | "products" | "storefront_signals" | "review_imports";
 type OwnerColumn = "seller_id" | "owner_id" | "account_id";
 
 async function deleteAllFor(
@@ -86,6 +86,9 @@ async function main(): Promise<void> {
     "account_id",
     config.testSellerId,
   );
+  // Review import runs: a run takes its reviews with it. Every other review
+  // goes with its product just below.
+  const importsDeleted = await deleteAllFor(supabase, "review_imports", "seller_id", config.testSellerId);
   const productsDeleted = await deleteAllFor(
     supabase,
     "products",
@@ -107,7 +110,8 @@ async function main(): Promise<void> {
   console.log(`  Test seller           ${config.testSellerId}`);
   console.log(`  Orders deleted        ${ordersDeleted}`);
   console.log(`  Signals deleted       ${signalsDeleted}`);
-  console.log(`  Products deleted      ${productsDeleted}`);
+  console.log(`  Products deleted      ${productsDeleted} (with their reviews)`);
+  console.log(`  Review imports        ${importsDeleted}`);
   console.log(`  Remaining (orders)    ${ordersLeft}`);
   console.log(`  Remaining (signals)   ${signalsLeft}`);
   console.log(`  Remaining (products)  ${productsLeft}`);
