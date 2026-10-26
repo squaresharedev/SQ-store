@@ -48,13 +48,13 @@ const ICONS: Array<{
   {
     name: "Discounts",
     story:
-      "The price tag jiggles in place and settles.",
+      "The price tag jiggles around its punch hole, its edges smearing with motion blur.",
     icon: DiscountsIcon,
   },
   {
     name: "Analytics",
     story:
-      "The arrow threads out of the top-right along its own zigzag, speeding up, then weaves back in from the bottom-left and slows to a stop.",
+      "The arrow threads out of the top-right along its own zigzag, speeding up, then weaves back in from the bottom-left and slows to a stop, wind tearing past both ways.",
     icon: AnalyticsIcon,
   },
   {
