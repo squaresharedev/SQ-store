@@ -48,13 +48,13 @@ const ICONS: Array<{
   {
     name: "Discounts",
     story:
-      "The badge shrinks away and the price tag pops up in its place, then jiggles.",
+      "The price tag jiggles in place and settles.",
     icon: DiscountsIcon,
   },
   {
     name: "Analytics",
     story:
-      "The arrow speeds up its slope and off the top, then rises back in from the bottom.",
+      "The arrow threads out of the top-right along its own zigzag, speeding up, then weaves back in from the bottom-left and slows to a stop.",
     icon: AnalyticsIcon,
   },
   {

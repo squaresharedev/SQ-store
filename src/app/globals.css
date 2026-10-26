@@ -126,7 +126,7 @@
   --transition-duration-slow: 260ms;
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-exit: cubic-bezier(0.7, 0, 0.84, 0); /* speeding up as it leaves */
+  --ease-exit: cubic-bezier(0.55, 0.085, 0.68, 0.53); /* speeding up as it leaves */
 }
 
 /* Soft shadow ramp (styles.md §6.1) — borders first, shadows sparingly. */

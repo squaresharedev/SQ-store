@@ -13,7 +13,9 @@ export const EASE_ENTRANCE: [number, number, number, number] = [
   0.16, 1, 0.3, 1,
 ];
 /** Accelerating away: something picking up speed as it leaves. */
-export const EASE_EXIT: [number, number, number, number] = [0.7, 0, 0.84, 0];
+export const EASE_EXIT: [number, number, number, number] = [
+  0.55, 0.085, 0.68, 0.53,
+];
 
 /** Seconds, mirroring --transition-duration-fast/base/slow. */
 export const DURATION = { fast: 0.12, base: 0.18, slow: 0.26 } as const;
