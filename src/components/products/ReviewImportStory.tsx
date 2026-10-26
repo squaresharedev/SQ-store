@@ -31,33 +31,26 @@ const PRODUCT_PRICE = 24;
 /** One review card's box, shared by the card and the slot it lands in. */
 const REVIEW_CARD_SIZE = "h-10 w-full";
 
-/** Where the card sits in the pile before it is picked up: a loose stack. */
-const PILE_OFFSETS = [
-  { x: 0, y: 0, rotate: 0 },
-  { x: 5, y: -6, rotate: -4 },
-  { x: -4, y: -11, rotate: 3 },
-] as const;
-
-/** Where the pile is: in the other store, lifted, carried, landed, or gone for the next take. */
-type Pile = "rest" | "lifted" | "carried" | "landed" | "gone";
+/** Where the list is: in the old store, picked up, carried, landed, or gone for the next take. */
+type ListState = "rest" | "lifted" | "carried" | "landed" | "gone";
 
 /** Where the cursor is heading. */
-type CursorTarget = "rest" | "pile" | "drop";
+type CursorTarget = "rest" | "list" | "drop";
 
 /**
- * THE STORY, beat by beat. The cursor goes to the pile of reviews in the old
- * store, picks it up, carries it across to the product page, lets go, and the
- * reviews deal into the page's review list while its rating fills in. The
- * last beat clears them for the next take.
+ * THE STORY, beat by beat. The cursor goes to the review list in the old
+ * store, picks the whole list up, carries it across to the product page and
+ * lets go; the list settles into the page's reviews while its rating fills
+ * in. The last beat clears it for the next take.
  */
-const STORY: readonly { pile: Pile; cursor: CursorTarget; press: boolean; ms: number }[] = [
-  { pile: "rest", cursor: "rest", press: false, ms: 900 },
-  { pile: "rest", cursor: "pile", press: false, ms: 850 },
-  { pile: "lifted", cursor: "pile", press: true, ms: 280 },
-  { pile: "carried", cursor: "drop", press: true, ms: 1000 },
-  { pile: "landed", cursor: "drop", press: false, ms: 700 },
-  { pile: "landed", cursor: "rest", press: false, ms: 2400 },
-  { pile: "gone", cursor: "rest", press: false, ms: 400 },
+const STORY: readonly { list: ListState; cursor: CursorTarget; press: boolean; ms: number }[] = [
+  { list: "rest", cursor: "rest", press: false, ms: 900 },
+  { list: "rest", cursor: "list", press: false, ms: 850 },
+  { list: "lifted", cursor: "list", press: true, ms: 320 },
+  { list: "carried", cursor: "drop", press: true, ms: 1000 },
+  { list: "landed", cursor: "drop", press: false, ms: 700 },
+  { list: "landed", cursor: "rest", press: false, ms: 2400 },
+  { list: "gone", cursor: "rest", press: false, ms: 400 },
 ];
 
 /** The beat the picture rests on: everything landed, cursor out of the way. */
@@ -68,17 +61,19 @@ const LOOPS = 2;
 
 /** Travel across the stage: slower than a state change. */
 const GLIDE = { duration: 0.7, ease: EASE_STANDARD };
-/** Each card's beat after the one before it as they deal into the list (s). */
-const DEAL_STAGGER = 0.08;
+/** How far the list rises when it is picked up (px). */
+const LIFT = 3;
+/** The selection outline's margin around the list it holds (px). */
+const SELECTION_INSET = 4;
 /** Where the cursor rests, as a fraction of the stage: low, between the windows. */
 const REST = { x: 0.5, y: 0.9 };
 /** The pointer's tip sits this far inside its own box (px). */
 const CURSOR_TIP = 3;
-/** Where on the top card the cursor grabs, as a fraction of the card. */
-const AIM = { x: 0.72, y: 0.7 };
+/** Where on the list the cursor grabs it, as a fraction of the list. */
+const AIM = { x: 0.78, y: 0.55 };
 
 type Box = { x: number; y: number; width: number; height: number };
-type Layout = { pile: Box; slots: Box[]; rest: { x: number; y: number } };
+type Layout = { rows: Box[]; slots: Box[]; rest: { x: number; y: number } };
 
 /** `node`'s box in `root`'s coordinates. Offsets, not bounding rects, so a
  *  transform on the way (the card lifting) never moves the measurement. */
@@ -92,7 +87,14 @@ function boxWithin(node: HTMLElement, root: HTMLElement): Box {
   return { x, y, width: node.offsetWidth, height: node.offsetHeight };
 }
 
-/** The point the cursor holds a card by. */
+/** The box around a list of rows. */
+function around(rows: Box[]): Box {
+  const first = rows[0];
+  const last = rows[rows.length - 1];
+  return { x: first.x, y: first.y, width: first.width, height: last.y + last.height - first.y };
+}
+
+/** The point the cursor holds a list by. */
 function grip(box: Box): { x: number; y: number } {
   return { x: box.x + box.width * AIM.x, y: box.y + box.height * AIM.y };
 }
@@ -142,9 +144,9 @@ function ReviewCard({ name, rating, quote }: { name: string; rating: number; quo
 
 /**
  * THE MOTION GRAPHIC ON THE REVIEW IMPORT: what the page does, shown. A cursor
- * picks up a pile of reviews in the store the seller is leaving, carries them
- * to a product page on Square Share, and lets go; the reviews deal into the
- * page's review list and its rating fills in.
+ * picks up the review list in the store the seller is leaving, all of it at
+ * once, carries it to a product page on Square Share and lets go; the reviews
+ * settle into the page's review list and its rating fills in.
  *
  * The old store is drawn generic (a globe, no brand): the importer reads
  * several review apps' exports. Plays `LOOPS` times and rests on the landed
@@ -164,7 +166,7 @@ export function ReviewImportStory() {
   const [beats, setBeats] = useState(prefersStill ? LANDED_BEAT : 0);
   const [layout, setLayout] = useState<Layout | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const pileRef = useRef<HTMLDivElement>(null);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const beat = STORY[beats % STORY.length];
@@ -181,17 +183,17 @@ export function ReviewImportStory() {
     return () => window.clearTimeout(id);
   }, [playing, beats, beat.ms]);
 
-  // Where the pile and the three slots are, measured: they move with the
-  // page's width and the length of the copy in each language.
+  // Where the old store's rows and the page's slots are, measured: they move
+  // with the page's width and the length of the copy in each language.
   useEffect(() => {
     const stage = stageRef.current;
     if (!stage || typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(() => {
-      const pile = pileRef.current;
+      const rows = rowRefs.current.filter((row): row is HTMLDivElement => row !== null);
       const slots = slotRefs.current.filter((slot): slot is HTMLDivElement => slot !== null);
-      if (!pile || slots.length !== REVIEWS.length) return;
+      if (rows.length !== REVIEWS.length || slots.length !== REVIEWS.length) return;
       setLayout({
-        pile: boxWithin(pile, stage),
+        rows: rows.map((row) => boxWithin(row, stage)),
         slots: slots.map((slot) => boxWithin(slot, stage)),
         rest: { x: stage.offsetWidth * REST.x, y: stage.offsetHeight * REST.y },
       });
@@ -200,64 +202,48 @@ export function ReviewImportStory() {
     return () => observer.disconnect();
   }, []);
 
-  const landed = beat.pile === "landed";
+  const landed = beat.list === "landed";
 
-  /** Where card `index` is on this beat, and how it gets there. */
-  function cardMotion(index: number, { pile, slots }: Layout) {
-    const slot = slots[index];
-    // The pile is centred in the old store's window, at the slots' width.
-    const home = { x: pile.x + (pile.width - slot.width) / 2, y: pile.y };
-    const carry = { x: slots[0].x - home.x, y: slots[0].y - home.y };
-    const offset = PILE_OFFSETS[index];
-    switch (beat.pile) {
+  /**
+   * Where the list is on this beat, as an offset from its rows in the old
+   * store, and how it gets there. The rows and the slots are spaced alike, so
+   * one offset moves the whole list and lands every review in its slot.
+   */
+  function listMotion({ rows, slots }: Layout) {
+    const carry = { x: slots[0].x - rows[0].x, y: slots[0].y - rows[0].y };
+    switch (beat.list) {
       case "rest":
         return {
-          animate: { x: home.x + offset.x, y: home.y + offset.y, rotate: offset.rotate, scale: 1, opacity: 1 },
+          animate: { x: 0, y: 0, scale: 1, opacity: 1 },
           // Back from "gone": appear in place rather than fly home.
           transition: { default: { duration: 0 }, opacity: { duration: DURATION.slow, ease: EASE_ENTRANCE } },
         };
       case "lifted":
-        return {
-          animate: { x: home.x + offset.x, y: home.y + offset.y - 3, rotate: offset.rotate, scale: 1.04, opacity: 1 },
-          transition: POP,
-        };
+        return { animate: { x: 0, y: -LIFT, scale: 1.02, opacity: 1 }, transition: POP };
       case "carried":
-        return {
-          animate: {
-            x: home.x + offset.x + carry.x,
-            y: home.y + offset.y + carry.y - 3,
-            rotate: offset.rotate,
-            scale: 1.04,
-            opacity: 1,
-          },
-          transition: GLIDE,
-        };
+        return { animate: { x: carry.x, y: carry.y - LIFT, scale: 1.02, opacity: 1 }, transition: GLIDE };
       case "landed":
-        return {
-          animate: { x: slot.x, y: slot.y, rotate: 0, scale: 1, opacity: 1 },
-          transition: { ...POP, delay: index * DEAL_STAGGER },
-        };
+        return { animate: { x: carry.x, y: carry.y, scale: 1, opacity: 1 }, transition: POP };
       case "gone":
         return {
-          animate: { x: slot.x, y: slot.y, rotate: 0, scale: 1, opacity: 0 },
+          animate: { x: carry.x, y: carry.y, scale: 1, opacity: 0 },
           transition: { duration: DURATION.slow, ease: EASE_STANDARD },
         };
     }
   }
 
+  const held = beat.list === "lifted" || beat.list === "carried";
   const cursorAt = layout
     ? beat.cursor === "rest"
       ? layout.rest
-      : beat.cursor === "pile"
-        ? grip({ ...layout.pile, x: layout.pile.x + (layout.pile.width - layout.slots[0].width) / 2, width: layout.slots[0].width })
-        : grip(layout.slots[0])
+      : grip(around(beat.cursor === "list" ? layout.rows : layout.slots))
     : null;
 
   return (
     <div className="relative" data-review-import-story={playing ? "playing" : "still"}>
       <div ref={stageRef} aria-hidden="true" className={cn(cardClass, "@container relative overflow-hidden")}>
         <div className="grid grid-cols-2 gap-3 bg-secondary p-3">
-          {/* The store the reviews are leaving: a pile of them, nothing else. */}
+          {/* The store the reviews are leaving, with its review list. */}
           <Window
             chrome={
               <>
@@ -268,8 +254,17 @@ export function ReviewImportStory() {
           >
             <span className={cn(placeholderBarClass, "w-1/2")} />
             <span className={cn(placeholderBarClass, "mt-2 w-1/3")} />
-            <div className="flex flex-1 items-center">
-              <div ref={pileRef} className={REVIEW_CARD_SIZE} />
+            {/* Where the reviews sit in the old store, spaced like the page's slots. */}
+            <div className="mt-auto flex flex-col gap-1.5">
+              {REVIEWS.map((review, index) => (
+                <div
+                  key={review.id}
+                  ref={(node) => {
+                    rowRefs.current[index] = node;
+                  }}
+                  className={REVIEW_CARD_SIZE}
+                />
+              ))}
             </div>
           </Window>
 
@@ -332,26 +327,40 @@ export function ReviewImportStory() {
           </Window>
         </div>
 
-        {/* The cards, over both windows so they can travel between them. The
-            first is the pile's top card, so it is drawn last. */}
+        {/* The list, over both windows so it can travel between them: the
+            reviews at their rows, moved as one, and the outline that shows the
+            cursor holds all of them. */}
         {layout &&
-          REVIEWS.map((review, index) => ({ review, index }))
-            .reverse()
-            .map(({ review, index }) => {
-              const { animate, transition } = cardMotion(index, layout);
-              return (
-                <motion.div
-                  key={review.id}
-                  className="absolute left-0 top-0"
-                  style={{ width: layout.slots[index].width }}
+          (() => {
+            const { animate, transition } = listMotion(layout);
+            const list = around(layout.rows);
+            return (
+              <motion.div
+                className="absolute"
+                style={{ left: list.x, top: list.y, width: list.width, height: list.height }}
+                initial={false}
+                animate={animate}
+                transition={transition}
+              >
+                <motion.span
+                  className="absolute rounded-md border border-dashed border-foreground/40"
+                  style={{ inset: -SELECTION_INSET }}
                   initial={false}
-                  animate={animate}
-                  transition={transition}
-                >
-                  <ReviewCard name={review.name} rating={review.rating} quote={t(`reviews.${review.id}`)} />
-                </motion.div>
-              );
-            })}
+                  animate={{ opacity: held ? 1 : 0 }}
+                  transition={{ duration: DURATION.base, ease: EASE_STANDARD }}
+                />
+                {REVIEWS.map((review, index) => (
+                  <div
+                    key={review.id}
+                    className="absolute left-0"
+                    style={{ top: layout.rows[index].y - list.y, width: list.width }}
+                  >
+                    <ReviewCard name={review.name} rating={review.rating} quote={t(`reviews.${review.id}`)} />
+                  </div>
+                ))}
+              </motion.div>
+            );
+          })()}
 
         {cursorAt && (
           <motion.span
