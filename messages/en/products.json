@@ -1092,15 +1092,14 @@
       "reviews": {
         "a": "“Lovely glaze, keeps my coffee hot.”",
         "b": "“Even nicer in person.”",
-        "c": "“Arrived fast and well packed.”",
-        "d": "“Bought a second one as a gift.”"
+        "c": "“Arrived fast and well packed.”"
       }
     }
   },
   "reviewModeration": {
     "heading": "Reviews",
     "description": "What buyers said about your products. Every review is checked automatically before it appears, and the ones the check was unsure about wait here for you.",
-    "importLink": "Moving from Shopify? Import your reviews",
+    "importButton": "Import from anywhere",
     "filtersLabel": "Filter reviews",
     "filters": {
       "all": "All",

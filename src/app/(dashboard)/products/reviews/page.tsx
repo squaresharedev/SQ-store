@@ -10,7 +10,9 @@ import { PRODUCTS_PATH } from "@/lib/products/paths";
 import { REVIEWS_FILTER_PARAM, REVIEWS_IMPORT_PATH, REVIEWS_PATH } from "@/lib/reviews/paths";
 import { REVIEW_MODERATION_FILTERS, type ReviewModerationFilter } from "@/lib/reviews/moderation-rules";
 import { getSellerReviews } from "@/lib/reviews/seller-queries";
-import { ghostButtonClass, quietLinkClass } from "@/components/ui/control-styles";
+import { ghostButtonClass, secondaryButtonClass } from "@/components/ui/control-styles";
+import { UploadIcon } from "@/components/ui/UploadIcon";
+import { cn } from "@/lib/utils";
 import { ReviewModeration } from "@/components/products/ReviewModeration";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -53,12 +55,17 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
           <ArrowLeft className="size-4" strokeWidth={2} aria-hidden="true" />
           {tPage("back")}
         </Link>
-        <div>
-          <h1 className="font-inter text-2xl font-semibold text-foreground">{t("heading")}</h1>
-          <p className="mt-1 font-inter text-sm text-muted-foreground">{t("description")}</p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="font-inter text-2xl font-semibold text-foreground">{t("heading")}</h1>
+            <p className="mt-1 font-inter text-sm text-muted-foreground">{t("description")}</p>
+          </div>
+          {/* A button, like Import on Products: someone arriving with reviews
+              elsewhere is looking for exactly this. */}
           {can(account.role, "products.write") && (
-            <Link href={REVIEWS_IMPORT_PATH} className={`${quietLinkClass} mt-2 inline-block`}>
-              {t("importLink")}
+            <Link href={REVIEWS_IMPORT_PATH} className={cn(secondaryButtonClass, "h-10 shrink-0 px-3 py-2 text-sm")}>
+              <UploadIcon className="size-4" />
+              {t("importButton")}
             </Link>
           )}
         </div>

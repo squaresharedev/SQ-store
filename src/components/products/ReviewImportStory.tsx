@@ -18,7 +18,6 @@ const REVIEWS = [
   { id: "a", name: "Rafael M.", rating: 5, photo: "/review-import/reviewer-1.webp" },
   { id: "b", name: "Tomás R.", rating: 5, photo: "/review-import/reviewer-2.webp" },
   { id: "c", name: "Jonas B.", rating: 4, photo: "/review-import/reviewer-3.webp" },
-  { id: "d", name: "Liam O.", rating: 5, photo: "/review-import/reviewer-4.webp" },
 ] as const;
 
 /** Their average, as the product page shows it once they land. */
@@ -33,10 +32,8 @@ const OTHER_DOMAIN = "yourdomain.com";
 /** Where the product page lives. A domain, not copy. */
 const PAGE_DOMAIN = "squareshare.eu";
 
-/** One review card's box, shared by the card, its row in the old store and the slot it lands in. */
-const REVIEW_CARD_SIZE = "h-10 w-full";
-/** The gap between rows, alike in the old store and on the page, so one move lands every review. */
-const REVIEW_LIST_GAP = "gap-1.5";
+/** One review row's box, shared by the row, its place in the old store and the slot it lands in. */
+const REVIEW_ROW_SIZE = "h-12 w-full";
 
 /** The three window controls of a drawn browser, in their own colours. */
 const WINDOW_DOTS = ["bg-window-close", "bg-window-minimize", "bg-window-zoom"] as const;
@@ -71,7 +68,7 @@ const GLIDE = { duration: 0.7, ease: EASE_STANDARD };
 /** How far the list rises when it is picked up (px). */
 const LIFT = 3;
 /** The selection outline's margin around the list it holds (px). */
-const SELECTION_INSET = 4;
+const SELECTION_INSET = 6;
 /** Where the cursor rests, as a fraction of the stage: low, between the windows. */
 const REST = { x: 0.5, y: 0.92 };
 /** The pointer's tip sits this far inside its own box (px). */
@@ -166,13 +163,26 @@ function ProductPhoto() {
   );
 }
 
-/** One review: who (with their photo), how many stars, what they said. */
-function ReviewCard({ name, photo, rating, quote }: { name: string; photo: string; rating: number; quote: string }) {
+/** One review as a store lists it: who (with their photo), how many stars,
+ *  what they said, and a hairline under every row but the last. */
+function ReviewRow({
+  name,
+  photo,
+  rating,
+  quote,
+  last,
+}: {
+  name: string;
+  photo: string;
+  rating: number;
+  quote: string;
+  last: boolean;
+}) {
   return (
-    <div className={cn(cardClass, REVIEW_CARD_SIZE, "flex items-center gap-2 bg-background px-2")}>
+    <div className={cn(REVIEW_ROW_SIZE, "flex items-center gap-2 bg-background", !last && "border-b border-border")}>
       {/* Decorative, inside an aria-hidden stage: no alt text, and too small for next/image to earn its keep. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={photo} alt="" width={24} height={24} className="size-6 shrink-0 rounded-full bg-secondary" />
+      <img src={photo} alt="" width={28} height={28} className="size-7 shrink-0 rounded-full bg-secondary" />
       <span className="flex min-w-0 flex-1 flex-col">
         {/* The name keeps its width; the stars give way on a narrow page. */}
         <span className="flex min-w-0 items-center gap-1.5 overflow-hidden">
@@ -187,17 +197,17 @@ function ReviewCard({ name, photo, rating, quote }: { name: string; photo: strin
   );
 }
 
-/** Rows (or slots) spaced like each other, one per review, measured by ref. */
-function ReviewRows({ refs, className }: { refs: RefObject<(HTMLDivElement | null)[]>; className?: string }) {
+/** Where each review row sits (in the old store, or its slot on the page), measured by ref. */
+function ReviewRows({ refs }: { refs: RefObject<(HTMLDivElement | null)[]> }) {
   return (
-    <div className={cn("flex flex-col", REVIEW_LIST_GAP)}>
+    <div className="flex flex-col">
       {REVIEWS.map((review, index) => (
         <div
           key={review.id}
           ref={(node) => {
             refs.current[index] = node;
           }}
-          className={cn(REVIEW_CARD_SIZE, className)}
+          className={REVIEW_ROW_SIZE}
         />
       ))}
     </div>
@@ -331,7 +341,7 @@ export function ReviewImportStory() {
                 </span>
               </div>
             </div>
-            <span className="mb-2 mt-3 font-inter text-xs font-semibold text-foreground">{t("customerReviews")}</span>
+            <span className="mb-3 mt-3 font-inter text-xs font-semibold text-foreground">{t("customerReviews")}</span>
             <ReviewRows refs={rowRefs} />
           </div>
         </BrowserWindow>
@@ -383,8 +393,17 @@ export function ReviewImportStory() {
                 </span>
               </div>
             </div>
-            <span className="mb-2 mt-3 font-inter text-xs font-semibold text-foreground">{tReviews("heading")}</span>
-            <ReviewRows refs={slotRefs} className="rounded-md border border-dashed border-border" />
+            <span className="mb-3 mt-3 font-inter text-xs font-semibold text-foreground">{tReviews("heading")}</span>
+            {/* An empty list until the reviews land on it. */}
+            <div className="relative">
+              <motion.span
+                className="absolute inset-0 rounded-md border border-dashed border-border"
+                initial={false}
+                animate={{ opacity: landed ? 0 : 1 }}
+                transition={{ duration: DURATION.base, ease: EASE_STANDARD }}
+              />
+              <ReviewRows refs={slotRefs} />
+            </div>
           </div>
         </BrowserWindow>
       </div>
@@ -405,7 +424,7 @@ export function ReviewImportStory() {
               transition={transition}
             >
               <motion.span
-                className="absolute rounded-md border-2 border-acid bg-acid/5"
+                className="absolute rounded-md border-3 border-dotted border-foreground"
                 style={{ inset: -SELECTION_INSET }}
                 initial={false}
                 animate={{ opacity: held ? 1 : 0 }}
@@ -417,11 +436,12 @@ export function ReviewImportStory() {
                   className="absolute left-0"
                   style={{ top: layout.rows[index].y - list.y, width: list.width }}
                 >
-                  <ReviewCard
+                  <ReviewRow
                     name={review.name}
                     photo={review.photo}
                     rating={review.rating}
                     quote={t(`reviews.${review.id}`)}
+                    last={index === REVIEWS.length - 1}
                   />
                 </div>
               ))}

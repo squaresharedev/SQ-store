@@ -1092,15 +1092,14 @@
       "reviews": {
         "a": "«Vidrado lindo, mantém o café quente.»",
         "b": "«Ainda mais bonita ao vivo.»",
-        "c": "«Chegou depressa e bem embalada.»",
-        "d": "«Comprei outra para oferecer.»"
+        "c": "«Chegou depressa e bem embalada.»"
       }
     }
   },
   "reviewModeration": {
     "heading": "Avaliações",
     "description": "O que os compradores dizem dos seus produtos. Cada avaliação é verificada automaticamente antes de aparecer, e as que deixaram a verificação com dúvidas esperam aqui pela sua decisão.",
-    "importLink": "Vem do Shopify? Importe as suas avaliações",
+    "importButton": "Importar de qualquer lado",
     "filtersLabel": "Filtrar avaliações",
     "filters": {
       "all": "Todas",

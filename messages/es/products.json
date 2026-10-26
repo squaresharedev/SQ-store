@@ -1092,15 +1092,14 @@
       "reviews": {
         "a": "«Esmalte precioso, mantiene el café caliente.»",
         "b": "«Aún más bonita en persona.»",
-        "c": "«Llegó rápido y bien embalada.»",
-        "d": "«Compré otra para regalar.»"
+        "c": "«Llegó rápido y bien embalada.»"
       }
     }
   },
   "reviewModeration": {
     "heading": "Reseñas",
     "description": "Lo que dicen los compradores de tus productos. Cada reseña se revisa automáticamente antes de publicarse, y las que generaron dudas te esperan aquí.",
-    "importLink": "¿Vienes de Shopify? Importa tus reseñas",
+    "importButton": "Importar desde cualquier sitio",
     "filtersLabel": "Filtrar reseñas",
     "filters": {
       "all": "Todas",

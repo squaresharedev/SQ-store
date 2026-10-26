@@ -1092,15 +1092,14 @@
       "reviews": {
         "a": "„Schöne Glasur, hält den Kaffee lange warm.“",
         "b": "„In echt noch schöner.“",
-        "c": "„Schnell da und gut verpackt.“",
-        "d": "„Gleich noch einen zum Verschenken gekauft.“"
+        "c": "„Schnell da und gut verpackt.“"
       }
     }
   },
   "reviewModeration": {
     "heading": "Bewertungen",
     "description": "Was Käufer über deine Produkte sagen. Jede Bewertung wird vor dem Erscheinen automatisch geprüft, und die, bei denen die Prüfung unsicher war, warten hier auf dich.",
-    "importLink": "Kommst du von Shopify? Importiere deine Bewertungen",
+    "importButton": "Von überall importieren",
     "filtersLabel": "Bewertungen filtern",
     "filters": {
       "all": "Alle",

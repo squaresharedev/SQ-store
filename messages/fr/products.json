@@ -1092,15 +1092,14 @@
       "reviews": {
         "a": "« Bel émail, garde mon café bien chaud. »",
         "b": "« Encore plus belle en vrai. »",
-        "c": "« Arrivée vite et bien emballée. »",
-        "d": "« J’en ai acheté une deuxième à offrir. »"
+        "c": "« Arrivée vite et bien emballée. »"
       }
     }
   },
   "reviewModeration": {
     "heading": "Avis",
     "description": "Ce que les acheteurs disent de vos produits. Chaque avis est vérifié automatiquement avant de paraître, et ceux sur lesquels la vérification a eu un doute vous attendent ici.",
-    "importLink": "Vous venez de Shopify ? Importez vos avis",
+    "importButton": "Importer depuis n’importe où",
     "filtersLabel": "Filtrer les avis",
     "filters": {
       "all": "Tous",

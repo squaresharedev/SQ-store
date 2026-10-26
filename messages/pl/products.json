@@ -1092,15 +1092,14 @@
       "reviews": {
         "a": "„Piękne szkliwo, kawa długo trzyma ciepło.”",
         "b": "„Na żywo jeszcze ładniejszy.”",
-        "c": "„Przyszedł szybko i dobrze zapakowany.”",
-        "d": "„Kupiłem drugi na prezent.”"
+        "c": "„Przyszedł szybko i dobrze zapakowany.”"
       }
     }
   },
   "reviewModeration": {
     "heading": "Opinie",
     "description": "Co kupujący mówią o twoich produktach. Każda opinia jest automatycznie sprawdzana przed publikacją, a te, co do których sprawdzanie miało wątpliwości, czekają tu na ciebie.",
-    "importLink": "Przechodzisz z Shopify? Zaimportuj swoje opinie",
+    "importButton": "Importuj z dowolnego miejsca",
     "filtersLabel": "Filtruj opinie",
     "filters": {
       "all": "Wszystkie",

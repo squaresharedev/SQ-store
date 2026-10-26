@@ -1092,15 +1092,14 @@
       "reviews": {
         "a": "“Prachtig glazuur, houdt mijn koffie warm.”",
         "b": "“In het echt nog mooier.”",
-        "c": "“Snel geleverd en goed verpakt.”",
-        "d": "“Meteen een tweede als cadeau gekocht.”"
+        "c": "“Snel geleverd en goed verpakt.”"
       }
     }
   },
   "reviewModeration": {
     "heading": "Reviews",
     "description": "Wat kopers over je producten zeggen. Elke review wordt automatisch gecontroleerd voordat hij verschijnt, en de reviews waarover de controle twijfelde, wachten hier op jou.",
-    "importLink": "Kom je van Shopify? Importeer je reviews",
+    "importButton": "Overal vandaan importeren",
     "filtersLabel": "Reviews filteren",
     "filters": {
       "all": "Alle",

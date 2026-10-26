@@ -1092,15 +1092,14 @@
       "reviews": {
         "a": "„Krásná glazura, kafe dlouho drží teplé.“",
         "b": "„Naživo ještě hezčí.“",
-        "c": "„Přišel rychle a dobře zabalený.“",
-        "d": "„Koupil jsem druhý jako dárek.“"
+        "c": "„Přišel rychle a dobře zabalený.“"
       }
     }
   },
   "reviewModeration": {
     "heading": "Recenze",
     "description": "Co kupující říkají o vašich produktech. Každá recenze se před zveřejněním automaticky kontroluje a ty, u kterých si kontrola nebyla jistá, tu čekají na vás.",
-    "importLink": "Přecházíte ze Shopify? Importujte své recenze",
+    "importButton": "Importovat odkudkoli",
     "filtersLabel": "Filtrovat recenze",
     "filters": {
       "all": "Vše",
