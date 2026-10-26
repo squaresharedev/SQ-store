@@ -1084,6 +1084,14 @@
       "unrecognised": "Ce fichier n’est pas un export d’avis que nous savons lire.",
       "nothing": "Rien à importer. Associez au moins un produit.",
       "failed": "L’importation n’a pas abouti et rien n’a été enregistré. Réessayez."
+    },
+    "story": {
+      "product": "Tasse en céramique",
+      "reviews": {
+        "a": "« Bel émail, garde mon café bien chaud. »",
+        "b": "« Encore plus belle en vrai. »",
+        "c": "« Arrivée vite et bien emballée. »"
+      }
     }
   },
   "reviewModeration": {

@@ -1084,6 +1084,14 @@
       "unrecognised": "Dit bestand is geen review-export die we kunnen lezen.",
       "nothing": "Niets te importeren. Koppel minstens één product.",
       "failed": "De import is niet gelukt en er is niets opgeslagen. Probeer het opnieuw."
+    },
+    "story": {
+      "product": "Keramische mok",
+      "reviews": {
+        "a": "“Prachtig glazuur, houdt mijn koffie warm.”",
+        "b": "“In het echt nog mooier.”",
+        "c": "“Snel geleverd en goed verpakt.”"
+      }
     }
   },
   "reviewModeration": {

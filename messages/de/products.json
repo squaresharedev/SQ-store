@@ -1084,6 +1084,14 @@
       "unrecognised": "Diese Datei ist kein Bewertungsexport, den wir lesen können.",
       "nothing": "Nichts zu importieren. Ordne mindestens ein Produkt zu.",
       "failed": "Der Import hat nicht geklappt, es wurde nichts gespeichert. Versuch es noch einmal."
+    },
+    "story": {
+      "product": "Keramikbecher",
+      "reviews": {
+        "a": "„Schöne Glasur, hält den Kaffee lange warm.“",
+        "b": "„In echt noch schöner.“",
+        "c": "„Schnell da und gut verpackt.“"
+      }
     }
   },
   "reviewModeration": {

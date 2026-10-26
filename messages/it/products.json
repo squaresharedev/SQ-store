@@ -1084,6 +1084,14 @@
       "unrecognised": "Questo file non è un’esportazione di recensioni che sappiamo leggere.",
       "nothing": "Niente da importare. Abbina almeno un prodotto.",
       "failed": "L’importazione non è riuscita e non è stato salvato nulla. Riprova."
+    },
+    "story": {
+      "product": "Tazza in ceramica",
+      "reviews": {
+        "a": "«Smalto bellissimo, tiene caldo il caffè.»",
+        "b": "«Dal vivo è ancora più bella.»",
+        "c": "«Arrivata presto e ben imballata.»"
+      }
     }
   },
   "reviewModeration": {

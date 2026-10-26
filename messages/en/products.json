@@ -1084,6 +1084,14 @@
       "unrecognised": "This file is not a review export we can read.",
       "nothing": "Nothing to import. Match at least one product.",
       "failed": "The import did not go through, and nothing was saved. Try again."
+    },
+    "story": {
+      "product": "Ceramic mug",
+      "reviews": {
+        "a": "“Lovely glaze, keeps my coffee hot.”",
+        "b": "“Even nicer in person.”",
+        "c": "“Arrived fast and well packed.”"
+      }
     }
   },
   "reviewModeration": {

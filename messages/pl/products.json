@@ -1084,6 +1084,14 @@
       "unrecognised": "Ten plik nie jest eksportem opinii, który potrafimy odczytać.",
       "nothing": "Nie ma czego importować. Przypisz co najmniej jeden produkt.",
       "failed": "Import się nie powiódł i nic nie zostało zapisane. Spróbuj ponownie."
+    },
+    "story": {
+      "product": "Kubek ceramiczny",
+      "reviews": {
+        "a": "„Piękne szkliwo, kawa długo trzyma ciepło.”",
+        "b": "„Na żywo jeszcze ładniejszy.”",
+        "c": "„Przyszedł szybko i dobrze zapakowany.”"
+      }
     }
   },
   "reviewModeration": {

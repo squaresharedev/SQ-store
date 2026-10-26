@@ -1084,6 +1084,14 @@
       "unrecognised": "Este ficheiro não é uma exportação de avaliações que consigamos ler.",
       "nothing": "Nada para importar. Associe pelo menos um produto.",
       "failed": "A importação não foi concluída e nada foi guardado. Tente novamente."
+    },
+    "story": {
+      "product": "Caneca de cerâmica",
+      "reviews": {
+        "a": "«Vidrado lindo, mantém o café quente.»",
+        "b": "«Ainda mais bonita ao vivo.»",
+        "c": "«Chegou depressa e bem embalada.»"
+      }
     }
   },
   "reviewModeration": {

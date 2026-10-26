@@ -1084,6 +1084,14 @@
       "unrecognised": "Tento soubor není export recenzí, který umíme přečíst.",
       "nothing": "Není co importovat. Přiřaďte alespoň jeden produkt.",
       "failed": "Import se nepodařil a nic se neuložilo. Zkuste to znovu."
+    },
+    "story": {
+      "product": "Keramický hrnek",
+      "reviews": {
+        "a": "„Krásná glazura, kafe dlouho drží teplé.“",
+        "b": "„Naživo ještě hezčí.“",
+        "c": "„Přišel rychle a dobře zabalený.“"
+      }
     }
   },
   "reviewModeration": {

@@ -1084,6 +1084,14 @@
       "unrecognised": "Este archivo no es una exportación de reseñas que podamos leer.",
       "nothing": "No hay nada que importar. Asocia al menos un producto.",
       "failed": "La importación no se ha completado y no se ha guardado nada. Inténtalo de nuevo."
+    },
+    "story": {
+      "product": "Taza de cerámica",
+      "reviews": {
+        "a": "«Esmalte precioso, mantiene el café caliente.»",
+        "b": "«Aún más bonita en persona.»",
+        "c": "«Llegó rápido y bien embalada.»"
+      }
     }
   },
   "reviewModeration": {

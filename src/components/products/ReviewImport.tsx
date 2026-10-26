@@ -22,7 +22,7 @@ import {
   suggestProductMatches,
   type MatchableProduct,
 } from "@/lib/reviews/import";
-import { ReviewImportMotion } from "./ReviewImportMotion";
+import { ReviewImportStory } from "./ReviewImportStory";
 
 /**
  * Bringing a store's reviews over from a Shopify review app.
@@ -140,7 +140,7 @@ export function ReviewImport({ products }: { products: readonly MatchableProduct
   return (
     <div className="space-y-5">
       {/* What the page does, shown until there is a file to work on. */}
-      {!file && <ReviewImportMotion />}
+      {!file && <ReviewImportStory />}
       <FileDropzone
         id="review-import-file"
         accept=".csv,text/csv"
