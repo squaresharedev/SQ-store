@@ -143,6 +143,7 @@ export function ReviewImport({ products }: { products: readonly MatchableProduct
       {!file && <ReviewImportStory />}
       <FileDropzone
         id="review-import-file"
+        bold
         accept=".csv,text/csv"
         label={file ? file.name : t("dropPrompt")}
         meta={file ? tShared("fileMeta", { size: formatBytes(file.size, locale) }) : t("rowsLimit", { max: REVIEW_IMPORT_ROWS_MAX })}

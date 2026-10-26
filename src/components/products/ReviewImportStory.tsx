@@ -68,7 +68,7 @@ const GLIDE = { duration: 0.7, ease: EASE_STANDARD };
 /** How far the list rises when it is picked up (px). */
 const LIFT = 3;
 /** The selection outline's margin around the list it holds (px). */
-const SELECTION_INSET = 6;
+const SELECTION_INSET = 4;
 /** Where the cursor rests, as a fraction of the stage: low, between the windows. */
 const REST = { x: 0.5, y: 0.92 };
 /** The pointer's tip sits this far inside its own box (px). */
@@ -424,7 +424,7 @@ export function ReviewImportStory() {
               transition={transition}
             >
               <motion.span
-                className="absolute rounded-md border-3 border-dotted border-foreground"
+                className="absolute rounded-md border-2 border-acid bg-acid/5"
                 style={{ inset: -SELECTION_INSET }}
                 initial={false}
                 animate={{ opacity: held ? 1 : 0 }}
