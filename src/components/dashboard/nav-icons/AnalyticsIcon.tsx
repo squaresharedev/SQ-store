@@ -88,7 +88,7 @@ const SAMPLES = 72;
 /** Fractions of the run: the exit, a hidden beat, then the entry. */
 const EXIT_END = 0.38;
 const ENTRY_START = 0.44;
-const DURATION = 1.1;
+const DURATION = 0.75;
 
 const exitCurve = cubicBezier(...EASE_EXIT);
 const entryCurve = cubicBezier(...EASE_ENTRANCE);
@@ -203,7 +203,7 @@ function streak(delay: number, distance: number): Variants {
       x: [0, -distance * 0.4, -distance],
       y: [0, distance * 0.4, distance],
       opacity: [0, 0.95, 0],
-      transition: { delay, duration: 0.32, ease: EASE_ENTRANCE },
+      transition: { delay, duration: 0.22, ease: EASE_ENTRANCE },
     },
   };
 }
@@ -213,12 +213,12 @@ const dash = (x: number, y: number, length = 1.7) =>
   `M${x} ${y}l-${length} ${length}`;
 
 const STREAKS: Array<{ d: string; variants: Variants }> = [
-  { d: dash(22.5, 11.5), variants: streak(0.1, 7) },
-  { d: dash(21, 15, 2.1), variants: streak(0.14, 8) },
-  { d: dash(12, 3, 2.1), variants: streak(0.16, 8) },
-  { d: dash(23, 16), variants: streak(0.2, 7) },
-  { d: dash(8.5, 5.5), variants: streak(0.22, 7) },
-  { d: dash(18.5, 16), variants: streak(0.26, 7) },
+  { d: dash(22.5, 11.5), variants: streak(0.07, 7) },
+  { d: dash(21, 15, 2.1), variants: streak(0.1, 8) },
+  { d: dash(12, 3, 2.1), variants: streak(0.11, 8) },
+  { d: dash(23, 16), variants: streak(0.14, 7) },
+  { d: dash(8.5, 5.5), variants: streak(0.15, 7) },
+  { d: dash(18.5, 16), variants: streak(0.18, 7) },
 ];
 
 const TRACK_PATH = TRACK.map(
