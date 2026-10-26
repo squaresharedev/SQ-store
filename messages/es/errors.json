@@ -68,6 +68,10 @@
     "manageDiscounts": {
       "withRole": "Tu rol de {role, select, owner {propietario} editor {editor} viewer {lector} other {{role}}} no te permite gestionar descuentos en esta tienda.",
       "noRole": "No tienes permiso para gestionar descuentos en esta tienda."
+    },
+    "moderateReviews": {
+      "withRole": "Tu rol de {role, select, owner {propietario} editor {editor} viewer {lector} other {{role}}} no te permite ocultar ni publicar reseñas en esta tienda.",
+      "noRole": "No tienes permiso para ocultar ni publicar reseñas en esta tienda."
     }
   },
   "notFound": {
@@ -76,7 +80,8 @@
     "storefront": "No se ha encontrado ese escaparate.",
     "item": "No se ha encontrado ese elemento.",
     "order": "No se ha encontrado ese pedido.",
-    "discount": "No se ha encontrado ese descuento."
+    "discount": "No se ha encontrado ese descuento.",
+    "review": "No se ha encontrado esa reseña."
   },
   "rateLimited": {
     "fix": "Espera unos minutos y vuelve a intentarlo. Si no hay nada reintentándolo en segundo plano, recarga la página primero.",
@@ -98,7 +103,8 @@
     "connectPayments": "Demasiados intentos de conectar Stripe en poco tiempo.",
     "readCheckoutSettings": "Demasiados intentos de leer los ajustes del proceso de pago en poco tiempo.",
     "changePlan": "Demasiados cambios de plan iniciados en poco tiempo.",
-    "saveDiscounts": "Demasiados cambios de descuentos en poco tiempo."
+    "saveDiscounts": "Demasiados cambios de descuentos en poco tiempo.",
+    "moderateReviews": "Demasiados cambios en reseñas en poco tiempo."
   },
   "serverError": {
     "fix": "Suele ser algo temporal. Espera un momento y vuelve a intentarlo; si sigue fallando, recarga la página.",
@@ -136,7 +142,8 @@
     "openBillingPortal": "No se han podido abrir tus datos de facturación por un problema en nuestro lado.",
     "cancelPlan": "No se ha podido cancelar tu plan por un problema en nuestro lado.",
     "resumePlan": "No se ha podido mantener tu plan por un problema en nuestro lado.",
-    "saveDiscount": "No se ha podido guardar el descuento por un problema en nuestro sistema."
+    "saveDiscount": "No se ha podido guardar el descuento por un problema en nuestro sistema.",
+    "moderateReview": "No se ha podido cambiar la reseña por un problema de nuestra parte."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Este producto se ha retirado, no está en pausa.} storefront {Este escaparate se ha retirado, no está en pausa.} other {Este elemento se ha retirado, no está en pausa.}}",
@@ -684,6 +691,16 @@
     "tooMany": {
       "message": "Esta tienda tiene el máximo de descuentos que puede tener.",
       "fix": "Elimina los descuentos que ya no uses e inténtalo de nuevo."
+    }
+  },
+  "reviews": {
+    "blocked": {
+      "message": "La revisión automática ha bloqueado esta reseña, así que no se puede publicar.",
+      "fix": "Incumple una norma, por ejemplo por odio, amenazas o contenido sexual, y seguirá oculta."
+    },
+    "noReason": {
+      "message": "Elige por qué ocultas esta reseña.",
+      "fix": "Una reseña solo se puede ocultar por uno de los motivos indicados."
     }
   }
 }

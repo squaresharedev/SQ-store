@@ -98,6 +98,9 @@ export type BuyerOrder = {
   /** Whether the confirmation email was actually sent. The page says "on its
    *  way to j***@..." only then. */
   confirmationSent: boolean;
+  /** Whether the buyer can review the product (lib/reviews/eligibility.ts),
+   *  already has, or cannot. Absent in the editor's previews. */
+  review?: "open" | "done" | "closed";
 };
 
 export type OrderPageData = {

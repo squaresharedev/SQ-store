@@ -57,7 +57,8 @@
     "system": "Sistema",
     "security": "Sicurezza",
     "policy": "Norme",
-    "billing": "Fatturazione"
+    "billing": "Fatturazione",
+    "review": "Recensione"
   },
   "time": {
     "justNow": "adesso",
@@ -204,6 +205,16 @@
       "autoPaused": {
         "title": "Serve un tuo intervento: {target, select, product {il tuo prodotto «{title}» è in pausa} other {la tua vetrina «{title}» è in pausa}}",
         "body": "Un controllo automatico lo ha nascosto agli acquirenti perché sembra violare le regole. Modificalo e verrà controllato di nuovo subito, oppure chiedi che una persona riesamini la decisione."
+      }
+    },
+    "review": {
+      "new": {
+        "title": "{rating, plural, one {Nuova recensione da {rating} stella} other {Nuova recensione da {rating} stelle}} per {title}",
+        "body": "Leggila nella tua pagina delle recensioni."
+      },
+      "held": {
+        "title": "Una recensione di {title} ti aspetta",
+        "body": "Il controllo automatico aveva dubbi. Pubblicala o nascondila."
       }
     }
   }

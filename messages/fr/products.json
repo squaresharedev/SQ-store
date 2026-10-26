@@ -11,6 +11,12 @@
     },
     "import": {
       "title": "Importer des produits"
+    },
+    "importReviews": {
+      "title": "Importer des avis"
+    },
+    "reviews": {
+      "title": "Avis"
     }
   },
   "page": {
@@ -28,9 +34,14 @@
     },
     "import": {
       "heading": "Importer des produits",
-      "description": "Importez un catalogue depuis Shopify, ou tout autre outil qui exporte un CSV. Vous verrez exactement ce qui arrive avant que rien ne soit enregistré."
+      "description": "Importez un catalogue depuis Shopify, ou tout autre outil qui exporte un CSV. Vous verrez exactement ce qui arrive avant que rien ne soit enregistré.",
+      "reviewsLink": "Vous transférez aussi vos avis ? Importer des avis"
     },
-    "formLoading": "Chargement du formulaire produit"
+    "formLoading": "Chargement du formulaire produit",
+    "importReviews": {
+      "heading": "Importer des avis",
+      "description": "Récupérez vos avis depuis Judge.me, Loox, Yotpo ou Shopify Product Reviews. Exportez-les en CSV, déposez le fichier ici et vérifiez à quel produit chacun appartient avant tout enregistrement."
+    }
   },
   "emptyState": {
     "title": "Pas encore de produits",
@@ -60,7 +71,8 @@
     "import": "Importer",
     "add": "Ajouter un produit",
     "updating": "Mise à jour…",
-    "pagination": "{total, plural, one {{total} produit · page {page} sur {pages}} many {{total} produits · page {page} sur {pages}} other {{total} produits · page {page} sur {pages}}}"
+    "pagination": "{total, plural, one {{total} produit · page {page} sur {pages}} many {{total} produits · page {page} sur {pages}} other {{total} produits · page {page} sur {pages}}}",
+    "reviews": "Avis"
   },
   "list": {
     "noMatch": {
@@ -1021,6 +1033,146 @@
         "label": "Contrôle qualité",
         "keywords": "testé, inspecté, vérifié, approuvé"
       }
+    }
+  },
+  "reviewImport": {
+    "dropPrompt": "Déposez votre export d’avis ici, ou choisissez un fichier CSV",
+    "rowsLimit": "{max, plural, one {Jusqu’à {max} avis par fichier} other {Jusqu’à {max} avis par fichier}}",
+    "fileTooLarge": "Ce fichier est trop volumineux. La limite est de {max}.",
+    "fileEmpty": "Ce fichier est vide.",
+    "badgeNote": "Les avis importés indiquent où ils ont été écrits, par exemple « Importé de Shopify (Judge.me) ». Seuls les avis écrits par des acheteurs à partir d’une commande Square Share sont signalés comme venant d’un acheteur vérifié. Chaque avis importé paraît une fois lu par notre vérification automatique.",
+    "missingColumns": "Ce fichier n’a pas de colonne pour : {fields}. Exportez à nouveau vos avis depuis votre application d’avis, au format CSV.",
+    "fields": {
+      "rating": "note",
+      "title": "titre",
+      "body": "avis",
+      "author": "nom de l’auteur",
+      "date": "date",
+      "product": "produit",
+      "status": "statut"
+    },
+    "summary": "{ready, plural, one {<count>{ready}</count> avis prêt} other {<count>{ready}</count> avis prêts}}{skipped, plural, =0 {.} other {, {skipped} écartés.}}",
+    "hiddenRows": "{count, plural, one {{count} avis était masqué ou signalé comme spam sur votre ancienne boutique, il est donc écarté.} other {{count} avis étaient masqués ou signalés comme spam sur votre ancienne boutique, ils sont donc écartés.}}",
+    "droppedRows": "{count, plural, one {{count} avis dépasse les {max} qu’un fichier peut contenir, il est donc écarté.} other {{count} avis dépassent les {max} qu’un fichier peut contenir, ils sont donc écartés.}}",
+    "source": "Importé de",
+    "sourceUnknown": "Choisissez l’application",
+    "sourceHelp": "Affiché sur chaque avis, pour que les acheteurs sachent où il a été écrit.",
+    "sources": {
+      "judgeme": "Judge.me",
+      "loox": "Loox",
+      "yotpo": "Yotpo",
+      "shopify": "Shopify Product Reviews"
+    },
+    "mappingHeading": "Associer les produits",
+    "mappingHelp": "Chaque produit du fichier, et le produit d’ici auquel ses avis sont rattachés. Associés par nom quand c’est possible. Tout ce qui est réglé sur « Ne pas importer » est écarté.",
+    "mappingFileProduct": "Dans le fichier",
+    "mappingReviews": "Avis",
+    "mappingProduct": "Produit ici",
+    "mappingSelect": "Produit pour {key}",
+    "skipProduct": "Ne pas importer",
+    "skippedHeading": "Lignes qui seront écartées",
+    "skippedRow": "Ligne {line} : {problem}",
+    "run": "{count, plural, one {Importer {count} avis} other {Importer {count} avis}}",
+    "imported": "{count, plural, one {{count} avis a été importé.} other {{count} avis ont été importés.}}",
+    "duplicates": "{count, plural, one {{count} était déjà là.} other {{count} étaient déjà là.}}",
+    "skippedRows": "{count, plural, one {{count} ligne a été écartée.} other {{count} lignes ont été écartées.}}",
+    "errors": {
+      "rateLimited": "Trop d’importations au cours de la dernière heure. Réessayez plus tard.",
+      "tooLarge": "Ce fichier est trop volumineux pour être importé.",
+      "unrecognised": "Ce fichier n’est pas un export d’avis que nous savons lire.",
+      "nothing": "Rien à importer. Associez au moins un produit.",
+      "failed": "L’importation n’a pas abouti et rien n’a été enregistré. Réessayez."
+    }
+  },
+  "reviewModeration": {
+    "heading": "Avis",
+    "description": "Ce que les acheteurs disent de vos produits. Chaque avis est vérifié automatiquement avant de paraître, et ceux sur lesquels la vérification a eu un doute vous attendent ici.",
+    "importLink": "Vous venez de Shopify ? Importez vos avis",
+    "filtersLabel": "Filtrer les avis",
+    "filters": {
+      "all": "Tous",
+      "held": "En attente de vous",
+      "hidden": "Masqués"
+    },
+    "heldCount": "{count, plural, one {{count} avis vous attend} other {{count} avis vous attendent}}",
+    "loadFailed": "Impossible de charger vos avis. Actualisez la page pour réessayer.",
+    "empty": {
+      "all": {
+        "title": "Aucun avis pour l’instant",
+        "body": "Quand un acheteur évalue un produit depuis sa page de commande, l’avis apparaît ici."
+      },
+      "held": {
+        "title": "Rien ne vous attend",
+        "body": "Les avis sur lesquels la vérification automatique a un doute attendent ici votre décision."
+      },
+      "hidden": {
+        "title": "Aucun avis masqué",
+        "body": "Les avis que vous masquez apparaissent ici, et vous pouvez les afficher à nouveau à tout moment."
+      }
+    },
+    "pagination": "{total, plural, one {{total} avis · page {page} sur {pages}} other {{total} avis · page {page} sur {pages}}}",
+    "status": {
+      "pending": "En cours de vérification",
+      "held": "En attente de vous",
+      "blocked": "Bloqué par la vérification"
+    },
+    "grounds": {
+      "illegal": "contenu illégal",
+      "sexual": "contenu sexuel",
+      "violence": "menaces ou violence",
+      "hate": "haine ou harcèlement",
+      "counterfeit": "contrefaçon",
+      "scam": "arnaque",
+      "spam": "spam ou publicité",
+      "other": "enfreint les règles"
+    },
+    "hiddenBecause": "Masqué : {reason}",
+    "reasons": {
+      "spam": {
+        "label": "Spam ou publicité",
+        "hint": "Fait la promotion d’une autre boutique ou d’un autre produit, ou n’est pas un vrai avis."
+      },
+      "offensive": {
+        "label": "Injurieux ou choquant",
+        "hint": "Insulte des personnes, emploie des termes haineux ou harcèle quelqu’un."
+      },
+      "personal_info": {
+        "label": "Contient des informations personnelles",
+        "hint": "Contient un numéro de téléphone, une adresse, un e-mail ou d’autres informations privées."
+      },
+      "unrelated": {
+        "label": "Sans rapport avec le produit",
+        "hint": "Parle de tout autre chose, par exemple d’une autre commande ou d’un autre produit."
+      }
+    },
+    "hide": {
+      "title": "Masquer cet avis",
+      "description": "Les acheteurs ne le verront plus, et il ne comptera plus dans la note.",
+      "legend": "Pourquoi le masquez-vous ?",
+      "legal": "Les avis négatifs restent visibles. Masquer un avis parce qu’il est critique induit les acheteurs en erreur et n’est pas autorisé par le droit européen de la consommation, c’est pourquoi un avis ne peut être masqué que pour l’une de ces raisons.",
+      "confirm": "Masquer l’avis"
+    },
+    "actions": {
+      "publish": "Publier",
+      "show": "Afficher à nouveau",
+      "hide": "Masquer"
+    },
+    "done": {
+      "hide": "Avis masqué.",
+      "show": "Avis affiché à nouveau.",
+      "publish": "Avis publié."
+    },
+    "email": {
+      "new": {
+        "subject": "{rating, plural, one {Nouvel avis {rating} étoile} other {Nouvel avis {rating} étoiles}} : {title}",
+        "intro": "{rating, plural, one {Un acheteur a donné {rating} étoile à {title}.} other {Un acheteur a donné {rating} étoiles à {title}.}} Lisez l’avis sur votre page d’avis."
+      },
+      "held": {
+        "subject": "Un avis sur {title} vous attend",
+        "intro": "Notre vérification automatique n’était pas sûre qu’un avis sur {title} respecte les règles, il est donc masqué jusqu’à votre décision. Publiez-le ou masquez-le depuis votre page d’avis."
+      },
+      "open": "Ouvrir vos avis : {url}",
+      "settings": "Vous pouvez désactiver ces e-mails dans Paramètres › Notifications."
     }
   }
 }

@@ -11,6 +11,12 @@
     },
     "import": {
       "title": "Importa prodotti"
+    },
+    "importReviews": {
+      "title": "Importa recensioni"
+    },
+    "reviews": {
+      "title": "Recensioni"
     }
   },
   "page": {
@@ -28,9 +34,14 @@
     },
     "import": {
       "heading": "Importa prodotti",
-      "description": "Porta qui un catalogo da Shopify, o da qualsiasi strumento che esporta un CSV. Vedrai esattamente cosa arriva prima che venga salvato nulla."
+      "description": "Porta qui un catalogo da Shopify, o da qualsiasi strumento che esporta un CSV. Vedrai esattamente cosa arriva prima che venga salvato nulla.",
+      "reviewsLink": "Porti anche le tue recensioni? Importa recensioni"
     },
-    "formLoading": "Caricamento del modulo prodotto"
+    "formLoading": "Caricamento del modulo prodotto",
+    "importReviews": {
+      "heading": "Importa recensioni",
+      "description": "Porta qui le tue recensioni da Judge.me, Loox, Yotpo o Shopify Product Reviews. Esportale lì come CSV, trascina qui il file e controlla a quale prodotto appartiene ognuna prima di salvare qualsiasi cosa."
+    }
   },
   "emptyState": {
     "title": "Ancora nessun prodotto",
@@ -60,7 +71,8 @@
     "import": "Importa",
     "add": "Aggiungi prodotto",
     "updating": "Aggiornamento…",
-    "pagination": "{total, plural, one {{total} prodotto · pagina {page} di {pages}} many {{total} di prodotti · pagina {page} di {pages}} other {{total} prodotti · pagina {page} di {pages}}}"
+    "pagination": "{total, plural, one {{total} prodotto · pagina {page} di {pages}} many {{total} di prodotti · pagina {page} di {pages}} other {{total} prodotti · pagina {page} di {pages}}}",
+    "reviews": "Recensioni"
   },
   "list": {
     "noMatch": {
@@ -1021,6 +1033,146 @@
         "label": "Qualità verificata",
         "keywords": "testato, controllato, approvato, qualità verificata"
       }
+    }
+  },
+  "reviewImport": {
+    "dropPrompt": "Trascina qui l’esportazione delle recensioni o scegli un file CSV",
+    "rowsLimit": "{max, plural, one {Fino a {max} recensione per file} other {Fino a {max} recensioni per file}}",
+    "fileTooLarge": "Il file è troppo grande. Il limite è {max}.",
+    "fileEmpty": "Il file è vuoto.",
+    "badgeNote": "Le recensioni importate indicano dove sono state scritte, ad esempio «Importata da Shopify (Judge.me)». Solo le recensioni scritte dagli acquirenti da un ordine Square Share sono indicate come di un acquirente verificato. Ogni recensione importata appare dopo che il nostro controllo automatico l’ha letta.",
+    "missingColumns": "Questo file non ha una colonna per: {fields}. Esporta di nuovo le recensioni dalla tua app di recensioni, in formato CSV.",
+    "fields": {
+      "rating": "voto",
+      "title": "titolo",
+      "body": "recensione",
+      "author": "nome dell’autore",
+      "date": "data",
+      "product": "prodotto",
+      "status": "stato"
+    },
+    "summary": "{ready, plural, one {<count>{ready}</count> recensione pronta} other {<count>{ready}</count> recensioni pronte}}{skipped, plural, =0 {.} other {, {skipped} escluse.}}",
+    "hiddenRows": "{count, plural, one {{count} recensione era nascosta o segnata come spam nel tuo vecchio negozio, quindi viene esclusa.} other {{count} recensioni erano nascoste o segnate come spam nel tuo vecchio negozio, quindi vengono escluse.}}",
+    "droppedRows": "{count, plural, one {{count} recensione supera le {max} che un file può contenere, quindi viene esclusa.} other {{count} recensioni superano le {max} che un file può contenere, quindi vengono escluse.}}",
+    "source": "Importate da",
+    "sourceUnknown": "Scegli l’app",
+    "sourceHelp": "Mostrato su ogni recensione, così gli acquirenti sanno dove è stata scritta.",
+    "sources": {
+      "judgeme": "Judge.me",
+      "loox": "Loox",
+      "yotpo": "Yotpo",
+      "shopify": "Shopify Product Reviews"
+    },
+    "mappingHeading": "Abbina i prodotti",
+    "mappingHelp": "Ogni prodotto del file e il prodotto qui a cui vanno le sue recensioni. Abbinati per nome quando possibile. Quello impostato su «Non importare» viene escluso.",
+    "mappingFileProduct": "Nel file",
+    "mappingReviews": "Recensioni",
+    "mappingProduct": "Prodotto qui",
+    "mappingSelect": "Prodotto per {key}",
+    "skipProduct": "Non importare",
+    "skippedHeading": "Righe che verranno escluse",
+    "skippedRow": "Riga {line}: {problem}",
+    "run": "{count, plural, one {Importa {count} recensione} other {Importa {count} recensioni}}",
+    "imported": "{count, plural, one {{count} recensione importata.} other {{count} recensioni importate.}}",
+    "duplicates": "{count, plural, one {{count} era già qui.} other {{count} erano già qui.}}",
+    "skippedRows": "{count, plural, one {{count} riga esclusa.} other {{count} righe escluse.}}",
+    "errors": {
+      "rateLimited": "Troppe importazioni nell’ultima ora. Riprova più tardi.",
+      "tooLarge": "Il file è troppo grande per essere importato.",
+      "unrecognised": "Questo file non è un’esportazione di recensioni che sappiamo leggere.",
+      "nothing": "Niente da importare. Abbina almeno un prodotto.",
+      "failed": "L’importazione non è riuscita e non è stato salvato nulla. Riprova."
+    }
+  },
+  "reviewModeration": {
+    "heading": "Recensioni",
+    "description": "Cosa dicono gli acquirenti dei tuoi prodotti. Ogni recensione viene controllata automaticamente prima di apparire, e quelle su cui il controllo aveva dubbi ti aspettano qui.",
+    "importLink": "Arrivi da Shopify? Importa le tue recensioni",
+    "filtersLabel": "Filtra recensioni",
+    "filters": {
+      "all": "Tutte",
+      "held": "In attesa di te",
+      "hidden": "Nascoste"
+    },
+    "heldCount": "{count, plural, one {{count} recensione ti aspetta} other {{count} recensioni ti aspettano}}",
+    "loadFailed": "Non è stato possibile caricare le tue recensioni. Ricarica la pagina per riprovare.",
+    "empty": {
+      "all": {
+        "title": "Ancora nessuna recensione",
+        "body": "Quando un acquirente recensisce un prodotto dalla pagina dell’ordine, la recensione compare qui."
+      },
+      "held": {
+        "title": "Niente ti aspetta",
+        "body": "Le recensioni su cui il controllo automatico ha dubbi aspettano qui la tua decisione."
+      },
+      "hidden": {
+        "title": "Nessuna recensione nascosta",
+        "body": "Le recensioni che nascondi compaiono qui, e puoi mostrarle di nuovo in qualsiasi momento."
+      }
+    },
+    "pagination": "{total, plural, one {{total} recensione · pagina {page} di {pages}} other {{total} recensioni · pagina {page} di {pages}}}",
+    "status": {
+      "pending": "In controllo",
+      "held": "In attesa di te",
+      "blocked": "Bloccata dal controllo"
+    },
+    "grounds": {
+      "illegal": "contenuti illegali",
+      "sexual": "contenuti sessuali",
+      "violence": "minacce o violenza",
+      "hate": "odio o molestie",
+      "counterfeit": "contraffazione",
+      "scam": "truffa",
+      "spam": "spam o pubblicità",
+      "other": "viola le regole"
+    },
+    "hiddenBecause": "Nascosta: {reason}",
+    "reasons": {
+      "spam": {
+        "label": "Spam o pubblicità",
+        "hint": "Promuove un altro negozio o prodotto, o non è una vera recensione."
+      },
+      "offensive": {
+        "label": "Offensiva o ingiuriosa",
+        "hint": "Insulta persone, usa insulti d’odio o molesta qualcuno."
+      },
+      "personal_info": {
+        "label": "Contiene dati personali",
+        "hint": "Contiene un numero di telefono, un indirizzo, un’email o altre informazioni private."
+      },
+      "unrelated": {
+        "label": "Non riguarda il prodotto",
+        "hint": "Parla di tutt’altro, per esempio di un altro ordine o prodotto."
+      }
+    },
+    "hide": {
+      "title": "Nascondi questa recensione",
+      "description": "Gli acquirenti non la vedranno e non conterà nella valutazione.",
+      "legend": "Perché la nascondi?",
+      "legal": "Le recensioni negative restano visibili. Nascondere una recensione perché è critica inganna gli acquirenti e non è consentito dal diritto europeo dei consumatori, quindi una recensione può essere nascosta solo per uno di questi motivi.",
+      "confirm": "Nascondi recensione"
+    },
+    "actions": {
+      "publish": "Pubblica",
+      "show": "Mostra di nuovo",
+      "hide": "Nascondi"
+    },
+    "done": {
+      "hide": "Recensione nascosta.",
+      "show": "Recensione di nuovo visibile.",
+      "publish": "Recensione pubblicata."
+    },
+    "email": {
+      "new": {
+        "subject": "{rating, plural, one {Nuova recensione da {rating} stella} other {Nuova recensione da {rating} stelle}}: {title}",
+        "intro": "{rating, plural, one {Un acquirente ha dato {rating} stella a {title}.} other {Un acquirente ha dato {rating} stelle a {title}.}} Leggi la recensione nella tua pagina delle recensioni."
+      },
+      "held": {
+        "subject": "Una recensione di {title} ti aspetta",
+        "intro": "Il nostro controllo automatico non era sicuro che una recensione di {title} rispetti le regole, quindi è nascosta finché non decidi. Pubblicala o nascondila dalla tua pagina delle recensioni."
+      },
+      "open": "Apri le tue recensioni: {url}",
+      "settings": "Puoi disattivare queste email in Impostazioni › Notifiche."
     }
   }
 }

@@ -27,6 +27,9 @@ export const NOTIFICATION_TYPES = [
    *  plan that is about to end. About what the seller PAYS us, so kept apart
    *  from "payment", which is about what buyers pay them. */
   "billing",
+  /** A buyer reviewed one of the seller's products, or a review is waiting
+   *  for the seller to decide whether to publish it (lib/reviews/notify.ts). */
+  "review",
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];

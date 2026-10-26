@@ -12,6 +12,7 @@ import {
   CircleDot,
   FileEdit,
   ListFilter,
+  MessageSquareQuote,
   Plus,
   ShoppingBag,
   SlidersHorizontal,
@@ -31,6 +32,7 @@ import type { FilterOption } from "@/components/ui/FilterOptionList";
 import { SortSlidersIcon } from "@/components/ui/SortSlidersIcon";
 import { Spinner } from "@/components/ui/spinner";
 import { UploadIcon } from "@/components/ui/UploadIcon";
+import { REVIEWS_PATH } from "@/lib/reviews/paths";
 import {
   helpTextClass,
   infoTextClass,
@@ -239,6 +241,16 @@ export function ProductsBrowser({
               {t("browser.clear")}
             </button>
           )}
+          {/* Every member reads the store's reviews; the page itself decides
+              who may hide or publish them. */}
+          <Link
+            href={REVIEWS_PATH}
+            className={cn(secondaryButtonClass, "h-10 shrink-0 px-3 py-2 text-sm")}
+            data-products-reviews-link=""
+          >
+            <MessageSquareQuote className="size-4" strokeWidth={2} aria-hidden="true" />
+            {t("browser.reviews")}
+          </Link>
           {canWrite && (
             <>
               {/* Beside "Add product", not buried in a menu: someone arriving

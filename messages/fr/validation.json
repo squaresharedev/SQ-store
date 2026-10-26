@@ -311,6 +311,21 @@
       "required": "Un badge doit contenir du texte.",
       "tooLong": "Un badge ne peut pas dépasser {maximum} caractères.",
       "unsupported": "Un badge contient des caractères non pris en charge."
+    },
+    "reviewTitle": {
+      "required": "Un titre d’avis est obligatoire.",
+      "tooLong": "Le titre d’un avis doit faire {maximum} caractères au maximum.",
+      "unsupported": "Le titre de l’avis contient des caractères non pris en charge."
+    },
+    "reviewBody": {
+      "required": "Écrivez quelques mots sur le produit.",
+      "tooLong": "Un avis doit faire {maximum} caractères au maximum.",
+      "unsupported": "L’avis contient des caractères non pris en charge."
+    },
+    "reviewAuthor": {
+      "required": "Ajoutez le nom à afficher avec l’avis.",
+      "tooLong": "Un nom doit faire {maximum} caractères au maximum.",
+      "unsupported": "Le nom contient des caractères non pris en charge."
     }
   },
   "email": {
@@ -426,6 +441,11 @@
       "whole": "La limite doit être un nombre entier.",
       "tooSmall": "La limite doit être au moins {minimum}.",
       "tooBig": "La limite peut être au plus {maximum}."
+    },
+    "reviewRating": {
+      "whole": "Une note doit être un nombre entier d’étoiles.",
+      "tooSmall": "Une note doit être d’au moins {minimum} étoile.",
+      "tooBig": "Une note ne peut pas dépasser {maximum} étoiles."
     }
   },
   "list": {
@@ -534,5 +554,13 @@
     "endBeforeStart": "La fin doit être postérieure au début.",
     "startInPast": "Le début ne peut pas être dans le passé. Choisissez une heure ultérieure, ou démarrez maintenant.",
     "endInPast": "La fin ne peut pas être dans le passé."
+  },
+  "reviewImport": {
+    "rating": "Aucune note de 1 à 5.",
+    "title": "Le titre est trop long.",
+    "body": "L’avis est trop long ou contient des caractères non pris en charge.",
+    "author": "Aucun nom d’auteur.",
+    "date": "Aucune date lisible.",
+    "product": "Aucun produit."
   }
 }

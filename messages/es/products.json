@@ -11,6 +11,12 @@
     },
     "import": {
       "title": "Importar productos"
+    },
+    "importReviews": {
+      "title": "Importar reseñas"
+    },
+    "reviews": {
+      "title": "Reseñas"
     }
   },
   "page": {
@@ -28,9 +34,14 @@
     },
     "import": {
       "heading": "Importar productos",
-      "description": "Trae un catálogo desde Shopify, o desde cualquier herramienta que exporte un CSV. Verás exactamente lo que va a entrar antes de guardar nada."
+      "description": "Trae un catálogo desde Shopify, o desde cualquier herramienta que exporte un CSV. Verás exactamente lo que va a entrar antes de guardar nada.",
+      "reviewsLink": "¿También traes tus reseñas? Importar reseñas"
     },
-    "formLoading": "Cargando el formulario del producto"
+    "formLoading": "Cargando el formulario del producto",
+    "importReviews": {
+      "heading": "Importar reseñas",
+      "description": "Trae tus reseñas de Judge.me, Loox, Yotpo o Shopify Product Reviews. Expórtalas allí como CSV, suelta el archivo aquí y comprueba a qué producto pertenece cada una antes de guardar nada."
+    }
   },
   "emptyState": {
     "title": "Todavía no hay productos",
@@ -60,7 +71,8 @@
     "import": "Importar",
     "add": "Añadir producto",
     "updating": "Actualizando…",
-    "pagination": "{total, plural, one {{total} producto · página {page} de {pages}} many {{total} productos · página {page} de {pages}} other {{total} productos · página {page} de {pages}}}"
+    "pagination": "{total, plural, one {{total} producto · página {page} de {pages}} many {{total} productos · página {page} de {pages}} other {{total} productos · página {page} de {pages}}}",
+    "reviews": "Reseñas"
   },
   "list": {
     "noMatch": {
@@ -1021,6 +1033,146 @@
         "label": "Calidad verificada",
         "keywords": "testado, inspeccionado, comprobado, aprobado"
       }
+    }
+  },
+  "reviewImport": {
+    "dropPrompt": "Suelta aquí tu exportación de reseñas o elige un archivo CSV",
+    "rowsLimit": "{max, plural, one {Hasta {max} reseña por archivo} other {Hasta {max} reseñas por archivo}}",
+    "fileTooLarge": "Ese archivo es demasiado grande. El límite es {max}.",
+    "fileEmpty": "Ese archivo está vacío.",
+    "badgeNote": "Las reseñas importadas muestran dónde se escribieron, como «Importada de Shopify (Judge.me)». Solo las reseñas que escriben los compradores desde un pedido de Square Share se marcan como de comprador verificado. Cada reseña importada aparece cuando nuestra revisión automática la ha leído.",
+    "missingColumns": "Este archivo no tiene columna para: {fields}. Vuelve a exportar tus reseñas desde tu app de reseñas, en CSV.",
+    "fields": {
+      "rating": "valoración",
+      "title": "título",
+      "body": "reseña",
+      "author": "nombre de quien la escribió",
+      "date": "fecha",
+      "product": "producto",
+      "status": "estado"
+    },
+    "summary": "{ready, plural, one {<count>{ready}</count> reseña lista} other {<count>{ready}</count> reseñas listas}}{skipped, plural, =0 {.} other {, {skipped} se omiten.}}",
+    "hiddenRows": "{count, plural, one {{count} reseña estaba oculta o marcada como spam en tu antigua tienda, así que se omite.} other {{count} reseñas estaban ocultas o marcadas como spam en tu antigua tienda, así que se omiten.}}",
+    "droppedRows": "{count, plural, one {{count} reseña supera las {max} que admite un archivo, así que se omite.} other {{count} reseñas superan las {max} que admite un archivo, así que se omiten.}}",
+    "source": "Importadas de",
+    "sourceUnknown": "Elige la app",
+    "sourceHelp": "Se muestra en cada reseña, para que los compradores sepan dónde se escribió.",
+    "sources": {
+      "judgeme": "Judge.me",
+      "loox": "Loox",
+      "yotpo": "Yotpo",
+      "shopify": "Shopify Product Reviews"
+    },
+    "mappingHeading": "Asociar productos",
+    "mappingHelp": "Cada producto del archivo y el producto de aquí al que van sus reseñas. Se asocian por nombre cuando es posible. Lo que esté en «No importar» se omite.",
+    "mappingFileProduct": "En el archivo",
+    "mappingReviews": "Reseñas",
+    "mappingProduct": "Producto aquí",
+    "mappingSelect": "Producto para {key}",
+    "skipProduct": "No importar",
+    "skippedHeading": "Filas que se omitirán",
+    "skippedRow": "Línea {line}: {problem}",
+    "run": "{count, plural, one {Importar {count} reseña} other {Importar {count} reseñas}}",
+    "imported": "{count, plural, one {{count} reseña importada.} other {{count} reseñas importadas.}}",
+    "duplicates": "{count, plural, one {{count} ya estaba aquí.} other {{count} ya estaban aquí.}}",
+    "skippedRows": "{count, plural, one {Se ha omitido {count} fila.} other {Se han omitido {count} filas.}}",
+    "errors": {
+      "rateLimited": "Demasiadas importaciones en la última hora. Inténtalo más tarde.",
+      "tooLarge": "Ese archivo es demasiado grande para importarlo.",
+      "unrecognised": "Este archivo no es una exportación de reseñas que podamos leer.",
+      "nothing": "No hay nada que importar. Asocia al menos un producto.",
+      "failed": "La importación no se ha completado y no se ha guardado nada. Inténtalo de nuevo."
+    }
+  },
+  "reviewModeration": {
+    "heading": "Reseñas",
+    "description": "Lo que dicen los compradores de tus productos. Cada reseña se revisa automáticamente antes de publicarse, y las que generaron dudas te esperan aquí.",
+    "importLink": "¿Vienes de Shopify? Importa tus reseñas",
+    "filtersLabel": "Filtrar reseñas",
+    "filters": {
+      "all": "Todas",
+      "held": "Esperando tu decisión",
+      "hidden": "Ocultas"
+    },
+    "heldCount": "{count, plural, one {{count} reseña espera tu decisión} other {{count} reseñas esperan tu decisión}}",
+    "loadFailed": "No se han podido cargar tus reseñas. Recarga la página para intentarlo de nuevo.",
+    "empty": {
+      "all": {
+        "title": "Aún no hay reseñas",
+        "body": "Cuando un comprador valore un producto desde su página de pedido, la reseña aparecerá aquí."
+      },
+      "held": {
+        "title": "Nada espera tu decisión",
+        "body": "Las reseñas que generan dudas en la revisión automática esperan aquí hasta que decidas."
+      },
+      "hidden": {
+        "title": "No hay reseñas ocultas",
+        "body": "Las reseñas que ocultes aparecen aquí, y puedes volver a mostrarlas cuando quieras."
+      }
+    },
+    "pagination": "{total, plural, one {{total} reseña · página {page} de {pages}} other {{total} reseñas · página {page} de {pages}}}",
+    "status": {
+      "pending": "En revisión",
+      "held": "Esperando tu decisión",
+      "blocked": "Bloqueada por la revisión"
+    },
+    "grounds": {
+      "illegal": "contenido ilegal",
+      "sexual": "contenido sexual",
+      "violence": "amenazas o violencia",
+      "hate": "odio o acoso",
+      "counterfeit": "falsificaciones",
+      "scam": "estafa",
+      "spam": "spam o publicidad",
+      "other": "incumple las normas"
+    },
+    "hiddenBecause": "Oculta: {reason}",
+    "reasons": {
+      "spam": {
+        "label": "Spam o publicidad",
+        "hint": "Promociona otra tienda u otro producto, o no es una reseña real."
+      },
+      "offensive": {
+        "label": "Abusiva u ofensiva",
+        "hint": "Insulta a personas, usa insultos de odio o acosa a alguien."
+      },
+      "personal_info": {
+        "label": "Comparte datos personales",
+        "hint": "Incluye un teléfono, una dirección, un correo electrónico u otra información privada."
+      },
+      "unrelated": {
+        "label": "No trata del producto",
+        "hint": "Habla de otra cosa, como otro pedido u otro producto."
+      }
+    },
+    "hide": {
+      "title": "Ocultar esta reseña",
+      "description": "Los compradores no la verán y no contará en la valoración.",
+      "legend": "¿Por qué la ocultas?",
+      "legal": "Las reseñas negativas se quedan. Ocultar una reseña por ser crítica engaña a los compradores y no está permitido por la normativa europea de consumo, así que una reseña solo se puede ocultar por uno de estos motivos.",
+      "confirm": "Ocultar reseña"
+    },
+    "actions": {
+      "publish": "Publicar",
+      "show": "Volver a mostrar",
+      "hide": "Ocultar"
+    },
+    "done": {
+      "hide": "Reseña oculta.",
+      "show": "Reseña visible de nuevo.",
+      "publish": "Reseña publicada."
+    },
+    "email": {
+      "new": {
+        "subject": "{rating, plural, one {Nueva reseña de {rating} estrella} other {Nueva reseña de {rating} estrellas}}: {title}",
+        "intro": "{rating, plural, one {Un comprador ha dado {rating} estrella a {title}.} other {Un comprador ha dado {rating} estrellas a {title}.}} Lee la reseña en tu página de reseñas."
+      },
+      "held": {
+        "subject": "Una reseña de {title} espera tu decisión",
+        "intro": "Nuestra revisión automática no estaba segura de si una reseña de {title} incumple las normas, así que está oculta hasta que decidas. Publícala u ocúltala desde tu página de reseñas."
+      },
+      "open": "Abrir tus reseñas: {url}",
+      "settings": "Puedes desactivar estos correos en Configuración › Notificaciones."
     }
   }
 }

@@ -57,7 +57,8 @@
     "system": "Systém",
     "security": "Bezpečnosť",
     "policy": "Pravidlá",
-    "billing": "Fakturácia"
+    "billing": "Fakturácia",
+    "review": "Recenzia"
   },
   "time": {
     "justNow": "práve teraz",
@@ -204,6 +205,16 @@
       "autoPaused": {
         "title": "Je potrebný zásah: {target, select, product {váš produkt „{title}“ je pozastavený} other {váš výklad „{title}“ je pozastavený}}",
         "body": "Automatická kontrola ho skryla pred kupujúcimi, pretože to vyzerá, že porušuje pravidlá. Zmeňte ho a hneď sa skontroluje znova, alebo požiadajte, aby rozhodnutie preskúmal človek."
+      }
+    },
+    "review": {
+      "new": {
+        "title": "{rating, plural, one {Nová recenzia ({rating} z 5) pri produkte {title}} few {Nová recenzia ({rating} z 5) pri produkte {title}} many {Nová recenzia ({rating} z 5) pri produkte {title}} other {Nová recenzia ({rating} z 5) pri produkte {title}}}",
+        "body": "Prečítajte si ju na stránke recenzií."
+      },
+      "held": {
+        "title": "Recenzia produktu {title} čaká na vás",
+        "body": "Automatická kontrola si nebola istá. Zverejnite ju alebo ju skryte."
       }
     }
   }

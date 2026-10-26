@@ -583,6 +583,7 @@ export async function saveNotifications(
   if (!user) return SIGNED_OUT;
   const rejected = unknownField(formData, [
     "notify_sales",
+    "notify_reviews",
     "notify_product_updates",
     "notify_marketing",
   ]);
@@ -590,6 +591,7 @@ export async function saveNotifications(
 
   const parsed = notificationsSchema.safeParse({
     notify_sales: formData.get("notify_sales") === "on",
+    notify_reviews: formData.get("notify_reviews") === "on",
     notify_product_updates: formData.get("notify_product_updates") === "on",
     notify_marketing: formData.get("notify_marketing") === "on",
   });

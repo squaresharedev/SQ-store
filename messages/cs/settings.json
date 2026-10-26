@@ -194,6 +194,10 @@
       "marketing": {
         "label": "Tipy a novinky z tržiště",
         "blurb": "Občasné nápady, jak prodávat víc. Jen s mírou, žádný spam."
+      },
+      "reviews": {
+        "label": "Recenze",
+        "blurb": "Poslat mi e-mail, když kupující ohodnotí některý z mých produktů."
       }
     },
     "success": {

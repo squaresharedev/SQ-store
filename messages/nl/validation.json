@@ -311,6 +311,21 @@
       "required": "Een badge heeft tekst nodig.",
       "tooLong": "Een badge mag maximaal {maximum} tekens hebben.",
       "unsupported": "Een badge bevat niet-ondersteunde tekens."
+    },
+    "reviewTitle": {
+      "required": "Een titel voor de review is verplicht.",
+      "tooLong": "De titel van een review mag maximaal {maximum} tekens zijn.",
+      "unsupported": "De titel van de review bevat niet-ondersteunde tekens."
+    },
+    "reviewBody": {
+      "required": "Schrijf een paar woorden over het product.",
+      "tooLong": "Een review mag maximaal {maximum} tekens zijn.",
+      "unsupported": "De review bevat niet-ondersteunde tekens."
+    },
+    "reviewAuthor": {
+      "required": "Voeg de naam toe die bij de review wordt getoond.",
+      "tooLong": "Een naam mag maximaal {maximum} tekens zijn.",
+      "unsupported": "De naam bevat niet-ondersteunde tekens."
     }
   },
   "email": {
@@ -426,6 +441,11 @@
       "whole": "De limiet moet een heel getal zijn.",
       "tooSmall": "De limiet moet minstens {minimum} zijn.",
       "tooBig": "De limiet mag maximaal {maximum} zijn."
+    },
+    "reviewRating": {
+      "whole": "Een beoordeling moet een heel aantal sterren zijn.",
+      "tooSmall": "Een beoordeling moet minstens {minimum} ster zijn.",
+      "tooBig": "Een beoordeling mag maximaal {maximum} sterren zijn."
     }
   },
   "list": {
@@ -534,5 +554,13 @@
     "endBeforeStart": "Het einde moet na het begin liggen.",
     "startInPast": "Het begin kan niet in het verleden liggen. Kies een later tijdstip, of start nu.",
     "endInPast": "Het einde kan niet in het verleden liggen."
+  },
+  "reviewImport": {
+    "rating": "Geen beoordeling van 1 tot 5.",
+    "title": "De titel is te lang.",
+    "body": "De review is te lang of bevat niet-ondersteunde tekens.",
+    "author": "Geen naam van de schrijver.",
+    "date": "Geen leesbare datum.",
+    "product": "Geen product."
   }
 }

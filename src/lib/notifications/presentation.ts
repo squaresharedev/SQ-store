@@ -6,6 +6,7 @@ import {
   Package,
   Receipt,
   Scale,
+  Star,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -40,6 +41,8 @@ export const TYPE_ICON: Record<NotificationType, LucideIcon> = {
   policy: Scale,
   // The seller's own plan, as on the Plan & billing settings page.
   billing: Gem,
+  // A buyer's review, drawn with the star the product page rates in.
+  review: Star,
 };
 
 export const TYPE_LABEL: Record<NotificationType, MessageKey> = {
@@ -51,6 +54,7 @@ export const TYPE_LABEL: Record<NotificationType, MessageKey> = {
   security: "Notifications.types.security",
   policy: "Notifications.types.policy",
   billing: "Notifications.types.billing",
+  review: "Notifications.types.review",
 };
 
 const MINUTE = 60_000;

@@ -194,6 +194,10 @@
       "marketing": {
         "label": "Tips & marketplace news",
         "blurb": "Occasional ideas to help you sell more. We keep it light, no spam."
+      },
+      "reviews": {
+        "label": "Reviews",
+        "blurb": "Email me when a buyer reviews one of my products."
       }
     },
     "success": {

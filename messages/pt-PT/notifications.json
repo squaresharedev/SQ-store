@@ -57,7 +57,8 @@
     "system": "Sistema",
     "security": "Segurança",
     "policy": "Política",
-    "billing": "Faturação"
+    "billing": "Faturação",
+    "review": "Avaliação"
   },
   "time": {
     "justNow": "agora mesmo",
@@ -204,6 +205,16 @@
       "autoPaused": {
         "title": "Ação necessária: {target, select, product {o seu produto «{title}» está pausado} other {a sua montra «{title}» está pausada}}",
         "body": "Uma verificação automática ocultou-o dos compradores porque parece violar as regras. Altere-o e será verificado de novo de imediato, ou peça que uma pessoa reveja a decisão."
+      }
+    },
+    "review": {
+      "new": {
+        "title": "{rating, plural, one {Nova avaliação de {rating} estrela} other {Nova avaliação de {rating} estrelas}} em {title}",
+        "body": "Leia-a na sua página de avaliações."
+      },
+      "held": {
+        "title": "Uma avaliação de {title} está à sua espera",
+        "body": "A verificação automática teve dúvidas. Publique-a ou oculte-a."
       }
     }
   }

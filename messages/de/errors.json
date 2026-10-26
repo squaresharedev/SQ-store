@@ -68,6 +68,10 @@
     "manageDiscounts": {
       "withRole": "Mit deiner Rolle als {role, select, owner {Inhaber} editor {Bearbeiter} viewer {Betrachter} other {{role}}} kannst du in diesem Shop keine Rabatte verwalten.",
       "noRole": "Du hast keine Berechtigung, in diesem Shop Rabatte zu verwalten."
+    },
+    "moderateReviews": {
+      "withRole": "Mit deiner Rolle als {role, select, owner {Inhaber} editor {Bearbeiter} viewer {Betrachter} other {{role}}} kannst du in diesem Shop keine Bewertungen ausblenden oder veröffentlichen.",
+      "noRole": "Du hast keine Berechtigung, in diesem Shop Bewertungen auszublenden oder zu veröffentlichen."
     }
   },
   "notFound": {
@@ -76,7 +80,8 @@
     "storefront": "Dieses Schaufenster konnte nicht gefunden werden.",
     "item": "Dieses Element wurde nicht gefunden.",
     "order": "Diese Bestellung konnte nicht gefunden werden.",
-    "discount": "Dieser Rabatt konnte nicht gefunden werden."
+    "discount": "Dieser Rabatt konnte nicht gefunden werden.",
+    "review": "Diese Bewertung wurde nicht gefunden."
   },
   "rateLimited": {
     "fix": "Warte einige Minuten und versuche es erneut. Falls nichts im Hintergrund wiederholt wird, lade die Seite zuerst neu.",
@@ -98,7 +103,8 @@
     "connectPayments": "Zu viele Versuche, Stripe in kurzer Zeit zu verbinden.",
     "readCheckoutSettings": "Zu viele Versuche, in kurzer Zeit die Kasseneinstellungen abzurufen.",
     "changePlan": "Zu viele Tarifwechsel in kurzer Zeit gestartet.",
-    "saveDiscounts": "Zu viele Rabattänderungen in kurzer Zeit."
+    "saveDiscounts": "Zu viele Rabattänderungen in kurzer Zeit.",
+    "moderateReviews": "Zu viele Änderungen an Bewertungen in kurzer Zeit."
   },
   "serverError": {
     "fix": "Das ist meist vorübergehend. Warte kurz und versuche es erneut. Falls es weiterhin fehlschlägt, lade die Seite neu.",
@@ -136,7 +142,8 @@
     "openBillingPortal": "Deine Abrechnungsdaten konnten wegen eines Problems auf unserer Seite nicht geöffnet werden.",
     "cancelPlan": "Dein Tarif konnte wegen eines Problems auf unserer Seite nicht gekündigt werden.",
     "resumePlan": "Dein Tarif konnte wegen eines Problems auf unserer Seite nicht behalten werden.",
-    "saveDiscount": "Der Rabatt konnte aufgrund eines Problems auf unserer Seite nicht gespeichert werden."
+    "saveDiscount": "Der Rabatt konnte aufgrund eines Problems auf unserer Seite nicht gespeichert werden.",
+    "moderateReview": "Die Bewertung konnte wegen eines Problems bei uns nicht geändert werden."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Dieses Produkt wurde entfernt, nicht pausiert.} storefront {Dieses Schaufenster wurde entfernt, nicht pausiert.} other {Dieses Element wurde entfernt, nicht pausiert.}}",
@@ -684,6 +691,16 @@
     "tooMany": {
       "message": "Dieser Shop hat die maximale Anzahl an Rabatten erreicht.",
       "fix": "Lösche Rabatte, die du nicht mehr verwendest, und versuche es dann erneut."
+    }
+  },
+  "reviews": {
+    "blocked": {
+      "message": "Die automatische Prüfung hat diese Bewertung blockiert, deshalb kann sie nicht veröffentlicht werden.",
+      "fix": "Sie verstößt gegen eine Regel, etwa durch Hass, Drohungen oder sexuelle Inhalte, und bleibt ausgeblendet."
+    },
+    "noReason": {
+      "message": "Wähle, warum du diese Bewertung ausblendest.",
+      "fix": "Eine Bewertung kann nur aus einem der aufgeführten Gründe ausgeblendet werden."
     }
   }
 }

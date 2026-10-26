@@ -11,6 +11,12 @@
     },
     "import": {
       "title": "Produkte importieren"
+    },
+    "importReviews": {
+      "title": "Bewertungen importieren"
+    },
+    "reviews": {
+      "title": "Bewertungen"
     }
   },
   "page": {
@@ -28,9 +34,14 @@
     },
     "import": {
       "heading": "Produkte importieren",
-      "description": "Bringe einen Katalog aus Shopify oder einem anderen Tool, das eine CSV exportiert. Du siehst genau, was ankommen wird, bevor etwas gespeichert wird."
+      "description": "Bringe einen Katalog aus Shopify oder einem anderen Tool, das eine CSV exportiert. Du siehst genau, was ankommen wird, bevor etwas gespeichert wird.",
+      "reviewsLink": "Ziehst du auch deine Bewertungen um? Bewertungen importieren"
     },
-    "formLoading": "Produktformular wird geladen"
+    "formLoading": "Produktformular wird geladen",
+    "importReviews": {
+      "heading": "Bewertungen importieren",
+      "description": "Hol deine Bewertungen von Judge.me, Loox, Yotpo oder Shopify Product Reviews. Exportiere sie dort als CSV, zieh die Datei hierher und prüfe, zu welchem Produkt jede gehört, bevor etwas gespeichert wird."
+    }
   },
   "emptyState": {
     "title": "Noch keine Produkte",
@@ -60,7 +71,8 @@
     "import": "Import",
     "add": "Produkt hinzufügen",
     "updating": "Wird aktualisiert…",
-    "pagination": "{total, plural, one {{total} Produkt · Seite {page} von {pages}} other {{total} Produkte · Seite {page} von {pages}}}"
+    "pagination": "{total, plural, one {{total} Produkt · Seite {page} von {pages}} other {{total} Produkte · Seite {page} von {pages}}}",
+    "reviews": "Bewertungen"
   },
   "list": {
     "noMatch": {
@@ -1021,6 +1033,146 @@
         "label": "Qualitätsgeprüft",
         "keywords": "getestet, geprüft, überprüft, genehmigt"
       }
+    }
+  },
+  "reviewImport": {
+    "dropPrompt": "Zieh deinen Bewertungsexport hierher oder wähle eine CSV-Datei",
+    "rowsLimit": "{max, plural, one {Bis zu {max} Bewertung pro Datei} other {Bis zu {max} Bewertungen pro Datei}}",
+    "fileTooLarge": "Die Datei ist zu groß. Die Grenze liegt bei {max}.",
+    "fileEmpty": "Die Datei ist leer.",
+    "badgeNote": "Importierte Bewertungen zeigen, wo sie ursprünglich geschrieben wurden, z. B. „Von Shopify importiert (Judge.me)“. Nur Bewertungen, die Käufer zu einer Square Share-Bestellung schreiben, gelten als Bewertungen verifizierter Käufer. Jede importierte Bewertung erscheint, sobald unsere automatische Prüfung sie gelesen hat.",
+    "missingColumns": "Diese Datei hat keine Spalte für: {fields}. Exportiere deine Bewertungen noch einmal als CSV aus deiner Bewertungs-App.",
+    "fields": {
+      "rating": "Bewertung",
+      "title": "Titel",
+      "body": "Bewertungstext",
+      "author": "Name des Bewertenden",
+      "date": "Datum",
+      "product": "Produkt",
+      "status": "Status"
+    },
+    "summary": "{ready, plural, one {<count>{ready}</count> Bewertung bereit} other {<count>{ready}</count> Bewertungen bereit}}{skipped, plural, =0 {.} other {, {skipped} ausgelassen.}}",
+    "hiddenRows": "{count, plural, one {{count} Bewertung war in deinem alten Shop ausgeblendet oder als Spam markiert und wird ausgelassen.} other {{count} Bewertungen waren in deinem alten Shop ausgeblendet oder als Spam markiert und werden ausgelassen.}}",
+    "droppedRows": "{count, plural, one {{count} Bewertung liegt über den {max}, die eine Datei enthalten kann, und wird ausgelassen.} other {{count} Bewertungen liegen über den {max}, die eine Datei enthalten kann, und werden ausgelassen.}}",
+    "source": "Importiert von",
+    "sourceUnknown": "App auswählen",
+    "sourceHelp": "Wird bei jeder Bewertung angezeigt, damit Käufer wissen, wo sie ursprünglich geschrieben wurde.",
+    "sources": {
+      "judgeme": "Judge.me",
+      "loox": "Loox",
+      "yotpo": "Yotpo",
+      "shopify": "Shopify Product Reviews"
+    },
+    "mappingHeading": "Produkte zuordnen",
+    "mappingHelp": "Jedes Produkt in der Datei und das Produkt hier, zu dem seine Bewertungen gehören. Wo möglich nach Namen zugeordnet. Alles auf „Nicht importieren“ wird ausgelassen.",
+    "mappingFileProduct": "In der Datei",
+    "mappingReviews": "Bewertungen",
+    "mappingProduct": "Produkt hier",
+    "mappingSelect": "Produkt für {key}",
+    "skipProduct": "Nicht importieren",
+    "skippedHeading": "Zeilen, die ausgelassen werden",
+    "skippedRow": "Zeile {line}: {problem}",
+    "run": "{count, plural, one {{count} Bewertung importieren} other {{count} Bewertungen importieren}}",
+    "imported": "{count, plural, one {{count} Bewertung wurde importiert.} other {{count} Bewertungen wurden importiert.}}",
+    "duplicates": "{count, plural, one {{count} war schon da.} other {{count} waren schon da.}}",
+    "skippedRows": "{count, plural, one {{count} Zeile wurde ausgelassen.} other {{count} Zeilen wurden ausgelassen.}}",
+    "errors": {
+      "rateLimited": "Zu viele Importe in der letzten Stunde. Versuch es später noch einmal.",
+      "tooLarge": "Die Datei ist zu groß für einen Import.",
+      "unrecognised": "Diese Datei ist kein Bewertungsexport, den wir lesen können.",
+      "nothing": "Nichts zu importieren. Ordne mindestens ein Produkt zu.",
+      "failed": "Der Import hat nicht geklappt, es wurde nichts gespeichert. Versuch es noch einmal."
+    }
+  },
+  "reviewModeration": {
+    "heading": "Bewertungen",
+    "description": "Was Käufer über deine Produkte sagen. Jede Bewertung wird vor dem Erscheinen automatisch geprüft, und die, bei denen die Prüfung unsicher war, warten hier auf dich.",
+    "importLink": "Kommst du von Shopify? Importiere deine Bewertungen",
+    "filtersLabel": "Bewertungen filtern",
+    "filters": {
+      "all": "Alle",
+      "held": "Warten auf dich",
+      "hidden": "Ausgeblendet"
+    },
+    "heldCount": "{count, plural, one {{count} Bewertung wartet auf dich} other {{count} Bewertungen warten auf dich}}",
+    "loadFailed": "Deine Bewertungen konnten nicht geladen werden. Lade die Seite neu, um es noch einmal zu versuchen.",
+    "empty": {
+      "all": {
+        "title": "Noch keine Bewertungen",
+        "body": "Wenn ein Käufer ein Produkt auf der Bestellseite bewertet, erscheint die Bewertung hier."
+      },
+      "held": {
+        "title": "Nichts wartet auf dich",
+        "body": "Bewertungen, bei denen die automatische Prüfung unsicher ist, warten hier, bis du entscheidest."
+      },
+      "hidden": {
+        "title": "Keine ausgeblendeten Bewertungen",
+        "body": "Bewertungen, die du ausblendest, erscheinen hier, und du kannst sie jederzeit wieder anzeigen."
+      }
+    },
+    "pagination": "{total, plural, one {{total} Bewertung · Seite {page} von {pages}} other {{total} Bewertungen · Seite {page} von {pages}}}",
+    "status": {
+      "pending": "Wird geprüft",
+      "held": "Wartet auf dich",
+      "blocked": "Von der Prüfung blockiert"
+    },
+    "grounds": {
+      "illegal": "illegale Inhalte",
+      "sexual": "sexuelle Inhalte",
+      "violence": "Drohungen oder Gewalt",
+      "hate": "Hass oder Belästigung",
+      "counterfeit": "Fälschungen",
+      "scam": "Betrug",
+      "spam": "Spam oder Werbung",
+      "other": "verstößt gegen die Regeln"
+    },
+    "hiddenBecause": "Ausgeblendet: {reason}",
+    "reasons": {
+      "spam": {
+        "label": "Spam oder Werbung",
+        "hint": "Wirbt für einen anderen Shop oder ein anderes Produkt oder ist keine echte Bewertung."
+      },
+      "offensive": {
+        "label": "Beleidigend oder anstößig",
+        "hint": "Beleidigt Menschen, verwendet Beschimpfungen oder belästigt jemanden."
+      },
+      "personal_info": {
+        "label": "Enthält persönliche Daten",
+        "hint": "Enthält eine Telefonnummer, Adresse, E-Mail-Adresse oder andere private Informationen."
+      },
+      "unrelated": {
+        "label": "Nicht zum Produkt",
+        "hint": "Handelt von etwas ganz anderem, etwa einer anderen Bestellung oder einem anderen Produkt."
+      }
+    },
+    "hide": {
+      "title": "Diese Bewertung ausblenden",
+      "description": "Käufer sehen sie nicht mehr, und sie zählt nicht zur Bewertung.",
+      "legend": "Warum blendest du sie aus?",
+      "legal": "Negative Bewertungen bleiben sichtbar. Eine Bewertung auszublenden, weil sie kritisch ist, täuscht Käufer und ist nach EU-Verbraucherrecht nicht erlaubt. Deshalb kann eine Bewertung nur aus einem dieser Gründe ausgeblendet werden.",
+      "confirm": "Bewertung ausblenden"
+    },
+    "actions": {
+      "publish": "Veröffentlichen",
+      "show": "Wieder anzeigen",
+      "hide": "Ausblenden"
+    },
+    "done": {
+      "hide": "Bewertung ausgeblendet.",
+      "show": "Bewertung wird wieder angezeigt.",
+      "publish": "Bewertung veröffentlicht."
+    },
+    "email": {
+      "new": {
+        "subject": "{rating, plural, one {Neue {rating}-Sterne-Bewertung} other {Neue {rating}-Sterne-Bewertung}}: {title}",
+        "intro": "{rating, plural, one {Ein Käufer hat {title} mit {rating} Stern bewertet.} other {Ein Käufer hat {title} mit {rating} Sternen bewertet.}} Lies auf deiner Bewertungsseite, was geschrieben wurde."
+      },
+      "held": {
+        "subject": "Eine Bewertung zu {title} wartet auf dich",
+        "intro": "Unsere automatische Prüfung war unsicher, ob eine Bewertung zu {title} gegen die Regeln verstößt, deshalb ist sie ausgeblendet, bis du entscheidest. Veröffentliche sie oder blende sie auf deiner Bewertungsseite aus."
+      },
+      "open": "Deine Bewertungen öffnen: {url}",
+      "settings": "Du kannst diese E-Mails unter Einstellungen › Benachrichtigungen abschalten."
     }
   }
 }

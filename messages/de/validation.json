@@ -311,6 +311,21 @@
       "required": "Ein Badge braucht einen Text.",
       "tooLong": "Ein Badge darf höchstens {maximum} Zeichen lang sein.",
       "unsupported": "Ein Badge enthält nicht unterstützte Zeichen."
+    },
+    "reviewTitle": {
+      "required": "Ein Titel für die Bewertung ist erforderlich.",
+      "tooLong": "Ein Titel darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Der Titel enthält nicht unterstützte Zeichen."
+    },
+    "reviewBody": {
+      "required": "Schreib ein paar Worte zum Produkt.",
+      "tooLong": "Eine Bewertung darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Die Bewertung enthält nicht unterstützte Zeichen."
+    },
+    "reviewAuthor": {
+      "required": "Gib den Namen an, der mit der Bewertung angezeigt wird.",
+      "tooLong": "Ein Name darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Der Name enthält nicht unterstützte Zeichen."
     }
   },
   "email": {
@@ -426,6 +441,11 @@
       "whole": "Das Limit muss eine ganze Zahl sein.",
       "tooSmall": "Das Limit muss mindestens {minimum} betragen.",
       "tooBig": "Das Limit darf höchstens {maximum} betragen."
+    },
+    "reviewRating": {
+      "whole": "Eine Bewertung muss eine ganze Zahl an Sternen sein.",
+      "tooSmall": "Eine Bewertung braucht mindestens {minimum} Stern.",
+      "tooBig": "Eine Bewertung kann höchstens {maximum} Sterne haben."
     }
   },
   "list": {
@@ -534,5 +554,13 @@
     "endBeforeStart": "Das Ende muss nach dem Start liegen.",
     "startInPast": "Der Start kann nicht in der Vergangenheit liegen. Wähle eine spätere Zeit oder starte jetzt.",
     "endInPast": "Das Ende kann nicht in der Vergangenheit liegen."
+  },
+  "reviewImport": {
+    "rating": "Keine Bewertung von 1 bis 5.",
+    "title": "Der Titel ist zu lang.",
+    "body": "Die Bewertung ist zu lang oder enthält nicht unterstützte Zeichen.",
+    "author": "Kein Name des Bewertenden.",
+    "date": "Kein lesbares Datum.",
+    "product": "Kein Produkt."
   }
 }

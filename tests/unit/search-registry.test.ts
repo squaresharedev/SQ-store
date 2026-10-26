@@ -83,6 +83,13 @@ describe("local search registry — matching by intent", () => {
     ["vouchers", "/discounts"],
     ["promo code", "/discounts/new"],
     ["run a sale", "/discounts/new"],
+    // The reviews page sits under Products, not on the rail.
+    ["reviews", "/products/reviews"],
+    ["ratings", "/products/reviews"],
+    ["hide a review", "/products/reviews"],
+    ["import reviews", "/products/import-reviews"],
+    ["shopify reviews", "/products/import-reviews"],
+    ["review emails", "/settings/notifications#preferences"],
   ];
 
   for (const [query, expectedHref] of cases) {
@@ -215,6 +222,15 @@ describe("local search registry — permission gate", () => {
   it("offers write actions to an editor", () => {
     const editor = searchLocalRegistry("product", { role: "editor", limit: 50, t: english });
     expect(hrefs(editor)).toContain("/products/new");
+  });
+
+  it("shows a viewer the reviews but offers importing them only to an editor", () => {
+    const viewer = hrefs(searchLocalRegistry("reviews", { role: "viewer", limit: 50, t: english }));
+    expect(viewer).toContain("/products/reviews");
+    expect(viewer).not.toContain("/products/import-reviews");
+    expect(
+      hrefs(searchLocalRegistry("reviews", { role: "editor", limit: 50, t: english })),
+    ).toContain("/products/import-reviews");
   });
 
   it("hides invite from a viewer but not from an editor", () => {

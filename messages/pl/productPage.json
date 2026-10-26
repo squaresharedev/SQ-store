@@ -260,7 +260,31 @@
     "footerLink": "Odstąp od zakupu",
     "total": "Łącznie zapłacono",
     "quantity": "Ilość {quantity}",
-    "editHeadline": "Nagłówek podziękowania"
+    "editHeadline": "Nagłówek podziękowania",
+    "review": {
+      "title": "Jak było?",
+      "body": "Napisz innym kupującym, co sądzisz o produkcie {product}.",
+      "open": "Napisz opinię",
+      "done": "Ten produkt ma już twoją opinię. Dziękujemy!",
+      "dialogTitle": "Napisz opinię",
+      "sentTitle": "Dziękujemy za opinię",
+      "sentBody": "Pojawi się na stronie produktu mniej więcej w ciągu minuty, gdy przeczyta ją nasze automatyczne sprawdzanie, oznaczona jako opinia zweryfikowanego kupującego.",
+      "ratingLegend": "Twoja ocena",
+      "ratingOption": "{rating, plural, one {{rating} gwiazdka} few {{rating} gwiazdki} many {{rating} gwiazdek} other {{rating} gwiazdki}}",
+      "ratingPrompt": "Wybierz ocenę.",
+      "ratingWords": "{rating, select, 1 {Słabo} 2 {Przeciętnie} 3 {Dobrze} 4 {Bardzo dobrze} other {Doskonale}}",
+      "bodyLabel": "Twoja opinia",
+      "bodyPlaceholder": "Co ci się podobało? Co mogłoby być lepsze?",
+      "titleLabel": "Tytuł (opcjonalnie)",
+      "nameLabel": "Wyświetlane imię",
+      "nameHelp": "Widoczne przy twojej opinii. Twój adres e-mail i zamówienie pozostają prywatne.",
+      "send": "Opublikuj opinię",
+      "errors": {
+        "notEligible": "Tego zamówienia nie można już ocenić.",
+        "rateLimited": "Za dużo opinii z tego połączenia. Spróbuj ponownie za godzinę.",
+        "failed": "Nie udało się opublikować opinii. Spróbuj ponownie."
+      }
+    }
   },
   "checkout": {
     "metadata": {
@@ -386,5 +410,24 @@
     "endsOn": "Obniżka kończy się {date}"
   },
   "badges": "Wyróżnienia",
-  "badgesOnPhoto": "Wyróżnienia na zdjęciu"
+  "badgesOnPhoto": "Wyróżnienia na zdjęciu",
+  "reviews": {
+    "heading": "Opinie",
+    "average": "{average} na 5 gwiazdek",
+    "count": "{count, plural, one {Na podstawie {count} opinii} few {Na podstawie {count} opinii} many {Na podstawie {count} opinii} other {Na podstawie {count} opinii}}",
+    "stars": "{rating, plural, one {Ocena: {rating} gwiazdka na 5} few {Ocena: {rating} gwiazdki na 5} many {Ocena: {rating} gwiazdek na 5} other {Ocena: {rating} gwiazdki na 5}}",
+    "starsShort": "{rating, plural, one {{rating} gwiazdka} few {{rating} gwiazdki} many {{rating} gwiazdek} other {{rating} gwiazdki}}",
+    "verified": "Zweryfikowany kupujący",
+    "imported": "{source, select, judgeme {Zaimportowano z Shopify (Judge.me)} loox {Zaimportowano z Shopify (Loox)} yotpo {Zaimportowano z Shopify (Yotpo)} other {Zaimportowano z Shopify}}",
+    "sortLabel": "Sortuj opinie",
+    "sorts": {
+      "newest": "Najnowsze",
+      "highest": "Najwyżej oceniane",
+      "lowest": "Najniżej oceniane"
+    },
+    "more": "Pokaż więcej opinii",
+    "loading": "Ładowanie…",
+    "loadFailed": "Nie udało się wczytać kolejnych opinii. Spróbuj ponownie.",
+    "about": "Opinie oznaczone jako „Zweryfikowany kupujący” pochodzą z zamówień złożonych w Square Share. Każda opinia jest automatycznie sprawdzana przed publikacją, a sprzedawcy mogą ukryć opinię tylko wtedy, gdy jest spamem, jest obraźliwa, zawiera dane osobowe lub nie dotyczy produktu."
+  }
 }

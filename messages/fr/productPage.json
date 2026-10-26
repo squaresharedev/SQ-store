@@ -260,7 +260,31 @@
     "footerLink": "Se rétracter d'un achat",
     "total": "Total payé",
     "quantity": "Quantité : {quantity}",
-    "editHeadline": "Titre du remerciement"
+    "editHeadline": "Titre du remerciement",
+    "review": {
+      "title": "Qu’en avez-vous pensé ?",
+      "body": "Dites aux autres acheteurs ce que vous pensez de {product}.",
+      "open": "Écrire un avis",
+      "done": "Vous avez évalué ce produit. Merci !",
+      "dialogTitle": "Écrire un avis",
+      "sentTitle": "Merci pour votre avis",
+      "sentBody": "Il paraîtra sur la page du produit d’ici une minute environ, une fois lu par notre vérification automatique, signalé comme venant d’un acheteur vérifié.",
+      "ratingLegend": "Votre note",
+      "ratingOption": "{rating, plural, one {{rating} étoile} other {{rating} étoiles}}",
+      "ratingPrompt": "Choisissez une note.",
+      "ratingWords": "{rating, select, 1 {Décevant} 2 {Passable} 3 {Bien} 4 {Très bien} other {Excellent}}",
+      "bodyLabel": "Votre avis",
+      "bodyPlaceholder": "Qu’avez-vous aimé ? Qu’est-ce qui pourrait être mieux ?",
+      "titleLabel": "Titre (facultatif)",
+      "nameLabel": "Nom affiché",
+      "nameHelp": "Affiché avec votre avis. Votre adresse e-mail et votre commande restent privées.",
+      "send": "Publier l’avis",
+      "errors": {
+        "notEligible": "Cette commande ne peut plus être évaluée.",
+        "rateLimited": "Trop d’avis depuis cette connexion. Réessayez dans une heure.",
+        "failed": "Votre avis n’a pas pu être publié. Réessayez."
+      }
+    }
   },
   "checkout": {
     "metadata": {
@@ -386,5 +410,24 @@
     "endsOn": "Promo jusqu'au {date}"
   },
   "badges": "Points forts",
-  "badgesOnPhoto": "Points forts sur la photo"
+  "badgesOnPhoto": "Points forts sur la photo",
+  "reviews": {
+    "heading": "Avis",
+    "average": "{average} sur 5 étoiles",
+    "count": "{count, plural, one {Basé sur {count} avis} other {Basé sur {count} avis}}",
+    "stars": "{rating, plural, one {Noté {rating} étoile sur 5} other {Noté {rating} étoiles sur 5}}",
+    "starsShort": "{rating, plural, one {{rating} étoile} other {{rating} étoiles}}",
+    "verified": "Acheteur vérifié",
+    "imported": "{source, select, judgeme {Importé de Shopify (Judge.me)} loox {Importé de Shopify (Loox)} yotpo {Importé de Shopify (Yotpo)} other {Importé de Shopify}}",
+    "sortLabel": "Trier les avis",
+    "sorts": {
+      "newest": "Plus récents",
+      "highest": "Mieux notés",
+      "lowest": "Moins bien notés"
+    },
+    "more": "Afficher plus d’avis",
+    "loading": "Chargement…",
+    "loadFailed": "Impossible de charger plus d’avis. Réessayez.",
+    "about": "Les avis marqués « Acheteur vérifié » proviennent de commandes passées sur Square Share. Chaque avis est vérifié automatiquement avant de paraître, et les vendeurs ne peuvent masquer un avis que s’il s’agit de spam, s’il est injurieux, s’il contient des informations personnelles ou s’il ne concerne pas le produit."
+  }
 }

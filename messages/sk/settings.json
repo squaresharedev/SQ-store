@@ -194,6 +194,10 @@
       "marketing": {
         "label": "Tipy a novinky z trhoviska",
         "blurb": "Príležitostné nápady, ako predávať viac. Nenásilne, žiadny spam."
+      },
+      "reviews": {
+        "label": "Recenzie",
+        "blurb": "Poslať mi e-mail, keď kupujúci ohodnotí niektorý z mojich produktov."
       }
     },
     "success": {
