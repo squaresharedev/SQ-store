@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
-import { ChevronLeft, ChevronRight, Lock, MousePointer2, RotateCw, ShoppingBag } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock, MousePointer2, RotateCw, Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -27,9 +27,9 @@ const AVERAGE = REVIEWS.reduce((sum, review) => sum + review.rating, 0) / REVIEW
 /** The made-up product the reviews land on: a mug, priced in the store currency. */
 const PRODUCT_PRICE = 24;
 
-/** The store the reviews are leaving: a made-up shop with its own name and
- *  address. Proper nouns, not copy. */
-const OTHER_STORE = { name: "Clay & Co.", domain: "clayandco.shop" } as const;
+/** The address of the store the reviews are leaving: a stand-in, since it is
+ *  whatever store the seller comes from. A domain, not copy. */
+const OTHER_DOMAIN = "yourdomain.com";
 /** Where the product page lives. A domain, not copy. */
 const PAGE_DOMAIN = "squareshare.eu";
 
@@ -301,22 +301,19 @@ export function ReviewImportStory() {
       data-review-import-story={still ? "still" : "playing"}
       className={cn(cardClass, "@container relative overflow-hidden")}
     >
-      <div className="grid grid-cols-2 items-start gap-3 bg-secondary p-3">
+      {/* Side by side when there is room; stacked, the old store above the new one,
+          when there is not, so neither is squeezed. */}
+      <div className="grid grid-cols-1 items-start gap-3 bg-secondary p-3 @md:grid-cols-2">
         {/* The store the reviews are leaving: somebody else's site, plain and editorial. */}
         <BrowserWindow
-          favicon={<ShoppingBag className="size-3 shrink-0" strokeWidth={2} />}
-          tab={OTHER_STORE.name}
-          domain={OTHER_STORE.domain}
+          favicon={<Globe className="size-3 shrink-0" strokeWidth={2} />}
+          tab={t("product")}
+          domain={OTHER_DOMAIN}
         >
-          <div className="flex flex-col items-center gap-2 border-b border-border px-3 py-2.5">
-            <span className="truncate font-display text-xs font-semibold uppercase tracking-widest text-foreground">
-              {OTHER_STORE.name}
-            </span>
-            <span className="flex gap-2">
-              <span className={cn(placeholderBarClass, "h-1 w-6")} />
-              <span className={cn(placeholderBarClass, "h-1 w-6")} />
-              <span className={cn(placeholderBarClass, "h-1 w-6")} />
-            </span>
+          <div className="flex justify-center gap-2 border-b border-border px-3 py-3">
+            <span className={cn(placeholderBarClass, "h-1 w-8")} />
+            <span className={cn(placeholderBarClass, "h-1 w-8")} />
+            <span className={cn(placeholderBarClass, "h-1 w-8")} />
           </div>
           {/* The same mug, as the old store sells it, with its reviews under it. */}
           <div className="flex flex-col p-3">
