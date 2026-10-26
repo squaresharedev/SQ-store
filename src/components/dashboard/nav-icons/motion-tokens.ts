@@ -6,5 +6,6 @@
 export {
   EASE_STANDARD,
   EASE_ENTRANCE,
+  EASE_EXIT,
   SETTLE,
 } from "@/components/ui/motion-tokens";

@@ -56,8 +56,17 @@ describe("nav icons", () => {
       const stroke = el.getAttribute("stroke");
       const fill = el.getAttribute("fill");
       if (stroke) expect(stroke).toBe("currentColor");
-      if (fill) expect(fill).toBe("none");
+      if (fill) expect(["none", "currentColor"]).toContain(fill);
     }
+  });
+
+  it("DiscountsIcon is the plain lucide tag: no badge, nothing extra", () => {
+    const { container } = render(<DiscountsIcon />);
+    expect(container.querySelectorAll("path")).toHaveLength(1);
+    expect(container.querySelectorAll("circle")).toHaveLength(1);
+    expect(container.querySelector("path")?.getAttribute("d")).toContain(
+      "M12.586 2.586",
+    );
   });
 
   it("ProductsIcon keeps the lucide package silhouette", () => {
