@@ -2,6 +2,7 @@
 // the member's own session (RLS: reviews_select_member), scoped to the active
 // store, so a member sees exactly the reviews of the store they are in.
 
+import { presignGetUrl } from "@/lib/r2";
 import { createClient } from "@/lib/supabase/server";
 import { ilikeAny } from "@/lib/supabase/ilike";
 import { isRemovalGround } from "@/lib/moderation/removal";
@@ -15,7 +16,7 @@ import type { RatingSummary, SellerReview } from "@/types/review";
 export const SELLER_REVIEWS_PAGE_SIZE = 20;
 
 const SELLER_REVIEW_SELECT =
-  "id, product_id, rating, title, body, author_name, is_verified_buyer, source, reviewed_at, moderation_status, moderation_ground, hidden_reason, products(title)" as const;
+  "id, product_id, rating, title, body, author_name, is_verified_buyer, source, reviewed_at, moderation_status, moderation_ground, hidden_reason, products(title, image_key)" as const;
 
 type SellerReviewRow = {
   id: string;
@@ -30,14 +31,15 @@ type SellerReviewRow = {
   moderation_status: string;
   moderation_ground: string | null;
   hidden_reason: string | null;
-  products: { title: string } | null;
+  products: { title: string; image_key: string | null } | null;
 };
 
-function toSellerReview(row: SellerReviewRow): SellerReview {
+function toSellerReview(row: SellerReviewRow, imageUrls: Map<string, string | null>): SellerReview {
   return {
     id: row.id,
     productId: row.product_id,
     productTitle: row.products?.title ?? "",
+    productImageUrl: row.products?.image_key ? (imageUrls.get(row.products.image_key) ?? null) : null,
     rating: row.rating,
     title: row.title,
     body: row.body,
@@ -108,8 +110,12 @@ export async function getSellerReviews(
     console.error("[reviews] seller review read failed", rows.error?.message ?? held.error?.message);
     return null;
   }
+  const data = rows.data as unknown as SellerReviewRow[];
+  // One signed URL per product photo, however many of its reviews are on the page.
+  const keys = [...new Set(data.map((row) => row.products?.image_key).filter((key): key is string => Boolean(key)))];
+  const imageUrls = new Map(await Promise.all(keys.map(async (key) => [key, await presignGetUrl(key)] as const)));
   return {
-    rows: (rows.data as unknown as SellerReviewRow[]).map(toSellerReview),
+    rows: data.map((row) => toSellerReview(row, imageUrls)),
     total: rows.count ?? 0,
     page,
     pageSize: SELLER_REVIEWS_PAGE_SIZE,

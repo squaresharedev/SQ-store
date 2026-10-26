@@ -6,6 +6,8 @@ import { Ban, BadgeCheck, Clock, Download, EyeOff, Hourglass, Package } from "lu
 import Link from "@/components/ui/AppLink";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { ProductThumb } from "@/components/ui/ProductThumb";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { badgeClass, cardClass } from "@/components/ui/surface-styles";
 import { focusRingClass, transitionClass } from "@/components/ui/control-styles";
 import { StarRating } from "@/components/product-page/StarRating";
@@ -26,24 +28,9 @@ const iconBadgeClass = cn(badgeClass, "inline-flex items-center gap-1");
 const MODERATION_BADGE: Record<Exclude<ReviewModerationStatus, "clean">, { icon: typeof Clock; tone: string }> = {
   pending: { icon: Hourglass, tone: "text-muted-foreground" },
   held: { icon: Clock, tone: "bg-rating/15 text-foreground" },
-  blocked: { icon: Ban, tone: "bg-destructive/10 text-destructive" },
+  // Square, not a pill: a block is final, and reads as a notice rather than a tag.
+  blocked: { icon: Ban, tone: "rounded-sm bg-destructive/10 text-destructive" },
 };
-
-/** The stripe down a card's left edge, for the reviews that are not simply live. */
-function accentClass(review: SellerReview): string | undefined {
-  if (review.moderation === "blocked") return "border-l-4 border-l-destructive";
-  if (review.moderation === "held") return "border-l-4 border-l-rating";
-  if (review.hiddenReason) return "border-l-4 border-l-muted-foreground/40 bg-muted/30";
-  return undefined;
-}
-
-/** "Hannah K." -> "HK": the avatar's letters. */
-function initials(name: string): string {
-  const parts = name.replace(/\./g, "").trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
 
 /** Characters with a meaning in a regular expression, escaped so a search term matches itself. */
 function escapeRegExp(text: string): string {
@@ -107,17 +94,17 @@ export function ReviewCard({
 
   return (
     <article
-      className={cn(cardClass, "flex gap-3 p-4 @md:gap-4", accentClass(review))}
+      className={cn(cardClass, "flex gap-3 p-4 @md:gap-4")}
       data-review={review.id}
       data-review-moderation={review.moderation}
       data-review-hidden={hidden || undefined}
     >
-      <span
-        aria-hidden="true"
-        className="flex size-10 shrink-0 items-center justify-center rounded-full bg-rating/15 font-inter text-sm font-semibold text-foreground"
-      >
-        {initials(review.authorName)}
-      </span>
+      {/* The product's photo tells reviews apart at a glance, faster than its
+          name. A shortcut for the pointer: the named link below is the one
+          keyboards and screen readers use. */}
+      <Link href={productEditPath(review.productId)} tabIndex={-1} aria-hidden="true" className="shrink-0">
+        <ProductThumb src={review.productImageUrl} className="size-14 @md:size-16" />
+      </Link>
 
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
@@ -125,17 +112,19 @@ export function ReviewCard({
             <span className="font-inter text-sm font-semibold text-foreground">
               <Highlight text={review.authorName} term={search} />
             </span>
-            {review.source !== "native" ? (
+            {review.verified && (
+              <Tooltip label={tPage("verified")}>
+                <span role="img" aria-label={tPage("verified")} tabIndex={0} className={cn("rounded-full text-success", focusRingClass)}>
+                  <BadgeCheck aria-hidden="true" className="size-4" />
+                </span>
+              </Tooltip>
+            )}
+            {review.source !== "native" && (
               <span className={cn(iconBadgeClass, "text-muted-foreground")}>
                 <Download aria-hidden="true" className="size-3" />
                 {tPage("imported", { source: review.source })}
               </span>
-            ) : review.verified ? (
-              <span className={cn(iconBadgeClass, "bg-success/10 text-success")}>
-                <BadgeCheck aria-hidden="true" className="size-3" />
-                {tPage("verified")}
-              </span>
-            ) : null}
+            )}
           </p>
           <time dateTime={review.reviewedAt} className="font-inter text-xs text-muted-foreground">
             {formatOrderDate(review.reviewedAt, locale)}

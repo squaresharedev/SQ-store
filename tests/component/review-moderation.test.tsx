@@ -30,6 +30,7 @@ function review(overrides: Partial<SellerReview> = {}): SellerReview {
     id: "r-1",
     productId: "577c5e40-51a9-49e6-a272-38ad9549111f",
     productTitle: "Roundhouse Coffee Table",
+    productImageUrl: "https://images.test/table.jpg",
     rating: 5,
     title: "Love it",
     body: "The table broke the internet, it is that good.",
@@ -135,6 +136,13 @@ describe("ReviewModeration", () => {
     expect(document.querySelector('[data-review="c"]')).toHaveTextContent("Hidden: Shares personal details");
     // A held review is the one that needs the seller: its Publish is the primary action.
     expect(within(document.querySelector('[data-review="a"]') as HTMLElement).getByRole("button", { name: "Publish" })).toBeEnabled();
+  });
+
+  it("shows the product's photo, and marks a verified buyer with a named icon", () => {
+    mount(ALL, [review({ id: "a", verified: true }), review({ id: "b", verified: false, source: "loox" })]);
+    expect(document.querySelector('[data-review="a"] img')).toHaveAttribute("src", "https://images.test/table.jpg");
+    expect(within(document.querySelector('[data-review="a"]') as HTMLElement).getByRole("img", { name: "Verified buyer" })).toBeInTheDocument();
+    expect(within(document.querySelector('[data-review="b"]') as HTMLElement).queryByRole("img", { name: "Verified buyer" })).toBeNull();
   });
 
   it("counts what the view holds", () => {
