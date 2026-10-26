@@ -10882,10 +10882,9 @@ create index if not exists orders_ship_to_city_trgm_idx
 notify pgrst, 'reload schema';
 
 -- =============================================================================
--- ===== (pending) reviews =====================================================
--- supabase/migrations/20261025_reviews.sql, replayed verbatim. NOT YET APPLIED to
--- prod: the deploy schema gate (scripts/lib/prod-schema.ts) refuses a deploy
--- until it is. Retitle this block "(applied)" with the date once it is.
+-- ===== (applied) reviews =====================================================
+-- supabase/migrations/20261025_reviews.sql, replayed verbatim. Applied to prod
+-- 2026-10-26 through the SQL editor (no schema_migrations row).
 -- =============================================================================
 
 -- =============================================================================

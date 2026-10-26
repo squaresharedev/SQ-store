@@ -24,6 +24,7 @@ import {
 import type { TeamAction, TeamRole } from "@/lib/team/permissions";
 import { BILLING_SETTINGS_PATH, PLANS_PATH } from "@/lib/billing/paths";
 import { NEW_DISCOUNT_PATH } from "@/lib/discounts/paths";
+import { REVIEWS_IMPORT_PATH, REVIEWS_PATH } from "@/lib/reviews/paths";
 
 /**
  * THE LOCAL INDEX — every page, settings section, settings FIELD and quick
@@ -138,6 +139,30 @@ const PAGES: EntrySpec[] = [...MAIN_NAV, SETTINGS_LINK].map((link) => ({
   href: link.href,
   synonyms: PAGE_SYNONYMS[link.href] ?? [],
 }));
+
+/**
+ * Pages that sit UNDER a rail destination rather than on the rail, so the nav
+ * map cannot supply them. The subtitle names the rail page they live in.
+ */
+const SUB_PAGES: EntrySpec[] = [
+  {
+    id: `page:${REVIEWS_PATH}`,
+    type: "page",
+    title: "Products.metadata.reviews.title",
+    subtitle: "Nav.main.products.label",
+    href: REVIEWS_PATH,
+    synonyms: [
+      "ratings",
+      "stars",
+      "feedback",
+      "testimonials",
+      "customer reviews",
+      "product reviews",
+      "moderate reviews",
+      "hide a review",
+    ],
+  },
+];
 
 /** Extra words a settings section answers to, beyond its own name. */
 const SECTION_SYNONYMS: Record<string, string[]> = {
@@ -365,6 +390,14 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     synonyms: ["feature announcements", "changelog emails"],
   },
   {
+    id: "field:notify-reviews",
+    type: "settings",
+    title: "Search.fields.reviewEmails",
+    section: NOTIFICATIONS,
+    href: "/settings/notifications#preferences",
+    synonyms: ["email me when someone reviews", "review alerts", "new review", "rating emails"],
+  },
+  {
     id: "field:legal",
     type: "settings",
     title: "Search.fields.termsOfService",
@@ -422,6 +455,14 @@ const ACTIONS: EntrySpec[] = [
     title: "Search.actions.newDiscount",
     href: NEW_DISCOUNT_PATH,
     synonyms: ["add discount", "create coupon", "discount code", "promo code", "run a sale", "voucher"],
+    permission: "products.write",
+  },
+  {
+    id: "action:import-reviews",
+    type: "action",
+    title: "Products.metadata.importReviews.title",
+    href: REVIEWS_IMPORT_PATH,
+    synonyms: ["shopify reviews", "judge.me", "loox", "yotpo", "move my reviews", "upload reviews", "review export"],
     permission: "products.write",
   },
   {
@@ -533,6 +574,7 @@ function localIndex(t: SearchTranslator): LocalIndex {
   const index: LocalIndex = {
     all: [
       ...resolve(PAGES),
+      ...resolve(SUB_PAGES),
       ...actions,
       ...resolve(SETTINGS_SECTIONS),
       ...fields,
