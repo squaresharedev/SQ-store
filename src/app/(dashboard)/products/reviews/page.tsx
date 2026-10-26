@@ -7,9 +7,9 @@ import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { requireUser } from "@/lib/auth/session";
 import { PRODUCTS_PATH } from "@/lib/products/paths";
-import { REVIEWS_FILTER_PARAM, REVIEWS_IMPORT_PATH, REVIEWS_PATH } from "@/lib/reviews/paths";
-import { REVIEW_MODERATION_FILTERS, type ReviewModerationFilter } from "@/lib/reviews/moderation-rules";
-import { getSellerReviews } from "@/lib/reviews/seller-queries";
+import { REVIEWS_IMPORT_PATH, REVIEWS_PATH } from "@/lib/reviews/paths";
+import { parseSellerReviewFilters } from "@/lib/reviews/seller-filters";
+import { getSellerReviewOverview, getSellerReviews } from "@/lib/reviews/seller-queries";
 import { ghostButtonClass, quietLinkClass } from "@/components/ui/control-styles";
 import { ReviewModeration } from "@/components/products/ReviewModeration";
 
@@ -20,10 +20,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
-function first(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
-}
-
 // PROTECTED by (dashboard)/layout.tsx. Every member of the store can read its
 // reviews; only those who may edit products can hide, show or publish them
 // (the action and review_set_visibility both check).
@@ -32,22 +28,17 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
   const account = await getActiveAccount();
   if (!account || !can(account.role, "store.read")) redirect(PRODUCTS_PATH);
 
-  const query = await searchParams;
-  const requested = first(query[REVIEWS_FILTER_PARAM]);
-  const filter: ReviewModerationFilter = (REVIEW_MODERATION_FILTERS as readonly string[]).includes(requested ?? "")
-    ? (requested as ReviewModerationFilter)
-    : "all";
-  const pageNumber = Number(first(query.page) ?? 1);
-  const page = Number.isInteger(pageNumber) && pageNumber >= 1 && pageNumber <= 10_000 ? pageNumber : 1;
+  const { filters, page } = parseSellerReviewFilters(await searchParams);
 
-  const [list, t, tPage] = await Promise.all([
-    getSellerReviews(account.accountId, filter, page),
+  const [list, overview, t, tPage] = await Promise.all([
+    getSellerReviews(account.accountId, filters, page),
+    getSellerReviewOverview(account.accountId),
     getTranslations("Products.reviewModeration"),
     getTranslations("Products.page"),
   ]);
 
   return (
-    <div className="@container mx-auto w-full max-w-3xl space-y-6 p-4 @md:p-6">
+    <div className="@container mx-auto w-full max-w-4xl space-y-6 p-4 @md:p-6">
       <div className="space-y-3">
         <Link href={PRODUCTS_PATH} className={ghostButtonClass}>
           <ArrowLeft className="size-4" strokeWidth={2} aria-hidden="true" />
@@ -63,7 +54,12 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
           )}
         </div>
       </div>
-      <ReviewModeration list={list} filter={filter} canModerate={can(account.role, "products.write")} />
+      <ReviewModeration
+        list={list}
+        overview={overview}
+        filters={filters}
+        canModerate={can(account.role, "products.write")}
+      />
     </div>
   );
 }

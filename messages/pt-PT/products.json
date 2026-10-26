@@ -1186,6 +1186,40 @@
       },
       "open": "Abrir as suas avaliações: {url}",
       "settings": "Pode desativar estes emails em Definições › Notificações."
+    },
+    "overview": {
+      "label": "Classificação da loja",
+      "none": "Ainda não há avaliações públicas.",
+      "breakdown": "Avaliações por estrelas",
+      "showStars": "{stars, plural, one {Mostrar só avaliações de {stars} estrela ({count})} other {Mostrar só avaliações de {stars} estrelas ({count})}}"
+    },
+    "toolbar": {
+      "region": "Pesquisar e filtrar avaliações",
+      "search": "Pesquisar avaliações",
+      "searchPlaceholder": "Palavras, um título ou um nome",
+      "rating": "Classificação",
+      "anyRating": "Qualquer classificação",
+      "product": "Produto",
+      "anyProduct": "Todos os produtos",
+      "origin": "Origem",
+      "anyOrigin": "Todas as origens",
+      "origins": {
+        "verified": "Compradores verificados",
+        "imported": "Importadas"
+      },
+      "sort": "Ordenar",
+      "sorts": {
+        "newest": "Mais recentes",
+        "oldest": "Mais antigas",
+        "highest": "Mais bem classificadas",
+        "lowest": "Pior classificadas"
+      },
+      "clear": "Limpar filtros"
+    },
+    "results": "{count, plural, one {{count} avaliação} other {{count} avaliações}}",
+    "emptyFiltered": {
+      "title": "Nenhuma avaliação corresponde",
+      "body": "Experimente outras palavras ou outro filtro, ou limpe-os para ver todas as avaliações."
     }
   }
 }

@@ -1186,6 +1186,40 @@
       },
       "open": "Abrir tus reseñas: {url}",
       "settings": "Puedes desactivar estos correos en Configuración › Notificaciones."
+    },
+    "overview": {
+      "label": "Valoración de la tienda",
+      "none": "Todavía no hay reseñas públicas.",
+      "breakdown": "Reseñas por estrellas",
+      "showStars": "{stars, plural, one {Mostrar solo reseñas de {stars} estrella ({count})} other {Mostrar solo reseñas de {stars} estrellas ({count})}}"
+    },
+    "toolbar": {
+      "region": "Buscar y filtrar reseñas",
+      "search": "Buscar en las reseñas",
+      "searchPlaceholder": "Palabras, un título o un nombre",
+      "rating": "Valoración",
+      "anyRating": "Cualquier valoración",
+      "product": "Producto",
+      "anyProduct": "Todos los productos",
+      "origin": "Origen",
+      "anyOrigin": "Todos los orígenes",
+      "origins": {
+        "verified": "Compradores verificados",
+        "imported": "Importadas"
+      },
+      "sort": "Orden",
+      "sorts": {
+        "newest": "Más recientes",
+        "oldest": "Más antiguas",
+        "highest": "Mejor valoradas",
+        "lowest": "Peor valoradas"
+      },
+      "clear": "Borrar filtros"
+    },
+    "results": "{count, plural, one {{count} reseña} other {{count} reseñas}}",
+    "emptyFiltered": {
+      "title": "Ninguna reseña coincide",
+      "body": "Prueba con otras palabras u otro filtro, o bórralos para ver todas las reseñas."
     }
   }
 }

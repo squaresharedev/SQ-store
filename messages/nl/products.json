@@ -1186,6 +1186,40 @@
       },
       "open": "Je reviews openen: {url}",
       "settings": "Je kunt deze e-mails uitzetten via Instellingen › Meldingen."
+    },
+    "overview": {
+      "label": "Winkelbeoordeling",
+      "none": "Nog geen openbare reviews.",
+      "breakdown": "Reviews per aantal sterren",
+      "showStars": "{stars, plural, one {Alleen reviews met {stars} ster tonen ({count})} other {Alleen reviews met {stars} sterren tonen ({count})}}"
+    },
+    "toolbar": {
+      "region": "Reviews zoeken en filteren",
+      "search": "Zoeken in reviews",
+      "searchPlaceholder": "Woorden, een titel of een naam",
+      "rating": "Beoordeling",
+      "anyRating": "Elke beoordeling",
+      "product": "Product",
+      "anyProduct": "Alle producten",
+      "origin": "Herkomst",
+      "anyOrigin": "Alle herkomsten",
+      "origins": {
+        "verified": "Geverifieerde kopers",
+        "imported": "Geïmporteerd"
+      },
+      "sort": "Sorteren",
+      "sorts": {
+        "newest": "Nieuwste eerst",
+        "oldest": "Oudste eerst",
+        "highest": "Hoogst beoordeeld",
+        "lowest": "Laagst beoordeeld"
+      },
+      "clear": "Filters wissen"
+    },
+    "results": "{count, plural, one {{count} review} other {{count} reviews}}",
+    "emptyFiltered": {
+      "title": "Geen reviews gevonden",
+      "body": "Probeer andere woorden of een ander filter, of wis de filters om alle reviews te zien."
     }
   }
 }

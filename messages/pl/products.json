@@ -1186,6 +1186,40 @@
       },
       "open": "Otwórz opinie: {url}",
       "settings": "Te e-maile możesz wyłączyć w Ustawienia › Powiadomienia."
+    },
+    "overview": {
+      "label": "Ocena sklepu",
+      "none": "Brak publicznych opinii.",
+      "breakdown": "Opinie według liczby gwiazdek",
+      "showStars": "{stars, plural, one {Pokaż tylko opinie z {stars} gwiazdką ({count})} few {Pokaż tylko opinie z {stars} gwiazdkami ({count})} many {Pokaż tylko opinie z {stars} gwiazdkami ({count})} other {Pokaż tylko opinie z {stars} gwiazdkami ({count})}}"
+    },
+    "toolbar": {
+      "region": "Szukaj i filtruj opinie",
+      "search": "Szukaj w opiniach",
+      "searchPlaceholder": "Słowa, tytuł lub imię",
+      "rating": "Ocena",
+      "anyRating": "Dowolna ocena",
+      "product": "Produkt",
+      "anyProduct": "Wszystkie produkty",
+      "origin": "Źródło",
+      "anyOrigin": "Wszystkie źródła",
+      "origins": {
+        "verified": "Zweryfikowani kupujący",
+        "imported": "Zaimportowane"
+      },
+      "sort": "Sortowanie",
+      "sorts": {
+        "newest": "Od najnowszych",
+        "oldest": "Od najstarszych",
+        "highest": "Najwyżej oceniane",
+        "lowest": "Najniżej oceniane"
+      },
+      "clear": "Wyczyść filtry"
+    },
+    "results": "{count, plural, one {{count} opinia} few {{count} opinie} many {{count} opinii} other {{count} opinii}}",
+    "emptyFiltered": {
+      "title": "Brak pasujących opinii",
+      "body": "Spróbuj innych słów lub innego filtra albo wyczyść filtry, aby zobaczyć wszystkie opinie."
     }
   }
 }

@@ -1186,6 +1186,40 @@
       },
       "open": "Otevřít recenze: {url}",
       "settings": "Tyto e-maily můžete vypnout v Nastavení › Oznámení."
+    },
+    "overview": {
+      "label": "Hodnocení obchodu",
+      "none": "Zatím žádné veřejné recenze.",
+      "breakdown": "Recenze podle počtu hvězdiček",
+      "showStars": "{stars, plural, one {Zobrazit jen recenze s {stars} hvězdičkou ({count})} few {Zobrazit jen recenze se {stars} hvězdičkami ({count})} other {Zobrazit jen recenze s {stars} hvězdičkami ({count})}}"
+    },
+    "toolbar": {
+      "region": "Hledat a filtrovat recenze",
+      "search": "Hledat v recenzích",
+      "searchPlaceholder": "Slova, nadpis nebo jméno",
+      "rating": "Hodnocení",
+      "anyRating": "Jakékoli hodnocení",
+      "product": "Produkt",
+      "anyProduct": "Všechny produkty",
+      "origin": "Zdroj",
+      "anyOrigin": "Všechny zdroje",
+      "origins": {
+        "verified": "Ověření kupující",
+        "imported": "Importované"
+      },
+      "sort": "Řazení",
+      "sorts": {
+        "newest": "Od nejnovějších",
+        "oldest": "Od nejstarších",
+        "highest": "Nejlépe hodnocené",
+        "lowest": "Nejhůře hodnocené"
+      },
+      "clear": "Zrušit filtry"
+    },
+    "results": "{count, plural, one {{count} recenze} few {{count} recenze} other {{count} recenzí}}",
+    "emptyFiltered": {
+      "title": "Žádné recenze neodpovídají",
+      "body": "Zkuste jiná slova nebo jiný filtr, případně filtry zrušte a uvidíte všechny recenze."
     }
   }
 }
