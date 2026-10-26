@@ -3,10 +3,11 @@
 // reviews, so the two can never disagree.
 //
 // SECURITY MODEL, same as the product page: a service-role read behind an
-// application gate, never an anon RLS policy. Only APPROVED reviews are ever
-// selected, and each is BUILT field by field (toPublicReview), so the order
-// id, the seller id and anything added to the table later stay on the server
-// by construction.
+// application gate, never an anon RLS policy. Only PUBLIC reviews (not hidden
+// by the seller, and passed by the automatic check) are ever selected, and
+// each is BUILT field by field (toPublicReview), so the order id, the seller
+// id and anything added to the table later stay on the server by
+// construction.
 //
 // FAST BY DESIGN. The numbers come from product_rating_summaries, which the
 // database keeps current on every review write (20261025_reviews.sql); no
@@ -112,7 +113,7 @@ export async function listReviews(
     .from("reviews")
     .select(PUBLIC_REVIEW_SELECT)
     .eq("product_id", productId)
-    .eq("is_approved", true);
+    .eq("is_public", true);
   for (const { column, ascending } of SORT_ORDER[query.sort]) {
     request = request.order(column, { ascending });
   }

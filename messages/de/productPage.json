@@ -265,10 +265,10 @@
       "title": "Wie war’s?",
       "body": "Erzähl anderen Käufern, wie du {product} findest.",
       "open": "Bewertung schreiben",
-      "done": "Danke für deine Bewertung. Sie steht jetzt auf der Produktseite.",
+      "done": "Du hast dieses Produkt bewertet. Danke!",
       "dialogTitle": "Bewertung schreiben",
       "sentTitle": "Danke für deine Bewertung",
-      "sentBody": "Sie steht jetzt auf der Produktseite, als Bewertung eines verifizierten Käufers.",
+      "sentBody": "Sie erscheint in etwa einer Minute auf der Produktseite, sobald unsere automatische Prüfung sie gelesen hat, als Bewertung eines verifizierten Käufers.",
       "ratingLegend": "Deine Sterne",
       "ratingOption": "{rating, plural, one {{rating} Stern} other {{rating} Sterne}}",
       "ratingPrompt": "Wähle die Anzahl der Sterne.",
@@ -427,6 +427,7 @@
     },
     "more": "Weitere Bewertungen anzeigen",
     "loading": "Wird geladen…",
-    "loadFailed": "Weitere Bewertungen konnten nicht geladen werden. Versuch es noch einmal."
+    "loadFailed": "Weitere Bewertungen konnten nicht geladen werden. Versuch es noch einmal.",
+    "about": "Bewertungen mit „Verifizierter Käufer“ stammen aus Bestellungen auf Square Share. Jede Bewertung wird vor dem Erscheinen automatisch auf Missbrauch geprüft, und Verkäufer können eine Bewertung nur ausblenden, wenn sie Spam ist, beleidigend ist, persönliche Daten enthält oder nichts mit dem Produkt zu tun hat."
   }
 }

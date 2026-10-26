@@ -1,4 +1,5 @@
 import { sweep } from "@/lib/moderation/auto/check";
+import { sweepReviews, type ReviewSweepReport } from "@/lib/reviews/moderation";
 import { cronAuthorized } from "@/lib/ops/cron";
 
 /**
@@ -8,7 +9,9 @@ import { cronAuthorized } from "@/lib/ops/cron";
  * WHAT IT PICKS UP. Everything the moderation wall is holding that no save
  * settled: a row written straight through the REST API or by another app, a
  * check that timed out or found the classifier down, and content from before
- * the wall, which is audited while it stays live. A slow or missed run delays
+ * the wall, which is audited while it stays live. And buyer reviews still
+ * waiting on their check (lib/reviews/moderation.ts): imports, and any whose
+ * check after posting found the classifier down. A slow or missed run delays
  * sellers and never safety: what it has not reached is hidden, not public.
  *
  * `?dry=1` judges what is waiting and reports what each row WOULD become
@@ -28,7 +31,18 @@ export async function POST(request: Request) {
 
   try {
     const dryRun = new URL(request.url).searchParams.get("dry") === "1";
-    return Response.json(await sweep({ dryRun }), { headers: NO_STORE });
+    const report = await sweep({ dryRun });
+    if (dryRun) return Response.json(report, { headers: NO_STORE });
+    // Its own failure only: listings settled above stay settled.
+    let reviews: ReviewSweepReport | { error: string };
+    try {
+      reviews = await sweepReviews();
+    } catch (error) {
+      console.error("[moderation] review sweep failed:", error instanceof Error ? error.message : error);
+      reviews = { error: "failed" };
+    }
+    const more = report.more || ("more" in reviews && reviews.more);
+    return Response.json({ ...report, reviews, more }, { headers: NO_STORE });
   } catch (error) {
     // The run could not even read what is waiting. Nothing was settled.
     console.error("[moderation] sweep failed:", error instanceof Error ? error.message : error);

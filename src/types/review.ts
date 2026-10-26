@@ -1,5 +1,7 @@
 import type { Paginated } from "@/types/pagination";
 import type { ReviewSource } from "@/lib/reviews/sources";
+import type { ReviewHideReason, ReviewModerationStatus } from "@/lib/reviews/moderation-rules";
+import type { RemovalGround } from "@/lib/moderation/removal";
 
 /**
  * A review as a buyer may see it: no order, no email, no seller id. Built
@@ -33,4 +35,19 @@ export type ReviewPage = Paginated<PublicReview>;
 export type ProductReviews = {
   summary: RatingSummary;
   firstPage: ReviewPage;
+};
+
+/**
+ * A review as its own store sees it on the moderation page: everything a
+ * buyer sees, plus where the check and the seller left it. Never sent to a
+ * buyer.
+ */
+export type SellerReview = PublicReview & {
+  productId: string;
+  productTitle: string;
+  moderation: ReviewModerationStatus;
+  /** The rule the check named, when it held or blocked the review. */
+  ground: RemovalGround | null;
+  /** Why the seller hid it; null while it is not hidden. */
+  hiddenReason: ReviewHideReason | null;
 };

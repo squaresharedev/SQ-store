@@ -441,6 +441,12 @@ export const RATE_LIMITS = {
    * a handful of tries while the mapping is right, not a loop.
    */
   reviewImport: { max: 12, windowSeconds: 60 * 60 },
+  /**
+   * Hiding, showing and publishing reviews, per signed-in user. One row and a
+   * summary recount each; sized for a seller working through a backlog of
+   * imported reviews in one sitting, not for a loop.
+   */
+  reviewModerate: { max: 240, windowSeconds: 60 * 60 },
 } as const;
 
 export type RateLimitBudget = { max: number; windowSeconds: number };

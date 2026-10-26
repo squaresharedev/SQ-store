@@ -14,6 +14,9 @@
     },
     "importReviews": {
       "title": "Reviews importeren"
+    },
+    "reviews": {
+      "title": "Reviews"
     }
   },
   "page": {
@@ -68,7 +71,8 @@
     "import": "Importeren",
     "add": "Product toevoegen",
     "updating": "Bijwerken…",
-    "pagination": "{total, plural, one {{total} product · pagina {page} van {pages}} other {{total} producten · pagina {page} van {pages}}}"
+    "pagination": "{total, plural, one {{total} product · pagina {page} van {pages}} other {{total} producten · pagina {page} van {pages}}}",
+    "reviews": "Reviews"
   },
   "list": {
     "noMatch": {
@@ -1036,7 +1040,7 @@
     "rowsLimit": "{max, plural, one {Maximaal {max} review per bestand} other {Maximaal {max} reviews per bestand}}",
     "fileTooLarge": "Dat bestand is te groot. De limiet is {max}.",
     "fileEmpty": "Dat bestand is leeg.",
-    "badgeNote": "Geïmporteerde reviews laten zien waar ze eerst zijn geschreven, zoals “Geïmporteerd uit Shopify (Judge.me)”. Alleen reviews die kopers bij een Square Share-bestelling schrijven, worden gemarkeerd als van een geverifieerde koper.",
+    "badgeNote": "Geïmporteerde reviews laten zien waar ze eerst zijn geschreven, zoals “Geïmporteerd uit Shopify (Judge.me)”. Alleen reviews die kopers bij een Square Share-bestelling schrijven, worden gemarkeerd als van een geverifieerde koper. Elke geïmporteerde review verschijnt zodra onze automatische controle hem heeft gelezen.",
     "missingColumns": "Dit bestand heeft geen kolom voor: {fields}. Exporteer je reviews opnieuw uit je review-app, als CSV.",
     "fields": {
       "rating": "beoordeling",
@@ -1078,6 +1082,97 @@
       "unrecognised": "Dit bestand is geen review-export die we kunnen lezen.",
       "nothing": "Niets te importeren. Koppel minstens één product.",
       "failed": "De import is niet gelukt en er is niets opgeslagen. Probeer het opnieuw."
+    }
+  },
+  "reviewModeration": {
+    "heading": "Reviews",
+    "description": "Wat kopers over je producten zeggen. Elke review wordt automatisch gecontroleerd voordat hij verschijnt, en de reviews waarover de controle twijfelde, wachten hier op jou.",
+    "importLink": "Kom je van Shopify? Importeer je reviews",
+    "filtersLabel": "Reviews filteren",
+    "filters": {
+      "all": "Alle",
+      "held": "Wachten op jou",
+      "hidden": "Verborgen"
+    },
+    "heldCount": "{count, plural, one {{count} review wacht op jou} other {{count} reviews wachten op jou}}",
+    "loadFailed": "Je reviews konden niet worden geladen. Vernieuw de pagina om het opnieuw te proberen.",
+    "empty": {
+      "all": {
+        "title": "Nog geen reviews",
+        "body": "Als een koper een product beoordeelt vanaf de bestelpagina, verschijnt de review hier."
+      },
+      "held": {
+        "title": "Niets wacht op jou",
+        "body": "Reviews waarover de automatische controle twijfelt, wachten hier tot je beslist."
+      },
+      "hidden": {
+        "title": "Geen verborgen reviews",
+        "body": "Reviews die je verbergt, verschijnen hier, en je kunt ze altijd weer tonen."
+      }
+    },
+    "pagination": "{total, plural, one {{total} review · pagina {page} van {pages}} other {{total} reviews · pagina {page} van {pages}}}",
+    "status": {
+      "pending": "Wordt gecontroleerd",
+      "held": "Wacht op jou",
+      "blocked": "Geblokkeerd door de controle"
+    },
+    "grounds": {
+      "illegal": "illegale inhoud",
+      "sexual": "seksuele inhoud",
+      "violence": "bedreigingen of geweld",
+      "hate": "haat of intimidatie",
+      "counterfeit": "namaak",
+      "scam": "oplichting",
+      "spam": "spam of reclame",
+      "other": "overtreedt de regels"
+    },
+    "hiddenBecause": "Verborgen: {reason}",
+    "reasons": {
+      "spam": {
+        "label": "Spam of reclame",
+        "hint": "Maakt reclame voor een andere winkel of een ander product, of is geen echte review."
+      },
+      "offensive": {
+        "label": "Beledigend of kwetsend",
+        "hint": "Beledigt mensen, gebruikt scheldwoorden of valt iemand lastig."
+      },
+      "personal_info": {
+        "label": "Bevat persoonlijke gegevens",
+        "hint": "Bevat een telefoonnummer, adres, e-mailadres of andere privégegevens."
+      },
+      "unrelated": {
+        "label": "Gaat niet over het product",
+        "hint": "Gaat over iets heel anders, zoals een andere bestelling of een ander product."
+      }
+    },
+    "hide": {
+      "title": "Deze review verbergen",
+      "description": "Kopers zien hem niet meer en hij telt niet mee in de beoordeling.",
+      "legend": "Waarom verberg je hem?",
+      "legal": "Negatieve reviews blijven staan. Een review verbergen omdat hij kritisch is, misleidt kopers en is niet toegestaan onder het Europese consumentenrecht, dus een review kan alleen om een van deze redenen worden verborgen.",
+      "confirm": "Review verbergen"
+    },
+    "actions": {
+      "publish": "Publiceren",
+      "show": "Weer tonen",
+      "hide": "Verbergen"
+    },
+    "done": {
+      "hide": "Review verborgen.",
+      "show": "Review weer zichtbaar.",
+      "publish": "Review gepubliceerd."
+    },
+    "email": {
+      "new": {
+        "subject": "{rating, plural, one {Nieuwe review met {rating} ster} other {Nieuwe review met {rating} sterren}}: {title}",
+        "intro": "{rating, plural, one {Een koper gaf {title} {rating} ster.} other {Een koper gaf {title} {rating} sterren.}} Lees de review op je reviewpagina."
+      },
+      "held": {
+        "subject": "Een review van {title} wacht op jou",
+        "intro": "Onze automatische controle wist niet zeker of een review van {title} de regels overtreedt, dus hij is verborgen tot je beslist. Publiceer of verberg hem vanaf je reviewpagina."
+      },
+      "open": "Je reviews openen: {url}",
+      "settings": "Je kunt deze e-mails uitzetten via Instellingen › Meldingen."
     }
   }
 }

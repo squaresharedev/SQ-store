@@ -1657,6 +1657,7 @@ export type Database = {
           locale: string | null
           notify_marketing: boolean
           notify_product_updates: boolean
+          notify_reviews: boolean
           notify_sales: boolean
           onboarding_completed_at: string | null
           sample_storefront_hidden_at: string | null
@@ -1687,6 +1688,7 @@ export type Database = {
           locale?: string | null
           notify_marketing?: boolean
           notify_product_updates?: boolean
+          notify_reviews?: boolean
           notify_sales?: boolean
           onboarding_completed_at?: string | null
           sample_storefront_hidden_at?: string | null
@@ -1717,6 +1719,7 @@ export type Database = {
           locale?: string | null
           notify_marketing?: boolean
           notify_product_updates?: boolean
+          notify_reviews?: boolean
           notify_sales?: boolean
           onboarding_completed_at?: string | null
           sample_storefront_hidden_at?: string | null
@@ -1896,14 +1899,22 @@ export type Database = {
           body: string
           created_at: string
           external_id: string | null
+          hidden_at: string | null
+          hidden_by: string | null
+          hidden_reason: string | null
           id: string
           import_id: string | null
           is_approved: boolean
           is_imported: boolean
+          is_public: boolean
           is_verified_buyer: boolean
+          moderated_at: string | null
+          moderation_ground: string | null
+          moderation_status: string
           order_id: string | null
           product_id: string
           rating: number
+          released_by: string | null
           reviewed_at: string
           seller_id: string
           source: string
@@ -1915,14 +1926,22 @@ export type Database = {
           body?: string
           created_at?: string
           external_id?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
           id?: string
           import_id?: string | null
           is_approved?: boolean
           is_imported?: never
+          is_public?: never
           is_verified_buyer?: boolean
+          moderated_at?: string | null
+          moderation_ground?: string | null
+          moderation_status?: string
           order_id?: string | null
           product_id: string
           rating: number
+          released_by?: string | null
           reviewed_at?: string
           seller_id: string
           source?: string
@@ -1934,14 +1953,22 @@ export type Database = {
           body?: string
           created_at?: string
           external_id?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
           id?: string
           import_id?: string | null
           is_approved?: boolean
           is_imported?: never
+          is_public?: never
           is_verified_buyer?: boolean
+          moderated_at?: string | null
+          moderation_ground?: string | null
+          moderation_status?: string
           order_id?: string | null
           product_id?: string
           rating?: number
+          released_by?: string | null
           reviewed_at?: string
           seller_id?: string
           source?: string
@@ -2750,6 +2777,10 @@ export type Database = {
           p_status?: string
         }
         Returns: Json
+      }
+      review_set_visibility: {
+        Args: { p_action: string; p_reason?: string; p_review_id: string }
+        Returns: string
       }
       review_summaries_refresh: {
         Args: { p_product_ids: string[] }

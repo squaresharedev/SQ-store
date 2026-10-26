@@ -10907,11 +10907,23 @@ notify pgrst, 'reload schema';
 --                             5..1 breakdown), kept by triggers so no page
 --                             load ever aggregates reviews.
 --
--- WRITES are the server's alone (service role): the buyer route checks the
--- order credential and the import route checks the seller's role before
--- anything is written. Clients read their own store's rows through RLS and
--- write nothing. Buyers read through the server, which only ever selects
--- approved rows.
+-- WRITES are the server's (service role): the buyer route checks the order
+-- credential and the import route checks the seller's role before anything is
+-- written. Clients read their own store's rows through RLS; the one thing a
+-- seller can change is a review's visibility, through review_set_visibility()
+-- below. Buyers read through the server, which only ever selects public rows.
+--
+-- WHAT BUYERS SEE is is_public: the seller has not hidden it AND the automatic
+-- check (lib/reviews/moderation.ts) passed it. Every review starts pending, so
+-- nothing anyone writes is public before it has been read. The check holds
+-- what it is unsure about (the seller may publish it) and blocks what breaks a
+-- rule (nobody may publish it).
+--
+-- HIDING HAS TO HAVE A REASON. Hiding a review because it is negative misleads
+-- buyers about what other buyers think, which EU consumer law forbids
+-- (Directive 2005/29/EC as amended by 2019/2161). So a seller hides only for
+-- one of four reasons that are not about the opinion (spam, offensive,
+-- personal information, not about the product), and the reason is kept.
 --
 -- VERIFIED MEANS VERIFIED. is_verified_buyer is set by the server only for a
 -- native review whose order is paid and not refunded, and the trigger on
@@ -10972,7 +10984,24 @@ create table if not exists public.reviews (
   body              text not null default '',
   author_name       text not null,
   is_verified_buyer boolean not null default false,
+  -- The seller's say: false once they hide it, with the reason they gave.
   is_approved       boolean not null default true,
+  hidden_reason     text,
+  -- Who hid it. No foreign key, as review_imports.created_by.
+  hidden_by         uuid,
+  hidden_at         timestamptz,
+  -- The automatic check: pending until judged, then clean, held (unsure:
+  -- hidden until the seller publishes it) or blocked (broke a rule).
+  moderation_status text not null default 'pending',
+  -- Which rule, in the moderation vocabulary (REMOVAL_GROUNDS), when held or
+  -- blocked.
+  moderation_ground text,
+  moderated_at      timestamptz,
+  -- Who published a held review. No foreign key, as hidden_by.
+  released_by       uuid,
+  -- What buyers see. The one condition every public read, index and the
+  -- summary use.
+  is_public         boolean generated always as (is_approved and moderation_status = 'clean') stored,
   -- When the review was written: now for a native review, the original date
   -- for an imported one. The feed sorts on this.
   reviewed_at       timestamptz not null default now(),
@@ -10991,7 +11020,18 @@ create table if not exists public.reviews (
     (source = 'native' and import_id is null and external_id is null)
     or (source <> 'native' and order_id is null and import_id is not null and external_id is not null)
   ),
-  constraint reviews_imported_not_verified check (source = 'native' or not is_verified_buyer)
+  constraint reviews_imported_not_verified check (source = 'native' or not is_verified_buyer),
+  -- MIRROR of REVIEW_HIDE_REASONS in src/lib/reviews/moderation-rules.ts.
+  constraint reviews_hidden_reason_check
+    check (hidden_reason is null or hidden_reason in ('spam', 'offensive', 'personal_info', 'unrelated')),
+  constraint reviews_hidden_has_reason check (is_approved = (hidden_reason is null)),
+  -- MIRROR of REVIEW_MODERATION_STATUSES in src/lib/reviews/moderation-rules.ts.
+  constraint reviews_moderation_status_check
+    check (moderation_status in ('pending', 'clean', 'held', 'blocked')),
+  -- MIRROR of REMOVAL_GROUNDS in src/lib/moderation/removal.ts.
+  constraint reviews_moderation_ground_check
+    check (moderation_ground is null
+           or moderation_ground in ('illegal', 'sexual', 'violence', 'hate', 'counterfeit', 'scam', 'spam', 'other'))
 );
 
 -- Plain (not partial) unique indexes, so the importer's upsert can name them
@@ -11002,21 +11042,26 @@ create unique index if not exists reviews_external_unique
   on public.reviews (product_id, external_id);
 -- The feed, newest first, and the summary's recount.
 create index if not exists reviews_product_feed_idx
-  on public.reviews (product_id, reviewed_at desc, id desc) where is_approved;
+  on public.reviews (product_id, reviewed_at desc, id desc) where is_public;
 -- The feed sorted by rating.
 create index if not exists reviews_product_rating_idx
-  on public.reviews (product_id, rating, reviewed_at desc) where is_approved;
+  on public.reviews (product_id, rating, reviewed_at desc) where is_public;
 create index if not exists reviews_seller_idx
   on public.reviews (seller_id, created_at desc);
 create index if not exists reviews_import_idx
   on public.reviews (import_id) where import_id is not null;
+-- The automatic check's worklist, oldest first.
+create index if not exists reviews_moderation_due_idx
+  on public.reviews (created_at) where moderation_status = 'pending';
 
 comment on table public.reviews is
-  'A product review: native (a buyer, proven by their order link) or imported (a Shopify review app export). Buyers see approved rows only. Written by the service role only.';
+  'A product review: native (a buyer, proven by their order link) or imported (a Shopify review app export). Buyers see is_public rows only. Written by the service role; sellers change visibility through review_set_visibility().';
 comment on column public.reviews.is_verified_buyer is
   'True only for a native review of a paid, unrefunded order. Cleared if the order is refunded. Never true for an imported review.';
 comment on column public.reviews.is_approved is
-  'Whether buyers see it. Only approved reviews count towards product_rating_summaries.';
+  'False once the seller hid it (hidden_reason says why). Buyers see a review only while is_public.';
+comment on column public.reviews.is_public is
+  'Approved by the seller and passed by the automatic check. The only reviews buyers see, and the only ones product_rating_summaries counts.';
 
 -- The owner, from the product, and the edit time. Before the row's CHECKs,
 -- so a writer cannot file a review under someone else's store.
@@ -11072,9 +11117,9 @@ create index if not exists product_rating_summaries_seller_idx
   on public.product_rating_summaries (seller_id);
 
 comment on table public.product_rating_summaries is
-  'Per product: how many approved reviews, their average and the 1..5 breakdown. Kept by triggers on reviews (review_summaries_refresh); never written by the app.';
+  'Per product: how many public reviews, their average and the 1..5 breakdown. Kept by triggers on reviews (review_summaries_refresh); never written by the app.';
 
--- Recount the given products from their approved reviews. A RECOUNT rather
+-- Recount the given products from their public reviews. A RECOUNT rather
 -- than +1/-1 deltas, so the numbers cannot drift whatever happened before;
 -- one indexed scan per product, run once per statement (so an import of a
 -- thousand rows recounts each product once, not a thousand times).
@@ -11107,7 +11152,7 @@ begin
          (count(*) filter (where r.rating = 5))::integer,
          now()
     from public.products p
-    left join public.reviews r on r.product_id = p.id and r.is_approved
+    left join public.reviews r on r.product_id = p.id and r.is_public
    where p.id = any (p_product_ids)
    group by p.id, p.owner_id
   on conflict (product_id) do update
@@ -11196,9 +11241,107 @@ create trigger reviews_unverify_refunded
   when (new.status = 'refunded' and old.status is distinct from 'refunded')
   execute function public.reviews_unverify_refunded();
 
--- ---- 5. Access ------------------------------------------------------------------
--- Members of a store read its rows (the dashboard); nobody writes but the
--- service role.
+-- ---- 5. The seller's one write: a review's visibility ---------------------------
+-- Self-gated like order_mark_shipped: the 2FA session bar, then the owner or a
+-- teammate who may edit products. Actions:
+--   hide     with one of the four reasons (see the header for why only those)
+--   show     undo a hide
+--   publish  release a review the automatic check held; never one it blocked
+-- Returns hidden | shown | published | unchanged | blocked | invalid | not_found.
+
+create or replace function public.review_set_visibility(
+  p_review_id uuid,
+  p_action text,
+  p_reason text default null
+)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  target public.reviews%rowtype;
+  uid    uuid := (select auth.uid());
+begin
+  if not public.mfa_session_ok() then
+    return 'not_found';
+  end if;
+
+  select * into target
+    from public.reviews
+   where id = p_review_id
+     for update;
+
+  if not found
+     or not (
+       target.seller_id = uid
+       or public.team_role_can(public.team_actor_role(target.seller_id), 'products.write')
+     ) then
+    return 'not_found';
+  end if;
+
+  if p_action = 'hide' then
+    if p_reason is null or p_reason not in ('spam', 'offensive', 'personal_info', 'unrelated') then
+      return 'invalid';
+    end if;
+    update public.reviews
+       set is_approved = false, hidden_reason = p_reason, hidden_by = uid, hidden_at = now()
+     where id = target.id;
+    return 'hidden';
+  elsif p_action = 'show' then
+    if target.is_approved then
+      return 'unchanged';
+    end if;
+    update public.reviews
+       set is_approved = true, hidden_reason = null, hidden_by = null, hidden_at = null
+     where id = target.id;
+    return 'shown';
+  elsif p_action = 'publish' then
+    if target.moderation_status = 'blocked' then
+      return 'blocked';
+    end if;
+    if target.moderation_status <> 'held' then
+      return 'unchanged';
+    end if;
+    update public.reviews
+       set moderation_status = 'clean', released_by = uid
+     where id = target.id;
+    return 'published';
+  end if;
+  return 'invalid';
+end
+$$;
+
+-- A new function is auto-granted to anon (the PostgREST auto-grant trap), so
+-- the grant is set explicitly both ways.
+revoke execute on function public.review_set_visibility(uuid, text, text) from public, anon;
+grant execute on function public.review_set_visibility(uuid, text, text) to authenticated, service_role;
+
+comment on function public.review_set_visibility(uuid, text, text) is
+  'Seller hides a review (spam | offensive | personal_info | unrelated), shows it again, or publishes one the automatic check held. Self-gated: 2FA session bar, owner or products.write. Returns hidden | shown | published | unchanged | blocked | invalid | not_found.';
+
+-- ---- 6. Telling the seller ------------------------------------------------------
+-- A bell notification of type 'review' for each new review that passes the
+-- check (lib/reviews/notify.ts), and an email unless the seller switched it off.
+
+alter table public.profiles
+  add column if not exists notify_reviews boolean not null default true;
+
+comment on column public.profiles.notify_reviews is
+  'Email the seller when a buyer reviews one of their products. The bell notification is sent either way.';
+
+alter table public.notifications
+  drop constraint if exists notifications_type_check;
+alter table public.notifications
+  add constraint notifications_type_check
+  check (type = any (array['team','payment','stock','order','system','security','policy','billing','review']));
+
+comment on constraint notifications_type_check on public.notifications is
+  'Mirror of NOTIFICATION_TYPES in lib/notifications/types.ts. Update both together: a type present in one and not the other fails the insert silently.';
+
+-- ---- 7. Access ------------------------------------------------------------------
+-- Members of a store read its rows (the dashboard); the service role writes,
+-- and sellers change visibility through review_set_visibility() alone.
 
 alter table public.review_imports enable row level security;
 alter table public.reviews enable row level security;

@@ -265,10 +265,10 @@
       "title": "Jaké to bylo?",
       "body": "Napište ostatním kupujícím, jak hodnotíte produkt {product}.",
       "open": "Napsat recenzi",
-      "done": "Děkujeme za recenzi. Už je na stránce produktu.",
+      "done": "Tento produkt už má vaši recenzi. Děkujeme!",
       "dialogTitle": "Napsat recenzi",
       "sentTitle": "Děkujeme za recenzi",
-      "sentBody": "Už je na stránce produktu, označená jako recenze od ověřeného kupujícího.",
+      "sentBody": "Na stránce produktu se objeví zhruba do minuty, jakmile ji přečte naše automatická kontrola, označená jako recenze od ověřeného kupujícího.",
       "ratingLegend": "Vaše hodnocení",
       "ratingOption": "{rating, plural, one {{rating} hvězdička} few {{rating} hvězdičky} many {{rating} hvězdičky} other {{rating} hvězdiček}}",
       "ratingPrompt": "Zvolte hodnocení.",
@@ -427,6 +427,7 @@
     },
     "more": "Zobrazit další recenze",
     "loading": "Načítání…",
-    "loadFailed": "Další recenze se nepodařilo načíst. Zkuste to znovu."
+    "loadFailed": "Další recenze se nepodařilo načíst. Zkuste to znovu.",
+    "about": "Recenze označené „Ověřený kupující“ pocházejí z objednávek na Square Share. Každá recenze se před zveřejněním automaticky kontroluje a prodejci mohou recenzi skrýt jen tehdy, když jde o spam, je urážlivá, obsahuje osobní údaje nebo se netýká produktu."
   }
 }

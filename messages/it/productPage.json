@@ -265,10 +265,10 @@
       "title": "Com’è andata?",
       "body": "Racconta agli altri acquirenti cosa pensi di {product}.",
       "open": "Scrivi una recensione",
-      "done": "Grazie per la tua recensione. Ora è sulla pagina del prodotto.",
+      "done": "Hai recensito questo prodotto. Grazie!",
       "dialogTitle": "Scrivi una recensione",
       "sentTitle": "Grazie per la tua recensione",
-      "sentBody": "Ora è sulla pagina del prodotto, indicata come di un acquirente verificato.",
+      "sentBody": "Apparirà sulla pagina del prodotto entro un minuto circa, dopo che il nostro controllo automatico l’avrà letta, indicata come di un acquirente verificato.",
       "ratingLegend": "Il tuo voto",
       "ratingOption": "{rating, plural, one {{rating} stella} other {{rating} stelle}}",
       "ratingPrompt": "Scegli un voto.",
@@ -427,6 +427,7 @@
     },
     "more": "Mostra altre recensioni",
     "loading": "Caricamento…",
-    "loadFailed": "Non è stato possibile caricare altre recensioni. Riprova."
+    "loadFailed": "Non è stato possibile caricare altre recensioni. Riprova.",
+    "about": "Le recensioni contrassegnate come «Acquirente verificato» provengono da ordini effettuati su Square Share. Ogni recensione viene controllata automaticamente prima di apparire, e i venditori possono nascondere una recensione solo se è spam, è offensiva, contiene dati personali o non riguarda il prodotto."
   }
 }

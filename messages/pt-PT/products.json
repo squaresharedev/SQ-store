@@ -14,6 +14,9 @@
     },
     "importReviews": {
       "title": "Importar avaliações"
+    },
+    "reviews": {
+      "title": "Avaliações"
     }
   },
   "page": {
@@ -68,7 +71,8 @@
     "import": "Importar",
     "add": "Adicionar produto",
     "updating": "A atualizar…",
-    "pagination": "{total, plural, one {{total} produto · página {page} de {pages}} many {{total} de produtos · página {page} de {pages}} other {{total} produtos · página {page} de {pages}}}"
+    "pagination": "{total, plural, one {{total} produto · página {page} de {pages}} many {{total} de produtos · página {page} de {pages}} other {{total} produtos · página {page} de {pages}}}",
+    "reviews": "Avaliações"
   },
   "list": {
     "noMatch": {
@@ -1036,7 +1040,7 @@
     "rowsLimit": "{max, plural, one {Até {max} avaliação por ficheiro} other {Até {max} avaliações por ficheiro}}",
     "fileTooLarge": "Esse ficheiro é demasiado grande. O limite é {max}.",
     "fileEmpty": "Esse ficheiro está vazio.",
-    "badgeNote": "As avaliações importadas mostram onde foram escritas, como «Importada do Shopify (Judge.me)». Só as avaliações que os compradores escrevem a partir de uma encomenda Square Share são marcadas como de comprador verificado.",
+    "badgeNote": "As avaliações importadas mostram onde foram escritas, como «Importada do Shopify (Judge.me)». Só as avaliações que os compradores escrevem a partir de uma encomenda Square Share são marcadas como de comprador verificado. Cada avaliação importada aparece depois de lida pela nossa verificação automática.",
     "missingColumns": "Este ficheiro não tem coluna para: {fields}. Exporte novamente as avaliações a partir da sua app de avaliações, em CSV.",
     "fields": {
       "rating": "classificação",
@@ -1078,6 +1082,97 @@
       "unrecognised": "Este ficheiro não é uma exportação de avaliações que consigamos ler.",
       "nothing": "Nada para importar. Associe pelo menos um produto.",
       "failed": "A importação não foi concluída e nada foi guardado. Tente novamente."
+    }
+  },
+  "reviewModeration": {
+    "heading": "Avaliações",
+    "description": "O que os compradores dizem dos seus produtos. Cada avaliação é verificada automaticamente antes de aparecer, e as que deixaram a verificação com dúvidas esperam aqui pela sua decisão.",
+    "importLink": "Vem do Shopify? Importe as suas avaliações",
+    "filtersLabel": "Filtrar avaliações",
+    "filters": {
+      "all": "Todas",
+      "held": "À sua espera",
+      "hidden": "Ocultas"
+    },
+    "heldCount": "{count, plural, one {{count} avaliação à sua espera} other {{count} avaliações à sua espera}}",
+    "loadFailed": "Não foi possível carregar as suas avaliações. Atualize a página para tentar novamente.",
+    "empty": {
+      "all": {
+        "title": "Ainda sem avaliações",
+        "body": "Quando um comprador avaliar um produto a partir da página da encomenda, a avaliação aparece aqui."
+      },
+      "held": {
+        "title": "Nada à sua espera",
+        "body": "As avaliações sobre as quais a verificação automática tem dúvidas esperam aqui pela sua decisão."
+      },
+      "hidden": {
+        "title": "Sem avaliações ocultas",
+        "body": "As avaliações que ocultar aparecem aqui, e pode voltar a mostrá-las a qualquer momento."
+      }
+    },
+    "pagination": "{total, plural, one {{total} avaliação · página {page} de {pages}} other {{total} avaliações · página {page} de {pages}}}",
+    "status": {
+      "pending": "Em verificação",
+      "held": "À sua espera",
+      "blocked": "Bloqueada pela verificação"
+    },
+    "grounds": {
+      "illegal": "conteúdo ilegal",
+      "sexual": "conteúdo sexual",
+      "violence": "ameaças ou violência",
+      "hate": "ódio ou assédio",
+      "counterfeit": "contrafação",
+      "scam": "burla",
+      "spam": "spam ou publicidade",
+      "other": "viola as regras"
+    },
+    "hiddenBecause": "Oculta: {reason}",
+    "reasons": {
+      "spam": {
+        "label": "Spam ou publicidade",
+        "hint": "Promove outra loja ou outro produto, ou não é uma avaliação verdadeira."
+      },
+      "offensive": {
+        "label": "Abusiva ou ofensiva",
+        "hint": "Insulta pessoas, usa insultos de ódio ou assedia alguém."
+      },
+      "personal_info": {
+        "label": "Partilha dados pessoais",
+        "hint": "Contém um número de telefone, morada, email ou outra informação privada."
+      },
+      "unrelated": {
+        "label": "Não é sobre o produto",
+        "hint": "Fala de outra coisa, como outra encomenda ou outro produto."
+      }
+    },
+    "hide": {
+      "title": "Ocultar esta avaliação",
+      "description": "Os compradores deixam de a ver e não conta para a classificação.",
+      "legend": "Porque a está a ocultar?",
+      "legal": "As avaliações negativas ficam visíveis. Ocultar uma avaliação por ser crítica engana os compradores e não é permitido pelo direito do consumidor da UE, por isso uma avaliação só pode ser ocultada por um destes motivos.",
+      "confirm": "Ocultar avaliação"
+    },
+    "actions": {
+      "publish": "Publicar",
+      "show": "Mostrar novamente",
+      "hide": "Ocultar"
+    },
+    "done": {
+      "hide": "Avaliação ocultada.",
+      "show": "Avaliação visível novamente.",
+      "publish": "Avaliação publicada."
+    },
+    "email": {
+      "new": {
+        "subject": "{rating, plural, one {Nova avaliação de {rating} estrela} other {Nova avaliação de {rating} estrelas}}: {title}",
+        "intro": "{rating, plural, one {Um comprador deu {rating} estrela a {title}.} other {Um comprador deu {rating} estrelas a {title}.}} Leia a avaliação na sua página de avaliações."
+      },
+      "held": {
+        "subject": "Uma avaliação de {title} está à sua espera",
+        "intro": "A nossa verificação automática não teve a certeza de que uma avaliação de {title} cumpre as regras, por isso está oculta até decidir. Publique-a ou oculte-a na sua página de avaliações."
+      },
+      "open": "Abrir as suas avaliações: {url}",
+      "settings": "Pode desativar estes emails em Definições › Notificações."
     }
   }
 }

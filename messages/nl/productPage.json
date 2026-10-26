@@ -265,10 +265,10 @@
       "title": "Hoe was het?",
       "body": "Vertel andere kopers wat je van {product} vindt.",
       "open": "Review schrijven",
-      "done": "Bedankt voor je review. Hij staat nu op de productpagina.",
+      "done": "Je hebt dit product beoordeeld. Bedankt!",
       "dialogTitle": "Review schrijven",
       "sentTitle": "Bedankt voor je review",
-      "sentBody": "Hij staat nu op de productpagina, gemarkeerd als review van een geverifieerde koper.",
+      "sentBody": "Hij verschijnt binnen een minuut of zo op de productpagina, zodra onze automatische controle hem heeft gelezen, gemarkeerd als review van een geverifieerde koper.",
       "ratingLegend": "Je beoordeling",
       "ratingOption": "{rating, plural, one {{rating} ster} other {{rating} sterren}}",
       "ratingPrompt": "Kies een beoordeling.",
@@ -427,6 +427,7 @@
     },
     "more": "Meer reviews tonen",
     "loading": "Laden…",
-    "loadFailed": "Meer reviews konden niet worden geladen. Probeer het opnieuw."
+    "loadFailed": "Meer reviews konden niet worden geladen. Probeer het opnieuw.",
+    "about": "Reviews met “Geverifieerde koper” komen van bestellingen op Square Share. Elke review wordt automatisch gecontroleerd voordat hij verschijnt, en verkopers kunnen een review alleen verbergen als het spam is, beledigend is, persoonlijke gegevens bevat of niet over het product gaat."
   }
 }

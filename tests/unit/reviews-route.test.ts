@@ -25,6 +25,18 @@ const state = vi.hoisted(() => ({
 }));
 
 vi.mock("next/headers", () => ({ headers: async () => new Headers({ "cf-connecting-ip": "203.0.113.7" }) }));
+const scheduled = vi.hoisted(() => ({ tasks: [] as (() => unknown)[] }));
+vi.mock("next/server", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/server")>()),
+  after: vi.fn((task: () => unknown) => scheduled.tasks.push(task)),
+}));
+const moderation = vi.hoisted(() => ({ checked: [] as string[] }));
+vi.mock("@/lib/reviews/moderation", () => ({
+  moderateReview: vi.fn(async (id: string) => {
+    moderation.checked.push(id);
+    return "clean";
+  }),
+}));
 vi.mock("@/lib/rate-limit", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/rate-limit")>()),
   rateLimitKey: vi.fn(async () => state.allow),
@@ -44,19 +56,7 @@ vi.mock("@/lib/supabase/admin", () => ({
             single: async () =>
               state.insertError
                 ? { data: null, error: state.insertError }
-                : {
-                    data: {
-                      id: "r1",
-                      rating: row.rating,
-                      title: row.title,
-                      body: row.body,
-                      author_name: row.author_name,
-                      is_verified_buyer: row.is_verified_buyer,
-                      source: "native",
-                      reviewed_at: "2026-10-25T00:00:00Z",
-                    },
-                    error: null,
-                  },
+                : { data: { id: "r1" }, error: null },
           }),
         };
       },
@@ -94,10 +94,12 @@ beforeEach(() => {
   state.reviewable = true;
   state.insertError = null;
   state.inserts = [];
+  scheduled.tasks = [];
+  moderation.checked = [];
 });
 
 describe("POST /api/products/[id]/reviews", () => {
-  it("writes a verified review from a paid order of this product", async () => {
+  it("writes a verified review from a paid order of this product, pending its check", async () => {
     const response = await post({ ...review, authorName: "  Aoife  " });
     expect(response.status).toBe(201);
     expect(state.inserts).toEqual([
@@ -112,7 +114,14 @@ describe("POST /api/products/[id]/reviews", () => {
         is_verified_buyer: true,
       },
     ]);
-    expect((await response.json()).review).toMatchObject({ verified: true, authorName: "Aoife", source: "native" });
+    // Nothing a buyer types is public before the automatic check reads it:
+    // the row is written with the table's default (pending) and the check
+    // runs after the response.
+    expect(state.inserts[0]).not.toHaveProperty("moderation_status");
+    expect(await response.json()).toEqual({ ok: true, status: "pending" });
+    expect(moderation.checked).toEqual([]);
+    await Promise.all(scheduled.tasks.map((task) => task()));
+    expect(moderation.checked).toEqual(["r1"]);
   });
 
   it("refuses a request from another site's page", async () => {

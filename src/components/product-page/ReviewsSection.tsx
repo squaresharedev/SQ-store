@@ -88,6 +88,11 @@ export function ReviewsSection({
           cornerRadius={cornerRadius}
         />
       </div>
+      {/* How these reviews were checked: EU consumer law (Directive
+          2019/2161) requires saying so wherever reviews are shown. */}
+      <p className="mt-6 text-xs opacity-70" data-reviews-about="">
+        {t("about")}
+      </p>
     </section>
   );
 }

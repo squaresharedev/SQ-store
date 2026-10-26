@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -8,6 +9,7 @@ import { uuidField } from "@/lib/validation/inputs";
 import { REVIEW_IMPORT_BODY_MAX, REVIEW_IMPORT_BYTES_MAX, REVIEW_IMPORT_ROWS_MAX } from "@/lib/reviews/limits";
 import { isReviewImportSource } from "@/lib/reviews/sources";
 import { buildReviewImportPlan, slugKey, type ReviewImportProblem } from "@/lib/reviews/import";
+import { sweepReviews } from "@/lib/reviews/moderation";
 
 /**
  * POST /api/sellers/import-reviews: a seller bringing their reviews over from
@@ -30,6 +32,10 @@ import { buildReviewImportPlan, slugKey, type ReviewImportProblem } from "@/lib/
  * UNDOABLE. The run is recorded in review_imports and its reviews hang off
  * it; deleting the run deletes them. A run that fails part-way is deleted
  * here, so nothing is left half-imported.
+ *
+ * CHECKED BEFORE SHOWN. Imported reviews land pending, like a buyer's, and
+ * appear once the automatic check has read them: the first batch straight
+ * after this response, the rest on the moderation sweep's schedule.
  *
  * NEVER "VERIFIED". An imported review is labelled with where it came from
  * and is never marked a verified purchase: we cannot check another
@@ -170,6 +176,14 @@ export async function POST(request: Request): Promise<Response> {
   await (imported === 0
     ? admin.from("review_imports").delete().eq("id", run.id)
     : admin.from("review_imports").update({ imported_count: imported, skipped_count: skipped.length }).eq("id", run.id));
+
+  if (imported > 0) {
+    after(async () => {
+      await sweepReviews().catch((error: unknown) =>
+        console.error("[review-import] first check did not run:", error instanceof Error ? error.message : error),
+      );
+    });
+  }
 
   return reply(
     {

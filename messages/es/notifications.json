@@ -57,7 +57,8 @@
     "system": "Sistema",
     "security": "Seguridad",
     "policy": "Normas",
-    "billing": "Facturación"
+    "billing": "Facturación",
+    "review": "Reseña"
   },
   "time": {
     "justNow": "ahora mismo",
@@ -204,6 +205,16 @@
       "autoPaused": {
         "title": "Tienes que actuar: {target, select, product {tu producto «{title}» está en pausa} other {tu escaparate «{title}» está en pausa}}",
         "body": "Una revisión automática lo ha ocultado a los compradores porque parece incumplir las normas. Cámbialo y se revisará de nuevo al momento, o pide que una persona revise la decisión."
+      }
+    },
+    "review": {
+      "new": {
+        "title": "{rating, plural, one {Nueva reseña de {rating} estrella} other {Nueva reseña de {rating} estrellas}} en {title}",
+        "body": "Léela en tu página de reseñas."
+      },
+      "held": {
+        "title": "Una reseña de {title} espera tu decisión",
+        "body": "La revisión automática tenía dudas. Publícala u ocúltala."
       }
     }
   }

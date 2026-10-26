@@ -14,7 +14,7 @@ import { ShippingSection } from "@/components/settings/ShippingSection";
 
 afterEach(cleanup);
 
-const DEFAULTS = { notify_sales: true, notify_product_updates: true, notify_marketing: false };
+const DEFAULTS = { notify_sales: true, notify_reviews: true, notify_product_updates: true, notify_marketing: false };
 
 describe("the notification preferences", () => {
   it("say nothing extra where mail is switched on", () => {

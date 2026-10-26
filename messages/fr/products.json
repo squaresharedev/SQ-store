@@ -14,6 +14,9 @@
     },
     "importReviews": {
       "title": "Importer des avis"
+    },
+    "reviews": {
+      "title": "Avis"
     }
   },
   "page": {
@@ -68,7 +71,8 @@
     "import": "Importer",
     "add": "Ajouter un produit",
     "updating": "Mise à jour…",
-    "pagination": "{total, plural, one {{total} produit · page {page} sur {pages}} many {{total} produits · page {page} sur {pages}} other {{total} produits · page {page} sur {pages}}}"
+    "pagination": "{total, plural, one {{total} produit · page {page} sur {pages}} many {{total} produits · page {page} sur {pages}} other {{total} produits · page {page} sur {pages}}}",
+    "reviews": "Avis"
   },
   "list": {
     "noMatch": {
@@ -1036,7 +1040,7 @@
     "rowsLimit": "{max, plural, one {Jusqu’à {max} avis par fichier} other {Jusqu’à {max} avis par fichier}}",
     "fileTooLarge": "Ce fichier est trop volumineux. La limite est de {max}.",
     "fileEmpty": "Ce fichier est vide.",
-    "badgeNote": "Les avis importés indiquent où ils ont été écrits, par exemple « Importé de Shopify (Judge.me) ». Seuls les avis écrits par des acheteurs à partir d’une commande Square Share sont signalés comme venant d’un acheteur vérifié.",
+    "badgeNote": "Les avis importés indiquent où ils ont été écrits, par exemple « Importé de Shopify (Judge.me) ». Seuls les avis écrits par des acheteurs à partir d’une commande Square Share sont signalés comme venant d’un acheteur vérifié. Chaque avis importé paraît une fois lu par notre vérification automatique.",
     "missingColumns": "Ce fichier n’a pas de colonne pour : {fields}. Exportez à nouveau vos avis depuis votre application d’avis, au format CSV.",
     "fields": {
       "rating": "note",
@@ -1078,6 +1082,97 @@
       "unrecognised": "Ce fichier n’est pas un export d’avis que nous savons lire.",
       "nothing": "Rien à importer. Associez au moins un produit.",
       "failed": "L’importation n’a pas abouti et rien n’a été enregistré. Réessayez."
+    }
+  },
+  "reviewModeration": {
+    "heading": "Avis",
+    "description": "Ce que les acheteurs disent de vos produits. Chaque avis est vérifié automatiquement avant de paraître, et ceux sur lesquels la vérification a eu un doute vous attendent ici.",
+    "importLink": "Vous venez de Shopify ? Importez vos avis",
+    "filtersLabel": "Filtrer les avis",
+    "filters": {
+      "all": "Tous",
+      "held": "En attente de vous",
+      "hidden": "Masqués"
+    },
+    "heldCount": "{count, plural, one {{count} avis vous attend} other {{count} avis vous attendent}}",
+    "loadFailed": "Impossible de charger vos avis. Actualisez la page pour réessayer.",
+    "empty": {
+      "all": {
+        "title": "Aucun avis pour l’instant",
+        "body": "Quand un acheteur évalue un produit depuis sa page de commande, l’avis apparaît ici."
+      },
+      "held": {
+        "title": "Rien ne vous attend",
+        "body": "Les avis sur lesquels la vérification automatique a un doute attendent ici votre décision."
+      },
+      "hidden": {
+        "title": "Aucun avis masqué",
+        "body": "Les avis que vous masquez apparaissent ici, et vous pouvez les afficher à nouveau à tout moment."
+      }
+    },
+    "pagination": "{total, plural, one {{total} avis · page {page} sur {pages}} other {{total} avis · page {page} sur {pages}}}",
+    "status": {
+      "pending": "En cours de vérification",
+      "held": "En attente de vous",
+      "blocked": "Bloqué par la vérification"
+    },
+    "grounds": {
+      "illegal": "contenu illégal",
+      "sexual": "contenu sexuel",
+      "violence": "menaces ou violence",
+      "hate": "haine ou harcèlement",
+      "counterfeit": "contrefaçon",
+      "scam": "arnaque",
+      "spam": "spam ou publicité",
+      "other": "enfreint les règles"
+    },
+    "hiddenBecause": "Masqué : {reason}",
+    "reasons": {
+      "spam": {
+        "label": "Spam ou publicité",
+        "hint": "Fait la promotion d’une autre boutique ou d’un autre produit, ou n’est pas un vrai avis."
+      },
+      "offensive": {
+        "label": "Injurieux ou choquant",
+        "hint": "Insulte des personnes, emploie des termes haineux ou harcèle quelqu’un."
+      },
+      "personal_info": {
+        "label": "Contient des informations personnelles",
+        "hint": "Contient un numéro de téléphone, une adresse, un e-mail ou d’autres informations privées."
+      },
+      "unrelated": {
+        "label": "Sans rapport avec le produit",
+        "hint": "Parle de tout autre chose, par exemple d’une autre commande ou d’un autre produit."
+      }
+    },
+    "hide": {
+      "title": "Masquer cet avis",
+      "description": "Les acheteurs ne le verront plus, et il ne comptera plus dans la note.",
+      "legend": "Pourquoi le masquez-vous ?",
+      "legal": "Les avis négatifs restent visibles. Masquer un avis parce qu’il est critique induit les acheteurs en erreur et n’est pas autorisé par le droit européen de la consommation, c’est pourquoi un avis ne peut être masqué que pour l’une de ces raisons.",
+      "confirm": "Masquer l’avis"
+    },
+    "actions": {
+      "publish": "Publier",
+      "show": "Afficher à nouveau",
+      "hide": "Masquer"
+    },
+    "done": {
+      "hide": "Avis masqué.",
+      "show": "Avis affiché à nouveau.",
+      "publish": "Avis publié."
+    },
+    "email": {
+      "new": {
+        "subject": "{rating, plural, one {Nouvel avis {rating} étoile} other {Nouvel avis {rating} étoiles}} : {title}",
+        "intro": "{rating, plural, one {Un acheteur a donné {rating} étoile à {title}.} other {Un acheteur a donné {rating} étoiles à {title}.}} Lisez l’avis sur votre page d’avis."
+      },
+      "held": {
+        "subject": "Un avis sur {title} vous attend",
+        "intro": "Notre vérification automatique n’était pas sûre qu’un avis sur {title} respecte les règles, il est donc masqué jusqu’à votre décision. Publiez-le ou masquez-le depuis votre page d’avis."
+      },
+      "open": "Ouvrir vos avis : {url}",
+      "settings": "Vous pouvez désactiver ces e-mails dans Paramètres › Notifications."
     }
   }
 }

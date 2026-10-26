@@ -17,8 +17,10 @@ export default async function NotificationsSettingsPage() {
     <NotificationsSection
       emailEnabled={emailSendingEnabled()}
       defaults={{
-        // DB defaults for new users: sales + product updates on, marketing off.
+        // DB defaults for new users: sales, reviews and product updates on,
+        // marketing off.
         notify_sales: profile?.notify_sales ?? true,
+        notify_reviews: profile?.notify_reviews ?? true,
         notify_product_updates: profile?.notify_product_updates ?? true,
         notify_marketing: profile?.notify_marketing ?? false,
       }}

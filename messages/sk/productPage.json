@@ -265,10 +265,10 @@
       "title": "Aké to bolo?",
       "body": "Napíšte ostatným kupujúcim, ako hodnotíte produkt {product}.",
       "open": "Napísať recenziu",
-      "done": "Ďakujeme za recenziu. Už je na stránke produktu.",
+      "done": "Tento produkt už má vašu recenziu. Ďakujeme!",
       "dialogTitle": "Napísať recenziu",
       "sentTitle": "Ďakujeme za recenziu",
-      "sentBody": "Už je na stránke produktu, označená ako recenzia od overeného kupujúceho.",
+      "sentBody": "Na stránke produktu sa zobrazí približne do minúty, keď ju prečíta naša automatická kontrola, označená ako recenzia od overeného kupujúceho.",
       "ratingLegend": "Vaše hodnotenie",
       "ratingOption": "{rating, plural, one {{rating} hviezdička} few {{rating} hviezdičky} many {{rating} hviezdičky} other {{rating} hviezdičiek}}",
       "ratingPrompt": "Zvoľte hodnotenie.",
@@ -427,6 +427,7 @@
     },
     "more": "Zobraziť ďalšie recenzie",
     "loading": "Načítava sa…",
-    "loadFailed": "Ďalšie recenzie sa nepodarilo načítať. Skúste to znova."
+    "loadFailed": "Ďalšie recenzie sa nepodarilo načítať. Skúste to znova.",
+    "about": "Recenzie označené „Overený kupujúci“ pochádzajú z objednávok na Square Share. Každá recenzia sa pred zverejnením automaticky kontroluje a predajcovia môžu recenziu skryť, len ak ide o spam, je urážlivá, obsahuje osobné údaje alebo sa netýka produktu."
   }
 }

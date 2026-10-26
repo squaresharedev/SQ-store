@@ -265,10 +265,10 @@
       "title": "O que achou?",
       "body": "Diga a outros compradores o que pensa de {product}.",
       "open": "Escrever uma avaliação",
-      "done": "Obrigado pela sua avaliação. Já está na página do produto.",
+      "done": "Já avaliou este produto. Obrigado!",
       "dialogTitle": "Escrever uma avaliação",
       "sentTitle": "Obrigado pela sua avaliação",
-      "sentBody": "Já está na página do produto, marcada como de um comprador verificado.",
+      "sentBody": "Vai aparecer na página do produto dentro de cerca de um minuto, depois de lida pela nossa verificação automática, marcada como de um comprador verificado.",
       "ratingLegend": "A sua classificação",
       "ratingOption": "{rating, plural, one {{rating} estrela} other {{rating} estrelas}}",
       "ratingPrompt": "Escolha uma classificação.",
@@ -427,6 +427,7 @@
     },
     "more": "Mostrar mais avaliações",
     "loading": "A carregar…",
-    "loadFailed": "Não foi possível carregar mais avaliações. Tente novamente."
+    "loadFailed": "Não foi possível carregar mais avaliações. Tente novamente.",
+    "about": "As avaliações marcadas como «Comprador verificado» vêm de encomendas feitas na Square Share. Cada avaliação é verificada automaticamente antes de aparecer, e os vendedores só podem ocultar uma avaliação se for spam, for ofensiva, partilhar dados pessoais ou não for sobre o produto."
   }
 }

@@ -265,10 +265,10 @@
       "title": "Qu’en avez-vous pensé ?",
       "body": "Dites aux autres acheteurs ce que vous pensez de {product}.",
       "open": "Écrire un avis",
-      "done": "Merci pour votre avis. Il est maintenant sur la page du produit.",
+      "done": "Vous avez évalué ce produit. Merci !",
       "dialogTitle": "Écrire un avis",
       "sentTitle": "Merci pour votre avis",
-      "sentBody": "Il est maintenant sur la page du produit, signalé comme venant d’un acheteur vérifié.",
+      "sentBody": "Il paraîtra sur la page du produit d’ici une minute environ, une fois lu par notre vérification automatique, signalé comme venant d’un acheteur vérifié.",
       "ratingLegend": "Votre note",
       "ratingOption": "{rating, plural, one {{rating} étoile} other {{rating} étoiles}}",
       "ratingPrompt": "Choisissez une note.",
@@ -427,6 +427,7 @@
     },
     "more": "Afficher plus d’avis",
     "loading": "Chargement…",
-    "loadFailed": "Impossible de charger plus d’avis. Réessayez."
+    "loadFailed": "Impossible de charger plus d’avis. Réessayez.",
+    "about": "Les avis marqués « Acheteur vérifié » proviennent de commandes passées sur Square Share. Chaque avis est vérifié automatiquement avant de paraître, et les vendeurs ne peuvent masquer un avis que s’il s’agit de spam, s’il est injurieux, s’il contient des informations personnelles ou s’il ne concerne pas le produit."
   }
 }

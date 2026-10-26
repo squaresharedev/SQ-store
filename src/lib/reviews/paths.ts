@@ -14,3 +14,14 @@ export const REVIEW_IMPORT_API_PATH = "/api/sellers/import-reviews";
 
 /** The dashboard page that imports reviews. */
 export const REVIEWS_IMPORT_PATH = `${PRODUCTS_PATH}/import-reviews`;
+
+/** The dashboard page where a seller reads and moderates their reviews. */
+export const REVIEWS_PATH = `${PRODUCTS_PATH}/reviews`;
+
+/** `?filter=` on the reviews page (REVIEW_MODERATION_FILTERS). */
+export const REVIEWS_FILTER_PARAM = "filter";
+
+/** The reviews page on one filter: "held" is where a held review waits. */
+export function reviewsFilterPath(filter: "held" | "hidden"): string {
+  return `${REVIEWS_PATH}?${REVIEWS_FILTER_PARAM}=${filter}`;
+}

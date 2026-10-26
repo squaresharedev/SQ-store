@@ -22,6 +22,8 @@ import {
   MODERATION_EFFORT,
   MODERATION_MODEL,
   POLICY_PROMPT,
+  REVIEW_POLICY_PROMPT,
+  reviewInstruction,
   textInstruction,
   TEXT_MAX_CHARS,
   type ModerationScope,
@@ -122,6 +124,8 @@ async function ask(
   /** Whether a request the API refuses outright means the CONTENT is
    *  unreadable (a file) rather than that we built the request wrong (text). */
   unreadableIsVerdict: boolean,
+  /** Which policy: the listing one, or the buyer-review one. */
+  policy: string = POLICY_PROMPT,
 ): Promise<ClassifyResult> {
   const anthropic = client();
   if (!anthropic) return null;
@@ -130,7 +134,10 @@ async function ask(
     const response = await anthropic.messages.parse({
       model: MODERATION_MODEL,
       max_tokens: RESPONSE_MAX_TOKENS,
-      system: POLICY_PROMPT,
+      // Cached: the policy is the same on every call and most of each
+      // request's input, so after the first call it is read at a tenth of
+      // the price. Nothing variable is in it, so nothing invalidates it.
+      system: [{ type: "text", text: policy, cache_control: { type: "ephemeral" } }],
       messages: [{ role: "user", content }],
       // No temperature or top_p: this model answers them with a 400.
       output_config: { effort: MODERATION_EFFORT, format: zodOutputFormat(answerSchema) },
@@ -288,6 +295,37 @@ export async function classifyText(
     ],
     judged.map(linePath),
     false,
+  );
+}
+
+/**
+ * Judge one buyer review (lib/reviews/moderation.ts) under the review policy:
+ * the shown name, the title and the text, as field=value lines. The same
+ * fences as a listing's text: hidden characters and text that addresses the
+ * check are held without asking, and what the model reads is normalised and
+ * fenced.
+ */
+export async function classifyReview(review: {
+  authorName: string;
+  title: string | null;
+  body: string;
+}): Promise<ClassifyResult> {
+  const lines = [
+    `author=${review.authorName}`,
+    ...(review.title ? [`title=${review.title}`] : []),
+    ...(review.body ? [`body=${review.body}`] : []),
+  ];
+  if (moderationTestProvider()) return classifyTextForTest(lines);
+  const steering = lines.filter((line) => hasHiddenCharacters(line) || addressesTheCheck(line));
+  if (steering.length > 0) {
+    return { verdict: "unsure", ground: null, paths: [...new Set(steering.map(linePath))] };
+  }
+  const text = fenceSafe(normalizeForModel(lines.join("\n")));
+  return ask(
+    [{ type: "text", text: `${reviewInstruction()}\n\n<content>\n${text}\n</content>` }],
+    lines.map(linePath),
+    false,
+    REVIEW_POLICY_PROMPT,
   );
 }
 

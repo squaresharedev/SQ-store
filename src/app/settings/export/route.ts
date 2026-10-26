@@ -37,7 +37,7 @@ export const dynamic = "force-dynamic";
 
 const PROFILE_COLUMNS =
   "username, avatar_url, created_at, updated_at, " +
-  "notify_sales, notify_product_updates, notify_marketing, " +
+  "notify_sales, notify_reviews, notify_product_updates, notify_marketing, " +
   "tax_business_name, tax_vat_id, tax_country, " +
   "seller_address, seller_email, seller_email_verified_at, " +
   "seller_phone, seller_phone_verified_at, seller_bio, " +

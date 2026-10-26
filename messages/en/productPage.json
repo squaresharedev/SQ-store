@@ -378,10 +378,10 @@
       "title": "How was it?",
       "body": "Tell other buyers what you think of {product}.",
       "open": "Write a review",
-      "done": "Thanks for your review. It is on the product page now.",
+      "done": "You have reviewed this product. Thank you!",
       "dialogTitle": "Write a review",
       "sentTitle": "Thanks for your review",
-      "sentBody": "It is on the product page now, marked as from a verified buyer.",
+      "sentBody": "It will appear on the product page within a minute or so, once our automatic check has read it, marked as from a verified buyer.",
       "ratingLegend": "Your rating",
       "ratingOption": "{rating, plural, one {{rating} star} other {{rating} stars}}",
       "ratingPrompt": "Choose a rating.",
@@ -427,6 +427,7 @@
     },
     "more": "Show more reviews",
     "loading": "Loading…",
-    "loadFailed": "More reviews could not be loaded. Try again."
+    "loadFailed": "More reviews could not be loaded. Try again.",
+    "about": "Reviews marked “Verified buyer” come from orders placed on Square Share. Every review is checked automatically for abuse before it appears, and sellers can only hide a review that is spam, offensive, shares personal details or is not about the product."
   }
 }

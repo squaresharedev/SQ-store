@@ -299,6 +299,8 @@ describe("SECURITY DEFINER functions (RLS does not reach inside them)", () => {
       "order_mark_shipped",
       // Guarded, and the owner's alone; both proven in 33-order-lifecycle.
       "order_refund",
+      // Guarded; its aal1 refusal is proven in 42-reviews.
+      "review_set_visibility",
       "rl_take",
       "team_accept_invite",
       "team_actor_role",

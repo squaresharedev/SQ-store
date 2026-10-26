@@ -68,6 +68,10 @@
     "manageDiscounts": {
       "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de gérer les réductions dans cette boutique.",
       "noRole": "Vous n'avez pas la permission de gérer les réductions dans cette boutique."
+    },
+    "moderateReviews": {
+      "withRole": "Votre rôle {role, select, owner {Propriétaire} editor {Éditeur} viewer {Lecteur} other {{role}}} ne permet pas de masquer ou de publier des avis dans cette boutique.",
+      "noRole": "Votre compte n’a pas l’autorisation de masquer ou de publier des avis dans cette boutique."
     }
   },
   "notFound": {
@@ -76,7 +80,8 @@
     "storefront": "Cette vitrine est introuvable.",
     "item": "Cet élément est introuvable.",
     "order": "Cette commande est introuvable.",
-    "discount": "Cette réduction est introuvable."
+    "discount": "Cette réduction est introuvable.",
+    "review": "Cet avis est introuvable."
   },
   "rateLimited": {
     "fix": "Attendez quelques minutes puis réessayez. Si rien ne se relance en arrière-plan, rechargez d’abord la page.",
@@ -98,7 +103,8 @@
     "connectPayments": "Trop de tentatives de connexion à Stripe en peu de temps.",
     "readCheckoutSettings": "Trop de tentatives de lecture des paramètres de paiement en peu de temps.",
     "changePlan": "Trop de changements de forfait lancés en peu de temps.",
-    "saveDiscounts": "Trop de modifications de réductions en peu de temps."
+    "saveDiscounts": "Trop de modifications de réductions en peu de temps.",
+    "moderateReviews": "Trop de modifications d’avis en peu de temps."
   },
   "serverError": {
     "fix": "C’est généralement temporaire. Attendez un instant puis réessayez ; si le problème persiste, actualisez la page.",
@@ -136,7 +142,8 @@
     "openBillingPortal": "Impossible d'ouvrir vos informations de facturation en raison d'un problème de notre côté.",
     "cancelPlan": "Impossible d’annuler votre forfait en raison d’un problème de notre côté.",
     "resumePlan": "Impossible de conserver votre forfait en raison d’un problème de notre côté.",
-    "saveDiscount": "Impossible d'enregistrer la réduction en raison d'un problème de notre côté."
+    "saveDiscount": "Impossible d'enregistrer la réduction en raison d'un problème de notre côté.",
+    "moderateReview": "Impossible de modifier l’avis en raison d’un problème de notre côté."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Ce produit a été retiré, et non mis en pause.} storefront {Cette vitrine a été retirée, et non mise en pause.} other {Cet élément a été retiré, et non mis en pause.}}",
@@ -684,6 +691,16 @@
     "tooMany": {
       "message": "Cette boutique a atteint le nombre maximal de réductions.",
       "fix": "Supprimez les réductions que vous n'utilisez plus, puis réessayez."
+    }
+  },
+  "reviews": {
+    "blocked": {
+      "message": "La vérification automatique a bloqué cet avis, il ne peut donc pas être publié.",
+      "fix": "Il enfreint une règle (haine, menaces ou contenu sexuel, par exemple) et reste masqué."
+    },
+    "noReason": {
+      "message": "Choisissez pourquoi vous masquez cet avis.",
+      "fix": "Un avis ne peut être masqué que pour l’une des raisons proposées."
     }
   }
 }

@@ -18,6 +18,7 @@ const INITIAL: ActionState = {};
 /** Each preference's form field, and where its copy lives under Settings.notifications.prefs. */
 const PREFS = [
   { name: "notify_sales", copy: "sales" },
+  { name: "notify_reviews", copy: "reviews" },
   { name: "notify_product_updates", copy: "productUpdates" },
   { name: "notify_marketing", copy: "marketing" },
 ] as const;

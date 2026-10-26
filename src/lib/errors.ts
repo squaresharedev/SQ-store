@@ -141,7 +141,8 @@ export type PermissionCapability =
   | "refundOrders"
   | "connectPayments"
   | "manageBilling"
-  | "manageDiscounts";
+  | "manageDiscounts"
+  | "moderateReviews";
 
 /**
  * Role-aware permission error: names the caller's actual role, what it can't
@@ -162,7 +163,7 @@ export function permissionDenied(
 }
 
 /** What can be missing. Each has its own sentence (see PermissionCapability). */
-export type NotFoundEntity = "product" | "storefront" | "order" | "item" | "discount";
+export type NotFoundEntity = "product" | "storefront" | "order" | "item" | "discount" | "review";
 
 export function notFound(entity: NotFoundEntity): ActionError {
   return {
@@ -201,7 +202,8 @@ export type RateLimitedOperation =
   | "refundOrders"
   | "connectPayments"
   | "changePlan"
-  | "saveDiscounts";
+  | "saveDiscounts"
+  | "moderateReviews";
 
 /**
  * A signed-in write budget is spent (lib/rate-limit.ts).
@@ -304,7 +306,8 @@ export type ServerErrorOperation =
   | "openBillingPortal"
   | "cancelPlan"
   | "resumePlan"
-  | "saveDiscount";
+  | "saveDiscount"
+  | "moderateReview";
 
 export function serverError(operation: ServerErrorOperation): ActionError {
   return {

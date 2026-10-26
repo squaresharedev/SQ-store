@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 import { isSameOriginRequest } from "@/lib/security/same-origin";
@@ -7,14 +8,8 @@ import { uuidField } from "@/lib/validation/inputs";
 import { parseReviewQuery, reviewSubmitSchema } from "@/lib/validation/reviews";
 import { readOrderByRef } from "@/lib/orders/order-page";
 import { isReviewableOrder } from "@/lib/reviews/eligibility";
-import {
-  PUBLIC_REVIEW_SELECT,
-  getRatingSummary,
-  isReviewableProduct,
-  listReviews,
-  toPublicReview,
-  type PublicReviewRow,
-} from "@/lib/reviews/queries";
+import { moderateReview } from "@/lib/reviews/moderation";
+import { getRatingSummary, isReviewableProduct, listReviews } from "@/lib/reviews/queries";
 
 /**
  * /api/products/[id]/reviews: a product's reviews.
@@ -34,7 +29,10 @@ import {
  *     link that proves nothing);
  *   - the order must be paid and not refunded (lib/reviews/eligibility.ts),
  *     which is what earns the "Verified buyer" badge;
- *   - one review per order, enforced by a unique index rather than by asking.
+ *   - one review per order, enforced by a unique index rather than by asking;
+ *   - written PENDING, so nothing a buyer types is public before the
+ *     automatic check has read it (lib/reviews/moderation.ts, run after the
+ *     response, so it appears within seconds; the sweep retries it otherwise).
  *
  * Answers are codes, not sentences: the order page's dialog says them in the
  * buyer's language.
@@ -107,7 +105,7 @@ export async function POST(request: Request, { params }: Params): Promise<Respon
       author_name: authorName,
       is_verified_buyer: true,
     })
-    .select(PUBLIC_REVIEW_SELECT)
+    .select("id")
     .single();
   if (error) {
     // 23505 is reviews_order_unique: this order has its review already.
@@ -116,5 +114,8 @@ export async function POST(request: Request, { params }: Params): Promise<Respon
     return reply({ ok: false, error: "failed" }, 500);
   }
 
-  return reply({ ok: true, review: toPublicReview(data as PublicReviewRow) }, 201);
+  // After the response: the buyer is not kept waiting on the classifier, and
+  // a check that fails here leaves the review pending for the sweep.
+  after(() => moderateReview(data.id));
+  return reply({ ok: true, status: "pending" }, 201);
 }

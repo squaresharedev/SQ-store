@@ -265,10 +265,10 @@
       "title": "Jak było?",
       "body": "Napisz innym kupującym, co sądzisz o produkcie {product}.",
       "open": "Napisz opinię",
-      "done": "Dziękujemy za opinię. Jest już na stronie produktu.",
+      "done": "Ten produkt ma już twoją opinię. Dziękujemy!",
       "dialogTitle": "Napisz opinię",
       "sentTitle": "Dziękujemy za opinię",
-      "sentBody": "Jest już na stronie produktu, oznaczona jako opinia zweryfikowanego kupującego.",
+      "sentBody": "Pojawi się na stronie produktu mniej więcej w ciągu minuty, gdy przeczyta ją nasze automatyczne sprawdzanie, oznaczona jako opinia zweryfikowanego kupującego.",
       "ratingLegend": "Twoja ocena",
       "ratingOption": "{rating, plural, one {{rating} gwiazdka} few {{rating} gwiazdki} many {{rating} gwiazdek} other {{rating} gwiazdki}}",
       "ratingPrompt": "Wybierz ocenę.",
@@ -427,6 +427,7 @@
     },
     "more": "Pokaż więcej opinii",
     "loading": "Ładowanie…",
-    "loadFailed": "Nie udało się wczytać kolejnych opinii. Spróbuj ponownie."
+    "loadFailed": "Nie udało się wczytać kolejnych opinii. Spróbuj ponownie.",
+    "about": "Opinie oznaczone jako „Zweryfikowany kupujący” pochodzą z zamówień złożonych w Square Share. Każda opinia jest automatycznie sprawdzana przed publikacją, a sprzedawcy mogą ukryć opinię tylko wtedy, gdy jest spamem, jest obraźliwa, zawiera dane osobowe lub nie dotyczy produktu."
   }
 }

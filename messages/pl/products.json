@@ -14,6 +14,9 @@
     },
     "importReviews": {
       "title": "Importuj opinie"
+    },
+    "reviews": {
+      "title": "Opinie"
     }
   },
   "page": {
@@ -68,7 +71,8 @@
     "import": "Importuj",
     "add": "Dodaj produkt",
     "updating": "Aktualizowanie…",
-    "pagination": "{total, plural, one {{total} produkt · strona {page} z {pages}} few {{total} produkty · strona {page} z {pages}} many {{total} produktów · strona {page} z {pages}} other {{total} produktu · strona {page} z {pages}}}"
+    "pagination": "{total, plural, one {{total} produkt · strona {page} z {pages}} few {{total} produkty · strona {page} z {pages}} many {{total} produktów · strona {page} z {pages}} other {{total} produktu · strona {page} z {pages}}}",
+    "reviews": "Opinie"
   },
   "list": {
     "noMatch": {
@@ -1036,7 +1040,7 @@
     "rowsLimit": "{max, plural, one {Do {max} opinii w pliku} few {Do {max} opinii w pliku} many {Do {max} opinii w pliku} other {Do {max} opinii w pliku}}",
     "fileTooLarge": "Ten plik jest za duży. Limit to {max}.",
     "fileEmpty": "Ten plik jest pusty.",
-    "badgeNote": "Zaimportowane opinie pokazują, gdzie zostały napisane, np. „Zaimportowano z Shopify (Judge.me)”. Jako opinie zweryfikowanego kupującego oznaczane są tylko opinie napisane przez kupujących do zamówienia w Square Share.",
+    "badgeNote": "Zaimportowane opinie pokazują, gdzie zostały napisane, np. „Zaimportowano z Shopify (Judge.me)”. Jako opinie zweryfikowanego kupującego oznaczane są tylko opinie napisane przez kupujących do zamówienia w Square Share. Każda zaimportowana opinia pojawi się, gdy przeczyta ją nasze automatyczne sprawdzanie.",
     "missingColumns": "W tym pliku brakuje kolumny: {fields}. Wyeksportuj opinie ponownie ze swojej aplikacji do opinii jako CSV.",
     "fields": {
       "rating": "ocena",
@@ -1078,6 +1082,97 @@
       "unrecognised": "Ten plik nie jest eksportem opinii, który potrafimy odczytać.",
       "nothing": "Nie ma czego importować. Przypisz co najmniej jeden produkt.",
       "failed": "Import się nie powiódł i nic nie zostało zapisane. Spróbuj ponownie."
+    }
+  },
+  "reviewModeration": {
+    "heading": "Opinie",
+    "description": "Co kupujący mówią o twoich produktach. Każda opinia jest automatycznie sprawdzana przed publikacją, a te, co do których sprawdzanie miało wątpliwości, czekają tu na ciebie.",
+    "importLink": "Przechodzisz z Shopify? Zaimportuj swoje opinie",
+    "filtersLabel": "Filtruj opinie",
+    "filters": {
+      "all": "Wszystkie",
+      "held": "Czekają na ciebie",
+      "hidden": "Ukryte"
+    },
+    "heldCount": "{count, plural, one {{count} opinia czeka na ciebie} few {{count} opinie czekają na ciebie} many {{count} opinii czeka na ciebie} other {{count} opinii czeka na ciebie}}",
+    "loadFailed": "Nie udało się wczytać twoich opinii. Odśwież stronę, aby spróbować ponownie.",
+    "empty": {
+      "all": {
+        "title": "Nie ma jeszcze opinii",
+        "body": "Gdy kupujący oceni produkt na stronie zamówienia, opinia pojawi się tutaj."
+      },
+      "held": {
+        "title": "Nic na ciebie nie czeka",
+        "body": "Opinie, co do których automatyczne sprawdzanie ma wątpliwości, czekają tu na twoją decyzję."
+      },
+      "hidden": {
+        "title": "Brak ukrytych opinii",
+        "body": "Opinie, które ukryjesz, pojawią się tutaj i w każdej chwili możesz je przywrócić."
+      }
+    },
+    "pagination": "{total, plural, one {{total} opinia · strona {page} z {pages}} few {{total} opinie · strona {page} z {pages}} many {{total} opinii · strona {page} z {pages}} other {{total} opinii · strona {page} z {pages}}}",
+    "status": {
+      "pending": "Sprawdzanie",
+      "held": "Czeka na ciebie",
+      "blocked": "Zablokowana przez sprawdzanie"
+    },
+    "grounds": {
+      "illegal": "treści nielegalne",
+      "sexual": "treści seksualne",
+      "violence": "groźby lub przemoc",
+      "hate": "nienawiść lub nękanie",
+      "counterfeit": "podróbki",
+      "scam": "oszustwo",
+      "spam": "spam lub reklama",
+      "other": "łamie zasady"
+    },
+    "hiddenBecause": "Ukryta: {reason}",
+    "reasons": {
+      "spam": {
+        "label": "Spam lub reklama",
+        "hint": "Promuje inny sklep lub produkt albo nie jest prawdziwą opinią."
+      },
+      "offensive": {
+        "label": "Obraźliwa lub obelżywa",
+        "hint": "Obraża ludzi, używa obelg lub kogoś nęka."
+      },
+      "personal_info": {
+        "label": "Zawiera dane osobowe",
+        "hint": "Zawiera numer telefonu, adres, e-mail lub inne prywatne informacje."
+      },
+      "unrelated": {
+        "label": "Nie dotyczy produktu",
+        "hint": "Dotyczy czegoś zupełnie innego, np. innego zamówienia lub produktu."
+      }
+    },
+    "hide": {
+      "title": "Ukryj tę opinię",
+      "description": "Kupujący jej nie zobaczą i nie będzie wliczana do oceny.",
+      "legend": "Dlaczego ją ukrywasz?",
+      "legal": "Negatywne opinie pozostają widoczne. Ukrywanie opinii dlatego, że jest krytyczna, wprowadza kupujących w błąd i jest niedozwolone w unijnym prawie konsumenckim, dlatego opinię można ukryć tylko z jednego z tych powodów.",
+      "confirm": "Ukryj opinię"
+    },
+    "actions": {
+      "publish": "Opublikuj",
+      "show": "Pokaż ponownie",
+      "hide": "Ukryj"
+    },
+    "done": {
+      "hide": "Opinia ukryta.",
+      "show": "Opinia znów widoczna.",
+      "publish": "Opinia opublikowana."
+    },
+    "email": {
+      "new": {
+        "subject": "{rating, plural, one {Nowa opinia ({rating} na 5): {title}} few {Nowa opinia ({rating} na 5): {title}} many {Nowa opinia ({rating} na 5): {title}} other {Nowa opinia ({rating} na 5): {title}}}",
+        "intro": "{rating, plural, one {Produkt {title} ma nową opinię z oceną {rating} na 5. Przeczytaj ją na stronie opinii.} few {Produkt {title} ma nową opinię z oceną {rating} na 5. Przeczytaj ją na stronie opinii.} many {Produkt {title} ma nową opinię z oceną {rating} na 5. Przeczytaj ją na stronie opinii.} other {Produkt {title} ma nową opinię z oceną {rating} na 5. Przeczytaj ją na stronie opinii.}}"
+      },
+      "held": {
+        "subject": "Opinia o produkcie {title} czeka na ciebie",
+        "intro": "Nasze automatyczne sprawdzanie nie było pewne, czy opinia o produkcie {title} nie łamie zasad, dlatego jest ukryta, dopóki nie zdecydujesz. Opublikuj ją lub ukryj na stronie opinii."
+      },
+      "open": "Otwórz opinie: {url}",
+      "settings": "Te e-maile możesz wyłączyć w Ustawienia › Powiadomienia."
     }
   }
 }

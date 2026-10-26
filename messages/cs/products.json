@@ -14,6 +14,9 @@
     },
     "importReviews": {
       "title": "Importovat recenze"
+    },
+    "reviews": {
+      "title": "Recenze"
     }
   },
   "page": {
@@ -68,7 +71,8 @@
     "import": "Importovat",
     "add": "Přidat produkt",
     "updating": "Aktualizace…",
-    "pagination": "{total, plural, one {{total} produkt · strana {page} z {pages}} few {{total} produkty · strana {page} z {pages}} many {{total} produktu · strana {page} z {pages}} other {{total} produktů · strana {page} z {pages}}}"
+    "pagination": "{total, plural, one {{total} produkt · strana {page} z {pages}} few {{total} produkty · strana {page} z {pages}} many {{total} produktu · strana {page} z {pages}} other {{total} produktů · strana {page} z {pages}}}",
+    "reviews": "Recenze"
   },
   "list": {
     "noMatch": {
@@ -1036,7 +1040,7 @@
     "rowsLimit": "{max, plural, one {Až {max} recenze na soubor} few {Až {max} recenze na soubor} many {Až {max} recenze na soubor} other {Až {max} recenzí na soubor}}",
     "fileTooLarge": "Soubor je příliš velký. Limit je {max}.",
     "fileEmpty": "Soubor je prázdný.",
-    "badgeNote": "Importované recenze ukazují, kde byly původně napsány, např. „Importováno ze Shopify (Judge.me)“. Jako recenze od ověřeného kupujícího se označují jen ty, které kupující napíší k objednávce ze Square Share.",
+    "badgeNote": "Importované recenze ukazují, kde byly původně napsány, např. „Importováno ze Shopify (Judge.me)“. Jako recenze od ověřeného kupujícího se označují jen ty, které kupující napíší k objednávce ze Square Share. Každá importovaná recenze se zobrazí, jakmile ji přečte naše automatická kontrola.",
     "missingColumns": "V tomto souboru chybí sloupec pro: {fields}. Vyexportujte recenze z aplikace na recenze znovu jako CSV.",
     "fields": {
       "rating": "hodnocení",
@@ -1078,6 +1082,97 @@
       "unrecognised": "Tento soubor není export recenzí, který umíme přečíst.",
       "nothing": "Není co importovat. Přiřaďte alespoň jeden produkt.",
       "failed": "Import se nepodařil a nic se neuložilo. Zkuste to znovu."
+    }
+  },
+  "reviewModeration": {
+    "heading": "Recenze",
+    "description": "Co kupující říkají o vašich produktech. Každá recenze se před zveřejněním automaticky kontroluje a ty, u kterých si kontrola nebyla jistá, tu čekají na vás.",
+    "importLink": "Přecházíte ze Shopify? Importujte své recenze",
+    "filtersLabel": "Filtrovat recenze",
+    "filters": {
+      "all": "Vše",
+      "held": "Čeká na vás",
+      "hidden": "Skryté"
+    },
+    "heldCount": "{count, plural, one {{count} recenze čeká na vás} few {{count} recenze čekají na vás} many {{count} recenze čeká na vás} other {{count} recenzí čeká na vás}}",
+    "loadFailed": "Vaše recenze se nepodařilo načíst. Obnovte stránku a zkuste to znovu.",
+    "empty": {
+      "all": {
+        "title": "Zatím žádné recenze",
+        "body": "Když kupující ohodnotí produkt na stránce objednávky, recenze se objeví tady."
+      },
+      "held": {
+        "title": "Nic na vás nečeká",
+        "body": "Recenze, u kterých si automatická kontrola není jistá, tu čekají, dokud nerozhodnete."
+      },
+      "hidden": {
+        "title": "Žádné skryté recenze",
+        "body": "Recenze, které skryjete, se objeví tady a kdykoli je můžete znovu zobrazit."
+      }
+    },
+    "pagination": "{total, plural, one {{total} recenze · strana {page} z {pages}} few {{total} recenze · strana {page} z {pages}} many {{total} recenze · strana {page} z {pages}} other {{total} recenzí · strana {page} z {pages}}}",
+    "status": {
+      "pending": "Probíhá kontrola",
+      "held": "Čeká na vás",
+      "blocked": "Zablokováno kontrolou"
+    },
+    "grounds": {
+      "illegal": "nezákonný obsah",
+      "sexual": "sexuální obsah",
+      "violence": "výhrůžky nebo násilí",
+      "hate": "nenávist nebo obtěžování",
+      "counterfeit": "padělky",
+      "scam": "podvod",
+      "spam": "spam nebo reklama",
+      "other": "porušuje pravidla"
+    },
+    "hiddenBecause": "Skryto: {reason}",
+    "reasons": {
+      "spam": {
+        "label": "Spam nebo reklama",
+        "hint": "Propaguje jiný obchod nebo produkt, nebo nejde o skutečnou recenzi."
+      },
+      "offensive": {
+        "label": "Urážlivá nebo nevhodná",
+        "hint": "Uráží lidi, používá nadávky nebo někoho obtěžuje."
+      },
+      "personal_info": {
+        "label": "Obsahuje osobní údaje",
+        "hint": "Obsahuje telefonní číslo, adresu, e-mail nebo jiné soukromé informace."
+      },
+      "unrelated": {
+        "label": "Netýká se produktu",
+        "hint": "Jde o něco úplně jiného, třeba o jinou objednávku nebo jiný produkt."
+      }
+    },
+    "hide": {
+      "title": "Skrýt tuto recenzi",
+      "description": "Kupující ji neuvidí a nebude se započítávat do hodnocení.",
+      "legend": "Proč ji skrýváte?",
+      "legal": "Negativní recenze zůstávají viditelné. Skrýt recenzi proto, že je kritická, klame kupující a evropské spotřebitelské právo to nedovoluje, proto lze recenzi skrýt jen z jednoho z těchto důvodů.",
+      "confirm": "Skrýt recenzi"
+    },
+    "actions": {
+      "publish": "Zveřejnit",
+      "show": "Znovu zobrazit",
+      "hide": "Skrýt"
+    },
+    "done": {
+      "hide": "Recenze skryta.",
+      "show": "Recenze je znovu vidět.",
+      "publish": "Recenze zveřejněna."
+    },
+    "email": {
+      "new": {
+        "subject": "{rating, plural, one {Nová recenze ({rating} z 5): {title}} few {Nová recenze ({rating} z 5): {title}} many {Nová recenze ({rating} z 5): {title}} other {Nová recenze ({rating} z 5): {title}}}",
+        "intro": "{rating, plural, one {Produkt {title} má novou recenzi s hodnocením {rating} z 5. Přečtěte si ji na stránce recenzí.} few {Produkt {title} má novou recenzi s hodnocením {rating} z 5. Přečtěte si ji na stránce recenzí.} many {Produkt {title} má novou recenzi s hodnocením {rating} z 5. Přečtěte si ji na stránce recenzí.} other {Produkt {title} má novou recenzi s hodnocením {rating} z 5. Přečtěte si ji na stránce recenzí.}}"
+      },
+      "held": {
+        "subject": "Recenze produktu {title} čeká na vás",
+        "intro": "Naše automatická kontrola si nebyla jistá, zda recenze produktu {title} neporušuje pravidla, proto je skrytá, dokud nerozhodnete. Zveřejněte ji nebo ji skryjte na stránce recenzí."
+      },
+      "open": "Otevřít recenze: {url}",
+      "settings": "Tyto e-maily můžete vypnout v Nastavení › Oznámení."
     }
   }
 }
