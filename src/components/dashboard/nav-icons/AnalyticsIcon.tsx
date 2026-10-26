@@ -11,10 +11,11 @@ import type { NavIconProps } from "./types";
  * The arrow is a snake of fixed length on a track that is its own zigzag,
  * extended off the icon at both ends. On hover it speeds up along the track
  * and threads out of the top-right corner, head first, the line following
- * through the same corners; then a new run feeds in from the bottom-left,
- * head first again, and slows to a stop exactly where it began. The head turns
- * at every corner it passes, so it travels the zigzag rather than sliding as
- * one rigid piece.
+ * through the same corners; then a new run feeds in from the bottom-left and
+ * slows to a stop exactly where it began, the line alone, with the arrowhead
+ * popping in only once the line has reached the tip. The head turns at every
+ * corner it passes on the way out, so it travels the zigzag rather than
+ * sliding as one rigid piece.
  *
  * Everything is driven by one sampled speed profile (the exit accelerates, the
  * entry decelerates) so the head, the line and the fade all stay in step. The
@@ -105,20 +106,43 @@ function headAt(t: number) {
   return { head: HEAD_GONE_IN + (REST_HEAD - HEAD_GONE_IN) * f, shown: true };
 }
 
-const FRAMES = Array.from({ length: SAMPLES }, (_, i) => {
+/** The entering line is this close to the tip before the arrowhead shows. */
+const REVEAL_GAP = 0.5;
+/** Samples the arrowhead takes to pop in once the line has arrived. */
+const REVEAL_SAMPLES = 4;
+/** The scale the arrowhead pops in from, about its tip. */
+const REVEAL_FROM = 0.4;
+
+const RUN = Array.from({ length: SAMPLES }, (_, i) => {
   const t = i / (SAMPLES - 1);
   const { head: runHead, shown } = headAt(t);
   // Park the head at the start runway for the hidden beat's second half, so
   // the jump between the two ends happens while nothing is drawn.
   const head =
     !shown && t > (EXIT_END + ENTRY_START) / 2 ? HEAD_GONE_IN : runHead;
+  return { t, head, shown };
+});
+/** The first sample at which the entering line has reached the tip. */
+const ARRIVED = RUN.findIndex(
+  ({ t, head }) => t >= ENTRY_START && REST_HEAD - head <= REVEAL_GAP,
+);
+
+const FRAMES = RUN.map(({ t, head, shown }, i) => {
   const p = pointAt(head);
+  // The arrowhead leads the line out, but on the way back in only the line
+  // comes: the tip appears once the line has reached it.
+  const reveal =
+    t < ENTRY_START
+      ? 1
+      : Math.min(Math.max((i - ARRIVED) / REVEAL_SAMPLES, 0), 1);
   return {
     x: p.x - TIP[0],
     y: p.y - TIP[1],
     rotate: p.heading,
     offset: (head - LINE_LENGTH) / TRACK_LENGTH,
     opacity: shown ? 1 : 0,
+    headOpacity: reveal > 0 ? 1 : 0,
+    headScale: REVEAL_FROM + (1 - REVEAL_FROM) * reveal,
   };
 });
 const channel = (key: keyof (typeof FRAMES)[number]) =>
@@ -153,11 +177,20 @@ const LINE: Variants = {
 };
 
 const HEAD: Variants = {
-  idle: { x: 0, y: 0, rotate: 0, transition: { duration: 0 } },
+  idle: {
+    x: 0,
+    y: 0,
+    rotate: 0,
+    scale: 1,
+    opacity: 1,
+    transition: { duration: 0 },
+  },
   hover: {
     x: channel("x"),
     y: channel("y"),
     rotate: channel("rotate"),
+    scale: channel("headScale"),
+    opacity: channel("headOpacity"),
     transition: { duration: DURATION, ease: "linear" },
   },
 };
