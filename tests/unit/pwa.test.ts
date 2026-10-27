@@ -70,10 +70,118 @@ describe("service worker", () => {
     expect(worker).toContain("cache.add(new Request(OFFLINE_URL");
   });
 
-  it("only ever answers page loads", () => {
-    expect(worker).toContain(
-      'if (request.mode !== "navigate" || request.method !== "GET") return;',
+});
+
+describe("service worker: a Worker stopped at its CPU limit", () => {
+  const worker = read("public", SERVICE_WORKER_PATH).toString("utf8");
+  const ORIGIN = "https://dashboard.squareshare.eu";
+  /** The answer Cloudflare gives in place of the Worker's (Error 1102). */
+  const limitPage = () =>
+    new Response(
+      "<!DOCTYPE html><title>Worker exceeded resource limits | dashboard.squareshare.eu | Cloudflare</title>" +
+        '<span class="inline-block">Error</span><span class="code-label">Error code 1102</span>',
+      { status: 503, headers: { "Content-Type": "text/html" } },
     );
+  const page = () => new Response("<!doctype html><h1>Orders</h1>", { status: 200 });
+  const offlinePage = new Response("<!doctype html><h1>You're offline</h1>");
+
+  type FakeRequest = { url: string; method: string; mode: string; headers: Headers };
+  const pageLoad = (path = "/orders"): FakeRequest => ({
+    url: ORIGIN + path, method: "GET", mode: "navigate", headers: new Headers(),
+  });
+  const pageChange = (headers: Record<string, string> = {}): FakeRequest => ({
+    url: `${ORIGIN}/orders?_rsc=abc`, method: "GET", mode: "cors", headers: new Headers({ rsc: "1", ...headers }),
+  });
+
+  /**
+   * Runs public/sw.js as the browser would, against a network that gives the
+   * answers listed (an Error is a network failure), and dispatches one fetch.
+   * Returns what the worker answered (undefined when it let the request be).
+   */
+  async function dispatch(
+    request: FakeRequest,
+    answers: Array<Response | Error>,
+    preload?: Response,
+  ) {
+    const listeners: Record<string, (event: unknown) => void> = {};
+    const fetched: FakeRequest[] = [];
+    const waits: number[] = [];
+    const network = async (r: FakeRequest) => {
+      fetched.push(r);
+      const next = answers.shift();
+      if (!next || next instanceof Error) throw next ?? new Error("no answer left");
+      return next;
+    };
+    const self = {
+      location: new URL(ORIGIN),
+      addEventListener: (type: string, fn: (event: unknown) => void) => (listeners[type] = fn),
+    };
+    const caches = { match: async () => offlinePage.clone() };
+    // The waits between tries are recorded, not slept.
+    const wait = (fn: () => void, ms: number) => (waits.push(ms), fn());
+    new Function("self", "caches", "fetch", "setTimeout", worker)(self, caches, network, wait);
+
+    let answered: Promise<Response> | undefined;
+    listeners.fetch({
+      request,
+      preloadResponse: Promise.resolve(preload),
+      respondWith: (p: Promise<Response>) => (answered = p),
+    });
+    return { response: answered && (await answered), fetched, waits };
+  }
+
+  it("asks again after a moment, and serves the page once it comes", async () => {
+    const { response, fetched, waits } = await dispatch(pageLoad(), [limitPage(), limitPage(), page()]);
+    expect(response?.status).toBe(200);
+    expect(await response?.text()).toContain("Orders");
+    expect(fetched).toHaveLength(3);
+    expect(waits).toEqual([300, 800]);
+  });
+
+  it("counts the browser's preloaded answer as the first try", async () => {
+    const { response, fetched } = await dispatch(pageLoad(), [page()], limitPage());
+    expect(response?.status).toBe(200);
+    expect(fetched).toHaveLength(1);
+  });
+
+  it("gives up after three more tries and shows the page Cloudflare sent", async () => {
+    const { response, fetched } = await dispatch(pageLoad(), Array.from({ length: 6 }, limitPage));
+    expect(fetched).toHaveLength(4);
+    expect(response?.status).toBe(503);
+    expect(await response?.text()).toContain("Worker exceeded resource limits");
+  });
+
+  it("passes any other server error straight back, untried", async () => {
+    const busy = new Response('{"error":"database unavailable"}', { status: 503 });
+    const { response, fetched } = await dispatch(pageLoad(), [busy, page()]);
+    expect(response?.status).toBe(503);
+    expect(fetched).toHaveLength(1);
+  });
+
+  it("retries the router's fetch of the next page the same way", async () => {
+    const { response, fetched } = await dispatch(pageChange(), [limitPage(), page()]);
+    expect(response?.status).toBe(200);
+    expect(fetched).toHaveLength(2);
+  });
+
+  it("never touches a prefetch, a server action, or another site's request", async () => {
+    const prefetch = await dispatch(pageChange({ "next-router-prefetch": "1" }), [limitPage()]);
+    const action: FakeRequest = { ...pageLoad(), method: "POST", headers: new Headers({ "next-action": "x" }) };
+    const elsewhere: FakeRequest = { ...pageChange(), url: "https://example.com/?_rsc=abc" };
+    const data: FakeRequest = { ...pageChange(), headers: new Headers() };
+    for (const run of [prefetch, await dispatch(action, []), await dispatch(elsewhere, []), await dispatch(data, [])]) {
+      expect(run.response).toBeUndefined();
+      expect(run.fetched).toHaveLength(0);
+    }
+  });
+
+  it("shows the offline page when the network itself is gone", async () => {
+    const load = await dispatch(pageLoad(), [new Error("offline")]);
+    expect(await load.response?.text()).toContain("offline");
+    // A page change fails as it would without the worker: the router then
+    // loads the page in full, which comes back here as a page load.
+    const change = await dispatch(pageChange(), [new Error("offline")]);
+    expect(change.response?.type).toBe("error");
   });
 });
 

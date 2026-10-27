@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { ReactNode } from "react";
-import { act, cleanup, render, screen } from "../setup/render";
-import { AppLink } from "@/components/ui/AppLink";
+import { act, cleanup, fireEvent, render, screen } from "../setup/render";
+import { AppLink, PREFETCH_INTENT_MS } from "@/components/ui/AppLink";
 import { NavigationProgress } from "@/components/layout/NavigationProgress";
 import { PENDING_DELAY_MS } from "@/components/ui/motion-tokens";
 import { useProgressWhile } from "@/lib/hooks/useProgressWhile";
@@ -17,8 +17,18 @@ const link = vi.hoisted(() => ({ pending: false }));
 vi.mock("next/link", () => ({
   // What Next reports for the link under the pointer.
   useLinkStatus: () => ({ pending: link.pending }),
-  default: ({ href, children, ...rest }: { href: string; children: ReactNode }) => (
-    <a href={href} {...rest}>
+  // The prefetch prop is shown as data-prefetch, for the tests to read.
+  default: ({
+    href,
+    children,
+    prefetch,
+    ...rest
+  }: {
+    href: string;
+    children: ReactNode;
+    prefetch?: boolean | "auto" | null;
+  }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...rest}>
       {children}
     </a>
   ),
@@ -162,5 +172,70 @@ describe("AppLink", () => {
     );
     elapse(PENDING_DELAY_MS * 3);
     expect(bar()).toBeNull();
+  });
+});
+
+/**
+ * Every page fetched ahead is a server render on the Worker. Fetching every
+ * link on screen ran it out of CPU (Cloudflare Error 1102), so a link fetches
+ * its page ahead only once someone shows they mean to follow it.
+ */
+describe("AppLink prefetching", () => {
+  const prefetch = () => screen.getByRole("link").getAttribute("data-prefetch");
+
+  it("fetches nothing ahead while the link is merely on screen", () => {
+    render(<AppLink href="/orders">Orders</AppLink>);
+    elapse(PREFETCH_INTENT_MS * 10);
+    expect(prefetch()).toBe("false");
+  });
+
+  it("fetches ahead once the pointer rests on it", () => {
+    render(<AppLink href="/orders">Orders</AppLink>);
+    fireEvent.mouseEnter(screen.getByRole("link"));
+    elapse(PREFETCH_INTENT_MS - 1);
+    expect(prefetch()).toBe("false");
+    elapse(1);
+    // null is next/link's own default: fetch now that the link is on screen.
+    expect(prefetch()).toBe("null");
+  });
+
+  it("fetches nothing for a pointer passing over on its way elsewhere", () => {
+    render(<AppLink href="/orders">Orders</AppLink>);
+    const anchor = screen.getByRole("link");
+    fireEvent.mouseEnter(anchor);
+    elapse(PREFETCH_INTENT_MS / 2);
+    fireEvent.mouseLeave(anchor);
+    elapse(PREFETCH_INTENT_MS * 10);
+    expect(prefetch()).toBe("false");
+  });
+
+  it("counts keyboard focus resting on it as intent", () => {
+    render(<AppLink href="/orders">Orders</AppLink>);
+    fireEvent.focus(screen.getByRole("link"));
+    elapse(PREFETCH_INTENT_MS);
+    expect(prefetch()).toBe("null");
+  });
+
+  it("leaves a prefetch prop passed in as it is", () => {
+    render(
+      <AppLink href="/orders" prefetch>
+        Orders
+      </AppLink>,
+    );
+    expect(prefetch()).toBe("true");
+  });
+
+  it("still runs the caller's own pointer and focus handlers", () => {
+    const onMouseEnter = vi.fn();
+    const onFocus = vi.fn();
+    render(
+      <AppLink href="/orders" onMouseEnter={onMouseEnter} onFocus={onFocus}>
+        Orders
+      </AppLink>,
+    );
+    fireEvent.mouseEnter(screen.getByRole("link"));
+    fireEvent.focus(screen.getByRole("link"));
+    expect(onMouseEnter).toHaveBeenCalledOnce();
+    expect(onFocus).toHaveBeenCalledOnce();
   });
 });
