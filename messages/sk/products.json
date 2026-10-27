@@ -1099,7 +1099,7 @@
   "reviewModeration": {
     "heading": "Recenzie",
     "description": "Čo kupujúci hovoria o vašich produktoch. Každá recenzia sa pred zverejnením automaticky kontroluje a tie, pri ktorých si kontrola nebola istá, tu čakajú na vás.",
-    "importButton": "Importovať odkiaľkoľvek",
+    "importLink": "Prechádzate zo Shopify? Importujte svoje recenzie",
     "filtersLabel": "Filtrovať recenzie",
     "filters": {
       "all": "Všetko",
