@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { getTranslations } from "next-intl/server";
 import { pageShellClass } from "@/components/ui/surface-styles";
 import { primaryButtonClass } from "@/components/ui/control-styles";

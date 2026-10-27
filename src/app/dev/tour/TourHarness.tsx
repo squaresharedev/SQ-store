@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState, type ReactNode } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { Code, Menu, Search } from "lucide-react";
 import { TourOverlay } from "@/components/onboarding/TourOverlay";
 import { TourReplayCard } from "@/components/onboarding/TourReplayCard";

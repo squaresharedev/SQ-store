@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { usePendingRouter } from "@/lib/hooks/usePendingRouter";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { transitionClass } from "@/components/ui/control-styles";
@@ -49,7 +49,7 @@ export function NotificationItem({
   onNavigate?: () => void;
 }) {
   const t = useTranslations();
-  const router = useRouter();
+  const router = usePendingRouter();
   const { id, type, read, created_at, data, action } = notification;
   const { title, body } = useNotificationText(notification);
   const locale = useLocale();

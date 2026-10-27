@@ -1185,6 +1185,40 @@
       },
       "open": "Otvoriť recenzie: {url}",
       "settings": "Tieto e-maily môžete vypnúť v Nastavenia › Upozornenia."
+    },
+    "overview": {
+      "label": "Hodnotenie obchodu",
+      "none": "Zatiaľ žiadne verejné recenzie.",
+      "breakdown": "Recenzie podľa počtu hviezdičiek",
+      "showStars": "{stars, plural, one {Zobraziť len recenzie s {stars} hviezdičkou ({count})} few {Zobraziť len recenzie s {stars} hviezdičkami ({count})} other {Zobraziť len recenzie s {stars} hviezdičkami ({count})}}"
+    },
+    "toolbar": {
+      "region": "Hľadať a filtrovať recenzie",
+      "search": "Hľadať v recenziách",
+      "searchPlaceholder": "Slová, nadpis alebo meno",
+      "rating": "Hodnotenie",
+      "anyRating": "Akékoľvek hodnotenie",
+      "product": "Produkt",
+      "anyProduct": "Všetky produkty",
+      "origin": "Zdroj",
+      "anyOrigin": "Všetky zdroje",
+      "origins": {
+        "verified": "Overení kupujúci",
+        "imported": "Importované"
+      },
+      "sort": "Zoradenie",
+      "sorts": {
+        "newest": "Od najnovších",
+        "oldest": "Od najstarších",
+        "highest": "Najlepšie hodnotené",
+        "lowest": "Najhoršie hodnotené"
+      },
+      "clear": "Zrušiť filtre"
+    },
+    "results": "{count, plural, one {{count} recenzia} few {{count} recenzie} other {{count} recenzií}}",
+    "emptyFiltered": {
+      "title": "Žiadne recenzie nezodpovedajú",
+      "body": "Skúste iné slová alebo iný filter, prípadne filtre zrušte a uvidíte všetky recenzie."
     }
   }
 }

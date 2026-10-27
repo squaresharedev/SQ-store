@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { Info, Truck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ShippingChoices } from "@/lib/storefront/queries";

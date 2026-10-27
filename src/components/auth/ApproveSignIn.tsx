@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { Monitor, ShieldAlert, ShieldX, Smartphone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button, buttonClassName } from "@/components/ui/button";

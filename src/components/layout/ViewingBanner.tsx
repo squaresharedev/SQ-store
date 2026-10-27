@@ -4,6 +4,8 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Eye, X } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { useDelayedPending } from "@/lib/hooks/useDelayedPending";
 import { setActiveAccount } from "@/lib/team/actions";
 import type { TeamRole } from "@/lib/team/permissions";
 
@@ -25,6 +27,7 @@ export function ViewingBanner({
   const t = useTranslations("Nav.viewingBanner");
   const router = useRouter();
   const [pending, startTransition] = React.useTransition();
+  const showSpinner = useDelayedPending(pending);
   const readOnly = role === "viewer";
 
   function backToOwn() {
@@ -51,9 +54,11 @@ export function ViewingBanner({
         type="button"
         onClick={backToOwn}
         disabled={pending}
+        aria-busy={pending || undefined}
         className="flex shrink-0 items-center gap-1 rounded-sm px-2 py-1 font-inter text-xs font-medium text-muted-foreground transition-colors hover:bg-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
       >
-        <X className="size-3.5" aria-hidden />
+        {/* The spinner takes the icon's place, so the button does not grow. */}
+        {showSpinner ? <Spinner className="size-3.5" /> : <X className="size-3.5" aria-hidden />}
         {t("backToYourStore")}
       </button>
     </div>

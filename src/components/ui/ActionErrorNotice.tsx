@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { AlertCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { errorTextClass, helpTextClass } from "@/components/ui/control-styles";

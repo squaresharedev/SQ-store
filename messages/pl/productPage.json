@@ -28,6 +28,7 @@
     "shipping": "Wysyłka",
     "returns": "Zwroty",
     "safety": "Bezpieczeństwo i zgodność",
+    "reviews": "Opinie",
     "seller": "Sprzedawca"
   },
   "soldBy": "Sprzedawca: {seller}",
@@ -415,6 +416,8 @@
     "heading": "Opinie",
     "average": "{average} na 5 gwiazdek",
     "count": "{count, plural, one {Na podstawie {count} opinii} few {Na podstawie {count} opinii} many {Na podstawie {count} opinii} other {Na podstawie {count} opinii}}",
+    "jump": "{average} na 5 gwiazdek, {count, plural, one {{count} opinia} few {{count} opinie} many {{count} opinii} other {{count} opinii}}. Przejdź do opinii",
+    "list": "Lista opinii",
     "stars": "{rating, plural, one {Ocena: {rating} gwiazdka na 5} few {Ocena: {rating} gwiazdki na 5} many {Ocena: {rating} gwiazdek na 5} other {Ocena: {rating} gwiazdki na 5}}",
     "starsShort": "{rating, plural, one {{rating} gwiazdka} few {{rating} gwiazdki} many {{rating} gwiazdek} other {{rating} gwiazdki}}",
     "verified": "Zweryfikowany kupujący",
@@ -428,6 +431,14 @@
     "more": "Pokaż więcej opinii",
     "loading": "Ładowanie…",
     "loadFailed": "Nie udało się wczytać kolejnych opinii. Spróbuj ponownie.",
-    "about": "Opinie oznaczone jako „Zweryfikowany kupujący” pochodzą z zamówień złożonych w Square Share. Każda opinia jest automatycznie sprawdzana przed publikacją, a sprzedawcy mogą ukryć opinię tylko wtedy, gdy jest spamem, jest obraźliwa, zawiera dane osobowe lub nie dotyczy produktu."
+    "about": "Opinie oznaczone jako „Zweryfikowany kupujący” pochodzą z zamówień złożonych w Square Share. Każda opinia jest automatycznie sprawdzana przed publikacją, a sprzedawcy mogą ukryć opinię tylko wtedy, gdy jest spamem, jest obraźliwa, zawiera dane osobowe lub nie dotyczy produktu.",
+    "empty": {
+      "title": "Brak opinii",
+      "body": "Kupujący, którzy zamówią ten produkt, mogą go ocenić na stronie swojego zamówienia."
+    },
+    "breakdownLabel": "Opinie według liczby gwiazdek",
+    "filterStars": "{stars, plural, one {Pokaż opinie z {stars} gwiazdką ({count})} few {Pokaż opinie z {stars} gwiazdkami ({count})} many {Pokaż opinie z {stars} gwiazdkami ({count})} other {Pokaż opinie z {stars} gwiazdkami ({count})}}",
+    "showing": "{rating, plural, one {Opinie z {rating} gwiazdką} few {Opinie z {rating} gwiazdkami} many {Opinie z {rating} gwiazdkami} other {Opinie z {rating} gwiazdkami}}",
+    "showAll": "Pokaż wszystkie opinie"
   }
 }

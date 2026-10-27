@@ -114,6 +114,7 @@ export async function listReviews(
     .select(PUBLIC_REVIEW_SELECT)
     .eq("product_id", productId)
     .eq("is_public", true);
+  if (query.rating) request = request.eq("rating", query.rating);
   for (const { column, ascending } of SORT_ORDER[query.sort]) {
     request = request.order(column, { ascending });
   }

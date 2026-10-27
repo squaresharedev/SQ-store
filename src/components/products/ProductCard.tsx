@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { useTranslations, useLocale } from "next-intl";
 import { ArrowRight, Image as ImageIcon, Pencil, TrendingUp } from "lucide-react";
 import type { Product, ProductSales } from "@/types/product";

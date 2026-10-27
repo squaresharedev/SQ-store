@@ -28,6 +28,7 @@
     "shipping": "Verzending",
     "returns": "Retouren",
     "safety": "Veiligheid en conformiteit",
+    "reviews": "Reviews",
     "seller": "Verkoper"
   },
   "soldBy": "Verkocht door {seller}",
@@ -415,6 +416,8 @@
     "heading": "Reviews",
     "average": "{average} van 5 sterren",
     "count": "{count, plural, one {Op basis van {count} review} other {Op basis van {count} reviews}}",
+    "jump": "{average} van 5 sterren, {count, plural, one {{count} review} other {{count} reviews}}. Naar de reviews",
+    "list": "Lijst met reviews",
     "stars": "{rating, plural, one {Beoordeeld met {rating} van 5 sterren} other {Beoordeeld met {rating} van 5 sterren}}",
     "starsShort": "{rating, plural, one {{rating} ster} other {{rating} sterren}}",
     "verified": "Geverifieerde koper",
@@ -428,6 +431,14 @@
     "more": "Meer reviews tonen",
     "loading": "Laden…",
     "loadFailed": "Meer reviews konden niet worden geladen. Probeer het opnieuw.",
-    "about": "Reviews met “Geverifieerde koper” komen van bestellingen op Square Share. Elke review wordt automatisch gecontroleerd voordat hij verschijnt, en verkopers kunnen een review alleen verbergen als het spam is, beledigend is, persoonlijke gegevens bevat of niet over het product gaat."
+    "about": "Reviews met “Geverifieerde koper” komen van bestellingen op Square Share. Elke review wordt automatisch gecontroleerd voordat hij verschijnt, en verkopers kunnen een review alleen verbergen als het spam is, beledigend is, persoonlijke gegevens bevat of niet over het product gaat.",
+    "empty": {
+      "title": "Nog geen reviews",
+      "body": "Wie dit product bestelt, kan het beoordelen via de eigen bestelpagina."
+    },
+    "breakdownLabel": "Reviews per aantal sterren",
+    "filterStars": "{stars, plural, one {Reviews met {stars} ster tonen ({count})} other {Reviews met {stars} sterren tonen ({count})}}",
+    "showing": "{rating, plural, one {Reviews met {rating} ster} other {Reviews met {rating} sterren}}",
+    "showAll": "Alle reviews tonen"
   }
 }

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslations, useLocale } from "next-intl";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { Check, Image as ImageIcon, Plus, Search } from "lucide-react";
 import type { Product } from "@/types/product";
 import { formatPrice } from "@/lib/format";

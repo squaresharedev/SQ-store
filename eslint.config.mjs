@@ -35,6 +35,26 @@ const eslintConfig = defineConfig([
     ".open-next/**",
   ]),
   {
+    // In-app links are AppLink, not next/link: it is the same link plus the
+    // page-wide answer to a slow page change (components/ui/AppLink). A link
+    // imported from next/link would silently go without.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/components/ui/AppLink.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "next/link",
+              message: 'Import Link from "@/components/ui/AppLink" instead: it shows the progress bar when a page change is slow.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     // Test scaffolding legitimately uses `any` for chainable supabase/mock
     // stubs and keeps intentionally-unused fixtures for readability. Relax the
     // two rules that fight that without weakening app-code linting.

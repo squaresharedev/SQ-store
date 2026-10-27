@@ -21,6 +21,14 @@ export const REVIEWS_PATH = `${PRODUCTS_PATH}/reviews`;
 /** `?filter=` on the reviews page (REVIEW_MODERATION_FILTERS). */
 export const REVIEWS_FILTER_PARAM = "filter";
 
+/** The reviews page's other narrowing params (lib/reviews/seller-filters.ts). */
+export const REVIEWS_SEARCH_PARAM = "q";
+export const REVIEWS_RATING_PARAM = "rating";
+export const REVIEWS_PRODUCT_PARAM = "product";
+export const REVIEWS_SOURCE_PARAM = "source";
+export const REVIEWS_SORT_PARAM = "sort";
+export const REVIEWS_PAGE_PARAM = "page";
+
 /** The reviews page on one filter: "held" is where a held review waits. */
 export function reviewsFilterPath(filter: "held" | "hidden"): string {
   return `${REVIEWS_PATH}?${REVIEWS_FILTER_PARAM}=${filter}`;

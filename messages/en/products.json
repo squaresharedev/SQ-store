@@ -1185,6 +1185,40 @@
       },
       "open": "Open your reviews: {url}",
       "settings": "You can turn these emails off in Settings › Notifications."
+    },
+    "overview": {
+      "label": "Store rating",
+      "none": "No public reviews yet.",
+      "breakdown": "Reviews by star rating",
+      "showStars": "{stars, plural, one {Show only {stars}-star reviews ({count})} other {Show only {stars}-star reviews ({count})}}"
+    },
+    "toolbar": {
+      "region": "Search and filter reviews",
+      "search": "Search reviews",
+      "searchPlaceholder": "Words, a title or a name",
+      "rating": "Rating",
+      "anyRating": "Any rating",
+      "product": "Product",
+      "anyProduct": "All products",
+      "origin": "Source",
+      "anyOrigin": "All sources",
+      "origins": {
+        "verified": "Verified buyers",
+        "imported": "Imported"
+      },
+      "sort": "Sort",
+      "sorts": {
+        "newest": "Newest first",
+        "oldest": "Oldest first",
+        "highest": "Highest rated",
+        "lowest": "Lowest rated"
+      },
+      "clear": "Clear filters"
+    },
+    "results": "{count, plural, one {{count} review} other {{count} reviews}}",
+    "emptyFiltered": {
+      "title": "No reviews match",
+      "body": "Try other words or another filter, or clear them to see every review."
     }
   }
 }

@@ -1185,6 +1185,40 @@
       },
       "open": "Ouvrir vos avis : {url}",
       "settings": "Vous pouvez désactiver ces e-mails dans Paramètres › Notifications."
+    },
+    "overview": {
+      "label": "Note de la boutique",
+      "none": "Aucun avis public pour l’instant.",
+      "breakdown": "Avis par nombre d’étoiles",
+      "showStars": "{stars, plural, one {Afficher uniquement les avis à {stars} étoile ({count})} other {Afficher uniquement les avis à {stars} étoiles ({count})}}"
+    },
+    "toolbar": {
+      "region": "Rechercher et filtrer les avis",
+      "search": "Rechercher dans les avis",
+      "searchPlaceholder": "Mots, titre ou nom",
+      "rating": "Note",
+      "anyRating": "Toutes les notes",
+      "product": "Produit",
+      "anyProduct": "Tous les produits",
+      "origin": "Origine",
+      "anyOrigin": "Toutes les origines",
+      "origins": {
+        "verified": "Acheteurs vérifiés",
+        "imported": "Importés"
+      },
+      "sort": "Tri",
+      "sorts": {
+        "newest": "Plus récents",
+        "oldest": "Plus anciens",
+        "highest": "Mieux notés",
+        "lowest": "Moins bien notés"
+      },
+      "clear": "Effacer les filtres"
+    },
+    "results": "{count, plural, one {{count} avis} other {{count} avis}}",
+    "emptyFiltered": {
+      "title": "Aucun avis ne correspond",
+      "body": "Essayez d’autres mots ou un autre filtre, ou effacez-les pour voir tous les avis."
     }
   }
 }

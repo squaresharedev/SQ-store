@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { usePendingRouter } from "@/lib/hooks/usePendingRouter";
 import { SearchOverlay } from "@/components/search/SearchOverlay";
 import { useNavigationBlocker } from "@/lib/hooks/useNavigationBlocker";
 import {
@@ -73,7 +73,7 @@ export function SearchProvider({
   navigate?: (href: string) => void;
 }) {
   const existing = React.useContext(SearchContext);
-  const router = useRouter();
+  const router = usePendingRouter();
   const [isOpen, setIsOpen] = React.useState(false);
   // Seeded from the module cache so a provider REMOUNT (route-group hop,
   // account switch) starts with data instead of a null flash.

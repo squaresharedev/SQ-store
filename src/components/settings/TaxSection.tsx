@@ -2,7 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { ArrowRight } from "lucide-react";
 import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { SaveButton } from "@/components/ui/SaveButton";

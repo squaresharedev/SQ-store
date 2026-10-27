@@ -44,17 +44,26 @@ export const reviewSubmitSchema = z.strictObject({
 
 export type ReviewSubmitInput = z.infer<typeof reviewSubmitSchema>;
 
-export type ReviewQuery = { sort: ReviewSort; page: number; pageSize: number };
+export type ReviewQuery = {
+  sort: ReviewSort;
+  page: number;
+  pageSize: number;
+  /** Only reviews with this many stars; absent for all of them. */
+  rating?: number;
+};
 
 /**
- * The feed's `?sort=&page=&pageSize=`, read leniently: anything unknown or
- * out of range falls back to the default rather than failing the page.
+ * The feed's `?sort=&page=&pageSize=&rating=`, read leniently: anything
+ * unknown or out of range falls back to the default rather than failing the
+ * page (a bad `rating` simply means every rating).
  */
 export function parseReviewQuery(params: URLSearchParams): ReviewQuery {
   const sort = params.get("sort");
   const page = Number(params.get("page") ?? 1);
   const pageSize = Number(params.get("pageSize") ?? REVIEW_PAGE_SIZE);
+  const rating = Number(params.get("rating"));
   return {
+    ...(Number.isInteger(rating) && rating >= REVIEW_RATING_MIN && rating <= REVIEW_RATING_MAX ? { rating } : {}),
     sort: (REVIEW_SORTS as readonly string[]).includes(sort ?? "") ? (sort as ReviewSort) : DEFAULT_REVIEW_SORT,
     page: Number.isInteger(page) && page >= 1 && page <= 10_000 ? page : 1,
     pageSize:

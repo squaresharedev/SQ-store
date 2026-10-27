@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { AlertTriangle, FileSpreadsheet } from "lucide-react";

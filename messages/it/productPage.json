@@ -28,6 +28,7 @@
     "shipping": "Spedizione",
     "returns": "Resi",
     "safety": "Sicurezza e conformità",
+    "reviews": "Recensioni",
     "seller": "Venditore"
   },
   "soldBy": "Venduto da {seller}",
@@ -415,6 +416,8 @@
     "heading": "Recensioni",
     "average": "{average} su 5 stelle",
     "count": "{count, plural, one {Basato su {count} recensione} other {Basato su {count} recensioni}}",
+    "jump": "{average} su 5 stelle, {count, plural, one {{count} recensione} other {{count} recensioni}}. Vai alle recensioni",
+    "list": "Elenco delle recensioni",
     "stars": "{rating, plural, one {Valutato {rating} stella su 5} other {Valutato {rating} stelle su 5}}",
     "starsShort": "{rating, plural, one {{rating} stella} other {{rating} stelle}}",
     "verified": "Acquirente verificato",
@@ -428,6 +431,14 @@
     "more": "Mostra altre recensioni",
     "loading": "Caricamento…",
     "loadFailed": "Non è stato possibile caricare altre recensioni. Riprova.",
-    "about": "Le recensioni contrassegnate come «Acquirente verificato» provengono da ordini effettuati su Square Share. Ogni recensione viene controllata automaticamente prima di apparire, e i venditori possono nascondere una recensione solo se è spam, è offensiva, contiene dati personali o non riguarda il prodotto."
+    "about": "Le recensioni contrassegnate come «Acquirente verificato» provengono da ordini effettuati su Square Share. Ogni recensione viene controllata automaticamente prima di apparire, e i venditori possono nascondere una recensione solo se è spam, è offensiva, contiene dati personali o non riguarda il prodotto.",
+    "empty": {
+      "title": "Ancora nessuna recensione",
+      "body": "Chi ordina questo prodotto può recensirlo dalla pagina del proprio ordine."
+    },
+    "breakdownLabel": "Recensioni per stelle",
+    "filterStars": "{stars, plural, one {Mostra le recensioni da {stars} stella ({count})} other {Mostra le recensioni da {stars} stelle ({count})}}",
+    "showing": "{rating, plural, one {Recensioni da {rating} stella} other {Recensioni da {rating} stelle}}",
+    "showAll": "Mostra tutte le recensioni"
   }
 }

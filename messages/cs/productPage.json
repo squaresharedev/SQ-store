@@ -28,6 +28,7 @@
     "shipping": "Doprava",
     "returns": "Vrácení zboží",
     "safety": "Bezpečnost a shoda",
+    "reviews": "Recenze",
     "seller": "Prodejce"
   },
   "soldBy": "Prodává {seller}",
@@ -415,6 +416,8 @@
     "heading": "Recenze",
     "average": "{average} z 5 hvězdiček",
     "count": "{count, plural, one {Na základě {count} recenze} few {Na základě {count} recenzí} many {Na základě {count} recenze} other {Na základě {count} recenzí}}",
+    "jump": "{average} z 5 hvězdiček, {count, plural, one {{count} recenze} few {{count} recenze} other {{count} recenzí}}. Přejít na recenze",
+    "list": "Seznam recenzí",
     "stars": "{rating, plural, one {Hodnocení {rating} hvězdička z 5} few {Hodnocení {rating} hvězdičky z 5} many {Hodnocení {rating} hvězdičky z 5} other {Hodnocení {rating} hvězdiček z 5}}",
     "starsShort": "{rating, plural, one {{rating} hvězdička} few {{rating} hvězdičky} many {{rating} hvězdičky} other {{rating} hvězdiček}}",
     "verified": "Ověřený kupující",
@@ -428,6 +431,14 @@
     "more": "Zobrazit další recenze",
     "loading": "Načítání…",
     "loadFailed": "Další recenze se nepodařilo načíst. Zkuste to znovu.",
-    "about": "Recenze označené „Ověřený kupující“ pocházejí z objednávek na Square Share. Každá recenze se před zveřejněním automaticky kontroluje a prodejci mohou recenzi skrýt jen tehdy, když jde o spam, je urážlivá, obsahuje osobní údaje nebo se netýká produktu."
+    "about": "Recenze označené „Ověřený kupující“ pocházejí z objednávek na Square Share. Každá recenze se před zveřejněním automaticky kontroluje a prodejci mohou recenzi skrýt jen tehdy, když jde o spam, je urážlivá, obsahuje osobní údaje nebo se netýká produktu.",
+    "empty": {
+      "title": "Zatím žádné recenze",
+      "body": "Kupující, kteří si produkt objednají, ho mohou ohodnotit na stránce své objednávky."
+    },
+    "breakdownLabel": "Recenze podle počtu hvězdiček",
+    "filterStars": "{stars, plural, one {Zobrazit recenze s {stars} hvězdičkou ({count})} few {Zobrazit recenze se {stars} hvězdičkami ({count})} other {Zobrazit recenze s {stars} hvězdičkami ({count})}}",
+    "showing": "{rating, plural, one {Recenze s {rating} hvězdičkou} few {Recenze se {rating} hvězdičkami} other {Recenze s {rating} hvězdičkami}}",
+    "showAll": "Zobrazit všechny recenze"
   }
 }

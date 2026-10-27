@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { useId, type HTMLAttributes } from "react";
 import {
   BadgePercent,

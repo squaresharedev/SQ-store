@@ -1185,6 +1185,40 @@
       },
       "open": "Apri le tue recensioni: {url}",
       "settings": "Puoi disattivare queste email in Impostazioni › Notifiche."
+    },
+    "overview": {
+      "label": "Valutazione del negozio",
+      "none": "Ancora nessuna recensione pubblica.",
+      "breakdown": "Recensioni per stelle",
+      "showStars": "{stars, plural, one {Mostra solo le recensioni da {stars} stella ({count})} other {Mostra solo le recensioni da {stars} stelle ({count})}}"
+    },
+    "toolbar": {
+      "region": "Cerca e filtra le recensioni",
+      "search": "Cerca nelle recensioni",
+      "searchPlaceholder": "Parole, un titolo o un nome",
+      "rating": "Valutazione",
+      "anyRating": "Qualsiasi valutazione",
+      "product": "Prodotto",
+      "anyProduct": "Tutti i prodotti",
+      "origin": "Provenienza",
+      "anyOrigin": "Tutte le provenienze",
+      "origins": {
+        "verified": "Acquirenti verificati",
+        "imported": "Importate"
+      },
+      "sort": "Ordine",
+      "sorts": {
+        "newest": "Più recenti",
+        "oldest": "Meno recenti",
+        "highest": "Valutazione più alta",
+        "lowest": "Valutazione più bassa"
+      },
+      "clear": "Azzera i filtri"
+    },
+    "results": "{count, plural, one {{count} recensione} other {{count} recensioni}}",
+    "emptyFiltered": {
+      "title": "Nessuna recensione corrisponde",
+      "body": "Prova altre parole o un altro filtro, oppure azzerali per vedere tutte le recensioni."
     }
   }
 }

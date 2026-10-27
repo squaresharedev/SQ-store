@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { ArrowUpRight, Crown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { iconNudgeRightClass } from "@/components/ui/control-styles";

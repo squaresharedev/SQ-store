@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { useTranslations, useLocale } from "next-intl";
 import { ExternalLink, Share2, Trash2 } from "lucide-react";
 import { cardClass } from "@/components/ui/surface-styles";

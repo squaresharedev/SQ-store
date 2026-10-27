@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { RotateCcw } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -545,10 +545,13 @@ export function ProductPageSection({
                     id={rowId}
                     checked={entry.show}
                     disabled={mandatory}
+                    // Over the normalised rows, not the stored list: a config
+                    // saved before a section existed has no entry for it, and
+                    // mapping the stored list would leave its switch dead.
                     onCheckedChange={(show) =>
                       onProductPageChange({
                         ...productPage,
-                        sections: productPage.sections.map((candidate) =>
+                        sections: rows.map((candidate) =>
                           candidate.id === entry.id ? { ...candidate, show } : candidate,
                         ),
                       })

@@ -29,6 +29,11 @@ import {
  *  only on hover, so a footer of policies does not shout. */
 export const quietLinkClass = "underline-offset-2 hover:underline";
 
+/** The reviews list's own scroll area: the page does not grow with every
+ *  review, a buyer scrolls the list instead. Tall enough for a few reviews to
+ *  read without scrolling at all. */
+export const REVIEW_FEED_SCROLL_CLASS = "max-h-120 overflow-y-auto";
+
 /** The price notes as the branch names `ProductPage.priceNotes` selects on.
  *  The copy itself lives in the catalogue, in the buyer's language. */
 export const PRICE_NOTE_TOKENS: Record<ProductPagePriceNote, "incl" | "excl" | "none"> = {

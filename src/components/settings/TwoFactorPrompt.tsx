@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { ArrowRight, ShieldAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { iconNudgeRightClass, primaryButtonClass } from "@/components/ui/control-styles";

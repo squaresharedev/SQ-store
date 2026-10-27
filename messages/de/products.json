@@ -1185,6 +1185,40 @@
       },
       "open": "Deine Bewertungen öffnen: {url}",
       "settings": "Du kannst diese E-Mails unter Einstellungen › Benachrichtigungen abschalten."
+    },
+    "overview": {
+      "label": "Shop-Bewertung",
+      "none": "Noch keine öffentlichen Bewertungen.",
+      "breakdown": "Bewertungen nach Sternen",
+      "showStars": "{stars, plural, one {Nur Bewertungen mit {stars} Stern zeigen ({count})} other {Nur Bewertungen mit {stars} Sternen zeigen ({count})}}"
+    },
+    "toolbar": {
+      "region": "Bewertungen suchen und filtern",
+      "search": "Bewertungen durchsuchen",
+      "searchPlaceholder": "Wörter, Titel oder Name",
+      "rating": "Bewertung",
+      "anyRating": "Alle Bewertungen",
+      "product": "Produkt",
+      "anyProduct": "Alle Produkte",
+      "origin": "Herkunft",
+      "anyOrigin": "Alle Herkünfte",
+      "origins": {
+        "verified": "Verifizierte Käufer",
+        "imported": "Importiert"
+      },
+      "sort": "Sortierung",
+      "sorts": {
+        "newest": "Neueste zuerst",
+        "oldest": "Älteste zuerst",
+        "highest": "Beste zuerst",
+        "lowest": "Schlechteste zuerst"
+      },
+      "clear": "Filter zurücksetzen"
+    },
+    "results": "{count, plural, one {{count} Bewertung} other {{count} Bewertungen}}",
+    "emptyFiltered": {
+      "title": "Keine passenden Bewertungen",
+      "body": "Versuche andere Wörter oder einen anderen Filter, oder setze die Filter zurück, um alle Bewertungen zu sehen."
     }
   }
 }

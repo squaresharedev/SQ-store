@@ -45,6 +45,8 @@ export type ProductReviews = {
 export type SellerReview = PublicReview & {
   productId: string;
   productTitle: string;
+  /** The product's photo, signed for this page; null when it has none. */
+  productImageUrl: string | null;
   moderation: ReviewModerationStatus;
   /** The rule the check named, when it held or blocked the review. */
   ground: RemovalGround | null;

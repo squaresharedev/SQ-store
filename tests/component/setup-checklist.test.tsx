@@ -17,6 +17,8 @@ import { SETUP_COLLAPSED_KEY, SetupChecklist } from "@/components/onboarding/Set
 import { DEFAULT_PRODUCT_PAGE_CONFIG, type StorefrontConfig } from "@/types/storefront";
 
 vi.mock("next/link", () => ({
+  // AppLink reads this to report a page change; nothing is ever pending in a test.
+  useLinkStatus: () => ({ pending: false }),
   default: ({ href, children, ...rest }: { href: string; children: ReactNode }) => (
     <a href={href} {...rest}>
       {children}

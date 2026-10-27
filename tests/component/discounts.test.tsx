@@ -33,6 +33,8 @@ vi.mock("next/navigation", () => ({
 
 // The rest of the props go through: an icon-only link is named by its aria-label.
 vi.mock("next/link", () => ({
+  // AppLink reads this to report a page change; nothing is ever pending in a test.
+  useLinkStatus: () => ({ pending: false }),
   default: ({ href, children, ...rest }: { href: string; children: React.ReactNode } & React.ComponentProps<"a">) => (
     <a href={href} {...rest}>
       {children}

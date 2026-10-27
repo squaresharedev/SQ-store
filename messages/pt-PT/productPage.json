@@ -28,6 +28,7 @@
     "shipping": "Envio",
     "returns": "Devoluções",
     "safety": "Segurança e conformidade",
+    "reviews": "Avaliações",
     "seller": "Vendedor"
   },
   "soldBy": "Vendido por {seller}",
@@ -415,6 +416,8 @@
     "heading": "Avaliações",
     "average": "{average} de 5 estrelas",
     "count": "{count, plural, one {Com base em {count} avaliação} other {Com base em {count} avaliações}}",
+    "jump": "{average} de 5 estrelas, {count, plural, one {{count} avaliação} other {{count} avaliações}}. Ir para as avaliações",
+    "list": "Lista de avaliações",
     "stars": "{rating, plural, one {Avaliado com {rating} estrela de 5} other {Avaliado com {rating} estrelas de 5}}",
     "starsShort": "{rating, plural, one {{rating} estrela} other {{rating} estrelas}}",
     "verified": "Comprador verificado",
@@ -428,6 +431,14 @@
     "more": "Mostrar mais avaliações",
     "loading": "A carregar…",
     "loadFailed": "Não foi possível carregar mais avaliações. Tente novamente.",
-    "about": "As avaliações marcadas como «Comprador verificado» vêm de encomendas feitas na Square Share. Cada avaliação é verificada automaticamente antes de aparecer, e os vendedores só podem ocultar uma avaliação se for spam, for ofensiva, partilhar dados pessoais ou não for sobre o produto."
+    "about": "As avaliações marcadas como «Comprador verificado» vêm de encomendas feitas na Square Share. Cada avaliação é verificada automaticamente antes de aparecer, e os vendedores só podem ocultar uma avaliação se for spam, for ofensiva, partilhar dados pessoais ou não for sobre o produto.",
+    "empty": {
+      "title": "Ainda não há avaliações",
+      "body": "Quem encomendar este produto pode avaliá-lo na página da sua encomenda."
+    },
+    "breakdownLabel": "Avaliações por estrelas",
+    "filterStars": "{stars, plural, one {Mostrar avaliações de {stars} estrela ({count})} other {Mostrar avaliações de {stars} estrelas ({count})}}",
+    "showing": "{rating, plural, one {Avaliações de {rating} estrela} other {Avaliações de {rating} estrelas}}",
+    "showAll": "Mostrar todas as avaliações"
   }
 }

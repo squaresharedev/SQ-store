@@ -9,6 +9,7 @@ import {
   compactText,
   isDefaultProductPage,
   isEuSeller,
+  isProductPageSectionShown,
   normalizeSections,
   resolveProductPage,
 } from "@/lib/storefront/product-page";
@@ -275,13 +276,44 @@ describe("resolveProductPage", () => {
       show: true,
     });
     // Everything the stored list never named comes back hidden — except
-    // `safety`, mandatory alongside `seller` (see the dedicated test below).
+    // `safety`, mandatory alongside `seller` (see the dedicated test below),
+    // and `reviews`, which showed before it could be switched (see below).
     expect(
       sections
-        .filter((s) => s.id !== "seller" && s.id !== "description" && s.id !== "safety")
+        .filter((s) => !["seller", "description", "safety", "reviews"].includes(s.id))
         .every((s) => s.show === false),
     ).toBe(true);
     expect(sections.find((s) => s.id === "safety")?.show).toBe(true);
+    expect(sections.find((s) => s.id === "reviews")?.show).toBe(true);
+  });
+
+  // Reviews showed on every product page that had any before a seller could
+  // switch them, so a config saved before the switch must keep showing them.
+  // Once the seller has chosen, their choice holds.
+  describe("the reviews section", () => {
+    it("shows for a config saved before it could be switched", () => {
+      const legacy = [{ id: "specs" as const, show: true }];
+      expect(isProductPageSectionShown({ sections: legacy }, "reviews")).toBe(true);
+      expect(resolveProductPage({ productPage: { ...DEFAULT_PRODUCT_PAGE_CONFIG, sections: legacy } }).sections).toContainEqual({
+        id: "reviews",
+        show: true,
+      });
+    });
+
+    it("stays off once the seller switches it off", () => {
+      expect(isProductPageSectionShown({ sections: [{ id: "reviews", show: false }] }, "reviews")).toBe(false);
+    });
+
+    it("is on for a new storefront", () => {
+      expect(isProductPageSectionShown(DEFAULT_PRODUCT_PAGE_CONFIG, "reviews")).toBe(true);
+    });
+
+    it("parses when stored, and a config without it still parses", () => {
+      const withReviews = { ...DEFAULT_PRODUCT_PAGE_CONFIG, sections: [{ id: "reviews", show: false }] };
+      expect(productPageSchema.safeParse(withReviews).success).toBe(true);
+      const without = { ...DEFAULT_PRODUCT_PAGE_CONFIG, sections: [{ id: "specs", show: true }] };
+      expect(productPageSchema.safeParse(without).success).toBe(true);
+    });
   });
 
   // Safety and compliance and Seller are legal disclosures (GPSR, and the

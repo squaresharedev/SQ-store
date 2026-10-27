@@ -28,6 +28,7 @@
     "shipping": "Shipping",
     "returns": "Returns",
     "safety": "Safety and compliance",
+    "reviews": "Reviews",
     "seller": "Seller"
   },
   "soldBy": "Sold by {seller}",
@@ -415,6 +416,8 @@
     "heading": "Reviews",
     "average": "{average} out of 5 stars",
     "count": "{count, plural, one {Based on {count} review} other {Based on {count} reviews}}",
+    "jump": "{average} out of 5 stars, {count, plural, one {{count} review} other {{count} reviews}}. Go to the reviews",
+    "list": "Review list",
     "stars": "{rating, plural, one {Rated {rating} star out of 5} other {Rated {rating} stars out of 5}}",
     "starsShort": "{rating, plural, one {{rating} star} other {{rating} stars}}",
     "verified": "Verified buyer",
@@ -428,6 +431,14 @@
     "more": "Show more reviews",
     "loading": "Loading…",
     "loadFailed": "More reviews could not be loaded. Try again.",
-    "about": "Reviews marked “Verified buyer” come from orders placed on Square Share. Every review is checked automatically for abuse before it appears, and sellers can only hide a review that is spam, offensive, shares personal details or is not about the product."
+    "about": "Reviews marked “Verified buyer” come from orders placed on Square Share. Every review is checked automatically for abuse before it appears, and sellers can only hide a review that is spam, offensive, shares personal details or is not about the product.",
+    "empty": {
+      "title": "No reviews yet",
+      "body": "Buyers who order this product can review it from their order page."
+    },
+    "breakdownLabel": "Reviews by star rating",
+    "filterStars": "{stars, plural, one {Show {stars}-star reviews ({count})} other {Show {stars}-star reviews ({count})}}",
+    "showing": "{rating, plural, one {Showing {rating}-star reviews} other {Showing {rating}-star reviews}}",
+    "showAll": "Show all reviews"
   }
 }

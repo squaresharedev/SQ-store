@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { ArrowUpRight } from "lucide-react";
 import { buttonClassName } from "@/components/ui/button";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";

@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { ArtboardFrame } from "./ArtboardFrame";
 import type { PreviewDevice } from "./DeviceSizeSwitch";
 import { usePreviewProduct } from "./usePreviewProduct";
+import { usePreviewReviews } from "./usePreviewReviews";
+import { isProductPageSectionShown } from "@/lib/storefront/product-page";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
 import { BadgeMoveProvider } from "@/components/product-page/BadgeDrag";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
@@ -86,6 +88,11 @@ export function ProductPageArtboard({
   const showActionError = useActionErrorToast();
   const sample = useSampleMode();
   const loaded = usePreviewProduct(product, productPage.showStock, soldOut);
+  // The product's real reviews, read only while the section is switched on.
+  const reviews = usePreviewReviews(
+    product.id,
+    isProductPageSectionShown(productPage, "reviews"),
+  );
 
   // THE BADGES, MOVABLE HERE. A badge dragged to another place on this page
   // moves at once and is saved behind it (the product's own field, the same
@@ -177,7 +184,7 @@ export function ProductPageArtboard({
         onRefused={() => toast.error(tBadges("photoFull", { max: BADGES_ON_PHOTO_MAX }))}
         copy={badgeCopy}
       >
-        <ProductPageView page={page} mode="preview" />
+        <ProductPageView page={page} mode="preview" reviews={reviews} />
       </BadgeMoveProvider>
     </ArtboardFrame>
   );

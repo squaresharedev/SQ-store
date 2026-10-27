@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import { useTranslations } from "next-intl";
 import { ArrowUpRight } from "lucide-react";
 import { ErrorScreen } from "@/components/error/ErrorScreen";

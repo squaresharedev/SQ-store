@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/ui/AppLink";
 import type { CSSProperties, ReactNode } from "react";
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
