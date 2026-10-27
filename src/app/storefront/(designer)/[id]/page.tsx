@@ -3,8 +3,6 @@ import { getTranslations } from "next-intl/server";
 import { listStorefrontProducts } from "@/lib/discounts/storefront-preview";
 import { getStorefront } from "@/lib/storefront/queries";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
-import { NotificationBell } from "@/components/notifications/NotificationBell";
-import { NotificationsProvider } from "@/components/notifications/NotificationsProvider";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { getSellerIdentity, getTraderIdentityStatus } from "@/lib/settings/seller-identity";
@@ -123,13 +121,6 @@ export default async function StorefrontEditorPage({
       accountId={account?.accountId ?? null}
       takedown={storefront.removal ?? null}
       initialVersion={storefront.version ?? null}
-      // The bell the rest of the app wears, so an order that arrives while the
-      // seller designs is seen here too.
-      headerActions={
-        <NotificationsProvider>
-          <NotificationBell />
-        </NotificationsProvider>
-      }
       publicPagePath={
         // The same three conditions the public page itself asks.
         !storefront.removal && resolveProductPage(storefront.config).enabled && identity?.ok && identity.missing.length === 0

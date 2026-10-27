@@ -68,6 +68,10 @@ export const destructiveButtonClass = `${BUTTON_BASE} rounded-none border border
 /** Square icon-only button (styles.md §8.4). */
 export const iconButtonClass = `group/btn inline-flex size-9 items-center justify-center rounded-none border border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground ${TRANSITION} ${FOCUS_RING}`;
 
+/** Puts a text button at iconButtonClass's 36px, so a bar mixing icon and text
+ *  controls (the editor's top bar) sits level instead of at the 40px default. */
+export const barButtonSizeClass = "h-9 shrink-0 py-0";
+
 /** The icon button for a CONSEQUENTIAL action on a row (delete, end): neutral
  *  at rest, destructive on hover/focus, the icon-only ghostDangerButtonClass.
  *  Spelled whole rather than composed onto iconButtonClass, whose own hover

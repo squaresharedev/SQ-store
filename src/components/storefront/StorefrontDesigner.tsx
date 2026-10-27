@@ -76,6 +76,7 @@ import { UnsavedChangesDialog } from "@/components/ui/UnsavedChangesDialog";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { HeroMark } from "@/components/ui/HeroMark";
 import {
+  barButtonSizeClass,
   ghostButtonClass,
   helpTextClass,
   iconButtonClass,
@@ -350,7 +351,6 @@ export function StorefrontDesigner({
   sample = null,
   takedown = null,
   publicPagePath = null,
-  headerActions = null,
   initialVersion = null,
 }: {
   /**
@@ -406,7 +406,6 @@ export function StorefrontDesigner({
    * missed. Passed in rather than built here, so the editor itself (and its
    * tests) never starts a notifications subscription of its own.
    */
-  headerActions?: React.ReactNode;
   /** The saved copy's fingerprint (lib/storefront/version.ts), sent back with
    *  every save so one from elsewhere in between is asked about, not lost. */
   initialVersion?: string | null;
@@ -3789,7 +3788,7 @@ export function StorefrontDesigner({
                 aria-label={tKey("Storefront.sample.designer.createAriaLabel")}
                 onClick={() => void createStorefrontNow()}
                 disabled={creating}
-                className={cn(primaryButtonClass, "group/btn h-9 shrink-0 py-0")}
+                className={cn(primaryButtonClass, "group/btn", barButtonSizeClass)}
               >
                 <span className="sm:hidden">{tKey("Storefront.sample.designer.createShort")}</span>
                 <span className="hidden sm:inline">{tKey("Storefront.sample.designer.create")}</span>
@@ -3798,7 +3797,6 @@ export function StorefrontDesigner({
             </div>
           ) : (
           <div className="flex items-center gap-3">
-            {headerActions}
             <DesignerSearchButton />
             {/* The one thing the header says is whether there is work not yet
                 written. What HAPPENED when Save was pressed is a toast, which
@@ -3822,10 +3820,6 @@ export function StorefrontDesigner({
                 {t("header.unsaved")}
               </span>
             )}
-            {/* h-9 py-0 pairs it with the search button beside it: the default
-                button is 40px tall (py-2.5 + text-sm) against that button's
-                36px, and two controls of different heights sitting side by side
-                in the same bar look like a mistake rather than a hierarchy. */}
             {/* What buyers see, once there is something saved to see: not
                 while edits are pending (the page would not show them yet),
                 and not with product pages switched off here. */}
@@ -3834,7 +3828,7 @@ export function StorefrontDesigner({
                 href={publicPagePath}
                 target="_blank"
                 rel="noopener"
-                className={cn(ghostButtonClass, "h-9 shrink-0 gap-1.5 px-3 py-0 text-sm")}
+                className={cn(ghostButtonClass, barButtonSizeClass, "gap-1.5 px-3")}
                 data-designer-view-page=""
               >
                 <ExternalLink className="size-4" strokeWidth={2} aria-hidden="true" />
@@ -3846,13 +3840,13 @@ export function StorefrontDesigner({
             <button
               type="button"
               onClick={() => leaveGuard.requestLeave(storefrontEmbedPath(storefrontId))}
-              className={cn(ghostButtonClass, "h-9 shrink-0 gap-1.5 px-3 py-0 text-sm")}
+              className={cn(ghostButtonClass, barButtonSizeClass, "gap-1.5 px-3")}
               data-designer-share=""
             >
               <Share2 className="size-4" strokeWidth={2} aria-hidden="true" />
               <span className="max-sm:sr-only">{tKey("Storefront.card.share")}</span>
             </button>
-            <Button onClick={() => void handleSave()} disabled={saving} className="h-9 py-0">
+            <Button onClick={() => void handleSave()} disabled={saving} className={barButtonSizeClass}>
               {saving ? tCommon("saving") : tCommon("save")}
             </Button>
           </div>
