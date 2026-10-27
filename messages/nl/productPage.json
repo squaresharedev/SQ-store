@@ -416,6 +416,8 @@
     "heading": "Reviews",
     "average": "{average} van 5 sterren",
     "count": "{count, plural, one {Op basis van {count} review} other {Op basis van {count} reviews}}",
+    "jump": "{average} van 5 sterren, {count, plural, one {{count} review} other {{count} reviews}}. Naar de reviews",
+    "list": "Lijst met reviews",
     "stars": "{rating, plural, one {Beoordeeld met {rating} van 5 sterren} other {Beoordeeld met {rating} van 5 sterren}}",
     "starsShort": "{rating, plural, one {{rating} ster} other {{rating} sterren}}",
     "verified": "Geverifieerde koper",

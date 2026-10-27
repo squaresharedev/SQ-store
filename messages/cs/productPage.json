@@ -416,6 +416,8 @@
     "heading": "Recenze",
     "average": "{average} z 5 hvězdiček",
     "count": "{count, plural, one {Na základě {count} recenze} few {Na základě {count} recenzí} many {Na základě {count} recenze} other {Na základě {count} recenzí}}",
+    "jump": "{average} z 5 hvězdiček, {count, plural, one {{count} recenze} few {{count} recenze} other {{count} recenzí}}. Přejít na recenze",
+    "list": "Seznam recenzí",
     "stars": "{rating, plural, one {Hodnocení {rating} hvězdička z 5} few {Hodnocení {rating} hvězdičky z 5} many {Hodnocení {rating} hvězdičky z 5} other {Hodnocení {rating} hvězdiček z 5}}",
     "starsShort": "{rating, plural, one {{rating} hvězdička} few {{rating} hvězdičky} many {{rating} hvězdičky} other {{rating} hvězdiček}}",
     "verified": "Ověřený kupující",

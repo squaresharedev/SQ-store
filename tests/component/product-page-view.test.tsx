@@ -1161,3 +1161,91 @@ describe("ProductPageView reviews", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("More reviews could not be loaded");
   });
 });
+
+describe("ProductPageView rating link", () => {
+  afterEach(cleanup);
+
+  const link = () => document.querySelector<HTMLAnchorElement>("[data-product-rating]");
+
+  it("shows the rating under the title and leads to the reviews", () => {
+    render(<ProductPageView page={data()} mode="public" reviews={REVIEWS} />);
+    expect(link()).toHaveTextContent("3.7(3)");
+    expect(link()).toHaveAttribute("href", "#product-reviews");
+    expect(link()).toHaveAccessibleName("3.7 out of 5 stars, 3 reviews. Go to the reviews");
+    // The target exists, named as the link says.
+    expect(document.getElementById("product-reviews")).toHaveTextContent("Reviews");
+    // Under the title, above the seller byline.
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading.compareDocumentPosition(link()!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("says '1 review' for a single one", () => {
+    const one: ProductReviews = {
+      summary: { count: 1, average: 5, breakdown: [0, 0, 0, 0, 1] },
+      firstPage: { rows: [publicReview("only", 5)], total: 1, page: 1, pageSize: 10 },
+    };
+    render(<ProductPageView page={data()} mode="public" reviews={one} />);
+    expect(link()).toHaveAccessibleName("5.0 out of 5 stars, 1 review. Go to the reviews");
+  });
+
+  it.each([
+    ["no reviews yet", NO_REVIEWS, true],
+    ["reviews that could not be read", null, true],
+    ["a section the seller switched off", REVIEWS, false],
+  ])("is absent for %s", (_name, reviews, on) => {
+    render(<ProductPageView page={data(withReviews(on))} mode="public" reviews={reviews} />);
+    expect(link()).toBeNull();
+  });
+
+  it("scrolls this page's own reviews in the editor's preview, without moving the address", async () => {
+    const scrolled: Element[] = [];
+    Element.prototype.scrollIntoView = function (this: Element) {
+      scrolled.push(this);
+    };
+    const before = window.location.href;
+    const user = userEvent.setup();
+    render(<ProductPageView page={data()} mode="preview" reviews={REVIEWS} />);
+    await user.click(link()!);
+    expect(scrolled).toEqual([reviewsSection()]);
+    expect(window.location.href).toBe(before);
+  });
+
+  it("leaves the click to the browser on the public page, so it works with no script", async () => {
+    const scrolled: Element[] = [];
+    Element.prototype.scrollIntoView = function (this: Element) {
+      scrolled.push(this);
+    };
+    const user = userEvent.setup();
+    render(<ProductPageView page={data()} mode="public" reviews={REVIEWS} />);
+    await user.click(link()!);
+    expect(scrolled).toEqual([]);
+  });
+});
+
+describe("ProductPageView reviews list height", () => {
+  afterEach(cleanup);
+
+  it("scrolls inside its own named, focusable region, with 'show more' at the end of it", () => {
+    const many: ProductReviews = {
+      ...REVIEWS,
+      firstPage: { ...REVIEWS.firstPage, total: 25, pageSize: 10 },
+    };
+    render(<ProductPageView page={data()} mode="public" reviews={many} />);
+    const region = screen.getByRole("region", { name: "Review list" });
+    expect(region).toHaveAttribute("tabindex", "0");
+    expect(region).toHaveClass("overflow-y-auto");
+    expect(within(region).getByRole("button", { name: "Show more reviews" })).toBeInTheDocument();
+  });
+
+  it("goes back to the top when the order changes", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ ok: true, page: { rows: [publicReview("r5", 5)], total: 3, page: 1, pageSize: 10 } })));
+    const user = userEvent.setup();
+    render(<ProductPageView page={data()} mode="public" reviews={REVIEWS} />);
+    const region = screen.getByRole("region", { name: "Review list" });
+    region.scrollTop = 200;
+    await user.click(screen.getByRole("combobox", { name: "Sort reviews" }));
+    await user.click(await screen.findByRole("option", { name: "Lowest rated" }));
+    await vi.waitFor(() => expect(region.scrollTop).toBe(0));
+    vi.unstubAllGlobals();
+  });
+});

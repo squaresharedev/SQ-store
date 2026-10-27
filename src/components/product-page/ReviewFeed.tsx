@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { productReviewsApiPath } from "@/lib/reviews/paths";
@@ -8,12 +8,23 @@ import { REVIEW_PAGE_SIZE, REVIEW_SORTS, DEFAULT_REVIEW_SORT, type ReviewSort } 
 import type { ReviewPage } from "@/types/review";
 import { PageSelect } from "./PageSelect";
 import { ReviewItem } from "./ReviewItem";
-import { CTA_BUTTON_CLASS, ctaGhostStyle, surfaceRadius, type CtaAppearance } from "./product-page-maps";
+import {
+  CTA_BUTTON_CLASS,
+  REVIEW_FEED_SCROLL_CLASS,
+  ctaGhostStyle,
+  surfaceRadius,
+  type CtaAppearance,
+} from "./product-page-maps";
 
 /**
  * The review list: the first page arrives with the product page, the rest a
  * page at a time from GET /api/products/[id]/reviews. Changing the order
  * starts again from the first page of that order.
+ *
+ * The list scrolls inside a fixed height (REVIEW_FEED_SCROLL_CLASS) rather
+ * than lengthening the page, with "Show more reviews" at the end of it. It is
+ * a focusable, named region so a keyboard can scroll it, and a new order or
+ * rating starts it back at the top.
  *
  * Narrowed to one star rating (`rating`), the feed has no first page handed
  * to it and reads its own on mount; the section remounts it (keyed by the
@@ -47,6 +58,7 @@ export function ReviewFeed({
   const [failed, setFailed] = useState(false);
   const pageSize = initial?.pageSize ?? REVIEW_PAGE_SIZE;
   const hasMore = page * pageSize < total;
+  const scroller = useRef<HTMLDivElement>(null);
 
   /** One page of this view from the API; null when it could not be read. */
   async function fetchPage(nextSort: ReviewSort, nextPage: number): Promise<ReviewPage | null> {
@@ -69,6 +81,7 @@ export function ReviewFeed({
       return;
     }
     setRows((current) => (nextPage === 1 ? result.rows : [...current, ...result.rows]));
+    if (nextPage === 1 && scroller.current) scroller.current.scrollTop = 0;
     setPage(nextPage);
     setTotal(result.total);
     setSort(nextSort);
@@ -112,30 +125,39 @@ export function ReviewFeed({
           />
         </div>
       )}
-      <div className={cn("flex flex-col divide-y", loading && "opacity-60")} data-review-feed="">
-        {rows.map((review) => (
-          <div key={review.id} style={{ borderColor: rule }}>
-            <ReviewItem review={review} ink={ink} cornerRadius={cornerRadius} />
-          </div>
-        ))}
+      <div
+        ref={scroller}
+        role="region"
+        aria-label={t("list")}
+        tabIndex={0}
+        className={cn("flex flex-col", REVIEW_FEED_SCROLL_CLASS)}
+        data-review-scroll=""
+      >
+        <div className={cn("flex flex-col divide-y", loading && "opacity-60")} data-review-feed="">
+          {rows.map((review) => (
+            <div key={review.id} style={{ borderColor: rule }}>
+              <ReviewItem review={review} ink={ink} cornerRadius={cornerRadius} />
+            </div>
+          ))}
+        </div>
+        {failed && (
+          <p role="alert" className="pt-2 text-sm font-medium text-destructive">
+            {t("loadFailed")}
+          </p>
+        )}
+        {hasMore && (
+          <button
+            type="button"
+            onClick={() => void load(sort, page + 1)}
+            disabled={loading}
+            className={cn(CTA_BUTTON_CLASS, "my-4 w-auto shrink-0 self-start hover:opacity-90 disabled:opacity-60")}
+            style={ctaGhostStyle(cta, ink)}
+            data-reviews-more=""
+          >
+            {loading ? t("loading") : t("more")}
+          </button>
+        )}
       </div>
-      {failed && (
-        <p role="alert" className="pt-2 text-sm font-medium text-destructive">
-          {t("loadFailed")}
-        </p>
-      )}
-      {hasMore && (
-        <button
-          type="button"
-          onClick={() => void load(sort, page + 1)}
-          disabled={loading}
-          className={cn(CTA_BUTTON_CLASS, "mt-4 w-auto self-start hover:opacity-90 disabled:opacity-60")}
-          style={ctaGhostStyle(cta, ink)}
-          data-reviews-more=""
-        >
-          {loading ? t("loading") : t("more")}
-        </button>
-      )}
     </div>
   );
 }

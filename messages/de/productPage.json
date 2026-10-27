@@ -416,6 +416,8 @@
     "heading": "Bewertungen",
     "average": "{average} von 5 Sternen",
     "count": "{count, plural, one {Basierend auf {count} Bewertung} other {Basierend auf {count} Bewertungen}}",
+    "jump": "{average} von 5 Sternen, {count, plural, one {{count} Bewertung} other {{count} Bewertungen}}. Zu den Bewertungen",
+    "list": "Liste der Bewertungen",
     "stars": "{rating, plural, one {Mit {rating} von 5 Sternen bewertet} other {Mit {rating} von 5 Sternen bewertet}}",
     "starsShort": "{rating, plural, one {{rating} Stern} other {{rating} Sterne}}",
     "verified": "Verifizierter Käufer",

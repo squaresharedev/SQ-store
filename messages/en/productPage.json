@@ -416,6 +416,8 @@
     "heading": "Reviews",
     "average": "{average} out of 5 stars",
     "count": "{count, plural, one {Based on {count} review} other {Based on {count} reviews}}",
+    "jump": "{average} out of 5 stars, {count, plural, one {{count} review} other {{count} reviews}}. Go to the reviews",
+    "list": "Review list",
     "stars": "{rating, plural, one {Rated {rating} star out of 5} other {Rated {rating} stars out of 5}}",
     "starsShort": "{rating, plural, one {{rating} star} other {{rating} stars}}",
     "verified": "Verified buyer",

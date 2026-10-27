@@ -416,6 +416,8 @@
     "heading": "Avis",
     "average": "{average} sur 5 étoiles",
     "count": "{count, plural, one {Basé sur {count} avis} other {Basé sur {count} avis}}",
+    "jump": "{average} sur 5 étoiles, {count, plural, one {{count} avis} other {{count} avis}}. Aller aux avis",
+    "list": "Liste des avis",
     "stars": "{rating, plural, one {Noté {rating} étoile sur 5} other {Noté {rating} étoiles sur 5}}",
     "starsShort": "{rating, plural, one {{rating} étoile} other {{rating} étoiles}}",
     "verified": "Acheteur vérifié",

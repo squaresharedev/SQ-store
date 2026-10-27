@@ -416,6 +416,8 @@
     "heading": "Recenzie",
     "average": "{average} z 5 hviezdičiek",
     "count": "{count, plural, one {Na základe {count} recenzie} few {Na základe {count} recenzií} many {Na základe {count} recenzie} other {Na základe {count} recenzií}}",
+    "jump": "{average} z 5 hviezdičiek, {count, plural, one {{count} recenzia} few {{count} recenzie} other {{count} recenzií}}. Prejsť na recenzie",
+    "list": "Zoznam recenzií",
     "stars": "{rating, plural, one {Hodnotenie {rating} hviezdička z 5} few {Hodnotenie {rating} hviezdičky z 5} many {Hodnotenie {rating} hviezdičky z 5} other {Hodnotenie {rating} hviezdičiek z 5}}",
     "starsShort": "{rating, plural, one {{rating} hviezdička} few {{rating} hviezdičky} many {{rating} hviezdičky} other {{rating} hviezdičiek}}",
     "verified": "Overený kupujúci",

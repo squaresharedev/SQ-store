@@ -20,6 +20,7 @@ import { ProductCta } from "./ProductCta";
 import { ProductDescription } from "./ProductDescription";
 import { ProductGallery } from "./ProductGallery";
 import { ProductPrice } from "./ProductPrice";
+import { ReviewsLink } from "./ReviewsLink";
 import { ReviewsSection } from "./ReviewsSection";
 import { PoweredByFooter } from "./PoweredByFooter";
 import { SellerBlock, hasSellerDetails } from "./SellerBlock";
@@ -212,6 +213,9 @@ export function ProductPageView({
   // Normalised here, not trusted: the editor hands over its stored config,
   // which may predate the switch and so not name it (it then reads as on).
   const reviewsShown = isProductPageSectionShown(productPage, "reviews");
+  // The rating under the title, for a product with reviews to go to.
+  const average = reviewsShown ? reviews?.summary.average : null;
+  const reviewCount = reviews?.summary.count ?? 0;
 
   // Which sections have anything to say, in the seller's order. `safety` is
   // also mandatory (GPSR), so it is let through here whatever its stored show
@@ -469,6 +473,7 @@ export function ProductPageView({
                     <h1 id="product-title" className="text-2xl font-semibold leading-tight @md:text-3xl">
                       {product.title}
                     </h1>
+                    {average != null && <ReviewsLink average={average} count={reviewCount} preview={preview} />}
                     {productPage.showSeller && (
                       <p className="text-sm opacity-70" data-product-sold-by="">
                         {t("soldBy", { seller: soldBy })}

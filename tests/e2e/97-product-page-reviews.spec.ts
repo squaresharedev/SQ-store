@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import {
   freshUser,
@@ -19,7 +20,9 @@ import {
  *   - the star breakdown narrows the list to one rating, and lets go again;
  *   - only public reviews count: a held one is neither shown nor averaged;
  *   - a product with none says so;
- *   - the seller's switch takes the whole section away.
+ *   - the seller's switch takes the whole section away;
+ *   - "★ 4.7 (13)" under the title takes a buyer to the reviews, at any width;
+ *   - the list scrolls inside a fixed height instead of lengthening the page.
  */
 
 const THEME = {
@@ -145,10 +148,31 @@ test("a buyer reads a product's reviews, narrows them, and the seller can switch
   await expect(section.locator("[data-review]")).toHaveCount(10);
   await page.screenshot({ path: test.info().outputPath("product-reviews.png"), fullPage: true });
 
-  // More, a page at a time.
-  await section.getByRole("button", { name: "Show more reviews" }).click();
+  // THE LIST HAS A SET HEIGHT: ten reviews do not lengthen the page, they
+  // scroll in their own region, and "show more" is at the end of it.
+  const list = section.getByRole("region", { name: "Review list" });
+  const box = await list.boundingBox();
+  expect(box!.height).toBeLessThanOrEqual(480);
+  expect(await list.evaluate((node) => node.scrollHeight > node.clientHeight)).toBe(true);
+  const more = list.getByRole("button", { name: "Show more reviews" });
+  await expect(more).toBeAttached();
+
+  // No accessibility violations in the section (a scrollable region must be
+  // reachable by keyboard, landmarks must be uniquely named).
+  const axe = await new AxeBuilder({ page }).include("[data-product-section='reviews']").analyze();
+  expect(axe.violations.map((v) => v.id)).toEqual([]);
+
+  // More, a page at a time, from inside the scrolling list.
+  await more.scrollIntoViewIfNeeded();
+  await more.click();
   await expect(section.locator("[data-review]")).toHaveCount(13);
   await expect(section.getByRole("button", { name: "Show more reviews" })).toHaveCount(0);
+  // A new order starts the list back at the top.
+  await section.getByRole("combobox", { name: "Sort reviews" }).click();
+  await page.getByRole("option", { name: "Lowest rated" }).click();
+  await expect.poll(() => list.evaluate((node) => node.scrollTop)).toBe(0);
+  await section.getByRole("combobox", { name: "Sort reviews" }).click();
+  await page.getByRole("option", { name: "Newest first" }).click();
 
   // Narrowed to the one-star reviews from the breakdown.
   await section.getByRole("button", { name: "Show 1-star reviews (1)" }).click();
@@ -160,13 +184,36 @@ test("a buyer reads a product's reviews, narrows them, and the seller can switch
   await section.getByRole("button", { name: "Show all reviews" }).click();
   await expect(section.locator("[data-review]")).toHaveCount(10);
 
-  // A product nobody has reviewed says so.
+  // The rating under the title takes the buyer to the reviews. (Reload so the
+  // page is back at its top.)
+  await page.goto(`/s/${storefront!.id}/p/${oak}`);
+  const rating = page.locator("[data-product-rating]");
+  await expect(rating).toHaveText("4.7(13)");
+  const title = page.getByRole("heading", { level: 1, name: "Oak lamp" });
+  expect((await title.boundingBox())!.y).toBeLessThan((await rating.boundingBox())!.y);
+  await expect(section).not.toBeInViewport();
+  await rating.click();
+  await expect(page).toHaveURL(/#product-reviews$/);
+  await expect(section.getByRole("heading", { name: "Reviews" })).toBeInViewport();
+
+  // The same at a phone's width.
+  await page.setViewportSize({ width: 390, height: 780 });
+  await page.goto(`/s/${storefront!.id}/p/${oak}`);
+  await expect(section).not.toBeInViewport();
+  await page.locator("[data-product-rating]").click();
+  await expect(section.getByRole("heading", { name: "Reviews" })).toBeInViewport();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.setViewportSize({ width: 1280, height: 720 });
+
+  // A product nobody has reviewed says so, and offers no rating to jump to.
   await page.goto(`/s/${storefront!.id}/p/${brass}`);
   await expect(page.locator("[data-product-section='reviews']").getByText("No reviews yet")).toBeVisible();
+  await expect(page.locator("[data-product-rating]")).toHaveCount(0);
 
   // The seller's switch takes the section away.
   await configure(false);
   await page.goto(`/s/${storefront!.id}/p/${oak}`);
   await expect(page.getByRole("heading", { name: "Oak lamp" })).toBeVisible();
   await expect(page.locator("[data-product-section='reviews']")).toHaveCount(0);
+  await expect(page.locator("[data-product-rating]")).toHaveCount(0);
 });

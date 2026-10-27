@@ -416,6 +416,8 @@
     "heading": "Opinie",
     "average": "{average} na 5 gwiazdek",
     "count": "{count, plural, one {Na podstawie {count} opinii} few {Na podstawie {count} opinii} many {Na podstawie {count} opinii} other {Na podstawie {count} opinii}}",
+    "jump": "{average} na 5 gwiazdek, {count, plural, one {{count} opinia} few {{count} opinie} many {{count} opinii} other {{count} opinii}}. Przejdź do opinii",
+    "list": "Lista opinii",
     "stars": "{rating, plural, one {Ocena: {rating} gwiazdka na 5} few {Ocena: {rating} gwiazdki na 5} many {Ocena: {rating} gwiazdek na 5} other {Ocena: {rating} gwiazdki na 5}}",
     "starsShort": "{rating, plural, one {{rating} gwiazdka} few {{rating} gwiazdki} many {{rating} gwiazdek} other {{rating} gwiazdki}}",
     "verified": "Zweryfikowany kupujący",
