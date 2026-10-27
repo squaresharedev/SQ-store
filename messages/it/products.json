@@ -1099,7 +1099,7 @@
   "reviewModeration": {
     "heading": "Recensioni",
     "description": "Cosa dicono gli acquirenti dei tuoi prodotti. Ogni recensione viene controllata automaticamente prima di apparire, e quelle su cui il controllo aveva dubbi ti aspettano qui.",
-    "importLink": "Arrivi da Shopify? Importa le tue recensioni",
+    "importButton": "Importa da qualsiasi posto",
     "filtersLabel": "Filtra recensioni",
     "filters": {
       "all": "Tutte",

@@ -1099,7 +1099,7 @@
   "reviewModeration": {
     "heading": "Reviews",
     "description": "What buyers said about your products. Every review is checked automatically before it appears, and the ones the check was unsure about wait here for you.",
-    "importLink": "Moving from Shopify? Import your reviews",
+    "importButton": "Import from anywhere",
     "filtersLabel": "Filter reviews",
     "filters": {
       "all": "All",

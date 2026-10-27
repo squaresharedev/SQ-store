@@ -1099,7 +1099,7 @@
   "reviewModeration": {
     "heading": "Opinie",
     "description": "Co kupujący mówią o twoich produktach. Każda opinia jest automatycznie sprawdzana przed publikacją, a te, co do których sprawdzanie miało wątpliwości, czekają tu na ciebie.",
-    "importLink": "Przechodzisz z Shopify? Zaimportuj swoje opinie",
+    "importButton": "Importuj z dowolnego miejsca",
     "filtersLabel": "Filtruj opinie",
     "filters": {
       "all": "Wszystkie",

@@ -1099,7 +1099,7 @@
   "reviewModeration": {
     "heading": "Avis",
     "description": "Ce que les acheteurs disent de vos produits. Chaque avis est vérifié automatiquement avant de paraître, et ceux sur lesquels la vérification a eu un doute vous attendent ici.",
-    "importLink": "Vous venez de Shopify ? Importez vos avis",
+    "importButton": "Importer depuis n’importe où",
     "filtersLabel": "Filtrer les avis",
     "filters": {
       "all": "Tous",
