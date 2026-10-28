@@ -9,6 +9,7 @@
 // nothing about the writer.
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { recordPaidOrder, type RecordResult } from "@/lib/orders/record";
 import { noSaleFee } from "@/lib/billing/fees";
 import { DEFAULT_PLAN } from "@/lib/billing/plans";
@@ -18,8 +19,15 @@ import { parseOptionGroups } from "@/lib/products/detail";
 import type { ProductOption } from "@/types/product";
 import type { OrderChannel, ShipTo } from "@/types/order-view";
 
+/** The simulator's own page (app/dev/simulate-sale). */
+export const SIMULATE_SALE_PATH = "/dev/simulate-sale";
+
 /** Where a pretend sale says it came from: the embed, like most real ones. */
 const SIMULATED_CHANNEL: OrderChannel = "embed";
+
+/** How a pretend sale's checkout session id starts, which is how its order
+ *  (and any review written from it) is told apart from a real one. */
+const SIMULATED_SESSION_PREFIX = "cs_dev_";
 
 /** Buyers on the reserved .test domain, so nothing here can reach a real
  *  inbox even if a message escaped the dev outbox. */
@@ -55,6 +63,9 @@ export type SimulatedSaleRequest = {
   /** Replay a checkout already recorded, the way a payment provider
    *  redelivers a webhook; a fresh one when absent. */
   checkoutSessionId?: string;
+  /** The storefront it was bought from, so the order page wears its design.
+   *  The writer drops one that is not this store's. */
+  storefrontId?: string;
 };
 
 /** The active store's products a sale can be simulated for. */
@@ -109,10 +120,10 @@ export async function simulateSale(
 
   return recordPaidOrder({
     checkoutSessionId:
-      request.checkoutSessionId ?? `cs_dev_${crypto.randomUUID().replace(/-/g, "")}`,
+      request.checkoutSessionId ?? `${SIMULATED_SESSION_PREFIX}${crypto.randomUUID().replace(/-/g, "")}`,
     productId: product.id,
     sellerId: accountId,
-    storefrontId: null,
+    storefrontId: request.storefrontId ?? null,
     channel: SIMULATED_CHANNEL,
     quantity,
     selection: optionSummaryRows(groups, chosen),
@@ -123,4 +134,49 @@ export async function simulateSale(
     buyerLocale: buyer.locale,
     shipTo: buyer.shipTo,
   });
+}
+
+/**
+ * The storefront a pretend buyer of `productId` bought from: one whose board
+ * places the product, else the store's newest. Null when the store has none.
+ */
+export async function buyerStorefrontFor(accountId: string, productId: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("storefronts")
+    .select("id, config")
+    .eq("owner_id", accountId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  const storefronts = (data ?? []) as { id: string; config: { blocks?: { type?: string; productId?: string }[] } | null }[];
+  const placing = storefronts.find((storefront) =>
+    storefront.config?.blocks?.some((block) => block.type === "product" && block.productId === productId),
+  );
+  return (placing ?? storefronts[0])?.id ?? null;
+}
+
+/**
+ * Delete this store's reviews that were written from PRETEND orders, so trying
+ * the buyer's review form leaves nothing behind on the product pages. A real
+ * buyer's review is never matched: its order did not come from here.
+ */
+export async function deleteSimulatedReviews(accountId: string): Promise<number | null> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("reviews")
+    .select("id, orders!inner(checkout_session_id)")
+    .eq("seller_id", accountId)
+    .like("orders.checkout_session_id", `${SIMULATED_SESSION_PREFIX}%`);
+  if (error) {
+    console.error("[simulated-sale] test review read failed", error.message);
+    return null;
+  }
+  const ids = (data ?? []).map((row) => row.id);
+  if (ids.length === 0) return 0;
+  const { error: deleteError } = await admin.from("reviews").delete().in("id", ids);
+  if (deleteError) {
+    console.error("[simulated-sale] test review delete failed", deleteError.message);
+    return null;
+  }
+  return ids.length;
 }

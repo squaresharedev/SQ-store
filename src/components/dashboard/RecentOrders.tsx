@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "@/components/ui/AppLink";
-import { ChevronRight, Image as ImageIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { iconNudgeRightClass, infoTextClass } from "@/components/ui/control-styles";
 import { badgeClass } from "@/components/ui/surface-styles";
+import { ProductThumb } from "@/components/ui/ProductThumb";
 import { OrderDetailSheet } from "@/components/orders/OrderDetailSheet";
 import { cn } from "@/lib/utils";
 import { isModifiedClick } from "@/lib/utils/modified-click";
@@ -36,20 +37,6 @@ function StatusBadge({ status }: { status: OrderStatus }) {
       )}
     >
       {t(known)}
-    </span>
-  );
-}
-
-/** The product's photo at row size; a quiet placeholder when it has none. */
-function OrderThumb({ url }: { url: string | null }) {
-  return (
-    <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-muted">
-      {url ? (
-        // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
-        <img src={url} alt="" loading="lazy" className="size-full object-cover" />
-      ) : (
-        <ImageIcon className="size-4 text-muted-foreground" strokeWidth={1.5} aria-hidden="true" />
-      )}
     </span>
   );
 }
@@ -110,7 +97,7 @@ export function RecentOrders({
                   aria-haspopup={detail ? "dialog" : undefined}
                   className="group/btn -mx-2 flex items-center gap-3 rounded-sm px-2 py-2.5 transition-colors duration-base ease-standard hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
                 >
-                  <OrderThumb url={glance?.photoUrl ?? null} />
+                  <ProductThumb src={glance?.photoUrl} loading="lazy" className="size-10" />
                   <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-3 gap-y-1">
                     <div className="min-w-0 flex-1">
                       {/* "2 × Lamp" when more than one was bought; a lone

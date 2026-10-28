@@ -5,8 +5,8 @@
  *    (app/offline/route.ts) instead of the browser's error screen.
  * 2. When Cloudflare stopped the Worker mid-request for running past its plan's
  *    CPU allowance (its own "Error 1102" page, which the app never gets to
- *    answer), ask again after a moment, a few times, before showing it. The
- *    allowance refills within moments, so the second try is usually served.
+ *    answer), ask again, spread out over a few seconds, before showing it.
+ *    The allowance refills within seconds, so a later try is usually served.
  *
  * Only page loads and page changes (the router's fetch of the next page) pass
  * through here, and only GETs: a server action that was stopped may already
@@ -19,9 +19,9 @@
  * is the offline page, which holds no account data at all.
  *
  * Plain JS in public/ because a worker must be served as a standalone script
- * from the scope it controls ("/"), so it cannot import app modules. The two
+ * from the scope it controls ("/"), so it cannot import app modules. The
  * values it shares with the app are mirrored below, and tests/unit/pwa.test.ts
- * fails if either copy drifts.
+ * fails if any copy drifts.
  */
 
 // Mirrors OFFLINE_PATH in src/lib/pwa/paths.ts.
@@ -34,9 +34,12 @@ const CACHE_PREFIX = "sq-offline-";
 const CACHE_NAME = `${CACHE_PREFIX}v1`;
 
 // How long to wait before each new try of a request Cloudflare stopped at the
-// Worker's CPU limit (ms). Three tries over about three seconds, then the
-// error page is shown as it came.
-const LIMIT_RETRY_DELAYS_MS = [300, 800, 1600];
+// Worker's CPU limit (ms): six more tries over about fifteen seconds, then the
+// error page is shown as it came. In production a stopped Worker took from a
+// few seconds to over half a minute to answer again, and three seconds of
+// tries lost most of those pages. Mirrors RETRY_DELAYS_MS in
+// src/lib/resilient-action.ts, which the sign-in screens' actions wait on.
+const LIMIT_RETRY_DELAYS_MS = [500, 1000, 2000, 3000, 4000, 5000];
 // How Cloudflare's own error page names that stop (status 503).
 const WORKER_LIMIT_PAGE = /error\s*(code:?\s*)?1102|worker exceeded resource limits/i;
 // The headers Next.js's router marks its fetch of the next page with

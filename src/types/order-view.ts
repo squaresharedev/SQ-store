@@ -195,6 +195,14 @@ export type OrderView = {
   paidThroughProvider: boolean;
 };
 
+/** A row of the Orders list: the order, and a picture of what was bought, so a
+ *  seller can tell the rows apart by looking rather than reading. */
+export type OrderListRow = OrderView & {
+  /** Signed URL of the bought version's photo, else the product's cover. Null
+   *  when the product has none, is gone, or moderation has taken it down. */
+  photoUrl: string | null;
+};
+
 /** A discount on one order (the orders.discount_* snapshot). */
 export type OrderDiscount = {
   /** How much less than the regular price the items cost. 0 when a code was

@@ -97,7 +97,10 @@ test.describe("two-factor with a passkey", () => {
     await expect(usePasskey).toBeEnabled({ timeout: 20_000 });
     await usePasskey.click();
     // Verified: a beat of success on the challenge page, then the dashboard.
-    await expect(page.getByRole("status")).toHaveText("Signing you in…", { timeout: 20_000 });
+    // Filtered: the page-wide loading announcer (NavigationProgress) is a status too.
+    await expect(page.getByRole("status").filter({ hasText: "Signing you in…" })).toBeVisible({
+      timeout: 20_000,
+    });
     await expect(page.locator('[data-success-mark="passkey"]')).toBeVisible();
     await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
     const signedIn = claimsOf(await accessToken(context));

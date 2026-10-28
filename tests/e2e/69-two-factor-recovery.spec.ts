@@ -50,7 +50,10 @@ test.describe("two-factor recovery", () => {
     await page.getByRole("button", { name: "Continue" }).click();
 
     await page.waitForURL(/\/settings\/security\?recovered=1/, { timeout: 30_000 });
-    await expect(page.getByRole("status")).toContainText("Two-factor authentication is off.");
+    // Filtered: the page-wide loading announcer (NavigationProgress) is a status too.
+    await expect(
+      page.getByRole("status").filter({ hasText: "Two-factor authentication is off." }),
+    ).toBeVisible();
     // Setup is already open in front of them.
     await expect(page.getByRole("dialog", { name: "Turn on two-factor authentication" })).toBeVisible();
     await page.keyboard.press("Escape");

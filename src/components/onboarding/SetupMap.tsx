@@ -1,6 +1,16 @@
 import type { CSSProperties } from "react";
 import { Check } from "lucide-react";
 import type { SetupStep, SetupStepId } from "@/lib/onboarding/steps";
+import {
+  TRANSIT_JOG as JOG,
+  TRANSIT_LINE_TONE as LINE_TONE,
+  TRANSIT_LINE_WIDTH as WIDTH,
+  TRANSIT_OFFSET as OFFSET,
+  TRANSIT_STATION as STATION,
+  transitBend,
+  type TransitLineState as LineState,
+  type TransitStationLook as StationLook,
+} from "@/components/ui/transit-styles";
 import { cn } from "@/lib/utils";
 
 /**
@@ -28,12 +38,6 @@ const STATION_TOP_CLASS = "top-[calc(1.375rem+1px)]";
 
 /** The line's column (`--map`) and the gap after it (`--map-gap`). */
 export const MAP_WIDTH_CLASS = "[--map:3.5rem] [--map-gap:0.75rem]";
-
-type StationLook = "done" | "current" | "todo";
-
-/** A stretch between two stations: walked (both ends done), the one to walk
- *  now (it leads to the current station), or still ahead. */
-type LineState = "done" | "next" | "todo";
 
 /* ---------------------------------------------------------------------------
  * The "just done" moment
@@ -165,21 +169,8 @@ export function MapCell({
  * The line
  * ------------------------------------------------------------------------- */
 
-/** Stations sit this far either side of the column's centre; the line jogs
- *  between them, so the jog is twice this tall. */
-const OFFSET = 11;
-const JOG = OFFSET * 2;
-/** The line's weight: Vignelli's bold bands. */
-const WIDTH = 6;
+/** Stations sit OFFSET either side of the column's centre, a jog apart. */
 const stationLeft = (side: 0 | 1) => `calc(50% ${side === 0 ? "-" : "+"} ${OFFSET}px)`;
-
-const LINE_TONE: Record<LineState, string> = {
-  done: "text-success",
-  next: "text-foreground",
-  // Faded as a whole, not by a translucent colour: the runs and the jog
-  // overlap at the bends, and a translucent colour darkens every overlap.
-  todo: "text-muted-foreground opacity-30",
-};
 
 function Line({
   state,
@@ -201,7 +192,7 @@ function Line({
   const a = x(fromSide);
   const b = x(toSide);
   // An S-bend from one run to the next, its ends tucked into the straight runs.
-  const bend = `M ${a} -2 L ${a} 0 C ${a} ${JOG * 0.55}, ${b} ${JOG * 0.45}, ${b} ${JOG} L ${b} ${JOG + 2}`;
+  const bend = `M ${a} -2 L ${a} 0 ${transitBend(0, a, b, (along, across) => `${across} ${along}`)} L ${b} ${JOG + 2}`;
   const run = (side: 0 | 1) => (
     <span
       className="flex-1 -translate-x-1/2 bg-current"
@@ -232,14 +223,6 @@ function Line({
 /* ---------------------------------------------------------------------------
  * Stations
  * ------------------------------------------------------------------------- */
-
-/** A white dot set into the line: bolder for the step to take, smaller and
- *  greyer for what is ahead, a green disc with a tick once done. */
-const STATION: Record<StationLook, string> = {
-  done: "size-5 bg-success text-background",
-  current: "size-4 border-[3px] border-foreground bg-background",
-  todo: "size-3 border-[3px] border-muted-foreground/30 bg-background",
-};
 
 function Station({
   look,

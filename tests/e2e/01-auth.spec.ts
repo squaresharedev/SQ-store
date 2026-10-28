@@ -33,7 +33,7 @@ test.describe("auth", () => {
     await expect(page).toHaveURL(/\/dashboard/);
   });
 
-  test("signing up with an existing email is refused", async ({ page }) => {
+  test("signing up with an existing email opens nothing, and says nothing about the account", async ({ page }) => {
     const user = freshUser("dupe");
     await signUp(page, user);
     await page.context().clearCookies();
@@ -46,7 +46,14 @@ test.describe("auth", () => {
     await page.locator('input[name="password"]').fill(user.password);
     await page.locator('input[name="confirm_password"]').fill(user.password);
     await page.locator('button[name="intent"]').click();
-    await expect(page.getByRole("alert").filter({ hasText: /already exists/i })).toBeVisible();
+    // The same answer a brand-new address gets (SIGNUP_CHECK_EMAIL in
+    // lib/auth/actions.ts): anything else would tell a stranger who has an
+    // account here. Its second sentence is the way on for the real owner.
+    await expect(page.getByText(/If you already have an account with that address, sign in instead/)).toBeVisible();
+    await expect(page).toHaveURL(/\/login/);
+    // The session itself, not the sign-up's PKCE code-verifier cookie.
+    const session = (await page.context().cookies()).filter((c) => /^sb-[^.]+-auth-token(\.\d+)?$/.test(c.name));
+    expect(session).toHaveLength(0);
   });
 
   test("unauthenticated dashboard visit redirects to login", async ({ page }) => {

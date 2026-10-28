@@ -99,8 +99,10 @@ export type BuyerOrder = {
    *  way to j***@..." only then. */
   confirmationSent: boolean;
   /** Whether the buyer can review the product (lib/reviews/eligibility.ts),
-   *  already has, or cannot. Absent in the editor's previews. */
+   *  already has, or cannot. The editor's sample order is always "open". */
   review?: "open" | "done" | "closed";
+  /** The stars this order's review gave, once it has one. */
+  reviewRating?: number;
 };
 
 export type OrderPageData = {

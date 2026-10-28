@@ -148,7 +148,7 @@ export const getOrderPage = cache(
             .eq("id", order.product_id)
             .maybeSingle()
         : Promise.resolve({ data: null }),
-      admin.from("reviews").select("id").eq("order_id", order.id).maybeSingle(),
+      admin.from("reviews").select("id, rating").eq("order_id", order.id).maybeSingle(),
     ]);
     if (!storefront && !detached) return null;
     // The order outlives the shop's moderation state, and the shop itself; the
@@ -238,6 +238,7 @@ export const getOrderPage = cache(
           : isReviewableOrder(order) && product?.status === "active" && isContentVisible(product.moderation_status)
             ? "open"
             : "closed",
+        ...(review ? { reviewRating: review.rating } : {}),
       },
     };
   },

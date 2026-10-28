@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { resetPassword } from "@/lib/auth/actions";
 import type { ActionState } from "@/lib/errors";
+import { resilientAction, SIGN_IN_UNREACHABLE } from "@/lib/resilient-action";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -13,13 +14,19 @@ import { Spinner } from "@/components/ui/spinner";
 
 const INITIAL: ActionState = {};
 
+// Never sent twice: a lost answer may have changed the password already, and
+// a second try would then be refused as "that's already your password". A
+// request that never came back is said in place instead of taking the page
+// down (lib/resilient-action.ts).
+const setPassword = resilientAction(resetPassword, SIGN_IN_UNREACHABLE, []);
+
 /**
  * Set-a-new-password form, shown after following a recovery link. The server
  * action verifies the recovery session and calls updateUser, then redirects
  * into the app on success.
  */
 export function ResetPasswordForm({ email }: { email?: string }) {
-  const [state, formAction, isPending] = useActionState(resetPassword, INITIAL);
+  const [state, formAction, isPending] = useActionState(setPassword, INITIAL);
   const resolveMessage = useResolveMessage();
   const t = useTranslations("Auth.resetPassword");
   // The one statement of the password rule, shared with sign-up.

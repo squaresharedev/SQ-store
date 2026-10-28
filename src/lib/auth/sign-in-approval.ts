@@ -352,6 +352,12 @@ export type ApprovalRequestView = {
   userId: string;
   /** Still waiting for a decision, and not expired. */
   open: boolean;
+  /**
+   * The decision already on it, if any ("used" is an approval the waiting
+   * device has collected). Lets a tap whose answer was lost on the way be
+   * told what it decided, instead of "expired".
+   */
+  decided: "approved" | "denied" | null;
   browser: string | null;
   os: string | null;
   country: string | null;
@@ -375,6 +381,12 @@ export async function findApprovalRequest(token: string): Promise<ApprovalReques
       id: data.id,
       userId: data.user_id,
       open: data.status === "pending" && Date.parse(data.expires_at) > Date.now(),
+      decided:
+        data.status === "approved" || data.status === "used"
+          ? "approved"
+          : data.status === "denied"
+            ? "denied"
+            : null,
       browser: data.browser,
       os: data.os,
       country: data.country,

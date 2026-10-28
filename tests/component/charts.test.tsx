@@ -6,6 +6,7 @@ import { HBarChart } from "@/components/charts/HBarChart";
 import { LineChart } from "@/components/charts/LineChart";
 import { PieChart } from "@/components/charts/PieChart";
 import { compactNumber, formatNumber, formatShare } from "@/components/charts/format";
+import { dimmedClass } from "@/components/charts/theme";
 
 // Charts render with a fixed `width` in tests so Recharts draws synchronously
 // without responsive measuring; `animate={false}` keeps renders settled.
@@ -389,6 +390,55 @@ describe("PieChart", () => {
     expect(screen.getByText("Other")).toBeInTheDocument();
     // Other = 54 + 38 + 21 + 12
     expect(screen.getByText("125")).toBeInTheDocument();
+  });
+
+  describe("hover", () => {
+    const THREE = CATEGORIES.slice(0, 3);
+    const grown = (container: HTMLElement) =>
+      [...container.querySelectorAll("path.recharts-sector")].map((path) =>
+        path.hasAttribute("data-slice-grown"),
+      );
+    const dimmed = (container: HTMLElement) =>
+      [...container.querySelectorAll("path.recharts-sector")].filter((path) =>
+        path.getAttribute("class")?.split(" ").includes(dimmedClass),
+      );
+
+    const marked = (container: HTMLElement) =>
+      [...container.querySelectorAll("ul > li")].map((row) => row.hasAttribute("data-highlighted"));
+
+    it("grows only the hovered slice and marks its legend row, greying nothing", () => {
+      const { container } = render(<PieChart items={THREE} animate={false} />);
+      // Re-queried each time: Recharts redraws the sectors on hover.
+      const sector = (i: number) => container.querySelectorAll(".recharts-pie-sector")[i];
+      fireEvent.mouseEnter(sector(1));
+      expect(grown(container)).toEqual([false, true, false]);
+      expect(marked(container)).toEqual([false, true, false]);
+      expect(dimmed(container)).toHaveLength(0);
+      fireEvent.mouseLeave(sector(1));
+      expect(grown(container)).toEqual([false, false, false]);
+      expect(marked(container)).toEqual([false, false, false]);
+    });
+
+    it("grows a slice from its legend row too, and greys nothing", () => {
+      const { container } = render(<PieChart items={THREE} animate={false} />);
+      const row = within(container.querySelector("ul")!).getByText("Stickers").closest("li")!;
+      fireEvent.mouseEnter(row);
+      expect(grown(container)).toEqual([false, false, true]);
+      expect(marked(container)).toEqual([false, false, true]);
+      expect(dimmed(container)).toHaveLength(0);
+      fireEvent.mouseLeave(row);
+      expect(grown(container)).toEqual([false, false, false]);
+    });
+
+    it("floats no readout over the plot while the legend says it all", () => {
+      const { container } = render(<PieChart items={THREE} animate={false} />);
+      expect(container.querySelector(".recharts-tooltip-wrapper")).toBeNull();
+    });
+
+    it("keeps the readout when there is no legend to say it", () => {
+      const { container } = render(<PieChart items={THREE} animate={false} showLegend={false} />);
+      expect(container.querySelector(".recharts-tooltip-wrapper")).not.toBeNull();
+    });
   });
 
   it("shows the headline total in the donut hole", () => {

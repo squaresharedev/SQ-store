@@ -41,11 +41,21 @@ import {
 } from "@/lib/auth/mfa-actions";
 import { suggestedName } from "@/lib/auth/factor-names";
 import { createPasskey } from "@/lib/auth/webauthn-client";
+import { FORM_UNREACHABLE, resilientAction } from "@/lib/resilient-action";
 import { FACTOR_NAME_MAX } from "@/lib/validation/mfa";
 
 const BEGIN_INITIAL: BeginSetupState = {};
 const PASSKEY_BEGIN_INITIAL: BeginPasskeySetupState = {};
 const CONFIRM_INITIAL: ConfirmSetupState = {};
+
+// Each step asks again while its request never comes back, then says so in
+// the dialog, which stays open (lib/resilient-action.ts). A second try is
+// safe: starting discards any half-made authenticator first, and a code or a
+// new passkey is accepted once.
+const beginApp = resilientAction(beginTwoFactorSetup, FORM_UNREACHABLE);
+const confirmApp = resilientAction(confirmTwoFactorSetup, FORM_UNREACHABLE);
+const beginPasskey = resilientAction(beginPasskeySetup, FORM_UNREACHABLE);
+const confirmPasskey = resilientAction(confirmPasskeySetup, FORM_UNREACHABLE);
 
 /** Where "Confirm with Google" comes back to: this page, with setup open. */
 const SETUP_RETURN = "/settings/security?setup=1";
@@ -112,17 +122,14 @@ export function TwoFactorSetupModal({
   const [mode] = React.useState(adding ? "add" : "enable");
   const [method, setMethod] = React.useState<Method>(passkeysAvailable ? "passkey" : "app");
 
-  const [begin, beginAction, beginPending] = useActionState(beginTwoFactorSetup, BEGIN_INITIAL);
-  const [confirm, confirmAction, confirmPending] = useActionState(
-    confirmTwoFactorSetup,
-    CONFIRM_INITIAL,
-  );
+  const [begin, beginAction, beginPending] = useActionState(beginApp, BEGIN_INITIAL);
+  const [confirm, confirmAction, confirmPending] = useActionState(confirmApp, CONFIRM_INITIAL);
   const [passkeyBegin, passkeyBeginAction, passkeyBeginPending] = useActionState(
-    beginPasskeySetup,
+    beginPasskey,
     PASSKEY_BEGIN_INITIAL,
   );
   const [passkeyConfirm, passkeyConfirmAction, passkeyConfirmPending] = useActionState(
-    confirmPasskeySetup,
+    confirmPasskey,
     CONFIRM_INITIAL,
   );
 

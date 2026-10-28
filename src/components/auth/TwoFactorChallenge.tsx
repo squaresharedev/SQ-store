@@ -36,9 +36,20 @@ import {
 import type { DeviceLabel } from "@/lib/auth/device-label";
 import { assertPasskey, devicePasskeysAvailable, passkeysSupported } from "@/lib/auth/webauthn-client";
 import type { ActionError } from "@/lib/errors";
+import { resilientAction, SIGN_IN_UNREACHABLE } from "@/lib/resilient-action";
 import { cn } from "@/lib/utils";
 
 const INITIAL: ChallengeState = {};
+
+// Every way through asks again while its request never comes back, and then
+// says so in place: a stopped request must not take the screen down with the
+// code typed into it (lib/resilient-action.ts). Each is single-use on the
+// server, so a second try finishes the sign-in or is refused plainly.
+const verifyCode = resilientAction(verifyTwoFactorSignIn, SIGN_IN_UNREACHABLE);
+const verifyPasskey = resilientAction(verifyPasskeySignIn, SIGN_IN_UNREACHABLE);
+const recoverWithCode = resilientAction(signInWithRecoveryCode, SIGN_IN_UNREACHABLE);
+const loadPasskeyOptions = resilientAction(passkeySignInOptions, { error: SIGN_IN_UNREACHABLE.error });
+const leave = resilientAction(signOut, undefined);
 
 type Mode = "passkey" | "code" | "approve" | "recovery";
 
@@ -220,7 +231,7 @@ export function TwoFactorChallenge({
         ))}
         {/* A way out of the half-signed-in state on a shared computer, or for
             the wrong account. Ends only this session. */}
-        <form action={signOut}>
+        <form action={leave}>
           <button
             type="submit"
             className={quietLinkClass}
@@ -351,7 +362,7 @@ function PasskeyForm({
   const tp = useTranslations("Auth.twoFactor.passkey");
   const reducedMotion = useReducedMotion();
   const resolve = useResolveMessage();
-  const [state, formAction, isPending] = useActionState(verifyPasskeySignIn, INITIAL);
+  const [state, formAction, isPending] = useActionState(verifyPasskey, INITIAL);
   const [challenge, setChallenge] = React.useState<SignInChallenge | null>(null);
   const [problem, setProblem] = React.useState<ActionError | string | null>(null);
   // The problem is the person closing the prompt: said in muted words, not red.
@@ -382,7 +393,7 @@ function PasskeyForm({
     let live = true;
     // A request that failed outright (offline, a deploy mid-visit) is a failed
     // load too, so the button offers to try again instead of staying disabled.
-    void passkeySignInOptions()
+    void loadPasskeyOptions()
       .catch(() => null)
       .then((result) => {
         if (!live) return;
@@ -531,7 +542,7 @@ function CodeForm({
   onVerified: (next: string) => void;
 }) {
   const t = useTranslations("Auth.twoFactor");
-  const [state, formAction, isPending] = useActionState(verifyTwoFactorSignIn, INITIAL);
+  const [state, formAction, isPending] = useActionState(verifyCode, INITIAL);
   const single = factors.length < 2 ? factors[0] : null;
   useReportVerified(state, onVerified);
 
@@ -582,7 +593,7 @@ function CodeForm({
 
 function RecoveryForm({ next }: { next: string }) {
   const t = useTranslations("Auth.twoFactor.recovery");
-  const [state, formAction, isPending] = useActionState(signInWithRecoveryCode, INITIAL);
+  const [state, formAction, isPending] = useActionState(recoverWithCode, INITIAL);
 
   return (
     <form action={formAction} className="flex flex-col gap-5" noValidate>

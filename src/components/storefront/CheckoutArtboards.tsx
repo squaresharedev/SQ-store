@@ -207,5 +207,7 @@ export function sampleOrder(
       },
       policy,
     ),
+    // Not yet reviewed, so the seller sees (and can try) the ask a buyer gets.
+    review: "open",
   };
 }

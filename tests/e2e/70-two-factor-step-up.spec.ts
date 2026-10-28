@@ -28,6 +28,8 @@ import {
  */
 
 const ELEVEN_MINUTES = 11 * 60;
+/** The invite was written: "Invite sent." when the email went out, "Invite created, but…" when it did not. */
+const INVITE_WRITTEN = /invite (sent|created)/i;
 
 async function setUp(browser: import("@playwright/test").Browser, tag: string) {
   const context = await browser.newContext();
@@ -69,7 +71,7 @@ test.describe("two-factor step-up", () => {
     await dialog.getByLabel("Email address").fill(`teammate-${Date.now()}@e2e.squareshare.to`);
     await expect(dialog.getByLabel("Authenticator code")).toHaveCount(0);
     await dialog.getByRole("button", { name: "Send invite" }).click();
-    await expectToast(page, /invite created/i);
+    await expectToast(page, INVITE_WRITTEN);
     await context.close();
   });
 
@@ -87,7 +89,7 @@ test.describe("two-factor step-up", () => {
     await expect(code).toBeVisible({ timeout: 10_000 });
     await code.fill(await nextCode(app));
     await dialog.getByRole("button", { name: "Send invite" }).click();
-    await expectToast(page, /invite created/i);
+    await expectToast(page, INVITE_WRITTEN);
 
     const id = await userIdByEmail(user.email);
     const rows = (await serviceRest(

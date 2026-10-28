@@ -7,6 +7,8 @@ import {
   legendMetaClass,
   legendRowClass,
   legendSwatchClass,
+  sliceLegendRowActiveClass,
+  sliceLegendRowClass,
 } from "@/components/charts/theme";
 import { formatNumber, formatShare } from "@/components/charts/format";
 import type { ChartSlice, ResolvedSeries } from "@/components/charts/types";
@@ -51,14 +53,16 @@ export function ChartLegend({
 
 /** Part-to-whole legend (pie slices, composition segments): every row shows
  *  its value and share in plain sight, so the numbers are never hover-gated.
- *  Hovering a row highlights its part in the plot (the reverse of hovering
- *  the mark), keeping identity traceable without colour-matching. */
+ *  Hovering a row highlights its part in the plot, and a part hovered in the
+ *  plot lights up its row here (`highlighted`), so identity is traceable both
+ *  ways without colour-matching. */
 export function SliceLegend({
   slices,
   colors,
   total,
   valueFormatter: valueFormatterProp,
   onHighlight,
+  highlighted = null,
   className,
 }: {
   slices: ChartSlice[];
@@ -68,17 +72,20 @@ export function SliceLegend({
   valueFormatter?: (value: number) => string;
   /** Called with the hovered slice index, and null on leave. */
   onHighlight?: (index: number | null) => void;
+  /** The part being hovered, wherever it was hovered; its row is marked. */
+  highlighted?: number | null;
   className?: string;
 }) {
   const locale = useLocale();
   const valueFormatter =
     valueFormatterProp ?? ((value: number) => formatNumber(value, locale));
   return (
-    <ul className={cn("flex flex-col gap-2.5", className)}>
+    <ul className={cn("flex flex-col gap-0.5", className)}>
       {slices.map((slice, i) => (
         <li
           key={slice.label}
-          className="flex items-center gap-3"
+          className={cn(sliceLegendRowClass, highlighted === i && sliceLegendRowActiveClass)}
+          data-highlighted={highlighted === i ? "" : undefined}
           onMouseEnter={() => onHighlight?.(i)}
           onMouseLeave={() => onHighlight?.(null)}
         >

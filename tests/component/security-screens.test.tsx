@@ -6,18 +6,31 @@
  */
 
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "../setup/render";
+import { act, fireEvent, render, screen, cleanup } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { failed, actionError } from "@/lib/errors";
 import { msg } from "@/i18n/types";
+import { RETRY_DELAYS_MS } from "@/lib/resilient-action";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  // A fake-clock test that fails must not leave the clock fake for the next.
+  vi.useRealTimers();
+});
+
+/** What Next.js's client throws when Cloudflare answered with its own 1102 page. */
+const stoppedWorker = () => new Error("An unexpected response was received from the server.");
+/** Every wait before the sign-in screens give up asking. */
+const RETRY_TOTAL_MS = RETRY_DELAYS_MS.reduce((sum, ms) => sum + ms, 0);
 
 const verifyMock = vi.hoisted(() => vi.fn().mockResolvedValue({}));
 const signInOptionsMock = vi.hoisted(() => vi.fn().mockResolvedValue({}));
 // The challenge moves on with the router once its success mark has played.
 const replaceMock = vi.hoisted(() => vi.fn());
-vi.mock("next/navigation", () => ({
+// The real module otherwise: lib/resilient-action.ts tells a redirect apart
+// from a request that never came back with its helpers.
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
   useRouter: () => ({ replace: replaceMock, push: vi.fn(), refresh: vi.fn() }),
   usePathname: () => "/login/two-factor",
   useSearchParams: () => new URLSearchParams(),
@@ -127,6 +140,48 @@ describe("TwoFactorChallenge", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Your device couldn't use the passkey. Try again.");
     // Not stuck waiting on an answer that is never coming: a click retries.
     expect(screen.getByRole("button", { name: "Use your passkey" })).toBeEnabled();
+  });
+
+  it("rides out a code check that Cloudflare stopped, and signs in when it comes through", async () => {
+    // Production, 2026-10-28: the Worker was stopped mid-request (Error 1102),
+    // and the thrown error replaced the whole sign-in screen.
+    verifyMock
+      .mockClear()
+      .mockRejectedValueOnce(stoppedWorker())
+      .mockRejectedValueOnce(stoppedWorker())
+      .mockResolvedValueOnce({ verified: { next: "/orders" } });
+    const user = userEvent.setup();
+    render(<TwoFactorChallenge next="/orders" email="seller@example.com" factors={[PHONE]} />);
+    await user.type(screen.getByLabelText("Authentication code"), "123456");
+    expect(await screen.findByRole("status", {}, { timeout: 4000 })).toHaveTextContent("Signing you in…");
+    expect(verifyMock).toHaveBeenCalledTimes(3);
+    // The same code each time: the server spends it once.
+    expect(verifyMock.mock.calls.map(([, data]) => (data as FormData).get("code"))).toEqual([
+      "123456",
+      "123456",
+      "123456",
+    ]);
+  });
+
+  it("when the code check never comes back, says so in place and keeps the screen", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    verifyMock.mockClear().mockRejectedValue(stoppedWorker());
+    try {
+      render(<TwoFactorChallenge next="/" email="seller@example.com" factors={[PHONE]} />);
+      fireEvent.change(screen.getByLabelText("Authentication code"), { target: { value: "123456" } });
+      await act(async () => fireEvent.click(screen.getByRole("button", { name: "Verify" })));
+      await act(() => vi.advanceTimersByTimeAsync(RETRY_TOTAL_MS + 1000));
+      expect(verifyMock).toHaveBeenCalledTimes(RETRY_DELAYS_MS.length + 1);
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "We couldn't reach the sign-in service. Check your connection and try again.",
+      );
+      // Still the challenge, ready for another go: nothing was thrown.
+      expect(screen.getByLabelText("Authentication code")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Verify" })).toBeEnabled();
+    } finally {
+      verifyMock.mockReset().mockResolvedValue({});
+      vi.useRealTimers();
+    }
   });
 
   it("switches to the recovery-code form and back", async () => {
@@ -390,5 +445,32 @@ describe("ApproveSignIn", () => {
     const sent = decideMock.mock.calls[0][1] as FormData;
     expect(sent.get("number")).toBe("17");
     expect(sent.get("decision")).toBeNull();
+  });
+
+  it("a tap whose request Cloudflare stopped is sent again, and the approval lands", async () => {
+    decideMock.mockReset().mockResolvedValue({});
+    decideMock.mockRejectedValueOnce(stoppedWorker()).mockResolvedValueOnce({ decided: "approve" });
+    render(<ApproveSignIn {...props} />);
+    await userEvent.click(screen.getByRole("button", { name: "Approve with 42" }));
+    expect(await screen.findByRole("heading", { name: "Sign-in approved" }, { timeout: 4000 })).toBeInTheDocument();
+    expect(decideMock).toHaveBeenCalledTimes(2);
+    expect((decideMock.mock.calls[1][1] as FormData).get("number")).toBe("42");
+  });
+
+  it("when a tap never comes back, says so and keeps the numbers to tap again", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    decideMock.mockReset().mockRejectedValue(stoppedWorker());
+    try {
+      render(<ApproveSignIn {...props} />);
+      await act(async () => fireEvent.click(screen.getByRole("button", { name: "Approve with 42" })));
+      await act(() => vi.advanceTimersByTimeAsync(RETRY_TOTAL_MS + 1000));
+      expect(decideMock).toHaveBeenCalledTimes(RETRY_DELAYS_MS.length + 1);
+      expect(screen.getByRole("alert")).toHaveTextContent("We couldn't reach the sign-in service.");
+      expect(screen.getByRole("button", { name: "Approve with 42" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Deny" })).toBeEnabled();
+    } finally {
+      decideMock.mockReset().mockResolvedValue({});
+      vi.useRealTimers();
+    }
   });
 });

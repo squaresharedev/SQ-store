@@ -91,6 +91,12 @@ export const TOOLTIP = {
 export const dimmableClass = "transition-opacity duration-base ease-standard";
 export const dimmedClass = "opacity-25";
 
+/** How far a hovered pie slice reaches: its OUTER edge eases out to this
+ *  multiple of its radius while the inner edge stays put, so the slice grows
+ *  where it stands instead of moving. Its neighbours are left exactly as they
+ *  are (no dim). */
+export const SLICE_GROW = 1.1;
+
 /** Mark specs (marks stay thin; the data is the only thing allowed to be loud). */
 export const MARK = {
   /** Bars never exceed this thickness — the band's leftover space is air. */
@@ -206,3 +212,11 @@ export const legendSwatchClass = "size-2 shrink-0 rounded-full";
  *  no space in it has to give way to the value beside it, not push it out. */
 export const legendLabelClass = "font-inter text-sm text-foreground wrap-anywhere";
 export const legendMetaClass = "font-inter text-sm text-muted-foreground";
+
+/** A part-to-whole legend row (SliceLegend). Padded into the gutter so the
+ *  highlight band can land without the text moving. */
+export const sliceLegendRowClass =
+  "-mx-2 flex items-center gap-3 px-2 py-1 transition-colors duration-base ease-standard motion-reduce:transition-none";
+/** The row of the part being hovered (in the plot or the legend): the accent
+ *  the dashboard's hovered rows wear. */
+export const sliceLegendRowActiveClass = "bg-accent";

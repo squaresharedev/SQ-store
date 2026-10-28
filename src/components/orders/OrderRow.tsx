@@ -2,9 +2,10 @@
 
 import { useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import type { OrderView, OrdersView } from "@/types/order-view";
+import type { OrderListRow, OrderView, OrdersView } from "@/types/order-view";
 import { cn } from "@/lib/utils";
 import { badgeClass } from "@/components/ui/surface-styles";
+import { ProductThumb } from "@/components/ui/ProductThumb";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { FulfilmentBadge } from "./FulfilmentBadge";
 import { formatCents } from "@/lib/format/money";
@@ -20,7 +21,7 @@ export function OrderRow({
   highlighted = false,
   view = "all",
 }: {
-  order: OrderView;
+  order: OrderListRow;
   onSelect: (order: OrderView) => void;
   /** This is the row the user came here for (arrived via `?highlight=`). It is
    *  marked, scrolled to and focused — but NOT opened: the detail panel is one
@@ -87,36 +88,46 @@ export function OrderRow({
           sold ("the six seater one"), it is empty for most products, and a
           column that is blank on nine rows in ten is a column that earns
           nothing. */}
-      {/* Narrower on a phone: at max-w-xs the queue's three columns were 45px wider
-          than a 390px screen and the date was cut off at the edge. */}
-      <td className="py-2.5 px-3 max-w-40 text-sm sm:max-w-xs">
-        {/* "2 × Lamp" when more than one was bought; a lone unit is just
-            its name, which is what nearly every row is. */}
-        <span className="flex items-center gap-2">
-          <span className="truncate font-medium text-foreground">
-            {order.quantity > 1
-              ? t("detail.packLine", { quantity: order.quantity, title: order.productTitle })
-              : order.productTitle}
-          </span>
-          {/* The buyer has withdrawn: whatever this row was, it is now a
-              conversation, and the list must not read like plain work. */}
-          {order.withdrawalRequestedAt && (
-            <span
-              className={cn(badgeClass, "shrink-0 text-danger-strong")}
-              data-order-withdrawn=""
-            >
-              {t("list.withdrawn")}
+      {/* Narrower on a phone, so the queue's three columns fit a 390px screen
+          with a long title: the date column alone needs ~106px, and at a wider
+          cap it was pushed off the edge. The photo names the product there,
+          and the full title is one tap away. */}
+      <td className="py-2.5 px-3 max-w-32 text-sm sm:max-w-xs">
+        {/* The photo leads: a seller knows the lamp by its picture before
+            reading its name. It is no taller than the two lines beside it, so
+            a row is no taller for it. */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <ProductThumb src={order.photoUrl} loading="lazy" className="size-8 sm:size-9" />
+          <div className="min-w-0 flex-1">
+            {/* "2 × Lamp" when more than one was bought; a lone unit is just
+                its name, which is what nearly every row is. */}
+            <span className="flex items-center gap-2">
+              <span className="truncate font-medium text-foreground">
+                {order.quantity > 1
+                  ? t("detail.packLine", { quantity: order.quantity, title: order.productTitle })
+                  : order.productTitle}
+              </span>
+              {/* The buyer has withdrawn: whatever this row was, it is now a
+                  conversation, and the list must not read like plain work. */}
+              {order.withdrawalRequestedAt && (
+                <span
+                  className={cn(badgeClass, "shrink-0 text-danger-strong")}
+                  data-order-withdrawn=""
+                >
+                  {t("list.withdrawn")}
+                </span>
+              )}
             </span>
-          )}
-        </span>
-        {order.selection.length > 0 && (
-          <span
-            className="block truncate font-inter text-xs text-muted-foreground"
-            data-order-selection=""
-          >
-            {formatOrderSelection(order.selection)}
-          </span>
-        )}
+            {order.selection.length > 0 && (
+              <span
+                className="block truncate font-inter text-xs text-muted-foreground"
+                data-order-selection=""
+              >
+                {formatOrderSelection(order.selection)}
+              </span>
+            )}
+          </div>
+        </div>
       </td>
 
       {view === "to-ship" ? (

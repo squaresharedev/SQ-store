@@ -12,9 +12,13 @@ import { infoTextClass } from "@/components/ui/control-styles";
 import { StepUpPrompt, StepUpScope, StepUpSubmit } from "@/components/auth/StepUp";
 import { setSignInApproval } from "@/lib/auth/sign-in-approval-actions";
 import type { ActionState } from "@/lib/errors";
+import { FORM_UNREACHABLE, resilientAction } from "@/lib/resilient-action";
 import { cn } from "@/lib/utils";
 
 const INITIAL: ActionState = {};
+
+// On or off is the same answer however often it is sent (lib/resilient-action.ts).
+const save = resilientAction(setSignInApproval, FORM_UNREACHABLE);
 
 /**
  * Sign-in approval, as one of the account's ways through 2FA: "approve from a
@@ -73,7 +77,7 @@ export function SignInApprovalRow({
 function SwitchModal({ turningOn, onClose }: { turningOn: boolean; onClose: () => void }) {
   const t = useTranslations("Settings.security.approvals");
   const resolve = useResolveMessage();
-  const [state, formAction, isPending] = useActionState(setSignInApproval, INITIAL);
+  const [state, formAction, isPending] = useActionState(save, INITIAL);
   // Success as a toast (the modal closes with it); errors stay inline.
   const announced = React.useMemo<ActionState | undefined>(
     () => (state.success ? { success: state.success } : undefined),

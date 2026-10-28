@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import Link from "@/components/ui/AppLink";
 import { Monitor, ShieldAlert, ShieldX, Smartphone } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -18,10 +19,43 @@ import type { DeviceLabel } from "@/lib/auth/device-label";
 import { PASSWORD_SETTINGS_PATH } from "@/lib/auth/paths";
 import {
   decideSignInApproval,
+  reconfirmToApprove,
   type DecideApprovalState,
 } from "@/lib/auth/sign-in-approval-actions";
+import { resilientAction, SIGN_IN_UNREACHABLE } from "@/lib/resilient-action";
 
 const INITIAL: DecideApprovalState = {};
+
+// A tap whose request never came back is asked again, then said in place
+// (lib/resilient-action.ts). A request is decided once on the server, so a
+// second try either decides it or reads it as already answered.
+const decide = resilientAction(decideSignInApproval, SIGN_IN_UNREACHABLE);
+// Signing this device out to sign in again is safe to repeat.
+const reconfirm = resilientAction(reconfirmToApprove, undefined);
+
+/**
+ * "Sign in again" for a device whose two-factor is too old to approve: ends
+ * this session and comes back to the same request through sign-in. A client
+ * form so a request that never comes back is asked again, not a crash.
+ */
+export function ReconfirmToApprove({ token, label }: { token: string; label: string }) {
+  return (
+    <form action={reconfirm}>
+      <input type="hidden" name="token" value={token} />
+      <ReconfirmButton label={label} />
+    </form>
+  );
+}
+
+function ReconfirmButton({ label }: { label: string }) {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending} className="w-full" suppressHydrationWarning>
+      {pending && <Spinner />}
+      {label}
+    </Button>
+  );
+}
 
 /** The systems that are a phone or a tablet (lib/auth/device-label.ts): the
  *  device asking is drawn as one, and as a computer otherwise. */
@@ -58,7 +92,7 @@ export function ApproveSignIn({
   const t = useTranslations("Auth.approve");
   const resolve = useResolveMessage();
   const deviceName = useDeviceName();
-  const [state, formAction, isPending] = useActionState(decideSignInApproval, INITIAL);
+  const [state, formAction, isPending] = useActionState(decide, INITIAL);
   // Which button was pressed, for its own "working" label.
   const [choice, setChoice] = React.useState<number | "deny" | null>(null);
 

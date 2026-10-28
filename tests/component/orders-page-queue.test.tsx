@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { act, cleanup, render, screen, within } from "../setup/render";
 import { orderView } from "../setup/order-view";
-import type { OrderView } from "@/types/order-view";
+import type { OrderListRow } from "@/types/order-view";
 
 // The Orders page as a seller clearing a queue uses it: the list they chose
 // stays the list they chose, and each parcel leads to the next without a trip
@@ -25,7 +25,7 @@ import { OrdersEmptyState } from "@/components/orders/OrdersEmptyState";
 
 afterEach(cleanup);
 
-const toShip = (id: string, title: string): OrderView =>
+const toShip = (id: string, title: string): OrderListRow =>
   orderView({
     id,
     productTitle: title,
@@ -36,12 +36,12 @@ const toShip = (id: string, title: string): OrderView =>
 const FIRST = toShip("aaaaaaaa-1111-4111-8111-111111111111", "Blue mug");
 const SECOND = toShip("bbbbbbbb-2222-4222-8222-222222222222", "Red plate");
 
-const sentVersion = (order: OrderView): OrderView => ({
+const sentVersion = (order: OrderListRow): OrderListRow => ({
   ...order,
   fulfilment: { status: "shipped", shippedAt: "2026-09-27T10:00:00Z", trackingNumber: null, carrier: null },
 });
 
-function renderPage(rows: OrderView[], view: "to-ship" | "all" = "to-ship") {
+function renderPage(rows: OrderListRow[], view: "to-ship" | "all" = "to-ship") {
   return render(
     <OrdersPage
       view={view}

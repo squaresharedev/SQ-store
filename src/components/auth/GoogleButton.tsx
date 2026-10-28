@@ -1,10 +1,24 @@
 "use client";
 
+import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
 import { signInWithGoogle } from "@/lib/auth/actions";
+import type { ActionState } from "@/lib/errors";
+import { resilientAction, SIGN_IN_UNREACHABLE } from "@/lib/resilient-action";
 import { LastUsedBadge } from "@/components/auth/LastUsedBadge";
+import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { Spinner } from "@/components/ui/spinner";
+
+const INITIAL: ActionState = {};
+
+// The action only ever redirects (to Google, or back here with ?error=). Asked
+// again while its request never comes back, then said under the button, so a
+// stopped request never takes the sign-in screen down (lib/resilient-action.ts).
+const continueWithGoogle = resilientAction(async (_prev: ActionState, formData: FormData) => {
+  await signInWithGoogle(formData);
+  return INITIAL;
+}, SIGN_IN_UNREACHABLE);
 
 /** What the button says: "continue" signs in, "confirm" re-verifies someone
  *  already signed in. */
@@ -49,10 +63,17 @@ export function GoogleButton({
   /** "confirm" where it re-verifies someone already signed in. */
   intent?: GoogleButtonIntent;
 }) {
+  const [state, formAction] = useActionState(continueWithGoogle, INITIAL);
+  const resolve = useResolveMessage();
   return (
-    <form action={signInWithGoogle}>
+    <form action={formAction} className="flex flex-col gap-2">
       <input type="hidden" name="next" value={next} />
       <GoogleButtonInner lastUsed={lastUsed} intent={intent} />
+      {state.error && (
+        <p role="alert" className="text-sm font-medium text-destructive">
+          {resolve(state.error.message)}
+        </p>
+      )}
     </form>
   );
 }

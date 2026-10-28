@@ -5,8 +5,8 @@ import { useActionState } from "react";
 import { Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { authenticate } from "@/lib/auth/actions";
-import { actionError, failed, type ActionState } from "@/lib/errors";
-import { msg } from "@/i18n/types";
+import type { ActionState } from "@/lib/errors";
+import { FORM_UNREACHABLE, resilientAction } from "@/lib/resilient-action";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
 import { HeroMark } from "@/components/ui/HeroMark";
@@ -16,6 +16,12 @@ import { Modal, ModalActions } from "@/components/ui/modal";
 import { Spinner } from "@/components/ui/spinner";
 
 const INITIAL: ActionState = {};
+
+// Wrapped, not passed bare: if the action's POST never lands (the Worker
+// stopped, the connection dropped) the rejection would propagate out of
+// useActionState and take the whole login page down to the error boundary.
+// Asked again first; a second reset email is harmless (lib/resilient-action.ts).
+const sendResetLink = resilientAction(authenticate, FORM_UNREACHABLE);
 
 /**
  * "Forgot your password?" dialog on the sign-in screen. Collects the email
@@ -33,20 +39,7 @@ export function PasswordResetModal({
   defaultEmail?: string;
   next?: string;
 }) {
-  // Wrapped, not passed bare: if the action's POST never lands (server
-  // restarting, connection dropped) the rejection propagates out of
-  // useActionState and takes the whole login page down to the error boundary.
-  // The reset branch never redirects, so nothing thrown here needs re-raising.
-  const [state, formAction, isPending] = useActionState(
-    async (prev: ActionState, formData: FormData): Promise<ActionState> => {
-      try {
-        return await authenticate(prev, formData);
-      } catch {
-        return failed(actionError("unexpected", msg("Errors.form.unreachable")));
-      }
-    },
-    INITIAL,
-  );
+  const [state, formAction, isPending] = useActionState(sendResetLink, INITIAL);
   const resolveMessage = useResolveMessage();
   const t = useTranslations("Auth.passwordReset");
   const tCommon = useTranslations("Common.actions");

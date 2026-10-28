@@ -29,9 +29,14 @@ import type { Locale } from "@/i18n/locales";
 import { removeAuthenticator, type ManageState } from "@/lib/auth/mfa-actions";
 import type { ActionState } from "@/lib/errors";
 import { dateTimeFormat, intlTag } from "@/lib/format/intl";
+import { FORM_UNREACHABLE, resilientAction } from "@/lib/resilient-action";
 import { cn } from "@/lib/utils";
 
 const MANAGE_INITIAL: ManageState = {};
+
+// Asked again while its request never comes back (lib/resilient-action.ts);
+// a second try of a removal that already happened is refused plainly.
+const remove = resilientAction(removeAuthenticator, FORM_UNREACHABLE);
 
 const ADDED_DAY: Intl.DateTimeFormatOptions = {
   day: "numeric",
@@ -269,7 +274,7 @@ function RemoveAuthenticatorModal({
   const t = useTranslations("Settings.security");
   const tCommon = useTranslations("Common.actions");
   const resolve = useResolveMessage();
-  const [state, formAction, isPending] = useActionState(removeAuthenticator, MANAGE_INITIAL);
+  const [state, formAction, isPending] = useActionState(remove, MANAGE_INITIAL);
   // Success as a toast (the modal closes, so an inline line would vanish with
   // it); errors stay inline beside the code they are about. Memoised on the
   // state object, because the toast hook announces each NEW object it sees.

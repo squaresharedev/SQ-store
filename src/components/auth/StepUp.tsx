@@ -16,6 +16,7 @@ import { STEP_UP_HINT_COOKIE, STEP_UP_WINDOW_SECONDS } from "@/lib/auth/assuranc
 import { passkeyStepUpOptions } from "@/lib/auth/mfa-actions";
 import { assertPasskey, passkeysSupported } from "@/lib/auth/webauthn-client";
 import type { ActionError } from "@/lib/errors";
+import { FORM_UNREACHABLE, resilientAction } from "@/lib/resilient-action";
 
 /**
  * Client half of the step-up ("confirm it's you") check that sensitive
@@ -50,6 +51,10 @@ const StepUpContext = React.createContext<StepUpContextValue>({
  * someone who starts typing at 9m50s is not refused at 10m05s.
  */
 const EARLY_SECONDS = 60;
+
+// A passkey challenge is sealed and single-use, so asking again for one is
+// always safe (lib/resilient-action.ts).
+const loadPasskeyOptions = resilientAction(passkeyStepUpOptions, { error: FORM_UNREACHABLE.error });
 
 export function StepUpProvider({
   enrolled,
@@ -434,7 +439,7 @@ function usePasskeyStepUp(
     let live = true;
     // A request that failed outright (offline, a deploy mid-visit) is a failed
     // load too, so the button offers to try again instead of staying disabled.
-    void passkeyStepUpOptions()
+    void loadPasskeyOptions()
       .catch(() => null)
       .then((result) => {
         if (!live) return;

@@ -1,19 +1,20 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { animate, motionValue, useMotionValueEvent, type MotionValue } from "motion/react";
 import { Cell, Pie, PieChart as RPieChart, Sector, Tooltip } from "recharts";
-import type { PieSectorDataItem } from "recharts";
+import type { PieSectorShapeProps } from "recharts";
 import { infoTextClass } from "@/components/ui/control-styles";
+import { DURATION, EASE_STANDARD } from "@/components/ui/motion-tokens";
 import { cn } from "@/lib/utils";
 import { FitText } from "@/components/ui/FitText";
 import {
   CHART,
   CHART_ANIMATION,
   MARK,
+  SLICE_GROW,
   TOOLTIP,
-  dimmableClass,
-  dimmedClass,
   tooltipLabelClass,
   tooltipValueClass,
   tooltipWrapperClass,
@@ -26,8 +27,10 @@ import type { ChartSlice } from "@/components/charts/types";
 // Part-to-whole at a glance. Subtypes via `variant`:
 //   "donut" (default) — ring with the headline total in the hole.
 //   "pie"             — full disc.
-// Slices start at 12 o'clock, carry 2px surface gaps, and lift slightly on
-// hover (hovering a slice or its legend row recedes the rest). Identity is
+// Slices start at 12 o'clock and carry 2px surface gaps. The one hovered (or
+// whose legend row is hovered) grows outward in place and its legend row
+// lights up; the rest are left alone, and nothing floats over the plot to
+// cover the slice the reader is moving to. Identity is
 // monochrome-first (ink → greys → blue); the tail beyond `maxSlices` folds
 // into the de-emphasised "Other" automatically, which is also where the
 // distinguishable slots run out. The legend lists every value and share in
@@ -95,6 +98,45 @@ function SliceTooltip({
   );
 }
 
+/**
+ * How far each slice has grown, 0 at rest to 1 fully grown, eased towards the
+ * hovered one. Held HERE, above Recharts, not in the slices: Recharts keys its
+ * sector animation on the Pie's whole props object, so every re-render (each
+ * hover change among them) remounts the sectors, and a slice that kept its own
+ * progress would lose it mid-grow and jump.
+ */
+function useSliceGrowth(
+  count: number,
+  grown: number | null,
+  instant: boolean,
+): MotionValue<number>[] {
+  const growth = useMemo(() => Array.from({ length: count }, () => motionValue(0)), [count]);
+  useEffect(() => {
+    const transition = instant
+      ? { duration: 0 }
+      : { duration: DURATION.base, ease: EASE_STANDARD };
+    const controls = growth.map((value, i) => animate(value, i === grown ? 1 : 0, transition));
+    return () => controls.forEach((control) => control.stop());
+  }, [growth, grown, instant]);
+  return growth;
+}
+
+/**
+ * One slice, drawn through the Pie's `shape` hook. Its OUTER edge reaches out
+ * by `growth` (up to SLICE_GROW times its radius); the inner edge never moves,
+ * so the slice grows where it stands rather than shifting. Only this slice
+ * re-renders while it animates, and a remounted one picks up mid-way.
+ */
+function PieSlice({ growth, ...props }: PieSectorShapeProps & { growth?: MotionValue<number> }) {
+  const [step, setStep] = useState(() => growth?.get() ?? 0);
+  useMotionValueEvent(growth ?? REST, "change", setStep);
+  const outer = Number(props.outerRadius ?? 0);
+  return <Sector {...props} outerRadius={outer * (1 + (SLICE_GROW - 1) * step)} />;
+}
+
+/** Stands in for a slice with no growth value of its own (never animates). */
+const REST = motionValue(0);
+
 export function PieChart({
   items,
   variant = "donut",
@@ -113,13 +155,15 @@ export function PieChart({
     valueFormatterProp ?? ((value: number) => formatNumber(value, locale));
   const ariaLabel = ariaLabelProp ?? t("proportional");
   const reducedMotion = useReducedMotion();
-  // Hovering a slice (or its legend row) keeps it at full strength while the
-  // rest recede — identity stays traceable without colour-matching.
+  // Hovering a slice (or its legend row) grows that slice and marks its row,
+  // and touches nothing else: identity stays traceable without
+  // colour-matching, and the other parts stay as readable as they were.
   const [highlighted, setHighlighted] = useState<number | null>(null);
   const slices = foldTail(items, maxSlices, t("other"));
   const colors = slices.map((slice, i) => resolveSliceColor(slice, i));
   const total = slices.reduce((sum, slice) => sum + Math.max(slice.value, 0), 0);
   const donut = variant === "donut";
+  const growth = useSliceGrowth(slices.length, highlighted, reducedMotion);
 
   return (
     <div
@@ -135,18 +179,24 @@ export function PieChart({
     >
       <div className="relative shrink-0" style={{ width: size, height: size }}>
         <RPieChart width={size} height={size}>
-          <Tooltip
-            isAnimationActive={TOOLTIP.animated}
-            wrapperStyle={TOOLTIP.wrapperStyle}
-            content={({ active, payload }) => (
-              <SliceTooltip
-                active={active}
-                payload={payload}
-                total={total}
-                valueFormatter={valueFormatter}
-              />
-            )}
-          />
+          {/* The legend states every value and share and lights up the
+              hovered slice's row, so a floating readout would only cover the
+              slices the reader moves to next. Without a legend it is the only
+              readout, so there it stays. */}
+          {!showLegend && (
+            <Tooltip
+              isAnimationActive={TOOLTIP.animated}
+              wrapperStyle={TOOLTIP.wrapperStyle}
+              content={({ active, payload }) => (
+                <SliceTooltip
+                  active={active}
+                  payload={payload}
+                  total={total}
+                  valueFormatter={valueFormatter}
+                />
+              )}
+            />
+          )}
           <Pie
             data={slices}
             dataKey="value"
@@ -158,9 +208,8 @@ export function PieChart({
             stroke={CHART.surface}
             strokeWidth={MARK.surfaceGap}
             cornerRadius={donut ? 3 : 0}
-            // The hovered slice lifts a touch — the mark responds to the reader.
-            activeShape={(props: PieSectorDataItem) => (
-              <Sector {...props} outerRadius={Number(props.outerRadius ?? 0) + 4} />
+            shape={(props: PieSectorShapeProps) => (
+              <PieSlice {...props} growth={growth[props.index]} />
             )}
             isAnimationActive={animate && !reducedMotion}
             animationDuration={CHART_ANIMATION.duration}
@@ -174,10 +223,7 @@ export function PieChart({
               <Cell
                 key={slice.label}
                 fill={colors[i]}
-                className={cn(
-                  dimmableClass,
-                  highlighted !== null && highlighted !== i && dimmedClass,
-                )}
+                data-slice-grown={highlighted === i ? "" : undefined}
               />
             ))}
           </Pie>
@@ -206,6 +252,7 @@ export function PieChart({
           total={total}
           valueFormatter={valueFormatter}
           onHighlight={setHighlighted}
+          highlighted={highlighted}
           className="min-w-0"
         />
       )}

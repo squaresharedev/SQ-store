@@ -13,8 +13,10 @@ import type { OrderExportRow } from "@/lib/orders/csv";
 import { ORDER_CHANNELS, REFUND_REASONS, WITHDRAWN_STATUS_FILTER } from "@/types/order-view";
 import type {
   OrderView,
+  OrderListRow,
   OrderDiscount,
   OrderFilters,
+  OrderSelection,
   OrderSort,
   OrderChannel,
   OrderStatus,
@@ -42,7 +44,7 @@ export const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 100;
 
 /** Return an empty paginated envelope with the given page/pageSize echoed back. */
-function emptyPage(page: number, pageSize: number): Paginated<OrderView> {
+function emptyPage(page: number, pageSize: number): Paginated<OrderListRow> {
   return { rows: [], total: 0, page, pageSize };
 }
 
@@ -119,6 +121,58 @@ const ORDER_COLUMNS =
 
 /** How a Stripe PaymentIntent id starts: the one payment_ref a refund can name. */
 export const PROVIDER_PAYMENT_PREFIX = "pi_";
+
+/**
+ * The bought product's photo fields, EMBEDDED in an order read (PostgREST
+ * follows orders.product_id), so a page of orders and their pictures are one
+ * query: no second read for the products, and none per row. Named by its
+ * foreign key because reviews link orders to products as well, which makes a
+ * bare `products(...)` ambiguous.
+ */
+const ORDER_PHOTO_EMBED =
+  "product:products!orders_product_id_fkey(owner_id, image_key, gallery, option_groups, moderation_status)";
+
+/** The product as ORDER_PHOTO_EMBED hands it back; null when it is gone. */
+type OrderPhotoProduct = {
+  owner_id: string;
+  image_key: string | null;
+  gallery: unknown;
+  option_groups: unknown;
+  moderation_status: string | null;
+};
+
+/**
+ * The R2 key of the photo an order read with ORDER_PHOTO_EMBED shows, or null:
+ * none when its product is gone, is another store's, or has been taken down.
+ */
+function photoKeyOf(
+  row: Record<string, unknown>,
+  selection: OrderSelection[],
+  accountId: string,
+): string | null {
+  const product = row.product as OrderPhotoProduct | null | undefined;
+  if (!product || product.owner_id !== accountId || !isContentVisible(product.moderation_status)) {
+    return null;
+  }
+  return orderPhotoKey(product, selection);
+}
+
+/**
+ * presignGetUrl, signing each distinct key once. A page of orders is mostly
+ * the same few products, and every row of one product gets the same URL,
+ * which is also what lets the browser download each picture only once.
+ */
+function signOncePerKey(): (key: string) => Promise<string | null> {
+  const signed = new Map<string, Promise<string | null>>();
+  return (key) => {
+    let url = signed.get(key);
+    if (!url) {
+      url = presignGetUrl(key);
+      signed.set(key, url);
+    }
+    return url;
+  };
+}
 
 /**
  * The To ship rule (lib/orders/fulfilment.ts isToShip) as a query filter, so
@@ -244,9 +298,10 @@ export type OrderGlance = {
 };
 
 /**
- * Photo and quantity for several orders in one pair of queries (orders, then
- * their products), keyed by order id. Scoped like getOrdersByIds. Soft-fails
- * to {}: the card reads fine without thumbnails, so a blip costs polish only.
+ * Photo and quantity for several orders in one query (the photo comes embedded,
+ * see ORDER_PHOTO_EMBED), keyed by order id. Scoped like getOrdersByIds.
+ * Soft-fails to {}: the card reads fine without thumbnails, so a blip costs
+ * polish only.
  */
 export async function getOrderGlances(ids: string[]): Promise<Record<string, OrderGlance>> {
   const valid = Array.from(new Set(ids.filter((id) => UUID.test(id)))).slice(0, MAX_BATCH_IDS);
@@ -255,38 +310,23 @@ export async function getOrderGlances(ids: string[]): Promise<Record<string, Ord
   const account = await getActiveAccount();
   if (!account) return {};
 
-  const supabase = (await createClient()) as SupabaseClient;
-  const { data: orders, error } = await supabase
+  const supabase = await createClient();
+  const { data, error } = await (supabase as SupabaseClient)
     .from("orders")
-    .select("id, product_id, quantity, selected_options")
+    .select(`id, quantity, selected_options, ${ORDER_PHOTO_EMBED}`)
     .eq("seller_id", account.accountId)
     .in("id", valid);
-  if (error || !orders) return {};
+  if (error || !data) return {};
 
-  const productIds = Array.from(
-    new Set(orders.map((row) => row.product_id as string | null).filter((id): id is string => Boolean(id))),
-  );
-  const { data: products } = productIds.length
-    ? await supabase
-        .from("products")
-        .select("id, image_key, gallery, option_groups, moderation_status")
-        .eq("owner_id", account.accountId)
-        .in("id", productIds)
-    : { data: [] };
-  const productById = new Map((products ?? []).map((product) => [product.id as string, product]));
-
+  const sign = signOncePerKey();
   const glances: Record<string, OrderGlance> = {};
   await Promise.all(
-    orders.map(async (row) => {
+    (data as Record<string, unknown>[]).map(async (row) => {
       const quantity = Number(row.quantity);
-      const product = row.product_id ? productById.get(row.product_id as string) : undefined;
-      const key =
-        product && isContentVisible(product.moderation_status)
-          ? orderPhotoKey(product, parseOrderSelection(row.selected_options))
-          : null;
+      const key = photoKeyOf(row, parseOrderSelection(row.selected_options), account.accountId);
       glances[String(row.id)] = {
         quantity: Number.isInteger(quantity) && quantity >= 1 ? quantity : 1,
-        photoUrl: key ? await presignGetUrl(key) : null,
+        photoUrl: key ? await sign(key) : null,
       };
     }),
   );
@@ -452,8 +492,12 @@ export async function listOrdersForExport(
  * OLDEST first whatever the sort says (the order they should go out in), and
  * no filters, which answer questions about history rather than about work.
  *
- * Returns an empty Paginated when the user is not signed in, or on any
- * Supabase error (calm zero state — the orders table may still be landing).
+ * Each row carries its product's photo, read in the SAME query (see
+ * ORDER_PHOTO_EMBED) and signed without a network call, so a page costs one
+ * read whatever is on it.
+ *
+ * Returns an empty Paginated when the user is not signed in; THROWS on a read
+ * error (see below).
  */
 export async function listOrders(options?: {
   view?: OrdersView;
@@ -464,7 +508,7 @@ export async function listOrders(options?: {
   sort?: OrderSort;
   page?: number;
   pageSize?: number;
-}): Promise<Paginated<OrderView>> {
+}): Promise<Paginated<OrderListRow>> {
   // Clamp pagination inputs.
   const pageSize = Math.min(
     Math.max(1, options?.pageSize ?? DEFAULT_PAGE_SIZE),
@@ -488,7 +532,7 @@ export async function listOrders(options?: {
   // Scoped to the ACTIVE account's store (own, or one you're a member of).
   let query = (supabase as SupabaseClient)
     .from("orders")
-    .select(ORDER_COLUMNS, { count: "exact" })
+    .select(`${ORDER_COLUMNS}, ${ORDER_PHOTO_EMBED}`, { count: "exact" })
     .eq("seller_id", account.accountId);
   if (toShip) query = onlyToShip(query);
   if (options?.productId) query = query.eq("product_id", options.productId);
@@ -535,7 +579,14 @@ export async function listOrders(options?: {
     throw new Error(`Orders are unavailable right now: ${error.message}`);
   }
 
-  const rows = ((data ?? []) as Record<string, unknown>[]).map(toOrderView);
+  const sign = signOncePerKey();
+  const rows = await Promise.all(
+    ((data ?? []) as Record<string, unknown>[]).map(async (row): Promise<OrderListRow> => {
+      const order = toOrderView(row);
+      const key = photoKeyOf(row, order.selection, account.accountId);
+      return { ...order, photoUrl: key ? await sign(key) : null };
+    }),
+  );
   const total = count ?? 0;
 
   return { rows, total, page, pageSize };

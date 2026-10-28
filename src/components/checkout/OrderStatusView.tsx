@@ -5,6 +5,7 @@ import { formatCents } from "@/lib/format/money";
 import { regionName } from "@/lib/format/country";
 import { orderDownloadApiPath } from "@/lib/checkout/paths";
 import { storefrontPagePath } from "@/lib/storefront/product-page-url";
+import { isProductPageSectionShown } from "@/lib/storefront/product-page";
 import { AnimatedCheck } from "@/components/ui/animated-check";
 import { CTA_BUTTON_CLASS, ctaStyle, subtleFill } from "@/components/product-page/product-page-maps";
 import { PageShell } from "@/components/product-page/PageShell";
@@ -140,6 +141,8 @@ export function OrderStatusView({
     });
   }
   const current = steps.findIndex((step) => !step.done);
+  const asksForReview =
+    (order.review === "open" || order.review === "done") && isProductPageSectionShown(productPage, "reviews");
 
   return (
     <PageShell
@@ -352,25 +355,26 @@ export function OrderStatusView({
           </a>
         )}
 
+        {/* THE ASK: once the buyer knows what happens next, and above the
+            legal small print. Only while the product page shows reviews: a
+            review nobody will see is not worth asking for. */}
+        {asksForReview && order.productId && (
+          <ReviewPanel
+            orderRef={order.ref}
+            productId={order.productId}
+            defaultName={order.firstName}
+            state={order.review === "done" ? "done" : "open"}
+            givenRating={order.reviewRating ?? null}
+            theme={theme}
+            preview={preview}
+          />
+        )}
+
         {paid && (
           <WithdrawalPanel
             orderRef={order.ref}
             withdrawal={order.withdrawal}
             sellerName={sellerName}
-            ink={theme.ink}
-            rule={theme.rule}
-            cta={theme.cta}
-            preview={preview}
-          />
-        )}
-
-        {order.productId && (order.review === "open" || order.review === "done") && (
-          <ReviewPanel
-            orderRef={order.ref}
-            productId={order.productId}
-            productTitle={order.productTitle}
-            defaultName={order.firstName}
-            state={order.review}
             ink={theme.ink}
             rule={theme.rule}
             cta={theme.cta}

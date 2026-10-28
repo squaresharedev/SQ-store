@@ -248,13 +248,24 @@ export async function decideSignInApproval(
   }
 
   const request = await findApprovalRequest(token);
+  const matched =
+    request !== null &&
+    request.matchCode !== null &&
+    !denying &&
+    /^\d{2}$/.test(String(picked)) &&
+    Number(picked) === request.matchCode;
+  // The same tap again, after its answer was lost on the way (the page asks
+  // again when a request never comes back): say what it already decided.
+  // Nothing is decided here, and only for this account's own request.
+  if (request && request.userId === user.id && !request.open) {
+    if (request.decided === "approved" && matched) return { decided: "approve" };
+    if (request.decided === "denied" && !matched) return { decided: denying ? "deny" : "mismatch" };
+  }
   if (!request || !request.open || request.matchCode === null) {
     return failed(invalidInput(msg("Errors.approval.expired")));
   }
   if (request.userId !== user.id) return failed(invalidInput(msg("Errors.approval.otherAccount")));
 
-  const matched =
-    !denying && /^\d{2}$/.test(String(picked)) && Number(picked) === request.matchCode;
   if (!matched) {
     if (!(await decideApprovalRequest({ id: request.id, userId: user.id, decision: "deny" }))) {
       return failed(invalidInput(msg("Errors.approval.expired")));

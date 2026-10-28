@@ -99,6 +99,28 @@ describe("OrdersTable — the highlighted row", () => {
   });
 });
 
+describe("OrdersTable — the photo of what was bought", () => {
+  it("leads the row with the product's photo, loaded lazily", () => {
+    render(
+      <OrdersTable
+        orders={[order({ productTitle: "Lamp", photoUrl: "https://cdn.example/lamp.jpg" })]}
+        onSelect={vi.fn()}
+      />,
+    );
+    const img = rowFor("Lamp").querySelector("img");
+    expect(img).toHaveAttribute("src", "https://cdn.example/lamp.jpg");
+    expect(img).toHaveAttribute("loading", "lazy");
+    // Decorative: the product's name is right beside it.
+    expect(img).toHaveAttribute("alt", "");
+  });
+
+  it("shows the quiet placeholder for a product without one", () => {
+    render(<OrdersTable orders={[order({ photoUrl: null })]} onSelect={vi.fn()} />);
+    expect(rowFor("Lamp").querySelector("img")).toBeNull();
+    expect(rowFor("Lamp").querySelector("svg.lucide-image")).not.toBeNull();
+  });
+});
+
 describe("OrdersTable — which version was bought", () => {
   it("names the version under the product, so a seller knows what to pack", () => {
     render(

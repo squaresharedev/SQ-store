@@ -21,9 +21,15 @@ import {
   type StartApprovalResult,
 } from "@/lib/auth/sign-in-approval-actions";
 import type { ActionError } from "@/lib/errors";
+import { resilientAction, SIGN_IN_UNREACHABLE } from "@/lib/resilient-action";
 import { cn } from "@/lib/utils";
 
 type ShownRequest = NonNullable<StartApprovalResult["request"]>;
+
+// Asked again while its request never comes back (lib/resilient-action.ts):
+// a new request withdraws any earlier one of this session's, so a second try
+// leaves one code on screen and one that works.
+const startApproval = resilientAction(startSignInApproval, { error: SIGN_IN_UNREACHABLE.error });
 
 type Phase =
   | { kind: "loading" }
@@ -71,7 +77,7 @@ export function ApproveFromDevice({
     let live = true;
     // A request that failed outright (offline, a deploy mid-visit) is a
     // failure to show, with a button to try again, not a spinner forever.
-    void startSignInApproval()
+    void startApproval()
       .catch(() => null)
       .then((result) => {
         if (!live) return;

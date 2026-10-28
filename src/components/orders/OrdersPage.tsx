@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { TYPING_DEBOUNCE_MS } from "@/lib/typing-debounce";
 import type {
   OrderFilters,
+  OrderListRow,
   OrderSort,
   OrderView,
   OrdersView,
@@ -97,7 +98,7 @@ export function OrdersPage({
   /** Whether a buyer can pay through Square Share checkout right now. It
    *  decides what an empty list says (see OrdersEmptyState). */
   checkoutOpen?: boolean;
-  data: Paginated<OrderView>;
+  data: Paginated<OrderListRow>;
   filters: OrderFilters;
   /** The one product both lists are narrowed to (`?product=<id>`), or null. */
   product?: Pick<Product, "id" | "title" | "imageUrl"> | null;

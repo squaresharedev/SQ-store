@@ -5,7 +5,7 @@ import { History, LogIn, TimerOff, UserX } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { AuthNotice } from "@/components/auth/AuthNotice";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
-import { ApproveSignIn } from "@/components/auth/ApproveSignIn";
+import { ApproveSignIn, ReconfirmToApprove } from "@/components/auth/ApproveSignIn";
 import { buttonClassName } from "@/components/ui/button";
 import { HeroMark } from "@/components/ui/HeroMark";
 import type { Locale } from "@/i18n/locales";
@@ -17,7 +17,6 @@ import {
   findApprovalRequest,
   matchChoices,
 } from "@/lib/auth/sign-in-approval";
-import { reconfirmToApprove } from "@/lib/auth/sign-in-approval-actions";
 import { regionName } from "@/lib/format/country";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -113,12 +112,7 @@ export default async function ApproveSignInPage({
           body={t("stale.body")}
           attributes={{ "data-approve-state": "stale" }}
         >
-          <form action={reconfirmToApprove}>
-            <input type="hidden" name="token" value={token} />
-            <button type="submit" className={buttonClassName("primary", "w-full")}>
-              {t("stale.button")}
-            </button>
-          </form>
+          <ReconfirmToApprove token={token} label={t("stale.button")} />
         </AuthNotice>
       </AuthPageShell>
     );

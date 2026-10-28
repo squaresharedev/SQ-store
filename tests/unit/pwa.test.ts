@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Locale } from "@/i18n/locales";
 import { MANIFEST_ICONS } from "@/lib/pwa/icons";
+import { RETRY_DELAYS_MS } from "@/lib/resilient-action";
 import {
   OFFLINE_LOCALE_MESSAGE,
   OFFLINE_PATH,
@@ -130,12 +131,33 @@ describe("service worker: a Worker stopped at its CPU limit", () => {
     return { response: answered && (await answered), fetched, waits };
   }
 
+  it("waits on the same schedule as the sign-in screens' actions", () => {
+    // One schedule for "Cloudflare stopped the Worker": a page load riding it
+    // out here, an action riding it out in src/lib/resilient-action.ts.
+    expect(worker).toContain(`const LIMIT_RETRY_DELAYS_MS = [${RETRY_DELAYS_MS.join(", ")}];`);
+  });
+
   it("asks again after a moment, and serves the page once it comes", async () => {
     const { response, fetched, waits } = await dispatch(pageLoad(), [limitPage(), limitPage(), page()]);
     expect(response?.status).toBe(200);
     expect(await response?.text()).toContain("Orders");
     expect(fetched).toHaveLength(3);
-    expect(waits).toEqual([300, 800]);
+    expect(waits).toEqual(RETRY_DELAYS_MS.slice(0, 2));
+  });
+
+  it("keeps asking, spread out, through a stop that lasts several seconds", async () => {
+    // Production, 2026-10-28: a phone's page loads were stopped for 5 to 35 s
+    // at a time. Three seconds of tries showed the error page for most.
+    const stopped = RETRY_DELAYS_MS.length;
+    const { response, fetched, waits } = await dispatch(pageLoad(), [
+      ...Array.from({ length: stopped }, limitPage),
+      page(),
+    ]);
+    expect(response?.status).toBe(200);
+    expect(fetched).toHaveLength(stopped + 1);
+    expect(waits.reduce((sum, ms) => sum + ms, 0)).toBeGreaterThanOrEqual(10_000);
+    // Each wait at least as long as the one before: no burst at the end.
+    expect(waits).toEqual([...waits].sort((a, b) => a - b));
   });
 
   it("counts the browser's preloaded answer as the first try", async () => {
@@ -144,9 +166,10 @@ describe("service worker: a Worker stopped at its CPU limit", () => {
     expect(fetched).toHaveLength(1);
   });
 
-  it("gives up after three more tries and shows the page Cloudflare sent", async () => {
-    const { response, fetched } = await dispatch(pageLoad(), Array.from({ length: 6 }, limitPage));
-    expect(fetched).toHaveLength(4);
+  it("gives up once the schedule runs out and shows the page Cloudflare sent", async () => {
+    const tries = RETRY_DELAYS_MS.length + 1;
+    const { response, fetched } = await dispatch(pageLoad(), Array.from({ length: tries + 2 }, limitPage));
+    expect(fetched).toHaveLength(tries);
     expect(response?.status).toBe(503);
     expect(await response?.text()).toContain("Worker exceeded resource limits");
   });

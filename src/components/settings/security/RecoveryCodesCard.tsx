@@ -15,8 +15,14 @@ import { StepUpPrompt, StepUpScope, StepUpSubmit } from "@/components/auth/StepU
 import { RecoveryCodesDisplay } from "@/components/settings/security/RecoveryCodesDisplay";
 import { regenerateRecoveryCodes, type ManageState } from "@/lib/auth/mfa-actions";
 import { RECOVERY_CODES_LOW, RECOVERY_CODE_COUNT } from "@/lib/auth/recovery-codes";
+import { FORM_UNREACHABLE, resilientAction } from "@/lib/resilient-action";
 
 const INITIAL: ManageState = {};
+
+// Asked again while its request never comes back (lib/resilient-action.ts). A
+// second try makes another new set, which is the one shown: the set before it
+// stops working either way.
+const regenerate = resilientAction(regenerateRecoveryCodes, FORM_UNREACHABLE);
 
 /**
  * How many recovery codes are left, and a way to replace the whole set. The
@@ -64,7 +70,7 @@ export function RecoveryCodesCard({ remaining }: { remaining: number | null }) {
 function RegenerateModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useTranslations("Settings.security");
   const resolve = useResolveMessage();
-  const [state, formAction, isPending] = useActionState(regenerateRecoveryCodes, INITIAL);
+  const [state, formAction, isPending] = useActionState(regenerate, INITIAL);
 
   // The new set, once made: the codes are the dialog, shown once.
   if (state.codes) {

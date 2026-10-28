@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { act, cleanup, render, screen } from "../setup/render";
 import { orderView } from "../setup/order-view";
 import { stubClipboard } from "../setup/clipboard";
-import type { OrderView } from "@/types/order-view";
+import type { OrderListRow, OrderView } from "@/types/order-view";
 
 // What a seller is told and handed at each step of dealing with an order beyond
 // the ship button itself: the number the buyer quotes, a way to write to them,
@@ -301,7 +301,7 @@ describe("clearing the queue", () => {
 });
 
 describe("the orders list", () => {
-  const inTable = (order: OrderView, view: "all" | "to-ship" = "all") =>
+  const inTable = (order: OrderListRow, view: "all" | "to-ship" = "all") =>
     render(
       <table>
         <tbody>

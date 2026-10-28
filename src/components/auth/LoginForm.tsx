@@ -19,11 +19,17 @@ import { PasswordResetModal } from "@/components/auth/PasswordResetModal";
 import { Turnstile } from "@/components/auth/Turnstile";
 import type { SignInMethod } from "@/lib/auth/last-method";
 import { USERNAME_MAX_LENGTH, looksLikeEmail } from "@/lib/validation/auth";
+import { resilientAction, SIGN_IN_UNREACHABLE } from "@/lib/resilient-action";
 import { cn } from "@/lib/utils";
 
 type Mode = "signin" | "signup" | "magic";
 
 const INITIAL: ActionState = {};
+
+// Asked again while its request never comes back, then said in place, so a
+// stopped request never takes the sign-in screen down (lib/resilient-action.ts).
+// A second try signs in, or is refused as the first would have been.
+const submit = resilientAction(authenticate, SIGN_IN_UNREACHABLE);
 
 /**
  * Public by design (it identifies the widget, not a secret) and inlined at
@@ -53,7 +59,7 @@ export function LoginForm({
 }) {
   const t = useTranslations("Auth.login");
   const [mode, setMode] = React.useState<Mode>(initialMode);
-  const [state, formAction, isPending] = useActionState(authenticate, INITIAL);
+  const [state, formAction, isPending] = useActionState(submit, INITIAL);
   const resolveMessage = useResolveMessage();
   const formRef = React.useRef<HTMLFormElement>(null);
   const submittedIdentifier = React.useRef("");

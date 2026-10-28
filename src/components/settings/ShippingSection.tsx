@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, type SelectOption } from "@/components/ui/select";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { TransitFlow } from "@/components/ui/TransitFlow";
 import { cn } from "@/lib/utils";
 import {
   helpTextClass,
@@ -345,7 +346,7 @@ export function ShippingSection({
         fold={compact ? "open" : undefined}
         title={t("shipping.shippingCard.title")}
         description={t("shipping.shippingCard.description")}
-        decoration="grid"
+        art={<TransitFlow />}
       >
         <div className="flex flex-col gap-4 [&>div]:scroll-mt-20">
           <div id="ships-from" className="flex flex-col gap-1.5">

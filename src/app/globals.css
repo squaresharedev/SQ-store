@@ -52,10 +52,11 @@
   --color-plan-gold: #ca8a04; /* amber-600 on light surfaces */
   --color-plan-gold-dark: #fbbf24; /* amber-400 on black cards */
 
-  /* Illustrations only (components/products/ReviewImportStory): a review's
-     stars in the yellow every review site uses, and the window controls of a
-     drawn browser. Never product UI: a buyer's page draws stars in the
-     seller's own ink. */
+  /* A review's stars in the yellow every review site uses: the import story's
+     illustration (components/products/ReviewImportStory) and the stars a buyer
+     gives on their order page (components/checkout/ReviewPanel). The product
+     page's review list still draws its stars in the seller's own ink. Also
+     the window controls of a drawn browser, illustrations only. */
   --color-rating: #f59e0b; /* amber-500 */
   --color-window-close: #ff5f57;
   --color-window-minimize: #febc2e;
@@ -1086,6 +1087,66 @@ textarea {
   animation: check-draw 300ms cubic-bezier(0.65, 0, 0.35, 1) 80ms forwards;
 }
 
+/* The buyer's review stars (components/checkout/ReviewPanel). A star pops
+   when it is chosen; on "thanks" the stars given land one after another
+   (--star-index sets each one's turn), each with a ring bursting out from
+   behind it. Reduced motion: the stars are simply there. */
+@keyframes review-star-tap {
+  50% {
+    scale: 1.3;
+  }
+}
+@keyframes review-star-land {
+  0% {
+    scale: 0;
+    rotate: -60deg;
+    opacity: 0;
+  }
+  60% {
+    scale: 1.25;
+    rotate: 8deg;
+    opacity: 1;
+  }
+  100% {
+    scale: 1;
+    rotate: 0deg;
+    opacity: 1;
+  }
+}
+@keyframes review-star-burst {
+  0% {
+    scale: 0.4;
+    opacity: 0.8;
+  }
+  100% {
+    scale: 1.9;
+    opacity: 0;
+  }
+}
+.review-star-tap {
+  animation: review-star-tap var(--transition-duration-slow) var(--ease-standard);
+}
+.review-star-land {
+  animation: review-star-land calc(var(--transition-duration-slow) * 2) var(--ease-entrance)
+    calc(var(--transition-duration-base) + var(--star-index, 0) * var(--transition-duration-fast)) backwards;
+}
+/* Hidden until its turn (forwards only, so the first frame is not drawn
+   during the delay), and hidden again once it has burst. */
+.review-star-burst {
+  opacity: 0;
+  animation: review-star-burst calc(var(--transition-duration-slow) * 2.5) var(--ease-entrance)
+    calc(var(--transition-duration-slow) + var(--star-index, 0) * var(--transition-duration-fast)) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .review-star-tap,
+  .review-star-land {
+    animation: none;
+  }
+  .review-star-burst {
+    display: none;
+  }
+}
+
 /* Payments: a card glides through the reader, dwells to be read, and is
    approved, looping. Hero motion for the Connect-with-Stripe onboarding
    (components/payments/CardSwipe). translateX is relative to a flex-centred
@@ -1546,6 +1607,58 @@ textarea {
 }
 @media (prefers-reduced-motion: reduce) {
   .setup-anim {
+    animation: none;
+  }
+}
+
+/* Transit flow (ui/TransitFlow): a pill of ink runs the whole line at an
+   even pace, in through one cut edge of the card and out through the other,
+   and each station it passes lights as it goes through. The pill's path is
+   pathLength 100 and it travels from 20 to -100 (TransitFlow times the
+   stations from those two numbers): it starts wholly before the line and ends
+   wholly past it, and both of the line's ends are off the card, so it is
+   never seen to appear or vanish. TransitFlow sets the loop's length
+   (--transit-loop) and each station's own animation-delay; a flash peaks at
+   the loop's start, so that delay is simply when the pill reaches it. The
+   still pose (pill hidden, lit stations at opacity 0) is in the markup, so
+   these only add the motion. */
+@keyframes transit-flow-run {
+  from {
+    stroke-dashoffset: 20;
+  }
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+.transit-flow-run {
+  animation: transit-flow-run var(--transit-loop) linear infinite;
+}
+/* A lit station grows out of the plain one and shrinks back into it: at 0.75
+   the bold ring (size-4) is exactly the plain one's size-3, so the change
+   reads as the station darkening, not as a second ring fading over it. */
+@keyframes transit-flow-pass {
+  0%,
+  3% {
+    opacity: 1;
+    scale: 1;
+  }
+  10%,
+  90% {
+    opacity: 0;
+    scale: 0.75;
+  }
+  97%,
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+.transit-flow-pass {
+  animation: transit-flow-pass var(--transit-loop) var(--ease-standard) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .transit-flow-run,
+  .transit-flow-pass {
     animation: none;
   }
 }

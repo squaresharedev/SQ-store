@@ -9,6 +9,18 @@ import {
  *  closes the open one when another is opened. */
 const FOLD_GROUP = "settings-card";
 
+/** The open card's padding, and the art slot pulled back out through it so
+ *  the art's top and right edges are the card's own. The art never shows
+ *  below sm (see ART_SHOWN_CLASS), so only that step is undone. */
+const CARD_PAD_CLASS = "p-6 sm:p-7";
+const ART_BLEED_CLASS = "sm:-mr-7 sm:-mt-7";
+/** The art only once the header is wide enough to keep a readable text column
+ *  beside it, measured on the header row itself since the settings rails, not
+ *  the screen, decide how wide a card is. The header is the @container, never
+ *  the card: containment would re-anchor ui/Popover's fixed phone sheet for
+ *  every picker in the card's body. */
+const ART_SHOWN_CLASS = "hidden @xl:block";
+
 /**
  * One settings card: a titled white panel holding a single form or action.
  * Sections stack a few of these with generous spacing so sparse pages still
@@ -16,6 +28,10 @@ const FOLD_GROUP = "settings-card";
  *
  * Pass `decoration` to fade a texture into the corner — reserved for the lead
  * card of a section, not every form, so it stays a signal (styles.md §2.4).
+ * Pass `art` instead for a picture in that corner (ui/TransitFlow): it sits
+ * flush in the card's top-right corner, so the card's edges cut it, and
+ * beside the title, so the description wraps before it rather than running
+ * under it. Left out wherever the header is too narrow to give it room.
  *
  * Pass `fold` where the same cards are shown inside a dialog (the shipping
  * settings, opened over the product form): each card is then ONE LINE THAT
@@ -30,6 +46,7 @@ export function SettingsCard({
   description,
   danger,
   decoration,
+  art,
   fold,
   children,
 }: {
@@ -43,6 +60,9 @@ export function SettingsCard({
   danger?: boolean;
   /** Fade a decorative texture into the top-right corner. Omit for plain cards. */
   decoration?: CardBackdropVariant;
+  /** A decorative picture flush in the top-right corner, beside the title.
+   *  Not shown while folded. */
+  art?: React.ReactNode;
   /** Draw the card as one line that opens; `open` starts it opened. */
   fold?: "closed" | "open";
   children: React.ReactNode;
@@ -90,26 +110,39 @@ export function SettingsCard({
     <section
       id={id}
       className={cn(
-        "border bg-background p-6 sm:p-7 scroll-mt-20",
+        "border bg-background scroll-mt-20",
+        CARD_PAD_CLASS,
         decoration && "relative overflow-hidden",
         danger ? "border-destructive/40" : "border-border",
       )}
     >
       {decoration && <CardBackdrop variant={decoration} corner="tr" />}
       <div className={cn(decoration && "relative")}>
-        <h2
-          className={cn(
-            "text-base font-semibold",
-            danger ? "text-destructive" : "text-foreground",
-          )}
-        >
-          {title}
-        </h2>
-        {description && (
-          <p className="mt-1 font-inter text-sm leading-relaxed text-muted-foreground">
-            {description}
-          </p>
-        )}
+        <div className="@container flex items-start gap-6">
+          <div className="min-w-0 flex-1">
+            <h2
+              className={cn(
+                "text-base font-semibold",
+                danger ? "text-destructive" : "text-foreground",
+              )}
+            >
+              {title}
+            </h2>
+            {description && (
+              // Pretty-wrapped beside art: the narrower column otherwise
+              // strands the last word on a line of its own.
+              <p
+                className={cn(
+                  "mt-1 font-inter text-sm leading-relaxed text-muted-foreground",
+                  art && "text-pretty",
+                )}
+              >
+                {description}
+              </p>
+            )}
+          </div>
+          {art && <div className={cn(ART_SHOWN_CLASS, ART_BLEED_CLASS)}>{art}</div>}
+        </div>
         <div className="mt-5">{children}</div>
       </div>
     </section>

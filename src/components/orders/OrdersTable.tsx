@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import type { OrderView, OrdersView } from "@/types/order-view";
+import type { OrderListRow, OrderView, OrdersView } from "@/types/order-view";
 import { OrderRow } from "./OrderRow";
 
 /** One column heading. Cells hidden below md say so at the call site. */
@@ -21,7 +21,7 @@ export function OrdersTable({
   highlightId = null,
   view = "all",
 }: {
-  orders: OrderView[];
+  orders: OrderListRow[];
   onSelect: (order: OrderView) => void;
   /** Row to mark as the one the user arrived for (see OrdersPage). */
   highlightId?: string | null;
