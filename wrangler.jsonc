@@ -14,6 +14,15 @@
   "observability": {
     "enabled": true
   },
+  // CPU per request. The account is on Workers Paid since 2026-10-28; on the
+  // Free plan every request got 10 ms, which no page render fits in, and the
+  // dashboard died with Error 1102 whenever a visitor clicked around. Pinned so
+  // a deploy onto a Free account fails loudly ("CPU limits are not supported
+  // for the Free plan") instead of quietly shipping a dashboard that dies. The
+  // heaviest real request uses under 2 s; 30 s is Paid's default.
+  "limits": {
+    "cpu_ms": 30000
+  },
   // NEXT_PUBLIC_* vars only — these ship to the browser bundle already, so
   // committing them here is no additional exposure. `wrangler deploy` treats
   // this object as authoritative and wipes any dashboard-added vars not
