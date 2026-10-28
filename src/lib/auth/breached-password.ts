@@ -3,7 +3,10 @@
  * Pwned's range API, the complement to lib/auth/password.ts: that rule knows
  * the short head of common passwords and the person's own identity, this one
  * knows the hundreds of millions of real passwords already in attackers' lists.
- * (Supabase's own breach check needs a paid plan, so the app asks itself.)
+ * Supabase Auth's own breach check is on as well (Pro plan, since 2026-10-28)
+ * and refuses a breached password with `weak_password`, for any password set
+ * without passing through here. This one runs first so the form can say why
+ * in the app's own words, before the auth server is asked at all.
  *
  * K-ANONYMITY. Only the first five hex characters of the password's SHA-1 ever
  * leave; the service answers with every suffix sharing that prefix, and the
