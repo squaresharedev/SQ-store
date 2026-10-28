@@ -161,6 +161,23 @@ describe("what the checks call healthy", () => {
     expect((await runCheck(checksFor("anon")[1])).ok).toBe(false);
   });
 
+  it("reads a healthy page to the end, so the site never logs a dropped connection", async () => {
+    let finished = false;
+    const page = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode("<!doctype html><h1>Sign in</h1>"));
+        controller.close();
+      },
+      cancel() {
+        throw new Error("the monitor hung up mid-page");
+      },
+    });
+    const body = page.pipeThrough(new TransformStream({ flush: () => void (finished = true) }));
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(body, { status: 200 })));
+    expect((await runCheck(checksFor("anon")[1])).ok).toBe(true);
+    expect(finished).toBe(true);
+  });
+
   it("names Cloudflare's own error pages and nothing else", () => {
     expect(failureNote(CLOUDFLARE_1102)).toContain("1102");
     expect(failureNote("Error 1101 Worker threw exception")).toContain("1101");

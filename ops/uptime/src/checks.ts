@@ -86,7 +86,10 @@ export async function runCheck(check: Check): Promise<CheckResult> {
     });
     const healthy = check.statuses ?? [200];
     const wanted = healthy.includes(response.status);
-    const body = check.verify || !wanted ? await response.text() : (await response.body?.cancel(), "");
+    // Read the whole answer even when only its status matters. Hanging up
+    // mid-page made the dashboard log "Network connection lost" on every
+    // probe, ~150 false errors a day burying the real ones in Workers Logs.
+    const body = await response.text();
     const ms = Date.now() - started;
     if (!wanted) return { ...base, ok: false, detail: `status ${response.status} in ${ms} ms${failureNote(body)}` };
     const problem = check.verify?.(body) ?? null;
