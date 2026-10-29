@@ -23,6 +23,21 @@ design or behaviour change is one edit in one place and reuse is the default.
 - When you touch code that hand-spells something a token now covers, move it
   onto the token.
 
+## Machine resources
+
+Several sessions often share one machine with ~27 GB of RAM, and on 28 Oct
+parallel sessions each booting their own E2E stack ran it out of memory and
+crashed it twice. Measured costs: a `next dev` (the developer's own, or the one
+inside the E2E stack) holds 4–6 GB; the `unit` Vitest project peaks near 5 GB.
+
+- Before starting `next dev` or Playwright, check whether a server is already
+  listening (`netstat -ano | grep -E ":(3000|3100) .*LISTENING"`) and reuse it
+  instead of starting a second one.
+- One Playwright run at a time, and no full Vitest run alongside it.
+- Prefer running the specs and test files you touched over the whole suite.
+- `.next*/dev` is cleared automatically past 3 GB (`scripts/trim-next-cache.ts`);
+  never commit or copy it around.
+
 ## Task tracking (Teamster via Operator MCP)
 
 **The default is NOT to create a task.** The board is a record of things worth

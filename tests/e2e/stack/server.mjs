@@ -34,6 +34,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO = join(__dirname, "..", "..", "..");
 
 import { REPLICA_INITDB_FLAGS } from "../../db/replica.mjs";
+import { trimNextCache } from "../../../scripts/trim-next-cache.ts";
 import { ANON_KEY, JWT_SECRET, SERVICE_KEY, signJwt } from "./keys.mjs";
 import { newSecret, totpValid } from "./totp.mjs";
 
@@ -738,6 +739,10 @@ console.log(`[stack] gateway on :${GATEWAY_PORT} (anon key + service key minted)
 // the whole E2E stack depend on pnpm's pre-run dependency check, which fails
 // the moment the installed pnpm disagrees with node_modules (a major upgrade is
 // enough) and takes every spec down with it. The binary is right there.
+//
+// Its build dir is cleared first once it outgrows the cap: nothing else prunes
+// Turbopack's dev cache, and an E2E run never goes through `pnpm dev`.
+trimNextCache(".next-e2e");
 const next = spawn(
   process.execPath,
   [join(REPO, "node_modules", "next", "dist", "bin", "next"), "dev", "-p", String(NEXT_PORT)],
