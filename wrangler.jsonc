@@ -51,7 +51,7 @@
     // Its signing key is a secret: `wrangler secret put AGENT_JWT_SIGNING_KEY`,
     // a private JWK imported into Supabase as a STANDBY signing key, so Auth
     // never signs with it and revoking it there stops agent access alone.
-    "AGENT_ACCESS_ENABLED": "false"
+    "AGENT_ACCESS_ENABLED": "true"
     // NEXT_PUBLIC_TURNSTILE_SITE_KEY does NOT belong here, ever. The forms
     // that render the widget are client components, so the site key is
     // inlined at BUILD time and has to be in .env.production; a var in this
