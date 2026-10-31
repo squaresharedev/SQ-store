@@ -1,3 +1,7 @@
+/** Who we say we are when fetching someone else's URL. A Worker sends no
+ *  User-Agent by default, and plenty of hosts refuse a request without one. */
+export const FETCH_USER_AGENT = "SquareShare/1.0 (+https://squareshare.eu)";
+
 /**
  * Whether a URL an outsider gave us may be fetched by this server: HTTPS, a real
  * host name, no credentials. The Worker has no private network to reach; this is

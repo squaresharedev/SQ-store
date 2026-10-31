@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isPublicHttpsUrl } from "@/lib/agent/oauth/public-url";
+import { FETCH_USER_AGENT, isPublicHttpsUrl } from "@/lib/agent/oauth/public-url";
 
 /**
  * How a picture reaches a tool: a URL this server fetches, or the bytes inline.
@@ -58,6 +58,7 @@ async function fetchImage(startUrl: string, maxBytes: number): Promise<Uint8Arra
     const response = await fetch(url, {
       redirect: "manual",
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      headers: { "user-agent": FETCH_USER_AGENT },
     });
     if (response.status >= 300 && response.status < 400) {
       const next = response.headers.get("location");

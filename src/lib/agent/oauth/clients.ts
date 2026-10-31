@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { randomCredential } from "@/lib/agent/oauth/crypto";
-import { isPublicHttpsUrl } from "@/lib/agent/oauth/public-url";
+import { FETCH_USER_AGENT, isPublicHttpsUrl } from "@/lib/agent/oauth/public-url";
 import {
   isAllowedRedirectUri,
   type ApplicationType,
@@ -9,9 +9,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
  * Who an app says it is. Two ways in, because MCP clients use both:
- *   - it registers itself (RFC 7591, what Claude does today), and gets an id;
+ *   - it registers itself (RFC 7591), and gets an id;
  *   - its client_id IS the HTTPS URL of a metadata document we read
- *     (Client ID Metadata Documents, the newer spec's preferred way).
+ *     (Client ID Metadata Documents, the newer spec's preferred way, and what
+ *     Claude does today: https://claude.ai/oauth/mcp-oauth-client-metadata).
  *
  * NEITHER PROVES ANYTHING ABOUT THE NAME. Anyone can register as "Claude",
  * which is why the consent page leads with the redirect host, the one part an
@@ -115,15 +116,23 @@ async function fetchClientMetadata(clientId: string): Promise<AgentClient | null
   if (!isMetadataDocumentUrl(clientId)) return null;
   let text: string;
   try {
+    // "manual", never "error": a Worker throws on "error" ("does not make sense
+    // at the edge"). A redirect then comes back as a 3xx, which is refused below,
+    // because a document has to answer at the URL that names it.
     const response = await fetch(clientId, {
-      redirect: "error",
+      redirect: "manual",
       signal: AbortSignal.timeout(METADATA_FETCH_TIMEOUT_MS),
-      headers: { accept: "application/json" },
+      headers: { accept: "application/json", "user-agent": FETCH_USER_AGENT },
     });
-    if (!response.ok) return null;
+    if (response.status !== 200) {
+      console.warn(`[agent] client metadata answered ${response.status}: ${clientId}`);
+      return null;
+    }
     text = await response.text();
     if (text.length > METADATA_MAX_BYTES) return null;
-  } catch {
+  } catch (error) {
+    // Logged: "unknown app" is all the seller sees, and this is the only trace of why.
+    console.warn(`[agent] client metadata fetch failed: ${clientId}:`, error instanceof Error ? error.message : String(error));
     return null;
   }
   let document: unknown;
