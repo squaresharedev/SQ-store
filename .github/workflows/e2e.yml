@@ -66,7 +66,10 @@ jobs:
       - name: Product page and deep links
         run: npx playwright test 30-product-page.spec.ts 97-deep-link-sign-in.spec.ts --retries=1 --reporter=line
 
+      # The app URL is what passkeys are bound to, and consent is checked with one.
       - name: The MCP server
+        env:
+          NEXT_PUBLIC_APP_URL: http://localhost:3100
         run: npx playwright test 101-mcp.spec.ts --retries=1 --reporter=line
 
       - name: Keep screenshots and traces of a failure
