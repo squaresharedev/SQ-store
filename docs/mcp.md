@@ -12,8 +12,10 @@ an assistant must and must not do with it.
 1. Add `https://dashboard.squareshare.eu/mcp` as a connector in the client.
 2. The client sends the seller to a Square Share page that names the app and where
    its access goes.
-3. The seller chooses a store and what the app may do, then presses Connect. An
-   account with 2FA on is asked to prove it.
+3. The seller chooses a store and what the app may do, then presses Connect. That
+   is all for an account without 2FA, or one that passed it in the last 10 minutes.
+   Otherwise the usual step-up applies: a passkey makes Connect "Confirm with
+   passkey" (one press), and only an account with an authenticator app types a code.
 
 Settings > Connected apps lists every connected app, with a Disconnect button.
 
@@ -81,9 +83,19 @@ page, the settings page and the OAuth metadata all read that list.
 - **Buyer-written text is data.** Say so in the description of any tool returning it.
 - **Anything that cannot be undone** takes an opt-in scope and `DESTRUCTIVE`.
 
+## Designing a storefront
+
+`edit_storefront` takes a list of small operations (add, move, resize, rotate,
+layer, style, remove, theme, header), saved together or not at all, so an assistant
+never resends blocks it was not asked about. The rules are pure data in
+`lib/storefront/design-ops.ts`; the result goes through `storefrontConfigSchema` and
+`saveStorefront` like a save from the designer. `upload_element` stores artwork for
+`add_image` through `lib/uploads/store-element.ts`, shared with the upload route.
+`save_storefront` remains for renaming and for replacing a whole config member.
+
 ## Not exposed yet
 
-Digital file, font, element and document uploads; review CSV import and export;
+Digital file, font and document uploads; review CSV import and export;
 payments (`getPaymentsOverview`), until Stripe Connect is live.
 
 ## Operations

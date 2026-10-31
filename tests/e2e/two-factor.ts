@@ -91,6 +91,44 @@ export async function nameAuthenticator(dialog: Locator, name: string) {
   await dialog.getByLabel("Name this authenticator").fill(name);
 }
 
+/** A platform authenticator with Face ID/fingerprint that always says yes. */
+export async function addPhone(page: Page) {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("WebAuthn.enable");
+  await cdp.send("WebAuthn.addVirtualAuthenticator", {
+    options: {
+      protocol: "ctap2",
+      transport: "internal",
+      hasResidentKey: true,
+      hasUserVerification: true,
+      isUserVerified: true,
+      automaticPresenceSimulation: true,
+    },
+  });
+}
+
+/**
+ * Turn 2FA on with a passkey and nothing else, through the real Settings ›
+ * Security UI, for a user who signed up a moment ago (that is the proof).
+ */
+export async function enablePasskey(page: Page) {
+  await clearAuthRateLimits();
+  await addPhone(page);
+  await page.goto("/settings/security");
+  await page.waitForLoadState("networkidle").catch(() => {});
+  const dialog = page.getByRole("dialog");
+  await expect(async () => {
+    await page.getByRole("button", { name: "Set up two-factor authentication" }).click();
+    await expect(dialog).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 20_000 });
+  await dialog.getByRole("button", { name: "Continue" }).click();
+  await dialog.getByRole("button", { name: "Create passkey" }).click({ timeout: 20_000 });
+  await expect(dialog.getByRole("list", { name: "Recovery codes" })).toBeVisible({ timeout: 30_000 });
+  await dialog.getByLabel(/saved my recovery codes/i).check();
+  await dialog.getByRole("button", { name: "Done" }).click();
+  await expect(page.locator('[data-two-factor-status="on"]')).toBeVisible({ timeout: 20_000 });
+}
+
 /**
  * Turn 2FA on through the real Settings › Security UI, for a signed-in user
  * who has a password. Returns the phone and the recovery codes shown.

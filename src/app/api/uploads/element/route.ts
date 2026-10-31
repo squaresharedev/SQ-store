@@ -1,13 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { buildObjectKey, deleteObject, hasR2Credentials, putObject } from "@/lib/r2";
-import {
-  ELEMENT_CONTENT_TYPES,
-  ELEMENT_MAX_BYTES,
-} from "@/lib/validation/product";
-import { classifierCanSee, sniffImage, sniffSvg } from "@/lib/uploads/sniff";
-import { holdForPerson } from "@/lib/moderation/auto/check";
+import { hasR2Credentials } from "@/lib/r2";
+import { ELEMENT_MAX_BYTES } from "@/lib/validation/product";
+import { storeElement } from "@/lib/uploads/store-element";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { declaredLengthExceeds } from "@/lib/security/read-json";
 
@@ -104,53 +100,24 @@ export async function POST(request: Request) {
     );
   }
 
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  // The measured length is the one that counts: `file.size` is a claim in the
-  // multipart headers, this is what we actually received.
-  if (bytes.byteLength > ELEMENT_MAX_BYTES || bytes.byteLength === 0) {
-    return bad(413, t("tooLarge.image"));
+  // What the file IS, not what it says it is: one function, shared with an
+  // assistant's upload_element.
+  const stored = await storeElement(new Uint8Array(await file.arrayBuffer()), file.name, account.userId);
+  if (!stored.ok) {
+    switch (stored.reason) {
+      case "empty":
+      case "too_large":
+        return bad(413, t("tooLarge.image"));
+      case "unsupported":
+        // The fix deliberately names the SVG rules: "not supported" alone would
+        // read as a format problem when the usual cause is an export carrying script.
+        return bad(415, t("unsupported.image"), t("unsupportedFix.element"));
+      case "store_failed":
+        return bad(502, t("storeFailed.image"), t("fix.tryAgainInAMoment"));
+      case "moderation_unavailable":
+        return bad(503, t("moderationUnavailable"), t("fix.tryAgainInAFewMinutes"));
+    }
   }
 
-  // What the file IS, not what it says it is. SVG first: it is the only kind
-  // with no magic number, so it has to be identified by structure, and a file
-  // that is not one falls through to the raster signatures.
-  const svg = sniffSvg(bytes);
-  const sniffed = svg ?? sniffImage(bytes);
-  const allowed: readonly string[] = ELEMENT_CONTENT_TYPES;
-  if (!sniffed || !allowed.includes(sniffed.mime)) {
-    // The fix deliberately names the SVG rules: "not supported" alone would
-    // read as a format problem when the usual cause is an export carrying script.
-    return bad(415, t("unsupported.image"), t("unsupportedFix.element"));
-  }
-
-  const key = buildObjectKey(
-    "element",
-    account.userId,
-    file.name || `element.${sniffed.ext}`,
-  );
-
-  try {
-    // `attachment` on SVG only: it changes nothing about how an `<img>` loads
-    // the artwork, and makes a presigned URL opened directly in a tab download
-    // rather than render as a document. See putObject.
-    await putObject(
-      key,
-      bytes,
-      sniffed.mime,
-      svg ? "attachment" : undefined,
-    );
-  } catch (error) {
-    console.error("[uploads] element store failed", error);
-    return bad(502, t("storeFailed.image"), t("fix.tryAgainInAMoment"));
-  }
-
-  // Markup, and any raster the classifier cannot fully see, goes to a person.
-  // Unrecorded, it would be judged on what a classifier could make of it, so
-  // an upload whose hold cannot be written is refused.
-  if ((svg || !classifierCanSee(bytes, sniffed.mime)) && !(await holdForPerson(key))) {
-    await deleteObject(key).catch(() => {});
-    return bad(503, t("moderationUnavailable"), t("fix.tryAgainInAFewMinutes"));
-  }
-
-  return Response.json({ key });
+  return Response.json({ key: stored.key });
 }

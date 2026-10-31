@@ -49,18 +49,16 @@ describe("images have exactly one route into storage", () => {
   it.each(["image", "element"])(
     "the %s route flags what the classifier cannot see, or refuses the upload",
     (name) => {
-      // The image route's bytes go through the function it shares with upload_image.
-      const route =
-        name === "image"
-          ? repoFile("src", "lib", "uploads", "store-image.ts")
-          : repoFile("src", "app", "api", "uploads", name, "route.ts");
+      // Each route's bytes go through the function it shares with an assistant's
+      // upload tool.
+      const route = repoFile("src", "lib", "uploads", `store-${name}.ts`);
       // Asked of the real bytes, and a hold that cannot be recorded is not
       // waved through: the object is deleted and no key is returned.
       expect(route).toMatch(/classifierCanSee\(bytes, sniffed\.mime\)/);
       expect(route).toMatch(/!\(await holdForPerson\(key\)\)/);
       const heldAt = route.indexOf("holdForPerson(key)");
       const refusedAt = route.indexOf("deleteObject(key)", heldAt);
-      const returnedAt = route.lastIndexOf(name === "image" ? "return { ok: true, key }" : "Response.json({ key })");
+      const returnedAt = route.lastIndexOf("return { ok: true, key }");
       expect(heldAt).toBeGreaterThan(-1);
       expect(refusedAt).toBeGreaterThan(heldAt);
       expect(returnedAt).toBeGreaterThan(refusedAt);
@@ -68,8 +66,9 @@ describe("images have exactly one route into storage", () => {
   );
 
   it("the element route holds every SVG for a person", () => {
-    const route = repoFile("src", "app", "api", "uploads", "element", "route.ts");
-    expect(route).toMatch(/\(svg \|\| !classifierCanSee\(bytes, sniffed\.mime\)\)/);
+    expect(repoFile("src", "app", "api", "uploads", "element", "route.ts")).toMatch(/storeElement\(/);
+    const store = repoFile("src", "lib", "uploads", "store-element.ts");
+    expect(store).toMatch(/\(svg \|\| !classifierCanSee\(bytes, sniffed\.mime\)\)/);
   });
 
   it("no upload route classifies content itself any more", () => {

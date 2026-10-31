@@ -298,6 +298,16 @@ export function stepUpFreshUntil(assurance: SessionAssurance | null): Seconds | 
   return assurance.secondFactorAt + STEP_UP_WINDOW_SECONDS;
 }
 
+/** What a StepUpProvider is told about this session: every page or layout that
+ *  holds a step-up form hands it over the same way. */
+export function stepUpProviderProps(assurance: SessionAssurance | null) {
+  return {
+    enrolled: assurance?.enrolled ?? false,
+    freshUntil: stepUpFreshUntil(assurance),
+    factors: (assurance?.factors ?? []).map(({ id, name, type }) => ({ id, name, type })),
+  };
+}
+
 /** Did this session sign in (first factor) within `maxAgeSeconds`? */
 export function signedInRecently(
   assurance: SessionAssurance | null,

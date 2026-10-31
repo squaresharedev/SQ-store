@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
+import { StepUpProvider } from "@/components/auth/StepUp";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { getProfile, requireUser } from "@/lib/auth/session";
+import { stepUpProviderProps } from "@/lib/auth/assurance";
+import { getAssurance, getProfile, requireUser } from "@/lib/auth/session";
 import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
 import { NavigationBlockerProvider } from "@/lib/hooks/useNavigationBlocker";
 
@@ -36,7 +38,7 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const user = await requireUser("/");
-  const profile = await getProfile();
+  const [profile, assurance] = await Promise.all([getProfile(), getAssurance()]);
   const t = await getTranslations("Dashboard.shell");
   const username = profile?.username || user.email?.split("@")[0] || t("accountFallback");
 
@@ -49,10 +51,15 @@ export default async function DashboardLayout({
   // provider installs one capture-phase click listener on document, so every
   // internal link in the chrome — sidebar, back links, breadcrumbs — goes
   // through the active blocker when a dirty editor is mounted.
+  //
+  // StepUpProvider: the step-up forms in this group (the welcome flow, the plan
+  // buttons) have to know what the account confirms with (components/auth/StepUp.tsx).
   return (
     <ScopedIntlProvider scope="app">
       <NavigationBlockerProvider>
-        <DashboardShell username={username}>{children}</DashboardShell>
+        <StepUpProvider {...stepUpProviderProps(assurance)}>
+          <DashboardShell username={username}>{children}</DashboardShell>
+        </StepUpProvider>
       </NavigationBlockerProvider>
     </ScopedIntlProvider>
   );

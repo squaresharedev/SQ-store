@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { collectObjectKeys, restoreObjectKeys, withholdObjectKeys } from "@/lib/agent/object-refs";
+import { bytesFromImageInput, imageInputShape } from "@/lib/agent/image-input";
+import { collectObjectKeys, rememberUpload, restoreObjectKeys, withholdObjectKeys } from "@/lib/agent/object-refs";
 import { DESTRUCTIVE, READ, ToolFailure, WRITE, defineTool, formDataFrom, unwrap, unwrapState } from "@/lib/agent/tool";
 import {
   GET as getCheckoutPageRoute,
@@ -9,7 +10,8 @@ import {
   GET as getProductPageRoute,
   PATCH as patchProductPageRoute,
 } from "@/app/api/storefronts/[id]/product-page/route";
-import { actionError, invalidInput, notFound, serverError, type ActionErrorCode } from "@/lib/errors";
+import { actionError, invalidInput, notFound, rateLimited, serverError, type ActionErrorCode } from "@/lib/errors";
+import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { saveShippingPolicy } from "@/lib/settings/shipping-actions";
 import { getShippingPolicy } from "@/lib/settings/shipping-policy";
 import {
@@ -19,10 +21,12 @@ import {
   saveStorefront,
   updateEmbedSettings,
 } from "@/lib/storefront/actions";
+import { DesignOpRefused, applyDesignOps, boardSummary, designOpSchema } from "@/lib/storefront/design-ops";
 import { getShippingChoices, getStorefront, listStorefronts } from "@/lib/storefront/queries";
+import { storeElement } from "@/lib/uploads/store-element";
 import { msg } from "@/i18n/types";
 import { firstIssue } from "@/lib/validation/messages";
-import { productWriteSchema } from "@/lib/validation/product";
+import { ELEMENT_MAX_BYTES, productWriteSchema } from "@/lib/validation/product";
 import { shippingPolicySchema } from "@/lib/validation/shipping-policy";
 import { discountInputSchema } from "@/lib/validation/discounts";
 import { storefrontConfigSchema } from "@/lib/validation/storefront";
@@ -91,6 +95,19 @@ const pageSettings = z
   .record(z.string(), z.unknown())
   .describe("Only what changes. null clears an optional field back to inheriting.");
 
+/** How many changes one edit_storefront call may make: a whole board's worth. */
+const DESIGN_OPS_MAX = 200;
+
+/** A refusal in words written for the assistant reading it. */
+function refused(message: string, fix?: string): ToolFailure {
+  return new ToolFailure(
+    invalidInput(
+      msg("Errors.agent.passThrough", { message }),
+      fix ? msg("Errors.agent.passThrough", { message: fix }) : undefined,
+    ),
+  );
+}
+
 export const storefrontTools = [
   defineTool({
     name: "list_storefronts",
@@ -120,7 +137,7 @@ export const storefrontTools = [
     name: "get_storefront",
     title: "Get a storefront",
     description:
-      "One storefront's whole design. Files appear as ref: handles: send them back unchanged to keep them. `version` goes back with save_storefront so a seller's newer edit is not overwritten. " +
+      "One storefront's whole design. Files appear as ref: handles: send them back unchanged to keep them. `version` goes back with edit_storefront or save_storefront so a seller's newer edit is not overwritten. " +
       "x/y/w/h is a block's unrotated rectangle. z is paint order only, not reading order. Blocks may overlap on purpose.",
     scope: "store:read",
     permission: "store.read",
@@ -192,7 +209,7 @@ export const storefrontTools = [
   defineTool({
     name: "create_storefront",
     title: "Create a storefront",
-    description: "Make a new empty storefront and get its id. Then design it with save_storefront.",
+    description: "Make a new empty storefront and get its id. Then design it with edit_storefront.",
     scope: "storefronts:write",
     permission: "storefront.write",
     annotations: WRITE,
@@ -204,10 +221,109 @@ export const storefrontTools = [
   }),
 
   defineTool({
+    name: "edit_storefront",
+    title: "Edit a storefront's design",
+    description:
+      "Move, resize, turn, restyle, layer, add or remove things on a storefront, in as many steps as you like: the whole list is saved together or not at all, so a refused step changes nothing. The way to change a design, because nothing you do not name is touched. " +
+      "The board is theme.columns by theme.rows cells; x and y count from 0 at the top left, and blocks may overlap on purpose. Operations (`op`): " +
+      "add_product, add_text, add_shape, add_image (the file is an upload_id from upload_element) place something new, on the next free cells unless you give x and y; " +
+      "move (x, y), resize (w, h), rotate (clockwise degrees), layer (front, forward, backward, back), remove; " +
+      "style changes a block's look with `changes`: on a shape kind, color, borderWidth, borderColor, opacity, roundness, points; on text text, variant, align, color, fontSize, font, bold, italic, underline; on an image alt, fit, opacity, imagePlacement, file; on a product tile the per-tile look such as cornerRadius, titleStyle, priceTagPosition, priceTagColor, and imagePlacement to frame its photo; " +
+      "theme changes the whole board with `changes`: background ({kind:solid,color} or {kind:gradient,from,to,angle}), accent, font, columns, rows, cornerRadius, gridGap and more; header changes the store name and bio above the board. " +
+      "get_schema with of=storefront_config has every field and limit. Colors are strict #rrggbb. Answers with the board as it now stands and the new `version`.",
+    scope: "storefronts:write",
+    permission: "storefront.write",
+    annotations: WRITE,
+    input: z.strictObject({
+      id: storefrontId,
+      operations: z.array(designOpSchema).min(1).max(DESIGN_OPS_MAX),
+      version: z
+        .string()
+        .max(200)
+        .optional()
+        .describe("From get_storefront or the last edit. If the seller has saved since, this refuses rather than overwriting them."),
+    }),
+    handler: async ({ id, operations, version }, { grantId }) => {
+      const current = await getStorefront(id);
+      if (!current) throw new ToolFailure(notFound("storefront"));
+      const operationsWithFiles = await restoreObjectKeys(operations, collectObjectKeys(current.config), grantId);
+      let edited;
+      try {
+        edited = applyDesignOps(current.config, operationsWithFiles);
+      } catch (error) {
+        if (error instanceof DesignOpRefused) throw refused(error.message, error.fix);
+        throw error;
+      }
+      const parsed = storefrontConfigSchema.safeParse(edited.config);
+      if (!parsed.success) {
+        const offBoard = parsed.error.issues.some((issue) => issue.path[0] === "blocks");
+        const { columns, rows } = edited.config.theme;
+        throw new ToolFailure(
+          invalidInput(
+            firstIssue(parsed.error),
+            offBoard
+              ? msg("Errors.agent.passThrough", {
+                  message: `The board is ${columns} by ${rows} cells: x + w may reach ${columns} and y + h may reach ${rows}. A theme operation in the same list can make it bigger.`,
+                })
+              : undefined,
+          ),
+        );
+      }
+      // Always compared: the board was just read, and a seller's save landing
+      // between that read and this write must not be overwritten by it.
+      const saved = unwrap(
+        await saveStorefront(id, { name: current.name, config: edited.config }, { expectedVersion: version ?? current.version }),
+      );
+      return {
+        id,
+        version: "version" in saved ? saved.version : undefined,
+        added: edited.added,
+        board: boardSummary(parsed.data),
+      };
+    },
+  }),
+
+  defineTool({
+    name: "upload_element",
+    title: "Upload artwork for a storefront",
+    description:
+      "Store a logo, icon or graphic (SVG, or an image up to 2 MB) and get an upload_id to place with add_image in edit_storefront. From a public HTTPS URL, or base64. An SVG carrying script or outside references is refused, and every SVG waits for a person to check it before buyers see it. An upload_id lasts 24 hours.",
+    scope: "storefronts:write",
+    permission: "storefront.write",
+    annotations: { ...WRITE, openWorldHint: true },
+    input: z.strictObject(imageInputShape),
+    handler: async (input, { account, grantId }) => {
+      if (!input.url && !input.base64) {
+        throw new ToolFailure(invalidInput(msg("Errors.agent.imageUnreadable"), msg("Errors.agent.imageUnreadableFix")));
+      }
+      if (!(await rateLimit("upload_presign", RATE_LIMITS.uploadPresign))) {
+        throw new ToolFailure(rateLimited("agentTools"));
+      }
+      const bytes = await bytesFromImageInput(input, ELEMENT_MAX_BYTES);
+      if (!bytes) {
+        throw new ToolFailure(invalidInput(msg("Errors.agent.imageUnreadable"), msg("Errors.agent.imageUnreadableFix")));
+      }
+      const stored = await storeElement(bytes, input.filename, account.userId);
+      if (!stored.ok) {
+        if (stored.reason === "store_failed" || stored.reason === "moderation_unavailable") {
+          throw new ToolFailure(serverError("agentTools"));
+        }
+        throw refused(
+          "That file cannot be used as artwork.",
+          "Send an SVG with no script or outside references, or a JPEG, PNG, WebP, GIF or AVIF, within 2 MB.",
+        );
+      }
+      const uploadId = await rememberUpload({ grantId, kind: "element", objectKey: stored.key });
+      if (!uploadId) throw new ToolFailure(serverError("agentTools"));
+      return { uploadId };
+    },
+  }),
+
+  defineTool({
     name: "save_storefront",
     title: "Save a storefront",
     description:
-      "Change a storefront's name or design. Send only the top-level config members you are changing: theme, header, blocks and so on, each replaced whole, the rest kept. Call get_schema with of=storefront_config for what is valid. " +
+      "Rename a storefront, or replace whole parts of its design. To change things on a board use edit_storefront instead: here `blocks` is replaced whole, so anything left out is gone. Send only the top-level config members you are changing: theme, header, blocks and so on, each replaced whole, the rest kept. Call get_schema with of=storefront_config for what is valid. " +
       "Pass the version from get_storefront: if the seller has saved since, this refuses rather than overwriting them, so read it again. A product block must name a product of this store. New photos go in as upload_id values from upload_image.",
     scope: "storefronts:write",
     permission: "storefront.write",

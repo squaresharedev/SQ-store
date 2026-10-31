@@ -39,6 +39,12 @@ type StepUpContextValue = {
   markFresh: () => void;
 };
 
+/**
+ * With no StepUpProvider above it, a form believes the account has no factors,
+ * so a passkey-only account is shown a code box it can never fill. Every route
+ * holding a step-up form needs a provider (the dashboard and settings layouts
+ * have one; the consent page brings its own).
+ */
 const StepUpContext = React.createContext<StepUpContextValue>({
   enrolled: false,
   freshUntil: null,
@@ -289,6 +295,7 @@ export function StepUpSubmit({
   children,
   pending = false,
   pendingLabel,
+  disabled = false,
   variant = "primary",
   className,
 }: {
@@ -296,16 +303,18 @@ export function StepUpSubmit({
   children: React.ReactNode;
   pending?: boolean;
   pendingLabel?: React.ReactNode;
+  /** The form cannot be sent yet, however it would be confirmed. */
+  disabled?: boolean;
   /** `destructive` where what is being confirmed cannot be undone. */
   variant?: "primary" | "destructive";
   className?: string;
 }) {
   const stepUp = useFormStepUp();
   if (stepUp.show && stepUp.usePasskey) {
-    return <PasskeyConfirmButton variant={variant} className={className} />;
+    return <PasskeyConfirmButton variant={variant} disabled={disabled} className={className} />;
   }
   return (
-    <Button type="submit" variant={variant} disabled={pending} className={className}>
+    <Button type="submit" variant={variant} disabled={pending || disabled} className={className}>
       {pending ? (
         <>
           <Spinner />
@@ -508,9 +517,11 @@ function usePasskeyStepUp(
  */
 function PasskeyConfirmButton({
   variant,
+  disabled = false,
   className,
 }: {
   variant: "primary" | "secondary" | "destructive";
+  disabled?: boolean;
   className?: string;
 }) {
   const t = useTranslations("Auth.stepUp");
@@ -525,7 +536,7 @@ function PasskeyConfirmButton({
         type="button"
         variant={variant}
         onClick={passkey.confirm}
-        disabled={passkey.working || passkey.loading}
+        disabled={passkey.working || passkey.loading || disabled}
         className={className}
         data-passkey-confirm={id}
         data-passkey-ready={passkey.ready ? "" : undefined}

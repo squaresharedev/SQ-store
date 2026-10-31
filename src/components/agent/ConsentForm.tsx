@@ -3,14 +3,13 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
-import { StepUpField } from "@/components/auth/StepUp";
+import { StepUpPrompt, StepUpScope, StepUpSubmit } from "@/components/auth/StepUp";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
-import { Button, buttonClassName } from "@/components/ui/button";
+import { buttonClassName } from "@/components/ui/button";
 import { helpTextClass } from "@/components/ui/control-styles";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { approveAgentConnection, type ConsentState } from "@/lib/agent/consent-actions";
 import type { AgentScope } from "@/lib/agent/scopes";
@@ -146,17 +145,19 @@ export function ConsentForm({
       <p className={helpTextClass}>{t("note", { app: appName })}</p>
 
       {state.error ? <ActionErrorNotice error={state.error} /> : null}
-      <StepUpField id="agent-consent" state={state} />
-
-      <div className="flex items-center justify-end gap-3">
-        <a href={denyHref} className={buttonClassName("ghost")}>
-          {t("deny")}
-        </a>
-        <Button type="submit" disabled={pending || !store}>
-          {pending ? <Spinner /> : null}
-          {pending ? t("approving") : t("approve")}
-        </Button>
-      </div>
+      {/* However the account confirms: no 2FA, or a recent sign-in, is just the
+          button; a passkey IS the button; only an authenticator app types a code. */}
+      <StepUpScope id="agent-consent" state={state}>
+        <StepUpPrompt />
+        <div className="flex items-center justify-end gap-3">
+          <a href={denyHref} className={buttonClassName("ghost")}>
+            {t("deny")}
+          </a>
+          <StepUpSubmit pending={pending} pendingLabel={t("approving")} disabled={!store}>
+            {t("approve")}
+          </StepUpSubmit>
+        </div>
+      </StepUpScope>
     </form>
   );
 }

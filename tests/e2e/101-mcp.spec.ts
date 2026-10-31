@@ -11,7 +11,7 @@ import {
   signUp,
   userIdByEmail,
 } from "./helpers";
-import { ageSecondFactor, enableTwoFactor, nextCode } from "./two-factor";
+import { ageSecondFactor, enablePasskey, enableTwoFactor, nextCode } from "./two-factor";
 
 /**
  * The MCP server, end to end, the way a real client meets it: a 401, discovery,
@@ -64,14 +64,17 @@ function authorizeUrl(clientId: string, challenge: string, resource: string, sco
 }
 
 /** Press Connect and catch where the browser is sent, with no real client there. */
-async function approve(page: Page): Promise<URL> {
+async function approve(
+  page: Page,
+  button = page.locator('[data-agent-consent="form"] button[type="submit"]'),
+): Promise<URL> {
   const landed = new Promise<URL>((resolve) => {
     void page.route("https://client.example/**", async (route) => {
       resolve(new URL(route.request().url()));
       await route.fulfill({ status: 200, contentType: "text/html", body: "<p>back at the client</p>" });
     });
   });
-  await page.locator('[data-agent-consent="form"] button[type="submit"]').click();
+  await button.click();
   return landed;
 }
 
@@ -311,6 +314,101 @@ test.describe("connecting and using an assistant", () => {
     });
     expect(stolen.isError).toBe(true);
     await client.close();
+  });
+
+  test("designs a storefront one change at a time, and the seller sees it in the designer", async ({ page }) => {
+    test.setTimeout(180_000);
+    const user = freshUser("mcpdesign");
+    await signUp(page, user);
+    const ownerId = await userIdByEmail(user.email);
+    await seedProducts(ownerId, [{ title: "Moved lamp", status: "active" }]);
+    const [product] = (await serviceRest(`/products?owner_id=eq.${ownerId}&select=id`)) as { id: string }[];
+    const { accessToken } = await connect(page);
+    const client = await mcpClient(accessToken);
+    const id = (await call(client, "create_storefront")).data.id as unknown as string;
+
+    type Board = { block: string; type: string; kind?: string; color?: string; x: number; y: number; w: number; h: number; rotation?: number };
+    type Edited = { version: string; added: string[]; board: { columns: number; rows: number; blocks: Board[] } };
+    const edit = async (operations: unknown[], version?: string) =>
+      call(client, "edit_storefront", { id, operations, ...(version ? { version } : {}) }) as unknown as Promise<{
+        isError: boolean;
+        data: Edited & { error: { code: string; message: string; fix?: string } };
+      }>;
+
+    // Place a product, a shape and some words.
+    const placed = await edit([
+      { op: "add_product", productId: product.id },
+      { op: "add_shape", kind: "circle", color: "#112233", x: 2, y: 2, w: 2, h: 2 },
+      { op: "add_text", text: "Hello from Claude", x: 0, y: 3, w: 3, h: 1, color: "#334455" },
+    ]);
+    expect(placed.isError, JSON.stringify(placed.data)).toBe(false);
+    const [, shape, words] = placed.data.added;
+
+    // Move the product and the element, reshape and recolour, turn, layer, and
+    // recolour the board. All in one save.
+    const changed = await edit(
+      [
+        { op: "move", block: product.id, x: 4, y: 1 },
+        { op: "resize", block: product.id, w: 2, h: 2 },
+        { op: "move", block: shape, x: 1, y: 1 },
+        { op: "style", block: shape, changes: { kind: "star", color: "#ff0000", points: 6 } },
+        { op: "rotate", block: shape, degrees: 30 },
+        { op: "layer", block: shape, to: "back" },
+        { op: "style", block: words, changes: { text: "Changed", color: "#00aa00", bold: true } },
+        { op: "style", block: product.id, changes: { cornerRadius: 24 } },
+        { op: "theme", changes: { accent: "#aa00aa", background: { kind: "solid", color: "#fafafa" } } },
+        { op: "header", changes: { name: "Designed by an assistant", show: true } },
+      ],
+      placed.data.version,
+    );
+    expect(changed.isError, JSON.stringify(changed.data)).toBe(false);
+    const after = Object.fromEntries(changed.data.board.blocks.map((block) => [block.block, block]));
+    expect(after[product.id]).toMatchObject({ x: 4, y: 1, w: 2, h: 2 });
+    expect(after[shape]).toMatchObject({ kind: "star", color: "#ff0000", x: 1, y: 1, rotation: 30 });
+    // Painted furthest back.
+    expect(changed.data.board.blocks[0].block).toBe(shape);
+
+    // What was stored is what the seller's own read gets.
+    const [row] = (await serviceRest(`/storefronts?id=eq.${id}&select=config`)) as {
+      config: { theme: { accent: string }; header: { name: string }; blocks: Record<string, unknown>[] };
+    }[];
+    expect(row.config.theme.accent).toBe("#aa00aa");
+    expect(row.config.header.name).toBe("Designed by an assistant");
+    expect(row.config.blocks.find((block) => block.productId === product.id)).toMatchObject({
+      x: 4,
+      y: 1,
+      style: { cornerRadius: 24 },
+    });
+
+    // A refused list changes nothing, however much of it was fine.
+    const before = JSON.stringify(row.config);
+    const unknownBlock = await edit([
+      { op: "move", block: shape, x: 0, y: 0 },
+      { op: "remove", block: "not-a-block" },
+    ]);
+    expect(unknownBlock.isError).toBe(true);
+    expect(unknownBlock.data.error.message).toContain("not-a-block");
+    const offBoard = await edit([{ op: "move", block: shape, x: 11, y: 0 }]);
+    expect(offBoard.isError).toBe(true);
+    expect(offBoard.data.error.fix).toContain("The board is");
+    const badColor = await edit([{ op: "style", block: shape, changes: { color: "red" } }]);
+    expect(badColor.isError).toBe(true);
+    const moved = await edit([{ op: "style", block: shape, changes: { key: "images/x" } }]);
+    expect(moved.isError).toBe(true);
+    const [unchanged] = (await serviceRest(`/storefronts?id=eq.${id}&select=config`)) as { config: unknown }[];
+    expect(JSON.stringify(unchanged.config)).toBe(before);
+
+    // A seller's newer save is not overwritten by an assistant reading an old one.
+    const stale = await edit([{ op: "move", block: shape, x: 0, y: 0 }], placed.data.version);
+    expect(stale.isError).toBe(true);
+    await client.close();
+
+    // And the seller sees it, in the real designer.
+    await page.goto(`/storefront/${id}`);
+    await expect(page.getByText("Changed", { exact: true }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Moved lamp").first()).toBeVisible();
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: "test-results/mcp-designed-storefront.png" });
   });
 
   test("stays inside its one store", async ({ page, browser }) => {
@@ -782,24 +880,8 @@ test.describe("the code exchange", () => {
 test.describe("an account with two-factor on", () => {
   test.setTimeout(240_000);
 
-  test("proves it at consent, and its assistant then gets past the database's 2FA policy", async ({ page, context }) => {
-    const user = freshUser("mcp2fa");
-    await signUp(page, user);
-    const { app } = await enableTwoFactor(page, user.password);
-    await ageSecondFactor(context, 30 * 60);
-
-    const clientId = await registerApp();
-    const resource = await resourceUrl();
-    const { verifier, challenge } = pkce();
-    await gotoApp(page, authorizeUrl(clientId, challenge, resource));
-    await page.locator('[data-agent-consent="form"] button[type="submit"]').click();
-
-    // Asked for the code rather than sent on.
-    const codeBox = page.locator('[data-agent-consent="form"] input[name="mfa_code"]');
-    await expect(codeBox).toBeVisible();
-    await codeBox.fill(await nextCode(app));
-    const landed = await approve(page);
-
+  /** The token from a code, used as far as the 2FA policy on products reaches. */
+  async function expectPastTwoFactorPolicy(clientId: string, landed: URL, verifier: string, resource: string) {
     const token = (await (
       await exchange(clientId, landed.searchParams.get("code") ?? "", verifier, resource)
     ).json()) as { access_token: string };
@@ -809,5 +891,78 @@ test.describe("an account with two-factor on", () => {
     const list = await call(client, "list_products");
     expect(JSON.stringify(list.data)).toContain("Past 2FA");
     await client.close();
+  }
+
+  test("an authenticator app types its code, and the assistant gets past the database's 2FA policy", async ({ page, context }) => {
+    const user = freshUser("mcp2fa");
+    await signUp(page, user);
+    const { app } = await enableTwoFactor(page, user.password);
+    await ageSecondFactor(context, 30 * 60);
+
+    const clientId = await registerApp();
+    const resource = await resourceUrl();
+    const { verifier, challenge } = pkce();
+    await gotoApp(page, authorizeUrl(clientId, challenge, resource));
+
+    // On screen before Connect is pressed, as on every other step-up form.
+    const codeBox = page.locator('[data-agent-consent="form"] input[name="mfa_code"]');
+    await expect(codeBox).toBeVisible();
+    await codeBox.fill(await nextCode(app));
+    await expectPastTwoFactorPolicy(clientId, await approve(page), verifier, resource);
+  });
+
+  test("a passkey is one press, and no code is ever asked for", async ({ page, context }) => {
+    const user = freshUser("mcppasskey");
+    await signUp(page, user);
+    await enablePasskey(page);
+    await ageSecondFactor(context, 30 * 60);
+
+    const clientId = await registerApp();
+    const resource = await resourceUrl();
+    const { verifier, challenge } = pkce();
+    await gotoApp(page, authorizeUrl(clientId, challenge, resource));
+
+    const form = page.locator('[data-agent-consent="form"]');
+    const confirm = form.getByRole("button", { name: "Confirm with passkey" });
+    await expect(confirm).toBeEnabled({ timeout: 20_000 });
+    await expect(form.locator('input[name="mfa_code"]')).toHaveCount(0);
+    await expect(form.locator('button[type="submit"]')).toHaveCount(0);
+    await expectPastTwoFactorPolicy(clientId, await approve(page, confirm), verifier, resource);
+  });
+
+  test("having just signed in with it is enough: nothing more is asked", async ({ page }) => {
+    const user = freshUser("mcpfresh");
+    await signUp(page, user);
+    await enablePasskey(page);
+
+    const clientId = await registerApp();
+    const resource = await resourceUrl();
+    const { verifier, challenge } = pkce();
+    await gotoApp(page, authorizeUrl(clientId, challenge, resource));
+
+    const form = page.locator('[data-agent-consent="form"]');
+    await expect(form.locator('button[type="submit"]')).toBeEnabled();
+    await expect(form.locator("[data-step-up-field]")).toHaveCount(0);
+    await expect(form.getByRole("button", { name: "Confirm with passkey" })).toHaveCount(0);
+    await expectPastTwoFactorPolicy(clientId, await approve(page), verifier, resource);
+  });
+});
+
+test.describe("an account without two-factor", () => {
+  test("only has to be signed in", async ({ page }) => {
+    const user = freshUser("mcpno2fa");
+    await signUp(page, user);
+
+    const clientId = await registerApp();
+    const resource = await resourceUrl();
+    const { challenge } = pkce();
+    await gotoApp(page, authorizeUrl(clientId, challenge, resource));
+
+    const form = page.locator('[data-agent-consent="form"]');
+    await expect(form.locator('button[type="submit"]')).toBeEnabled();
+    await expect(form.locator("[data-step-up-field]")).toHaveCount(0);
+    await expect(form.getByRole("button", { name: "Confirm with passkey" })).toHaveCount(0);
+    const landed = await approve(page);
+    expect(landed.searchParams.get("code")).toBeTruthy();
   });
 });

@@ -1,6 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
-import { freshUser, signUp, userIdByEmail } from "./helpers";
-import { accessToken, ageSecondFactor, claimsOf, signInToChallenge, sql } from "./two-factor";
+import { expect, test } from "@playwright/test";
+import { freshUser, openSellerStep, signUp, userIdByEmail } from "./helpers";
+import { accessToken, addPhone, ageSecondFactor, claimsOf, enablePasskey, signInToChallenge, sql } from "./two-factor";
 
 /**
  * Two-factor authentication with a PASSKEY instead of an authenticator app,
@@ -16,22 +16,6 @@ import { accessToken, ageSecondFactor, claimsOf, signInToChallenge, sql } from "
 
 // Generous: the first visit to each 2FA route compiles it in next dev.
 test.describe.configure({ timeout: 180_000 });
-
-/** A platform authenticator with Face ID/fingerprint that always says yes. */
-async function addPhone(page: Page) {
-  const cdp = await page.context().newCDPSession(page);
-  await cdp.send("WebAuthn.enable");
-  await cdp.send("WebAuthn.addVirtualAuthenticator", {
-    options: {
-      protocol: "ctap2",
-      transport: "internal",
-      hasResidentKey: true,
-      hasUserVerification: true,
-      isUserVerified: true,
-      automaticPresenceSimulation: true,
-    },
-  });
-}
 
 test.describe("two-factor with a passkey", () => {
   test("turn it on, sign in with it, confirm a sensitive change with it", async ({ page, context }) => {
@@ -124,6 +108,19 @@ test.describe("two-factor with a passkey", () => {
     // The factor went, and the passkey with it (the foreign key's cascade).
     expect(await sql(`select id from auth.mfa_factors where user_id = $1`, [userId])).toHaveLength(0);
     expect(await sql(`select id from public.mfa_passkeys where user_id = $1`, [userId])).toHaveLength(0);
+  });
+
+  test("the welcome flow asks for the passkey, not a code it could never type", async ({ page, context }) => {
+    const user = freshUser("passkey-welcome");
+    await signUp(page, user, { welcome: "keep" });
+    await enablePasskey(page);
+    await ageSecondFactor(context, 60 * 60);
+
+    await page.goto("/dashboard");
+    await openSellerStep(page);
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByRole("button", { name: "Confirm with passkey" })).toBeEnabled({ timeout: 20_000 });
+    await expect(dialog.locator('input[name="mfa_code"]')).toHaveCount(0);
   });
 
   test("the sign-in challenge offers the app too when the account has both", async ({ page, context }) => {

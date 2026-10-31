@@ -4,7 +4,7 @@ import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SettingsShell } from "@/components/settings/SettingsShell";
 import { StepUpProvider } from "@/components/auth/StepUp";
-import { stepUpFreshUntil } from "@/lib/auth/assurance";
+import { stepUpProviderProps } from "@/lib/auth/assurance";
 import { getAssurance, getProfile, requireUser } from "@/lib/auth/session";
 
 // The template applies to every child page's `title` field, so a page
@@ -55,11 +55,7 @@ export default async function SettingsLayout({
   return (
     <ScopedIntlProvider scope="app">
     <DashboardShell username={username}>
-      <StepUpProvider
-        enrolled={assurance?.enrolled ?? false}
-        freshUntil={stepUpFreshUntil(assurance)}
-        factors={(assurance?.factors ?? []).map(({ id, name, type }) => ({ id, name, type }))}
-      >
+      <StepUpProvider {...stepUpProviderProps(assurance)}>
         <SettingsShell securityRecommended={assurance ? !assurance.enrolled : false}>
           {children}
         </SettingsShell>

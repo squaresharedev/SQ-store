@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { StepUpProvider } from "@/components/auth/StepUp";
 import { PlansPage } from "@/components/billing/PlansPage";
 import { pageShellClass } from "@/components/ui/surface-styles";
-import { stepUpFreshUntil } from "@/lib/auth/assurance";
-import { getAssurance, requireUser } from "@/lib/auth/session";
+import { requireUser } from "@/lib/auth/session";
 import { getPricingContext } from "@/lib/billing/pricing-context";
 import { PLANS_SOURCE_PARAM, parsePricingSource, PLANS_PATH } from "@/lib/billing/paths";
 
@@ -21,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * passed on to checkout. An unknown value is ignored, never stored.
  *
  * The switch and cancel buttons open the Stripe Customer Portal, which asks
- * for a two-factor code first on an account that has 2FA; the step-up
+ * for a two-factor code first on an account that has 2FA; the layout's step-up
  * provider lets the code box appear right on the card that asked.
  */
 export default async function PlansRoutePage({
@@ -33,7 +31,7 @@ export default async function PlansRoutePage({
   // (see ../layout.tsx, or ../../layout.tsx from a nested page): a page asks.
   await requireUser(PLANS_PATH);
   const source = parsePricingSource((await searchParams)[PLANS_SOURCE_PARAM]);
-  const [result, assurance] = await Promise.all([getPricingContext(source), getAssurance()]);
+  const result = await getPricingContext(source);
 
   if (!result.ok) {
     const t = await getTranslations("Billing.page");
@@ -44,13 +42,5 @@ export default async function PlansRoutePage({
     );
   }
 
-  return (
-    <StepUpProvider
-      enrolled={assurance?.enrolled ?? false}
-      freshUntil={stepUpFreshUntil(assurance)}
-      factors={(assurance?.factors ?? []).map(({ id, name, type }) => ({ id, name, type }))}
-    >
-      <PlansPage context={result.context} source={source} />
-    </StepUpProvider>
-  );
+  return <PlansPage context={result.context} source={source} />;
 }
