@@ -50,9 +50,17 @@ export const UNPROBED_MIGRATIONS: Record<string, string> = {
     "Applied AFTER the deploy, never before: the build is inert without it (lib/moderation/auto), while the wall it installs hides every save until a deployed checker settles it. A sentinel here would demand the unsafe order.",
   "20261013_marketplace_moderation.sql":
     "Applied AFTER the deploy, for the same reason, and after SQ-app's: it makes collection names writable by the service role only and empties the public directory until each handle is approved. Nothing in this build reads anything it adds.",
+  "20261027_reviews_buyers_only.sql":
+    "NOT YET APPLIED to prod. A second guard behind the review route's own check that a buyer review belongs to a paid order of that product; the app never depends on it. Once applied, replace this entry with a function requirement on reviews_require_purchase().",
 };
 
 export const SCHEMA_REQUIREMENTS: readonly SchemaRequirement[] = [
+  { kind: "relation", name: "agent_grants", migration: "20261030_agent_access.sql" },
+  { kind: "relation", name: "agent_tokens", migration: "20261030_agent_access.sql" },
+  { kind: "relation", name: "agent_clients", migration: "20261030_agent_access.sql" },
+  { kind: "relation", name: "agent_uploads", migration: "20261030_agent_access.sql" },
+  { kind: "relation", name: "agent_auth_codes", migration: "20261030_agent_access.sql" },
+  { kind: "relation", name: "agent_audit_log", migration: "20261030_agent_access.sql" },
   { kind: "column", table: "products", column: "moderation_review_requested_at", migration: "20260923_moderation_pause.sql" },
   { kind: "relation", name: "mfa_recovery_codes", migration: "20260923_two_factor_auth.sql" },
   { kind: "function", signature: "mfa_session_ok()", migration: "20260923_two_factor_auth.sql" },

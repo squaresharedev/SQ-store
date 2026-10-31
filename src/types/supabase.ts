@@ -278,6 +278,178 @@ export type Database = {
           },
         ]
       }
+      agent_audit_log: {
+        Row: {
+          account_id: string
+          created_at: string
+          grant_id: string | null
+          id: number
+          outcome: string
+          tool: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          grant_id?: string | null
+          outcome: string
+          tool: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          grant_id?: string | null
+          outcome?: string
+          tool?: string
+        }
+        Relationships: []
+      }
+      agent_auth_codes: {
+        Row: {
+          code_challenge: string
+          code_hash: string
+          expires_at: string
+          grant_id: string
+          redirect_uri: string
+          used_at: string | null
+        }
+        Insert: {
+          code_challenge: string
+          code_hash: string
+          expires_at: string
+          grant_id: string
+          redirect_uri: string
+          used_at?: string | null
+        }
+        Update: {
+          code_challenge?: string
+          code_hash?: string
+          expires_at?: string
+          grant_id?: string
+          redirect_uri?: string
+          used_at?: string | null
+        }
+        Relationships: []
+      }
+      agent_clients: {
+        Row: {
+          application_type: string
+          created_at: string
+          fetched_at: string | null
+          id: string
+          kind: string
+          name: string
+          redirect_uris: string[]
+        }
+        Insert: {
+          application_type?: string
+          created_at?: string
+          fetched_at?: string | null
+          id: string
+          kind: string
+          name: string
+          redirect_uris: string[]
+        }
+        Update: {
+          application_type?: string
+          created_at?: string
+          fetched_at?: string | null
+          id?: string
+          kind?: string
+          name?: string
+          redirect_uris?: string[]
+        }
+        Relationships: []
+      }
+      agent_grants: {
+        Row: {
+          account_id: string
+          client_id: string
+          created_at: string
+          id: string
+          last_used_at: string | null
+          resource: string
+          revoked_at: string | null
+          scopes: string[]
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          client_id: string
+          created_at?: string
+          id?: string
+          last_used_at?: string | null
+          resource: string
+          revoked_at?: string | null
+          scopes: string[]
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+          last_used_at?: string | null
+          resource?: string
+          revoked_at?: string | null
+          scopes?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      agent_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          grant_id: string
+          kind: string
+          token_hash: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          grant_id: string
+          kind: string
+          token_hash: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          grant_id?: string
+          kind?: string
+          token_hash?: string
+          used_at?: string | null
+        }
+        Relationships: []
+      }
+      agent_uploads: {
+        Row: {
+          created_at: string
+          expires_at: string
+          grant_id: string
+          id: string
+          kind: string
+          object_key: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          grant_id: string
+          id?: string
+          kind: string
+          object_key: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          grant_id?: string
+          id?: string
+          kind?: string
+          object_key?: string
+        }
+        Relationships: []
+      }
       artifacts: {
         Row: {
           collection_id: string | null

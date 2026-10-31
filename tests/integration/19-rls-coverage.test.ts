@@ -26,6 +26,15 @@ import { asSuper, closePool } from "../db/client";
  * than inferred so that a table arriving here is a decision, not an accident.
  */
 const POLICY_FREE_BY_DESIGN = new Set([
+  // Who approved which assistant, and the hashes of its credentials
+  // (20261030_agent_access). Service role only (lib/agent/oauth): a token that
+  // could read its own grant could find out what else exists.
+  "agent_clients",
+  "agent_grants",
+  "agent_auth_codes",
+  "agent_tokens",
+  "agent_uploads",
+  "agent_audit_log",
   // Rate-limit state. Written only through rl_take / rl_take_key, which are
   // SECURITY DEFINER; a client that could read these could map other users'
   // budgets, and one that could write them could clear its own.

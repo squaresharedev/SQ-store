@@ -43,7 +43,8 @@
     "language": "Taal",
     "team": "Team en toegang",
     "danger": "Gevarenzone",
-    "billing": "Abonnement en facturering"
+    "billing": "Abonnement en facturering",
+    "connectedApps": "Gekoppelde apps"
   },
   "profileMenu": {
     "label": "Accountmenu",

@@ -104,7 +104,8 @@
     "readCheckoutSettings": "Demasiadas tentativas de ler as definições de pagamento num curto espaço de tempo.",
     "changePlan": "Demasiadas alterações de plano iniciadas num curto espaço de tempo.",
     "saveDiscounts": "Demasiadas alterações de descontos num curto espaço de tempo.",
-    "moderateReviews": "Demasiadas alterações a avaliações em pouco tempo."
+    "moderateReviews": "Demasiadas alterações a avaliações em pouco tempo.",
+    "agentTools": "Este assistente fez demasiados pedidos num curto espaço de tempo."
   },
   "serverError": {
     "fix": "Isto costuma ser temporário. Aguarde um momento e tente novamente; se continuar a falhar, atualize a página.",
@@ -143,7 +144,8 @@
     "cancelPlan": "Não foi possível cancelar o seu plano devido a um problema do nosso lado.",
     "resumePlan": "Não foi possível manter o seu plano devido a um problema do nosso lado.",
     "saveDiscount": "Não foi possível guardar o desconto devido a um problema do nosso lado.",
-    "moderateReview": "Não foi possível alterar a avaliação devido a um problema do nosso lado."
+    "moderateReview": "Não foi possível alterar a avaliação devido a um problema do nosso lado.",
+    "agentTools": "Não foi possível fazer isso devido a um problema do nosso lado."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Este produto foi removido, não pausado.} storefront {Esta montra foi removida, não pausada.} other {Este item foi removido, não pausado.}}",
@@ -702,5 +704,14 @@
       "message": "Escolha porque está a ocultar esta avaliação.",
       "fix": "Uma avaliação só pode ser ocultada por um dos motivos indicados."
     }
+  },
+  "agent": {
+    "invalidInput": "Esses dados não são válidos.",
+    "unknownFile": "Esse identificador de ficheiro não é reconhecido por esta loja.",
+    "unknownFileFix": "Use um valor ref: lido deste registo, ou um upload_id de upload_image.",
+    "imageUnreadable": "Não foi possível ler essa imagem.",
+    "imageUnreadableFix": "Envie uma ligação HTTPS pública ou dados base64 de um JPEG, PNG, WebP, GIF ou AVIF dentro do limite de tamanho.",
+    "passThrough": "{message}",
+    "requestInvalid": "Este pedido de ligação não é válido. Comece de novo a partir da aplicação."
   }
 }

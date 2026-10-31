@@ -104,7 +104,8 @@
     "readCheckoutSettings": "Příliš mnoho pokusů o načtení nastavení pokladny v krátké době.",
     "changePlan": "Příliš mnoho změn plánu za krátkou dobu.",
     "saveDiscounts": "Příliš mnoho změn slev za krátkou dobu.",
-    "moderateReviews": "Příliš mnoho změn recenzí v krátké době."
+    "moderateReviews": "Příliš mnoho změn recenzí v krátké době.",
+    "agentTools": "Tento asistent poslal příliš mnoho požadavků za krátkou dobu."
   },
   "serverError": {
     "fix": "Obvykle jde o dočasný problém. Chvíli počkejte a zkuste to znovu; pokud to stále nejde, obnovte stránku.",
@@ -143,7 +144,8 @@
     "cancelPlan": "Plán se nepodařilo zrušit kvůli problému na naší straně.",
     "resumePlan": "Plán se nepodařilo ponechat kvůli problému na naší straně.",
     "saveDiscount": "Slevu se kvůli problému na naší straně nepodařilo uložit.",
-    "moderateReview": "Recenzi se kvůli problému na naší straně nepodařilo změnit."
+    "moderateReview": "Recenzi se kvůli problému na naší straně nepodařilo změnit.",
+    "agentTools": "Nepodařilo se to kvůli problému na naší straně."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Tento produkt byl odstraněn, nikoli pozastaven.} storefront {Tato výloha byla odstraněna, nikoli pozastavena.} other {Tato položka byla odstraněna, nikoli pozastavena.}}",
@@ -702,5 +704,14 @@
       "message": "Zvolte, proč tuto recenzi skrýváte.",
       "fix": "Recenzi lze skrýt jen z jednoho z uvedených důvodů."
     }
+  },
+  "agent": {
+    "invalidInput": "Tyto údaje nejsou platné.",
+    "unknownFile": "Tento odkaz na soubor tento obchod nezná.",
+    "unknownFileFix": "Použijte hodnotu ref: přečtenou z tohoto záznamu nebo upload_id z upload_image.",
+    "imageUnreadable": "Tento obrázek se nepodařilo přečíst.",
+    "imageUnreadableFix": "Pošlete veřejný odkaz HTTPS nebo data base64 pro JPEG, PNG, WebP, GIF nebo AVIF v rámci limitu velikosti.",
+    "passThrough": "{message}",
+    "requestInvalid": "Tento požadavek na připojení není platný. Začněte znovu v aplikaci."
   }
 }

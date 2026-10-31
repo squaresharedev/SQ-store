@@ -142,6 +142,10 @@
       "stepUpLockedOut": {
         "title": "Too many wrong two-factor codes",
         "body": "While signed in to your account, someone entered too many wrong two-factor codes trying to change a setting, so that's paused for a few minutes. If this wasn't you, change your password and sign out of every device."
+      },
+      "agentConnected": {
+        "title": "An app can now work on your store",
+        "body": "{app} was connected to your account. If this wasn't you, disconnect it in Settings and change your password."
       }
     },
     "order": {

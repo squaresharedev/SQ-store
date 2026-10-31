@@ -792,6 +792,10 @@ const next = spawn(
       // Scheduled jobs (lib/ops/cron.ts): a fixed, obviously fake secret, so
       // specs can start a run the way the scheduler does.
       CRON_SECRET: "e2e-cron-secret-not-a-real-one-0123456789",
+      // The MCP server (lib/agent): on, and signing its per-request JWTs with
+      // the secret this stack's PostgREST trusts.
+      AGENT_ACCESS_ENABLED: "true",
+      AGENT_JWT_SIGNING_KEY: JSON.stringify({ kty: "oct", k: Buffer.from(JWT_SECRET).toString("base64url") }),
       TRANSACTIONAL_EMAIL_FROM: "no-reply@e2e.squareshare.to",
       SMS_SENDER: "Squareshare",
       CONTACT_VERIFICATION_KEY: "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE",

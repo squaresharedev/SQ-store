@@ -104,7 +104,8 @@
     "readCheckoutSettings": "Too many attempts to read checkout settings in a short time.",
     "changePlan": "Too many plan changes started in a short time.",
     "saveDiscounts": "Too many discount changes in a short time.",
-    "moderateReviews": "Too many review changes in a short time."
+    "moderateReviews": "Too many review changes in a short time.",
+    "agentTools": "This assistant has made too many requests in a short time."
   },
   "serverError": {
     "fix": "This is usually temporary. Wait a moment and try again; if it keeps failing, refresh the page.",
@@ -143,7 +144,8 @@
     "cancelPlan": "Could not cancel your plan because of a problem on our side.",
     "resumePlan": "Could not keep your plan because of a problem on our side.",
     "saveDiscount": "Could not save the discount because of a problem on our side.",
-    "moderateReview": "Could not change the review because of a problem on our side."
+    "moderateReview": "Could not change the review because of a problem on our side.",
+    "agentTools": "That could not be done because of a problem on our side."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {This product was removed, not paused.} storefront {This storefront was removed, not paused.} other {This item was removed, not paused.}}",
@@ -702,5 +704,14 @@
       "message": "Choose why you're hiding this review.",
       "fix": "A review can only be hidden for one of the listed reasons."
     }
+  },
+  "agent": {
+    "invalidInput": "Those details are not valid.",
+    "unknownFile": "That file handle is not one this store recognises.",
+    "unknownFileFix": "Use a ref: value read from this record, or an upload_id from upload_image.",
+    "imageUnreadable": "That image could not be read.",
+    "imageUnreadableFix": "Send a public HTTPS link or base64 data for a JPEG, PNG, WebP, GIF or AVIF within the size limit.",
+    "passThrough": "{message}",
+    "requestInvalid": "This connection request is not valid. Start again from the app."
   }
 }

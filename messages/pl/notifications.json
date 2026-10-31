@@ -142,6 +142,10 @@
       "stepUpLockedOut": {
         "title": "Zbyt wiele błędnych kodów dwuskładnikowych",
         "body": "Ktoś zalogowany na twoje konto podał zbyt wiele błędnych kodów dwuskładnikowych, próbując zmienić ustawienie, więc ta czynność jest wstrzymana na kilka minut. Jeśli to nie ty, zmień hasło i wyloguj się ze wszystkich urządzeń."
+      },
+      "agentConnected": {
+        "title": "Aplikacja może teraz pracować w twoim sklepie",
+        "body": "Do twojego konta połączono aplikację {app}. Jeśli to nie ty, odłącz ją w Ustawieniach i zmień hasło."
       }
     },
     "order": {

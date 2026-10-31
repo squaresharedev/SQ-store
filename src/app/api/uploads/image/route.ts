@@ -1,16 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import {
-  buildObjectKey,
-  deleteObject,
-  hasR2Credentials,
-  putObject,
-  r2FailureMessage,
-} from "@/lib/r2";
-import { IMAGE_CONTENT_TYPES, IMAGE_MAX_BYTES } from "@/lib/validation/product";
-import { classifierCanSee, sniffImage } from "@/lib/uploads/sniff";
-import { holdForPerson } from "@/lib/moderation/auto/check";
+import { hasR2Credentials } from "@/lib/r2";
+import { IMAGE_MAX_BYTES } from "@/lib/validation/product";
+import { storeImage } from "@/lib/uploads/store-image";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { declaredLengthExceeds } from "@/lib/security/read-json";
 
@@ -117,33 +110,22 @@ export async function POST(request: Request) {
     return bad(413, t("tooLarge.image"));
   }
 
-  // What the file IS, not what it says it is.
-  const sniffed = sniffImage(bytes);
-  const allowed: readonly string[] = IMAGE_CONTENT_TYPES;
-  if (!sniffed || !allowed.includes(sniffed.mime)) {
-    return bad(
-      415,
-      t("unsupported.image"),
-      t("unsupportedFix.image"),
-    );
+  // What the file IS, not what it says it is, and the moderation hold: one
+  // place for both, shared with an assistant's upload_image.
+  const stored = await storeImage(bytes, file.name, account.userId);
+  if (!stored.ok) {
+    switch (stored.reason) {
+      case "empty":
+      case "too_large":
+        return bad(413, t("tooLarge.image"));
+      case "unsupported":
+        return bad(415, t("unsupported.image"), t("unsupportedFix.image"));
+      case "store_failed":
+        return bad(502, t("storeFailed.image"), t("fix.tryAgainInAMoment"));
+      case "moderation_unavailable":
+        return bad(503, t("moderationUnavailable"), t("fix.tryAgainInAFewMinutes"));
+    }
   }
 
-  const key = buildObjectKey("image", account.userId, file.name || `image.${sniffed.ext}`);
-
-  try {
-    await putObject(key, bytes, sniffed.mime);
-  } catch (error) {
-    console.error("[uploads] store failed:", r2FailureMessage(error));
-    return bad(502, t("storeFailed.image"), t("fix.tryAgainInAMoment"));
-  }
-
-  // An image the classifier cannot fully see goes to a person. If that cannot
-  // be recorded the upload is refused: left unflagged, an animation would be
-  // approved on the strength of its first frame.
-  if (!classifierCanSee(bytes, sniffed.mime) && !(await holdForPerson(key))) {
-    await deleteObject(key).catch(() => {});
-    return bad(503, t("moderationUnavailable"), t("fix.tryAgainInAFewMinutes"));
-  }
-
-  return Response.json({ key });
+  return Response.json({ key: stored.key });
 }

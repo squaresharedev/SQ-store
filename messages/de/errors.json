@@ -104,7 +104,8 @@
     "readCheckoutSettings": "Zu viele Versuche, in kurzer Zeit die Kasseneinstellungen abzurufen.",
     "changePlan": "Zu viele Tarifwechsel in kurzer Zeit gestartet.",
     "saveDiscounts": "Zu viele Rabattänderungen in kurzer Zeit.",
-    "moderateReviews": "Zu viele Änderungen an Bewertungen in kurzer Zeit."
+    "moderateReviews": "Zu viele Änderungen an Bewertungen in kurzer Zeit.",
+    "agentTools": "Dieser Assistent hat in kurzer Zeit zu viele Anfragen gestellt."
   },
   "serverError": {
     "fix": "Das ist meist vorübergehend. Warte kurz und versuche es erneut. Falls es weiterhin fehlschlägt, lade die Seite neu.",
@@ -143,7 +144,8 @@
     "cancelPlan": "Dein Tarif konnte wegen eines Problems auf unserer Seite nicht gekündigt werden.",
     "resumePlan": "Dein Tarif konnte wegen eines Problems auf unserer Seite nicht behalten werden.",
     "saveDiscount": "Der Rabatt konnte aufgrund eines Problems auf unserer Seite nicht gespeichert werden.",
-    "moderateReview": "Die Bewertung konnte wegen eines Problems bei uns nicht geändert werden."
+    "moderateReview": "Die Bewertung konnte wegen eines Problems bei uns nicht geändert werden.",
+    "agentTools": "Das ging wegen eines Problems auf unserer Seite nicht."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Dieses Produkt wurde entfernt, nicht pausiert.} storefront {Dieses Schaufenster wurde entfernt, nicht pausiert.} other {Dieses Element wurde entfernt, nicht pausiert.}}",
@@ -702,5 +704,14 @@
       "message": "Wähle, warum du diese Bewertung ausblendest.",
       "fix": "Eine Bewertung kann nur aus einem der aufgeführten Gründe ausgeblendet werden."
     }
+  },
+  "agent": {
+    "invalidInput": "Diese Angaben sind nicht gültig.",
+    "unknownFile": "Diesen Dateiverweis kennt dieser Shop nicht.",
+    "unknownFileFix": "Nutze einen ref:-Wert aus diesem Datensatz oder eine upload_id von upload_image.",
+    "imageUnreadable": "Dieses Bild konnte nicht gelesen werden.",
+    "imageUnreadableFix": "Sende einen öffentlichen HTTPS-Link oder base64-Daten für ein JPEG, PNG, WebP, GIF oder AVIF innerhalb der Größenbegrenzung.",
+    "passThrough": "{message}",
+    "requestInvalid": "Diese Verbindungsanfrage ist nicht gültig. Starte noch einmal in der App."
   }
 }

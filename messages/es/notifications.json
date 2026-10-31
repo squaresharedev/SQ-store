@@ -142,6 +142,10 @@
       "stepUpLockedOut": {
         "title": "Demasiados códigos de verificación en dos pasos incorrectos",
         "body": "Con la sesión iniciada en tu cuenta, alguien introdujo demasiados códigos de verificación en dos pasos incorrectos al intentar cambiar un ajuste, así que se ha pausado unos minutos. Si no has sido tú, cambia tu contraseña y cierra la sesión en todos los dispositivos."
+      },
+      "agentConnected": {
+        "title": "Una aplicación ya puede trabajar en tu tienda",
+        "body": "{app} se conectó a tu cuenta. Si no fuiste tú, desconéctala en Configuración y cambia tu contraseña."
       }
     },
     "order": {

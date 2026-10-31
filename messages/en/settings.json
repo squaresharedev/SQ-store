@@ -30,6 +30,9 @@
     },
     "billing": {
       "title": "Plan & billing"
+    },
+    "connectedApps": {
+      "title": "Connected apps"
     }
   },
   "loading": "Loading settings…",
@@ -690,7 +693,9 @@
         "signInApproved": "Sign-in approved from another device",
         "signInDenied": "Sign-in denied from another device",
         "approvalsEnabled": "Sign-in approval turned on",
-        "approvalsDisabled": "Sign-in approval turned off"
+        "approvalsDisabled": "Sign-in approval turned off",
+        "agentConnected": "An app was connected",
+        "agentRevoked": "An app was disconnected"
       }
     },
     "success": {
@@ -798,6 +803,89 @@
       "role": "Your role: {role}",
       "how": "To accept, sign in with this email address ({email}), or create an account with it. The invite will be waiting in Settings, under Team & access.",
       "ignore": "Not expecting this? You can ignore this email. Nothing happens unless you accept."
+    }
+  },
+  "connectedApps": {
+    "listTitle": "Apps with access",
+    "empty": "No apps connected yet.",
+    "connect": {
+      "title": "Connect an assistant",
+      "body": "Add this address to Claude or another MCP app, then approve it when it asks.",
+      "copy": "Copy address",
+      "copied": "Copied",
+      "copyFailed": "Could not copy. Select the address and copy it yourself.",
+      "paused": "Connecting assistants is switched off for now."
+    },
+    "lastUsed": "Last used {when}",
+    "neverUsed": "Not used yet",
+    "revoke": "Disconnect",
+    "revoking": "Disconnecting…",
+    "revokeTitle": "Disconnect {app}?",
+    "revokeBody": "It stops working straight away. You can connect it again later.",
+    "revoked": "Disconnected.",
+    "consent": {
+      "metadataTitle": "Connect an app",
+      "title": "Connect {app} to your store?",
+      "sendsTo": "Access goes to <strong>{host}</strong>",
+      "store": "Store",
+      "scopesTitle": "What it can do",
+      "note": "Only connect if you started this from {app}. You can disconnect it any time in Settings.",
+      "approve": "Connect",
+      "approving": "Connecting…",
+      "deny": "Cancel",
+      "connected": "Connected. Taking you back to {app}…",
+      "refusedTitle": "This request can't be trusted",
+      "refusedBody": "The app that sent you here isn't set up correctly. Nothing was connected."
+    },
+    "scopes": {
+      "storeRead": {
+        "label": "See your store",
+        "hint": "Products, storefronts, discounts, reviews, sales figures and your notifications."
+      },
+      "ordersRead": {
+        "label": "See orders",
+        "hint": "Orders, including buyers' names, emails and delivery addresses."
+      },
+      "productsWrite": {
+        "label": "Edit products",
+        "hint": "Create and change products, their stock and their photos."
+      },
+      "storefrontsWrite": {
+        "label": "Edit storefronts",
+        "hint": "Design storefronts, product pages and checkout, and set shipping terms."
+      },
+      "discountsWrite": {
+        "label": "Manage discounts",
+        "hint": "Start and end sales, and create discount codes."
+      },
+      "reviewsWrite": {
+        "label": "Moderate reviews",
+        "hint": "Hide, show and publish reviews."
+      },
+      "ordersFulfil": {
+        "label": "Ship orders",
+        "hint": "Mark orders shipped, which emails the buyer."
+      },
+      "profileWrite": {
+        "label": "Edit your profile",
+        "hint": "Your username, bio, photo and email preferences."
+      },
+      "notificationsWrite": {
+        "label": "Clear notifications",
+        "hint": "Mark your notifications as read."
+      },
+      "moderationWrite": {
+        "label": "Answer takedowns",
+        "hint": "Ask for a review of a takedown, or appeal a decision."
+      },
+      "ordersRefund": {
+        "label": "Refund orders",
+        "hint": "Take orders back, which emails the buyer and can't be undone."
+      },
+      "destructive": {
+        "label": "Delete things",
+        "hint": "Delete products, storefronts and discounts, and replace embed keys. This can't be undone."
+      }
     }
   }
 }

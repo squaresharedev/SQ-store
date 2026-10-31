@@ -45,7 +45,13 @@
     // passkey survives a move between subdomains. NEVER CHANGE IT once
     // passkeys exist: every one registered would stop working. Its sealing
     // key is a secret: `wrangler secret put MFA_PASSKEY_KEY`.
-    "WEBAUTHN_RP_ID": "squareshare.eu"
+    "WEBAUTHN_RP_ID": "squareshare.eu",
+    // The MCP server at /mcp and its OAuth endpoints (lib/agent/access.ts). The
+    // kill switch: "false" answers 404 on all of them and touches no grant.
+    // Its signing key is a secret: `wrangler secret put AGENT_JWT_SIGNING_KEY`,
+    // a private JWK imported into Supabase as a STANDBY signing key, so Auth
+    // never signs with it and revoking it there stops agent access alone.
+    "AGENT_ACCESS_ENABLED": "false"
     // NEXT_PUBLIC_TURNSTILE_SITE_KEY does NOT belong here, ever. The forms
     // that render the widget are client components, so the site key is
     // inlined at BUILD time and has to be in .env.production; a var in this

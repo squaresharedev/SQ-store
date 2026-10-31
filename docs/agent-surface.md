@@ -4,6 +4,19 @@ An audit of every datapoint in the Store app, judged against one question: can
 an MCP server expose it to an assistant that helps a creator **set up** and
 **run** their shop?
 
+Update 2026-10-30: **the server exists.** It is at `/mcp`, built as
+[mcp.md](./mcp.md) describes, which is where to go to connect or to add a tool.
+B1 and B2 below are settled: an OAuth bearer token naming one store, and row level
+security underneath through a JWT minted per request. Three things below have since
+changed: `/api/uploads/presign` is gone, replaced by `/api/uploads/image`, `file`,
+`document`, `element` and `font`; `updateDisplayName` is now `updateUsername`; and
+payments are no longer only mock data (B5), because Stripe Connect is built and
+switched off. Four writes this catalogue calls Ready are deliberately NOT tools,
+because they sit behind the 2FA step-up gate and a long-lived token must not be
+stronger than a stolen session: `saveTaxInfo`, `inviteMember`, `changeMemberRole`
+and `revokeMemberAccess`. The rest of this document is still the contract for what
+each datapoint means and what an assistant must not do with it.
+
 Scope note: there is no MCP server for Store today. The only HTTP surface is
 `/api/embed/[key]` (public, buyer-facing), `/api/uploads/*`, `/api/search` + `/api/search/snapshot`,
 `/api/settings/username-available`, and — new, see the 2026-09-08 update below —

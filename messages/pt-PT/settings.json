@@ -30,6 +30,9 @@
     },
     "billing": {
       "title": "Plano e faturação"
+    },
+    "connectedApps": {
+      "title": "Aplicações ligadas"
     }
   },
   "loading": "A carregar definições…",
@@ -690,7 +693,9 @@
         "signInApproved": "Início de sessão aprovado a partir de outro dispositivo",
         "signInDenied": "Início de sessão recusado a partir de outro dispositivo",
         "approvalsEnabled": "Aprovação de início de sessão ativada",
-        "approvalsDisabled": "Aprovação de início de sessão desativada"
+        "approvalsDisabled": "Aprovação de início de sessão desativada",
+        "agentConnected": "Foi ligada uma aplicação",
+        "agentRevoked": "Foi desligada uma aplicação"
       }
     },
     "success": {
@@ -798,6 +803,89 @@
       "role": "A sua função: {role}",
       "how": "Para aceitar, inicie sessão com este endereço de e-mail ({email}) ou crie uma conta com ele. O convite estará à sua espera em Definições, em Equipa e acesso.",
       "ignore": "Não estava à espera disto? Pode ignorar este e-mail. Nada acontece a menos que aceite."
+    }
+  },
+  "connectedApps": {
+    "listTitle": "Aplicações com acesso",
+    "empty": "Ainda não há aplicações ligadas.",
+    "connect": {
+      "title": "Ligar um assistente",
+      "body": "Adicione este endereço ao Claude ou a outra aplicação MCP e aprove-a quando o pedir.",
+      "copy": "Copiar endereço",
+      "copied": "Copiado",
+      "copyFailed": "Não foi possível copiar. Selecione o endereço e copie-o manualmente.",
+      "paused": "A ligação de assistentes está desativada por agora."
+    },
+    "lastUsed": "Última utilização {when}",
+    "neverUsed": "Ainda não utilizada",
+    "revoke": "Desligar",
+    "revoking": "A desligar…",
+    "revokeTitle": "Desligar {app}?",
+    "revokeBody": "Deixa de funcionar de imediato. Pode voltar a ligá-la mais tarde.",
+    "revoked": "Desligada.",
+    "consent": {
+      "metadataTitle": "Ligar uma aplicação",
+      "title": "Ligar {app} à sua loja?",
+      "sendsTo": "O acesso vai para <strong>{host}</strong>",
+      "store": "Loja",
+      "scopesTitle": "O que pode fazer",
+      "note": "Só ligue se tiver começado isto a partir de {app}. Pode desligá-la a qualquer momento em Definições.",
+      "approve": "Ligar",
+      "approving": "A ligar…",
+      "deny": "Cancelar",
+      "connected": "Ligada. A levá-lo de volta a {app}…",
+      "refusedTitle": "Não é possível confiar neste pedido",
+      "refusedBody": "A aplicação que o enviou para aqui não está bem configurada. Não foi ligado nada."
+    },
+    "scopes": {
+      "storeRead": {
+        "label": "Ver a sua loja",
+        "hint": "Produtos, montras, descontos, avaliações, valores de vendas e as suas notificações."
+      },
+      "ordersRead": {
+        "label": "Ver encomendas",
+        "hint": "Encomendas, incluindo os nomes, e-mails e moradas de entrega dos compradores."
+      },
+      "productsWrite": {
+        "label": "Editar produtos",
+        "hint": "Criar e alterar produtos, o respetivo stock e as fotografias."
+      },
+      "storefrontsWrite": {
+        "label": "Editar montras",
+        "hint": "Criar o design de montras, páginas de produto e finalização da compra, e definir condições de envio."
+      },
+      "discountsWrite": {
+        "label": "Gerir descontos",
+        "hint": "Iniciar e terminar promoções e criar códigos de desconto."
+      },
+      "reviewsWrite": {
+        "label": "Moderar avaliações",
+        "hint": "Ocultar, mostrar e publicar avaliações."
+      },
+      "ordersFulfil": {
+        "label": "Enviar encomendas",
+        "hint": "Marcar encomendas como enviadas, o que envia um e-mail ao comprador."
+      },
+      "profileWrite": {
+        "label": "Editar o seu perfil",
+        "hint": "O seu nome de utilizador, biografia, fotografia e preferências de e-mail."
+      },
+      "notificationsWrite": {
+        "label": "Limpar notificações",
+        "hint": "Marcar as suas notificações como lidas."
+      },
+      "moderationWrite": {
+        "label": "Responder a remoções",
+        "hint": "Pedir a revisão de uma remoção ou recorrer de uma decisão."
+      },
+      "ordersRefund": {
+        "label": "Reembolsar encomendas",
+        "hint": "Anular encomendas com reembolso, o que envia um e-mail ao comprador e não pode ser desfeito."
+      },
+      "destructive": {
+        "label": "Eliminar coisas",
+        "hint": "Eliminar produtos, montras e descontos, e substituir chaves de incorporação. Isto não pode ser desfeito."
+      }
     }
   }
 }

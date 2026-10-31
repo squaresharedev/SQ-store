@@ -30,6 +30,9 @@
     },
     "billing": {
       "title": "Plán a fakturácia"
+    },
+    "connectedApps": {
+      "title": "Pripojené aplikácie"
     }
   },
   "loading": "Načítavajú sa nastavenia…",
@@ -690,7 +693,9 @@
         "signInApproved": "Prihlásenie schválené z iného zariadenia",
         "signInDenied": "Prihlásenie zamietnuté z iného zariadenia",
         "approvalsEnabled": "Schvaľovanie prihlásenia zapnuté",
-        "approvalsDisabled": "Schvaľovanie prihlásenia vypnuté"
+        "approvalsDisabled": "Schvaľovanie prihlásenia vypnuté",
+        "agentConnected": "Pripojila sa aplikácia",
+        "agentRevoked": "Aplikácia bola odpojená"
       }
     },
     "success": {
@@ -798,6 +803,89 @@
       "role": "Vaša rola: {role}",
       "how": "Pozvánku prijmete tak, že sa prihlásite touto e-mailovou adresou ({email}) alebo si s ňou vytvoríte účet. Pozvánka na vás bude čakať v Nastaveniach, v časti Tím a prístup.",
       "ignore": "Nečakali ste to? Tento e-mail môžete ignorovať. Kým pozvánku neprijmete, nič sa nestane."
+    }
+  },
+  "connectedApps": {
+    "listTitle": "Aplikácie s prístupom",
+    "empty": "Zatiaľ nie sú pripojené žiadne aplikácie.",
+    "connect": {
+      "title": "Pripojiť asistenta",
+      "body": "Pridajte túto adresu do Claude alebo inej aplikácie MCP a keď o to požiada, schváľte ju.",
+      "copy": "Kopírovať adresu",
+      "copied": "Skopírované",
+      "copyFailed": "Kopírovanie sa nepodarilo. Označte adresu a skopírujte ju ručne.",
+      "paused": "Pripájanie asistentov je zatiaľ vypnuté."
+    },
+    "lastUsed": "Naposledy použité {when}",
+    "neverUsed": "Zatiaľ nepoužité",
+    "revoke": "Odpojiť",
+    "revoking": "Odpájanie…",
+    "revokeTitle": "Odpojiť {app}?",
+    "revokeBody": "Prestane fungovať okamžite. Neskôr ju môžete pripojiť znova.",
+    "revoked": "Odpojené.",
+    "consent": {
+      "metadataTitle": "Pripojiť aplikáciu",
+      "title": "Pripojiť {app} k vášmu obchodu?",
+      "sendsTo": "Prístup pôjde na <strong>{host}</strong>",
+      "store": "Obchod",
+      "scopesTitle": "Čo môže robiť",
+      "note": "Pripojte ju, iba ak ste to začali z {app}. Kedykoľvek ju môžete odpojiť v Nastaveniach.",
+      "approve": "Pripojiť",
+      "approving": "Pripájanie…",
+      "deny": "Zrušiť",
+      "connected": "Pripojené. Vraciame vás do {app}…",
+      "refusedTitle": "Tejto požiadavke sa nedá veriť",
+      "refusedBody": "Aplikácia, ktorá vás sem poslala, nie je správne nastavená. Nič sa nepripojilo."
+    },
+    "scopes": {
+      "storeRead": {
+        "label": "Pozrieť váš obchod",
+        "hint": "Produkty, výklady, zľavy, recenzie, údaje o predaji a vaše upozornenia."
+      },
+      "ordersRead": {
+        "label": "Pozrieť objednávky",
+        "hint": "Objednávky vrátane mien, e-mailov a doručovacích adries kupujúcich."
+      },
+      "productsWrite": {
+        "label": "Upraviť produkty",
+        "hint": "Vytvárať a meniť produkty, ich zásoby a fotky."
+      },
+      "storefrontsWrite": {
+        "label": "Upraviť výklady",
+        "hint": "Navrhovať výklady, produktové stránky a pokladňu a nastavovať podmienky dopravy."
+      },
+      "discountsWrite": {
+        "label": "Spravovať zľavy",
+        "hint": "Spúšťať a ukončovať akcie a vytvárať zľavové kódy."
+      },
+      "reviewsWrite": {
+        "label": "Moderovať recenzie",
+        "hint": "Skrývať, zobrazovať a zverejňovať recenzie."
+      },
+      "ordersFulfil": {
+        "label": "Odoslať objednávky",
+        "hint": "Označiť objednávky ako odoslané, čím sa kupujúcemu pošle e-mail."
+      },
+      "profileWrite": {
+        "label": "Upraviť váš profil",
+        "hint": "Vaše používateľské meno, bio, fotka a nastavenia e-mailov."
+      },
+      "notificationsWrite": {
+        "label": "Vymazať upozornenia",
+        "hint": "Označiť vaše upozornenia ako prečítané."
+      },
+      "moderationWrite": {
+        "label": "Reagovať na odstránenia",
+        "hint": "Požiadať o preskúmanie odstránenia alebo sa proti rozhodnutiu odvolať."
+      },
+      "ordersRefund": {
+        "label": "Vrátiť peniaze za objednávky",
+        "hint": "Zrušiť objednávky s vrátením peňazí, čím sa kupujúcemu pošle e-mail a nedá sa to vrátiť späť."
+      },
+      "destructive": {
+        "label": "Odstraňovať veci",
+        "hint": "Odstraňovať produkty, výklady a zľavy a meniť kľúče na vkladanie. Nedá sa to vrátiť späť."
+      }
     }
   }
 }

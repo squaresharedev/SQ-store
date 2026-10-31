@@ -43,7 +43,8 @@
     "language": "Idioma",
     "team": "Equipo y acceso",
     "danger": "Zona de peligro",
-    "billing": "Plan y facturación"
+    "billing": "Plan y facturación",
+    "connectedApps": "Aplicaciones conectadas"
   },
   "profileMenu": {
     "label": "Menú de la cuenta",

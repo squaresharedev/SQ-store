@@ -104,7 +104,8 @@
     "readCheckoutSettings": "Zbyt wiele prób odczytania ustawień kasy w krótkim czasie.",
     "changePlan": "Za dużo zmian planu w krótkim czasie.",
     "saveDiscounts": "Zbyt wiele zmian rabatów w krótkim czasie.",
-    "moderateReviews": "Za dużo zmian w opiniach w krótkim czasie."
+    "moderateReviews": "Za dużo zmian w opiniach w krótkim czasie.",
+    "agentTools": "Ten asystent wysłał zbyt wiele żądań w krótkim czasie."
   },
   "serverError": {
     "fix": "Zwykle jest to problem tymczasowy. Odczekaj chwilę i spróbuj ponownie; jeśli nadal się nie udaje, odśwież stronę.",
@@ -143,7 +144,8 @@
     "cancelPlan": "Nie udało się anulować twojego planu z powodu problemu po naszej stronie.",
     "resumePlan": "Nie udało się zachować twojego planu z powodu problemu po naszej stronie.",
     "saveDiscount": "Nie udało się zapisać rabatu z powodu problemu po naszej stronie.",
-    "moderateReview": "Nie udało się zmienić opinii z powodu problemu po naszej stronie."
+    "moderateReview": "Nie udało się zmienić opinii z powodu problemu po naszej stronie.",
+    "agentTools": "Nie udało się tego zrobić z powodu problemu po naszej stronie."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Ten produkt został usunięty, a nie wstrzymany.} storefront {Ta witryna została usunięta, a nie wstrzymana.} other {Ten element został usunięty, a nie wstrzymany.}}",
@@ -702,5 +704,14 @@
       "message": "Wybierz, dlaczego ukrywasz tę opinię.",
       "fix": "Opinię można ukryć tylko z jednego z podanych powodów."
     }
+  },
+  "agent": {
+    "invalidInput": "Te dane są nieprawidłowe.",
+    "unknownFile": "Ten uchwyt pliku nie jest rozpoznawany przez ten sklep.",
+    "unknownFileFix": "Użyj wartości ref: odczytanej z tego rekordu albo upload_id z upload_image.",
+    "imageUnreadable": "Nie udało się odczytać tego obrazu.",
+    "imageUnreadableFix": "Wyślij publiczny link HTTPS albo dane base64 pliku JPEG, PNG, WebP, GIF lub AVIF mieszczącego się w limicie rozmiaru.",
+    "passThrough": "{message}",
+    "requestInvalid": "Ta prośba o połączenie jest nieprawidłowa. Zacznij od nowa w aplikacji."
   }
 }

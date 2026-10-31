@@ -51,6 +51,7 @@ export const config = {
     "/notifications/:path*",
     "/payments/:path*",
     "/plans/:path*",
+    "/oauth/authorize/:path*",
     {
       source: "/((?!api/|_next/).*)",
       has: [{ type: "header", key: "content-type", value: "multipart/form-data.*" }],

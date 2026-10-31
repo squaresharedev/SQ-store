@@ -142,6 +142,10 @@
       "stepUpLockedOut": {
         "title": "Příliš mnoho chybných kódů dvoufázového ověření",
         "body": "V přihlášeném účtu někdo zadal příliš mnoho chybných kódů dvoufázového ověření při pokusu změnit nastavení, a proto je to na několik minut pozastaveno. Pokud jste to nebyli vy, změňte si heslo a odhlaste se ze všech zařízení."
+      },
+      "agentConnected": {
+        "title": "Aplikace nyní může pracovat s vaším obchodem",
+        "body": "Aplikace {app} byla připojena k vašemu účtu. Pokud jste to nebyli vy, odpojte ji v Nastavení a změňte si heslo."
       }
     },
     "order": {

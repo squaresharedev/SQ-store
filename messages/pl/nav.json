@@ -43,7 +43,8 @@
     "language": "Język",
     "team": "Zespół i dostęp",
     "danger": "Strefa niebezpieczna",
-    "billing": "Plan i rozliczenia"
+    "billing": "Plan i rozliczenia",
+    "connectedApps": "Połączone aplikacje"
   },
   "profileMenu": {
     "label": "Menu konta",

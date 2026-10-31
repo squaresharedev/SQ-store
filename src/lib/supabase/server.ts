@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { agentContext } from "@/lib/agent/context";
 import { AUTH_COOKIE_OPTIONS } from "./cookie-options";
 import { resilientFetch } from "./fetch";
 import type { Database } from "@/types";
@@ -28,6 +29,19 @@ export async function createClient() {
     throw new Error(
       "Supabase configuration incomplete: NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY are not set.",
     );
+  }
+
+  // An assistant has no cookie jar: its request carries a user JWT minted for
+  // this call (lib/agent/context.ts), which RLS reads exactly like a browser's.
+  const agent = agentContext();
+  if (agent) {
+    return createServerClient<Database>(url, key, {
+      global: {
+        fetch: resilientFetch,
+        headers: { Authorization: `Bearer ${agent.jwt}` },
+      },
+      cookies: { getAll: () => [], setAll: () => {} },
+    });
   }
 
   const cookieStore = await cookies();

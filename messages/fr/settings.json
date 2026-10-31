@@ -30,6 +30,9 @@
     },
     "billing": {
       "title": "Forfait et facturation"
+    },
+    "connectedApps": {
+      "title": "Applications connectées"
     }
   },
   "loading": "Chargement des paramètres…",
@@ -690,7 +693,9 @@
         "signInApproved": "Connexion approuvée depuis un autre appareil",
         "signInDenied": "Connexion refusée depuis un autre appareil",
         "approvalsEnabled": "Approbation des connexions activée",
-        "approvalsDisabled": "Approbation des connexions désactivée"
+        "approvalsDisabled": "Approbation des connexions désactivée",
+        "agentConnected": "Une application a été connectée",
+        "agentRevoked": "Une application a été déconnectée"
       }
     },
     "success": {
@@ -798,6 +803,89 @@
       "role": "Votre rôle : {role}",
       "how": "Pour accepter, connectez-vous avec cette adresse e-mail ({email}) ou créez un compte avec elle. L’invitation vous attendra dans Paramètres, sous Équipe et accès.",
       "ignore": "Vous ne vous y attendiez pas ? Vous pouvez ignorer cet e-mail. Rien ne se passe tant que vous n’acceptez pas."
+    }
+  },
+  "connectedApps": {
+    "listTitle": "Applications avec accès",
+    "empty": "Aucune application connectée pour le moment.",
+    "connect": {
+      "title": "Connecter un assistant",
+      "body": "Ajoutez cette adresse à Claude ou à une autre application MCP, puis approuvez-la quand elle vous le demande.",
+      "copy": "Copier l’adresse",
+      "copied": "Copiée",
+      "copyFailed": "Impossible de copier. Sélectionnez l’adresse et copiez-la vous-même.",
+      "paused": "La connexion d’assistants est désactivée pour le moment."
+    },
+    "lastUsed": "Dernière utilisation {when}",
+    "neverUsed": "Pas encore utilisée",
+    "revoke": "Déconnecter",
+    "revoking": "Déconnexion…",
+    "revokeTitle": "Déconnecter {app} ?",
+    "revokeBody": "Elle cesse de fonctionner immédiatement. Vous pourrez la reconnecter plus tard.",
+    "revoked": "Déconnectée.",
+    "consent": {
+      "metadataTitle": "Connecter une application",
+      "title": "Connecter {app} à votre boutique ?",
+      "sendsTo": "L’accès est envoyé à <strong>{host}</strong>",
+      "store": "Boutique",
+      "scopesTitle": "Ce qu’elle peut faire",
+      "note": "Ne vous connectez que si vous avez lancé cette démarche depuis {app}. Vous pouvez la déconnecter à tout moment dans les Paramètres.",
+      "approve": "Connecter",
+      "approving": "Connexion…",
+      "deny": "Annuler",
+      "connected": "Connectée. Retour vers {app}…",
+      "refusedTitle": "Cette demande n’est pas fiable",
+      "refusedBody": "L’application qui vous a envoyé ici n’est pas configurée correctement. Rien n’a été connecté."
+    },
+    "scopes": {
+      "storeRead": {
+        "label": "Voir votre boutique",
+        "hint": "Produits, vitrines, réductions, avis, chiffres de vente et vos notifications."
+      },
+      "ordersRead": {
+        "label": "Voir les commandes",
+        "hint": "Commandes, y compris les noms, e-mails et adresses de livraison des acheteurs."
+      },
+      "productsWrite": {
+        "label": "Modifier les produits",
+        "hint": "Créer et modifier des produits, leur stock et leurs photos."
+      },
+      "storefrontsWrite": {
+        "label": "Modifier les vitrines",
+        "hint": "Concevoir les vitrines, les pages produit et le paiement, et définir les conditions de livraison."
+      },
+      "discountsWrite": {
+        "label": "Gérer les réductions",
+        "hint": "Lancer et arrêter des promotions, et créer des codes de réduction."
+      },
+      "reviewsWrite": {
+        "label": "Modérer les avis",
+        "hint": "Masquer, afficher et publier des avis."
+      },
+      "ordersFulfil": {
+        "label": "Expédier les commandes",
+        "hint": "Marquer des commandes comme expédiées, ce qui envoie un e-mail à l’acheteur."
+      },
+      "profileWrite": {
+        "label": "Modifier votre profil",
+        "hint": "Votre nom d’utilisateur, votre bio, votre photo et vos préférences d’e-mail."
+      },
+      "notificationsWrite": {
+        "label": "Effacer les notifications",
+        "hint": "Marquer vos notifications comme lues."
+      },
+      "moderationWrite": {
+        "label": "Répondre aux retraits",
+        "hint": "Demander le réexamen d’un retrait, ou contester une décision."
+      },
+      "ordersRefund": {
+        "label": "Rembourser les commandes",
+        "hint": "Reprendre des commandes, ce qui envoie un e-mail à l’acheteur et ne peut pas être annulé."
+      },
+      "destructive": {
+        "label": "Supprimer des éléments",
+        "hint": "Supprimer des produits, des vitrines et des réductions, et remplacer les clés d’intégration. Cette action est irréversible."
+      }
     }
   }
 }

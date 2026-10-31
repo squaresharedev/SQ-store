@@ -59,6 +59,10 @@ export const SECURITY_EVENTS = [
   "mfa.approvals_enabled",
   /** Sign-in approval switched off in Settings › Security. */
   "mfa.approvals_disabled",
+  /** An assistant was approved to act on a store (lib/agent). */
+  "agent.connected",
+  /** An assistant's access was taken away from Settings › Connected apps. */
+  "agent.revoked",
 ] as const;
 
 export type SecurityEvent = (typeof SECURITY_EVENTS)[number];
@@ -85,6 +89,8 @@ export const SECURITY_EVENT_LABELS: Record<SecurityEvent, MessageKey> = {
   "mfa.sign_in_denied": "Settings.security.activity.events.signInDenied",
   "mfa.approvals_enabled": "Settings.security.activity.events.approvalsEnabled",
   "mfa.approvals_disabled": "Settings.security.activity.events.approvalsDisabled",
+  "agent.connected": "Settings.security.activity.events.agentConnected",
+  "agent.revoked": "Settings.security.activity.events.agentRevoked",
 };
 
 export function isSecurityEvent(value: unknown): value is SecurityEvent {

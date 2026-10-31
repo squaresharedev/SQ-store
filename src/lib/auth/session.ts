@@ -2,6 +2,7 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { isAuthRetryableFetchError, type User } from "@supabase/supabase-js";
+import { agentContext } from "@/lib/agent/context";
 import { createClient } from "@/lib/supabase/server";
 import {
   assuranceFrom,
@@ -132,6 +133,17 @@ async function validatedAccessToken(supabase: {
   }
 }
 
+/** What the session helpers report for an assistant's request. */
+const AGENT_ASSURANCE: SessionAssurance = {
+  enrolled: false,
+  level: "aal2",
+  secondFactorAt: null,
+  signedInAt: null,
+  factors: [],
+  approvalFactorId: null,
+  sessionId: null,
+};
+
 /**
  * The raw session read: did we get an answer, and what was it? Cached so the
  * repeated calls within one render share a single round-trip (and a single
@@ -151,6 +163,14 @@ const loadUser = cache(
     unreachable: unknown;
     assurance: SessionAssurance | null;
   }> => {
+    // An assistant: lib/agent/authenticate.ts has already checked its token and
+    // loaded its user. There is no session to ask GoTrue about, and this
+    // assurance is not one a person could present: checkStepUp refuses an agent
+    // before reading it.
+    const agent = agentContext();
+    if (agent) {
+      return { user: agent.user, unreachable: null, assurance: AGENT_ASSURANCE };
+    }
     try {
       const supabase = await createClient();
       const result = await withTimeout<

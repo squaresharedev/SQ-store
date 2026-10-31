@@ -34,6 +34,12 @@ describe("embedded supabase replica", () => {
       "account_deletion_requests",
       "admin_audit_log",
       "admin_users",
+      "agent_audit_log",
+      "agent_auth_codes",
+      "agent_clients",
+      "agent_grants",
+      "agent_tokens",
+      "agent_uploads",
       "artifact_likes",
       "artifacts",
       // The seller-plan launch switch: whether plan limits refuse creates

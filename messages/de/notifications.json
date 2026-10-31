@@ -142,6 +142,10 @@
       "stepUpLockedOut": {
         "title": "Zu viele falsche Zwei-Faktor-Codes",
         "body": "Während du in deinem Konto angemeldet warst, hat jemand zu viele falsche Zwei-Faktor-Codes eingegeben, um eine Einstellung zu ändern, deshalb ist das für ein paar Minuten pausiert. Wenn du das nicht warst, ändere dein Passwort und melde dich auf allen Geräten ab."
+      },
+      "agentConnected": {
+        "title": "Eine App kann jetzt an deinem Shop arbeiten",
+        "body": "{app} wurde mit deinem Konto verbunden. Falls du das nicht warst, trenne sie in den Einstellungen und ändere dein Passwort."
       }
     },
     "order": {

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { revokeAllGrantsForUser } from "@/lib/agent/oauth/revoke-all";
 import { createClient } from "@/lib/supabase/server";
 import { appOrigin } from "@/lib/app-url";
 import { getAssurance, getProfile, getUser } from "@/lib/auth/session";
@@ -645,6 +646,8 @@ export async function requestAccountDeletion(
     deletion_requested_at: requestedAt,
   });
   if (!ok) return SAVE_FAILED;
+  // An account on its way out should not have assistants still working on it.
+  await revokeAllGrantsForUser(user.id);
   // Deliberate audit trail for a sensitive action.
   console.warn(
     `[settings] account deletion REQUESTED user=${user.id} at=${requestedAt}`,

@@ -142,6 +142,10 @@
       "stepUpLockedOut": {
         "title": "Demasiados códigos de dois fatores errados",
         "body": "Com a sessão iniciada na sua conta, alguém introduziu demasiados códigos de dois fatores errados ao tentar alterar uma definição, pelo que isso foi suspenso durante alguns minutos. Se não foi uma ação sua, altere a palavra-passe e termine a sessão em todos os dispositivos."
+      },
+      "agentConnected": {
+        "title": "Uma aplicação já pode trabalhar na sua loja",
+        "body": "{app} foi ligada à sua conta. Se não foi você, desligue-a em Definições e altere a palavra-passe."
       }
     },
     "order": {

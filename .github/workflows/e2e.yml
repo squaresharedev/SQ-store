@@ -66,6 +66,9 @@ jobs:
       - name: Product page and deep links
         run: npx playwright test 30-product-page.spec.ts 97-deep-link-sign-in.spec.ts --retries=1 --reporter=line
 
+      - name: The MCP server
+        run: npx playwright test 101-mcp.spec.ts --retries=1 --reporter=line
+
       - name: Keep screenshots and traces of a failure
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4

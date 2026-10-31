@@ -12,6 +12,7 @@ import {
 import {
   Bell,
   Gem,
+  Plug,
   Receipt,
   ScrollText,
   ShieldCheck,
@@ -30,6 +31,7 @@ import {
   SETTINGS_PATH,
 } from "@/lib/dashboard/paths";
 import { PRODUCTS_PATH } from "@/lib/products/paths";
+import { CONNECTED_APPS_PATH } from "@/lib/agent/paths";
 import { DISCOUNTS_PATH } from "@/lib/discounts/paths";
 import { BILLING_SETTINGS_PATH } from "@/lib/billing/paths";
 import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
@@ -103,6 +105,8 @@ export const SETTINGS_NAV: SettingsNavEntry[] = [
   { href: "/settings/legal", label: "Nav.settings.legal", icon: ScrollText },
   { href: "/settings/notifications", label: "Nav.settings.notifications", icon: Bell },
   { href: "/settings/team", label: "Nav.settings.team", icon: Users },
+  // Assistants connected through MCP (lib/agent): each one a way into the store.
+  { href: CONNECTED_APPS_PATH, label: "Nav.settings.connectedApps", icon: Plug },
   {
     href: "/settings/danger",
     label: "Nav.settings.danger",

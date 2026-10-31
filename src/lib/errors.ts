@@ -203,7 +203,8 @@ export type RateLimitedOperation =
   | "connectPayments"
   | "changePlan"
   | "saveDiscounts"
-  | "moderateReviews";
+  | "moderateReviews"
+  | "agentTools";
 
 /**
  * A signed-in write budget is spent (lib/rate-limit.ts).
@@ -307,7 +308,8 @@ export type ServerErrorOperation =
   | "cancelPlan"
   | "resumePlan"
   | "saveDiscount"
-  | "moderateReview";
+  | "moderateReview"
+  | "agentTools";
 
 export function serverError(operation: ServerErrorOperation): ActionError {
   return {

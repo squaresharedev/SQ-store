@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { AuthError } from "@supabase/supabase-js";
+import { revokeAllGrantsForUser } from "@/lib/agent/oauth/revoke-all";
 import { createClient } from "@/lib/supabase/server";
 import {
   actionUser,
@@ -609,6 +610,8 @@ export async function resetPassword(
   // survive it. `others` scope keeps THIS (recovery) session alive so the
   // redirect below lands them signed in.
   await revokeOtherSessions(supabase);
+  // A connected assistant is a way in too, and it outlives every session.
+  await revokeAllGrantsForUser(user.id);
 
   // Recorded BEFORE the redirect, which throws. `password.set` when the account
   // had none (an OAuth user establishing their first one) and `password.changed`
@@ -691,6 +694,10 @@ export async function signOut(): Promise<void> {
  */
 export async function signOutEverywhere(): Promise<void> {
   const supabase = await createClient();
+  // Before the sign-out, while there is still a user to ask about. "Everywhere"
+  // has to mean connected assistants too.
+  const { user } = await actionUser();
+  if (user) await revokeAllGrantsForUser(user.id);
   await supabase.auth.signOut({ scope: "global" });
   redirect("/login");
 }

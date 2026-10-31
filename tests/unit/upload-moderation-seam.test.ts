@@ -49,14 +49,18 @@ describe("images have exactly one route into storage", () => {
   it.each(["image", "element"])(
     "the %s route flags what the classifier cannot see, or refuses the upload",
     (name) => {
-      const route = repoFile("src", "app", "api", "uploads", name, "route.ts");
+      // The image route's bytes go through the function it shares with upload_image.
+      const route =
+        name === "image"
+          ? repoFile("src", "lib", "uploads", "store-image.ts")
+          : repoFile("src", "app", "api", "uploads", name, "route.ts");
       // Asked of the real bytes, and a hold that cannot be recorded is not
       // waved through: the object is deleted and no key is returned.
       expect(route).toMatch(/classifierCanSee\(bytes, sniffed\.mime\)/);
       expect(route).toMatch(/!\(await holdForPerson\(key\)\)/);
       const heldAt = route.indexOf("holdForPerson(key)");
       const refusedAt = route.indexOf("deleteObject(key)", heldAt);
-      const returnedAt = route.lastIndexOf("Response.json({ key })");
+      const returnedAt = route.lastIndexOf(name === "image" ? "return { ok: true, key }" : "Response.json({ key })");
       expect(heldAt).toBeGreaterThan(-1);
       expect(refusedAt).toBeGreaterThan(heldAt);
       expect(returnedAt).toBeGreaterThan(refusedAt);
@@ -80,12 +84,17 @@ describe("images have exactly one route into storage", () => {
   });
 
   it("the image route sniffs magic bytes rather than trusting the claim", () => {
+    // One function, shared with an assistant's upload_image, so neither door
+    // is a way around it.
     const route = repoFile("src", "app", "api", "uploads", "image", "route.ts");
-    expect(route).toMatch(/sniffImage\(bytes\)/);
+    expect(route).toMatch(/storeImage\(bytes,/);
+    expect(route).not.toMatch(/putObject/);
+    const store = repoFile("src", "lib", "uploads", "store-image.ts");
+    expect(store).toMatch(/sniffImage\(bytes\)/);
     // The sniffed type is what gets stored, so R2 serves what it really is.
     // `[^)]*` already crosses newlines, so no dotAll flag is needed (and the
     // repo's TS target predates it).
-    expect(route).toMatch(/putObject\([^)]*sniffed\.mime/);
+    expect(store).toMatch(/putObject\([^)]*sniffed\.mime/);
   });
 
   it("the document route gates a PUBLIC download harder than the paid one", () => {

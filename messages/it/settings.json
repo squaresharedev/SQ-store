@@ -30,6 +30,9 @@
     },
     "billing": {
       "title": "Piano e fatturazione"
+    },
+    "connectedApps": {
+      "title": "App collegate"
     }
   },
   "loading": "Caricamento impostazioni…",
@@ -690,7 +693,9 @@
         "signInApproved": "Accesso approvato da un altro dispositivo",
         "signInDenied": "Accesso negato da un altro dispositivo",
         "approvalsEnabled": "Approvazione degli accessi attivata",
-        "approvalsDisabled": "Approvazione degli accessi disattivata"
+        "approvalsDisabled": "Approvazione degli accessi disattivata",
+        "agentConnected": "Un’app è stata collegata",
+        "agentRevoked": "Un’app è stata scollegata"
       }
     },
     "success": {
@@ -798,6 +803,89 @@
       "role": "Il tuo ruolo: {role}",
       "how": "Per accettare, accedi con questo indirizzo email ({email}) oppure crea un account con lo stesso indirizzo. L’invito ti aspetta in Impostazioni, alla voce Team e accessi.",
       "ignore": "Non te lo aspettavi? Puoi ignorare questa email. Non succede nulla finché non accetti."
+    }
+  },
+  "connectedApps": {
+    "listTitle": "App con accesso",
+    "empty": "Nessuna app collegata per ora.",
+    "connect": {
+      "title": "Collega un assistente",
+      "body": "Aggiungi questo indirizzo a Claude o a un’altra app MCP, poi approvalo quando te lo chiede.",
+      "copy": "Copia indirizzo",
+      "copied": "Copiato",
+      "copyFailed": "Impossibile copiare. Seleziona l’indirizzo e copialo tu.",
+      "paused": "Il collegamento degli assistenti è disattivato per ora."
+    },
+    "lastUsed": "Ultimo utilizzo {when}",
+    "neverUsed": "Non ancora usata",
+    "revoke": "Scollega",
+    "revoking": "Scollegamento…",
+    "revokeTitle": "Scollegare {app}?",
+    "revokeBody": "Smette di funzionare subito. Potrai ricollegarla più tardi.",
+    "revoked": "Scollegata.",
+    "consent": {
+      "metadataTitle": "Collega un’app",
+      "title": "Collegare {app} al tuo negozio?",
+      "sendsTo": "L’accesso va a <strong>{host}</strong>",
+      "store": "Negozio",
+      "scopesTitle": "Cosa può fare",
+      "note": "Collega solo se hai avviato tu questa richiesta da {app}. Puoi scollegarla in qualsiasi momento dalle Impostazioni.",
+      "approve": "Collega",
+      "approving": "Collegamento…",
+      "deny": "Annulla",
+      "connected": "Collegata. Ti riportiamo su {app}…",
+      "refusedTitle": "Questa richiesta non è affidabile",
+      "refusedBody": "L’app che ti ha mandato qui non è configurata correttamente. Non è stato collegato nulla."
+    },
+    "scopes": {
+      "storeRead": {
+        "label": "Vedere il tuo negozio",
+        "hint": "Prodotti, vetrine, sconti, recensioni, dati di vendita e le tue notifiche."
+      },
+      "ordersRead": {
+        "label": "Vedere gli ordini",
+        "hint": "Ordini, compresi nomi, email e indirizzi di consegna degli acquirenti."
+      },
+      "productsWrite": {
+        "label": "Modificare i prodotti",
+        "hint": "Creare e cambiare prodotti, le loro scorte e le loro foto."
+      },
+      "storefrontsWrite": {
+        "label": "Modificare le vetrine",
+        "hint": "Progettare vetrine, pagine prodotto e checkout, e impostare le condizioni di spedizione."
+      },
+      "discountsWrite": {
+        "label": "Gestire gli sconti",
+        "hint": "Avviare e chiudere le promozioni, e creare codici sconto."
+      },
+      "reviewsWrite": {
+        "label": "Moderare le recensioni",
+        "hint": "Nascondere, mostrare e pubblicare le recensioni."
+      },
+      "ordersFulfil": {
+        "label": "Spedire gli ordini",
+        "hint": "Segnare gli ordini come spediti, cosa che invia un’email all’acquirente."
+      },
+      "profileWrite": {
+        "label": "Modificare il tuo profilo",
+        "hint": "Il tuo nome utente, la bio, la foto e le preferenze email."
+      },
+      "notificationsWrite": {
+        "label": "Cancellare le notifiche",
+        "hint": "Segnare le tue notifiche come lette."
+      },
+      "moderationWrite": {
+        "label": "Rispondere alle rimozioni",
+        "hint": "Chiedere il riesame di una rimozione, o contestare una decisione."
+      },
+      "ordersRefund": {
+        "label": "Rimborsare gli ordini",
+        "hint": "Annullare gli ordini rimborsando, cosa che invia un’email all’acquirente e non si può annullare."
+      },
+      "destructive": {
+        "label": "Eliminare elementi",
+        "hint": "Eliminare prodotti, vetrine e sconti, e sostituire le chiavi di incorporamento. Non si può annullare."
+      }
     }
   }
 }

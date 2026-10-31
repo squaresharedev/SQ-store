@@ -1,3 +1,4 @@
+import { agentContext } from "@/lib/agent/context";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CONTACT_CODE_COOLDOWN_SECONDS } from "@/lib/contact-verification/policy";
@@ -447,6 +448,22 @@ export const RATE_LIMITS = {
    * imported reviews in one sitting, not for a loop.
    */
   reviewModerate: { max: 240, windowSeconds: 60 * 60 },
+  /**
+   * Tool calls that read, per connected assistant (lib/agent, keyed on the
+   * grant). On top of whatever each read costs elsewhere: an assistant in a
+   * loop is a cost event nobody is watching.
+   */
+  agentRead: { max: 300, windowSeconds: 60 },
+  /** Tool calls that change something, per connected assistant. Each action
+   *  still spends its own budget underneath. */
+  agentWrite: { max: 60, windowSeconds: 60 },
+  /** The OAuth token endpoint, per client address. A connection refreshes about
+   *  hourly; this is room for a whole office behind one address. */
+  agentToken: { max: 120, windowSeconds: 60 * 60 },
+  /** App registration, per client address. A real app registers once. */
+  agentRegister: { max: 20, windowSeconds: 60 * 60 },
+  /** Approving an app, per signed-in user. */
+  agentConsent: { max: 20, windowSeconds: 60 * 60 },
 } as const;
 
 export type RateLimitBudget = { max: number; windowSeconds: number };
@@ -481,7 +498,9 @@ export async function rateLimit(
   try {
     const supabase = await createClient();
     const { data, error } = await supabase.rpc("rl_take", {
-      p_action: action,
+      // A budget of its own, so an assistant in a loop cannot lock the person
+      // out of their own dashboard.
+      p_action: agentContext() ? `agent:${action}` : action,
       p_max: budget.max,
       p_window_seconds: budget.windowSeconds,
     });

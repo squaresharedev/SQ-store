@@ -43,7 +43,8 @@
     "language": "Sprache",
     "team": "Team und Zugriff",
     "danger": "Gefahrenzone",
-    "billing": "Tarif und Abrechnung"
+    "billing": "Tarif und Abrechnung",
+    "connectedApps": "Verbundene Apps"
   },
   "profileMenu": {
     "label": "Kontomenü",

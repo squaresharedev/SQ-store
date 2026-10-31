@@ -156,6 +156,8 @@ const REGISTRY: Record<string, Classification> = {
   // --- orders -------------------------------------------------------------
   // Marking an order shipped mails the BUYER, so it is bounded like every
   // other action that can put mail in a stranger's inbox.
+  "lib/agent/consent-actions.ts::approveAgentConnection": limited(),
+  "lib/agent/consent-actions.ts::revokeConnectedApp": limited(),
   "lib/orders/actions.ts::markOrderShipped": limited(),
   // Taking an order back mails the buyer too, and for an order a provider
   // charged it moves money: its own budget (orderRefund).

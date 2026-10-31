@@ -43,7 +43,8 @@
     "language": "Jazyk",
     "team": "Tím a prístup",
     "danger": "Nebezpečná zóna",
-    "billing": "Plán a fakturácia"
+    "billing": "Plán a fakturácia",
+    "connectedApps": "Pripojené aplikácie"
   },
   "profileMenu": {
     "label": "Ponuka účtu",

@@ -104,7 +104,8 @@
     "readCheckoutSettings": "Te veel pogingen om afrekeneinstellingen te lezen in korte tijd.",
     "changePlan": "Je hebt in korte tijd te veel abonnementswijzigingen gestart.",
     "saveDiscounts": "Te veel kortingswijzigingen in korte tijd.",
-    "moderateReviews": "Te veel wijzigingen aan reviews in korte tijd."
+    "moderateReviews": "Te veel wijzigingen aan reviews in korte tijd.",
+    "agentTools": "Deze assistent heeft in korte tijd te veel verzoeken gedaan."
   },
   "serverError": {
     "fix": "Dit is meestal tijdelijk. Wacht even en probeer het opnieuw; als het blijft mislukken, vernieuw dan de pagina.",
@@ -143,7 +144,8 @@
     "cancelPlan": "Je abonnement kon niet worden opgezegd door een probleem aan onze kant.",
     "resumePlan": "Je abonnement kon niet worden behouden door een probleem aan onze kant.",
     "saveDiscount": "De korting kon niet worden opgeslagen door een probleem aan onze kant.",
-    "moderateReview": "De review kon niet worden gewijzigd door een probleem bij ons."
+    "moderateReview": "De review kon niet worden gewijzigd door een probleem bij ons.",
+    "agentTools": "Dat kon niet worden gedaan door een probleem aan onze kant."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Dit product is verwijderd, niet gepauzeerd.} storefront {Deze etalage is verwijderd, niet gepauzeerd.} other {Dit item is verwijderd, niet gepauzeerd.}}",
@@ -702,5 +704,14 @@
       "message": "Kies waarom je deze review verbergt.",
       "fix": "Een review kan alleen om een van de genoemde redenen worden verborgen."
     }
+  },
+  "agent": {
+    "invalidInput": "Die gegevens zijn niet geldig.",
+    "unknownFile": "Deze bestandsverwijzing wordt door deze winkel niet herkend.",
+    "unknownFileFix": "Gebruik een ref:-waarde uit dit record, of een upload_id van upload_image.",
+    "imageUnreadable": "Die afbeelding kon niet worden gelezen.",
+    "imageUnreadableFix": "Stuur een openbare HTTPS-link of base64-gegevens voor een JPEG-, PNG-, WebP-, GIF- of AVIF-afbeelding binnen de groottelimiet.",
+    "passThrough": "{message}",
+    "requestInvalid": "Dit koppelingsverzoek is niet geldig. Begin opnieuw vanuit de app."
   }
 }

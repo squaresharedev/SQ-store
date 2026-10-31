@@ -104,7 +104,8 @@
     "readCheckoutSettings": "Demasiados intentos de leer los ajustes del proceso de pago en poco tiempo.",
     "changePlan": "Demasiados cambios de plan iniciados en poco tiempo.",
     "saveDiscounts": "Demasiados cambios de descuentos en poco tiempo.",
-    "moderateReviews": "Demasiados cambios en reseñas en poco tiempo."
+    "moderateReviews": "Demasiados cambios en reseñas en poco tiempo.",
+    "agentTools": "Este asistente ha hecho demasiadas solicitudes en poco tiempo."
   },
   "serverError": {
     "fix": "Suele ser algo temporal. Espera un momento y vuelve a intentarlo; si sigue fallando, recarga la página.",
@@ -143,7 +144,8 @@
     "cancelPlan": "No se ha podido cancelar tu plan por un problema en nuestro lado.",
     "resumePlan": "No se ha podido mantener tu plan por un problema en nuestro lado.",
     "saveDiscount": "No se ha podido guardar el descuento por un problema en nuestro sistema.",
-    "moderateReview": "No se ha podido cambiar la reseña por un problema de nuestra parte."
+    "moderateReview": "No se ha podido cambiar la reseña por un problema de nuestra parte.",
+    "agentTools": "No se pudo hacer por un problema de nuestra parte."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Este producto se ha retirado, no está en pausa.} storefront {Este escaparate se ha retirado, no está en pausa.} other {Este elemento se ha retirado, no está en pausa.}}",
@@ -702,5 +704,14 @@
       "message": "Elige por qué ocultas esta reseña.",
       "fix": "Una reseña solo se puede ocultar por uno de los motivos indicados."
     }
+  },
+  "agent": {
+    "invalidInput": "Esos datos no son válidos.",
+    "unknownFile": "Esta tienda no reconoce ese identificador de archivo.",
+    "unknownFileFix": "Usa un valor ref: leído de este registro o un upload_id de upload_image.",
+    "imageUnreadable": "No se pudo leer esa imagen.",
+    "imageUnreadableFix": "Envía un enlace HTTPS público o datos base64 de un JPEG, PNG, WebP, GIF o AVIF dentro del límite de tamaño.",
+    "passThrough": "{message}",
+    "requestInvalid": "Esta solicitud de conexión no es válida. Empieza de nuevo desde la aplicación."
   }
 }

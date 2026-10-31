@@ -142,6 +142,10 @@
       "stepUpLockedOut": {
         "title": "Príliš veľa nesprávnych kódov dvojfaktorového overenia",
         "body": "Počas prihlásenia do vášho účtu niekto zadal priveľa nesprávnych kódov dvojfaktorového overenia pri pokuse zmeniť nastavenie, preto je to na niekoľko minút pozastavené. Ak ste to neboli vy, zmeňte heslo a odhláste sa zo všetkých zariadení."
+      },
+      "agentConnected": {
+        "title": "Aplikácia môže teraz pracovať vo vašom obchode",
+        "body": "K vášmu účtu sa pripojila aplikácia {app}. Ak ste to neboli vy, odpojte ju v Nastaveniach a zmeňte si heslo."
       }
     },
     "order": {

@@ -69,6 +69,25 @@ jobs:
           done
           echo "::warning title=Account deletions are not finishing::40 runs in a row still had more to do."
 
+  agent-cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      APP_URL: https://dashboard.squareshare.eu
+    steps:
+      - name: Say so when it is not set up
+        if: ${{ env.CRON_SECRET == '' }}
+        run: echo "::warning title=The agent cleanup did not run::Set the CRON_SECRET repository secret."
+
+      - name: Drop expired agent tokens, old trail rows and unused app registrations
+        if: ${{ env.CRON_SECRET != '' }}
+        run: |
+          set -euo pipefail
+          # --fail: a 404 (secret not on the Worker, or wrong) or a 500 turns the
+          # job red. Tomorrow's run takes up whatever is left.
+          curl --fail --silent --show-error --max-time 120             --request POST             --header "Authorization: Bearer ${CRON_SECRET}"             "${APP_URL}/api/cron/agent-cleanup"
+
   funnel-rollup:
     runs-on: ubuntu-latest
     timeout-minutes: 5

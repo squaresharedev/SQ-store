@@ -104,7 +104,8 @@
     "readCheckoutSettings": "Príliš veľa pokusov o načítanie nastavení pokladne za krátky čas.",
     "changePlan": "Príliš veľa zmien plánu v krátkom čase.",
     "saveDiscounts": "Príliš veľa zmien zliav za krátky čas.",
-    "moderateReviews": "Príliš veľa zmien recenzií v krátkom čase."
+    "moderateReviews": "Príliš veľa zmien recenzií v krátkom čase.",
+    "agentTools": "Tento asistent poslal za krátky čas príliš veľa požiadaviek."
   },
   "serverError": {
     "fix": "Zvyčajne je to dočasné. Chvíľu počkajte a skúste to znova. Ak sa problém opakuje, obnovte stránku.",
@@ -143,7 +144,8 @@
     "cancelPlan": "Plán sa nepodarilo zrušiť z dôvodu chyby na našej strane.",
     "resumePlan": "Plán sa nepodarilo ponechať z dôvodu chyby na našej strane.",
     "saveDiscount": "Zľavu sa nepodarilo uložiť kvôli problému na našej strane.",
-    "moderateReview": "Recenziu sa pre problém na našej strane nepodarilo zmeniť."
+    "moderateReview": "Recenziu sa pre problém na našej strane nepodarilo zmeniť.",
+    "agentTools": "Nepodarilo sa to kvôli problému na našej strane."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Tento produkt bol odstránený, nie pozastavený.} storefront {Tento výklad bol odstránený, nie pozastavený.} other {Táto položka bola odstránená, nie pozastavená.}}",
@@ -702,5 +704,14 @@
       "message": "Zvoľte, prečo túto recenziu skrývate.",
       "fix": "Recenziu je možné skryť len z jedného z uvedených dôvodov."
     }
+  },
+  "agent": {
+    "invalidInput": "Tieto údaje nie sú platné.",
+    "unknownFile": "Tento obchod nepozná takýto identifikátor súboru.",
+    "unknownFileFix": "Použite hodnotu ref: prečítanú z tohto záznamu alebo upload_id z upload_image.",
+    "imageUnreadable": "Tento obrázok sa nepodarilo prečítať.",
+    "imageUnreadableFix": "Pošlite verejný odkaz HTTPS alebo údaje base64 pre JPEG, PNG, WebP, GIF alebo AVIF v rámci limitu veľkosti.",
+    "passThrough": "{message}",
+    "requestInvalid": "Táto žiadosť o pripojenie nie je platná. Začnite znova v aplikácii."
   }
 }

@@ -30,6 +30,9 @@
     },
     "billing": {
       "title": "Plan y facturación"
+    },
+    "connectedApps": {
+      "title": "Aplicaciones conectadas"
     }
   },
   "loading": "Cargando configuración…",
@@ -690,7 +693,9 @@
         "signInApproved": "Inicio de sesión aprobado desde otro dispositivo",
         "signInDenied": "Inicio de sesión denegado desde otro dispositivo",
         "approvalsEnabled": "Aprobación de inicio de sesión activada",
-        "approvalsDisabled": "Aprobación de inicio de sesión desactivada"
+        "approvalsDisabled": "Aprobación de inicio de sesión desactivada",
+        "agentConnected": "Se conectó una aplicación",
+        "agentRevoked": "Se desconectó una aplicación"
       }
     },
     "success": {
@@ -798,6 +803,89 @@
       "role": "Tu rol: {role}",
       "how": "Para aceptar, inicia sesión con esta dirección de correo ({email}) o crea una cuenta con ella. La invitación te estará esperando en Configuración, en Equipo y acceso.",
       "ignore": "¿No lo esperabas? Puedes ignorar este correo. No pasa nada a menos que aceptes."
+    }
+  },
+  "connectedApps": {
+    "listTitle": "Aplicaciones con acceso",
+    "empty": "Aún no hay aplicaciones conectadas.",
+    "connect": {
+      "title": "Conecta un asistente",
+      "body": "Añade esta dirección a Claude o a otra aplicación MCP y apruébala cuando te lo pida.",
+      "copy": "Copiar dirección",
+      "copied": "Copiada",
+      "copyFailed": "No se pudo copiar. Selecciona la dirección y cópiala tú.",
+      "paused": "Conectar asistentes está desactivado por ahora."
+    },
+    "lastUsed": "Último uso {when}",
+    "neverUsed": "Aún sin usar",
+    "revoke": "Desconectar",
+    "revoking": "Desconectando…",
+    "revokeTitle": "¿Desconectar {app}?",
+    "revokeBody": "Deja de funcionar al instante. Puedes volver a conectarla más tarde.",
+    "revoked": "Desconectada.",
+    "consent": {
+      "metadataTitle": "Conectar una aplicación",
+      "title": "¿Conectar {app} a tu tienda?",
+      "sendsTo": "El acceso va a <strong>{host}</strong>",
+      "store": "Tienda",
+      "scopesTitle": "Lo que puede hacer",
+      "note": "Conéctala solo si lo has iniciado desde {app}. Puedes desconectarla cuando quieras en Configuración.",
+      "approve": "Conectar",
+      "approving": "Conectando…",
+      "deny": "Cancelar",
+      "connected": "Conectada. Te llevamos de vuelta a {app}…",
+      "refusedTitle": "No se puede confiar en esta solicitud",
+      "refusedBody": "La aplicación que te ha enviado aquí no está bien configurada. No se ha conectado nada."
+    },
+    "scopes": {
+      "storeRead": {
+        "label": "Ver tu tienda",
+        "hint": "Productos, escaparates, descuentos, reseñas, cifras de ventas y tus notificaciones."
+      },
+      "ordersRead": {
+        "label": "Ver pedidos",
+        "hint": "Pedidos, incluidos los nombres, correos y direcciones de entrega de los compradores."
+      },
+      "productsWrite": {
+        "label": "Editar productos",
+        "hint": "Crear y cambiar productos, sus existencias y sus fotos."
+      },
+      "storefrontsWrite": {
+        "label": "Editar escaparates",
+        "hint": "Diseñar escaparates, páginas de producto y proceso de pago, y fijar las condiciones de envío."
+      },
+      "discountsWrite": {
+        "label": "Gestionar descuentos",
+        "hint": "Iniciar y terminar rebajas y crear códigos de descuento."
+      },
+      "reviewsWrite": {
+        "label": "Moderar reseñas",
+        "hint": "Ocultar, mostrar y publicar reseñas."
+      },
+      "ordersFulfil": {
+        "label": "Enviar pedidos",
+        "hint": "Marcar pedidos como enviados, lo que envía un correo al comprador."
+      },
+      "profileWrite": {
+        "label": "Editar tu perfil",
+        "hint": "Tu nombre de usuario, biografía, foto y preferencias de correo."
+      },
+      "notificationsWrite": {
+        "label": "Limpiar notificaciones",
+        "hint": "Marcar tus notificaciones como leídas."
+      },
+      "moderationWrite": {
+        "label": "Responder a retiradas",
+        "hint": "Pedir que se revise una retirada o recurrir una decisión."
+      },
+      "ordersRefund": {
+        "label": "Reembolsar pedidos",
+        "hint": "Anular pedidos, lo que envía un correo al comprador y no se puede deshacer."
+      },
+      "destructive": {
+        "label": "Borrar cosas",
+        "hint": "Borrar productos, escaparates y descuentos, y sustituir claves de inserción. No se puede deshacer."
+      }
     }
   }
 }

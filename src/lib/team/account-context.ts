@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { cookies } from "next/headers";
+import { agentContext } from "@/lib/agent/context";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/session";
 import { getActorRole } from "@/lib/team/queries";
@@ -46,6 +47,21 @@ export type AccountOption = {
 export const getActiveAccount = cache(async (): Promise<ActiveAccount | null> => {
   const user = await getUser();
   if (!user) return null;
+
+  // An assistant acts on the one store its grant names, and the role is read
+  // fresh, so removing someone from a team stops their assistant on the next
+  // call. No fallback to their own store, unlike the stale cookie below: a
+  // browser shows the wrong page for a moment, an agent would write there.
+  const agent = agentContext();
+  if (agent) {
+    if (agent.accountId === user.id) {
+      return { accountId: user.id, role: "owner", isOwner: true, userId: user.id };
+    }
+    const role = await getActorRole(agent.accountId);
+    return role
+      ? { accountId: agent.accountId, role, isOwner: false, userId: user.id }
+      : null;
+  }
 
   const store = await cookies();
   const requested = store.get(ACTIVE_ACCOUNT_COOKIE)?.value;

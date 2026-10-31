@@ -1,4 +1,5 @@
 import { cookies, headers } from "next/headers";
+import { agentContext } from "@/lib/agent/context";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
@@ -259,6 +260,10 @@ async function checkStepUp(
   formData: FormData,
   options: { maxAgeSeconds?: number },
 ): Promise<{ problem: StepUpProblem } | null> {
+  // An assistant never passes. What sits behind a step-up is what a stolen
+  // session should not reach, and a long-lived agent token must not be stronger
+  // than one. No tool calls these actions; this holds if one ever does.
+  if (agentContext()) return { problem: "signed_out" };
   const state = await getSessionState();
   if (state.kind !== "signed_in") return { problem: "signed_out" };
   const { user, assurance } = state;

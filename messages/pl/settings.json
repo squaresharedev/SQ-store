@@ -30,6 +30,9 @@
     },
     "billing": {
       "title": "Plan i rozliczenia"
+    },
+    "connectedApps": {
+      "title": "Połączone aplikacje"
     }
   },
   "loading": "Wczytywanie ustawień…",
@@ -690,7 +693,9 @@
         "signInApproved": "Zatwierdzono logowanie z innego urządzenia",
         "signInDenied": "Odrzucono logowanie z innego urządzenia",
         "approvalsEnabled": "Włączono zatwierdzanie logowania",
-        "approvalsDisabled": "Wyłączono zatwierdzanie logowania"
+        "approvalsDisabled": "Wyłączono zatwierdzanie logowania",
+        "agentConnected": "Połączono aplikację",
+        "agentRevoked": "Odłączono aplikację"
       }
     },
     "success": {
@@ -798,6 +803,89 @@
       "role": "Twoja rola: {role}",
       "how": "Aby przyjąć zaproszenie, zaloguj się tym adresem e-mail ({email}) albo załóż na niego konto. Zaproszenie będzie czekać w Ustawieniach, w sekcji Zespół i dostęp.",
       "ignore": "Nie spodziewasz się tej wiadomości? Możesz ją zignorować. Nic się nie stanie, dopóki nie przyjmiesz zaproszenia."
+    }
+  },
+  "connectedApps": {
+    "listTitle": "Aplikacje z dostępem",
+    "empty": "Nie połączono jeszcze żadnych aplikacji.",
+    "connect": {
+      "title": "Połącz asystenta",
+      "body": "Dodaj ten adres do Claude lub innej aplikacji MCP, a potem zatwierdź ją, gdy o to poprosi.",
+      "copy": "Kopiuj adres",
+      "copied": "Skopiowano",
+      "copyFailed": "Nie udało się skopiować. Zaznacz adres i skopiuj go ręcznie.",
+      "paused": "Łączenie asystentów jest na razie wyłączone."
+    },
+    "lastUsed": "Ostatnio użyto {when}",
+    "neverUsed": "Jeszcze nieużywana",
+    "revoke": "Odłącz",
+    "revoking": "Odłączanie…",
+    "revokeTitle": "Odłączyć {app}?",
+    "revokeBody": "Przestanie działać od razu. Możesz ją połączyć ponownie później.",
+    "revoked": "Odłączono.",
+    "consent": {
+      "metadataTitle": "Połącz aplikację",
+      "title": "Połączyć {app} z twoim sklepem?",
+      "sendsTo": "Dostęp trafi do <strong>{host}</strong>",
+      "store": "Sklep",
+      "scopesTitle": "Co może robić",
+      "note": "Łącz tylko wtedy, gdy zaczynasz to z {app}. W każdej chwili możesz to odłączyć w Ustawieniach.",
+      "approve": "Połącz",
+      "approving": "Łączenie…",
+      "deny": "Anuluj",
+      "connected": "Połączono. Wracamy do {app}…",
+      "refusedTitle": "Tej prośbie nie można ufać",
+      "refusedBody": "Aplikacja, która cię tu przysłała, jest źle skonfigurowana. Nic nie zostało połączone."
+    },
+    "scopes": {
+      "storeRead": {
+        "label": "Zobacz swój sklep",
+        "hint": "Produkty, witryny, rabaty, opinie, dane sprzedaży i twoje powiadomienia."
+      },
+      "ordersRead": {
+        "label": "Zobacz zamówienia",
+        "hint": "Zamówienia, w tym imiona i nazwiska kupujących, ich e-maile i adresy dostawy."
+      },
+      "productsWrite": {
+        "label": "Edytuj produkty",
+        "hint": "Twórz i zmieniaj produkty, ich stan magazynowy i zdjęcia."
+      },
+      "storefrontsWrite": {
+        "label": "Edytuj witryny",
+        "hint": "Projektuj witryny, strony produktów i finalizację zakupu oraz ustawiaj warunki wysyłki."
+      },
+      "discountsWrite": {
+        "label": "Zarządzaj rabatami",
+        "hint": "Rozpoczynaj i kończ wyprzedaże oraz twórz kody rabatowe."
+      },
+      "reviewsWrite": {
+        "label": "Moderuj opinie",
+        "hint": "Ukrywaj, pokazuj i publikuj opinie."
+      },
+      "ordersFulfil": {
+        "label": "Wysyłaj zamówienia",
+        "hint": "Oznaczaj zamówienia jako wysłane, co wysyła e-mail do kupującego."
+      },
+      "profileWrite": {
+        "label": "Edytuj swój profil",
+        "hint": "Twoja nazwa użytkownika, opis, zdjęcie i ustawienia e-maili."
+      },
+      "notificationsWrite": {
+        "label": "Czyść powiadomienia",
+        "hint": "Oznaczaj twoje powiadomienia jako przeczytane."
+      },
+      "moderationWrite": {
+        "label": "Odpowiadaj na blokady",
+        "hint": "Proś o ponowne rozpatrzenie blokady lub odwołuj się od decyzji."
+      },
+      "ordersRefund": {
+        "label": "Zwracaj pieniądze za zamówienia",
+        "hint": "Anuluj zamówienia ze zwrotem pieniędzy, co wysyła e-mail do kupującego i nie da się tego cofnąć."
+      },
+      "destructive": {
+        "label": "Usuwaj rzeczy",
+        "hint": "Usuwaj produkty, witryny i rabaty oraz wymieniaj klucze osadzania. Tego nie da się cofnąć."
+      }
     }
   }
 }

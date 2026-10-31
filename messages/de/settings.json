@@ -30,6 +30,9 @@
     },
     "billing": {
       "title": "Tarif und Abrechnung"
+    },
+    "connectedApps": {
+      "title": "Verbundene Apps"
     }
   },
   "loading": "Einstellungen werden geladen…",
@@ -690,7 +693,9 @@
         "signInApproved": "Anmeldung von einem anderen Gerät genehmigt",
         "signInDenied": "Anmeldung von einem anderen Gerät abgelehnt",
         "approvalsEnabled": "Anmeldebestätigung eingeschaltet",
-        "approvalsDisabled": "Anmeldebestätigung ausgeschaltet"
+        "approvalsDisabled": "Anmeldebestätigung ausgeschaltet",
+        "agentConnected": "Eine App wurde verbunden",
+        "agentRevoked": "Eine App wurde getrennt"
       }
     },
     "success": {
@@ -798,6 +803,89 @@
       "role": "Deine Rolle: {role}",
       "how": "Um anzunehmen, melde dich mit dieser E-Mail-Adresse ({email}) an oder erstelle damit ein Konto. Die Einladung wartet in den Einstellungen unter „Team und Zugriff“.",
       "ignore": "Nicht erwartet? Du kannst diese E-Mail ignorieren. Es passiert nichts, solange du nicht annimmst."
+    }
+  },
+  "connectedApps": {
+    "listTitle": "Apps mit Zugriff",
+    "empty": "Noch keine Apps verbunden.",
+    "connect": {
+      "title": "Assistenten verbinden",
+      "body": "Füge diese Adresse in Claude oder einer anderen MCP-App hinzu und bestätige sie dann, wenn danach gefragt wird.",
+      "copy": "Adresse kopieren",
+      "copied": "Kopiert",
+      "copyFailed": "Kopieren nicht möglich. Markiere die Adresse und kopiere sie selbst.",
+      "paused": "Das Verbinden von Assistenten ist vorerst abgeschaltet."
+    },
+    "lastUsed": "Zuletzt genutzt {when}",
+    "neverUsed": "Noch nicht genutzt",
+    "revoke": "Trennen",
+    "revoking": "Wird getrennt…",
+    "revokeTitle": "{app} trennen?",
+    "revokeBody": "Sie funktioniert sofort nicht mehr. Du kannst sie später wieder verbinden.",
+    "revoked": "Getrennt.",
+    "consent": {
+      "metadataTitle": "App verbinden",
+      "title": "{app} mit deinem Shop verbinden?",
+      "sendsTo": "Der Zugriff geht an <strong>{host}</strong>",
+      "store": "Shop",
+      "scopesTitle": "Was sie tun kann",
+      "note": "Verbinde sie nur, wenn du das in {app} gestartet hast. Du kannst die Verbindung jederzeit in den Einstellungen trennen.",
+      "approve": "Verbinden",
+      "approving": "Wird verbunden…",
+      "deny": "Abbrechen",
+      "connected": "Verbunden. Du wirst zurück zu {app} geleitet…",
+      "refusedTitle": "Dieser Anfrage ist nicht zu trauen",
+      "refusedBody": "Die App, die dich hierher geschickt hat, ist nicht richtig eingerichtet. Es wurde nichts verbunden."
+    },
+    "scopes": {
+      "storeRead": {
+        "label": "Deinen Shop ansehen",
+        "hint": "Produkte, Schaufenster, Rabatte, Bewertungen, Verkaufszahlen und deine Benachrichtigungen."
+      },
+      "ordersRead": {
+        "label": "Bestellungen ansehen",
+        "hint": "Bestellungen, auch mit Namen, E-Mail-Adressen und Lieferadressen der Käufer."
+      },
+      "productsWrite": {
+        "label": "Produkte bearbeiten",
+        "hint": "Produkte, ihren Lagerbestand und ihre Fotos anlegen und ändern."
+      },
+      "storefrontsWrite": {
+        "label": "Schaufenster bearbeiten",
+        "hint": "Schaufenster, Produktseiten und Checkout gestalten und Versandbedingungen festlegen."
+      },
+      "discountsWrite": {
+        "label": "Rabatte verwalten",
+        "hint": "Aktionen starten und beenden und Rabattcodes erstellen."
+      },
+      "reviewsWrite": {
+        "label": "Bewertungen moderieren",
+        "hint": "Bewertungen ausblenden, einblenden und veröffentlichen."
+      },
+      "ordersFulfil": {
+        "label": "Bestellungen versenden",
+        "hint": "Bestellungen als versendet markieren, wodurch der Käufer eine E-Mail erhält."
+      },
+      "profileWrite": {
+        "label": "Dein Profil bearbeiten",
+        "hint": "Dein Benutzername, deine Bio, dein Foto und deine E-Mail-Einstellungen."
+      },
+      "notificationsWrite": {
+        "label": "Benachrichtigungen erledigen",
+        "hint": "Deine Benachrichtigungen als gelesen markieren."
+      },
+      "moderationWrite": {
+        "label": "Auf Sperrungen antworten",
+        "hint": "Eine Sperrung prüfen lassen oder gegen eine Entscheidung Einspruch einlegen."
+      },
+      "ordersRefund": {
+        "label": "Bestellungen erstatten",
+        "hint": "Bestellungen zurücknehmen, wodurch der Käufer eine E-Mail erhält. Das lässt sich nicht rückgängig machen."
+      },
+      "destructive": {
+        "label": "Dinge löschen",
+        "hint": "Produkte, Schaufenster und Rabatte löschen und Einbettungsschlüssel ersetzen. Das lässt sich nicht rückgängig machen."
+      }
     }
   }
 }

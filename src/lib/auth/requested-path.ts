@@ -37,6 +37,9 @@ export const SIGNED_IN_PREFIXES = [
   "/notifications",
   "/payments",
   "/plans",
+  // Approving an app (lib/agent): a seller who was signed out comes back to it
+  // with the app's whole request intact.
+  "/oauth/authorize",
 ] as const;
 
 /** Next's own cache-busting query parameter on a client navigation. */

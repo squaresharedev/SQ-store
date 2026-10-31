@@ -43,7 +43,8 @@
     "language": "Language",
     "team": "Team & access",
     "danger": "Danger zone",
-    "billing": "Plan & billing"
+    "billing": "Plan & billing",
+    "connectedApps": "Connected apps"
   },
   "profileMenu": {
     "label": "Account menu",

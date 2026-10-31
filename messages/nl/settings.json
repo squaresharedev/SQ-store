@@ -30,6 +30,9 @@
     },
     "billing": {
       "title": "Abonnement en facturering"
+    },
+    "connectedApps": {
+      "title": "Gekoppelde apps"
     }
   },
   "loading": "Instellingen laden…",
@@ -690,7 +693,9 @@
         "signInApproved": "Inlogpoging goedgekeurd vanaf een ander apparaat",
         "signInDenied": "Inlogpoging geweigerd vanaf een ander apparaat",
         "approvalsEnabled": "Inloggoedkeuring aangezet",
-        "approvalsDisabled": "Inloggoedkeuring uitgezet"
+        "approvalsDisabled": "Inloggoedkeuring uitgezet",
+        "agentConnected": "Er is een app gekoppeld",
+        "agentRevoked": "Er is een app losgekoppeld"
       }
     },
     "success": {
@@ -798,6 +803,89 @@
       "role": "Jouw rol: {role}",
       "how": "Om te accepteren log je in met dit e-mailadres ({email}), of maak je er een account mee aan. De uitnodiging staat voor je klaar in Instellingen, onder Team en toegang.",
       "ignore": "Had je dit niet verwacht? Je kunt deze e-mail negeren. Er gebeurt niets tenzij je accepteert."
+    }
+  },
+  "connectedApps": {
+    "listTitle": "Apps met toegang",
+    "empty": "Nog geen apps gekoppeld.",
+    "connect": {
+      "title": "Koppel een assistent",
+      "body": "Voeg dit adres toe aan Claude of een andere MCP-app en keur het goed als erom wordt gevraagd.",
+      "copy": "Adres kopiëren",
+      "copied": "Gekopieerd",
+      "copyFailed": "Kopiëren is niet gelukt. Selecteer het adres en kopieer het zelf.",
+      "paused": "Assistenten koppelen staat voorlopig uit."
+    },
+    "lastUsed": "Laatst gebruikt {when}",
+    "neverUsed": "Nog niet gebruikt",
+    "revoke": "Loskoppelen",
+    "revoking": "Loskoppelen…",
+    "revokeTitle": "{app} loskoppelen?",
+    "revokeBody": "Het werkt meteen niet meer. Je kunt het later weer koppelen.",
+    "revoked": "Losgekoppeld.",
+    "consent": {
+      "metadataTitle": "Koppel een app",
+      "title": "{app} koppelen aan je winkel?",
+      "sendsTo": "Toegang gaat naar <strong>{host}</strong>",
+      "store": "Winkel",
+      "scopesTitle": "Wat het kan doen",
+      "note": "Koppel alleen als je dit zelf vanuit {app} hebt gestart. Je kunt het op elk moment loskoppelen in Instellingen.",
+      "approve": "Koppelen",
+      "approving": "Koppelen…",
+      "deny": "Annuleren",
+      "connected": "Gekoppeld. We brengen je terug naar {app}…",
+      "refusedTitle": "Dit verzoek is niet te vertrouwen",
+      "refusedBody": "De app die je hierheen stuurde is niet goed ingesteld. Er is niets gekoppeld."
+    },
+    "scopes": {
+      "storeRead": {
+        "label": "Je winkel bekijken",
+        "hint": "Producten, etalages, kortingen, beoordelingen, verkoopcijfers en je meldingen."
+      },
+      "ordersRead": {
+        "label": "Bestellingen bekijken",
+        "hint": "Bestellingen, inclusief namen, e-mailadressen en bezorgadressen van kopers."
+      },
+      "productsWrite": {
+        "label": "Producten bewerken",
+        "hint": "Producten, hun voorraad en hun foto's aanmaken en wijzigen."
+      },
+      "storefrontsWrite": {
+        "label": "Etalages bewerken",
+        "hint": "Etalages, productpagina's en afrekenen ontwerpen en verzendvoorwaarden instellen."
+      },
+      "discountsWrite": {
+        "label": "Kortingen beheren",
+        "hint": "Acties starten en beëindigen en kortingscodes aanmaken."
+      },
+      "reviewsWrite": {
+        "label": "Beoordelingen modereren",
+        "hint": "Beoordelingen verbergen, tonen en publiceren."
+      },
+      "ordersFulfil": {
+        "label": "Bestellingen verzenden",
+        "hint": "Bestellingen als verzonden markeren, waarbij de koper een e-mail krijgt."
+      },
+      "profileWrite": {
+        "label": "Je profiel bewerken",
+        "hint": "Je gebruikersnaam, bio, foto en e-mailvoorkeuren."
+      },
+      "notificationsWrite": {
+        "label": "Meldingen wissen",
+        "hint": "Je meldingen als gelezen markeren."
+      },
+      "moderationWrite": {
+        "label": "Reageren op verwijderingen",
+        "hint": "Een verwijdering laten beoordelen of bezwaar maken tegen een besluit."
+      },
+      "ordersRefund": {
+        "label": "Bestellingen terugbetalen",
+        "hint": "Bestellingen terugnemen, waarbij de koper een e-mail krijgt. Dit kan niet ongedaan worden gemaakt."
+      },
+      "destructive": {
+        "label": "Dingen verwijderen",
+        "hint": "Producten, etalages en kortingen verwijderen en insluitsleutels vervangen. Dit kan niet ongedaan worden gemaakt."
+      }
     }
   }
 }

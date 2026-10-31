@@ -104,7 +104,8 @@
     "readCheckoutSettings": "Troppi tentativi di leggere le impostazioni del checkout in poco tempo.",
     "changePlan": "Hai avviato troppe modifiche di piano in poco tempo.",
     "saveDiscounts": "Troppe modifiche agli sconti in poco tempo.",
-    "moderateReviews": "Troppe modifiche alle recensioni in poco tempo."
+    "moderateReviews": "Troppe modifiche alle recensioni in poco tempo.",
+    "agentTools": "Questo assistente ha fatto troppe richieste in poco tempo."
   },
   "serverError": {
     "fix": "Di solito è temporaneo. Attendi un momento e riprova; se continua a non funzionare, aggiorna la pagina.",
@@ -143,7 +144,8 @@
     "cancelPlan": "Non è stato possibile annullare il tuo piano a causa di un problema da parte nostra.",
     "resumePlan": "Non è stato possibile mantenere il tuo piano a causa di un problema da parte nostra.",
     "saveDiscount": "Non è stato possibile salvare lo sconto per un problema dalla nostra parte.",
-    "moderateReview": "Non è stato possibile modificare la recensione per un problema da parte nostra."
+    "moderateReview": "Non è stato possibile modificare la recensione per un problema da parte nostra.",
+    "agentTools": "Non è stato possibile farlo a causa di un problema da parte nostra."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Questo prodotto è stato rimosso, non messo in pausa.} storefront {Questa vetrina è stata rimossa, non messa in pausa.} other {Questo elemento è stato rimosso, non messo in pausa.}}",
@@ -702,5 +704,14 @@
       "message": "Scegli perché nascondi questa recensione.",
       "fix": "Una recensione può essere nascosta solo per uno dei motivi elencati."
     }
+  },
+  "agent": {
+    "invalidInput": "Questi dati non sono validi.",
+    "unknownFile": "Questo riferimento al file non è riconosciuto da questo negozio.",
+    "unknownFileFix": "Usa un valore ref: letto da questo record, oppure un upload_id ottenuto con upload_image.",
+    "imageUnreadable": "Non è stato possibile leggere questa immagine.",
+    "imageUnreadableFix": "Invia un link HTTPS pubblico o dati base64 di un’immagine JPEG, PNG, WebP, GIF o AVIF entro il limite di dimensione.",
+    "passThrough": "{message}",
+    "requestInvalid": "Questa richiesta di collegamento non è valida. Ricomincia dall’app."
   }
 }

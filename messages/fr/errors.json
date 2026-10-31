@@ -104,7 +104,8 @@
     "readCheckoutSettings": "Trop de tentatives de lecture des paramètres de paiement en peu de temps.",
     "changePlan": "Trop de changements de forfait lancés en peu de temps.",
     "saveDiscounts": "Trop de modifications de réductions en peu de temps.",
-    "moderateReviews": "Trop de modifications d’avis en peu de temps."
+    "moderateReviews": "Trop de modifications d’avis en peu de temps.",
+    "agentTools": "Cet assistant a envoyé trop de requêtes en peu de temps."
   },
   "serverError": {
     "fix": "C’est généralement temporaire. Attendez un instant puis réessayez ; si le problème persiste, actualisez la page.",
@@ -143,7 +144,8 @@
     "cancelPlan": "Impossible d’annuler votre forfait en raison d’un problème de notre côté.",
     "resumePlan": "Impossible de conserver votre forfait en raison d’un problème de notre côté.",
     "saveDiscount": "Impossible d'enregistrer la réduction en raison d'un problème de notre côté.",
-    "moderateReview": "Impossible de modifier l’avis en raison d’un problème de notre côté."
+    "moderateReview": "Impossible de modifier l’avis en raison d’un problème de notre côté.",
+    "agentTools": "Impossible de faire cela à cause d’un problème de notre côté."
   },
   "moderation": {
     "removedNotPaused": "{target, select, product {Ce produit a été retiré, et non mis en pause.} storefront {Cette vitrine a été retirée, et non mise en pause.} other {Cet élément a été retiré, et non mis en pause.}}",
@@ -702,5 +704,14 @@
       "message": "Choisissez pourquoi vous masquez cet avis.",
       "fix": "Un avis ne peut être masqué que pour l’une des raisons proposées."
     }
+  },
+  "agent": {
+    "invalidInput": "Ces informations ne sont pas valides.",
+    "unknownFile": "Cet identifiant de fichier n’est pas reconnu par cette boutique.",
+    "unknownFileFix": "Utilisez une valeur ref: lue dans cet enregistrement, ou un upload_id obtenu avec upload_image.",
+    "imageUnreadable": "Cette image n’a pas pu être lue.",
+    "imageUnreadableFix": "Envoyez un lien HTTPS public ou des données base64 pour une image JPEG, PNG, WebP, GIF ou AVIF dans la limite de taille.",
+    "passThrough": "{message}",
+    "requestInvalid": "Cette demande de connexion n’est pas valide. Recommencez depuis l’application."
   }
 }

@@ -142,6 +142,10 @@
       "stepUpLockedOut": {
         "title": "Troppi codici a due fattori sbagliati",
         "body": "Mentre l’account era connesso, qualcuno ha inserito troppi codici a due fattori sbagliati cercando di modificare un’impostazione, quindi ora è tutto in pausa per qualche minuto. Se non eri tu, cambia la password ed esci da ogni dispositivo."
+      },
+      "agentConnected": {
+        "title": "Un’app ora può lavorare sul tuo negozio",
+        "body": "{app} è stata collegata al tuo account. Se non sei stato tu, scollegala dalle Impostazioni e cambia la password."
       }
     },
     "order": {
