@@ -128,7 +128,8 @@ export function ConnectedAppsSection({ mcpUrl, apps }: { mcpUrl: string; apps: C
       <SettingsCard title={t("connect.title")} description={t("connect.body")}>
         <div className="flex flex-col gap-6">
           <div className="flex flex-wrap items-center gap-2" data-mcp-url>
-            <code className="min-w-0 flex-1 basis-64 truncate rounded-sm border border-border bg-muted px-3 py-2 text-sm text-foreground">
+            {/* A line of its own, whole: the address is the thing to read and copy. */}
+            <code className="min-w-0 basis-full break-all rounded-sm border border-border bg-muted px-3 py-2 text-sm text-foreground">
               {mcpUrl}
             </code>
             <CopyButton value={mcpUrl} variant="labelled" messages={COPY_MESSAGES} />
