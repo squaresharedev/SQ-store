@@ -1,7 +1,7 @@
 import type { AgentContext } from "@/lib/agent/context";
 import { mintAgentJwt } from "@/lib/agent/mint";
 import { ACCESS_TOKEN_PREFIX } from "@/lib/agent/oauth/crypto";
-import { grantForAccessToken } from "@/lib/agent/oauth/grants";
+import { grantForAccessToken, type LiveGrant } from "@/lib/agent/oauth/grants";
 import { mcpResourceUrl } from "@/lib/agent/paths";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -35,25 +35,30 @@ export async function authenticateAgentRequest(request: Request): Promise<AgentA
     const grant = await grantForAccessToken(token);
     // RFC 8707: a token is good for the resource it was issued for, only.
     if (!grant || grant.resource !== mcpResourceUrl()) return { kind: "invalid" };
-
-    const { data, error } = await createAdminClient().auth.admin.getUserById(grant.userId);
-    if (error || !data.user) return { kind: "invalid" };
-    const bannedUntil = data.user.banned_until ? Date.parse(data.user.banned_until) : 0;
-    if (bannedUntil > Date.now()) return { kind: "invalid" };
-
-    return {
-      kind: "ok",
-      context: {
-        user: data.user,
-        accountId: grant.accountId,
-        grantId: grant.id,
-        clientId: grant.clientId,
-        scopes: new Set(grant.scopes),
-        jwt: await mintAgentJwt(data.user, grant.id),
-      },
-    };
+    const context = await contextForGrant(grant);
+    return context ? { kind: "ok", context } : { kind: "invalid" };
   } catch (error) {
     console.error("[agent] authentication failed:", error instanceof Error ? error.message : String(error));
     return { kind: "unavailable" };
   }
+}
+
+/**
+ * The identity a live grant acts as, or null when its person is banned or gone.
+ * The one place a grant becomes an AgentContext: the /mcp route, and a preview
+ * page an assistant asked for (lib/agent/preview), which acts as that same grant.
+ */
+export async function contextForGrant(grant: LiveGrant): Promise<AgentContext | null> {
+  const { data, error } = await createAdminClient().auth.admin.getUserById(grant.userId);
+  if (error || !data.user) return null;
+  const bannedUntil = data.user.banned_until ? Date.parse(data.user.banned_until) : 0;
+  if (bannedUntil > Date.now()) return null;
+  return {
+    user: data.user,
+    accountId: grant.accountId,
+    grantId: grant.id,
+    clientId: grant.clientId,
+    scopes: new Set(grant.scopes),
+    jwt: await mintAgentJwt(data.user, grant.id),
+  };
 }

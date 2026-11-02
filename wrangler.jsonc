@@ -23,6 +23,13 @@
   "limits": {
     "cpu_ms": 30000
   },
+  // Cloudflare Browser Run, for the screenshots in an assistant's previews
+  // (lib/agent/preview/snapshot.ts calls quickAction("snapshot")). A binding,
+  // so no API token exists to leak; quickAction needs a compatibility date of
+  // 2026-03-24 or later. Billed per browser time on Workers Paid.
+  "browser": {
+    "binding": "BROWSER"
+  },
   // NEXT_PUBLIC_* vars only — these ship to the browser bundle already, so
   // committing them here is no additional exposure. `wrangler deploy` treats
   // this object as authoritative and wipes any dashboard-added vars not
@@ -51,7 +58,12 @@
     // Its signing key is a secret: `wrangler secret put AGENT_JWT_SIGNING_KEY`,
     // a private JWK imported into Supabase as a STANDBY signing key, so Auth
     // never signs with it and revoking it there stops agent access alone.
-    "AGENT_ACCESS_ENABLED": "true"
+    "AGENT_ACCESS_ENABLED": "true",
+    // Previews an assistant asks for (preview_storefront, lib/agent/preview):
+    // its own switch, under the one above. "false" drops the tool from every
+    // tool list and answers 404 on the pages it photographs. The pictures come
+    // from Browser Run through the BROWSER binding above.
+    "AGENT_PREVIEW_ENABLED": "true"
     // NEXT_PUBLIC_TURNSTILE_SITE_KEY does NOT belong here, ever. The forms
     // that render the widget are client components, so the site key is
     // inlined at BUILD time and has to be in .env.production; a var in this

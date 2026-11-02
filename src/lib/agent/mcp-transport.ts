@@ -5,8 +5,10 @@ import { authenticateAgentRequest } from "@/lib/agent/authenticate";
 import { runAsAgent, type AgentContext } from "@/lib/agent/context";
 import { callTool, toolAvailable } from "@/lib/agent/dispatch";
 import { protectedResourceMetadataUrl } from "@/lib/agent/paths";
+import { MCP_APP_MIME_TYPE } from "@/lib/agent/preview/view";
 import { AGENT_SCOPE_IDS } from "@/lib/agent/scopes";
 import { AGENT_TOOLS, findTool } from "@/lib/agent/tools";
+import { PREVIEW_VIEWS } from "@/lib/agent/tools/previews";
 import { appOrigin } from "@/lib/app-url";
 import { getActiveAccount, type ActiveAccount } from "@/lib/team/account-context";
 
@@ -74,8 +76,10 @@ function buildServer(context: AgentContext, account: ActiveAccount): McpServer {
     // choice compiles validators with new Function, which a Worker refuses.
     jsonSchemaValidator: new CfWorkerJsonSchemaValidator(),
   });
+  const views = new Set<string>();
   for (const tool of AGENT_TOOLS) {
     if (!toolAvailable(tool, context.scopes, account)) continue;
+    if (tool.view) views.add(tool.view);
     server.registerTool(
       tool.name,
       {
@@ -83,16 +87,40 @@ function buildServer(context: AgentContext, account: ActiveAccount): McpServer {
         description: tool.description,
         inputSchema: tool.input,
         annotations: { title: tool.title, ...tool.annotations },
+        // MCP Apps: a host that has them shows the result in this view. The
+        // flat key is the spec's deprecated spelling, kept for older hosts.
+        ...(tool.view ? { _meta: { ui: { resourceUri: tool.view }, "ui/resourceUri": tool.view } } : {}),
       },
       async (input: unknown) => {
         const result = await callTool(tool, input, account);
         const payload = result.ok ? result.data : { error: result.error };
         const text = JSON.stringify(payload ?? null);
         return {
-          content: [{ type: "text" as const, text }],
+          // Text first, every host reads it; pictures after it, in the order
+          // the view's imageIndex names.
+          content: [
+            { type: "text" as const, text },
+            ...(result.ok && result.images
+              ? result.images.map((image) => ({ type: "image" as const, data: image.data, mimeType: image.mimeType }))
+              : []),
+          ],
+          ...(result.ok && result.view ? { structuredContent: result.view } : {}),
           ...(result.ok ? {} : { isError: true }),
         };
       },
+    );
+  }
+  for (const uri of views) {
+    const view = PREVIEW_VIEWS[uri];
+    if (!view) continue;
+    // Self-contained: nothing outside the document is loaded, so the host's
+    // restrictive default CSP is all it needs and none is declared.
+    const meta = { ui: { prefersBorder: true } };
+    server.registerResource(
+      view.name,
+      uri,
+      { title: view.title, description: view.description, mimeType: MCP_APP_MIME_TYPE, _meta: meta },
+      async () => ({ contents: [{ uri, mimeType: MCP_APP_MIME_TYPE, text: view.html, _meta: meta }] }),
     );
   }
   return server;

@@ -1,8 +1,10 @@
 import { z } from "zod";
-import { clampToCanvas, findFreeCell, type GridBlock } from "@/components/grid/gridConstants";
+import { clampToCanvas, columnsThatFit, findFreeCell, reflowBlocks, type GridBlock } from "@/components/grid/gridConstants";
 import { LAYER_OPS, normalizeLayers, type LayerOp } from "@/lib/storefront/layers";
+import { PHONE_BOARD_WIDTH_PX, phoneLayout } from "@/lib/storefront/mobile-layout";
 import {
   CANVAS_ROWS_MAX,
+  DEFAULT_MOBILE_COLUMNS,
   EMPTY_STOREFRONT_HEADER,
   IMAGE_FITS,
   SHAPE_KINDS,
@@ -10,10 +12,12 @@ import {
   TEXT_ALIGNS,
   TEXT_VARIANTS,
   blockKey,
+  isFreelyArranged,
   layerOrder,
   mergeCardStyleOverrides,
   withRotation,
   type CardStyleOverrides,
+  type MobilePlacement,
   type StorefrontBlock,
   type StorefrontConfig,
 } from "@/types/storefront";
@@ -46,6 +50,11 @@ const changes = z
   .describe("Only what changes. null clears an optional field back to following the theme.");
 
 const color = z.string().max(7).describe("Strict #rrggbb.");
+
+const viewport = z
+  .enum(["desktop", "mobile"])
+  .optional()
+  .describe("Which board: the desktop one (the default), or the phone layout.");
 
 export const designOpSchema = z.discriminatedUnion("op", [
   z.strictObject({
@@ -86,7 +95,7 @@ export const designOpSchema = z.discriminatedUnion("op", [
     opacity: z.number().int().optional(),
     ...placement,
   }),
-  z.strictObject({ op: z.literal("move"), block: blockRef, x: z.number().int(), y: z.number().int() }),
+  z.strictObject({ op: z.literal("move"), block: blockRef, x: z.number().int(), y: z.number().int(), viewport }),
   z.strictObject({
     op: z.literal("resize"),
     block: blockRef,
@@ -94,11 +103,13 @@ export const designOpSchema = z.discriminatedUnion("op", [
     h: z.number().int(),
     x: z.number().int().optional(),
     y: z.number().int().optional(),
+    viewport,
   }),
   z.strictObject({ op: z.literal("rotate"), block: blockRef, degrees: z.number().int() }),
   z.strictObject({ op: z.literal("layer"), block: blockRef, to: z.enum(["front", "forward", "backward", "back"]) }),
   z.strictObject({ op: z.literal("style"), block: blockRef, changes }),
-  z.strictObject({ op: z.literal("remove"), block: blockRef }),
+  z.strictObject({ op: z.literal("remove"), block: blockRef, viewport }),
+  z.strictObject({ op: z.literal("mobile_reset"), block: blockRef }),
   z.strictObject({ op: z.literal("theme"), changes }),
   z.strictObject({ op: z.literal("header"), changes }),
 ]);
@@ -117,7 +128,7 @@ type Fields = Record<string, unknown>;
 
 /** What a style change may not reach: where a block is has its own operations,
  *  and what a block is does not change. */
-const NOT_STYLE = new Set(["type", "id", "productId", "key", "x", "y", "w", "h", "rotation", "z"]);
+const NOT_STYLE = new Set(["type", "id", "productId", "key", "x", "y", "w", "h", "rotation", "z", "mobile"]);
 
 /** Lay `changes` over `target`, where null clears a field. */
 function patched<T extends object>(target: T, patch: Fields): T {
@@ -219,6 +230,25 @@ export function applyDesignOps(
     added.push(refOf(block));
   };
 
+  /** A phone operation on a board without a phone layout starts one, at the
+   *  width a phone fits: the rest of its blocks keep being placed for it. */
+  const startPhoneLayout = () => {
+    if (theme.mobileColumns === undefined) {
+      theme = { ...theme, mobileColumns: Math.min(DEFAULT_MOBILE_COLUMNS, theme.columns) };
+    }
+  };
+  /** Where a block is on the phone right now: its own rect, or the one placed for it. */
+  const phoneRect = (block: StorefrontBlock): MobilePlacement => {
+    const spot = phoneLayout(theme, blocks)?.placed.find((candidate) => candidate.block === block);
+    if (spot) return { x: spot.x, y: spot.y, w: spot.w, h: spot.h };
+    const { hidden: _hidden, ...own } = block.mobile ?? { x: 0, y: 0, w: 1, h: 1 };
+    void _hidden;
+    return own;
+  };
+  const placeOnPhone = (block: StorefrontBlock, rect: MobilePlacement) => {
+    replace(block, { ...block, mobile: rect });
+  };
+
   for (const op of ops) {
     switch (op.op) {
       case "add_product": {
@@ -274,12 +304,26 @@ export function applyDesignOps(
       }
       case "move": {
         const block = find(op.block);
-        replace(block, { ...block, x: op.x, y: op.y });
+        if (op.viewport === "mobile") {
+          startPhoneLayout();
+          placeOnPhone(block, { ...phoneRect(block), x: op.x, y: op.y });
+        } else replace(block, { ...block, x: op.x, y: op.y });
         break;
       }
       case "resize": {
         const block = find(op.block);
-        replace(block, { ...block, w: op.w, h: op.h, x: op.x ?? block.x, y: op.y ?? block.y });
+        if (op.viewport === "mobile") {
+          startPhoneLayout();
+          const at = phoneRect(block);
+          placeOnPhone(block, { x: op.x ?? at.x, y: op.y ?? at.y, w: op.w, h: op.h });
+        } else replace(block, { ...block, w: op.w, h: op.h, x: op.x ?? block.x, y: op.y ?? block.y });
+        break;
+      }
+      case "mobile_reset": {
+        const block = find(op.block);
+        const { mobile: _mobile, ...rest } = block;
+        void _mobile;
+        replace(block, rest as StorefrontBlock);
         break;
       }
       case "rotate": {
@@ -298,7 +342,11 @@ export function applyDesignOps(
       }
       case "remove": {
         const block = find(op.block);
-        blocks = blocks.filter((candidate) => candidate !== block);
+        if (op.viewport === "mobile") {
+          // Off phones only: it stays on the desktop board.
+          startPhoneLayout();
+          placeOnPhone(block, { ...phoneRect(block), hidden: true });
+        } else blocks = blocks.filter((candidate) => candidate !== block);
         break;
       }
       case "theme": {
@@ -323,7 +371,7 @@ export function applyDesignOps(
 }
 
 /** findFreeCell reads a block's placement and nothing else. */
-function asGridBlock(block: StorefrontBlock): GridBlock {
+function asGridBlock(block: StorefrontBlock): GridBlock<StorefrontBlock> {
   const { x, y, w, h, rotation } = block;
   return { key: blockKey(block), data: block, x, y, w, h, rotation };
 }
@@ -346,5 +394,43 @@ export function boardSummary(config: StorefrontConfig) {
       h: block.h,
       ...(block.rotation ? { rotation: block.rotation } : {}),
     })),
+    phone: phoneSummary(config),
+  };
+}
+
+/**
+ * What a phone draws, in words a model can plan from. A board with a phone
+ * layout says where everything is on it. One without says what happens
+ * instead: the same board when it fits, the automatic reflow, or the whole
+ * board shrunk when it is tilted or stacked (which nothing repacks).
+ */
+export function phoneSummary(config: StorefrontConfig) {
+  const own = phoneLayout(config.theme, config.blocks);
+  if (own) {
+    return {
+      layout: "own" as const,
+      columns: own.columns,
+      rows: own.rows,
+      blocks: own.placed.map((spot) => ({
+        block: refOf(spot.block),
+        x: spot.x,
+        y: spot.y,
+        w: spot.w,
+        h: spot.h,
+        ...(spot.pinned ? {} : { placedAutomatically: true }),
+      })),
+      hidden: own.hidden.map(refOf),
+    };
+  }
+  const { theme, blocks } = config;
+  if (isFreelyArranged(blocks)) return { layout: "scaled" as const, columns: theme.columns };
+  const columns = columnsThatFit(PHONE_BOARD_WIDTH_PX, theme.gridGap, theme.columns);
+  if (columns >= theme.columns) return { layout: "same" as const, columns };
+  const reflowed = reflowBlocks(blocks.map(asGridBlock), theme.columns, columns);
+  return {
+    layout: "reflow" as const,
+    columns,
+    rows: reflowed.rows,
+    blocks: reflowed.blocks.map((spot) => ({ block: refOf(spot.data), x: spot.x, y: spot.y, w: spot.w, h: spot.h })),
   };
 }

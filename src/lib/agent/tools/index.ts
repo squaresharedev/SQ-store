@@ -3,6 +3,7 @@ import { discountTools } from "@/lib/agent/tools/discounts";
 import { moderationTools } from "@/lib/agent/tools/moderation";
 import { notificationTools } from "@/lib/agent/tools/notifications";
 import { orderTools } from "@/lib/agent/tools/orders";
+import { previewTools } from "@/lib/agent/tools/previews";
 import { productTools } from "@/lib/agent/tools/products";
 import { reviewTools } from "@/lib/agent/tools/reviews";
 import { storefrontTools } from "@/lib/agent/tools/storefronts";
@@ -14,6 +15,7 @@ export const AGENT_TOOLS: readonly AgentTool[] = [
   ...storeTools,
   ...productTools,
   ...storefrontTools,
+  ...previewTools,
   ...orderTools,
   ...discountTools,
   ...reviewTools,

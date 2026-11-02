@@ -39,6 +39,7 @@ import {
   fontPresentation,
 } from "@/lib/theme/storefront-fonts";
 import { Grid } from "@/components/grid/Grid";
+import { phoneGridLayout } from "./phone-grid";
 import {
   FRAME_Z,
   OVERLAY_Z,
@@ -664,6 +665,9 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   // Cheap enough to run per render on a 120-block board, and it has to follow
   // the blocks, since one drag onto a neighbour is what changes the answer.
   const freelyArranged = useMemo(() => isFreelyArranged(blocks), [blocks]);
+  // The board's own phone layout, when it has one: the phone preview shows
+  // what a buyer's phone draws (StorefrontBoard), not the automatic reflow.
+  const phone = useMemo(() => phoneGridLayout(theme, blocks), [theme, blocks]);
 
   // The design canvas renders at its natural size and is scaled; the mobile
   // preview simulates a real phone's width instead — fixed, not fluid, once
@@ -920,6 +924,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             // the two side by side is a different design, not a smaller one.
             // Such a board keeps its columns and its cells simply get smaller.
             responsive={!freelyArranged}
+            narrowLayout={phone}
             // Corner roundness drives the cell clip (style beats the grid's
             // default rounded-sm class); tiles inherit it, no clip of their
             // own. Scaled per tile size so big tiles round like small ones.

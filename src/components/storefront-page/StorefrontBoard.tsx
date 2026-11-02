@@ -6,6 +6,7 @@ import { Grid } from "@/components/grid/Grid";
 import type { GridBlock } from "@/components/grid/gridConstants";
 import { resolveInk } from "@/components/product-page/product-page-maps";
 import { BlockFace } from "@/components/storefront/BlockFace";
+import { phoneGridLayout } from "@/components/storefront/phone-grid";
 import { StorefrontMasthead } from "@/components/storefront/StorefrontMasthead";
 import { resolveBackgroundStyle } from "@/components/storefront/background-presets";
 import {
@@ -148,6 +149,9 @@ export function StorefrontBoard({
   }, [blocks]);
   const covers = useMemo(() => tileCovers(theme, blocks), [theme, blocks]);
   const freelyArranged = useMemo(() => isFreelyArranged(blocks), [blocks]);
+  // The seller's own phone layout, when the board has one (types/storefront,
+  // PHONE LAYOUT): drawn instead of the automatic reflow on a phone.
+  const phone = useMemo(() => phoneGridLayout(theme, blocks), [theme, blocks]);
   // Only the rows the board uses. The designer shows every row because empty
   // ones are room to build in; to a buyer they are a screen of nothing between
   // the last tile and the footer.
@@ -170,6 +174,7 @@ export function StorefrontBoard({
           columns={theme.columns}
           rows={usedRows}
           responsive={!freelyArranged}
+          narrowLayout={phone}
           // A block under a product on the same cells takes that card's
           // corners, exactly as it does on the canvas (blockTileClipStyle).
           cellStyle={(placement, gridBlock) =>

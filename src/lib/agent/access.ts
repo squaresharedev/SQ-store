@@ -12,6 +12,15 @@ export function agentAccessEnabled(): boolean {
 }
 
 /**
+ * THE SWITCH for previews an assistant asks for (preview_storefront and the
+ * pages it photographs, lib/agent/preview). Off unless set, and only ever on
+ * under the agent switch above. See LAUNCH SWITCHES in wrangler.jsonc.
+ */
+export function agentPreviewEnabled(): boolean {
+  return agentAccessEnabled() && process.env.AGENT_PREVIEW_ENABLED === "true";
+}
+
+/**
  * Whether this store may connect an assistant at all. Every plan may today.
  * This is the one place to gate it on a plan later.
  */

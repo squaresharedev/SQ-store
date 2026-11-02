@@ -128,8 +128,35 @@ export const PLACEMENT_Y_MIN = -Math.floor((CANVAS_ROWS_MAX - 1) / 2);
 export const ROTATION_MIN = -180;
 export const ROTATION_MAX = 180;
 
+// PHONE LAYOUT. Optional, and absent on every board until someone sets it: a
+// board with no `theme.mobileColumns` reflows on a phone exactly as it always
+// has (reflowBlocks in components/grid), or scales down whole when it is freely
+// arranged. Setting `theme.mobileColumns` gives the board a phone layout of
+// its own, `mobileColumns` wide: a block with a `mobile` rect sits there, a
+// block with `mobile.hidden` is left out on phones, and every other block is
+// placed for it in reading order (lib/storefront/mobile-layout). The rects are
+// the board's own cells, in the phone board's columns, never pixels or CSS.
+
+export const MOBILE_COLUMNS_MIN = 2;
+export const MOBILE_COLUMNS_MAX = 6;
+/** Where a phone layout starts when it is first asked for: what a phone fits. */
+export const DEFAULT_MOBILE_COLUMNS = 4;
+/** Below this board width, a board with a phone layout is drawn from it. */
+export const MOBILE_LAYOUT_MAX_WIDTH_PX = 640;
+
+/** Where a block sits on the phone board. `hidden` leaves it off phones. */
+export type MobilePlacement = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  hidden?: boolean;
+};
+
 /** Where a block sits on the canvas and how many cells it covers. */
 export type BlockPlacement = {
+  /** Its place on the phone board, when the board has one (see PHONE LAYOUT). */
+  mobile?: MobilePlacement;
   x: number;
   y: number;
   w: number;
@@ -1420,6 +1447,9 @@ export type StorefrontTheme = {
   soldOutBadge: boolean;
   /** Hide sold-out blocks from buyers (the designer still shows them dimmed). */
   hideSoldOut: boolean;
+  /** The phone board's width in cells, MOBILE_COLUMNS_MIN..MAX. Absent = no
+   *  phone layout: the board reflows by itself (see PHONE LAYOUT). */
+  mobileColumns?: number;
 };
 
 /**

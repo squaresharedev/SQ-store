@@ -464,6 +464,9 @@ export const RATE_LIMITS = {
   agentRegister: { max: 20, windowSeconds: 60 * 60 },
   /** Approving an app, per signed-in user. */
   agentConsent: { max: 20, windowSeconds: 60 * 60 },
+  /** Previews an assistant asks for, per connection: each one drives a real
+   *  browser twice (lib/agent/preview), so far fewer than ordinary reads. */
+  agentPreview: { max: 30, windowSeconds: 60 * 60 },
 } as const;
 
 export type RateLimitBudget = { max: number; windowSeconds: number };

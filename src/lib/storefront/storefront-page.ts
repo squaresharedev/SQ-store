@@ -86,9 +86,9 @@ export type StorefrontPageRow = {
 };
 
 /** The columns a tile needs, plus the two the gate reads. */
-const TILE_PRODUCT_SELECT = `id, title, price_cents, currency, image_key, created_at, ${MODERATION_GATE_SELECT}`;
+export const TILE_PRODUCT_SELECT = `id, title, price_cents, currency, image_key, created_at, ${MODERATION_GATE_SELECT}`;
 
-type TileProductRow = {
+export type TileProductRow = {
   id: string;
   title: string;
   price_cents: number;
@@ -283,7 +283,7 @@ export async function buildStorefrontPage(
  * carries the regular price (struck through beside it) and, when the records
  * prove one, the percentage for its sale chip. Nothing else about the sale.
  */
-async function tileProduct(
+export async function tileProduct(
   row: TileProductRow,
   href: string,
   pricing: ProductPricing | undefined,
@@ -307,7 +307,7 @@ async function tileProduct(
  * handed URLs minted for this response. A block R2 cannot sign for is left out
  * and draws nothing.
  */
-async function signImageBlocks(blocks: readonly StorefrontBlock[]): Promise<Record<string, string>> {
+export async function signImageBlocks(blocks: readonly StorefrontBlock[]): Promise<Record<string, string>> {
   const signed = await Promise.all(
     blocks.flatMap((block) =>
       block.type === "image"

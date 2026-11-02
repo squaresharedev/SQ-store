@@ -673,6 +673,28 @@ async function handleAuth(req, res, url) {
   return fail(res, 404, "not_found", `mock gotrue: no route for ${req.method} ${path}`);
 }
 
+/** One headless Chromium for every snapshot, started on the first one. */
+let snapshotBrowser = null;
+
+async function testSnapshot(request) {
+  if (!snapshotBrowser) {
+    const { chromium } = await import("@playwright/test");
+    snapshotBrowser = await chromium.launch();
+  }
+  const page = await snapshotBrowser.newPage({ viewport: request.viewport });
+  try {
+    await page.goto(request.url, { waitUntil: request.gotoOptions?.waitUntil ?? "load", timeout: request.gotoOptions?.timeout });
+    if (request.waitForSelector) {
+      await page.waitForSelector(request.waitForSelector.selector, { state: "attached", timeout: request.waitForSelector.timeout });
+    }
+    const options = request.screenshotOptions ?? {};
+    const screenshot = await page.screenshot({ fullPage: options.fullPage, type: options.type, quality: options.quality });
+    return { success: true, result: { screenshot: screenshot.toString("base64"), content: await page.content() } };
+  } finally {
+    await page.close();
+  }
+}
+
 const gateway = createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${GATEWAY_PORT}`);
 
@@ -683,6 +705,18 @@ const gateway = createServer(async (req, res) => {
       "Access-Control-Allow-Methods": "*",
     });
     return res.end();
+  }
+
+  // Browser Run's snapshot quick action, for previews (lib/agent/preview/
+  // snapshot.ts): the same request, answered with the same shape, by a headless
+  // Chromium of the stack's own. Production never points here.
+  if (req.method === "POST" && url.pathname === "/__test/snapshot") {
+    try {
+      return json(res, 200, await testSnapshot(await readBody(req)));
+    } catch (error) {
+      console.error("[stack] snapshot error", error);
+      return json(res, 500, { success: false });
+    }
   }
 
   if (url.pathname.startsWith("/auth/v1")) {
@@ -796,6 +830,9 @@ const next = spawn(
       // the secret this stack's PostgREST trusts.
       AGENT_ACCESS_ENABLED: "true",
       AGENT_JWT_SIGNING_KEY: JSON.stringify({ kty: "oct", k: Buffer.from(JWT_SECRET).toString("base64url") }),
+      // Previews on, photographed by the stack's own browser (testSnapshot).
+      AGENT_PREVIEW_ENABLED: "true",
+      AGENT_PREVIEW_TEST_SNAPSHOT_URL: `http://127.0.0.1:${GATEWAY_PORT}/__test/snapshot`,
       TRANSACTIONAL_EMAIL_FROM: "no-reply@e2e.squareshare.to",
       SMS_SENDER: "Squareshare",
       CONTACT_VERIFICATION_KEY: "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE",

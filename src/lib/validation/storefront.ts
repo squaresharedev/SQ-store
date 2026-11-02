@@ -27,6 +27,8 @@ import {
   CANVAS_COLUMNS_MIN,
   CANVAS_ROWS_MAX,
   CANVAS_ROWS_MIN,
+  MOBILE_COLUMNS_MAX,
+  MOBILE_COLUMNS_MIN,
   PLACEMENT_X_MIN,
   PLACEMENT_Y_MIN,
   CORNER_RADIUS_MAX,
@@ -307,6 +309,8 @@ const themeObjectSchema = z.strictObject({
   gridGap: z.number().int().min(0).max(GRID_GAP_MAX),
   soldOutBadge: z.boolean(),
   hideSoldOut: z.boolean(),
+  // The phone board's width. Absent = no phone layout (see PHONE LAYOUT).
+  mobileColumns: z.number().int().min(MOBILE_COLUMNS_MIN).max(MOBILE_COLUMNS_MAX).optional(),
 });
 
 /** Legacy text-size enum -> px, matching the classes each one rendered at
@@ -673,6 +677,18 @@ const placementFields = {
   // paint order, and refusing to save it would be an error the seller has no
   // way to act on.
   z: z.number().int().min(0).max(MAX_BLOCKS - 1).optional(),
+  // Its place on the phone board (types/storefront, PHONE LAYOUT): cells only,
+  // bounded like the desktop rect. Optional, so a board without a phone layout
+  // is byte-identical to one saved before phone layouts existed.
+  mobile: z
+    .strictObject({
+      x: z.number().int().min(0).max(MOBILE_COLUMNS_MAX - 1),
+      y: z.number().int().min(0).max(CANVAS_ROWS_MAX - 1),
+      w: z.number().int().min(1).max(MOBILE_COLUMNS_MAX),
+      h: z.number().int().min(1).max(CANVAS_ROWS_MAX),
+      hidden: z.boolean().optional(),
+    })
+    .optional(),
 };
 
 // Per-tile card styling: the SAME closed enums and bounded integers as the
@@ -863,12 +879,23 @@ const configObjectSchema = z
   // has no placement that hides its overhang, and refusing that save would
   // strand the design rather than protect it.
   .superRefine((config, ctx) => {
-    const { columns, rows } = config.theme;
+    const { columns, rows, mobileColumns } = config.theme;
     config.blocks.forEach((block, index) => {
       if (!isOnBoard(block, block.rotation ?? 0, columns, rows)) {
         ctx.addIssue({
           code: "custom",
           path: ["blocks", index],
+          message: issueKey("Validation.storefront.blockOutsideCanvas"),
+        });
+      }
+      // A phone placement fits the phone board, the same rule as the desktop
+      // one, against the phone's own width. Only asked while there is a phone
+      // board: placements kept from before it was switched off are inert.
+      const phone = block.mobile;
+      if (mobileColumns !== undefined && phone && !phone.hidden && phone.x + phone.w > mobileColumns) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["blocks", index, "mobile"],
           message: issueKey("Validation.storefront.blockOutsideCanvas"),
         });
       }

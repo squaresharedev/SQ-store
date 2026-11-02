@@ -41,8 +41,26 @@ export type AgentTool<Schema extends z.ZodObject = z.ZodObject> = {
   ownerOnly?: boolean;
   annotations: ToolAnnotations;
   input: Schema;
+  /** An MCP Apps view (`ui://`) a host that has them shows the result in. */
+  view?: string;
+  /** Behind a switch of its own: listed and callable only while this is true. */
+  enabled?: () => boolean;
   handler: (input: z.output<Schema>, call: ToolCall) => Promise<unknown>;
 };
+
+/**
+ * A result that carries pictures as well as data, for a tool with a `view`.
+ * `data` is what the model reads (and what every host shows); `images` go
+ * beside it as image content, so the model sees them too; `view` is the
+ * structured data the view draws from, which a host keeps from the model.
+ */
+export class ToolMedia {
+  constructor(
+    readonly data: unknown,
+    readonly images: readonly { data: string; mimeType: string }[],
+    readonly view: Record<string, unknown>,
+  ) {}
+}
 
 export function defineTool<Schema extends z.ZodObject>(tool: AgentTool<Schema>): AgentTool {
   return tool as unknown as AgentTool;

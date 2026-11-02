@@ -471,6 +471,13 @@ interface GridCommonProps<TData> {
    *  cells. Off for boards that are scaled down as a whole rather than
    *  re-laid-out, where the designed coordinates ARE the thing being shown. */
   responsive?: boolean;
+  /**
+   * A layout of its own for narrow containers, used instead of reflowing (or of
+   * scaling, for a board that is not `responsive`) once the container is
+   * narrower than `maxWidth`. Read-only, like a reflowed board. The consumer
+   * decides where each block goes; the grid only draws it.
+   */
+  narrowLayout?: { maxWidth: number; columns: number; rows: number; blocks: GridBlock<TData>[] } | null;
   /** Accessible name for the grid list. */
   ariaLabel?: string;
   /** Accessible name per block, for its drag/resize affordances. */
@@ -572,6 +579,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     columns = GRID_COLUMNS_DEFAULT,
     rows = GRID_ROWS_DEFAULT,
     responsive = true,
+    narrowLayout = null,
     onMove,
     onResize,
     onMoveMany,
@@ -889,8 +897,9 @@ export function Grid<TData>(props: GridProps<TData>) {
   useEffect(() => {
     const container = containerRef.current;
     // A non-responsive grid never consults its width, so it also never pays
-    // for the observer — which matters on a page of preview cards.
-    if (!container || !responsive) return;
+    // for the observer — which matters on a page of preview cards. One with a
+    // narrow layout of its own has to know when to switch to it.
+    if (!container || (!responsive && !narrowLayout)) return;
     const measure = () => {
       const grid = gridRef.current;
       const gap = grid
@@ -902,16 +911,22 @@ export function Grid<TData>(props: GridProps<TData>) {
     const observer = new ResizeObserver(measure);
     observer.observe(container);
     return () => observer.disconnect();
-  }, [responsive]);
+  }, [responsive, narrowLayout]);
 
-  const renderColumns =
-    responsive && metrics.width > 0
+  const narrow = Boolean(narrowLayout && metrics.width > 0 && metrics.width < narrowLayout.maxWidth);
+  const renderColumns = narrow && narrowLayout
+    ? narrowLayout.columns
+    : responsive && metrics.width > 0
       ? columnsThatFit(metrics.width, metrics.gap, columns)
       : columns;
 
   // Exact tier: coordinates are honoured. Reflow tier: they are not, so the
-  // board is read-only until it has room again.
+  // board is read-only until it has room again. Narrow layout tier: the
+  // consumer's own placements, read-only the same way.
   const view = useMemo(() => {
+    if (narrow && narrowLayout) {
+      return { blocks: narrowLayout.blocks, rows: Math.max(narrowLayout.rows, 1), reflowed: true };
+    }
     if (renderColumns >= columns) {
       return { blocks, rows, reflowed: false };
     }
@@ -921,7 +936,7 @@ export function Grid<TData>(props: GridProps<TData>) {
       rows: Math.max(reflowed.rows, 1),
       reflowed: true,
     };
-  }, [blocks, columns, rows, renderColumns]);
+  }, [blocks, columns, rows, renderColumns, narrow, narrowLayout]);
 
   /**
    * COORDINATES ARE HONOURED, so a gesture that writes them is meaningful.

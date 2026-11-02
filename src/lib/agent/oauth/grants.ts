@@ -261,16 +261,25 @@ export async function grantForAccessToken(accessToken: string): Promise<LiveGran
     .maybeSingle();
   if (error) throw new Error(`Reading an agent token failed: ${error.message}`);
   if (!token || Date.parse(token.expires_at) <= Date.now()) return null;
+  return liveGrant(token.grant_id, { touch: true });
+}
 
+/**
+ * A grant that is still in force, by id, or null. Read every time, so a
+ * revocation takes effect at once. `touch` records the use (at most every
+ * LAST_USED_WRITE_MS), which only a call from the app itself should do.
+ */
+export async function liveGrant(grantId: string, options: { touch?: boolean } = {}): Promise<LiveGrant | null> {
+  const admin = createAdminClient();
   const { data: grant, error: grantError } = await admin
     .from("agent_grants")
     .select("id, user_id, account_id, client_id, scopes, resource, revoked_at, last_used_at")
-    .eq("id", token.grant_id)
+    .eq("id", grantId)
     .maybeSingle();
   if (grantError) throw new Error(`Reading an agent grant failed: ${grantError.message}`);
   if (!grant || grant.revoked_at) return null;
 
-  if (!grant.last_used_at || Date.now() - Date.parse(grant.last_used_at) > LAST_USED_WRITE_MS) {
+  if (options.touch && (!grant.last_used_at || Date.now() - Date.parse(grant.last_used_at) > LAST_USED_WRITE_MS)) {
     const touched = await admin
       .from("agent_grants")
       .update({ last_used_at: new Date().toISOString() })

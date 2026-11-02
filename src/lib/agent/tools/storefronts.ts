@@ -150,6 +150,8 @@ export const storefrontTools = [
         id: storefront.id,
         name: storefront.name,
         version: storefront.version,
+        // Where everything is on desktop and on a phone, worked out.
+        board: boardSummary(storefront.config),
         config: await withholdObjectKeys(storefront.config),
         ...(storefront.removal ? { takenDown: storefront.removal } : {}),
       };
@@ -230,6 +232,9 @@ export const storefrontTools = [
       "move (x, y), resize (w, h), rotate (clockwise degrees), layer (front, forward, backward, back), remove; " +
       "style changes a block's look with `changes`: on a shape kind, color, borderWidth, borderColor, opacity, roundness, points; on text text, variant, align, color, fontSize, font, bold, italic, underline; on an image alt, fit, opacity, imagePlacement, file; on a product tile the per-tile look such as cornerRadius, titleStyle, priceTagPosition, priceTagColor, and imagePlacement to frame its photo; " +
       "theme changes the whole board with `changes`: background ({kind:solid,color} or {kind:gradient,from,to,angle}), accent, font, columns, rows, cornerRadius, gridGap and more; header changes the store name and bio above the board. " +
+      "PHONES: most buyers are on a phone. Without a phone layout a board reflows by itself, or shrinks whole when blocks are tilted or stacked; `board.phone` in the answer says which and where things land. " +
+      "Give move, resize or remove `viewport: \"mobile\"` to place a block on the phone board instead (remove then only hides it on phones); the first one starts a phone layout " +
+      "(theme.mobileColumns, 2 to 6 columns, default 4) and blocks you have not placed keep being placed automatically around yours. mobile_reset hands a block back to automatic placement; theme changes {mobileColumns: null} drops the phone layout. " +
       "get_schema with of=storefront_config has every field and limit. Colors are strict #rrggbb. Answers with the board as it now stands and the new `version`.",
     scope: "storefronts:write",
     permission: "storefront.write",

@@ -1,5 +1,6 @@
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, createHmac, hkdfSync, randomBytes } from "node:crypto";
+import { writeFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import {
   PUBLISHABLE_SELLER,
@@ -12,6 +13,7 @@ import {
   userIdByEmail,
 } from "./helpers";
 import { ageSecondFactor, enablePasskey, enableTwoFactor, nextCode } from "./two-factor";
+import { JWT_SECRET } from "./stack/keys.mjs";
 
 /**
  * The MCP server, end to end, the way a real client meets it: a 401, discovery,
@@ -19,7 +21,8 @@ import { ageSecondFactor, enablePasskey, enableTwoFactor, nextCode } from "./two
  * official MCP client SDK calling tools, whose results show up in the dashboard.
  */
 
-const APP = "http://localhost:3100";
+// The stack moves off 3100 when E2E_APP_PORT says so (tests/e2e/stack/keys.mjs).
+const APP = `http://localhost:${process.env.E2E_APP_PORT || 3100}`;
 const MCP = `${APP}/mcp`;
 const REDIRECT = "https://client.example/callback";
 
@@ -982,5 +985,136 @@ test.describe("an account without two-factor", () => {
     await expect(form.getByRole("button", { name: "Confirm with passkey" })).toHaveCount(0);
     const landed = await approve(page);
     expect(landed.searchParams.get("code")).toBeTruthy();
+  });
+});
+
+/** A preview page token, minted the way lib/agent/preview/token.ts does, from the
+ *  stack's own agent key: proves the derivation, and lets a spec open the page. */
+function previewToken(storefrontId: string, grantId: string, lifetimeSeconds = 120): string {
+  const agentKey = Buffer.from(JWT_SECRET);
+  const key = Buffer.from(hkdfSync("sha256", agentKey, Buffer.alloc(0), "square-share agent preview v1", 32));
+  const body = Buffer.from(
+    JSON.stringify({ kind: "storefront", id: storefrontId, grantId, exp: Math.floor(Date.now() / 1000) + lifetimeSeconds }),
+  ).toString("base64url");
+  return `${body}.${createHmac("sha256", key).update(body).digest("base64url")}`;
+}
+
+type RawResult = {
+  isError?: boolean;
+  content: ({ type: "text"; text: string } | { type: "image"; data: string; mimeType: string })[];
+  structuredContent?: Record<string, unknown>;
+};
+
+test.describe("previews", () => {
+  test.setTimeout(240_000);
+
+  test("preview_storefront shows the real board on a desktop and a phone, as pictures, for the model and the view", async ({ page }) => {
+    const user = freshUser("mcppreview");
+    await signUp(page, user);
+    const { accessToken } = await connect(page);
+    const client = await mcpClient(accessToken);
+
+    // Advertised as an MCP App: the tool names its view, and the view is served.
+    const { tools } = await client.listTools();
+    const tool = tools.find((candidate) => candidate.name === "preview_storefront");
+    expect((tool?._meta as { ui?: { resourceUri?: string } })?.ui?.resourceUri).toBe("ui://square-share/storefront-preview");
+    const view = await client.readResource({ uri: "ui://square-share/storefront-preview" });
+    expect(view.contents[0]).toMatchObject({ mimeType: "text/html;profile=mcp-app" });
+    expect((view.contents[0] as { text: string }).text).toContain("ui/initialize");
+
+    const product = await call(client, "create_product", { title: "Preview lamp", priceCents: 1200, currency: "EUR" });
+    expect(product.isError, JSON.stringify(product.data)).toBe(false);
+    const productId = (product.data.id ?? (product.data.product as { id: string }).id) as string;
+    const id = (await call(client, "create_storefront")).data.id as string;
+    const edited = await call(client, "edit_storefront", {
+      id,
+      operations: [
+        { op: "add_product", productId, x: 4, y: 0, w: 2, h: 2 },
+        { op: "add_text", text: "Previewed", x: 0, y: 0, w: 3, h: 1 },
+        // Its own place on a phone: first, the whole width.
+        { op: "move", block: productId, x: 0, y: 0, viewport: "mobile" },
+        { op: "resize", block: productId, w: 4, h: 2, viewport: "mobile" },
+      ],
+    });
+    expect(edited.isError, JSON.stringify(edited.data)).toBe(false);
+    expect((edited.data.board as { phone: { layout: string } }).phone.layout).toBe("own");
+
+    const result = (await client.callTool({ name: "preview_storefront", arguments: { id } })) as RawResult;
+    expect(result.isError).toBeFalsy();
+
+    // Words first, for every host: what was taken, and what keeps it from buyers.
+    const words = JSON.parse((result.content[0] as { text: string }).text) as { pictures: string[]; notes: string[] };
+    expect(words.pictures).toEqual(["desktop", "mobile"]);
+    expect(words.notes.join(" ")).toContain("Preview lamp");
+    expect(words.notes.join(" ")).toMatch(/not shown to buyers until published/);
+    expect(words.notes.join(" ")).toMatch(/Buyers cannot open this storefront yet/);
+
+    // Then the two pictures, which the model sees as images.
+    const images = result.content.filter((block) => block.type === "image") as { data: string; mimeType: string }[];
+    expect(images).toHaveLength(2);
+    for (const image of images) {
+      expect(image.mimeType).toBe("image/jpeg");
+      expect(Buffer.from(image.data, "base64").subarray(0, 2).toString("hex")).toBe("ffd8");
+    }
+
+    // And what the view draws from: which picture is which, and where the tile is in each.
+    const data = result.structuredContent as {
+      imageIndex: Record<string, number>;
+      viewports: Record<string, { page: { width: number }; tiles: { productId: string; x: number; w: number }[] }>;
+    };
+    expect(data.imageIndex).toEqual({ desktop: 1, mobile: 2 });
+    const desk = data.viewports.desktop.tiles.find((tile) => tile.productId === productId)!;
+    const phone = data.viewports.mobile.tiles.find((tile) => tile.productId === productId)!;
+    // Desktop: two of six columns, on the right. Phone: the whole width.
+    expect(desk.x).toBeGreaterThan(data.viewports.desktop.page.width / 2);
+    expect(phone.w).toBeGreaterThan(data.viewports.mobile.page.width * 0.7);
+    await client.close();
+
+    for (const [name, index] of Object.entries(data.imageIndex)) {
+      const image = result.content[index] as { data: string };
+      writeFileSync(`test-results/mcp-preview-${name}.jpg`, Buffer.from(image.data, "base64"));
+    }
+  });
+
+  test("a preview shows only the caller's own store, and its page only to a live grant", async ({ page, browser }) => {
+    const owner = freshUser("mcpprevown");
+    await signUp(page, owner);
+    const { accessToken, refreshToken, clientId } = await connect(page);
+    const client = await mcpClient(accessToken);
+    const id = (await call(client, "create_storefront")).data.id as string;
+
+    // Another store's storefront is not found, before any picture is taken.
+    const otherContext = await browser.newContext();
+    const otherPage = await otherContext.newPage();
+    const other = freshUser("mcpprevother");
+    await signUp(otherPage, other);
+    const otherClient = await mcpClient((await connect(otherPage)).accessToken);
+    const foreignId = (await call(otherClient, "create_storefront")).data.id as string;
+    await otherClient.close();
+    await otherContext.close();
+    const refused = await call(client, "preview_storefront", { id: foreignId });
+    expect(refused.isError).toBe(true);
+    expect((refused.data as { error: { code: string } }).error.code).toBe("not_found");
+    await client.close();
+
+    // The page itself: a good token opens it; a token for another storefront,
+    // a forged or expired one, or one for a revoked grant is the same 404.
+    const [grant] = (await serviceRest(`/agent_grants?client_id=eq.${encodeURIComponent(clientId)}&select=id`)) as { id: string }[];
+    const open = (storefrontId: string, token: string) =>
+      page.request.get(`/agent-preview/storefront/${storefrontId}?t=${encodeURIComponent(token)}`);
+    const good = await open(id, previewToken(id, grant.id));
+    expect(good.status()).toBe(200);
+    expect(await good.text()).toContain(`data-storefront-page="${id}"`);
+    expect((await open(foreignId, previewToken(foreignId, grant.id))).status()).toBe(404);
+    expect((await open(id, previewToken(foreignId, grant.id))).status()).toBe(404);
+    expect((await open(id, previewToken(id, grant.id, -5))).status()).toBe(404);
+    expect((await open(id, `${previewToken(id, grant.id).split(".")[0]}.${"A".repeat(43)}`)).status()).toBe(404);
+
+    await fetch(`${APP}/oauth/revoke`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ token: refreshToken, client_id: clientId }),
+    });
+    expect((await open(id, previewToken(id, grant.id))).status()).toBe(404);
   });
 });

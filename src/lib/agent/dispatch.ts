@@ -3,7 +3,7 @@ import { agentContext } from "@/lib/agent/context";
 import { UnknownHandleError } from "@/lib/agent/object-refs";
 import { recordToolCall } from "@/lib/agent/oauth/grants";
 import { findSecret } from "@/lib/agent/secrets";
-import { ToolFailure, type AgentTool } from "@/lib/agent/tool";
+import { ToolFailure, ToolMedia, type AgentTool } from "@/lib/agent/tool";
 import { appUrl } from "@/lib/app-url";
 import { msg, type MessageRef } from "@/i18n/types";
 import {
@@ -27,7 +27,14 @@ import type { AgentScope } from "@/lib/agent/scopes";
 
 /** What comes back: the data, or the app's error envelope. */
 export type ToolResult =
-  | { ok: true; data: unknown }
+  | {
+      ok: true;
+      data: unknown;
+      /** Pictures for the model and the view (ToolMedia). */
+      images?: readonly { data: string; mimeType: string }[];
+      /** What the tool's MCP Apps view draws from. */
+      view?: Record<string, unknown>;
+    }
   | { ok: false; error: ToolErrorEnvelope };
 
 /**
@@ -48,6 +55,7 @@ export function toolAvailable(
   scopes: ReadonlySet<AgentScope>,
   account: ActiveAccount,
 ): boolean {
+  if (tool.enabled && !tool.enabled()) return false;
   if (!scopes.has(tool.scope)) return false;
   if (!can(account.role, tool.permission)) return false;
   if (tool.ownerOnly && !account.isOwner) return false;
@@ -97,14 +105,17 @@ export async function callTool(tool: AgentTool, rawInput: unknown, account: Acti
       throw new ToolFailure(invalidInput(firstIssue(parsed.error, msg("Errors.agent.invalidInput"))));
     }
 
-    const data = await tool.handler(parsed.data, { account, grantId: agent.grantId });
+    const returned = await tool.handler(parsed.data, { account, grantId: agent.grantId });
+    const media = returned instanceof ToolMedia ? returned : null;
+    const data = media ? media.data : returned;
 
-    const secret = findSecret(data);
+    // Pictures are pixels; everything in words is checked, the view's data too.
+    const secret = findSecret(data) ?? (media ? findSecret(media.view) : null);
     if (secret) {
       console.error(`[agent] ${tool.name} tried to return a secret at ${secret}. Refused.`);
       throw new ToolFailure(serverError("agentTools"));
     }
-    return finish("ok", { ok: true, data });
+    return finish("ok", media ? { ok: true, data, images: media.images, view: media.view } : { ok: true, data });
   } catch (error) {
     if (error instanceof ToolFailure) {
       return finish(error.error.code, { ok: false, error: await toEnvelope(error.error) });

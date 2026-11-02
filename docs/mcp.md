@@ -93,6 +93,10 @@ never resends blocks it was not asked about. The rules are pure data in
 `add_image` through `lib/uploads/store-element.ts`, shared with the upload route.
 `save_storefront` remains for renaming and for replacing a whole config member.
 
+Phone layouts (`viewport: "mobile"`, `mobile_reset`, `theme.mobileColumns`) and
+`preview_storefront`, which returns screenshots of the real renderer and an MCP
+Apps view, are designed in `docs/mcp-apps.md`.
+
 ## Not exposed yet
 
 Digital file, font and document uploads; review CSV import and export;
