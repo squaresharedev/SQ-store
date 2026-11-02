@@ -814,7 +814,9 @@
       "copy": "Copier l’adresse",
       "copied": "Copiée",
       "copyFailed": "Impossible de copier. Sélectionnez l’adresse et copiez-la vous-même.",
-      "paused": "La connexion d’assistants est désactivée pour le moment."
+      "openClaude": "Ouvrir les connecteurs Claude",
+      "capabilitiesTitle": "Ce qu’un assistant peut faire",
+      "offByDefault": "Désactivé par défaut"
     },
     "lastUsed": "Dernière utilisation {when}",
     "neverUsed": "Pas encore utilisée",
@@ -886,6 +888,10 @@
         "label": "Supprimer des éléments",
         "hint": "Supprimer des produits, des vitrines et des réductions, et remplacer les clés d’intégration. Cette action est irréversible."
       }
+    },
+    "app": {
+      "capabilitiesLabel": "Ce que {app} peut faire",
+      "changeHint": "Pour modifier cela, déconnectez-la puis reconnectez-la."
     }
   }
 }

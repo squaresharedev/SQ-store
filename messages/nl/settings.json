@@ -814,7 +814,9 @@
       "copy": "Adres kopiëren",
       "copied": "Gekopieerd",
       "copyFailed": "Kopiëren is niet gelukt. Selecteer het adres en kopieer het zelf.",
-      "paused": "Assistenten koppelen staat voorlopig uit."
+      "openClaude": "Claude-connectors openen",
+      "capabilitiesTitle": "Wat een assistent kan doen",
+      "offByDefault": "Standaard uit"
     },
     "lastUsed": "Laatst gebruikt {when}",
     "neverUsed": "Nog niet gebruikt",
@@ -886,6 +888,10 @@
         "label": "Dingen verwijderen",
         "hint": "Producten, etalages en kortingen verwijderen en insluitsleutels vervangen. Dit kan niet ongedaan worden gemaakt."
       }
+    },
+    "app": {
+      "capabilitiesLabel": "Wat {app} kan doen",
+      "changeHint": "Om dit te wijzigen, koppel je de app los en koppel je hem opnieuw."
     }
   }
 }

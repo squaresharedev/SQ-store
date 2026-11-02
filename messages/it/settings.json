@@ -814,7 +814,9 @@
       "copy": "Copia indirizzo",
       "copied": "Copiato",
       "copyFailed": "Impossibile copiare. Seleziona l’indirizzo e copialo tu.",
-      "paused": "Il collegamento degli assistenti è disattivato per ora."
+      "openClaude": "Apri i connettori di Claude",
+      "capabilitiesTitle": "Cosa può fare un assistente",
+      "offByDefault": "Disattivato per impostazione predefinita"
     },
     "lastUsed": "Ultimo utilizzo {when}",
     "neverUsed": "Non ancora usata",
@@ -886,6 +888,10 @@
         "label": "Eliminare elementi",
         "hint": "Eliminare prodotti, vetrine e sconti, e sostituire le chiavi di incorporamento. Non si può annullare."
       }
+    },
+    "app": {
+      "capabilitiesLabel": "Cosa può fare {app}",
+      "changeHint": "Per cambiarlo, scollegala e ricollegala."
     }
   }
 }

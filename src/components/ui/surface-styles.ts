@@ -93,6 +93,16 @@ export const badgeClass =
   "rounded-full bg-secondary px-2 py-0.5 font-inter text-xs font-medium";
 
 /**
+ * The On / Off mark beside something switchable (sign-in approval, what a
+ * connected app may do). Outlined and monochrome: ink when on, muted when off,
+ * and the word itself says which. Pair with switchStateOnClass or
+ * switchStateOffClass.
+ */
+export const switchStateClass = "border px-1.5 py-0.5 font-inter text-xs font-semibold leading-none";
+export const switchStateOnClass = "border-foreground text-foreground";
+export const switchStateOffClass = "border-border text-muted-foreground";
+
+/**
  * An ink pill that marks the one thing in a set worth looking at first ("Best
  * value" on a plan, "Cheapest for you" in the calculator). Monochrome: the
  * ink is the emphasis, never a colour.

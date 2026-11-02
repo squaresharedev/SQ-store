@@ -814,7 +814,9 @@
       "copy": "Copiar dirección",
       "copied": "Copiada",
       "copyFailed": "No se pudo copiar. Selecciona la dirección y cópiala tú.",
-      "paused": "Conectar asistentes está desactivado por ahora."
+      "openClaude": "Abrir conectores de Claude",
+      "capabilitiesTitle": "Lo que puede hacer un asistente",
+      "offByDefault": "Desactivado por defecto"
     },
     "lastUsed": "Último uso {when}",
     "neverUsed": "Aún sin usar",
@@ -886,6 +888,10 @@
         "label": "Borrar cosas",
         "hint": "Borrar productos, escaparates y descuentos, y sustituir claves de inserción. No se puede deshacer."
       }
+    },
+    "app": {
+      "capabilitiesLabel": "Lo que puede hacer {app}",
+      "changeHint": "Para cambiarlo, desconéctala y vuelve a conectarla."
     }
   }
 }

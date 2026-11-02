@@ -9,6 +9,9 @@ export const OAUTH_REVOKE_PATH = "/oauth/revoke";
 export const PROTECTED_RESOURCE_METADATA_PATH = `/.well-known/oauth-protected-resource${MCP_PATH}`;
 export const CONNECTED_APPS_PATH = "/settings/connected-apps";
 
+/** Where a person adds a custom connector in Claude (Settings > Connectors). */
+export const CLAUDE_CONNECTORS_URL = "https://claude.ai/settings/connectors";
+
 /** This server's identity as an OAuth issuer. */
 export function oauthIssuer(): string {
   return appOrigin();

@@ -672,9 +672,27 @@ test.describe("taking access away", () => {
     await client.close();
 
     await gotoApp(page, "/settings/connected-apps");
+    // The address, the way into Claude and what an assistant can be allowed to
+    // do, whatever is connected.
     await expect(page.locator("[data-mcp-url]")).toContainText("/mcp");
+    await expect(page.locator("[data-open-claude]")).toHaveAttribute("href", "https://claude.ai/settings/connectors");
+    await expect(page.locator("[data-mcp-capabilities] [data-scope]")).toHaveCount(12);
+    await expect(page.getByText("Connecting assistants is switched off")).toHaveCount(0);
+
     const row = page.locator('[data-connected-app="Revocable App"]');
     await expect(row).toContainText("client.example");
+    // A name is only a claim, so an app at an unknown host wears its letter, not a logo.
+    await expect(row.locator("[data-app-logo]")).toHaveAttribute("data-app-logo", "letter");
+    // What it was given is on, and what was left out is off.
+    await expect(row.locator('[data-scope="store:read"]')).toHaveAttribute("data-scope-state", "on");
+    await expect(row.locator('[data-scope="products:write"]')).toHaveAttribute("data-scope-state", "on");
+    await expect(row.locator('[data-scope="orders:refund"]')).toHaveAttribute("data-scope-state", "off");
+    await expect(row.locator('[data-scope="destructive"]')).toHaveAttribute("data-scope-state", "off");
+    for (const [width, height, name] of [[1280, 900, "desktop"], [390, 844, "phone"]] as const) {
+      await page.setViewportSize({ width, height });
+      await page.screenshot({ path: `test-results/connected-apps-${name}.png`, fullPage: true });
+    }
+    await page.setViewportSize({ width: 1280, height: 720 });
     await row.getByRole("button", { name: /disconnect/i }).click();
     await page.getByRole("dialog").getByRole("button", { name: /disconnect/i }).click();
     await expect(page.locator('[data-connected-app="Revocable App"]')).toHaveCount(0);

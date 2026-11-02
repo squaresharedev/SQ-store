@@ -814,7 +814,9 @@
       "copy": "Kopírovať adresu",
       "copied": "Skopírované",
       "copyFailed": "Kopírovanie sa nepodarilo. Označte adresu a skopírujte ju ručne.",
-      "paused": "Pripájanie asistentov je zatiaľ vypnuté."
+      "openClaude": "Otvoriť konektory v Claude",
+      "capabilitiesTitle": "Čo môže asistent robiť",
+      "offByDefault": "Predvolene vypnuté"
     },
     "lastUsed": "Naposledy použité {when}",
     "neverUsed": "Zatiaľ nepoužité",
@@ -886,6 +888,10 @@
         "label": "Odstraňovať veci",
         "hint": "Odstraňovať produkty, výklady a zľavy a meniť kľúče na vkladanie. Nedá sa to vrátiť späť."
       }
+    },
+    "app": {
+      "capabilitiesLabel": "Čo môže {app} robiť",
+      "changeHint": "Ak to chcete zmeniť, aplikáciu odpojte a znova pripojte."
     }
   }
 }

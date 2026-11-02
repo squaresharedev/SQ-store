@@ -814,7 +814,9 @@
       "copy": "Copiar endereço",
       "copied": "Copiado",
       "copyFailed": "Não foi possível copiar. Selecione o endereço e copie-o manualmente.",
-      "paused": "A ligação de assistentes está desativada por agora."
+      "openClaude": "Abrir conectores do Claude",
+      "capabilitiesTitle": "O que um assistente pode fazer",
+      "offByDefault": "Desativado por predefinição"
     },
     "lastUsed": "Última utilização {when}",
     "neverUsed": "Ainda não utilizada",
@@ -886,6 +888,10 @@
         "label": "Eliminar coisas",
         "hint": "Eliminar produtos, montras e descontos, e substituir chaves de incorporação. Isto não pode ser desfeito."
       }
+    },
+    "app": {
+      "capabilitiesLabel": "O que {app} pode fazer",
+      "changeHint": "Para alterar isto, desligue a aplicação e volte a ligá-la."
     }
   }
 }

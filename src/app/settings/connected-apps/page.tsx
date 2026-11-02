@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { ConnectedAppsSection } from "@/components/settings/ConnectedAppsSection";
-import { agentAccessEnabled } from "@/lib/agent/access";
 import { listConnectedApps } from "@/lib/agent/oauth/grants";
 import { redirectDisplayHost } from "@/lib/agent/oauth/redirects";
 import { CONNECTED_APPS_PATH, mcpResourceUrl } from "@/lib/agent/paths";
@@ -14,9 +13,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Settings > Connected apps: the address to connect an assistant with, and every
- * app this person has let in, each one a press away from being out again. Stays
- * up while the agent switch is off, so anyone can still disconnect an app.
+ * Settings > Connected apps: the address to connect an assistant with, what an
+ * assistant can be allowed to do, and every app this person has let in with
+ * what each may do, each one a press away from being out again. The address is
+ * always shown: it is this server's fixed public URL, whatever the switch says.
  */
 export default async function ConnectedAppsPage() {
   const user = await requireUser(CONNECTED_APPS_PATH);
@@ -25,7 +25,7 @@ export default async function ConnectedAppsPage() {
 
   return (
     <ConnectedAppsSection
-      mcpUrl={agentAccessEnabled() ? mcpResourceUrl() : null}
+      mcpUrl={mcpResourceUrl()}
       apps={apps.map((app) => ({
         grantId: app.grantId,
         name: app.appName,

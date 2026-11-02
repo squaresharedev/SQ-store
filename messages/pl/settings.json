@@ -814,7 +814,9 @@
       "copy": "Kopiuj adres",
       "copied": "Skopiowano",
       "copyFailed": "Nie udało się skopiować. Zaznacz adres i skopiuj go ręcznie.",
-      "paused": "Łączenie asystentów jest na razie wyłączone."
+      "openClaude": "Otwórz konektory w Claude",
+      "capabilitiesTitle": "Co może robić asystent",
+      "offByDefault": "Domyślnie wyłączone"
     },
     "lastUsed": "Ostatnio użyto {when}",
     "neverUsed": "Jeszcze nieużywana",
@@ -886,6 +888,10 @@
         "label": "Usuwaj rzeczy",
         "hint": "Usuwaj produkty, witryny i rabaty oraz wymieniaj klucze osadzania. Tego nie da się cofnąć."
       }
+    },
+    "app": {
+      "capabilitiesLabel": "Co może robić {app}",
+      "changeHint": "Aby to zmienić, odłącz aplikację i połącz ją ponownie."
     }
   }
 }

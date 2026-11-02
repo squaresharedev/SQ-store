@@ -814,7 +814,9 @@
       "copy": "Adresse kopieren",
       "copied": "Kopiert",
       "copyFailed": "Kopieren nicht möglich. Markiere die Adresse und kopiere sie selbst.",
-      "paused": "Das Verbinden von Assistenten ist vorerst abgeschaltet."
+      "openClaude": "Claude-Connectors öffnen",
+      "capabilitiesTitle": "Was ein Assistent tun kann",
+      "offByDefault": "Standardmäßig aus"
     },
     "lastUsed": "Zuletzt genutzt {when}",
     "neverUsed": "Noch nicht genutzt",
@@ -886,6 +888,10 @@
         "label": "Dinge löschen",
         "hint": "Produkte, Schaufenster und Rabatte löschen und Einbettungsschlüssel ersetzen. Das lässt sich nicht rückgängig machen."
       }
+    },
+    "app": {
+      "capabilitiesLabel": "Was {app} tun kann",
+      "changeHint": "Um das zu ändern, trenne die App und verbinde sie neu."
     }
   }
 }

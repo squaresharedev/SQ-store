@@ -9,6 +9,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { HeroMark } from "@/components/ui/HeroMark";
 import { useActionStateToast, useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { infoTextClass } from "@/components/ui/control-styles";
+import { switchStateClass, switchStateOffClass, switchStateOnClass } from "@/components/ui/surface-styles";
 import { StepUpPrompt, StepUpScope, StepUpSubmit } from "@/components/auth/StepUp";
 import { setSignInApproval } from "@/lib/auth/sign-in-approval-actions";
 import type { ActionState } from "@/lib/errors";
@@ -53,12 +54,7 @@ export function SignInApprovalRow({
         <div className="min-w-0">
           <p className="flex flex-wrap items-center gap-2 font-inter text-sm font-medium text-foreground">
             {t("title")}
-            <span
-              className={cn(
-                "border px-1.5 py-0.5 text-xs font-semibold leading-none",
-                enabled ? "border-foreground text-foreground" : "border-border text-muted-foreground",
-              )}
-            >
+            <span className={cn(switchStateClass, enabled ? switchStateOnClass : switchStateOffClass)}>
               {enabled ? t("statusOn") : t("statusOff")}
             </span>
           </p>

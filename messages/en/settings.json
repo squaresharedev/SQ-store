@@ -814,7 +814,9 @@
       "copy": "Copy address",
       "copied": "Copied",
       "copyFailed": "Could not copy. Select the address and copy it yourself.",
-      "paused": "Connecting assistants is switched off for now."
+      "openClaude": "Open Claude connectors",
+      "capabilitiesTitle": "What an assistant can do",
+      "offByDefault": "Off by default"
     },
     "lastUsed": "Last used {when}",
     "neverUsed": "Not used yet",
@@ -886,6 +888,10 @@
         "label": "Delete things",
         "hint": "Delete products, storefronts and discounts, and replace embed keys. This can't be undone."
       }
+    },
+    "app": {
+      "capabilitiesLabel": "What {app} can do",
+      "changeHint": "To change these, disconnect it and connect again."
     }
   }
 }
