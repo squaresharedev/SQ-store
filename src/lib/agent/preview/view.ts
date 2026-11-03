@@ -36,43 +36,43 @@ const PROTOCOL_VERSION = "2026-01-26";
 const STYLE = `
 :root {
   color-scheme: light dark;
-  --bg: var(--color-background-primary, light-dark(#ffffff, #171717));
-  --bg-2: var(--color-background-secondary, light-dark(#f5f5f5, #262626));
-  --ink: var(--color-text-primary, light-dark(#171717, #fafafa));
-  --ink-2: var(--color-text-secondary, light-dark(#525252, #a3a3a3));
-  --line: var(--color-border-primary, light-dark(#e5e5e5, #404040));
-  --accent: var(--color-background-inverse, light-dark(#171717, #fafafa));
-  --accent-ink: var(--color-text-inverse, light-dark(#ffffff, #171717));
-  --font: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  --pv-bg: var(--color-background-primary, light-dark(#ffffff, #171717));
+  --pv-bg-2: var(--color-background-secondary, light-dark(#f5f5f5, #262626));
+  --pv-ink: var(--color-text-primary, light-dark(#171717, #fafafa));
+  --pv-ink-2: var(--color-text-secondary, light-dark(#525252, #a3a3a3));
+  --pv-line: var(--color-border-primary, light-dark(#e5e5e5, #404040));
+  --pv-accent: var(--color-background-inverse, light-dark(#171717, #fafafa));
+  --pv-accent-ink: var(--color-text-inverse, light-dark(#ffffff, #171717));
+  --pv-font: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 var(--font); }
+html, body { margin: 0; background: var(--pv-bg); color: var(--pv-ink); font: 14px/1.4 var(--pv-font); }
 .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; }
 .name { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.switch { display: inline-flex; border: 1px solid var(--line); }
-.switch button, .action { font: inherit; font-size: 13px; padding: 6px 12px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
-.switch button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
-.notes { padding: 0 12px 8px; color: var(--ink-2); font-size: 12px; }
+.switch { display: inline-flex; border: 1px solid var(--pv-line); }
+.switch button, .action { font: inherit; font-size: 13px; padding: 6px 12px; border: 0; background: transparent; color: var(--pv-ink); cursor: pointer; }
+.switch button[aria-pressed="true"] { background: var(--pv-accent); color: var(--pv-accent-ink); }
+.notes { padding: 0 12px 8px; color: var(--pv-ink-2); font-size: 12px; }
 .stage { padding: 0 12px 12px; display: flex; justify-content: center; }
-.frame { position: relative; width: 100%; border: 1px solid var(--line); background: var(--bg-2); }
+.frame { position: relative; width: 100%; border: 1px solid var(--pv-line); background: var(--pv-bg-2); }
 .frame.phone { max-width: 390px; }
 .frame img { display: block; width: 100%; height: auto; }
 .hot { position: absolute; border: 0; padding: 0; background: transparent; cursor: pointer; }
-.hot:hover, .hot:focus-visible, .hot[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: -2px; }
-.live { position: relative; width: 100%; overflow: hidden; border: 1px solid var(--line); }
+.hot:hover, .hot:focus-visible, .hot[aria-pressed="true"] { outline: 2px solid var(--pv-accent); outline-offset: -2px; }
+.live { position: relative; width: 100%; overflow: hidden; border: 1px solid var(--pv-line); }
 .live.phone { max-width: 390px; }
 .live-inner { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
 .live-inner [data-storefront-page] { min-height: 0 !important; }
 .live-inner a { cursor: pointer; }
-.live-inner a[data-picked] { outline: 3px solid var(--accent); outline-offset: -3px; }
-.panel { margin: 0 12px 12px; padding: 10px 12px; border: 1px solid var(--line); display: grid; gap: 6px; }
+.live-inner a[data-picked] { outline: 3px solid var(--pv-accent); outline-offset: -3px; }
+.panel { margin: 0 12px 12px; padding: 10px 12px; border: 1px solid var(--pv-line); display: grid; gap: 6px; }
 .panel[hidden] { display: none; }
 .panel .title { font-weight: 600; }
-.panel .meta { color: var(--ink-2); font-size: 12px; word-break: break-all; }
+.panel .meta { color: var(--pv-ink-2); font-size: 12px; word-break: break-all; }
 .panel .row { display: flex; flex-wrap: wrap; gap: 6px; }
-.action { border: 1px solid var(--line); }
-.action.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.empty { padding: 24px 12px; color: var(--ink-2); text-align: center; }
+.action { border: 1px solid var(--pv-line); }
+.action.primary { background: var(--pv-accent); color: var(--pv-accent-ink); border-color: var(--pv-accent); }
+.empty { padding: 24px 12px; color: var(--pv-ink-2); text-align: center; }
 `;
 
 const SCRIPT = `
@@ -191,13 +191,17 @@ const SCRIPT = `
     const page = document.importNode(source, true);
     for (const script of page.querySelectorAll("script")) script.remove();
     absolutize(page, url);
-    return page;
+    // The page root carries the font variables (next/font) the storefront's
+    // typefaces are named by; without them every face falls back.
+    const fonts = (doc.documentElement.getAttribute("class") || "").split(/\\s+/).filter(Boolean);
+    return { page, fonts };
   }
 
   /** The page at its own width, scaled down to the room there is. */
-  function liveStage(viewport, page) {
+  function liveStage(viewport, { page, fonts }) {
     const width = WIDTHS[viewport];
     const inner = el("div", { className: "live-inner" }, [page]);
+    inner.classList.add(...fonts);
     inner.style.width = width + "px";
     const stage = el("div", { className: "live" + (viewport === "mobile" ? " phone" : "") }, [inner]);
     const fit = () => {
