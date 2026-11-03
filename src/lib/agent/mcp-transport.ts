@@ -113,9 +113,9 @@ function buildServer(context: AgentContext, account: ActiveAccount): McpServer {
   for (const uri of views) {
     const view = PREVIEW_VIEWS[uri];
     if (!view) continue;
-    // Self-contained: nothing outside the document is loaded, so the host's
-    // restrictive default CSP is all it needs and none is declared.
-    const meta = { ui: { prefersBorder: true } };
+    // Only what the view itself needs beyond the document (PREVIEW_VIEWS), so
+    // the host's CSP stays as narrow as the spec's default otherwise.
+    const meta = { ui: { prefersBorder: true, csp: view.csp() } };
     server.registerResource(
       view.name,
       uri,

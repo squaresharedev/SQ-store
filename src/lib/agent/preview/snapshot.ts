@@ -29,6 +29,13 @@ export const PREVIEW_READY_SELECTOR = "html[data-preview-ready]";
 
 export type Snapshot = { image: string; mimeType: "image/jpeg"; html: string };
 
+/**
+ * JPEG quality. Kept low enough that both pictures and the words fit well
+ * inside what a chat host will hand to an MCP Apps view (Claude: about 150,000
+ * characters per tool result, docs/mcp-apps.md); legible text still survives.
+ */
+const SNAPSHOT_JPEG_QUALITY = 60;
+
 /** The page, taken full length as a JPEG (a fraction of a PNG's size). */
 function snapshotRequest(url: string, viewport: PreviewViewport) {
   return {
@@ -36,7 +43,7 @@ function snapshotRequest(url: string, viewport: PreviewViewport) {
     viewport: PREVIEW_VIEWPORTS[viewport],
     gotoOptions: { waitUntil: "load", timeout: 20_000 },
     waitForSelector: { selector: PREVIEW_READY_SELECTOR, timeout: 15_000 },
-    screenshotOptions: { fullPage: true, type: "jpeg", quality: 80 },
+    screenshotOptions: { fullPage: true, type: "jpeg", quality: SNAPSHOT_JPEG_QUALITY },
   };
 }
 

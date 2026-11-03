@@ -87,14 +87,34 @@ Claude ──tools/call preview_storefront──▶ /mcp (Worker)
 ```
 
 - **Resource:** `ui://square-share/storefront-preview`, `text/html;profile=mcp-app`,
-  one self-contained HTML document (`lib/agent/preview/view.ts`). The tool names it
-  in `_meta.ui.resourceUri` (and the deprecated flat `ui/resourceUri`, for older
-  hosts). The resource is registered only for a grant that can see the tool.
-- **CSP:** the view loads nothing: no script, style, font or image from any origin.
-  The screenshots arrive in the tool result and are shown as `data:` URLs, which the
-  host's restrictive default CSP already allows, so **no `csp` domains are
-  declared**. Signed R2 URLs never reach the view; the page Browser Run renders
-  loads them on our own origin.
+  one HTML document with no script or stylesheet of its own from anywhere
+  (`lib/agent/preview/view.ts`). The tool names it in `_meta.ui.resourceUri` (and
+  the deprecated flat `ui/resourceUri`, for older hosts). The resource is
+  registered only for a grant that can see the tool.
+- **The live storefront, not a picture of it.** The result carries a 15-minute
+  link to the preview page (`structuredContent.live.url`). The view fetches it
+  (`vp=mobile` for the phone board, rendered by the server for a 358px board via
+  the grid's `assumedSize`), takes the `[data-storefront-page]` element out with
+  `DOMParser`, imports it node by node with its scripts removed, and draws it with
+  this app's own stylesheets and fonts: a desktop board at 1280px scaled to fit, a
+  phone board at 390px. Clicks are caught: a product tile is picked, nothing
+  navigates. **Why not a nested iframe:** Claude's own MCP Apps guidelines say
+  "The `frameDomains` field, for embedding third-party iframes, is restricted in
+  Claude pending security review", so an iframe of our site would not load in
+  Claude today. The screenshots stay as the fallback when the page cannot be
+  read (an expired link, a host that refuses the connection).
+- **CSP:** declared in `_meta.ui.csp`: `connectDomains` = this app (the preview
+  page), `resourceDomains` = this app (stylesheets, fonts) and
+  `https://*.r2.cloudflarestorage.com` (photos). The preview page answers
+  cross-origin (`Access-Control-Allow-Origin: *` in `next.config.ts`, safe because
+  it takes no cookie, only the token), and the font files do too
+  (`public/_headers`), since browsers fetch cross-origin fonts only with CORS.
+  `next dev` refuses `/_next/*` to another origin, so locally the live view is
+  unstyled; production serves those files from static assets.
+- **Size:** Claude does not open a view on a tool result over about 150,000
+  characters. The screenshots are JPEG quality 60 and capped at 110,000 base64
+  characters together (`PICTURE_BUDGET_CHARS`); a picture past it is left out and
+  named in `picturesTooLargeToSend`, while the view still shows the live page.
 - **postMessage protocol (hand-written, about 10 messages):** `ui/initialize`
   (`appInfo`, `appCapabilities.availableDisplayModes`, `protocolVersion`) then
   `ui/notifications/initialized`; it receives `ui/notifications/tool-result`,

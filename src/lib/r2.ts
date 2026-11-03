@@ -67,6 +67,10 @@ export function hasR2Credentials(): boolean {
   );
 }
 
+/** Every origin a signed object URL can have (objectUrl below), as a CSP
+ *  host source: what a page that shows stored files must allow. */
+export const R2_ORIGIN_SOURCE = "https://*.r2.cloudflarestorage.com";
+
 function objectUrl(key: string): URL {
   const accountId = requireEnv("R2_ACCOUNT_ID");
   const bucket = requireEnv("R2_BUCKET_NAME");

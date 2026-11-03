@@ -1,0 +1,8 @@
+# Cloudflare static assets: headers for files served straight from the build.
+#
+# The font files may be read cross-origin. A storefront preview's MCP Apps view
+# (lib/agent/preview/view.ts) draws this app's markup on the chat host's sandbox
+# origin, and a browser fetches a cross-origin font only with CORS. Fonts are
+# public build output, so any origin may have them.
+/_next/static/media/*
+  Access-Control-Allow-Origin: *

@@ -1,7 +1,7 @@
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 import { createHash, createHmac, hkdfSync, randomBytes } from "node:crypto";
 import { writeFileSync } from "node:fs";
-import { expect, test, type Page } from "@playwright/test";
+import { chromium, expect, test, type Page } from "@playwright/test";
 import {
   PUBLISHABLE_SELLER,
   freshUser,
@@ -1068,12 +1068,76 @@ test.describe("previews", () => {
     // Desktop: two of six columns, on the right. Phone: the whole width.
     expect(desk.x).toBeGreaterThan(data.viewports.desktop.page.width / 2);
     expect(phone.w).toBeGreaterThan(data.viewports.mobile.page.width * 0.7);
-    await client.close();
-
     for (const [name, index] of Object.entries(data.imageIndex)) {
       const image = result.content[index] as { data: string };
       writeFileSync(`test-results/mcp-preview-${name}.jpg`, Buffer.from(image.data, "base64"));
     }
+
+    // The view, as a host runs it: a sandboxed frame under the CSP the spec
+    // builds from what the view declared, then the real tool result. It shows
+    // the storefront itself, read live from the preview page.
+    const resource = view.contents[0] as { text: string; _meta?: { ui?: { csp?: { connectDomains?: string[]; resourceDomains?: string[] } } } };
+    await client.close();
+    const declared = resource._meta?.ui?.csp ?? {};
+    // What the view may reach: this app (its page and assets) and the photos' store.
+    expect(declared.connectDomains).toEqual([APP]);
+    expect(declared.resourceDomains).toEqual([APP, "https://*.r2.cloudflarestorage.com"]);
+    const resources = (declared.resourceDomains ?? []).join(" ");
+    const csp = [
+      "default-src 'none'",
+      `script-src 'self' 'unsafe-inline' ${resources}`,
+      `style-src 'self' 'unsafe-inline' ${resources}`,
+      `connect-src 'self' ${(declared.connectDomains ?? []).join(" ")}`,
+      `img-src 'self' data: ${resources}`,
+      `font-src 'self' ${resources}`,
+      "frame-src 'none'",
+      "object-src 'none'",
+    ].join("; ");
+    const html = resource.text.replace("<head>", `<head><meta http-equiv="Content-Security-Policy" content="${csp}">`);
+    // In a browser of its own, as a chat host is: the test browser treats a
+    // sandboxed frame reaching this machine (loopback) as a private-network
+    // request and refuses it, which a host reaching dashboard.squareshare.eu is not.
+    const hostBrowser = await chromium.launch();
+    const host = await hostBrowser.newPage();
+    await host.setContent(`<!doctype html><html><body><iframe id="view" sandbox="allow-scripts" style="width:760px;height:1400px;border:0"></iframe>
+<script>
+  window.received = [];
+  const frame = document.getElementById("view");
+  const post = (message) => frame.contentWindow.postMessage(message, "*");
+  window.addEventListener("message", (event) => {
+    if (event.source !== frame.contentWindow) return;
+    const m = event.data;
+    window.received.push(m);
+    if (m.method === "ui/initialize") {
+      post({ jsonrpc: "2.0", id: m.id, result: { protocolVersion: "2026-01-26", hostInfo: { name: "spec", version: "1" }, hostCapabilities: {}, hostContext: { theme: "light" } } });
+    } else if (m.method === "ui/notifications/initialized") {
+      post({ jsonrpc: "2.0", method: "ui/notifications/tool-result", params: window.toolResult });
+    } else if (m.id !== undefined && m.method) {
+      post({ jsonrpc: "2.0", id: m.id, result: {} });
+    }
+  });
+</script></body></html>`);
+    await host.evaluate((value) => { (window as unknown as { toolResult: unknown }).toolResult = value; }, result);
+    await host.evaluate((text) => { (document.getElementById("view") as HTMLIFrameElement).srcdoc = text; }, html);
+    const frame = host.frameLocator("#view");
+    const storefront = frame.locator(".live [data-storefront-page]");
+    await expect(storefront).toBeVisible({ timeout: 30_000 });
+    await expect(storefront).toContainText("Preview lamp");
+    await expect(storefront).toContainText("Previewed");
+    // A click on the tile picks it; nothing navigates.
+    await storefront.getByText("Preview lamp").first().click();
+    await expect(frame.locator(".panel .title")).toHaveText("Preview lamp");
+    await expect(frame.locator(".live")).toBeVisible();
+    // The phone board, live, as the server drew it for a phone: the tile in the
+    // first row, across all four columns. (The look itself needs this app's
+    // stylesheet, which next dev refuses to another origin; production does not.)
+    await frame.getByRole("button", { name: "Phone" }).click();
+    const phoneTile = frame.locator(".live.phone [data-storefront-page] li").filter({ hasText: "Preview lamp" }).first();
+    await expect(phoneTile).toBeVisible({ timeout: 30_000 });
+    const placed = (await phoneTile.getAttribute("style")) ?? "";
+    expect(placed.replace(/\s/g, "")).toContain("grid-column:1/span4;grid-row:1/span2");
+    await host.screenshot({ path: "test-results/mcp-preview-view.png", fullPage: true });
+    await hostBrowser.close();
   });
 
   test("a preview shows only the caller's own store, and its page only to a live grant", async ({ page, browser }) => {

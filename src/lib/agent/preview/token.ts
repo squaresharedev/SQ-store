@@ -9,8 +9,12 @@
  * label): no new secret to manage, and a preview token is no use as a JWT.
  */
 
-/** How long a preview link works: long enough to load once, no longer. */
+/** How long the link a headless browser opens works: long enough to load once. */
 export const PREVIEW_TOKEN_SECONDS = 2 * 60;
+
+/** How long the link a preview's view reads works: a look at the result, and a
+ *  switch between screens, then a new preview is asked for. */
+export const LIVE_PREVIEW_TOKEN_SECONDS = 15 * 60;
 
 export type PreviewSubject = { kind: "storefront"; id: string };
 
@@ -53,11 +57,15 @@ async function previewKey(): Promise<CryptoKey> {
   return key;
 }
 
-export async function mintPreviewToken(subject: PreviewSubject, grantId: string): Promise<string> {
+export async function mintPreviewToken(
+  subject: PreviewSubject,
+  grantId: string,
+  lifetimeSeconds = PREVIEW_TOKEN_SECONDS,
+): Promise<string> {
   const claims: PreviewClaims = {
     ...subject,
     grantId,
-    exp: Math.floor(Date.now() / 1000) + PREVIEW_TOKEN_SECONDS,
+    exp: Math.floor(Date.now() / 1000) + lifetimeSeconds,
   };
   const body = base64Url(encoder.encode(JSON.stringify(claims)));
   const signature = await crypto.subtle.sign("HMAC", await previewKey(), encoder.encode(body));

@@ -4,10 +4,11 @@ import { STOREFRONT_PREVIEW_VIEW_URI, storefrontPreviewUrl } from "@/lib/agent/p
 import { takeSnapshot, type PreviewViewport } from "@/lib/agent/preview/snapshot";
 import { storefrontPreview, type StorefrontPreviewNotes } from "@/lib/agent/preview/storefront-preview";
 import { readMeasurements, type PreviewMeasurements } from "@/lib/agent/preview/targets";
-import { mintPreviewToken } from "@/lib/agent/preview/token";
+import { LIVE_PREVIEW_TOKEN_SECONDS, mintPreviewToken } from "@/lib/agent/preview/token";
 import { STOREFRONT_PREVIEW_VIEW_HTML } from "@/lib/agent/preview/view";
 import { READ, ToolFailure, ToolMedia, defineTool } from "@/lib/agent/tool";
-import { appUrl } from "@/lib/app-url";
+import { appOrigin, appUrl } from "@/lib/app-url";
+import { R2_ORIGIN_SOURCE } from "@/lib/r2";
 import { notFound, rateLimited } from "@/lib/errors";
 import { RATE_LIMITS, rateLimitKey } from "@/lib/rate-limit";
 import { boardSummary } from "@/lib/storefront/design-ops";
@@ -20,15 +21,38 @@ import { getStorefront } from "@/lib/storefront/queries";
  * MCP Apps, for the seller beside the conversation (docs/mcp-apps.md).
  */
 
-/** The views these tools name, as the transport serves them from resources/read. */
-export const PREVIEW_VIEWS: Record<string, { name: string; title: string; description: string; html: string }> = {
+/** What a view may reach beyond itself, as MCP Apps `_meta.ui.csp`. */
+export type ViewCsp = { connectDomains?: string[]; resourceDomains?: string[] };
+
+/**
+ * The views these tools name, as the transport serves them from resources/read.
+ *
+ * The storefront view reads the live preview page from this app (connect) and
+ * shows its markup with this app's stylesheets, fonts and photos (resources).
+ * Not a nested iframe: Claude restricts `frameDomains` pending its own security
+ * review, so the page's HTML is fetched and drawn in the view itself.
+ */
+export const PREVIEW_VIEWS: Record<
+  string,
+  { name: string; title: string; description: string; html: string; csp: () => ViewCsp }
+> = {
   [STOREFRONT_PREVIEW_VIEW_URI]: {
     name: "storefront-preview",
     title: "Storefront preview",
-    description: "A storefront on a desktop and on a phone, with each product tile selectable.",
+    description: "A storefront on a desktop and on a phone, live, with each product tile selectable.",
     html: STOREFRONT_PREVIEW_VIEW_HTML,
+    csp: () => ({ connectDomains: [appOrigin()], resourceDomains: [appOrigin(), R2_ORIGIN_SOURCE] }),
   },
 };
+
+/**
+ * How much of a result the pictures for the model may take, in base64
+ * characters. Claude does not open a view on a tool result past about 150,000
+ * characters, so the pictures stay well under it with the words beside them; a
+ * picture that does not fit is left out and said so, and the view still shows
+ * the storefront live.
+ */
+const PICTURE_BUDGET_CHARS = 110_000;
 
 /** The notes in plain sentences, for the model and the view alike. */
 function notesInWords(notes: StorefrontPreviewNotes): string[] {
@@ -93,15 +117,24 @@ export const previewTools = [
       const images: { data: string; mimeType: string }[] = [];
       const imageIndex: Partial<Record<PreviewViewport, number>> = {};
       const measured: Partial<Record<PreviewViewport, PreviewMeasurements>> = {};
+      const tooLarge: PreviewViewport[] = [];
+      let budget = PICTURE_BUDGET_CHARS;
       wanted.forEach((screen, index) => {
         const shot = shots[index];
         if (!shot) return;
+        const found = readMeasurements(shot.html);
+        if (found) measured[screen] = found;
+        if (shot.image.length > budget) {
+          tooLarge.push(screen);
+          return;
+        }
+        budget -= shot.image.length;
         // Content block 0 is the text; the pictures follow it, in this order.
         imageIndex[screen] = 1 + images.length;
         images.push({ data: shot.image, mimeType: shot.mimeType });
-        const found = readMeasurements(shot.html);
-        if (found) measured[screen] = found;
       });
+      // The view reads the page itself, for a quarter of an hour.
+      const liveToken = await mintPreviewToken({ kind: "storefront", id }, grantId, LIVE_PREVIEW_TOKEN_SECONDS);
 
       const notes = notesInWords(preview.notes);
       const isPublic = preview.notes.notPublic.length === 0;
@@ -115,8 +148,9 @@ export const previewTools = [
         {
           storefront: { id: storefront.id, name: storefront.name },
           pictures: wanted.filter((screen) => imageIndex[screen] !== undefined),
-          ...(images.length < wanted.length
-            ? { picturesMissing: wanted.filter((screen) => imageIndex[screen] === undefined) }
+          ...(tooLarge.length ? { picturesTooLargeToSend: tooLarge } : {}),
+          ...(wanted.some((screen) => imageIndex[screen] === undefined && !tooLarge.includes(screen))
+            ? { picturesMissing: wanted.filter((screen) => imageIndex[screen] === undefined && !tooLarge.includes(screen)) }
             : {}),
           notes,
           // Where each product tile was drawn, in page pixels of its picture.
@@ -134,6 +168,8 @@ export const previewTools = [
               .map((screen) => [screen, { page: measured[screen]?.page, tiles: tilesFor(screen) }]),
           ),
           links: { designer: appUrl(storefrontEditorPath(id)) },
+          // The page the view draws live; `vp=mobile` gives its phone board.
+          live: { url: storefrontPreviewUrl(id, liveToken) },
           notes,
         },
       );

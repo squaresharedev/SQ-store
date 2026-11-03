@@ -246,6 +246,18 @@ const nextConfig: NextConfig = {
       { source: "/s/:storefrontId/p/:productId/checkout", headers: PURCHASE_PAGE_HEADERS },
       { source: "/api/orders/:path*", headers: PURCHASE_PAGE_HEADERS },
       { source: "/api/checkout/:path*", headers: PURCHASE_PAGE_HEADERS },
+      // AN ASSISTANT'S STOREFRONT PREVIEW (lib/agent/preview). Its MCP Apps
+      // view runs on the chat host's sandbox origin and reads this page with
+      // fetch, so it may be read cross-origin. Safe to open to any origin: it
+      // takes no cookie, only the short-lived token in its address, and no
+      // cache may keep it.
+      {
+        source: "/agent-preview/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Cache-Control", value: "no-store" },
+        ],
+      },
       // THE SHARE CARD GALLERY, cross-origin isolated, so the background-
       // removal model (src/lib/share-card/cutout/engine.ts), where it falls
       // back from the GPU to the CPU, runs on several threads instead of one.

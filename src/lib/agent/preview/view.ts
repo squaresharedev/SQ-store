@@ -2,19 +2,30 @@
  * THE STOREFRONT PREVIEW VIEW: an MCP Apps view (the `ui://` resource that
  * preview_storefront names in `_meta.ui.resourceUri`), spec 2026-01-26.
  *
- * One self-contained HTML document: no script, style or font from anywhere,
- * so it runs under the host's restrictive default CSP with nothing declared.
- * It speaks the protocol by hand (it is a handful of messages): `ui/initialize`,
- * then the host's `ui/notifications/tool-result`, whose content carries the
- * screenshots (`image` blocks, shown as data: URLs, which the default CSP
- * allows) and whose structuredContent carries where each tile is.
+ * It shows THE STOREFRONT ITSELF, live: it reads the preview page from this app
+ * (`structuredContent.live.url`, a short-lived token, `vp=mobile` for the phone
+ * board), takes the storefront out of it, and draws that markup with this
+ * app's own stylesheets, fonts and photos. A nested iframe would be simpler,
+ * but Claude restricts `frameDomains` pending its own security review, so the
+ * page is drawn here instead, its scripts left behind. Hover reveals, fonts,
+ * gradients and photos are the real ones; a desktop board is drawn at 1280px
+ * and scaled to fit, a phone board at 390px.
  *
- * Every word from a seller (titles, the storefront's name) goes in through
- * textContent, never as markup.
+ * What it may reach is declared in its resource's `_meta.ui.csp`: this app for
+ * the page (connect) and its assets, and R2 for the photos (resources). Nothing
+ * else. When the page cannot be read (an old link, a host that refuses the
+ * connection), it shows the screenshots the result carries as `image` blocks.
  *
- * What the seller does here goes back to the model with `ui/update-model-context`
- * (which tile they are looking at), and out with `ui/open-link` (the product
- * page, the designer), both of which the host may ask the person about first.
+ * It speaks the protocol by hand: `ui/initialize`, then the host's
+ * `ui/notifications/tool-result`. A click on a product tile is caught (nothing
+ * navigates), tells the model which tile with `ui/update-model-context`, and
+ * offers `ui/open-link` to the product page or the designer; the host may ask
+ * the person about either.
+ *
+ * Seller words reach this document only inside the storefront markup this app
+ * rendered (React escaped them there) and through textContent. It never parses
+ * markup into itself with innerHTML: the page is parsed by DOMParser and its
+ * storefront imported node by node, scripts removed.
  */
 
 export const MCP_APP_MIME_TYPE = "text/html;profile=mcp-app";
@@ -48,6 +59,12 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4
 .frame img { display: block; width: 100%; height: auto; }
 .hot { position: absolute; border: 0; padding: 0; background: transparent; cursor: pointer; }
 .hot:hover, .hot:focus-visible, .hot[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: -2px; }
+.live { position: relative; width: 100%; overflow: hidden; border: 1px solid var(--line); }
+.live.phone { max-width: 390px; }
+.live-inner { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+.live-inner [data-storefront-page] { min-height: 0 !important; }
+.live-inner a { cursor: pointer; }
+.live-inner a[data-picked] { outline: 3px solid var(--accent); outline-offset: -3px; }
 .panel { margin: 0 12px 12px; padding: 10px 12px; border: 1px solid var(--line); display: grid; gap: 6px; }
 .panel[hidden] { display: none; }
 .panel .title { font-weight: 600; }
@@ -61,9 +78,13 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4
 const SCRIPT = `
 (() => {
   const PROTOCOL = ${JSON.stringify(PROTOCOL_VERSION)};
+  /** The widths a board is drawn at: a laptop's, and a phone's. */
+  const WIDTHS = { desktop: 1280, mobile: 390 };
   const pending = new Map();
   let nextId = 1;
-  let state = { loading: "Taking the pictures…", viewports: {}, images: {}, viewport: "desktop", selected: null, links: {}, name: "", notes: [] };
+  let state = { loading: "Taking the pictures…" };
+  let live = { stages: {}, status: {} };
+  const adopted = new Set();
 
   const send = (message) => window.parent.postMessage(message, "*");
   const notify = (method, params) => send({ jsonrpc: "2.0", method, params });
@@ -84,6 +105,24 @@ const SCRIPT = `
   };
   const root = document.getElementById("app");
 
+  function findTile(productId) {
+    for (const viewport of Object.values(state.viewports || {})) {
+      const tile = (viewport.tiles || []).find((candidate) => candidate.productId === productId);
+      if (tile) return tile;
+    }
+    return null;
+  }
+
+  function markPicked() {
+    for (const stage of Object.values(live.stages)) {
+      for (const anchor of stage.querySelectorAll("a[data-picked]")) anchor.removeAttribute("data-picked");
+      if (!state.selected) continue;
+      for (const anchor of stage.querySelectorAll("a[data-href]")) {
+        if (productOf(anchor.getAttribute("data-href")) === state.selected.productId) anchor.setAttribute("data-picked", "");
+      }
+    }
+  }
+
   function selectTile(tile) {
     state.selected = tile;
     draw();
@@ -99,20 +138,142 @@ const SCRIPT = `
     if (url) request("ui/open-link", { url }).catch(() => {});
   }
 
+  /** A product page path's product id, or null. */
+  function productOf(href) {
+    const match = /\\/p\\/([^/?#]+)/.exec(href || "");
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+
+  /** This app's stylesheets and font faces, once each, so its markup looks as it does there. */
+  function adoptStyle(node, base) {
+    if (node.tagName === "LINK") {
+      const href = new URL(node.getAttribute("href"), base).href;
+      if (adopted.has(href)) return;
+      adopted.add(href);
+      document.head.append(el("link", { rel: "stylesheet", href }));
+    } else {
+      // A font face's address is relative to the page it came from.
+      const text = (node.textContent || "").replace(/url\\((['"]?)\\/(?!\\/)/g, "url($1" + base.origin + "/");
+      if (adopted.has(text)) return;
+      adopted.add(text);
+      document.head.append(el("style", { textContent: text }));
+    }
+  }
+
+  /** Addresses in the imported markup point back at this app, not at the view. */
+  function absolutize(page, base) {
+    for (const node of page.querySelectorAll("[src],[href],[srcset],[poster]")) {
+      for (const name of ["src", "href", "poster"]) {
+        const value = node.getAttribute(name);
+        if (!value || /^(data:|blob:|#)/.test(value)) continue;
+        if (name === "href") node.setAttribute("data-href", value);
+        node.setAttribute(name, new URL(value, base).href);
+      }
+      const set = node.getAttribute("srcset");
+      if (set) {
+        node.setAttribute("srcset", set.split(",").map((part) => {
+          const [address, size] = part.trim().split(/\\s+/, 2);
+          return new URL(address, base).href + (size ? " " + size : "");
+        }).join(", "));
+      }
+    }
+  }
+
+  async function loadPage(viewport) {
+    const url = new URL(state.live.url);
+    if (viewport === "mobile") url.searchParams.set("vp", "mobile");
+    const response = await fetch(url.href, { credentials: "omit", cache: "no-store" });
+    if (!response.ok) throw new Error("preview page " + response.status);
+    const doc = new DOMParser().parseFromString(await response.text(), "text/html");
+    const source = doc.querySelector("[data-storefront-page]");
+    if (!source) throw new Error("no storefront in the page");
+    for (const node of doc.querySelectorAll('link[rel="stylesheet"][href], style')) adoptStyle(node, url);
+    const page = document.importNode(source, true);
+    for (const script of page.querySelectorAll("script")) script.remove();
+    absolutize(page, url);
+    return page;
+  }
+
+  /** The page at its own width, scaled down to the room there is. */
+  function liveStage(viewport, page) {
+    const width = WIDTHS[viewport];
+    const inner = el("div", { className: "live-inner" }, [page]);
+    inner.style.width = width + "px";
+    const stage = el("div", { className: "live" + (viewport === "mobile" ? " phone" : "") }, [inner]);
+    const fit = () => {
+      const scale = Math.min(1, (stage.clientWidth || width) / width);
+      inner.style.transform = "scale(" + scale + ")";
+      stage.style.height = Math.ceil(inner.scrollHeight * scale) + "px";
+    };
+    new ResizeObserver(fit).observe(stage);
+    new ResizeObserver(fit).observe(inner);
+    // Nothing in a preview navigates: a product tile is picked instead.
+    inner.addEventListener("click", (event) => {
+      const anchor = event.target.closest && event.target.closest("a");
+      if (!anchor) return;
+      event.preventDefault();
+      const productId = productOf(anchor.getAttribute("data-href"));
+      if (!productId) return;
+      selectTile(findTile(productId) || { productId, title: (anchor.textContent || "").trim().slice(0, 120), status: "active" });
+    });
+    inner.addEventListener("submit", (event) => event.preventDefault());
+    return stage;
+  }
+
+  function ensureLive(viewport) {
+    if (live.status[viewport]) return;
+    live.status[viewport] = "loading";
+    loadPage(viewport)
+      .then((page) => {
+        live.stages[viewport] = liveStage(viewport, page);
+        live.status[viewport] = "ready";
+      })
+      .catch(() => { live.status[viewport] = "failed"; })
+      .finally(draw);
+  }
+
+  function drawPicture() {
+    const image = state.images[state.viewport];
+    if (!image) {
+      const message = state.live
+        ? "This preview has run out. Ask for a new one to see the storefront again."
+        : "No picture of this storefront could be taken. The details are in the text of this result.";
+      root.append(el("div", { className: "empty", textContent: message }));
+      return;
+    }
+    const frame = el("div", { className: "frame" + (state.viewport === "mobile" ? " phone" : "") });
+    frame.append(el("img", { src: image, alt: state.name + ", " + (state.viewport === "mobile" ? "on a phone" : "on a desktop") }));
+    const measured = (state.viewports || {})[state.viewport];
+    if (measured && measured.page && measured.page.width > 0 && measured.page.height > 0) {
+      for (const tile of measured.tiles || []) {
+        const hot = el("button", { type: "button", className: "hot", title: tile.title });
+        hot.setAttribute("aria-label", tile.title);
+        hot.setAttribute("aria-pressed", String(Boolean(state.selected && state.selected.productId === tile.productId)));
+        hot.style.left = (100 * tile.x / measured.page.width) + "%";
+        hot.style.top = (100 * tile.y / measured.page.height) + "%";
+        hot.style.width = (100 * tile.w / measured.page.width) + "%";
+        hot.style.height = (100 * tile.h / measured.page.height) + "%";
+        hot.addEventListener("click", () => selectTile(tile));
+        frame.append(hot);
+      }
+    }
+    root.append(el("div", { className: "stage" }, [frame]));
+  }
+
   function draw() {
     root.replaceChildren();
     if (state.loading) {
       root.append(el("div", { className: "empty", textContent: state.loading }));
       return;
     }
-    const viewports = Object.keys(state.images);
-    if (!viewports.includes(state.viewport)) state.viewport = viewports[0] || "desktop";
+    const screens = state.live ? ["desktop", "mobile"] : Object.keys(state.images);
+    if (!screens.includes(state.viewport)) state.viewport = screens[0] || "desktop";
 
     const bar = el("div", { className: "bar" }, [el("div", { className: "name", textContent: state.name })]);
-    if (viewports.length > 1) {
+    if (screens.length > 1) {
       const toggle = el("div", { className: "switch", role: "group", ariaLabel: "Screen" });
       for (const [key, label] of [["desktop", "Desktop"], ["mobile", "Phone"]]) {
-        if (!state.images[key]) continue;
+        if (!screens.includes(key)) continue;
         const button = el("button", { type: "button", textContent: label });
         button.setAttribute("aria-pressed", String(state.viewport === key));
         button.addEventListener("click", () => { state.viewport = key; state.selected = null; draw(); });
@@ -123,28 +284,16 @@ const SCRIPT = `
     root.append(bar);
     for (const note of state.notes) root.append(el("div", { className: "notes", textContent: note }));
 
-    const image = state.images[state.viewport];
-    if (!image) {
-      root.append(el("div", { className: "empty", textContent: "No picture of this storefront could be taken. The details are in the text of this result." }));
-      return;
+    const status = state.live ? live.status[state.viewport] : "failed";
+    if (status === "ready") {
+      root.append(el("div", { className: "stage" }, [live.stages[state.viewport]]));
+      markPicked();
+    } else if (status === "failed") {
+      drawPicture();
+    } else {
+      root.append(el("div", { className: "empty", textContent: "Loading the storefront…" }));
+      ensureLive(state.viewport);
     }
-    const frame = el("div", { className: "frame" + (state.viewport === "mobile" ? " phone" : "") });
-    frame.append(el("img", { src: image, alt: state.name + ", " + (state.viewport === "mobile" ? "on a phone" : "on a desktop") }));
-    const measured = state.viewports[state.viewport];
-    if (measured && measured.page && measured.page.width > 0 && measured.page.height > 0) {
-      for (const tile of measured.tiles || []) {
-        const hot = el("button", { type: "button", className: "hot", title: tile.title });
-        hot.setAttribute("aria-label", tile.title);
-        hot.setAttribute("aria-pressed", String(state.selected && state.selected.productId === tile.productId));
-        hot.style.left = (100 * tile.x / measured.page.width) + "%";
-        hot.style.top = (100 * tile.y / measured.page.height) + "%";
-        hot.style.width = (100 * tile.w / measured.page.width) + "%";
-        hot.style.height = (100 * tile.h / measured.page.height) + "%";
-        hot.addEventListener("click", () => selectTile(tile));
-        frame.append(hot);
-      }
-    }
-    root.append(el("div", { className: "stage" }, [frame]));
 
     const tile = state.selected;
     const panel = el("div", { className: "panel", hidden: !tile });
@@ -178,6 +327,7 @@ const SCRIPT = `
         images[viewport] = "data:" + block.mimeType + ";base64," + block.data;
       }
     }
+    live = { stages: {}, status: {} };
     state = {
       loading: null,
       viewports: data.viewports || {},
@@ -185,6 +335,7 @@ const SCRIPT = `
       viewport: data.viewport === "mobile" ? "mobile" : "desktop",
       selected: null,
       links: data.links || {},
+      live: data.live && typeof data.live.url === "string" ? data.live : null,
       name: (data.storefront && data.storefront.name) || "Storefront",
       notes: Array.isArray(data.notes) ? data.notes.filter((note) => typeof note === "string") : [],
     };
@@ -220,7 +371,7 @@ const SCRIPT = `
         render(message.params);
         break;
       case "ui/notifications/tool-cancelled":
-        state.loading = "The preview was cancelled.";
+        state = { loading: "The preview was cancelled." };
         draw();
         break;
       case "ui/notifications/host-context-changed":

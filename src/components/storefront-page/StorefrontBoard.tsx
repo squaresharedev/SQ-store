@@ -112,6 +112,7 @@ export function StorefrontBoard({
   page,
   displayName,
   tilesOpenNewTab = false,
+  assumedWidth,
 }: {
   page: StorefrontPageData;
   /** The shop's name as buyers know it, for the grid's label and empty line. */
@@ -119,6 +120,9 @@ export function StorefrontBoard({
   /** The embed frame: a product opens in a tab of its own, so the seller's
    *  page stays where it is behind it. */
   tilesOpenNewTab?: boolean;
+  /** A board width to render for before the page has measured one (a phone's,
+   *  for a preview drawn without JavaScript). */
+  assumedWidth?: number;
 }) {
   const t = useTranslations("ProductPage.storefront");
   const { theme, header } = page;
@@ -175,6 +179,7 @@ export function StorefrontBoard({
           rows={usedRows}
           responsive={!freelyArranged}
           narrowLayout={phone}
+          assumedSize={assumedWidth ? { width: assumedWidth, gap: theme.gridGap } : undefined}
           // A block under a product on the same cells takes that card's
           // corners, exactly as it does on the canvas (blockTileClipStyle).
           cellStyle={(placement, gridBlock) =>

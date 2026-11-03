@@ -478,6 +478,12 @@ interface GridCommonProps<TData> {
    * decides where each block goes; the grid only draws it.
    */
   narrowLayout?: { maxWidth: number; columns: number; rows: number; blocks: GridBlock<TData>[] } | null;
+  /**
+   * The size to lay out for until the container has been measured, so a server
+   * render already has the tier a container that wide gets (a phone's reflow or
+   * narrow layout) rather than the full board. Measuring replaces it.
+   */
+  assumedSize?: { width: number; gap: number };
   /** Accessible name for the grid list. */
   ariaLabel?: string;
   /** Accessible name per block, for its drag/resize affordances. */
@@ -580,6 +586,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     rows = GRID_ROWS_DEFAULT,
     responsive = true,
     narrowLayout = null,
+    assumedSize,
     onMove,
     onResize,
     onMoveMany,
@@ -724,7 +731,7 @@ export function Grid<TData>(props: GridProps<TData>) {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLUListElement>(null);
-  const [metrics, setMetrics] = useState({ width: 0, gap: 0 });
+  const [metrics, setMetrics] = useState(() => assumedSize ?? { width: 0, gap: 0 });
   // Which block is under a gesture — set ONCE when it starts, cleared when it
   // ends. The moment-to-moment preview lives in gestureRef and is painted
   // straight to the DOM, so a drag costs two renders rather than one per

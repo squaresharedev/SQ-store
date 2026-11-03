@@ -73,14 +73,28 @@ describe("the storefront preview view", () => {
     }
   });
 
-  it("loads nothing from anywhere, so the host's default CSP is all it needs", () => {
+  it("ships no script or stylesheet of its own from anywhere", () => {
     expect(STOREFRONT_PREVIEW_VIEW_HTML).not.toMatch(/<script[^>]+src=/);
     expect(STOREFRONT_PREVIEW_VIEW_HTML).not.toMatch(/<link[^>]+href=/);
-    expect(STOREFRONT_PREVIEW_VIEW_HTML).not.toMatch(/@import|url\(/);
-    expect(STOREFRONT_PREVIEW_VIEW_HTML).not.toMatch(/fetch\(|XMLHttpRequest|WebSocket/);
+    expect(STOREFRONT_PREVIEW_VIEW_HTML).not.toMatch(/@import/);
   });
 
-  it("puts words in as text, never as markup", () => {
+  it("reads one thing, the live page it was handed, without a cookie", () => {
+    const fetches = STOREFRONT_PREVIEW_VIEW_HTML.match(/fetch\(/g) ?? [];
+    expect(fetches).toHaveLength(1);
+    expect(STOREFRONT_PREVIEW_VIEW_HTML).toContain('fetch(url.href, { credentials: "omit", cache: "no-store" })');
+    expect(STOREFRONT_PREVIEW_VIEW_HTML).toContain("new URL(state.live.url)");
+    expect(STOREFRONT_PREVIEW_VIEW_HTML).not.toMatch(/XMLHttpRequest|WebSocket|EventSource/);
+  });
+
+  it("never parses markup into itself: the page is parsed apart and its scripts left behind", () => {
     expect(STOREFRONT_PREVIEW_VIEW_HTML).not.toMatch(/innerHTML|outerHTML|insertAdjacentHTML|document\.write/);
+    expect(STOREFRONT_PREVIEW_VIEW_HTML).toContain('new DOMParser().parseFromString(');
+    expect(STOREFRONT_PREVIEW_VIEW_HTML).toContain('for (const script of page.querySelectorAll("script")) script.remove();');
+  });
+
+  it("navigates nowhere: a click in the storefront picks a tile", () => {
+    expect(STOREFRONT_PREVIEW_VIEW_HTML).toContain("event.preventDefault();");
+    expect(STOREFRONT_PREVIEW_VIEW_HTML).toContain('inner.addEventListener("submit", (event) => event.preventDefault());');
   });
 });

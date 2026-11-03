@@ -17,7 +17,14 @@ import { StorefrontBoard, storefrontSurface } from "./StorefrontBoard";
  * screen, and it closes with the footer every hosted page carries (who the
  * seller is, and how to report the storefront).
  */
-export function StorefrontPageView({ page }: { page: StorefrontPageData }) {
+export function StorefrontPageView({
+  page,
+  assumedWidth,
+}: {
+  page: StorefrontPageData;
+  /** See StorefrontBoard: the board width to render for before measuring. */
+  assumedWidth?: number;
+}) {
   const { theme } = page;
   const surface = storefrontSurface(page);
   const displayName = storefrontDisplayName(page);
@@ -35,7 +42,7 @@ export function StorefrontPageView({ page }: { page: StorefrontPageData }) {
           the masthead is a design choice, a name for the page is not. */}
       <h1 className="sr-only">{displayName}</h1>
       <main className="mx-auto w-full max-w-[76rem] flex-1 px-4 py-6 @md:px-6 @3xl:px-10">
-        <StorefrontBoard page={page} displayName={displayName} />
+        <StorefrontBoard page={page} displayName={displayName} assumedWidth={assumedWidth} />
       </main>
       <PoweredByFooter
         ruleColor={ruleColor(surface.ink)}
