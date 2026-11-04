@@ -712,6 +712,8 @@
     "imageUnreadable": "Nie udało się odczytać tego obrazu.",
     "imageUnreadableFix": "Wyślij publiczny link HTTPS albo dane base64 pliku JPEG, PNG, WebP, GIF lub AVIF mieszczącego się w limicie rozmiaru.",
     "passThrough": "{message}",
-    "requestInvalid": "Ta prośba o połączenie jest nieprawidłowa. Zacznij od nowa w aplikacji."
+    "requestInvalid": "Ta prośba o połączenie jest nieprawidłowa. Zacznij od nowa w aplikacji.",
+    "noStorefrontForPage": "Ten sklep nie ma jeszcze witryny, a strona produktu jest częścią witryny.",
+    "noStorefrontForPageFix": "Utwórz ją za pomocą create_storefront, dodaj produkt za pomocą edit_storefront, a potem wyświetl podgląd."
   }
 }

@@ -1,25 +1,45 @@
 import { z } from "zod";
+import { toEnvelope, type ToolErrorEnvelope } from "@/lib/agent/dispatch";
 import { bytesFromImageInput, imageInputShape } from "@/lib/agent/image-input";
 import { collectObjectKeys, rememberUpload, restoreObjectKeys } from "@/lib/agent/object-refs";
+import { PUBLISH_CARD_VIEW_URI } from "@/lib/agent/paths";
 import { presentProduct, presentProductDetail } from "@/lib/agent/present";
-import { DESTRUCTIVE, READ, ToolFailure, WRITE, defineTool, unwrap } from "@/lib/agent/tool";
+import { DESTRUCTIVE, READ, ToolFailure, ToolMedia, WRITE, defineTool, unwrap } from "@/lib/agent/tool";
+import { appUrl } from "@/lib/app-url";
 import { getProductsSummary } from "@/lib/dashboard/queries";
 import { invalidInput, notFound, rateLimited, serverError } from "@/lib/errors";
+import { formatCents } from "@/lib/format/money";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { msg } from "@/i18n/types";
 import { checkBadgeLabel, moveProductBadge } from "@/lib/products/badge-actions";
 import { createProduct, deleteProduct, updateProduct } from "@/lib/products/actions";
 import { importProducts } from "@/lib/products/import-actions";
-import { getProductPagePreviewData } from "@/lib/products/preview-actions";
+import { productEditPath } from "@/lib/products/paths";
 import { getProduct, getProductPlacements, getProductSales, listProducts } from "@/lib/products/queries";
 import { PRODUCT_SORTS } from "@/lib/products/sort";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { updateStockSettings } from "@/lib/stock/actions";
+import { resolveProductPage } from "@/lib/storefront/product-page";
+import { productPageUrl } from "@/lib/storefront/product-page-url";
+import { getStorefront } from "@/lib/storefront/queries";
 import { storeImage } from "@/lib/uploads/store-image";
 import { firstIssue } from "@/lib/validation/messages";
 import { IMAGE_MAX_BYTES, productWriteSchema } from "@/lib/validation/product";
 import { CURRENCIES, PRODUCT_STATUSES } from "@/types/product";
 
 const IMAGE_URL_NOTE = "imageUrl is a signed link that expires within hours: show it, never store it.";
+
+/** How many products one publish_products call may put on sale. */
+const PUBLISH_BATCH_MAX = 20;
+
+/** Said of a product that went live without a storefront to be found on. */
+const NO_STOREFRONT_NOTE = "On sale, but on no storefront yet, so buyers have no way to it. Add it to one with edit_storefront.";
+
+/** The first item `test` says yes to, asked one at a time, in order. */
+async function firstAsync<T>(items: readonly T[], test: (item: T) => Promise<boolean>): Promise<T | undefined> {
+  for (const item of items) if (await test(item)) return item;
+  return undefined;
+}
 
 const productId = z.string().describe("The product's id.");
 
@@ -143,24 +163,10 @@ export const productTools = [
   }),
 
   defineTool({
-    name: "preview_product_page",
-    title: "Preview a product page",
-    description: "A product exactly as a buyer would see it on its hosted page, including any running sale and its stock badge. priceCents is what a buyer pays now.",
-    scope: "store:read",
-    permission: "store.read",
-    annotations: READ,
-    input: z.strictObject({ id: productId }),
-    handler: async ({ id }) => {
-      const { product } = unwrap(await getProductPagePreviewData(id));
-      return { product };
-    },
-  }),
-
-  defineTool({
     name: "create_product",
     title: "Create a product",
     description:
-      "Add a product. Keep it as a draft unless the seller asked to publish: setting status to active is refused with trader_identity_required until the seller's legal details are complete, and that is theirs to fix, so stay in draft and tell them.",
+      "Add a product. Keep it as a draft unless the seller asked to publish (then publish_products, which shows them what went live): setting status to active is refused with trader_identity_required until the seller's legal details are complete, and that is theirs to fix, so stay in draft and tell them.",
     scope: "products:write",
     permission: "products.write",
     annotations: WRITE,
@@ -187,7 +193,7 @@ export const productTools = [
     name: "update_product",
     title: "Update a product",
     description:
-      "Change a product. Send only what changes: everything left out stays as it is. Lists (gallery, optionGroups, addOnIds) are replaced whole. Setting status to active can be refused with trader_identity_required, which only the seller can fix.",
+      "Change a product. Send only what changes: everything left out stays as it is. Lists (gallery, optionGroups, addOnIds) are replaced whole. To put products on sale prefer publish_products, which shows the seller what went live. Setting status to active can be refused with trader_identity_required, which only the seller can fix.",
     scope: "products:write",
     permission: "products.write",
     annotations: WRITE,
@@ -217,6 +223,113 @@ export const productTools = [
       assertValidWrite(write);
       unwrap(await updateProduct(id, write));
       return { id };
+    },
+  }),
+
+  defineTool({
+    name: "publish_products",
+    title: "Publish products",
+    description:
+      "Put products on sale: each goes from draft or archived to active, so buyers can see and buy it on every storefront it is on. Only when the seller has asked to publish. " +
+      "Each product is published or refused on its own and the answer says which. A refusal carries its reason and fix: trader_identity_required means the seller's legal details are not complete, which only they can do, so pass on its link. " +
+      `A product on no storefront goes live with no way to it yet, and the answer says so. At most ${PUBLISH_BATCH_MAX} at once. In a host with MCP Apps the seller sees a card of what went live, with each page, and what did not.`,
+    scope: "products:write",
+    permission: "products.write",
+    annotations: WRITE,
+    view: PUBLISH_CARD_VIEW_URI,
+    input: z.strictObject({
+      ids: z.array(productId).min(1).max(PUBLISH_BATCH_MAX).describe("The products to put on sale."),
+    }),
+    handler: async ({ ids }) => {
+      const placements = await getProductPlacements();
+      const storefronts = new Map<string, Promise<boolean>>();
+      // Whether a buyer can open product pages there at all.
+      const pagesOpen = (storefrontId: string) => {
+        if (!storefronts.has(storefrontId)) {
+          storefronts.set(
+            storefrontId,
+            getStorefront(storefrontId).then((record) => Boolean(record && !record.removal && resolveProductPage(record.config).enabled)),
+          );
+        }
+        return storefronts.get(storefrontId)!;
+      };
+
+      const results: {
+        id: string;
+        outcome: "published" | "already_live" | "refused" | "not_found";
+        current?: NonNullable<Awaited<ReturnType<typeof getProduct>>>;
+        error?: ToolErrorEnvelope;
+        pageUrl?: string;
+        note?: string;
+      }[] = [];
+      // One at a time, in the order asked: each is the same write the product form makes.
+      for (const id of new Set(ids)) {
+        const current = await getProduct(id);
+        if (!current) {
+          results.push({ id, outcome: "not_found", error: await toEnvelope(notFound("product")) });
+          continue;
+        }
+        let outcome: "published" | "already_live" | "refused" = "already_live";
+        let error: ToolErrorEnvelope | undefined;
+        if (current.status !== "active") {
+          const write = {
+            title: current.title,
+            description: current.description,
+            priceCents: Math.round(current.price * 100),
+            currency: current.currency,
+            status: "active",
+          };
+          assertValidWrite(write);
+          const result = await updateProduct(id, write);
+          if (result.ok) outcome = "published";
+          else {
+            outcome = "refused";
+            error = await toEnvelope(result.error);
+          }
+        }
+        const on = placements[id] ?? [];
+        const open = outcome === "refused" ? undefined : await firstAsync(on, (spot) => pagesOpen(spot.id));
+        results.push({
+          id,
+          outcome,
+          current,
+          ...(error ? { error } : {}),
+          ...(open ? { pageUrl: productPageUrl(open.id, id) } : {}),
+          ...(outcome !== "refused" && on.length === 0 ? { note: NO_STOREFRONT_NOTE } : {}),
+        });
+      }
+
+      return new ToolMedia(
+        {
+          products: results.map(({ id, outcome, current, error, pageUrl, note }) => ({
+            id,
+            ...(current ? { title: current.title } : {}),
+            outcome,
+            ...(pageUrl ? { pageUrl } : {}),
+            ...(note ? { note } : {}),
+            ...(error ? { error } : {}),
+          })),
+        },
+        [],
+        {
+          kind: "publish",
+          items: results.map(({ id, outcome, current, error, pageUrl, note }) => ({
+            id,
+            title: current?.title ?? id,
+            outcome,
+            ...(current
+              ? {
+                  price: formatCents(Math.round(current.price * 100), current.currency, DEFAULT_LOCALE),
+                  imageUrl: current.imageUrl,
+                  editUrl: appUrl(productEditPath(id)),
+                }
+              : {}),
+            ...(pageUrl ? { pageUrl } : {}),
+            ...(error || note ? { reason: error ? (error.fix ?? error.message) : note } : {}),
+            ...(error?.action ? { fix: { label: error.action.label, url: error.action.href } } : {}),
+          })),
+        },
+      );
     },
   }),
 

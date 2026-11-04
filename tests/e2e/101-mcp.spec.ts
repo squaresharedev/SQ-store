@@ -602,6 +602,7 @@ test.describe("connecting and using an assistant", () => {
 
     await ok("update_stock", { id: product.id, trackStock: true, stockQuantity: 7, lowStockThreshold: 2 });
     await ok("check_badge_label", { label: "New" });
+    await ok("publish_products", { ids: [product.id] });
     await ok("update_embed_settings", { id: storefrontId, enabled: true, domains: ["shop.example.com"] });
     await ok("update_product_page", { id: storefrontId, settings: { ctaLabel: "Get it" } });
     await ok("update_checkout_page", { id: storefrontId, settings: { celebrate: "none" } });
@@ -681,6 +682,11 @@ test.describe("taking access away", () => {
     await expect(page.locator("[data-open-claude]")).toHaveAttribute("href", "https://claude.ai/settings/connectors");
     await expect(page.locator("[data-mcp-capabilities] [data-scope]")).toHaveCount(12);
     await expect(page.getByText("Connecting assistants is switched off")).toHaveCount(0);
+    // What each one means is folded under its name, and opens from its chevron.
+    const productsScope = page.locator('[data-mcp-capabilities] [data-scope="products:write"]');
+    await expect(productsScope.locator("[data-scope-hint]")).toBeHidden();
+    await productsScope.locator("summary").click();
+    await expect(productsScope.locator("[data-scope-hint]")).toBeVisible();
 
     const row = page.locator('[data-connected-app="Revocable App"]');
     await expect(row).toContainText("client.example");
@@ -860,7 +866,7 @@ test.describe("the code exchange", () => {
     });
     await gotoApp(page, `/oauth/authorize?${query}`);
     await expect(page.locator('[data-agent-consent-refused="bad_redirect"]')).toBeVisible();
-    expect(page.url()).toContain("localhost:3100");
+    expect(page.url()).toContain(new URL(APP).host);
   });
 
   test("saying no sends the app away with nothing", async ({ page }) => {
@@ -1005,6 +1011,83 @@ type RawResult = {
   structuredContent?: Record<string, unknown>;
 };
 
+type ViewResource = { text: string; _meta?: { ui?: { csp?: { connectDomains?: string[]; resourceDomains?: string[] } } } };
+
+/** A JPEG's size in pixels, from its first frame header. */
+function jpegSize(data: Buffer): { width: number; height: number } {
+  for (let at = 2; at + 9 < data.length; at += 2 + data.readUInt16BE(at + 2)) {
+    const marker = data[at + 1];
+    if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
+      return { height: data.readUInt16BE(at + 5), width: data.readUInt16BE(at + 7) };
+    }
+  }
+  throw new Error("no JPEG frame header");
+}
+
+/** What a view may reach, as declared: this app, and photos only from R2's one exact host. */
+function expectDeclaredCsp(resource: ViewResource, { connects }: { connects: boolean }) {
+  const declared = resource._meta?.ui?.csp ?? {};
+  expect(declared.connectDomains ?? []).toEqual(connects ? [APP] : []);
+  const photoHosts = (declared.resourceDomains ?? []).filter((origin) => origin !== APP);
+  for (const origin of photoHosts) expect(origin).toMatch(/^https:\/\/[a-z0-9]+\.r2\.cloudflarestorage\.com$/);
+  if (connects) expect(declared.resourceDomains?.[0]).toBe(APP);
+}
+
+/**
+ * A view as a chat host runs it: a sandboxed frame under the CSP the spec
+ * builds from what the view declared, then the real tool result. In a browser
+ * of its own, as a chat host is: the test browser treats a sandboxed frame
+ * reaching this machine (loopback) as a private-network request and refuses
+ * it, which a host reaching dashboard.squareshare.eu is not.
+ */
+async function hostView(resource: ViewResource, result: RawResult) {
+  const declared = resource._meta?.ui?.csp ?? {};
+  const resources = (declared.resourceDomains ?? []).join(" ");
+  const csp = [
+    "default-src 'none'",
+    `script-src 'self' 'unsafe-inline' ${resources}`,
+    `style-src 'self' 'unsafe-inline' ${resources}`,
+    `connect-src 'self' ${(declared.connectDomains ?? []).join(" ")}`,
+    `img-src 'self' data: ${resources}`,
+    `font-src 'self' ${resources}`,
+    "frame-src 'none'",
+    "object-src 'none'",
+  ].join("; ");
+  const html = resource.text.replace("<head>", `<head><meta http-equiv="Content-Security-Policy" content="${csp}">`);
+  const hostBrowser = await chromium.launch();
+  const host = await hostBrowser.newPage();
+  await host.setContent(`<!doctype html><html><body><iframe id="view" sandbox="allow-scripts" style="width:760px;height:1400px;border:0"></iframe>
+<script>
+  window.received = [];
+  const frame = document.getElementById("view");
+  const post = (message) => frame.contentWindow.postMessage(message, "*");
+  window.addEventListener("message", (event) => {
+    if (event.source !== frame.contentWindow) return;
+    const m = event.data;
+    window.received.push(m);
+    if (m.method === "ui/initialize") {
+      post({ jsonrpc: "2.0", id: m.id, result: { protocolVersion: "2026-01-26", hostInfo: { name: "spec", version: "1" }, hostCapabilities: {}, hostContext: { theme: "light" } } });
+    } else if (m.method === "ui/notifications/initialized") {
+      post({ jsonrpc: "2.0", method: "ui/notifications/tool-result", params: window.toolResult });
+    } else if (m.id !== undefined && m.method) {
+      post({ jsonrpc: "2.0", id: m.id, result: {} });
+    }
+  });
+</script></body></html>`);
+  await host.evaluate((value) => { (window as unknown as { toolResult: unknown }).toolResult = value; }, result);
+  await host.evaluate((text) => { (document.getElementById("view") as HTMLIFrameElement).srcdoc = text; }, html);
+  return { host, frame: host.frameLocator("#view"), close: () => hostBrowser.close() };
+}
+
+/** The links a view asked the host to open, in order. */
+async function openedLinks(host: Page): Promise<string[]> {
+  return host.evaluate(() =>
+    (window as unknown as { received: { method?: string; params?: { url?: string } }[] }).received
+      .filter((message) => message.method === "ui/open-link")
+      .map((message) => message.params?.url ?? ""),
+  );
+}
+
 test.describe("previews", () => {
   test.setTimeout(240_000);
 
@@ -1038,6 +1121,18 @@ test.describe("previews", () => {
     });
     expect(edited.isError, JSON.stringify(edited.data)).toBe(false);
     expect((edited.data.board as { phone: { layout: string } }).phone.layout).toBe("own");
+    // The headline big on a desktop, smaller on a phone, each without the other.
+    const [, headline] = edited.data.added as string[];
+    const sized = await call(client, "edit_storefront", {
+      id,
+      operations: [
+        { op: "style", block: headline, changes: { fontSize: 64 } },
+        { op: "style", block: headline, viewport: "mobile", changes: { fontSize: 24 } },
+      ],
+    });
+    expect(sized.isError, JSON.stringify(sized.data)).toBe(false);
+    const phoneSpots = (sized.data.board as { phone: { blocks: { block: string; fontSize?: number }[] } }).phone.blocks;
+    expect(phoneSpots.find((spot) => spot.block === headline)?.fontSize).toBe(24);
 
     const result = (await client.callTool({ name: "preview_storefront", arguments: { id } })) as RawResult;
     expect(result.isError).toBeFalsy();
@@ -1049,13 +1144,16 @@ test.describe("previews", () => {
     expect(words.notes.join(" ")).toMatch(/not shown to buyers until published/);
     expect(words.notes.join(" ")).toMatch(/Buyers cannot open this storefront yet/);
 
-    // Then the two pictures, which the model sees as images.
+    // Then the two pictures, which the model sees as images: the desktop one
+    // laid out at 1280 and pictured 800 wide, small enough to reach a model.
     const images = result.content.filter((block) => block.type === "image") as { data: string; mimeType: string }[];
     expect(images).toHaveLength(2);
     for (const image of images) {
       expect(image.mimeType).toBe("image/jpeg");
       expect(Buffer.from(image.data, "base64").subarray(0, 2).toString("hex")).toBe("ffd8");
     }
+    expect(jpegSize(Buffer.from(images[0].data, "base64")).width).toBe(800);
+    expect(jpegSize(Buffer.from(images[1].data, "base64")).width).toBe(390);
 
     // And what the view draws from: which picture is which, and where the tile is in each.
     const data = result.structuredContent as {
@@ -1073,53 +1171,13 @@ test.describe("previews", () => {
       writeFileSync(`test-results/mcp-preview-${name}.jpg`, Buffer.from(image.data, "base64"));
     }
 
-    // The view, as a host runs it: a sandboxed frame under the CSP the spec
-    // builds from what the view declared, then the real tool result. It shows
-    // the storefront itself, read live from the preview page.
-    const resource = view.contents[0] as { text: string; _meta?: { ui?: { csp?: { connectDomains?: string[]; resourceDomains?: string[] } } } };
+    // The view, as a host runs it. It shows the storefront itself, read live
+    // from the preview page. What it may reach: this app (its page and assets)
+    // and the photos' store, by its exact host.
+    const resource = view.contents[0] as ViewResource;
     await client.close();
-    const declared = resource._meta?.ui?.csp ?? {};
-    // What the view may reach: this app (its page and assets) and the photos' store.
-    expect(declared.connectDomains).toEqual([APP]);
-    expect(declared.resourceDomains).toEqual([APP, "https://*.r2.cloudflarestorage.com"]);
-    const resources = (declared.resourceDomains ?? []).join(" ");
-    const csp = [
-      "default-src 'none'",
-      `script-src 'self' 'unsafe-inline' ${resources}`,
-      `style-src 'self' 'unsafe-inline' ${resources}`,
-      `connect-src 'self' ${(declared.connectDomains ?? []).join(" ")}`,
-      `img-src 'self' data: ${resources}`,
-      `font-src 'self' ${resources}`,
-      "frame-src 'none'",
-      "object-src 'none'",
-    ].join("; ");
-    const html = resource.text.replace("<head>", `<head><meta http-equiv="Content-Security-Policy" content="${csp}">`);
-    // In a browser of its own, as a chat host is: the test browser treats a
-    // sandboxed frame reaching this machine (loopback) as a private-network
-    // request and refuses it, which a host reaching dashboard.squareshare.eu is not.
-    const hostBrowser = await chromium.launch();
-    const host = await hostBrowser.newPage();
-    await host.setContent(`<!doctype html><html><body><iframe id="view" sandbox="allow-scripts" style="width:760px;height:1400px;border:0"></iframe>
-<script>
-  window.received = [];
-  const frame = document.getElementById("view");
-  const post = (message) => frame.contentWindow.postMessage(message, "*");
-  window.addEventListener("message", (event) => {
-    if (event.source !== frame.contentWindow) return;
-    const m = event.data;
-    window.received.push(m);
-    if (m.method === "ui/initialize") {
-      post({ jsonrpc: "2.0", id: m.id, result: { protocolVersion: "2026-01-26", hostInfo: { name: "spec", version: "1" }, hostCapabilities: {}, hostContext: { theme: "light" } } });
-    } else if (m.method === "ui/notifications/initialized") {
-      post({ jsonrpc: "2.0", method: "ui/notifications/tool-result", params: window.toolResult });
-    } else if (m.id !== undefined && m.method) {
-      post({ jsonrpc: "2.0", id: m.id, result: {} });
-    }
-  });
-</script></body></html>`);
-    await host.evaluate((value) => { (window as unknown as { toolResult: unknown }).toolResult = value; }, result);
-    await host.evaluate((text) => { (document.getElementById("view") as HTMLIFrameElement).srcdoc = text; }, html);
-    const frame = host.frameLocator("#view");
+    expectDeclaredCsp(resource, { connects: true });
+    const { host, frame, close } = await hostView(resource, result);
     const storefront = frame.locator(".live [data-storefront-page]");
     await expect(storefront).toBeVisible({ timeout: 30_000 });
     await expect(storefront).toContainText("Preview lamp");
@@ -1136,8 +1194,111 @@ test.describe("previews", () => {
     await expect(phoneTile).toBeVisible({ timeout: 30_000 });
     const placed = (await phoneTile.getAttribute("style")) ?? "";
     expect(placed.replace(/\s/g, "")).toContain("grid-column:1/span4;grid-row:1/span2");
+    // The headline at its phone size there, and at its own on the desktop board.
+    const headlineIn = (scope: string) => frame.locator(`${scope} [data-storefront-page] p`).filter({ hasText: "Previewed" }).first();
+    await expect(headlineIn(".live.phone")).toHaveAttribute("style", /font-size:\s*24px/);
+    await frame.getByRole("button", { name: "Desktop" }).click();
+    await expect(headlineIn(".live:not(.phone)")).toHaveAttribute("style", /font-size:\s*64px/);
     await host.screenshot({ path: "test-results/mcp-preview-view.png", fullPage: true });
-    await hostBrowser.close();
+    await close();
+  });
+
+  test("a draft's page is previewed live, and publish_products puts it on sale with a card of what went live", async ({ page }) => {
+    const user = freshUser("mcppublish");
+    await signUp(page, user);
+    const { accessToken } = await connect(page);
+    const client = await mcpClient(accessToken);
+
+    const { tools } = await client.listTools();
+    const viewOf = (name: string) => (tools.find((candidate) => candidate.name === name)?._meta as { ui?: { resourceUri?: string } })?.ui?.resourceUri;
+    expect(viewOf("preview_product_page")).toBe("ui://square-share/product-page-preview");
+    expect(viewOf("publish_products")).toBe("ui://square-share/publish-card");
+
+    const productId = (await call(client, "create_product", { title: "Ember side table", priceCents: 32000, currency: "EUR" })).data.id as string;
+    const storefrontId = (await call(client, "create_storefront")).data.id as string;
+    const placed = await call(client, "edit_storefront", { id: storefrontId, operations: [{ op: "add_product", productId }] });
+    expect(placed.isError, JSON.stringify(placed.data)).toBe(false);
+
+    // The draft's page, as a buyer's browser would draw it once it is on sale.
+    const preview = (await client.callTool({ name: "preview_product_page", arguments: { id: productId } })) as RawResult;
+    expect(preview.isError, JSON.stringify(preview.content)).toBeFalsy();
+    const words = JSON.parse((preview.content[0] as { text: string }).text) as {
+      product: { title: string; priceCents: number };
+      status: string;
+      storefront: { id: string };
+      notes: string[];
+      pictures: string[];
+    };
+    expect(words.product).toMatchObject({ title: "Ember side table", priceCents: 32000 });
+    expect(words.status).toBe("draft");
+    expect(words.storefront.id).toBe(storefrontId);
+    expect(words.notes.join(" ")).toMatch(/Buyers cannot open this page yet: it is a draft/);
+    expect(words.notes.join(" ")).toMatch(/No photo/);
+    // Nothing to buy it with yet, which a buyer's page shows as no button at all.
+    expect(words.notes.join(" ")).toMatch(/no buy button/);
+    expect(words.pictures).toEqual(["desktop", "mobile"]);
+    const shots = preview.content.filter((block) => block.type === "image") as { data: string }[];
+    expect(shots.map((shot) => jpegSize(Buffer.from(shot.data, "base64")).width)).toEqual([800, 390]);
+    writeFileSync("test-results/mcp-product-preview-desktop.jpg", Buffer.from(shots[0].data, "base64"));
+
+    const pageView = (await client.readResource({ uri: "ui://square-share/product-page-preview" })).contents[0] as ViewResource;
+    expectDeclaredCsp(pageView, { connects: true });
+    const previewed = await hostView(pageView, preview);
+    const productPage = previewed.frame.locator(".live [data-product-page]");
+    await expect(productPage).toBeVisible({ timeout: 30_000 });
+    await expect(productPage).toContainText("Ember side table");
+    // A draft has no live page to open yet, only its editor.
+    await expect(previewed.frame.getByRole("button", { name: "Open the live page" })).toHaveCount(0);
+    await previewed.frame.getByRole("button", { name: "Edit the product" }).click();
+    await expect.poll(() => openedLinks(previewed.host)).toEqual([`${APP}/products/${productId}/edit`]);
+    await previewed.frame.getByRole("button", { name: "Phone" }).click();
+    await expect(previewed.frame.locator(".live.phone [data-product-page]")).toBeVisible({ timeout: 30_000 });
+    await previewed.close();
+
+    // Publishing waits on the seller's trader details, and says where they go.
+    const refused = (await client.callTool({ name: "publish_products", arguments: { ids: [productId] } })) as RawResult;
+    expect(refused.isError).toBeFalsy();
+    const refusedWords = JSON.parse((refused.content[0] as { text: string }).text) as {
+      products: { id: string; outcome: string; error?: { code: string; action?: { href: string } } }[];
+    };
+    expect(refusedWords.products).toEqual([expect.objectContaining({ id: productId, outcome: "refused" })]);
+    expect(refusedWords.products[0].error?.code).toBe("trader_identity_required");
+    const refusedItem = (refused.structuredContent as { items: { fix?: { url: string } }[] }).items[0];
+    expect(refusedItem.fix?.url).toBe(refusedWords.products[0].error?.action?.href);
+
+    // Once they are in, it goes live, and opens on the storefront it is on.
+    await seedSellerIdentity(await userIdByEmail(user.email), PUBLISHABLE_SELLER);
+    const published = (await client.callTool({ name: "publish_products", arguments: { ids: [productId] } })) as RawResult;
+    const items = (published.structuredContent as { kind: string; items: { outcome: string; pageUrl?: string; price?: string }[] });
+    expect(items.kind).toBe("publish");
+    expect(items.items).toEqual([expect.objectContaining({ outcome: "published", pageUrl: `${APP}/s/${storefrontId}/p/${productId}` })]);
+    expect(items.items[0].price).toContain("320.00");
+    expect((await call(client, "get_product", { id: productId })).data.status).toBe("active");
+    // Asked again, it is already live: nothing is written twice.
+    const again = (await client.callTool({ name: "publish_products", arguments: { ids: [productId] } })) as RawResult;
+    expect((again.structuredContent as { items: { outcome: string }[] }).items[0].outcome).toBe("already_live");
+
+    const card = (await client.readResource({ uri: "ui://square-share/publish-card" })).contents[0] as ViewResource;
+    expectDeclaredCsp(card, { connects: false });
+    const shown = await hostView(card, published);
+    await expect(shown.frame.getByText("1 product is live")).toBeVisible({ timeout: 15_000 });
+    const row = shown.frame.locator('.row[data-outcome="published"]');
+    await expect(row).toContainText("Ember side table");
+    await expect(row).toContainText("Live now");
+    await row.getByRole("button", { name: "Open the page" }).click();
+    await expect.poll(() => openedLinks(shown.host)).toEqual([`${APP}/s/${storefrontId}/p/${productId}`]);
+    await shown.host.screenshot({ path: "test-results/mcp-publish-card.png", fullPage: true });
+    await shown.close();
+
+    // And its page now opens for a buyer, which the preview says too.
+    expect((await page.request.get(`/s/${storefrontId}/p/${productId}`)).status()).toBe(200);
+    const live = (await client.callTool({ name: "preview_product_page", arguments: { id: productId, viewport: "desktop" } })) as RawResult;
+    const liveNotes = JSON.parse((live.content[0] as { text: string }).text).notes.join(" ");
+    expect(liveNotes).not.toMatch(/Buyers cannot open/);
+    // The seller's contact email is a way to ask for it now.
+    expect(liveNotes).not.toMatch(/no buy button/);
+    expect((live.structuredContent as { links: { page?: string } }).links.page).toBe(`${APP}/s/${storefrontId}/p/${productId}`);
+    await client.close();
   });
 
   test("a preview shows only the caller's own store, and its page only to a live grant", async ({ page, browser }) => {

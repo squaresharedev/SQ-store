@@ -712,6 +712,8 @@
     "imageUnreadable": "That image could not be read.",
     "imageUnreadableFix": "Send a public HTTPS link or base64 data for a JPEG, PNG, WebP, GIF or AVIF within the size limit.",
     "passThrough": "{message}",
-    "requestInvalid": "This connection request is not valid. Start again from the app."
+    "requestInvalid": "This connection request is not valid. Start again from the app.",
+    "noStorefrontForPage": "This store has no storefront yet, and a product page is part of one.",
+    "noStorefrontForPageFix": "Create one with create_storefront and add the product with edit_storefront, then preview it."
   }
 }

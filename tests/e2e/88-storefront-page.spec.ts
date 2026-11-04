@@ -153,6 +153,8 @@ test.describe("the hosted storefront", () => {
     // A report from here is about the storefront, and the footer names the trader.
     await expect(buyer.locator("[data-report-trigger='storefront']")).toHaveText("Report this storefront");
     await expect(buyer.locator("[data-product-sale-disclosure]")).toContainText(shop.store);
+    // Nothing has been ordered yet: the seller is the seller of what is shown.
+    await expect(buyer.locator("[data-product-sale-disclosure]")).toContainText("is the seller of these products");
 
     // The tile leads to the product, and the product's shop bar leads back.
     await tiles.first().click();

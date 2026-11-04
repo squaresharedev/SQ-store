@@ -1,9 +1,10 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { applyDesignOps, boardSummary, phoneSummary, type DesignOp } from "@/lib/storefront/design-ops";
+import { phoneGridLayout } from "@/components/storefront/phone-grid";
+import { DesignOpRefused, applyDesignOps, boardSummary, phoneSummary, type DesignOp } from "@/lib/storefront/design-ops";
 import { phoneLayout } from "@/lib/storefront/mobile-layout";
 import { storefrontConfigSchema } from "@/lib/validation/storefront";
-import { DEFAULT_STOREFRONT_CONFIG, type StorefrontBlock, type StorefrontConfig } from "@/types/storefront";
+import { DEFAULT_STOREFRONT_CONFIG, drawnOnPhone, type StorefrontBlock, type StorefrontConfig } from "@/types/storefront";
 
 const A = "11111111-1111-4111-8111-111111111111";
 const B = "22222222-2222-4222-8222-222222222222";
@@ -111,6 +112,39 @@ describe("editing the phone board", () => {
   it("a desktop move does not touch the phone rect", () => {
     const { config } = run([{ op: "move", block: A, x: 2, y: 2 }], board([{ ...tile(A, 0, 0), mobile: { x: 1, y: 1, w: 1, h: 1 } }], 4));
     expect(found(config, A)).toMatchObject({ x: 2, y: 2, mobile: { x: 1, y: 1 } });
+  });
+
+  describe("a text block's size on phones", () => {
+    const headline: StorefrontBlock = { type: "text", id: C, text: "Gather round.", variant: "heading", align: "left", fontSize: 72, x: 0, y: 0, w: 4, h: 1 };
+    const textOf = (config: StorefrontConfig) => config.blocks.find((block) => block.type === "text")!;
+
+    it("is kept beside the desktop size, which stays as it was", () => {
+      const { config, valid } = run([{ op: "style", block: C, viewport: "mobile", changes: { fontSize: 32 } }], board([headline]));
+      expect(valid).toBe(true);
+      expect(config.theme.mobileColumns).toBe(4);
+      expect(textOf(config)).toMatchObject({ fontSize: 72, mobileFontSize: 32 });
+    });
+
+    it("is what the phone board draws, and what the summary says", () => {
+      const config = board([{ ...headline, mobileFontSize: 32 }], 4);
+      expect(drawnOnPhone(config.blocks[0])).toMatchObject({ fontSize: 32 });
+      expect(phoneGridLayout(config.theme, config.blocks)!.blocks[0].data).toMatchObject({ fontSize: 32 });
+      expect(phoneSummary(config)).toMatchObject({ blocks: [{ block: C, fontSize: 32 }] });
+    });
+
+    it("follows the desktop size again when cleared", () => {
+      const { config } = run([{ op: "style", block: C, viewport: "mobile", changes: { fontSize: null } }], board([{ ...headline, mobileFontSize: 32 }], 4));
+      expect(textOf(config)).not.toHaveProperty("mobileFontSize");
+      expect(drawnOnPhone(textOf(config))).toMatchObject({ fontSize: 72 });
+    });
+
+    it("is the only look that may differ on a phone, and only within the size bounds", () => {
+      expect(() => run([{ op: "style", block: C, viewport: "mobile", changes: { color: "#ff0000" } }], board([headline]))).toThrow(DesignOpRefused);
+      expect(() => run([{ op: "style", block: A, viewport: "mobile", changes: { fontSize: 20 } }], board([tile(A, 0, 0)]))).toThrow(DesignOpRefused);
+      // Not settable around the phone operation, where it would do nothing on a board without a phone layout.
+      expect(() => run([{ op: "style", block: C, changes: { mobileFontSize: 20 } }], board([headline]))).toThrow(DesignOpRefused);
+      expect(run([{ op: "style", block: C, viewport: "mobile", changes: { fontSize: 2 } }], board([headline])).valid).toBe(false);
+    });
   });
 
   it("dropping mobileColumns drops the phone layout and keeps the rects, inert", () => {

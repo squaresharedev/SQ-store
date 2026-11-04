@@ -712,6 +712,8 @@
     "imageUnreadable": "Non è stato possibile leggere questa immagine.",
     "imageUnreadableFix": "Invia un link HTTPS pubblico o dati base64 di un’immagine JPEG, PNG, WebP, GIF o AVIF entro il limite di dimensione.",
     "passThrough": "{message}",
-    "requestInvalid": "Questa richiesta di collegamento non è valida. Ricomincia dall’app."
+    "requestInvalid": "Questa richiesta di collegamento non è valida. Ricomincia dall’app.",
+    "noStorefrontForPage": "Questo negozio non ha ancora una vetrina, e una pagina prodotto fa parte di una vetrina.",
+    "noStorefrontForPageFix": "Creane una con create_storefront, aggiungi il prodotto con edit_storefront e poi visualizzane l’anteprima."
   }
 }

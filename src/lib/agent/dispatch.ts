@@ -62,7 +62,9 @@ export function toolAvailable(
   return true;
 }
 
-async function toEnvelope(error: ActionError): Promise<ToolErrorEnvelope> {
+/** An ActionError in words: for the whole call's refusal, or for one item of
+ *  a call that answers item by item (publish_products). */
+export async function toEnvelope(error: ActionError): Promise<ToolErrorEnvelope> {
   const t = await getTranslations();
   const text = (ref: MessageRef) => t(ref.key, ref.values);
   return {

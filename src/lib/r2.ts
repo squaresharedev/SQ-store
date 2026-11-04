@@ -67,18 +67,26 @@ export function hasR2Credentials(): boolean {
   );
 }
 
-/** Every origin a signed object URL can have (objectUrl below), as a CSP
- *  host source: what a page that shows stored files must allow. */
-export const R2_ORIGIN_SOURCE = "https://*.r2.cloudflarestorage.com";
+function r2Host(accountId: string): string {
+  return `https://${accountId}.r2.cloudflarestorage.com`;
+}
+
+/**
+ * The one origin every signed object URL has (objectUrl below), for a page
+ * that shows stored files to allow: exact, because a host that builds the CSP
+ * may not honour a wildcard (MCP Apps views, lib/agent/tools/previews.ts).
+ * Null without R2 credentials, when no such URL is ever made.
+ */
+export function r2Origin(): string | null {
+  return hasR2Credentials() ? r2Host(requireEnv("R2_ACCOUNT_ID")) : null;
+}
 
 function objectUrl(key: string): URL {
   const accountId = requireEnv("R2_ACCOUNT_ID");
   const bucket = requireEnv("R2_BUCKET_NAME");
   // Keys are minted by buildObjectKey from a conservative charset, so the raw
   // key is already URL-safe.
-  return new URL(
-    `https://${accountId}.r2.cloudflarestorage.com/${bucket}/${key}`,
-  );
+  return new URL(`${r2Host(accountId)}/${bucket}/${key}`);
 }
 
 // One client per isolate. aws4fetch memoizes derived signing keys on the

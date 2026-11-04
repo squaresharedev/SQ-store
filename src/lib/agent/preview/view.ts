@@ -1,10 +1,12 @@
 /**
- * THE STOREFRONT PREVIEW VIEW: an MCP Apps view (the `ui://` resource that
- * preview_storefront names in `_meta.ui.resourceUri`), spec 2026-01-26.
+ * THE PAGE PREVIEW VIEW: an MCP Apps view (the `ui://` resource that
+ * preview_storefront and preview_product_page name in `_meta.ui.resourceUri`),
+ * spec 2026-01-26. `structuredContent.kind` says which page it is showing.
  *
- * It shows THE STOREFRONT ITSELF, live: it reads the preview page from this app
- * (`structuredContent.live.url`, a short-lived token, `vp=mobile` for the phone
- * board), takes the storefront out of it, and draws that markup with this
+ * It shows THE PAGE ITSELF, live: it reads the preview page from this app
+ * (`structuredContent.live.url`, a short-lived token, `vp=mobile` for a
+ * storefront's phone board), takes the storefront or the product page out of
+ * it, and draws that markup with this
  * app's own stylesheets, fonts and photos. A nested iframe would be simpler,
  * but Claude restricts `frameDomains` pending its own security review, so the
  * page is drawn here instead, its scripts left behind. Hover reveals, fonts,
@@ -16,11 +18,12 @@
  * else. When the page cannot be read (an old link, a host that refuses the
  * connection), it shows the screenshots the result carries as `image` blocks.
  *
- * It speaks the protocol by hand: `ui/initialize`, then the host's
- * `ui/notifications/tool-result`. A click on a product tile is caught (nothing
- * navigates), tells the model which tile with `ui/update-model-context`, and
- * offers `ui/open-link` to the product page or the designer; the host may ask
- * the person about either.
+ * The protocol is the shared kit's (view-kit.ts): `ui/initialize`, then the
+ * host's `ui/notifications/tool-result`. Nothing in it navigates. On a storefront a
+ * click on a product tile is caught, tells the model which tile with
+ * `ui/update-model-context`, and offers `ui/open-link` to the product page or
+ * the designer; a product page offers its live page and its editor. The host
+ * may ask the person about any of them.
  *
  * Seller words reach this document only inside the storefront markup this app
  * rendered (React escaped them there) and through textContent. It never parses
@@ -28,31 +31,14 @@
  * storefront imported node by node, scripts removed.
  */
 
-export const MCP_APP_MIME_TYPE = "text/html;profile=mcp-app";
-
-/** The protocol revision this view speaks. */
-const PROTOCOL_VERSION = "2026-01-26";
+import { viewDocument } from "@/lib/agent/preview/view-kit";
 
 const STYLE = `
-:root {
-  color-scheme: light dark;
-  --pv-bg: var(--color-background-primary, light-dark(#ffffff, #171717));
-  --pv-bg-2: var(--color-background-secondary, light-dark(#f5f5f5, #262626));
-  --pv-ink: var(--color-text-primary, light-dark(#171717, #fafafa));
-  --pv-ink-2: var(--color-text-secondary, light-dark(#525252, #a3a3a3));
-  --pv-line: var(--color-border-primary, light-dark(#e5e5e5, #404040));
-  --pv-accent: var(--color-background-inverse, light-dark(#171717, #fafafa));
-  --pv-accent-ink: var(--color-text-inverse, light-dark(#ffffff, #171717));
-  --pv-font: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
-}
-* { box-sizing: border-box; }
-html, body { margin: 0; background: var(--pv-bg); color: var(--pv-ink); font: 14px/1.4 var(--pv-font); }
 .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; }
 .name { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .switch { display: inline-flex; border: 1px solid var(--pv-line); }
-.switch button, .action { font: inherit; font-size: 13px; padding: 6px 12px; border: 0; background: transparent; color: var(--pv-ink); cursor: pointer; }
+.switch button { font: inherit; font-size: 13px; padding: 6px 12px; border: 0; background: transparent; color: var(--pv-ink); cursor: pointer; }
 .switch button[aria-pressed="true"] { background: var(--pv-accent); color: var(--pv-accent-ink); }
-.notes { padding: 0 12px 8px; color: var(--pv-ink-2); font-size: 12px; }
 .stage { padding: 0 12px 12px; display: flex; justify-content: center; }
 .frame { position: relative; width: 100%; border: 1px solid var(--pv-line); background: var(--pv-bg-2); }
 .frame.phone { max-width: 390px; }
@@ -62,7 +48,8 @@ html, body { margin: 0; background: var(--pv-bg); color: var(--pv-ink); font: 14
 .live { position: relative; width: 100%; overflow: hidden; border: 1px solid var(--pv-line); }
 .live.phone { max-width: 390px; }
 .live-inner { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
-.live-inner [data-storefront-page] { min-height: 0 !important; }
+.live-inner [data-storefront-page], .live-inner [data-product-page] { min-height: 0 !important; }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 10px; }
 .live-inner a { cursor: pointer; }
 .live-inner a[data-picked] { outline: 3px solid var(--pv-accent); outline-offset: -3px; }
 .panel { margin: 0 12px 12px; padding: 10px 12px; border: 1px solid var(--pv-line); display: grid; gap: 6px; }
@@ -70,39 +57,14 @@ html, body { margin: 0; background: var(--pv-bg); color: var(--pv-ink); font: 14
 .panel .title { font-weight: 600; }
 .panel .meta { color: var(--pv-ink-2); font-size: 12px; word-break: break-all; }
 .panel .row { display: flex; flex-wrap: wrap; gap: 6px; }
-.action { border: 1px solid var(--pv-line); }
-.action.primary { background: var(--pv-accent); color: var(--pv-accent-ink); border-color: var(--pv-accent); }
-.empty { padding: 24px 12px; color: var(--pv-ink-2); text-align: center; }
 `;
 
 const SCRIPT = `
-(() => {
-  const PROTOCOL = ${JSON.stringify(PROTOCOL_VERSION)};
-  /** The widths a board is drawn at: a laptop's, and a phone's. */
+  /** The widths a page is drawn at: a laptop's, and a phone's. */
   const WIDTHS = { desktop: 1280, mobile: 390 };
-  const pending = new Map();
-  let nextId = 1;
   let state = { loading: "Taking the pictures…" };
   let live = { stages: {}, status: {} };
   const adopted = new Set();
-
-  const send = (message) => window.parent.postMessage(message, "*");
-  const notify = (method, params) => send({ jsonrpc: "2.0", method, params });
-  const request = (method, params) => {
-    const id = nextId++;
-    send({ jsonrpc: "2.0", id, method, params });
-    return new Promise((resolve, reject) => {
-      pending.set(id, { resolve, reject });
-      setTimeout(() => { if (pending.delete(id)) reject(new Error("timeout")); }, 30000);
-    });
-  };
-
-  const el = (tag, props, children) => {
-    const node = document.createElement(tag);
-    Object.assign(node, props || {});
-    for (const child of children || []) node.append(child);
-    return node;
-  };
   const root = document.getElementById("app");
 
   function findTile(productId) {
@@ -132,10 +94,6 @@ const SCRIPT = `
         content: [{ type: "text", text: "In the storefront preview (" + state.viewport + "), the seller selected the tile for product \\"" + tile.title + "\\" (productId " + tile.productId + ", status " + tile.status + ")." }],
       }).catch(() => {});
     }
-  }
-
-  function openLink(url) {
-    if (url) request("ui/open-link", { url }).catch(() => {});
   }
 
   /** A product page path's product id, or null. */
@@ -185,8 +143,8 @@ const SCRIPT = `
     const response = await fetch(url.href, { credentials: "omit", cache: "no-store" });
     if (!response.ok) throw new Error("preview page " + response.status);
     const doc = new DOMParser().parseFromString(await response.text(), "text/html");
-    const source = doc.querySelector("[data-storefront-page]");
-    if (!source) throw new Error("no storefront in the page");
+    const source = doc.querySelector(state.kind === "product" ? "[data-product-page]" : "[data-storefront-page]");
+    if (!source) throw new Error("nothing to show in the page");
     for (const node of doc.querySelectorAll('link[rel="stylesheet"][href], style')) adoptStyle(node, url);
     const page = document.importNode(source, true);
     for (const script of page.querySelectorAll("script")) script.remove();
@@ -211,11 +169,12 @@ const SCRIPT = `
     };
     new ResizeObserver(fit).observe(stage);
     new ResizeObserver(fit).observe(inner);
-    // Nothing in a preview navigates: a product tile is picked instead.
+    // Nothing in a preview navigates: on a storefront a product tile is picked instead.
     inner.addEventListener("click", (event) => {
       const anchor = event.target.closest && event.target.closest("a");
       if (!anchor) return;
       event.preventDefault();
+      if (state.kind !== "storefront") return;
       const productId = productOf(anchor.getAttribute("data-href"));
       if (!productId) return;
       selectTile(findTile(productId) || { productId, title: (anchor.textContent || "").trim().slice(0, 120), status: "active" });
@@ -240,8 +199,8 @@ const SCRIPT = `
     const image = state.images[state.viewport];
     if (!image) {
       const message = state.live
-        ? "This preview has run out. Ask for a new one to see the storefront again."
-        : "No picture of this storefront could be taken. The details are in the text of this result.";
+        ? "This preview has run out. Ask for a new one to see the " + state.noun + " again."
+        : "No picture of this " + state.noun + " could be taken. The details are in the text of this result.";
       root.append(el("div", { className: "empty", textContent: message }));
       return;
     }
@@ -287,6 +246,18 @@ const SCRIPT = `
     }
     root.append(bar);
     for (const note of state.notes) root.append(el("div", { className: "notes", textContent: note }));
+    // A product page's ways out, always there: it has no tiles to pick.
+    if (state.kind === "product") {
+      const actions = el("div", { className: "actions" });
+      for (const [key, label, primary] of [["page", "Open the live page", true], ["edit", "Edit the product", false]]) {
+        const url = state.links[key];
+        if (typeof url !== "string") continue;
+        const button = el("button", { type: "button", className: "action" + (primary ? " primary" : ""), textContent: label });
+        button.addEventListener("click", () => openLink(url));
+        actions.append(button);
+      }
+      if (actions.childElementCount) root.append(actions);
+    }
 
     const status = state.live ? live.status[state.viewport] : "failed";
     if (status === "ready") {
@@ -295,7 +266,7 @@ const SCRIPT = `
     } else if (status === "failed") {
       drawPicture();
     } else {
-      root.append(el("div", { className: "empty", textContent: "Loading the storefront…" }));
+      root.append(el("div", { className: "empty", textContent: "Loading the " + state.noun + "…" }));
       ensureLive(state.viewport);
     }
 
@@ -321,7 +292,7 @@ const SCRIPT = `
     root.append(panel);
   }
 
-  function render(result) {
+  function onResult(result) {
     const content = (result && result.content) || [];
     const data = (result && result.structuredContent) || {};
     const images = {};
@@ -332,91 +303,33 @@ const SCRIPT = `
       }
     }
     live = { stages: {}, status: {} };
+    const kind = data.kind === "product" ? "product" : "storefront";
     state = {
       loading: null,
+      kind,
+      noun: kind === "product" ? "product page" : "storefront",
       viewports: data.viewports || {},
       images,
       viewport: data.viewport === "mobile" ? "mobile" : "desktop",
       selected: null,
       links: data.links || {},
       live: data.live && typeof data.live.url === "string" ? data.live : null,
-      name: (data.storefront && data.storefront.name) || "Storefront",
+      name: (kind === "product" ? data.product && data.product.title : data.storefront && data.storefront.name) || "Preview",
       notes: Array.isArray(data.notes) ? data.notes.filter((note) => typeof note === "string") : [],
     };
     draw();
   }
 
-  function applyContext(context) {
-    if (context && (context.theme === "light" || context.theme === "dark")) {
-      document.documentElement.style.colorScheme = context.theme;
-    }
-    const variables = context && context.styles && context.styles.variables;
-    if (variables) {
-      for (const [name, value] of Object.entries(variables)) {
-        if (typeof value === "string" && name.startsWith("--")) document.documentElement.style.setProperty(name, value);
-      }
-    }
+  function onCancelled() {
+    state = { loading: "The preview was cancelled." };
+    draw();
   }
-
-  window.addEventListener("message", (event) => {
-    if (event.source !== window.parent) return;
-    const message = event.data;
-    if (!message || message.jsonrpc !== "2.0") return;
-    if (message.id !== undefined && message.method === undefined) {
-      const waiting = pending.get(message.id);
-      if (!waiting) return;
-      pending.delete(message.id);
-      if (message.error) waiting.reject(message.error);
-      else waiting.resolve(message.result);
-      return;
-    }
-    switch (message.method) {
-      case "ui/notifications/tool-result":
-        render(message.params);
-        break;
-      case "ui/notifications/tool-cancelled":
-        state = { loading: "The preview was cancelled." };
-        draw();
-        break;
-      case "ui/notifications/host-context-changed":
-        applyContext(message.params);
-        break;
-      case "ui/resource-teardown":
-      case "ping":
-        if (message.id !== undefined) send({ jsonrpc: "2.0", id: message.id, result: {} });
-        break;
-    }
-  });
-
-  new ResizeObserver(() => {
-    notify("ui/notifications/size-changed", { width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight });
-  }).observe(document.documentElement);
-
-  draw();
-  request("ui/initialize", {
-    appInfo: { name: "square-share-storefront-preview", version: "1.0.0" },
-    appCapabilities: { availableDisplayModes: ["inline", "fullscreen"] },
-    protocolVersion: PROTOCOL,
-  })
-    .then((result) => {
-      applyContext((result && result.hostContext) || {});
-      notify("ui/notifications/initialized", {});
-    })
-    .catch(() => {});
-})();
 `;
 
 /** The whole view, as `resources/read` returns it. */
-export const STOREFRONT_PREVIEW_VIEW_HTML = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Storefront preview</title>
-<style>${STYLE}</style>
-</head>
-<body>
-<div id="app"></div>
-<script>${SCRIPT}</script>
-</body>
-</html>`;
+export const PAGE_PREVIEW_VIEW_HTML = viewDocument({
+  title: "Preview",
+  style: STYLE,
+  script: SCRIPT,
+  app: { name: "square-share-page-preview", version: "1.1.0" },
+});

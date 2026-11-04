@@ -135,7 +135,9 @@ export function PoweredByFooter({
           className="max-w-[46rem] text-center leading-relaxed"
           data-product-sale-disclosure=""
         >
-          {t.rich("disclosure", {
+          {/* A storefront's page sells several things and none yet, so it
+              names the seller of its products rather than of "this order". */}
+          {t.rich(product ? "disclosure" : "storefrontDisclosure", {
             name: sellerName,
             seller: (chunks) => <span className="font-medium">{chunks}</span>,
           })}

@@ -681,7 +681,9 @@ async function testSnapshot(request) {
     const { chromium } = await import("@playwright/test");
     snapshotBrowser = await chromium.launch();
   }
-  const page = await snapshotBrowser.newPage({ viewport: request.viewport });
+  // Browser Run takes the device scale inside `viewport`; Playwright beside it.
+  const { deviceScaleFactor = 1, ...viewport } = request.viewport;
+  const page = await snapshotBrowser.newPage({ viewport, deviceScaleFactor });
   try {
     await page.goto(request.url, { waitUntil: request.gotoOptions?.waitUntil ?? "load", timeout: request.gotoOptions?.timeout });
     if (request.waitForSelector) {

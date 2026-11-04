@@ -712,6 +712,8 @@
     "imageUnreadable": "Cette image n’a pas pu être lue.",
     "imageUnreadableFix": "Envoyez un lien HTTPS public ou des données base64 pour une image JPEG, PNG, WebP, GIF ou AVIF dans la limite de taille.",
     "passThrough": "{message}",
-    "requestInvalid": "Cette demande de connexion n’est pas valide. Recommencez depuis l’application."
+    "requestInvalid": "Cette demande de connexion n’est pas valide. Recommencez depuis l’application.",
+    "noStorefrontForPage": "Cette boutique n’a pas encore de vitrine, et une page produit fait partie d’une vitrine.",
+    "noStorefrontForPageFix": "Créez-en une avec create_storefront, ajoutez-y le produit avec edit_storefront, puis prévisualisez-la."
   }
 }

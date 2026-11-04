@@ -24,6 +24,18 @@ export const PREVIEW_VIEWPORTS: Record<PreviewViewport, { width: number; height:
   mobile: { width: 390, height: 844 },
 };
 
+/**
+ * How wide each picture is, in pixels. A page is laid out at its screen's own
+ * width and photographed smaller where that is wide: a full-length desktop page
+ * at 1280 pixels is past what a chat host hands a model, so it never reached it.
+ */
+export const PREVIEW_PICTURE_WIDTH_PX: Record<PreviewViewport, number> = { desktop: 800, mobile: 390 };
+
+/** Picture pixels per page pixel: what a measurement on the page is times, on its picture. */
+export function pictureScale(viewport: PreviewViewport): number {
+  return PREVIEW_PICTURE_WIDTH_PX[viewport] / PREVIEW_VIEWPORTS[viewport].width;
+}
+
 /** Set on <html> by the preview page once every tile is measured. */
 export const PREVIEW_READY_SELECTOR = "html[data-preview-ready]";
 
@@ -36,11 +48,12 @@ export type Snapshot = { image: string; mimeType: "image/jpeg"; html: string };
  */
 const SNAPSHOT_JPEG_QUALITY = 60;
 
-/** The page, taken full length as a JPEG (a fraction of a PNG's size). */
+/** The page, taken full length as a JPEG (a fraction of a PNG's size), and
+ *  drawn at a device scale that makes it PREVIEW_PICTURE_WIDTH_PX wide. */
 function snapshotRequest(url: string, viewport: PreviewViewport) {
   return {
     url,
-    viewport: PREVIEW_VIEWPORTS[viewport],
+    viewport: { ...PREVIEW_VIEWPORTS[viewport], deviceScaleFactor: pictureScale(viewport) },
     gotoOptions: { waitUntil: "load", timeout: 20_000 },
     waitForSelector: { selector: PREVIEW_READY_SELECTOR, timeout: 15_000 },
     screenshotOptions: { fullPage: true, type: "jpeg", quality: SNAPSHOT_JPEG_QUALITY },

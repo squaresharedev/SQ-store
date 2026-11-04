@@ -3,6 +3,7 @@ import { phoneLayout } from "@/lib/storefront/mobile-layout";
 import {
   MOBILE_LAYOUT_MAX_WIDTH_PX,
   blockKey,
+  drawnOnPhone,
   layerOrder,
   type StorefrontBlock,
   type StorefrontTheme,
@@ -13,6 +14,7 @@ import {
  * the board has none. Shared by every place a board is drawn for a buyer or
  * previewed for a phone, so they cannot disagree about where a block goes.
  * Depth is the board's own: a block keeps its place in the stack on a phone.
+ * Each block is handed over as the phone draws it (drawnOnPhone).
  */
 export function phoneGridLayout(
   theme: StorefrontTheme,
@@ -35,7 +37,7 @@ export function phoneGridLayout(
         h: spot.h,
         rotation: spot.block.rotation,
         z: depths.get(key),
-        data: spot.block,
+        data: drawnOnPhone(spot.block),
       };
     }),
   };

@@ -100,6 +100,7 @@
   },
   "footer": {
     "disclosure": "<seller>{name}</seller> jest sprzedawcą w tym zamówieniu i odpowiada za produkt, jego dostawę oraz wszelkie zwroty towaru lub zwroty środków. Square Share dostarcza technologię, na której działa ta strona, i nie jest stroną umowy sprzedaży.",
+    "storefrontDisclosure": "<seller>{name}</seller> jest sprzedawcą tych produktów i odpowiada za nie, za ich dostawę oraz wszelkie zwroty towaru lub zwroty środków. Square Share dostarcza technologię, na której działa ta strona, i nie jest stroną żadnej umowy sprzedaży.",
     "poweredBy": "Obsługiwane przez <brand>Square Share</brand>",
     "policiesLabel": "Zasady Square Share",
     "policies": {

@@ -88,7 +88,9 @@ export async function checkoutProviderFor(ownerId: string): Promise<CheckoutProv
  * price cannot show an honest total (EU CRD art. 6(1)(e)), so it keeps the
  * product page's fallback instead.
  */
-export async function checkoutAvailableFor(gate: Purchasable): Promise<boolean> {
+export async function checkoutAvailableFor(
+  gate: Pick<Purchasable, "ownerId" | "shippingPolicy"> & { row: Pick<Purchasable["row"], "digital_file_key" | "currency"> },
+): Promise<boolean> {
   // The cheap, local answer first: a physical product with no delivery price
   // has no checkout whoever would take the money.
   const isDigital = gate.row.digital_file_key !== null;

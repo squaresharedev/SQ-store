@@ -712,6 +712,8 @@
     "imageUnreadable": "Dieses Bild konnte nicht gelesen werden.",
     "imageUnreadableFix": "Sende einen öffentlichen HTTPS-Link oder base64-Daten für ein JPEG, PNG, WebP, GIF oder AVIF innerhalb der Größenbegrenzung.",
     "passThrough": "{message}",
-    "requestInvalid": "Diese Verbindungsanfrage ist nicht gültig. Starte noch einmal in der App."
+    "requestInvalid": "Diese Verbindungsanfrage ist nicht gültig. Starte noch einmal in der App.",
+    "noStorefrontForPage": "Dieser Shop hat noch kein Schaufenster, und eine Produktseite gehört zu einem.",
+    "noStorefrontForPageFix": "Erstelle eines mit create_storefront, füge das Produkt mit edit_storefront hinzu und sieh es dir dann an."
   }
 }

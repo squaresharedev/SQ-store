@@ -29,7 +29,13 @@ is the desktop board at about a third of the size.
 ```ts
 theme.mobileColumns?: 2..6           // absent = today's behaviour, unchanged
 block.mobile?: { x, y, w, h, hidden? } // bounded ints, the phone board's own cells
+textBlock.mobileFontSize?: 8..200     // its size on the phone board; absent = fontSize
 ```
+
+A text block's size is the one look that may differ on a phone: a headline sized
+for a desktop board is often too big for a phone's, and before this an assistant
+had to shrink the desktop one to fix it. The phone board draws each block through
+`drawnOnPhone` (types/storefront), which is where that size is swapped in.
 
 - With `mobileColumns` set, below 640 px of board (`MOBILE_LAYOUT_MAX_WIDTH_PX`)
   the board is drawn from its phone layout (`lib/storefront/mobile-layout.ts`):
@@ -57,7 +63,8 @@ The designer's phone preview draws the same layout (`DesignerCanvas` passes
 sees it there, read-only, like a reflowed board.
 
 **MCP:** `edit_storefront` takes `viewport: "mobile"` on `move`, `resize` and
-`remove` (which then hides on phones only), plus `mobile_reset`. The first phone
+`remove` (which then hides on phones only), and on `style` for a text block's
+`fontSize` alone (anything else is refused, with what can be), plus `mobile_reset`. The first phone
 operation starts a phone layout at 4 columns. `theme` changes
 `{ mobileColumns: null }` turn it off. Every edit result and `get_storefront` now
 carry `board.phone`, which says what a phone draws whether or not there is a phone
@@ -86,11 +93,25 @@ Claude ──tools/call preview_storefront──▶ /mcp (Worker)
    Claude (MCP Apps) ──resources/read ui://square-share/storefront-preview──▶ the view
 ```
 
-- **Resource:** `ui://square-share/storefront-preview`, `text/html;profile=mcp-app`,
-  one HTML document with no script or stylesheet of its own from anywhere
-  (`lib/agent/preview/view.ts`). The tool names it in `_meta.ui.resourceUri` (and
-  the deprecated flat `ui/resourceUri`, for older hosts). The resource is
-  registered only for a grant that can see the tool.
+- **Three views** (`AGENT_VIEWS` in `lib/agent/tools/previews.ts`), each
+  `text/html;profile=mcp-app`, one document with no script or stylesheet of its
+  own from anywhere, built on one kit (`lib/agent/preview/view-kit.ts`: the
+  host's look, the buttons, the protocol):
+  - `ui://square-share/storefront-preview` for `preview_storefront`, and
+  - `ui://square-share/product-page-preview` for `preview_product_page`: the
+    same page view (`lib/agent/preview/view.ts`), told which page by
+    `structuredContent.kind`. A product page is drawn by the buyer's own
+    renderer from `/agent-preview/product/<id>?s=<storefront>`, drafts included,
+    with its live page and its editor as buttons;
+  - `ui://square-share/publish-card` for `publish_products`
+    (`lib/agent/preview/publish-card.ts`): one row per product, what went live
+    with its page, what was refused with the reason and the link that fixes it.
+    It reads nothing; it only shows the products' photos.
+
+  A tool names its view in `_meta.ui.resourceUri` (and the deprecated flat
+  `ui/resourceUri`, for older hosts) only while the view is available (the two
+  page views need `AGENT_PREVIEW_ENABLED`); a resource is registered only for a
+  grant that can see a tool naming it.
 - **The live storefront, not a picture of it.** The result carries a 15-minute
   link to the preview page (`structuredContent.live.url`). The view fetches it
   (`vp=mobile` for the phone board, rendered by the server for a 358px board via
@@ -104,8 +125,11 @@ Claude ──tools/call preview_storefront──▶ /mcp (Worker)
   Claude today. The screenshots stay as the fallback when the page cannot be
   read (an expired link, a host that refuses the connection).
 - **CSP:** declared in `_meta.ui.csp`: `connectDomains` = this app (the preview
-  page), `resourceDomains` = this app (stylesheets, fonts) and
-  `https://*.r2.cloudflarestorage.com` (photos). The preview page answers
+  page), `resourceDomains` = this app (stylesheets, fonts) and R2's one exact
+  host, `https://<account>.r2.cloudflarestorage.com` (photos, `r2Origin()`). It
+  was a `*.r2.cloudflarestorage.com` wildcard until photos showed as broken
+  images in Claude while our own origin loaded: a host may not honour a
+  wildcard, and every signed URL has the one host anyway. The preview page answers
   cross-origin (`Access-Control-Allow-Origin: *` in `next.config.ts`, safe because
   it takes no cookie, only the token), and the font files do too
   (`public/_headers`), since browsers fetch cross-origin fonts only with CORS.
@@ -124,10 +148,10 @@ Claude ──tools/call preview_storefront──▶ /mcp (Worker)
 - **Interactivity:** a desktop / phone switch, and every product tile is a target
   measured on the real page. Picking one shows its title, id and status, offers
   its product page when it is public, and offers the designer.
-- **Consent:** the view calls no tool. `ui/open-link` goes through the host, which
-  may ask the person. The publish card (section 6) will call `update_product` via
-  `tools/call`, which the host proxies with its own consent prompt, on top of the
-  `products:write` scope the seller granted.
+- **Consent:** no view calls a tool. `ui/open-link` goes through the host, which
+  may ask the person. Publishing is the model's tool call, which the host already
+  asks about, on top of the `products:write` scope the seller granted; the card
+  shows what that call did.
 - **Text fallback:** the result is a normal tool result in every host: text JSON
   first (what was taken, notes, where every tile is, the phone summary), then the
   images. A host without MCP Apps ignores `_meta` and shows that. If no picture
@@ -149,8 +173,11 @@ starts once the person looks at the view. So the model is given the pictures
 directly: **server-side screenshots** from Cloudflare **Browser Run**, through the
 Worker's `BROWSER` binding (`quickAction("snapshot")`: screenshot and rendered
 HTML in one browser session, no API token, nothing added to the bundle). Desktop
-1280×800 and phone 390×844, full length, JPEG quality 80. The model sees the same
-pixels the seller sees.
+laid out at 1280×800 and phone at 390×844, full length, JPEG quality 60. The
+desktop page is photographed at a device scale of 0.625, so its picture is 800
+wide: at its full 1280 a long page (1280×1171 for The Fireside Edit) never
+reached the model. `pictureScale` in the result turns a tile's page pixels into
+picture pixels.
 
 The e2e stack has no Browser Run, so it answers the same request with its own
 headless Chromium (`/__test/snapshot` in `tests/e2e/stack/server.mjs`), enabled
@@ -167,12 +194,14 @@ only by `AGENT_PREVIEW_TEST_SNAPSHOT_URL`, which a production build never reads.
 ## 6. Not built yet (priority order from the brief)
 
 1. ~~`preview_storefront`~~ (built, desktop and phone).
-2. `preview_product_page` as a view: the same pipeline with a product page route
-   and the existing JSON alongside.
-3. **Publish confirmation card:** a view showing the photo, title, price and what
-   is missing (photo, GPSR safety information, shipping profile, the store's
-   trader details), with a Publish button that calls `update_product`
-   (`status: "active"`) through the host's `tools/call` consent.
+2. ~~`preview_product_page` as a view~~ (built: the same pipeline with a product
+   page route, the existing JSON alongside, and notes on what keeps the page from
+   buyers, including a page with no buy button).
+3. ~~Publish card~~ (built as `publish_products`' answer: what went live, what
+   did not and why). Still open: a card shown BEFORE publishing, with what is
+   missing (GPSR safety information, a shipping profile) and a Publish button
+   that calls `publish_products` through the host's `tools/call`. It needs a
+   host that proxies a view's tool calls, which is unverified in Claude.
 4. A thumbnail after each `edit_storefront` batch: cheap once the publish card
    exists, but it would spend a browser session per edit, so it should be opt-in
    (`preview: true` on the call).

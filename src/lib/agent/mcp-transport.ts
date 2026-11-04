@@ -5,10 +5,10 @@ import { authenticateAgentRequest } from "@/lib/agent/authenticate";
 import { runAsAgent, type AgentContext } from "@/lib/agent/context";
 import { callTool, toolAvailable } from "@/lib/agent/dispatch";
 import { protectedResourceMetadataUrl } from "@/lib/agent/paths";
-import { MCP_APP_MIME_TYPE } from "@/lib/agent/preview/view";
+import { MCP_APP_MIME_TYPE } from "@/lib/agent/preview/view-kit";
 import { AGENT_SCOPE_IDS } from "@/lib/agent/scopes";
 import { AGENT_TOOLS, findTool } from "@/lib/agent/tools";
-import { PREVIEW_VIEWS } from "@/lib/agent/tools/previews";
+import { AGENT_VIEWS } from "@/lib/agent/tools/previews";
 import { appOrigin } from "@/lib/app-url";
 import { getActiveAccount, type ActiveAccount } from "@/lib/team/account-context";
 
@@ -79,7 +79,9 @@ function buildServer(context: AgentContext, account: ActiveAccount): McpServer {
   const views = new Set<string>();
   for (const tool of AGENT_TOOLS) {
     if (!toolAvailable(tool, context.scopes, account)) continue;
-    if (tool.view) views.add(tool.view);
+    // A view with nothing to draw (its switch is off) is not pointed at.
+    const view = tool.view && AGENT_VIEWS[tool.view]?.available() ? tool.view : undefined;
+    if (view) views.add(view);
     server.registerTool(
       tool.name,
       {
@@ -89,7 +91,7 @@ function buildServer(context: AgentContext, account: ActiveAccount): McpServer {
         annotations: { title: tool.title, ...tool.annotations },
         // MCP Apps: a host that has them shows the result in this view. The
         // flat key is the spec's deprecated spelling, kept for older hosts.
-        ...(tool.view ? { _meta: { ui: { resourceUri: tool.view }, "ui/resourceUri": tool.view } } : {}),
+        ...(view ? { _meta: { ui: { resourceUri: view }, "ui/resourceUri": view } } : {}),
       },
       async (input: unknown) => {
         const result = await callTool(tool, input, account);
@@ -111,9 +113,9 @@ function buildServer(context: AgentContext, account: ActiveAccount): McpServer {
     );
   }
   for (const uri of views) {
-    const view = PREVIEW_VIEWS[uri];
+    const view = AGENT_VIEWS[uri];
     if (!view) continue;
-    // Only what the view itself needs beyond the document (PREVIEW_VIEWS), so
+    // Only what the view itself needs beyond the document (AGENT_VIEWS), so
     // the host's CSP stays as narrow as the spec's default otherwise.
     const meta = { ui: { prefersBorder: true, csp: view.csp() } };
     server.registerResource(

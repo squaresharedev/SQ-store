@@ -100,6 +100,7 @@
   },
   "footer": {
     "disclosure": "Prodávajícím u této objednávky je <seller>{name}</seller> a odpovídá za produkt, jeho doručení i případné vrácení zboží nebo peněz. Square Share poskytuje technologii, na které tato stránka běží, a není smluvní stranou kupní smlouvy.",
+    "storefrontDisclosure": "Prodávajícím těchto produktů je <seller>{name}</seller> a odpovídá za ně, za jejich doručení i případné vrácení zboží nebo peněz. Square Share poskytuje technologii, na které tato stránka běží, a není smluvní stranou žádné kupní smlouvy.",
     "poweredBy": "Běží na platformě <brand>Square Share</brand>",
     "policiesLabel": "Zásady Square Share",
     "policies": {

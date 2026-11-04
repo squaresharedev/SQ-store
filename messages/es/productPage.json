@@ -100,6 +100,7 @@
   },
   "footer": {
     "disclosure": "<seller>{name}</seller> es quien vende en este pedido y es responsable del producto, su entrega y cualquier devolución o reembolso. Square Share proporciona la tecnología que hace posible esta página y no es parte del contrato de compraventa.",
+    "storefrontDisclosure": "<seller>{name}</seller> es quien vende estos productos y es responsable de ellos, de su entrega y de cualquier devolución o reembolso. Square Share proporciona la tecnología que hace posible esta página y no es parte de ningún contrato de compraventa.",
     "poweredBy": "Creado con <brand>Square Share</brand>",
     "policiesLabel": "Políticas de Square Share",
     "policies": {

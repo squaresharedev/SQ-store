@@ -712,6 +712,8 @@
     "imageUnreadable": "Tento obrázok sa nepodarilo prečítať.",
     "imageUnreadableFix": "Pošlite verejný odkaz HTTPS alebo údaje base64 pre JPEG, PNG, WebP, GIF alebo AVIF v rámci limitu veľkosti.",
     "passThrough": "{message}",
-    "requestInvalid": "Táto žiadosť o pripojenie nie je platná. Začnite znova v aplikácii."
+    "requestInvalid": "Táto žiadosť o pripojenie nie je platná. Začnite znova v aplikácii.",
+    "noStorefrontForPage": "Tento obchod zatiaľ nemá výklad a stránka produktu je jeho súčasťou.",
+    "noStorefrontForPageFix": "Vytvorte ho pomocou create_storefront, pridajte produkt pomocou edit_storefront a potom si ho pozrite."
   }
 }

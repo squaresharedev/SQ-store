@@ -784,6 +784,8 @@ const textBlockSchema = z.strictObject({
         : value,
     z.number().int().min(TEXT_SIZE_MIN).max(TEXT_SIZE_MAX).optional(),
   ),
+  // Its size on the phone board, when that differs. Never had a legacy form.
+  mobileFontSize: z.number().int().min(TEXT_SIZE_MIN).max(TEXT_SIZE_MAX).optional(),
   font: z.enum(STOREFRONT_FONTS).optional(),
 });
 

@@ -712,6 +712,8 @@
     "imageUnreadable": "Não foi possível ler essa imagem.",
     "imageUnreadableFix": "Envie uma ligação HTTPS pública ou dados base64 de um JPEG, PNG, WebP, GIF ou AVIF dentro do limite de tamanho.",
     "passThrough": "{message}",
-    "requestInvalid": "Este pedido de ligação não é válido. Comece de novo a partir da aplicação."
+    "requestInvalid": "Este pedido de ligação não é válido. Comece de novo a partir da aplicação.",
+    "noStorefrontForPage": "Esta loja ainda não tem montra, e uma página de produto faz parte de uma.",
+    "noStorefrontForPageFix": "Crie uma com create_storefront, adicione o produto com edit_storefront e depois pré-visualize-a."
   }
 }

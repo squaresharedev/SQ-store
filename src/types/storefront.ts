@@ -153,6 +153,12 @@ export type MobilePlacement = {
   hidden?: boolean;
 };
 
+/** A block as the phone board draws it: a text block at its phone size
+ *  (TextBlock.mobileFontSize), when it has one. */
+export function drawnOnPhone(block: StorefrontBlock): StorefrontBlock {
+  return block.type === "text" && block.mobileFontSize !== undefined ? { ...block, fontSize: block.mobileFontSize } : block;
+}
+
 /** Where a block sits on the canvas and how many cells it covers. */
 export type BlockPlacement = {
   /** Its place on the phone board, when the board has one (see PHONE LAYOUT). */
@@ -1697,6 +1703,10 @@ export type TextBlock = BlockPlacement & {
   /** Size override in px, TEXT_SIZE_MIN..TEXT_SIZE_MAX; absent = the
    *  variant's default scale. */
   fontSize?: number;
+  /** The size on the phone board (see PHONE LAYOUT), same bounds. Absent =
+   *  `fontSize` there too. A headline sized for a desktop board is often too
+   *  big for a phone's, and this keeps fixing one from shrinking the other. */
+  mobileFontSize?: number;
   /** Per-block font family from the same allowlist as the theme font.
    *  Absent = inherit the canvas font. */
   font?: StorefrontFont;

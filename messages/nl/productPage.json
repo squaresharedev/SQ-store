@@ -100,6 +100,7 @@
   },
   "footer": {
     "disclosure": "<seller>{name}</seller> is de verkoper voor deze bestelling en is verantwoordelijk voor het product, de levering ervan en eventuele retouren of terugbetalingen. Square Share levert de technologie achter deze pagina en is geen partij bij de koopovereenkomst.",
+    "storefrontDisclosure": "<seller>{name}</seller> is de verkoper van deze producten en is verantwoordelijk voor de producten, de levering ervan en eventuele retouren of terugbetalingen. Square Share levert de technologie achter deze pagina en is geen partij bij een koopovereenkomst.",
     "poweredBy": "Mogelijk gemaakt door <brand>Square Share</brand>",
     "policiesLabel": "Square Share-beleid",
     "policies": {

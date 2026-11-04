@@ -100,6 +100,7 @@
   },
   "footer": {
     "disclosure": "<seller>{name}</seller> je predajca pre túto objednávku a zodpovedá za produkt, jeho doručenie a akékoľvek vrátenie tovaru alebo vrátenie peňazí. Square Share poskytuje technológiu za touto stránkou a nie je zmluvnou stranou kúpnej zmluvy.",
+    "storefrontDisclosure": "<seller>{name}</seller> je predajca týchto produktov a zodpovedá za ne, za ich doručenie a akékoľvek vrátenie tovaru alebo vrátenie peňazí. Square Share poskytuje technológiu za touto stránkou a nie je zmluvnou stranou žiadnej kúpnej zmluvy.",
     "poweredBy": "Na technológii <brand>Square Share</brand>",
     "policiesLabel": "Zásady Square Share",
     "policies": {

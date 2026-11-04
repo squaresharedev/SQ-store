@@ -12,8 +12,8 @@ import { Button, buttonClassName } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { helpTextClass, infoTextClass, labelClass } from "@/components/ui/control-styles";
 import { CopyButton } from "@/components/ui/CopyButton";
+import { Disclosure } from "@/components/ui/Disclosure";
 import { HeroMark } from "@/components/ui/HeroMark";
-import { InfoTip } from "@/components/ui/InfoTip";
 import {
   badgeClass,
   switchStateClass,
@@ -36,6 +36,9 @@ const COPY_MESSAGES = {
 
 /** Two columns where there is room: the list is twelve short lines. */
 const SCOPE_GRID_CLASS = "grid gap-x-6 gap-y-2 sm:grid-cols-2";
+
+/** Lines text up with a ScopeName's words: its icon (size-4) plus its gap (2.5). */
+const SCOPE_TEXT_INDENT_CLASS = "pl-6.5";
 
 export type ConnectedAppRow = {
   grantId: string;
@@ -150,12 +153,22 @@ export function ConnectedAppsSection({ mcpUrl, apps }: { mcpUrl: string; apps: C
             <p className={labelClass}>{t("connect.capabilitiesTitle")}</p>
             <ul className={SCOPE_GRID_CLASS} data-mcp-capabilities>
               {AGENT_SCOPE_IDS.map((scope) => (
-                <li key={scope} className="flex items-center gap-1" data-scope={scope}>
-                  <ScopeName scope={scope} />
-                  <InfoTip label={resolve(AGENT_SCOPES[scope].hint)}>{resolve(AGENT_SCOPES[scope].hint)}</InfoTip>
-                  {"optIn" in AGENT_SCOPES[scope] ? (
-                    <span className={cn(badgeClass, "ml-auto shrink-0 text-muted-foreground")}>{t("connect.offByDefault")}</span>
-                  ) : null}
+                <li key={scope} data-scope={scope}>
+                  <Disclosure
+                    summary={
+                      <span className="flex min-w-0 items-center gap-2">
+                        <ScopeName scope={scope} />
+                        {"optIn" in AGENT_SCOPES[scope] ? (
+                          <span className={cn(badgeClass, "ml-auto shrink-0 text-muted-foreground")}>{t("connect.offByDefault")}</span>
+                        ) : null}
+                      </span>
+                    }
+                  >
+                    {/* Under the name's words, past its icon. */}
+                    <p className={cn(infoTextClass, SCOPE_TEXT_INDENT_CLASS)} data-scope-hint>
+                      {resolve(AGENT_SCOPES[scope].hint)}
+                    </p>
+                  </Disclosure>
                 </li>
               ))}
             </ul>

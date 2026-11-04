@@ -712,6 +712,8 @@
     "imageUnreadable": "Die afbeelding kon niet worden gelezen.",
     "imageUnreadableFix": "Stuur een openbare HTTPS-link of base64-gegevens voor een JPEG-, PNG-, WebP-, GIF- of AVIF-afbeelding binnen de groottelimiet.",
     "passThrough": "{message}",
-    "requestInvalid": "Dit koppelingsverzoek is niet geldig. Begin opnieuw vanuit de app."
+    "requestInvalid": "Dit koppelingsverzoek is niet geldig. Begin opnieuw vanuit de app.",
+    "noStorefrontForPage": "Deze winkel heeft nog geen etalage, en een productpagina hoort bij een etalage.",
+    "noStorefrontForPageFix": "Maak er een met create_storefront, voeg het product toe met edit_storefront en bekijk het daarna."
   }
 }

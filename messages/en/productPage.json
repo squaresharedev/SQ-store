@@ -100,6 +100,7 @@
   },
   "footer": {
     "disclosure": "<seller>{name}</seller> is the seller for this order and is responsible for the product, its delivery, and any returns or refunds. Square Share provides the technology behind this page and is not a party to the sale.",
+    "storefrontDisclosure": "<seller>{name}</seller> is the seller of these products and is responsible for them, their delivery, and any returns or refunds. Square Share provides the technology behind this page and is not a party to any sale.",
     "poweredBy": "Powered by <brand>Square Share</brand>",
     "policiesLabel": "Square Share policies",
     "policies": {

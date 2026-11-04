@@ -16,7 +16,10 @@ export const PREVIEW_TOKEN_SECONDS = 2 * 60;
  *  switch between screens, then a new preview is asked for. */
 export const LIVE_PREVIEW_TOKEN_SECONDS = 15 * 60;
 
-export type PreviewSubject = { kind: "storefront"; id: string };
+/** What a preview page shows: a storefront, or one product's page. */
+export const PREVIEW_KINDS = ["storefront", "product"] as const;
+
+export type PreviewSubject = { kind: (typeof PREVIEW_KINDS)[number]; id: string };
 
 export type PreviewClaims = PreviewSubject & { grantId: string; exp: number };
 
@@ -80,7 +83,7 @@ export async function verifyPreviewToken(token: string | null | undefined): Prom
     const valid = await crypto.subtle.verify("HMAC", await previewKey(), fromBase64Url(signature), encoder.encode(body));
     if (!valid) return null;
     const claims = JSON.parse(new TextDecoder().decode(fromBase64Url(body))) as PreviewClaims;
-    if (claims.kind !== "storefront" || typeof claims.id !== "string" || typeof claims.grantId !== "string") return null;
+    if (!PREVIEW_KINDS.includes(claims.kind) || typeof claims.id !== "string" || typeof claims.grantId !== "string") return null;
     if (typeof claims.exp !== "number" || claims.exp <= Math.floor(Date.now() / 1000)) return null;
     return claims;
   } catch {

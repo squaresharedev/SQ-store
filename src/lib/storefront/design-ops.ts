@@ -10,6 +10,8 @@ import {
   SHAPE_KINDS,
   STOREFRONT_FONTS,
   TEXT_ALIGNS,
+  TEXT_SIZE_MAX,
+  TEXT_SIZE_MIN,
   TEXT_VARIANTS,
   blockKey,
   isFreelyArranged,
@@ -107,7 +109,14 @@ export const designOpSchema = z.discriminatedUnion("op", [
   }),
   z.strictObject({ op: z.literal("rotate"), block: blockRef, degrees: z.number().int() }),
   z.strictObject({ op: z.literal("layer"), block: blockRef, to: z.enum(["front", "forward", "backward", "back"]) }),
-  z.strictObject({ op: z.literal("style"), block: blockRef, changes }),
+  z.strictObject({
+    op: z.literal("style"),
+    block: blockRef,
+    changes,
+    viewport: viewport.describe(
+      `Which board the look is for. On the phone layout only a text block's fontSize may differ (${TEXT_SIZE_MIN} to ${TEXT_SIZE_MAX}, null to follow the desktop size again).`,
+    ),
+  }),
   z.strictObject({ op: z.literal("remove"), block: blockRef, viewport }),
   z.strictObject({ op: z.literal("mobile_reset"), block: blockRef }),
   z.strictObject({ op: z.literal("theme"), changes }),
@@ -128,7 +137,31 @@ type Fields = Record<string, unknown>;
 
 /** What a style change may not reach: where a block is has its own operations,
  *  and what a block is does not change. */
-const NOT_STYLE = new Set(["type", "id", "productId", "key", "x", "y", "w", "h", "rotation", "z", "mobile"]);
+const NOT_STYLE = new Set(["type", "id", "productId", "key", "x", "y", "w", "h", "rotation", "z", "mobile", "mobileFontSize"]);
+
+/** What a block's look may be on the phone board alone, and the field that keeps it. */
+const PHONE_STYLE: Partial<Record<StorefrontBlock["type"], Record<string, string>>> = {
+  text: { fontSize: "mobileFontSize" },
+};
+
+/** `changes` for the phone board, as the fields that keep them on the block. */
+function phoneStyle(block: StorefrontBlock, patch: Fields): Fields {
+  const allowed = PHONE_STYLE[block.type] ?? {};
+  return Object.fromEntries(
+    Object.entries(patch).map(([field, value]) => {
+      const stored = allowed[field];
+      if (!stored) {
+        throw new DesignOpRefused(
+          `"${field}" is the same on every board, so it cannot be set for the phone alone.`,
+          Object.keys(allowed).length
+            ? `On the phone layout a ${block.type} block can only change ${Object.keys(allowed).join(", ")}. Leave viewport out to change it everywhere.`
+            : "Leave viewport out to change it everywhere, or move, resize or remove it with viewport \"mobile\".",
+        );
+      }
+      return [stored, value];
+    }),
+  );
+}
 
 /** Lay `changes` over `target`, where null clears a field. */
 function patched<T extends object>(target: T, patch: Fields): T {
@@ -337,7 +370,12 @@ export function applyDesignOps(
       }
       case "style": {
         const block = find(op.block);
-        replace(block, restyled(block, op.changes));
+        if (op.viewport === "mobile") {
+          // Kept beside the desktop look, for the phone board to draw instead.
+          const patch = phoneStyle(block, op.changes);
+          startPhoneLayout();
+          replace(block, patched(block, patch));
+        } else replace(block, restyled(block, op.changes));
         break;
       }
       case "remove": {
@@ -387,7 +425,7 @@ export function boardSummary(config: StorefrontConfig) {
       block: refOf(block),
       type: block.type,
       ...(block.type === "shape" ? { kind: block.kind, color: block.color } : {}),
-      ...(block.type === "text" ? { text: block.text } : {}),
+      ...(block.type === "text" ? { text: block.text, ...(block.fontSize ? { fontSize: block.fontSize } : {}) } : {}),
       x: block.x,
       y: block.y,
       w: block.w,
@@ -417,6 +455,7 @@ export function phoneSummary(config: StorefrontConfig) {
         y: spot.y,
         w: spot.w,
         h: spot.h,
+        ...(spot.block.type === "text" && spot.block.mobileFontSize ? { fontSize: spot.block.mobileFontSize } : {}),
         ...(spot.pinned ? {} : { placedAutomatically: true }),
       })),
       hidden: own.hidden.map(refOf),
