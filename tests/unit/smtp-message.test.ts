@@ -49,6 +49,26 @@ describe("the message on the wire", () => {
   });
 });
 
+describe("one-click unsubscribe (RFC 8058)", () => {
+  it("names the address and asks for a POST, only on mail that can be stopped", () => {
+    const url = "https://store.example/api/orders/review-reminder/unsubscribe?ref=abc.def";
+    const lines = headerLines(render({ ...base, unsubscribeUrl: url }));
+    expect(lines).toContain(`List-Unsubscribe: <${url}>`);
+    expect(lines).toContain("List-Unsubscribe-Post: List-Unsubscribe=One-Click");
+    expect(headerLines(render(base)).some((line) => line.startsWith("List-Unsubscribe"))).toBe(false);
+  });
+
+  it("refuses an address that could break out of its header", () => {
+    for (const hostile of [
+      "https://store.example/x\r\nBcc: attacker@evil.example",
+      "https://store.example/x>, <mailto:attacker@evil.example",
+      "javascript:alert(1)",
+    ]) {
+      expect(() => render({ ...base, unsubscribeUrl: hostile })).toThrow(/unsubscribe/);
+    }
+  });
+});
+
 describe("header injection", () => {
   it("never lets a line break in a subject reach the wire raw", () => {
     const hostile = "Order\r\nBcc: attacker@evil.example\r\nX-Spam: yes";

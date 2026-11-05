@@ -13,7 +13,8 @@ import { StorefrontLinkCard } from "@/components/storefront/StorefrontLinkCard";
 import { resolveProductPage } from "@/lib/storefront/product-page";
 import { storefrontPageUrl } from "@/lib/storefront/product-page-url";
 import { listStorefrontProducts } from "@/lib/discounts/storefront-preview";
-import { getStorefrontSummary } from "@/lib/storefront/queries";
+import { getStorefrontSummary, listEmbedDomains } from "@/lib/storefront/queries";
+import { embedDomainsElsewhere } from "@/lib/predictions";
 import { placedProductIds } from "@/lib/storefront/placed-products";
 import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
 import { getActiveAccount } from "@/lib/team/account-context";
@@ -38,7 +39,7 @@ export default async function StorefrontEmbedPage({
   const account = await getActiveAccount();
   if (!can(account?.role, "storefront.write")) redirect(STOREFRONT_LIST_PATH);
 
-  const [t, tDesigner, tButton, storefront, products, identity] = await Promise.all([
+  const [t, tDesigner, tButton, storefront, products, identity, embedDomains] = await Promise.all([
     getTranslations("Storefront.embed"),
     getTranslations("Storefront.designer.header"),
     getTranslations("Products.buyButton"),
@@ -47,6 +48,7 @@ export default async function StorefrontEmbedPage({
     account
       ? getTraderIdentityStatus(account.accountId)
       : Promise.resolve({ ok: true as const, missing: [] }),
+    listEmbedDomains(),
   ]);
   if (!storefront) notFound();
   // The hero draws this storefront's own products; the rest of the catalogue
@@ -82,6 +84,7 @@ export default async function StorefrontEmbedPage({
           products={products.filter((product) => placed.has(product.id))}
           missingTraderDetails={identity.ok ? identity.missing : []}
           productPagesOn={pageState !== "pages-off"}
+          suggestedDomains={embedDomainsElsewhere(embedDomains, storefront.id)}
         />
         {/* The other way onto a seller's own site, for someone selling one
             product: the buy button lives on the product, so this points there.

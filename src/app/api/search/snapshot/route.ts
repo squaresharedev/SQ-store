@@ -32,8 +32,9 @@ import {
  *     broken table costs its group, not the snapshot.
  */
 
-/** Caps keep the payload tens-of-KB. Newest first, so what falls off the end
- *  is exactly what the live search is still able to find. */
+/** Caps keep the payload tens-of-KB. Newest first (products: last touched
+ *  first, which is what the Recent rail offers), so what falls off the end is
+ *  exactly what the live search is still able to find. */
 const CAPS = { products: 300, orders: 100, notifications: 50 } as const;
 
 export async function GET() {
@@ -68,7 +69,7 @@ export async function GET() {
         .from("products")
         .select("id, title, status")
         .eq("owner_id", accountId)
-        .order("created_at", { ascending: false })
+        .order("updated_at", { ascending: false })
         .limit(CAPS.products);
       if (error) throw new Error(error.message);
       snapshot.products = (data ?? []).map((row) => ({

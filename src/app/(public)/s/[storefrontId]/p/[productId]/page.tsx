@@ -18,12 +18,17 @@ import { REVIEW_RATING_MAX, REVIEW_RATING_MIN } from "@/lib/reviews/limits";
 import { PAGE_BUSY } from "@/lib/public/busy";
 import { QUANTITY_QUERY_PARAM, requestedQuantity } from "@/lib/products/quantity";
 import { clientKey } from "@/lib/rate-limit";
-import { requestedOptions, requestedVia, type SearchParams } from "@/lib/storefront/product-page-url";
+import {
+  requestedAddOns,
+  requestedOptions,
+  requestedVia,
+  type SearchParams,
+} from "@/lib/storefront/product-page-url";
 import { collectOptionIds } from "@/lib/validation/product";
 
 /**
  * /s/[storefrontId]/p/[productId]: the hosted product page a buyer lands on
- * from a product tile.
+ * from a product tile (or from an add-on's details on a tile's page).
  *
  * Everything that decides whether this page exists lives in
  * getPublicProductPage (lib/products/public.ts): ids, rate limit, storefront,
@@ -255,6 +260,11 @@ export default async function ProductPage({
           initialQuantity={requestedQuantity(
             query[QUANTITY_QUERY_PARAM],
             page.product.maxQuantity,
+          )}
+          // `?a=`, limited to the add-ons actually on offer here.
+          initialAddOns={requestedAddOns(
+            query,
+            (page.addOns ?? []).map((card) => card.id),
           )}
         />
       </main>

@@ -9,8 +9,26 @@ import { searchLocalRegistry } from "@/lib/search/registry";
 import { english } from "../setup/translate";
 import { searchEditor, editorEntries } from "@/components/storefront/editor-search";
 import { STOREFRONT_SETTINGS, settingIndexFields } from "@/lib/storefront/setting-ref";
+import type { StorefrontBlock } from "@/types/storefront";
 
 type Thing = { note: string };
+
+/** A board holding one block of each kind a setting can open (text, shape,
+ *  image), so every block setting is offered. */
+const ONE_OF_EACH_BLOCK: StorefrontBlock[] = [
+  { type: "text", id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", text: "Hi", variant: "body", align: "left", x: 0, y: 0, w: 1, h: 1 },
+  { type: "shape", id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", kind: "circle", color: "#171717", x: 1, y: 0, w: 1, h: 1 },
+  {
+    type: "image",
+    id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    key: "elements/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/ffffffff-ffff-4fff-8fff-ffffffffffff-logo.png",
+    alt: "",
+    x: 2,
+    y: 0,
+    w: 1,
+    h: 1,
+  },
+];
 
 function make(
   id: string,
@@ -182,8 +200,11 @@ describe("the two surfaces agree about a setting", () => {
     // lists everything: both pages' settings are gated on the page being on
     // the canvas (see editor-search), and that is a question of WHEN a row is
     // offered, never of what its terms are once it is.
+    // And with one block of each kind on the board, for the same reason: a
+    // block's own settings are offered only while there is a block to open
+    // them on.
     const editorBySetting = new Map(
-      editorEntries([], new Map(), english, { pageOpen: true, checkoutOpen: true })
+      editorEntries(ONE_OF_EACH_BLOCK, new Map(), english, { pageOpen: true, checkoutOpen: true })
         .filter((entry) => entry.payload.kind === "setting")
         .map((entry) => [entry.title, entryTerms(entry)]),
     );

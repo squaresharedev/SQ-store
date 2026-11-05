@@ -21,8 +21,11 @@ import {
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { BlockActions } from "./BlockActions";
+import { BlurSlider } from "./BlurSlider";
 import { FONT_LABELS, TEXT_VARIANT_LABELS } from "./config-maps";
 import { FontSizeField } from "./FontSizeField";
+import { SummonedField, type BlockFieldSummons } from "./SummonedField";
+import { TextSpacingFields } from "./TextSpacingFields";
 import { useReportedAutoFitSize } from "./text-autofit-registry";
 import { AlignmentToggles, FormatToggles } from "./TextFormatControls";
 import { InfoTip } from "@/components/ui/InfoTip";
@@ -40,6 +43,10 @@ export type TextBlockPatch = Partial<
     | "fontSize"
     | "font"
     | "spans"
+    | "letterSpacing"
+    | "lineHeight"
+    | "blur"
+    | "blurDirection"
   >
 >;
 
@@ -49,8 +56,8 @@ type FontChoice = StorefrontFont | "theme";
 
 /**
  * Text-block editor rendered in the side panel: style, formatting, alignment,
- * and per-block font / size / color overrides (all optional — a fresh block
- * simply follows the theme). Every change is applied live (no "done" step);
+ * per-block font / size / color overrides (all optional — a fresh block
+ * simply follows the theme) and a blur. Every change is applied live (no "done" step);
  * the tile updates as you set it.
  *
  * The WORDS are deliberately not here. They are typed on the tile itself, at
@@ -69,6 +76,7 @@ export function TextBlockEditor({
   selectedRange = null,
   onColorChange,
   multi = false,
+  summons = null,
 }: {
   block: TextBlock;
   /** Theme accent — what a heading renders in when no override is set. */
@@ -97,6 +105,8 @@ export function TextBlockEditor({
   /** Group-editing mode (MultiBlockEditor): hides the content control, since
    *  one caret cannot be in several blocks at once. Styling controls stay. */
   multi?: boolean;
+  /** A control the selection toolbar has pointed at (see SummonedField). */
+  summons?: BlockFieldSummons;
 }) {
   const fieldId = useId();
   const t = useTranslations("Storefront");
@@ -259,6 +269,30 @@ export function TextBlockEditor({
         align={block.align}
         onChange={(align) => onUpdate({ align })}
       />
+
+      <SummonedField field="spacing" summons={summons} variant="slider">
+        {(highlighted) => (
+          <TextSpacingFields
+            id={`${fieldId}-spacing`}
+            value={block}
+            onChange={onUpdate}
+            highlighted={highlighted}
+          />
+        )}
+      </SummonedField>
+
+      <SummonedField field="blur" summons={summons} variant="slider">
+        {(highlighted) => (
+          <BlurSlider
+            id={`${fieldId}-blur`}
+            value={block.blur ?? 0}
+            onChange={(blur) => onUpdate({ blur })}
+            direction={block.blurDirection}
+            onDirectionChange={(blurDirection) => onUpdate({ blurDirection })}
+            highlighted={highlighted}
+          />
+        )}
+      </SummonedField>
 
       <BlockActions
         onDuplicate={onDuplicate}

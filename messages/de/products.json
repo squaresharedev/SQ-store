@@ -40,7 +40,7 @@
     "formLoading": "Produktformular wird geladen",
     "importReviews": {
       "heading": "Bewertungen importieren",
-      "description": "Hol deine Bewertungen von Judge.me, Loox, Yotpo oder Shopify Product Reviews. Exportiere sie dort als CSV, zieh die Datei hierher und prüfe, zu welchem Produkt jede gehört, bevor etwas gespeichert wird."
+      "description": "Hol deine Bewertungen von Judge.me, Loox, Yotpo oder Shopify Product Reviews."
     }
   },
   "emptyState": {
@@ -300,6 +300,11 @@
         "label": "Badges",
         "description": "Ein paar Wörter auf der Produktseite: ein Grund, dir zu vertrauen, oder eine Tatsache auf einen Blick. Wähle ein fertiges aus oder schreibe dein eigenes, gib seinem Symbol eine Farbe und platziere es neben dem Produkt oder auf dem Foto.",
         "about": "Wozu Badges dient"
+      },
+      "addOns": {
+        "label": "Zur Bestellung hinzufügen",
+        "description": "Andere deiner Produkte, die Käufer mit einem Tippen hinzufügen können, direkt über Jetzt kaufen. Es werden nur Produkte derselben Art und Währung angezeigt, damit alles eine Bestellung bleibt.",
+        "about": "Wozu Zur Bestellung hinzufügen dient"
       }
     },
     "summary": {
@@ -327,7 +332,8 @@
       "active": "Aktiv",
       "draft": "Entwurf",
       "badges": "{count, plural, one {{count} Badge} other {{count} Badges}}",
-      "physical": "Physisch"
+      "physical": "Physisch",
+      "addOns": "{count, plural, one {{count} Produkt} other {{count} Produkte}}"
     },
     "errors": {
       "titleRequired": "Gib deinem Produkt einen Titel, Käufer sehen ihn zuerst.",
@@ -363,6 +369,23 @@
     "description": "Beschreibung",
     "optional": "(optional)",
     "descriptionPlaceholder": "Was ist es, und was bekommt der Käufer?",
+    "ai": {
+      "write": "Mit KI schreiben",
+      "improve": "Mit KI verbessern",
+      "writing": "Wird geschrieben…",
+      "written": "Von KI geschrieben",
+      "improved": "Von KI verbessert",
+      "writeHint": "Die KI schreibt die Beschreibung aus deinen Angaben und erfindet nichts dazu. Prüfe sie vor dem Speichern.",
+      "improveHint": "Die KI formuliert deinen Text klarer und behält jede Angabe bei. Prüfe ihn vor dem Speichern.",
+      "asYouTypeIdle": "Die KI schlägt beim Tippen die nächsten Wörter vor.",
+      "asYouTypeOffered": "fügt den grauen Text ein. Esc blendet ihn aus.",
+      "asYouTypeAccept": "Vorgeschlagene Wörter einfügen",
+      "asYouTypeAnnounce": "Vorschlag:",
+      "asYouTypeTurnOff": "Ausschalten",
+      "asYouTypeOff": "Vorschläge beim Tippen sind aus. Du kannst sie unter Einstellungen, Tarif und Abrechnung wieder einschalten.",
+      "upsellHint": "Im Pro-Tarif: Die KI schreibt und vervollständigt Beschreibungen aus deinen Angaben. Die Tarife öffnen sich in einem neuen Tab.",
+      "upsellBadge": "Pro"
+    },
     "displayImage": "Titelbild",
     "displayImageAbout": "Wozu das Titelbild verwendet wird",
     "displayImageHelp": "Wird auf deinem Schaufenster und in Einbettungen angezeigt.",
@@ -530,6 +553,14 @@
     "addFirst": "In mehr als einer Variante erhältlich?",
     "addAnother": "Weitere Variation hinzufügen",
     "somethingElse": "Etwas anderes",
+    "guessSizes": "Größen {first} bis {last}",
+    "guessSizesAny": "Größen",
+    "nextOptions": "Wahrscheinliche nächste Optionen",
+    "addNamed": "{name} hinzufügen",
+    "sameAsHint": "Übernimmt Optionen, technische Daten und Herstellerangaben von {title} in die Bereiche, die du noch nicht ausgefüllt hast.",
+    "guessSizesHint": "Der Titel klingt nach Kleidung, deshalb kommen die üblichen Größen dazu. Entferne die, die du nicht verkaufst.",
+    "guessSizesAnyHint": "Der Titel klingt nach etwas, das es in Größen gibt, deshalb kommt die Option Größe zum Ausfüllen dazu.",
+    "nextOptionsHint": "Geschätzt anhand der Optionen, die du bisher hinzugefügt hast.",
     "groupsFull": "{max, plural, one {Das ist bereits die einzige {max} Optionsgruppe.} other {Das sind bereits alle {max} Optionsgruppen.}}",
     "optionsFull": "{max, plural, one {Das ist bereits die einzige {max} Option.} other {Das sind bereits alle {max} Optionen.}}",
     "whatVaries": "Was variiert",
@@ -1053,12 +1084,8 @@
       "product": "Produkt",
       "status": "Status"
     },
-    "summary": "{ready, plural, one {<count>{ready}</count> Bewertung bereit} other {<count>{ready}</count> Bewertungen bereit}}{skipped, plural, =0 {.} other {, {skipped} ausgelassen.}}",
-    "hiddenRows": "{count, plural, one {{count} Bewertung war in deinem alten Shop ausgeblendet oder als Spam markiert und wird ausgelassen.} other {{count} Bewertungen waren in deinem alten Shop ausgeblendet oder als Spam markiert und werden ausgelassen.}}",
-    "droppedRows": "{count, plural, one {{count} Bewertung liegt über den {max}, die eine Datei enthalten kann, und wird ausgelassen.} other {{count} Bewertungen liegen über den {max}, die eine Datei enthalten kann, und werden ausgelassen.}}",
     "source": "Importiert von",
     "sourceUnknown": "App auswählen",
-    "sourceHelp": "Wird bei jeder Bewertung angezeigt, damit Käufer wissen, wo sie ursprünglich geschrieben wurde.",
     "sources": {
       "judgeme": "Judge.me",
       "loox": "Loox",
@@ -1067,17 +1094,10 @@
     },
     "mappingHeading": "Produkte zuordnen",
     "mappingHelp": "Jedes Produkt in der Datei und das Produkt hier, zu dem seine Bewertungen gehören. Wo möglich nach Namen zugeordnet. Alles auf „Nicht importieren“ wird ausgelassen.",
-    "mappingFileProduct": "In der Datei",
-    "mappingReviews": "Bewertungen",
-    "mappingProduct": "Produkt hier",
     "mappingSelect": "Produkt für {key}",
     "skipProduct": "Nicht importieren",
-    "skippedHeading": "Zeilen, die ausgelassen werden",
     "skippedRow": "Zeile {line}: {problem}",
     "run": "{count, plural, one {{count} Bewertung importieren} other {{count} Bewertungen importieren}}",
-    "imported": "{count, plural, one {{count} Bewertung wurde importiert.} other {{count} Bewertungen wurden importiert.}}",
-    "duplicates": "{count, plural, one {{count} war schon da.} other {{count} waren schon da.}}",
-    "skippedRows": "{count, plural, one {{count} Zeile wurde ausgelassen.} other {{count} Zeilen wurden ausgelassen.}}",
     "errors": {
       "rateLimited": "Zu viele Importe in der letzten Stunde. Versuch es später noch einmal.",
       "tooLarge": "Die Datei ist zu groß für einen Import.",
@@ -1094,6 +1114,39 @@
         "b": "„In echt noch schöner.“",
         "c": "„Schnell da und gut verpackt.“"
       }
+    },
+    "tally": {
+      "toImport": "Zu importieren",
+      "imported": "Importiert",
+      "already": "Schon da",
+      "leftOut": "Ausgelassen"
+    },
+    "alreadyNote": "{count, plural, one {{count} Bewertung aus dieser Datei ist schon da und wird nicht doppelt hinzugefügt.} other {{count} Bewertungen aus dieser Datei sind schon da und werden nicht doppelt hinzugefügt.}}",
+    "sourceTip": "Über importierte Bewertungen",
+    "mappingTip": "So werden Produkte zugeordnet",
+    "reviewCount": "{count, plural, one {{count} Bewertung} other {{count} Bewertungen}}",
+    "keyAlready": "{count, plural, one {{count} schon da} other {{count} schon da}}",
+    "leftOutSummary": "{count, plural, one {Warum {count} Bewertung ausgelassen wird} other {Warum {count} Bewertungen ausgelassen werden}}",
+    "leftOutUnmatched": "{count, plural, one {{count} für ein Produkt auf „Nicht importieren“} other {{count} für Produkte auf „Nicht importieren“}}",
+    "leftOutHidden": "{count, plural, one {{count} in deinem alten Shop ausgeblendet oder als Spam markiert} other {{count} in deinem alten Shop ausgeblendet oder als Spam markiert}}",
+    "leftOutDropped": "{count, plural, one {{count} über die {max} hinaus, die eine Datei enthalten kann} other {{count} über die {max} hinaus, die eine Datei enthalten kann}}",
+    "leftOutProblems": "{count, plural, one {{count} Zeile, die sich nicht lesen lässt:} other {{count} Zeilen, die sich nicht lesen lassen:}}",
+    "nothingNew": "Nichts Neues zu importieren",
+    "done": {
+      "title": "{count, plural, one {{count} Bewertung importiert} other {{count} Bewertungen importiert}}",
+      "body": "Sie erscheinen auf deinen Produktseiten, sobald unsere automatische Prüfung sie gelesen hat.",
+      "already": "{count, plural, one {{count} war schon da und wurde nicht doppelt hinzugefügt.} other {{count} waren schon da und wurden nicht doppelt hinzugefügt.}}",
+      "nothingTitle": "Nichts doppelt hinzugefügt",
+      "nothingBody": "{count, plural, one {{count} Bewertung aus dieser Datei war schon da.} other {{count} Bewertungen aus dieser Datei waren schon da.}}",
+      "seeReviews": "Bewertungen ansehen",
+      "another": "Weitere Datei importieren"
+    },
+    "squareShare": {
+      "label": "Ein Square-Share-Export",
+      "tipLabel": "Über Square-Share-Exporte",
+      "tip": "Wir haben diese Datei nach einzelnen Bewertungen abgeglichen, nicht nach App. Bewertungen, die schon in diesem Shop sind, bleiben unverändert, und nichts wird doppelt hinzugefügt. Bewertungen aus einem anderen Shop lassen sich nicht per Export übernehmen.",
+      "leftOut": "{count, plural, one {{count} nicht in diesem Shop: Ein Export kann sie nicht hinzufügen} other {{count} nicht in diesem Shop: Ein Export kann sie nicht hinzufügen}}",
+      "checkFailed": "Wir konnten diese Datei nicht mit deinen Bewertungen abgleichen. Es wurde nichts geändert. Versuche es gleich noch einmal."
     }
   },
   "reviewModeration": {
@@ -1219,6 +1272,42 @@
     "emptyFiltered": {
       "title": "Keine passenden Bewertungen",
       "body": "Versuche andere Wörter oder einen anderen Filter, oder setze die Filter zurück, um alle Bewertungen zu sehen."
+    },
+    "export": {
+      "hint": "Lädt die Bewertungen in dieser Ansicht als CSV-Datei herunter.",
+      "empty": "In dieser Ansicht gibt es keine Bewertungen zum Exportieren.",
+      "truncated": "{count, plural, one {Die Datei enthält die erste Bewertung dieser Ansicht.} other {Die Datei enthält die ersten # Bewertungen dieser Ansicht.}} Grenze die Liste nach Produkt oder Sternen ein, um den Rest zu exportieren.",
+      "fileName": "bewertungen.csv"
+    }
+  },
+  "addOnsField": {
+    "listLabel": "Deine anderen Produkte",
+    "count": "{count} von {max} ausgewählt",
+    "add": "{title} hinzufügen",
+    "draft": "Entwurf",
+    "draftHint": "Käufer sehen es, sobald es aktiv ist.",
+    "remove": "{title} entfernen",
+    "none": "Du hast noch keine anderen Produkte. Füge zuerst ein weiteres Produkt hinzu und biete es dann hier an.",
+    "notPosted": "Nicht angeboten: ist ein Download",
+    "notADownload": "Nicht angeboten: wird versandt",
+    "search": "Deine Produkte durchsuchen",
+    "noMatch": "Kein Produkt passt dazu.",
+    "noneFit": "Keines deiner anderen Produkte passt mit diesem in eine Bestellung. Eine Bestellung hat eine Art (Versand oder Download) und eine Währung.",
+    "otherCurrency": "Nicht angeboten: Preis in {currency}",
+    "previewLabel": "Das sehen Käufer",
+    "soldOutHint": "Käufer sehen es, sobald es wieder auf Lager ist.",
+    "takenDown": "Entfernt",
+    "takenDownHint": "Käufer sehen es nicht, solange es entfernt ist.",
+    "ownBuyLink": "Jetzt kaufen führt bei diesem Produkt zu deinem eigenen Link, daher sehen Käufer diesen Bereich nicht. Entferne den Link, um ihn zu nutzen.",
+    "suggestion": {
+      "boughtWith": {
+        "label": "Oft zusammen gekauft: {titles}",
+        "hint": "Käufer dieses Produkts haben auch {titles} gekauft. {count, plural, one {Ein Tippen fügt es dieser Liste hinzu.} other {Ein Tippen fügt sie dieser Liste hinzu.}}"
+      },
+      "offeredWith": {
+        "label": "Fügst du oft hinzu: {titles}",
+        "hint": "Du bietest {titles} bei mehreren deiner anderen Produkte an. {count, plural, one {Ein Tippen fügt es auch hier hinzu.} other {Ein Tippen fügt sie auch hier hinzu.}}"
+      }
     }
   }
 }

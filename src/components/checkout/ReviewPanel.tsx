@@ -29,30 +29,17 @@ const reviewFieldClass = cn(fieldBaseClass, "rounded-none");
 type ReviewError = "notEligible" | "rateLimited" | "failed";
 
 /**
- * THE REVIEW ASK on a buyer's order page: the thank-you straight after paying,
- * and the same page whenever the buyer comes back to it from their email.
- *
- * WHY HERE. Buyers have no accounts, and the order page is the one place a
- * buyer proves what they bought: its address is the order's credential, and
- * the review is sent with it (app/api/products/[id]/reviews). So every review
- * written here is from a paid order and carries the "Verified buyer" badge.
- *
- * ONE QUESTION FIRST. The card is a heading and five big yellow stars.
- * Choosing one pops it and opens the rest in place: a title, the words, and
- * the name to show (prefilled with the first name on the order). Sent, the
- * stars they gave land one after another above the thank-you, and the card
- * stays a thank-you when the page is opened again.
- *
- * In the editor's preview it works the same, so a seller can try it, but
- * sends nothing and says so.
+ * One order's review as it is being written: the stars, the words, and where
+ * it stands. A hook of its own so the card on the page and the dialog the
+ * reminder email opens (components/checkout/ReviewAsk.tsx) are the SAME
+ * review: closing the dialog leaves what was typed, or the thanks, in place.
  */
-export function ReviewPanel({
+export function useReviewDraft({
   orderRef,
   productId,
   defaultName,
   state,
   givenRating,
-  theme,
   preview,
 }: {
   orderRef: string;
@@ -61,13 +48,8 @@ export function ReviewPanel({
   state: "open" | "done";
   /** The stars of the review this order already has. */
   givenRating: number | null;
-  theme: CheckoutTheme;
   preview: boolean;
 }) {
-  const t = useTranslations("ProductPage.order.review");
-  const tReviews = useTranslations("ProductPage.reviews");
-  const tActions = useTranslations("Common.actions");
-  const ids = { heading: useId(), stars: useId(), title: useId(), body: useId(), name: useId(), nameHelp: useId() };
   const [stage, setStage] = useState<"ask" | "sent" | "done">(state === "done" ? "done" : "ask");
   const [rating, setRating] = useState(givenRating ?? 0);
   const [hovered, setHovered] = useState(0);
@@ -78,17 +60,6 @@ export function ReviewPanel({
   const [name, setName] = useState(defaultName ?? "");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<ReviewError | null>(null);
-
-  // The fields sit on the page's own colour inside the tinted card, so they
-  // read as places to type rather than as more of the card.
-  const cardStyle = {
-    ...storefrontOverlayVars(theme.ink, theme.cornerRadius),
-    "--background": theme.surface,
-    borderColor: theme.rule,
-    borderRadius: `${theme.surfaceRadius}px`,
-    backgroundColor: subtleFill(theme.ink),
-  } as CSSProperties;
-  const starsLabel = (value: number) => tReviews("stars", { rating: value });
 
   function choose(value: number) {
     setRating(value);
@@ -123,10 +94,97 @@ export function ReviewPanel({
     }
   }
 
+  /** After the dialog's thanks: the page's card is the quiet "reviewed" row,
+   *  not a second round of landing stars. */
+  function settle() {
+    setStage((current) => (current === "sent" ? "done" : current));
+  }
+
+  return {
+    stage,
+    settle,
+    rating,
+    hovered,
+    setHovered,
+    taps,
+    choose,
+    title,
+    setTitle,
+    body,
+    setBody,
+    name,
+    setName,
+    sending,
+    error,
+    submit,
+    preview,
+  };
+}
+
+export type ReviewDraft = ReturnType<typeof useReviewDraft>;
+
+/**
+ * THE REVIEW ASK on a buyer's order page, once the buyer HAS what they bought
+ * (lib/reviews/reminders.ts buyerHasGoods): never the thank-you straight
+ * after paying for a parcel, which offers the reminder instead.
+ *
+ * WHY HERE. Buyers have no accounts, and the order page is the one place a
+ * buyer proves what they bought: its address is the order's credential, and
+ * the review is sent with it (app/api/products/[id]/reviews). So every review
+ * written here is from a paid order and carries the "Verified buyer" badge.
+ *
+ * ONE QUESTION FIRST. The card is a heading and five big yellow stars.
+ * Choosing one pops it and opens the rest in place: a title, the words, and
+ * the name to show (prefilled with the first name on the order). Sent, the
+ * stars they gave land one after another above the thank-you, and the card
+ * stays a thank-you when the page is opened again.
+ *
+ * `bare` is the same review inside the dialog the reminder email opens: the
+ * dialog is the card (and carries the heading), and `onDone` closes it once
+ * the review is sent.
+ *
+ * In the editor's preview it works the same, so a seller can try it, but
+ * sends nothing and says so.
+ */
+export function ReviewPanel({
+  draft,
+  theme,
+  bare = false,
+  onDone,
+}: {
+  draft: ReviewDraft;
+  theme: CheckoutTheme;
+  bare?: boolean;
+  onDone?: () => void;
+}) {
+  const t = useTranslations("ProductPage.order.review");
+  const tReviews = useTranslations("ProductPage.reviews");
+  const tActions = useTranslations("Common.actions");
+  const ids = { heading: useId(), stars: useId(), title: useId(), body: useId(), name: useId(), nameHelp: useId() };
+  const { stage, rating, hovered, setHovered, taps, choose, title, setTitle, body, setBody, name, setName, sending, error, submit, preview } =
+    draft;
+
+  // The fields sit on the page's own colour inside the tinted card, so they
+  // read as places to type rather than as more of the card. Bare, the dialog
+  // is the card: no second frame inside it.
+  const cardStyle = (
+    bare
+      ? storefrontOverlayVars(theme.ink, theme.cornerRadius)
+      : {
+          ...storefrontOverlayVars(theme.ink, theme.cornerRadius),
+          "--background": theme.surface,
+          borderColor: theme.rule,
+          borderRadius: `${theme.surfaceRadius}px`,
+          backgroundColor: subtleFill(theme.ink),
+        }
+  ) as CSSProperties;
+  const frame = bare ? "" : "border";
+  const starsLabel = (value: number) => tReviews("stars", { rating: value });
+
   if (stage === "done") {
     return (
       <section
-        className="flex flex-col items-center gap-2 border p-6 text-center"
+        className={cn("flex flex-col items-center gap-2 p-6 text-center", frame)}
         style={cardStyle}
         data-order-review="done"
         data-setting-skip=""
@@ -141,7 +199,7 @@ export function ReviewPanel({
   if (stage === "sent") {
     return (
       <section
-        className="flex flex-col items-center gap-3 border px-6 py-8 text-center @md:py-10"
+        className={cn("flex flex-col items-center gap-3 px-6 py-8 text-center @md:py-10", frame)}
         style={cardStyle}
         data-order-review="sent"
         data-setting-skip=""
@@ -151,6 +209,16 @@ export function ReviewPanel({
         <h2 className="mt-2 text-lg font-semibold">{t("sentTitle")}</h2>
         <p className="max-w-sm text-sm opacity-75">{t("sentBody")}</p>
         {preview && <p className="text-xs opacity-70">{t("previewSent")}</p>}
+        {onDone && (
+          <button
+            type="button"
+            onClick={onDone}
+            className={cn(CTA_BUTTON_CLASS, "mt-2 w-full hover:opacity-90")}
+            style={ctaStyle(theme.cta)}
+          >
+            {tActions("done")}
+          </button>
+        )}
       </section>
     );
   }
@@ -158,15 +226,18 @@ export function ReviewPanel({
   const shown = hovered || rating;
   return (
     <section
-      className="flex flex-col items-center gap-5 border p-6 text-center @md:p-8"
+      className={cn("flex flex-col items-center gap-5 text-center", bare ? "pt-2" : "border p-6 @md:p-8")}
       style={cardStyle}
-      aria-labelledby={ids.heading}
+      aria-labelledby={bare ? undefined : ids.heading}
       data-order-review="ask"
       data-setting-skip=""
     >
-      <h2 id={ids.heading} className="text-lg font-semibold">
-        {t("title")}
-      </h2>
+      {/* In the dialog, the dialog's own title asks the question. */}
+      {!bare && (
+        <h2 id={ids.heading} className="text-lg font-semibold">
+          {t("title")}
+        </h2>
+      )}
 
       <fieldset className="flex flex-col items-center gap-2">
         <legend className="sr-only">{t("ratingLegend")}</legend>

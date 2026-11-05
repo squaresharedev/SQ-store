@@ -33,15 +33,17 @@ import { parseFulfilment } from "@/lib/orders/fulfilment";
 import { trackingLinkFor } from "@/lib/orders/carriers";
 import { buyerWithdrawal } from "@/lib/orders/withdrawal";
 import { orderPhotoKey } from "@/lib/orders/photo";
-import { isReviewableOrder } from "@/lib/reviews/eligibility";
-import type { OrderPageData } from "@/types/checkout";
+import { orderReviewState } from "@/lib/reviews/eligibility";
+import { reviewRemindersAvailable } from "@/lib/reviews/reminder-job";
+import { reviewReminderOffered, reviewReminderShownDue, reviewReminderStatus } from "@/lib/reviews/reminders";
+import type { BuyerOrder, OrderPageData } from "@/types/checkout";
 
 const idSchema = uuidField();
 
 /** The order columns an order page reads. Named, so a new column is never
  *  shown to a buyer by accident. */
 const ORDER_PAGE_SELECT =
-  "id, storefront_id, seller_id, product_id, product_title, quantity, selected_options, amount_cents, currency, status, buyer_email, ship_to, fulfilment_status, shipped_at, tracking_number, tracking_carrier, created_at, withdrawal_requested_at, supply_consent_at, digital_file_key, refunded_at, confirmation_sent_at" as const;
+  "id, storefront_id, seller_id, product_id, product_title, quantity, selected_options, amount_cents, currency, status, buyer_email, ship_to, fulfilment_status, shipped_at, tracking_number, tracking_carrier, created_at, withdrawal_requested_at, supply_consent_at, digital_file_key, refunded_at, confirmation_sent_at, review_reminder_requested_at, review_reminder_stopped_at, review_reminder_sent_at, review_reminder_dropped_at" as const;
 
 export type OrderRow = {
   id: string;
@@ -66,6 +68,10 @@ export type OrderRow = {
   withdrawal_requested_at: string | null;
   supply_consent_at: string | null;
   digital_file_key: string | null;
+  review_reminder_requested_at: string | null;
+  review_reminder_stopped_at: string | null;
+  review_reminder_sent_at: string | null;
+  review_reminder_dropped_at: string | null;
 };
 
 /** "aoife.byrne@example.test" → "a***@example.test". */
@@ -131,7 +137,7 @@ export const getOrderPage = cache(
     if (!detached && order.storefront_id !== storefrontId) return null;
 
     const admin = createAdminClient();
-    const [{ data: storefront }, seller, shippingPolicy, { data: product }, { data: review }] = await Promise.all([
+    const [{ data: storefront }, seller, shippingPolicy, { data: product }, { data: review }, { data: addOnRows }] = await Promise.all([
       detached
         ? Promise.resolve({ data: null })
         : admin
@@ -149,6 +155,13 @@ export const getOrderPage = cache(
             .maybeSingle()
         : Promise.resolve({ data: null }),
       admin.from("reviews").select("id, rating").eq("order_id", order.id).maybeSingle(),
+      // "Add to your order": the order's other lines, read from their own
+      // snapshot like the main product.
+      admin
+        .from("order_add_ons")
+        .select("id, product_id, product_title, quantity, selected_options, digital_file_key, position")
+        .eq("order_id", order.id)
+        .order("position", { ascending: true }),
     ]);
     if (!storefront && !detached) return null;
     // The order outlives the shop's moderation state, and the shop itself; the
@@ -173,6 +186,8 @@ export const getOrderPage = cache(
       if (url) photo = { url, alt: order.product_title };
     }
 
+    const addOns = await buyerAddOns(admin, addOnRows ?? []);
+
     const theme = config.theme;
     const backgroundImageUrl =
       theme.background.kind === "image" ? await presignGetUrl(theme.background.key) : null;
@@ -188,6 +203,8 @@ export const getOrderPage = cache(
       : (findShippingProfile(shippingPolicy.profiles, product?.shipping_profile_id)?.dispatch ??
           shippingPolicy.dispatch ??
           null);
+    const reviewState = orderReviewState(order, product, review !== null);
+    const reviewReminder = buyerReviewReminder(order, reviewState);
 
     return {
       storefront: {
@@ -233,13 +250,73 @@ export const getOrderPage = cache(
         confirmationSent: order.confirmation_sent_at !== null,
         // The same rules the review route applies, so the button is offered
         // exactly when pressing it can work.
-        review: review
-          ? "done"
-          : isReviewableOrder(order) && product?.status === "active" && isContentVisible(product.moderation_status)
-            ? "open"
-            : "closed",
+        review: reviewState,
         ...(review ? { reviewRating: review.rating } : {}),
+        ...(reviewReminder ? { reviewReminder } : {}),
+        ...(addOns.length > 0 ? { addOns } : {}),
       },
     };
   },
 );
+
+/**
+ * The review reminder as the buyer's page shows it, or undefined where none
+ * can be offered: mail or the scheduler is off, there is no address to write
+ * to, the order cannot be reviewed, its shop has been deleted (the reminder
+ * links to the shop's page), or it is too late to ask. One already asked for
+ * keeps showing while it waits, so the buyer can see it and stop it.
+ */
+function buyerReviewReminder(order: OrderRow, review: BuyerOrder["review"]): BuyerOrder["reviewReminder"] {
+  if (review !== "open" || !order.buyer_email || !order.storefront_id || !reviewRemindersAvailable()) return undefined;
+  const status = reviewReminderStatus(order);
+  const now = new Date();
+  if (status === null || (status === "off" && !reviewReminderOffered(order, now))) return undefined;
+  return { status, dueAt: status === "on" ? reviewReminderShownDue(order, now) : null };
+}
+
+type AddOnRow = {
+  id: string;
+  product_id: string | null;
+  product_title: string;
+  quantity: number;
+  selected_options: unknown;
+  digital_file_key: string | null;
+};
+
+/** The order's add-on lines for its buyer, each with the photo of the version
+ *  bought (when its product is still there and not taken down), built field
+ *  by field like the main line. */
+async function buyerAddOns(
+  admin: ReturnType<typeof createAdminClient>,
+  rows: readonly AddOnRow[],
+): Promise<NonNullable<OrderPageData["order"]["addOns"]>> {
+  if (rows.length === 0) return [];
+  const ids = rows.flatMap((row) => (row.product_id ? [row.product_id] : []));
+  const { data: products } = ids.length
+    ? await admin
+        .from("products")
+        .select("id, image_key, gallery, option_groups, moderation_status")
+        .in("id", ids)
+    : { data: [] };
+  const byId = new Map((products ?? []).map((row) => [row.id, row]));
+  return Promise.all(
+    rows.map(async (row) => {
+      const selection = parseOrderSelection(row.selected_options);
+      const product = row.product_id ? byId.get(row.product_id) : undefined;
+      let photo: OrderPageData["order"]["photo"] = null;
+      if (product && isContentVisible(product.moderation_status)) {
+        const photoKey = orderPhotoKey(product, selection);
+        const url = photoKey ? await presignGetUrl(photoKey) : null;
+        if (url) photo = { url, alt: row.product_title };
+      }
+      return {
+        id: row.id,
+        productTitle: row.product_title,
+        photo,
+        quantity: row.quantity,
+        selection,
+        digitalFormat: row.digital_file_key ? formatFromKey(row.digital_file_key) : null,
+      };
+    }),
+  );
+}

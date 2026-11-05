@@ -1,4 +1,5 @@
-import type { ProductPageProduct, ProductSale } from "@/types/product";
+import type { AddOnCard, HiddenAddOn, ProductPageProduct, ProductSale } from "@/types/product";
+import type { ProductReviews } from "@/types/review";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 
@@ -72,6 +73,120 @@ function harnessSale(kind: HarnessSale, regularCents: number): ProductSale {
   };
 }
 
+/** "Add to your order" cards for the harness product (`?addons=1`): one with
+ *  versions, one on sale, so both draw. The same kind as the product. */
+export function harnessAddOns(digital: boolean): AddOnCard[] {
+  if (digital) {
+    return [
+      {
+        id: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a11",
+        title: "Firing log template",
+        description: "A printable log for every kiln firing: cone, ramp, hold and what came out.",
+        pagePath: null,
+        priceCents: 600,
+        currency: "EUR",
+        sale: null,
+        images: [{ url: "/sample-storefront/mouse.webp", alt: "A firing log" }],
+        optionGroups: [],
+        isDigital: true,
+        digitalFormat: "PDF",
+        shippingProfileId: null,
+        rating: null,
+      },
+    ];
+  }
+  return [
+    {
+      id: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a12",
+      title: "Oak coasters",
+      description: "Turned from Irish oak and oiled by hand.\n\nThey sit flat under anything from a mug to a vase.",
+      // Stands for a tile on the storefront, so the dialog offers its full page.
+      pagePath: "/dev/checkout?view=product",
+      priceCents: 1800,
+      currency: "EUR",
+      sale: null,
+      images: [{ url: "/sample-storefront/watch.webp", alt: "Oak coasters" }],
+      optionGroups: [
+        {
+          id: "g-set",
+          name: "Set",
+          display: "chip",
+          options: [
+            { id: "o-two", name: "Two", available: true },
+            { id: "o-four", name: "Four", available: true },
+          ],
+        },
+      ],
+      isDigital: false,
+      digitalFormat: null,
+      shippingProfileId: null,
+      // Reviewed, so its details show the stars.
+      rating: { average: 4.6, count: 12 },
+    },
+    {
+      id: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a13",
+      title: "Glaze sampler",
+      description: "",
+      pagePath: null,
+      priceCents: 900,
+      currency: "EUR",
+      sale: harnessSale("proven", 1200),
+      images: [{ url: "/sample-storefront/speaker.webp", alt: "A glaze sampler" }],
+      optionGroups: [],
+      isDigital: false,
+      digitalFormat: null,
+      shippingProfileId: null,
+      rating: null,
+    },
+  ];
+}
+
+/** Two more posted cards, so `?addons=4` offers the most a product can (four). */
+export function harnessMoreAddOns(): AddOnCard[] {
+  const card = (id: string, title: string, priceCents: number, image: string): AddOnCard => ({
+    id,
+    title,
+    description: "",
+    pagePath: null,
+    priceCents,
+    currency: "EUR",
+    sale: null,
+    images: [{ url: image, alt: title }],
+    optionGroups: [],
+    isDigital: false,
+    digitalFormat: null,
+    shippingProfileId: null,
+    rating: null,
+  });
+  return [
+    card("5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a14", "Linen tea towel", 1400, "/sample-storefront/succulent.webp"),
+    card("5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a15", "Beeswax candle", 1100, "/sample-storefront/headphones.webp"),
+  ];
+}
+
+/** Chosen but not offered (`?addons=hidden`): a draft and one sold out, as the
+ *  seller's previews draw them. */
+export function harnessHiddenAddOns(): HiddenAddOn[] {
+  return [
+    {
+      id: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a16",
+      title: "Candlestick floor lamp",
+      imageUrl: "/sample-storefront/camera.webp",
+      priceCents: 38000,
+      currency: "EUR",
+      reason: "draft",
+    },
+    {
+      id: "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a17",
+      title: "Loft oak bookshelf",
+      imageUrl: "/sample-storefront/mouse.webp",
+      priceCents: 112000,
+      currency: "EUR",
+      reason: "soldOut",
+    },
+  ];
+}
+
 /** The harness product. On `sale`, its price is what the sale leaves. */
 export function harnessProduct(digital: boolean, sale: HarnessSale | null = null): ProductPageProduct {
   const regularCents = digital ? 1200 : 2400;
@@ -116,3 +231,25 @@ export function harnessProduct(digital: boolean, sale: HarnessSale | null = null
     maxQuantity: 5,
   };
 }
+
+/** A product with reviews (`?reviews=1`): every row of the star filter but one has some. */
+export const HARNESS_REVIEWS: ProductReviews = {
+  summary: { count: 17, average: 3.6, breakdown: [2, 2, 4, 1, 8] },
+  firstPage: {
+    rows: [
+      {
+        id: "harness-review-1",
+        rating: 5,
+        title: "Lovely glaze",
+        body: "Arrived well packed and looks even better in person.",
+        authorName: "Aoife",
+        verified: true,
+        source: "native",
+        reviewedAt: "2026-10-01T10:00:00.000Z",
+      },
+    ],
+    total: 17,
+    page: 1,
+    pageSize: 10,
+  },
+};

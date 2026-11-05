@@ -278,6 +278,51 @@ export type Database = {
           },
         ]
       }
+      ai_credit_usage: {
+        Row: {
+          calls: number
+          owner_id: string
+          period: string
+          updated_at: string
+          used_micros: number
+        }
+        Insert: {
+          calls?: number
+          owner_id: string
+          period: string
+          updated_at?: string
+          used_micros?: number
+        }
+        Update: {
+          calls?: number
+          owner_id?: string
+          period?: string
+          updated_at?: string
+          used_micros?: number
+        }
+        Relationships: []
+      }
+      ai_platform_usage: {
+        Row: {
+          calls: number
+          day: string
+          updated_at: string
+          used_micros: number
+        }
+        Insert: {
+          calls?: number
+          day: string
+          updated_at?: string
+          used_micros?: number
+        }
+        Update: {
+          calls?: number
+          day?: string
+          updated_at?: string
+          used_micros?: number
+        }
+        Relationships: []
+      }
       agent_audit_log: {
         Row: {
           account_id: string
@@ -1218,6 +1263,82 @@ export type Database = {
           },
         ]
       }
+      order_add_ons: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          digital_file_key: string | null
+          discount_cents: number
+          discount_id: string | null
+          id: string
+          order_id: string
+          position: number
+          product_id: string | null
+          product_price_cents: number
+          product_title: string
+          quantity: number
+          selected_options: Json
+          seller_id: string
+          stock_reserved: number
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          digital_file_key?: string | null
+          discount_cents?: number
+          discount_id?: string | null
+          id?: string
+          order_id: string
+          position?: number
+          product_id?: string | null
+          product_price_cents: number
+          product_title: string
+          quantity?: number
+          selected_options?: Json
+          seller_id: string
+          stock_reserved?: number
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          digital_file_key?: string | null
+          discount_cents?: number
+          discount_id?: string | null
+          id?: string
+          order_id?: string
+          position?: number
+          product_id?: string | null
+          product_price_cents?: number
+          product_title?: string
+          quantity?: number
+          selected_options?: Json
+          seller_id?: string
+          stock_reserved?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_add_ons_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_add_ons_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_add_ons_discount_id_fkey"
+            columns: ["discount_id"]
+            isOneToOne: false
+            referencedRelation: "discounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           ad_fee_cents: number
@@ -1250,6 +1371,10 @@ export type Database = {
           quantity: number
           refund_reason: string | null
           refunded_at: string | null
+          review_reminder_dropped_at: string | null
+          review_reminder_requested_at: string | null
+          review_reminder_sent_at: string | null
+          review_reminder_stopped_at: string | null
           selected_options: Json
           seller_id: string
           seller_notified_at: string | null
@@ -1296,6 +1421,10 @@ export type Database = {
           quantity?: number
           refund_reason?: string | null
           refunded_at?: string | null
+          review_reminder_dropped_at?: string | null
+          review_reminder_requested_at?: string | null
+          review_reminder_sent_at?: string | null
+          review_reminder_stopped_at?: string | null
           selected_options?: Json
           seller_id: string
           seller_notified_at?: string | null
@@ -1342,6 +1471,10 @@ export type Database = {
           quantity?: number
           refund_reason?: string | null
           refunded_at?: string | null
+          review_reminder_dropped_at?: string | null
+          review_reminder_requested_at?: string | null
+          review_reminder_sent_at?: string | null
+          review_reminder_stopped_at?: string | null
           selected_options?: Json
           seller_id?: string
           seller_notified_at?: string | null
@@ -1667,6 +1800,7 @@ export type Database = {
       }
       products: {
         Row: {
+          add_on_ids: string[]
           created_at: string
           currency: string
           description: string | null
@@ -1700,6 +1834,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          add_on_ids?: string[]
           created_at?: string
           currency?: string
           description?: string | null
@@ -1733,6 +1868,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          add_on_ids?: string[]
           created_at?: string
           currency?: string
           description?: string | null
@@ -1817,6 +1953,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ai_suggest_as_you_type: boolean
           avatar_url: string | null
           created_at: string
           deletion_requested_at: string | null
@@ -1848,6 +1985,7 @@ export type Database = {
           username: string | null
         }
         Insert: {
+          ai_suggest_as_you_type?: boolean
           avatar_url?: string | null
           created_at?: string
           deletion_requested_at?: string | null
@@ -1879,6 +2017,7 @@ export type Database = {
           username?: string | null
         }
         Update: {
+          ai_suggest_as_you_type?: boolean
           avatar_url?: string | null
           created_at?: string
           deletion_requested_at?: string | null
@@ -2590,6 +2729,57 @@ export type Database = {
         }
         Relationships: []
       }
+      terms_notice_sends: {
+        Row: {
+          attempts: number
+          sent_at: string | null
+          user_id: string
+          version: string
+        }
+        Insert: {
+          attempts?: number
+          sent_at?: string | null
+          user_id: string
+          version: string
+        }
+        Update: {
+          attempts?: number
+          sent_at?: string | null
+          user_id?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      terms_versions: {
+        Row: {
+          created_at: string
+          effective_at: string | null
+          notice_completed_at: string | null
+          notice_started_at: string | null
+          planned_effective_at: string | null
+          short_notice_reason: string | null
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          effective_at?: string | null
+          notice_completed_at?: string | null
+          notice_started_at?: string | null
+          planned_effective_at?: string | null
+          short_notice_reason?: string | null
+          version: string
+        }
+        Update: {
+          created_at?: string
+          effective_at?: string | null
+          notice_completed_at?: string | null
+          notice_started_at?: string | null
+          planned_effective_at?: string | null
+          short_notice_reason?: string | null
+          version?: string
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           accepted_at: string | null
@@ -2744,6 +2934,21 @@ export type Database = {
     }
     Functions: {
       account_plan: { Args: { p_owner: string }; Returns: string }
+      ai_credit_hold: {
+        Args: {
+          p_allowance: number
+          p_day: string
+          p_micros: number
+          p_owner: string
+          p_period: string
+          p_platform_max: number
+        }
+        Returns: string
+      }
+      ai_credit_settle: {
+        Args: { p_day: string; p_delta: number; p_owner: string; p_period: string }
+        Returns: undefined
+      }
       admin_notification_scan_tick: { Args: never; Returns: undefined }
       admin_revoke_user_sessions: {
         Args: { target_user_id: string }

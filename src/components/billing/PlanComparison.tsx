@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { cardClass, eyebrowClass } from "@/components/ui/surface-styles";
-import { PLAN_FEATURE_ICON } from "@/components/billing/PlanFeatureList";
+import { PLAN_FEATURE_ICON, aiCreditLabel } from "@/components/billing/PlanFeatureList";
 import { usePlanPrices } from "@/components/billing/plan-context";
 import { MarkedPlanName } from "@/components/billing/PlanWordmark";
 import { cn } from "@/lib/utils";
@@ -82,6 +82,13 @@ export function PlanComparison({ interval, currentPlan }: { interval: BillingInt
       case "storefronts":
       case "teamSeats":
         return definition.limits[key] === null ? t("compare.unlimited") : number.format(definition.limits[key]);
+      case "aiSuggestions":
+        // The credit is the offer: "€10 credit a month", not a bare tick.
+        return planHas(plan, key) ? (
+          t("compare.aiCredit", { credit: aiCreditLabel(plan, locale) })
+        ) : (
+          <Minus className="mx-auto size-4 text-muted-foreground" strokeWidth={2} aria-label={t("compare.notIncluded")} />
+        );
       default:
         return planHas(plan, key) ? (
           <Check className="mx-auto size-4 text-foreground" strokeWidth={2.5} aria-label={t("compare.included")} />

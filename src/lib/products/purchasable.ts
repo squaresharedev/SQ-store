@@ -9,8 +9,9 @@
 // must be UUIDs before any I/O; the client IP spends a rate-limit token (the
 // caller names the bucket, and cannot skip it); the storefront must exist, not
 // be taken down, and have its product page switched on; the product must be
-// PLACED on that storefront, `active`, owned by the storefront's owner and not
-// taken down; and the seller must have disclosed who they are. Every refusal
+// PLACED on that storefront (or offered beside one that is, see
+// offeredByATile), `active`, owned by the storefront's owner and not taken
+// down; and the seller must have disclosed who they are. Every refusal
 // is the same `null`, which each route turns into the same 404, so nothing
 // here is enumerable. (A spent rate limit or a failed read is not a refusal:
 // see gatePurchasable and lib/public/busy.ts. That includes the read of the
@@ -42,7 +43,7 @@ import { PAGE_BUSY, type PageBusy } from "@/lib/public/busy";
 import { clientKey, rateLimitKey, type RateLimitBudget } from "@/lib/rate-limit";
 import { uuidField } from "@/lib/validation/inputs";
 import { parseStoredStorefrontConfig } from "@/lib/validation/storefront";
-import { resolveProductPage } from "@/lib/storefront/product-page";
+import { isProductPageSectionShown, resolveProductPage } from "@/lib/storefront/product-page";
 import { PUBLIC_STOCK_SELECT } from "@/lib/stock/public";
 import { readActiveSales } from "@/lib/discounts/public";
 import type { ActiveSale } from "@/types/discount";
@@ -61,7 +62,7 @@ import type {
  * drift onto a column that seam has not admitted.
  */
 export const PUBLIC_PRODUCT_SELECT =
-  `id, title, description, price_cents, currency, image_key, digital_file_key, gallery, option_groups, details, documents, purchase_url, shipping_profile_id, max_per_order, created_at, ${MODERATION_GATE_SELECT}, ${PUBLIC_STOCK_SELECT}` as const;
+  `id, title, description, price_cents, currency, image_key, digital_file_key, gallery, option_groups, details, documents, purchase_url, shipping_profile_id, max_per_order, created_at, add_on_ids, ${MODERATION_GATE_SELECT}, ${PUBLIC_STOCK_SELECT}` as const;
 
 export type PublicProductRow = {
   id: string;
@@ -81,6 +82,9 @@ export type PublicProductRow = {
   /** When it was listed. Read by the sale's pricing only (a product younger
    *  than the 30 days a sale is measured against), never by a payload builder. */
   created_at: string | null;
+  /** The seller's "Add to your order" choices (lib/products/add-ons.ts). Ids
+   *  only, re-checked on every read; never placed on a payload as they are. */
+  add_on_ids?: string[] | null;
   /** Takedown state. Read by the gate, never by a payload builder: nothing
    *  about a removal is buyer-facing. */
   moderation_status: string | null;
@@ -96,8 +100,9 @@ export type Purchasable = {
   storefront: { id: string; name: string };
   config: StorefrontConfig;
   productPage: ProductPageConfig;
-  /** The tile this product sits on, which carries the manual sold-out flag. */
-  block: ProductBlock;
+  /** The tile this product sits on, which carries the manual sold-out flag.
+   *  Null for a product that is here only as another tile's add-on. */
+  block: ProductBlock | null;
   row: PublicProductRow;
   /** The six buyer-facing identity columns, built field by field. */
   seller: StorefrontSeller;
@@ -183,13 +188,20 @@ export async function gatePurchasable<Extra = undefined>(
   const productPage = resolveProductPage(config);
   if (!productPage.enabled) return null;
 
-  // The page belongs to a tile. A product the seller has not placed on this
-  // storefront has no page here, whatever its status. Hidden sold-out tiles
-  // still count: the page then simply says sold out.
-  const block = config.blocks.find(
-    (candidate) => candidate.type === "product" && candidate.productId === productId,
-  );
-  if (!block || block.type !== "product") return null;
+  // The page belongs to a tile, or to a product a tile offers in "Add to your
+  // order" (its details dialog links here). Any other product the seller has
+  // not placed on this storefront has no page here, whatever its status.
+  // Hidden sold-out tiles still count: the page then simply says sold out.
+  const tiles = config.blocks.flatMap((candidate) => (candidate.type === "product" ? [candidate] : []));
+  const block = tiles.find((candidate) => candidate.productId === productId) ?? null;
+  if (!block) {
+    const offered = await offeredByATile(admin, storefront.owner_id, productId, {
+      tileProductIds: tiles.map((tile) => tile.productId),
+      productPage,
+    });
+    if (offered === null) return PAGE_BUSY;
+    if (!offered) return null;
+  }
 
   // Product, seller identity and the store's running sales all depend only on
   // the owner id already in hand, so they run together rather than one after
@@ -271,4 +283,35 @@ export async function gatePurchasable<Extra = undefined>(
     now,
     extra: extra as Extra,
   };
+}
+
+/**
+ * Whether a product that is not a tile here is one a tile OFFERS: in the
+ * add_on_ids of a live product placed on this storefront, while the storefront
+ * shows "Add to your order". The seller choosing it there is what put it on
+ * sale here, so its own page (and checkout) are here too; the rest of the gate
+ * still asks everything it asks of a tile's product. Null when the database
+ * did not answer. Exported for its test.
+ */
+export async function offeredByATile(
+  admin: ReturnType<typeof createAdminClient>,
+  ownerId: string,
+  productId: string,
+  here: { tileProductIds: readonly string[]; productPage: ProductPageConfig },
+): Promise<boolean | null> {
+  if (here.tileProductIds.length === 0 || !isProductPageSectionShown(here.productPage, "addOns")) {
+    return false;
+  }
+  const { data, error } = await admin
+    .from("products")
+    .select(`id, ${MODERATION_GATE_SELECT}`)
+    .eq("owner_id", ownerId)
+    .eq("status", "active")
+    .in("id", [...here.tileProductIds])
+    .contains("add_on_ids", [productId]);
+  if (error) {
+    console.error("[purchasable] add-on host read failed", error);
+    return null;
+  }
+  return (data ?? []).some((row) => isContentVisible(row.moderation_status));
 }

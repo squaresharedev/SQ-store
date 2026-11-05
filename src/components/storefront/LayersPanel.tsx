@@ -18,7 +18,7 @@ import {
   infoTextClass,
   transitionClass,
 } from "@/components/ui/control-styles";
-import { PanelBackRow } from "@/components/ui/PanelMenu";
+import { PanelSubmenu } from "@/components/ui/PanelMenu";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { BLOCK_KIND_LABELS, blockLabel } from "./block-label";
 import { ShapeKindGlyph } from "./ShapeTileContent";
@@ -258,12 +258,11 @@ export function LayersPanel({
   }
 
   return (
-    <div>
-      <PanelBackRow
-        title={t("title")}
-        ariaLabel={t("backAriaLabel")}
-        onBack={onBack}
-      />
+    <PanelSubmenu
+      title={t("title")}
+      ariaLabel={t("backAriaLabel")}
+      onBack={onBack}
+    >
 
       {total === 0 ? (
         <p className={cn(infoTextClass, "px-0 py-4 lg:px-4")}>
@@ -436,7 +435,7 @@ export function LayersPanel({
           <ShortcutHint />
         </>
       )}
-    </div>
+    </PanelSubmenu>
   );
 }
 

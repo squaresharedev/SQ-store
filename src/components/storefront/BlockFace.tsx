@@ -20,6 +20,7 @@ import { ProductTileContent } from "./ProductTileContent";
 import { ShapeTileContent } from "./ShapeTileContent";
 import { TextTileContent } from "./TextTileContent";
 import type { TileSpotDrag } from "./TileSpotDragLayer";
+import type { TileLook } from "@/lib/storefront/tile-look";
 
 /**
  * The visual face of one grid block, independent of tile chrome: dispatches to
@@ -42,6 +43,8 @@ export function BlockFace({
   textEditing = false,
   textSelectAll = false,
   spotDrag,
+  look,
+  hoverMotion,
   onTextChange,
   onToggleBlockFormat,
   onTextRangeChange,
@@ -63,6 +66,10 @@ export function BlockFace({
   /** Product blocks only, editor only: arms the title and price for dragging.
    *  Every other kind has nothing placeable on it. */
   spotDrag?: TileSpotDrag;
+  /** Product blocks only: what cards borrow from the product page, and
+   *  whether this one may move on hover (see ProductTileContent). */
+  look?: TileLook;
+  hoverMotion?: boolean;
   /** Text and the spans that format parts of it, always together. */
   onTextChange?: (text: string, spans: TextSpan[], source: TextEditSource) => void;
   /** Ctrl+B / I / U with nothing selected: the whole block. */
@@ -107,6 +114,8 @@ export function BlockFace({
         imagePlacement={block.imagePlacement}
         imageRef={imageRef}
         spotDrag={spotDrag}
+        look={look}
+        hoverMotion={hoverMotion}
       />
     );
   }

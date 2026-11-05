@@ -326,6 +326,11 @@
       "required": "Añade el nombre que se mostrará con la reseña.",
       "tooLong": "Un nombre debe tener {maximum} caracteres como máximo.",
       "unsupported": "El nombre contiene caracteres no admitidos."
+    },
+    "addOnsTitle": {
+      "required": "El título es obligatorio.",
+      "tooLong": "El título no puede superar {maximum} caracteres.",
+      "unsupported": "El título contiene caracteres no admitidos."
     }
   },
   "email": {
@@ -513,7 +518,10 @@
     "galleryStaleOption": "Una foto apunta a una opción que ya no existe.",
     "badgesTooMany": "Un producto puede tener hasta {maximum} insignias.",
     "badgeDuplicate": "Cada insignia solo puede aparecer una vez.",
-    "badgesOnPhotoTooMany": "Un producto puede mostrar hasta {maximum} insignias en su foto."
+    "badgesOnPhotoTooMany": "Un producto puede mostrar hasta {maximum} insignias en su foto.",
+    "addOnsTooMany": "Un producto puede ofrecer hasta {maximum} productos más.",
+    "addOnDuplicate": "Cada producto solo se puede ofrecer una vez.",
+    "addOnNotYours": "Uno de los productos ofrecidos ya no está en esta tienda. Elimínalo y guarda de nuevo."
   },
   "productImport": {
     "noTitle": "Sin título.",

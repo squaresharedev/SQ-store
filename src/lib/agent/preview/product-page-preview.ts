@@ -7,7 +7,8 @@
 //     only this store's exist for this caller;
 //   - a draft is drawn (the owner is previewing their own page), and what would
 //     keep the page from buyers is reported in `notes` instead of refused;
-//   - prices go through the seller's preview pricing, and the page is
+//   - prices go through the seller's preview pricing, add-ons through the
+//     buyer's own loader under the buyer page's own rule, and the page is
 //     drawn by the buyer's renderer: what a buyer would see, nothing of the
 //     designer's (its hints, the add-ons it shows faded).
 //
@@ -22,6 +23,7 @@ import { emailProofRequired } from "@/lib/contact-verification/availability";
 import { loadPreviewPricing } from "@/lib/discounts/storefront-preview";
 import { toCurrency } from "@/lib/format/money";
 import { isContentVisible } from "@/lib/moderation/removal";
+import { loadAddOnCards } from "@/lib/products/add-ons";
 import { PUBLIC_PRODUCT_SELECT, buildProductPageProduct, type PublicProductRow } from "@/lib/products/public";
 import { getProductPlacements } from "@/lib/products/queries";
 import { presignGetUrl } from "@/lib/r2";
@@ -105,6 +107,7 @@ export async function productPagePreview(
   const block = config.blocks.find((candidate) => candidate.type === "product" && candidate.productId === productId);
 
   const admin = createAdminClient();
+  const now = new Date();
   const [{ data: sellerRow }, pricing] = await Promise.all([
     admin.from("profiles").select(`${TRADER_GATE_SELECT}, ${SHIPPING_POLICY_SELECT}`).eq("id", account.accountId).maybeSingle(),
     loadPreviewPricing(account.accountId, [
@@ -127,6 +130,20 @@ export async function productPagePreview(
     signPagePhoto(productPage.backgroundImage),
     checkoutAvailableFor({ ownerId: account.accountId, shippingPolicy, row }),
   ]);
+  // Offered exactly where the buyer's page offers them (lib/products/public.ts).
+  const addOns =
+    checkout && isProductPageSectionShown(productPage, "addOns") && !product.soldOut
+      ? await loadAddOnCards(admin, {
+          ownerId: account.accountId,
+          ids: row.add_on_ids,
+          isDigital: product.isDigital,
+          currency: product.currency,
+          now,
+          unreadableSales: "regular",
+          pages: { storefrontId: storefront.id, linked: () => true },
+          withRatings: reviewsShown,
+        })
+      : [];
 
   const seller = buildSellerIdentity(sellerRow as SellerIdentityRow | null);
   // The page's own rule for its button, so the note says what the page draws.
@@ -167,6 +184,7 @@ export async function productPagePreview(
       },
       product,
       productUrl: productPageUrl(storefront.id, product.id),
+      ...(addOns.length > 0 ? { addOns } : {}),
     },
     reviews,
     status: row.status,

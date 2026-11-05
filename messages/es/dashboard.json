@@ -127,6 +127,13 @@
       "description": "Tienen derecho a un reembolso en los 14 días siguientes a su desistimiento. Organiza la devolución y luego reembolsa el pedido.",
       "action": "Ver desistimientos"
     },
+    "restock": {
+      "label": "{count, plural, one {{count} producto a punto de agotarse} many {{count} productos a punto de agotarse} other {{count} productos a punto de agotarse}}",
+      "descriptionSingle": "A este ritmo, «{title}» se agota en aproximadamente {days, plural, one {# día} many {# días} other {# días}}.",
+      "descriptionMultiple": "«{title}» se agota primero, en aproximadamente {days, plural, one {# día} many {# días} other {# días}}.",
+      "actionSingle": "Actualizar existencias",
+      "actionMultiple": "Revisar existencias"
+    },
     "checkoutRates": {
       "label": "Fija tus precios de entrega",
       "description": "Los compradores no pueden pagar un producto físico hasta que un destino tenga tanto una tarifa como un país.",

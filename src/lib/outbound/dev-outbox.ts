@@ -32,6 +32,8 @@ export type DevMessage = {
   replyTo?: string;
   /** Email only: the display name, when it is not the platform's own. */
   fromName?: string;
+  /** Email only: the one-click unsubscribe address, on mail that can be stopped. */
+  unsubscribeUrl?: string;
   text: string;
   at: string;
 };

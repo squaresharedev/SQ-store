@@ -171,3 +171,37 @@ export function priceOrder(input: {
     codeOutdone: false,
   };
 }
+
+export type PricedAddOn = {
+  /** What one costs: the sale price when a sale lowers it, else the regular. */
+  unitPriceCents: number;
+  /** unitPriceCents x quantity: what the line is charged. */
+  amountCents: number;
+  /** How much less than the regular price the line costs. */
+  discountCents: number;
+  applied: "sale" | null;
+};
+
+/**
+ * Price one "Add to your order" line. Its own running sale applies, exactly as
+ * its tile and card show it; a code never does (a code is for the product the
+ * buyer came to buy, priceOrder above). A sale's price already stops at
+ * MIN_PAYABLE_CENTS (reductionCents), so the line never costs less than that.
+ */
+export function priceAddOn(input: {
+  regularUnitCents: number;
+  saleUnitCents: number | null;
+  quantity: number;
+}): PricedAddOn {
+  const { regularUnitCents, quantity } = input;
+  const saleUnit =
+    input.saleUnitCents !== null && input.saleUnitCents < regularUnitCents ? input.saleUnitCents : null;
+  const unitPriceCents = saleUnit ?? regularUnitCents;
+  const amountCents = lineTotalCents(unitPriceCents, quantity);
+  return {
+    unitPriceCents,
+    amountCents,
+    discountCents: lineTotalCents(regularUnitCents, quantity) - amountCents,
+    applied: saleUnit === null ? null : "sale",
+  };
+}

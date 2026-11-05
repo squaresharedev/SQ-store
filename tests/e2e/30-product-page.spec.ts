@@ -598,7 +598,7 @@ test.describe("hosted product page", () => {
     // off it), so it answers to its label rather than to a role.
     await page.getByLabel(/^oak lamp\. press enter/i).click();
     await canvasStill(page);
-    const node = page.getByRole("button", { name: /^open the product page for oak lamp$/i });
+    const node = page.getByRole("button", { name: /^open the buyer flow for oak lamp$/i });
     await expect(node).toBeVisible();
     await node.click();
 
@@ -682,7 +682,7 @@ test.describe("hosted product page", () => {
     await expectToast(page, /saved, but some products are still drafts/i, 15_000);
     await expectToast(page, /hidden draft is a draft and buyers cannot reach it yet/i);
     await page.reload();
-    await page.getByRole("button", { name: /^show the product page$/i }).click();
+    await page.getByRole("button", { name: /^show the product page, checkout and thank-you page$/i }).click();
     // The saved change (the description switched off, then back on) survived.
     await expect(
       page.locator(`[data-artboard-id="${s.active}"] [data-product-description]`),
@@ -690,7 +690,7 @@ test.describe("hosted product page", () => {
 
     // And the artboard's own control puts it away again.
     await page
-      .getByRole("button", { name: /^close the product page for oak lamp$/i })
+      .getByRole("button", { name: /^close the buyer flow for oak lamp$/i })
       .first()
       .click();
     await expect(page.locator(`[data-artboard-id="${s.active}"]`)).toHaveCount(0);
@@ -795,7 +795,7 @@ test.describe("hosted product page", () => {
     // off it), so it answers to its label rather than to a role.
     await page.getByLabel(/^oak lamp\. press enter/i).click();
     await canvasStill(page);
-    await page.getByRole("button", { name: /^open the product page for oak lamp$/i }).click();
+    await page.getByRole("button", { name: /^open the buyer flow for oak lamp$/i }).click();
     const root = page.locator(`[data-artboard-id="${s.active}"] [data-product-page]`);
     await expect(root).toBeVisible();
 
@@ -832,7 +832,7 @@ test.describe("hosted product page", () => {
     // off it), so it answers to its label rather than to a role.
     await page.getByLabel(/^oak lamp\. press enter/i).click();
     await canvasStill(page);
-    await page.getByRole("button", { name: /^open the product page for oak lamp$/i }).click();
+    await page.getByRole("button", { name: /^open the buyer flow for oak lamp$/i }).click();
     const artboard = page.locator(`[data-artboard-id="${s.active}"]`);
     await expect(artboard).toBeVisible();
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { MoveDiagonal2, RotateCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -511,6 +511,9 @@ interface GridCommonProps<TData> {
   showEmptyCells?: boolean;
   /** Click a free cell (editable only) — used to insert right there. */
   onEmptyCellClick?: (x: number, y: number) => void;
+  /** Something to offer in one free cell, editable only. It takes the place of
+   *  that cell and is not a block: nothing here can drag or select it. */
+  suggestion?: { x: number; y: number; node: ReactNode };
   /**
    * Tilt a block, in degrees. OPTIONAL even in editable mode, unlike move and
    * resize: a consumer that does not offer rotation simply omits it and no
@@ -597,6 +600,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     cellStyle,
     showEmptyCells = false,
     onEmptyCellClick,
+    suggestion,
     onRotate,
     allowOverlap = false,
     groupKeys,
@@ -1763,9 +1767,11 @@ export function Grid<TData>(props: GridProps<TData>) {
   // A cell is taken when something PAINTS on it, so the guides disappear from
   // under a tilted block's real corners instead of from under the cells it
   // happens to be placed in.
+  const suggestionCell = suggestion ? `${suggestion.x},${suggestion.y}` : null;
   const emptyCells = useMemo(() => {
     if (!showEmptyCells || !editable) return [];
     const taken = new Set<string>();
+    if (suggestionCell) taken.add(suggestionCell);
     for (const block of view.blocks) {
       const covered = blockFootprint(block);
       for (let y = covered.y; y < covered.y + covered.h; y += 1) {
@@ -1781,7 +1787,7 @@ export function Grid<TData>(props: GridProps<TData>) {
       }
     }
     return cells;
-  }, [showEmptyCells, editable, view.blocks, view.rows, renderColumns]);
+  }, [showEmptyCells, editable, view.blocks, view.rows, renderColumns, suggestionCell]);
 
   /** Every block under a gesture, for cellStyle. Follows `active`, which is
    *  set once when a gesture starts and cleared when it ends. */
@@ -2118,6 +2124,18 @@ export function Grid<TData>(props: GridProps<TData>) {
             </Fragment>
           );
         })}
+
+        {suggestion && interactive && (
+          <li
+            style={{
+              ...placementStyle({ x: suggestion.x, y: suggestion.y, w: 1, h: 1 }, renderColumns, view.rows),
+              ...cellStyle?.({ x: suggestion.x, y: suggestion.y, w: 1, h: 1 }),
+            }}
+            className={cn(GRID_CELL_RADIUS_CLASS, cellClassName)}
+          >
+            {suggestion.node}
+          </li>
+        )}
 
         {/* Free cells. Clickable when the consumer wants insert-here.
             EMPTY_CELL_Z puts them under every block: they are drawn last so

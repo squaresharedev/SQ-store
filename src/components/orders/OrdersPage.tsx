@@ -370,7 +370,10 @@ export function OrdersPage({
           order={selected}
           onClose={closeDetail}
           canFulfil={canFulfil}
-          onOrderChange={setSelected}
+          // Only while that order is still the open one: a ship reports back
+          // after its truck has finished, by which time the seller may have
+          // closed the panel or opened the next parcel, and must keep that.
+          onOrderChange={(order) => setSelected((open) => (open?.id === order.id ? order : open))}
           onNext={nextOrder ? () => setSelected(nextOrder) : undefined}
           queueDone={queueDone}
         />

@@ -11,6 +11,8 @@ import { TermsSummary } from "@/components/legal/TermsSummary";
 import { acceptLegal } from "@/lib/settings/actions";
 import type { ActionState } from "@/lib/errors";
 import { formatLongDate } from "@/lib/format/date";
+import { TermsChangeNotice } from "@/components/legal/TermsChangeNotice";
+import type { TermsStatus } from "@/lib/legal/terms-versions";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 
 const INITIAL: ActionState = {};
@@ -28,9 +30,12 @@ const INITIAL: ActionState = {};
 export function LegalSection({
   acceptedAt,
   acceptedVersion,
+  upcoming = null,
 }: {
   acceptedAt: string | null;
   acceptedVersion: string | null;
+  /** The Terms version on its way, if any. */
+  upcoming?: TermsStatus["upcoming"];
 }) {
   const t = useTranslations("Settings.legal");
   const locale = useLocale();
@@ -50,6 +55,7 @@ export function LegalSection({
       description={t("termsDescription")}
     >
       <div className="flex flex-col gap-4">
+        {upcoming && <TermsChangeNotice upcoming={upcoming} />}
         <TermsSummary />
 
         {isCurrent ? (

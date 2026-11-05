@@ -4,7 +4,15 @@ import type { GridPlacement } from "@/components/grid/gridConstants";
 import { legibleInkOn, mixHex, readableInkOn } from "@/lib/format/color";
 import { isStrictHexColor } from "@/lib/validation/storefront";
 import { cn } from "@/lib/utils";
+import { ctaStyle, type CtaAppearance } from "@/components/product-page/product-page-maps";
 import {
+  BLUR_MAX,
+  CORNER_SPOT_LIMIT,
+  TEXT_LINE_HEIGHT_DEFAULT,
+  type CardBuyButton,
+  type CardHoverEffect,
+  type TextBlock,
+  DEFAULT_BLUR_DIRECTION,
   PRICE_TAG_DEFAULT_BORDER,
   TITLE_SHADOW_DEFAULT_COLOR,
   PRICE_TAG_SIZE_MIN,
@@ -15,6 +23,7 @@ import {
   TITLE_INSET_AUTO,
   blockCornerRadius,
   blockKey,
+  type BlurDirection,
   type ChipScale,
   type PriceTagFont,
   type SpotRow,
@@ -277,6 +286,192 @@ export function titleShadowBackdrop(color: string | undefined): string {
   return mixHex(titleShadowColor(color), "#cccccc", 0.3);
 }
 
+/** How soft BLUR_MAX is: a fifth of one grid cell's side, enough to melt a
+ *  shape into a glow. Every blur slider in the editor runs up to it. */
+const BLUR_FULL_CELL_SHARE = 0.2;
+
+/** How the slider climbs to it. Eased rather than straight, so the low end
+ *  (where a word stays readable and a photo merely softens) gets most of the
+ *  track instead of being over by 20. */
+const BLUR_CURVE = 1.5;
+
+/**
+ * A blur amount (0..BLUR_MAX) as a CSS length, measured against ONE GRID CELL
+ * (--ss-cell, globals.css) rather than in pixels: the board is drawn at every
+ * width from a phone to a wide screen, and a fixed radius would turn a gentle
+ * blur on the desktop into mush on the phone. Measured against the cell, not
+ * the tile, so a 1x1 block and a 3x3 hero set to the same number are equally
+ * soft. Outside a grid (--ss-in-grid 0) it measures against the reference
+ * tile the labels use.
+ */
+export function blurRadius(amount: number): string {
+  const share = Math.round((amount / BLUR_MAX) ** BLUR_CURVE * BLUR_FULL_CELL_SHARE * 10000) / 10000;
+  const cell = `(var(--ss-cell) * var(--ss-in-grid) + ${TILE_LABEL_AUTO_SCALE.referencePx}px * (1 - var(--ss-in-grid)))`;
+  return `calc(${cell} * ${share})`;
+}
+
+/** A blur that runs from one edge rather than all over. */
+type BlurEdge = Exclude<BlurDirection, "all">;
+
+/** For each one-edge blur direction, the gradient line that runs FROM the soft
+ *  edge toward the sharp one. */
+const BLUR_FROM: Record<BlurEdge, string> = {
+  top: "to bottom",
+  bottom: "to top",
+  left: "to right",
+  right: "to left",
+};
+
+/** A mask in both spellings: Safari before 18 knows only the prefix. */
+function maskStyle(mask: {
+  image: string;
+  clip?: string;
+  size?: string;
+  position?: string;
+  repeat?: string;
+}): CSSProperties {
+  return {
+    maskImage: mask.image,
+    WebkitMaskImage: mask.image,
+    ...(mask.clip && { maskClip: mask.clip, WebkitMaskClip: mask.clip }),
+    ...(mask.size && { maskSize: mask.size, WebkitMaskSize: mask.size }),
+    ...(mask.position && { maskPosition: mask.position, WebkitMaskPosition: mask.position }),
+    ...(mask.repeat && { maskRepeat: mask.repeat, WebkitMaskRepeat: mask.repeat }),
+  };
+}
+
+/** A block's blur and the way it runs, or null when the block is sharp.
+ *  Products blur their photo only (photoBlurStyle), never their labels. */
+function blockBlur(block: StorefrontBlock): { amount: number; direction: BlurDirection } | null {
+  if (block.type === "product" || !block.blur) return null;
+  return { amount: block.blur, direction: block.blurDirection ?? DEFAULT_BLUR_DIRECTION };
+}
+
+/**
+ * A shape's, element's or text block's own blur, for its tile FACE. On the
+ * face rather than on the content because the face clips itself to the tile's
+ * corners: filtering the clipped face lets the softened edge spill past the
+ * tile, where filtering inside the clip would cut it off flat. Empty when
+ * sharp, so an untouched block carries no filter at all.
+ *
+ * A ONE-EDGE BLUR IS THREE LAYERS, CROSS-FADED: the block at full blur (this
+ * face), at half blur, and sharp (the two copies blockBlurCopyStyles lays over
+ * it). Along the blur, each fades in as the one before fades out (full from
+ * the soft edge to the middle, half peaking at the middle, sharp from the
+ * middle to the sharp edge), and the copies are ADDED to what is under them
+ * (`plus-lighter`) rather than laid on top, so the three always sum to the
+ * block itself, whatever it is made of. Laying one sharp copy over an unfaded
+ * blur was right only for a solid block: text is see-through between its
+ * letters, and the blur's haze showed through there as a grey box round the
+ * words. Two layers instead of three read as sharp words with a ghost halfway,
+ * where a progressive blur should be half soft.
+ *
+ * Every fade runs past the tile too (blurFadeMask), so a layer's spill shows
+ * only where that layer does: off the soft side, never the sharp one. Browsers
+ * without mask `no-clip` keep the spill inside the tile, and the blur still
+ * runs; without `plus-lighter` the middle of a solid block thins a little.
+ */
+export function blockBlurStyle(block: StorefrontBlock): CSSProperties {
+  const blur = blockBlur(block);
+  if (!blur) return {};
+  const radius = blurRadius(blur.amount);
+  const filter = `blur(${radius})`;
+  if (blur.direction === "all") return { filter };
+  return {
+    filter,
+    ...blurFadeMask(blur.direction, radius, [
+      ["#000", 0],
+      ["transparent", 0.5],
+    ]),
+  };
+}
+
+/** The copies laid over a block blurred from one edge (see blockBlurStyle),
+ *  bottom to top: the half blur peaking across the middle, then the sharp
+ *  block taking over toward the sharp edge. Empty for a sharp block or one
+ *  blurred all over, which have none. */
+export function blockBlurCopyStyles(block: StorefrontBlock): CSSProperties[] {
+  const blur = blockBlur(block);
+  const edge = blur?.direction;
+  if (!blur || !edge || edge === "all") return [];
+  const radius = blurRadius(blur.amount);
+  const fade = (stops: [string, number][]) => blurFadeMask(edge, radius, stops);
+  return [
+    {
+      filter: `blur(calc(${radius} / 2))`,
+      mixBlendMode: "plus-lighter",
+      ...fade([
+        ["transparent", 0],
+        ["#000", 0.5],
+        ["transparent", 1],
+      ]),
+    },
+    {
+      mixBlendMode: "plus-lighter",
+      ...fade([
+        ["transparent", 0.5],
+        ["#000", 1],
+      ]),
+    },
+  ];
+}
+
+/**
+ * One layer's fade along a one-edge blur. Drawn over the tile PLUS the spill's
+ * reach on every side (three radii, where a gaussian is spent), so the layer's
+ * soft edge shows past the tile wherever the layer itself does, while each
+ * stop sits on the tile: `stops` pair a colour with a point from the soft edge
+ * (0) to the sharp one (1). Every layer measures the same way, which is what
+ * keeps their fades summing to exactly one.
+ */
+function blurFadeMask(edge: BlurEdge, radius: string, stops: [string, number][]): CSSProperties {
+  const spill = `calc(${radius} * 3)`;
+  const at = (t: number) => `calc(${spill} + (100% - 2 * ${spill}) * ${t})`;
+  return maskStyle({
+    image: `linear-gradient(${BLUR_FROM[edge]}, ${stops.map(([colour, t]) => `${colour} ${at(t)}`).join(", ")})`,
+    clip: "no-clip",
+    size: `calc(100% + 2 * ${spill}) calc(100% + 2 * ${spill})`,
+    position: `calc(-1 * ${spill}) calc(-1 * ${spill})`,
+    repeat: "no-repeat",
+  });
+}
+
+/** A backdrop blur, both spellings: Safari before 18 knows only the prefix. */
+function backdropBlur(amount: number): CSSProperties {
+  const value = `blur(${blurRadius(amount)})`;
+  return { backdropFilter: value, WebkitBackdropFilter: value };
+}
+
+/**
+ * A product photo's blur, for a layer laid over the photo inside its frame.
+ * A BACKDROP blur rather than a filter on the <img>: a filtered picture fades
+ * to transparent at its own edges and the card shows a grey rim round it,
+ * where a backdrop blur keeps the photo solid to the frame. Safe on a product
+ * because its photo is opaque and fills the frame, so the backdrop is the
+ * picture and nothing behind it. Blurred from one edge, the layer simply
+ * fades out toward the other.
+ */
+export function photoBlurStyle(amount: number, direction: BlurDirection): CSSProperties {
+  return {
+    ...backdropBlur(amount),
+    ...(direction !== "all" &&
+      maskStyle({ image: `linear-gradient(${BLUR_FROM[direction]}, #000, transparent)` })),
+  };
+}
+
+/**
+ * The `shadow` fade's frost: a backdrop blur over the photo behind the band,
+ * masked to fade out the same way the tint does (titleShadowStyle), so the
+ * picture goes soft under the words and sharp again where the shade ends.
+ */
+export function titleShadowBlurStyle(row: SpotRow, amount: number): CSSProperties {
+  const image =
+    row === "middle"
+      ? "linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent)"
+      : `linear-gradient(to ${row === "top" ? "bottom" : "top"}, #000, #000 45%, transparent)`;
+  return { ...backdropBlur(amount), ...maskStyle({ image }) };
+}
+
 /**
  * Inline style driving the shared --grid-gap token (see .ss-grid in
  * globals.css). Set on a grid ancestor; the gap AND the square-cell row math
@@ -304,7 +499,7 @@ export const TEXT_VARIANT_WEIGHT_CLASSES: Record<TextVariant, string> = {
  * goes out as px, with a line height in ems so any size stays readable.
  */
 export function textSizeStyle(px: number): CSSProperties {
-  return { fontSize: `${px}px`, lineHeight: 1.25 };
+  return { fontSize: `${px}px`, lineHeight: TEXT_LINE_HEIGHT_DEFAULT / 100 };
 }
 
 // Price tag typeface. Its own three-entry map rather than a slice of
@@ -587,3 +782,117 @@ export function tileFrameClass(block: Pick<StorefrontBlock, "type">): string {
  */
 export const TILE_FACE_CLASS =
   "flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[inherit] [contain:paint] [clip-path:var(--tile-cover-clip,none)]";
+
+/**
+ * WHAT A PRODUCT CARD DOES ON HOVER, on its frame (CARD_HOVER_EFFECTS): lift
+ * raises it and lays a shadow under it, tilt tips it a little. Zoom works on
+ * the photo instead (CARD_HOVER_ZOOM_CLASS), so its frame does nothing.
+ *
+ * Keyboard focus inside the card plays it too. `motion-safe` keeps every one
+ * still for a reader who asked for less motion, and `group-hover` only answers
+ * on a device that can hover, so a phone never leaves a card stuck mid-lift.
+ * The cell is the `group` (Grid), the frame the thing that moves, because the
+ * designer animates the cell itself while a tile is dragged.
+ */
+export const CARD_HOVER_FRAME_CLASSES: Record<CardHoverEffect, string> = {
+  none: "",
+  lift: cn(
+    "transition-[translate,box-shadow] duration-base ease-standard",
+    "motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:shadow-lg",
+    "motion-safe:group-focus-within:-translate-y-1 motion-safe:group-focus-within:shadow-lg",
+  ),
+  zoom: "",
+  tilt: cn(
+    "transition-[rotate,scale] duration-base ease-standard",
+    "motion-safe:group-hover:rotate-1 motion-safe:group-hover:scale-102",
+    "motion-safe:group-focus-within:rotate-1 motion-safe:group-focus-within:scale-102",
+  ),
+};
+
+/** The zoom effect, on the photo (and the second photo) inside its frame,
+ *  which clips it. The CSS `scale` property, so it composes with the inline
+ *  transform a framed photo already carries (imageStyle). */
+export const CARD_HOVER_ZOOM_CLASS = cn(
+  "transition-[scale] duration-slow ease-standard",
+  "motion-safe:group-hover:scale-105 motion-safe:group-focus-within:scale-105",
+);
+
+/** The second photo, laid over the first and faded in while the card is
+ *  pointed at or focused. A fade is not motion, so it stays under reduced
+ *  motion, only instant. */
+export const HOVER_PHOTO_CLASS = cn(
+  "pointer-events-none absolute inset-0 size-full object-cover opacity-0",
+  "transition-opacity duration-slow ease-standard motion-reduce:transition-none",
+  "group-hover:opacity-100 group-focus-within:opacity-100",
+);
+
+/**
+ * The details line under a card's name (the stars, "Low stock"): a step
+ * smaller than the name, so it reads as about the product rather than as a
+ * second title, and in ems so it scales with the band (titleBandFontStyle).
+ */
+export const TILE_DETAILS_SCALE = 0.85;
+
+export function tileDetailsStyle(): CSSProperties {
+  return { fontSize: `${TILE_DETAILS_SCALE}em` };
+}
+
+/** An icon set inline with words, sized to them. */
+export const INLINE_ICON_STYLE: CSSProperties = { width: "1em", height: "1em" };
+
+/** The card's buy button padding, in ems of the band's type so it grows with
+ *  the tile like the words in it. */
+const TILE_BUY_PADDING = "0.45em 1em";
+
+/** The surface a card's buy row sits on (bg-card), which an outline or a
+ *  bare link is read against. */
+const TILE_BUY_SURFACE = "#ffffff";
+
+/**
+ * THE CARD'S BUY BUTTON (CARD_BUY_BUTTONS), drawn from the product page's own
+ * button (resolveCta) so it is that button in small.
+ *
+ * Solid is the page's button exactly. Outline and link have no fill to carry
+ * the page's colour on, so the colour moves to the words (and the ring), and
+ * through legibleInkOn: a pale yellow button reads fine filled, but its words
+ * alone on a white card would vanish, and then they take the ink that reads.
+ */
+export function tileBuyButtonStyle(look: Exclude<CardBuyButton, "none">, cta: CtaAppearance): CSSProperties {
+  if (look === "solid") return { ...ctaStyle(cta), padding: TILE_BUY_PADDING };
+  const ink = legibleInkOn(cta.fill, TILE_BUY_SURFACE);
+  if (look === "outline") {
+    return {
+      color: ink,
+      borderRadius: `${cta.radius}px`,
+      boxShadow: `inset 0 0 0 ${Math.max(cta.borderWidth, 1)}px ${ink}`,
+      padding: TILE_BUY_PADDING,
+    };
+  }
+  return { color: ink, padding: TILE_BUY_PADDING };
+}
+
+/** The box around the buy button's words: one line, the band's weight. The
+ *  link look underlines them, since it has no shape to say "press me". */
+export function tileBuyButtonClass(look: Exclude<CardBuyButton, "none">, cornerRadius: number): string {
+  return cn(
+    "flex min-w-0 items-center justify-center truncate font-semibold",
+    // A heavily rounded tile clips its bottom corners away, where a
+    // full-width button would lose its ends: there it sizes to its words and
+    // sits in the middle, where the curve leaves room.
+    cornerRadius >= CORNER_SPOT_LIMIT ? "mx-auto w-fit max-w-full" : "w-full",
+    look === "link" && "underline underline-offset-2",
+  );
+}
+
+/**
+ * A text block's spacing (TEXT_LETTER_SPACING_*, TEXT_LINE_HEIGHT_*), from
+ * the bounded ints the schema allows into the em and factor CSS wants. Absent
+ * fields add nothing, so a block that never set them keeps textSizeStyle's
+ * line height and the face's own letter spacing.
+ */
+export function textSpacingStyle(block: Pick<TextBlock, "letterSpacing" | "lineHeight">): CSSProperties {
+  return {
+    ...(block.letterSpacing !== undefined ? { letterSpacing: `${block.letterSpacing / 100}em` } : {}),
+    ...(block.lineHeight !== undefined ? { lineHeight: block.lineHeight / 100 } : {}),
+  };
+}

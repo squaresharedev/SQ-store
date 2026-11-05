@@ -1,13 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { iconNudgeRightClass } from "@/components/ui/control-styles";
-import { cn } from "@/lib/utils";
 import { ArtboardFrame } from "./ArtboardFrame";
 import type { PreviewDevice } from "./DeviceSizeSwitch";
-import { usePreviewProduct } from "./usePreviewProduct";
+import { useProductAddOnsEditor } from "./ProductAddOnsEditor";
+import { usePreviewAddOns, usePreviewProduct } from "./usePreviewProduct";
 import { usePreviewReviews } from "./usePreviewReviews";
 import { isProductPageSectionShown } from "@/lib/storefront/product-page";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
@@ -18,6 +16,7 @@ import { canPlaceBadge, withBadgePlacement } from "@/lib/products/badges";
 import { moveProductBadge } from "@/lib/products/badge-actions";
 import { useSampleMode } from "@/lib/storefront/sample-mode";
 import { badgeLabelKey } from "@/lib/validation/product";
+import { productPagePath } from "@/lib/storefront/product-page-url";
 import { PRODUCT_PAGE_HOTSPOTS, isProductPageHotspot } from "@/lib/storefront/setting-ref";
 import { BADGES_ON_PHOTO_MAX, type BadgePlacement, type Product, type ProductBadge } from "@/types/product";
 import type { PagePhotoView, ProductPageData } from "@/types/product-page";
@@ -35,10 +34,9 @@ import type {
  *
  * A product page is not a different place, it is what a tile leads to, which
  * is why it is an artboard beside the board rather than a mode the editor
- * switches into. And a product page leads somewhere in turn: its chrome
- * carries a CHECKOUT node that puts the checkout and thank-you artboards out
- * beside it, chained on, so the seller can design the whole way from tile to
- * thank-you in one view.
+ * switches into. And a product page leads somewhere in turn: the checkout and
+ * thank-you artboards come out beside it, chained on (see DesignerCanvas), so
+ * the seller can design the whole way from tile to thank-you in one view.
  */
 export function ProductPageArtboard({
   product,
@@ -56,8 +54,6 @@ export function ProductPageArtboard({
   onClose,
   widths,
   initialDevice,
-  checkoutOpen = false,
-  onToggleCheckout,
 }: {
   /** The product this page is for; from the editor's catalogue snapshot. */
   product: Product;
@@ -77,10 +73,6 @@ export function ProductPageArtboard({
   onClose: () => void;
   widths: Record<PreviewDevice, number>;
   initialDevice: PreviewDevice;
-  /** Whether this product's checkout is out on the canvas. */
-  checkoutOpen?: boolean;
-  /** Put this product's checkout out beside the page, or take it back. */
-  onToggleCheckout?: () => void;
 }) {
   const t = useTranslations("Storefront.artboard");
   const tBadges = useTranslations("Products.badgesField");
@@ -88,6 +80,17 @@ export function ProductPageArtboard({
   const showActionError = useActionErrorToast();
   const sample = useSampleMode();
   const loaded = usePreviewProduct(product, productPage.showStock, soldOut);
+  // What a buyer would be offered beside it (and what was chosen but is not),
+  // from the same preview load, until the seller changes it in the panel
+  // beside this page. A tile's add-ons each have a page on this storefront
+  // (lib/products/purchasable.ts), which their details link to.
+  const previewAddOns = usePreviewAddOns(product.id, productPage.showStock);
+  const addOnsEditor = useProductAddOnsEditor();
+  const shownAddOns = addOnsEditor?.edits[product.id] ?? previewAddOns;
+  const addOns = useMemo(
+    () => shownAddOns.cards.map((card) => ({ ...card, pagePath: productPagePath(storefrontId, card.id) })),
+    [shownAddOns.cards, storefrontId],
+  );
   // The product's real reviews, read only while the section is switched on.
   const reviews = usePreviewReviews(
     product.id,
@@ -143,6 +146,8 @@ export function ProductPageArtboard({
     },
     product: previewed,
     productUrl: "",
+    addOns,
+    hiddenAddOns: shownAddOns.hidden,
   };
 
   return (
@@ -154,29 +159,11 @@ export function ProductPageArtboard({
       onClose={onClose}
       widths={widths}
       initialDevice={initialDevice}
-      resolveHotspot={(name) => (isProductPageHotspot(name) ? PRODUCT_PAGE_HOTSPOTS[name] : null)}
-      actions={
-        onToggleCheckout && (
-          <button
-            type="button"
-            onClick={onToggleCheckout}
-            aria-pressed={checkoutOpen}
-            aria-label={t("openCheckoutAriaLabel", { title: product.title })}
-            title={t("openCheckoutAriaLabel", { title: product.title })}
-            className={cn(
-              // A trailing arrow, nudged on hover: this opens something.
-              "group/btn flex h-7 shrink-0 items-center gap-1.5 rounded-sm border px-2 font-inter text-xs font-medium transition-colors duration-base ease-standard",
-              checkoutOpen
-                ? "border-foreground bg-foreground text-background"
-                : "border-border bg-background text-muted-foreground hover:text-foreground",
-            )}
-            data-checkout-node={checkoutOpen ? "open" : "closed"}
-          >
-            {t("openCheckout")}
-            <ArrowRight className={cn("size-3.5", iconNudgeRightClass)} strokeWidth={2} aria-hidden="true" />
-          </button>
-        )
-      }
+      resolveHotspot={(name) => {
+        // The section clicked on THIS page is the one the panel should choose for.
+        if (name === "addOns") addOnsEditor?.aim(product.id);
+        return isProductPageHotspot(name) ? PRODUCT_PAGE_HOTSPOTS[name] : null;
+      }}
     >
       <BadgeMoveProvider
         canPlace={canPlace}

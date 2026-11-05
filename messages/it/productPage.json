@@ -29,13 +29,15 @@
     "returns": "Resi",
     "safety": "Sicurezza e conformità",
     "reviews": "Recensioni",
-    "seller": "Venditore"
+    "seller": "Venditore",
+    "addOns": "Aggiungi al tuo ordine"
   },
   "soldBy": "Venduto da {seller}",
   "moreDetails": "Maggiori dettagli",
   "trust": {
     "digitalDelivery": "Consegnato come download dopo l’acquisto.",
-    "euRights": "14 giorni per cambiare idea, e una garanzia legale di 2 anni."
+    "euRights": "14 giorni per cambiare idea, e una garanzia legale di 2 anni.",
+    "euRightsForEu": "Acquirenti UE: 14 giorni per cambiare idea e garanzia legale di 2 anni."
   },
   "safety": {
     "manufacturer": "Fabbricante",
@@ -284,8 +286,33 @@
         "notEligible": "Questo ordine non può più essere recensito.",
         "rateLimited": "Troppe recensioni da questa connessione. Riprova tra un’ora.",
         "failed": "Non è stato possibile pubblicare la tua recensione. Riprova."
+      },
+      "later": {
+        "title": "{kind, select, parcel {Recensiscilo quando sarà arrivato} other {Recensiscilo quando l'avrai provato}}",
+        "body": "{store} può inviarti una sola email, {kind, select, parcel {circa una settimana dopo la spedizione} other {tra qualche giorno}}, con un link per recensirlo qui. Puoi annullarla in qualsiasi momento.",
+        "remind": "Ricordamelo via email",
+        "notYet": "{kind, select, parcel {Non è ancora arrivato?} other {Non l'hai ancora provato?}}",
+        "once": "{store} ti invierà una sola email. Puoi annullarla in qualsiasi momento.",
+        "onDate": "{store} ti invierà un promemoria verso il {date}.",
+        "onLater": "{store} ti invierà un promemoria {kind, select, parcel {circa una settimana dopo la spedizione} other {tra qualche giorno}}.",
+        "stop": "Non inviarmi l'email",
+        "preview": "Questa è un'anteprima, quindi non verrà inviata nessuna email.",
+        "errors": {
+          "closed": "Non è più possibile impostare un promemoria per questo ordine.",
+          "rateLimited": "Troppi tentativi da questa connessione. Riprova tra un'ora.",
+          "failed": "Non ha funzionato. Riprova."
+        }
+      },
+      "stopDialog": {
+        "title": "Annullare il promemoria?",
+        "body": "{store} non ti invierà email per chiederti di recensire questo ordine.",
+        "confirm": "Annulla il promemoria",
+        "doneTitle": "Promemoria annullato",
+        "doneBody": "Non riceverai altre email per recensire questo ordine."
       }
-    }
+    },
+    "lineQuantity": "{quantity} × {title}",
+    "downloadItem": "Scarica {title}"
   },
   "checkout": {
     "metadata": {
@@ -384,7 +411,8 @@
       "invalid": "Alcuni dettagli richiedono una verifica. Controlla i campi evidenziati.",
       "discount_invalid": "Questo codice sconto non può più essere usato. Rimuovilo per pagare il prezzo intero.",
       "price_changed": "Il prezzo è cambiato mentre questa pagina era aperta, quindi non è stato addebitato nulla. Controlla il nuovo totale, poi paga.",
-      "turnstile": "Il controllo di sicurezza non è stato completato, quindi non è stato addebitato nulla. È ripartito ora: attendi un momento e riprova."
+      "turnstile": "Il controllo di sicurezza non è stato completato, quindi non è stato addebitato nulla. È ripartito ora: attendi un momento e riprova.",
+      "add_on_unavailable": "Qualcosa che hai aggiunto non può più essere venduto con questo ordine, quindi non è stato addebitato niente. Controlla il tuo ordine e il nuovo totale, poi paga."
     },
     "editHeadline": "Titolo del checkout",
     "discount": {
@@ -398,7 +426,12 @@
       "invalid": "Questo codice non può essere usato per questo ordine.",
       "rateLimited": "Troppi codici inseriti. Aspetta un po', poi riprova.",
       "line": "Sconto ({code})"
-    }
+    },
+    "addOns": {
+      "label": "Aggiunto al tuo ordine",
+      "remove": "Rimuovi {title} da questo ordine"
+    },
+    "termsAssent": "Ordinando accetti anche i <terms>Termini</terms> di Square Share per l'utilizzo di questa piattaforma. Il tuo acquisto è con {seller}."
   },
   "sale": {
     "wasNow": "Era {was}, ora {now}",
@@ -440,5 +473,27 @@
     "filterStars": "{stars, plural, one {Mostra le recensioni da {stars} stella ({count})} other {Mostra le recensioni da {stars} stelle ({count})}}",
     "showing": "{rating, plural, one {Recensioni da {rating} stella} other {Recensioni da {rating} stelle}}",
     "showAll": "Mostra tutte le recensioni"
+  },
+  "addOns": {
+    "title": "Aggiungi al tuo ordine",
+    "add": "Aggiungi",
+    "added": "Aggiunto",
+    "optionLabel": "{group} per {product}",
+    "unset": "Non ci sono ancora altri prodotti proposti qui. Fai clic qui per sceglierli.",
+    "addNamed": "Aggiungi {title} al tuo ordine",
+    "detailsNamed": "Vedi i dettagli di {title}",
+    "seeDetails": "Dettagli",
+    "fullPage": "Vedi la pagina completa",
+    "addToOrder": "Aggiungi al tuo ordine",
+    "removeFromOrder": "Rimuovi dal tuo ordine",
+    "rating": "{average} su 5 stelle, {count, plural, one {# recensione} other {# recensioni}}",
+    "hidden": {
+      "hint": "Gli acquirenti non vedono questo prodotto.",
+      "draft": "Bozza",
+      "soldOut": "Esaurito",
+      "takenDown": "Rimosso",
+      "otherKind": "Altro tipo",
+      "otherCurrency": "Altra valuta"
+    }
   }
 }

@@ -21,6 +21,7 @@ import { HeroMark } from "@/components/ui/HeroMark";
 import { useActionStateToast, useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { dangerNoticeClass, helpTextClass, infoTextClass } from "@/components/ui/control-styles";
 import { SettingsCard } from "@/components/settings/SettingsCard";
+import { CodeReels } from "@/components/settings/corner-art/CodeReels";
 import { StepUpPrompt, StepUpScope, StepUpSubmit } from "@/components/auth/StepUp";
 import { SignInApprovalRow } from "@/components/settings/security/SignInApprovalRow";
 import { TwoFactorSetupModal } from "@/components/settings/security/TwoFactorSetupModal";
@@ -117,7 +118,7 @@ export function TwoFactorCard({
       id="two-factor"
       title={t("cardTitle")}
       description={enrolled ? t("descriptionOn") : t("descriptionOff")}
-      decoration={enrolled ? undefined : "dots"}
+      art={<CodeReels />}
     >
       <div className="flex flex-col gap-5">
         <AnimatePresence mode="wait" initial={false}>

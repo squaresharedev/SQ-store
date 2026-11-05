@@ -40,7 +40,7 @@
     "formLoading": "A carregar o formulário do produto",
     "importReviews": {
       "heading": "Importar avaliações",
-      "description": "Traga as suas avaliações do Judge.me, Loox, Yotpo ou Shopify Product Reviews. Exporte-as aí em CSV, largue o ficheiro aqui e confirme a que produto pertence cada uma antes de guardar."
+      "description": "Traga as suas avaliações do Judge.me, Loox, Yotpo ou Shopify Product Reviews."
     }
   },
   "emptyState": {
@@ -300,6 +300,11 @@
         "label": "Emblemas",
         "description": "Algumas palavras na página de produto: um motivo para confiar em si, ou um facto relevante de ver de relance. Escolha um predefinido ou escreva o seu, escolha uma cor para o ícone e coloque-o ao lado do produto ou sobre a fotografia.",
         "about": "Para que serve Emblemas"
+      },
+      "addOns": {
+        "label": "Adicionar à encomenda",
+        "description": "Outros produtos seus que os compradores podem adicionar com um toque, mesmo acima de Comprar agora. Só aparecem produtos do mesmo tipo e moeda, para que tudo fique numa única encomenda.",
+        "about": "Para que serve Adicionar à encomenda"
       }
     },
     "summary": {
@@ -327,7 +332,8 @@
       "active": "Ativo",
       "draft": "Rascunho",
       "badges": "{count, plural, one {{count} emblema} many {{count} de emblemas} other {{count} emblemas}}",
-      "physical": "Físico"
+      "physical": "Físico",
+      "addOns": "{count, plural, one {{count} produto} many {{count} de produtos} other {{count} produtos}}"
     },
     "errors": {
       "titleRequired": "Dê um título ao seu produto: é a primeira coisa que os compradores veem.",
@@ -363,6 +369,23 @@
     "description": "Descrição",
     "optional": "(opcional)",
     "descriptionPlaceholder": "O que é, e o que é que o comprador recebe?",
+    "ai": {
+      "write": "Escrever com IA",
+      "improve": "Melhorar com IA",
+      "writing": "A escrever…",
+      "written": "Escrito com IA",
+      "improved": "Melhorado com IA",
+      "writeHint": "A IA redige-a a partir dos dados que introduziu, sem acrescentar nada da sua parte. Reveja-a antes de guardar.",
+      "improveHint": "A IA reescreve o seu texto para se ler melhor, mantendo todos os dados. Reveja-o antes de guardar.",
+      "asYouTypeIdle": "A IA sugere as palavras seguintes enquanto escreve.",
+      "asYouTypeOffered": "acrescenta o texto a cinzento. Esc oculta-o.",
+      "asYouTypeAccept": "Acrescentar as palavras sugeridas",
+      "asYouTypeAnnounce": "Sugestão:",
+      "asYouTypeTurnOff": "Desativar",
+      "asYouTypeOff": "As sugestões durante a escrita estão desativadas. Pode voltar a ativá-las em Definições, na secção Plano e faturação.",
+      "upsellHint": "Incluído no Pro: a IA redige e completa descrições a partir dos seus dados. Os planos abrem num novo separador.",
+      "upsellBadge": "Pro"
+    },
     "displayImage": "Imagem principal",
     "displayImageAbout": "Onde a imagem principal é utilizada",
     "displayImageHelp": "Mostrada na sua montra e nas incorporações.",
@@ -530,6 +553,14 @@
     "addFirst": "Vendido em mais do que uma variante?",
     "addAnother": "Adicionar outra forma de variar",
     "somethingElse": "Outra coisa",
+    "guessSizes": "Tamanhos do {first} ao {last}",
+    "guessSizesAny": "Tamanhos",
+    "nextOptions": "Próximas opções prováveis",
+    "addNamed": "Adicionar {name}",
+    "sameAsHint": "Copia as opções, especificações e dados do fabricante de {title} para as secções que ainda não preencheu.",
+    "guessSizesHint": "O título parece de roupa, por isso adiciona os tamanhos habituais. Remova os que não vende.",
+    "guessSizesAnyHint": "O título parece de algo vendido por tamanhos, por isso adiciona a opção Tamanho para preencher.",
+    "nextOptionsHint": "Deduzido das opções que adicionou até agora.",
     "groupsFull": "{max, plural, one {É o máximo: {max} grupo de opções.} many {É o máximo: {max} de grupos de opções.} other {É o máximo: {max} grupos de opções.}}",
     "optionsFull": "{max, plural, one {É o máximo: {max} opção.} many {É o máximo: {max} de opções.} other {É o máximo: {max} opções.}}",
     "whatVaries": "O que varia",
@@ -1053,12 +1084,8 @@
       "product": "produto",
       "status": "estado"
     },
-    "summary": "{ready, plural, one {<count>{ready}</count> avaliação pronta} other {<count>{ready}</count> avaliações prontas}}{skipped, plural, =0 {.} other {, {skipped} deixadas de fora.}}",
-    "hiddenRows": "{count, plural, one {{count} avaliação estava oculta ou marcada como spam na sua loja anterior, por isso fica de fora.} other {{count} avaliações estavam ocultas ou marcadas como spam na sua loja anterior, por isso ficam de fora.}}",
-    "droppedRows": "{count, plural, one {{count} avaliação ultrapassa as {max} que um ficheiro pode ter, por isso fica de fora.} other {{count} avaliações ultrapassam as {max} que um ficheiro pode ter, por isso ficam de fora.}}",
     "source": "Importadas de",
     "sourceUnknown": "Escolha a app",
-    "sourceHelp": "Mostrado em cada avaliação, para que os compradores saibam onde foi escrita.",
     "sources": {
       "judgeme": "Judge.me",
       "loox": "Loox",
@@ -1067,17 +1094,10 @@
     },
     "mappingHeading": "Associar produtos",
     "mappingHelp": "Cada produto do ficheiro e o produto daqui a que pertencem as suas avaliações. Associados pelo nome sempre que possível. O que estiver em «Não importar» fica de fora.",
-    "mappingFileProduct": "No ficheiro",
-    "mappingReviews": "Avaliações",
-    "mappingProduct": "Produto aqui",
     "mappingSelect": "Produto para {key}",
     "skipProduct": "Não importar",
-    "skippedHeading": "Linhas que ficam de fora",
     "skippedRow": "Linha {line}: {problem}",
     "run": "{count, plural, one {Importar {count} avaliação} other {Importar {count} avaliações}}",
-    "imported": "{count, plural, one {Foi importada {count} avaliação.} other {Foram importadas {count} avaliações.}}",
-    "duplicates": "{count, plural, one {{count} já estava cá.} other {{count} já estavam cá.}}",
-    "skippedRows": "{count, plural, one {{count} linha ficou de fora.} other {{count} linhas ficaram de fora.}}",
     "errors": {
       "rateLimited": "Demasiadas importações na última hora. Tente novamente mais tarde.",
       "tooLarge": "Esse ficheiro é demasiado grande para importar.",
@@ -1094,6 +1114,39 @@
         "b": "«Ainda mais bonita ao vivo.»",
         "c": "«Chegou depressa e bem embalada.»"
       }
+    },
+    "tally": {
+      "toImport": "Por importar",
+      "imported": "Importadas",
+      "already": "Já cá estão",
+      "leftOut": "Ficam de fora"
+    },
+    "alreadyNote": "{count, plural, one {{count} avaliação deste ficheiro já cá está, por isso não será adicionada duas vezes.} other {{count} avaliações deste ficheiro já cá estão, por isso não serão adicionadas duas vezes.}}",
+    "sourceTip": "Sobre as avaliações importadas",
+    "mappingTip": "Como os produtos são associados",
+    "reviewCount": "{count, plural, one {{count} avaliação} other {{count} avaliações}}",
+    "keyAlready": "{count, plural, one {{count} já cá está} other {{count} já cá estão}}",
+    "leftOutSummary": "{count, plural, one {Porque fica de fora {count} avaliação} other {Porque ficam de fora {count} avaliações}}",
+    "leftOutUnmatched": "{count, plural, one {{count} de um produto em «Não importar»} other {{count} de produtos em «Não importar»}}",
+    "leftOutHidden": "{count, plural, one {{count} oculta ou marcada como spam na sua loja anterior} other {{count} ocultas ou marcadas como spam na sua loja anterior}}",
+    "leftOutDropped": "{count, plural, one {{count} além das {max} que um ficheiro pode conter} other {{count} além das {max} que um ficheiro pode conter}}",
+    "leftOutProblems": "{count, plural, one {{count} linha que não se consegue ler:} other {{count} linhas que não se conseguem ler:}}",
+    "nothingNew": "Nada de novo para importar",
+    "done": {
+      "title": "{count, plural, one {{count} avaliação importada} other {{count} avaliações importadas}}",
+      "body": "Aparecem nas suas páginas de produto assim que a nossa verificação automática as tiver lido.",
+      "already": "{count, plural, one {{count} já cá estava, por isso não foi adicionada duas vezes.} other {{count} já cá estavam, por isso não foram adicionadas duas vezes.}}",
+      "nothingTitle": "Nada adicionado duas vezes",
+      "nothingBody": "{count, plural, one {{count} avaliação deste ficheiro já cá estava.} other {{count} avaliações deste ficheiro já cá estavam.}}",
+      "seeReviews": "Ver avaliações",
+      "another": "Importar outro ficheiro"
+    },
+    "squareShare": {
+      "label": "Uma exportação da Square Share",
+      "tipLabel": "Sobre as exportações da Square Share",
+      "tip": "Comparámos este ficheiro avaliação a avaliação, não por aplicação. As avaliações que já estão nesta loja ficam como estão e nada é adicionado duas vezes. As avaliações de outra loja não podem ser transferidas com uma exportação.",
+      "leftOut": "{count, plural, one {{count} não está nesta loja: uma exportação não a pode adicionar} other {{count} não estão nesta loja: uma exportação não as pode adicionar}}",
+      "checkFailed": "Não foi possível comparar este ficheiro com as suas avaliações. Nada foi alterado. Tente novamente daqui a pouco."
     }
   },
   "reviewModeration": {
@@ -1219,6 +1272,42 @@
     "emptyFiltered": {
       "title": "Nenhuma avaliação corresponde",
       "body": "Experimente outras palavras ou outro filtro, ou limpe-os para ver todas as avaliações."
+    },
+    "export": {
+      "hint": "Descarrega as avaliações desta vista num ficheiro CSV.",
+      "empty": "Não há avaliações nesta vista para exportar.",
+      "truncated": "{count, plural, one {O ficheiro contém a primeira avaliação desta vista.} other {O ficheiro contém as primeiras # avaliações desta vista.}} Filtre a lista por produto ou classificação para exportar as restantes.",
+      "fileName": "avaliacoes.csv"
+    }
+  },
+  "addOnsField": {
+    "listLabel": "Os seus outros produtos",
+    "count": "{count} de {max} escolhidos",
+    "add": "Adicionar {title}",
+    "draft": "Rascunho",
+    "draftHint": "Os compradores veem-no assim que estiver ativo.",
+    "remove": "Remover {title}",
+    "none": "Ainda não tem outros produtos. Adicione primeiro outro produto e depois ofereça-o aqui.",
+    "notPosted": "Não oferecido: é uma transferência",
+    "notADownload": "Não oferecido: é físico",
+    "search": "Pesquisar nos seus produtos",
+    "noMatch": "Nenhum produto corresponde.",
+    "noneFit": "Nenhum dos seus outros produtos pode ficar na mesma encomenda que este. Uma encomenda tem um só tipo (envio ou transferência) e uma só moeda.",
+    "otherCurrency": "Não oferecido: preço em {currency}",
+    "previewLabel": "O que os compradores veem",
+    "soldOutHint": "Os compradores veem-no assim que voltar a ter stock.",
+    "takenDown": "Retirado",
+    "takenDownHint": "Os compradores não o veem enquanto estiver retirado.",
+    "ownBuyLink": "Comprar agora neste produto leva à sua própria ligação, por isso os compradores não veem esta secção. Remova a ligação para a usar.",
+    "suggestion": {
+      "boughtWith": {
+        "label": "Comprados juntos muitas vezes: {titles}",
+        "hint": "Quem comprou este produto também comprou {titles}. {count, plural, one {Um toque adiciona-o a esta lista.} other {Um toque adiciona-os a esta lista.}}"
+      },
+      "offeredWith": {
+        "label": "Costuma adicionar: {titles}",
+        "hint": "Oferece {titles} com vários dos seus outros produtos. {count, plural, one {Um toque adiciona-o aqui também.} other {Um toque adiciona-os aqui também.}}"
+      }
     }
   }
 }

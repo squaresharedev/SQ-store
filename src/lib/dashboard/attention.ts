@@ -1,10 +1,11 @@
-import { LEGAL_VERSION } from "@/lib/settings/constants";
+import { agreementOutdated } from "@/lib/legal/terms-versions";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { msg, type MessageRef } from "@/i18n/types";
 import { ordersStatusPath, ordersViewPath } from "@/lib/orders/paths";
 import { WITHDRAWN_STATUS_FILTER } from "@/types/order-view";
 import { SHIPPING_RATES_HREF } from "@/types/shipping-policy";
 import { ORDERS_PATH, PAYMENTS_PATH } from "./paths";
+import type { RestockForecast } from "@/lib/predictions";
 import type { DashboardOrdersData, ProductsSummary, ProfileSummary } from "./queries";
 
 /**
@@ -73,6 +74,7 @@ export type StorefrontAttentionInfo = {
  * softly): a transient DB error should not show the seller a false alarm.
  */
 export function buildAttentionItems({
+  termsInForce = null,
   orders,
   products,
   storefronts,
@@ -83,6 +85,7 @@ export function buildAttentionItems({
   twoFactorEnabled = true,
   toShipCount = 0,
   withdrawalsToSettle = 0,
+  restocks = [],
   checkoutOpen = false,
 }: {
   orders: DashboardOrdersData;
@@ -90,6 +93,8 @@ export function buildAttentionItems({
   storefronts: StorefrontAttentionInfo;
   /** Null when the profile read failed (soft fail); all profile rows are hidden. */
   profile: ProfileAttentionData | null;
+  /** The Terms version in force, or null if that could not be read. */
+  termsInForce?: string | null;
   /**
    * Whether Stripe Connect is wired up. Comes from getAccountStatus() in
    * lib/payments/mock.ts so the overview and the payments page share one source
@@ -119,6 +124,9 @@ export function buildAttentionItems({
   /** Recent withdrawals not refunded yet (lib/orders/queries.ts
    *  countWithdrawalsToSettle). */
   withdrawalsToSettle?: number;
+  /** Counted products about to sell out, soonest first
+   *  (lib/dashboard/queries.ts getRestockForecasts). */
+  restocks?: readonly RestockForecast[];
   /**
    * A buyer can pay through Square Share checkout right now
    * (lib/checkout/availability.ts). Only then does an unpriced delivery policy
@@ -153,6 +161,23 @@ export function buildAttentionItems({
       description: msg("Dashboard.attention.withdrawals.description"),
       href: ordersStatusPath(WITHDRAWN_STATUS_FILTER),
       actionLabel: msg("Dashboard.attention.withdrawals.action"),
+    });
+  }
+
+  // Then what is about to stop selling: a forecast, not a fact, so it says
+  // "about" and names the product that runs out first.
+  if (restocks.length > 0) {
+    const [first] = restocks;
+    const only = restocks.length === 1;
+    items.push({
+      key: "restock",
+      label: msg("Dashboard.attention.restock.label", { count: restocks.length }),
+      description: msg(
+        only ? "Dashboard.attention.restock.descriptionSingle" : "Dashboard.attention.restock.descriptionMultiple",
+        { title: first.title, days: first.daysLeft },
+      ),
+      href: only ? `/products/${first.id}/edit` : "/products",
+      actionLabel: msg(only ? "Dashboard.attention.restock.actionSingle" : "Dashboard.attention.restock.actionMultiple"),
     });
   }
 
@@ -201,9 +226,10 @@ export function buildAttentionItems({
   // it). This row is for everyone that did not reach: accounts from before the
   // terms step, and anyone whose agreement predates the current Terms. It asks
   // rather than warns, and only says "updated" to someone who agreed to an
-  // older version. Gated on profile being readable; skipped when the current
-  // LEGAL_VERSION is already agreed to.
-  if (profile && profile.legalAcceptedVersion !== LEGAL_VERSION) {
+  // older version. Gated on profile being readable. A new version does not ask
+  // until it is in force: during its 30 days of notice the shell's banner says
+  // so (components/settings/TermsNoticeBanner.tsx).
+  if (profile && agreementOutdated(profile.legalAcceptedVersion, termsInForce)) {
     const updated = profile.legalAcceptedVersion !== null;
     items.push({
       key: "no-legal",

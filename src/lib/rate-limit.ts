@@ -2,6 +2,7 @@ import { agentContext } from "@/lib/agent/context";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CONTACT_CODE_COOLDOWN_SECONDS } from "@/lib/contact-verification/policy";
+import { clientLimitKey } from "@/lib/security/client-ip";
 
 // SERVER ONLY. rateLimitKey uses the service-role admin client; this module must
 // never be imported from a Client Component. (Enforced by convention here — the
@@ -230,6 +231,31 @@ export const RATE_LIMITS = {
    * adds a handful per product; sixty an hour is a long afternoon of them.
    */
   badgeCheck: { max: 60, windowSeconds: 60 * 60 },
+  // --- AI writing help (lib/suggestions, a Pro perk) -----------------------
+  // Each call is a model call paid by the platform. What bounds the bill is
+  // money, not counts: every call holds the most it can cost on the store's
+  // monthly AI credit and on the platform's daily ceiling before the model is
+  // asked (lib/billing/ai-credit.ts). These budgets bound the PACE, each
+  // closing a different hole: one person, and one store whatever its team
+  // size.
+  /**
+   * Drafts one person asks for: a seller listing a catalogue writes a
+   * description or two per product, and asks again after an undo.
+   */
+  aiSuggest: { max: 60, windowSeconds: 60 * 60 },
+  /** The same per STORE, across every teammate, so a store's cost does not
+   *  grow with its team. Keyed on the store. */
+  aiSuggestPerStore: { max: 150, windowSeconds: 60 * 60 },
+  /**
+   * Suggestions while one person types a description. The field asks only
+   * after a pause at the end of a word, so a steady writer asks every few
+   * seconds: the minute budget stops a stuck loop at once, the hour one a
+   * long day.
+   */
+  aiCompletePerMinute: { max: 30, windowSeconds: 60 },
+  aiComplete: { max: 600, windowSeconds: 60 * 60 },
+  /** The same per STORE, across every teammate. */
+  aiCompletePerStore: { max: 1_500, windowSeconds: 60 * 60 },
   /** Storefront saves: the heaviest write path (multi-query + R2 verify). */
   storefrontWrite: { max: 240, windowSeconds: 60 * 60 },
   /**
@@ -420,6 +446,18 @@ export const RATE_LIMITS = {
    */
   orderWithdrawPerOrder: { max: 8, windowSeconds: 60 * 60 },
   /**
+   * The review reminder switch on an order page, and its unsubscribe link,
+   * per client IP. Nothing is sent when it is pressed (one email, days later,
+   * at most), so this only stops a loop hammering the database.
+   */
+  orderReviewReminder: { max: 30, windowSeconds: 60 * 60 },
+  /**
+   * One-click unsubscribes from the review reminder, per ORDER: they come from
+   * the buyer's mail provider's servers, so a per-IP budget would put every
+   * Gmail user's unsubscribe in one bucket.
+   */
+  orderReviewReminderUnsubscribe: { max: 10, windowSeconds: 60 * 60 },
+  /**
    * "Email me my order link" lookups, per client IP. Each can send mail, and
    * an address is not proof of anything, so this stays small.
    */
@@ -442,6 +480,26 @@ export const RATE_LIMITS = {
    * a handful of tries while the mapping is right, not a loop.
    */
   reviewImport: { max: 12, windowSeconds: 60 * 60 },
+  /**
+   * "Already imported?" checks, per signed-in user: one per file dropped on
+   * the import page, reading only. Room to try several files and mappings.
+   */
+  reviewImportCheck: { max: 60, windowSeconds: 60 * 60 },
+  /**
+   * The reviews CSV (app/api/sellers/export-reviews), per signed-in user. Each
+   * one reads up to REVIEW_EXPORT_ROWS_MAX reviews in pages and writes a file
+   * of up to REVIEW_EXPORT_BYTES_MAX, the same weight as the orders export, so
+   * the same ceiling: room for a seller exporting several filtered views in a
+   * sitting, and a few retries; a loop bites.
+   */
+  reviewsExport: { max: 20, windowSeconds: 60 * 60 },
+  /**
+   * The same export per STORE, keyed on the store across every teammate. The
+   * budget above is per person, so without this a store's cost would grow
+   * with its team: every member, or every session a script holds, would bring
+   * twenty more full reads of the same reviews.
+   */
+  reviewsExportPerStore: { max: 40, windowSeconds: 60 * 60 },
   /**
    * Hiding, showing and publishing reviews, per signed-in user. One row and a
    * summary recount each; sized for a seller working through a backlog of
@@ -564,11 +622,15 @@ export async function rateLimitKey(
  * the client. The x-forwarded-for fallback is only for local dev — a client CAN
  * forge that header, so anonymous limits are defence-in-depth (paired with a
  * per-target-address limit that no header can influence), never the sole guard.
+ *
+ * An IPv6 address counts as its /64 (lib/security/client-ip.ts): one client
+ * holds a whole /64 and could otherwise take a fresh address per request. So
+ * this is a KEY, not an address: hand Turnstile the edge header itself.
  */
 export async function clientKey(headerList: Headers): Promise<string> {
-  return (
+  return clientLimitKey(
     headerList.get("cf-connecting-ip") ??
-    headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    "unknown-client"
+      headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      "unknown-client",
   );
 }

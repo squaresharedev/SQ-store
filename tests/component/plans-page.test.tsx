@@ -342,6 +342,8 @@ describe("PlansPage", () => {
     expect(within(pro).getByText("500 products")).toBeTruthy();
     expect(within(pro).getByText("Download analytics reports (CSV)")).toBeTruthy();
     expect(within(pro).getByText("Priority support: your messages answered first")).toBeTruthy();
+    expect(within(pro).getByText("AI writing help, with €10 of AI credit a month")).toBeTruthy();
+    expect(within(starter).queryByText(/AI writing help/)).toBeNull();
   });
 
   it("draws each plan as a shelf that grows, with no glow on the recommended card", () => {
@@ -365,6 +367,10 @@ describe("PlansPage", () => {
     expect(Array.from(products.querySelectorAll("td")).map((cell) => cell.textContent)).toEqual(["20", "60", "500"]);
     const imports = document.querySelector("[data-compare-row='productImport']") as HTMLElement;
     expect(within(imports).getAllByLabelText("Included")).toHaveLength(3);
+    const writing = document.querySelector("[data-compare-row='aiSuggestions']") as HTMLElement;
+    // The credit is the offer, so the cell says it instead of a tick.
+    expect(Array.from(writing.querySelectorAll("td")).map((cell) => cell.textContent)).toEqual(["", "", "€10 credit a month"]);
+    expect(within(writing).getAllByLabelText("Not included")).toHaveLength(2);
     // Removed at the owner's request: not selling points of a plan.
     expect(document.querySelector("[data-compare-row='security']")).toBeNull();
     expect(document.querySelector("[data-compare-row='languages']")).toBeNull();

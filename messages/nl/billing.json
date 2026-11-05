@@ -33,7 +33,8 @@
     "unavailable": "Abonnementen kunnen nu niet worden getoond. Vernieuw de pagina over een moment.",
     "yearlyFree": "{count, plural, one {# maand gratis} other {# maanden gratis}}",
     "launchNote": "Een lanceringsprijs is een introductieprijs: de normale prijs is de doorgestreepte prijs.",
-    "grantTitle": "{plan} krijg je van ons"
+    "grantTitle": "{plan} krijg je van ons",
+    "autoRenew": "Betaalde abonnementen worden automatisch elke maand verlengd tegen de getoonde prijs, totdat je opzegt."
   },
   "card": {
     "perMonth": "/ maand",
@@ -65,6 +66,7 @@
     "earlyAccess": "Vroege toegang tot nieuwe functies",
     "prioritySupport": "Voorrang bij support: je berichten worden als eerste beantwoord",
     "analyticsExport": "Statistiekrapporten downloaden (CSV)",
+    "aiSuggestions": "Schrijfhulp met AI, met {credit} AI-tegoed per maand",
     "products": "{count, plural, one {# product} other {# producten}}",
     "productsUnlimited": "Onbeperkt aantal producten"
   },
@@ -87,6 +89,7 @@
     "unlimited": "Onbeperkt",
     "included": "Inbegrepen",
     "notIncluded": "Niet inbegrepen",
+    "aiCredit": "{credit} tegoed per maand",
     "rows": {
       "fee": "Kosten per verkoop",
       "storefronts": "Etalages",
@@ -105,7 +108,8 @@
       "roles": "Teamrollen",
       "analytics": "Statistieken",
       "analyticsExport": "Statistiekrapporten (CSV)",
-      "productImport": "Productimport (CSV)"
+      "productImport": "Productimport (CSV)",
+      "aiSuggestions": "Schrijfhulp met AI"
     },
     "groups": {
       "selling": "Verkopen",
@@ -206,6 +210,24 @@
     "grantLine": "Van ons: Square Share geeft je winkel dit abonnement cadeau.",
     "grantUntil": "Tot {date}. Als het afloopt, wordt er niets verwijderd.",
     "grantNoEnd": "Zonder einddatum."
+  },
+  "ai": {
+    "title": "Schrijfhulp met AI",
+    "description": "Concepten, herschrijvingen en de volgende woorden terwijl je typt, op basis van wat je invult. Eigen beweringen voegt het niet toe.",
+    "creditUsed": "{used} van {allowance} gebruikt deze maand",
+    "creditRenews": "Vernieuwd op {date}",
+    "creditNote": "Een concept of suggestie kost een fractie van een cent.",
+    "creditSpent": "Het tegoed van deze maand is op. De schrijfhulp is er weer op {date}.",
+    "creditUnreadable": "Je AI-tegoed kan nu niet worden gelezen. Probeer het zo opnieuw.",
+    "asYouTypeLabel": "Volgende woorden voorstellen terwijl ik typ",
+    "asYouTypeHelp": "Terwijl je een productbeschrijving schrijft, verschijnt grijze tekst: Tab voegt hem toe, Esc verbergt hem. Deze instelling geldt alleen voor jou, niet voor je team.",
+    "abilities": {
+      "asYouType": "Stelt de volgende woorden voor terwijl je een beschrijving schrijft",
+      "write": "Schrijft een eerste versie op basis van wat je hebt ingevuld",
+      "improve": "Schaaft een beschrijving bij die je zelf schreef en houdt alle gegevens aan"
+    },
+    "upsellCta": "Bekijk Pro",
+    "upsellCredit": "{credit} AI-tegoed per maand inbegrepen"
   },
   "cancel": {
     "title": "{plan} opzeggen?",

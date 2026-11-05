@@ -5,6 +5,7 @@ import {
   isAllowedRedirectUri,
   type ApplicationType,
 } from "@/lib/agent/oauth/redirects";
+import { logSafe } from "@/lib/security/log-safe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -104,10 +105,19 @@ export function isMetadataClientId(clientId: string): boolean {
   return clientId.startsWith("https://");
 }
 
+/**
+ * Characters a client_id may not hold, though a URL parser lets them through:
+ * anything outside printable ASCII, a double quote and a backslash. The id is
+ * an app's own choice, is stored as our key, and is quoted into a PostgREST
+ * filter by the cleanup job (lib/agent/cleanup.ts), where an unescaped quote
+ * would end the value early. Real metadata URLs never contain them.
+ */
+const CLIENT_ID_UNSAFE = /[^\x21-\x7e]|["\\]/;
+
 /** A metadata document's address: public, and with a path, as the spec requires
- *  (a bare origin is not a document), and no fragment. */
+ *  (a bare origin is not a document), no fragment, and only safe characters. */
 function isMetadataDocumentUrl(clientId: string): boolean {
-  if (!isPublicHttpsUrl(clientId)) return false;
+  if (CLIENT_ID_UNSAFE.test(clientId) || !isPublicHttpsUrl(clientId)) return false;
   const url = new URL(clientId);
   return url.pathname !== "/" && url.pathname !== "" && !url.hash;
 }
@@ -125,14 +135,14 @@ async function fetchClientMetadata(clientId: string): Promise<AgentClient | null
       headers: { accept: "application/json", "user-agent": FETCH_USER_AGENT },
     });
     if (response.status !== 200) {
-      console.warn(`[agent] client metadata answered ${response.status}: ${clientId}`);
+      console.warn(`[agent] client metadata answered ${response.status}: ${logSafe(clientId)}`);
       return null;
     }
     text = await response.text();
     if (text.length > METADATA_MAX_BYTES) return null;
   } catch (error) {
     // Logged: "unknown app" is all the seller sees, and this is the only trace of why.
-    console.warn(`[agent] client metadata fetch failed: ${clientId}:`, error instanceof Error ? error.message : String(error));
+    console.warn(`[agent] client metadata fetch failed: ${logSafe(clientId)}:`, error instanceof Error ? logSafe(error.message) : String(error));
     return null;
   }
   let document: unknown;

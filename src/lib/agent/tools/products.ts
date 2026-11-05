@@ -68,6 +68,7 @@ const productFields = {
   details: z.record(z.string(), z.unknown()).optional().describe("Dimensions, weight, materials, specs and so on. See get_schema with of=product."),
   purchaseUrl: z.string().nullable().optional().describe("Where the buy button goes. HTTPS only."),
   shippingProfileId: z.string().nullable().optional(),
+  addOnIds: z.array(z.string()).max(4).optional().describe("Other products of this store offered beside this one. At most 4."),
 };
 
 /** The agent's words for a write, in the shape productWriteSchema reads. */

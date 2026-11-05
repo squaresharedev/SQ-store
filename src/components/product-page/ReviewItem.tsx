@@ -17,10 +17,12 @@ import { chipStyle, paragraphs } from "./product-page-maps";
 export function ReviewItem({
   review,
   ink,
+  starColor,
   cornerRadius,
 }: {
   review: PublicReview;
   ink: string;
+  starColor: string;
   cornerRadius: number;
 }) {
   const t = useTranslations("ProductPage.reviews");
@@ -30,7 +32,7 @@ export function ReviewItem({
   return (
     <article className="flex flex-col gap-2 py-5" data-review={review.id}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <StarRating value={review.rating} label={t("stars", { rating: review.rating })} />
+        <StarRating value={review.rating} label={t("stars", { rating: review.rating })} color={starColor} />
         {review.title && <h3 className="text-sm font-semibold">{review.title}</h3>}
       </div>
       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs opacity-70">

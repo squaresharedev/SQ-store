@@ -105,7 +105,8 @@
     "changePlan": "Too many plan changes started in a short time.",
     "saveDiscounts": "Too many discount changes in a short time.",
     "moderateReviews": "Too many review changes in a short time.",
-    "agentTools": "This assistant has made too many requests in a short time."
+    "agentTools": "This assistant has made too many requests in a short time.",
+    "writeWithAi": "Too many AI drafts asked for in a short time."
   },
   "serverError": {
     "fix": "This is usually temporary. Wait a moment and try again; if it keeps failing, refresh the page.",
@@ -517,6 +518,28 @@
       "fix": "Try different words, or write to {email} and a person will look."
     }
   },
+  "ai": {
+    "notOnPlan": {
+      "message": "AI writing help is part of the Pro plan.",
+      "fix": "Write the description yourself, or switch to Pro."
+    },
+    "tooLittle": {
+      "message": "There's not enough to write from yet.",
+      "fix": "Add a few details first, such as options, materials or size."
+    },
+    "declined": {
+      "message": "AI couldn't write a description for this product.",
+      "fix": "Write it yourself, or change a few words and try again."
+    },
+    "unavailable": {
+      "message": "AI writing help isn't available right now.",
+      "fix": "Try again in a few minutes, or write the description yourself."
+    },
+    "creditUsed": {
+      "message": "This month's AI credit is used up.",
+      "fix": "It renews on the 1st. Until then, write as usual."
+    }
+  },
   "productImport": {
     "unreadable": {
       "message": "That import could not be read.",
@@ -704,6 +727,12 @@
       "message": "Choose why you're hiding this review.",
       "fix": "A review can only be hidden for one of the listed reasons."
     }
+  },
+  "reviewsExport": {
+    "permissionDenied": "You don't have access to this store's reviews.",
+    "unavailable": "Your reviews can't be exported right now.",
+    "rateLimited": "That's a lot of review exports in a short time.",
+    "storeRateLimited": "Your team has exported this store's reviews many times in the last hour."
   },
   "agent": {
     "invalidInput": "Those details are not valid.",

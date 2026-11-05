@@ -17,10 +17,16 @@
     "confirm": "Confirm",
     "remove": "Remove",
     "delete": "Delete",
-    "deleting": "Deleting…"
+    "deleting": "Deleting…",
+    "sameAs": "Same as {title}",
+    "undo": "Undo"
   },
   "badge": {
     "comingSoon": "Coming soon"
+  },
+  "connection": {
+    "offline": "You're offline",
+    "backOnline": "Back online"
   },
   "pagination": {
     "previous": "Previous",
@@ -70,7 +76,8 @@
   "stock": {
     "inStock": "In stock",
     "lowStock": "{remaining, plural, one {Only {remaining} left} other {Only {remaining} left}}",
-    "soldOut": "Sold out"
+    "soldOut": "Sold out",
+    "lowStockLabel": "Low stock"
   },
   "toast": {
     "regionLabel": "Notifications",
@@ -109,5 +116,10 @@
     "rotated": "{label} rotated to {degrees, plural, other {# degrees}}",
     "rotatedBlock": "Block rotated to {degrees, plural, other {# degrees}}",
     "blocksMoved": "{count, plural, other {# blocks moved}}"
+  },
+  "export": {
+    "button": "Export CSV",
+    "preparing": "Preparing file",
+    "failed": "The export didn't download. Try again in a moment."
   }
 }

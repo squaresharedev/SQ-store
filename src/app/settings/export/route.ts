@@ -61,7 +61,9 @@ const CANCELLATION_COLUMNS = "plan, billing_interval, reason, detail, ends_at, c
 const ORDER_COLUMNS =
   "id, product_title, selected_options, quantity, amount_cents, shipping_cents, discount_cents, " +
   "platform_fee_cents, platform_fee_bps, currency, channel, status, fulfilment_status, " +
-  "created_at, shipped_at, tracking_carrier, refunded_at, refund_reason";
+  "created_at, shipped_at, tracking_carrier, refunded_at, refund_reason, " +
+  // What else each order sold ("Add to your order"), nested under it.
+  "add_ons:order_add_ons(product_title, selected_options, quantity, amount_cents)";
 
 // What we told them, and whether they read it.
 const NOTIFICATION_COLUMNS = "type, title, body, read, created_at";

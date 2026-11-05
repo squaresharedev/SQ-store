@@ -607,6 +607,23 @@ export async function saveNotifications(
   return succeeded(msg("Settings.notifications.success.notificationsSaved"));
 }
 
+// --- AI writing help -------------------------------------------------------
+
+/**
+ * The person's own switch for suggestions while they type a description
+ * (profiles.ai_suggest_as_you_type, on by default). Personal, not the
+ * store's: each teammate decides for themselves. The switch shows the state,
+ * so success says nothing (`{}`).
+ */
+export async function saveSuggestAsYouType(on: unknown): Promise<ActionState> {
+  const user = await getUser();
+  if (!user) return SIGNED_OUT;
+  if (typeof on !== "boolean") return SAVE_FAILED;
+  if (!(await rateLimit("settings_write", RATE_LIMITS.settingsWrite))) return TOO_MANY;
+  if (!(await updateOwnProfile(user.id, { ai_suggest_as_you_type: on }))) return SAVE_FAILED;
+  return {};
+}
+
 // --- Danger zone -----------------------------------------------------------
 
 /**

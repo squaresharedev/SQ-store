@@ -8,18 +8,21 @@ const STARS = Array.from({ length: REVIEW_RATING_MAX }, (_, index) => index);
 const STAR_SIZE = { sm: "size-3.5", md: "size-5" } as const;
 
 /**
- * A rating as five stars, in the page's own ink: filled up to `value`
- * (fractions included, for an average), faint beyond it. One image to a
- * screen reader, named by `label` ("4.5 out of 5 stars"), never five.
+ * A rating as five stars: filled up to `value` (fractions included, for an
+ * average), faint beyond it. One image to a screen reader, named by `label`
+ * ("4.5 out of 5 stars"), never five.
  */
 export function StarRating({
   value,
   label,
   size = "sm",
+  color,
 }: {
   value: number;
   label: string;
   size?: keyof typeof STAR_SIZE;
+  /** The stars' colour; without one they take the surrounding text's. */
+  color?: string;
 }) {
   const filled = `${Math.max(0, Math.min(1, value / REVIEW_RATING_MAX)) * 100}%`;
   const row = (fill: boolean) =>
@@ -35,7 +38,13 @@ export function StarRating({
   return (
     // w-fit: the fill is a share of the stars' own width, so the box must
     // never stretch to its parent's (a flex column does that by default).
-    <span role="img" aria-label={label} className="relative inline-flex w-fit shrink-0" data-star-rating={value}>
+    <span
+      role="img"
+      aria-label={label}
+      className="relative inline-flex w-fit shrink-0"
+      style={{ color }}
+      data-star-rating={value}
+    >
       <span className="inline-flex opacity-30">{row(false)}</span>
       <span className="absolute inset-y-0 left-0 inline-flex overflow-hidden" style={{ width: filled }}>
         {row(true)}

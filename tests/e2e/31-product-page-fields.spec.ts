@@ -127,7 +127,8 @@ test.describe("product form: options, photos, documents", () => {
     // is exactly the case the route has to hold on its own.
     const post = (query: string, body: Buffer) =>
       page.request.post(`/api/uploads/document?${query}`, {
-        headers: { "content-type": "application/pdf" },
+        // What a browser on our own page sends: the route refuses other sites.
+        headers: { "content-type": "application/pdf", "sec-fetch-site": "same-origin" },
         data: body,
       });
 

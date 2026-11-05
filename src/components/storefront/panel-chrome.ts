@@ -46,9 +46,15 @@
  *  floating editor toolbar too (z-40) rather than level with it and settled by
  *  document order. Tooltips and select popovers portal into <body> at the same
  *  z-50 and so still land on top of the sheet they belong to, which is what a
- *  tip inside a sheet needs. */
+ *  tip inside a sheet needs.
+ *
+ *  NO PADDING ON TOP: the gap above the content is a `before` spacer instead,
+ *  which scrolls away with it. A pinned row (the panel's "Design / ..." back
+ *  row, sticky top-0) sticks at the edge of the padding, not of the sheet, so
+ *  a padded top left a strip ABOVE the pinned row that the panel's controls
+ *  scrolled up through. */
 export const SHEET_ON_MOBILE_CLASS =
-  "fixed inset-x-0 bottom-0 z-50 max-h-[55vh] overflow-y-auto rounded-t-lg border-t border-border bg-background p-4 pb-10 shadow-lg lg:static lg:z-auto lg:max-h-none lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:pb-0 lg:shadow-none";
+  "fixed inset-x-0 bottom-0 z-50 max-h-[55vh] overflow-y-auto rounded-t-lg border-t border-border bg-background px-4 pb-10 shadow-lg before:block before:h-4 before:content-[''] lg:static lg:z-auto lg:max-h-none lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:pb-0 lg:shadow-none lg:before:hidden";
 
 /**
  * ROOM TO SCROLL A BLOCK OUT FROM UNDER A SHEET, in the mobile preview.

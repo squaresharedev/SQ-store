@@ -105,7 +105,8 @@
     "changePlan": "Je hebt in korte tijd te veel abonnementswijzigingen gestart.",
     "saveDiscounts": "Te veel kortingswijzigingen in korte tijd.",
     "moderateReviews": "Te veel wijzigingen aan reviews in korte tijd.",
-    "agentTools": "Deze assistent heeft in korte tijd te veel verzoeken gedaan."
+    "agentTools": "Deze assistent heeft in korte tijd te veel verzoeken gedaan.",
+    "writeWithAi": "Te veel AI-concepten aangevraagd in korte tijd."
   },
   "serverError": {
     "fix": "Dit is meestal tijdelijk. Wacht even en probeer het opnieuw; als het blijft mislukken, vernieuw dan de pagina.",
@@ -517,6 +518,28 @@
       "fix": "Probeer andere woorden, of schrijf naar {email} en een medewerker kijkt ernaar."
     }
   },
+  "ai": {
+    "notOnPlan": {
+      "message": "Schrijfhulp met AI hoort bij het Pro-abonnement.",
+      "fix": "Schrijf de beschrijving zelf of stap over op Pro."
+    },
+    "tooLittle": {
+      "message": "Er is nog te weinig om op te schrijven.",
+      "fix": "Vul eerst een paar gegevens in, zoals opties, materialen of maat."
+    },
+    "declined": {
+      "message": "AI kon geen beschrijving voor dit product schrijven.",
+      "fix": "Schrijf de beschrijving zelf of pas een paar woorden aan en probeer het opnieuw."
+    },
+    "unavailable": {
+      "message": "Schrijfhulp met AI is nu niet beschikbaar.",
+      "fix": "Probeer het over een paar minuten opnieuw of schrijf de beschrijving zelf."
+    },
+    "creditUsed": {
+      "message": "Het AI-tegoed van deze maand is op.",
+      "fix": "Het wordt op de 1e vernieuwd. Tot dan schrijf je zoals altijd."
+    }
+  },
   "productImport": {
     "unreadable": {
       "message": "Dat importbestand kon niet worden gelezen.",
@@ -704,6 +727,12 @@
       "message": "Kies waarom je deze review verbergt.",
       "fix": "Een review kan alleen om een van de genoemde redenen worden verborgen."
     }
+  },
+  "reviewsExport": {
+    "permissionDenied": "Je hebt geen toegang tot de reviews van deze winkel.",
+    "unavailable": "Je reviews kunnen nu niet worden geëxporteerd.",
+    "rateLimited": "Dat zijn veel review-exports in korte tijd.",
+    "storeRateLimited": "Je team heeft de reviews van deze winkel het afgelopen uur heel vaak geëxporteerd."
   },
   "agent": {
     "invalidInput": "Die gegevens zijn niet geldig.",

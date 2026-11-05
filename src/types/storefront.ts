@@ -298,6 +298,24 @@ export const HOVER_TRANSITION_MS_MAX = 1000;
 export const HOVER_TRANSITION_MS_DEFAULT = 180;
 
 /**
+ * What a product card does while a buyer points at it (or tabs onto it):
+ * nothing, rise off the board, zoom its photo, or tip a little. Pure CSS, so
+ * it needs no script on the buyer's page, and none of it moves under reduced
+ * motion or on a touch screen, which has no hover.
+ */
+export const CARD_HOVER_EFFECTS = ["none", "lift", "zoom", "tilt"] as const;
+export type CardHoverEffect = (typeof CARD_HOVER_EFFECTS)[number];
+
+/**
+ * A buy button drawn on the card itself, in the product page button's words
+ * and colour: off, a filled button, an outline, or the words alone. The whole
+ * card is already one link to the product page, so the button goes where the
+ * card goes.
+ */
+export const CARD_BUY_BUTTONS = ["none", "solid", "outline", "link"] as const;
+export type CardBuyButton = (typeof CARD_BUY_BUTTONS)[number];
+
+/**
  * The seven spots something can take on a product tile: the 4 corners plus the
  * center vertical axis (top, middle, bottom). Circle tiles clip their corners
  * entirely, so on those only the vertical axis is offered/rendered.
@@ -717,6 +735,25 @@ export const PRICE_TAG_SHADOW_TEXT = "#ffffff";
  *  color was adjustable. Read through titleShadowStyle and titleShadowInk. */
 export const TITLE_SHADOW_DEFAULT_COLOR = "#000000";
 
+/**
+ * The top of every blur slider: a block's own blur, a product's photo blur and
+ * the frosted `shadow` fade all run 0..BLUR_MAX, absent or 0 being sharp. An
+ * amount rather than pixels, because it is drawn as a share of one grid cell
+ * (see blurRadius in config-maps), so the same number softens a board equally
+ * on a phone and on a wide screen.
+ */
+export const BLUR_MAX = 100;
+
+/**
+ * Which way a blur runs. `all` softens the whole thing evenly; the others are
+ * a PROGRESSIVE blur, strongest at the named edge and fading to sharp at the
+ * opposite one. Offered wherever a seller sets a blur except the shadow fade,
+ * whose frost already runs with the fade. Absent = DEFAULT_BLUR_DIRECTION.
+ */
+export const BLUR_DIRECTIONS = ["all", "top", "bottom", "left", "right"] as const;
+export type BlurDirection = (typeof BLUR_DIRECTIONS)[number];
+export const DEFAULT_BLUR_DIRECTION: BlurDirection = "all";
+
 /** Grid gutter cap, in px. The value drives the shared --grid-gap token that
  *  .ss-grid's gap AND square-cell row math consume. Legacy configs stored a
  *  density enum (compact/comfy/spacious); the schema migrates it on parse. */
@@ -949,6 +986,21 @@ export type ProductPageShippingNote = (typeof PRODUCT_PAGE_SHIPPING_NOTES)[numbe
  */
 export const PRODUCT_PAGE_SALE_STYLES = ["strike", "slash"] as const;
 export type ProductPageSaleStyle = (typeof PRODUCT_PAGE_SALE_STYLES)[number];
+
+/** How "Add to your order" draws its products: a column of rows, or a grid of
+ *  photo tiles. Closed list, append only (stored). */
+export const PRODUCT_PAGE_ADD_ON_LAYOUTS = ["list", "tiles"] as const;
+export type ProductPageAddOnLayout = (typeof PRODUCT_PAGE_ADD_ON_LAYOUTS)[number];
+export const DEFAULT_PRODUCT_PAGE_ADD_ON_LAYOUT: ProductPageAddOnLayout = "list";
+
+/** Where "Add to your order" sits in the buy box: before Buy now (the offer is
+ *  part of choosing) or after it (a quieter suggestion). Append only. */
+export const PRODUCT_PAGE_ADD_ON_PLACEMENTS = ["beforeButton", "afterButton"] as const;
+export type ProductPageAddOnPlacement = (typeof PRODUCT_PAGE_ADD_ON_PLACEMENTS)[number];
+export const DEFAULT_PRODUCT_PAGE_ADD_ON_PLACEMENT: ProductPageAddOnPlacement = "beforeButton";
+
+/** The add-ons heading: a heading, not a sentence. */
+export const PRODUCT_PAGE_ADD_ONS_TITLE_MAX = 40;
 export const DEFAULT_PRODUCT_PAGE_SALE_STYLE: ProductPageSaleStyle = "strike";
 
 /** The collapsible sections below the fold, in their default order. The seller
@@ -967,6 +1019,11 @@ export const PRODUCT_PAGE_SECTION_IDS = [
   // What other buyers said: open at the foot of the page, above the seller.
   "reviews",
   "seller",
+  // "Add to your order": the seller's other products, drawn in the buy box
+  // right above Buy now rather than below the fold. The products themselves
+  // are chosen per product (products.add_on_ids); this only shows or hides
+  // the section on this storefront.
+  "addOns",
 ] as const;
 export type ProductPageSectionId = (typeof PRODUCT_PAGE_SECTION_IDS)[number];
 export type ProductPageSectionEntry = { id: ProductPageSectionId; show: boolean };
@@ -1075,6 +1132,20 @@ export type ProductPageConfig = {
   /** How a sale's regular price is crossed out. Absent =
    *  DEFAULT_PRODUCT_PAGE_SALE_STYLE, so an untouched page never grows a key. */
   saleStyle?: ProductPageSaleStyle;
+  /** "Add to your order", as this storefront draws it. Which products it
+   *  offers is chosen per product (products.add_on_ids); these only decide how
+   *  the section looks here. Each absent = the default, so an untouched page
+   *  never grows a key. */
+  /** The section's heading in the seller's own words. Absent = "Add to your
+   *  order" in the buyer's language. */
+  addOnsTitle?: string;
+  /** Absent = DEFAULT_PRODUCT_PAGE_ADD_ON_LAYOUT. */
+  addOnsLayout?: ProductPageAddOnLayout;
+  /** Absent = DEFAULT_PRODUCT_PAGE_ADD_ON_PLACEMENT. */
+  addOnsPlacement?: ProductPageAddOnPlacement;
+  /** The review stars: the section's and the rating under the title. Absent =
+   *  DEFAULT_PRODUCT_PAGE_STAR_COLOR, so an untouched page never grows a key. */
+  starColor?: string;
   showStock: boolean;
   /** "Sold by {business}" beside the title. The legal block is the `seller`
    *  SECTION; this is only the byline. */
@@ -1177,6 +1248,10 @@ export type StorefrontSeller = {
   phone?: string;
   bio?: string;
 };
+
+/** What the review stars are painted in until a seller chooses: the yellow of
+ *  the `--color-rating` token, as a hex because the colour picker needs one. */
+export const DEFAULT_PRODUCT_PAGE_STAR_COLOR = "#f59e0b";
 
 export const DEFAULT_PRODUCT_PAGE_CONFIG: ProductPageConfig = {
   enabled: true,
@@ -1399,6 +1474,25 @@ export type StorefrontTheme = {
   /** The `shadow` title style's gradient tint, strict #rrggbb. Absent =
    *  TITLE_SHADOW_DEFAULT_COLOR. Unused by the other title styles. */
   titleShadowColor?: string;
+  /** How much the `shadow` fade frosts the photo behind it, 0..BLUR_MAX.
+   *  Absent = sharp. Unused by the other title styles. */
+  titleShadowBlur?: number;
+  /** How much the product photo is blurred, 0..BLUR_MAX. Absent = sharp. */
+  photoBlur?: number;
+  /** Which way the photo's blur runs. Absent = DEFAULT_BLUR_DIRECTION. */
+  photoBlurDirection?: BlurDirection;
+  /**
+   * The card extras, all off when absent so a storefront saved before they
+   * existed looks and saves exactly as it did: what a card does on hover
+   * (CARD_HOVER_EFFECTS), whether it shows the product's second photo then,
+   * a buy button on the card (CARD_BUY_BUTTONS), the buyers' star rating and
+   * a "Low stock" line (never a count) under the name.
+   */
+  hoverEffect?: CardHoverEffect;
+  hoverPhoto?: boolean;
+  buyButton?: CardBuyButton;
+  showRating?: boolean;
+  showLowStock?: boolean;
   /** Hover-reveal transition speed in ms, HOVER_TRANSITION_MS_MIN..MAX.
    *  Absent = HOVER_TRANSITION_MS_DEFAULT. */
   titleHoverMs?: number;
@@ -1479,6 +1573,17 @@ export type CardStyle = {
   /** Stays OPTIONAL after resolution, like the price tag's colors: "default"
    *  is a state the picker's inherit dot has to be able to show. */
   titleShadowColor?: string;
+  /** Both blurs resolve to a number (0 when nobody set one): sharp is just
+   *  the bottom of the slider, not a state of its own to show. */
+  titleShadowBlur: number;
+  photoBlur: number;
+  photoBlurDirection: BlurDirection;
+  /** The card extras, resolved to a value (off when nobody set one). */
+  hoverEffect: CardHoverEffect;
+  hoverPhoto: boolean;
+  buyButton: CardBuyButton;
+  showRating: boolean;
+  showLowStock: boolean;
   /** Always resolves to a concrete value (HOVER_TRANSITION_MS_DEFAULT when
    *  nobody set one), unlike titleInset: there is no CSS-native "auto" for a
    *  transition speed worth preserving as its own state. */
@@ -1535,6 +1640,15 @@ export function resolveCardStyle(
       overrides?.titlePosition ?? theme.titlePosition ?? DEFAULT_TITLE_POSITION,
     titleInset: overrides?.titleInset ?? theme.titleInset,
     titleShadowColor: overrides?.titleShadowColor ?? theme.titleShadowColor,
+    titleShadowBlur: overrides?.titleShadowBlur ?? theme.titleShadowBlur ?? 0,
+    photoBlur: overrides?.photoBlur ?? theme.photoBlur ?? 0,
+    photoBlurDirection:
+      overrides?.photoBlurDirection ?? theme.photoBlurDirection ?? DEFAULT_BLUR_DIRECTION,
+    hoverEffect: overrides?.hoverEffect ?? theme.hoverEffect ?? "none",
+    hoverPhoto: overrides?.hoverPhoto ?? theme.hoverPhoto ?? false,
+    buyButton: overrides?.buyButton ?? theme.buyButton ?? "none",
+    showRating: overrides?.showRating ?? theme.showRating ?? false,
+    showLowStock: overrides?.showLowStock ?? theme.showLowStock ?? false,
     titleHoverMs:
       overrides?.titleHoverMs ?? theme.titleHoverMs ?? HOVER_TRANSITION_MS_DEFAULT,
     priceDisplay: overrides?.priceDisplay ?? theme.priceDisplay,
@@ -1710,7 +1824,30 @@ export type TextBlock = BlockPlacement & {
   /** Per-block font family from the same allowlist as the theme font.
    *  Absent = inherit the canvas font. */
   font?: StorefrontFont;
+  /** Space between letters in hundredths of an em,
+   *  TEXT_LETTER_SPACING_MIN..MAX. Absent = the typeface's own spacing. */
+  letterSpacing?: number;
+  /** Space between lines as a percent of the type size,
+   *  TEXT_LINE_HEIGHT_MIN..MAX. Absent = TEXT_LINE_HEIGHT_DEFAULT. */
+  lineHeight?: number;
+  /** Whole-block blur, 0..BLUR_MAX. Absent = sharp. */
+  blur?: number;
+  /** Which way that blur runs. Absent = DEFAULT_BLUR_DIRECTION. */
+  blurDirection?: BlurDirection;
 };
+
+/**
+ * A text block's spacing, as bounded ints because the slider rounds and the
+ * value goes straight into a style attribute. Measured against the type
+ * (em, and a share of the size) rather than in px, so it holds its look at
+ * any size the block is set to or shrinks to fit at.
+ */
+export const TEXT_LETTER_SPACING_MIN = -10;
+export const TEXT_LETTER_SPACING_MAX = 50;
+export const TEXT_LINE_HEIGHT_MIN = 80;
+export const TEXT_LINE_HEIGHT_MAX = 250;
+/** What every text block rendered at before spacing was adjustable (1.25). */
+export const TEXT_LINE_HEIGHT_DEFAULT = 125;
 
 /** Outline thickness cap for shape blocks, in px. */
 export const SHAPE_BORDER_WIDTH_MAX = 24;
@@ -1746,6 +1883,10 @@ export type ShapeBlock = BlockPlacement & {
   borderColor?: string;
   /** Whole-shape opacity as a percent, 0..100. Absent = fully opaque. */
   opacity?: number;
+  /** Whole-shape blur, 0..BLUR_MAX. Absent = sharp. */
+  blur?: number;
+  /** Which way that blur runs. Absent = DEFAULT_BLUR_DIRECTION. */
+  blurDirection?: BlurDirection;
   /**
    * Corner roundness, 0..SHAPE_ROUNDNESS_MAX, for the kinds that support it
    * (polygons, star family, and the box kinds; see shape-geometry). Percent
@@ -1794,6 +1935,10 @@ export type ImageBlock = BlockPlacement & {
   imagePlacement?: ImagePlacement;
   /** Whole-block opacity as a percent, 0..100. Absent = fully opaque. */
   opacity?: number;
+  /** Whole-block blur, 0..BLUR_MAX. Absent = sharp. */
+  blur?: number;
+  /** Which way that blur runs. Absent = DEFAULT_BLUR_DIRECTION. */
+  blurDirection?: BlurDirection;
 };
 
 export type StorefrontBlock =

@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { isEuSeller, isProductPageSectionShown, MANDATORY_PRODUCT_PAGE_SECTION_IDS } from "@/lib/storefront/product-page";
+import { isEuSeller, isProductPageSectionShown, MANDATORY_PRODUCT_PAGE_SECTION_IDS, mayOweEuRights } from "@/lib/storefront/product-page";
+import { shippingCountries } from "@/lib/shipping/rates";
 import type { ProseResolver } from "@/lib/shipping/policy-prose";
 import { resolveProductShipping, resolveReturns } from "@/lib/storefront/shipping";
 import { deliveryPriceRange } from "@/lib/shipping/rates";
@@ -9,9 +10,14 @@ import { formatCents, toCurrency } from "@/lib/format/money";
 import type { Locale } from "@/i18n/locales";
 import { SECTION_SETTING } from "@/lib/storefront/setting-ref";
 import type { ProductPageData } from "@/types/product-page";
+import type { AddOnCard } from "@/types/product";
 import type { ProductReviews } from "@/types/review";
 import { isOnPhoto } from "@/lib/validation/product";
-import type { ProductPageSectionId } from "@/types/storefront";
+import {
+  DEFAULT_PRODUCT_PAGE_ADD_ON_PLACEMENT,
+  DEFAULT_PRODUCT_PAGE_STAR_COLOR,
+  type ProductPageSectionId,
+} from "@/types/storefront";
 import { resolveCtaTarget } from "./cta-target";
 import { DocumentsList } from "./DocumentsList";
 import { BadgeDropZone } from "./BadgeDrag";
@@ -32,8 +38,15 @@ import { OptionProvider } from "./OptionContext";
 import { OptionPicker } from "./OptionPicker";
 import { QuantityProvider } from "./QuantityContext";
 import { QuantityPicker } from "./QuantityPicker";
+import { AddOnsProvider } from "./AddOnsContext";
+import { AddOnsSection } from "./AddOnsSection";
 import { PageShell } from "./PageShell";
-import { orderLookupPath, storefrontPagePath, type LinkChannel } from "@/lib/storefront/product-page-url";
+import {
+  orderLookupPath,
+  storefrontPagePath,
+  type AddOnPick,
+  type LinkChannel,
+} from "@/lib/storefront/product-page-url";
 import { StickyBar } from "./StickyBar";
 import { TrustList, buildTrustLines } from "./TrustList";
 import {
@@ -60,12 +73,15 @@ import {
  * split into paragraphs and nothing else; there is no markup path here.
  */
 const NO_OPTIONS: readonly string[] = [];
+const NO_ADD_ONS: readonly AddOnPick[] = [];
+const NO_CARDS: readonly AddOnCard[] = [];
 
 export function ProductPageView({
   page,
   mode,
   initialOptionIds = NO_OPTIONS,
   initialQuantity = 1,
+  initialAddOns = NO_ADD_ONS,
   via = null,
   reviews = null,
 }: {
@@ -79,6 +95,8 @@ export function ProductPageView({
   /** From `?q=`, already clamped against this product's own limit by the
    *  server. The provider re-clamps anyway; neither is what authorizes a sale. */
   initialQuantity?: number;
+  /** From `?a=`, already limited to the add-ons on offer by the server. */
+  initialAddOns?: readonly AddOnPick[];
   /** The product's reviews (lib/reviews/queries.ts on the public page; the
    *  editor's preview reads the same through the reviews API). Null while
    *  unknown or unreadable, which leaves the section out rather than showing
@@ -163,7 +181,8 @@ export function ProductPageView({
   const cta = resolveCta(productPage, theme);
   const rule = ruleColor(ink);
   const radius = surfaceRadius(theme.cornerRadius);
-  const isEu = isEuSeller(seller);
+  const starColor = productPage.starColor ?? DEFAULT_PRODUCT_PAGE_STAR_COLOR;
+  const isEu = mayOweEuRights(seller, { isDigital: product.isDigital, reach: shippingCountries(shippingPolicy) });
   const storeName = storefront.header?.show && storefront.header.name ? storefront.header.name : storefront.name;
   const soldBy = seller.businessName || storefront.name;
   const target = resolveCtaTarget(
@@ -184,7 +203,10 @@ export function ProductPageView({
     returnsText,
     isDigital: product.isDigital,
     isEu,
-    copy: { digitalDelivery: t("trust.digitalDelivery"), euRights: t("trust.euRights") },
+    copy: {
+      digitalDelivery: t("trust.digitalDelivery"),
+      euRights: isEuSeller(seller) ? t("trust.euRights") : t("trust.euRightsForEu"),
+    },
   });
 
   // THE DESCRIPTION READS UNDER THE TITLE, always: with the title and the
@@ -222,9 +244,43 @@ export function ProductPageView({
   // flag says; its own case below is what decides whether there is anything
   // to actually disclose (no data yet, or a digital product GPSR does not
   // reach, both print nothing, same as always).
+  // "ADD TO YOUR ORDER" sits in the buy box, above the button, and only where
+  // the button is our checkout: an add-on is paid for in the same order, which
+  // a seller's own link or an enquiry email cannot do. The editor always draws
+  // it while its switch is on, so a seller sees where the add-ons go.
+  const addOnsShown =
+    isProductPageSectionShown(productPage, "addOns") &&
+    !product.soldOut &&
+    (target.kind === "checkout" || preview);
+
+  // Before Buy now (part of choosing) or after it (a quieter suggestion), as
+  // the storefront set it, in its own heading and look.
+  const addOnsPlacement = productPage.addOnsPlacement ?? DEFAULT_PRODUCT_PAGE_ADD_ON_PLACEMENT;
+  const addOnsSection = (
+    <AddOnsSection
+      ink={ink}
+      rule={rule}
+      radius={radius}
+      saleStyle={productPage.saleStyle}
+      title={productPage.addOnsTitle}
+      layout={productPage.addOnsLayout}
+      preview={preview}
+      // What was chosen but is not offered: the seller's preview only.
+      hidden={preview ? page.hiddenAddOns : undefined}
+      // Each add-on's stars, where this page shows reviews at all.
+      starColor={reviewsShown ? starColor : undefined}
+    />
+  );
+
   const sections = productPage.sections
     .filter((entry) => entry.show || MANDATORY_PRODUCT_PAGE_SECTION_IDS.includes(entry.id))
-    .filter((entry) => entry.id !== "description" && entry.id !== "seller" && entry.id !== "reviews")
+    .filter(
+      (entry) =>
+        entry.id !== "description" &&
+        entry.id !== "seller" &&
+        entry.id !== "reviews" &&
+        entry.id !== "addOns",
+    )
     .map((entry) => ({ id: entry.id, body: sectionBody(entry.id) }))
     .filter((entry): entry is { id: ProductPageSectionId; body: ReactNode } => entry.body !== null);
 
@@ -241,6 +297,9 @@ export function ProductPageView({
         return null;
       // And this one: it stands open below the accordion (see `reviewsShown`).
       case "reviews":
+        return null;
+      // In the buy box, above the button (see `addOnsShown`).
+      case "addOns":
         return null;
       case "specs":
         return hasSpecs(product.details, product.optionGroups) ? (
@@ -346,6 +405,11 @@ export function ProductPageView({
         initialQuantity={initialQuantity}
         syncUrl={!preview}
       >
+        <AddOnsProvider
+          offered={addOnsShown ? (page.addOns ?? NO_CARDS) : NO_CARDS}
+          initialPicks={initialAddOns}
+          syncUrl={!preview}
+        >
         <PageShell
           storefront={storefront}
           shopHref={preview ? undefined : storefrontPagePath(storefront.id)}
@@ -473,7 +537,9 @@ export function ProductPageView({
                     <h1 id="product-title" className="text-2xl font-semibold leading-tight @md:text-3xl">
                       {product.title}
                     </h1>
-                    {average != null && <ReviewsLink average={average} count={reviewCount} preview={preview} />}
+                    {average != null && (
+                      <ReviewsLink average={average} count={reviewCount} starColor={starColor} preview={preview} />
+                    )}
                     {productPage.showSeller && (
                       <p className="text-sm opacity-70" data-product-sold-by="">
                         {t("soldBy", { seller: soldBy })}
@@ -559,6 +625,7 @@ export function ProductPageView({
                       />
                     </div>
                   )}
+                  {addOnsShown && addOnsPlacement === "beforeButton" && addOnsSection}
                   <div data-setting-hotspot="cta">
                     <ProductCta
                       target={target}
@@ -569,6 +636,7 @@ export function ProductPageView({
                       preview={preview}
                     />
                   </div>
+                  {addOnsShown && addOnsPlacement === "afterButton" && addOnsSection}
                   <TrustList lines={trust} ruleColor={rule} />
                 </div>
               </div>
@@ -613,6 +681,7 @@ export function ProductPageView({
                   reviews={reviews}
                   ink={ink}
                   rule={rule}
+                  starColor={starColor}
                   cta={cta}
                   cornerRadius={theme.cornerRadius}
                 />
@@ -637,6 +706,7 @@ export function ProductPageView({
             </article>
           </div>
         </PageShell>
+        </AddOnsProvider>
       </QuantityProvider>
     </OptionProvider>
   );

@@ -104,7 +104,8 @@
       "cards": "Schaufenster / Produktkacheln",
       "soldOut": "Schaufenster / Ausverkauft",
       "productPage": "Schaufenster / Produktseite",
-      "checkoutPage": "Schaufenster / Kasse"
+      "checkoutPage": "Schaufenster / Kasse",
+      "blocks": "Schaufenster / Blöcke"
     },
     "labels": {
       "looks": "Schaufenster-Look",
@@ -151,7 +152,16 @@
       "productPagePhoto": "Foto der Produktseite",
       "checkoutPhoto": "Foto der Kasse",
       "thanksPhoto": "Foto der Dankeseite",
-      "chipScale": "Gleiche Labelgröße auf allen Karten"
+      "chipScale": "Gleiche Labelgröße auf allen Karten",
+      "productPageAddOns": "Zu deiner Bestellung hinzufügen",
+      "productPageStars": "Farbe der Bewertungssterne",
+      "cardHoverEffect": "Hover-Effekt",
+      "cardSecondPhoto": "Zweites Foto beim Darüberfahren",
+      "cardBuyButton": "Kauf-Button auf Kacheln",
+      "cardStarRating": "Sternebewertung auf Kacheln",
+      "cardLowStock": "Label Wenig auf Lager",
+      "textSpacing": "Zeichenabstand und Zeilenhöhe",
+      "elementBlur": "Unschärfe"
     }
   },
   "editorSearch": {
@@ -214,6 +224,7 @@
     "domainsLabel": "Zugelassene Domains",
     "domainsPlaceholder": "yoursite.com, blog.yoursite.com",
     "domainsHint": "Bis zu {max}, kommagetrennt. Füge eine URL ein, und wir kürzen sie auf die Domain.",
+    "sameAsHint": "Übernimmt die zugelassenen Domains von {title}.",
     "emptyDomainsWarning": "Füge mindestens eine Domain hinzu. Solange dies leer ist, wird das Schaufenster nirgendwo geladen, auch wenn die Einbettung aktiviert ist.",
     "builderLabel": "Dein Website-Baukasten",
     "builderOther": "Andere Website",
@@ -310,14 +321,11 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Produktseite",
-    "closeAriaLabel": "Produktseite für {title} schließen",
+    "closeAriaLabel": "Kaufablauf für {title} schließen",
     "desktopSize": "Desktop-Größe",
     "mobileSize": "Mobile Größe",
     "checkoutLabel": " · Kasse",
-    "thanksLabel": " · Danke",
-    "openCheckout": "Kasse",
-    "openCheckoutAriaLabel": "Kasse für {title} öffnen",
-    "closeCheckoutAriaLabel": "Kasse schließen"
+    "thanksLabel": " · Danke"
   },
   "customFont": {},
   "metadata": {
@@ -765,7 +773,8 @@
         "returns": "Rücksendungen",
         "safety": "Sicherheit und Konformität",
         "reviews": "Bewertungen",
-        "seller": "Verkäufer"
+        "seller": "Verkäufer",
+        "addOns": "Zu deiner Bestellung hinzufügen"
       },
       "availability": "Verfügbarkeit",
       "soldByByline": "„Verkauft von“-Zeile"
@@ -794,6 +803,42 @@
       "look": "Aussehen",
       "style": "Stil",
       "besidePrice": "Neben dem Preis"
+    },
+    "addOns": {
+      "title": "Zu deiner Bestellung hinzufügen",
+      "infoLabel": "Was „Zu deiner Bestellung hinzufügen“ ist",
+      "infoContent": "Weitere Produkte, die Käufer auf der Produktseite zur selben Bestellung hinzufügen können. Jedes Produkt hat seine eigene Liste: Jeder Klick wird sofort gespeichert, in jedem Schaufenster mit diesem Produkt.",
+      "show": "Diesen Abschnitt anzeigen",
+      "heading": {
+        "label": "Überschrift",
+        "charsLeft": "{count, plural, one {# Zeichen übrig} other {# Zeichen übrig}}"
+      },
+      "layout": {
+        "label": "Darstellung",
+        "list": "Zeilen",
+        "tiles": "Kacheln"
+      },
+      "placement": {
+        "label": "Position",
+        "beforeButton": "Über dem Button",
+        "afterButton": "Unter dem Button"
+      },
+      "products": {
+        "offeredWith": "Angeboten zu",
+        "offeredWithOne": "Angeboten zu {title}",
+        "ownLink": "Ausgeblendet: Jetzt kaufen führt zu deinem eigenen Link.",
+        "noPage": "Öffne die Seite eines Produkts auf der Arbeitsfläche, um auszuwählen, was es anbietet.",
+        "loadFailed": "Deine Produkte konnten nicht geladen werden."
+      }
+    },
+    "reviews": {
+      "title": "Bewertungen",
+      "infoLabel": "Was du bei Bewertungen ändern kannst",
+      "infoContent": "Bewertungen von Käufern am Ende der Produktseite. Die Sternfarbe gilt auch für die Bewertung unter dem Produktnamen.",
+      "show": "Diesen Abschnitt anzeigen",
+      "starColor": "Sternfarbe",
+      "defaultStarColor": "Standard-Gelb",
+      "useDefaultStarColor": "Standard-Gelb verwenden"
     }
   },
   "productBlock": {
@@ -813,8 +858,8 @@
       "lowStock": "Geringer Bestand: {count} vorrätig.",
       "inStock": "{count} auf Lager."
     },
-    "openProductPage": "Produktseite öffnen",
-    "hideProductPage": "Produktseite ausblenden",
+    "openProductPage": "Kaufablauf öffnen",
+    "hideProductPage": "Kaufablauf ausblenden",
     "tileStyle": {
       "title": "Kachel-Stil",
       "reset": "Auf Theme zurücksetzen",
@@ -881,6 +926,23 @@
       "label": "Beschreibung",
       "placeholder": "Logo, Symbol, Dekoration…",
       "hint": "Wird von Screenreadern vorgelesen. Lass es leer, wenn das Bild rein dekorativ ist."
+    }
+  },
+  "blur": {
+    "label": "Unschärfe",
+    "photo": "Foto-Unschärfe",
+    "shadow": "Schatten-Unschärfe",
+    "shadowTip": "Zeichnet das Foto hinter Name und Preis weich.",
+    "off": "Aus",
+    "valueText": "{value} von 100",
+    "direction": "Richtung",
+    "directionAriaLabel": "Richtung der Unschärfe",
+    "directions": {
+      "all": "Überall",
+      "top": "Von oben",
+      "bottom": "Von unten",
+      "left": "Von links",
+      "right": "Von rechts"
     }
   },
   "shapeBlock": {
@@ -951,10 +1013,10 @@
     "uploadImage": "Bild hochladen",
     "allShapes": "Alle Formen",
     "browseShapes": "Die vollständige Formbibliothek durchsuchen",
-    "closePage": "Produktseite schließen",
-    "showPage": "Produktseite anzeigen",
-    "closePages": "Produktseiten schließen",
-    "showPageFull": "Produktseite anzeigen",
+    "closePage": "Kaufablauf schließen",
+    "showPage": "Kaufablauf anzeigen",
+    "closePages": "Produktseite, Kasse und Dankes-Seite schließen",
+    "showPageFull": "Produktseite, Kasse und Dankes-Seite anzeigen",
     "undo": "Rückgängig",
     "undoTip": "Rückgängig (Ctrl+Z)",
     "redo": "Wiederholen",
@@ -969,25 +1031,18 @@
     "zoomIn": "Hineinzoomen",
     "zoomInTip": "Hineinzoomen (Ctrl +)",
     "designSettings": "Design-Einstellungen",
-    "page": "Seite",
-    "moreTools": "Weitere Werkzeuge",
-    "checkout": "Kasse",
-    "showCheckout": "Kasse anzeigen",
-    "closeCheckout": "Kasse schließen",
-    "showCheckoutFull": "Kasse und Dankes-Seite anzeigen",
-    "closeCheckoutFull": "Kasse und Dankes-Seite schließen"
+    "page": "Kaufablauf",
+    "moreTools": "Weitere Werkzeuge"
   },
   "selectionToolbar": {
     "toolsFor": "Werkzeuge für {name}",
     "elements": "{count, plural, one {# Element} other {# Elemente}}",
-    "hidePage": "Seite ausblenden",
-    "hidePages": "Seiten ausblenden",
-    "openPage": "Seite öffnen",
-    "openPages": "Seiten öffnen",
-    "openProductPage": "Produktseite für {name} öffnen",
-    "closeProductPage": "Produktseite für {name} schließen",
-    "openProductPages": "Produktseiten für {count, plural, one {# Produkt} other {# Produkte}} öffnen",
-    "closeProductPages": "Produktseiten für {count, plural, one {# Produkt} other {# Produkte}} schließen",
+    "hidePage": "Kaufablauf ausblenden",
+    "openPage": "Kaufablauf öffnen",
+    "openProductPage": "Kaufablauf für {name} öffnen",
+    "closeProductPage": "Kaufablauf für {name} schließen",
+    "openProductPages": "Kaufablauf für {count, plural, one {# Produkt} other {# Produkte}} öffnen",
+    "closeProductPages": "Kaufablauf für {count, plural, one {# Produkt} other {# Produkte}} schließen",
     "editText": "Text bearbeiten",
     "editTextOf": "Text von {name} bearbeiten",
     "color": "Farbe",
@@ -998,19 +1053,18 @@
     "editCornersOf": "Eckenrundung von {name} bearbeiten",
     "opacity": "Deckkraft",
     "editOpacityOf": "Deckkraft von {name} bearbeiten",
+    "blur": "Unschärfe",
+    "editBlurOf": "Unschärfe von {name} bearbeiten",
     "frame": "Zuschneiden und positionieren",
     "frameImageFor": "Bild für {name} zuschneiden und positionieren",
     "duplicate": "Duplizieren",
     "duplicateNamed": "{name} duplizieren",
     "duplicateN": "{count, plural, one {# Element duplizieren} other {# Elemente duplizieren}}",
     "removeFrom": "{name} aus dem Raster entfernen",
-    "removeN": "{count, plural, one {# Element aus dem Raster entfernen} other {# Elemente aus dem Raster entfernen}}",
-    "openCheckout": "Kasse öffnen",
-    "hideCheckout": "Kasse ausblenden",
-    "openCheckoutFor": "Kasse für {name} anzeigen",
-    "closeCheckoutFor": "Kasse für {name} ausblenden"
+    "removeN": "{count, plural, one {# Element aus dem Raster entfernen} other {# Elemente aus dem Raster entfernen}}"
   },
   "canvas": {
+    "addSuggested": "{title} zu diesem Schaufenster hinzufügen",
     "gridLabel": "Schaufenster-Arbeitsfläche",
     "emptyGrid": "Dein Raster ist leer",
     "emptyGridHint": "Füge ein Produkt hinzu, um dein Schaufenster zu gestalten. Text und Formen befinden sich in der Werkzeugleiste unten.",
@@ -1377,5 +1431,45 @@
     "info": "Wird hinter der Seite gezeigt. Die Überlagerung in der Seitenfarbe hält den Text lesbar; schalte sie aus, um das Foto unverändert zu zeigen.",
     "remove": "Foto entfernen",
     "overlay": "Farbüberlagerung"
+  },
+  "cardExtras": {
+    "hoverTitle": "Hover",
+    "shoppingTitle": "Einkauf",
+    "effect": "Effekt",
+    "effectAriaLabel": "Was eine Kachel beim Darüberfahren tut",
+    "effects": {
+      "none": "Keiner",
+      "lift": "Anheben",
+      "zoom": "Zoomen",
+      "tilt": "Kippen"
+    },
+    "effectTipLabel": "Wie Hover-Effekte ablaufen",
+    "effectTip": "Läuft, wenn ein Käufer auf eine Kachel zeigt oder mit der Tabulatortaste zu ihr springt. Auf Handys und für alle, die weniger Bewegung eingestellt haben, bleiben die Kacheln ruhig.",
+    "secondPhoto": "Zweites Foto",
+    "secondPhotoTipLabel": "Welches Foto erscheint",
+    "secondPhotoTip": "Zeigt das nächste Foto des Produkts, solange ein Käufer auf die Kachel zeigt. Produkte mit nur einem Foto bleiben, wie sie sind.",
+    "buyButton": "Kauf-Button",
+    "buyButtonAriaLabel": "Kauf-Button auf der Kachel",
+    "buyButtons": {
+      "none": "Aus",
+      "solid": "Gefüllt",
+      "outline": "Umriss",
+      "link": "Link"
+    },
+    "buyButtonTipLabel": "Wohin der Button führt",
+    "buyButtonTip": "Nutzt Text und Farbe des Buttons deiner Produktseite und öffnet die Produktseite.",
+    "rating": "Sternebewertung",
+    "ratingTipLabel": "Woher die Sterne kommen",
+    "ratingTip": "Aus Käuferbewertungen. Erscheint unter dem Namen, sobald ein Produkt eine Bewertung hat.",
+    "ratingTipReviewsOff": "Bewertungen sind auf deiner Produktseite ausgeschaltet, deshalb zeigen Kacheln keine Sterne. Schalte sie unter Produktseite, Bewertungen ein.",
+    "lowStock": "Wenig auf Lager",
+    "lowStockTipLabel": "Wann das Label erscheint",
+    "lowStockTip": "Zeigt Wenig auf Lager, wenn ein Produkt seinen Mindestbestand erreicht oder unterschreitet, und Ausverkauft bei null. Käufer sehen nie, wie viele noch da sind."
+  },
+  "textSpacing": {
+    "letterSpacing": "Zeichenabstand",
+    "lineHeight": "Zeilenhöhe",
+    "normal": "Normal",
+    "valueText": "{value} Prozent der Schriftgröße"
   }
 }

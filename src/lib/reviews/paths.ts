@@ -12,6 +12,12 @@ export function productReviewsApiPath(productId: string): string {
 /** POST a seller's review import. */
 export const REVIEW_IMPORT_API_PATH = "/api/sellers/import-reviews";
 
+/** POST a file's review fingerprints; answers which the store already has. */
+export const REVIEW_IMPORT_CHECK_API_PATH = `${REVIEW_IMPORT_API_PATH}/check`;
+
+/** GET a view of the store's reviews as a CSV file (lib/reviews/export.ts). */
+export const REVIEWS_EXPORT_API_PATH = "/api/sellers/export-reviews";
+
 /** The dashboard page that imports reviews. */
 export const REVIEWS_IMPORT_PATH = `${PRODUCTS_PATH}/import-reviews`;
 

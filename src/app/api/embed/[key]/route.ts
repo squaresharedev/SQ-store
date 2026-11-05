@@ -375,6 +375,8 @@ async function publicBlocks(
           color: block.color,
           borderWidth: block.borderWidth,
           opacity: block.opacity,
+          blur: block.blur,
+          blurDirection: block.blurDirection,
         };
       }
       if (block.type === "image") {
@@ -393,6 +395,8 @@ async function publicBlocks(
           fit: block.fit,
           imagePlacement: block.imagePlacement,
           opacity: block.opacity,
+          blur: block.blur,
+          blurDirection: block.blurDirection,
           // Omitted rather than null when R2 is unconfigured, so the widget
           // sees a block with no source instead of a broken one.
           ...(src ? { src } : {}),
@@ -414,6 +418,11 @@ async function publicBlocks(
         spans: block.spans,
         fontSize: block.fontSize,
         font: block.font,
+        // Bounded ints (hundredths of an em, a percent of the size).
+        letterSpacing: block.letterSpacing,
+        lineHeight: block.lineHeight,
+        blur: block.blur,
+        blurDirection: block.blurDirection,
       };
     }),
   );

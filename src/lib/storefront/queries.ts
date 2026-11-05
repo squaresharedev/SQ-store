@@ -196,6 +196,31 @@ export async function getPrimaryStorefrontId(): Promise<string | null> {
 }
 
 /**
+ * Each storefront's embed domains, the one edited last first, for the embed
+ * page to offer another storefront's list (lib/predictions.ts). Reads the
+ * domains alone, not the config; whatever is copied is validated again on
+ * save. Fails soft to none, which only costs the offer.
+ */
+export async function listEmbedDomains(): Promise<{ id: string; name: string; domains: string[] }[]> {
+  const account = await getActiveAccount();
+  if (!account) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("storefronts")
+    .select("id, name, domains:config->embed->domains")
+    .eq("owner_id", account.accountId)
+    .order("updated_at", { ascending: false });
+  if (error) return [];
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    domains: Array.isArray(row.domains)
+      ? row.domains.filter((domain): domain is string => typeof domain === "string")
+      : [],
+  }));
+}
+
+/**
  * THE SHIPPING CHOICES A PRODUCT HAS, gathered for the product form.
  *
  * ONE ACCOUNT, ONE ANSWER — since 20260905_shipping_policy_on_profile. This

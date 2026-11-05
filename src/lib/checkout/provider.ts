@@ -23,7 +23,7 @@ import type { SaleFee } from "@/lib/billing/fees";
 import { sellerSaleFee } from "@/lib/billing/sale-fee";
 import { testPaymentsEnabled, type CheckoutProviderId } from "@/lib/checkout/availability";
 import { placeStripeOrder } from "@/lib/checkout/stripe-provider";
-import type { CheckoutQuote } from "@/lib/checkout/quote";
+import { paidAddOns, type CheckoutQuote } from "@/lib/checkout/quote";
 import type { OrderChannel, ShipTo } from "@/types/order-view";
 
 /** Who is buying and where it goes, as validated by the order route. */
@@ -122,6 +122,7 @@ async function placeTestOrder(
     shipTo: buyer.shipTo,
     giftMessage: buyer.giftMessage,
     supplyConsent: buyer.supplyConsent,
+    addOns: paidAddOns(quote),
   });
   if (!result.ok) return { ok: false, reason: result.reason === "sold_out" ? "sold_out" : "failed" };
   if (!result.duplicate) return { ok: true, orderId: result.orderId };

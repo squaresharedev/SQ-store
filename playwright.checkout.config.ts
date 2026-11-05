@@ -1,5 +1,6 @@
 import { defineConfig } from "@playwright/test";
 import base, { STACK_SERVER } from "./playwright.config";
+import { NEXT_URL } from "./tests/e2e/stack/keys.mjs";
 
 /**
  * The CHECKOUT run: the same stack, started with the development test payment
@@ -22,7 +23,7 @@ import base, { STACK_SERVER } from "./playwright.config";
  */
 const CHECKOUT_ENV = {
   CHECKOUT_TEST_PAYMENTS: "1",
-  NEXT_PUBLIC_APP_URL: "http://localhost:3100",
+  NEXT_PUBLIC_APP_URL: NEXT_URL,
 };
 
 // Set on THIS process, which is what the stack inherits: Playwright starts the
@@ -44,6 +45,7 @@ export default defineConfig({
     "83-discounts.spec.ts",
     "86-order-lifecycle.spec.ts",
     "90-device-sweep.spec.ts",
+    "102-product-add-ons.spec.ts",
   ],
   webServer: {
     ...STACK_SERVER,

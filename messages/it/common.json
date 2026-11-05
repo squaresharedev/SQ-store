@@ -17,10 +17,16 @@
     "confirm": "Conferma",
     "remove": "Rimuovi",
     "delete": "Elimina",
-    "deleting": "Eliminazione…"
+    "deleting": "Eliminazione…",
+    "sameAs": "Come {title}",
+    "undo": "Annulla"
   },
   "badge": {
     "comingSoon": "Prossimamente"
+  },
+  "connection": {
+    "offline": "Sei offline",
+    "backOnline": "Di nuovo online"
   },
   "pagination": {
     "previous": "Precedente",
@@ -70,7 +76,8 @@
   "stock": {
     "inStock": "Disponibile",
     "lowStock": "{remaining, plural, one {Ne resta solo {remaining}} many {Ne restano solo {remaining}} other {Ne restano solo {remaining}}}",
-    "soldOut": "Esaurito"
+    "soldOut": "Esaurito",
+    "lowStockLabel": "Ultimi pezzi"
   },
   "toast": {
     "regionLabel": "Notifiche",
@@ -109,5 +116,10 @@
     "rotated": "Rotazione di {label} impostata a {degrees, plural, one {# grado} many {# gradi} other {# gradi}}",
     "rotatedBlock": "Rotazione del blocco impostata a {degrees, plural, one {# grado} many {# gradi} other {# gradi}}",
     "blocksMoved": "{count, plural, one {# blocco spostato} many {# blocchi spostati} other {# blocchi spostati}}"
+  },
+  "export": {
+    "button": "Esporta CSV",
+    "preparing": "Preparazione del file",
+    "failed": "Il download dell’esportazione non è riuscito. Riprova tra un istante."
   }
 }

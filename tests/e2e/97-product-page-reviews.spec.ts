@@ -43,8 +43,9 @@ const THEME = {
 };
 
 /** A complete product page config (the schema is strict), with the reviews switch as given. */
-function productPage(reviews: boolean) {
+function productPage(reviews: boolean, starColor?: string) {
   return {
+    ...(starColor ? { starColor } : {}),
     enabled: true,
     imageFit: "contain",
     ctaLabel: "Buy now",
@@ -84,7 +85,7 @@ test("a buyer reads a product's reviews, narrows them, and the seller can switch
   const oak = products.find((p) => p.title === "Oak lamp")!.id;
   const brass = products.find((p) => p.title === "Brass lamp")!.id;
 
-  async function configure(reviews: boolean) {
+  async function configure(reviews: boolean, starColor?: string) {
     await serviceRest(`/storefronts?id=eq.${storefront!.id}`, {
       method: "PATCH",
       body: {
@@ -94,7 +95,7 @@ test("a buyer reads a product's reviews, narrows them, and the seller can switch
             { type: "product", productId: oak, x: 0, y: 0, w: 2, h: 2 },
             { type: "product", productId: brass, x: 2, y: 0, w: 2, h: 2 },
           ],
-          productPage: productPage(reviews),
+          productPage: productPage(reviews, starColor),
         },
       },
     });
@@ -209,6 +210,23 @@ test("a buyer reads a product's reviews, narrows them, and the seller can switch
   await page.goto(`/s/${storefront!.id}/p/${brass}`);
   await expect(page.locator("[data-product-section='reviews']").getByText("No reviews yet")).toBeVisible();
   await expect(page.locator("[data-product-rating]")).toHaveCount(0);
+
+  // The stars are yellow until the seller chooses, and a stored colour reaches
+  // a buyer's page: the section, its reviews and the rating under the title.
+  const starColors = async () => {
+    await page.goto(`/s/${storefront!.id}/p/${oak}`);
+    await expect(section.locator("[data-review]").first()).toBeVisible();
+    return page.evaluate(() => [
+      ...new Set(
+        [...document.querySelectorAll("[data-star-rating], [data-product-rating] svg")].map(
+          (star) => getComputedStyle(star).color,
+        ),
+      ),
+    ]);
+  };
+  expect(await starColors()).toEqual(["rgb(245, 158, 11)"]);
+  await configure(true, "#7c3aed");
+  expect(await starColors()).toEqual(["rgb(124, 58, 237)"]);
 
   // The seller's switch takes the section away.
   await configure(false);

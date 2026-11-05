@@ -181,14 +181,19 @@ describe("GET /api/search/snapshot — shape", () => {
     expect(selected("notifications")).toBe("id, title, read");
   });
 
-  it("caps and orders each source newest-first", async () => {
+  it("caps and orders each source newest-first, products and storefronts by last touched", async () => {
     await GET();
     expect(limitFor("products")).toBe(300);
     expect(limitFor("orders")).toBe(100);
     expect(limitFor("notifications")).toBe(50);
-    for (const table of ["products", "orders", "notifications"]) {
+    for (const [table, column] of [
+      ["products", "updated_at"],
+      ["storefronts", "updated_at"],
+      ["orders", "created_at"],
+      ["notifications", "created_at"],
+    ]) {
       const order = callsFor(table).find((c) => c.method === "order");
-      expect(order?.args[0], table).toBe("created_at");
+      expect(order?.args[0], table).toBe(column);
       expect(order?.args[1], table).toEqual({ ascending: false });
     }
   });

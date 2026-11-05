@@ -29,13 +29,15 @@
     "returns": "Rücksendungen",
     "safety": "Sicherheit und Konformität",
     "reviews": "Bewertungen",
-    "seller": "Verkäufer"
+    "seller": "Verkäufer",
+    "addOns": "Zu deiner Bestellung hinzufügen"
   },
   "soldBy": "Verkauft von {seller}",
   "moreDetails": "Weitere Details",
   "trust": {
     "digitalDelivery": "Nach dem Kauf als Download geliefert.",
-    "euRights": "14 Tage Bedenkzeit und eine 2-jährige Gewährleistung."
+    "euRights": "14 Tage Bedenkzeit und eine 2-jährige Gewährleistung.",
+    "euRightsForEu": "EU-Käufer: 14 Tage Bedenkzeit und 2 Jahre gesetzliche Gewährleistung."
   },
   "safety": {
     "manufacturer": "Hersteller",
@@ -284,8 +286,33 @@
         "notEligible": "Diese Bestellung kann nicht mehr bewertet werden.",
         "rateLimited": "Zu viele Bewertungen von dieser Verbindung. Versuch es in einer Stunde noch einmal.",
         "failed": "Deine Bewertung konnte nicht veröffentlicht werden. Versuch es noch einmal."
+      },
+      "later": {
+        "title": "{kind, select, parcel {Bewerte es, sobald es angekommen ist} other {Bewerte es, sobald du es ausprobiert hast}}",
+        "body": "{store} kann dir einmal eine E-Mail schicken, {kind, select, parcel {etwa eine Woche nach dem Versand} other {in ein paar Tagen}}, mit einem Link, um es hier zu bewerten. Du kannst das jederzeit abbestellen.",
+        "remind": "Per E-Mail erinnern",
+        "notYet": "{kind, select, parcel {Noch nicht angekommen?} other {Noch nicht ausprobiert?}}",
+        "once": "{store} schickt dir nur eine einzige E-Mail. Du kannst das jederzeit abbestellen.",
+        "onDate": "{store} schickt dir um den {date} eine Erinnerung.",
+        "onLater": "{store} schickt dir {kind, select, parcel {etwa eine Woche nach dem Versand} other {in ein paar Tagen}} eine Erinnerung.",
+        "stop": "Keine E-Mail schicken",
+        "preview": "Das ist eine Vorschau, es wird keine E-Mail verschickt.",
+        "errors": {
+          "closed": "Für diese Bestellung kann keine Erinnerung mehr eingerichtet werden.",
+          "rateLimited": "Zu viele Versuche von dieser Verbindung. Versuch es in einer Stunde noch einmal.",
+          "failed": "Das hat nicht geklappt. Versuch es noch einmal."
+        }
+      },
+      "stopDialog": {
+        "title": "Erinnerung abbestellen?",
+        "body": "{store} schickt dir keine E-Mail mehr, um diese Bestellung zu bewerten.",
+        "confirm": "Erinnerung abbestellen",
+        "doneTitle": "Erinnerung abbestellt",
+        "doneBody": "Du bekommst keine E-Mails mehr zur Bewertung dieser Bestellung."
       }
-    }
+    },
+    "lineQuantity": "{quantity} × {title}",
+    "downloadItem": "{title} herunterladen"
   },
   "checkout": {
     "metadata": {
@@ -384,7 +411,8 @@
       "invalid": "Einige Details müssen überprüft werden. Prüfe die hervorgehobenen Felder.",
       "discount_invalid": "Dieser Rabattcode kann nicht mehr verwendet werden. Entferne ihn, um den vollen Preis zu zahlen.",
       "price_changed": "Der Preis hat sich geändert, während diese Seite geöffnet war, daher wurde nichts berechnet. Prüfe den neuen Gesamtbetrag und zahle dann.",
-      "turnstile": "Die Sicherheitsprüfung wurde nicht abgeschlossen, daher wurde nichts belastet. Sie läuft jetzt erneut: Warte einen Moment und versuche es dann noch einmal."
+      "turnstile": "Die Sicherheitsprüfung wurde nicht abgeschlossen, daher wurde nichts belastet. Sie läuft jetzt erneut: Warte einen Moment und versuche es dann noch einmal.",
+      "add_on_unavailable": "Etwas, das du hinzugefügt hast, kann mit dieser Bestellung nicht mehr verkauft werden, daher wurde nichts berechnet. Überprüfe deine Bestellung und den neuen Gesamtbetrag und bezahle dann."
     },
     "editHeadline": "Überschrift der Kasse",
     "discount": {
@@ -398,7 +426,12 @@
       "invalid": "Dieser Code kann für diese Bestellung nicht verwendet werden.",
       "rateLimited": "Zu viele Codes ausprobiert. Warte kurz und versuche es dann erneut.",
       "line": "Rabatt ({code})"
-    }
+    },
+    "addOns": {
+      "label": "Zu deiner Bestellung hinzugefügt",
+      "remove": "{title} aus dieser Bestellung entfernen"
+    },
+    "termsAssent": "Mit deiner Bestellung akzeptierst du auch die <terms>Nutzungsbedingungen</terms> von Square Share für die Nutzung dieser Plattform. Dein Kauf selbst ist ein Vertrag mit {seller}."
   },
   "sale": {
     "wasNow": "War {was}, jetzt {now}",
@@ -440,5 +473,27 @@
     "filterStars": "{stars, plural, one {Bewertungen mit {stars} Stern zeigen ({count})} other {Bewertungen mit {stars} Sternen zeigen ({count})}}",
     "showing": "{rating, plural, one {Bewertungen mit {rating} Stern} other {Bewertungen mit {rating} Sternen}}",
     "showAll": "Alle Bewertungen zeigen"
+  },
+  "addOns": {
+    "title": "Zu deiner Bestellung hinzufügen",
+    "add": "Hinzufügen",
+    "added": "Hinzugefügt",
+    "optionLabel": "{group} für {product}",
+    "unset": "Hier werden noch keine anderen Produkte angeboten. Klicke hier, um sie auszuwählen.",
+    "addNamed": "{title} zu deiner Bestellung hinzufügen",
+    "detailsNamed": "Details zu {title} ansehen",
+    "seeDetails": "Details",
+    "fullPage": "Ganze Seite ansehen",
+    "addToOrder": "Zu deiner Bestellung hinzufügen",
+    "removeFromOrder": "Aus deiner Bestellung entfernen",
+    "rating": "{average} von 5 Sternen, {count, plural, one {# Bewertung} other {# Bewertungen}}",
+    "hidden": {
+      "hint": "Käufer sehen dieses Produkt nicht.",
+      "draft": "Entwurf",
+      "soldOut": "Ausverkauft",
+      "takenDown": "Entfernt",
+      "otherKind": "Andere Art",
+      "otherCurrency": "Andere Währung"
+    }
   }
 }

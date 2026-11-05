@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { CornerArt } from "@/components/ui/CornerArt";
 import {
   TRANSIT_JOG,
   TRANSIT_LINE_TONE,
@@ -126,78 +127,67 @@ function passDelay(at: number): string {
  * one cut and out past the other. Every station is plain until the pill passes
  * through it, and lights as it does.
  *
- * Grey, black and white, and held back to a faint grey as a whole, so it
- * decorates the corner without competing with the card. Its top and right
- * edges are the cut lines: SettingsCard's `art` sets it flush in the corner.
- * Decoration, so aria-hidden; under reduced motion it is the still line.
+ * In the corner-art frame (ui/CornerArt), whose top and right edges are the
+ * cut lines. Under reduced motion it is the still line.
  */
 export function TransitFlow({ className }: { className?: string }) {
   return (
-    <span
-      aria-hidden
-      data-transit-flow=""
-      className={cn("relative block shrink-0", className)}
-      style={
-        {
-          width: (WIDTH - OVERHANG) * SCALE,
-          height: HEIGHT * SCALE,
-          "--transit-loop": `${LOOP_MS}ms`,
-        } as CSSProperties
-      }
+    <CornerArt
+      name="transit"
+      width={WIDTH * SCALE}
+      height={HEIGHT * SCALE}
+      overhang={OVERHANG * SCALE}
+      style={{ "--transit-loop": `${LOOP_MS}ms` } as CSSProperties}
+      className={className}
     >
       <span
-        className="absolute right-0 top-0 overflow-hidden opacity-40"
-        style={{ width: WIDTH * SCALE, height: HEIGHT * SCALE }}
+        className="absolute left-0 top-0 origin-top-left"
+        style={{ width: WIDTH, height: HEIGHT, scale: String(SCALE) }}
       >
-        <span
-          className="absolute left-0 top-0 origin-top-left"
-          style={{ width: WIDTH, height: HEIGHT, scale: String(SCALE) }}
+        <svg
+          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+          width={WIDTH}
+          height={HEIGHT}
+          className="absolute inset-0 overflow-visible"
         >
-          <svg
-            viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-            width={WIDTH}
-            height={HEIGHT}
-            className="absolute inset-0 overflow-visible"
-          >
-            <path
-              d={TRACK}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={TRANSIT_LINE_WIDTH}
-              strokeLinejoin="round"
-              className={TRANSIT_LINE_TONE.todo}
-            />
-            {/* The pill: one dash on a pathLength-100 copy of the line, so
-                the keyframes count in "percent of the way". Its resting pose
-                is set HERE, wholly before the line starts, so without the
-                animation (reduced motion, or no stylesheet) it is not there. */}
-            <path
-              d={TRACK}
-              pathLength={100}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={TRANSIT_LINE_WIDTH}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeDasharray={`${PILL_PERCENT} 200`}
-              strokeDashoffset={RUN_FROM}
-              className={cn("transit-flow-run", TRANSIT_LINE_TONE.next)}
-            />
-          </svg>
-          {STATIONS.map((station, index) => (
-            <Station key={`plain-${index}`} look="todo" {...station} />
-          ))}
-          {STATIONS.map((station, index) => (
-            <Station
-              key={`lit-${index}`}
-              look="current"
-              {...station}
-              flashDelay={passDelay(STATION_AT[index])}
-            />
-          ))}
-        </span>
+          <path
+            d={TRACK}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={TRANSIT_LINE_WIDTH}
+            strokeLinejoin="round"
+            className={TRANSIT_LINE_TONE.todo}
+          />
+          {/* The pill: one dash on a pathLength-100 copy of the line, so
+              the keyframes count in "percent of the way". Its resting pose
+              is set HERE, wholly before the line starts, so without the
+              animation (reduced motion, or no stylesheet) it is not there. */}
+          <path
+            d={TRACK}
+            pathLength={100}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={TRANSIT_LINE_WIDTH}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray={`${PILL_PERCENT} 200`}
+            strokeDashoffset={RUN_FROM}
+            className={cn("transit-flow-run", TRANSIT_LINE_TONE.next)}
+          />
+        </svg>
+        {STATIONS.map((station, index) => (
+          <Station key={`plain-${index}`} look="todo" {...station} />
+        ))}
+        {STATIONS.map((station, index) => (
+          <Station
+            key={`lit-${index}`}
+            look="current"
+            {...station}
+            flashDelay={passDelay(STATION_AT[index])}
+          />
+        ))}
       </span>
-    </span>
+    </CornerArt>
   );
 }
 

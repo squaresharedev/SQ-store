@@ -105,7 +105,8 @@
     "changePlan": "Trop de changements de forfait lancés en peu de temps.",
     "saveDiscounts": "Trop de modifications de réductions en peu de temps.",
     "moderateReviews": "Trop de modifications d’avis en peu de temps.",
-    "agentTools": "Cet assistant a envoyé trop de requêtes en peu de temps."
+    "agentTools": "Cet assistant a envoyé trop de requêtes en peu de temps.",
+    "writeWithAi": "Trop de brouillons demandés à l’IA en peu de temps."
   },
   "serverError": {
     "fix": "C’est généralement temporaire. Attendez un instant puis réessayez ; si le problème persiste, actualisez la page.",
@@ -517,6 +518,28 @@
       "fix": "Essayez d’autres mots, ou écrivez à {email} et une personne examinera."
     }
   },
+  "ai": {
+    "notOnPlan": {
+      "message": "L’aide à la rédaction par IA fait partie du forfait Pro.",
+      "fix": "Rédigez la description vous-même, ou passez à Pro."
+    },
+    "tooLittle": {
+      "message": "Il n’y a pas encore assez d’informations pour rédiger.",
+      "fix": "Ajoutez d’abord quelques détails, comme des options, des matières ou une taille."
+    },
+    "declined": {
+      "message": "L’IA n’a pas pu rédiger de description pour ce produit.",
+      "fix": "Rédigez-la vous-même, ou modifiez quelques mots et réessayez."
+    },
+    "unavailable": {
+      "message": "L’aide à la rédaction par IA n’est pas disponible pour le moment.",
+      "fix": "Réessayez dans quelques minutes, ou rédigez la description vous-même."
+    },
+    "creditUsed": {
+      "message": "Le crédit IA de ce mois est épuisé.",
+      "fix": "Il se renouvelle le 1er. D’ici là, écrivez comme d’habitude."
+    }
+  },
   "productImport": {
     "unreadable": {
       "message": "Cet import n’a pas pu être lu.",
@@ -704,6 +727,12 @@
       "message": "Choisissez pourquoi vous masquez cet avis.",
       "fix": "Un avis ne peut être masqué que pour l’une des raisons proposées."
     }
+  },
+  "reviewsExport": {
+    "permissionDenied": "Vous n'avez pas accès aux avis de cette boutique.",
+    "unavailable": "Vos avis ne peuvent pas être exportés pour l'instant.",
+    "rateLimited": "Cela fait beaucoup d'exports d'avis en peu de temps.",
+    "storeRateLimited": "Votre équipe a exporté les avis de cette boutique de nombreuses fois au cours de la dernière heure."
   },
   "agent": {
     "invalidInput": "Ces informations ne sont pas valides.",

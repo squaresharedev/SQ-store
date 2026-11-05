@@ -13,6 +13,7 @@
  */
 
 import type { MessageKey } from "@/i18n/types";
+import type { BlockField } from "@/components/storefront/SummonedField";
 import type { ProductPageSectionId } from "@/types/storefront";
 
 /** The design panel's seven groups, mirrored from ControlsPanel. */
@@ -28,7 +29,11 @@ export const CONTROLS_GROUPS = [
 export type ControlsGroup = (typeof CONTROLS_GROUPS)[number];
 
 /** The sections of the Product cards group. */
-export type CardsSectionId = "cardStyle" | "priceTag" | "saleChip";
+export type CardsSectionId = "cardStyle" | "priceTag" | "saleChip" | "hover" | "shopping";
+
+/** The kinds of block whose inspector a setting can open (a product tile's
+ *  settings are `cards`, at both scopes). */
+export type BlockSettingType = "text" | "shape" | "image";
 
 /** The sale chip's own setting, which the discount form links to. */
 export const SALE_CHIP_SETTING_ID = "sale-chip";
@@ -42,7 +47,7 @@ export type ThemeSectionId = "look" | "canvas";
 
 /** The five sections of the Product page group. ("Panel" so it cannot be
  *  confused with the page's own on-screen sections, ProductPageSectionId.) */
-export type ProductPagePanelSection = "layout" | "cta" | "sections" | "policies" | "seller";
+export type ProductPagePanelSection = "layout" | "cta" | "sections" | "addOns" | "reviews" | "policies" | "seller";
 
 /** The three sections of the Checkout group: how it is arranged and coloured,
  *  what it says around the form, and the thank-you page. */
@@ -61,7 +66,12 @@ export type SettingRef =
   | { kind: "productPage"; section: ProductPagePanelSection }
   /** One section of the Checkout group. Opening any of these puts the
    *  checkout and thank-you artboards on the canvas. */
-  | { kind: "checkoutPage"; section: CheckoutPagePanelSection };
+  | { kind: "checkoutPage"; section: CheckoutPagePanelSection }
+  /** One control of a BLOCK'S OWN inspector (a text block's spacing, a
+   *  shape's blur), which has no storefront-wide copy at all. The designer
+   *  opens it on the selected block when that block has it, else on the first
+   *  block on the board that does (see StorefrontDesigner.openSetting). */
+  | { kind: "block"; field: BlockField; types: readonly BlockSettingType[] };
 
 /**
  * CLICKING THE PAGE ITSELF opens the setting behind what was clicked.
@@ -106,6 +116,10 @@ export const PRODUCT_PAGE_HOTSPOTS = {
   policies: { kind: "productPage", section: "policies" },
   /** The trader identity block. */
   seller: { kind: "productPage", section: "seller" },
+  /** "Add to your order": its heading, look and place in the buy box. */
+  addOns: { kind: "productPage", section: "addOns" },
+  /** The buyers' reviews: whether they show, and the colour of their stars. */
+  reviews: { kind: "productPage", section: "reviews" },
 } as const satisfies Record<string, SettingRef>;
 
 export type ProductPageHotspot = keyof typeof PRODUCT_PAGE_HOTSPOTS;
@@ -163,12 +177,15 @@ export const SECTION_SETTING: Record<ProductPageSectionId, ProductPageHotspot> =
   shipping: "policies",
   returns: "policies",
   safety: "sections",
-  reviews: "sections",
+  reviews: "reviews",
   seller: "seller",
+  addOns: "addOns",
 };
 
-/** Which group of the design panel a ref lands in. */
-export function settingGroup(ref: SettingRef): ControlsGroup {
+/** Which group of the design panel a ref lands in. None for a block's own
+ *  setting, which opens in that block's inspector instead. */
+export function settingGroup(ref: SettingRef): ControlsGroup | null {
+  if (ref.kind === "block") return null;
   if (ref.kind === "group") return ref.group;
   if (ref.kind === "cards") return "cards";
   if (ref.kind === "theme") return "theme";
@@ -192,6 +209,9 @@ export function isSameSettingRef(
   }
   if (a.kind === "checkoutPage" && b.kind === "checkoutPage") {
     return a.section === b.section;
+  }
+  if (a.kind === "block" && b.kind === "block") {
+    return a.field === b.field && a.types.join() === b.types.join();
   }
   return false;
 }
@@ -218,6 +238,16 @@ export function isPerTileSetting(ref: SettingRef): boolean {
  */
 export function freshSettingRef(ref: SettingRef): SettingRef {
   return { ...ref };
+}
+
+/** The "Storefront / ..." line for a block's own setting, which belongs to
+ *  no group of the panel. */
+const BLOCK_SUBTITLE: MessageKey = "Storefront.settings.subtitle.blocks";
+
+/** The "Storefront / ..." line under a search result, for any ref. */
+export function settingSubtitle(ref: SettingRef): MessageKey {
+  const group = settingGroup(ref);
+  return group ? GROUP_SUBTITLES[group] : BLOCK_SUBTITLE;
 }
 
 /**
@@ -299,7 +329,7 @@ export function settingIndexFields(
 } {
   return {
     title: t(setting.label),
-    subtitle: t(GROUP_SUBTITLES[settingGroup(setting.ref)]),
+    subtitle: t(settingSubtitle(setting.ref)),
     keywords: setting.keywords,
   };
 }
@@ -464,6 +494,11 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "shadow colour",
       "fade colour",
       "gradient colour",
+      "shadow blur",
+      "fade blur",
+      "frosted",
+      "photo blur",
+      "blurry photo",
       "caption style",
       "name style",
       "title colour",
@@ -556,6 +591,114 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "flag",
     ],
     ref: { kind: "cards", section: "saleChip" },
+  },
+  {
+    id: "card-hover-effect",
+    label: "Storefront.settings.labels.cardHoverEffect",
+    keywords: [
+      "hover",
+      "on hover",
+      "mouse over",
+      "lift",
+      "zoom",
+      "tilt",
+      "animation",
+      "motion",
+      "card effect",
+      "grow on hover",
+      "pop out",
+    ],
+    ref: { kind: "cards", section: "hover" },
+  },
+  {
+    id: "card-second-photo",
+    label: "Storefront.settings.labels.cardSecondPhoto",
+    keywords: [
+      "second image",
+      "hover photo",
+      "hover image",
+      "alternate image",
+      "swap photo",
+      "back photo",
+      "another picture",
+      "image on hover",
+    ],
+    ref: { kind: "cards", section: "hover" },
+  },
+  {
+    id: "card-buy-button",
+    label: "Storefront.settings.labels.cardBuyButton",
+    keywords: [
+      "add to cart",
+      "shop now",
+      "buy on card",
+      "button on tile",
+      "call to action on card",
+      "cta on card",
+      "purchase button",
+    ],
+    ref: { kind: "cards", section: "shopping" },
+  },
+  {
+    id: "card-star-rating",
+    label: "Storefront.settings.labels.cardStarRating",
+    keywords: [
+      "stars",
+      "rating",
+      "reviews on card",
+      "review score",
+      "average rating",
+      "star rating",
+      "social proof",
+    ],
+    ref: { kind: "cards", section: "shopping" },
+  },
+  {
+    id: "card-low-stock",
+    label: "Storefront.settings.labels.cardLowStock",
+    keywords: [
+      "low stock",
+      "stock label",
+      "almost gone",
+      "running out",
+      "few left",
+      "scarcity",
+      "inventory",
+      "limited stock",
+    ],
+    ref: { kind: "cards", section: "shopping" },
+  },
+  {
+    id: "text-spacing",
+    label: "Storefront.settings.labels.textSpacing",
+    keywords: [
+      "letter spacing",
+      "line height",
+      "line spacing",
+      "tracking",
+      "leading",
+      "kerning",
+      "space between letters",
+      "space between lines",
+    ],
+    ref: { kind: "block", field: "spacing", types: ["text"] },
+  },
+  {
+    id: "element-blur",
+    label: "Storefront.settings.labels.elementBlur",
+    keywords: [
+      "blur",
+      "soften",
+      "blurry",
+      "out of focus",
+      "frosted",
+      "progressive blur",
+      "blur direction",
+      "shape blur",
+      "image blur",
+      "text blur",
+    ],
+    ref: { kind: "block", field: "blur", types: ["shape", "image", "text"] },
   },
   {
     id: "sold-out",
@@ -803,6 +946,18 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
     ref: { kind: "productPage", section: "sections" },
   },
   {
+    id: "product-page-add-ons",
+    label: "Storefront.settings.labels.productPageAddOns",
+    keywords: ["add to order", "add to your order", "add-ons", "upsell", "bundle", "cross-sell", "goes with"],
+    ref: { kind: "productPage", section: "addOns" },
+  },
+  {
+    id: "product-page-stars",
+    label: "Storefront.settings.labels.productPageStars",
+    keywords: ["star colour", "rating colour", "yellow stars", "review stars", "reviews", "ratings"],
+    ref: { kind: "productPage", section: "reviews" },
+  },
+  {
     id: "product-page-availability",
     label: "Storefront.settings.labels.productPageAvailability",
     keywords: [
@@ -1016,9 +1171,16 @@ export const PRODUCT_PAGE_SETTINGS: readonly SettingEntry[] =
 export const CHECKOUT_PAGE_SETTINGS: readonly SettingEntry[] =
   STOREFRONT_SETTINGS.filter((entry) => entry.ref.kind === "checkoutPage");
 
-/** Everything that is NOT a page's: findable at all times. */
+/** The settings of a block's own inspector, derived for the same reason: they
+ *  are offered only while the board holds a block that has them (see
+ *  editor-search), since there is nothing for them to open otherwise. */
+export const BLOCK_SETTINGS: readonly SettingEntry[] =
+  STOREFRONT_SETTINGS.filter((entry) => entry.ref.kind === "block");
+
+/** Everything that is neither a page's nor a block's: findable at all times. */
 export const STOREFRONT_ONLY_SETTINGS: readonly SettingEntry[] = STOREFRONT_SETTINGS.filter(
-  (entry) => entry.ref.kind !== "productPage" && entry.ref.kind !== "checkoutPage",
+  (entry) =>
+    entry.ref.kind !== "productPage" && entry.ref.kind !== "checkoutPage" && entry.ref.kind !== "block",
 );
 
 const BY_ID = new Map(STOREFRONT_SETTINGS.map((entry) => [entry.id, entry]));

@@ -117,12 +117,12 @@ describe("taxSchema", () => {
       ).toBe(false);
     }
   });
-  it("country must be an EU code from the list", () => {
+  it("country must be a code from the list of places we operate", () => {
     expect(
       taxSchema.safeParse({
         tax_business_name: "",
         tax_vat_id: "",
-        tax_country: "US",
+        tax_country: "GB",
         ...BLANK_SELLER,
       }).success,
     ).toBe(false);

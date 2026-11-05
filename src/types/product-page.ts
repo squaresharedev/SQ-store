@@ -1,4 +1,4 @@
-import type { ProductPageProduct } from "@/types/product";
+import type { AddOnCard, HiddenAddOn, ProductPageProduct } from "@/types/product";
 import type {
   ProductPageConfig,
   StorefrontHeader,
@@ -63,6 +63,18 @@ export type ProductPageData = {
    * in the editor preview, where reporting is inert anyway.
    */
   reportScopes?: ProductPageReportScopes;
+  /**
+   * "Add to your order": the seller's other products a buyer may take in the
+   * same order, in the seller's order (lib/products/add-ons.ts). Absent or
+   * empty when there are none to offer, or the section is switched off.
+   */
+  addOns?: AddOnCard[];
+  /**
+   * The SELLER's preview only: what this product chose that buyers are not
+   * offered right now (a draft, one sold out...), drawn faded after the rest
+   * so the section shows everything chosen. Never set on a buyer's page.
+   */
+  hiddenAddOns?: HiddenAddOn[];
 };
 
 export type ProductPageReportScopes = { storefront: boolean; seller: boolean };

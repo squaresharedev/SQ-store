@@ -95,6 +95,7 @@ const REGISTRY: Record<string, Classification> = {
   "lib/settings/actions.ts::requestEmailChange": limited(),
   "lib/settings/actions.ts::sendPasswordReset": limited(),
   "lib/settings/actions.ts::saveTaxInfo": limited(),
+  "lib/settings/actions.ts::saveSuggestAsYouType": limited(),
   // Contact proof. Sending spends five budgets inside issueContactCode (own
   // cooldown, own hourly and daily, the TARGET's across all accounts, the
   // client's, plus the platform's SMS ceiling); checking spends the per-account
@@ -132,7 +133,12 @@ const REGISTRY: Record<string, Classification> = {
 
   // --- products / stock / storefront --------------------------------------
   "lib/products/badge-actions.ts::checkBadgeLabel": limited(),
+  // AI writing help: startAiCall (the plan, the pace budgets, a hold on the credit).
+  "lib/products/describe-actions.ts::suggestProductDescription": limited(),
+  "lib/products/describe-actions.ts::suggestDescriptionCompletion": limited(),
   "lib/products/badge-actions.ts::moveProductBadge": limited(),
+  "lib/products/add-on-actions.ts::getAddOnPicker": limited(),
+  "lib/products/add-on-actions.ts::setProductAddOns": limited(),
   "lib/products/actions.ts::createProduct": limited(),
   "lib/products/actions.ts::updateProduct": limited(),
   "lib/products/actions.ts::deleteProduct": limited(),
@@ -311,10 +317,17 @@ const CONTACT_LIMITERS = ["issueContactCode", "redeemContactCode"];
  */
 const DISCOUNT_LIMITERS = ["authorizeDiscountWrite"];
 
+/**
+ * AI writing help's shared gate (lib/products/describe-actions.ts): the plan
+ * beside each task's pace budgets, then a hold on the month's AI credit,
+ * before the model is asked. Pinned below.
+ */
+const AI_LIMITERS = ["startAiCall"];
+
 /** Does this body take from a rate-limit budget? */
 function isRateLimited(body: string): boolean {
   if (/\brateLimit(?:Key)?\s*\(/.test(body)) return true;
-  return [...SECOND_FACTOR_LIMITERS, ...SETUP_LIMITERS, ...CONTACT_LIMITERS, ...DISCOUNT_LIMITERS].some((name) =>
+  return [...SECOND_FACTOR_LIMITERS, ...SETUP_LIMITERS, ...CONTACT_LIMITERS, ...DISCOUNT_LIMITERS, ...AI_LIMITERS].some((name) =>
     new RegExp(`\\b${name}\\s*\\(`).test(body),
   );
 }
@@ -336,6 +349,41 @@ describe("discount write gate", () => {
     expect(exported.map((match) => match[1]).sort()).toEqual(
       ["createDiscount", "deleteDiscount", "endSale", "setCodeEnabled", "updateDiscount"],
     );
+  });
+});
+
+describe("AI writing gate", () => {
+  // The registry trusts this name as a budget, so pin that it is one: per
+  // person and per store, then a hold on the store's credit for the most the
+  // call can cost, before any model call.
+  const source = readFileSync(join(process.cwd(), "src", "lib", "products", "describe-actions.ts"), "utf8");
+
+  it("startAiCall takes from the person's and the store's budgets, then holds the credit", () => {
+    const body = source.slice(source.indexOf("async function startAiCall"));
+    const gate = body.slice(0, body.search(/\r?\n\}\r?\n/));
+    expect(gate).toMatch(/aiPlanFor\(accountId\)/);
+    expect(gate).toMatch(/rateLimit\(action, budget\)/);
+    expect(gate).toMatch(/rateLimitKey\(accountId, pace\.store\.action, pace\.store\.budget\)/);
+    // The hold comes after every budget said yes, so a refused call holds nothing.
+    expect(gate.indexOf("holdAiCredit(")).toBeGreaterThan(gate.indexOf("rateLimited("));
+    expect(gate).toMatch(/holdAiCredit\(accountId, plan\.plan, maxCostMicroUsd\)/);
+  });
+
+  it("every AI action holds the most its call can cost, then settles what it cost", () => {
+    for (const [action, task] of [
+      ["suggestProductDescription", "describeListing"],
+      ["suggestDescriptionCompletion", "completeListing"],
+    ]) {
+      const body = source.slice(source.indexOf(`export async function ${action}`));
+      const end = body.search(/\r?\n\}\r?\n/);
+      const fn = body.slice(0, end);
+      expect(fn, action).toMatch(
+        new RegExp(`await startAiCall\\(account\\.accountId, \\w+_PACE, ${task}MaxCost\\(parsed\\.data\\)\\)`),
+      );
+      expect(fn, action).toMatch(/await settleAiCredit\(started\.hold, outcome\.cost\)/);
+      // The model is asked only after the gate.
+      expect(fn.indexOf(`await ${task}(`), action).toBeGreaterThan(fn.indexOf("await startAiCall("));
+    }
   });
 });
 

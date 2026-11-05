@@ -2,7 +2,7 @@
 // Supabase rows all share this shape, so the wiring stage can swap the data
 // source without touching component props.
 
-import type { StockBadge } from "@/types/stock";
+import type { StockBadge, TileStockState } from "@/types/stock";
 
 /** Lifecycle of a product. `draft` is hidden from buyers; `active` is live. */
 export const PRODUCT_STATUSES = ["draft", "active"] as const;
@@ -63,6 +63,16 @@ export interface Product {
    * is the listed price and the only one.
    */
   sale?: ProductTileSale;
+  /**
+   * The card extras, set the same way: only where a storefront is drawn, and
+   * only when the card has something to show. The product's second photo for
+   * a card that shows it on hover (signed URL), its buyers' rating once it has
+   * a review, and, on a buyer's board, its stock as a STATE with no count (the
+   * designer works that out from the seller's own counts above instead).
+   */
+  hoverImageUrl?: string;
+  rating?: ProductRating;
+  stockState?: TileStockState;
 }
 
 /**
@@ -431,6 +441,9 @@ export interface ProductDetail extends Product {
   /** Which of the storefront's named shipping profiles this product ships
    *  under. Null = the store's default terms, which is the common case. */
   shippingProfileId: string | null;
+  /** Other products offered as "Add to your order" on this one's page, in the
+   *  seller's order. Empty for most products. */
+  addOnIds: string[];
 }
 
 /** A displayable product photo: signed URL, alt, optional option tie. */
@@ -502,6 +515,74 @@ export interface ProductPageProduct {
    */
   maxQuantity: number;
 }
+
+// ── Add-ons ─────────────────────────────────────────────────────────────
+//
+// "Add to your order": other products of the same store that a product's page
+// offers beside Buy now, picked by the seller. A buyer who taps one pays for it
+// in the same order (order_add_ons, 20261028_product_add_ons.sql).
+
+/** How many add-ons one product may offer. MIRROR of the
+ *  products_add_on_ids_size check (20261028_product_add_ons.sql). */
+export const ADD_ONS_MAX = 4;
+
+/**
+ * One add-on as a buyer's page shows it. Built by the same builder as
+ * ProductPageProduct (lib/products/add-ons.ts calls buildProductPageProduct),
+ * narrowed to what a small card and the checkout's sum need, so it can never
+ * carry anything that shape does not.
+ */
+export type AddOnCard = Pick<
+  ProductPageProduct,
+  | "id"
+  | "title"
+  | "description"
+  | "priceCents"
+  | "currency"
+  | "sale"
+  | "images"
+  | "optionGroups"
+  | "isDigital"
+  | "digitalFormat"
+  | "shippingProfileId"
+> & {
+  /** Its own product page on THIS storefront, for "See full page" in the
+   *  details dialog (an add-on has one wherever a product on the storefront
+   *  offers it, see lib/products/purchasable.ts). Null when the surface links
+   *  nowhere: the checkout, the quote, the product form's picture. */
+  pagePath: string | null;
+  /** Its buyers' reviews in two numbers, for the details dialog. Null without
+   *  any, or where the surface did not read them. */
+  rating: ProductRating | null;
+};
+
+/** A product's public reviews at a glance: their average and how many there
+ *  are. Only ever built for a product with at least one (see
+ *  lib/reviews/ratings.ts). */
+export type ProductRating = { average: number; count: number };
+
+/**
+ * Why a chosen add-on is NOT offered to buyers right now, most final first:
+ * staff took it down, it cannot share an order with this product (kind or
+ * currency), it is a draft, or it is sold out. One rule decides it for the
+ * buyer's page and every preview (lib/products/add-on-visibility.ts).
+ */
+export const ADD_ON_HIDDEN_REASONS = ["takenDown", "otherKind", "otherCurrency", "draft", "soldOut"] as const;
+export type AddOnHiddenReason = (typeof ADD_ON_HIDDEN_REASONS)[number];
+
+/**
+ * A chosen add-on buyers are not offered right now, as the SELLER's previews
+ * draw it (faded, with the reason), so four chosen never looks like two.
+ * Never on a buyer's page.
+ */
+export type HiddenAddOn = {
+  id: string;
+  title: string;
+  imageUrl: string | null;
+  priceCents: number;
+  currency: Currency;
+  reason: AddOnHiddenReason;
+};
 
 /**
  * A sale on one product, as a buyer's page shows it.

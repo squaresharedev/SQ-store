@@ -17,10 +17,16 @@
     "confirm": "Potvrdiť",
     "remove": "Odobrať",
     "delete": "Zmazať",
-    "deleting": "Maže sa…"
+    "deleting": "Maže sa…",
+    "sameAs": "Rovnaké ako {title}",
+    "undo": "Späť"
   },
   "badge": {
     "comingSoon": "Čoskoro"
+  },
+  "connection": {
+    "offline": "Ste offline",
+    "backOnline": "Znova online"
   },
   "pagination": {
     "previous": "Predchádzajúce",
@@ -70,7 +76,8 @@
   "stock": {
     "inStock": "Na sklade",
     "lowStock": "{remaining, plural, one {Zostáva len {remaining}} few {Zostávajú len {remaining}} many {Zostáva len {remaining}} other {Zostáva len {remaining}}}",
-    "soldOut": "Vypredané"
+    "soldOut": "Vypredané",
+    "lowStockLabel": "Posledné kusy"
   },
   "toast": {
     "regionLabel": "Upozornenia",
@@ -109,5 +116,10 @@
     "rotated": "{label}: otočené na {degrees, plural, one {# stupeň} few {# stupne} many {# stupňa} other {# stupňov}}",
     "rotatedBlock": "Blok otočený na {degrees, plural, one {# stupeň} few {# stupne} many {# stupňa} other {# stupňov}}",
     "blocksMoved": "{count, plural, one {Presunutý # blok} few {Presunuté # bloky} many {Presunutého # bloku} other {Presunutých # blokov}}"
+  },
+  "export": {
+    "button": "Exportovať CSV",
+    "preparing": "Pripravuje sa súbor",
+    "failed": "Export sa nestiahol. Skúste to o chvíľu znova."
   }
 }

@@ -10,7 +10,7 @@ import { REVIEW_RATING_MAX } from "@/lib/reviews/limits";
 import type { ProductReviews } from "@/types/review";
 import { ReviewFeed } from "./ReviewFeed";
 import { StarRating } from "./StarRating";
-import { surfaceRadius, type CtaAppearance } from "./product-page-maps";
+import type { CtaAppearance } from "./product-page-maps";
 
 /** 5 down to 1: the breakdown reads best-first, like every review site. */
 const BREAKDOWN_ORDER = Array.from({ length: REVIEW_RATING_MAX }, (_, index) => REVIEW_RATING_MAX - index);
@@ -30,13 +30,15 @@ const BREAKDOWN_ORDER = Array.from({ length: REVIEW_RATING_MAX }, (_, index) => 
  * nothing, which would read as a page that failed to load.
  *
  * Drawn in the page's own ink and hairlines, like every other section, so it
- * belongs to the seller's shop.
+ * belongs to the seller's shop. The stars alone have a colour of their own
+ * (`starColor`): yellow until the seller picks another.
  */
 export function ReviewsSection({
   productId,
   reviews,
   ink,
   rule,
+  starColor,
   cta,
   cornerRadius,
 }: {
@@ -44,6 +46,7 @@ export function ReviewsSection({
   reviews: ProductReviews;
   ink: string;
   rule: string;
+  starColor: string;
   cta: CtaAppearance;
   cornerRadius: number;
 }) {
@@ -59,7 +62,7 @@ export function ReviewsSection({
       style={{ borderColor: rule }}
       aria-labelledby="product-reviews"
       data-product-section="reviews"
-      data-setting-hotspot="sections"
+      data-setting-hotspot="reviews"
     >
       <h2 id="product-reviews" className="pb-4 text-lg font-semibold">
         {t("heading")}
@@ -67,7 +70,7 @@ export function ReviewsSection({
 
       {empty ? (
         <div className="flex flex-col gap-2" data-reviews-empty="">
-          <StarRating value={0} label={t("empty.title")} size="md" />
+          <StarRating value={0} label={t("empty.title")} size="md" color={starColor} />
           <p className="text-sm font-medium">{t("empty.title")}</p>
           <p className="text-sm opacity-70">{t("empty.body")}</p>
         </div>
@@ -84,6 +87,7 @@ export function ReviewsSection({
                     value={summary.average!}
                     label={t("average", { average: formatFixed(summary.average!, 1, locale) })}
                     size="md"
+                    color={starColor}
                   />
                   <span className="text-xs opacity-70">{t("count", { count: summary.count })}</span>
                 </div>
@@ -101,12 +105,11 @@ export function ReviewsSection({
                         disabled={count === 0}
                         onClick={() => setRating(active ? undefined : stars)}
                         className={cn(
-                          "flex w-full items-center gap-2 px-1.5 py-1 text-left transition-opacity duration-base ease-standard",
+                          "flex w-full items-center gap-2 rounded-none px-1.5 py-1 text-left transition-opacity duration-base ease-standard",
                           "focus-visible:outline-2 focus-visible:outline-offset-1 disabled:cursor-default enabled:hover:opacity-80",
                           rating !== undefined && !active && "opacity-50",
                         )}
                         style={{
-                          borderRadius: surfaceRadius(cornerRadius),
                           backgroundColor: active ? rule : undefined,
                           outlineColor: ink,
                         }}
@@ -153,6 +156,7 @@ export function ReviewsSection({
                 rating={rating}
                 ink={ink}
                 rule={rule}
+                starColor={starColor}
                 cta={cta}
                 cornerRadius={cornerRadius}
               />

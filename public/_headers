@@ -1,5 +1,15 @@
 # Cloudflare static assets: headers for files served straight from the build.
 #
+# Every file gets the two transport headers the app's own responses carry
+# (next.config.ts headers()): the Worker adds those to what it renders, but a
+# file served straight from the build (sw.js, widget.js, every /_next/static
+# chunk) never passes through it. KEEP THE VALUES EQUAL to next.config.ts;
+# tests/unit/static-headers.test.ts compares them. A request matching several
+# rules below gets the headers of all of them.
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+#
 # The font files may be read cross-origin. A storefront preview's MCP Apps view
 # (lib/agent/preview/view.ts) draws this app's markup on the chat host's sandbox
 # origin, and a browser fetches a cross-origin font only with CORS. Fonts are

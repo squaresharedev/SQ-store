@@ -44,7 +44,7 @@ import { translatorFor } from "@/i18n/translator";
 import { DEFAULT_LOCALE, parseLocale, type Locale } from "@/i18n/locales";
 import type { SaleFee } from "@/lib/billing/fees";
 import type { CheckoutBuyer, PlaceResult } from "@/lib/checkout/provider";
-import type { CheckoutQuote } from "@/lib/checkout/quote";
+import { paidAddOns, type CheckoutQuote } from "@/lib/checkout/quote";
 
 /** The prefix of the checkout ids this provider mints for orders.checkout_session_id.
  *  Its own, so one is never mistaken for Stripe's (`cs_test_`, `cs_live_`) or
@@ -100,6 +100,7 @@ export async function placeStripeOrder(
     shipTo: buyer.shipTo,
     giftMessage: buyer.giftMessage,
     supplyConsent: buyer.supplyConsent,
+    addOns: paidAddOns(quote),
   });
   if (!reserved.ok) return { ok: false, reason: reserved.reason === "sold_out" ? "sold_out" : "failed" };
 
@@ -161,6 +162,15 @@ export async function placeStripeOrder(
               product_data: { name: quote.quantity > 1 ? `${quote.quantity} × ${quote.title}` : quote.title },
             },
           },
+          // "Add to your order": one line each, at what the line is charged.
+          ...quote.addOns.map((line) => ({
+            quantity: 1,
+            price_data: {
+              currency,
+              unit_amount: line.amountCents,
+              product_data: { name: line.quantity > 1 ? `${line.quantity} × ${line.title}` : line.title },
+            },
+          })),
           ...(quote.shippingCents && quote.shippingCents > 0
             ? [
                 {

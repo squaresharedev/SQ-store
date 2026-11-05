@@ -10,6 +10,7 @@ import { singleLineText } from "@/lib/validation/inputs";
 import { fileBytesContradictType } from "@/lib/uploads/sniff";
 import { peekStream } from "@/lib/uploads/peek";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
+import { isSameOriginRequest } from "@/lib/security/same-origin";
 
 /** Enough for every container signature the sniffer checks (longest reaches byte 11). */
 const SNIFF_BYTES = 12;
@@ -51,6 +52,10 @@ function bad(status: number, error: string, fix?: string) {
 
 export async function POST(request: Request) {
   const t = await getTranslations("Errors.uploadRoute");
+  // The body's declared type is not checked, so a text/plain POST (no
+  // preflight) from a sibling squareshare.eu site would arrive with the
+  // seller's cookie. Only our own pages upload.
+  if (!isSameOriginRequest(request)) return bad(403, t("permissionDenied"));
   const account = await getActiveAccount();
   if (!account) return bad(401, t("signIn.file"));
   if (!can(account.role, "products.write")) {

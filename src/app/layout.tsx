@@ -7,6 +7,7 @@ import { LocaleSwitchProvider } from "@/i18n/LocaleSwitchProvider";
 import { ToastProvider } from "@/components/ui/Toast";
 import { NavigationProgress } from "@/components/layout/NavigationProgress";
 import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
+import { ConnectionStatus } from "@/components/pwa/ConnectionStatus";
 import { BRAND_NAME, BRAND_SURFACE, BRAND_TITLE_TEMPLATE } from "@/lib/brand";
 import { THEME_BOOTSTRAP } from "@/lib/theme-mode";
 import { cn } from "@/lib/utils";
@@ -164,6 +165,7 @@ export default async function RootLayout({
             its own client components need (src/i18n/scopes.ts). */}
         <ScopedIntlProvider scope="shell">
           <ToastProvider>
+            <ConnectionStatus />
             <LocaleSwitchProvider>{children}</LocaleSwitchProvider>
           </ToastProvider>
           <ServiceWorkerRegistrar />

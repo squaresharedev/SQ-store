@@ -49,7 +49,15 @@ export function escapeIlike(term: string): string {
  * search and not the filter's own syntax. Wildcards are escaped as above.
  */
 export function ilikeAny(columns: readonly string[], term: string): string {
-  const pattern = `%${escapeIlike(term)}%`;
-  const quoted = `"${pattern.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+  const quoted = quotedFilterValue(`%${escapeIlike(term)}%`);
   return columns.map((column) => `${column}.ilike.${quoted}`).join(",");
+}
+
+/**
+ * A value written into a PostgREST filter string (an `or` list, an `in` list),
+ * double-quoted with `\` and `"` escaped inside, so a comma, a parenthesis or a
+ * quote in it is part of the value and never the filter's own syntax.
+ */
+export function quotedFilterValue(value: string): string {
+  return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }

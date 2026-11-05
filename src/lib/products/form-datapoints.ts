@@ -83,6 +83,7 @@ export const PRODUCT_FORM_SECTIONS = [
   { id: "specs", required: false },
   { id: "documents", required: false },
   { id: "safety", required: false },
+  { id: "addOns", required: false },
   { id: "visibility", required: false },
 ] as const;
 
@@ -166,6 +167,9 @@ export type ProductFormSnapshot = {
    *  colour id and where each sits, defaults spelled out ("ink", "beside"),
    *  rows with no words left out (exactly the badges a save would store). */
   badges: { icon: string; label: string; color: string; placement: string }[];
+  /** Other products offered as "Add to your order" on this one's page, in the
+   *  seller's order. Product ids (opaque references, not object keys). */
+  addOnIds: string[];
   specs: {
     hasDimensions: boolean;
     hasWeight: boolean;
@@ -204,6 +208,8 @@ export type ProductFormStateInput = {
   gallery: GalleryFormImage[];
   documents: DocumentFormValue[];
   badges: BadgeFormValue[];
+  /** The add-ons chosen, in order. */
+  addOnIds: readonly string[];
   details: DetailsFormValues;
   /** Per-version measurements, keyed by option id. Entries whose option is
    *  gone are ignored, exactly as the save path ignores them. */
@@ -394,6 +400,10 @@ export function sectionSummaries(
     safety: safetyStarted(details.safety)
       ? [manufacturer || msg("Products.form.summary.started")]
       : [],
+    addOns:
+      input.addOnIds.length === 0
+        ? []
+        : [msg("Products.form.summary.addOns", { count: input.addOnIds.length })],
     visibility: [
       values.status === "active"
         ? msg("Products.form.summary.active")
@@ -489,6 +499,7 @@ export function buildProductFormSnapshot(
       color: badge.color ?? "ink",
       placement: badge.placement ?? "beside",
     })),
+    addOnIds: [...input.addOnIds],
     specs: {
       hasDimensions: Boolean(
         details.length.trim() || details.width.trim() || details.height.trim(),

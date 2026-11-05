@@ -207,7 +207,7 @@
   },
   "legal": {
     "cardTitle": "Seller Agreement, Terms & Privacy",
-    "cardDescription": "The current drafts, in plain language, because nobody reads legalese for fun. Real legal copy is on its way; accepting now covers this draft version.",
+    "cardDescription": "What you agree to and how we handle your data. Each has a short version, with the full text a click away.",
     "termsTitle": "Terms of Service",
     "termsDescription": "The short version of what you agree to by selling on Square Share, with the full Terms a click away.",
     "docs": {
@@ -252,6 +252,7 @@
           "heading": "Who you're dealing with",
           "points": {
             "merchantOfRecord": "Square Share is a platform that helps you sell. When a buyer orders from you, the sale is between you and that buyer: you are the seller and merchant of record, not us.",
+            "regions": "Square Share operates in the EU, the USA and Canada. We don't operate anywhere else yet, so you need to be based in one of those places to sell here. Québec has to wait for the French version of these Terms.",
             "eligibility": "You must be at least 18, or the age of majority where you live. If you sign up for a business, you confirm you can bind it to these Terms."
           }
         },
@@ -266,8 +267,8 @@
           "heading": "Selling",
           "points": {
             "lawfulListings": "List accurately, and only sell lawful things you have the right to sell.",
-            "consumerRights": "Honour your buyers' consumer rights, including the 14-day right of withdrawal and the legal guarantee, and handle your own delivery, support and refunds.",
-            "taxesAndRecords": "Taxes and VAT on your sales are yours to handle, and you keep your own sales records for 10 years."
+            "consumerRights": "Honour the consumer rights your buyers have where they live, such as the 14-day right of withdrawal and the legal guarantee in the EU, and handle your own delivery, support and refunds.",
+            "taxesAndRecords": "Taxes on your sales (VAT, GST/HST or sales tax) are yours to handle, and you keep your own sales records for as long as the law where you trade requires."
           }
         },
         "payments": {
@@ -296,10 +297,35 @@
           "points": {
             "cap": "Square Share is early and offered as is to business users. For them, our liability is capped at the fees paid to us in the last 12 months or EUR 100, whichever is greater, and business sellers cover us for claims caused by their products, sites or breaches. If you are a consumer, your legal rights are unaffected.",
             "termination": "We can suspend or close accounts that break these Terms. You can leave at any time and take your data with you.",
-            "changesAndLaw": "We may update these Terms, with advance notice of material changes. Czech law applies.",
-            "policies": "Our Privacy Policy and Cookie Policy form part of these Terms."
+            "changesAndLaw": "We give at least 30 days' notice of material changes to these Terms. Czech law applies to business users. If you are a consumer, the protections of your home country, state or province still apply.",
+            "policies": "Our Privacy Policy and Cookie Policy form part of these Terms.",
+            "disputes": "Disputes in the USA go to individual arbitration instead of court, unless you opt out within 30 days of agreeing. Consumers in the EU and Canada can still go to court where they live."
           }
         }
+      }
+    },
+    "notice": {
+      "bannerLabel": "Terms of Service update",
+      "bannerLink": "See what's changing",
+      "title": "Our Terms change on {date}.",
+      "titleSoon": "Our Terms are changing soon.",
+      "body": "Until then, the <current>current Terms</current> apply. Here is what the <next>new Terms</next> change:",
+      "leave": "If you don't agree, you can close your account at no charge before they take effect. If you keep using Square Share after that date, the new Terms apply to you.",
+      "changes": {
+        "regions": "We now operate only in the EU, the USA and Canada, and each has its own section.",
+        "disputes": "Disputes in the USA go to individual arbitration instead of court, unless you opt out within 30 days. Consumers in the EU and Canada can still go to court where they live.",
+        "plans": "Paid plans and per-sale fees are now set out, including automatic renewal and how to cancel.",
+        "moderation": "We explain how we check content, and how to report it, appeal and send a copyright complaint.",
+        "notice": "You now get at least 30 days' notice by email before material changes to the Terms."
+      },
+      "email": {
+        "subject": "We're updating our Terms of Service",
+        "intro": "We're updating the Square Share Terms of Service. The new Terms take effect on {date}.",
+        "changes": "What's changing:",
+        "readNew": "Read the new Terms: {url}",
+        "readCurrent": "Read the current Terms: {url}",
+        "nothingNow": "You don't have to do anything today. You can agree to the new Terms now in your dashboard: {url}",
+        "leave": "If you don't agree, you can close your account at no charge before {date}. If you keep using Square Share after that date, the new Terms apply to you."
       }
     }
   },
@@ -311,7 +337,7 @@
       "required": "<strong>Your trader name, address and contact email are required before you can publish or sell anything.</strong> Buyers have to be able to see who they are buying from and how to reach you before they order.",
       "privacyNoteLinked": "These details appear publicly on your product pages for that reason alone. We never use them for marketing, and never sell or share them. The only message we send to your contact email or phone is the code that confirms it. See the <link>Square Share Privacy Policy</link>."
     },
-    "countryNotEu": "Not in the EU / prefer not to say",
+    "countryUnset": "Prefer not to say",
     "vatAdvisory": {
       "noCountry": "This VAT ID looks like it was issued by {issuer}. You may want to set your country.",
       "mismatch": "This VAT ID looks like it was issued by {issuer}, but your country is set to {selected}. Check both are correct."
@@ -340,6 +366,7 @@
         "placeholder": "e.g. ATU12345678"
       },
       "country": {
+        "hint": "Square Share operates in the EU, the USA and Canada. We don't operate anywhere else yet.",
         "label": "Country"
       },
       "phone": {
@@ -395,7 +422,9 @@
   "shipping": {
     "shipsFrom": {
       "label": "Ships from",
-      "notSet": "Not set"
+      "notSet": "Not set",
+      "sameAsBusiness": "Same as your business: {country}",
+      "sameAsBusinessHint": "Taken from the address in your seller details."
     },
     "shippingCard": {
       "title": "Shipping",

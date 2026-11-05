@@ -8,6 +8,7 @@ import {
   Mail,
   MapPin,
   Package,
+  PackagePlus,
   Phone,
   TriangleAlert,
   Wallet,
@@ -30,7 +31,7 @@ import { regionName } from "@/lib/format/country";
 import { orderNumber } from "@/lib/orders/order-number";
 import { formatOrderSelection } from "@/lib/orders/selection";
 import { formatShipTo } from "@/lib/orders/ship-to";
-import type { OrderView } from "@/types/order-view";
+import type { OrderAddOnLine, OrderView } from "@/types/order-view";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { CHANNEL_ICONS } from "./channel-icons";
 import { EmailBuyerLink, OrderActions } from "./OrderActions";
@@ -156,10 +157,10 @@ const copyMessages = {
 } satisfies Record<string, CopyButtonMessages>;
 
 /** The version the buyer chose, as label/value pairs. */
-function SelectionList({ order }: { order: OrderView }) {
+function SelectionList({ selection }: { selection: OrderView["selection"] }) {
   return (
     <dl className="text-sm text-foreground" data-order-selection="">
-      {order.selection.map((entry) => (
+      {selection.map((entry) => (
         <div key={entry.label} className="flex flex-wrap gap-x-1.5">
           <dt className="text-muted-foreground">{entry.label}:</dt>
           <dd className="min-w-0 break-words font-medium">{entry.value}</dd>
@@ -197,9 +198,17 @@ export function OrderDetail({
   const youReceiveCents = order.amountCents - order.platformFeeCents;
   const ships = order.fulfilment.status !== "not_required";
   const packLine = t("detail.packLine", { quantity: order.quantity, title: order.productTitle });
+  // "Add to your order": every other product in the order goes in the same
+  // box, so the packing list (and its copy) names each of them too.
+  const linePack = (line: OrderAddOnLine) =>
+    t("detail.packLine", { quantity: line.quantity, title: line.productTitle });
   const packText = [
     packLine,
     ...(order.selection.length > 0 ? [formatOrderSelection(order.selection)] : []),
+    ...order.addOns.flatMap((line) => [
+      linePack(line),
+      ...(line.selection.length > 0 ? [formatOrderSelection(line.selection)] : []),
+    ]),
   ].join("\n");
   const address = order.shipTo
     ? formatShipTo(order.shipTo, regionName(order.shipTo.country, locale))
@@ -260,7 +269,13 @@ export function OrderDetail({
             <p className="break-words text-sm font-medium text-foreground" data-order-pack="">
               {packLine}
             </p>
-            {order.selection.length > 0 && <SelectionList order={order} />}
+            {order.selection.length > 0 && <SelectionList selection={order.selection} />}
+            {order.addOns.map((line, index) => (
+              <div key={index} className="mt-2" data-order-pack-add-on={index}>
+                <p className="break-words text-sm font-medium text-foreground">{linePack(line)}</p>
+                {line.selection.length > 0 && <SelectionList selection={line.selection} />}
+              </div>
+            ))}
           </DetailRow>
         ) : (
           // Nothing to pack for a download, but the version still says which
@@ -276,9 +291,22 @@ export function OrderDetail({
                 />
               }
             >
-              <SelectionList order={order} />
+              <SelectionList selection={order.selection} />
             </DetailRow>
           )
+        )}
+
+        {/* A download's other downloads: nothing to pack, but the seller
+            should still see everything the buyer paid for. */}
+        {!ships && order.addOns.length > 0 && (
+          <DetailRow icon={PackagePlus} label={t("detail.alsoBought")}>
+            {order.addOns.map((line, index) => (
+              <div key={index} className={index > 0 ? "mt-2" : undefined} data-order-add-on={index}>
+                <p className="break-words text-sm font-medium text-foreground">{linePack(line)}</p>
+                {line.selection.length > 0 && <SelectionList selection={line.selection} />}
+              </div>
+            ))}
+          </DetailRow>
         )}
 
         {ships &&

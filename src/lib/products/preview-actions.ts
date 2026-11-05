@@ -21,7 +21,11 @@ import {
 } from "@/lib/products/public";
 import { loadPreviewPricing } from "@/lib/discounts/storefront-preview";
 import { toCurrency } from "@/lib/format/money";
-import type { ProductPageProduct } from "@/types/product";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { loadAddOnCards } from "@/lib/products/add-ons";
+import { listHiddenAddOns } from "@/lib/products/add-on-choices";
+import { parseAddOnIds } from "@/lib/products/detail";
+import type { AddOnCard, HiddenAddOn, ProductPageProduct } from "@/types/product";
 
 /**
  * What the editor's product-page preview needs for ONE product: the same
@@ -38,9 +42,12 @@ import type { ProductPageProduct } from "@/types/product";
  * PRICED AS A BUYER SEES IT: a running sale sets the price here exactly as it
  * does on the public page (lib/discounts/storefront-preview.ts), so the page a
  * seller previews and the tile beside it on the canvas say the same number.
+ *
+ * Beside the add-ons a buyer is offered come the ones they are not (`hidden`),
+ * which only the seller's preview draws, faded with the reason.
  */
 export type ProductPagePreviewResult =
-  | { ok: true; product: ProductPageProduct }
+  | { ok: true; product: ProductPageProduct; addOns: AddOnCard[]; hidden: HiddenAddOn[] }
   | { ok: false; error: ActionError };
 
 export async function getProductPagePreviewData(
@@ -86,12 +93,29 @@ export async function getProductPagePreviewData(
     },
   ]);
 
-  return {
-    ok: true,
-    product: await buildProductPageProduct(row, {
-      soldOutFlag: soldOutFlag === true,
-      showStock: showStock === true,
-      pricing: pricing.get(row.id),
-    }),
-  };
+  const product = await buildProductPageProduct(row, {
+    soldOutFlag: soldOutFlag === true,
+    showStock: showStock === true,
+    pricing: pricing.get(row.id),
+  });
+  // Exactly the add-ons a buyer would be offered (active, same kind, same
+  // currency, in stock), read with the service role but only ever for the
+  // active account's own products. A preview whose sales cannot be read shows
+  // the regular prices, like the rest of the designer.
+  const host = { isDigital: product.isDigital, currency: product.currency };
+  const addOns = await loadAddOnCards(createAdminClient(), {
+    ownerId: account.accountId,
+    ids: row.add_on_ids,
+    ...host,
+    now: new Date(),
+    unreadableSales: "regular",
+    withRatings: true,
+  });
+  const hidden = await listHiddenAddOns(
+    parseAddOnIds(row.add_on_ids),
+    addOns.map((card) => card.id),
+    host,
+  );
+
+  return { ok: true, product, addOns, hidden };
 }

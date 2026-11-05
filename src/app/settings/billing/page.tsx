@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { BillingSection } from "@/components/settings/BillingSection";
+import { aiSettingsFor } from "@/lib/ai-suggestions";
 import { requireUser } from "@/lib/auth/session";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
@@ -53,5 +54,6 @@ export default async function BillingSettingsPage({
     return <p className="font-inter text-sm text-destructive">{t("unavailable")}</p>;
   }
 
-  return <BillingSection context={result.context} returned={returned} />;
+  const ai = await aiSettingsFor(account.accountId, account.userId, result.context.plan);
+  return <BillingSection context={result.context} returned={returned} ai={ai} />;
 }

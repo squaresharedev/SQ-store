@@ -295,6 +295,7 @@ describe("product form — the machine-readable contract", () => {
       gallery: [],
       documents: [],
       badges: [],
+      addOnIds: [],
       details: initialDetailsValues(),
       optionDetails: {},
       purchaseUrl: "",

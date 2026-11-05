@@ -123,6 +123,15 @@ export function createFakeAdmin(tables: Record<string, Row[]> = {}) {
         predicates.push((row) => wanted.includes(row[column]));
         return chain;
       },
+      /** An array column holding every one of `wanted` (PostgREST `cs`). */
+      contains(column: string, wanted: readonly unknown[]) {
+        note(`contains:${column}`, wanted);
+        predicates.push((row) => {
+          const held = row[column];
+          return Array.isArray(held) && wanted.every((value) => held.includes(value));
+        });
+        return chain;
+      },
       or(expression: string) {
         note("or", expression);
         const terms = expression.split(",").map(orTerm);

@@ -189,7 +189,7 @@ describe("shippingPolicySchema — new rate fields", () => {
   it("accepts a countries array with known codes", () => {
     expect(
       shippingPolicySchema.safeParse({
-        destinations: [{ area: "IE", time: "2 days", countries: ["IE", "GB"] }],
+        destinations: [{ area: "IE", time: "2 days", countries: ["IE", "DE"] }],
       }).success,
     ).toBe(true);
   });
@@ -258,9 +258,9 @@ describe("compactShippingPolicy — new rate fields survive round-trip", () => {
   it("keeps countries on a destination row", () => {
     expect(
       compactShippingPolicy({
-        destinations: [{ area: "IE", time: "2 days", countries: ["IE", "GB"] }],
+        destinations: [{ area: "IE", time: "2 days", countries: ["IE", "DE"] }],
       }),
-    ).toEqual({ destinations: [{ area: "IE", time: "2 days", countries: ["IE", "GB"] }] });
+    ).toEqual({ destinations: [{ area: "IE", time: "2 days", countries: ["IE", "DE"] }] });
   });
 
   it("keeps ratesCurrency", () => {

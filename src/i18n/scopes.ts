@@ -49,12 +49,17 @@ const APP = [
   "Search",
   "Settings",
   "ProductPage.footer.policies",
+  // The product form's add to order preview is the buyer page's own section.
+  "ProductPage.addOns",
   // The reviews page draws each review's stars and badges in the product
   // page's own words.
   "ProductPage.reviews",
   "ProductPage.sale",
   "ProductPage.shippingProse",
   "Storefront.colors.presets",
+  // That same preview takes the page's font from the helper these names sit with.
+  "Storefront.fonts",
+  "Storefront.textVariants",
   "Storefront.settings",
 ] as const;
 

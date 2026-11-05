@@ -22,6 +22,8 @@ import {
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { BlockActions } from "./BlockActions";
 import { CardStyleControls } from "./CardStyleControls";
+import { CardHoverControls } from "./CardHoverControls";
+import { CardShoppingControls } from "./CardShoppingControls";
 import { ImageBlockEditor, type ImageBlockPatch } from "./ImageBlockEditor";
 import { PriceTagControls } from "./PriceTagControls";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
@@ -37,7 +39,8 @@ import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
  * actions only. Duplicate covers the text/shape blocks; products are
  * excluded from copying by design (one block per product).
  *
- * This is also where the selection toolbar's Stroke, Corners and Opacity land:
+ * This is also where the selection toolbar's Stroke, Corners, Opacity and Blur
+ * land:
  * the bar points at a control rather than opening one over the board, and with
  * several blocks selected the control it points at is the one here. So the
  * summons has to reach the same editors — a bar button that scrolled to
@@ -54,6 +57,7 @@ export function MultiBlockEditor({
   onImageChange,
   onDuplicate,
   onRemove,
+  reviewsShown = true,
 }: {
   /** The selection, in selection order (length >= 2). */
   blocks: readonly StorefrontBlock[];
@@ -69,6 +73,8 @@ export function MultiBlockEditor({
   onDuplicate: () => void;
   /** Remove the whole selection. */
   onRemove: () => void;
+  /** Whether the product page shows reviews, which a card's stars need. */
+  reviewsShown?: boolean;
 }) {
   const t = useTranslations("Storefront");
   const products = blocks.filter((b): b is ProductBlock => b.type === "product");
@@ -123,6 +129,7 @@ export function MultiBlockEditor({
           accent={theme.accent}
           hasCustomFont={theme.customFont !== undefined}
           multi
+          summons={summons}
           onUpdate={onTextChange}
           onDuplicate={onDuplicate}
           onRemove={onRemove}
@@ -201,6 +208,21 @@ export function MultiBlockEditor({
               overrides={products[0].style ?? {}}
               onChange={onProductStyleChange}
               scope="many"
+            />
+          </CollapsibleSection>
+
+          <CollapsibleSection title={t("cardExtras.hoverTitle")} collapsible defaultOpen={false}>
+            <CardHoverControls
+              value={resolveCardStyle(theme, products[0].style)}
+              onChange={onProductStyleChange}
+            />
+          </CollapsibleSection>
+
+          <CollapsibleSection title={t("cardExtras.shoppingTitle")} collapsible defaultOpen={false}>
+            <CardShoppingControls
+              value={resolveCardStyle(theme, products[0].style)}
+              onChange={onProductStyleChange}
+              reviewsShown={reviewsShown}
             />
           </CollapsibleSection>
         </div>

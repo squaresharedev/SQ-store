@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState, useSyncExternalStore } from "react";
-import { NO_INSETS, safeSpan, type Insets } from "./canvas-geometry";
+import { NO_INSETS, jumpPan, safeSpan, type Insets } from "./canvas-geometry";
 
 /**
  * THE CANVAS VIEWPORT — pan + zoom, deliberately kept OUT of React state.
@@ -286,6 +286,35 @@ export function useCanvasViewport(initial: CanvasView): CanvasViewport {
     },
   }));
   return controller;
+}
+
+/**
+ * Move the camera until `target`, an element on the stage, sits at the top of
+ * the open part of the workspace: an in-page link, the canvas way (see jumpPan
+ * for why never by scrolling). Eased like a panel's re-anchor, and like any
+ * eased move, the seller's own hand takes over from wherever it has got to.
+ */
+export function jumpToElement(viewport: CanvasViewport, target: Element) {
+  // The workspace is the stage's parent, the same box the clamp measures.
+  const workspace = viewport.stage()?.parentElement;
+  if (!workspace) return;
+  // Measure the board the seller can see, not one a frame behind the view.
+  viewport.flush();
+  const area = workspace.getBoundingClientRect();
+  const box = target.getBoundingClientRect();
+  const view = viewport.get();
+  const pan = jumpPan({
+    pan: view.pan,
+    workspace: { width: workspace.clientWidth, height: workspace.clientHeight },
+    insets: viewport.insets(),
+    target: {
+      left: box.left - area.left - workspace.clientLeft,
+      top: box.top - area.top - workspace.clientTop,
+      width: box.width,
+      height: box.height,
+    },
+  });
+  viewport.set({ zoom: view.zoom, pan }, { animate: true });
 }
 
 /** Subscribe a small component to the zoom, so it can show the percentage

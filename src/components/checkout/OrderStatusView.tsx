@@ -19,7 +19,8 @@ import { CHECKOUT_HEADLINE_MAX, CHECKOUT_THANKS_MESSAGE_MAX } from "@/types/stor
 import { QuantityMark } from "./QuantityMark";
 import { VersionChips } from "./VersionChips";
 import { WithdrawalPanel } from "./WithdrawalPanel";
-import { ReviewPanel } from "./ReviewPanel";
+import { buyerHasGoods, type ReviewDialog } from "@/lib/reviews/reminders";
+import { ReviewAsk } from "./ReviewAsk";
 import { PaymentWatch } from "./PaymentWatch";
 import { resolveCheckoutTheme } from "./checkout-theme";
 
@@ -51,11 +52,14 @@ export function OrderStatusView({
   page,
   mode,
   placed,
+  reviewDialog = null,
 }: {
   page: OrderPageData;
   mode: "public" | "preview";
   /** Straight after paying (`?placed=1`): play the celebration. */
   placed: boolean;
+  /** `?review=` from the review reminder email: open its dialog. */
+  reviewDialog?: ReviewDialog | null;
 }) {
   const { storefront, order } = page;
   const { checkoutPage, productPage, seller } = storefront;
@@ -81,6 +85,8 @@ export function OrderStatusView({
   // Not one still being paid for, and not one already refunded (the download
   // route refuses both: app/api/orders/[orderRef]/download).
   const paid = order.payment === "paid";
+  // "Add to your order": the other lines of this order (none for most).
+  const addOns = order.addOns ?? [];
   const steps: Step[] = [
     paying
       ? { key: "paid", title: t("timeline.confirming"), detail: t("timeline.confirmingDetail"), done: false }
@@ -234,12 +240,14 @@ export function OrderStatusView({
           )}
         </section>
 
-        {/* WHAT WAS BOUGHT. */}
+        {/* WHAT WAS BOUGHT: the product, then anything added to the order on
+            its page, each line read from the order's own snapshot. */}
         <section
-          className="flex items-center gap-4 border p-4"
+          className="flex flex-col gap-3 border p-4"
           style={{ borderColor: theme.rule, borderRadius: `${theme.surfaceRadius}px` }}
           data-order-summary=""
         >
+        <div className="flex items-center gap-4">
           {order.photo && (
             <div className="relative size-20 shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element -- a presigned R2 URL, like the product gallery's */}
@@ -279,6 +287,30 @@ export function OrderStatusView({
               {formatCents(order.amountCents, order.currency, locale)}
             </p>
           </div>
+        </div>
+          {addOns.length > 0 && (
+            <ul className="flex flex-col gap-3 border-t pt-3" style={{ borderColor: theme.rule }} data-order-add-ons={addOns.length}>
+              {addOns.map((line) => (
+                <li key={line.id} className="flex items-center gap-3" data-order-add-on={line.id}>
+                  <span
+                    className="relative size-12 shrink-0 overflow-hidden"
+                    style={{ borderRadius: `${theme.controlRadius}px`, background: subtleFill(theme.ink) }}
+                  >
+                    {line.photo && (
+                      // eslint-disable-next-line @next/next/no-img-element -- a presigned R2 URL, like the product gallery's
+                      <img src={line.photo.url} alt={line.photo.alt} className="size-full object-cover" />
+                    )}
+                  </span>
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <p className="text-sm font-medium leading-tight">
+                      {line.quantity > 1 ? t("lineQuantity", { quantity: line.quantity, title: line.productTitle }) : line.productTitle}
+                    </p>
+                    <VersionChips chips={line.selection} ink={theme.ink} cornerRadius={theme.cornerRadius} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         {/* WHAT HAPPENS NEXT. */}
@@ -354,17 +386,36 @@ export function OrderStatusView({
             {order.digitalFormat ? t("download", { format: order.digitalFormat }) : t("downloadPlain")}
           </a>
         )}
+        {/* Each download added to the order has its own, named, since "Download
+            PDF" twice would not say which is which. */}
+        {order.isDigital &&
+          paid &&
+          addOns.map((line) => (
+            <a
+              key={line.id}
+              href={preview ? undefined : orderDownloadApiPath(order.ref, line.id)}
+              aria-disabled={preview || undefined}
+              className={cn(CTA_BUTTON_CLASS, "hover:opacity-90")}
+              style={ctaStyle(theme.cta)}
+              data-order-download={line.id}
+              data-setting-skip=""
+            >
+              <Download className="size-4" strokeWidth={2.25} aria-hidden="true" />
+              {t("downloadItem", { title: line.productTitle })}
+            </a>
+          ))}
 
         {/* THE ASK: once the buyer knows what happens next, and above the
             legal small print. Only while the product page shows reviews: a
-            review nobody will see is not worth asking for. */}
-        {asksForReview && order.productId && (
-          <ReviewPanel
-            orderRef={order.ref}
-            productId={order.productId}
-            defaultName={order.firstName}
-            state={order.review === "done" ? "done" : "open"}
-            givenRating={order.reviewRating ?? null}
+            review nobody will see is not worth asking for. And only once the
+            buyer has what they bought: before that, the reminder (ReviewAsk). */}
+        {((asksForReview && order.productId) || reviewDialog === "stop") && (
+          <ReviewAsk
+            order={order}
+            asks={asksForReview && order.productId !== null}
+            hasGoods={buyerHasGoods(order, placed)}
+            dialog={reviewDialog}
+            storeName={sellerName}
             theme={theme}
             preview={preview}
           />

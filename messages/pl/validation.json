@@ -326,6 +326,11 @@
       "required": "Dodaj imię, które będzie widoczne przy opinii.",
       "tooLong": "Imię może mieć maksymalnie {maximum} znaków.",
       "unsupported": "Imię zawiera nieobsługiwane znaki."
+    },
+    "addOnsTitle": {
+      "required": "Nagłówek jest wymagany.",
+      "tooLong": "Limit długości nagłówka: {maximum}.",
+      "unsupported": "Nagłówek zawiera nieobsługiwane znaki."
     }
   },
   "email": {
@@ -513,7 +518,10 @@
     "galleryStaleOption": "Zdjęcie wskazuje na opcję, która już nie istnieje.",
     "badgesTooMany": "Produkt może mieć co najwyżej {maximum} odznak.",
     "badgeDuplicate": "Każda odznaka może być użyta tylko raz.",
-    "badgesOnPhotoTooMany": "Produkt może wyświetlić do {maximum} odznak na zdjęciu."
+    "badgesOnPhotoTooMany": "Produkt może wyświetlić do {maximum} odznak na zdjęciu.",
+    "addOnsTooMany": "Liczba oferowanych produktów jest ograniczona do {maximum}.",
+    "addOnDuplicate": "Każdy produkt można zaoferować tylko raz.",
+    "addOnNotYours": "Jeden z oferowanych produktów nie ma już w tym sklepie. Usuń go i zapisz ponownie."
   },
   "productImport": {
     "noTitle": "Brak nazwy.",

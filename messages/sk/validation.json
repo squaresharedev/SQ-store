@@ -326,6 +326,11 @@
       "required": "Doplňte meno, ktoré sa zobrazí pri recenzii.",
       "tooLong": "Meno môže mať najviac {maximum} znakov.",
       "unsupported": "Meno obsahuje nepodporované znaky."
+    },
+    "addOnsTitle": {
+      "required": "Nadpis je povinný.",
+      "tooLong": "Nadpis môže mať najviac {maximum} znakov.",
+      "unsupported": "Nadpis obsahuje nepodporované znaky."
     }
   },
   "email": {
@@ -513,7 +518,10 @@
     "galleryStaleOption": "Fotografia odkazuje na možnosť, ktorá už neexistuje.",
     "badgesTooMany": "Produkt môže mať najviac {maximum} odznakov.",
     "badgeDuplicate": "Každý odznak môže byť uvedený iba raz.",
-    "badgesOnPhotoTooMany": "Produkt môže na fotke zobraziť najviac {maximum} odznaky."
+    "badgesOnPhotoTooMany": "Produkt môže na fotke zobraziť najviac {maximum} odznaky.",
+    "addOnsTooMany": "Počet ponúkaných produktov je obmedzený na {maximum}.",
+    "addOnDuplicate": "Každý produkt je možné ponúknuť len raz.",
+    "addOnNotYours": "Jeden z ponúkaných produktov sa už v tomto obchode nenachádza. Odoberte ho a znova uložte."
   },
   "productImport": {
     "noTitle": "Chýba názov.",

@@ -15,6 +15,9 @@
 //   5. The order link, again, to a buyer who asked for it by email.
 //   6. "Your order was refunded" to the BUYER when the seller takes it back
 //      (lib/orders/actions.ts refundOrder).
+//   7. The REVIEW REMINDER to the BUYER, once, and only when they asked for
+//      it on their order page (lib/reviews/reminders.ts says why it must be
+//      opt-in, and lib/reviews/reminder-job.ts sends it).
 //
 // PLAIN TEXT, like every other mail this app sends (lib/security/events.ts):
 // an order email is read on a phone next to a pile of boxes, and it has to
@@ -44,18 +47,24 @@ import type { Locale } from "@/i18n/locales";
 import type { CarrierId, OrderSelection, RefundReason, ShipTo } from "@/types/order-view";
 import type { StorefrontSeller } from "@/types/storefront";
 
-/** What both emails say about the goods. */
-type Goods = {
+type GoodsLine = {
   productTitle: string;
   quantity: number;
   selection: readonly OrderSelection[];
 };
 
-/** "2 × Blue mug" and, when there is one, the version under it: the same two
- *  lines the order panel shows under What to pack. */
+/** What every order email says about the goods: the product, and anything
+ *  added to the order on its page ("Add to your order"), in the seller's order. */
+type Goods = GoodsLine & { more?: readonly GoodsLine[] };
+
+/** "2 × Blue mug" and, when there is one, the version under it, for each thing
+ *  in the order: the same lines the order panel shows under What to pack. */
 function packLines(t: Translate, goods: Goods): string[] {
-  const lines = [t("Orders.detail.packLine", { quantity: goods.quantity, title: goods.productTitle })];
-  if (goods.selection.length > 0) lines.push(formatOrderSelection(goods.selection));
+  const lines: string[] = [];
+  for (const line of [goods, ...(goods.more ?? [])]) {
+    lines.push(t("Orders.detail.packLine", { quantity: line.quantity, title: line.productTitle }));
+    if (line.selection.length > 0) lines.push(formatOrderSelection(line.selection));
+  }
   return lines;
 }
 
@@ -73,6 +82,19 @@ function addressBlock(address: ShipTo, locale: Locale): string {
  */
 function sellerOrderLink(orderId: string): string {
   return appUrl(signInPath(orderDetailPath(orderId)));
+}
+
+/** "Sold by", then the seller's name, postal address, country and contact
+ *  address: who the buyer bought from, as the product page disclosed it. */
+function sellerLines(t: Translate, seller: StorefrontSeller, store: string, locale: Locale): string[] {
+  const lines = [t("Orders.email.confirmation.seller"), seller.businessName || store];
+  if (seller.address) lines.push(seller.address);
+  // The address is free text; add the country when the seller did not write
+  // it, so the mail names where the trader is without relying on it.
+  const country = regionName(seller.country, locale);
+  if (country && !seller.address?.toLowerCase().includes(country.toLowerCase())) lines.push(country);
+  if (seller.email) lines.push(seller.email);
+  return lines;
 }
 
 /** Log a delivery that should have worked. "disabled" is a deployment choice
@@ -133,6 +155,8 @@ export async function sendNewOrderEmail(
       lines.push("");
     } else {
       lines.push(t("Orders.email.newOrder.introDigital", { title: order.productTitle }), "");
+      // Downloads added to the order: named, since the intro names only one.
+      if (order.more && order.more.length > 0) lines.push(...packLines(t, order), "");
     }
 
     // The number the buyer will quote when they write, so the seller can match
@@ -406,15 +430,7 @@ export async function sendOrderConfirmation(
     }
 
     // Who the contract is with: the identity the product page disclosed.
-    lines.push(t("Orders.email.confirmation.seller"), order.seller.businessName || store);
-    if (order.seller.address) lines.push(order.seller.address);
-    // The address is free text; add the country when the seller did not write
-    // it, so the contract names where the trader is without relying on it.
-    const sellerCountry = regionName(order.seller.country, locale);
-    if (sellerCountry && !order.seller.address?.toLowerCase().includes(sellerCountry.toLowerCase())) {
-      lines.push(sellerCountry);
-    }
-    if (order.seller.email) lines.push(order.seller.email);
+    lines.push(...sellerLines(t, order.seller, store, locale));
     if (order.seller.vatId) {
       lines.push(t("Orders.email.confirmation.sellerVat", { vat: order.seller.vatId }));
     }
@@ -565,6 +581,71 @@ export async function sendOrderLinkEmail(
     return result;
   } catch (error) {
     console.error("[orders] order link email threw:", error instanceof Error ? error.message : error);
+    return { sent: false, reason: "failed" };
+  }
+}
+
+// ── 7. The review reminder, to the buyer who asked for it ─────────────────
+
+export type ReviewReminderEmail = GoodsLine & {
+  /** When the buyer asked for it on their order page: what makes it theirs. */
+  requestedAt: Date;
+  /** The order page with the review dialog open. */
+  reviewUrl: string;
+  /** The order page with the dialog that stops it. */
+  stopUrl: string;
+  /** The one-click unsubscribe address (RFC 8058), for the mail client. */
+  unsubscribeUrl: string;
+  /** Who is asking: the seller, named with their postal address and contact
+   *  address, as anti-spam law wants of any such email (CASL, CAN-SPAM). */
+  seller: StorefrontSeller;
+  store: { name: string; contactEmail: string | null };
+};
+
+/**
+ * "Your reminder to review it", to a buyer who pressed "Email me a reminder".
+ * Never throws; the result says whether it went, so the job can try again.
+ *
+ * It says why it came (they asked, and when), asks for nothing but an honest
+ * review, offers nothing for one, names who sent it and where they are, and
+ * carries a way to stop that works without signing in.
+ */
+export async function sendReviewReminder(
+  to: string,
+  locale: Locale,
+  reminder: ReviewReminderEmail,
+): Promise<SendResult> {
+  try {
+    const t = await translatorFor(locale);
+    const store = reminder.store.name;
+    const date = new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(reminder.requestedAt);
+    const lines = [
+      t("Orders.email.reviewReminder.intro", { store, date }),
+      "",
+      ...packLines(t, reminder),
+      "",
+      t("Orders.email.reviewReminder.write", { url: reminder.reviewUrl }),
+      "",
+      t("Orders.email.reviewReminder.how"),
+      "",
+      t("Orders.email.reviewReminder.once", { url: reminder.stopUrl }),
+      "",
+      ...sellerLines(t, reminder.seller, store, locale),
+      "",
+      t("Orders.email.confirmation.footer", { store }),
+    ];
+    const result = await sendEmail({
+      to,
+      subject: t("Orders.email.reviewReminder.subject", { title: reminder.productTitle }),
+      text: lines.join("\n"),
+      fromName: t("Orders.email.fromName", { store }),
+      unsubscribeUrl: reminder.unsubscribeUrl,
+      ...(reminder.store.contactEmail ? { replyTo: reminder.store.contactEmail } : {}),
+    });
+    reportFailure("review-reminder", result);
+    return result;
+  } catch (error) {
+    console.error("[orders] review reminder threw:", error instanceof Error ? error.message : error);
     return { sent: false, reason: "failed" };
   }
 }

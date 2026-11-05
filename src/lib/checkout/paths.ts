@@ -24,7 +24,25 @@ export const CHECKOUT_CANCEL_PARAM = "c";
 /** POST: "email me my order link", for a buyer without the email. */
 export const ORDER_LOOKUP_API_PATH = "/api/orders/lookup";
 
+/** POST: ask for, or stop, the one review reminder email an order page offers
+ *  (lib/reviews/reminders.ts). */
+export const ORDER_REVIEW_REMINDER_API_PATH = "/api/orders/review-reminder";
+
+/** `?ref=` on the reminder's unsubscribe route: the order's credential. */
+export const ORDER_REVIEW_REMINDER_REF_PARAM = "ref";
+
+/** The reminder email's List-Unsubscribe address: a mail client's one-click
+ *  POST stops it (RFC 8058); a plain visit opens the order page's stop dialog. */
+export function orderReviewReminderUnsubscribePath(orderRef: string): string {
+  return `${ORDER_REVIEW_REMINDER_API_PATH}/unsubscribe?${ORDER_REVIEW_REMINDER_REF_PARAM}=${encodeURIComponent(orderRef)}`;
+}
+
 /** GET: the order's download, handed out as a short-lived signed link. */
-export function orderDownloadApiPath(orderRef: string): string {
-  return `/api/orders/${encodeURIComponent(orderRef)}/download`;
+/** `?item=` on the download route: one of the order's add-on lines. */
+export const ORDER_DOWNLOAD_ITEM_PARAM = "item";
+
+/** The order's own download, or (with `itemId`) an add-on line's. */
+export function orderDownloadApiPath(orderRef: string, itemId?: string): string {
+  const path = `/api/orders/${encodeURIComponent(orderRef)}/download`;
+  return itemId ? `${path}?${ORDER_DOWNLOAD_ITEM_PARAM}=${encodeURIComponent(itemId)}` : path;
 }

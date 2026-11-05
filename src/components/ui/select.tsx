@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -41,6 +41,9 @@ export type SelectOption<T extends string> = {
   label: string;
   /** Optional muted second line under the label. */
   description?: string;
+  /** Optional picture ahead of the label (a product's photo), in the list and
+   *  on the closed control. Decorative: the label says what it is. */
+  leading?: ReactNode;
 };
 
 /**
@@ -306,7 +309,10 @@ export function Select<T extends string>({
           triggerClassName,
         )}
       >
-        <span className="truncate">{selected?.label ?? ""}</span>
+        <span className="flex min-w-0 items-center gap-2.5">
+          {selected?.leading && <span aria-hidden="true" className="flex shrink-0">{selected.leading}</span>}
+          <span className="truncate">{selected?.label ?? ""}</span>
+        </span>
         <ChevronDown
           className={cn(
             "size-4 shrink-0 text-muted-foreground transition-transform duration-base ease-standard motion-reduce:transition-none",
@@ -367,22 +373,25 @@ export function Select<T extends string>({
                     isActive && "bg-accent",
                   )}
                 >
-                  <span className="min-w-0">
-                    <span
-                      className={cn(
-                        "block truncate text-sm",
-                        isSelected
-                          ? "font-medium text-foreground"
-                          : "text-foreground",
-                      )}
-                    >
-                      {option.label}
-                    </span>
-                    {option.description && (
-                      <span className="block font-inter text-xs text-muted-foreground">
-                        {option.description}
+                  <span className="flex min-w-0 items-center gap-2.5">
+                    {option.leading && <span aria-hidden="true" className="flex shrink-0">{option.leading}</span>}
+                    <span className="min-w-0">
+                      <span
+                        className={cn(
+                          "block truncate text-sm",
+                          isSelected
+                            ? "font-medium text-foreground"
+                            : "text-foreground",
+                        )}
+                      >
+                        {option.label}
                       </span>
-                    )}
+                      {option.description && (
+                        <span className="block font-inter text-xs text-muted-foreground">
+                          {option.description}
+                        </span>
+                      )}
+                    </span>
                   </span>
                   {isSelected && (
                     <Check

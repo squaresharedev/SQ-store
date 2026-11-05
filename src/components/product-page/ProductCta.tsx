@@ -9,6 +9,7 @@ import { mailtoHref, type CtaTarget } from "./cta-target";
 import { CTA_BUTTON_CLASS, ctaGhostStyle, ctaStyle, type CtaAppearance } from "./product-page-maps";
 import { useOptionSelection } from "./OptionContext";
 import { useQuantity } from "./QuantityContext";
+import { useAddOns } from "./AddOnsContext";
 
 // WHERE THE BUTTON GOES is decided in ./cta-target.ts (server-callable): the
 // seller's own purchase link, else Square Share checkout, else an enquiry
@@ -70,6 +71,9 @@ export function ProductCta({
   const tStock = useTranslations("Common.stock");
   const { unavailableIn, groups, selection, selectedIds } = useOptionSelection();
   const { quantity } = useQuantity();
+  // "Add to your order": what the buyer took beside it, carried to the
+  // checkout the same way as the version and the quantity.
+  const { picks } = useAddOns();
 
   // NO DESTINATION SET. On a live page there is nothing honest to render: a
   // button that goes nowhere is worse than no button. In the editor it is the
@@ -139,6 +143,7 @@ export function ProductCta({
         ? checkoutPath(target.storefrontId, target.productId, {
             optionIds: [...selectedIds],
             quantity,
+            addOns: picks,
             via: target.via,
           })
         : target.href;

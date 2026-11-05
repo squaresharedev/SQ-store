@@ -104,7 +104,8 @@
       "cards": "Etalage / Producttegels",
       "soldOut": "Etalage / Uitverkocht",
       "productPage": "Etalage / Productpagina",
-      "checkoutPage": "Etalage / Afrekenen"
+      "checkoutPage": "Etalage / Afrekenen",
+      "blocks": "Etalage / Blokken"
     },
     "labels": {
       "looks": "Etalage-uitstraling",
@@ -151,7 +152,16 @@
       "productPagePhoto": "Foto van de productpagina",
       "checkoutPhoto": "Foto van afrekenen",
       "thanksPhoto": "Foto van de bedankpagina",
-      "chipScale": "Even grote labels op alle kaarten"
+      "chipScale": "Even grote labels op alle kaarten",
+      "productPageAddOns": "Toevoegen aan je bestelling",
+      "productPageStars": "Kleur van de reviewsterren",
+      "cardHoverEffect": "Effect bij aanwijzen",
+      "cardSecondPhoto": "Tweede foto bij aanwijzen",
+      "cardBuyButton": "Koopknop op tegels",
+      "cardStarRating": "Sterrenbeoordeling op tegels",
+      "cardLowStock": "Label Bijna op",
+      "textSpacing": "Letterafstand en regelhoogte",
+      "elementBlur": "Vervaging"
     }
   },
   "editorSearch": {
@@ -214,6 +224,7 @@
     "domainsLabel": "Toegestane domeinen",
     "domainsPlaceholder": "jouwsite.com, blog.jouwsite.com",
     "domainsHint": "Tot {max}, gescheiden door komma's. Plak een URL en we knippen die terug tot het domein.",
+    "sameAsHint": "Neemt de toegestane domeinen van {title} over.",
     "emptyDomainsWarning": "Voeg minstens één domein toe. Zolang dit leeg is, laadt de etalage nergens, ook al staat insluiten aan.",
     "builderLabel": "Je sitebouwer",
     "builderOther": "Andere site",
@@ -310,14 +321,11 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Productpagina",
-    "closeAriaLabel": "De productpagina voor {title} sluiten",
+    "closeAriaLabel": "Het koopproces voor {title} sluiten",
     "desktopSize": "Desktopformaat",
     "mobileSize": "Mobiel formaat",
     "checkoutLabel": " · Afrekenen",
-    "thanksLabel": " · Bedankt",
-    "openCheckout": "Afrekenen",
-    "openCheckoutAriaLabel": "Afrekenen openen voor {title}",
-    "closeCheckoutAriaLabel": "Afrekenen sluiten"
+    "thanksLabel": " · Bedankt"
   },
   "customFont": {},
   "metadata": {
@@ -765,7 +773,8 @@
         "returns": "Retouren",
         "safety": "Veiligheid en conformiteit",
         "reviews": "Reviews",
-        "seller": "Verkoper"
+        "seller": "Verkoper",
+        "addOns": "Toevoegen aan je bestelling"
       },
       "availability": "Beschikbaarheid",
       "soldByByline": "“Verkocht door”-regel"
@@ -794,6 +803,42 @@
       "look": "Uiterlijk",
       "style": "Stijl",
       "besidePrice": "Naast de prijs"
+    },
+    "addOns": {
+      "title": "Toevoegen aan je bestelling",
+      "infoLabel": "Wat Toevoegen aan je bestelling is",
+      "infoContent": "Andere producten die een koper vanaf de productpagina aan dezelfde bestelling kan toevoegen. Elk product heeft een eigen lijst: elke klik wordt meteen opgeslagen, in elke etalage waarin het product staat.",
+      "show": "Deze sectie tonen",
+      "heading": {
+        "label": "Kop",
+        "charsLeft": "{count, plural, one {# teken over} other {# tekens over}}"
+      },
+      "layout": {
+        "label": "Weergave",
+        "list": "Rijen",
+        "tiles": "Tegels"
+      },
+      "placement": {
+        "label": "Plaats",
+        "beforeButton": "Boven de knop",
+        "afterButton": "Onder de knop"
+      },
+      "products": {
+        "offeredWith": "Aangeboden bij",
+        "offeredWithOne": "Aangeboden bij {title}",
+        "ownLink": "Verborgen: Nu kopen gaat naar je eigen link.",
+        "noPage": "Open de pagina van een product op het canvas om te kiezen wat het aanbiedt.",
+        "loadFailed": "Je producten konden niet worden geladen."
+      }
+    },
+    "reviews": {
+      "title": "Reviews",
+      "infoLabel": "Wat je aan reviews kunt wijzigen",
+      "infoContent": "Reviews van kopers, onderaan de productpagina. De sterkleur geldt ook voor de beoordeling onder de productnaam.",
+      "show": "Deze sectie tonen",
+      "starColor": "Sterkleur",
+      "defaultStarColor": "Standaardgeel",
+      "useDefaultStarColor": "Standaardgeel gebruiken"
     }
   },
   "productBlock": {
@@ -813,8 +858,8 @@
       "lowStock": "Lage voorraad: {count} beschikbaar.",
       "inStock": "{count} op voorraad."
     },
-    "openProductPage": "Productpagina openen",
-    "hideProductPage": "Productpagina verbergen",
+    "openProductPage": "Koopproces openen",
+    "hideProductPage": "Koopproces verbergen",
     "tileStyle": {
       "title": "Tegelstijl",
       "reset": "Terugzetten naar thema",
@@ -881,6 +926,23 @@
       "label": "Beschrijving",
       "placeholder": "Logo, icoon, decoratie…",
       "hint": "Wordt voorgelezen door schermlezers. Laat leeg als de afbeelding puur decoratief is."
+    }
+  },
+  "blur": {
+    "label": "Vervaging",
+    "photo": "Fotovervaging",
+    "shadow": "Schaduwvervaging",
+    "shadowTip": "Verzacht de foto achter de naam en de prijs.",
+    "off": "Uit",
+    "valueText": "{value} van 100",
+    "direction": "Richting",
+    "directionAriaLabel": "Richting van de vervaging",
+    "directions": {
+      "all": "Overal",
+      "top": "Van boven",
+      "bottom": "Van onder",
+      "left": "Van links",
+      "right": "Van rechts"
     }
   },
   "shapeBlock": {
@@ -951,10 +1013,10 @@
     "uploadImage": "Afbeelding uploaden",
     "allShapes": "Alle vormen",
     "browseShapes": "Blader door de volledige vormenbibliotheek",
-    "closePage": "Productpagina sluiten",
-    "showPage": "Productpagina tonen",
-    "closePages": "De productpagina's sluiten",
-    "showPageFull": "De productpagina tonen",
+    "closePage": "Koopproces sluiten",
+    "showPage": "Koopproces tonen",
+    "closePages": "Productpagina, afrekenen en bedankpagina sluiten",
+    "showPageFull": "Productpagina, afrekenen en bedankpagina tonen",
     "undo": "Ongedaan maken",
     "undoTip": "Ongedaan maken (Ctrl+Z)",
     "redo": "Opnieuw",
@@ -969,25 +1031,18 @@
     "zoomIn": "Inzoomen",
     "zoomInTip": "Inzoomen (Ctrl +)",
     "designSettings": "Ontwerpinstellingen",
-    "page": "Pagina",
-    "moreTools": "Meer hulpmiddelen",
-    "checkout": "Afrekenen",
-    "showCheckout": "Afrekenen tonen",
-    "closeCheckout": "Afrekenen sluiten",
-    "showCheckoutFull": "Afrekenen en bedankpagina tonen",
-    "closeCheckoutFull": "Afrekenen en bedankpagina sluiten"
+    "page": "Koopproces",
+    "moreTools": "Meer hulpmiddelen"
   },
   "selectionToolbar": {
     "toolsFor": "Hulpmiddelen voor {name}",
     "elements": "{count, plural, one {# element} other {# elementen}}",
-    "hidePage": "Pagina verbergen",
-    "hidePages": "Pagina's verbergen",
-    "openPage": "Pagina openen",
-    "openPages": "Pagina's openen",
-    "openProductPage": "De productpagina voor {name} openen",
-    "closeProductPage": "De productpagina voor {name} sluiten",
-    "openProductPages": "De productpagina's openen voor {count, plural, one {# product} other {# producten}}",
-    "closeProductPages": "De productpagina's sluiten voor {count, plural, one {# product} other {# producten}}",
+    "hidePage": "Koopproces verbergen",
+    "openPage": "Koopproces openen",
+    "openProductPage": "Het koopproces voor {name} openen",
+    "closeProductPage": "Het koopproces voor {name} sluiten",
+    "openProductPages": "Het koopproces openen voor {count, plural, one {# product} other {# producten}}",
+    "closeProductPages": "Het koopproces sluiten voor {count, plural, one {# product} other {# producten}}",
     "editText": "Tekst bewerken",
     "editTextOf": "De tekst van {name} bewerken",
     "color": "Kleur",
@@ -998,19 +1053,18 @@
     "editCornersOf": "De hoekafronding van {name} bewerken",
     "opacity": "Dekking",
     "editOpacityOf": "De dekking van {name} bewerken",
+    "blur": "Vervaging",
+    "editBlurOf": "De vervaging van {name} bewerken",
     "frame": "Bijsnijden en plaatsen",
     "frameImageFor": "Afbeelding voor {name} bijsnijden en plaatsen",
     "duplicate": "Dupliceren",
     "duplicateNamed": "{name} dupliceren",
     "duplicateN": "{count, plural, one {# element} other {# elementen}} dupliceren",
     "removeFrom": "{name} verwijderen uit raster",
-    "removeN": "{count, plural, one {# element} other {# elementen}} verwijderen uit raster",
-    "openCheckout": "Afrekenen openen",
-    "hideCheckout": "Afrekenen verbergen",
-    "openCheckoutFor": "Afrekenen voor {name} tonen",
-    "closeCheckoutFor": "Afrekenen voor {name} verbergen"
+    "removeN": "{count, plural, one {# element} other {# elementen}} verwijderen uit raster"
   },
   "canvas": {
+    "addSuggested": "{title} aan deze etalage toevoegen",
     "gridLabel": "Canvas van de etalage",
     "emptyGrid": "Je raster is leeg",
     "emptyGridHint": "Voeg een product toe om je etalage in te richten. Tekst en vormen staan in de werkbalk hieronder.",
@@ -1377,5 +1431,45 @@
     "info": "Wordt achter de pagina getoond. De laag in de paginakleur houdt de tekst leesbaar; zet hem uit om de foto onaangepast te tonen.",
     "remove": "Foto verwijderen",
     "overlay": "Kleurlaag"
+  },
+  "cardExtras": {
+    "hoverTitle": "Aanwijzen",
+    "shoppingTitle": "Kopen",
+    "effect": "Effect",
+    "effectAriaLabel": "Wat een tegel doet bij aanwijzen",
+    "effects": {
+      "none": "Geen",
+      "lift": "Optillen",
+      "zoom": "Inzoomen",
+      "tilt": "Kantelen"
+    },
+    "effectTipLabel": "Hoe effecten afspelen",
+    "effectTip": "Speelt af wanneer een koper een tegel aanwijst of er met Tab naartoe gaat. Op telefoons, en voor wie om minder beweging vroeg, blijven tegels stil.",
+    "secondPhoto": "Tweede foto",
+    "secondPhotoTipLabel": "Welke foto verschijnt",
+    "secondPhotoTip": "Toont de volgende foto van het product zolang een koper de tegel aanwijst. Producten met één foto blijven zoals ze zijn.",
+    "buyButton": "Koopknop",
+    "buyButtonAriaLabel": "Koopknop op de tegel",
+    "buyButtons": {
+      "none": "Uit",
+      "solid": "Gevuld",
+      "outline": "Omlijnd",
+      "link": "Link"
+    },
+    "buyButtonTipLabel": "Waar de knop heen gaat",
+    "buyButtonTip": "Gebruikt de tekst en kleur van de knop op je productpagina, en opent de productpagina.",
+    "rating": "Sterrenbeoordeling",
+    "ratingTipLabel": "Waar de sterren vandaan komen",
+    "ratingTip": "Uit reviews van kopers. Verschijnt onder de naam zodra een product een review heeft.",
+    "ratingTipReviewsOff": "Reviews staan uit op je productpagina, dus tegels tonen geen sterren. Zet ze aan onder Productpagina, Reviews.",
+    "lowStock": "Bijna op",
+    "lowStockTipLabel": "Wanneer het label verschijnt",
+    "lowStockTip": "Toont Bijna op wanneer een product op of onder zijn lage-voorraadgrens zit, en Uitverkocht bij nul. Kopers zien nooit hoeveel er nog zijn."
+  },
+  "textSpacing": {
+    "letterSpacing": "Letterafstand",
+    "lineHeight": "Regelhoogte",
+    "normal": "Normaal",
+    "valueText": "{value} procent van de lettergrootte"
   }
 }

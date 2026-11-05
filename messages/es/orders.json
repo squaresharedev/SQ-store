@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} pedido} many {{total} pedidos} other {{total} pedidos}} · página {page} de {totalPages}",
     "detailDialog": "Detalles del pedido",
     "closeDetail": "Cerrar detalles del pedido",
-    "withdrawn": "Desistido"
+    "withdrawn": "Desistido",
+    "moreItems": "+{count} más"
   },
   "table": {
     "product": "Producto",
@@ -150,7 +151,8 @@
     "discount": "Descuento",
     "discountSale": "Rebaja, {amount} de descuento",
     "discountCode": "Código {code}, {amount} de descuento",
-    "discountCodeOutdone": "Código {code} aplicado, pero el precio de rebaja era más bajo"
+    "discountCodeOutdone": "Código {code} aplicado, pero el precio de rebaja era más bajo",
+    "alsoBought": "También en este pedido"
   },
   "actions": {
     "disputeInStripe": "El banco del comprador ha abierto una disputa. Respóndela en tu panel de Stripe antes de la fecha límite.",
@@ -296,12 +298,16 @@
       "subject": "Tu enlace de pedido en {store}",
       "intro": "Aquí tienes el enlace a tu página para el pedido {number} en {store}:",
       "ignore": "Si no solicitaste esto, puedes ignorar este correo."
+    },
+    "reviewReminder": {
+      "subject": "Tu recordatorio para valorar {title}",
+      "intro": "El {date} pediste a {store} que te recordara valorar tu pedido cuando lo tuvieras. Aquí tienes ese recordatorio.",
+      "write": "Cuéntales a otros compradores qué te parece. Solo lleva un minuto:\n{url}",
+      "how": "Tu reseña se muestra en la página del producto con el nombre que elijas, marcada como de un comprador verificado. Tu correo electrónico y tu pedido siguen siendo privados. Todas las reseñas son bienvenidas, buenas o malas.",
+      "once": "Este es el único recordatorio sobre este pedido. Para dejar de recibir correos como este: {url}"
     }
   },
   "export": {
-    "button": "Exportar CSV",
-    "preparing": "Preparando el archivo",
-    "failed": "La exportación no se descargó. Inténtalo de nuevo en un momento.",
     "truncated": "El archivo contiene tus {count, number} pedidos más recientes.",
     "lockedTitle": "Exportar pedidos está incluido en {plan} y superiores.",
     "fileName": "pedidos.csv"

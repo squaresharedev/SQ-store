@@ -11,6 +11,8 @@ import { TourOverlay } from "@/components/onboarding/TourOverlay";
 import { SearchProvider } from "@/components/search/SearchProvider";
 import { SearchMobileTrigger } from "@/components/search/SearchMobileTrigger";
 import { SellerDetailsBanner } from "@/components/settings/SellerDetailsNotice";
+import { TermsNoticeBanner } from "@/components/settings/TermsNoticeBanner";
+import { getTermsStatus } from "@/lib/legal/terms-status";
 import { AccountPlanProvider } from "@/components/billing/plan-context";
 import { PlanStatusBanner } from "@/components/billing/PlanStatusBanner";
 import {
@@ -20,10 +22,11 @@ import {
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { getProfile, getUser } from "@/lib/auth/session";
 import { getAccountBilling } from "@/lib/billing/account-plan";
-import { countOrdersToShip } from "@/lib/orders/queries";
+import { countOrdersToShip, getCarrierHabits } from "@/lib/orders/queries";
 import { ORDERS_PATH } from "@/lib/dashboard/paths";
 import { emailSendingEnabled } from "@/lib/email/send";
 import { OrderMailProvider } from "@/components/orders/OrderMailProvider";
+import { LastCarrierProvider } from "@/components/orders/LastCarrierProvider";
 import { OrderRefundProvider } from "@/components/orders/OrderRefundProvider";
 import { can } from "@/lib/team/permissions";
 import { SkipLink } from "@/components/ui/SkipLink";
@@ -50,13 +53,15 @@ export async function DashboardShell({
   username: string;
   children: ReactNode;
 }) {
-  const [account, accounts, profile, user, toShipCount] = await Promise.all([
+  const [account, accounts, profile, user, toShipCount, terms, carrierHabits] = await Promise.all([
     getActiveAccount(),
     getAccessibleAccounts(),
     getProfile(),
     getUser(),
     // Cached per request, so the Orders page and the overview reuse it.
     countOrdersToShip(),
+    getTermsStatus(),
+    getCarrierHabits(),
   ]);
   const t = await getTranslations("Dashboard.shell");
   const tOrders = await getTranslations("Orders");
@@ -165,13 +170,19 @@ export async function DashboardShell({
                   {sellerDetailsBanner}
                 </HiddenOnPaths>
               )}
+              <TermsNoticeBanner
+                upcoming={terms?.upcoming}
+                acceptedVersion={profile?.legal_accepted_version ?? null}
+              />
               <PlanStatusBanner pastDuePlan={pastDuePlan} audience={viewingOther ? "member" : "owner"} />
               {/* Where "Skip to main content" lands. A plain wrapper: each page
                   brings its own <main>, and this only has to take focus. */}
               <div id={MAIN_CONTENT_ID} tabIndex={-1} className="outline-none">
                 <OrderMailProvider enabled={emailSendingEnabled()}>
                   <OrderRefundProvider allowed={can(account?.role, "orders.refund")} storeName={viewingStoreKnownName}>
-                    {children}
+                    <LastCarrierProvider storeId={currentAccountId} habits={carrierHabits}>
+                      {children}
+                    </LastCarrierProvider>
                   </OrderRefundProvider>
                 </OrderMailProvider>
               </div>

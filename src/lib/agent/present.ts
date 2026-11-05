@@ -43,6 +43,7 @@ export async function presentProductDetail(product: ProductDetail) {
     details: await withholdObjectKeys(product.details),
     purchaseUrl: product.purchaseUrl,
     shippingProfileId: product.shippingProfileId,
+    addOnIds: product.addOnIds,
   };
 }
 
@@ -52,6 +53,7 @@ export function presentOrder(order: OrderView) {
     productTitle: order.productTitle,
     selection: order.selection,
     quantity: order.quantity,
+    addOns: order.addOns,
     amountCents: order.amountCents,
     platformFeeCents: order.platformFeeCents,
     platformFeeBps: order.platformFeeBps,

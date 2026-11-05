@@ -33,7 +33,8 @@
     "unavailable": "Não é possível mostrar os planos agora. Atualize a página num momento.",
     "yearlyFree": "{count, plural, one {# mês grátis} many {# de meses grátis} other {# meses grátis}}",
     "launchNote": "Um preço de lançamento é um preço introdutório: o preço normal é o que aparece riscado.",
-    "grantTitle": "{plan} é oferta nossa"
+    "grantTitle": "{plan} é oferta nossa",
+    "autoRenew": "Os planos pagos renovam-se automaticamente todos os meses ao preço apresentado, até cancelar."
   },
   "card": {
     "perMonth": "/ mês",
@@ -65,6 +66,7 @@
     "earlyAccess": "Acesso antecipado a novas funcionalidades",
     "prioritySupport": "Suporte prioritário: as suas mensagens são respondidas primeiro",
     "analyticsExport": "Descarregue relatórios de estatísticas (CSV)",
+    "aiSuggestions": "Ajuda da IA na escrita, com {credit} de crédito de IA por mês",
     "products": "{count, plural, one {# produto} many {# de produtos} other {# produtos}}",
     "productsUnlimited": "Produtos ilimitados"
   },
@@ -87,6 +89,7 @@
     "unlimited": "Ilimitado",
     "included": "Incluído",
     "notIncluded": "Não incluído",
+    "aiCredit": "{credit} de crédito por mês",
     "rows": {
       "fee": "Taxa por venda",
       "storefronts": "Montras",
@@ -105,7 +108,8 @@
       "roles": "Funções da equipa",
       "analytics": "Estatísticas",
       "analyticsExport": "Relatórios de estatísticas (CSV)",
-      "productImport": "Importação de produtos (CSV)"
+      "productImport": "Importação de produtos (CSV)",
+      "aiSuggestions": "Ajuda da IA na escrita"
     },
     "groups": {
       "selling": "Vendas",
@@ -206,6 +210,24 @@
     "grantLine": "Oferta nossa: a Square Share ofereceu este plano à sua loja.",
     "grantUntil": "Até {date}. Quando terminar, nada é removido.",
     "grantNoEnd": "Sem data de fim."
+  },
+  "ai": {
+    "title": "Ajuda da IA na escrita",
+    "description": "Rascunhos, reformulações e as palavras seguintes enquanto escreve, a partir dos dados que introduz. Não acrescenta afirmações próprias.",
+    "creditUsed": "{used} de {allowance} usados este mês",
+    "creditRenews": "Renova-se a {date}",
+    "creditNote": "Um rascunho ou uma sugestão custa uma fração de cêntimo.",
+    "creditSpent": "O crédito deste mês esgotou-se. A ajuda da IA volta a {date}.",
+    "creditUnreadable": "Não é possível ler o seu crédito de IA neste momento. Tente novamente daqui a pouco.",
+    "asYouTypeLabel": "Sugerir as palavras seguintes enquanto escrevo",
+    "asYouTypeHelp": "Ao escrever a descrição de um produto aparece texto a cinzento: Tab acrescenta-o, Esc oculta-o. Esta definição é só sua, não da sua equipa.",
+    "abilities": {
+      "asYouType": "Sugere as palavras seguintes enquanto escreve uma descrição",
+      "write": "Redige um primeiro rascunho a partir dos dados que introduziu",
+      "improve": "Afina uma descrição que escreveu, mantendo todos os factos"
+    },
+    "upsellCta": "Ver Pro",
+    "upsellCredit": "{credit} de crédito de IA por mês incluídos"
   },
   "cancel": {
     "title": "Cancelar o {plan}?",

@@ -94,7 +94,7 @@ describe("ordersCsv", () => {
   });
 
   it("names the carrier right after the tracking number", () => {
-    expect(ORDERS_CSV_COLUMNS.slice(-4, -2)).toEqual(["tracking_number", "tracking_carrier"]);
+    expect(ORDERS_CSV_COLUMNS.slice(-5, -3)).toEqual(["tracking_number", "tracking_carrier"]);
     const [, line] = ordersCsv([
       row({
         fulfilment: {
@@ -112,8 +112,8 @@ describe("ordersCsv", () => {
     expect([cells.tracking_number, cells.tracking_carrier]).toEqual(["RR123456789IE", "an-post"]);
   });
 
-  it("ends with what a discount took off and the code used, the newest columns", () => {
-    expect(ORDERS_CSV_COLUMNS.slice(-2)).toEqual(["discount", "discount_code"]);
+  it("ends with what a discount took off and the code used, then the add-ons", () => {
+    expect(ORDERS_CSV_COLUMNS.slice(-3)).toEqual(["discount", "discount_code", "add_ons"]);
     const lines = ordersCsv([
       row({ discount: { cents: 480, code: "SUMMER10", byCode: true } }),
       row({ discount: { cents: 600, code: null, byCode: false } }),
@@ -123,12 +123,29 @@ describe("ordersCsv", () => {
       .trimEnd()
       .split("\r\n")
       .slice(1)
-      .map((line) => line.split(",").slice(-2));
+      .map((line) => line.split(",").slice(-3, -1));
     expect(lines).toEqual([
       ["4.80", "SUMMER10"],
       ["6.00", ""],
       ["0.00", ""],
     ]);
+  });
+
+  it("lists what was added to the order in English, one line per add-on", () => {
+    const [, line] = ordersCsv([
+      row({
+        addOns: [
+          { productTitle: "Mug", selection: [{ label: "Size", value: "Large" }], quantity: 1, amountCents: 1200 },
+          { productTitle: "Coasters", selection: [], quantity: 2, amountCents: 3600 },
+        ],
+      }),
+    ])
+      .replace(CSV_BOM, "")
+      .trimEnd()
+      .split("\r\n");
+    expect(line!.endsWith("1 × Mug (Size: Large) | 2 × Coasters")).toBe(true);
+    const [, plain] = ordersCsv([row()]).replace(CSV_BOM, "").trimEnd().split("\r\n");
+    expect(plain!.endsWith(",")).toBe(true);
   });
 
   it("is a ledger, not a mailing list: no buyer email, name or street", () => {

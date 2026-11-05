@@ -1,5 +1,5 @@
-import { expect, type Locator, type Page } from "@playwright/test";
-import { ANON_KEY, GATEWAY_URL, SERVICE_KEY } from "./stack/keys.mjs";
+import { expect, type Download, type Locator, type Page } from "@playwright/test";
+import { ANON_KEY, GATEWAY_URL, NEXT_URL, SERVICE_KEY } from "./stack/keys.mjs";
 import { saleFee } from "../../src/lib/billing/fees.ts";
 import { PLAN_PRICE_SEED } from "../../src/lib/billing/pricing-seed.ts";
 import type { SignalKind } from "../../src/lib/analytics/signals.ts";
@@ -7,7 +7,7 @@ import type { OrderChannel } from "../../src/types/order-view.ts";
 
 /** The app under test. Mirrors playwright.config.ts's baseURL, for the few
  *  helpers that fetch it directly rather than through a page. */
-const APP_URL = "http://localhost:3100";
+const APP_URL = NEXT_URL;
 
 let counter = 0;
 
@@ -36,6 +36,17 @@ export function toast(page: Page, text: RegExp | string) {
     .getByRole("region", { name: "Notifications" })
     .getByText(text)
     .first();
+}
+
+/** Click a download button until the file arrives: a click that lands before
+ *  hydration does nothing, so one try is not enough on a fresh page. */
+export async function downloadFrom(page: Page, button: Locator): Promise<Download> {
+  await expect(button).toBeVisible();
+  let file: Download | null = null;
+  await expect(async () => {
+    [file] = await Promise.all([page.waitForEvent("download", { timeout: 4_000 }), button.click()]);
+  }).toPass({ timeout: 30_000 });
+  return file!;
 }
 
 /** Wait for a confirmation toast carrying `text`. */
@@ -535,6 +546,8 @@ type DevMessage = {
   /** Email sent on someone's behalf: where replies go, and the display name. */
   replyTo?: string;
   fromName?: string;
+  /** Mail a person can stop: its one-click unsubscribe address. */
+  unsubscribeUrl?: string;
   text: string;
   at: string;
 };

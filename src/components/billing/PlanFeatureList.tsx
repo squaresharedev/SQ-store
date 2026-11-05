@@ -10,6 +10,7 @@ import {
   Sparkles,
   Store,
   Users,
+  WandSparkles,
   type LucideIcon,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -19,7 +20,9 @@ import { cn } from "@/lib/utils";
 import { formatFeeRate } from "@/lib/billing/format";
 import type { PlanFeatureKey } from "@/lib/billing/features";
 import { directFeeBps } from "@/lib/billing/fees";
-import { PLANS, type PlanId } from "@/lib/billing/plans";
+import { BILLING_CURRENCY, PLANS, type PlanId } from "@/lib/billing/plans";
+import { formatCents } from "@/lib/format/money";
+import type { Locale } from "@/i18n/locales";
 
 /** The glyph for each feature, the same wherever a plan is described. */
 export const PLAN_FEATURE_ICON: Record<PlanFeatureKey, LucideIcon> = {
@@ -32,7 +35,13 @@ export const PLAN_FEATURE_ICON: Record<PlanFeatureKey, LucideIcon> = {
   earlyAccess: Sparkles,
   analyticsExport: ChartColumn,
   prioritySupport: LifeBuoy,
+  aiSuggestions: WandSparkles,
 };
+
+/** A plan's monthly AI credit in whole money ("€10"), for the lines that name it. */
+export function aiCreditLabel(plan: PlanId, locale: Locale): string {
+  return formatCents(PLANS[plan].aiCreditCents, BILLING_CURRENCY, locale, { wholeUnits: true });
+}
 
 /** One feature of one plan as a sentence ("2% fee per sale", "10 storefronts").
  *  The fee is the plan price in force, so it needs a PlanPricesProvider. */
@@ -57,6 +66,8 @@ export function usePlanFeatureLabel(): (plan: PlanId, key: PlanFeatureKey) => st
         return definition.limits.products === null
           ? t("productsUnlimited")
           : t("products", { count: definition.limits.products });
+      case "aiSuggestions":
+        return t("aiSuggestions", { credit: aiCreditLabel(plan, locale) });
       default:
         return t(key);
     }

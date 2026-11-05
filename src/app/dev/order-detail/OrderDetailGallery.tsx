@@ -42,6 +42,7 @@ const BASE: OrderView = {
   refund: null,
   stockReserved: 0,
   paidThroughProvider: false,
+  addOns: [],
 };
 
 const SPECIMENS: { key: string; title: string; order: OrderView; mail?: boolean }[] = [
@@ -73,6 +74,19 @@ const SPECIMENS: { key: string; title: string; order: OrderView; mail?: boolean 
         trackingNumber: "RR123456789IE",
         carrier: "an-post",
       },
+    },
+  },
+  {
+    key: "add-ons",
+    title: "Added to the order on the product page",
+    order: {
+      ...BASE,
+      amountCents: 55400,
+      stockReserved: 3,
+      addOns: [
+        { productTitle: "Oak coasters", selection: [{ label: "Set", value: "Four" }], quantity: 1, amountCents: 2400 },
+        { productTitle: "Table oil", selection: [], quantity: 1, amountCents: 5000 },
+      ],
     },
   },
   { key: "no-address", title: "No delivery address", order: { ...BASE, shipTo: null, channel: "direct" } },

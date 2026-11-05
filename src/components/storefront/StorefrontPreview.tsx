@@ -17,6 +17,7 @@ import {
   type StorefrontTheme,
 } from "@/types/storefront";
 import { cn } from "@/lib/utils";
+import { resolveTileLook } from "@/lib/storefront/tile-look";
 import {
   customFontVars,
   fontPresentation,
@@ -122,19 +123,22 @@ function silenceProductBlock(block: ProductBlock): ProductBlock {
   return style === block.style ? block : { ...block, style };
 }
 
-/** A block's overrides with the two that can print words removed. Returns the
+/** The card settings that can print words on a tile: the title, the price,
+ *  the buy button, the stars and "Low stock". */
+const WORDY_CARD_FIELDS = ["showTitle", "priceTagPosition", "buyButton", "showRating", "showLowStock"] as const;
+
+/** A block's overrides with the ones that can print words removed. Returns the
  *  original object when there was nothing to remove, so an untouched tile
  *  keeps its identity (and the memoised BlockTile its props). */
 function silenceCardStyle(
   style: CardStyleOverrides | undefined,
 ): CardStyleOverrides | undefined {
   if (!style) return style;
-  if (style.showTitle === undefined && style.priceTagPosition === undefined) {
+  if (WORDY_CARD_FIELDS.every((field) => style[field] === undefined)) {
     return style;
   }
   const rest: CardStyleOverrides = { ...style };
-  delete rest.showTitle;
-  delete rest.priceTagPosition;
+  for (const field of WORDY_CARD_FIELDS) delete rest[field];
   return Object.keys(rest).length > 0 ? rest : undefined;
 }
 
@@ -147,6 +151,9 @@ function silenceTheme(theme: StorefrontTheme): StorefrontTheme {
     showTitle: false,
     priceTagPosition: "hidden",
     soldOutBadge: false,
+    buyButton: "none",
+    showRating: false,
+    showLowStock: false,
   };
 }
 
@@ -197,6 +204,8 @@ export function StorefrontPreview({
     () => (textless ? silenceTheme(theme) : theme),
     [textless, theme],
   );
+  // The cards' button and stars, from the page they lead to (resolveTileLook).
+  const tileLook = useMemo(() => resolveTileLook(config), [config]);
 
   // Resolved once for the whole board, not per cell: layerOrder sorts every
   // block, and a preview page renders many of these side by side.
@@ -310,6 +319,7 @@ export function StorefrontPreview({
                 block={gridBlock.data}
                 product={getProduct(gridBlock.data)}
                 theme={tileTheme}
+                look={tileLook}
                 editable={false}
               />
             )}

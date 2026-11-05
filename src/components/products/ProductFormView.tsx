@@ -3,6 +3,9 @@ import type { Product, ProductDetail } from "@/types/product";
 import type { ShippingChoices } from "@/lib/storefront/queries";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import type { TraderIdentityField } from "@/lib/settings/trader-identity";
+import type { AddOnChoice } from "@/lib/products/add-on-choices";
+import type { AddOnHabits, ProductSuggestions } from "@/lib/predictions";
+import type { AiWriting } from "@/lib/ai-suggestions";
 import { BackLink } from "@/components/ui/BackLink";
 import { ProductForm } from "./ProductForm";
 import { RemovalNotice } from "./RemovalNotice";
@@ -17,6 +20,10 @@ export function ProductFormView({
   shippingPolicy,
   missingTraderDetails = [],
   returnTo = null,
+  addOnChoices,
+  addOnHabits,
+  suggested,
+  ai,
 }: {
   title: string;
   subtitle: string;
@@ -34,6 +41,14 @@ export function ProductFormView({
   /** A storefront designer to return to after creating (already validated by
    *  lib/products/return-path.ts). Null keeps the products list. */
   returnTo?: string | null;
+  /** The store's products for the "Add to order" section. */
+  addOnChoices?: readonly AddOnChoice[];
+  /** What the store's history says goes with this product (lib/predictions). */
+  addOnHabits?: AddOnHabits;
+  /** A new product's better defaults (lib/predictions). */
+  suggested?: ProductSuggestions;
+  /** What AI writing help the form offers (lib/ai-suggestions.ts aiWritingFor). */
+  ai?: AiWriting;
 }) {
   const t = useTranslations("Products.page");
   return (
@@ -76,6 +91,10 @@ export function ProductFormView({
         shippingPolicy={shippingPolicy}
         missingTraderDetails={missingTraderDetails}
         returnTo={returnTo}
+        addOnChoices={addOnChoices}
+        addOnHabits={addOnHabits}
+        suggested={suggested}
+        {...ai}
       />
     </main>
   );

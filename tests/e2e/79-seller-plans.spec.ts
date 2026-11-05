@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
-import { expect, test, type Download, type Locator, type Page } from "@playwright/test";
-import { expectToast, freshUser, seedProducts, seedStorefronts, serviceRest, signUp, userIdByEmail } from "./helpers";
+import { expect, test, type Locator, type Page } from "@playwright/test";
+import { downloadFrom, expectToast, freshUser, seedProducts, seedStorefronts, serviceRest, signUp, userIdByEmail } from "./helpers";
 import { ANON_KEY, GATEWAY_URL, signJwt } from "./stack/keys.mjs";
 
 /**
@@ -29,17 +29,6 @@ import { ANON_KEY, GATEWAY_URL, signJwt } from "./stack/keys.mjs";
 function userJwt(id: string, email: string): string {
   const now = Math.floor(Date.now() / 1000);
   return signJwt({ sub: id, email, role: "authenticated", aud: "authenticated", iat: now, exp: now + 3600 });
-}
-
-/** Click a download button until the file arrives: a click that lands before
- *  hydration does nothing, so one try is not enough on a fresh page. */
-async function downloadFrom(page: Page, button: Locator): Promise<Download> {
-  await expect(button).toBeVisible();
-  let file: Download | null = null;
-  await expect(async () => {
-    [file] = await Promise.all([page.waitForEvent("download", { timeout: 4_000 }), button.click()]);
-  }).toPass({ timeout: 30_000 });
-  return file!;
 }
 
 /** Open the cancel dialog from its trigger (retrying a pre-hydration click). */

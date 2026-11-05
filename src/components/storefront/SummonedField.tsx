@@ -23,7 +23,7 @@ import { scrollIntoPanelCenter } from "@/lib/utils/scroll-into-panel";
  * answers "which of these did I just ask for".
  */
 
-export type BlockField = "fill" | "stroke" | "corners" | "opacity";
+export type BlockField = "fill" | "stroke" | "corners" | "opacity" | "blur" | "spacing";
 
 /**
  * A request for one field. The nonce is what makes a SECOND press of the same

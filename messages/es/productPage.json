@@ -29,13 +29,15 @@
     "returns": "Devoluciones",
     "safety": "Seguridad y cumplimiento",
     "reviews": "Reseñas",
-    "seller": "Vendedor"
+    "seller": "Vendedor",
+    "addOns": "Añadir a tu pedido"
   },
   "soldBy": "Vendido por {seller}",
   "moreDetails": "Más detalles",
   "trust": {
     "digitalDelivery": "Se entrega como descarga tras la compra.",
-    "euRights": "14 días para cambiar de opinión, y una garantía de 2 años."
+    "euRights": "14 días para cambiar de opinión, y una garantía de 2 años.",
+    "euRightsForEu": "Compradores de la UE: 14 días para cambiar de opinión y garantía de 2 años."
   },
   "safety": {
     "manufacturer": "Fabricante",
@@ -284,8 +286,33 @@
         "notEligible": "Este pedido ya no se puede valorar.",
         "rateLimited": "Demasiadas reseñas desde esta conexión. Inténtalo de nuevo dentro de una hora.",
         "failed": "No se ha podido publicar tu reseña. Inténtalo de nuevo."
+      },
+      "later": {
+        "title": "{kind, select, parcel {Valóralo cuando haya llegado} other {Valóralo cuando lo hayas probado}}",
+        "body": "{store} puede enviarte un solo correo, {kind, select, parcel {más o menos una semana después del envío} other {dentro de unos días}}, con un enlace para valorarlo aquí. Puedes cancelarlo cuando quieras.",
+        "remind": "Recuérdamelo por correo",
+        "notYet": "{kind, select, parcel {¿Aún no ha llegado?} other {¿Aún no lo has probado?}}",
+        "once": "{store} te enviará un solo correo. Puedes cancelarlo cuando quieras.",
+        "onDate": "{store} te enviará un recordatorio hacia el {date}.",
+        "onLater": "{store} te enviará un recordatorio {kind, select, parcel {más o menos una semana después del envío} other {dentro de unos días}}.",
+        "stop": "No me envíes el correo",
+        "preview": "Es una vista previa, así que no se enviará ningún correo.",
+        "errors": {
+          "closed": "Ya no se puede programar un recordatorio para este pedido.",
+          "rateLimited": "Demasiados intentos desde esta conexión. Vuelve a intentarlo dentro de una hora.",
+          "failed": "No ha funcionado. Vuelve a intentarlo."
+        }
+      },
+      "stopDialog": {
+        "title": "¿Cancelar el recordatorio?",
+        "body": "{store} no te enviará ningún correo para pedirte que valores este pedido.",
+        "confirm": "Cancelar el recordatorio",
+        "doneTitle": "Recordatorio cancelado",
+        "doneBody": "No recibirás más correos para valorar este pedido."
       }
-    }
+    },
+    "lineQuantity": "{quantity} × {title}",
+    "downloadItem": "Descargar {title}"
   },
   "checkout": {
     "metadata": {
@@ -384,7 +411,8 @@
       "invalid": "Algunos datos necesitan revisión. Revisa los campos marcados.",
       "discount_invalid": "Este código de descuento ya no puede usarse. Quítalo para pagar el precio completo.",
       "price_changed": "El precio cambió mientras tenías esta página abierta, así que no se ha cobrado nada. Comprueba el nuevo total y paga.",
-      "turnstile": "La comprobación de seguridad no ha terminado, así que no se ha cobrado nada. Se está ejecutando de nuevo: espera un momento e inténtalo otra vez."
+      "turnstile": "La comprobación de seguridad no ha terminado, así que no se ha cobrado nada. Se está ejecutando de nuevo: espera un momento e inténtalo otra vez.",
+      "add_on_unavailable": "Algo que añadiste ya no se puede vender con este pedido, por lo que no se ha cobrado nada. Revisa tu pedido y el nuevo total, y luego paga."
     },
     "editHeadline": "Titular del pago",
     "discount": {
@@ -398,7 +426,12 @@
       "invalid": "Este código no puede usarse para este pedido.",
       "rateLimited": "Demasiados códigos probados. Espera un momento e inténtalo de nuevo.",
       "line": "Descuento ({code})"
-    }
+    },
+    "addOns": {
+      "label": "Añadido a tu pedido",
+      "remove": "Quitar {title} de este pedido"
+    },
+    "termsAssent": "Al hacer el pedido también aceptas las <terms>Condiciones</terms> de Square Share para el uso de esta plataforma. Tu compra en sí es con {seller}."
   },
   "sale": {
     "wasNow": "Antes {was}, ahora {now}",
@@ -440,5 +473,27 @@
     "filterStars": "{stars, plural, one {Mostrar reseñas de {stars} estrella ({count})} other {Mostrar reseñas de {stars} estrellas ({count})}}",
     "showing": "{rating, plural, one {Reseñas de {rating} estrella} other {Reseñas de {rating} estrellas}}",
     "showAll": "Mostrar todas las reseñas"
+  },
+  "addOns": {
+    "title": "Añadir a tu pedido",
+    "add": "Añadir",
+    "added": "Añadido",
+    "optionLabel": "{group} para {product}",
+    "unset": "Aquí todavía no se ofrecen otros productos. Haz clic aquí para elegirlos.",
+    "addNamed": "Añadir {title} a tu pedido",
+    "detailsNamed": "Ver los detalles de {title}",
+    "seeDetails": "Detalles",
+    "fullPage": "Ver la página completa",
+    "addToOrder": "Añadir a tu pedido",
+    "removeFromOrder": "Quitar de tu pedido",
+    "rating": "{average} de 5 estrellas, {count, plural, one {# reseña} other {# reseñas}}",
+    "hidden": {
+      "hint": "Los compradores no ven este producto.",
+      "draft": "Borrador",
+      "soldOut": "Agotado",
+      "takenDown": "Retirado",
+      "otherKind": "Otro tipo",
+      "otherCurrency": "Otra moneda"
+    }
   }
 }

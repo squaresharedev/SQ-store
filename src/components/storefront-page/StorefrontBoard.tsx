@@ -6,11 +6,14 @@ import { Grid } from "@/components/grid/Grid";
 import type { GridBlock } from "@/components/grid/gridConstants";
 import { resolveInk } from "@/components/product-page/product-page-maps";
 import { BlockFace } from "@/components/storefront/BlockFace";
+import { BlockBlurCopies } from "@/components/storefront/BlockBlurCopies";
 import { phoneGridLayout } from "@/components/storefront/phone-grid";
 import { StorefrontMasthead } from "@/components/storefront/StorefrontMasthead";
 import { resolveBackgroundStyle } from "@/components/storefront/background-presets";
 import {
+  CARD_HOVER_FRAME_CLASSES,
   TILE_FACE_CLASS,
+  blockBlurStyle,
   blockTileClipStyle,
   gridGapStyle,
   scaledCornerRadius,
@@ -26,6 +29,7 @@ import {
   isFreelyArranged,
   layerOrder,
   readingOrder,
+  resolveCardStyle,
   tileCovers,
   type StorefrontBlock,
 } from "@/types/storefront";
@@ -73,6 +77,11 @@ function asFaceProduct(tile: StorefrontTileProduct): Product {
     stockQuantity: null,
     lowStockThreshold: 0,
     maxPerOrder: 1,
+    // The card extras, exactly as sent: a photo, two numbers about reviews,
+    // and a stock STATE (never a count, see StorefrontTileProduct).
+    ...(tile.hoverImageUrl ? { hoverImageUrl: tile.hoverImageUrl } : {}),
+    ...(tile.rating ? { rating: tile.rating } : {}),
+    ...(tile.stockState ? { stockState: tile.stockState } : {}),
   };
 }
 
@@ -190,15 +199,20 @@ export function StorefrontBoard({
           renderBlock={(gridBlock) => {
             const block = gridBlock.data;
             const tile = block.type === "product" ? tiles.get(block.productId) : undefined;
+            const imageUrl = page.imageUrls[gridBlock.key] ?? null;
             const face = (
-              <div className={TILE_FACE_CLASS}>
-                <BlockFace
-                  block={block}
-                  product={tile?.product ?? null}
-                  theme={theme}
-                  imageUrl={page.imageUrls[gridBlock.key] ?? null}
-                />
-              </div>
+              <>
+                <div className={TILE_FACE_CLASS} style={blockBlurStyle(block)}>
+                  <BlockFace
+                    block={block}
+                    product={tile?.product ?? null}
+                    theme={theme}
+                    imageUrl={imageUrl}
+                    look={page.tileLook}
+                  />
+                </div>
+                <BlockBlurCopies block={block} theme={theme} imageUrl={imageUrl} />
+              </>
             );
             // A product tile is the way to its page. Every other block is
             // part of the picture and leads nowhere.
@@ -210,6 +224,10 @@ export function StorefrontBoard({
                 {...(tilesOpenNewTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 className={cn(
                   tileFrameClass(block),
+                  // What the card does on hover (CARD_HOVER_FRAME_CLASSES):
+                  // the cell is the group, this link the thing that moves.
+                  block.type === "product" &&
+                    CARD_HOVER_FRAME_CLASSES[resolveCardStyle(theme, block.style).hoverEffect],
                   // The ring is the board's own ink, not the dashboard's grey:
                   // the ink is chosen to read on the seller's background, and
                   // the grey is 2.3:1 on a cream one, short of the 3:1 a focus

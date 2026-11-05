@@ -77,6 +77,12 @@ const POLICY_FREE_BY_DESIGN = new Set([
   // role (lib/billing). A client that could write it could put itself on Pro;
   // members read their store's plan through the server, never the table.
   "seller_billing",
+  // AI credit (20261104_ai_credit): what each store's AI writing help has used
+  // this month, and every store together today, written only by ai_credit_hold
+  // and ai_credit_settle through the service role. A client that could write
+  // them could reset its own month, or the platform's day, and spend on.
+  "ai_credit_usage",
+  "ai_platform_usage",
   // Account deletion (20261010_account_deletion_requests): the record the
   // deletion job acts on. A client that could write it could delete an account
   // without the two-factor step or the waiting period, or, by removing a row,

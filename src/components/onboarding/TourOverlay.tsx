@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import {
   iconNudgeLeftClass,
   iconNudgeRightClass,
+  kbdClass,
   overlaySurfaceClass,
 } from "@/components/ui/control-styles";
 import { EASE_STANDARD, STEP_SWAP } from "@/components/ui/motion-tokens";
@@ -622,9 +623,7 @@ function ActiveTour({
                 {tOverlay.rich("shortcut", {
                   shortcut,
                   kbd: (chunks) => (
-                    <kbd className="rounded-sm border border-border bg-muted px-1.5 py-0.5 font-inter text-xs font-medium text-foreground">
-                      {chunks}
-                    </kbd>
+                    <kbd className={kbdClass}>{chunks}</kbd>
                   ),
                 })}
               </p>

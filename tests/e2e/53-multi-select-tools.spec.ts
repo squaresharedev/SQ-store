@@ -226,6 +226,9 @@ test.describe("tools for a multiple selection", () => {
     page,
   }) => {
     await newStorefront(page, "multipages");
+    // Wide enough to keep the tiles in view beside two pages and the checkout
+    // chain: the quick bar stands down when its tiles leave the screen.
+    await page.setViewportSize({ width: 1920, height: 1080 });
     await addProducts(page, [/^Select Enamel Mug$/, /^Select Canvas Tote$/]);
     await expect(page.locator("li[data-grid-cell]")).toHaveCount(2);
 
@@ -242,24 +245,25 @@ test.describe("tools for a multiple selection", () => {
     expect(firstChild, "the bar opens with a divider").toBe("BUTTON");
 
     const open = bar(page).getByRole("button", {
-      name: /open the product pages for 2 products/i,
+      name: /open the buyer flow for 2 products/i,
     });
     await expect(open).toBeVisible();
     await open.click();
 
-    // Both pages are out, and they are NOT in the same spot: the canvas lays
-    // every open artboard out in one row beside the board.
+    // Both pages are out, with the one checkout and thank-you page after the
+    // second, and they are NOT in the same spot: the canvas lays every open
+    // artboard out in one row beside the board.
     const boxes = await page
       .locator("[data-artboard-id]")
       .evaluateAll((els) =>
         els.map((el) => Math.round(el.getBoundingClientRect().x)),
       );
-    expect(boxes).toHaveLength(2);
-    expect(new Set(boxes).size, "two pages opened on top of each other").toBe(2);
+    expect(boxes).toHaveLength(4);
+    expect(new Set(boxes).size, "two pages opened on top of each other").toBe(4);
 
     // And it is a toggle for the group: pressing it again puts them all away.
     await bar(page)
-      .getByRole("button", { name: /close the product pages for 2 products/i })
+      .getByRole("button", { name: /close the buyer flow for 2 products/i })
       .click();
     await expect(page.locator("[data-artboard-id]")).toHaveCount(0);
   });

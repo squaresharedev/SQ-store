@@ -5,6 +5,7 @@ import { hasR2Credentials } from "@/lib/r2";
 import { IMAGE_MAX_BYTES } from "@/lib/validation/product";
 import { storeImage } from "@/lib/uploads/store-image";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
+import { isSameOriginRequest } from "@/lib/security/same-origin";
 import { declaredLengthExceeds } from "@/lib/security/read-json";
 
 /**
@@ -49,6 +50,9 @@ function bad(status: number, error: string, fix?: string) {
 
 export async function POST(request: Request) {
   const t = await getTranslations("Errors.uploadRoute");
+  // A multipart POST needs no preflight, so a page on a sibling squareshare.eu
+  // site would arrive with the seller's cookie. Only our own pages upload.
+  if (!isSameOriginRequest(request)) return bad(403, t("permissionDenied"));
   const account = await getActiveAccount();
   if (!account) return bad(401, t("signIn.image"));
   if (!can(account.role, "products.write")) {

@@ -135,11 +135,14 @@ async function pressCanvasButton(page: Page, name: string | RegExp) {
  *  node that appears on it. */
 async function openPageFor(page: Page, title: string) {
   await dismissPanel(page);
-  await pressCanvasButton(page, `Select ${title}`);
+  // The tile is a focusable container that answers to Enter, which reaches it
+  // on a phone too, where the board can be outside the window.
+  await page.getByLabel(new RegExp(`^${title}\. press enter`, "i")).focus();
+  await page.keyboard.press("Enter");
   await canvasStill(page);
   await pressCanvasButton(
     page,
-    new RegExp(`^open the product page for ${title}$`, "i"),
+    new RegExp(`^open the buyer flow for ${title}$`, "i"),
   );
 }
 
@@ -288,7 +291,9 @@ for (const viewport of VIEWPORTS) {
       await canvasStill(page);
 
       const geometry = await connectorGeometry(page);
-      expect(geometry.artboards.map((a) => a.id)).toEqual([s.lamp, s.stool]);
+      // Both pages, then the one checkout and thank-you page, after the newest.
+      const flow = [s.lamp, s.stool, `checkout:${s.stool}`, `thanks:${s.stool}`];
+      expect(geometry.artboards.map((a) => a.id)).toEqual(flow);
       const [first, second] = geometry.artboards;
 
       // 2. SIDE BY SIDE. The second page starts to the RIGHT of where the
@@ -308,8 +313,10 @@ for (const viewport of VIEWPORTS) {
         x: geometry.board.left + geometry.board.width,
         y: geometry.board.top,
       };
-      expect(geometry.ends).toHaveLength(2);
-      for (const end of geometry.ends) {
+      expect(geometry.ends).toHaveLength(4);
+      // The board's own lines come first; the last two join the chain.
+      const boardLines = geometry.ends.slice(0, 2);
+      for (const end of boardLines) {
         expect(end.start.x).toBeCloseTo(boardCorner.x, 0);
         expect(end.start.y).toBeCloseTo(boardCorner.y, 0);
       }
@@ -322,7 +329,7 @@ for (const viewport of VIEWPORTS) {
 
       // Each line lands on the TOP-CENTRE of its own page's card, not
       // partway down its side and not on the label row above the card.
-      geometry.ends.forEach((end, index) => {
+      boardLines.forEach((end, index) => {
         const card = geometry.artboards[index]!.card;
         expect(end.finish.x).toBeCloseTo(card.left + card.width / 2, 0);
         expect(end.finish.y).toBeCloseTo(card.top, 0);
@@ -340,7 +347,7 @@ for (const viewport of VIEWPORTS) {
       // stool's line (further from the board) clears the lamp's rather than
       // running flush against it near the top.
       const apexes: number[] = [];
-      for (const end of geometry.ends) {
+      for (const end of boardLines) {
         const match =
           /^M ([-\d.]+) ([-\d.]+) C ([-\d.]+) ([-\d.]+), ([-\d.]+) ([-\d.]+), ([-\d.]+) ([-\d.]+)$/.exec(
             end.d,
@@ -402,7 +409,7 @@ for (const viewport of VIEWPORTS) {
       // The drag moved the WORKSPACE, not a block: both pages are still open
       // and the board still holds both tiles where they were.
       const settled = await connectorGeometry(page);
-      expect(settled.artboards.map((a) => a.id)).toEqual([s.lamp, s.stool]);
+      expect(settled.artboards.map((a) => a.id)).toEqual(flow);
       expect(settled.tiles[`p_${s.lamp}`]).toEqual(lampTile);
       expect(settled.tiles[`p_${s.stool}`]).toEqual(stoolTile);
     });

@@ -6,13 +6,16 @@ import { getActiveAccount } from "@/lib/team/account-context";
 import { parseOrderSelection } from "@/lib/orders/selection";
 import { parseShipTo } from "@/lib/orders/ship-to";
 import { parseFulfilment } from "@/lib/orders/fulfilment";
+import { parseCarrier } from "@/lib/orders/carriers";
 import { orderPhotoKey } from "@/lib/orders/photo";
 import { presignGetUrl } from "@/lib/r2";
 import { isContentVisible } from "@/lib/moderation/removal";
 import type { OrderExportRow } from "@/lib/orders/csv";
 import { ORDER_CHANNELS, REFUND_REASONS, WITHDRAWN_STATUS_FILTER } from "@/types/order-view";
+import { carrierHabits, NO_CARRIER_HABITS, type CarrierHabits } from "@/lib/predictions";
 import type {
   OrderView,
+  OrderAddOnLine,
   OrderListRow,
   OrderDiscount,
   OrderFilters,
@@ -63,6 +66,7 @@ function toStatus(value: unknown): OrderStatus {
 /** Map a raw DB row to the OrderView shape. Money stays integer cents. */
 function toOrderView(row: Record<string, unknown>): OrderView {
   const quantity = Number(row.quantity);
+  const addOns = toAddOnLines(row.add_ons);
   return {
     id: String(row.id),
     productTitle: String(row.product_title ?? ""),
@@ -83,9 +87,40 @@ function toOrderView(row: Record<string, unknown>): OrderView {
       row.withdrawal_requested_at != null ? String(row.withdrawal_requested_at) : null,
     discount: toOrderDiscount(row),
     refund: toOrderRefund(row),
-    stockReserved: Number.isInteger(Number(row.stock_reserved)) ? Math.max(0, Number(row.stock_reserved)) : 0,
+    // Everything still off the shelf for this order, add-on lines included:
+    // what "put them back in stock" returns (order_apply_refund).
+    stockReserved: reservedUnits(row.stock_reserved) + addOns.reduce((total, line) => total + line.reserved, 0),
     paidThroughProvider: isProviderPayment(row.payment_ref),
+    addOns: addOns.map((line) => ({
+      productTitle: line.productTitle,
+      selection: line.selection,
+      quantity: line.quantity,
+      amountCents: line.amountCents,
+    })),
   };
+}
+
+function reservedUnits(value: unknown): number {
+  const units = Number(value);
+  return Number.isInteger(units) ? Math.max(0, units) : 0;
+}
+
+/** The embedded order_add_ons rows, in the seller's order. Tolerates a read
+ *  that did not embed them (an older caller, a test row): none. */
+function toAddOnLines(raw: unknown): (OrderAddOnLine & { reserved: number })[] {
+  if (!Array.isArray(raw)) return [];
+  return [...raw]
+    .sort((a, b) => Number(a?.position ?? 0) - Number(b?.position ?? 0))
+    .map((line: Record<string, unknown>) => {
+      const quantity = Number(line.quantity);
+      return {
+        productTitle: String(line.product_title ?? ""),
+        selection: parseOrderSelection(line.selected_options),
+        quantity: Number.isInteger(quantity) && quantity >= 1 ? quantity : 1,
+        amountCents: Number(line.amount_cents ?? 0),
+        reserved: reservedUnits(line.stock_reserved),
+      };
+    });
 }
 
 /** Whether orders.payment_ref names a payment a provider can refund (a Stripe
@@ -117,7 +152,7 @@ function toOrderDiscount(row: Record<string, unknown>): OrderDiscount | null {
 
 /** The column list every order read selects — one contract, one place. */
 const ORDER_COLUMNS =
-  "id, product_title, selected_options, quantity, ship_to, fulfilment_status, shipped_at, tracking_number, tracking_carrier, amount_cents, platform_fee_cents, platform_fee_bps, currency, channel, status, buyer_email, created_at, gift_message, withdrawal_requested_at, discount_id, discount_cents, discount_code_id, discount_code, refunded_at, refund_reason, stock_reserved, payment_ref";
+  "id, product_title, selected_options, quantity, ship_to, fulfilment_status, shipped_at, tracking_number, tracking_carrier, amount_cents, platform_fee_cents, platform_fee_bps, currency, channel, status, buyer_email, created_at, gift_message, withdrawal_requested_at, discount_id, discount_cents, discount_code_id, discount_code, refunded_at, refund_reason, stock_reserved, payment_ref, add_ons:order_add_ons(product_title, selected_options, quantity, amount_cents, stock_reserved, position)";
 
 /** How a Stripe PaymentIntent id starts: the one payment_ref a refund can name. */
 export const PROVIDER_PAYMENT_PREFIX = "pi_";
@@ -358,6 +393,39 @@ export const countOrdersToShip = cache(async (): Promise<number> => {
     return 0;
   }
   return count ?? 0;
+});
+
+/** How many of the newest carrier-named orders the ship form learns from. */
+const CARRIER_HABIT_ORDERS = 50;
+
+/**
+ * The carriers the ACTIVE store ships with, overall and per destination
+ * country, read from its newest orders that name one, so the ship form opens on
+ * the one this parcel most likely goes with (lib/predictions.ts carrierHabits).
+ * Soft-fails to none, which opens it on no carrier.
+ */
+export const getCarrierHabits = cache(async (): Promise<CarrierHabits> => {
+  const account = await getActiveAccount();
+  if (!account) return NO_CARRIER_HABITS;
+
+  const supabase = await createClient();
+  const { data, error } = await (supabase as SupabaseClient)
+    .from("orders")
+    .select("tracking_carrier, country:ship_to->>country")
+    .eq("seller_id", account.accountId)
+    .not("tracking_carrier", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(CARRIER_HABIT_ORDERS);
+  if (error) {
+    console.error("[orders] carrier habits failed", error.message);
+    return NO_CARRIER_HABITS;
+  }
+  return carrierHabits(
+    ((data ?? []) as { tracking_carrier: string | null; country: string | null }[]).flatMap((row) => {
+      const carrier = parseCarrier(row.tracking_carrier);
+      return carrier ? [{ carrier, country: row.country }] : [];
+    }),
+  );
 });
 
 /**

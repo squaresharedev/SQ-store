@@ -11,6 +11,8 @@ import { PlanWordmark } from "@/components/billing/PlanWordmark";
 import { PortalButton } from "@/components/billing/PortalButton";
 import { UpgradeCard } from "@/components/billing/UpgradeCard";
 import { UsageMeter } from "@/components/billing/UsageMeter";
+import { AiWritingCard } from "@/components/settings/AiWritingCard";
+import type { AiSettings } from "@/lib/ai-suggestions";
 import { CancelPlanButton } from "@/components/billing/CancelPlanDialog";
 import { KeepPlanButton } from "@/components/billing/KeepPlanButton";
 import { PlanPricesProvider } from "@/components/billing/plan-context";
@@ -152,6 +154,8 @@ export function YourPlanCard({
  *                        would change for this store (UpgradeCard); on the top
  *                        plan, what it includes.
  *   What you're using    storefronts and team seats against the plan's caps.
+ *   AI writing help      on Pro, the month's AI credit and this person's
+ *                        as-you-type switch; below it, what Pro would add.
  *   Billing & invoices   the Stripe Customer Portal (owner only, 2FA first).
  *
  * The upgrade is left out while a payment is failing: the one thing worth
@@ -174,9 +178,12 @@ type BillingSectionProps = {
   returned: CheckoutReturn | null;
   /** The server calls, or stand-ins on /dev/pricing. */
   actions?: BillingActions;
+  /** The AI writing card's facts (lib/ai-suggestions.ts aiSettingsFor);
+   *  absent or null shows no card. */
+  ai?: AiSettings;
 };
 
-function BillingSectionBody({ context, returned, actions = SERVER_BILLING_ACTIONS }: BillingSectionProps) {
+function BillingSectionBody({ context, returned, actions = SERVER_BILLING_ACTIONS, ai = null }: BillingSectionProps) {
   const t = useTranslations("Billing");
   const router = useRouter();
   const { plan, status, usage, canManage } = context;
@@ -251,6 +258,8 @@ function BillingSectionBody({ context, returned, actions = SERVER_BILLING_ACTION
           </p>
         )}
       </SettingsCard>
+
+      <AiWritingCard settings={ai} />
 
       {canManage && (
         <SettingsCard id="invoices" title={t("settings.invoicesTitle")} description={t("settings.invoicesDescription")}>

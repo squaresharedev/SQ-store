@@ -1,4 +1,4 @@
-import type { ProductPageImage, ProductPageProduct } from "@/types/product";
+import type { AddOnCard, ProductPageImage, ProductPageProduct } from "@/types/product";
 import type { ProductPageReportScopes, ProductPageStorefront } from "@/types/product-page";
 import type { CheckoutPageConfig } from "@/types/storefront";
 import type { TrackingLink } from "@/types/order-view";
@@ -20,6 +20,10 @@ export type CheckoutPageData = {
   product: ProductPageProduct;
   /** Which of the page's wider report targets apply; absent in the editor. */
   reportScopes?: ProductPageReportScopes;
+  /** "Add to your order": the add-ons on offer with this product (the same
+   *  cards the product page showed). Which of them are in THIS order rides in
+   *  `?a=`. Absent in the editor. */
+  addOns?: AddOnCard[];
 };
 
 /** Why an order was refused, as the checkout's order route reports it. The
@@ -41,7 +45,10 @@ export type CheckoutErrorCode =
   | "discount_invalid"
   /** The total changed since the page was opened (a sale ended, a price
    *  moved). Nothing was charged; the buyer sees the new total first. */
-  | "price_changed";
+  | "price_changed"
+  /** Something added to the order can no longer be sold with it (gone, sold
+   *  out, or that version is not available). Nothing was charged. */
+  | "add_on_unavailable";
 
 /** The discount-code check's answer: the code's terms, or one refusal for
  *  every reason it cannot be used (nothing here says whether a code exists). */
@@ -103,6 +110,28 @@ export type BuyerOrder = {
   review?: "open" | "done" | "closed";
   /** The stars this order's review gave, once it has one. */
   reviewRating?: number;
+  /** The one review reminder email the buyer can ask for
+   *  (lib/reviews/reminders.ts): not asked for, asked for, or sent, and when
+   *  it falls due once that is known (null while the parcel has not been
+   *  sent). Absent where none can be offered: mail or the scheduler is off,
+   *  the order has no email address, it cannot be reviewed, or it is too late. */
+  reviewReminder?: { status: "off" | "on" | "sent"; dueAt: string | null };
+  /** "Add to your order": what else this order bought, in the seller's
+   *  order. Absent or empty for most orders. */
+  addOns?: BuyerOrderAddOn[];
+};
+
+/** One add-on line on a buyer's order page. */
+export type BuyerOrderAddOn = {
+  /** The line's own id: what the download route's `?item=` names. Not a
+   *  credential on its own; the order's ref is. */
+  id: string;
+  productTitle: string;
+  photo: ProductPageImage | null;
+  quantity: number;
+  selection: { label: string; value: string }[];
+  /** "PDF" for a download line, never a name or key; null for a parcel. */
+  digitalFormat: string | null;
 };
 
 export type OrderPageData = {

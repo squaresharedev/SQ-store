@@ -10,6 +10,7 @@ import {
 import { issueKey } from "@/lib/validation/messages";
 import { fold } from "@/lib/search/vocabulary";
 import {
+  ADD_ONS_MAX,
   BADGE_COLORS,
   BADGE_ICONS,
   BADGE_LABEL_MAX,
@@ -468,6 +469,19 @@ export const purchaseUrlSchema = z
   );
 
 /**
+ * Other products of the same store offered as "Add to your order", in the
+ * seller's order. That each id is the active account's own (and not this
+ * product) is the action's check against the catalogue, and the database's
+ * (guard_add_on_ids).
+ */
+export const addOnIdsSchema = z
+  .array(uuidField("product"))
+  .max(ADD_ONS_MAX, issueKey("Validation.product.addOnsTooMany"))
+  .refine((ids) => new Set(ids).size === ids.length, {
+    error: issueKey("Validation.product.addOnDuplicate"),
+  });
+
+/**
  * A full product write. For updates, `imageKey`/`digitalFileKey` are
  * three-state: `undefined` = keep the stored key, `null` = clear it,
  * `string` = replace it (must be a key the caller owns — see
@@ -523,6 +537,8 @@ export const productWriteSchema = z
     // resolves nowhere falls back to the store default by design (see
     // lib/storefront/shipping.ts).
     shippingProfileId: uuidField("shippingProfile").nullish(),
+    // Replaced whole; absent leaves the stored list alone.
+    addOnIds: addOnIdsSchema.optional(),
   })
   // Mirrors the DB constraint: tracking without a concrete quantity is invalid.
   .refine(

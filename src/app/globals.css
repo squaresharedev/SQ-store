@@ -53,9 +53,10 @@
   --color-plan-gold-dark: #fbbf24; /* amber-400 on black cards */
 
   /* A review's stars in the yellow every review site uses: the import story's
-     illustration (components/products/ReviewImportStory) and the stars a buyer
-     gives on their order page (components/checkout/ReviewPanel). The product
-     page's review list still draws its stars in the seller's own ink. Also
+     illustration (components/products/ReviewImportStory), the stars a buyer
+     gives on their order page (components/checkout/ReviewPanel) and the
+     seller's own review pages. The product page's stars start from the same
+     yellow (DEFAULT_PRODUCT_PAGE_STAR_COLOR) and a seller can change them. Also
      the window controls of a drawn browser, illustrations only. */
   --color-rating: #f59e0b; /* amber-500 */
   --color-window-close: #ff5f57;
@@ -451,6 +452,23 @@
    on the tile, and handles drawn over it would sit on its own corner controls. */
 .ss-grid > [data-grid-cell]:has([data-block-overlay]) + [data-grid-chrome] {
   display: none;
+}
+/* A CARD TOO SMALL FOR ITS EXTRAS lets them go (ProductTileContent), so the
+   name and the photo keep their room: a phone's three-across row is the usual
+   case. The product's face is the size container, so this asks the card
+   itself, at any span. The buy button goes first, on a card too short for it,
+   since the whole card is already the link to the product; the stars and "Low
+   stock" go only once there is no room for words beside the name at all. */
+@container (max-width: 7rem) or (max-height: 7rem) {
+  [data-tile-details],
+  [data-tile-extras-band] {
+    display: none;
+  }
+}
+@container (max-width: 7rem) or (max-height: 9rem) {
+  [data-tile-buy] {
+    display: none;
+  }
 }
 /* ONE CELL'S SIDE, handed down to every tile for what should be the same
    size on all of them whatever their span: chips, when the theme asks for
@@ -1010,15 +1028,19 @@ textarea {
     --flow-angle: 360deg;
   }
 }
-.code-surface {
+.code-surface,
+.suggestion-surface {
   /* Everything worth retuning is here. LIGHT shades of green only, deepest to
      palest and back, so the ring thins out and thickens as it turns: the dark
-     success green (green-700) was tried and read as heavy on a white slab. */
-  --flow-ring: 4px;
+     success green (green-700) was tried and read as heavy on a white slab.
+     Shared with the suggestion chips' rim below. */
   --flow-stops: #22c55e, var(--color-success-dark) 25%, #bbf7d0 50%,
     var(--color-success-dark) 75%, #22c55e; /* green-500, 400, 200 */
   position: relative;
   isolation: isolate;
+}
+.code-surface {
+  --flow-ring: 4px;
 }
 /* The same ring in light reds, for a block the seller has to act on and not
    just copy from (the embed's privacy text). Only the palette changes. */
@@ -1052,6 +1074,61 @@ textarea {
 @media (prefers-reduced-motion: reduce) {
   .code-surface::before {
     animation: none;
+    transition: none;
+  }
+}
+
+/* SUGGESTION RIM: the code block's flow as a thin rim on a chip the app is
+   GUESSING (control-styles `suggestionChipClass`), so every prediction reads as
+   one family with it. Built differently on purpose: a form can show several
+   chips at once, and turning the registered angle above costs main-thread work
+   on every frame for each one (measured: about 9% of a core per chip). Here the
+   same gradient spins as a transform, which the compositor runs on its own.
+     ::before  a square of the gradient, twice the chip's width so it always
+               covers the corners, spun about the chip's centre
+     ::after   the chip's fill, inset by the rim, taking the chip's hover
+   The chip keeps its size: its border goes clear and the rim sits inside it. */
+@keyframes suggestion-flow {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+.suggestion-surface {
+  --flow-rim: 2px;
+  border-color: transparent;
+  background-clip: padding-box;
+  overflow: hidden;
+}
+.suggestion-surface::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: conic-gradient(var(--flow-stops));
+  animation: suggestion-flow var(--duration-flow) linear infinite;
+  pointer-events: none;
+}
+.suggestion-surface::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: var(--flow-rim);
+  background: var(--background);
+  transition: background-color var(--transition-duration-base) var(--ease-standard);
+  pointer-events: none;
+}
+.suggestion-surface:hover::after {
+  background: var(--accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .suggestion-surface::before {
+    animation: none;
+  }
+  .suggestion-surface::after {
     transition: none;
   }
 }
@@ -1594,6 +1671,13 @@ textarea {
 .setup-check-pop {
   animation: check-pop 260ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
+/* A product chosen for add to order fades into the form's preview of the
+   buyer's section. Only the preview: a buyer's page does not fade its rows in. */
+@media (prefers-reduced-motion: no-preference) {
+  .add-ons-preview-page [data-product-add-on] {
+    animation: setup-fade-in var(--transition-duration-slow) var(--ease-standard) backwards;
+  }
+}
 @keyframes setup-label-settle {
   from {
     color: var(--foreground);
@@ -1659,6 +1743,240 @@ textarea {
 @media (prefers-reduced-motion: reduce) {
   .transit-flow-run,
   .transit-flow-pass {
+    animation: none;
+  }
+}
+
+/* Corner art (ui/CornerArt, settings/corner-art): the small pictures in a
+   settings page's lead card. Each sets its own loop (--corner-loop) and the
+   distances its drawing decides; the still pose is in the markup, so these
+   only add the motion, and reduced motion leaves the still picture. */
+
+/* Code reels (two-factor): each reel spins to a code, holds, spins half a
+   cycle on to the next and holds, ending where it began. */
+@keyframes corner-reel {
+  0%,
+  8% {
+    translate: 0 0;
+  }
+  28%,
+  58% {
+    translate: 0 var(--reel-spin);
+  }
+  78%,
+  to {
+    translate: 0 calc(var(--reel-spin) * 2);
+  }
+}
+.corner-reel {
+  animation: corner-reel var(--corner-loop) var(--ease-standard) infinite backwards;
+}
+
+/* Ringing bell (notifications): a swing that dies away, the clapper a beat
+   behind it, a ring out either side at each strike, then quiet. */
+@keyframes corner-bell-swing {
+  0%,
+  52% {
+    rotate: 0deg;
+  }
+  56% {
+    rotate: 12deg;
+  }
+  62% {
+    rotate: -10deg;
+  }
+  68% {
+    rotate: 8deg;
+  }
+  74% {
+    rotate: -5deg;
+  }
+  80% {
+    rotate: 2.5deg;
+  }
+  86%,
+  to {
+    rotate: 0deg;
+  }
+}
+@keyframes corner-bell-clapper {
+  0%,
+  54% {
+    rotate: 0deg;
+  }
+  58% {
+    rotate: -12deg;
+  }
+  64% {
+    rotate: 10deg;
+  }
+  70% {
+    rotate: -7deg;
+  }
+  76% {
+    rotate: 4deg;
+  }
+  82% {
+    rotate: -2deg;
+  }
+  88%,
+  to {
+    rotate: 0deg;
+  }
+}
+@keyframes corner-bell-ring {
+  0%,
+  55% {
+    opacity: 0;
+    scale: 0.85;
+  }
+  60% {
+    opacity: 1;
+    scale: 1;
+  }
+  80%,
+  to {
+    opacity: 0;
+    scale: 1.2;
+  }
+}
+.corner-bell-swing {
+  animation: corner-bell-swing var(--corner-loop) var(--ease-standard) infinite;
+}
+.corner-bell-clapper {
+  animation: corner-bell-clapper var(--corner-loop) var(--ease-standard) infinite;
+}
+.corner-bell-ring {
+  animation: corner-bell-ring var(--corner-loop) var(--ease-entrance) infinite backwards;
+}
+
+/* Arriving team: the row steps along one place per stage, a stage per look,
+   so a loop ends where it began; each newcomer hops as it takes its place. */
+@keyframes corner-team-shift {
+  0%,
+  18% {
+    translate: 0 0;
+  }
+  25%,
+  43% {
+    translate: calc(var(--team-step) * -1) 0;
+  }
+  50%,
+  68% {
+    translate: calc(var(--team-step) * -2) 0;
+  }
+  75%,
+  93% {
+    translate: calc(var(--team-step) * -3) 0;
+  }
+  to {
+    translate: calc(var(--team-step) * -4) 0;
+  }
+}
+.corner-team-shift {
+  animation: corner-team-shift var(--corner-loop) var(--ease-standard) infinite;
+}
+@keyframes corner-team-hop {
+  0%,
+  6%,
+  to {
+    translate: 0 0;
+  }
+  3% {
+    translate: 0 -0.5rem;
+  }
+}
+.corner-team-hop {
+  animation: corner-team-hop var(--corner-loop) var(--ease-standard) infinite backwards;
+}
+
+/* Printing receipt (billing): fed out of the card's top edge in jerks, a line
+   at a time, held, then torn off and dropped. */
+@keyframes corner-receipt {
+  from {
+    translate: 0 var(--receipt-hide);
+    rotate: 0deg;
+    opacity: 1;
+    animation-timing-function: steps(8, end);
+  }
+  40%,
+  72% {
+    translate: 0 0;
+    rotate: 0deg;
+    opacity: 1;
+  }
+  86%,
+  to {
+    translate: 0 0.75rem;
+    rotate: -5deg;
+    opacity: 0;
+  }
+}
+.corner-receipt {
+  animation: corner-receipt var(--corner-loop) var(--ease-standard) infinite;
+}
+
+/* Writing signature (terms): the pen comes down, writes the signature along
+   its own path in step with the ink, and lifts away; the ink rests, fades,
+   and is written again. Both share the writing stretch (8% to 48%) and its
+   easing, so the nib stays on the line. */
+@keyframes corner-sign-ink {
+  0%,
+  8% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  48%,
+  82% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  92%,
+  to {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+@keyframes corner-sign-pen {
+  from {
+    offset-distance: 0%;
+    opacity: 0;
+    translate: 0.5rem -0.75rem;
+  }
+  8% {
+    offset-distance: 0%;
+    opacity: 1;
+    translate: 0 0;
+  }
+  48% {
+    offset-distance: 100%;
+    opacity: 1;
+    translate: 0 0;
+  }
+  60%,
+  to {
+    offset-distance: 100%;
+    opacity: 0;
+    translate: 0.5rem -0.75rem;
+  }
+}
+.corner-sign-ink {
+  animation: corner-sign-ink var(--corner-loop) var(--ease-standard) infinite;
+}
+.corner-sign-pen {
+  animation: corner-sign-pen var(--corner-loop) var(--ease-standard) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .corner-reel,
+  .corner-bell-swing,
+  .corner-bell-clapper,
+  .corner-bell-ring,
+  .corner-team-shift,
+  .corner-team-hop,
+  .corner-receipt,
+  .corner-sign-ink,
+  .corner-sign-pen {
     animation: none;
   }
 }

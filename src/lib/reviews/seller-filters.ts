@@ -2,6 +2,7 @@ import { REVIEW_RATING_MAX, REVIEW_RATING_MIN } from "@/lib/reviews/limits";
 import { uuidField } from "@/lib/validation/inputs";
 import { REVIEW_MODERATION_FILTERS, type ReviewModerationFilter } from "@/lib/reviews/moderation-rules";
 import {
+  REVIEWS_EXPORT_API_PATH,
   REVIEWS_FILTER_PARAM,
   REVIEWS_PAGE_PARAM,
   REVIEWS_PATH,
@@ -87,8 +88,8 @@ export function hasReviewNarrowing(filters: SellerReviewFilters): boolean {
   return Boolean(filters.search || filters.rating || filters.productId || filters.origin);
 }
 
-/** The reviews page on a view. Defaults are left out, so a plain view stays a plain URL. */
-export function sellerReviewsHref(filters: SellerReviewFilters, page = 1): string {
+/** `path` on a view. Defaults are left out, so a plain view stays a plain URL. */
+function viewHref(path: string, filters: SellerReviewFilters, page = 1): string {
   const params = new URLSearchParams();
   if (filters.status !== "all") params.set(REVIEWS_FILTER_PARAM, filters.status);
   if (filters.search) params.set(REVIEWS_SEARCH_PARAM, filters.search);
@@ -98,5 +99,15 @@ export function sellerReviewsHref(filters: SellerReviewFilters, page = 1): strin
   if (filters.sort !== "newest") params.set(REVIEWS_SORT_PARAM, filters.sort);
   if (page > 1) params.set(REVIEWS_PAGE_PARAM, String(page));
   const query = params.toString();
-  return query ? `${REVIEWS_PATH}?${query}` : REVIEWS_PATH;
+  return query ? `${path}?${query}` : path;
+}
+
+/** The reviews page on a view. */
+export function sellerReviewsHref(filters: SellerReviewFilters, page = 1): string {
+  return viewHref(REVIEWS_PATH, filters, page);
+}
+
+/** The export of a view: every page of it, read by the same parser as the page. */
+export function reviewsExportHref(filters: SellerReviewFilters): string {
+  return viewHref(REVIEWS_EXPORT_API_PATH, filters);
 }

@@ -59,7 +59,7 @@ import {
 } from "@/components/ui/control-styles";
 import { ShapeKindGlyph } from "./ShapeTileContent";
 import { QUICK_SHAPE_KINDS } from "./shape-specs";
-import { CheckoutNodeIcon, PageNodeIcon } from "./page-node-icons";
+import { PageNodeIcon } from "./page-node-icons";
 
 /**
  * What the file dialog offers. Extensions alongside the MIME types because
@@ -175,20 +175,13 @@ export function EditorToolbar({
   pagesOpen,
   canOpenPage,
   onTogglePages,
-  checkoutOpen = false,
-  onToggleCheckout,
 }: {
-  /** True while at least one product page is out on the canvas. */
+  /** True while a buyer flow is out on the canvas. */
   pagesOpen: boolean;
-  /** False when the board holds no product, so there is no page to show. */
+  /** False when the board holds no product, so there is no flow to show. */
   canOpenPage: boolean;
-  /** Show the page for the selected (or first) product, or put them all away. */
+  /** Show the flow for the selected (or first) product, or put it all away. */
   onTogglePages: () => void;
-  /** True while a checkout and thank-you page are out on the canvas. */
-  checkoutOpen?: boolean;
-  /** Show the checkout for the selected (or first) product, or put it away.
-   *  Absent where there is no checkout to design. */
-  onToggleCheckout?: () => void;
   onAddProduct: () => void;   // opens the product picker card (does not insert directly)
   onAddText: () => void;
   /** Insert a shape of the given kind (chosen from the hover menu). */
@@ -493,10 +486,10 @@ export function EditorToolbar({
         />
       </div>
 
-      {/* -- The PRODUCT PAGE node. Sits with the insert tools because that is
-            what it does: it puts another thing on the canvas. The tiles have
-            their own node (see BlockTile); this is the route in when nothing
-            is selected. -- */}
+      {/* -- The BUYER FLOW node: the product page, checkout and thank-you page.
+            Sits with the insert tools because that is what it does: it puts
+            more things on the canvas. The tiles have their own node (see
+            SelectionToolbar); this is the route in when nothing is selected. -- */}
       <button
         type="button"
         suppressHydrationWarning
@@ -511,25 +504,6 @@ export function EditorToolbar({
         <span className="hidden sm:inline">{t("toolbar.page")}</span>
         <ToolbarTip>{pagesOpen ? t("toolbar.closePage") : t("toolbar.showPage")}</ToolbarTip>
       </button>
-
-      {/* -- The CHECKOUT node, one step further along the same way: the
-            checkout and thank-you page, with the product page they hang off. -- */}
-      {onToggleCheckout && (
-        <button
-          type="button"
-          suppressHydrationWarning
-          className={`${INSERT_BTN} ${checkoutOpen ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
-          onClick={onToggleCheckout}
-          disabled={!canOpenPage && !checkoutOpen}
-          aria-pressed={checkoutOpen}
-          data-toolbar-checkout=""
-          aria-label={checkoutOpen ? t("toolbar.closeCheckoutFull") : t("toolbar.showCheckoutFull")}
-        >
-          <CheckoutNodeIcon className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
-          <span className="hidden sm:inline">{t("toolbar.checkout")}</span>
-          <ToolbarTip>{checkoutOpen ? t("toolbar.closeCheckout") : t("toolbar.showCheckout")}</ToolbarTip>
-        </button>
-      )}
 
       <Divider />
 

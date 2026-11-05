@@ -156,7 +156,7 @@ describe("SelectionToolbar", () => {
   // unreliable on touch, and iOS claims it outright.
   it("offers a product its page, its crop, and removal", () => {
     renderToolbar([productBlock]);
-    expect(button(/open the product page/i)).not.toBeNull();
+    expect(button(/open the buyer flow/i)).not.toBeNull();
     expect(button(/crop and position the image/i)).not.toBeNull();
     expect(button(/remove .* from grid/i)).not.toBeNull();
     expect(button(/edit the text/i)).toBeNull();
@@ -169,7 +169,7 @@ describe("SelectionToolbar", () => {
     expect(button(/product page/i)).toBeNull();
   });
 
-  it("gives a shape Canva's four, in Canva's order", () => {
+  it("gives a shape Canva's four, in Canva's order, then its blur", () => {
     renderToolbar([shapeBlock]);
     const bar = screen.getByRole("toolbar");
     // The two whole-block actions (duplicate, remove) sit after a divider and
@@ -182,6 +182,7 @@ describe("SelectionToolbar", () => {
       "Edit the border of Square",
       "Edit the corner roundness of Square",
       "Edit the opacity of Square",
+      "Edit the blur of Square",
     ]);
     // Not a product and not text: nothing to crop, nothing to type.
     expect(button(/crop and position the image/i)).toBeNull();
@@ -242,6 +243,41 @@ describe("SelectionToolbar", () => {
     expect(onOpenSetting).toHaveBeenCalledWith([blockKey(imageBlock)], "opacity");
   });
 
+  /**
+   * BLUR IS OFFERED WHEREVER THE INSPECTOR HOLDS ITS SLIDER: any one shape,
+   * element or text block, or several of one kind. Never a product (its photo
+   * blur is a tile style, in the inspector), and never a mixed selection,
+   * whose inspector has the group actions only.
+   */
+  describe("blur", () => {
+    it("is offered to a shape, an element and a text block, and points at the inspector", () => {
+      for (const block of [shapeBlock, imageBlock, textBlock]) {
+        const { onOpenSetting } = renderToolbar([block]);
+        fireEvent.click(button(/edit the blur/i)!);
+        expect(onOpenSetting).toHaveBeenLastCalledWith([blockKey(block)], "blur");
+        cleanup();
+      }
+    });
+
+    it("is offered to several blocks of one kind", () => {
+      const second = { ...textBlock, id: "dddddddd-dddd-4ddd-8ddd-dddddddddddd" };
+      const { onOpenSetting } = renderToolbar([textBlock, second]);
+      fireEvent.click(button(/edit the blur of 2 elements/i)!);
+      expect(onOpenSetting).toHaveBeenLastCalledWith(
+        [blockKey(textBlock), blockKey(second)],
+        "blur",
+      );
+    });
+
+    it("is not offered to a product or a mixed selection", () => {
+      renderToolbar([productBlock]);
+      expect(button(/edit the blur/i)).toBeNull();
+      cleanup();
+      renderToolbar([shapeBlock, imageBlock]);
+      expect(button(/edit the blur/i)).toBeNull();
+    });
+  });
+
   it("draws icons only, and keeps the words for assistive tech", () => {
     // The bar has to fit over the block it points at; a product's own title
     // was wider than most tiles. Every label survives as an accessible name.
@@ -275,7 +311,7 @@ describe("SelectionToolbar", () => {
 
   it("reads as a toggle while the product's page is out", () => {
     renderToolbar([productBlock], { openPages: [PRODUCT.id] });
-    const page = button(/close the product page/i);
+    const page = button(/close the buyer flow/i);
     expect(page).not.toBeNull();
     expect(page).toHaveAttribute("aria-pressed", "true");
   });
@@ -344,7 +380,7 @@ describe("SelectionToolbar", () => {
     cleanup();
 
     const product = renderToolbar([productBlock]);
-    fireEvent.click(button(/open the product page/i)!);
+    fireEvent.click(button(/open the buyer flow/i)!);
     // The page is opened by PRODUCT, not by block key: one page per product,
     // however many tiles point at it.
     expect(product.onOpenPages).toHaveBeenCalledWith([PRODUCT.id]);
@@ -414,6 +450,7 @@ describe("SelectionToolbar", () => {
         "Edit the border of 2 elements",
         "Edit the corner roundness of 2 elements",
         "Edit the opacity of 2 elements",
+        "Edit the blur of 2 elements",
       ]);
     });
 
@@ -464,7 +501,7 @@ describe("SelectionToolbar", () => {
 
     it("opens every selected product's page in one press", () => {
       const { onOpenPages } = renderToolbar([productBlock, secondProduct]);
-      const open = button(/open the product pages for 2 products/i)!;
+      const open = button(/open the buyer flow for 2 products/i)!;
       expect(open).not.toBeNull();
       fireEvent.click(open);
       expect(onOpenPages).toHaveBeenCalledWith([PRODUCT.id, PHOTOLESS.id]);
@@ -477,7 +514,7 @@ describe("SelectionToolbar", () => {
         productBlock,
         { ...productBlock, x: 4 },
       ]);
-      fireEvent.click(button(/open the product page for enamel mug/i)!);
+      fireEvent.click(button(/open the buyer flow for enamel mug/i)!);
       expect(onOpenPages).toHaveBeenCalledWith([PRODUCT.id]);
     });
 
@@ -486,7 +523,7 @@ describe("SelectionToolbar", () => {
         openPages: [PRODUCT.id],
       });
       // One of two out is not "open": the press has more to do.
-      expect(button(/open the product pages/i)).toHaveAttribute(
+      expect(button(/open the buyer flow/i)).toHaveAttribute(
         "aria-pressed",
         "false",
       );
@@ -495,7 +532,7 @@ describe("SelectionToolbar", () => {
       renderToolbar([productBlock, secondProduct], {
         openPages: [PRODUCT.id, PHOTOLESS.id],
       });
-      expect(button(/close the product pages/i)).toHaveAttribute(
+      expect(button(/close the buyer flow/i)).toHaveAttribute(
         "aria-pressed",
         "true",
       );
@@ -505,7 +542,7 @@ describe("SelectionToolbar", () => {
       // The same rule Duplicate follows: act on the part of the selection that
       // can answer, rather than on none of it.
       const { onOpenPages } = renderToolbar([productBlock, shapeBlock]);
-      fireEvent.click(button(/open the product page/i)!);
+      fireEvent.click(button(/open the buyer flow/i)!);
       expect(onOpenPages).toHaveBeenCalledWith([PRODUCT.id]);
     });
   });

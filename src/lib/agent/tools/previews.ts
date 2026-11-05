@@ -301,6 +301,7 @@ export const previewTools = [
       const notes = productNotesInWords(preview.notes, page.storefront.name);
       const data = {
         product: page.product,
+        addOns: page.addOns ?? [],
         status,
         storefront: { id: page.storefront.id, name: page.storefront.name },
         notes,

@@ -40,7 +40,7 @@
     "formLoading": "Caricamento del modulo prodotto",
     "importReviews": {
       "heading": "Importa recensioni",
-      "description": "Porta qui le tue recensioni da Judge.me, Loox, Yotpo o Shopify Product Reviews. Esportale lì come CSV, trascina qui il file e controlla a quale prodotto appartiene ognuna prima di salvare qualsiasi cosa."
+      "description": "Porta qui le tue recensioni da Judge.me, Loox, Yotpo o Shopify Product Reviews."
     }
   },
   "emptyState": {
@@ -300,6 +300,11 @@
         "label": "Badge",
         "description": "Poche parole nella pagina prodotto: un motivo per fidarsi di te, o un fatto che vale la pena vedere a colpo d'occhio. Scegline uno pronto o scrivine uno tuo, scegli un colore per l'icona e mettilo accanto al prodotto o sulla foto.",
         "about": "A cosa servono i Badge"
+      },
+      "addOns": {
+        "label": "Aggiungi all'ordine",
+        "description": "Altri tuoi prodotti che gli acquirenti possono aggiungere con un tocco, subito sopra Acquista ora. Compaiono solo prodotti dello stesso tipo e valuta, così resta tutto un unico ordine.",
+        "about": "A cosa serve Aggiungi all'ordine"
       }
     },
     "summary": {
@@ -327,7 +332,8 @@
       "active": "Attivo",
       "draft": "Bozza",
       "badges": "{count, plural, one {{count} badge} many {{count} di badge} other {{count} badge}}",
-      "physical": "Fisico"
+      "physical": "Fisico",
+      "addOns": "{count, plural, one {{count} prodotto} many {{count} di prodotti} other {{count} prodotti}}"
     },
     "errors": {
       "titleRequired": "Dai un titolo al tuo prodotto: è la prima cosa che vedono gli acquirenti.",
@@ -363,6 +369,23 @@
     "description": "Descrizione",
     "optional": "(facoltativo)",
     "descriptionPlaceholder": "Cos’è, e cosa riceve l’acquirente?",
+    "ai": {
+      "write": "Scrivi con l'IA",
+      "improve": "Migliora con l'IA",
+      "writing": "Scrittura in corso…",
+      "written": "Scritto dall'IA",
+      "improved": "Migliorato dall'IA",
+      "writeHint": "L'IA la scrive a partire dai dati che hai inserito, senza aggiungere nulla di suo. Controllala prima di salvare.",
+      "improveHint": "L'IA riscrive il tuo testo per renderlo più chiaro, mantenendo ogni informazione. Controllalo prima di salvare.",
+      "asYouTypeIdle": "L'IA suggerisce le parole successive mentre scrivi.",
+      "asYouTypeOffered": "aggiunge il testo grigio. Esc lo nasconde.",
+      "asYouTypeAccept": "Aggiungi le parole suggerite",
+      "asYouTypeAnnounce": "Suggerimento:",
+      "asYouTypeTurnOff": "Disattiva",
+      "asYouTypeOff": "I suggerimenti mentre scrivi sono disattivati. Puoi riattivarli in Impostazioni, nella sezione Piano e fatturazione.",
+      "upsellHint": "Incluso in Pro: l'IA scrive e completa le descrizioni a partire dai tuoi dati. I piani si aprono in una nuova scheda.",
+      "upsellBadge": "Pro"
+    },
     "displayImage": "Immagine principale",
     "displayImageAbout": "Dove viene usata l’immagine principale",
     "displayImageHelp": "Mostrata sulla tua vetrina e negli incorporamenti.",
@@ -530,6 +553,14 @@
     "addFirst": "Venduto in più di una variante?",
     "addAnother": "Aggiungi un altro modo in cui varia",
     "somethingElse": "Qualcos’altro",
+    "guessSizes": "Taglie dalla {first} alla {last}",
+    "guessSizesAny": "Taglie",
+    "nextOptions": "Prossime opzioni probabili",
+    "addNamed": "Aggiungi {name}",
+    "sameAsHint": "Copia opzioni, specifiche e dati del produttore da {title} nelle sezioni che non hai ancora compilato.",
+    "guessSizesHint": "Il titolo sembra di un capo d'abbigliamento, quindi aggiunge le taglie abituali. Togli quelle che non vendi.",
+    "guessSizesAnyHint": "Il titolo sembra di qualcosa venduto in taglie, quindi aggiunge l'opzione Taglia da compilare.",
+    "nextOptionsHint": "Dedotto dalle opzioni che hai aggiunto finora.",
     "groupsFull": "{max, plural, one {È tutto: {max} gruppo di opzioni.} many {È tutto: {max} di gruppi di opzioni.} other {È tutto: {max} gruppi di opzioni.}}",
     "optionsFull": "{max, plural, one {È tutto: {max} opzione.} many {È tutto: {max} di opzioni.} other {È tutto: {max} opzioni.}}",
     "whatVaries": "Cosa varia",
@@ -1053,12 +1084,8 @@
       "product": "prodotto",
       "status": "stato"
     },
-    "summary": "{ready, plural, one {<count>{ready}</count> recensione pronta} other {<count>{ready}</count> recensioni pronte}}{skipped, plural, =0 {.} other {, {skipped} escluse.}}",
-    "hiddenRows": "{count, plural, one {{count} recensione era nascosta o segnata come spam nel tuo vecchio negozio, quindi viene esclusa.} other {{count} recensioni erano nascoste o segnate come spam nel tuo vecchio negozio, quindi vengono escluse.}}",
-    "droppedRows": "{count, plural, one {{count} recensione supera le {max} che un file può contenere, quindi viene esclusa.} other {{count} recensioni superano le {max} che un file può contenere, quindi vengono escluse.}}",
     "source": "Importate da",
     "sourceUnknown": "Scegli l’app",
-    "sourceHelp": "Mostrato su ogni recensione, così gli acquirenti sanno dove è stata scritta.",
     "sources": {
       "judgeme": "Judge.me",
       "loox": "Loox",
@@ -1067,17 +1094,10 @@
     },
     "mappingHeading": "Abbina i prodotti",
     "mappingHelp": "Ogni prodotto del file e il prodotto qui a cui vanno le sue recensioni. Abbinati per nome quando possibile. Quello impostato su «Non importare» viene escluso.",
-    "mappingFileProduct": "Nel file",
-    "mappingReviews": "Recensioni",
-    "mappingProduct": "Prodotto qui",
     "mappingSelect": "Prodotto per {key}",
     "skipProduct": "Non importare",
-    "skippedHeading": "Righe che verranno escluse",
     "skippedRow": "Riga {line}: {problem}",
     "run": "{count, plural, one {Importa {count} recensione} other {Importa {count} recensioni}}",
-    "imported": "{count, plural, one {{count} recensione importata.} other {{count} recensioni importate.}}",
-    "duplicates": "{count, plural, one {{count} era già qui.} other {{count} erano già qui.}}",
-    "skippedRows": "{count, plural, one {{count} riga esclusa.} other {{count} righe escluse.}}",
     "errors": {
       "rateLimited": "Troppe importazioni nell’ultima ora. Riprova più tardi.",
       "tooLarge": "Il file è troppo grande per essere importato.",
@@ -1094,6 +1114,39 @@
         "b": "«Dal vivo è ancora più bella.»",
         "c": "«Arrivata presto e ben imballata.»"
       }
+    },
+    "tally": {
+      "toImport": "Da importare",
+      "imported": "Importate",
+      "already": "Già qui",
+      "leftOut": "Escluse"
+    },
+    "alreadyNote": "{count, plural, one {{count} recensione di questo file è già qui, quindi non verrà aggiunta due volte.} other {{count} recensioni di questo file sono già qui, quindi non verranno aggiunte due volte.}}",
+    "sourceTip": "Sulle recensioni importate",
+    "mappingTip": "Come vengono abbinati i prodotti",
+    "reviewCount": "{count, plural, one {{count} recensione} other {{count} recensioni}}",
+    "keyAlready": "{count, plural, one {{count} già qui} other {{count} già qui}}",
+    "leftOutSummary": "{count, plural, one {Perché {count} recensione viene esclusa} other {Perché {count} recensioni vengono escluse}}",
+    "leftOutUnmatched": "{count, plural, one {{count} per un prodotto impostato su «Non importare»} other {{count} per prodotti impostati su «Non importare»}}",
+    "leftOutHidden": "{count, plural, one {{count} nascosta o segnata come spam nel tuo vecchio negozio} other {{count} nascoste o segnate come spam nel tuo vecchio negozio}}",
+    "leftOutDropped": "{count, plural, one {{count} oltre le {max} che un file può contenere} other {{count} oltre le {max} che un file può contenere}}",
+    "leftOutProblems": "{count, plural, one {{count} riga che non si riesce a leggere:} other {{count} righe che non si riescono a leggere:}}",
+    "nothingNew": "Niente di nuovo da importare",
+    "done": {
+      "title": "{count, plural, one {{count} recensione importata} other {{count} recensioni importate}}",
+      "body": "Compaiono sulle tue pagine prodotto non appena il nostro controllo automatico le ha lette.",
+      "already": "{count, plural, one {{count} era già qui, quindi non è stata aggiunta due volte.} other {{count} erano già qui, quindi non sono state aggiunte due volte.}}",
+      "nothingTitle": "Niente aggiunto due volte",
+      "nothingBody": "{count, plural, one {{count} recensione di questo file era già qui.} other {{count} recensioni di questo file erano già qui.}}",
+      "seeReviews": "Vedi le recensioni",
+      "another": "Importa un altro file"
+    },
+    "squareShare": {
+      "label": "Un’esportazione di Square Share",
+      "tipLabel": "Informazioni sulle esportazioni di Square Share",
+      "tip": "Abbiamo confrontato questo file recensione per recensione, non per app. Le recensioni già presenti in questo negozio restano come sono e nulla viene aggiunto due volte. Le recensioni di un altro negozio non si possono trasferire con un’esportazione.",
+      "leftOut": "{count, plural, one {{count} non è in questo negozio: un’esportazione non può aggiungerla} other {{count} non sono in questo negozio: un’esportazione non può aggiungerle}}",
+      "checkFailed": "Non è stato possibile confrontare questo file con le tue recensioni. Non è cambiato nulla. Riprova tra un istante."
     }
   },
   "reviewModeration": {
@@ -1219,6 +1272,42 @@
     "emptyFiltered": {
       "title": "Nessuna recensione corrisponde",
       "body": "Prova altre parole o un altro filtro, oppure azzerali per vedere tutte le recensioni."
+    },
+    "export": {
+      "hint": "Scarica le recensioni di questa vista in un file CSV.",
+      "empty": "In questa vista non ci sono recensioni da esportare.",
+      "truncated": "{count, plural, one {Il file contiene la prima recensione di questa vista.} other {Il file contiene le prime # recensioni di questa vista.}} Filtra l’elenco per prodotto o valutazione per esportare le altre.",
+      "fileName": "recensioni.csv"
+    }
+  },
+  "addOnsField": {
+    "listLabel": "I tuoi altri prodotti",
+    "count": "{count} di {max} scelti",
+    "add": "Aggiungi {title}",
+    "draft": "Bozza",
+    "draftHint": "Gli acquirenti lo vedono appena è attivo.",
+    "remove": "Rimuovi {title}",
+    "none": "Non hai ancora altri prodotti. Aggiungi prima un altro prodotto, poi proponilo qui.",
+    "notPosted": "Non proposto: è un download",
+    "notADownload": "Non proposto: è fisico",
+    "search": "Cerca tra i tuoi prodotti",
+    "noMatch": "Nessun prodotto corrisponde.",
+    "noneFit": "Nessuno dei tuoi altri prodotti può stare nello stesso ordine di questo. Un ordine ha un solo tipo (spedizione o download) e una sola valuta.",
+    "otherCurrency": "Non proposto: prezzo in {currency}",
+    "previewLabel": "Cosa vedono gli acquirenti",
+    "soldOutHint": "Gli acquirenti lo vedono appena torna disponibile.",
+    "takenDown": "Rimosso",
+    "takenDownHint": "Gli acquirenti non lo vedono finché è rimosso.",
+    "ownBuyLink": "Acquista ora su questo prodotto porta al tuo link, quindi gli acquirenti non vedono questa sezione. Rimuovi il link per usarla.",
+    "suggestion": {
+      "boughtWith": {
+        "label": "Spesso comprati insieme: {titles}",
+        "hint": "Chi ha comprato questo prodotto ha comprato anche {titles}. {count, plural, one {Un tocco lo aggiunge a questo elenco.} other {Un tocco li aggiunge a questo elenco.}}"
+      },
+      "offeredWith": {
+        "label": "Aggiungi spesso: {titles}",
+        "hint": "Offri {titles} con diversi altri tuoi prodotti. {count, plural, one {Un tocco lo aggiunge anche qui.} other {Un tocco li aggiunge anche qui.}}"
+      }
     }
   }
 }

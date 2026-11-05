@@ -34,6 +34,8 @@ import { checkoutAvailableFor } from "@/lib/checkout/availability";
 import { productPageUrl } from "@/lib/storefront/product-page-url";
 import { toCurrency } from "@/lib/format/money";
 import { loadProductSale, msUntilSaleEnds } from "@/lib/discounts/public";
+import { loadAddOnCards } from "@/lib/products/add-ons";
+import { isProductPageSectionShown } from "@/lib/storefront/product-page";
 import type {
   ProductPageDocument,
   ProductPageImage,
@@ -227,7 +229,7 @@ export const getPublicProductPage = cache(
 
     const pricing = await gatePricing(gate);
     const product = await buildProductPageProduct(row, {
-      soldOutFlag: block.soldOut,
+      soldOutFlag: block?.soldOut,
       showStock: productPage.showStock,
       pricing,
     });
@@ -237,6 +239,32 @@ export const getPublicProductPage = cache(
       theme.background.kind === "image" ? await presignGetUrl(theme.background.key) : null;
     const customFontUrl = theme.customFont ? await presignGetUrl(theme.customFont.key) : null;
     const pagePhoto = await signPagePhoto(productPage.backgroundImage);
+    const checkout = await checkoutAvailableFor(gate);
+    const placed = new Set(
+      config.blocks.flatMap((candidate) => (candidate.type === "product" ? [candidate.productId] : [])),
+    );
+    // Offered only where they can be paid for in the same order (the button
+    // leads to our checkout), while the section is shown, and while the
+    // product itself can be bought: a sold-out product sells nothing beside it.
+    const addOns =
+      checkout && isProductPageSectionShown(productPage, "addOns") && !product.soldOut
+        ? await loadAddOnCards(createAdminClient(), {
+            ownerId: gate.ownerId,
+            ids: row.add_on_ids,
+            isDigital: product.isDigital,
+            currency: product.currency,
+            now: gate.now,
+            unreadableSales: "busy",
+            // A tile's add-ons each have a page here (the gate admits a
+            // product a tile offers). This page may itself be an add-on's,
+            // whose own add-ons have one only where they are tiles.
+            pages: {
+              storefrontId: gate.storefront.id,
+              linked: block ? () => true : (id) => placed.has(id),
+            },
+            withRatings: isProductPageSectionShown(productPage, "reviews"),
+          })
+        : [];
 
     return {
       page: {
@@ -251,14 +279,16 @@ export const getPublicProductPage = cache(
           backgroundImageUrl,
           customFontUrl,
           pagePhoto,
-          checkout: await checkoutAvailableFor(gate),
+          checkout,
         },
         product,
         productUrl: productPageUrl(gate.storefront.id, product.id),
         reportScopes: gate.extra,
+        ...(addOns.length > 0 ? { addOns } : {}),
       },
       ownerId: gate.ownerId,
-      saleEndsInMs: msUntilSaleEnds([pricing], gate.now),
+      // An add-on's sale ending changes this page's prices too.
+      saleEndsInMs: msUntilSaleEnds([pricing, ...addOns], gate.now),
     };
   },
 );

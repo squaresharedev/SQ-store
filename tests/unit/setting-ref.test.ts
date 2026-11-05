@@ -26,11 +26,48 @@ describe("the catalogue", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("only ever points at a group the panel actually has", () => {
+  it("only ever points at a group the panel actually has, or at a block's own control", () => {
     for (const entry of STOREFRONT_SETTINGS) {
-      expect(CONTROLS_GROUPS).toContain(settingGroup(entry.ref));
-      expect(GROUP_LABELS[settingGroup(entry.ref)]).toBeTruthy();
+      const group = settingGroup(entry.ref);
+      if (entry.ref.kind === "block") {
+        // A block's setting opens in that block's inspector, never a group,
+        // and names a field that block kind's inspector really has.
+        expect(group).toBeNull();
+        expect(entry.ref.types.length).toBeGreaterThan(0);
+        continue;
+      }
+      expect(CONTROLS_GROUPS).toContain(group);
+      expect(GROUP_LABELS[group!]).toBeTruthy();
     }
+  });
+
+  it("finds the card extras and the block settings by the words a seller would use", () => {
+    const byId = (id: string) => settingById(id)!;
+    expect(byId("card-hover-effect").ref).toEqual({ kind: "cards", section: "hover" });
+    expect(byId("card-second-photo").ref).toEqual({ kind: "cards", section: "hover" });
+    for (const id of ["card-buy-button", "card-star-rating", "card-low-stock"]) {
+      expect(byId(id).ref).toEqual({ kind: "cards", section: "shopping" });
+    }
+    expect(byId("text-spacing").ref).toEqual({ kind: "block", field: "spacing", types: ["text"] });
+    expect(byId("element-blur").ref).toMatchObject({ kind: "block", field: "blur" });
+    // Both scopes have the card extras; a block setting has no tile copy.
+    expect(isPerTileSetting(byId("card-low-stock").ref)).toBe(true);
+    expect(isPerTileSetting(byId("text-spacing").ref)).toBe(false);
+  });
+
+  it("compares block refs by field and kinds", () => {
+    expect(
+      isSameSettingRef(
+        { kind: "block", field: "blur", types: ["shape", "text"] },
+        { kind: "block", field: "blur", types: ["shape", "text"] },
+      ),
+    ).toBe(true);
+    expect(
+      isSameSettingRef(
+        { kind: "block", field: "blur", types: ["shape"] },
+        { kind: "block", field: "spacing", types: ["shape"] },
+      ),
+    ).toBe(false);
   });
 
   it("covers every group, so no part of the panel is unreachable by name", () => {

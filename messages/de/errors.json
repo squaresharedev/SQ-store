@@ -105,7 +105,8 @@
     "changePlan": "Zu viele Tarifwechsel in kurzer Zeit gestartet.",
     "saveDiscounts": "Zu viele Rabattänderungen in kurzer Zeit.",
     "moderateReviews": "Zu viele Änderungen an Bewertungen in kurzer Zeit.",
-    "agentTools": "Dieser Assistent hat in kurzer Zeit zu viele Anfragen gestellt."
+    "agentTools": "Dieser Assistent hat in kurzer Zeit zu viele Anfragen gestellt.",
+    "writeWithAi": "Zu viele KI-Entwürfe in kurzer Zeit angefordert."
   },
   "serverError": {
     "fix": "Das ist meist vorübergehend. Warte kurz und versuche es erneut. Falls es weiterhin fehlschlägt, lade die Seite neu.",
@@ -517,6 +518,28 @@
       "fix": "Versuche andere Wörter, oder schreibe an {email}, dann schaut sich eine Person das an."
     }
   },
+  "ai": {
+    "notOnPlan": {
+      "message": "KI-Schreibhilfe gehört zum Pro-Tarif.",
+      "fix": "Schreib die Beschreibung selbst oder wechsle zu Pro."
+    },
+    "tooLittle": {
+      "message": "Noch zu wenige Angaben zum Schreiben.",
+      "fix": "Füge zuerst ein paar Angaben hinzu, etwa Optionen, Material oder Größe."
+    },
+    "declined": {
+      "message": "Die KI konnte für dieses Produkt keine Beschreibung schreiben.",
+      "fix": "Schreib sie selbst oder ändere ein paar Wörter und versuch es noch einmal."
+    },
+    "unavailable": {
+      "message": "Die KI-Schreibhilfe ist gerade nicht verfügbar.",
+      "fix": "Versuch es in ein paar Minuten noch einmal oder schreib die Beschreibung selbst."
+    },
+    "creditUsed": {
+      "message": "Das KI-Guthaben für diesen Monat ist aufgebraucht.",
+      "fix": "Es wird am 1. erneuert. Bis dahin schreibst du wie gewohnt."
+    }
+  },
   "productImport": {
     "unreadable": {
       "message": "Dieser Import konnte nicht gelesen werden.",
@@ -704,6 +727,12 @@
       "message": "Wähle, warum du diese Bewertung ausblendest.",
       "fix": "Eine Bewertung kann nur aus einem der aufgeführten Gründe ausgeblendet werden."
     }
+  },
+  "reviewsExport": {
+    "permissionDenied": "Du hast keinen Zugriff auf die Bewertungen dieses Shops.",
+    "unavailable": "Deine Bewertungen können gerade nicht exportiert werden.",
+    "rateLimited": "Das sind viele Bewertungsexporte in kurzer Zeit.",
+    "storeRateLimited": "Dein Team hat die Bewertungen dieses Shops in der letzten Stunde sehr oft exportiert."
   },
   "agent": {
     "invalidInput": "Diese Angaben sind nicht gültig.",

@@ -60,6 +60,16 @@ describe("resolveCardStyle", () => {
       // and its spacing follows the tile's roundness rather than a number.
       titlePosition: DEFAULT_TITLE_POSITION,
       titleInset: undefined,
+      // Nobody asked for a blur, so both are sharp.
+      titleShadowBlur: 0,
+      photoBlur: 0,
+      photoBlurDirection: "all",
+      // The card extras are all off until a seller turns one on.
+      hoverEffect: "none",
+      hoverPhoto: false,
+      buyButton: "none",
+      showRating: false,
+      showLowStock: false,
       // Absent everywhere resolves to the design system's own speed.
       titleHoverMs: HOVER_TRANSITION_MS_DEFAULT,
       priceDisplay: t.priceDisplay,

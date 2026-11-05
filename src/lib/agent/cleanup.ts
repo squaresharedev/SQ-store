@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { quotedFilterValue } from "@/lib/supabase/ilike";
 
 /** How long a tool's trail is kept. */
 const AUDIT_RETENTION_DAYS = 90;
@@ -43,7 +44,7 @@ export async function cleanUpAgentData(): Promise<boolean> {
       .not("revoked_at", "is", null)
       .lt("revoked_at", daysAgo(REVOKED_GRANT_RETENTION_DAYS)),
     keepClients.length > 0
-      ? unusedClients.not("id", "in", `(${keepClients.map((id) => `"${id}"`).join(",")})`)
+      ? unusedClients.not("id", "in", `(${keepClients.map(quotedFilterValue).join(",")})`)
       : unusedClients,
   ]);
 

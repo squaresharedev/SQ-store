@@ -85,14 +85,16 @@ export async function POST(request: Request, { params }: { params: Promise<Param
   const order = parsed.data;
 
   const { storefrontId, productId } = await params;
-  const ip = await clientKey(await headers());
-  if (!(await rateLimitKey(ip, "checkout_place", RATE_LIMITS.checkoutPlace))) {
+  const requestHeaders = await headers();
+  if (!(await rateLimitKey(await clientKey(requestHeaders), "checkout_place", RATE_LIMITS.checkoutPlace))) {
     return refuse("rate_limited", 429);
   }
   if (turnstileEnabled()) {
     const token =
       typeof turnstileToken === "string" && turnstileToken.length <= TURNSTILE_TOKEN_MAX ? turnstileToken : "";
-    if (!(await verifyTurnstile(token, ip))) return refuse("invalid", 400, ["turnstile"]);
+    // The address itself, as sign-up sends it: clientKey is a rate-limit key.
+    const remoteIp = requestHeaders.get("cf-connecting-ip") ?? undefined;
+    if (!(await verifyTurnstile(token, remoteIp))) return refuse("invalid", 400, ["turnstile"]);
   }
 
   const quoted = await quoteCheckout(
@@ -103,6 +105,7 @@ export async function POST(request: Request, { params }: { params: Promise<Param
       quantity: order.quantity,
       country: order.shipTo?.country ?? null,
       discountCode: order.discountCode ?? null,
+      addOns: order.addOns ?? [],
     },
     // The gate spends from the checkout PAGE budget: the place budget above is
     // already spent, and a buyer who has just loaded the page is well within

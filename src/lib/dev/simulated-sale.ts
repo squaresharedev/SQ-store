@@ -15,7 +15,7 @@ import { noSaleFee } from "@/lib/billing/fees";
 import { DEFAULT_PLAN } from "@/lib/billing/plans";
 import { sellerSaleFee } from "@/lib/billing/sale-fee";
 import { optionSummaryRows } from "@/lib/products/option-details";
-import { parseOptionGroups } from "@/lib/products/detail";
+import { parseAddOnIds, parseOptionGroups } from "@/lib/products/detail";
 import type { ProductOption } from "@/types/product";
 import type { OrderChannel, ShipTo } from "@/types/order-view";
 
@@ -66,6 +66,9 @@ export type SimulatedSaleRequest = {
   /** The storefront it was bought from, so the order page wears its design.
    *  The writer drops one that is not this store's. */
   storefrontId?: string;
+  /** Also buy every "Add to your order" product the seller chose for it (one
+   *  each, regular price), as if the buyer had tapped them all. */
+  withAddOns?: boolean;
 };
 
 /** The active store's products a sale can be simulated for. */
@@ -73,7 +76,7 @@ export async function simulatableProducts(accountId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("products")
-    .select("id, title, price_cents, currency, option_groups, digital_file_key")
+    .select("id, title, price_cents, currency, option_groups, digital_file_key, add_on_ids")
     .eq("owner_id", accountId)
     .eq("status", "active")
     .order("created_at", { ascending: false })
@@ -97,11 +100,25 @@ export async function simulateSale(
   if (!product) return { ok: false, reason: "unknown_product" };
 
   const groups = parseOptionGroups(product.option_groups);
-  const chosen: Record<string, ProductOption> = {};
-  for (const group of groups) {
-    const option = group.options.find((candidate) => candidate.available) ?? group.options[0];
-    if (option) chosen[group.id] = option;
-  }
+  const chosen = firstVersion(groups);
+
+  // The add-ons, the way the page would offer them: active, the same kind.
+  const addOns = request.withAddOns
+    ? parseAddOnIds(product.add_on_ids).flatMap((id) => {
+        const extra = products.find((candidate) => candidate.id === id);
+        if (!extra || (extra.digital_file_key === null) !== (product.digital_file_key === null)) return [];
+        const extraGroups = parseOptionGroups(extra.option_groups);
+        return [
+          {
+            productId: extra.id,
+            selection: optionSummaryRows(extraGroups, firstVersion(extraGroups)),
+            unitPriceCents: extra.price_cents,
+            quantity: 1,
+            amountCents: extra.price_cents,
+          },
+        ];
+      })
+    : [];
 
   const quantity = Math.min(100, Math.max(1, Math.trunc(request.quantity ?? 1)));
   const buyer =
@@ -110,7 +127,8 @@ export async function simulateSale(
         ? Math.abs(request.buyer as number) % BUYERS.length
         : Math.floor(Math.random() * BUYERS.length)
     ]!;
-  const amountCents = product.price_cents * quantity;
+  const amountCents =
+    product.price_cents * quantity + addOns.reduce((total, line) => total + line.amountCents, 0);
   // Charged the way a real sale is, by the same function: the store's own
   // plan rate on the whole amount, nothing while fees are switched off or the
   // store's fee is waived. A pretend sale is never refused over a fee that
@@ -133,7 +151,19 @@ export async function simulateSale(
     buyerEmail: buyer.email,
     buyerLocale: buyer.locale,
     shipTo: buyer.shipTo,
+    ...(addOns.length > 0 ? { addOns } : {}),
   });
+}
+
+/** The first available version of each option group, as a default page load
+ *  would show it. */
+function firstVersion(groups: ReturnType<typeof parseOptionGroups>): Record<string, ProductOption> {
+  const chosen: Record<string, ProductOption> = {};
+  for (const group of groups) {
+    const option = group.options.find((candidate) => candidate.available) ?? group.options[0];
+    if (option) chosen[group.id] = option;
+  }
+  return chosen;
 }
 
 /**

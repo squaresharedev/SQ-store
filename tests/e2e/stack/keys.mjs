@@ -8,7 +8,11 @@ import { createHmac } from "node:crypto";
 
 export const JWT_SECRET = "sqstore-e2e-jwt-secret-with-at-least-32-chars!!";
 export const GATEWAY_URL = "http://127.0.0.1:54321";
-export const NEXT_URL = "http://localhost:3100";
+/** The app's port: 3100, unless E2E_APP_PORT names another (3100 already held
+ *  by some other process on the machine). The stack, the helpers and both
+ *  Playwright configs read it from here. */
+export const NEXT_PORT = Number(process.env.E2E_APP_PORT || 3100);
+export const NEXT_URL = `http://localhost:${NEXT_PORT}`;
 export const DB_URL = "postgres://postgres:postgres@localhost:54322/sqstore_e2e";
 
 const b64url = (buf) =>

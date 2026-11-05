@@ -31,7 +31,7 @@ const LOCALE_MESSAGE = "offline-locale";
 
 // Bump the version to replace the stored offline page on every install at once.
 const CACHE_PREFIX = "sq-offline-";
-const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const CACHE_NAME = `${CACHE_PREFIX}v2`;
 
 // How long to wait before each new try of a request Cloudflare stopped at the
 // Worker's CPU limit (ms): six more tries over about fifteen seconds, then the

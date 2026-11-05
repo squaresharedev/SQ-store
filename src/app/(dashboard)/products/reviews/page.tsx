@@ -14,6 +14,10 @@ import { ghostButtonClass, secondaryButtonClass } from "@/components/ui/control-
 import { UploadIcon } from "@/components/ui/UploadIcon";
 import { cn } from "@/lib/utils";
 import { ReviewModeration } from "@/components/products/ReviewModeration";
+import { ReviewsExportButton } from "@/components/products/ReviewsExportButton";
+
+/** The header's buttons (export and import), sized as one pair. */
+const headerButtonClass = "h-10 shrink-0 px-3 py-2 text-sm";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Products.metadata.reviews");
@@ -51,14 +55,19 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
             <h1 className="font-inter text-2xl font-semibold text-foreground">{t("heading")}</h1>
             <p className="mt-1 font-inter text-sm text-muted-foreground">{t("description")}</p>
           </div>
-          {/* A button, like Import on Products: someone arriving with reviews
-              elsewhere is looking for exactly this. */}
-          {can(account.role, "products.write") && (
-            <Link href={REVIEWS_IMPORT_PATH} className={cn(secondaryButtonClass, "h-10 shrink-0 px-3 py-2 text-sm")}>
-              <UploadIcon className="size-4" />
-              {t("importButton")}
-            </Link>
-          )}
+          <div className="flex shrink-0 flex-wrap gap-2">
+            {/* Everyone who can read the reviews can take them away in a
+                file, of whatever the list is showing. */}
+            {list && <ReviewsExportButton filters={filters} count={list.total} className={headerButtonClass} />}
+            {/* A button, like Import on Products: someone arriving with reviews
+                elsewhere is looking for exactly this. */}
+            {can(account.role, "products.write") && (
+              <Link href={REVIEWS_IMPORT_PATH} className={cn(secondaryButtonClass, headerButtonClass)}>
+                <UploadIcon className="size-4" />
+                {t("importButton")}
+              </Link>
+            )}
+          </div>
         </div>
       </div>
       <ReviewModeration

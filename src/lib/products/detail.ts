@@ -11,6 +11,7 @@ import {
   productOptionSchema,
 } from "@/lib/validation/product";
 import {
+  ADD_ONS_MAX,
   BADGE_COLORS,
   BADGE_PLACEMENTS,
   BADGES_MAX,
@@ -146,6 +147,23 @@ export function parseDetails(raw: unknown): ProductDetails {
 export function parseDocuments(raw: unknown): ProductDocument[] {
   const parsed = documentListSchema.safeParse(raw);
   return parsed.success ? parsed.data.slice(0, DOCUMENTS_MAX) : [];
+}
+
+const addOnIdSchema = z.uuid();
+
+/** products.add_on_ids, in the seller's order: uuids only, each once, capped.
+ *  Each add-on costs the public page a read and a presign, so the cap holds
+ *  on the way out too. */
+export function parseAddOnIds(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const ids: string[] = [];
+  for (const value of raw) {
+    if (ids.length >= ADD_ONS_MAX) break;
+    if (addOnIdSchema.safeParse(value).success && !ids.includes(value as string)) {
+      ids.push(value as string);
+    }
+  }
+  return ids;
 }
 
 /** Drop a photo's option tie when that option no longer exists, so a stale

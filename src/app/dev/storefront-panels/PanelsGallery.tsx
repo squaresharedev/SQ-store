@@ -163,7 +163,6 @@ export function PanelsGallery() {
   // The product page's own settings, live: the design panel edits them and
   // the artboard below draws them.
   const [productPage, setProductPage] = useState(PRODUCT_PAGE_DEFAULTS);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const tKey = useTranslations();
 
   // The editor's search index over the SAME fixtures the inspectors below use,
@@ -367,8 +366,6 @@ export function PanelsGallery() {
               onClose={() => {}}
               widths={{ desktop: 760, mobile: 390 }}
               initialDevice="desktop"
-              checkoutOpen={checkoutOpen}
-              onToggleCheckout={() => setCheckoutOpen((open) => !open)}
             />
           </div>
         </section>

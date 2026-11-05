@@ -8,6 +8,7 @@ import { can } from "@/lib/team/permissions";
 import { requireUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { parseDetails } from "@/lib/products/detail";
+import { presignGetUrl } from "@/lib/r2";
 import { PRODUCTS_PATH } from "@/lib/products/paths";
 import { REVIEWS_IMPORT_PATH } from "@/lib/reviews/paths";
 import { ghostButtonClass } from "@/components/ui/control-styles";
@@ -34,14 +35,18 @@ export default async function ImportReviewsPage() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("products")
-    .select("id, title, details")
+    .select("id, title, details, image_key")
     .eq("owner_id", account.accountId)
     .order("title")
     .limit(PRODUCTS_READ_MAX);
+  // Each product's photo for the matching picker, signed once per photo.
+  const keys = [...new Set((data ?? []).flatMap((row) => (row.image_key ? [row.image_key] : [])))];
+  const imageUrls = new Map(await Promise.all(keys.map(async (key) => [key, await presignGetUrl(key)] as const)));
   const products: MatchableProduct[] = (data ?? []).map((row) => ({
     id: row.id,
     title: row.title,
     identifier: parseDetails(row.details).safety?.identifier ?? null,
+    imageUrl: row.image_key ? (imageUrls.get(row.image_key) ?? null) : null,
   }));
 
   const t = await getTranslations("Products.page");

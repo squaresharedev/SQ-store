@@ -17,10 +17,16 @@
     "confirm": "Potvrdit",
     "remove": "Odebrat",
     "delete": "Smazat",
-    "deleting": "Mazání…"
+    "deleting": "Mazání…",
+    "sameAs": "Stejné jako {title}",
+    "undo": "Zpět"
   },
   "badge": {
     "comingSoon": "Již brzy"
+  },
+  "connection": {
+    "offline": "Jste offline",
+    "backOnline": "Znovu online"
   },
   "pagination": {
     "previous": "Předchozí",
@@ -70,7 +76,8 @@
   "stock": {
     "inStock": "Skladem",
     "lowStock": "{remaining, plural, one {Zbývá jen {remaining} kus} few {Zbývají jen {remaining} kusy} many {Zbývá jen {remaining} kusu} other {Zbývá jen {remaining} kusů}}",
-    "soldOut": "Vyprodáno"
+    "soldOut": "Vyprodáno",
+    "lowStockLabel": "Málo skladem"
   },
   "toast": {
     "regionLabel": "Oznámení",
@@ -109,5 +116,10 @@
     "rotated": "{label}: otočeno na {degrees, plural, one {# stupeň} few {# stupně} many {# stupně} other {# stupňů}}",
     "rotatedBlock": "Blok otočen na {degrees, plural, one {# stupeň} few {# stupně} many {# stupně} other {# stupňů}}",
     "blocksMoved": "{count, plural, one {Přesunut # blok} few {Přesunuty # bloky} many {Přesunuto # bloku} other {Přesunuto # bloků}}"
+  },
+  "export": {
+    "button": "Exportovat CSV",
+    "preparing": "Připravuje se soubor",
+    "failed": "Export se nestáhl. Za chvíli to zkuste znovu."
   }
 }

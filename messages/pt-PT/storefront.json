@@ -104,7 +104,8 @@
       "cards": "Montra / Cartões de produto",
       "soldOut": "Montra / Esgotado",
       "productPage": "Montra / Página de produto",
-      "checkoutPage": "Montra / Pagamento"
+      "checkoutPage": "Montra / Pagamento",
+      "blocks": "Montra / Blocos"
     },
     "labels": {
       "looks": "Aspeto da montra",
@@ -151,7 +152,16 @@
       "productPagePhoto": "Foto da página de produto",
       "checkoutPhoto": "Foto do pagamento",
       "thanksPhoto": "Foto da página de agradecimento",
-      "chipScale": "Mesmo tamanho de etiqueta em todos os cartões"
+      "chipScale": "Mesmo tamanho de etiqueta em todos os cartões",
+      "productPageAddOns": "Adicionar à sua encomenda",
+      "productPageStars": "Cor das estrelas das avaliações",
+      "cardHoverEffect": "Efeito ao passar o rato",
+      "cardSecondPhoto": "Segunda foto ao passar o rato",
+      "cardBuyButton": "Botão de compra nos cartões",
+      "cardStarRating": "Classificação em estrelas nos cartões",
+      "cardLowStock": "Etiqueta Últimas unidades",
+      "textSpacing": "Espaçamento entre letras e altura da linha",
+      "elementBlur": "Desfoque"
     }
   },
   "editorSearch": {
@@ -214,6 +224,7 @@
     "domainsLabel": "Domínios permitidos",
     "domainsPlaceholder": "oseusite.com, blog.oseusite.com",
     "domainsHint": "Até {max}, separados por vírgulas. Cole um URL e nós reduzimo-lo ao domínio.",
+    "sameAsHint": "Copia os domínios permitidos de {title}.",
     "emptyDomainsWarning": "Adicione pelo menos um domínio. Enquanto isto estiver vazio, a montra não carrega em lado nenhum, mesmo com a incorporação ativada.",
     "builderLabel": "O seu construtor de sites",
     "builderOther": "Outro site",
@@ -310,14 +321,11 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Página de produto",
-    "closeAriaLabel": "Fechar a página de produto de {title}",
+    "closeAriaLabel": "Fechar o percurso de compra de {title}",
     "desktopSize": "Tamanho para computador",
     "mobileSize": "Tamanho para telemóvel",
     "checkoutLabel": " · Pagamento",
-    "thanksLabel": " · Obrigado",
-    "openCheckout": "Pagamento",
-    "openCheckoutAriaLabel": "Abrir o pagamento de {title}",
-    "closeCheckoutAriaLabel": "Fechar o pagamento"
+    "thanksLabel": " · Obrigado"
   },
   "customFont": {},
   "metadata": {
@@ -765,7 +773,8 @@
         "returns": "Devoluções",
         "safety": "Segurança e conformidade",
         "reviews": "Avaliações",
-        "seller": "Vendedor"
+        "seller": "Vendedor",
+        "addOns": "Adicionar à sua encomenda"
       },
       "availability": "Disponibilidade",
       "soldByByline": "Assinatura «Vendido por»"
@@ -794,6 +803,42 @@
       "look": "Aspeto",
       "style": "Estilo",
       "besidePrice": "Junto ao preço"
+    },
+    "addOns": {
+      "title": "Adicionar à sua encomenda",
+      "infoLabel": "O que é Adicionar à sua encomenda",
+      "infoContent": "Outros produtos que um comprador pode adicionar à mesma encomenda a partir da página do produto. Cada produto tem a sua própria lista: cada clique é guardado de imediato, em todas as montras onde o produto está.",
+      "show": "Mostrar esta secção",
+      "heading": {
+        "label": "Título",
+        "charsLeft": "{count, plural, one {Resta # carácter} many {Restam # carateres} other {Restam # carateres}}"
+      },
+      "layout": {
+        "label": "Aspeto",
+        "list": "Linhas",
+        "tiles": "Mosaicos"
+      },
+      "placement": {
+        "label": "Onde fica",
+        "beforeButton": "Acima do botão",
+        "afterButton": "Abaixo do botão"
+      },
+      "products": {
+        "offeredWith": "Oferecido com",
+        "offeredWithOne": "Oferecido com {title}",
+        "ownLink": "Oculto: Comprar agora leva à sua própria ligação.",
+        "noPage": "Abra a página de um produto na tela para escolher o que oferece.",
+        "loadFailed": "Não foi possível carregar os seus produtos."
+      }
+    },
+    "reviews": {
+      "title": "Avaliações",
+      "infoLabel": "O que pode alterar nas avaliações",
+      "infoContent": "As avaliações dos compradores, no fim da página do produto. A cor das estrelas aplica-se também à classificação sob o nome do produto.",
+      "show": "Mostrar esta secção",
+      "starColor": "Cor das estrelas",
+      "defaultStarColor": "Amarelo predefinido",
+      "useDefaultStarColor": "Utilizar o amarelo predefinido"
     }
   },
   "productBlock": {
@@ -813,8 +858,8 @@
       "lowStock": "Stock baixo: {count} disponíveis.",
       "inStock": "{count} em stock."
     },
-    "openProductPage": "Abrir página de produto",
-    "hideProductPage": "Ocultar página de produto",
+    "openProductPage": "Abrir percurso de compra",
+    "hideProductPage": "Ocultar percurso de compra",
     "tileStyle": {
       "title": "Estilo do cartão",
       "reset": "Repor tema",
@@ -881,6 +926,23 @@
       "label": "Descrição",
       "placeholder": "Logótipo, ícone, decoração…",
       "hint": "Lido em voz alta por leitores de ecrã. Deixe vazio se a imagem for puramente decorativa."
+    }
+  },
+  "blur": {
+    "label": "Desfoque",
+    "photo": "Desfoque da fotografia",
+    "shadow": "Desfoque da sombra",
+    "shadowTip": "Suaviza a fotografia por trás do nome e do preço.",
+    "off": "Nenhum",
+    "valueText": "{value} em 100",
+    "direction": "Direção",
+    "directionAriaLabel": "Direção do desfoque",
+    "directions": {
+      "all": "Em toda a parte",
+      "top": "De cima",
+      "bottom": "De baixo",
+      "left": "Da esquerda",
+      "right": "Da direita"
     }
   },
   "shapeBlock": {
@@ -951,10 +1013,10 @@
     "uploadImage": "Carregar imagem",
     "allShapes": "Todas as formas",
     "browseShapes": "Explorar a biblioteca completa de formas",
-    "closePage": "Fechar página de produto",
-    "showPage": "Mostrar página de produto",
-    "closePages": "Fechar as páginas de produto",
-    "showPageFull": "Mostrar a página de produto",
+    "closePage": "Fechar percurso de compra",
+    "showPage": "Mostrar percurso de compra",
+    "closePages": "Fechar a página de produto, o pagamento e a página de agradecimento",
+    "showPageFull": "Mostrar a página de produto, o pagamento e a página de agradecimento",
     "undo": "Anular",
     "undoTip": "Anular (Ctrl+Z)",
     "redo": "Refazer",
@@ -969,25 +1031,18 @@
     "zoomIn": "Aumentar zoom",
     "zoomInTip": "Aumentar zoom (Ctrl +)",
     "designSettings": "Definições de design",
-    "page": "Página",
-    "moreTools": "Mais ferramentas",
-    "checkout": "Pagamento",
-    "showCheckout": "Mostrar o pagamento",
-    "closeCheckout": "Fechar o pagamento",
-    "showCheckoutFull": "Mostrar o pagamento e a página de agradecimento",
-    "closeCheckoutFull": "Fechar o pagamento e a página de agradecimento"
+    "page": "Percurso de compra",
+    "moreTools": "Mais ferramentas"
   },
   "selectionToolbar": {
     "toolsFor": "Ferramentas para {name}",
     "elements": "{count, plural, one {# elemento} many {# de elementos} other {# elementos}}",
-    "hidePage": "Ocultar página",
-    "hidePages": "Ocultar páginas",
-    "openPage": "Abrir página",
-    "openPages": "Abrir páginas",
-    "openProductPage": "Abrir a página de produto de {name}",
-    "closeProductPage": "Fechar a página de produto de {name}",
-    "openProductPages": "Abrir as páginas de produto de {count, plural, one {# produto} many {# de produtos} other {# produtos}}",
-    "closeProductPages": "Fechar as páginas de produto de {count, plural, one {# produto} many {# de produtos} other {# produtos}}",
+    "hidePage": "Ocultar percurso de compra",
+    "openPage": "Abrir percurso de compra",
+    "openProductPage": "Abrir o percurso de compra de {name}",
+    "closeProductPage": "Fechar o percurso de compra de {name}",
+    "openProductPages": "Abrir o percurso de compra de {count, plural, one {# produto} many {# de produtos} other {# produtos}}",
+    "closeProductPages": "Fechar o percurso de compra de {count, plural, one {# produto} many {# de produtos} other {# produtos}}",
     "editText": "Editar texto",
     "editTextOf": "Editar o texto de {name}",
     "color": "Cor",
@@ -998,19 +1053,18 @@
     "editCornersOf": "Editar o arredondamento dos cantos de {name}",
     "opacity": "Opacidade",
     "editOpacityOf": "Editar a opacidade de {name}",
+    "blur": "Desfoque",
+    "editBlurOf": "Editar o desfoque de {name}",
     "frame": "Recortar e posicionar",
     "frameImageFor": "Recortar e posicionar a imagem de {name}",
     "duplicate": "Duplicar",
     "duplicateNamed": "Duplicar {name}",
     "duplicateN": "Duplicar {count, plural, one {# elemento} many {# de elementos} other {# elementos}}",
     "removeFrom": "Remover {name} da grelha",
-    "removeN": "Remover {count, plural, one {# elemento} many {# de elementos} other {# elementos}} da grelha",
-    "openCheckout": "Abrir o pagamento",
-    "hideCheckout": "Ocultar o pagamento",
-    "openCheckoutFor": "Mostrar o pagamento de {name}",
-    "closeCheckoutFor": "Ocultar o pagamento de {name}"
+    "removeN": "Remover {count, plural, one {# elemento} many {# de elementos} other {# elementos}} da grelha"
   },
   "canvas": {
+    "addSuggested": "Adicionar {title} a esta montra",
     "gridLabel": "Tela da montra",
     "emptyGrid": "A sua grelha está vazia",
     "emptyGridHint": "Adicione um produto para começar a organizar a sua montra. O texto e as formas estão na barra de ferramentas abaixo.",
@@ -1377,5 +1431,45 @@
     "info": "Mostrada atrás da página. A camada na cor da página mantém o texto legível; desligue-a para mostrar a foto tal como está.",
     "remove": "Remover foto",
     "overlay": "Camada de cor"
+  },
+  "cardExtras": {
+    "hoverTitle": "Ao passar o rato",
+    "shoppingTitle": "Compra",
+    "effect": "Efeito",
+    "effectAriaLabel": "O que um cartão faz ao passar o rato",
+    "effects": {
+      "none": "Nenhum",
+      "lift": "Elevar",
+      "zoom": "Ampliar",
+      "tilt": "Inclinar"
+    },
+    "effectTipLabel": "Como os efeitos funcionam",
+    "effectTip": "Funciona quando um comprador aponta para um cartão ou chega a ele com a tecla Tab. Nos telemóveis, e para quem pediu menos movimento, os cartões ficam parados.",
+    "secondPhoto": "Segunda foto",
+    "secondPhotoTipLabel": "Que foto aparece",
+    "secondPhotoTip": "Mostra a foto seguinte do produto enquanto um comprador aponta para o cartão. Os produtos com uma só foto ficam como estão.",
+    "buyButton": "Botão de compra",
+    "buyButtonAriaLabel": "Botão de compra no cartão",
+    "buyButtons": {
+      "none": "Desativado",
+      "solid": "Preenchido",
+      "outline": "Contorno",
+      "link": "Ligação"
+    },
+    "buyButtonTipLabel": "Para onde leva o botão",
+    "buyButtonTip": "Usa o texto e a cor do botão da sua página de produto, e abre a página de produto.",
+    "rating": "Classificação em estrelas",
+    "ratingTipLabel": "De onde vêm as estrelas",
+    "ratingTip": "Das avaliações dos compradores. Aparece por baixo do nome assim que um produto tem uma avaliação.",
+    "ratingTipReviewsOff": "As avaliações estão desativadas na sua página de produto, por isso os cartões não mostram estrelas. Ative-as em Página de produto, Avaliações.",
+    "lowStock": "Últimas unidades",
+    "lowStockTipLabel": "Quando a etiqueta aparece",
+    "lowStockTip": "Diz Últimas unidades quando um produto está no seu nível de stock baixo ou abaixo dele, e Esgotado a zero. Os compradores nunca veem quantas restam."
+  },
+  "textSpacing": {
+    "letterSpacing": "Espaçamento entre letras",
+    "lineHeight": "Altura da linha",
+    "normal": "Normal",
+    "valueText": "{value} por cento do tamanho do texto"
   }
 }

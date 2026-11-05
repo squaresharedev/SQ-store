@@ -17,7 +17,7 @@ import { saveTaxInfo } from "@/lib/settings/actions";
 import type { ActionState } from "@/lib/errors";
 import type { ContactChannel } from "@/lib/contact-verification/policy";
 import { SELLER_FIELD_MAX } from "@/lib/settings/constants";
-import { useEuCountries } from "@/components/settings/use-eu-countries";
+import { useOperatingCountries } from "@/components/settings/use-operating-countries";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { RequiredMark } from "@/components/ui/RequiredMark";
 import { LEGAL_LINKS } from "@/lib/legal/links";
@@ -161,11 +161,11 @@ export function TaxSection({
   continueHref: string;
 }) {
   const t = useTranslations("Settings");
-  const { countries, countryName } = useEuCountries();
+  const { countries, countryName } = useOperatingCountries();
   // "" is a real choice (non-EU / declined), so it leads the list.
   const countryOptions: readonly SelectOption<string>[] = useMemo(
     () => [
-      { value: "", label: t("tax.countryNotEu") },
+      { value: "", label: t("tax.countryUnset") },
       ...countries.map((c) => ({ value: c.code, label: c.name })),
     ],
     [countries, t],
@@ -349,6 +349,7 @@ export function TaxSection({
             onChange={setCountryCode}
             disabled={isPending}
           />
+          <p className={helpTextClass}>{t("tax.fields.country.hint")}</p>
         </div>
         <div id="phone" className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1.5">

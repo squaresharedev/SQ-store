@@ -193,6 +193,18 @@ export type OrderView = {
    *  False for an order no provider charged: the seller pays the buyer back
    *  themselves and the refund is only recorded. */
   paidThroughProvider: boolean;
+  /** "Add to your order": what else was sold in this order, in the seller's
+   *  order. Empty for most orders. Snapshots, like the fields above. */
+  addOns: OrderAddOnLine[];
+};
+
+/** One add-on line of an order (order_add_ons), as the seller packs it. */
+export type OrderAddOnLine = {
+  productTitle: string;
+  selection: OrderSelection[];
+  quantity: number;
+  /** What the line was charged; part of the order's amountCents. */
+  amountCents: number;
 };
 
 /** A row of the Orders list: the order, and a picture of what was bought, so a

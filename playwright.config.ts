@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { NEXT_URL } from "./tests/e2e/stack/keys.mjs";
 
 /**
  * E2E config. The webServer command boots the ENTIRE local stack
@@ -12,7 +13,7 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export const STACK_SERVER = {
   command: "node tests/e2e/stack/server.mjs",
-  url: "http://localhost:3100",
+  url: NEXT_URL,
   reuseExistingServer: true,
   timeout: 240_000,
   stdout: "pipe",
@@ -29,7 +30,7 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   reporter: [["list"]],
   use: {
-    baseURL: "http://localhost:3100",
+    baseURL: NEXT_URL,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     // The app registers a service worker (public/sw.js) on every page, and

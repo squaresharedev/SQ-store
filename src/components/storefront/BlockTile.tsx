@@ -26,7 +26,14 @@ import {
 } from "@/lib/storefront/tile-spots";
 import { cn } from "@/lib/utils";
 import { BlockFace } from "./BlockFace";
-import { TILE_FACE_CLASS, tileFrameClass } from "./config-maps";
+import { BlockBlurCopies } from "./BlockBlurCopies";
+import {
+  CARD_HOVER_FRAME_CLASSES,
+  TILE_FACE_CLASS,
+  blockBlurStyle,
+  tileFrameClass,
+} from "./config-maps";
+import type { TileLook } from "@/lib/storefront/tile-look";
 import type {
   InlineFormatKey,
   TextEditSource,
@@ -114,6 +121,7 @@ export const BlockTile = memo(function BlockTile({
   block,
   product,
   theme,
+  look,
   imageUrl,
   editable,
   isEditing = false,
@@ -138,6 +146,9 @@ export const BlockTile = memo(function BlockTile({
   block: StorefrontBlock;
   product: Product | null;
   theme: StorefrontTheme;
+  /** Product blocks only: what cards borrow from the product page
+   *  (resolveTileLook). Memoised by the canvas, so it keeps its identity. */
+  look?: TileLook;
   /** Image blocks only: the server-signed URL for this element's artwork. */
   imageUrl?: string | null;
   editable: boolean;
@@ -288,6 +299,13 @@ export const BlockTile = memo(function BlockTile({
   const card = placeable
     ? resolveCardStyle(theme, block.type === "product" ? block.style : undefined)
     : null;
+
+  // The card's hover effect (CARD_HOVER_FRAME_CLASSES), and whether it may
+  // play: never on a selected tile, while framing, typing or dragging a label,
+  // since the selection's chrome sits outside the tile and would not follow.
+  const cardHover =
+    block.type === "product" ? resolveCardStyle(theme, block.style).hoverEffect : null;
+  const hoverMotion = !(editable && isEditing) && !isFraming && !isTyping;
 
   // Where the two tokens sit right now, resolved exactly as the face resolves
   // them, so a drag starts from what the seller can see.
@@ -641,6 +659,10 @@ export const BlockTile = memo(function BlockTile({
         // is a field right now".
         isTyping &&
           "outline-2 outline-dashed outline-ring -outline-offset-2",
+        // What the card does on hover, played on the board as a buyer would
+        // see it, EXCEPT on a selected tile or mid-gesture: the selection's
+        // handles live outside the tile and would be left behind.
+        hoverMotion && cardHover && CARD_HOVER_FRAME_CLASSES[cardHover],
         selectable &&
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
         // In the designer, a block buyers won't see (sold out + hideSoldOut)
@@ -714,8 +736,10 @@ export const BlockTile = memo(function BlockTile({
       {/* The clip-path is set only on a block that sits UNDER a product on
           the same cells (see blockTileClipStyle): it pulls this face in just
           past the product's antialiased edge, so no rim of it shows. The
-          variable is unset everywhere else, which leaves no clip-path at all. */}
-      <div className={TILE_FACE_CLASS}>
+          variable is unset everywhere else, which leaves no clip-path at all.
+          The block's blur is set here too, and lifted while its words are
+          being typed: a seller has to be able to read what they are writing. */}
+      <div className={TILE_FACE_CLASS} style={isTyping ? undefined : blockBlurStyle(block)}>
         <BlockFace
           block={block}
           product={product}
@@ -723,6 +747,8 @@ export const BlockTile = memo(function BlockTile({
           imageUrl={imageUrl}
           imageRef={isFraming ? imageRef : undefined}
           spotDrag={spotDrag}
+          look={look}
+          hoverMotion={hoverMotion}
           textEditing={typable && isTyping}
           textSelectAll={typingSelectAll}
           onTextChange={
@@ -752,6 +778,9 @@ export const BlockTile = memo(function BlockTile({
           </span>
         )}
       </div>
+      {/* A block blurred from one edge is the face above plus these copies
+          over it. Gone while typing, like the blur itself. */}
+      {!isTyping && <BlockBlurCopies block={block} theme={theme} imageUrl={imageUrl} />}
     </div>
   );
 });

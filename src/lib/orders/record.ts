@@ -69,9 +69,11 @@ import { orderDetailPath } from "@/lib/orders/paths";
 import { productEditPath } from "@/lib/products/paths";
 import { sendNewOrderEmail } from "@/lib/orders/emails";
 import { sendBuyerConfirmation } from "@/lib/orders/confirmation";
+import { orderAddOnGoods } from "@/lib/orders/add-on-lines";
 import { PURCHASE_QUANTITY_MAX } from "@/lib/validation/product";
 import { DISCOUNT_CODE_PATTERN } from "@/lib/discounts/code";
 import { GIFT_MESSAGE_MAX } from "@/types/storefront";
+import { ADD_ONS_MAX } from "@/types/product";
 import { DEFAULT_LOCALE, parseLocale } from "@/i18n/locales";
 import { PLAN_IDS, type PlanId } from "@/lib/billing/plans";
 import { recordOrderFees } from "@/lib/billing/fee-ledger";
@@ -133,6 +135,25 @@ export type PaidCheckout = {
   /** A download buyer agreed to immediate supply (and the loss of the right to
    *  withdraw). Recorded as the moment the order was written. */
   supplyConsent?: boolean;
+  /** "Add to your order": the other products sold in this order, in the
+   *  seller's order. Each must be the same seller's and the same kind as the
+   *  main product; their amounts are part of amountCents. */
+  addOns?: PaidAddOn[];
+};
+
+/** One add-on line of a paid checkout, as the quote priced it. */
+export type PaidAddOn = {
+  productId: string;
+  /** The version, in the seller's words: [{ label, value }]. */
+  selection: unknown;
+  /** The REGULAR price of one, snapshotted as product_price_cents. */
+  unitPriceCents: number;
+  quantity: number;
+  /** What was charged for the line. */
+  amountCents: number;
+  /** The sale that priced it, if one did. Only an id, checked against the
+   *  seller's own discounts like the main line's. */
+  discountId?: string | null;
 };
 
 export type RecordResult =
@@ -154,6 +175,8 @@ type Placed = {
   duplicate: boolean;
   stock_left?: number | null;
   low_stock?: boolean;
+  /** Add-on products left at or under their low-stock line by this order. */
+  add_on_low_stock?: { product_id: string; stock_left: number }[];
 };
 
 /** The exception public.order_place raises when a tracked product has too few. */
@@ -192,7 +215,28 @@ const paidCheckoutSchema = z.object({
   // it back out of provider metadata.
   giftMessage: z.string().trim().min(1).max(GIFT_MESSAGE_MAX).nullable().optional(),
   supplyConsent: z.boolean().optional(),
+  addOns: z
+    .array(
+      z.object({
+        productId: z.uuid(),
+        selection: z.unknown(),
+        unitPriceCents: z.number().int().min(0),
+        quantity: z.number().int().min(1).max(PURCHASE_QUANTITY_MAX),
+        amountCents: z.number().int().min(0),
+        discountId: z.uuid().nullable().optional(),
+      }),
+    )
+    .max(ADD_ONS_MAX)
+    .optional(),
 });
+
+/** What the writer reads of an add-on's product. */
+type AddOnProductRow = {
+  id: string;
+  owner_id: string;
+  title: string;
+  digital_file_key: string | null;
+};
 
 type ProductRow = {
   owner_id: string;
@@ -290,7 +334,9 @@ async function placeOrder(
     !parsed.success ||
     applicationFeeCents !== parsed.data.platformFeeCents + adFeeCents ||
     applicationFeeCents > parsed.data.amountCents ||
-    (parsed.data.shippingCents ?? 0) > parsed.data.amountCents
+    (parsed.data.shippingCents ?? 0) +
+      (parsed.data.addOns ?? []).reduce((total, line) => total + line.amountCents, 0) >
+      parsed.data.amountCents
   ) {
     console.error("[orders] refused a malformed checkout", parsed.error?.issues[0]?.path);
     return { ok: false, reason: "invalid" };
@@ -327,6 +373,35 @@ async function placeOrder(
     }
 
     const ships = product.digital_file_key === null;
+
+    // The add-on lines: each one this seller's own product, and the same kind
+    // as the main one (an order is sent one way). Read here, not taken from the
+    // caller, like the main product: the title and the download are snapshots
+    // of the row as it is now.
+    const addOnInputs = checkout.addOns ?? [];
+    const addOnRows = new Map<string, AddOnProductRow>();
+    if (addOnInputs.length > 0) {
+      const { data: rows, error: addOnError } = await admin
+        .from("products")
+        .select("id, owner_id, title, digital_file_key")
+        .in(
+          "id",
+          addOnInputs.map((line) => line.productId),
+        );
+      if (addOnError) throw addOnError;
+      for (const row of (rows ?? []) as AddOnProductRow[]) addOnRows.set(row.id, row);
+      for (const line of addOnInputs) {
+        const row = addOnRows.get(line.productId);
+        if (!row) return { ok: false, reason: "unknown_product" };
+        if (row.owner_id !== sellerId) {
+          console.error("[orders] an add-on is another seller's product");
+          return { ok: false, reason: "seller_mismatch" };
+        }
+        if ((row.digital_file_key === null) !== ships) return { ok: false, reason: "invalid" };
+      }
+    }
+    const addOnsCharged = addOnInputs.reduce((total, line) => total + line.amountCents, 0);
+
     const shipTo = ships ? parseShipTo(input.shipTo) : null;
     const selection = parseOrderSelection(input.selection);
     const fulfilment: FulfilmentStatus = ships ? "unfulfilled" : "not_required";
@@ -336,13 +411,37 @@ async function placeOrder(
     // discount. Worked out here rather than taken from the caller, so a
     // provider's figures can never make the order claim a discount it did not
     // charge.
+    // The main product's share is what is left once delivery and the add-on
+    // lines are taken out.
     const unitPriceCents = checkout.unitPriceCents ?? product.price_cents;
     const regularItems = unitPriceCents * checkout.quantity;
     const discountCents = Math.min(
       regularItems,
-      Math.max(0, regularItems - (checkout.amountCents - (checkout.shippingCents ?? 0))),
+      Math.max(0, regularItems - (checkout.amountCents - (checkout.shippingCents ?? 0) - addOnsCharged)),
     );
     const attribution = await verifyAttribution(admin, sellerId, checkout.discountId ?? null, checkout.credit ?? null);
+    const addOnSales = await ownedDiscountIds(
+      admin,
+      sellerId,
+      addOnInputs.flatMap((line) => (line.discountId ? [line.discountId] : [])),
+    );
+    const addOns = addOnInputs.map((line) => {
+      const row = addOnRows.get(line.productId)!;
+      const regular = line.unitPriceCents * line.quantity;
+      const lineDiscount = Math.min(regular, Math.max(0, regular - line.amountCents));
+      return {
+        product_id: line.productId,
+        product_title: row.title,
+        product_price_cents: line.unitPriceCents,
+        quantity: line.quantity,
+        amount_cents: line.amountCents,
+        discount_cents: lineDiscount,
+        discount_id: lineDiscount > 0 && line.discountId && addOnSales.has(line.discountId) ? line.discountId : null,
+        selected_options: parseOrderSelection(line.selection),
+        // Snapshotted for the same reason as the main product's download.
+        digital_file_key: row.digital_file_key,
+      };
+    });
 
     const { data, error } = await admin.rpc("order_place", {
       p_order: {
@@ -381,7 +480,9 @@ async function placeOrder(
         // product cannot take the buyer's download with it.
         digital_file_key: product.digital_file_key,
         pending_expires_at: as.status === "pending" ? as.expiresAt.toISOString() : null,
-      } as Json,
+        // Not an orders column: order_place writes these to order_add_ons.
+        add_ons: addOns,
+      } as unknown as Json,
     });
     if (error) {
       // Not enough left: the function took its own insert back, so there is no
@@ -399,6 +500,13 @@ async function placeOrder(
     if (!placed.duplicate && placed.low_stock) {
       const left = placed.stock_left ?? 0;
       await afterResponse(() => tellSellerStockIsLow(sellerId, checkout.productId, product.title, left));
+    }
+    if (!placed.duplicate) {
+      for (const low of placed.add_on_low_stock ?? []) {
+        const title = addOnRows.get(low.product_id)?.title;
+        if (!title) continue;
+        await afterResponse(() => tellSellerStockIsLow(sellerId, low.product_id, title, low.stock_left));
+      }
     }
     return { ok: true, orderId: placed.order_id, duplicate: placed.duplicate };
   } catch (error) {
@@ -468,12 +576,16 @@ export async function announceOrder(orderId: string): Promise<void> {
       order.discount_code_id !== null &&
       order.discount_id === order.discount_code_id;
 
+    // What else went in the box ("Add to your order"), for both messages.
+    const more = await orderAddOnGoods(admin, order.id);
+
     if (!order.seller_notified_at) {
       const told = await tellSeller(order.seller_id, {
         orderId: order.id,
         productTitle: order.product_title,
         quantity: order.quantity,
         selection,
+        more,
         ships,
         shipTo,
         amountCents: order.amount_cents,
@@ -498,6 +610,7 @@ export async function announceOrder(orderId: string): Promise<void> {
         productTitle: order.product_title,
         quantity: order.quantity,
         selection,
+        more,
         shipTo,
         shippingProfileId: product?.shipping_profile_id ?? null,
         amountCents: order.amount_cents,
@@ -577,6 +690,23 @@ async function verifyAttribution(
     discountId: discountId && owned.has(discountId) ? discountId : null,
     credit: credit && creditCode ? { id: credit.id, code: creditCode } : null,
   };
+}
+
+/** Which of these discount ids are this seller's own (an add-on line's sale
+ *  is credited only then, like the main line's). */
+async function ownedDiscountIds(
+  admin: ReturnType<typeof createAdminClient>,
+  sellerId: string,
+  ids: readonly string[],
+): Promise<Set<string>> {
+  const unique = [...new Set(ids)];
+  if (unique.length === 0) return new Set();
+  const { data, error } = await admin.from("discounts").select("id").eq("owner_id", sellerId).in("id", unique);
+  if (error) {
+    console.error("[orders] add-on discount read failed:", error.message);
+    return new Set();
+  }
+  return new Set((data ?? []).map((row) => row.id));
 }
 
 /**

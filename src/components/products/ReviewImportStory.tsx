@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Lock, MousePointer2, RotateCw, Globe } from 
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
-import { BRAND_MARK } from "@/lib/brand";
+import { BrandMarkIcon } from "@/components/ui/BrandMarkIcon";
 import { formatFixed } from "@/lib/format/intl";
 import { formatPrice } from "@/lib/format";
 import type { Locale } from "@/i18n/locales";
@@ -348,15 +348,7 @@ export function ReviewImportStory() {
 
         {/* A product page on Square Share: photo, name, price, rating, buy, reviews. */}
         <BrowserWindow
-          favicon={
-            <svg
-              viewBox={`0 0 ${BRAND_MARK.width} ${BRAND_MARK.height}`}
-              className="size-3 shrink-0 text-foreground"
-              fill="currentColor"
-            >
-              <path d={BRAND_MARK.path} />
-            </svg>
-          }
+          favicon={<BrandMarkIcon className="size-3 text-foreground" />}
           tab={t("product")}
           domain={PAGE_DOMAIN}
         >

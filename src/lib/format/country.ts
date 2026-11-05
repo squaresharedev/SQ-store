@@ -1,8 +1,8 @@
 import type { Locale } from "@/i18n/locales";
-import { EU_COUNTRIES } from "@/lib/settings/constants";
+import { EU_COUNTRIES, OPERATING_COUNTRIES } from "@/lib/settings/constants";
 
-export type EuCountryCode = (typeof EU_COUNTRIES)[number]["code"];
-export type EuCountry = { code: EuCountryCode; name: string };
+export type OperatingCountryCode = (typeof OPERATING_COUNTRIES)[number]["code"];
+export type OperatingCountry = { code: OperatingCountryCode; name: string };
 
 /**
  * Country names in the reader's language. Pure: usable from client and server.
@@ -63,13 +63,13 @@ export function regionName(code: string | null | undefined, locale: Locale): str
   }
 }
 
-const sortedLists = new Map<Locale, readonly EuCountry[]>();
+const sortedLists = new Map<Locale, readonly OperatingCountry[]>();
 
-/** The EU member states named in the reader's language, sorted the way that language sorts. */
-export function euCountries(locale: Locale): readonly EuCountry[] {
+/** The countries we operate in, named in the reader's language, sorted the way that language sorts. */
+export function operatingCountries(locale: Locale): readonly OperatingCountry[] {
   let list = sortedLists.get(locale);
   if (!list) {
-    list = EU_COUNTRIES.map(({ code }) => ({ code, name: countryName(code, locale) ?? code })).sort(
+    list = OPERATING_COUNTRIES.map(({ code }) => ({ code, name: countryName(code, locale) ?? code })).sort(
       (a, b) => a.name.localeCompare(b.name, locale),
     );
     sortedLists.set(locale, list);

@@ -1,16 +1,17 @@
 // Shared constants for the settings slice.
 
 import type { Locale } from "@/i18n/locales";
+import { LATEST_TERMS_VERSION } from "@/lib/legal/terms-versions";
 
 /**
  * Version tag recorded when a user agrees to the Terms of Service (the welcome
  * flow's terms step, or Settings › Legal). It names WHICH Terms were agreed to:
- * the full document's "last updated" date (TERMS_LAST_UPDATED in
- * lib/legal/terms-summary.ts). Bump both together whenever the Terms change;
- * anyone who agreed to an older version is asked again (the Overview attention
- * row). Capped at 32 characters by a DB CHECK.
+ * always the newest listed in lib/legal/terms-versions.ts, which is where a new
+ * version is added. Once an older one stops being in force, anyone who agreed
+ * only to that is asked again (the Overview attention row). Capped at 32
+ * characters by a DB CHECK.
  */
-export const LEGAL_VERSION = "tos-2026-10-11";
+export const LEGAL_VERSION = LATEST_TERMS_VERSION;
 
 // The account's name bounds live with the rest of the handle rules, in
 // lib/validation/auth.ts (USERNAME_MIN_LENGTH / USERNAME_MAX_LENGTH). They are
@@ -64,8 +65,7 @@ export function isDeleteConfirmPhrase(value: string): boolean {
 }
 
 /**
- * EU member states for the tax section (ISO 3166-1 alpha-2). Also the
- * trader-identity country list: an EU country here is what makes
+ * EU member states (ISO 3166-1 alpha-2). An EU country here is what makes
  * `isEuSeller` (lib/storefront/product-page.ts) add the statutory
  * withdrawal/conformity lines to a product page.
  */
@@ -102,9 +102,23 @@ export const EU_COUNTRIES = [
 export const EU_COUNTRY_CODES = EU_COUNTRIES.map((c) => c.code);
 
 /**
- * The curated list of countries a buyer can choose from at checkout: all EU
- * member states, plus the most common non-EU shipping markets. Ordered to keep
- * EU codes together so the list is scannable.
+ * WHERE SQUARE SHARE OPERATES: the EU, the USA and Canada, and nowhere else yet.
+ * A seller's country comes from this list and checkout only delivers inside it.
+ * The Terms of Service say the same (Home: src/content/legal/terms.ts, "Where we
+ * operate"), so opening a new area means changing both, and LEGAL_VERSION.
+ */
+export const OPERATING_COUNTRIES = [
+  ...EU_COUNTRIES,
+  { code: "US", name: "United States" },
+  { code: "CA", name: "Canada" },
+] as const;
+
+export const OPERATING_COUNTRY_CODES = OPERATING_COUNTRIES.map((c) => c.code);
+
+/**
+ * The countries a buyer can choose from at checkout, and a seller can deliver
+ * to: OPERATING_COUNTRIES, as literals. Ordered to keep EU codes together so the
+ * list is scannable.
  *
  * The "*" catch-all (SHIP_ANYWHERE) is handled separately and is NOT in this
  * list; it appears as its own "Everywhere else" option in the UI.
@@ -118,10 +132,7 @@ export const SHIPPING_COUNTRY_CODES = [
   "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
   "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL",
   "PL", "PT", "RO", "SK", "SI", "ES", "SE",
-  // EEA non-EU
-  "IS", "LI", "NO",
-  // Other key markets
-  "CH", "GB", "US", "CA", "AU", "NZ",
+  "US", "CA",
 ] as const;
 
 /** Type-level union of the curated country codes. */

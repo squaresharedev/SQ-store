@@ -2,8 +2,12 @@
 
 import type { CSSProperties, RefObject } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, Star } from "lucide-react";
+import type { Locale } from "@/i18n/locales";
 import type { Product } from "@/types/product";
+import { formatFixed } from "@/lib/format/intl";
+import { tileStockState } from "@/lib/stock/badge";
+import { resolveTileLook, type TileLook } from "@/lib/storefront/tile-look";
 import {
   PRICE_TAG_SIZE_MIN,
   defaultPriceTagFill,
@@ -28,12 +32,19 @@ import { imageStyle } from "@/lib/images/placement";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import {
+  CARD_HOVER_ZOOM_CLASS,
+  HOVER_PHOTO_CLASS,
+  INLINE_ICON_STYLE,
   PRICE_TAG_FONT_CLASSES,
   TEXT_ALIGN_CLASSES,
+  tileBuyButtonClass,
+  tileBuyButtonStyle,
+  tileDetailsStyle,
   TILE_SPOT_CLASSES,
   TITLE_BAND_ROW_CLASSES,
   TITLE_BAND_SHADOW_CLASSES,
   chipWidth,
+  photoBlurStyle,
   priceTagChipStyle,
   priceTagInsetStyle,
   priceTagWasStyle,
@@ -41,6 +52,7 @@ import {
   titleBandFontStyle,
   titleBandStyle,
   titleShadowBackdrop,
+  titleShadowBlurStyle,
   titleShadowInk,
   titleShadowStyle,
 } from "./config-maps";
@@ -151,15 +163,18 @@ export function ProductTileContent({
   product,
   theme,
   overrides,
-  soldOut = false,
+  soldOut: markedSoldOut = false,
   imagePlacement,
   imageRef,
   spotDrag,
+  look,
+  hoverMotion = true,
 }: {
   product: Product;
   theme: StorefrontTheme;
   /** The block's per-tile style overrides (block.style), if any. */
   overrides?: CardStyleOverrides;
+  /** The seller's own sold-out mark on this block (block.soldOut). */
   soldOut?: boolean;
   /** Where the photo sits in this tile's frame. Absent = centred at cover,
    *  which renders with no inline style at all. */
@@ -171,13 +186,39 @@ export function ProductTileContent({
    *  every read-only path (preview, card thumbnail, the buyer's page), which
    *  then renders with no handlers, no tab stops and no affordance. */
   spotDrag?: TileSpotDrag;
+  /** What the card borrows from the product page (resolveTileLook). Absent =
+   *  the product page's defaults, for a surface with no page to ask. */
+  look?: TileLook;
+  /** False while this card must hold still on hover (the designer's selected
+   *  tile, whose handles would drift off it): turns the photo zoom off. */
+  hoverMotion?: boolean;
 }) {
   const t = useTranslations("Storefront.spotDrag");
   const tCommon = useTranslations("Common");
   const tSale = useTranslations("ProductPage.sale");
+  const tAddOns = useTranslations("ProductPage.addOns");
   const saleWords = useSaleChipWords();
   const locale = useLocale();
   const card = resolveCardStyle(theme, overrides);
+  const tileLook = look ?? resolveTileLook({ theme });
+
+  // THE CARD EXTRAS. Stock is a state, never a count (tileStockState): "Low
+  // stock" under the name, and the sold-out badge once none are left, the
+  // same badge the seller's own mark puts up. The buy button asks too, Low
+  // stock on or not: a card never offers to sell what has none left. Stars
+  // only while the product page shows reviews, and only once there is one
+  // (product.rating).
+  const stock = card.showLowStock || card.buyButton !== "none" ? tileStockState(product) : null;
+  const outOfStock = stock === "sold_out";
+  const soldOut = markedSoldOut || (card.showLowStock && outOfStock);
+  const rating = card.showRating && tileLook.reviewsShown ? (product.rating ?? null) : null;
+  const lowStock = card.showLowStock && stock === "low_stock";
+  const hasDetails = rating !== null || lowStock;
+  const buyLook = card.buyButton !== "none" && !soldOut && !outOfStock ? card.buyButton : null;
+  // Framing (imageRef) shows the one photo being framed, still.
+  const zoom = card.hoverEffect === "zoom" && hoverMotion && !imageRef;
+  const hoverPhotoUrl =
+    card.hoverPhoto && product.imageUrl && product.hoverImageUrl && !imageRef ? product.hoverImageUrl : null;
 
   // A token in flight is drawn where it is GOING, not where it is stored: the
   // whole point of dragging the thing is watching it move. Nothing is written
@@ -215,7 +256,9 @@ export function ProductTileContent({
   // that row moves to the opposite one rather than landing on the name. A band
   // the tile does not draw (showTitle off) reserves nothing, which titleBandRow
   // is what answers.
-  const bandRow = titleBandRow({ ...card, titlePosition: titleSpot });
+  // The details line draws the band on its own (see showTitleArea), so a band
+  // holding only stars still keeps the chips off its row.
+  const bandRow = titleBandRow({ ...card, titlePosition: titleSpot, showTitle: card.showTitle || hasDetails });
   const tagPosition = resolvePriceTagPosition(pricePosition, {
     cornerRadius: card.cornerRadius,
     titleBand: bandRow,
@@ -396,14 +439,110 @@ export function ProductTileContent({
   // (then it renders with just the price so the layout keeps its shape).
   // ONE band either way — "below" means "in the title band", so the price
   // follows the title's row instead of stranding a second bar somewhere else.
+  // And when there is a details line to show, for the same reason.
   const showTitleArea =
-    card.showTitle || (!priceHidden && tagPosition === "below");
+    card.showTitle || (!priceHidden && tagPosition === "below") || hasDetails;
 
-  const titleArea = showTitleArea ? (
+  // THE DETAILS LINE: the stars and "Low stock", under the name in the band's
+  // own ink and column. The stars are drawn and the sentence is heard, so a
+  // screen reader gets "4.6 out of 5 stars, 12 reviews" rather than "4.6 (12)".
+  const shownAverage = rating ? formatFixed(rating.average, 1, locale as Locale) : "";
+  const details = hasDetails ? (
+    <span
+      data-tile-details=""
+      className={cn(
+        "block truncate",
+        TEXT_ALIGN_CLASSES[spotColumn(titleSpot)],
+        shadowArea ? shadowInk === "#ffffff" && "drop-shadow-sm" : "text-foreground",
+      )}
+      style={{ ...tileDetailsStyle(), ...(shadowArea ? { color: shadowInk } : {}) }}
+    >
+      {rating && (
+        <span data-tile-rating="">
+          <span className="sr-only">{tAddOns("rating", { average: shownAverage, count: rating.count })}</span>
+          <span aria-hidden="true">
+            <Star
+              className="inline-block align-text-bottom"
+              style={{ ...INLINE_ICON_STYLE, color: tileLook.starColor }}
+              fill="currentColor"
+              strokeWidth={1.5}
+            />{" "}
+            <span className="font-medium tabular-nums">{shownAverage}</span>{" "}
+            <span className="opacity-70 tabular-nums">({rating.count})</span>
+          </span>
+        </span>
+      )}
+      {rating && lowStock && <span aria-hidden="true"> · </span>}
+      {lowStock && (
+        <span data-tile-low-stock="" className="font-medium">
+          {tCommon("stock.lowStockLabel")}
+        </span>
+      )}
+    </span>
+  ) : null;
+
+  // THE BUY BUTTON: a row of its own at the foot of the card, the product
+  // page's button in small (tileBuyButtonStyle). Not a link of its own: on a
+  // buyer's board the whole card already is one, to the same page.
+  const buyRow = buyLook ? (
+    <div
+      data-tile-buy={buyLook}
+      className="shrink-0 bg-card py-1.5"
+      style={{ ...titleBandStyle(card.titleInset), ...titleBandFontStyle() }}
+    >
+      <span
+        className={tileBuyButtonClass(buyLook, card.cornerRadius)}
+        style={tileBuyButtonStyle(buyLook, tileLook.buy)}
+      >
+        {tileLook.buyLabel}
+      </span>
+    </div>
+  ) : null;
+
+  // THE FADE'S FROST is the band's SIBLING, never its child. A backdrop blur
+  // sees nothing past an ancestor whose opacity is below 1, and a band that
+  // reveals on hover fades in by opacity: a frost inside it would be missing
+  // for the whole fade and pop in at the end. So a frosted band hands its
+  // pinning to a wrapper with no opacity of its own, and the frost and the band
+  // fade in side by side inside it. An unfrosted band is pinned itself, exactly
+  // as before.
+  const frosted = shadowArea && card.titleShadowBlur > 0;
+  const bandPinClass = cn("absolute inset-x-0 z-10", TITLE_BAND_ROW_CLASSES[titleRow]);
+
+  const titleName = card.showTitle ? (
+    <span
+      {...titleToken}
+      className={cn(
+        // min-w-0 states what `truncate`'s overflow already implies: the
+        // title yields to the price rather than pushing it out of the row.
+        // With the price shrink-0 beside it, the two cannot overlap; flex-1
+        // is what lets the spot's column steer the words inside that space.
+        // No text-xs: the size is inherited from the band, which scales it
+        // with the tile (titleBandFontStyle).
+        "min-w-0 flex-1 truncate font-medium",
+        TEXT_ALIGN_CLASSES[spotColumn(titleSpot)],
+        // On a shadow the ink follows the shade's lightness (inline, since
+        // the shade is a seller hex that no theme token tracks); the drop
+        // shadow only helps white words, and muddies dark ones.
+        shadowArea
+          ? shadowInk === "#ffffff" && "drop-shadow-sm"
+          : "text-foreground",
+        titleToken?.className,
+      )}
+      style={shadowArea ? { color: shadowInk } : undefined}
+    >
+      {product.title}
+    </span>
+  ) : null;
+
+  const band = (
     <div
       // How a price being dragged finds its way home: the band is the one drop
       // target that is not a spot on the board, so it has to be hit-testable.
       data-title-band=""
+      // A band drawn only for the details line goes with it on a card too
+      // small to carry one (globals.css), rather than standing empty.
+      data-tile-extras-band={!card.showTitle && !inlinePrice ? "" : undefined}
       // Horizontal padding is the one part of the band that is not a class:
       // on auto it reads the tile's own clip radius (see titleBandStyle).
       // The band's TYPE is not a class either, for the same reason the chip's
@@ -420,8 +559,7 @@ export function ProductTileContent({
         "flex items-baseline justify-between gap-2 py-1.5",
         // A bar is a real row in the tile's column, so it needs no pinning.
         !overlaid && "bg-card",
-        overlaid && "absolute inset-x-0 z-10",
-        overlaid && TITLE_BAND_ROW_CLASSES[titleRow],
+        overlaid && (frosted ? "relative" : bandPinClass),
         card.titleStyle === "overlay" && "bg-card/90",
         // Shadow: no bar, a gradient fading away from the words for legibility.
         shadowArea && TITLE_BAND_SHADOW_CLASSES[titleRow],
@@ -436,34 +574,37 @@ export function ProductTileContent({
           "ring-2 ring-inset ring-primary",
       )}
     >
-      {card.showTitle && (
-        <span
-          {...titleToken}
-          className={cn(
-            // min-w-0 states what `truncate`'s overflow already implies: the
-            // title yields to the price rather than pushing it out of the row.
-            // With the price shrink-0 beside it, the two cannot overlap; flex-1
-            // is what lets the spot's column steer the words inside that space.
-            // No text-xs: the size is inherited from the band, which scales it
-            // with the tile (titleBandFontStyle).
-            "min-w-0 flex-1 truncate font-medium",
-            TEXT_ALIGN_CLASSES[spotColumn(titleSpot)],
-            // On a shadow the ink follows the shade's lightness (inline, since
-            // the shade is a seller hex that no theme token tracks); the drop
-            // shadow only helps white words, and muddies dark ones.
-            shadowArea
-              ? shadowInk === "#ffffff" && "drop-shadow-sm"
-              : "text-foreground",
-            titleToken?.className,
-          )}
-          style={shadowArea ? { color: shadowInk } : undefined}
-        >
-          {product.title}
+      {details ? (
+        // The name and its details as one column, so the price still sits on
+        // the name's baseline beside them. Without a name, the line alone.
+        <span className="flex min-w-0 flex-1 flex-col">
+          {titleName}
+          {details}
         </span>
+      ) : (
+        titleName
       )}
       {inlinePrice}
     </div>
-  ) : null;
+  );
+
+  const titleArea = !showTitleArea ? null : frosted ? (
+    <div className={bandPinClass}>
+      {/* Under the band in paint order, shaped by the same fade, so the photo
+          is soft only where it is shaded. */}
+      <span
+        aria-hidden="true"
+        className={cn("pointer-events-none absolute inset-0", titleHover && HOVER_REVEAL_CLASS)}
+        style={{
+          ...titleShadowBlurStyle(titleRow, card.titleShadowBlur),
+          ...hoverDurationStyle(card.titleHoverMs),
+        }}
+      />
+      {band}
+    </div>
+  ) : (
+    band
+  );
 
   // A `bar` title at the top is a row ABOVE the picture — the only placement
   // that changes the tile's own column order rather than pinning a band.
@@ -489,7 +630,9 @@ export function ProductTileContent({
         // the overflow at the wrong scale. See frameElement in
         // TileImageFramer.
         data-image-frame=""
-        className="relative min-h-0 flex-1 bg-muted"
+        // A zoomed photo grows past its frame, which then clips it, so it
+        // never spills over a bar title or the buy row.
+        className={cn("relative min-h-0 flex-1 bg-muted", zoom && "overflow-hidden")}
       >
         {product.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
@@ -506,6 +649,7 @@ export function ProductTileContent({
             className={cn(
               "size-full object-cover",
               soldOut && "opacity-60 grayscale",
+              zoom && CARD_HOVER_ZOOM_CLASS,
             )}
           />
         ) : (
@@ -516,6 +660,36 @@ export function ProductTileContent({
               aria-hidden="true"
             />
           </div>
+        )}
+        {/* The product's second photo, over the first, shown while the card
+            is pointed at (HOVER_PHOTO_CLASS). Unframed: the seller framed the
+            cover, not this one. Lazy, since most visits never hover. */}
+        {hoverPhotoUrl && (
+          // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
+          <img
+            src={hoverPhotoUrl}
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            loading="lazy"
+            decoding="async"
+            data-tile-hover-photo=""
+            className={cn(
+              HOVER_PHOTO_CLASS,
+              soldOut && "grayscale group-hover:opacity-60 group-focus-within:opacity-60",
+              zoom && CARD_HOVER_ZOOM_CLASS,
+            )}
+          />
+        )}
+        {/* The photo's blur, as a layer over it rather than a filter on it,
+            so the picture stays solid to the frame (see photoBlurStyle).
+            Under every chip and the title band, which stay sharp. */}
+        {product.imageUrl && card.photoBlur > 0 && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={photoBlurStyle(card.photoBlur, card.photoBlurDirection)}
+          />
         )}
         {/* Floating price tag, placed over the image per the chosen spot. */}
         {floatedPrice}
@@ -533,8 +707,13 @@ export function ProductTileContent({
             {tCommon("stock.soldOut")}
           </span>
         )}
+        {/* An overlaid band is pinned to the PHOTO, so a buy row under the
+            picture never ends up beneath it. Last in the frame, so it paints
+            over the chips exactly as it did as the face's own child. */}
+        {overlaid && titleArea}
       </div>
-      {!barAbove && titleArea}
+      {!overlaid && !barAbove && titleArea}
+      {buyRow}
     </div>
   );
 }

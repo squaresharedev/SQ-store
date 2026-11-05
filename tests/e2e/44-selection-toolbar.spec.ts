@@ -124,7 +124,7 @@ test.describe("the selection toolbar", () => {
     await page.locator("li[data-grid-cell] [data-block-tile]").click();
 
     const bar = page.locator("[data-selection-toolbar]");
-    await expect(bar.getByRole("button", { name: /open the product page/i })).toBeVisible();
+    await expect(bar.getByRole("button", { name: /open the buyer flow/i })).toBeVisible();
     await expect(bar.getByRole("button", { name: /crop and position the image/i })).toBeVisible();
     await expect(bar.getByRole("button", { name: /remove .* from grid/i })).toBeVisible();
     // The block's name is in the accessible names, not drawn on the bar: it

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import {
   DEFAULT_CHECKOUT_PAGE_CONFIG,
   patchThemeCardStyle,
+  resolveCardStyle,
   type CheckoutPageConfig,
   type ProductPageConfig,
   type StorefrontHeader,
@@ -21,7 +22,7 @@ import {
 } from "@/lib/storefront/setting-ref";
 import { useSettingTarget } from "@/lib/storefront/setting-context";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
-import { PanelBackRow, PanelMenu, PanelMenuItem } from "@/components/ui/PanelMenu";
+import { PanelMenu, PanelMenuItem, PanelSubmenu } from "@/components/ui/PanelMenu";
 import { PanelSearchField } from "./PanelSearchField";
 import type { EditorJump, EditorSearchEntry } from "./editor-search";
 import { FONT_LABELS } from "./config-maps";
@@ -30,6 +31,9 @@ import { HeaderSection } from "./HeaderSection";
 import { CardsSection } from "./CardsSection";
 import { PriceTagSection } from "./PriceTagSection";
 import { SaleBadgeControls } from "./SaleBadgeControls";
+import { CardHoverControls } from "./CardHoverControls";
+import { CardShoppingControls } from "./CardShoppingControls";
+import { isProductPageSectionShown } from "@/lib/storefront/product-page";
 import { ChipScaleControl } from "./ChipScaleControl";
 import { LayoutSection } from "./LayoutSection";
 import { TypographySection } from "./TypographySection";
@@ -161,7 +165,7 @@ export function ControlsPanel({
   // editor opened straight from a search result elsewhere) still navigates.
   //
   // Compared by REFERENCE, not by isSameSettingRef's field-by-field equality:
-  // the opener (StorefrontDesigner's openSetting/openProductPage) mints a
+  // the opener (StorefrontDesigner's openSetting/openBuyerFlow) mints a
   // fresh object per explicit open() call, so identity is exactly "have we
   // already reacted to this specific request" — an ordinary re-render for
   // any other reason hands back the SAME object and changes nothing here,
@@ -172,7 +176,9 @@ export function ControlsPanel({
   const [lastRef, setLastRef] = useState<SettingRef | null>(null);
   if (activeRef !== lastRef) {
     setLastRef(activeRef);
-    if (activeRef) setGroup(settingGroup(activeRef));
+    // A block's own setting has no group: it opens in the block's inspector.
+    const opened = activeRef ? settingGroup(activeRef) : null;
+    if (opened) setGroup(opened);
   }
 
   /** Which half of Product cards a summons is pointing at, if any. */
@@ -213,7 +219,10 @@ export function ControlsPanel({
               return;
             }
             if (setting) setting.open(target.ref);
-            else setGroup(settingGroup(target.ref));
+            else {
+              const opened = settingGroup(target.ref);
+              if (opened) setGroup(opened);
+            }
           }}
         />
         {GROUPS.map((id) => (
@@ -266,12 +275,11 @@ export function ControlsPanel({
   }
 
   return (
-    <div>
-      <PanelBackRow
-        title={tKey(GROUP_TITLES[group])}
-        path={t("design")}
-        onBack={() => setGroup(null)}
-      />
+    <PanelSubmenu
+      title={tKey(GROUP_TITLES[group])}
+      path={t("design")}
+      onBack={() => setGroup(null)}
+    >
 
       {/* Cards is the one group with halves rather than a flat body: they are
           full-width sections drawing their own dividers, and both can be open
@@ -304,6 +312,29 @@ export function ControlsPanel({
               theme={theme}
               onChange={(patch) => onThemeChange(patchThemeCardStyle(theme, patch))}
               afterLook={<ChipScaleControl theme={theme} onChange={onThemeChange} />}
+            />
+          </CollapsibleSection>
+          <CollapsibleSection
+            title={tKey("Storefront.cardExtras.hoverTitle")}
+            collapsible
+            defaultOpen={false}
+            summon={summoned === "hover"}
+          >
+            <CardHoverControls
+              value={resolveCardStyle(theme)}
+              onChange={(patch) => onThemeChange(patchThemeCardStyle(theme, patch))}
+            />
+          </CollapsibleSection>
+          <CollapsibleSection
+            title={tKey("Storefront.cardExtras.shoppingTitle")}
+            collapsible
+            defaultOpen={false}
+            summon={summoned === "shopping"}
+          >
+            <CardShoppingControls
+              value={resolveCardStyle(theme)}
+              onChange={(patch) => onThemeChange(patchThemeCardStyle(theme, patch))}
+              reviewsShown={isProductPageSectionShown(productPage, "reviews")}
             />
           </CollapsibleSection>
         </>
@@ -385,6 +416,6 @@ export function ControlsPanel({
           )}
         </div>
       )}
-    </div>
+    </PanelSubmenu>
   );
 }

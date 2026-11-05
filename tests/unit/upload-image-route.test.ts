@@ -65,10 +65,19 @@ vi.mock("next-intl/server", async () => {
 const PNG_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
 
+/** A POST as our own page sends it (the route refuses any other site). */
+function sameOriginPost(body: FormData): Request {
+  return new Request("http://localhost/api/uploads/image", {
+    method: "POST",
+    headers: { "sec-fetch-site": "same-origin" },
+    body,
+  });
+}
+
 function request(file: File): Request {
   const body = new FormData();
   body.append("image", file);
-  return new Request("http://localhost/api/uploads/image", { method: "POST", body });
+  return sameOriginPost(body);
 }
 
 const png = () =>
@@ -141,7 +150,7 @@ describe.skipIf(!HAS_R2)("POST /api/uploads/image - against real R2", () => {
     body.append("image", png());
     body.append("surprise", "value");
     const res = await POST(
-      new Request("http://localhost/api/uploads/image", { method: "POST", body }),
+      sameOriginPost(body),
     );
     expect(res.status).toBe(400);
   });

@@ -43,7 +43,25 @@ const ENFORCED_TABLES = [
   "reports",
   // Added with the table itself (20261004_discounts).
   "discounts",
+  // Created without it, added by 20261103_two_factor_review_tables.
+  "reviews",
+  "review_imports",
+  "product_rating_summaries",
+  "storefront_funnel_daily",
 ];
+
+/**
+ * Tables a client role can read that do NOT carry the rule, and why. Anything
+ * else with a client policy must, so a new table cannot ship without it.
+ */
+const NOT_A_SELLERS_DATA: Record<string, string> = {
+  plans: "the public plan catalog",
+  plan_prices: "the public price list",
+  plan_entitlements: "what each plan includes, the same for everyone",
+  profile_directory: "public profiles, readable by anon too",
+  terms_versions: "published Terms versions and dates, readable by anon too",
+  waitlist_signups: "the marketing site's anonymous waitlist insert; no client can read it",
+};
 
 let alice: TestUser; // turns 2FA on
 let bob: TestUser; // never does
@@ -63,16 +81,36 @@ async function enrol(user: TestUser, status: "verified" | "unverified" = "verifi
 
 async function seed(user: TestUser) {
   await asService(async (q) => {
+    const product = (
+      await q.query(
+        `insert into public.products (owner_id, title, price_cents, currency, status)
+         values ($1, 'Lamp', 1200, 'EUR', 'draft') returning id`,
+        [user.id],
+      )
+    ).rows[0].id;
+    const order = (
+      await q.query(
+        `insert into public.orders (seller_id, product_id, channel, status, amount_cents, platform_fee_cents,
+                                    currency, buyer_email, product_title, product_price_cents)
+         values ($1, $2, 'embed', 'paid', 1200, 60, 'EUR', 'buyer@example.com', 'Lamp', 1200) returning id`,
+        [user.id, product],
+      )
+    ).rows[0].id;
+    // A review the seller hid for carrying a buyer's personal details: the
+    // kind of row a password alone must not open.
     await q.query(
-      `insert into public.products (owner_id, title, price_cents, currency, status)
-       values ($1, 'Lamp', 1200, 'EUR', 'draft')`,
-      [user.id],
+      `insert into public.reviews (product_id, seller_id, order_id, rating, body, author_name,
+                                   is_verified_buyer, moderation_status, is_approved, hidden_reason)
+       values ($1, $2, $3, 5, 'Call me on 0123', 'Aoife', true, 'clean', false, 'personal_info')`,
+      [product, user.id, order],
     );
+    await q.query(`insert into public.review_imports (seller_id, source, row_count) values ($1, 'judgeme', 3)`, [
+      user.id,
+    ]);
     await q.query(
-      `insert into public.orders (seller_id, channel, status, amount_cents, platform_fee_cents,
-                                  currency, buyer_email, product_title, product_price_cents)
-       values ($1, 'embed', 'paid', 1200, 60, 'EUR', 'buyer@example.com', 'Lamp', 1200)`,
-      [user.id],
+      `insert into public.storefront_funnel_daily (seller_id, store_id, product_id, day, event, events)
+       values ($1, $2, $3, '2026-10-01', 'checkout_started', 4)`,
+      [user.id, randomUUID(), product],
     );
     await q.query(
       `insert into public.notifications (user_id, type, title) values ($1, 'system', 'Hello')`,
@@ -98,6 +136,12 @@ async function visible(user: TestUser, claims: Record<string, unknown>) {
       security_events: await count(`select count(*) n from public.security_events where user_id = $1`),
       storefronts: await count(`select count(*) n from public.storefronts where owner_id = $1`),
       team_members: await count(`select count(*) n from public.team_members where account_owner_id = $1`),
+      reviews: await count(`select count(*) n from public.reviews where seller_id = $1`),
+      review_imports: await count(`select count(*) n from public.review_imports where seller_id = $1`),
+      product_rating_summaries: await count(
+        `select count(*) n from public.product_rating_summaries where seller_id = $1`,
+      ),
+      storefront_funnel_daily: await count(`select count(*) n from public.storefront_funnel_daily where seller_id = $1`),
     };
   });
 }
@@ -185,6 +229,27 @@ describe("restrictive policies (alice has 2FA on from here)", () => {
     }
   });
 
+  it("every table a client can read carries a two-factor rule, unless it is nobody's private data", async () => {
+    const rows = await asSuper(async (q) =>
+      (
+        await q.query(
+          `select tablename,
+                  bool_or(permissive = 'PERMISSIVE'
+                          and (roles && array['authenticated', 'public']::name[])) as client_policy,
+                  bool_or(permissive = 'RESTRICTIVE' and cmd = 'ALL'
+                          and roles && array['authenticated']::name[]
+                          and (qual ilike '%mfa_session_ok%' or qual ilike '%aal2%')) as two_factor
+             from pg_policies where schemaname = 'public'
+            group by tablename`,
+        )
+      ).rows as { tablename: string; client_policy: boolean; two_factor: boolean }[],
+    );
+    const missing = rows
+      .filter((r) => r.client_policy && !r.two_factor && !(r.tablename in NOT_A_SELLERS_DATA))
+      .map((r) => r.tablename);
+    expect(missing).toEqual([]);
+  });
+
   it("an aal1 token for a 2FA account sees NONE of its own private data", async () => {
     expect(await visible(alice, AAL1)).toEqual({
       profiles: 0,
@@ -194,6 +259,10 @@ describe("restrictive policies (alice has 2FA on from here)", () => {
       security_events: 0,
       storefronts: 0,
       team_members: 0,
+      reviews: 0,
+      review_imports: 0,
+      product_rating_summaries: 0,
+      storefront_funnel_daily: 0,
     });
   });
 
@@ -206,6 +275,9 @@ describe("restrictive policies (alice has 2FA on from here)", () => {
     expect(seen.security_events).toBe(1);
     expect(seen.storefronts).toBe(1);
     expect(seen.team_members).toBeGreaterThanOrEqual(1);
+    expect(seen.reviews).toBe(1);
+    expect(seen.review_imports).toBe(1);
+    expect(seen.storefront_funnel_daily).toBe(1);
   });
 
   it("an account WITHOUT 2FA is unaffected at aal1 (no regression)", async () => {
@@ -213,6 +285,9 @@ describe("restrictive policies (alice has 2FA on from here)", () => {
     expect(seen.profiles).toBe(1);
     expect(seen.products).toBe(1);
     expect(seen.orders).toBe(1);
+    expect(seen.reviews).toBe(1);
+    expect(seen.review_imports).toBe(1);
+    expect(seen.storefront_funnel_daily).toBe(1);
   });
 
   it("an aal1 token cannot UPDATE the account's own rows", async () => {

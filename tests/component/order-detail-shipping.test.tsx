@@ -14,6 +14,8 @@ vi.mock("@/lib/orders/actions", () => ({
 }));
 
 import { OrderDetail } from "@/components/orders/OrderDetail";
+import { LastCarrierProvider } from "@/components/orders/LastCarrierProvider";
+import { carrierHabits } from "@/lib/predictions";
 
 afterEach(cleanup);
 
@@ -172,9 +174,8 @@ describe("marking it shipped", () => {
     await playOut();
   });
 
-  it("picks the carrier a number names, and opens on the last one used", async () => {
+  it("picks the carrier a number names", async () => {
     const user = userEvent.setup();
-    localStorage.clear();
     markOrderShippedMock.mockResolvedValue({ ok: true, order: waiting, buyerEmailed: true });
     renderDetail(waiting);
 
@@ -185,19 +186,47 @@ describe("marking it shipped", () => {
     await user.click(screen.getByRole("button", { name: "Mark shipped" }));
     expect(markOrderShippedMock).toHaveBeenCalledWith(waiting.id, "RR123456789IE", "an-post");
     await playOut();
+  });
 
-    // The next parcel opens on the same carrier, waiting for its number.
-    cleanup();
-    renderDetail(orderView({ ...waiting, id: "next-order" }));
+  it("opens on the carrier the store last shipped with to that country, then on the one just used", async () => {
+    const user = userEvent.setup();
+    markOrderShippedMock.mockResolvedValue({ ok: true, order: waiting, buyerEmailed: true });
+    // An Post at home in Ireland, GLS to France.
+    const habits = carrierHabits([
+      { carrier: "an-post", country: "IE" },
+      { carrier: "gls", country: "FR" },
+    ]);
+    const inStore = (order: OrderView) => (
+      <LastCarrierProvider storeId="store-1" habits={habits}>
+        <OrderDetail key={order.id} order={order} onClose={vi.fn()} canFulfil />
+      </LastCarrierProvider>
+    );
+    const toFrance = orderView({ ...waiting, id: "to-france", shipTo: { ...ADDRESS, country: "FR" } });
+    const { rerender } = render(inStore(toFrance));
     await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
     await user.type(screen.getByLabelText("Tracking number (optional)"), "123456");
-    expect(screen.getByRole("combobox", { name: "Carrier (optional)" })).toHaveTextContent("An Post");
-    localStorage.clear();
+    expect(screen.getByRole("combobox", { name: "Carrier (optional)" })).toHaveTextContent("GLS");
+
+    // A parcel to Ireland starts on An Post; the seller sends it with DHL.
+    rerender(inStore(waiting));
+    await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
+    const carrier = screen.getByRole("combobox", { name: "Carrier (optional)" });
+    await user.type(screen.getByLabelText("Tracking number (optional)"), "123456");
+    expect(carrier).toHaveTextContent("An Post");
+    await user.click(carrier);
+    await user.click(screen.getByRole("option", { name: "DHL" }));
+    await user.click(screen.getByRole("button", { name: "Mark shipped" }));
+    await playOut();
+
+    // The next parcel to Ireland, in the same store, starts on DHL.
+    rerender(inStore(orderView({ ...waiting, id: "next-order" })));
+    await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
+    await user.type(screen.getByLabelText("Tracking number (optional)"), "654321");
+    expect(screen.getByRole("combobox", { name: "Carrier (optional)" })).toHaveTextContent("DHL");
   });
 
   it("never overrides a carrier the seller picked", async () => {
     const user = userEvent.setup();
-    localStorage.clear();
     renderDetail(waiting);
     await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
     const field = screen.getByLabelText("Tracking number (optional)");

@@ -13,10 +13,12 @@ import { strictSelection } from "@/lib/checkout/selection";
 import { QUANTITY_QUERY_PARAM, requestedQuantity } from "@/lib/products/quantity";
 import { clientKey } from "@/lib/rate-limit";
 import {
+  ADD_ON_QUERY_PARAM,
   OPTION_QUERY_PARAM,
   VIA_QUERY_PARAM,
   firstValue,
   productPagePath,
+  requestedAddOns,
   requestedOptions,
   requestedVia,
   type SearchParams,
@@ -84,6 +86,8 @@ export default async function CheckoutPage({
     const back = new URLSearchParams();
     const o = firstValue(query[OPTION_QUERY_PARAM]);
     if (o) back.set(OPTION_QUERY_PARAM, o);
+    const a = firstValue(query[ADD_ON_QUERY_PARAM]);
+    if (a) back.set(ADD_ON_QUERY_PARAM, a);
     if (via) back.set(VIA_QUERY_PARAM, via);
     redirect(`${productPagePath(storefrontId, productId)}${back.size > 0 ? `?${back}` : ""}`);
   }
@@ -124,6 +128,8 @@ export default async function CheckoutPage({
         provider={await checkoutProviderFor(ownerId)}
         initialCountry={country}
         via={via}
+        // `?a=`, limited to the add-ons on offer with this product.
+        initialAddOns={requestedAddOns(query, (page.addOns ?? []).map((card) => card.id))}
       />
     </main>
   );

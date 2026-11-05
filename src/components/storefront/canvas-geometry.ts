@@ -52,6 +52,10 @@ export type Insets = {
 
 export const NO_INSETS: Insets = { top: 0, right: 0, bottom: 0, left: 0 };
 
+/** Breathing room left around the board when it is centred or fitted, and
+ *  above whatever a jump brings to the top of the window (see jumpPan). */
+export const CANVAS_MARGIN = 24;
+
 /** Sub-pixel differences are layout noise (fractional device pixels, a border
  *  rounding), never a panel opening. */
 const EPSILON = 0.5;
@@ -578,5 +582,41 @@ export function revealPan({
         true,
         board && { pos: pan.y + board.top * zoom, size: board.height * zoom },
       ),
+  };
+}
+
+/**
+ * The pan that brings a box to the TOP of the open strip: the canvas's answer
+ * to an in-page link (a product page's "★ 4.7" jumping to its reviews).
+ *
+ * On the canvas such a link must move the CAMERA, never scroll anything. A
+ * page there is a card that clips to its own height, and the workspace clips
+ * too; `scrollIntoView` scrolls clipping boxes all the same, so it slid the
+ * page up inside its card, left blank card under it, and gave the seller no
+ * way to scroll back to what it had pushed out of the top.
+ *
+ * Vertically it always goes to the top, as a followed link does. Across, the
+ * same rule as a selection (see revealIntoView): nothing if it is already in
+ * the open, centred if it is not.
+ *
+ * `target` is in workspace coordinates AS DRAWN (measured off the screen, so
+ * already zoomed and scaled), unlike the board boxes above.
+ */
+export function jumpPan({
+  pan,
+  workspace,
+  insets,
+  target,
+}: {
+  pan: { x: number; y: number };
+  workspace: { width: number; height: number };
+  insets: Insets;
+  target: Box;
+}): { x: number; y: number } {
+  const spanX = safeSpan(workspace.width, insets.left, insets.right);
+  const [minY] = safeSpan(workspace.height, insets.top, insets.bottom);
+  return {
+    x: pan.x + revealIntoView(target.left, target.width, spanX, true),
+    y: pan.y + minY + CANVAS_MARGIN - target.top,
   };
 }

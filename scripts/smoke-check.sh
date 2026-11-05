@@ -88,6 +88,11 @@ expect_redirect() {
 expect "200" GET /login
 expect "404" GET "/s/$NOBODY/p/$NOBODY"
 expect "400 404" POST /api/billing/webhook
+# The /dev harness is not in a production build at all (next.config.ts). One
+# page and the two routes that do something, to prove it stayed that way.
+expect "404" GET /dev/toast
+expect "404" GET /dev/outbox
+expect "404" GET /dev/simulate-sale
 # Signed out, a deep link is sent to sign-in carrying the page AND its query
 # (src/middleware.ts + requireUser), not to the dashboard home.
 expect_redirect "/orders?view=all" "/login?next=%2Forders%3Fview%3Dall"

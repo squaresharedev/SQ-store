@@ -14,6 +14,11 @@
 # `"configured":false` until the Worker has what it reads with (wrangler.jsonc,
 # STOREFRONT FUNNEL), and that is not a failure.
 #
+# REVIEW REMINDERS (src/lib/reviews/reminder-job.ts). Once a day, send the
+# one review reminder email each buyer who asked for it on their order page is
+# due (about a week after the parcel ships), and let go the ones that can no
+# longer be sent. Calls again while it answers `"more":true`.
+#
 # Required secret (the job is skipped, loudly, without it):
 #   CRON_SECRET   A long random string (32 characters or more), set BOTH here
 #                 as a repository secret and on the Worker
@@ -68,6 +73,75 @@ jobs:
             fi
           done
           echo "::warning title=Account deletions are not finishing::40 runs in a row still had more to do."
+
+  # Emails everyone about a new Terms version, then starts its 30 days
+  # (lib/legal/terms-notices.ts). Red means a notice could not go out: mail is
+  # off, or the new version is not on the marketing site yet. The version stays
+  # out of force until this goes green, so fix the cause rather than rerunning.
+  terms-notices:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      APP_URL: https://dashboard.squareshare.eu
+    steps:
+      - name: Say so when it is not set up
+        if: ${{ env.CRON_SECRET == '' }}
+        run: echo "::warning title=Terms notices did not run::Set the CRON_SECRET repository secret."
+
+      - name: Send the notices that are due
+        if: ${{ env.CRON_SECRET != '' }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 40); do
+            result="$(curl --silent --show-error --max-time 60 --write-out '\n%{http_code}' \
+              --request POST \
+              --header "Authorization: Bearer ${CRON_SECRET}" \
+              "${APP_URL}/api/cron/terms-notices")"
+            body="$(printf '%s' "${result}" | sed '$d')"
+            code="$(printf '%s' "${result}" | tail -n 1)"
+            echo "run ${attempt}: ${code} ${body}"
+            if [ "${code}" != "200" ]; then
+              echo "::error title=Terms notices are blocked::${body}. New Terms stay out of force until this is fixed: see docs/changing-the-terms.md."
+              exit 1
+            fi
+            if ! printf '%s' "${body}" | grep -q '"more":true'; then
+              exit 0
+            fi
+          done
+          echo "::warning title=Terms notices are not finishing::40 runs in a row still had more to send."
+
+  # Sends the review reminders that have fallen due: the ONE email a buyer
+  # asked for on their order page (src/lib/reviews/reminder-job.ts). Prints
+  # counts only. `"configured":false` means mail is off, which is not a
+  # failure: order pages offer no reminder then. Red means the queue could not
+  # be read; a reminder that failed to send waits for tomorrow's run.
+  review-reminders:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      APP_URL: https://dashboard.squareshare.eu
+    steps:
+      - name: Say so when it is not set up
+        if: ${{ env.CRON_SECRET == '' }}
+        run: echo "::warning title=Review reminders did not run::Set the CRON_SECRET repository secret."
+
+      - name: Send the review reminders that are due
+        if: ${{ env.CRON_SECRET != '' }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 40); do
+            result="$(curl --fail --silent --show-error --max-time 120 \
+              --request POST \
+              --header "Authorization: Bearer ${CRON_SECRET}" \
+              "${APP_URL}/api/cron/review-reminders")"
+            echo "run ${attempt}: ${result}"
+            if ! printf '%s' "${result}" | grep -q '"more":true'; then
+              exit 0
+            fi
+          done
+          echo "::warning title=Review reminders are not finishing::40 runs in a row still had more to send."
 
   agent-cleanup:
     runs-on: ubuntu-latest

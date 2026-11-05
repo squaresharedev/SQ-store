@@ -17,10 +17,16 @@
     "confirm": "Confirmar",
     "remove": "Remover",
     "delete": "Eliminar",
-    "deleting": "A eliminar…"
+    "deleting": "A eliminar…",
+    "sameAs": "Igual a {title}",
+    "undo": "Anular"
   },
   "badge": {
     "comingSoon": "Brevemente"
+  },
+  "connection": {
+    "offline": "Está offline",
+    "backOnline": "Novamente online"
   },
   "pagination": {
     "previous": "Anterior",
@@ -70,7 +76,8 @@
   "stock": {
     "inStock": "Em stock",
     "lowStock": "{remaining, plural, one {Só resta {remaining}} many {Só restam {remaining}} other {Só restam {remaining}}}",
-    "soldOut": "Esgotado"
+    "soldOut": "Esgotado",
+    "lowStockLabel": "Últimas unidades"
   },
   "toast": {
     "regionLabel": "Notificações",
@@ -109,5 +116,10 @@
     "rotated": "{label} rodado para {degrees, plural, one {# grau} many {# graus} other {# graus}}",
     "rotatedBlock": "Bloco rodado para {degrees, plural, one {# grau} many {# graus} other {# graus}}",
     "blocksMoved": "{count, plural, one {# bloco movido} many {# blocos movidos} other {# blocos movidos}}"
+  },
+  "export": {
+    "button": "Exportar CSV",
+    "preparing": "A preparar o ficheiro",
+    "failed": "A exportação não foi descarregada. Tente novamente daqui a pouco."
   }
 }

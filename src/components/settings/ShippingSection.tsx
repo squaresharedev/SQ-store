@@ -2,7 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import Link from "@/components/ui/AppLink";
-import { ArrowRight, Plus, Trash2 } from "lucide-react";
+import { ArrowRight, MapPin, Plus, Trash2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { SaveButton } from "@/components/ui/SaveButton";
@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, type SelectOption } from "@/components/ui/select";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { TransitFlow } from "@/components/ui/TransitFlow";
+import { SuggestionChip } from "@/components/ui/SuggestionChip";
 import { cn } from "@/lib/utils";
 import {
   helpTextClass,
@@ -20,9 +21,10 @@ import {
   iconNudgeRightClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
+import type { ShippingSuggestions } from "@/lib/predictions";
 import { saveShippingPolicy } from "@/lib/settings/shipping-actions";
 import type { ActionState } from "@/lib/errors";
-import { useEuCountries } from "@/components/settings/use-eu-countries";
+import { useOperatingCountries } from "@/components/settings/use-operating-countries";
 import { CountryPicker, countryPickerSummary } from "@/components/settings/CountryPicker";
 import { buildShippingProse } from "@/lib/shipping/policy-prose";
 import { isPriced } from "@/lib/shipping/rates";
@@ -93,8 +95,11 @@ export function ShippingSection({
   policy,
   continueHref,
   compact = false,
+  suggested = {},
 }: {
   policy: SellerShippingPolicy;
+  /** What the account's own data says while a field is unset (lib/predictions). */
+  suggested?: ShippingSuggestions;
   /** Inside a dialog (the product form's shipping modal): each card is one
    *  line that opens, the first one already open, so the dialog is a short
    *  list of what can be changed rather than the whole settings page. */
@@ -106,7 +111,7 @@ export function ShippingSection({
   continueHref?: string;
 }) {
   const t = useTranslations("Settings");
-  const { countries, countryName } = useEuCountries();
+  const { countries, countryName } = useOperatingCountries();
   const fromOptions: readonly SelectOption<string>[] = useMemo(
     () => [
       { value: "", label: t("shipping.shipsFrom.notSet") },
@@ -152,6 +157,10 @@ export function ShippingSection({
   const justSaved = !isPending && Boolean(state.success);
 
   const [shipsFrom, setShipsFrom] = useState(policy.shipsFrom ?? "");
+  // Whether the business-country tap set it, so its undo shows until changed.
+  const [tookFrom, setTookFrom] = useState(false);
+  // The business's country, when it is one the picker offers.
+  const suggestedFrom = countries.find((country) => country.code === suggested.shipsFrom)?.code ?? null;
   const [dispatch, setDispatch] = useState(policy.dispatch ?? "");
   const [destinations, setDestinations] = useState<ShippingDestination[]>(
     policy.destinations ?? [],
@@ -190,7 +199,7 @@ export function ShippingSection({
   // lets a seller type "4.50" freely; it is only parsed on save (via the
   // compactShippingPolicy/schema pipeline).
   const [ratesCurrency, setRatesCurrency] = useState<Currency>(
-    policy.ratesCurrency ?? "EUR",
+    policy.ratesCurrency ?? suggested.ratesCurrency ?? "EUR",
   );
   const [freeOverInput, setFreeOverInput] = useState(
     typeof policy.freeOverCents === "number" && policy.freeOverCents > 0
@@ -355,9 +364,31 @@ export function ShippingSection({
               id="ships_from"
               value={shipsFrom}
               options={fromOptions}
-              onChange={setShipsFrom}
+              onChange={(next) => {
+                setShipsFrom(next);
+                setTookFrom(false);
+              }}
               disabled={isPending}
             />
+            {/* Offered, not chosen: where goods ship from is told to buyers. */}
+            {suggestedFrom && (!shipsFrom || (tookFrom && shipsFrom === suggestedFrom)) && (
+              <span className="self-start">
+                <SuggestionChip
+                  icon={MapPin}
+                  label={t("shipping.shipsFrom.sameAsBusiness", { country: countryName(suggestedFrom) })}
+                  hint={t("shipping.shipsFrom.sameAsBusinessHint")}
+                  done={tookFrom && shipsFrom === suggestedFrom}
+                  onApply={() => {
+                    setShipsFrom(suggestedFrom);
+                    setTookFrom(true);
+                  }}
+                  onUndo={() => {
+                    setShipsFrom("");
+                    setTookFrom(false);
+                  }}
+                />
+              </span>
+            )}
           </div>
 
           <div id="dispatch-time" className="flex flex-col gap-1.5">

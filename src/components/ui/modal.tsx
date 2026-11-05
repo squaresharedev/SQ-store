@@ -42,6 +42,7 @@ export function Modal({
   className,
   initialFocus = "first-control",
   dismissible = true,
+  themeVars,
 }: {
   open: boolean;
   onClose: () => void;
@@ -72,6 +73,13 @@ export function Modal({
    * button), so the person has to reach it on purpose.
    */
   initialFocus?: "first-control" | "dialog";
+  /**
+   * CSS variables for the dialog, for one opened on a SELLER's page: pass
+   * storefrontOverlayVars (components/product-page/product-page-maps.ts) and
+   * the panel, its text and its hairlines take the shop's ink, so a dark shop
+   * gets a dark dialog rather than a white card punched into it.
+   */
+  themeVars?: React.CSSProperties;
 }) {
   const t = useTranslations("Common.actions");
   const panelRef = React.useRef<HTMLDivElement>(null);
@@ -183,7 +191,7 @@ export function Modal({
   // overlay was always positioned `fixed` relative to the viewport, never to
   // its DOM parent, so moving it has no visual effect for any existing caller.
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4" style={themeVars}>
       <div
         aria-hidden
         onClick={dismissible ? onClose : undefined}

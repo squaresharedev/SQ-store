@@ -5,6 +5,22 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 const isDev = process.env.NODE_ENV === "development";
 
 /**
+ * Next's default route file extensions, spelled out because the /dev harness
+ * adds to them.
+ */
+const PAGE_EXTENSIONS = ["tsx", "ts", "jsx", "js"];
+
+/**
+ * THE /dev HARNESS EXISTS ONLY UNDER `next dev`. Its route files are named
+ * page.dev.tsx, route.dev.ts and layout.dev.tsx, and only a development server
+ * is told those are routes. To a production build they are stray modules nothing
+ * imports, so /dev/* has no route, no server code and no chunk in the deploy.
+ * tests/unit/dev-routes-dev-only.test.ts fails on a harness route with a plain
+ * name, and the deploy refuses a build that has one.
+ */
+const DEV_ONLY_PAGE_EXTENSIONS = ["dev.tsx", "dev.ts"];
+
+/**
  * Origins the browser is allowed to talk to, derived from the same env var the
  * browser client reads so a preview deployment on a different Supabase project
  * does not need this file edited. Falls back to nothing rather than to a
@@ -149,6 +165,8 @@ const embedHost = (() => {
 })();
 
 const nextConfig: NextConfig = {
+  pageExtensions: isDev ? [...DEV_ONLY_PAGE_EXTENSIONS, ...PAGE_EXTENSIONS] : PAGE_EXTENSIONS,
+
   // OpenNext runs the Node runtime on Workers. Never set
   // `export const runtime = "edge"` anywhere in the app.
 
@@ -261,7 +279,7 @@ const nextConfig: NextConfig = {
       // THE SHARE CARD GALLERY, cross-origin isolated, so the background-
       // removal model (src/lib/share-card/cutout/engine.ts), where it falls
       // back from the GPU to the CPU, runs on several threads instead of one.
-      { source: "/dev/share-cards", headers: CROSS_ORIGIN_ISOLATED_HEADERS },
+      ...(isDev ? [{ source: "/dev/share-cards", headers: CROSS_ORIGIN_ISOLATED_HEADERS }] : []),
       // THE EMBED FRAME (see embedHost above): one entry per number of sites
       // the address names. Everything these do not match keeps
       // X-Frame-Options: DENY and nothing else, which is what makes a

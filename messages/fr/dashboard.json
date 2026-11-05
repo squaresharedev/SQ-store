@@ -127,6 +127,13 @@
       "description": "Ils doivent être remboursés dans les 14 jours suivant leur rétractation. Organisez le retour, puis remboursez la commande.",
       "action": "Voir les rétractations"
     },
+    "restock": {
+      "label": "{count, plural, one {{count} produit bientôt épuisé} many {{count} produits bientôt épuisés} other {{count} produits bientôt épuisés}}",
+      "descriptionSingle": "À ce rythme, « {title} » sera épuisé dans environ {days, plural, one {# jour} many {# jours} other {# jours}}.",
+      "descriptionMultiple": "« {title} » s’épuisera en premier, dans environ {days, plural, one {# jour} many {# jours} other {# jours}}.",
+      "actionSingle": "Mettre à jour le stock",
+      "actionMultiple": "Vérifier le stock"
+    },
     "checkoutRates": {
       "label": "Définissez vos tarifs de livraison",
       "description": "Les acheteurs ne peuvent pas passer commande pour un produit physique tant qu’une destination n’a pas à la fois un tarif et un pays.",

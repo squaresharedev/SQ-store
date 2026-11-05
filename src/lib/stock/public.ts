@@ -14,8 +14,8 @@
 // null) to the buyer payload. Any future embed/marketplace product payload
 // must do the same; do not forward any raw stock numbers.
 
-import { deriveStockBadge } from "@/lib/stock/badge";
-import type { StockBadge } from "@/types/stock";
+import { deriveStockBadge, deriveTileStockState } from "@/lib/stock/badge";
+import type { StockBadge, TileStockState } from "@/types/stock";
 
 /**
  * The ONLY stock columns a public payload builder may select. Importing this
@@ -26,7 +26,7 @@ export const PUBLIC_STOCK_SELECT =
   "track_stock, stock_quantity, low_stock_threshold" as const;
 
 /** The slice of a product row that toPublicStockBadge accepts. */
-type PublicStockRow = {
+export type PublicStockRow = {
   track_stock: boolean;
   stock_quantity: number | null;
   low_stock_threshold: number;
@@ -43,6 +43,19 @@ type PublicStockRow = {
  */
 export function toPublicStockBadge(row: PublicStockRow): StockBadge | null {
   return deriveStockBadge({
+    trackStock: row.track_stock,
+    stockQuantity: row.stock_quantity,
+    lowStockThreshold: row.low_stock_threshold,
+  });
+}
+
+/**
+ * The same row as a CARD may show it: low or gone, never how many (see
+ * TileStockState). `null` for a product that does not track stock or has
+ * plenty, so a card carries nothing at all about it.
+ */
+export function toPublicStockState(row: PublicStockRow): TileStockState | null {
+  return deriveTileStockState({
     trackStock: row.track_stock,
     stockQuantity: row.stock_quantity,
     lowStockThreshold: row.low_stock_threshold,

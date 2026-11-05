@@ -1,3 +1,5 @@
+import { REVIEW_IMPORT_SOURCES } from "@/lib/reviews/sources";
+
 /**
  * The review system's numbers, in one place. Pure constants: safe on server
  * and client.
@@ -27,3 +29,14 @@ export const REVIEW_IMPORT_BYTES_MAX = 4 * 1024 * 1024;
 export const REVIEW_IMPORT_ROWS_MAX = 5000;
 /** Body cap for the import route: the file plus its mapping. */
 export const REVIEW_IMPORT_BODY_MAX = REVIEW_IMPORT_BYTES_MAX + 256 * 1024;
+/** The most reviews, and bytes, one export file carries: the import's own
+ *  ceilings, so a file this app writes is always one it would read back. */
+export const REVIEW_EXPORT_ROWS_MAX = REVIEW_IMPORT_ROWS_MAX;
+export const REVIEW_EXPORT_BYTES_MAX = REVIEW_IMPORT_BYTES_MAX;
+/** Reviews read per database round trip while an export is written, so the
+ *  Worker holds one page of the answer at a time, never the whole store. */
+export const REVIEW_EXPORT_PAGE_SIZE = 500;
+/** Fingerprints one "already here?" check may ask about: every row, as each app. */
+export const REVIEW_IMPORT_CHECK_IDS_MAX = REVIEW_IMPORT_ROWS_MAX * REVIEW_IMPORT_SOURCES.length;
+/** Body cap for that check: a quoted 64-character fingerprint and a comma each. */
+export const REVIEW_IMPORT_CHECK_BODY_MAX = REVIEW_IMPORT_CHECK_IDS_MAX * 67 + 1024;

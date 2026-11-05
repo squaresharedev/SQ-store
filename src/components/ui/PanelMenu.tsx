@@ -83,13 +83,40 @@ export function PanelMenuItem({
 }
 
 /**
- * The way out of a submenu, pinned to the top of the panel.
+ * A submenu: its back row pinned on top, its controls scrolling under it.
+ *
+ * THE BODY IS ITS OWN STACKING CONTEXT (`isolate`), and that is the whole
+ * reason this wrapper exists. The row is `sticky z-10`, and controls inside a
+ * group lift themselves too: a segmented control's chosen option sits at z-10
+ * so its border covers its neighbours', the tile layout board lifts its dots
+ * and tokens. Each of those, scrolled up under the row, compared against it
+ * directly and won on document order, so "Fit" or a spot on the board painted
+ * straight over "Design / Product page". Isolated, every z-index in the body
+ * is settled inside the body, and the row is above all of it whatever a
+ * control ever sets. Nothing in a panel body needs to escape it: tooltips,
+ * selects and dialogs portal into <body>.
+ */
+export function PanelSubmenu({
+  children,
+  ...row
+}: React.ComponentProps<typeof PanelBackRow> & { children: React.ReactNode }) {
+  return (
+    <div>
+      <PanelBackRow {...row} />
+      <div className="isolate">{children}</div>
+    </div>
+  );
+}
+
+/**
+ * The way out of a submenu, pinned to the top of the panel. Rendered through
+ * PanelSubmenu, which keeps the body under it from painting over it.
  *
  * `sticky` is load-bearing rather than polish: on mobile these panels are
  * `max-h-[70vh]` bottom sheets, so a back button that scrolls away with the
  * content strands anyone who has scrolled down a long group.
  */
-export function PanelBackRow({
+function PanelBackRow({
   title,
   path,
   ariaLabel,

@@ -104,7 +104,8 @@
       "cards": "Storefront / Product cards",
       "soldOut": "Storefront / Sold out",
       "productPage": "Storefront / Product page",
-      "checkoutPage": "Storefront / Checkout"
+      "checkoutPage": "Storefront / Checkout",
+      "blocks": "Storefront / Blocks"
     },
     "labels": {
       "looks": "Storefront look",
@@ -151,7 +152,16 @@
       "productPagePhoto": "Product page photo",
       "checkoutPhoto": "Checkout photo",
       "thanksPhoto": "Thank-you page photo",
-      "chipScale": "Same chip size on every card"
+      "chipScale": "Same chip size on every card",
+      "productPageAddOns": "Add to your order",
+      "productPageStars": "Review star colour",
+      "cardHoverEffect": "Hover effect",
+      "cardSecondPhoto": "Second photo on hover",
+      "cardBuyButton": "Buy button on cards",
+      "cardStarRating": "Star rating on cards",
+      "cardLowStock": "Low stock label",
+      "textSpacing": "Letter spacing and line height",
+      "elementBlur": "Blur"
     }
   },
   "editorSearch": {
@@ -214,6 +224,7 @@
     "domainsLabel": "Allowed domains",
     "domainsPlaceholder": "yoursite.com, blog.yoursite.com",
     "domainsHint": "Up to {max}, comma-separated. Paste a URL and we''ll trim it to the domain.",
+    "sameAsHint": "Copies the allowed domains from {title}.",
     "emptyDomainsWarning": "Add at least one domain. While this is empty the storefront won''t load anywhere, even though embedding is on.",
     "builderLabel": "Your site builder",
     "builderOther": "Another site",
@@ -310,14 +321,11 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Product page",
-    "closeAriaLabel": "Close the product page for {title}",
+    "closeAriaLabel": "Close the buyer flow for {title}",
     "desktopSize": "Desktop size",
     "mobileSize": "Mobile size",
     "checkoutLabel": " · Checkout",
-    "thanksLabel": " · Thank you",
-    "openCheckout": "Checkout",
-    "openCheckoutAriaLabel": "Open the checkout for {title}",
-    "closeCheckoutAriaLabel": "Close the checkout"
+    "thanksLabel": " · Thank you"
   },
   "customFont": {},
   "metadata": {
@@ -765,7 +773,8 @@
         "returns": "Returns",
         "safety": "Safety and compliance",
         "reviews": "Reviews",
-        "seller": "Seller"
+        "seller": "Seller",
+        "addOns": "Add to your order"
       },
       "availability": "Availability",
       "soldByByline": "“Sold by” byline"
@@ -794,6 +803,42 @@
       "look": "Look",
       "style": "Style",
       "besidePrice": "Beside the price"
+    },
+    "addOns": {
+      "title": "Add to your order",
+      "infoLabel": "What Add to your order is",
+      "infoContent": "Other products a buyer can add to the same order from the product page. Each product has its own list: a press saves it at once, on every storefront the product is on.",
+      "show": "Show this section",
+      "heading": {
+        "label": "Heading",
+        "charsLeft": "{count, plural, one {# character left} other {# characters left}}"
+      },
+      "layout": {
+        "label": "Look",
+        "list": "Rows",
+        "tiles": "Tiles"
+      },
+      "placement": {
+        "label": "Where it sits",
+        "beforeButton": "Above the button",
+        "afterButton": "Below the button"
+      },
+      "products": {
+        "offeredWith": "Offered with",
+        "offeredWithOne": "Offered with {title}",
+        "ownLink": "Hidden: Buy now goes to your own link.",
+        "noPage": "Open a product's page on the canvas to choose what it offers.",
+        "loadFailed": "Your products could not be loaded."
+      }
+    },
+    "reviews": {
+      "title": "Reviews",
+      "infoLabel": "What you can change about reviews",
+      "infoContent": "Buyers' reviews, at the foot of the product page. The star color also paints the rating under the product's name.",
+      "show": "Show this section",
+      "starColor": "Star color",
+      "defaultStarColor": "Default yellow",
+      "useDefaultStarColor": "Use the default yellow"
     }
   },
   "productBlock": {
@@ -813,8 +858,8 @@
       "lowStock": "Low stock: {count} on hand.",
       "inStock": "{count} in stock."
     },
-    "openProductPage": "Open product page",
-    "hideProductPage": "Hide product page",
+    "openProductPage": "Open buyer flow",
+    "hideProductPage": "Hide buyer flow",
     "tileStyle": {
       "title": "Tile style",
       "reset": "Reset to theme",
@@ -881,6 +926,23 @@
       "label": "Description",
       "placeholder": "Logo, icon, decoration…",
       "hint": "Read aloud by screen readers. Leave it empty if the image is purely decorative."
+    }
+  },
+  "blur": {
+    "label": "Blur",
+    "photo": "Photo blur",
+    "shadow": "Shadow blur",
+    "shadowTip": "Softens the photo behind the name and price.",
+    "off": "Off",
+    "valueText": "{value} out of 100",
+    "direction": "Direction",
+    "directionAriaLabel": "Blur direction",
+    "directions": {
+      "all": "All over",
+      "top": "From the top",
+      "bottom": "From the bottom",
+      "left": "From the left",
+      "right": "From the right"
     }
   },
   "shapeBlock": {
@@ -951,10 +1013,10 @@
     "uploadImage": "Upload image",
     "allShapes": "All shapes",
     "browseShapes": "Browse the full shape library",
-    "closePage": "Close product page",
-    "showPage": "Show product page",
-    "closePages": "Close the product pages",
-    "showPageFull": "Show the product page",
+    "closePage": "Close buyer flow",
+    "showPage": "Show buyer flow",
+    "closePages": "Close the product page, checkout and thank-you page",
+    "showPageFull": "Show the product page, checkout and thank-you page",
     "undo": "Undo",
     "undoTip": "Undo (Ctrl+Z)",
     "redo": "Redo",
@@ -969,25 +1031,18 @@
     "zoomIn": "Zoom in",
     "zoomInTip": "Zoom in (Ctrl +)",
     "designSettings": "Design settings",
-    "page": "Page",
-    "moreTools": "More tools",
-    "checkout": "Checkout",
-    "showCheckout": "Show checkout",
-    "closeCheckout": "Close checkout",
-    "showCheckoutFull": "Show the checkout and thank-you page",
-    "closeCheckoutFull": "Close the checkout and thank-you page"
+    "page": "Buyer flow",
+    "moreTools": "More tools"
   },
   "selectionToolbar": {
     "toolsFor": "Tools for {name}",
     "elements": "{count, plural, one {# element} other {# elements}}",
-    "hidePage": "Hide page",
-    "hidePages": "Hide pages",
-    "openPage": "Open page",
-    "openPages": "Open pages",
-    "openProductPage": "Open the product page for {name}",
-    "closeProductPage": "Close the product page for {name}",
-    "openProductPages": "Open the product pages for {count, plural, one {# product} other {# products}}",
-    "closeProductPages": "Close the product pages for {count, plural, one {# product} other {# products}}",
+    "hidePage": "Hide buyer flow",
+    "openPage": "Open buyer flow",
+    "openProductPage": "Open the buyer flow for {name}",
+    "closeProductPage": "Close the buyer flow for {name}",
+    "openProductPages": "Open the buyer flow for {count, plural, one {# product} other {# products}}",
+    "closeProductPages": "Close the buyer flow for {count, plural, one {# product} other {# products}}",
     "editText": "Edit text",
     "editTextOf": "Edit the text of {name}",
     "color": "Color",
@@ -998,19 +1053,18 @@
     "editCornersOf": "Edit the corner roundness of {name}",
     "opacity": "Opacity",
     "editOpacityOf": "Edit the opacity of {name}",
+    "blur": "Blur",
+    "editBlurOf": "Edit the blur of {name}",
     "frame": "Crop & position",
     "frameImageFor": "Crop and position the image for {name}",
     "duplicate": "Duplicate",
     "duplicateNamed": "Duplicate {name}",
     "duplicateN": "Duplicate {count, plural, one {# element} other {# elements}}",
     "removeFrom": "Remove {name} from grid",
-    "removeN": "Remove {count, plural, one {# element} other {# elements}} from grid",
-    "openCheckout": "Open checkout",
-    "hideCheckout": "Hide checkout",
-    "openCheckoutFor": "Show the checkout for {name}",
-    "closeCheckoutFor": "Hide the checkout for {name}"
+    "removeN": "Remove {count, plural, one {# element} other {# elements}} from grid"
   },
   "canvas": {
+    "addSuggested": "Add {title} to this storefront",
     "gridLabel": "Storefront canvas",
     "emptyGrid": "Your grid is empty",
     "emptyGridHint": "Add a product to start arranging your storefront. Text and shapes are on the toolbar below.",
@@ -1377,5 +1431,45 @@
     "info": "Drawn behind the page. The overlay uses the page color to keep the text readable; turn it off to show the photo as it is.",
     "remove": "Remove photo",
     "overlay": "Color overlay"
+  },
+  "cardExtras": {
+    "hoverTitle": "Hover",
+    "shoppingTitle": "Shopping",
+    "effect": "Effect",
+    "effectAriaLabel": "What a card does on hover",
+    "effects": {
+      "none": "None",
+      "lift": "Lift",
+      "zoom": "Zoom",
+      "tilt": "Tilt"
+    },
+    "effectTipLabel": "How hover effects play",
+    "effectTip": "Plays when a buyer points at a card or tabs to it. On phones, and for anyone who asked for less motion, cards stay still.",
+    "secondPhoto": "Second photo",
+    "secondPhotoTipLabel": "Which photo shows",
+    "secondPhotoTip": "Shows the product's next photo while a buyer points at the card. Products with one photo stay as they are.",
+    "buyButton": "Buy button",
+    "buyButtonAriaLabel": "Buy button on the card",
+    "buyButtons": {
+      "none": "Off",
+      "solid": "Solid",
+      "outline": "Outline",
+      "link": "Link"
+    },
+    "buyButtonTipLabel": "Where the button leads",
+    "buyButtonTip": "Uses your product page button's words and colour, and opens the product page.",
+    "rating": "Star rating",
+    "ratingTipLabel": "Where the stars come from",
+    "ratingTip": "From buyer reviews. Shows under the name once a product has a review.",
+    "ratingTipReviewsOff": "Reviews are off on your product page, so cards show no stars. Turn them on under Product page, Reviews.",
+    "lowStock": "Low stock",
+    "lowStockTipLabel": "When the label shows",
+    "lowStockTip": "Says Low stock when a product is at or below its low stock level, and Sold out at zero. Buyers never see how many are left."
+  },
+  "textSpacing": {
+    "letterSpacing": "Letter spacing",
+    "lineHeight": "Line height",
+    "normal": "Normal",
+    "valueText": "{value} percent of the type size"
   }
 }

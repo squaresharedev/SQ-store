@@ -2,7 +2,8 @@ import { appUrl } from "@/lib/app-url";
 import { QUANTITY_QUERY_PARAM } from "@/lib/products/quantity";
 import { uuidField } from "@/lib/validation/inputs";
 import type { OrderChannel } from "@/types/order-view";
-import { OPTIONS_TOTAL_MAX } from "@/types/product";
+import type { ReviewDialog } from "@/lib/reviews/reminders";
+import { ADD_ONS_MAX, OPTIONS_TOTAL_MAX } from "@/types/product";
 
 // Where a product page lives. One function, so the embed payload, the editor
 // and any future "copy link" all agree on the shape and the origin.
@@ -39,6 +40,13 @@ export const LEGACY_VARIANT_QUERY_PARAM = "v";
  * without it (from the email, days later) opens quietly on the status.
  */
 export const PLACED_QUERY_PARAM = "placed";
+
+/**
+ * `?review=write|stop` on an order page: the review reminder email's two links
+ * (lib/reviews/reminders.ts). Opens the review dialog, or the one that stops
+ * the reminder. Proves nothing either: the order ref in the path does.
+ */
+export const REVIEW_QUERY_PARAM = "review";
 
 /** Every buyer-facing page lives under this prefix: robots.txt opens it to
  *  crawlers, and the dashboard's service worker is never registered from it. */
@@ -106,6 +114,55 @@ export function requestedOptions(searchParams: SearchParams, optionIds: Readonly
   return [...wanted];
 }
 
+/**
+ * `?a=` carries the "Add to your order" picks from the product page to its
+ * checkout: each add-on's product id followed by its option ids, dot
+ * separated, and the add-ons comma separated (`a=<id>.<option>,<id>`).
+ * Requests, like `?o=`: the checkout re-reads every add-on, and the quote
+ * prices only those on the main product's own list.
+ */
+export const ADD_ON_QUERY_PARAM = "a";
+
+/** One add-on a buyer picked, and which version of it. */
+export type AddOnPick = { productId: string; optionIds: string[] };
+
+const productIdSchema = uuidField("product");
+
+/** The `?a=` value for these picks (empty for none). */
+export function addOnsParam(picks: readonly AddOnPick[]): string {
+  return picks.map((pick) => [pick.productId, ...pick.optionIds].join(".")).join(",");
+}
+
+/**
+ * The add-ons the URL asks for, limited to `allowedIds` (the main product's
+ * own add-ons, or the ones on offer) and in the order asked. Option ids are
+ * only shape-checked here; which options a product has is the selection's
+ * question (lib/checkout/selection.ts).
+ */
+export function requestedAddOns(
+  searchParams: SearchParams,
+  allowedIds: readonly string[],
+): AddOnPick[] {
+  const raw = firstValue(searchParams[ADD_ON_QUERY_PARAM]);
+  if (!raw) return [];
+  const picks: AddOnPick[] = [];
+  for (const entry of raw.split(",").slice(0, ADD_ONS_MAX)) {
+    const [productId = "", ...options] = entry.trim().split(".");
+    if (!productIdSchema.safeParse(productId).success) continue;
+    if (!allowedIds.includes(productId)) continue;
+    if (picks.some((pick) => pick.productId === productId)) continue;
+    const optionIds = [
+      ...new Set(
+        options
+          .slice(0, OPTIONS_TOTAL_MAX)
+          .filter((id) => optionIdSchema.safeParse(id).success),
+      ),
+    ];
+    picks.push({ productId, optionIds });
+  }
+  return picks;
+}
+
 /** A storefront's own hosted page: the whole board, on an address of its own
  *  (app/(public)/s/[storefrontId]). Path only, for same-origin links. */
 export function storefrontPagePath(storefrontId: string): string {
@@ -144,13 +201,20 @@ export function productPageUrl(storefrontId: string, productId: string, options:
 export function checkoutPath(
   storefrontId: string,
   productId: string,
-  choice: { optionIds?: readonly string[]; quantity?: number } & ViaOption = {},
+  choice: {
+    optionIds?: readonly string[];
+    quantity?: number;
+    addOns?: readonly AddOnPick[];
+  } & ViaOption = {},
 ): string {
   const params = new URLSearchParams();
   if (choice.optionIds && choice.optionIds.length > 0) {
     params.set(OPTION_QUERY_PARAM, choice.optionIds.join(","));
   }
   if (choice.quantity && choice.quantity > 1) params.set(QUANTITY_QUERY_PARAM, String(choice.quantity));
+  if (choice.addOns && choice.addOns.length > 0) {
+    params.set(ADD_ON_QUERY_PARAM, addOnsParam(choice.addOns));
+  }
   if (choice.via) params.set(VIA_QUERY_PARAM, choice.via);
   const query = params.toString();
   return `${productPagePath(storefrontId, productId)}/checkout${query ? `?${query}` : ""}`;
@@ -165,9 +229,11 @@ export function orderPagePath(storefrontId: string, orderRef: string): string {
   return `${PUBLIC_PAGES_PREFIX}${encodeURIComponent(storefrontId)}/order/${encodeURIComponent(orderRef)}`;
 }
 
-/** Absolute, for the confirmation email. */
-export function orderPageUrl(storefrontId: string, orderRef: string): string {
-  return appUrl(orderPagePath(storefrontId, orderRef));
+/** Absolute, for the confirmation email. With `review`, the review reminder's
+ *  links: the page with its review (or stop) dialog open. */
+export function orderPageUrl(storefrontId: string, orderRef: string, review?: ReviewDialog): string {
+  const path = orderPagePath(storefrontId, orderRef);
+  return appUrl(review ? `${path}?${REVIEW_QUERY_PARAM}=${review}` : path);
 }
 
 /** Where a buyer asks for their order link again (the withdrawal function's

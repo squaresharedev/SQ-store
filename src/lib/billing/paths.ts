@@ -38,6 +38,7 @@ export const PRICING_SOURCES = [
   "notification",
   "checkout_cancel",
   "orders_export",
+  "ai_writing",
 ] as const;
 export type PricingSource = (typeof PRICING_SOURCES)[number];
 

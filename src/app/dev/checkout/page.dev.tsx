@@ -1,0 +1,66 @@
+import { notFound } from "next/navigation";
+import { checkoutPageSchema } from "@/lib/validation/storefront";
+import { DEFAULT_CHECKOUT_PAGE_CONFIG } from "@/types/storefront";
+import { CheckoutGallery } from "./CheckoutGallery";
+
+// Living reference for the hosted checkout and its thank-you page: the real
+// CheckoutView and OrderStatusView in preview mode, beside the real Checkout
+// panel from the storefront designer, so the design and every one of its
+// settings can be judged without a sign-in, a database or a product page.
+// `?w=390` draws that width (320 to 1440; without it the page fills the room
+// beside the panel), `?kind=digital` a
+// download, `?sale=1` the product on sale (a struck price and its percent), `?view=thanks` the thank-you page, `?q=3` three of it, `?scroll=1`
+// the page inside a phone-height window it scrolls in (as the editor shows it
+// on a phone), `?view=thanks&buyer=1` the thank-you in the buyer's mode
+// (screen-wide confetti), and `?layout=` / `?bg=` (a hex without the #) / `?photo=1` (with `&overlay=0` for a photo shown as it is) start
+// the design somewhere other than the defaults. `?addons=1` offers two
+// "Add to your order" products (one for a download) and takes them all
+// (`?addons=4` four, `?addons=hidden` two more chosen that buyers would not be
+// offered, a draft and one sold out, drawn faded as the editor draws them), and
+// `?view=product` draws the product page those cards sit on, with `&reviews=1`
+// a product with reviews and `&radius=24` a storefront with round corners. Dev-only: the
+// route 404s in production builds.
+
+/** A stand-in uploaded photo for `?photo=1`: a key shaped like a real one, shown
+ *  from a picture the app already serves. */
+const HARNESS_PHOTO_KEY = "images/00000000-0000-4000-8000-000000000000/00000000-0000-4000-8000-000000000001-harness.webp";
+const HARNESS_PHOTO_URL = "/sample-storefront/camera.webp";
+
+/** The frame's width bounds, in px: a small phone to a wide desktop. */
+const WIDTH_MIN = 320;
+const WIDTH_MAX = 1440;
+
+export const metadata = { title: "Checkout: dev gallery" };
+
+export default async function CheckoutDevPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  if (process.env.NODE_ENV === "production") notFound();
+  const { w, kind, sale, view, q, layout, bg, scroll, buyer, photo, overlay, addons, reviews, radius } = await searchParams;
+  const harnessPhoto = { key: HARNESS_PHOTO_KEY, ...(overlay === "0" ? { overlay: false } : {}) };
+  const initial = checkoutPageSchema.safeParse({
+    ...DEFAULT_CHECKOUT_PAGE_CONFIG,
+    ...(layout ? { layout } : {}),
+    ...(bg ? { backgroundColor: `#${bg}` } : {}),
+    ...(photo === "1" ? { backgroundImage: harnessPhoto, thanksBackgroundImage: harnessPhoto } : {}),
+  });
+  const width = Number(w);
+  return (
+    <CheckoutGallery
+      width={w && Number.isInteger(width) ? Math.min(Math.max(width, WIDTH_MIN), WIDTH_MAX) : null}
+      digital={kind === "digital"}
+      sale={sale === "1"}
+      view={view === "thanks" ? "thanks" : view === "product" ? "product" : "checkout"}
+      addOns={addons === "1" ? "two" : addons === "4" ? "four" : addons === "hidden" ? "hidden" : "none"}
+      reviews={reviews === "1"}
+      cornerRadius={Number(radius) || 0}
+      quantity={Math.min(Math.max(Number(q) || 1, 1), 5)}
+      scroll={scroll === "1"}
+      buyer={buyer === "1"}
+      initialCheckoutPage={initial.success ? initial.data : DEFAULT_CHECKOUT_PAGE_CONFIG}
+      initialPhotoUrls={{ [HARNESS_PHOTO_KEY]: HARNESS_PHOTO_URL }}
+    />
+  );
+}

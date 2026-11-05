@@ -82,6 +82,10 @@ describe("embedded supabase replica", () => {
       "moderation_checks",
       "moderation_decisions",
       "notifications",
+      // What an order sold besides its main product ("Add to your order",
+      // 20261028_product_add_ons). The store's team reads its own; written by
+      // order_place only.
+      "order_add_ons",
       "orders",
       // Why sellers cancelled a paid plan, for the admin panel
       // (20261003_plan_cancellations). Service-role only.

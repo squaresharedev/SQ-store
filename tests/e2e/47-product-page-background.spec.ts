@@ -91,7 +91,7 @@ async function openPage(page: Page, storefrontId: string, lamp: string) {
   await expect(page.getByRole("button", { name: "Add product", exact: true })).toBeVisible();
   await page.getByLabel(/^oak lamp\. press enter/i).click();
   await canvasStill(page);
-  await page.getByRole("button", { name: /^open the product page for oak lamp$/i }).click();
+  await page.getByRole("button", { name: /^open the buyer flow for oak lamp$/i }).click();
   const artboard = page.locator(`[data-artboard-id="${lamp}"]`);
   await expect(artboard).toBeVisible();
   return artboard;

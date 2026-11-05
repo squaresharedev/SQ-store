@@ -105,7 +105,8 @@
     "changePlan": "Příliš mnoho změn plánu za krátkou dobu.",
     "saveDiscounts": "Příliš mnoho změn slev za krátkou dobu.",
     "moderateReviews": "Příliš mnoho změn recenzí v krátké době.",
-    "agentTools": "Tento asistent poslal příliš mnoho požadavků za krátkou dobu."
+    "agentTools": "Tento asistent poslal příliš mnoho požadavků za krátkou dobu.",
+    "writeWithAi": "Příliš mnoho žádostí o návrh od AI v krátké době."
   },
   "serverError": {
     "fix": "Obvykle jde o dočasný problém. Chvíli počkejte a zkuste to znovu; pokud to stále nejde, obnovte stránku.",
@@ -517,6 +518,28 @@
       "fix": "Zkuste jiná slova, nebo napište na adresu {email} a podívá se na to člověk."
     }
   },
+  "ai": {
+    "notOnPlan": {
+      "message": "Pomoc AI s psaním je součástí plánu Pro.",
+      "fix": "Napište popis sami, nebo přejděte na Pro."
+    },
+    "tooLittle": {
+      "message": "Zatím není z čeho psát.",
+      "fix": "Nejdřív přidejte pár údajů, například možnosti, materiály nebo velikost."
+    },
+    "declined": {
+      "message": "AI pro tento produkt popis napsat nedokázala.",
+      "fix": "Napište ho sami, nebo upravte pár slov a zkuste to znovu."
+    },
+    "unavailable": {
+      "message": "Pomoc AI s psaním teď není k dispozici.",
+      "fix": "Zkuste to znovu za pár minut, nebo napište popis sami."
+    },
+    "creditUsed": {
+      "message": "Kredit na AI pro tento měsíc je vyčerpaný.",
+      "fix": "Obnoví se 1. den příštího měsíce. Do té doby pište jako obvykle."
+    }
+  },
   "productImport": {
     "unreadable": {
       "message": "Import se nepodařilo přečíst.",
@@ -704,6 +727,12 @@
       "message": "Zvolte, proč tuto recenzi skrýváte.",
       "fix": "Recenzi lze skrýt jen z jednoho z uvedených důvodů."
     }
+  },
+  "reviewsExport": {
+    "permissionDenied": "K recenzím tohoto obchodu nemáte přístup.",
+    "unavailable": "Vaše recenze se teď nedají exportovat.",
+    "rateLimited": "Exportů recenzí za krátkou dobu je příliš mnoho.",
+    "storeRateLimited": "Váš tým za poslední hodinu exportoval recenze tohoto obchodu mnohokrát."
   },
   "agent": {
     "invalidInput": "Tyto údaje nejsou platné.",

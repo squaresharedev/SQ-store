@@ -76,6 +76,9 @@ const COVERAGE: Record<string, Coverage> = {
   "lib/settings/actions.ts::updateUsername": tool("update_username"),
   "lib/settings/actions.ts::updateBio": tool("update_bio"),
   "lib/settings/actions.ts::saveNotifications": tool("save_notification_settings"),
+  "lib/settings/actions.ts::saveSuggestAsYouType": person(
+    "How the description field behaves while this person types; an assistant does not type in it.",
+  ),
   "lib/settings/actions.ts::requestEmailChange": person(STEP_UP),
   "lib/settings/actions.ts::sendPasswordReset": person(SIGN_IN),
   "lib/settings/actions.ts::acceptLegal": person("Accepting terms binds the person: a decision, not an operation."),
@@ -102,8 +105,16 @@ const COVERAGE: Record<string, Coverage> = {
   "lib/products/actions.ts::updateProduct": tool("update_product"),
   "lib/products/actions.ts::deleteProduct": tool("delete_product"),
   "lib/products/import-actions.ts::importProducts": tool("import_products"),
+  "lib/products/add-on-actions.ts::getAddOnPicker": browser("Fills the storefront editor's panel. An assistant reads a product's add-ons through get_product and list_products."),
+  "lib/products/add-on-actions.ts::setProductAddOns": tool("update_product"),
   "lib/products/badge-actions.ts::checkBadgeLabel": tool("check_badge_label"),
   "lib/products/badge-actions.ts::moveProductBadge": tool("move_product_badge"),
+  "lib/products/describe-actions.ts::suggestProductDescription": person(
+    "An assistant writes its own words; this spends the store's AI budget for a person at the form.",
+  ),
+  "lib/products/describe-actions.ts::suggestDescriptionCompletion": person(
+    "Grey words for someone typing in the description field; an assistant writes the whole description itself.",
+  ),
   "lib/products/picker-actions.ts::searchCatalogProducts": tool("list_products"),
   "lib/products/preview-actions.ts::getProductPagePreviewData": tool("preview_product_page"),
   "lib/stock/actions.ts::updateStockSettings": tool("update_stock"),

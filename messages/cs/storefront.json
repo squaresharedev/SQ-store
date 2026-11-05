@@ -104,7 +104,8 @@
       "cards": "Výloha / Dlaždice produktů",
       "soldOut": "Výloha / Vyprodáno",
       "productPage": "Výloha / Produktová stránka",
-      "checkoutPage": "Výloha / Pokladna"
+      "checkoutPage": "Výloha / Pokladna",
+      "blocks": "Výloha / Bloky"
     },
     "labels": {
       "looks": "Vzhled výlohy",
@@ -151,7 +152,16 @@
       "productPagePhoto": "Fotka produktové stránky",
       "checkoutPhoto": "Fotka pokladny",
       "thanksPhoto": "Fotka stránky s poděkováním",
-      "chipScale": "Stejná velikost štítků na všech kartách"
+      "chipScale": "Stejná velikost štítků na všech kartách",
+      "productPageAddOns": "Přidat k vaší objednávce",
+      "productPageStars": "Barva hvězdiček recenzí",
+      "cardHoverEffect": "Efekt při najetí myší",
+      "cardSecondPhoto": "Druhá fotka při najetí myší",
+      "cardBuyButton": "Tlačítko nákupu na kartách",
+      "cardStarRating": "Hodnocení hvězdičkami na kartách",
+      "cardLowStock": "Štítek Málo skladem",
+      "textSpacing": "Mezery mezi písmeny a výška řádku",
+      "elementBlur": "Rozmazání"
     }
   },
   "editorSearch": {
@@ -214,6 +224,7 @@
     "domainsLabel": "Povolené domény",
     "domainsPlaceholder": "vasweb.cz, blog.vasweb.cz",
     "domainsHint": "Nejvýše {max}, oddělené čárkou. Když vložíte adresu URL, zkrátíme ji na doménu.",
+    "sameAsHint": "Zkopíruje povolené domény, které má {title}.",
     "emptyDomainsWarning": "Přidejte alespoň jednu doménu. Dokud je seznam prázdný, výloha se nikde nenačte, i když je vložení na web zapnuté.",
     "builderLabel": "Váš nástroj pro tvorbu webu",
     "builderOther": "Jiný web",
@@ -310,14 +321,11 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Produktová stránka",
-    "closeAriaLabel": "Zavřít produktovou stránku produktu {title}",
+    "closeAriaLabel": "Zavřít průběh nákupu produktu {title}",
     "desktopSize": "Velikost pro počítač",
     "mobileSize": "Velikost pro mobil",
     "checkoutLabel": " · Pokladna",
-    "thanksLabel": " · Děkujeme",
-    "openCheckout": "Pokladna",
-    "openCheckoutAriaLabel": "Otevřít pokladnu pro {title}",
-    "closeCheckoutAriaLabel": "Zavřít pokladnu"
+    "thanksLabel": " · Děkujeme"
   },
   "customFont": {},
   "metadata": {
@@ -765,7 +773,8 @@
         "returns": "Vrácení zboží",
         "safety": "Bezpečnost a shoda",
         "reviews": "Recenze",
-        "seller": "Prodejce"
+        "seller": "Prodejce",
+        "addOns": "Přidat k vaší objednávce"
       },
       "availability": "Dostupnost",
       "soldByByline": "Řádek „Prodává“"
@@ -794,6 +803,42 @@
       "look": "Vzhled",
       "style": "Styl",
       "besidePrice": "U ceny"
+    },
+    "addOns": {
+      "title": "Přidat k vaší objednávce",
+      "infoLabel": "Co je Přidat k vaší objednávce",
+      "infoContent": "Další produkty, které si kupující může z produktové stránky přidat ke stejné objednávce. Každý produkt má vlastní seznam: každé stisknutí se hned uloží, a to ve všech výlohách, kde produkt je.",
+      "show": "Zobrazit tuto sekci",
+      "heading": {
+        "label": "Nadpis",
+        "charsLeft": "{count, plural, one {Zbývá # znak} few {Zbývají # znaky} many {Zbývá # znaku} other {Zbývá # znaků}}"
+      },
+      "layout": {
+        "label": "Vzhled",
+        "list": "Řádky",
+        "tiles": "Dlaždice"
+      },
+      "placement": {
+        "label": "Umístění",
+        "beforeButton": "Nad tlačítkem",
+        "afterButton": "Pod tlačítkem"
+      },
+      "products": {
+        "offeredWith": "Nabízeno s produktem",
+        "offeredWithOne": "Nabízeno s produktem {title}",
+        "ownLink": "Skryto: Koupit vede na váš vlastní odkaz.",
+        "noPage": "Otevřete na plátně stránku produktu a vyberte, co nabízí.",
+        "loadFailed": "Vaše produkty se nepodařilo načíst."
+      }
+    },
+    "reviews": {
+      "title": "Recenze",
+      "infoLabel": "Co můžete u recenzí změnit",
+      "infoContent": "Recenze kupujících ve spodní části stránky produktu. Barva hvězdiček platí i pro hodnocení pod názvem produktu.",
+      "show": "Zobrazit tuto sekci",
+      "starColor": "Barva hvězdiček",
+      "defaultStarColor": "Výchozí žlutá",
+      "useDefaultStarColor": "Použít výchozí žlutou"
     }
   },
   "productBlock": {
@@ -813,8 +858,8 @@
       "lowStock": "Docházející zásoby: {count} ks.",
       "inStock": "Skladem: {count} ks."
     },
-    "openProductPage": "Otevřít produktovou stránku",
-    "hideProductPage": "Skrýt produktovou stránku",
+    "openProductPage": "Otevřít průběh nákupu",
+    "hideProductPage": "Skrýt průběh nákupu",
     "tileStyle": {
       "title": "Styl dlaždice",
       "reset": "Obnovit podle motivu",
@@ -881,6 +926,23 @@
       "label": "Popis",
       "placeholder": "Logo, ikona, dekorace…",
       "hint": "Čtečky obrazovky ho přečtou nahlas. Pokud je obrázek čistě dekorativní, nechte popis prázdný."
+    }
+  },
+  "blur": {
+    "label": "Rozmazání",
+    "photo": "Rozmazání fotky",
+    "shadow": "Rozmazání stínu",
+    "shadowTip": "Rozmaže fotku za názvem a cenou.",
+    "off": "Vypnuto",
+    "valueText": "{value} ze 100",
+    "direction": "Směr",
+    "directionAriaLabel": "Směr rozmazání",
+    "directions": {
+      "all": "Všude",
+      "top": "Odshora",
+      "bottom": "Odspodu",
+      "left": "Zleva",
+      "right": "Zprava"
     }
   },
   "shapeBlock": {
@@ -951,10 +1013,10 @@
     "uploadImage": "Nahrát obrázek",
     "allShapes": "Všechny tvary",
     "browseShapes": "Procházet celou knihovnu tvarů",
-    "closePage": "Zavřít produktovou stránku",
-    "showPage": "Zobrazit produktovou stránku",
-    "closePages": "Zavřít produktové stránky",
-    "showPageFull": "Zobrazit produktovou stránku",
+    "closePage": "Zavřít průběh nákupu",
+    "showPage": "Zobrazit průběh nákupu",
+    "closePages": "Zavřít produktovou stránku, pokladnu a stránku s poděkováním",
+    "showPageFull": "Zobrazit produktovou stránku, pokladnu a stránku s poděkováním",
     "undo": "Zpět",
     "undoTip": "Zpět (Ctrl+Z)",
     "redo": "Znovu",
@@ -969,25 +1031,18 @@
     "zoomIn": "Přiblížit",
     "zoomInTip": "Přiblížit (Ctrl +)",
     "designSettings": "Nastavení designu",
-    "page": "Stránka",
-    "moreTools": "Další nástroje",
-    "checkout": "Pokladna",
-    "showCheckout": "Zobrazit pokladnu",
-    "closeCheckout": "Zavřít pokladnu",
-    "showCheckoutFull": "Zobrazit pokladnu a stránku s poděkováním",
-    "closeCheckoutFull": "Zavřít pokladnu a stránku s poděkováním"
+    "page": "Průběh nákupu",
+    "moreTools": "Další nástroje"
   },
   "selectionToolbar": {
     "toolsFor": "Nástroje: {name}",
     "elements": "{count, plural, one {# prvek} few {# prvky} many {# prvku} other {# prvků}}",
-    "hidePage": "Skrýt stránku",
-    "hidePages": "Skrýt stránky",
-    "openPage": "Otevřít stránku",
-    "openPages": "Otevřít stránky",
-    "openProductPage": "Otevřít produktovou stránku: {name}",
-    "closeProductPage": "Zavřít produktovou stránku: {name}",
-    "openProductPages": "Otevřít produktové stránky {count, plural, one {# produktu} few {# produktů} many {# produktu} other {# produktů}}",
-    "closeProductPages": "Zavřít produktové stránky {count, plural, one {# produktu} few {# produktů} many {# produktu} other {# produktů}}",
+    "hidePage": "Skrýt průběh nákupu",
+    "openPage": "Otevřít průběh nákupu",
+    "openProductPage": "Otevřít průběh nákupu: {name}",
+    "closeProductPage": "Zavřít průběh nákupu: {name}",
+    "openProductPages": "Otevřít průběh nákupu {count, plural, one {# produktu} few {# produktů} many {# produktu} other {# produktů}}",
+    "closeProductPages": "Zavřít průběh nákupu {count, plural, one {# produktu} few {# produktů} many {# produktu} other {# produktů}}",
     "editText": "Upravit text",
     "editTextOf": "Upravit text: {name}",
     "color": "Barva",
@@ -998,19 +1053,18 @@
     "editCornersOf": "Upravit zaoblení rohů: {name}",
     "opacity": "Neprůhlednost",
     "editOpacityOf": "Upravit neprůhlednost: {name}",
+    "blur": "Rozmazání",
+    "editBlurOf": "Upravit rozmazání: {name}",
     "frame": "Oříznout a umístit",
     "frameImageFor": "Oříznout a umístit obrázek pro {name}",
     "duplicate": "Duplikovat",
     "duplicateNamed": "Duplikovat: {name}",
     "duplicateN": "Duplikovat {count, plural, one {# prvek} few {# prvky} many {# prvku} other {# prvků}}",
     "removeFrom": "Odebrat z mřížky: {name}",
-    "removeN": "Odebrat z mřížky {count, plural, one {# prvek} few {# prvky} many {# prvku} other {# prvků}}",
-    "openCheckout": "Otevřít pokladnu",
-    "hideCheckout": "Skrýt pokladnu",
-    "openCheckoutFor": "Zobrazit pokladnu: {name}",
-    "closeCheckoutFor": "Skrýt pokladnu: {name}"
+    "removeN": "Odebrat z mřížky {count, plural, one {# prvek} few {# prvky} many {# prvku} other {# prvků}}"
   },
   "canvas": {
+    "addSuggested": "Přidat {title} do této výlohy",
     "gridLabel": "Plátno výlohy",
     "emptyGrid": "Vaše mřížka je prázdná",
     "emptyGridHint": "Přidejte produkt a začněte výlohu uspořádávat. Text a tvary najdete na panelu nástrojů dole.",
@@ -1377,5 +1431,45 @@
     "info": "Zobrazí se za stránkou. Překryv v barvě stránky udrží text čitelný; vypnutím se fotka ukáže tak, jak je.",
     "remove": "Odebrat fotku",
     "overlay": "Barevný překryv"
+  },
+  "cardExtras": {
+    "hoverTitle": "Najetí myší",
+    "shoppingTitle": "Nákup",
+    "effect": "Efekt",
+    "effectAriaLabel": "Co karta udělá při najetí myší",
+    "effects": {
+      "none": "Žádný",
+      "lift": "Zvednout",
+      "zoom": "Přiblížit",
+      "tilt": "Naklonit"
+    },
+    "effectTipLabel": "Jak se efekty přehrávají",
+    "effectTip": "Přehraje se, když kupující najede na kartu nebo na ni přejde klávesou Tab. Na telefonech a pro každého, kdo si vyžádal méně pohybu, zůstávají karty v klidu.",
+    "secondPhoto": "Druhá fotka",
+    "secondPhotoTipLabel": "Která fotka se ukáže",
+    "secondPhotoTip": "Ukáže další fotku produktu, zatímco kupující ukazuje na kartu. Produkty s jedinou fotkou zůstanou, jak jsou.",
+    "buyButton": "Tlačítko nákupu",
+    "buyButtonAriaLabel": "Tlačítko nákupu na kartě",
+    "buyButtons": {
+      "none": "Vypnuto",
+      "solid": "Plné",
+      "outline": "Obrys",
+      "link": "Odkaz"
+    },
+    "buyButtonTipLabel": "Kam tlačítko vede",
+    "buyButtonTip": "Použije text a barvu tlačítka z vaší produktové stránky a otevře produktovou stránku.",
+    "rating": "Hodnocení hvězdičkami",
+    "ratingTipLabel": "Odkud jsou hvězdičky",
+    "ratingTip": "Z recenzí kupujících. Ukáže se pod názvem, jakmile má produkt recenzi.",
+    "ratingTipReviewsOff": "Recenze jsou na vaší produktové stránce vypnuté, takže karty neukazují žádné hvězdičky. Zapněte je v části Produktová stránka, Recenze.",
+    "lowStock": "Málo skladem",
+    "lowStockTipLabel": "Kdy se štítek ukáže",
+    "lowStockTip": "Ukáže Málo skladem, když je produkt na své hranici nízkých zásob nebo pod ní, a Vyprodáno při nule. Kupující nikdy neuvidí, kolik kusů zbývá."
+  },
+  "textSpacing": {
+    "letterSpacing": "Mezery mezi písmeny",
+    "lineHeight": "Výška řádku",
+    "normal": "Normální",
+    "valueText": "{value} procent velikosti písma"
   }
 }

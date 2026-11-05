@@ -326,6 +326,11 @@
       "required": "Add the name to show with the review.",
       "tooLong": "A name must be {maximum} characters or fewer.",
       "unsupported": "A name contains unsupported characters."
+    },
+    "addOnsTitle": {
+      "required": "The heading is required.",
+      "tooLong": "The heading must be {maximum} characters or fewer.",
+      "unsupported": "The heading contains unsupported characters."
     }
   },
   "email": {
@@ -513,7 +518,10 @@
     "galleryStaleOption": "A photo points at an option that no longer exists.",
     "badgesTooMany": "A product can have up to {maximum} badges.",
     "badgeDuplicate": "Each badge can only be listed once.",
-    "badgesOnPhotoTooMany": "A product can show up to {maximum} badges on its photo."
+    "badgesOnPhotoTooMany": "A product can show up to {maximum} badges on its photo.",
+    "addOnsTooMany": "A product can offer up to {maximum} other products.",
+    "addOnDuplicate": "Each product can only be offered once.",
+    "addOnNotYours": "One of the products offered is not in this store any more. Remove it and save again."
   },
   "productImport": {
     "noTitle": "No title.",

@@ -40,7 +40,7 @@
     "formLoading": "Loading the product form",
     "importReviews": {
       "heading": "Import reviews",
-      "description": "Bring your reviews over from Judge.me, Loox, Yotpo or Shopify Product Reviews. Export them as a CSV there, drop the file here, and check which product each one belongs to before anything is saved."
+      "description": "Bring your reviews over from Judge.me, Loox, Yotpo or Shopify Product Reviews."
     }
   },
   "emptyState": {
@@ -300,6 +300,11 @@
         "label": "Badges",
         "description": "A few words on the product page: a reason to trust you, or a fact worth seeing at a glance. Pick a ready-made one or write your own, give its icon a colour, and put it beside the product or on the photo.",
         "about": "What Badges is for"
+      },
+      "addOns": {
+        "label": "Add to order",
+        "description": "Other products of yours that buyers can add with one tap, right above Buy now. Only products of the same kind and currency are listed, so it all stays one order.",
+        "about": "What Add to order is for"
       }
     },
     "summary": {
@@ -327,7 +332,8 @@
       "active": "Active",
       "draft": "Draft",
       "badges": "{count, plural, one {{count} badge} other {{count} badges}}",
-      "physical": "Physical"
+      "physical": "Physical",
+      "addOns": "{count, plural, one {{count} product} other {{count} products}}"
     },
     "errors": {
       "titleRequired": "Give your product a title — buyers see it first.",
@@ -363,6 +369,23 @@
     "description": "Description",
     "optional": "(optional)",
     "descriptionPlaceholder": "What is it, and what does the buyer get?",
+    "ai": {
+      "write": "Write with AI",
+      "improve": "Improve with AI",
+      "writing": "Writing…",
+      "written": "Written by AI",
+      "improved": "Improved by AI",
+      "writeHint": "AI drafts it from the details you've entered and adds nothing of its own. Check it before you save.",
+      "improveHint": "AI rewrites your text so it reads more clearly, keeping every fact. Check it before you save.",
+      "asYouTypeIdle": "AI suggests the next words as you type.",
+      "asYouTypeOffered": "adds the grey text. Esc hides it.",
+      "asYouTypeAccept": "Add the suggested words",
+      "asYouTypeAnnounce": "Suggestion:",
+      "asYouTypeTurnOff": "Turn off",
+      "asYouTypeOff": "Suggestions as you type are off. You can turn them back on in Settings, under Plan & billing.",
+      "upsellHint": "Comes with Pro: AI drafts and finishes descriptions from your details. The plans open in a new tab.",
+      "upsellBadge": "Pro"
+    },
     "displayImage": "Display image",
     "displayImageAbout": "Where the display image is used",
     "displayImageHelp": "Shown on your storefront and embeds.",
@@ -530,6 +553,14 @@
     "addFirst": "Sold in more than one version?",
     "addAnother": "Add another way it varies",
     "somethingElse": "Something else",
+    "guessSizes": "Sizes {first} to {last}",
+    "guessSizesAny": "Sizes",
+    "nextOptions": "Likely next options",
+    "addNamed": "Add {name}",
+    "sameAsHint": "Copies the options, specifications and maker details from {title} into the sections you haven't filled yet.",
+    "guessSizesHint": "Your title sounds like clothing, so this adds the usual sizes. Remove any you don't sell.",
+    "guessSizesAnyHint": "Your title sounds like something sold in sizes, so this adds a Size option for you to fill in.",
+    "nextOptionsHint": "Guessed from the options you've added so far.",
     "groupsFull": "{max, plural, one {That is all {max} option group.} other {That is all {max} option groups.}}",
     "optionsFull": "{max, plural, one {That is all {max} option.} other {That is all {max} options.}}",
     "whatVaries": "What varies",
@@ -1053,12 +1084,8 @@
       "product": "product",
       "status": "status"
     },
-    "summary": "{ready, plural, one {<count>{ready}</count> review ready} other {<count>{ready}</count> reviews ready}}{skipped, plural, =0 {.} other {, {skipped} left out.}}",
-    "hiddenRows": "{count, plural, one {{count} review was hidden or marked as spam on your old store, so it is left out.} other {{count} reviews were hidden or marked as spam on your old store, so they are left out.}}",
-    "droppedRows": "{count, plural, one {{count} review is past the {max} a file can carry, so it is left out.} other {{count} reviews are past the {max} a file can carry, so they are left out.}}",
     "source": "Imported from",
     "sourceUnknown": "Choose the app",
-    "sourceHelp": "Shown on each review, so buyers know where it was first written.",
     "sources": {
       "judgeme": "Judge.me",
       "loox": "Loox",
@@ -1067,17 +1094,10 @@
     },
     "mappingHeading": "Match products",
     "mappingHelp": "Each product in the file, and the product here its reviews go to. Matched by name where possible. Anything set to \"Don't import\" is left out.",
-    "mappingFileProduct": "In the file",
-    "mappingReviews": "Reviews",
-    "mappingProduct": "Product here",
     "mappingSelect": "Product for {key}",
     "skipProduct": "Don't import",
-    "skippedHeading": "Rows that will be left out",
     "skippedRow": "Line {line}: {problem}",
     "run": "{count, plural, one {Import {count} review} other {Import {count} reviews}}",
-    "imported": "{count, plural, one {{count} review was imported.} other {{count} reviews were imported.}}",
-    "duplicates": "{count, plural, one {{count} was already here.} other {{count} were already here.}}",
-    "skippedRows": "{count, plural, one {{count} row was left out.} other {{count} rows were left out.}}",
     "errors": {
       "rateLimited": "Too many imports in the last hour. Try again later.",
       "tooLarge": "That file is too large to import.",
@@ -1094,6 +1114,39 @@
         "b": "“Even nicer in person.”",
         "c": "“Arrived fast and well packed.”"
       }
+    },
+    "tally": {
+      "toImport": "To import",
+      "imported": "Imported",
+      "already": "Already here",
+      "leftOut": "Left out"
+    },
+    "alreadyNote": "{count, plural, one {{count} review in this file is already here, so it won't be added twice.} other {{count} reviews in this file are already here, so they won't be added twice.}}",
+    "sourceTip": "About imported reviews",
+    "mappingTip": "How products are matched",
+    "reviewCount": "{count, plural, one {{count} review} other {{count} reviews}}",
+    "keyAlready": "{count, plural, one {{count} already here} other {{count} already here}}",
+    "leftOutSummary": "{count, plural, one {Why {count} review is left out} other {Why {count} reviews are left out}}",
+    "leftOutUnmatched": "{count, plural, one {{count} for a product set to \"Don't import\"} other {{count} for products set to \"Don't import\"}}",
+    "leftOutHidden": "{count, plural, one {{count} hidden or marked as spam on your old store} other {{count} hidden or marked as spam on your old store}}",
+    "leftOutDropped": "{count, plural, one {{count} past the {max} a file can carry} other {{count} past the {max} a file can carry}}",
+    "leftOutProblems": "{count, plural, one {{count} row that can't be read:} other {{count} rows that can't be read:}}",
+    "nothingNew": "Nothing new to import",
+    "done": {
+      "title": "{count, plural, one {{count} review imported} other {{count} reviews imported}}",
+      "body": "They appear on your product pages once our automatic check has read them.",
+      "already": "{count, plural, one {{count} was already here, so it wasn't added twice.} other {{count} were already here, so they weren't added twice.}}",
+      "nothingTitle": "Nothing added twice",
+      "nothingBody": "{count, plural, one {{count} review from this file was already here.} other {{count} reviews from this file were already here.}}",
+      "seeReviews": "See reviews",
+      "another": "Import another file"
+    },
+    "squareShare": {
+      "label": "A Square Share export",
+      "tipLabel": "About Square Share exports",
+      "tip": "We matched this file by review, not by app. Reviews already in this store stay as they are and nothing is added twice. Reviews from another store can't be brought over with an export.",
+      "leftOut": "{count, plural, one {{count} not in this store: an export can't add it} other {{count} not in this store: an export can't add them}}",
+      "checkFailed": "We couldn't check this file against your reviews. Nothing was changed. Try again in a moment."
     }
   },
   "reviewModeration": {
@@ -1219,6 +1272,42 @@
     "emptyFiltered": {
       "title": "No reviews match",
       "body": "Try other words or another filter, or clear them to see every review."
+    },
+    "export": {
+      "hint": "Download the reviews in this view as a CSV file.",
+      "empty": "There are no reviews in this view to export.",
+      "truncated": "{count, plural, one {The file holds the first review of this view.} other {The file holds the first # reviews of this view.}} Narrow the list by product or rating to export the rest.",
+      "fileName": "reviews.csv"
+    }
+  },
+  "addOnsField": {
+    "listLabel": "Your other products",
+    "count": "{count} of {max} chosen",
+    "add": "Add {title}",
+    "draft": "Draft",
+    "draftHint": "Buyers see it once it is active.",
+    "remove": "Remove {title}",
+    "none": "You have no other products yet. Add another product first, then offer it here.",
+    "notPosted": "Not offered: it is a download",
+    "notADownload": "Not offered: it is posted",
+    "search": "Search your products",
+    "noMatch": "No product matches that.",
+    "noneFit": "None of your other products can share an order with this one. One order takes one kind (posted or download) and one currency.",
+    "otherCurrency": "Not offered: priced in {currency}",
+    "previewLabel": "What buyers see",
+    "soldOutHint": "Buyers see it once it is back in stock.",
+    "takenDown": "Taken down",
+    "takenDownHint": "Buyers cannot see it while it is taken down.",
+    "ownBuyLink": "Buy now on this product goes to your own link, so buyers do not see this section. Remove the link to use it.",
+    "suggestion": {
+      "boughtWith": {
+        "label": "Often bought together: {titles}",
+        "hint": "Buyers who bought this product also bought {titles}. {count, plural, one {A tap adds it to this list.} other {A tap adds them to this list.}}"
+      },
+      "offeredWith": {
+        "label": "You often add: {titles}",
+        "hint": "You offer {titles} with several of your other products. {count, plural, one {A tap adds it here too.} other {A tap adds them here too.}}"
+      }
     }
   }
 }

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/control-styles";
 import {
   BADGE_PRESETS,
+  DEFAULT_BADGE_COLOR,
   DEFAULT_BADGE_PLACEMENT,
   canPlaceBadge,
   countRange,
@@ -82,11 +83,15 @@ export function BadgesField({
   error,
   previewImageUrl = null,
   previewTitle = "",
+  own = [],
 }: {
   inputId: string;
   badges: BadgeFormValue[];
   onChange: (next: BadgeFormValue[]) => void;
   error?: string;
+  /** The seller's own badges from earlier products (lib/predictions), offered
+   *  ahead of the ready-made ones. */
+  own?: readonly ProductBadge[];
   /** The cover photo as the form holds it now, for the preview. */
   previewImageUrl?: string | null;
   /** The title as typed so far, for the preview. */
@@ -171,9 +176,26 @@ export function BadgesField({
     seen.add(key);
   }
 
-  const suggestions = presets.filter(
-    (preset) => SUGGESTED.includes(preset.id) && !hasPresetBadge(badges, preset),
-  );
+  // The seller's own first, then the ready-made ones, all of them: an own
+  // badge never pushes a ready-made one out of the place it is learned in.
+  const ownLeft = own.filter((badge) => !hasBadgeLabel(badges, badge.label));
+  const suggestions = [
+    ...ownLeft.map((badge) => ({
+      id: "own",
+      badge: { icon: badge.icon, label: badge.label, color: badge.color ?? DEFAULT_BADGE_COLOR },
+      preset: null,
+    })),
+    ...presets
+      .filter(
+        (preset) =>
+          SUGGESTED.includes(preset.id) && !hasPresetBadge(badges, preset) && !hasBadgeLabel(ownLeft, preset.label),
+      )
+      .map((preset) => ({
+        id: preset.id,
+        badge: { icon: preset.icon, label: preset.label, color: preset.color },
+        preset,
+      })),
+  ];
 
   return (
     <div className="space-y-4" data-product-field="badges" data-product-value={badges.length}>
@@ -289,18 +311,16 @@ export function BadgesField({
             {badges.length === 0 ? t("addFirst") : t("addAnother")}
           </p>
           <div className="flex flex-wrap items-center gap-2">
-            {suggestions.map((preset) => (
+            {suggestions.map(({ id, badge, preset }) => (
               <button
-                key={preset.id}
+                key={badge.label}
                 type="button"
                 className={chipButtonClass}
-                onClick={() =>
-                  add({ icon: preset.icon, label: preset.label, color: preset.color }, preset, "suggestion")
-                }
-                data-badge-suggestion={preset.id}
+                onClick={() => add(badge, preset, "suggestion")}
+                data-badge-suggestion={id}
               >
                 <Plus className="size-3.5" strokeWidth={2} aria-hidden="true" />
-                {preset.label}
+                {badge.label}
               </button>
             ))}
             <BadgePicker

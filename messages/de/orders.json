@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} Bestellung} other {{total} Bestellungen}} · Seite {page} von {totalPages}",
     "detailDialog": "Bestelldetails",
     "closeDetail": "Bestelldetails schließen",
-    "withdrawn": "Widerrufen"
+    "withdrawn": "Widerrufen",
+    "moreItems": "+{count} weitere"
   },
   "table": {
     "product": "Produkt",
@@ -150,7 +151,8 @@
     "discount": "Rabatt",
     "discountSale": "Aktion, {amount} Rabatt",
     "discountCode": "Code {code}, {amount} Rabatt",
-    "discountCodeOutdone": "Code {code} verwendet, aber der Aktionspreis war günstiger"
+    "discountCodeOutdone": "Code {code} verwendet, aber der Aktionspreis war günstiger",
+    "alsoBought": "Auch in dieser Bestellung"
   },
   "actions": {
     "disputeInStripe": "Die Bank des Käufers hat eine Zahlungsanfechtung eröffnet. Beantworte sie vor Ablauf der Frist in deinem Stripe-Dashboard.",
@@ -296,12 +298,16 @@
       "subject": "Dein Bestelllink bei {store}",
       "intro": "Hier ist der Link zu deiner Bestellseite für Bestellung {number} bei {store}:",
       "ignore": "Wenn du das nicht angefordert hast, kannst du diese E-Mail ignorieren."
+    },
+    "reviewReminder": {
+      "subject": "Deine Erinnerung: {title} bewerten",
+      "intro": "Am {date} hast du {store} gebeten, dich an eine Bewertung deiner Bestellung zu erinnern, sobald du sie hast. Hier ist diese Erinnerung.",
+      "write": "Erzähl anderen Käufern, was du davon hältst. Es dauert nur eine Minute:\n{url}",
+      "how": "Deine Bewertung erscheint auf der Produktseite mit dem Namen, den du wählst, gekennzeichnet als Bewertung eines verifizierten Käufers. Deine E-Mail-Adresse und deine Bestellung bleiben privat. Jede Bewertung ist willkommen, ob gut oder schlecht.",
+      "once": "Das ist die einzige Erinnerung zu dieser Bestellung. Solche E-Mails abbestellen: {url}"
     }
   },
   "export": {
-    "button": "CSV exportieren",
-    "preparing": "Datei wird vorbereitet",
-    "failed": "Der Export wurde nicht heruntergeladen. Versuche es gleich noch einmal.",
     "truncated": "Die Datei enthält deine {count, number} neuesten Bestellungen.",
     "lockedTitle": "Der Bestellexport ist ab {plan} enthalten.",
     "fileName": "bestellungen.csv"

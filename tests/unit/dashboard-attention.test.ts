@@ -8,6 +8,7 @@ import {
   type StorefrontAttentionInfo,
 } from "@/lib/dashboard/attention";
 import type { DashboardOrdersData, ProductsSummary } from "@/lib/dashboard/queries";
+import type { RestockForecast } from "@/lib/predictions";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 import type { MessageRef } from "@/i18n/types";
@@ -112,6 +113,7 @@ function build(overrides: {
   setupVisible?: boolean;
   toShipCount?: number;
   withdrawalsToSettle?: number;
+  restocks?: RestockForecast[];
   checkoutOpen?: boolean;
 } = {}) {
   const items = buildAttentionItems({
@@ -119,11 +121,13 @@ function build(overrides: {
     products: { ...NO_PRODUCTS, ...overrides.products },
     storefronts: { ...NO_STOREFRONTS, ...overrides.storefronts },
     profile: overrides.profile !== undefined ? overrides.profile : HEALTHY_PROFILE,
+    termsInForce: LEGAL_VERSION,
     stripeConnected: overrides.stripeConnected ?? true,
     stripeConnectAvailable: overrides.stripeConnectAvailable,
     setupVisible: overrides.setupVisible,
     toShipCount: overrides.toShipCount,
     withdrawalsToSettle: overrides.withdrawalsToSettle,
+    restocks: overrides.restocks,
     checkoutOpen: overrides.checkoutOpen,
   });
   return new Map(items.map((item) => [item.key, item]));
@@ -135,6 +139,14 @@ const ALL_BRANCHES = [
   build({ toShipCount: 3 }),
   // Buyers who withdrew and are owed a refund
   build({ withdrawalsToSettle: 2 }),
+  // Products about to sell out
+  build({ restocks: [{ id: "p1", title: "Bowl", daysLeft: 3 }] }),
+  build({
+    restocks: [
+      { id: "p1", title: "Bowl", daysLeft: 3 },
+      { id: "p2", title: "Mug", daysLeft: 6 },
+    ],
+  }),
   // Stripe not connected, on the day connecting is possible
   build({ stripeConnected: false, stripeConnectAvailable: true }),
   // Legal not accepted
@@ -230,6 +242,22 @@ describe("needs-attention destinations", () => {
     expect(text(row?.label)).toBe("2 buyers withdrew");
     expect(text(row?.actionLabel)).toBe("See withdrawals");
     expect(build().has("withdrawals")).toBe(false);
+  });
+
+  it("warns of a product about to sell out next, naming the one that goes first", () => {
+    const bowl = { id: "p1", title: "Bowl", daysLeft: 1 };
+    const single = build({ toShipCount: 1, restocks: [bowl] });
+    expect([...single.keys()].slice(0, 2)).toEqual(["to-ship", "restock"]);
+    const row = single.get("restock");
+    expect(row?.href).toBe("/products/p1/edit");
+    expect(text(row?.label)).toBe("1 product selling out soon");
+    expect(text(row?.description)).toBe('At this pace "Bowl" sells out in about 1 day.');
+    expect(text(row?.actionLabel)).toBe("Update stock");
+
+    const several = build({ restocks: [bowl, { id: "p2", title: "Mug", daysLeft: 6 }] }).get("restock");
+    expect(several?.href).toBe("/products");
+    expect(text(several?.description)).toBe('"Bowl" goes first, in about 1 day.');
+    expect(build().has("restock")).toBe(false);
   });
 
   it("sends the Stripe row to /payments, where the connection lives", () => {

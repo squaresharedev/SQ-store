@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} zamówienie} few {{total} zamówienia} many {{total} zamówień} other {{total} zamówienia}} · strona {page} z {totalPages}",
     "detailDialog": "Szczegóły zamówienia",
     "closeDetail": "Zamknij szczegóły zamówienia",
-    "withdrawn": "Odstąpiono"
+    "withdrawn": "Odstąpiono",
+    "moreItems": "+{count} więcej"
   },
   "table": {
     "product": "Produkt",
@@ -150,7 +151,8 @@
     "discount": "Rabat",
     "discountSale": "Obniżka, -{amount}",
     "discountCode": "Kod {code}, -{amount}",
-    "discountCodeOutdone": "Użyto kodu {code}, ale cena promocyjna była niższa"
+    "discountCodeOutdone": "Użyto kodu {code}, ale cena promocyjna była niższa",
+    "alsoBought": "Też w tym zamówieniu"
   },
   "actions": {
     "disputeInStripe": "Bank kupującego otworzył spór. Odpowiedz na niego w panelu Stripe przed terminem.",
@@ -296,12 +298,16 @@
       "subject": "Twój link do zamówienia w {store}",
       "intro": "Oto link do Twojej strony zamówienia {number} w {store}:",
       "ignore": "Jeśli tego nie żądałeś, możesz zignorować tego e-maila."
+    },
+    "reviewReminder": {
+      "subject": "Przypomnienie o ocenie: {title}",
+      "intro": "Dnia {date} poprosiłeś sklep {store} o przypomnienie o ocenie zamówienia, gdy już je otrzymasz. Oto to przypomnienie.",
+      "write": "Napisz innym kupującym, co o tym sądzisz. To zajmie minutę:\n{url}",
+      "how": "Twoja opinia pojawi się na stronie produktu z wybranym przez ciebie imieniem, oznaczona jako opinia zweryfikowanego kupującego. Twój adres e-mail i zamówienie pozostają prywatne. Każda opinia jest mile widziana, dobra czy zła.",
+      "once": "To jedyne przypomnienie dotyczące tego zamówienia. Aby nie dostawać takich e-maili: {url}"
     }
   },
   "export": {
-    "button": "Eksportuj CSV",
-    "preparing": "Przygotowywanie pliku",
-    "failed": "Eksport nie został pobrany. Spróbuj ponownie za chwilę.",
     "truncated": "W pliku jest {count, number} twoich najnowszych zamówień.",
     "lockedTitle": "Eksport zamówień jest dostępny w planie {plan} i wyższych.",
     "fileName": "zamowienia.csv"

@@ -119,6 +119,18 @@ describe("an app known by its metadata document", () => {
     expect((await resolveClient(CLAUDE))?.name).toBe("Claude");
   });
 
+  it("refuses an id holding a quote, a backslash or a space, which a URL parser lets through", async () => {
+    // The cleanup job quotes client ids into a PostgREST filter: a quote in one
+    // would end the value early. Every id below parses as a URL.
+    const fetcher = workerFetch({ body: CLAUDE_DOCUMENT });
+    vi.stubGlobal("fetch", fetcher);
+    for (const id of ['https://evil.example/a"),("b', "https://evil.example/a" + String.fromCharCode(92) + "b", "https://evil.example/a b"]) {
+      expect(new URL(id).protocol).toBe("https:");
+      expect(await resolveClient(id)).toBeNull();
+    }
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
   it("does not fetch at all for a URL that would reach inward", async () => {
     const fetcher = workerFetch({ body: CLAUDE_DOCUMENT });
     vi.stubGlobal("fetch", fetcher);

@@ -59,7 +59,7 @@ test.describe("sample storefront", () => {
       { id: "editor-design", target: "[data-design-panel] [data-panel-menu]" },
       {
         id: "editor-page",
-        target: '[role="toolbar"][aria-label="Editor tools"] button[aria-label="Show the product page"]',
+        target: '[role="toolbar"][aria-label="Editor tools"] button[aria-label="Show the product page, checkout and thank-you page"]',
       },
       { id: "editor-finish", target: "[data-sample-create]" },
     ];

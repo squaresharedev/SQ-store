@@ -28,6 +28,8 @@ import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
 import { resolveProductPage } from "@/lib/storefront/product-page";
 import { productPagePath, storefrontPageUrl } from "@/lib/storefront/product-page-url";
 import { getStorefront } from "@/lib/storefront/queries";
+import { loadTileExtras, tileExtrasWanted } from "@/lib/storefront/tile-extras";
+import { resolveTileLook } from "@/lib/storefront/tile-look";
 import { TILE_PRODUCT_SELECT, signImageBlocks, tileProduct, type TileProductRow } from "@/lib/storefront/storefront-page";
 import { presignGetUrl } from "@/lib/r2";
 import { getActiveAccount } from "@/lib/team/account-context";
@@ -93,16 +95,25 @@ export async function storefrontPreview(
     admin.from("profiles").select(TRADER_GATE_SELECT).eq("id", account.accountId).maybeSingle(),
     drawable.length === 0 ? Promise.resolve([]) : readStoreSales(admin, account.accountId, now),
   ]);
-  const pricing = await loadProductSales(admin, {
-    ownerId: account.accountId,
-    products: drawable.map((row) => ({
-      productId: row.id,
-      regularPriceCents: row.price_cents,
-      currency: toCurrency(row.currency),
-      sales: salesCovering(storeSales ?? [], row.id),
-      listedAt: row.created_at ?? null,
-    })),
-  });
+  // The cards' extras the same way a buyer's board gets them (tile-extras),
+  // read as the grant: the ratings under RLS, the photos signed for this view.
+  const tileLook = resolveTileLook(config);
+  const [pricing, extras] = await Promise.all([
+    loadProductSales(admin, {
+      ownerId: account.accountId,
+      products: drawable.map((row) => ({
+        productId: row.id,
+        regularPriceCents: row.price_cents,
+        currency: toCurrency(row.currency),
+        sales: salesCovering(storeSales ?? [], row.id),
+        listedAt: row.created_at ?? null,
+      })),
+    }),
+    loadTileExtras(supabase, drawable, tileExtrasWanted({ theme: config.theme, blocks }), {
+      reviewsShown: tileLook.reviewsShown,
+      context: "storefront preview",
+    }),
+  ]);
 
   if (!resolveProductPage(config).enabled) notes.notPublic.push("product_pages_off");
   if (
@@ -117,7 +128,7 @@ export async function storefrontPreview(
   const { theme } = config;
   const hrefOf = (productId: string) => productPagePath(storefront.id, productId);
   const [tiles, imageUrls, backgroundImageUrl, customFontUrl] = await Promise.all([
-    Promise.all(drawable.map((row) => tileProduct(row, hrefOf(row.id), pricing.get(row.id)))),
+    Promise.all(drawable.map((row) => tileProduct(row, hrefOf(row.id), pricing.get(row.id), extras.get(row.id)))),
     signImageBlocks(blocks),
     theme.background.kind === "image" ? presignGetUrl(theme.background.key) : null,
     theme.customFont ? presignGetUrl(theme.customFont.key) : null,
@@ -131,6 +142,7 @@ export async function storefrontPreview(
       ...(config.header ? { header: config.header } : {}),
       blocks,
       products: tiles,
+      tileLook,
       imageUrls,
       backgroundImageUrl,
       customFontUrl,

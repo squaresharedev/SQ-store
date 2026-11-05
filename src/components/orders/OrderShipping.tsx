@@ -17,7 +17,7 @@ import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { helpTextClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
 import { markOrderShipped } from "@/lib/orders/actions";
-import { CARRIER_OPTIONS, detectCarrier, parseCarrier, trackingLinkFor } from "@/lib/orders/carriers";
+import { CARRIER_OPTIONS, detectCarrier, trackingLinkFor } from "@/lib/orders/carriers";
 import { formatOrderDateTime } from "@/lib/format/date";
 import type { ActionError } from "@/lib/errors";
 import { TRACKING_NUMBER_MAX, type CarrierId, type OrderView } from "@/types/order-view";
@@ -31,6 +31,7 @@ import {
   type ShipState,
 } from "./ShipConfirmButton";
 import { useOrderMailEnabled } from "./OrderMailProvider";
+import { useLastCarrier } from "./LastCarrierProvider";
 
 const pause = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
@@ -38,26 +39,6 @@ const pause = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
  *  The buyer still gets the number, just not a link. */
 const NO_CARRIER = "";
 type CarrierChoice = CarrierId | typeof NO_CARRIER;
-
-/** This browser's last-used carrier: most sellers ship everything one way, so
- *  the picker opens on it. A per-device convenience, nothing more. */
-const LAST_CARRIER_KEY = "sq.orders.last-carrier";
-
-function lastCarrier(): CarrierChoice {
-  try {
-    return parseCarrier(localStorage.getItem(LAST_CARRIER_KEY)) ?? NO_CARRIER;
-  } catch {
-    return NO_CARRIER;
-  }
-}
-
-function rememberCarrier(carrier: CarrierId) {
-  try {
-    localStorage.setItem(LAST_CARRIER_KEY, carrier);
-  } catch {
-    // Storage off: the next form simply opens on "Other" again.
-  }
-}
 
 /** The tracking number as it reads in the panel, linked or not. */
 const trackingValueClass = "min-w-0 break-all font-mono text-sm text-foreground";
@@ -76,8 +57,9 @@ const trackingValueClass = "min-w-0 break-all font-mono text-sm text-foreground"
  * The carrier is a PICK, never a typed link: with a number beside it, the
  * buyer's order page links to that carrier's own tracking page
  * (lib/orders/carriers.ts). It waits for a number, because that is all it
- * describes. It opens on the last carrier used here, and a number that names
- * its carrier picks it, until the seller picks one themselves.
+ * describes. It opens on the carrier this store last shipped with to the
+ * parcel's country (LastCarrierProvider), and a number that names its carrier picks it, until
+ * the seller picks one themselves.
  *
  * The confirm click gets an ending: the truck spins its wheels while the server
  * works, then drives across the button into a "Shipped" state (ShipConfirmButton).
@@ -115,6 +97,7 @@ export function OrderShipping({
   const locale = useLocale();
   const toast = useToast();
   const mailOn = useOrderMailEnabled();
+  const { carrierFor, remember: rememberCarrier } = useLastCarrier();
   const inputId = useId();
   const carrierId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -176,7 +159,7 @@ export function OrderShipping({
 
   function open() {
     setTracking(fulfilment.trackingNumber ?? "");
-    setCarrier(fulfilment.carrier ?? lastCarrier());
+    setCarrier(fulfilment.carrier ?? carrierFor(order.shipTo?.country) ?? NO_CARRIER);
     setCarrierChosen(fulfilment.carrier !== null);
     setError(null);
     setEditing(true);
@@ -201,7 +184,7 @@ export function OrderShipping({
         setError(result.error);
         return;
       }
-      if (sentCarrier) rememberCarrier(sentCarrier);
+      if (sentCarrier) rememberCarrier(sentCarrier, order.shipTo?.country ?? null);
       if (drives) {
         setShipState("delivered");
         await pause(sequence.rollMs);

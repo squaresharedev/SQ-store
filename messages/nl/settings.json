@@ -207,7 +207,7 @@
   },
   "legal": {
     "cardTitle": "Verkopersovereenkomst, voorwaarden en privacy",
-    "cardDescription": "De huidige concepten, in gewone taal, want niemand leest voor de lol juridisch jargon. Echte juridische tekst is onderweg; accepteren dekt nu deze conceptversie.",
+    "cardDescription": "Wat je accepteert en hoe we met je gegevens omgaan. Elk onderdeel heeft een korte versie, met de volledige tekst op één klik.",
     "termsTitle": "Servicevoorwaarden",
     "termsDescription": "De korte versie van waarmee je akkoord gaat als je verkoopt via Square Share, met de volledige voorwaarden een klik verderop.",
     "docs": {
@@ -252,6 +252,7 @@
           "heading": "Met wie je zaken doet",
           "points": {
             "merchantOfRecord": "Square Share is een platform dat je helpt te verkopen. Wanneer een koper bij je bestelt, komt de verkoop tot stand tussen jou en die koper: jij bent de verkoper en de verantwoordelijke handelaar (merchant of record), niet wij.",
+            "regions": "Square Share is actief in de EU, de VS en Canada. Elders zijn we nog niet actief, dus je moet in een van die gebieden gevestigd zijn om hier te verkopen. Québec moet wachten op de Franse versie van deze voorwaarden.",
             "eligibility": "Je moet minstens 18 jaar zijn, of de meerderjarige leeftijd hebben die geldt waar je woont. Als je je aanmeldt namens een bedrijf, bevestig je dat je het aan deze voorwaarden kunt binden."
           }
         },
@@ -266,8 +267,8 @@
           "heading": "Verkopen",
           "points": {
             "lawfulListings": "Vermeld je producten juist en verkoop alleen wettige zaken waarvoor je de verkooprechten hebt.",
-            "consumerRights": "Respecteer de consumentenrechten van je kopers, waaronder het herroepingsrecht van 14 dagen en de wettelijke garantie, en regel zelf je levering, klantenservice en terugbetalingen.",
-            "taxesAndRecords": "Belastingen en btw over je verkopen regel je zelf, en je bewaart je eigen verkoopadministratie 10 jaar."
+            "consumerRights": "Respecteer de consumentenrechten die je kopers hebben waar ze wonen, zoals het herroepingsrecht van 14 dagen en de wettelijke garantie in de EU, en regel zelf de levering, support en terugbetalingen.",
+            "taxesAndRecords": "Belastingen op je verkopen (btw, GST/HST of sales tax) regel je zelf, en je bewaart je verkoopgegevens zo lang als de wet van je vestigingsplaats vereist."
           }
         },
         "payments": {
@@ -296,10 +297,35 @@
           "points": {
             "cap": "Square Share is nog in een vroeg stadium en wordt zoals het is (as is) aangeboden aan zakelijke gebruikers. Voor hen is onze aansprakelijkheid beperkt tot de kosten die ze de afgelopen 12 maanden aan ons hebben betaald of EUR 100, al naargelang welk bedrag hoger is, en zakelijke verkopers vrijwaren ons voor claims die voortvloeien uit hun producten, sites of overtredingen. Als je consument bent, blijven je wettelijke rechten onaangetast.",
             "termination": "Wij kunnen accounts die deze voorwaarden overtreden opschorten of sluiten. Je kunt op elk moment vertrekken en je gegevens meenemen.",
-            "changesAndLaw": "Wij kunnen deze voorwaarden bijwerken, met voorafgaande kennisgeving van ingrijpende wijzigingen. Tsjechisch recht is van toepassing.",
-            "policies": "Ons Privacybeleid en Cookiebeleid maken deel uit van deze voorwaarden."
+            "changesAndLaw": "Over wezenlijke wijzigingen in deze voorwaarden informeren we je minstens 30 dagen vooraf. Op zakelijke gebruikers is Tsjechisch recht van toepassing. Als consument houd je de bescherming van je eigen land, staat of provincie.",
+            "policies": "Ons Privacybeleid en Cookiebeleid maken deel uit van deze voorwaarden.",
+            "disputes": "Geschillen in de VS worden opgelost via individuele arbitrage in plaats van via de rechter, tenzij je je er binnen 30 dagen na akkoordgaan van afmeldt. Consumenten in de EU en Canada kunnen nog steeds naar de rechter in hun woonplaats."
           }
         }
+      }
+    },
+    "notice": {
+      "bannerLabel": "Update van de Servicevoorwaarden",
+      "bannerLink": "Bekijk wat er verandert",
+      "title": "Onze Servicevoorwaarden wijzigen op {date}.",
+      "titleSoon": "Onze Servicevoorwaarden gaan binnenkort wijzigen.",
+      "body": "Tot die tijd gelden de <current>huidige Servicevoorwaarden</current>. Dit veranderen de <next>nieuwe Servicevoorwaarden</next>:",
+      "leave": "Als je het er niet mee eens bent, kun je je account voor die datum kosteloos sluiten. Als je Square Share na die datum blijft gebruiken, gelden de nieuwe Servicevoorwaarden voor jou.",
+      "changes": {
+        "regions": "We zijn nu alleen actief in de EU, de VS en Canada, en elke regio heeft een eigen sectie.",
+        "disputes": "Geschillen in de VS worden opgelost via individuele arbitrage in plaats van via de rechter, tenzij je je er binnen 30 dagen van afmeldt. Consumenten in de EU en Canada kunnen nog steeds naar de rechter in hun woonplaats.",
+        "plans": "Betaalde abonnementen en commissies per verkoop zijn nu beschreven, inclusief automatische verlenging en hoe je opzegt.",
+        "moderation": "We leggen uit hoe we content controleren, en hoe je die kunt melden, bezwaar kunt maken en een klacht over auteursrechtinbreuk kunt indienen.",
+        "notice": "Je ontvangt nu minstens 30 dagen van tevoren een e-mail over wezenlijke wijzigingen in de Servicevoorwaarden."
+      },
+      "email": {
+        "subject": "We werken onze Servicevoorwaarden bij",
+        "intro": "We werken de Square Share Servicevoorwaarden bij. De nieuwe Servicevoorwaarden gaan in op {date}.",
+        "changes": "Wat er verandert:",
+        "readNew": "Lees de nieuwe Servicevoorwaarden: {url}",
+        "readCurrent": "Lees de huidige Servicevoorwaarden: {url}",
+        "nothingNow": "Je hoeft vandaag niets te doen. Je kunt de nieuwe Servicevoorwaarden nu accepteren in je dashboard: {url}",
+        "leave": "Als je het er niet mee eens bent, kun je je account voor {date} kosteloos sluiten. Als je Square Share na die datum blijft gebruiken, gelden de nieuwe Servicevoorwaarden voor jou."
       }
     }
   },
@@ -311,7 +337,7 @@
       "required": "<strong>Je handelsnaam, adres en contact-e-mailadres zijn verplicht voordat je iets kunt publiceren of verkopen.</strong> Kopers moeten kunnen zien van wie ze kopen en hoe ze je kunnen bereiken voordat ze bestellen.",
       "privacyNoteLinked": "Deze gegevens verschijnen alleen daarom openbaar op je productpagina's. We gebruiken ze nooit voor marketing, en verkopen of delen ze nooit. Het enige bericht dat we naar je contact-e-mailadres of telefoonnummer sturen, is de code die het bevestigt. Zie het <link>Square Share-privacybeleid</link>."
     },
-    "countryNotEu": "Niet in de EU / geef ik liever niet aan",
+    "countryUnset": "Geef ik liever niet aan",
     "vatAdvisory": {
       "noCountry": "Dit btw-id lijkt te zijn uitgegeven door {issuer}. Misschien wil je je land instellen.",
       "mismatch": "Dit btw-id lijkt te zijn uitgegeven door {issuer}, maar je land staat ingesteld op {selected}. Controleer of beide kloppen."
@@ -340,6 +366,7 @@
         "placeholder": "bijv. NL123456789B01"
       },
       "country": {
+        "hint": "Square Share is actief in de EU, de VS en Canada. Elders zijn we nog niet actief.",
         "label": "Land"
       },
       "phone": {
@@ -395,7 +422,9 @@
   "shipping": {
     "shipsFrom": {
       "label": "Verzending vanuit",
-      "notSet": "Niet ingesteld"
+      "notSet": "Niet ingesteld",
+      "sameAsBusiness": "Zelfde als je bedrijf: {country}",
+      "sameAsBusinessHint": "Overgenomen van het adres in je verkopersgegevens."
     },
     "shippingCard": {
       "title": "Verzending",

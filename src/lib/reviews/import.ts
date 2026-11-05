@@ -1,8 +1,9 @@
 import { msg, type MessageRef } from "@/i18n/types";
 import { htmlToText, parseCsv } from "@/lib/products/csv";
+import { uuidField } from "@/lib/validation/inputs";
 import { reviewContent } from "@/lib/validation/reviews";
 import { REVIEW_IMPORT_ROWS_MAX } from "@/lib/reviews/limits";
-import type { ReviewImportSource } from "@/lib/reviews/sources";
+import { REVIEW_IMPORT_SOURCES, type ReviewImportSource } from "@/lib/reviews/sources";
 
 /**
  * Reading a seller's reviews out of a Shopify review app's export, so moving
@@ -29,6 +30,9 @@ import type { ReviewImportSource } from "@/lib/reviews/sources";
  * read, so never stored), photos (fetching URLs from a spreadsheet is the
  * same SSRF problem the product importer declines), seller replies, and rows
  * the app marked as spam or hidden.
+ *
+ * THIS APP'S OWN EXPORT (lib/reviews/export.ts) is read differently: see
+ * readSquareShareExport.
  */
 
 export type ReviewImportField = "rating" | "title" | "body" | "author" | "date" | "product" | "status";
@@ -145,7 +149,49 @@ export type ReviewImportPlan = {
   hidden: number;
   /** Rows past REVIEW_IMPORT_ROWS_MAX, left out. */
   dropped: number;
+  /** Set when the file is this app's own export; `rows` is then empty. */
+  squareShare: SquareShareExport | null;
 };
+
+/** A Square Share export, as far as an import needs to know it. */
+export type SquareShareExport = {
+  /** The file's reviews, by their id in the store they were exported from. */
+  reviewIds: string[];
+  /** Rows without a readable id: nothing can say whose review they are. */
+  unreadable: number;
+};
+
+const exportReviewId = uuidField();
+
+/**
+ * The file, when it is a Square Share export, known by the columns only that
+ * export writes. Files from before the `exported_from` column count too.
+ *
+ * AN EXPORT IS NEVER WRITTEN FROM. Its reviews are matched by id, not by
+ * fingerprint: a buyer's review has no fingerprint at all, and an imported one
+ * was fingerprinted under the key of the file it first came from. Reading one
+ * back as a new import would land every review a second time, and call a
+ * verified buyer's review "from Judge.me", since the app is the only label an
+ * import can give. So a review already in the store is "already here" and any
+ * other is left out, whichever store the file came from.
+ */
+function readSquareShareExport(
+  header: readonly string[],
+  records: readonly (readonly string[])[],
+): (SquareShareExport & { dropped: number }) | null {
+  const columns = header.map(normalizeHeader);
+  const idColumn = columns.indexOf("reviewid");
+  if (!columns.includes("exportedfrom") && !(idColumn !== -1 && columns.includes("moderationstatus"))) return null;
+  const reviewIds: string[] = [];
+  let unreadable = 0;
+  const kept = records.slice(0, REVIEW_IMPORT_ROWS_MAX);
+  for (const record of kept) {
+    const id = exportReviewId.safeParse((record[idColumn] ?? "").trim());
+    if (id.success) reviewIds.push(id.data);
+    else unreadable += 1;
+  }
+  return { reviewIds, unreadable, dropped: records.length - kept.length };
+}
 
 /** Reviews older than this are a typo or a bad column, not a review. */
 const EARLIEST_REVIEW = Date.UTC(2000, 0, 1);
@@ -180,6 +226,11 @@ function parseDate(raw: string, now: number): string | null {
 export function buildReviewImportPlan(text: string, now: number = Date.now()): ReviewImportPlan {
   const [header = [], ...records] = parseCsv(text);
   const columns = guessReviewColumns(header);
+  const exported = readSquareShareExport(header, records);
+  if (exported) {
+    const { dropped, ...squareShare } = exported;
+    return { header, columns, source: null, missing: [], rows: [], hidden: 0, dropped, squareShare };
+  }
   const missing = REQUIRED_REVIEW_FIELDS.filter((field) => columns[field] === null);
   const cell = (record: readonly string[], field: ReviewImportField) => {
     const index = columns[field];
@@ -232,27 +283,54 @@ export function buildReviewImportPlan(text: string, now: number = Date.now()): R
     });
   });
 
-  return { header, columns, source: detectReviewSource(header), missing, rows, hidden, dropped };
+  return { header, columns, source: detectReviewSource(header), missing, rows, hidden, dropped, squareShare: null };
 }
 
-/** One product key in the file and how many importable reviews carry it. */
-export type ReviewProductKey = { key: string; slug: string; count: number };
+/** One product key in the file, how many importable reviews carry it, and their average rating. */
+export type ReviewProductKey = { key: string; slug: string; count: number; average: number };
 
 /** The file's product keys, most reviewed first. */
 export function reviewProductKeys(plan: ReviewImportPlan): ReviewProductKey[] {
-  const keys = new Map<string, ReviewProductKey>();
+  const keys = new Map<string, ReviewProductKey & { total: number }>();
   for (const row of plan.rows) {
     if (row.problem !== null) continue;
     const slug = slugKey(row.productKey);
-    const entry = keys.get(slug) ?? { key: row.productKey, slug, count: 0 };
+    const entry = keys.get(slug) ?? { key: row.productKey, slug, count: 0, average: 0, total: 0 };
     entry.count += 1;
+    entry.total += row.rating;
     keys.set(slug, entry);
   }
-  return [...keys.values()].sort((a, b) => b.count - a.count || a.key.localeCompare(b.key));
+  return [...keys.values()]
+    .map(({ total, ...entry }) => ({ ...entry, average: total / entry.count }))
+    .sort((a, b) => b.count - a.count || a.key.localeCompare(b.key));
 }
 
-/** A seller's product as the matcher sees it. */
-export type MatchableProduct = { id: string; title: string; identifier: string | null };
+/**
+ * A review's identity across imports: the database keeps one review per
+ * product and fingerprint, so a file imported twice lands once. Taken over the
+ * app, the product key and what the reviewer wrote.
+ *
+ * NEVER CHANGE THE RECIPE: imported reviews carry it, and a new one would let
+ * every file imported before it land a second time.
+ */
+export async function reviewFingerprint(source: ReviewImportSource, row: ReviewImportRow): Promise<string> {
+  const parts = [source, slugKey(row.productKey), row.author, row.reviewedAt, row.rating, row.body];
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(parts)));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * The same review's fingerprint as each app it could have been imported from.
+ * The app is the seller's pick and part of the recipe, so "already here" asks
+ * about all of them: a file imported as Judge.me and again as Loox is still
+ * the same reviews.
+ */
+export function reviewFingerprints(row: ReviewImportRow): Promise<string[]> {
+  return Promise.all(REVIEW_IMPORT_SOURCES.map((source) => reviewFingerprint(source, row)));
+}
+
+/** A seller's product as the matcher sees it, with its photo for the picker. */
+export type MatchableProduct = { id: string; title: string; identifier: string | null; imageUrl?: string | null };
 
 /**
  * A first guess at which product each key is: the product whose title or

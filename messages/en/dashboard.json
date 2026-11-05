@@ -127,6 +127,13 @@
       "description": "They are owed a refund within 14 days of withdrawing. Arrange the return, then refund the order.",
       "action": "See withdrawals"
     },
+    "restock": {
+      "label": "{count, plural, one {{count} product selling out soon} other {{count} products selling out soon}}",
+      "descriptionSingle": "At this pace \"{title}\" sells out in about {days, plural, one {# day} other {# days}}.",
+      "descriptionMultiple": "\"{title}\" goes first, in about {days, plural, one {# day} other {# days}}.",
+      "actionSingle": "Update stock",
+      "actionMultiple": "Check stock"
+    },
     "checkoutRates": {
       "label": "Set your delivery prices",
       "description": "Buyers can't check out a physical product until a destination has both a rate and a country.",

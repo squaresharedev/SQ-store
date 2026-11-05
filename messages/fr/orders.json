@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} commande} many {{total} commandes} other {{total} commandes}} · page {page} sur {totalPages}",
     "detailDialog": "Détails de la commande",
     "closeDetail": "Fermer les détails de la commande",
-    "withdrawn": "Rétractée"
+    "withdrawn": "Rétractée",
+    "moreItems": "+{count} de plus"
   },
   "table": {
     "product": "Produit",
@@ -150,7 +151,8 @@
     "discount": "Réduction",
     "discountSale": "Promotion, {amount} de remise",
     "discountCode": "Code {code}, {amount} de remise",
-    "discountCodeOutdone": "Code {code} utilisé, mais le prix promotionnel était plus bas"
+    "discountCodeOutdone": "Code {code} utilisé, mais le prix promotionnel était plus bas",
+    "alsoBought": "Aussi dans cette commande"
   },
   "actions": {
     "disputeInStripe": "La banque de l’acheteur a ouvert un litige. Répondez-y dans votre tableau de bord Stripe avant la date limite.",
@@ -296,12 +298,16 @@
       "subject": "Votre lien de commande chez {store}",
       "intro": "Voici le lien vers votre page pour la commande {number} chez {store}:",
       "ignore": "Si vous n'avez pas fait cette demande, vous pouvez ignorer cet e-mail."
+    },
+    "reviewReminder": {
+      "subject": "Votre rappel pour donner votre avis sur {title}",
+      "intro": "Le {date}, vous avez demandé à {store} de vous rappeler de donner votre avis sur votre commande une fois reçue. Voici ce rappel.",
+      "write": "Dites aux autres acheteurs ce que vous en pensez. Cela prend une minute :\n{url}",
+      "how": "Votre avis s'affiche sur la page du produit avec le nom que vous choisissez, signalé comme provenant d'un acheteur vérifié. Votre adresse e-mail et votre commande restent privées. Tous les avis sont les bienvenus, positifs ou négatifs.",
+      "once": "C'est le seul rappel pour cette commande. Pour ne plus recevoir ce type d'e-mail : {url}"
     }
   },
   "export": {
-    "button": "Exporter en CSV",
-    "preparing": "Préparation du fichier",
-    "failed": "L'export n'a pas été téléchargé. Réessayez dans un instant.",
     "truncated": "Le fichier contient vos {count, number} commandes les plus récentes.",
     "lockedTitle": "L'export des commandes est inclus à partir de {plan}.",
     "fileName": "commandes.csv"

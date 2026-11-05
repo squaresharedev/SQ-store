@@ -127,6 +127,13 @@
       "description": "Têm direito ao reembolso no prazo de 14 dias após a desistência. Combine a devolução e depois reembolse a encomenda.",
       "action": "Ver desistências"
     },
+    "restock": {
+      "label": "{count, plural, one {{count} produto quase esgotado} many {{count} de produtos quase esgotados} other {{count} produtos quase esgotados}}",
+      "descriptionSingle": "A este ritmo, «{title}» esgota dentro de cerca de {days, plural, one {# dia} many {# dias} other {# dias}}.",
+      "descriptionMultiple": "«{title}» esgota primeiro, dentro de cerca de {days, plural, one {# dia} many {# dias} other {# dias}}.",
+      "actionSingle": "Atualizar stock",
+      "actionMultiple": "Ver stock"
+    },
     "checkoutRates": {
       "label": "Defina os preços de entrega",
       "description": "Os compradores não podem finalizar a compra de um produto físico até um destino ter taxa e país.",

@@ -213,6 +213,20 @@ describe("ProductPageSection", () => {
     expect(screen.queryByText("Border color")).toBeNull();
   });
 
+  it("offers the review stars' colour, and drops the key on the way back to yellow", async () => {
+    const user = userEvent.setup();
+    const { onProductPageChange } = mount({
+      summoned: "reviews",
+      productPage: { ...DEFAULT_PRODUCT_PAGE_CONFIG, starColor: "#7c3aed" },
+    });
+    expect(screen.getByText("Star color")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Use the default yellow" }));
+    expect(onProductPageChange).toHaveBeenLastCalledWith(
+      expect.not.objectContaining({ starColor: expect.anything() }),
+    );
+  });
+
   it("drops each key rather than storing a value that means 'inherit'", async () => {
     const user = userEvent.setup();
     const { onProductPageChange } = mount({

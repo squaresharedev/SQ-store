@@ -34,6 +34,14 @@ export const emptyStateClass =
 export const emptyShowcaseClass =
   "relative flex flex-col items-center justify-center overflow-hidden rounded-md border border-border bg-background px-6 py-16 text-center";
 
+/** A real product's tile standing in as a suggestion, not yet on the board. */
+export const suggestedTileFaceClass = "opacity-60 grayscale";
+
+/** The press over a suggested tile: drawn like the board's free cells, because
+ *  it still is one until the seller takes it. `group/btn` drives the "+" pop. */
+export const suggestedTileButtonClass =
+  "group/btn absolute inset-0 flex items-center justify-center rounded-[inherit] border border-dashed border-border transition-colors duration-base ease-standard hover:border-foreground/40 hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none";
+
 /**
  * One shimmering placeholder block. Give it a width/height at the call site;
  * the pulse stops under reduced motion (styles.md §6.2).

@@ -7,6 +7,7 @@ import { EditableText } from "./EditableText";
 import { QuantityBadge } from "./QuantityBadge";
 import { VersionChips } from "./VersionChips";
 import { CheckoutItemPrice } from "./CheckoutItemPrice";
+import { CheckoutAddOns } from "./CheckoutAddOns";
 import type { ImageFit } from "@/types/storefront";
 import type { Currency, ProductPageImage, ProductSale } from "@/types/product";
 import type { CheckoutTheme } from "./checkout-theme";
@@ -68,6 +69,12 @@ export function CheckoutShowcase({
         />
         <ItemFacts item={item} ink={theme.panelInk} cornerRadius={theme.cornerRadius} size="lg" />
       </div>
+      <CheckoutAddOns
+        ink={theme.panelInk}
+        rule={theme.panelRule}
+        cornerRadius={theme.cornerRadius}
+        controlRadius={theme.controlRadius}
+      />
       {note}
     </section>
   );
@@ -77,13 +84,21 @@ export function CheckoutShowcase({
 export function CheckoutSummaryCard({ item, theme }: { item: CheckoutItem; theme: CheckoutTheme }) {
   return (
     <section
-      className="flex items-center gap-4 border p-4"
+      className="flex flex-col gap-3 border p-4"
       style={{ borderColor: theme.rule, borderRadius: `${theme.surfaceRadius}px` }}
       data-checkout-summary-card=""
       data-setting-hotspot="layout"
     >
-      <ItemPhoto item={item} theme={theme} className="size-20 shrink-0" />
-      <ItemFacts item={item} ink={theme.ink} cornerRadius={theme.cornerRadius} size="sm" />
+      <div className="flex items-center gap-4">
+        <ItemPhoto item={item} theme={theme} className="size-20 shrink-0" />
+        <ItemFacts item={item} ink={theme.ink} cornerRadius={theme.cornerRadius} size="sm" />
+      </div>
+      <CheckoutAddOns
+        ink={theme.ink}
+        rule={theme.rule}
+        cornerRadius={theme.cornerRadius}
+        controlRadius={theme.controlRadius}
+      />
     </section>
   );
 }

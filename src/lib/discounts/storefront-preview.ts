@@ -15,6 +15,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { listAllProducts } from "@/lib/products/queries";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { loadProductSales, readStoreSales, salesCovering, type ProductPricing } from "@/lib/discounts/public";
+import { presignGetUrl } from "@/lib/r2";
+import { readRatingSummaries } from "@/lib/reviews/ratings";
+import { secondPhotoKey } from "@/lib/storefront/tile-extras";
 import type { Product, ProductTileSale } from "@/types/product";
 
 /** One product to price for a preview. */
@@ -98,5 +101,57 @@ export async function withRunningSales(ownerId: string, products: Product[]): Pr
  */
 export async function listStorefrontProducts(): Promise<Product[]> {
   const [account, products] = await Promise.all([getActiveAccount(), listAllProducts()]);
-  return account ? withRunningSales(account.accountId, products) : products;
+  if (!account) return products;
+  const [priced, extras] = await Promise.all([
+    withRunningSales(account.accountId, products),
+    loadSellerCardExtras(account.accountId, products),
+  ]);
+  return priced.map((product) => {
+    const extra = extras.get(product.id);
+    return extra ? { ...product, ...extra } : product;
+  });
+}
+
+/**
+ * What the seller's cards can show beyond the price: each product's second
+ * photo and its buyers' rating, so a card switched to show either does so the
+ * moment the switch is pressed. The stock line needs nothing from here: the
+ * seller's own counts are already on the product.
+ *
+ * A failed read leaves them out, as above: a preview without stars beats no
+ * designer.
+ */
+async function loadSellerCardExtras(
+  ownerId: string,
+  products: readonly Product[],
+): Promise<Map<string, Pick<Product, "hoverImageUrl" | "rating">>> {
+  if (products.length === 0) return new Map();
+  try {
+    const admin = createAdminClient();
+    const [{ data, error }, ratings] = await Promise.all([
+      admin.from("products").select("id, image_key, gallery").eq("owner_id", ownerId).limit(LISTING_DATES_MAX),
+      readRatingSummaries(admin, products.map((product) => product.id), "storefront designer"),
+    ]);
+    if (error) console.error("[storefront designer] gallery read failed", error.message);
+    const photos = new Map(
+      await Promise.all(
+        ((data ?? []) as { id: string; image_key: string | null; gallery: unknown }[]).map(async (row) => {
+          const key = row.image_key ? secondPhotoKey(row.gallery) : null;
+          return [row.id, key ? await presignGetUrl(key) : null] as const;
+        }),
+      ),
+    );
+    const extras = new Map<string, Pick<Product, "hoverImageUrl" | "rating">>();
+    for (const product of products) {
+      const hoverImageUrl = photos.get(product.id);
+      const rating = ratings.get(product.id);
+      if (hoverImageUrl || rating) {
+        extras.set(product.id, { ...(hoverImageUrl ? { hoverImageUrl } : {}), ...(rating ? { rating } : {}) });
+      }
+    }
+    return extras;
+  } catch (error) {
+    console.error("[storefront designer] card extras failed", error instanceof Error ? error.message : String(error));
+    return new Map();
+  }
 }

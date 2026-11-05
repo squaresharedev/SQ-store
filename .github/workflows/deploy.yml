@@ -152,6 +152,18 @@ jobs:
           fi
           echo "Supabase config present in the client bundle."
 
+      # Same reasoning: ask the artifact. /dev/* only exists under next dev
+      # (pageExtensions in next.config.ts), so any trace of it here means a
+      # harness route would ship.
+      - name: Verify the /dev harness is not in the build
+        run: |
+          set -euo pipefail
+          if [ -e .next/server/app/dev ]; then
+            echo "::error::.next/server/app/dev exists: a /dev harness route made it into a production build. Name it page.dev.tsx or route.dev.ts."
+            exit 1
+          fi
+          echo "No /dev routes in the build."
+
       # STAGED DEPLOY. The build is uploaded as a VERSION that serves nobody,
       # put beside the live version at 0%, and smoke-checked on the real
       # hostname through Cloudflare's version-override header

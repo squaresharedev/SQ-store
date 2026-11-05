@@ -36,6 +36,7 @@ export function ReviewFeed({
   rating,
   ink,
   rule,
+  starColor,
   cta,
   cornerRadius,
 }: {
@@ -46,6 +47,7 @@ export function ReviewFeed({
   rating?: number;
   ink: string;
   rule: string;
+  starColor: string;
   cta: CtaAppearance;
   cornerRadius: number;
 }) {
@@ -136,7 +138,7 @@ export function ReviewFeed({
         <div className={cn("flex flex-col divide-y", loading && "opacity-60")} data-review-feed="">
           {rows.map((review) => (
             <div key={review.id} style={{ borderColor: rule }}>
-              <ReviewItem review={review} ink={ink} cornerRadius={cornerRadius} />
+              <ReviewItem review={review} ink={ink} starColor={starColor} cornerRadius={cornerRadius} />
             </div>
           ))}
         </div>

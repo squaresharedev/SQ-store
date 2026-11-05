@@ -525,9 +525,9 @@ test.describe("hosted checkout", () => {
     await gotoApp(page, `/storefront/${s.storefrontId}`);
     await page.getByLabel(/^stoneware vase. press enter/i).click();
     await canvasStill(page);
-    // Straight from the tile: its quick bar opens the checkout, and with it
-    // the product page the checkout hangs off.
-    await page.getByRole("button", { name: /^show the checkout for stoneware vase$/i }).click();
+    // One button on the tile's quick bar puts the whole flow out.
+    const flowOnTile = page.getByRole("button", { name: /^open the buyer flow for stoneware vase$/i });
+    await flowOnTile.click();
     const productPage = page.locator(`[data-artboard-id="${s.vase}"]`);
     const checkout = page.locator(`[data-artboard-id="checkout:${s.vase}"]`);
     const thanks = page.locator(`[data-artboard-id="thanks:${s.vase}"]`);
@@ -539,21 +539,34 @@ test.describe("hosted checkout", () => {
     // None of them runs through a page's label row, or across a page.
     await canvasStill(page);
     expect(await connectorCrossings(page)).toEqual([]);
-    // The panel arrived on the checkout's own settings.
-    const arrangement = page.getByRole("group", { name: "Arrangement" });
-    await expect(arrangement).toBeVisible();
+    // The first page is the one the panel arrives on.
+    await expect(page.getByRole("switch", { name: "Show a product page" })).toBeVisible();
 
-    // The bottom toolbar's Checkout puts it away; the product page's own frame
-    // brings it back.
-    const toolbarCheckout = page.locator("[data-toolbar-checkout]");
-    await expect(toolbarCheckout).toHaveAttribute("aria-pressed", "true");
-    await toolbarCheckout.click();
+    // The bottom toolbar's one button puts all three away and brings them back.
+    const toolbarFlow = page.locator('[data-tour="editor-product-pages"]');
+    await expect(toolbarFlow).toHaveAttribute("aria-pressed", "true");
+    await toolbarFlow.click();
+    await expect(productPage).toHaveCount(0);
     await expect(checkout).toHaveCount(0);
+    await expect(thanks).toHaveCount(0);
+    await toolbarFlow.click();
     await expect(productPage).toBeVisible();
-    await page.getByRole("button", { name: /^open the checkout for stoneware vase$/i }).click();
+    await expect(checkout.locator("[data-checkout-page='preview']")).toBeVisible();
+    await expect(thanks.locator("[data-order-page='preview']")).toBeVisible();
+
+    // The X on any of the three closes the flow, not one page of it.
+    await thanks.getByRole("button", { name: /^close the buyer flow for stoneware vase$/i }).click();
+    await expect(productPage).toHaveCount(0);
+    await expect(checkout).toHaveCount(0);
+    await expect(thanks).toHaveCount(0);
+    await flowOnTile.click();
     await expect(checkout.locator("[data-checkout-page='preview']")).toBeVisible();
 
-    // The arrangement changes the artboard at once.
+    // Clicking the checkout's arrangement opens its settings, and a change
+    // there shows on the artboard at once.
+    await checkout.locator("[data-checkout-showcase]").click({ position: { x: 4, y: 4 } });
+    const arrangement = page.getByRole("group", { name: "Arrangement" });
+    await expect(arrangement).toBeVisible();
     await expect(checkout.locator("[data-checkout-layout]")).toHaveAttribute("data-checkout-layout", "showcase");
     await arrangement.getByRole("button", { name: "Compact" }).click();
     await expect(checkout.locator("[data-checkout-layout]")).toHaveAttribute("data-checkout-layout", "compact");
@@ -588,12 +601,15 @@ test.describe("hosted checkout", () => {
     await page.getByRole("switch", { name: "Confetti" }).click();
     await expect(thanks.locator("[data-celebration]")).toHaveCount(0);
 
-    // A second product's page lands past the whole chain, so its line has to
-    // get over three pages: it climbs above their labels rather than through.
+    // A second product's flow takes the chain with it: there is one checkout
+    // design, so it stays one chain, now after the newer page. No line runs
+    // through a label on the way.
     await page.getByLabel(/^glaze zine. press enter/i).click();
     await canvasStill(page);
-    await page.getByRole("button", { name: /^open the product page for glaze zine$/i }).click();
+    await page.getByRole("button", { name: /^open the buyer flow for glaze zine$/i }).click();
     await expect(page.locator(`[data-artboard-id="${s.zine}"]`)).toBeVisible();
+    await expect(page.locator(`[data-artboard-id="checkout:${s.zine}"]`)).toBeVisible();
+    await expect(checkout).toHaveCount(0);
     await expect(page.locator("[data-page-connectors]")).toHaveAttribute("data-page-connectors", "4");
     await canvasStill(page);
     expect(await connectorCrossings(page)).toEqual([]);

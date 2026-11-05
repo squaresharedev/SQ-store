@@ -52,6 +52,12 @@ export const chipButtonClass = cn(
   "px-3 py-1.5 text-xs aria-pressed:border-foreground aria-pressed:bg-accent",
 );
 
+/** `chipButtonClass` for a chip the app is GUESSING (lib/predictions.ts): the
+ *  code block's flowing green, as a thin rim, so every prediction reads as one
+ *  thing. Same size as the plain chip. The look is `.suggestion-surface` in
+ *  globals.css. */
+export const suggestionChipClass = cn(chipButtonClass, "suggestion-surface");
+
 /** Quiet text button. */
 export const ghostButtonClass = `${BUTTON_BASE} rounded-none text-muted-foreground hover:bg-accent hover:text-foreground`;
 
@@ -67,6 +73,16 @@ export const destructiveButtonClass = `${BUTTON_BASE} rounded-none border border
 
 /** Square icon-only button (styles.md §8.4). */
 export const iconButtonClass = `group/btn inline-flex size-9 items-center justify-center rounded-none border border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground ${TRANSITION} ${FOCUS_RING}`;
+
+/** The "+" at the end of a pick-from-a-list row (the designer's product picker,
+ *  the product form's add to order). Dims when there is no room for another. */
+export const addIconButtonClass = cn(iconButtonClass, "size-8 shrink-0 disabled:pointer-events-none disabled:opacity-40");
+
+/** That "+" once its row is in: a filled check, pressed again to take it off. */
+export const addedIconButtonClass = cn(
+  iconButtonClass,
+  "size-8 shrink-0 border-foreground bg-foreground text-background hover:bg-foreground/85 hover:text-background",
+);
 
 /** Puts a text button at iconButtonClass's 36px, so a bar mixing icon and text
  *  controls (the editor's top bar) sits level instead of at the 40px default. */
@@ -161,6 +177,10 @@ export const tooltipArrowDownClass = "border-b border-r border-border";
  *  pointer. Positioned `fixed` and placed from JS (see Tooltip), so it is
  *  never clipped by a scrolling side panel. */
 export const tooltipBubbleClass = `${tooltipSurfaceClass} pointer-events-none fixed z-50 max-w-[calc(100vw-1rem)] px-2 py-1 font-inter text-xs font-medium leading-snug`;
+
+/** The same bubble holding a sentence instead of a word (Tooltip `hint`):
+ *  wraps at the "?" tip's column rather than running on one line. */
+export const tooltipHintBubbleClass = cn(tooltipBubbleClass, "w-max max-w-64");
 
 /* --- Toolbar tip: a compact label above an icon-only control ------------
    The same bubble, done in pure CSS with no portal — every caller today lives
@@ -287,6 +307,14 @@ export const cautionNoticeClass =
  *  something the person must act on (2FA off after recovery, an unknown factor). */
 export const dangerNoticeClass =
   "flex items-start gap-3 border border-destructive/40 bg-destructive/5 px-4 py-3";
+
+/** A link inside a sentence of help or legal text. */
+export const inlineLinkClass =
+  "font-medium text-foreground underline underline-offset-2 hover:no-underline";
+
+/** A key named in a sentence of help ("Press Tab", "Ctrl K" in the tour). */
+export const kbdClass =
+  "rounded-sm border border-border bg-muted px-1.5 py-0.5 font-inter text-xs font-medium text-foreground";
 
 /** A small way out or way around, set under the main control as a quiet
  *  underlined link ("Not you? Sign out", "Use a code instead"). */

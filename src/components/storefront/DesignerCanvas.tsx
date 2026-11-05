@@ -7,6 +7,7 @@ import { ShoppingBag } from "lucide-react";
 import type { Product } from "@/types/product";
 import type { PagePhotoView } from "@/types/product-page";
 import { pagePhotoView } from "@/lib/storefront/product-page";
+import { resolveTileLook } from "@/lib/storefront/tile-look";
 import {
   blockKey,
   isFreelyArranged,
@@ -55,6 +56,7 @@ import { BlockTile } from "./BlockTile";
 import type { SpotDrop, SpotToken } from "./TileSpotDragLayer";
 import { CustomFontFace } from "./CustomFontFace";
 import { StorefrontMasthead } from "./StorefrontMasthead";
+import { SuggestedTile } from "./SuggestedTile";
 import { resolveBackgroundStyle } from "./background-presets";
 import {
   blockTileClipStyle,
@@ -62,7 +64,8 @@ import {
   scaledCornerRadius,
   tileClipStyle,
 } from "./config-maps";
-import type { CanvasViewport } from "./useCanvasViewport";
+import { jumpToElement, type CanvasViewport } from "./useCanvasViewport";
+import { CanvasCameraProvider, type CanvasCamera } from "@/lib/storefront/canvas-camera";
 import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
 
 
@@ -148,6 +151,8 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   onRotateBlock,
   onEmptyCellClick,
   onAddProduct,
+  suggestedProduct,
+  onAcceptSuggestion,
   selectedKeys,
   onSelectBlock,
   onSelectMany,
@@ -179,9 +184,6 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   storefrontName = "",
   productPage,
   checkoutPage,
-  checkoutFor = null,
-  onToggleCheckout,
-  onCloseCheckout,
   onCheckoutPageChange,
   celebrationPlays = 0,
   shippingPolicy = {},
@@ -233,6 +235,10 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   /** Opens the product picker. Drives the empty state's CTA; omitted in
    *  read-only renders, where there is nothing to add. */
   onAddProduct?: () => void;
+  /** The product an empty board offers instead of its empty state (see
+   *  lib/predictions), and what taking it does. Never a block. */
+  suggestedProduct?: Product | null;
+  onAcceptSuggestion?: (productId: string) => void;
   /** Keys of the blocks currently open in the inspector panel. */
   selectedKeys: readonly string[];
   /** Click selection; `additive` = shift-click (add/remove, not replace). */
@@ -300,12 +306,6 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   productPage?: ProductPageConfig;
   /** The checkout's design. Absent leaves the checkout artboards unrendered. */
   checkoutPage?: CheckoutPageConfig;
-  /** The product whose checkout and thank-you page are out beside its page:
-   *  one at a time, since there is one checkout design per storefront. View
-   *  state, never saved. */
-  checkoutFor?: string | null;
-  onToggleCheckout?: (productId: string) => void;
-  onCloseCheckout?: () => void;
   /** The checkout's words, typed straight onto its artboards. */
   onCheckoutPageChange?: (next: CheckoutPageConfig) => void;
   /** Bumped by the panel's "Play it": replays the thank-you celebration. */
@@ -660,6 +660,9 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   // Which blocks sit under a product on the same cells, and so take its
   // corners. Once per board like the depths above, not once per cell.
   const covers = useMemo(() => tileCovers(theme, blocks), [theme, blocks]);
+  // What the cards borrow from the product page (its button, its stars),
+  // once per board and kept stable so the memoised tiles do not re-render.
+  const tileLook = useMemo(() => resolveTileLook({ theme, productPage }), [theme, productPage]);
 
   // Whether this board is arranged in a way a straight line cannot express.
   // Cheap enough to run per render on a 120-block board, and it has to follow
@@ -675,6 +678,16 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   // page sees them at the same believable scale rather than one shrinking to
   // fit whatever room is left.
   const isDesign = previewMode === "desktop";
+  // The first cell of an empty design board. The phone preview reflows, so it
+  // has no honest cell to offer and keeps the empty state.
+  const suggestion =
+    isDesign && blocks.length === 0 && suggestedProduct && onAcceptSuggestion
+      ? {
+          x: 0,
+          y: 0,
+          node: <SuggestedTile product={suggestedProduct} theme={theme} onAccept={onAcceptSuggestion} />,
+        }
+      : undefined;
   const desktopBoardWidth =
     theme.columns * DESIGN_CELL_PX +
     (theme.columns - 1) * theme.gridGap +
@@ -716,10 +729,11 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     return ids;
   }, [blocks]);
 
-  // The checkout chain hangs off ONE open product page. A checkout whose page
-  // has been closed (or whose product has gone) is simply not drawn.
-  const checkoutId =
-    checkoutPage && checkoutFor && openProductIds.includes(checkoutFor) ? checkoutFor : null;
+  // THE BUYER FLOW: a page out on the canvas brings the checkout and thank-you
+  // page with it. Chained onto the NEWEST page only, since there is one checkout
+  // design per storefront and a second chain would show it twice; if that page
+  // closes, the chain falls back to the one before it.
+  const checkoutId = checkoutPage ? (openProductIds.at(-1) ?? null) : null;
 
   // A stored photo with the display URL this session holds for it.
   const photoView = (photo: PagePhoto | undefined): PagePhotoView | null =>
@@ -748,7 +762,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                 thanksPhoto: photoView(checkoutPage.thanksBackgroundImage),
                 widths: pageWidths,
                 initialDevice: previewMode,
-                onClose: () => onCloseCheckout?.(),
+                onClose: () => onClosePage?.(id),
                 onCheckoutPageChange,
               }
             : null;
@@ -770,8 +784,6 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             customFontUrl={customFontUrl}
             pagePhoto={photoView(productPage.backgroundImage)}
             onClose={() => onClosePage?.(id)}
-            checkoutOpen={id === checkoutId}
-            onToggleCheckout={checkoutPage && onToggleCheckout ? () => onToggleCheckout(id) : undefined}
           />,
           // The checkout and its thank-you, right after the page they follow.
           ...(chain
@@ -798,18 +810,20 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   ];
 
   // What can move either end of a line without the connectors hearing about
-  // it: which pages are out, and where the tiles sit on the board.
+  // it: which pages are out (the chain follows from those), and where the tiles
+  // sit on the board.
+  const hasCheckoutChain = checkoutPage !== undefined;
   const connectorRevision = useMemo(
     () =>
       [
         openProductIds.join(","),
-        checkoutId ?? "",
+        hasCheckoutChain,
         theme.columns,
         theme.rows,
         theme.gridGap,
         blocks.map((block) => `${block.x},${block.y},${block.w},${block.h}`).join("|"),
       ].join("~"),
-    [openProductIds, checkoutId, theme.columns, theme.rows, theme.gridGap, blocks],
+    [openProductIds, hasCheckoutChain, theme.columns, theme.rows, theme.gridGap, blocks],
   );
 
   const canvas = (
@@ -876,7 +890,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
           onEditDone={endHeaderEdit}
         />
 
-        {blocks.length === 0 ? (
+        {blocks.length === 0 && !suggestion ? (
           <div className="flex min-h-64 flex-col items-center justify-center rounded-sm border border-dashed border-border bg-background/60 p-6 text-center">
             <div className="mb-4 flex size-12 items-center justify-center rounded-full border border-border bg-background shadow-xs">
               <ShoppingBag
@@ -915,6 +929,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             // the Layer controls decide which one paints over the other.
             allowOverlap
             showEmptyCells={showGrid}
+            suggestion={suggestion}
             blocks={gridBlocks}
             ariaLabel={t("canvas.gridLabel")}
             columns={theme.columns}
@@ -983,6 +998,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                 block={gridBlock.data}
                 product={productFor(gridBlock.data)}
                 theme={theme}
+                look={tileLook}
                 imageUrl={elementUrls?.[gridBlock.key] ?? null}
                 editable={state.editable}
                 isEditing={selectedKeys.includes(gridBlock.key)}
@@ -1100,6 +1116,12 @@ function Stage({
     },
     [viewport],
   );
+  // What lets a link on one of the pages move the camera rather than scroll
+  // the page under its own clipping card (see canvas-camera).
+  const camera = useMemo<CanvasCamera | null>(
+    () => (viewport ? { jumpTo: (target) => jumpToElement(viewport, target) } : null),
+    [viewport],
+  );
 
   return (
     <div
@@ -1145,7 +1167,9 @@ function Stage({
           about the board is on screen any more; in a row they stay at the
           board's own eye level, and panning right walks through them. */}
       {artboards.length > 0 && (
-        <div className="flex items-start gap-24">{artboards}</div>
+        <CanvasCameraProvider value={camera}>
+          <div className="flex items-start gap-24">{artboards}</div>
+        </CanvasCameraProvider>
       )}
     </div>
   );

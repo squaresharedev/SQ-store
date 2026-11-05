@@ -3,7 +3,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import {
   BIO_MAX,
   DELETE_CONFIRM_PHRASES,
-  EU_COUNTRY_CODES,
+  OPERATING_COUNTRY_CODES,
   LEGAL_VERSION,
   SELLER_FIELD_MAX,
   isDeleteConfirmPhrase,
@@ -130,7 +130,7 @@ export const taxSchema = z.strictObject({
   ),
   tax_country: z
     .string()
-    .refine((v) => v === "" || (EU_COUNTRY_CODES as string[]).includes(v), {
+    .refine((v) => v === "" || (OPERATING_COUNTRY_CODES as string[]).includes(v), {
       message: issueKey("Validation.settings.pickCountry"),
     })
     .transform((v) => (v === "" ? null : v)),

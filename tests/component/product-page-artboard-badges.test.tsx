@@ -18,7 +18,12 @@ const BADGES: ProductBadge[] = [
 vi.mock("@/lib/products/preview-actions", () => ({
   getProductPagePreviewData: async () => {
     const product = harnessProduct(false);
-    return { ok: true, product: { ...product, details: { ...product.details, badges: BADGES } } };
+    return {
+      ok: true,
+      product: { ...product, details: { ...product.details, badges: BADGES } },
+      addOns: [],
+      hidden: [],
+    };
   },
 }));
 

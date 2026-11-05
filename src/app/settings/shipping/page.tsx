@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { ShippingSection } from "@/components/settings/ShippingSection";
 import { requireUser } from "@/lib/auth/session";
+import { predictShippingDefaults } from "@/lib/predictions";
+import { listRecentProductFacts } from "@/lib/products/queries";
+import { getSellerIdentity } from "@/lib/settings/seller-identity";
 import { getShippingPolicy } from "@/lib/settings/shipping-policy";
 import { getPrimaryStorefrontId } from "@/lib/storefront/queries";
 
@@ -19,9 +22,11 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function ShippingSettingsPage() {
   const user = await requireUser("/settings/shipping");
-  const [policy, storefrontId] = await Promise.all([
+  const [policy, storefrontId, recentProducts, identity] = await Promise.all([
     getShippingPolicy(user.id),
     getPrimaryStorefrontId(),
+    listRecentProductFacts(user.id),
+    getSellerIdentity(user.id),
   ]);
 
   return (
@@ -30,6 +35,10 @@ export default async function ShippingSettingsPage() {
       // Where "Continue to your storefront" goes after a successful save: the
       // storefront the seller last worked on, or the list if they have none.
       continueHref={storefrontId ? `/storefront/${storefrontId}` : "/storefront"}
+      suggested={predictShippingDefaults(
+        recentProducts.map((product) => product.currency),
+        identity.country,
+      )}
     />
   );
 }

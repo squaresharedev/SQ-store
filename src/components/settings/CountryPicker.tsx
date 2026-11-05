@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEuCountries } from "@/components/settings/use-eu-countries";
+import { useOperatingCountries } from "@/components/settings/use-operating-countries";
 import { CheckboxListPanel, type CheckboxListItem } from "@/components/ui/CheckboxListPanel";
 import { SHIPPING_COUNTRY_CODES } from "@/lib/settings/constants";
 import { SHIP_ANYWHERE } from "@/types/shipping-policy";
@@ -13,9 +13,8 @@ import { SHIP_ANYWHERE } from "@/types/shipping-policy";
  * "*" is the SHIP_ANYWHERE sentinel ("Everywhere else"). It lives at the TOP
  * of the list so it is easy to spot rather than buried at the end of 36 codes.
  *
- * Country names come from the browser's Intl.DisplayNames via useEuCountries,
- * which returns the reader's locale. For non-EU codes (GB, US, etc.) not in
- * that list, `countryName(code)` falls back to the raw ISO code.
+ * Country names come from the browser's Intl.DisplayNames via
+ * useOperatingCountries, in the reader's locale.
  */
 
 type CountryPickerProps = {
@@ -29,7 +28,7 @@ type CountryPickerProps = {
 
 export function CountryPicker({ value, onChange, summaryLabel, disabled }: CountryPickerProps) {
   const t = useTranslations("Settings");
-  const { countryName } = useEuCountries();
+  const { countryName } = useOperatingCountries();
 
   const items: CheckboxListItem<string>[] = [
     // Catch-all "*" first.

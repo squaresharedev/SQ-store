@@ -16,6 +16,7 @@ import {
   Layers,
   Link2,
   Package,
+  PackagePlus,
   Pencil,
   Plus,
   Ruler,
@@ -38,8 +39,17 @@ import { OptionsField } from "./OptionsField";
 import { OptionSpecsField } from "./OptionSpecsField";
 import { DetailsFields } from "./DetailsFields";
 import { SafetyFields } from "./SafetyFields";
+import type { AddOnHabits, ProductSuggestions } from "@/lib/predictions";
 import { DocumentsField } from "./DocumentsField";
 import { BadgesField } from "./BadgesField";
+import { StarterSuggestions, type Starter } from "./StarterSuggestions";
+import { AiUpsellChip, DescriptionAiChip } from "./DescriptionAiChip";
+import { descriptionFacts } from "./description-facts";
+import { useDescriptionCompletion } from "./use-description-completion";
+import { SuggestingTextarea } from "@/components/ui/SuggestingTextarea";
+import { saveSuggestAsYouType } from "@/lib/settings/actions";
+import { AddOnsField } from "./AddOnsField";
+import type { AddOnChoice } from "@/lib/products/add-on-choices";
 import {
   badgesSnapshot,
   badgesToInput,
@@ -202,6 +212,7 @@ type FormProduct = Product &
       | "documents"
       | "purchaseUrl"
       | "shippingProfileId"
+      | "addOnIds"
     >
   >;
 
@@ -226,12 +237,22 @@ function initialDocuments(product?: FormProduct): DocumentFormValue[] {
   }));
 }
 
-function initialValues(product?: Product, canPublish = true): ProductFormValues {
+/** What the details start as: a new product takes the units the store uses. */
+function initialDetails(product?: FormProduct, seed?: ProductSuggestions): DetailsFormValues {
+  const values = initialDetailsValues(product?.details);
+  return {
+    ...values,
+    dimensionUnit: seed?.dimensionUnit ?? values.dimensionUnit,
+    weightUnit: seed?.weightUnit ?? values.weightUnit,
+  };
+}
+
+function initialValues(product?: Product, canPublish = true, seed?: ProductSuggestions): ProductFormValues {
   return {
     title: product?.title ?? "",
     description: product?.description ?? "",
     price: product ? product.price.toFixed(2) : "",
-    currency: product?.currency ?? "EUR",
+    currency: product?.currency ?? seed?.currency ?? "EUR",
     // Common-answer default: new products go live on save. Existing products
     // keep whatever the seller chose — INCLUDING `active` for one that went
     // live before the store's trader details were cleared, because showing it
@@ -241,8 +262,10 @@ function initialValues(product?: Product, canPublish = true): ProductFormValues 
     trackStock: product?.trackStock ?? false,
     stockQuantity:
       product?.stockQuantity != null ? String(product.stockQuantity) : "",
-    lowStockThreshold: String(product?.lowStockThreshold ?? LOW_STOCK_THRESHOLD_DEFAULT),
-    maxPerOrder: String(product?.maxPerOrder ?? MAX_PER_ORDER_DEFAULT),
+    lowStockThreshold: String(
+      product?.lowStockThreshold ?? seed?.lowStockThreshold ?? LOW_STOCK_THRESHOLD_DEFAULT,
+    ),
+    maxPerOrder: String(product?.maxPerOrder ?? seed?.maxPerOrder ?? MAX_PER_ORDER_DEFAULT),
   };
 }
 
@@ -500,10 +523,33 @@ export function ProductForm({
   shippingPolicy = EMPTY_SHIPPING_POLICY,
   missingTraderDetails = [],
   returnTo = null,
+  addOnChoices,
+  addOnHabits,
+  suggested,
+  aiSuggestions = false,
+  suggestAsYouType = false,
+  aiUpsell = false,
 }: {
   product?: FormProduct;
+  /** A new product's better defaults (lib/predictions). Ignored when editing. */
+  suggested?: ProductSuggestions;
+  /** AI writing help for the description (a Pro perk, decided on the server
+   *  by lib/ai-suggestions.ts; the actions check again). */
+  aiSuggestions?: boolean;
+  /** With aiSuggestions: grey next words while typing, unless this person
+   *  turned them off (their own switch, Settings > Plan & billing). */
+  suggestAsYouType?: boolean;
+  /** On a plan without AI writing help: the quiet "Write with AI · Pro" link
+   *  where the chip would be. */
+  aiUpsell?: boolean;
   /** The store's shipping terms and named profiles, read on the server. */
   shippingChoices?: ShippingChoices;
+  /** The store's products for "Add to order", read on the server. Absent
+   *  (a caller that did not load them) leaves the stored add-ons untouched. */
+  addOnChoices?: readonly AddOnChoice[];
+  /** What the store's history says goes with this product, for the one-tap
+   *  suggestion over that list (lib/predictions.ts). Absent offers none. */
+  addOnHabits?: AddOnHabits;
   /** The full policy document, only used to seed the shipping-terms modal. */
   shippingPolicy?: SellerShippingPolicy;
   /** Trader details this store still owes buyers, from the server. Non-empty
@@ -525,9 +571,10 @@ export function ProductForm({
   const resolveMessage = useResolveMessage();
 
   const canPublish = missingTraderDetails.length === 0;
+  const seed = product ? undefined : suggested;
 
   const [values, setValues] = useState<ProductFormValues>(() =>
-    initialValues(product, canPublish),
+    initialValues(product, canPublish, seed),
   );
   // The product page's facts, held apart from `values`: the gallery carries
   // Files, and the details are their own tree of in-progress strings.
@@ -539,9 +586,7 @@ export function ProductForm({
       options: group.options.map((option) => ({ ...option })),
     })),
   );
-  const [details, setDetails] = useState<DetailsFormValues>(() =>
-    initialDetailsValues(product?.details),
-  );
+  const [details, setDetails] = useState<DetailsFormValues>(() => initialDetails(product, seed));
   // Stored inside the details, held apart here like the gallery: each row has
   // a key of its own that the dirty check and the save leave out.
   const [badges, setBadges] = useState<BadgeFormValue[]>(() => initialBadges(product?.details));
@@ -555,8 +600,10 @@ export function ProductForm({
   // Null = the store's default shipping terms, which is what nearly every
   // product uses and what a new one starts on.
   const [shippingProfileId, setShippingProfileId] = useState<string | null>(
-    product?.shippingProfileId ?? null,
+    product?.shippingProfileId ?? seed?.shippingProfileId ?? null,
   );
+  // "Add to order": other products of the store, in the seller's order.
+  const [addOnIds, setAddOnIds] = useState<string[]>(() => product?.addOnIds ?? []);
   const [detailsErrors, setDetailsErrors] = useState<DetailsFieldErrors>({});
   /** One message per option id, shown on the version that carries it. */
   const [optionDetailErrors, setOptionDetailErrors] = useState<Record<string, string>>({});
@@ -635,8 +682,8 @@ export function ProductForm({
   // reads as already-edited for a store that may not publish yet — and the
   // leave guard then challenges someone who has typed nothing.
   const pristine = useMemo(
-    () => JSON.stringify(initialValues(product, canPublish)),
-    [product, canPublish],
+    () => JSON.stringify(initialValues(product, canPublish, seed)),
+    [product, canPublish, seed],
   );
   const pristinePage = useMemo(
     () =>
@@ -645,12 +692,13 @@ export function ProductForm({
         documents: initialDocuments(product).map(({ key, label }) => ({ key, label })),
         optionGroups: product?.optionGroups ?? [],
         badges: badgesSnapshot(initialBadges(product?.details)),
-        details: initialDetailsValues(product?.details),
+        details: initialDetails(product, seed),
         optionDetails: initialOptionDetails(product?.optionGroups ?? []),
         purchaseUrl: product?.purchaseUrl ?? "",
-        shippingProfileId: product?.shippingProfileId ?? null,
+        shippingProfileId: product?.shippingProfileId ?? seed?.shippingProfileId ?? null,
+        addOnIds: product?.addOnIds ?? [],
       }),
-    [product],
+    [product, seed],
   );
   const pageState = JSON.stringify({
     gallery: gallery.map(({ key, alt, optionId }) => ({ key, alt, optionId })),
@@ -661,6 +709,7 @@ export function ProductForm({
     optionDetails,
     purchaseUrl,
     shippingProfileId,
+    addOnIds,
   });
   const dirty =
     !saved &&
@@ -692,6 +741,37 @@ export function ProductForm({
   /** A digital product still waiting on the file buyers will download. */
   const needsFile = isDigital && !hasDigitalFile;
 
+  // AI WRITING HELP reads the form as facts, labelled the way the form shows
+  // them to this seller: the draft chip, the grey next words and the upsell.
+  const listingFacts = descriptionFacts(
+    { optionGroups, details, badges, isDigital },
+    {
+      materials: t("form.summary.materials"),
+      madeIn: t("form.summary.madeIn"),
+      care: t("form.summary.care"),
+      contents: t("form.summary.contents"),
+      dimensions: t("form.summary.dimensions"),
+      weight: t("form.summary.weight"),
+      badges: t("form.sections.badges.label"),
+      kind: t("form.kind.legend"),
+      download: t("form.kind.digital"),
+    },
+  );
+  const [asYouType, setAsYouType] = useState(aiSuggestions && suggestAsYouType);
+  const suggestNextWords = useDescriptionCompletion({ title: values.title, facts: listingFacts, enabled: asYouType });
+
+  /** "Turn off" under the field: this person's switch, saved at once. */
+  async function turnOffAsYouType() {
+    setAsYouType(false);
+    const result = await saveSuggestAsYouType(false).catch(() => ({ error: unexpectedError() }));
+    if (result.error) {
+      setAsYouType(true);
+      showActionError(result.error);
+      return;
+    }
+    toast.success(t("form.ai.asYouTypeOff"));
+  }
+
   // THE FORM AS ONE OBJECT, built from the state above and used twice: by the
   // section headers and the index rail a seller scans, and by the JSON island
   // an assistant reads. One computation, so the two cannot disagree about
@@ -705,6 +785,7 @@ export function ProductForm({
     gallery,
     documents,
     badges,
+    addOnIds,
     details,
     optionDetails,
     purchaseUrl,
@@ -951,6 +1032,23 @@ export function ProductForm({
     if (guess) updateField("title", guess);
   }
 
+  /** A head-start tap: fill what it filled, open the sections that now hold
+   *  something without moving the page, and say which ones it opened. */
+  function applyStarter(next: Starter, open: readonly ExtraSectionId[]): ExtraSectionId[] {
+    updateOptionGroups(next.optionGroups);
+    updateDetails(next.details);
+    const opened = open.filter((id) => !openedExtras.has(id));
+    setOpenedExtras((previous) => new Set([...previous, ...opened]));
+    return opened;
+  }
+
+  /** Its undo: the form as it was, and the sections it opened closed again. */
+  function undoStarter(before: Starter, opened: readonly ExtraSectionId[]) {
+    updateOptionGroups(before.optionGroups);
+    updateDetails(before.details);
+    setOpenedExtras((previous) => new Set([...previous].filter((id) => !opened.includes(id))));
+  }
+
   function openExtra(id: ExtraSectionId) {
     setOpenedExtras((previous) => new Set(previous).add(id));
     // After the render that puts the section on the page.
@@ -1103,6 +1201,15 @@ export function ProductForm({
         // added is dropped rather than stored where nothing will read it —
         // the same rule the safety block follows.
         shippingProfileId: isDigital ? null : shippingProfileId,
+        // Only what the catalogue still holds: an add-on deleted since is
+        // dropped here. Without the catalogue the stored list is left alone.
+        ...(addOnChoices
+          ? {
+              addOnIds: addOnIds.filter((id) =>
+                addOnChoices.some((choice) => choice.id === id),
+              ),
+            }
+          : {}),
         title: values.title.trim(),
         description: values.description.trim(),
         // The form shows decimal major units; the DB stores integer cents.
@@ -1395,6 +1502,18 @@ export function ProductForm({
                   {errors.title}
                 </p>
               )}
+              {/* A new product's head start: "Same as" the last one, and the
+                  sizes a title like "Linen shirt" is plainly sold in. */}
+              {!product && (
+                <StarterSuggestions
+                  sameAs={seed?.sameAs}
+                  title={values.title}
+                  isDigital={isDigital}
+                  current={{ optionGroups, details }}
+                  onApply={applyStarter}
+                  onUndo={undoStarter}
+                />
+              )}
             </div>
 
             {/* Price beside the title rather than in a section of its own:
@@ -1422,15 +1541,35 @@ export function ProductForm({
                 </span>
                 {fixMark("description")}
               </label>
-              <textarea
+              <SuggestingTextarea
                 id={`${fieldId}-description`}
                 value={values.description}
-                onChange={(event) => updateField("description", event.target.value)}
+                onChange={(description) => updateField("description", description)}
+                suggest={suggestNextWords}
+                labels={{
+                  idle: t("form.ai.asYouTypeIdle"),
+                  offered: t("form.ai.asYouTypeOffered"),
+                  accept: t("form.ai.asYouTypeAccept"),
+                  announce: t("form.ai.asYouTypeAnnounce"),
+                  turnOff: t("form.ai.asYouTypeTurnOff"),
+                }}
+                onTurnOff={() => void turnOffAsYouType()}
                 rows={3}
                 placeholder={t("form.descriptionPlaceholder")}
                 data-product-field="description"
                 className={cn(fieldBaseClass, "resize-y")}
               />
+              {aiSuggestions && (
+                <DescriptionAiChip
+                  title={values.title}
+                  description={values.description}
+                  facts={listingFacts}
+                  onChange={(description) => updateField("description", description)}
+                />
+              )}
+              {aiUpsell && (
+                <AiUpsellChip title={values.title} description={values.description} facts={listingFacts} />
+              )}
             </div>
           </div>
         </div>
@@ -1675,6 +1814,7 @@ export function ProductForm({
             error={errors.badges}
             previewImageUrl={pickedCover ?? product?.imageUrl ?? null}
             previewTitle={values.title}
+            own={seed?.badges}
           />
         </FormSection>
       )}
@@ -1731,6 +1871,20 @@ export function ProductForm({
         }))}
         onOpen={openExtra}
       />
+
+      <FormSection {...section("addOns")} icon={PackagePlus}>
+        <AddOnsField
+          inputId={`${fieldId}-add-ons`}
+          productId={product?.id ?? null}
+          isDigital={isDigital}
+          currency={values.currency}
+          ownBuyLink={purchaseUrl.trim() !== ""}
+          choices={addOnChoices ?? []}
+          habits={addOnHabits}
+          value={addOnIds}
+          onChange={setAddOnIds}
+        />
+      </FormSection>
 
       <FormSection
         {...section("visibility")}

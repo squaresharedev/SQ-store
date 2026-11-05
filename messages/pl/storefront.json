@@ -104,7 +104,8 @@
       "cards": "Witryna / Kafelki produktów",
       "soldOut": "Witryna / Wyprzedane",
       "productPage": "Witryna / Strona produktu",
-      "checkoutPage": "Witryna / Kasa"
+      "checkoutPage": "Witryna / Kasa",
+      "blocks": "Witryna / Bloki"
     },
     "labels": {
       "looks": "Wygląd witryny",
@@ -151,7 +152,16 @@
       "productPagePhoto": "Zdjęcie strony produktu",
       "checkoutPhoto": "Zdjęcie kasy",
       "thanksPhoto": "Zdjęcie strony z podziękowaniem",
-      "chipScale": "Ten sam rozmiar etykiet na wszystkich kartach"
+      "chipScale": "Ten sam rozmiar etykiet na wszystkich kartach",
+      "productPageAddOns": "Dodaj do swojego zamówienia",
+      "productPageStars": "Kolor gwiazdek opinii",
+      "cardHoverEffect": "Efekt po najechaniu kursorem",
+      "cardSecondPhoto": "Drugie zdjęcie po najechaniu kursorem",
+      "cardBuyButton": "Przycisk zakupu na kafelkach",
+      "cardStarRating": "Ocena w gwiazdkach na kafelkach",
+      "cardLowStock": "Etykieta Ostatnie sztuki",
+      "textSpacing": "Odstęp między literami i wysokość wiersza",
+      "elementBlur": "Rozmycie"
     }
   },
   "editorSearch": {
@@ -214,6 +224,7 @@
     "domainsLabel": "Dozwolone domeny",
     "domainsPlaceholder": "twojastrona.com, blog.twojastrona.com",
     "domainsHint": "Maksymalnie {max}, oddzielone przecinkami. Wklej adres URL, a przytniemy go do samej domeny.",
+    "sameAsHint": "Kopiuje dozwolone domeny, które ma {title}.",
     "emptyDomainsWarning": "Dodaj co najmniej jedną domenę. Dopóki lista jest pusta, witryna nie wczyta się nigdzie, mimo że osadzenie jest włączone.",
     "builderLabel": "Twój kreator stron",
     "builderOther": "Inna strona",
@@ -310,14 +321,11 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Strona produktu",
-    "closeAriaLabel": "Zamknij stronę produktu: {title}",
+    "closeAriaLabel": "Zamknij ścieżkę zakupu: {title}",
     "desktopSize": "Rozmiar na komputer",
     "mobileSize": "Rozmiar na telefon",
     "checkoutLabel": " · Kasa",
-    "thanksLabel": " · Dziękujemy",
-    "openCheckout": "Kasa",
-    "openCheckoutAriaLabel": "Otwórz kasę dla: {title}",
-    "closeCheckoutAriaLabel": "Zamknij kasę"
+    "thanksLabel": " · Dziękujemy"
   },
   "customFont": {},
   "metadata": {
@@ -765,7 +773,8 @@
         "returns": "Zwroty",
         "safety": "Bezpieczeństwo i zgodność",
         "reviews": "Opinie",
-        "seller": "Sprzedawca"
+        "seller": "Sprzedawca",
+        "addOns": "Dodaj do swojego zamówienia"
       },
       "availability": "Dostępność",
       "soldByByline": "Podpis „Sprzedawca:”"
@@ -794,6 +803,42 @@
       "look": "Wygląd",
       "style": "Styl",
       "besidePrice": "Przy cenie"
+    },
+    "addOns": {
+      "title": "Dodaj do swojego zamówienia",
+      "infoLabel": "Czym jest Dodaj do swojego zamówienia",
+      "infoContent": "Inne produkty, które kupujący może dodać do tego samego zamówienia ze strony produktu. Każdy produkt ma własną listę: każde kliknięcie zapisuje się od razu, we wszystkich witrynach, w których jest ten produkt.",
+      "show": "Pokaż tę sekcję",
+      "heading": {
+        "label": "Nagłówek",
+        "charsLeft": "{count, plural, one {Pozostał # znak} few {Pozostały # znaki} many {Pozostało # znaków} other {Pozostało # znaku}}"
+      },
+      "layout": {
+        "label": "Wygląd",
+        "list": "Wiersze",
+        "tiles": "Kafelki"
+      },
+      "placement": {
+        "label": "Położenie",
+        "beforeButton": "Nad przyciskiem",
+        "afterButton": "Pod przyciskiem"
+      },
+      "products": {
+        "offeredWith": "Oferowane z produktem",
+        "offeredWithOne": "Oferowane z produktem {title}",
+        "ownLink": "Ukryte: Kup teraz prowadzi do Twojego linku.",
+        "noPage": "Otwórz stronę produktu na płótnie, aby wybrać, co oferuje.",
+        "loadFailed": "Nie udało się wczytać Twoich produktów."
+      }
+    },
+    "reviews": {
+      "title": "Opinie",
+      "infoLabel": "Co możesz zmienić w opiniach",
+      "infoContent": "Opinie kupujących na dole strony produktu. Kolor gwiazdek dotyczy też oceny pod nazwą produktu.",
+      "show": "Pokaż tę sekcję",
+      "starColor": "Kolor gwiazdek",
+      "defaultStarColor": "Domyślny żółty",
+      "useDefaultStarColor": "Użyj domyślnego żółtego"
     }
   },
   "productBlock": {
@@ -813,8 +858,8 @@
       "lowStock": "Niski stan: {count} sztuk.",
       "inStock": "{count} dostępnych."
     },
-    "openProductPage": "Otwórz stronę produktu",
-    "hideProductPage": "Ukryj stronę produktu",
+    "openProductPage": "Otwórz ścieżkę zakupu",
+    "hideProductPage": "Ukryj ścieżkę zakupu",
     "tileStyle": {
       "title": "Styl kafelka",
       "reset": "Przywróć motyw",
@@ -881,6 +926,23 @@
       "label": "Opis",
       "placeholder": "Logo, ikona, dekoracja…",
       "hint": "Odczytywane na głos przez czytniki ekranu. Zostaw puste, jeśli obraz jest czysto dekoracyjny."
+    }
+  },
+  "blur": {
+    "label": "Rozmycie",
+    "photo": "Rozmycie zdjęcia",
+    "shadow": "Rozmycie cienia",
+    "shadowTip": "Zmiękcza zdjęcie za nazwą i ceną.",
+    "off": "Brak",
+    "valueText": "{value} na 100",
+    "direction": "Kierunek",
+    "directionAriaLabel": "Kierunek rozmycia",
+    "directions": {
+      "all": "Wszędzie",
+      "top": "Od góry",
+      "bottom": "Od dołu",
+      "left": "Od lewej",
+      "right": "Od prawej"
     }
   },
   "shapeBlock": {
@@ -951,10 +1013,10 @@
     "uploadImage": "Prześlij obraz",
     "allShapes": "Wszystkie kształty",
     "browseShapes": "Przeglądaj pełną bibliotekę kształtów",
-    "closePage": "Zamknij stronę produktu",
-    "showPage": "Pokaż stronę produktu",
-    "closePages": "Zamknij strony produktów",
-    "showPageFull": "Pokaż stronę produktu",
+    "closePage": "Zamknij ścieżkę zakupu",
+    "showPage": "Pokaż ścieżkę zakupu",
+    "closePages": "Zamknij stronę produktu, kasę i stronę z podziękowaniem",
+    "showPageFull": "Pokaż stronę produktu, kasę i stronę z podziękowaniem",
     "undo": "Cofnij",
     "undoTip": "Cofnij (Ctrl+Z)",
     "redo": "Ponów",
@@ -969,25 +1031,18 @@
     "zoomIn": "Powiększ",
     "zoomInTip": "Powiększ (Ctrl +)",
     "designSettings": "Ustawienia projektu",
-    "page": "Strona",
-    "moreTools": "Więcej narzędzi",
-    "checkout": "Kasa",
-    "showCheckout": "Pokaż kasę",
-    "closeCheckout": "Zamknij kasę",
-    "showCheckoutFull": "Pokaż kasę i stronę z podziękowaniem",
-    "closeCheckoutFull": "Zamknij kasę i stronę z podziękowaniem"
+    "page": "Ścieżka zakupu",
+    "moreTools": "Więcej narzędzi"
   },
   "selectionToolbar": {
     "toolsFor": "Narzędzia dla: {name}",
     "elements": "{count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}",
-    "hidePage": "Ukryj stronę",
-    "hidePages": "Ukryj strony",
-    "openPage": "Otwórz stronę",
-    "openPages": "Otwórz strony",
-    "openProductPage": "Otwórz stronę produktu: {name}",
-    "closeProductPage": "Zamknij stronę produktu: {name}",
-    "openProductPages": "Otwórz strony produktów dla: {count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}}",
-    "closeProductPages": "Zamknij strony produktów dla: {count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}}",
+    "hidePage": "Ukryj ścieżkę zakupu",
+    "openPage": "Otwórz ścieżkę zakupu",
+    "openProductPage": "Otwórz ścieżkę zakupu: {name}",
+    "closeProductPage": "Zamknij ścieżkę zakupu: {name}",
+    "openProductPages": "Otwórz ścieżkę zakupu dla: {count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}}",
+    "closeProductPages": "Zamknij ścieżkę zakupu dla: {count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}}",
     "editText": "Edytuj tekst",
     "editTextOf": "Edytuj tekst: {name}",
     "color": "Kolor",
@@ -998,19 +1053,18 @@
     "editCornersOf": "Edytuj zaokrąglenie rogów: {name}",
     "opacity": "Przezroczystość",
     "editOpacityOf": "Edytuj przezroczystość: {name}",
+    "blur": "Rozmycie",
+    "editBlurOf": "Edytuj rozmycie: {name}",
     "frame": "Przytnij i ustaw",
     "frameImageFor": "Przytnij i ustaw obraz: {name}",
     "duplicate": "Duplikuj",
     "duplicateNamed": "Duplikuj: {name}",
     "duplicateN": "Duplikuj {count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}",
     "removeFrom": "Usuń z siatki: {name}",
-    "removeN": "Usuń z siatki: {count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}",
-    "openCheckout": "Otwórz kasę",
-    "hideCheckout": "Ukryj kasę",
-    "openCheckoutFor": "Pokaż kasę: {name}",
-    "closeCheckoutFor": "Ukryj kasę: {name}"
+    "removeN": "Usuń z siatki: {count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}"
   },
   "canvas": {
+    "addSuggested": "Dodaj {title} do tej witryny",
     "gridLabel": "Obszar roboczy witryny",
     "emptyGrid": "Twoja siatka jest pusta",
     "emptyGridHint": "Dodaj produkt, aby zacząć układać witrynę. Tekst i kształty znajdziesz na pasku narzędzi poniżej.",
@@ -1377,5 +1431,45 @@
     "info": "Wyświetlane za stroną. Nakładka w kolorze strony zapewnia czytelność tekstu; wyłącz ją, by pokazać zdjęcie bez zmian.",
     "remove": "Usuń zdjęcie",
     "overlay": "Nakładka kolorystyczna"
+  },
+  "cardExtras": {
+    "hoverTitle": "Najechanie kursorem",
+    "shoppingTitle": "Zakupy",
+    "effect": "Efekt",
+    "effectAriaLabel": "Co robi kafelek po najechaniu kursorem",
+    "effects": {
+      "none": "Brak",
+      "lift": "Uniesienie",
+      "zoom": "Przybliżenie",
+      "tilt": "Przechylenie"
+    },
+    "effectTipLabel": "Jak działają efekty",
+    "effectTip": "Włącza się, gdy kupujący wskaże kafelek albo przejdzie do niego klawiszem Tab. Na telefonach i u osób, które wybrały mniej ruchu, kafelki stoją w miejscu.",
+    "secondPhoto": "Drugie zdjęcie",
+    "secondPhotoTipLabel": "Które zdjęcie się pokaże",
+    "secondPhotoTip": "Pokazuje kolejne zdjęcie produktu, gdy kupujący wskazuje kafelek. Produkty z jednym zdjęciem zostają bez zmian.",
+    "buyButton": "Przycisk zakupu",
+    "buyButtonAriaLabel": "Przycisk zakupu na kafelku",
+    "buyButtons": {
+      "none": "Wyłączony",
+      "solid": "Pełny",
+      "outline": "Obrys",
+      "link": "Link"
+    },
+    "buyButtonTipLabel": "Dokąd prowadzi przycisk",
+    "buyButtonTip": "Używa tekstu i koloru przycisku z Twojej strony produktu i otwiera stronę produktu.",
+    "rating": "Ocena w gwiazdkach",
+    "ratingTipLabel": "Skąd biorą się gwiazdki",
+    "ratingTip": "Z opinii kupujących. Pojawia się pod nazwą, gdy produkt ma pierwszą opinię.",
+    "ratingTipReviewsOff": "Opinie są wyłączone na Twojej stronie produktu, więc kafelki nie pokazują gwiazdek. Włącz je w Strona produktu, Opinie.",
+    "lowStock": "Ostatnie sztuki",
+    "lowStockTipLabel": "Kiedy pojawia się etykieta",
+    "lowStockTip": "Pokazuje Ostatnie sztuki, gdy produkt jest na swoim progu niskiego stanu lub poniżej, a przy zerze Wyprzedany. Kupujący nigdy nie widzą, ile sztuk zostało."
+  },
+  "textSpacing": {
+    "letterSpacing": "Odstęp między literami",
+    "lineHeight": "Wysokość wiersza",
+    "normal": "Normalny",
+    "valueText": "{value} procent rozmiaru tekstu"
   }
 }

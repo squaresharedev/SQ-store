@@ -10,7 +10,7 @@
  *                      factor API, and aal/amr/session_id claims)
  *        /rest/v1/*  → proxied to PostgREST
  *        everything else → 404
- *   4. `next dev` on :3100 pointed at the gateway
+ *   4. `next dev` on :3100 (or E2E_APP_PORT, see keys.mjs) pointed at the gateway
  *
  * The mock GoTrue mints real HS256 JWTs with the same claims hosted GoTrue
  * uses (sub/email/role), signed with a fixed test secret that PostgREST also
@@ -35,13 +35,12 @@ const REPO = join(__dirname, "..", "..", "..");
 
 import { REPLICA_INITDB_FLAGS } from "../../db/replica.mjs";
 import { trimNextCache } from "../../../scripts/trim-next-cache.ts";
-import { ANON_KEY, JWT_SECRET, SERVICE_KEY, signJwt } from "./keys.mjs";
+import { ANON_KEY, JWT_SECRET, NEXT_PORT, SERVICE_KEY, signJwt } from "./keys.mjs";
 import { newSecret, totpValid } from "./totp.mjs";
 
 const PG_PORT = 54322;
 const POSTGREST_PORT = 3111;
 const GATEWAY_PORT = 54321;
-const NEXT_PORT = 3100;
 const DB_NAME = "sqstore_e2e";
 
 const b64url = (buf) =>
@@ -639,6 +638,21 @@ async function handleAuth(req, res, url) {
 
   // ---- Users (the admin API, service role only) ------------------------------
 
+  // Every account, a page at a time, as auth.admin.listUsers asks for them
+  // (the Terms notice job, src/lib/legal/terms-notices.ts).
+  if (req.method === "GET" && path === "/admin/users") {
+    if (!requireServiceRole(req, res)) return;
+    const page = Number(url.searchParams.get("page") ?? 1);
+    const perPage = Number(url.searchParams.get("per_page") ?? 50);
+    const { rows } = await pool.query("select id from auth.users order by created_at, id limit $1 offset $2", [
+      perPage,
+      (page - 1) * perPage,
+    ]);
+    const users = [];
+    for (const { id } of rows) users.push(await userJson(await loadUser(id)));
+    return json(res, 200, { users, aud: "authenticated" });
+  }
+
   // The account as the admin API serialises it. The order writer reads a
   // seller's sign-in address this way for the "ship this" email
   // (src/lib/orders/record.ts).
@@ -825,6 +839,10 @@ const next = spawn(
       // blanked so nothing a spec types can leave the machine.
       MODERATION_TEST_PROVIDER: "1",
       ANTHROPIC_API_KEY: "",
+      // AI writing help: the dev-only stand-in (lib/suggestions/describe-
+      // listing.ts describeListingForTest), so a Pro seller's "Write with AI"
+      // runs the real action, plan check and budgets with no key.
+      AI_SUGGESTIONS_TEST_PROVIDER: "1",
       // Scheduled jobs (lib/ops/cron.ts): a fixed, obviously fake secret, so
       // specs can start a run the way the scheduler does.
       CRON_SECRET: "e2e-cron-secret-not-a-real-one-0123456789",

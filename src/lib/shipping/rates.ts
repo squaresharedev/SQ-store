@@ -207,6 +207,37 @@ export function quoteShipping(
 }
 
 /**
+ * Delivery for an ORDER of several posted products ("Add to your order"): one
+ * parcel, charged once, at the highest rate any of its products' shipping
+ * terms would charge. Every product is quoted with the order's whole items
+ * subtotal, so the free-over threshold is reached by the order, not by one
+ * line. If any product cannot be sent there, neither can the order.
+ */
+export function quoteOrderShipping(
+  policy: SellerShippingPolicy,
+  request: {
+    profileIds: readonly (string | null)[];
+    country: string;
+    subtotalCents: number;
+    currency: Currency;
+  },
+): ShippingQuote {
+  const profiles = [...new Set(request.profileIds.length > 0 ? request.profileIds : [null])];
+  let highest: ShippingQuote | null = null;
+  for (const profileId of profiles) {
+    const quote = quoteShipping(policy, {
+      profileId,
+      country: request.country,
+      subtotalCents: request.subtotalCents,
+      currency: request.currency,
+    });
+    if (!quote.ok) return quote;
+    if (!highest || (highest.ok && quote.rateCents > highest.rateCents)) highest = quote;
+  }
+  return highest!;
+}
+
+/**
  * What delivery will cost, said BEFORE the buyer has named a country: the
  * lowest rate any destination pays for this product, and whether every
  * destination pays that same rate ("Delivery €4.50" rather than "from").

@@ -127,6 +127,13 @@
       "description": "Ze krijgen binnen 14 dagen na de herroeping hun geld terug. Regel de retour en betaal de bestelling dan terug.",
       "action": "Herroepingen bekijken"
     },
+    "restock": {
+      "label": "{count, plural, one {{count} product bijna uitverkocht} other {{count} producten bijna uitverkocht}}",
+      "descriptionSingle": "In dit tempo is \"{title}\" over ongeveer {days, plural, one {# dag} other {# dagen}} uitverkocht.",
+      "descriptionMultiple": "\"{title}\" is als eerste op, over ongeveer {days, plural, one {# dag} other {# dagen}}.",
+      "actionSingle": "Voorraad bijwerken",
+      "actionMultiple": "Voorraad bekijken"
+    },
     "checkoutRates": {
       "label": "Stel je bezorgprijzen in",
       "description": "Kopers kunnen een fysiek product pas afrekenen als een bestemming zowel een tarief als een land heeft.",

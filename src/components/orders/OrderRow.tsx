@@ -107,6 +107,16 @@ export function OrderRow({
                   ? t("detail.packLine", { quantity: order.quantity, title: order.productTitle })
                   : order.productTitle}
               </span>
+              {/* Added to the order on the product page: the rest of the box. */}
+              {order.addOns.length > 0 && (
+                <span
+                  className={cn(badgeClass, "shrink-0 text-muted-foreground")}
+                  data-order-add-ons={order.addOns.length}
+                  title={order.addOns.map((line) => line.productTitle).join(", ")}
+                >
+                  {t("list.moreItems", { count: order.addOns.length })}
+                </span>
+              )}
               {/* The buyer has withdrawn: whatever this row was, it is now a
                   conversation, and the list must not read like plain work. */}
               {order.withdrawalRequestedAt && (

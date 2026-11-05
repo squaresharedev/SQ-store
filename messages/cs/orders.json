@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} objednávka} few {{total} objednávky} many {{total} objednávky} other {{total} objednávek}} · strana {page} z {totalPages}",
     "detailDialog": "Podrobnosti objednávky",
     "closeDetail": "Zavřít podrobnosti objednávky",
-    "withdrawn": "Odstoupeno"
+    "withdrawn": "Odstoupeno",
+    "moreItems": "+{count} dalších"
   },
   "table": {
     "product": "Produkt",
@@ -150,7 +151,8 @@
     "discount": "Sleva",
     "discountSale": "Akce, sleva {amount}",
     "discountCode": "Kód {code}, sleva {amount}",
-    "discountCodeOutdone": "Kód {code} použit, ale akční cena byla nižší"
+    "discountCodeOutdone": "Kód {code} použit, ale akční cena byla nižší",
+    "alsoBought": "Také v této objednávce"
   },
   "actions": {
     "disputeInStripe": "Banka kupujícího otevřela spor. Odpovězte na něj v panelu Stripe před jeho termínem.",
@@ -296,12 +298,16 @@
       "subject": "Váš odkaz na objednávku u {store}",
       "intro": "Zde je odkaz na vaši stránku objednávky {number} u {store}:",
       "ignore": "Pokud jste o to nežádali, tento e-mail ignorujte."
+    },
+    "reviewReminder": {
+      "subject": "Připomenutí: ohodnoťte {title}",
+      "intro": "Dne {date} jste obchod {store} požádali, aby vám připomněl ohodnotit vaši objednávku, až ji budete mít. Tady je to připomenutí.",
+      "write": "Řekněte ostatním kupujícím, co si o tom myslíte. Zabere to minutu:\n{url}",
+      "how": "Vaše recenze se zobrazí na stránce produktu se jménem, které si zvolíte, označená jako od ověřeného kupujícího. Váš e-mail a objednávka zůstanou soukromé. Vítáme každou recenzi, dobrou i špatnou.",
+      "once": "Toto je jediné připomenutí k této objednávce. Pokud takové e-maily nechcete: {url}"
     }
   },
   "export": {
-    "button": "Exportovat CSV",
-    "preparing": "Připravuje se soubor",
-    "failed": "Export se nestáhl. Za chvíli to zkuste znovu.",
     "truncated": "Soubor obsahuje vašich {count, number} nejnovějších objednávek.",
     "lockedTitle": "Export objednávek je součástí plánu {plan} a vyšších.",
     "fileName": "objednavky.csv"

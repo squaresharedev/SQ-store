@@ -8,6 +8,7 @@ import {
   getProductsSummary,
   getProfileSummary,
   getExistingProductIds,
+  getRestockForecasts,
 } from "@/lib/dashboard/queries";
 import { listStorefronts } from "@/lib/storefront/queries";
 import {
@@ -25,6 +26,7 @@ import { getAssurance, getProfile, requireUser } from "@/lib/auth/session";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { emailProofRequired } from "@/lib/contact-verification/availability";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
+import { getTermsStatus } from "@/lib/legal/terms-status";
 import { buildSetupSteps } from "@/lib/onboarding/steps";
 import { parseSeenSteps, SETUP_SEEN_COOKIE } from "@/lib/onboarding/seen-steps";
 import { productPageUrl } from "@/lib/storefront/product-page-url";
@@ -60,6 +62,7 @@ export default async function DashboardOverviewPage({
     assurance,
     toShipCount,
     withdrawalsToSettle,
+    restocks,
   ] = await Promise.all([
       getDashboardOrders(),
       getProductsSummary(),
@@ -77,6 +80,7 @@ export default async function DashboardOverviewPage({
       // Shared with the sidebar's count in the same render (cached).
       countOrdersToShip(),
       countWithdrawalsToSettle(),
+      getRestockForecasts(),
     ]);
 
   // A product the setup checklist is waiting on ("goes live once the check
@@ -217,6 +221,7 @@ export default async function DashboardOverviewPage({
   return (
     <main>
       <DashboardHome
+        termsInForce={(await getTermsStatus())?.inForce ?? null}
         orders={orders}
         products={products}
         storefronts={storefrontInfo}
@@ -231,6 +236,7 @@ export default async function DashboardOverviewPage({
         recentOrderGlances={recentOrderGlances}
         toShipCount={toShipCount}
         withdrawalsToSettle={withdrawalsToSettle}
+        restocks={restocks}
         canFulfil={can(account?.role, "orders.fulfil")}
         checkoutOpen={account ? (await checkoutProviderFor(account.accountId)) !== null : false}
       />

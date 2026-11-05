@@ -59,6 +59,7 @@ import {
   Blend,
   Copy,
   Crop,
+  Droplet,
   Equal,
   Spline,
   Trash2,
@@ -87,7 +88,7 @@ import {
 import { supportsRoundness } from "./shape-geometry";
 import type { BlockField } from "./SummonedField";
 import { CANVAS_PANEL_ATTR } from "./useCanvasAnchor";
-import { CheckoutNodeIcon, PageNodeIcon } from "./page-node-icons";
+import { PageNodeIcon } from "./page-node-icons";
 import type { CanvasViewport } from "./useCanvasViewport";
 
 /** How far above the block the bar floats, in screen pixels. */
@@ -156,7 +157,6 @@ function ToolButton({
   pressed,
   danger = false,
   pageNode,
-  checkoutNode,
   children,
 }: {
   /** The word that pops above the button. */
@@ -166,10 +166,8 @@ function ToolButton({
   onClick: () => void;
   pressed?: boolean;
   danger?: boolean;
-  /** Marks the product-page toggle for the specs that drive it. */
+  /** Marks the buyer-flow toggle for the specs that drive it. */
   pageNode?: "open" | "closed";
-  /** Marks the checkout toggle, likewise. */
-  checkoutNode?: "open" | "closed";
   children: React.ReactNode;
 }) {
   return (
@@ -180,7 +178,6 @@ function ToolButton({
       aria-label={label}
       aria-pressed={pressed}
       data-page-node={pageNode}
-      data-quick-checkout-node={checkoutNode}
       className={cn(
         ICON_BTN,
         pressed && "bg-accent text-foreground",
@@ -462,10 +459,8 @@ export function SelectionToolbar({
   productsById,
   elementUrls,
   openPages,
-  checkoutOpenFor = null,
   viewport,
   onOpenPages,
-  onToggleCheckout,
   onType,
   onFrame,
   onOpenColor,
@@ -478,10 +473,8 @@ export function SelectionToolbar({
   productsById: ReadonlyMap<string, Product>;
   /** Signed URLs for image elements, keyed by block key. */
   elementUrls?: Record<string, string>;
-  /** Products whose page is out on the canvas, so Page reads as a toggle. */
+  /** Products whose page is out on the canvas, so the door reads as a toggle. */
   openPages: readonly string[];
-  /** The product whose checkout is out on the canvas, if any. */
-  checkoutOpenFor?: string | null;
   /** The board's pan and zoom, so the bar can follow a block through both.
    *  Absent in harnesses whose board does neither. */
   viewport?: CanvasViewport;
@@ -489,10 +482,6 @@ export function SelectionToolbar({
    *  however many tiles point at it. Out with all of them, or away with all of
    *  them — the caller decides which from what is already open. */
   onOpenPages: (productIds: readonly string[]) => void;
-  /** Out with one product's checkout and thank-you page (and its product
-   *  page, which they hang off), or away with them. Absent in harnesses
-   *  that have no checkout. */
-  onToggleCheckout?: (productId: string) => void;
   onType: (key: string) => void;
   onFrame: (key: string) => void;
   /** Shapes: put these blocks' fill or outline in the colour panel, which is
@@ -545,8 +534,6 @@ export function SelectionToolbar({
   const pagesAreOpen =
     pageProductIds.length > 0 &&
     pageProductIds.every((id) => openPages.includes(id));
-  const checkoutProductId = pageProductIds.length === 1 ? pageProductIds[0] : null;
-  const checkoutIsOpen = checkoutProductId !== null && checkoutOpenFor === checkoutProductId;
   const framable =
     only !== null && framedSrcOf(only, productsById, elementUrls) !== null;
 
@@ -602,6 +589,15 @@ export function SelectionToolbar({
     ? keys
     : [];
 
+  /** Blur belongs to whole objects too, and a text block is one. Offered only
+   *  while the inspector holds the slider it points at: one block, or several
+   *  of ONE kind (a mixed selection's inspector has the group actions only). */
+  const blurKeys = blocks.every(
+    (block) => block.type !== "product" && block.type === blocks[0].type,
+  )
+    ? keys
+    : [];
+
   /**
    * Whether the seam before Duplicate/Delete has anything to separate. It is a
    * statement about two groups of controls, so with the left-hand group empty
@@ -613,6 +609,7 @@ export function SelectionToolbar({
     only?.type === "text" ||
     shape !== null ||
     opacityKeys.length > 0 ||
+    blurKeys.length > 0 ||
     framable;
 
   return (
@@ -662,22 +659,14 @@ export function SelectionToolbar({
             "bg-background/95 p-1 backdrop-blur",
           )}
         >
-          {/* The product page, as a door on the canvas beside the board. One
-              per PRODUCT, so two tiles of the same mug open one page — and a
-              selection of six products opens six, laid out side by side beside
-              the board rather than stacked in one spot (see DesignerCanvas's
-              artboard row). */}
+          {/* The buyer flow (product page, checkout, thank-you page), as one
+              door on the canvas beside the board. One page per PRODUCT, so two
+              tiles of the same mug open one page — and a selection of six
+              products opens six, laid out side by side beside the board rather
+              than stacked in one spot (see DesignerCanvas's artboard row). */}
           {pageProductIds.length > 0 && (
             <ToolButton
-              tip={
-                pagesAreOpen
-                  ? pageProductIds.length > 1
-                    ? t("selectionToolbar.hidePages")
-                    : t("selectionToolbar.hidePage")
-                  : pageProductIds.length > 1
-                    ? t("selectionToolbar.openPages")
-                    : t("selectionToolbar.openPage")
-              }
+              tip={pagesAreOpen ? t("selectionToolbar.hidePage") : t("selectionToolbar.openPage")}
               pressed={pagesAreOpen}
               pageNode={pagesAreOpen ? "open" : "closed"}
               onClick={() => onOpenPages(pageProductIds)}
@@ -692,26 +681,6 @@ export function SelectionToolbar({
               }
             >
               <PageNodeIcon className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
-            </ToolButton>
-          )}
-
-          {/* The next door along: this product's checkout and thank-you page,
-              straight from the tile, without going through its page's frame
-              first. One product at a time, since a storefront has ONE
-              checkout design, previewed with whichever product it hangs off. */}
-          {checkoutProductId !== null && onToggleCheckout && (
-            <ToolButton
-              tip={checkoutIsOpen ? t("selectionToolbar.hideCheckout") : t("selectionToolbar.openCheckout")}
-              pressed={checkoutIsOpen}
-              checkoutNode={checkoutIsOpen ? "open" : "closed"}
-              onClick={() => onToggleCheckout(checkoutProductId)}
-              label={
-                checkoutIsOpen
-                  ? t("selectionToolbar.closeCheckoutFor", { name: singlePageName ?? name })
-                  : t("selectionToolbar.openCheckoutFor", { name: singlePageName ?? name })
-              }
-            >
-              <CheckoutNodeIcon className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
             </ToolButton>
           )}
 
@@ -775,6 +744,18 @@ export function SelectionToolbar({
               label={t("selectionToolbar.editOpacityOf", { name })}
             >
               <Blend className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
+            </ToolButton>
+          )}
+
+          {/* Blur rides beside opacity: both say how much of the object comes
+              through, and the droplet is the blur tool's long-standing mark. */}
+          {blurKeys.length > 0 && (
+            <ToolButton
+              tip={t("selectionToolbar.blur")}
+              onClick={() => onOpenSetting(blurKeys, "blur")}
+              label={t("selectionToolbar.editBlurOf", { name })}
+            >
+              <Droplet className={ACTION_ICON} strokeWidth={2} aria-hidden="true" />
             </ToolButton>
           )}
 

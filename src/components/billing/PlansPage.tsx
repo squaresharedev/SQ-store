@@ -195,7 +195,7 @@ function PlansPageBody({ context, source, actions = SERVER_BILLING_ACTIONS }: Pl
       <PlanComparison interval={interval} currentPlan={context.plan} />
       <PlansFaq />
       <p className={cn(infoTextClass, "mx-auto max-w-3xl text-center")}>
-        {t("page.finePrint")}
+        {t("page.autoRenew")} {t("page.finePrint")}
         {/* What a struck-through price is, wherever one is shown. */}
         {hasLaunchPrice && <> {t("page.launchNote")}</>}
       </p>

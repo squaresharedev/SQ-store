@@ -19,6 +19,7 @@ import {
   TEXT_ALIGN_CLASSES,
   TEXT_VARIANT_WEIGHT_CLASSES,
   textSizeStyle,
+  textSpacingStyle,
 } from "./config-maps";
 import { useAutoFitRegistry } from "./text-autofit-registry";
 import { useAutoFitTextSize } from "./useAutoFitTextSize";
@@ -106,6 +107,9 @@ export function TextTileContent({
       block.font,
       block.variant,
       block.align,
+      // Spacing changes how much room the words take, so Auto re-fits.
+      block.letterSpacing,
+      block.lineHeight,
       editing,
     ],
   });
@@ -139,6 +143,9 @@ export function TextTileContent({
   );
   const bodyStyle = {
     ...textSizeStyle(resolvedSize),
+    // The block's own spacing, over textSizeStyle's line height (see
+    // textSpacingStyle). Absent, it adds nothing at all.
+    ...textSpacingStyle(block),
     ...(color ? { color } : undefined),
   };
 

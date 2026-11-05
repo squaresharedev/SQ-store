@@ -1,6 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { listStorefrontProducts } from "@/lib/discounts/storefront-preview";
+import { firstPlaceable, rankProductsToPlace } from "@/lib/predictions";
+import { getLastTouchedProduct, getProductSales } from "@/lib/products/queries";
 import { getStorefront } from "@/lib/storefront/queries";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
 import { getActiveAccount } from "@/lib/team/account-context";
@@ -75,11 +77,13 @@ export default async function StorefrontEditorPage({
   // scoped to whichever account is active (the store being edited, which for
   // a team member is not necessarily their own). See
   // lib/settings/seller-identity.ts for why this is a service-role read.
-  const [storefront, products, sellerIdentity, shippingPolicy, identity] = await Promise.all([
+  const [storefront, products, sales, lastTouched, sellerIdentity, shippingPolicy, identity] = await Promise.all([
     getStorefront(id),
     // The catalogue as a storefront draws it: a running sale's price on the
     // tile, exactly as the published page shows it to buyers.
     listStorefrontProducts(),
+    getProductSales(),
+    getLastTouchedProduct(),
     account ? getSellerIdentity(account.accountId) : Promise.resolve({}),
     account ? getShippingPolicy(account.accountId) : Promise.resolve({}),
     // Whether the publish gate would let this storefront's page answer.
@@ -108,6 +112,11 @@ export default async function StorefrontEditorPage({
       initialName={storefront.name}
       initialConfig={storefront.config}
       products={products}
+      // The likeliest product to place first, for the empty board. The picker
+      // keeps the catalogue's own order, so nothing a seller has learned moves.
+      suggestedProductId={
+        firstPlaceable(rankProductsToPlace(products, sales.byProduct, lastTouched, new Date()))?.id ?? null
+      }
       initialBackgroundImageUrl={backgroundImageUrl}
       initialCustomFontUrl={customFontUrl}
       initialElementUrls={elementUrls}

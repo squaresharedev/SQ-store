@@ -22,6 +22,7 @@ import {
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { SliderField } from "@/components/ui/SliderField";
 import { BlockActions } from "./BlockActions";
+import { BlurSlider } from "./BlurSlider";
 import { SummonedField, type BlockFieldSummons } from "./SummonedField";
 import { ShapeKindGlyph } from "./ShapeTileContent";
 import {
@@ -39,6 +40,8 @@ export type ShapeBlockPatch = Partial<
     | "borderWidth"
     | "borderColor"
     | "opacity"
+    | "blur"
+    | "blurDirection"
     | "roundness"
     | "points"
   >
@@ -53,7 +56,7 @@ const KIND_BUTTON_CLASS = `inline-flex size-9 items-center justify-center rounde
 
 /**
  * Inspector card body for a SHAPE block in the side panel: the kind picker
- * (the shapes themselves, no dropdown), color, opacity, and outline controls.
+ * (the shapes themselves, no dropdown), color, outline, opacity and blur.
  * A `ring` has no fill, so there its color IS the stroke and the width slider
  * sets the ring's thickness. Patches emit on each change; no "save" step.
  */
@@ -227,6 +230,19 @@ export function ShapeBlockEditor({
             ariaLabel={t("shapeBlock.opacity.ariaLabel")}
             valueText={t("shapeBlock.opacity.valueText", { value: opacity })}
             unit="%"
+            highlighted={highlighted}
+          />
+        )}
+      </SummonedField>
+
+      <SummonedField field="blur" summons={summons} variant="slider">
+        {(highlighted) => (
+          <BlurSlider
+            id={`${fieldId}-blur`}
+            value={block.blur ?? 0}
+            onChange={(blur) => onUpdate({ blur })}
+            direction={block.blurDirection}
+            onDirectionChange={(blurDirection) => onUpdate({ blurDirection })}
             highlighted={highlighted}
           />
         )}

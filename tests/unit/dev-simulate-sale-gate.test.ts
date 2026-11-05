@@ -16,7 +16,7 @@ const account = vi.hoisted(() => ({ getActiveAccount: vi.fn() }));
 vi.mock("@/lib/dev/simulated-sale", () => ({ SIMULATE_SALE_PATH: "/dev/simulate-sale", ...simulated }));
 vi.mock("@/lib/team/account-context", () => account);
 
-import { GET, POST } from "@/app/dev/simulate-sale/route";
+import { GET, POST } from "@/app/dev/simulate-sale/route.dev";
 
 const URL_ = "http://localhost:3000/dev/simulate-sale";
 

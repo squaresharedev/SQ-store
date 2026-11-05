@@ -5,7 +5,8 @@ import { OrderStatusView } from "@/components/checkout/OrderStatusView";
 import { BuyerBusy } from "@/components/product-page/BuyerNotice";
 import { getOrderPage } from "@/lib/orders/order-page";
 import { PAGE_BUSY } from "@/lib/public/busy";
-import { PLACED_QUERY_PARAM, firstValue, type SearchParams } from "@/lib/storefront/product-page-url";
+import { PLACED_QUERY_PARAM, REVIEW_QUERY_PARAM, firstValue, type SearchParams } from "@/lib/storefront/product-page-url";
+import { parseReviewDialog } from "@/lib/reviews/reminders";
 
 /**
  * /s/[storefrontId]/order/[orderRef]: a buyer's order page. The thank-you
@@ -48,7 +49,12 @@ export default async function OrderPage({
   if (!page) notFound();
   return (
     <main>
-      <OrderStatusView page={page} mode="public" placed={firstValue(query[PLACED_QUERY_PARAM]) === "1"} />
+      <OrderStatusView
+        page={page}
+        mode="public"
+        placed={firstValue(query[PLACED_QUERY_PARAM]) === "1"}
+        reviewDialog={parseReviewDialog(firstValue(query[REVIEW_QUERY_PARAM]))}
+      />
     </main>
   );
 }

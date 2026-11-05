@@ -3,6 +3,13 @@ import { clampToCanvas, columnsThatFit, findFreeCell, reflowBlocks, type GridBlo
 import { LAYER_OPS, normalizeLayers, type LayerOp } from "@/lib/storefront/layers";
 import { PHONE_BOARD_WIDTH_PX, phoneLayout } from "@/lib/storefront/mobile-layout";
 import {
+  BLUR_DIRECTIONS,
+  BLUR_MAX,
+  TEXT_LETTER_SPACING_MAX,
+  TEXT_LETTER_SPACING_MIN,
+  TEXT_LINE_HEIGHT_DEFAULT,
+  TEXT_LINE_HEIGHT_MAX,
+  TEXT_LINE_HEIGHT_MIN,
   CANVAS_ROWS_MAX,
   DEFAULT_MOBILE_COLUMNS,
   EMPTY_STOREFRONT_HEADER,
@@ -53,6 +60,17 @@ const changes = z
 
 const color = z.string().max(7).describe("Strict #rrggbb.");
 
+const blur = z
+  .number()
+  .int()
+  .optional()
+  .describe(`How soft the block is, 0 (sharp) to ${BLUR_MAX}.`);
+
+const blurDirection = z
+  .enum(BLUR_DIRECTIONS)
+  .optional()
+  .describe("Which way the blur runs: all over (the default), or soft from one edge and sharp at the other.");
+
 const viewport = z
   .enum(["desktop", "mobile"])
   .optional()
@@ -76,6 +94,18 @@ export const designOpSchema = z.discriminatedUnion("op", [
     bold: z.boolean().optional(),
     italic: z.boolean().optional(),
     underline: z.boolean().optional(),
+    letterSpacing: z
+      .number()
+      .int()
+      .optional()
+      .describe(`Space between letters in hundredths of the type size, ${TEXT_LETTER_SPACING_MIN} to ${TEXT_LETTER_SPACING_MAX}; leave out for the typeface's own.`),
+    lineHeight: z
+      .number()
+      .int()
+      .optional()
+      .describe(`Space between lines as a percent of the type size, ${TEXT_LINE_HEIGHT_MIN} to ${TEXT_LINE_HEIGHT_MAX}; leave out for ${TEXT_LINE_HEIGHT_DEFAULT}.`),
+    blur,
+    blurDirection,
     ...placement,
   }),
   z.strictObject({
@@ -85,6 +115,8 @@ export const designOpSchema = z.discriminatedUnion("op", [
     borderWidth: z.number().int().optional(),
     borderColor: color.optional(),
     opacity: z.number().int().optional().describe("Percent, 0 to 100."),
+    blur,
+    blurDirection,
     roundness: z.number().int().optional(),
     points: z.number().int().optional(),
     ...placement,
@@ -95,6 +127,8 @@ export const designOpSchema = z.discriminatedUnion("op", [
     alt: z.string().max(200).optional().describe("What it shows, for screen readers. Empty for decoration."),
     fit: z.enum(IMAGE_FITS).optional(),
     opacity: z.number().int().optional(),
+    blur,
+    blurDirection,
     ...placement,
   }),
   z.strictObject({ op: z.literal("move"), block: blockRef, x: z.number().int(), y: z.number().int(), viewport }),

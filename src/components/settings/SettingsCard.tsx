@@ -28,7 +28,7 @@ const ART_SHOWN_CLASS = "hidden @xl:block";
  *
  * Pass `decoration` to fade a texture into the corner — reserved for the lead
  * card of a section, not every form, so it stays a signal (styles.md §2.4).
- * Pass `art` instead for a picture in that corner (ui/TransitFlow): it sits
+ * Pass `art` instead for a picture in that corner (ui/CornerArt): it sits
  * flush in the card's top-right corner, so the card's edges cut it, and
  * beside the title, so the description wraps before it rather than running
  * under it. Left out wherever the header is too narrow to give it room.

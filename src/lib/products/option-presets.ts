@@ -54,6 +54,10 @@ export const OPTION_GROUP_PRESETS: readonly OptionGroupPreset[] = [
   { id: "finish", display: "swatch", values: [] },
 ];
 
+/** The Size preset: what a size guess (option-guesses.ts) adds, the same as
+ *  the "Size" button. */
+export const SIZE_PRESET = OPTION_GROUP_PRESETS.find((preset) => preset.id === "size")!;
+
 /**
  * How a group named `name` should draw before the seller says otherwise.
  *
@@ -116,4 +120,24 @@ export function groupFromPreset(
     preset.values,
     mintId,
   );
+}
+
+/** Another product's groups for this one: the same axes, choices and swatches
+ *  under fresh ids, every choice on sale, and none of the other product's
+ *  per-version facts, which describe that product only. */
+export function copyOptionGroups(
+  groups: readonly ProductOptionGroup[],
+  mintId: () => string,
+): ProductOptionGroup[] {
+  return groups.map((group) => ({
+    id: mintId(),
+    name: group.name,
+    display: group.display,
+    options: group.options.map((option) => ({
+      id: mintId(),
+      name: option.name,
+      ...(option.swatch ? { swatch: option.swatch } : {}),
+      available: true,
+    })),
+  }));
 }

@@ -207,7 +207,7 @@
   },
   "legal": {
     "cardTitle": "Contrat vendeur, conditions et confidentialité",
-    "cardDescription": "Les versions actuelles, en langage clair, parce que personne ne lit le jargon juridique pour le plaisir. Les vrais textes juridiques arrivent bientôt ; accepter maintenant couvre cette version provisoire.",
+    "cardDescription": "Ce que vous acceptez et comment nous traitons vos données. Chaque section dispose d’une version courte, avec le texte complet accessible en un clic.",
     "termsTitle": "Conditions d’utilisation",
     "termsDescription": "La version courte de ce que vous acceptez en vendant sur Square Share, avec les Conditions complètes à un clic.",
     "docs": {
@@ -252,6 +252,7 @@
           "heading": "À qui vous avez affaire",
           "points": {
             "merchantOfRecord": "Square Share est une plateforme qui vous aide à vendre. Lorsqu’un acheteur vous passe commande, la vente est conclue entre vous et cet acheteur : c’est vous le vendeur et le professionnel responsable de la vente, et non nous.",
+            "regions": "Square Share opère dans l’UE, aux États-Unis et au Canada. Nous n’opérons pas encore ailleurs : vous devez donc être établi dans l’une de ces zones pour vendre ici. Le Québec doit attendre la version française de ces conditions.",
             "eligibility": "Vous devez avoir au moins 18 ans, ou l’âge de la majorité là où vous vivez. Si vous vous inscrivez pour une entreprise, vous confirmez pouvoir l’engager au titre de ces Conditions."
           }
         },
@@ -266,8 +267,8 @@
           "heading": "Vendre",
           "points": {
             "lawfulListings": "Décrivez vos offres avec exactitude, et ne vendez que des produits licites que vous avez le droit de vendre.",
-            "consumerRights": "Respectez les droits des consommateurs de vos acheteurs, y compris le droit de rétractation de 14 jours et la garantie légale, et assurez vous-même la livraison, l’assistance et les remboursements.",
-            "taxesAndRecords": "Les taxes et la TVA sur vos ventes relèvent de vous, et vous conservez vos propres registres de ventes pendant 10 ans."
+            "consumerRights": "Respectez les droits dont vos acheteurs bénéficient là où ils vivent, comme le droit de rétractation de 14 jours et la garantie légale dans l’UE, et gérez vous-même la livraison, l’assistance et les remboursements.",
+            "taxesAndRecords": "Les taxes sur vos ventes (TVA, TPS/TVH ou taxe de vente) sont à votre charge, et vous conservez vos registres de ventes aussi longtemps que l’exige le droit du lieu où vous exercez."
           }
         },
         "payments": {
@@ -296,10 +297,35 @@
           "points": {
             "cap": "Square Share en est à ses débuts et est proposé « en l’état » aux utilisateurs professionnels. À leur égard, notre responsabilité est plafonnée aux frais qu’ils nous ont versés au cours des 12 derniers mois ou à 100 EUR, le montant le plus élevé étant retenu, et les vendeurs professionnels nous garantissent contre les réclamations causées par leurs produits, leurs sites ou leurs manquements. Si vous êtes un consommateur, vos droits légaux ne sont pas affectés.",
             "termination": "Nous pouvons suspendre ou fermer les comptes qui ne respectent pas ces Conditions. Vous pouvez partir à tout moment et emporter vos données.",
-            "changesAndLaw": "Nous pouvons mettre à jour ces Conditions, avec un préavis en cas de modification importante. Le droit tchèque s’applique.",
-            "policies": "Notre Politique de confidentialité et notre Politique relative aux cookies font partie de ces Conditions."
+            "changesAndLaw": "Nous vous prévenons au moins 30 jours à l’avance de toute modification importante de ces conditions. Le droit tchèque s’applique aux utilisateurs professionnels. Si vous êtes un consommateur, vous conservez la protection de votre pays, État ou province.",
+            "policies": "Notre Politique de confidentialité et notre Politique relative aux cookies font partie de ces Conditions.",
+            "disputes": "Les litiges aux États-Unis sont soumis à un arbitrage individuel plutôt qu’aux tribunaux, sauf si vous vous y opposez dans les 30 jours suivant votre acceptation. Les consommateurs de l’UE et du Canada peuvent toujours saisir les tribunaux de leur lieu de résidence."
           }
         }
+      }
+    },
+    "notice": {
+      "bannerLabel": "Mise à jour des Conditions d’utilisation",
+      "bannerLink": "Voir ce qui change",
+      "title": "Nos Conditions changent le {date}.",
+      "titleSoon": "Nos Conditions vont bientôt changer.",
+      "body": "D’ici là, les <current>Conditions actuelles</current> s’appliquent. Voici ce que les <next>nouvelles Conditions</next> modifient :",
+      "leave": "Si vous n’êtes pas d’accord, vous pouvez clôturer votre compte sans frais avant leur entrée en vigueur. Si vous continuez à utiliser Square Share après cette date, les nouvelles Conditions vous seront applicables.",
+      "changes": {
+        "regions": "Nous opérons désormais uniquement dans l’UE, aux États-Unis et au Canada, et chaque région dispose de sa propre section.",
+        "disputes": "Les litiges aux États-Unis sont soumis à un arbitrage individuel plutôt qu’aux tribunaux, sauf si vous vous y opposez dans les 30 jours. Les consommateurs de l’UE et du Canada peuvent toujours saisir les tribunaux de leur lieu de résidence.",
+        "plans": "Les forfaits payants et les frais par vente sont désormais détaillés, y compris le renouvellement automatique et la procédure de résiliation.",
+        "moderation": "Nous expliquons comment nous contrôlons les contenus, et comment les signaler, les contester et déposer une réclamation pour atteinte au droit d’auteur.",
+        "notice": "Vous recevez désormais au moins 30 jours à l’avance un e-mail vous informant de toute modification importante des Conditions."
+      },
+      "email": {
+        "subject": "Nous mettons à jour nos Conditions d’utilisation",
+        "intro": "Nous mettons à jour les Conditions d’utilisation de Square Share. Les nouvelles Conditions entrent en vigueur le {date}.",
+        "changes": "Ce qui change :",
+        "readNew": "Lire les nouvelles Conditions : {url}",
+        "readCurrent": "Lire les Conditions actuelles : {url}",
+        "nothingNow": "Vous n’avez rien à faire aujourd’hui. Vous pouvez accepter les nouvelles Conditions dès maintenant dans votre tableau de bord : {url}",
+        "leave": "Si vous n’êtes pas d’accord, vous pouvez clôturer votre compte sans frais avant le {date}. Si vous continuez à utiliser Square Share après cette date, les nouvelles Conditions vous seront applicables."
       }
     }
   },
@@ -311,7 +337,7 @@
       "required": "<strong>Votre raison sociale, votre adresse et votre e-mail de contact sont obligatoires avant de pouvoir publier ou vendre quoi que ce soit.</strong> Les acheteurs doivent pouvoir voir à qui ils achètent et comment vous contacter avant de commander.",
       "privacyNoteLinked": "Ces informations apparaissent publiquement sur vos pages produit pour cette seule raison. Nous ne les utilisons jamais pour le marketing, et ne les vendons ni ne les partageons jamais. Le seul message que nous envoyons à votre e-mail de contact ou à votre téléphone est le code qui le confirme. Voir la <link>Politique de confidentialité de Square Share</link>."
     },
-    "countryNotEu": "Hors UE / je préfère ne pas préciser",
+    "countryUnset": "Je préfère ne pas préciser",
     "vatAdvisory": {
       "noCountry": "Ce numéro de TVA semble avoir été délivré par {issuer}. Vous voudrez peut-être définir votre pays.",
       "mismatch": "Ce numéro de TVA semble avoir été délivré par {issuer}, mais votre pays est défini sur {selected}. Vérifiez que les deux sont corrects."
@@ -340,6 +366,7 @@
         "placeholder": "p. ex. FR12345678901"
       },
       "country": {
+        "hint": "Square Share opère dans l’UE, aux États-Unis et au Canada. Nous n’opérons pas encore ailleurs.",
         "label": "Pays"
       },
       "phone": {
@@ -395,7 +422,9 @@
   "shipping": {
     "shipsFrom": {
       "label": "Expédié depuis",
-      "notSet": "Non défini"
+      "notSet": "Non défini",
+      "sameAsBusiness": "Comme votre entreprise : {country}",
+      "sameAsBusinessHint": "Repris de l'adresse de vos informations vendeur."
     },
     "shippingCard": {
       "title": "Livraison",

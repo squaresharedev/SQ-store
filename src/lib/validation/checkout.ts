@@ -9,7 +9,7 @@ import {
 import { issueKey } from "@/lib/validation/messages";
 import { PURCHASE_QUANTITY_MAX } from "@/lib/validation/product";
 import { isCourierPhone } from "@/lib/orders/ship-to";
-import { OPTIONS_TOTAL_MAX } from "@/types/product";
+import { ADD_ONS_MAX, OPTIONS_TOTAL_MAX } from "@/types/product";
 import { SHIP_TO_MAX } from "@/types/order-view";
 import { GIFT_MESSAGE_MAX } from "@/types/storefront";
 import { SHIPPING_COUNTRY_CODES } from "@/lib/settings/constants";
@@ -63,6 +63,17 @@ export const placeOrderSchema = z.strictObject({
   /** The total on the Pay button. Optional so a tab opened before this field
    *  existed still pays; when sent, a different quote refuses the order. */
   expectedTotalCents: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(),
+  /** "Add to your order": other products taken with this one, each with its
+   *  version. Only ids: the quote prices the main product's own add-ons. */
+  addOns: z
+    .array(
+      z.strictObject({
+        productId: uuidField("product"),
+        optionIds: z.array(uuidField("option")).max(OPTIONS_TOTAL_MAX),
+      }),
+    )
+    .max(ADD_ONS_MAX)
+    .optional(),
 });
 
 /** The checkout's "Apply" for a discount code: just the code. */

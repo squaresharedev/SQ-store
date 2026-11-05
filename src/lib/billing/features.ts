@@ -59,7 +59,7 @@ export const COMPARE_GROUPS: readonly { key: CompareGroupKey; rows: readonly Com
     rows: ["fee", "products", "productPages", "checkout", "digitalDownloads", "stock", "shipping", "embed"],
   },
   { key: "store", rows: ["storefronts", "designer", "teamSeats", "roles"] },
-  { key: "tools", rows: ["analytics", "ordersExport", "analyticsExport", "productImport"] },
+  { key: "tools", rows: ["aiSuggestions", "analytics", "ordersExport", "analyticsExport", "productImport"] },
   { key: "support", rows: ["earlyAccess", "prioritySupport"] },
 ];
 

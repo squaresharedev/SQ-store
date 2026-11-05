@@ -40,7 +40,7 @@
     "formLoading": "Wczytywanie formularza produktu",
     "importReviews": {
       "heading": "Importuj opinie",
-      "description": "Przenieś opinie z Judge.me, Loox, Yotpo lub Shopify Product Reviews. Wyeksportuj je tam jako CSV, upuść plik tutaj i sprawdź, do którego produktu należy każda z nich, zanim cokolwiek zostanie zapisane."
+      "description": "Przenieś opinie z Judge.me, Loox, Yotpo lub Shopify Product Reviews."
     }
   },
   "emptyState": {
@@ -300,6 +300,11 @@
         "label": "Odznaki",
         "description": "Kilka słów na stronie produktu: powód, by Ci zaufać, albo fakt wart uwagi na pierwszy rzut oka. Wybierz gotową odznakę lub napisz własną, nadaj ikonie kolor i umieść ją obok produktu albo na zdjęciu.",
         "about": "Do czego służą odznaki"
+      },
+      "addOns": {
+        "label": "Dodaj do zamówienia",
+        "description": "Inne twoje produkty, które kupujący mogą dodać jednym dotknięciem, tuż nad Kup teraz. Widać tu tylko produkty tego samego rodzaju i waluty, aby wszystko zostało jednym zamówieniem.",
+        "about": "Do czego służy sekcja Dodaj do zamówienia"
       }
     },
     "summary": {
@@ -327,7 +332,8 @@
       "active": "Aktywny",
       "draft": "Wersja robocza",
       "badges": "{count, plural, one {{count} odznaka} few {{count} odznaki} many {{count} odznak} other {{count} odznaki}}",
-      "physical": "Fizyczny"
+      "physical": "Fizyczny",
+      "addOns": "{count, plural, one {{count} produkt} few {{count} produkty} many {{count} produktów} other {{count} produktu}}"
     },
     "errors": {
       "titleRequired": "Nadaj produktowi nazwę: kupujący widzą ją jako pierwszą.",
@@ -363,6 +369,23 @@
     "description": "Opis",
     "optional": "(opcjonalnie)",
     "descriptionPlaceholder": "Czym to jest i co dostanie kupujący?",
+    "ai": {
+      "write": "Napisz z AI",
+      "improve": "Popraw z AI",
+      "writing": "Trwa pisanie…",
+      "written": "Napisane przez AI",
+      "improved": "Poprawione przez AI",
+      "writeHint": "AI napisze opis na podstawie wprowadzonych danych i nie doda niczego od siebie. Sprawdź go przed zapisaniem.",
+      "improveHint": "AI przepisze Twój tekst, żeby był czytelniejszy, zachowując wszystkie informacje. Sprawdź go przed zapisaniem.",
+      "asYouTypeIdle": "AI podpowiada kolejne słowa podczas pisania.",
+      "asYouTypeOffered": "dodaje szary tekst. Esc go ukrywa.",
+      "asYouTypeAccept": "Dodaj podpowiedziane słowa",
+      "asYouTypeAnnounce": "Podpowiedź:",
+      "asYouTypeTurnOff": "Wyłącz",
+      "asYouTypeOff": "Podpowiedzi podczas pisania są wyłączone. Włączysz je ponownie w Ustawieniach, w sekcji Plan i rozliczenia.",
+      "upsellHint": "W planie Pro: AI pisze i uzupełnia opisy na podstawie twoich danych. Plany otworzą się w nowej karcie.",
+      "upsellBadge": "Pro"
+    },
     "displayImage": "Zdjęcie główne",
     "displayImageAbout": "Gdzie używane jest zdjęcie główne",
     "displayImageHelp": "Widoczne w twojej witrynie i osadzeniach.",
@@ -530,6 +553,14 @@
     "addFirst": "Sprzedajesz w więcej niż jednym wariancie?",
     "addAnother": "Dodaj kolejny sposób, w jaki się różni",
     "somethingElse": "Coś innego",
+    "guessSizes": "Rozmiary od {first} do {last}",
+    "guessSizesAny": "Rozmiary",
+    "nextOptions": "Prawdopodobne kolejne opcje",
+    "addNamed": "Dodaj {name}",
+    "sameAsHint": "Kopiuje opcje, specyfikację i dane producenta, które ma {title}, do sekcji, które są jeszcze puste.",
+    "guessSizesHint": "Tytuł wygląda na odzież, więc dodaje typowe rozmiary. Usuń te, których nie sprzedajesz.",
+    "guessSizesAnyHint": "Tytuł wygląda na coś sprzedawanego w rozmiarach, więc dodaje opcję Rozmiar do uzupełnienia.",
+    "nextOptionsHint": "Na podstawie opcji dodanych do tej pory.",
     "groupsFull": "{max, plural, one {To już wszystkie {max} grupa opcji.} few {To już wszystkie {max} grupy opcji.} many {To już wszystkie {max} grup opcji.} other {To już wszystkie {max} grupy opcji.}}",
     "optionsFull": "{max, plural, one {To już wszystkie {max} opcja.} few {To już wszystkie {max} opcje.} many {To już wszystkie {max} opcji.} other {To już wszystkie {max} opcji.}}",
     "whatVaries": "Co się zmienia",
@@ -1053,12 +1084,8 @@
       "product": "produkt",
       "status": "status"
     },
-    "summary": "{ready, plural, one {<count>{ready}</count> opinia gotowa} few {<count>{ready}</count> opinie gotowe} many {<count>{ready}</count> opinii gotowych} other {<count>{ready}</count> opinii gotowych}}{skipped, plural, =0 {.} other {, pominięte: {skipped}.}}",
-    "hiddenRows": "{count, plural, one {{count} opinia była ukryta lub oznaczona jako spam w twoim poprzednim sklepie, więc zostanie pominięta.} few {{count} opinie były ukryte lub oznaczone jako spam w twoim poprzednim sklepie, więc zostaną pominięte.} many {{count} opinii było ukrytych lub oznaczonych jako spam w twoim poprzednim sklepie, więc zostaną pominięte.} other {{count} opinii było ukrytych lub oznaczonych jako spam w twoim poprzednim sklepie, więc zostaną pominięte.}}",
-    "droppedRows": "{count, plural, one {{count} opinia przekracza limit {max} na plik, więc zostanie pominięta.} few {{count} opinie przekraczają limit {max} na plik, więc zostaną pominięte.} many {{count} opinii przekracza limit {max} na plik, więc zostaną pominięte.} other {{count} opinii przekracza limit {max} na plik, więc zostaną pominięte.}}",
     "source": "Zaimportowano z",
     "sourceUnknown": "Wybierz aplikację",
-    "sourceHelp": "Widoczne przy każdej opinii, aby kupujący wiedzieli, gdzie została napisana.",
     "sources": {
       "judgeme": "Judge.me",
       "loox": "Loox",
@@ -1067,17 +1094,10 @@
     },
     "mappingHeading": "Przypisz produkty",
     "mappingHelp": "Każdy produkt z pliku i produkt tutaj, do którego trafią jego opinie. W miarę możliwości przypisane według nazwy. Wszystko ustawione na „Nie importuj” zostanie pominięte.",
-    "mappingFileProduct": "W pliku",
-    "mappingReviews": "Opinie",
-    "mappingProduct": "Produkt tutaj",
     "mappingSelect": "Produkt dla {key}",
     "skipProduct": "Nie importuj",
-    "skippedHeading": "Wiersze, które zostaną pominięte",
     "skippedRow": "Wiersz {line}: {problem}",
     "run": "{count, plural, one {Importuj {count} opinię} few {Importuj {count} opinie} many {Importuj {count} opinii} other {Importuj {count} opinii}}",
-    "imported": "{count, plural, one {Zaimportowano {count} opinię.} few {Zaimportowano {count} opinie.} many {Zaimportowano {count} opinii.} other {Zaimportowano {count} opinii.}}",
-    "duplicates": "{count, plural, one {{count} już tu była.} few {{count} już tu były.} many {{count} już tu było.} other {{count} już tu było.}}",
-    "skippedRows": "{count, plural, one {Pominięto {count} wiersz.} few {Pominięto {count} wiersze.} many {Pominięto {count} wierszy.} other {Pominięto {count} wiersza.}}",
     "errors": {
       "rateLimited": "Za dużo importów w ciągu ostatniej godziny. Spróbuj później.",
       "tooLarge": "Ten plik jest za duży, aby go zaimportować.",
@@ -1094,6 +1114,39 @@
         "b": "„Na żywo jeszcze ładniejszy.”",
         "c": "„Przyszedł szybko i dobrze zapakowany.”"
       }
+    },
+    "tally": {
+      "toImport": "Do importu",
+      "imported": "Zaimportowane",
+      "already": "Już są",
+      "leftOut": "Pominięte"
+    },
+    "alreadyNote": "{count, plural, one {{count} opinia z tego pliku już tu jest, więc nie zostanie dodana dwa razy.} few {{count} opinie z tego pliku już tu są, więc nie zostaną dodane dwa razy.} many {{count} opinii z tego pliku już tu jest, więc nie zostaną dodane dwa razy.} other {{count} opinii z tego pliku już tu jest, więc nie zostaną dodane dwa razy.}}",
+    "sourceTip": "O importowanych opiniach",
+    "mappingTip": "Jak dopasowywane są produkty",
+    "reviewCount": "{count, plural, one {{count} opinia} few {{count} opinie} many {{count} opinii} other {{count} opinii}}",
+    "keyAlready": "{count, plural, one {{count} już jest} few {{count} już są} many {{count} już jest} other {{count} już jest}}",
+    "leftOutSummary": "{count, plural, one {Dlaczego {count} opinia zostanie pominięta} few {Dlaczego {count} opinie zostaną pominięte} many {Dlaczego {count} opinii zostanie pominiętych} other {Dlaczego {count} opinii zostanie pominiętych}}",
+    "leftOutUnmatched": "{count, plural, one {{count} dla produktu ustawionego na „Nie importuj”} few {{count} dla produktów ustawionych na „Nie importuj”} many {{count} dla produktów ustawionych na „Nie importuj”} other {{count} dla produktów ustawionych na „Nie importuj”}}",
+    "leftOutHidden": "{count, plural, one {{count} ukryta lub oznaczona jako spam w twoim poprzednim sklepie} few {{count} ukryte lub oznaczone jako spam w twoim poprzednim sklepie} many {{count} ukrytych lub oznaczonych jako spam w twoim poprzednim sklepie} other {{count} ukrytych lub oznaczonych jako spam w twoim poprzednim sklepie}}",
+    "leftOutDropped": "{count, plural, one {{count} ponad limit {max} na plik} few {{count} ponad limit {max} na plik} many {{count} ponad limit {max} na plik} other {{count} ponad limit {max} na plik}}",
+    "leftOutProblems": "{count, plural, one {{count} wiersz, którego nie da się odczytać:} few {{count} wiersze, których nie da się odczytać:} many {{count} wierszy, których nie da się odczytać:} other {{count} wierszy, których nie da się odczytać:}}",
+    "nothingNew": "Nie ma nic nowego do importu",
+    "done": {
+      "title": "{count, plural, one {Zaimportowano {count} opinię} few {Zaimportowano {count} opinie} many {Zaimportowano {count} opinii} other {Zaimportowano {count} opinii}}",
+      "body": "Pojawią się na stronach produktów, gdy tylko przeczyta je nasza automatyczna kontrola.",
+      "already": "{count, plural, one {{count} już tu była, więc nie została dodana dwa razy.} few {{count} już tu były, więc nie zostały dodane dwa razy.} many {{count} już tu było, więc nie zostały dodane dwa razy.} other {{count} już tu było, więc nie zostały dodane dwa razy.}}",
+      "nothingTitle": "Nic nie dodano dwa razy",
+      "nothingBody": "{count, plural, one {{count} opinia z tego pliku już tu była.} few {{count} opinie z tego pliku już tu były.} many {{count} opinii z tego pliku już tu było.} other {{count} opinii z tego pliku już tu było.}}",
+      "seeReviews": "Zobacz opinie",
+      "another": "Importuj kolejny plik"
+    },
+    "squareShare": {
+      "label": "Eksport ze Square Share",
+      "tipLabel": "O eksportach ze Square Share",
+      "tip": "Porównaliśmy ten plik według poszczególnych opinii, a nie aplikacji. Opinie, które są już w tym sklepie, pozostają bez zmian i nic nie zostanie dodane dwa razy. Opinii z innego sklepu nie można przenieść za pomocą eksportu.",
+      "leftOut": "{count, plural, one {{count} nie ma w tym sklepie: eksport nie może jej dodać} few {{count} nie ma w tym sklepie: eksport nie może ich dodać} many {{count} nie ma w tym sklepie: eksport nie może ich dodać} other {{count} nie ma w tym sklepie: eksport nie może ich dodać}}",
+      "checkFailed": "Nie udało się porównać tego pliku z twoimi opiniami. Nic nie zostało zmienione. Spróbuj ponownie za chwilę."
     }
   },
   "reviewModeration": {
@@ -1219,6 +1272,42 @@
     "emptyFiltered": {
       "title": "Brak pasujących opinii",
       "body": "Spróbuj innych słów lub innego filtra albo wyczyść filtry, aby zobaczyć wszystkie opinie."
+    },
+    "export": {
+      "hint": "Pobiera opinie z tego widoku jako plik CSV.",
+      "empty": "W tym widoku nie ma opinii do wyeksportowania.",
+      "truncated": "{count, plural, one {Plik zawiera pierwszą opinię z tego widoku.} few {Plik zawiera pierwsze # opinie z tego widoku.} many {Plik zawiera pierwszych # opinii z tego widoku.} other {Plik zawiera pierwszych # opinii z tego widoku.}} Zawęź listę według produktu lub oceny, aby wyeksportować resztę.",
+      "fileName": "opinie.csv"
+    }
+  },
+  "addOnsField": {
+    "listLabel": "Twoje inne produkty",
+    "count": "Wybrano {count} z {max}",
+    "add": "Dodaj {title}",
+    "draft": "Wersja robocza",
+    "draftHint": "Kupujący zobaczą go, gdy będzie aktywny.",
+    "remove": "Usuń {title}",
+    "none": "Nie masz jeszcze innych produktów. Najpierw dodaj kolejny produkt, a potem zaoferuj go tutaj.",
+    "notPosted": "Nie oferowany: to plik do pobrania",
+    "notADownload": "Nie oferowany: jest wysyłany",
+    "search": "Szukaj w swoich produktach",
+    "noMatch": "Żaden produkt nie pasuje.",
+    "noneFit": "Żaden z twoich innych produktów nie może być w jednym zamówieniu z tym. Jedno zamówienie ma jeden rodzaj (wysyłka albo pobranie) i jedną walutę.",
+    "otherCurrency": "Nie oferowany: cena w {currency}",
+    "previewLabel": "Co widzą kupujący",
+    "soldOutHint": "Kupujący zobaczą go, gdy znów będzie dostępny.",
+    "takenDown": "Usunięty",
+    "takenDownHint": "Kupujący go nie widzą, dopóki jest usunięty.",
+    "ownBuyLink": "Kup teraz prowadzi w tym produkcie do Twojego linku, więc kupujący nie widzą tej sekcji. Usuń link, aby jej użyć.",
+    "suggestion": {
+      "boughtWith": {
+        "label": "Często kupowane razem: {titles}",
+        "hint": "Kupujący ten produkt kupili też {titles}. {count, plural, one {Jedno dotknięcie doda go do tej listy.} few {Jedno dotknięcie doda je do tej listy.} many {Jedno dotknięcie doda je do tej listy.} other {Jedno dotknięcie doda je do tej listy.}}"
+      },
+      "offeredWith": {
+        "label": "Często dodajesz: {titles}",
+        "hint": "Oferujesz {titles} przy kilku innych swoich produktach. {count, plural, one {Jedno dotknięcie doda go także tutaj.} few {Jedno dotknięcie doda je także tutaj.} many {Jedno dotknięcie doda je także tutaj.} other {Jedno dotknięcie doda je także tutaj.}}"
+      }
     }
   }
 }

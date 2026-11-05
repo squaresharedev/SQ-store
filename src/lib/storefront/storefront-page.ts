@@ -57,6 +57,14 @@ import {
 } from "@/lib/settings/seller-identity";
 import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
 import { resolveProductPage } from "@/lib/storefront/product-page";
+import {
+  TILE_EXTRAS_SELECT,
+  loadTileExtras,
+  tileExtrasWanted,
+  type TileExtras,
+  type TileExtrasRow,
+} from "@/lib/storefront/tile-extras";
+import { resolveTileLook } from "@/lib/storefront/tile-look";
 import { productPagePath, storefrontPageUrl } from "@/lib/storefront/product-page-url";
 import { uuidField } from "@/lib/validation/inputs";
 import { parseStoredStorefrontConfig } from "@/lib/validation/storefront";
@@ -85,10 +93,11 @@ export type StorefrontPageRow = {
   moderation_status: string | null;
 };
 
-/** The columns a tile needs, plus the two the gate reads. */
-export const TILE_PRODUCT_SELECT = `id, title, price_cents, currency, image_key, created_at, ${MODERATION_GATE_SELECT}`;
+/** The columns a tile needs, the card extras' (TILE_EXTRAS_SELECT), plus the
+ *  two the gate reads. */
+export const TILE_PRODUCT_SELECT = `id, title, price_cents, currency, image_key, created_at, ${TILE_EXTRAS_SELECT}, ${MODERATION_GATE_SELECT}`;
 
-export type TileProductRow = {
+export type TileProductRow = TileExtrasRow & {
   id: string;
   title: string;
   price_cents: number;
@@ -237,20 +246,29 @@ export async function buildStorefrontPage(
     (block) => block.type !== "product" || liveIds.has(block.productId),
   );
 
-  const pricing = await loadProductSales(admin, {
-    ownerId: storefront.owner_id,
-    products: live.map((row) => ({
-      productId: row.id,
-      regularPriceCents: row.price_cents,
-      currency: toCurrency(row.currency),
-      sales: salesCovering(storeSales, row.id),
-      listedAt: row.created_at ?? null,
-    })),
-  });
+  const tileLook = resolveTileLook(config);
+  const [pricing, extras] = await Promise.all([
+    loadProductSales(admin, {
+      ownerId: storefront.owner_id,
+      products: live.map((row) => ({
+        productId: row.id,
+        regularPriceCents: row.price_cents,
+        currency: toCurrency(row.currency),
+        sales: salesCovering(storeSales, row.id),
+        listedAt: row.created_at ?? null,
+      })),
+    }),
+    loadTileExtras(admin, live, tileExtrasWanted({ theme: config.theme, blocks }), {
+      reviewsShown: tileLook.reviewsShown,
+      context: "storefront page",
+    }),
+  ]);
 
   const { theme } = config;
   const [tiles, imageUrls, backgroundImageUrl, customFontUrl] = await Promise.all([
-    Promise.all(live.map((row) => tileProduct(row, options.tileHref(row.id), pricing.get(row.id)))),
+    Promise.all(
+      live.map((row) => tileProduct(row, options.tileHref(row.id), pricing.get(row.id), extras.get(row.id))),
+    ),
     signImageBlocks(blocks),
     theme.background.kind === "image" ? presignGetUrl(theme.background.key) : null,
     theme.customFont ? presignGetUrl(theme.customFont.key) : null,
@@ -264,6 +282,7 @@ export async function buildStorefrontPage(
       ...(config.header ? { header: config.header } : {}),
       blocks,
       products: tiles,
+      tileLook,
       imageUrls,
       backgroundImageUrl,
       customFontUrl,
@@ -282,11 +301,15 @@ export async function buildStorefrontPage(
  * `pricing` is what it costs right now. While a sale lowers it the tile also
  * carries the regular price (struck through beside it) and, when the records
  * prove one, the percentage for its sale chip. Nothing else about the sale.
+ *
+ * `extras` is what its card shows beyond that (loadTileExtras), copied field
+ * by field too, so the stock COUNT the row carries can never ride along.
  */
 export async function tileProduct(
   row: TileProductRow,
   href: string,
   pricing: ProductPricing | undefined,
+  extras?: TileExtras,
 ): Promise<StorefrontTileProduct> {
   const sale = pricing?.sale ?? null;
   return {
@@ -297,6 +320,9 @@ export async function tileProduct(
     ...(sale && sale.offerPercent !== null ? { offerPercent: sale.offerPercent } : {}),
     currency: toCurrency(row.currency),
     imageUrl: row.image_key ? await presignGetUrl(row.image_key) : null,
+    ...(extras?.hoverImageUrl ? { hoverImageUrl: extras.hoverImageUrl } : {}),
+    ...(extras?.rating ? { rating: { average: extras.rating.average, count: extras.rating.count } } : {}),
+    ...(extras?.stockState ? { stockState: extras.stockState } : {}),
     href,
   };
 }

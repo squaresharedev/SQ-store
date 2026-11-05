@@ -55,7 +55,6 @@ export function ArtboardFrame({
   widths,
   initialDevice,
   resolveHotspot,
-  actions,
   children,
 }: {
   /** What the connectors and tests find this artboard by. */
@@ -72,8 +71,6 @@ export function ArtboardFrame({
   initialDevice: PreviewDevice;
   /** The setting a hotspot name opens here, or null for none. */
   resolveHotspot: (name: string) => SettingRef | null;
-  /** More chrome beside the device switch (a node to the next page). */
-  actions?: ReactNode;
   /** The page itself, rendered at the full width. */
   children: ReactNode;
 }) {
@@ -108,7 +105,6 @@ export function ArtboardFrame({
           <span className="text-muted-foreground">{kindLabel}</span>
         </p>
         <div className="flex shrink-0 items-center gap-1">
-          {actions}
           <DeviceSizeSwitch
             device={device}
             onChange={setDevice}

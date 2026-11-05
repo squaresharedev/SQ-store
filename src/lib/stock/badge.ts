@@ -1,4 +1,4 @@
-import type { StockBadge } from "@/types/stock";
+import type { StockBadge, TileStockState } from "@/types/stock";
 
 // Badge derivation — the ONLY place stock numbers become a public badge.
 // Pure and client-safe (no server imports), but ALWAYS fed from
@@ -24,4 +24,23 @@ export function deriveStockBadge(fields: StockFields): StockBadge | null {
     return { state: "low_stock", remaining: fields.stockQuantity };
   }
   return { state: "in_stock" };
+}
+
+/**
+ * The card's half of the same decision: the state alone, never a count (see
+ * TileStockState). `null` for a product that does not track stock or has
+ * plenty left.
+ */
+export function deriveTileStockState(fields: StockFields): TileStockState | null {
+  const badge = deriveStockBadge(fields);
+  return badge && badge.state !== "in_stock" ? badge.state : null;
+}
+
+/**
+ * What a card shows for this product. A buyer's board is handed the state
+ * already worked out (`stockState`, its counts are never sent); the designer
+ * has the seller's own counts and works it out here, by the same rule.
+ */
+export function tileStockState(product: StockFields & { stockState?: TileStockState }): TileStockState | null {
+  return product.stockState ?? deriveTileStockState(product);
 }

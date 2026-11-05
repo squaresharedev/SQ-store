@@ -5,6 +5,8 @@ import { toCurrency } from "@/lib/format/money";
 import { toChannel } from "@/lib/orders/queries";
 import { buildShippingPolicy } from "@/lib/settings/shipping-policy";
 import { hasPricedDestination } from "@/lib/shipping/rates";
+import { forecastRestocks, RESTOCK_PACE_DAYS, type RestockForecast } from "@/lib/predictions";
+import { LOW_STOCK_THRESHOLD_DEFAULT } from "@/lib/validation/product";
 import type { Currency } from "@/types/product";
 import type { OrderChannel, OrderStatus } from "@/types/order-view";
 
@@ -384,6 +386,64 @@ export async function getExistingProductIds(
     return [];
   }
   return (data ?? []).map((row) => row.id);
+}
+
+/** Safety bounds for the restock forecast, not pagination: counted products,
+ *  and paid orders in the pace window. */
+const RESTOCK_PRODUCTS_LIMIT = 200;
+const RESTOCK_ORDERS_LIMIT = 5000;
+
+/**
+ * The overview's restock forecast (forecastRestocks in lib/predictions.ts):
+ * live, counted products with stock left, against the units each sold in paid
+ * orders over the last RESTOCK_PACE_DAYS. Two reads, no N+1. An order's
+ * add-ons are not counted, so a product sold mostly as an add-on is forecast
+ * late rather than early. Fails soft to none: the row is advisory.
+ */
+export async function getRestockForecasts(now = new Date()): Promise<RestockForecast[]> {
+  const account = await getActiveAccount();
+  if (!account) return [];
+  const supabase = await createClient();
+  const { data: products, error } = await supabase
+    .from("products")
+    .select("id, title, stock_quantity, low_stock_threshold")
+    .eq("owner_id", account.accountId)
+    .eq("status", "active")
+    .eq("track_stock", true)
+    .gt("stock_quantity", 0)
+    .limit(RESTOCK_PRODUCTS_LIMIT);
+  if (error || !products || products.length === 0) {
+    if (error) console.warn("[dashboard] restock products failed:", error.message);
+    return [];
+  }
+
+  const since = new Date(now.getTime() - RESTOCK_PACE_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const { data: orders, error: ordersError } = await (supabase as SupabaseClient)
+    .from("orders")
+    .select("product_id, quantity")
+    .eq("seller_id", account.accountId)
+    .eq("status", "paid")
+    .gte("created_at", since)
+    .limit(RESTOCK_ORDERS_LIMIT);
+  if (ordersError) {
+    console.warn("[dashboard] restock orders failed:", ordersError.message);
+    return [];
+  }
+
+  const unitsSold: Record<string, number> = {};
+  for (const order of (orders ?? []) as { product_id: string | null; quantity: number | null }[]) {
+    if (!order.product_id) continue;
+    unitsSold[order.product_id] = (unitsSold[order.product_id] ?? 0) + (order.quantity ?? 1);
+  }
+  return forecastRestocks(
+    products.map((product) => ({
+      id: product.id,
+      title: product.title,
+      stockQuantity: product.stock_quantity ?? 0,
+      lowStockThreshold: product.low_stock_threshold ?? LOW_STOCK_THRESHOLD_DEFAULT,
+    })),
+    unitsSold,
+  );
 }
 
 /** Returns null when there is no active account or the read fails softly. */

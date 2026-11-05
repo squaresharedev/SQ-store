@@ -326,6 +326,11 @@
       "required": "Gib den Namen an, der mit der Bewertung angezeigt wird.",
       "tooLong": "Ein Name darf höchstens {maximum} Zeichen lang sein.",
       "unsupported": "Der Name enthält nicht unterstützte Zeichen."
+    },
+    "addOnsTitle": {
+      "required": "Die Überschrift ist erforderlich.",
+      "tooLong": "Die Überschrift darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Die Überschrift enthält nicht unterstützte Zeichen."
     }
   },
   "email": {
@@ -513,7 +518,10 @@
     "galleryStaleOption": "Ein Foto verweist auf eine Option, die nicht mehr existiert.",
     "badgesTooMany": "Ein Produkt kann bis zu {maximum} Badges haben.",
     "badgeDuplicate": "Jedes Badge kann nur einmal angegeben werden.",
-    "badgesOnPhotoTooMany": "Ein Produkt kann bis zu {maximum} Badges auf dem Foto anzeigen."
+    "badgesOnPhotoTooMany": "Ein Produkt kann bis zu {maximum} Badges auf dem Foto anzeigen.",
+    "addOnsTooMany": "Ein Produkt kann bis zu {maximum} andere Produkte anbieten.",
+    "addOnDuplicate": "Jedes Produkt kann nur einmal angeboten werden.",
+    "addOnNotYours": "Eines der angebotenen Produkte ist nicht mehr in diesem Shop. Entferne es und speichere erneut."
   },
   "productImport": {
     "noTitle": "Kein Titel.",

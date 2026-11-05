@@ -104,7 +104,8 @@
       "cards": "Vitrine / Vignettes produit",
       "soldOut": "Vitrine / Épuisé",
       "productPage": "Vitrine / Page produit",
-      "checkoutPage": "Vitrine / Paiement"
+      "checkoutPage": "Vitrine / Paiement",
+      "blocks": "Vitrine / Blocs"
     },
     "labels": {
       "looks": "Aspect de la vitrine",
@@ -151,7 +152,16 @@
       "productPagePhoto": "Photo de la page produit",
       "checkoutPhoto": "Photo du paiement",
       "thanksPhoto": "Photo de la page de remerciement",
-      "chipScale": "Même taille d'étiquette sur toutes les cartes"
+      "chipScale": "Même taille d'étiquette sur toutes les cartes",
+      "productPageAddOns": "Ajouter à votre commande",
+      "productPageStars": "Couleur des étoiles des avis",
+      "cardHoverEffect": "Effet au survol",
+      "cardSecondPhoto": "Deuxième photo au survol",
+      "cardBuyButton": "Bouton d’achat sur les vignettes",
+      "cardStarRating": "Note en étoiles sur les vignettes",
+      "cardLowStock": "Étiquette Stock faible",
+      "textSpacing": "Espacement des lettres et hauteur de ligne",
+      "elementBlur": "Flou"
     }
   },
   "editorSearch": {
@@ -214,6 +224,7 @@
     "domainsLabel": "Domaines autorisés",
     "domainsPlaceholder": "votresite.com, blog.votresite.com",
     "domainsHint": "Jusqu’à {max}, séparés par des virgules. Collez une URL, nous la réduirons au domaine.",
+    "sameAsHint": "Copie les domaines autorisés de {title}.",
     "emptyDomainsWarning": "Ajoutez au moins un domaine. Tant que ce champ est vide, la vitrine ne se charge nulle part, même si l’intégration est activée.",
     "builderLabel": "Votre créateur de site",
     "builderOther": "Autre site",
@@ -310,14 +321,11 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Page produit",
-    "closeAriaLabel": "Fermer la page produit de {title}",
+    "closeAriaLabel": "Fermer le parcours d’achat de {title}",
     "desktopSize": "Taille bureau",
     "mobileSize": "Taille mobile",
     "checkoutLabel": " · Paiement",
-    "thanksLabel": " · Merci",
-    "openCheckout": "Paiement",
-    "openCheckoutAriaLabel": "Ouvrir le paiement pour {title}",
-    "closeCheckoutAriaLabel": "Fermer la page de paiement"
+    "thanksLabel": " · Merci"
   },
   "customFont": {},
   "metadata": {
@@ -765,7 +773,8 @@
         "returns": "Retours",
         "safety": "Sécurité et conformité",
         "reviews": "Avis",
-        "seller": "Vendeur"
+        "seller": "Vendeur",
+        "addOns": "Ajouter à votre commande"
       },
       "availability": "Disponibilité",
       "soldByByline": "Mention « Vendu par »"
@@ -794,6 +803,42 @@
       "look": "Apparence",
       "style": "Style",
       "besidePrice": "À côté du prix"
+    },
+    "addOns": {
+      "title": "Ajouter à votre commande",
+      "infoLabel": "Ce qu’est Ajouter à votre commande",
+      "infoContent": "D’autres produits qu’un acheteur peut ajouter à la même commande depuis la page produit. Chaque produit a sa propre liste : chaque clic est enregistré aussitôt, dans toutes les vitrines où se trouve le produit.",
+      "show": "Afficher cette section",
+      "heading": {
+        "label": "Titre",
+        "charsLeft": "{count, plural, one {# caractère restant} many {# caractères restants} other {# caractères restants}}"
+      },
+      "layout": {
+        "label": "Apparence",
+        "list": "Lignes",
+        "tiles": "Tuiles"
+      },
+      "placement": {
+        "label": "Emplacement",
+        "beforeButton": "Au-dessus du bouton",
+        "afterButton": "Sous le bouton"
+      },
+      "products": {
+        "offeredWith": "Proposé avec",
+        "offeredWithOne": "Proposé avec {title}",
+        "ownLink": "Masqué : Acheter mène à votre propre lien.",
+        "noPage": "Ouvrez la page d’un produit sur le canevas pour choisir ce qu’elle propose.",
+        "loadFailed": "Impossible de charger vos produits."
+      }
+    },
+    "reviews": {
+      "title": "Avis",
+      "infoLabel": "Ce que vous pouvez changer dans les avis",
+      "infoContent": "Les avis des acheteurs, en bas de la page produit. La couleur des étoiles s’applique aussi à la note sous le nom du produit.",
+      "show": "Afficher cette section",
+      "starColor": "Couleur des étoiles",
+      "defaultStarColor": "Jaune par défaut",
+      "useDefaultStarColor": "Utiliser le jaune par défaut"
     }
   },
   "productBlock": {
@@ -813,8 +858,8 @@
       "lowStock": "Stock faible : {count} en stock.",
       "inStock": "{count} en stock."
     },
-    "openProductPage": "Ouvrir la page produit",
-    "hideProductPage": "Masquer la page produit",
+    "openProductPage": "Ouvrir le parcours d’achat",
+    "hideProductPage": "Masquer le parcours d’achat",
     "tileStyle": {
       "title": "Style de vignette",
       "reset": "Réinitialiser au thème",
@@ -881,6 +926,23 @@
       "label": "Description",
       "placeholder": "Logo, icône, décoration…",
       "hint": "Lu à voix haute par les lecteurs d’écran. Laissez vide si l’image est purement décorative."
+    }
+  },
+  "blur": {
+    "label": "Flou",
+    "photo": "Flou de la photo",
+    "shadow": "Flou de l’ombre",
+    "shadowTip": "Adoucit la photo derrière le nom et le prix.",
+    "off": "Aucun",
+    "valueText": "{value} sur 100",
+    "direction": "Direction",
+    "directionAriaLabel": "Direction du flou",
+    "directions": {
+      "all": "Partout",
+      "top": "Depuis le haut",
+      "bottom": "Depuis le bas",
+      "left": "Depuis la gauche",
+      "right": "Depuis la droite"
     }
   },
   "shapeBlock": {
@@ -951,10 +1013,10 @@
     "uploadImage": "Importer une image",
     "allShapes": "Toutes les formes",
     "browseShapes": "Parcourir toute la bibliothèque de formes",
-    "closePage": "Fermer la page produit",
-    "showPage": "Afficher la page produit",
-    "closePages": "Fermer les pages produit",
-    "showPageFull": "Afficher la page produit",
+    "closePage": "Fermer le parcours d’achat",
+    "showPage": "Afficher le parcours d’achat",
+    "closePages": "Fermer la page produit, le paiement et la page de remerciement",
+    "showPageFull": "Afficher la page produit, le paiement et la page de remerciement",
     "undo": "Annuler",
     "undoTip": "Annuler (Ctrl+Z)",
     "redo": "Rétablir",
@@ -969,25 +1031,18 @@
     "zoomIn": "Zoom avant",
     "zoomInTip": "Zoom avant (Ctrl +)",
     "designSettings": "Paramètres de design",
-    "page": "Page",
-    "moreTools": "Plus d’outils",
-    "checkout": "Paiement",
-    "showCheckout": "Afficher le paiement",
-    "closeCheckout": "Fermer le paiement",
-    "showCheckoutFull": "Afficher le paiement et la page de remerciement",
-    "closeCheckoutFull": "Fermer le paiement et la page de remerciement"
+    "page": "Parcours d’achat",
+    "moreTools": "Plus d’outils"
   },
   "selectionToolbar": {
     "toolsFor": "Outils pour {name}",
     "elements": "{count, plural, one {# élément} many {# éléments} other {# éléments}}",
-    "hidePage": "Masquer la page",
-    "hidePages": "Masquer les pages",
-    "openPage": "Ouvrir la page",
-    "openPages": "Ouvrir les pages",
-    "openProductPage": "Ouvrir la page produit de {name}",
-    "closeProductPage": "Fermer la page produit de {name}",
-    "openProductPages": "Ouvrir les pages produit de {count, plural, one {# produit} many {# produits} other {# produits}}",
-    "closeProductPages": "Fermer les pages produit de {count, plural, one {# produit} many {# produits} other {# produits}}",
+    "hidePage": "Masquer le parcours d’achat",
+    "openPage": "Ouvrir le parcours d’achat",
+    "openProductPage": "Ouvrir le parcours d’achat de {name}",
+    "closeProductPage": "Fermer le parcours d’achat de {name}",
+    "openProductPages": "Ouvrir le parcours d’achat de {count, plural, one {# produit} many {# produits} other {# produits}}",
+    "closeProductPages": "Fermer le parcours d’achat de {count, plural, one {# produit} many {# produits} other {# produits}}",
     "editText": "Modifier le texte",
     "editTextOf": "Modifier le texte de {name}",
     "color": "Couleur",
@@ -998,19 +1053,18 @@
     "editCornersOf": "Modifier l’arrondi des coins de {name}",
     "opacity": "Opacité",
     "editOpacityOf": "Modifier l’opacité de {name}",
+    "blur": "Flou",
+    "editBlurOf": "Modifier le flou de {name}",
     "frame": "Recadrer et placer",
     "frameImageFor": "Recadrer et placer l’image de {name}",
     "duplicate": "Dupliquer",
     "duplicateNamed": "Dupliquer {name}",
     "duplicateN": "Dupliquer {count, plural, one {# élément} many {# éléments} other {# éléments}}",
     "removeFrom": "Retirer {name} de la grille",
-    "removeN": "Retirer {count, plural, one {# élément} many {# éléments} other {# éléments}} de la grille",
-    "openCheckout": "Ouvrir le paiement",
-    "hideCheckout": "Masquer le paiement",
-    "openCheckoutFor": "Afficher le paiement de {name}",
-    "closeCheckoutFor": "Masquer le paiement de {name}"
+    "removeN": "Retirer {count, plural, one {# élément} many {# éléments} other {# éléments}} de la grille"
   },
   "canvas": {
+    "addSuggested": "Ajouter {title} à cette vitrine",
     "gridLabel": "Canevas de la vitrine",
     "emptyGrid": "Votre grille est vide",
     "emptyGridHint": "Ajoutez un produit pour commencer à organiser votre vitrine. Le texte et les formes sont dans la barre d’outils ci-dessous.",
@@ -1343,7 +1397,7 @@
       "pageColor": "Couleur de la page",
       "followsProductPage": "Fond de la page produit",
       "useProductPage": "Utiliser le fond de la page produit",
-      "button": "Le bouton de paiement reprend le style du bouton d'achat de votre page produit.",
+      "button": "Le bouton de paiement reprend le style du bouton d’achat de votre page produit.",
       "styleButton": "Personnaliser le bouton",
       "payButton": "Bouton de paiement",
       "payButtonInfoLabel": "À propos du bouton de paiement"
@@ -1377,5 +1431,45 @@
     "info": "Affichée derrière la page. La couche de la couleur de la page garde le texte lisible ; désactivez-la pour montrer la photo telle quelle.",
     "remove": "Retirer la photo",
     "overlay": "Couche de couleur"
+  },
+  "cardExtras": {
+    "hoverTitle": "Survol",
+    "shoppingTitle": "Achat",
+    "effect": "Effet",
+    "effectAriaLabel": "Ce que fait une vignette au survol",
+    "effects": {
+      "none": "Aucun",
+      "lift": "Soulever",
+      "zoom": "Zoomer",
+      "tilt": "Incliner"
+    },
+    "effectTipLabel": "Comment les effets se jouent",
+    "effectTip": "Se joue quand un acheteur pointe une vignette ou l’atteint avec la touche Tab. Sur mobile, et pour qui a demandé moins d’animations, les vignettes restent immobiles.",
+    "secondPhoto": "Deuxième photo",
+    "secondPhotoTipLabel": "Quelle photo s’affiche",
+    "secondPhotoTip": "Affiche la photo suivante du produit tant qu’un acheteur pointe la vignette. Les produits qui n’ont qu’une photo restent tels quels.",
+    "buyButton": "Bouton d’achat",
+    "buyButtonAriaLabel": "Bouton d’achat sur la vignette",
+    "buyButtons": {
+      "none": "Désactivé",
+      "solid": "Plein",
+      "outline": "Contour",
+      "link": "Lien"
+    },
+    "buyButtonTipLabel": "Où mène le bouton",
+    "buyButtonTip": "Reprend le texte et la couleur du bouton de votre page produit, et ouvre la page produit.",
+    "rating": "Note en étoiles",
+    "ratingTipLabel": "D’où viennent les étoiles",
+    "ratingTip": "Issue des avis des acheteurs. S’affiche sous le nom dès qu’un produit a un avis.",
+    "ratingTipReviewsOff": "Les avis sont désactivés sur votre page produit, donc les vignettes n’affichent pas d’étoiles. Activez-les dans Page produit, Avis.",
+    "lowStock": "Stock faible",
+    "lowStockTipLabel": "Quand l’étiquette s’affiche",
+    "lowStockTip": "Indique Stock faible quand un produit atteint ou passe sous son seuil de stock faible, et Épuisé à zéro. Les acheteurs ne voient jamais combien il en reste."
+  },
+  "textSpacing": {
+    "letterSpacing": "Espacement des lettres",
+    "lineHeight": "Hauteur de ligne",
+    "normal": "Normal",
+    "valueText": "{value} pour cent de la taille du texte"
   }
 }

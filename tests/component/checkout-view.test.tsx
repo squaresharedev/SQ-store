@@ -90,7 +90,7 @@ describe("CheckoutView", () => {
     expect(document.querySelector("[data-product-statutory]")).not.toBeNull();
     // The seller's own note, and the fixed pay label with the full total.
     expect(screen.getByText("Thrown by hand.")).toBeInTheDocument();
-    expect(payButton()).toHaveTextContent("Pay €28.50");
+    expect(payButton()).toHaveTextContent("Order with obligation to pay (€28.50)");
     expect(payButton().disabled).toBe(false);
   });
 
@@ -314,7 +314,7 @@ describe("checkout discounts", () => {
     expect(line).toHaveTextContent("Discount (SUMMER10)");
     expect(line).toHaveTextContent("-€2.40");
     // 24.00 - 2.40 + 4.50 delivery.
-    expect(payButton()).toHaveTextContent("Pay €26.10");
+    expect(payButton()).toHaveTextContent("Order with obligation to pay (€26.10)");
 
     await fillAddress(user);
     await user.click(payButton());
@@ -332,7 +332,7 @@ describe("checkout discounts", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("This code can't be used for this order.");
     expect(screen.getByLabelText("Discount code")).toHaveAttribute("aria-invalid", "true");
     expect(document.querySelector("[data-checkout-line='discount']")).toBeNull();
-    expect(payButton()).toHaveTextContent("Pay €28.50");
+    expect(payButton()).toHaveTextContent("Order with obligation to pay (€28.50)");
     fetches.restore();
   });
 
@@ -362,7 +362,7 @@ describe("checkout discounts", () => {
       "outdone",
     );
     expect(document.querySelector("[data-checkout-line='discount']")).toBeNull();
-    expect(payButton()).toHaveTextContent("Pay €23.70");
+    expect(payButton()).toHaveTextContent("Order with obligation to pay (€23.70)");
     fetches.restore();
   });
 
@@ -376,7 +376,7 @@ describe("checkout discounts", () => {
     expect(document.querySelector("[data-checkout-unit-price='2400']")).not.toBeNull();
     expect(document.querySelector("[data-checkout-line='discount']")).toHaveTextContent("-€7.20");
     // 24.00 - 7.20 + 4.50.
-    expect(payButton()).toHaveTextContent("Pay €21.30");
+    expect(payButton()).toHaveTextContent("Order with obligation to pay (€21.30)");
     fetches.restore();
   });
 

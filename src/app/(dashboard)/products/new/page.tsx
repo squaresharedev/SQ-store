@@ -6,6 +6,10 @@ import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { getShippingChoices } from "@/lib/storefront/queries";
+import { getAddOnHabits, listAddOnChoices } from "@/lib/products/add-on-choices";
+import { predictProductDefaults } from "@/lib/predictions";
+import { aiWritingFor, NO_AI_WRITING } from "@/lib/ai-suggestions";
+import { listRecentProductFacts } from "@/lib/products/queries";
 import { getShippingPolicy } from "@/lib/settings/shipping-policy";
 import { EMPTY_SHIPPING_POLICY } from "@/types/shipping-policy";
 import { storefrontReturnPath } from "@/lib/products/return-path";
@@ -36,10 +40,13 @@ export default async function NewProductPage({
   await requireUser(PRODUCTS_PATH);
   // Overlapped: the shipping read is scoped to the active account on its own
   // (and RLS backs that up), and nothing is rendered before the role check.
-  const [account, shippingChoices, params] = await Promise.all([
+  const [account, shippingChoices, params, addOnChoices, addOnHabits, recentProducts] = await Promise.all([
     getActiveAccount(),
     getShippingChoices(),
     searchParams,
+    listAddOnChoices(),
+    getAddOnHabits(null),
+    listRecentProductFacts(),
   ]);
   if (!can(account?.role, "products.write")) redirect("/products");
 
@@ -74,6 +81,9 @@ export default async function NewProductPage({
     ? await getShippingPolicy(account.userId)
     : EMPTY_SHIPPING_POLICY;
 
+  // The shell has already read this store's plan for this request (cached).
+  const ai = account ? await aiWritingFor(account.accountId, account.userId) : NO_AI_WRITING;
+
   return (
     <ProductFormView
       title={t("new.title")}
@@ -84,6 +94,13 @@ export default async function NewProductPage({
       shippingChoices={shippingChoices}
       shippingPolicy={shippingPolicy}
       missingTraderDetails={identity.ok ? identity.missing : []}
+      addOnChoices={addOnChoices}
+      addOnHabits={addOnHabits}
+      suggested={predictProductDefaults(
+        recentProducts,
+        shippingChoices.profiles.map((profile) => profile.id),
+      )}
+      ai={ai}
     />
   );
 }

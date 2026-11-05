@@ -109,8 +109,9 @@ export type SnapshotOrder = {
 export type SnapshotNotification = { id: string; title: string; read: boolean };
 
 export type SearchSnapshot = {
-  /** Newest first. */
+  /** Last touched first. */
   products: SnapshotProduct[];
+  /** Last touched first. */
   storefronts: SnapshotStorefront[];
   team: SnapshotTeamMember[];
   /** Newest first. */

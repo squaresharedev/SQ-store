@@ -31,7 +31,12 @@ export type Message = {
   text: string;
   html?: string;
   replyTo?: string;
+  /** One-click unsubscribe (RFC 8058): an absolute http(s) URL, POSTed to. */
+  unsubscribeUrl?: string;
 };
+
+/** An unsubscribe URL that can sit inside `<...>` on one header line. */
+const UNSUBSCRIBE_URL = /^https?:\/\/[\x21-\x3b\x3d\x3f-\x7e]+$/;
 
 /** The relay this app sends through. */
 export const BREVO_SMTP_HOST = "smtp-relay.brevo.com";
@@ -85,10 +90,16 @@ export function formatMessage(m: Message, now: Date, id: string): string {
   for (const address of [m.fromAddress, ...m.to, ...(m.replyTo ? [m.replyTo] : [])]) {
     if (!isSafeAddress(address)) throw new Error("refusing to send: an address is not a plain email address");
   }
+  if (m.unsubscribeUrl !== undefined && (m.unsubscribeUrl.length > 900 || !UNSUBSCRIBE_URL.test(m.unsubscribeUrl))) {
+    throw new Error("refusing to send: the unsubscribe address is not a plain URL");
+  }
   const headers = [
     `From: ${headerText(m.fromName)} <${m.fromAddress}>`,
     `To: ${m.to.join(", ")}`,
     ...(m.replyTo ? [`Reply-To: ${m.replyTo}`] : []),
+    ...(m.unsubscribeUrl
+      ? [`List-Unsubscribe: <${m.unsubscribeUrl}>`, "List-Unsubscribe-Post: List-Unsubscribe=One-Click"]
+      : []),
     `Subject: ${headerText(m.subject)}`,
     `Date: ${now.toUTCString()}`,
     `Message-ID: <${id}@${m.fromAddress.split("@")[1]}>`,

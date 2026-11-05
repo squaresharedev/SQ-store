@@ -6,7 +6,7 @@ import { useState } from "react";
 import { DEFAULT_PRODUCT_PAGE_CONFIG, DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 import { ToastProvider } from "@/components/ui/Toast";
 import { PanelTabs, panelProps } from "@/components/ui/PanelTabs";
-import { PanelBackRow, PanelMenu, PanelMenuItem } from "@/components/ui/PanelMenu";
+import { PanelMenu, PanelMenuItem, PanelSubmenu } from "@/components/ui/PanelMenu";
 import { ControlsPanel } from "@/components/storefront/ControlsPanel";
 import { editorEntries } from "@/components/storefront/editor-search";
 import { SettingTargetProvider } from "@/lib/storefront/setting-context";
@@ -92,7 +92,11 @@ describe("PanelMenu", () => {
     await user.click(row);
     expect(onOpen).toHaveBeenCalledTimes(1);
 
-    rerender(<PanelBackRow title="Typography" onBack={onBack} />);
+    rerender(
+      <PanelSubmenu title="Typography" onBack={onBack}>
+        <p>Body</p>
+      </PanelSubmenu>,
+    );
     await user.click(screen.getByRole("button", { name: /back/i }));
     expect(onBack).toHaveBeenCalledTimes(1);
   });
@@ -240,5 +244,25 @@ describe("ControlsPanel reopening a setting by name", () => {
       "aria-expanded",
       "true",
     );
+  });
+});
+
+describe("PanelSubmenu", () => {
+  it("keeps the body in a stacking context of its own, under the pinned row", () => {
+    // A control in the body that lifts itself (a segmented control's chosen
+    // option is z-10) used to paint over the pinned row once scrolled under
+    // it. Isolated, the body can never outrank the row.
+    render(
+      <PanelSubmenu title="Product page" onBack={() => {}}>
+        <button type="button" className="relative z-10">
+          Fit
+        </button>
+      </PanelSubmenu>,
+    );
+    const row = screen.getByRole("button", { name: /back/i }).parentElement!;
+    const body = screen.getByRole("button", { name: "Fit" }).parentElement!;
+    expect(row).toHaveClass("sticky", "z-10");
+    expect(body).toHaveClass("isolate");
+    expect(body.contains(row)).toBe(false);
   });
 });

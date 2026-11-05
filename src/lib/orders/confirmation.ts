@@ -11,7 +11,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getSellerIdentity } from "@/lib/settings/seller-identity";
 import { getShippingPolicy } from "@/lib/settings/shipping-policy";
 import { findShippingProfile } from "@/lib/storefront/shipping";
-import { isEuSeller } from "@/lib/storefront/product-page";
+import { orderOwesEuRights } from "@/lib/storefront/product-page";
 import { orderDownloadApiPath } from "@/lib/checkout/paths";
 import { orderNumber, orderRef } from "@/lib/orders/order-link";
 import { orderPageUrl } from "@/lib/storefront/product-page-url";
@@ -28,6 +28,8 @@ export type ConfirmationInput = {
   productTitle: string;
   quantity: number;
   selection: readonly OrderSelection[];
+  /** "Add to your order": the other lines of the order, in the seller's order. */
+  more?: readonly { productTitle: string; quantity: number; selection: readonly OrderSelection[] }[];
   shipTo: ShipTo | null;
   shippingProfileId: string | null;
   amountCents: number;
@@ -73,6 +75,7 @@ export async function sendBuyerConfirmation(order: ConfirmationInput): Promise<b
       productTitle: order.productTitle,
       quantity: order.quantity,
       selection: order.selection,
+      more: order.more,
       number: orderNumber(order.orderId),
       placedAt: order.placedAt,
       subtotalCents: order.amountCents - (shippingCents ?? 0) + (order.codeDiscount?.cents ?? 0),
@@ -86,7 +89,7 @@ export async function sendBuyerConfirmation(order: ConfirmationInput): Promise<b
       downloadUrl: order.isDigital && ref ? appUrl(orderDownloadApiPath(ref)) : null,
       seller,
       store: { name: storeName, contactEmail: seller.email ?? null },
-      isEu: isEuSeller(seller),
+      isEu: orderOwesEuRights(seller, { isDigital: order.isDigital, shipToCountry: order.shipTo?.country ?? null }),
       supplyConsent: order.supplyConsent,
     });
     return result.sent;

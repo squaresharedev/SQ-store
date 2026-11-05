@@ -12,8 +12,11 @@ import type {
   ProductSales,
   ProductSalesSummary,
 } from "@/types/product";
+import type { RecentProduct } from "@/lib/predictions";
+import { AGREEMENT_WINDOW } from "@/lib/suggestions/rules";
 import {
   parseDetails,
+  parseAddOnIds,
   parseDocuments,
   parseGallery,
   parseOptionGroups,
@@ -86,10 +89,11 @@ type ProductDetailRow = ProductListRow &
     | "documents"
     | "purchase_url"
     | "shipping_profile_id"
+    | "add_on_ids"
   >;
 
 const PRODUCT_DETAIL_COLUMNS =
-  `${PRODUCT_LIST_COLUMNS}, gallery, option_groups, details, documents, purchase_url, shipping_profile_id` as const;
+  `${PRODUCT_LIST_COLUMNS}, gallery, option_groups, details, documents, purchase_url, shipping_profile_id, add_on_ids` as const;
 
 /**
  * Safety bound, not pagination. Every row costs an R2 presign (an HMAC) on top
@@ -162,6 +166,7 @@ async function rowToProductDetail(row: ProductDetailRow): Promise<ProductDetail>
     documents,
     purchaseUrl: row.purchase_url,
     shippingProfileId: row.shipping_profile_id,
+    addOnIds: parseAddOnIds(row.add_on_ids),
   };
 }
 
@@ -384,6 +389,51 @@ export async function getProductSales(): Promise<ProductSalesSummary> {
   return { byProduct, bestsellerId: payload.bestseller_id };
 }
 
+/**
+ * The product most recently written to. updated_at also moves on a sale, a
+ * restock or a moderation pass, so this is "last touched", not "last edited by a
+ * person". Fails soft: it only ever refines a suggestion (lib/predictions).
+ */
+export async function getLastTouchedProduct(): Promise<{ id: string; at: string } | null> {
+  const account = await getActiveAccount();
+  if (!account) return null;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("products")
+    .select("id, updated_at")
+    .eq("owner_id", account.accountId)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data ? { id: data.id, at: data.updated_at } : null;
+}
+
+/**
+ * The newest products' facts a new product's defaults are predicted from, newest
+ * first. The active store's unless `ownerId` names one (Settings reads the
+ * signed-in person's own). Fails soft to none, which leaves the usual defaults.
+ */
+export async function listRecentProductFacts(ownerId?: string): Promise<RecentProduct[]> {
+  const owner = ownerId ?? (await getActiveAccount())?.accountId;
+  if (!owner) return [];
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("products")
+    .select("title, currency, shipping_profile_id, details, option_groups, low_stock_threshold, max_per_order")
+    .eq("owner_id", owner)
+    .order("created_at", { ascending: false })
+    .limit(AGREEMENT_WINDOW);
+  return (data ?? []).map((row) => ({
+    title: row.title,
+    currency: toCurrency(row.currency),
+    shippingProfileId: row.shipping_profile_id,
+    details: parseDetails(row.details),
+    optionGroups: parseOptionGroups(row.option_groups),
+    lowStockThreshold: row.low_stock_threshold,
+    maxPerOrder: productQuantityCap(row.max_per_order),
+  }));
+}
+
 /** A single storefront a product is placed on. `productPagesOn` is false when
  *  that storefront has switched product pages off, so a link to the product's
  *  page there would 404 (absent reads as on, the default). */
@@ -406,10 +456,14 @@ export async function getProductPlacements(): Promise<Record<string, StorefrontP
   const account = await getActiveAccount();
   if (!account) return {};
   const supabase = await createClient();
+  // The storefront edited last first, so a product on several leads with the
+  // one the seller is working on: the buy button starts on it, and the
+  // storefront pickers list it first.
   const { data, error } = await supabase
     .from("storefronts")
     .select("id, name, config")
-    .eq("owner_id", account.accountId);
+    .eq("owner_id", account.accountId)
+    .order("updated_at", { ascending: false });
   if (error) return {};
 
   const result: Record<string, StorefrontPlacement[]> = {};

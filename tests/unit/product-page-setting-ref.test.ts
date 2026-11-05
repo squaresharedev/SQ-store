@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  BLOCK_SETTINGS,
   CHECKOUT_PAGE_SETTINGS,
   CONTROLS_GROUPS,
   GROUP_LABELS,
@@ -76,16 +77,21 @@ describe("product page settings catalogue", () => {
     );
   });
 
-  it("keeps the catalogue's three parts disjoint and complete", () => {
-    // Storefront-wide, the product page's, and the checkout's: every entry in
-    // exactly one, so gating the two pages in editor search can never hide or
-    // double a storefront setting.
-    expect([...STOREFRONT_ONLY_SETTINGS, ...PRODUCT_PAGE_SETTINGS, ...CHECKOUT_PAGE_SETTINGS]).toHaveLength(
-      STOREFRONT_SETTINGS.length,
-    );
+  it("keeps the catalogue's four parts disjoint and complete", () => {
+    // Storefront-wide, the product page's, the checkout's, and a block's own:
+    // every entry in exactly one, so gating the pages (and the blocks) in
+    // editor search can never hide or double a storefront setting.
+    expect([
+      ...STOREFRONT_ONLY_SETTINGS,
+      ...PRODUCT_PAGE_SETTINGS,
+      ...CHECKOUT_PAGE_SETTINGS,
+      ...BLOCK_SETTINGS,
+    ]).toHaveLength(STOREFRONT_SETTINGS.length);
     expect(STOREFRONT_ONLY_SETTINGS.some((entry) => entry.ref.kind === "productPage")).toBe(false);
     expect(STOREFRONT_ONLY_SETTINGS.some((entry) => entry.ref.kind === "checkoutPage")).toBe(false);
+    expect(STOREFRONT_ONLY_SETTINGS.some((entry) => entry.ref.kind === "block")).toBe(false);
     expect(CHECKOUT_PAGE_SETTINGS.every((entry) => entry.ref.kind === "checkoutPage")).toBe(true);
+    expect(BLOCK_SETTINGS.every((entry) => entry.ref.kind === "block")).toBe(true);
   });
 
   it("compares product page refs by section", () => {

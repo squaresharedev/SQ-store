@@ -1,13 +1,15 @@
 import { Lock, ShieldCheck, Store, UserRound } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { isEuSeller } from "@/lib/storefront/product-page";
+import { isEuSeller, mayOweEuRights } from "@/lib/storefront/product-page";
 import { resolveProductShipping, resolveReturns } from "@/lib/storefront/shipping";
 import type { ProseResolver } from "@/lib/shipping/policy-prose";
 import { shippingCountries } from "@/lib/shipping/rates";
 import { regionName } from "@/lib/format/country";
 import { SHIPPING_COUNTRY_CODES } from "@/lib/settings/constants";
 import { LEGAL_LINKS } from "@/lib/legal/links";
-import { orderLookupPath, type LinkChannel } from "@/lib/storefront/product-page-url";
+import { orderLookupPath, type AddOnPick, type LinkChannel } from "@/lib/storefront/product-page-url";
+import { AddOnsProvider } from "@/components/product-page/AddOnsContext";
+import type { AddOnCard } from "@/types/product";
 import {
   photoForSelection,
   previewSelection,
@@ -32,6 +34,8 @@ import { CheckoutShowcase, CheckoutSummaryCard, MakerNote, type CheckoutItem } f
 import { resolveCheckoutTheme } from "./checkout-theme";
 
 const NO_OPTIONS: readonly string[] = [];
+const NO_ADD_ONS: readonly AddOnPick[] = [];
+const NO_CARDS: readonly AddOnCard[] = [];
 
 /**
  * The hosted checkout, as a buyer sees it and as the editor previews it.
@@ -58,9 +62,13 @@ export function CheckoutView({
   provider = null,
   initialCountry,
   via = null,
+  initialAddOns = NO_ADD_ONS,
 }: {
   page: CheckoutPageData;
   mode: "public" | "preview";
+  /** "Add to your order" picks from `?a=`, already limited by the route to
+   *  the add-ons on offer with this product. */
+  initialAddOns?: readonly AddOnPick[];
   /** How the buyer arrived (`?via=`), already allowlisted; sent with the order. */
   via?: LinkChannel | null;
   /** The version, already checked strictly against the product by the route. */
@@ -118,6 +126,7 @@ export function CheckoutView({
   // ("everywhere else") offers the platform's shipping list on top of the
   // countries the seller named.
   const reach = shippingCountries(shippingPolicy);
+  const showsEuRights = mayOweEuRights(seller, { isDigital: product.isDigital, reach });
   const codes = [...new Set([...reach.codes, ...(reach.anywhere ? SHIPPING_COUNTRY_CODES : [])])];
   const countries = codes
     .map((code) => ({ code, name: regionName(code, locale) ?? code }))
@@ -176,11 +185,11 @@ export function CheckoutView({
       >
         <SellerBlock seller={seller} fallbackName={storefront.name} />
       </Disclosure>
-      {isEu && (
+      {showsEuRights && (
         <Disclosure
           icon={ShieldCheck}
           attributes={{ "data-checkout-legal-row": "rights" }}
-          summary={<span className="opacity-80">{tPage("trust.euRights")}</span>}
+          summary={<span className="opacity-80">{isEu ? tPage("trust.euRights") : tPage("trust.euRightsForEu")}</span>}
         >
           <StatutoryNotes isDigital={product.isDigital} />
         </Disclosure>
@@ -203,6 +212,24 @@ export function CheckoutView({
           </a>
         </p>
       </Disclosure>
+      {/* Out in the open beside the button, because this is what binds a buyer
+          to the platform's Terms. The sale itself is with the seller. */}
+      <p className="opacity-70" data-checkout-terms-assent="">
+        {t.rich("termsAssent", {
+          seller: sellerName,
+          terms: (chunks) => (
+            <a
+              href={LEGAL_LINKS.terms.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2"
+              data-setting-skip=""
+            >
+              {chunks}
+            </a>
+          ),
+        })}
+      </p>
     </div>
   );
 
@@ -242,6 +269,7 @@ export function CheckoutView({
 
   return (
     <QuantityProvider limit={product.maxQuantity} initialQuantity={initialQuantity} syncUrl={!preview}>
+      <AddOnsProvider offered={page.addOns ?? NO_CARDS} initialPicks={initialAddOns} syncUrl={!preview}>
       <DiscountCodeProvider>
         <PageShell
           storefront={storefront}
@@ -291,6 +319,7 @@ export function CheckoutView({
           </div>
         </PageShell>
       </DiscountCodeProvider>
+      </AddOnsProvider>
     </QuantityProvider>
   );
 }

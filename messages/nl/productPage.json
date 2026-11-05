@@ -29,13 +29,15 @@
     "returns": "Retouren",
     "safety": "Veiligheid en conformiteit",
     "reviews": "Reviews",
-    "seller": "Verkoper"
+    "seller": "Verkoper",
+    "addOns": "Toevoegen aan je bestelling"
   },
   "soldBy": "Verkocht door {seller}",
   "moreDetails": "Meer details",
   "trust": {
     "digitalDelivery": "Geleverd als download na aankoop.",
-    "euRights": "14 dagen bedenktijd, en een garantie van 2 jaar."
+    "euRights": "14 dagen bedenktijd, en een garantie van 2 jaar.",
+    "euRightsForEu": "EU-kopers: 14 dagen bedenktijd en 2 jaar wettelijke garantie."
   },
   "safety": {
     "manufacturer": "Fabrikant",
@@ -284,8 +286,33 @@
         "notEligible": "Deze bestelling kan niet meer worden beoordeeld.",
         "rateLimited": "Te veel reviews vanaf deze verbinding. Probeer het over een uur opnieuw.",
         "failed": "Je review kon niet worden geplaatst. Probeer het opnieuw."
+      },
+      "later": {
+        "title": "{kind, select, parcel {Beoordeel het zodra het binnen is} other {Beoordeel het zodra je het hebt geprobeerd}}",
+        "body": "{store} kan je één keer mailen, {kind, select, parcel {ongeveer een week na verzending} other {over een paar dagen}}, met een link om het hier te beoordelen. Je kunt dit altijd stopzetten.",
+        "remind": "Herinner me per e-mail",
+        "notYet": "{kind, select, parcel {Nog niet binnen?} other {Nog niet geprobeerd?}}",
+        "once": "{store} mailt je maar één keer. Je kunt dit altijd stopzetten.",
+        "onDate": "{store} stuurt je rond {date} een herinnering.",
+        "onLater": "{store} stuurt je {kind, select, parcel {ongeveer een week na verzending} other {over een paar dagen}} een herinnering.",
+        "stop": "Mail me niet",
+        "preview": "Dit is een voorbeeld, dus er wordt geen e-mail verstuurd.",
+        "errors": {
+          "closed": "Voor deze bestelling kan geen herinnering meer worden ingesteld.",
+          "rateLimited": "Te veel pogingen vanaf deze verbinding. Probeer het over een uur opnieuw.",
+          "failed": "Dat is niet gelukt. Probeer het opnieuw."
+        }
+      },
+      "stopDialog": {
+        "title": "Herinnering stopzetten?",
+        "body": "{store} mailt je niet meer over het beoordelen van deze bestelling.",
+        "confirm": "Herinnering stopzetten",
+        "doneTitle": "Herinnering stopgezet",
+        "doneBody": "Je krijgt geen e-mails meer over het beoordelen van deze bestelling."
       }
-    }
+    },
+    "lineQuantity": "{quantity} × {title}",
+    "downloadItem": "{title} downloaden"
   },
   "checkout": {
     "metadata": {
@@ -384,7 +411,8 @@
       "invalid": "Sommige gegevens moeten worden nagekeken. Controleer de gemarkeerde velden.",
       "discount_invalid": "Deze kortingscode kan niet meer worden gebruikt. Verwijder hem om de volle prijs te betalen.",
       "price_changed": "De prijs is gewijzigd terwijl deze pagina open was, dus er is niets in rekening gebracht. Bekijk het nieuwe totaal en betaal dan.",
-      "turnstile": "De beveiligingscontrole is niet afgerond, dus er is niets in rekening gebracht. Hij loopt nu opnieuw: wacht even en probeer het dan nog eens."
+      "turnstile": "De beveiligingscontrole is niet afgerond, dus er is niets in rekening gebracht. Hij loopt nu opnieuw: wacht even en probeer het dan nog eens.",
+      "add_on_unavailable": "Iets wat je hebt toegevoegd kan niet meer bij deze bestelling worden verkocht, dus er is niets in rekening gebracht. Controleer je bestelling en het nieuwe totaal, en betaal dan."
     },
     "editHeadline": "Koptekst van afrekenen",
     "discount": {
@@ -398,7 +426,12 @@
       "invalid": "Deze code kan niet worden gebruikt voor deze bestelling.",
       "rateLimited": "Te veel codes geprobeerd. Wacht even en probeer het opnieuw.",
       "line": "Korting ({code})"
-    }
+    },
+    "addOns": {
+      "label": "Toegevoegd aan je bestelling",
+      "remove": "{title} uit deze bestelling verwijderen"
+    },
+    "termsAssent": "Door te bestellen accepteer je ook de <terms>Servicevoorwaarden</terms> van Square Share voor het gebruik van dit platform. Je aankoop zelf is bij {seller}."
   },
   "sale": {
     "wasNow": "Was {was}, nu {now}",
@@ -440,5 +473,27 @@
     "filterStars": "{stars, plural, one {Reviews met {stars} ster tonen ({count})} other {Reviews met {stars} sterren tonen ({count})}}",
     "showing": "{rating, plural, one {Reviews met {rating} ster} other {Reviews met {rating} sterren}}",
     "showAll": "Alle reviews tonen"
+  },
+  "addOns": {
+    "title": "Toevoegen aan je bestelling",
+    "add": "Toevoegen",
+    "added": "Toegevoegd",
+    "optionLabel": "{group} voor {product}",
+    "unset": "Er worden hier nog geen andere producten aangeboden. Klik hier om ze te kiezen.",
+    "addNamed": "{title} toevoegen aan je bestelling",
+    "detailsNamed": "Details van {title} bekijken",
+    "seeDetails": "Details",
+    "fullPage": "Volledige pagina bekijken",
+    "addToOrder": "Toevoegen aan je bestelling",
+    "removeFromOrder": "Uit je bestelling verwijderen",
+    "rating": "{average} van 5 sterren, {count, plural, one {# review} other {# reviews}}",
+    "hidden": {
+      "hint": "Kopers zien dit product niet.",
+      "draft": "Concept",
+      "soldOut": "Uitverkocht",
+      "takenDown": "Verwijderd",
+      "otherKind": "Ander soort",
+      "otherCurrency": "Andere valuta"
+    }
   }
 }

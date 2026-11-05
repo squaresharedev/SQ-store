@@ -127,6 +127,13 @@
       "description": "Ihnen steht innerhalb von 14 Tagen nach dem Widerruf eine Erstattung zu. Kläre die Rücksendung und erstatte dann die Bestellung.",
       "action": "Widerrufe ansehen"
     },
+    "restock": {
+      "label": "{count, plural, one {{count} Produkt bald ausverkauft} other {{count} Produkte bald ausverkauft}}",
+      "descriptionSingle": "Bei diesem Tempo ist „{title}“ in etwa {days, plural, one {# Tag} other {# Tagen}} ausverkauft.",
+      "descriptionMultiple": "„{title}“ ist zuerst weg, in etwa {days, plural, one {# Tag} other {# Tagen}}.",
+      "actionSingle": "Bestand aktualisieren",
+      "actionMultiple": "Bestand prüfen"
+    },
     "checkoutRates": {
       "label": "Lege deine Versandtarife fest",
       "description": "Käufer können ein physisches Produkt erst kaufen, wenn ein Lieferziel sowohl einen Tarif als auch ein Land hat.",

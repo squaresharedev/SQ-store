@@ -402,7 +402,7 @@ describe("WelcomeFlow: the Terms", () => {
     expect(within(summary).getByRole("heading", { name: "Selling" })).toBeInTheDocument();
 
     const full = within(dialog).getByRole("link", { name: /read the full terms of service/i });
-    expect(full).toHaveAttribute("href", LEGAL_LINKS.terms.href);
+    expect(full).toHaveAttribute("href", `https://squareshare.eu/terms/v/${LEGAL_VERSION}/`);
     expect(full).toHaveAttribute("target", "_blank");
     expect(full).toHaveAttribute("rel", expect.stringContaining("noopener"));
   });

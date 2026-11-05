@@ -126,7 +126,7 @@ test.describe("finding a product page setting from the design panel", () => {
 
     // ---- THE PAGE GOES AWAY AGAIN ---------------------------------------
     // The gate is live state, not a first-paint decision.
-    await page.getByRole("button", { name: /^close the product page for oak lamp$/i }).first().click();
+    await page.getByRole("button", { name: /^close the buyer flow for oak lamp$/i }).first().click();
     await expect(artboard).toHaveCount(0);
     const reclosed = await search(page, "photo fit");
     expect(reclosed.join(" | ")).toContain("Open the product page");

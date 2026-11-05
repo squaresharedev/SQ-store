@@ -33,6 +33,8 @@ import { CardStyleControls } from "./CardStyleControls";
 import { PriceTagControls } from "./PriceTagControls";
 import { SaleBadgeControls } from "./SaleBadgeControls";
 import { ChipScaleControl } from "./ChipScaleControl";
+import { CardHoverControls } from "./CardHoverControls";
+import { CardShoppingControls } from "./CardShoppingControls";
 
 /** Decimal input string -> integer cents, or null when not a finite number. */
 function centsOf(input: string): number | null {
@@ -69,6 +71,7 @@ export function ProductBlockEditor({
   onDesignPage,
   pageOpen = false,
   onThemeChange,
+  reviewsShown = true,
 }: {
   block: ProductBlock;
   theme: StorefrontTheme;
@@ -88,6 +91,8 @@ export function ProductBlockEditor({
   onDesignPage?: () => void;
   /** True while that page is already out. */
   pageOpen?: boolean;
+  /** Whether the product page shows reviews, which a card's stars need. */
+  reviewsShown?: boolean;
 }) {
   const fieldId = useId();
   const t = useTranslations("Storefront");
@@ -388,6 +393,28 @@ export function ProductBlockEditor({
             onChange={onStyleChange}
             product={product}
             afterLook={onThemeChange && <ChipScaleControl theme={theme} onChange={onThemeChange} onEveryCard />}
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          title={t("cardExtras.hoverTitle")}
+          collapsible
+          defaultOpen={false}
+          summon={summoned === "hover"}
+        >
+          <CardHoverControls value={resolveCardStyle(theme, block.style)} onChange={onStyleChange} />
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          title={t("cardExtras.shoppingTitle")}
+          collapsible
+          defaultOpen={false}
+          summon={summoned === "shopping"}
+        >
+          <CardShoppingControls
+            value={resolveCardStyle(theme, block.style)}
+            onChange={onStyleChange}
+            reviewsShown={reviewsShown}
           />
         </CollapsibleSection>
       </div>

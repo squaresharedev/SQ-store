@@ -207,7 +207,7 @@
   },
   "legal": {
     "cardTitle": "Zmluva s predajcom, podmienky a ochrana súkromia",
-    "cardDescription": "Aktuálne návrhy, v zrozumiteľnom jazyku, pretože nikto nečíta právnický žargón pre radosť. Skutočné právne znenie je na ceste; prijatím teraz pokrývate tento návrh.",
+    "cardDescription": "Čo odsúhlasujete a ako nakladáme s vašimi údajmi. Každá časť má skrátenú verziu a celý text je len na jedno kliknutie.",
     "termsTitle": "Podmienky služby",
     "termsDescription": "Skrátená verzia toho, s čím súhlasíte predajom na Square Share, s úplnými Podmienkami na jedno kliknutie.",
     "docs": {
@@ -252,6 +252,7 @@
           "heading": "S kým máte do činenia",
           "points": {
             "merchantOfRecord": "Square Share je platforma, ktorá vám pomáha predávať. Keď kupujúci u vás objedná, predaj sa uzatvára medzi vami a týmto kupujúcim: predajcom a obchodníkom zodpovedným za predaj ste vy, nie my.",
+            "regions": "Square Share pôsobí v EÚ, USA a Kanade. Inde zatiaľ nepôsobíme, takže aby ste tu mohli predávať, musíte mať sídlo v jednej z týchto oblastí. Québec musí počkať na francúzske znenie týchto podmienok.",
             "eligibility": "Musíte mať aspoň 18 rokov alebo dosiahnuť vek plnoletosti podľa miesta, kde žijete. Ak sa registrujete za firmu, potvrdzujete, že ju môžete týmito Podmienkami zaviazať."
           }
         },
@@ -266,8 +267,8 @@
           "heading": "Predaj",
           "points": {
             "lawfulListings": "Ponuky uvádzajte pravdivo a predávajte len zákonný tovar, ktorý máte právo predávať.",
-            "consumerRights": "Dodržiavajte práva spotrebiteľov svojich kupujúcich vrátane 14-dňovej lehoty na odstúpenie od zmluvy a zákonnej záruky a sami zabezpečujte doručenie, podporu a vrátenie peňazí.",
-            "taxesAndRecords": "Dane a DPH z vašich predajov vybavujete vy a vlastné záznamy o predaji uchovávate 10 rokov."
+            "consumerRights": "Dodržiavajte spotrebiteľské práva, ktoré majú vaši kupujúci tam, kde žijú, napríklad 14-dňové právo na odstúpenie a zákonnú záruku v EÚ, a sami zabezpečujte doručenie, podporu a vrátenie peňazí.",
+            "taxesAndRecords": "Dane z vašich predajov (DPH, GST/HST alebo sales tax) si riešite sami a svoje záznamy o predajoch uchovávate tak dlho, ako to vyžaduje právo v mieste vášho podnikania."
           }
         },
         "payments": {
@@ -296,10 +297,35 @@
           "points": {
             "cap": "Square Share je v ranej fáze a podnikateľským používateľom sa ponúka tak, ako je. Voči nim je naša zodpovednosť obmedzená na poplatky, ktoré nám boli zaplatené za posledných 12 mesiacov, alebo na 100 EUR, podľa toho, čo je vyššie, a predajcovia podnikatelia nás odškodňujú za nároky spôsobené ich produktmi, stránkami alebo porušeniami. Ak ste spotrebiteľ, vaše zákonné práva zostávajú nedotknuté.",
             "termination": "Účty, ktoré porušujú tieto Podmienky, môžeme pozastaviť alebo zrušiť. Odísť môžete kedykoľvek a svoje údaje si môžete odniesť.",
-            "changesAndLaw": "Tieto Podmienky môžeme aktualizovať, pričom podstatné zmeny oznámime vopred. Uplatňuje sa české právo.",
-            "policies": "Zásady ochrany osobných údajov a Zásady používania cookies tvoria súčasť týchto Podmienok."
+            "changesAndLaw": "O podstatných zmenách týchto podmienok informujeme najmenej 30 dní vopred. Na podnikateľov sa vzťahuje české právo. Ak ste spotrebiteľ, naďalej vás chráni právo vašej domovskej krajiny, štátu alebo provincie.",
+            "policies": "Zásady ochrany osobných údajov a Zásady používania cookies tvoria súčasť týchto Podmienok.",
+            "disputes": "Spory v USA sa riešia individuálnym rozhodcovským konaním namiesto súdu, pokiaľ sa neodhlásíte do 30 dní od odsúhlasenia. Spotrebitelia v EÚ a Kanade sa môžu naďalej obrátiť na súd vo svojom mieste bydliska."
           }
         }
+      }
+    },
+    "notice": {
+      "bannerLabel": "Aktualizácia Podmienok služby",
+      "bannerLink": "Zistiť, čo sa mení",
+      "title": "Naše Podmienky sa zmenia {date}.",
+      "titleSoon": "Naše Podmienky sa čoskoro zmenia.",
+      "body": "Do vtedy platia <current>aktuálne Podmienky</current>. Tu je to, čo <next>nové Podmienky</next> menia:",
+      "leave": "Ak nesúhlasíte, môžete si zrušiť účet bezplatne pred ich nadobudnutím účinnosti. Ak budete Square Share po tomto dátume naďalej používať, nové Podmienky sa na vás vzťahujú.",
+      "changes": {
+        "regions": "Teraz pôsobíme len v EÚ, USA a Kanade a každá oblasť má vlastnú sekciu.",
+        "disputes": "Spory v USA sa riešia individuálnym rozhodcovským konaním namiesto súdu, pokiaľ sa neodhlásíte do 30 dní. Spotrebitelia v EÚ a Kanade sa môžu naďalej obrátiť na súd vo svojom mieste bydliska.",
+        "plans": "Platené plány a poplatky za predaj sú teraz podrobne opísané vrátane automatického obnovenia a postupu na zrušenie.",
+        "moderation": "Vysvetľujeme, ako kontrolujeme obsah, ako ho nahlásiť, podať odvolanie alebo sťažnosť z dôvodu porušenia autorských práv.",
+        "notice": "Teraz dostanete e-mailom najmenej 30 dní vopred oznámenie o podstatných zmenách Podmienok."
+      },
+      "email": {
+        "subject": "Aktualizujeme naše Podmienky služby",
+        "intro": "Aktualizujeme Podmienky služby Square Share. Nové Podmienky nadobúdajú účinnosť {date}.",
+        "changes": "Čo sa mení:",
+        "readNew": "Prečítať nové Podmienky: {url}",
+        "readCurrent": "Prečítať aktuálne Podmienky: {url}",
+        "nothingNow": "Dnes nemusíte nič robiť. Nové Podmienky môžete prijať hneď vo svojom paneli: {url}",
+        "leave": "Ak nesúhlasíte, môžete si zrušiť účet bezplatne pred {date}. Ak budete Square Share po tomto dátume naďalej používať, nové Podmienky sa na vás vzťahujú."
       }
     }
   },
@@ -311,7 +337,7 @@
       "required": "<strong>Pred zverejnením alebo predajom čohokoľvek je povinné uviesť obchodné meno, adresu a kontaktný e-mail.</strong> Kupujúci musia vedieť, od koho nakupujú a ako vás kontaktovať pred objednávkou.",
       "privacyNoteLinked": "Tieto údaje sa na stránkach vašich produktov zobrazujú verejne iba z tohto dôvodu. Nikdy ich nepoužívame na marketing a nikdy ich nepredávame ani neposkytujeme ďalej. Jediná správa, ktorú posielame na váš kontaktný e-mail alebo telefón, je kód na jeho potvrdenie. Pozrite si <link>Zásady ochrany osobných údajov Square Share</link>."
     },
-    "countryNotEu": "Mimo EÚ / radšej neuvádzam",
+    "countryUnset": "Radšej neuvádzam",
     "vatAdvisory": {
       "noCountry": "Toto IČ DPH vyzerá, že ho vydal {issuer}. Možno budete chcieť nastaviť krajinu.",
       "mismatch": "Toto IČ DPH vyzerá, že ho vydal {issuer}, ale vaša krajina je nastavená na {selected}. Skontrolujte, či oboje sedí."
@@ -340,6 +366,7 @@
         "placeholder": "napr. SK1234567890"
       },
       "country": {
+        "hint": "Square Share pôsobí v EÚ, USA a Kanade. Inde zatiaľ nepôsobíme.",
         "label": "Krajina"
       },
       "phone": {
@@ -395,7 +422,9 @@
   "shipping": {
     "shipsFrom": {
       "label": "Odosiela sa z",
-      "notSet": "Nenastavené"
+      "notSet": "Nenastavené",
+      "sameAsBusiness": "Rovnako ako vaša firma: {country}",
+      "sameAsBusinessHint": "Prevzaté z adresy vo vašich údajoch predajcu."
     },
     "shippingCard": {
       "title": "Doprava",

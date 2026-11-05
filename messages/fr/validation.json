@@ -326,6 +326,11 @@
       "required": "Ajoutez le nom à afficher avec l’avis.",
       "tooLong": "Un nom doit faire {maximum} caractères au maximum.",
       "unsupported": "Le nom contient des caractères non pris en charge."
+    },
+    "addOnsTitle": {
+      "required": "Le titre est obligatoire.",
+      "tooLong": "Le titre doit faire {maximum} caractères ou moins.",
+      "unsupported": "Le titre contient des caractères non pris en charge."
     }
   },
   "email": {
@@ -513,7 +518,10 @@
     "galleryStaleOption": "Une photo pointe vers une option qui n’existe plus.",
     "badgesTooMany": "Un produit peut avoir jusqu’à {maximum} badges.",
     "badgeDuplicate": "Chaque badge ne peut apparaître qu’une seule fois.",
-    "badgesOnPhotoTooMany": "Un produit peut afficher jusqu’à {maximum} badges sur sa photo."
+    "badgesOnPhotoTooMany": "Un produit peut afficher jusqu’à {maximum} badges sur sa photo.",
+    "addOnsTooMany": "Un produit peut proposer jusqu'à {maximum} autres produits.",
+    "addOnDuplicate": "Chaque produit ne peut être proposé qu'une seule fois.",
+    "addOnNotYours": "L'un des produits proposés n'est plus dans cette boutique. Retirez-le et enregistrez à nouveau."
   },
   "productImport": {
     "noTitle": "Aucun titre.",

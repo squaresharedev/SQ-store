@@ -36,6 +36,26 @@ export function strictSelection(
 }
 
 /**
+ * An add-on's version as a buyer's tap takes it: in each group the option they
+ * asked for when it is there and available, else the first available one.
+ * Null when a group has nothing available, which means the add-on cannot be
+ * taken in any version. Always a selection strictSelection accepts.
+ */
+export function addOnSelectionIds(
+  groups: readonly ProductOptionGroup[],
+  requested: readonly string[],
+): string[] | null {
+  const ids: string[] = [];
+  for (const group of groups) {
+    const available = group.options.filter((option) => option.available);
+    const chosen = available.find((option) => requested.includes(option.id)) ?? available[0];
+    if (!chosen) return null;
+    ids.push(chosen.id);
+  }
+  return ids;
+}
+
+/**
  * A version to SHOW when nobody has chosen one: the editor's checkout
  * artboard, which previews the design against the first available option of
  * each group. Never used to decide an order.

@@ -8,6 +8,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { flushSync } from "react-dom";
 import Link from "@/components/ui/AppLink";
 import { ArrowLeft, ArrowRight, ExternalLink, Search, Share2, Sparkles, Users, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -48,7 +49,7 @@ import {
   type StorefrontSeller,
 } from "@/types/storefront";
 import { LAYER_OPS, moveLayerTo, type LayerOp } from "@/lib/storefront/layers";
-import { isDefaultProductPage } from "@/lib/storefront/product-page";
+import { isDefaultProductPage, isProductPageSectionShown } from "@/lib/storefront/product-page";
 import { isDefaultCheckoutPage, resolveCheckoutPage } from "@/lib/storefront/checkout-page";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { applyFormatToRange } from "@/lib/storefront/text-spans";
@@ -126,6 +127,7 @@ type LeftPanelState =
   | null;
 import { editorEntries, type EditorJump } from "./editor-search";
 import { ControlsPanel } from "./ControlsPanel";
+import { ProductAddOnsEditorProvider } from "./ProductAddOnsEditor";
 import { DesignPanel } from "./DesignPanel";
 import {
   SHEET_ON_MOBILE_CLASS,
@@ -144,7 +146,7 @@ import {
   type BlockField,
   type BlockFieldSummons,
 } from "./SummonedField";
-import { ImageBlockEditor } from "./ImageBlockEditor";
+import { ImageBlockEditor, type ImageBlockPatch } from "./ImageBlockEditor";
 import { MultiBlockEditor } from "./MultiBlockEditor";
 import { PlacementSection } from "./PlacementSection";
 import { LayersPanel } from "./LayersPanel";
@@ -158,7 +160,7 @@ import {
   useCanvasAnchor,
   useScrollReveal,
 } from "./useCanvasAnchor";
-import { safeSpan } from "./canvas-geometry";
+import { CANVAS_MARGIN, safeSpan } from "./canvas-geometry";
 import { useEditorHistory } from "./useEditorHistory";
 import { useUnsavedChangesGuard } from "@/lib/hooks/useUnsavedChangesGuard";
 import { SearchProvider, useSearch } from "@/components/search/SearchProvider";
@@ -194,6 +196,27 @@ function changedField<T extends object>(prev: T, next: T): string {
   return "unchanged";
 }
 
+/** An element's undo step for a slider drag (opacity, blur): one step per
+ *  field per selection, so a whole drag undoes at once. A fit or alt change
+ *  is a step of its own. */
+function imageCoalesce(selection: string, patch: ImageBlockPatch): string | undefined {
+  if (patch.opacity !== undefined) return `image:${selection}:opacity`;
+  if (patch.blur !== undefined) return `image:${selection}:blur`;
+  return undefined;
+}
+
+/** A text block's undo step: a blur drag, a change of which way the blur
+ *  runs, and a drag of either spacing slider are each their own, kept apart
+ *  from the typing and formatting that share the default "text" run. Spacing
+ *  is asked by key, since dragging back to Normal sends `undefined`. */
+function textCoalesce(patch: TextBlockPatch): string | undefined {
+  if (patch.blur !== undefined) return "blur";
+  if (patch.blurDirection !== undefined) return "blurDirection";
+  if ("letterSpacing" in patch) return "letterSpacing";
+  if ("lineHeight" in patch) return "lineHeight";
+  return undefined;
+}
+
 /** Canvas zoom bounds. A view preference only: never saved, never seen by
  *  buyers, and deliberately NOT affecting layout width, so zooming out never
  *  trips the grid's small-screen reflow. */
@@ -225,9 +248,6 @@ const WHEEL_ZOOM_PX = 100;
  * the cap, stays one to one.
  */
 const WHEEL_ZOOM_STEP_PX = 25;
-
-/** Breathing room left around the board when it is centred or fitted. */
-const CANVAS_MARGIN = 24;
 
 /** Rough line height / page size used to convert non-pixel wheel deltas. */
 const WHEEL_LINE_PX = 16;
@@ -339,6 +359,7 @@ export function StorefrontDesigner({
   initialName,
   initialConfig,
   products,
+  suggestedProductId = null,
   initialBackgroundImageUrl = null,
   initialCustomFontUrl = null,
   initialElementUrls = {},
@@ -364,6 +385,10 @@ export function StorefrontDesigner({
   initialName: string;
   initialConfig: StorefrontConfig;
   products: Product[];
+  /** The product an empty board offers as its first tile (lib/predictions.ts
+   *  rankProductsToPlace). The picker keeps `products` in their own order, so
+   *  nothing the seller has learned to find moves. */
+  suggestedProductId?: string | null;
   /** The active account's trader identity (Settings › Business & seller
    *  details), read-only here — see lib/settings/seller-identity.ts. Shown on
    *  every product page of this storefront; this editor has no control that
@@ -474,10 +499,6 @@ export function StorefrontDesigner({
   const [checkoutPage, setCheckoutPage] = useState<CheckoutPageConfig>(() =>
     resolveCheckoutPage(initialConfig),
   );
-  // WHICH PRODUCT'S CHECKOUT IS OUT beside its page (with its thank-you), or
-  // none. One at a time: there is one checkout design per storefront, and a
-  // second chain would show the same design twice. View state, never saved.
-  const [checkoutFor, setCheckoutFor] = useState<string | null>(null);
   // Bumped by the panel's "Play it" to replay the thank-you celebration.
   const [celebrationPlays, setCelebrationPlays] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -601,22 +622,21 @@ export function StorefrontDesigner({
     [catalog],
   );
 
-  /** Whether any product page is out on the canvas. */
+  /** Whether a buyer flow is out on the canvas: a product page, and the
+   *  checkout and thank-you page that always come with it. */
   const pageOpen = openPages.length > 0;
-  /** Whether the checkout is out, hanging off an open page. */
-  const checkoutOpen = checkoutFor !== null && openPages.includes(checkoutFor);
 
   // What the design panel's search field can find. Rebuilt when the board or
   // the catalogue changes, because half of this index IS the board: the
   // objects on it are searchable by the same names the layers list shows.
   //
-  // It also tracks whether a page is out. The product page's settings are only
-  // offered while the page they describe is on screen; with none out they
-  // collapse to a single row that opens one, so the same words still answer
-  // and what they answer with is the step that has to come first anyway.
+  // It also tracks whether a flow is out. The settings of its pages are only
+  // offered while the pages they describe are on screen; with none out they
+  // collapse to a single row each that opens the flow, so the same words still
+  // answer and what they answer with is the step that has to come first anyway.
   const editorSearchEntries = useMemo(
-    () => editorEntries(blocks, productsById, tKey, { pageOpen, checkoutOpen }),
-    [blocks, productsById, tKey, pageOpen, checkoutOpen],
+    () => editorEntries(blocks, productsById, tKey, { pageOpen, checkoutOpen: pageOpen }),
+    [blocks, productsById, tKey, pageOpen],
   );
   const usedProductIds = useMemo(
     () =>
@@ -2908,7 +2928,7 @@ export function StorefrontDesigner({
    */
   function updateImageBlocks(
     keys: readonly string[],
-    patch: Partial<Pick<ImageBlock, "alt" | "fit" | "opacity">>,
+    patch: ImageBlockPatch,
     coalesceKey?: string,
   ) {
     const wanted = new Set(keys);
@@ -3236,7 +3256,12 @@ export function StorefrontDesigner({
     // A cold arrival from a search result picked elsewhere. Seeded rather than
     // opened in an effect, so the panel is already on the right group when the
     // editor first paints.
-    () => settingById(initialSetting ?? "")?.ref ?? null,
+    // (A block's own setting has no panel to seed: it is answered below, once
+    // there is a board to pick its block from.)
+    () => {
+      const ref = settingById(initialSetting ?? "")?.ref;
+      return ref && ref.kind !== "block" ? ref : null;
+    },
   );
   useEffect(() => {
     if (!settingTarget) return;
@@ -3244,24 +3269,53 @@ export function StorefrontDesigner({
     return () => clearTimeout(timer);
   }, [settingTarget]);
 
+  /**
+   * A BLOCK'S OWN SETTING (a text block's spacing, a shape's blur), opened on
+   * a block that has it: the selection when it is all one kind that does (so
+   * "blur" with three shapes selected edits all three), else the first such
+   * block in reading order, which is selected for it. A board with none has
+   * nothing to open, and nothing happens.
+   *
+   * A new selection is committed BEFORE the field is asked for, so the
+   * inspector is already standing when the summons arrives and flashes the
+   * field, rather than mounting with it already "seen" (see useSummonFlash).
+   */
+  function openBlockSetting(ref: Extract<SettingRef, { kind: "block" }>) {
+    const fits = (block: StorefrontBlock) => (ref.types as readonly string[]).includes(block.type);
+    const selectionFits =
+      selectedBlocks.length > 0 &&
+      selectedBlocks.every(fits) &&
+      new Set(selectedBlocks.map((block) => block.type)).size === 1;
+    if (!selectionFits) {
+      const first = readingOrder(blocks).find(fits);
+      if (!first) return;
+      flushSync(() => setInspector({ kind: "blocks", keys: [blockKey(first)] }));
+    }
+    openBlockField(ref.field);
+  }
+
+  // A cold arrival on a block's setting (a search result picked elsewhere) is
+  // answered once the board is up: it needs a block to select, which only the
+  // first render has.
+  useEffect(() => {
+    const ref = settingById(initialSetting ?? "")?.ref;
+    if (ref?.kind !== "block") return;
+    const timer = setTimeout(() => openBlockSetting(ref), 0);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- answered once, for the arrival only
+  }, []);
+
   function openSetting(ref: SettingRef) {
-    // A checkout setting is edited while looking at the checkout, so opening
-    // one puts the chain out (its product page included) if it is not.
-    if (ref.kind === "checkoutPage") {
-      if (!checkoutOpen && defaultPageProductId) {
-        openCheckout(checkoutFor ?? defaultPageProductId, ref);
-      } else {
-        setSettingTarget(freshSettingRef(ref));
-        setPanelOpen(true);
-      }
+    if (ref.kind === "block") {
+      openBlockSetting(ref);
       return;
     }
-    // A product page setting is edited while LOOKING at the page, so opening
-    // one puts a page on the canvas if none is out yet. The mobile settings
+    // A page's setting is edited while LOOKING at the page, so opening one puts
+    // the buyer flow on the canvas if none is out yet. The mobile settings
     // sheet is left standing on purpose: it navigates in place.
-    if (ref.kind === "productPage") {
-      if (openPages.length === 0 && defaultPageProductId) {
-        openProductPage(defaultPageProductId, ref);
+    if (ref.kind === "productPage" || ref.kind === "checkoutPage") {
+      if (!pageOpen && defaultPageProductId) {
+        openBuyerFlow(defaultPageProductId, ref);
       } else {
         setSettingTarget(freshSettingRef(ref));
         setPanelOpen(true);
@@ -3279,14 +3333,15 @@ export function StorefrontDesigner({
   }
 
   /**
-   * Put a product's page on the canvas beside the board, and aim the design
-   * panel at the page's settings.
+   * Put a product's BUYER FLOW on the canvas beside the board (its page, then
+   * the checkout and thank-you page, which DesignerCanvas chains on), and aim
+   * the design panel at the settings of the first page unless told otherwise.
    *
    * The board stays exactly where it is. That is the whole point of the
    * artboard model: a page is not a screen the editor switches to, it is
    * another thing on the same workspace, joined to the tile that opens it.
    */
-  function openProductPage(
+  function openBuyerFlow(
     productId: string,
     ref: SettingRef = { kind: "productPage", section: "layout" },
   ) {
@@ -3298,46 +3353,14 @@ export function StorefrontDesigner({
     revealArtboard();
   }
 
-  function closeProductPage(productId: string) {
+  function closeBuyerFlow(productId: string) {
     setOpenPages((current) => current.filter((id) => id !== productId));
-    // The checkout hangs off its page: closing the page takes it too.
-    if (checkoutFor === productId) setCheckoutFor(null);
   }
 
-  /**
-   * Put a product's checkout and thank-you page out beside its product page
-   * (opening that too if it is not out), and aim the panel at the checkout.
-   */
-  function openCheckout(
-    productId: string,
-    ref: SettingRef = { kind: "checkoutPage", section: "layout" },
-  ) {
-    setOpenPages((current) => (current.includes(productId) ? current : [...current, productId]));
-    setCheckoutFor(productId);
-    setSettingTarget(freshSettingRef(ref));
-    setPanelOpen(true);
-    revealArtboard();
-  }
-
-  /** The Checkout node on a product page's frame (and on its tile's quick
-   *  bar) is a toggle. */
-  function toggleCheckout(productId: string) {
-    if (checkoutOpen && checkoutFor === productId) setCheckoutFor(null);
-    else openCheckout(productId);
-  }
-
-  /** The toolbar's Checkout button: the checkout for whatever the seller is
-   *  on (the selected tile, else the first product), or put it away. Opens the
-   *  product page too, since the checkout hangs off it. */
-  function toggleDefaultCheckout() {
-    if (checkoutOpen) setCheckoutFor(null);
-    else if (defaultPageProductId) openCheckout(defaultPageProductId);
-  }
-
-  /** The node on a tile is a toggle: pressing it again puts the page away. */
-  function togglePageForProduct(productId: string) {
-    if (openPages.includes(productId)) closeProductPage(productId);
-    else openProductPage(productId);
+  /** The node on a tile is a toggle: pressing it again puts the flow away. */
+  function toggleBuyerFlow(productId: string) {
+    if (openPages.includes(productId)) closeBuyerFlow(productId);
+    else openBuyerFlow(productId);
   }
 
   /**
@@ -3354,12 +3377,10 @@ export function StorefrontDesigner({
    * revealArtboard fits the whole stage rather than aiming at one page, so
    * opening six leaves the board and all six in view.
    */
-  function togglePagesForProducts(productIds: readonly string[]) {
+  function toggleBuyerFlows(productIds: readonly string[]) {
     if (productIds.length === 0) return;
     if (productIds.every((id) => openPages.includes(id))) {
       setOpenPages((current) => current.filter((id) => !productIds.includes(id)));
-      // The checkout hangs off its page: putting the page away takes it too.
-      if (checkoutFor !== null && productIds.includes(checkoutFor)) setCheckoutFor(null);
       return;
     }
     // One state write for the whole group, so the canvas lays the new row out
@@ -3373,15 +3394,14 @@ export function StorefrontDesigner({
     revealArtboard();
   }
 
-  /** The toolbar's button: show the page for whatever the seller is on, or
-   *  put every open page away. */
-  function toggleProductPages() {
-    if (openPages.length > 0) {
+  /** The toolbar's button: show the flow for whatever the seller is on, or put
+   *  everything that is out away. */
+  function toggleDefaultBuyerFlow() {
+    if (pageOpen) {
       setOpenPages([]);
-      setCheckoutFor(null);
       return;
     }
-    if (defaultPageProductId) openProductPage(defaultPageProductId);
+    if (defaultPageProductId) openBuyerFlow(defaultPageProductId);
   }
 
   /**
@@ -3718,6 +3738,7 @@ export function StorefrontDesigner({
         close: () => setSettingTarget(null),
       }}
     >
+    <ProductAddOnsEditorProvider catalog={catalog} openPages={openPages}>
     <SearchProvider
       role={role}
       accountId={accountId}
@@ -4088,6 +4109,10 @@ export function StorefrontDesigner({
             onRotateBlock={onRotateBlock}
             onEmptyCellClick={onInsertAt}
             onAddProduct={togglePicker}
+            suggestedProduct={
+              isSample ? null : (catalog.find((product) => product.id === suggestedProductId) ?? null)
+            }
+            onAcceptSuggestion={addProduct}
             selectedKeys={selectedKeys}
             onSelectBlock={onSelectBlock}
             onSelectMany={onSelectMany}
@@ -4117,14 +4142,11 @@ export function StorefrontDesigner({
             disableMarquee={spaceHeld}
             // The product pages the seller has out, beside the board.
             openPages={openPages}
-            onClosePage={closeProductPage}
+            onClosePage={closeBuyerFlow}
             storefrontId={storefrontId}
             storefrontName={name}
             productPage={productPage}
             checkoutPage={checkoutPage}
-            checkoutFor={checkoutFor}
-            onToggleCheckout={toggleCheckout}
-            onCloseCheckout={() => setCheckoutFor(null)}
             onCheckoutPageChange={updateCheckoutPage}
             celebrationPlays={celebrationPlays}
             shippingPolicy={shippingPolicy}
@@ -4143,11 +4165,9 @@ export function StorefrontDesigner({
               productsById={productsById}
               elementUrls={elementUrls}
               openPages={openPages}
-              checkoutOpenFor={checkoutOpen ? checkoutFor : null}
               // So the bar can follow its block through a pan and a zoom.
               viewport={viewport}
-              onOpenPages={togglePagesForProducts}
-              onToggleCheckout={toggleCheckout}
+              onOpenPages={toggleBuyerFlows}
               onType={onTypeStart}
               onFrame={onFrameBlock}
               // The panel opens on the FIRST selected shape's colour, which is
@@ -4295,6 +4315,7 @@ export function StorefrontDesigner({
                     <MultiBlockEditor
                       blocks={selectedBlocks}
                       theme={theme}
+                      reviewsShown={isProductPageSectionShown(productPage, "reviews")}
                       // The selection toolbar points at a control rather than
                       // opening one over the board, and with several blocks
                       // selected that control is in HERE.
@@ -4309,18 +4330,17 @@ export function StorefrontDesigner({
                         updateShapeBlocks(selectedKeys, patch)
                       }
                       onTextChange={(patch) =>
-                        updateTextBlocks(selectedKeys, patch)
+                        updateTextBlocks(selectedKeys, patch, textCoalesce(patch))
                       }
                       onImageChange={(patch) =>
                         updateImageBlocks(
                           selectedKeys,
                           patch,
-                          // One undo step for the whole opacity drag, keyed on
-                          // the selection so a later drag on a different one is
-                          // its own (the single-block editor does the same).
-                          patch.opacity !== undefined
-                            ? `image:${selectedKeys.join("+")}`
-                            : undefined,
+                          // One undo step for the whole opacity or blur drag,
+                          // keyed on the selection so a later drag on a
+                          // different one is its own (the single-block editor
+                          // does the same).
+                          imageCoalesce(selectedKeys.join("+"), patch),
                         )
                       }
                       onDuplicate={() => duplicateBlocks(selectedKeys)}
@@ -4343,8 +4363,9 @@ export function StorefrontDesigner({
                       onRemove={() => removeBlock(blockKey(selectedBlock))}
                       onProductSaved={applyProductUpdate}
                       pageOpen={openPages.includes(selectedBlock.productId)}
-                      onDesignPage={() => togglePageForProduct(selectedBlock.productId)}
+                      onDesignPage={() => toggleBuyerFlow(selectedBlock.productId)}
                       onThemeChange={updateTheme}
+                      reviewsShown={isProductPageSectionShown(productPage, "reviews")}
                     />
                   ) : selectedBlock?.type === "shape" ? (
                     <ShapeBlockEditor
@@ -4363,8 +4384,9 @@ export function StorefrontDesigner({
                       block={selectedBlock}
                       accent={theme.accent}
                       hasCustomFont={theme.customFont !== undefined}
+                      summons={blockField}
                       onUpdate={(patch) =>
-                        updateTextBlocks([blockKey(selectedBlock)], patch)
+                        updateTextBlocks([blockKey(selectedBlock)], patch, textCoalesce(patch))
                       }
                       onDuplicate={() =>
                         duplicateBlocks([blockKey(selectedBlock)])
@@ -4393,11 +4415,9 @@ export function StorefrontDesigner({
                         updateImageBlocks(
                           [blockKey(selectedBlock)],
                           patch,
-                          // Coalesce the opacity drag into one undo step; a
-                          // fit or alt change is its own.
-                          patch.opacity !== undefined
-                            ? `image:${blockKey(selectedBlock)}`
-                            : undefined,
+                          // Coalesce an opacity or blur drag into one undo
+                          // step; a fit or alt change is its own.
+                          imageCoalesce(blockKey(selectedBlock), patch),
                         )
                       }
                       onFrame={() => frameBlock(blockKey(selectedBlock))}
@@ -4436,11 +4456,9 @@ export function StorefrontDesigner({
         settingsOpen={settingsOpen}
         onToggleSettings={toggleSettings}
         sheetOpen={mobileSheet !== null}
-        pagesOpen={openPages.length > 0}
+        pagesOpen={pageOpen}
         canOpenPage={defaultPageProductId !== null}
-        onTogglePages={toggleProductPages}
-        checkoutOpen={checkoutOpen}
-        onToggleCheckout={toggleDefaultCheckout}
+        onTogglePages={toggleDefaultBuyerFlow}
       />
 
       <ConfirmDialog
@@ -4475,6 +4493,7 @@ export function StorefrontDesigner({
       {sample && <EditorTour autoStart={sample.autoStartTour} />}
       </div>
     </SearchProvider>
+    </ProductAddOnsEditorProvider>
     </SettingTargetProvider>
     </ColorTargetProvider>
     </AutoFitRegistryProvider>

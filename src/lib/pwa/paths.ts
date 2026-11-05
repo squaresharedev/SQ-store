@@ -13,3 +13,7 @@ export const OFFLINE_PATH = "/offline";
 /** The message the page sends the service worker with its current language,
  *  so the stored offline page can be re-fetched after the seller switches. */
 export const OFFLINE_LOCALE_MESSAGE = "offline-locale";
+
+/** sessionStorage key the offline page sets, so the page that replaces it can
+ *  say the connection is back (components/pwa/ConnectionStatus.tsx). */
+export const BACK_ONLINE_FLAG = "sq-back-online";

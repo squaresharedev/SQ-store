@@ -105,7 +105,8 @@
     "changePlan": "Demasiados cambios de plan iniciados en poco tiempo.",
     "saveDiscounts": "Demasiados cambios de descuentos en poco tiempo.",
     "moderateReviews": "Demasiados cambios en reseñas en poco tiempo.",
-    "agentTools": "Este asistente ha hecho demasiadas solicitudes en poco tiempo."
+    "agentTools": "Este asistente ha hecho demasiadas solicitudes en poco tiempo.",
+    "writeWithAi": "Demasiados borradores de IA solicitados en poco tiempo."
   },
   "serverError": {
     "fix": "Suele ser algo temporal. Espera un momento y vuelve a intentarlo; si sigue fallando, recarga la página.",
@@ -517,6 +518,28 @@
       "fix": "Prueba con otras palabras o escribe a {email} y una persona lo revisará."
     }
   },
+  "ai": {
+    "notOnPlan": {
+      "message": "La ayuda de IA para escribir está incluida en el plan Pro.",
+      "fix": "Escribe tú la descripción o cámbiate a Pro."
+    },
+    "tooLittle": {
+      "message": "Todavía no hay suficiente para escribir.",
+      "fix": "Añade primero algunos datos, como opciones, materiales o tamaño."
+    },
+    "declined": {
+      "message": "La IA no ha podido escribir una descripción para este producto.",
+      "fix": "Escríbela tú o cambia algunas palabras y vuelve a intentarlo."
+    },
+    "unavailable": {
+      "message": "La ayuda de IA para escribir no está disponible ahora mismo.",
+      "fix": "Vuelve a intentarlo en unos minutos o escribe tú la descripción."
+    },
+    "creditUsed": {
+      "message": "El crédito de IA de este mes se ha agotado.",
+      "fix": "Se renueva el día 1. Hasta entonces, escribe como siempre."
+    }
+  },
   "productImport": {
     "unreadable": {
       "message": "No se ha podido leer esa importación.",
@@ -704,6 +727,12 @@
       "message": "Elige por qué ocultas esta reseña.",
       "fix": "Una reseña solo se puede ocultar por uno de los motivos indicados."
     }
+  },
+  "reviewsExport": {
+    "permissionDenied": "No tienes acceso a las reseñas de esta tienda.",
+    "unavailable": "Ahora mismo no se pueden exportar tus reseñas.",
+    "rateLimited": "Son muchas exportaciones de reseñas en poco tiempo.",
+    "storeRateLimited": "Tu equipo ha exportado las reseñas de esta tienda muchas veces en la última hora."
   },
   "agent": {
     "invalidInput": "Esos datos no son válidos.",

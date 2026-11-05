@@ -87,11 +87,16 @@ function fontFile(head: number[] | string, name = "Face.woff2", size = 64): File
   return new File([bytes], name);
 }
 
-function post(file: File | null, field = "font"): Promise<Response> {
+/** What a browser on our own page sends; `site` stands in for any other. */
+function post(file: File | null, field = "font", site = "same-origin"): Promise<Response> {
   const body = new FormData();
   if (file) body.append(field, file);
   return POST(
-    new Request("http://localhost/api/uploads/font", { method: "POST", body }),
+    new Request("http://localhost/api/uploads/font", {
+      method: "POST",
+      headers: { "sec-fetch-site": site },
+      body,
+    }),
   );
 }
 
@@ -111,6 +116,18 @@ beforeEach(() => {
 });
 
 describe("POST /api/uploads/font", () => {
+  it("refuses a post from another site, a sibling squareshare.eu one included", async () => {
+    // A multipart POST needs no preflight, and a sibling subdomain is the same
+    // SITE, so the seller's cookie would ride along. Nothing may be stored.
+    for (const site of ["same-site", "cross-site", "none"]) {
+      const res = await post(fontFile(WOFF2), "font", site);
+      expect(res.status, site).toBe(403);
+    }
+    const bare = await POST(new Request("http://localhost/api/uploads/font", { method: "POST", body: new FormData() }));
+    expect(bare.status).toBe(403);
+    expect(storage.puts).toHaveLength(0);
+  });
+
   it("stores a real font under the caller's own fonts/ prefix", async () => {
     const res = await post(fontFile(WOFF2));
     expect(res.status).toBe(200);

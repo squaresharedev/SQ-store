@@ -17,10 +17,16 @@
     "confirm": "Potwierdź",
     "remove": "Usuń",
     "delete": "Usuń",
-    "deleting": "Usuwanie…"
+    "deleting": "Usuwanie…",
+    "sameAs": "Tak samo jak {title}",
+    "undo": "Cofnij"
   },
   "badge": {
     "comingSoon": "Wkrótce"
+  },
+  "connection": {
+    "offline": "Jesteś offline",
+    "backOnline": "Ponownie online"
   },
   "pagination": {
     "previous": "Poprzednia",
@@ -70,7 +76,8 @@
   "stock": {
     "inStock": "Dostępny",
     "lowStock": "{remaining, plural, one {Został tylko {remaining}} few {Zostało tylko {remaining}} many {Zostało tylko {remaining}} other {Zostało tylko {remaining}}}",
-    "soldOut": "Wyprzedany"
+    "soldOut": "Wyprzedany",
+    "lowStockLabel": "Ostatnie sztuki"
   },
   "toast": {
     "regionLabel": "Powiadomienia",
@@ -109,5 +116,10 @@
     "rotated": "{label}: obrócono do {degrees, plural, one {# stopień} few {# stopnie} many {# stopni} other {# stopnia}}",
     "rotatedBlock": "Blok obrócono do {degrees, plural, one {# stopień} few {# stopnie} many {# stopni} other {# stopnia}}",
     "blocksMoved": "{count, plural, one {Przesunięto # blok} few {Przesunięto # bloki} many {Przesunięto # bloków} other {Przesunięto # bloku}}"
+  },
+  "export": {
+    "button": "Eksportuj CSV",
+    "preparing": "Przygotowywanie pliku",
+    "failed": "Eksport nie został pobrany. Spróbuj ponownie za chwilę."
   }
 }

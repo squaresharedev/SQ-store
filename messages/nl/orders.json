@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} bestelling} other {{total} bestellingen}} · pagina {page} van {totalPages}",
     "detailDialog": "Bestelgegevens",
     "closeDetail": "Bestelgegevens sluiten",
-    "withdrawn": "Herroepen"
+    "withdrawn": "Herroepen",
+    "moreItems": "+{count} meer"
   },
   "table": {
     "product": "Product",
@@ -150,7 +151,8 @@
     "discount": "Korting",
     "discountSale": "Actie, {amount} korting",
     "discountCode": "Code {code}, {amount} korting",
-    "discountCodeOutdone": "Code {code} gebruikt, maar de actieprijs was lager"
+    "discountCodeOutdone": "Code {code} gebruikt, maar de actieprijs was lager",
+    "alsoBought": "Ook in deze bestelling"
   },
   "actions": {
     "disputeInStripe": "De bank van de koper heeft een geschil geopend. Reageer erop in je Stripe-dashboard vóór de deadline.",
@@ -296,12 +298,16 @@
       "subject": "Jouw bestelkoppeling bij {store}",
       "intro": "Hier is de koppeling naar je pagina voor bestelling {number} bij {store}:",
       "ignore": "Als je dit niet hebt aangevraagd, kun je deze e-mail negeren."
+    },
+    "reviewReminder": {
+      "subject": "Je herinnering om {title} te beoordelen",
+      "intro": "Op {date} vroeg je {store} om je eraan te herinneren je bestelling te beoordelen zodra je die had. Hier is die herinnering.",
+      "write": "Vertel andere kopers wat je ervan vindt. Het kost maar een minuut:\n{url}",
+      "how": "Je review wordt op de productpagina getoond met de naam die je kiest, gemarkeerd als van een geverifieerde koper. Je e-mailadres en je bestelling blijven privé. Elke review is welkom, goed of slecht.",
+      "once": "Dit is de enige herinnering over deze bestelling. Zulke e-mails stopzetten: {url}"
     }
   },
   "export": {
-    "button": "CSV exporteren",
-    "preparing": "Bestand voorbereiden",
-    "failed": "De export is niet gedownload. Probeer het over een moment opnieuw.",
     "truncated": "Het bestand bevat je {count, number} nieuwste bestellingen.",
     "lockedTitle": "Bestellingen exporteren hoort bij {plan} en hoger.",
     "fileName": "bestellingen.csv"

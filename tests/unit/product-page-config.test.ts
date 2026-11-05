@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
   parseStoredStorefrontConfig,
@@ -16,6 +18,7 @@ import {
 import { resolveCta } from "@/components/product-page/product-page-maps";
 import {
   DEFAULT_PRODUCT_PAGE_CONFIG,
+  DEFAULT_PRODUCT_PAGE_STAR_COLOR,
   DEFAULT_STOREFRONT_CONFIG,
   PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX,
   PRODUCT_PAGE_CTA_RADIUS_MAX,
@@ -191,6 +194,21 @@ describe("product page config schema", () => {
     }
   });
 
+  it("keeps the review stars' colour a strict hex, absent by default", () => {
+    expect(DEFAULT_PRODUCT_PAGE_CONFIG).not.toHaveProperty("starColor");
+    const styled = { ...DEFAULT_PRODUCT_PAGE_CONFIG, starColor: "#7c3aed" };
+    expect(productPageSchema.safeParse(styled).success).toBe(true);
+    expect(isDefaultProductPage(styled)).toBe(false);
+    for (const bad of ["#fff", "red", "rgb(0,0,0)", "url(x)"]) {
+      expect(productPageSchema.safeParse({ ...styled, starColor: bad }).success, bad).toBe(false);
+    }
+  });
+
+  it("starts the review stars from the --color-rating token's yellow", () => {
+    const css = readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8");
+    expect(css).toContain(`--color-rating: ${DEFAULT_PRODUCT_PAGE_STAR_COLOR};`);
+  });
+
   it("bounds every part of the buy button, and lets all four stay absent", () => {
     // Absent is the shipped state: the button follows the storefront, and the
     // defaults must keep parsing without any of these keys.
@@ -277,14 +295,16 @@ describe("resolveProductPage", () => {
     });
     // Everything the stored list never named comes back hidden — except
     // `safety`, mandatory alongside `seller` (see the dedicated test below),
-    // and `reviews`, which showed before it could be switched (see below).
+    // `reviews`, which showed before it could be switched (see below), and
+    // `addOns`, chosen per product, so its storefront switch starts on.
     expect(
       sections
-        .filter((s) => !["seller", "description", "safety", "reviews"].includes(s.id))
+        .filter((s) => !["seller", "description", "safety", "reviews", "addOns"].includes(s.id))
         .every((s) => s.show === false),
     ).toBe(true);
     expect(sections.find((s) => s.id === "safety")?.show).toBe(true);
     expect(sections.find((s) => s.id === "reviews")?.show).toBe(true);
+    expect(sections.find((s) => s.id === "addOns")?.show).toBe(true);
   });
 
   // Reviews showed on every product page that had any before a seller could

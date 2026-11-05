@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
-import { DEFAULT_PRODUCT_PAGE_CONFIG, DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
+import { DEFAULT_PRODUCT_PAGE_CONFIG, DEFAULT_PRODUCT_PAGE_STAR_COLOR, DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 import type { ProductPageData } from "@/types/product-page";
 import type { ProductPageProduct } from "@/types/product";
 import type { ProductReviews, PublicReview } from "@/types/review";
@@ -1177,6 +1177,32 @@ describe("ProductPageView rating link", () => {
     // Under the title, above the seller byline.
     const heading = screen.getByRole("heading", { level: 1 });
     expect(heading.compareDocumentPosition(link()!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("draws every review star in the default yellow, whatever the page's ink", () => {
+    render(<ProductPageView page={data({ productPage: { backgroundColor: "#111111" } })} mode="public" reviews={REVIEWS} />);
+    expect(link()!.querySelector("svg")).toHaveStyle({ color: DEFAULT_PRODUCT_PAGE_STAR_COLOR });
+    const ratings = document.querySelectorAll("[data-star-rating]");
+    expect(ratings.length).toBeGreaterThan(1);
+    for (const rating of ratings) expect(rating).toHaveStyle({ color: DEFAULT_PRODUCT_PAGE_STAR_COLOR });
+  });
+
+  it("draws every review star in the colour the seller chose", () => {
+    render(<ProductPageView page={data({ productPage: { starColor: "#7c3aed" } })} mode="public" reviews={REVIEWS} />);
+    expect(link()!.querySelector("svg")).toHaveStyle({ color: "#7c3aed" });
+    for (const rating of document.querySelectorAll("[data-star-rating]")) {
+      expect(rating).toHaveStyle({ color: "#7c3aed" });
+    }
+  });
+
+  it("the star filter's selected row stays square on a storefront with round corners", async () => {
+    const user = userEvent.setup();
+    render(<ProductPageView page={data({ theme: { cornerRadius: 30 } })} mode="public" reviews={REVIEWS} />);
+    const row = document.querySelector<HTMLElement>("[data-review-breakdown='5']")!;
+    await user.click(row);
+    expect(row).toHaveAttribute("aria-pressed", "true");
+    expect(row.style.borderRadius).toBe("");
+    expect(row).toHaveClass("rounded-none");
   });
 
   it("says '1 review' for a single one", () => {

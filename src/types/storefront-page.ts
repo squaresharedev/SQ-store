@@ -1,4 +1,6 @@
-import type { Currency } from "@/types/product";
+import type { Currency, ProductRating } from "@/types/product";
+import type { TileStockState } from "@/types/stock";
+import type { TileLook } from "@/lib/storefront/tile-look";
 import type {
   StorefrontBlock,
   StorefrontHeader,
@@ -32,6 +34,12 @@ export type StorefrontTileProduct = {
   currency: Currency;
   /** Signed, expiring URL for the tile's photo, or null for a placeholder. */
   imageUrl: string | null;
+  /** The card extras (lib/storefront/tile-extras.ts), each present only when
+   *  its card shows it: the second photo shown on hover (signed), the buyers'
+   *  rating once there is one, and the stock as a STATE, never a count. */
+  hoverImageUrl?: string;
+  rating?: ProductRating;
+  stockState?: TileStockState;
   /** Where the tile leads: the product's hosted page. */
   href: string;
 };
@@ -46,6 +54,9 @@ export type StorefrontPageData = {
    *  product is not live are already gone. */
   blocks: StorefrontBlock[];
   products: StorefrontTileProduct[];
+  /** What the cards borrow from the product page: the buy button's words and
+   *  colours, the star colour, whether reviews show (resolveTileLook). */
+  tileLook: TileLook;
   /** Signed URLs for image blocks, by block key. A block with no entry draws
    *  nothing rather than a broken picture. */
   imageUrls: Record<string, string>;

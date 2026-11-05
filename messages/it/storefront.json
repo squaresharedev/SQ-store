@@ -104,7 +104,8 @@
       "cards": "Vetrina / Riquadri prodotto",
       "soldOut": "Vetrina / Esaurito",
       "productPage": "Vetrina / Pagina prodotto",
-      "checkoutPage": "Vetrina / Checkout"
+      "checkoutPage": "Vetrina / Checkout",
+      "blocks": "Vetrina / Blocchi"
     },
     "labels": {
       "looks": "Aspetto della vetrina",
@@ -151,7 +152,16 @@
       "productPagePhoto": "Foto della pagina prodotto",
       "checkoutPhoto": "Foto del checkout",
       "thanksPhoto": "Foto della pagina di ringraziamento",
-      "chipScale": "Stessa misura delle etichette su tutte le schede"
+      "chipScale": "Stessa misura delle etichette su tutte le schede",
+      "productPageAddOns": "Aggiungi al tuo ordine",
+      "productPageStars": "Colore delle stelle delle recensioni",
+      "cardHoverEffect": "Effetto al passaggio del mouse",
+      "cardSecondPhoto": "Seconda foto al passaggio del mouse",
+      "cardBuyButton": "Pulsante di acquisto sui riquadri",
+      "cardStarRating": "Valutazione a stelle sui riquadri",
+      "cardLowStock": "Etichetta Ultimi pezzi",
+      "textSpacing": "Spaziatura lettere e altezza riga",
+      "elementBlur": "Sfocatura"
     }
   },
   "editorSearch": {
@@ -214,6 +224,7 @@
     "domainsLabel": "Domini consentiti",
     "domainsPlaceholder": "iltuosito.com, blog.iltuosito.com",
     "domainsHint": "Fino a {max}, separati da virgola. Incolla un URL e lo ridurremo al dominio.",
+    "sameAsHint": "Copia i domini consentiti da {title}.",
     "emptyDomainsWarning": "Aggiungi almeno un dominio. Finché è vuoto, la vetrina non si caricherà da nessuna parte, anche se l’incorporamento è attivo.",
     "builderLabel": "Il tuo costruttore di siti",
     "builderOther": "Altro sito",
@@ -310,14 +321,11 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Pagina prodotto",
-    "closeAriaLabel": "Chiudi la pagina prodotto per {title}",
+    "closeAriaLabel": "Chiudi il percorso d’acquisto per {title}",
     "desktopSize": "Dimensioni desktop",
     "mobileSize": "Dimensioni mobile",
     "checkoutLabel": " · Checkout",
-    "thanksLabel": " · Grazie",
-    "openCheckout": "Checkout",
-    "openCheckoutAriaLabel": "Apri il checkout per {title}",
-    "closeCheckoutAriaLabel": "Chiudi il checkout"
+    "thanksLabel": " · Grazie"
   },
   "customFont": {},
   "metadata": {
@@ -765,7 +773,8 @@
         "returns": "Resi",
         "safety": "Sicurezza e conformità",
         "reviews": "Recensioni",
-        "seller": "Venditore"
+        "seller": "Venditore",
+        "addOns": "Aggiungi al tuo ordine"
       },
       "availability": "Disponibilità",
       "soldByByline": "Dicitura «Venduto da»"
@@ -794,6 +803,42 @@
       "look": "Aspetto",
       "style": "Stile",
       "besidePrice": "Accanto al prezzo"
+    },
+    "addOns": {
+      "title": "Aggiungi al tuo ordine",
+      "infoLabel": "Cos’è Aggiungi al tuo ordine",
+      "infoContent": "Altri prodotti che un acquirente può aggiungere allo stesso ordine dalla pagina del prodotto. Ogni prodotto ha il suo elenco: ogni clic viene salvato subito, in tutte le vetrine in cui si trova il prodotto.",
+      "show": "Mostra questa sezione",
+      "heading": {
+        "label": "Titolo",
+        "charsLeft": "{count, plural, one {# carattere rimasto} many {# di caratteri rimasti} other {# caratteri rimasti}}"
+      },
+      "layout": {
+        "label": "Aspetto",
+        "list": "Righe",
+        "tiles": "Riquadri"
+      },
+      "placement": {
+        "label": "Posizione",
+        "beforeButton": "Sopra il pulsante",
+        "afterButton": "Sotto il pulsante"
+      },
+      "products": {
+        "offeredWith": "Proposto con",
+        "offeredWithOne": "Proposto con {title}",
+        "ownLink": "Nascosto: Acquista ora porta al tuo link.",
+        "noPage": "Apri la pagina di un prodotto sulla tela per scegliere cosa propone.",
+        "loadFailed": "Non è stato possibile caricare i tuoi prodotti."
+      }
+    },
+    "reviews": {
+      "title": "Recensioni",
+      "infoLabel": "Cosa puoi cambiare nelle recensioni",
+      "infoContent": "Le recensioni degli acquirenti, in fondo alla pagina del prodotto. Il colore delle stelle vale anche per la valutazione sotto il nome del prodotto.",
+      "show": "Mostra questa sezione",
+      "starColor": "Colore delle stelle",
+      "defaultStarColor": "Giallo predefinito",
+      "useDefaultStarColor": "Usa il giallo predefinito"
     }
   },
   "productBlock": {
@@ -813,8 +858,8 @@
       "lowStock": "Scorte basse: {count} disponibili.",
       "inStock": "{count} disponibili."
     },
-    "openProductPage": "Apri pagina prodotto",
-    "hideProductPage": "Nascondi pagina prodotto",
+    "openProductPage": "Apri percorso d’acquisto",
+    "hideProductPage": "Nascondi percorso d’acquisto",
     "tileStyle": {
       "title": "Stile riquadro",
       "reset": "Ripristina al tema",
@@ -881,6 +926,23 @@
       "label": "Descrizione",
       "placeholder": "Logo, icona, decorazione…",
       "hint": "Letto ad alta voce dagli screen reader. Lascialo vuoto se l’immagine è puramente decorativa."
+    }
+  },
+  "blur": {
+    "label": "Sfocatura",
+    "photo": "Sfocatura della foto",
+    "shadow": "Sfocatura dell’ombra",
+    "shadowTip": "Ammorbidisce la foto dietro il nome e il prezzo.",
+    "off": "Nessuna",
+    "valueText": "{value} su 100",
+    "direction": "Direzione",
+    "directionAriaLabel": "Direzione della sfocatura",
+    "directions": {
+      "all": "Ovunque",
+      "top": "Dall’alto",
+      "bottom": "Dal basso",
+      "left": "Da sinistra",
+      "right": "Da destra"
     }
   },
   "shapeBlock": {
@@ -951,10 +1013,10 @@
     "uploadImage": "Carica immagine",
     "allShapes": "Tutte le forme",
     "browseShapes": "Sfoglia la libreria completa delle forme",
-    "closePage": "Chiudi pagina prodotto",
-    "showPage": "Mostra pagina prodotto",
-    "closePages": "Chiudi le pagine prodotto",
-    "showPageFull": "Mostra la pagina prodotto",
+    "closePage": "Chiudi percorso d’acquisto",
+    "showPage": "Mostra percorso d’acquisto",
+    "closePages": "Chiudi la pagina prodotto, il checkout e la pagina di ringraziamento",
+    "showPageFull": "Mostra la pagina prodotto, il checkout e la pagina di ringraziamento",
     "undo": "Annulla",
     "undoTip": "Annulla (Ctrl+Z)",
     "redo": "Ripeti",
@@ -969,25 +1031,18 @@
     "zoomIn": "Aumenta zoom",
     "zoomInTip": "Aumenta zoom (Ctrl +)",
     "designSettings": "Impostazioni design",
-    "page": "Pagina",
-    "moreTools": "Altri strumenti",
-    "checkout": "Checkout",
-    "showCheckout": "Mostra il checkout",
-    "closeCheckout": "Chiudi il checkout",
-    "showCheckoutFull": "Mostra il checkout e la pagina di ringraziamento",
-    "closeCheckoutFull": "Chiudi il checkout e la pagina di ringraziamento"
+    "page": "Percorso d’acquisto",
+    "moreTools": "Altri strumenti"
   },
   "selectionToolbar": {
     "toolsFor": "Strumenti per {name}",
     "elements": "{count, plural, one {# elemento} many {# di elementi} other {# elementi}}",
-    "hidePage": "Nascondi pagina",
-    "hidePages": "Nascondi pagine",
-    "openPage": "Apri pagina",
-    "openPages": "Apri pagine",
-    "openProductPage": "Apri la pagina prodotto per {name}",
-    "closeProductPage": "Chiudi la pagina prodotto per {name}",
-    "openProductPages": "Apri le pagine prodotto per {count, plural, one {# prodotto} many {# di prodotti} other {# prodotti}}",
-    "closeProductPages": "Chiudi le pagine prodotto per {count, plural, one {# prodotto} many {# di prodotti} other {# prodotti}}",
+    "hidePage": "Nascondi percorso d’acquisto",
+    "openPage": "Apri percorso d’acquisto",
+    "openProductPage": "Apri il percorso d’acquisto per {name}",
+    "closeProductPage": "Chiudi il percorso d’acquisto per {name}",
+    "openProductPages": "Apri il percorso d’acquisto per {count, plural, one {# prodotto} many {# di prodotti} other {# prodotti}}",
+    "closeProductPages": "Chiudi il percorso d’acquisto per {count, plural, one {# prodotto} many {# di prodotti} other {# prodotti}}",
     "editText": "Modifica testo",
     "editTextOf": "Modifica il testo di {name}",
     "color": "Colore",
@@ -998,19 +1053,18 @@
     "editCornersOf": "Modifica l’arrotondamento degli angoli di {name}",
     "opacity": "Opacità",
     "editOpacityOf": "Modifica l’opacità di {name}",
+    "blur": "Sfocatura",
+    "editBlurOf": "Modifica la sfocatura di {name}",
     "frame": "Ritaglia e posiziona",
     "frameImageFor": "Ritaglia e posiziona l’immagine di {name}",
     "duplicate": "Duplica",
     "duplicateNamed": "Duplica {name}",
     "duplicateN": "Duplica {count, plural, one {# elemento} many {# di elementi} other {# elementi}}",
     "removeFrom": "Rimuovi {name} dalla griglia",
-    "removeN": "Rimuovi {count, plural, one {# elemento} many {# di elementi} other {# elementi}} dalla griglia",
-    "openCheckout": "Apri il checkout",
-    "hideCheckout": "Nascondi il checkout",
-    "openCheckoutFor": "Mostra il checkout per {name}",
-    "closeCheckoutFor": "Nascondi il checkout per {name}"
+    "removeN": "Rimuovi {count, plural, one {# elemento} many {# di elementi} other {# elementi}} dalla griglia"
   },
   "canvas": {
+    "addSuggested": "Aggiungi {title} a questa vetrina",
     "gridLabel": "Area di lavoro della vetrina",
     "emptyGrid": "La tua griglia è vuota",
     "emptyGridHint": "Aggiungi un prodotto per iniziare a organizzare la tua vetrina. Testo e forme si trovano nella barra degli strumenti qui sotto.",
@@ -1343,7 +1397,7 @@
       "pageColor": "Colore pagina",
       "followsProductPage": "Sfondo della pagina prodotto",
       "useProductPage": "Usa lo sfondo della pagina prodotto",
-      "button": "Il pulsante di pagamento corrisponde al pulsante d'acquisto della pagina prodotto.",
+      "button": "Il pulsante di pagamento corrisponde al pulsante d’acquisto della pagina prodotto.",
       "styleButton": "Stile pulsante",
       "payButton": "Pulsante di pagamento",
       "payButtonInfoLabel": "Informazioni sul pulsante di pagamento"
@@ -1377,5 +1431,45 @@
     "info": "Mostrata dietro la pagina. Lo strato del colore della pagina mantiene il testo leggibile; disattivalo per mostrare la foto così com'è.",
     "remove": "Rimuovi foto",
     "overlay": "Strato di colore"
+  },
+  "cardExtras": {
+    "hoverTitle": "Passaggio del mouse",
+    "shoppingTitle": "Acquisto",
+    "effect": "Effetto",
+    "effectAriaLabel": "Cosa fa un riquadro al passaggio del mouse",
+    "effects": {
+      "none": "Nessuno",
+      "lift": "Solleva",
+      "zoom": "Ingrandisci",
+      "tilt": "Inclina"
+    },
+    "effectTipLabel": "Come si attivano gli effetti",
+    "effectTip": "Si attiva quando un acquirente punta un riquadro o ci arriva con il tasto Tab. Sui telefoni, e per chi ha chiesto meno movimento, i riquadri restano fermi.",
+    "secondPhoto": "Seconda foto",
+    "secondPhotoTipLabel": "Quale foto compare",
+    "secondPhotoTip": "Mostra la foto successiva del prodotto mentre un acquirente punta il riquadro. I prodotti con una sola foto restano come sono.",
+    "buyButton": "Pulsante di acquisto",
+    "buyButtonAriaLabel": "Pulsante di acquisto sul riquadro",
+    "buyButtons": {
+      "none": "Disattivato",
+      "solid": "Pieno",
+      "outline": "Contorno",
+      "link": "Link"
+    },
+    "buyButtonTipLabel": "Dove porta il pulsante",
+    "buyButtonTip": "Usa il testo e il colore del pulsante della tua pagina prodotto, e apre la pagina prodotto.",
+    "rating": "Valutazione a stelle",
+    "ratingTipLabel": "Da dove vengono le stelle",
+    "ratingTip": "Dalle recensioni degli acquirenti. Compare sotto il nome appena un prodotto ha una recensione.",
+    "ratingTipReviewsOff": "Le recensioni sono disattivate sulla tua pagina prodotto, quindi i riquadri non mostrano stelle. Attivale in Pagina prodotto, Recensioni.",
+    "lowStock": "Ultimi pezzi",
+    "lowStockTipLabel": "Quando compare l’etichetta",
+    "lowStockTip": "Indica Ultimi pezzi quando un prodotto è al suo livello di scorte basse o sotto, ed Esaurito a zero. Gli acquirenti non vedono mai quanti ne restano."
+  },
+  "textSpacing": {
+    "letterSpacing": "Spaziatura lettere",
+    "lineHeight": "Altezza riga",
+    "normal": "Normale",
+    "valueText": "{value} per cento della dimensione del testo"
   }
 }

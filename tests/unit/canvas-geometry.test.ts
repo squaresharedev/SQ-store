@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  CANVAS_MARGIN,
   NO_INSETS,
   centerIntoView,
+  jumpPan,
   panelInset,
   reanchorPan,
   revealPan,
@@ -438,5 +440,40 @@ describe("reanchorPan", () => {
     // At 2x the board is 1200 wide against 700 of room, so the tile answers:
     // it paints at 800..1000, already inside [300, 1000]. Nothing to do.
     expect(pan.x).toBe(0);
+  });
+});
+
+describe("jumpPan", () => {
+  // Measured off the screen, so already zoomed: a product page's reviews
+  // section, far down the page and off the bottom of the window.
+  const reviews: Box = { left: 300, top: 1400, width: 600, height: 400 };
+  const workspace = { width: 1200, height: 800 };
+
+  it("brings the target to the top of the window, a margin below the edge", () => {
+    const pan = jumpPan({ pan: { x: 40, y: 20 }, workspace, insets: NO_INSETS, target: reviews });
+    // Up by exactly what puts its top at the margin; across, it was already in
+    // the open, so nothing.
+    expect(pan).toEqual({ x: 40, y: 20 + CANVAS_MARGIN - 1400 });
+  });
+
+  it("goes to the top even when the target is already on screen", () => {
+    // A followed link lands on its heading, wherever it started.
+    const near: Box = { ...reviews, top: 300 };
+    expect(jumpPan({ pan: { x: 0, y: 0 }, workspace, insets: NO_INSETS, target: near }).y).toBe(
+      CANVAS_MARGIN - 300,
+    );
+  });
+
+  it("measures the top from below a panel standing on it", () => {
+    const insets = { ...NO_INSETS, top: 100 };
+    expect(jumpPan({ pan: { x: 0, y: 0 }, workspace, insets, target: reviews }).y).toBe(
+      100 + CANVAS_MARGIN - 1400,
+    );
+  });
+
+  it("centres it across when it is off to one side", () => {
+    const aside: Box = { ...reviews, left: 1000 };
+    // 600 wide in 1200 of room: centred at 300, so 700 to the left.
+    expect(jumpPan({ pan: { x: 0, y: 0 }, workspace, insets: NO_INSETS, target: aside }).x).toBe(-700);
   });
 });

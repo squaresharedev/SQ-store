@@ -20,17 +20,19 @@ import {
 } from "@/components/ui/control-styles";
 import { SliderField } from "@/components/ui/SliderField";
 import { BlockActions } from "./BlockActions";
+import { BlurSlider } from "./BlurSlider";
 import { SummonedField, type BlockFieldSummons } from "./SummonedField";
 
 export type ImageBlockPatch = Partial<
-  Pick<ImageBlock, "alt" | "fit" | "opacity">
+  Pick<ImageBlock, "alt" | "fit" | "opacity" | "blur" | "blurDirection">
 >;
 
 const FIT_BUTTON_CLASS = `inline-flex flex-1 items-center justify-center rounded-none border border-border bg-background px-2 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground ${transitionClass} ${focusRingClass}`;
 
 /**
  * Inspector card body for an IMAGE block: the seller's own artwork on the
- * canvas. Alt text, how it fills its block, opacity, and the way into framing.
+ * canvas. Alt text, how it fills its block, opacity, blur, and the way into
+ * framing.
  * Patches emit on each change; no "save" step.
  *
  * There is no control for the picture itself — replacing artwork means adding
@@ -59,7 +61,7 @@ export function ImageBlockEditor({
    * artwork inside this block (there is no group answer to where six different
    * photos should sit), and a description describes what is in the picture, so
    * writing one across six of them would put the same sentence on all six.
-   * Fit and opacity are group settings, and stay.
+   * Fit, opacity and blur are group settings, and stay.
    */
   multi?: boolean;
   onUpdate: (patch: ImageBlockPatch) => void;
@@ -150,6 +152,19 @@ export function ImageBlockEditor({
             ariaLabel={t("imageBlock.opacity.ariaLabel")}
             valueText={t("imageBlock.opacity.valueText", { value: opacity })}
             unit="%"
+            highlighted={highlighted}
+          />
+        )}
+      </SummonedField>
+
+      <SummonedField field="blur" summons={summons} variant="slider">
+        {(highlighted) => (
+          <BlurSlider
+            id={`${fieldId}-blur`}
+            value={block.blur ?? 0}
+            onChange={(blur) => onUpdate({ blur })}
+            direction={block.blurDirection}
+            onDirectionChange={(blurDirection) => onUpdate({ blurDirection })}
             highlighted={highlighted}
           />
         )}

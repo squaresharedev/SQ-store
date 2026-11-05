@@ -130,8 +130,8 @@ export function buildSnapshotGroups(
 }
 
 /**
- * The "Recent" rail for the EMPTY palette: the newest few products and
- * storefronts, i.e. what this account most plausibly wants to jump back into.
+ * The "Recent" rail for the EMPTY palette: the products and storefront touched
+ * last, i.e. what this account most plausibly wants to jump back into.
  * Null when the snapshot has nothing to offer, so the empty state falls back
  * to the registry suggestions alone.
  */
@@ -140,7 +140,8 @@ export function buildRecentGroup(
   t: SearchTranslator,
 ): SearchGroup | null {
   if (!snapshot) return null;
-  // Snapshot arrays are newest-first by contract (see the route handler).
+  // Products and storefronts are last touched first by contract (see the route
+  // handler).
   // Three rows total: the resting card shows Recent + Actions + Settings and
   // must fit its cap without scrolling.
   const results: SearchResult[] = toResults(

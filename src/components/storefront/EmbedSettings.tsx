@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/action-icons";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { SameAsChip } from "@/components/ui/SameAsChip";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -55,6 +56,7 @@ import {
 import { LEGAL_LINKS } from "@/lib/legal/links";
 import { SellerDetailsNotice } from "@/components/settings/SellerDetailsNotice";
 import type { TraderIdentityField } from "@/lib/settings/trader-identity";
+import type { SameAs } from "@/lib/suggestions/rules";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
 import type { Product } from "@/types/product";
 import { EmbedHero } from "./EmbedHero";
@@ -144,8 +146,12 @@ export function EmbedSettings({
   onSaved,
   missingTraderDetails = [],
   productPagesOn = true,
+  suggestedDomains = null,
 }: {
   storefront: StorefrontSummary;
+  /** Another storefront's domains, offered behind one tap while the field is
+   *  empty: an allowlist is never filled in by itself. */
+  suggestedDomains?: SameAs<string[]> | null;
   /** Feeds the live preview in the hero picture. */
   products?: Product[];
   /** Told after a successful save. */
@@ -176,6 +182,8 @@ export function EmbedSettings({
   const [saved, setSaved] = useState<EmbedSettingsValue>(stored);
   const [enabled, setEnabled] = useState(stored.enabled);
   const [domainsText, setDomainsText] = useState(stored.domains.join(", "));
+  // What "Same as" put in the field, so its undo shows until the seller edits it.
+  const [copiedDomains, setCopiedDomains] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   // The switch is in flight: it is saved the moment it is flipped.
   const [toggling, setToggling] = useState(false);
@@ -210,6 +218,8 @@ export function EmbedSettings({
     // Show the list as it was saved, unless the seller has typed on since:
     // a save landing late must never take back what they wrote meanwhile.
     setDomainsText((current) => (current === submittedText ? parsed.data.domains.join(", ") : current));
+    // Saved is the seller's own list now: nothing left to undo.
+    setCopiedDomains(null);
     setSaved(parsed.data);
     onSaved?.(storefront.id, parsed.data);
     toast.success(t("saved"));
@@ -341,6 +351,22 @@ export function EmbedSettings({
                 </li>
               ))}
             </ul>
+          )}
+          {suggestedDomains && (!domainsText.trim() || domainsText === copiedDomains) && (
+            <SameAsChip
+              from={suggestedDomains.from}
+              hint={t("sameAsHint", { title: suggestedDomains.from })}
+              done={domainsText === copiedDomains}
+              onApply={() => {
+                const copied = suggestedDomains.value.join(", ");
+                setCopiedDomains(copied);
+                setDomainsText(copied);
+              }}
+              onUndo={() => {
+                setCopiedDomains(null);
+                setDomainsText("");
+              }}
+            />
           )}
           <p className={helpTextClass}>{t("domainsHint", { max: EMBED_MAX_DOMAINS })}</p>
           {/* Deny-by-default: an empty list serves nowhere. Said plainly

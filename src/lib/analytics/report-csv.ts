@@ -1,5 +1,4 @@
-import { BRAND_NAME } from "@/lib/brand";
-import { centsToDecimal, toCsv, type CsvValue } from "@/lib/format/csv";
+import { CSV_FILE_BRAND, centsToDecimal, toCsv, type CsvValue } from "@/lib/format/csv";
 import { SIGNAL_KINDS, type SignalKind } from "@/lib/analytics/signals";
 import type { AnalyticsSnapshot } from "@/lib/analytics/types";
 
@@ -60,9 +59,8 @@ export function analyticsReportCsv(snapshot: AnalyticsSnapshot): string {
 /** "square-share-analytics-2026-09-01-to-2026-09-30.csv", from the range the
  *  figures cover (open ends fall back to the day the report was made). */
 export function analyticsReportFileName(snapshot: AnalyticsSnapshot): string {
-  const brand = BRAND_NAME.toLowerCase().replace(/\s+/g, "-");
   const made = snapshot.generatedAt.slice(0, 10);
   const from = snapshot.range.from ?? made;
   const to = snapshot.range.to ?? made;
-  return `${brand}-analytics-${from}-to-${to}.csv`;
+  return `${CSV_FILE_BRAND}-analytics-${from}-to-${to}.csv`;
 }

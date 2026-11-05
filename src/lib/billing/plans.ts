@@ -76,8 +76,21 @@ export type PlanLimits = Record<PlanLimitKey, number | null>;
  *                    CSV report (components/analytics/AnalyticsExportButton)
  *   prioritySupport  support answers first, within one business day (an
  *                    operational promise: whoever staffs support keeps it)
+ *   aiSuggestions    AI writing help: a product description written or
+ *                    improved from what the seller entered, and the next
+ *                    words while they type it (lib/suggestions;
+ *                    lib/products/describe-actions.ts checks this flag), on
+ *                    the plan's monthly aiCreditCents
+ *
+ * In display order: AI writing help first, the perk a plan card leads with.
  */
-export const PLAN_PERK_KEYS = ["ordersExport", "earlyAccess", "analyticsExport", "prioritySupport"] as const;
+export const PLAN_PERK_KEYS = [
+  "aiSuggestions",
+  "ordersExport",
+  "earlyAccess",
+  "analyticsExport",
+  "prioritySupport",
+] as const;
 export type PlanPerkKey = (typeof PLAN_PERK_KEYS)[number];
 export type PlanPerks = Record<PlanPerkKey, boolean>;
 
@@ -85,6 +98,14 @@ export type PlanDefinition = {
   id: PlanId;
   limits: PlanLimits;
   perks: PlanPerks;
+  /**
+   * The AI credit a month, in cents of BILLING_CURRENCY, on a plan with the
+   * aiSuggestions perk: what the store's AI writing help may use before it
+   * pauses until the 1st. Spent at the model's cost plus a margin
+   * (ai-credit.ts), so it also caps what AI can cost the platform per store
+   * per month. 0 = none.
+   */
+  aiCreditCents: number;
   /** The one plan the plans page and the upsell point at ("Best value"). */
   recommended: boolean;
 };
@@ -94,13 +115,27 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
   free: {
     id: "free",
     limits: { storefronts: 3, teamSeats: 2, products: 20 },
-    perks: { ordersExport: true, earlyAccess: false, analyticsExport: false, prioritySupport: false },
+    perks: {
+      ordersExport: true,
+      earlyAccess: false,
+      analyticsExport: false,
+      prioritySupport: false,
+      aiSuggestions: false,
+    },
+    aiCreditCents: 0,
     recommended: false,
   },
   starter: {
     id: "starter",
     limits: { storefronts: 10, teamSeats: 5, products: 60 },
-    perks: { ordersExport: true, earlyAccess: true, analyticsExport: false, prioritySupport: false },
+    perks: {
+      ordersExport: true,
+      earlyAccess: true,
+      analyticsExport: false,
+      prioritySupport: false,
+      aiSuggestions: false,
+    },
+    aiCreditCents: 0,
     // The best value: most of Pro's saving on a typical shop, at under a
     // third of the price.
     recommended: true,
@@ -108,7 +143,16 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
   pro: {
     id: "pro",
     limits: { storefronts: null, teamSeats: null, products: 500 },
-    perks: { ordersExport: true, earlyAccess: true, analyticsExport: true, prioritySupport: true },
+    perks: {
+      ordersExport: true,
+      earlyAccess: true,
+      analyticsExport: true,
+      prioritySupport: true,
+      aiSuggestions: true,
+    },
+    // EUR 10, at most USD 8.33 of model calls (ai-credit.ts) against a EUR 40
+    // plan. Real use is a few cents: about USD 0.00016 a draft or suggestion.
+    aiCreditCents: 1_000,
     recommended: false,
   },
 };

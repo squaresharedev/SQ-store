@@ -33,7 +33,8 @@
     "unavailable": "Die Tarife können gerade nicht angezeigt werden. Lade die Seite gleich neu.",
     "yearlyFree": "{count, plural, one {# Monat gratis} other {# Monate gratis}}",
     "launchNote": "Ein Einführungspreis ist ein Preis zum Start: Der reguläre Preis ist der durchgestrichene.",
-    "grantTitle": "{plan} geht auf uns"
+    "grantTitle": "{plan} geht auf uns",
+    "autoRenew": "Bezahlte Tarife verlängern sich automatisch jeden Monat zum angezeigten Preis, bis du kündigst."
   },
   "card": {
     "perMonth": "/ Monat",
@@ -65,6 +66,7 @@
     "earlyAccess": "Früher Zugang zu neuen Funktionen",
     "prioritySupport": "Bevorzugter Support: deine Nachrichten werden zuerst beantwortet",
     "analyticsExport": "Analyseberichte herunterladen (CSV)",
+    "aiSuggestions": "KI-Schreibhilfe mit {credit} KI-Guthaben im Monat",
     "products": "{count, plural, one {# Produkt} other {# Produkte}}",
     "productsUnlimited": "Unbegrenzt viele Produkte"
   },
@@ -87,6 +89,7 @@
     "unlimited": "Unbegrenzt",
     "included": "Inklusive",
     "notIncluded": "Nicht enthalten",
+    "aiCredit": "{credit} Guthaben im Monat",
     "rows": {
       "fee": "Gebühr pro Verkauf",
       "storefronts": "Schaufenster",
@@ -105,7 +108,8 @@
       "roles": "Teamrollen",
       "analytics": "Analysen",
       "analyticsExport": "Analyseberichte (CSV)",
-      "productImport": "Produktimport (CSV)"
+      "productImport": "Produktimport (CSV)",
+      "aiSuggestions": "KI-Schreibhilfe"
     },
     "groups": {
       "selling": "Verkauf",
@@ -206,6 +210,24 @@
     "grantLine": "Geht auf uns: Square Share schenkt deinem Shop diesen Tarif.",
     "grantUntil": "Bis zum {date}. Wenn er endet, wird nichts offline genommen.",
     "grantNoEnd": "Ohne Enddatum."
+  },
+  "ai": {
+    "title": "KI-Schreibhilfe",
+    "description": "Entwürfe, Überarbeitungen und die nächsten Wörter beim Tippen, aus deinen Angaben. Eigene Behauptungen fügt sie nicht hinzu.",
+    "creditUsed": "{used} von {allowance} in diesem Monat verbraucht",
+    "creditRenews": "Erneuert am {date}",
+    "creditNote": "Ein Entwurf oder Vorschlag kostet einen Bruchteil eines Cents.",
+    "creditSpent": "Das Guthaben für diesen Monat ist aufgebraucht. Die KI-Schreibhilfe ist am {date} wieder da.",
+    "creditUnreadable": "Dein KI-Guthaben kann gerade nicht gelesen werden. Versuch es gleich noch einmal.",
+    "asYouTypeLabel": "Beim Tippen die nächsten Wörter vorschlagen",
+    "asYouTypeHelp": "Beim Schreiben einer Produktbeschreibung erscheint grauer Text: Tab fügt ihn ein, Esc blendet ihn aus. Diese Einstellung gilt nur für dich, nicht für dein Team.",
+    "abilities": {
+      "asYouType": "Schlägt beim Schreiben einer Beschreibung die nächsten Wörter vor",
+      "write": "Schreibt einen ersten Entwurf aus deinen Angaben",
+      "improve": "Glättet eine Beschreibung, die du geschrieben hast, und behält jede Angabe bei"
+    },
+    "upsellCta": "Pro ansehen",
+    "upsellCredit": "{credit} KI-Guthaben im Monat inklusive"
   },
   "cancel": {
     "title": "{plan} kündigen?",

@@ -17,10 +17,16 @@
     "confirm": "Bevestigen",
     "remove": "Weghalen",
     "delete": "Verwijderen",
-    "deleting": "Verwijderen…"
+    "deleting": "Verwijderen…",
+    "sameAs": "Zelfde als {title}",
+    "undo": "Ongedaan maken"
   },
   "badge": {
     "comingSoon": "Binnenkort beschikbaar"
+  },
+  "connection": {
+    "offline": "Je bent offline",
+    "backOnline": "Weer online"
   },
   "pagination": {
     "previous": "Vorige",
@@ -70,7 +76,8 @@
   "stock": {
     "inStock": "Op voorraad",
     "lowStock": "{remaining, plural, one {Nog maar {remaining}} other {Nog maar {remaining}}}",
-    "soldOut": "Uitverkocht"
+    "soldOut": "Uitverkocht",
+    "lowStockLabel": "Bijna op"
   },
   "toast": {
     "regionLabel": "Meldingen",
@@ -109,5 +116,10 @@
     "rotated": "{label} gedraaid naar {degrees, plural, one {# graad} other {# graden}}",
     "rotatedBlock": "Blok gedraaid naar {degrees, plural, one {# graad} other {# graden}}",
     "blocksMoved": "{count, plural, one {# blok verplaatst} other {# blokken verplaatst}}"
+  },
+  "export": {
+    "button": "CSV exporteren",
+    "preparing": "Bestand voorbereiden",
+    "failed": "De export is niet gedownload. Probeer het over een moment opnieuw."
   }
 }

@@ -30,7 +30,7 @@ describe("TermsSummary", () => {
     const region = screen.getByRole("region", { name: "Terms of Service, short version" });
     expect(region).toHaveAttribute("tabindex", "0");
     const links = screen.getAllByRole("link").map((link) => link.getAttribute("href"));
-    expect(links).toContain("https://squareshare.eu/terms/");
+    expect(links).toContain(`https://squareshare.eu/terms/v/${LEGAL_VERSION}/`);
     expect(links).toContain("https://squareshare.eu/legal/privacy-policy/");
   });
 });
@@ -41,6 +41,7 @@ const ENGLISH_SUMMARY: readonly { heading: string; points: readonly string[] }[]
     heading: "Who you're dealing with",
     points: [
       "Square Share is a platform that helps you sell. When a buyer orders from you, the sale is between you and that buyer: you are the seller and merchant of record, not us.",
+      "Square Share operates in the EU, the USA and Canada. We don't operate anywhere else yet, so you need to be based in one of those places to sell here. Québec has to wait for the French version of these Terms.",
       "You must be at least 18, or the age of majority where you live. If you sign up for a business, you confirm you can bind it to these Terms.",
     ],
   },
@@ -55,8 +56,8 @@ const ENGLISH_SUMMARY: readonly { heading: string; points: readonly string[] }[]
     heading: "Selling",
     points: [
       "List accurately, and only sell lawful things you have the right to sell.",
-      "Honour your buyers' consumer rights, including the 14-day right of withdrawal and the legal guarantee, and handle your own delivery, support and refunds.",
-      "Taxes and VAT on your sales are yours to handle, and you keep your own sales records for 10 years.",
+      "Honour the consumer rights your buyers have where they live, such as the 14-day right of withdrawal and the legal guarantee in the EU, and handle your own delivery, support and refunds.",
+      "Taxes on your sales (VAT, GST/HST or sales tax) are yours to handle, and you keep your own sales records for as long as the law where you trade requires.",
     ],
   },
   {
@@ -85,7 +86,8 @@ const ENGLISH_SUMMARY: readonly { heading: string; points: readonly string[] }[]
     points: [
       "Square Share is early and offered as is to business users. For them, our liability is capped at the fees paid to us in the last 12 months or EUR 100, whichever is greater, and business sellers cover us for claims caused by their products, sites or breaches. If you are a consumer, your legal rights are unaffected.",
       "We can suspend or close accounts that break these Terms. You can leave at any time and take your data with you.",
-      "We may update these Terms, with advance notice of material changes. Czech law applies.",
+      "We give at least 30 days' notice of material changes to these Terms. Czech law applies to business users. If you are a consumer, the protections of your home country, state or province still apply.",
+      "Disputes in the USA go to individual arbitration instead of court, unless you opt out within 30 days of agreeing. Consumers in the EU and Canada can still go to court where they live.",
       "Our Privacy Policy and Cookie Policy form part of these Terms.",
     ],
   },
@@ -118,9 +120,9 @@ describe("TermsSummary English copy", () => {
     render(<TermsSummary />);
     const intro = document.querySelector("[data-terms-full-link]")!.closest("p")!;
     expect(intro.textContent).toBe(
-      "The short version, in plain language. Last updated 11 October 2026. Read the full Terms of Service (opens in a new tab)",
+      "The short version, in plain language. Last updated 31 October 2026. Read the full Terms of Service (opens in a new tab)",
     );
-    expect(TERMS_LAST_UPDATED).toBe("2026-10-11");
+    expect(TERMS_LAST_UPDATED).toBe("2026-10-31");
 
     const region = screen.getByRole("region", { name: "Terms of Service, short version" });
     const footer = region.querySelector("p")!;
@@ -129,7 +131,7 @@ describe("TermsSummary English copy", () => {
     );
     expect(within(footer).getByRole("link", { name: "Terms of Service" })).toHaveAttribute(
       "href",
-      "https://squareshare.eu/terms/",
+      `https://squareshare.eu/terms/v/${LEGAL_VERSION}/`,
     );
     expect(within(footer).getByRole("link", { name: "Privacy Policy" })).toHaveAttribute(
       "href",

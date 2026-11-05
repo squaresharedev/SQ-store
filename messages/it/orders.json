@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} ordine} many {{total} di ordini} other {{total} ordini}} · pagina {page} di {totalPages}",
     "detailDialog": "Dettagli ordine",
     "closeDetail": "Chiudi dettagli ordine",
-    "withdrawn": "Recesso"
+    "withdrawn": "Recesso",
+    "moreItems": "+{count} altri"
   },
   "table": {
     "product": "Prodotto",
@@ -150,7 +151,8 @@
     "discount": "Sconto",
     "discountSale": "Promozione, {amount} di sconto",
     "discountCode": "Codice {code}, {amount} di sconto",
-    "discountCodeOutdone": "Codice {code} usato, ma il prezzo della promozione era più basso"
+    "discountCodeOutdone": "Codice {code} usato, ma il prezzo della promozione era più basso",
+    "alsoBought": "Anche in questo ordine"
   },
   "actions": {
     "disputeInStripe": "La banca dell’acquirente ha aperto una contestazione. Rispondi nella tua dashboard Stripe prima della scadenza.",
@@ -296,12 +298,16 @@
       "subject": "Il tuo link dell'ordine presso {store}",
       "intro": "Ecco il link alla tua pagina per l'ordine {number} presso {store}:",
       "ignore": "Se non hai richiesto questo, puoi ignorare questa e-mail."
+    },
+    "reviewReminder": {
+      "subject": "Il tuo promemoria per recensire {title}",
+      "intro": "Il {date} hai chiesto a {store} di ricordarti di recensire il tuo ordine una volta ricevuto. Ecco il promemoria.",
+      "write": "Racconta agli altri acquirenti cosa ne pensi. Ci vuole un minuto:\n{url}",
+      "how": "La tua recensione appare nella pagina del prodotto con il nome che scegli, contrassegnata come di un acquirente verificato. Il tuo indirizzo email e il tuo ordine restano privati. Ogni recensione è benvenuta, positiva o negativa.",
+      "once": "Questo è l'unico promemoria per questo ordine. Per non ricevere più email come questa: {url}"
     }
   },
   "export": {
-    "button": "Esporta CSV",
-    "preparing": "Preparazione del file",
-    "failed": "Il download dell’esportazione non è riuscito. Riprova tra un istante.",
     "truncated": "Il file contiene i tuoi {count, number} ordini più recenti.",
     "lockedTitle": "L’esportazione degli ordini è inclusa in {plan} e nei piani superiori.",
     "fileName": "ordini.csv"

@@ -8,7 +8,14 @@ import { readBoundedJson } from "@/lib/security/read-json";
 import { uuidField } from "@/lib/validation/inputs";
 import { REVIEW_IMPORT_BODY_MAX, REVIEW_IMPORT_BYTES_MAX, REVIEW_IMPORT_ROWS_MAX } from "@/lib/reviews/limits";
 import { isReviewImportSource } from "@/lib/reviews/sources";
-import { buildReviewImportPlan, slugKey, type ReviewImportProblem } from "@/lib/reviews/import";
+import {
+  buildReviewImportPlan,
+  reviewFingerprints,
+  slugKey,
+  type ReviewImportProblem,
+} from "@/lib/reviews/import";
+import { REVIEW_IMPORT_SOURCES } from "@/lib/reviews/sources";
+import { importedReviewProducts } from "@/lib/reviews/import-existing";
 import { sweepReviews } from "@/lib/reviews/moderation";
 
 /**
@@ -27,7 +34,9 @@ import { sweepReviews } from "@/lib/reviews/moderation";
  * IDEMPOTENT. Each row is fingerprinted (source, product key, author, date,
  * rating and text), and the database keeps one review per fingerprint per
  * product, so importing the same file twice lands each review once and the
- * second run reports them as already there.
+ * second run reports them as already there. A review the store has under
+ * ANY app's fingerprint counts as there, so picking a different app for the
+ * same file does not land it twice either.
  *
  * UNDOABLE. The run is recorded in review_imports and its reviews hang off
  * it; deleting the run deletes them. A run that fails part-way is deleted
@@ -63,11 +72,6 @@ function safeMatches(raw: unknown): Map<string, string> {
   return out;
 }
 
-async function fingerprint(parts: readonly (string | number)[]): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(parts)));
-  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-
 export async function POST(request: Request): Promise<Response> {
   if (!isSameOriginRequest(request)) return reply({ ok: false, error: "forbidden" }, 403);
   const account = await getActiveAccount();
@@ -87,6 +91,8 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const plan = buildReviewImportPlan(csv);
+  // This app's own export is compared, never written from (readSquareShareExport).
+  if (plan.squareShare) return reply({ ok: false, error: "square_share_export" }, 400);
   if (plan.missing.length > 0) return reply({ ok: false, error: "unrecognised", missing: plan.missing }, 400);
   const importSource = isReviewImportSource(source) ? source : plan.source;
   if (!importSource) return reply({ ok: false, error: "invalid" }, 400);
@@ -106,6 +112,26 @@ export async function POST(request: Request): Promise<Response> {
   const ownedIds = new Set((owned ?? []).map((row) => row.id));
 
   const skipped: { line: number; problem: ReviewImportProblem }[] = [];
+  const candidates: { productId: string; fingerprints: string[]; row: (typeof plan.rows)[number] }[] = [];
+  for (const row of plan.rows) {
+    const productId = requested.get(slugKey(row.productKey));
+    const problem = row.problem ?? (productId && ownedIds.has(productId) ? null : "product");
+    if (problem || !productId) {
+      skipped.push({ line: row.line, problem: problem ?? "product" });
+      continue;
+    }
+    candidates.push({ productId, fingerprints: await reviewFingerprints(row), row });
+  }
+  if (candidates.length === 0) return reply({ ok: false, error: "nothing", skipped: skipped.length }, 400);
+
+  // Reviews the store already has, under whichever app they were imported as.
+  const existing = await importedReviewProducts(
+    account.accountId,
+    candidates.flatMap((candidate) => candidate.fingerprints),
+  );
+  if (!existing) return reply({ ok: false, error: "failed" }, 503);
+
+  const sourceIndex = REVIEW_IMPORT_SOURCES.indexOf(importSource);
   const inserts = new Map<string, {
     product_id: string;
     seller_id: string;
@@ -117,14 +143,9 @@ export async function POST(request: Request): Promise<Response> {
     author_name: string;
     reviewed_at: string;
   }>();
-  for (const row of plan.rows) {
-    const productId = requested.get(slugKey(row.productKey));
-    const problem = row.problem ?? (productId && ownedIds.has(productId) ? null : "product");
-    if (problem || !productId) {
-      skipped.push({ line: row.line, problem: problem ?? "product" });
-      continue;
-    }
-    const externalId = await fingerprint([importSource, slugKey(row.productKey), row.author, row.reviewedAt, row.rating, row.body]);
+  for (const { productId, fingerprints, row } of candidates) {
+    if (fingerprints.some((id) => existing.get(id)?.has(productId))) continue;
+    const externalId = fingerprints[sourceIndex]!;
     // The same review twice in one file is one review.
     inserts.set(`${productId}:${externalId}`, {
       product_id: productId,
@@ -138,7 +159,21 @@ export async function POST(request: Request): Promise<Response> {
       reviewed_at: row.reviewedAt,
     });
   }
-  if (inserts.size === 0) return reply({ ok: false, error: "nothing", skipped: skipped.length }, 400);
+  // Every review in the file is already here: say so, and record no run.
+  if (inserts.size === 0) {
+    return reply(
+      {
+        ok: true,
+        imported: 0,
+        duplicates: candidates.length,
+        hidden: plan.hidden,
+        dropped: plan.dropped,
+        skipped: skipped.slice(0, SKIPPED_LISTED_MAX),
+        skippedCount: skipped.length,
+      },
+      201,
+    );
+  }
 
   const { data: run, error: runError } = await admin
     .from("review_imports")
@@ -189,7 +224,9 @@ export async function POST(request: Request): Promise<Response> {
     {
       ok: true,
       imported,
-      duplicates: rows.length - imported,
+      // Already here before this run, twice in the file, or landed by a run
+      // racing this one: none of them was added a second time.
+      duplicates: candidates.length - imported,
       hidden: plan.hidden,
       dropped: plan.dropped,
       skipped: skipped.slice(0, SKIPPED_LISTED_MAX),

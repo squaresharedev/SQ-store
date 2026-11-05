@@ -55,12 +55,6 @@ export const UNPROBED_MIGRATIONS: Record<string, string> = {
 };
 
 export const SCHEMA_REQUIREMENTS: readonly SchemaRequirement[] = [
-  { kind: "relation", name: "agent_grants", migration: "20261030_agent_access.sql" },
-  { kind: "relation", name: "agent_tokens", migration: "20261030_agent_access.sql" },
-  { kind: "relation", name: "agent_clients", migration: "20261030_agent_access.sql" },
-  { kind: "relation", name: "agent_uploads", migration: "20261030_agent_access.sql" },
-  { kind: "relation", name: "agent_auth_codes", migration: "20261030_agent_access.sql" },
-  { kind: "relation", name: "agent_audit_log", migration: "20261030_agent_access.sql" },
   { kind: "column", table: "products", column: "moderation_review_requested_at", migration: "20260923_moderation_pause.sql" },
   { kind: "relation", name: "mfa_recovery_codes", migration: "20260923_two_factor_auth.sql" },
   { kind: "function", signature: "mfa_session_ok()", migration: "20260923_two_factor_auth.sql" },
@@ -129,6 +123,32 @@ export const SCHEMA_REQUIREMENTS: readonly SchemaRequirement[] = [
   { kind: "column", table: "reviews", column: "is_public", migration: "20261025_reviews.sql" },
   { kind: "column", table: "profiles", column: "notify_reviews", migration: "20261025_reviews.sql" },
   { kind: "check", constraint: "notifications_type_check", allows: "review", migration: "20261025_reviews.sql" },
+  { kind: "relation", name: "terms_versions", migration: "20261031_terms_notices.sql" },
+  { kind: "relation", name: "terms_notice_sends", migration: "20261031_terms_notices.sql" },
+  { kind: "relation", name: "agent_grants", migration: "20261030_agent_access.sql" },
+  { kind: "relation", name: "agent_tokens", migration: "20261030_agent_access.sql" },
+  { kind: "relation", name: "agent_clients", migration: "20261030_agent_access.sql" },
+  { kind: "relation", name: "agent_uploads", migration: "20261030_agent_access.sql" },
+  { kind: "relation", name: "agent_auth_codes", migration: "20261030_agent_access.sql" },
+  { kind: "relation", name: "agent_audit_log", migration: "20261030_agent_access.sql" },
+  { kind: "column", table: "products", column: "add_on_ids", migration: "20261028_product_add_ons.sql" },
+  { kind: "relation", name: "order_add_ons", migration: "20261028_product_add_ons.sql" },
+  { kind: "relation", name: "order_lines", migration: "20261028_product_add_ons.sql" },
+  { kind: "body", signature: "order_place(jsonb)", includes: "add_on_low_stock", migration: "20261028_product_add_ons.sql" },
+  { kind: "column", table: "orders", column: "review_reminder_requested_at", migration: "20261102_review_reminders.sql" },
+  { kind: "column", table: "orders", column: "review_reminder_stopped_at", migration: "20261102_review_reminders.sql" },
+  { kind: "column", table: "orders", column: "review_reminder_sent_at", migration: "20261102_review_reminders.sql" },
+  { kind: "column", table: "orders", column: "review_reminder_dropped_at", migration: "20261102_review_reminders.sql" },
+  { kind: "relation", name: "ai_credit_usage", migration: "20261104_ai_credit.sql" },
+  { kind: "relation", name: "ai_platform_usage", migration: "20261104_ai_credit.sql" },
+  {
+    kind: "function",
+    signature: "ai_credit_hold(uuid,date,date,bigint,bigint,bigint)",
+    migration: "20261104_ai_credit.sql",
+  },
+  { kind: "function", signature: "ai_credit_settle(uuid,date,date,bigint)", migration: "20261104_ai_credit.sql" },
+  { kind: "column", table: "profiles", column: "ai_suggest_as_you_type", migration: "20261104_ai_credit.sql" },
+  { kind: "check", constraint: "seller_funnel_events_source_check", allows: "ai_writing", migration: "20261104_ai_credit.sql" },
 ];
 
 /** A SQL string literal. Every value below is a constant from this file, and

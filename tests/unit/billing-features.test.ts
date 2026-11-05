@@ -36,7 +36,7 @@ describe("plan features", () => {
   it("gives Free the core and the orders export, and no paid-only perk", () => {
     expect(planFeatures("free")).toEqual(["fee", "products", "storefronts", "teamSeats", "core", "ordersExport"]);
     expect(planHas("free", "ordersExport")).toBe(true);
-    for (const perk of ["earlyAccess", "analyticsExport", "prioritySupport"] as const) {
+    for (const perk of ["earlyAccess", "analyticsExport", "prioritySupport", "aiSuggestions"] as const) {
       expect(planHas("free", perk), perk).toBe(false);
     }
   });
@@ -49,7 +49,8 @@ describe("plan features", () => {
     });
     expect(planCardFeatures(PLAN_PRICE_SEED, "pro")).toEqual({
       below: "starter",
-      features: ["fee", "products", "storefronts", "teamSeats", "analyticsExport", "prioritySupport"],
+      // AI writing help leads the perks: the one an upsell to Pro leads with.
+      features: ["fee", "products", "storefronts", "teamSeats", "aiSuggestions", "analyticsExport", "prioritySupport"],
     });
   });
 
@@ -71,6 +72,7 @@ describe("plan features", () => {
     expect(cheapestPlanWith("ordersExport")).toBe("free");
     expect(cheapestPlanWith("analyticsExport")).toBe("pro");
     expect(cheapestPlanWith("prioritySupport")).toBe("pro");
+    expect(cheapestPlanWith("aiSuggestions")).toBe("pro");
   });
 
   it("recommends Starter", () => {

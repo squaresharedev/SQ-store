@@ -2,14 +2,12 @@
 
 import { ExternalLink } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { focusRingInsetClass, helpTextClass } from "@/components/ui/control-styles";
+import { focusRingInsetClass, helpTextClass, inlineLinkClass } from "@/components/ui/control-styles";
 import { formatLongCalendarDate } from "@/lib/format/calendar";
 import { LEGAL_LINKS } from "@/lib/legal/links";
 import { TERMS_LAST_UPDATED, TERMS_SUMMARY } from "@/lib/legal/terms-summary";
+import { LATEST_TERMS_VERSION, termsVersionUrl } from "@/lib/legal/terms-versions";
 import { cn } from "@/lib/utils";
-
-const linkClass =
-  "font-medium text-foreground underline underline-offset-2 hover:no-underline";
 
 /**
  * The short version of the Terms of Service in a scroll box, with the full
@@ -32,10 +30,10 @@ export function TermsSummary({ className }: { className?: string }) {
       <p className={helpTextClass}>
         {t("intro", { date: formatLongCalendarDate(TERMS_LAST_UPDATED, locale) })}{" "}
         <a
-          href={LEGAL_LINKS.terms.href}
+          href={termsVersionUrl(LATEST_TERMS_VERSION)}
           target="_blank"
           rel="noopener noreferrer"
-          className={cn(linkClass, "inline-flex items-center gap-1")}
+          className={cn(inlineLinkClass, "inline-flex items-center gap-1")}
           data-terms-full-link
         >
           {t("fullTermsLink")}
@@ -69,10 +67,10 @@ export function TermsSummary({ className }: { className?: string }) {
             {t.rich("footer", {
               terms: (chunks) => (
                 <a
-                  href={LEGAL_LINKS.terms.href}
+                  href={termsVersionUrl(LATEST_TERMS_VERSION)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={linkClass}
+                  className={inlineLinkClass}
                 >
                   {chunks}
                 </a>
@@ -82,7 +80,7 @@ export function TermsSummary({ className }: { className?: string }) {
                   href={LEGAL_LINKS.privacy.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={linkClass}
+                  className={inlineLinkClass}
                 >
                   {chunks}
                 </a>

@@ -207,7 +207,7 @@
   },
   "legal": {
     "cardTitle": "Acuerdo de vendedor, condiciones y privacidad",
-    "cardDescription": "Los borradores actuales, en lenguaje sencillo, porque a nadie le gusta leer textos legales por gusto. El texto legal definitivo está en camino; aceptar ahora cubre esta versión provisional.",
+    "cardDescription": "Qué aceptas y cómo tratamos tus datos. Cada sección tiene una versión resumida, con el texto completo a un clic.",
     "termsTitle": "Condiciones del servicio",
     "termsDescription": "La versión resumida de lo que aceptas al vender en Square Share, con las Condiciones completas a un clic.",
     "docs": {
@@ -252,6 +252,7 @@
           "heading": "Con quién tratas",
           "points": {
             "merchantOfRecord": "Square Share es una plataforma que te ayuda a vender. Cuando un comprador te hace un pedido, la venta se celebra entre tú y ese comprador: el vendedor y comerciante responsable de la venta eres tú, no nosotros.",
+            "regions": "Square Share opera en la UE, Estados Unidos y Canadá. Todavía no operamos en ningún otro lugar, así que debes tener tu sede en uno de ellos para vender aquí. Quebec tendrá que esperar a la versión francesa de estas condiciones.",
             "eligibility": "Debes tener al menos 18 años, o la mayoría de edad en el lugar donde vives. Si te registras en nombre de una empresa, confirmas que puedes obligarla a cumplir estas Condiciones."
           }
         },
@@ -266,8 +267,8 @@
           "heading": "Ventas",
           "points": {
             "lawfulListings": "Publica información veraz y vende solo cosas lícitas que tengas derecho a vender.",
-            "consumerRights": "Respeta los derechos de consumidor de tus compradores, incluidos el derecho de desistimiento de 14 días y la garantía legal, y encárgate tú de tus envíos, la atención al cliente y los reembolsos.",
-            "taxesAndRecords": "Los impuestos y el IVA de tus ventas corren por tu cuenta, y conservas tus propios registros de ventas durante 10 años."
+            "consumerRights": "Respeta los derechos de consumo que tus compradores tienen donde viven, como el derecho de desistimiento de 14 días y la garantía legal en la UE, y encárgate tú de la entrega, la atención y los reembolsos.",
+            "taxesAndRecords": "Los impuestos sobre tus ventas (IVA, GST/HST o sales tax) corren de tu cuenta, y guardas tus registros de ventas durante el tiempo que exija la ley del lugar donde operas."
           }
         },
         "payments": {
@@ -296,10 +297,35 @@
           "points": {
             "cap": "Square Share está en una fase temprana y se ofrece tal cual a los usuarios profesionales. Para ellos, nuestra responsabilidad se limita a las comisiones que nos hayan pagado en los últimos 12 meses o a 100 EUR, lo que sea mayor, y los vendedores profesionales nos mantienen indemnes frente a reclamaciones causadas por sus productos, sitios o incumplimientos. Si eres consumidor, tus derechos legales no se ven afectados.",
             "termination": "Podemos suspender o cerrar las cuentas que incumplan estas Condiciones. Puedes marcharte cuando quieras y llevarte tus datos.",
-            "changesAndLaw": "Podemos actualizar estas Condiciones, avisando con antelación de los cambios importantes. Se aplica la legislación checa.",
-            "policies": "Nuestra Política de privacidad y nuestra Política de cookies forman parte de estas Condiciones."
+            "changesAndLaw": "Avisamos con al menos 30 días de antelación de los cambios importantes en estas condiciones. A los usuarios profesionales se les aplica la ley checa. Si eres consumidor, sigues teniendo la protección de tu país, estado o provincia.",
+            "policies": "Nuestra Política de privacidad y nuestra Política de cookies forman parte de estas Condiciones.",
+            "disputes": "Las disputas en EE. UU. se resuelven mediante arbitraje individual en lugar de los tribunales, salvo que te excluyas en 30 días desde la aceptación. Los consumidores de la UE y Canadá pueden seguir acudiendo a los tribunales de su lugar de residencia."
           }
         }
+      }
+    },
+    "notice": {
+      "bannerLabel": "Actualización de las Condiciones del servicio",
+      "bannerLink": "Ver qué cambia",
+      "title": "Nuestras Condiciones cambian el {date}.",
+      "titleSoon": "Nuestras Condiciones van a cambiar pronto.",
+      "body": "Hasta entonces, se aplican las <current>Condiciones actuales</current>. Esto es lo que cambian las <next>nuevas Condiciones</next>:",
+      "leave": "Si no estás de acuerdo, puedes cerrar tu cuenta sin cargo antes de que entren en vigor. Si sigues usando Square Share después de esa fecha, las nuevas Condiciones se aplicarán a ti.",
+      "changes": {
+        "regions": "Ahora solo operamos en la UE, EE. UU. y Canadá, y cada zona tiene su propia sección.",
+        "disputes": "Las disputas en EE. UU. se resuelven mediante arbitraje individual en lugar de los tribunales, salvo que te excluyas en 30 días. Los consumidores de la UE y Canadá pueden seguir acudiendo a los tribunales de su lugar de residencia.",
+        "plans": "Los planes de pago y las comisiones por venta están ahora detallados, incluida la renovación automática y cómo cancelarlos.",
+        "moderation": "Explicamos cómo revisamos el contenido, y cómo denunciarlo, reclamar o presentar una queja por infracción de derechos de autor.",
+        "notice": "Ahora recibirás un aviso por correo electrónico con al menos 30 días de antelación antes de los cambios importantes en las Condiciones."
+      },
+      "email": {
+        "subject": "Actualizamos nuestras Condiciones del servicio",
+        "intro": "Actualizamos las Condiciones del servicio de Square Share. Las nuevas Condiciones entran en vigor el {date}.",
+        "changes": "Qué cambia:",
+        "readNew": "Lee las nuevas Condiciones: {url}",
+        "readCurrent": "Lee las Condiciones actuales: {url}",
+        "nothingNow": "Hoy no tienes que hacer nada. Puedes aceptar las nuevas Condiciones ahora en tu panel: {url}",
+        "leave": "Si no estás de acuerdo, puedes cerrar tu cuenta sin cargo antes del {date}. Si sigues usando Square Share después de esa fecha, las nuevas Condiciones se aplicarán a ti."
       }
     }
   },
@@ -311,7 +337,7 @@
       "required": "<strong>Tu nombre o razón social, dirección y correo de contacto son obligatorios antes de poder publicar o vender nada.</strong> Los compradores tienen que poder ver a quién le compran y cómo contactarte antes de hacer el pedido.",
       "privacyNoteLinked": "Estos datos aparecen públicamente en tus páginas de producto solo por ese motivo. Nunca los usamos para marketing ni los vendemos o compartimos. El único mensaje que enviamos a tu correo de contacto o teléfono es el código que lo confirma. Consulta la <link>Política de privacidad de Square Share</link>."
     },
-    "countryNotEu": "Fuera de la UE / prefiero no decirlo",
+    "countryUnset": "Prefiero no decirlo",
     "vatAdvisory": {
       "noCountry": "Este NIF-IVA parece emitido por {issuer}. Puede que quieras indicar tu país.",
       "mismatch": "Este NIF-IVA parece emitido por {issuer}, pero tu país está configurado como {selected}. Comprueba que ambos sean correctos."
@@ -340,6 +366,7 @@
         "placeholder": "p. ej. ESB12345678"
       },
       "country": {
+        "hint": "Square Share opera en la UE, Estados Unidos y Canadá. Todavía no operamos en ningún otro lugar.",
         "label": "País"
       },
       "phone": {
@@ -395,7 +422,9 @@
   "shipping": {
     "shipsFrom": {
       "label": "Se envía desde",
-      "notSet": "Sin configurar"
+      "notSet": "Sin configurar",
+      "sameAsBusiness": "Igual que tu empresa: {country}",
+      "sameAsBusinessHint": "Tomado de la dirección de tus datos de vendedor."
     },
     "shippingCard": {
       "title": "Envío",

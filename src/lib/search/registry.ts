@@ -160,6 +160,8 @@ const SUB_PAGES: EntrySpec[] = [
       "product reviews",
       "moderate reviews",
       "hide a review",
+      "export reviews",
+      "download reviews",
     ],
   },
 ];

@@ -63,6 +63,9 @@ JSON.parse(document.getElementById("product-form-snapshot").textContent)
   // placement: "beside" (under the title) or a corner of the photo
   "badges": [{ "icon": "heart", "label": "Loved by 250+ people",
                "color": "red", "placement": "photo-top-left" }],
+  // "Add to order": other products of the store offered beside Buy now, in
+  // the seller's order (product ids; at most ADD_ONS_MAX = 4)
+  "addOnIds": ["8f0c1d2e-…", "3b7a9e41-…"],
   "specs":  { "hasDimensions": true, "hasWeight": false, "hasMaterials": true,
               "hasCare": false, "includedCount": 3, "specCount": 2,
               "hasOrigin": true,
@@ -135,7 +138,7 @@ section shows no "?" at all, for one whose own fields already explain it
 Section ids, in render order:
 
 ```
-basics  media  shipping  stock  options  photos  badges  specs  documents  safety  visibility
+basics  media  shipping  stock  options  photos  badges  specs  documents  safety  addOns  visibility
 ```
 
 `media` is shown to the seller as **Delivery**: a physical-or-digital choice
@@ -183,6 +186,14 @@ trackStock         stockQuantity      lowStockThreshold      maxPerOrder
 coverImage         digitalFile        purchaseUrl
 shippingProfile (+value: a profile id, or "default" for the store's terms)
 optionGroups       gallery            documents          badges (+value: how many)
+addOns (+value: how many products are offered with this one; a row is
+  [data-product-add-on="<id>"] with data-product-add-on-state="added|offered",
+  and its [data-product-add-on-toggle] adds or removes it. A guess from the
+  store's history sits over the list as [data-product-add-ons-suggestion=
+  "boughtWith|offeredWith"]; its [data-suggestion] adds the products it names,
+  then [data-suggestion-undo] takes them back. Look inside the field: the
+  preview beside it, [data-add-ons-preview="empty|chosen|off"], is the buyer's
+  real section, so it holds the same attributes but cannot be pressed)
 badge.<n>.label    badge.<n>.icon (+value: the icon id)
 badge.<n>.color (+value: the colour id)   badge.<n>.placement (+value: where it sits)
 length  width  height  dimensionUnit  weight  weightUnit

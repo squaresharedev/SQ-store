@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} encomenda} many {{total} de encomendas} other {{total} encomendas}} · página {page} de {totalPages}",
     "detailDialog": "Detalhes da encomenda",
     "closeDetail": "Fechar detalhes da encomenda",
-    "withdrawn": "Desistência"
+    "withdrawn": "Desistência",
+    "moreItems": "+{count} mais"
   },
   "table": {
     "product": "Produto",
@@ -150,7 +151,8 @@
     "discount": "Desconto",
     "discountSale": "Promoção, {amount} de desconto",
     "discountCode": "Código {code}, {amount} de desconto",
-    "discountCodeOutdone": "Código {code} utilizado, mas o preço da promoção era inferior"
+    "discountCodeOutdone": "Código {code} utilizado, mas o preço da promoção era inferior",
+    "alsoBought": "Também nesta encomenda"
   },
   "actions": {
     "disputeInStripe": "O banco do comprador abriu uma disputa. Responda-lhe no seu painel Stripe antes do prazo.",
@@ -296,12 +298,16 @@
       "subject": "O seu link de encomenda em {store}",
       "intro": "Aqui está o link para a sua página da encomenda {number} em {store}:",
       "ignore": "Se não solicitou isto, pode ignorar este e-mail."
+    },
+    "reviewReminder": {
+      "subject": "O seu lembrete para avaliar {title}",
+      "intro": "A {date}, pediu a {store} um lembrete para avaliar a sua encomenda depois de a receber. Aqui está esse lembrete.",
+      "write": "Diga a outros compradores o que achou. Demora um minuto:\n{url}",
+      "how": "A sua avaliação aparece na página do produto com o nome que escolher, marcada como de um comprador verificado. O seu e-mail e a sua encomenda continuam privados. Todas as avaliações são bem-vindas, boas ou más.",
+      "once": "Este é o único lembrete sobre esta encomenda. Para deixar de receber e-mails como este: {url}"
     }
   },
   "export": {
-    "button": "Exportar CSV",
-    "preparing": "A preparar o ficheiro",
-    "failed": "A exportação não foi descarregada. Tente novamente daqui a pouco.",
     "truncated": "O ficheiro contém as suas {count, number} encomendas mais recentes.",
     "lockedTitle": "A exportação de encomendas está incluída em {plan} e planos superiores.",
     "fileName": "encomendas.csv"

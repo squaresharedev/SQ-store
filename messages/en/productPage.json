@@ -29,13 +29,15 @@
     "returns": "Returns",
     "safety": "Safety and compliance",
     "reviews": "Reviews",
-    "seller": "Seller"
+    "seller": "Seller",
+    "addOns": "Add to your order"
   },
   "soldBy": "Sold by {seller}",
   "moreDetails": "More details",
   "trust": {
     "digitalDelivery": "Delivered as a download after purchase.",
-    "euRights": "14 days to change your mind, and a 2-year guarantee."
+    "euRights": "14 days to change your mind, and a 2-year guarantee.",
+    "euRightsForEu": "EU buyers: 14 days to change your mind, and a 2-year guarantee."
   },
   "safety": {
     "manufacturer": "Manufacturer",
@@ -273,7 +275,7 @@
       "soldByIn": "Sold by {seller}, {country}",
       "privacySummary": "How {seller} uses your details"
     },
-    "pay": "Pay {amount}",
+    "pay": "Order with obligation to pay ({amount})",
     "placing": "Placing your order…",
     "errors": {
       "title": "We couldn't place your order",
@@ -295,7 +297,8 @@
       "invalid": "Some details need another look. Check the highlighted fields.",
       "discount_invalid": "This discount code can't be used any more. Remove it to pay the full price.",
       "price_changed": "The price changed while this page was open, so nothing was charged. Check the new total, then pay.",
-      "turnstile": "The security check didn't finish, so nothing was charged. It's running again now: wait a moment, then try again."
+      "turnstile": "The security check didn't finish, so nothing was charged. It's running again now: wait a moment, then try again.",
+      "add_on_unavailable": "Something you added can't be sold with this order any more, so nothing was charged. Check your order and the new total, then pay."
     },
     "editHeadline": "Checkout headline",
     "discount": {
@@ -309,7 +312,12 @@
       "invalid": "This code can't be used for this order.",
       "rateLimited": "Too many codes tried. Wait a while, then try again.",
       "line": "Discount ({code})"
-    }
+    },
+    "addOns": {
+      "label": "Added to your order",
+      "remove": "Take {title} out of this order"
+    },
+    "termsAssent": "By ordering you also accept Square Share's <terms>Terms</terms> for using this platform. Your purchase itself is with {seller}."
   },
   "order": {
     "metadata": {
@@ -397,8 +405,33 @@
         "notEligible": "This order can no longer be reviewed.",
         "rateLimited": "Too many reviews from this connection. Try again in an hour.",
         "failed": "Your review could not be posted. Try again."
+      },
+      "later": {
+        "title": "{kind, select, parcel {Review it once it has arrived} other {Review it once you have tried it}}",
+        "body": "{store} can email you once, {kind, select, parcel {about a week after it ships} other {in a few days}}, with a link to review it here. You can stop it at any time.",
+        "remind": "Email me a reminder",
+        "notYet": "{kind, select, parcel {Not arrived yet?} other {Not tried it yet?}}",
+        "once": "{store} will email you once. You can stop it at any time.",
+        "onDate": "{store} will email you a reminder around {date}.",
+        "onLater": "{store} will email you a reminder {kind, select, parcel {about a week after it ships} other {in a few days}}.",
+        "stop": "Don't email me",
+        "preview": "This is a preview, so no email will be sent.",
+        "errors": {
+          "closed": "A reminder can no longer be set up for this order.",
+          "rateLimited": "Too many tries from this connection. Try again in an hour.",
+          "failed": "That didn't work. Try again."
+        }
+      },
+      "stopDialog": {
+        "title": "Stop the reminder?",
+        "body": "{store} won't email you about reviewing this order.",
+        "confirm": "Stop the reminder",
+        "doneTitle": "Reminder stopped",
+        "doneBody": "You won't get any more emails about reviewing this order."
       }
-    }
+    },
+    "lineQuantity": "{quantity} × {title}",
+    "downloadItem": "Download {title}"
   },
   "sale": {
     "wasNow": "Was {was}, now {now}",
@@ -440,5 +473,27 @@
     "filterStars": "{stars, plural, one {Show {stars}-star reviews ({count})} other {Show {stars}-star reviews ({count})}}",
     "showing": "{rating, plural, one {Showing {rating}-star reviews} other {Showing {rating}-star reviews}}",
     "showAll": "Show all reviews"
+  },
+  "addOns": {
+    "title": "Add to your order",
+    "add": "Add",
+    "added": "Added",
+    "optionLabel": "{group} for {product}",
+    "unset": "No other products are offered here yet. Click here to choose them.",
+    "addNamed": "Add {title} to your order",
+    "detailsNamed": "See details of {title}",
+    "seeDetails": "Details",
+    "fullPage": "See full page",
+    "addToOrder": "Add to your order",
+    "removeFromOrder": "Remove from your order",
+    "rating": "{average} out of 5 stars, {count, plural, one {# review} other {# reviews}}",
+    "hidden": {
+      "hint": "Buyers do not see this one.",
+      "draft": "Draft",
+      "soldOut": "Sold out",
+      "takenDown": "Taken down",
+      "otherKind": "Other kind",
+      "otherCurrency": "Other currency"
+    }
   }
 }

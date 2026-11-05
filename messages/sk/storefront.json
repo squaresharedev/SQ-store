@@ -104,7 +104,8 @@
       "cards": "Výklad / Produktové dlaždice",
       "soldOut": "Výklad / Vypredané",
       "productPage": "Výklad / Produktová stránka",
-      "checkoutPage": "Výklad / Pokladňa"
+      "checkoutPage": "Výklad / Pokladňa",
+      "blocks": "Výklad / Bloky"
     },
     "labels": {
       "looks": "Vzhľad výkladu",
@@ -151,7 +152,16 @@
       "productPagePhoto": "Fotka produktovej stránky",
       "checkoutPhoto": "Fotka pokladne",
       "thanksPhoto": "Fotka stránky s poďakovaním",
-      "chipScale": "Rovnaká veľkosť štítkov na všetkých kartách"
+      "chipScale": "Rovnaká veľkosť štítkov na všetkých kartách",
+      "productPageAddOns": "Pridať k vašej objednávke",
+      "productPageStars": "Farba hviezdičiek recenzií",
+      "cardHoverEffect": "Efekt pri prechode myšou",
+      "cardSecondPhoto": "Druhá fotka pri prechode myšou",
+      "cardBuyButton": "Tlačidlo nákupu na kartách",
+      "cardStarRating": "Hodnotenie hviezdičkami na kartách",
+      "cardLowStock": "Štítok Posledné kusy",
+      "textSpacing": "Medzery medzi písmenami a výška riadka",
+      "elementBlur": "Rozmazanie"
     }
   },
   "editorSearch": {
@@ -214,6 +224,7 @@
     "domainsLabel": "Povolené domény",
     "domainsPlaceholder": "vasastranka.sk, blog.vasastranka.sk",
     "domainsHint": "Najviac {max}, oddelené čiarkou. Vložte URL a automaticky sa orezá na doménu.",
+    "sameAsHint": "Skopíruje povolené domény, ktoré má {title}.",
     "emptyDomainsWarning": "Pridajte aspoň jednu doménu. Pokiaľ je toto prázdne, výklad sa nebude načítavať nikde, aj keď je vloženie na web zapnuté.",
     "builderLabel": "Váš nástroj na tvorbu webu",
     "builderOther": "Iný web",
@@ -310,14 +321,11 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Produktová stránka",
-    "closeAriaLabel": "Zavrieť produktovú stránku pre {title}",
+    "closeAriaLabel": "Zavrieť priebeh nákupu pre {title}",
     "desktopSize": "Veľkosť pre desktop",
     "mobileSize": "Veľkosť pre mobil",
     "checkoutLabel": " · Pokladňa",
-    "thanksLabel": " · Ďakujeme",
-    "openCheckout": "Pokladňa",
-    "openCheckoutAriaLabel": "Otvoriť pokladňu pre {title}",
-    "closeCheckoutAriaLabel": "Zavrieť pokladňu"
+    "thanksLabel": " · Ďakujeme"
   },
   "customFont": {},
   "metadata": {
@@ -765,7 +773,8 @@
         "returns": "Vrátenie tovaru",
         "safety": "Bezpečnosť a zhoda",
         "reviews": "Recenzie",
-        "seller": "Predajca"
+        "seller": "Predajca",
+        "addOns": "Pridať k vašej objednávke"
       },
       "availability": "Dostupnosť",
       "soldByByline": "Riadok „Predáva“"
@@ -794,6 +803,42 @@
       "look": "Vzhľad",
       "style": "Štýl",
       "besidePrice": "Pri cene"
+    },
+    "addOns": {
+      "title": "Pridať k vašej objednávke",
+      "infoLabel": "Čo je Pridať k vašej objednávke",
+      "infoContent": "Ďalšie produkty, ktoré si kupujúci môže zo stránky produktu pridať k tej istej objednávke. Každý produkt má vlastný zoznam: každé stlačenie sa hneď uloží, a to vo všetkých výkladoch, kde produkt je.",
+      "show": "Zobraziť túto sekciu",
+      "heading": {
+        "label": "Nadpis",
+        "charsLeft": "{count, plural, one {Zostáva # znak} few {Zostávajú # znaky} many {Zostáva # znaku} other {Zostáva # znakov}}"
+      },
+      "layout": {
+        "label": "Vzhľad",
+        "list": "Riadky",
+        "tiles": "Dlaždice"
+      },
+      "placement": {
+        "label": "Umiestnenie",
+        "beforeButton": "Nad tlačidlom",
+        "afterButton": "Pod tlačidlom"
+      },
+      "products": {
+        "offeredWith": "Ponúkané s produktom",
+        "offeredWithOne": "Ponúkané s produktom {title}",
+        "ownLink": "Skryté: Kúpiť vedie na váš vlastný odkaz.",
+        "noPage": "Otvorte na plátne stránku produktu a vyberte, čo ponúka.",
+        "loadFailed": "Vaše produkty sa nepodarilo načítať."
+      }
+    },
+    "reviews": {
+      "title": "Recenzie",
+      "infoLabel": "Čo môžete pri recenziách zmeniť",
+      "infoContent": "Recenzie kupujúcich v spodnej časti stránky produktu. Farba hviezdičiek platí aj pre hodnotenie pod názvom produktu.",
+      "show": "Zobraziť túto sekciu",
+      "starColor": "Farba hviezdičiek",
+      "defaultStarColor": "Predvolená žltá",
+      "useDefaultStarColor": "Použiť predvolenú žltú"
     }
   },
   "productBlock": {
@@ -813,8 +858,8 @@
       "lowStock": "Nízke zásoby: {count} ks.",
       "inStock": "Na sklade: {count} ks."
     },
-    "openProductPage": "Otvoriť produktovú stránku",
-    "hideProductPage": "Skryť produktovú stránku",
+    "openProductPage": "Otvoriť priebeh nákupu",
+    "hideProductPage": "Skryť priebeh nákupu",
     "tileStyle": {
       "title": "Štýl dlaždice",
       "reset": "Obnoviť na motív",
@@ -881,6 +926,23 @@
       "label": "Popis",
       "placeholder": "Logo, ikona, dekorácia…",
       "hint": "Čítačky obrazovky ho prečítajú nahlas. Ak je obrázok čisto dekoratívny, nechajte to prázdne."
+    }
+  },
+  "blur": {
+    "label": "Rozmazanie",
+    "photo": "Rozmazanie fotky",
+    "shadow": "Rozmazanie tieňa",
+    "shadowTip": "Rozmaže fotku za názvom a cenou.",
+    "off": "Vypnuté",
+    "valueText": "{value} zo 100",
+    "direction": "Smer",
+    "directionAriaLabel": "Smer rozmazania",
+    "directions": {
+      "all": "Všade",
+      "top": "Zhora",
+      "bottom": "Zdola",
+      "left": "Zľava",
+      "right": "Sprava"
     }
   },
   "shapeBlock": {
@@ -951,10 +1013,10 @@
     "uploadImage": "Nahrať obrázok",
     "allShapes": "Všetky tvary",
     "browseShapes": "Prehľadávať celú knižnicu tvarov",
-    "closePage": "Zavrieť produktovú stránku",
-    "showPage": "Zobraziť produktovú stránku",
-    "closePages": "Zavrieť produktové stránky",
-    "showPageFull": "Zobraziť produktovú stránku",
+    "closePage": "Zavrieť priebeh nákupu",
+    "showPage": "Zobraziť priebeh nákupu",
+    "closePages": "Zavrieť produktovú stránku, pokladňu a stránku s poďakovaním",
+    "showPageFull": "Zobraziť produktovú stránku, pokladňu a stránku s poďakovaním",
     "undo": "Späť",
     "undoTip": "Späť (Ctrl+Z)",
     "redo": "Znova",
@@ -969,25 +1031,18 @@
     "zoomIn": "Priblížiť",
     "zoomInTip": "Priblížiť (Ctrl +)",
     "designSettings": "Nastavenia dizajnu",
-    "page": "Stránka",
-    "moreTools": "Ďalšie nástroje",
-    "checkout": "Pokladňa",
-    "showCheckout": "Zobraziť pokladňu",
-    "closeCheckout": "Zavrieť pokladňu",
-    "showCheckoutFull": "Zobraziť pokladňu a stránku s poďakovaním",
-    "closeCheckoutFull": "Zavrieť pokladňu a stránku s poďakovaním"
+    "page": "Priebeh nákupu",
+    "moreTools": "Ďalšie nástroje"
   },
   "selectionToolbar": {
     "toolsFor": "Nástroje pre {name}",
     "elements": "{count, plural, one {# prvok} few {# prvky} many {# prvku} other {# prvkov}}",
-    "hidePage": "Skryť stránku",
-    "hidePages": "Skryť stránky",
-    "openPage": "Otvoriť stránku",
-    "openPages": "Otvoriť stránky",
-    "openProductPage": "Otvoriť produktovú stránku: {name}",
-    "closeProductPage": "Zavrieť produktovú stránku: {name}",
-    "openProductPages": "Otvoriť produktové stránky pre {count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktov}}",
-    "closeProductPages": "Zavrieť produktové stránky pre {count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktov}}",
+    "hidePage": "Skryť priebeh nákupu",
+    "openPage": "Otvoriť priebeh nákupu",
+    "openProductPage": "Otvoriť priebeh nákupu: {name}",
+    "closeProductPage": "Zavrieť priebeh nákupu: {name}",
+    "openProductPages": "Otvoriť priebeh nákupu pre {count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktov}}",
+    "closeProductPages": "Zavrieť priebeh nákupu pre {count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktov}}",
     "editText": "Upraviť text",
     "editTextOf": "Upraviť text: {name}",
     "color": "Farba",
@@ -998,19 +1053,18 @@
     "editCornersOf": "Upraviť zaoblenie rohov: {name}",
     "opacity": "Priehľadnosť",
     "editOpacityOf": "Upraviť priehľadnosť: {name}",
+    "blur": "Rozmazanie",
+    "editBlurOf": "Upraviť rozmazanie: {name}",
     "frame": "Orezať a umiestniť",
     "frameImageFor": "Orezať a umiestniť obrázok pre {name}",
     "duplicate": "Duplikovať",
     "duplicateNamed": "Duplikovať: {name}",
     "duplicateN": "Duplikovať {count, plural, one {# prvok} few {# prvky} many {# prvku} other {# prvkov}}",
     "removeFrom": "Odobrať z mriežky: {name}",
-    "removeN": "Odobrať {count, plural, one {# prvok} few {# prvky} many {# prvku} other {# prvkov}} z mriežky",
-    "openCheckout": "Otvoriť pokladňu",
-    "hideCheckout": "Skryť pokladňu",
-    "openCheckoutFor": "Zobraziť pokladňu: {name}",
-    "closeCheckoutFor": "Skryť pokladňu: {name}"
+    "removeN": "Odobrať {count, plural, one {# prvok} few {# prvky} many {# prvku} other {# prvkov}} z mriežky"
   },
   "canvas": {
+    "addSuggested": "Pridať {title} do tohto výkladu",
     "gridLabel": "Plátno výkladu",
     "emptyGrid": "Vaša mriežka je prázdna",
     "emptyGridHint": "Pridajte produkt a začnite upravovať výklad. Text a tvary sú na paneli nástrojov nižšie.",
@@ -1377,5 +1431,45 @@
     "info": "Zobrazí sa za stránkou. Prekrytie vo farbe stránky udrží text čitateľný; vypnutím sa fotka ukáže taká, aká je.",
     "remove": "Odstrániť fotku",
     "overlay": "Farebné prekrytie"
+  },
+  "cardExtras": {
+    "hoverTitle": "Prechod myšou",
+    "shoppingTitle": "Nákup",
+    "effect": "Efekt",
+    "effectAriaLabel": "Čo karta urobí pri prechode myšou",
+    "effects": {
+      "none": "Žiadny",
+      "lift": "Zdvihnúť",
+      "zoom": "Priblížiť",
+      "tilt": "Nakloniť"
+    },
+    "effectTipLabel": "Ako sa efekty prehrávajú",
+    "effectTip": "Prehrá sa, keď kupujúci ukáže na kartu alebo na ňu prejde klávesom Tab. Na telefónoch a pre každého, kto si vyžiadal menej pohybu, zostávajú karty v pokoji.",
+    "secondPhoto": "Druhá fotka",
+    "secondPhotoTipLabel": "Ktorá fotka sa ukáže",
+    "secondPhotoTip": "Ukáže ďalšiu fotku produktu, kým kupujúci ukazuje na kartu. Produkty s jedinou fotkou zostanú, ako sú.",
+    "buyButton": "Tlačidlo nákupu",
+    "buyButtonAriaLabel": "Tlačidlo nákupu na karte",
+    "buyButtons": {
+      "none": "Vypnuté",
+      "solid": "Plné",
+      "outline": "Obrys",
+      "link": "Odkaz"
+    },
+    "buyButtonTipLabel": "Kam tlačidlo vedie",
+    "buyButtonTip": "Použije text a farbu tlačidla z vašej produktovej stránky a otvorí produktovú stránku.",
+    "rating": "Hodnotenie hviezdičkami",
+    "ratingTipLabel": "Odkiaľ sú hviezdičky",
+    "ratingTip": "Z recenzií kupujúcich. Ukáže sa pod názvom, keď má produkt recenziu.",
+    "ratingTipReviewsOff": "Recenzie sú na vašej produktovej stránke vypnuté, takže karty neukazujú žiadne hviezdičky. Zapnite ich v časti Produktová stránka, Recenzie.",
+    "lowStock": "Posledné kusy",
+    "lowStockTipLabel": "Kedy sa štítok ukáže",
+    "lowStockTip": "Ukáže Posledné kusy, keď je produkt na svojej hranici nízkych zásob alebo pod ňou, a Vypredané pri nule. Kupujúci nikdy neuvidia, koľko kusov zostáva."
+  },
+  "textSpacing": {
+    "letterSpacing": "Medzery medzi písmenami",
+    "lineHeight": "Výška riadka",
+    "normal": "Normálne",
+    "valueText": "{value} percent veľkosti písma"
   }
 }

@@ -326,6 +326,11 @@
       "required": "Voeg de naam toe die bij de review wordt getoond.",
       "tooLong": "Een naam mag maximaal {maximum} tekens zijn.",
       "unsupported": "De naam bevat niet-ondersteunde tekens."
+    },
+    "addOnsTitle": {
+      "required": "De kop is verplicht.",
+      "tooLong": "De kop mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "De kop bevat niet-ondersteunde tekens."
     }
   },
   "email": {
@@ -513,7 +518,10 @@
     "galleryStaleOption": "Een foto verwijst naar een optie die niet meer bestaat.",
     "badgesTooMany": "Een product kan maximaal {maximum} badges hebben.",
     "badgeDuplicate": "Elke badge kan maar één keer worden toegevoegd.",
-    "badgesOnPhotoTooMany": "Een product kan maximaal {maximum} badges op de foto tonen."
+    "badgesOnPhotoTooMany": "Een product kan maximaal {maximum} badges op de foto tonen.",
+    "addOnsTooMany": "Een product kan maximaal {maximum} andere producten aanbieden.",
+    "addOnDuplicate": "Elk product kan maar één keer worden aangeboden.",
+    "addOnNotYours": "Een van de aangeboden producten staat niet meer in deze winkel. Verwijder het en sla opnieuw op."
   },
   "productImport": {
     "noTitle": "Geen titel.",

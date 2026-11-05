@@ -20,3 +20,10 @@ export type StockBadge =
   | { state: "in_stock" }
   | { state: "low_stock"; remaining: number }
   | { state: "sold_out" };
+
+/**
+ * What a storefront CARD may say about stock: running low, or gone. A plain
+ * state with no number in any arm, so a card can never print a count however
+ * it is drawn. In stock says nothing on a card, so it is not a state here.
+ */
+export type TileStockState = Exclude<StockBadgeState, "in_stock">;

@@ -12,16 +12,11 @@ import { cn } from "@/lib/utils";
 import { TYPING_DEBOUNCE_MS } from "@/lib/typing-debounce";
 import {
   fieldBaseClass,
+  addIconButtonClass,
   helpTextClass,
-  iconButtonClass,
   iconPopClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
-
-const ADD_BUTTON_CLASS = cn(
-  iconButtonClass,
-  "size-8 shrink-0 disabled:pointer-events-none disabled:opacity-40",
-);
 
 /**
  * Pick from the seller's existing products; each can be in the grid once.
@@ -379,7 +374,7 @@ function ProductList({
                     ? t("inGridAriaLabel", { title: product.title })
                     : t("addToGridAriaLabel", { title: product.title })
                 }
-                className={cn(ADD_BUTTON_CLASS)}
+                className={addIconButtonClass}
               >
                 <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
               </button>

@@ -33,7 +33,8 @@
     "unavailable": "Plans can't be shown right now. Refresh the page in a moment.",
     "yearlyFree": "{count, plural, one {# month free} other {# months free}}",
     "launchNote": "A launch price is an introductory price: the regular price is the one shown struck through.",
-    "grantTitle": "{plan} is on us"
+    "grantTitle": "{plan} is on us",
+    "autoRenew": "Paid plans renew automatically every month at the price shown, until you cancel."
   },
   "card": {
     "perMonth": "/ month",
@@ -65,6 +66,7 @@
     "earlyAccess": "Early access to new features",
     "prioritySupport": "Priority support: your messages answered first",
     "analyticsExport": "Download analytics reports (CSV)",
+    "aiSuggestions": "AI writing help, with {credit} of AI credit a month",
     "products": "{count, plural, one {# product} other {# products}}",
     "productsUnlimited": "Unlimited products"
   },
@@ -87,6 +89,7 @@
     "unlimited": "Unlimited",
     "included": "Included",
     "notIncluded": "Not included",
+    "aiCredit": "{credit} credit a month",
     "rows": {
       "fee": "Fee per sale",
       "storefronts": "Storefronts",
@@ -105,7 +108,8 @@
       "roles": "Team roles",
       "analytics": "Analytics",
       "analyticsExport": "Analytics reports (CSV)",
-      "productImport": "Product import (CSV)"
+      "productImport": "Product import (CSV)",
+      "aiSuggestions": "AI writing help"
     },
     "groups": {
       "selling": "Selling",
@@ -206,6 +210,24 @@
     "grantLine": "On us: Square Share gave your store this plan.",
     "grantUntil": "Until {date}. Nothing is taken down when it ends.",
     "grantNoEnd": "No end date."
+  },
+  "ai": {
+    "title": "AI writing help",
+    "description": "Drafts, rewrites and the next words as you type, from the details you enter. It adds no claims of its own.",
+    "creditUsed": "{used} of {allowance} used this month",
+    "creditRenews": "Renews {date}",
+    "creditNote": "A draft or a suggestion uses a fraction of a cent.",
+    "creditSpent": "This month's credit is used up. AI writing help is back on {date}.",
+    "creditUnreadable": "Your AI credit can't be read right now. Try again in a moment.",
+    "asYouTypeLabel": "Suggest the next words as I type",
+    "asYouTypeHelp": "Grey text appears as you write a product description: Tab adds it, Esc hides it. This is your own setting, not your team's.",
+    "abilities": {
+      "asYouType": "Suggests the next words as you write a description",
+      "write": "Writes a first draft from the details you entered",
+      "improve": "Tidies a description you wrote, keeping every fact"
+    },
+    "upsellCta": "See Pro",
+    "upsellCredit": "{credit} of AI credit a month included"
   },
   "cancel": {
     "title": "Cancel {plan}?",

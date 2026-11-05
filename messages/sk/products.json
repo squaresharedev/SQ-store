@@ -40,7 +40,7 @@
     "formLoading": "Načítava sa formulár produktu",
     "importReviews": {
       "heading": "Importovať recenzie",
-      "description": "Preneste si recenzie z Judge.me, Loox, Yotpo alebo Shopify Product Reviews. Vyexportujte ich tam ako CSV, presuňte súbor sem a pred uložením skontrolujte, ku ktorému produktu každá patrí."
+      "description": "Preneste si recenzie z Judge.me, Loox, Yotpo alebo Shopify Product Reviews."
     }
   },
   "emptyState": {
@@ -300,6 +300,11 @@
         "label": "Odznaky",
         "description": "Niekoľko slov na stránke produktu: dôvod dôverovať vám alebo skutočnosť, ktorá zaujme na prvý pohľad. Vyberte hotový odznak alebo napíšte vlastný, dajte ikone farbu a umiestnite ho vedľa produktu alebo na fotku.",
         "about": "Na čo slúžia odznaky"
+      },
+      "addOns": {
+        "label": "Pridať k objednávke",
+        "description": "Vaše ďalšie produkty, ktoré si kupujúci pridajú jedným ťuknutím, hneď nad tlačidlom Kúpiť. Zobrazujú sa len produkty rovnakého druhu a meny, aby všetko zostalo v jednej objednávke.",
+        "about": "Na čo slúži sekcia Pridať k objednávke"
       }
     },
     "summary": {
@@ -327,7 +332,8 @@
       "active": "Aktívny",
       "draft": "Koncept",
       "badges": "{count, plural, one {{count} odznak} few {{count} odznaky} many {{count} odznaku} other {{count} odznakov}}",
-      "physical": "Fyzický"
+      "physical": "Fyzický",
+      "addOns": "{count, plural, one {{count} produkt} few {{count} produkty} many {{count} produktu} other {{count} produktov}}"
     },
     "errors": {
       "titleRequired": "Dajte produktu názov, kupujúci ho uvidia ako prvé.",
@@ -363,6 +369,23 @@
     "description": "Popis",
     "optional": "(voliteľné)",
     "descriptionPlaceholder": "Čo to je a čo kupujúci dostane?",
+    "ai": {
+      "write": "Napísať s AI",
+      "improve": "Vylepšiť s AI",
+      "writing": "Píše sa…",
+      "written": "Napísané pomocou AI",
+      "improved": "Vylepšené pomocou AI",
+      "writeHint": "AI ho zostaví z údajov, ktoré ste zadali, a nič vlastné nepridá. Pred uložením ho skontrolujte.",
+      "improveHint": "AI prepíše váš text, aby sa čítal zrozumiteľnejšie, a zachová všetky fakty. Pred uložením ho skontrolujte.",
+      "asYouTypeIdle": "AI navrhuje ďalšie slová, kým píšete.",
+      "asYouTypeOffered": "vloží sivý text. Esc ho skryje.",
+      "asYouTypeAccept": "Vložiť navrhnuté slová",
+      "asYouTypeAnnounce": "Návrh:",
+      "asYouTypeTurnOff": "Vypnúť",
+      "asYouTypeOff": "Návrhy počas písania sú vypnuté. Znova ich zapnete v Nastaveniach, v časti Plán a fakturácia.",
+      "upsellHint": "Súčasť plánu Pro: AI podľa vašich údajov napíše a dokončí popisy. Plány sa otvoria na novej karte.",
+      "upsellBadge": "Pro"
+    },
     "displayImage": "Hlavný obrázok",
     "displayImageAbout": "Kde sa hlavný obrázok používa",
     "displayImageHelp": "Zobrazuje sa vo vašom výklade a vo vloženiach na web.",
@@ -530,6 +553,14 @@
     "addFirst": "Predávate vo viac ako jednom variante?",
     "addAnother": "Pridať ďalší spôsob, ako sa líši",
     "somethingElse": "Niečo iné",
+    "guessSizes": "Veľkosti {first} až {last}",
+    "guessSizesAny": "Veľkosti",
+    "nextOptions": "Pravdepodobné ďalšie možnosti",
+    "addNamed": "Pridať {name}",
+    "sameAsHint": "Skopíruje možnosti, špecifikácie a údaje o výrobcovi, ktoré má {title}, do sekcií, ktoré ste ešte nevyplnili.",
+    "guessSizesHint": "Názov znie ako oblečenie, preto pridá bežné veľkosti. Tie, ktoré nepredávate, odstráňte.",
+    "guessSizesAnyHint": "Názov znie ako niečo, čo sa predáva vo veľkostiach, preto pridá možnosť Veľkosť, ktorú vyplníte sami.",
+    "nextOptionsHint": "Odhadnuté podľa možností, ktoré ste zatiaľ pridali.",
     "groupsFull": "{max, plural, one {Limit: {max} skupina možností.} few {Limit: {max} skupiny možností.} many {Limit: {max} skupiny možností.} other {Limit: {max} skupín možností.}}",
     "optionsFull": "{max, plural, one {Limit: {max} možnosť.} few {Limit: {max} možnosti.} many {Limit: {max} možnosti.} other {Limit: {max} možností.}}",
     "whatVaries": "Čo sa mení",
@@ -1053,12 +1084,8 @@
       "product": "produkt",
       "status": "stav"
     },
-    "summary": "{ready, plural, one {<count>{ready}</count> recenzia pripravená} few {<count>{ready}</count> recenzie pripravené} many {<count>{ready}</count> recenzie pripravené} other {<count>{ready}</count> recenzií pripravených}}{skipped, plural, =0 {.} other {, {skipped} vynechaných.}}",
-    "hiddenRows": "{count, plural, one {{count} recenzia bola vo vašom pôvodnom obchode skrytá alebo označená ako spam, preto sa vynechá.} few {{count} recenzie boli vo vašom pôvodnom obchode skryté alebo označené ako spam, preto sa vynechajú.} many {{count} recenzie bolo vo vašom pôvodnom obchode skrytých alebo označených ako spam, preto sa vynechajú.} other {{count} recenzií bolo vo vašom pôvodnom obchode skrytých alebo označených ako spam, preto sa vynechajú.}}",
-    "droppedRows": "{count, plural, one {{count} recenzia presahuje {max}, ktoré súbor pojme, preto sa vynechá.} few {{count} recenzie presahujú {max}, ktoré súbor pojme, preto sa vynechajú.} many {{count} recenzie presahuje {max}, ktoré súbor pojme, preto sa vynechajú.} other {{count} recenzií presahuje {max}, ktoré súbor pojme, preto sa vynechajú.}}",
     "source": "Importované z",
     "sourceUnknown": "Vyberte aplikáciu",
-    "sourceHelp": "Zobrazuje sa pri každej recenzii, aby kupujúci vedeli, kde bola pôvodne napísaná.",
     "sources": {
       "judgeme": "Judge.me",
       "loox": "Loox",
@@ -1067,17 +1094,10 @@
     },
     "mappingHeading": "Priradiť produkty",
     "mappingHelp": "Každý produkt zo súboru a produkt tu, ku ktorému patria jeho recenzie. Kde sa dá, priradené podľa názvu. Všetko nastavené na „Neimportovať“ sa vynechá.",
-    "mappingFileProduct": "V súbore",
-    "mappingReviews": "Recenzie",
-    "mappingProduct": "Produkt tu",
     "mappingSelect": "Produkt pre {key}",
     "skipProduct": "Neimportovať",
-    "skippedHeading": "Riadky, ktoré sa vynechajú",
     "skippedRow": "Riadok {line}: {problem}",
     "run": "{count, plural, one {Importovať {count} recenziu} few {Importovať {count} recenzie} many {Importovať {count} recenzie} other {Importovať {count} recenzií}}",
-    "imported": "{count, plural, one {Importovaná {count} recenzia.} few {Importované {count} recenzie.} many {Importovaných {count} recenzie.} other {Importovaných {count} recenzií.}}",
-    "duplicates": "{count, plural, one {{count} tu už bola.} few {{count} tu už boli.} many {{count} tu už bolo.} other {{count} tu už bolo.}}",
-    "skippedRows": "{count, plural, one {Vynechaný {count} riadok.} few {Vynechané {count} riadky.} many {Vynechaných {count} riadka.} other {Vynechaných {count} riadkov.}}",
     "errors": {
       "rateLimited": "Za poslednú hodinu príliš veľa importov. Skúste to neskôr.",
       "tooLarge": "Súbor je na import príliš veľký.",
@@ -1094,6 +1114,39 @@
         "b": "„Naživo ešte krajší.“",
         "c": "„Prišiel rýchlo a dobre zabalený.“"
       }
+    },
+    "tally": {
+      "toImport": "Na import",
+      "imported": "Importované",
+      "already": "Už tu sú",
+      "leftOut": "Vynechané"
+    },
+    "alreadyNote": "{count, plural, one {{count} recenzia z tohto súboru tu už je, takže sa nepridá dvakrát.} few {{count} recenzie z tohto súboru tu už sú, takže sa nepridajú dvakrát.} many {{count} recenzie z tohto súboru tu už je, takže sa nepridajú dvakrát.} other {{count} recenzií z tohto súboru tu už je, takže sa nepridajú dvakrát.}}",
+    "sourceTip": "O importovaných recenziách",
+    "mappingTip": "Ako sa produkty priraďujú",
+    "reviewCount": "{count, plural, one {{count} recenzia} few {{count} recenzie} many {{count} recenzie} other {{count} recenzií}}",
+    "keyAlready": "{count, plural, one {{count} tu už je} few {{count} tu už sú} many {{count} tu už je} other {{count} tu už je}}",
+    "leftOutSummary": "{count, plural, one {Prečo sa vynechá {count} recenzia} few {Prečo sa vynechajú {count} recenzie} many {Prečo sa vynechá {count} recenzie} other {Prečo sa vynechá {count} recenzií}}",
+    "leftOutUnmatched": "{count, plural, one {{count} pre produkt nastavený na „Neimportovať“} few {{count} pre produkty nastavené na „Neimportovať“} many {{count} pre produkty nastavené na „Neimportovať“} other {{count} pre produkty nastavené na „Neimportovať“}}",
+    "leftOutHidden": "{count, plural, one {{count} skrytá alebo označená ako spam vo vašom pôvodnom obchode} few {{count} skryté alebo označené ako spam vo vašom pôvodnom obchode} many {{count} skrytých alebo označených ako spam vo vašom pôvodnom obchode} other {{count} skrytých alebo označených ako spam vo vašom pôvodnom obchode}}",
+    "leftOutDropped": "{count, plural, one {{count} nad limit {max} na súbor} few {{count} nad limit {max} na súbor} many {{count} nad limit {max} na súbor} other {{count} nad limit {max} na súbor}}",
+    "leftOutProblems": "{count, plural, one {{count} riadok, ktorý sa nedá prečítať:} few {{count} riadky, ktoré sa nedajú prečítať:} many {{count} riadka, ktoré sa nedajú prečítať:} other {{count} riadkov, ktoré sa nedajú prečítať:}}",
+    "nothingNew": "Nič nové na import",
+    "done": {
+      "title": "{count, plural, one {Importovaná {count} recenzia} few {Importované {count} recenzie} many {Importovaných {count} recenzie} other {Importovaných {count} recenzií}}",
+      "body": "Na stránkach produktov sa zobrazia, hneď ako ich prečíta naša automatická kontrola.",
+      "already": "{count, plural, one {{count} tu už bola, takže sa nepridala dvakrát.} few {{count} tu už boli, takže sa nepridali dvakrát.} many {{count} tu už bolo, takže sa nepridali dvakrát.} other {{count} tu už bolo, takže sa nepridali dvakrát.}}",
+      "nothingTitle": "Nič sa nepridalo dvakrát",
+      "nothingBody": "{count, plural, one {{count} recenzia z tohto súboru tu už bola.} few {{count} recenzie z tohto súboru tu už boli.} many {{count} recenzie z tohto súboru tu už bolo.} other {{count} recenzií z tohto súboru tu už bolo.}}",
+      "seeReviews": "Zobraziť recenzie",
+      "another": "Importovať ďalší súbor"
+    },
+    "squareShare": {
+      "label": "Export zo Square Share",
+      "tipLabel": "O exportoch zo Square Share",
+      "tip": "Tento súbor sme porovnali podľa jednotlivých recenzií, nie podľa aplikácie. Recenzie, ktoré už v tomto obchode sú, zostanú bez zmeny a nič sa nepridá dvakrát. Recenzie z iného obchodu sa exportom preniesť nedajú.",
+      "leftOut": "{count, plural, one {{count} nie je v tomto obchode: export ju nemôže pridať} few {{count} nie sú v tomto obchode: export ich nemôže pridať} other {{count} nie je v tomto obchode: export ich nemôže pridať}}",
+      "checkFailed": "Súbor sa nepodarilo porovnať s vašimi recenziami. Nič sa nezmenilo. Skúste to o chvíľu znova."
     }
   },
   "reviewModeration": {
@@ -1219,6 +1272,42 @@
     "emptyFiltered": {
       "title": "Žiadne recenzie nezodpovedajú",
       "body": "Skúste iné slová alebo iný filter, prípadne filtre zrušte a uvidíte všetky recenzie."
+    },
+    "export": {
+      "hint": "Stiahne recenzie v tomto zobrazení ako súbor CSV.",
+      "empty": "V tomto zobrazení nie sú žiadne recenzie na export.",
+      "truncated": "{count, plural, one {Súbor obsahuje prvú recenziu tohto zobrazenia.} few {Súbor obsahuje prvé # recenzie tohto zobrazenia.} other {Súbor obsahuje prvých # recenzií tohto zobrazenia.}} Zvyšok exportujete, keď zoznam zúžite podľa produktu alebo hodnotenia.",
+      "fileName": "recenzie.csv"
+    }
+  },
+  "addOnsField": {
+    "listLabel": "Vaše ďalšie produkty",
+    "count": "Vybraté {count} z {max}",
+    "add": "Pridať {title}",
+    "draft": "Koncept",
+    "draftHint": "Kupujúci ho uvidia, keď bude aktívny.",
+    "remove": "Odobrať {title}",
+    "none": "Zatiaľ nemáte iné produkty. Najprv pridajte ďalší produkt a potom ho tu ponúknite.",
+    "notPosted": "Neponúkané: je to produkt na stiahnutie",
+    "notADownload": "Neponúkané: je to fyzický produkt",
+    "search": "Hľadať vo vašich produktoch",
+    "noMatch": "Tomu nezodpovedá žiadny produkt.",
+    "noneFit": "Žiadny z vašich ďalších produktov nemôže byť v tej istej objednávke ako tento. Jedna objednávka má jeden druh (zásielka, alebo stiahnutie) a jednu menu.",
+    "otherCurrency": "Neponúkané: cena v {currency}",
+    "previewLabel": "Čo uvidia kupujúci",
+    "soldOutHint": "Kupujúci ho uvidia, keď bude opäť na sklade.",
+    "takenDown": "Stiahnuté",
+    "takenDownHint": "Kupujúci ho neuvidia, kým je stiahnutý.",
+    "ownBuyLink": "Kúpiť pri tomto produkte vedie na váš vlastný odkaz, takže kupujúci túto sekciu neuvidia. Ak ju chcete použiť, odkaz odoberte.",
+    "suggestion": {
+      "boughtWith": {
+        "label": "Často kupované spolu: {titles}",
+        "hint": "Kupujúci, ktorí kúpili tento produkt, kúpili aj {titles}. {count, plural, one {Ťuknutím sa pridá do tohto zoznamu.} few {Ťuknutím sa pridajú do tohto zoznamu.} other {Ťuknutím sa pridajú do tohto zoznamu.}}"
+      },
+      "offeredWith": {
+        "label": "Často pridávate: {titles}",
+        "hint": "{titles} ponúkate pri viacerých svojich ďalších produktoch. {count, plural, one {Ťuknutím sa pridá aj sem.} few {Ťuknutím sa pridajú aj sem.} other {Ťuknutím sa pridajú aj sem.}}"
+      }
     }
   }
 }

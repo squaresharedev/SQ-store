@@ -204,7 +204,8 @@ export type RateLimitedOperation =
   | "changePlan"
   | "saveDiscounts"
   | "moderateReviews"
-  | "agentTools";
+  | "agentTools"
+  | "writeWithAi";
 
 /**
  * A signed-in write budget is spent (lib/rate-limit.ts).

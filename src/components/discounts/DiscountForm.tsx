@@ -43,6 +43,7 @@ import {
   type DiscountValue,
   type DiscountView,
 } from "@/types/discount";
+import type { DiscountSuggestions } from "@/lib/predictions";
 import { DiscountExample } from "./DiscountExample";
 import { DiscountFormSectionsSkeleton } from "./DiscountsSkeleton";
 import { ScheduleField, type ScheduleValue } from "./ScheduleField";
@@ -89,7 +90,12 @@ function at(iso: string | null): ScheduleValue {
   return local ? { mode: "at", ...local } : { mode: "open" };
 }
 
-function initialState(discount: DiscountView | null, products: readonly DiscountProductChoice[]): FormState {
+function initialState(
+  discount: DiscountView | null,
+  products: readonly DiscountProductChoice[],
+  suggested: DiscountSuggestions,
+  now: Date,
+): FormState {
   if (!discount) {
     // A sale first: the discount most sellers come here to make.
     return {
@@ -97,13 +103,13 @@ function initialState(discount: DiscountView | null, products: readonly Discount
       code: "",
       shareChannel: "",
       valueType: "percent",
-      percent: "10",
+      percent: String(suggested.percent ?? 10),
       amount: "",
       currency: products[0]?.currency ?? "EUR",
       appliesTo: "all",
       productIds: [],
       start: { mode: "open" },
-      end: { mode: "open" },
+      end: suggested.days ? at(shiftInstant(now.toISOString(), { days: suggested.days })) : { mode: "open" },
       usageLimit: "",
       enabled: true,
     };
@@ -124,6 +130,18 @@ function initialState(discount: DiscountView | null, products: readonly Discount
     usageLimit: discount.usageLimit !== null ? String(discount.usageLimit) : "",
     enabled: discount.enabled,
   };
+}
+
+/** Where a code could be shared, as one tap each: the seller's own channels
+ *  first, then every usual one they have not used, so none is pushed out. */
+function channelSuggestions(own: readonly string[], usual: readonly string[]): string[] {
+  const seen = new Set<string>();
+  return [...own, ...usual].filter((channel) => {
+    const key = channel.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 /** The currencies an amount off can be in: the catalogue's, plus the one a
@@ -206,16 +224,18 @@ type DiscountFormProps = {
   /** The storefront designer's Sale chip section, for the seller's most
    *  recent storefront (null without one). */
   chipHref?: string | null;
+  /** A new discount's better defaults (lib/predictions). */
+  suggested?: DiscountSuggestions;
 };
 
-function DiscountFormFields({ discount, products, chipHref = null, now }: DiscountFormProps & { now: Date }) {
+function DiscountFormFields({ discount, products, chipHref = null, suggested = {}, now }: DiscountFormProps & { now: Date }) {
   const t = useTranslations("Discounts.form");
   const words = useDiscountWording();
   const locale = useLocale();
   const router = useRouter();
   const toast = useToast();
   const ids = { code: useId(), channel: useId(), value: useId(), limit: useId() };
-  const [state, setState] = useState<FormState>(() => initialState(discount, products));
+  const [state, setState] = useState<FormState>(() => initialState(discount, products, suggested, now));
   const [error, setError] = useState<ActionError | null>(null);
   const [saving, startSaving] = useTransition();
 
@@ -344,7 +364,11 @@ function DiscountFormFields({ discount, products, chipHref = null, now }: Discou
                 autoComplete="off"
               />
               <div className="flex flex-wrap gap-2" aria-label={t("channel.suggestions")} role="group">
-                {[...PLATFORM_SUGGESTIONS, t("channel.newsletter"), t("channel.creator")].map((suggestion) => (
+                {channelSuggestions(suggested.channels ?? [], [
+                  ...PLATFORM_SUGGESTIONS,
+                  t("channel.newsletter"),
+                  t("channel.creator"),
+                ]).map((suggestion) => (
                   <button
                     key={suggestion}
                     type="button"

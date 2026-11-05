@@ -52,6 +52,13 @@ export type OutboundEmail = {
   /** The display name mail arrives from; {@link SENDER_NAME} when absent.
    *  The address itself is always {@link senderAddress}. */
   fromName?: string;
+  /**
+   * For mail a person can stop (the review reminder): an absolute https
+   * address that stops it on a POST. Sent as List-Unsubscribe with
+   * List-Unsubscribe-Post (RFC 8058), so the mail client offers its own
+   * one-click "Unsubscribe" beside the message.
+   */
+  unsubscribeUrl?: string;
 };
 
 export type SendResult =
@@ -110,6 +117,7 @@ async function deliver(message: OutboundEmail, from: string): Promise<void> {
     fromAddress: from,
     to: [message.to],
     ...(message.replyTo ? { replyTo: message.replyTo } : {}),
+    ...(message.unsubscribeUrl ? { unsubscribeUrl: message.unsubscribeUrl } : {}),
     subject: message.subject,
     text: message.text,
     ...(message.html ? { html: message.html } : {}),

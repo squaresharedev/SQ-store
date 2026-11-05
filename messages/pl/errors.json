@@ -105,7 +105,8 @@
     "changePlan": "Za dużo zmian planu w krótkim czasie.",
     "saveDiscounts": "Zbyt wiele zmian rabatów w krótkim czasie.",
     "moderateReviews": "Za dużo zmian w opiniach w krótkim czasie.",
-    "agentTools": "Ten asystent wysłał zbyt wiele żądań w krótkim czasie."
+    "agentTools": "Ten asystent wysłał zbyt wiele żądań w krótkim czasie.",
+    "writeWithAi": "Zbyt wiele próśb o szkic od AI w krótkim czasie."
   },
   "serverError": {
     "fix": "Zwykle jest to problem tymczasowy. Odczekaj chwilę i spróbuj ponownie; jeśli nadal się nie udaje, odśwież stronę.",
@@ -517,6 +518,28 @@
       "fix": "Spróbuj innych słów albo napisz do {email}, a zajmie się tym człowiek."
     }
   },
+  "ai": {
+    "notOnPlan": {
+      "message": "Pomoc AI w pisaniu jest częścią planu Pro.",
+      "fix": "Napisz opis samodzielnie albo przejdź na Pro."
+    },
+    "tooLittle": {
+      "message": "Na razie jest za mało danych, żeby napisać opis.",
+      "fix": "Najpierw dodaj kilka szczegółów, np. opcje, materiały lub rozmiar."
+    },
+    "declined": {
+      "message": "AI nie udało się napisać opisu tego produktu.",
+      "fix": "Napisz go samodzielnie albo zmień kilka słów i spróbuj ponownie."
+    },
+    "unavailable": {
+      "message": "Pomoc AI w pisaniu jest teraz niedostępna.",
+      "fix": "Spróbuj ponownie za kilka minut albo napisz opis samodzielnie."
+    },
+    "creditUsed": {
+      "message": "Kredyt na AI w tym miesiącu się wyczerpał.",
+      "fix": "Odnowi się 1. dnia miesiąca. Do tego czasu pisz jak zwykle."
+    }
+  },
   "productImport": {
     "unreadable": {
       "message": "Nie udało się odczytać tego importu.",
@@ -704,6 +727,12 @@
       "message": "Wybierz, dlaczego ukrywasz tę opinię.",
       "fix": "Opinię można ukryć tylko z jednego z podanych powodów."
     }
+  },
+  "reviewsExport": {
+    "permissionDenied": "Nie masz dostępu do opinii tego sklepu.",
+    "unavailable": "Twoich opinii nie można teraz wyeksportować.",
+    "rateLimited": "To dużo eksportów opinii w krótkim czasie.",
+    "storeRateLimited": "Twój zespół wyeksportował opinie tego sklepu wiele razy w ciągu ostatniej godziny."
   },
   "agent": {
     "invalidInput": "Te dane są nieprawidłowe.",

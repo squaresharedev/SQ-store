@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   buildReviewImportPlan,
   detectReviewSource,
+  reviewFingerprint,
+  reviewFingerprints,
   reviewProductKeys,
   slugKey,
   suggestProductMatches,
@@ -83,8 +85,8 @@ describe("matching products", () => {
     const plan = buildReviewImportPlan(JUDGEME, NOW);
     const keys = reviewProductKeys(plan);
     expect(keys).toEqual([
-      { key: "linen-lamp", slug: "linen-lamp", count: 2 },
-      { key: "Café Mug", slug: "cafe-mug", count: 1 },
+      { key: "linen-lamp", slug: "linen-lamp", count: 2, average: 4 },
+      { key: "Café Mug", slug: "cafe-mug", count: 1, average: 4 },
     ]);
     const products = [
       { id: "p-lamp", title: "Linen Lamp", identifier: null },
@@ -97,5 +99,21 @@ describe("matching products", () => {
   it("slugs titles and handles to the same key", () => {
     expect(slugKey("Linen Shirt (Blue)")).toBe(slugKey("linen-shirt-blue"));
     expect(slugKey("  Crème brûlée  ")).toBe("creme-brulee");
+  });
+});
+
+describe("a review's fingerprint", () => {
+  const [row] = buildReviewImportPlan(JUDGEME, NOW).rows;
+
+  it("keeps the recipe imported reviews already carry", async () => {
+    // Pinned: a change here lets every file imported before it land twice.
+    expect(await reviewFingerprint("judgeme", row!)).toBe("617b4b6f1c37fd3812c253c951fd8cc8864eef85ebe6ddf79fb3869ed4041501");
+  });
+
+  it("is the same review as every app, so changing the app does not import it again", async () => {
+    const all = await reviewFingerprints(row!);
+    expect(all).toHaveLength(4);
+    expect(new Set(all).size).toBe(4);
+    expect(all).toContain(await reviewFingerprint("loox", row!));
   });
 });

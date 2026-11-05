@@ -16,6 +16,8 @@ import { isOnBoard } from "@/lib/geometry/rotated-box";
 import {
   BACKGROUND_IMAGE_SCALE_MAX,
   BACKGROUND_IMAGE_SCALE_MIN,
+  BLUR_DIRECTIONS,
+  BLUR_MAX,
   CHECKOUT_CELEBRATIONS,
   CHECKOUT_HEADLINE_MAX,
   CHECKOUT_LAYOUTS,
@@ -27,6 +29,8 @@ import {
   CANVAS_COLUMNS_MIN,
   CANVAS_ROWS_MAX,
   CANVAS_ROWS_MIN,
+  CARD_BUY_BUTTONS,
+  CARD_HOVER_EFFECTS,
   MOBILE_COLUMNS_MAX,
   MOBILE_COLUMNS_MIN,
   PLACEMENT_X_MIN,
@@ -43,6 +47,9 @@ import {
   IMAGE_ALT_MAX,
   IMAGE_FITS,
   POLICY_TEXT_MAX,
+  PRODUCT_PAGE_ADD_ON_LAYOUTS,
+  PRODUCT_PAGE_ADD_ON_PLACEMENTS,
+  PRODUCT_PAGE_ADD_ONS_TITLE_MAX,
   PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX,
   PRODUCT_PAGE_CTA_MAX,
   PRODUCT_PAGE_CTA_RADIUS_MAX,
@@ -70,6 +77,10 @@ import {
   SHAPE_ROUNDNESS_MAX,
   STOREFRONT_FONTS,
   TEXT_ALIGNS,
+  TEXT_LETTER_SPACING_MAX,
+  TEXT_LETTER_SPACING_MIN,
+  TEXT_LINE_HEIGHT_MAX,
+  TEXT_LINE_HEIGHT_MIN,
   TEXT_MAX_LENGTH,
   TEXT_SIZE_MAX,
   TEXT_SIZE_MIN,
@@ -170,6 +181,12 @@ const customFontSchema = z.strictObject({
   name: singleLineText({ field: "fontName", max: CUSTOM_FONT_NAME_MAX }),
 });
 
+/** Every blur in a config: a block's, a product photo's, the shadow fade's. A
+ *  bounded integer, drawn as a share of a grid cell (see blurRadius). */
+const blurSchema = z.number().int().min(0).max(BLUR_MAX);
+/** Which way a blur runs: a closed list, never free text. */
+const blurDirectionSchema = z.enum(BLUR_DIRECTIONS);
+
 /**
  * Where the title band sits, identical on the theme and on a per-tile override
  * — spread into both so the two can never drift. Both fields are optional on
@@ -179,9 +196,15 @@ const customFontSchema = z.strictObject({
 const titlePlacementFields = {
   titlePosition: z.enum(TILE_SPOTS).optional(),
   titleInset: z.number().int().min(0).max(TITLE_INSET_MAX).optional(),
-  // The `shadow` style's gradient tint. Lives with the band's placement so
-  // it is spread into the theme and the override from the same place.
+  // The `shadow` style's gradient tint and frost. Live with the band's
+  // placement so they are spread into the theme and the override from the
+  // same place.
   titleShadowColor: hexColorSchema.optional(),
+  titleShadowBlur: blurSchema.optional(),
+  // The product photo's blur rides along: it is the one card field that is
+  // about the picture rather than the labels, too small for a group of its own.
+  photoBlur: blurSchema.optional(),
+  photoBlurDirection: blurDirectionSchema.optional(),
 };
 
 /**
@@ -245,6 +268,20 @@ const hoverTimingFields = {
     .optional(),
 };
 
+/**
+ * The card extras (hover effect, second photo, buy button, stars, low stock),
+ * identical on the theme and on a per-tile override, spread into both so the
+ * two can never drift. Closed lists and switches only: the button's words are
+ * the product page's own, so nothing here is seller text.
+ */
+const cardExtrasFields = {
+  hoverEffect: z.enum(CARD_HOVER_EFFECTS).optional(),
+  hoverPhoto: z.boolean().optional(),
+  buyButton: z.enum(CARD_BUY_BUTTONS).optional(),
+  showRating: z.boolean().optional(),
+  showLowStock: z.boolean().optional(),
+};
+
 /** Legacy chip size enum -> px, matching the text sizes each one rendered at
  *  (text-[0.625rem] / text-xs / text-sm). */
 const LEGACY_PRICE_TAG_SIZE_PX: Record<string, number> = {
@@ -304,6 +341,7 @@ const themeObjectSchema = z.strictObject({
   ...priceTagAppearanceFields,
   ...hoverTimingFields,
   ...saleBadgeFields,
+  ...cardExtrasFields,
   chipScale: z.enum(CHIP_SCALES).optional(),
   showTitle: z.boolean(),
   gridGap: z.number().int().min(0).max(GRID_GAP_MAX),
@@ -538,6 +576,14 @@ export const productPageSchema = z.preprocess(
     shippingNote: z.enum(PRODUCT_PAGE_SHIPPING_NOTES),
     // Absent = the default look, so an untouched page never grows a key.
     saleStyle: z.enum(PRODUCT_PAGE_SALE_STYLES).optional(),
+    // "Add to your order", as this storefront draws it. Absent = the default
+    // each time. The heading is the seller's own words on the page a buyer
+    // pays from, so it goes through sellerProse like the checkout's headline.
+    addOnsTitle: sellerProse({ field: "addOnsTitle", max: PRODUCT_PAGE_ADD_ONS_TITLE_MAX }).optional(),
+    addOnsLayout: z.enum(PRODUCT_PAGE_ADD_ON_LAYOUTS).optional(),
+    addOnsPlacement: z.enum(PRODUCT_PAGE_ADD_ON_PLACEMENTS).optional(),
+    // Absent = the default yellow, so an untouched page never grows a key.
+    starColor: hexColorSchema.optional(),
     showStock: z.boolean(),
     showSeller: z.boolean(),
     allowIndexing: z.boolean(),
@@ -712,6 +758,7 @@ const cardStyleOverridesSchema = z.preprocess((value) => {
   ...priceTagAppearanceFields,
   ...hoverTimingFields,
   ...saleBadgeFields,
+  ...cardExtrasFields,
 }));
 
 /** Focal point + zoom for an image inside a frame. The same bounded ints the
@@ -787,6 +834,12 @@ const textBlockSchema = z.strictObject({
   // Its size on the phone board, when that differs. Never had a legacy form.
   mobileFontSize: z.number().int().min(TEXT_SIZE_MIN).max(TEXT_SIZE_MAX).optional(),
   font: z.enum(STOREFRONT_FONTS).optional(),
+  // Spacing: bounded ints, turned into em and a line-height factor by
+  // textSpacingStyle, so no unit or CSS ever comes from the config.
+  letterSpacing: z.number().int().min(TEXT_LETTER_SPACING_MIN).max(TEXT_LETTER_SPACING_MAX).optional(),
+  lineHeight: z.number().int().min(TEXT_LINE_HEIGHT_MIN).max(TEXT_LINE_HEIGHT_MAX).optional(),
+  blur: blurSchema.optional(),
+  blurDirection: blurDirectionSchema.optional(),
 });
 
 // Decorative shape: allowlisted kind + regex-gated color, nothing free-form.
@@ -800,6 +853,8 @@ const shapeBlockSchema = z.strictObject({
   borderWidth: z.number().int().min(0).max(SHAPE_BORDER_WIDTH_MAX).optional(),
   borderColor: hexColorSchema.optional(),
   opacity: z.number().int().min(0).max(100).optional(),
+  blur: blurSchema.optional(),
+  blurDirection: blurDirectionSchema.optional(),
   // Geometry parameters (bounded ints; resolved through code-defined path
   // generation only), optional for the same back-compat reason.
   roundness: z.number().int().min(0).max(SHAPE_ROUNDNESS_MAX).optional(),
@@ -828,6 +883,8 @@ const imageBlockSchema = z.strictObject({
   fit: z.enum(IMAGE_FITS).optional(),
   imagePlacement: imagePlacementSchema.optional(),
   opacity: z.number().int().min(0).max(100).optional(),
+  blur: blurSchema.optional(),
+  blurDirection: blurDirectionSchema.optional(),
 });
 
 const blockSchema = z.discriminatedUnion("type", [

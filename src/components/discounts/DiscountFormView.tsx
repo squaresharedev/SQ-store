@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { BackLink } from "@/components/ui/BackLink";
 import { DISCOUNTS_PATH } from "@/lib/discounts/paths";
+import type { DiscountSuggestions } from "@/lib/predictions";
 import type { DiscountProductChoice, DiscountView } from "@/types/discount";
 import { DiscountForm } from "./DiscountForm";
 
@@ -13,11 +14,14 @@ export function DiscountFormView({
   discount,
   products,
   chipHref,
+  suggested,
 }: {
   discount: DiscountView | null;
   products: readonly DiscountProductChoice[];
   /** See DiscountForm. */
   chipHref: string | null;
+  /** See DiscountForm. */
+  suggested?: DiscountSuggestions;
 }) {
   const t = useTranslations("Discounts.form");
   return (
@@ -29,7 +33,7 @@ export function DiscountFormView({
       >
         {discount ? t(discount.kind === "code" ? "editCode" : "editSale") : t("newTitle")}
       </h1>
-      <DiscountForm discount={discount} products={products} chipHref={chipHref} />
+      <DiscountForm discount={discount} products={products} chipHref={chipHref} suggested={suggested} />
     </main>
   );
 }

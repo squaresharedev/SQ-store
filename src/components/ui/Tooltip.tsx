@@ -3,7 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
-import { tooltipBubbleClass } from "@/components/ui/control-styles";
+import { tooltipBubbleClass, tooltipHintBubbleClass } from "@/components/ui/control-styles";
 import {
   TipArrow,
   tipBubbleStyle,
@@ -32,14 +32,21 @@ import {
  *
  * Placement, bubble and point are the shared tooltip system (ui/tip-placement
  * + the tooltip tokens in control-styles), so this and the "?" are one thing.
+ *
+ * `hint` makes it a sentence about a control whose text is already on it (a
+ * suggestion saying where its guess came from). Still decorative by the same
+ * rule: give the control that sentence as its `aria-describedby`.
  */
 export function Tooltip({
   label,
+  hint = false,
   children,
   className,
 }: {
   /** The word the icon means. Keep it to a few — it renders on one line. */
   label: string;
+  /** `label` is a sentence: it wraps into a narrow column. */
+  hint?: boolean;
   /** The control it describes. Give it the same text as its `aria-label`. */
   children: React.ReactNode;
   /**
@@ -104,7 +111,7 @@ export function Tooltip({
             aria-hidden="true"
             data-tooltip=""
             style={tipBubbleStyle(placement)}
-            className={cn(tooltipBubbleClass, "whitespace-nowrap")}
+            className={hint ? tooltipHintBubbleClass : cn(tooltipBubbleClass, "whitespace-nowrap")}
           >
             {label}
             <TipArrow placement={placement} />

@@ -104,7 +104,7 @@ export function CheckoutArtboard(props: ChainProps) {
       artboardId={checkoutArtboardId(props.product.id)}
       title={props.product.title}
       kindLabel={t("checkoutLabel")}
-      closeLabel={t("closeCheckoutAriaLabel")}
+      closeLabel={t("closeAriaLabel", { title: props.product.title })}
       onClose={props.onClose}
       widths={props.widths}
       initialDevice={props.initialDevice}
@@ -139,7 +139,7 @@ export function ThanksArtboard(props: ChainProps & { playKey: number }) {
       artboardId={thanksArtboardId(props.product.id)}
       title={props.product.title}
       kindLabel={t("thanksLabel")}
-      closeLabel={t("closeCheckoutAriaLabel")}
+      closeLabel={t("closeAriaLabel", { title: props.product.title })}
       onClose={props.onClose}
       widths={props.widths}
       initialDevice={props.initialDevice}
@@ -207,7 +207,9 @@ export function sampleOrder(
       },
       policy,
     ),
-    // Not yet reviewed, so the seller sees (and can try) the ask a buyer gets.
+    // Not yet reviewed, so the seller sees (and can try) the ask a buyer gets:
+    // on this thank-you, before the goods arrive, the reminder offer.
     review: "open",
+    reviewReminder: { status: "off", dueAt: null },
   };
 }

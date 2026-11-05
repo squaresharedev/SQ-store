@@ -5,9 +5,9 @@
  * A SUMMARY, NEVER A SUBSTITUTE. Every place this renders also links the full
  * Terms (LEGAL_LINKS.terms) and says the full text is what applies. It follows
  * the full document on the marketing site (Home: src/content/legal/terms.ts).
- * When that document changes, update TERMS_LAST_UPDATED and these points, and
- * bump LEGAL_VERSION (lib/settings/constants.ts) so everyone agrees again: an
- * acceptance is only worth something if it names what was accepted.
+ * When that document changes, update these points and add the version to
+ * lib/legal/terms-versions.ts: an acceptance is only worth something if it names
+ * what was accepted.
  *
  * The words live in the catalogue (Settings.legal.termsSummary, English in
  * messages/en/settings.json); this module only fixes their order, and each
@@ -16,10 +16,11 @@
  */
 
 import type { MessageKey } from "@/i18n/types";
+import { LATEST_TERMS_VERSION, termsVersionDate } from "@/lib/legal/terms-versions";
 
 /** The full Terms' own "last updated" date, as an ISO calendar date. Render it
  *  with formatLongCalendarDate (lib/format/calendar.ts). */
-export const TERMS_LAST_UPDATED = "2026-10-11";
+export const TERMS_LAST_UPDATED = termsVersionDate(LATEST_TERMS_VERSION);
 
 export type TermsSummarySection = {
   heading: MessageKey;
@@ -31,6 +32,7 @@ export const TERMS_SUMMARY: readonly TermsSummarySection[] = [
     heading: "Settings.legal.termsSummary.sections.parties.heading",
     points: [
       "Settings.legal.termsSummary.sections.parties.points.merchantOfRecord",
+      "Settings.legal.termsSummary.sections.parties.points.regions",
       "Settings.legal.termsSummary.sections.parties.points.eligibility",
     ],
   },
@@ -74,6 +76,7 @@ export const TERMS_SUMMARY: readonly TermsSummarySection[] = [
       "Settings.legal.termsSummary.sections.liability.points.cap",
       "Settings.legal.termsSummary.sections.liability.points.termination",
       "Settings.legal.termsSummary.sections.liability.points.changesAndLaw",
+      "Settings.legal.termsSummary.sections.liability.points.disputes",
       "Settings.legal.termsSummary.sections.liability.points.policies",
     ],
   },

@@ -17,6 +17,7 @@ import {
   DEFAULT_STOREFRONT_CONFIG,
   DEFAULT_STOREFRONT_HEADER,
   DEFAULT_STOREFRONT_NAME,
+  HEADER_NAME_MAX,
   type StorefrontConfig,
 } from "@/types/storefront";
 import {
@@ -30,7 +31,7 @@ import {
   type ActionFailure,
 } from "@/lib/errors";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
-import { publishBlockedError } from "@/lib/settings/seller-identity";
+import { getSellerIdentity, publishBlockedError } from "@/lib/settings/seller-identity";
 import { precheck, settleAfterWrite } from "@/lib/moderation/auto/check";
 import {
   planLimitError,
@@ -38,6 +39,7 @@ import {
   planLimitKeyOf,
 } from "@/lib/billing/limits";
 import { firstIssue } from "@/lib/validation/messages";
+import { carryOverDesign } from "@/lib/predictions";
 import { msg } from "@/i18n/types";
 import {
   listStorefronts,
@@ -100,9 +102,10 @@ export type DeleteStorefrontResult = { ok: true } | ActionFailure;
 /**
  * Create a storefront and return its id (the caller navigates to it).
  *
- * Nothing is asked first: "Create storefront" makes one with the default look
- * and name, and the seller shapes it in the designer, where every choice is
- * made with the board in view.
+ * Nothing is asked first: "Create storefront" makes one named after the
+ * business and designed like the seller's last one (lib/predictions.ts), or
+ * with the defaults when there is neither, and the seller shapes it in the
+ * designer, where every choice is made with the board in view.
  */
 export async function createStorefront(): Promise<CreateStorefrontResult> {
   const account = await getActiveAccount();
@@ -119,8 +122,13 @@ export async function createStorefront(): Promise<CreateStorefrontResult> {
   const overLimit = await planLimitError(account.accountId, "storefronts", account.userId);
   if (overLimit) return failure(overLimit);
 
-  // A default the seller renames in the designer.
-  const baseName = DEFAULT_STOREFRONT_NAME;
+  // The business's name, which buyers already see as the trader on every page,
+  // or a default the seller renames in the designer. A name too long for the
+  // masthead is left for the seller to shorten rather than cut.
+  const { businessName } = await getSellerIdentity(account.accountId);
+  const ownName = businessName?.trim();
+  const brandName = ownName && ownName.length <= HEADER_NAME_MAX ? ownName : null;
+  const baseName = brandName ?? DEFAULT_STOREFRONT_NAME;
 
   const supabase = await createClient();
 
@@ -142,10 +150,12 @@ export async function createStorefront(): Promise<CreateStorefrontResult> {
   }
 
   // SF-03: Seed the buyer-facing header name from the storefront name so the
-  // two are in sync from the moment the storefront is created.
+  // two are in sync from the moment the storefront is created. A business
+  // name goes on the masthead as it is: the " 2" only tells the seller's own
+  // storefronts apart.
   const initialHeader: typeof DEFAULT_STOREFRONT_HEADER = {
     ...DEFAULT_STOREFRONT_HEADER,
-    name: finalName,
+    name: brandName ?? finalName,
   };
 
   // SF-04: New storefronts allow indexing by default. The constant
@@ -154,6 +164,18 @@ export async function createStorefront(): Promise<CreateStorefrontResult> {
   // silent flip). Only rows created here get the true default.
   const initialProductPage = { ...DEFAULT_PRODUCT_PAGE_CONFIG, allowIndexing: true };
 
+  // A seller's next storefront starts designed like their last one: its look,
+  // product page and checkout. A failed read only costs the head start: it
+  // falls back to the defaults.
+  const { data: latest } = await supabase
+    .from("storefronts")
+    .select("config")
+    .eq("owner_id", account.accountId)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const previous = latest ? parseStoredStorefrontConfig(latest.config) : null;
+
   const insert = {
     owner_id: account.accountId,
     name: finalName,
@@ -161,6 +183,7 @@ export async function createStorefront(): Promise<CreateStorefrontResult> {
       ...DEFAULT_STOREFRONT_CONFIG,
       header: initialHeader,
       productPage: initialProductPage,
+      ...(previous ? carryOverDesign(previous) : {}),
     },
   };
   // Judged before it is stored, so a clean storefront passes the moderation

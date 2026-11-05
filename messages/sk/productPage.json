@@ -29,13 +29,15 @@
     "returns": "Vrátenie tovaru",
     "safety": "Bezpečnosť a zhoda",
     "reviews": "Recenzie",
-    "seller": "Predajca"
+    "seller": "Predajca",
+    "addOns": "Pridať k vašej objednávke"
   },
   "soldBy": "Predáva {seller}",
   "moreDetails": "Viac podrobností",
   "trust": {
     "digitalDelivery": "Dostupné na stiahnutie po nákupe.",
-    "euRights": "14 dní na rozmyslenie a dvojročná zákonná záruka."
+    "euRights": "14 dní na rozmyslenie a dvojročná zákonná záruka.",
+    "euRightsForEu": "Kupujúci z EÚ: 14 dní na rozmyslenie a zákonná záruka na 2 roky."
   },
   "safety": {
     "manufacturer": "Výrobca",
@@ -284,8 +286,33 @@
         "notEligible": "Túto objednávku už nie je možné hodnotiť.",
         "rateLimited": "Z tohto pripojenia prišlo príliš veľa recenzií. Skúste to znova o hodinu.",
         "failed": "Recenziu sa nepodarilo zverejniť. Skúste to znova."
+      },
+      "later": {
+        "title": "{kind, select, parcel {Ohodnoťte, keď zásielka dorazí} other {Ohodnoťte, keď to vyskúšate}}",
+        "body": "Obchod {store} vám môže raz poslať e-mail, {kind, select, parcel {približne týždeň po odoslaní} other {o pár dní}}, s odkazom na hodnotenie tu. Kedykoľvek to môžete zrušiť.",
+        "remind": "Pripomenúť e-mailom",
+        "notYet": "{kind, select, parcel {Ešte nedorazilo?} other {Ešte ste to nevyskúšali?}}",
+        "once": "Obchod {store} vám pošle len jeden e-mail. Kedykoľvek to môžete zrušiť.",
+        "onDate": "Obchod {store} vám pošle pripomenutie okolo {date}.",
+        "onLater": "Obchod {store} vám pošle pripomenutie {kind, select, parcel {približne týždeň po odoslaní} other {o pár dní}}.",
+        "stop": "Neposielať e-mail",
+        "preview": "Toto je ukážka, žiadny e-mail sa neodošle.",
+        "errors": {
+          "closed": "Pre túto objednávku už pripomenutie nastaviť nemožno.",
+          "rateLimited": "Príliš veľa pokusov z tohto pripojenia. Skúste to znova o hodinu.",
+          "failed": "Nepodarilo sa. Skúste to znova."
+        }
+      },
+      "stopDialog": {
+        "title": "Zrušiť pripomenutie?",
+        "body": "Obchod {store} vám nepošle e-mail so žiadosťou o hodnotenie tejto objednávky.",
+        "confirm": "Zrušiť pripomenutie",
+        "doneTitle": "Pripomenutie zrušené",
+        "doneBody": "Už nedostanete žiadne e-maily so žiadosťou o hodnotenie tejto objednávky."
       }
-    }
+    },
+    "lineQuantity": "{quantity} × {title}",
+    "downloadItem": "Stiahnuť {title}"
   },
   "checkout": {
     "metadata": {
@@ -384,7 +411,8 @@
       "invalid": "Niektoré údaje vyžadujú kontrolu. Skontrolujte zvýraznené polia.",
       "discount_invalid": "Tento zľavový kód sa už nedá použiť. Odstráňte ho a zaplaťte plnú cenu.",
       "price_changed": "Cena sa počas otvorenej stránky zmenila, takže nič nebolo účtované. Skontrolujte nový súhrn a zaplaťte.",
-      "turnstile": "Bezpečnostná kontrola neprebehla, takže nič nebolo účtované. Práve beží znova: chvíľu počkajte a skúste to znova."
+      "turnstile": "Bezpečnostná kontrola neprebehla, takže nič nebolo účtované. Práve beží znova: chvíľu počkajte a skúste to znova.",
+      "add_on_unavailable": "Niečo, čo ste pridali, sa už nedá predať s touto objednávkou, takže vám nebolo nič účtované. Skontrolujte objednávku a nový celkový súčet a zaplaťte."
     },
     "editHeadline": "Nadpis pokladne",
     "discount": {
@@ -398,7 +426,12 @@
       "invalid": "Tento kód sa nedá použiť pre túto objednávku.",
       "rateLimited": "Príliš veľa pokusov s kódmi. Chvíľu počkajte a skúste to znova.",
       "line": "Zľava ({code})"
-    }
+    },
+    "addOns": {
+      "label": "Pridané k vašej objednávke",
+      "remove": "Odobrať {title} z tejto objednávky"
+    },
+    "termsAssent": "Objednaním zároveň prijímate <terms>Podmienky</terms> Square Share pre používanie tejto platformy. Samotný nákup je uzatvorený s {seller}."
   },
   "sale": {
     "wasNow": "Bolo {was}, teraz {now}",
@@ -440,5 +473,27 @@
     "filterStars": "{stars, plural, one {Zobraziť recenzie s {stars} hviezdičkou ({count})} few {Zobraziť recenzie s {stars} hviezdičkami ({count})} other {Zobraziť recenzie s {stars} hviezdičkami ({count})}}",
     "showing": "{rating, plural, one {Recenzie s {rating} hviezdičkou} few {Recenzie s {rating} hviezdičkami} other {Recenzie s {rating} hviezdičkami}}",
     "showAll": "Zobraziť všetky recenzie"
+  },
+  "addOns": {
+    "title": "Pridať k vašej objednávke",
+    "add": "Pridať",
+    "added": "Pridané",
+    "optionLabel": "{group} pre {product}",
+    "unset": "Zatiaľ tu nie sú ponúkané žiadne iné produkty. Kliknutím sem ich vyberte.",
+    "addNamed": "Pridať {title} k vašej objednávke",
+    "detailsNamed": "Zobraziť podrobnosti: {title}",
+    "seeDetails": "Podrobnosti",
+    "fullPage": "Zobraziť celú stránku",
+    "addToOrder": "Pridať k vašej objednávke",
+    "removeFromOrder": "Odobrať z vašej objednávky",
+    "rating": "{average} z 5 hviezdičiek, {count, plural, one {# recenzia} few {# recenzie} other {# recenzií}}",
+    "hidden": {
+      "hint": "Kupujúci tento produkt nevidia.",
+      "draft": "Koncept",
+      "soldOut": "Vypredané",
+      "takenDown": "Stiahnuté",
+      "otherKind": "Iný druh",
+      "otherCurrency": "Iná mena"
+    }
   }
 }

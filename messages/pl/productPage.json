@@ -29,13 +29,15 @@
     "returns": "Zwroty",
     "safety": "Bezpieczeństwo i zgodność",
     "reviews": "Opinie",
-    "seller": "Sprzedawca"
+    "seller": "Sprzedawca",
+    "addOns": "Dodaj do swojego zamówienia"
   },
   "soldBy": "Sprzedawca: {seller}",
   "moreDetails": "Więcej szczegółów",
   "trust": {
     "digitalDelivery": "Dostarczane jako plik do pobrania po zakupie.",
-    "euRights": "14 dni na zmianę zdania i 2 lata ochrony na wypadek niezgodności towaru z umową."
+    "euRights": "14 dni na zmianę zdania i 2 lata ochrony na wypadek niezgodności towaru z umową.",
+    "euRightsForEu": "Kupujący z UE: 14 dni na zmianę zdania i 2 lata ochrony z tytułu niezgodności towaru z umową."
   },
   "safety": {
     "manufacturer": "Producent",
@@ -284,8 +286,33 @@
         "notEligible": "Tego zamówienia nie można już ocenić.",
         "rateLimited": "Za dużo opinii z tego połączenia. Spróbuj ponownie za godzinę.",
         "failed": "Nie udało się opublikować opinii. Spróbuj ponownie."
+      },
+      "later": {
+        "title": "{kind, select, parcel {Oceń, gdy przesyłka dotrze} other {Oceń, gdy wypróbujesz}}",
+        "body": "Sklep {store} może wysłać ci jednego e-maila, {kind, select, parcel {mniej więcej tydzień po wysyłce} other {za kilka dni}}, z linkiem do oceny tutaj. Możesz to wyłączyć w każdej chwili.",
+        "remind": "Przypomnij mi e-mailem",
+        "notYet": "{kind, select, parcel {Jeszcze nie dotarło?} other {Jeszcze nie wypróbowane?}}",
+        "once": "Sklep {store} wyśle ci tylko jednego e-maila. Możesz to wyłączyć w każdej chwili.",
+        "onDate": "Sklep {store} wyśle ci przypomnienie około {date}.",
+        "onLater": "Sklep {store} wyśle ci przypomnienie {kind, select, parcel {mniej więcej tydzień po wysyłce} other {za kilka dni}}.",
+        "stop": "Nie wysyłaj mi e-maila",
+        "preview": "To jest podgląd, więc żaden e-mail nie zostanie wysłany.",
+        "errors": {
+          "closed": "Dla tego zamówienia nie można już ustawić przypomnienia.",
+          "rateLimited": "Zbyt wiele prób z tego połączenia. Spróbuj ponownie za godzinę.",
+          "failed": "Nie udało się. Spróbuj ponownie."
+        }
+      },
+      "stopDialog": {
+        "title": "Wyłączyć przypomnienie?",
+        "body": "Sklep {store} nie wyśle ci e-maila z prośbą o ocenę tego zamówienia.",
+        "confirm": "Wyłącz przypomnienie",
+        "doneTitle": "Przypomnienie wyłączone",
+        "doneBody": "Nie dostaniesz już e-maili z prośbą o ocenę tego zamówienia."
       }
-    }
+    },
+    "lineQuantity": "{quantity} × {title}",
+    "downloadItem": "Pobierz {title}"
   },
   "checkout": {
     "metadata": {
@@ -384,7 +411,8 @@
       "invalid": "Niektóre dane wymagają sprawdzenia. Sprawdź wyróżnione pola.",
       "discount_invalid": "Ten kod rabatowy nie może być już użyty. Usuń go, aby zapłacić pełną cenę.",
       "price_changed": "Cena zmieniła się, gdy ta strona była otwarta, więc nic nie zostało pobrane. Sprawdź nową kwotę i zapłać.",
-      "turnstile": "Kontrola bezpieczeństwa nie została ukończona, więc nic nie zostało obciążone. Właśnie uruchamia się ponownie: poczekaj chwilę i spróbuj jeszcze raz."
+      "turnstile": "Kontrola bezpieczeństwa nie została ukończona, więc nic nie zostało obciążone. Właśnie uruchamia się ponownie: poczekaj chwilę i spróbuj jeszcze raz.",
+      "add_on_unavailable": "Coś, co dodałeś, nie może już być sprzedane z tym zamówieniem, więc nic nie zostało obciążone. Sprawdź zamówienie i nową kwotę, a potem zapłać."
     },
     "editHeadline": "Nagłówek kasy",
     "discount": {
@@ -398,7 +426,12 @@
       "invalid": "Ten kod nie może być użyty do tego zamówienia.",
       "rateLimited": "Zbyt wiele prób. Poczekaj chwilę i spróbuj ponownie.",
       "line": "Rabat ({code})"
-    }
+    },
+    "addOns": {
+      "label": "Dodane do twojego zamówienia",
+      "remove": "Usuń {title} z tego zamówienia"
+    },
+    "termsAssent": "Składając zamówienie, akceptujesz również <terms>Warunki korzystania z usługi</terms> Square Share dotyczące korzystania z tej platformy. Sama transakcja zakupu jest z {seller}."
   },
   "sale": {
     "wasNow": "Było {was}, teraz {now}",
@@ -440,5 +473,27 @@
     "filterStars": "{stars, plural, one {Pokaż opinie z {stars} gwiazdką ({count})} few {Pokaż opinie z {stars} gwiazdkami ({count})} many {Pokaż opinie z {stars} gwiazdkami ({count})} other {Pokaż opinie z {stars} gwiazdkami ({count})}}",
     "showing": "{rating, plural, one {Opinie z {rating} gwiazdką} few {Opinie z {rating} gwiazdkami} many {Opinie z {rating} gwiazdkami} other {Opinie z {rating} gwiazdkami}}",
     "showAll": "Pokaż wszystkie opinie"
+  },
+  "addOns": {
+    "title": "Dodaj do swojego zamówienia",
+    "add": "Dodaj",
+    "added": "Dodano",
+    "optionLabel": "{group} dla {product}",
+    "unset": "Nie zaoferowano tu jeszcze żadnych innych produktów. Kliknij tutaj, aby je wybrać.",
+    "addNamed": "Dodaj {title} do swojego zamówienia",
+    "detailsNamed": "Zobacz szczegóły: {title}",
+    "seeDetails": "Szczegóły",
+    "fullPage": "Zobacz całą stronę",
+    "addToOrder": "Dodaj do swojego zamówienia",
+    "removeFromOrder": "Usuń ze swojego zamówienia",
+    "rating": "{average} na 5 gwiazdek, {count, plural, one {# opinia} few {# opinie} many {# opinii} other {# opinii}}",
+    "hidden": {
+      "hint": "Kupujący nie widzą tego produktu.",
+      "draft": "Wersja robocza",
+      "soldOut": "Wyprzedany",
+      "takenDown": "Usunięty",
+      "otherKind": "Inny rodzaj",
+      "otherCurrency": "Inna waluta"
+    }
   }
 }

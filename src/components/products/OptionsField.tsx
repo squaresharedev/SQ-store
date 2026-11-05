@@ -19,9 +19,11 @@ import {
 } from "@/components/ui/control-styles";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { SuggestionButton } from "@/components/ui/SuggestionChip";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Switch } from "@/components/ui/switch";
 import { RowButton } from "./RowButton";
+import { nextOptionValues } from "@/lib/products/option-guesses";
 import {
   OPTION_GROUP_PRESETS,
   addOptions,
@@ -270,6 +272,8 @@ function OptionGroupEditor({
   );
   const full =
     group.options.length >= OPTIONS_PER_GROUP_MAX || totalOptions >= OPTIONS_TOTAL_MAX;
+  // What usually comes next ("S" brings M and L), one tap each.
+  const next = full ? [] : nextOptionValues(group.options.map((option) => option.name));
 
   function commit(names: string[]) {
     if (names.length === 0) return;
@@ -637,6 +641,23 @@ function OptionGroupEditor({
           {t("add")}
         </button>
       </div>
+
+      {next.length > 0 && (
+        <div className="flex flex-wrap gap-2" role="group" aria-label={t("nextOptions")} data-option-next="">
+          {next.map((name) => (
+            <SuggestionButton
+              key={name}
+              icon={Plus}
+              hint={t("nextOptionsHint")}
+              // Not through the box: a value half-typed there stays put.
+              onClick={() => onChange(addOptions(group, [name], () => crypto.randomUUID()))}
+              aria-label={t("addNamed", { name })}
+            >
+              {name}
+            </SuggestionButton>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

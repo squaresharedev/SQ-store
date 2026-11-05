@@ -8,6 +8,7 @@ import { ilikeAny } from "@/lib/supabase/ilike";
 import { isRemovalGround } from "@/lib/moderation/removal";
 import { isReviewSource } from "@/lib/reviews/sources";
 import { isReviewHideReason, isReviewModerationStatus } from "@/lib/reviews/moderation-rules";
+import { REVIEW_EXPORT_PAGE_SIZE } from "@/lib/reviews/limits";
 import type { SellerReviewFilters, SellerReviewSort } from "@/lib/reviews/seller-filters";
 import type { Paginated } from "@/types/pagination";
 import type { RatingSummary, SellerReview } from "@/types/review";
@@ -75,18 +76,18 @@ const SELLER_REVIEW_ORDER: Record<SellerReviewSort, { column: string; ascending:
   ],
 };
 
-/** One page of the store's reviews, narrowed and ordered as asked. Null on a failed read. */
-export async function getSellerReviews(
+/**
+ * The store's reviews in one view, narrowed and ordered as `filters` ask, not
+ * yet paged. The page and the export both read through this, so a file always
+ * holds exactly the reviews the list shows.
+ */
+function sellerReviewView(
+  supabase: Awaited<ReturnType<typeof createClient>>,
   accountId: string,
   filters: SellerReviewFilters,
-  page: number,
-): Promise<SellerReviewList | null> {
-  const supabase = await createClient();
-  const from = (page - 1) * SELLER_REVIEWS_PAGE_SIZE;
-  let list = supabase
-    .from("reviews")
-    .select(SELLER_REVIEW_SELECT, { count: "exact" })
-    .eq("seller_id", accountId);
+  options?: { count: "exact" },
+) {
+  let list = supabase.from("reviews").select(SELLER_REVIEW_SELECT, options).eq("seller_id", accountId);
   if (filters.status === "held") list = list.eq("moderation_status", "held");
   if (filters.status === "hidden") list = list.eq("is_approved", false);
   if (filters.search) list = list.or(ilikeAny(SELLER_REVIEW_SEARCH_COLUMNS, filters.search));
@@ -97,9 +98,20 @@ export async function getSellerReviews(
   for (const { column, ascending } of SELLER_REVIEW_ORDER[filters.sort]) {
     list = list.order(column, { ascending });
   }
+  return list.order("id", { ascending: false });
+}
+
+/** One page of the store's reviews, narrowed and ordered as asked. Null on a failed read. */
+export async function getSellerReviews(
+  accountId: string,
+  filters: SellerReviewFilters,
+  page: number,
+): Promise<SellerReviewList | null> {
+  const supabase = await createClient();
+  const from = (page - 1) * SELLER_REVIEWS_PAGE_SIZE;
 
   const [rows, held] = await Promise.all([
-    list.order("id", { ascending: false }).range(from, from + SELLER_REVIEWS_PAGE_SIZE - 1),
+    sellerReviewView(supabase, accountId, filters, { count: "exact" }).range(from, from + SELLER_REVIEWS_PAGE_SIZE - 1),
     supabase
       .from("reviews")
       .select("id", { count: "exact", head: true })
@@ -121,6 +133,32 @@ export async function getSellerReviews(
     pageSize: SELLER_REVIEWS_PAGE_SIZE,
     held: held.count ?? 0,
   };
+}
+
+/**
+ * Every review in one view, in its order, for the export (lib/reviews/
+ * export.ts): read REVIEW_EXPORT_PAGE_SIZE at a time and only as the consumer
+ * asks, so a file that fills up early stops the reads, and never past `limit`
+ * rows. Photos are not signed: a file has no use for a link that expires.
+ *
+ * THROWS on a failed read, rather than ending early: a file quietly missing
+ * its tail would read as the whole store.
+ */
+export async function* sellerReviewsForExport(
+  accountId: string,
+  filters: SellerReviewFilters,
+  limit: number,
+): AsyncGenerator<SellerReview> {
+  const supabase = await createClient();
+  const noPhotos = new Map<string, string | null>();
+  for (let from = 0; from < limit; from += REVIEW_EXPORT_PAGE_SIZE) {
+    const to = Math.min(from + REVIEW_EXPORT_PAGE_SIZE, limit) - 1;
+    const { data, error } = await sellerReviewView(supabase, accountId, filters).range(from, to);
+    if (error) throw new Error(`Reviews export read failed: ${error.message}`);
+    const rows = data as unknown as SellerReviewRow[];
+    for (const row of rows) yield toSellerReview(row, noPhotos);
+    if (rows.length < to - from + 1) return;
+  }
 }
 
 /** A product the store's reviews can be narrowed to. */

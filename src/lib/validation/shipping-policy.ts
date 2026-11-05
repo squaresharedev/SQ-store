@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { boundedInt, multiLineText, singleLineText, uniqueList } from "@/lib/validation/inputs";
 import { issueKey } from "@/lib/validation/messages";
-import { EU_COUNTRY_CODES, SHIPPING_COUNTRY_CODES } from "@/lib/settings/constants";
+import { OPERATING_COUNTRY_CODES, SHIPPING_COUNTRY_CODES } from "@/lib/settings/constants";
 import {
   DESTINATION_AREA_MAX,
   DESTINATION_COST_MAX,
@@ -66,11 +66,11 @@ const destinationSchema = z.strictObject({
 
 export const shippingPolicySchema = z.strictObject({
   // A country the seller ships FROM, from the same list the tax country uses.
-  // "" is a real answer (not in the EU / prefer not to say) and reaches here
+  // "" is a real answer (prefer not to say) and reaches here
   // as an absent key, so the enum never has to carry a blank member.
   shipsFrom: z
     .string()
-    .refine((code) => (EU_COUNTRY_CODES as readonly string[]).includes(code), {
+    .refine((code) => (OPERATING_COUNTRY_CODES as readonly string[]).includes(code), {
       error: issueKey("Validation.shipping.shipsFromInvalid"),
     })
     .optional(),

@@ -215,12 +215,18 @@ async function emptyTable(
  * was bought, which can outlive the product's current file. True when none are
  * left.
  */
-async function emptyOrderFiles(admin: Admin, userId: string, budget: Budget): Promise<boolean> {
+async function emptyOrderFiles(
+  admin: Admin,
+  userId: string,
+  budget: Budget,
+  // An order's own download, or one its "Add to your order" lines sold.
+  table: "orders" | "order_add_ons" = "orders",
+): Promise<boolean> {
   for (;;) {
     const rows = must(
       "order files",
       await admin
-        .from("orders")
+        .from(table)
         .select("digital_file_key")
         .eq("seller_id", userId)
         .not("digital_file_key", "is", null)
@@ -235,7 +241,7 @@ async function emptyOrderFiles(admin: Admin, userId: string, budget: Budget): Pr
     await forgetChecks(admin, fileSubjects(batchKeys));
     must(
       "order files",
-      await admin.from("orders").update({ digital_file_key: null }).eq("seller_id", userId).in("digital_file_key", batch),
+      await admin.from(table).update({ digital_file_key: null }).eq("seller_id", userId).in("digital_file_key", batch),
     );
     budget.left -= batch.length + 1;
     budget.spent += batch.length + 1;
@@ -269,6 +275,7 @@ async function deleteAccount(
   if (!(await emptyTable(admin, "products", userId, budget))) return "more";
   if (!(await emptyTable(admin, "storefronts", userId, budget))) return "more";
   if (!(await emptyOrderFiles(admin, userId, budget))) return "more";
+  if (!(await emptyOrderFiles(admin, userId, budget, "order_add_ons"))) return "more";
   await removeAvatar(admin, userId);
 
   // Who to tell, and what the content check remembered by name, read while

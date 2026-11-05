@@ -5,6 +5,7 @@ import { buildObjectKey, hasR2Credentials, putObject } from "@/lib/r2";
 import { FONT_CONTENT_TYPES, FONT_MAX_BYTES } from "@/lib/validation/product";
 import { sniffFont } from "@/lib/uploads/sniff";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
+import { isSameOriginRequest } from "@/lib/security/same-origin";
 import { declaredLengthExceeds } from "@/lib/security/read-json";
 
 /**
@@ -30,6 +31,9 @@ function bad(status: number, error: string, fix?: string) {
 
 export async function POST(request: Request) {
   const t = await getTranslations("Errors.uploadRoute");
+  // A multipart POST needs no preflight, so a page on a sibling squareshare.eu
+  // site would arrive with the seller's cookie. Only our own pages upload.
+  if (!isSameOriginRequest(request)) return bad(403, t("permissionDenied"));
   const account = await getActiveAccount();
   if (!account) return bad(401, t("signIn.font"));
   if (!can(account.role, "storefront.write")) {

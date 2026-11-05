@@ -12,6 +12,7 @@ vi.mock("@/lib/email/send", () => ({
 import {
   sendNewOrderEmail,
   sendOrderConfirmation,
+  sendReviewReminder,
   sendShippedEmail,
   sendWithdrawalNotice,
 } from "@/lib/orders/emails";
@@ -241,5 +242,56 @@ describe("discounts in order mail", () => {
       amountCents: 4770,
     });
     expect(sent().text).not.toContain("Discount");
+  });
+});
+
+describe("the buyer's review reminder", () => {
+  const reminder = {
+    productTitle: "Blue mug",
+    quantity: 1,
+    selection: [{ label: "Colour", value: "Blue" }],
+    requestedAt: new Date("2026-10-20T12:00:00Z"),
+    reviewUrl: "https://store.example/s/sf/order/REF?review=write",
+    stopUrl: "https://store.example/s/sf/order/REF?review=stop",
+    unsubscribeUrl: "https://store.example/api/orders/review-reminder/unsubscribe?ref=REF",
+    seller: { businessName: "Harbour Pottery", address: "1 Quay, Galway", country: "IE", email: "hi@harbour.example" },
+    store: { name: "Harbour Pottery", contactEmail: "hi@harbour.example" },
+  };
+
+  it("says the buyer asked for it, and when, and links to the review", async () => {
+    await sendReviewReminder("aoife.byrne@example.test", "en", reminder);
+    const mail = sent();
+    expect(mail.subject).toBe("Your reminder to review Blue mug");
+    expect(mail.text).toContain("On October 20, 2026 you asked Harbour Pottery to remind you");
+    expect(mail.text).toContain("1 × Blue mug\nColour: Blue");
+    expect(mail.text).toContain(`It takes a minute:\n${reminder.reviewUrl}`);
+  });
+
+  it("asks for an honest review and offers nothing for one", async () => {
+    await sendReviewReminder("aoife.byrne@example.test", "en", reminder);
+    const { text } = sent();
+    expect(text).toContain("Every review is welcome, good or bad.");
+    expect(text).not.toMatch(/discount|coupon|voucher|free|5 stars|five stars/i);
+  });
+
+  it("names who sent it and where they are, and carries a way to stop it", async () => {
+    await sendReviewReminder("aoife.byrne@example.test", "en", reminder);
+    const mail = sent();
+    // CASL and CAN-SPAM: the sender's name, postal address and a contact.
+    expect(mail.text).toContain("Sold by\nHarbour Pottery\n1 Quay, Galway\nIreland\nhi@harbour.example");
+    expect(mail.text).toContain(`To stop emails like this: ${reminder.stopUrl}`);
+    expect(mail.unsubscribeUrl).toBe(reminder.unsubscribeUrl);
+    expect(mail.fromName).toBe("Harbour Pottery via Square Share");
+    expect(mail.replyTo).toBe("hi@harbour.example");
+  });
+
+  it("is written in the buyer's language", async () => {
+    await sendReviewReminder("aoife.byrne@example.test", "de", reminder);
+    expect(sent().subject).toBe("Deine Erinnerung: Blue mug bewerten");
+  });
+
+  it("never throws when the mail cannot go", async () => {
+    sendEmailMock.mockRejectedValueOnce(new Error("relay down"));
+    expect(await sendReviewReminder("aoife.byrne@example.test", "en", reminder)).toEqual({ sent: false, reason: "failed" });
   });
 });

@@ -97,7 +97,7 @@ async function openPage(page: Page, storefrontId: string, lamp: string) {
   // so it answers to its label, not to a role.
   await page.getByLabel(/^oak lamp\. press enter/i).click();
   await canvasStill(page);
-  await page.getByRole("button", { name: /^open the product page for oak lamp$/i }).click();
+  await page.getByRole("button", { name: /^open the buyer flow for oak lamp$/i }).click();
   const artboard = page.locator(`[data-artboard-id="${lamp}"]`);
   await expect(artboard).toBeVisible();
   return artboard;
@@ -150,7 +150,7 @@ test.describe("styling the buy button", () => {
     await page.getByRole("button", { name: /^save$/i }).click();
     await expectToast(page, /storefront saved/i, 15_000);
     await page.reload();
-    await page.getByRole("button", { name: /^show the product page$/i }).click();
+    await page.getByRole("button", { name: /^show the product page, checkout and thank-you page$/i }).click();
     const saved = page.locator(`[data-artboard-id="${s.lamp}"] [data-product-cta]`).first();
     await expect(saved).toHaveAttribute("data-cta-fill", "#171717");
     await expect(saved).toHaveAttribute("data-cta-radius", "5");
@@ -200,7 +200,7 @@ test.describe("styling the buy button", () => {
 
     // And the seller's own editor shows what the route wrote.
     await page.reload();
-    await page.getByRole("button", { name: /^show the product page$/i }).click();
+    await page.getByRole("button", { name: /^show the product page, checkout and thank-you page$/i }).click();
     const reread = page.locator(`[data-artboard-id="${s.lamp}"] [data-product-cta]`).first();
     await expect(reread).toHaveAttribute("data-cta-fill", ACCENT);
     await expect(reread.getByText("Order now")).toBeVisible();

@@ -25,8 +25,9 @@ import { StickyBar } from "@/components/product-page/StickyBar";
 import { Turnstile } from "@/components/auth/Turnstile";
 import { useRouter } from "next/navigation";
 import { formatCents } from "@/lib/format/money";
-import { priceOrder } from "@/lib/discounts/pricing";
-import { freeDeliveryGapCents, quoteShipping } from "@/lib/shipping/rates";
+import { priceBasket } from "@/lib/checkout/basket";
+import { freeDeliveryGapCents, quoteOrderShipping } from "@/lib/shipping/rates";
+import { useAddOns } from "@/components/product-page/AddOnsContext";
 import { checkoutApiPath } from "@/lib/checkout/paths";
 import type { LinkChannel } from "@/lib/storefront/product-page-url";
 import { isCourierPhone } from "@/lib/orders/ship-to";
@@ -169,6 +170,7 @@ export function CheckoutForm({
   const formId = useId();
   const { quantity, limit } = useQuantity();
   const { terms: code, setTerms: setCode } = useAppliedCode();
+  const { offered, picks } = useAddOns();
 
   const [values, setValues] = useState<Values>(EMPTY);
   const [country, setCountry] = useState(initialCountry);
@@ -203,20 +205,36 @@ export function CheckoutForm({
   const showRegion = ships && REGION_COUNTRIES.has(country);
   const postcodeRequired = ships && !POSTCODE_OPTIONAL.has(country);
 
-  // The items, priced by the function the quote uses: the sale, or an applied
-  // code when it does better.
-  const priced = priceOrder({
-    regularUnitCents: product.sale?.regularPriceCents ?? product.priceCents,
-    currency: product.currency,
-    quantity,
-    saleUnitCents: product.sale ? product.priceCents : null,
-    code: code?.value ?? null,
+  // The items, priced by the function the quote uses (lib/checkout/basket):
+  // the main product's sale, or an applied code when it does better, plus
+  // whatever was added to the order at its own price.
+  const pickedCards = picks.flatMap((pick) => {
+    const card = offered.find((candidate) => candidate.id === pick.productId);
+    return card ? [card] : [];
   });
-  const subtotal = priced.subtotalCents;
-  const items = priced.itemsCents;
+  const basket = priceBasket({
+    main: {
+      regularUnitCents: product.sale?.regularPriceCents ?? product.priceCents,
+      currency: product.currency,
+      quantity,
+      saleUnitCents: product.sale ? product.priceCents : null,
+      code: code?.value ?? null,
+    },
+    addOns: pickedCards.map((card) => ({
+      productId: card.id,
+      regularUnitCents: card.sale?.regularPriceCents ?? card.priceCents,
+      saleUnitCents: card.sale ? card.priceCents : null,
+      quantity: 1,
+    })),
+  });
+  const priced = basket.main;
+  const addOnsCents = basket.itemsCents - priced.itemsCents;
+  const subtotal = priced.subtotalCents + addOnsCents;
+  const items = basket.itemsCents;
+  // One parcel, charged once: the highest of its products' rates.
   const shipping = ships
-    ? quoteShipping(shippingPolicy, {
-        profileId: product.shippingProfileId,
+    ? quoteOrderShipping(shippingPolicy, {
+        profileIds: [product.shippingProfileId, ...pickedCards.map((card) => card.shippingProfileId)],
         country,
         subtotalCents: items,
         currency: product.currency,
@@ -324,6 +342,9 @@ export function CheckoutForm({
       locale,
       ...(via ? { channel: via } : {}),
       ...(code ? { discountCode: code.code } : {}),
+      // What was added on the product page: ids and versions only. The quote
+      // prices them from the database like everything else here.
+      ...(picks.length > 0 ? { addOns: picks } : {}),
       // The total on the Pay button: the route refuses rather than charge
       // anything else (a sale that ended while the page was open).
       expectedTotalCents: total,
@@ -368,7 +389,9 @@ export function CheckoutForm({
       // the one that will be charged; a changed price is re-read from the
       // server, so the buyer pays the new total only after seeing it.
       if (reason === "discount_invalid") setCode(null);
-      if (reason === "price_changed") router.refresh();
+      // An add-on that can no longer be sold drops out when the page is read
+      // again, and the buyer sees the new total before paying.
+      if (reason === "price_changed" || reason === "add_on_unavailable") router.refresh();
       setFormError(botCheckFailed ? t("errors.turnstile") : messageFor(reason));
     } catch {
       // No answer at all: the request may still have reached the route.

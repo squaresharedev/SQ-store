@@ -127,6 +127,13 @@
       "description": "Hanno diritto al rimborso entro 14 giorni dal recesso. Organizza il reso, poi rimborsa l’ordine.",
       "action": "Vedi i recessi"
     },
+    "restock": {
+      "label": "{count, plural, one {{count} prodotto quasi esaurito} many {{count} prodotti quasi esauriti} other {{count} prodotti quasi esauriti}}",
+      "descriptionSingle": "A questo ritmo «{title}» si esaurisce in circa {days, plural, one {# giorno} many {# giorni} other {# giorni}}.",
+      "descriptionMultiple": "«{title}» finisce per primo, in circa {days, plural, one {# giorno} many {# giorni} other {# giorni}}.",
+      "actionSingle": "Aggiorna le scorte",
+      "actionMultiple": "Controlla le scorte"
+    },
     "checkoutRates": {
       "label": "Imposta i prezzi di consegna",
       "description": "Gli acquirenti non possono completare l’acquisto di un prodotto fisico finché una destinazione non ha sia una tariffa sia un paese.",

@@ -33,6 +33,7 @@ export const PRODUCT_PAGE_SECTION_LABELS: Record<ProductPageSectionId, string> =
   safety: "Safety and compliance",
   reviews: "Reviews",
   seller: "Seller",
+  addOns: "Add to your order",
 };
 
 /**
@@ -59,8 +60,15 @@ export const MANDATORY_PRODUCT_PAGE_SECTION_IDS: readonly ProductPageSectionId[]
  * section a seller could switch, so a config saved before then has no entry
  * for it and must keep showing it: hiding it would take reviews down from
  * every live page that already had them.
+ *
+ * `addOns` is chosen per PRODUCT, in the product form: a seller who picked
+ * add-ons there expects to see them, so the storefront switch starts on and
+ * a product with none simply draws nothing.
  */
-export const PRODUCT_PAGE_SECTIONS_SHOWN_WHEN_UNSET: readonly ProductPageSectionId[] = ["reviews"];
+export const PRODUCT_PAGE_SECTIONS_SHOWN_WHEN_UNSET: readonly ProductPageSectionId[] = [
+  "reviews",
+  "addOns",
+];
 
 /**
  * Every section exactly once, in the FIXED order of PRODUCT_PAGE_SECTION_IDS.
@@ -156,7 +164,33 @@ export function compactText<T extends Record<string, string | undefined>>(
   return Object.keys(compact).length > 0 ? (compact as T) : undefined;
 }
 
-/** EU sellers owe buyers the statutory withdrawal and conformity lines. */
+/** A seller who said they are based in the EU. */
 export function isEuSeller(seller: StorefrontSeller | undefined): boolean {
   return Boolean(seller?.country) && (EU_COUNTRY_CODES as string[]).includes(seller!.country!);
+}
+
+/**
+ * Whether a buyer of this product may be owed the EU's 14 days and 2-year
+ * guarantee, so the page has to say so before they pay.
+ *
+ * Those rights follow the BUYER, wherever the seller is based. So they are
+ * withheld only where no EU buyer can be reached: a seller outside the EU, who
+ * told us so, selling goods they deliver only outside it.
+ */
+export function mayOweEuRights(
+  seller: StorefrontSeller | undefined,
+  sale: { isDigital: boolean; reach: { codes: readonly string[]; anywhere: boolean } },
+): boolean {
+  if (isEuSeller(seller) || !seller?.country) return true;
+  if (sale.isDigital || sale.reach.anywhere) return true;
+  return sale.reach.codes.some((code) => (EU_COUNTRY_CODES as string[]).includes(code));
+}
+
+/** The same question for a placed order, where the delivery country is known. */
+export function orderOwesEuRights(
+  seller: StorefrontSeller | undefined,
+  order: { isDigital: boolean; shipToCountry: string | null },
+): boolean {
+  if (isEuSeller(seller) || order.isDigital || !order.shipToCountry) return true;
+  return (EU_COUNTRY_CODES as string[]).includes(order.shipToCountry);
 }

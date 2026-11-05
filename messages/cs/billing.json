@@ -33,7 +33,8 @@
     "unavailable": "Plány se teď nedají zobrazit. Za chvíli stránku obnovte.",
     "yearlyFree": "{count, plural, one {# měsíc zdarma} few {# měsíce zdarma} many {# měsíce zdarma} other {# měsíců zdarma}}",
     "launchNote": "Úvodní cena je zvýhodněná cena na začátku: běžná cena je ta přeškrtnutá.",
-    "grantTitle": "{plan} je na naše náklady"
+    "grantTitle": "{plan} je na naše náklady",
+    "autoRenew": "Placené plány se automaticky obnovují každý měsíc za zobrazenou cenu, dokud je nezrušíte."
   },
   "card": {
     "perMonth": "/ měsíc",
@@ -65,6 +66,7 @@
     "earlyAccess": "Předběžný přístup k novým funkcím",
     "prioritySupport": "Prioritní podpora: vaše zprávy vyřídíme jako první",
     "analyticsExport": "Stahování reportů analytiky (CSV)",
+    "aiSuggestions": "Pomoc AI s psaním, s kreditem {credit} měsíčně",
     "products": "{count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktů}}",
     "productsUnlimited": "Neomezený počet produktů"
   },
@@ -87,6 +89,7 @@
     "unlimited": "Neomezeně",
     "included": "V ceně",
     "notIncluded": "Není v ceně",
+    "aiCredit": "kredit {credit} měsíčně",
     "rows": {
       "fee": "Poplatek za prodej",
       "storefronts": "Výlohy",
@@ -105,7 +108,8 @@
       "roles": "Role v týmu",
       "analytics": "Analytika",
       "analyticsExport": "Reporty analytiky (CSV)",
-      "productImport": "Import produktů (CSV)"
+      "productImport": "Import produktů (CSV)",
+      "aiSuggestions": "Pomoc AI s psaním"
     },
     "groups": {
       "selling": "Prodej",
@@ -206,6 +210,24 @@
     "grantLine": "Na naše náklady: Square Share daroval vašemu obchodu tento plán.",
     "grantUntil": "Do {date}. Až skončí, nic se neodstraní.",
     "grantNoEnd": "Bez data ukončení."
+  },
+  "ai": {
+    "title": "Pomoc AI s psaním",
+    "description": "Návrhy popisů, úpravy a další slova při psaní, z údajů, které zadáte. Žádná vlastní tvrzení nepřidává.",
+    "creditUsed": "Tento měsíc využito {used} z {allowance}",
+    "creditRenews": "Obnoví se {date}",
+    "creditNote": "Jeden návrh stojí zlomek centu.",
+    "creditSpent": "Kredit na tento měsíc je vyčerpaný. Pomoc AI s psaním bude znovu k dispozici {date}.",
+    "creditUnreadable": "Kredit na AI teď nelze načíst. Zkuste to za chvíli znovu.",
+    "asYouTypeLabel": "Navrhovat další slova při psaní",
+    "asYouTypeHelp": "Při psaní popisu produktu se zobrazí šedý text: Tab ho vloží, Esc ho skryje. Toto nastavení platí jen pro vás, ne pro celý tým.",
+    "abilities": {
+      "asYouType": "Navrhuje další slova, když píšete popis",
+      "write": "Napíše první verzi z údajů, které jste zadali",
+      "improve": "Učeše popis, který jste napsali, a zachová všechna fakta"
+    },
+    "upsellCta": "Zobrazit Pro",
+    "upsellCredit": "Kredit na AI {credit} měsíčně v ceně"
   },
   "cancel": {
     "title": "Zrušit plán {plan}?",

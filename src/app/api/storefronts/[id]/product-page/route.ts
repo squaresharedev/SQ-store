@@ -4,6 +4,7 @@ import { isDefaultProductPage, resolveProductPage } from "@/lib/storefront/produ
 import { productPageSchema } from "@/lib/validation/storefront";
 import {
   PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX,
+  PRODUCT_PAGE_ADD_ONS_TITLE_MAX,
   PRODUCT_PAGE_CTA_MAX,
   PRODUCT_PAGE_CTA_RADIUS_MAX,
   type StorefrontConfig,
@@ -67,6 +68,7 @@ function payload(storefrontId: string, config: StorefrontConfig) {
       ctaLabelMax: PRODUCT_PAGE_CTA_MAX,
       ctaRadiusMax: PRODUCT_PAGE_CTA_RADIUS_MAX,
       ctaBorderWidthMax: PRODUCT_PAGE_CTA_BORDER_WIDTH_MAX,
+      addOnsTitleMax: PRODUCT_PAGE_ADD_ONS_TITLE_MAX,
     },
   };
 }

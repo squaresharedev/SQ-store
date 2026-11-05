@@ -40,7 +40,7 @@
     "formLoading": "Het productformulier laden",
     "importReviews": {
       "heading": "Reviews importeren",
-      "description": "Haal je reviews op uit Judge.me, Loox, Yotpo of Shopify Product Reviews. Exporteer ze daar als CSV, zet het bestand hier neer en controleer bij welk product elke review hoort voordat er iets wordt opgeslagen."
+      "description": "Haal je reviews op uit Judge.me, Loox, Yotpo of Shopify Product Reviews."
     }
   },
   "emptyState": {
@@ -300,6 +300,11 @@
         "label": "Badges",
         "description": "Een paar woorden op de productpagina: een reden om je te vertrouwen, of iets wat meteen opvalt. Kies een kant-en-klare badge of schrijf je eigen, geef het pictogram een kleur en zet hem naast het product of op de foto.",
         "about": "Waar Badges voor is"
+      },
+      "addOns": {
+        "label": "Toevoegen aan bestelling",
+        "description": "Andere producten van jou die kopers met één tik kunnen toevoegen, vlak boven Nu kopen. Alleen producten van dezelfde soort en valuta staan hier, zodat het één bestelling blijft.",
+        "about": "Waar Toevoegen aan bestelling voor is"
       }
     },
     "summary": {
@@ -327,7 +332,8 @@
       "active": "Actief",
       "draft": "Concept",
       "badges": "{count, plural, one {{count} badge} other {{count} badges}}",
-      "physical": "Fysiek"
+      "physical": "Fysiek",
+      "addOns": "{count, plural, one {{count} product} other {{count} producten}}"
     },
     "errors": {
       "titleRequired": "Geef je product een titel, kopers zien die als eerste.",
@@ -363,6 +369,23 @@
     "description": "Beschrijving",
     "optional": "(optioneel)",
     "descriptionPlaceholder": "Wat is het, en wat krijgt de koper?",
+    "ai": {
+      "write": "Schrijven met AI",
+      "improve": "Verbeteren met AI",
+      "writing": "Bezig met schrijven…",
+      "written": "Geschreven door AI",
+      "improved": "Verbeterd door AI",
+      "writeHint": "AI schrijft de beschrijving op basis van wat je hebt ingevuld en voegt zelf niets toe. Controleer de tekst voordat je opslaat.",
+      "improveHint": "AI herschrijft je tekst zodat die duidelijker leest en houdt alle gegevens aan. Controleer de tekst voordat je opslaat.",
+      "asYouTypeIdle": "AI stelt de volgende woorden voor terwijl je typt.",
+      "asYouTypeOffered": "voegt de grijze tekst toe. Esc verbergt hem.",
+      "asYouTypeAccept": "Voorgestelde woorden toevoegen",
+      "asYouTypeAnnounce": "Suggestie:",
+      "asYouTypeTurnOff": "Uitzetten",
+      "asYouTypeOff": "Suggesties tijdens het typen staan uit. Je zet ze weer aan in Instellingen, onder Abonnement en facturering.",
+      "upsellHint": "Zit in Pro: AI schrijft en vult beschrijvingen aan op basis van je gegevens. De abonnementen openen in een nieuw tabblad.",
+      "upsellBadge": "Pro"
+    },
     "displayImage": "Hoofdafbeelding",
     "displayImageAbout": "Waar de hoofdafbeelding wordt gebruikt",
     "displayImageHelp": "Wordt getoond in je etalage en in insluitingen.",
@@ -530,6 +553,14 @@
     "addFirst": "Verkocht in meer dan één variant?",
     "addAnother": "Nog een manier toevoegen waarop het varieert",
     "somethingElse": "Iets anders",
+    "guessSizes": "Maten {first} tot {last}",
+    "guessSizesAny": "Maten",
+    "nextOptions": "Waarschijnlijke volgende opties",
+    "addNamed": "{name} toevoegen",
+    "sameAsHint": "Neemt de opties, specificaties en fabrikantgegevens van {title} over in de onderdelen die je nog niet hebt ingevuld.",
+    "guessSizesHint": "De titel klinkt als kleding, dus worden de gangbare maten toegevoegd. Haal weg wat je niet verkoopt.",
+    "guessSizesAnyHint": "De titel klinkt als iets dat in maten wordt verkocht, dus wordt de optie Maat toegevoegd om zelf in te vullen.",
+    "nextOptionsHint": "Afgeleid van de opties die je tot nu toe hebt toegevoegd.",
     "groupsFull": "{max, plural, one {Dat is de maximale {max} optiegroep.} other {Dat zijn alle {max} optiegroepen.}}",
     "optionsFull": "{max, plural, one {Dat is de maximale {max} optie.} other {Dat zijn alle {max} opties.}}",
     "whatVaries": "Wat varieert",
@@ -1053,12 +1084,8 @@
       "product": "product",
       "status": "status"
     },
-    "summary": "{ready, plural, one {<count>{ready}</count> review klaar} other {<count>{ready}</count> reviews klaar}}{skipped, plural, =0 {.} other {, {skipped} weggelaten.}}",
-    "hiddenRows": "{count, plural, one {{count} review was verborgen of als spam gemarkeerd in je oude winkel en wordt weggelaten.} other {{count} reviews waren verborgen of als spam gemarkeerd in je oude winkel en worden weggelaten.}}",
-    "droppedRows": "{count, plural, one {{count} review valt buiten de {max} die een bestand kan bevatten en wordt weggelaten.} other {{count} reviews vallen buiten de {max} die een bestand kan bevatten en worden weggelaten.}}",
     "source": "Geïmporteerd uit",
     "sourceUnknown": "Kies de app",
-    "sourceHelp": "Wordt bij elke review getoond, zodat kopers weten waar hij eerst is geschreven.",
     "sources": {
       "judgeme": "Judge.me",
       "loox": "Loox",
@@ -1067,17 +1094,10 @@
     },
     "mappingHeading": "Producten koppelen",
     "mappingHelp": "Elk product in het bestand, en het product hier waar de reviews bij horen. Waar mogelijk op naam gekoppeld. Alles op “Niet importeren” wordt weggelaten.",
-    "mappingFileProduct": "In het bestand",
-    "mappingReviews": "Reviews",
-    "mappingProduct": "Product hier",
     "mappingSelect": "Product voor {key}",
     "skipProduct": "Niet importeren",
-    "skippedHeading": "Rijen die worden weggelaten",
     "skippedRow": "Regel {line}: {problem}",
     "run": "{count, plural, one {{count} review importeren} other {{count} reviews importeren}}",
-    "imported": "{count, plural, one {{count} review is geïmporteerd.} other {{count} reviews zijn geïmporteerd.}}",
-    "duplicates": "{count, plural, one {{count} stond er al.} other {{count} stonden er al.}}",
-    "skippedRows": "{count, plural, one {{count} rij is weggelaten.} other {{count} rijen zijn weggelaten.}}",
     "errors": {
       "rateLimited": "Te veel imports in het afgelopen uur. Probeer het later opnieuw.",
       "tooLarge": "Dat bestand is te groot om te importeren.",
@@ -1094,6 +1114,39 @@
         "b": "“In het echt nog mooier.”",
         "c": "“Snel geleverd en goed verpakt.”"
       }
+    },
+    "tally": {
+      "toImport": "Te importeren",
+      "imported": "Geïmporteerd",
+      "already": "Staat er al",
+      "leftOut": "Weggelaten"
+    },
+    "alreadyNote": "{count, plural, one {{count} review uit dit bestand staat er al, dus die wordt niet dubbel toegevoegd.} other {{count} reviews uit dit bestand staan er al, dus die worden niet dubbel toegevoegd.}}",
+    "sourceTip": "Over geïmporteerde reviews",
+    "mappingTip": "Hoe producten worden gekoppeld",
+    "reviewCount": "{count, plural, one {{count} review} other {{count} reviews}}",
+    "keyAlready": "{count, plural, one {{count} staat er al} other {{count} staan er al}}",
+    "leftOutSummary": "{count, plural, one {Waarom {count} review wordt weggelaten} other {Waarom {count} reviews worden weggelaten}}",
+    "leftOutUnmatched": "{count, plural, one {{count} voor een product op “Niet importeren”} other {{count} voor producten op “Niet importeren”}}",
+    "leftOutHidden": "{count, plural, one {{count} verborgen of als spam gemarkeerd in je oude winkel} other {{count} verborgen of als spam gemarkeerd in je oude winkel}}",
+    "leftOutDropped": "{count, plural, one {{count} boven de {max} die een bestand kan bevatten} other {{count} boven de {max} die een bestand kan bevatten}}",
+    "leftOutProblems": "{count, plural, one {{count} rij die niet te lezen is:} other {{count} rijen die niet te lezen zijn:}}",
+    "nothingNew": "Niets nieuws om te importeren",
+    "done": {
+      "title": "{count, plural, one {{count} review geïmporteerd} other {{count} reviews geïmporteerd}}",
+      "body": "Ze verschijnen op je productpagina’s zodra onze automatische controle ze heeft gelezen.",
+      "already": "{count, plural, one {{count} stond er al, dus die is niet dubbel toegevoegd.} other {{count} stonden er al, dus die zijn niet dubbel toegevoegd.}}",
+      "nothingTitle": "Niets dubbel toegevoegd",
+      "nothingBody": "{count, plural, one {{count} review uit dit bestand stond er al.} other {{count} reviews uit dit bestand stonden er al.}}",
+      "seeReviews": "Reviews bekijken",
+      "another": "Nog een bestand importeren"
+    },
+    "squareShare": {
+      "label": "Een Square Share-export",
+      "tipLabel": "Over Square Share-exports",
+      "tip": "We hebben dit bestand per review vergeleken, niet per app. Reviews die al in deze winkel staan blijven zoals ze zijn en niets wordt dubbel toegevoegd. Reviews uit een andere winkel kun je niet met een export overzetten.",
+      "leftOut": "{count, plural, one {{count} staat niet in deze winkel: een export kan deze niet toevoegen} other {{count} staan niet in deze winkel: een export kan deze niet toevoegen}}",
+      "checkFailed": "We konden dit bestand niet met je reviews vergelijken. Er is niets gewijzigd. Probeer het over een moment opnieuw."
     }
   },
   "reviewModeration": {
@@ -1219,6 +1272,42 @@
     "emptyFiltered": {
       "title": "Geen reviews gevonden",
       "body": "Probeer andere woorden of een ander filter, of wis de filters om alle reviews te zien."
+    },
+    "export": {
+      "hint": "Downloadt de reviews in deze weergave als CSV-bestand.",
+      "empty": "Er zijn geen reviews in deze weergave om te exporteren.",
+      "truncated": "{count, plural, one {Het bestand bevat de eerste review van deze weergave.} other {Het bestand bevat de eerste # reviews van deze weergave.}} Filter de lijst op product of beoordeling om de rest te exporteren.",
+      "fileName": "reviews.csv"
+    }
+  },
+  "addOnsField": {
+    "listLabel": "Je andere producten",
+    "count": "{count} van {max} gekozen",
+    "add": "{title} toevoegen",
+    "draft": "Concept",
+    "draftHint": "Kopers zien het zodra het actief is.",
+    "remove": "{title} verwijderen",
+    "none": "Je hebt nog geen andere producten. Voeg er eerst een ander toe, dan kun je het hier aanbieden.",
+    "notPosted": "Niet aangeboden: het is een download",
+    "notADownload": "Niet aangeboden: het is fysiek",
+    "search": "Zoek in je producten",
+    "noMatch": "Geen product komt daarmee overeen.",
+    "noneFit": "Geen van je andere producten kan in dezelfde bestelling als dit product. Een bestelling heeft één soort (verzending of download) en één valuta.",
+    "otherCurrency": "Niet aangeboden: prijs in {currency}",
+    "previewLabel": "Wat kopers zien",
+    "soldOutHint": "Kopers zien het zodra het weer op voorraad is.",
+    "takenDown": "Verwijderd",
+    "takenDownHint": "Kopers zien het niet zolang het verwijderd is.",
+    "ownBuyLink": "Nu kopen gaat bij dit product naar je eigen link, dus kopers zien dit onderdeel niet. Verwijder de link om het te gebruiken.",
+    "suggestion": {
+      "boughtWith": {
+        "label": "Vaak samen gekocht: {titles}",
+        "hint": "Kopers van dit product kochten ook {titles}. {count, plural, one {Eén tik zet het in deze lijst.} other {Eén tik zet ze in deze lijst.}}"
+      },
+      "offeredWith": {
+        "label": "Voeg je vaak toe: {titles}",
+        "hint": "Je biedt {titles} aan bij meerdere van je andere producten. {count, plural, one {Eén tik zet het ook hier.} other {Eén tik zet ze ook hier.}}"
+      }
     }
   }
 }

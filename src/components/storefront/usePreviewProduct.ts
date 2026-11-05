@@ -5,7 +5,7 @@ import { deriveStockBadge } from "@/lib/stock/badge";
 import { publicQuantityLimit } from "@/lib/products/quantity";
 import { getProductPagePreviewData } from "@/lib/products/preview-actions";
 import { useSampleMode } from "@/lib/storefront/sample-mode";
-import type { Product, ProductPageProduct } from "@/types/product";
+import type { AddOnCard, HiddenAddOn, Product, ProductPageProduct } from "@/types/product";
 
 type PreviewResult = Awaited<ReturnType<typeof getProductPagePreviewData>>;
 
@@ -60,6 +60,38 @@ export function usePreviewProduct(product: Product, showStock: boolean, soldOut:
   }, [product.id, showStock, sample]);
 
   return withLiveSoldOut(loaded ?? fromCatalogRow(product, showStock), soldOut);
+}
+
+/** What "Add to your order" holds for one product: what a buyer is offered,
+ *  and what was chosen but is not (drawn faded for the seller). */
+export type PreviewAddOns = { cards: AddOnCard[]; hidden: HiddenAddOn[] };
+
+const NO_ADD_ONS: PreviewAddOns = { cards: [], hidden: [] };
+
+/**
+ * The "Add to your order" cards a buyer would be offered beside this product,
+ * and the chosen ones they would not, from the same preview load as
+ * usePreviewProduct (one request between them). None until it answers, and
+ * none in sample mode, whose products exist only in code.
+ */
+export function usePreviewAddOns(productId: string, showStock: boolean): PreviewAddOns {
+  const [loaded, setLoaded] = useState<{ id: string; addOns: PreviewAddOns } | null>(null);
+  const sample = useSampleMode();
+  useEffect(() => {
+    if (sample) return;
+    let cancelled = false;
+    loadPreview(productId, showStock)
+      .then((result) => {
+        if (!cancelled && result.ok) {
+          setLoaded({ id: productId, addOns: { cards: result.addOns, hidden: result.hidden } });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [productId, showStock, sample]);
+  return loaded?.id === productId ? loaded.addOns : NO_ADD_ONS;
 }
 
 /** A faithful first frame from the catalogue row alone: no gallery, no

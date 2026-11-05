@@ -23,6 +23,7 @@ import {
 } from "@/lib/errors";
 import { publishBlockedError } from "@/lib/settings/seller-identity";
 import { precheck, settleAfterWrite, type AutoOutcome } from "@/lib/moderation/auto/check";
+import { addOnRefusal } from "@/lib/products/add-on-refusal";
 import { badgeRefusal } from "@/lib/products/badge-moderation";
 import { countToShipForProduct } from "@/lib/orders/queries";
 import { planLimitError, planLimitErrorFromTrigger, planLimitKeyOf } from "@/lib/billing/limits";
@@ -374,6 +375,10 @@ export async function createProduct(
   const badgeProblem = await badgeRefusal(badgeLabels(data));
   if (badgeProblem) return failure(badgeProblem);
 
+  const supabase = await createClient();
+  const addOnProblem = await addOnRefusal(supabase, account.accountId, data.addOnIds, null);
+  if (addOnProblem) return failure(addOnProblem);
+
   const insert: TablesInsert<"products"> = {
     owner_id: account.accountId,
     title: data.title,
@@ -398,13 +403,13 @@ export async function createProduct(
     documents: toJson(data.documents ?? []),
     purchase_url: data.purchaseUrl ?? null,
     shipping_profile_id: data.shippingProfileId ?? null,
+    add_on_ids: data.addOnIds ?? [],
   };
 
   // The words and photos are judged before they are stored, so a clean
   // listing passes the moderation wall as it is written (lib/moderation/auto).
   await precheck("product", null, insert);
 
-  const supabase = await createClient();
   const { data: row, error } = await supabase
     .from("products")
     .insert(insert)
@@ -498,6 +503,8 @@ export async function updateProduct(
   if (!verified.ok) return failure(verified.error);
   const badgeProblem = await badgeRefusal(badgeLabels(data));
   if (badgeProblem) return failure(badgeProblem);
+  const addOnProblem = await addOnRefusal(supabase, account.accountId, data.addOnIds, id);
+  if (addOnProblem) return failure(addOnProblem);
 
   const update: TablesUpdate<"products"> = {
     title: data.title,
@@ -517,6 +524,7 @@ export async function updateProduct(
   if (data.shippingProfileId !== undefined) {
     update.shipping_profile_id = data.shippingProfileId;
   }
+  if (data.addOnIds !== undefined) update.add_on_ids = data.addOnIds;
   // Three-state stock columns: only written when the field was explicitly
   // included in the payload (undefined = leave the stored value untouched).
   if (data.trackStock !== undefined) {
@@ -666,11 +674,14 @@ async function fileStillSold(
   key: string | null,
 ): Promise<boolean> {
   if (!key) return false;
-  const { count, error } = await supabase
-    .from("orders")
-    .select("id", { count: "exact", head: true })
-    .eq("digital_file_key", key);
-  return Boolean(error) || (count ?? 0) > 0;
+  // An order's own download, or one sold as an "Add to your order" line.
+  const [orders, addOns] = await Promise.all([
+    supabase.from("orders").select("id", { count: "exact", head: true }).eq("digital_file_key", key),
+    supabase.from("order_add_ons").select("id", { count: "exact", head: true }).eq("digital_file_key", key),
+  ]);
+  return (
+    Boolean(orders.error || addOns.error) || (orders.count ?? 0) > 0 || (addOns.count ?? 0) > 0
+  );
 }
 
 /** Best-effort R2 cleanup — storage cleanup never fails the parent operation. */

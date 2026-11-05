@@ -20,7 +20,7 @@ import {
   weekdayLabels,
 } from "@/lib/format/calendar";
 import { formatFixed, formatList, formatPercent } from "@/lib/format/intl";
-import { countryName, euCountries } from "@/lib/format/country";
+import { countryName, operatingCountries } from "@/lib/format/country";
 import { compactNumber, formatNumber, formatShare } from "@/components/charts/format";
 import { moneyCompact, moneyExact } from "@/components/analytics/chart-format";
 import { formatBucketLabel, formatWeekdayLabel } from "@/lib/analytics/buckets";
@@ -169,7 +169,10 @@ describe("country names", () => {
   it("keeps the English list's own names", () => {
     expect(countryName("CZ", "en")).toBe("Czechia");
     expect(countryName("ZZ", "en")).toBeNull();
-    expect(euCountries("en")[0]).toEqual({ code: "AT", name: "Austria" });
+    expect(operatingCountries("en")[0]).toEqual({ code: "AT", name: "Austria" });
+    expect(operatingCountries("en").map((country) => country.code)).toEqual(
+      expect.arrayContaining(["US", "CA"]),
+    );
   });
 
   it("names countries in the reader's language", () => {

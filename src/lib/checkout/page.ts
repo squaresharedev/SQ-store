@@ -18,6 +18,9 @@ import { PAGE_BUSY, type PageBusy } from "@/lib/public/busy";
 import { buildProductPageProduct, gatePricing } from "@/lib/products/public";
 import { checkoutAvailableFor } from "@/lib/checkout/availability";
 import { resolveCheckoutPage } from "@/lib/storefront/checkout-page";
+import { isProductPageSectionShown } from "@/lib/storefront/product-page";
+import { loadAddOnCards } from "@/lib/products/add-ons";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { CheckoutPageData } from "@/types/checkout";
 
 export type CheckoutPageResult = {
@@ -37,10 +40,23 @@ export const getCheckoutPage = cache(
     const { config, productPage, block, row, seller, shippingPolicy } = gate;
 
     const product = await buildProductPageProduct(row, {
-      soldOutFlag: block.soldOut,
+      soldOutFlag: block?.soldOut,
       showStock: productPage.showStock,
       pricing: await gatePricing(gate),
     });
+    // The add-ons the product page offered, read by the same rules. Which of
+    // them are in this order is the route's `?a=`, limited to these.
+    const addOns =
+      isProductPageSectionShown(productPage, "addOns") && !product.soldOut
+        ? await loadAddOnCards(createAdminClient(), {
+            ownerId: gate.ownerId,
+            ids: row.add_on_ids,
+            isDigital: product.isDigital,
+            currency: product.currency,
+            now: gate.now,
+            unreadableSales: "busy",
+          })
+        : [];
 
     const theme = config.theme;
     const backgroundImageUrl =
@@ -66,6 +82,7 @@ export const getCheckoutPage = cache(
           checkout: true,
         },
         product,
+        ...(addOns.length > 0 ? { addOns } : {}),
       },
       ownerId: gate.ownerId,
     };

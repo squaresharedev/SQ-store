@@ -38,6 +38,14 @@ inside the E2E stack) holds 4–6 GB; the `unit` Vitest project peaks near 5 GB.
 - `.next*/dev` is cleared automatically past 3 GB (`scripts/trim-next-cache.ts`);
   never commit or copy it around.
 
+## Changing the Terms of Service
+
+Never edit a published version and never pick a date. Follow
+`docs/changing-the-terms.md`: a new version file on Home, a new entry in
+`src/lib/legal/terms-versions.ts`, then the daily job emails everyone and the 30
+days run from the last email. Home's build, a Store test and a database rule each
+refuse the shortcuts.
+
 ## Task tracking (Teamster via Operator MCP)
 
 **The default is NOT to create a task.** The board is a record of things worth

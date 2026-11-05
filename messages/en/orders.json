@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} order} other {{total} orders}} · page {page} of {totalPages}",
     "detailDialog": "Order details",
     "closeDetail": "Close order details",
-    "withdrawn": "Withdrawn"
+    "withdrawn": "Withdrawn",
+    "moreItems": "+{count} more"
   },
   "table": {
     "product": "Product",
@@ -150,7 +151,8 @@
     "discount": "Discount",
     "discountSale": "Sale, {amount} off",
     "discountCode": "Code {code}, {amount} off",
-    "discountCodeOutdone": "Code {code} used, but the sale price was lower"
+    "discountCodeOutdone": "Code {code} used, but the sale price was lower",
+    "alsoBought": "Also in this order"
   },
   "actions": {
     "disputeInStripe": "The buyer's bank opened a dispute. Answer it in your Stripe dashboard before its deadline.",
@@ -296,12 +298,16 @@
       "subject": "Your order link for {store}",
       "intro": "Here is the link to your page for order {number} with {store}:",
       "ignore": "If you didn't ask for this, you can ignore this email."
+    },
+    "reviewReminder": {
+      "subject": "Your reminder to review {title}",
+      "intro": "On {date} you asked {store} to remind you to review your order once you had it. Here is that reminder.",
+      "write": "Tell other buyers what you think. It takes a minute:\n{url}",
+      "how": "Your review is shown on the product page with the name you choose, marked as from a verified buyer. Your email address and your order stay private. Every review is welcome, good or bad.",
+      "once": "This is the only reminder about this order. To stop emails like this: {url}"
     }
   },
   "export": {
-    "button": "Export CSV",
-    "preparing": "Preparing file",
-    "failed": "The export didn't download. Try again in a moment.",
     "truncated": "The file holds your newest {count, number} orders.",
     "lockedTitle": "Exporting orders comes with {plan} and above.",
     "fileName": "orders.csv"

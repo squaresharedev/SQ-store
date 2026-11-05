@@ -5,6 +5,7 @@ import {
   type SectionSpec,
 } from "@/lib/search/catalog";
 import {
+  BLOCK_SETTINGS,
   CHECKOUT_PAGE_SETTINGS,
   GROUP_SUBTITLES,
   PRODUCT_PAGE_SETTINGS,
@@ -268,6 +269,7 @@ function panelEntries(t: KeyTranslator): EditorSearchEntry[] {
 type StaticRows = {
   sections: SectionSpec[];
   settings: EditorSearchEntry[];
+  blockSettings: EditorSearchEntry[];
   productPage: EditorSearchEntry[];
   openPage: EditorSearchEntry;
   checkoutPage: EditorSearchEntry[];
@@ -283,6 +285,7 @@ function staticRows(t: KeyTranslator): StaticRows {
   const rows: StaticRows = {
     sections: sections(t),
     settings: settingRows(STOREFRONT_ONLY_SETTINGS, t),
+    blockSettings: settingRows(BLOCK_SETTINGS, t),
     productPage: settingRows(PRODUCT_PAGE_SETTINGS, t),
     openPage: openPageEntry(t),
     checkoutPage: settingRows(CHECKOUT_PAGE_SETTINGS, t),
@@ -335,9 +338,18 @@ export function editorEntries(
   options: { pageOpen?: boolean; checkoutOpen?: boolean } = {},
 ): EditorSearchEntry[] {
   const rows = staticRows(t);
+  // A block's own setting only while the board holds a block that has it:
+  // "line height" with no text on the board has nothing to open.
+  const kinds = new Set<string>(blocks.map((block) => block.type));
   return [
     ...canvasEntries(blocks, productsById, t),
     ...rows.settings,
+    ...rows.blockSettings.filter(
+      (row) =>
+        row.payload.kind === "setting" &&
+        row.payload.ref.kind === "block" &&
+        row.payload.ref.types.some((type) => kinds.has(type)),
+    ),
     ...(options.pageOpen ? rows.productPage : [rows.openPage]),
     ...(options.checkoutOpen ? rows.checkoutPage : [rows.openCheckout]),
     ...rows.panels,

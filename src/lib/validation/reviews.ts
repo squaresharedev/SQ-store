@@ -44,6 +44,13 @@ export const reviewSubmitSchema = z.strictObject({
 
 export type ReviewSubmitInput = z.infer<typeof reviewSubmitSchema>;
 
+/** The order page's reminder switch: ask for the one review reminder email
+ *  (`want: true`), or stop it. The order's link credential is the proof. */
+export const reviewReminderSchema = z.strictObject({
+  orderRef: orderReference,
+  want: z.boolean(),
+});
+
 export type ReviewQuery = {
   sort: ReviewSort;
   page: number;

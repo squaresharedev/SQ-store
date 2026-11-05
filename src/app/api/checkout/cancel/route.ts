@@ -7,7 +7,7 @@ import { CHECKOUT_CANCEL_PARAM } from "@/lib/checkout/paths";
 import { releasePendingOrder } from "@/lib/orders/record";
 import { readPaymentAccount } from "@/lib/payments/connect/account";
 import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
-import { checkoutPath } from "@/lib/storefront/product-page-url";
+import { checkoutPath, type AddOnPick } from "@/lib/storefront/product-page-url";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -48,11 +48,19 @@ export async function GET(request: Request) {
 
   const { data: order, error } = await createAdminClient()
     .from("orders")
-    .select("seller_id, storefront_id, product_id, status, payment_ref, selected_options, quantity")
+    .select("id, seller_id, storefront_id, product_id, status, payment_ref, selected_options, quantity")
     .eq("checkout_session_id", checkoutSessionId)
     .maybeSingle();
   if (error) console.error("[checkout] cancel could not read the order:", error.message);
   if (!order?.storefront_id || !order.product_id) return gone();
+
+  // What was added to the order, read BEFORE the release below deletes the
+  // order with its lines, so the buyer goes back to the order they were paying.
+  const { data: addOnLines } = await createAdminClient()
+    .from("order_add_ons")
+    .select("product_id, selected_options, position")
+    .eq("order_id", order.id)
+    .order("position", { ascending: true });
 
   if (order.status === "pending" && order.payment_ref?.startsWith("cs_")) {
     try {
@@ -72,7 +80,30 @@ export async function GET(request: Request) {
   // without them a product with options bounced them to its page to choose
   // again, and everything they had typed was gone with it.
   const choice = await choiceOf(order.product_id, order.selected_options, order.quantity);
-  return Response.redirect(appUrl(checkoutPath(order.storefront_id, order.product_id, choice)), 303);
+  const addOns = await addOnsOf(addOnLines ?? []);
+  return Response.redirect(appUrl(checkoutPath(order.storefront_id, order.product_id, { ...choice, addOns })), 303);
+}
+
+/** The add-ons of the order, as the checkout link carries them. A line whose
+ *  version can no longer be named goes back without one, and the checkout
+ *  then takes the first available version, as the product page would. */
+async function addOnsOf(
+  lines: readonly { product_id: string | null; selected_options: unknown }[],
+): Promise<AddOnPick[]> {
+  const ids = lines.flatMap((line) => (line.product_id ? [line.product_id] : []));
+  if (ids.length === 0) return [];
+  const { data: products } = await createAdminClient()
+    .from("products")
+    .select("id, option_groups")
+    .in("id", ids);
+  const groupsOf = new Map((products ?? []).map((row) => [row.id, parseOptionGroups(row.option_groups)]));
+  return ids.map((productId, index) => ({
+    productId,
+    optionIds: optionIdsForSelection(
+      groupsOf.get(productId) ?? [],
+      parseOrderSelection(lines[index]?.selected_options),
+    ),
+  }));
 }
 
 /** The option ids and quantity of the order, as the checkout link carries

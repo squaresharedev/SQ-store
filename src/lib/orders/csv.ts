@@ -1,5 +1,4 @@
-import { BRAND_NAME } from "@/lib/brand";
-import { centsToDecimal, toCsv, type CsvValue } from "@/lib/format/csv";
+import { centsToDecimal, datedCsvFileName, toCsv, type CsvValue } from "@/lib/format/csv";
 import { formatOrderSelection } from "@/lib/orders/selection";
 import { orderNumber } from "@/lib/orders/order-number";
 import type { OrderView } from "@/types/order-view";
@@ -56,6 +55,9 @@ export const ORDERS_CSV_COLUMNS = [
   "tracking_carrier",
   "discount",
   "discount_code",
+  // "Add to your order": the other products in the same order, one per
+  // " | ", each as "2 × Title (Size: Large)". Their amounts are in `amount`.
+  "add_ons",
 ] as const;
 
 /** One order's cells, in ORDERS_CSV_COLUMNS order. */
@@ -84,7 +86,14 @@ function orderCells(order: OrderExportRow): CsvValue[] {
     // used (the channel the sale is credited to), for the books.
     order.discount ? centsToDecimal(order.discount.cents) : centsToDecimal(0),
     order.discount?.code ?? null,
+    order.addOns.length > 0 ? order.addOns.map(addOnCell).join(" | ") : null,
   ];
+}
+
+/** One add-on line, in English like the header: the file is a data contract. */
+function addOnCell(line: OrderExportRow["addOns"][number]): string {
+  const version = line.selection.length > 0 ? ` (${formatOrderSelection(line.selection)})` : "";
+  return `${line.quantity} × ${line.productTitle}${version}`;
 }
 
 /** The whole file for `orders` (already scoped to one store and sorted). */
@@ -94,6 +103,5 @@ export function ordersCsv(orders: readonly OrderExportRow[]): string {
 
 /** "square-share-orders-2026-09-30.csv", dated in UTC like the data export. */
 export function ordersCsvFileName(now: Date): string {
-  const brand = BRAND_NAME.toLowerCase().replace(/\s+/g, "-");
-  return `${brand}-orders-${now.toISOString().slice(0, 10)}.csv`;
+  return datedCsvFileName("orders", now);
 }

@@ -29,13 +29,15 @@
     "returns": "Retours",
     "safety": "Sécurité et conformité",
     "reviews": "Avis",
-    "seller": "Vendeur"
+    "seller": "Vendeur",
+    "addOns": "Ajouter à votre commande"
   },
   "soldBy": "Vendu par {seller}",
   "moreDetails": "Plus de détails",
   "trust": {
     "digitalDelivery": "Livré sous forme de téléchargement après achat.",
-    "euRights": "14 jours pour changer d’avis, et une garantie de 2 ans."
+    "euRights": "14 jours pour changer d’avis, et une garantie de 2 ans.",
+    "euRightsForEu": "Acheteurs UE : 14 jours pour changer d’avis, et une garantie de 2 ans."
   },
   "safety": {
     "manufacturer": "Fabricant",
@@ -284,8 +286,33 @@
         "notEligible": "Cette commande ne peut plus être évaluée.",
         "rateLimited": "Trop d’avis depuis cette connexion. Réessayez dans une heure.",
         "failed": "Votre avis n’a pas pu être publié. Réessayez."
+      },
+      "later": {
+        "title": "{kind, select, parcel {Donnez votre avis une fois l'article reçu} other {Donnez votre avis une fois l'article essayé}}",
+        "body": "{store} peut vous envoyer un seul e-mail, {kind, select, parcel {environ une semaine après l'expédition} other {dans quelques jours}}, avec un lien pour donner votre avis ici. Vous pouvez l'annuler à tout moment.",
+        "remind": "Me le rappeler par e-mail",
+        "notYet": "{kind, select, parcel {Pas encore reçu ?} other {Pas encore essayé ?}}",
+        "once": "{store} vous enverra un seul e-mail. Vous pouvez l'annuler à tout moment.",
+        "onDate": "{store} vous enverra un rappel vers le {date}.",
+        "onLater": "{store} vous enverra un rappel {kind, select, parcel {environ une semaine après l'expédition} other {dans quelques jours}}.",
+        "stop": "Ne pas m'envoyer d'e-mail",
+        "preview": "Ceci est un aperçu, aucun e-mail ne sera envoyé.",
+        "errors": {
+          "closed": "Un rappel ne peut plus être programmé pour cette commande.",
+          "rateLimited": "Trop de tentatives depuis cette connexion. Réessayez dans une heure.",
+          "failed": "Cela n'a pas fonctionné. Réessayez."
+        }
+      },
+      "stopDialog": {
+        "title": "Annuler le rappel ?",
+        "body": "{store} ne vous enverra pas d'e-mail pour vous demander votre avis sur cette commande.",
+        "confirm": "Annuler le rappel",
+        "doneTitle": "Rappel annulé",
+        "doneBody": "Vous ne recevrez plus d'e-mails vous demandant votre avis sur cette commande."
       }
-    }
+    },
+    "lineQuantity": "{quantity} × {title}",
+    "downloadItem": "Télécharger {title}"
   },
   "checkout": {
     "metadata": {
@@ -384,7 +411,8 @@
       "invalid": "Certains détails nécessitent une vérification. Vérifiez les champs mis en évidence.",
       "discount_invalid": "Ce code de réduction ne peut plus être utilisé. Retirez-le pour payer le prix normal.",
       "price_changed": "Le prix a changé pendant que cette page était ouverte, rien n'a donc été débité. Vérifiez le nouveau total, puis payez.",
-      "turnstile": "La vérification de sécurité n’a pas abouti, donc rien n’a été débité. Elle est relancée : patientez un instant, puis réessayez."
+      "turnstile": "La vérification de sécurité n’a pas abouti, donc rien n’a été débité. Elle est relancée : patientez un instant, puis réessayez.",
+      "add_on_unavailable": "Un article que vous avez ajouté ne peut plus être vendu avec cette commande, rien n'a donc été débité. Vérifiez votre commande et le nouveau total, puis payez."
     },
     "editHeadline": "Titre du paiement",
     "discount": {
@@ -398,7 +426,12 @@
       "invalid": "Ce code ne peut pas être utilisé pour cette commande.",
       "rateLimited": "Trop de codes essayés. Attendez un moment, puis réessayez.",
       "line": "Réduction ({code})"
-    }
+    },
+    "addOns": {
+      "label": "Ajouté à votre commande",
+      "remove": "Retirer {title} de cette commande"
+    },
+    "termsAssent": "En commandant, vous acceptez également les <terms>Conditions</terms> de Square Share pour l’utilisation de cette plateforme. Votre achat lui-même est conclu avec {seller}."
   },
   "sale": {
     "wasNow": "Était {was}, maintenant {now}",
@@ -440,5 +473,27 @@
     "filterStars": "{stars, plural, one {Afficher les avis à {stars} étoile ({count})} other {Afficher les avis à {stars} étoiles ({count})}}",
     "showing": "{rating, plural, one {Avis à {rating} étoile} other {Avis à {rating} étoiles}}",
     "showAll": "Afficher tous les avis"
+  },
+  "addOns": {
+    "title": "Ajouter à votre commande",
+    "add": "Ajouter",
+    "added": "Ajouté",
+    "optionLabel": "{group} pour {product}",
+    "unset": "Aucun autre produit n'est proposé ici pour l'instant. Cliquez ici pour les choisir.",
+    "addNamed": "Ajouter {title} à votre commande",
+    "detailsNamed": "Voir les détails de {title}",
+    "seeDetails": "Détails",
+    "fullPage": "Voir la page complète",
+    "addToOrder": "Ajouter à votre commande",
+    "removeFromOrder": "Retirer de votre commande",
+    "rating": "{average} sur 5 étoiles, {count, plural, one {# avis} other {# avis}}",
+    "hidden": {
+      "hint": "Les acheteurs ne voient pas ce produit.",
+      "draft": "Brouillon",
+      "soldOut": "Épuisé",
+      "takenDown": "Retiré",
+      "otherKind": "Autre type",
+      "otherCurrency": "Autre devise"
+    }
   }
 }

@@ -1,3 +1,5 @@
+import { logSafe } from "@/lib/security/log-safe";
+
 /**
  * CSP violation sink for the report-only policy in next.config.ts.
  *
@@ -22,6 +24,10 @@
 /** Bigger than any real report; past this we are being fed, not reported to. */
 const MAX_BODY_BYTES = 64 * 1024;
 
+/** Lines one request may write. A browser batches a handful; a 64 KB body of
+ *  empty reports would otherwise be thousands of log lines from one call. */
+const MAX_REPORTS_PER_REQUEST = 20;
+
 /** The two content types browsers actually use: the Reporting API sends
  *  `application/reports+json` (an ARRAY of reports), the older
  *  report-uri path sends `application/csp-report` (a single object). */
@@ -43,7 +49,7 @@ export async function POST(request: Request): Promise<Response> {
   // content-length is a claim, not a fact; check what actually arrived too.
   if (body.length > MAX_BODY_BYTES) return new Response(null, { status: 204 });
 
-  for (const report of normalise(body)) {
+  for (const report of normalise(body).slice(0, MAX_REPORTS_PER_REQUEST)) {
     // One compact line per violation. The directive and the blocked URI are
     // the two fields that decide whether the policy is wrong or the page is.
     console.warn(
@@ -106,7 +112,7 @@ function toViolation(source: Record<string, unknown>): Violation {
       const value = source[key];
       // Cap each field: these end up in logs, and the blocked URI is attacker
       // -influenced in exactly the case this endpoint exists to catch.
-      if (typeof value === "string" && value) return value.slice(0, 300);
+      if (typeof value === "string" && value) return logSafe(value);
     }
     return undefined;
   };

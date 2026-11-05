@@ -207,7 +207,7 @@
   },
   "legal": {
     "cardTitle": "Verkäufervereinbarung, Nutzungsbedingungen und Datenschutz",
-    "cardDescription": "Die aktuellen Entwürfe in einfacher Sprache, denn niemand liest Juristendeutsch zum Spaß. Der echte Rechtstext kommt noch; die Annahme jetzt gilt für diese Entwurfsversion.",
+    "cardDescription": "Was du akzeptierst und wie wir mit deinen Daten umgehen. Jeder Abschnitt hat eine Kurzfassung, und den vollständigen Text findest du mit einem Klick.",
     "termsTitle": "Nutzungsbedingungen",
     "termsDescription": "Die Kurzfassung dessen, wozu du dich mit dem Verkauf auf Square Share verpflichtest, mit den vollständigen Bedingungen nur einen Klick entfernt.",
     "docs": {
@@ -252,6 +252,7 @@
           "heading": "Mit wem du es zu tun hast",
           "points": {
             "merchantOfRecord": "Square Share ist eine Plattform, die dir beim Verkaufen hilft. Wenn ein Käufer bei dir bestellt, kommt der Verkauf zwischen dir und diesem Käufer zustande: Du bist der Verkäufer und der Vertragspartner des Käufers, nicht wir.",
+            "regions": "Square Share ist in der EU, den USA und Kanada tätig. Anderswo sind wir noch nicht tätig, du musst also dort ansässig sein, um hier zu verkaufen. Québec muss auf die französische Fassung dieser Bedingungen warten.",
             "eligibility": "Du musst mindestens 18 Jahre alt sein oder das Volljährigkeitsalter an deinem Wohnort erreicht haben. Wenn du dich für ein Unternehmen anmeldest, bestätigst du, dass du es an diese Bedingungen binden kannst."
           }
         },
@@ -266,8 +267,8 @@
           "heading": "Verkaufen",
           "points": {
             "lawfulListings": "Beschreibe wahrheitsgemäß und verkaufe nur rechtmäßige Dinge, die du verkaufen darfst.",
-            "consumerRights": "Beachte die Verbraucherrechte deiner Käufer, einschließlich des 14-tägigen Widerrufsrechts und der gesetzlichen Gewährleistung, und kümmere dich selbst um Lieferung, Support und Rückerstattungen.",
-            "taxesAndRecords": "Steuern und MwSt. auf deine Verkäufe sind deine Sache, und du bewahrst deine Verkaufsunterlagen 10 Jahre lang selbst auf."
+            "consumerRights": "Achte die Verbraucherrechte, die deine Käufer dort haben, wo sie leben, etwa das 14-tägige Widerrufsrecht und die gesetzliche Gewährleistung in der EU, und kümmere dich selbst um Lieferung, Support und Erstattungen.",
+            "taxesAndRecords": "Steuern auf deine Verkäufe (Umsatzsteuer, GST/HST oder Sales Tax) sind deine Sache, und du bewahrst deine Verkaufsunterlagen so lange auf, wie es das Recht an deinem Geschäftssitz verlangt."
           }
         },
         "payments": {
@@ -296,10 +297,35 @@
           "points": {
             "cap": "Square Share befindet sich noch in einer frühen Phase und wird gewerblichen Nutzern in der vorliegenden Form angeboten. Ihnen gegenüber ist unsere Haftung auf die in den letzten 12 Monaten an uns gezahlten Gebühren oder 100 EUR begrenzt, je nachdem, welcher Betrag höher ist, und gewerbliche Verkäufer stellen uns von Ansprüchen frei, die durch ihre Produkte, Websites oder Verstöße verursacht werden. Wenn du Verbraucher bist, bleiben deine gesetzlichen Rechte unberührt.",
             "termination": "Wir können Konten sperren oder schließen, die gegen diese Bedingungen verstoßen. Du kannst jederzeit gehen und deine Daten mitnehmen.",
-            "changesAndLaw": "Wir können diese Bedingungen aktualisieren und kündigen wesentliche Änderungen vorab an. Es gilt tschechisches Recht.",
-            "policies": "Unsere Datenschutzerklärung und unsere Cookie-Richtlinie sind Bestandteil dieser Bedingungen."
+            "changesAndLaw": "Über wesentliche Änderungen dieser Bedingungen informieren wir mindestens 30 Tage im Voraus. Für gewerbliche Nutzer gilt tschechisches Recht. Als Verbraucher behältst du den Schutz deines Heimatlandes, Bundesstaats oder deiner Provinz.",
+            "policies": "Unsere Datenschutzerklärung und unsere Cookie-Richtlinie sind Bestandteil dieser Bedingungen.",
+            "disputes": "Streitigkeiten in den USA werden durch Einzelschiedsverfahren statt vor Gericht gelöst, es sei denn, du widersprichst innerhalb von 30 Tagen nach Zustimmung. Verbraucher in der EU und Kanada können weiterhin in ihrem Wohnsitzland vor Gericht gehen."
           }
         }
+      }
+    },
+    "notice": {
+      "bannerLabel": "Aktualisierung der Nutzungsbedingungen",
+      "bannerLink": "Änderungen ansehen",
+      "title": "Unsere Nutzungsbedingungen ändern sich am {date}.",
+      "titleSoon": "Unsere Nutzungsbedingungen ändern sich bald.",
+      "body": "Bis dahin gelten die <current>aktuellen Nutzungsbedingungen</current>. Was die <next>neuen Nutzungsbedingungen</next> ändern:",
+      "leave": "Wenn du nicht einverstanden bist, kannst du dein Konto kostenlos schließen, bevor sie in Kraft treten. Wenn du Square Share nach diesem Datum weiter nutzt, gelten die neuen Nutzungsbedingungen für dich.",
+      "changes": {
+        "regions": "Wir sind jetzt nur noch in der EU, den USA und Kanada tätig, und jede Region hat einen eigenen Abschnitt.",
+        "disputes": "Streitigkeiten in den USA werden durch Einzelschiedsverfahren statt vor Gericht gelöst, es sei denn, du widersprichst innerhalb von 30 Tagen. Verbraucher in der EU und Kanada können weiterhin in ihrem Wohnsitzland vor Gericht gehen.",
+        "plans": "Bezahlte Tarife und Verkaufsgebühren sind jetzt aufgeführt, einschließlich automatischer Verlängerung und wie du kündigen kannst.",
+        "moderation": "Wir erklären, wie wir Inhalte prüfen und wie du sie melden, dagegen Einspruch erheben und eine Urheberrechtsbeschwerde einreichen kannst.",
+        "notice": "Du erhältst jetzt mindestens 30 Tage vorher eine E-Mail, bevor wesentliche Änderungen an den Nutzungsbedingungen in Kraft treten."
+      },
+      "email": {
+        "subject": "Wir aktualisieren unsere Nutzungsbedingungen",
+        "intro": "Wir aktualisieren die Square Share Nutzungsbedingungen. Die neuen Nutzungsbedingungen treten am {date} in Kraft.",
+        "changes": "Was sich ändert:",
+        "readNew": "Neue Nutzungsbedingungen lesen: {url}",
+        "readCurrent": "Aktuelle Nutzungsbedingungen lesen: {url}",
+        "nothingNow": "Du musst heute nichts unternehmen. Du kannst den neuen Nutzungsbedingungen jetzt in deinem Dashboard zustimmen: {url}",
+        "leave": "Wenn du nicht einverstanden bist, kannst du dein Konto bis {date} kostenlos schließen. Wenn du Square Share nach diesem Datum weiter nutzt, gelten die neuen Nutzungsbedingungen für dich."
       }
     }
   },
@@ -311,7 +337,7 @@
       "required": "<strong>Dein Händlername, deine Adresse und deine Kontakt-E-Mail sind erforderlich, bevor du etwas veröffentlichen oder verkaufen kannst.</strong> Käufer müssen sehen können, von wem sie kaufen und wie sie dich erreichen können, bevor sie bestellen.",
       "privacyNoteLinked": "Diese Angaben erscheinen aus diesem Grund allein öffentlich auf deinen Produktseiten. Wir nutzen sie nie für Marketing und verkaufen oder teilen sie nie. Die einzige Nachricht, die wir an deine Kontakt-E-Mail oder Telefonnummer senden, ist der Code, der sie bestätigt. Siehe die <link>Square Share Datenschutzerklärung</link>."
     },
-    "countryNotEu": "Nicht in der EU / keine Angabe",
+    "countryUnset": "Keine Angabe",
     "vatAdvisory": {
       "noCountry": "Diese USt-IdNr. wurde offenbar von {issuer} ausgestellt. Du solltest dein Land festlegen.",
       "mismatch": "Diese USt-IdNr. wurde offenbar von {issuer} ausgestellt, aber dein Land ist auf {selected} gesetzt. Prüfe, ob beides korrekt ist."
@@ -340,6 +366,7 @@
         "placeholder": "z. B. DE123456789"
       },
       "country": {
+        "hint": "Square Share ist in der EU, den USA und Kanada tätig. Anderswo sind wir noch nicht tätig.",
         "label": "Land"
       },
       "phone": {
@@ -395,7 +422,9 @@
   "shipping": {
     "shipsFrom": {
       "label": "Versand aus",
-      "notSet": "Nicht festgelegt"
+      "notSet": "Nicht festgelegt",
+      "sameAsBusiness": "Wie dein Unternehmen: {country}",
+      "sameAsBusinessHint": "Aus der Adresse in deinen Verkäuferangaben übernommen."
     },
     "shippingCard": {
       "title": "Versand",

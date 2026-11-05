@@ -52,6 +52,8 @@ import {
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { PagePhotoField } from "./PagePhotoField";
+import { AddOnsDesignFields } from "./AddOnsDesignFields";
+import { ReviewsDesignFields } from "./ReviewsDesignFields";
 import { PanelField, PanelGroup, PanelRow, PanelTextField } from "./PanelField";
 
 /**
@@ -583,6 +585,36 @@ export function ProductPageSection({
             </li>
           </ul>
         </div>
+      </CollapsibleSection>
+
+      {/* "ADD TO YOUR ORDER": which products the page out on the canvas offers
+          (saved to that product at once), and how this storefront draws it. */}
+      <CollapsibleSection
+        title={t("productPage.addOns.title")}
+        collapsible
+        defaultOpen={false}
+        summon={summoned === "addOns"}
+        headerAction={
+          <InfoTip label={t("productPage.addOns.infoLabel")}>
+            {t("productPage.addOns.infoContent")}
+          </InfoTip>
+        }
+      >
+        <AddOnsDesignFields productPage={productPage} onProductPageChange={onProductPageChange} />
+      </CollapsibleSection>
+
+      <CollapsibleSection
+        title={t("productPage.reviews.title")}
+        collapsible
+        defaultOpen={false}
+        summon={summoned === "reviews"}
+        headerAction={
+          <InfoTip label={t("productPage.reviews.infoLabel")}>
+            {t("productPage.reviews.infoContent")}
+          </InfoTip>
+        }
+      >
+        <ReviewsDesignFields productPage={productPage} onProductPageChange={onProductPageChange} />
       </CollapsibleSection>
 
       {/* READ-ONLY, deliberately, and this is the bigger of the two moves on

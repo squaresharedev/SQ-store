@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
-import { infoTextClass, quietLinkClass } from "@/components/ui/control-styles";
+import { infoTextClass, inlineLinkClass, quietLinkClass } from "@/components/ui/control-styles";
 import { authenticate } from "@/lib/auth/actions";
 import { EMAIL_NOT_CONFIRMED_KEY, SIGNUP_CHECK_EMAIL_KEY } from "@/lib/auth/signup";
 import type { ActionState } from "@/lib/errors";
@@ -20,6 +20,7 @@ import { Turnstile } from "@/components/auth/Turnstile";
 import type { SignInMethod } from "@/lib/auth/last-method";
 import { USERNAME_MAX_LENGTH, looksLikeEmail } from "@/lib/validation/auth";
 import { resilientAction, SIGN_IN_UNREACHABLE } from "@/lib/resilient-action";
+import { LEGAL_LINKS } from "@/lib/legal/links";
 import { cn } from "@/lib/utils";
 
 type Mode = "signin" | "signup" | "magic";
@@ -292,6 +293,26 @@ export function LoginForm({
               onExpire={clearTurnstileToken}
             />
           </div>
+        )}
+
+        {/* Who can sign up, and where the Terms and Privacy Policy are, before
+            any personal data is sent. Agreeing itself happens in the welcome
+            flow, which records the version agreed to. */}
+        {mode === "signup" && (
+          <p className={infoTextClass} data-signup-legal="">
+            {t.rich("signupLegal", {
+              terms: (chunks) => (
+                <a href={LEGAL_LINKS.terms.href} target="_blank" rel="noopener noreferrer" className={inlineLinkClass}>
+                  {chunks}
+                </a>
+              ),
+              privacy: (chunks) => (
+                <a href={LEGAL_LINKS.privacy.href} target="_blank" rel="noopener noreferrer" className={inlineLinkClass}>
+                  {chunks}
+                </a>
+              ),
+            })}
+          </p>
         )}
 
         {/* Status: error (red) or confirmation (neutral) */}

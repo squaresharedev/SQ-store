@@ -11,6 +11,7 @@ import {
   type StorefrontAttentionInfo,
 } from "@/lib/dashboard/attention";
 import { formatMoney } from "@/lib/dashboard/format";
+import type { RestockForecast } from "@/lib/predictions";
 import type { OrderView } from "@/types/order-view";
 import type { OrderGlance } from "@/lib/orders/queries";
 import { MetricTile } from "./MetricTile";
@@ -23,6 +24,7 @@ const RECENT_ORDERS_ID = "recent-orders";
 
 /** Composition only: lays the modules out; all data arrives as props. */
 export function DashboardHome({
+  termsInForce,
   orders,
   products,
   storefronts,
@@ -34,9 +36,12 @@ export function DashboardHome({
   recentOrderGlances,
   toShipCount = 0,
   withdrawalsToSettle = 0,
+  restocks = [],
   canFulfil = false,
   checkoutOpen = false,
 }: {
+  /** The Terms version in force, or null if that could not be read. */
+  termsInForce: string | null;
   orders: DashboardOrdersData;
   /** Full detail for the Recent orders rows, so each opens in place. */
   recentOrderDetails?: OrderView[];
@@ -46,6 +51,8 @@ export function DashboardHome({
   toShipCount?: number;
   /** Recent withdrawals still waiting for their refund; above zero adds a row. */
   withdrawalsToSettle?: number;
+  /** Counted products about to sell out at their pace; any adds a row. */
+  restocks?: readonly RestockForecast[];
   /** Whether the viewer may mark orders shipped from an opened order. */
   canFulfil?: boolean;
   /** Whether a buyer can pay through Square Share checkout right now. */
@@ -138,11 +145,13 @@ export function DashboardHome({
               products,
               storefronts,
               profile,
+              termsInForce,
               stripeConnected,
               setupVisible,
               twoFactorEnabled,
               toShipCount,
               withdrawalsToSettle,
+              restocks,
               checkoutOpen,
             })}
           />

@@ -30,6 +30,7 @@ import {
   strongLabelClass,
 } from "@/components/ui/control-styles";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
+import { BlurSlider } from "./BlurSlider";
 import { LayoutPresetPicker } from "./LayoutPresetPicker";
 import { TileLayoutBoard } from "./TileLayoutBoard";
 import { TitleStylePicker } from "./TitleStylePicker";
@@ -105,6 +106,7 @@ export function CardStyleControls({
   };
 }) {
   const t = useTranslations("Storefront.cardStyle");
+  const tBlur = useTranslations("Storefront.blur");
   const fieldId = useId();
   const revealHints: Record<SpotRow, string> = {
     top: t("revealTop"),
@@ -175,11 +177,31 @@ export function CardStyleControls({
       />
 
       {/* Out of Fine tuning on purpose: a seller who picks Gallery sees the
-          fade straight away and should find its color without digging. Shown
-          only while a shadow is actually drawn. */}
-      {colorScope && value.showTitle && value.titleStyle === "shadow" && (
-        <TitleShadowColorField {...colorScope} onChange={onChange} />
+          fade straight away and should find its color and its blur without
+          digging. Shown only while a shadow is actually drawn. */}
+      {value.showTitle && value.titleStyle === "shadow" && (
+        <>
+          {colorScope && <TitleShadowColorField {...colorScope} onChange={onChange} />}
+          <BlurSlider
+            id={`${fieldId}-shadow-blur`}
+            label={tBlur("shadow")}
+            tip={tBlur("shadowTip")}
+            value={value.titleShadowBlur}
+            onChange={(titleShadowBlur) => onChange({ titleShadowBlur })}
+            labelClassName={strongLabelClass}
+          />
+        </>
       )}
+
+      <BlurSlider
+        id={`${fieldId}-photo-blur`}
+        label={tBlur("photo")}
+        value={value.photoBlur}
+        onChange={(photoBlur) => onChange({ photoBlur })}
+        direction={value.photoBlurDirection}
+        onDirectionChange={(photoBlurDirection) => onChange({ photoBlurDirection })}
+        labelClassName={strongLabelClass}
+      />
 
       <CollapsibleSection title={t("fineTuning")} collapsible defaultOpen={false}>
         <div className="space-y-4">

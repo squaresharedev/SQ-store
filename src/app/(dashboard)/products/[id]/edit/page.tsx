@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { getProduct } from "@/lib/products/queries";
+import { getAddOnHabits, listAddOnChoices } from "@/lib/products/add-on-choices";
 import { checkMany } from "@/lib/moderation/auto/check";
 import { after } from "next/server";
 import { ProductFormView } from "@/components/products/ProductFormView";
@@ -12,6 +13,7 @@ import { getShippingChoices } from "@/lib/storefront/queries";
 import { getShippingPolicy } from "@/lib/settings/shipping-policy";
 import { EMPTY_SHIPPING_POLICY } from "@/types/shipping-policy";
 import { requireUser } from "@/lib/auth/session";
+import { aiWritingFor, NO_AI_WRITING } from "@/lib/ai-suggestions";
 import { PRODUCTS_PATH } from "@/lib/products/paths";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -35,10 +37,12 @@ export default async function EditProductPage({
   // the product read because getProduct scopes itself to the active account
   // (and RLS backs that up) — the role check gates EDITING, not reading, and
   // nothing is rendered before it is applied below.
-  const [account, product, shippingChoices] = await Promise.all([
+  const [account, product, shippingChoices, addOnChoices, addOnHabits] = await Promise.all([
     getActiveAccount(),
     getProduct(id),
     getShippingChoices(),
+    listAddOnChoices(),
+    getAddOnHabits(id),
   ]);
   if (!can(account?.role, "products.write")) redirect("/products");
   if (!product) notFound();
@@ -64,6 +68,8 @@ export default async function EditProductPage({
     : EMPTY_SHIPPING_POLICY;
 
   const t = await getTranslations("Products.page.edit");
+  // The shell has already read this store's plan for this request (cached).
+  const ai = account ? await aiWritingFor(account.accountId, account.userId) : NO_AI_WRITING;
 
   return (
     <ProductFormView
@@ -73,6 +79,9 @@ export default async function EditProductPage({
       shippingChoices={shippingChoices}
       shippingPolicy={shippingPolicy}
       missingTraderDetails={identity.ok ? identity.missing : []}
+      addOnChoices={addOnChoices}
+      addOnHabits={addOnHabits}
+      ai={ai}
     />
   );
 }

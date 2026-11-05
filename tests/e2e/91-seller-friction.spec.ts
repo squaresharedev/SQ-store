@@ -153,7 +153,7 @@ test.describe("everyday seller friction", () => {
         amount_cents: 3100,
         product_title: "Linen apron",
         buyer_email: "ada@example.com",
-        ship_to: { name: "Ada Lovelace", line1: "1 Analytical Way", city: "Marylebone", country: "GB" },
+        ship_to: { name: "Ada Lovelace", line1: "1 Analytical Way", city: "Marylebone", country: "IE" },
         tracking_number: "JD0002233445NL",
       },
       {

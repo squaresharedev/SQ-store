@@ -6,6 +6,7 @@ import {
   BRAND_TITLE_TEMPLATE,
 } from "@/lib/brand";
 import { escapeHtml } from "@/lib/format/html";
+import { BACK_ONLINE_FLAG } from "@/lib/pwa/paths";
 
 /**
  * GET /offline: the page the service worker (public/sw.js) shows instead of
@@ -22,7 +23,10 @@ import { escapeHtml } from "@/lib/format/html";
  *
  * "Try again" is a link to the empty URL: the worker serves this document in
  * place of the page that failed, so the empty URL IS that page. The one line
- * of script retries by itself the moment the connection comes back.
+ * of script retries by itself the moment the connection comes back. The other
+ * line leaves a flag for whichever page loads next in this tab, so it can say
+ * "Back online": this document is gone by then, and only the browser's storage
+ * outlives it.
  *
  * In the request's language, and Content-Language says which, so the worker
  * can tell when the seller has since switched and fetch a fresh copy.
@@ -81,7 +85,8 @@ a {
 <h1>${title}</h1>
 <p>${escapeHtml(t("description"))}</p>
 <a href="">${escapeHtml(t("retry"))}</a>
-<script>addEventListener("online", () => location.reload());</script>
+<script>try { sessionStorage.setItem("${BACK_ONLINE_FLAG}", "1"); } catch {}
+addEventListener("online", () => location.reload());</script>
 </body>
 </html>`;
 
