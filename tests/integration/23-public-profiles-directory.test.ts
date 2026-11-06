@@ -202,12 +202,23 @@ describe("the directory follows the profile", () => {
   });
 
   it("shows no picture that has not been approved", async () => {
-    await asUser(changer, (q) =>
+    // Since 20261105_write_bounds the owner's own session cannot even set one
+    // (the team page draws it for other people too).
+    const refused = await expectDbError(
+      asUser(changer, (q) =>
+        q.query(`update public.profiles set avatar_url = 'https://elsewhere.test/c.webp' where id = $1`, [
+          changer.id,
+        ]),
+      ),
+    );
+    expect(refused).toMatch(/uploading it, not by naming it/);
+    // One a trusted path wrote is still kept out of the directory. Still
+    // listed, without it: a picture is not worth unlisting someone for.
+    await asService((q) =>
       q.query(`update public.profiles set avatar_url = 'https://elsewhere.test/c.webp' where id = $1`, [
         changer.id,
       ]),
     );
-    // Still listed, without it: a picture is not worth unlisting someone for.
     expect(await directoryRow(changer.id)).toMatchObject({ username: "dir_renamed", avatar_url: null });
 
     await asUser(changer, (q) =>

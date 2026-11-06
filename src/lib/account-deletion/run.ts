@@ -39,7 +39,7 @@
 //     payments already made, and anything Stripe keeps for a subscription.
 
 import { DEFAULT_LOCALE, parseLocale } from "@/i18n/locales";
-import { collectObjectKeys } from "@/lib/account-deletion/object-keys";
+import { collectObjectKeys, keysUploadedBy } from "@/lib/account-deletion/object-keys";
 import { aftercareCutoff, deletionOutlook, deletionResting, dueCutoff } from "@/lib/account-deletion/policy";
 import { readDeletionOrderFacts } from "@/lib/account-deletion/requests";
 import { sendAccountDeletedEmail } from "@/lib/account-deletion/emails";
@@ -172,6 +172,24 @@ const fileSubjects = (keys: Iterable<string>): string[] =>
 type Budget = { left: number; spent: number };
 
 /**
+ * Whose uploads count as this store's files: the account's own and its
+ * team's, revoked members included (what they added stays the store's). A
+ * re-invited member's earlier link is gone, so their old uploads are left
+ * behind rather than guessed at.
+ */
+async function storeUploaders(admin: Admin, userId: string): Promise<Set<string>> {
+  const rows = must(
+    "team",
+    await admin
+      .from("team_members")
+      .select("member_user_id")
+      .eq("account_owner_id", userId)
+      .not("member_user_id", "is", null),
+  );
+  return new Set([userId, ...(rows ?? []).flatMap((row) => (row.member_user_id ? [row.member_user_id] : []))]);
+}
+
+/**
  * Delete the account's rows of one kind, each after its files: read a page,
  * remove the files of as many rows as the budget allows, delete those rows in
  * one statement, and go round again. True when none are left.
@@ -180,6 +198,7 @@ async function emptyTable(
   admin: Admin,
   table: "products" | "storefronts",
   userId: string,
+  uploaders: ReadonlySet<string>,
   budget: Budget,
 ): Promise<boolean> {
   for (;;) {
@@ -191,7 +210,7 @@ async function emptyTable(
 
     const done: string[] = [];
     for (const row of rows) {
-      const keys = collectObjectKeys(row);
+      const keys = keysUploadedBy(collectObjectKeys(row), uploaders);
       // The first piece of work in a run is always done, whatever it costs,
       // or one row with many files could never be got past.
       if (budget.spent > 0 && keys.size + 1 > budget.left) break;
@@ -218,6 +237,7 @@ async function emptyTable(
 async function emptyOrderFiles(
   admin: Admin,
   userId: string,
+  uploaders: ReadonlySet<string>,
   budget: Budget,
   // An order's own download, or one its "Add to your order" lines sold.
   table: "orders" | "order_add_ons" = "orders",
@@ -236,7 +256,7 @@ async function emptyOrderFiles(
     if (keys.length === 0) return true;
 
     const batch = keys.slice(0, Math.max(1, budget.left - 1));
-    const batchKeys = collectObjectKeys(batch);
+    const batchKeys = keysUploadedBy(collectObjectKeys(batch), uploaders);
     await removeFiles(batchKeys);
     await forgetChecks(admin, fileSubjects(batchKeys));
     must(
@@ -272,10 +292,11 @@ async function deleteAccount(
   requestedAt: string,
   budget: Budget,
 ): Promise<"deleted" | "more"> {
-  if (!(await emptyTable(admin, "products", userId, budget))) return "more";
-  if (!(await emptyTable(admin, "storefronts", userId, budget))) return "more";
-  if (!(await emptyOrderFiles(admin, userId, budget))) return "more";
-  if (!(await emptyOrderFiles(admin, userId, budget, "order_add_ons"))) return "more";
+  const uploaders = await storeUploaders(admin, userId);
+  if (!(await emptyTable(admin, "products", userId, uploaders, budget))) return "more";
+  if (!(await emptyTable(admin, "storefronts", userId, uploaders, budget))) return "more";
+  if (!(await emptyOrderFiles(admin, userId, uploaders, budget))) return "more";
+  if (!(await emptyOrderFiles(admin, userId, uploaders, budget, "order_add_ons"))) return "more";
   await removeAvatar(admin, userId);
 
   // Who to tell, and what the content check remembered by name, read while

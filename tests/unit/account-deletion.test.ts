@@ -22,7 +22,7 @@ import {
   dueCutoff,
   type DeletionOrderFacts,
 } from "@/lib/account-deletion/policy";
-import { collectObjectKeys, isObjectKey } from "@/lib/account-deletion/object-keys";
+import { collectObjectKeys, isObjectKey, keysUploadedBy, uploaderOf } from "@/lib/account-deletion/object-keys";
 import { cronAuthorized } from "@/lib/ops/cron";
 
 const NOTHING_OWED: DeletionOrderFacts = { toShip: 0, pending: 0, disputed: 0, lastSaleAt: null, lastShippedAt: null };
@@ -161,6 +161,25 @@ describe("which files a row points at", () => {
       productPage: { backgroundImage: { key: key("images", "page.jpg") } },
     };
     expect(collectObjectKeys(config).size).toBe(4);
+  });
+
+  it("deletes only what the account or its team uploaded, wherever a key sits", () => {
+    const TEAMMATE = "7a2e9c41-0b3d-4c5e-8f6a-1b2c3d4e5f60";
+    const STRANGER = "9d8c7b6a-5e4f-4a3b-9c2d-1e0f9a8b7c6d";
+    const theirs = `images/${STRANGER}/${FILE}-their-photo.jpg`;
+    const teammates = `images/${TEAMMATE}/${FILE}-side.png`;
+    // A stranger's key planted where no guard looked before 20261105: a
+    // product's details. The row goes; the stranger's file must not.
+    const product = {
+      image_key: key("images"),
+      gallery: [{ key: teammates }],
+      details: { note: theirs },
+      option_groups: [{ values: [{ label: `files/${STRANGER}/${FILE}-paid.pdf` }] }],
+    };
+    expect([...keysUploadedBy(collectObjectKeys(product), new Set([OWNER, TEAMMATE]))].sort()).toEqual(
+      [key("images"), teammates].sort(),
+    );
+    expect(uploaderOf(theirs)).toBe(STRANGER);
   });
 });
 

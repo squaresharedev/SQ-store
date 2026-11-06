@@ -1,4 +1,4 @@
-# Security audit, 2026-11-03 (overnight)
+# Security audit, 2026-11-03 (overnight) and 2026-11-05 (second pass)
 
 Follows `C:\Users\edwar\security-audit-skill\squareshare-store\run-1\REPORT.md`
 (2026-10-20/21). That run reviewed everything up to commit `594b2bd` and
@@ -13,30 +13,69 @@ replica (`tests/db`), and NOT applied to production. Production was only read:
 catalog queries through the Supabase connector, the security advisors, and one
 GoTrue probe that cannot create an account (a too-short password).
 
-**Owner actions, in order:**
-1. Check Auth > Hooks: is "Before User Created" set to `signup_intent_gate`?
-   If not, turn it on (steps in `wrangler.jsonc`, SIGN-UP GATE). Section 3.
-2. Apply `supabase/migrations/20261103_two_factor_review_tables.sql` (1.1),
-   then change its header in `tests/db/prod-migrations.sql` to "(applied)".
-3. Apply `Home/supabase/migrations/20261103_consent_logs_bounds.sql` to the
-   SQ-store project, deploy Home, accept the banner once and check a row
-   lands (1.3). Teamster: "Cookie consent records are not being saved".
-4. Review and commit the code (list under "Files changed"), deploy, then
-   `curl -sI https://dashboard.squareshare.eu/sw.js` shows HSTS and nosniff.
-5. Decide on review suppression (3b). Teamster: "Decide how to stop sellers
+**Second pass (2026-11-05).** Seven reviewers, one area each, read every
+seller action, dashboard route, buyer surface, auth flow, file path, money
+path, CI file and the two sibling repos; the live database was read through
+the Supabase connector. Every claim was re-read against the source before it
+was kept (four were rejected, see the end of section 2b). Same rules: code
+uncommitted, SQL as new migrations tested on the replica, production read only.
+
+**Owner actions from the first pass: all done, and verified live 2026-11-05.**
+The Before User Created hook runs `signup_intent_gate` (auth log, 2026-11-04
+18:26), and a direct `POST /auth/v1/signup` now answers 403 "Sign up on Square
+Share.". The four two-factor policies are live. Home's `consent_logs` exists
+and the first record landed (2026-11-04 18:34). The code was committed
+(`7abc199`) and deployed: `sw.js` carries HSTS and nosniff.
+
+**Done 2026-11-06:** the 14 `database-backup-*` artifacts are deleted and the
+backup workflow is disabled on GitHub; the new `backup.yml` (no schedule,
+refuses on a public repo) and the deletion job's uploader check are committed.
+That commit also fixes the three test breaks that kept `7abc199` from
+deploying (storefront action mocks, the 2FA migration's probe entry, the
+replica's table lists).
+
+**Owner actions now, in order:**
+1. ~~Delete the database backups in the public repo's Actions artifacts~~
+   (done 2026-11-06, see above).
+2. Apply, in this order, `supabase/migrations/20261031_terms_notices.sql`
+   (not security, but every deploy since `7abc199` needs it),
+   `20261105_object_keys_anywhere.sql` (1.8, 1.9), then
+   `20261105_write_bounds.sql` (1.11, 1.12). The Supabase connector declines
+   `apply_migration` from a Claude Code session, so this is the SQL editor
+   (or allowing the connector's writes). The schema gate now names all
+   three, so nothing deploys until they are in. Then change their headers in
+   `tests/db/prod-migrations.sql` to "(applied)" and re-run the deploy.
+3. Review, commit and deploy: Store (deletion job, `backup.yml`), App
+   (`worker/routes/artifacts.ts`, before App goes live), Home
+   (`next.config.ts`, `public/_headers`). List under "Files changed, second
+   pass".
+4. DMARC to `p=quarantine` once Brevo's reports show the real mail passing
+   (1.13).
+5. Upgrade Next.js to 16.4.1 or later in Store and Home, in its own session
+   with the full test suite (1.14).
+6. Decide on review suppression (3b). Teamster: "Decide how to stop sellers
    hiding genuine bad reviews".
 
 ## 1. Findings
 
 | # | Severity | Finding | Status |
 |---|---|---|---|
-| 1 | Medium | A password alone (no second factor) reads a 2FA seller's reviews, imports, rating and funnel tables | Patched (migration, not applied to prod), tested |
-| 2 | Low | Upload routes accept a post from any page on a squareshare.eu subdomain, carrying the seller's cookie | Patched, tested (unit + dev server) |
-| 3 | Medium (compliance) | squareshare.eu has never stored a cookie consent record: the table does not exist | Migration written (Home), tested on the replica, NOT applied |
-| 4 | Low (hardening) | Static files (`sw.js`, `widget.js`, every `/_next/static` chunk) are served without HSTS or nosniff | Patched (`public/_headers`), unit-tested; live after deploy |
+| 1 | Medium | A password alone (no second factor) reads a 2FA seller's reviews, imports, rating and funnel tables | Fixed, **live** (applied 2026-11-04) |
+| 2 | Low | Upload routes accept a post from any page on a squareshare.eu subdomain, carrying the seller's cookie | Fixed, deployed |
+| 3 | Medium (compliance) | squareshare.eu has never stored a cookie consent record: the table does not exist | Fixed, **live** (applied 2026-11-04, first record landed) |
+| 4 | Low (hardening) | Static files (`sw.js`, `widget.js`, every `/_next/static` chunk) are served without HSTS or nosniff | Fixed, deployed, seen live |
 | 5 | Low | Anyone can write log lines through `/api/csp-report`: thousands per request, and text that can fake an `[ops alert]` line | Patched, unit-tested, route checked on the dev server |
 | 6 | Medium | Every per-IP limit resets for an IPv6 client by changing address within its own /64 | Patched, unit-tested, proven on the dev server |
 | 7 | Low | An app can name itself with a quote in its client id and break the OAuth cleanup job's filter | Patched, unit-tested |
+| **Second pass** | | | |
+| 8 | **High** | Any seller can make the account-deletion job delete other sellers' files (photos, paid downloads), by naming them anywhere in their own rows | Patched (migration NOT applied + job), tested |
+| 9 | **High** (dormant: App not live) | Any App user can delete any object in the bucket the Store shares, through an artifact naming it | Patched (migration NOT applied + App Worker), tested |
+| 10 | **High** | Every nightly encrypted production dump is downloadable by anyone signed in to GitHub (public repo artifacts) | Patched (`backup.yml`, not pushed); owner deletes the 15 artifacts |
+| 11 | Medium | Any free account can fill the database through PostgREST (32 MB bodies, unbounded columns and row counts); anonymous inserts have no end | Patched (migration NOT applied), tested |
+| 12 | Low | A team member can point their profile picture at their own server and see when (and from where) the owner opens the team page | Patched (same migration), tested |
+| 13 | Medium (owner, DNS) | DMARC is `p=none`: mail forged as @squareshare.eu is not refused by receivers | Owner action |
+| 14 | Medium (owner) | Next.js 16.2.9 is below the fixes for five critical advisories (none reachable in this configuration) | Owner action |
+| 15 | Low (hardening) | squareshare.eu sends no HSTS, nosniff or Referrer-Policy | Patched (Home, not deployed) |
 
 ### 1.1 Four seller tables skip the two-factor rule (medium)
 
@@ -256,7 +295,7 @@ Replica runs: 22-two-factor-rls, 42-reviews and 37-storefront-funnel-daily,
 58 tests, all pass. Its one real catch, the split surrogate in `logSafe`, is
 fixed above.
 
-### Files changed (all uncommitted)
+### Files changed, first pass (committed in `7abc199`, deployed)
 
 Store, only this audit's:
 - `supabase/migrations/20261103_two_factor_review_tables.sql`,
@@ -287,6 +326,172 @@ Home: `supabase/migrations/20261103_consent_logs_bounds.sql`,
 Gates on the whole working tree after the last change (2026-11-04 ~00:15):
 `npx tsc --noEmit` 0 errors; `npx eslint` on every file above, exit 0. Home
 and the App worker typecheck.
+
+### 1.8 The deletion job deletes whatever a seller names (high)
+
+- **Where:** `src/lib/account-deletion/run.ts` and `object-keys.ts`
+  (`collectObjectKeys`), against `guard_object_keys`
+  (`20261021_object_key_ownership.sql`).
+- **What:** the job finds a store's files BY SHAPE: every string anywhere in
+  a product or storefront row that looks like an object key, in any column,
+  and deletes each from R2 with the service role. The guard only judged
+  `image_key`, `digital_file_key`, `gallery[].key`, `documents[].key` and
+  `key` properties of a storefront config, and only fired when those columns
+  changed.
+- **Exploit:** a seller (any free account) reads other sellers' keys off any
+  public page (every presigned photo URL carries one; a buyer's download URL
+  carries the paid file's). They write them straight through PostgREST into
+  their own `products.details` (16 KB, about 150 keys a row), `option_groups`,
+  `title`, `description`, or under any other property of a storefront config,
+  then ask for their own account to be deleted. Fourteen days later the job
+  removes those sellers' photos, storefront images, fonts and paid downloads,
+  and forgets their moderation approvals. Nothing on the victims' side shows
+  it coming.
+- **Fix, two layers:** `20261105_object_keys_anywhere.sql` makes the guard
+  judge every key-shaped string anywhere in the row (`object_key_strings_in`
+  over `to_jsonb(new)`) on every insert and update, as well as the named
+  places; the rule is unchanged (a key new to the row must be the writer's own
+  upload). And the job now deletes only keys uploaded by the account or its
+  team (`keysUploadedBy`, `storeUploaders`), whatever a row says.
+- **Live:** no production row holds a key from outside its store (checked by
+  shape over every column, 2026-11-05), so it has not been used.
+- **Tested:** `41-object-key-ownership` gains three cases (a stranger's key in
+  details, options, title, description, a config text block, and an insert;
+  own keys and path-like text still pass). `tests/unit/account-deletion.test.ts`
+  proves the job keeps a stranger's planted keys out of what it deletes.
+
+### 1.9 App can delete any file in the shared bucket (high, dormant)
+
+- **Where:** App `worker/routes/artifacts.ts` (`DELETE /api/artifacts/:id`)
+  and `public.artifacts.image_key`. App's `R2_BUCKET_NAME` is
+  `squareshare-products`, the Store's bucket.
+- **Exploit:** an App user inserts an artifact straight through PostgREST
+  (`artifacts_owner_all` allows any row they own) with `image_key` set to any
+  object in the bucket: a seller's product photo, a paid download. Then
+  `DELETE /api/artifacts/:id`: the Worker deletes the row under RLS and evicts
+  the row's key with its own R2 credentials. The create route checks the key
+  (`isOwnObjectKey`); the delete trusted the row.
+- **Dormant:** `app.squareshare.eu` does not resolve yet (App's `CUTOVER.md`
+  step 7), and production holds no artifacts. It goes live at the cutover.
+- **Fix, two layers:** the same migration adds `guard_artifact_image_key`
+  (a client may only write `artifacts/{own id}/{uuid}-{name}`), and the delete
+  route evicts only `isOwnObjectKey(key, "artifact", user.id)`.
+- **Tested:** `41-object-key-ownership` (another user's App key, any Store key
+  and a URL refused on insert; a swap to another user's key refused on
+  update). Existing tests 15 and 37 now use real-shaped keys of the writer's
+  own. App worker: typecheck and lint exit 0.
+
+### 1.10 Production backups in a public repo's artifacts (high)
+
+- **Where:** `.github/workflows/backup.yml`; the repo `squaresharedev/SQ-store`
+  is public (the GitHub API answers it without a token).
+- **What:** every night's encrypted `pg_dump` of `public` and `auth` (every
+  account's email and password hash, buyers' names and addresses) was an
+  Actions artifact for 14 days, and the artifacts of a public repository can
+  be downloaded by anyone signed in to GitHub. 15 were listed on 2026-11-05,
+  about 2 MB each. Only the GPG passphrase stands between them and the data;
+  any leak of it, now or later, opens every copy ever downloaded.
+- **Fix:** the schedule is gone (the org has been on Supabase Pro since
+  2026-10-28, which keeps daily backups), and the job refuses to run at all
+  while the repository is public. **Owner:** delete the existing artifacts
+  (Actions, each `Database backup` run, Artifacts), and push the workflow. If
+  an off-site copy is still wanted, make the repo private or send the file to
+  a private bucket.
+- **Tested:** the workflow parses (js-yaml), with only `workflow_dispatch`
+  and the refusal as its first step. It has not run (needs a push).
+
+### 1.11 Any free account can fill the database (medium)
+
+- **Where:** client-writable columns with no size bound
+  (`products.title`/`description`, `storefronts.config`/`brief`,
+  `profiles.avatar_url`, `rate_limits.action` through `rl_take`), no ceiling
+  on products or storefronts per account (plans cap neither while the switch
+  is off; Pro storefronts are unlimited when it is on), and anonymous inserts
+  into `waitlist_signups` and `consent_logs` with no limit at all.
+- **Seen live:** the Supabase gateway accepted a 32 MB request body (sent to a
+  function that does not exist, so nothing was stored). The database is 54 MB
+  today; one account with a few hundred requests could add gigabytes. The
+  anonymous tables are written at `vnyfndqpdllwhvhinjoi.supabase.co`, where no
+  squareshare.eu edge rule applies.
+- **Fix:** `20261105_write_bounds.sql`: size checks far above the app's own
+  limits; a per-account ceiling for client writers (2000 products, product
+  import's own ceiling; 200 storefronts); a platform-wide cap on anonymous
+  inserts (120 consent records and 60 waitlist sign-ups a minute) with the
+  row's time forced to now(). The numbers are tunable; under a flood the
+  anonymous caps also refuse real visitors for that minute, which is the
+  trade for a table that cannot grow without end.
+- **Tested:** `47-write-bounds` (8 cases); all fail without the migration.
+
+### 1.12 A member's picture URL is anyone's server (low)
+
+- **Where:** `profiles.avatar_url` took any text; `team_roster` returns it and
+  `MemberRow` draws it as a plain `<img>` for the owner and admins (the CSP
+  that would stop it is report-only).
+- **Fix:** in the same migration, a client may only set a picture that
+  moderation approved: the `avatar:<url>` record both upload paths write
+  before they set the URL (Store `lib/settings/avatar.ts`, App
+  `worker/routes/profiles.ts`). Clearing it still works.
+- **Tested:** `47-write-bounds`; test 23 updated (the owner's own session can
+  no longer set an unapproved picture at all).
+
+### 1.13 DMARC does not enforce (medium, owner)
+
+`_dmarc.squareshare.eu` is `v=DMARC1; p=none` and SPF ends `~all`. DKIM is set
+up (Brevo's `brevo1`/`brevo2` selectors resolve), so the real mail can align.
+With `p=none` a receiver takes no action on mail forged as
+`@squareshare.eu`: a "your payout is on hold" mail to a seller is one SMTP
+session away. Read Brevo's DMARC reports (`rua`), and once only Brevo and
+Cloudflare send for the domain, set `p=quarantine`, later `p=reject`.
+
+### 1.14 Next.js below the critical fixes (medium, owner)
+
+Store and Home run `next` 16.2.9; `pnpm audit --prod` reports 6 critical
+advisories in Store (2 in Home), patched in 16.3.3 to 16.4.1. None is reachable
+as configured: no `images.remotePatterns` (the optimizer refuses outside
+URLs), no `"use cache"`, no `next/og`, and Workers rather than Windows. One
+config change (an R2 origin in `remotePatterns`) would open the image
+optimizer ones. Upgrade in its own session, with the full unit, db and e2e
+suites.
+
+### 1.15 squareshare.eu sends no transport headers (low)
+
+The apex is the only host whose HSTS covers every subdomain, and it sent none
+(nor nosniff or Referrer-Policy). Home `next.config.ts` now sends HSTS
+(`includeSubDomains`, no `preload`: submitting to the preload lists is a
+separate decision), nosniff and Referrer-Policy, with the same for static
+files in `public/_headers`, and drops `x-powered-by`. Every subdomain found
+(`www`, `dashboard`, `embed`, `admin`) is served over HTTPS by Cloudflare.
+Checked by loading the config and calling `headers()`; no Home dev server was
+started (1.4 GB of memory free, two dev stacks running). Live after Home's
+next deploy.
+
+### Files changed, second pass (all uncommitted)
+
+Store:
+- `supabase/migrations/20261105_object_keys_anywhere.sql`,
+  `supabase/rollbacks/20261105_object_keys_anywhere.down.sql`,
+  `src/lib/account-deletion/run.ts`, `src/lib/account-deletion/object-keys.ts`,
+  `tests/unit/account-deletion.test.ts`,
+  `tests/integration/41-object-key-ownership.test.ts`,
+  `tests/integration/15-rls-collections-artifacts.test.ts`,
+  `tests/integration/37-auto-moderation.test.ts` (1.8, 1.9)
+- `supabase/migrations/20261105_write_bounds.sql`,
+  `supabase/rollbacks/20261105_write_bounds.down.sql`,
+  `tests/integration/47-write-bounds.test.ts`,
+  `tests/integration/23-public-profiles-directory.test.ts` (1.11, 1.12)
+- `.github/workflows/backup.yml` (1.10)
+- `tests/db/prod-migrations.sql`: the 2FA block's header now "(applied
+  2026-11-04)", and three blocks appended at the end: Home's
+  consent_logs_bounds (applied) and the two pending migrations
+- this report
+
+App: `worker/routes/artifacts.ts` (the delete route only; the file also holds
+another session's uncommitted edits). Home: `next.config.ts`, `public/_headers`.
+
+Gates: `npx tsc --noEmit` 0 errors (Store); eslint exit 0 on every changed
+Store file and App's route; App worker typecheck exit 0. Replica: 8 db files,
+164 tests, all pass; the 11 new security cases all fail on a HEAD worktree
+without the two migrations. `account-deletion` unit tests: 22 pass.
 
 ## 2. Checked and sound
 
@@ -400,8 +605,84 @@ session's user id, uploads accept only sniffed still rasters under
 from user text, and private collections and profiles stay private through
 RLS. Home renders only developer-written content.
 
+## 2b. Checked and sound, second pass (2026-11-05)
+
+- **Seller actions and dashboard routes:** all 25 seller `"use server"` files
+  and every dashboard route reach data through `getActiveAccount` and a role
+  check, with an explicit store predicate on every service-role read and
+  write (`getDiscount`, `getOrderById`, `listStorefronts`, `team_roster`
+  traced). MCP tools run the same actions inside the grant's context.
+- **Live database:** every client-callable SECURITY DEFINER RPC checks
+  `mfa_session_ok` and then ownership or the team permission
+  (`order_mark_shipped`, `order_refund`, `team_accept_invite`, `team_roster`,
+  `rl_take`). `team_members_guard` freezes identity columns, never grants
+  ownership, binds an accepted invite to the invited email, and refuses any
+  role above the actor's. `guard_seller_text` and `guard_contact_proof`
+  hold. Storage: three public buckets of platform images, no client policies.
+  Realtime: only `notifications`, under RLS; no channel policies, so private
+  channels deny everyone. Only `public` and `graphql_public` are exposed
+  (PostgREST's own error, 2026-11-05).
+- **Auth:** `safeInternalPath` and `afterChallenge` refuse every open-redirect
+  form; recovery codes 80-bit, hashed, spent atomically; contact codes
+  HMAC-bound to owner, channel and value; WebAuthn requires user
+  verification; sign-in approval tokens are 32 random bytes, spent once. Both
+  hooks run in production (`mfa_access_token_gate` on every refresh,
+  `signup_intent_gate` on sign-up).
+- **Buyer surface:** colours re-gated as strict hex before any `style`, font
+  URLs and `cssUrl` quoted and escaped, text tiles plain React text, JSON-LD
+  escaped; downloads re-prove the order link on every click; the embed's
+  `frame-ancestors` hosts are `[a-z0-9.-]+` only; no open redirect in cancel,
+  lookup or unsubscribe.
+- **Files and mail:** five upload routes sniff bytes; SVGs are stored as
+  attachments; CSV cells formula-escaped; PDF text never reaches PDF syntax;
+  mail links come from `NEXT_PUBLIC_APP_URL`, never the Host header.
+- **Money:** prices re-derived server-side; code usage re-checked under a row
+  lock; stock taken atomically with add-ons; the test provider needs a
+  development build; both webhooks resolve the account from the database, not
+  the event.
+- **Infra:** no secret in any repo's history; no source maps or dotfiles
+  served; no dangling CNAME among the subdomains found; no `pull_request_target`
+  or expression injection in any workflow.
+
+**Rejected during verification (second pass):**
+- "App's `cors.json` PUT lets an XSS overwrite approved images" (medium):
+  CORS only decides whether a page may read a response. Writing to R2 still
+  needs a SigV4 signature, and nothing presigns a PUT any more.
+- "The MCP Apps view-kit has no `postMessage` origin check" (low): in MCP Apps
+  the parent is the assistant's host, whose origin the view cannot know;
+  checking `event.source === window.parent` is the protocol's pattern.
+- "No DKIM for squareshare.eu" (part of a high): Brevo's `brevo1._domainkey`
+  and `brevo2._domainkey` resolve. The DMARC half stands (1.13).
+- "The two GoTrue hooks may be off" (unsure): both are in the auth logs.
+
+**Hardening notes (second pass, no exploit shown):**
+- App and Home ship no CSP at all, and the Store's is report-only. Give App
+  one before its cutover: it renders user content on a same-site host.
+- Home's waitlist answers 409 for an address already on it (and PostgREST's
+  unique error says the same to a direct insert). Low value either way.
+- Product documents (PDFs) open inline from R2; a seller's PDF can carry
+  JavaScript, which modern viewers restrict. `response-content-disposition`
+  would make them downloads, at a cost to buyers who just want to read one.
+- One-time sign-in and recovery links are spent by the first GET: a mail
+  scanner that follows links can use one before the person does. A
+  confirm-with-a-button page fixes it.
+- The sign-in approval match number has a 0.35% modulo bias (no attack: it is
+  chosen from a list on the approving device).
+- No Permissions-Policy, COOP or `poweredByHeader: false` on the dashboard;
+  deploy.yml passes `secrets: inherit` to the e2e workflow.
+- `pg_net`'s functions and `demo.signal_emit` are executable by anon; neither
+  schema is exposed, so neither is reachable.
+- `.env.local` on the dev machine holds a Supabase management token and live
+  mail and model keys; keep it to what local work needs.
+- Imported reviews count toward a product's rating like native ones (labelled
+  per review, not in the average); `reviews_require_purchase` is still
+  unapplied (known).
+
 ## 3. Open configuration items (owner action, not code)
 
+- **Closed 2026-11-04:** the Before User Created hook is on, and a direct
+  sign-up is refused (verified 2026-11-05). The text below is the state the
+  first pass found.
 - **Supabase Auth CAPTCHA is still off for direct GoTrue calls.** A POST to
   `/auth/v1/signup` with the anon key and a disposable address got as far as
   the password rule (422 `weak_password`, now including `pwned`, so leaked-

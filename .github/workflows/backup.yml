@@ -1,11 +1,17 @@
-# A nightly, encrypted dump of the production database, kept for 14 days.
+# An encrypted dump of the production database, kept for 14 days. Run by
+# hand only, and only from a PRIVATE repository.
 #
-# WHY THIS EXISTS. The production Supabase project is on the Free plan, which
-# keeps NO backups and has no point-in-time recovery (checked 2026-10-09
-# through the Management API: zero backups listed). Until the project is on a
-# plan that has them, this is the only copy of every order, product and
-# account outside the live database. It is a stopgap, not a substitute: a
-# Supabase plan with daily backups (or PITR) is the real fix.
+# WHY IT EXISTED. The production Supabase project was on the Free plan, which
+# keeps NO backups (checked 2026-10-09). This was the stopgap until a plan
+# with daily backups. The org has been on Pro since 2026-10-28, which keeps
+# daily backups, so the nightly schedule is gone.
+#
+# WHY NOT FROM HERE. This repository is public, and the artifacts of a public
+# repository can be downloaded by anyone signed in to GitHub: every nightly
+# dump sat there, encrypted, for 14 days (security audit 2026-11-05,
+# docs/security-audit-2026-11.md). The job now refuses to run while the
+# repository is public. For an off-site copy as well, make the repository
+# private, or change the last step to send the file to a private bucket.
 #
 # RESTORED ONCE, 2026-10-20: run 39488676049 was downloaded, decrypted and
 # restored into a scratch Postgres 17, and all 77 tables of public and auth
@@ -34,9 +40,6 @@
 name: Database backup
 
 on:
-  schedule:
-    # 02:17 UTC, off the hour so it does not queue behind everyone's midnight.
-    - cron: "17 2 * * *"
   workflow_dispatch: {}
 
 concurrency:
@@ -56,9 +59,21 @@ jobs:
       BACKUP_DB_URL: ${{ secrets.BACKUP_DB_URL }}
       BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
     steps:
+      # Before anything is read: an artifact of a public repository is
+      # anyone's to download.
+      - name: Refuse to publish a dump from a public repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          private="$(gh api "repos/${GITHUB_REPOSITORY}" --jq .private)"
+          if [ "$private" != "true" ]; then
+            echo "::error title=No database backup was taken::This repository is public, so anyone signed in to GitHub could download the dump. Make it private, or send the file to a private bucket instead of an artifact."
+            exit 1
+          fi
+
       - name: Say so when it is not set up
         if: ${{ env.BACKUP_DB_URL == '' || env.BACKUP_PASSPHRASE == '' }}
-        run: echo "::warning title=No database backup was taken::Set the BACKUP_DB_URL and BACKUP_PASSPHRASE repository secrets. The production database has no other backup."
+        run: echo "::warning title=No database backup was taken::Set the BACKUP_DB_URL and BACKUP_PASSPHRASE repository secrets."
 
       # pg_dump must be at least as new as the server (Postgres 17).
       - name: Install pg_dump 17

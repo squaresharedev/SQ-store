@@ -23,6 +23,22 @@ export function isObjectKey(value: unknown): value is string {
   return typeof value === "string" && OBJECT_KEY.test(value);
 }
 
+/** Who uploaded the file an object key names: its second segment. */
+export function uploaderOf(key: string): string {
+  return key.split("/")[1] ?? "";
+}
+
+/**
+ * The keys among these that one of `uploaders` uploaded. A row names only its
+ * store's own files while every write meets guard_object_keys, but a deletion
+ * is where trusting that would cost someone else their file, so the job
+ * deletes only what the account or its team uploaded. Any other key is left
+ * alone; the row that named it goes anyway.
+ */
+export function keysUploadedBy(keys: Iterable<string>, uploaders: ReadonlySet<string>): Set<string> {
+  return new Set([...keys].filter((key) => uploaders.has(uploaderOf(key))));
+}
+
 /** Every object key anywhere inside `value` (a row, a config, a list of rows),
  *  each once. */
 export function collectObjectKeys(value: unknown, into: Set<string> = new Set()): Set<string> {

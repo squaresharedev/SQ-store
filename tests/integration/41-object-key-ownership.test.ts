@@ -110,6 +110,88 @@ describe("a key new to the row", () => {
   });
 });
 
+// 20261105_object_keys_anywhere: the account-deletion job deletes every
+// key-shaped string anywhere in the row (collectObjectKeys), so the guard
+// judges every one, in every column, on every write.
+describe("a key anywhere else in the row", () => {
+  it("cannot be another seller's, in any column the deletion job reads", async () => {
+    const theirs = key("images", bob);
+    for (const sql of [
+      `update public.products set details = jsonb_build_object('note', $2::text) where id = $1`,
+      `update public.products set option_groups = jsonb_build_array(jsonb_build_object('name', 'Size', 'values', jsonb_build_array(jsonb_build_object('label', $2::text)))) where id = $1`,
+      `update public.products set description = $2 where id = $1`,
+      `update public.products set title = $2 where id = $1`,
+    ]) {
+      const msg = await expectDbError(asUser(alice, (q) => q.query(sql, [productId, theirs])));
+      expect(msg).toMatch(/uploading it, not by naming it/);
+    }
+    const paid = await expectDbError(
+      asUser(alice, (q) =>
+        q.query(
+          `insert into public.products (owner_id, title, price_cents, details)
+           values ($1, 'Copy', 100, jsonb_build_object('x', $2::text))`,
+          [alice.id, key("files", bob)],
+        ),
+      ),
+    );
+    expect(paid).toMatch(/uploading it, not by naming it/);
+  });
+
+  it("cannot be someone else's under any property of a storefront config", async () => {
+    const msg = await expectDbError(
+      asUser(alice, (q) =>
+        q.query(
+          `update public.storefronts
+              set config = jsonb_build_object('blocks', jsonb_build_array(jsonb_build_object('type', 'text', 'text', $2::text)))
+            where id = $1`,
+          [storefrontId, key("elements", bob)],
+        ),
+      ),
+    );
+    expect(msg).toMatch(/uploading it, not by naming it/);
+  });
+
+  it("is fine when it is the writer's own, and text that only looks like a path is left alone", async () => {
+    const { rowCount } = await asUser(alice, (q) =>
+      q.query(
+        `update public.products set details = jsonb_build_object('note', $2::text, 'other', 'images/are/nice') where id = $1`,
+        [productId, key("images", alice)],
+      ),
+    );
+    expect(rowCount).toBe(1);
+  });
+});
+
+// App's artifacts: DELETE /api/artifacts/:id evicts the row's image_key from
+// the bucket the Store shares, so only the writer's own App upload may go in.
+describe("an App artifact's picture", () => {
+  const appKey = (owner: TestUser) => `artifacts/${owner.id}/${randomUUID()}-artifact.jpg`;
+  const insertArtifact = (owner: TestUser, imageKey: string) =>
+    asUser(owner, (q) =>
+      q.query(
+        `insert into public.artifacts (owner_id, image_key, grid_x, grid_y) values ($1, $2, 1, 1) returning id`,
+        [owner.id, imageKey],
+      ),
+    );
+
+  it("cannot be another user's App upload, or any Store file", async () => {
+    for (const theirs of [appKey(bob), key("images", bob), key("files", bob), "https://example.net/a.jpg"]) {
+      const msg = await expectDbError(insertArtifact(alice, theirs));
+      expect(msg).toMatch(/uploading it, not by naming it/);
+    }
+  });
+
+  it("is the writer's own, and cannot be swapped for someone else's later", async () => {
+    const { rows } = await insertArtifact(alice, appKey(alice));
+    const msg = await expectDbError(
+      asUser(alice, (q) =>
+        q.query(`update public.artifacts set image_key = $2 where id = $1`, [rows[0].id, appKey(bob)]),
+      ),
+    );
+    expect(msg).toMatch(/uploading it, not by naming it/);
+  });
+});
+
 describe("keys already on the row", () => {
   it("stay valid for a teammate who saves without touching them, and theirs can be added", async () => {
     const { rowCount } = await asUser(editor, (q) =>

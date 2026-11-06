@@ -3,6 +3,7 @@
  * the new profiles fields (username, is_public): owners get full CRUD, the
  * public sees exactly what is_public flags expose, strangers get nothing else.
  */
+import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   asAnon,
@@ -14,6 +15,10 @@ import {
   expectDbError,
   type TestUser,
 } from "../db/client";
+
+/** A key App's upload route would mint for this user: since 20261105 a
+ *  user's own write may hold nothing else (41-object-key-ownership). */
+const ownKey = (owner: TestUser) => `artifacts/${owner.id}/${randomUUID()}-artifact.webp`;
 
 let carol: TestUser; // curator whose content we probe
 let dave: TestUser; // unrelated second user
@@ -285,8 +290,8 @@ describe("artifacts RLS", () => {
     const msg = await expectDbError(
       asUser(dave, (q) =>
         q.query(
-          `insert into public.artifacts (owner_id, image_key) values ($1, 'images/x/spoof.webp')`,
-          [carol.id],
+          `insert into public.artifacts (owner_id, image_key) values ($1, $2)`,
+          [carol.id, ownKey(dave)],
         ),
       ),
     );
@@ -300,8 +305,8 @@ describe("artifacts RLS", () => {
     const { rows } = await asUser(dave, (q) =>
       q.query(
         `insert into public.artifacts (owner_id, collection_id, image_key)
-         values ($1, $2, 'images/dave/d.webp') returning id`,
-        [dave.id, publicCollectionId],
+         values ($1, $2, $3) returning id`,
+        [dave.id, publicCollectionId, ownKey(dave)],
       ),
     );
     expect(rows).toHaveLength(1);
@@ -310,14 +315,14 @@ describe("artifacts RLS", () => {
 
   it("enforces grid checks: spans >= 1, positions >= 0, title <= 200", async () => {
     const cases = [
-      `insert into public.artifacts (owner_id, image_key, span_w) values ($1, 'k', 0)`,
-      `insert into public.artifacts (owner_id, image_key, span_h) values ($1, 'k', 0)`,
-      `insert into public.artifacts (owner_id, image_key, grid_x) values ($1, 'k', -1)`,
-      `insert into public.artifacts (owner_id, image_key, grid_y) values ($1, 'k', -1)`,
-      `insert into public.artifacts (owner_id, image_key, title) values ($1, 'k', repeat('x', 201))`,
+      `insert into public.artifacts (owner_id, image_key, span_w) values ($1, $2, 0)`,
+      `insert into public.artifacts (owner_id, image_key, span_h) values ($1, $2, 0)`,
+      `insert into public.artifacts (owner_id, image_key, grid_x) values ($1, $2, -1)`,
+      `insert into public.artifacts (owner_id, image_key, grid_y) values ($1, $2, -1)`,
+      `insert into public.artifacts (owner_id, image_key, title) values ($1, $2, repeat('x', 201))`,
     ];
     for (const sql of cases) {
-      const msg = await expectDbError(asUser(carol, (q) => q.query(sql, [carol.id])));
+      const msg = await expectDbError(asUser(carol, (q) => q.query(sql, [carol.id, ownKey(carol)])));
       expect(msg).toMatch(/check constraint/i);
     }
   });
@@ -370,8 +375,8 @@ describe("artifact FK detach behavior", () => {
     });
     const artifactId = await asUser(carol, async (q) => {
       const { rows } = await q.query(
-        `insert into public.artifacts (owner_id, product_id, image_key) values ($1, $2, 'images/p.webp') returning id`,
-        [carol.id, productId],
+        `insert into public.artifacts (owner_id, product_id, image_key) values ($1, $2, $3) returning id`,
+        [carol.id, productId, ownKey(carol)],
       );
       return rows[0].id as string;
     });

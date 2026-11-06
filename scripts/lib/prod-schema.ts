@@ -52,6 +52,8 @@ export const UNPROBED_MIGRATIONS: Record<string, string> = {
     "Applied AFTER the deploy, for the same reason, and after SQ-app's: it makes collection names writable by the service role only and empties the public directory until each handle is approved. Nothing in this build reads anything it adds.",
   "20261027_reviews_buyers_only.sql":
     "NOT YET APPLIED to prod. A second guard behind the review route's own check that a buyer review belongs to a paid order of that product; the app never depends on it. Once applied, replace this entry with a function requirement on reviews_require_purchase().",
+  "20261103_two_factor_review_tables.sql":
+    "Applied 2026-11-04. It only adds RESTRICTIVE policies, which this probe has no kind for, and the build reads nothing it adds.",
 };
 
 export const SCHEMA_REQUIREMENTS: readonly SchemaRequirement[] = [
@@ -149,6 +151,11 @@ export const SCHEMA_REQUIREMENTS: readonly SchemaRequirement[] = [
   { kind: "function", signature: "ai_credit_settle(uuid,date,date,bigint)", migration: "20261104_ai_credit.sql" },
   { kind: "column", table: "profiles", column: "ai_suggest_as_you_type", migration: "20261104_ai_credit.sql" },
   { kind: "check", constraint: "seller_funnel_events_source_check", allows: "ai_writing", migration: "20261104_ai_credit.sql" },
+  { kind: "function", signature: "object_key_strings_in(jsonb)", migration: "20261105_object_keys_anywhere.sql" },
+  { kind: "function", signature: "guard_artifact_image_key()", migration: "20261105_object_keys_anywhere.sql" },
+  { kind: "function", signature: "guard_account_ceiling()", migration: "20261105_write_bounds.sql" },
+  { kind: "function", signature: "guard_anonymous_insert_rate()", migration: "20261105_write_bounds.sql" },
+  { kind: "function", signature: "guard_avatar_url()", migration: "20261105_write_bounds.sql" },
 ];
 
 /** A SQL string literal. Every value below is a constant from this file, and

@@ -40,12 +40,15 @@ describe("embedded supabase replica", () => {
       "agent_grants",
       "agent_tokens",
       "agent_uploads",
+      "ai_credit_usage",
+      "ai_platform_usage",
       "artifact_likes",
       "artifacts",
       // The seller-plan launch switch: whether plan limits refuse creates
       // yet (20260930_seller_plans). Service-role only.
       "billing_switches",
       "collections",
+      "consent_logs",
       // Pending codes proving a seller owns their buyer-facing email and
       // phone (20260926_contact_verification). Service-role only.
       "contact_verifications",
@@ -142,6 +145,8 @@ describe("embedded supabase replica", () => {
       // (20260930_seller_plans). Service-role only.
       "stripe_events",
       "team_members",
+      "terms_notice_sends",
+      "terms_versions",
       "waitlist_signups",
     ]);
   });

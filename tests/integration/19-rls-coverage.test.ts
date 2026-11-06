@@ -35,6 +35,11 @@ const POLICY_FREE_BY_DESIGN = new Set([
   "agent_tokens",
   "agent_uploads",
   "agent_audit_log",
+  // Who has been sent the notice of a new Terms version, and how often it
+  // was tried (20261031_terms_notices). Only the daily job writes and reads
+  // it, through the service role (lib/legal/terms-notices.ts): a client that
+  // could read it would list every account the notice went to.
+  "terms_notice_sends",
   // Rate-limit state. Written only through rl_take / rl_take_key, which are
   // SECURITY DEFINER; a client that could read these could map other users'
   // budgets, and one that could write them could clear its own.

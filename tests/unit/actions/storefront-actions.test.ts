@@ -17,7 +17,7 @@ vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 const dbFn = vi.fn();
 const db: any = {};
 // SF-03: added "like" for the name-deduplication query inside createStorefront.
-for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in", "like"]) {
+for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in", "like", "order", "limit"]) {
   db[m] = vi.fn(() => db);
 }
 db.single = vi.fn(() => dbFn());
@@ -60,11 +60,13 @@ vi.mock('@/lib/rate-limit', async (importOriginal) => ({
 
 // The publish gate reads the owner's profile with the SERVICE ROLE, which has
 // no env here. Defaults to "this store may publish"; the embed cases below
-// flip it to assert the gate.
+// flip it to assert the gate. createStorefront reads the business name the
+// same way: none here, so a new storefront takes the default name.
 const publishBlockedMock = vi.fn(async () => null as unknown);
 vi.mock("@/lib/settings/seller-identity", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/settings/seller-identity")>()),
   publishBlockedError: (...args: unknown[]) => publishBlockedMock(...(args as [])),
+  getSellerIdentity: async () => ({}),
 }));
 
 // ---- imports -------------------------------------------------------------
@@ -113,7 +115,7 @@ beforeEach(() => {
   rateLimitMock.mockResolvedValue(true);
   publishBlockedMock.mockResolvedValue(null);
   dbFn.mockResolvedValue({ data: null, error: null });
-  for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in", "like"]) {
+  for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in", "like", "order", "limit"]) {
     db[m].mockReturnValue(db);
   }
   db.single.mockImplementation(() => dbFn());
@@ -144,8 +146,10 @@ describe("createStorefront - auth gates", () => {
 describe("createStorefront - happy path", () => {
   it("inserts the default storefront for the account and returns its id", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
-    // SF-03: first dbFn call is the name-dedup SELECT (db.then); second is insert .single().
+    // SF-03: first dbFn call is the name-dedup SELECT (db.then); then the newest
+    // storefront to carry the design over from (.maybeSingle); then the insert.
     dbFn.mockResolvedValueOnce({ data: [], error: null }); // name check: no duplicates
+    dbFn.mockResolvedValueOnce({ data: null, error: null }); // no earlier storefront
     dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null }); // insert
 
     const result = await createStorefront();
@@ -168,6 +172,7 @@ describe("createStorefront - happy path", () => {
   it("SF-03: auto-suffixes the name when one already exists", async () => {
     getActiveAccountMock.mockResolvedValue(ownerAccount());
     dbFn.mockResolvedValueOnce({ data: [{ name: "Untitled storefront" }], error: null });
+    dbFn.mockResolvedValueOnce({ data: null, error: null }); // no earlier storefront
     dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
 
     await createStorefront();

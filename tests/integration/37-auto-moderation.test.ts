@@ -593,8 +593,8 @@ describe("the approved list and its functions", () => {
 });
 
 describe("the marketplace", () => {
-  const artifactKey =
-    "artifacts/11111111-1111-4111-8111-111111111111/99999999-9999-4999-8999-999999999999-art.jpg";
+  // The writer's own upload: since 20261105 no other key gets onto the row.
+  const artifactKey = () => `artifacts/${other.id}/99999999-9999-4999-8999-999999999999-art.jpg`;
   let artifactId: string;
 
   const seenByAnyone = async () =>
@@ -613,7 +613,7 @@ describe("the marketplace", () => {
     artifactId = await asUser(other, async (q) => {
       const { rows } = await q.query(
         `insert into public.artifacts (owner_id, title, image_key) values ($1, 'Wall piece', $2) returning id`,
-        [other.id, artifactKey],
+        [other.id, artifactKey()],
       );
       return rows[0].id as string;
     });
