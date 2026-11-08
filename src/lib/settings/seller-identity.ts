@@ -39,6 +39,7 @@ import { emailQualityProblem } from "@/lib/validation/email-quality";
 import { addressQualityProblem } from "@/lib/validation/address-quality";
 import { formatPhoneInternational } from "@/lib/validation/phone";
 import {
+  isTraderIdentityComplete,
   missingTraderIdentity,
   type TraderIdentityField,
   type TraderIdentityInput,
@@ -109,6 +110,18 @@ export function buildTraderIdentityInput(
     ...(email && plausibleEmail(email) ? { email } : {}),
     emailVerified: Boolean(row?.seller_email_verified_at),
   };
+}
+
+/**
+ * THE READ SIDE OF THE PUBLISH GATE, as every public page asks it: may this
+ * seller's offers be shown to a buyer? Pass `null` when the row could not be
+ * read: that fails closed, since an identity we could not read is one we
+ * cannot display.
+ */
+export function sellerMaySell(row: TraderGateRow | null): boolean {
+  return isTraderIdentityComplete(buildTraderIdentityInput(row), {
+    requireVerifiedEmail: emailProofRequired(),
+  });
 }
 
 /**

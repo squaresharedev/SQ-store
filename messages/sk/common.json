@@ -91,7 +91,11 @@
     "proportional": "Pomerné rozdelenie",
     "other": "Ostatné",
     "total": "Spolu",
-    "category": "Kategória"
+    "category": "Kategória",
+    "changeUp": "Nárast o {percent} oproti predchádzajúcemu obdobiu",
+    "changeDown": "Pokles o {percent} oproti predchádzajúcemu obdobiu",
+    "vsBefore": "oproti {amount} predtým",
+    "spark": "{label} po dňoch"
   },
   "legal": {
     "cookies": {

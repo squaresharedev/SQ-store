@@ -10,7 +10,7 @@
     },
     "storefront": {
       "label": "Etalage",
-      "description": "Ontwerp het raster waarop je producten staan."
+      "description": "Ontwerp het raster waarop je producten staan. Het wordt een pagina die kopers kunnen openen en delen."
     },
     "orders": {
       "label": "Bestellingen",
@@ -31,7 +31,8 @@
     "discounts": {
       "label": "Kortingen",
       "description": "Voer acties uit en deel kortingscodes."
-    }
+    },
+    "help": "Hulp"
   },
   "settings": {
     "account": "Account",
@@ -42,17 +43,18 @@
     "notifications": "Meldingen",
     "language": "Taal",
     "team": "Team en toegang",
-    "danger": "Gevarenzone",
+    "danger": "Account verwijderen",
     "billing": "Abonnement en facturering",
-    "connectedApps": "Gekoppelde apps"
+    "connectedApps": "AI-assistent"
   },
   "profileMenu": {
     "label": "Accountmenu",
     "account": "Account",
-    "switchAccounts": "Van account wisselen",
+    "switchAccounts": "Mijn winkels",
     "yourStore": "Je winkel",
     "owner": "Eigenaar",
     "logOut": "Uitloggen",
+    "logOutEverywhere": "Overal uitloggen",
     "plan": "Abonnement"
   },
   "viewingBanner": {

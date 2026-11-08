@@ -4,6 +4,7 @@ import Link from "@/components/ui/AppLink";
 import { useMemo, useState } from "react";
 import { AccountPlanProvider, PlanPricesProvider } from "@/components/billing/plan-context";
 import { PlanChip } from "@/components/billing/PlanChip";
+import { NAV_ITEM_CLASSES } from "@/components/dashboard/Sidebar";
 import { PlanLimitNotice } from "@/components/billing/PlanLimitNotice";
 import { PlansPage } from "@/components/billing/PlansPage";
 import { UpgradeCard } from "@/components/billing/UpgradeCard";
@@ -122,7 +123,7 @@ export function PricingGallery({ banners }: { banners: React.ReactNode }) {
         <GallerySection title="Rail chip, Orders export button">
           <div className="flex flex-wrap items-center gap-6">
             <div className="w-64 border border-border p-3">
-              <PlanChip className="flex items-center gap-2 rounded-sm px-3 py-2.5 text-sm font-medium" />
+              <PlanChip className={NAV_ITEM_CLASSES} />
             </div>
             <OrdersExportButton enabled={planHas(context.plan, "ordersExport")} />
           </div>

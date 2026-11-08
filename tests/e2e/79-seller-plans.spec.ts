@@ -97,7 +97,7 @@ test.describe("seller plans", () => {
     const sellerId = await userIdByEmail(seller.email);
 
     // A new account is on Free, and the rail offers the upgrade.
-    await expect(page.locator("nav [data-plan-chip='free']")).toBeVisible();
+    await expect(page.locator("nav [data-plan-chip='free']")).toContainText("Upgrade to Starter");
 
     await openPlansFromRail(page);
     await expect(page.locator("[data-pricing-plan='free']")).toContainText("Current plan");
@@ -110,7 +110,8 @@ test.describe("seller plans", () => {
     await expect(page.locator("[data-billing-return='confirmed']")).toContainText("You're on Pro");
     await expect(page.locator("[data-billing-plan='pro']")).toBeVisible();
     await expect(page).toHaveURL(/\/settings\/billing$/);
-    await expect(page.locator("nav [data-plan-chip='pro']")).toBeVisible();
+    // ...and the rail has nothing left to offer, so the chip is gone.
+    await expect(page.locator("nav [data-plan-chip]")).toHaveCount(0);
     // On the top plan, Settings shows what it has rather than selling more.
     await expect(page.locator("[data-upsell='top']")).toBeVisible();
 
@@ -350,6 +351,15 @@ test.describe("seller plans", () => {
       const productCount = async () =>
         ((await serviceRest(`/products?owner_id=eq.${sellerId}&select=id`)) as unknown[]).length;
 
+      // Nearly full: the products list says so before Add product meets it.
+      await page.goto("/products");
+      const usage = page.locator("[data-products-plan-usage]");
+      await expect(usage).toContainText(`${cap - 2} of ${cap} products on your plan.`);
+      await expect(usage.getByRole("link", { name: "See plans" })).toHaveAttribute(
+        "href",
+        "/plans?from=product_limit",
+      );
+
       // Room for two: the import says so, brings in two of five, and names
       // the three it left out, with the way to more room.
       await page.goto("/products/import");
@@ -366,7 +376,7 @@ test.describe("seller plans", () => {
         "/plans?from=product_limit",
       );
       await page.getByRole("button", { name: /^import 2 products$/i }).click();
-      await expect(page).toHaveURL(/\/products$/);
+      await expect(page.locator("[data-import-done]")).toContainText("2 products were imported.");
       expect(await productCount()).toBe(cap);
 
       // Full: both ways of adding a product show the limit instead of a form.

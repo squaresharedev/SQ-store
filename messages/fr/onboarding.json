@@ -2,7 +2,7 @@
   "steps": {
     "seller": {
       "label": "Ajoutez vos informations vendeur",
-      "detail": "Votre raison sociale, votre adresse et votre e-mail de contact figurent sur chaque page produit.",
+      "detail": "Votre nom ou celui de votre entreprise, votre adresse et votre e-mail de contact figurent sur chaque page produit.",
       "detailDone": "Les acheteurs peuvent voir à qui ils achètent.",
       "detailUnconfirmed": "Confirmez votre e-mail de contact avec le code que nous lui envoyons.",
       "action": "Ajouter les informations",
@@ -20,10 +20,10 @@
     "storefront": {
       "label": "Placez un produit sur une vitrine",
       "detailDone": "Un produit est sur votre vitrine.",
-      "detailNone": "Créez une vitrine, puis ajoutez-y un produit dans sa grille.",
-      "detailEmpty": "Ouvrez votre vitrine et choisissez Ajouter un produit dans la barre d’outils.",
+      "detailNone": "Une vitrine est la page de votre boutique. Créez-en une, puis ajoutez un produit à sa grille.",
+      "detailEmpty": "Ouvrez votre vitrine et utilisez le bouton Ajouter un produit, en haut.",
       "actionCreate": "Créer une vitrine",
-      "actionOpen": "Ouvrir l’éditeur",
+      "actionOpen": "Ouvrir la vitrine",
       "cta": "Ouvrez votre vitrine",
       "ctaCreate": "Créez une vitrine"
     },
@@ -32,7 +32,7 @@
       "detailDone": "Votre page produit est en ligne.",
       "detailNeedsSeller": "Terminez vos informations vendeur, votre page pourra alors passer en ligne.",
       "detailNeedsStorefront": "Une fois un produit sur une vitrine, sa page peut passer en ligne.",
-      "detailNeedsActive": "Passez ce produit en Actif pour que sa page soit en ligne.",
+      "detailNeedsActive": "Ouvrez le produit et passez son statut à Actif pour mettre sa page en ligne.",
       "detailChecking": "Votre page sera en ligne dès que la vérification automatique aura approuvé le produit.",
       "detailPaused": "La vérification automatique a mis ce produit en pause. Ouvrez-le pour voir quoi modifier.",
       "detailPagesOff": "Les pages produit sont désactivées sur cette vitrine. Activez-les dans l’éditeur.",
@@ -64,7 +64,7 @@
     "showMeAround": "Faire une visite guidée",
     "showSteps": "Afficher les étapes",
     "hideSteps": "Masquer les étapes",
-    "liveHint": "Votre première page produit est en ligne. Partagez le lien où vous voulez.",
+    "liveHint": "Votre première page produit est en ligne. Partagez les liens où vous voulez.",
     "copyLink": {
       "copy": "Copier le lien de la page produit",
       "copied": "Lien de la page produit copié",
@@ -75,7 +75,12 @@
     "hide": "Masquer",
     "progress": "{total, plural, one {{done} sur {total} terminée} many {{done} sur {total} terminées} other {{done} sur {total} terminées}}",
     "stepDone": " (terminé)",
-    "stepToDo": " (à faire)"
+    "stepToDo": " (à faire)",
+    "copyStorefrontLink": {
+      "copy": "Copier le lien de la vitrine",
+      "copied": "Lien de la vitrine copié",
+      "failed": "Impossible de copier le lien de la vitrine. Sélectionnez-le et copiez-le manuellement."
+    }
   },
   "welcome": {
     "steps": {
@@ -121,10 +126,10 @@
     "seller": {
       "namePlaceholder": "ex. : Claire Martin ou Céramiques Claire",
       "nameHelp": "Votre raison sociale, ou votre nom complet si vous vendez en votre nom propre.",
-      "nameAlternative": "Ou votre nom complet, si vous vendez en votre nom propre.",
+      "nameAlternative": "Si vous vendez en votre nom propre, indiquez votre nom complet.",
       "addressPlaceholder": "p. ex. 12 rue du Marché\n75001 Paris\nFrance",
       "emailPlaceholder": "p. ex. bonjour@votreboutique.example",
-      "emailHelp": "L’adresse à laquelle les acheteurs vous écrivent. Elle peut différer de votre e-mail de connexion.",
+      "emailHelp": "L’adresse à laquelle les acheteurs vous écrivent. Elle peut différer de votre e-mail de connexion.{verify, select, true { Nous enverrons un code à cette adresse pour la confirmer.} other {}}",
       "emailTipLabel": "À propos de cet e-mail"
     },
     "confirm": {
@@ -140,12 +145,12 @@
     "nav": {
       "skipOnboarding": "Passer la prise en main",
       "next": "Suivant",
-      "showMeAround": "Faites-moi visiter",
       "skipIntro": "Passer l’introduction",
       "getStarted": "Commencer",
       "skipForNow": "Passer pour l’instant",
       "saveAndContinue": "Enregistrer et continuer",
       "continue": "Continuer",
+      "confirmLater": "Confirmer plus tard",
       "exploreOnMyOwn": "Explorer par moi-même",
       "notNow": "Pas maintenant"
     },
@@ -205,16 +210,13 @@
       },
       "storefrontEmbed": {
         "title": "Intégrez une vitrine à votre site",
-        "body": "Chaque vitrine a un bouton d’intégration qui vous donne un code comme celui-ci. Le widget est encore en développement et ne s’affiche pas encore sur d’autres sites.",
-        "bodyButton": "Ce bouton vous donne un code comme celui ci-dessous, à coller dans votre site. Le widget est encore en développement et ne s’affiche pas encore sur d’autres sites.",
-        "fallbackBody": "Une fois que vous avez une vitrine, le bouton d’intégration de sa carte vous donne un code comme celui-ci. Le widget est encore en développement et ne s’affiche pas encore sur d’autres sites.",
-        "bodyLive": "Chaque vitrine a un bouton d’intégration qui vous donne un code comme celui-ci. Collez-le dans votre propre site et la vitrine s’y affiche.",
-        "bodyButtonLive": "Ce bouton vous donne un code comme celui ci-dessous. Collez-le dans votre propre site et la vitrine s’y affiche.",
-        "fallbackBodyLive": "Une fois que vous avez une vitrine, le bouton d’intégration de sa carte vous donne un code comme celui-ci, à coller dans votre propre site."
+        "bodyLive": "Chaque vitrine a un bouton d’intégration qui vous donne un code pour votre site, comme celui-ci. Collez-le dans votre propre site et la vitrine s’y affiche.",
+        "bodyButtonLive": "Ce bouton vous donne un code pour votre site, comme celui ci-dessous. Collez-le dans votre propre site et la vitrine s’y affiche.",
+        "fallbackBodyLive": "Une fois que vous avez une vitrine, le bouton d’intégration de sa carte vous donne un code pour votre site, comme celui-ci, à coller dans votre propre site."
       },
       "ordersSearch": {
         "title": "Retrouvez une commande",
-        "body": "Recherchez dans cette liste par e-mail de l’acheteur. Pour retrouver une commande par son numéro, un nom, une ville ou un numéro de suivi, utilisez la recherche en haut de la page."
+        "body": "Recherchez dans cette liste par numéro de commande, e-mail ou nom de l’acheteur, ville, produit ou numéro de suivi."
       },
       "ordersFilters": {
         "title": "Filtrez et triez",
@@ -241,7 +243,7 @@
     "steps": {
       "editorAdd": {
         "title": "Ajoutez à votre grille",
-        "body": "Ajoutez des produits, du texte et des formes depuis cette barre. Faites glisser un élément de la grille pour le déplacer, et tirez sur un coin pour le redimensionner."
+        "body": "Ajoutez des produits, du texte, des formes et des images depuis cette barre. Touchez ou cliquez sur un bloc pour le sélectionner, puis faites-le glisser pour le déplacer. Tirez sur une poignée d’angle pour le redimensionner."
       },
       "editorDesign": {
         "title": "Définissez l’apparence",
@@ -255,8 +257,13 @@
       },
       "editorFinish": {
         "title": "Faites-en la vôtre",
-        "body": "L’exemple n’est jamais enregistré : essayez ce que vous voulez. Quand vous êtes prêt, créez votre propre vitrine."
+        "body": "L’exemple n’est jamais enregistré : essayez ce que vous voulez. Quand vous êtes prêt, créez votre propre vitrine.",
+        "bodySave": "Appuyez sur Enregistrer pour conserver votre travail. Quand le résultat vous plaît, Partager vous donne son lien et le code pour votre site."
       }
     }
+  },
+  "install": {
+    "title": "Ajoutez Square Share à votre écran d’accueil",
+    "add": "Ajouter"
   }
 }

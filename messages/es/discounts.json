@@ -51,7 +51,8 @@
     "noEnd": "Sin fecha de fin",
     "orders": "{orders, plural, =0 {Todavía no hay pedidos} one {# pedido} other {# pedidos}}",
     "uses": "{uses} de {limit} usos",
-    "switchLabel": "Activo",
+    "turnOn": "Activar",
+    "turnOff": "Desactivar",
     "edit": "Editar",
     "endNow": "Terminar ahora",
     "delete": "Eliminar",
@@ -86,7 +87,7 @@
     "kind": {
       "title": "¿Qué tipo de descuento?",
       "code": "Código de descuento",
-      "codeHint": "Los compradores lo escriben al pagar, y ves de qué canal llegaron.",
+      "codeHint": "Los compradores lo escriben al pagar, y ves de qué canal llegaron. No se suma a una rebaja en curso: los compradores obtienen el precio más bajo.",
       "automatic": "Rebajas",
       "automaticHint": "Baja tus precios para todos. Sin código."
     },
@@ -99,6 +100,7 @@
     },
     "channel": {
       "label": "Compartido en (opcional)",
+      "hint": "Consulta cuántos pedidos trae cada canal en tu página de Descuentos.",
       "suggestions": "Canales sugeridos",
       "newsletter": "Boletín",
       "creator": "Creador"
@@ -141,7 +143,7 @@
       }
     },
     "limit": {
-      "label": "Máximo de pedidos (opcional)",
+      "label": "Máximo de usos (opcional)",
       "none": "Sin límite"
     },
     "locked": "Esta rebaja ya ha empezado, así que solo puede cambiarse su fin. Para cambiar cualquier otra cosa, termínala y crea una nueva rebaja.",
@@ -153,7 +155,8 @@
       "noEnd": "Sin fecha de fin",
       "exampleLabel": "Ejemplo",
       "example": "Ejemplo: {title} a {regular} cuesta {now}.",
-      "chipLink": "Cambiar cómo se ven las rebajas en tu tienda"
+      "exampleUnchanged": "{title} se queda en {price}: tiene el precio en otra moneda.",
+      "chipLink": "Cambiar cómo se ven las rebajas en {storefront}"
     },
     "create": "Crear descuento",
     "save": "Guardar cambios",

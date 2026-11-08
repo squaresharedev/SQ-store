@@ -99,8 +99,10 @@ export function canGrant(
 /** Roles that can appear in invite / role-change forms. Never includes owner. */
 export const ASSIGNABLE_ROLES = ["editor", "viewer"] as const satisfies readonly TeamRole[];
 
-/** Least-privilege default for new invites. */
-export const DEFAULT_INVITE_ROLE: TeamRole = "viewer";
+/** Default for new invites: a helper is usually there to edit, and Viewer is
+ *  one pick away. Never owner (ASSIGNABLE_ROLES), and the form still offers
+ *  only what the inviter may grant (canGrant). */
+export const DEFAULT_INVITE_ROLE: (typeof ASSIGNABLE_ROLES)[number] = "editor";
 
 /**
  * Each role's name and what it can do, as message keys: this module is shared

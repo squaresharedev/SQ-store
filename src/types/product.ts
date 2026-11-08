@@ -31,6 +31,12 @@ export interface Product {
    * derived from the row's `digital_file_key`. `null` until one is uploaded.
    */
   digitalFileName: string | null;
+  /**
+   * The seller's own buy link, where the product page's buy button goes; null
+   * = none set. Every catalogue read fills it (the designer warns about a
+   * button with nowhere to go); products built in code may leave it out.
+   */
+  purchaseUrl?: string | null;
   /** Stock tracking is opt-in per product; false = unlimited (no badge). */
   trackStock: boolean;
   /** Units on hand. Set (>= 0) whenever `trackStock`; null when not tracking. */
@@ -640,7 +646,14 @@ export interface ProductFilters {
   search?: string;
   /** Exact lifecycle match. */
   status?: ProductStatus;
+  /** Only what moderation is holding back from buyers: checking, in review,
+   *  paused or removed. */
+  moderated?: boolean;
 }
+
+/** The products list's `?status=` value for `moderated`, offered in the same
+ *  status filter as the lifecycle statuses. */
+export const MODERATED_FILTER = "moderated";
 
 export interface ProductSalesSummary {
   byProduct: Record<string, ProductSales>;

@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { DiscountFormView } from "@/components/discounts/DiscountFormView";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { getDiscount, listProductChoices, saleChipHref } from "@/lib/discounts/queries";
+import { getDiscount, listProductChoices, saleChipLink } from "@/lib/discounts/queries";
 import { DISCOUNTS_PATH } from "@/lib/discounts/paths";
 import { requireUser } from "@/lib/auth/session";
 
@@ -21,13 +21,13 @@ export default async function EditDiscountPage({ params }: { params: Promise<{ i
   // (see ../layout.tsx, or ../../layout.tsx from a nested page): a page asks.
   await requireUser(DISCOUNTS_PATH);
   const { id } = await params;
-  const [account, discount, products, chipHref] = await Promise.all([
+  const [account, discount, products, chip] = await Promise.all([
     getActiveAccount(),
     getDiscount(id),
     listProductChoices(),
-    saleChipHref(),
+    saleChipLink(),
   ]);
   if (!can(account?.role, "products.write")) redirect(DISCOUNTS_PATH);
   if (!discount) notFound();
-  return <DiscountFormView discount={discount} products={products} chipHref={chipHref} />;
+  return <DiscountFormView discount={discount} products={products} chip={chip} />;
 }

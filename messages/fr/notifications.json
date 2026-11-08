@@ -159,8 +159,8 @@
         "body": "C'est un téléchargement, il n'y a donc rien à expédier."
       },
       "withdrawn": {
-        "title": "Un acheteur s'est rétracté de la commande {number}",
-        "body": "{title}. Organisez le retour et le remboursement avec lui."
+        "title": "Un acheteur a annulé la commande {number}",
+        "body": "{title}. Organisez le retour et remboursez-le sous 14 jours."
       }
     },
     "billing": {

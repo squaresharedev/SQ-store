@@ -2,7 +2,7 @@
   "steps": {
     "seller": {
       "label": "Dodaj dane sprzedawcy",
-      "detail": "Twoja nazwa przedsiębiorcy, adres i e-mail kontaktowy trafiają na każdą stronę produktu.",
+      "detail": "Twoje imię i nazwisko lub nazwa firmy, adres i e-mail kontaktowy trafiają na każdą stronę produktu.",
       "detailDone": "Kupujący widzą, od kogo kupują.",
       "detailUnconfirmed": "Potwierdź e-mail kontaktowy za pomocą kodu, który na niego wysyłamy.",
       "action": "Dodaj dane",
@@ -20,10 +20,10 @@
     "storefront": {
       "label": "Umieść produkt w witrynie",
       "detailDone": "Produkt znajduje się w twojej witrynie.",
-      "detailNone": "Utwórz witrynę, a potem dodaj produkt do jej siatki.",
-      "detailEmpty": "Otwórz witrynę i wybierz Dodaj produkt na pasku narzędzi.",
+      "detailNone": "Witryna to strona twojego sklepu. Utwórz ją, a potem dodaj produkt do jej siatki.",
+      "detailEmpty": "Otwórz witrynę i użyj przycisku Dodaj produkt na górze.",
       "actionCreate": "Utwórz witrynę",
-      "actionOpen": "Otwórz edytor",
+      "actionOpen": "Otwórz witrynę",
       "cta": "Otwórz swoją witrynę",
       "ctaCreate": "Utwórz witrynę"
     },
@@ -32,7 +32,7 @@
       "detailDone": "Strona twojego produktu jest opublikowana.",
       "detailNeedsSeller": "Uzupełnij dane sprzedawcy, aby móc opublikować stronę.",
       "detailNeedsStorefront": "Gdy produkt znajdzie się w witrynie, jego strona będzie mogła zostać opublikowana.",
-      "detailNeedsActive": "Ustaw ten produkt jako Aktywny, aby jego strona została opublikowana.",
+      "detailNeedsActive": "Otwórz produkt i ustaw jego status na Aktywny, aby opublikować jego stronę.",
       "detailChecking": "Twoja strona zostanie opublikowana, gdy automatyczne sprawdzanie zatwierdzi produkt.",
       "detailPaused": "Automatyczne sprawdzanie wstrzymało ten produkt. Otwórz go, aby zobaczyć, co zmienić.",
       "detailPagesOff": "Strony produktów są wyłączone w tej witrynie. Włącz je w edytorze.",
@@ -64,7 +64,7 @@
     "showMeAround": "Oprowadź mnie",
     "showSteps": "Pokaż kroki",
     "hideSteps": "Ukryj kroki",
-    "liveHint": "Strona twojego pierwszego produktu jest opublikowana. Udostępnij link, gdzie chcesz.",
+    "liveHint": "Strona twojego pierwszego produktu jest opublikowana. Udostępniaj linki, gdzie chcesz.",
     "copyLink": {
       "copy": "Kopiuj link do strony produktu",
       "copied": "Skopiowano link do strony produktu",
@@ -75,7 +75,12 @@
     "hide": "Ukryj",
     "progress": "{total, plural, one {Ukończono {done} z {total}} few {Ukończono {done} z {total}} many {Ukończono {done} z {total}} other {Ukończono {done} z {total}}}",
     "stepDone": " (gotowe)",
-    "stepToDo": " (do zrobienia)"
+    "stepToDo": " (do zrobienia)",
+    "copyStorefrontLink": {
+      "copy": "Kopiuj link do witryny",
+      "copied": "Skopiowano link do witryny",
+      "failed": "Nie udało się skopiować linku do witryny. Zaznacz i skopiuj ręcznie."
+    }
   },
   "welcome": {
     "steps": {
@@ -121,10 +126,10 @@
     "seller": {
       "namePlaceholder": "np. Anna Kowalska lub Ceramika Anny",
       "nameHelp": "Nazwa twojej firmy albo twoje pełne imię i nazwisko, jeśli sprzedajesz jako osoba prywatna.",
-      "nameAlternative": "Albo swoje imię i nazwisko, jeśli sprzedajesz jako osoba prywatna.",
+      "nameAlternative": "Jeśli sprzedajesz jako osoba prywatna, podaj swoje imię i nazwisko.",
       "addressPlaceholder": "np. ul. Rynek 12\nWarszawa, 00-001\nPolska",
       "emailPlaceholder": "np. kontakt@twojsklep.example",
-      "emailHelp": "Adres, na który piszą kupujący. Może różnić się od e-maila do logowania.",
+      "emailHelp": "Adres, na który piszą kupujący. Może różnić się od e-maila do logowania.{verify, select, true { Wyślemy na ten adres kod, aby go potwierdzić.} other {}}",
       "emailTipLabel": "O tym adresie e-mail"
     },
     "confirm": {
@@ -140,12 +145,12 @@
     "nav": {
       "skipOnboarding": "Pomiń wprowadzenie",
       "next": "Dalej",
-      "showMeAround": "Pokaż mi, jak to działa",
       "skipIntro": "Pomiń wprowadzenie",
       "getStarted": "Zacznij",
       "skipForNow": "Pomiń na razie",
       "saveAndContinue": "Zapisz i kontynuuj",
       "continue": "Kontynuuj",
+      "confirmLater": "Potwierdź później",
       "exploreOnMyOwn": "Zbadam to samodzielnie",
       "notNow": "Nie teraz"
     },
@@ -205,16 +210,13 @@
       },
       "storefrontEmbed": {
         "title": "Osadź witrynę na swojej stronie",
-        "body": "Każda witryna ma przycisk osadzenia, który daje kod taki jak ten. Widget jest jeszcze w trakcie tworzenia i nie wyświetla się jeszcze na innych stronach.",
-        "bodyButton": "Ten przycisk daje kod taki jak ten poniżej, do wklejenia na swojej stronie. Widget jest jeszcze w trakcie tworzenia i nie wyświetla się jeszcze na innych stronach.",
-        "fallbackBody": "Gdy będziesz mieć witrynę, przycisk osadzenia na jej kafelku da ci kod taki jak ten. Widget jest jeszcze w trakcie tworzenia i nie wyświetla się jeszcze na innych stronach.",
-        "bodyLive": "Każda witryna ma przycisk osadzenia, który daje kod taki jak ten. Wklej go na swojej stronie, a witryna się tam wyświetli.",
-        "bodyButtonLive": "Ten przycisk daje kod taki jak ten poniżej. Wklej go na swojej stronie, a witryna się tam wyświetli.",
-        "fallbackBodyLive": "Gdy będziesz mieć witrynę, przycisk osadzenia na jej kafelku da ci kod taki jak ten do wklejenia na swojej stronie."
+        "bodyLive": "Każda witryna ma przycisk osadzenia, który daje taki kod na stronę jak ten. Wklej go na swojej stronie, a witryna się tam wyświetli.",
+        "bodyButtonLive": "Ten przycisk daje taki kod na stronę jak ten poniżej. Wklej go na swojej stronie, a witryna się tam wyświetli.",
+        "fallbackBodyLive": "Gdy będziesz mieć witrynę, przycisk osadzenia na jej kafelku da ci taki kod do wklejenia na swojej stronie."
       },
       "ordersSearch": {
         "title": "Znajdź zamówienie",
-        "body": "Szukaj na tej liście po adresie e-mail kupującego. Aby znaleźć zamówienie po numerze, imieniu i nazwisku, mieście lub numerze śledzenia, użyj wyszukiwania u góry strony."
+        "body": "Szukaj na tej liście po numerze zamówienia, adresie e-mail lub imieniu i nazwisku kupującego, mieście, produkcie albo numerze przesyłki."
       },
       "ordersFilters": {
         "title": "Filtruj i sortuj",
@@ -241,7 +243,7 @@
     "steps": {
       "editorAdd": {
         "title": "Dodaj coś do siatki",
-        "body": "Dodawaj produkty, tekst i kształty z tego paska. Przeciągnij dowolny element na siatce, aby go przesunąć, i pociągnij za róg, aby zmienić jego rozmiar."
+        "body": "Dodawaj produkty, tekst, kształty i obrazy z tego paska. Stuknij lub kliknij blok, aby go zaznaczyć, a potem przeciągnij, aby go przesunąć. Pociągnij za uchwyt w rogu, aby zmienić rozmiar."
       },
       "editorDesign": {
         "title": "Ustaw wygląd",
@@ -255,8 +257,13 @@
       },
       "editorFinish": {
         "title": "Zrób to po swojemu",
-        "body": "Przykład nigdy się nie zapisuje, więc próbuj wszystkiego. Gdy przyjdzie pora, utwórz własną witrynę."
+        "body": "Przykład nigdy się nie zapisuje, więc próbuj wszystkiego. Gdy przyjdzie pora, utwórz własną witrynę.",
+        "bodySave": "Naciśnij Zapisz, aby zachować swoją pracę. Gdy efekt ci się spodoba, przycisk Udostępnij da ci link do witryny i kod na twoją stronę internetową."
       }
     }
+  },
+  "install": {
+    "title": "Dodaj Square Share do ekranu głównego",
+    "add": "Dodaj"
   }
 }

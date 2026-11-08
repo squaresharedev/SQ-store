@@ -2,14 +2,17 @@
 
 import { ArrowUpRight, BadgeCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { cardClass } from "@/components/ui/surface-styles";
+import Link from "@/components/ui/AppLink";
+import { sharpCardClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { stubBadgeClass } from "@/components/ui/control-styles";
+import { inlineLinkClass, stubBadgeClass } from "@/components/ui/control-styles";
 import { Spinner } from "@/components/ui/spinner";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
 import { startStripeOnboarding } from "@/lib/payments/connect/actions";
 import type { AccountStatus } from "@/lib/payments/types";
+import { PRODUCTS_PATH } from "@/lib/products/paths";
+import { traderIdentityHref } from "@/lib/settings/trader-identity";
 import { CardSwipe } from "./CardSwipe";
 import { useLeaveForStripe } from "./useLeaveForStripe";
 
@@ -45,13 +48,14 @@ export function ConnectionStatusCard({
   const [finish, leaving] = useLeaveForStripe(startStripeOnboarding);
   // Until Stripe Connect ships, a "Connect with Stripe" button only opens a
   // modal whose continue button is disabled. Say what is true instead, and how
-  // buyers pay in the meantime (lib/payments/availability.ts).
+  // buyers pay in the meantime (lib/payments/availability.ts), each way linked
+  // to where it is set up: the products' buy links, and the contact address.
   if (!account.connected && !STRIPE_CONNECT_AVAILABLE) {
     return (
       <section
         data-tour="stripe-connection"
         aria-label={t("connection.label")}
-        className={cn(cardClass, "overflow-hidden")}
+        className={cn(sharpCardClass, "overflow-hidden")}
       >
         <CardSwipe className="rounded-none border-x-0 border-t-0" />
         <div className="p-6">
@@ -60,7 +64,18 @@ export function ConnectionStatusCard({
             <span className={stubBadgeClass}>{t("soon")}</span>
           </h2>
           <p className="mt-1 max-w-md font-inter text-sm text-muted-foreground">
-            {t("connection.comingSoonBody")}
+            {t.rich("connection.comingSoonBody", {
+              buyLink: (chunks) => (
+                <Link href={PRODUCTS_PATH} className={inlineLinkClass}>
+                  {chunks}
+                </Link>
+              ),
+              email: (chunks) => (
+                <Link href={traderIdentityHref(["email"])} className={inlineLinkClass}>
+                  {chunks}
+                </Link>
+              ),
+            })}
           </p>
         </div>
       </section>
@@ -72,7 +87,7 @@ export function ConnectionStatusCard({
       <section
         data-tour="stripe-connection"
         aria-label={t("connection.label")}
-        className={cn(cardClass, "overflow-hidden")}
+        className={cn(sharpCardClass, "overflow-hidden")}
       >
         {/* Hero: a card being swiped — the "get paid" moment made tangible. */}
         <CardSwipe className="rounded-none border-x-0 border-t-0" />
@@ -98,7 +113,7 @@ export function ConnectionStatusCard({
     <section
       data-tour="stripe-connection"
       aria-label={t("connection.label")}
-      className={cn(cardClass, "p-4")}
+      className={cn(sharpCardClass, "p-4")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">

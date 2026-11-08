@@ -216,6 +216,10 @@ export const PRICE_CENTS_MAX = 100_000_000;
 // Inventory cap — far below int4 max; nobody hand-tracks more units than this.
 export const STOCK_QUANTITY_MAX = 1_000_000;
 
+/** The longest product title a save accepts (the CSV import and a duplicate's
+ *  "Copy of" title keep to it too). */
+export const PRODUCT_TITLE_MAX = 200;
+
 /**
  * THE PLATFORM CEILING on how many units one buyer may take in one order, and
  * the ONLY number in this file a buyer's request is measured against.
@@ -490,7 +494,7 @@ export const addOnIdsSchema = z
  */
 export const productWriteSchema = z
   .object({
-    title: singleLineText({ field: "productTitle", max: 200 }),
+    title: singleLineText({ field: "productTitle", max: PRODUCT_TITLE_MAX }),
     description: multiLineText({ field: "productDescription", max: 5000 }),
     priceCents: boundedInt({ field: "price", min: 1, max: PRICE_CENTS_MAX }),
     currency: z.enum(CURRENCIES),

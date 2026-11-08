@@ -4,7 +4,7 @@ import * as React from "react";
 import { useActionState } from "react";
 import Link from "@/components/ui/AppLink";
 import { useRouter } from "next/navigation";
-import { Fingerprint, KeyRound, MonitorSmartphone, Smartphone } from "lucide-react";
+import { Fingerprint, KeyRound, MonitorSmartphone, Smartphone, TriangleAlert } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import type { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/browser";
@@ -594,6 +594,8 @@ function CodeForm({
 function RecoveryForm({ next }: { next: string }) {
   const t = useTranslations("Auth.twoFactor.recovery");
   const [state, formAction, isPending] = useActionState(recoverWithCode, INITIAL);
+  const [understood, setUnderstood] = React.useState(false);
+  const understoodId = React.useId();
 
   return (
     <form action={formAction} className="flex flex-col gap-5" noValidate>
@@ -617,16 +619,32 @@ function RecoveryForm({ next }: { next: string }) {
           required
           className="font-mono"
         />
-        {/* Said BEFORE they press the button: this is not a quiet way round
-            2FA, it switches it off. */}
-        <p className={infoTextClass}>{t("warning")}</p>
       </div>
+
+      {/* Prominent warning: the same visual weight as RecoveryCodesDisplay uses
+          for one-shot codes, so a stressed seller cannot mistake it for a hint. */}
+      <p className="flex items-start gap-2 border border-border bg-muted/40 p-3 font-inter text-sm text-foreground">
+        <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+        <span>{t("warning")}</span>
+      </p>
+
+      {/* Acknowledgment checkbox gates the submit button. */}
+      <label htmlFor={understoodId} className="flex items-start gap-2.5">
+        <input
+          id={understoodId}
+          type="checkbox"
+          checked={understood}
+          onChange={(event) => setUnderstood(event.target.checked)}
+          className="mt-0.5 size-4 shrink-0 accent-foreground"
+        />
+        <span className={helpTextClass}>{t("understood")}</span>
+      </label>
 
       <Status state={state} next={next} />
 
       <Button
         type="submit"
-        disabled={isPending}
+        disabled={isPending || !understood}
         suppressHydrationWarning
         className="w-full px-8 py-3.5 text-base"
       >

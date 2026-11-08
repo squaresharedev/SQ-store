@@ -48,7 +48,8 @@ export function PanelMenuItem({
   onClick,
 }: {
   label: string;
-  /** The current value, when the group HAS a single one worth showing. */
+  /** The current value, when the group HAS a single one worth showing; or a
+   *  few words on what it holds, when its name does not say. */
   hint?: string;
   onClick: () => void;
 }) {

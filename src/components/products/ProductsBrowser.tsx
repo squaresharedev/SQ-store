@@ -14,32 +14,40 @@ import {
   ListFilter,
   MessageSquareQuote,
   Plus,
+  Search,
+  ShieldAlert,
   ShoppingBag,
   SlidersHorizontal,
 } from "lucide-react";
-import type {
-  Product,
-  ProductFilters,
-  ProductSalesSummary,
-  ProductStatus,
+import {
+  MODERATED_FILTER,
+  type Product,
+  type ProductFilters,
+  type ProductSalesSummary,
+  type ProductStatus,
 } from "@/types/product";
 import type { StorefrontPlacement } from "@/lib/products/queries";
+import { NEW_PRODUCT_PATH, PRODUCTS_IMPORT_PATH } from "@/lib/products/paths";
 import type { TraderIdentityField } from "@/lib/settings/trader-identity";
 import type { Paginated } from "@/types/pagination";
 import { PRODUCT_SORTS, type ProductSort } from "@/lib/products/sort";
 import { FilterMenu } from "@/components/ui/FilterMenu";
 import type { FilterOption } from "@/components/ui/FilterOptionList";
+import { useSearch } from "@/components/search/SearchProvider";
 import { SortSlidersIcon } from "@/components/ui/SortSlidersIcon";
 import { Spinner } from "@/components/ui/spinner";
 import { UploadIcon } from "@/components/ui/UploadIcon";
 import { REVIEWS_PATH } from "@/lib/reviews/paths";
+import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
 import {
   helpTextClass,
   infoTextClass,
+  inlineLinkClass,
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
+import { ConnectAiHint } from "./ConnectAiHint";
 import { ProductList } from "./ProductList";
 
 // Owns the products page toolbar + paging. Status/sort/page live in the URL
@@ -51,8 +59,10 @@ import { ProductList } from "./ProductList";
 // which reaches products from anywhere and goes straight to the one you
 // picked); a second field doing a worse version of it on this page alone was
 // the only reason this component held a debounce, a draft copy of the filters
-// and a resync-on-back/forward. Status and ordering share ONE trigger
-// (FilterMenu), so what remains is a menu, a Clear and the CTA.
+// and a resync-on-back/forward. The toolbar's Search button opens that search
+// instead, so it is found where a seller looks for it. Status and ordering
+// share ONE trigger (FilterMenu), so what remains is a menu, a Clear and the
+// CTA.
 //
 // The `search` filter still exists in the QUERY layer — the storefront
 // designer's product picker runs on it (lib/products/picker-actions). It is
@@ -68,6 +78,12 @@ const SORT_ICONS: { value: ProductSort; icon: FilterOption<ProductSort>["icon"] 
   { value: "title", icon: ArrowDownAZ },
 ];
 
+/** The toolbar's secondary buttons, the CTA's height beside it. */
+const toolbarButtonClass = cn(secondaryButtonClass, "h-10 shrink-0 px-3 py-2 text-sm");
+
+/** A one-line note between the toolbar and the grid. */
+const listNoteClass = cn(infoTextClass, "mb-4");
+
 /** Build the products URL from the current view. Defaults are omitted so a
  *  plain /products stays clean and shareable. */
 function buildQuery(
@@ -76,7 +92,8 @@ function buildQuery(
   page: number,
 ): string {
   const params = new URLSearchParams();
-  if (filters.status) params.set("status", filters.status);
+  const status = filters.moderated ? MODERATED_FILTER : filters.status;
+  if (status) params.set("status", status);
   if (sort !== "default") params.set("sort", sort);
   if (page > 1) params.set("page", String(page));
   const query = params.toString();
@@ -118,17 +135,22 @@ export function ProductsBrowser({
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations("Products");
+  const tSearch = useTranslations("Search.trigger");
   const tPagination = useTranslations("Common.pagination");
+  const search = useSearch();
 
   const sortOptions: FilterOption<ProductSort>[] = SORT_ICONS.map(({ value, icon }) => ({
     value,
     label: t(`browser.sort.${value}`),
     icon,
   }));
-  const statusOptions: FilterOption<ProductStatus | "">[] = [
+  const statusOptions: FilterOption<ProductStatus | typeof MODERATED_FILTER | "">[] = [
     { value: "", label: t("browser.allStatuses"), icon: ListFilter },
     { value: "active", label: t("status.active"), icon: CircleDot, tone: "text-success" },
     { value: "draft", label: t("status.draft"), icon: FileEdit, tone: "text-muted-foreground" },
+    // Checking, in review, paused and removed together: whatever buyers
+    // cannot see because of moderation, gathered in one place to work through.
+    { value: MODERATED_FILTER, label: t("browser.moderated"), icon: ShieldAlert },
   ];
 
   // Every remaining control navigates on the spot (no typing to debounce), so
@@ -153,7 +175,7 @@ export function ProductsBrowser({
     const status: ProductStatus | undefined =
       value === "active" || value === "draft" ? value : undefined;
     // Any filter change restarts at page 1.
-    navigate({ status }, sort, 1);
+    navigate(value === MODERATED_FILTER ? { moderated: true } : { status }, sort, 1);
   }
 
   function handleSort(value: string) {
@@ -169,7 +191,7 @@ export function ProductsBrowser({
   }
 
   const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
-  const filtered = filters.status !== undefined;
+  const filtered = filters.status !== undefined || filters.moderated === true;
   // The toolbar stays available whenever the seller has products OR is
   // filtering: hiding it on a no-results page would strand them there.
   const showToolbar = data.total > 0 || filtered;
@@ -191,8 +213,23 @@ export function ProductsBrowser({
             array that creates the requirement. Renders no DOM. */}
         <Fragment key="heading">{heading}</Fragment>
         {/* Mobile: own full-width row, so the CTA lands on the right edge of the
-            grid below it. Desktop: hugs its content beside the heading. */}
-        <div className="flex w-full flex-nowrap items-center justify-between gap-2 sm:w-auto sm:justify-end">
+            grid below it. Desktop: hugs its content beside the heading. Wraps
+            at every width rather than run past a narrow content column. */}
+        <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
+          {/* Universal search, from where a seller looks for it on this page:
+              it finds any product by name and opens it. */}
+          {showToolbar && search && (
+            <button
+              type="button"
+              onClick={search.open}
+              aria-haspopup="dialog"
+              aria-expanded={search.isOpen}
+              className={toolbarButtonClass}
+            >
+              <Search className="size-4" strokeWidth={2} aria-hidden="true" />
+              {tSearch("label")}
+            </button>
+          )}
           {showToolbar && (
             <FilterMenu
               ariaLabel={t("browser.filterLabel")}
@@ -200,7 +237,7 @@ export function ProductsBrowser({
               sections={[
                 {
                   label: t("browser.statusSection"),
-                  value: filters.status ?? "",
+                  value: filters.moderated ? MODERATED_FILTER : (filters.status ?? ""),
                   options: statusOptions,
                   onChange: handleStatus,
                   defaultValue: "",
@@ -216,12 +253,12 @@ export function ProductsBrowser({
               // Always the sliders icon (not the selected option's): it is the
               // control's identity, and its handles animate on hover.
               triggerIcon={<SortSlidersIcon className="size-4 shrink-0" />}
-              iconOnlyOnMobile
               // h-10 on both controls: the outlined trigger's border would
-              // otherwise make it 2px taller than the CTA, and the icon-only
-              // mobile state 2px shorter. `max-w-[13rem]` keeps a two-group
-              // summary from crowding the CTA — it truncates, the panel and the
-              // tooltip carry the full text.
+              // otherwise make it 2px taller than the CTA. The label shows at
+              // every width, a phone included: a sliders icon alone is not
+              // something every seller reads as "filter". `max-w-[13rem]`
+              // keeps a two-group summary from crowding the CTA: it
+              // truncates, the panel and the tooltip carry the full text.
               // `group/sort` is the hover/focus scope the handle motion keys off.
               triggerClassName="group/sort h-10 max-w-[13rem] shrink-0"
               panelClassName="sm:w-64"
@@ -233,44 +270,62 @@ export function ProductsBrowser({
               the time. The menu's own "All statuses" does the same job; this
               is the one-click version of it. */}
           {filtered && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className={cn(secondaryButtonClass, "h-10 shrink-0 px-3 py-2 text-sm")}
-            >
+            <button type="button" onClick={handleClear} className={toolbarButtonClass}>
               {t("browser.clear")}
             </button>
           )}
           {/* Every member reads the store's reviews; the page itself decides
               who may hide or publish them. */}
-          <Link
-            href={REVIEWS_PATH}
-            className={cn(secondaryButtonClass, "h-10 shrink-0 px-3 py-2 text-sm")}
-            data-products-reviews-link=""
-          >
+          <Link href={REVIEWS_PATH} className={toolbarButtonClass} data-products-reviews-link="">
             <MessageSquareQuote className="size-4" strokeWidth={2} aria-hidden="true" />
             {t("browser.reviews")}
           </Link>
-          {canWrite && (
+          {canWrite ? (
             <>
               {/* Beside "Add product", not buried in a menu: someone arriving
                   with a catalogue elsewhere is deciding whether this is worth
                   the typing, and that is exactly when they need to find it. */}
-              <Link
-                href="/products/import"
-                className={cn(secondaryButtonClass, "h-10 shrink-0 px-3 py-2 text-sm")}
-              >
+              <Link href={PRODUCTS_IMPORT_PATH} className={toolbarButtonClass}>
                 <UploadIcon className="size-4" />
                 {t("browser.import")}
               </Link>
-              <Link href="/products/new" className={`${primaryButtonClass} h-10 shrink-0`}>
+              <Link href={NEW_PRODUCT_PATH} className={`${primaryButtonClass} h-10 shrink-0`}>
                 <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
                 {t("browser.add")}
               </Link>
             </>
+          ) : (
+            // Where the add and import buttons would be, the reason they are
+            // not: a missing control with no word of why reads as a fault.
+            <p className={cn(infoTextClass, "max-w-xs")} data-products-view-only="">
+              {t("browser.viewOnlyHint")}
+            </p>
           )}
         </div>
       </div>
+
+      {/* Several drafts in view, say after an import: the way to publish them
+          all at once rather than one card menu at a time. */}
+      {canWrite && filters.status === "draft" && data.total > 1 && (
+        <p className={listNoteClass} data-products-bulk-hint="">
+          <ConnectAiHint />
+        </p>
+      )}
+
+      {/* The sort above orders this list only. The order buyers see is where
+          the tiles sit on a storefront, said here where a seller looks for a
+          way to reorder. */}
+      {canWrite && !filtered && data.total > 0 && (
+        <p className={listNoteClass}>
+          {t.rich("browser.orderHint", {
+            link: (chunks) => (
+              <Link href={STOREFRONT_LIST_PATH} className={inlineLinkClass}>
+                {chunks}
+              </Link>
+            ),
+          })}
+        </p>
+      )}
 
       {/* Results region. While a re-query is in flight the current cards stay
           put (no layout jump) but dim and stop taking clicks. */}

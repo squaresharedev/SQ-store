@@ -13,7 +13,7 @@ export function DangerZone({
   deletion: DeletionStatus | null;
 }) {
   return (
-    // The id is universal search's landing point (/settings/danger#delete).
+    // The id is the deletion emails' landing point (/settings/danger#delete).
     <div className="flex flex-col gap-6">
       <div id="delete" className="scroll-mt-20">
         <DeleteAccountForm deletion={deletion} />

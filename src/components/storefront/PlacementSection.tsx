@@ -21,6 +21,7 @@ import type { LayerOp } from "@/lib/storefront/layers";
 import { cn } from "@/lib/utils";
 import {
   helpTextClass,
+  infoTextClass,
   labelClass,
   transitionClass,
   focusRingClass,
@@ -137,9 +138,15 @@ const QUICK_ANGLES = [-90, 0, 90] as const;
 const QUICK_BUTTON_CLASS = cn(
   "inline-flex h-8 flex-1 items-center justify-center rounded-none border border-border bg-background",
   "font-inter text-xs text-muted-foreground hover:bg-accent hover:text-foreground",
+  "disabled:pointer-events-none disabled:opacity-50",
   transitionClass,
   focusRingClass,
 );
+
+/** What the "On phones" row can do to the selection on the board's own phone
+ *  arrangement: leave it off phones, put it back, or let it be placed there
+ *  automatically again. */
+export type PhoneChange = "hide" | "show" | "automatic";
 
 export function PlacementSection({
   blocks,
@@ -147,6 +154,7 @@ export function PlacementSection({
   onRotate,
   onReorder,
   onOpenLayers,
+  onPhoneChange,
 }: {
   /** The current selection, in selection order (length >= 1). */
   blocks: readonly StorefrontBlock[];
@@ -162,12 +170,16 @@ export function PlacementSection({
   /** Swaps this panel over to the full stack. Omitted where there is no panel
    *  to swap (the dev gallery), and the row simply does not render. */
   onOpenLayers?: () => void;
+  /** The whole selection on the phone arrangement, as one undo step. Omitted
+   *  while the board has none, and the row does not render. */
+  onPhoneChange?: (change: PhoneChange) => void;
 }) {
   const t = useTranslations("Storefront.placement");
   const fieldId = useId();
   const shared = sharedRotation(blocks);
   const multiple = blocks.length > 1;
   const layer = layerState(board, blocks);
+  const hiddenOnPhones = blocks.every((block) => block.mobile?.hidden);
   const layerLabels: Record<string, string> = {
     back: t("sendToBack"),
     backward: t("sendBackward"),
@@ -226,10 +238,7 @@ export function PlacementSection({
           <span className="flex items-center gap-1.5">
             <span className={labelClass}>{t("layerLabel")}</span>
             <InfoTip label={t("layerInfoLabel")}>
-              {t("layerInfoBody", {
-                multi: String(multiple),
-                stacked: String(layer.stacked),
-              })}
+              {t("layerInfoBody", { multi: String(multiple) })}
             </InfoTip>
           </span>
           <span className={helpTextClass}>
@@ -285,7 +294,40 @@ export function PlacementSection({
             </button>
           )}
         </div>
+        {/* The way to the block underneath, said exactly when there is one: a
+            stacked selection. A line of its own rather than inside the tip
+            above, where a seller stuck under a stack never thought to look. */}
+        {layer.stacked && <p className={infoTextClass}>{t("stackedHint")}</p>}
       </div>
+
+      {/* The board's own phone arrangement, per block. Nothing here touches
+          the desktop board. */}
+      {onPhoneChange && (
+        <div className="space-y-1.5">
+          <span className="flex items-center gap-1.5">
+            <span className={labelClass}>{t("phoneLabel")}</span>
+            <InfoTip label={t("phoneInfoLabel")}>{t("phoneInfoBody")}</InfoTip>
+          </span>
+          <div role="group" aria-label={t("phoneLabel")} className="flex gap-1.5">
+            <button
+              type="button"
+              onClick={() => onPhoneChange(hiddenOnPhones ? "show" : "hide")}
+              className={QUICK_BUTTON_CLASS}
+            >
+              {hiddenOnPhones ? t("showOnPhones") : t("hideOnPhones")}
+            </button>
+            <button
+              type="button"
+              onClick={() => onPhoneChange("automatic")}
+              // Only a block placed by hand (or hidden) has anything to go back from.
+              disabled={!blocks.some((block) => block.mobile)}
+              className={QUICK_BUTTON_CLASS}
+            >
+              {t("phoneAutomatic")}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

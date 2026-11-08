@@ -7,6 +7,9 @@ import { cleanup, fireEvent, render, screen, waitFor } from "../setup/render";
  * for a seller who has already been through it.
  */
 
+// Stripe Connect as it is in production today: not open yet. Only the card
+// for a seller with no account reads this; a connected one never asks.
+vi.mock("@/lib/payments/availability", () => ({ STRIPE_CONNECT_AVAILABLE: false }));
 const startStripeOnboarding = vi.fn(async () => ({ ok: true as const, url: "https://stripe.test/onboarding" }));
 vi.mock("@/lib/payments/connect/actions", () => ({
   startStripeOnboarding: () => startStripeOnboarding(),
@@ -51,6 +54,21 @@ describe("Stripe buttons on /payments", () => {
   it("a payable account with nothing due shows no button at all", () => {
     render(<ConnectionStatusCard account={connected} onConnect={() => {}} />);
     expect(screen.queryByRole("button", { name: /Finish on Stripe/ })).toBeNull();
+  });
+
+  it("before Stripe opens, says how buyers pay meanwhile, each way linked to where it is set", () => {
+    render(
+      <ConnectionStatusCard
+        account={{ ...connected, connected: false, accountId: null, chargesEnabled: false, detailsSubmitted: false }}
+        onConnect={() => {}}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: /Connect with Stripe/ })).toBeNull();
+    expect(screen.getByRole("link", { name: "buy link" })).toHaveAttribute("href", "/products");
+    expect(screen.getByRole("link", { name: "contact address" })).toHaveAttribute(
+      "href",
+      "/settings/business#contact-email",
+    );
   });
 
   it("Manage in Stripe opens the seller's Stripe dashboard", async () => {

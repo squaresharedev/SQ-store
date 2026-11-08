@@ -88,6 +88,11 @@ test.describe("account deletion", () => {
     const seller = await newSeller(page, "del-ask");
 
     await gotoApp(page, "/settings/danger");
+    // A copy of everything is one link away, before anything is asked.
+    await expect(page.locator("#delete").getByRole("link", { name: "Account settings" })).toHaveAttribute(
+      "href",
+      "/settings/account#export",
+    );
     await page.getByRole("button", { name: "Delete my account" }).click();
     await page.getByLabel(/to confirm/i).fill("delete my account");
     await page.getByRole("button", { name: "Permanently delete" }).click();

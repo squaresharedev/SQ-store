@@ -3,6 +3,7 @@ import { renderWithoutToasts, screen, cleanup, fireEvent } from "../setup/render
 import type { Product } from "@/types/product";
 import { blockKey, type StorefrontBlock } from "@/types/storefront";
 import { SelectionToolbar } from "@/components/storefront/SelectionToolbar";
+import { LONG_PRESS_MS } from "@/components/storefront/BlockTile";
 
 /**
  * ONE ISLAND, AND IT OFFERS ONLY WHAT THE SELECTION CAN ACTUALLY DO.
@@ -106,6 +107,7 @@ function renderToolbar(
   const onOpenSetting = vi.fn();
   const onDuplicate = vi.fn();
   const onRemove = vi.fn();
+  const onHoldTool = vi.fn();
   const view = renderWithoutToasts(
     <SelectionToolbar
       blocks={blocks}
@@ -119,6 +121,7 @@ function renderToolbar(
       onOpenSetting={onOpenSetting}
       onDuplicate={onDuplicate}
       onRemove={onRemove}
+      onHoldTool={onHoldTool}
     />,
   );
   return {
@@ -130,6 +133,7 @@ function renderToolbar(
     onOpenSetting,
     onDuplicate,
     onRemove,
+    onHoldTool,
   };
 }
 
@@ -156,7 +160,7 @@ describe("SelectionToolbar", () => {
   // unreliable on touch, and iOS claims it outright.
   it("offers a product its page, its crop, and removal", () => {
     renderToolbar([productBlock]);
-    expect(button(/open the buyer flow/i)).not.toBeNull();
+    expect(button(/open the product page/i)).not.toBeNull();
     expect(button(/crop and position the image/i)).not.toBeNull();
     expect(button(/remove .* from grid/i)).not.toBeNull();
     expect(button(/edit the text/i)).toBeNull();
@@ -262,7 +266,7 @@ describe("SelectionToolbar", () => {
     it("is offered to several blocks of one kind", () => {
       const second = { ...textBlock, id: "dddddddd-dddd-4ddd-8ddd-dddddddddddd" };
       const { onOpenSetting } = renderToolbar([textBlock, second]);
-      fireEvent.click(button(/edit the blur of 2 elements/i)!);
+      fireEvent.click(button(/edit the blur of 2 blocks/i)!);
       expect(onOpenSetting).toHaveBeenLastCalledWith(
         [blockKey(textBlock), blockKey(second)],
         "blur",
@@ -311,7 +315,7 @@ describe("SelectionToolbar", () => {
 
   it("reads as a toggle while the product's page is out", () => {
     renderToolbar([productBlock], { openPages: [PRODUCT.id] });
-    const page = button(/close the buyer flow/i);
+    const page = button(/close the product page/i);
     expect(page).not.toBeNull();
     expect(page).toHaveAttribute("aria-pressed", "true");
   });
@@ -322,7 +326,7 @@ describe("SelectionToolbar", () => {
     // offered to a group — unlike colour, stroke, corners and opacity, which
     // are settings the inspector has always edited together.
     renderToolbar([productBlock, textBlock, shapeBlock]);
-    expect(button(/remove 3 elements from grid/i)).not.toBeNull();
+    expect(button(/remove 3 blocks from grid/i)).not.toBeNull();
     expect(button(/crop and position the image/i)).toBeNull();
     expect(button(/edit the text/i)).toBeNull();
   });
@@ -330,7 +334,7 @@ describe("SelectionToolbar", () => {
   it("removes the whole selection in one act", () => {
     // Three tiles is one removal and one entry in the history, not three.
     const { onRemove } = renderToolbar([productBlock, textBlock, shapeBlock]);
-    fireEvent.click(button(/remove 3 elements from grid/i)!);
+    fireEvent.click(button(/remove 3 blocks from grid/i)!);
     expect(onRemove).toHaveBeenCalledTimes(1);
     expect(onRemove.mock.calls[0][0]).toHaveLength(3);
   });
@@ -362,7 +366,7 @@ describe("SelectionToolbar", () => {
 
   it("duplicates the copyable half of a mixed selection", () => {
     const { onDuplicate } = renderToolbar([productBlock, textBlock, shapeBlock]);
-    const duplicate = button(/^duplicate 2 elements/i)!;
+    const duplicate = button(/^duplicate 2 blocks/i)!;
     expect(duplicate).not.toBeNull();
     fireEvent.click(duplicate);
     expect(onDuplicate).toHaveBeenCalledTimes(1);
@@ -380,7 +384,7 @@ describe("SelectionToolbar", () => {
     cleanup();
 
     const product = renderToolbar([productBlock]);
-    fireEvent.click(button(/open the buyer flow/i)!);
+    fireEvent.click(button(/open the product page/i)!);
     // The page is opened by PRODUCT, not by block key: one page per product,
     // however many tiles point at it.
     expect(product.onOpenPages).toHaveBeenCalledWith([PRODUCT.id]);
@@ -446,11 +450,11 @@ describe("SelectionToolbar", () => {
         .map((el) => el.getAttribute("aria-label") ?? "")
         .filter((name) => !/remove|duplicate/i.test(name));
       expect(offered).toEqual([
-        "Change the colour of 2 elements",
-        "Edit the border of 2 elements",
-        "Edit the corner roundness of 2 elements",
-        "Edit the opacity of 2 elements",
-        "Edit the blur of 2 elements",
+        "Change the colour of 2 blocks",
+        "Edit the border of 2 blocks",
+        "Edit the corner roundness of 2 blocks",
+        "Edit the opacity of 2 blocks",
+        "Edit the blur of 2 blocks",
       ]);
     });
 
@@ -501,7 +505,7 @@ describe("SelectionToolbar", () => {
 
     it("opens every selected product's page in one press", () => {
       const { onOpenPages } = renderToolbar([productBlock, secondProduct]);
-      const open = button(/open the buyer flow for 2 products/i)!;
+      const open = button(/open the product page for 2 products/i)!;
       expect(open).not.toBeNull();
       fireEvent.click(open);
       expect(onOpenPages).toHaveBeenCalledWith([PRODUCT.id, PHOTOLESS.id]);
@@ -514,7 +518,7 @@ describe("SelectionToolbar", () => {
         productBlock,
         { ...productBlock, x: 4 },
       ]);
-      fireEvent.click(button(/open the buyer flow for enamel mug/i)!);
+      fireEvent.click(button(/open the product page for enamel mug/i)!);
       expect(onOpenPages).toHaveBeenCalledWith([PRODUCT.id]);
     });
 
@@ -523,7 +527,7 @@ describe("SelectionToolbar", () => {
         openPages: [PRODUCT.id],
       });
       // One of two out is not "open": the press has more to do.
-      expect(button(/open the buyer flow/i)).toHaveAttribute(
+      expect(button(/open the product page/i)).toHaveAttribute(
         "aria-pressed",
         "false",
       );
@@ -532,7 +536,7 @@ describe("SelectionToolbar", () => {
       renderToolbar([productBlock, secondProduct], {
         openPages: [PRODUCT.id, PHOTOLESS.id],
       });
-      expect(button(/close the buyer flow/i)).toHaveAttribute(
+      expect(button(/close the product page/i)).toHaveAttribute(
         "aria-pressed",
         "true",
       );
@@ -542,8 +546,52 @@ describe("SelectionToolbar", () => {
       // The same rule Duplicate follows: act on the part of the selection that
       // can answer, rather than on none of it.
       const { onOpenPages } = renderToolbar([productBlock, shapeBlock]);
-      fireEvent.click(button(/open the buyer flow/i)!);
+      fireEvent.click(button(/open the product page/i)!);
       expect(onOpenPages).toHaveBeenCalledWith([PRODUCT.id]);
+    });
+  });
+
+  /**
+   * A FINGER CANNOT HOVER, so the tips never show on touch, and the bar scales
+   * with the board, so words under its icons would be a few pixels tall on a
+   * phone. Holding a tool names it instead, and that press does nothing.
+   */
+  describe("a finger held on a tool", () => {
+    afterEach(() => vi.useRealTimers());
+
+    it("says what the tool does, and does not do it", () => {
+      vi.useFakeTimers();
+      const { onRemove, onHoldTool } = renderToolbar([shapeBlock]);
+      const remove = button(/remove square from grid/i)!;
+      fireEvent.pointerDown(remove, { pointerType: "touch" });
+      vi.advanceTimersByTime(LONG_PRESS_MS);
+      fireEvent.pointerUp(remove, { pointerType: "touch" });
+      fireEvent.click(remove);
+      expect(onHoldTool).toHaveBeenCalledWith("Remove Square from grid");
+      expect(onRemove).not.toHaveBeenCalled();
+    });
+
+    it("still presses it on a tap", () => {
+      vi.useFakeTimers();
+      const { onRemove, onHoldTool } = renderToolbar([shapeBlock]);
+      const remove = button(/remove square from grid/i)!;
+      fireEvent.pointerDown(remove, { pointerType: "touch" });
+      fireEvent.pointerUp(remove, { pointerType: "touch" });
+      vi.advanceTimersByTime(LONG_PRESS_MS);
+      fireEvent.click(remove);
+      expect(onRemove).toHaveBeenCalledTimes(1);
+      expect(onHoldTool).not.toHaveBeenCalled();
+    });
+
+    it("leaves a mouse alone however long it rests", () => {
+      vi.useFakeTimers();
+      const { onRemove, onHoldTool } = renderToolbar([shapeBlock]);
+      const remove = button(/remove square from grid/i)!;
+      fireEvent.pointerDown(remove, { pointerType: "mouse" });
+      vi.advanceTimersByTime(LONG_PRESS_MS);
+      fireEvent.click(remove);
+      expect(onRemove).toHaveBeenCalledTimes(1);
+      expect(onHoldTool).not.toHaveBeenCalled();
     });
   });
 });

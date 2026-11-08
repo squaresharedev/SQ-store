@@ -598,7 +598,7 @@ test.describe("hosted product page", () => {
     // off it), so it answers to its label rather than to a role.
     await page.getByLabel(/^oak lamp\. press enter/i).click();
     await canvasStill(page);
-    const node = page.getByRole("button", { name: /^open the buyer flow for oak lamp$/i });
+    const node = page.getByRole("button", { name: /^open the product page for oak lamp$/i });
     await expect(node).toBeVisible();
     await node.click();
 
@@ -690,7 +690,7 @@ test.describe("hosted product page", () => {
 
     // And the artboard's own control puts it away again.
     await page
-      .getByRole("button", { name: /^close the buyer flow for oak lamp$/i })
+      .getByRole("button", { name: /^close the product page for oak lamp$/i })
       .first()
       .click();
     await expect(page.locator(`[data-artboard-id="${s.active}"]`)).toHaveCount(0);
@@ -757,7 +757,7 @@ test.describe("hosted product page", () => {
     await gotoApp(page, "/settings/tax");
     // Substring matches: the three fields the publish gate requires carry a
     // RequiredMark asterisk inside their label.
-    await page.getByLabel(/Trader name/).fill("Lamp Studio Renamed");
+    await page.getByLabel(/Your name or business name/).fill("Lamp Studio Renamed");
     await page.getByLabel(/^Address/).fill("12 Market Street\nDublin, D02 X285");
     // A real, resolvable domain: the save refuses a placeholder or a reserved
     // TLD, and asks a public resolver whether the domain takes mail at all.
@@ -795,7 +795,7 @@ test.describe("hosted product page", () => {
     // off it), so it answers to its label rather than to a role.
     await page.getByLabel(/^oak lamp\. press enter/i).click();
     await canvasStill(page);
-    await page.getByRole("button", { name: /^open the buyer flow for oak lamp$/i }).click();
+    await page.getByRole("button", { name: /^open the product page for oak lamp$/i }).click();
     const root = page.locator(`[data-artboard-id="${s.active}"] [data-product-page]`);
     await expect(root).toBeVisible();
 
@@ -832,7 +832,7 @@ test.describe("hosted product page", () => {
     // off it), so it answers to its label rather than to a role.
     await page.getByLabel(/^oak lamp\. press enter/i).click();
     await canvasStill(page);
-    await page.getByRole("button", { name: /^open the buyer flow for oak lamp$/i }).click();
+    await page.getByRole("button", { name: /^open the product page for oak lamp$/i }).click();
     const artboard = page.locator(`[data-artboard-id="${s.active}"]`);
     await expect(artboard).toBeVisible();
 

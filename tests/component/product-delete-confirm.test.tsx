@@ -12,6 +12,9 @@ vi.mock("@/lib/products/actions", () => ({
     return deleteProductMock(id);
   },
 }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
+}));
 
 import { ProductList } from "@/components/products/ProductList";
 import type { Product, ProductSalesSummary } from "@/types/product";

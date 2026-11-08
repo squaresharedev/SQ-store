@@ -21,6 +21,7 @@
   },
   "page": {
     "heading": "Produits",
+    "planUsage": "{used} sur {cap, plural, one {# produit} many {# produits} other {# produits}} de votre forfait. <link>Voir les forfaits</link>",
     "loading": "chargement des produits",
     "back": "Produits",
     "backToStorefront": "Vitrine",
@@ -34,8 +35,13 @@
     },
     "import": {
       "heading": "Importer des produits",
-      "description": "Importez un catalogue depuis Shopify, ou tout autre outil qui exporte un CSV. Vous verrez exactement ce qui arrive avant que rien ne soit enregistré.",
-      "reviewsLink": "Vous transférez aussi vos avis ? Importer des avis"
+      "description": "Importez un catalogue depuis Shopify, Etsy, ou tout autre outil qui exporte un CSV. Vous verrez exactement ce qui arrive avant que quoi que ce soit ne soit enregistré.",
+      "reviewsLink": "Vous transférez aussi vos avis ? Importer des avis",
+      "templateLink": "Télécharger un modèle vierge",
+      "columnHint": "Colonnes nécessaires : Titre et Prix. Description, SKU et Stock sont facultatives.",
+      "howToGetFile": "Comment obtenir votre fichier",
+      "howToGetFileShopify": "Shopify : Produits > Exporter > Tous les produits, au format CSV.",
+      "howToGetFileEtsy": "Etsy : Gestionnaire de boutique > Paramètres > Options > Télécharger les données > Télécharger le CSV."
     },
     "formLoading": "Chargement du formulaire produit",
     "importReviews": {
@@ -63,8 +69,10 @@
       "title": "Nom : A–Z"
     },
     "allStatuses": "Tous les statuts",
+    "moderated": "En modération",
     "filterLabel": "Trier et filtrer les produits",
-    "sortResting": "Trier",
+    "sortResting": "Trier et filtrer",
+    "viewOnlyHint": "Vous avez un accès en lecture seule. Contactez le propriétaire de la boutique pour modifier les produits.",
     "statusSection": "Statut",
     "sortSection": "Trier par",
     "clear": "Effacer",
@@ -72,7 +80,8 @@
     "add": "Ajouter un produit",
     "updating": "Mise à jour…",
     "pagination": "{total, plural, one {{total} produit · page {page} sur {pages}} many {{total} produits · page {page} sur {pages}} other {{total} produits · page {page} sur {pages}}}",
-    "reviews": "Avis"
+    "reviews": "Avis",
+    "orderHint": "Pour changer l’ordre que voient les acheteurs, faites glisser vos produits à leur place sur votre <link>vitrine</link>."
   },
   "list": {
     "noMatch": {
@@ -81,6 +90,11 @@
       "clear": "Effacer les filtres"
     },
     "deleted": "« {title} » a été supprimé.",
+    "madeActive": "« {title} » est maintenant actif.",
+    "madeDraft": "« {title} » enregistré comme brouillon.",
+    "duplicated": "Copie de « {title} » créée comme brouillon.",
+    "duplicateTitle": "Copie de {title}",
+    "stockSaved": "Stock mis à jour.",
     "linkCopied": "Lien copié.",
     "copyFailed": "Impossible de copier.",
     "copyFailedUrl": "L’URL est : {url}",
@@ -97,6 +111,11 @@
       "copyTitle": "Copier le lien de quelle vitrine ?",
       "description": "{count, plural, one {« {title} » est sur {count} vitrine. Choisissez-en une.} many {« {title} » est sur {count} vitrines. Choisissez-en une.} other {« {title} » est sur {count} vitrines. Choisissez-en une.}}",
       "hint": "Ou annulez et utilisez l’éditeur de vitrine pour choisir une vitrine par défaut."
+    },
+    "stockDialog": {
+      "title": "Mettre à jour la quantité",
+      "description": "Combien de « {title} » avez-vous en stock en ce moment ?",
+      "label": "Quantité en stock"
     }
   },
   "card": {
@@ -113,9 +132,14 @@
     "unitsSold": "{count, plural, one {{count} vendu} many {{count} vendus} other {{count} vendus}}",
     "noSales": "Pas encore de ventes",
     "addToWebsite": "Ajouter à votre site",
-    "unlimited": "Illimité",
+    "editStock": "Modifier le stock de {title}",
+    "addToWebsiteShort": "Ajouter « {title} » à votre site",
+    "unlimited": "Stock illimité",
     "noStorefront": "Sans vitrine",
-    "ship": "Expédier"
+    "ship": "Expédier",
+    "duplicate": "Dupliquer",
+    "makeActive": "Rendre actif",
+    "makeDraft": "Passer en brouillon"
   },
   "shareCard": {
     "scanToShop": "Scannez pour acheter",
@@ -164,7 +188,7 @@
     "concerned": "Ce que cela concernait",
     "showField": "Afficher {field} sur cette page",
     "fields": {
-      "product": "{field, select, title {Titre} description {Description} price {Prix} image {Image principale} file {Fichier numérique} purchaseLink {Lien d'achat} shipping {Livraison} options {Options} photos {Photos} specs {Badges et caractéristiques techniques} documents {Documents} safety {Sécurité et conformité} other {Autre chose}}",
+      "product": "{field, select, title {Titre} description {Description} price {Prix} image {Image principale} file {Fichier numérique} purchaseLink {Lien d’achat} shipping {Livraison} options {Options} photos {Photos} specs {Badges et caractéristiques techniques} documents {Documents} safety {Sécurité et conformité} other {Autre chose}}",
       "storefront": "{field, select, name {Nom de la vitrine} header {En-tête} text {Texte} images {Images} products {Produits affichés} background {Arrière-plan} productPage {Pages produit} other {Autre chose}}"
     },
     "reference": "Référence",
@@ -191,6 +215,7 @@
     "badgePendingHint": "Les acheteurs le verront dès que la vérification automatique l’aura approuvé.",
     "badgeReview": "En examen",
     "badgeReviewHint": "Une personne l’examine. Les acheteurs le verront dès qu’il sera approuvé.",
+    "badgeHintLabel": "Ce que cela signifie",
     "titlePending": "{kind, select, product {Ce produit est en cours de vérification} other {Cette vitrine est en cours de vérification}}",
     "titleReview": "{kind, select, product {Une personne vérifie ce produit} other {Une personne vérifie cette vitrine}}",
     "hiddenPending": "Les acheteurs ne pourront pas le voir tant que la vérification automatique n’est pas terminée. Cela prend généralement quelques secondes : rechargez la page pour voir où elle en est.",
@@ -204,7 +229,7 @@
       "title": "Titre",
       "description": "Description",
       "price": "Prix",
-      "sku": "SKU",
+      "sku": "Code produit (SKU)",
       "stock": "Stock"
     },
     "fileTooLarge": "Ce fichier fait {size}. Les fichiers importés doivent faire {max} maximum.",
@@ -212,6 +237,10 @@
     "imported": "{count, plural, one {{count} produit a été importé.} many {{count} produits ont été importés.} other {{count} produits ont été importés.}}",
     "skippedRows": "{count, plural, one {{count} ligne a été ignorée.} many {{count} lignes ont été ignorées.} other {{count} lignes ont été ignorées.}}",
     "checkingRows": "{count, plural, one {{count} produit est encore en vérification : les acheteurs le verront dès que la vérification automatique l’aura approuvé.} many {{count} produits sont encore en vérification : les acheteurs les verront dès que la vérification automatique les aura approuvés.} other {{count} produits sont encore en vérification : les acheteurs les verront dès que la vérification automatique les aura approuvés.}}",
+    "draftsImportedHint": "Ce sont des brouillons, invisibles pour les acheteurs tant que vous ne les publiez pas.",
+    "connectAiHint": "Pour en publier beaucoup à la fois, <link>connectez un assistant IA</link>.",
+    "columnsNeeded": "Nécessaires",
+    "columnsOptional": "Facultatives",
     "dropPrompt": "Déposez un CSV ou cliquez pour en choisir un",
     "fileMeta": "{size} · choisissez-en un autre pour recommencer",
     "rowsLimit": "{max, plural, one {Jusqu’à {max} produit par fichier} many {Jusqu’à {max} produits par fichier} other {Jusqu’à {max} produits par fichier}}",
@@ -223,9 +252,9 @@
     "currencyHelp": "Chaque produit importé sera au prix dans cette devise.",
     "importAs": "Importer en tant que",
     "asDrafts": "Brouillons",
-    "asLive": "Produits en ligne",
+    "asLive": "Produits actifs",
     "draftsHint": "Rien ne passe en ligne tant que vous ne le publiez pas.",
-    "liveHint": "Ceux-ci apparaissent immédiatement dans votre boutique.",
+    "liveHint": "Ils sont mis en Actif : les acheteurs peuvent les acheter dès qu’ils sont sur une vitrine.",
     "columns": "Colonnes",
     "needed": "(nécessaire)",
     "notSet": "Non défini",
@@ -244,7 +273,22 @@
     "run": "{count, plural, one {Importer {count} produit} many {Importer {count} produits} other {Importer {count} produits}}",
     "clear": "Effacer",
     "planRoom": "{max, plural, one {Votre forfait a de la place pour # produit de plus} other {Votre forfait a de la place pour # produits de plus}}",
-    "droppedByPlan": "{count, plural, one {# ligne ne sera pas importée : votre forfait a de la place pour {max} de plus.} other {# lignes ne seront pas importées : votre forfait a de la place pour {max} de plus.}}"
+    "droppedByPlan": "{count, plural, one {# ligne ne sera pas importée : votre forfait a de la place pour {max} de plus.} other {# lignes ne seront pas importées : votre forfait a de la place pour {max} de plus.}}",
+    "story": {
+      "shelf": "Votre boutique",
+      "items": {
+        "camera": "Appareil",
+        "headphones": "Casque",
+        "succulent": "Plante",
+        "watch": "Montre",
+        "sunglasses": "Lunettes",
+        "tshirt": "T-shirt"
+      }
+    },
+    "columnsMatched": "{count, plural, one {# associée} many {# associées} other {# associées}}",
+    "undoImport": "{count, plural, one {Supprimer le produit importé} many {Supprimer les # produits importés} other {Supprimer les # produits importés}}",
+    "undoDone": "{count, plural, one {# produit importé a été supprimé.} many {# produits importés ont été supprimés.} other {# produits importés ont été supprimés.}}",
+    "goToProducts": "Aller aux produits"
   },
   "form": {
     "sections": {
@@ -259,7 +303,7 @@
         "about": "À quoi sert Stock"
       },
       "media": {
-        "label": "Livraison"
+        "label": "Comment l’acheteur le reçoit"
       },
       "shipping": {
         "label": "Livraison",
@@ -273,7 +317,7 @@
       },
       "photos": {
         "label": "Photos",
-        "description": "D’autres angles pour la page produit. Déposez des photos sur une option pour ne les afficher que pour elle.",
+        "description": "D’autres angles, affichés sur la page produit (pas sur la vitrine). Déposez des photos sur une option pour ne les afficher que pour elle.",
         "about": "À quoi sert Photos"
       },
       "specs": {
@@ -302,9 +346,9 @@
         "about": "À quoi sert Badges"
       },
       "addOns": {
-        "label": "Ajouter à la commande",
+        "label": "Proposer aussi ces produits",
         "description": "D'autres de vos produits que les acheteurs peuvent ajouter d'un appui, juste au-dessus d'Acheter. Seuls les produits du même type et de la même devise sont listés, pour que tout reste une seule commande.",
-        "about": "À quoi sert Ajouter à la commande"
+        "about": "À quoi sert cette section"
       }
     },
     "summary": {
@@ -382,19 +426,22 @@
       "asYouTypeAccept": "Ajouter les mots suggérés",
       "asYouTypeAnnounce": "Suggestion :",
       "asYouTypeTurnOff": "Désactiver",
-      "asYouTypeOff": "Les suggestions pendant la saisie sont désactivées. Vous pouvez les réactiver dans Paramètres, rubrique Forfait et facturation.",
-      "upsellHint": "Inclus dans le forfait Pro : l’IA rédige et complète vos descriptions à partir de vos informations. Les forfaits s’ouvrent dans un nouvel onglet.",
-      "upsellBadge": "Pro"
+      "asYouTypeOff": "Les suggestions pendant la saisie sont désactivées.",
+      "asYouTypeBackOn": "Réactivez-les dans Paramètres, rubrique Forfait et facturation.",
+      "upsellHint": "Inclus dans le forfait Pro : l’IA rédige vos descriptions à partir de vos informations et suggère les mots suivants pendant que vous écrivez (Tab pour les ajouter). Les forfaits s’ouvrent dans un nouvel onglet.",
+      "upsellBadge": "Pro",
+      "about": "Ce que fait l’aide à la rédaction par IA",
+      "aboutBody": "Rédiger avec l’IA rédige ou améliore la description à partir de vos informations. Des mots gris suggèrent la suite pendant que vous écrivez (Tab les ajoute). Les deux utilisent votre crédit IA mensuel, affiché dans Paramètres, rubrique Forfait et facturation."
     },
     "displayImage": "Image principale",
     "displayImageAbout": "Où l’image principale est utilisée",
-    "displayImageHelp": "Affichée sur votre vitrine et vos intégrations.",
+    "displayImageHelp": "La seule photo affichée sur votre vitrine et vos intégrations. Ajoutez d’autres angles pour la page produit dans Photos, ci-dessous.",
     "digitalFile": "Fichier numérique",
     "digitalFileAbout": "Ce qu’est le fichier numérique",
     "digitalFileHelp": "Le fichier que les acheteurs téléchargent juste après le paiement. Un téléchargement n’a besoin d’aucune information de livraison ni de sécurité du produit.",
     "purchaseLink": "Lien d’achat",
     "purchaseLinkAbout": "Où le bouton d’achat envoie les acheteurs",
-    "purchaseLinkHelp": "Laissez-le vide et les acheteurs paient via le paiement Square Share, ou vous écrivent par e-mail là où le paiement n’est pas encore actif. Un lien ici remplace les deux.",
+    "purchaseLinkHelp": "Laissez-le vide et les acheteurs {checkout, select, true {paient via le paiement Square Share} other {écrivent à votre adresse de contact}}. Ajoutez un lien ici pour les envoyer plutôt vers votre propre paiement.",
     "purchaseLinkPlaceholder": "p. ex. https://votre-boutique.example/paiement/ce-produit",
     "statusLabel": "Statut du produit",
     "problems": "{count, plural, one {{count} chose à corriger avant d’enregistrer} many {{count} choses à corriger avant d’enregistrer} other {{count} choses à corriger avant d’enregistrer}}",
@@ -408,7 +455,8 @@
     "saveProduct": "Enregistrer le produit",
     "savedToast": "« {title} » a été enregistré.",
     "addedToast": "« {title} » a été ajouté à vos produits.",
-    "checkingToast": "Les acheteurs le verront dès que la vérification automatique l’aura approuvé.",
+    "checkingToast": "Les acheteurs le verront dès que la vérification automatique l’aura approuvé, en général en quelques secondes.",
+    "placeToast": "Ensuite, placez-le sur une vitrine pour lui donner une page.",
     "documentFallbackLabel": "Document",
     "discard": {
       "title": "Abandonner vos modifications ?",
@@ -438,6 +486,7 @@
       }
     },
     "coverPrompt": "Déposez votre plus belle photo ici",
+    "coverPromptTouch": "Touchez pour ajouter votre plus belle photo",
     "kind": {
       "legend": "Que vendez-vous ?",
       "physical": "Quelque chose que j’expédie",
@@ -446,19 +495,21 @@
       "digitalHint": "Un fichier que l’acheteur reçoit juste après avoir payé"
     },
     "purchaseLinkAdd": "Vous vendez via votre propre paiement ? Ajoutez son lien",
+    "safetyPrompt": "Vous livrez des acheteurs dans l’UE ? Ajoutez les informations sur le fabricant exigées par la loi",
     "extras": {
-      "heading": "Mettez-le en valeur",
+      "heading": "Plus de détails",
       "subheading": "Tout est facultatif. Ajoutez ce qui aide les acheteurs à se décider.",
-      "options": "Tailles, couleurs, versions",
+      "options": "Tailles, couleurs, versions, avec un même prix et un même stock",
       "photos": "Plus d’angles et de détails",
-      "badges": "Fait main, livraison offerte…",
+      "badges": "Atouts en bref : Fait main, Livraison offerte…",
       "specs": "Taille, poids, matériaux",
       "documents": "Notices et certificats",
       "safety": "Infos fabricant pour les règles UE"
     },
     "visibility": {
       "activeHint": "Les acheteurs peuvent l’acheter dès qu’il est dans une vitrine",
-      "draftHint": "Vous seul le voyez, jusqu’à ce que vous soyez prêt"
+      "draftHint": "Vous seul le voyez, jusqu’à ce que vous soyez prêt",
+      "buyButton": "{kind, select, link {Le bouton d’achat envoie les acheteurs sur {host} pour payer.} checkout {Les acheteurs paient sur sa page, via le paiement Square Share.} other {Pas encore de paiement pour ce produit : le bouton d’achat permet aux acheteurs de vous écrire par e-mail pour se renseigner.}}"
     },
     "preview": {
       "heading": "Aperçu en direct",
@@ -507,12 +558,12 @@
   "optionsField": {
     "display": {
       "swatch": "Échantillons",
-      "chip": "Puces",
+      "chip": "Boutons texte",
       "select": "Liste déroulante"
     },
     "displayHint": {
       "swatch": "Cercles de couleur. Donnez un échantillon à chaque option, ou les acheteurs verront sa première lettre.",
-      "chip": "Boutons texte, pour les valeurs que les acheteurs lisent : tailles, puissances, longueurs.",
+      "chip": "Idéal pour les valeurs que les acheteurs lisent : tailles, puissances, longueurs.",
       "select": "Une liste déroulante. Idéale quand il y a plus de valeurs qu’il n’en tient en boutons."
     },
     "presets": {
@@ -607,14 +658,15 @@
     "removePhoto": "Retirer la photo",
     "movePhotoEarlier": "Déplacer la photo plus tôt",
     "movePhotoLater": "Déplacer la photo plus tard",
-    "altPlaceholder": "Texte alternatif",
+    "altPlaceholder": "Description de la photo",
     "altLabel": "Décrivez cette photo, pour les personnes qui ne peuvent pas la voir",
     "versionLabel": "Pour quelle variante cette photo est affichée",
     "tally": "{max, plural, one {{count} sur {max} photo} many {{count} sur {max} photos} other {{count} sur {max} photos}}",
     "orderAbout": "Comment ces photos sont ordonnées",
-    "orderHelp": "L’image principale de Médias et livraison est toujours première. Ensuite, les photos s’affichent dans l’ordre où elles apparaissent ici.",
+    "orderHelp": "L’image principale, en haut du formulaire, est toujours première. Ensuite, les photos s’affichent dans l’ordre où elles apparaissent ici.",
     "limitReached": "Limite atteinte",
-    "dropOrClick": "Déposez ou cliquez"
+    "dropOrClick": "Déposez ou cliquez",
+    "dropOrClickTouch": "Touchez pour ajouter une photo"
   },
   "optionSpecsField": {
     "heading": "Différent pour chaque variante",
@@ -689,7 +741,7 @@
     "tooLarge": "L’image doit faire moins de {max} Mo.",
     "previewAlt": "Aperçu de l’image principale",
     "dropPrompt": "Déposez une image ou cliquez pour importer",
-    "hint": "PNG, JPG, WEBP, GIF ou AVIF, jusqu’à {max} Mo",
+    "hint": "PNG, JPG, WEBP, GIF ou AVIF, jusqu’à {max} Mo. Les photos carrées conviennent le mieux.",
     "remove": "Retirer l’image principale"
   },
   "photoFormat": {
@@ -698,7 +750,7 @@
   "fileDropzone": {
     "currentFile": "Fichier actuel",
     "dropPrompt": "Déposez un fichier ou cliquez pour importer",
-    "hint": "ZIP, PDF et formats similaires, jusqu’à {max} Mo",
+    "hint": "PDF, EPUB, ZIP, MP3, WAV, MP4, JPG, PNG, WEBP ou TXT, jusqu’à {max} Mo",
     "remove": "Retirer le fichier numérique"
   },
   "statement": {
@@ -829,7 +881,7 @@
     },
     "editProduct": "Modifier le produit",
     "goToStorefronts": "Aller aux vitrines",
-    "embedPointer": "Vous ne vendez qu’un seul produit ? Au lieu d’intégrer toute la vitrine, donnez-lui un bouton d’achat sur votre site : dans Produits, ouvrez son menu et choisissez « Ajouter à votre site ».",
+    "embedPointer": "Vous ne vendez qu’un seul produit ? Au lieu d’intégrer toute la vitrine, donnez-lui un bouton d’achat sur votre site : dans Produits, ouvrez le menu à trois points de sa carte et choisissez « Ajouter à votre site ».",
     "embedPointerLink": "Aller aux produits",
     "demo": {
       "play": "Lire l’animation",
@@ -923,6 +975,7 @@
       "pink": "Rose"
     },
     "placementFor": "Emplacement du badge {position}",
+    "placementLabel": "Emplacement",
     "placementPicker": "Emplacement",
     "placements": {
       "beside": "À côté du produit",
@@ -1107,12 +1160,11 @@
     },
     "story": {
       "product": "Tasse en céramique",
-      "customerReviews": "Avis clients",
-      "addToCart": "Ajouter au panier",
       "reviews": {
         "a": "« Bel émail, garde mon café bien chaud. »",
         "b": "« Encore plus belle en vrai. »",
-        "c": "« Arrivée vite et bien emballée. »"
+        "c": "« Arrivée vite et bien emballée. »",
+        "d": "« J’en ai acheté une deuxième à offrir. »"
       }
     },
     "tally": {
@@ -1152,6 +1204,7 @@
   "reviewModeration": {
     "heading": "Avis",
     "description": "Ce que les acheteurs disent de vos produits. Chaque avis est vérifié automatiquement avant de paraître, et ceux sur lesquels la vérification a eu un doute vous attendent ici.",
+    "productPageLink": "Afficher ou masquer les avis sur votre page produit",
     "importButton": "Importer depuis n’importe où",
     "filtersLabel": "Filtrer les avis",
     "filters": {
@@ -1164,7 +1217,7 @@
     "empty": {
       "all": {
         "title": "Aucun avis pour l’instant",
-        "body": "Quand un acheteur évalue un produit depuis sa page de commande, l’avis apparaît ici."
+        "body": "Les acheteurs sont invités à laisser un avis sur leur page de commande une fois qu’ils ont le produit : pour un colis, dès que vous l’avez marqué comme expédié. Leurs avis apparaissent ici."
       },
       "held": {
         "title": "Rien ne vous attend",
@@ -1242,7 +1295,7 @@
     "overview": {
       "label": "Note de la boutique",
       "none": "Aucun avis public pour l’instant.",
-      "breakdown": "Avis par nombre d’étoiles",
+      "breakdown": "Filtrer par nombre d’étoiles",
       "showStars": "{stars, plural, one {Afficher uniquement les avis à {stars} étoile ({count})} other {Afficher uniquement les avis à {stars} étoiles ({count})}}"
     },
     "toolbar": {
@@ -1253,8 +1306,8 @@
       "anyRating": "Toutes les notes",
       "product": "Produit",
       "anyProduct": "Tous les produits",
-      "origin": "Origine",
-      "anyOrigin": "Toutes les origines",
+      "origin": "Type",
+      "anyOrigin": "Tous les types",
       "origins": {
         "verified": "Acheteurs vérifiés",
         "imported": "Importés"

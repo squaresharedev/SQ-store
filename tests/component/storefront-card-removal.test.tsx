@@ -62,4 +62,9 @@ describe("StorefrontCard moderation line", () => {
     expect(line).toHaveTextContent("Removed by Square Share");
     expect(line).toHaveClass("text-destructive");
   });
+
+  it("the moderation line takes the place of the live status, never sits beside it", () => {
+    renderWith("paused");
+    expect(document.querySelector("[data-storefront-status]")).toBeNull();
+  });
 });

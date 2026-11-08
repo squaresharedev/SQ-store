@@ -186,7 +186,7 @@ test.describe("analytics, storefront funnel", () => {
     await expect(metric(page, "embed_views")).toHaveAttribute("data-analytics-value", "20");
     await expect(metric(page, "checkouts_started")).toHaveAttribute("data-analytics-value", "4");
     await expect(funnel(page).getByText("Orders: 3, views: 20")).toBeVisible();
-    await expect(funnel(page).getByText("Rates appear once this range holds 50 views.")).toBeVisible();
+    await expect(funnel(page).getByText(/Rates appear once this range holds 50 views/)).toBeVisible();
     await funnel(page).screenshot({ path: "test-results/funnel-thin.png" });
   });
 

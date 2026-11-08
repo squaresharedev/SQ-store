@@ -245,12 +245,25 @@ function usualCurrency(currencies: readonly Currency[]): Currency | null {
   return mostUsed(currencies.slice(0, AGREEMENT_WINDOW), (currency) => currency, 1)[0] ?? null;
 }
 
-/** `recent` is newest first; `profileIds` are the shipping profiles that still exist. */
+/** Business countries whose stores start in dollars; every other country
+ *  starts in euros. */
+const DOLLAR_COUNTRIES: readonly string[] = ["US", "CA"];
+
+/** The currency a store with nothing priced yet starts in, from its business
+ *  country (Settings, Business & seller details); null while none is set. */
+export function homeCurrency(businessCountry: string | undefined): Currency | null {
+  if (!businessCountry) return null;
+  return DOLLAR_COUNTRIES.includes(businessCountry) ? "USD" : "EUR";
+}
+
+/** `recent` is newest first; `profileIds` are the shipping profiles that still
+ *  exist. A store's own currency wins over its country's. */
 export function predictProductDefaults(
   recent: readonly RecentProduct[],
   profileIds: readonly string[],
+  businessCountry?: string,
 ): ProductSuggestions {
-  const currency = usualCurrency(recent.map((product) => product.currency));
+  const currency = usualCurrency(recent.map((product) => product.currency)) ?? homeCurrency(businessCountry);
   const profile = agreed(recent.map((product) => product.shippingProfileId), 2);
   const dimensionUnit = agreed(recent.flatMap((product) => product.details.dimensions?.unit ?? []));
   const weightUnit = agreed(recent.flatMap((product) => product.details.weight?.unit ?? []));

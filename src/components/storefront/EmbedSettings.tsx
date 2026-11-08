@@ -25,6 +25,7 @@ import {
   codeTextClass,
   iconTileClass,
   inkBadgeClass,
+  mutedBadgeClass,
   sectionTitleClass,
   stepNumberClass,
   withPictureClass,
@@ -52,6 +53,7 @@ import {
   embedFrameSnippet,
   embedSnippet,
   isEmbedAvailable,
+  type EmbedLink,
 } from "@/lib/storefront/embed-snippet";
 import { LEGAL_LINKS } from "@/lib/legal/links";
 import { SellerDetailsNotice } from "@/components/settings/SellerDetailsNotice";
@@ -127,9 +129,9 @@ function EmbedStep({
             <span aria-hidden="true" className={stepNumberClass}>
               {number}
             </span>
-            <h2 id={headingId} className={sectionTitleClass}>
+            <h3 id={headingId} className={sectionTitleClass}>
               {title}
-            </h2>
+            </h3>
             {badge && <span className={inkBadgeClass}>{badge}</span>}
           </div>
           {children}
@@ -147,6 +149,7 @@ export function EmbedSettings({
   missingTraderDetails = [],
   productPagesOn = true,
   suggestedDomains = null,
+  link = null,
 }: {
   storefront: StorefrontSummary;
   /** Another storefront's domains, offered behind one tap while the field is
@@ -164,9 +167,15 @@ export function EmbedSettings({
    *  tiles open them, so without them the frame draws nothing
    *  (lib/storefront/embed-frame-loader.ts) and the snippet is not offered. */
   productPagesOn?: boolean;
+  /** A fallback anchor for the script snippet: the hosted storefront's URL and
+   *  display name, for crawlers and no-JS visitors. Omit when the hosted page
+   *  is not yet live (no link to a 404). The plain-iframe variant never carries
+   *  it because that variant has no widget script to hide it. */
+  link?: EmbedLink | null;
 }) {
   const t = useTranslations("Storefront.embed");
   const tCommon = useTranslations("Common");
+  const tDesigner = useTranslations("Storefront.designer.header");
   const toast = useToast();
   const showActionError = useActionErrorToast();
   // The rotate buttons drive their own icon: hovering anywhere on the button
@@ -270,34 +279,49 @@ export function EmbedSettings({
   }
 
   // SELL-03: Copy is only meaningful once the embed would actually show:
-  // switched on (the switch itself, which saves as it is flipped), with a
-  // domain that is SAVED (the frame reads what the server holds, and "a domain
-  // typed, never saved" is the easiest way to paste a snippet that shows
-  // nothing), on a storefront that may publish and has product pages for its
-  // tiles to open. And only once the embed has a host at all
-  // (isEmbedAvailable).
+  // switched on (the switch itself, which saves as it is flipped), with the
+  // domains SAVED as typed (the frame reads what the server holds, and "a
+  // domain typed, never saved" is the easiest way to paste a snippet that
+  // shows nothing, on a second site as much as a first), on a storefront that
+  // may publish and has product pages for its tiles to open. And only once the
+  // embed has a host at all (isEmbedAvailable).
   const available = isEmbedAvailable();
   const domains = parseDomains(domainsText);
   // A store that may not publish can neither turn embedding on nor be handed a
   // snippet: the frame the snippet asks for refuses it too.
   const canPublish = missingTraderDetails.length === 0;
   const hasSavedDomain = saved.domains.length > 0;
-  const canCopy = available && enabled && hasSavedDomain && canPublish && productPagesOn;
+  // The field holds a list the server has not been told: the chips preview
+  // the field, they do not confirm a save.
+  const domainsUnsaved = domains.join(",") !== saved.domains.join(",");
+  const canCopy = available && enabled && hasSavedDomain && !domainsUnsaved && canPublish && productPagesOn;
   // A domain is typed but the server has not been told yet.
-  const unsaved = enabled && !hasSavedDomain && domains.length > 0;
+  const unsaved = enabled && domainsUnsaved && domains.length > 0;
   const privacyText = t("privacyText", { policy: LEGAL_LINKS.privacy.href });
   // The iframe names the SAVED sites, as the frame will check them. Before
   // there are any (when it cannot be copied) it shows the typed ones, then the
   // placeholder's, so its picture is never an address with nothing at the end.
   const iframeDomains =
     [saved.domains, domains].find((list) => list.length > 0) ?? parseDomains(t("domainsPlaceholder"));
+  // The script snippet carries the fallback anchor for crawlers and no-JS
+  // visitors; the plain-iframe variant does not (no widget script would hide
+  // it, so the two would appear side by side on a scripts-stripped site).
   const snippet =
-    kind === "script" ? embedSnippet(embedKey) : embedFrameSnippet(embedKey, embedFrameSites(iframeDomains));
+    kind === "script" ? embedSnippet(embedKey, link) : embedFrameSnippet(embedKey, embedFrameSites(iframeDomains));
 
   return (
     <div className="space-y-6">
+      {/* The website half of sharing, under a heading of its own, so what is
+          said below (the notice, the steps) reads as this section's and never
+          as the storefront link's above it. */}
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 className={sectionTitleClass}>{t("sectionTitle")}</h2>
+        {!available && <span className={mutedBadgeClass}>{tCommon("badge.comingSoon")}</span>}
+      </div>
+
       {/* SELL-03: in-development notice is the headline, not a footnote. Only
-          while the embed has no host to be served from. */}
+          while the embed has no host to be served from. It names the privacy
+          step too, which only appears once there is a host. */}
       {!available && <p className={cautionNoticeClass}>{t("inDevNotice")}</p>}
 
       {/* Above the switch it disables, so the reason arrives before the
@@ -379,10 +403,19 @@ export function EmbedSettings({
           )}
         </div>
 
-        {/* Saves the domains; the switch above saves itself. */}
-        <button type="button" onClick={handleSave} disabled={saving} className={primaryButtonClass}>
-          {saving ? t("saving") : t("saveSettings")}
-        </button>
+        {/* Saves the domains; the switch above saves itself. Beside it, while
+            the field and the server disagree, the designer's own words for
+            work not yet written. */}
+        <div className="flex flex-wrap items-center gap-3">
+          <button type="button" onClick={handleSave} disabled={saving} className={primaryButtonClass}>
+            {saving ? t("saving") : t("saveSettings")}
+          </button>
+          {domainsUnsaved && !saving && (
+            <span role="status" className={helpTextClass} data-embed-unsaved="">
+              {tDesigner("unsaved")}
+            </span>
+          )}
+        </div>
       </EmbedStep>
 
       {/* 2. WHAT TO PASTE. The code is the picture. */}

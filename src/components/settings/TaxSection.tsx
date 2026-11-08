@@ -3,7 +3,7 @@
 import { useActionState, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "@/components/ui/AppLink";
-import { ArrowRight } from "lucide-react";
+import { ArrowDown, ArrowRight } from "lucide-react";
 import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { StepUpField } from "@/components/auth/StepUp";
@@ -16,7 +16,8 @@ import { Select, type SelectOption } from "@/components/ui/select";
 import { saveTaxInfo } from "@/lib/settings/actions";
 import type { ActionState } from "@/lib/errors";
 import type { ContactChannel } from "@/lib/contact-verification/policy";
-import { SELLER_FIELD_MAX } from "@/lib/settings/constants";
+import { ACCOUNT_BIO_PATH, SELLER_FIELD_MAX } from "@/lib/settings/constants";
+import { CONFIRM_CONTACT_ANCHOR } from "@/lib/settings/trader-identity";
 import { useOperatingCountries } from "@/components/settings/use-operating-countries";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { RequiredMark } from "@/components/ui/RequiredMark";
@@ -24,6 +25,7 @@ import { LEGAL_LINKS } from "@/lib/legal/links";
 import {
   helpTextClass,
   iconNudgeRightClass,
+  inlineLinkClass,
   secondaryButtonClass,
   strongLabelClass,
 } from "@/components/ui/control-styles";
@@ -78,7 +80,7 @@ type VatAdvisory =
 /**
  * Country/VAT advisory: says which warning applies when the VAT ID's country
  * prefix and the selected country disagree, or when an EU VAT ID is paired
- * with "Not in the EU". Advisory only — the server still accepts the save.
+ * with no country. Advisory only: the server still accepts the save.
  */
 function vatAdvisory(
   vatId: string,
@@ -96,8 +98,8 @@ function vatAdvisory(
   const issuer = countryName(impliedIso);
 
   if (countryCode === "") {
-    // A recognised EU VAT prefix alongside "not in the EU" is almost certainly
-    // a mistake, since the prefix tells us which member state issued the number.
+    // A recognised EU VAT prefix with no country set is almost certainly a
+    // country left out, since the prefix tells us which member state issued it.
     return { kind: "noCountry", issuer };
   }
 
@@ -162,7 +164,9 @@ export function TaxSection({
 }) {
   const t = useTranslations("Settings");
   const { countries, countryName } = useOperatingCountries();
-  // "" is a real choice (non-EU / declined), so it leads the list.
+  // "" (not set) is a real choice, so it leads the list. Worded as a plain
+  // empty state, not as declining: the US and Canada are on the list, and an
+  // unset country makes product pages state EU buyer rights (mayOweEuRights).
   const countryOptions: readonly SelectOption<string>[] = useMemo(
     () => [
       { value: "", label: t("tax.countryUnset") },
@@ -202,6 +206,9 @@ export function TaxSection({
   const proveEmail =
     savedEmail.trim() !== "" && (verification.emailRequired || verification.email);
   const provePhone = savedPhone.trim() !== "";
+  // Saved is not done while the gate still waits on the email code: the next
+  // step is the code box below, not the storefront.
+  const confirmEmailNext = verification.emailRequired && proveEmail && !emailVerified;
 
   return (
     <SettingsCard
@@ -229,7 +236,7 @@ export function TaxSection({
                 href={LEGAL_LINKS.privacy.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline underline-offset-2 hover:no-underline"
+                className={inlineLinkClass}
               >
                 {chunks}
               </a>
@@ -311,10 +318,20 @@ export function TaxSection({
             aria-required="true"
             disabled={isPending}
           />
+          {/* Said before the first save: once an address is saved, the code
+              box below takes over and says what is left to do. */}
+          {verification.email && savedEmail.trim() === "" && (
+            <p className={helpTextClass}>{t("tax.fields.email.codeHint")}</p>
+          )}
         </div>
 
         <div id="vat" className="flex flex-col gap-1.5">
-          <Label htmlFor="tax_vat_id">{t("tax.fields.vatId.label")}</Label>
+          <span className="flex items-center gap-1.5">
+            <Label htmlFor="tax_vat_id">{t("tax.fields.vatId.label")}</Label>
+            <InfoTip label={t("tax.fields.vatId.tipLabel")}>
+              {t("tax.fields.vatId.tipBody")}
+            </InfoTip>
+          </span>
           <Input
             id="tax_vat_id"
             name="tax_vat_id"
@@ -369,6 +386,7 @@ export function TaxSection({
             autoComplete="tel"
             disabled={isPending}
           />
+          <p className={helpTextClass}>{t("tax.fields.phone.restriction")}</p>
         </div>
         <StepUpField id="business-details" state={state} />
         <div className="flex flex-wrap items-center gap-3">
@@ -378,16 +396,22 @@ export function TaxSection({
               needs to be told where to go next rather than left on a settings
               page wondering. Persists past SaveButton's own flash so the
               answer doesn't vanish before it's used. */}
-          {justSaved && (
-            <Link href={continueHref} className={cn(secondaryButtonClass, "w-fit")}>
-              {t("continueToStorefront")}
-              <ArrowRight
-                className={cn("size-4", iconNudgeRightClass)}
-                strokeWidth={2}
-                aria-hidden
-              />
-            </Link>
-          )}
+          {justSaved &&
+            (confirmEmailNext ? (
+              <a href={`#${CONFIRM_CONTACT_ANCHOR}`} className={cn(secondaryButtonClass, "w-fit")}>
+                {t("confirmEmailNext")}
+                <ArrowDown className="size-4" strokeWidth={2} aria-hidden />
+              </a>
+            ) : (
+              <Link href={continueHref} className={cn(secondaryButtonClass, "w-fit")}>
+                {t("continueToStorefront")}
+                <ArrowRight
+                  className={cn("size-4", iconNudgeRightClass)}
+                  strokeWidth={2}
+                  aria-hidden
+                />
+              </Link>
+            ))}
         </div>
       </form>
 
@@ -396,7 +420,7 @@ export function TaxSection({
           HTML that browsers resolve by dropping one of them. */}
       {(proveEmail || provePhone) && (
         <section
-          id="confirm-contact"
+          id={CONFIRM_CONTACT_ANCHOR}
           aria-labelledby="confirm-contact-heading"
           className="mt-6 scroll-mt-20 space-y-4 border-t border-border pt-5"
         >
@@ -428,6 +452,18 @@ export function TaxSection({
           )}
         </section>
       )}
+
+      {/* Buyers see the bio too, but it is written in Account settings: said
+          at the foot of the details buyers see, so nobody hunts for it here. */}
+      <p className={`${helpTextClass} mt-6`}>
+        {t.rich("tax.bioHint", {
+          link: (chunks) => (
+            <Link href={ACCOUNT_BIO_PATH} className={inlineLinkClass}>
+              {chunks}
+            </Link>
+          ),
+        })}
+      </p>
     </SettingsCard>
   );
 }

@@ -1,34 +1,43 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Copy, ExternalLink, MoreHorizontal, MousePointerClick, Trash2 } from "lucide-react";
+import { CheckCircle, Copy, ExternalLink, Files, MoreHorizontal, MousePointerClick, PenLine, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { iconButtonClass, overlayItemClass, photoControlClass } from "@/components/ui/control-styles";
 import { Popover } from "@/components/ui/Popover";
+import type { ProductStatus } from "@/types/product";
 
 /**
  * Every action on a product card behind one button: copy link, open page, add
- * to a website, and (for writers) delete. Copy and open stay available to
- * every role (viewing the product page is not a write) and dim when the
- * product is on no storefront, since there is no page to link to yet; the
- * click says so. Sits on the card's photo, so it wears the photo-control skin.
+ * to a website, (for writers) duplicate / status toggle / delete. Copy and
+ * open stay available to every role (viewing the product page is not a write)
+ * and dim when the product is on no storefront. Sits on the card's photo, so
+ * it wears the photo-control skin.
  */
 export function ProductCardMenu({
   title,
+  status,
   canWrite,
   storefrontCount,
   onCopyLink,
   onOpenPage,
   onBuyButton,
+  onDuplicate,
+  onMakeActive,
+  onMakeDraft,
   onDelete,
 }: {
   title: string;
-  /** Delete is write-only and absent for read-only members. */
+  status: ProductStatus;
+  /** Delete, duplicate and status actions are write-only. */
   canWrite: boolean;
   /** Storefronts the product is on: 0 dims copy/open, 2+ says a choice follows. */
   storefrontCount: number;
   onCopyLink: () => void;
   onOpenPage: () => void;
   onBuyButton: () => void;
+  onDuplicate: () => void;
+  onMakeActive: () => void;
+  onMakeDraft: () => void;
   onDelete: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -93,10 +102,28 @@ export function ProductCardMenu({
           {t("addToWebsite")}
         </button>
         {canWrite && (
-          <button type="button" onClick={run(onDelete)} className={cn(overlayItemClass, "hover:text-destructive")}>
-            <Trash2 className="size-4 shrink-0" aria-hidden="true" />
-            {tCommon("delete")}
-          </button>
+          <>
+            {/* Quick status toggle: draft -> active, active -> draft. */}
+            {status === "draft" ? (
+              <button type="button" onClick={run(onMakeActive)} className={overlayItemClass}>
+                <CheckCircle className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                {t("makeActive")}
+              </button>
+            ) : (
+              <button type="button" onClick={run(onMakeDraft)} className={overlayItemClass}>
+                <PenLine className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                {t("makeDraft")}
+              </button>
+            )}
+            <button type="button" onClick={run(onDuplicate)} className={overlayItemClass}>
+              <Files className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+              {t("duplicate")}
+            </button>
+            <button type="button" onClick={run(onDelete)} className={cn(overlayItemClass, "hover:text-destructive")}>
+              <Trash2 className="size-4 shrink-0" aria-hidden="true" />
+              {tCommon("delete")}
+            </button>
+          </>
         )}
       </div>
     </Popover>

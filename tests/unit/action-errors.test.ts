@@ -57,7 +57,7 @@ describe("ActionError factories: English is unchanged", () => {
   it("notFound, rateLimited, serverError", () => {
     expect(english(notFound("storefront").message)).toBe("That storefront could not be found.");
     expect(english(rateLimited("rotateEmbedKeys").message)).toBe(
-      "Too many embed code resets in a short time.",
+      "Too many attempts to get a new website code in a short time.",
     );
     expect(english(serverError("verifyImageUpload").message)).toBe(
       "Could not verify your image upload because of a problem on our side.",
@@ -76,10 +76,10 @@ describe("ActionError factories: English is unchanged", () => {
       "Add your contact email in Settings › Business & seller details, then publish.",
     );
     expect(fix(["businessName", "email"])).toBe(
-      "Add your trader name and contact email in Settings › Business & seller details, then publish.",
+      "Add your name or business name and your contact email in Settings › Business & seller details, then publish.",
     );
     expect(fix(["businessName", "address", "email"])).toBe(
-      "Add your trader name, business address and contact email in Settings › Business & seller details, then publish.",
+      "Add your name or business name, your business address and your contact email in Settings › Business & seller details, then publish.",
     );
     expect(fix(["address", "emailVerified"])).toBe(
       "Add your business address in Settings › Business & seller details, and confirm your contact email with the code we send to it.",

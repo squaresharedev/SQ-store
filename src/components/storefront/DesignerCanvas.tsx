@@ -9,6 +9,7 @@ import type { PagePhotoView } from "@/types/product-page";
 import { pagePhotoView } from "@/lib/storefront/product-page";
 import { resolveTileLook } from "@/lib/storefront/tile-look";
 import {
+  CANVAS_ROWS_MAX,
   blockKey,
   isFreelyArranged,
   layerOrder,
@@ -148,6 +149,8 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   onMoveBlock,
   onMoveBlocks,
   onResizeBlock,
+  onMoveOnPhone,
+  onResizeOnPhone,
   onRotateBlock,
   onEmptyCellClick,
   onAddProduct,
@@ -228,6 +231,10 @@ export const DesignerCanvas = memo(function DesignerCanvas({
    *  somewhere new is one act and one entry in the history. */
   onMoveBlocks: (moves: readonly { key: string; x: number; y: number }[]) => void;
   onResizeBlock: (key: string, placement: GridPlacement) => void;
+  /** The same two gestures on the board's own phone arrangement, which the
+   *  phone preview edits while there is one: where blocks landed there. */
+  onMoveOnPhone: (moves: readonly { key: string; x: number; y: number }[]) => void;
+  onResizeOnPhone: (key: string, placement: GridPlacement) => void;
   /** Tilt, in degrees. The block keeps the cells it had. */
   onRotateBlock: (key: string, rotation: number) => void;
   /** Clicking a free cell inserts there. */
@@ -678,6 +685,12 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   // page sees them at the same believable scale rather than one shrinking to
   // fit whatever room is left.
   const isDesign = previewMode === "desktop";
+  // THE PHONE ARRANGEMENT, EDITABLE. The phone preview draws it as the board
+  // itself rather than as the grid's read-only narrow layout, so the gestures
+  // that edit the desktop board edit this one, into each block's phone rect.
+  // One spare row underneath gives a block somewhere lower to go.
+  const phoneBoard =
+    !isDesign && phone ? { ...phone, rows: Math.min(CANVAS_ROWS_MAX, phone.rows + 1) } : null;
   // The first cell of an empty design board. The phone preview reflows, so it
   // has no honest cell to offer and keeps the empty state.
   const suggestion =
@@ -811,7 +824,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
 
   // What can move either end of a line without the connectors hearing about
   // it: which pages are out (the chain follows from those), and where the tiles
-  // sit on the board.
+  // sit on the board being drawn (the phone arrangement, in its preview).
   const hasCheckoutChain = checkoutPage !== undefined;
   const connectorRevision = useMemo(
     () =>
@@ -821,9 +834,11 @@ export const DesignerCanvas = memo(function DesignerCanvas({
         theme.columns,
         theme.rows,
         theme.gridGap,
-        blocks.map((block) => `${block.x},${block.y},${block.w},${block.h}`).join("|"),
+        (!isDesign && phone ? phone.blocks : blocks)
+          .map((block) => `${block.x},${block.y},${block.w},${block.h}`)
+          .join("|"),
       ].join("~"),
-    [openProductIds, hasCheckoutChain, theme.columns, theme.rows, theme.gridGap, blocks],
+    [openProductIds, hasCheckoutChain, theme.columns, theme.rows, theme.gridGap, isDesign, phone, blocks],
   );
 
   const canvas = (
@@ -930,16 +945,17 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             allowOverlap
             showEmptyCells={showGrid}
             suggestion={suggestion}
-            blocks={gridBlocks}
+            blocks={phoneBoard?.blocks ?? gridBlocks}
             ariaLabel={t("canvas.gridLabel")}
-            columns={theme.columns}
-            rows={theme.rows}
+            columns={phoneBoard?.columns ?? theme.columns}
+            rows={phoneBoard?.rows ?? theme.rows}
             // A board with a tilt or a stack on it has no honest narrow-screen
             // repacking: pulling a word off the shape it sits on and setting
             // the two side by side is a different design, not a smaller one.
             // Such a board keeps its columns and its cells simply get smaller.
-            responsive={!freelyArranged}
-            narrowLayout={phone}
+            // The phone arrangement is already phone-sized.
+            responsive={!phoneBoard && !freelyArranged}
+            narrowLayout={phoneBoard ? null : phone}
             // Corner roundness drives the cell clip (style beats the grid's
             // default rounded-sm class); tiles inherit it, no clip of their
             // own. Scaled per tile size so big tiles round like small ones.
@@ -982,16 +998,22 @@ export const DesignerCanvas = memo(function DesignerCanvas({
               const text = block.text.trim();
               return text ? t("blockTile.textWithContent", { text: text.slice(0, 30) }) : t("blockTile.textBlock");
             }}
-            onMove={onMoveBlock}
-            onResize={onResizeBlock}
+            onMove={
+              phoneBoard
+                ? (key: string, x: number, y: number) => onMoveOnPhone([{ key, x, y }])
+                : onMoveBlock
+            }
+            onResize={phoneBoard ? onResizeOnPhone : onResizeBlock}
             onRotate={onRotateBlock}
             // THE SELECTION TRAVELS TOGETHER. A drag or an arrow on any one of
             // several selected tiles carries all of them, as one rigid body and
             // one undo step; the grid stays selection-agnostic and is simply
             // told which keys move as a group (see `groupKeys` in Grid).
             groupKeys={selectedKeys}
-            onMoveMany={onMoveBlocks}
-            onEmptyCellClick={onEmptyCellClick}
+            onMoveMany={phoneBoard ? onMoveOnPhone : onMoveBlocks}
+            // A free cell of the phone arrangement is no place on the desktop
+            // board to insert into.
+            onEmptyCellClick={phoneBoard ? undefined : onEmptyCellClick}
             renderBlock={(gridBlock, state) => (
               <BlockTile
                 blockKey={gridBlock.key}
@@ -1007,6 +1029,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                 }
                 isFraming={framingKey === gridBlock.key}
                 isTyping={typingKey === gridBlock.key}
+                isGesture={state.isDragging || state.isResizing}
                 typingSelectAll={typingSelectAll}
                 // Stable across renders, so a memoised tile only re-renders
                 // when its OWN data or selection changes.

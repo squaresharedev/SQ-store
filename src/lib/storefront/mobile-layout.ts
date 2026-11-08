@@ -1,5 +1,15 @@
+import { columnsThatFit } from "@/components/grid/gridConstants";
 import { orientedSpan, rotatedFootprint } from "@/lib/geometry/rotated-box";
-import { blockFootprint, readingOrder, type StorefrontBlock, type StorefrontTheme } from "@/types/storefront";
+import {
+  MOBILE_COLUMNS_MAX,
+  MOBILE_COLUMNS_MIN,
+  blockFootprint,
+  blockKey,
+  readingOrder,
+  type MobilePlacement,
+  type StorefrontBlock,
+  type StorefrontTheme,
+} from "@/types/storefront";
 
 // THE PHONE BOARD, as pure data (types/storefront, PHONE LAYOUT). The renderer
 // draws from it below MOBILE_LAYOUT_MAX_WIDTH_PX, an assistant reads it back,
@@ -63,9 +73,7 @@ export function phoneLayout(
     const phone = block.mobile;
     if (phone?.hidden) hidden.push(block);
     else if (phone) {
-      const w = Math.min(Math.max(1, phone.w), columns);
-      const x = Math.min(Math.max(0, phone.x), columns - w);
-      const rect = { x, y: Math.max(0, phone.y), w, h: Math.max(1, phone.h) };
+      const rect = ontoPhone(phone, columns);
       const covered = rotatedFootprint(rect, block.rotation ?? 0);
       take(Math.max(0, covered.x), Math.max(0, covered.y), Math.min(covered.w, columns), covered.h);
       pinned.push({ block, ...rect, pinned: true });
@@ -112,4 +120,92 @@ export function phoneLayout(
 
 function readingOrderOf(spots: PhonePlacement[]): PhonePlacement[] {
   return spots.sort((a, b) => a.y - b.y || a.x - b.x);
+}
+
+/** A phone rect pulled onto a phone board `columns` wide, the way it is drawn
+ *  there: never wider than the board, never past an edge. */
+function ontoPhone(rect: MobilePlacement, columns: number): MobilePlacement {
+  const w = Math.min(Math.max(1, rect.w), columns);
+  return { x: Math.min(Math.max(0, rect.x), columns - w), y: Math.max(0, rect.y), w, h: Math.max(1, rect.h) };
+}
+
+/** Where a block is on the phone board right now, given that board's layout:
+ *  the rect it is drawn at, or the one it keeps while hidden. */
+function rectIn(layout: PhoneLayout | null, block: StorefrontBlock): MobilePlacement {
+  const spot = layout?.placed.find((candidate) => candidate.block === block);
+  if (spot) return { x: spot.x, y: spot.y, w: spot.w, h: spot.h };
+  const { hidden: _hidden, ...own } = block.mobile ?? { x: 0, y: 0, w: 1, h: 1 };
+  void _hidden;
+  return own;
+}
+
+/** Where a block is on the phone board right now: its own rect, or the one placed for it. */
+export function phoneRect(
+  theme: Pick<StorefrontTheme, "columns" | "mobileColumns">,
+  blocks: readonly StorefrontBlock[],
+  block: StorefrontBlock,
+): MobilePlacement {
+  return rectIn(phoneLayout(theme, blocks), block);
+}
+
+/**
+ * `blocks` with each block named in `changes` (by blockKey) pinned on the phone
+ * board: where it is there now, with its change laid over it. What a move, a
+ * resize, a hide or a show on the designer's phone board writes. Only a change
+ * that says `hidden: true` leaves the block hidden.
+ */
+export function pinOnPhone(
+  theme: Pick<StorefrontTheme, "columns" | "mobileColumns">,
+  blocks: readonly StorefrontBlock[],
+  changes: ReadonlyMap<string, Partial<MobilePlacement>>,
+): StorefrontBlock[] {
+  const layout = phoneLayout(theme, blocks);
+  return blocks.map((block) => {
+    const change = changes.get(blockKey(block));
+    if (!change) return block;
+    const { x, y, w, h } = { ...rectIn(layout, block), ...change };
+    return { ...block, mobile: { x, y, w, h, ...(change.hidden ? { hidden: true } : {}) } };
+  });
+}
+
+/** A block handed back to automatic placement on phones: no rect of its own. */
+export function unpinnedOnPhone(block: StorefrontBlock): StorefrontBlock {
+  if (!block.mobile) return block;
+  const { mobile: _mobile, ...rest } = block;
+  void _mobile;
+  return rest as StorefrontBlock;
+}
+
+/**
+ * The board with a phone layout `columns` wide, or with none (null): back to
+ * automatic. Switching it off keeps the blocks' phone rects, inert, the way the
+ * theme operation does, so switching it on again brings the arrangement back.
+ * A narrower phone board pulls each pinned rect onto it, as phoneLayout draws
+ * it, so the board still saves.
+ */
+export function withPhoneColumns<Theme extends Pick<StorefrontTheme, "columns" | "mobileColumns">>(
+  theme: Theme,
+  blocks: StorefrontBlock[],
+  columns: number | null,
+): { theme: Theme; blocks: StorefrontBlock[] } {
+  if (columns === null) {
+    const { mobileColumns: _columns, ...automatic } = theme;
+    void _columns;
+    return { theme: automatic as Theme, blocks };
+  }
+  return {
+    theme: { ...theme, mobileColumns: columns },
+    blocks: blocks.map((block) =>
+      block.mobile
+        ? { ...block, mobile: { ...ontoPhone(block.mobile, columns), ...(block.mobile.hidden ? { hidden: true } : {}) } }
+        : block,
+    ),
+  };
+}
+
+/** How wide a phone layout starts: the columns the automatic reflow fits on a
+ *  phone, so the seller starts from the arrangement phones already get. */
+export function automaticPhoneColumns(theme: Pick<StorefrontTheme, "columns" | "gridGap">): number {
+  const fits = columnsThatFit(PHONE_BOARD_WIDTH_PX, theme.gridGap, theme.columns);
+  return Math.min(MOBILE_COLUMNS_MAX, Math.max(MOBILE_COLUMNS_MIN, fits));
 }

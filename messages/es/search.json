@@ -48,7 +48,7 @@
     "securityActivity": "Actividad de seguridad",
     "signOut": "Cerrar sesión",
     "vat": "NIF-IVA",
-    "businessName": "Nombre o razón social",
+    "businessName": "Tu nombre o razón social",
     "country": "País",
     "address": "Dirección comercial",
     "contactEmail": "Correo de contacto",
@@ -61,7 +61,6 @@
     "sellerAgreement": "Acuerdo de vendedor",
     "termsOfService": "Condiciones del servicio",
     "exportData": "Exportar mis datos",
-    "deleteAccount": "Eliminar cuenta",
     "plan": "Plan y precios",
     "invoices": "Facturas y datos de pago"
   },

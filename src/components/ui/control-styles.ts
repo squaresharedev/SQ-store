@@ -94,6 +94,10 @@ export const barButtonSizeClass = "h-9 shrink-0 py-0";
  *  colours a plain string cannot override. */
 export const iconDangerButtonClass = `group/btn inline-flex size-9 items-center justify-center rounded-none border border-border bg-background text-muted-foreground hover:border-destructive/40 hover:bg-destructive/5 hover:text-destructive focus-visible:text-destructive disabled:pointer-events-none disabled:opacity-50 ${TRANSITION} ${FOCUS_RING}`;
 
+/** An icon-only control on the phone top bar (menu, add, search, bell): no
+ *  frame of its own, at the bar's 40px touch-target size. */
+export const topBarIconButtonClass = `flex size-10 items-center justify-center rounded-sm text-foreground hover:bg-accent ${TRANSITION} ${FOCUS_RING}`;
+
 /* --- Overlays: modal, popover, dropdown, listbox, menu, toast ----------
    Every floating surface is the SAME panel — sharp corners, hairline border,
    popover surface, lifted shadow — so a dropdown opened over a modal reads as
@@ -320,6 +324,15 @@ export const kbdClass =
  *  underlined link ("Not you? Sign out", "Use a code instead"). */
 export const quietLinkClass = `font-inter text-xs text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground ${TRANSITION} ${FOCUS_RING}`;
 
+/** `quietLinkClass` led by a small icon, on a line of its own (the product
+ *  form's "Add its link", the reviews page's way to the product page). */
+export const quietIconLinkClass = `${quietLinkClass} flex w-fit items-center gap-1.5`;
+
+/** A dashboard module's small underlined "go" link (a Needs attention row's
+ *  action, "See all orders", a setup step). Pair it with a trailing ArrowRight
+ *  wearing iconNudgeRightClass, as dashboard/ModuleCard's ModuleActionLink does. */
+export const moduleLinkClass = `group/btn inline-flex items-center gap-1 font-inter text-xs font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground ${TRANSITION} ${FOCUS_RING}`;
+
 /** "Last used" chip marking the sign-in option this browser used last.
  *
  *  Sentence case, not uppercase: this is a quiet aside to a returning user, and
@@ -355,6 +368,10 @@ export const stubBadgeClass =
 /** Nudge right: "go / open / next / sign out" actions (a trailing arrow). */
 export const iconNudgeRightClass =
   "transition-transform duration-base ease-entrance group-hover/btn:translate-x-0.5 group-focus-visible/btn:translate-x-0.5 motion-reduce:transition-none";
+
+/** Nudge up-right: an ArrowUpRight ("upgrade", "open"), leaning along its own
+ *  diagonal, the way it points. The motion lives in globals.css (.cta-arrow). */
+export const iconNudgeUpRightClass = "cta-arrow";
 
 /** Nudge left: "back" navigation (a leading arrow). */
 export const iconNudgeLeftClass =

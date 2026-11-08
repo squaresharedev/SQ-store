@@ -271,13 +271,18 @@ const hoverTimingFields = {
 /**
  * The card extras (hover effect, second photo, buy button, stars, low stock),
  * identical on the theme and on a per-tile override, spread into both so the
- * two can never drift. Closed lists and switches only: the button's words are
- * the product page's own, so nothing here is seller text.
+ * two can never drift. Closed lists and switches, plus the button's own words
+ * and colours: the words are held to the product page button's own rule (and
+ * read by the content check with the rest of the config), the colours are
+ * strict hex like every other colour here.
  */
 const cardExtrasFields = {
   hoverEffect: z.enum(CARD_HOVER_EFFECTS).optional(),
   hoverPhoto: z.boolean().optional(),
   buyButton: z.enum(CARD_BUY_BUTTONS).optional(),
+  buyButtonLabel: singleLineText({ field: "ctaLabel", max: PRODUCT_PAGE_CTA_MAX }).optional(),
+  buyButtonColor: hexColorSchema.optional(),
+  buyButtonTextColor: hexColorSchema.optional(),
   showRating: z.boolean().optional(),
   showLowStock: z.boolean().optional(),
 };

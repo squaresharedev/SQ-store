@@ -91,7 +91,11 @@
     "proportional": "Anteilige Aufschlüsselung",
     "other": "Andere",
     "total": "Gesamt",
-    "category": "Kategorie"
+    "category": "Kategorie",
+    "changeUp": "{percent} mehr als im Zeitraum davor",
+    "changeDown": "{percent} weniger als im Zeitraum davor",
+    "vsBefore": "gegenüber {amount} davor",
+    "spark": "{label}, Tag für Tag"
   },
   "legal": {
     "cookies": {

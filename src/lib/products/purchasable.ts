@@ -27,12 +27,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import {
   TRADER_GATE_SELECT,
   buildSellerIdentity,
-  buildTraderIdentityInput,
+  sellerMaySell,
   type SellerIdentityRow,
   type TraderGateRow,
 } from "@/lib/settings/seller-identity";
-import { emailProofRequired } from "@/lib/contact-verification/availability";
-import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
 import {
   SHIPPING_POLICY_SELECT,
   buildShippingPolicy,
@@ -42,8 +40,8 @@ import { MODERATION_GATE_SELECT, isContentVisible } from "@/lib/moderation/remov
 import { PAGE_BUSY, type PageBusy } from "@/lib/public/busy";
 import { clientKey, rateLimitKey, type RateLimitBudget } from "@/lib/rate-limit";
 import { uuidField } from "@/lib/validation/inputs";
-import { parseStoredStorefrontConfig } from "@/lib/validation/storefront";
-import { isProductPageSectionShown, resolveProductPage } from "@/lib/storefront/product-page";
+import { isProductPageSectionShown } from "@/lib/storefront/product-page";
+import { openStorefront } from "@/lib/storefront/public-gate";
 import { PUBLIC_STOCK_SELECT } from "@/lib/stock/public";
 import { readActiveSales } from "@/lib/discounts/public";
 import type { ActiveSale } from "@/types/discount";
@@ -178,15 +176,13 @@ export async function gatePurchasable<Extra = undefined>(
   }
   if (!storefront) return null;
 
-  // A removed STOREFRONT takes every page hanging off it, before the product is
-  // even read: taking down a shop and leaving its product pages reachable by
-  // direct link would be a takedown in name only.
-  if (!isContentVisible(storefront.moderation_status)) return null;
-
-  const config = parseStoredStorefrontConfig(storefront.config);
-  if (!config) return null;
-  const productPage = resolveProductPage(config);
-  if (!productPage.enabled) return null;
+  // The storefront half of the gate (lib/storefront/public-gate.ts). A removed
+  // STOREFRONT takes every page hanging off it, before the product is even
+  // read: taking down a shop and leaving its product pages reachable by direct
+  // link would be a takedown in name only.
+  const open = openStorefront(storefront);
+  if (!open) return null;
+  const { config, productPage } = open;
 
   // The page belongs to a tile, or to a product a tile offers in "Add to your
   // order" (its details dialog links here). Any other product the seller has
@@ -254,13 +250,7 @@ export async function gatePurchasable<Extra = undefined>(
   // so the verification flag cannot ride along onto a buyer's page); the gate
   // asks a wider question of the same row.
   const gateRow = sellerError ? null : (sellerRow as TraderGateRow | null);
-  if (
-    !isTraderIdentityComplete(buildTraderIdentityInput(gateRow), {
-      requireVerifiedEmail: emailProofRequired(),
-    })
-  ) {
-    return null;
-  }
+  if (!sellerMaySell(gateRow)) return null;
 
   // THE PRICE. Which sales are running decides what this product costs, so
   // sales that could not be read are a price that is not known: "not right

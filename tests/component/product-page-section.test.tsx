@@ -2,6 +2,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import { ProductPageSection } from "@/components/storefront/ProductPageSection";
+import { SettingTargetProvider } from "@/lib/storefront/setting-context";
 import {
   DEFAULT_PRODUCT_PAGE_CONFIG,
   PRODUCT_PAGE_CTA_MAX,
@@ -60,7 +61,7 @@ describe("ProductPageSection", () => {
     const user = userEvent.setup();
     const { onProductPageChange } = mount({ storefrontFont: "display" });
     // The inherit option names what following currently gets you, so the
-    // seller can see the answer without opening Typography.
+    // seller can see the answer without opening the storefront's Font group.
     const font = screen.getByRole("combobox", { name: "Font" });
     expect(font).toHaveTextContent("Same as storefront (Display)");
 
@@ -94,9 +95,47 @@ describe("ProductPageSection", () => {
     expect(screen.getByRole("option", { name: "Chapeau Bold" })).toBeInTheDocument();
   });
 
+  it("says once, at the top, that it designs every product page in the storefront", () => {
+    // The way in is often one product's tile, which reads as "this page only".
+    mount();
+    expect(screen.getByText("These settings apply to every product page in this storefront.")).toBeInTheDocument();
+  });
+
+  it("leads back to the checkout from the buy button, whose paint its pay button wears", async () => {
+    const user = userEvent.setup();
+    const open = vi.fn();
+    render(
+      <SettingTargetProvider value={{ activeRef: null, open, close: vi.fn() }}>
+        <ProductPageSection
+          productPage={DEFAULT_PRODUCT_PAGE_CONFIG}
+          onProductPageChange={vi.fn()}
+          shippingPolicy={{}}
+          sellerIdentity={{}}
+          storefrontFont="sans"
+          customFontName={undefined}
+          background={{ kind: "solid", color: "#ffffff" }}
+          accent="#171717"
+          cornerRadius={0}
+          summoned="cta"
+        />
+      </SettingTargetProvider>,
+    );
+    await user.click(screen.getByRole("button", { name: "Go to Checkout" }));
+    expect(open).toHaveBeenCalledWith({ kind: "checkoutPage", section: "layout" });
+
+    // Outside the designer there is no checkout to go to: the fact stays, the
+    // way there does not.
+    cleanup();
+    mount({ summoned: "cta" });
+    expect(screen.getByText(/the pay button on your checkout matches this one/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Go to Checkout" })).toBeNull();
+  });
+
   it("switches the page off through the first control", async () => {
     const user = userEvent.setup();
     const { onProductPageChange } = mount();
+    // What else the switch does is in sight, not behind its "?".
+    expect(screen.getByText("Also gives your storefront its own shareable link.")).toBeInTheDocument();
     await user.click(screen.getByRole("switch", { name: "Show a product page" }));
     expect(onProductPageChange).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: false }),

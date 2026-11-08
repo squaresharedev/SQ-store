@@ -91,7 +91,11 @@
     "proportional": "Desglose proporcional",
     "other": "Otros",
     "total": "Total",
-    "category": "Categoría"
+    "category": "Categoría",
+    "changeUp": "{percent} más que el periodo anterior",
+    "changeDown": "{percent} menos que el periodo anterior",
+    "vsBefore": "frente a {amount} antes",
+    "spark": "{label}, día a día"
   },
   "legal": {
     "cookies": {

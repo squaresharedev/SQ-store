@@ -3,11 +3,16 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "@/components/ui/AppLink";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { LifeBuoy, Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { MotionConfig, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
-import { focusRingClass, overlayScrimClass, transitionClass } from "@/components/ui/control-styles";
+import {
+  focusRingClass,
+  overlayScrimClass,
+  topBarIconButtonClass,
+  transitionClass,
+} from "@/components/ui/control-styles";
 import { attentionCountClass } from "@/components/ui/surface-styles";
 import { PlanChip } from "@/components/billing/PlanChip";
 import {
@@ -15,6 +20,7 @@ import {
   SETTINGS_LINK,
   type NavEntry,
 } from "@/lib/search/nav-constants";
+import { HELP_CENTER_URL } from "@/lib/site";
 
 // The nav map itself lives in @/lib/search/nav-constants so the universal
 // search registry indexes exactly what this rail renders.
@@ -52,11 +58,14 @@ function activeNavItem(pathname: string): NavEntry | undefined {
 // Nav rows keep a radius (the brand rule squares buttons and overlays, not
 // in-page navigation), and share the app's motion + focus tokens so they read
 // as one family of controls with the mobile menu toggle.
-const NAV_ITEM_CLASSES = cn(
+export const NAV_ITEM_CLASSES = cn(
   "flex items-center gap-2 rounded-sm px-3 py-2.5 text-sm font-medium",
   transitionClass,
   focusRingClass,
 );
+
+/** A rail row that is not the page on screen: muted until hovered. */
+export const NAV_ITEM_IDLE_CLASSES = "text-muted-foreground hover:bg-accent hover:text-foreground";
 
 function NavLinkItem({
   item,
@@ -80,6 +89,7 @@ function NavLinkItem({
       href={item.href}
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
+      title={item.description ? t(item.description) : undefined}
       {...animationProps}
       // Plain component state, for the icons whose story is a one-shot that
       // must not rewind when the pointer leaves (see NavIconProps.hoverCount).
@@ -89,9 +99,7 @@ function NavLinkItem({
       onFocus={countHover}
       className={cn(
         NAV_ITEM_CLASSES,
-        active
-          ? "bg-accent text-foreground"
-          : "text-muted-foreground hover:bg-accent hover:text-foreground",
+        active ? "bg-accent text-foreground" : NAV_ITEM_IDLE_CLASSES,
       )}
     >
       <item.icon hoverCount={hoverCount} />
@@ -200,11 +208,7 @@ export function Sidebar({
           aria-expanded={isOpen}
           aria-controls={navId}
           onClick={() => setIsOpen((open) => !open)}
-          className={cn(
-            "flex size-10 items-center justify-center rounded-sm text-foreground hover:bg-accent",
-            transitionClass,
-            focusRingClass,
-          )}
+          className={topBarIconButtonClass}
         >
           {isOpen ? (
             <X className="size-5" strokeWidth={2} aria-hidden="true" />
@@ -217,7 +221,8 @@ export function Sidebar({
           {titleItem ? t(titleItem.label) : null}
         </span>
 
-        {/* Right cluster: the shared top-bar slot (notification bell + menu). */}
+        {/* Right cluster: the shared top-bar slot (add on Overview, search,
+            the bell and the profile menu). */}
         <div className="ml-auto shrink-0">{topBarSlot}</div>
       </header>
 
@@ -277,6 +282,17 @@ export function Sidebar({
             pathname={pathname}
             onNavigate={closeDrawer}
           />
+          {/* The help centre: FAQ, troubleshooting and the ways to reach a
+              person, in a new tab so the seller's place here is kept. */}
+          <a
+            href={HELP_CENTER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(NAV_ITEM_CLASSES, NAV_ITEM_IDLE_CLASSES)}
+          >
+            <LifeBuoy className="size-5 shrink-0" strokeWidth={2} aria-hidden="true" />
+            {t("Nav.main.help")}
+          </a>
         </div>
       </nav>
     </MotionConfig>

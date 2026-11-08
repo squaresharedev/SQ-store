@@ -2,7 +2,7 @@
   "steps": {
     "seller": {
       "label": "Doplňte údaje prodejce",
-      "detail": "Obchodní jméno, adresa a kontaktní e-mail se zobrazují na každé produktové stránce.",
+      "detail": "Vaše jméno nebo název firmy, adresa a kontaktní e-mail se zobrazují na každé produktové stránce.",
       "detailDone": "Kupující vidí, od koho kupují.",
       "detailUnconfirmed": "Potvrďte kontaktní e-mail kódem, který na něj pošleme.",
       "action": "Doplnit údaje",
@@ -20,10 +20,10 @@
     "storefront": {
       "label": "Umístěte produkt do výlohy",
       "detailDone": "Ve vaší výloze je produkt.",
-      "detailNone": "Vytvořte výlohu a pak do její mřížky přidejte produkt.",
-      "detailEmpty": "Otevřete výlohu a na panelu nástrojů zvolte Přidat produkt.",
+      "detailNone": "Výloha je stránka vašeho obchodu. Vytvořte ji a pak do její mřížky přidejte produkt.",
+      "detailEmpty": "Otevřete výlohu a použijte tlačítko Přidat produkt nahoře.",
       "actionCreate": "Vytvořit výlohu",
-      "actionOpen": "Otevřít editor",
+      "actionOpen": "Otevřít výlohu",
       "cta": "Otevřete svou výlohu",
       "ctaCreate": "Vytvořte výlohu"
     },
@@ -32,7 +32,7 @@
       "detailDone": "Vaše produktová stránka je zveřejněná.",
       "detailNeedsSeller": "Dokončete údaje prodejce a pak můžete stránku zveřejnit.",
       "detailNeedsStorefront": "Jakmile bude produkt ve výloze, můžete jeho stránku zveřejnit.",
-      "detailNeedsActive": "Nastavte produktu stav Aktivní, aby se jeho stránka zveřejnila.",
+      "detailNeedsActive": "Otevřete produkt a nastavte mu stav Aktivní, aby se jeho stránka zveřejnila.",
       "detailChecking": "Vaše stránka se zveřejní, až automatická kontrola produkt schválí.",
       "detailPaused": "Automatická kontrola ten produkt pozastavila. Otevřete ho a uvidíte, co změnit.",
       "detailPagesOff": "Produktové stránky jsou v této výloze vypnuté. Zapněte je v editoru.",
@@ -64,7 +64,7 @@
     "showMeAround": "Provést mě panelem",
     "showSteps": "Zobrazit kroky",
     "hideSteps": "Skrýt kroky",
-    "liveHint": "Vaše první produktová stránka je zveřejněná. Odkaz můžete sdílet kdekoli.",
+    "liveHint": "Vaše první produktová stránka je zveřejněná. Odkazy můžete sdílet kdekoli.",
     "copyLink": {
       "copy": "Kopírovat odkaz na produktovou stránku",
       "copied": "Odkaz na produktovou stránku zkopírován",
@@ -75,7 +75,12 @@
     "hide": "Skrýt",
     "progress": "{total, plural, one {Hotovo {done} z {total}} few {Hotovo {done} z {total}} many {Hotovo {done} z {total}} other {Hotovo {done} z {total}}}",
     "stepDone": " (hotovo)",
-    "stepToDo": " (zbývá)"
+    "stepToDo": " (zbývá)",
+    "copyStorefrontLink": {
+      "copy": "Kopírovat odkaz na výlohu",
+      "copied": "Odkaz na výlohu zkopírován",
+      "failed": "Odkaz na výlohu se nepodařilo zkopírovat. Označte ho a zkopírujte ručně."
+    }
   },
   "welcome": {
     "steps": {
@@ -121,10 +126,10 @@
     "seller": {
       "namePlaceholder": "např. Jana Nováková nebo Keramika Jana",
       "nameHelp": "Obchodní jméno vaší firmy, nebo vaše celé jméno, pokud prodáváte jako fyzická osoba.",
-      "nameAlternative": "Nebo své celé jméno, pokud prodáváte jako fyzická osoba.",
+      "nameAlternative": "Pokud prodáváte sami za sebe, uveďte své celé jméno.",
       "addressPlaceholder": "např. Tržní 12\n110 00 Praha 1\nČeská republika",
       "emailPlaceholder": "např. ahoj@vasobchod.example",
-      "emailHelp": "Sem vám budou psát kupující. Může se lišit od přihlašovacího e-mailu.",
+      "emailHelp": "Sem vám budou psát kupující. Může se lišit od přihlašovacího e-mailu.{verify, select, true { Na tuto adresu pošleme kód, kterým ji potvrdíte.} other {}}",
       "emailTipLabel": "O tomto e-mailu"
     },
     "confirm": {
@@ -140,12 +145,12 @@
     "nav": {
       "skipOnboarding": "Přeskočit úvod",
       "next": "Další",
-      "showMeAround": "Provést mě",
       "skipIntro": "Přeskočit úvod",
       "getStarted": "Začít",
       "skipForNow": "Teď přeskočit",
       "saveAndContinue": "Uložit a pokračovat",
       "continue": "Pokračovat",
+      "confirmLater": "Potvrdit později",
       "exploreOnMyOwn": "Prozkoumat na vlastní pěst",
       "notNow": "Teď ne"
     },
@@ -205,16 +210,13 @@
       },
       "storefrontEmbed": {
         "title": "Vložte výlohu na svůj web",
-        "body": "Každá výloha má tlačítko pro vložení na web, které vám dá kód podobný tomuto. Widget je zatím ve vývoji a na jiných webech se ještě nezobrazuje.",
-        "bodyButton": "Toto tlačítko vám dá kód podobný tomu níže, který vložíte na svůj web. Widget je zatím ve vývoji a na jiných webech se ještě nezobrazuje.",
-        "fallbackBody": "Jakmile budete mít výlohu, tlačítko pro vložení na její kartě vám dá kód podobný tomuto. Widget je zatím ve vývoji a na jiných webech se ještě nezobrazuje.",
-        "bodyLive": "Každá výloha má tlačítko pro vložení na web, které vám dá kód podobný tomuto. Vložte ho na svůj web a výloha se tam zobrazí.",
-        "bodyButtonLive": "Toto tlačítko vám dá kód podobný tomu níže. Vložte ho na svůj web a výloha se tam zobrazí.",
-        "fallbackBodyLive": "Jakmile budete mít výlohu, tlačítko pro vložení na její kartě vám dá kód podobný tomuto, který vložíte na svůj web."
+        "bodyLive": "Každá výloha má tlačítko pro vložení na web, které vám dá kód pro web podobný tomuto. Vložte ho na svůj web a výloha se tam zobrazí.",
+        "bodyButtonLive": "Toto tlačítko vám dá kód pro web podobný tomu níže. Vložte ho na svůj web a výloha se tam zobrazí.",
+        "fallbackBodyLive": "Jakmile budete mít výlohu, tlačítko pro vložení na její kartě vám dá kód pro web podobný tomuto, který vložíte na svůj web."
       },
       "ordersSearch": {
         "title": "Najděte objednávku",
-        "body": "Tady hledejte podle e-mailu kupujícího. Objednávku podle čísla, jména, města nebo čísla zásilky najdete pomocí vyhledávání v horní části stránky."
+        "body": "V tomto seznamu můžete hledat podle čísla objednávky, e-mailu nebo jména kupujícího, města, produktu nebo čísla zásilky."
       },
       "ordersFilters": {
         "title": "Filtrujte a řaďte",
@@ -241,7 +243,7 @@
     "steps": {
       "editorAdd": {
         "title": "Přidávejte do mřížky",
-        "body": "Z tohoto panelu přidáte produkty, text a tvary. Cokoli na mřížce přesunete tažením a velikost změníte tažením za roh."
+        "body": "Z tohoto panelu přidáte produkty, text, tvary a obrázky. Klepnutím nebo kliknutím blok vyberete a tažením ho přesunete. Velikost změníte tažením za úchyt v rohu."
       },
       "editorDesign": {
         "title": "Nastavte vzhled",
@@ -255,8 +257,13 @@
       },
       "editorFinish": {
         "title": "Udělejte si ji po svém",
-        "body": "Ukázka se nikdy neukládá, takže si můžete zkusit cokoli. Až budete připraveni, vytvořte si vlastní výlohu."
+        "body": "Ukázka se nikdy neukládá, takže si můžete zkusit cokoli. Až budete připraveni, vytvořte si vlastní výlohu.",
+        "bodySave": "Stiskněte Uložit a vaše práce zůstane zachovaná. Až budete spokojeni, tlačítko Sdílet vám dá její odkaz a kód pro váš web."
       }
     }
+  },
+  "install": {
+    "title": "Přidejte si Square Share na plochu",
+    "add": "Přidat"
   }
 }

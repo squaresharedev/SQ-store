@@ -93,7 +93,7 @@
     "createStorefronts": "Demasiados intentos de crear escaparates en poco tiempo.",
     "saveStorefronts": "Demasiados intentos de guardar escaparates en poco tiempo.",
     "deleteStorefronts": "Demasiados intentos de eliminar escaparates en poco tiempo.",
-    "rotateEmbedKeys": "Demasiados cambios del código de inserción en poco tiempo.",
+    "rotateEmbedKeys": "Demasiados intentos de obtener un código nuevo para tu web en poco tiempo.",
     "updateStock": "Demasiados intentos de actualizar el stock en poco tiempo.",
     "readProductPageSettings": "Demasiados intentos de leer los ajustes de la página de producto en poco tiempo.",
     "requestReview": "Demasiados intentos de solicitar una revisión en poco tiempo.",
@@ -119,7 +119,7 @@
     "verifyDocumentUpload": "No se ha podido verificar la subida de tu documento por un problema en nuestro sistema.",
     "verifyFileUpload": "No se ha podido verificar la subida de tu archivo por un problema en nuestro sistema.",
     "verifyFontUpload": "No se ha podido verificar la subida de tu fuente por un problema en nuestro sistema.",
-    "verifyElementUpload": "No se ha podido verificar la subida de tu elemento por un problema en nuestro sistema.",
+    "verifyElementUpload": "No se ha podido verificar la subida de tu imagen por un problema en nuestro sistema.",
     "verifyBackgroundImage": "No se ha podido verificar tu imagen de fondo por un problema en nuestro sistema.",
     "verifyFont": "No se ha podido verificar tu fuente por un problema en nuestro sistema.",
     "verifyImage": "No se ha podido verificar tu imagen por un problema en nuestro sistema.",
@@ -127,7 +127,7 @@
     "saveStorefront": "No se ha podido guardar tu escaparate por un problema en nuestro sistema.",
     "saveEmbedSettings": "No se han podido guardar los ajustes de incorporación por un problema en nuestro sistema.",
     "deleteStorefront": "No se ha podido eliminar el escaparate por un problema en nuestro sistema.",
-    "rotateEmbedKey": "No se ha podido renovar la clave de incorporación por un problema en nuestro sistema.",
+    "rotateEmbedKey": "No se ha podido obtener un código nuevo para tu web por un problema en nuestro sistema.",
     "saveStockSettings": "No se han podido guardar los ajustes de stock por un problema en nuestro sistema.",
     "checkSellerDetails": "No se han podido comprobar tus datos de vendedor por un problema en nuestro sistema.",
     "loadProductPageSettings": "No se han podido cargar los ajustes de tu página de producto por un problema en nuestro sistema.",
@@ -211,7 +211,7 @@
     "wrongPasswordGoogle": "Esa no es la contraseña de Square Share de esta cuenta. Inicias sesión con Google, así que usa “Confirmar con Google”.",
     "passwordCheckUnavailable": "No hemos podido comprobar tu contraseña en este momento. Inténtalo de nuevo en unos instantes.",
     "reauthRequired": "Por tu seguridad, vuelve a iniciar sesión antes de activar la verificación en dos pasos.",
-    "setupRateLimited": "Has hecho muchos intentos de configuración. Inténtalo un poco más tarde.",
+    "setupRateLimited": "Demasiados intentos de configuración. Espera un minuto e inténtalo de nuevo.",
     "tooManyFactors": "Esta cuenta ya tiene el máximo de aplicaciones de autenticación. Quita una primero.",
     "setupFailed": "No hemos podido iniciar la configuración ahora mismo. Inténtalo de nuevo en un momento.",
     "setupUnavailable": "La configuración de la verificación en dos pasos no está disponible ahora mismo. Inténtalo más tarde.",
@@ -226,7 +226,7 @@
   "settings": {
     "usernameTaken": "Ese nombre de usuario ya está en uso. Prueba con otro.",
     "emailUnchanged": "Ese ya es tu correo.",
-    "emailChangeRateLimited": "Demasiadas solicitudes de cambio de correo. Espera un poco antes de volver a intentarlo.",
+    "emailChangeRateLimited": "Demasiadas solicitudes de cambio de correo. Espera un minuto e inténtalo de nuevo.",
     "emailChangeNeedsPassword": "Introduce tu contraseña actual para cambiar tu correo.",
     "wrongPassword": "La contraseña actual no es correcta.",
     "passwordCheckUnavailable": "No se ha podido comprobar tu contraseña ahora mismo. Inténtalo de nuevo.",
@@ -235,7 +235,7 @@
     "passwordUnchanged": "Esa ya es tu contraseña.",
     "passwordUpdateFailed": "No se ha podido actualizar la contraseña. Inténtalo de nuevo.",
     "passwordReauthNeeded": "Por tu seguridad, cierra sesión y vuelve a iniciarla, y después cambia tu contraseña.",
-    "resetRateLimited": "Demasiados correos de restablecimiento. Espera un poco antes de volver a intentarlo.",
+    "resetRateLimited": "Demasiados correos de restablecimiento. Espera un minuto e inténtalo de nuevo.",
     "resetSendRateLimited": "Demasiadas solicitudes. Espera un minuto e inténtalo de nuevo.",
     "resetFailed": "No se ha podido enviar el correo de restablecimiento. Inténtalo de nuevo.",
     "contactEmailTakesNoMail": "El dominio de ese correo de contacto no acepta correo. Revisa que esté bien escrito, o usa una dirección a la que los compradores puedan escribirte de verdad.",
@@ -294,7 +294,7 @@
     "serviceUnreachable": "No se ha podido conectar con el servicio de autenticación. Inténtalo de nuevo.",
     "invalidEmail": "Introduce una dirección de correo válida.",
     "emailRequired": "Introduce tu correo electrónico.",
-    "tooManyAttempts": "Demasiados intentos. Espera un poco e inténtalo de nuevo.",
+    "tooManyAttempts": "Demasiados intentos. Espera un minuto e inténtalo de nuevo.",
     "magicLinkFailed": "No se ha podido enviar el correo. Comprueba tu conexión e inténtalo de nuevo.",
     "resetEmailRequired": "Introduce tu correo electrónico para restablecer tu contraseña.",
     "resetEmailFailed": "No se ha podido enviar el correo de restablecimiento. Comprueba tu conexión e inténtalo de nuevo.",
@@ -332,21 +332,21 @@
       "document": "Ese documento es demasiado grande.",
       "file": "Ese archivo es demasiado grande.",
       "font": "Esa fuente es demasiado grande.",
-      "element": "Ese elemento es demasiado grande."
+      "element": "Esa imagen es demasiado grande."
     },
     "tooLargeFix": {
       "image": "Usa una imagen de menos de {maxMb} MB. Comprímela o cambia su tamaño e inténtalo de nuevo.",
       "document": "Usa un documento de menos de {maxMb} MB. Comprímelo o cambia su tamaño e inténtalo de nuevo.",
       "file": "Usa un archivo de menos de {maxMb} MB. Comprímelo o cambia su tamaño e inténtalo de nuevo.",
       "font": "Usa una fuente de menos de {maxMb} MB. Comprímela o cambia su tamaño e inténtalo de nuevo.",
-      "element": "Usa un elemento de menos de {maxMb} MB. Comprímelo o cambia su tamaño e inténtalo de nuevo."
+      "element": "Usa una imagen de menos de {maxMb} MB. Comprímela o cambia su tamaño e inténtalo de nuevo."
     },
     "neverReached": {
       "image": "La imagen nunca llegó al servidor.",
       "document": "El documento nunca llegó al servidor.",
       "file": "El archivo nunca llegó al servidor.",
       "font": "La fuente nunca llegó al servidor.",
-      "element": "El elemento nunca llegó al servidor."
+      "element": "La imagen nunca llegó al servidor."
     },
     "neverReachedFix": "Comprueba tu conexión a internet e inténtalo de nuevo.",
     "rejected": {
@@ -354,7 +354,7 @@
       "document": "No se ha podido subir ese documento.",
       "file": "No se ha podido subir ese archivo.",
       "font": "No se ha podido subir esa fuente.",
-      "element": "No se ha podido subir ese elemento."
+      "element": "No se ha podido subir esa imagen."
     },
     "rejectedFix": {
       "signedOut": "Vuelve a iniciar sesión y vuelve a intentarlo.",
@@ -365,7 +365,7 @@
   "uploadRoute": {
     "signIn": {
       "image": "Inicia sesión para subir imágenes.",
-      "element": "Inicia sesión para subir elementos.",
+      "element": "Inicia sesión para subir imágenes.",
       "document": "Inicia sesión para subir documentos.",
       "file": "Inicia sesión para subir archivos.",
       "font": "Inicia sesión para subir fuentes."
@@ -378,7 +378,7 @@
     },
     "notConfigured": {
       "image": "La subida de imágenes aún no está configurada. Inténtalo más tarde.",
-      "element": "La subida de elementos aún no está configurada. Inténtalo más tarde.",
+      "element": "La subida de imágenes no está disponible ahora mismo. Inténtalo más tarde.",
       "document": "Las subidas aún no están configuradas. Inténtalo más tarde.",
       "file": "La subida de archivos aún no está configurada. Inténtalo más tarde.",
       "font": "La subida de fuentes aún no está configurada. Inténtalo más tarde."
@@ -459,28 +459,28 @@
       "document": "La subida de tu documento no ha terminado.",
       "file": "La subida de tu archivo no ha terminado.",
       "font": "La subida de tu fuente no ha terminado.",
-      "element": "La subida de tu elemento no ha terminado."
+      "element": "La subida de tu imagen no ha terminado."
     },
     "uploadUnfinishedFix": {
       "image": "Vuelve a seleccionar la imagen y súbela de nuevo antes de guardar.",
       "document": "Vuelve a seleccionar el documento y súbelo de nuevo antes de guardar.",
       "file": "Vuelve a seleccionar el archivo y súbelo de nuevo antes de guardar.",
       "font": "Vuelve a seleccionar la fuente y súbela de nuevo antes de guardar.",
-      "element": "Vuelve a seleccionar el elemento y súbelo de nuevo antes de guardar."
+      "element": "Vuelve a seleccionar la imagen y súbela de nuevo antes de guardar."
     },
     "uploadTooLarge": {
       "image": "Esa imagen es demasiado grande.",
       "document": "Ese documento es demasiado grande.",
       "file": "Ese archivo es demasiado grande.",
       "font": "Esa fuente es demasiado grande.",
-      "element": "Ese elemento es demasiado grande."
+      "element": "Esa imagen es demasiado grande."
     },
     "uploadTooLargeFix": {
       "image": "Usa una imagen de menos de {maxMb} MB y vuelve a subirla.",
       "document": "Usa un documento de menos de {maxMb} MB y vuelve a subirlo.",
       "file": "Usa un archivo de menos de {maxMb} MB y vuelve a subirlo.",
       "font": "Usa una fuente de menos de {maxMb} MB y vuelve a subirla.",
-      "element": "Usa un elemento de menos de {maxMb} MB y vuelve a subirlo."
+      "element": "Usa una imagen de menos de {maxMb} MB y vuelve a subirla."
     },
     "wrongTypeFix": {
       "image": "Usa una imagen JPEG, PNG, WebP, GIF o AVIF.",

@@ -122,6 +122,9 @@ describe("the seller's withdrawal notice", () => {
     const next = encodeURIComponent(`/orders?order=${ORDER_ID}`);
     expect(sent().text).toContain(`https://store.example/login?next=${next}`);
     expect(sent().replyTo).toBe("aoife.byrne@example.test");
+    // Plain words first, the legal one kept in brackets for whoever needs it.
+    expect(sent().subject).toBe("Cancellation (withdrawal): order AAAAAAAA (Blue mug)");
+    expect(sent().text).toContain("The buyer aoife.byrne@example.test cancelled order AAAAAAAA");
   });
 });
 

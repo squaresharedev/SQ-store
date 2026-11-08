@@ -47,3 +47,16 @@ export function orderNumberRange(prefix: string): { from: string; to: string } {
     to: `${prefix.padEnd(8, "f")}-ffff-ffff-ffff-ffffffffffff`,
   };
 }
+
+/**
+ * That range as ONE PostgREST condition, for an `or` list beside the other
+ * columns a search matches (the Orders page's box), or null when the term is
+ * not shaped like an order number. Built from the parsed hex alone, so
+ * nothing typed reaches the filter's syntax.
+ */
+export function orderNumberCondition(raw: string): string | null {
+  const prefix = parseOrderNumberQuery(raw);
+  if (!prefix) return null;
+  const { from, to } = orderNumberRange(prefix);
+  return `and(id.gte.${from},id.lte.${to})`;
+}

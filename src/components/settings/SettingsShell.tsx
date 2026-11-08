@@ -13,6 +13,19 @@ import {
 // The settings map itself lives in @/lib/search/nav-constants so the universal
 // search registry indexes exactly what this rail renders.
 import { SETTINGS_NAV } from "@/lib/search/nav-constants";
+import { SECURITY_SETTINGS_PATH } from "@/lib/auth/paths";
+import { LEGAL_SETTINGS_PATH } from "@/lib/legal/terms-versions";
+
+/** How an overlay at an end of the phone strip (a fade, a badge dot) comes and goes. */
+const EDGE_FADE_CLASS =
+  "transition-opacity duration-base ease-standard motion-reduce:transition-none";
+
+/** The dot at an end of the phone strip that a badge is scrolled out past,
+ *  centred on the tab row (the strip's bottom padding sits under it). */
+const BADGE_DOT_CLASS = cn(
+  "pointer-events-none absolute bottom-3 top-0 my-auto size-2 rounded-full bg-foreground lg:hidden",
+  EDGE_FADE_CLASS,
+);
 
 function navItemClasses(active: boolean, danger?: boolean) {
   return cn(
@@ -57,15 +70,23 @@ function navItemClasses(active: boolean, danger?: boolean) {
 export function SettingsShell({
   children,
   securityRecommended = false,
+  legalActionNeeded = false,
 }: {
   children: React.ReactNode;
   /** 2FA is off for this account: badge the Security entry until it isn't. */
   securityRecommended?: boolean;
+  /** The Terms in force are not agreed to yet: badge the Legal entry until they are. */
+  legalActionNeeded?: boolean;
 }) {
   const t = useTranslations();
   const pathname = usePathname();
   const navRef = React.useRef<HTMLElement>(null);
-  const [overflows, setOverflows] = React.useState({ start: false, end: false });
+  const [overflows, setOverflows] = React.useState({
+    start: false,
+    end: false,
+    badgeStart: false,
+    badgeEnd: false,
+  });
 
   // The active section label becomes the page h1. Falls back to "Settings"
   // for any path not in the nav map (there should not be any in practice).
@@ -74,16 +95,24 @@ export function SettingsShell({
   );
   const sectionLabel = t(activeEntry?.label ?? "Nav.main.settings.label");
 
-  /** Which ends of the strip still have tabs hidden past them. */
+  /** Which ends of the strip still have tabs hidden past them, and which have
+   *  a badge ("Recommended", "Action needed") hidden past them, cut off or out
+   *  of sight. */
   const syncEdges = React.useCallback(() => {
     const nav = navRef.current;
     if (!nav) return;
     const max = nav.scrollWidth - nav.clientWidth;
+    const box = nav.getBoundingClientRect();
+    const badges = Array.from(nav.querySelectorAll("[data-settings-badge]"), (badge) =>
+      badge.getBoundingClientRect(),
+    );
     // 1px slack: fractional scroll offsets otherwise leave a fade stuck on at
     // the very end of the strip.
     setOverflows({
       start: nav.scrollLeft > 1,
       end: nav.scrollLeft < max - 1,
+      badgeStart: badges.some((badge) => badge.left < box.left),
+      badgeEnd: badges.some((badge) => badge.right > box.right),
     });
   }, []);
 
@@ -109,6 +138,12 @@ export function SettingsShell({
     const active = pathname.startsWith(item.href);
     const Icon = item.icon;
     const danger = item.danger;
+    const badge =
+      securityRecommended && item.href === SECURITY_SETTINGS_PATH
+        ? t("Settings.shell.recommended")
+        : legalActionNeeded && item.href === LEGAL_SETTINGS_PATH
+          ? t("Settings.shell.actionNeeded")
+          : null;
 
     return (
       <Link
@@ -119,12 +154,14 @@ export function SettingsShell({
       >
         <Icon aria-hidden className="size-4" />
         {t(item.label)}
-        {securityRecommended && item.href === "/settings/security" && (
+        {badge && (
           // Words, not just a dot: a coloured dot says "something is wrong"
           // without saying what, and a screen reader would say nothing at all.
           // Same quiet pill as the sign-in page's "Last used", for the same
           // contrast reason: the accent colour misses AA at this size.
-          <span className={cn(lastUsedBadgeClass, "ml-auto")}>{t("Settings.shell.recommended")}</span>
+          <span className={cn(lastUsedBadgeClass, "ml-auto")} data-settings-badge>
+            {badge}
+          </span>
         )}
       </Link>
     );
@@ -168,7 +205,7 @@ export function SettingsShell({
               aria-hidden
               className={cn(
                 "pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-background to-transparent lg:hidden",
-                "transition-opacity duration-base ease-standard motion-reduce:transition-none",
+                EDGE_FADE_CLASS,
                 overflows.start ? "opacity-100" : "opacity-0",
               )}
             />
@@ -176,9 +213,24 @@ export function SettingsShell({
               aria-hidden
               className={cn(
                 "pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent lg:hidden",
-                "transition-opacity duration-base ease-standard motion-reduce:transition-none",
+                EDGE_FADE_CLASS,
                 overflows.end ? "opacity-100" : "opacity-0",
               )}
+            />
+            {/* A badge swiped out of sight takes its nudge with it, so the end
+                it went past keeps a dot until it is back in view: on a phone,
+                Security's "Recommended" is off one end or the other of most
+                tabs. Decorative: the badge's own words stay in the strip for a
+                screen reader. */}
+            <span
+              aria-hidden
+              data-badge-dot="start"
+              className={cn(BADGE_DOT_CLASS, "left-2", overflows.badgeStart ? "opacity-100" : "opacity-0")}
+            />
+            <span
+              aria-hidden
+              data-badge-dot="end"
+              className={cn(BADGE_DOT_CLASS, "right-2", overflows.badgeEnd ? "opacity-100" : "opacity-0")}
             />
           </div>
           <div aria-hidden className="border-b border-border lg:hidden" />

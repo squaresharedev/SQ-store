@@ -60,6 +60,10 @@ test("a seller imports reviews, and importing the same file again adds nothing",
 
   // THE FILE, READ: counts first.
   await page.goto("/products/import-reviews");
+  // Over the file drop, the graphic: the review apps the importer reads, sending reviews to a product page.
+  const graphic = page.locator("[data-review-import-beams]");
+  await expect(graphic).toBeVisible();
+  await expect(graphic).toContainText("Judge.me");
   await page.locator("#review-import-file").setInputFiles(FILE);
   // 5 matched by name; the loops (no matching name), the half star and the
   // old store's spam are left out.

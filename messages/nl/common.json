@@ -91,7 +91,11 @@
     "proportional": "Procentuele verdeling",
     "other": "Overig",
     "total": "Totaal",
-    "category": "Categorie"
+    "category": "Categorie",
+    "changeUp": "{percent} hoger dan de periode ervoor",
+    "changeDown": "{percent} lager dan de periode ervoor",
+    "vsBefore": "tegenover {amount} ervoor",
+    "spark": "{label}, per dag"
   },
   "legal": {
     "cookies": {

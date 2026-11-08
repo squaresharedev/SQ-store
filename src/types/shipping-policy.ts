@@ -140,8 +140,8 @@ export const DESTINATION_COST_MAX = 40;
  *  and may still come from there; values may not. */
 export const SHIPPING_SETTINGS_HREF = "/settings/shipping";
 
-/** The delivery-prices card on that page, and the link straight to it: where a
- *  seller gives checkout the numbers it quotes a total from. */
+/** The destination rows on that page, and the link straight to them: where a
+ *  seller gives each destination the rate checkout quotes a total from. */
 export const SHIPPING_RATES_ANCHOR = "checkout-rates";
 export const SHIPPING_RATES_HREF = `${SHIPPING_SETTINGS_HREF}#${SHIPPING_RATES_ANCHOR}`;
 

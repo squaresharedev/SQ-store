@@ -12831,9 +12831,9 @@ grant insert on public.consent_logs to anon;
 notify pgrst, 'reload schema';
 
 -- =============================================================================
--- ===== (pending) object_keys_anywhere =========================================
+-- ===== (applied) object_keys_anywhere =========================================
 -- supabase/migrations/20261105_object_keys_anywhere.sql, replayed verbatim.
--- NOT in prod as of 2026-11-05 (security audit, docs/security-audit-2026-11.md).
+-- In prod as of 2026-11-08 (security audit, docs/security-audit-2026-11.md).
 -- =============================================================================
 -- =============================================================================
 -- Object keys are judged wherever they sit in a row, and on App's artifacts
@@ -13000,9 +13000,9 @@ create trigger guard_artifact_image_key
 notify pgrst, 'reload schema';
 
 -- =============================================================================
--- ===== (pending) write_bounds =================================================
+-- ===== (applied) write_bounds =================================================
 -- supabase/migrations/20261105_write_bounds.sql, replayed verbatim.
--- NOT in prod as of 2026-11-05 (security audit, docs/security-audit-2026-11.md).
+-- In prod as of 2026-11-08 (security audit, docs/security-audit-2026-11.md).
 -- =============================================================================
 -- =============================================================================
 -- Bounds on what a client can write straight through PostgREST

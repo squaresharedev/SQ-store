@@ -12,6 +12,7 @@ import {
 import {
   Bell,
   Gem,
+  Globe,
   Plug,
   Receipt,
   ScrollText,
@@ -25,6 +26,7 @@ import {
 import type { MessageKey } from "@/i18n/types";
 import {
   ANALYTICS_PATH,
+  LANGUAGE_SETTINGS_PATH,
   ORDERS_PATH,
   OVERVIEW_PATH,
   PAYMENTS_PATH,
@@ -59,6 +61,9 @@ import { TRADER_IDENTITY_HREF } from "@/lib/settings/trader-identity";
 /** A dashboard rail destination. Its icon is an animated motion component. */
 export type NavEntry = {
   label: MessageKey;
+  /** One-line description shown as a tooltip on hover (desktop) and as a subtitle
+   *  in search results. Maps to the same-named key in nav.json. */
+  description?: MessageKey;
   href: string;
   icon: (props: NavIconProps) => React.ReactNode;
 };
@@ -74,24 +79,27 @@ export type SettingsNavEntry = {
 export const MAIN_NAV: NavEntry[] = [
   // The Overview page lives at /dashboard ("/" merely redirects there);
   // linking it directly keeps the active state working and skips the hop.
-  { label: "Nav.main.overview.label", href: OVERVIEW_PATH, icon: OverviewIcon },
-  { label: "Nav.main.products.label", href: PRODUCTS_PATH, icon: ProductsIcon },
-  { label: "Nav.main.storefront.label", href: STOREFRONT_LIST_PATH, icon: StorefrontIcon },
-  { label: "Nav.main.orders.label", href: ORDERS_PATH, icon: OrdersIcon },
-  { label: "Nav.main.discounts.label", href: DISCOUNTS_PATH, icon: DiscountsIcon },
-  { label: "Nav.main.analytics.label", href: ANALYTICS_PATH, icon: AnalyticsIcon },
-  { label: "Nav.main.payments.label", href: PAYMENTS_PATH, icon: PaymentsIcon },
+  { label: "Nav.main.overview.label", description: "Nav.main.overview.description", href: OVERVIEW_PATH, icon: OverviewIcon },
+  { label: "Nav.main.products.label", description: "Nav.main.products.description", href: PRODUCTS_PATH, icon: ProductsIcon },
+  { label: "Nav.main.storefront.label", description: "Nav.main.storefront.description", href: STOREFRONT_LIST_PATH, icon: StorefrontIcon },
+  { label: "Nav.main.orders.label", description: "Nav.main.orders.description", href: ORDERS_PATH, icon: OrdersIcon },
+  { label: "Nav.main.discounts.label", description: "Nav.main.discounts.description", href: DISCOUNTS_PATH, icon: DiscountsIcon },
+  { label: "Nav.main.analytics.label", description: "Nav.main.analytics.description", href: ANALYTICS_PATH, icon: AnalyticsIcon },
+  { label: "Nav.main.payments.label", description: "Nav.main.payments.description", href: PAYMENTS_PATH, icon: PaymentsIcon },
 ];
 
 export const SETTINGS_LINK: NavEntry = {
   label: "Nav.main.settings.label",
+  description: "Nav.main.settings.description",
   href: SETTINGS_PATH,
   icon: SettingsIcon,
 };
 
 export const SETTINGS_NAV: SettingsNavEntry[] = [
   { href: "/settings/account", label: "Nav.settings.account", icon: User },
-  // Second: the one page a seller has to fill in before they can sell.
+  // A card on Account rather than a page, named here so the rail says where it is.
+  { href: LANGUAGE_SETTINGS_PATH, label: "Nav.settings.language", icon: Globe },
+  // Near the top: the one page a seller has to fill in before they can sell.
   { href: TRADER_IDENTITY_HREF, label: "Nav.settings.tax", icon: Receipt },
   // Beside Business, not off in the storefront designer where these terms used
   // to be written: both are account-level facts about the business that every

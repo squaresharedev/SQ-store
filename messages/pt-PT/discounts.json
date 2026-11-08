@@ -51,7 +51,8 @@
     "noEnd": "Sem data de fim",
     "orders": "{orders, plural, =0 {Ainda sem encomendas} one {# encomenda} other {# encomendas}}",
     "uses": "{uses} de {limit} utilizações",
-    "switchLabel": "Ativo",
+    "turnOn": "Ativar",
+    "turnOff": "Desativar",
     "edit": "Editar",
     "endNow": "Terminar agora",
     "delete": "Eliminar",
@@ -86,7 +87,7 @@
     "kind": {
       "title": "Que tipo de desconto?",
       "code": "Código de desconto",
-      "codeHint": "Os compradores escrevem-no no pagamento, e vê de que canal vieram.",
+      "codeHint": "Os compradores escrevem-no no pagamento, e vê de que canal vieram. Não se soma a uma promoção em curso: os compradores ficam com o preço mais baixo.",
       "automatic": "Promoção",
       "automaticHint": "Baixa os seus preços para todos. Sem código."
     },
@@ -99,6 +100,7 @@
     },
     "channel": {
       "label": "Partilhado em (opcional)",
+      "hint": "Veja quantas encomendas traz cada canal, na sua página Descontos.",
       "suggestions": "Canais sugeridos",
       "newsletter": "Newsletter",
       "creator": "Criador"
@@ -141,7 +143,7 @@
       }
     },
     "limit": {
-      "label": "Máximo de encomendas (opcional)",
+      "label": "Máximo de utilizações (opcional)",
       "none": "Sem limite"
     },
     "locked": "Esta promoção já foi iniciada, por isso só o fim pode ser alterado. Para alterar qualquer outra coisa, termine-a e crie uma nova promoção.",
@@ -153,7 +155,8 @@
       "noEnd": "Sem data de fim",
       "exampleLabel": "Exemplo",
       "example": "Exemplo: {title} a {regular} custa {now}.",
-      "chipLink": "Mudar o aspeto das promoções na sua loja"
+      "exampleUnchanged": "{title} mantém-se a {price}: tem o preço noutra moeda.",
+      "chipLink": "Mudar o aspeto das promoções em {storefront}"
     },
     "create": "Criar desconto",
     "save": "Guardar alterações",

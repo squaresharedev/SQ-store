@@ -72,8 +72,9 @@ describe("DesignPanel", () => {
       "true",
     );
 
-    await user.click(screen.getByRole("tab", { name: "Design" }));
-    expect(screen.getByRole("tab", { name: "Design" })).toHaveAttribute(
+    // The other tab names its scope: the whole storefront, not this block.
+    await user.click(screen.getByRole("tab", { name: "Whole storefront" }));
+    expect(screen.getByRole("tab", { name: "Whole storefront" })).toHaveAttribute(
       "aria-selected",
       "true",
     );
@@ -83,7 +84,7 @@ describe("DesignPanel", () => {
     const user = userEvent.setup();
     render(<Harness initialSelection="block-1" />);
 
-    await user.click(screen.getByRole("tab", { name: "Design" }));
+    await user.click(screen.getByRole("tab", { name: "Whole storefront" }));
     // Reaching for a block on the canvas is a request to see that block, so a
     // new selection pulls the panel back rather than leaving the seller on the
     // theme settings wondering why nothing responded.

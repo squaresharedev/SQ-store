@@ -37,6 +37,11 @@ inside the E2E stack) holds 4–6 GB; the `unit` Vitest project peaks near 5 GB.
 - Prefer running the specs and test files you touched over the whole suite.
 - `.next*/dev` is cleared automatically past 3 GB (`scripts/trim-next-cache.ts`);
   never commit or copy it around.
+- `pnpm dev` runs `scripts/dev.ts`, which restarts `next dev` once its process
+  tree passes 8 GB (`DEV_SERVER_MAX_GB`) or its dev dir passes 3 GB, and
+  Turbopack has a 4 GB memory target under `next dev` (next.config.ts). A
+  server started with plain `next dev` has neither ceiling: one left running for
+  a day reached 17 GB.
 
 ## Changing the Terms of Service
 

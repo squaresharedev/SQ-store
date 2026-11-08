@@ -46,10 +46,10 @@ test.describe("product options", () => {
     await expect(colour.getByLabel("Add options")).toHaveValue("");
 
     // A second axis, whose values are WORDS. This is the case the colour-only
-    // field could not express: the display defaults to chips, not swatches.
+    // field could not express: the display defaults to text buttons, not swatches.
     await page.getByRole("button", { name: "Power output", exact: true }).click();
     const power = page.locator("[data-option-group]").nth(1);
-    await expect(power.getByRole("button", { name: "Chips" })).toHaveAttribute(
+    await expect(power.getByRole("button", { name: "Text buttons" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );

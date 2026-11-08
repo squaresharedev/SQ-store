@@ -159,8 +159,8 @@
         "body": "Es una descarga, así que no hay nada que enviar."
       },
       "withdrawn": {
-        "title": "Un comprador se retiró del pedido {number}",
-        "body": "{title}. Organiza la devolución y el reembolso con él."
+        "title": "Un comprador ha cancelado el pedido {number}",
+        "body": "{title}. Organiza la devolución y reembólsale en un plazo de 14 días."
       }
     },
     "billing": {

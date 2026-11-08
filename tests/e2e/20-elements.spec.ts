@@ -88,7 +88,7 @@ async function seedImageBlock(
 test.describe("the Element tool", () => {
   test("replaces the Shape tool in the toolbar", async ({ page }) => {
     await setUp(page, "el-tool");
-    await expect(page.getByRole("button", { name: "Add element" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Add shape or image" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Add shape" })).toHaveCount(0);
   });
 
@@ -96,8 +96,8 @@ test.describe("the Element tool", () => {
     page,
   }) => {
     await setUp(page, "el-menu");
-    await page.getByRole("button", { name: "Add element" }).click();
-    const menu = page.getByRole("menu", { name: "Elements" });
+    await page.getByRole("button", { name: "Add shape or image" }).click();
+    const menu = page.getByRole("menu", { name: "Shapes and images" });
     await expect(menu).toBeVisible();
     await expect(menu.getByRole("menuitem")).toHaveCount(4);
     await expect(menu.getByRole("menuitem", { name: "Upload" })).toBeVisible();
@@ -127,10 +127,10 @@ test.describe("the Element tool", () => {
 
   test("a quick shape lands on the canvas", async ({ page }) => {
     await setUp(page, "el-quick");
-    await page.getByRole("button", { name: "Add element" }).click();
-    await expect(page.getByRole("menu", { name: "Elements" })).toBeVisible();
+    await page.getByRole("button", { name: "Add shape or image" }).click();
+    await expect(page.getByRole("menu", { name: "Shapes and images" })).toBeVisible();
     await page
-      .getByRole("menu", { name: "Elements" })
+      .getByRole("menu", { name: "Shapes and images" })
       .getByRole("menuitem", { name: "Add circle" })
       .click();
     await expect(page.locator("li[data-grid-cell]")).toHaveCount(1);
@@ -142,10 +142,10 @@ test.describe("the shape library in the left panel", () => {
     page,
   }) => {
     await setUp(page, "el-panel");
-    await page.getByRole("button", { name: "Add element" }).click();
-    await expect(page.getByRole("menu", { name: "Elements" })).toBeVisible();
+    await page.getByRole("button", { name: "Add shape or image" }).click();
+    await expect(page.getByRole("menu", { name: "Shapes and images" })).toBeVisible();
     await page
-      .getByRole("menu", { name: "Elements" })
+      .getByRole("menu", { name: "Shapes and images" })
       .getByRole("menuitem", { name: "All shapes" })
       .click();
 
@@ -164,10 +164,10 @@ test.describe("the shape library in the left panel", () => {
 
   test("closes on its own control", async ({ page }) => {
     await setUp(page, "el-panel-close");
-    await page.getByRole("button", { name: "Add element" }).click();
-    await expect(page.getByRole("menu", { name: "Elements" })).toBeVisible();
+    await page.getByRole("button", { name: "Add shape or image" }).click();
+    await expect(page.getByRole("menu", { name: "Shapes and images" })).toBeVisible();
     await page
-      .getByRole("menu", { name: "Elements" })
+      .getByRole("menu", { name: "Shapes and images" })
       .getByRole("menuitem", { name: "All shapes" })
       .click();
     await page.getByRole("button", { name: "Close library panel" }).click();
@@ -178,10 +178,10 @@ test.describe("the shape library in the left panel", () => {
     page,
   }) => {
     await setUp(page, "el-tabs");
-    await page.getByRole("button", { name: "Add element" }).click();
-    await expect(page.getByRole("menu", { name: "Elements" })).toBeVisible();
+    await page.getByRole("button", { name: "Add shape or image" }).click();
+    await expect(page.getByRole("menu", { name: "Shapes and images" })).toBeVisible();
     await page
-      .getByRole("menu", { name: "Elements" })
+      .getByRole("menu", { name: "Shapes and images" })
       .getByRole("menuitem", { name: "All shapes" })
       .click();
 

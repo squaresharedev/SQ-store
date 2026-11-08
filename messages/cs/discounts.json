@@ -51,7 +51,8 @@
     "noEnd": "Bez data ukončení",
     "orders": "{orders, plural, =0 {Zatím žádné objednávky} one {# objednávka} few {# objednávky} many {# objednávky} other {# objednávek}}",
     "uses": "{uses} z {limit} použití",
-    "switchLabel": "Zapnuto",
+    "turnOn": "Zapnout",
+    "turnOff": "Vypnout",
     "edit": "Upravit",
     "endNow": "Ukončit nyní",
     "delete": "Smazat",
@@ -86,7 +87,7 @@
     "kind": {
       "title": "Jaký druh slevy?",
       "code": "Slevový kód",
-      "codeHint": "Kupující ho zadají při placení a vy uvidíte, odkud přišli.",
+      "codeHint": "Kupující ho zadají při placení a vy uvidíte, odkud přišli. Nesčítá se s probíhající akcí: kupující dostane nižší z obou cen.",
       "automatic": "Akce",
       "automaticHint": "Sníží ceny pro všechny. Bez kódu."
     },
@@ -99,6 +100,7 @@
     },
     "channel": {
       "label": "Kde ho sdílíte (nepovinné)",
+      "hint": "Kolik objednávek který kanál přináší, uvidíte na stránce Slevy.",
       "suggestions": "Doporučené kanály",
       "newsletter": "Newsletter",
       "creator": "Tvůrce"
@@ -141,7 +143,7 @@
       }
     },
     "limit": {
-      "label": "Nejvýše objednávek (nepovinné)",
+      "label": "Nejvýše použití (nepovinné)",
       "none": "Bez omezení"
     },
     "locked": "Tato akce již začala, takže lze měnit pouze její konec. Chcete-li změnit cokoli jiného, ukončete ji a vytvořte novou akci.",
@@ -153,7 +155,8 @@
       "noEnd": "Bez data ukončení",
       "exampleLabel": "Příklad",
       "example": "Příklad: {title} za {regular} stojí nyní {now}.",
-      "chipLink": "Změnit, jak akce vypadá na vašem obchodě"
+      "exampleUnchanged": "{title} zůstává za {price}: má cenu v jiné měně.",
+      "chipLink": "Změnit, jak akce vypadá ve výloze {storefront}"
     },
     "create": "Vytvořit slevu",
     "save": "Uložit změny",

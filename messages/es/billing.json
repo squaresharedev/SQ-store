@@ -34,7 +34,7 @@
     "yearlyFree": "{count, plural, one {# mes gratis} other {# meses gratis}}",
     "launchNote": "Un precio de lanzamiento es un precio introductorio: el precio habitual es el que aparece tachado.",
     "grantTitle": "{plan} corre por nuestra cuenta",
-    "autoRenew": "Los planes de pago se renuevan automáticamente cada mes al precio indicado, hasta que los canceles."
+    "autoRenew": "Los planes de pago se renuevan automáticamente {interval, select, year {una vez al año} other {cada mes}} al precio indicado, hasta que los canceles."
   },
   "card": {
     "perMonth": "/ mes",
@@ -79,7 +79,8 @@
     "cheapest": "Con {sales} al mes en ventas, {plan} te sale más barato.",
     "legendPrice": "Precio del plan",
     "legendFee": "Comisión sobre tus ventas",
-    "cheapestTag": "Lo más barato para ti"
+    "cheapestTag": "Lo más barato para ti",
+    "stripeFeeNote": "La comisión de Stripe por procesar la tarjeta en cada venta se suma a estas cifras."
   },
   "compare": {
     "eyebrow": "Comparar",
@@ -160,17 +161,17 @@
   },
   "portal": {
     "opening": "Abriendo Stripe",
-    "stepUp": "Confirma que eres tú antes de abrir tus datos de facturación."
+    "stepUp": "Tienes activada la verificación en dos pasos, así que confirma que eres tú antes de abrir tus datos de facturación."
   },
   "chip": {
     "label": "Plan: {plan}",
-    "upgrade": "Actualizar",
-    "pro": "Plan Pro"
+    "upgrade": "Actualizar"
   },
   "banner": {
     "label": "Pago del plan",
     "pastDue": "El pago del plan {plan} ha fallado. Actualiza tu tarjeta para conservarlo.",
     "pastDueMember": "El pago del plan {plan} de esta tienda ha fallado. Solo el propietario puede actualizar la tarjeta.",
+    "seeTeam": "Ver los miembros del equipo",
     "action": "Actualizar tarjeta"
   },
   "settings": {
@@ -197,7 +198,7 @@
       "over": "{count} de más",
       "full": "Completo"
     },
-    "overLimit": "Por encima del límite de este plan. Todo sigue funcionando; elimina uno o actualiza para añadir más.",
+    "overLimit": "Por encima del límite de este plan. Todo sigue funcionando; elimina uno o <upgrade>mejora tu plan</upgrade> para añadir más.",
     "invoicesTitle": "Facturación y facturas",
     "invoicesDescription": "Tu tarjeta, dirección de facturación, NIF/CIF y todas las facturas, en la página segura de Stripe.",
     "manage": "Gestionar facturación y facturas",

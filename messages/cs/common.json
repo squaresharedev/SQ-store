@@ -91,7 +91,11 @@
     "proportional": "Poměrné rozložení",
     "other": "Ostatní",
     "total": "Celkem",
-    "category": "Kategorie"
+    "category": "Kategorie",
+    "changeUp": "Nárůst o {percent} oproti předchozímu období",
+    "changeDown": "Pokles o {percent} oproti předchozímu období",
+    "vsBefore": "oproti {amount} předtím",
+    "spark": "{label} po dnech"
   },
   "legal": {
     "cookies": {

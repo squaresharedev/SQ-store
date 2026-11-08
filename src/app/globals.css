@@ -25,6 +25,8 @@
   /* One accent only: electric purple ("acid"). Used as a scalpel. */
   --color-acid: #a855f7;
   --color-acid-hover: #9333ea;
+  /* Its deepest shade (purple-950), for purple that should only just show on black. */
+  --color-acid-deep: #3b0764;
 
   /* Surfaces */
   --color-surface-dark: #000000;
@@ -62,6 +64,23 @@
   --color-window-close: #ff5f57;
   --color-window-minimize: #febc2e;
   --color-window-zoom: #28c840;
+
+  /* The platforms a seller's reviews live on, in the colours their companies
+     are known by: the review import graphic's `lettered` marks only
+     (components/products/ReviewImportBeams), which need each company's
+     permission before they ship; the page uses plain icons in ink. */
+  --color-place-store: #5e8e3e;
+  --color-place-maps: #1a73e8;
+  --color-place-marketplace: #f1641e;
+  --color-place-social: #1877f2;
+  --color-place-review-site: #00b67a;
+
+  /* The smallest type the product sets (`text-2xs`, 10px on a 12px line, so a
+     truncated word keeps its descenders): a word that rides under an icon
+     where there is no room beside it, the way a phone tab bar labels its tabs
+     (the designer toolbar on a phone). Never for prose. */
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: calc(0.75 / 0.625);
 }
 
 /* Font utilities map to the next/font local faces set on <html> in layout.tsx.
@@ -208,6 +227,13 @@
      hue only ever appears when it means something. */
   --chart-accent: #2a78d6;
 
+  /* The store's own money over time: the Payments tab's earnings chart and
+     its trend sparklines. The brand purple taken two steps deeper so a 2px
+     line reads on white (the user asked for a darker purple or a green over
+     the lab's blurple). Not green: green says "good" here, and the change
+     chips beside the line use it. */
+  --chart-earnings: #7e22ce; /* purple-700 */
+
   /* The acid, stepped so it stays LEGIBLE as small text on the current
      surface. --color-acid itself is a decoration colour: at 12px it manages
      3.96:1 on white, under the 4.5:1 WCAG AA needs, while clearing it
@@ -270,6 +296,23 @@
      durations so every timing the app can retune is in one place. */
   --duration-flow: 8s;
 
+  /* The code block's deepest and palest greens (.code-surface below), with
+     --color-success-dark (green-400) between them. Named because the ASCII
+     field's `code` palette (ui/gradient-ascii-tokens) draws in the same three,
+     so the places a seller copies code or connects something glow one green. */
+  --flow-green-deep: #22c55e; /* green-500 */
+  --flow-green-pale: #bbf7d0; /* green-200 */
+
+  /* The terminal field behind the MCP address (ui/GradientAscii's `terminal`
+     palette), edge to core: greys up to a white core, with the edge in the
+     acid's deepest shade. Purple outside styles.md §2.4's two sanctioned uses,
+     chosen on purpose in the ASCII lab: it only shows where the light fades
+     into the black, as the page's one purple moment. */
+  --ascii-terminal-edge: var(--color-acid-deep);
+  --ascii-terminal-mid: #525252; /* neutral-600 */
+  --ascii-terminal-light: #d4d4d4; /* neutral-300 */
+  --ascii-terminal-core: #ffffff;
+
   /* One full flow of the add-colour button's rim (.color-wheel below), shown
      only while it is hovered. Each colour's drift is a fraction of this. */
   --duration-wheel-flow: 6s;
@@ -320,7 +363,7 @@
      same purple would change nothing at all. One step brighter separates the
      two, the way the light palette's step darker does. */
   --slider-active: #c084fc; /* purple-400 */
-  --slider-active-rail: #3b0764; /* purple-950 */
+  --slider-active-rail: var(--color-acid-deep);
   --slider-active-halo: rgb(192 132 252 / 0.22);
 
   /* Error hero, dark: the digits sink one step OUT of black instead of into
@@ -344,6 +387,8 @@
 
   /* Chart accent, dark: the same blue re-stepped for dark card surfaces. */
   --chart-accent: #3987e5;
+  /* Earnings line, dark: purple-700 sinks into black, purple-400 holds. */
+  --chart-earnings: #c084fc;
 }
 
 /* Bottom padding that clears the home indicator on a notched phone. Needed by
@@ -1034,8 +1079,8 @@ textarea {
      palest and back, so the ring thins out and thickens as it turns: the dark
      success green (green-700) was tried and read as heavy on a white slab.
      Shared with the suggestion chips' rim below. */
-  --flow-stops: #22c55e, var(--color-success-dark) 25%, #bbf7d0 50%,
-    var(--color-success-dark) 75%, #22c55e; /* green-500, 400, 200 */
+  --flow-stops: var(--flow-green-deep), var(--color-success-dark) 25%, var(--flow-green-pale) 50%,
+    var(--color-success-dark) 75%, var(--flow-green-deep);
   position: relative;
   isolation: isolate;
 }

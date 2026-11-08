@@ -91,7 +91,7 @@ async function openPage(page: Page, storefrontId: string, lamp: string) {
   await expect(page.getByRole("button", { name: "Add product", exact: true })).toBeVisible();
   await page.getByLabel(/^oak lamp\. press enter/i).click();
   await canvasStill(page);
-  await page.getByRole("button", { name: /^open the buyer flow for oak lamp$/i }).click();
+  await page.getByRole("button", { name: /^open the product page for oak lamp$/i }).click();
   const artboard = page.locator(`[data-artboard-id="${lamp}"]`);
   await expect(artboard).toBeVisible();
   return artboard;
@@ -154,7 +154,7 @@ test.describe("the product page's background", () => {
     // panel section it happens to live in.
     await page.getByRole("button", { name: /^back to all settings/i }).first().click();
     await canvasStill(page);
-    const field = page.getByRole("combobox", { name: "Find a setting or object" });
+    const field = page.getByRole("combobox", { name: "Find a setting or block" });
     await field.fill("page background");
     const rows = page.getByRole("option");
     await expect(async () => {

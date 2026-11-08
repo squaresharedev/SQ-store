@@ -2,6 +2,7 @@
   "pageTitle": "Platby",
   "soon": "Brzy",
   "bankOnFile": "Váš bankovní účet",
+  "invoicesPointer": "Faktury za váš plán Square Share najdete v Nastavení v části <link>Plán a fakturace</link>.",
   "balance": {
     "available": {
       "label": "K dispozici",
@@ -24,10 +25,31 @@
       "hint": "Podíl Square Share z vašich prodejů, po vrácených platbách"
     }
   },
+  "earnings": {
+    "label": "Vyděláno za posledních {days} dní",
+    "labelOn": "Vyděláno do {date}",
+    "vsBefore": "oproti {amount} za předchozích {days} dní",
+    "range": "Období",
+    "rangeShort": "{days} d",
+    "rangeLong": "Posledních {days} dní",
+    "legendNow": "Těchto {days} dní",
+    "legendBefore": "Předchozích {days} dní",
+    "today": "Dnes",
+    "empty": "Tato čára začne vaším prvním prodejem.",
+    "emptyRange": "Za posledních {days} dní žádné prodeje.",
+    "otherCurrencies": "V {currency}. Prodeje v jiných měnách zde nejsou započítány."
+  },
+  "trends": {
+    "gross": "Hrubé tržby",
+    "sales": "Prodeje",
+    "costs": "Vrácení peněz a poplatky",
+    "paidOut": "Vyplaceno",
+    "noBefore": "První období, zatím bez srovnání"
+  },
   "connection": {
     "label": "Propojení se Stripe",
     "comingSoonTitle": "Příjem plateb přes Stripe už brzy",
-    "comingSoonBody": "Do té doby vám kupující platí přes odkaz na nákup u produktu nebo se vám ozvou e-mailem.",
+    "comingSoonBody": "Do té doby vám kupující platí přímo. Tlačítko nákupu u produktu otevře <buyLink>odkaz na nákup</buyLink>, který mu zadáte (vaši vlastní pokladnu), nebo, pokud žádný nemá, napíše e-mail na vaši <email>kontaktní adresu</email>.",
     "connectTitle": "Propojte Stripe a začněte dostávat peníze",
     "connectBody": "Výplaty chodí přímo na váš bankovní účet. Nastavení probíhá bezpečně u Stripe, vaše bankovní údaje nikdy nevidíme ani neukládáme.",
     "connectButton": "Propojit se Stripe",

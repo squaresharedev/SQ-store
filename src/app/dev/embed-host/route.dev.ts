@@ -2,7 +2,12 @@ import { embedOrigin } from "@/lib/app-url";
 import { escapeHtml } from "@/lib/format/html";
 import { embedFramePath, parseEmbedSites } from "@/lib/storefront/embed-frame";
 import { embedFrameSnippet, embedSnippet } from "@/lib/storefront/embed-snippet";
+import { storefrontPageUrl } from "@/lib/storefront/product-page-url";
 import { uuidField } from "@/lib/validation/inputs";
+
+/** The storefront the harness snippet's link names: nobody's, as the harness
+ *  is given an embed key, not the storefront behind it. */
+const HARNESS_STOREFRONT_ID = "00000000-0000-4000-8000-000000000000";
 
 /**
  * GET /dev/embed-host?key=<embed key>: a stand-in for A SELLER'S OWN WEBSITE,
@@ -67,7 +72,11 @@ export async function GET(request: Request) {
   const here = request.headers.get("host") ?? url.host;
   const page = new URL(`${url.protocol}//${here}`);
 
-  let embed = embedSnippet(key);
+  // The link a real snippet carries inside its div, so the loader hiding it
+  // once the frame is drawn can be watched here. The harness knows only the
+  // embed key, so it points at a storefront id that is not anyone's; the
+  // embed page links the real one (storefrontPageUrl(storefront.id)).
+  let embed = embedSnippet(key, { url: storefrontPageUrl(HARNESS_STOREFRONT_ID), label: "A seller's shop" });
   const claim = params.get("claim");
   if (claim !== null) {
     const sites = parseEmbedSites(claim.split(","), { allowPort: true });

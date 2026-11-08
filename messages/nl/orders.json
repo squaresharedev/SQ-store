@@ -6,7 +6,7 @@
   },
   "page": {
     "title": "Bestellingen",
-    "subtitle": "Elke bestelling geplaatst via Square Share."
+    "subtitle": "Bestellingen die via het afrekenen van Square Share zijn geplaatst."
   },
   "status": {
     "paid": "Betaald",
@@ -17,7 +17,7 @@
   "channel": {
     "embed": "Op je website",
     "marketplace": "Marketplace",
-    "direct": "Jouw pagina",
+    "direct": "Directe link",
     "button": "Koopknop"
   },
   "empty": {
@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} bestelling} other {{total} bestellingen}} · pagina {page} van {totalPages}",
     "detailDialog": "Bestelgegevens",
     "closeDetail": "Bestelgegevens sluiten",
-    "withdrawn": "Herroepen",
+    "withdrawn": "Door koper geannuleerd",
+    "refundDue": "Terugbetalen uiterlijk {date}",
     "moreItems": "+{count} meer"
   },
   "table": {
@@ -52,12 +53,12 @@
     "shipping": "Verzending",
     "shipTo": "Verzenden naar",
     "noAddress": "Geen adres",
-    "feeLine": "Kosten {amount}"
+    "feeLine": "Platformkosten {amount}"
   },
   "toolbar": {
     "region": "bestelfilters",
     "channel": "kanaal",
-    "searchPlaceholder": "zoek e-mail, naam, plaats, product of zending",
+    "searchPlaceholder": "zoek bestelnummer, e-mail, naam, plaats, product of zending",
     "search": "zoeken",
     "status": "status",
     "statusAriaLabel": "Filter op status",
@@ -121,7 +122,7 @@
       "failed": "Kopiëren van het telefoonnummer is mislukt. Selecteer en kopieer het handmatig."
     },
     "giftMessage": "Cadeaubericht",
-    "withdrawalNotice": "De koper heeft op {date} verzocht dit aankoop te herroepen. Spreek de retourzending en terugbetaling met hen af.",
+    "withdrawalNotice": "De koper heeft deze aankoop op {date} geannuleerd. Regel de retour en betaal binnen 14 dagen terug.",
     "noAddress": "Er staat geen leveringsadres op deze bestelling. Stuur de koper een e-mail om te vragen waar het naartoe moet.",
     "shipping": "Verzending",
     "shippedOn": "Verzonden {date}",
@@ -147,7 +148,7 @@
     },
     "emailBuyer": "Stuur de koper een e-mail",
     "mailSubject": "Je bestelling {number}",
-    "withdrawnShipWarning": "De koper heeft deze aankoop herroepen. Verzend hem alleen als je dat met de koper hebt afgesproken.",
+    "withdrawnShipWarning": "De koper heeft deze aankoop geannuleerd. Verzend hem alleen als je dat met de koper hebt afgesproken.",
     "discount": "Korting",
     "discountSale": "Actie, {amount} korting",
     "discountCode": "Code {code}, {amount} korting",
@@ -155,8 +156,10 @@
     "alsoBought": "Ook in deze bestelling"
   },
   "actions": {
-    "disputeInStripe": "De bank van de koper heeft een geschil geopend. Reageer erop in je Stripe-dashboard vóór de deadline.",
+    "disputeInStripe": "De bank van de koper heeft een geschil geopend. Reageer erop in je Stripe-dashboard vóór de deadline, anders krijgt de koper het geld terug.",
     "answerInStripe": "Reageren in Stripe",
+    "disputeOwnerOnly": "Alleen de eigenaar van de winkel kan erop reageren.",
+    "disputeOwnerOnlyNamed": "Alleen de eigenaar van {store} kan erop reageren. Laat het de eigenaar weten.",
     "pendingPayment": "De betaling van de koper wordt nog bevestigd. Verstuur nog niets: de bestelling staat als betaald zodra die doorkomt, en sluit vanzelf als dat niet gebeurt.",
     "none": "Er zijn geen acties beschikbaar voor deze bestelling."
   },
@@ -179,8 +182,8 @@
     "refundedOnReason": "{reason, select, cancelled {Geannuleerd en terugbetaald op {date}} returned {Teruggestuurd en terugbetaald op {date}} other {Terugbetaald op {date}}}",
     "ownerOnly": "Alleen de eigenaar van de winkel kan een bestelling terugbetalen of annuleren.",
     "ownerOnlyNamed": "Alleen de eigenaar van {store} kan een bestelling terugbetalen of annuleren. Vraag de eigenaar om het te doen.",
-    "manual": "Deze betaling is niet via Square Share verlopen. Betaal de koper zelf terug en leg het hier vast.",
-    "viaProvider": "Het volledige bedrag gaat via Stripe terug naar de kaart van de koper. Dit kan niet ongedaan worden gemaakt."
+    "manual": "Deze betaling is niet via Square Share verlopen. Betaal de koper zelf het volledige bedrag van {amount} terug en leg het hier vast.",
+    "viaProvider": "Betaalt de hele bestelling, {amount}, via Stripe terug naar de kaart van de koper. Dit kan niet ongedaan worden gemaakt."
   },
   "skeleton": {
     "loading": "bestellingen laden"
@@ -289,8 +292,8 @@
       "buyerSubject": "Jouw herroeping van bestelling {number} bij {store}",
       "buyerIntro": "We hebben je herroeping van bestelling {number} ({title}) op {date} ontvangen en direct doorgegeven aan {store}.",
       "buyerNext": "{store} neemt contact met je op over het retourneren en je terugbetaling, die binnen 14 dagen na je herroeping verschuldigd is.",
-      "sellerSubject": "Herroeping: bestelling {number} ({title})",
-      "sellerIntro": "De koper {email} heeft bestelling {number} op {date} herroepen via de herroepingsknop op zijn bestelpagina.",
+      "sellerSubject": "Annulering (herroeping): bestelling {number} ({title})",
+      "sellerIntro": "De koper {email} heeft bestelling {number} op {date} geannuleerd via de herroepingsknop op de bestelpagina.",
       "sellerName": "Opgegeven naam: {name}",
       "sellerNext": "Neem contact op om het retourneren te regelen en betaal binnen 14 dagen terug. Je kunt de terugbetaling inhouden totdat het artikel terug is of de koper aantoont dat het verzonden is. De bestelling: {url}"
     },

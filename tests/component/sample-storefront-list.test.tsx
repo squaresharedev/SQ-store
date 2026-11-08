@@ -1,12 +1,12 @@
 /**
  * The sample storefront in the storefront list.
  *
- * What these pin: the sample is a quiet LINK at the foot of the list, never a
- * card, so the list holds the seller's own storefronts and nothing else (and
- * with none, the empty state alone, with no "0 storefronts" above it); the link
- * opens the sample in the designer and carries the guided tour's hook; and it
- * stays away for a read-only role, an unreadable flag, and anyone who hid the
- * sample back when it was a card.
+ * What these pin: the sample is a quiet LINK, never a card, so the list holds
+ * the seller's own storefronts and nothing else (and with none, the empty state
+ * alone, with no "0 storefronts" above it, and the link inside it, under the
+ * create card's hint); the link opens the sample in the designer and carries
+ * the guided tour's hook; and it stays away for a read-only role, an unreadable
+ * flag, and anyone who hid the sample back when it was a card.
  */
 
 import type { ReactNode } from "react";
@@ -112,10 +112,12 @@ function renderList(props: {
 const sampleLink = () => screen.queryByRole("link", { name: "Open the sample storefront" });
 
 describe("sample storefront in the list", () => {
-  it("is a link under the empty state for a seller with no storefront, never a card", async () => {
+  it("is a link inside the empty state for a seller with no storefront, never a card", async () => {
     await renderList({ sample: "shown" });
-    expect(screen.getByRole("heading", { name: "No storefronts yet" })).toBeInTheDocument();
+    const heading = screen.getByRole("heading", { name: "No storefronts yet" });
     expect(sampleLink()).toHaveAttribute("href", "/storefront/sample");
+    // With the create card and its hint, not past the frame: seen without a scroll.
+    expect(heading.parentElement).toContainElement(sampleLink());
     // The tour's hook hugs the link.
     expect(sampleLink()?.closest("[data-storefront-sample]")).not.toBeNull();
     // Nothing in the list but the seller's own: no sample card, no grid of

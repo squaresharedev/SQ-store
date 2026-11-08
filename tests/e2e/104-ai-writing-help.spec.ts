@@ -1,6 +1,16 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { expectToast, fillStable, freshUser, gotoApp, seedProducts, serviceRest, signUp, userIdByEmail } from "./helpers";
+import {
+  expectToast,
+  fillStable,
+  freshUser,
+  gotoApp,
+  seedProducts,
+  serviceRest,
+  signUp,
+  toast,
+  userIdByEmail,
+} from "./helpers";
 
 /**
  * AI WRITING HELP (lib/suggestions, a Pro perk) as a seller meets it: "Write
@@ -48,11 +58,14 @@ test.describe("AI writing help", () => {
     await gotoApp(page, "/products/new");
     await fillStable(page, "Title", "Linen shirt");
     await fillStable(page, /price/i, "40");
-    // A title alone has nothing a draft could honestly add.
-    await expect(aiChip(page)).toHaveCount(0);
+    // A title alone has nothing a draft could honestly add: the chip is there,
+    // dimmed, and says what it needs.
+    const write = aiChip(page).getByRole("button", { name: "Write with AI" });
+    await expect(write).toHaveAttribute("aria-disabled", "true");
+    await expect(write).toHaveAccessibleDescription(/not enough to write from yet/);
 
     await page.locator("[data-product-starters]").getByRole("button", { name: /^Sizes/ }).click();
-    const write = aiChip(page).getByRole("button", { name: "Write with AI" });
+    await expect(write).not.toHaveAttribute("aria-disabled");
     await expect(write).toHaveClass(/suggestion-surface/);
     await expect(write).toHaveAccessibleDescription(/adds nothing of its own/);
     const axe = await new AxeBuilder({ page }).include("[data-fix-field-block='description']").analyze();
@@ -95,9 +108,10 @@ test.describe("AI writing help", () => {
     const user = freshUser("ai-free");
     await signUp(page, user);
     await gotoApp(page, "/products/new");
-    await fillStable(page, "Title", "Linen shirt");
-    // Nothing to write from yet: no upsell either.
+    // Nothing to name yet: no upsell either. A title is enough to show it.
     await expect(page.locator("[data-description-ai-upsell]")).toHaveCount(0);
+    await fillStable(page, "Title", "Linen shirt");
+    await expect(page.locator("[data-description-ai-upsell]")).toBeVisible();
     await page.locator("[data-product-starters]").getByRole("button", { name: /^Sizes/ }).click();
     await expect(aiChip(page)).toHaveCount(0);
     const upsell = page.locator("[data-description-ai-upsell]").getByRole("link", { name: /Write with AI/ });
@@ -153,13 +167,30 @@ test.describe("AI writing help as you type", () => {
     await expect(suggestion(page)).toHaveCount(0);
   });
 
-  test("Turn off is one tap from the field, and Settings turns it back on", async ({ page }) => {
+  test("Turn off is in sight before typing, its toast leads to Settings, and Settings turns it back on", async ({
+    page,
+  }) => {
     await proSeller(page, "ai-off");
     await shirtWithSizes(page);
-    await description(page).click();
+    // No need to click into the field first: the line under it already says
+    // what the grey words are, and holds the way out.
+    await expect(hint(page)).toHaveText("AI suggests the next words as you type.");
     await page.getByRole("button", { name: "Turn off" }).click();
     await expectToast(page, "Suggestions as you type are off.");
     await expect(hint(page)).toHaveCount(0);
+
+    // The toast is the way back to the switch, asking about the unsaved
+    // product first like any other way out of the form.
+    await toast(page, "Turn them back on in Settings, under Plan & billing.").click();
+    await page
+      .getByRole("dialog", { name: "Discard your changes?" })
+      .getByRole("button", { name: "Discard changes" })
+      .click();
+    await expect(page).toHaveURL(/\/settings\/billing#ai$/);
+    await expect(page.getByRole("switch", { name: "Suggest the next words as I type" })).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
 
     // Saved: a fresh form asks nothing either.
     await shirtWithSizes(page);
@@ -202,9 +233,13 @@ test.describe("AI writing help as you type", () => {
     await expect(card.locator("[data-ai-credit='used']")).toBeVisible();
     await expect(card.getByText(/This month's credit is used up/)).toBeVisible();
 
+    // The form says so before a tap: the chip is dimmed with the reason, and
+    // no grey words are asked for.
     await shirtWithSizes(page);
-    await aiChip(page).getByRole("button", { name: "Write with AI" }).click();
-    await expectToast(page, "This month's AI credit is used up.");
-    await expect(description(page)).toHaveValue("");
+    const write = aiChip(page).getByRole("button", { name: "Write with AI" });
+    await expect(write).toHaveAttribute("aria-disabled", "true");
+    await expect(write).toHaveAccessibleDescription(/AI credit is used up/);
+    await description(page).click();
+    await expect(hint(page)).toHaveCount(0);
   });
 });

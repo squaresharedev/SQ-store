@@ -91,7 +91,7 @@
     "groups": {
       "theme": "Tema",
       "header": "Intestazione",
-      "typography": "Tipografia",
+      "typography": "Font",
       "cards": "Riquadri prodotto",
       "soldOut": "Esaurito",
       "productPage": "Pagina prodotto",
@@ -100,7 +100,7 @@
     "subtitle": {
       "theme": "Vetrina / Tema",
       "header": "Vetrina / Intestazione",
-      "typography": "Vetrina / Tipografia",
+      "typography": "Vetrina / Font",
       "cards": "Vetrina / Riquadri prodotto",
       "soldOut": "Vetrina / Esaurito",
       "productPage": "Vetrina / Pagina prodotto",
@@ -161,7 +161,8 @@
       "cardStarRating": "Valutazione a stelle sui riquadri",
       "cardLowStock": "Etichetta Ultimi pezzi",
       "textSpacing": "Spaziatura lettere e altezza riga",
-      "elementBlur": "Sfocatura"
+      "elementBlur": "Sfocatura",
+      "phoneLayout": "Disposizione per telefoni"
     }
   },
   "editorSearch": {
@@ -207,31 +208,37 @@
     "emptyHint": "Questa griglia è vuota",
     "removed": "Rimosso da Square Share",
     "pausedInReview": "In pausa · in revisione da Square Share",
-    "pausedNeedsChanges": "In pausa per decisione di Square Share · servono modifiche"
+    "pausedNeedsChanges": "In pausa per decisione di Square Share · servono modifiche",
+    "status": {
+      "live": "Online",
+      "pagesOff": "Non ancora online: attiva le pagine prodotto",
+      "detailsMissing": "Non ancora online: aggiungi i tuoi dati venditore"
+    }
   },
   "embed": {
-    "inDevNotice": "Il widget di incorporamento è in sviluppo e non viene ancora visualizzato sui siti esterni. Configura le tue impostazioni qui sotto, così sarai pronto a incollare lo snippet non appena sarà disponibile.",
+    "sectionTitle": "Sul tuo sito",
+    "inDevNotice": "Non viene ancora mostrata su altri siti. Configurala ora e sarà pronta non appena sarà disponibile. A quel punto aggiungerai anche una breve nota alla tua informativa sulla privacy: ti daremo noi il testo.",
     "title": "Condividi questa vetrina",
-    "description": "Manda a chi vuoi un link a «{name}», oppure incolla uno snippet nel tuo sito per mostrarla lì.",
+    "description": "Manda a chi vuoi un link a «{name}», oppure incolla il codice per il sito nelle tue pagine per mostrarla lì.",
     "steps": {
       "site": "Scegli i siti in cui compare",
-      "snippet": "Incolla lo snippet nel tuo sito",
+      "snippet": "Aggiungi il codice al tuo sito",
       "privacy": "Aggiungi questo alla tua informativa sulla privacy"
     },
     "required": "Obbligatorio",
     "enabledLabel": "Mostra sul mio sito",
     "showingLabel": "Visibile sul tuo sito",
-    "domainsLabel": "Domini consentiti",
+    "domainsLabel": "Indirizzi del tuo sito",
     "domainsPlaceholder": "iltuosito.com, blog.iltuosito.com",
-    "domainsHint": "Fino a {max}, separati da virgola. Incolla un URL e lo ridurremo al dominio.",
-    "sameAsHint": "Copia i domini consentiti da {title}.",
-    "emptyDomainsWarning": "Aggiungi almeno un dominio. Finché è vuoto, la vetrina non si caricherà da nessuna parte, anche se l’incorporamento è attivo.",
+    "domainsHint": "La vetrina incorporata si carica solo su questi siti. Incolla un URL completo e ne estrarremo l’indirizzo. Fino a {max}, separati da virgola.",
+    "sameAsHint": "Copia gli indirizzi del sito da {title}.",
+    "emptyDomainsWarning": "Aggiungi almeno un indirizzo del sito. Finché è vuoto, la vetrina non si caricherà da nessuna parte, anche se l’incorporamento è attivo.",
     "builderLabel": "Il tuo costruttore di siti",
     "builderOther": "Altro sito",
     "builderSteps": {
       "other": "Incollalo nell’HTML della tua pagina, dove vuoi che compaia la vetrina.",
       "wordpress": "Aggiungi un blocco «HTML personalizzato» dove vuoi che compaia la vetrina e incollaci il codice.",
-      "squarespace": "Aggiungi un blocco «Code» e incollaci il codice. Se la vetrina compare solo dopo aver ricaricato la pagina, passa a «Solo iframe».",
+      "squarespace": "Aggiungi un blocco «Code» e incollaci il codice. Se la vetrina compare solo dopo aver ricaricato la pagina, passa a «Incorporamento semplice».",
       "wix": "Aggiungi «Embed Code», poi «Embed HTML», e incollaci il codice. Poi allunga il riquadro fino all’altezza della vetrina.",
       "webflow": "Aggiungi un elemento «Code Embed» e incollaci il codice. Compare sul sito pubblicato.",
       "shopify": "Nell’editor del tema, aggiungi una sezione «Custom Liquid» e incollaci il codice.",
@@ -240,22 +247,22 @@
       "carrd": "Aggiungi un elemento «Embed», imposta il tipo su «Code» e incollaci il codice."
     },
     "snippetKinds": {
-      "label": "Tipo di snippet",
-      "script": "Script",
-      "iframe": "Solo iframe"
+      "label": "Tipo di codice",
+      "script": "Incorporamento completo",
+      "iframe": "Incorporamento semplice"
     },
-    "snippetReadyHint": "Basta incollarlo una volta. Si adatta alla vetrina e segue ciò che modifichi qui.",
-    "iframeHint": "Per i siti che rimuovono gli script. È alto {height} pixel e scorre all’interno. Copialo di nuovo dopo aver modificato i domini.",
-    "snippetLockedHint": "Attiva l’incorporamento e aggiungi almeno un dominio per sbloccare il pulsante Copia.",
+    "snippetReadyHint": "Funziona sulla maggior parte dei siti. Basta incollarlo una volta: si adatta alla vetrina e segue ciò che modifichi qui.",
+    "iframeHint": "Usalo se l’incorporamento completo non è comparso sul tuo sito. È alto {height} pixel e scorre all’interno. Copialo di nuovo ogni volta che modifichi gli indirizzi del sito.",
+    "snippetLockedHint": "Attiva l’incorporamento e aggiungi almeno un indirizzo del sito per sbloccare il pulsante Copia.",
     "snippetSaveHint": "Salva le impostazioni per sbloccare il pulsante Copia.",
     "pagesOffHint": "Attiva prima le pagine prodotto nell’editor. Un clic su un prodotto apre la sua pagina.",
     "notShowingLabel": "Se la vetrina non compare",
-    "notShowingTip": "L’indirizzo del tuo sito deve essere tra i Domini consentiti e il sito deve usare https. Il codice incollato compare sul sito pubblicato, non nell’editor del costruttore di siti. Per vederlo su un indirizzo di anteprima (come tuosito.webflow.io), aggiungi anche quell’indirizzo.",
+    "notShowingTip": "L’indirizzo del tuo sito deve essere tra gli indirizzi del sito qui sopra e il sito deve usare https. Il codice incollato compare sul sito pubblicato, non nell’editor del costruttore di siti. Se la vetrina non compare affatto, prova il tipo di codice Incorporamento semplice. Per vederla su un indirizzo di anteprima (come tuosito.webflow.io), aggiungi anche quell’indirizzo.",
     "copySnippet": {
-      "copy": "Copia snippet di incorporamento",
-      "copied": "Snippet di incorporamento copiato",
-      "failed": "Non è stato possibile copiare lo snippet di incorporamento. Selezionalo e copialo manualmente.",
-      "cannotCopyYet": "lo snippet di incorporamento non può ancora essere copiato"
+      "copy": "Copia codice per il sito",
+      "copied": "Codice per il sito copiato",
+      "failed": "Non è stato possibile copiare il codice per il sito. Selezionalo e copialo manualmente.",
+      "cannotCopyYet": "il codice per il sito non può ancora essere copiato"
     },
     "privacyHint": "Il tuo sito ora carica questa vetrina da Square Share, quindi la sua informativa sulla privacy deve dirlo. Incollaci questo testo:",
     "privacyTextLabel": "Testo sulla privacy",
@@ -265,20 +272,21 @@
       "copied": "Testo sulla privacy copiato",
       "failed": "Non è stato possibile copiare il testo. Selezionalo e copialo manualmente."
     },
-    "snippetKeyLabel": "Chiave dello snippet",
-    "rotateConfirmText": "Rigenerare crea una nuova chiave. Ogni copia del vecchio snippet smette di funzionare immediatamente, comprese quelle sui siti che vuoi ancora usare: dovrai incollare il nuovo snippet ovunque.",
-    "rotateKey": "Rigenera chiave",
-    "rotating": "Rigenerazione…",
-    "revokeHint": "Incollato da qualche parte dove non doveva essere? Rigenera la chiave per revocare ogni snippet esistente.",
+    "snippetKeyLabel": "Codice per il sito",
+    "rotateConfirmText": "Ottenere un nuovo codice disattiva quello vecchio ovunque sia stato incollato. Sui siti in cui vuoi continuare a mostrare la vetrina dovrai incollare di nuovo il nuovo codice.",
+    "rotateKey": "Ottieni un nuovo codice",
+    "rotating": "Creazione di un nuovo codice…",
+    "revokeHint": "Il codice per il sito è fatto per essere pubblico: viene mostrato solo sugli indirizzi del tuo sito. Ottieni un nuovo codice solo per disattivare tutte le copie già incollate.",
     "saveSettings": "Salva impostazioni",
     "saving": "Salvataggio…",
     "saved": "Impostazioni di incorporamento salvate.",
-    "newKeyIssued": "Nuova chiave di incorporamento generata.",
-    "newKeyDetail": "Incolla di nuovo lo snippet ovunque questa vetrina sia incorporata."
+    "newKeyIssued": "Nuovo codice per il sito creato.",
+    "newKeyDetail": "Incolla di nuovo il codice per il sito ovunque questa vetrina sia incorporata."
   },
   "share": {
     "title": "Link della vetrina",
     "live": "La tua vetrina ha una pagina tutta sua. Chiunque abbia questo link può sfogliarla, senza bisogno di un sito.",
+    "searchOff": "Nascosta ai motori di ricerca come Google.",
     "pagesOff": "Attiva le pagine prodotto nell’editor e questa vetrina avrà un link da condividere.",
     "detailsMissing": "Questa vetrina avrà un link da condividere quando i tuoi dati venditore saranno completi.",
     "open": "Apri",
@@ -321,7 +329,7 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Pagina prodotto",
-    "closeAriaLabel": "Chiudi il percorso d’acquisto per {title}",
+    "closeAriaLabel": "Chiudi la pagina prodotto di {title}",
     "desktopSize": "Dimensioni desktop",
     "mobileSize": "Dimensioni mobile",
     "checkoutLabel": " · Checkout",
@@ -331,7 +339,7 @@
   "metadata": {
     "storefronts": {
       "title": "Vetrine",
-      "subtitle": "Ogni vetrina ha la propria griglia e il proprio tema. Creane quante ne servono, poi aprine una per modificarla."
+      "subtitle": "Ogni vetrina ha la propria griglia, il proprio tema e un link tutto suo da condividere. Creane quante ne servono, poi aprine una per modificarla."
     },
     "editor": {
       "title": "Modifica vetrina"
@@ -351,20 +359,20 @@
   "controls": {
     "off": "Disattivato",
     "layers": "Livelli",
-    "objectCount": "{count, plural, one {1 oggetto} many {# di oggetti} other {# oggetti}}",
+    "objectCount": "{count, plural, one {# blocco} many {# di blocchi} other {# blocchi}}",
     "cardStyle": "Stile riquadro",
     "priceTag": "Cartellino prezzo",
     "theme": "Tema",
-    "canvas": "Area di lavoro",
-    "design": "Design"
+    "themeHint": "Colori, dimensioni della griglia e disposizione per telefoni",
+    "canvas": "Area di lavoro"
   },
   "designPanel": {
     "tabSelection": "Selezione",
-    "tabDesign": "Design",
+    "tabDesign": "Tutta la vetrina",
     "show": "Mostra pannello design",
     "hide": "Nascondi pannello design",
     "resize": "Ridimensiona pannello design",
-    "closeSettings": "Chiudi impostazioni design",
+    "closeSettings": "Chiudi stile della vetrina",
     "scopeLabel": "Ambito del pannello"
   },
   "library": {
@@ -434,10 +442,11 @@
     "sectionPalettes": "Palette"
   },
   "themePanel": {
-    "accent": "Accento"
+    "accent": "Accento",
+    "accentHint": "Usato per pulsanti, etichette promo, titoli e il nome del tuo negozio."
   },
   "panelSearch": {
-    "placeholder": "Trova un’impostazione o un oggetto",
+    "placeholder": "Trova un’impostazione o un blocco",
     "clear": "Cancella ricerca",
     "noResults": "Niente nell’editor corrisponde a questo.",
     "matchesLabel": "Corrispondenze"
@@ -488,7 +497,7 @@
     "cornerValueText": "{n, plural, one {# pixel} many {# pixel} other {# pixel}}",
     "sharp": "Netto",
     "circle": "Cerchio",
-    "fineTuning": "Regolazione fine",
+    "titleSection": "Titolo",
     "showTitle": "Mostra titolo",
     "titleStyleLabel": "Stile del titolo",
     "edgeSpacing": "Spaziatura dal bordo",
@@ -556,12 +565,13 @@
     "label": "Sulle schede più grandi",
     "tile": "Ingrandisci",
     "cell": "Stessa misura",
-    "everyCard": "Vale per tutte le schede di questo negozio."
+    "everyCard": "Vale per i cartellini prezzo e le etichette promo su tutti i riquadri."
   },
   "layout": {
     "canvasWidth": "Larghezza dell’area di lavoro",
     "canvasWidthAriaLabel": "Larghezza dell’area di lavoro in blocchi",
     "blocksWide": "{n, plural, one {# blocco di larghezza} many {# di blocchi di larghezza} other {# blocchi di larghezza}}",
+    "blocksUnit": "blocchi",
     "canvasHeight": "Altezza dell’area di lavoro",
     "heightTip": "L’area di lavoro non può restringersi sotto i blocchi già presenti: trascina prima un blocco più in alto, poi accorcia l’area di lavoro.",
     "canvasHeightAriaLabel": "Altezza dell’area di lavoro in blocchi",
@@ -570,6 +580,11 @@
     "gridDensityAriaLabel": "Densità della griglia",
     "gridGapValue": "{n, plural, one {spazio di # pixel} many {spazio di # pixel} other {spazio di # pixel}}",
     "noGap": "Nessuno spazio",
+    "phonesInfoLabel": "Come i telefoni mostrano questa griglia",
+    "phonesInfoBody": "Se è disattivato, i telefoni riorganizzano da soli la griglia per adattarla. Se è attivato, apri la vista telefono e trascina o ridimensiona i blocchi per posizionarli tu. La griglia desktop resta com’è.",
+    "phonesAutomatic": "I telefoni dispongono questa griglia automaticamente.",
+    "phoneWidth": "Larghezza sul telefono",
+    "phoneWidthAriaLabel": "Larghezza sul telefono in blocchi",
     "showGrid": "Mostra griglia",
     "gridInfoLabel": "Chi vede la griglia",
     "gridInfoBody": "Una guida per te mentre progetti: disegna gli spazi vuoti così puoi vedere dove atterrerà un blocco. Gli acquirenti non la vedono mai."
@@ -588,7 +603,8 @@
     "angle": "{n}°",
     "layerLabel": "Livello",
     "layerInfoLabel": "Come funzionano i livelli",
-    "layerInfoBody": "I livelli decidono solo cosa viene disegnato sopra dove i blocchi si sovrappongono; l’ordine di lettura seguito da uno screen reader non cambia mai.{multi, select, true { Questa selezione mantiene il proprio ordine all’interno della pila mentre si sposta.} other {}}{stacked, select, true { Alt+clic su una pila nell’area di lavoro per raggiungere il blocco sottostante.} other {}}",
+    "layerInfoBody": "I livelli decidono solo cosa viene disegnato sopra dove i blocchi si sovrappongono; l’ordine di lettura seguito da uno screen reader non cambia mai.{multi, select, true { Questa selezione mantiene il proprio ordine all’interno della pila mentre si sposta.} other {}}",
+    "stackedHint": "Alt+clic per selezionare il blocco sottostante. Su uno schermo touch, tocca di nuovo la pila.",
     "blocksSelected": "{count, plural, one {# blocco selezionato} many {# di blocchi selezionati} other {# blocchi selezionati}}",
     "layerOf": "Livello {index} di {total}",
     "blockLayerLabel": "Livello del blocco",
@@ -596,7 +612,13 @@
     "sendBackward": "Porta indietro",
     "bringForward": "Porta avanti",
     "bringToFront": "Porta in primo piano",
-    "seeAllLayers": "Vedi tutti i livelli"
+    "seeAllLayers": "Vedi tutti i livelli",
+    "phoneLabel": "Sui telefoni",
+    "phoneInfoLabel": "Come si dispone un blocco sui telefoni",
+    "phoneInfoBody": "Trascina o ridimensiona un blocco nella vista telefono per posizionarlo tu. «Torna ad automatico» lascia che la disposizione per telefoni lo posizioni di nuovo. La griglia desktop resta com’è.",
+    "hideOnPhones": "Nascondi sui telefoni",
+    "showOnPhones": "Mostra sui telefoni",
+    "phoneAutomatic": "Torna ad automatico"
   },
   "header": {
     "showHeader": "Mostra intestazione",
@@ -606,7 +628,8 @@
     "storeNamePlaceholder": "Nome del negozio mostrato agli acquirenti",
     "bio": "Bio",
     "bioPlaceholder": "Una breve descrizione del tuo negozio",
-    "charsLeft": "{n, plural, one {# carattere rimasto} many {# di caratteri rimasti} other {# caratteri rimasti}}"
+    "charsLeft": "{n, plural, one {# carattere rimasto} many {# di caratteri rimasti} other {# caratteri rimasti}}",
+    "styleLine": "{line, select, name {Font e colore del nome} other {Font e colore della bio}}"
   },
   "soldOut": {
     "hide": "Nascondi agli acquirenti",
@@ -682,10 +705,12 @@
     "movePriceTo": "{spot, select, top_left {Sposta il prezzo in alto a sinistra} top_center {Sposta il prezzo in alto al centro} top_right {Sposta il prezzo in alto a destra} middle_center {Sposta il prezzo al centro} bottom_left {Sposta il prezzo in basso a sinistra} bottom_center {Sposta il prezzo in basso al centro} bottom_right {Sposta il prezzo in basso a destra} other {Sposta il prezzo qui}}"
   },
   "productPage": {
+    "scopeNote": "Queste impostazioni valgono per ogni pagina prodotto di questa vetrina.",
     "layout": {
       "title": "Pagina",
       "showPage": {
         "label": "Mostra una pagina prodotto",
+        "hint": "Dà anche alla tua vetrina un link tutto suo da condividere.",
         "infoLabel": "Cosa fa questo interruttore",
         "infoOn": "Toccare un riquadro prodotto apre la sua pagina, e la vetrina ha una pagina tutta sua da condividere.",
         "infoOff": "I riquadri prodotto non hanno una pagina da aprire, e anche il link della vetrina stessa smette di funzionare."
@@ -702,7 +727,7 @@
         "label": "Font",
         "infoLabel": "Come si relaziona il font di questa pagina con quello della vetrina",
         "infoOwn": "Questa pagina usa il proprio font, qualunque sia quello della vetrina.",
-        "infoFollows": "Segue il font della tua vetrina. Cambialo in Tipografia.",
+        "infoFollows": "Segue il font della tua vetrina. Cambialo nelle impostazioni Font.",
         "inheritOption": "Come la vetrina ({name})"
       },
       "indexing": {
@@ -716,6 +741,7 @@
       "title": "Pulsante di acquisto",
       "infoLabel": "Cosa decide se un pulsante viene mostrato",
       "infoContent": "Il pulsante segue il link di acquisto di ogni prodotto (impostato sul prodotto). Senza, invia un’email al tuo indirizzo di contatto qui sotto; senza nessuno dei due, non viene mostrato alcun pulsante.",
+      "checkoutNote": "Il pulsante di pagamento del checkout corrisponde a questo. <link>Vai al checkout</link>",
       "buttonText": {
         "label": "Testo del pulsante",
         "charsLeft": "{count, plural, one {# carattere rimasto} many {# di caratteri rimasti} other {# caratteri rimasti}}"
@@ -844,6 +870,7 @@
   "productBlock": {
     "deleted": "Questo prodotto è stato rimosso dal tuo catalogo.",
     "removeFromGrid": "Rimuovi dalla griglia",
+    "details": "Dettagli del prodotto",
     "nameLabel": "Nome",
     "namePlaceholder": "Nome del prodotto",
     "priceLabel": "Prezzo ({currency})",
@@ -858,13 +885,14 @@
       "lowStock": "Scorte basse: {count} disponibili.",
       "inStock": "{count} disponibili."
     },
-    "openProductPage": "Apri percorso d’acquisto",
-    "hideProductPage": "Nascondi percorso d’acquisto",
+    "openProductPage": "Apri pagina prodotto",
+    "hideProductPage": "Nascondi pagina prodotto",
+    "noCtaWarning": "Il pulsante di acquisto sulla sua pagina non ha ancora una destinazione. Aggiungi un link di acquisto al prodotto, oppure un’email di contatto nei tuoi dati venditore.",
     "tileStyle": {
       "title": "Stile riquadro",
-      "reset": "Ripristina al tema",
+      "reset": "Usa lo stile del tema",
       "infoLabel": "Come si relaziona lo stile di questo riquadro con il tema",
-      "infoWithOverrides": "Questo riquadro ha il proprio stile. Le impostazioni che non hai modificato qui continuano a seguire il tema.",
+      "infoWithOverrides": "Questo riquadro ha il proprio stile; tutto ciò che non modifichi qui segue il tema. «Usa lo stile del tema» cancella solo le modifiche di questo riquadro: il tema resta com’è.",
       "infoNoOverrides": "Personalizza lo stile di questo riquadro singolarmente. Tutto ciò che non modifichi continua a seguire il tema."
     },
     "priceTag": "Cartellino prezzo",
@@ -876,6 +904,7 @@
       "updateEverywhere": "Aggiorna ovunque"
     },
     "savedToast": "«{title}» è stato aggiornato ovunque compaia.",
+    "unsavedToast": "Il nuovo nome o prezzo di «{title}» non è stato salvato. Premi Salva prima di andare avanti per conservarlo.",
     "validation": {
       "noTitle": "Dai un titolo al tuo prodotto.",
       "noPrice": "Imposta un prezzo.",
@@ -983,7 +1012,7 @@
   "multiBlock": {
     "shapesContext": "Stai modificando {count, plural, one {# forma} many {# di forme} other {# forme}} insieme. I valori mostrati provengono dalla prima forma selezionata; ogni modifica si applica a tutte.",
     "textsContext": "Stai modificando {count, plural, one {# blocco di testo} many {# di blocchi di testo} other {# blocchi di testo}} insieme. I valori mostrati provengono dal primo blocco selezionato; ogni modifica si applica a tutti. Ogni blocco mantiene il proprio testo.",
-    "imagesContext": "Stai modificando {count, plural, one {# elemento} many {# di elementi} other {# elementi}} insieme. I valori mostrati provengono dal primo elemento selezionato; ogni modifica si applica a tutti. Ognuno mantiene la propria immagine.",
+    "imagesContext": "Stai modificando {count, plural, one {# blocco} many {# di blocchi} other {# blocchi}} insieme. I valori mostrati provengono dal primo blocco selezionato; ogni modifica si applica a tutti. Ognuno mantiene la propria immagine.",
     "productsContext": "Stai personalizzando {count, plural, one {# riquadro prodotto} many {# di riquadri prodotto} other {# riquadri prodotto}} insieme. I valori mostrati provengono dal primo riquadro selezionato; ogni modifica si applica a tutti.",
     "mixedContext": "Sono selezionati {count, plural, one {# blocco} many {# di blocchi} other {# blocchi}} di tipo diverso. Seleziona blocchi di un solo tipo per modificarne le impostazioni insieme.",
     "remove": "Rimuovi {count, plural, one {# blocco} many {# di blocchi} other {# blocchi}}",
@@ -991,7 +1020,7 @@
     "productsNotDuplicated": "I prodotti non vengono duplicati.",
     "tileStyle": {
       "title": "Stile riquadro",
-      "reset": "Ripristina al tema"
+      "reset": "Usa lo stile del tema"
     },
     "priceTag": "Cartellino prezzo"
   },
@@ -1003,18 +1032,18 @@
     "ariaLabel": "Strumenti dell’editor",
     "addProduct": "Aggiungi prodotto",
     "addText": "Aggiungi testo",
-    "addElement": "Aggiungi elemento",
+    "addElement": "Aggiungi forma o immagine",
     "product": "Prodotto",
     "text": "Testo",
-    "element": "Elemento",
-    "elementsMenu": "Elementi",
+    "element": "Forme",
+    "elementsMenu": "Forme e immagini",
     "uploading": "Caricamento…",
     "upload": "Carica",
     "uploadImage": "Carica immagine",
     "allShapes": "Tutte le forme",
     "browseShapes": "Sfoglia la libreria completa delle forme",
-    "closePage": "Chiudi percorso d’acquisto",
-    "showPage": "Mostra percorso d’acquisto",
+    "closePage": "Chiudi pagina prodotto",
+    "showPage": "Mostra pagina prodotto",
     "closePages": "Chiudi la pagina prodotto, il checkout e la pagina di ringraziamento",
     "showPageFull": "Mostra la pagina prodotto, il checkout e la pagina di ringraziamento",
     "undo": "Annulla",
@@ -1027,22 +1056,26 @@
     "zoomOutTip": "Riduci zoom (Ctrl -)",
     "zoomReset": "Ripristina zoom al 100%",
     "zoomResetTip": "Ripristina zoom (Ctrl 0)",
-    "zoomResetMenuItem": "Ripristina zoom",
+    "zoomFit": "Adatta allo schermo",
     "zoomIn": "Aumenta zoom",
     "zoomInTip": "Aumenta zoom (Ctrl +)",
-    "designSettings": "Impostazioni design",
-    "page": "Percorso d’acquisto",
-    "moreTools": "Altri strumenti"
+    "designSettings": "Stile della vetrina",
+    "style": "Stile",
+    "page": "Pagina prodotto",
+    "pageMobile": "Pagina",
+    "pageDisabledTip": "Aggiungi un prodotto per aprire la sua pagina",
+    "moreTools": "Altri strumenti",
+    "more": "Altro"
   },
   "selectionToolbar": {
     "toolsFor": "Strumenti per {name}",
-    "elements": "{count, plural, one {# elemento} many {# di elementi} other {# elementi}}",
-    "hidePage": "Nascondi percorso d’acquisto",
-    "openPage": "Apri percorso d’acquisto",
-    "openProductPage": "Apri il percorso d’acquisto per {name}",
-    "closeProductPage": "Chiudi il percorso d’acquisto per {name}",
-    "openProductPages": "Apri il percorso d’acquisto per {count, plural, one {# prodotto} many {# di prodotti} other {# prodotti}}",
-    "closeProductPages": "Chiudi il percorso d’acquisto per {count, plural, one {# prodotto} many {# di prodotti} other {# prodotti}}",
+    "elements": "{count, plural, one {# blocco} many {# di blocchi} other {# blocchi}}",
+    "hidePage": "Nascondi pagina prodotto",
+    "openPage": "Apri pagina prodotto",
+    "openProductPage": "Apri la pagina prodotto di {name}",
+    "closeProductPage": "Chiudi la pagina prodotto di {name}",
+    "openProductPages": "Apri la pagina prodotto di {count, plural, one {# prodotto} many {# di prodotti} other {# prodotti}}",
+    "closeProductPages": "Chiudi la pagina prodotto di {count, plural, one {# prodotto} many {# di prodotti} other {# prodotti}}",
     "editText": "Modifica testo",
     "editTextOf": "Modifica il testo di {name}",
     "color": "Colore",
@@ -1059,24 +1092,26 @@
     "frameImageFor": "Ritaglia e posiziona l’immagine di {name}",
     "duplicate": "Duplica",
     "duplicateNamed": "Duplica {name}",
-    "duplicateN": "Duplica {count, plural, one {# elemento} many {# di elementi} other {# elementi}}",
+    "duplicateN": "Duplica {count, plural, one {# blocco} many {# di blocchi} other {# blocchi}}",
     "removeFrom": "Rimuovi {name} dalla griglia",
-    "removeN": "Rimuovi {count, plural, one {# elemento} many {# di elementi} other {# elementi}} dalla griglia"
+    "removeN": "Rimuovi {count, plural, one {# blocco} many {# di blocchi} other {# blocchi}} dalla griglia"
   },
   "canvas": {
     "addSuggested": "Aggiungi {title} a questa vetrina",
     "gridLabel": "Area di lavoro della vetrina",
     "emptyGrid": "La tua griglia è vuota",
-    "emptyGridHint": "Aggiungi un prodotto per iniziare a organizzare la tua vetrina. Testo e forme si trovano nella barra degli strumenti qui sotto.",
+    "emptyGridHint": "Aggiungi un prodotto per iniziare a organizzare la tua vetrina. Testo, forme e le tue immagini si trovano nella barra degli strumenti qui sotto.",
     "addProduct": "Aggiungi prodotto",
     "desktopPreview": "Anteprima desktop",
-    "mobilePreview": "Anteprima mobile"
+    "mobilePreview": "Anteprima mobile",
+    "multiSelectTip": "Per selezionare più blocchi, fai Shift+clic su ciascuno o trascina su uno spazio vuoto. Su uno schermo touch, tieni premuto ciascuno.",
+    "sheetTip": "Chiudi questo pannello per far tornare la barra degli strumenti."
   },
   "blockTile": {
     "removedProduct": "Prodotto rimosso",
     "shape": "{kind, select, square {forma quadrata} circle {forma circolare} ring {forma ad anello} diamond {forma a rombo} rounded {forma quadrata arrotondata} pill {forma a pillola} half {forma a semicerchio} quarter {forma a quarto di cerchio} bar {forma a barra} triangle {forma triangolare} wedge {forma a cuneo} pentagon {forma pentagonale} hexagon {forma esagonale} octagon {forma ottagonale} star {forma a stella} sparkle {forma a scintilla} cross {forma a croce} arrow {forma a freccia} chevron {forma a chevron} trapezoid {forma trapezoidale} parallelogram {forma a parallelogramma} burst {forma a esplosione} other {forma {kind}}}",
     "imageWithAlt": "Immagine: {alt}",
-    "imageElement": "Elemento immagine",
+    "imageElement": "Blocco immagine",
     "textWithContent": "Testo: {text}",
     "textBlock": "Blocco di testo",
     "selected": "Selezionato: {label}. Premi Invio per deselezionare.",
@@ -1109,11 +1144,14 @@
       "nameLabel": "Nome della vetrina",
       "namePlaceholder": "Vetrina senza titolo",
       "unsaved": "Modifiche non salvate",
+      "saveTip": "Salva (Ctrl+S)",
       "viewPage": "Vedi la pagina",
+      "viewSavedPage": "Vedi la pagina salvata",
+      "shareSetupNeeded": "I tuoi dati venditore sono incompleti, quindi questa vetrina non può ancora essere condivisa",
       "search": "Cerca"
     },
     "mobileNotice": {
-      "body": "Per la migliore esperienza di modifica, apri questo editor su desktop o tablet. Riordinare i blocchi e modificare l’intestazione funzionano su qualsiasi dispositivo.",
+      "body": "Qui funziona tutto: tocca un blocco per modificarlo, tieni premuti altri blocchi per selezionarli insieme, tieni premuto uno strumento per vedere cosa fa e pizzica per lo zoom. Le regolazioni fini sono più facili su uno schermo più grande.",
       "dismiss": "Ignora l’avviso di modifica su schermo piccolo"
     },
     "inspector": {
@@ -1171,13 +1209,6 @@
       "badge": "Esempio",
       "summary": "{count, plural, one {{count} blocco · prova pure di tutto, nulla viene salvato} many {{count} di blocchi · prova pure di tutto, nulla viene salvato} other {{count} blocchi · prova pure di tutto, nulla viene salvato}}",
       "hide": "Nascondi la vetrina di esempio"
-    },
-    "embed": {
-      "title": "Incorpora una vetrina",
-      "description": "Ogni vetrina che crei ha il suo snippet da incollare nel tuo sito web.",
-      "snippetLabel": "Uno snippet si presenta così",
-      "inDevelopment": "Il widget è ancora in sviluppo e non compare ancora sugli altri siti.",
-      "create": "Crea una vetrina"
     },
     "list": {
       "show": "Mostra la vetrina di esempio",
@@ -1457,7 +1488,11 @@
       "link": "Link"
     },
     "buyButtonTipLabel": "Dove porta il pulsante",
-    "buyButtonTip": "Usa il testo e il colore del pulsante della tua pagina prodotto, e apre la pagina prodotto.",
+    "buyButtonTip": "Apre la pagina prodotto. Parte dal testo e dal colore del pulsante di quella pagina, che qui puoi cambiare per i riquadri.",
+    "pageButton": {
+      "label": "Pulsante della pagina prodotto",
+      "use": "Usa il pulsante della pagina prodotto"
+    },
     "rating": "Valutazione a stelle",
     "ratingTipLabel": "Da dove vengono le stelle",
     "ratingTip": "Dalle recensioni degli acquirenti. Compare sotto il nome appena un prodotto ha una recensione.",
@@ -1471,5 +1506,43 @@
     "lineHeight": "Altezza riga",
     "normal": "Normale",
     "valueText": "{value} per cento della dimensione del testo"
+  },
+  "shortcuts": {
+    "title": "Scorciatoie da tastiera",
+    "tip": "Scorciatoie da tastiera (?)",
+    "rows": {
+      "save": {
+        "label": "Salva",
+        "keys": "<kbd>{mod}</kbd> <kbd>S</kbd>"
+      },
+      "copyPaste": {
+        "label": "Copia e incolla blocchi",
+        "keys": "<kbd>{mod}</kbd> <kbd>C</kbd> poi <kbd>{mod}</kbd> <kbd>V</kbd>"
+      },
+      "remove": {
+        "label": "Rimuovi i blocchi selezionati",
+        "keys": "<kbd>Canc</kbd>"
+      },
+      "move": {
+        "label": "Sposta i blocchi selezionati",
+        "keys": "<kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd>"
+      },
+      "selectMore": {
+        "label": "Seleziona più blocchi",
+        "keys": "<kbd>Shift</kbd> + clic"
+      },
+      "selectUnder": {
+        "label": "Seleziona il blocco sottostante",
+        "keys": "<kbd>{alt}</kbd> + clic"
+      },
+      "layer": {
+        "label": "Porta avanti o porta indietro",
+        "keys": "<kbd>{mod}</kbd> <kbd>]</kbd> o <kbd>[</kbd>"
+      },
+      "pan": {
+        "label": "Muoviti nell’area di lavoro",
+        "keys": "Tieni premuto <kbd>Spazio</kbd> e trascina"
+      }
+    }
   }
 }

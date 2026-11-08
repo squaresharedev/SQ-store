@@ -1,5 +1,6 @@
 "use client";
 
+import { Package } from "lucide-react";
 import Link from "@/components/ui/AppLink";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -8,6 +9,8 @@ import {
   helpTextClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
+import { emptyIconClass, emptyShowcaseClass } from "@/components/ui/surface-styles";
+import { PRODUCTS_PATH } from "@/lib/products/paths";
 
 /**
  * What the orders list says when it has no rows.
@@ -43,7 +46,12 @@ export function OrdersEmptyState({
 }) {
   const t = useTranslations("Orders.empty");
   return (
-    <div className="border border-border bg-card px-4 py-16 text-center">
+    // The frame every other empty list wears, led by a mark instead of an add
+    // card: a seller cannot make an order.
+    <div className={emptyShowcaseClass}>
+      <div className={cn(emptyIconClass, "mb-4")}>
+        <Package className="size-6" strokeWidth={1.5} aria-hidden="true" />
+      </div>
       {toShip ? (
         <>
           <p className="text-base font-semibold text-foreground">{t("toShipTitle")}</p>
@@ -85,7 +93,7 @@ export function OrdersEmptyState({
           <p className={cn(helpTextClass, "mx-auto mt-1 max-w-md")}>
             {t(checkoutOpen ? "hintOpen" : "hint")}
           </p>
-          <Link href="/products" className={cn(secondaryButtonClass, "mt-4")}>
+          <Link href={PRODUCTS_PATH} className={cn(secondaryButtonClass, "mt-4")}>
             {t("goToProducts")}
           </Link>
         </>

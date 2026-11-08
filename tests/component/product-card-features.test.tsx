@@ -4,6 +4,9 @@
  *   PRD-07 — Draft badge is a visible text pill, not an unlabelled dot.
  *   PRD-08 — Tracked stock count appears in the card footer.
  *   SELL-04 — Copy-link and open affordances route through the placement data.
+ *
+ * And the card's quick actions: Make active / Make draft, Duplicate, and the
+ * stock count that changes the number in place.
  */
 import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
 import { render, screen, cleanup, waitFor } from "../setup/render";
@@ -11,6 +14,22 @@ import userEvent from "@testing-library/user-event";
 
 vi.mock("@/lib/products/actions", () => ({
   deleteProduct: vi.fn().mockResolvedValue({ ok: true }),
+}));
+
+const push = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push, replace: vi.fn(), refresh: vi.fn() }),
+}));
+
+const setProductStatusMock = vi.fn().mockResolvedValue({ ok: true });
+const duplicateProductMock = vi.fn().mockResolvedValue({ ok: true, id: "p2" });
+vi.mock("@/lib/products/card-actions", () => ({
+  setProductStatus: (...args: unknown[]) => setProductStatusMock(...args),
+  duplicateProduct: (...args: unknown[]) => duplicateProductMock(...args),
+}));
+const updateStockMock = vi.fn().mockResolvedValue({ ok: true });
+vi.mock("@/lib/stock/actions", () => ({
+  updateStockSettings: (...args: unknown[]) => updateStockMock(...args),
 }));
 
 import { StatusBadge } from "@/components/products/StatusBadge";
@@ -106,6 +125,21 @@ describe("StatusBadge (PRD-07)", () => {
   });
 });
 
+// ── An active product on no storefront ──────────────────────────────────────
+
+describe("the 'No storefront' chip", () => {
+  it("takes a writer to the storefronts, where the product is placed", () => {
+    renderList([makeProduct()]);
+    expect(screen.getByRole("link", { name: "No storefront" })).toHaveAttribute("href", "/storefront");
+  });
+
+  it("is only a label on a read-only card", () => {
+    render(<ProductList products={[makeProduct()]} canWrite={false} sales={NO_SALES} placements={{}} />);
+    expect(screen.getByText("No storefront")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "No storefront" })).toBeNull();
+  });
+});
+
 // ── PRD-08: Stock display in footer ─────────────────────────────────────────
 
 describe("stock count in card footer (PRD-08)", () => {
@@ -166,7 +200,7 @@ describe("copy-link placement (SELL-04)", () => {
     expect(screen.getByRole("button", { name: /open product page/i })).toBeInTheDocument();
   });
 
-  it("shows a toast when the product is not on any storefront", async () => {
+  it("shows a toast that leads to the storefronts when the product is not on any", async () => {
     const user = userEvent.setup();
     renderList([makeProduct()], {});
 
@@ -177,6 +211,9 @@ describe("copy-link placement (SELL-04)", () => {
         /not on any storefront/i,
       ),
     );
+    // Not a dead end: the toast itself is the way to put it on one.
+    await user.click(screen.getByRole("button", { name: /go to storefronts/i }));
+    expect(push).toHaveBeenCalledWith("/storefront");
   });
 
   it("copies immediately when the product is on exactly one storefront", async () => {
@@ -233,5 +270,53 @@ describe("copy-link placement (SELL-04)", () => {
     );
     // Chooser modal closes after picking.
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+});
+
+// ── Quick actions: status, duplicate, stock ─────────────────────────────────
+
+describe("the card's quick actions", () => {
+  it("makes a draft active from the menu", async () => {
+    const user = userEvent.setup();
+    renderList([makeProduct({ status: "draft" })]);
+    await openActions(user);
+    await user.click(screen.getByRole("button", { name: "Make active" }));
+    expect(setProductStatusMock).toHaveBeenCalledWith("p1", "active");
+  });
+
+  it("duplicates a product and opens the copy in the editor", async () => {
+    const user = userEvent.setup();
+    renderList([makeProduct()]);
+    await openActions(user);
+    await user.click(screen.getByRole("button", { name: "Duplicate" }));
+    expect(duplicateProductMock).toHaveBeenCalledWith("p1");
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/products/p2/edit"));
+  });
+
+  it("changes a tracked stock count from the card, and only to a whole number", async () => {
+    const user = userEvent.setup();
+    renderList([makeProduct({ trackStock: true, stockQuantity: 12, lowStockThreshold: 5 })]);
+    await user.click(screen.getByRole("button", { name: /12 in stock/ }));
+
+    const field = screen.getByLabelText("Quantity in stock");
+    await user.clear(field);
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    await user.type(field, "30");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(updateStockMock).toHaveBeenCalledWith("p1", { trackStock: true, stockQuantity: 30, lowStockThreshold: 5 });
+  });
+
+  it("leaves the stock count as plain text for a member who cannot edit", () => {
+    render(
+      <ProductList
+        products={[makeProduct({ trackStock: true, stockQuantity: 12, lowStockThreshold: 5 })]}
+        canWrite={false}
+        sales={NO_SALES}
+        placements={{}}
+      />,
+    );
+    expect(screen.getByText("12 in stock")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /12 in stock/ })).toBeNull();
   });
 });

@@ -4,7 +4,6 @@ import * as React from "react";
 import { useActionState } from "react";
 import { Mail, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { infoTextClass } from "@/components/ui/control-styles";
 import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
 import { HeroMark } from "@/components/ui/HeroMark";
@@ -55,9 +54,7 @@ export function InviteModal({
     if (toPlansFor(state.error)) onClose();
   }, [state.error, toPlansFor, onClose]);
   const [email, setEmail] = React.useState("");
-  const [selectedRole, setSelectedRole] = React.useState<"editor" | "viewer">(
-    DEFAULT_INVITE_ROLE === "owner" ? "viewer" : (DEFAULT_INVITE_ROLE as "editor" | "viewer"),
-  );
+  const [selectedRole, setSelectedRole] = React.useState<"editor" | "viewer">(DEFAULT_INVITE_ROLE);
 
   const grantableOptions = ASSIGNABLE_ROLES.filter((r) =>
     canGrant(actorRole, r),
@@ -132,8 +129,6 @@ export function InviteModal({
             />
           </div>
         )}
-
-        <p className={infoTextClass}>{t("Settings.team.inviteModal.notificationNote")}</p>
 
         <StepUpField id="invite-step-up" state={state} />
 

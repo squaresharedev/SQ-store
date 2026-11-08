@@ -2,14 +2,16 @@
 
 import { useId, useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { TimerOff } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/ChoiceCards";
 import { CheckboxListPanel } from "@/components/ui/CheckboxListPanel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { SaveButton } from "@/components/ui/SaveButton";
-import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
+import { ActionErrorNotice, useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { useToast } from "@/components/ui/Toast";
 import { helpTextClass, quietLinkClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { SettingsCard } from "@/components/settings/SettingsCard";
@@ -25,9 +27,10 @@ import {
 import { parseFormPriceCents } from "@/lib/products/price";
 import { generateDiscountCode } from "@/lib/discounts/code";
 import { priceOfOne } from "@/lib/discounts/pricing";
-import { saleHasStarted } from "@/lib/discounts/status";
-import { createDiscount, updateDiscount } from "@/lib/discounts/actions";
+import { discountStatus, saleHasStarted } from "@/lib/discounts/status";
+import { createDiscount, endSale, updateDiscount } from "@/lib/discounts/actions";
 import { DISCOUNTS_PATH } from "@/lib/discounts/paths";
+import type { SaleChipLink } from "@/lib/discounts/queries";
 import { useNow } from "@/lib/hooks/useNow";
 import type { ActionError } from "@/lib/errors";
 import { CURRENCIES, type Currency } from "@/types/product";
@@ -46,6 +49,7 @@ import {
 import type { DiscountSuggestions } from "@/lib/predictions";
 import { DiscountExample } from "./DiscountExample";
 import { DiscountFormSectionsSkeleton } from "./DiscountsSkeleton";
+import { EndSaleDialog } from "./EndSaleDialog";
 import { ScheduleField, type ScheduleValue } from "./ScheduleField";
 import { useDiscountWording } from "./useDiscountWording";
 
@@ -221,23 +225,27 @@ type DiscountFormProps = {
   /** The discount being edited, or null for a new one. */
   discount: DiscountView | null;
   products: readonly DiscountProductChoice[];
-  /** The storefront designer's Sale chip section, for the seller's most
-   *  recent storefront (null without one). */
-  chipHref?: string | null;
+  /** The storefront designer's Sale chip section, on the seller's most recent
+   *  storefront, with that storefront's name (null without one). */
+  chip?: SaleChipLink | null;
   /** A new discount's better defaults (lib/predictions). */
   suggested?: DiscountSuggestions;
 };
 
-function DiscountFormFields({ discount, products, chipHref = null, suggested = {}, now }: DiscountFormProps & { now: Date }) {
+function DiscountFormFields({ discount, products, chip = null, suggested = {}, now }: DiscountFormProps & { now: Date }) {
   const t = useTranslations("Discounts.form");
+  const tDiscounts = useTranslations("Discounts");
   const words = useDiscountWording();
   const locale = useLocale();
   const router = useRouter();
   const toast = useToast();
+  const showError = useActionErrorToast();
   const ids = { code: useId(), channel: useId(), value: useId(), limit: useId() };
   const [state, setState] = useState<FormState>(() => initialState(discount, products, suggested, now));
   const [error, setError] = useState<ActionError | null>(null);
   const [saving, startSaving] = useTransition();
+  const [confirmingEnd, setConfirmingEnd] = useState(false);
+  const [ending, startEnding] = useTransition();
 
   // A discount that has started keeps its start: it is a fact by then, shown
   // rather than offered. (To hold a code back, switch it off.)
@@ -245,6 +253,8 @@ function DiscountFormFields({ discount, products, chipHref = null, suggested = {
   // A started SALE keeps its terms too: they are part of the price history
   // the EU's 30-day rule reads (see 20261004_discounts.sql).
   const locked = discount !== null && saleHasStarted(discount, now);
+  // One still running can be ended from here, as from its row in the list.
+  const running = discount !== null && locked && discountStatus(discount, 0, now) === "active";
   const isCode = state.kind === "code";
   const value = valueOf(state);
   const set = (patch: Partial<FormState>) => setState((current) => ({ ...current, ...patch }));
@@ -293,10 +303,33 @@ function DiscountFormFields({ discount, products, chipHref = null, suggested = {
     });
   }
 
-  // THE SUMMARY: what the discount does, on what, and one worked example.
-  const sample = products.find((product) => state.productIds.includes(product.id)) ?? products[0];
+  // The shortcut the locked note offers: the same confirm, action and answer
+  // as the sale's row in the list, then back to that list.
+  function endNow() {
+    if (!discount) return;
+    startEnding(async () => {
+      const result = await endSale(discount.id);
+      setConfirmingEnd(false);
+      if (!result.ok) {
+        showError(result.error);
+        return;
+      }
+      toast.success(tDiscounts("toast.ended"));
+      router.push(DISCOUNTS_PATH);
+    });
+  }
+
+  // THE SUMMARY: what the discount does, on what, and one worked example. An
+  // amount off is in one currency, so its example is a product priced in it,
+  // and a product in scope priced in another is said to stay as it is.
+  const inScope =
+    state.appliesTo === "products" ? products.filter((product) => state.productIds.includes(product.id)) : products;
+  const amountCurrency = state.valueType === "amount" ? state.currency : null;
+  const sample =
+    inScope.find((product) => !amountCurrency || product.currency === amountCurrency) ?? inScope[0] ?? products[0];
   const example =
     value && sample ? priceOfOne(state.kind, value, sample.priceCents, sample.currency) : null;
+  const unchanged = amountCurrency ? inScope.find((product) => product.currency !== amountCurrency) : undefined;
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-6" data-discount-form="">
@@ -321,12 +354,29 @@ function DiscountFormFields({ discount, products, chipHref = null, suggested = {
         </SettingsCard>
       )}
 
-      {/* What can still change, said before anything else on the page. */}
+      {/* What can still change, said before anything else on the page, with
+          the way to end a running sale here rather than from the list. */}
       {locked && (
-        <p className={cn(PANEL, "text-sm text-foreground")} data-discount-locked="">
-          {t("locked")}
-        </p>
+        <div className={PANEL} data-discount-locked="">
+          <p className="text-sm text-foreground">{t("locked")}</p>
+          {running && (
+            <Button variant="secondary" className="mt-2 self-start" onClick={() => setConfirmingEnd(true)}>
+              <TimerOff className="size-4" strokeWidth={2} aria-hidden="true" />
+              {tDiscounts("list.endNow")}
+            </Button>
+          )}
+        </div>
       )}
+      {/* Mounted whatever the note shows: ending the sale refreshes this page,
+          which takes the button above away while the confirm is still open. */}
+      <EndSaleDialog
+        open={confirmingEnd}
+        pending={ending}
+        onClose={() => {
+          if (!ending) setConfirmingEnd(false);
+        }}
+        onConfirm={endNow}
+      />
 
       {isCode && (
         <SettingsCard title={t("code.title")} description={t("code.description")}>
@@ -380,6 +430,7 @@ function DiscountFormFields({ discount, products, chipHref = null, suggested = {
                   </button>
                 ))}
               </div>
+              <p className={helpTextClass}>{t("channel.hint")}</p>
             </div>
             <div className="flex max-w-48 flex-col gap-1.5">
               <Label htmlFor={ids.limit}>{t("limit.label")}</Label>
@@ -555,11 +606,19 @@ function DiscountFormFields({ discount, products, chipHref = null, suggested = {
         {value && example !== null && sample && example < sample.priceCents && (
           <DiscountExample product={sample} value={value} nowCents={example} />
         )}
-        {/* Where a buyer meets a sale first: its chip on the storefront. In a
-            new tab, so the form keeps what has been typed. */}
-        {!isCode && chipHref && (
-          <a href={chipHref} target="_blank" rel="noopener" className={cn(quietLinkClass, "mt-2 self-start")} data-discount-chip-link="">
-            {t("summary.chipLink")}
+        {value && unchanged && (
+          <p className={cn(helpTextClass, "mt-2")} data-discount-unchanged="">
+            {t("summary.exampleUnchanged", {
+              title: unchanged.title,
+              price: formatCents(unchanged.priceCents, unchanged.currency, locale),
+            })}
+          </p>
+        )}
+        {/* Where a buyer meets a sale first: its chip on the storefront, which
+            the link names. In a new tab, so the form keeps what has been typed. */}
+        {!isCode && chip && (
+          <a href={chip.href} target="_blank" rel="noopener" className={cn(quietLinkClass, "mt-2 self-start")} data-discount-chip-link="">
+            {t("summary.chipLink", { storefront: chip.storefrontName })}
           </a>
         )}
       </section>

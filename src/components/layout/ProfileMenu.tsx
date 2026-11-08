@@ -4,7 +4,16 @@ import * as React from "react";
 import Link from "@/components/ui/AppLink";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Check, ChevronRight, Gem, Languages, LogOut, Store, User } from "lucide-react";
+import {
+  Check,
+  ChevronRight,
+  Gem,
+  Languages,
+  LogOut,
+  MonitorSmartphone,
+  Store,
+  User,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocaleSwitch } from "@/i18n/LocaleSwitchProvider";
 import { LOCALES, LOCALE_NAMES, type Locale } from "@/i18n/locales";
@@ -17,7 +26,7 @@ import {
   overlayItemClass,
 } from "@/components/ui/control-styles";
 import { setActiveAccount } from "@/lib/team/actions";
-import { signOut } from "@/lib/auth/actions";
+import { signOut, signOutEverywhere } from "@/lib/auth/actions";
 import { useProgressWhile } from "@/lib/hooks/useProgressWhile";
 import { ROLE_LABELS } from "@/lib/team/permissions";
 import type { AccountOption } from "@/lib/team/account-context";
@@ -25,10 +34,10 @@ import type { AccountOption } from "@/lib/team/account-context";
 const ITEM = cn(overlayItemClass, "px-2.5");
 
 /**
- * Account menu behind the top-bar avatar: Account, Switch accounts (inline list
- * of the stores you belong to — hidden when you only have your own), and Log
- * out. Switching persists server-side (setActiveAccount validates membership)
- * and refreshes so all account-scoped data reloads.
+ * Account menu behind the top-bar avatar: Account, My stores (inline list of
+ * the stores you belong to, hidden when you only have your own), and Sign out,
+ * here or everywhere. Switching persists server-side (setActiveAccount
+ * validates membership) and refreshes so all account-scoped data reloads.
  */
 export function ProfileMenu({
   name,
@@ -248,6 +257,14 @@ export function ProfileMenu({
             <button type="submit" className={cn(ITEM, "hover:text-destructive")}>
               <LogOut className="size-4 shrink-0" aria-hidden />
               {t("logOut")}
+            </button>
+          </form>
+          {/* Here as well as on Settings › Account: after a lost phone or
+              laptop, this menu is where a seller looks first. */}
+          <form action={signOutEverywhere}>
+            <button type="submit" className={cn(ITEM, "hover:text-destructive")}>
+              <MonitorSmartphone className="size-4 shrink-0" aria-hidden />
+              {t("logOutEverywhere")}
             </button>
           </form>
         </div>

@@ -73,7 +73,7 @@
     "label": "Ilość"
   },
   "cta": {
-    "unwired": "Ten przycisk nie ma jeszcze dokąd prowadzić. Dodaj link do zakupu w produkcie albo e-mail kontaktowy w danych sprzedawcy.",
+    "unwired": "Ten przycisk nie ma jeszcze dokąd prowadzić. Dodaj link do zakupu w produkcie albo e-mail kontaktowy w swoich danych sprzedawcy.",
     "unavailableIn": "Niedostępne dla opcji: {group}",
     "askAbout": "Zapytaj o ten produkt",
     "checkoutOn": "Dokończ zakup na <strong>{host}</strong>",
@@ -374,8 +374,8 @@
       "testBody": "To jest kasa deweloperska. Żadna karta nie zostaje obciążona i żadne pieniądze nie są przenoszone.",
       "stripeTitle": "Bezpieczna płatność przez Stripe",
       "stripeBody": "Dane karty wpisujesz na bezpiecznej stronie Stripe w następnym kroku.",
-      "previewTitle": "Dane karty",
-      "previewBody": "Karta, Apple Pay i Google Pay pojawią się tutaj w Twoich kolorach po połączeniu ze Stripe.",
+      "previewConnect": "Kupujący zapłacą tu kartą, gdy połączysz Stripe w sekcji <link>Płatności</link>.",
+      "previewComingSoon": "Płatności kartą będą tu dostępne wkrótce. Do tego czasu kupujący płacą ci przez link do zakupu w produkcie albo pisząc do ciebie e-mail.",
       "cardNumber": "Numer karty",
       "expiry": "MM / RR",
       "cvc": "CVV",

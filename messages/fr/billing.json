@@ -34,7 +34,7 @@
     "yearlyFree": "{count, plural, one {# mois offert} other {# mois offerts}}",
     "launchNote": "Un prix de lancement est un prix introductif : le prix habituel est celui affiché barré.",
     "grantTitle": "{plan} vous est offert",
-    "autoRenew": "Les forfaits payants se renouvellent automatiquement chaque mois au prix affiché, jusqu’à ce que vous les résiliiez."
+    "autoRenew": "Les forfaits payants se renouvellent automatiquement {interval, select, year {une fois par an} other {chaque mois}} au prix affiché, jusqu’à ce que vous les résiliiez."
   },
   "card": {
     "perMonth": "/ mois",
@@ -79,7 +79,8 @@
     "cheapest": "Avec {sales} de ventes par mois, {plan} vous revient le moins cher.",
     "legendPrice": "Prix du forfait",
     "legendFee": "Commission sur vos ventes",
-    "cheapestTag": "Le moins cher pour vous"
+    "cheapestTag": "Le moins cher pour vous",
+    "stripeFeeNote": "Les frais de traitement par carte que Stripe prélève sur chaque vente s’ajoutent à ces montants."
   },
   "compare": {
     "eyebrow": "Comparer",
@@ -160,17 +161,17 @@
   },
   "portal": {
     "opening": "Ouverture de Stripe",
-    "stepUp": "Confirmez votre identité avant d'accéder à vos informations de facturation."
+    "stepUp": "L’authentification à deux facteurs est activée : confirmez votre identité avant d’accéder à vos informations de facturation."
   },
   "chip": {
     "label": "Forfait : {plan}",
-    "upgrade": "Mettre à niveau",
-    "pro": "Forfait Pro"
+    "upgrade": "Mettre à niveau"
   },
   "banner": {
     "label": "Paiement du forfait",
     "pastDue": "Le paiement de votre forfait {plan} a échoué. Mettez à jour votre carte pour le conserver.",
     "pastDueMember": "Le paiement du forfait {plan} de cette boutique a échoué. Seul le propriétaire peut mettre à jour la carte.",
+    "seeTeam": "Voir les membres de l’équipe",
     "action": "Mettre à jour la carte"
   },
   "settings": {
@@ -197,7 +198,7 @@
       "over": "{count} en trop",
       "full": "Complet"
     },
-    "overLimit": "Au-delà de la limite de ce forfait. Tout continue de fonctionner ; supprimez-en un ou mettez à niveau pour en ajouter.",
+    "overLimit": "Au-delà de la limite de ce forfait. Tout continue de fonctionner ; supprimez-en un ou <upgrade>mettez à niveau</upgrade> pour en ajouter.",
     "invoicesTitle": "Facturation et factures",
     "invoicesDescription": "Votre carte, adresse de facturation, numéro de TVA et toutes vos factures, sur la page sécurisée de Stripe.",
     "manage": "Gérer la facturation et les factures",

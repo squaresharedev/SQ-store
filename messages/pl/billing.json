@@ -34,7 +34,7 @@
     "yearlyFree": "{count, plural, one {# miesiąc gratis} few {# miesiące gratis} many {# miesięcy gratis} other {# miesiąca gratis}}",
     "launchNote": "Cena startowa to cena promocyjna na początek: zwykła cena jest ta przekreślona.",
     "grantTitle": "{plan} na nasz koszt",
-    "autoRenew": "Płatne plany odnawiają się automatycznie co miesiąc po wyświetlonej cenie, do momentu rezygnacji."
+    "autoRenew": "Płatne plany odnawiają się automatycznie {interval, select, year {raz w roku} other {co miesiąc}} po wyświetlonej cenie, do momentu rezygnacji."
   },
   "card": {
     "perMonth": "/ miesiąc",
@@ -79,7 +79,8 @@
     "cheapest": "Przy sprzedaży {sales} miesięcznie {plan} jest dla ciebie najtańszy.",
     "legendPrice": "Cena planu",
     "legendFee": "Opłata od twojej sprzedaży",
-    "cheapestTag": "Najtańszy dla ciebie"
+    "cheapestTag": "Najtańszy dla ciebie",
+    "stripeFeeNote": "Do tych kwot dochodzi własna opłata Stripe za obsługę płatności kartą przy każdej sprzedaży."
   },
   "compare": {
     "eyebrow": "Porównanie",
@@ -160,17 +161,17 @@
   },
   "portal": {
     "opening": "Otwieranie Stripe",
-    "stepUp": "Potwierdź swoją tożsamość przed otwarciem danych rozliczeniowych."
+    "stepUp": "Masz włączone uwierzytelnianie dwuskładnikowe, więc potwierdź swoją tożsamość przed otwarciem danych rozliczeniowych."
   },
   "chip": {
     "label": "Plan: {plan}",
-    "upgrade": "Ulepsz",
-    "pro": "Plan Pro"
+    "upgrade": "Ulepsz"
   },
   "banner": {
     "label": "Płatność za plan",
     "pastDue": "Płatność za plan {plan} nie powiodła się. Zaktualizuj kartę, aby go zachować.",
     "pastDueMember": "Płatność za plan {plan} tego sklepu nie powiodła się. Tylko właściciel może zaktualizować kartę.",
+    "seeTeam": "Zobacz członków zespołu",
     "action": "Zaktualizuj kartę"
   },
   "settings": {
@@ -197,7 +198,7 @@
       "over": "{count} ponad limit",
       "full": "Pełne"
     },
-    "overLimit": "Przekroczono limit tego planu. Wszystko działa bez zmian; usuń jeden element lub przejdź wyżej, żeby dodać więcej.",
+    "overLimit": "Przekroczono limit tego planu. Wszystko działa bez zmian; usuń jeden element lub <upgrade>przejdź na wyższy plan</upgrade>, żeby dodać więcej.",
     "invoicesTitle": "Rozliczenia i faktury",
     "invoicesDescription": "Twoja karta, adres rozliczeniowy, NIP i wszystkie faktury na bezpiecznej stronie Stripe.",
     "manage": "Zarządzaj rozliczeniami i fakturami",

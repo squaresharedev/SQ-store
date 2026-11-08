@@ -507,9 +507,9 @@
     "optionGroupTooManyOptions": "An option group can have up to {maximum} options.",
     "includedTooMany": "List up to {maximum} included items.",
     "specsTooMany": "List up to {maximum} specifications.",
-    "purchaseLinkFormat": "The purchase link must be a full https:// address.",
-    "purchaseLinkTooLong": "The purchase link must be {maximum} characters or fewer.",
-    "purchaseLinkCredentials": "The purchase link cannot contain a username or password.",
+    "purchaseLinkFormat": "The buy link must be a full https:// address.",
+    "purchaseLinkTooLong": "The buy link must be {maximum} characters or fewer.",
+    "purchaseLinkCredentials": "The buy link cannot contain a username or password.",
     "galleryTooMany": "A product can have up to {maximum} extra photos.",
     "optionGroupsTooMany": "A product can have up to {maximum} option groups.",
     "documentsTooMany": "A product can have up to {maximum} documents.",
@@ -524,11 +524,11 @@
     "addOnNotYours": "One of the products offered is not in this store any more. Remove it and save again."
   },
   "productImport": {
-    "noTitle": "No title.",
+    "noTitle": "No title. Check that the Title column above is set.",
     "titleTooLong": "Title is longer than 200 characters.",
-    "noPrice": "No price we could read.",
+    "noPrice": "No price we could read. Check that the Price column above points at the right column.",
     "priceZero": "Price is zero.",
-    "duplicateTitle": "Another row has this title."
+    "duplicateTitle": "Another row has this title. Duplicate titles are skipped; rename one in your spreadsheet."
   },
   "shipping": {
     "shipsFromInvalid": "That is not a country we can ship from yet.",

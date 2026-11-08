@@ -1,6 +1,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Filter } from "lucide-react";
 import { MetricTile } from "@/components/dashboard/MetricTile";
+import { infoTextClass } from "@/components/ui/control-styles";
 import { formatNumber } from "@/components/charts";
 import { formatFixed, formatPercent } from "@/lib/format/intl";
 import { FUNNEL_MIN_VIEWS } from "@/lib/analytics/funnel/events";
@@ -75,6 +76,7 @@ export function FunnelSection({
       id={FUNNEL_SECTION_ID}
       title={t("funnel.label")}
       description={t("funnel.description")}
+      subtitle={t("funnel.subtitle")}
       icon={Filter}
       state="live"
     >
@@ -146,7 +148,7 @@ export function FunnelSection({
       </div>
 
       {!enough && (
-        <p className="font-inter text-xs text-muted-foreground" data-funnel-threshold={FUNNEL_MIN_VIEWS}>
+        <p className={infoTextClass} data-funnel-threshold={FUNNEL_MIN_VIEWS}>
           {t("funnel.notEnoughHint", { min: formatNumber(FUNNEL_MIN_VIEWS, locale) })}
         </p>
       )}

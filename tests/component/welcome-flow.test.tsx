@@ -120,7 +120,7 @@ async function toSellerStep(user: User) {
 
 async function fillSellerDetails(user: User) {
   const dialog = screen.getByRole("dialog", { name: "Add your seller details" });
-  await user.type(within(dialog).getByLabelText("Trader name"), "Welcome Studio");
+  await user.type(within(dialog).getByLabelText("Your name or business name"), "Welcome Studio");
   await user.type(within(dialog).getByLabelText("Business address"), "12 Market Street");
   await user.type(within(dialog).getByLabelText("Contact email"), "hello@studio.eu");
 }
@@ -260,7 +260,7 @@ describe("WelcomeFlow", () => {
     const props = renderFlow({ verificationOn: true });
     await toSellerStep(user);
     const dialog = screen.getByRole("dialog", { name: "Add your seller details" });
-    await user.type(within(dialog).getByLabelText("Trader name"), "Welcome Studio");
+    await user.type(within(dialog).getByLabelText("Your name or business name"), "Welcome Studio");
     await user.type(within(dialog).getByLabelText("Business address"), "12 Market Street");
     await user.type(within(dialog).getByLabelText("Contact email"), "hello@studoi.eu");
     await user.click(screen.getByRole("button", { name: "Save and continue" }));
@@ -279,7 +279,7 @@ describe("WelcomeFlow", () => {
     select.mockRestore();
     expect(field).toHaveValue("hello@studoi.eu");
     // Everything else typed is still there.
-    expect(within(dialog).getByLabelText("Trader name")).toHaveValue("Welcome Studio");
+    expect(within(dialog).getByLabelText("Your name or business name")).toHaveValue("Welcome Studio");
 
     await user.clear(field);
     await user.type(field, "hello@studio.eu");
@@ -350,7 +350,9 @@ describe("WelcomeFlow", () => {
     await user.click(await within(dialog).findByRole("button", { name: "Send a new code" }));
     await waitFor(() => expect(props.sendCodeAction).toHaveBeenCalledTimes(1));
 
-    await user.click(within(dialog).getByRole("button", { name: "Continue" }));
+    // The way on says what it defers, rather than a plain "Continue".
+    expect(within(dialog).queryByRole("button", { name: "Continue" })).toBeNull();
+    await user.click(within(dialog).getByRole("button", { name: "Confirm later" }));
     expect(props.onClose).toHaveBeenCalledTimes(1);
   });
 

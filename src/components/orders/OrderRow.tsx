@@ -4,15 +4,18 @@ import { useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import type { OrderListRow, OrderView, OrdersView } from "@/types/order-view";
 import { cn } from "@/lib/utils";
+import { infoTextClass } from "@/components/ui/control-styles";
 import { badgeClass } from "@/components/ui/surface-styles";
 import { ProductThumb } from "@/components/ui/ProductThumb";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { FulfilmentBadge } from "./FulfilmentBadge";
 import { formatCents } from "@/lib/format/money";
+import { shiftInstant } from "@/lib/format/calendar";
 import { formatAge, formatOrderDate } from "@/lib/format/date";
 import { regionName } from "@/lib/format/country";
 import { isOverdue } from "@/lib/orders/fulfilment";
 import { formatOrderSelection } from "@/lib/orders/selection";
+import { WITHDRAWAL_REFUND_DAYS } from "@/lib/orders/withdrawal";
 import { useNow } from "@/lib/hooks/useNow";
 
 export function OrderRow({
@@ -37,6 +40,15 @@ export function OrderRow({
   const now = useNow();
   const waiting = view === "to-ship" && now ? formatAge(order.createdAt, locale, now) : null;
   const overdue = view === "to-ship" && now ? isOverdue(order.createdAt, now) : false;
+  // A buyer who withdrew is owed their refund by this day, while it is unsent.
+  const refundDue =
+    order.withdrawalRequestedAt && order.status === "paid"
+      ? shiftInstant(order.withdrawalRequestedAt, { days: WITHDRAWAL_REFUND_DAYS })
+      : null;
+  // The town and country a seller sorts a pile of parcels by.
+  const destination = order.shipTo
+    ? `${order.shipTo.city}, ${regionName(order.shipTo.country, locale) ?? order.shipTo.country}`
+    : null;
   const channelLabel = t(`channel.${order.channel}`);
 
   // Bring the row to the user rather than making them find the marked one:
@@ -88,11 +100,12 @@ export function OrderRow({
           sold ("the six seater one"), it is empty for most products, and a
           column that is blank on nine rows in ten is a column that earns
           nothing. */}
-      {/* Narrower on a phone, so the queue's three columns fit a 390px screen
-          with a long title: the date column alone needs ~106px, and at a wider
-          cap it was pushed off the edge. The photo names the product there,
-          and the full title is one tap away. */}
-      <td className="py-2.5 px-3 max-w-32 text-sm sm:max-w-xs">
+      {/* Narrower on a phone, so the row fits a 390px screen with a long
+          title: the date column alone needs ~106px, and at a wider cap it was
+          pushed off the edge. The queue's ship-to column folds into this cell
+          there, so the title takes the room it frees. The photo names the
+          product, and the full title is one tap away. */}
+      <td className={cn("py-2.5 px-3 text-sm sm:max-w-xs", view === "to-ship" ? "max-w-56" : "max-w-32")}>
         {/* The photo leads: a seller knows the lamp by its picture before
             reading its name. It is no taller than the two lines beside it, so
             a row is no taller for it. */}
@@ -129,11 +142,20 @@ export function OrderRow({
               )}
             </span>
             {order.selection.length > 0 && (
-              <span
-                className="block truncate font-inter text-xs text-muted-foreground"
-                data-order-selection=""
-              >
+              <span className={cn(infoTextClass, "block truncate")} data-order-selection="">
                 {formatOrderSelection(order.selection)}
+              </span>
+            )}
+            {refundDue && (
+              <span className={cn(infoTextClass, "block truncate")} data-order-refund-due="">
+                {t("list.refundDue", { date: formatOrderDate(refundDue, locale) })}
+              </span>
+            )}
+            {/* On small screens the SHIP TO column is hidden; show city+country
+                here so the seller can still scan the destination at a glance. */}
+            {view === "to-ship" && (
+              <span className={cn(infoTextClass, "block truncate sm:hidden")}>
+                {destination ?? t("table.noAddress")}
               </span>
             )}
           </div>
@@ -143,16 +165,14 @@ export function OrderRow({
       {view === "to-ship" ? (
         // Where it goes: the name, and the town and country a seller sorts a
         // pile of parcels by. The full label is one click away.
-        <td className="py-2.5 px-3 max-w-36 text-sm sm:max-w-xs" data-order-ship-to-summary="">
+        <td className="hidden sm:table-cell py-2.5 px-3 max-w-xs text-sm" data-order-ship-to-summary="">
           {order.shipTo ? (
             <>
               <span className="block truncate text-foreground">{order.shipTo.name}</span>
-              <span className="block truncate font-inter text-xs text-muted-foreground">
-                {order.shipTo.city}, {regionName(order.shipTo.country, locale) ?? order.shipTo.country}
-              </span>
+              <span className={cn(infoTextClass, "block truncate")}>{destination}</span>
             </>
           ) : (
-            <span className="font-inter text-xs text-muted-foreground">{t("table.noAddress")}</span>
+            <span className={infoTextClass}>{t("table.noAddress")}</span>
           )}
         </td>
       ) : (

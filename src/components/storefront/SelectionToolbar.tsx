@@ -86,6 +86,7 @@ import {
   type Insets,
 } from "./canvas-geometry";
 import { supportsRoundness } from "./shape-geometry";
+import { LONG_PRESS_MS } from "./BlockTile";
 import type { BlockField } from "./SummonedField";
 import { CANVAS_PANEL_ATTR } from "./useCanvasAnchor";
 import { PageNodeIcon } from "./page-node-icons";
@@ -148,7 +149,9 @@ function Divider() {
  * for something the icon already said, and the widest of them — a product's
  * own title — was wider than most tiles. The words are not lost: each is the
  * button's accessible name, and each pops as a tip on hover and focus, which
- * is how the bottom toolbar has always labelled its icon-only controls.
+ * is how the bottom toolbar has always labelled its icon-only controls. A
+ * finger, which cannot hover, holds the button instead (see the bar's
+ * onPointerDown).
  */
 function ToolButton({
   tip,
@@ -467,7 +470,11 @@ export function SelectionToolbar({
   onOpenSetting,
   onDuplicate,
   onRemove,
+  onHoldTool,
 }: {
+  /** A finger held on a tool: say what it does (its full name), in place of
+   *  the tip a finger can never hover to see. Absent, a hold is a press. */
+  onHoldTool?: (name: string) => void;
   /** The current selection, in selection order. Nothing is drawn for none. */
   blocks: readonly StorefrontBlock[];
   productsById: ReadonlyMap<string, Product>;
@@ -504,6 +511,10 @@ export function SelectionToolbar({
   const tRoot = useTranslations();
   const frameRef = useRef<HTMLDivElement | null>(null);
   const barRef = useRef<HTMLDivElement | null>(null);
+  // The pending hold on a tool, and whether it has named the tool already, so
+  // the click the lifted finger then makes does nothing (see onHoldTool).
+  const holdTimer = useRef(0);
+  const toolNamed = useRef(false);
   const keys = blocks.map(blockKey);
   useAnchorToSelection({ frameRef, barRef, keys, viewport });
 
@@ -639,7 +650,33 @@ export function SelectionToolbar({
           data-selection-toolbar=""
           // A pointerdown here is chrome, not board: without this the canvas
           // underneath takes it and a slider drag pans the workspace.
-          onPointerDown={(event) => event.stopPropagation()}
+          //
+          // It is also where a HELD finger is caught. The tools are icons
+          // whose words only pop on hover, which a finger never does, and the
+          // words cannot sit under the icons: the bar scales with the board,
+          // so on a phone's fitted board they would be a few pixels tall.
+          // Holding a tool names it at full size instead (onHoldTool), the way
+          // a phone names any icon button, and the press then does nothing.
+          onPointerDown={(event) => {
+            event.stopPropagation();
+            window.clearTimeout(holdTimer.current);
+            toolNamed.current = false;
+            const tool =
+              event.target instanceof Element ? event.target.closest("button") : null;
+            const toolName = tool?.getAttribute("aria-label");
+            if (event.pointerType !== "touch" || !toolName || !onHoldTool) return;
+            holdTimer.current = window.setTimeout(() => {
+              toolNamed.current = true;
+              onHoldTool(toolName);
+            }, LONG_PRESS_MS);
+          }}
+          onPointerUp={() => window.clearTimeout(holdTimer.current)}
+          onPointerCancel={() => window.clearTimeout(holdTimer.current)}
+          onClickCapture={(event) => {
+            if (!toolNamed.current) return;
+            toolNamed.current = false;
+            event.stopPropagation();
+          }}
           className={cn(
             overlaySurfaceClass,
             // SLIGHTLY ROUNDED, against the brand rule that floating surfaces

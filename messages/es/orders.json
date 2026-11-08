@@ -6,7 +6,7 @@
   },
   "page": {
     "title": "Pedidos",
-    "subtitle": "Todos los pedidos hechos a través de Square Share."
+    "subtitle": "Pedidos hechos con el proceso de pago de Square Share."
   },
   "status": {
     "paid": "Pagado",
@@ -17,7 +17,7 @@
   "channel": {
     "embed": "En tu web",
     "marketplace": "Marketplace",
-    "direct": "Tu página",
+    "direct": "Enlace directo",
     "button": "Botón de compra"
   },
   "empty": {
@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} pedido} many {{total} pedidos} other {{total} pedidos}} · página {page} de {totalPages}",
     "detailDialog": "Detalles del pedido",
     "closeDetail": "Cerrar detalles del pedido",
-    "withdrawn": "Desistido",
+    "withdrawn": "Cancelado por el comprador",
+    "refundDue": "Reembolsar antes del {date}",
     "moreItems": "+{count} más"
   },
   "table": {
@@ -52,12 +53,12 @@
     "shipping": "Envío",
     "shipTo": "Enviar a",
     "noAddress": "Sin dirección",
-    "feeLine": "Comisión {amount}"
+    "feeLine": "Comisión de la plataforma {amount}"
   },
   "toolbar": {
     "region": "filtros de pedidos",
     "channel": "canal",
-    "searchPlaceholder": "buscar correo, nombre, ciudad, producto o envío",
+    "searchPlaceholder": "buscar número de pedido, correo, nombre, ciudad, producto o envío",
     "search": "buscar",
     "status": "estado",
     "statusAriaLabel": "Filtrar por estado",
@@ -121,7 +122,7 @@
       "failed": "No hemos podido copiar el número de teléfono. Selecciónalo y cópialo a mano."
     },
     "giftMessage": "Mensaje de regalo",
-    "withdrawalNotice": "El comprador solicitó desistir de esta compra el {date}. Acuerda la devolución y el reembolso con él.",
+    "withdrawalNotice": "El comprador canceló esta compra el {date}. Organiza la devolución y haz el reembolso en un plazo de 14 días.",
     "noAddress": "Este pedido no tiene dirección de entrega. Escribe al comprador para preguntarle adónde enviarlo.",
     "shipping": "Envío",
     "shippedOn": "Enviado el {date}",
@@ -147,7 +148,7 @@
     },
     "emailBuyer": "Enviar correo al comprador",
     "mailSubject": "Tu pedido {number}",
-    "withdrawnShipWarning": "El comprador ha desistido de esta compra. Envíalo solo si lo has acordado con él.",
+    "withdrawnShipWarning": "El comprador ha cancelado esta compra. Envíalo solo si lo has acordado con él.",
     "discount": "Descuento",
     "discountSale": "Rebaja, {amount} de descuento",
     "discountCode": "Código {code}, {amount} de descuento",
@@ -155,8 +156,10 @@
     "alsoBought": "También en este pedido"
   },
   "actions": {
-    "disputeInStripe": "El banco del comprador ha abierto una disputa. Respóndela en tu panel de Stripe antes de la fecha límite.",
+    "disputeInStripe": "El banco del comprador ha abierto una disputa. Respóndela en tu panel de Stripe antes de la fecha límite, o el comprador recuperará el dinero.",
     "answerInStripe": "Responder en Stripe",
+    "disputeOwnerOnly": "Solo el propietario de la tienda puede responderla.",
+    "disputeOwnerOnlyNamed": "Solo el propietario de {store} puede responderla. Avísale.",
     "pendingPayment": "El pago del comprador aún se está confirmando. No envíes nada todavía: el pedido aparecerá como pagado cuando se complete, y se cerrará solo si no se completa.",
     "none": "No hay acciones disponibles para este pedido."
   },
@@ -179,8 +182,8 @@
     "refundedOnReason": "{reason, select, cancelled {Cancelado y reembolsado el {date}} returned {Devuelto y reembolsado el {date}} other {Reembolsado el {date}}}",
     "ownerOnly": "Solo el propietario de la tienda puede reembolsar o cancelar un pedido.",
     "ownerOnlyNamed": "Solo el propietario de {store} puede reembolsar o cancelar un pedido. Pídeselo.",
-    "manual": "Este pago no se realizó a través de Square Share. Devuelve el importe al comprador tú mismo y regístralo aquí.",
-    "viaProvider": "El importe total vuelve a la tarjeta del comprador a través de Stripe. Esto no se puede deshacer."
+    "manual": "Este pago no se realizó a través de Square Share. Devuelve tú mismo al comprador el total de {amount} y luego regístralo aquí.",
+    "viaProvider": "Reembolsa el pedido completo, {amount}, a la tarjeta del comprador a través de Stripe. Esto no se puede deshacer."
   },
   "skeleton": {
     "loading": "cargando pedidos"
@@ -289,8 +292,8 @@
       "buyerSubject": "Tu desistimiento del pedido {number} en {store}",
       "buyerIntro": "Recibimos tu desistimiento del pedido {number} ({title}) el {date} y lo trasladamos inmediatamente a {store}.",
       "buyerNext": "{store} se pondrá en contacto contigo sobre la devolución y tu reembolso, que se abonará en un plazo de 14 días desde tu desistimiento.",
-      "sellerSubject": "Desistimiento: pedido {number} ({title})",
-      "sellerIntro": "El comprador {email} desistió del pedido {number} el {date}, usando el botón de desistimiento en su página de pedido.",
+      "sellerSubject": "Cancelación (desistimiento): pedido {number} ({title})",
+      "sellerIntro": "El comprador {email} canceló el pedido {number} el {date}, usando el botón de desistimiento de su página de pedido.",
       "sellerName": "Nombre indicado: {name}",
       "sellerNext": "Contáctale para organizar la devolución y realiza el reembolso en 14 días. Puedes retener el reembolso hasta que el artículo sea devuelto o muestre que ha sido enviado. El pedido: {url}"
     },

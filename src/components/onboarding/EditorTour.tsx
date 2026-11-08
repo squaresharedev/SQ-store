@@ -18,7 +18,7 @@ let mountedEditors = 0;
 
 /**
  * The storefront designer's short tour (lib/onboarding/editor-tour-steps.ts),
- * mounted by the designer in sample mode.
+ * mounted by every designer: the sample's and a real storefront's.
  *
  * Starts by itself when `autoStart` (the person's `editor_tour_seen_at` is still
  * null) and records the start straight away, so it is a first-visit thing on

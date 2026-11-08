@@ -4,7 +4,7 @@ import { parseClientMetadata } from "@/lib/agent/oauth/clients";
 import { isPkceChallenge, isPkceVerifier, pkceChallenge, randomCredential, sha256Hex } from "@/lib/agent/oauth/crypto";
 import { isPublicHttpsUrl } from "@/lib/agent/oauth/public-url";
 import { isAllowedRedirectUri, redirectDisplayHost, redirectUriMatches, redirectWith } from "@/lib/agent/oauth/redirects";
-import { AGENT_SCOPES, AGENT_SCOPE_IDS, initialScopes, knownScopes, parseScopeParam } from "@/lib/agent/scopes";
+import { AGENT_SCOPES, AGENT_SCOPE_IDS, initialScopes, knownScopes, parseScopeParam, scopeBadge } from "@/lib/agent/scopes";
 
 describe("redirect URIs an app may register", () => {
   it("takes HTTPS and a local listener", () => {
@@ -194,5 +194,13 @@ describe("scopes", () => {
   it("marks exactly the money-moving and unrecoverable scopes as opt-in", () => {
     const optIn = AGENT_SCOPE_IDS.filter((id) => "optIn" in AGENT_SCOPES[id]);
     expect(optIn.sort()).toEqual(["destructive", "orders:refund"]);
+  });
+
+  it("badges the locked scope as required and the opt-in ones as off by default, and nothing else", () => {
+    expect(scopeBadge("store:read")).toBe("Settings.connectedApps.connect.required");
+    expect(scopeBadge("orders:refund")).toBe("Settings.connectedApps.connect.offByDefault");
+    expect(scopeBadge("destructive")).toBe("Settings.connectedApps.connect.offByDefault");
+    const plain = AGENT_SCOPE_IDS.filter((id) => scopeBadge(id) === null);
+    expect(plain).toHaveLength(AGENT_SCOPE_IDS.length - 3);
   });
 });

@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cardClass, pageShellClass } from "@/components/ui/surface-styles";
+import { joinedCardsClass, joinedCellClass, pageShellClass, sharpCardClass } from "@/components/ui/surface-styles";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 /** Route-level loading state while the payments overview is assembled. */
@@ -15,21 +15,33 @@ export default function PaymentsLoading() {
 
       <span className="sr-only">{t("srLoading")}</span>
 
-      {/* Balance tiles */}
-      <div aria-hidden="true" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 3 }, (_, index) => (
-          <div
-            key={index}
-            className={cn(cardClass, "flex flex-col gap-3 p-4")}
-          >
-            <Skeleton className="h-3 w-24" />
-            <Skeleton className="h-8 w-32" />
-          </div>
-        ))}
+      {/* Balance */}
+      <div aria-hidden="true" className={cn(sharpCardClass, "flex flex-col gap-3 p-5 sm:p-6")}>
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-3 w-64 max-w-full" />
+      </div>
+
+      {/* Earnings chart and trend tiles */}
+      <div aria-hidden="true" className={joinedCardsClass}>
+        <div className={cn(joinedCellClass,"flex flex-col gap-3 p-5 sm:p-6")}>
+          <Skeleton className="h-3 w-40" />
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="mt-4 h-52 w-full" />
+        </div>
+        <div className="grid grid-cols-2 gap-px lg:grid-cols-4">
+          {Array.from({ length: 4 }, (_, index) => (
+            <div key={index} className={cn(joinedCellClass, "flex flex-col gap-3 p-4")}>
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-7 w-28 max-w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Activity list */}
-      <div aria-hidden="true" className={cardClass}>
+      <div aria-hidden="true" className={sharpCardClass}>
         {Array.from({ length: 5 }, (_, index) => (
           <div
             key={index}

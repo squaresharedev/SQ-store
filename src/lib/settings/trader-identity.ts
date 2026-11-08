@@ -56,6 +56,9 @@ export type TraderIdentityInput = StorefrontSeller & {
  *  warning links here. (The old /settings/tax redirects to it.) */
 export const TRADER_IDENTITY_HREF = "/settings/business";
 
+/** The code box on that page, below the form, where the contact email is proven. */
+export const CONFIRM_CONTACT_ANCHOR = "confirm-contact";
+
 /**
  * Each required field, with the anchor on the settings page that lands on it
  * (see the `id`s on TaxSection's field wrappers) and the reason a buyer needs
@@ -90,8 +93,7 @@ export const TRADER_IDENTITY_FIELDS: readonly {
   {
     key: "emailVerified",
     label: "Settings.sellerDetails.fields.emailVerified.label",
-    // The code box, below the form (TaxSection's "confirm-contact" section).
-    anchor: "confirm-contact",
+    anchor: CONFIRM_CONTACT_ANCHOR,
     why: "Settings.sellerDetails.fields.emailVerified.why",
   },
 ] as const;

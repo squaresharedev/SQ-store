@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { cardClass } from "@/components/ui/surface-styles";
+import { sharpCardClass } from "@/components/ui/surface-styles";
 import { formatCents } from "@/lib/format/money";
 import { formatOrderDate } from "@/lib/format/date";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
@@ -30,7 +30,7 @@ export function PayoutHistory({
   return (
     <section
       aria-label={t("label")}
-      className={cardClass}
+      className={sharpCardClass}
     >
       <div className="border-b border-border px-4 py-3">
         <h2 className="text-base font-semibold text-foreground">{t("title")}</h2>

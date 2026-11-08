@@ -2,7 +2,7 @@
 
 import type { CSSProperties, RefObject } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { Image as ImageIcon, Star } from "lucide-react";
+import { ArrowRight, Image as ImageIcon, Star } from "lucide-react";
 import type { Locale } from "@/i18n/locales";
 import type { Product } from "@/types/product";
 import { formatFixed } from "@/lib/format/intl";
@@ -32,13 +32,16 @@ import { imageStyle } from "@/lib/images/placement";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import {
-  CARD_HOVER_ZOOM_CLASS,
-  HOVER_PHOTO_CLASS,
   INLINE_ICON_STYLE,
   PRICE_TAG_FONT_CLASSES,
   TEXT_ALIGN_CLASSES,
+  cardHoverZoomClass,
+  hoverPhotoClass,
+  tileBuyArrowClass,
   tileBuyButtonClass,
   tileBuyButtonStyle,
+  tileBuyLabelClass,
+  type CardHoverTrigger,
   tileDetailsStyle,
   TILE_SPOT_CLASSES,
   TITLE_BAND_ROW_CLASSES,
@@ -168,7 +171,7 @@ export function ProductTileContent({
   imageRef,
   spotDrag,
   look,
-  hoverMotion = true,
+  hover = "board",
 }: {
   product: Product;
   theme: StorefrontTheme;
@@ -189,9 +192,10 @@ export function ProductTileContent({
   /** What the card borrows from the product page (resolveTileLook). Absent =
    *  the product page's defaults, for a surface with no page to ask. */
   look?: TileLook;
-  /** False while this card must hold still on hover (the designer's selected
-   *  tile, whose handles would drift off it): turns the photo zoom off. */
-  hoverMotion?: boolean;
+  /** What plays the card's hover effects (CardHoverTrigger): a buyer's
+   *  pointer and focus by default, the pointer alone in the designer, nothing
+   *  while a gesture owns the tile. */
+  hover?: CardHoverTrigger;
 }) {
   const t = useTranslations("Storefront.spotDrag");
   const tCommon = useTranslations("Common");
@@ -216,7 +220,7 @@ export function ProductTileContent({
   const hasDetails = rating !== null || lowStock;
   const buyLook = card.buyButton !== "none" && !soldOut && !outOfStock ? card.buyButton : null;
   // Framing (imageRef) shows the one photo being framed, still.
-  const zoom = card.hoverEffect === "zoom" && hoverMotion && !imageRef;
+  const zoom = card.hoverEffect === "zoom" && hover !== "still" && !imageRef;
   const hoverPhotoUrl =
     card.hoverPhoto && product.imageUrl && product.hoverImageUrl && !imageRef ? product.hoverImageUrl : null;
 
@@ -482,19 +486,25 @@ export function ProductTileContent({
   ) : null;
 
   // THE BUY BUTTON: a row of its own at the foot of the card, the product
-  // page's button in small (tileBuyButtonStyle). Not a link of its own: on a
-  // buyer's board the whole card already is one, to the same page.
+  // page's button in small (tileBuyButtonStyle) unless the seller gave the
+  // cards their own words and colours, with an arrow that steps right on
+  // hover. Not a link of its own: on a buyer's board the whole card already
+  // is one, to the same page.
   const buyRow = buyLook ? (
     <div
       data-tile-buy={buyLook}
       className="shrink-0 bg-card py-1.5"
       style={{ ...titleBandStyle(card.titleInset), ...titleBandFontStyle() }}
     >
-      <span
-        className={tileBuyButtonClass(buyLook, card.cornerRadius)}
-        style={tileBuyButtonStyle(buyLook, tileLook.buy)}
-      >
-        {tileLook.buyLabel}
+      <span className={tileBuyButtonClass(card.cornerRadius)} style={tileBuyButtonStyle(buyLook, tileLook.buy, card)}>
+        <span className={tileBuyLabelClass(buyLook)}>{card.buyButtonLabel ?? tileLook.buyLabel}</span>
+        <ArrowRight
+          aria-hidden="true"
+          data-tile-buy-arrow=""
+          className={tileBuyArrowClass(hover)}
+          style={INLINE_ICON_STYLE}
+          strokeWidth={2.25}
+        />
       </span>
     </div>
   ) : null;
@@ -649,7 +659,7 @@ export function ProductTileContent({
             className={cn(
               "size-full object-cover",
               soldOut && "opacity-60 grayscale",
-              zoom && CARD_HOVER_ZOOM_CLASS,
+              zoom && cardHoverZoomClass(hover),
             )}
           />
         ) : (
@@ -662,7 +672,7 @@ export function ProductTileContent({
           </div>
         )}
         {/* The product's second photo, over the first, shown while the card
-            is pointed at (HOVER_PHOTO_CLASS). Unframed: the seller framed the
+            is pointed at (hoverPhotoClass). Unframed: the seller framed the
             cover, not this one. Lazy, since most visits never hover. */}
         {hoverPhotoUrl && (
           // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
@@ -674,11 +684,7 @@ export function ProductTileContent({
             loading="lazy"
             decoding="async"
             data-tile-hover-photo=""
-            className={cn(
-              HOVER_PHOTO_CLASS,
-              soldOut && "grayscale group-hover:opacity-60 group-focus-within:opacity-60",
-              zoom && CARD_HOVER_ZOOM_CLASS,
-            )}
+            className={cn(hoverPhotoClass(hover, soldOut), zoom && cardHoverZoomClass(hover))}
           />
         )}
         {/* The photo's blur, as a layer over it rather than a filter on it,

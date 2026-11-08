@@ -11,7 +11,7 @@
       "title": "Benachrichtigungseinstellungen"
     },
     "danger": {
-      "title": "Gefahrenzone"
+      "title": "Konto löschen"
     },
     "legal": {
       "title": "Rechtliche Einstellungen"
@@ -32,15 +32,17 @@
       "title": "Tarif und Abrechnung"
     },
     "connectedApps": {
-      "title": "Verbundene Apps"
+      "title": "KI-Assistent"
     }
   },
   "loading": "Einstellungen werden geladen…",
   "shell": {
     "sectionsLabel": "Einstellungen-Abschnitte",
-    "recommended": "Empfohlen"
+    "recommended": "Empfohlen",
+    "actionNeeded": "Aktion erforderlich"
   },
   "continueToStorefront": "Zum Schaufenster",
+  "confirmEmailNext": "Als Nächstes: Bestätige deine E-Mail-Adresse",
   "account": {
     "fallbackName": "Konto",
     "avatar": {
@@ -73,7 +75,7 @@
     },
     "username": {
       "cardTitle": "Benutzername",
-      "cardDescription": "Melde dich damit anstatt mit deiner E-Mail an. Nur Buchstaben, Zahlen und Unterstriche, und kein Benutzername kann von zwei Konten geteilt werden.",
+      "cardDescription": "Melde dich damit anstatt mit deiner E-Mail an. Er erscheint auch in Nachrichten, die in deinem Namen gesendet werden, etwa Team-Einladungen. Nur Buchstaben, Zahlen und Unterstriche, und kein Benutzername kann von zwei Konten geteilt werden.",
       "label": "Benutzername",
       "placeholder": "yourhandle",
       "available": "Verfügbar.",
@@ -136,7 +138,7 @@
   "danger": {
     "export": {
       "cardTitle": "Meine Daten exportieren",
-      "cardDescription": "Alles, was wir über dich speichern: Profil, Produkte, Schaufenster, deine verkauften Bestellungen, Benachrichtigungen und Sicherheitsprotokoll, alles in einer JSON-Datei. Das sind deine Daten, die dir gehören.",
+      "cardDescription": "Alles, was wir über dich speichern: Profil, Produkte, Schaufenster, deine verkauften Bestellungen, Benachrichtigungen und Sicherheitsprotokoll, in einer Datei, die du mit jedem Texteditor öffnen kannst. Das sind deine Daten, die dir gehören.",
       "downloadButton": "Meine Daten herunterladen",
       "stepUpDescription": "Dein Export enthält dein gesamtes Konto. Gib den aktuellen Code aus deiner Authenticator-App ein, um ihn herunterzuladen."
     },
@@ -155,6 +157,7 @@
       "keepButton": "Konto behalten",
       "title": "Konto löschen",
       "description": "Dein Konto, deine Produkte, Schaufenster und Bestellungen werden {days} Tage nach deiner Anfrage endgültig gelöscht. Bis dahin kannst du es dir anders überlegen. Danach ist alles weg.",
+      "exportFirst": "Bevor alles weg ist, kannst du in den <link>Kontoeinstellungen</link> eine Kopie deiner Daten herunterladen.",
       "deleteButton": "Mein Konto löschen",
       "confirmLabel": "Gib <code>{phrase}</code> ein, um zu bestätigen",
       "flagging": "Wird markiert…",
@@ -203,7 +206,8 @@
     "success": {
       "notificationsSaved": "Einstellungen gespeichert."
     },
-    "emailOff": "E-Mail ist für Square Share noch nicht eingeschaltet, daher wird unten nichts gesendet. Neue Bestellungen erscheinen weiterhin unter Bestellungen und in deinen Benachrichtigungen."
+    "emailOff": "E-Mail ist für Square Share noch nicht eingeschaltet, daher wird unten nichts gesendet. Neue Bestellungen erscheinen weiterhin unter Bestellungen und in deinen Benachrichtigungen.",
+    "inAppNote": "Diese Schalter steuern nur E-Mails. Neue Bestellungen und Bewertungen erscheinen immer in deinen Benachrichtigungen."
   },
   "legal": {
     "cardTitle": "Verkäufervereinbarung, Nutzungsbedingungen und Datenschutz",
@@ -225,18 +229,18 @@
       },
       "sellerDetails": {
         "title": "Deine Verkäuferangaben und wohin sie gehen",
-        "body": "Dein Händlername, deine Adresse und deine Kontakt-E-Mail werden Käufern auf deinen Produktseiten angezeigt und sind Voraussetzung dafür, dass du etwas veröffentlichen oder verkaufen kannst. Das ist das Einzige, wofür wir sie verwenden: Das EU-Verbraucherrecht verlangt, dass Käufer sehen können, von wem sie kaufen, und sie vor der Bestellung erreichen können. Wir senden einen Link an deine Kontaktadresse, damit du bestätigen kannst, dass sie erreichbar ist. Das ist die einzige E-Mail, die wir dort von uns aus senden: keine Liste, kein Marketing, und wir verkaufen oder teilen nichts davon. Deine Telefonnummer und deine USt-IdNr. sind optional und werden nur angezeigt, wenn du sie einträgst."
+        "body": "Dein Name oder Firmenname, deine Adresse und deine Kontakt-E-Mail werden Käufern auf deinen Produktseiten angezeigt und sind Voraussetzung dafür, dass du etwas veröffentlichen oder verkaufen kannst. Das ist das Einzige, wofür wir sie verwenden: Das EU-Verbraucherrecht verlangt, dass Käufer sehen können, von wem sie kaufen, und sie vor der Bestellung erreichen können. Wir senden einen Link an deine Kontaktadresse, damit du bestätigen kannst, dass sie erreichbar ist. Das ist die einzige E-Mail, die wir dort von uns aus senden: keine Liste, kein Marketing, und wir verkaufen oder teilen nichts davon. Deine Telefonnummer und deine USt-IdNr. sind optional und werden nur angezeigt, wenn du sie einträgst."
       }
     },
     "accepted": "Du hast Version <code>{version}</code> am {date} akzeptiert. Hier gibt es nichts mehr zu tun.",
     "outdated": "Du hast Version <code>{version}</code> am {date} akzeptiert, aber die Dokumente haben sich seitdem geändert. Lies sie noch einmal durch und akzeptiere die aktuelle Version.",
-    "agreed": "Du hast Version <code>{version}</code> am {date} zugestimmt. Hier ist nichts weiter zu tun.",
-    "agreedOutdated": "Du hast Version <code>{version}</code> am {date} zugestimmt, aber die Bedingungen haben sich seitdem geändert. Lies sie erneut und stimme der aktuellen Version zu.",
+    "agreed": "Du hast diesen Nutzungsbedingungen am {date} zugestimmt. Hier ist nichts weiter zu tun.",
+    "agreedOutdated": "Du hast am {date} einer früheren Version der Nutzungsbedingungen zugestimmt. Lies die Nutzungsbedingungen oben und stimme ihnen zu.",
+    "whatChanged": "Was sich geändert hat:",
     "recording": "Wird aufgezeichnet…",
     "acceptButton": "Ich akzeptiere",
     "agreeButton": "Ich habe die Bedingungen gelesen und stimme zu",
     "acceptNote": "Die Annahme speichert Datum und Version <code>{version}</code> in deinem Konto.",
-    "agreeNote": "Mit deiner Zustimmung werden das Datum und die Version <code>{version}</code> in deinem Konto gespeichert.",
     "success": {
       "legalAccepted": "Akzeptiert. Danke, dass du das Kleingedruckte gelesen hast.",
       "termsAgreed": "Du hast den Nutzungsbedingungen zugestimmt."
@@ -297,7 +301,7 @@
           "points": {
             "cap": "Square Share befindet sich noch in einer frühen Phase und wird gewerblichen Nutzern in der vorliegenden Form angeboten. Ihnen gegenüber ist unsere Haftung auf die in den letzten 12 Monaten an uns gezahlten Gebühren oder 100 EUR begrenzt, je nachdem, welcher Betrag höher ist, und gewerbliche Verkäufer stellen uns von Ansprüchen frei, die durch ihre Produkte, Websites oder Verstöße verursacht werden. Wenn du Verbraucher bist, bleiben deine gesetzlichen Rechte unberührt.",
             "termination": "Wir können Konten sperren oder schließen, die gegen diese Bedingungen verstoßen. Du kannst jederzeit gehen und deine Daten mitnehmen.",
-            "changesAndLaw": "Über wesentliche Änderungen dieser Bedingungen informieren wir mindestens 30 Tage im Voraus. Für gewerbliche Nutzer gilt tschechisches Recht. Als Verbraucher behältst du den Schutz deines Heimatlandes, Bundesstaats oder deiner Provinz.",
+            "changesAndLaw": "Über wesentliche Änderungen dieser Bedingungen informieren wir mindestens 30 Tage im Voraus. Für gewerbliche Nutzer gilt tschechisches Recht, in Kanada stattdessen das Recht deiner Provinz oder deines Territoriums. Als Verbraucher behältst du den Schutz deines Heimatlandes, Bundesstaats oder deiner Provinz.",
             "policies": "Unsere Datenschutzerklärung und unsere Cookie-Richtlinie sind Bestandteil dieser Bedingungen.",
             "disputes": "Streitigkeiten in den USA werden durch Einzelschiedsverfahren statt vor Gericht gelöst, es sei denn, du widersprichst innerhalb von 30 Tagen nach Zustimmung. Verbraucher in der EU und Kanada können weiterhin in ihrem Wohnsitzland vor Gericht gehen."
           }
@@ -311,12 +315,14 @@
       "titleSoon": "Unsere Nutzungsbedingungen ändern sich bald.",
       "body": "Bis dahin gelten die <current>aktuellen Nutzungsbedingungen</current>. Was die <next>neuen Nutzungsbedingungen</next> ändern:",
       "leave": "Wenn du nicht einverstanden bist, kannst du dein Konto kostenlos schließen, bevor sie in Kraft treten. Wenn du Square Share nach diesem Datum weiter nutzt, gelten die neuen Nutzungsbedingungen für dich.",
+      "summaryIsNew": "Die Zusammenfassung unten bezieht sich auf die neuen Nutzungsbedingungen. Wenn du jetzt zustimmst, akzeptierst du sie vorzeitig.",
       "changes": {
         "regions": "Wir sind jetzt nur noch in der EU, den USA und Kanada tätig, und jede Region hat einen eigenen Abschnitt.",
         "disputes": "Streitigkeiten in den USA werden durch Einzelschiedsverfahren statt vor Gericht gelöst, es sei denn, du widersprichst innerhalb von 30 Tagen. Verbraucher in der EU und Kanada können weiterhin in ihrem Wohnsitzland vor Gericht gehen.",
         "plans": "Bezahlte Tarife und Verkaufsgebühren sind jetzt aufgeführt, einschließlich automatischer Verlängerung und wie du kündigen kannst.",
         "moderation": "Wir erklären, wie wir Inhalte prüfen und wie du sie melden, dagegen Einspruch erheben und eine Urheberrechtsbeschwerde einreichen kannst.",
-        "notice": "Du erhältst jetzt mindestens 30 Tage vorher eine E-Mail, bevor wesentliche Änderungen an den Nutzungsbedingungen in Kraft treten."
+        "notice": "Du erhältst jetzt mindestens 30 Tage vorher eine E-Mail, bevor wesentliche Änderungen an den Nutzungsbedingungen in Kraft treten.",
+        "northAmerica": "Die Abschnitte zu den USA und Kanada beschreiben jetzt, was das dortige Recht von Verkäufern verlangt. Für gewerbliche Nutzer in Kanada gelten jetzt das Recht und die Gerichte ihrer Provinz."
       },
       "email": {
         "subject": "Wir aktualisieren unsere Nutzungsbedingungen",
@@ -334,19 +340,19 @@
     "cardDescription": "Einmal für dein gesamtes Konto festgelegt. Wird Käufern auf jeder Produktseite angezeigt und für Rechnungen und MwSt. verwendet.",
     "memberScope": "Das sind deine eigenen Verkäuferangaben. Die Angaben, die Käufer bei {store} sehen, gehören dem Inhaber, der sie in seinen eigenen Einstellungen festlegt.",
     "gate": {
-      "required": "<strong>Dein Händlername, deine Adresse und deine Kontakt-E-Mail sind erforderlich, bevor du etwas veröffentlichen oder verkaufen kannst.</strong> Käufer müssen sehen können, von wem sie kaufen und wie sie dich erreichen können, bevor sie bestellen.",
+      "required": "<strong>Dein Name oder Firmenname, deine Adresse und deine Kontakt-E-Mail sind erforderlich, bevor du etwas veröffentlichen oder verkaufen kannst.</strong> Käufer müssen sehen können, von wem sie kaufen und wie sie dich erreichen können, bevor sie bestellen.",
       "privacyNoteLinked": "Diese Angaben erscheinen aus diesem Grund allein öffentlich auf deinen Produktseiten. Wir nutzen sie nie für Marketing und verkaufen oder teilen sie nie. Die einzige Nachricht, die wir an deine Kontakt-E-Mail oder Telefonnummer senden, ist der Code, der sie bestätigt. Siehe die <link>Square Share Datenschutzerklärung</link>."
     },
-    "countryUnset": "Keine Angabe",
+    "countryUnset": "Nicht festgelegt",
     "vatAdvisory": {
       "noCountry": "Diese USt-IdNr. wurde offenbar von {issuer} ausgestellt. Du solltest dein Land festlegen.",
       "mismatch": "Diese USt-IdNr. wurde offenbar von {issuer} ausgestellt, aber dein Land ist auf {selected} gesetzt. Prüfe, ob beides korrekt ist."
     },
     "fields": {
       "businessName": {
-        "label": "Händlername",
+        "label": "Dein Name oder Firmenname",
         "tipLabel": "Was hier einzutragen ist",
-        "tipBody": "Der Name, mit dem Käufer einen Vertrag abschließen. Dein eingetragener Unternehmensname, wenn du über ein Unternehmen verkaufst, oder dein vollständiger Name, wenn du als Einzelperson verkaufst. Der Name deines Schaufensters ist ein Shopname, das ist nicht dasselbe und kann diesen nicht ersetzen.",
+        "tipBody": "Der Name, unter dem du verkaufst, oder dein vollständiger Name: Das ist der Händlername, den das EU-Recht verlangt. Verwende deinen eingetragenen Firmennamen, wenn du über ein Unternehmen verkaufst, und deinen eigenen Namen, wenn du als Privatperson verkaufst. Der Name deines Schaufensters ist ein Shopname und kann diesen nicht ersetzen.",
         "placeholder": "z. B. Lena Schmidt oder Lenas Keramik"
       },
       "address": {
@@ -358,21 +364,25 @@
       "email": {
         "label": "Kontakt-E-Mail",
         "tipLabel": "Wie sich das von deiner Anmelde-E-Mail unterscheidet",
-        "tipBody": "Wird Käufern als mailto-Link angezeigt und als Fallback für den Kauf-Button verwendet, wenn ein Produkt keinen Kauflink hat. Bewusst von deiner Anmelde-E-Mail getrennt: Verwende die Adresse, an die du möchtest, dass Käufer schreiben. Sie muss eine Adresse sein, die du wirklich liest: Platzhalter, Wegwerf-E-Mail-Anbieter und No-Reply-Adressen werden abgelehnt, ebenso Domains, die keine E-Mails empfangen.",
-        "placeholder": "z. B. hallo@deinshop.example"
+        "tipBody": "Wird Käufern als mailto-Link angezeigt und als Fallback für den Kauf-Button verwendet, wenn ein Produkt keinen Kauflink hat. Bewusst von deiner Anmelde-E-Mail getrennt: Verwende die Adresse, an die Käufer dir schreiben sollen. Sie muss eine Adresse sein, die du wirklich liest: Platzhalter, Wegwerf-E-Mail-Anbieter und No-Reply-Adressen werden abgelehnt, ebenso Domains, die keine E-Mails empfangen.",
+        "placeholder": "z. B. hallo@deinshop.example",
+        "codeHint": "Beim Speichern senden wir einen Code an diese Adresse. Gib ihn unten ein, um sie zu bestätigen."
       },
       "vatId": {
         "label": "USt-IdNr.",
+        "tipLabel": "Brauche ich das?",
+        "tipBody": "Optional, und nur, wenn du in der EU für die Umsatzsteuer registriert bist. Gib die Nummer mit ihrem Länderkürzel ein, etwa ATU12345678 für Österreich. Lass das Feld sonst leer: Eine Handelsregisternummer oder eine andere Steuernummer gehört nicht hierher. Wird Käufern im Abschnitt „Verkäufer“ deiner Produktseiten angezeigt.",
         "placeholder": "z. B. DE123456789"
       },
       "country": {
-        "hint": "Square Share ist in der EU, den USA und Kanada tätig. Anderswo sind wir noch nicht tätig.",
+        "hint": "Wo dein Unternehmen sitzt, wird Käufern zusammen mit deinem Namen angezeigt. Square Share ist in der EU, den USA und Kanada tätig.",
         "label": "Land"
       },
       "phone": {
         "label": "Telefon",
         "tipLabel": "Wann Käufer das sehen",
-        "tipBody": "Optional. Käufer sehen sie erst, nachdem du sie mit einem Code bestätigt hast, den wir per SMS senden. Verwende daher eine Mobilnummer in der EU, dem EWR, der Schweiz oder dem Vereinigten Königreich.",
+        "tipBody": "Optional. Käufer sehen sie erst, nachdem du sie mit einem Code bestätigt hast, den wir per SMS senden.",
+        "restriction": "Nur Mobilnummern aus der EU, dem EWR, der Schweiz und dem Vereinigten Königreich. Lass das Feld leer, wenn deine Nummer außerhalb dieser Regionen liegt.",
         "placeholder": "z. B. +353 87 123 4567"
       },
       "bio": {
@@ -386,7 +396,8 @@
     "success": {
       "sellerDetailsSaved": "Unternehmen und Verkäuferangaben gespeichert.",
       "savedCodeSent": "{which, select, email {Gespeichert. Wir haben einen Code an {email} gesendet: Gib ihn unten ein, um die Adresse zu bestätigen.} phone {Gespeichert. Wir haben einen Code per SMS an {phone} gesendet: Gib ihn unten ein, um die Nummer zu bestätigen.} other {Gespeichert. Wir haben Codes an {email} und {phone} gesendet: Gib sie unten ein, um beide zu bestätigen.}}"
-    }
+    },
+    "bioHint": "Deine Kurzbio (ein kurzer Satz über dich oder das, was du machst) findest du in den <link>Kontoeinstellungen</link>."
   },
   "contactVerification": {
     "heading": "Kontaktdaten bestätigen",
@@ -440,7 +451,7 @@
       "label": "Wohin du versendest und wie lange es dauert",
       "tipLabel": "Wie viel Detail anzugeben ist",
       "tipBody": "Gruppiere Lieferziele so, wie du wirklich versendest: eine Zeile für dein Land, eine für den Rest der EU, eine für alles andere reicht. Lasse die Kosten leer, wenn sie variieren.",
-      "flatRate": "Ein Tarif wird einmal pro Bestellung berechnet, unabhängig von Menge und Gewicht. Käufer bestellen ein Produkt auf einmal: Einen Warenkorb gibt es noch nicht.",
+      "costAndRate": "Jede Zeile hat zwei Preise. Versandkosten ist der Text, den Käufer auf deiner Produktseite lesen, etwa „9,00 €“. Tarif ist, was der Checkout tatsächlich berechnet, einmal pro Bestellung, unabhängig von Menge und Gewicht. Der Checkout liefert nur in eine Zeile mit Tarif und Ländern.",
       "empty": "Noch nichts eingetragen. Käufer sehen keine Lieferzeiten, bis du eine Zeile hinzufügst.",
       "areaLabel": "Lieferziel {number}",
       "areaPlaceholder": "z. B. Rest der EU",
@@ -450,7 +461,6 @@
       "costPlaceholder": "z. B. 9,00 €",
       "rateLabel": "Tarif {number}",
       "ratePlaceholder": "z.B. 4,50",
-      "rateHint": "Leer lassen für reine Anzeige.",
       "countriesLabel": "Länder {number}",
       "countriesNone": "Keine Länder",
       "everywhereElse": "Überall sonst",
@@ -461,13 +471,12 @@
       "needsRate": "Der Checkout kann diese Zeile erst verwenden, wenn sie sowohl einen Tarif als auch ein Land hat. Käufer sehen sie weiterhin auf der Produktseite."
     },
     "rates": {
-      "title": "Versandtarife",
-      "description": "Die Versandpreise, die der Checkout berechnet, damit Käufer den Gesamtbetrag sehen, bevor sie bezahlen.",
+      "title": "Währung und kostenloser Versand",
+      "description": "Die Währung, in der der Checkout deine Tarife berechnet, und ab wann die Lieferung kostenlos ist. Den Tarif für jedes Lieferziel legst du oben unter Versand fest.",
       "currencyLabel": "Tarifwährung",
       "freeOverLabel": "Kostenloser Versand ab",
       "freeOverPlaceholder": "z.B. 50,00",
-      "freeOverHint": "Wenn der Bestellwert diesen Betrag erreicht, ist die Lieferung kostenlos.",
-      "hint": "Diese Tarife werden an der Kasse berechnet. Lassen Sie den Tarif einer Destination leer, um sie nur zur Anzeige zu behalten."
+      "freeOverHint": "Wenn der Bestellwert diesen Betrag erreicht, ist die Lieferung kostenlos."
     },
     "notes": {
       "label": "Weitere Versandhinweise",
@@ -475,13 +484,13 @@
     },
     "returnsCard": {
       "title": "Rücksendungen",
-      "description": "Was du zusätzlich zu den gesetzlichen Rechten anbietest, die deine Produktseiten bereits ausweisen."
+      "description": "Was du zusätzlich zu den gesetzlichen Rechten anbietest, die deine Produktseiten bereits nennen."
     },
     "returnsWindow": {
       "label": "Rückgabefrist",
-      "tipLabel": "Was das gesetzliche Recht bereits abdeckt",
+      "tipLabel": "Was das Gesetz Käufern bereits gibt",
       "tipBody": "Wer EU-Käufern im Fernabsatz verkauft, gewährt ihnen 14 Tage Widerrufsrecht und eine gesetzliche Gewährleistung von zwei Jahren bei Mängeln, unabhängig davon, was du hier wählst. Deine Produktseiten weisen beides bereits aus, das hier ist also, was du darüber hinaus anbietest.",
-      "none": "Nur das gesetzliche Recht",
+      "none": "Nichts über das gesetzlich Vorgeschriebene hinaus",
       "days": "{days, plural, one {# Tag} other {# Tage}}",
       "statutoryMinimum": "Das gesetzliche EU-Minimum",
       "custom": "Etwas anderes",
@@ -539,7 +548,8 @@
   "sellerDetails": {
     "bannerLabel": "Verkäuferangaben erforderlich",
     "memberHeadline": "Dieser Shop kann noch nicht veröffentlichen oder verkaufen.",
-    "memberFix": "Der Inhaber muss seine Verkäuferangaben in den eigenen Einstellungen hinzufügen.",
+    "memberFix": "Der Inhaber von {storeName} muss seine Verkäuferangaben in den eigenen Einstellungen hinzufügen.",
+    "memberFixGeneric": "Der Inhaber muss seine Verkäuferangaben in den eigenen Einstellungen hinzufügen.",
     "addLink": "Verkäuferangaben hinzufügen",
     "opensInNewTab": " (wird in einem neuen Tab geöffnet)",
     "headline": {
@@ -552,7 +562,7 @@
     "reason": "Käufer müssen sehen können, von wem sie kaufen und wie sie dich erreichen können, bevor sie bestellen. Diese werden daher allein auf deinen Produktseiten angezeigt, niemals für Marketing verwendet.",
     "fields": {
       "businessName": {
-        "label": "Händlername",
+        "label": "Dein Name oder Firmenname",
         "why": "Käufer müssen wissen, von wem sie kaufen: dein Händlername oder dein vollständiger Name, wenn du als Einzelperson verkaufst."
       },
       "address": {
@@ -737,7 +747,7 @@
     },
     "approvals": {
       "title": "Von einem angemeldeten Gerät genehmigen",
-      "description": "Wenn du dich irgendwo neu anmeldest, scanne den QR-Code mit einem Handy, auf dem du bereits angemeldet bist, und tippe auf die passende Zahl. Praktisch, wenn dein Passkey auf einem anderen Gerät ist.",
+      "description": "Du meldest dich auf einem neuen Gerät an und dein Passkey ist auf einem anderen? Ein Handy, auf dem du bereits angemeldet bist, kann das genehmigen: Scanne damit den QR-Code und tippe auf die passende Zahl.",
       "statusOn": "Ein",
       "statusOff": "Aus",
       "turnOn": "Einschalten",
@@ -799,7 +809,6 @@
       "emailLabel": "E-Mail-Adresse",
       "emailPlaceholder": "kollege@example.com",
       "roleLabel": "Rolle",
-      "notificationNote": "E-Mail-Benachrichtigungen sind noch nicht eingerichtet: Die Einladung tritt in Kraft, wenn die Person sich anmeldet. Du solltest sie daher direkt informieren.",
       "sendButton": "Einladung senden"
     },
     "inviteRow": {
@@ -839,13 +848,17 @@
     "empty": "Noch keine Apps verbunden.",
     "connect": {
       "title": "Assistenten verbinden",
-      "body": "Füge diese Adresse in Claude oder einer anderen MCP-App hinzu und bestätige sie dann, wenn danach gefragt wird.",
+      "benefit": "Ein KI-Assistent, den du hier verbindest, kann deine Produkte auflisten, Entwürfe veröffentlichen, dein Schaufenster gestalten, Rabatte verwalten und deine Fragen beantworten, alles in normaler Sprache.",
+      "body": "Füge diese Adresse in Claude oder einem anderen KI-Assistenten hinzu und bestätige sie dann, wenn danach gefragt wird.",
+      "mcpHintLabel": "Zu dieser Adresse",
+      "mcpHint": "Dein Assistent fragt vielleicht nach einer MCP-Server-URL: Füge diese Adresse dort ein. MCP ist der offene Standard, mit dem sich Assistenten mit Apps verbinden.",
       "copy": "Adresse kopieren",
       "copied": "Kopiert",
       "copyFailed": "Kopieren nicht möglich. Markiere die Adresse und kopiere sie selbst.",
       "openClaude": "Claude-Connectors öffnen",
       "capabilitiesTitle": "Was ein Assistent tun kann",
-      "offByDefault": "Standardmäßig aus"
+      "offByDefault": "Standardmäßig aus",
+      "required": "Erforderlich"
     },
     "lastUsed": "Zuletzt genutzt {when}",
     "neverUsed": "Noch nicht genutzt",
@@ -858,15 +871,21 @@
       "metadataTitle": "App verbinden",
       "title": "{app} mit deinem Shop verbinden?",
       "sendsTo": "Der Zugriff geht an <strong>{host}</strong>",
+      "sendsToTipLabel": "Warum diese Adresse wichtig ist",
+      "sendsToTipBody": "Eine App kann sich jeden beliebigen Namen geben, aber der Zugriff geht immer nur an diese Adresse, und die kann ein Betrüger nicht fälschen.",
       "store": "Shop",
+      "storeHint": "Nur der Shop, den du auswählst, wird geteilt. Deine anderen Shops bleiben privat.",
       "scopesTitle": "Was sie tun kann",
       "note": "Verbinde sie nur, wenn du das in {app} gestartet hast. Du kannst die Verbindung jederzeit in den Einstellungen trennen.",
+      "stepUpDescription": "Wenn du {app} verbindest, bekommt es Zugriff auf deinen Shop. Gib den aktuellen Code aus deiner Authenticator-App ein, um zu bestätigen, dass du es bist.",
       "approve": "Verbinden",
       "approving": "Wird verbunden…",
-      "deny": "Abbrechen",
+      "deny": "Nicht verbinden",
+      "denyHint": "„Nicht verbinden“ bringt dich zurück zu {app} und teilt ihm mit, dass du abgelehnt hast.",
       "connected": "Verbunden. Du wirst zurück zu {app} geleitet…",
       "refusedTitle": "Dieser Anfrage ist nicht zu trauen",
-      "refusedBody": "Die App, die dich hierher geschickt hat, ist nicht richtig eingerichtet. Es wurde nichts verbunden."
+      "refusedBody": "Die App, die dich hierher geschickt hat, ist nicht richtig eingerichtet. Es wurde nichts verbunden.",
+      "goToStore": "Zu deinem Shop"
     },
     "scopes": {
       "storeRead": {
@@ -915,12 +934,12 @@
       },
       "destructive": {
         "label": "Dinge löschen",
-        "hint": "Produkte, Schaufenster und Rabatte löschen und Einbettungsschlüssel ersetzen. Das lässt sich nicht rückgängig machen."
+        "hint": "Produkte, Schaufenster und Rabatte löschen und neue Website-Codes erstellen. Das lässt sich nicht rückgängig machen."
       }
     },
     "app": {
       "capabilitiesLabel": "Was {app} tun kann",
-      "changeHint": "Um das zu ändern, trenne die App und verbinde sie neu."
+      "changeHint": "Um zu ändern, was {app} tun kann, trenne die Verbindung hier, verbinde es dann von {app} aus erneut und wähle beim Bestätigen neu aus."
     }
   }
 }

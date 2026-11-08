@@ -73,7 +73,7 @@
     "label": "Množství"
   },
   "cta": {
-    "unwired": "Toto tlačítko zatím nikam nevede. Přidejte k produktu odkaz na nákup, nebo vyplňte kontaktní e-mail v sekci Firma a údaje prodejce.",
+    "unwired": "Toto tlačítko zatím nikam nevede. Přidejte k produktu odkaz na nákup, nebo kontaktní e-mail do svých údajů prodejce.",
     "unavailableIn": "Nedostupné pro možnost: {group}",
     "askAbout": "Zeptat se na tento produkt",
     "checkoutOn": "Pokladna na <strong>{host}</strong>",
@@ -374,8 +374,8 @@
       "testBody": "Toto je vývojová pokladna. Žádná karta není účtována a žádné peníze se nepřesouvají.",
       "stripeTitle": "Bezpečná platba přes Stripe",
       "stripeBody": "Údaje karty zadáte na zabezpečené stránce Stripe v dalším kroku.",
-      "previewTitle": "Údaje karty",
-      "previewBody": "Karta, Apple Pay a Google Pay se zobrazí zde ve vašich barvách, jakmile propojíte Stripe.",
+      "previewConnect": "Kupující tu budou platit kartou, jakmile připojíte Stripe v sekci <link>Platby</link>.",
+      "previewComingSoon": "Platby kartou tu budou brzy. Do té doby vám kupující platí přes odkaz na nákup u produktu nebo se vám ozvou e-mailem.",
       "cardNumber": "Číslo karty",
       "expiry": "MM / RR",
       "cvc": "CVC",

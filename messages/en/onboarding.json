@@ -2,7 +2,7 @@
   "steps": {
     "seller": {
       "label": "Add your seller details",
-      "detail": "Your trader name, address and contact email go on every product page.",
+      "detail": "Your name or business name, address and contact email go on every product page.",
       "detailDone": "Buyers can see who they are buying from.",
       "detailUnconfirmed": "Confirm your contact email with the code we send to it.",
       "action": "Add details",
@@ -20,10 +20,10 @@
     "storefront": {
       "label": "Put a product on a storefront",
       "detailDone": "A product is on your storefront.",
-      "detailNone": "Create a storefront, then add a product to its grid.",
-      "detailEmpty": "Open your storefront and choose Add product in the toolbar.",
+      "detailNone": "A storefront is your shop page. Create one, then add a product to its grid.",
+      "detailEmpty": "Open your storefront and use the Add product button at the top.",
       "actionCreate": "Create storefront",
-      "actionOpen": "Open designer",
+      "actionOpen": "Open storefront",
       "cta": "Open your storefront",
       "ctaCreate": "Create a storefront"
     },
@@ -32,7 +32,7 @@
       "detailDone": "Your product page is live.",
       "detailNeedsSeller": "Finish your seller details, then your page can go live.",
       "detailNeedsStorefront": "Once a product is on a storefront, its page can go live.",
-      "detailNeedsActive": "Set that product to Active so its page goes live.",
+      "detailNeedsActive": "Open the product and set its status to Active to make its page live.",
       "detailChecking": "Your page goes live once the automatic check approves the product.",
       "detailPaused": "The automatic check paused that product. Open it to see what to change.",
       "detailPagesOff": "Product pages are off on that storefront. Turn them on in the designer.",
@@ -64,11 +64,16 @@
     "showMeAround": "Show me around",
     "showSteps": "Show steps",
     "hideSteps": "Hide steps",
-    "liveHint": "Your first product page is live. Share the link anywhere.",
+    "liveHint": "Your first product page is live. Share the links anywhere.",
     "copyLink": {
       "copy": "Copy product page link",
       "copied": "Copied product page link",
       "failed": "Couldn't copy product page link. Select and copy it manually."
+    },
+    "copyStorefrontLink": {
+      "copy": "Copy storefront link",
+      "copied": "Copied storefront link",
+      "failed": "Couldn't copy storefront link. Select and copy it manually."
     },
     "openPage": "Open page",
     "opensInNewTab": " (opens in a new tab)",
@@ -121,10 +126,10 @@
     "seller": {
       "namePlaceholder": "e.g. Jane Doe or Jane's Ceramics",
       "nameHelp": "Your business name, or your full name if you sell as yourself.",
-      "nameAlternative": "Or your full name, if you sell as yourself.",
+      "nameAlternative": "If you sell as yourself, use your full name.",
       "addressPlaceholder": "e.g. 12 Market Street\nDublin, D02 X285\nIreland",
       "emailPlaceholder": "e.g. hello@yourshop.example",
-      "emailHelp": "Where buyers write to you. It can differ from your sign-in email.",
+      "emailHelp": "Where buyers write to you. It can differ from your sign-in email.{verify, select, true { We'll send a code to this address to confirm it.} other {}}",
       "emailTipLabel": "About this email"
     },
     "confirm": {
@@ -140,12 +145,12 @@
     "nav": {
       "skipOnboarding": "Skip onboarding",
       "next": "Next",
-      "showMeAround": "Show me around",
       "skipIntro": "Skip intro",
       "getStarted": "Get started",
       "skipForNow": "Skip for now",
       "saveAndContinue": "Save and continue",
       "continue": "Continue",
+      "confirmLater": "Confirm later",
       "exploreOnMyOwn": "Explore on my own",
       "notNow": "Not now"
     },
@@ -171,6 +176,10 @@
     "title": "Guided tour",
     "description": "A short walk through the main thing to do on each page, one step at a time.",
     "start": "Start the tour"
+  },
+  "install": {
+    "title": "Add Square Share to your home screen",
+    "add": "Add"
   },
   "guidedTour": {
     "steps": {
@@ -205,16 +214,13 @@
       },
       "storefrontEmbed": {
         "title": "Embed a storefront on your site",
-        "body": "Each storefront has an embed button that gives you a snippet like this one. The widget is still in development and doesn't show on other sites yet.",
-        "bodyButton": "This button gives you a snippet like the one below to paste into your site. The widget is still in development and doesn't show on other sites yet.",
-        "fallbackBody": "Once you have a storefront, the embed button on its card gives you a snippet like this one. The widget is still in development and doesn't show on other sites yet.",
-        "bodyLive": "Each storefront has an embed button that gives you a snippet like this one. Paste it into your own site and the storefront shows there.",
-        "bodyButtonLive": "This button gives you a snippet like the one below. Paste it into your own site and the storefront shows there.",
-        "fallbackBodyLive": "Once you have a storefront, the embed button on its card gives you a snippet like this one to paste into your own site."
+        "bodyLive": "Each storefront has an embed button that gives you website code like this. Paste it into your own site and the storefront shows there.",
+        "bodyButtonLive": "This button gives you website code like the code below. Paste it into your own site and the storefront shows there.",
+        "fallbackBodyLive": "Once you have a storefront, the embed button on its card gives you website code like this to paste into your own site."
       },
       "ordersSearch": {
         "title": "Find an order",
-        "body": "Search this list by the buyer's email. To find an order by its number, a name, a city or a tracking number, use search at the top of the page."
+        "body": "Search this list by order number, the buyer's email or name, a city, a product or a tracking number."
       },
       "ordersFilters": {
         "title": "Filter and sort",
@@ -241,7 +247,7 @@
     "steps": {
       "editorAdd": {
         "title": "Add to your grid",
-        "body": "Add products, text and shapes from this bar. Drag anything on the grid to move it, and pull a corner to resize it."
+        "body": "Add products, text, shapes and images from this bar. Tap or click a block to select it, then drag to move. Pull a corner handle to resize."
       },
       "editorDesign": {
         "title": "Set the look",
@@ -255,7 +261,8 @@
       },
       "editorFinish": {
         "title": "Make it yours",
-        "body": "The sample never saves, so try anything. When you're ready, create a storefront of your own."
+        "body": "The sample never saves, so try anything. When you're ready, create a storefront of your own.",
+        "bodySave": "Press Save to keep your work. When you're happy with it, Share gives you its link and the code for your website."
       }
     }
   }

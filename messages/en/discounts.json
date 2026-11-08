@@ -51,7 +51,8 @@
     "noEnd": "No end date",
     "orders": "{orders, plural, =0 {No orders yet} one {# order} other {# orders}}",
     "uses": "{uses} of {limit} uses",
-    "switchLabel": "On",
+    "turnOn": "Turn on",
+    "turnOff": "Turn off",
     "edit": "Edit",
     "endNow": "End now",
     "delete": "Delete",
@@ -86,7 +87,7 @@
     "kind": {
       "title": "What kind of discount?",
       "code": "Discount code",
-      "codeHint": "Buyers type it at checkout, and you see which channel brought them.",
+      "codeHint": "Buyers type it at checkout, and you see which channel brought them. It doesn't add to a running sale: buyers get the lower price.",
       "automatic": "Sale",
       "automaticHint": "Lowers your prices for everyone. No code needed."
     },
@@ -99,6 +100,7 @@
     },
     "channel": {
       "label": "Shared on (optional)",
+      "hint": "See how many orders each channel brings in, on your Discounts page.",
       "suggestions": "Suggested channels",
       "newsletter": "Newsletter",
       "creator": "Creator"
@@ -141,7 +143,7 @@
       }
     },
     "limit": {
-      "label": "Max orders (optional)",
+      "label": "Max uses (optional)",
       "none": "No limit"
     },
     "locked": "This sale has started, so only its end can change. To change anything else, end it and create a new sale.",
@@ -153,7 +155,8 @@
       "noEnd": "No end date",
       "exampleLabel": "Example",
       "example": "Example: {title} at {regular} costs {now}.",
-      "chipLink": "Change how sales look on your storefront"
+      "exampleUnchanged": "{title} stays at {price}: it's priced in another currency.",
+      "chipLink": "Change how sales look on {storefront}"
     },
     "create": "Create discount",
     "save": "Save changes",

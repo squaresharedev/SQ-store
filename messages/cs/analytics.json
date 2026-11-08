@@ -13,8 +13,9 @@
   },
   "firstRun": {
     "title": "Zatím není co měřit",
-    "body": "Návštěvy produktových stránek se tu objeví, jakmile bude některá z nich zveřejněná.",
-    "backToSetup": "Zpět k nastavení"
+    "body": "Zveřejněte výlohu a uvidíte zobrazení, nebo uskutečněte první prodej a uvidíte tržby.",
+    "publishStorefront": "Zveřejnit výlohu",
+    "goToProducts": "Přejít na produkty"
   },
   "range": {
     "ariaLabel": "Období",
@@ -73,12 +74,20 @@
   },
   "compare": {
     "previous": "Předchozí období",
-    "vsPrevious": "{change} oproti předchozímu období"
+    "vsPrevious": "{change} oproti předchozímu období",
+    "previousPeriodDates": "{from} - {to}"
+  },
+  "scrub": {
+    "on": "Dne {date}",
+    "inMonth": "V období {date}",
+    "upTo": "Do {date}",
+    "noSales": "Žádné prodeje"
   },
   "funnel": {
     "label": "Trychtýř výlohy",
     "description": "Od zobrazení výlohy na vašem vlastním webu po zaplacenou objednávku. Počítají se události, ne lidé.",
-    "views": "Zobrazení na vašem webu",
+    "subtitle": "Návštěvníci, kteří viděli vaši výlohu vloženou na vašem vlastním webu (ne přes přímé odkazy), od prvního zobrazení po zaplacenou objednávku.",
+    "views": "Zobrazení přes vložení na web",
     "viewsEmpty": "V tomto období žádná zobrazení",
     "opens": "Otevřené produkty",
     "opensEmpty": "V tomto období žádný neotevřen",
@@ -91,7 +100,7 @@
     "abandonment": "Nedokončené pokladny",
     "abandonmentCounts": "Nedokončené: {expired}, zahájené: {started}",
     "notEnough": "Zatím málo dat",
-    "notEnoughHint": "Míry se zobrazí, jakmile bude v tomto období {min} zobrazení."
+    "notEnoughHint": "Míry se zobrazí, jakmile bude v tomto období {min} zobrazení: při menším počtu by jediná objednávka procento zkreslila."
   },
   "tiles": {
     "revenue": "Tržby",
@@ -110,7 +119,7 @@
   "channels": {
     "embed": "Na vašem webu",
     "marketplace": "Tržiště",
-    "direct": "Vaše stránka",
+    "direct": "Přímý odkaz",
     "button": "Tlačítko nákupu"
   },
   "signalsUnavailable": {
@@ -119,7 +128,8 @@
   },
   "upcoming": {
     "needProducts": "Tyto metriky se tu objeví, jakmile bude produkt v některé z vašich výloh: {labels}.",
-    "needBlocks": "Tyto metriky se tu objeví, jakmile bude jejich blok v některé z vašich výloh: {labels}."
+    "needBlocks": "Tyto metriky se tu objeví, jakmile bude jejich blok v některé z vašich výloh: {labels}.",
+    "recordedOnly": "{labels} se tu objeví, jakmile kupující otevře pokladnu u některého z vašich produktů."
   },
   "signal": {
     "visitors": "Návštěvníci",
@@ -168,6 +178,7 @@
     "product_view": {
       "label": "Zobrazení produktových stránek",
       "description": "Návštěvníci, kteří otevřeli některou z vašich produktových stránek.",
+      "subtitle": "Včetně kliknutí z dlaždic ve výloze a z přímých odkazů.",
       "count": "{count, plural, one {{formatted} zobrazení} few {{formatted} zobrazení} many {{formatted} zobrazení} other {{formatted} zobrazení}}",
       "total": "Zobrazení celkem",
       "emptyRange": "V tomto období žádná zobrazení",

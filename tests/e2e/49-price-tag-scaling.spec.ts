@@ -153,9 +153,9 @@ test.describe("price tag scaling and legibility", () => {
     // because the pairing is the bug.
     const style = page.getByRole("button", { name: /^Tile style/ }).first();
     if ((await style.getAttribute("aria-expanded")) !== "true") await style.click();
-    // Title style lives under Fine tuning, which starts collapsed.
-    const fine = page.getByRole("button", { name: /^Fine tuning/ }).first();
-    if ((await fine.getAttribute("aria-expanded")) !== "true") await fine.click();
+    // Title style lives under the Title fold, which starts collapsed.
+    const fold = page.getByRole("button", { name: "Title", exact: true }).first();
+    if ((await fold.getAttribute("aria-expanded")) !== "true") await fold.click();
     await page
       .getByRole("group", { name: "Title style" })
       .getByRole("button", { name: "Shadow" })

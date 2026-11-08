@@ -6,6 +6,8 @@ import { SettingsShell } from "@/components/settings/SettingsShell";
 import { StepUpProvider } from "@/components/auth/StepUp";
 import { stepUpProviderProps } from "@/lib/auth/assurance";
 import { getAssurance, getProfile, requireUser } from "@/lib/auth/session";
+import { getTermsStatus } from "@/lib/legal/terms-status";
+import { agreementOutdated } from "@/lib/legal/terms-versions";
 
 // The template applies to every child page's `title` field, so a page
 // whose title is "Business & seller details" gets the full tab title
@@ -43,7 +45,12 @@ export default async function SettingsLayout({
   children: React.ReactNode;
 }) {
   const user = await requireUser("/settings");
-  const [profile, assurance] = await Promise.all([getProfile(), getAssurance()]);
+  // getTermsStatus is per-request cached, and the dashboard shell reads it too.
+  const [profile, assurance, terms] = await Promise.all([
+    getProfile(),
+    getAssurance(),
+    getTermsStatus(),
+  ]);
   const t = await getTranslations("Settings.account");
   const username =
     profile?.username || user.email?.split("@")[0] || t("fallbackName");
@@ -56,7 +63,15 @@ export default async function SettingsLayout({
     <ScopedIntlProvider scope="app">
     <DashboardShell username={username}>
       <StepUpProvider {...stepUpProviderProps(assurance)}>
-        <SettingsShell securityRecommended={assurance ? !assurance.enrolled : false}>
+        <SettingsShell
+          securityRecommended={assurance ? !assurance.enrolled : false}
+          // Same rule as Overview's attention row: asked once the Terms are in
+          // force; during their notice the shell's banner speaks instead.
+          legalActionNeeded={
+            profile !== null &&
+            agreementOutdated(profile.legal_accepted_version, terms?.inForce ?? null)
+          }
+        >
           {children}
         </SettingsShell>
       </StepUpProvider>

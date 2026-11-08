@@ -11,9 +11,12 @@ import {
   type StorefrontAttentionInfo,
 } from "@/lib/dashboard/attention";
 import { formatMoney } from "@/lib/dashboard/format";
+import { NEW_PRODUCT_PATH } from "@/lib/products/paths";
 import type { RestockForecast } from "@/lib/predictions";
 import type { OrderView } from "@/types/order-view";
 import type { OrderGlance } from "@/lib/orders/queries";
+import { TourLink } from "@/components/onboarding/TourLink";
+import { InstallOffer } from "@/components/pwa/InstallOffer";
 import { MetricTile } from "./MetricTile";
 import { MobileRevenueHero } from "./MobileRevenueHero";
 import { NeedsAttention } from "./NeedsAttention";
@@ -38,6 +41,7 @@ export function DashboardHome({
   withdrawalsToSettle = 0,
   restocks = [],
   canFulfil = false,
+  canAddProducts = false,
   checkoutOpen = false,
 }: {
   /** The Terms version in force, or null if that could not be read. */
@@ -55,6 +59,8 @@ export function DashboardHome({
   restocks?: readonly RestockForecast[];
   /** Whether the viewer may mark orders shipped from an opened order. */
   canFulfil?: boolean;
+  /** Whether the viewer may add products; a viewer-role teammate gets no Add button. */
+  canAddProducts?: boolean;
   /** Whether a buyer can pay through Square Share checkout right now. */
   checkoutOpen?: boolean;
   products: ProductsSummary;
@@ -90,14 +96,16 @@ export function DashboardHome({
           </div>
           {/* Secondary while setup is on screen: its next step is the one
               primary action on the page. */}
-          <Link href="/products/new" className={setupVisible ? secondaryButtonClass : primaryButtonClass}>
-            <Plus
-              className={`size-4 ${iconPopClass}`}
-              strokeWidth={2}
-              aria-hidden="true"
-            />
-            {t("addProduct")}
-          </Link>
+          {canAddProducts && (
+            <Link href={NEW_PRODUCT_PATH} className={setupVisible ? secondaryButtonClass : primaryButtonClass}>
+              <Plus
+                className={`size-4 ${iconPopClass}`}
+                strokeWidth={2}
+                aria-hidden="true"
+              />
+              {t("addProduct")}
+            </Link>
+          )}
         </div>
 
         {showMetrics && <MobileRevenueHero value={formatMoney(last30d.revenue, locale)} />}
@@ -112,8 +120,9 @@ export function DashboardHome({
           )}
         >
         <OnboardingSlot onboarding={onboarding} />
+        <InstallOffer />
 
-        {/* Headline metrics: last 30 days only — all-time and per-channel/click trends live in Analytics. */}
+        {/* Headline metrics: last 30 days only. All-time and per-channel/click trends live in Analytics. */}
         {showMetrics && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {/* Mobile shows revenue as the hero above instead of this cell. */}
@@ -140,6 +149,7 @@ export function DashboardHome({
         {/* Status modules. */}
         <div className="space-y-4">
           <NeedsAttention
+            setupVisible={setupVisible}
             items={buildAttentionItems({
               orders,
               products,
@@ -161,8 +171,13 @@ export function DashboardHome({
             glances={recentOrderGlances}
             id={RECENT_ORDERS_ID}
             canFulfil={canFulfil}
+            checkoutOpen={checkoutOpen}
           />
         </div>
+
+        {/* The checklist offers the tour while setup is on screen; after
+            that, this is the way back to it on the page a seller lands on. */}
+        {!setupVisible && <TourLink />}
         </div>
       </div>
     </div>

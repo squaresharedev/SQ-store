@@ -64,7 +64,7 @@ test.describe("needs attention links", () => {
     );
     url = await followAction(
       page,
-      /open designer/i,
+      /open storefront/i,
       new RegExp(`/storefront/${storefrontId}`),
     );
     expect(url.pathname).toBe(`/storefront/${storefrontId}`);

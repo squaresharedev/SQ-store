@@ -13,8 +13,9 @@
   },
   "firstRun": {
     "title": "Nothing to measure yet",
-    "body": "Visits to your product pages show up here once one is live.",
-    "backToSetup": "Back to setup"
+    "body": "Publish a storefront to see views, or make your first sale to see revenue.",
+    "publishStorefront": "Publish a storefront",
+    "goToProducts": "Go to products"
   },
   "range": {
     "ariaLabel": "Date range",
@@ -73,12 +74,20 @@
   },
   "compare": {
     "previous": "Previous period",
-    "vsPrevious": "{change} vs previous period"
+    "vsPrevious": "{change} vs previous period",
+    "previousPeriodDates": "{from} - {to}"
+  },
+  "scrub": {
+    "on": "On {date}",
+    "inMonth": "In {date}",
+    "upTo": "Up to {date}",
+    "noSales": "No sales"
   },
   "funnel": {
     "label": "Storefront funnel",
     "description": "From your storefront being shown on your own site to a paid order. These count events, not people.",
-    "views": "Views on your site",
+    "subtitle": "Visitors who saw your storefront embed on your own website (not direct links), from first view to paid order.",
+    "views": "Views via embed",
     "viewsEmpty": "No views in this range",
     "opens": "Products opened",
     "opensEmpty": "None opened in this range",
@@ -91,7 +100,7 @@
     "abandonment": "Checkouts not finished",
     "abandonmentCounts": "Left unpaid: {expired}, started: {started}",
     "notEnough": "Not enough data yet",
-    "notEnoughHint": "Rates appear once this range holds {min} views."
+    "notEnoughHint": "Rates appear once this range holds {min} views: with fewer, a single order would skew the percentage."
   },
   "tiles": {
     "revenue": "Revenue",
@@ -110,7 +119,7 @@
   "channels": {
     "embed": "On your site",
     "marketplace": "Marketplace",
-    "direct": "Your page",
+    "direct": "Direct link",
     "button": "Buy button"
   },
   "signalsUnavailable": {
@@ -119,7 +128,8 @@
   },
   "upcoming": {
     "needProducts": "{labels} appear here once a product is on one of your storefronts.",
-    "needBlocks": "{labels} appear here once their block is on one of your storefronts."
+    "needBlocks": "{labels} appear here once their block is on one of your storefronts.",
+    "recordedOnly": "{labels} appear here once a buyer opens checkout on one of your products."
   },
   "signal": {
     "visitors": "Visitors",
@@ -168,6 +178,7 @@
     "product_view": {
       "label": "Product page views",
       "description": "Visitors opening one of your hosted product pages.",
+      "subtitle": "Includes clicks from storefront tiles and direct links.",
       "count": "{count, plural, one {{formatted} view} other {{formatted} views}}",
       "total": "Total views",
       "emptyRange": "No views in this range",

@@ -91,7 +91,7 @@
     "groups": {
       "theme": "Tema",
       "header": "Cabeçalho",
-      "typography": "Tipografia",
+      "typography": "Tipo de letra",
       "cards": "Cartões de produto",
       "soldOut": "Esgotado",
       "productPage": "Página de produto",
@@ -100,7 +100,7 @@
     "subtitle": {
       "theme": "Montra / Tema",
       "header": "Montra / Cabeçalho",
-      "typography": "Montra / Tipografia",
+      "typography": "Montra / Tipo de letra",
       "cards": "Montra / Cartões de produto",
       "soldOut": "Montra / Esgotado",
       "productPage": "Montra / Página de produto",
@@ -161,7 +161,8 @@
       "cardStarRating": "Classificação em estrelas nos cartões",
       "cardLowStock": "Etiqueta Últimas unidades",
       "textSpacing": "Espaçamento entre letras e altura da linha",
-      "elementBlur": "Desfoque"
+      "elementBlur": "Desfoque",
+      "phoneLayout": "Organizar para telemóveis"
     }
   },
   "editorSearch": {
@@ -207,31 +208,37 @@
     "emptyHint": "Esta grelha está vazia",
     "removed": "Removido pela Square Share",
     "pausedInReview": "Pausado · na Square Share para análise",
-    "pausedNeedsChanges": "Pausado pela Square Share · requer alterações"
+    "pausedNeedsChanges": "Pausado pela Square Share · requer alterações",
+    "status": {
+      "live": "Publicada",
+      "pagesOff": "Ainda não publicada: ative as páginas de produto",
+      "detailsMissing": "Ainda não publicada: adicione os seus dados de vendedor"
+    }
   },
   "embed": {
-    "inDevNotice": "O widget de incorporação está em desenvolvimento e ainda não é apresentado em sites externos. Configure as definições abaixo para estar pronto a colar o código assim que for lançado.",
+    "sectionTitle": "No seu próprio site",
+    "inDevNotice": "Isto ainda não aparece noutros sites. Configure-o agora e ficará pronto assim que for lançado. Nessa altura, também vai acrescentar uma pequena nota à sua política de privacidade: nós damos-lhe o texto.",
     "title": "Partilhar esta montra",
-    "description": "Envie um link para «{name}» ou cole um código no seu próprio site para a mostrar lá.",
+    "description": "Envie um link para «{name}», ou cole o código para o site no seu próprio site para a mostrar lá.",
     "steps": {
       "site": "Escolha os sites onde aparece",
-      "snippet": "Cole o código no seu site",
+      "snippet": "Adicione o código ao seu site",
       "privacy": "Acrescente isto à sua política de privacidade"
     },
     "required": "Obrigatório",
     "enabledLabel": "Mostrar no meu site",
     "showingLabel": "Visível no seu site",
-    "domainsLabel": "Domínios permitidos",
+    "domainsLabel": "Endereços do seu site",
     "domainsPlaceholder": "oseusite.com, blog.oseusite.com",
-    "domainsHint": "Até {max}, separados por vírgulas. Cole um URL e nós reduzimo-lo ao domínio.",
-    "sameAsHint": "Copia os domínios permitidos de {title}.",
-    "emptyDomainsWarning": "Adicione pelo menos um domínio. Enquanto isto estiver vazio, a montra não carrega em lado nenhum, mesmo com a incorporação ativada.",
+    "domainsHint": "A incorporação só carrega nestes sites. Cole um URL completo e nós extraímos o endereço. Até {max}, separados por vírgulas.",
+    "sameAsHint": "Copia os endereços do site de {title}.",
+    "emptyDomainsWarning": "Adicione pelo menos um endereço do seu site. Enquanto isto estiver vazio, a montra não carrega em lado nenhum, mesmo com a incorporação ativada.",
     "builderLabel": "O seu construtor de sites",
     "builderOther": "Outro site",
     "builderSteps": {
       "other": "Cole-o no HTML da sua página, onde a montra deve aparecer.",
       "wordpress": "Adicione um bloco «HTML personalizado» onde a montra deve aparecer e cole lá o código.",
-      "squarespace": "Adicione um bloco «Code» e cole lá o código. Se a montra só aparecer depois de recarregar, mude para «Só iframe».",
+      "squarespace": "Adicione um bloco «Code» e cole lá o código. Se a montra só aparecer depois de recarregar, mude para «Incorporação simples».",
       "wix": "Adicione «Embed Code» e depois «Embed HTML», e cole o código. Depois estique a caixa até à altura da montra.",
       "webflow": "Adicione um elemento «Code Embed» e cole lá o código. Aparece no site publicado.",
       "shopify": "No editor de temas, adicione uma secção «Custom Liquid» e cole lá o código.",
@@ -241,21 +248,21 @@
     },
     "snippetKinds": {
       "label": "Tipo de código",
-      "script": "Script",
-      "iframe": "Só iframe"
+      "script": "Incorporação completa",
+      "iframe": "Incorporação simples"
     },
-    "snippetReadyHint": "Basta colá-lo uma vez. Ajusta-se à montra e acompanha o que alterar aqui.",
-    "iframeHint": "Para sites que removem scripts. Tem {height} píxeis de altura e desloca-se por dentro. Copie-o de novo depois de alterar os seus domínios.",
-    "snippetLockedHint": "Ative a incorporação e adicione pelo menos um domínio para desbloquear o botão Copiar.",
+    "snippetReadyHint": "Funciona na maioria dos sites. Basta colá-lo uma vez: ajusta-se à montra e acompanha o que alterar aqui.",
+    "iframeHint": "Utilize este se a Incorporação completa não aparecer no seu site. Tem {height} píxeis de altura e desloca-se por dentro. Copie-o de novo sempre que alterar os endereços do seu site.",
+    "snippetLockedHint": "Ative a incorporação e adicione pelo menos um endereço do seu site para desbloquear o botão Copiar.",
     "snippetSaveHint": "Guarde as definições para desbloquear o botão Copiar.",
     "pagesOffHint": "Ative primeiro as páginas de produto no editor. Um clique num produto abre a respetiva página.",
     "notShowingLabel": "Se a montra não aparecer",
-    "notShowingTip": "O endereço do seu site tem de estar em Domínios permitidos e o site tem de usar https. O código colado aparece no site publicado, não no editor do construtor de sites. Para o ver num endereço de pré-visualização (como oseusite.webflow.io), adicione também esse endereço.",
+    "notShowingTip": "O endereço do seu site tem de estar em Endereços do seu site, acima, e o site tem de usar https. O código colado aparece no site publicado, não no editor do construtor de sites. Se a montra não aparecer de todo, experimente o tipo de código Incorporação simples. Para o ver num endereço de pré-visualização (como oseusite.webflow.io), adicione também esse endereço.",
     "copySnippet": {
-      "copy": "Copiar código de incorporação",
-      "copied": "Código de incorporação copiado",
-      "failed": "Não foi possível copiar o código de incorporação. Selecione-o e copie-o manualmente.",
-      "cannotCopyYet": "o código de incorporação ainda não pode ser copiado"
+      "copy": "Copiar código para o site",
+      "copied": "Código para o site copiado",
+      "failed": "Não foi possível copiar o código para o site. Selecione-o e copie-o manualmente.",
+      "cannotCopyYet": "o código para o site ainda não pode ser copiado"
     },
     "privacyHint": "O seu site passa a carregar esta montra a partir da Square Share, pelo que a política de privacidade tem de o indicar. Cole nela este texto:",
     "privacyTextLabel": "Texto de privacidade",
@@ -265,20 +272,21 @@
       "copied": "Texto de privacidade copiado",
       "failed": "Não foi possível copiar o texto. Selecione-o e copie-o manualmente."
     },
-    "snippetKeyLabel": "Chave do código",
-    "rotateConfirmText": "Renovar emite uma nova chave. Todas as cópias do código antigo deixam de funcionar de imediato, incluindo as que estão em sites que ainda quer manter: vai ter de colar o novo código em todo o lado.",
-    "rotateKey": "Renovar chave",
-    "rotating": "A renovar…",
-    "revokeHint": "Colou nalgum sítio onde não devia? Renove a chave para revogar todos os códigos existentes.",
+    "snippetKeyLabel": "Código para o site",
+    "rotateConfirmText": "Obter um novo código desativa o antigo em todos os sítios onde foi colado. Nos sites onde ainda quer mostrar a montra, terá de colar novamente o novo código.",
+    "rotateKey": "Obter um novo código",
+    "rotating": "A obter um novo código…",
+    "revokeHint": "O código para o site foi feito para ser público: só aparece nos endereços do seu site. Obtenha um novo código apenas para desativar todas as cópias já coladas.",
     "saveSettings": "Guardar definições",
     "saving": "A guardar…",
     "saved": "Definições de incorporação guardadas.",
-    "newKeyIssued": "Nova chave de incorporação emitida.",
-    "newKeyDetail": "Cole novamente o código em todos os locais onde esta montra está incorporada."
+    "newKeyIssued": "Novo código para o site criado.",
+    "newKeyDetail": "Cole novamente o código para o site em todos os locais onde esta montra está incorporada."
   },
   "share": {
     "title": "Ligação da montra",
     "live": "A sua montra tem uma página própria. Qualquer pessoa com esta ligação pode vê-la, sem precisar de um site.",
+    "searchOff": "Oculta dos motores de pesquisa, como o Google.",
     "pagesOff": "Ative as páginas de produto no editor e esta montra passa a ter uma ligação para partilhar.",
     "detailsMissing": "Esta montra passa a ter uma ligação para partilhar quando os seus dados de vendedor estiverem completos.",
     "open": "Abrir",
@@ -321,7 +329,7 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Página de produto",
-    "closeAriaLabel": "Fechar o percurso de compra de {title}",
+    "closeAriaLabel": "Fechar a página de produto de {title}",
     "desktopSize": "Tamanho para computador",
     "mobileSize": "Tamanho para telemóvel",
     "checkoutLabel": " · Pagamento",
@@ -331,7 +339,7 @@
   "metadata": {
     "storefronts": {
       "title": "Montras",
-      "subtitle": "Cada montra tem a sua própria grelha e tema. Crie tantas quantas precisar e depois abra uma para a editar."
+      "subtitle": "Cada montra tem a sua própria grelha e tema, e um link próprio para partilhar. Crie tantas quantas precisar e depois abra uma para a editar."
     },
     "editor": {
       "title": "Editar montra"
@@ -351,20 +359,20 @@
   "controls": {
     "off": "Desativado",
     "layers": "Camadas",
-    "objectCount": "{count, plural, one {1 objeto} many {# de objetos} other {# objetos}}",
+    "objectCount": "{count, plural, one {# bloco} many {# de blocos} other {# blocos}}",
     "cardStyle": "Estilo do cartão",
     "priceTag": "Etiqueta de preço",
     "theme": "Tema",
-    "canvas": "Tela",
-    "design": "Design"
+    "themeHint": "Cores, tamanho da grelha e esquema para telemóvel",
+    "canvas": "Tela"
   },
   "designPanel": {
     "tabSelection": "Seleção",
-    "tabDesign": "Design",
+    "tabDesign": "Toda a montra",
     "show": "Mostrar painel de design",
     "hide": "Ocultar painel de design",
     "resize": "Redimensionar painel de design",
-    "closeSettings": "Fechar definições de design",
+    "closeSettings": "Fechar estilo da montra",
     "scopeLabel": "Âmbito do painel"
   },
   "library": {
@@ -434,10 +442,11 @@
     "sectionPalettes": "Paletas"
   },
   "themePanel": {
-    "accent": "Destaque"
+    "accent": "Destaque",
+    "accentHint": "Utilizada nos botões, etiquetas de promoção, títulos e no nome da sua loja."
   },
   "panelSearch": {
-    "placeholder": "Encontrar uma definição ou objeto",
+    "placeholder": "Encontrar uma definição ou bloco",
     "clear": "Limpar pesquisa",
     "noResults": "Nada no editor corresponde a isso.",
     "matchesLabel": "Resultados"
@@ -488,7 +497,7 @@
     "cornerValueText": "{n, plural, one {# pixel} many {# pixels} other {# pixels}}",
     "sharp": "Reto",
     "circle": "Círculo",
-    "fineTuning": "Ajuste fino",
+    "titleSection": "Título",
     "showTitle": "Mostrar título",
     "titleStyleLabel": "Estilo do título",
     "edgeSpacing": "Espaçamento na margem",
@@ -556,12 +565,13 @@
     "label": "Em cartões maiores",
     "tile": "Aumentar",
     "cell": "Mesmo tamanho",
-    "everyCard": "Aplica-se a todos os cartões desta loja."
+    "everyCard": "Aplica-se às etiquetas de preço e de promoção em todos os cartões."
   },
   "layout": {
     "canvasWidth": "Largura da tela",
     "canvasWidthAriaLabel": "Largura da tela em blocos",
     "blocksWide": "{n, plural, one {# bloco de largura} many {# blocos de largura} other {# blocos de largura}}",
+    "blocksUnit": "blocos",
     "canvasHeight": "Altura da tela",
     "heightTip": "O painel não pode ficar mais pequeno do que os blocos que já tem: arraste um bloco para cima primeiro e depois reduza a tela.",
     "canvasHeightAriaLabel": "Altura da tela em blocos",
@@ -570,6 +580,11 @@
     "gridDensityAriaLabel": "Densidade da grelha",
     "gridGapValue": "{n, plural, one {espaço de # pixel} many {espaço de # pixels} other {espaço de # pixels}}",
     "noGap": "Sem espaço",
+    "phonesInfoLabel": "Como os telemóveis mostram este painel",
+    "phonesInfoBody": "Desativado, os telemóveis reorganizam o painel sozinhos para caber no ecrã. Ativado, abra a vista de telemóvel e arraste ou redimensione os blocos para os colocar onde quiser. O painel para computador fica como está.",
+    "phonesAutomatic": "Os telemóveis organizam este painel automaticamente.",
+    "phoneWidth": "Largura no telemóvel",
+    "phoneWidthAriaLabel": "Largura no telemóvel em blocos",
     "showGrid": "Mostrar grelha",
     "gridInfoLabel": "Quem vê a grelha",
     "gridInfoBody": "Um guia para si enquanto cria o design: desenha os espaços vazios para poder ver onde um bloco vai ficar. Os compradores nunca a veem."
@@ -588,7 +603,8 @@
     "angle": "{n}°",
     "layerLabel": "Camada",
     "layerInfoLabel": "Como funcionam as camadas",
-    "layerInfoBody": "As camadas decidem apenas o que é desenhado por cima onde os blocos se sobrepõem; a ordem de leitura que um leitor de ecrã segue nunca muda.{multi, select, true { Esta seleção mantém a sua própria ordem dentro da pilha ao mover-se.} other {}}{stacked, select, true { Alt-clique numa pilha na tela para alcançar o bloco por baixo.} other {}}",
+    "layerInfoBody": "As camadas decidem apenas o que é desenhado por cima onde os blocos se sobrepõem; a ordem de leitura que um leitor de ecrã segue nunca muda.{multi, select, true { Esta seleção mantém a sua própria ordem dentro da pilha ao mover-se.} other {}}",
+    "stackedHint": "Alt-clique para selecionar o bloco por baixo. Num ecrã tátil, toque novamente na pilha.",
     "blocksSelected": "{count, plural, one {# bloco selecionado} many {# de blocos selecionados} other {# blocos selecionados}}",
     "layerOf": "Camada {index} de {total}",
     "blockLayerLabel": "Camada do bloco",
@@ -596,7 +612,13 @@
     "sendBackward": "Recuar uma camada",
     "bringForward": "Avançar uma camada",
     "bringToFront": "Trazer para a frente",
-    "seeAllLayers": "Ver todas as camadas"
+    "seeAllLayers": "Ver todas as camadas",
+    "phoneLabel": "Nos telemóveis",
+    "phoneInfoLabel": "Como um bloco fica nos telemóveis",
+    "phoneInfoBody": "Arraste ou redimensione um bloco na vista de telemóvel para o colocar aí. Voltar ao automático deixa a organização para telemóvel colocá-lo de novo. O painel para computador fica como está.",
+    "hideOnPhones": "Ocultar nos telemóveis",
+    "showOnPhones": "Mostrar nos telemóveis",
+    "phoneAutomatic": "Voltar ao automático"
   },
   "header": {
     "showHeader": "Mostrar cabeçalho",
@@ -606,7 +628,8 @@
     "storeNamePlaceholder": "Nome da loja mostrado aos compradores",
     "bio": "Biografia",
     "bioPlaceholder": "Uma linha curta sobre a sua loja",
-    "charsLeft": "{n, plural, one {Resta # carácter} many {Restam # carateres} other {Restam # carateres}}"
+    "charsLeft": "{n, plural, one {Resta # carácter} many {Restam # carateres} other {Restam # carateres}}",
+    "styleLine": "{line, select, name {Tipo de letra e cor do nome} other {Tipo de letra e cor da biografia}}"
   },
   "soldOut": {
     "hide": "Ocultar dos compradores",
@@ -682,10 +705,12 @@
     "movePriceTo": "{spot, select, top_left {Mover o preço para o canto superior esquerdo} top_center {Mover o preço para o topo ao centro} top_right {Mover o preço para o canto superior direito} middle_center {Mover o preço para o centro} bottom_left {Mover o preço para o canto inferior esquerdo} bottom_center {Mover o preço para a base ao centro} bottom_right {Mover o preço para o canto inferior direito} other {Mover o preço para aqui}}"
   },
   "productPage": {
+    "scopeNote": "Estas definições aplicam-se a todas as páginas de produto desta montra.",
     "layout": {
       "title": "Página",
       "showPage": {
         "label": "Mostrar uma página de produto",
+        "hint": "Também dá à sua montra um link próprio para partilhar.",
         "infoLabel": "O que este interruptor faz",
         "infoOn": "Tocar num cartão de produto abre a sua página, e a montra tem uma página própria para partilhar.",
         "infoOff": "Os cartões de produto não têm página para abrir, e o link da própria montra também deixa de funcionar."
@@ -702,7 +727,7 @@
         "label": "Tipo de letra",
         "infoLabel": "Como o tipo de letra desta página se relaciona com o da montra",
         "infoOwn": "Esta página é apresentada no seu próprio tipo de letra, seja qual for o que a montra usa.",
-        "infoFollows": "Segue o tipo de letra da sua montra. Altere-o em Tipografia.",
+        "infoFollows": "Segue o tipo de letra da sua montra. Altere-o nas definições de Tipo de letra.",
         "inheritOption": "Igual ao da montra ({name})"
       },
       "indexing": {
@@ -716,6 +741,7 @@
       "title": "Botão de compra",
       "infoLabel": "O que decide se um botão aparece",
       "infoContent": "O botão segue o link de compra de cada produto (definido no produto). Sem um, envia um e-mail para o seu endereço de contacto abaixo; sem nenhum dos dois, não é mostrado nenhum botão.",
+      "checkoutNote": "O botão de pagamento na sua página de pagamento acompanha este. <link>Ir para Pagamento</link>",
       "buttonText": {
         "label": "Texto do botão",
         "charsLeft": "{count, plural, one {Resta # carácter} many {Restam # carateres} other {Restam # carateres}}"
@@ -844,6 +870,7 @@
   "productBlock": {
     "deleted": "Este produto foi removido do seu catálogo.",
     "removeFromGrid": "Remover da grelha",
+    "details": "Detalhes do produto",
     "nameLabel": "Nome",
     "namePlaceholder": "Nome do produto",
     "priceLabel": "Preço ({currency})",
@@ -858,13 +885,14 @@
       "lowStock": "Stock baixo: {count} disponíveis.",
       "inStock": "{count} em stock."
     },
-    "openProductPage": "Abrir percurso de compra",
-    "hideProductPage": "Ocultar percurso de compra",
+    "openProductPage": "Abrir página de produto",
+    "hideProductPage": "Ocultar página de produto",
+    "noCtaWarning": "O botão de compra na página deste produto ainda não tem destino. Adicione um link de compra ao produto, ou um e-mail de contacto nos seus dados de vendedor.",
     "tileStyle": {
       "title": "Estilo do cartão",
-      "reset": "Repor tema",
+      "reset": "Usar estilo do tema",
       "infoLabel": "Como o estilo deste cartão se relaciona com o tema",
-      "infoWithOverrides": "Este cartão tem o seu próprio estilo. As definições que não alterou aqui continuam a seguir o tema.",
+      "infoWithOverrides": "Este cartão tem o seu próprio estilo; tudo o que não for alterado aqui segue o tema. Usar estilo do tema limpa apenas as alterações deste cartão: o tema fica como está.",
       "infoNoOverrides": "Dê um estilo próprio a este cartão. Tudo o que não alterar continua a seguir o tema."
     },
     "priceTag": "Etiqueta de preço",
@@ -876,6 +904,7 @@
       "updateEverywhere": "Atualizar em todo o lado"
     },
     "savedToast": "«{title}» foi atualizado em todo o lado onde aparece.",
+    "unsavedToast": "O novo nome ou preço de «{title}» não foi guardado. Prima Guardar antes de continuar para o manter.",
     "validation": {
       "noTitle": "Dê um título ao seu produto.",
       "noPrice": "Defina um preço.",
@@ -983,7 +1012,7 @@
   "multiBlock": {
     "shapesContext": "A editar {count, plural, one {# forma} many {# de formas} other {# formas}} em conjunto. Os valores mostrados vêm da primeira forma selecionada; cada alteração aplica-se a todas.",
     "textsContext": "A editar {count, plural, one {# bloco de texto} many {# de blocos de texto} other {# blocos de texto}} em conjunto. Os valores mostrados vêm do primeiro bloco selecionado; cada alteração aplica-se a todos. Cada bloco mantém o seu próprio texto.",
-    "imagesContext": "A editar {count, plural, one {# elemento} many {# de elementos} other {# elementos}} em conjunto. Os valores mostrados vêm do primeiro elemento selecionado; cada alteração aplica-se a todos. Cada um mantém a sua própria imagem.",
+    "imagesContext": "A editar {count, plural, one {# bloco} many {# de blocos} other {# blocos}} em conjunto. Os valores mostrados vêm do primeiro bloco selecionado; cada alteração aplica-se a todos. Cada um mantém a sua própria imagem.",
     "productsContext": "A estilizar {count, plural, one {# cartão de produto} many {# de cartões de produto} other {# cartões de produto}} em conjunto. Os valores mostrados vêm do primeiro cartão selecionado; cada alteração aplica-se a todos.",
     "mixedContext": "{count, plural, one {Está selecionado # bloco} many {Estão selecionados # de blocos} other {Estão selecionados # blocos}} de tipos diferentes. Selecione blocos de um único tipo para editar as suas definições em conjunto.",
     "remove": "Remover {count, plural, one {# bloco} many {# de blocos} other {# blocos}}",
@@ -991,7 +1020,7 @@
     "productsNotDuplicated": "Os produtos não são duplicados.",
     "tileStyle": {
       "title": "Estilo do cartão",
-      "reset": "Repor tema"
+      "reset": "Usar estilo do tema"
     },
     "priceTag": "Etiqueta de preço"
   },
@@ -1003,18 +1032,18 @@
     "ariaLabel": "Ferramentas do editor",
     "addProduct": "Adicionar produto",
     "addText": "Adicionar texto",
-    "addElement": "Adicionar elemento",
+    "addElement": "Adicionar forma ou imagem",
     "product": "Produto",
     "text": "Texto",
-    "element": "Elemento",
-    "elementsMenu": "Elementos",
+    "element": "Formas",
+    "elementsMenu": "Formas e imagens",
     "uploading": "A carregar…",
     "upload": "Carregar",
     "uploadImage": "Carregar imagem",
     "allShapes": "Todas as formas",
     "browseShapes": "Explorar a biblioteca completa de formas",
-    "closePage": "Fechar percurso de compra",
-    "showPage": "Mostrar percurso de compra",
+    "closePage": "Fechar página de produto",
+    "showPage": "Mostrar página de produto",
     "closePages": "Fechar a página de produto, o pagamento e a página de agradecimento",
     "showPageFull": "Mostrar a página de produto, o pagamento e a página de agradecimento",
     "undo": "Anular",
@@ -1027,22 +1056,26 @@
     "zoomOutTip": "Reduzir zoom (Ctrl -)",
     "zoomReset": "Repor zoom para 100%",
     "zoomResetTip": "Repor zoom (Ctrl 0)",
-    "zoomResetMenuItem": "Repor zoom",
+    "zoomFit": "Ajustar ao ecrã",
     "zoomIn": "Aumentar zoom",
     "zoomInTip": "Aumentar zoom (Ctrl +)",
-    "designSettings": "Definições de design",
-    "page": "Percurso de compra",
-    "moreTools": "Mais ferramentas"
+    "designSettings": "Estilo da montra",
+    "style": "Estilo",
+    "page": "Página de produto",
+    "pageMobile": "Página",
+    "pageDisabledTip": "Adicione um produto para abrir a respetiva página",
+    "moreTools": "Mais ferramentas",
+    "more": "Mais"
   },
   "selectionToolbar": {
     "toolsFor": "Ferramentas para {name}",
-    "elements": "{count, plural, one {# elemento} many {# de elementos} other {# elementos}}",
-    "hidePage": "Ocultar percurso de compra",
-    "openPage": "Abrir percurso de compra",
-    "openProductPage": "Abrir o percurso de compra de {name}",
-    "closeProductPage": "Fechar o percurso de compra de {name}",
-    "openProductPages": "Abrir o percurso de compra de {count, plural, one {# produto} many {# de produtos} other {# produtos}}",
-    "closeProductPages": "Fechar o percurso de compra de {count, plural, one {# produto} many {# de produtos} other {# produtos}}",
+    "elements": "{count, plural, one {# bloco} many {# de blocos} other {# blocos}}",
+    "hidePage": "Ocultar página de produto",
+    "openPage": "Abrir página de produto",
+    "openProductPage": "Abrir a página de produto de {name}",
+    "closeProductPage": "Fechar a página de produto de {name}",
+    "openProductPages": "{count, plural, one {Abrir a página de produto de # produto} many {Abrir as páginas de produto de # de produtos} other {Abrir as páginas de produto de # produtos}}",
+    "closeProductPages": "{count, plural, one {Fechar a página de produto de # produto} many {Fechar as páginas de produto de # de produtos} other {Fechar as páginas de produto de # produtos}}",
     "editText": "Editar texto",
     "editTextOf": "Editar o texto de {name}",
     "color": "Cor",
@@ -1059,24 +1092,26 @@
     "frameImageFor": "Recortar e posicionar a imagem de {name}",
     "duplicate": "Duplicar",
     "duplicateNamed": "Duplicar {name}",
-    "duplicateN": "Duplicar {count, plural, one {# elemento} many {# de elementos} other {# elementos}}",
+    "duplicateN": "Duplicar {count, plural, one {# bloco} many {# de blocos} other {# blocos}}",
     "removeFrom": "Remover {name} da grelha",
-    "removeN": "Remover {count, plural, one {# elemento} many {# de elementos} other {# elementos}} da grelha"
+    "removeN": "Remover {count, plural, one {# bloco} many {# de blocos} other {# blocos}} da grelha"
   },
   "canvas": {
     "addSuggested": "Adicionar {title} a esta montra",
     "gridLabel": "Tela da montra",
     "emptyGrid": "A sua grelha está vazia",
-    "emptyGridHint": "Adicione um produto para começar a organizar a sua montra. O texto e as formas estão na barra de ferramentas abaixo.",
+    "emptyGridHint": "Adicione um produto para começar a organizar a sua montra. O texto, as formas e as suas próprias imagens estão na barra de ferramentas abaixo.",
     "addProduct": "Adicionar produto",
     "desktopPreview": "Pré-visualização para computador",
-    "mobilePreview": "Pré-visualização para telemóvel"
+    "mobilePreview": "Pré-visualização para telemóvel",
+    "multiSelectTip": "Para selecionar vários blocos, clique neles com Shift ou arraste por um espaço vazio. Num ecrã tátil, mantenha premido cada um.",
+    "sheetTip": "Feche este painel para voltar a ver a barra de ferramentas."
   },
   "blockTile": {
     "removedProduct": "Produto removido",
     "shape": "{kind, select, square {forma de quadrado} circle {forma de círculo} ring {forma de anel} diamond {forma de losango} rounded {forma de quadrado arredondado} pill {forma de pílula} half {forma de meio círculo} quarter {forma de quarto de círculo} bar {forma de barra} triangle {forma de triângulo} wedge {forma de cunha} pentagon {forma de pentágono} hexagon {forma de hexágono} octagon {forma de octógono} star {forma de estrela} sparkle {forma de brilho} cross {forma de cruz} arrow {forma de seta} chevron {forma de galão} trapezoid {forma de trapézio} parallelogram {forma de paralelogramo} burst {forma de explosão} other {forma {kind}}}",
     "imageWithAlt": "Imagem: {alt}",
-    "imageElement": "Elemento de imagem",
+    "imageElement": "Bloco de imagem",
     "textWithContent": "Texto: {text}",
     "textBlock": "Bloco de texto",
     "selected": "Selecionado: {label}. Prima Enter para anular a seleção.",
@@ -1109,11 +1144,14 @@
       "nameLabel": "Nome da montra",
       "namePlaceholder": "Montra sem título",
       "unsaved": "Alterações não guardadas",
+      "saveTip": "Guardar (Ctrl+S)",
       "viewPage": "Ver página",
+      "viewSavedPage": "Ver página guardada",
+      "shareSetupNeeded": "Os seus dados de vendedor estão incompletos, por isso esta montra ainda não pode ser partilhada",
       "search": "Pesquisar"
     },
     "mobileNotice": {
-      "body": "Para a melhor experiência de edição, abra este editor num computador ou tablet. Reordenar blocos e editar o cabeçalho funcionam em qualquer dispositivo.",
+      "body": "Aqui funciona tudo: toque num bloco para o editar, mantenha premidos outros blocos para os selecionar em conjunto, mantenha premida uma ferramenta para ver o que faz e junte os dedos para fazer zoom. Os ajustes finos são mais fáceis num ecrã maior.",
       "dismiss": "Dispensar o aviso de edição em ecrã pequeno"
     },
     "inspector": {
@@ -1171,13 +1209,6 @@
       "badge": "Exemplo",
       "summary": "{count, plural, one {{count} bloco · experimente à vontade, nada é guardado} many {{count} de blocos · experimente à vontade, nada é guardado} other {{count} blocos · experimente à vontade, nada é guardado}}",
       "hide": "Ocultar a montra de exemplo"
-    },
-    "embed": {
-      "title": "Incorporar uma montra",
-      "description": "Cada montra que criar tem o seu próprio código para colar no seu site.",
-      "snippetLabel": "Um código tem este aspeto",
-      "inDevelopment": "O widget ainda está em desenvolvimento e ainda não aparece noutros sites.",
-      "create": "Criar uma montra"
     },
     "list": {
       "show": "Mostrar a montra de exemplo",
@@ -1457,7 +1488,11 @@
       "link": "Ligação"
     },
     "buyButtonTipLabel": "Para onde leva o botão",
-    "buyButtonTip": "Usa o texto e a cor do botão da sua página de produto, e abre a página de produto.",
+    "buyButtonTip": "Abre a página de produto. Começa com o texto e a cor do botão dessa página, que pode alterar aqui para os cartões.",
+    "pageButton": {
+      "label": "Botão da página de produto",
+      "use": "Utilizar o botão da página de produto"
+    },
     "rating": "Classificação em estrelas",
     "ratingTipLabel": "De onde vêm as estrelas",
     "ratingTip": "Das avaliações dos compradores. Aparece por baixo do nome assim que um produto tem uma avaliação.",
@@ -1471,5 +1506,43 @@
     "lineHeight": "Altura da linha",
     "normal": "Normal",
     "valueText": "{value} por cento do tamanho do texto"
+  },
+  "shortcuts": {
+    "title": "Atalhos de teclado",
+    "tip": "Atalhos de teclado (?)",
+    "rows": {
+      "save": {
+        "label": "Guardar",
+        "keys": "<kbd>{mod}</kbd> <kbd>S</kbd>"
+      },
+      "copyPaste": {
+        "label": "Copiar e colar blocos",
+        "keys": "<kbd>{mod}</kbd> <kbd>C</kbd> e depois <kbd>{mod}</kbd> <kbd>V</kbd>"
+      },
+      "remove": {
+        "label": "Remover os blocos selecionados",
+        "keys": "<kbd>Delete</kbd>"
+      },
+      "move": {
+        "label": "Mover os blocos selecionados",
+        "keys": "<kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd>"
+      },
+      "selectMore": {
+        "label": "Selecionar vários blocos",
+        "keys": "<kbd>Shift</kbd> + clique"
+      },
+      "selectUnder": {
+        "label": "Selecionar o bloco por baixo",
+        "keys": "<kbd>{alt}</kbd> + clique"
+      },
+      "layer": {
+        "label": "Avançar ou recuar uma camada",
+        "keys": "<kbd>{mod}</kbd> <kbd>]</kbd> ou <kbd>[</kbd>"
+      },
+      "pan": {
+        "label": "Mover-se pela tela",
+        "keys": "Mantenha premido <kbd>Espaço</kbd> e arraste"
+      }
+    }
   }
 }

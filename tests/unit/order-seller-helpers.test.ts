@@ -5,6 +5,7 @@ import { buyerMailto } from "@/lib/orders/buyer-mailto";
 import { OVERDUE_AFTER_DAYS, isOverdue } from "@/lib/orders/fulfilment";
 import {
   orderNumber,
+  orderNumberCondition,
   orderNumberLabel,
   orderNumberRange,
   parseOrderNumberQuery,
@@ -50,6 +51,17 @@ describe("the order number", () => {
     expect(from).toBe("44560000-0000-0000-0000-000000000000");
     expect(to).toBe("4456ffff-ffff-ffff-ffff-ffffffffffff");
     expect(ID >= from && ID <= to).toBe(true);
+  });
+
+  it("is one condition in the Orders search box's or list, and none for a word", () => {
+    // The box matches the buyer, the address, the product and the tracking
+    // number; a term shaped like a number also matches its range of ids.
+    expect(orderNumberCondition("#4456")).toBe(
+      "and(id.gte.44560000-0000-0000-0000-000000000000,id.lte.4456ffff-ffff-ffff-ffff-ffffffffffff)",
+    );
+    expect(orderNumberCondition("blue mug")).toBeNull();
+    // Only parsed hex reaches the filter, never the characters that were typed.
+    expect(orderNumberCondition("4456),or(id.gte.0")).toBeNull();
   });
 });
 

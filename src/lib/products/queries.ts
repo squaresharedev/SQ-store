@@ -60,6 +60,9 @@ type ProductListRow = Pick<
   | "stock_quantity"
   | "low_stock_threshold"
   | "max_per_order"
+  // The buy-button destination: needed by the storefront designer to warn
+  // when a product block has nowhere to send buyers.
+  | "purchase_url"
   // Moderation travels with EVERY seller-side read, list included. A takedown
   // a seller only discovers by opening the one product it happened to is not
   // a notification, it is a trap: the list is where they look first.
@@ -73,7 +76,7 @@ type ProductListRow = Pick<
 >;
 
 const PRODUCT_LIST_COLUMNS =
-  `id, title, description, price_cents, currency, status, image_key, digital_file_key, track_stock, stock_quantity, low_stock_threshold, max_per_order, ${MODERATION_DETAIL_SELECT}` as const;
+  `id, title, description, price_cents, currency, status, image_key, digital_file_key, track_stock, stock_quantity, low_stock_threshold, max_per_order, purchase_url, ${MODERATION_DETAIL_SELECT}` as const;
 
 /**
  * The list columns plus the product-page jsonb. Only the single-product read
@@ -87,13 +90,12 @@ type ProductDetailRow = ProductListRow &
     | "option_groups"
     | "details"
     | "documents"
-    | "purchase_url"
     | "shipping_profile_id"
     | "add_on_ids"
   >;
 
 const PRODUCT_DETAIL_COLUMNS =
-  `${PRODUCT_LIST_COLUMNS}, gallery, option_groups, details, documents, purchase_url, shipping_profile_id, add_on_ids` as const;
+  `${PRODUCT_LIST_COLUMNS}, gallery, option_groups, details, documents, shipping_profile_id, add_on_ids` as const;
 
 /**
  * Safety bound, not pagination. Every row costs an R2 presign (an HMAC) on top
@@ -135,6 +137,7 @@ async function rowToProduct(row: ProductListRow): Promise<Product> {
     // Corrected into the legal range on the way out, so the form's field and
     // the buyer's picker are bounded by the same function (see quantity.ts).
     maxPerOrder: productQuantityCap(row.max_per_order),
+    purchaseUrl: row.purchase_url ?? null,
     // Spread, so a product nobody has touched produces the byte-identical
     // object it always has and no surface has to check a flag before deciding
     // whether the removal fields mean anything.
@@ -218,6 +221,7 @@ const DB_SORT_COLUMNS: Partial<
  */
 type ProductFilterable<T> = {
   eq(column: string, value: string): T;
+  neq(column: string, value: string): T;
   ilike(column: string, pattern: string): T;
 };
 
@@ -231,6 +235,9 @@ function applyProductFilters<T extends ProductFilterable<T>>(
   // to, so without this a team member's list would mix every store they see.
   let next = query.eq("owner_id", accountId);
   if (filters?.status) next = next.eq("status", filters.status);
+  // Every state the moderation gate hides from buyers: only "ok" is served
+  // (lib/moderation/removal.ts isContentVisible).
+  if (filters?.moderated) next = next.neq("moderation_status", "ok");
   const search = filters?.search?.trim();
   if (search) {
     // Title only: descriptions are long-form and would make every search a
@@ -276,7 +283,12 @@ export async function listProducts(options?: {
   if (!account) return empty;
   const supabase = await createClient();
 
-  const dbSort = isMetricSort(sort) ? undefined : DB_SORT_COLUMNS[sort];
+  // The ranking function cannot narrow by moderation, so that filter keeps the
+  // plain path in its default order: it is a handful of products at most.
+  const dbSort =
+    isMetricSort(sort) && !options?.filters?.moderated
+      ? undefined
+      : (DB_SORT_COLUMNS[sort] ?? DB_SORT_COLUMNS.default);
   if (dbSort) {
     const from = (page - 1) * pageSize;
     let query = supabase

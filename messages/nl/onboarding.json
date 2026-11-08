@@ -2,7 +2,7 @@
   "steps": {
     "seller": {
       "label": "Voeg je verkopersgegevens toe",
-      "detail": "Je handelsnaam, vestigingsadres en contact-e-mailadres staan op elke productpagina.",
+      "detail": "Je naam of bedrijfsnaam, adres en contact-e-mailadres staan op elke productpagina.",
       "detailDone": "Kopers kunnen zien van wie ze kopen.",
       "detailUnconfirmed": "Bevestig je contact-e-mailadres met de code die we ernaar sturen.",
       "action": "Gegevens toevoegen",
@@ -20,10 +20,10 @@
     "storefront": {
       "label": "Zet een product op een etalage",
       "detailDone": "Er staat een product op je etalage.",
-      "detailNone": "Maak een etalage en voeg dan een product toe aan het raster.",
-      "detailEmpty": "Open je etalage en kies Product toevoegen in de werkbalk.",
+      "detailNone": "Een etalage is je winkelpagina. Maak er een en voeg dan een product toe aan het raster.",
+      "detailEmpty": "Open je etalage en gebruik de knop Product toevoegen bovenaan.",
       "actionCreate": "Etalage maken",
-      "actionOpen": "Editor openen",
+      "actionOpen": "Etalage openen",
       "cta": "Open je etalage",
       "ctaCreate": "Maak een etalage"
     },
@@ -32,7 +32,7 @@
       "detailDone": "Je productpagina is online.",
       "detailNeedsSeller": "Rond je verkopersgegevens af, dan kan je pagina online gaan.",
       "detailNeedsStorefront": "Zodra een product op een etalage staat, kan de pagina online gaan.",
-      "detailNeedsActive": "Zet dat product op Actief zodat de pagina online gaat.",
+      "detailNeedsActive": "Open het product en zet de status op Actief om de pagina online te zetten.",
       "detailChecking": "Je pagina gaat online zodra de automatische controle het product goedkeurt.",
       "detailPaused": "De automatische controle heeft dat product gepauzeerd. Open het om te zien wat je moet aanpassen.",
       "detailPagesOff": "Productpagina's staan uit voor die etalage. Zet ze aan in de editor.",
@@ -64,7 +64,7 @@
     "showMeAround": "Laat het me zien",
     "showSteps": "Stappen tonen",
     "hideSteps": "Stappen verbergen",
-    "liveHint": "Je eerste productpagina is online. Deel de link overal.",
+    "liveHint": "Je eerste productpagina is online. Deel de links overal.",
     "copyLink": {
       "copy": "Link naar productpagina kopiëren",
       "copied": "Link naar productpagina gekopieerd",
@@ -75,7 +75,12 @@
     "hide": "Verbergen",
     "progress": "{total, plural, one {{done} van {total} voltooid} other {{done} van {total} voltooid}}",
     "stepDone": " (voltooid)",
-    "stepToDo": " (te doen)"
+    "stepToDo": " (te doen)",
+    "copyStorefrontLink": {
+      "copy": "Link naar de etalage kopiëren",
+      "copied": "Link naar de etalage gekopieerd",
+      "failed": "Kopiëren van de link naar de etalage is mislukt. Selecteer en kopieer hem handmatig."
+    }
   },
   "welcome": {
     "steps": {
@@ -121,10 +126,10 @@
     "seller": {
       "namePlaceholder": "bijv. Sanne de Vries of Sannes Keramiek",
       "nameHelp": "Je handelsnaam, of je volledige naam als je als jezelf verkoopt.",
-      "nameAlternative": "Of je volledige naam, als je als privépersoon verkoopt.",
+      "nameAlternative": "Verkoop je als privépersoon, gebruik dan je volledige naam.",
       "addressPlaceholder": "bijv. Marktstraat 12\n1012 AB Amsterdam\nNederland",
       "emailPlaceholder": "bijv. hallo@jouwwinkel.example",
-      "emailHelp": "Waar kopers je kunnen bereiken. Dit mag afwijken van je inlog-e-mailadres.",
+      "emailHelp": "Waar kopers je kunnen bereiken. Dit mag afwijken van je inlog-e-mailadres.{verify, select, true { We sturen een code naar dit adres om het te bevestigen.} other {}}",
       "emailTipLabel": "Over dit e-mailadres"
     },
     "confirm": {
@@ -140,12 +145,12 @@
     "nav": {
       "skipOnboarding": "Introductie overslaan",
       "next": "Volgende",
-      "showMeAround": "Laat me rondkijken",
       "skipIntro": "Intro overslaan",
       "getStarted": "Aan de slag",
       "skipForNow": "Voorlopig overslaan",
       "saveAndContinue": "Opslaan en doorgaan",
       "continue": "Doorgaan",
+      "confirmLater": "Later bevestigen",
       "exploreOnMyOwn": "Zelf verkennen",
       "notNow": "Niet nu"
     },
@@ -205,16 +210,13 @@
       },
       "storefrontEmbed": {
         "title": "Sluit een etalage in op je site",
-        "body": "Elke etalage heeft een insluitknop die je een insluitcode geeft zoals deze. De widget is nog in ontwikkeling en wordt op andere sites nog niet getoond.",
-        "bodyButton": "Deze knop geeft je een insluitcode zoals die hieronder, om in je site te plakken. De widget is nog in ontwikkeling en wordt op andere sites nog niet getoond.",
-        "fallbackBody": "Zodra je een etalage hebt, geeft de insluitknop op de kaart een insluitcode zoals deze. De widget is nog in ontwikkeling en wordt op andere sites nog niet getoond.",
-        "bodyLive": "Elke etalage heeft een insluitknop die je een insluitcode geeft zoals deze. Plak hem in je eigen site en de etalage verschijnt daar.",
-        "bodyButtonLive": "Deze knop geeft je een insluitcode zoals die hieronder. Plak hem in je eigen site en de etalage verschijnt daar.",
-        "fallbackBodyLive": "Zodra je een etalage hebt, geeft de insluitknop op de kaart een insluitcode zoals deze om in je eigen site te plakken."
+        "bodyLive": "Elke etalage heeft een insluitknop die je websitecode zoals deze geeft. Plak hem in je eigen site en de etalage verschijnt daar.",
+        "bodyButtonLive": "Deze knop geeft je websitecode zoals de code hieronder. Plak hem in je eigen site en de etalage verschijnt daar.",
+        "fallbackBodyLive": "Zodra je een etalage hebt, geeft de insluitknop op de kaart je websitecode zoals deze om in je eigen site te plakken."
       },
       "ordersSearch": {
         "title": "Zoek een bestelling",
-        "body": "Zoek in deze lijst op het e-mailadres van de koper. Gebruik zoeken bovenaan de pagina om een bestelling te vinden op nummer, naam, plaats of trackingnummer."
+        "body": "Zoek in deze lijst op bestelnummer, e-mailadres of naam van de koper, plaats, product of trackingnummer."
       },
       "ordersFilters": {
         "title": "Filteren en sorteren",
@@ -241,7 +243,7 @@
     "steps": {
       "editorAdd": {
         "title": "Voeg iets toe aan je raster",
-        "body": "Voeg producten, tekst en vormen toe via deze balk. Sleep iets op het raster om het te verplaatsen en trek aan een hoek om het te vergroten of verkleinen."
+        "body": "Voeg producten, tekst, vormen en afbeeldingen toe via deze balk. Tik of klik op een blok om het te selecteren en sleep dan om het te verplaatsen. Trek aan een hoekgreep om het groter of kleiner te maken."
       },
       "editorDesign": {
         "title": "Bepaal de uitstraling",
@@ -255,8 +257,13 @@
       },
       "editorFinish": {
         "title": "Maak het helemaal van jou",
-        "body": "Het voorbeeld wordt nooit opgeslagen, dus probeer gerust alles uit. Maak een eigen etalage wanneer je er klaar voor bent."
+        "body": "Het voorbeeld wordt nooit opgeslagen, dus probeer gerust alles uit. Maak een eigen etalage wanneer je er klaar voor bent.",
+        "bodySave": "Druk op Opslaan om je werk te bewaren. Ben je er tevreden over, dan geeft Delen je de link en de code voor je website."
       }
     }
+  },
+  "install": {
+    "title": "Zet Square Share op je beginscherm",
+    "add": "Toevoegen"
   }
 }

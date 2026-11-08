@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
-import { freshUser, seedProducts, serviceRest, signUp, userIdByEmail } from "./helpers";
+import { freshUser, seedProducts, seedStorefronts, serviceRest, signUp, userIdByEmail } from "./helpers";
 
 /**
  * THE REVIEWS PAGE, SEARCHED AND FILTERED.
@@ -30,6 +30,7 @@ test("a seller finds the reviews that matter: rating, search, filters", async ({
   const sellerId = await userIdByEmail(user.email);
 
   await seedProducts(sellerId, [{ title: "Roundhouse Coffee Table" }, { title: "Braid Knit Pouffe" }]);
+  await seedStorefronts(sellerId, [{ name: "Living room" }]);
   const products = (await serviceRest(`/products?owner_id=eq.${sellerId}&select=id,title&order=title.desc`)) as {
     id: string;
     title: string;
@@ -64,6 +65,13 @@ test("a seller finds the reviews that matter: rating, search, filters", async ({
   // Public reviews only: the held one does not count. (5+5+4+4+3+1) / 6 = 3.67.
   await expect(overview.getByText("3.7")).toBeVisible();
   await expect(page.getByText("7 reviews")).toBeVisible();
+  // The star rows say they are filters in words, for a phone with no hover.
+  await expect(overview.getByText("Filter by star rating")).toBeVisible();
+  // Whether buyers see the reviews is the product page's switch, one link away.
+  await expect(page.getByRole("link", { name: "Show or hide reviews on your product page" })).toHaveAttribute(
+    "href",
+    /^\/storefront\/[^/?]+\?setting=product-page-stars$/,
+  );
   await page.screenshot({ path: test.info().outputPath("reviews-page.png"), fullPage: true });
 
   // A star row narrows to those reviews.
@@ -111,7 +119,7 @@ test("a seller finds the reviews that matter: rating, search, filters", async ({
 
   // Only imported reviews in this store: none from verified buyers.
   await page.getByRole("link", { name: /^All$/ }).click();
-  await page.getByRole("button", { name: "Source" }).click();
+  await page.getByRole("button", { name: "Type" }).click();
   await page.getByRole("option", { name: "Verified buyers" }).click();
   await page.keyboard.press("Escape");
   await expect(page.getByText("No reviews match")).toBeVisible();

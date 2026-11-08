@@ -4,6 +4,7 @@ import { useId } from "react";
 import { useTranslations } from "next-intl";
 import type { StorefrontBackground, StorefrontTheme } from "@/types/storefront";
 import { ColorPicker } from "@/components/ui/ColorPicker";
+import { infoTextClass } from "@/components/ui/control-styles";
 import { BackgroundEditor } from "./BackgroundEditor";
 import { LooksSection } from "./LooksSection";
 
@@ -47,13 +48,18 @@ export function ThemePanel({
         onImageChange={onBackgroundImageChange}
         accent={theme.accent}
       />
-      <ColorPicker
-        id={`${fieldId}-accent`}
-        label={t("accent")}
-        value={theme.accent}
-        onChange={(accent) => onChange({ ...theme, accent })}
-        target={{ kind: "theme-accent" }}
-      />
+      {/* "Accent" is a role, not a thing on the page, so the line under it
+          names what it colours. */}
+      <div className="space-y-1">
+        <ColorPicker
+          id={`${fieldId}-accent`}
+          label={t("accent")}
+          value={theme.accent}
+          onChange={(accent) => onChange({ ...theme, accent })}
+          target={{ kind: "theme-accent" }}
+        />
+        <p className={infoTextClass}>{t("accentHint")}</p>
+      </div>
     </div>
   );
 }

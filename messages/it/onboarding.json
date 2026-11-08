@@ -2,7 +2,7 @@
   "steps": {
     "seller": {
       "label": "Aggiungi i tuoi dati venditore",
-      "detail": "La tua ragione sociale, l’indirizzo e l’email di contatto compaiono su ogni pagina prodotto.",
+      "detail": "Il tuo nome o il nome della tua attività, l’indirizzo e l’email di contatto compaiono su ogni pagina prodotto.",
       "detailDone": "Gli acquirenti possono vedere da chi stanno comprando.",
       "detailUnconfirmed": "Conferma la tua email di contatto con il codice che ti inviamo.",
       "action": "Aggiungi dati",
@@ -20,10 +20,10 @@
     "storefront": {
       "label": "Metti un prodotto su una vetrina",
       "detailDone": "Un prodotto è sulla tua vetrina.",
-      "detailNone": "Crea una vetrina, poi aggiungi un prodotto alla sua griglia.",
-      "detailEmpty": "Apri la tua vetrina e scegli Aggiungi prodotto nella barra degli strumenti.",
+      "detailNone": "Una vetrina è la pagina del tuo negozio. Creane una, poi aggiungi un prodotto alla sua griglia.",
+      "detailEmpty": "Apri la tua vetrina e usa il pulsante Aggiungi prodotto in alto.",
       "actionCreate": "Crea vetrina",
-      "actionOpen": "Apri editor",
+      "actionOpen": "Apri vetrina",
       "cta": "Apri la tua vetrina",
       "ctaCreate": "Crea una vetrina"
     },
@@ -32,7 +32,7 @@
       "detailDone": "La tua pagina prodotto è pubblicata.",
       "detailNeedsSeller": "Completa i tuoi dati venditore, poi la tua pagina potrà essere pubblicata.",
       "detailNeedsStorefront": "Una volta che un prodotto è su una vetrina, la sua pagina può essere pubblicata.",
-      "detailNeedsActive": "Imposta quel prodotto su Attivo perché la sua pagina venga pubblicata.",
+      "detailNeedsActive": "Apri il prodotto e imposta il suo stato su Attivo per pubblicare la sua pagina.",
       "detailChecking": "La tua pagina verrà pubblicata appena il controllo automatico approva il prodotto.",
       "detailPaused": "Il controllo automatico ha messo in pausa quel prodotto. Aprilo per vedere cosa cambiare.",
       "detailPagesOff": "Le pagine prodotto sono disattivate su quella vetrina. Attivale nell’editor.",
@@ -64,7 +64,7 @@
     "showMeAround": "Fammi fare un giro",
     "showSteps": "Mostra i passaggi",
     "hideSteps": "Nascondi i passaggi",
-    "liveHint": "La tua prima pagina prodotto è pubblicata. Condividi il link ovunque.",
+    "liveHint": "La tua prima pagina prodotto è pubblicata. Condividi i link ovunque.",
     "copyLink": {
       "copy": "Copia link pagina prodotto",
       "copied": "Link pagina prodotto copiato",
@@ -75,7 +75,12 @@
     "hide": "Nascondi",
     "progress": "{total, plural, one {{done} di {total} completato} many {{done} di {total} completati} other {{done} di {total} completati}}",
     "stepDone": " (fatto)",
-    "stepToDo": " (da fare)"
+    "stepToDo": " (da fare)",
+    "copyStorefrontLink": {
+      "copy": "Copia link della vetrina",
+      "copied": "Link della vetrina copiato",
+      "failed": "Non è stato possibile copiare il link della vetrina. Selezionalo e copialo manualmente."
+    }
   },
   "welcome": {
     "steps": {
@@ -121,10 +126,10 @@
     "seller": {
       "namePlaceholder": "es. Giulia Rossi o Ceramiche Giulia",
       "nameHelp": "La tua ragione sociale, o il tuo nome completo se vendi come persona fisica.",
-      "nameAlternative": "Oppure il tuo nome e cognome, se vendi a titolo personale.",
+      "nameAlternative": "Se vendi a titolo personale, usa il tuo nome e cognome.",
       "addressPlaceholder": "es. Via del Mercato 12\n20100 Milano\nItalia",
       "emailPlaceholder": "es. ciao@iltuonegozio.example",
-      "emailHelp": "Dove gli acquirenti ti scrivono. Può essere diversa dalla tua email di accesso.",
+      "emailHelp": "Dove gli acquirenti ti scrivono. Può essere diversa dalla tua email di accesso.{verify, select, true { Invieremo un codice a questo indirizzo per confermarlo.} other {}}",
       "emailTipLabel": "Informazioni su questa email"
     },
     "confirm": {
@@ -140,12 +145,12 @@
     "nav": {
       "skipOnboarding": "Salta l’onboarding",
       "next": "Avanti",
-      "showMeAround": "Fammi vedere",
       "skipIntro": "Salta l’introduzione",
       "getStarted": "Inizia",
       "skipForNow": "Salta per ora",
       "saveAndContinue": "Salva e continua",
       "continue": "Continua",
+      "confirmLater": "Conferma più tardi",
       "exploreOnMyOwn": "Esplora in autonomia",
       "notNow": "Non ora"
     },
@@ -205,16 +210,13 @@
       },
       "storefrontEmbed": {
         "title": "Incorpora una vetrina nel tuo sito",
-        "body": "Ogni vetrina ha un pulsante di incorporamento che ti dà uno snippet come questo. Il widget è ancora in sviluppo e non compare ancora sugli altri siti.",
-        "bodyButton": "Questo pulsante ti dà uno snippet come quello qui sotto da incollare nel tuo sito. Il widget è ancora in sviluppo e non compare ancora sugli altri siti.",
-        "fallbackBody": "Quando avrai una vetrina, il pulsante di incorporamento sulla sua scheda ti darà uno snippet come questo. Il widget è ancora in sviluppo e non compare ancora sugli altri siti.",
-        "bodyLive": "Ogni vetrina ha un pulsante di incorporamento che ti dà uno snippet come questo. Incollalo nel tuo sito e la vetrina compare lì.",
-        "bodyButtonLive": "Questo pulsante ti dà uno snippet come quello qui sotto. Incollalo nel tuo sito e la vetrina compare lì.",
-        "fallbackBodyLive": "Quando avrai una vetrina, il pulsante di incorporamento sulla sua scheda ti darà uno snippet come questo da incollare nel tuo sito."
+        "bodyLive": "Ogni vetrina ha un pulsante di incorporamento che ti dà un codice per il sito come questo. Incollalo nel tuo sito e la vetrina compare lì.",
+        "bodyButtonLive": "Questo pulsante ti dà un codice per il sito come quello qui sotto. Incollalo nel tuo sito e la vetrina compare lì.",
+        "fallbackBodyLive": "Quando avrai una vetrina, il pulsante di incorporamento sulla sua scheda ti darà un codice per il sito come questo da incollare nel tuo sito."
       },
       "ordersSearch": {
         "title": "Trova un ordine",
-        "body": "Cerca in questo elenco per email dell’acquirente. Per trovare un ordine dal numero, da un nome, da una città o da un numero di tracciamento, usa la ricerca in cima alla pagina."
+        "body": "Cerca in questo elenco per numero d’ordine, email o nome dell’acquirente, città, prodotto o numero di tracciamento."
       },
       "ordersFilters": {
         "title": "Filtra e ordina",
@@ -241,7 +243,7 @@
     "steps": {
       "editorAdd": {
         "title": "Aggiungi alla griglia",
-        "body": "Aggiungi prodotti, testo e forme da questa barra. Trascina qualsiasi elemento sulla griglia per spostarlo e tira un angolo per ridimensionarlo."
+        "body": "Aggiungi prodotti, testo, forme e immagini da questa barra. Tocca o clicca un blocco per selezionarlo, poi trascinalo per spostarlo. Tira la maniglia di un angolo per ridimensionarlo."
       },
       "editorDesign": {
         "title": "Imposta l’aspetto",
@@ -255,8 +257,13 @@
       },
       "editorFinish": {
         "title": "Rendila tua",
-        "body": "L’esempio non viene mai salvato, quindi prova pure di tutto. Quando vuoi, crea una vetrina tutta tua."
+        "body": "L’esempio non viene mai salvato, quindi prova pure di tutto. Quando vuoi, crea una vetrina tutta tua.",
+        "bodySave": "Premi Salva per conservare il tuo lavoro. Quando ti piace il risultato, Condividi ti dà il suo link e il codice per il tuo sito."
       }
     }
+  },
+  "install": {
+    "title": "Aggiungi Square Share alla schermata Home",
+    "add": "Aggiungi"
   }
 }

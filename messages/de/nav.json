@@ -10,7 +10,7 @@
     },
     "storefront": {
       "label": "Schaufenster",
-      "description": "Gestalte das Raster, auf dem deine Produkte liegen."
+      "description": "Gestalte das Raster, auf dem deine Produkte liegen. Daraus wird eine Seite, die Käufer öffnen und teilen können."
     },
     "orders": {
       "label": "Bestellungen",
@@ -31,7 +31,8 @@
     "discounts": {
       "label": "Rabatte",
       "description": "Aktionen starten und Rabattcodes teilen."
-    }
+    },
+    "help": "Hilfe"
   },
   "settings": {
     "account": "Konto",
@@ -42,17 +43,18 @@
     "notifications": "Benachrichtigungen",
     "language": "Sprache",
     "team": "Team und Zugriff",
-    "danger": "Gefahrenzone",
+    "danger": "Konto löschen",
     "billing": "Tarif und Abrechnung",
-    "connectedApps": "Verbundene Apps"
+    "connectedApps": "KI-Assistent"
   },
   "profileMenu": {
     "label": "Kontomenü",
     "account": "Konto",
-    "switchAccounts": "Konto wechseln",
+    "switchAccounts": "Meine Shops",
     "yourStore": "Dein Shop",
     "owner": "Inhaber",
     "logOut": "Abmelden",
+    "logOutEverywhere": "Überall abmelden",
     "plan": "Tarif"
   },
   "viewingBanner": {

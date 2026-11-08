@@ -93,7 +93,7 @@
     "createStorefronts": "Demasiadas tentativas de criar montras num curto espaço de tempo.",
     "saveStorefronts": "Demasiadas tentativas de guardar montras num curto espaço de tempo.",
     "deleteStorefronts": "Demasiadas tentativas de eliminar montras num curto espaço de tempo.",
-    "rotateEmbedKeys": "Demasiadas renovações do código de incorporação em pouco tempo.",
+    "rotateEmbedKeys": "Demasiadas tentativas de obter um novo código para o site em pouco tempo.",
     "updateStock": "Demasiadas tentativas de atualizar o stock num curto espaço de tempo.",
     "readProductPageSettings": "Demasiadas tentativas de ler as definições da página de produto num curto espaço de tempo.",
     "requestReview": "Demasiadas tentativas de pedir uma revisão num curto espaço de tempo.",
@@ -119,7 +119,7 @@
     "verifyDocumentUpload": "Não foi possível verificar o carregamento do documento devido a um problema do nosso lado.",
     "verifyFileUpload": "Não foi possível verificar o carregamento do ficheiro devido a um problema do nosso lado.",
     "verifyFontUpload": "Não foi possível verificar o carregamento do tipo de letra devido a um problema do nosso lado.",
-    "verifyElementUpload": "Não foi possível verificar o carregamento do elemento devido a um problema do nosso lado.",
+    "verifyElementUpload": "Não foi possível verificar o carregamento da imagem devido a um problema do nosso lado.",
     "verifyBackgroundImage": "Não foi possível verificar a imagem de fundo devido a um problema do nosso lado.",
     "verifyFont": "Não foi possível verificar o tipo de letra devido a um problema do nosso lado.",
     "verifyImage": "Não foi possível verificar a imagem devido a um problema do nosso lado.",
@@ -127,7 +127,7 @@
     "saveStorefront": "Não foi possível guardar a montra devido a um problema do nosso lado.",
     "saveEmbedSettings": "Não foi possível guardar as definições de incorporação devido a um problema do nosso lado.",
     "deleteStorefront": "Não foi possível eliminar a montra devido a um problema do nosso lado.",
-    "rotateEmbedKey": "Não foi possível renovar a chave de incorporação devido a um problema do nosso lado.",
+    "rotateEmbedKey": "Não foi possível obter um novo código para o site devido a um problema do nosso lado.",
     "saveStockSettings": "Não foi possível guardar as definições de stock devido a um problema do nosso lado.",
     "checkSellerDetails": "Não foi possível verificar os seus dados de vendedor devido a um problema do nosso lado.",
     "loadProductPageSettings": "Não foi possível carregar as definições da página de produto devido a um problema do nosso lado.",
@@ -166,8 +166,8 @@
     "message": "Não pode publicar nem vender enquanto os seus dados de vendedor não estiverem completos.",
     "action": "Adicionar dados de vendedor",
     "fix": {
-      "add": "{fields, select, businessName {Adicione o seu nome ou denominação social em Definições › Empresa e dados do vendedor e depois publique.} address {Adicione a sua morada comercial em Definições › Empresa e dados do vendedor e depois publique.} email {Adicione o seu e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.} businessName_address {Adicione o seu nome ou denominação social e a morada comercial em Definições › Empresa e dados do vendedor e depois publique.} businessName_email {Adicione o seu nome ou denominação social e o e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.} address_email {Adicione a sua morada comercial e o e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.} other {Adicione o seu nome ou denominação social, morada comercial e e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.}}",
-      "addAndConfirm": "{fields, select, businessName {Adicione o seu nome ou denominação social em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto com o código que lhe enviámos.} address {Adicione a sua morada comercial em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto com o código que lhe enviámos.} email {Adicione o seu e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme-o com o código que lhe enviámos.} businessName_address {Adicione o seu nome ou denominação social e a morada comercial em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto com o código que lhe enviámos.} businessName_email {Adicione o seu nome ou denominação social e o e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o e-mail com o código que lhe enviámos.} address_email {Adicione a sua morada comercial e o e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o e-mail com o código que lhe enviámos.} other {Adicione o seu nome ou denominação social, morada comercial e e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o e-mail com o código que lhe enviámos.}}",
+      "add": "{fields, select, businessName {Adicione o seu nome ou denominação social em Definições › Empresa e dados do vendedor e depois publique.} address {Adicione a sua morada comercial em Definições › Empresa e dados do vendedor e depois publique.} email {Adicione o seu e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.} businessName_address {Adicione o seu nome ou denominação social e a sua morada comercial em Definições › Empresa e dados do vendedor e depois publique.} businessName_email {Adicione o seu nome ou denominação social e o seu e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.} address_email {Adicione a sua morada comercial e o e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.} other {Adicione o seu nome ou denominação social, a sua morada comercial e o seu e-mail de contacto em Definições › Empresa e dados do vendedor e depois publique.}}",
+      "addAndConfirm": "{fields, select, businessName {Adicione o seu nome ou denominação social em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto com o código que lhe enviámos.} address {Adicione a sua morada comercial em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto com o código que lhe enviámos.} email {Adicione o seu e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme-o com o código que lhe enviámos.} businessName_address {Adicione o seu nome ou denominação social e a sua morada comercial em Definições › Empresa e dados do vendedor, e confirme o seu e-mail de contacto com o código que lhe enviámos.} businessName_email {Adicione o seu nome ou denominação social e o seu e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o e-mail com o código que lhe enviámos.} address_email {Adicione a sua morada comercial e o e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o e-mail com o código que lhe enviámos.} other {Adicione o seu nome ou denominação social, a sua morada comercial e o seu e-mail de contacto em Definições › Empresa e dados do vendedor, e confirme o e-mail com o código que lhe enviámos.}}",
       "confirm": "Confirme o seu e-mail de contacto: envie a si próprio um código a partir de Definições › Empresa e dados do vendedor e introduza-o lá.",
       "complete": "Complete Definições › Empresa e dados do vendedor e depois publique."
     }
@@ -211,7 +211,7 @@
     "wrongPasswordGoogle": "Essa não é a palavra-passe da Square Share desta conta. A conta inicia sessão com o Google, por isso utilize antes «Confirmar com o Google».",
     "passwordCheckUnavailable": "Não foi possível verificar a palavra-passe neste momento. Tente novamente daqui a pouco.",
     "reauthRequired": "Por motivos de segurança, inicie sessão novamente antes de ativar a autenticação de dois fatores.",
-    "setupRateLimited": "Já fez muitas tentativas de configuração. Tente novamente mais tarde.",
+    "setupRateLimited": "Demasiadas tentativas de configuração. Aguarde um minuto e tente novamente.",
     "tooManyFactors": "Esta conta já tem o número máximo de autenticadores. Remova primeiro um deles.",
     "setupFailed": "Não foi possível iniciar a configuração neste momento. Tente novamente dentro de momentos.",
     "setupUnavailable": "A configuração da autenticação de dois fatores não está disponível neste momento. Tente novamente mais tarde.",
@@ -226,7 +226,7 @@
   "settings": {
     "usernameTaken": "Esse nome de utilizador já está em uso. Experimente outro.",
     "emailUnchanged": "Esse já é o seu e-mail.",
-    "emailChangeRateLimited": "Demasiados pedidos de alteração de e-mail. Aguarde um pouco antes de tentar novamente.",
+    "emailChangeRateLimited": "Demasiados pedidos de alteração de e-mail. Aguarde um minuto e tente novamente.",
     "emailChangeNeedsPassword": "Indique a sua palavra-passe atual para alterar o e-mail.",
     "wrongPassword": "A palavra-passe atual está incorreta.",
     "passwordCheckUnavailable": "Não foi possível verificar a palavra-passe neste momento. Tente novamente.",
@@ -235,7 +235,7 @@
     "passwordUnchanged": "Essa já é a sua palavra-passe.",
     "passwordUpdateFailed": "Não foi possível atualizar a palavra-passe. Tente novamente.",
     "passwordReauthNeeded": "Por motivos de segurança, termine a sessão, inicie-a de novo e depois altere a palavra-passe.",
-    "resetRateLimited": "Demasiados e-mails de redefinição. Aguarde um pouco antes de tentar novamente.",
+    "resetRateLimited": "Demasiados e-mails de redefinição. Aguarde um minuto e tente novamente.",
     "resetSendRateLimited": "Demasiados pedidos. Aguarde um minuto e tente novamente.",
     "resetFailed": "Não foi possível enviar o e-mail de redefinição. Tente novamente.",
     "contactEmailTakesNoMail": "O domínio desse e-mail de contacto não aceita correio. Verifique a ortografia, ou utilize um endereço que os compradores consigam realmente contactar.",
@@ -294,7 +294,7 @@
     "serviceUnreachable": "Não foi possível ligar ao serviço de autenticação. Tente novamente.",
     "invalidEmail": "Indique um endereço de e-mail válido.",
     "emailRequired": "Indique o seu e-mail.",
-    "tooManyAttempts": "Demasiadas tentativas. Aguarde um pouco e tente novamente.",
+    "tooManyAttempts": "Demasiadas tentativas. Aguarde um minuto e tente novamente.",
     "magicLinkFailed": "Não foi possível enviar o e-mail. Verifique a sua ligação e tente novamente.",
     "resetEmailRequired": "Indique o seu e-mail para redefinir a palavra-passe.",
     "resetEmailFailed": "Não foi possível enviar o e-mail de redefinição. Verifique a sua ligação e tente novamente.",
@@ -332,21 +332,21 @@
       "document": "Esse documento é demasiado grande.",
       "file": "Esse ficheiro é demasiado grande.",
       "font": "Esse tipo de letra é demasiado grande.",
-      "element": "Esse elemento é demasiado grande."
+      "element": "Essa imagem é demasiado grande."
     },
     "tooLargeFix": {
       "image": "Utilize uma imagem com menos de {maxMb} MB. Comprima-a ou redimensione-a e tente novamente.",
       "document": "Utilize um documento com menos de {maxMb} MB. Comprima-o ou redimensione-o e tente novamente.",
       "file": "Utilize um ficheiro com menos de {maxMb} MB. Comprima-o ou redimensione-o e tente novamente.",
       "font": "Utilize um tipo de letra com menos de {maxMb} MB. Comprima-o ou redimensione-o e tente novamente.",
-      "element": "Utilize um elemento com menos de {maxMb} MB. Comprima-o ou redimensione-o e tente novamente."
+      "element": "Utilize uma imagem com menos de {maxMb} MB. Comprima-a ou redimensione-a e tente novamente."
     },
     "neverReached": {
       "image": "A imagem nunca chegou ao servidor.",
       "document": "O documento nunca chegou ao servidor.",
       "file": "O ficheiro nunca chegou ao servidor.",
       "font": "O tipo de letra nunca chegou ao servidor.",
-      "element": "O elemento nunca chegou ao servidor."
+      "element": "A imagem nunca chegou ao servidor."
     },
     "neverReachedFix": "Verifique a sua ligação à Internet e tente novamente.",
     "rejected": {
@@ -354,7 +354,7 @@
       "document": "Não foi possível carregar esse documento.",
       "file": "Não foi possível carregar esse ficheiro.",
       "font": "Não foi possível carregar esse tipo de letra.",
-      "element": "Não foi possível carregar esse elemento."
+      "element": "Não foi possível carregar essa imagem."
     },
     "rejectedFix": {
       "signedOut": "Inicie sessão novamente e tente outra vez.",
@@ -365,7 +365,7 @@
   "uploadRoute": {
     "signIn": {
       "image": "Inicie sessão para carregar imagens.",
-      "element": "Inicie sessão para carregar elementos.",
+      "element": "Inicie sessão para carregar imagens.",
       "document": "Inicie sessão para carregar documentos.",
       "file": "Inicie sessão para carregar ficheiros.",
       "font": "Inicie sessão para carregar tipos de letra."
@@ -378,7 +378,7 @@
     },
     "notConfigured": {
       "image": "O carregamento de imagens ainda não está configurado. Tente novamente mais tarde.",
-      "element": "O carregamento de elementos ainda não está configurado. Tente novamente mais tarde.",
+      "element": "O carregamento de imagens não está disponível neste momento. Tente novamente mais tarde.",
       "document": "O carregamento ainda não está configurado. Tente novamente mais tarde.",
       "file": "O carregamento de ficheiros ainda não está configurado. Tente novamente mais tarde.",
       "font": "O carregamento de tipos de letra ainda não está configurado. Tente novamente mais tarde."
@@ -459,28 +459,28 @@
       "document": "O carregamento do documento não terminou.",
       "file": "O carregamento do ficheiro não terminou.",
       "font": "O carregamento do tipo de letra não terminou.",
-      "element": "O carregamento do elemento não terminou."
+      "element": "O carregamento da imagem não terminou."
     },
     "uploadUnfinishedFix": {
       "image": "Selecione a imagem novamente e carregue-a antes de guardar.",
       "document": "Selecione o documento novamente e carregue-o antes de guardar.",
       "file": "Selecione o ficheiro novamente e carregue-o antes de guardar.",
       "font": "Selecione o tipo de letra novamente e carregue-o antes de guardar.",
-      "element": "Selecione o elemento novamente e carregue-o antes de guardar."
+      "element": "Selecione a imagem novamente e carregue-a antes de guardar."
     },
     "uploadTooLarge": {
       "image": "Essa imagem é demasiado grande.",
       "document": "Esse documento é demasiado grande.",
       "file": "Esse ficheiro é demasiado grande.",
       "font": "Esse tipo de letra é demasiado grande.",
-      "element": "Esse elemento é demasiado grande."
+      "element": "Essa imagem é demasiado grande."
     },
     "uploadTooLargeFix": {
       "image": "Utilize uma imagem com menos de {maxMb} MB e carregue-a novamente.",
       "document": "Utilize um documento com menos de {maxMb} MB e carregue-o novamente.",
       "file": "Utilize um ficheiro com menos de {maxMb} MB e carregue-o novamente.",
       "font": "Utilize um tipo de letra com menos de {maxMb} MB e carregue-o novamente.",
-      "element": "Utilize um elemento com menos de {maxMb} MB e carregue-o novamente."
+      "element": "Utilize uma imagem com menos de {maxMb} MB e carregue-a novamente."
     },
     "wrongTypeFix": {
       "image": "Utilize uma imagem JPEG, PNG, WebP, GIF ou AVIF.",

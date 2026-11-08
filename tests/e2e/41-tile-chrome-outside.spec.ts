@@ -224,9 +224,9 @@ async function moveBlockTo(page: Page, cell: Locator, x: number, y: number) {
 
 /** Add a square shape element to the board. */
 async function addSquare(page: Page) {
-  await page.getByRole("button", { name: "Add element" }).click();
+  await page.getByRole("button", { name: "Add shape or image" }).click();
   await page
-    .getByRole("menu", { name: "Elements" })
+    .getByRole("menu", { name: "Shapes and images" })
     .getByRole("menuitem", { name: "All shapes" })
     .click();
   await page.getByRole("button", { name: "Add square" }).click();

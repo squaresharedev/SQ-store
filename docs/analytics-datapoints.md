@@ -128,12 +128,14 @@ with a locale and a symbol baked into it; `120450` is a fact. (The rendered
 text also animates on mount, so it is briefly wrong on purpose.)
 
 **`sales.revenue` is not a tile.** Revenue is the page's headline: the figure
-sits over the revenue chart, which stands in a frame of four corner marks at the top
-of the sales section (`RevenueHero`). It carries the same six attributes as a
-tile, on the element that shows the figure, so select it by
-`data-analytics-metric` like any other and never by position. That element
-moves: it is in the chart's top left corner when the graph is going up and its
-top right when it is going down.
+sits at the top of a card over the revenue line, with the sales tiles joined
+under it (`RevenueCard`; the look is set in
+[`look.ts`](../src/components/analytics/look.ts), and the older frame look
+draws it as `RevenueHero`, the figure over the chart). It carries the same six
+attributes as a tile, on the element that shows the figure, so select it by
+`data-analytics-metric` like any other and never by position. Moving along the
+line reads a day into the figure's visible text; the attributes keep the
+range's total.
 
 Current metric ids:
 
@@ -177,14 +179,14 @@ snapshot; [agent-surface.md](./agent-surface.md) says what each one counts.
 `top_products`, `statuses`) plus `data-analytics-source`, and the same
 `data-analytics-state` with an extra `empty` for "measured, nothing in range".
 
-The sales `trend` panel is the revenue hero, which is not a card, and it
-publishes the same attributes as one. The `sales.revenue` metric element is
-inside it.
+The sales `trend` panel is the revenue lead, and it publishes the same
+attributes as a card. The `sales.revenue` metric element is inside it.
 
-When the previous period sold anything, the hero also states the change, on an
+When the previous period sold anything, the lead also states the change, on an
 element carrying `data-analytics-change`: the ratio at full precision (`0.25`
 is up a quarter, `-0.084` is down 8.4%). Absent when there is nothing to
-compare against. The trend charts draw the previous period as a dashed grey
+compare against. The sales count and average order tiles state theirs as a
+chip, read from the same snapshot (`previous.sales`). The trend charts draw the previous period as a dashed grey
 line under the current one; their `sr-only` tables list it as a second column.
 
 Charts also render an `sr-only` table twin carrying every plotted value, so the

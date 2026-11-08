@@ -179,6 +179,18 @@ describe("CheckoutView", () => {
     expect(document.querySelector("[data-checkout-payment='preview']")).not.toBeNull();
     expect(payButton().disabled).toBe(false);
   });
+
+  it("says under the editor's drawing that it takes no money yet, and what buyers get meanwhile", () => {
+    // Stripe Connect is switched off in tests, as it is in production for now.
+    render(<CheckoutView page={page()} mode="preview" />);
+    const note = document.querySelector("[data-checkout-payment-note]");
+    expect(note).toHaveTextContent(/card payments here are coming soon/i);
+    expect(note).toHaveTextContent(/buy link/i);
+    // A buyer's checkout has a provider, so it never carries the note.
+    cleanup();
+    render(<CheckoutView page={page()} mode="public" attemptId={ATTEMPT} provider="test" />);
+    expect(document.querySelector("[data-checkout-payment-note]")).toBeNull();
+  });
 });
 
 describe("CheckoutView page photo", () => {

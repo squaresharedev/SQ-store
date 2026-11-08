@@ -58,9 +58,15 @@ had to shrink the desktop one to fix it. The phone board draws each block throug
 | A separate `mobileBlocks` array | Simple to render | Two copies of every block to keep in step: a product added on desktop is missing on phones, and a delete leaves a ghost. Duplicates the moderation and ownership checks |
 | Reflow rules only (order, hide, span) | Smallest change | Cannot express "this tile first and full width" for tilted or stacked boards, which is exactly where the reflow gives up |
 
-The designer's phone preview draws the same layout (`DesignerCanvas` passes
-`narrowLayout` too). Hand-editing it in the designer is not built yet: a seller
-sees it there, read-only, like a reflowed board.
+The designer edits the same layout by hand. Theme, Canvas has an "Arrange for
+phones" switch (on at `automaticPhoneColumns`, the width the reflow fits, and a
+phone width slider once on; off keeps the rects, inert, like the theme change
+below). With it on, the phone preview draws the phone layout as the board itself
+rather than as `narrowLayout`, so the usual drag, resize and arrow keys write
+each block's `mobile` rect (`pinOnPhone`), and the block inspector's "On phones"
+row hides, shows or hands a block back to automatic (`unpinnedOnPhone`, what
+`mobile_reset` does). Both go through the same helpers in `mobile-layout.ts` as
+the operations below. Without a phone layout the preview stays read-only.
 
 **MCP:** `edit_storefront` takes `viewport: "mobile"` on `move`, `resize` and
 `remove` (which then hides on phones only), and on `style` for a text block's

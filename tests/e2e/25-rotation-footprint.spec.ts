@@ -36,9 +36,9 @@ async function setUpBar(page: Page, tag: string) {
   await gotoApp(page, "/storefront");
   await createStorefrontViaUI(page);
 
-  await page.getByRole("button", { name: "Add element" }).click();
+  await page.getByRole("button", { name: "Add shape or image" }).click();
   await page
-    .getByRole("menu", { name: "Elements" })
+    .getByRole("menu", { name: "Shapes and images" })
     .getByRole("menuitem", { name: "All shapes" })
     .click();
   await page.getByRole("button", { name: "Add square" }).click();

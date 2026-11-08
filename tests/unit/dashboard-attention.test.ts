@@ -89,6 +89,7 @@ const NO_STOREFRONTS: StorefrontAttentionInfo = {
   noindexProductPageCount: 0,
   deadBlockCount: 0,
   firstNoindexStorefrontId: null,
+  firstDeadBlockStorefrontId: null,
 };
 
 const HEALTHY_PROFILE: ProfileAttentionData = {
@@ -111,6 +112,7 @@ function build(overrides: {
   stripeConnected?: boolean;
   stripeConnectAvailable?: boolean;
   setupVisible?: boolean;
+  twoFactorEnabled?: boolean;
   toShipCount?: number;
   withdrawalsToSettle?: number;
   restocks?: RestockForecast[];
@@ -125,6 +127,7 @@ function build(overrides: {
     stripeConnected: overrides.stripeConnected ?? true,
     stripeConnectAvailable: overrides.stripeConnectAvailable,
     setupVisible: overrides.setupVisible,
+    twoFactorEnabled: overrides.twoFactorEnabled,
     toShipCount: overrides.toShipCount,
     withdrawalsToSettle: overrides.withdrawalsToSettle,
     restocks: overrides.restocks,
@@ -139,6 +142,9 @@ const ALL_BRANCHES = [
   build({ toShipCount: 3 }),
   // Buyers who withdrew and are owed a refund
   build({ withdrawalsToSettle: 2 }),
+  // Products moderation hid from buyers
+  build({ products: { pausedProductIds: ["p1"] } }),
+  build({ products: { pausedProductIds: ["p1", "p2"] } }),
   // Products about to sell out
   build({ restocks: [{ id: "p1", title: "Bowl", daysLeft: 3 }] }),
   build({
@@ -149,6 +155,8 @@ const ALL_BRANCHES = [
   }),
   // Stripe not connected, on the day connecting is possible
   build({ stripeConnected: false, stripeConnectAvailable: true }),
+  // 2FA off, setup done (visible = false)
+  build({ twoFactorEnabled: false }),
   // Legal not accepted
   build({ profile: { ...HEALTHY_PROFILE, legalAcceptedVersion: null } }),
   build({ profile: { ...HEALTHY_PROFILE, legalAcceptedVersion: "2025-01-old" } }),
@@ -217,6 +225,7 @@ const ALL_BRANCHES = [
   // Dead blocks
   build({ storefronts: { deadBlockCount: 1 } }),
   build({ storefronts: { deadBlockCount: 3 } }),
+  build({ storefronts: { deadBlockCount: 2, firstDeadBlockStorefrontId: "sf-1" } }),
 ];
 
 describe("needs-attention destinations", () => {
@@ -239,9 +248,28 @@ describe("needs-attention destinations", () => {
     expect([...items.keys()].slice(0, 2)).toEqual(["to-ship", "withdrawals"]);
     const row = items.get("withdrawals");
     expect(row?.href).toBe("/orders?status=withdrawn");
-    expect(text(row?.label)).toBe("2 buyers withdrew");
-    expect(text(row?.actionLabel)).toBe("See withdrawals");
+    expect(text(row?.label)).toBe("2 buyers cancelled");
+    expect(text(row?.actionLabel)).toBe("See cancellations");
     expect(build().has("withdrawals")).toBe(false);
+  });
+
+  it("keeps a product moderation hid in view, opening its editor, or the moderated list for several", () => {
+    const single = build({ restocks: [{ id: "p9", title: "Bowl", daysLeft: 2 }], products: { pausedProductIds: ["p1"] } });
+    // Already not selling, so ahead of what is only about to stop.
+    expect([...single.keys()].slice(0, 2)).toEqual(["paused", "restock"]);
+    const row = single.get("paused");
+    expect(row?.href).toBe("/products/p1/edit");
+    expect(text(row?.label)).toBe("1 product hidden from buyers");
+    expect(text(row?.actionLabel)).toBe("See why");
+
+    const several = build({ products: { pausedProductIds: ["p1", "p2"] } }).get("paused");
+    expect(several?.href).toBe("/products?status=moderated");
+    expect(text(several?.label)).toBe("2 products hidden from buyers");
+    expect(text(several?.actionLabel)).toBe("Review products");
+
+    // Not stood down by the setup checklist: it only speaks when no page is live.
+    expect(build({ setupVisible: true, products: { pausedProductIds: ["p1"] } }).has("paused")).toBe(true);
+    expect(build().has("paused")).toBe(false);
   });
 
   it("warns of a product about to sell out next, naming the one that goes first", () => {
@@ -286,6 +314,18 @@ describe("needs-attention destinations", () => {
     expect(
       build({ stripeConnected: true, stripeConnectAvailable: true }).get("stripe"),
     ).toBeUndefined();
+  });
+
+  it("shows the 2FA row when 2FA is off and setup is not visible", () => {
+    expect(build({ twoFactorEnabled: false }).has("two-factor")).toBe(true);
+  });
+
+  it("hides the 2FA row while the setup checklist is showing", () => {
+    // A seller who has not finished setup should focus on that first;
+    // the 2FA row reappears once the checklist is gone.
+    expect(
+      build({ twoFactorEnabled: false, setupVisible: true }).has("two-factor"),
+    ).toBe(false);
   });
 
   it("opens the storefront list when none is saved yet", () => {
@@ -545,13 +585,20 @@ describe("needs-attention destinations", () => {
   it("adds the dead-blocks row with a count in the label", () => {
     const item = build({ storefronts: { deadBlockCount: 3 } }).get("dead-blocks");
     expect(item?.href).toBe("/storefront");
-    expect(text(item?.label)).toContain("3 storefront blocks");
+    expect(text(item?.label)).toContain("3 product slots");
+  });
+
+  it("links to the specific storefront when firstDeadBlockStorefrontId is provided", () => {
+    const item = build({
+      storefronts: { deadBlockCount: 2, firstDeadBlockStorefrontId: "sf-99" },
+    }).get("dead-blocks");
+    expect(item?.href).toBe("/storefront/sf-99");
   });
 
   it("uses the singular label for a single dead block", () => {
     const item = build({ storefronts: { deadBlockCount: 1 } }).get("dead-blocks");
-    expect(text(item?.label)).toContain("1 storefront block");
-    expect(text(item?.label)).not.toContain("blocks");
+    expect(text(item?.label)).toContain("1 product slot");
+    expect(text(item?.label)).not.toContain("slots");
   });
 
   it("hides the dead-blocks row when there are no dead blocks", () => {

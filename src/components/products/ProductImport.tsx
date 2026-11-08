@@ -1,43 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "@/components/ui/AppLink";
-import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { AlertTriangle, FileSpreadsheet } from "lucide-react";
+import { AlertTriangle, FileSpreadsheet, ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast, useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { SaveButton, type SaveResult } from "@/components/ui/SaveButton";
 import { FileDropzone } from "@/components/ui/FileDropzone";
 import { Select } from "@/components/ui/select";
-import { iconTileClass } from "@/components/ui/surface-styles";
+import { Disclosure } from "@/components/ui/Disclosure";
+import { AnimatedCheck } from "@/components/ui/animated-check";
+import {
+  iconTileClass,
+  importResultCardClass,
+  importResultTitleClass,
+} from "@/components/ui/surface-styles";
 import {
   errorTextClass,
+  ghostDangerButtonClass,
   helpTextClass,
   infoTextClass,
   labelClass,
+  primaryButtonClass,
   quietLinkClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { formatBytes } from "@/lib/format";
 import { formatCents } from "@/lib/format/money";
-import { importProducts } from "@/lib/products/import-actions";
+import { importProducts, undoProductImport } from "@/lib/products/import-actions";
+import { PRODUCTS_PATH } from "@/lib/products/paths";
 import { plansHref } from "@/lib/billing/paths";
 import {
   IMPORT_BYTES_MAX,
+  IMPORT_FIELDS_BY_NEED,
+  IMPORT_REQUIRED_FIELDS,
   IMPORT_ROWS_MAX,
   buildImportPlan,
   importProblemMessage,
   importableRows,
   parseCsv,
   type ColumnMap,
-  type ImportField,
   type ImportPlan,
+  type ImportRow,
 } from "@/lib/products/csv";
 import { CURRENCIES, PRODUCT_STATUSES, type Currency, type ProductStatus } from "@/types/product";
 import { SellerDetailsNotice } from "@/components/settings/SellerDetailsNotice";
 import type { TraderIdentityField } from "@/lib/settings/trader-identity";
+import { ConnectAiHint } from "./ConnectAiHint";
 
 /**
  * Moving a catalogue in from somewhere else.
@@ -50,20 +61,14 @@ import type { TraderIdentityField } from "@/lib/settings/trader-identity";
  * there cannot drift.
  *
  * The mapping is offered but rarely needed: a Shopify export maps itself, and
- * so does any file whose columns are called roughly what they are.
+ * so does any file whose columns are called roughly what they are. So it stays
+ * folded until rows fail for a missing title or price, which is what a wrong
+ * mapping looks like.
+ *
+ * AFTER THE IMPORT the result takes the form's place: what landed, what to do
+ * next, and a one-click way to take it all back, which returns to the same
+ * file so a wrong currency or column is fixed and imported again.
  */
-
-/** Fields a product cannot be built without, marked so the seller knows which
- *  mapping to fix when rows are failing. */
-const REQUIRED_FIELDS: readonly ImportField[] = ["title", "price"];
-
-const ORDERED_FIELDS: readonly ImportField[] = [
-  "title",
-  "price",
-  "description",
-  "stock",
-  "sku",
-];
 
 /** How many preview rows to draw. Enough to trust the mapping without
  *  rendering a 200-row table nobody reads. */
@@ -71,9 +76,15 @@ const PREVIEW_ROWS = 8;
 
 type Loaded = { name: string; size: number; text: string };
 
+/** A finished import: what it created, and the lines that go with it. */
+type Imported = { ids: string[]; lines: string[]; drafts: boolean };
+
 export function ProductImport({
   missingTraderDetails = [],
   planRoomLeft = null,
+  defaultCurrency = "EUR",
+  limitNotice = null,
+  intro,
 }: {
   /** Trader details the store still owes buyers. Non-empty means the server
    *  refuses a live import, so only drafts are offered. */
@@ -82,10 +93,20 @@ export function ProductImport({
    *  caps it. The server applies the same number: this keeps the preview
    *  honest about which rows will land. */
   planRoomLeft?: number | null;
+  /** What the currency starts on: the store's own, else its country's
+   *  (lib/predictions.ts, as for a new product). */
+  defaultCurrency?: Currency;
+  /** Shown in place of the importer while the plan has no room left. Handed
+   *  in rather than swapped in by the page: an import that fills the plan
+   *  reloads the page, and its result must stay up. */
+  limitNotice?: ReactNode;
+  /** What a seller reads before choosing a file (what it needs, where to get
+   *  it). Shown until a file is picked. */
+  intro?: ReactNode;
 } = {}) {
-  const router = useRouter();
   const t = useTranslations("Products.import");
   const tErrors = useTranslations("Errors");
+  const tActions = useTranslations("Common.actions");
   const locale = useLocale();
   const toast = useToast();
   const showActionError = useActionErrorToast();
@@ -93,7 +114,10 @@ export function ProductImport({
 
   const [file, setFile] = useState<Loaded | null>(null);
   const [overrides, setOverrides] = useState<Partial<ColumnMap>>({});
-  const [currency, setCurrency] = useState<Currency>("EUR");
+  // Once the seller has changed a column, the mapping stays open: fixing the
+  // last failing row must not fold it away mid-task.
+  const [mappingTouched, setMappingTouched] = useState(false);
+  const [currency, setCurrency] = useState<Currency>(defaultCurrency);
   // Drafts by default: an import is a bulk action, and a mistake that lands
   // live is a mistake buyers can see. The seller publishes when they have
   // looked at what arrived.
@@ -104,6 +128,9 @@ export function ProductImport({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [saveResult, setSaveResult] = useState<SaveResult | null>(null);
+  const [imported, setImported] = useState<Imported | null>(null);
+  const [undoing, setUndoing] = useState(false);
+  const doneHeadingRef = useRef<HTMLHeadingElement>(null);
 
   // One file carries IMPORT_ROWS_MAX rows, or as many as the plan has room
   // for when that is fewer; which of the two binds decides how it is worded.
@@ -114,6 +141,26 @@ export function ProductImport({
     : null;
   const ready = plan ? importableRows(plan) : [];
   const failing = plan ? plan.rows.filter((row) => row.problem !== null) : [];
+  const mappingSuspect = failing.some((row) => row.problem === "noTitle" || row.problem === "noPrice");
+  const mappedCount = plan ? IMPORT_FIELDS_BY_NEED.filter((field) => plan.columns[field] !== null).length : 0;
+
+  /** One skipped row: its line, its title when it has one, and why. */
+  const skippedItem = (row: ImportRow) => (
+    <li key={row.line}>
+      {row.problem &&
+        t("skippedRow", {
+          titled: row.title ? "yes" : "no",
+          line: row.line,
+          title: row.title,
+          problem: resolveMessage(importProblemMessage(row.problem)),
+        })}
+    </li>
+  );
+
+  // The result takes the place of the button that was just pressed.
+  useEffect(() => {
+    if (imported) doneHeadingRef.current?.focus();
+  }, [imported]);
 
   async function load(picked: File | undefined) {
     if (!picked) return;
@@ -136,6 +183,7 @@ export function ProductImport({
     // A fresh file gets a fresh mapping: overrides made against the last
     // file's columns would silently point at the wrong ones here.
     setOverrides({});
+    setMappingTouched(false);
     setFile({ name: picked.name, size: picked.size, text });
   }
 
@@ -158,26 +206,86 @@ export function ProductImport({
         showActionError(result.error);
         return;
       }
-      setSaveResult({ success: t("importedLabel") });
-      const lines = [
-        ...(result.skipped.length > 0 ? [t("skippedRows", { count: result.skipped.length })] : []),
-        // Most of a big import is still waiting on the automatic check when
-        // the list loads: said here, so a row of "Checking" badges is expected.
-        ...(result.checking > 0 ? [t("checkingRows", { count: result.checking })] : []),
-      ];
-      toast.success(t("imported", { count: result.imported }), {
-        lines: lines.length > 0 ? lines : undefined,
+      // The file stays loaded underneath, so taking the import back returns
+      // to it ready to fix and import again.
+      setImported({
+        ids: result.ids,
+        drafts: importStatus === "draft",
+        lines: [
+          ...(result.skipped.length > 0 ? [t("skippedRows", { count: result.skipped.length })] : []),
+          // Most of a big import is still waiting on the automatic check when
+          // the list loads: said here, so a row of "Checking" badges is expected.
+          ...(result.checking > 0 ? [t("checkingRows", { count: result.checking })] : []),
+        ],
       });
-      router.push("/products");
     } finally {
       setBusy(false);
     }
   }
 
+  async function undo() {
+    if (!imported || undoing) return;
+    setUndoing(true);
+    const result = await undoProductImport(imported.ids);
+    setUndoing(false);
+    if (!result.ok) {
+      showActionError(result.error);
+      return;
+    }
+    toast.success(t("undoDone", { count: result.deleted }));
+    setImported(null);
+  }
+
+  if (imported) {
+    const count = imported.ids.length;
+    return (
+      <section className={importResultCardClass} data-import-done="">
+        <div className="flex items-start gap-3">
+          <span className={cn(iconTileClass, "size-10")} aria-hidden="true">
+            <AnimatedCheck className="size-5" />
+          </span>
+          <div className="space-y-1" role="status">
+            <h2 ref={doneHeadingRef} tabIndex={-1} className={importResultTitleClass}>
+              {t("imported", { count })}
+            </h2>
+            {imported.lines.map((line) => (
+              <p key={line} className={helpTextClass}>
+                {line}
+              </p>
+            ))}
+            {imported.drafts && (
+              <p className={helpTextClass}>
+                {t("draftsImportedHint")}
+                {count > 1 && (
+                  <>
+                    {" "}
+                    <ConnectAiHint />
+                  </>
+                )}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link href={PRODUCTS_PATH} className={primaryButtonClass}>
+            {t("goToProducts")}
+          </Link>
+          <button type="button" className={ghostDangerButtonClass} onClick={() => void undo()} disabled={undoing}>
+            {undoing ? tActions("deleting") : t("undoImport", { count })}
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  if (limitNotice) return limitNotice;
+
   return (
     <div className="space-y-5">
+      {!file && intro}
       <FileDropzone
         id="import-file"
+        bold
         accept=".csv,text/csv"
         label={file ? file.name : t("dropPrompt")}
         meta={
@@ -190,9 +298,14 @@ export function ProductImport({
 
       {/* Said before a file is picked: for a big shop, adding every photo by
           hand afterwards is the real cost of an import, so it is known first. */}
-      <p className={infoTextClass} data-import-photos-note="">
-        {t("photosNotImported")}
-      </p>
+      <div className="flex items-start gap-3">
+        <span className={cn(iconTileClass, "size-8")} aria-hidden="true">
+          <ImageOff className="size-4 text-muted-foreground" strokeWidth={2} />
+        </span>
+        <p className={cn(infoTextClass, "pt-1.5")} data-import-photos-note="">
+          {t("photosNotImported")}
+        </p>
+      </div>
 
       {error && (
         <p className={errorTextClass} role="alert">
@@ -286,12 +399,20 @@ export function ProductImport({
             </div>
           </div>
 
-          <div className="space-y-3">
-            <p className={labelClass}>{t("columns")}</p>
+          <Disclosure
+            open={mappingSuspect || mappingTouched}
+            summary={
+              <span className="flex flex-wrap items-baseline gap-x-2">
+                <span className={labelClass}>{t("columns")}</span>
+                <span className={helpTextClass}>{t("columnsMatched", { count: mappedCount })}</span>
+              </span>
+            }
+            attributes={{ "data-import-columns": "" }}
+          >
             <div className="grid gap-3 @md:grid-cols-2 @2xl:grid-cols-3">
-              {ORDERED_FIELDS.map((field) => {
+              {IMPORT_FIELDS_BY_NEED.map((field) => {
                 const selected = plan.columns[field];
-                const required = REQUIRED_FIELDS.includes(field);
+                const required = IMPORT_REQUIRED_FIELDS.includes(field);
                 return (
                   <div key={field} className="space-y-1.5">
                     <label htmlFor={`import-col-${field}`} className={cn(labelClass, "text-xs")}>
@@ -308,18 +429,19 @@ export function ProductImport({
                           label: name || t("columnFallback", { number: index + 1 }),
                         })),
                       ]}
-                      onChange={(value) =>
+                      onChange={(value) => {
+                        setMappingTouched(true);
                         setOverrides((current) => ({
                           ...current,
                           [field]: value === "" ? null : Number(value),
-                        }))
-                      }
+                        }));
+                      }}
                     />
                   </div>
                 );
               })}
             </div>
-          </div>
+          </Disclosure>
 
           {ready.length > 0 && (
             <div className="space-y-2">
@@ -363,19 +485,15 @@ export function ProductImport({
                 {t("skippedHeading")}
               </p>
               <ul className={cn(infoTextClass, "space-y-1")}>
-                {failing.slice(0, PREVIEW_ROWS).map((row) => (
-                  <li key={row.line}>
-                    {row.problem &&
-                      t("skippedRow", {
-                        titled: row.title ? "yes" : "no",
-                        line: row.line,
-                        title: row.title,
-                        problem: resolveMessage(importProblemMessage(row.problem)),
-                      })}
-                  </li>
-                ))}
+                {failing.slice(0, PREVIEW_ROWS).map(skippedItem)}
+                {/* The rest one tap away, so a file with many bad rows can be
+                    fixed in one pass rather than eight lines at a time. */}
                 {failing.length > PREVIEW_ROWS && (
-                  <li>{t("andMore", { count: failing.length - PREVIEW_ROWS })}</li>
+                  <li>
+                    <Disclosure summary={t("andMore", { count: failing.length - PREVIEW_ROWS })}>
+                      <ul className="space-y-1">{failing.slice(PREVIEW_ROWS).map(skippedItem)}</ul>
+                    </Disclosure>
+                  </li>
                 )}
               </ul>
             </div>
@@ -389,7 +507,6 @@ export function ProductImport({
               pending={busy}
               state={saveResult ?? undefined}
               pendingLabel={t("importing")}
-              savedLabel={t("importedLabel")}
             >
               {t("run", { count: ready.length })}
             </SaveButton>
@@ -399,6 +516,7 @@ export function ProductImport({
               onClick={() => {
                 setFile(null);
                 setOverrides({});
+                setMappingTouched(false);
                 setError(null);
                 setSaveResult(null);
               }}

@@ -19,6 +19,7 @@ import {
   aiCreditAllowance,
   aiCreditCharge,
   aiCreditPeriod,
+  hasAiCreditLeft,
   MICROS_PER_CENT,
   type AiCredit,
 } from "@/lib/billing/ai-credit";
@@ -59,9 +60,18 @@ export type AiWriting = {
   suggestAsYouType: boolean;
   /** A plan without the perk, on a deployment that has it: the quiet link. */
   aiUpsell: boolean;
+  /** With the perk: the month's credit is spent, so the form says so before a
+   *  tap rather than after one. False when it cannot be read: the actions
+   *  check again either way. */
+  aiCreditUsed: boolean;
 };
 
-export const NO_AI_WRITING: AiWriting = { aiSuggestions: false, suggestAsYouType: false, aiUpsell: false };
+export const NO_AI_WRITING: AiWriting = {
+  aiSuggestions: false,
+  suggestAsYouType: false,
+  aiUpsell: false,
+  aiCreditUsed: false,
+};
 
 /** What `userId` gets of AI writing help in `accountId`'s store now. A plan
  *  that cannot be read offers nothing: the perk is never handed out on a
@@ -70,8 +80,19 @@ export async function aiWritingFor(accountId: string, userId: string): Promise<A
   if (!canAnswer()) return NO_AI_WRITING;
   const billing = await getAccountBilling(accountId);
   if (!billing.ok) return NO_AI_WRITING;
-  if (!planHas(billing.billing.plan, "aiSuggestions")) return { ...NO_AI_WRITING, aiUpsell: true };
-  return { aiSuggestions: true, suggestAsYouType: await suggestsAsYouType(userId), aiUpsell: false };
+  const plan = billing.billing.plan;
+  if (!planHas(plan, "aiSuggestions")) return { ...NO_AI_WRITING, aiUpsell: true };
+  const [asYouType, credit] = await Promise.all([
+    suggestsAsYouType(userId),
+    // A credit that cannot be read must not cost the seller the form.
+    readAiCredit(accountId, plan).catch(() => null),
+  ]);
+  return {
+    aiSuggestions: true,
+    suggestAsYouType: asYouType,
+    aiUpsell: false,
+    aiCreditUsed: credit !== null && !hasAiCreditLeft(credit),
+  };
 }
 
 /**

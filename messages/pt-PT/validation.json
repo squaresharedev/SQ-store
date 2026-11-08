@@ -524,11 +524,11 @@
     "addOnNotYours": "Um dos produtos oferecidos já não está nesta loja. Remova-o e guarde novamente."
   },
   "productImport": {
-    "noTitle": "Sem título.",
+    "noTitle": "Sem título. Verifique se a coluna Título acima está definida.",
     "titleTooLong": "O título tem mais de 200 carateres.",
-    "noPrice": "Não foi possível ler o preço.",
+    "noPrice": "Não foi possível ler o preço. Verifique se a coluna Preço acima aponta para a coluna certa.",
     "priceZero": "O preço é zero.",
-    "duplicateTitle": "Outra linha já tem este título."
+    "duplicateTitle": "Outra linha já tem este título. Os títulos repetidos são ignorados; mude o nome de um deles na sua folha de cálculo."
   },
   "shipping": {
     "shipsFromInvalid": "Ainda não é possível enviar a partir desse país.",

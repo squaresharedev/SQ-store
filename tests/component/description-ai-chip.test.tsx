@@ -15,12 +15,29 @@ afterEach(cleanup);
 const FACTS: ListingFact[] = [{ label: "Capacity", value: "350 ml" }];
 
 /** The chip under a real description field, as the product form puts it. */
-function Field({ suggest, facts = FACTS, title = "Ceramic mug" }: { suggest: SuggestDescription; facts?: ListingFact[]; title?: string }) {
+function Field({
+  suggest,
+  facts = FACTS,
+  title = "Ceramic mug",
+  creditUsed = false,
+}: {
+  suggest: SuggestDescription;
+  facts?: ListingFact[];
+  title?: string;
+  creditUsed?: boolean;
+}) {
   const [description, setDescription] = useState("");
   return (
     <>
       <textarea aria-label="Description" value={description} onChange={(event) => setDescription(event.target.value)} />
-      <DescriptionAiChip title={title} description={description} facts={facts} onChange={setDescription} suggest={suggest} />
+      <DescriptionAiChip
+        title={title}
+        description={description}
+        facts={facts}
+        creditUsed={creditUsed}
+        onChange={setDescription}
+        suggest={suggest}
+      />
     </>
   );
 }
@@ -35,11 +52,36 @@ function deferred() {
 const field = () => screen.getByRole("textbox", { name: "Description" });
 
 describe("DescriptionAiChip", () => {
-  it("offers nothing until there is something to write from", () => {
-    const { rerender } = render(<Field suggest={vi.fn()} facts={[]} />);
+  it("shows nothing before there is a title", () => {
+    render(<Field suggest={vi.fn()} title="  " />);
     expect(screen.queryByRole("button")).toBeNull();
-    rerender(<Field suggest={vi.fn()} title="  " />);
-    expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  it("is shown, dimmed, until there is something to write from, and says why", async () => {
+    const user = userEvent.setup();
+    const suggest = vi.fn<SuggestDescription>();
+    render(<Field suggest={suggest} facts={[]} />);
+    const chip = screen.getByRole("button", { name: "Write with AI" });
+    expect(chip).toHaveAttribute("aria-disabled", "true");
+    expect(chip).toHaveAccessibleDescription(/not enough to write from yet/);
+    await user.click(chip);
+    expect(suggest).not.toHaveBeenCalled();
+    expect(field()).toHaveValue("");
+
+    // A first line to improve is something to work from.
+    await user.type(field(), "nice mug");
+    expect(screen.getByRole("button", { name: "Improve with AI" })).not.toHaveAttribute("aria-disabled");
+  });
+
+  it("says the month's credit is spent before a tap, not after one", async () => {
+    const user = userEvent.setup();
+    const suggest = vi.fn<SuggestDescription>();
+    render(<Field suggest={suggest} creditUsed />);
+    const chip = screen.getByRole("button", { name: "Write with AI" });
+    expect(chip).toHaveAttribute("aria-disabled", "true");
+    expect(chip).toHaveAccessibleDescription(/AI credit is used up/);
+    await user.click(chip);
+    expect(suggest).not.toHaveBeenCalled();
   });
 
   it("writes into the field, and the arrow takes it back", async () => {

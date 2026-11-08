@@ -25,9 +25,13 @@ type TermsVersion = {
   urgentReason?: "law" | "danger";
 };
 
+// tos-2026-10-31 is on the marketing site but deliberately absent here: it was
+// replaced by tos-2026-11-06 before any notice went out or anyone agreed to it,
+// so it never takes effect (Home marks it `replacedBy`). Listing it would email
+// everyone about Terms that were already superseded.
 export const TERMS_VERSIONS = [
   { version: "tos-2026-10-11" },
-  { version: "tos-2026-10-31" },
+  { version: "tos-2026-11-06" },
 ] as const satisfies readonly TermsVersion[];
 
 /** What anyone agreeing today agrees to. Agreeing early is always allowed. */

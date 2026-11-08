@@ -29,6 +29,9 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/dashboard",
 }));
 
+// Stripe payouts off, as in production today: the Payments row carries its pill.
+vi.mock("@/lib/payments/availability", () => ({ STRIPE_CONNECT_AVAILABLE: false }));
+
 afterEach(cleanup);
 
 const ICONS = [
@@ -140,16 +143,27 @@ describe("Sidebar with animated icons", () => {
       ["Analytics", "/analytics"],
       ["Payments", "/payments"],
       ["Settings", "/settings"],
+      ["Help", "https://docs.squareshare.eu"],
     ] as const) {
-      const link = screen.getByRole("link", { name: label });
+      // By how the name starts: a row may carry a pill after its label.
+      const link = screen.getByRole("link", { name: new RegExp(`^${label}`) });
       expect(link).toHaveAttribute("href", href);
       expect(link.querySelector("svg")).not.toBeNull();
     }
-    // Those eight and nothing else. The rail used to carry a permanently
+    // Those nine and nothing else. The rail used to carry a permanently
     // disabled "Discover / Coming soon" row: a roadmap entry occupying a slot
     // in navigation a seller uses dozens of times a day. Asserting the exact
     // set, rather than just the rows we want, is what stops the next one.
-    expect(within(nav).getAllByRole("link")).toHaveLength(8);
+    expect(within(nav).getAllByRole("link")).toHaveLength(9);
+  });
+
+  it("opens Help in a new tab, and carries no pill on Payments", () => {
+    render(<Sidebar />);
+    const help = screen.getByRole("link", { name: "Help" });
+    expect(help).toHaveAttribute("target", "_blank");
+    expect(help).toHaveAttribute("rel", "noopener noreferrer");
+    expect(screen.getByRole("link", { name: "Payments" })).toHaveAttribute("href", "/payments");
+    expect(screen.queryByText("Coming soon")).toBeNull();
   });
 
   it("marks the active route, and carries no dead rows", () => {

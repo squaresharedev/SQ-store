@@ -21,6 +21,9 @@ type ProductAddOnsEditorState = {
   edits: Readonly<Record<string, AddOnsEdit>>;
   /** Show this choice at once and save it behind that. */
   write: (productId: string, ids: string[], shown: PreviewAddOns) => void;
+  /** The board has a product whose page could be put out, so a section with
+   *  no page to choose for can offer to put one out. */
+  canOpenPage: boolean;
 };
 
 const ProductAddOnsEditorContext = createContext<ProductAddOnsEditorState | null>(null);
@@ -41,10 +44,12 @@ const ProductAddOnsEditorContext = createContext<ProductAddOnsEditorState | null
 export function ProductAddOnsEditorProvider({
   catalog,
   openPages,
+  canOpenPage = false,
   children,
 }: {
   catalog: readonly Product[];
   openPages: readonly string[];
+  canOpenPage?: boolean;
   children: ReactNode;
 }) {
   const sample = useSampleMode();
@@ -116,8 +121,9 @@ export function ProductAddOnsEditorProvider({
         waiting.current.set(productId, ids);
         void save(productId);
       },
+      canOpenPage,
     }),
-    [catalog, pages, target, edits, sample, save],
+    [catalog, pages, target, edits, sample, save, canOpenPage],
   );
 
   return <ProductAddOnsEditorContext.Provider value={value}>{children}</ProductAddOnsEditorContext.Provider>;

@@ -81,9 +81,10 @@ function TitleShadowColorField({
  * THREE DEPTHS, in the order a seller needs them. A row of layouts answers the
  * question outright. The board under it moves the two labels anywhere the
  * layouts do not reach, and is the same gesture as dragging them on the tile
- * itself. Everything that shapes them rather than places them is folded away in
- * Fine tuning, because a seller who has not asked for it should not have to
- * scroll past it.
+ * itself. Everything that shapes the title rather than places it is folded away
+ * under Title, because a seller who has not asked for it should not have to
+ * scroll past it. The fold is named for what it holds: "Fine tuning" hid the
+ * switch that shows or hides the title behind a word for extras.
  */
 export function CardStyleControls({
   value,
@@ -176,7 +177,7 @@ export function CardStyleControls({
         }
       />
 
-      {/* Out of Fine tuning on purpose: a seller who picks Gallery sees the
+      {/* Out of the Title fold on purpose: a seller who picks Gallery sees the
           fade straight away and should find its color and its blur without
           digging. Shown only while a shadow is actually drawn. */}
       {value.showTitle && value.titleStyle === "shadow" && (
@@ -203,7 +204,7 @@ export function CardStyleControls({
         labelClassName={strongLabelClass}
       />
 
-      <CollapsibleSection title={t("fineTuning")} collapsible defaultOpen={false}>
+      <CollapsibleSection title={t("titleSection")} collapsible defaultOpen={false}>
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3">
             <label htmlFor={`${fieldId}-show-title`} className={strongLabelClass}>

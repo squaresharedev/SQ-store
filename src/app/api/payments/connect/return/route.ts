@@ -3,6 +3,7 @@ import { signInPath } from "@/lib/auth/paths";
 import { PAYMENTS_PATH } from "@/lib/dashboard/paths";
 import { refreshPaymentAccount } from "@/lib/payments/connect/account";
 import { stripeConnectLive } from "@/lib/payments/connect/config";
+import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { getActiveAccount } from "@/lib/team/account-context";
 
 /**
@@ -27,7 +28,10 @@ export async function GET() {
   const account = await getActiveAccount();
   if (!account) return to(signInPath(PAYMENTS_PATH));
 
-  if (account.isOwner && stripeConnectLive()) {
+  // Each refresh is a read from Stripe on the platform's key, so a reloaded or
+  // scripted return is bounded like the billing return; over it, the page
+  // shows what we last knew and the account.updated event catches up.
+  if (account.isOwner && stripeConnectLive() && (await rateLimit("connect_return", RATE_LIMITS.billingRead))) {
     try {
       await refreshPaymentAccount(account.accountId);
     } catch (error) {

@@ -904,7 +904,7 @@ describe("English is unchanged", () => {
     );
     rateLimitMock.mockImplementation(async (action: string) => action !== "mfa_enroll");
     expect(errorText(await begin({ name: "Pixel 8" }))).toBe(
-      "That's a lot of setup attempts. Try again a bit later.",
+      "Too many setup attempts. Wait a minute and try again.",
     );
 
     rateLimitMock.mockResolvedValue(true);

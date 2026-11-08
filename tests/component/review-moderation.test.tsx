@@ -66,6 +66,9 @@ describe("ReviewModeration", () => {
     mount();
     const overview = screen.getByRole("region", { name: "Store rating" });
     expect(within(overview).getByText("4.1")).toBeInTheDocument();
+    // Said in words, not by hover alone: a phone has none.
+    expect(within(overview).getByText("Filter by star rating")).toBeVisible();
+    expect(within(overview).getByRole("list", { name: "Filter by star rating" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Show only 5-star reviews (14)" }));
     expect(replace).toHaveBeenCalledWith("/products/reviews?rating=5", { scroll: false });

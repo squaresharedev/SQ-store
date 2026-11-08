@@ -196,7 +196,7 @@ describe("the discount form", () => {
     await user.type(screen.getByLabelText("Code"), "VIP25");
     // No switch to find first: the box says what empty means.
     expect(screen.queryByRole("switch")).toBeNull();
-    const limit = screen.getByLabelText("Max orders (optional)");
+    const limit = screen.getByLabelText("Max uses (optional)");
     expect(limit).toHaveAttribute("placeholder", "No limit");
     await user.type(limit, "40");
 
@@ -210,8 +210,8 @@ describe("the discount form", () => {
     const user = userEvent.setup();
     const code = discount({ enabled: false, usageLimit: 25 });
     render(<DiscountForm discount={code} products={PRODUCTS} />);
-    expect(screen.getByLabelText("Max orders (optional)")).toHaveValue(25);
-    await user.clear(screen.getByLabelText("Max orders (optional)"));
+    expect(screen.getByLabelText("Max uses (optional)")).toHaveValue(25);
+    await user.clear(screen.getByLabelText("Max uses (optional)"));
     await user.click(screen.getByRole("button", { name: "Save changes" }));
     expect(actions.updateDiscount).toHaveBeenCalledWith(
       code.id,
@@ -243,10 +243,38 @@ describe("the discount form", () => {
     await user.click(within(both).getByRole("button", { name: "$" }));
     await user.type(screen.getByLabelText("Amount off"), "2");
     expect(screen.getByText("Applies only to products priced in this currency.")).toBeInTheDocument();
+    // The example is worked on a product in that currency, and the summary says
+    // what stays as it is, before anything is saved.
+    expect(summaryBox()).toHaveTextContent("Example: Zine at US$12.00 costs US$10.00.");
+    expect(document.querySelector("[data-discount-unchanged]")).toHaveTextContent(
+      "Blue mug stays at €24.00: it's priced in another currency.",
+    );
     await user.click(screen.getByRole("button", { name: "Create discount" }));
     expect(actions.createDiscount).toHaveBeenCalledWith(
       expect.objectContaining({ value: { type: "amount", amountOffCents: 200, currency: "USD" } }),
     );
+  });
+
+  it("says a product stays as it is only when the discount would otherwise cover it", async () => {
+    const user = userEvent.setup();
+    render(
+      <DiscountForm
+        discount={null}
+        products={[...PRODUCTS, { id: "33333333-3333-4333-8333-333333333333", title: "Zine", priceCents: 1200, currency: "USD" }]}
+      />,
+    );
+    const unchanged = () => document.querySelector("[data-discount-unchanged]");
+    await user.click(within(screen.getByRole("group", { name: "Percentage or amount" })).getByRole("button", { name: "€" }));
+    // Nothing typed yet: nothing to say.
+    expect(unchanged()).toBeNull();
+    await user.type(screen.getByLabelText("Amount off"), "5");
+    expect(unchanged()).toHaveTextContent("Zine stays at US$12.00: it's priced in another currency.");
+
+    // Only euro products chosen: none of them stays as it is.
+    await user.click(screen.getByRole("button", { name: "Specific products" }));
+    await user.click(screen.getByRole("button", { name: "Choose products" }));
+    await user.click(screen.getByRole("checkbox", { name: /Linen apron/ }));
+    expect(unchanged()).toBeNull();
   });
 
   it("says the time zone only once a date is in play", async () => {
@@ -257,21 +285,37 @@ describe("the discount form", () => {
     expect(screen.getByText(/Times are in your time zone/)).toBeInTheDocument();
   });
 
-  it("leads a sale, and only a sale, to how sales look on the storefront, in a new tab", async () => {
+  it("leads a sale, and only a sale, to how sales look on the storefront it names, in a new tab", async () => {
     const user = userEvent.setup();
-    render(<DiscountForm discount={null} products={PRODUCTS} chipHref="/storefront/abc?setting=sale-chip" />);
-    const link = screen.getByRole("link", { name: "Change how sales look on your storefront" });
+    render(
+      <DiscountForm
+        discount={null}
+        products={PRODUCTS}
+        chip={{ href: "/storefront/abc?setting=sale-chip", storefrontName: "Clay House" }}
+      />,
+    );
+    // Named, so a seller with several storefronts knows which one opens.
+    const link = screen.getByRole("link", { name: "Change how sales look on Clay House" });
     expect(link).toHaveAttribute("href", "/storefront/abc?setting=sale-chip");
     expect(link).toHaveAttribute("target", "_blank");
     await user.click(screen.getByRole("radio", { name: /^Discount code/ }));
-    expect(screen.queryByRole("link", { name: "Change how sales look on your storefront" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Change how sales look on Clay House" })).toBeNull();
+  });
+
+  it("says under where a code is shared what naming the channel gives", async () => {
+    const user = userEvent.setup();
+    render(<DiscountForm discount={null} products={PRODUCTS} />);
+    await user.click(screen.getByRole("radio", { name: /^Discount code/ }));
+    expect(
+      screen.getByText("See how many orders each channel brings in, on your Discounts page."),
+    ).toBeInTheDocument();
   });
 
   it("makes a sale: no code, channel or limit, an amount off each chosen product", async () => {
     const user = userEvent.setup();
     render(<DiscountForm discount={null} products={PRODUCTS} />);
     expect(screen.queryByLabelText("Code")).toBeNull();
-    expect(screen.queryByLabelText("Max orders (optional)")).toBeNull();
+    expect(screen.queryByLabelText("Max uses (optional)")).toBeNull();
     expect(screen.getByText("Taken off the price of each item.")).toBeInTheDocument();
 
     await user.click(within(screen.getByRole("group", { name: "Percentage or amount" })).getByRole("button", { name: "€" }));
@@ -343,6 +387,27 @@ describe("the discount form", () => {
     expect(await screen.findByText("Discount saved.")).toBeInTheDocument();
   });
 
+  it("ends a running sale from its own form, after the same confirm as its row", async () => {
+    const user = userEvent.setup();
+    const running = sale();
+    render(<DiscountForm discount={running} products={PRODUCTS} />);
+    const locked = document.querySelector<HTMLElement>("[data-discount-locked]")!;
+    await user.click(within(locked).getByRole("button", { name: "End now" }));
+    const dialog = screen.getByRole("dialog", { name: "End this sale now?" });
+    expect(actions.endSale).not.toHaveBeenCalled();
+    await user.click(within(dialog).getByRole("button", { name: "End sale" }));
+    expect(actions.endSale).toHaveBeenCalledWith(running.id);
+    expect(actions.updateDiscount).not.toHaveBeenCalled();
+    expect(await screen.findByText("Sale ended.")).toBeInTheDocument();
+    expect(push).toHaveBeenCalledWith("/discounts");
+    cleanup();
+
+    // A sale that is already over has nothing left to end.
+    render(<DiscountForm discount={sale({ endsAt: "2026-10-04T09:00:00.000Z" })} products={PRODUCTS} />);
+    expect(document.querySelector("[data-discount-locked]")).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "End now" })).toBeNull();
+  });
+
   it("sends back a start and an end nobody touched exactly as they were stored", async () => {
     // The database's own spelling, to the second and between two half hours.
     // Opening the form and saving must not move either by a minute, or a
@@ -406,13 +471,13 @@ describe("the discount form", () => {
   });
 
   it("heads an edit with what the discount is, a sale or a code, since that is no longer a choice", () => {
-    render(<DiscountFormView discount={sale()} products={PRODUCTS} chipHref={null} />);
+    render(<DiscountFormView discount={sale()} products={PRODUCTS} chip={null} />);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Edit sale");
     cleanup();
-    render(<DiscountFormView discount={discount()} products={PRODUCTS} chipHref={null} />);
+    render(<DiscountFormView discount={discount()} products={PRODUCTS} chip={null} />);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Edit discount code");
     cleanup();
-    render(<DiscountFormView discount={null} products={PRODUCTS} chipHref={null} />);
+    render(<DiscountFormView discount={null} products={PRODUCTS} chip={null} />);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("New discount");
   });
 });
@@ -496,7 +561,7 @@ describe("the discounts page", () => {
   it("switches a code off in one click", async () => {
     const user = userEvent.setup();
     render(<DiscountsPage products={PRODUCTS} summary={summary()} canWrite />);
-    await user.click(within(row(code.id)).getByRole("switch", { name: "On" }));
+    await user.click(within(row(code.id)).getByRole("switch", { name: "Turn off" }));
     expect(actions.setCodeEnabled).toHaveBeenCalledWith(code.id, false);
     expect(await screen.findByText("Code switched off.")).toBeInTheDocument();
   });
@@ -714,12 +779,22 @@ describe("a discount's row", () => {
     // 3 of 50, drawn.
     expect(row.querySelector("[data-meter='6']")).not.toBeNull();
 
-    await user.click(within(row).getByRole("switch", { name: "On" }));
+    await user.click(within(row).getByRole("switch", { name: "Turn off" }));
     expect(onToggle).toHaveBeenCalledWith(false);
     expect(within(row).getByRole("link", { name: "Edit" })).toHaveAttribute("href", `/discounts/${limited.id}/edit`);
     expect(within(row).queryByRole("button", { name: "End now" })).toBeNull();
     await user.click(within(row).getByRole("button", { name: "Delete" }));
     expect(onDelete).toHaveBeenCalledOnce();
+  });
+
+  it("names the switch for what pressing it does, not for where it stands", async () => {
+    const user = userEvent.setup();
+    const { row, onToggle } = mount(discount({ enabled: false }));
+    expect(row).toHaveAttribute("data-discount-status", "paused");
+    const toggle = within(row).getByRole("switch", { name: "Turn on" });
+    expect(toggle).not.toBeChecked();
+    await user.click(toggle);
+    expect(onToggle).toHaveBeenCalledWith(true);
   });
 
   it("lets a running sale be ended, and an ended one only deleted", async () => {
@@ -731,6 +806,9 @@ describe("a discount's row", () => {
     expect(within(row).getByText("Sale")).toBeInTheDocument();
     expect(within(row).getByText("No orders yet")).toBeInTheDocument();
     expect(within(row).queryByRole("switch")).toBeNull();
+    // Its word is on it, not only in a hover a phone never shows (a narrow
+    // row shows it; a wide one hides it beside the bare icon).
+    expect(within(row).getByRole("button", { name: "End now" })).toHaveTextContent("End now");
     await user.click(within(row).getByRole("button", { name: "End now" }));
     expect(onEnd).toHaveBeenCalledOnce();
     cleanup();

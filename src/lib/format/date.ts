@@ -38,6 +38,20 @@ function valid(isoDate: string): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+const DAY_MONTH: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "short",
+  // A day KEY ("2026-07-02") names a UTC day; read in the viewer's zone it
+  // would be the day before for anyone west of Greenwich.
+  timeZone: "UTC",
+};
+
+/** A UTC day key, `"2026-07-02"` -> `"2 Jul"` in English: a chart's dates. */
+export function formatDayMonth(day: string, locale: Locale): string {
+  const date = valid(`${day}T00:00:00Z`);
+  return date ? dateTimeFormat(intlTag(locale, "en-IE"), DAY_MONTH).format(date) : NO_DATE;
+}
+
 /** `"2026-07-02T14:05:00Z"` -> `"2 Jul 2026"` in English. */
 export function formatOrderDate(isoDate: string, locale: Locale): string {
   const date = valid(isoDate);

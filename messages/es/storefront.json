@@ -91,7 +91,7 @@
     "groups": {
       "theme": "Tema",
       "header": "Encabezado",
-      "typography": "Tipografía",
+      "typography": "Fuente",
       "cards": "Tarjetas de producto",
       "soldOut": "Agotado",
       "productPage": "Página de producto",
@@ -100,7 +100,7 @@
     "subtitle": {
       "theme": "Escaparate / Tema",
       "header": "Escaparate / Encabezado",
-      "typography": "Escaparate / Tipografía",
+      "typography": "Escaparate / Fuente",
       "cards": "Escaparate / Tarjetas de producto",
       "soldOut": "Escaparate / Agotado",
       "productPage": "Escaparate / Página de producto",
@@ -161,7 +161,8 @@
       "cardStarRating": "Valoración con estrellas en las tarjetas",
       "cardLowStock": "Etiqueta de pocas unidades",
       "textSpacing": "Espaciado entre letras y altura de línea",
-      "elementBlur": "Desenfoque"
+      "elementBlur": "Desenfoque",
+      "phoneLayout": "Organizar para móviles"
     }
   },
   "editorSearch": {
@@ -207,31 +208,37 @@
     "emptyHint": "Esta cuadrícula está vacía",
     "removed": "Retirado por Square Share",
     "pausedInReview": "En pausa · en revisión por Square Share",
-    "pausedNeedsChanges": "En pausa por Square Share · requiere cambios"
+    "pausedNeedsChanges": "En pausa por Square Share · requiere cambios",
+    "status": {
+      "live": "Publicado",
+      "pagesOff": "Aún no publicado: activa las páginas de producto",
+      "detailsMissing": "Aún no publicado: añade tus datos de vendedor"
+    }
   },
   "embed": {
-    "inDevNotice": "El widget de incorporación está en desarrollo y todavía no se muestra en sitios externos. Configura tus ajustes a continuación para tenerlo todo listo y pegar el fragmento de código en cuanto esté disponible.",
+    "sectionTitle": "En tu propia web",
+    "inDevNotice": "Esto todavía no se muestra en otras webs. Configúralo ahora y estará listo en cuanto se lance. Entonces también tendrás que añadir una nota breve a tu política de privacidad: te daremos el texto.",
     "title": "Comparte este escaparate",
-    "description": "Envía a la gente un enlace a «{name}», o pega un fragmento de código en tu propio sitio para mostrarlo allí.",
+    "description": "Envía a la gente un enlace a «{name}», o pega el código para tu web en tu propio sitio para mostrarlo allí.",
     "steps": {
       "site": "Elige los sitios donde aparece",
-      "snippet": "Pega el fragmento en tu sitio",
+      "snippet": "Añade el código a tu web",
       "privacy": "Añade esto a tu política de privacidad"
     },
     "required": "Obligatorio",
     "enabledLabel": "Mostrar en mi web",
     "showingLabel": "Se muestra en tu web",
-    "domainsLabel": "Dominios permitidos",
+    "domainsLabel": "Direcciones de tu web",
     "domainsPlaceholder": "tusitio.com, blog.tusitio.com",
-    "domainsHint": "Hasta {max}, separados por comas. Pega una URL y la recortaremos al dominio.",
-    "sameAsHint": "Copia los dominios permitidos de {title}.",
-    "emptyDomainsWarning": "Añade al menos un dominio. Mientras esté vacío, el escaparate no se cargará en ningún sitio, aunque la incorporación esté activada.",
+    "domainsHint": "La incorporación solo se carga en estos sitios. Pega una URL completa y extraeremos la dirección. Hasta {max}, separadas por comas.",
+    "sameAsHint": "Copia las direcciones web de {title}.",
+    "emptyDomainsWarning": "Añade al menos una dirección web. Mientras esté vacío, el escaparate no se cargará en ningún sitio, aunque la incorporación esté activada.",
     "builderLabel": "Tu creador de sitios",
     "builderOther": "Otro sitio",
     "builderSteps": {
       "other": "Pégalo en el HTML de tu página, donde quieras que aparezca el escaparate.",
       "wordpress": "Añade un bloque «HTML personalizado» donde quieras que aparezca el escaparate y pega el código.",
-      "squarespace": "Añade un bloque «Code» y pega el código. Si el escaparate solo aparece al recargar, cambia a «Solo iframe».",
+      "squarespace": "Añade un bloque «Code» y pega el código. Si el escaparate solo aparece al recargar, cambia a «Incorporación simple».",
       "wix": "Añade «Embed Code» y luego «Embed HTML», y pega el código. Después estira el recuadro hasta la altura de tu escaparate.",
       "webflow": "Añade un elemento «Code Embed» y pega el código. Aparece en tu sitio publicado.",
       "shopify": "En el editor de temas, añade una sección «Custom Liquid» y pega el código.",
@@ -241,21 +248,21 @@
     },
     "snippetKinds": {
       "label": "Tipo de código",
-      "script": "Script",
-      "iframe": "Solo iframe"
+      "script": "Incorporación completa",
+      "iframe": "Incorporación simple"
     },
-    "snippetReadyHint": "Pégalo una sola vez. Se ajusta a tu escaparate y sigue lo que cambies aquí.",
-    "iframeHint": "Para sitios que eliminan los scripts. Mide {height} píxeles de alto y se desplaza por dentro. Vuelve a copiarlo cuando cambies tus dominios.",
-    "snippetLockedHint": "Activa la incorporación y añade al menos un dominio para desbloquear el botón Copiar.",
+    "snippetReadyHint": "Funciona en la mayoría de los sitios. Pégalo una sola vez: se ajusta a tu escaparate y sigue lo que cambies aquí.",
+    "iframeHint": "Usa esta si la Incorporación completa no apareció en tu sitio. Mide {height} píxeles de alto y se desplaza por dentro. Vuelve a copiarla cada vez que cambies las direcciones de tu web.",
+    "snippetLockedHint": "Activa la incorporación y añade al menos una dirección web para desbloquear el botón Copiar.",
     "snippetSaveHint": "Guarda los ajustes para desbloquear el botón Copiar.",
     "pagesOffHint": "Activa primero las páginas de producto en el editor. Al hacer clic en un producto se abre su página.",
     "notShowingLabel": "Si el escaparate no aparece",
-    "notShowingTip": "La dirección de tu sitio debe estar en Dominios permitidos y el sitio debe usar https. El código pegado aparece en tu sitio publicado, no en el editor del creador de sitios. Para verlo en una dirección de vista previa (como tusitio.webflow.io), añade también esa dirección.",
+    "notShowingTip": "La dirección de tu sitio debe estar en las direcciones de tu web de arriba, y el sitio debe usar https. El código pegado aparece en tu sitio publicado, no en el editor del creador de sitios. Si el escaparate no aparece en absoluto, prueba el tipo de código Incorporación simple. Para verlo en una dirección de vista previa (como tusitio.webflow.io), añade también esa dirección.",
     "copySnippet": {
-      "copy": "Copiar fragmento de incorporación",
-      "copied": "Fragmento de incorporación copiado",
-      "failed": "No se ha podido copiar el fragmento de incorporación. Selecciónalo y cópialo a mano.",
-      "cannotCopyYet": "el fragmento de incorporación todavía no se puede copiar"
+      "copy": "Copiar el código para tu web",
+      "copied": "Código para tu web copiado",
+      "failed": "No se ha podido copiar el código para tu web. Selecciónalo y cópialo a mano.",
+      "cannotCopyYet": "el código para tu web todavía no se puede copiar"
     },
     "privacyHint": "Tu sitio carga ahora este escaparate desde Square Share, así que su política de privacidad tiene que decirlo. Pega este texto en ella:",
     "privacyTextLabel": "Texto de privacidad",
@@ -265,20 +272,21 @@
       "copied": "Texto de privacidad copiado",
       "failed": "No se ha podido copiar el texto. Selecciónalo y cópialo a mano."
     },
-    "snippetKeyLabel": "Clave del fragmento",
-    "rotateConfirmText": "Al renovarla se emite una clave nueva. Todas las copias del fragmento anterior dejan de funcionar de inmediato, incluidas las de sitios que sigues queriendo usar: tendrás que volver a pegar el nuevo fragmento en todas partes.",
-    "rotateKey": "Renovar clave",
-    "rotating": "Renovando…",
-    "revokeHint": "¿Lo has pegado en algún sitio donde no debería estar? Renueva la clave para revocar todos los fragmentos existentes.",
+    "snippetKeyLabel": "Código para tu web",
+    "rotateConfirmText": "Al obtener un código nuevo, el anterior deja de funcionar en todos los sitios donde se pegó. En las webs donde sigas mostrando el escaparate tendrás que volver a pegar el código nuevo.",
+    "rotateKey": "Obtener un código nuevo",
+    "rotating": "Obteniendo un código nuevo…",
+    "revokeHint": "El código para tu web está pensado para ser público: solo se muestra en las direcciones de tu web. Obtén un código nuevo solo para desactivar todas las copias ya pegadas.",
     "saveSettings": "Guardar ajustes",
     "saving": "Guardando…",
     "saved": "Ajustes de incorporación guardados.",
-    "newKeyIssued": "Se ha emitido una nueva clave de incorporación.",
-    "newKeyDetail": "Vuelve a pegar el fragmento en todos los sitios donde esté incorporado este escaparate."
+    "newKeyIssued": "Se ha generado un código nuevo para tu web.",
+    "newKeyDetail": "Vuelve a pegar el código para tu web en todos los sitios donde esté incorporado este escaparate."
   },
   "share": {
     "title": "Enlace del escaparate",
     "live": "Tu escaparate tiene su propia página. Cualquiera con este enlace puede verlo, sin necesidad de web.",
+    "searchOff": "Oculto a buscadores como Google.",
     "pagesOff": "Activa las páginas de producto en el editor y este escaparate tendrá un enlace para compartir.",
     "detailsMissing": "Este escaparate tendrá un enlace para compartir cuando completes tus datos de vendedor.",
     "open": "Abrir",
@@ -321,7 +329,7 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Página de producto",
-    "closeAriaLabel": "Cerrar el recorrido de compra de {title}",
+    "closeAriaLabel": "Cerrar la página de producto de {title}",
     "desktopSize": "Tamaño de escritorio",
     "mobileSize": "Tamaño móvil",
     "checkoutLabel": " · Pago",
@@ -331,7 +339,7 @@
   "metadata": {
     "storefronts": {
       "title": "Escaparates",
-      "subtitle": "Cada escaparate tiene su propia cuadrícula y tema. Crea tantos como necesites y luego abre uno para editarlo."
+      "subtitle": "Cada escaparate tiene su propia cuadrícula y tema, con su propio enlace para compartir. Crea tantos como necesites y luego abre uno para editarlo."
     },
     "editor": {
       "title": "Editar escaparate"
@@ -351,20 +359,20 @@
   "controls": {
     "off": "Desactivado",
     "layers": "Capas",
-    "objectCount": "{count, plural, one {1 objeto} many {# objetos} other {# objetos}}",
+    "objectCount": "{count, plural, one {# bloque} many {# bloques} other {# bloques}}",
     "cardStyle": "Estilo de tarjeta",
     "priceTag": "Etiqueta de precio",
     "theme": "Tema",
-    "canvas": "Lienzo",
-    "design": "Diseño"
+    "themeHint": "Colores, tamaño de la cuadrícula y diseño para móviles",
+    "canvas": "Lienzo"
   },
   "designPanel": {
     "tabSelection": "Selección",
-    "tabDesign": "Diseño",
+    "tabDesign": "Todo el escaparate",
     "show": "Mostrar panel de diseño",
     "hide": "Ocultar panel de diseño",
     "resize": "Cambiar el tamaño del panel de diseño",
-    "closeSettings": "Cerrar ajustes de diseño",
+    "closeSettings": "Cerrar el estilo del escaparate",
     "scopeLabel": "Ámbito del panel"
   },
   "library": {
@@ -434,10 +442,11 @@
     "sectionPalettes": "Paletas"
   },
   "themePanel": {
-    "accent": "Acento"
+    "accent": "Acento",
+    "accentHint": "Se usa en botones, etiquetas de rebaja, títulos y el nombre de tu tienda."
   },
   "panelSearch": {
-    "placeholder": "Buscar un ajuste u objeto",
+    "placeholder": "Buscar un ajuste o bloque",
     "clear": "Borrar búsqueda",
     "noResults": "Nada en el editor coincide con eso.",
     "matchesLabel": "Coincidencias"
@@ -488,7 +497,7 @@
     "cornerValueText": "{n, plural, one {# píxel} many {# píxeles} other {# píxeles}}",
     "sharp": "Recta",
     "circle": "Círculo",
-    "fineTuning": "Ajuste fino",
+    "titleSection": "Título",
     "showTitle": "Mostrar título",
     "titleStyleLabel": "Estilo del título",
     "edgeSpacing": "Margen",
@@ -556,12 +565,13 @@
     "label": "En tarjetas más grandes",
     "tile": "Crecer",
     "cell": "Mismo tamaño",
-    "everyCard": "Se aplica a todas las tarjetas de esta tienda."
+    "everyCard": "Se aplica a las etiquetas de precio y de rebaja de todas las tarjetas."
   },
   "layout": {
     "canvasWidth": "Ancho del lienzo",
     "canvasWidthAriaLabel": "Ancho del lienzo en bloques",
     "blocksWide": "{n, plural, one {# bloque de ancho} many {# bloques de ancho} other {# bloques de ancho}}",
+    "blocksUnit": "bloques",
     "canvasHeight": "Alto del lienzo",
     "heightTip": "El panel no puede encogerse por debajo de los bloques que ya contiene: primero arrastra un bloque hacia arriba y luego acorta el lienzo.",
     "canvasHeightAriaLabel": "Alto del lienzo en bloques",
@@ -570,6 +580,11 @@
     "gridDensityAriaLabel": "Densidad de la cuadrícula",
     "gridGapValue": "{n, plural, one {espacio de # píxel} many {espacio de # píxeles} other {espacio de # píxeles}}",
     "noGap": "Sin espacio",
+    "phonesInfoLabel": "Cómo muestran los móviles este lienzo",
+    "phonesInfoBody": "Desactivado, los móviles reorganizan el lienzo por sí solos para que quepa. Activado, abre la vista de móvil y arrastra o cambia el tamaño de los bloques para colocarlos tú. El lienzo de escritorio se queda como está.",
+    "phonesAutomatic": "Los móviles organizan este lienzo automáticamente.",
+    "phoneWidth": "Ancho en móvil",
+    "phoneWidthAriaLabel": "Ancho en móvil en bloques",
     "showGrid": "Mostrar cuadrícula",
     "gridInfoLabel": "Quién ve la cuadrícula",
     "gridInfoBody": "Una guía para ti mientras diseñas: dibuja los huecos vacíos para que veas dónde caerá un bloque. Los compradores nunca la ven."
@@ -588,7 +603,8 @@
     "angle": "{n}°",
     "layerLabel": "Capa",
     "layerInfoLabel": "Cómo funcionan las capas",
-    "layerInfoBody": "Las capas solo deciden qué se pinta encima cuando los bloques se superponen; el orden de lectura que sigue un lector de pantalla nunca cambia.{multi, select, true { Esta selección mantiene su propio orden dentro de la pila mientras se mueve.} other {}}{stacked, select, true { Alt-clic en una pila del lienzo para llegar al bloque de debajo.} other {}}",
+    "layerInfoBody": "Las capas solo deciden qué se pinta encima cuando los bloques se superponen; el orden de lectura que sigue un lector de pantalla nunca cambia.{multi, select, true { Esta selección mantiene su propio orden dentro de la pila mientras se mueve.} other {}}",
+    "stackedHint": "Alt-clic para seleccionar el bloque de debajo. En una pantalla táctil, vuelve a tocar la pila.",
     "blocksSelected": "{count, plural, one {# bloque seleccionado} many {# bloques seleccionados} other {# bloques seleccionados}}",
     "layerOf": "Capa {index} de {total}",
     "blockLayerLabel": "Capa del bloque",
@@ -596,7 +612,13 @@
     "sendBackward": "Atrasar",
     "bringForward": "Adelantar",
     "bringToFront": "Traer al frente",
-    "seeAllLayers": "Ver todas las capas"
+    "seeAllLayers": "Ver todas las capas",
+    "phoneLabel": "En móviles",
+    "phoneInfoLabel": "Cómo se coloca un bloque en móviles",
+    "phoneInfoBody": "Arrastra o cambia el tamaño de un bloque en la vista de móvil para colocarlo tú allí. Volver a automático deja que la organización para móviles lo coloque de nuevo. El lienzo de escritorio se queda como está.",
+    "hideOnPhones": "Ocultar en móviles",
+    "showOnPhones": "Mostrar en móviles",
+    "phoneAutomatic": "Volver a automático"
   },
   "header": {
     "showHeader": "Mostrar encabezado",
@@ -606,7 +628,8 @@
     "storeNamePlaceholder": "Nombre de la tienda mostrado a los compradores",
     "bio": "Bio",
     "bioPlaceholder": "Una línea breve sobre tu tienda",
-    "charsLeft": "{n, plural, one {# carácter restante} many {# caracteres restantes} other {# caracteres restantes}}"
+    "charsLeft": "{n, plural, one {# carácter restante} many {# caracteres restantes} other {# caracteres restantes}}",
+    "styleLine": "{line, select, name {Fuente y color del nombre} other {Fuente y color de la bio}}"
   },
   "soldOut": {
     "hide": "Ocultar a los compradores",
@@ -682,10 +705,12 @@
     "movePriceTo": "{spot, select, top_left {Mover el precio arriba a la izquierda} top_center {Mover el precio arriba al centro} top_right {Mover el precio arriba a la derecha} middle_center {Mover el precio al medio} bottom_left {Mover el precio abajo a la izquierda} bottom_center {Mover el precio abajo al centro} bottom_right {Mover el precio abajo a la derecha} other {Mover el precio aquí}}"
   },
   "productPage": {
+    "scopeNote": "Estos ajustes se aplican a todas las páginas de producto de este escaparate.",
     "layout": {
       "title": "Página",
       "showPage": {
         "label": "Mostrar una página de producto",
+        "hint": "También le da a tu escaparate su propio enlace para compartir.",
         "infoLabel": "Qué hace este interruptor",
         "infoOn": "Al tocar una tarjeta de producto se abre su página, y el escaparate tiene su propia página para compartir.",
         "infoOff": "Las tarjetas de producto no tienen página que abrir, y el enlace del propio escaparate también deja de funcionar."
@@ -702,7 +727,7 @@
         "label": "Fuente",
         "infoLabel": "Cómo se relaciona la fuente de esta página con la del escaparate",
         "infoOwn": "Esta página se muestra con su propia fuente, sea cual sea la del escaparate.",
-        "infoFollows": "Sigue la fuente de tu escaparate. Cámbiala en Tipografía.",
+        "infoFollows": "Sigue la fuente de tu escaparate. Cámbiala en los ajustes de Fuente.",
         "inheritOption": "Igual que el escaparate ({name})"
       },
       "indexing": {
@@ -716,6 +741,7 @@
       "title": "Botón de compra",
       "infoLabel": "Qué decide si se muestra un botón",
       "infoContent": "El botón sigue el enlace de compra de cada producto (configurado en el producto). Si no hay uno, escribe a tu dirección de contacto de abajo; si no hay ninguno de los dos, no se muestra ningún botón.",
+      "checkoutNote": "El botón de pago de tu proceso de pago coincide con este. <link>Ir a Proceso de pago</link>",
       "buttonText": {
         "label": "Texto del botón",
         "charsLeft": "{count, plural, one {# carácter restante} many {# caracteres restantes} other {# caracteres restantes}}"
@@ -844,6 +870,7 @@
   "productBlock": {
     "deleted": "Este producto se eliminó de tu catálogo.",
     "removeFromGrid": "Quitar de la cuadrícula",
+    "details": "Detalles del producto",
     "nameLabel": "Nombre",
     "namePlaceholder": "Nombre del producto",
     "priceLabel": "Precio ({currency})",
@@ -858,13 +885,14 @@
       "lowStock": "Stock bajo: {count} disponibles.",
       "inStock": "{count} en stock."
     },
-    "openProductPage": "Abrir recorrido de compra",
-    "hideProductPage": "Ocultar recorrido de compra",
+    "openProductPage": "Abrir página de producto",
+    "hideProductPage": "Ocultar página de producto",
+    "noCtaWarning": "El botón de compra de su página todavía no lleva a ningún sitio. Añade un enlace de compra al producto, o un correo de contacto en tus datos de vendedor.",
     "tileStyle": {
       "title": "Estilo de tarjeta",
-      "reset": "Restablecer al tema",
+      "reset": "Usar el estilo del tema",
       "infoLabel": "Cómo se relaciona el estilo de esta tarjeta con el tema",
-      "infoWithOverrides": "Esta tarjeta tiene su propio estilo. Los ajustes que no has cambiado aquí siguen el tema.",
+      "infoWithOverrides": "Esta tarjeta tiene su propio estilo; lo que no cambies aquí sigue el tema. Usar el estilo del tema borra solo los cambios de esta tarjeta: el tema se queda como está.",
       "infoNoOverrides": "Da estilo a esta tarjeta por su cuenta. Lo que no cambies sigue el tema."
     },
     "priceTag": "Etiqueta de precio",
@@ -876,6 +904,7 @@
       "updateEverywhere": "Actualizar en todas partes"
     },
     "savedToast": "«{title}» se ha actualizado en todos los sitios donde aparece.",
+    "unsavedToast": "El nuevo nombre o precio de «{title}» no se ha guardado. Pulsa Guardar antes de seguir para conservarlo.",
     "validation": {
       "noTitle": "Ponle un título a tu producto.",
       "noPrice": "Indica un precio.",
@@ -983,7 +1012,7 @@
   "multiBlock": {
     "shapesContext": "Editando {count, plural, one {# forma} many {# formas} other {# formas}} a la vez. Los valores mostrados vienen de la primera forma seleccionada; cada cambio se aplica a todas.",
     "textsContext": "Editando {count, plural, one {# bloque de texto} many {# bloques de texto} other {# bloques de texto}} a la vez. Los valores mostrados vienen del primer bloque seleccionado; cada cambio se aplica a todos. Cada bloque conserva su propio texto.",
-    "imagesContext": "Editando {count, plural, one {# elemento} many {# elementos} other {# elementos}} a la vez. Los valores mostrados vienen del primer elemento seleccionado; cada cambio se aplica a todos. Cada uno conserva su propia imagen.",
+    "imagesContext": "Editando {count, plural, one {# bloque} many {# bloques} other {# bloques}} a la vez. Los valores mostrados vienen del primer bloque seleccionado; cada cambio se aplica a todos. Cada uno conserva su propia imagen.",
     "productsContext": "Dando estilo a {count, plural, one {# tarjeta de producto} many {# tarjetas de producto} other {# tarjetas de producto}} a la vez. Los valores mostrados vienen de la primera tarjeta seleccionada; cada cambio se aplica a todas.",
     "mixedContext": "Hay {count, plural, one {# bloque} many {# bloques} other {# bloques}} de tipos distintos seleccionados. Selecciona bloques de un mismo tipo para editar sus ajustes a la vez.",
     "remove": "Quitar {count, plural, one {# bloque} many {# bloques} other {# bloques}}",
@@ -991,7 +1020,7 @@
     "productsNotDuplicated": "Los productos no se duplican.",
     "tileStyle": {
       "title": "Estilo de tarjeta",
-      "reset": "Restablecer al tema"
+      "reset": "Usar el estilo del tema"
     },
     "priceTag": "Etiqueta de precio"
   },
@@ -1003,18 +1032,18 @@
     "ariaLabel": "Herramientas del editor",
     "addProduct": "Añadir producto",
     "addText": "Añadir texto",
-    "addElement": "Añadir elemento",
+    "addElement": "Añadir forma o imagen",
     "product": "Producto",
     "text": "Texto",
-    "element": "Elemento",
-    "elementsMenu": "Elementos",
+    "element": "Formas",
+    "elementsMenu": "Formas e imágenes",
     "uploading": "Subiendo…",
     "upload": "Subir",
     "uploadImage": "Subir imagen",
     "allShapes": "Todas las formas",
     "browseShapes": "Explorar toda la biblioteca de formas",
-    "closePage": "Cerrar recorrido de compra",
-    "showPage": "Mostrar recorrido de compra",
+    "closePage": "Cerrar página de producto",
+    "showPage": "Mostrar página de producto",
     "closePages": "Cerrar la página de producto, el pago y la página de agradecimiento",
     "showPageFull": "Mostrar la página de producto, el pago y la página de agradecimiento",
     "undo": "Deshacer",
@@ -1027,22 +1056,26 @@
     "zoomOutTip": "Alejar (Ctrl -)",
     "zoomReset": "Restablecer zoom al 100%",
     "zoomResetTip": "Restablecer zoom (Ctrl 0)",
-    "zoomResetMenuItem": "Restablecer zoom",
+    "zoomFit": "Ajustar a la pantalla",
     "zoomIn": "Acercar",
     "zoomInTip": "Acercar (Ctrl +)",
-    "designSettings": "Ajustes de diseño",
-    "page": "Recorrido de compra",
-    "moreTools": "Más herramientas"
+    "designSettings": "Estilo del escaparate",
+    "style": "Estilo",
+    "page": "Página de producto",
+    "pageMobile": "Página",
+    "pageDisabledTip": "Añade un producto para abrir su página",
+    "moreTools": "Más herramientas",
+    "more": "Más"
   },
   "selectionToolbar": {
     "toolsFor": "Herramientas para {name}",
-    "elements": "{count, plural, one {# elemento} many {# elementos} other {# elementos}}",
-    "hidePage": "Ocultar recorrido de compra",
-    "openPage": "Abrir recorrido de compra",
-    "openProductPage": "Abrir el recorrido de compra de {name}",
-    "closeProductPage": "Cerrar el recorrido de compra de {name}",
-    "openProductPages": "Abrir el recorrido de compra de {count, plural, one {# producto} many {# productos} other {# productos}}",
-    "closeProductPages": "Cerrar el recorrido de compra de {count, plural, one {# producto} many {# productos} other {# productos}}",
+    "elements": "{count, plural, one {# bloque} many {# bloques} other {# bloques}}",
+    "hidePage": "Ocultar página de producto",
+    "openPage": "Abrir página de producto",
+    "openProductPage": "Abrir la página de producto de {name}",
+    "closeProductPage": "Cerrar la página de producto de {name}",
+    "openProductPages": "Abrir la página de producto de {count, plural, one {# producto} many {# productos} other {# productos}}",
+    "closeProductPages": "Cerrar la página de producto de {count, plural, one {# producto} many {# productos} other {# productos}}",
     "editText": "Editar texto",
     "editTextOf": "Editar el texto de {name}",
     "color": "Color",
@@ -1059,24 +1092,26 @@
     "frameImageFor": "Recortar y colocar la imagen de {name}",
     "duplicate": "Duplicar",
     "duplicateNamed": "Duplicar {name}",
-    "duplicateN": "Duplicar {count, plural, one {# elemento} many {# elementos} other {# elementos}}",
+    "duplicateN": "Duplicar {count, plural, one {# bloque} many {# bloques} other {# bloques}}",
     "removeFrom": "Quitar {name} de la cuadrícula",
-    "removeN": "Quitar {count, plural, one {# elemento} many {# elementos} other {# elementos}} de la cuadrícula"
+    "removeN": "Quitar {count, plural, one {# bloque} many {# bloques} other {# bloques}} de la cuadrícula"
   },
   "canvas": {
     "addSuggested": "Añadir {title} a este escaparate",
     "gridLabel": "Lienzo del escaparate",
     "emptyGrid": "Tu cuadrícula está vacía",
-    "emptyGridHint": "Añade un producto para empezar a organizar tu escaparate. El texto y las formas están en la barra de herramientas de abajo.",
+    "emptyGridHint": "Añade un producto para empezar a organizar tu escaparate. El texto, las formas y tus propias imágenes están en la barra de herramientas de abajo.",
     "addProduct": "Añadir producto",
     "desktopPreview": "Vista previa de escritorio",
-    "mobilePreview": "Vista previa móvil"
+    "mobilePreview": "Vista previa móvil",
+    "multiSelectTip": "Para seleccionar varios bloques, haz Mayús-clic en ellos o arrastra por un espacio vacío. En una pantalla táctil, mantén pulsado cada uno.",
+    "sheetTip": "Cierra este panel para recuperar la barra de herramientas."
   },
   "blockTile": {
     "removedProduct": "Producto eliminado",
     "shape": "{kind, select, square {forma de cuadrado} circle {forma de círculo} ring {forma de anillo} diamond {forma de rombo} rounded {forma de cuadrado redondeado} pill {forma de píldora} half {forma de medio círculo} quarter {forma de cuarto de círculo} bar {forma de barra} triangle {forma de triángulo} wedge {forma de cuña} pentagon {forma de pentágono} hexagon {forma de hexágono} octagon {forma de octágono} star {forma de estrella} sparkle {forma de destello} cross {forma de cruz} arrow {forma de flecha} chevron {forma de chevrón} trapezoid {forma de trapecio} parallelogram {forma de paralelogramo} burst {forma de estallido} other {forma de {kind}}}",
     "imageWithAlt": "Imagen: {alt}",
-    "imageElement": "Elemento de imagen",
+    "imageElement": "Bloque de imagen",
     "textWithContent": "Texto: {text}",
     "textBlock": "Bloque de texto",
     "selected": "Seleccionado: {label}. Pulsa Intro para deseleccionar.",
@@ -1109,11 +1144,14 @@
       "nameLabel": "Nombre del escaparate",
       "namePlaceholder": "Escaparate sin título",
       "unsaved": "Cambios sin guardar",
+      "saveTip": "Guardar (Ctrl+S)",
       "viewPage": "Ver página",
+      "viewSavedPage": "Ver la página guardada",
+      "shareSetupNeeded": "Tus datos de vendedor están incompletos, así que este escaparate todavía no se puede compartir",
       "search": "Buscar"
     },
     "mobileNotice": {
-      "body": "Para la mejor experiencia de edición, abre este editor en un ordenador o una tablet. Reordenar bloques y editar el encabezado funcionan en cualquier dispositivo.",
+      "body": "Aquí funciona todo: toca un bloque para editarlo, mantén pulsados más bloques para seleccionarlos juntos, mantén pulsada una herramienta para ver qué hace y pellizca para hacer zoom. Los ajustes finos son más fáciles en una pantalla más grande.",
       "dismiss": "Descartar el aviso de edición en pantalla pequeña"
     },
     "inspector": {
@@ -1171,13 +1209,6 @@
       "badge": "Ejemplo",
       "summary": "{count, plural, one {{count} bloque · prueba lo que quieras, nada se guarda} many {{count} de bloques · prueba lo que quieras, nada se guarda} other {{count} bloques · prueba lo que quieras, nada se guarda}}",
       "hide": "Ocultar el escaparate de ejemplo"
-    },
-    "embed": {
-      "title": "Incorpora un escaparate",
-      "description": "Cada escaparate que crees tendrá su propio fragmento para pegarlo en tu web.",
-      "snippetLabel": "Un fragmento tiene este aspecto",
-      "inDevelopment": "El widget aún está en desarrollo y todavía no se muestra en otros sitios.",
-      "create": "Crear un escaparate"
     },
     "list": {
       "show": "Mostrar el escaparate de ejemplo",
@@ -1457,7 +1488,11 @@
       "link": "Enlace"
     },
     "buyButtonTipLabel": "Adónde lleva el botón",
-    "buyButtonTip": "Usa el texto y el color del botón de tu página de producto, y abre la página de producto.",
+    "buyButtonTip": "Abre la página de producto. Empieza con el texto y el color del botón de esa página, que aquí puedes cambiar para las tarjetas.",
+    "pageButton": {
+      "label": "Botón de la página de producto",
+      "use": "Usar el botón de la página de producto"
+    },
     "rating": "Valoración con estrellas",
     "ratingTipLabel": "De dónde salen las estrellas",
     "ratingTip": "De las reseñas de compradores. Aparece bajo el nombre en cuanto un producto tiene una reseña.",
@@ -1471,5 +1506,43 @@
     "lineHeight": "Altura de línea",
     "normal": "Normal",
     "valueText": "{value} por ciento del tamaño del texto"
+  },
+  "shortcuts": {
+    "title": "Atajos de teclado",
+    "tip": "Atajos de teclado (?)",
+    "rows": {
+      "save": {
+        "label": "Guardar",
+        "keys": "<kbd>{mod}</kbd> <kbd>S</kbd>"
+      },
+      "copyPaste": {
+        "label": "Copiar y pegar bloques",
+        "keys": "<kbd>{mod}</kbd> <kbd>C</kbd> y luego <kbd>{mod}</kbd> <kbd>V</kbd>"
+      },
+      "remove": {
+        "label": "Quitar los bloques seleccionados",
+        "keys": "<kbd>Supr</kbd>"
+      },
+      "move": {
+        "label": "Mover los bloques seleccionados",
+        "keys": "<kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd>"
+      },
+      "selectMore": {
+        "label": "Seleccionar varios bloques",
+        "keys": "<kbd>Mayús</kbd> + clic"
+      },
+      "selectUnder": {
+        "label": "Seleccionar el bloque de debajo",
+        "keys": "<kbd>{alt}</kbd> + clic"
+      },
+      "layer": {
+        "label": "Adelantar o atrasar",
+        "keys": "<kbd>{mod}</kbd> <kbd>]</kbd> o <kbd>[</kbd>"
+      },
+      "pan": {
+        "label": "Moverse por el lienzo",
+        "keys": "Mantén pulsado <kbd>Espacio</kbd> y arrastra"
+      }
+    }
   }
 }

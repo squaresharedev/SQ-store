@@ -4,7 +4,13 @@ import { Globe, Lock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { BrowserChrome } from "@/components/ui/BrowserChrome";
-import { badgeClass, cardClass, lockBadgeClass, placeholderBarClass } from "@/components/ui/surface-styles";
+import {
+  badgeClass,
+  cardClass,
+  liveDotClass,
+  lockBadgeClass,
+  placeholderBarClass,
+} from "@/components/ui/surface-styles";
 import type { Product } from "@/types/product";
 import { buyerVisibleBlocks, type StorefrontConfig } from "@/types/storefront";
 import { StorefrontPreview } from "./StorefrontPreview";
@@ -85,7 +91,7 @@ export function EmbedHero({
                 "absolute left-3 top-0 flex -translate-y-1/2 items-center gap-1.5 border border-border bg-background text-foreground shadow-xs",
               )}
             >
-              <span className="size-1.5 rounded-full bg-success" />
+              <span className={liveDotClass} />
               {t("showingLabel")}
             </span>
           ) : (

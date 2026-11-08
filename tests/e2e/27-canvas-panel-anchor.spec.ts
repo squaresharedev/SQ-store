@@ -38,7 +38,7 @@ function libraryPanel() {
 }
 
 async function openShapeLibrary() {
-  await page.getByRole("button", { name: "Add element" }).click();
+  await page.getByRole("button", { name: "Add shape or image" }).click();
   await page.getByRole("menuitem", { name: /all shapes/i }).click();
   await expect(libraryPanel()).toBeVisible();
   await settle();
@@ -192,7 +192,7 @@ test.describe("canvas holds still when a panel opens (desktop)", () => {
     //
     // A shape rather than the text block: clicking a selected TEXT tile means
     // "let me type", which is a different gesture from the one under test.
-    await page.getByRole("button", { name: "Add element" }).click();
+    await page.getByRole("button", { name: "Add shape or image" }).click();
     await page.getByRole("menuitem", { name: "Add square" }).click();
     await expect(tiles()).toHaveCount(2);
     const shape = tiles().nth(1);

@@ -6,7 +6,7 @@
   },
   "page": {
     "title": "Encomendas",
-    "subtitle": "Todas as encomendas feitas através do Square Share."
+    "subtitle": "Encomendas feitas através da finalização da compra do Square Share."
   },
   "status": {
     "paid": "Paga",
@@ -17,7 +17,7 @@
   "channel": {
     "embed": "No seu site",
     "marketplace": "Marketplace",
-    "direct": "A sua página",
+    "direct": "Link direto",
     "button": "Botão de compra"
   },
   "empty": {
@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} encomenda} many {{total} de encomendas} other {{total} encomendas}} · página {page} de {totalPages}",
     "detailDialog": "Detalhes da encomenda",
     "closeDetail": "Fechar detalhes da encomenda",
-    "withdrawn": "Desistência",
+    "withdrawn": "Cancelada pelo comprador",
+    "refundDue": "Reembolsar até {date}",
     "moreItems": "+{count} mais"
   },
   "table": {
@@ -52,12 +53,12 @@
     "shipping": "Envio",
     "shipTo": "Enviar para",
     "noAddress": "Sem morada",
-    "feeLine": "Taxa {amount}"
+    "feeLine": "Taxa da plataforma {amount}"
   },
   "toolbar": {
     "region": "filtros de encomendas",
     "channel": "canal",
-    "searchPlaceholder": "pesquisar e-mail, nome, cidade, produto ou envio",
+    "searchPlaceholder": "pesquisar número da encomenda, e-mail, nome, cidade, produto ou envio",
     "search": "pesquisar",
     "status": "estado",
     "statusAriaLabel": "Filtrar por estado",
@@ -121,7 +122,7 @@
       "failed": "Não foi possível copiar o número de telefone. Selecione-o e copie-o manualmente."
     },
     "giftMessage": "Mensagem de presente",
-    "withdrawalNotice": "O comprador pediu para se retirar desta compra em {date}. Acorde a devolução e o reembolso com ele.",
+    "withdrawalNotice": "O comprador cancelou esta compra em {date}. Combine a devolução e faça o reembolso no prazo de 14 dias.",
     "noAddress": "Esta encomenda não tem morada de entrega. Envie um e-mail ao comprador para saber para onde deve ser enviada.",
     "shipping": "Envio",
     "shippedOn": "Enviada em {date}",
@@ -147,7 +148,7 @@
     },
     "emailBuyer": "Enviar e-mail ao comprador",
     "mailSubject": "A sua encomenda {number}",
-    "withdrawnShipWarning": "O comprador desistiu desta compra. Só a envie se tiver acordado isso com ele.",
+    "withdrawnShipWarning": "O comprador cancelou esta compra. Só a envie se tiver acordado isso com ele.",
     "discount": "Desconto",
     "discountSale": "Promoção, {amount} de desconto",
     "discountCode": "Código {code}, {amount} de desconto",
@@ -155,8 +156,10 @@
     "alsoBought": "Também nesta encomenda"
   },
   "actions": {
-    "disputeInStripe": "O banco do comprador abriu uma disputa. Responda-lhe no seu painel Stripe antes do prazo.",
+    "disputeInStripe": "O banco do comprador abriu uma disputa. Responda-lhe no seu painel Stripe antes do prazo, caso contrário o comprador recebe o dinheiro de volta.",
     "answerInStripe": "Responder na Stripe",
+    "disputeOwnerOnly": "Só o proprietário da loja pode responder.",
+    "disputeOwnerOnlyNamed": "Só o proprietário de {store} pode responder. Avise-o.",
     "pendingPayment": "O pagamento do comprador ainda está a ser confirmado. Não envie nada para já: a encomenda aparece como paga quando for concluído, e fecha-se sozinha se não for.",
     "none": "Não há ações disponíveis para esta encomenda."
   },
@@ -179,8 +182,8 @@
     "refundedOnReason": "{reason, select, cancelled {Cancelado e reembolsado em {date}} returned {Devolvido e reembolsado em {date}} other {Reembolsado em {date}}}",
     "ownerOnly": "Só o proprietário da loja pode reembolsar ou cancelar uma encomenda.",
     "ownerOnlyNamed": "Só o proprietário de {store} pode reembolsar ou cancelar uma encomenda. Peça-lhe que o faça.",
-    "manual": "Este pagamento não passou pelo Square Share. Reembolse o comprador diretamente e registe-o aqui.",
-    "viaProvider": "O valor total é devolvido para o cartão do comprador via Stripe. Esta operação não pode ser desfeita."
+    "manual": "Este pagamento não passou pelo Square Share. Devolva ao comprador a totalidade dos {amount} diretamente e registe-o aqui.",
+    "viaProvider": "Reembolsa a encomenda completa, {amount}, para o cartão do comprador via Stripe. Esta operação não pode ser desfeita."
   },
   "skeleton": {
     "loading": "a carregar encomendas"
@@ -289,8 +292,8 @@
       "buyerSubject": "A sua desistência da encomenda {number} em {store}",
       "buyerIntro": "Recebemos a sua desistência da encomenda {number} ({title}) em {date} e encaminhámos imediatamente para {store}.",
       "buyerNext": "{store} entrará em contacto consigo sobre a devolução e o reembolso, devido no prazo de 14 dias após a sua desistência.",
-      "sellerSubject": "Desistência: encomenda {number} ({title})",
-      "sellerIntro": "O comprador {email} desistiu da encomenda {number} em {date}, usando o botão de desistência na sua página de encomenda.",
+      "sellerSubject": "Cancelamento (livre resolução): encomenda {number} ({title})",
+      "sellerIntro": "O comprador {email} cancelou a encomenda {number} em {date}, usando o botão de desistência na página da encomenda.",
       "sellerName": "Nome indicado: {name}",
       "sellerNext": "Contacte-o para organizar a devolução e reembolse dentro de 14 dias. Pode reter o reembolso até que o artigo seja devolvido ou o comprador mostre que foi enviado. A encomenda: {url}"
     },

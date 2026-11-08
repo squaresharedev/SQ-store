@@ -524,11 +524,11 @@
     "addOnNotYours": "Een van de aangeboden producten staat niet meer in deze winkel. Verwijder het en sla opnieuw op."
   },
   "productImport": {
-    "noTitle": "Geen titel.",
+    "noTitle": "Geen titel. Controleer of de kolom Titel hierboven is ingesteld.",
     "titleTooLong": "Titel is langer dan 200 tekens.",
-    "noPrice": "Geen prijs die we konden lezen.",
+    "noPrice": "Geen prijs die we konden lezen. Controleer of de kolom Prijs hierboven naar de juiste kolom verwijst.",
     "priceZero": "Prijs is nul.",
-    "duplicateTitle": "Een andere rij heeft deze titel."
+    "duplicateTitle": "Een andere rij heeft deze titel. Dubbele titels worden overgeslagen; geef er een een andere naam in je spreadsheet."
   },
   "shipping": {
     "shipsFromInvalid": "Dat is nog geen land van waaruit we kunnen verzenden.",

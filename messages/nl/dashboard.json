@@ -52,7 +52,8 @@
   },
   "recentOrders": {
     "title": "Recente bestellingen",
-    "empty": "Nog geen bestellingen. Verkopen via je eigen aankooplink of per e-mail verschijnen hier niet."
+    "empty": "Nog geen bestellingen. Zodra afrekenen open is, verschijnen afgeronde aankopen hier.",
+    "emptyReady": "Nog geen bestellingen. Je eerste verkoop verschijnt hier."
   },
   "attention": {
     "title": "Vraagt om aandacht",
@@ -74,7 +75,7 @@
       "descriptionUpdated": "De voorwaarden zijn gewijzigd sinds je ze hebt geaccepteerd. Lees en accepteer de huidige versie.",
       "descriptionTerms": "Lees de Servicevoorwaarden en ga ermee akkoord.",
       "descriptionTermsUpdated": "De Servicevoorwaarden zijn gewijzigd sinds je ze hebt geaccepteerd. Lees de huidige versie en ga ermee akkoord.",
-      "action": "Voorwaarden bekijken"
+      "action": "Voorwaarden accepteren"
     },
     "noBuyPath": {
       "label": "{count, plural, one {{count} product zonder aankoopmogelijkheid} other {{count} producten zonder aankoopmogelijkheid}}",
@@ -114,18 +115,18 @@
       "action": "Editor openen"
     },
     "deadBlocks": {
-      "label": "{count, plural, one {{count} etalageblok dat naar verwijderde producten verwijst} other {{count} etalageblokken die naar verwijderde producten verwijzen}}",
-      "description": "Deze blokken lijken leeg voor bezoekers. Verwijder of vervang ze.",
-      "action": "Etalage openen"
+      "label": "{count, plural, one {{count} productvak dat naar een verwijderd product verwijst} other {{count} productvakken die naar verwijderde producten verwijzen}}",
+      "description": "Deze vakken lijken leeg voor bezoekers. Open de editor en verwijder of vervang ze.",
+      "action": "Editor openen"
     },
     "toShip": {
       "description": "Kopers wachten hierop. Pak ze in en markeer ze dan als verzonden.",
       "action": "Bestellingen verzenden"
     },
     "withdrawals": {
-      "label": "{count, plural, one {{count} koper heeft herroepen} other {{count} kopers hebben herroepen}}",
-      "description": "Ze krijgen binnen 14 dagen na de herroeping hun geld terug. Regel de retour en betaal de bestelling dan terug.",
-      "action": "Herroepingen bekijken"
+      "label": "{count, plural, one {{count} koper heeft geannuleerd} other {{count} kopers hebben geannuleerd}}",
+      "description": "Ze krijgen binnen 14 dagen hun geld terug. Regel de retour en betaal de bestelling dan terug.",
+      "action": "Annuleringen bekijken"
     },
     "restock": {
       "label": "{count, plural, one {{count} product bijna uitverkocht} other {{count} producten bijna uitverkocht}}",
@@ -138,6 +139,10 @@
       "label": "Stel je bezorgprijzen in",
       "description": "Kopers kunnen een fysiek product pas afrekenen als een bestemming zowel een tarief als een land heeft.",
       "action": "Prijzen instellen"
+    },
+    "paused": {
+      "label": "{count, plural, one {{count} product verborgen voor kopers} other {{count} producten verborgen voor kopers}}",
+      "description": "{count, plural, one {Square Share heeft het gepauzeerd of verwijderd. Bekijk waarom en wat je nu kunt doen.} other {Square Share heeft ze gepauzeerd of verwijderd. Bekijk waarom en wat je nu kunt doen.}}"
     }
   }
 }

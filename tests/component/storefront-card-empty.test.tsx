@@ -128,6 +128,24 @@ describe("StorefrontCard page link", () => {
     );
     expect(screen.queryByRole("link", { name: VIEW })).toBeNull();
   });
+
+  it("says in words whether buyers can open it, and if not, the first thing in the way", () => {
+    const status = () => document.querySelector("[data-storefront-status]");
+    renderCard({ ...DEFAULT_STOREFRONT_CONFIG, blocks: [] }, true, true);
+    expect(status()).toHaveTextContent("Live");
+    cleanup();
+    renderCard({ ...DEFAULT_STOREFRONT_CONFIG, blocks: [] }, true, false);
+    expect(status()).toHaveTextContent("Not live yet: add your seller details");
+    cleanup();
+    // Product pages come first, as on the Share page: with them off, the
+    // details would not make it live either.
+    renderCard(
+      { ...DEFAULT_STOREFRONT_CONFIG, blocks: [], productPage: { ...DEFAULT_PRODUCT_PAGE_CONFIG, enabled: false } },
+      true,
+      false,
+    );
+    expect(status()).toHaveTextContent("Not live yet: turn on product pages");
+  });
 });
 
 describe("StorefrontCard empty preview", () => {

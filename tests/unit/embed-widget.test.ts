@@ -291,6 +291,82 @@ describe("what the frame may tell the page", () => {
   });
 });
 
+describe("fallback content inside the div", () => {
+  // The new snippet places an anchor inside the div as a crawlable link to the
+  // hosted storefront page. The widget must hide it once the frame is live but
+  // leave it alone for every kind of invalid or refused message.
+  function slotWithAnchor(key: string): { node: HTMLElement; anchor: HTMLAnchorElement } {
+    const node = document.createElement("div");
+    node.setAttribute("data-squareshare-storefront", key);
+    const anchor = document.createElement("a");
+    anchor.href = "https://example.com/shop";
+    anchor.textContent = "My Store";
+    node.appendChild(anchor);
+    document.body.appendChild(node);
+    return { node, anchor };
+  }
+
+  const msg = (over: Record<string, unknown> = {}) => ({
+    source: EMBED_MESSAGE_SOURCE,
+    height: 640,
+    title: "Shop",
+    ...over,
+  });
+
+  it("is visible before any message arrives", () => {
+    const { anchor } = slotWithAnchor(KEY);
+    load();
+    expect(anchor.style.display).not.toBe("none");
+  });
+
+  it("is hidden after the first valid height message", () => {
+    const { anchor } = slotWithAnchor(KEY);
+    load();
+    const [frame] = frames();
+    post(msg(), { source: frame.contentWindow, origin: ORIGIN });
+    expect(anchor.style.display).toBe("none");
+    // With priority: a site stylesheet's `a { display: block !important }`
+    // must not bring the link back beside the frame.
+    expect(anchor.style.getPropertyPriority("display")).toBe("important");
+  });
+
+  it("stays visible after a message from the wrong origin", () => {
+    const { anchor } = slotWithAnchor(KEY);
+    load();
+    const [frame] = frames();
+    post(msg(), { source: frame.contentWindow, origin: "https://evil.example" });
+    expect(anchor.style.display).not.toBe("none");
+  });
+
+  it("stays visible after a message from the wrong source window", () => {
+    const { anchor } = slotWithAnchor(KEY);
+    load();
+    // Post from window itself rather than the frame's contentWindow.
+    post(msg(), { source: window, origin: ORIGIN });
+    expect(anchor.style.display).not.toBe("none");
+  });
+
+  it("stays visible after a message with a non-positive height", () => {
+    const { anchor } = slotWithAnchor(KEY);
+    load();
+    const [frame] = frames();
+    post(msg({ height: -1 }), { source: frame.contentWindow, origin: ORIGIN });
+    post(msg({ height: 0 }), { source: frame.contentWindow, origin: ORIGIN });
+    expect(anchor.style.display).not.toBe("none");
+  });
+
+  it("stays hidden on subsequent valid messages once hidden", () => {
+    const { anchor } = slotWithAnchor(KEY);
+    load();
+    const [frame] = frames();
+    post(msg(), { source: frame.contentWindow, origin: ORIGIN });
+    expect(anchor.style.display).toBe("none");
+    // A second valid message must not un-hide it.
+    post(msg({ height: 800 }), { source: frame.contentWindow, origin: ORIGIN });
+    expect(anchor.style.display).toBe("none");
+  });
+});
+
 describe("a storefront that never shows", () => {
   it("is explained once, in the console, to whoever is setting it up", () => {
     vi.useFakeTimers();
@@ -299,7 +375,7 @@ describe("a storefront that never shows", () => {
     load();
     vi.advanceTimersByTime(11_000);
     expect(info).toHaveBeenCalledTimes(1);
-    expect(String(info.mock.calls[0][0])).toMatch(/allowed domains/i);
+    expect(String(info.mock.calls[0][0])).toMatch(/website addresses/i);
     info.mockRestore();
   });
 

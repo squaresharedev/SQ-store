@@ -93,7 +93,7 @@
     "createStorefronts": "Troppi tentativi di creare vetrine in poco tempo.",
     "saveStorefronts": "Troppi tentativi di salvare vetrine in poco tempo.",
     "deleteStorefronts": "Troppi tentativi di eliminare vetrine in poco tempo.",
-    "rotateEmbedKeys": "Troppe rigenerazioni del codice di incorporamento in poco tempo.",
+    "rotateEmbedKeys": "Troppi tentativi di ottenere un nuovo codice per il sito in poco tempo.",
     "updateStock": "Troppi tentativi di aggiornare le scorte in poco tempo.",
     "readProductPageSettings": "Troppi tentativi di leggere le impostazioni della pagina prodotto in poco tempo.",
     "requestReview": "Troppi tentativi di chiedere una revisione in poco tempo.",
@@ -119,7 +119,7 @@
     "verifyDocumentUpload": "Non è stato possibile verificare il caricamento del tuo documento per un problema dalla nostra parte.",
     "verifyFileUpload": "Non è stato possibile verificare il caricamento del tuo file per un problema dalla nostra parte.",
     "verifyFontUpload": "Non è stato possibile verificare il caricamento del tuo font per un problema dalla nostra parte.",
-    "verifyElementUpload": "Non è stato possibile verificare il caricamento del tuo elemento per un problema dalla nostra parte.",
+    "verifyElementUpload": "Non è stato possibile verificare il caricamento della tua immagine per un problema dalla nostra parte.",
     "verifyBackgroundImage": "Non è stato possibile verificare la tua immagine di sfondo per un problema dalla nostra parte.",
     "verifyFont": "Non è stato possibile verificare il tuo font per un problema dalla nostra parte.",
     "verifyImage": "Non è stato possibile verificare la tua immagine per un problema dalla nostra parte.",
@@ -127,7 +127,7 @@
     "saveStorefront": "Non è stato possibile salvare la tua vetrina per un problema dalla nostra parte.",
     "saveEmbedSettings": "Non è stato possibile salvare le impostazioni di incorporamento per un problema dalla nostra parte.",
     "deleteStorefront": "Non è stato possibile eliminare la vetrina per un problema dalla nostra parte.",
-    "rotateEmbedKey": "Non è stato possibile rigenerare la chiave di incorporamento per un problema dalla nostra parte.",
+    "rotateEmbedKey": "Non è stato possibile ottenere un nuovo codice per il sito per un problema dalla nostra parte.",
     "saveStockSettings": "Non è stato possibile salvare le impostazioni delle scorte per un problema dalla nostra parte.",
     "checkSellerDetails": "Non è stato possibile verificare i tuoi dati venditore per un problema dalla nostra parte.",
     "loadProductPageSettings": "Non è stato possibile caricare le impostazioni della tua pagina prodotto per un problema dalla nostra parte.",
@@ -166,8 +166,8 @@
     "message": "Non puoi pubblicare o vendere finché i tuoi dati venditore non sono completi.",
     "action": "Aggiungi dati venditore",
     "fix": {
-      "add": "{fields, select, businessName {Aggiungi la tua ragione sociale o nome in Impostazioni › Attività e dati del venditore, poi pubblica.} address {Aggiungi il tuo indirizzo commerciale in Impostazioni › Attività e dati del venditore, poi pubblica.} email {Aggiungi la tua email di contatto in Impostazioni › Attività e dati del venditore, poi pubblica.} businessName_address {Aggiungi la tua ragione sociale o nome e il tuo indirizzo commerciale in Impostazioni › Attività e dati del venditore, poi pubblica.} businessName_email {Aggiungi la tua ragione sociale o nome e la tua email di contatto in Impostazioni › Attività e dati del venditore, poi pubblica.} address_email {Aggiungi il tuo indirizzo commerciale e la tua email di contatto in Impostazioni › Attività e dati del venditore, poi pubblica.} other {Aggiungi la tua ragione sociale o nome, l’indirizzo commerciale e l’email di contatto in Impostazioni › Attività e dati del venditore, poi pubblica.}}",
-      "addAndConfirm": "{fields, select, businessName {Aggiungi la tua ragione sociale o nome in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto con il codice che ti inviamo.} address {Aggiungi il tuo indirizzo commerciale in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto con il codice che ti inviamo.} email {Aggiungi la tua email di contatto in Impostazioni › Attività e dati del venditore, e confermala con il codice che ti inviamo.} businessName_address {Aggiungi la tua ragione sociale o nome e il tuo indirizzo commerciale in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto con il codice che ti inviamo.} businessName_email {Aggiungi la tua ragione sociale o nome e la tua email di contatto in Impostazioni › Attività e dati del venditore, e conferma l'email con il codice che ti inviamo.} address_email {Aggiungi il tuo indirizzo commerciale e la tua email di contatto in Impostazioni › Attività e dati del venditore, e conferma l'email con il codice che ti inviamo.} other {Aggiungi la tua ragione sociale o nome, l'indirizzo commerciale e l'email di contatto in Impostazioni › Attività e dati del venditore, e conferma l'email con il codice che ti inviamo.}}",
+      "add": "{fields, select, businessName {Aggiungi il tuo nome o il nome della tua attività in Impostazioni › Attività e dati del venditore, poi pubblica.} address {Aggiungi il tuo indirizzo commerciale in Impostazioni › Attività e dati del venditore, poi pubblica.} email {Aggiungi la tua email di contatto in Impostazioni › Attività e dati del venditore, poi pubblica.} businessName_address {Aggiungi il tuo nome o il nome della tua attività e il tuo indirizzo commerciale in Impostazioni › Attività e dati del venditore, poi pubblica.} businessName_email {Aggiungi il tuo nome o il nome della tua attività e la tua email di contatto in Impostazioni › Attività e dati del venditore, poi pubblica.} address_email {Aggiungi il tuo indirizzo commerciale e la tua email di contatto in Impostazioni › Attività e dati del venditore, poi pubblica.} other {Aggiungi il tuo nome o il nome della tua attività, il tuo indirizzo commerciale e la tua email di contatto in Impostazioni › Attività e dati del venditore, poi pubblica.}}",
+      "addAndConfirm": "{fields, select, businessName {Aggiungi il tuo nome o il nome della tua attività in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto con il codice che ti inviamo.} address {Aggiungi il tuo indirizzo commerciale in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto con il codice che ti inviamo.} email {Aggiungi la tua email di contatto in Impostazioni › Attività e dati del venditore, e confermala con il codice che ti inviamo.} businessName_address {Aggiungi il tuo nome o il nome della tua attività e il tuo indirizzo commerciale in Impostazioni › Attività e dati del venditore, e conferma la tua email di contatto con il codice che ti inviamo.} businessName_email {Aggiungi il tuo nome o il nome della tua attività e la tua email di contatto in Impostazioni › Attività e dati del venditore, e conferma l’email con il codice che ti inviamo.} address_email {Aggiungi il tuo indirizzo commerciale e la tua email di contatto in Impostazioni › Attività e dati del venditore, e conferma l’email con il codice che ti inviamo.} other {Aggiungi il tuo nome o il nome della tua attività, il tuo indirizzo commerciale e la tua email di contatto in Impostazioni › Attività e dati del venditore, e conferma l’email con il codice che ti inviamo.}}",
       "confirm": "Conferma la tua email di contatto: invia un codice da Impostazioni › Attività e dati del venditore, poi inseriscilo lì.",
       "complete": "Completa Impostazioni › Attività e dati del venditore, poi pubblica."
     }
@@ -211,7 +211,7 @@
     "wrongPasswordGoogle": "Questa non è la password di Square Share di questo account. Accedi con Google, quindi usa invece «Conferma con Google».",
     "passwordCheckUnavailable": "Non siamo riusciti a controllare la password in questo momento. Riprova tra poco.",
     "reauthRequired": "Per la tua sicurezza, accedi di nuovo prima di attivare l’autenticazione a due fattori.",
-    "setupRateLimited": "Hai fatto molti tentativi di configurazione. Riprova più tardi.",
+    "setupRateLimited": "Troppi tentativi di configurazione. Attendi un minuto e riprova.",
     "tooManyFactors": "Questo account ha già il numero massimo di app di autenticazione. Rimuovine una prima.",
     "setupFailed": "Non siamo riusciti ad avviare la configurazione in questo momento. Riprova tra un attimo.",
     "setupUnavailable": "La configurazione dell’autenticazione a due fattori non è disponibile al momento. Riprova più tardi.",
@@ -226,7 +226,7 @@
   "settings": {
     "usernameTaken": "Quel nome utente è già in uso. Provane un altro.",
     "emailUnchanged": "È già la tua email.",
-    "emailChangeRateLimited": "Troppe richieste di cambio email. Attendi un po’ prima di riprovare.",
+    "emailChangeRateLimited": "Troppe richieste di cambio email. Attendi un minuto e riprova.",
     "emailChangeNeedsPassword": "Inserisci la password attuale per cambiare la tua email.",
     "wrongPassword": "La password attuale non è corretta.",
     "passwordCheckUnavailable": "Non è stato possibile controllare la password in questo momento. Riprova.",
@@ -235,7 +235,7 @@
     "passwordUnchanged": "È già la tua password.",
     "passwordUpdateFailed": "Non è stato possibile aggiornare la password. Riprova.",
     "passwordReauthNeeded": "Per la tua sicurezza, esci e accedi di nuovo, poi cambia la password.",
-    "resetRateLimited": "Troppe email di reimpostazione. Attendi un po’ prima di riprovare.",
+    "resetRateLimited": "Troppe email di reimpostazione. Attendi un minuto e riprova.",
     "resetSendRateLimited": "Troppe richieste. Attendi un minuto e riprova.",
     "resetFailed": "Non è stato possibile inviare l’email di reimpostazione. Riprova.",
     "contactEmailTakesNoMail": "Il dominio di quell’email di contatto non accetta posta. Controlla che sia scritta correttamente, oppure usa un indirizzo che gli acquirenti possano davvero raggiungere.",
@@ -294,7 +294,7 @@
     "serviceUnreachable": "Non è stato possibile connettersi al servizio di autenticazione. Riprova.",
     "invalidEmail": "Inserisci un indirizzo email valido.",
     "emailRequired": "Inserisci la tua email.",
-    "tooManyAttempts": "Troppi tentativi. Attendi un po’ e riprova.",
+    "tooManyAttempts": "Troppi tentativi. Attendi un minuto e riprova.",
     "magicLinkFailed": "Non è stato possibile inviare l’email. Controlla la connessione e riprova.",
     "resetEmailRequired": "Inserisci la tua email per reimpostare la password.",
     "resetEmailFailed": "Non è stato possibile inviare l’email di reimpostazione. Controlla la connessione e riprova.",
@@ -332,21 +332,21 @@
       "document": "Quel documento è troppo grande.",
       "file": "Quel file è troppo grande.",
       "font": "Quel font è troppo grande.",
-      "element": "Quell’elemento è troppo grande."
+      "element": "Quell’immagine è troppo grande."
     },
     "tooLargeFix": {
       "image": "Usa un’immagine sotto i {maxMb} MB. Comprimila o ridimensionala, poi riprova.",
       "document": "Usa un documento sotto i {maxMb} MB. Comprimilo o ridimensionalo, poi riprova.",
       "file": "Usa un file sotto i {maxMb} MB. Comprimilo o ridimensionalo, poi riprova.",
       "font": "Usa un font sotto i {maxMb} MB. Comprimilo o ridimensionalo, poi riprova.",
-      "element": "Usa un elemento sotto i {maxMb} MB. Comprimilo o ridimensionalo, poi riprova."
+      "element": "Usa un’immagine sotto i {maxMb} MB. Comprimila o ridimensionala, poi riprova."
     },
     "neverReached": {
       "image": "L’immagine non ha mai raggiunto il server.",
       "document": "Il documento non ha mai raggiunto il server.",
       "file": "Il file non ha mai raggiunto il server.",
       "font": "Il font non ha mai raggiunto il server.",
-      "element": "L’elemento non ha mai raggiunto il server."
+      "element": "L’immagine non ha mai raggiunto il server."
     },
     "neverReachedFix": "Controlla la tua connessione internet e riprova.",
     "rejected": {
@@ -354,7 +354,7 @@
       "document": "Non è stato possibile caricare quel documento.",
       "file": "Non è stato possibile caricare quel file.",
       "font": "Non è stato possibile caricare quel font.",
-      "element": "Non è stato possibile caricare quell’elemento."
+      "element": "Non è stato possibile caricare quell’immagine."
     },
     "rejectedFix": {
       "signedOut": "Accedi di nuovo, poi riprova.",
@@ -365,7 +365,7 @@
   "uploadRoute": {
     "signIn": {
       "image": "Accedi per caricare immagini.",
-      "element": "Accedi per caricare elementi.",
+      "element": "Accedi per caricare immagini.",
       "document": "Accedi per caricare documenti.",
       "file": "Accedi per caricare file.",
       "font": "Accedi per caricare font."
@@ -378,7 +378,7 @@
     },
     "notConfigured": {
       "image": "Il caricamento delle immagini non è ancora configurato. Riprova più tardi.",
-      "element": "Il caricamento degli elementi non è ancora configurato. Riprova più tardi.",
+      "element": "Il caricamento delle immagini non è disponibile al momento. Riprova più tardi.",
       "document": "Il caricamento non è ancora configurato. Riprova più tardi.",
       "file": "Il caricamento dei file non è ancora configurato. Riprova più tardi.",
       "font": "Il caricamento dei font non è ancora configurato. Riprova più tardi."
@@ -459,28 +459,28 @@
       "document": "Il caricamento del tuo documento non è terminato.",
       "file": "Il caricamento del tuo file non è terminato.",
       "font": "Il caricamento del tuo font non è terminato.",
-      "element": "Il caricamento del tuo elemento non è terminato."
+      "element": "Il caricamento della tua immagine non è terminato."
     },
     "uploadUnfinishedFix": {
       "image": "Seleziona di nuovo l’immagine e caricala di nuovo prima di salvare.",
       "document": "Seleziona di nuovo il documento e caricalo di nuovo prima di salvare.",
       "file": "Seleziona di nuovo il file e caricalo di nuovo prima di salvare.",
       "font": "Seleziona di nuovo il font e caricalo di nuovo prima di salvare.",
-      "element": "Seleziona di nuovo l’elemento e caricalo di nuovo prima di salvare."
+      "element": "Seleziona di nuovo l’immagine e caricala di nuovo prima di salvare."
     },
     "uploadTooLarge": {
       "image": "Quell’immagine è troppo grande.",
       "document": "Quel documento è troppo grande.",
       "file": "Quel file è troppo grande.",
       "font": "Quel font è troppo grande.",
-      "element": "Quell’elemento è troppo grande."
+      "element": "Quell’immagine è troppo grande."
     },
     "uploadTooLargeFix": {
       "image": "Usa un’immagine sotto i {maxMb} MB, poi caricala di nuovo.",
       "document": "Usa un documento sotto i {maxMb} MB, poi caricalo di nuovo.",
       "file": "Usa un file sotto i {maxMb} MB, poi caricalo di nuovo.",
       "font": "Usa un font sotto i {maxMb} MB, poi caricalo di nuovo.",
-      "element": "Usa un elemento sotto i {maxMb} MB, poi caricalo di nuovo."
+      "element": "Usa un’immagine sotto i {maxMb} MB, poi caricala di nuovo."
     },
     "wrongTypeFix": {
       "image": "Usa un’immagine JPEG, PNG, WebP, GIF o AVIF.",

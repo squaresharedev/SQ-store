@@ -20,10 +20,10 @@
     "storefront": {
       "label": "Pon un producto en un escaparate",
       "detailDone": "Hay un producto en tu escaparate.",
-      "detailNone": "Crea un escaparate y luego añade un producto a su cuadrícula.",
-      "detailEmpty": "Abre tu escaparate y elige Añadir producto en la barra de herramientas.",
+      "detailNone": "Un escaparate es la página de tu tienda. Crea uno y luego añade un producto a su cuadrícula.",
+      "detailEmpty": "Abre tu escaparate y usa el botón Añadir producto de la parte superior.",
       "actionCreate": "Crear escaparate",
-      "actionOpen": "Abrir editor",
+      "actionOpen": "Abrir escaparate",
       "cta": "Abre tu escaparate",
       "ctaCreate": "Crea un escaparate"
     },
@@ -32,7 +32,7 @@
       "detailDone": "Tu página de producto está publicada.",
       "detailNeedsSeller": "Termina tus datos de vendedor y tu página podrá publicarse.",
       "detailNeedsStorefront": "En cuanto un producto esté en un escaparate, su página podrá publicarse.",
-      "detailNeedsActive": "Pon ese producto como Activo para que su página se publique.",
+      "detailNeedsActive": "Abre el producto y pon su estado en Activo para publicar su página.",
       "detailChecking": "Tu página se publicará en cuanto la revisión automática apruebe el producto.",
       "detailPaused": "La revisión automática ha pausado ese producto. Ábrelo para ver qué cambiar.",
       "detailPagesOff": "Las páginas de producto están desactivadas en ese escaparate. Actívalas en el editor.",
@@ -64,7 +64,7 @@
     "showMeAround": "Enséñamelo todo",
     "showSteps": "Mostrar pasos",
     "hideSteps": "Ocultar pasos",
-    "liveHint": "Tu primera página de producto ya está publicada. Comparte el enlace donde quieras.",
+    "liveHint": "Tu primera página de producto ya está publicada. Comparte los enlaces donde quieras.",
     "copyLink": {
       "copy": "Copiar el enlace de la página de producto",
       "copied": "Enlace de la página de producto copiado",
@@ -75,7 +75,12 @@
     "hide": "Ocultar",
     "progress": "{total, plural, one {{done} de {total} hecho} many {{done} de {total} hechos} other {{done} de {total} hechos}}",
     "stepDone": " (hecho)",
-    "stepToDo": " (pendiente)"
+    "stepToDo": " (pendiente)",
+    "copyStorefrontLink": {
+      "copy": "Copiar el enlace del escaparate",
+      "copied": "Enlace del escaparate copiado",
+      "failed": "No hemos podido copiar el enlace del escaparate. Selecciónalo y cópialo a mano."
+    }
   },
   "welcome": {
     "steps": {
@@ -121,10 +126,10 @@
     "seller": {
       "namePlaceholder": "p. ej., Lucía García o Cerámica Lucía",
       "nameHelp": "Tu razón social, o tu nombre completo si vendes como particular.",
-      "nameAlternative": "O tu nombre completo, si vendes a título personal.",
+      "nameAlternative": "Si vendes a título personal, usa tu nombre completo.",
       "addressPlaceholder": "p. ej. Calle Mayor 12\n28013 Madrid\nEspaña",
       "emailPlaceholder": "p. ej. hola@tutienda.example",
-      "emailHelp": "Adónde te escriben los compradores. Puede ser distinto de tu correo de inicio de sesión.",
+      "emailHelp": "Adónde te escriben los compradores. Puede ser distinto de tu correo de inicio de sesión.{verify, select, true { Te enviaremos un código a esta dirección para confirmarla.} other {}}",
       "emailTipLabel": "Sobre este correo"
     },
     "confirm": {
@@ -140,12 +145,12 @@
     "nav": {
       "skipOnboarding": "Omitir la bienvenida",
       "next": "Siguiente",
-      "showMeAround": "Enséñame",
       "skipIntro": "Saltar introducción",
       "getStarted": "Empezar",
       "skipForNow": "Saltar por ahora",
       "saveAndContinue": "Guardar y continuar",
       "continue": "Continuar",
+      "confirmLater": "Confirmar más tarde",
       "exploreOnMyOwn": "Explorar por mi cuenta",
       "notNow": "Ahora no"
     },
@@ -205,16 +210,13 @@
       },
       "storefrontEmbed": {
         "title": "Incorpora un escaparate a tu web",
-        "body": "Cada escaparate tiene un botón de incorporación que te da un fragmento como este. El widget aún está en desarrollo y todavía no se muestra en otros sitios.",
-        "bodyButton": "Este botón te da un fragmento como el de abajo para pegarlo en tu web. El widget aún está en desarrollo y todavía no se muestra en otros sitios.",
-        "fallbackBody": "Cuando tengas un escaparate, el botón de incorporación de su tarjeta te dará un fragmento como este. El widget aún está en desarrollo y todavía no se muestra en otros sitios.",
-        "bodyLive": "Cada escaparate tiene un botón de incorporación que te da un fragmento como este. Pégalo en tu propio sitio y el escaparate aparecerá allí.",
-        "bodyButtonLive": "Este botón te da un fragmento como el de abajo. Pégalo en tu propio sitio y el escaparate aparecerá allí.",
-        "fallbackBodyLive": "Cuando tengas un escaparate, el botón de incorporación de su tarjeta te dará un fragmento como este para pegarlo en tu propio sitio."
+        "bodyLive": "Cada escaparate tiene un botón de incorporación que te da un código para tu web como este. Pégalo en tu propio sitio y el escaparate aparecerá allí.",
+        "bodyButtonLive": "Este botón te da un código para tu web como el de abajo. Pégalo en tu propio sitio y el escaparate aparecerá allí.",
+        "fallbackBodyLive": "Cuando tengas un escaparate, el botón de incorporación de su tarjeta te dará un código para tu web como este para pegarlo en tu propio sitio."
       },
       "ordersSearch": {
         "title": "Encuentra un pedido",
-        "body": "Busca en esta lista por el correo del comprador. Para encontrar un pedido por su número, un nombre, una ciudad o un número de seguimiento, usa la búsqueda de la parte superior de la página."
+        "body": "Busca en esta lista por número de pedido, correo o nombre del comprador, ciudad, producto o número de seguimiento."
       },
       "ordersFilters": {
         "title": "Filtra y ordena",
@@ -241,7 +243,7 @@
     "steps": {
       "editorAdd": {
         "title": "Añade a tu cuadrícula",
-        "body": "Añade productos, texto y formas desde esta barra. Arrastra cualquier elemento de la cuadrícula para moverlo y tira de una esquina para cambiar su tamaño."
+        "body": "Añade productos, texto, formas e imágenes desde esta barra. Toca o haz clic en un bloque para seleccionarlo y luego arrástralo para moverlo. Tira de una esquina para cambiar su tamaño."
       },
       "editorDesign": {
         "title": "Define el aspecto",
@@ -255,8 +257,13 @@
       },
       "editorFinish": {
         "title": "Hazlo tuyo",
-        "body": "El ejemplo nunca se guarda, así que prueba lo que quieras. Cuando estés listo, crea tu propio escaparate."
+        "body": "El ejemplo nunca se guarda, así que prueba lo que quieras. Cuando estés listo, crea tu propio escaparate.",
+        "bodySave": "Pulsa Guardar para conservar tu trabajo. Cuando te guste cómo queda, Compartir te da su enlace y el código para tu web."
       }
     }
+  },
+  "install": {
+    "title": "Añade Square Share a tu pantalla de inicio",
+    "add": "Añadir"
   }
 }

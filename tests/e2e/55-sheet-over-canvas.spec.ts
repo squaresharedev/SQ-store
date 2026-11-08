@@ -55,9 +55,9 @@ async function openDesigner(page: Page, tag: string) {
 /** Put `count` squares on the board, leaving nothing selected. */
 async function addSquares(page: Page, count: number) {
   for (let i = 0; i < count; i += 1) {
-    await page.getByRole("button", { name: "Add element", exact: true }).click();
+    await page.getByRole("button", { name: "Add shape or image", exact: true }).click();
     await page
-      .getByRole("menu", { name: "Elements" })
+      .getByRole("menu", { name: "Shapes and images" })
       .getByRole("menuitem", { name: "All shapes" })
       .click();
     await page.getByRole("button", { name: "Add square" }).click();

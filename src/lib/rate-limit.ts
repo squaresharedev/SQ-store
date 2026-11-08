@@ -76,6 +76,12 @@ export const RATE_LIMITS = {
   /** The editor's product-page preview data, per signed-in user. */
   productPreview: { max: 300, windowSeconds: 60 * 60 },
   /**
+   * A product photo streamed through our own origin (api/products/[id]/photo),
+   * per signed-in user: a database read, an R2 read and the bytes passing
+   * through the Worker. Room for a share card per product of a big catalogue.
+   */
+  productPhoto: { max: 300, windowSeconds: 60 * 60 },
+  /**
    * Content reports from a buyer, per client IP. The only unauthenticated
    * WRITE in the app, so it is the tightest budget here.
    *
@@ -506,6 +512,14 @@ export const RATE_LIMITS = {
    * imported reviews in one sitting, not for a loop.
    */
   reviewModerate: { max: 240, windowSeconds: 60 * 60 },
+  /**
+   * /sitemap.xml, per client IP. Each request walks every indexable storefront,
+   * its seller and its tiles' products in three rounds of service-role reads,
+   * far heavier than a page. Crawlers fetch a sitemap a few times a day, so
+   * this is generous for them and slow for a scanner. Fails closed: a spent
+   * budget is a 500, which a crawler reads as "try again", not "no pages".
+   */
+  sitemap: { max: 30, windowSeconds: 60 * 60 },
   /**
    * Tool calls that read, per connected assistant (lib/agent, keyed on the
    * grant). On top of whatever each read costs elsewhere: an assistant in a

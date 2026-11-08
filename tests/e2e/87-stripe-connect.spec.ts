@@ -646,7 +646,7 @@ test.describe("Stripe Connect", () => {
     // (The ledger view: with parcels waiting, Orders opens on the To ship
     // queue, which shows where each goes rather than what it cost.)
     await gotoApp(page, "/orders?view=all");
-    await expect(page.locator("[data-order-fee]")).toHaveText(["Fee €0.57", "Fee €1.43"]);
+    await expect(page.locator("[data-order-fee]")).toHaveText(["Platform fee €0.57", "Platform fee €1.43"]);
     await gotoApp(page, "/payments");
     await expect(page.locator("[data-fees-this-month]")).toContainText("€2.00");
   });

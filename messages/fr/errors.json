@@ -93,7 +93,7 @@
     "createStorefronts": "Trop de tentatives de création de vitrines en peu de temps.",
     "saveStorefronts": "Trop de tentatives d’enregistrement de vitrines en peu de temps.",
     "deleteStorefronts": "Trop de tentatives de suppression de vitrines en peu de temps.",
-    "rotateEmbedKeys": "Trop de renouvellements du code d’intégration en peu de temps.",
+    "rotateEmbedKeys": "Trop de demandes de nouveau code pour votre site en peu de temps.",
     "updateStock": "Trop de tentatives de mise à jour du stock en peu de temps.",
     "readProductPageSettings": "Trop de tentatives de lecture des paramètres de page produit en peu de temps.",
     "requestReview": "Trop de demandes de réexamen en peu de temps.",
@@ -119,7 +119,7 @@
     "verifyDocumentUpload": "Impossible de vérifier l’import de votre document en raison d’un problème de notre côté.",
     "verifyFileUpload": "Impossible de vérifier l’import de votre fichier en raison d’un problème de notre côté.",
     "verifyFontUpload": "Impossible de vérifier l’import de votre police en raison d’un problème de notre côté.",
-    "verifyElementUpload": "Impossible de vérifier l’import de votre élément en raison d’un problème de notre côté.",
+    "verifyElementUpload": "Impossible de vérifier l’import de votre image en raison d’un problème de notre côté.",
     "verifyBackgroundImage": "Impossible de vérifier votre image d’arrière-plan en raison d’un problème de notre côté.",
     "verifyFont": "Impossible de vérifier votre police en raison d’un problème de notre côté.",
     "verifyImage": "Impossible de vérifier votre image en raison d’un problème de notre côté.",
@@ -127,7 +127,7 @@
     "saveStorefront": "Impossible d’enregistrer votre vitrine en raison d’un problème de notre côté.",
     "saveEmbedSettings": "Impossible d’enregistrer les paramètres d’intégration en raison d’un problème de notre côté.",
     "deleteStorefront": "Impossible de supprimer la vitrine en raison d’un problème de notre côté.",
-    "rotateEmbedKey": "Impossible de renouveler la clé d’intégration en raison d’un problème de notre côté.",
+    "rotateEmbedKey": "Impossible d’obtenir un nouveau code pour votre site en raison d’un problème de notre côté.",
     "saveStockSettings": "Impossible d’enregistrer les paramètres de stock en raison d’un problème de notre côté.",
     "checkSellerDetails": "Impossible de vérifier vos informations vendeur en raison d’un problème de notre côté.",
     "loadProductPageSettings": "Impossible de charger vos paramètres de page produit en raison d’un problème de notre côté.",
@@ -166,8 +166,8 @@
     "message": "Vous ne pouvez ni publier ni vendre tant que vos informations vendeur ne sont pas complètes.",
     "action": "Ajouter les informations vendeur",
     "fix": {
-      "add": "{fields, select, businessName {Ajoutez votre raison sociale dans Paramètres › Entreprise et informations vendeur, puis publiez.} address {Ajoutez votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, puis publiez.} email {Ajoutez votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.} businessName_address {Ajoutez votre raison sociale et votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, puis publiez.} businessName_email {Ajoutez votre raison sociale et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.} address_email {Ajoutez votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.} other {Ajoutez votre raison sociale, votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.}}",
-      "addAndConfirm": "{fields, select, businessName {Ajoutez votre raison sociale dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact avec le code que nous lui envoyons.} address {Ajoutez votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact avec le code que nous lui envoyons.} email {Ajoutez votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez-le avec le code que nous lui envoyons.} businessName_address {Ajoutez votre raison sociale et votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact avec le code que nous lui envoyons.} businessName_email {Ajoutez votre raison sociale et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez l'e-mail avec le code que nous lui envoyons.} address_email {Ajoutez votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez l'e-mail avec le code que nous lui envoyons.} other {Ajoutez votre raison sociale, votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez l'e-mail avec le code que nous lui envoyons.}}",
+      "add": "{fields, select, businessName {Ajoutez votre nom ou celui de votre entreprise dans Paramètres › Entreprise et informations vendeur, puis publiez.} address {Ajoutez votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, puis publiez.} email {Ajoutez votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.} businessName_address {Ajoutez votre nom ou celui de votre entreprise, ainsi que votre adresse professionnelle, dans Paramètres › Entreprise et informations vendeur, puis publiez.} businessName_email {Ajoutez votre nom ou celui de votre entreprise, ainsi que votre e-mail de contact, dans Paramètres › Entreprise et informations vendeur, puis publiez.} address_email {Ajoutez votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.} other {Ajoutez votre nom ou celui de votre entreprise, votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, puis publiez.}}",
+      "addAndConfirm": "{fields, select, businessName {Ajoutez votre nom ou celui de votre entreprise dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact avec le code que nous lui envoyons.} address {Ajoutez votre adresse professionnelle dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact avec le code que nous lui envoyons.} email {Ajoutez votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez-le avec le code que nous lui envoyons.} businessName_address {Ajoutez votre nom ou celui de votre entreprise, ainsi que votre adresse professionnelle, dans Paramètres › Entreprise et informations vendeur, et confirmez votre e-mail de contact avec le code que nous lui envoyons.} businessName_email {Ajoutez votre nom ou celui de votre entreprise, ainsi que votre e-mail de contact, dans Paramètres › Entreprise et informations vendeur, et confirmez l’e-mail avec le code que nous lui envoyons.} address_email {Ajoutez votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez l’e-mail avec le code que nous lui envoyons.} other {Ajoutez votre nom ou celui de votre entreprise, votre adresse professionnelle et votre e-mail de contact dans Paramètres › Entreprise et informations vendeur, et confirmez l’e-mail avec le code que nous lui envoyons.}}",
       "confirm": "Confirmez votre e-mail de contact : envoyez-vous un code depuis Paramètres › Entreprise et informations vendeur, puis saisissez-le.",
       "complete": "Complétez Paramètres › Entreprise et informations vendeur, puis publiez."
     }
@@ -211,7 +211,7 @@
     "wrongPasswordGoogle": "Ce n’est pas le mot de passe Square Share de ce compte. Vous vous connectez avec Google : utilisez plutôt « Confirmer avec Google ».",
     "passwordCheckUnavailable": "Nous n’avons pas pu vérifier votre mot de passe à l’instant. Réessayez dans un moment.",
     "reauthRequired": "Pour votre sécurité, reconnectez-vous avant d’activer l’authentification à deux facteurs.",
-    "setupRateLimited": "Vous avez fait beaucoup de tentatives de configuration. Réessayez un peu plus tard.",
+    "setupRateLimited": "Trop de tentatives de configuration. Attendez une minute et réessayez.",
     "tooManyFactors": "Ce compte a atteint le nombre maximal d’applications d’authentification. Supprimez-en une d’abord.",
     "setupFailed": "Nous n’avons pas pu lancer la configuration à l’instant. Réessayez dans un moment.",
     "setupUnavailable": "La configuration de l’authentification à deux facteurs n’est pas disponible pour le moment. Réessayez plus tard.",
@@ -226,7 +226,7 @@
   "settings": {
     "usernameTaken": "Ce nom d’utilisateur est déjà pris. Essayez-en un autre.",
     "emailUnchanged": "C’est déjà votre e-mail.",
-    "emailChangeRateLimited": "Trop de demandes de changement d’e-mail. Attendez un moment avant de réessayer.",
+    "emailChangeRateLimited": "Trop de demandes de changement d’e-mail. Attendez une minute et réessayez.",
     "emailChangeNeedsPassword": "Saisissez votre mot de passe actuel pour changer votre e-mail.",
     "wrongPassword": "Le mot de passe actuel est incorrect.",
     "passwordCheckUnavailable": "Impossible de vérifier votre mot de passe pour le moment. Réessayez.",
@@ -235,7 +235,7 @@
     "passwordUnchanged": "C’est déjà votre mot de passe.",
     "passwordUpdateFailed": "Impossible de mettre à jour le mot de passe. Réessayez.",
     "passwordReauthNeeded": "Pour votre sécurité, déconnectez-vous puis reconnectez-vous, et modifiez ensuite votre mot de passe.",
-    "resetRateLimited": "Trop d’e-mails de réinitialisation. Attendez un moment avant de réessayer.",
+    "resetRateLimited": "Trop d’e-mails de réinitialisation. Attendez une minute et réessayez.",
     "resetSendRateLimited": "Trop de demandes. Attendez une minute et réessayez.",
     "resetFailed": "Impossible d’envoyer l’e-mail de réinitialisation. Réessayez.",
     "contactEmailTakesNoMail": "Le domaine de cet e-mail de contact n’accepte aucun courrier. Vérifiez l’orthographe, ou utilisez une adresse que les acheteurs peuvent réellement joindre.",
@@ -294,7 +294,7 @@
     "serviceUnreachable": "Impossible de se connecter au service d’authentification. Réessayez.",
     "invalidEmail": "Saisissez une adresse e-mail valide.",
     "emailRequired": "Saisissez votre e-mail.",
-    "tooManyAttempts": "Trop de tentatives. Attendez un moment et réessayez.",
+    "tooManyAttempts": "Trop de tentatives. Attendez une minute et réessayez.",
     "magicLinkFailed": "Impossible d’envoyer l’e-mail. Vérifiez votre connexion et réessayez.",
     "resetEmailRequired": "Saisissez votre e-mail pour réinitialiser votre mot de passe.",
     "resetEmailFailed": "Impossible d’envoyer l’e-mail de réinitialisation. Vérifiez votre connexion et réessayez.",
@@ -332,21 +332,21 @@
       "document": "Ce document est trop volumineux.",
       "file": "Ce fichier est trop volumineux.",
       "font": "Cette police est trop volumineuse.",
-      "element": "Cet élément est trop volumineux."
+      "element": "Cette image est trop volumineuse."
     },
     "tooLargeFix": {
       "image": "Utilisez une image de moins de {maxMb} Mo. Compressez-la ou redimensionnez-la, puis réessayez.",
       "document": "Utilisez un document de moins de {maxMb} Mo. Compressez-le ou redimensionnez-le, puis réessayez.",
       "file": "Utilisez un fichier de moins de {maxMb} Mo. Compressez-le ou redimensionnez-le, puis réessayez.",
       "font": "Utilisez une police de moins de {maxMb} Mo. Compressez-la ou redimensionnez-la, puis réessayez.",
-      "element": "Utilisez un élément de moins de {maxMb} Mo. Compressez-le ou redimensionnez-le, puis réessayez."
+      "element": "Utilisez une image de moins de {maxMb} Mo. Compressez-la ou redimensionnez-la, puis réessayez."
     },
     "neverReached": {
       "image": "L’image n’a jamais atteint le serveur.",
       "document": "Le document n’a jamais atteint le serveur.",
       "file": "Le fichier n’a jamais atteint le serveur.",
       "font": "La police n’a jamais atteint le serveur.",
-      "element": "L’élément n’a jamais atteint le serveur."
+      "element": "L’image n’a jamais atteint le serveur."
     },
     "neverReachedFix": "Vérifiez votre connexion internet et réessayez.",
     "rejected": {
@@ -354,7 +354,7 @@
       "document": "Impossible d’importer ce document.",
       "file": "Impossible d’importer ce fichier.",
       "font": "Impossible d’importer cette police.",
-      "element": "Impossible d’importer cet élément."
+      "element": "Impossible d’importer cette image."
     },
     "rejectedFix": {
       "signedOut": "Reconnectez-vous, puis réessayez.",
@@ -365,7 +365,7 @@
   "uploadRoute": {
     "signIn": {
       "image": "Connectez-vous pour importer des images.",
-      "element": "Connectez-vous pour importer des éléments.",
+      "element": "Connectez-vous pour importer des images.",
       "document": "Connectez-vous pour importer des documents.",
       "file": "Connectez-vous pour importer des fichiers.",
       "font": "Connectez-vous pour importer des polices."
@@ -378,7 +378,7 @@
     },
     "notConfigured": {
       "image": "L’import d’images n’est pas encore configuré. Réessayez plus tard.",
-      "element": "L’import d’éléments n’est pas encore configuré. Réessayez plus tard.",
+      "element": "L’import d’images n’est pas disponible pour le moment. Réessayez plus tard.",
       "document": "L’import n’est pas encore configuré. Réessayez plus tard.",
       "file": "L’import de fichiers n’est pas encore configuré. Réessayez plus tard.",
       "font": "L’import de polices n’est pas encore configuré. Réessayez plus tard."
@@ -459,28 +459,28 @@
       "document": "L’import de votre document ne s’est pas terminé.",
       "file": "L’import de votre fichier ne s’est pas terminé.",
       "font": "L’import de votre police ne s’est pas terminé.",
-      "element": "L’import de votre élément ne s’est pas terminé."
+      "element": "L’import de votre image ne s’est pas terminé."
     },
     "uploadUnfinishedFix": {
       "image": "Sélectionnez à nouveau l’image et réimportez-la avant d’enregistrer.",
       "document": "Sélectionnez à nouveau le document et réimportez-le avant d’enregistrer.",
       "file": "Sélectionnez à nouveau le fichier et réimportez-le avant d’enregistrer.",
       "font": "Sélectionnez à nouveau la police et réimportez-la avant d’enregistrer.",
-      "element": "Sélectionnez à nouveau l’élément et réimportez-le avant d’enregistrer."
+      "element": "Sélectionnez à nouveau l’image et réimportez-la avant d’enregistrer."
     },
     "uploadTooLarge": {
       "image": "Cette image est trop volumineuse.",
       "document": "Ce document est trop volumineux.",
       "file": "Ce fichier est trop volumineux.",
       "font": "Cette police est trop volumineuse.",
-      "element": "Cet élément est trop volumineux."
+      "element": "Cette image est trop volumineuse."
     },
     "uploadTooLargeFix": {
       "image": "Utilisez une image de moins de {maxMb} Mo, puis réimportez-la.",
       "document": "Utilisez un document de moins de {maxMb} Mo, puis réimportez-le.",
       "file": "Utilisez un fichier de moins de {maxMb} Mo, puis réimportez-le.",
       "font": "Utilisez une police de moins de {maxMb} Mo, puis réimportez-la.",
-      "element": "Utilisez un élément de moins de {maxMb} Mo, puis réimportez-le."
+      "element": "Utilisez une image de moins de {maxMb} Mo, puis réimportez-la."
     },
     "wrongTypeFix": {
       "image": "Utilisez une image JPEG, PNG, WebP, GIF ou AVIF.",

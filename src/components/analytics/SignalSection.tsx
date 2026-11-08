@@ -57,12 +57,19 @@ export function SignalSection({
   const awaiting = state === "awaiting" ? source.awaiting : undefined;
   const hasData = totals.count > 0;
   const emptyText = t(`Analytics.sources.${source.id}.emptyRange`);
+  // A one-line context hint shown directly under the section heading, used
+  // when two adjacent sections need visible differentiation (e.g. product_view
+  // vs product_click). Only present when the message catalog defines it.
+  const subtitle = t.has(`Analytics.sources.${source.id}.subtitle` as Parameters<typeof t>[0])
+    ? t(`Analytics.sources.${source.id}.subtitle` as Parameters<typeof t>[0])
+    : undefined;
 
   return (
     <AnalyticsSection
       id={source.id}
       title={t(`Analytics.sources.${source.id}.label`)}
       description={t(`Analytics.sources.${source.id}.description`)}
+      subtitle={subtitle}
       icon={source.icon}
       state={state}
     >

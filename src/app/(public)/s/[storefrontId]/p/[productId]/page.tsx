@@ -6,6 +6,7 @@ import { after } from "next/server";
 import { BuyerBusy } from "@/components/product-page/BuyerNotice";
 import { PriceRefresh } from "@/components/product-page/PriceRefresh";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
+import { JsonLd } from "@/components/seo/JsonLd";
 import {
   productClickDedupeKey,
   productViewDedupeKey,
@@ -14,10 +15,13 @@ import {
 } from "@/lib/analytics/record";
 import { getPublicProductPage, resolveDisplayName } from "@/lib/products/public";
 import { getProductReviews } from "@/lib/reviews/queries";
-import { REVIEW_RATING_MAX, REVIEW_RATING_MIN } from "@/lib/reviews/limits";
 import { PAGE_BUSY } from "@/lib/public/busy";
+import { appUrl } from "@/lib/app-url";
+import { clipText } from "@/lib/format/text";
+import { productOgImagePath } from "@/lib/products/paths";
 import { QUANTITY_QUERY_PARAM, requestedQuantity } from "@/lib/products/quantity";
 import { clientKey } from "@/lib/rate-limit";
+import { productStructuredData } from "@/lib/seo/structured-data";
 import {
   requestedAddOns,
   requestedOptions,
@@ -55,20 +59,11 @@ import { collectOptionIds } from "@/lib/validation/product";
 
 type Params = { storefrontId: string; productId: string };
 
-/**
- * The first `max` characters of a line, never ending on half an emoji: a
- * surrogate pair cut in two prints as a broken glyph in a share card and is
- * not valid JSON for a search engine to read.
- */
-function clip(text: string, max: number): string {
-  return text.slice(0, max).replace(/[\ud800-\udbff]$/, "");
-}
-
 /** Description for search and share cards: first 160 characters, one line. */
 function summary(text: string, fallback: string): string {
   const flat = text.replace(/\s+/g, " ").trim();
   if (!flat) return fallback;
-  return flat.length > 160 ? `${clip(flat, 159).trimEnd()}…` : flat;
+  return flat.length > 160 ? `${clipText(flat, 159).trimEnd()}…` : flat;
 }
 
 export async function generateMetadata({
@@ -101,8 +96,7 @@ export async function generateMetadata({
   // never expires; only the redirect destination does, and that is fetched
   // fresh each time.
   const hasImage = product.images.length > 0;
-  const origin = new URL(page.productUrl).origin;
-  const ogImageUrl = `${origin}/api/og/p/${product.id}`;
+  const ogImageUrl = appUrl(productOgImagePath(product.id));
 
   return {
     title: { absolute: `${product.title} | ${displayName}` },
@@ -183,67 +177,11 @@ export default async function ProductPage({
     }
   });
 
-  // BUY-07: Product + Offer JSON-LD, emitted from the same data that fills the
-  // meta tags above so the two can never disagree. Only claim availability and
-  // price that the page itself is showing.
-  //
-  // WHY THE `<` IS PRE-ESCAPED. A script's text child is emitted raw, so a
-  // seller who puts a closing script tag in a product title would otherwise
-  // break out of the block. React does defend against that on the server (it
-  // rewrites the sequence to unicode escapes), but it does NOT produce the same
-  // text on the client, so the two disagree and React discards and re-renders
-  // the whole tree on every product page load. Escaping `<` ourselves is the
-  // fix for both at once: `<` is valid JSON, it cannot close the element,
-  // and server and client now emit identical text.
   const displayName = resolveDisplayName(page);
-  const origin = new URL(page.productUrl).origin;
-  const ogImageUrl = `${origin}/api/og/p/${page.product.id}`;
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: page.product.title,
-    ...(page.product.description
-      ? { description: clip(page.product.description.replace(/\s+/g, " ").trim(), 500) }
-      : {}),
-    ...(page.product.images.length > 0 ? { image: ogImageUrl } : {}),
-    // The same approved reviews the page shows, from the same summary row.
-    ...(reviews && reviews.summary.count > 0 && reviews.summary.average !== null
-      ? {
-          aggregateRating: {
-            "@type": "AggregateRating",
-            ratingValue: reviews.summary.average.toFixed(2),
-            reviewCount: reviews.summary.count,
-            bestRating: REVIEW_RATING_MAX,
-            worstRating: REVIEW_RATING_MIN,
-          },
-        }
-      : {}),
-    offers: {
-      "@type": "Offer",
-      // What it costs today: the sale price while a sale runs, valid until the
-      // sale ends.
-      price: (page.product.priceCents / 100).toFixed(2),
-      priceCurrency: page.product.currency,
-      ...(page.product.sale?.endsAt ? { priceValidUntil: page.product.sale.endsAt.slice(0, 10) } : {}),
-      availability: page.product.soldOut
-        ? "https://schema.org/OutOfStock"
-        : page.product.stock?.state === "low_stock"
-          ? "https://schema.org/LimitedAvailability"
-          : "https://schema.org/InStock",
-      url: page.productUrl,
-      seller: {
-        "@type": "Organization",
-        name: displayName,
-        ...(page.storefront.seller.bio ? { description: page.storefront.seller.bio } : {}),
-      },
-    },
-  };
 
   return (
     <>
-      <script type="application/ld+json" id="product-jsonld">
-        {JSON.stringify(jsonLd).replace(/</g, "\\u003c")}
-      </script>
+      <JsonLd id="product-jsonld" data={productStructuredData(page, displayName, reviews)} />
       <main>
         <ProductPageView
           page={page}

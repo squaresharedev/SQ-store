@@ -9,6 +9,9 @@ import userEvent from "@testing-library/user-event";
 vi.mock("@/lib/products/actions", () => ({
   deleteProduct: vi.fn().mockResolvedValue({ ok: true }),
 }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
+}));
 
 import { BuyButtonDialog, buyButtonState } from "@/components/products/BuyButtonDialog";
 import { ProductList } from "@/components/products/ProductList";

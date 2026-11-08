@@ -237,7 +237,7 @@ test.describe("a paused product", () => {
     await expect(notice).toBeVisible();
 
     // WHAT: the parts, in the order the form shows them.
-    await expect(notice.locator("[data-fix-field]")).toHaveText(["Title", "Purchase link", "Photos"]);
+    await expect(notice.locator("[data-fix-field]")).toHaveText(["Title", "Buy link", "Photos"]);
     await expect(notice.locator("[data-decision-reference]")).toHaveText(/^MD-[0-9A-F]{10}$/);
 
     // WHERE: those sections, and only those, say so; so does the index.
@@ -253,7 +253,7 @@ test.describe("a paused product", () => {
       "Square Share asked you to change Title here.",
     );
     await expect(page.locator('[data-product-section="media"] [data-fix-callout]')).toContainText(
-      "Purchase link",
+      "Buy link",
     );
     await expect(page.locator("[data-product-form-nav] [data-fix-flag]")).toHaveCount(3);
     await expect(page.locator('[data-fix-mark="title"]')).toHaveText("Change this");

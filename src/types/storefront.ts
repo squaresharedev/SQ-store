@@ -307,10 +307,11 @@ export const CARD_HOVER_EFFECTS = ["none", "lift", "zoom", "tilt"] as const;
 export type CardHoverEffect = (typeof CARD_HOVER_EFFECTS)[number];
 
 /**
- * A buy button drawn on the card itself, in the product page button's words
- * and colour: off, a filled button, an outline, or the words alone. The whole
- * card is already one link to the product page, so the button goes where the
- * card goes.
+ * A buy button drawn on the card itself, with an arrow after its words: off,
+ * a filled button, an outline, or the words alone. It takes the product page
+ * button's words and colour until the seller gives the cards their own. The
+ * whole card is already one link to the product page, so the button goes
+ * where the card goes.
  */
 export const CARD_BUY_BUTTONS = ["none", "solid", "outline", "link"] as const;
 export type CardBuyButton = (typeof CARD_BUY_BUTTONS)[number];
@@ -1491,6 +1492,15 @@ export type StorefrontTheme = {
   hoverEffect?: CardHoverEffect;
   hoverPhoto?: boolean;
   buyButton?: CardBuyButton;
+  /**
+   * The card's buy button in the seller's own words and paint, each absent =
+   * the product page button's (TileLook): its words (one line of up to
+   * PRODUCT_PAGE_CTA_MAX), its colour (a solid button's fill, an outline's
+   * ring, a link's words) and its words' colour, strict #rrggbb.
+   */
+  buyButtonLabel?: string;
+  buyButtonColor?: string;
+  buyButtonTextColor?: string;
   showRating?: boolean;
   showLowStock?: boolean;
   /** Hover-reveal transition speed in ms, HOVER_TRANSITION_MS_MIN..MAX.
@@ -1582,6 +1592,12 @@ export type CardStyle = {
   hoverEffect: CardHoverEffect;
   hoverPhoto: boolean;
   buyButton: CardBuyButton;
+  /** Stay OPTIONAL after resolution, like the price tag's colors: "the
+   *  product page button's" is a state the field's placeholder and the
+   *  pickers' inherit dots have to be able to show. */
+  buyButtonLabel?: string;
+  buyButtonColor?: string;
+  buyButtonTextColor?: string;
   showRating: boolean;
   showLowStock: boolean;
   /** Always resolves to a concrete value (HOVER_TRANSITION_MS_DEFAULT when
@@ -1647,6 +1663,9 @@ export function resolveCardStyle(
     hoverEffect: overrides?.hoverEffect ?? theme.hoverEffect ?? "none",
     hoverPhoto: overrides?.hoverPhoto ?? theme.hoverPhoto ?? false,
     buyButton: overrides?.buyButton ?? theme.buyButton ?? "none",
+    buyButtonLabel: overrides?.buyButtonLabel ?? theme.buyButtonLabel,
+    buyButtonColor: overrides?.buyButtonColor ?? theme.buyButtonColor,
+    buyButtonTextColor: overrides?.buyButtonTextColor ?? theme.buyButtonTextColor,
     showRating: overrides?.showRating ?? theme.showRating ?? false,
     showLowStock: overrides?.showLowStock ?? theme.showLowStock ?? false,
     titleHoverMs:

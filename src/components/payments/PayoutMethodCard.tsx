@@ -4,7 +4,7 @@ import { ArrowUpRight, Landmark } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { infoTextClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
-import { cardClass, iconTileClass } from "@/components/ui/surface-styles";
+import { sharpCardClass, iconTileClass } from "@/components/ui/surface-styles";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { STRIPE_CONNECT_AVAILABLE } from "@/lib/payments/availability";
@@ -31,7 +31,7 @@ export function PayoutMethodCard({
   return (
     <section
       aria-label={t("title")}
-      className={cn(cardClass, "p-4")}
+      className={cn(sharpCardClass, "p-4")}
     >
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-foreground">{t("title")}</h2>

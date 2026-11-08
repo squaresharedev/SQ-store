@@ -73,7 +73,7 @@
     "label": "Aantal"
   },
   "cta": {
-    "unwired": "Deze knop heeft nog geen bestemming. Voeg een aankooplink toe aan het product, of een contact-e-mailadres bij Verkopersgegevens.",
+    "unwired": "Deze knop heeft nog geen bestemming. Voeg een aankooplink toe aan het product, of een contact-e-mailadres in je verkopersgegevens.",
     "unavailableIn": "Niet beschikbaar bij deze {group}",
     "askAbout": "Vraag stellen over dit product",
     "checkoutOn": "Afrekenen op <strong>{host}</strong>",
@@ -374,8 +374,8 @@
       "testBody": "Dit is een ontwikkelingsafrekening. Er wordt geen kaart belast en er gaat geen geld over.",
       "stripeTitle": "Veilig betalen met Stripe",
       "stripeBody": "Je vult je kaartgegevens in op de beveiligde pagina van Stripe in de volgende stap.",
-      "previewTitle": "Kaartgegevens",
-      "previewBody": "Kaart, Apple Pay en Google Pay verschijnen hier in jouw kleuren zodra Stripe is verbonden.",
+      "previewConnect": "Kopers betalen hier met een kaart zodra Stripe is gekoppeld in <link>Betalingen</link>.",
+      "previewComingSoon": "Kaartbetalingen komen hier binnenkort. Tot die tijd betalen kopers je via de aankooplink van je product, of door je te e-mailen.",
       "cardNumber": "Kaartnummer",
       "expiry": "MM / JJ",
       "cvc": "CVC",

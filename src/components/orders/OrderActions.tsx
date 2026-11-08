@@ -12,7 +12,7 @@ import { buyerMailto } from "@/lib/orders/buyer-mailto";
 import { orderNumber } from "@/lib/orders/order-number";
 import type { OrderView } from "@/types/order-view";
 import { OrderRefund } from "./OrderRefund";
-import { useCanRefundOrders } from "./OrderRefundProvider";
+import { useCanRefundOrders, useRefundStoreName } from "./OrderRefundProvider";
 
 /** "Email the buyer", about this order: the subject carries the number they
  *  know it by, so their reply can be matched to it. */
@@ -70,22 +70,29 @@ export function OrderActions({
   return <p className={helpTextClass}>{t("none")}</p>;
 }
 
-/** Where a dispute is answered, with the way there for whoever can open the
- *  store's Stripe account (the owner, the same person who can refund). */
+/** Where a dispute is answered and what a missed deadline costs, with the way
+ *  there for whoever can open the store's Stripe account (the owner, the same
+ *  person who can refund) and, for anyone else, who to tell. */
 function DisputeActions() {
   const t = useTranslations("Orders.actions");
-  const canOpenStripe = useCanRefundOrders() && STRIPE_CONNECT_AVAILABLE;
+  const canOpenStripe = useCanRefundOrders();
+  const storeName = useRefundStoreName();
   const [answer, leaving] = useLeaveForStripe(openStripeDashboard);
   return (
     <div className="flex flex-col items-start gap-3">
       <p className={helpTextClass}>{t("disputeInStripe")}</p>
-      {canOpenStripe && (
-        <Button variant="secondary" onClick={answer} disabled={leaving} aria-busy={leaving || undefined}>
-          {leaving && <Spinner />}
-          {t("answerInStripe")}
-          <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden />
-        </Button>
-      )}
+      {STRIPE_CONNECT_AVAILABLE &&
+        (canOpenStripe ? (
+          <Button variant="secondary" onClick={answer} disabled={leaving} aria-busy={leaving || undefined}>
+            {leaving && <Spinner />}
+            {t("answerInStripe")}
+            <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden />
+          </Button>
+        ) : (
+          <p className={helpTextClass}>
+            {storeName ? t("disputeOwnerOnlyNamed", { store: storeName }) : t("disputeOwnerOnly")}
+          </p>
+        ))}
     </div>
   );
 }

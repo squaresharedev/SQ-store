@@ -5,41 +5,18 @@ import Link from "@/components/ui/AppLink";
 import { ChevronRight } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { iconNudgeRightClass, infoTextClass } from "@/components/ui/control-styles";
-import { badgeClass } from "@/components/ui/surface-styles";
 import { ProductThumb } from "@/components/ui/ProductThumb";
 import { OrderDetailSheet } from "@/components/orders/OrderDetailSheet";
+import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
 import { cn } from "@/lib/utils";
 import { isModifiedClick } from "@/lib/utils/modified-click";
 import { ORDERS_PATH } from "@/lib/dashboard/paths";
 import { orderDetailPath } from "@/lib/orders/paths";
-import type { DashboardOrder, OrderStatus } from "@/lib/dashboard/queries";
+import type { DashboardOrder } from "@/lib/dashboard/queries";
 import { formatCents, formatOrderDate } from "@/lib/dashboard/format";
 import type { OrderView } from "@/types/order-view";
 import type { OrderGlance } from "@/lib/orders/queries";
-import { ModuleCard, ModuleEmptyText } from "./ModuleCard";
-
-
-const STATUS_CLASSES: Record<OrderStatus, string> = {
-  paid: "text-success",
-  refunded: "text-danger-strong",
-  disputed: "text-danger-strong",
-  pending: "text-muted-foreground",
-};
-
-function StatusBadge({ status }: { status: OrderStatus }) {
-  const t = useTranslations("Orders.status");
-  const known: OrderStatus = STATUS_CLASSES[status] ? status : "pending";
-  return (
-    <span
-      className={cn(
-        badgeClass,
-        STATUS_CLASSES[known],
-      )}
-    >
-      {t(known)}
-    </span>
-  );
-}
+import { ModuleActionLink, ModuleCard, ModuleEmptyText } from "./ModuleCard";
 
 /** The latest ~5 orders across all statuses. */
 export function RecentOrders({
@@ -48,6 +25,7 @@ export function RecentOrders({
   glances = {},
   id,
   canFulfil = false,
+  checkoutOpen = false,
 }: {
   orders: DashboardOrder[];
   /** Full detail for these rows, read with the page. A row found here opens
@@ -59,6 +37,10 @@ export function RecentOrders({
   id?: string;
   /** Whether the viewer may mark orders shipped from the panel. */
   canFulfil?: boolean;
+  /** Whether a buyer can pay through checkout right now. Changes the empty
+   *  state: if checkout is open, the first sale is coming; if not, explain it
+   *  appears once checkout opens. */
+  checkoutOpen?: boolean;
 }) {
   const t = useTranslations();
   const locale = useLocale();
@@ -66,9 +48,20 @@ export function RecentOrders({
   const detailById = new Map(details.map((order) => [order.id, order]));
 
   return (
-    <ModuleCard title={t("Dashboard.recentOrders.title")} id={id}>
+    <ModuleCard
+      title={t("Dashboard.recentOrders.title")}
+      id={id}
+      // The rest of the list, once there is a list: the empty state stands alone.
+      action={
+        orders.length > 0 && (
+          <ModuleActionLink href={ORDERS_PATH}>{t("Orders.empty.seeAllOrders")}</ModuleActionLink>
+        )
+      }
+    >
       {orders.length === 0 ? (
-        <ModuleEmptyText>{t("Dashboard.recentOrders.empty")}</ModuleEmptyText>
+        <ModuleEmptyText>
+          {t(checkoutOpen ? "Dashboard.recentOrders.emptyReady" : "Dashboard.recentOrders.empty")}
+        </ModuleEmptyText>
       ) : (
         <ul className="divide-y divide-border">
           {orders.map((order, index) => {
@@ -114,7 +107,9 @@ export function RecentOrders({
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
-                      <StatusBadge status={order.status} />
+                      {/* The Orders page's own badge, so a colour means the
+                          same there and here (a refund is settled, not red). */}
+                      <OrderStatusBadge status={order.status} />
                       <span className="font-inter text-sm font-medium text-foreground">
                         {formatCents(order.amount_cents, order.currency, locale)}
                       </span>

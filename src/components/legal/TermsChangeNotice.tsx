@@ -18,7 +18,6 @@ export function TermsChangeNotice({
   upcoming: NonNullable<TermsStatus["upcoming"]>;
 }) {
   const t = useTranslations("Settings.legal.notice");
-  const tKey = useTranslations();
   const locale = useLocale();
   const external = { target: "_blank", rel: "noopener noreferrer", className: inlineLinkClass };
 
@@ -46,12 +45,21 @@ export function TermsChangeNotice({
           ),
         })}
       </p>
-      <ul className="flex list-disc flex-col gap-1 pl-4 text-muted-foreground marker:text-border">
-        {(TERMS_CHANGES[upcoming.version] ?? []).map((key) => (
-          <li key={key}>{tKey(key)}</li>
-        ))}
-      </ul>
+      <TermsChangesList version={upcoming.version} />
       <p className="text-muted-foreground">{t("leave")}</p>
     </section>
+  );
+}
+
+/** What one Terms version changes, as bullets: in the notice while it is on its
+ *  way, and in Settings › Legal for someone still to agree once it applies. */
+export function TermsChangesList({ version }: { version: string }) {
+  const tKey = useTranslations();
+  return (
+    <ul className="flex list-disc flex-col gap-1 pl-4 text-muted-foreground marker:text-border">
+      {(TERMS_CHANGES[version] ?? []).map((key) => (
+        <li key={key}>{tKey(key)}</li>
+      ))}
+    </ul>
   );
 }

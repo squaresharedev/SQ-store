@@ -13,8 +13,9 @@
   },
   "firstRun": {
     "title": "Nog niets om te meten",
-    "body": "Bezoeken aan je productpagina's verschijnen hier zodra er een online is.",
-    "backToSetup": "Terug naar Aan de slag"
+    "body": "Publiceer een etalage om weergaven te zien, of doe je eerste verkoop om omzet te zien.",
+    "publishStorefront": "Publiceer een etalage",
+    "goToProducts": "Naar producten"
   },
   "range": {
     "ariaLabel": "Periode",
@@ -73,12 +74,20 @@
   },
   "compare": {
     "previous": "Vorige periode",
-    "vsPrevious": "{change} ten opzichte van de vorige periode"
+    "vsPrevious": "{change} ten opzichte van de vorige periode",
+    "previousPeriodDates": "{from} - {to}"
+  },
+  "scrub": {
+    "on": "Op {date}",
+    "inMonth": "In {date}",
+    "upTo": "Tot {date}",
+    "noSales": "Geen verkopen"
   },
   "funnel": {
     "label": "Storefront-trechter",
     "description": "Van het tonen van je storefront op je eigen site tot een betaalde bestelling. Er worden gebeurtenissen geteld, geen personen.",
-    "views": "Weergaven op je site",
+    "subtitle": "Bezoekers die je etalage zagen via de insluiting op je eigen website (geen directe links), van eerste weergave tot betaalde bestelling.",
+    "views": "Weergaven via insluiting",
     "viewsEmpty": "Geen weergaven in deze periode",
     "opens": "Geopende producten",
     "opensEmpty": "Geen geopend in deze periode",
@@ -91,7 +100,7 @@
     "abandonment": "Niet afgeronde afrekeningen",
     "abandonmentCounts": "Onbetaald: {expired}, gestart: {started}",
     "notEnough": "Nog niet genoeg gegevens",
-    "notEnoughHint": "Percentages verschijnen zodra deze periode {min} weergaven telt."
+    "notEnoughHint": "Percentages verschijnen zodra deze periode {min} weergaven telt: bij minder zou één bestelling het percentage vertekenen."
   },
   "tiles": {
     "revenue": "Omzet",
@@ -110,7 +119,7 @@
   "channels": {
     "embed": "Op je website",
     "marketplace": "Marketplace",
-    "direct": "Jouw pagina",
+    "direct": "Directe link",
     "button": "Koopknop"
   },
   "signalsUnavailable": {
@@ -119,7 +128,8 @@
   },
   "upcoming": {
     "needProducts": "{labels} verschijnen hier zodra een product op een van je etalages staat.",
-    "needBlocks": "{labels} verschijnen hier zodra hun blok op een van je etalages staat."
+    "needBlocks": "{labels} verschijnen hier zodra hun blok op een van je etalages staat.",
+    "recordedOnly": "{labels} verschijnen hier zodra een koper het afrekenen opent voor een van je producten."
   },
   "signal": {
     "visitors": "Bezoekers",
@@ -168,6 +178,7 @@
     "product_view": {
       "label": "Productpaginaweergaven",
       "description": "Bezoekers die een van je gehoste productpagina's openen.",
+      "subtitle": "Inclusief klikken vanaf etalagetegels en directe links.",
       "count": "{count, plural, one {{formatted} weergave} other {{formatted} weergaven}}",
       "total": "Totaal aantal weergaven",
       "emptyRange": "Geen weergaven in deze periode",

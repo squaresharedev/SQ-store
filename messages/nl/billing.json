@@ -34,7 +34,7 @@
     "yearlyFree": "{count, plural, one {# maand gratis} other {# maanden gratis}}",
     "launchNote": "Een lanceringsprijs is een introductieprijs: de normale prijs is de doorgestreepte prijs.",
     "grantTitle": "{plan} krijg je van ons",
-    "autoRenew": "Betaalde abonnementen worden automatisch elke maand verlengd tegen de getoonde prijs, totdat je opzegt."
+    "autoRenew": "Betaalde abonnementen worden automatisch {interval, select, year {elk jaar} other {elke maand}} verlengd tegen de getoonde prijs, totdat je opzegt."
   },
   "card": {
     "perMonth": "/ maand",
@@ -79,7 +79,8 @@
     "cheapest": "Bij een verkoop van {sales} per maand is {plan} het voordeligst voor jou.",
     "legendPrice": "Abonnementsprijs",
     "legendFee": "Kosten over je verkoop",
-    "cheapestTag": "Voordeligst voor jou"
+    "cheapestTag": "Voordeligst voor jou",
+    "stripeFeeNote": "De eigen kosten van Stripe voor kaartbetalingen bij elke verkoop komen bovenop deze bedragen."
   },
   "compare": {
     "eyebrow": "Vergelijken",
@@ -160,17 +161,17 @@
   },
   "portal": {
     "opening": "Stripe openen",
-    "stepUp": "Bevestig dat jij het bent voordat je factureringsgegevens worden geopend."
+    "stepUp": "Je hebt tweestapsverificatie aanstaan, dus bevestig dat jij het bent voordat je factureringsgegevens worden geopend."
   },
   "chip": {
     "label": "Abonnement: {plan}",
-    "upgrade": "Upgraden",
-    "pro": "Pro-abonnement"
+    "upgrade": "Upgraden"
   },
   "banner": {
     "label": "Betaling abonnement",
     "pastDue": "De betaling voor je {plan}-abonnement is mislukt. Werk je kaart bij om het te behouden.",
     "pastDueMember": "De {plan}-betaling van deze winkel is mislukt. Alleen de eigenaar kan de kaart bijwerken.",
+    "seeTeam": "Teamleden bekijken",
     "action": "Kaart bijwerken"
   },
   "settings": {
@@ -197,7 +198,7 @@
       "over": "{count} te veel",
       "full": "Vol"
     },
-    "overLimit": "Boven de limiet van dit abonnement. Alles blijft werken; verwijder er een of upgrade om meer toe te voegen.",
+    "overLimit": "Boven de limiet van dit abonnement. Alles blijft werken; verwijder er een of <upgrade>upgrade</upgrade> om meer toe te voegen.",
     "invoicesTitle": "Facturering en facturen",
     "invoicesDescription": "Je kaart, factuuradres, btw-nummer en alle facturen, op de beveiligde pagina van Stripe.",
     "manage": "Facturering en facturen beheren",

@@ -21,6 +21,7 @@ import { ShapeTileContent } from "./ShapeTileContent";
 import { TextTileContent } from "./TextTileContent";
 import type { TileSpotDrag } from "./TileSpotDragLayer";
 import type { TileLook } from "@/lib/storefront/tile-look";
+import type { CardHoverTrigger } from "./config-maps";
 
 /**
  * The visual face of one grid block, independent of tile chrome: dispatches to
@@ -44,7 +45,7 @@ export function BlockFace({
   textSelectAll = false,
   spotDrag,
   look,
-  hoverMotion,
+  hover,
   onTextChange,
   onToggleBlockFormat,
   onTextRangeChange,
@@ -67,9 +68,9 @@ export function BlockFace({
    *  Every other kind has nothing placeable on it. */
   spotDrag?: TileSpotDrag;
   /** Product blocks only: what cards borrow from the product page, and
-   *  whether this one may move on hover (see ProductTileContent). */
+   *  what plays this one's hover effects (see ProductTileContent). */
   look?: TileLook;
-  hoverMotion?: boolean;
+  hover?: CardHoverTrigger;
   /** Text and the spans that format parts of it, always together. */
   onTextChange?: (text: string, spans: TextSpan[], source: TextEditSource) => void;
   /** Ctrl+B / I / U with nothing selected: the whole block. */
@@ -115,7 +116,7 @@ export function BlockFace({
         imageRef={imageRef}
         spotDrag={spotDrag}
         look={look}
-        hoverMotion={hoverMotion}
+        hover={hover}
       />
     );
   }

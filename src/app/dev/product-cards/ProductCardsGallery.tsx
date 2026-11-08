@@ -98,6 +98,10 @@ function Gallery() {
                 onCopyLink={() => toast.info(f.storefrontCount ? "Copy link" : "Not on a storefront yet")}
                 onOpenPage={() => toast.info(f.storefrontCount ? "Open page" : "Not on a storefront yet")}
                 onBuyButton={() => toast.info("Add to your website")}
+                onDuplicate={() => toast.info("Duplicate")}
+                onMakeActive={() => toast.info("Make active")}
+                onMakeDraft={() => toast.info("Make draft")}
+                onEditStock={() => toast.info("Edit stock")}
               />
             </li>
           ))}

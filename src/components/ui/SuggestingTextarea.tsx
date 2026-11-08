@@ -45,7 +45,7 @@ const MIRRORED = [
 type Offer = { after: string; text: string };
 
 export type SuggestingTextareaLabels = {
-  /** While the field has focus and nothing is on offer ("AI suggests the next words as you type."). */
+  /** While nothing is on offer, in focus or not ("AI suggests the next words as you type."). */
   idle: string;
   /** After the Tab key, while words are on offer ("adds the grey text. Esc hides it."). */
   offered: string;
@@ -68,7 +68,9 @@ export type SuggestingTextareaLabels = {
  * Added words go in through the browser's own editing (insertText), so Ctrl+Z
  * takes them back out like anything typed. Tab is only taken while words are
  * on offer; otherwise it moves focus as always. The line under the field says
- * what Tab does, holds the Tab key as a button for touch, and the way out.
+ * what Tab does, holds the Tab key as a button for touch, and the way out. It
+ * shows with the field out of focus too, so the grey words and their way out
+ * are found before anyone types.
  *
  * The grey words are drawn in a mirror under a transparent field: the same
  * box, font and wrapping, the person's text invisible in it and the offer
@@ -204,7 +206,8 @@ export function SuggestingTextarea({
   }
 
   // Focus anywhere in the field or its line (the Tab key, "Turn off") counts
-  // as being in the field, so the line's buttons stay while they are used.
+  // as being in the field, so the words on offer and their Tab key stay while
+  // the line is used.
   const leave = (event: FocusEvent<HTMLDivElement>) => {
     if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
       setFocused(false);
@@ -247,28 +250,27 @@ export function SuggestingTextarea({
       {suggest && (
         <div className={cn(infoTextClass, "mt-1 flex min-h-6 items-center gap-2")}>
           <p id={hintId} className="flex items-center gap-1.5" data-suggest-hint={visible ? "offered" : "idle"}>
-            {focused &&
-              (visible ? (
-                <>
-                  {/* Named by its own word, so the line reads "Tab adds the
-                      grey text" as the field's description too. */}
-                  <button
-                    type="button"
-                    className={cn(kbdClass, "cursor-pointer")}
-                    title={labels.accept}
-                    onPointerDown={keepFocus}
-                    onMouseDown={keepFocus}
-                    onClick={accept}
-                  >
-                    Tab
-                  </button>
-                  <span>{labels.offered}</span>
-                </>
-              ) : (
-                labels.idle
-              ))}
+            {visible ? (
+              <>
+                {/* Named by its own word, so the line reads "Tab adds the
+                    grey text" as the field's description too. */}
+                <button
+                  type="button"
+                  className={cn(kbdClass, "cursor-pointer")}
+                  title={labels.accept}
+                  onPointerDown={keepFocus}
+                  onMouseDown={keepFocus}
+                  onClick={accept}
+                >
+                  Tab
+                </button>
+                <span>{labels.offered}</span>
+              </>
+            ) : (
+              labels.idle
+            )}
           </p>
-          {focused && onTurnOff && (
+          {onTurnOff && (
             <button
               type="button"
               className={cn(quietLinkClass, "ml-auto")}

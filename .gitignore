@@ -17,6 +17,9 @@
 /.next/
 # the E2E stack's own build dir (see distDir in next.config.ts)
 /.next-e2e/
+# Any other NEXT_DIST_DIR. Tailwind scans every file git does not ignore, and
+# a Turbopack cache it can read puts compressed bytes into globals.css.
+/.next*/
 /out/
 
 # production

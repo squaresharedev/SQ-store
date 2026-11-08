@@ -91,7 +91,7 @@
     "groups": {
       "theme": "Theme",
       "header": "Header",
-      "typography": "Typography",
+      "typography": "Font",
       "cards": "Product cards",
       "soldOut": "Sold out",
       "productPage": "Product page",
@@ -100,7 +100,7 @@
     "subtitle": {
       "theme": "Storefront / Theme",
       "header": "Storefront / Header",
-      "typography": "Storefront / Typography",
+      "typography": "Storefront / Font",
       "cards": "Storefront / Product cards",
       "soldOut": "Storefront / Sold out",
       "productPage": "Storefront / Product page",
@@ -161,7 +161,8 @@
       "cardStarRating": "Star rating on cards",
       "cardLowStock": "Low stock label",
       "textSpacing": "Letter spacing and line height",
-      "elementBlur": "Blur"
+      "elementBlur": "Blur",
+      "phoneLayout": "Arrange for phones"
     }
   },
   "editorSearch": {
@@ -207,31 +208,37 @@
     "emptyHint": "This grid is empty",
     "removed": "Removed by Square Share",
     "pausedInReview": "Paused · with Square Share for review",
-    "pausedNeedsChanges": "Paused by Square Share · needs changes"
+    "pausedNeedsChanges": "Paused by Square Share · needs changes",
+    "status": {
+      "live": "Live",
+      "pagesOff": "Not live yet: turn on product pages",
+      "detailsMissing": "Not live yet: add your seller details"
+    }
   },
   "embed": {
-    "inDevNotice": "The embed widget is in development and not yet rendering on external sites. Configure your settings below so you are ready to paste the snippet the moment it ships.",
+    "sectionTitle": "On your own website",
+    "inDevNotice": "This does not show on other websites yet. Set it up now and it will be ready the moment it ships. You will then also add a short note to your privacy policy: we will give you the words.",
     "title": "Share this storefront",
-    "description": "Send people a link to \"{name}\", or paste a snippet into your own site to show it there.",
+    "description": "Send people a link to \"{name}\", or paste the website code into your own site to show it there.",
     "steps": {
       "site": "Choose the sites it shows on",
-      "snippet": "Paste the snippet into your site",
+      "snippet": "Add the website code to your site",
       "privacy": "Add this to your privacy policy"
     },
     "required": "Required",
     "enabledLabel": "Show on my website",
     "showingLabel": "Showing on your website",
-    "domainsLabel": "Allowed domains",
+    "domainsLabel": "Your website addresses",
     "domainsPlaceholder": "yoursite.com, blog.yoursite.com",
-    "domainsHint": "Up to {max}, comma-separated. Paste a URL and we''ll trim it to the domain.",
-    "sameAsHint": "Copies the allowed domains from {title}.",
-    "emptyDomainsWarning": "Add at least one domain. While this is empty the storefront won''t load anywhere, even though embedding is on.",
+    "domainsHint": "The embed only loads on these sites. Paste a full URL and we will extract the address. Up to {max}, comma-separated.",
+    "sameAsHint": "Copies the website addresses from {title}.",
+    "emptyDomainsWarning": "Add at least one website address. While this is empty the storefront won''t load anywhere, even though embedding is on.",
     "builderLabel": "Your site builder",
     "builderOther": "Another site",
     "builderSteps": {
       "other": "Paste it into your page''s HTML where the storefront should appear.",
       "wordpress": "Add a Custom HTML block where the storefront should appear, and paste it in.",
-      "squarespace": "Add a Code block and paste it in. If the storefront only appears after a reload, switch to Iframe only.",
+      "squarespace": "Add a Code block and paste it in. If the storefront only appears after a reload, switch to Simple embed.",
       "wix": "Add Embed Code, then Embed HTML, and paste it in. Then drag the box as tall as your storefront.",
       "webflow": "Add a Code Embed element and paste it in. It shows on your published site.",
       "shopify": "In the theme editor, add a Custom Liquid section and paste it in.",
@@ -240,22 +247,22 @@
       "carrd": "Add an Embed element, set its type to Code, and paste it in."
     },
     "snippetKinds": {
-      "label": "Snippet type",
-      "script": "Script",
-      "iframe": "Iframe only"
+      "label": "Code type",
+      "script": "Full embed",
+      "iframe": "Simple embed"
     },
-    "snippetReadyHint": "Paste it once. It sizes itself to your storefront and keeps up with what you change here.",
-    "iframeHint": "For a site that removes scripts. It is {height} pixels tall and scrolls inside. Copy it again after you change your domains.",
-    "snippetLockedHint": "Enable embedding and add at least one domain to unlock the Copy button.",
+    "snippetReadyHint": "Works on most sites. Paste it once: it sizes itself to your storefront and keeps up with what you change here.",
+    "iframeHint": "Use this if Full embed did not appear on your site. It is {height} pixels tall and scrolls inside. Copy it again each time you change your website addresses.",
+    "snippetLockedHint": "Enable embedding and add at least one website address to unlock the Copy button.",
     "snippetSaveHint": "Save your settings to unlock the Copy button.",
     "pagesOffHint": "Turn on product pages in the designer first. A click on a product opens its page.",
     "notShowingLabel": "If the storefront does not show",
-    "notShowingTip": "Your site''s address must be in Allowed domains, and the site must use https. Pasted code shows on your published site, not in a builder''s editor. To see it on a preview address (such as yoursite.webflow.io), add that address too.",
+    "notShowingTip": "Your site''s address must be in your website addresses above, and the site must use https. Pasted code shows on your published site, not in a builder''s editor. If the storefront does not appear at all, try the Simple embed code type. To see it on a preview address (such as yoursite.webflow.io), add that address too.",
     "copySnippet": {
-      "copy": "Copy embed snippet",
-      "copied": "Copied embed snippet",
-      "failed": "Couldn't copy embed snippet. Select and copy it manually.",
-      "cannotCopyYet": "embed snippet cannot be copied yet"
+      "copy": "Copy website code",
+      "copied": "Copied website code",
+      "failed": "Couldn''t copy the website code. Select and copy it manually.",
+      "cannotCopyYet": "website code cannot be copied yet"
     },
     "privacyHint": "Your site now loads this storefront from Square Share, so its privacy policy has to say so. Paste this into it:",
     "privacyTextLabel": "Privacy text",
@@ -265,20 +272,21 @@
       "copied": "Copied privacy text",
       "failed": "Couldn't copy the text. Select and copy it manually."
     },
-    "snippetKeyLabel": "Snippet key",
-    "rotateConfirmText": "Rotating issues a new key. Every copy of the old snippet stops working immediately, including ones on sites you still want -- you''ll need to paste the new snippet everywhere.",
-    "rotateKey": "Rotate key",
-    "rotating": "Rotating...",
-    "revokeHint": "Pasted somewhere it shouldn''t be? Rotate the key to revoke every existing snippet.",
+    "snippetKeyLabel": "Website code",
+    "rotateConfirmText": "Getting a new code deactivates the old one everywhere it was pasted. Sites you are still embedding on will need the new code pasted in again.",
+    "rotateKey": "Get a new code",
+    "rotating": "Getting a new code...",
+    "revokeHint": "Your website code is meant to be public: it only shows on your website addresses. Get a new code only to switch off every copy already pasted.",
     "saveSettings": "Save settings",
     "saving": "Saving...",
     "saved": "Embed settings saved.",
-    "newKeyIssued": "New embed key issued.",
-    "newKeyDetail": "Re-paste the snippet everywhere this storefront is embedded."
+    "newKeyIssued": "New website code issued.",
+    "newKeyDetail": "Re-paste the website code everywhere this storefront is embedded."
   },
   "share": {
     "title": "Storefront link",
     "live": "Your storefront has a page of its own. Anyone with this link can browse it, no website needed.",
+    "searchOff": "Hidden from search engines like Google.",
     "pagesOff": "Turn on product pages in the designer and this storefront gets a link you can share.",
     "detailsMissing": "This storefront gets a link you can share once your seller details are complete.",
     "open": "Open",
@@ -313,7 +321,7 @@
   },
   "masthead": {
     "namePlaceholder": "Your store name",
-    "bioPlaceholder": "A short line about your shop",
+    "bioPlaceholder": "A short line about your store",
     "editAriaLabel": "{line, select, name {Edit the store name} bio {Edit the store bio} other {Edit the store {line}}}",
     "editorNameAriaLabel": "Store name",
     "editorBioAriaLabel": "Store bio"
@@ -321,7 +329,7 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Product page",
-    "closeAriaLabel": "Close the buyer flow for {title}",
+    "closeAriaLabel": "Close the product page for {title}",
     "desktopSize": "Desktop size",
     "mobileSize": "Mobile size",
     "checkoutLabel": " · Checkout",
@@ -331,7 +339,7 @@
   "metadata": {
     "storefronts": {
       "title": "Storefronts",
-      "subtitle": "Each storefront is its own grid and theme. Create as many as you need, then open one to edit it."
+      "subtitle": "Each storefront is its own grid and theme, with a link of its own to share. Create as many as you need, then open one to edit it."
     },
     "editor": {
       "title": "Edit storefront"
@@ -351,20 +359,20 @@
   "controls": {
     "off": "Off",
     "layers": "Layers",
-    "objectCount": "{count, plural, one {1 object} other {# objects}}",
+    "objectCount": "{count, plural, one {# block} other {# blocks}}",
     "cardStyle": "Card style",
     "priceTag": "Price tag",
     "theme": "Theme",
-    "canvas": "Canvas",
-    "design": "Design"
+    "themeHint": "Colours, grid size and phone layout",
+    "canvas": "Canvas"
   },
   "designPanel": {
     "tabSelection": "Selection",
-    "tabDesign": "Design",
+    "tabDesign": "Whole storefront",
     "show": "Show design panel",
     "hide": "Hide design panel",
     "resize": "Resize design panel",
-    "closeSettings": "Close design settings",
+    "closeSettings": "Close storefront style",
     "scopeLabel": "Panel scope"
   },
   "library": {
@@ -434,10 +442,11 @@
     "sectionPalettes": "Palettes"
   },
   "themePanel": {
-    "accent": "Accent"
+    "accent": "Accent",
+    "accentHint": "Used for buttons, sale badges, headings and your store name."
   },
   "panelSearch": {
-    "placeholder": "Find a setting or object",
+    "placeholder": "Find a setting or block",
     "clear": "Clear search",
     "noResults": "Nothing in the editor matches that.",
     "matchesLabel": "Matches"
@@ -488,7 +497,7 @@
     "cornerValueText": "{n, plural, one {# pixels} other {# pixels}}",
     "sharp": "Sharp",
     "circle": "Circle",
-    "fineTuning": "Fine tuning",
+    "titleSection": "Title",
     "showTitle": "Show title",
     "titleStyleLabel": "Title style",
     "edgeSpacing": "Edge spacing",
@@ -556,12 +565,13 @@
     "label": "On bigger cards",
     "tile": "Grow",
     "cell": "Stay the same",
-    "everyCard": "Applies to every card on this storefront."
+    "everyCard": "Applies to price tags and sale badges on every card."
   },
   "layout": {
     "canvasWidth": "Canvas width",
     "canvasWidthAriaLabel": "Canvas width in blocks",
     "blocksWide": "{n, plural, one {# blocks wide} other {# blocks wide}}",
+    "blocksUnit": "blocks",
     "canvasHeight": "Canvas height",
     "heightTip": "The board can't shrink below the blocks already on it: drag a block up first, then shorten the canvas.",
     "canvasHeightAriaLabel": "Canvas height in blocks",
@@ -570,6 +580,11 @@
     "gridDensityAriaLabel": "Grid density",
     "gridGapValue": "{n, plural, one {# pixel gap} other {# pixel gap}}",
     "noGap": "No gap",
+    "phonesInfoLabel": "How phones show this board",
+    "phonesInfoBody": "Off, phones rearrange the board to fit by themselves. On, open the phone view and drag or resize blocks to place them yourself. The desktop board stays as it is.",
+    "phonesAutomatic": "Phones arrange this board automatically.",
+    "phoneWidth": "Phone width",
+    "phoneWidthAriaLabel": "Phone width in blocks",
     "showGrid": "Show grid",
     "gridInfoLabel": "Who sees the grid",
     "gridInfoBody": "A guide for you while you design: it draws the empty slots so you can see where a block will land. Buyers never see it."
@@ -588,7 +603,8 @@
     "angle": "{n}°",
     "layerLabel": "Layer",
     "layerInfoLabel": "How layering works",
-    "layerInfoBody": "Layers decide only what paints on top where blocks overlap; the reading order a screen reader follows never changes.{multi, select, true { This selection keeps its own order within the stack as it moves.} other {}}{stacked, select, true { Alt-click a stack on the canvas to reach the block underneath.} other {}}",
+    "layerInfoBody": "Layers decide only what paints on top where blocks overlap; the reading order a screen reader follows never changes.{multi, select, true { This selection keeps its own order within the stack as it moves.} other {}}",
+    "stackedHint": "Alt-click to select the block underneath. On a touch screen, tap the stack again.",
     "blocksSelected": "{count, plural, one {# blocks selected} other {# blocks selected}}",
     "layerOf": "Layer {index} of {total}",
     "blockLayerLabel": "Block layer",
@@ -596,7 +612,13 @@
     "sendBackward": "Send backward",
     "bringForward": "Bring forward",
     "bringToFront": "Bring to front",
-    "seeAllLayers": "See all layers"
+    "seeAllLayers": "See all layers",
+    "phoneLabel": "On phones",
+    "phoneInfoLabel": "How a block sits on phones",
+    "phoneInfoBody": "Drag or resize a block in the phone view to place it there yourself. Back to automatic lets the phone arrangement place it again. The desktop board stays as it is.",
+    "hideOnPhones": "Hide on phones",
+    "showOnPhones": "Show on phones",
+    "phoneAutomatic": "Back to automatic"
   },
   "header": {
     "showHeader": "Show header",
@@ -605,8 +627,9 @@
     "storeName": "Store name",
     "storeNamePlaceholder": "Store name shown to buyers",
     "bio": "Bio",
-    "bioPlaceholder": "A short line about your shop",
-    "charsLeft": "{n, plural, one {# characters left} other {# characters left}}"
+    "bioPlaceholder": "A short line about your store",
+    "charsLeft": "{n, plural, one {# characters left} other {# characters left}}",
+    "styleLine": "{line, select, name {Font and colour of the name} other {Font and colour of the bio}}"
   },
   "soldOut": {
     "hide": "Hide from buyers",
@@ -682,10 +705,12 @@
     "movePriceTo": "{spot, select, top_left {Move the price to the top left} top_center {Move the price to the top center} top_right {Move the price to the top right} middle_center {Move the price to the middle} bottom_left {Move the price to the bottom left} bottom_center {Move the price to the bottom center} bottom_right {Move the price to the bottom right} other {Move the price here}}"
   },
   "productPage": {
+    "scopeNote": "These settings apply to every product page in this storefront.",
     "layout": {
       "title": "Page",
       "showPage": {
         "label": "Show a product page",
+        "hint": "Also gives your storefront its own shareable link.",
         "infoLabel": "What this switch does",
         "infoOn": "Tapping a product tile opens its page, and the storefront has a page of its own to share.",
         "infoOff": "Product tiles have no page to open, and the storefront's own link stops working too."
@@ -702,7 +727,7 @@
         "label": "Font",
         "infoLabel": "How this page's font relates to the storefront's",
         "infoOwn": "This page reads in its own face, whatever the storefront uses.",
-        "infoFollows": "Follows your storefront's font. Change it under Typography.",
+        "infoFollows": "Follows your storefront's font. Change it in the Font settings.",
         "inheritOption": "Same as storefront ({name})"
       },
       "indexing": {
@@ -715,7 +740,8 @@
     "cta": {
       "title": "Buy button",
       "infoLabel": "What decides whether a button shows",
-      "infoContent": "The button follows each product’s purchase link (set on the product). Without one it emails your contact address below; with neither, no button is shown.",
+      "infoContent": "The button follows each product’s buy link (set on the product). Without one it emails your contact address below; with neither, no button is shown.",
+      "checkoutNote": "The pay button on your checkout matches this one. <link>Go to Checkout</link>",
       "buttonText": {
         "label": "Button text",
         "charsLeft": "{count, plural, one {# character left} other {# characters left}}"
@@ -793,7 +819,7 @@
     "sellerDetails": {
       "title": "Seller details",
       "infoLabel": "Why this lives in Settings, not here",
-      "infoContent": "Distance-selling law asks for the seller’s name, address and a way to get in touch next to every offer. Set once for your whole account — every storefront and every product shows the same details, so there is nothing to repeat per store.",
+      "infoContent": "Distance-selling law asks for the seller’s name, address and a way to get in touch next to every offer. Set once for your whole account: every storefront and every product shows the same details, so there is nothing to repeat per store.",
       "vatId": "VAT ID {vatId}",
       "nothingSet": "Nothing set yet. Until you add your business details, buyers only see the “Sold by” line under the title.",
       "editSettings": "Edit in Settings",
@@ -844,6 +870,7 @@
   "productBlock": {
     "deleted": "This product was removed from your catalog.",
     "removeFromGrid": "Remove from grid",
+    "details": "Product details",
     "nameLabel": "Name",
     "namePlaceholder": "Product name",
     "priceLabel": "Price ({currency})",
@@ -858,13 +885,14 @@
       "lowStock": "Low stock: {count} on hand.",
       "inStock": "{count} in stock."
     },
-    "openProductPage": "Open buyer flow",
-    "hideProductPage": "Hide buyer flow",
+    "openProductPage": "Open product page",
+    "hideProductPage": "Hide product page",
+    "noCtaWarning": "The buy button on its page has nowhere to go yet. Add a buy link to the product, or a contact email in your seller details.",
     "tileStyle": {
       "title": "Tile style",
-      "reset": "Reset to theme",
+      "reset": "Use theme style",
       "infoLabel": "How this tile's style relates to the theme",
-      "infoWithOverrides": "This tile has its own style. Settings you have not changed here keep following the theme.",
+      "infoWithOverrides": "This tile has its own style; anything not changed here follows the theme. Use theme style clears this tile's changes only: the theme stays as it is.",
       "infoNoOverrides": "Style this tile on its own. Anything you do not change keeps following the theme."
     },
     "priceTag": "Price tag",
@@ -876,6 +904,7 @@
       "updateEverywhere": "Update everywhere"
     },
     "savedToast": "\"{title}\" was updated everywhere it appears.",
+    "unsavedToast": "Your new name or price for \"{title}\" was not saved. Press Save before moving on to keep it.",
     "validation": {
       "noTitle": "Give your product a title.",
       "noPrice": "Set a price.",
@@ -983,7 +1012,7 @@
   "multiBlock": {
     "shapesContext": "Editing {count, plural, one {# shape} other {# shapes}} together. Values shown come from the first selected shape; every change applies to all of them.",
     "textsContext": "Editing {count, plural, one {# text block} other {# text blocks}} together. Values shown come from the first selected block; every change applies to all of them. Each block keeps its own text.",
-    "imagesContext": "Editing {count, plural, one {# element} other {# elements}} together. Values shown come from the first selected element; every change applies to all of them. Each keeps its own picture.",
+    "imagesContext": "Editing {count, plural, one {# block} other {# blocks}} together. Values shown come from the first selected block; every change applies to all of them. Each keeps its own picture.",
     "productsContext": "Styling {count, plural, one {# product tile} other {# product tiles}} together. Values shown come from the first selected tile; every change applies to all of them.",
     "mixedContext": "{count, plural, one {# block} other {# blocks}} of different types are selected. Select blocks of one type to edit their settings together.",
     "remove": "Remove {count, plural, one {# block} other {# blocks}}",
@@ -991,7 +1020,7 @@
     "productsNotDuplicated": "Products are not duplicated.",
     "tileStyle": {
       "title": "Tile style",
-      "reset": "Reset to theme"
+      "reset": "Use theme style"
     },
     "priceTag": "Price tag"
   },
@@ -1003,18 +1032,18 @@
     "ariaLabel": "Editor tools",
     "addProduct": "Add product",
     "addText": "Add text",
-    "addElement": "Add element",
+    "addElement": "Add shape or image",
     "product": "Product",
     "text": "Text",
-    "element": "Element",
-    "elementsMenu": "Elements",
+    "element": "Shapes",
+    "elementsMenu": "Shapes and images",
     "uploading": "Uploading…",
     "upload": "Upload",
     "uploadImage": "Upload image",
     "allShapes": "All shapes",
     "browseShapes": "Browse the full shape library",
-    "closePage": "Close buyer flow",
-    "showPage": "Show buyer flow",
+    "closePage": "Close product page",
+    "showPage": "Show product page",
     "closePages": "Close the product page, checkout and thank-you page",
     "showPageFull": "Show the product page, checkout and thank-you page",
     "undo": "Undo",
@@ -1027,22 +1056,64 @@
     "zoomOutTip": "Zoom out (Ctrl -)",
     "zoomReset": "Reset zoom to 100%",
     "zoomResetTip": "Reset zoom (Ctrl 0)",
-    "zoomResetMenuItem": "Reset zoom",
+    "zoomFit": "Fit to screen",
     "zoomIn": "Zoom in",
     "zoomInTip": "Zoom in (Ctrl +)",
-    "designSettings": "Design settings",
-    "page": "Buyer flow",
-    "moreTools": "More tools"
+    "designSettings": "Storefront style",
+    "style": "Style",
+    "page": "Product page",
+    "pageMobile": "Page",
+    "pageDisabledTip": "Add a product to open its page",
+    "moreTools": "More tools",
+    "more": "More"
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "tip": "Keyboard shortcuts (?)",
+    "rows": {
+      "save": {
+        "label": "Save",
+        "keys": "<kbd>{mod}</kbd> <kbd>S</kbd>"
+      },
+      "copyPaste": {
+        "label": "Copy and paste blocks",
+        "keys": "<kbd>{mod}</kbd> <kbd>C</kbd> then <kbd>{mod}</kbd> <kbd>V</kbd>"
+      },
+      "remove": {
+        "label": "Remove the selected blocks",
+        "keys": "<kbd>Delete</kbd>"
+      },
+      "move": {
+        "label": "Move the selected blocks",
+        "keys": "<kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd>"
+      },
+      "selectMore": {
+        "label": "Select several blocks",
+        "keys": "<kbd>Shift</kbd> + click"
+      },
+      "selectUnder": {
+        "label": "Select the block underneath",
+        "keys": "<kbd>{alt}</kbd> + click"
+      },
+      "layer": {
+        "label": "Bring forward or send backward",
+        "keys": "<kbd>{mod}</kbd> <kbd>]</kbd> or <kbd>[</kbd>"
+      },
+      "pan": {
+        "label": "Move around the canvas",
+        "keys": "Hold <kbd>Space</kbd> and drag"
+      }
+    }
   },
   "selectionToolbar": {
     "toolsFor": "Tools for {name}",
-    "elements": "{count, plural, one {# element} other {# elements}}",
-    "hidePage": "Hide buyer flow",
-    "openPage": "Open buyer flow",
-    "openProductPage": "Open the buyer flow for {name}",
-    "closeProductPage": "Close the buyer flow for {name}",
-    "openProductPages": "Open the buyer flow for {count, plural, one {# product} other {# products}}",
-    "closeProductPages": "Close the buyer flow for {count, plural, one {# product} other {# products}}",
+    "elements": "{count, plural, one {# block} other {# blocks}}",
+    "hidePage": "Hide product page",
+    "openPage": "Open product page",
+    "openProductPage": "Open the product page for {name}",
+    "closeProductPage": "Close the product page for {name}",
+    "openProductPages": "Open the product page for {count, plural, one {# product} other {# products}}",
+    "closeProductPages": "Close the product page for {count, plural, one {# product} other {# products}}",
     "editText": "Edit text",
     "editTextOf": "Edit the text of {name}",
     "color": "Color",
@@ -1059,24 +1130,26 @@
     "frameImageFor": "Crop and position the image for {name}",
     "duplicate": "Duplicate",
     "duplicateNamed": "Duplicate {name}",
-    "duplicateN": "Duplicate {count, plural, one {# element} other {# elements}}",
+    "duplicateN": "Duplicate {count, plural, one {# block} other {# blocks}}",
     "removeFrom": "Remove {name} from grid",
-    "removeN": "Remove {count, plural, one {# element} other {# elements}} from grid"
+    "removeN": "Remove {count, plural, one {# block} other {# blocks}} from grid"
   },
   "canvas": {
     "addSuggested": "Add {title} to this storefront",
     "gridLabel": "Storefront canvas",
     "emptyGrid": "Your grid is empty",
-    "emptyGridHint": "Add a product to start arranging your storefront. Text and shapes are on the toolbar below.",
+    "emptyGridHint": "Add a product to start arranging your storefront. Text, shapes and your own images are on the toolbar below.",
     "addProduct": "Add product",
     "desktopPreview": "Desktop preview",
-    "mobilePreview": "Mobile preview"
+    "mobilePreview": "Mobile preview",
+    "multiSelectTip": "To select several blocks, Shift-click them or drag across empty space. On a touch screen, hold each one.",
+    "sheetTip": "Close this panel to get the toolbar back."
   },
   "blockTile": {
     "removedProduct": "Removed product",
     "shape": "{kind, select, square {square shape} circle {circle shape} ring {ring shape} diamond {diamond shape} rounded {rounded shape} pill {pill shape} half {half shape} quarter {quarter shape} bar {bar shape} triangle {triangle shape} wedge {wedge shape} pentagon {pentagon shape} hexagon {hexagon shape} octagon {octagon shape} star {star shape} sparkle {sparkle shape} cross {cross shape} arrow {arrow shape} chevron {chevron shape} trapezoid {trapezoid shape} parallelogram {parallelogram shape} burst {burst shape} other {{kind} shape}}",
     "imageWithAlt": "Image: {alt}",
-    "imageElement": "Image element",
+    "imageElement": "Image block",
     "textWithContent": "Text: {text}",
     "textBlock": "Text block",
     "selected": "Selected: {label}. Press Enter to deselect.",
@@ -1109,11 +1182,14 @@
       "nameLabel": "Storefront name",
       "namePlaceholder": "Untitled storefront",
       "unsaved": "Unsaved changes",
+      "saveTip": "Save (Ctrl+S)",
       "viewPage": "View page",
+      "viewSavedPage": "View saved page",
+      "shareSetupNeeded": "Your seller details are incomplete, so this storefront cannot be shared yet",
       "search": "Search"
     },
     "mobileNotice": {
-      "body": "For the best editing experience, open this designer on a desktop or tablet. Reordering blocks and editing the header work on any device.",
+      "body": "Everything works here: tap a block to edit it, hold more blocks to select them together, hold a tool to see what it does, and pinch to zoom. Fine adjustments are easier on a bigger screen.",
       "dismiss": "Dismiss the small-screen editing notice"
     },
     "inspector": {
@@ -1171,13 +1247,6 @@
       "badge": "Sample",
       "summary": "{count, plural, one {{count} block · try anything, nothing is saved} other {{count} blocks · try anything, nothing is saved}}",
       "hide": "Hide the sample storefront"
-    },
-    "embed": {
-      "title": "Embed a storefront",
-      "description": "Every storefront you create gets its own snippet to paste into your website.",
-      "snippetLabel": "A snippet looks like this",
-      "inDevelopment": "The widget is still in development and doesn't show on other sites yet.",
-      "create": "Create a storefront"
     },
     "list": {
       "show": "Show the sample storefront",
@@ -1457,7 +1526,11 @@
       "link": "Link"
     },
     "buyButtonTipLabel": "Where the button leads",
-    "buyButtonTip": "Uses your product page button's words and colour, and opens the product page.",
+    "buyButtonTip": "Opens the product page. Starts with that page's button text and color; change them here for your cards.",
+    "pageButton": {
+      "label": "Product page button",
+      "use": "Use Product page button"
+    },
     "rating": "Star rating",
     "ratingTipLabel": "Where the stars come from",
     "ratingTip": "From buyer reviews. Shows under the name once a product has a review.",

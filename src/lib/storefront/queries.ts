@@ -176,23 +176,29 @@ export async function getStorefrontSummary(
 
 /**
  * The one storefront to send a seller onward to after finishing something
- * elsewhere (business/seller details, shipping terms): the one they most
- * recently worked on, if they have one at all. Unlike `listStorefronts`,
- * nothing here needs the full config, so the row is just an id.
+ * elsewhere (business/seller details, shipping terms, a sale's look): the one
+ * they most recently worked on, if they have one at all. Unlike
+ * `listStorefronts`, nothing here needs the full config, so the row is just
+ * its id and the name a link to it can say.
  */
-export async function getPrimaryStorefrontId(): Promise<string | null> {
+export async function getPrimaryStorefront(): Promise<{ id: string; name: string } | null> {
   const account = await getActiveAccount();
   if (!account) return null;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("storefronts")
-    .select("id")
+    .select("id, name")
     .eq("owner_id", account.accountId)
     .order("updated_at", { ascending: false })
     .limit(1)
     .maybeSingle();
   if (error) throw new Error(`Failed to load storefront: ${error.message}`);
-  return data?.id ?? null;
+  return data ?? null;
+}
+
+/** getPrimaryStorefront's id alone, for a link that needs no name. */
+export async function getPrimaryStorefrontId(): Promise<string | null> {
+  return (await getPrimaryStorefront())?.id ?? null;
 }
 
 /**

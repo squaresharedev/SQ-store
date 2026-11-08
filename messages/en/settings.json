@@ -11,7 +11,7 @@
       "title": "Notification settings"
     },
     "danger": {
-      "title": "Danger zone"
+      "title": "Delete account"
     },
     "legal": {
       "title": "Legal settings"
@@ -32,15 +32,17 @@
       "title": "Plan & billing"
     },
     "connectedApps": {
-      "title": "Connected apps"
+      "title": "AI assistant"
     }
   },
   "loading": "Loading settings…",
   "shell": {
     "sectionsLabel": "Settings sections",
-    "recommended": "Recommended"
+    "recommended": "Recommended",
+    "actionNeeded": "Action needed"
   },
   "continueToStorefront": "Continue to your storefront",
+  "confirmEmailNext": "Next: confirm your email",
   "account": {
     "fallbackName": "Account",
     "avatar": {
@@ -73,7 +75,7 @@
     },
     "username": {
       "cardTitle": "Username",
-      "cardDescription": "Sign in with this instead of your email. Letters, numbers and underscores only, and no two accounts can share one.",
+      "cardDescription": "Sign in with this instead of your email, and it appears in messages sent on your behalf, like team invites. Letters, numbers and underscores only, and no two accounts can share one.",
       "label": "Username",
       "placeholder": "yourhandle",
       "available": "Available.",
@@ -136,7 +138,7 @@
   "danger": {
     "export": {
       "cardTitle": "Export my data",
-      "cardDescription": "Everything we hold about you: your profile, products, storefronts, the orders you sold, your notifications and security log, all in one JSON file. It's your data, yours to keep.",
+      "cardDescription": "Everything we hold about you: your profile, products, storefronts, the orders you sold, your notifications and security log, in one file you can open in any text editor. It's your data, yours to keep.",
       "downloadButton": "Download my data",
       "stepUpDescription": "Your export contains your whole account. Enter the current code from your authenticator app to download it."
     },
@@ -155,6 +157,7 @@
       "keepButton": "Keep my account",
       "title": "Delete account",
       "description": "Your account, products, storefronts and orders are permanently deleted {days} days after you ask. Until then you can change your mind. After that it's gone.",
+      "exportFirst": "Before it's gone, you can download a copy of your data from <link>Account settings</link>.",
       "deleteButton": "Delete my account",
       "confirmLabel": "Type <code>{phrase}</code> to confirm",
       "flagging": "Flagging…",
@@ -203,7 +206,8 @@
     "success": {
       "notificationsSaved": "Preferences saved."
     },
-    "emailOff": "Email isn't switched on for Square Share yet, so nothing below is sent. New orders still show up under Orders and in your notifications."
+    "emailOff": "Email isn't switched on for Square Share yet, so nothing below is sent. New orders still show up under Orders and in your notifications.",
+    "inAppNote": "These switches only control email. New orders and reviews always show up in your notifications."
   },
   "legal": {
     "cardTitle": "Seller Agreement, Terms & Privacy",
@@ -225,18 +229,18 @@
       },
       "sellerDetails": {
         "title": "Your seller details, and where they go",
-        "body": "Your trader name, address and contact email are shown to buyers on your product pages, and are required before you can publish or sell anything. That is the only thing we do with them: EU consumer law says a buyer has to be able to see who they are buying from and reach them before they order. We send one link to your contact address so you can confirm it works, and that is the only email we send there on our own initiative — no list, no marketing, and we never sell or share any of it. Your phone number and VAT ID are optional and are shown only if you fill them in."
+        "body": "Your name or business name, address and contact email are shown to buyers on your product pages, and are required before you can publish or sell anything. That is the only thing we do with them: EU consumer law says a buyer has to be able to see who they are buying from and reach them before they order. We send one link to your contact address so you can confirm it works, and that is the only email we send there on our own initiative: no list, no marketing, and we never sell or share any of it. Your phone number and VAT ID are optional and are shown only if you fill them in."
       }
     },
     "accepted": "You accepted version <code>{version}</code> on {date}. Nothing more to do here.",
     "outdated": "You accepted version <code>{version}</code> on {date}, but the docs have changed since. Give them another read and accept the current version.",
-    "agreed": "You agreed to version <code>{version}</code> on {date}. Nothing more to do here.",
-    "agreedOutdated": "You agreed to version <code>{version}</code> on {date}, but the Terms have changed since. Give them another read and agree to the current version.",
+    "agreed": "You agreed to these Terms on {date}. Nothing more to do here.",
+    "agreedOutdated": "You agreed to an earlier version of the Terms on {date}. Read the Terms above and agree to them.",
+    "whatChanged": "What changed:",
     "recording": "Recording…",
     "acceptButton": "I accept",
     "agreeButton": "I have read and agree to the Terms",
     "acceptNote": "Accepting records the date and version <code>{version}</code> to your account.",
-    "agreeNote": "Agreeing records the date and version <code>{version}</code> on your account.",
     "success": {
       "legalAccepted": "Accepted. Thanks for reading the fine print.",
       "termsAgreed": "You've agreed to the Terms of Service."
@@ -297,7 +301,7 @@
           "points": {
             "cap": "Square Share is early and offered as is to business users. For them, our liability is capped at the fees paid to us in the last 12 months or EUR 100, whichever is greater, and business sellers cover us for claims caused by their products, sites or breaches. If you are a consumer, your legal rights are unaffected.",
             "termination": "We can suspend or close accounts that break these Terms. You can leave at any time and take your data with you.",
-            "changesAndLaw": "We give at least 30 days' notice of material changes to these Terms. Czech law applies to business users. If you are a consumer, the protections of your home country, state or province still apply.",
+            "changesAndLaw": "We give at least 30 days' notice of material changes to these Terms. Czech law applies to business users, except in Canada, where the law of your province or territory applies. If you are a consumer, the protections of your home country, state or province still apply.",
             "policies": "Our Privacy Policy and Cookie Policy form part of these Terms.",
             "disputes": "Disputes in the USA go to individual arbitration instead of court, unless you opt out within 30 days of agreeing. Consumers in the EU and Canada can still go to court where they live."
           }
@@ -311,12 +315,14 @@
       "titleSoon": "Our Terms are changing soon.",
       "body": "Until then, the <current>current Terms</current> apply. Here is what the <next>new Terms</next> change:",
       "leave": "If you don't agree, you can close your account at no charge before they take effect. If you keep using Square Share after that date, the new Terms apply to you.",
+      "summaryIsNew": "The summary below is of the new Terms. Agreeing now accepts them early.",
       "changes": {
         "regions": "We now operate only in the EU, the USA and Canada, and each has its own section.",
         "disputes": "Disputes in the USA go to individual arbitration instead of court, unless you opt out within 30 days. Consumers in the EU and Canada can still go to court where they live.",
         "plans": "Paid plans and per-sale fees are now set out, including automatic renewal and how to cancel.",
         "moderation": "We explain how we check content, and how to report it, appeal and send a copyright complaint.",
-        "notice": "You now get at least 30 days' notice by email before material changes to the Terms."
+        "notice": "You now get at least 30 days' notice by email before material changes to the Terms.",
+        "northAmerica": "The US and Canada sections now set out what the law there requires of sellers. Business users in Canada now use the law and courts of their own province."
       },
       "email": {
         "subject": "We're updating our Terms of Service",
@@ -334,19 +340,19 @@
     "cardDescription": "Set once for your whole account. Shown to buyers on every product page you sell on, and used for invoices and VAT.",
     "memberScope": "These are your own seller details. The ones buyers see on {store} belong to its owner, who sets them in their own settings.",
     "gate": {
-      "required": "<strong>Your trader name, address and contact email are required before you can publish or sell anything.</strong> Buyers have to be able to see who they are buying from and how to reach you before they order.",
+      "required": "<strong>Your name or business name, address and contact email are required before you can publish or sell anything.</strong> Buyers have to be able to see who they are buying from and how to reach you before they order.",
       "privacyNoteLinked": "These details appear publicly on your product pages for that reason alone. We never use them for marketing, and never sell or share them. The only message we send to your contact email or phone is the code that confirms it. See the <link>Square Share Privacy Policy</link>."
     },
-    "countryUnset": "Prefer not to say",
+    "countryUnset": "Not set",
     "vatAdvisory": {
       "noCountry": "This VAT ID looks like it was issued by {issuer}. You may want to set your country.",
       "mismatch": "This VAT ID looks like it was issued by {issuer}, but your country is set to {selected}. Check both are correct."
     },
     "fields": {
       "businessName": {
-        "label": "Trader name",
+        "label": "Your name or business name",
         "tipLabel": "What to put here",
-        "tipBody": "The name buyers are contracting with. Your registered business name if you sell through one; your own full name if you sell as an individual. Your storefront's name is a shop name, which is not the same thing and cannot stand in for this.",
+        "tipBody": "The name you sell under, or your own full name: this is the trader name EU law asks for. Use your registered business name if you sell through one; your personal name if you sell as an individual. Your storefront name is a shop name and cannot stand in for this.",
         "placeholder": "e.g. Jane Doe or Jane's Ceramics"
       },
       "address": {
@@ -358,21 +364,25 @@
       "email": {
         "label": "Contact email",
         "tipLabel": "How this differs from your sign-in email",
-        "tipBody": "Shown to buyers as a mailto link, and used as the buy button's fallback when a product has no purchase link. Kept separate from your sign-in email on purpose: use whichever address you want buyers writing to. It has to be an address you actually read — placeholders, temp-mail providers and no-reply addresses are refused, and so is a domain that takes no mail.",
-        "placeholder": "e.g. hello@yourshop.example"
+        "tipBody": "Shown to buyers as a mailto link, and used as the buy button's fallback when a product has no buy link. Kept separate from your sign-in email on purpose: use whichever address you want buyers writing to. It has to be an address you actually read: placeholders, temp-mail providers and no-reply addresses are refused, and so is a domain that takes no mail.",
+        "placeholder": "e.g. hello@yourshop.example",
+        "codeHint": "When you save, we email a code to this address. Type it in below to confirm it."
       },
       "vatId": {
         "label": "VAT ID",
+        "tipLabel": "Do I need this?",
+        "tipBody": "Optional, and only if you are registered for VAT in the EU. Enter the number with its country prefix, such as ATU12345678 for Austria. Leave it blank otherwise: a company number or another tax number does not belong here. Shown to buyers in the Seller section of your product pages.",
         "placeholder": "e.g. ATU12345678"
       },
       "country": {
-        "hint": "Square Share operates in the EU, the USA and Canada. We don't operate anywhere else yet.",
+        "hint": "Where your business is based, shown to buyers with your name. Square Share operates in the EU, the USA and Canada.",
         "label": "Country"
       },
       "phone": {
         "label": "Phone",
         "tipLabel": "When buyers see this",
-        "tipBody": "Optional. Buyers only see it once you've confirmed it with a code we text to it, so use a mobile number in the EU, the EEA, Switzerland or the UK.",
+        "tipBody": "Optional. Buyers only see it once you've confirmed it with a code we text to it.",
+        "restriction": "EU, EEA, Switzerland and UK mobile numbers only. Leave blank if yours is outside these regions.",
         "placeholder": "e.g. +353 87 123 4567"
       },
       "bio": {
@@ -386,7 +396,8 @@
     "success": {
       "sellerDetailsSaved": "Business & seller details saved.",
       "savedCodeSent": "{which, select, email {Saved. We emailed a code to {email}: enter it below to confirm the address.} phone {Saved. We texted a code to {phone}: enter it below to confirm the number.} other {Saved. We sent codes to {email} and {phone}: enter them below to confirm both.}}"
-    }
+    },
+    "bioHint": "Your bio (a short line about you or what you make) is in <link>Account settings</link>."
   },
   "contactVerification": {
     "heading": "Confirm your contact details",
@@ -440,7 +451,7 @@
       "label": "Where you ship, and how long it takes",
       "tipLabel": "How much detail to give",
       "tipBody": "Group destinations however you actually ship: one row for home, one for the rest of the EU, one for everywhere else is plenty. Leave the cost blank if it varies.",
-      "flatRate": "A rate is charged once per order, whatever the quantity or weight. Buyers order one product at a time: there is no cart yet.",
+      "costAndRate": "Each row has two prices. Shipping cost is the wording buyers read on your product page, such as “€9.00”. Rate is what checkout actually charges, once per order whatever the quantity or weight. Checkout only delivers to a row with a rate and countries.",
       "empty": "Nothing listed yet. Buyers see no delivery times until you add a row.",
       "areaLabel": "Destination {number}",
       "areaPlaceholder": "e.g. Rest of EU",
@@ -450,7 +461,6 @@
       "costPlaceholder": "e.g. €9.00",
       "rateLabel": "Rate {number}",
       "ratePlaceholder": "e.g. 4.50",
-      "rateHint": "Leave blank for display only.",
       "countriesLabel": "Countries {number}",
       "countriesNone": "No countries",
       "everywhereElse": "Everywhere else",
@@ -461,13 +471,12 @@
       "needsRate": "Checkout can't use this row until it has both a rate and a country. Buyers still read it on the product page."
     },
     "rates": {
-      "title": "Checkout rates",
-      "description": "The delivery prices checkout charges, so buyers see the full total before they pay.",
+      "title": "Currency and free shipping",
+      "description": "The currency checkout charges your rates in, and when delivery is free. Each destination's rate is set under Shipping above.",
       "currencyLabel": "Rate currency",
       "freeOverLabel": "Free shipping over",
       "freeOverPlaceholder": "e.g. 50.00",
-      "freeOverHint": "When the order total reaches this amount, delivery is free.",
-      "hint": "Rates here are what checkout charges. Leave a destination's rate blank to keep it display-only."
+      "freeOverHint": "When the order total reaches this amount, delivery is free."
     },
     "notes": {
       "label": "Anything else about shipping",
@@ -475,15 +484,15 @@
     },
     "returnsCard": {
       "title": "Returns",
-      "description": "What you offer on top of the statutory rights your product pages already state."
+      "description": "What you offer on top of the legal rights your product pages already state."
     },
     "returnsWindow": {
       "label": "Returns window",
-      "tipLabel": "What the statutory right already covers",
+      "tipLabel": "What the law already gives buyers",
       "tipBody": "Selling to EU buyers at a distance gives them 14 days to change their mind and a two-year guarantee on faults, whatever you choose here. Your product pages state both already, so this is what you offer on top.",
-      "none": "None beyond the statutory right",
+      "none": "Nothing beyond what the law requires",
       "days": "{days, plural, one {# day} other {# days}}",
-      "statutoryMinimum": "The EU statutory minimum",
+      "statutoryMinimum": "The EU legal minimum",
       "custom": "Something else",
       "customLabel": "Returns window in days",
       "daysUnit": "days"
@@ -539,7 +548,8 @@
   "sellerDetails": {
     "bannerLabel": "Seller details required",
     "memberHeadline": "This store can't publish or sell yet.",
-    "memberFix": "Its owner has to add their seller details in their own settings.",
+    "memberFix": "The owner of {storeName} has to add their seller details in their own settings.",
+    "memberFixGeneric": "Its owner has to add their seller details in their own settings.",
     "addLink": "Add seller details",
     "opensInNewTab": " (opens in a new tab)",
     "headline": {
@@ -552,7 +562,7 @@
     "reason": "Buyers have to be able to see who they are buying from and how to reach you before they order. These are shown on your product pages for that reason only, never used for marketing.",
     "fields": {
       "businessName": {
-        "label": "Trader name",
+        "label": "Your name or business name",
         "why": "Buyers have to know who they are buying from: your business name, or your own full name if you sell as an individual."
       },
       "address": {
@@ -561,7 +571,7 @@
       },
       "email": {
         "label": "Contact email",
-        "why": "The address buyers write to about an order. It is also the buy button's fallback when a product has no purchase link."
+        "why": "The address buyers write to about an order. It is also the buy button's fallback when a product has no buy link."
       },
       "emailVerified": {
         "label": "Confirmed contact email",
@@ -737,7 +747,7 @@
     },
     "approvals": {
       "title": "Approve from a signed-in device",
-      "description": "When you sign in somewhere new, scan the QR code with a phone where you're already signed in and tap the matching number. Handy when your passkey is on another device.",
+      "description": "Signing in on a new device and your passkey is on another one? A phone where you're already signed in can approve it: scan the QR code with it and tap the matching number.",
       "statusOn": "On",
       "statusOff": "Off",
       "turnOn": "Turn on",
@@ -799,7 +809,6 @@
       "emailLabel": "Email address",
       "emailPlaceholder": "colleague@example.com",
       "roleLabel": "Role",
-      "notificationNote": "Email notifications aren't wired up yet — the invite takes effect when they sign in. You may want to let them know directly.",
       "sendButton": "Send invite"
     },
     "inviteRow": {
@@ -839,13 +848,17 @@
     "empty": "No apps connected yet.",
     "connect": {
       "title": "Connect an assistant",
-      "body": "Add this address to Claude or another MCP app, then approve it when it asks.",
+      "benefit": "An AI assistant you connect here can list your products, publish drafts, design your storefront, manage discounts and answer your questions, all in plain language.",
+      "body": "Add this address to Claude or any AI assistant, then approve it when it asks.",
+      "mcpHintLabel": "About this address",
+      "mcpHint": "Your assistant may ask for an MCP server URL: paste this address there. MCP is the open standard assistants use to connect to apps.",
       "copy": "Copy address",
       "copied": "Copied",
       "copyFailed": "Could not copy. Select the address and copy it yourself.",
       "openClaude": "Open Claude connectors",
       "capabilitiesTitle": "What an assistant can do",
-      "offByDefault": "Off by default"
+      "offByDefault": "Off by default",
+      "required": "Required"
     },
     "lastUsed": "Last used {when}",
     "neverUsed": "Not used yet",
@@ -858,15 +871,21 @@
       "metadataTitle": "Connect an app",
       "title": "Connect {app} to your store?",
       "sendsTo": "Access goes to <strong>{host}</strong>",
+      "sendsToTipLabel": "Why this address matters",
+      "sendsToTipBody": "An app can give itself any name, but access only ever goes to this address, and an impostor can't fake that.",
       "store": "Store",
+      "storeHint": "Only the store you pick is shared. Your other stores stay private.",
       "scopesTitle": "What it can do",
       "note": "Only connect if you started this from {app}. You can disconnect it any time in Settings.",
+      "stepUpDescription": "Connecting {app} gives it access to your store. Enter the current code from your authenticator app to confirm it's you.",
       "approve": "Connect",
       "approving": "Connecting…",
-      "deny": "Cancel",
+      "deny": "Don't connect",
+      "denyHint": "Don't connect takes you back to {app} and tells it you said no.",
       "connected": "Connected. Taking you back to {app}…",
       "refusedTitle": "This request can't be trusted",
-      "refusedBody": "The app that sent you here isn't set up correctly. Nothing was connected."
+      "refusedBody": "The app that sent you here isn't set up correctly. Nothing was connected.",
+      "goToStore": "Go to your store"
     },
     "scopes": {
       "storeRead": {
@@ -915,12 +934,12 @@
       },
       "destructive": {
         "label": "Delete things",
-        "hint": "Delete products, storefronts and discounts, and replace embed keys. This can't be undone."
+        "hint": "Delete products, storefronts and discounts, and get new website codes. This can't be undone."
       }
     },
     "app": {
       "capabilitiesLabel": "What {app} can do",
-      "changeHint": "To change these, disconnect it and connect again."
+      "changeHint": "To change what {app} can do, disconnect it here, then connect it again from {app} and pick again when you approve it."
     }
   }
 }

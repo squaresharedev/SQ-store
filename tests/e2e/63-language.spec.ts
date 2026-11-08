@@ -24,6 +24,8 @@ test("Account has a Language card that switches the whole UI and is remembered",
   await expect(page).toHaveURL(/\/settings\/account#language$/);
   await expect(page.getByRole("heading", { level: 2, name: "Language" })).toBeVisible();
   await expect(page.locator('aside nav a[href="/settings/language"]')).toHaveCount(0);
+  // The settings rail still names Language, pointing straight at the card.
+  await expect(page.locator('aside nav a[href="/settings/account#language"]')).toHaveCount(1);
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
 
   // Switch to Czech.

@@ -10,7 +10,7 @@
     },
     "storefront": {
       "label": "Montra",
-      "description": "Crie o design da grelha onde os seus produtos são apresentados."
+      "description": "Crie o design da grelha onde os seus produtos são apresentados. Torna-se uma página que os compradores podem abrir e partilhar."
     },
     "orders": {
       "label": "Encomendas",
@@ -31,7 +31,8 @@
     "discounts": {
       "label": "Descontos",
       "description": "Crie promoções e partilhe códigos de desconto."
-    }
+    },
+    "help": "Ajuda"
   },
   "settings": {
     "account": "Conta",
@@ -42,17 +43,18 @@
     "notifications": "Notificações",
     "language": "Idioma",
     "team": "Equipa e acesso",
-    "danger": "Zona de perigo",
+    "danger": "Eliminar conta",
     "billing": "Plano e faturação",
-    "connectedApps": "Aplicações ligadas"
+    "connectedApps": "Assistente de IA"
   },
   "profileMenu": {
     "label": "Menu da conta",
     "account": "Conta",
-    "switchAccounts": "Mudar de conta",
+    "switchAccounts": "As minhas lojas",
     "yourStore": "A sua loja",
     "owner": "Proprietário",
     "logOut": "Terminar sessão",
+    "logOutEverywhere": "Terminar sessão em todo o lado",
     "plan": "Plano"
   },
   "viewingBanner": {

@@ -13,8 +13,9 @@
   },
   "firstRun": {
     "title": "Zatiaľ nie je čo merať",
-    "body": "Návštevy vašich produktových stránok sa zobrazia tu, keď bude niektorá zverejnená.",
-    "backToSetup": "Späť na nastavenie"
+    "body": "Zverejnite výklad a uvidíte zobrazenia, alebo uskutočnite prvý predaj a uvidíte tržby.",
+    "publishStorefront": "Zverejniť výklad",
+    "goToProducts": "Prejsť na produkty"
   },
   "range": {
     "ariaLabel": "Obdobie",
@@ -73,12 +74,20 @@
   },
   "compare": {
     "previous": "Predchádzajúce obdobie",
-    "vsPrevious": "{change} oproti predchádzajúcemu obdobiu"
+    "vsPrevious": "{change} oproti predchádzajúcemu obdobiu",
+    "previousPeriodDates": "{from} - {to}"
+  },
+  "scrub": {
+    "on": "Dňa {date}",
+    "inMonth": "V období {date}",
+    "upTo": "Do {date}",
+    "noSales": "Žiadne predaje"
   },
   "funnel": {
     "label": "Lievik výkladu",
     "description": "Od zobrazenia výkladu na vašom vlastnom webe po zaplatenú objednávku. Počítajú sa udalosti, nie ľudia.",
-    "views": "Zobrazenia na vašom webe",
+    "subtitle": "Návštevníci, ktorí videli váš výklad vložený na vašom vlastnom webe (nie cez priame odkazy), od prvého zobrazenia po zaplatenú objednávku.",
+    "views": "Zobrazenia cez vloženie na web",
     "viewsEmpty": "V tomto období žiadne zobrazenia",
     "opens": "Otvorené produkty",
     "opensEmpty": "V tomto období žiadny neotvorený",
@@ -91,7 +100,7 @@
     "abandonment": "Nedokončené pokladne",
     "abandonmentCounts": "Nedokončené: {expired}, začaté: {started}",
     "notEnough": "Zatiaľ málo dát",
-    "notEnoughHint": "Miery sa zobrazia, keď bude v tomto období {min} zobrazení."
+    "notEnoughHint": "Miery sa zobrazia, keď bude v tomto období {min} zobrazení: pri menšom počte by jediná objednávka skreslila percento."
   },
   "tiles": {
     "revenue": "Tržby",
@@ -110,7 +119,7 @@
   "channels": {
     "embed": "Na vašom webe",
     "marketplace": "Trhovisko",
-    "direct": "Vaša stránka",
+    "direct": "Priamy odkaz",
     "button": "Tlačidlo nákupu"
   },
   "signalsUnavailable": {
@@ -119,7 +128,8 @@
   },
   "upcoming": {
     "needProducts": "{labels} sa tu zobrazia, keď bude produkt na niektorom z vašich výkladov.",
-    "needBlocks": "{labels} sa tu zobrazia, keď bude ich blok na niektorom z vašich výkladov."
+    "needBlocks": "{labels} sa tu zobrazia, keď bude ich blok na niektorom z vašich výkladov.",
+    "recordedOnly": "{labels} sa tu zobrazia, keď kupujúci otvorí pokladňu pri niektorom z vašich produktov."
   },
   "signal": {
     "visitors": "Návštevníci",
@@ -168,6 +178,7 @@
     "product_view": {
       "label": "Zobrazenia produktovej stránky",
       "description": "Návštevníci, ktorí otvorili niektorú z vašich produktových stránok.",
+      "subtitle": "Zahŕňa kliknutia z dlaždíc výkladu aj z priamych odkazov.",
       "count": "{count, plural, one {{formatted} zobrazenie} few {{formatted} zobrazenia} many {{formatted} zobrazenia} other {{formatted} zobrazení}}",
       "total": "Celkové zobrazenia",
       "emptyRange": "V tomto období neboli žiadne zobrazenia",

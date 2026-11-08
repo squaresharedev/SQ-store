@@ -10,6 +10,7 @@ import { AGENT_SCOPE_IDS } from "@/lib/agent/scopes";
 import { AGENT_TOOLS, findTool } from "@/lib/agent/tools";
 import { AGENT_VIEWS } from "@/lib/agent/tools/previews";
 import { appOrigin } from "@/lib/app-url";
+import { readBoundedText } from "@/lib/security/read-json";
 import { getActiveAccount, type ActiveAccount } from "@/lib/team/account-context";
 
 /**
@@ -24,6 +25,14 @@ import { getActiveAccount, type ActiveAccount } from "@/lib/team/account-context
  */
 
 const SERVER_INFO = { name: "square-share", title: "Square Share", version: "1.0.0" };
+
+/**
+ * The largest request /mcp reads: an inline picture at its cap
+ * (imageInputShape's 4 MB of base64) plus the rest of the call. Read up to
+ * this and no further, so a token holder cannot make the Worker buffer and
+ * parse whatever the platform would otherwise let through.
+ */
+const MCP_REQUEST_BYTES_MAX = 5 * 1024 * 1024;
 
 const INSTRUCTIONS =
   "You are helping a seller run their Square Share store. Call get_store first. " +
@@ -58,10 +67,10 @@ function originAllowed(request: Request): boolean {
   return origin === null || origin === appOrigin();
 }
 
-/** The name in a tools/call, when this request is one. */
-async function calledToolName(request: Request): Promise<string | null> {
+/** The name in a tools/call, when this request body is one. */
+function calledToolName(text: string): string | null {
   try {
-    const body = (await request.clone().json()) as { method?: unknown; params?: { name?: unknown } };
+    const body = JSON.parse(text) as { method?: unknown; params?: { name?: unknown } };
     return body?.method === "tools/call" && typeof body.params?.name === "string" ? body.params.name : null;
   } catch {
     // Not JSON: the SDK answers that, in the protocol's own words.
@@ -146,9 +155,16 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
     // token is no good, and approving again offers the stores they do have.
     if (!account) return unauthorized("invalid_token");
 
+    const body = await readBoundedText(request, MCP_REQUEST_BYTES_MAX);
+    if (!body.ok) {
+      return body.reason === "too_large"
+        ? jsonError(413, "Request too large.")
+        : jsonError(400, "The request body must be UTF-8 JSON.");
+    }
+
     // A known tool outside this grant gets the challenge that lets a client ask
     // the seller for more, rather than "no such tool".
-    const called = await calledToolName(request);
+    const called = calledToolName(body.text);
     const tool = called ? findTool(called) : undefined;
     if (tool && !context.scopes.has(tool.scope)) {
       return jsonError(403, "Insufficient scope.", {
@@ -162,7 +178,13 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
       legacy: "stateless",
       responseMode: "json",
     });
-    const response = await handler.fetch(request);
+    // The body is spent; the SDK reads the same bytes from a fresh request,
+    // whose length the runtime sets again from the text.
+    const headers = new Headers(request.headers);
+    headers.delete("content-length");
+    const response = await handler.fetch(
+      new Request(request.url, { method: request.method, headers, body: body.text }),
+    );
     response.headers.set("cache-control", "no-store");
     return response;
   });

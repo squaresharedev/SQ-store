@@ -29,7 +29,7 @@ import { LEGAL_VERSION } from "@/lib/settings/constants";
 import { getTermsStatus } from "@/lib/legal/terms-status";
 import { buildSetupSteps } from "@/lib/onboarding/steps";
 import { parseSeenSteps, SETUP_SEEN_COOKIE } from "@/lib/onboarding/seen-steps";
-import { productPageUrl } from "@/lib/storefront/product-page-url";
+import { productPageUrl, storefrontPageUrl } from "@/lib/storefront/product-page-url";
 import { DashboardHome } from "@/components/dashboard/DashboardHome";
 import type { OnboardingData } from "@/components/dashboard/OnboardingSlot";
 import type { StorefrontAttentionInfo } from "@/lib/dashboard/attention";
@@ -119,6 +119,12 @@ export default async function DashboardOverviewPage({
     (id) => !existingSet.has(id),
   ).length;
 
+  // The first storefront holding a dead block, so the attention row opens its designer.
+  const firstDeadBlockStorefrontId =
+    storefronts.rows.find((sf) =>
+      sf.config.blocks.some((b) => b.type === "product" && !existingSet.has(b.productId)),
+    )?.id ?? null;
+
   // Noindex check: storefronts with an explicitly stored productPage config
   // that has enabled=true and allowIndexing=false. Optional-chaining keeps this
   // from firing for storefronts that predate the product-page feature.
@@ -136,6 +142,7 @@ export default async function DashboardOverviewPage({
     noindexProductPageCount,
     deadBlockCount,
     firstNoindexStorefrontId,
+    firstDeadBlockStorefrontId,
   };
 
   // --- Setup: the checklist and the welcome flow ------------------------
@@ -199,6 +206,9 @@ export default async function DashboardOverviewPage({
       livePageUrl: setup?.livePage
         ? productPageUrl(setup.livePage.storefrontId, setup.livePage.productId)
         : null,
+      liveStorefrontUrl: setup?.livePage
+        ? storefrontPageUrl(setup.livePage.storefrontId)
+        : null,
       tourRequested,
     };
   } else if (account) {
@@ -214,6 +224,7 @@ export default async function DashboardOverviewPage({
       seller: null,
       verificationOn: false,
       livePageUrl: null,
+      liveStorefrontUrl: null,
       tourRequested,
     };
   }
@@ -238,6 +249,7 @@ export default async function DashboardOverviewPage({
         withdrawalsToSettle={withdrawalsToSettle}
         restocks={restocks}
         canFulfil={can(account?.role, "orders.fulfil")}
+        canAddProducts={can(account?.role, "products.write")}
         checkoutOpen={account ? (await checkoutProviderFor(account.accountId)) !== null : false}
       />
     </main>

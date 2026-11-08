@@ -108,7 +108,9 @@ describe("writing to the buyer", () => {
   it("is offered beside a withdrawal, with the order number in the subject", () => {
     renderDetail({ ...waiting, withdrawalRequestedAt: "2026-09-28T09:00:00Z" });
     const alert = screen.getByRole("alert");
-    expect(alert).toHaveTextContent("withdraw");
+    // Plain words, and the deadline the law sets for the refund.
+    expect(alert).toHaveTextContent("The buyer cancelled this purchase");
+    expect(alert).toHaveTextContent("within 14 days");
     expect(alert.querySelector("a")).toHaveAttribute("href", SUBJECT_LINK);
   });
 
@@ -134,8 +136,9 @@ describe("taking an order back", () => {
     await user.click(screen.getByRole("button", { name: "Refund or cancel" }));
 
     // No payment provider is connected: this RECORDS a refund, and says so
-    // before anything can be pressed.
-    expect(screen.getByText(/didn't go through Square Share/)).toBeInTheDocument();
+    // before anything can be pressed. Always the whole order: there is no
+    // partial refund, so nobody may expect one.
+    expect(screen.getByText(/didn't go through Square Share/)).toHaveTextContent(/back the whole .+ yourself/);
     // An order that never left is being cancelled.
     expect(screen.getByLabelText("Reason")).toHaveTextContent("Cancelled before sending");
     expect(screen.getByRole("button", { name: /^Record refund of/ })).toBeInTheDocument();
@@ -234,14 +237,14 @@ describe("what the ship form promises", () => {
     const user = userEvent.setup();
     renderDetail({ ...waiting, withdrawalRequestedAt: "2026-09-28T09:00:00Z" });
     await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
-    expect(screen.getByText(/buyer has withdrawn from this purchase. Ship it only if/)).toBeInTheDocument();
+    expect(screen.getByText(/buyer has cancelled this purchase. Ship it only if/)).toBeInTheDocument();
   });
 
   it("does not warn on an ordinary order", async () => {
     const user = userEvent.setup();
     renderDetail(waiting);
     await user.click(screen.getByRole("button", { name: "Mark as shipped" }));
-    expect(screen.queryByText(/has withdrawn from this purchase/)).toBeNull();
+    expect(screen.queryByText(/has cancelled this purchase/)).toBeNull();
   });
 });
 
@@ -310,9 +313,16 @@ describe("the orders list", () => {
       </table>,
     );
 
-  it("marks a withdrawn order in the list itself", () => {
-    inTable({ ...waiting, withdrawalRequestedAt: "2026-09-28T09:00:00Z" });
-    expect(document.querySelector("[data-order-withdrawn]")).toHaveTextContent("Withdrawn");
+  it("marks a withdrawn order in the list itself, with the day its refund is due", () => {
+    inTable({ ...waiting, withdrawalRequestedAt: "2026-09-28T12:00:00Z" });
+    expect(document.querySelector("[data-order-withdrawn]")).toHaveTextContent("Buyer cancelled");
+    expect(document.querySelector("[data-order-refund-due]")).toHaveTextContent("Refund by 12 Oct 2026");
+  });
+
+  it("drops the refund date once the order is refunded, and keeps the mark", () => {
+    inTable({ ...waiting, status: "refunded", withdrawalRequestedAt: "2026-09-28T12:00:00Z" });
+    expect(document.querySelector("[data-order-withdrawn]")).toHaveTextContent("Buyer cancelled");
+    expect(document.querySelector("[data-order-refund-due]")).toBeNull();
   });
 
   it("does not mark an ordinary order", () => {

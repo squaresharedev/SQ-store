@@ -39,10 +39,19 @@ describe("editor tour steps", () => {
     }
   });
 
-  it("ends on the way out of the sample", () => {
+  it("ends on the way out of the sample, or on Save in a storefront of the seller's own", () => {
     const last = EDITOR_TOUR_STEPS[EDITOR_TOUR_STEPS.length - 1];
-    expect(last.targets.map((target) => target.selector)).toEqual(["[data-sample-create]"]);
+    expect(last.targets.map((target) => target.selector)).toEqual([
+      "[data-sample-create]",
+      "[data-designer-save]",
+    ]);
     expect(english(last.body)).toMatch(/never saves/i);
+    // A real storefront has no sample button, so its Save gets copy of its own
+    // rather than the sample's "never saves".
+    const save = last.targets[1].body;
+    expect(save).toBeDefined();
+    expect(english(save!)).toMatch(/press save/i);
+    expect(english(save!)).not.toMatch(/sample/i);
   });
 
   it("writes its copy without dashes standing in for punctuation", () => {

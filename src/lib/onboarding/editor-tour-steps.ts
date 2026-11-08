@@ -2,12 +2,14 @@ import type { TourStep } from "./tour-steps";
 
 /**
  * THE STOREFRONT DESIGNER'S TOUR: four stops, shown the first time a seller
- * opens the sample storefront (and again from its "Take the tour" button).
+ * opens the designer, on the sample storefront or on a storefront of their own
+ * (and again from the sample's "Take the tour" button).
  *
  * Short on purpose. The designer has dozens of controls, and a first visit only
  * needs the four ideas everything else hangs off: things go on the grid from the
  * toolbar, the look is set once for the whole storefront, every product has a
- * page, and a sample is for trying things before making your own.
+ * page, and the last step: on the sample, it is for trying things before making
+ * your own; on a real storefront, Save keeps the work.
  *
  * Same engine and rules as the dashboard tour (tour-steps.ts): real controls
  * found by language-independent selectors (`data-tour` ids and data attributes,
@@ -79,7 +81,15 @@ export const EDITOR_TOUR_STEPS: readonly TourStep<EditorTourStepId>[] = [
     page: "sampleStorefront",
     title: "Onboarding.editorTour.steps.editorFinish.title",
     body: "Onboarding.editorTour.steps.editorFinish.body",
-    targets: [{ selector: "[data-sample-create]" }],
+    targets: [
+      // The sample's way out, in place of Save.
+      { selector: "[data-sample-create]" },
+      // A real storefront's Save.
+      {
+        selector: "[data-designer-save]",
+        body: "Onboarding.editorTour.steps.editorFinish.bodySave",
+      },
+    ],
     scroll: false,
   },
 ];

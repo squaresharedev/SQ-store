@@ -4,7 +4,7 @@ import { getActiveAccount } from "@/lib/team/account-context";
 import { toCurrency } from "@/lib/format/money";
 import { presignGetUrl } from "@/lib/r2";
 import { DISCOUNT_COLUMNS, toDiscountView, type DiscountRow } from "@/lib/discounts/row";
-import { getPrimaryStorefrontId } from "@/lib/storefront/queries";
+import { getPrimaryStorefront } from "@/lib/storefront/queries";
 import { SALE_CHIP_SETTING_ID, settingHref } from "@/lib/storefront/setting-ref";
 import {
   DISCOUNT_PRODUCTS_MAX,
@@ -146,15 +146,21 @@ export async function listProductChoices(): Promise<DiscountProductChoice[]> {
   );
 }
 
+/** The discount form's way to how sales look, and which storefront it opens. */
+export type SaleChipLink = { href: string; storefrontName: string };
+
 /**
  * Where a seller changes how a sale looks to buyers: the Sale chip section of
- * the storefront they most recently worked on, or null without one. Never
- * throws: a link left out is better than a form that fails to open.
+ * the storefront they most recently worked on, named, so a seller with several
+ * knows which one opens; null without one. Never throws: a link left out is
+ * better than a form that fails to open.
  */
-export async function saleChipHref(): Promise<string | null> {
+export async function saleChipLink(): Promise<SaleChipLink | null> {
   try {
-    const id = await getPrimaryStorefrontId();
-    return id ? settingHref(SALE_CHIP_SETTING_ID, id) : null;
+    const storefront = await getPrimaryStorefront();
+    return storefront
+      ? { href: settingHref(SALE_CHIP_SETTING_ID, storefront.id), storefrontName: storefront.name }
+      : null;
   } catch {
     return null;
   }

@@ -8,6 +8,7 @@ import {
   embedDomainsElsewhere,
   firstPlaceable,
   forecastRestocks,
+  homeCurrency,
   NO_ADD_ON_HABITS,
   predictDiscountDefaults,
   predictProductDefaults,
@@ -197,6 +198,16 @@ describe("predictProductDefaults", () => {
     expect(predictProductDefaults([usd, recent()], []).currency).toBe("USD");
     // Nothing older than the newest three counts.
     expect(predictProductDefaults([usd, usd, recent(), recent(), recent()], []).currency).toBe("USD");
+  });
+
+  it("prices a first product in the business country's currency, and a store's own wins after that", () => {
+    expect(predictProductDefaults([], [], "US").currency).toBe("USD");
+    expect(predictProductDefaults([], [], "CA").currency).toBe("USD");
+    expect(predictProductDefaults([], [], "FR").currency).toBe("EUR");
+    expect(predictProductDefaults([], [], undefined)).toEqual({});
+    expect(predictProductDefaults([recent()], [], "US").currency).toBe("EUR");
+    expect(homeCurrency("IE")).toBe("EUR");
+    expect(homeCurrency(undefined)).toBeNull();
   });
 
   it("wants two products on a shipping profile that still exists", () => {

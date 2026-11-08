@@ -2,9 +2,15 @@
 import { describe, expect, it } from "vitest";
 import { phoneGridLayout } from "@/components/storefront/phone-grid";
 import { DesignOpRefused, applyDesignOps, boardSummary, phoneSummary, type DesignOp } from "@/lib/storefront/design-ops";
-import { phoneLayout } from "@/lib/storefront/mobile-layout";
+import {
+  automaticPhoneColumns,
+  phoneLayout,
+  pinOnPhone,
+  unpinnedOnPhone,
+  withPhoneColumns,
+} from "@/lib/storefront/mobile-layout";
 import { storefrontConfigSchema } from "@/lib/validation/storefront";
-import { DEFAULT_STOREFRONT_CONFIG, drawnOnPhone, type StorefrontBlock, type StorefrontConfig } from "@/types/storefront";
+import { DEFAULT_STOREFRONT_CONFIG, blockKey, drawnOnPhone, type StorefrontBlock, type StorefrontConfig } from "@/types/storefront";
 
 const A = "11111111-1111-4111-8111-111111111111";
 const B = "22222222-2222-4222-8222-222222222222";
@@ -152,6 +158,72 @@ describe("editing the phone board", () => {
     expect(valid).toBe(true);
     expect(config.theme).not.toHaveProperty("mobileColumns");
     expect(phoneLayout(config.theme, config.blocks)).toBeNull();
+  });
+});
+
+describe("arranging the phone board in the designer", () => {
+  const parses = (config: StorefrontConfig) => storefrontConfigSchema.safeParse(config).success;
+  const found = (blocks: readonly StorefrontBlock[], id: string) =>
+    blocks.find((block) => block.type === "product" && block.productId === id)!;
+  const keyOf = (id: string) => blockKey(tile(id, 0, 0));
+
+  it("starts at the columns the automatic reflow fits on a phone, within the phone bounds", () => {
+    expect(automaticPhoneColumns(theme)).toBe(4);
+    expect(automaticPhoneColumns({ ...theme, gridGap: 32 })).toBe(3);
+    expect(automaticPhoneColumns({ ...theme, columns: 3 })).toBe(3);
+  });
+
+  it("pins a moved block where it landed, at the size the phone already gave it", () => {
+    const config = board([tile(A, 4, 0, 2, 2), tile(B, 0, 0)], 4);
+    const blocks = pinOnPhone(config.theme, config.blocks, new Map([[keyOf(A), { x: 2, y: 3 }]]));
+    // A 2x2 tile on a 6-wide board takes one of the phone's four columns.
+    expect(found(blocks, A)).toMatchObject({ x: 4, y: 0, w: 2, h: 2, mobile: { x: 2, y: 3, w: 1, h: 1 } });
+    expect(found(blocks, B)).not.toHaveProperty("mobile");
+    expect(parses({ ...config, blocks })).toBe(true);
+  });
+
+  it("hides a block on phones where it was, and shows it there again", () => {
+    const config = board([tile(A, 0, 0), tile(B, 1, 0)], 4);
+    const hidden = pinOnPhone(config.theme, config.blocks, new Map([[keyOf(B), { hidden: true }]]));
+    expect(found(hidden, B).mobile).toEqual({ x: 1, y: 0, w: 1, h: 1, hidden: true });
+    expect(phoneLayout(config.theme, hidden)!.placed).toHaveLength(1);
+    const shown = pinOnPhone(config.theme, hidden, new Map([[keyOf(B), { hidden: false }]]));
+    expect(found(shown, B).mobile).toEqual({ x: 1, y: 0, w: 1, h: 1 });
+  });
+
+  it("hands a block back to automatic placement, and leaves one without a rect alone", () => {
+    const pinned = { ...tile(A, 0, 0), mobile: { x: 1, y: 1, w: 1, h: 1 } };
+    expect(unpinnedOnPhone(pinned)).not.toHaveProperty("mobile");
+    const plain = tile(B, 0, 0);
+    expect(unpinnedOnPhone(plain)).toBe(plain);
+  });
+
+  it("pulls placed blocks onto a narrower phone board, so it still saves", () => {
+    const config = board(
+      [
+        { ...tile(A, 0, 0), mobile: { x: 3, y: 0, w: 3, h: 1 } },
+        { ...tile(B, 1, 0), mobile: { x: 5, y: 2, w: 1, h: 1, hidden: true } },
+      ],
+      6,
+    );
+    const next = withPhoneColumns(config.theme, config.blocks, 2);
+    expect(next.theme.mobileColumns).toBe(2);
+    expect(found(next.blocks, A).mobile).toEqual({ x: 0, y: 0, w: 2, h: 1 });
+    expect(found(next.blocks, B).mobile).toEqual({ x: 1, y: 2, w: 1, h: 1, hidden: true });
+    expect(parses({ ...config, ...next })).toBe(true);
+  });
+
+  it("turned off, goes back to automatic and keeps the rects for turning it on again", () => {
+    const config = board([{ ...tile(A, 0, 0), mobile: { x: 3, y: 1, w: 3, h: 1 } }, tile(B, 1, 0)], 6);
+    const off = withPhoneColumns(config.theme, config.blocks, null);
+    expect(off.theme).not.toHaveProperty("mobileColumns");
+    expect(phoneLayout(off.theme, off.blocks)).toBeNull();
+    expect(off.blocks).toBe(config.blocks);
+    expect(parses({ ...config, ...off })).toBe(true);
+    // On again, at whatever width: the block is back where it was put, on the board.
+    const on = withPhoneColumns(off.theme, off.blocks, 4);
+    expect(found(on.blocks, A).mobile).toEqual({ x: 1, y: 1, w: 3, h: 1 });
+    expect(parses({ ...config, ...on })).toBe(true);
   });
 });
 

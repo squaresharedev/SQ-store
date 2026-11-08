@@ -48,7 +48,7 @@
     "securityActivity": "Bezpečnostní aktivita",
     "signOut": "Odhlásit se",
     "vat": "DIČ",
-    "businessName": "Obchodní jméno",
+    "businessName": "Vaše jméno nebo název firmy",
     "country": "Země",
     "address": "Adresa sídla",
     "contactEmail": "Kontaktní e-mail",
@@ -61,7 +61,6 @@
     "sellerAgreement": "Smlouva s prodejcem",
     "termsOfService": "Podmínky služby",
     "exportData": "Export mých dat",
-    "deleteAccount": "Smazat účet",
     "plan": "Plán a ceny",
     "invoices": "Faktury a platební údaje"
   },

@@ -4,6 +4,8 @@ import { msg, type MessageRef } from "@/i18n/types";
 import { ordersStatusPath, ordersViewPath } from "@/lib/orders/paths";
 import { WITHDRAWN_STATUS_FILTER } from "@/types/order-view";
 import { SHIPPING_RATES_HREF } from "@/types/shipping-policy";
+import { STOREFRONT_LIST_PATH, storefrontEditorPath } from "@/lib/storefront/paths";
+import { MODERATED_PRODUCTS_PATH, productEditPath } from "@/lib/products/paths";
 import { ORDERS_PATH, PAYMENTS_PATH } from "./paths";
 import type { RestockForecast } from "@/lib/predictions";
 import type { DashboardOrdersData, ProductsSummary, ProfileSummary } from "./queries";
@@ -60,6 +62,12 @@ export type StorefrontAttentionInfo = {
    * offending designer rather than the storefront list.
    */
   firstNoindexStorefrontId: string | null;
+  /**
+   * The id of the first storefront that contains at least one dead block.
+   * Null when deadBlockCount === 0. Used to link directly to the offending
+   * designer rather than the storefront list.
+   */
+  firstDeadBlockStorefrontId: string | null;
 };
 
 /**
@@ -164,6 +172,22 @@ export function buildAttentionItems({
     });
   }
 
+  // Then what has already stopped selling: products moderation paused or
+  // removed. The bell says so once; this stays until it is dealt with. One
+  // opens its own editor, where the reason and the way back are; several open
+  // the list narrowed to them.
+  const paused = products.pausedProductIds;
+  if (paused.length > 0) {
+    const only = paused.length === 1;
+    items.push({
+      key: "paused",
+      label: msg("Dashboard.attention.paused.label", { count: paused.length }),
+      description: msg("Dashboard.attention.paused.description", { count: paused.length }),
+      href: only ? productEditPath(paused[0]) : MODERATED_PRODUCTS_PATH,
+      actionLabel: msg(only ? "Products.form.moderation.seeWhy" : "Dashboard.attention.noBuyPath.action"),
+    });
+  }
+
   // Then what is about to stop selling: a forecast, not a fact, so it says
   // "about" and names the product that runs out first.
   if (restocks.length > 0) {
@@ -183,10 +207,10 @@ export function buildAttentionItems({
 
   // --- Account security -----------------------------------------------
 
-  // 2FA is optional, but this is where we push for it: first in the list,
-  // and it stays until it's done. Not stood down by the setup checklist
-  // either: a brand-new store is exactly when a password is the only lock.
-  if (!twoFactorEnabled) {
+  // 2FA is optional, but this is where we push for it, and it stays until it
+  // is done. It stands down while the setup checklist is showing, so a new
+  // seller meets one list of things to do, and comes back once setup is done.
+  if (!twoFactorEnabled && !setupVisible) {
     items.push({
       key: "two-factor",
       label: msg("Dashboard.attention.twoFactor.label"),
@@ -408,14 +432,17 @@ export function buildAttentionItems({
   }
 
   // Dead blocks: storefront blocks that reference a product that was deleted.
-  // Buyers see an empty slot; the seller needs to remove or replace these.
+  // Buyers see an empty slot; the seller needs to remove or replace these, in
+  // the designer of the first storefront that has one.
   if (storefronts.deadBlockCount > 0) {
     const count = storefronts.deadBlockCount;
     items.push({
       key: "dead-blocks",
       label: msg("Dashboard.attention.deadBlocks.label", { count }),
       description: msg("Dashboard.attention.deadBlocks.description"),
-      href: "/storefront",
+      href: storefronts.firstDeadBlockStorefrontId
+        ? storefrontEditorPath(storefronts.firstDeadBlockStorefrontId)
+        : STOREFRONT_LIST_PATH,
       actionLabel: msg("Dashboard.attention.deadBlocks.action"),
     });
   }

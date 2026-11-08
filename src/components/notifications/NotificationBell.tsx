@@ -5,10 +5,7 @@ import { Bell } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Popover } from "@/components/ui/Popover";
-import {
-  focusRingClass,
-  transitionClass,
-} from "@/components/ui/control-styles";
+import { topBarIconButtonClass } from "@/components/ui/control-styles";
 import { NotificationList } from "@/components/notifications/NotificationList";
 import { useNotificationsContext } from "@/components/notifications/NotificationsProvider";
 
@@ -50,9 +47,8 @@ export function NotificationBell({ className }: { className?: string }) {
       onClick={() => setOpen((v) => !v)}
       className={cn(
         // `group/bell` is the hover/focus scope the bell-nudge CSS keys off.
-        "group/bell relative flex size-10 items-center justify-center rounded-sm text-foreground hover:bg-accent",
-        transitionClass,
-        focusRingClass,
+        "group/bell relative",
+        topBarIconButtonClass,
       )}
     >
       {/* The hover background, played back on arrival so a notification landing

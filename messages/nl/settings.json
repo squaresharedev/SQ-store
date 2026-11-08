@@ -11,7 +11,7 @@
       "title": "Meldingsinstellingen"
     },
     "danger": {
-      "title": "Gevarenzone"
+      "title": "Account verwijderen"
     },
     "legal": {
       "title": "Juridische instellingen"
@@ -32,15 +32,17 @@
       "title": "Abonnement en facturering"
     },
     "connectedApps": {
-      "title": "Gekoppelde apps"
+      "title": "AI-assistent"
     }
   },
   "loading": "Instellingen laden…",
   "shell": {
     "sectionsLabel": "Secties van Instellingen",
-    "recommended": "Aanbevolen"
+    "recommended": "Aanbevolen",
+    "actionNeeded": "Actie nodig"
   },
   "continueToStorefront": "Doorgaan naar je etalage",
+  "confirmEmailNext": "Volgende stap: bevestig je e-mailadres",
   "account": {
     "fallbackName": "Account",
     "avatar": {
@@ -73,7 +75,7 @@
     },
     "username": {
       "cardTitle": "Gebruikersnaam",
-      "cardDescription": "Log hiermee in in plaats van met je e-mailadres. Alleen letters, cijfers en underscores, en geen twee accounts kunnen dezelfde delen.",
+      "cardDescription": "Log hiermee in in plaats van met je e-mailadres; je gebruikersnaam verschijnt ook in berichten die namens jou worden verstuurd, zoals teamuitnodigingen. Alleen letters, cijfers en underscores, en geen twee accounts kunnen dezelfde delen.",
       "label": "Gebruikersnaam",
       "placeholder": "jouwnaam",
       "available": "Beschikbaar.",
@@ -136,7 +138,7 @@
   "danger": {
     "export": {
       "cardTitle": "Mijn gegevens exporteren",
-      "cardDescription": "Alles wat we over je hebben: profiel, producten, etalages, de bestellingen die je hebt verkocht, je meldingen en het beveiligingslogboek, allemaal in één JSON-bestand. Het zijn jouw gegevens, om te bewaren.",
+      "cardDescription": "Alles wat we over je hebben: profiel, producten, etalages, de bestellingen die je hebt verkocht, je meldingen en het beveiligingslogboek, in één bestand dat je in elke teksteditor kunt openen. Het zijn jouw gegevens, om te bewaren.",
       "downloadButton": "Mijn gegevens downloaden",
       "stepUpDescription": "Je export bevat je hele account. Vul de huidige code uit je authenticator-app in om hem te downloaden."
     },
@@ -155,6 +157,7 @@
       "keepButton": "Mijn account behouden",
       "title": "Account verwijderen",
       "description": "Je account, producten, etalages en bestellingen worden {days} dagen na je verzoek definitief verwijderd. Tot dan kun je je bedenken. Daarna is het weg.",
+      "exportFirst": "Voordat het weg is, kun je een kopie van je gegevens downloaden via <link>Accountinstellingen</link>.",
       "deleteButton": "Mijn account verwijderen",
       "confirmLabel": "Typ <code>{phrase}</code> ter bevestiging",
       "flagging": "Markeren…",
@@ -203,7 +206,8 @@
     "success": {
       "notificationsSaved": "Voorkeuren opgeslagen."
     },
-    "emailOff": "E-mail staat nog niet aan voor Square Share, dus hieronder wordt niets verstuurd. Nieuwe bestellingen verschijnen nog wel onder Bestellingen en in je meldingen."
+    "emailOff": "E-mail staat nog niet aan voor Square Share, dus hieronder wordt niets verstuurd. Nieuwe bestellingen verschijnen nog wel onder Bestellingen en in je meldingen.",
+    "inAppNote": "Deze schakelaars gaan alleen over e-mail. Nieuwe bestellingen en reviews verschijnen altijd in je meldingen."
   },
   "legal": {
     "cardTitle": "Verkopersovereenkomst, voorwaarden en privacy",
@@ -225,18 +229,18 @@
       },
       "sellerDetails": {
         "title": "Je verkopersgegevens, en waar ze terechtkomen",
-        "body": "Je handelsnaam, adres en contact-e-mailadres worden aan kopers getoond op je productpagina's, en zijn verplicht voordat je iets kunt publiceren of verkopen. Dat is het enige wat we ermee doen: de Europese consumentenwetgeving bepaalt dat een koper moet kunnen zien van wie hij koopt en die persoon moet kunnen bereiken voordat hij bestelt. We sturen één link naar je contactadres zodat je kunt bevestigen dat het werkt, en dat is de enige e-mail die we daar op eigen initiatief naartoe sturen: geen lijst, geen marketing, en we verkopen of delen het nooit. Je telefoonnummer en btw-id zijn optioneel en worden alleen getoond als je ze invult."
+        "body": "Je naam of bedrijfsnaam, adres en contact-e-mailadres worden aan kopers getoond op je productpagina's, en zijn verplicht voordat je iets kunt publiceren of verkopen. Dat is het enige wat we ermee doen: de Europese consumentenwetgeving bepaalt dat een koper moet kunnen zien van wie hij koopt en die persoon moet kunnen bereiken voordat hij bestelt. We sturen één link naar je contactadres zodat je kunt bevestigen dat het werkt, en dat is de enige e-mail die we daar op eigen initiatief naartoe sturen: geen lijst, geen marketing, en we verkopen of delen het nooit. Je telefoonnummer en btw-id zijn optioneel en worden alleen getoond als je ze invult."
       }
     },
     "accepted": "Je hebt versie <code>{version}</code> geaccepteerd op {date}. Hier hoef je verder niets te doen.",
     "outdated": "Je hebt versie <code>{version}</code> geaccepteerd op {date}, maar de documenten zijn sindsdien gewijzigd. Lees ze nog eens door en accepteer de huidige versie.",
-    "agreed": "Je bent akkoord gegaan met versie <code>{version}</code> op {date}. Hier hoef je verder niets te doen.",
-    "agreedOutdated": "Je bent akkoord gegaan met versie <code>{version}</code> op {date}, maar de voorwaarden zijn sindsdien gewijzigd. Lees ze opnieuw en ga akkoord met de huidige versie.",
+    "agreed": "Je bent op {date} akkoord gegaan met deze voorwaarden. Hier hoef je verder niets te doen.",
+    "agreedOutdated": "Je bent op {date} akkoord gegaan met een eerdere versie van de voorwaarden. Lees de voorwaarden hierboven en ga ermee akkoord.",
+    "whatChanged": "Wat er is veranderd:",
     "recording": "Vastleggen…",
     "acceptButton": "Ik accepteer",
     "agreeButton": "Ik heb de voorwaarden gelezen en ga ermee akkoord",
     "acceptNote": "Accepteren legt de datum en versie <code>{version}</code> vast bij je account.",
-    "agreeNote": "Als je akkoord gaat, worden de datum en versie <code>{version}</code> op je account vastgelegd.",
     "success": {
       "legalAccepted": "Geaccepteerd. Bedankt voor het lezen van de kleine lettertjes.",
       "termsAgreed": "Je bent akkoord gegaan met de Servicevoorwaarden."
@@ -297,7 +301,7 @@
           "points": {
             "cap": "Square Share is nog in een vroeg stadium en wordt zoals het is (as is) aangeboden aan zakelijke gebruikers. Voor hen is onze aansprakelijkheid beperkt tot de kosten die ze de afgelopen 12 maanden aan ons hebben betaald of EUR 100, al naargelang welk bedrag hoger is, en zakelijke verkopers vrijwaren ons voor claims die voortvloeien uit hun producten, sites of overtredingen. Als je consument bent, blijven je wettelijke rechten onaangetast.",
             "termination": "Wij kunnen accounts die deze voorwaarden overtreden opschorten of sluiten. Je kunt op elk moment vertrekken en je gegevens meenemen.",
-            "changesAndLaw": "Over wezenlijke wijzigingen in deze voorwaarden informeren we je minstens 30 dagen vooraf. Op zakelijke gebruikers is Tsjechisch recht van toepassing. Als consument houd je de bescherming van je eigen land, staat of provincie.",
+            "changesAndLaw": "Over wezenlijke wijzigingen in deze voorwaarden informeren we je minstens 30 dagen vooraf. Op zakelijke gebruikers is Tsjechisch recht van toepassing, behalve in Canada, waar het recht van je provincie of territorium geldt. Als consument houd je de bescherming van je eigen land, staat of provincie.",
             "policies": "Ons Privacybeleid en Cookiebeleid maken deel uit van deze voorwaarden.",
             "disputes": "Geschillen in de VS worden opgelost via individuele arbitrage in plaats van via de rechter, tenzij je je er binnen 30 dagen na akkoordgaan van afmeldt. Consumenten in de EU en Canada kunnen nog steeds naar de rechter in hun woonplaats."
           }
@@ -311,12 +315,14 @@
       "titleSoon": "Onze Servicevoorwaarden gaan binnenkort wijzigen.",
       "body": "Tot die tijd gelden de <current>huidige Servicevoorwaarden</current>. Dit veranderen de <next>nieuwe Servicevoorwaarden</next>:",
       "leave": "Als je het er niet mee eens bent, kun je je account voor die datum kosteloos sluiten. Als je Square Share na die datum blijft gebruiken, gelden de nieuwe Servicevoorwaarden voor jou.",
+      "summaryIsNew": "De samenvatting hieronder gaat over de nieuwe Servicevoorwaarden. Als je nu akkoord gaat, accepteer je ze al vóór ze ingaan.",
       "changes": {
         "regions": "We zijn nu alleen actief in de EU, de VS en Canada, en elke regio heeft een eigen sectie.",
         "disputes": "Geschillen in de VS worden opgelost via individuele arbitrage in plaats van via de rechter, tenzij je je er binnen 30 dagen van afmeldt. Consumenten in de EU en Canada kunnen nog steeds naar de rechter in hun woonplaats.",
         "plans": "Betaalde abonnementen en commissies per verkoop zijn nu beschreven, inclusief automatische verlenging en hoe je opzegt.",
         "moderation": "We leggen uit hoe we content controleren, en hoe je die kunt melden, bezwaar kunt maken en een klacht over auteursrechtinbreuk kunt indienen.",
-        "notice": "Je ontvangt nu minstens 30 dagen van tevoren een e-mail over wezenlijke wijzigingen in de Servicevoorwaarden."
+        "notice": "Je ontvangt nu minstens 30 dagen van tevoren een e-mail over wezenlijke wijzigingen in de Servicevoorwaarden.",
+        "northAmerica": "De delen over de VS en Canada beschrijven nu wat de wet daar van verkopers vraagt. Voor zakelijke gebruikers in Canada gelden nu het recht en de rechtbanken van hun eigen provincie."
       },
       "email": {
         "subject": "We werken onze Servicevoorwaarden bij",
@@ -334,19 +340,19 @@
     "cardDescription": "Eenmalig ingesteld voor je hele account. Wordt getoond aan kopers op elke productpagina waarop je verkoopt, en gebruikt voor facturen en btw.",
     "memberScope": "Dit zijn je eigen verkopersgegevens. De gegevens die kopers bij {store} zien, zijn van de eigenaar, die ze in de eigen instellingen invult.",
     "gate": {
-      "required": "<strong>Je handelsnaam, adres en contact-e-mailadres zijn verplicht voordat je iets kunt publiceren of verkopen.</strong> Kopers moeten kunnen zien van wie ze kopen en hoe ze je kunnen bereiken voordat ze bestellen.",
+      "required": "<strong>Je naam of bedrijfsnaam, adres en contact-e-mailadres zijn verplicht voordat je iets kunt publiceren of verkopen.</strong> Kopers moeten kunnen zien van wie ze kopen en hoe ze je kunnen bereiken voordat ze bestellen.",
       "privacyNoteLinked": "Deze gegevens verschijnen alleen daarom openbaar op je productpagina's. We gebruiken ze nooit voor marketing, en verkopen of delen ze nooit. Het enige bericht dat we naar je contact-e-mailadres of telefoonnummer sturen, is de code die het bevestigt. Zie het <link>Square Share-privacybeleid</link>."
     },
-    "countryUnset": "Geef ik liever niet aan",
+    "countryUnset": "Niet ingesteld",
     "vatAdvisory": {
       "noCountry": "Dit btw-id lijkt te zijn uitgegeven door {issuer}. Misschien wil je je land instellen.",
       "mismatch": "Dit btw-id lijkt te zijn uitgegeven door {issuer}, maar je land staat ingesteld op {selected}. Controleer of beide kloppen."
     },
     "fields": {
       "businessName": {
-        "label": "Handelsnaam",
+        "label": "Je naam of bedrijfsnaam",
         "tipLabel": "Wat je hier invult",
-        "tipBody": "De naam waarmee kopers een overeenkomst aangaan. Je geregistreerde bedrijfsnaam als je via een bedrijf verkoopt; je volledige naam als je als particulier verkoopt. De naam van je etalage is een winkelnaam, en dat is niet hetzelfde en kan dit niet vervangen.",
+        "tipBody": "De naam waaronder je verkoopt, of je eigen volledige naam: dit is de handelsnaam die de EU-wetgeving vraagt. Gebruik je geregistreerde bedrijfsnaam als je via een bedrijf verkoopt, of je eigen naam als je als particulier verkoopt. De naam van je etalage is een winkelnaam en kan dit niet vervangen.",
         "placeholder": "bijv. Sanne de Vries of Sannes Keramiek"
       },
       "address": {
@@ -359,20 +365,24 @@
         "label": "Contact-e-mailadres",
         "tipLabel": "Hoe dit verschilt van je inlog-e-mailadres",
         "tipBody": "Wordt aan kopers getoond als mailto-link, en gebruikt als terugvaloptie voor de koopknop wanneer een product geen aankooplink heeft. Bewust gescheiden van je inlog-e-mailadres: gebruik het adres waarop je wilt dat kopers je schrijven. Het moet een adres zijn dat je ook echt leest: placeholders, tijdelijke-e-mailproviders en no-reply-adressen worden geweigerd, net als een domein dat geen e-mail accepteert.",
-        "placeholder": "bijv. hallo@jouwwinkel.example"
+        "placeholder": "bijv. hallo@jouwwinkel.example",
+        "codeHint": "Als je opslaat, mailen we een code naar dit adres. Typ die hieronder in om het te bevestigen."
       },
       "vatId": {
         "label": "Btw-id",
+        "tipLabel": "Heb ik dit nodig?",
+        "tipBody": "Optioneel, en alleen als je in de EU voor de btw bent geregistreerd. Vul het nummer in met de landcode ervoor, zoals ATU12345678 voor Oostenrijk. Laat het anders leeg: een KvK- of ondernemingsnummer of een ander belastingnummer hoort hier niet. Wordt aan kopers getoond in de sectie Verkoper van je productpagina's.",
         "placeholder": "bijv. NL123456789B01"
       },
       "country": {
-        "hint": "Square Share is actief in de EU, de VS en Canada. Elders zijn we nog niet actief.",
+        "hint": "Waar je bedrijf gevestigd is, getoond aan kopers bij je naam. Square Share is actief in de EU, de VS en Canada.",
         "label": "Land"
       },
       "phone": {
         "label": "Telefoon",
         "tipLabel": "Wanneer kopers dit zien",
-        "tipBody": "Optioneel. Kopers zien het pas zodra je het hebt bevestigd met een code die we er per sms naartoe sturen, dus gebruik een mobiel nummer in de EU, de EER, Zwitserland of het VK.",
+        "tipBody": "Optioneel. Kopers zien het pas zodra je het hebt bevestigd met een code die we er per sms naartoe sturen.",
+        "restriction": "Alleen mobiele nummers uit de EU, de EER, Zwitserland en het VK. Laat dit leeg als jouw nummer daarbuiten valt.",
         "placeholder": "bijv. +353 87 123 4567"
       },
       "bio": {
@@ -386,7 +396,8 @@
     "success": {
       "sellerDetailsSaved": "Bedrijfs- en verkopersgegevens opgeslagen.",
       "savedCodeSent": "{which, select, email {Opgeslagen. We hebben een code gemaild naar {email}: voer hem hieronder in om het adres te bevestigen.} phone {Opgeslagen. We hebben een code per sms gestuurd naar {phone}: voer hem hieronder in om het nummer te bevestigen.} other {Opgeslagen. We hebben codes gestuurd naar {email} en {phone}: voer ze hieronder in om beide te bevestigen.}}"
-    }
+    },
+    "bioHint": "Je bio (een korte regel over jou of wat je maakt) staat in <link>Accountinstellingen</link>."
   },
   "contactVerification": {
     "heading": "Bevestig je contactgegevens",
@@ -440,7 +451,7 @@
       "label": "Waar je naartoe verzendt, en hoe lang het duurt",
       "tipLabel": "Hoeveel detail je moet geven",
       "tipBody": "Groepeer bestemmingen zoals je daadwerkelijk verzendt: één rij voor thuis, één voor de rest van de EU, één voor de rest van de wereld is meestal genoeg. Laat de kosten leeg als ze variëren.",
-      "flatRate": "Een tarief geldt één keer per bestelling, ongeacht aantal of gewicht. Kopers bestellen één product tegelijk: er is nog geen winkelwagen.",
+      "costAndRate": "Elke rij heeft twee prijzen. Verzendkosten is de tekst die kopers op je productpagina lezen, zoals “€ 9,00”. Tarief is wat de kassa echt rekent, één keer per bestelling, ongeacht aantal of gewicht. De kassa levert alleen aan een rij met een tarief en landen.",
       "empty": "Nog niets vermeld. Kopers zien geen levertijden totdat je een rij toevoegt.",
       "areaLabel": "Bestemming {number}",
       "areaPlaceholder": "bijv. Rest van de EU",
@@ -450,7 +461,6 @@
       "costPlaceholder": "bijv. € 9,00",
       "rateLabel": "Tarief {number}",
       "ratePlaceholder": "bijv. 4,50",
-      "rateHint": "Leeg laten voor weergave alleen.",
       "countriesLabel": "Landen {number}",
       "countriesNone": "Geen landen",
       "everywhereElse": "Overal elders",
@@ -461,13 +471,12 @@
       "needsRate": "De kassa kan deze rij pas gebruiken als die zowel een tarief als een land heeft. Kopers zien hem nog wel op de productpagina."
     },
     "rates": {
-      "title": "Verzendtarieven",
-      "description": "De verzendprijzen die bij het afrekenen worden gerekend, zodat kopers het totaal zien voordat ze betalen.",
+      "title": "Valuta en gratis verzending",
+      "description": "De valuta waarin de kassa je tarieven rekent, en wanneer verzending gratis is. Het tarief per bestemming stel je in onder Verzending hierboven.",
       "currencyLabel": "Tariefvaluta",
       "freeOverLabel": "Gratis verzending boven",
       "freeOverPlaceholder": "bijv. 50,00",
-      "freeOverHint": "Wanneer het ordertotaal dit bedrag bereikt, is bezorging gratis.",
-      "hint": "Deze tarieven zijn wat de kassa in rekening brengt. Laat het tarief van een bestemming leeg om het alleen als weergave te bewaren."
+      "freeOverHint": "Wanneer het ordertotaal dit bedrag bereikt, is bezorging gratis."
     },
     "notes": {
       "label": "Nog iets over verzending",
@@ -479,11 +488,11 @@
     },
     "returnsWindow": {
       "label": "Retourtermijn",
-      "tipLabel": "Wat het wettelijke recht al dekt",
+      "tipLabel": "Wat de wet kopers al geeft",
       "tipBody": "Verkopen op afstand aan EU-kopers geeft hen sowieso 14 dagen bedenktijd en een garantie van twee jaar bij gebreken, wat je hier ook kiest. Je productpagina's vermelden beide al, dus dit is wat je daarbovenop aanbiedt.",
-      "none": "Niets naast het wettelijke recht",
+      "none": "Niets meer dan wat de wet vereist",
       "days": "{days, plural, one {# dag} other {# dagen}}",
-      "statutoryMinimum": "Het wettelijke EU-minimum",
+      "statutoryMinimum": "Het wettelijke minimum in de EU",
       "custom": "Iets anders",
       "customLabel": "Retourtermijn in dagen",
       "daysUnit": "dagen"
@@ -539,7 +548,8 @@
   "sellerDetails": {
     "bannerLabel": "Verkopersgegevens vereist",
     "memberHeadline": "Deze winkel kan nog niet publiceren of verkopen.",
-    "memberFix": "De eigenaar moet de verkopersgegevens toevoegen in de eigen instellingen.",
+    "memberFix": "De eigenaar van {storeName} moet de verkopersgegevens toevoegen in de eigen instellingen.",
+    "memberFixGeneric": "De eigenaar moet de verkopersgegevens toevoegen in de eigen instellingen.",
     "addLink": "Verkopersgegevens toevoegen",
     "opensInNewTab": " (opent in nieuw tabblad)",
     "headline": {
@@ -552,7 +562,7 @@
     "reason": "Kopers moeten kunnen zien van wie ze kopen en hoe ze je kunnen bereiken voordat ze bestellen. Dit wordt alleen daarom op je productpagina's getoond, nooit gebruikt voor marketing.",
     "fields": {
       "businessName": {
-        "label": "Handelsnaam",
+        "label": "Je naam of bedrijfsnaam",
         "why": "Kopers moeten weten van wie ze kopen: je bedrijfsnaam, of je volledige naam als je als particulier verkoopt."
       },
       "address": {
@@ -737,7 +747,7 @@
     },
     "approvals": {
       "title": "Goedkeuren vanaf een ingelogd apparaat",
-      "description": "Wanneer je ergens nieuw inlogt, scan je de QR-code met een telefoon waarop je al bent ingelogd en tik je op het bijbehorende nummer. Handig als je toegangssleutel op een ander apparaat staat.",
+      "description": "Log je in op een nieuw apparaat en staat je toegangssleutel op een ander apparaat? Een telefoon waarop je al bent ingelogd kan het goedkeuren: scan er de QR-code mee en tik op het bijbehorende nummer.",
       "statusOn": "Aan",
       "statusOff": "Uit",
       "turnOn": "Aanzetten",
@@ -799,7 +809,6 @@
       "emailLabel": "E-mailadres",
       "emailPlaceholder": "collega@example.com",
       "roleLabel": "Rol",
-      "notificationNote": "E-mailmeldingen zijn nog niet gekoppeld: de uitnodiging gaat in zodra ze inloggen. Je kunt ze misschien beter direct zelf laten weten.",
       "sendButton": "Uitnodiging versturen"
     },
     "inviteRow": {
@@ -839,13 +848,17 @@
     "empty": "Nog geen apps gekoppeld.",
     "connect": {
       "title": "Koppel een assistent",
-      "body": "Voeg dit adres toe aan Claude of een andere MCP-app en keur het goed als erom wordt gevraagd.",
+      "benefit": "Een AI-assistent die je hier koppelt, kan je producten opsommen, concepten publiceren, je etalage ontwerpen, kortingen beheren en je vragen beantwoorden, allemaal in gewone taal.",
+      "body": "Voeg dit adres toe aan Claude of een andere AI-assistent en keur het goed als erom wordt gevraagd.",
+      "mcpHintLabel": "Over dit adres",
+      "mcpHint": "Je assistent vraagt misschien om een MCP-server-URL: plak dit adres daar. MCP is de open standaard die assistenten gebruiken om met apps te verbinden.",
       "copy": "Adres kopiëren",
       "copied": "Gekopieerd",
       "copyFailed": "Kopiëren is niet gelukt. Selecteer het adres en kopieer het zelf.",
       "openClaude": "Claude-connectors openen",
       "capabilitiesTitle": "Wat een assistent kan doen",
-      "offByDefault": "Standaard uit"
+      "offByDefault": "Standaard uit",
+      "required": "Vereist"
     },
     "lastUsed": "Laatst gebruikt {when}",
     "neverUsed": "Nog niet gebruikt",
@@ -858,15 +871,21 @@
       "metadataTitle": "Koppel een app",
       "title": "{app} koppelen aan je winkel?",
       "sendsTo": "Toegang gaat naar <strong>{host}</strong>",
+      "sendsToTipLabel": "Waarom dit adres belangrijk is",
+      "sendsToTipBody": "Een app kan zichzelf elke naam geven, maar toegang gaat altijd alleen naar dit adres, en dat kan een bedrieger niet vervalsen.",
       "store": "Winkel",
+      "storeHint": "Alleen de winkel die je kiest wordt gedeeld. Je andere winkels blijven privé.",
       "scopesTitle": "Wat het kan doen",
       "note": "Koppel alleen als je dit zelf vanuit {app} hebt gestart. Je kunt het op elk moment loskoppelen in Instellingen.",
+      "stepUpDescription": "Als je {app} koppelt, krijgt het toegang tot je winkel. Vul de huidige code uit je authenticator-app in om te bevestigen dat jij het bent.",
       "approve": "Koppelen",
       "approving": "Koppelen…",
-      "deny": "Annuleren",
+      "deny": "Niet koppelen",
+      "denyHint": "Met Niet koppelen ga je terug naar {app}, en {app} hoort dat je nee hebt gezegd.",
       "connected": "Gekoppeld. We brengen je terug naar {app}…",
       "refusedTitle": "Dit verzoek is niet te vertrouwen",
-      "refusedBody": "De app die je hierheen stuurde is niet goed ingesteld. Er is niets gekoppeld."
+      "refusedBody": "De app die je hierheen stuurde is niet goed ingesteld. Er is niets gekoppeld.",
+      "goToStore": "Naar je winkel"
     },
     "scopes": {
       "storeRead": {
@@ -915,12 +934,12 @@
       },
       "destructive": {
         "label": "Dingen verwijderen",
-        "hint": "Producten, etalages en kortingen verwijderen en insluitsleutels vervangen. Dit kan niet ongedaan worden gemaakt."
+        "hint": "Producten, etalages en kortingen verwijderen, en nieuwe websitecodes aanvragen. Dit kan niet ongedaan worden gemaakt."
       }
     },
     "app": {
       "capabilitiesLabel": "Wat {app} kan doen",
-      "changeHint": "Om dit te wijzigen, koppel je de app los en koppel je hem opnieuw."
+      "changeHint": "Wil je wijzigen wat {app} kan doen? Koppel het hier los, koppel het daarna opnieuw vanuit {app} en maak je keuze opnieuw wanneer je het goedkeurt."
     }
   }
 }

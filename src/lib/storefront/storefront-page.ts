@@ -36,7 +36,6 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { presignGetUrl } from "@/lib/r2";
-import { emailProofRequired } from "@/lib/contact-verification/availability";
 import {
   loadProductSales,
   msUntilSaleEnds,
@@ -51,12 +50,11 @@ import { RATE_LIMITS, clientKey, rateLimitKey } from "@/lib/rate-limit";
 import {
   TRADER_GATE_SELECT,
   buildSellerIdentity,
-  buildTraderIdentityInput,
+  sellerMaySell,
   type SellerIdentityRow,
   type TraderGateRow,
 } from "@/lib/settings/seller-identity";
-import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
-import { resolveProductPage } from "@/lib/storefront/product-page";
+import { openStorefront } from "@/lib/storefront/public-gate";
 import {
   TILE_EXTRAS_SELECT,
   loadTileExtras,
@@ -67,7 +65,6 @@ import {
 import { resolveTileLook } from "@/lib/storefront/tile-look";
 import { productPagePath, storefrontPageUrl } from "@/lib/storefront/product-page-url";
 import { uuidField } from "@/lib/validation/inputs";
-import { parseStoredStorefrontConfig } from "@/lib/validation/storefront";
 import { blockKey, buyerVisibleBlocks, type StorefrontBlock, type StorefrontConfig } from "@/types/storefront";
 import type { StorefrontPageData, StorefrontTileProduct } from "@/types/storefront-page";
 
@@ -190,13 +187,10 @@ export async function buildStorefrontPage(
     allow?: (config: StorefrontConfig) => boolean;
   },
 ): Promise<PublicStorefrontPageResult | PageBusy | null> {
-  if (!isContentVisible(storefront.moderation_status)) return null;
-
-  const config = parseStoredStorefrontConfig(storefront.config);
-  if (!config) return null;
+  const open = openStorefront(storefront);
+  if (!open) return null;
+  const { config, productPage } = open;
   if (options.allow && !options.allow(config)) return null;
-  const productPage = resolveProductPage(config);
-  if (!productPage.enabled) return null;
 
   const admin = createAdminClient();
   const visible = buyerVisibleBlocks(config);
@@ -225,13 +219,7 @@ export async function buildStorefrontPage(
   // THE READ SIDE OF THE PUBLISH GATE. Fail-closed on a read error: an
   // identity we could not read is one we cannot display.
   const gateRow = sellerError ? null : (sellerRow as TraderGateRow | null);
-  if (
-    !isTraderIdentityComplete(buildTraderIdentityInput(gateRow), {
-      requireVerifiedEmail: emailProofRequired(),
-    })
-  ) {
-    return null;
-  }
+  if (!sellerMaySell(gateRow)) return null;
 
   // Sales that could not be read are prices that are not known: see the
   // header. Asked after the gate, so a storefront that is not public at all is

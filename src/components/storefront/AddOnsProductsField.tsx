@@ -14,6 +14,8 @@ import { chosenAddOns, hiddenAddOns, offeredAddOnCards } from "@/lib/products/ad
 import { deriveStockBadge } from "@/lib/stock/badge";
 import { NO_ADD_ON_HABITS } from "@/lib/predictions";
 import { useSampleMode } from "@/lib/storefront/sample-mode";
+import { useSettingTarget } from "@/lib/storefront/setting-context";
+import { PRODUCT_PAGE_HOTSPOTS } from "@/lib/storefront/setting-ref";
 import type { Product } from "@/types/product";
 import { useProductAddOnsEditor } from "./ProductAddOnsEditor";
 
@@ -71,7 +73,9 @@ export function AddOnsProductsField() {
   const t = useTranslations("Storefront.productPage.addOns.products");
   const tField = useTranslations("Products.addOnsField");
   const tActions = useTranslations("Common.actions");
+  const tBlock = useTranslations("Storefront.productBlock");
   const sample = useSampleMode();
+  const setting = useSettingTarget();
   const editor = useProductAddOnsEditor();
   const target = editor?.target ?? null;
   const targetId = target?.id ?? null;
@@ -95,10 +99,21 @@ export function AddOnsProductsField() {
 
   if (!editor) return null;
   if (!target) {
+    // Said, then done for them: the button puts the selected (or first)
+    // product's page out and keeps this section open beside it.
     return (
-      <p className={helpTextClass} data-add-ons-products="no-page">
-        {t("noPage")}
-      </p>
+      <div className="space-y-2" data-add-ons-products="no-page">
+        <p className={helpTextClass}>{t("noPage")}</p>
+        {setting && editor.canOpenPage && (
+          <button
+            type="button"
+            onClick={() => setting.open(PRODUCT_PAGE_HOTSPOTS.addOns)}
+            className={cn(secondaryButtonClass, "w-full justify-center")}
+          >
+            {tBlock("openProductPage")}
+          </button>
+        )}
+      </div>
     );
   }
 

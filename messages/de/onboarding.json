@@ -2,7 +2,7 @@
   "steps": {
     "seller": {
       "label": "Verkäuferangaben hinzufügen",
-      "detail": "Dein Händlername, deine Adresse und deine Kontakt-E-Mail erscheinen auf jeder Produktseite.",
+      "detail": "Dein Name oder Firmenname, deine Adresse und deine Kontakt-E-Mail erscheinen auf jeder Produktseite.",
       "detailDone": "Käufer können sehen, von wem sie kaufen.",
       "detailUnconfirmed": "Bestätige deine Kontakt-E-Mail mit dem Code, den wir dorthin senden.",
       "action": "Details hinzufügen",
@@ -20,10 +20,10 @@
     "storefront": {
       "label": "Ein Produkt auf ein Schaufenster legen",
       "detailDone": "Ein Produkt ist auf deinem Schaufenster.",
-      "detailNone": "Erstelle ein Schaufenster und füge dann ein Produkt zu seinem Raster hinzu.",
-      "detailEmpty": "Öffne dein Schaufenster und wähle „Produkt hinzufügen“ in der Werkzeugleiste.",
+      "detailNone": "Ein Schaufenster ist deine Shopseite. Erstelle eines und füge dann ein Produkt zu seinem Raster hinzu.",
+      "detailEmpty": "Öffne dein Schaufenster und nutze oben den Button „Produkt hinzufügen“.",
       "actionCreate": "Schaufenster erstellen",
-      "actionOpen": "Designer öffnen",
+      "actionOpen": "Schaufenster öffnen",
       "cta": "Dein Schaufenster öffnen",
       "ctaCreate": "Ein Schaufenster erstellen"
     },
@@ -32,7 +32,7 @@
       "detailDone": "Deine Produktseite ist online.",
       "detailNeedsSeller": "Vervollständige deine Verkäuferangaben, damit deine Seite online gehen kann.",
       "detailNeedsStorefront": "Sobald ein Produkt auf einem Schaufenster ist, kann seine Seite online gehen.",
-      "detailNeedsActive": "Setze dieses Produkt auf Aktiv, damit seine Seite online geht.",
+      "detailNeedsActive": "Öffne das Produkt und setze seinen Status auf Aktiv, damit seine Seite online geht.",
       "detailChecking": "Deine Seite geht online, sobald die automatische Prüfung das Produkt freigibt.",
       "detailPaused": "Die automatische Prüfung hat dieses Produkt pausiert. Öffne es, um zu sehen, was du ändern musst.",
       "detailPagesOff": "Produktseiten sind auf diesem Schaufenster deaktiviert. Schalte sie im Designer ein.",
@@ -64,7 +64,7 @@
     "showMeAround": "Zeig mir alles",
     "showSteps": "Schritte anzeigen",
     "hideSteps": "Schritte ausblenden",
-    "liveHint": "Deine erste Produktseite ist online. Teile den Link überall.",
+    "liveHint": "Deine erste Produktseite ist online. Teile die Links überall.",
     "copyLink": {
       "copy": "Link zur Produktseite kopieren",
       "copied": "Link zur Produktseite kopiert",
@@ -75,7 +75,12 @@
     "hide": "Ausblenden",
     "progress": "{total, plural, one {{done} von {total} erledigt} other {{done} von {total} erledigt}}",
     "stepDone": " (erledigt)",
-    "stepToDo": " (zu erledigen)"
+    "stepToDo": " (zu erledigen)",
+    "copyStorefrontLink": {
+      "copy": "Schaufenster-Link kopieren",
+      "copied": "Schaufenster-Link kopiert",
+      "failed": "Der Schaufenster-Link konnte nicht kopiert werden. Wähle ihn aus und kopiere ihn manuell."
+    }
   },
   "welcome": {
     "steps": {
@@ -121,10 +126,10 @@
     "seller": {
       "namePlaceholder": "z. B. Lena Schmidt oder Lenas Keramik",
       "nameHelp": "Dein Firmenname oder dein vollständiger Name, wenn du als Privatperson verkaufst.",
-      "nameAlternative": "Oder dein vollständiger Name, wenn du unter eigenem Namen verkaufst.",
+      "nameAlternative": "Wenn du unter eigenem Namen verkaufst, nimm deinen vollständigen Namen.",
       "addressPlaceholder": "z. B. Musterstraße 12\n10115 Berlin\nDeutschland",
       "emailPlaceholder": "z. B. hallo@deinshop.example",
-      "emailHelp": "Wohin Käufer dir schreiben. Diese kann sich von deiner Anmelde-E-Mail unterscheiden.",
+      "emailHelp": "Wohin Käufer dir schreiben. Diese kann sich von deiner Anmelde-E-Mail unterscheiden.{verify, select, true { Wir senden einen Code an diese Adresse, um sie zu bestätigen.} other {}}",
       "emailTipLabel": "Zu dieser E-Mail-Adresse"
     },
     "confirm": {
@@ -140,12 +145,12 @@
     "nav": {
       "skipOnboarding": "Einführung überspringen",
       "next": "Weiter",
-      "showMeAround": "Zeig mir alles",
       "skipIntro": "Einführung überspringen",
       "getStarted": "Loslegen",
       "skipForNow": "Vorerst überspringen",
       "saveAndContinue": "Speichern und fortfahren",
       "continue": "Weiter",
+      "confirmLater": "Später bestätigen",
       "exploreOnMyOwn": "Selbst erkunden",
       "notNow": "Nicht jetzt"
     },
@@ -205,16 +210,13 @@
       },
       "storefrontEmbed": {
         "title": "Ein Schaufenster auf deiner Website einbetten",
-        "body": "Jedes Schaufenster hat einen Einbetten-Button, der dir einen Code wie diesen gibt. Das Widget ist noch in Entwicklung und wird auf anderen Websites noch nicht angezeigt.",
-        "bodyButton": "Dieser Button gibt dir einen Code wie den darunter, den du in deine Website einfügst. Das Widget ist noch in Entwicklung und wird auf anderen Websites noch nicht angezeigt.",
-        "fallbackBody": "Sobald du ein Schaufenster hast, gibt dir der Einbetten-Button auf seiner Kachel einen Code wie diesen. Das Widget ist noch in Entwicklung und wird auf anderen Websites noch nicht angezeigt.",
-        "bodyLive": "Jedes Schaufenster hat einen Einbetten-Button, der dir einen Code wie diesen gibt. Füge ihn in deine eigene Website ein, und das Schaufenster erscheint dort.",
-        "bodyButtonLive": "Dieser Button gibt dir einen Code wie den darunter. Füge ihn in deine eigene Website ein, und das Schaufenster erscheint dort.",
-        "fallbackBodyLive": "Sobald du ein Schaufenster hast, gibt dir der Einbetten-Button auf seiner Kachel einen Code wie diesen, den du in deine eigene Website einfügst."
+        "bodyLive": "Jedes Schaufenster hat einen Einbetten-Button, der dir Website-Code wie diesen gibt. Füge ihn in deine eigene Website ein, und das Schaufenster erscheint dort.",
+        "bodyButtonLive": "Dieser Button gibt dir Website-Code wie den darunter. Füge ihn in deine eigene Website ein, und das Schaufenster erscheint dort.",
+        "fallbackBodyLive": "Sobald du ein Schaufenster hast, gibt dir der Einbetten-Button auf seiner Kachel Website-Code wie diesen, den du in deine eigene Website einfügst."
       },
       "ordersSearch": {
         "title": "Eine Bestellung finden",
-        "body": "Durchsuche diese Liste nach der E-Mail-Adresse des Käufers. Eine Bestellung findest du über ihre Nummer, einen Namen, eine Stadt oder eine Tracking-Nummer mit der Suche oben auf der Seite."
+        "body": "Durchsuche diese Liste nach Bestellnummer, E-Mail-Adresse oder Name des Käufers, einer Stadt, einem Produkt oder einer Sendungsnummer."
       },
       "ordersFilters": {
         "title": "Filtern und sortieren",
@@ -241,7 +243,7 @@
     "steps": {
       "editorAdd": {
         "title": "Zu deinem Raster hinzufügen",
-        "body": "Füge über diese Leiste Produkte, Text und Formen hinzu. Ziehe etwas auf dem Raster, um es zu verschieben, und zieh an einer Ecke, um die Größe zu ändern."
+        "body": "Füge über diese Leiste Produkte, Text, Formen und Bilder hinzu. Tippe oder klicke auf einen Block, um ihn auszuwählen, und zieh ihn dann, um ihn zu verschieben. Zieh an einem Eckgriff, um die Größe zu ändern."
       },
       "editorDesign": {
         "title": "Den Look festlegen",
@@ -255,8 +257,13 @@
       },
       "editorFinish": {
         "title": "Mach es zu deinem",
-        "body": "Das Beispiel wird nie gespeichert, probiere also alles aus. Wenn du bereit bist, erstelle dein eigenes Schaufenster."
+        "body": "Das Beispiel wird nie gespeichert, probiere also alles aus. Wenn du bereit bist, erstelle dein eigenes Schaufenster.",
+        "bodySave": "Drück auf Speichern, um deine Arbeit zu sichern. Wenn du zufrieden bist, gibt dir Teilen den Link und den Code für deine Website."
       }
     }
+  },
+  "install": {
+    "title": "Square Share zu deinem Startbildschirm hinzufügen",
+    "add": "Hinzufügen"
   }
 }

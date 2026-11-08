@@ -286,5 +286,16 @@ describe("RemovalNotice", () => {
   it("badges a card with one word", () => {
     render(<RemovalBadge kind="removed" />);
     expect(document.querySelector("[data-removal-badge]")?.textContent).toBe("Removed");
+    // A decision has its statement on the product: no "?" on the card.
+    expect(screen.queryByRole("button", { name: "What this means" })).not.toBeInTheDocument();
+  });
+
+  it("says why a waiting card is hidden on a tap, not only on a hover", () => {
+    render(<RemovalBadge kind="review" />);
+    expect(document.querySelector("[data-removal-badge]")?.textContent).toBe("In review");
+    fireEvent.click(screen.getByRole("button", { name: "What this means" }));
+    expect(screen.getByRole("tooltip")).toHaveTextContent(
+      "A person is checking it. Buyers see it once it is approved.",
+    );
   });
 });

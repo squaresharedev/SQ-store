@@ -45,7 +45,9 @@
     ".next-title/types/**/*.ts",
     ".next-title/dev/types/**/*.ts",
     ".next-favicon-check-dev/types/**/*.ts",
-    ".next-favicon-check-dev/dev/types/**/*.ts"
+    ".next-favicon-check-dev/dev/types/**/*.ts",
+    ".next-sup/types/**/*.ts",
+    ".next-sup/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

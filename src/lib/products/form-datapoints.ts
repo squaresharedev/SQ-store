@@ -61,12 +61,12 @@ export const PRODUCT_FORM_SNAPSHOT_ID = "product-form-snapshot";
  * and the entry in the snapshot. Labels and copy can change freely; an id
  * cannot, so append rather than rename. The copy (label, the "?" explanation)
  * lives in the catalogue under `Products.form.sections.<id>`. The Stock
- * explanation also covers the alert; Media (shown as Delivery: physical or
- * digital, the file or the shipping terms, the buy link) has none, since its
- * fields carry their own, and an empty explanation is what suppresses its "?".
- * The cover photo leads Basics, beside the title and price. Shipping renders
- * INSIDE the Delivery card for a physical product, but keeps its own anchor
- * and entry here.
+ * explanation also covers the alert; Media (shown as "How buyers get it":
+ * physical or digital, the file or the shipping terms, the buy link) has none,
+ * since its fields carry their own, and an empty explanation is what
+ * suppresses its "?". The cover photo leads Basics, beside the title and
+ * price. Shipping renders INSIDE the Media card for a physical product, but
+ * keeps its own anchor and entry here.
  *
  * `required` marks a section the product cannot be saved without — which is
  * what lets the rail show a seller the two things standing between them and a

@@ -2,6 +2,7 @@
   "pageTitle": "Payments",
   "soon": "Soon",
   "bankOnFile": "Your bank account",
+  "invoicesPointer": "Invoices for your Square Share plan are in Settings, under <link>Plan & billing</link>.",
   "balance": {
     "available": {
       "label": "Available",
@@ -24,10 +25,31 @@
       "hint": "Square Share's cut of your sales, after refunds"
     }
   },
+  "earnings": {
+    "label": "Earned, last {days} days",
+    "labelOn": "Earned by {date}",
+    "vsBefore": "vs {amount} the {days} days before",
+    "range": "Period",
+    "rangeShort": "{days}D",
+    "rangeLong": "Last {days} days",
+    "legendNow": "These {days} days",
+    "legendBefore": "The {days} before",
+    "today": "Today",
+    "empty": "Your first sale starts this line.",
+    "emptyRange": "No sales in the last {days} days.",
+    "otherCurrencies": "In {currency}. Sales in other currencies are not counted here."
+  },
+  "trends": {
+    "gross": "Gross sales",
+    "sales": "Sales",
+    "costs": "Refunds and fees",
+    "paidOut": "Paid out",
+    "noBefore": "First period, no comparison yet"
+  },
   "connection": {
     "label": "Stripe connection",
     "comingSoonTitle": "Getting paid through Stripe is coming soon",
-    "comingSoonBody": "Until then, buyers pay you through your product's buy link, or by emailing you.",
+    "comingSoonBody": "Until then, buyers pay you directly. A product's buy button opens the <buyLink>buy link</buyLink> you give it (your own checkout), or emails your <email>contact address</email> if it has none.",
     "connectTitle": "Connect Stripe to get paid",
     "connectBody": "Payouts go straight to your bank. Setup happens securely on Stripe, we never see or store your bank details.",
     "connectButton": "Connect with Stripe",

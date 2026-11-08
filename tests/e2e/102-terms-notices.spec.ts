@@ -72,6 +72,8 @@ test("a new Terms version: notice, 30 days, banner, agreement", async ({ page })
   }).toPass({ timeout: 60_000 });
   const notice = page.locator("[data-terms-change-notice]");
   await expect(notice).toBeVisible();
+  // The strip stands down on the page its link leads to: the notice is here in full.
+  await expect(banner).toHaveCount(0);
   await expect(notice.getByRole("link", { name: "new Terms" })).toHaveAttribute(
     "href",
     `https://squareshare.eu/terms/v/${LATEST_TERMS_VERSION}/`,
@@ -80,6 +82,8 @@ test("a new Terms version: notice, 30 days, banner, agreement", async ({ page })
   // Agreeing early clears it, and records the new version.
   await page.getByRole("button", { name: /agree/i }).click();
   await expect(page.locator("[data-terms-agreed]")).toBeVisible();
+  // and the notice with it, which would otherwise contradict "nothing more to do".
+  await expect(notice).toHaveCount(0);
   const saved = (await serviceRest(`/profiles?id=eq.${id}&select=legal_accepted_version`)) as {
     legal_accepted_version: string;
   }[];

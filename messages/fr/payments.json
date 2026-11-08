@@ -2,6 +2,7 @@
   "pageTitle": "Paiements",
   "soon": "Bientôt",
   "bankOnFile": "Votre compte bancaire",
+  "invoicesPointer": "Les factures de votre forfait Square Share se trouvent dans Paramètres, rubrique <link>Forfait et facturation</link>.",
   "balance": {
     "available": {
       "label": "Disponible",
@@ -24,10 +25,31 @@
       "hint": "La part de Square Share sur vos ventes, après remboursements"
     }
   },
+  "earnings": {
+    "label": "Gagné, {days} derniers jours",
+    "labelOn": "Gagné au {date}",
+    "vsBefore": "contre {amount} les {days} jours précédents",
+    "range": "Période",
+    "rangeShort": "{days} j",
+    "rangeLong": "{days} derniers jours",
+    "legendNow": "Ces {days} jours",
+    "legendBefore": "Les {days} précédents",
+    "today": "Aujourd’hui",
+    "empty": "Votre première vente lancera cette courbe.",
+    "emptyRange": "Aucune vente ces {days} derniers jours.",
+    "otherCurrencies": "En {currency}. Les ventes dans d’autres devises ne sont pas comptées ici."
+  },
+  "trends": {
+    "gross": "Ventes brutes",
+    "sales": "Ventes",
+    "costs": "Remboursements et frais",
+    "paidOut": "Versé",
+    "noBefore": "Première période, pas encore de comparaison"
+  },
   "connection": {
     "label": "Connexion Stripe",
     "comingSoonTitle": "Être payé via Stripe arrive bientôt",
-    "comingSoonBody": "En attendant, les acheteurs vous paient via le lien d’achat de votre produit, ou en vous écrivant.",
+    "comingSoonBody": "En attendant, les acheteurs vous paient directement. Le bouton d’achat d’un produit ouvre le <buyLink>lien d’achat</buyLink> que vous lui avez donné (votre propre paiement), ou envoie un e-mail à votre <email>adresse de contact</email> s’il n’en a pas.",
     "connectTitle": "Connectez Stripe pour être payé",
     "connectBody": "Les virements vont directement sur votre compte bancaire. La configuration se fait de façon sécurisée sur Stripe, nous ne voyons ni ne stockons jamais vos coordonnées bancaires.",
     "connectButton": "Se connecter avec Stripe",

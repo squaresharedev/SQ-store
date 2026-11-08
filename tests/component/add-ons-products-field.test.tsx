@@ -23,6 +23,7 @@ const { ProductAddOnsEditorProvider, useProductAddOnsEditor } = await import(
   "@/components/storefront/ProductAddOnsEditor"
 );
 const { SampleModeProvider } = await import("@/lib/storefront/sample-mode");
+const { SettingTargetProvider } = await import("@/lib/storefront/setting-context");
 
 const LAMP = "00000000-0000-4000-8000-000000000001";
 const SHADE = "00000000-0000-4000-8000-000000000002";
@@ -277,6 +278,30 @@ describe("the storefront editor's add-on picker", () => {
       "Open a product's page on the canvas to choose what it offers.",
     );
     expect(getAddOnPicker).not.toHaveBeenCalled();
+  });
+
+  function renderInDesigner(canOpenPage: boolean, open = vi.fn()) {
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <SettingTargetProvider value={{ activeRef: null, open, close: vi.fn() }}>
+          <ProductAddOnsEditorProvider catalog={CATALOG} openPages={[]} canOpenPage={canOpenPage}>
+            <AddOnsProductsField />
+          </ProductAddOnsEditorProvider>
+        </SettingTargetProvider>
+      </NextIntlClientProvider>,
+    );
+    return open;
+  }
+
+  it("puts a page out itself when none is, keeping this section open", async () => {
+    const open = renderInDesigner(true);
+    await userEvent.click(screen.getByRole("button", { name: "Open product page" }));
+    expect(open).toHaveBeenCalledWith({ kind: "productPage", section: "addOns" });
+  });
+
+  it("offers no button when the board has no product whose page could open", () => {
+    renderInDesigner(false);
+    expect(screen.queryByRole("button", { name: "Open product page" })).toBeNull();
   });
 
   it("says when the list could not be read, and tries again on request", async () => {

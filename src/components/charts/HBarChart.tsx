@@ -25,6 +25,7 @@ import { ChartTooltipContent } from "@/components/charts/ChartTooltip";
 import { ChartLegend } from "@/components/charts/ChartLegend";
 import { ChartDataTable } from "@/components/charts/ChartDataTable";
 import type { ChartDatum, ChartSeries } from "@/components/charts/types";
+import { useChartStyle, type ChartAxes } from "@/components/charts/style";
 
 // Horizontal bars — magnitude across categories whose names deserve room
 // (products, countries, referrers). This is the "many bars next to each
@@ -57,6 +58,10 @@ export interface HBarChartProps {
    *  numbers. Without it a week with one sale gets gridlines at 0.25, 0.5 and
    *  0.75 of a sale. */
   whole?: boolean;
+  /** How much scale to print: "quiet" drops the value axis (the tooltip and
+   *  the table twin carry the values) and dots the guides. Default: the page's
+   *  ChartStyle ("full"). */
+  axes?: ChartAxes;
   animate?: boolean;
   ariaLabel?: string;
   className?: string;
@@ -82,6 +87,7 @@ export function HBarChart({
   categoryFormatter,
   categoryWidth = 96,
   whole = false,
+  axes: axesProp,
   animate = true,
   ariaLabel: ariaLabelProp,
   className,
@@ -98,6 +104,8 @@ export function HBarChart({
   const reducedMotion = useReducedMotion();
   const animationActive = animate && !reducedMotion;
   const stacked = variant === "stacked";
+  const style = useChartStyle();
+  const quiet = (axesProp ?? style.axes) === "quiet";
   const r = MARK.barRadius;
   const plotHeight =
     height ?? defaultHeight(data.length, resolved.length, !stacked && resolved.length > 1);
@@ -115,7 +123,11 @@ export function HBarChart({
       barGap={MARK.surfaceGap}
       {...dims}
     >
-      <CartesianGrid horizontal={false} stroke={CHART.gridStroke} />
+      <CartesianGrid
+        horizontal={false}
+        stroke={CHART.gridStroke}
+        strokeDasharray={quiet ? MARK.guideDash : undefined}
+      />
       <XAxis
         type="number"
         axisLine={false}
@@ -124,6 +136,8 @@ export function HBarChart({
         tickMargin={8}
         allowDecimals={!whole}
         tickFormatter={axisValueFormatter}
+        // Hidden, it still sets the levels the guides are drawn at.
+        hide={quiet}
       />
       <YAxis
         type="category"

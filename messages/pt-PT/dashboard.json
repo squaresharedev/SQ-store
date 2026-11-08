@@ -52,7 +52,8 @@
   },
   "recentOrders": {
     "title": "Encomendas recentes",
-    "empty": "Ainda sem encomendas. As vendas feitas através do seu próprio link de compra ou por e-mail não aparecem aqui."
+    "empty": "Ainda sem encomendas. Quando a finalização da compra abrir, as compras concluídas aparecem aqui.",
+    "emptyReady": "Ainda sem encomendas. A sua primeira venda vai aparecer aqui."
   },
   "attention": {
     "title": "Precisa de atenção",
@@ -74,7 +75,7 @@
       "descriptionUpdated": "Os termos foram alterados desde que os aceitou. Leia e aceite a versão atual.",
       "descriptionTerms": "Leia os Termos de serviço e aceite-os.",
       "descriptionTermsUpdated": "Os Termos de serviço mudaram desde que os aceitou. Leia e aceite a versão atual.",
-      "action": "Rever termos"
+      "action": "Aceitar os Termos"
     },
     "noBuyPath": {
       "label": "{count, plural, one {{count} produto sem forma de compra} many {{count} de produtos sem forma de compra} other {{count} produtos sem forma de compra}}",
@@ -114,18 +115,18 @@
       "action": "Abrir editor"
     },
     "deadBlocks": {
-      "label": "{count, plural, one {{count} bloco de montra a referenciar produtos eliminados} many {{count} de blocos de montra a referenciar produtos eliminados} other {{count} blocos de montra a referenciar produtos eliminados}}",
-      "description": "Estes blocos aparecem vazios para os visitantes. Remova-os ou substitua-os.",
-      "action": "Abrir montra"
+      "label": "{count, plural, one {{count} espaço de produto aponta para um produto eliminado} many {{count} de espaços de produto apontam para produtos eliminados} other {{count} espaços de produto apontam para produtos eliminados}}",
+      "description": "Estes espaços aparecem vazios para os visitantes. Abra o editor e remova-os ou substitua-os.",
+      "action": "Abrir editor"
     },
     "toShip": {
       "description": "Os compradores estão à espera. Embale-as e marque-as como enviadas.",
       "action": "Enviar encomendas"
     },
     "withdrawals": {
-      "label": "{count, plural, one {{count} comprador desistiu} many {{count} de compradores desistiram} other {{count} compradores desistiram}}",
-      "description": "Têm direito ao reembolso no prazo de 14 dias após a desistência. Combine a devolução e depois reembolse a encomenda.",
-      "action": "Ver desistências"
+      "label": "{count, plural, one {{count} comprador cancelou} many {{count} de compradores cancelaram} other {{count} compradores cancelaram}}",
+      "description": "Têm direito ao reembolso no prazo de 14 dias. Combine a devolução e depois reembolse a encomenda.",
+      "action": "Ver cancelamentos"
     },
     "restock": {
       "label": "{count, plural, one {{count} produto quase esgotado} many {{count} de produtos quase esgotados} other {{count} produtos quase esgotados}}",
@@ -138,6 +139,10 @@
       "label": "Defina os preços de entrega",
       "description": "Os compradores não podem finalizar a compra de um produto físico até um destino ter taxa e país.",
       "action": "Definir preços"
+    },
+    "paused": {
+      "label": "{count, plural, one {{count} produto oculto aos compradores} many {{count} de produtos ocultos aos compradores} other {{count} produtos ocultos aos compradores}}",
+      "description": "{count, plural, one {A Square Share colocou-o em pausa ou removeu-o. Veja porquê e o que fazer a seguir.} many {A Square Share colocou-os em pausa ou removeu-os. Veja porquê e o que fazer a seguir.} other {A Square Share colocou-os em pausa ou removeu-os. Veja porquê e o que fazer a seguir.}}"
     }
   }
 }

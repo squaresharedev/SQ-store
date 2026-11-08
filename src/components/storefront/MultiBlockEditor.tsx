@@ -8,6 +8,7 @@ import {
   type CardStyleOverrides,
   type ImageBlock,
   type ProductBlock,
+  type ProductPageConfig,
   type ShapeBlock,
   type StorefrontBlock,
   type StorefrontTheme,
@@ -57,7 +58,7 @@ export function MultiBlockEditor({
   onImageChange,
   onDuplicate,
   onRemove,
-  reviewsShown = true,
+  productPage,
 }: {
   /** The selection, in selection order (length >= 2). */
   blocks: readonly StorefrontBlock[];
@@ -73,8 +74,9 @@ export function MultiBlockEditor({
   onDuplicate: () => void;
   /** Remove the whole selection. */
   onRemove: () => void;
-  /** Whether the product page shows reviews, which a card's stars need. */
-  reviewsShown?: boolean;
+  /** The storefront's product page, whose button and reviews a card
+   *  borrows. Absent = its defaults. */
+  productPage?: ProductPageConfig;
 }) {
   const t = useTranslations("Storefront");
   const products = blocks.filter((b): b is ProductBlock => b.type === "product");
@@ -220,9 +222,10 @@ export function MultiBlockEditor({
 
           <CollapsibleSection title={t("cardExtras.shoppingTitle")} collapsible defaultOpen={false}>
             <CardShoppingControls
-              value={resolveCardStyle(theme, products[0].style)}
+              theme={theme}
+              overrides={products[0].style ?? {}}
+              productPage={productPage}
               onChange={onProductStyleChange}
-              reviewsShown={reviewsShown}
             />
           </CollapsibleSection>
         </div>

@@ -93,7 +93,7 @@
     "createStorefronts": "Příliš mnoho pokusů o vytvoření výloh v krátké době.",
     "saveStorefronts": "Příliš mnoho pokusů o uložení výloh v krátké době.",
     "deleteStorefronts": "Příliš mnoho pokusů o smazání výloh v krátké době.",
-    "rotateEmbedKeys": "Příliš mnoho výměn kódu pro vložení v krátké době.",
+    "rotateEmbedKeys": "Příliš mnoho pokusů o nový kód pro web v krátké době.",
     "updateStock": "Příliš mnoho pokusů o aktualizaci zásob v krátké době.",
     "readProductPageSettings": "Příliš mnoho pokusů o načtení nastavení produktové stránky v krátké době.",
     "requestReview": "Příliš mnoho žádostí o kontrolu během krátké doby.",
@@ -119,7 +119,7 @@
     "verifyDocumentUpload": "Nahraný dokument se kvůli problému na naší straně nepodařilo ověřit.",
     "verifyFileUpload": "Nahraný soubor se kvůli problému na naší straně nepodařilo ověřit.",
     "verifyFontUpload": "Nahrané písmo se kvůli problému na naší straně nepodařilo ověřit.",
-    "verifyElementUpload": "Nahraný prvek se kvůli problému na naší straně nepodařilo ověřit.",
+    "verifyElementUpload": "Nahraný obrázek se kvůli problému na naší straně nepodařilo ověřit.",
     "verifyBackgroundImage": "Obrázek pozadí se kvůli problému na naší straně nepodařilo ověřit.",
     "verifyFont": "Písmo se kvůli problému na naší straně nepodařilo ověřit.",
     "verifyImage": "Obrázek se kvůli problému na naší straně nepodařilo ověřit.",
@@ -127,7 +127,7 @@
     "saveStorefront": "Vaši výlohu se kvůli problému na naší straně nepodařilo uložit.",
     "saveEmbedSettings": "Nastavení vložení na web se kvůli problému na naší straně nepodařilo uložit.",
     "deleteStorefront": "Výlohu se kvůli problému na naší straně nepodařilo smazat.",
-    "rotateEmbedKey": "Klíč pro vložení na web se kvůli problému na naší straně nepodařilo vyměnit.",
+    "rotateEmbedKey": "Nový kód pro web se kvůli problému na naší straně nepodařilo vytvořit.",
     "saveStockSettings": "Nastavení zásob se kvůli problému na naší straně nepodařilo uložit.",
     "checkSellerDetails": "Vaše údaje prodejce se kvůli problému na naší straně nepodařilo ověřit.",
     "loadProductPageSettings": "Nastavení produktové stránky se kvůli problému na naší straně nepodařilo načíst.",
@@ -166,8 +166,8 @@
     "message": "Dokud nebudou vaše údaje prodejce kompletní, nemůžete zveřejňovat ani prodávat.",
     "action": "Doplnit údaje prodejce",
     "fix": {
-      "add": "{fields, select, businessName {Doplňte obchodní jméno v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} address {Doplňte adresu sídla v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} email {Doplňte kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} businessName_address {Doplňte obchodní jméno a adresu sídla v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} businessName_email {Doplňte obchodní jméno a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} address_email {Doplňte adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} other {Doplňte obchodní jméno, adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.}}",
-      "addAndConfirm": "{fields, select, businessName {Doplňte obchodní jméno v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail kódem, který na něj pošleme.} address {Doplňte adresu sídla v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail kódem, který na něj pošleme.} email {Doplňte kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte ho kódem, který na něj pošleme.} businessName_address {Doplňte obchodní jméno a adresu sídla v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail kódem, který na něj pošleme.} businessName_email {Doplňte obchodní jméno a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte e-mail kódem, který na něj pošleme.} address_email {Doplňte adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte e-mail kódem, který na něj pošleme.} other {Doplňte obchodní jméno, adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte e-mail kódem, který na něj pošleme.}}",
+      "add": "{fields, select, businessName {Doplňte své jméno nebo název firmy v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} address {Doplňte adresu sídla v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} email {Doplňte kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} businessName_address {Doplňte své jméno nebo název firmy a adresu sídla v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} businessName_email {Doplňte své jméno nebo název firmy a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} address_email {Doplňte adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.} other {Doplňte své jméno nebo název firmy, adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a pak zveřejněte.}}",
+      "addAndConfirm": "{fields, select, businessName {Doplňte své jméno nebo název firmy v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail kódem, který na něj pošleme.} address {Doplňte adresu sídla v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail kódem, který na něj pošleme.} email {Doplňte kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte ho kódem, který na něj pošleme.} businessName_address {Doplňte své jméno nebo název firmy a adresu sídla v sekci Nastavení › Firma a údaje prodejce a potvrďte kontaktní e-mail kódem, který na něj pošleme.} businessName_email {Doplňte své jméno nebo název firmy a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte e-mail kódem, který na něj pošleme.} address_email {Doplňte adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte e-mail kódem, který na něj pošleme.} other {Doplňte své jméno nebo název firmy, adresu sídla a kontaktní e-mail v sekci Nastavení › Firma a údaje prodejce a potvrďte e-mail kódem, který na něj pošleme.}}",
       "confirm": "Potvrďte kontaktní e-mail: pošlete si kód ze sekce Nastavení › Firma a údaje prodejce a pak ho tam zadejte.",
       "complete": "Vyplňte sekci Nastavení › Firma a údaje prodejce a pak zveřejněte."
     }
@@ -211,7 +211,7 @@
     "wrongPasswordGoogle": "To není heslo k tomuto účtu Square Share. Přihlašujete se přes Google, proto místo toho použijte “Potvrdit přes Google”.",
     "passwordCheckUnavailable": "Heslo se teď nepodařilo ověřit. Zkuste to za chvíli znovu.",
     "reauthRequired": "Z bezpečnostních důvodů se před zapnutím dvoufázového ověření znovu přihlaste.",
-    "setupRateLimited": "Příliš mnoho pokusů o nastavení. Zkuste to o něco později.",
+    "setupRateLimited": "Příliš mnoho pokusů o nastavení. Počkejte minutu a zkuste to znovu.",
     "tooManyFactors": "Tento účet už má maximum ověřovacích aplikací. Nejdřív jednu odeberte.",
     "setupFailed": "Nastavení se teď nepodařilo spustit. Zkuste to za chvíli znovu.",
     "setupUnavailable": "Nastavení dvoufázového ověření teď není k dispozici. Zkuste to později.",
@@ -226,7 +226,7 @@
   "settings": {
     "usernameTaken": "Toto uživatelské jméno je obsazené. Zkuste jiné.",
     "emailUnchanged": "Tohle už je váš e-mail.",
-    "emailChangeRateLimited": "Příliš mnoho žádostí o změnu e-mailu. Chvíli počkejte a zkuste to znovu.",
+    "emailChangeRateLimited": "Příliš mnoho žádostí o změnu e-mailu. Počkejte minutu a zkuste to znovu.",
     "emailChangeNeedsPassword": "Pro změnu e-mailu zadejte současné heslo.",
     "wrongPassword": "Současné heslo není správné.",
     "passwordCheckUnavailable": "Heslo se teď nepodařilo zkontrolovat. Zkuste to znovu.",
@@ -235,7 +235,7 @@
     "passwordUnchanged": "Tohle už je vaše heslo.",
     "passwordUpdateFailed": "Heslo se nepodařilo změnit. Zkuste to znovu.",
     "passwordReauthNeeded": "Z bezpečnostních důvodů se odhlaste, znovu přihlaste a pak změňte heslo.",
-    "resetRateLimited": "Příliš mnoho e-mailů pro obnovení hesla. Chvíli počkejte a zkuste to znovu.",
+    "resetRateLimited": "Příliš mnoho e-mailů pro obnovení hesla. Počkejte minutu a zkuste to znovu.",
     "resetSendRateLimited": "Příliš mnoho požadavků. Počkejte minutu a zkuste to znovu.",
     "resetFailed": "E-mail pro obnovení hesla se nepodařilo odeslat. Zkuste to znovu.",
     "contactEmailTakesNoMail": "Doména tohoto kontaktního e-mailu nepřijímá poštu. Zkontrolujte, zda je adresa napsaná správně, nebo použijte adresu, na kterou vám kupující opravdu mohou napsat.",
@@ -294,7 +294,7 @@
     "serviceUnreachable": "Nepodařilo se připojit ke službě pro přihlášení. Zkuste to prosím znovu.",
     "invalidEmail": "Zadejte platnou e-mailovou adresu.",
     "emailRequired": "Zadejte svůj e-mail.",
-    "tooManyAttempts": "Příliš mnoho pokusů. Chvíli počkejte a zkuste to znovu.",
+    "tooManyAttempts": "Příliš mnoho pokusů. Počkejte minutu a zkuste to znovu.",
     "magicLinkFailed": "E-mail se nepodařilo odeslat. Zkontrolujte prosím připojení a zkuste to znovu.",
     "resetEmailRequired": "Pro obnovení hesla zadejte svůj e-mail.",
     "resetEmailFailed": "E-mail pro obnovení hesla se nepodařilo odeslat. Zkontrolujte prosím připojení a zkuste to znovu.",
@@ -332,21 +332,21 @@
       "document": "Dokument je příliš velký.",
       "file": "Soubor je příliš velký.",
       "font": "Písmo je příliš velké.",
-      "element": "Prvek je příliš velký."
+      "element": "Obrázek je příliš velký."
     },
     "tooLargeFix": {
       "image": "Použijte obrázek menší než {maxMb} MB. Zkomprimujte ho nebo zmenšete a zkuste to znovu.",
       "document": "Použijte dokument menší než {maxMb} MB. Zkomprimujte ho nebo zmenšete a zkuste to znovu.",
       "file": "Použijte soubor menší než {maxMb} MB. Zkomprimujte ho nebo zmenšete a zkuste to znovu.",
       "font": "Použijte písmo menší než {maxMb} MB. Zkomprimujte ho nebo zmenšete a zkuste to znovu.",
-      "element": "Použijte prvek menší než {maxMb} MB. Zkomprimujte ho nebo zmenšete a zkuste to znovu."
+      "element": "Použijte obrázek menší než {maxMb} MB. Zkomprimujte ho nebo zmenšete a zkuste to znovu."
     },
     "neverReached": {
       "image": "Obrázek se na server nedostal.",
       "document": "Dokument se na server nedostal.",
       "file": "Soubor se na server nedostal.",
       "font": "Písmo se na server nedostalo.",
-      "element": "Prvek se na server nedostal."
+      "element": "Obrázek se na server nedostal."
     },
     "neverReachedFix": "Zkontrolujte připojení k internetu a zkuste to znovu.",
     "rejected": {
@@ -354,7 +354,7 @@
       "document": "Dokument se nepodařilo nahrát.",
       "file": "Soubor se nepodařilo nahrát.",
       "font": "Písmo se nepodařilo nahrát.",
-      "element": "Prvek se nepodařilo nahrát."
+      "element": "Obrázek se nepodařilo nahrát."
     },
     "rejectedFix": {
       "signedOut": "Přihlaste se znovu a akci zopakujte.",
@@ -365,7 +365,7 @@
   "uploadRoute": {
     "signIn": {
       "image": "Pro nahrávání obrázků se přihlaste.",
-      "element": "Pro nahrávání prvků se přihlaste.",
+      "element": "Pro nahrávání obrázků se přihlaste.",
       "document": "Pro nahrávání dokumentů se přihlaste.",
       "file": "Pro nahrávání souborů se přihlaste.",
       "font": "Pro nahrávání písem se přihlaste."
@@ -378,7 +378,7 @@
     },
     "notConfigured": {
       "image": "Nahrávání obrázků zatím není nastavené. Zkuste to později.",
-      "element": "Nahrávání prvků zatím není nastavené. Zkuste to později.",
+      "element": "Nahrávání obrázků teď není k dispozici. Zkuste to později.",
       "document": "Nahrávání zatím není nastavené. Zkuste to později.",
       "file": "Nahrávání souborů zatím není nastavené. Zkuste to později.",
       "font": "Nahrávání písem zatím není nastavené. Zkuste to později."
@@ -459,28 +459,28 @@
       "document": "Nahrávání dokumentu se nedokončilo.",
       "file": "Nahrávání souboru se nedokončilo.",
       "font": "Nahrávání písma se nedokončilo.",
-      "element": "Nahrávání prvku se nedokončilo."
+      "element": "Nahrávání obrázku se nedokončilo."
     },
     "uploadUnfinishedFix": {
       "image": "Před uložením obrázek znovu vyberte a nahrajte.",
       "document": "Před uložením dokument znovu vyberte a nahrajte.",
       "file": "Před uložením soubor znovu vyberte a nahrajte.",
       "font": "Před uložením písmo znovu vyberte a nahrajte.",
-      "element": "Před uložením prvek znovu vyberte a nahrajte."
+      "element": "Před uložením obrázek znovu vyberte a nahrajte."
     },
     "uploadTooLarge": {
       "image": "Obrázek je příliš velký.",
       "document": "Dokument je příliš velký.",
       "file": "Soubor je příliš velký.",
       "font": "Písmo je příliš velké.",
-      "element": "Prvek je příliš velký."
+      "element": "Obrázek je příliš velký."
     },
     "uploadTooLargeFix": {
       "image": "Použijte obrázek menší než {maxMb} MB a nahrajte ho znovu.",
       "document": "Použijte dokument menší než {maxMb} MB a nahrajte ho znovu.",
       "file": "Použijte soubor menší než {maxMb} MB a nahrajte ho znovu.",
       "font": "Použijte písmo menší než {maxMb} MB a nahrajte ho znovu.",
-      "element": "Použijte prvek menší než {maxMb} MB a nahrajte ho znovu."
+      "element": "Použijte obrázek menší než {maxMb} MB a nahrajte ho znovu."
     },
     "wrongTypeFix": {
       "image": "Použijte obrázek JPEG, PNG, WebP, GIF nebo AVIF.",

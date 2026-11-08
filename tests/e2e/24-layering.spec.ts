@@ -39,9 +39,9 @@ async function setUpOverlappingBoard(page: Page, tag: string) {
   await gotoApp(page, "/storefront");
   await createStorefrontViaUI(page);
 
-  await page.getByRole("button", { name: "Add element" }).click();
+  await page.getByRole("button", { name: "Add shape or image" }).click();
   await page
-    .getByRole("menu", { name: "Elements" })
+    .getByRole("menu", { name: "Shapes and images" })
     .getByRole("menuitem", { name: "All shapes" })
     .click();
   await page.getByRole("button", { name: "Add square" }).click();
@@ -232,17 +232,11 @@ test.describe("stacking blocks", () => {
     );
     expect(cells[0]).toBe(cells[1]);
 
-    // And the panel now offers the way back to the one underneath. The hint
-    // lives inside the Layer info tip rather than as standing panel copy (see
-    // PlacementSection), so it has to be opened before it can be read — and
-    // the sentence is matched loosely, since a hint that says the same thing
-    // in more words is not a regression.
-    await page.getByRole("button", { name: "How layering works" }).click();
-    await expect(
-      page
-        .getByRole("tooltip")
-        .getByText(/Alt-click a stack.*to reach the block underneath\./),
-    ).toBeVisible();
+    // And the panel now offers the way back to the one underneath, in plain
+    // sight rather than behind the Layer info tip (see PlacementSection): a
+    // seller stuck under a stack never thought to open it. Matched loosely,
+    // since a hint that says the same thing in more words is not a regression.
+    await expect(page.getByText(/Alt-click to select the block underneath\./)).toBeVisible();
   });
 
   test("Alt-click walks down through a stack", async ({ page }) => {

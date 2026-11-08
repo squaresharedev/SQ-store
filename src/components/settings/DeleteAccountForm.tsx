@@ -7,6 +7,7 @@ import { useActionStateToast, useSaveResult } from "@/components/ui/ActionErrorN
 import { SaveButton } from "@/components/ui/SaveButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { StepUpField } from "@/components/auth/StepUp";
+import Link from "@/components/ui/AppLink";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,12 +16,14 @@ import {
   requestAccountDeletion,
 } from "@/lib/settings/actions";
 import {
+  ACCOUNT_EXPORT_PATH,
   DELETE_CONFIRM_PHRASES,
   isDeleteConfirmPhrase,
 } from "@/lib/settings/constants";
 import type { ActionState } from "@/lib/errors";
 import { formatLongDate } from "@/lib/format/date";
-import { helpTextClass } from "@/components/ui/control-styles";
+import { helpTextClass, inlineLinkClass } from "@/components/ui/control-styles";
+import { cn } from "@/lib/utils";
 import { ACCOUNT_DELETION_GRACE_DAYS, ORDER_AFTERCARE_DAYS } from "@/lib/account-deletion/policy";
 import type { DeletionStatus } from "@/lib/account-deletion/requests";
 
@@ -73,6 +76,19 @@ export function DeleteAccountForm({
   useActionStateToast(cancelState);
   const deleteResult = useSaveResult(deleteState);
   const cancelResult = useSaveResult(cancelState);
+  // The way to a copy of everything while there is still everything to copy:
+  // before the request, and through the waiting period after it.
+  const exportNote = (
+    <p className={cn(helpTextClass, "mb-4")}>
+      {t.rich("exportFirst", {
+        link: (chunks) => (
+          <Link href={ACCOUNT_EXPORT_PATH} className={inlineLinkClass}>
+            {chunks}
+          </Link>
+        ),
+      })}
+    </p>
+  );
 
   if (deletion?.started) {
     return (
@@ -111,6 +127,7 @@ export function DeleteAccountForm({
             </ul>
           </div>
         )}
+        {exportNote}
         <form action={cancelAction} className="flex flex-col gap-4">
           <div>
             <SaveButton
@@ -133,6 +150,7 @@ export function DeleteAccountForm({
       description={t("description", { days: ACCOUNT_DELETION_GRACE_DAYS })}
       danger
     >
+      {exportNote}
       {!armed ? (
         <Button variant="destructive" onClick={() => setArmed(true)}>
           {t("deleteButton")}

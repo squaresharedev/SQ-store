@@ -526,7 +526,7 @@ test.describe("hosted checkout", () => {
     await page.getByLabel(/^stoneware vase. press enter/i).click();
     await canvasStill(page);
     // One button on the tile's quick bar puts the whole flow out.
-    const flowOnTile = page.getByRole("button", { name: /^open the buyer flow for stoneware vase$/i });
+    const flowOnTile = page.getByRole("button", { name: /^open the product page for stoneware vase$/i });
     await flowOnTile.click();
     const productPage = page.locator(`[data-artboard-id="${s.vase}"]`);
     const checkout = page.locator(`[data-artboard-id="checkout:${s.vase}"]`);
@@ -555,7 +555,7 @@ test.describe("hosted checkout", () => {
     await expect(thanks.locator("[data-order-page='preview']")).toBeVisible();
 
     // The X on any of the three closes the flow, not one page of it.
-    await thanks.getByRole("button", { name: /^close the buyer flow for stoneware vase$/i }).click();
+    await thanks.getByRole("button", { name: /^close the product page for stoneware vase$/i }).click();
     await expect(productPage).toHaveCount(0);
     await expect(checkout).toHaveCount(0);
     await expect(thanks).toHaveCount(0);
@@ -606,7 +606,7 @@ test.describe("hosted checkout", () => {
     // through a label on the way.
     await page.getByLabel(/^glaze zine. press enter/i).click();
     await canvasStill(page);
-    await page.getByRole("button", { name: /^open the buyer flow for glaze zine$/i }).click();
+    await page.getByRole("button", { name: /^open the product page for glaze zine$/i }).click();
     await expect(page.locator(`[data-artboard-id="${s.zine}"]`)).toBeVisible();
     await expect(page.locator(`[data-artboard-id="checkout:${s.zine}"]`)).toBeVisible();
     await expect(checkout).toHaveCount(0);

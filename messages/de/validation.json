@@ -524,11 +524,11 @@
     "addOnNotYours": "Eines der angebotenen Produkte ist nicht mehr in diesem Shop. Entferne es und speichere erneut."
   },
   "productImport": {
-    "noTitle": "Kein Titel.",
+    "noTitle": "Kein Titel. Prüfe, ob die Spalte „Titel“ oben richtig gesetzt ist.",
     "titleTooLong": "Titel ist länger als 200 Zeichen.",
-    "noPrice": "Kein Preis lesbar.",
+    "noPrice": "Kein Preis lesbar. Prüfe, ob die Spalte „Preis“ oben auf die richtige Spalte zeigt.",
     "priceZero": "Preis ist null.",
-    "duplicateTitle": "Eine andere Zeile hat diesen Titel."
+    "duplicateTitle": "Eine andere Zeile hat diesen Titel. Doppelte Titel werden übersprungen; benenne einen davon in deiner Tabelle um."
   },
   "shipping": {
     "shipsFromInvalid": "Dieses Land wird noch nicht als Versandursprung unterstützt.",

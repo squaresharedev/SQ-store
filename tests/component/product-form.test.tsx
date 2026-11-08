@@ -535,6 +535,39 @@ describe("ProductForm - unsaved changes", () => {
     });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
+
+  // --- What comes after a create ---
+
+  const PLACE_IT = "Next, put it on a storefront to give it a page.";
+
+  it("says a new product needs a storefront, and its toast goes to them", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm />);
+
+    await user.type(screen.getByPlaceholderText(/ambient loops/i), "Product");
+    await user.type(screen.getByLabelText(/price/i), "5.00");
+    await user.click(screen.getByRole("button", { name: /save product/i }));
+
+    await user.click(await screen.findByText(PLACE_IT));
+    expect(mockPush).toHaveBeenCalledWith("/storefront");
+    // The held redirect to the list does not follow it.
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    expect(mockPush).not.toHaveBeenCalledWith("/products");
+  });
+
+  it("leaves that out for a seller who came from a storefront to add it", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm returnTo="/storefront/sf-1" />);
+
+    await user.type(screen.getByPlaceholderText(/ambient loops/i), "Product");
+    await user.type(screen.getByLabelText(/price/i), "5.00");
+    await user.click(screen.getByRole("button", { name: /save product/i }));
+
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/storefront/sf-1"), {
+      timeout: 15000,
+    });
+    expect(screen.queryByText(PLACE_IT)).toBeNull();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -656,5 +689,50 @@ describe("ProductForm - navigation blocker", () => {
     await user.click(screen.getByRole("link", { name: /back to products/i }));
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+});
+
+describe("ProductForm - what the buy button does", () => {
+  const line = () => document.querySelector("[data-product-buy-button]");
+
+  it("says buyers email the seller while there is neither checkout nor a link", () => {
+    render(<ProductForm product={BASE_PRODUCT_FOR_FOLD} />);
+    expect(line()).toHaveAttribute("data-product-buy-button", "mail");
+    expect(line()).toHaveTextContent("No checkout for it yet");
+  });
+
+  it("names the seller's own link first, then checkout for a download", () => {
+    const { unmount } = render(
+      <ProductForm product={{ ...BASE_PRODUCT_FOR_FOLD, purchaseUrl: "https://shop.example.com/lamp" }} checkoutOpen />,
+    );
+    expect(line()).toHaveTextContent("The buy button takes buyers to shop.example.com to pay.");
+    unmount();
+    render(<ProductForm product={{ ...BASE_PRODUCT_FOR_FOLD, digitalFileName: "album.zip" }} checkoutOpen />);
+    expect(line()).toHaveTextContent("Buyers pay on its page, through Square Share checkout.");
+  });
+
+  it("keeps a parcel without a delivery price on email, and says nothing while nothing can sell", () => {
+    const { unmount } = render(<ProductForm product={BASE_PRODUCT_FOR_FOLD} checkoutOpen />);
+    expect(line()).toHaveAttribute("data-product-buy-button", "mail");
+    unmount();
+    render(<ProductForm product={BASE_PRODUCT_FOR_FOLD} missingTraderDetails={["address"]} />);
+    expect(line()).toBeNull();
+  });
+});
+
+describe("ProductForm - EU safety prompt", () => {
+  const prompt = () => screen.queryByRole("button", { name: /shipping to eu buyers/i });
+
+  it("opens the maker's details for a parcel, and then steps aside", async () => {
+    const user = userEvent.setup();
+    render(<ProductForm />);
+    await user.click(prompt()!);
+    expect(document.querySelector('[data-product-section="safety"]')).not.toBeNull();
+    expect(prompt()).toBeNull();
+  });
+
+  it("is not offered for a download", () => {
+    render(<ProductForm product={{ ...BASE_PRODUCT_FOR_FOLD, digitalFileName: "album.zip" }} />);
+    expect(prompt()).toBeNull();
   });
 });

@@ -1,19 +1,54 @@
 import { useTranslations } from "next-intl";
 import { SIGNAL_SOURCES } from "@/lib/analytics/sources";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cardClass } from "@/components/ui/surface-styles";
+import { SCRUB } from "@/components/charts";
+import { cardClass, joinedCardsClass, joinedCellClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import {
   heroChartHeightClass,
   heroFrameClass,
   leadLaneClass,
 } from "@/components/analytics/chart-layout";
+import { ANALYTICS_LOOK } from "@/components/analytics/look";
+
+/** The revenue lead as a card (RevenueCard): label, figure, change, line, dates. */
+function RevenueCardSkeleton({ joined }: { joined: boolean }) {
+  return (
+    <div className={cn(joined ? joinedCellClass : cardClass, "flex flex-col gap-3 p-5 sm:p-6")}>
+      <Skeleton className="h-3 w-16" />
+      <Skeleton className="h-12 w-56" />
+      <Skeleton className="h-5 w-48" />
+      <div className="mt-6" style={{ height: SCRUB.leadHeight }}>
+        <Skeleton className="size-full" />
+      </div>
+    </div>
+  );
+}
+
+/** The sales tiles, plain or as trend tiles (a line along the bottom). */
+function SalesTilesSkeleton({ trend, joined }: { trend: boolean; joined: boolean }) {
+  return (
+    <div className={cn("grid grid-cols-2 lg:grid-cols-4", joined ? "gap-px" : "gap-4")}>
+      {Array.from({ length: 4 }, (_, i) => (
+        <div key={i} className={cn(joined ? joinedCellClass : cardClass, "flex flex-col gap-3 p-4")}>
+          <Skeleton className="h-3 w-16" />
+          <Skeleton className="h-8 w-24" />
+          {trend && (
+            <div style={{ height: SCRUB.sparkHeight }}>
+              <Skeleton className="size-full" />
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 /**
  * Module-level loading skeleton mirroring the analytics layout: the range
- * controls, the sales section (the revenue hero, four tiles, two two-up rows
- * and the full-width status card) and then one band per registered signal
- * source.
+ * controls, the sales section (the revenue lead and four tiles, drawn the way
+ * ANALYTICS_LOOK draws them, two two-up rows and the full-width status card)
+ * and then one band per registered signal source.
  *
  * The signal bands are DERIVED from SIGNAL_SOURCES rather than hard-coded, for
  * the same reason the page itself is: a source added to the registry that then
@@ -23,6 +58,8 @@ import {
  */
 export function AnalyticsSkeleton() {
   const t = useTranslations("Analytics.loading");
+  const look = ANALYTICS_LOOK;
+  const joined = look.lead === "card" && look.tiles === "trend" && look.joined;
   return (
     <div className="flex flex-col gap-10" aria-hidden="true">
       <span className="sr-only">{t("srLoading")}</span>
@@ -34,26 +71,27 @@ export function AnalyticsSkeleton() {
         {/* Section heading */}
         <Skeleton className="h-6 w-40" />
 
-        {/* The revenue hero: its label and figure, over the room its frame and
-            chart will take. No card, because the hero has none. */}
         <div className={leadLaneClass}>
-          <div className={heroFrameClass}>
-            <div className={cn(heroChartHeightClass, "flex flex-col gap-3 px-6")}>
-              <Skeleton className="h-3 w-16" />
-              <Skeleton className="h-10 w-48" />
+          {look.lead === "frame" ? (
+            // The revenue hero: its label and figure, over the room its frame
+            // and chart will take. No card, because the hero has none.
+            <div className={heroFrameClass}>
+              <div className={cn(heroChartHeightClass, "flex flex-col gap-3 px-6")}>
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-10 w-48" />
+              </div>
             </div>
-          </div>
+          ) : joined ? (
+            <div className={joinedCardsClass}>
+              <RevenueCardSkeleton joined />
+              <SalesTilesSkeleton trend joined />
+            </div>
+          ) : (
+            <RevenueCardSkeleton joined={false} />
+          )}
         </div>
 
-        {/* Tiles */}
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className={cn(cardClass, "flex flex-col gap-3 p-4")}>
-              <Skeleton className="h-3 w-16" />
-              <Skeleton className="h-8 w-24" />
-            </div>
-          ))}
-        </div>
+        {!joined && <SalesTilesSkeleton trend={look.tiles === "trend"} joined={false} />}
 
         {/* Chart pairs */}
         {Array.from({ length: 2 }, (_, row) => (

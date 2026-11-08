@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { after } from "next/server";
-import { pageShellClass } from "@/components/ui/surface-styles";
+import Link from "@/components/ui/AppLink";
+import { inlineLinkClass } from "@/components/ui/control-styles";
+import { pageShellClass, pageSubtitleClass } from "@/components/ui/surface-styles";
 import {
   PRODUCTS_DEFAULT_PAGE_SIZE,
   getProductPlacements,
@@ -10,10 +12,17 @@ import {
 } from "@/lib/products/queries";
 import { ProductsBrowser } from "@/components/products/ProductsBrowser";
 import { PRODUCT_SORTS, type ProductSort } from "@/lib/products/sort";
-import { PRODUCT_STATUSES, type ProductFilters, type ProductStatus } from "@/types/product";
+import {
+  MODERATED_FILTER,
+  PRODUCT_STATUSES,
+  type ProductFilters,
+  type ProductStatus,
+} from "@/types/product";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
+import { planRoom, planRoomRunningLow } from "@/lib/billing/limits";
+import { LIMIT_SOURCE, plansHref } from "@/lib/billing/paths";
 import { DEV_PREVIEW_PARAM, previewsEmptyList } from "@/lib/dev/preview";
 import { requireUser } from "@/lib/auth/session";
 import { toShipByProduct } from "@/lib/orders/queries";
@@ -47,7 +56,9 @@ function parseParams(params: SearchParams): {
   const filters: ProductFilters = {};
 
   const status = first(params.status);
-  if (PRODUCT_STATUSES.includes(status as ProductStatus)) {
+  if (status === MODERATED_FILTER) {
+    filters.moderated = true;
+  } else if (PRODUCT_STATUSES.includes(status as ProductStatus)) {
     filters.status = status as ProductStatus;
   }
   const sortParam = first(params.sort);
@@ -101,6 +112,11 @@ export default async function ProductsPage({
   const identity = account
     ? await getTraderIdentityStatus(account.accountId)
     : { ok: true as const, missing: [] };
+  // How much of the plan's product room is used, said under the heading once
+  // it is nearly gone: the limit is seen coming here, not met at Add product
+  // (where /products/new shows it in place of the form).
+  const room =
+    account && canWrite && !previewEmpty ? await planRoom(account.accountId, "products") : null;
   const t = await getTranslations("Products.page");
 
   return (
@@ -121,6 +137,19 @@ export default async function ProductsPage({
             <h1 className="text-3xl font-semibold text-foreground md:text-4xl">
               {t("heading")}
             </h1>
+            {planRoomRunningLow(room) && (
+              <p className={pageSubtitleClass} data-products-plan-usage="">
+                {t.rich("planUsage", {
+                  used: room.used,
+                  cap: room.cap,
+                  link: (chunks) => (
+                    <Link href={plansHref(LIMIT_SOURCE.products)} className={inlineLinkClass}>
+                      {chunks}
+                    </Link>
+                  ),
+                })}
+              </p>
+            )}
           </div>
         }
       />

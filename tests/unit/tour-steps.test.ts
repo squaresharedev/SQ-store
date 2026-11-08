@@ -163,8 +163,10 @@ describe("tour steps", () => {
       "finish",
     ]);
     expect(tourStepsFor(null).map((step) => step.id)).toEqual(viewer);
-    expect(tourStepsFor("owner")).toHaveLength(TOUR_STEPS.length);
-    expect(tourStepsFor("editor")).toHaveLength(TOUR_STEPS.length);
+    // Every stop for those who can act, less one whose feature is not on yet.
+    const switchedOn = TOUR_STEPS.filter((step) => step.available !== false);
+    expect(tourStepsFor("owner")).toEqual(switchedOn);
+    expect(tourStepsFor("editor")).toEqual(switchedOn);
   });
 
   it("writes its copy without dashes standing in for punctuation", () => {
@@ -192,18 +194,15 @@ describe("tour steps", () => {
     }
   });
 
-  it("says what is true of the embed today, with or without a storefront", () => {
-    // Like the payments stop: either something to paste now, or something
-    // still on its way (it has no host until NEXT_PUBLIC_EMBED_URL is set,
-    // which a test run, like production before launch, does not have).
+  it("stops at the embed only once it has a host, with or without a storefront", () => {
+    // It has no host until NEXT_PUBLIC_EMBED_URL is set (a test run, like
+    // production before launch, has none), and a stop about pasting a widget
+    // that shows on no other site is a promise the tour cannot keep.
     const embed = tourStep("storefront-embed")!;
+    expect(tourStepsFor("owner").some((step) => step.id === embed.id)).toBe(isEmbedAvailable());
     for (const key of [embed.body, embed.targets[0].body!, embed.fallbackBody!]) {
-      if (isEmbedAvailable()) {
-        expect(english(key)).toMatch(/your own site/i);
-        expect(english(key)).not.toMatch(/still in development/i);
-      } else {
-        expect(english(key)).toMatch(/still in development/i);
-      }
+      expect(english(key)).toMatch(/your own site/i);
+      expect(english(key)).not.toMatch(/still in development/i);
     }
     expect(embed.targets[0].extra).toBe("embed-snippet");
     expect(embed.fallbackExtra).toBe("embed-snippet");

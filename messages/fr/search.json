@@ -48,7 +48,7 @@
     "securityActivity": "Activité de sécurité",
     "signOut": "Déconnexion",
     "vat": "Numéro de TVA",
-    "businessName": "Raison sociale ou nom",
+    "businessName": "Votre nom ou celui de votre entreprise",
     "country": "Pays",
     "address": "Adresse professionnelle",
     "contactEmail": "E-mail de contact",
@@ -61,7 +61,6 @@
     "sellerAgreement": "Contrat vendeur",
     "termsOfService": "Conditions d’utilisation",
     "exportData": "Exporter mes données",
-    "deleteAccount": "Supprimer le compte",
     "plan": "Forfait et tarification",
     "invoices": "Factures et informations de paiement"
   },

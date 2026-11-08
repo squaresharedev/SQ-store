@@ -91,7 +91,7 @@
     "groups": {
       "theme": "Theme",
       "header": "Kopfbereich",
-      "typography": "Typografie",
+      "typography": "Schriftart",
       "cards": "Produktkacheln",
       "soldOut": "Ausverkauft",
       "productPage": "Produktseite",
@@ -100,7 +100,7 @@
     "subtitle": {
       "theme": "Schaufenster / Theme",
       "header": "Schaufenster / Kopfbereich",
-      "typography": "Schaufenster / Typografie",
+      "typography": "Schaufenster / Schriftart",
       "cards": "Schaufenster / Produktkacheln",
       "soldOut": "Schaufenster / Ausverkauft",
       "productPage": "Schaufenster / Produktseite",
@@ -161,7 +161,8 @@
       "cardStarRating": "Sternebewertung auf Kacheln",
       "cardLowStock": "Label Wenig auf Lager",
       "textSpacing": "Zeichenabstand und Zeilenhöhe",
-      "elementBlur": "Unschärfe"
+      "elementBlur": "Unschärfe",
+      "phoneLayout": "Für Handys anordnen"
     }
   },
   "editorSearch": {
@@ -207,31 +208,37 @@
     "emptyHint": "Dieses Raster ist leer",
     "removed": "Von Square Share entfernt",
     "pausedInReview": "Pausiert · bei Square Share in Prüfung",
-    "pausedNeedsChanges": "Von Square Share pausiert · Änderungen nötig"
+    "pausedNeedsChanges": "Von Square Share pausiert · Änderungen nötig",
+    "status": {
+      "live": "Online",
+      "pagesOff": "Noch nicht online: Schalte die Produktseiten ein",
+      "detailsMissing": "Noch nicht online: Füge deine Verkäuferangaben hinzu"
+    }
   },
   "embed": {
-    "inDevNotice": "Das Einbettungs-Widget befindet sich in der Entwicklung und wird noch nicht auf externen Websites angezeigt. Konfiguriere deine Einstellungen unten, damit du den Einbettungscode einfügen kannst, sobald er verfügbar ist.",
+    "sectionTitle": "Auf deiner eigenen Website",
+    "inDevNotice": "Das erscheint noch nicht auf anderen Websites. Richte es jetzt ein, dann ist es bereit, sobald es startet. Du ergänzt dann auch einen kurzen Hinweis in deiner Datenschutzerklärung: Den Text geben wir dir.",
     "title": "Dieses Schaufenster teilen",
-    "description": "Schick Leuten einen Link zu „{name}“, oder füge einen Code in deine eigene Website ein, um es dort zu zeigen.",
+    "description": "Schick Leuten einen Link zu „{name}“, oder füge den Website-Code in deine eigene Website ein, um es dort zu zeigen.",
     "steps": {
       "site": "Wähle die Websites, auf denen es erscheint",
-      "snippet": "Füge den Code in deine Website ein",
+      "snippet": "Füge den Website-Code in deine Website ein",
       "privacy": "Ergänze das in deiner Datenschutzerklärung"
     },
     "required": "Pflicht",
     "enabledLabel": "Auf meiner Website zeigen",
     "showingLabel": "Wird auf deiner Website gezeigt",
-    "domainsLabel": "Zugelassene Domains",
+    "domainsLabel": "Deine Website-Adressen",
     "domainsPlaceholder": "yoursite.com, blog.yoursite.com",
-    "domainsHint": "Bis zu {max}, kommagetrennt. Füge eine URL ein, und wir kürzen sie auf die Domain.",
-    "sameAsHint": "Übernimmt die zugelassenen Domains von {title}.",
-    "emptyDomainsWarning": "Füge mindestens eine Domain hinzu. Solange dies leer ist, wird das Schaufenster nirgendwo geladen, auch wenn die Einbettung aktiviert ist.",
+    "domainsHint": "Die Einbettung lädt nur auf diesen Websites. Füge eine vollständige URL ein, und wir übernehmen die Adresse daraus. Bis zu {max}, kommagetrennt.",
+    "sameAsHint": "Übernimmt die Website-Adressen von {title}.",
+    "emptyDomainsWarning": "Füge mindestens eine Website-Adresse hinzu. Solange dies leer ist, wird das Schaufenster nirgendwo geladen, auch wenn die Einbettung aktiviert ist.",
     "builderLabel": "Dein Website-Baukasten",
     "builderOther": "Andere Website",
     "builderSteps": {
       "other": "Füge den Code in das HTML deiner Seite ein, dort, wo das Schaufenster erscheinen soll.",
       "wordpress": "Füge einen Block „Individuelles HTML“ dort ein, wo das Schaufenster erscheinen soll, und füge den Code hinein.",
-      "squarespace": "Füge einen „Code“-Block hinzu und füge den Code hinein. Erscheint das Schaufenster erst nach dem Neuladen, wechsle zu „Nur Iframe“.",
+      "squarespace": "Füge einen „Code“-Block hinzu und füge den Code hinein. Erscheint das Schaufenster erst nach dem Neuladen, wechsle zu „Einfache Einbettung“.",
       "wix": "Füge „Embed Code“ und dann „Embed HTML“ hinzu und füge den Code hinein. Zieh das Feld danach so hoch wie dein Schaufenster.",
       "webflow": "Füge ein „Code Embed“-Element hinzu und füge den Code hinein. Es erscheint auf deiner veröffentlichten Website.",
       "shopify": "Füge im Theme-Editor einen Abschnitt „Custom Liquid“ hinzu und füge den Code hinein.",
@@ -241,21 +248,21 @@
     },
     "snippetKinds": {
       "label": "Art des Codes",
-      "script": "Skript",
-      "iframe": "Nur Iframe"
+      "script": "Vollständige Einbettung",
+      "iframe": "Einfache Einbettung"
     },
-    "snippetReadyHint": "Einmal einfügen genügt. Der Code passt sich deinem Schaufenster an und übernimmt, was du hier änderst.",
-    "iframeHint": "Für Websites, die Skripte entfernen. Er ist {height} Pixel hoch und scrollt innen. Kopiere ihn neu, wenn du deine Domains änderst.",
-    "snippetLockedHint": "Aktiviere die Einbettung und füge mindestens eine Domain hinzu, um die Schaltfläche „Kopieren“ freizuschalten.",
+    "snippetReadyHint": "Funktioniert auf den meisten Websites. Einmal einfügen genügt: Der Code passt sich deinem Schaufenster an und übernimmt, was du hier änderst.",
+    "iframeHint": "Nutze das, wenn die vollständige Einbettung auf deiner Website nicht erschienen ist. Sie ist {height} Pixel hoch und scrollt innen. Kopiere sie jedes Mal neu, wenn du deine Website-Adressen änderst.",
+    "snippetLockedHint": "Aktiviere die Einbettung und füge mindestens eine Website-Adresse hinzu, um die Schaltfläche „Kopieren“ freizuschalten.",
     "snippetSaveHint": "Speichere deine Einstellungen, um die Schaltfläche „Kopieren“ freizuschalten.",
     "pagesOffHint": "Schalte zuerst im Designer die Produktseiten ein. Ein Klick auf ein Produkt öffnet seine Seite.",
     "notShowingLabel": "Wenn das Schaufenster nicht erscheint",
-    "notShowingTip": "Die Adresse deiner Website muss unter „Zugelassene Domains“ stehen, und die Website muss https verwenden. Eingefügter Code erscheint auf deiner veröffentlichten Website, nicht im Editor eines Baukastens. Um ihn auf einer Vorschauadresse (etwa deineseite.webflow.io) zu sehen, füge auch diese Adresse hinzu.",
+    "notShowingTip": "Die Adresse deiner Website muss oben unter deinen Website-Adressen stehen, und die Website muss https verwenden. Eingefügter Code erscheint auf deiner veröffentlichten Website, nicht im Editor eines Baukastens. Wenn das Schaufenster gar nicht erscheint, probiere die Code-Art „Einfache Einbettung“. Um es auf einer Vorschauadresse (etwa deineseite.webflow.io) zu sehen, füge auch diese Adresse hinzu.",
     "copySnippet": {
-      "copy": "Einbettungscode kopieren",
-      "copied": "Einbettungscode kopiert",
-      "failed": "Einbettungscode konnte nicht kopiert werden. Wähle ihn aus und kopiere ihn manuell.",
-      "cannotCopyYet": "Einbettungscode kann noch nicht kopiert werden"
+      "copy": "Website-Code kopieren",
+      "copied": "Website-Code kopiert",
+      "failed": "Der Website-Code konnte nicht kopiert werden. Wähle ihn aus und kopiere ihn manuell.",
+      "cannotCopyYet": "Website-Code kann noch nicht kopiert werden"
     },
     "privacyHint": "Deine Website lädt dieses Schaufenster jetzt von Square Share, deshalb muss deine Datenschutzerklärung das erwähnen. Füge diesen Text ein:",
     "privacyTextLabel": "Datenschutztext",
@@ -265,20 +272,21 @@
       "copied": "Datenschutztext kopiert",
       "failed": "Der Text konnte nicht kopiert werden. Wähle ihn aus und kopiere ihn manuell."
     },
-    "snippetKeyLabel": "Schlüssel",
-    "rotateConfirmText": "Beim Erneuern wird ein neuer Schlüssel ausgestellt. Jede Kopie des alten Einbettungscodes hört sofort auf zu funktionieren, auch Kopien auf Websites, die du noch nutzt: Du musst den neuen Einbettungscode überall einfügen.",
-    "rotateKey": "Schlüssel erneuern",
-    "rotating": "Wird erneuert…",
-    "revokeHint": "An der falschen Stelle eingefügt? Erneuere den Schlüssel, um alle vorhandenen Einbettungscodes zu widerrufen.",
+    "snippetKeyLabel": "Website-Code",
+    "rotateConfirmText": "Ein neuer Code schaltet den alten überall ab, wo er eingefügt wurde. Auf Websites, auf denen das Schaufenster weiter erscheinen soll, musst du den neuen Code erneut einfügen.",
+    "rotateKey": "Neuen Code erstellen",
+    "rotating": "Neuer Code wird erstellt…",
+    "revokeHint": "Dein Website-Code darf öffentlich sein: Er erscheint nur auf deinen Website-Adressen. Erstelle nur dann einen neuen Code, wenn du jede bereits eingefügte Kopie abschalten willst.",
     "saveSettings": "Einstellungen speichern",
     "saving": "Wird gespeichert…",
     "saved": "Einbettungseinstellungen gespeichert.",
-    "newKeyIssued": "Neuer Schlüssel ausgestellt.",
-    "newKeyDetail": "Füge den Einbettungscode überall neu ein, wo dieses Schaufenster eingebettet ist."
+    "newKeyIssued": "Neuer Website-Code erstellt.",
+    "newKeyDetail": "Füge den Website-Code überall neu ein, wo dieses Schaufenster eingebettet ist."
   },
   "share": {
     "title": "Schaufenster-Link",
     "live": "Dein Schaufenster hat eine eigene Seite. Jeder mit diesem Link kann es ansehen, ganz ohne Website.",
+    "searchOff": "Für Suchmaschinen wie Google ausgeblendet.",
     "pagesOff": "Schalte im Designer die Produktseiten ein, dann bekommt dieses Schaufenster einen Link zum Teilen.",
     "detailsMissing": "Dieses Schaufenster bekommt einen Link zum Teilen, sobald deine Verkäuferangaben vollständig sind.",
     "open": "Öffnen",
@@ -321,7 +329,7 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Produktseite",
-    "closeAriaLabel": "Kaufablauf für {title} schließen",
+    "closeAriaLabel": "Produktseite für {title} schließen",
     "desktopSize": "Desktop-Größe",
     "mobileSize": "Mobile Größe",
     "checkoutLabel": " · Kasse",
@@ -331,7 +339,7 @@
   "metadata": {
     "storefronts": {
       "title": "Schaufenster",
-      "subtitle": "Jedes Schaufenster hat sein eigenes Raster und Theme. Erstelle so viele wie nötig und öffne eines zum Bearbeiten."
+      "subtitle": "Jedes Schaufenster hat sein eigenes Raster und Theme und einen eigenen Link zum Teilen. Erstelle so viele wie nötig und öffne eines zum Bearbeiten."
     },
     "editor": {
       "title": "Schaufenster bearbeiten"
@@ -351,20 +359,20 @@
   "controls": {
     "off": "Aus",
     "layers": "Ebenen",
-    "objectCount": "{count, plural, one {1 Objekt} other {# Objekte}}",
+    "objectCount": "{count, plural, one {# Block} other {# Blöcke}}",
     "cardStyle": "Kachelstil",
     "priceTag": "Preisschild",
     "theme": "Theme",
-    "canvas": "Arbeitsfläche",
-    "design": "Design"
+    "themeHint": "Farben, Rastergröße und Handy-Layout",
+    "canvas": "Arbeitsfläche"
   },
   "designPanel": {
     "tabSelection": "Auswahl",
-    "tabDesign": "Design",
+    "tabDesign": "Ganzes Schaufenster",
     "show": "Designbereich anzeigen",
     "hide": "Designbereich ausblenden",
     "resize": "Designbereich skalieren",
-    "closeSettings": "Designeinstellungen schließen",
+    "closeSettings": "Schaufenster-Stil schließen",
     "scopeLabel": "Bereichsumfang"
   },
   "library": {
@@ -434,10 +442,11 @@
     "sectionPalettes": "Paletten"
   },
   "themePanel": {
-    "accent": "Akzentfarbe"
+    "accent": "Akzentfarbe",
+    "accentHint": "Wird für Buttons, Aktions-Badges, Überschriften und deinen Shop-Namen verwendet."
   },
   "panelSearch": {
-    "placeholder": "Einstellung oder Objekt suchen",
+    "placeholder": "Einstellung oder Block suchen",
     "clear": "Suche löschen",
     "noResults": "Nichts im Editor stimmt damit überein.",
     "matchesLabel": "Treffer"
@@ -488,7 +497,7 @@
     "cornerValueText": "{n, plural, one {# Pixel} other {# Pixel}}",
     "sharp": "Eckig",
     "circle": "Kreis",
-    "fineTuning": "Feineinstellung",
+    "titleSection": "Titel",
     "showTitle": "Titel anzeigen",
     "titleStyleLabel": "Titelstil",
     "edgeSpacing": "Randabstand",
@@ -556,12 +565,13 @@
     "label": "Auf größeren Karten",
     "tile": "Mitwachsen",
     "cell": "Gleich bleiben",
-    "everyCard": "Gilt für alle Karten in diesem Shop."
+    "everyCard": "Gilt für Preisschilder und Aktions-Badges auf jeder Karte."
   },
   "layout": {
     "canvasWidth": "Breite der Arbeitsfläche",
     "canvasWidthAriaLabel": "Breite der Arbeitsfläche in Blöcken",
     "blocksWide": "{n, plural, one {# Block breit} other {# Blöcke breit}}",
+    "blocksUnit": "Blöcke",
     "canvasHeight": "Höhe der Arbeitsfläche",
     "heightTip": "Die Arbeitsfläche kann nicht kleiner werden als die bereits darauf platzierten Blöcke: Ziehe zuerst einen Block nach oben, dann verkürze die Arbeitsfläche.",
     "canvasHeightAriaLabel": "Höhe der Arbeitsfläche in Blöcken",
@@ -570,6 +580,11 @@
     "gridDensityAriaLabel": "Rasterdichte",
     "gridGapValue": "{n, plural, one {# Pixel Abstand} other {# Pixel Abstand}}",
     "noGap": "Kein Abstand",
+    "phonesInfoLabel": "Wie Handys dieses Raster anzeigen",
+    "phonesInfoBody": "Aus: Handys ordnen das Raster selbst passend an. Ein: Öffne die Handy-Ansicht und zieh Blöcke oder ändere ihre Größe, um sie selbst zu platzieren. Das Desktop-Raster bleibt, wie es ist.",
+    "phonesAutomatic": "Handys ordnen dieses Raster automatisch an.",
+    "phoneWidth": "Handy-Breite",
+    "phoneWidthAriaLabel": "Handy-Breite in Blöcken",
     "showGrid": "Raster anzeigen",
     "gridInfoLabel": "Wer das Raster sieht",
     "gridInfoBody": "Eine Hilfe für dich beim Gestalten: Es zeichnet die leeren Felder, damit du siehst, wo ein Block landet. Käufer sehen es nie."
@@ -588,7 +603,8 @@
     "angle": "{n}°",
     "layerLabel": "Ebene",
     "layerInfoLabel": "Wie Ebenen funktionieren",
-    "layerInfoBody": "Ebenen bestimmen nur, was oben gemalt wird, wo sich Blöcke überlappen; die Lesereihenfolge für Screenreader ändert sich nie.{multi, select, true { Diese Auswahl behält beim Verschieben ihre eigene Reihenfolge innerhalb des Stapels.} other {}}{stacked, select, true { Alt-Klick auf einen Stapel auf der Arbeitsfläche, um den darunterliegenden Block zu erreichen.} other {}}",
+    "layerInfoBody": "Ebenen bestimmen nur, was oben gemalt wird, wo sich Blöcke überlappen; die Lesereihenfolge für Screenreader ändert sich nie.{multi, select, true { Diese Auswahl behält beim Verschieben ihre eigene Reihenfolge innerhalb des Stapels.} other {}}",
+    "stackedHint": "Alt-Klick, um den darunterliegenden Block auszuwählen. Auf einem Touchscreen tippst du noch einmal auf den Stapel.",
     "blocksSelected": "{count, plural, one {# Block ausgewählt} other {# Blöcke ausgewählt}}",
     "layerOf": "Ebene {index} von {total}",
     "blockLayerLabel": "Block-Ebene",
@@ -596,7 +612,13 @@
     "sendBackward": "Eine Ebene nach hinten",
     "bringForward": "Eine Ebene nach vorne",
     "bringToFront": "In den Vordergrund",
-    "seeAllLayers": "Alle Ebenen anzeigen"
+    "seeAllLayers": "Alle Ebenen anzeigen",
+    "phoneLabel": "Auf Handys",
+    "phoneInfoLabel": "Wie ein Block auf Handys sitzt",
+    "phoneInfoBody": "Zieh einen Block in der Handy-Ansicht oder ändere seine Größe, um ihn dort selbst zu platzieren. „Zurück zu automatisch“ lässt die Handy-Anordnung ihn wieder selbst platzieren. Das Desktop-Raster bleibt, wie es ist.",
+    "hideOnPhones": "Auf Handys ausblenden",
+    "showOnPhones": "Auf Handys anzeigen",
+    "phoneAutomatic": "Zurück zu automatisch"
   },
   "header": {
     "showHeader": "Kopfbereich anzeigen",
@@ -606,7 +628,8 @@
     "storeNamePlaceholder": "Shop-Name, der Käufern angezeigt wird",
     "bio": "Kurzbio",
     "bioPlaceholder": "Ein kurzer Satz über deinen Shop",
-    "charsLeft": "{n, plural, one {# Zeichen übrig} other {# Zeichen übrig}}"
+    "charsLeft": "{n, plural, one {# Zeichen übrig} other {# Zeichen übrig}}",
+    "styleLine": "{line, select, name {Schriftart und Farbe des Namens} other {Schriftart und Farbe der Kurzbio}}"
   },
   "soldOut": {
     "hide": "Vor Käufern ausblenden",
@@ -682,10 +705,12 @@
     "movePriceTo": "{spot, select, top_left {Preis nach oben links verschieben} top_center {Preis nach oben Mitte verschieben} top_right {Preis nach oben rechts verschieben} middle_center {Preis in die Mitte verschieben} bottom_left {Preis nach unten links verschieben} bottom_center {Preis nach unten Mitte verschieben} bottom_right {Preis nach unten rechts verschieben} other {Preis hierhin verschieben}}"
   },
   "productPage": {
+    "scopeNote": "Diese Einstellungen gelten für jede Produktseite in diesem Schaufenster.",
     "layout": {
       "title": "Seite",
       "showPage": {
         "label": "Produktseite anzeigen",
+        "hint": "Gibt deinem Schaufenster außerdem einen eigenen Link zum Teilen.",
         "infoLabel": "Was dieser Schalter bewirkt",
         "infoOn": "Ein Tippen auf eine Produktkachel öffnet deren Seite, und das Schaufenster hat eine eigene Seite zum Teilen.",
         "infoOff": "Produktkacheln haben keine Seite zum Öffnen, und auch der Link zum Schaufenster selbst funktioniert nicht mehr."
@@ -702,7 +727,7 @@
         "label": "Schriftart",
         "infoLabel": "Wie die Schriftart dieser Seite mit der des Schaufensters zusammenhängt",
         "infoOwn": "Diese Seite wird mit einer eigenen Schrift angezeigt, unabhängig vom Schaufenster.",
-        "infoFollows": "Übernimmt die Schriftart deines Schaufensters. Ändere sie unter Typografie.",
+        "infoFollows": "Übernimmt die Schriftart deines Schaufensters. Ändere sie in den Schriftart-Einstellungen.",
         "inheritOption": "Wie das Schaufenster ({name})"
       },
       "indexing": {
@@ -716,6 +741,7 @@
       "title": "Kauf-Button",
       "infoLabel": "Was entscheidet, ob ein Button angezeigt wird",
       "infoContent": "Der Button folgt dem Kauflink des jeweiligen Produkts (am Produkt eingestellt). Ohne Kauflink wird deine Kontakt-E-Mail-Adresse unten verwendet; fehlen beide, wird kein Button angezeigt.",
+      "checkoutNote": "Der Bezahl-Button an deiner Kasse passt zu diesem. <link>Kasse öffnen</link>",
       "buttonText": {
         "label": "Button-Text",
         "charsLeft": "{count, plural, one {# Zeichen übrig} other {# Zeichen übrig}}"
@@ -844,6 +870,7 @@
   "productBlock": {
     "deleted": "Dieses Produkt wurde aus deinem Katalog entfernt.",
     "removeFromGrid": "Aus dem Raster entfernen",
+    "details": "Produktdetails",
     "nameLabel": "Name",
     "namePlaceholder": "Produktname",
     "priceLabel": "Preis ({currency})",
@@ -858,13 +885,14 @@
       "lowStock": "Geringer Bestand: {count} vorrätig.",
       "inStock": "{count} auf Lager."
     },
-    "openProductPage": "Kaufablauf öffnen",
-    "hideProductPage": "Kaufablauf ausblenden",
+    "openProductPage": "Produktseite öffnen",
+    "hideProductPage": "Produktseite ausblenden",
+    "noCtaWarning": "Der Kauf-Button auf seiner Seite hat noch kein Ziel. Füge dem Produkt einen Kauflink hinzu oder trage eine Kontakt-E-Mail in deinen Verkäuferangaben ein.",
     "tileStyle": {
       "title": "Kachel-Stil",
-      "reset": "Auf Theme zurücksetzen",
+      "reset": "Theme-Stil verwenden",
       "infoLabel": "Wie der Stil dieser Kachel mit dem Theme zusammenhängt",
-      "infoWithOverrides": "Diese Kachel hat einen eigenen Stil. Einstellungen, die du hier nicht geändert hast, folgen weiterhin dem Theme.",
+      "infoWithOverrides": "Diese Kachel hat einen eigenen Stil; alles, was du hier nicht änderst, folgt dem Theme. „Theme-Stil verwenden“ setzt nur die Änderungen dieser Kachel zurück: Das Theme bleibt, wie es ist.",
       "infoNoOverrides": "Gestalte diese Kachel eigenständig. Alles, was du nicht änderst, folgt weiterhin dem Theme."
     },
     "priceTag": "Preisschild",
@@ -876,6 +904,7 @@
       "updateEverywhere": "Überall aktualisieren"
     },
     "savedToast": "„{title}“ wurde überall aktualisiert, wo es erscheint.",
+    "unsavedToast": "Dein neuer Name oder Preis für „{title}“ wurde nicht gespeichert. Drück auf Speichern, bevor du weitermachst, um ihn zu behalten.",
     "validation": {
       "noTitle": "Gib deinem Produkt einen Titel.",
       "noPrice": "Lege einen Preis fest.",
@@ -983,7 +1012,7 @@
   "multiBlock": {
     "shapesContext": "{count, plural, one {# Form wird} other {# Formen werden}} gemeinsam bearbeitet. Die angezeigten Werte stammen von der ersten ausgewählten Form; jede Änderung gilt für alle.",
     "textsContext": "{count, plural, one {# Textblock wird} other {# Textblöcke werden}} gemeinsam bearbeitet. Die angezeigten Werte stammen vom ersten ausgewählten Block; jede Änderung gilt für alle. Jeder Block behält seinen eigenen Text.",
-    "imagesContext": "{count, plural, one {# Element wird} other {# Elemente werden}} gemeinsam bearbeitet. Die angezeigten Werte stammen vom ersten ausgewählten Element; jede Änderung gilt für alle. Jedes behält sein eigenes Bild.",
+    "imagesContext": "{count, plural, one {# Block wird} other {# Blöcke werden}} gemeinsam bearbeitet. Die angezeigten Werte stammen vom ersten ausgewählten Block; jede Änderung gilt für alle. Jeder behält sein eigenes Bild.",
     "productsContext": "{count, plural, one {# Produktkachel wird} other {# Produktkacheln werden}} gemeinsam gestaltet. Die angezeigten Werte stammen von der ersten ausgewählten Kachel; jede Änderung gilt für alle.",
     "mixedContext": "{count, plural, one {# Block verschiedener Typen ist ausgewählt.} other {# Blöcke verschiedener Typen sind ausgewählt.}} Wähle Blöcke desselben Typs aus, um ihre Einstellungen gemeinsam zu bearbeiten.",
     "remove": "{count, plural, one {# Block entfernen} other {# Blöcke entfernen}}",
@@ -991,7 +1020,7 @@
     "productsNotDuplicated": "Produkte werden nicht dupliziert.",
     "tileStyle": {
       "title": "Kachel-Stil",
-      "reset": "Auf Theme zurücksetzen"
+      "reset": "Theme-Stil verwenden"
     },
     "priceTag": "Preisschild"
   },
@@ -1003,18 +1032,18 @@
     "ariaLabel": "Editor-Werkzeuge",
     "addProduct": "Produkt hinzufügen",
     "addText": "Text hinzufügen",
-    "addElement": "Element hinzufügen",
+    "addElement": "Form oder Bild hinzufügen",
     "product": "Produkt",
     "text": "Text",
-    "element": "Element",
-    "elementsMenu": "Elemente",
+    "element": "Formen",
+    "elementsMenu": "Formen und Bilder",
     "uploading": "Wird hochgeladen…",
     "upload": "Hochladen",
     "uploadImage": "Bild hochladen",
     "allShapes": "Alle Formen",
     "browseShapes": "Die vollständige Formbibliothek durchsuchen",
-    "closePage": "Kaufablauf schließen",
-    "showPage": "Kaufablauf anzeigen",
+    "closePage": "Produktseite schließen",
+    "showPage": "Produktseite anzeigen",
     "closePages": "Produktseite, Kasse und Dankes-Seite schließen",
     "showPageFull": "Produktseite, Kasse und Dankes-Seite anzeigen",
     "undo": "Rückgängig",
@@ -1027,22 +1056,26 @@
     "zoomOutTip": "Herauszoomen (Ctrl -)",
     "zoomReset": "Zoom auf 100 % zurücksetzen",
     "zoomResetTip": "Zoom zurücksetzen (Ctrl 0)",
-    "zoomResetMenuItem": "Zoom zurücksetzen",
+    "zoomFit": "An Bildschirm anpassen",
     "zoomIn": "Hineinzoomen",
     "zoomInTip": "Hineinzoomen (Ctrl +)",
-    "designSettings": "Design-Einstellungen",
-    "page": "Kaufablauf",
-    "moreTools": "Weitere Werkzeuge"
+    "designSettings": "Schaufenster-Stil",
+    "style": "Stil",
+    "page": "Produktseite",
+    "pageMobile": "Seite",
+    "pageDisabledTip": "Füge ein Produkt hinzu, um seine Seite zu öffnen",
+    "moreTools": "Weitere Werkzeuge",
+    "more": "Mehr"
   },
   "selectionToolbar": {
     "toolsFor": "Werkzeuge für {name}",
-    "elements": "{count, plural, one {# Element} other {# Elemente}}",
-    "hidePage": "Kaufablauf ausblenden",
-    "openPage": "Kaufablauf öffnen",
-    "openProductPage": "Kaufablauf für {name} öffnen",
-    "closeProductPage": "Kaufablauf für {name} schließen",
-    "openProductPages": "Kaufablauf für {count, plural, one {# Produkt} other {# Produkte}} öffnen",
-    "closeProductPages": "Kaufablauf für {count, plural, one {# Produkt} other {# Produkte}} schließen",
+    "elements": "{count, plural, one {# Block} other {# Blöcke}}",
+    "hidePage": "Produktseite ausblenden",
+    "openPage": "Produktseite öffnen",
+    "openProductPage": "Produktseite für {name} öffnen",
+    "closeProductPage": "Produktseite für {name} schließen",
+    "openProductPages": "Produktseite für {count, plural, one {# Produkt} other {# Produkte}} öffnen",
+    "closeProductPages": "Produktseite für {count, plural, one {# Produkt} other {# Produkte}} schließen",
     "editText": "Text bearbeiten",
     "editTextOf": "Text von {name} bearbeiten",
     "color": "Farbe",
@@ -1059,24 +1092,26 @@
     "frameImageFor": "Bild für {name} zuschneiden und positionieren",
     "duplicate": "Duplizieren",
     "duplicateNamed": "{name} duplizieren",
-    "duplicateN": "{count, plural, one {# Element duplizieren} other {# Elemente duplizieren}}",
+    "duplicateN": "{count, plural, one {# Block duplizieren} other {# Blöcke duplizieren}}",
     "removeFrom": "{name} aus dem Raster entfernen",
-    "removeN": "{count, plural, one {# Element aus dem Raster entfernen} other {# Elemente aus dem Raster entfernen}}"
+    "removeN": "{count, plural, one {# Block aus dem Raster entfernen} other {# Blöcke aus dem Raster entfernen}}"
   },
   "canvas": {
     "addSuggested": "{title} zu diesem Schaufenster hinzufügen",
     "gridLabel": "Schaufenster-Arbeitsfläche",
     "emptyGrid": "Dein Raster ist leer",
-    "emptyGridHint": "Füge ein Produkt hinzu, um dein Schaufenster zu gestalten. Text und Formen befinden sich in der Werkzeugleiste unten.",
+    "emptyGridHint": "Füge ein Produkt hinzu, um dein Schaufenster zu gestalten. Text, Formen und deine eigenen Bilder findest du in der Werkzeugleiste unten.",
     "addProduct": "Produkt hinzufügen",
     "desktopPreview": "Desktop-Vorschau",
-    "mobilePreview": "Mobile Vorschau"
+    "mobilePreview": "Mobile Vorschau",
+    "multiSelectTip": "Um mehrere Blöcke auszuwählen, klicke sie mit gedrückter Shift-Taste an oder zieh über eine leere Fläche. Auf einem Touchscreen hältst du jeden einzeln gedrückt.",
+    "sheetTip": "Schließe dieses Panel, um die Werkzeugleiste zurückzubekommen."
   },
   "blockTile": {
     "removedProduct": "Entferntes Produkt",
     "shape": "{kind, select, square {Quadratform} circle {Kreisform} ring {Ringform} diamond {Rautenform} rounded {abgerundete Form} pill {Pillenform} half {Halbkreisform} quarter {Viertelkreisform} bar {Balkenform} triangle {Dreiecksform} wedge {Keilform} pentagon {Fünfeckform} hexagon {Sechseckform} octagon {Achteckform} star {Sternform} sparkle {Glitzersternform} cross {Kreuzform} arrow {Pfeilform} chevron {Pfeilspitzenform} trapezoid {Trapezform} parallelogram {Parallelogrammform} burst {Strahlenburstform} other {{kind} Form}}",
     "imageWithAlt": "Bild: {alt}",
-    "imageElement": "Bildelement",
+    "imageElement": "Bildblock",
     "textWithContent": "Text: {text}",
     "textBlock": "Textblock",
     "selected": "Ausgewählt: {label}. Drücke Enter, um die Auswahl aufzuheben.",
@@ -1109,11 +1144,14 @@
       "nameLabel": "Schaufenster-Name",
       "namePlaceholder": "Unbenanntes Schaufenster",
       "unsaved": "Nicht gespeicherte Änderungen",
+      "saveTip": "Speichern (Ctrl+S)",
       "viewPage": "Seite ansehen",
+      "viewSavedPage": "Gespeicherte Seite ansehen",
+      "shareSetupNeeded": "Deine Verkäuferangaben sind unvollständig, deshalb kann dieses Schaufenster noch nicht geteilt werden",
       "search": "Suche"
     },
     "mobileNotice": {
-      "body": "Öffne diesen Designer für das beste Bearbeitungserlebnis auf einem Desktop oder Tablet. Blöcke neu anordnen und die Kopfzeile bearbeiten funktioniert auf jedem Gerät.",
+      "body": "Hier funktioniert alles: Tippe auf einen Block, um ihn zu bearbeiten, halte weitere Blöcke gedrückt, um sie gemeinsam auszuwählen, halte ein Werkzeug gedrückt, um zu sehen, was es tut, und zoome mit zwei Fingern. Feine Anpassungen gehen auf einem größeren Bildschirm leichter.",
       "dismiss": "Hinweis zur Bearbeitung auf kleinem Bildschirm schließen"
     },
     "inspector": {
@@ -1171,13 +1209,6 @@
       "badge": "Beispiel",
       "summary": "{count, plural, one {{count} Block · probiere alles aus, nichts wird gespeichert} other {{count} Blöcke · probiere alles aus, nichts wird gespeichert}}",
       "hide": "Beispiel-Schaufenster ausblenden"
-    },
-    "embed": {
-      "title": "Ein Schaufenster einbetten",
-      "description": "Jedes Schaufenster, das du erstellst, bekommt einen eigenen Code zum Einfügen in deine Website.",
-      "snippetLabel": "So sieht ein Einbettungscode aus",
-      "inDevelopment": "Das Widget ist noch in Entwicklung und wird auf anderen Websites noch nicht angezeigt.",
-      "create": "Ein Schaufenster erstellen"
     },
     "list": {
       "show": "Beispiel-Schaufenster einblenden",
@@ -1457,7 +1488,11 @@
       "link": "Link"
     },
     "buyButtonTipLabel": "Wohin der Button führt",
-    "buyButtonTip": "Nutzt Text und Farbe des Buttons deiner Produktseite und öffnet die Produktseite.",
+    "buyButtonTip": "Öffnet die Produktseite. Übernimmt zuerst Text und Farbe des Buttons deiner Produktseite, die du hier für die Kacheln ändern kannst.",
+    "pageButton": {
+      "label": "Button der Produktseite",
+      "use": "Button der Produktseite verwenden"
+    },
     "rating": "Sternebewertung",
     "ratingTipLabel": "Woher die Sterne kommen",
     "ratingTip": "Aus Käuferbewertungen. Erscheint unter dem Namen, sobald ein Produkt eine Bewertung hat.",
@@ -1471,5 +1506,43 @@
     "lineHeight": "Zeilenhöhe",
     "normal": "Normal",
     "valueText": "{value} Prozent der Schriftgröße"
+  },
+  "shortcuts": {
+    "title": "Tastenkürzel",
+    "tip": "Tastenkürzel (?)",
+    "rows": {
+      "save": {
+        "label": "Speichern",
+        "keys": "<kbd>{mod}</kbd> <kbd>S</kbd>"
+      },
+      "copyPaste": {
+        "label": "Blöcke kopieren und einfügen",
+        "keys": "<kbd>{mod}</kbd> <kbd>C</kbd>, dann <kbd>{mod}</kbd> <kbd>V</kbd>"
+      },
+      "remove": {
+        "label": "Ausgewählte Blöcke entfernen",
+        "keys": "<kbd>Entf</kbd>"
+      },
+      "move": {
+        "label": "Ausgewählte Blöcke verschieben",
+        "keys": "<kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd>"
+      },
+      "selectMore": {
+        "label": "Mehrere Blöcke auswählen",
+        "keys": "<kbd>Shift</kbd> + Klick"
+      },
+      "selectUnder": {
+        "label": "Den darunterliegenden Block auswählen",
+        "keys": "<kbd>{alt}</kbd> + Klick"
+      },
+      "layer": {
+        "label": "Nach vorne holen oder nach hinten schieben",
+        "keys": "<kbd>{mod}</kbd> <kbd>]</kbd> oder <kbd>[</kbd>"
+      },
+      "pan": {
+        "label": "Auf der Arbeitsfläche bewegen",
+        "keys": "<kbd>Leertaste</kbd> gedrückt halten und ziehen"
+      }
+    }
   }
 }

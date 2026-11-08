@@ -41,7 +41,7 @@ test.describe("sample storefront", () => {
   }) => {
     test.setTimeout(240_000);
     const user = freshUser("sample-tour");
-    await signUp(page, user);
+    await signUp(page, user, { editorTour: "keep" });
 
     await gotoApp(page, "/storefront");
     const sample = page.locator("main [data-storefront-sample]");
@@ -119,12 +119,9 @@ test.describe("sample storefront", () => {
   }) => {
     test.setTimeout(150_000);
     const user = freshUser("sample-create");
+    // Past the designer tour already (signUp marks it seen), so the header is
+    // not under it.
     await signUp(page, user);
-    // Past the designer tour already, so the header is not under it.
-    await serviceRest(`/profiles?id=eq.${await userIdByEmail(user.email)}`, {
-      method: "PATCH",
-      body: { editor_tour_seen_at: new Date().toISOString() },
-    });
 
     await gotoApp(page, "/storefront/sample");
     const create = page.locator("[data-sample-create]");

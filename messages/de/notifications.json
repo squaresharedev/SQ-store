@@ -159,8 +159,8 @@
         "body": "Es ist ein Download, daher ist nichts zu versenden."
       },
       "withdrawn": {
-        "title": "Ein Käufer hat Bestellung {number} widerrufen",
-        "body": "{title}. Kläre die Rücksendung und Erstattung mit ihm."
+        "title": "Ein Käufer hat Bestellung {number} storniert",
+        "body": "{title}. Kläre die Rücksendung und erstatte den Betrag innerhalb von 14 Tagen."
       }
     },
     "billing": {

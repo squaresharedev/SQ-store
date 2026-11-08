@@ -59,9 +59,9 @@ async function createStorefrontOnAPhone(page: Page) {
 }
 
 async function addSquare(page: Page) {
-  await page.getByRole("button", { name: "Add element" }).tap();
+  await page.getByRole("button", { name: "Add shape or image" }).tap();
   await page
-    .getByRole("menu", { name: "Elements" })
+    .getByRole("menu", { name: "Shapes and images" })
     .getByRole("menuitem", { name: /^Add square$/ })
     .tap();
   // Inserting a block selects it, and on a phone the inspector is a sheet
@@ -136,10 +136,10 @@ test("press and hold builds a selection a finger can then use", async ({
   // the seller was already hitting on it.
   await expect(bar).toBeVisible();
   for (const name of [
-    /change the colour of 2 elements/i,
-    /edit the stroke of 2 elements/i,
-    /edit the corner roundness of 2 elements/i,
-    /edit the opacity of 2 elements/i,
+    /change the colour of 2 blocks/i,
+    /edit the border of 2 blocks/i,
+    /edit the corner roundness of 2 blocks/i,
+    /edit the opacity of 2 blocks/i,
   ]) {
     const button = bar.getByRole("button", { name });
     await expect(button).toBeVisible();
@@ -168,7 +168,7 @@ test("press and hold builds a selection a finger can then use", async ({
   // board it opens over.
   await hold(page, tiles(page).nth(1));
   await expect(page.locator("[data-block-selected]")).toHaveCount(2);
-  await bar.getByRole("button", { name: /change the colour of 2 elements/i }).tap();
+  await bar.getByRole("button", { name: /change the colour of 2 blocks/i }).tap();
   await expect(
     page.getByRole("group", { name: /standard colors/i }),
   ).toBeVisible();

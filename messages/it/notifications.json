@@ -159,8 +159,8 @@
         "body": "È un download, quindi non c'è niente da spedire."
       },
       "withdrawn": {
-        "title": "Un acquirente ha esercitato il recesso sull'ordine {number}",
-        "body": "{title}. Concordate la restituzione e il rimborso con lui."
+        "title": "Un acquirente ha annullato l’ordine {number}",
+        "body": "{title}. Organizza il reso e rimborsa l’acquirente entro 14 giorni."
       }
     },
     "billing": {

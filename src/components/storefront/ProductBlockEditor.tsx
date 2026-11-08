@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ArrowRight, Trash2 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import type { Product } from "@/types/product";
@@ -9,6 +9,7 @@ import {
   resolveCardStyle,
   type CardStyleOverrides,
   type ProductBlock,
+  type ProductPageConfig,
   type StorefrontTheme,
 } from "@/types/storefront";
 import { formatPrice } from "@/lib/format";
@@ -21,8 +22,9 @@ import {
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
-import { destructiveButtonClass, errorTextClass, fieldBaseClass, ghostButtonClass, infoTextClass, primaryButtonClass } from "@/components/ui/control-styles";
+import { cautionNoticeClass, destructiveButtonClass, errorTextClass, fieldBaseClass, ghostButtonClass, infoTextClass, panelEyebrowClass, primaryButtonClass } from "@/components/ui/control-styles";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
+import { resolveCtaTarget } from "@/components/product-page/cta-target";
 import { useSettingTarget } from "@/lib/storefront/setting-context";
 import { useSampleMode } from "@/lib/storefront/sample-mode";
 import { InfoTip } from "@/components/ui/InfoTip";
@@ -71,7 +73,8 @@ export function ProductBlockEditor({
   onDesignPage,
   pageOpen = false,
   onThemeChange,
-  reviewsShown = true,
+  productPage,
+  sellerEmail,
 }: {
   block: ProductBlock;
   theme: StorefrontTheme;
@@ -91,8 +94,12 @@ export function ProductBlockEditor({
   onDesignPage?: () => void;
   /** True while that page is already out. */
   pageOpen?: boolean;
-  /** Whether the product page shows reviews, which a card's stars need. */
-  reviewsShown?: boolean;
+  /** The storefront's product page, whose button and reviews a card
+   *  borrows. Absent = its defaults. */
+  productPage?: ProductPageConfig;
+  /** The seller's contact email, where the product page's buy button sends
+   *  buyers when the product has no buy link of its own. */
+  sellerEmail?: string;
 }) {
   const fieldId = useId();
   const t = useTranslations("Storefront");
@@ -115,6 +122,29 @@ export function ProductBlockEditor({
   const settingRef = useSettingTarget()?.activeRef ?? null;
   const summoned = settingRef?.kind === "cards" ? settingRef.section : null;
 
+  const trimmedTitle = draftTitle.trim();
+  const draftCents = centsOf(draftPrice);
+  const titleChanged = product !== null && trimmedTitle !== product.title;
+  const priceChanged = product !== null && draftCents !== Math.round(product.price * 100);
+  const dirty = titleChanged || priceChanged;
+
+  // The name and price drafts live only in this card, so closing it (another
+  // tile, the canvas, leaving the editor) drops them. That is said on the way
+  // out, so the old name never ships unnoticed. A ref, because only the
+  // unmount cleanup reads it.
+  const unsavedTitle = useRef<string | null>(null);
+  useEffect(() => {
+    unsavedTitle.current = product !== null && dirty ? product.title : null;
+  });
+  useEffect(
+    () => () => {
+      if (unsavedTitle.current !== null) {
+        toast.info(t("productBlock.unsavedToast", { title: unsavedTitle.current }));
+      }
+    },
+    [toast, t],
+  );
+
   // Null product: catalog entry was deleted; only offer a remove action.
   if (product === null) {
     return (
@@ -135,11 +165,6 @@ export function ProductBlockEditor({
   }
 
   const currencySign = currencySymbol(product.currency, locale);
-  const trimmedTitle = draftTitle.trim();
-  const draftCents = centsOf(draftPrice);
-  const titleChanged = trimmedTitle !== product.title;
-  const priceChanged = draftCents !== Math.round(product.price * 100);
-  const dirty = titleChanged || priceChanged;
   const hasStyleOverrides =
     block.style !== undefined && Object.keys(block.style).length > 0;
 
@@ -210,7 +235,7 @@ export function ProductBlockEditor({
   }
 
   // Stock status line: display-only. The designer REPORTS availability and
-  // never sets it — that lives on the product, in Products > Stock.
+  // never sets it: that lives on the product, in Products > Stock.
   let stockLine: string | null = null;
   if (product.trackStock) {
     if (product.stockQuantity === 0) {
@@ -230,8 +255,11 @@ export function ProductBlockEditor({
       {/* The product's own facts in one block: the thumbnail beside the two
           fields, which ARE the summary, so the name and price are not shown
           once as text and again as inputs below it. Both edit the product
-          itself (saved through a confirmation), not just this tile. */}
+          itself (saved through a confirmation), not just this tile, and the
+          eyebrow says so before a Save button appears: everything under the
+          rule below is this tile's style, which applies at once. */}
       <div className="space-y-1.5">
+        <p className={panelEyebrowClass}>{t("productBlock.details")}</p>
         <div className="flex items-start gap-2.5">
           {/* Two h-8 fields plus their gap-1.5, so the photo lines up with both. */}
           <ProductThumb src={product.imageUrl} className="size-[4.375rem]" />
@@ -319,12 +347,25 @@ export function ProductBlockEditor({
         </button>
       )}
 
+      {/* A buy button with nowhere to go, said where the product is picked
+          rather than only on its page: by the page's own rule (the editor has
+          no checkout to send it to), so this and the artboard always agree. */}
+      {resolveCtaTarget(product.purchaseUrl ?? null, sellerEmail, product.title, "").kind === "none" && (
+        <p className={cautionNoticeClass} data-product-no-cta="">
+          {t("productBlock.noCtaWarning")}
+        </p>
+      )}
+
       {/* Per-tile style and the price tag, as collapsible groups rather than
           two slabs divided by a rule: between them they are a dozen controls,
           and the product's own name and price were being pushed off the top of
           the panel by settings most tiles never override. Values shown are the
           resolved style, so opening a group on an untouched tile simply shows
           the theme.
+
+          Tile style alone starts OPEN. It sits below the name and price, so
+          they stay on top either way, and with every group shut a selected
+          tile read as a product form with no styling in it at all.
 
           Both are collapsible and CAN be open together on purpose: the corner
           roundness in one decides which spots the price tag in the other is
@@ -334,7 +375,6 @@ export function ProductBlockEditor({
         <CollapsibleSection
           title={t("productBlock.tileStyle.title")}
           collapsible
-          defaultOpen={false}
           summon={summoned === "cardStyle"}
           headerAction={
             <div className="flex items-center gap-1.5">
@@ -377,7 +417,7 @@ export function ProductBlockEditor({
             overrides={block.style ?? {}}
             onChange={onStyleChange}
             scope={{ blockKey: blockKey(block) }}
-            afterSize={onThemeChange && <ChipScaleControl theme={theme} onChange={onThemeChange} onEveryCard />}
+            afterSize={onThemeChange && <ChipScaleControl theme={theme} onChange={onThemeChange} />}
           />
         </CollapsibleSection>
 
@@ -392,7 +432,7 @@ export function ProductBlockEditor({
             overrides={block.style ?? {}}
             onChange={onStyleChange}
             product={product}
-            afterLook={onThemeChange && <ChipScaleControl theme={theme} onChange={onThemeChange} onEveryCard />}
+            afterLook={onThemeChange && <ChipScaleControl theme={theme} onChange={onThemeChange} />}
           />
         </CollapsibleSection>
 
@@ -412,9 +452,10 @@ export function ProductBlockEditor({
           summon={summoned === "shopping"}
         >
           <CardShoppingControls
-            value={resolveCardStyle(theme, block.style)}
+            theme={theme}
+            overrides={block.style ?? {}}
+            productPage={productPage}
             onChange={onStyleChange}
-            reviewsShown={reviewsShown}
           />
         </CollapsibleSection>
       </div>

@@ -11,7 +11,7 @@
       "title": "Nastavenia upozornení"
     },
     "danger": {
-      "title": "Nebezpečná zóna"
+      "title": "Zmazať konto"
     },
     "legal": {
       "title": "Právne nastavenia"
@@ -32,15 +32,17 @@
       "title": "Plán a fakturácia"
     },
     "connectedApps": {
-      "title": "Pripojené aplikácie"
+      "title": "AI asistent"
     }
   },
   "loading": "Načítavajú sa nastavenia…",
   "shell": {
     "sectionsLabel": "Sekcie nastavení",
-    "recommended": "Odporúčané"
+    "recommended": "Odporúčané",
+    "actionNeeded": "Vyžaduje sa akcia"
   },
   "continueToStorefront": "Pokračovať do vášho výkladu",
+  "confirmEmailNext": "Ďalej: potvrďte svoj e-mail",
   "account": {
     "fallbackName": "Účet",
     "avatar": {
@@ -73,7 +75,7 @@
     },
     "username": {
       "cardTitle": "Používateľské meno",
-      "cardDescription": "Prihlásenie namiesto e-mailovej adresy. Iba písmená, číslice a podčiarkovníky, pričom žiadne dve kontá nemôžu zdieľať jedno meno.",
+      "cardDescription": "Prihlásite sa ním namiesto e-mailu a zobrazuje sa v správach odoslaných vo vašom mene, napríklad v pozvánkach do tímu. Iba písmená, číslice a podčiarkovníky, pričom žiadne dve kontá nemôžu mať rovnaké meno.",
       "label": "Používateľské meno",
       "placeholder": "vashandle",
       "available": "K dispozícii.",
@@ -136,7 +138,7 @@
   "danger": {
     "export": {
       "cardTitle": "Exportovať moje údaje",
-      "cardDescription": "Všetko, čo o vás uchovávame: profil, produkty, výklady, objednávky, ktoré ste predali, oznámenia a bezpečnostný záznam, všetko v jednom súbore JSON. Sú to vaše údaje, vaše na uchovanie.",
+      "cardDescription": "Všetko, čo o vás uchovávame: profil, produkty, výklady, objednávky, ktoré ste predali, upozornenia a bezpečnostný záznam, v jednom súbore, ktorý otvoríte v ľubovoľnom textovom editore. Sú to vaše údaje a patria vám.",
       "downloadButton": "Stiahnuť moje údaje",
       "stepUpDescription": "Váš export obsahuje celý váš účet. Ak si ho chcete stiahnuť, zadajte aktuálny kód z overovacej aplikácie."
     },
@@ -155,6 +157,7 @@
       "keepButton": "Ponechať konto",
       "title": "Zmazať konto",
       "description": "Váš účet, produkty, výklady a objednávky sa natrvalo vymažú {days} dní po tom, čo o to požiadate. Dovtedy si to môžete rozmyslieť. Potom už nie.",
+      "exportFirst": "Kým účet zmizne, môžete si stiahnuť kópiu svojich údajov v <link>Nastaveniach účtu</link>.",
       "deleteButton": "Zmazať konto",
       "confirmLabel": "Zadajte <code>{phrase}</code> na potvrdenie",
       "flagging": "Označuje sa…",
@@ -203,7 +206,8 @@
     "success": {
       "notificationsSaved": "Predvoľby uložené."
     },
-    "emailOff": "E-mail ešte nie je pre Square Share zapnutý, takže sa nič z nižšie uvedeného neposiela. Nové objednávky sa stále zobrazujú v Objednávkach a vo vašich upozorneniach."
+    "emailOff": "E-mail ešte nie je pre Square Share zapnutý, takže sa nič z nižšie uvedeného neposiela. Nové objednávky sa stále zobrazujú v Objednávkach a vo vašich upozorneniach.",
+    "inAppNote": "Tieto prepínače ovládajú len e-maily. Nové objednávky a recenzie sa vždy zobrazia vo vašich upozorneniach."
   },
   "legal": {
     "cardTitle": "Zmluva s predajcom, podmienky a ochrana súkromia",
@@ -225,18 +229,18 @@
       },
       "sellerDetails": {
         "title": "Vaše údaje predajcu a kde sa použijú",
-        "body": "Vaše obchodné meno, adresa a kontaktný e-mail sa zobrazujú kupujúcim na stránkach produktov a sú povinné, kým môžete čokoľvek zverejniť alebo predať. To je jediné, čo s nimi robíme: zákon EÚ o ochrane spotrebiteľa vyžaduje, aby kupujúci vedel, od koho nakupuje a ako ho kontaktovať pred objednávkou. Na kontaktnú adresu pošleme jeden odkaz, aby ste potvrdili, že funguje, a to je jediný e-mail, ktorý tam z vlastnej iniciatívy pošleme, žiadny zoznam, žiadny marketing a nikdy ich nepredáme ani nezdieľame. Vaše telefónne číslo a IČ DPH sú voliteľné a zobrazujú sa len vtedy, ak ich vyplníte."
+        "body": "Vaše meno alebo názov firmy, adresa a kontaktný e-mail sa zobrazujú kupujúcim na stránkach produktov a musíte ich vyplniť, skôr než môžete čokoľvek zverejniť alebo predať. To je jediné, čo s nimi robíme: právo EÚ na ochranu spotrebiteľa vyžaduje, aby kupujúci pred objednávkou videl, od koho nakupuje, a mohol ho kontaktovať. Na kontaktnú adresu pošleme jeden odkaz, aby ste potvrdili, že funguje, a to je jediný e-mail, ktorý tam z vlastnej iniciatívy pošleme: žiadny zoznam, žiadny marketing a nikdy ich nepredáme ani nezdieľame. Vaše telefónne číslo a IČ DPH sú voliteľné a zobrazujú sa len vtedy, ak ich vyplníte."
       }
     },
     "accepted": "Prijali ste verziu <code>{version}</code> dňa {date}. Tu nie je nič ďalšie na vykonanie.",
     "outdated": "Prijali ste verziu <code>{version}</code> dňa {date}, no dokumenty sa odvtedy zmenili. Prečítajte si ich znova a prijmite aktuálnu verziu.",
-    "agreed": "Verziu <code>{version}</code> ste prijali dňa {date}. Tu nie je nič ďalšie na vykonanie.",
-    "agreedOutdated": "Verziu <code>{version}</code> ste prijali dňa {date}, no Podmienky sa odvtedy zmenili. Prečítajte si ich znova a prijmite aktuálnu verziu.",
+    "agreed": "S týmito Podmienkami ste súhlasili dňa {date}. Tu už nie je čo robiť.",
+    "agreedOutdated": "Dňa {date} ste súhlasili so staršou verziou Podmienok. Prečítajte si Podmienky vyššie a vyjadrite s nimi súhlas.",
+    "whatChanged": "Čo sa zmenilo:",
     "recording": "Zaznamenáva sa…",
     "acceptButton": "Prijímam",
     "agreeButton": "Beriem Podmienky na vedomie a súhlasím s nimi",
     "acceptNote": "Prijatím sa zaznamená dátum a verzia <code>{version}</code> do vášho konta.",
-    "agreeNote": "Prijatím sa do vášho účtu zaznamená dátum a verzia <code>{version}</code>.",
     "success": {
       "legalAccepted": "Prijaté. Ďakujeme, že ste si prečítali drobné písmo.",
       "termsAgreed": "Podmienky služby boli prijaté."
@@ -297,7 +301,7 @@
           "points": {
             "cap": "Square Share je v ranej fáze a podnikateľským používateľom sa ponúka tak, ako je. Voči nim je naša zodpovednosť obmedzená na poplatky, ktoré nám boli zaplatené za posledných 12 mesiacov, alebo na 100 EUR, podľa toho, čo je vyššie, a predajcovia podnikatelia nás odškodňujú za nároky spôsobené ich produktmi, stránkami alebo porušeniami. Ak ste spotrebiteľ, vaše zákonné práva zostávajú nedotknuté.",
             "termination": "Účty, ktoré porušujú tieto Podmienky, môžeme pozastaviť alebo zrušiť. Odísť môžete kedykoľvek a svoje údaje si môžete odniesť.",
-            "changesAndLaw": "O podstatných zmenách týchto podmienok informujeme najmenej 30 dní vopred. Na podnikateľov sa vzťahuje české právo. Ak ste spotrebiteľ, naďalej vás chráni právo vašej domovskej krajiny, štátu alebo provincie.",
+            "changesAndLaw": "O podstatných zmenách týchto podmienok informujeme najmenej 30 dní vopred. Na podnikateľov sa vzťahuje české právo, v Kanade namiesto neho právo vašej provincie alebo teritória. Ak ste spotrebiteľ, naďalej vás chráni právo vašej domovskej krajiny, štátu alebo provincie.",
             "policies": "Zásady ochrany osobných údajov a Zásady používania cookies tvoria súčasť týchto Podmienok.",
             "disputes": "Spory v USA sa riešia individuálnym rozhodcovským konaním namiesto súdu, pokiaľ sa neodhlásíte do 30 dní od odsúhlasenia. Spotrebitelia v EÚ a Kanade sa môžu naďalej obrátiť na súd vo svojom mieste bydliska."
           }
@@ -311,12 +315,14 @@
       "titleSoon": "Naše Podmienky sa čoskoro zmenia.",
       "body": "Do vtedy platia <current>aktuálne Podmienky</current>. Tu je to, čo <next>nové Podmienky</next> menia:",
       "leave": "Ak nesúhlasíte, môžete si zrušiť účet bezplatne pred ich nadobudnutím účinnosti. Ak budete Square Share po tomto dátume naďalej používať, nové Podmienky sa na vás vzťahujú.",
+      "summaryIsNew": "Zhrnutie nižšie sa týka nových Podmienok. Ak teraz súhlasíte, prijmete ich skôr.",
       "changes": {
         "regions": "Teraz pôsobíme len v EÚ, USA a Kanade a každá oblasť má vlastnú sekciu.",
         "disputes": "Spory v USA sa riešia individuálnym rozhodcovským konaním namiesto súdu, pokiaľ sa neodhlásíte do 30 dní. Spotrebitelia v EÚ a Kanade sa môžu naďalej obrátiť na súd vo svojom mieste bydliska.",
         "plans": "Platené plány a poplatky za predaj sú teraz podrobne opísané vrátane automatického obnovenia a postupu na zrušenie.",
         "moderation": "Vysvetľujeme, ako kontrolujeme obsah, ako ho nahlásiť, podať odvolanie alebo sťažnosť z dôvodu porušenia autorských práv.",
-        "notice": "Teraz dostanete e-mailom najmenej 30 dní vopred oznámenie o podstatných zmenách Podmienok."
+        "notice": "Teraz dostanete e-mailom najmenej 30 dní vopred oznámenie o podstatných zmenách Podmienok.",
+        "northAmerica": "Časti pre USA a Kanadu teraz opisujú, čo tamojšie právo vyžaduje od predajcov. Na podnikateľov v Kanade sa teraz vzťahuje právo a súdy ich provincie."
       },
       "email": {
         "subject": "Aktualizujeme naše Podmienky služby",
@@ -334,19 +340,19 @@
     "cardDescription": "Nastavte raz pre celé konto. Zobrazuje sa kupujúcim na každej stránke produktu, na ktorej predávate, a používa sa pre faktúry a DPH.",
     "memberScope": "Toto sú vaše vlastné údaje predajcu. Tie, ktoré kupujúci vidia v obchode {store}, patria jeho vlastníkovi a ten si ich nastavuje vo svojich nastaveniach.",
     "gate": {
-      "required": "<strong>Pred zverejnením alebo predajom čohokoľvek je povinné uviesť obchodné meno, adresu a kontaktný e-mail.</strong> Kupujúci musia vedieť, od koho nakupujú a ako vás kontaktovať pred objednávkou.",
+      "required": "<strong>Pred zverejnením alebo predajom čohokoľvek musíte uviesť svoje meno alebo názov firmy, adresu a kontaktný e-mail.</strong> Kupujúci musia pred objednávkou vedieť, od koho nakupujú a ako vás kontaktovať.",
       "privacyNoteLinked": "Tieto údaje sa na stránkach vašich produktov zobrazujú verejne iba z tohto dôvodu. Nikdy ich nepoužívame na marketing a nikdy ich nepredávame ani neposkytujeme ďalej. Jediná správa, ktorú posielame na váš kontaktný e-mail alebo telefón, je kód na jeho potvrdenie. Pozrite si <link>Zásady ochrany osobných údajov Square Share</link>."
     },
-    "countryUnset": "Radšej neuvádzam",
+    "countryUnset": "Nenastavené",
     "vatAdvisory": {
       "noCountry": "Toto IČ DPH vyzerá, že ho vydal {issuer}. Možno budete chcieť nastaviť krajinu.",
       "mismatch": "Toto IČ DPH vyzerá, že ho vydal {issuer}, ale vaša krajina je nastavená na {selected}. Skontrolujte, či oboje sedí."
     },
     "fields": {
       "businessName": {
-        "label": "Obchodné meno",
+        "label": "Vaše meno alebo názov firmy",
         "tipLabel": "Čo sem zadať",
-        "tipBody": "Meno, s ktorým kupujúci uzatvárajú zmluvu. Vaše registrované obchodné meno, ak predávate prostredníctvom firmy; vaše vlastné meno a priezvisko, ak predávate ako fyzická osoba. Názov výkladu je názov obchodu, čo nie je to isté a nemôže ho nahradiť.",
+        "tipBody": "Meno, pod ktorým predávate, alebo vaše celé meno: toto je obchodné meno, ktoré vyžaduje právo EÚ. Ak predávate prostredníctvom firmy, použite jej registrovaný názov; ak predávate ako fyzická osoba, svoje meno a priezvisko. Názov výkladu je názov obchodu a nemôže ho nahradiť.",
         "placeholder": "napr. Jana Nováková alebo Keramika Jany"
       },
       "address": {
@@ -358,21 +364,25 @@
       "email": {
         "label": "Kontaktný e-mail",
         "tipLabel": "Ako sa líši od prihlasovacieho e-mailu",
-        "tipBody": "Zobrazuje sa kupujúcim ako odkaz mailto a slúži ako záložná adresa tlačidla nákupu, keď produkt nemá odkaz na nákup. Zámerne sa uchováva oddelene od prihlasovacieho e-mailu: použite adresu, na ktorú chcete dostávať správy od kupujúcich. Musí to byť adresa, ktorú skutočne čítate, zástupné symboly, dočasné e-mailové adresy a adresy no-reply sú odmietnuté, rovnako ako doména, ktorá neprijíma poštu.",
-        "placeholder": "napr. ahoj@vasaobchod.example"
+        "tipBody": "Zobrazuje sa kupujúcim ako odkaz mailto a slúži ako záložná adresa tlačidla nákupu, keď produkt nemá odkaz na nákup. Zámerne sa uchováva oddelene od prihlasovacieho e-mailu: použite adresu, na ktorú chcete dostávať správy od kupujúcich. Musí to byť adresa, ktorú skutočne čítate: zástupné adresy, dočasné e-mailové schránky a adresy no-reply odmietame, rovnako ako doménu, ktorá neprijíma poštu.",
+        "placeholder": "napr. ahoj@vasaobchod.example",
+        "codeHint": "Po uložení vám na túto adresu pošleme kód. Zadajte ho nižšie a adresu tým potvrdíte."
       },
       "vatId": {
         "label": "IČ DPH",
+        "tipLabel": "Potrebujem to?",
+        "tipBody": "Nepovinné a len ak ste registrovaní pre DPH v EÚ. Zadajte číslo s predponou krajiny, napríklad SK1234567890 pre Slovensko. Inak pole nechajte prázdne: IČO ani iné daňové číslo sem nepatrí. Kupujúci ho uvidia v sekcii Predajca na vašich produktových stránkach.",
         "placeholder": "napr. SK1234567890"
       },
       "country": {
-        "hint": "Square Share pôsobí v EÚ, USA a Kanade. Inde zatiaľ nepôsobíme.",
+        "hint": "Kde sídli vaša firma; kupujúci to uvidia spolu s vaším menom. Square Share pôsobí v EÚ, USA a Kanade.",
         "label": "Krajina"
       },
       "phone": {
         "label": "Telefón",
         "tipLabel": "Kedy to kupujúci uvidia",
-        "tipBody": "Voliteľné. Kupujúci ho uvidia až po potvrdení kódom, ktorý vám naň pošleme, preto používajte mobilné číslo v EÚ, EHP, Švajčiarsku alebo Spojenom kráľovstve.",
+        "tipBody": "Voliteľné. Kupujúci ho uvidia až po potvrdení kódom, ktorý vám naň pošleme v SMS.",
+        "restriction": "Len mobilné čísla z EÚ, EHP, Švajčiarska a Spojeného kráľovstva. Ak je vaše číslo mimo týchto oblastí, nechajte pole prázdne.",
         "placeholder": "napr. +353 87 123 4567"
       },
       "bio": {
@@ -386,7 +396,8 @@
     "success": {
       "sellerDetailsSaved": "Firma a údaje predajcu uložené.",
       "savedCodeSent": "{which, select, email {Uložené. Kód sme poslali na {email}: zadajte ho nižšie a potvrďte adresu.} phone {Uložené. Kód sme zaslali na {phone}: zadajte ho nižšie a potvrďte číslo.} other {Uložené. Kódy sme odoslali na {email} a {phone}: zadajte ich nižšie a potvrďte obe.}}"
-    }
+    },
+    "bioHint": "Váš medailón (krátky riadok o vás alebo o tom, čo vyrábate) nájdete v <link>Nastaveniach účtu</link>."
   },
   "contactVerification": {
     "heading": "Potvrďte svoje kontaktné údaje",
@@ -440,7 +451,7 @@
       "label": "Kam doručujete a ako dlho to trvá",
       "tipLabel": "Koľko detailov uviesť",
       "tipBody": "Zoskupte cieľové miesta podľa toho, ako skutočne posielate: jeden riadok pre domácich, jeden pre zvyšok EÚ, jeden pre celý svet je dosť. Cenu nechajte prázdnu, ak sa mení.",
-      "flatRate": "Sadzba sa účtuje raz za objednávku bez ohľadu na množstvo či hmotnosť. Kupujúci objednávajú vždy jeden produkt: košík zatiaľ nie je.",
+      "costAndRate": "Každý riadok má dve ceny. Cena dopravy je text, ktorý kupujúci čítajú na vašej produktovej stránke, napríklad „9,00 €“. Sadzba je to, čo pokladňa skutočne účtuje, raz za objednávku bez ohľadu na množstvo či hmotnosť. Pokladňa doručuje len do riadku, ktorý má sadzbu aj krajiny.",
       "empty": "Zatiaľ nič nie je uvedené. Kupujúci neuvidia doby doručenia, kým nepridáte riadok.",
       "areaLabel": "Oblasť doručenia {number}",
       "areaPlaceholder": "napr. Zvyšok EÚ",
@@ -450,7 +461,6 @@
       "costPlaceholder": "napr. 9,00 €",
       "rateLabel": "Sadzba {number}",
       "ratePlaceholder": "napr. 4,50",
-      "rateHint": "Ponechajte prázdne iba pre zobrazenie.",
       "countriesLabel": "Krajiny {number}",
       "countriesNone": "Žiadne krajiny",
       "everywhereElse": "Všade inde",
@@ -461,13 +471,12 @@
       "needsRate": "Pokladňa nemôže použiť tento riadok, kým nemá sadzbu aj krajinu. Kupujúci si ho stále prečítajú na stránke produktu."
     },
     "rates": {
-      "title": "Sadzby za dopravu",
-      "description": "Ceny dopravy, ktoré účtuje pokladňa, aby kupujúci videli celkovú sumu ešte pred zaplatením.",
+      "title": "Mena a doprava zadarmo",
+      "description": "Mena, v ktorej pokladňa účtuje vaše sadzby, a kedy je doprava zadarmo. Sadzbu pre každú oblasť doručenia nastavíte vyššie v časti Doprava.",
       "currencyLabel": "Mena sadzieb",
       "freeOverLabel": "Doprava zadarmo nad",
       "freeOverPlaceholder": "napr. 50,00",
-      "freeOverHint": "Keď celková hodnota objednávky dosiahne túto sumu, doručenie je zadarmo.",
-      "hint": "Tieto sadzby sú to, čo pokladňa účtuje. Ponechajte sadzbu destinácie prázdnu, aby zostala iba ako zobrazovacia."
+      "freeOverHint": "Keď celková hodnota objednávky dosiahne túto sumu, doručenie je zadarmo."
     },
     "notes": {
       "label": "Ďalšie informácie o doprave",
@@ -475,13 +484,13 @@
     },
     "returnsCard": {
       "title": "Vrátenie tovaru",
-      "description": "Čo ponúkate nad rámec zákonných práv, ktoré stránky produktov uvádzajú."
+      "description": "Čo ponúkate nad rámec zákonných práv, ktoré už uvádzajú vaše produktové stránky."
     },
     "returnsWindow": {
       "label": "Lehota na vrátenie",
-      "tipLabel": "Čo zákonné právo už pokrýva",
+      "tipLabel": "Čo kupujúcim už dáva zákon",
       "tipBody": "Predaj kupujúcim v EÚ na diaľku im dáva 14 dní na rozmyslenie a zákonná zodpovednosť za vady trvá dva roky bez ohľadu na to, čo tu zvolíte. Stránky produktov to uvádzajú, toto je to, čo ponúkate navyše.",
-      "none": "Nič nad rámec zákonného práva",
+      "none": "Nič nad rámec toho, čo vyžaduje zákon",
       "days": "{days, plural, one {# deň} few {# dni} many {# dňa} other {# dní}}",
       "statutoryMinimum": "Zákonné minimum EÚ",
       "custom": "Niečo iné",
@@ -539,7 +548,8 @@
   "sellerDetails": {
     "bannerLabel": "Vyžadujú sa údaje predajcu",
     "memberHeadline": "Tento obchod zatiaľ nemôže zverejňovať ani predávať.",
-    "memberFix": "Vlastník tohto obchodu musí pridať svoje údaje predajcu vo vlastných nastaveniach.",
+    "memberFix": "Vlastník obchodu {storeName} musí pridať svoje údaje predajcu vo vlastných nastaveniach.",
+    "memberFixGeneric": "Vlastník tohto obchodu musí pridať svoje údaje predajcu vo vlastných nastaveniach.",
     "addLink": "Pridať údaje predajcu",
     "opensInNewTab": " (otvorí sa na novej karte)",
     "headline": {
@@ -552,7 +562,7 @@
     "reason": "Kupujúci musia vedieť, od koho nakupujú a ako vás kontaktovať pred objednávkou. Tieto údaje sa zobrazujú na stránkach produktov len z tohto dôvodu, nikdy sa nepoužívajú na marketing.",
     "fields": {
       "businessName": {
-        "label": "Obchodné meno",
+        "label": "Vaše meno alebo názov firmy",
         "why": "Kupujúci musia vedieť, od koho nakupujú: vaše obchodné meno alebo vaše vlastné meno a priezvisko, ak predávate ako fyzická osoba."
       },
       "address": {
@@ -737,7 +747,7 @@
     },
     "approvals": {
       "title": "Schváliť zo zariadenia, na ktorom ste prihlásení",
-      "description": "Pri novom prihlásení naskenujte QR kód telefónom, na ktorom ste už prihlásení, a ťuknite na zodpovedajúce číslo. Hodí sa, keď je váš prístupový kľúč na inom zariadení.",
+      "description": "Prihlasujete sa na novom zariadení a váš prístupový kľúč je na inom? Môže to schváliť telefón, na ktorom ste už prihlásení: naskenujte ním QR kód a ťuknite na zodpovedajúce číslo.",
       "statusOn": "Zapnuté",
       "statusOff": "Vypnuté",
       "turnOn": "Zapnúť",
@@ -799,7 +809,6 @@
       "emailLabel": "E-mailová adresa",
       "emailPlaceholder": "kolega@example.com",
       "roleLabel": "Rola",
-      "notificationNote": "E-mailové upozornenia ešte nie sú nastavené, pozvánka nadobudne účinnosť po prihlásení. Možno ich budete chcieť upozorniť priamo.",
       "sendButton": "Odoslať pozvánku"
     },
     "inviteRow": {
@@ -839,13 +848,17 @@
     "empty": "Zatiaľ nie sú pripojené žiadne aplikácie.",
     "connect": {
       "title": "Pripojiť asistenta",
-      "body": "Pridajte túto adresu do Claude alebo inej aplikácie MCP a keď o to požiada, schváľte ju.",
+      "benefit": "AI asistent, ktorého tu pripojíte, dokáže vypísať vaše produkty, zverejniť koncepty, navrhnúť výklad, spravovať zľavy a odpovedať na vaše otázky, všetko bežnou rečou.",
+      "body": "Pridajte túto adresu do Claude alebo iného AI asistenta a keď o to požiada, schváľte ju.",
+      "mcpHintLabel": "O tejto adrese",
+      "mcpHint": "Váš asistent môže pýtať URL adresu servera MCP: vložte tam túto adresu. MCP je otvorený štandard, ktorým sa asistenti pripájajú k aplikáciám.",
       "copy": "Kopírovať adresu",
       "copied": "Skopírované",
       "copyFailed": "Kopírovanie sa nepodarilo. Označte adresu a skopírujte ju ručne.",
       "openClaude": "Otvoriť konektory v Claude",
       "capabilitiesTitle": "Čo môže asistent robiť",
-      "offByDefault": "Predvolene vypnuté"
+      "offByDefault": "Predvolene vypnuté",
+      "required": "Povinné"
     },
     "lastUsed": "Naposledy použité {when}",
     "neverUsed": "Zatiaľ nepoužité",
@@ -858,15 +871,21 @@
       "metadataTitle": "Pripojiť aplikáciu",
       "title": "Pripojiť {app} k vášmu obchodu?",
       "sendsTo": "Prístup pôjde na <strong>{host}</strong>",
+      "sendsToTipLabel": "Prečo je táto adresa dôležitá",
+      "sendsToTipBody": "Aplikácia si môže dať akýkoľvek názov, ale prístup vždy dostane len táto adresa a podvodník ju nedokáže sfalšovať.",
       "store": "Obchod",
+      "storeHint": "Zdieľa sa len obchod, ktorý vyberiete. Vaše ostatné obchody zostanú súkromné.",
       "scopesTitle": "Čo môže robiť",
       "note": "Pripojte ju, iba ak ste to začali z {app}. Kedykoľvek ju môžete odpojiť v Nastaveniach.",
+      "stepUpDescription": "Pripojením aplikácie {app} jej dáte prístup k vášmu obchodu. Na potvrdenie, že ste to vy, zadajte aktuálny kód z overovacej aplikácie.",
       "approve": "Pripojiť",
       "approving": "Pripájanie…",
-      "deny": "Zrušiť",
+      "deny": "Nepripájať",
+      "denyHint": "Tlačidlo Nepripájať vás vráti do {app} a oznámi jej, že ste odmietli.",
       "connected": "Pripojené. Vraciame vás do {app}…",
       "refusedTitle": "Tejto požiadavke sa nedá veriť",
-      "refusedBody": "Aplikácia, ktorá vás sem poslala, nie je správne nastavená. Nič sa nepripojilo."
+      "refusedBody": "Aplikácia, ktorá vás sem poslala, nie je správne nastavená. Nič sa nepripojilo.",
+      "goToStore": "Prejsť do obchodu"
     },
     "scopes": {
       "storeRead": {
@@ -915,12 +934,12 @@
       },
       "destructive": {
         "label": "Odstraňovať veci",
-        "hint": "Odstraňovať produkty, výklady a zľavy a meniť kľúče na vkladanie. Nedá sa to vrátiť späť."
+        "hint": "Odstraňovať produkty, výklady a zľavy a získavať nové kódy pre web. Nedá sa to vrátiť späť."
       }
     },
     "app": {
       "capabilitiesLabel": "Čo môže {app} robiť",
-      "changeHint": "Ak to chcete zmeniť, aplikáciu odpojte a znova pripojte."
+      "changeHint": "Ak chcete zmeniť, čo môže {app} robiť, odpojte ju tu, potom ju znova pripojte z {app} a pri schvaľovaní vyberte znova."
     }
   }
 }

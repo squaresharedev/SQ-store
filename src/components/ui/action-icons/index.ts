@@ -17,5 +17,6 @@
 export { ActionIconSvg } from "./ActionIconSvg";
 export { useIconHoverProps } from "./hover-props";
 
+export { ArrowLoopIcon, useArrowLoop } from "./ArrowLoopIcon";
 export { RotateArrowIcon } from "./RotateArrowIcon";
 export { TRUCK_WHEELS, TruckIcon } from "./TruckIcon";

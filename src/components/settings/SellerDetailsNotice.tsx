@@ -50,6 +50,7 @@ export type SellerDetailsBlock = keyof typeof BLOCK_HEADLINES;
 export function SellerDetailsBanner({
   missing,
   audience = "owner",
+  storeName,
 }: {
   missing: readonly TraderIdentityField[];
   /**
@@ -60,6 +61,10 @@ export function SellerDetailsBanner({
    * this banner exactly where it was.
    */
   audience?: "owner" | "member";
+  /** The store's display name, interpolated into the member-facing fix message
+   *  so they know which store's owner to contact. Only used when audience is
+   *  "member". Falls back to generic copy when not supplied. */
+  storeName?: string | null;
 }) {
   const t = useTranslations();
   if (missing.length === 0) return null;
@@ -89,7 +94,9 @@ export function SellerDetailsBanner({
         </span>{" "}
         <span className="font-inter text-muted-foreground">
           {member
-            ? t("Settings.sellerDetails.memberFix")
+            ? storeName
+              ? t("Settings.sellerDetails.memberFix", { storeName })
+              : t("Settings.sellerDetails.memberFixGeneric")
             : t(fix.key, fix.values)}
         </span>
       </p>

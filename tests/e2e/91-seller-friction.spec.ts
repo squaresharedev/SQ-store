@@ -21,7 +21,7 @@ import {
  *     past unwarned (the action asks again).
  *   - A card says how many of its orders are waiting.
  *   - An order the buyer withdrew from leaves the To ship queue and asks for
- *     its refund on the overview instead, on its own "Withdrawn" list.
+ *     its refund on the overview instead, on its own "Buyer cancelled" list.
  *   - The Orders search finds an order by what a seller remembers of it.
  *   - A save the automatic check has not approved yet says buyers cannot see
  *     it yet, and the list's badge explains itself.
@@ -132,9 +132,9 @@ test.describe("everyday seller friction", () => {
     await gotoApp(page, "/dashboard");
     // One parcel to send, and one refund owed: two rows, not "2 orders to ship".
     await expect(page.getByText("1 order to ship").first()).toBeVisible();
-    const refundRow = page.getByRole("link", { name: "See withdrawals" });
+    const refundRow = page.getByRole("link", { name: "See cancellations" });
     await expect(refundRow).toBeVisible();
-    await expect(page.getByText("1 buyer withdrew")).toBeVisible();
+    await expect(page.getByText("1 buyer cancelled")).toBeVisible();
 
     await refundRow.click();
     await expect(page).toHaveURL(/\/orders\?status=withdrawn/);
@@ -182,11 +182,18 @@ test.describe("everyday seller friction", () => {
     await page.getByLabel(/price/i).fill("38");
     await page.getByRole("button", { name: /^save product$/i }).click();
 
-    await expectToast(page, "Buyers will see it once the automatic check approves it.");
+    await expectToast(
+      page,
+      "Buyers will see it once the automatic check approves it, usually in a few seconds.",
+    );
+    // A new product is on no storefront yet, and the same toast says what is next.
+    await expectToast(page, "Next, put it on a storefront to give it a page.");
     await page.waitForURL(/\/products$/, { timeout: 20_000 });
     const badge = page.locator("[data-removal-badge]").first();
     await expect(badge).toHaveText("In review");
-    await expect(badge).toHaveAttribute("title", "A person is checking it. Buyers see it once it is approved.");
+    // The why opens on a tap beside the chip, not only on a hover.
+    await page.getByRole("button", { name: "What this means" }).first().click();
+    await expect(page.getByRole("tooltip")).toHaveText("A person is checking it. Buyers see it once it is approved.");
   });
 
   test("an iPhone photo is named as one, and the import screen says photos stay behind", async ({ page }) => {

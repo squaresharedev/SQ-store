@@ -10,7 +10,7 @@
     },
     "storefront": {
       "label": "Vitrine",
-      "description": "Concevez la grille sur laquelle reposent vos produits."
+      "description": "Concevez la grille sur laquelle reposent vos produits. Elle devient une page que les acheteurs peuvent ouvrir et partager."
     },
     "orders": {
       "label": "Commandes",
@@ -31,7 +31,8 @@
     "discounts": {
       "label": "Réductions",
       "description": "Organisez des promotions et partagez des codes de réduction."
-    }
+    },
+    "help": "Aide"
   },
   "settings": {
     "account": "Compte",
@@ -42,17 +43,18 @@
     "notifications": "Notifications",
     "language": "Langue",
     "team": "Équipe et accès",
-    "danger": "Zone de danger",
+    "danger": "Supprimer le compte",
     "billing": "Forfait et facturation",
-    "connectedApps": "Applications connectées"
+    "connectedApps": "Assistant IA"
   },
   "profileMenu": {
     "label": "Menu du compte",
     "account": "Compte",
-    "switchAccounts": "Changer de compte",
+    "switchAccounts": "Mes boutiques",
     "yourStore": "Votre boutique",
     "owner": "Propriétaire",
     "logOut": "Se déconnecter",
+    "logOutEverywhere": "Se déconnecter partout",
     "plan": "Forfait"
   },
   "viewingBanner": {

@@ -114,7 +114,7 @@ export function fixFieldForPath(target: FixTarget, path: string): string {
   return match ? match[1] : "other";
 }
 
-/** The seller-facing name of one field ("Photos", "Purchase link"). */
+/** The seller-facing name of one field ("Photos", "Buy link"). */
 export function fixFieldLabel(target: FixTarget, field: string): MessageRef {
   return target === "product"
     ? msg("Products.removal.fields.product", { field })

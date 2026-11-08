@@ -73,7 +73,7 @@
     "label": "Quantidade"
   },
   "cta": {
-    "unwired": "Este botão ainda não tem destino. Adicione um link de compra ao produto, ou um e-mail de contacto em Dados do vendedor.",
+    "unwired": "Este botão ainda não tem destino. Adicione um link de compra ao produto, ou um e-mail de contacto nos seus dados de vendedor.",
     "unavailableIn": "Indisponível para a opção: {group}",
     "askAbout": "Perguntar sobre este produto",
     "checkoutOn": "Finalizar compra em <strong>{host}</strong>",
@@ -374,8 +374,8 @@
       "testBody": "Este é um pagamento de desenvolvimento. Nenhum cartão é cobrado e nenhum dinheiro é movido.",
       "stripeTitle": "Pague em segurança com Stripe",
       "stripeBody": "Introduz os dados do cartão na página segura do Stripe no passo seguinte.",
-      "previewTitle": "Dados do cartão",
-      "previewBody": "Cartão, Apple Pay e Google Pay aparecerão aqui nas suas cores quando ligar o Stripe.",
+      "previewConnect": "Os compradores pagam aqui com cartão assim que o Stripe estiver ligado em <link>Pagamentos</link>.",
+      "previewComingSoon": "Os pagamentos com cartão aqui estão para breve. Até lá, os compradores pagam-lhe através do link de compra do produto, ou por e-mail.",
       "cardNumber": "Número do cartão",
       "expiry": "MM / AA",
       "cvc": "CVV",

@@ -180,6 +180,11 @@ export function LoginForm({
           </div>
         )}
 
+        {/* Brief eligibility note shown early so ineligible sellers know before they fill the form. */}
+        {mode === "signup" && (
+          <p className={infoTextClass}>{t("signupRegionNote")}</p>
+        )}
+
         {/* Email, or (signing in) a username. Same element in every mode, so
             switching tabs keeps whatever was already typed. */}
         <div className="flex flex-col gap-2">
@@ -354,6 +359,23 @@ export function LoginForm({
           </div>
         )}
 
+        {/* Magic-link toggle — above the submit button so it is in the scan
+            path before the first-time user reaches for the button. */}
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={() => changeMode((m) => (m === "magic" ? "signin" : "magic"))}
+            suppressHydrationWarning
+            className="inline-flex max-w-full items-center gap-1.5 rounded-md px-3 py-1.5 font-inter text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            {isMagic ? t("usePassword") : t("useMagicLink")}
+            {/* Only while this button OFFERS the magic link. In magic mode it
+                offers the password instead, and badging that would point at
+                the wrong option. */}
+            {!isMagic && lastUsed === "magic" && <LastUsedBadge />}
+          </button>
+        </div>
+
         {/* Primary CTA — the only submit button, so Enter always lands here.
             Client-side gating on the Turnstile token is a courtesy (it saves
             an obviously-doomed round trip); the real gate is the server
@@ -379,22 +401,6 @@ export function LoginForm({
             cta
           )}
         </Button>
-
-        {/* Magic-link toggle — visible container on hover */}
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={() => changeMode((m) => (m === "magic" ? "signin" : "magic"))}
-            suppressHydrationWarning
-            className="inline-flex max-w-full items-center gap-1.5 rounded-md px-3 py-1.5 font-inter text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          >
-            {isMagic ? t("usePassword") : t("useMagicLink")}
-            {/* Only while this button OFFERS the magic link. In magic mode it
-                offers the password instead, and badging that would point at
-                the wrong option. */}
-            {!isMagic && lastUsed === "magic" && <LastUsedBadge />}
-          </button>
-        </div>
       </form>
 
       <PasswordResetModal

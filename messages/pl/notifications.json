@@ -159,8 +159,8 @@
         "body": "To plik do pobrania, więc nie ma czego wysyłać."
       },
       "withdrawn": {
-        "title": "Kupujący odstąpił od zamówienia {number}",
-        "body": "{title}. Uzgodnij z nim zwrot towaru i refundację."
+        "title": "Kupujący anulował zamówienie {number}",
+        "body": "{title}. Ustal zwrot towaru i zwróć kupującemu pieniądze w ciągu 14 dni."
       }
     },
     "billing": {

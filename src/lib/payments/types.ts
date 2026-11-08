@@ -107,6 +107,31 @@ export type UpcomingPayout = {
   expectedAt: string;
 } | null;
 
+/** One UTC day of the ledger, in the history's currency. Integer cents. */
+export type PaymentsDay = {
+  /** The day, "YYYY-MM-DD" (UTC). */
+  day: string;
+  /** Sales made that day, before anything is taken off. */
+  grossCents: number;
+  /** How many sales. */
+  sales: number;
+  /** What came off: the fees on those sales, refunds, Stripe's own fees and
+   *  corrections. Below zero on a day money came back (a dispute fee returned). */
+  costsCents: number;
+  /** Sent to the bank that day. */
+  paidOutCents: number;
+};
+
+/** The ledger day by day, for the earnings chart and the trend tiles. */
+export type PaymentsHistory = {
+  /** The store's main currency: the one these figures are in. */
+  currency: string;
+  /** Oldest first, today last. Only days the ledger was read in full. */
+  days: PaymentsDay[];
+  /** Money also moved in another currency, which these figures leave out. */
+  otherCurrencies: boolean;
+};
+
 /** Everything the /payments page needs, fetched in one place. */
 export type PaymentsOverview = {
   account: AccountStatus;
@@ -115,4 +140,6 @@ export type PaymentsOverview = {
   payoutMethod: PayoutMethod | null;
   payouts: Payout[];
   transactions: BalanceTransaction[];
+  /** Null while there is no connected account, or its ledger could not be read. */
+  history: PaymentsHistory | null;
 };

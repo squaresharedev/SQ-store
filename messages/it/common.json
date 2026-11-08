@@ -91,7 +91,11 @@
     "proportional": "Ripartizione proporzionale",
     "other": "Altro",
     "total": "Totale",
-    "category": "Categoria"
+    "category": "Categoria",
+    "changeUp": "In aumento del {percent} rispetto al periodo precedente",
+    "changeDown": "In calo del {percent} rispetto al periodo precedente",
+    "vsBefore": "rispetto a {amount} prima",
+    "spark": "{label}, giorno per giorno"
   },
   "legal": {
     "cookies": {

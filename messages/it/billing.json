@@ -34,7 +34,7 @@
     "yearlyFree": "{count, plural, one {# mese gratis} many {# di mesi gratis} other {# mesi gratis}}",
     "launchNote": "Un prezzo di lancio è un prezzo introduttivo: il prezzo di listino è quello mostrato barrato.",
     "grantTitle": "{plan} è offerto da noi",
-    "autoRenew": "I piani a pagamento si rinnovano automaticamente ogni mese al prezzo indicato, finché non disdici."
+    "autoRenew": "I piani a pagamento si rinnovano automaticamente {interval, select, year {una volta all’anno} other {ogni mese}} al prezzo indicato, finché non disdici."
   },
   "card": {
     "perMonth": "/ mese",
@@ -79,7 +79,8 @@
     "cheapest": "Con {sales} di vendite al mese, {plan} è quello che ti costa meno.",
     "legendPrice": "Prezzo del piano",
     "legendFee": "Commissione sulle tue vendite",
-    "cheapestTag": "Il più economico per te"
+    "cheapestTag": "Il più economico per te",
+    "stripeFeeNote": "La commissione di Stripe per l’elaborazione delle carte su ogni vendita si aggiunge a queste cifre."
   },
   "compare": {
     "eyebrow": "Confronta",
@@ -160,17 +161,17 @@
   },
   "portal": {
     "opening": "Apertura di Stripe",
-    "stepUp": "Conferma che sei tu prima di aprire i tuoi dati di fatturazione."
+    "stepUp": "Hai attivato l’autenticazione a due fattori, quindi conferma che sei tu prima di aprire i tuoi dati di fatturazione."
   },
   "chip": {
     "label": "Piano: {plan}",
-    "upgrade": "Potenzia",
-    "pro": "Piano Pro"
+    "upgrade": "Potenzia"
   },
   "banner": {
     "label": "Pagamento del piano",
     "pastDue": "Il pagamento del tuo piano {plan} non è riuscito. Aggiorna la carta per mantenerlo.",
     "pastDueMember": "Il pagamento del piano {plan} di questo negozio non è riuscito. Solo il proprietario può aggiornare la carta.",
+    "seeTeam": "Vedi i membri del team",
     "action": "Aggiorna la carta"
   },
   "settings": {
@@ -197,7 +198,7 @@
       "over": "{count} in più",
       "full": "Al limite"
     },
-    "overLimit": "Oltre il limite di questo piano. Tutto continua a funzionare; rimuovine uno o passa a un piano superiore per aggiungerne altri.",
+    "overLimit": "Oltre il limite di questo piano. Tutto continua a funzionare; rimuovine uno o <upgrade>passa a un piano superiore</upgrade> per aggiungerne altri.",
     "invoicesTitle": "Fatturazione e fatture",
     "invoicesDescription": "La tua carta, l’indirizzo di fatturazione, la partita IVA e tutte le fatture, nella pagina sicura di Stripe.",
     "manage": "Gestisci fatturazione e fatture",

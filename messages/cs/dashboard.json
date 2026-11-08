@@ -52,7 +52,8 @@
   },
   "recentOrders": {
     "title": "Poslední objednávky",
-    "empty": "Zatím žádné objednávky. Prodeje přes váš vlastní odkaz na nákup nebo e-mailem se tu nezobrazují."
+    "empty": "Zatím žádné objednávky. Jakmile bude pokladna spuštěná, dokončené nákupy se objeví tady.",
+    "emptyReady": "Zatím žádné objednávky. Váš první prodej se objeví tady."
   },
   "attention": {
     "title": "Vyžaduje pozornost",
@@ -74,7 +75,7 @@
       "descriptionUpdated": "Podmínky se od vašeho přijetí změnily. Přečtěte si aktuální verzi a přijměte ji.",
       "descriptionTerms": "Přečtěte si Podmínky služby a odsouhlaste je.",
       "descriptionTermsUpdated": "Podmínky služby se od vašeho souhlasu změnily. Přečtěte si aktuální verzi a odsouhlaste ji.",
-      "action": "Zkontrolovat podmínky"
+      "action": "Odsouhlasit Podmínky"
     },
     "noBuyPath": {
       "label": "{count, plural, one {{count} produkt bez možnosti nákupu} few {{count} produkty bez možnosti nákupu} many {{count} produktu bez možnosti nákupu} other {{count} produktů bez možnosti nákupu}}",
@@ -114,18 +115,18 @@
       "action": "Otevřít editor"
     },
     "deadBlocks": {
-      "label": "{count, plural, one {{count} blok výlohy odkazuje na smazané produkty} few {{count} bloky výlohy odkazují na smazané produkty} many {{count} bloku výlohy odkazuje na smazané produkty} other {{count} bloků výlohy odkazuje na smazané produkty}}",
-      "description": "Návštěvníkům se tyto bloky zobrazují prázdné. Odeberte je nebo nahraďte.",
-      "action": "Otevřít výlohu"
+      "label": "{count, plural, one {{count} místo pro produkt odkazuje na smazaný produkt} few {{count} místa pro produkty odkazují na smazané produkty} many {{count} místa pro produkty odkazuje na smazané produkty} other {{count} míst pro produkty odkazuje na smazané produkty}}",
+      "description": "Návštěvníkům se tato místa zobrazují prázdná. Otevřete editor a odeberte je nebo nahraďte.",
+      "action": "Otevřít editor"
     },
     "toShip": {
       "description": "Kupující čekají na zásilky. Zabalte je a označte jako odeslané.",
       "action": "Odeslat objednávky"
     },
     "withdrawals": {
-      "label": "{count, plural, one {{count} kupující odstoupil} few {{count} kupující odstoupili} many {{count} kupujícího odstoupilo} other {{count} kupujících odstoupilo}}",
-      "description": "Do 14 dnů od odstoupení jim máte vrátit peníze. Domluvte s nimi vrácení zboží a pak peníze vraťte.",
-      "action": "Zobrazit odstoupení"
+      "label": "{count, plural, one {{count} kupující zrušil nákup} few {{count} kupující zrušili nákup} many {{count} kupujícího zrušilo nákup} other {{count} kupujících zrušilo nákup}}",
+      "description": "Do 14 dnů jim máte vrátit peníze. Domluvte s nimi vrácení zboží a pak objednávku refundujte.",
+      "action": "Zobrazit zrušené nákupy"
     },
     "restock": {
       "label": "{count, plural, one {{count} produkt brzy dojde} few {{count} produkty brzy dojdou} many {{count} produktu brzy dojde} other {{count} produktů brzy dojde}}",
@@ -138,6 +139,10 @@
       "label": "Nastavte ceny doručení",
       "description": "Kupující nemohou fyzický produkt zaplatit v pokladně, dokud destinace nemá sazbu i zemi.",
       "action": "Nastavit ceny"
+    },
+    "paused": {
+      "label": "{count, plural, one {{count} produkt je skrytý před kupujícími} few {{count} produkty jsou skryté před kupujícími} many {{count} produktu je skryto před kupujícími} other {{count} produktů je skryto před kupujícími}}",
+      "description": "{count, plural, one {Společnost Square Share ho pozastavila nebo odstranila. Podívejte se proč a co dělat dál.} few {Společnost Square Share je pozastavila nebo odstranila. Podívejte se proč a co dělat dál.} many {Společnost Square Share je pozastavila nebo odstranila. Podívejte se proč a co dělat dál.} other {Společnost Square Share je pozastavila nebo odstranila. Podívejte se proč a co dělat dál.}}"
     }
   }
 }

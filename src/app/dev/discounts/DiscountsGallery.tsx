@@ -274,7 +274,7 @@ export function DiscountsGallery({ fixtures, now }: { fixtures: DiscountFixtures
                 key={formCase}
                 discount={formDiscount}
                 products={fixtures.products}
-                chipHref={settingHref(SALE_CHIP_SETTING_ID)}
+                chip={{ href: settingHref(SALE_CHIP_SETTING_ID), storefrontName: HARNESS_SELLER.businessName }}
               />
             </ToastProvider>
           </div>

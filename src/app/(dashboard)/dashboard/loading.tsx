@@ -12,12 +12,12 @@ export default function DashboardOverviewLoading() {
       <Skeleton className="h-9 w-40" />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }, (_, index) => (
-          <Skeleton key={index} className="h-28 rounded-md" />
+          <Skeleton key={index} className="h-28 rounded-none" />
         ))}
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Skeleton className="h-64 rounded-md lg:col-span-2" />
-        <Skeleton className="h-64 rounded-md" />
+        <Skeleton className="h-64 rounded-none lg:col-span-2" />
+        <Skeleton className="h-64 rounded-none" />
       </div>
       <span className="sr-only">{t("srLoading")}</span>
     </div>

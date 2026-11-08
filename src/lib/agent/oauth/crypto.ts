@@ -19,6 +19,15 @@ export function randomCredential(prefix: string): string {
   return `${prefix}${base64Url(crypto.getRandomValues(new Uint8Array(32)))}`;
 }
 
+/** What follows the prefix: 32 bytes as base64url, exactly 43 characters. */
+const CREDENTIAL_BODY_PATTERN = /^[A-Za-z0-9\-_]{43}$/;
+
+/** Whether `value` has the shape randomCredential gives `prefix`, so a lookup
+ *  can be skipped for anything that could never be one of ours. */
+export function isCredential(value: string, prefix: string): boolean {
+  return value.startsWith(prefix) && CREDENTIAL_BODY_PATTERN.test(value.slice(prefix.length));
+}
+
 export async function sha256Hex(value: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");

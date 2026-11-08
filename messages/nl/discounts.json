@@ -51,7 +51,8 @@
     "noEnd": "Geen einddatum",
     "orders": "{orders, plural, =0 {Nog geen bestellingen} one {# bestelling} other {# bestellingen}}",
     "uses": "{uses} van {limit} keer gebruikt",
-    "switchLabel": "Aan",
+    "turnOn": "Aanzetten",
+    "turnOff": "Uitzetten",
     "edit": "Bewerken",
     "endNow": "Nu beëindigen",
     "delete": "Verwijderen",
@@ -86,7 +87,7 @@
     "kind": {
       "title": "Wat voor korting?",
       "code": "Kortingscode",
-      "codeHint": "Kopers vullen hem in bij het afrekenen, en jij ziet via welk kanaal ze kwamen.",
+      "codeHint": "Kopers vullen hem in bij het afrekenen, en jij ziet via welk kanaal ze kwamen. Hij komt niet bovenop een lopende actie: kopers krijgen de laagste prijs.",
       "automatic": "Actie",
       "automaticHint": "Verlaagt je prijzen voor iedereen. Zonder code."
     },
@@ -99,6 +100,7 @@
     },
     "channel": {
       "label": "Gedeeld op (optioneel)",
+      "hint": "Op je pagina Kortingen zie je hoeveel bestellingen elk kanaal oplevert.",
       "suggestions": "Voorgestelde kanalen",
       "newsletter": "Nieuwsbrief",
       "creator": "Creator"
@@ -141,7 +143,7 @@
       }
     },
     "limit": {
-      "label": "Maximaal aantal bestellingen (optioneel)",
+      "label": "Gebruikslimiet (optioneel)",
       "none": "Geen limiet"
     },
     "locked": "Deze actie is al begonnen, dus alleen het einde kan worden gewijzigd. Beëindig hem en maak een nieuwe actie om iets anders te wijzigen.",
@@ -153,7 +155,8 @@
       "noEnd": "Geen einddatum",
       "exampleLabel": "Voorbeeld",
       "example": "Voorbeeld: {title} voor {regular} kost nu {now}.",
-      "chipLink": "Wijzig hoe acties eruitzien in je winkel"
+      "exampleUnchanged": "{title} blijft {price}: het heeft een prijs in een andere valuta.",
+      "chipLink": "Wijzig hoe acties eruitzien op {storefront}"
     },
     "create": "Korting aanmaken",
     "save": "Wijzigingen opslaan",

@@ -18,9 +18,9 @@ import {
  * EditorToolbar), which is all these cases need.
  */
 async function addElement(page: Page, name: RegExp) {
-  await page.getByRole("button", { name: "Add element" }).click();
+  await page.getByRole("button", { name: "Add shape or image" }).click();
   await page
-    .getByRole("menu", { name: "Elements" })
+    .getByRole("menu", { name: "Shapes and images" })
     .getByRole("menuitem", { name })
     .click();
   // Closing the menu makes the board step back out from under it; a click
@@ -121,17 +121,18 @@ test.describe("storefront designer", () => {
       });
     }).toPass({ timeout: 40_000 });
     const snippet = page.locator("pre");
-    // The snippet carries the storefront's rotatable EMBED KEY, never its id.
-    // Publishing the id would make the embed impossible to revoke without
-    // deleting the storefront, and would leak the dashboard's own identifier
-    // into every page that embeds it.
+    // The embed is keyed by the storefront's rotatable EMBED KEY, never its id.
+    // Keying it by the id would make the embed impossible to revoke without
+    // deleting the storefront. (Once the hosted page is live the snippet also
+    // carries a plain link to it, /s/<id>: that page is public by design and
+    // is not what keys the embed.)
     // It loads the embed's loader from the embed's own origin (this server, in
     // the test stack: NEXT_PUBLIC_EMBED_URL in tests/e2e/stack/server.mjs).
     await expect(snippet).toContainText('src="http://localhost:3100/widget.js"');
     await expect(snippet).toContainText(
       /data-squareshare-storefront="[0-9a-f-]{36}"/,
     );
-    await expect(snippet).not.toContainText(storefrontId);
+    await expect(snippet).not.toContainText(`data-squareshare-storefront="${storefrontId}"`);
 
     // Embed settings: enable + set a domain, save.
     await page.locator("#embed-enabled").click();
@@ -218,7 +219,9 @@ test.describe("storefront designer", () => {
     const squares = tile(page, "square shape");
     await squares.first().click();
     await squares.nth(1).click({ modifiers: ["Shift"] });
-    await expect(page.getByText("2 blocks", { exact: true })).toBeVisible();
+    // The visible one: the Design tab's hidden Layers row counts the board in
+    // the same words.
+    await expect(page.getByText("2 blocks", { exact: true }).filter({ visible: true })).toBeVisible();
 
     // One change in the group editor lands on every selected block.
     await page
@@ -281,21 +284,25 @@ test.describe("storefront designer", () => {
     }
 
     await sweepTopRow();
-    await expect(page.getByText("3 blocks", { exact: true })).toBeVisible();
+    await expect(page.getByText("3 blocks", { exact: true }).filter({ visible: true })).toBeVisible();
     // Mixed selection: settings differ per type, so group actions only.
     await expect(page.getByText(/different types/i)).toBeVisible();
 
-    // Duplicate covers the copyable blocks (the product is excluded)...
-    await page.getByRole("button", { name: /duplicate 2 blocks/i }).click();
+    // Duplicate covers the copyable blocks (the product is excluded)... The
+    // panel's button: the quick bar over the board offers the same words.
+    await page
+      .locator("[data-design-panel]")
+      .getByRole("button", { name: /duplicate 2 blocks/i })
+      .click();
     await expect(cells).toHaveCount(5);
     // ...and the fresh copies become the selection; Delete removes them.
-    await expect(page.getByText("2 blocks", { exact: true })).toBeVisible();
+    await expect(page.getByText("2 blocks", { exact: true }).filter({ visible: true })).toBeVisible();
     await page.keyboard.press("Delete");
     await expect(cells).toHaveCount(3);
 
     // Marquee again over everything, then delete the lot (product included).
     await sweepTopRow();
-    await expect(page.getByText("3 blocks", { exact: true })).toBeVisible();
+    await expect(page.getByText("3 blocks", { exact: true }).filter({ visible: true })).toBeVisible();
     await page.keyboard.press("Delete");
     await expect(cells).toHaveCount(0);
   });

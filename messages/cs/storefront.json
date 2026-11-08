@@ -91,7 +91,7 @@
     "groups": {
       "theme": "Motiv",
       "header": "Záhlaví",
-      "typography": "Typografie",
+      "typography": "Písmo",
       "cards": "Dlaždice produktů",
       "soldOut": "Vyprodáno",
       "productPage": "Produktová stránka",
@@ -100,7 +100,7 @@
     "subtitle": {
       "theme": "Výloha / Motiv",
       "header": "Výloha / Záhlaví",
-      "typography": "Výloha / Typografie",
+      "typography": "Výloha / Písmo",
       "cards": "Výloha / Dlaždice produktů",
       "soldOut": "Výloha / Vyprodáno",
       "productPage": "Výloha / Produktová stránka",
@@ -161,7 +161,8 @@
       "cardStarRating": "Hodnocení hvězdičkami na kartách",
       "cardLowStock": "Štítek Málo skladem",
       "textSpacing": "Mezery mezi písmeny a výška řádku",
-      "elementBlur": "Rozmazání"
+      "elementBlur": "Rozmazání",
+      "phoneLayout": "Uspořádání pro telefony"
     }
   },
   "editorSearch": {
@@ -207,31 +208,37 @@
     "emptyHint": "Tato mřížka je prázdná",
     "removed": "Odebráno službou Square Share",
     "pausedInReview": "Pozastaveno · Square Share ji kontroluje",
-    "pausedNeedsChanges": "Pozastaveno společností Square Share · vyžaduje změny"
+    "pausedNeedsChanges": "Pozastaveno společností Square Share · vyžaduje změny",
+    "status": {
+      "live": "Zveřejněno",
+      "pagesOff": "Zatím nezveřejněno: zapněte produktové stránky",
+      "detailsMissing": "Zatím nezveřejněno: doplňte údaje prodejce"
+    }
   },
   "embed": {
-    "inDevNotice": "Widget pro vložení na web je ve vývoji a na cizích webech se zatím nezobrazuje. Nastavte si vše níže, ať můžete kód pro vložení použít hned, jak bude hotový.",
+    "sectionTitle": "Na vašem vlastním webu",
+    "inDevNotice": "Na jiných webech se to zatím nezobrazuje. Nastavte si to už teď a bude to připravené hned, jak to spustíme. Pak také doplníte krátkou poznámku do svých zásad ochrany osobních údajů: text vám dodáme.",
     "title": "Sdílet výlohu",
-    "description": "Pošlete lidem odkaz na výlohu „{name}“, nebo vložte kód na svůj web a zobrazte ji tam.",
+    "description": "Pošlete lidem odkaz na výlohu „{name}“, nebo vložte kód pro web na své stránky a zobrazte ji tam.",
     "steps": {
       "site": "Vyberte weby, kde se zobrazí",
-      "snippet": "Vložte kód na svůj web",
+      "snippet": "Přidejte kód pro web na své stránky",
       "privacy": "Doplňte to do zásad ochrany osobních údajů"
     },
     "required": "Povinné",
     "enabledLabel": "Zobrazit na mém webu",
     "showingLabel": "Zobrazuje se na vašem webu",
-    "domainsLabel": "Povolené domény",
+    "domainsLabel": "Adresy vašeho webu",
     "domainsPlaceholder": "vasweb.cz, blog.vasweb.cz",
-    "domainsHint": "Nejvýše {max}, oddělené čárkou. Když vložíte adresu URL, zkrátíme ji na doménu.",
-    "sameAsHint": "Zkopíruje povolené domény, které má {title}.",
-    "emptyDomainsWarning": "Přidejte alespoň jednu doménu. Dokud je seznam prázdný, výloha se nikde nenačte, i když je vložení na web zapnuté.",
+    "domainsHint": "Výloha se načte jen na těchto webech. Vložte celou adresu URL a my z ní vybereme adresu webu. Nejvýše {max}, oddělené čárkou.",
+    "sameAsHint": "Zkopíruje adresy webu, které má {title}.",
+    "emptyDomainsWarning": "Přidejte alespoň jednu adresu webu. Dokud je seznam prázdný, výloha se nikde nenačte, i když je vložení na web zapnuté.",
     "builderLabel": "Váš nástroj pro tvorbu webu",
     "builderOther": "Jiný web",
     "builderSteps": {
       "other": "Vložte ho do HTML stránky na místo, kde se má výloha zobrazit.",
       "wordpress": "Přidejte blok „Vlastní HTML“ tam, kde se má výloha zobrazit, a vložte do něj kód.",
-      "squarespace": "Přidejte blok „Code“ a vložte do něj kód. Pokud se výloha zobrazí až po obnovení stránky, přepněte na „Jen iframe“.",
+      "squarespace": "Přidejte blok „Code“ a vložte do něj kód. Pokud se výloha zobrazí až po obnovení stránky, přepněte na „Jednoduché vložení“.",
       "wix": "Přidejte „Embed Code“, potom „Embed HTML“, a vložte kód. Pak roztáhněte rámeček na výšku výlohy.",
       "webflow": "Přidejte prvek „Code Embed“ a vložte do něj kód. Zobrazí se na zveřejněném webu.",
       "shopify": "V editoru motivu přidejte sekci „Custom Liquid“ a vložte do ní kód.",
@@ -241,21 +248,21 @@
     },
     "snippetKinds": {
       "label": "Typ kódu",
-      "script": "Skript",
-      "iframe": "Jen iframe"
+      "script": "Plné vložení",
+      "iframe": "Jednoduché vložení"
     },
-    "snippetReadyHint": "Stačí ho vložit jednou. Přizpůsobí se výloze a promítne, co zde změníte.",
-    "iframeHint": "Pro weby, které odstraňují skripty. Má výšku {height} pixelů a posouvá se uvnitř. Po změně domén ho zkopírujte znovu.",
-    "snippetLockedHint": "Zapněte vložení na web a přidejte alespoň jednu doménu, pak se odemkne tlačítko Kopírovat.",
+    "snippetReadyHint": "Funguje na většině webů. Stačí ho vložit jednou: přizpůsobí se výloze a promítne, co zde změníte.",
+    "iframeHint": "Použijte ho, pokud se Plné vložení na vašem webu nezobrazilo. Má výšku {height} pixelů a posouvá se uvnitř. Po každé změně adres webu ho zkopírujte znovu.",
+    "snippetLockedHint": "Zapněte vložení na web a přidejte alespoň jednu adresu webu, pak se odemkne tlačítko Kopírovat.",
     "snippetSaveHint": "Uložte nastavení, pak se odemkne tlačítko Kopírovat.",
     "pagesOffHint": "Nejdřív v editoru zapněte produktové stránky. Kliknutí na produkt otevře jeho stránku.",
     "notShowingLabel": "Když se výloha nezobrazuje",
-    "notShowingTip": "Adresa vašeho webu musí být v Povolených doménách a web musí používat https. Vložený kód se zobrazí na zveřejněném webu, ne v editoru nástroje pro tvorbu webu. Chcete-li ho vidět na adrese náhledu (třeba vasweb.webflow.io), přidejte i tuto adresu.",
+    "notShowingTip": "Adresa vašeho webu musí být mezi adresami webu výše a web musí používat https. Vložený kód se zobrazí na zveřejněném webu, ne v editoru nástroje pro tvorbu webu. Pokud se výloha vůbec nezobrazí, zkuste typ kódu Jednoduché vložení. Chcete-li ji vidět na adrese náhledu (třeba vasweb.webflow.io), přidejte i tuto adresu.",
     "copySnippet": {
-      "copy": "Kopírovat kód pro vložení",
-      "copied": "Kód pro vložení zkopírován",
-      "failed": "Kód pro vložení se nepodařilo zkopírovat. Označte ho a zkopírujte ručně.",
-      "cannotCopyYet": "kód pro vložení zatím nelze zkopírovat"
+      "copy": "Kopírovat kód pro web",
+      "copied": "Kód pro web zkopírován",
+      "failed": "Kód pro web se nepodařilo zkopírovat. Označte ho a zkopírujte ručně.",
+      "cannotCopyYet": "kód pro web zatím nelze zkopírovat"
     },
     "privacyHint": "Váš web teď načítá tuto výlohu ze Square Share, a jeho zásady ochrany osobních údajů to proto musí uvádět. Vložte do nich tento text:",
     "privacyTextLabel": "Text o soukromí",
@@ -265,20 +272,21 @@
       "copied": "Text o soukromí zkopírován",
       "failed": "Text se nepodařilo zkopírovat. Označte ho a zkopírujte ručně."
     },
-    "snippetKeyLabel": "Klíč kódu pro vložení",
-    "rotateConfirmText": "Výměnou vznikne nový klíč. Všechny kopie starého kódu okamžitě přestanou fungovat, i ty na webech, kde je chcete dál mít: nový kód pak budete muset vložit všude znovu.",
-    "rotateKey": "Vyměnit klíč",
-    "rotating": "Výměna klíče…",
-    "revokeHint": "Kód se dostal někam, kam nemá? Vyměňte klíč a všechny stávající kódy zneplatníte.",
+    "snippetKeyLabel": "Kód pro web",
+    "rotateConfirmText": "Získáním nového kódu přestane starý kód fungovat všude, kam jste ho vložili. Na weby, kde výlohu chcete mít dál, bude potřeba vložit nový kód znovu.",
+    "rotateKey": "Získat nový kód",
+    "rotating": "Získávání nového kódu…",
+    "revokeHint": "Kód pro web má být veřejný: zobrazí se jen na adresách vašeho webu. Nový kód si vyžádejte, jen pokud chcete vypnout všechny už vložené kopie.",
     "saveSettings": "Uložit nastavení",
     "saving": "Ukládání…",
     "saved": "Nastavení vložení na web uloženo.",
-    "newKeyIssued": "Nový klíč pro vložení na web vytvořen.",
-    "newKeyDetail": "Vložte kód znovu všude, kde je tato výloha vložená."
+    "newKeyIssued": "Nový kód pro web vytvořen.",
+    "newKeyDetail": "Vložte kód pro web znovu všude, kde je tato výloha vložená."
   },
   "share": {
     "title": "Odkaz na výlohu",
     "live": "Vaše výloha má vlastní stránku. Kdokoli s tímto odkazem si ji může prohlédnout, web nepotřebujete.",
+    "searchOff": "Skryto před vyhledávači, jako je Google.",
     "pagesOff": "Zapněte v editoru produktové stránky a tato výloha získá odkaz, který můžete sdílet.",
     "detailsMissing": "Tato výloha získá odkaz ke sdílení, jakmile doplníte údaje prodejce.",
     "open": "Otevřít",
@@ -321,7 +329,7 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Produktová stránka",
-    "closeAriaLabel": "Zavřít průběh nákupu produktu {title}",
+    "closeAriaLabel": "Zavřít stránku produktu {title}",
     "desktopSize": "Velikost pro počítač",
     "mobileSize": "Velikost pro mobil",
     "checkoutLabel": " · Pokladna",
@@ -331,7 +339,7 @@
   "metadata": {
     "storefronts": {
       "title": "Výlohy",
-      "subtitle": "Každá výloha má vlastní mřížku a motiv. Vytvořte jich, kolik potřebujete, a pak některou otevřete a upravte."
+      "subtitle": "Každá výloha má vlastní mřížku, motiv a odkaz ke sdílení. Vytvořte jich, kolik potřebujete, a pak některou otevřete a upravte."
     },
     "editor": {
       "title": "Upravit výlohu"
@@ -351,20 +359,20 @@
   "controls": {
     "off": "Vypnuto",
     "layers": "Vrstvy",
-    "objectCount": "{count, plural, one {1 objekt} few {# objekty} many {# objektu} other {# objektů}}",
+    "objectCount": "{count, plural, one {# blok} few {# bloky} many {# bloku} other {# bloků}}",
     "cardStyle": "Styl dlaždice",
     "priceTag": "Cenovka",
     "theme": "Motiv",
-    "canvas": "Plátno",
-    "design": "Design"
+    "themeHint": "Barvy, velikost mřížky a rozvržení pro telefony",
+    "canvas": "Plátno"
   },
   "designPanel": {
     "tabSelection": "Výběr",
-    "tabDesign": "Design",
+    "tabDesign": "Celá výloha",
     "show": "Zobrazit panel designu",
     "hide": "Skrýt panel designu",
     "resize": "Změnit velikost panelu designu",
-    "closeSettings": "Zavřít nastavení designu",
+    "closeSettings": "Zavřít styl výlohy",
     "scopeLabel": "Rozsah panelu"
   },
   "library": {
@@ -434,10 +442,11 @@
     "sectionPalettes": "Palety"
   },
   "themePanel": {
-    "accent": "Zvýraznění"
+    "accent": "Zvýraznění",
+    "accentHint": "Používá se pro tlačítka, štítky akcí, nadpisy a název obchodu."
   },
   "panelSearch": {
-    "placeholder": "Najít nastavení nebo objekt",
+    "placeholder": "Najít nastavení nebo blok",
     "clear": "Vymazat hledání",
     "noResults": "V editoru tomu nic neodpovídá.",
     "matchesLabel": "Výsledky"
@@ -488,7 +497,7 @@
     "cornerValueText": "{n, plural, one {# pixel} few {# pixely} many {# pixelu} other {# pixelů}}",
     "sharp": "Ostré",
     "circle": "Kruh",
-    "fineTuning": "Doladění",
+    "titleSection": "Název",
     "showTitle": "Zobrazit název",
     "titleStyleLabel": "Styl názvu",
     "edgeSpacing": "Odsazení od okraje",
@@ -556,12 +565,13 @@
     "label": "Na větších kartách",
     "tile": "Zvětšit",
     "cell": "Stejná velikost",
-    "everyCard": "Platí pro všechny karty v tomto obchodě."
+    "everyCard": "Platí pro cenovky a štítky akcí na všech kartách."
   },
   "layout": {
     "canvasWidth": "Šířka plátna",
     "canvasWidthAriaLabel": "Šířka plátna v blocích",
     "blocksWide": "{n, plural, one {# blok na šířku} few {# bloky na šířku} many {# bloku na šířku} other {# bloků na šířku}}",
+    "blocksUnit": "bloků",
     "canvasHeight": "Výška plátna",
     "heightTip": "Plátno nejde zmenšit pod bloky, které na něm už jsou: nejdřív přetáhněte blok výš a pak plátno zkraťte.",
     "canvasHeightAriaLabel": "Výška plátna v blocích",
@@ -570,6 +580,11 @@
     "gridDensityAriaLabel": "Hustota mřížky",
     "gridGapValue": "{n, plural, one {Mezera # pixel} few {Mezera # pixely} many {Mezera # pixelu} other {Mezera # pixelů}}",
     "noGap": "Bez mezery",
+    "phonesInfoLabel": "Jak telefony zobrazují toto plátno",
+    "phonesInfoBody": "Když je vypnuto, telefony plátno samy přeuspořádají, aby se vešlo. Když je zapnuto, otevřete zobrazení pro telefon a bloky si rozmístěte sami tažením nebo změnou velikosti. Plátno pro počítač zůstane beze změny.",
+    "phonesAutomatic": "Telefony toto plátno uspořádají automaticky.",
+    "phoneWidth": "Šířka na telefonu",
+    "phoneWidthAriaLabel": "Šířka na telefonu v blocích",
     "showGrid": "Zobrazit mřížku",
     "gridInfoLabel": "Kdo mřížku vidí",
     "gridInfoBody": "Pomůcka pro vás při navrhování: vykresluje prázdná místa, takže je vidět, kam blok dopadne. Kupující ji nikdy neuvidí."
@@ -588,7 +603,8 @@
     "angle": "{n}°",
     "layerLabel": "Vrstva",
     "layerInfoLabel": "Jak fungují vrstvy",
-    "layerInfoBody": "Vrstvy určují jen to, co se vykreslí navrchu, když se bloky překrývají; pořadí, ve kterém obsah čte čtečka obrazovky, se nikdy nemění.{multi, select, true { Tento výběr si při přesunu zachová své vnitřní pořadí ve vrstvách.} other {}}{stacked, select, true { Alt + kliknutím na překrývající se bloky na plátně se dostanete k bloku pod nimi.} other {}}",
+    "layerInfoBody": "Vrstvy určují jen to, co se vykreslí navrchu, když se bloky překrývají; pořadí, ve kterém obsah čte čtečka obrazovky, se nikdy nemění.{multi, select, true { Tento výběr si při přesunu zachová své vnitřní pořadí ve vrstvách.} other {}}",
+    "stackedHint": "Alt + kliknutím vyberete blok pod ním. Na dotykové obrazovce klepněte na překrývající se bloky znovu.",
     "blocksSelected": "{count, plural, one {Vybrán # blok} few {Vybrány # bloky} many {Vybráno # bloku} other {Vybráno # bloků}}",
     "layerOf": "Vrstva {index} z {total}",
     "blockLayerLabel": "Vrstva bloku",
@@ -596,7 +612,13 @@
     "sendBackward": "O vrstvu níž",
     "bringForward": "O vrstvu výš",
     "bringToFront": "Přenést do popředí",
-    "seeAllLayers": "Zobrazit všechny vrstvy"
+    "seeAllLayers": "Zobrazit všechny vrstvy",
+    "phoneLabel": "Na telefonech",
+    "phoneInfoLabel": "Jak je blok umístěn na telefonech",
+    "phoneInfoBody": "V zobrazení pro telefon blok přetáhněte nebo změňte jeho velikost a umístíte ho tam sami. Volba Zpět na automatické ho nechá znovu umístit automaticky. Plátno pro počítač zůstane beze změny.",
+    "hideOnPhones": "Skrýt na telefonech",
+    "showOnPhones": "Zobrazit na telefonech",
+    "phoneAutomatic": "Zpět na automatické"
   },
   "header": {
     "showHeader": "Zobrazit záhlaví",
@@ -606,7 +628,8 @@
     "storeNamePlaceholder": "Název obchodu, který uvidí kupující",
     "bio": "Medailonek",
     "bioPlaceholder": "Krátká věta o vašem obchodě",
-    "charsLeft": "{n, plural, one {Zbývá # znak} few {Zbývají # znaky} many {Zbývá # znaku} other {Zbývá # znaků}}"
+    "charsLeft": "{n, plural, one {Zbývá # znak} few {Zbývají # znaky} many {Zbývá # znaku} other {Zbývá # znaků}}",
+    "styleLine": "{line, select, name {Písmo a barva názvu} other {Písmo a barva medailonku}}"
   },
   "soldOut": {
     "hide": "Skrýt před kupujícími",
@@ -682,10 +705,12 @@
     "movePriceTo": "{spot, select, top_left {Přesunout cenu vlevo nahoru} top_center {Přesunout cenu nahoru doprostřed} top_right {Přesunout cenu vpravo nahoru} middle_center {Přesunout cenu doprostřed} bottom_left {Přesunout cenu vlevo dolů} bottom_center {Přesunout cenu dolů doprostřed} bottom_right {Přesunout cenu vpravo dolů} other {Přesunout cenu sem}}"
   },
   "productPage": {
+    "scopeNote": "Tato nastavení platí pro všechny produktové stránky v této výloze.",
     "layout": {
       "title": "Stránka",
       "showPage": {
         "label": "Zobrazit produktovou stránku",
+        "hint": "Vaše výloha tím také získá vlastní odkaz ke sdílení.",
         "infoLabel": "Co dělá tento přepínač",
         "infoOn": "Klepnutím na dlaždici produktu se otevře jeho stránka a výloha má vlastní stránku ke sdílení.",
         "infoOff": "Dlaždice produktů nemají žádnou stránku k otevření a přestane fungovat i odkaz na samotnou výlohu."
@@ -702,7 +727,7 @@
         "label": "Písmo",
         "infoLabel": "Jak souvisí písmo této stránky s písmem výlohy",
         "infoOwn": "Tato stránka má vlastní písmo bez ohledu na to, jaké používá výloha.",
-        "infoFollows": "Řídí se písmem vaší výlohy. Změníte ho v sekci Typografie.",
+        "infoFollows": "Řídí se písmem vaší výlohy. Změníte ho v nastavení Písmo.",
         "inheritOption": "Stejné jako výloha ({name})"
       },
       "indexing": {
@@ -716,6 +741,7 @@
       "title": "Tlačítko nákupu",
       "infoLabel": "Co rozhoduje o tom, jestli se tlačítko zobrazí",
       "infoContent": "Tlačítko vede na odkaz na nákup u každého produktu (nastavuje se u produktu). Bez něj otevře e-mail na vaši kontaktní adresu níže; když chybí obojí, tlačítko se nezobrazí.",
+      "checkoutNote": "Tlačítko Zaplatit v pokladně odpovídá tomuto tlačítku. <link>Přejít na pokladnu</link>",
       "buttonText": {
         "label": "Text tlačítka",
         "charsLeft": "{count, plural, one {Zbývá # znak} few {Zbývají # znaky} many {Zbývá # znaku} other {Zbývá # znaků}}"
@@ -844,6 +870,7 @@
   "productBlock": {
     "deleted": "Tento produkt byl odebrán z vašeho katalogu.",
     "removeFromGrid": "Odebrat z mřížky",
+    "details": "Podrobnosti produktu",
     "nameLabel": "Název",
     "namePlaceholder": "Název produktu",
     "priceLabel": "Cena ({currency})",
@@ -858,13 +885,14 @@
       "lowStock": "Docházející zásoby: {count} ks.",
       "inStock": "Skladem: {count} ks."
     },
-    "openProductPage": "Otevřít průběh nákupu",
-    "hideProductPage": "Skrýt průběh nákupu",
+    "openProductPage": "Otevřít produktovou stránku",
+    "hideProductPage": "Skrýt produktovou stránku",
+    "noCtaWarning": "Tlačítko nákupu na jeho stránce zatím nikam nevede. Přidejte k produktu odkaz na nákup, nebo kontaktní e-mail do svých údajů prodejce.",
     "tileStyle": {
       "title": "Styl dlaždice",
-      "reset": "Obnovit podle motivu",
+      "reset": "Použít styl motivu",
       "infoLabel": "Jak souvisí styl této dlaždice s motivem",
-      "infoWithOverrides": "Tato dlaždice má vlastní styl. Nastavení, která tu zůstala beze změny, se dál řídí motivem.",
+      "infoWithOverrides": "Tato dlaždice má vlastní styl; co tu nezměníte, se řídí motivem. Použít styl motivu vymaže jen změny této dlaždice: motiv zůstane beze změny.",
       "infoNoOverrides": "Nastavte styl jen této dlaždici. Co nezměníte, se bude dál řídit motivem."
     },
     "priceTag": "Cenovka",
@@ -876,6 +904,7 @@
       "updateEverywhere": "Změnit všude"
     },
     "savedToast": "Produkt „{title}“ byl změněn všude, kde se zobrazuje.",
+    "unsavedToast": "Nový název nebo cena produktu „{title}“ nebyly uloženy. Chcete-li je zachovat, stiskněte před odchodem Uložit.",
     "validation": {
       "noTitle": "Dejte produktu název.",
       "noPrice": "Nastavte cenu.",
@@ -983,7 +1012,7 @@
   "multiBlock": {
     "shapesContext": "Upravujete {count, plural, one {# tvar} few {# tvary} many {# tvaru} other {# tvarů}} najednou. Zobrazené hodnoty pocházejí z prvního vybraného tvaru; každá změna se použije na všechny.",
     "textsContext": "Upravujete {count, plural, one {# textový blok} few {# textové bloky} many {# textového bloku} other {# textových bloků}} najednou. Zobrazené hodnoty pocházejí z prvního vybraného bloku; každá změna se použije na všechny. Každý blok si ponechá svůj text.",
-    "imagesContext": "Upravujete {count, plural, one {# prvek} few {# prvky} many {# prvku} other {# prvků}} najednou. Zobrazené hodnoty pocházejí z prvního vybraného prvku; každá změna se použije na všechny. Každý si ponechá svůj obrázek.",
+    "imagesContext": "Upravujete {count, plural, one {# blok} few {# bloky} many {# bloku} other {# bloků}} najednou. Zobrazené hodnoty pocházejí z prvního vybraného bloku; každá změna se použije na všechny. Každý si ponechá svůj obrázek.",
     "productsContext": "Upravujete styl {count, plural, one {# dlaždice produktu} few {# dlaždic produktů} many {# dlaždice produktu} other {# dlaždic produktů}} najednou. Zobrazené hodnoty pocházejí z první vybrané dlaždice; každá změna se použije na všechny.",
     "mixedContext": "{count, plural, one {Je vybrán # blok} few {Jsou vybrány # bloky} many {Je vybráno # bloku} other {Je vybráno # bloků}} různých typů. Pokud chcete upravit nastavení najednou, vyberte bloky jednoho typu.",
     "remove": "Odebrat {count, plural, one {# blok} few {# bloky} many {# bloku} other {# bloků}}",
@@ -991,7 +1020,7 @@
     "productsNotDuplicated": "Produkty se neduplikují.",
     "tileStyle": {
       "title": "Styl dlaždice",
-      "reset": "Obnovit podle motivu"
+      "reset": "Použít styl motivu"
     },
     "priceTag": "Cenovka"
   },
@@ -1003,18 +1032,18 @@
     "ariaLabel": "Nástroje editoru",
     "addProduct": "Přidat produkt",
     "addText": "Přidat text",
-    "addElement": "Přidat prvek",
+    "addElement": "Přidat tvar nebo obrázek",
     "product": "Produkt",
     "text": "Text",
-    "element": "Prvek",
-    "elementsMenu": "Prvky",
+    "element": "Tvary",
+    "elementsMenu": "Tvary a obrázky",
     "uploading": "Nahrávání…",
     "upload": "Nahrát",
     "uploadImage": "Nahrát obrázek",
     "allShapes": "Všechny tvary",
     "browseShapes": "Procházet celou knihovnu tvarů",
-    "closePage": "Zavřít průběh nákupu",
-    "showPage": "Zobrazit průběh nákupu",
+    "closePage": "Zavřít produktovou stránku",
+    "showPage": "Zobrazit produktovou stránku",
     "closePages": "Zavřít produktovou stránku, pokladnu a stránku s poděkováním",
     "showPageFull": "Zobrazit produktovou stránku, pokladnu a stránku s poděkováním",
     "undo": "Zpět",
@@ -1027,22 +1056,26 @@
     "zoomOutTip": "Oddálit (Ctrl -)",
     "zoomReset": "Obnovit přiblížení na 100 %",
     "zoomResetTip": "Obnovit přiblížení (Ctrl 0)",
-    "zoomResetMenuItem": "Obnovit přiblížení",
+    "zoomFit": "Přizpůsobit obrazovce",
     "zoomIn": "Přiblížit",
     "zoomInTip": "Přiblížit (Ctrl +)",
-    "designSettings": "Nastavení designu",
-    "page": "Průběh nákupu",
-    "moreTools": "Další nástroje"
+    "designSettings": "Styl výlohy",
+    "style": "Styl",
+    "page": "Produktová stránka",
+    "pageMobile": "Stránka",
+    "pageDisabledTip": "Přidejte produkt, abyste mohli otevřít jeho stránku",
+    "moreTools": "Další nástroje",
+    "more": "Další"
   },
   "selectionToolbar": {
     "toolsFor": "Nástroje: {name}",
-    "elements": "{count, plural, one {# prvek} few {# prvky} many {# prvku} other {# prvků}}",
-    "hidePage": "Skrýt průběh nákupu",
-    "openPage": "Otevřít průběh nákupu",
-    "openProductPage": "Otevřít průběh nákupu: {name}",
-    "closeProductPage": "Zavřít průběh nákupu: {name}",
-    "openProductPages": "Otevřít průběh nákupu {count, plural, one {# produktu} few {# produktů} many {# produktu} other {# produktů}}",
-    "closeProductPages": "Zavřít průběh nákupu {count, plural, one {# produktu} few {# produktů} many {# produktu} other {# produktů}}",
+    "elements": "{count, plural, one {# blok} few {# bloky} many {# bloku} other {# bloků}}",
+    "hidePage": "Skrýt produktovou stránku",
+    "openPage": "Otevřít produktovou stránku",
+    "openProductPage": "Otevřít produktovou stránku: {name}",
+    "closeProductPage": "Zavřít produktovou stránku: {name}",
+    "openProductPages": "Otevřít produktové stránky ({count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktů}})",
+    "closeProductPages": "Zavřít produktové stránky ({count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktů}})",
     "editText": "Upravit text",
     "editTextOf": "Upravit text: {name}",
     "color": "Barva",
@@ -1059,24 +1092,26 @@
     "frameImageFor": "Oříznout a umístit obrázek pro {name}",
     "duplicate": "Duplikovat",
     "duplicateNamed": "Duplikovat: {name}",
-    "duplicateN": "Duplikovat {count, plural, one {# prvek} few {# prvky} many {# prvku} other {# prvků}}",
+    "duplicateN": "Duplikovat {count, plural, one {# blok} few {# bloky} many {# bloku} other {# bloků}}",
     "removeFrom": "Odebrat z mřížky: {name}",
-    "removeN": "Odebrat z mřížky {count, plural, one {# prvek} few {# prvky} many {# prvku} other {# prvků}}"
+    "removeN": "Odebrat z mřížky {count, plural, one {# blok} few {# bloky} many {# bloku} other {# bloků}}"
   },
   "canvas": {
     "addSuggested": "Přidat {title} do této výlohy",
     "gridLabel": "Plátno výlohy",
     "emptyGrid": "Vaše mřížka je prázdná",
-    "emptyGridHint": "Přidejte produkt a začněte výlohu uspořádávat. Text a tvary najdete na panelu nástrojů dole.",
+    "emptyGridHint": "Přidejte produkt a začněte výlohu uspořádávat. Text, tvary a vlastní obrázky najdete na panelu nástrojů dole.",
     "addProduct": "Přidat produkt",
     "desktopPreview": "Náhled na počítači",
-    "mobilePreview": "Náhled na mobilu"
+    "mobilePreview": "Náhled na mobilu",
+    "multiSelectTip": "Více bloků vyberete kliknutím se Shiftem nebo tažením přes prázdné místo. Na dotykové obrazovce na každém z nich podržte prst.",
+    "sheetTip": "Zavřete tento panel a panel nástrojů se vrátí."
   },
   "blockTile": {
     "removedProduct": "Odebraný produkt",
     "shape": "{kind, select, square {tvar čtverce} circle {tvar kruhu} ring {tvar prstence} diamond {tvar kosočtverce} rounded {zaoblený tvar} pill {tvar kapsle} half {tvar půlkruhu} quarter {tvar čtvrtkruhu} bar {tvar pruhu} triangle {tvar trojúhelníku} wedge {tvar klínu} pentagon {tvar pětiúhelníku} hexagon {tvar šestiúhelníku} octagon {tvar osmiúhelníku} star {tvar hvězdy} sparkle {tvar jiskry} cross {tvar kříže} arrow {tvar šipky} chevron {tvar lomené šipky} trapezoid {tvar lichoběžníku} parallelogram {tvar rovnoběžníku} burst {tvar výbuchu} other {tvar {kind}}}",
     "imageWithAlt": "Obrázek: {alt}",
-    "imageElement": "Obrázkový prvek",
+    "imageElement": "Obrázkový blok",
     "textWithContent": "Text: {text}",
     "textBlock": "Textový blok",
     "selected": "Vybráno: {label}. Stisknutím Enter výběr zrušíte.",
@@ -1109,11 +1144,14 @@
       "nameLabel": "Název výlohy",
       "namePlaceholder": "Výloha bez názvu",
       "unsaved": "Neuložené změny",
+      "saveTip": "Uložit (Ctrl+S)",
       "viewPage": "Zobrazit stránku",
+      "viewSavedPage": "Zobrazit uloženou stránku",
+      "shareSetupNeeded": "Vaše údaje prodejce nejsou úplné, takže tuto výlohu zatím nelze sdílet",
       "search": "Vyhledávání"
     },
     "mobileNotice": {
-      "body": "Pro nejpohodlnější úpravy otevřete editor na počítači nebo tabletu. Změna pořadí bloků a úprava záhlaví fungují na jakémkoli zařízení.",
+      "body": "Všechno tu funguje: klepnutím na blok ho upravíte, podržením dalších bloků je vyberete společně, podržením nástroje zjistíte, co dělá, a roztažením nebo sevřením prstů měníte přiblížení. Jemné úpravy jsou snazší na větší obrazovce.",
       "dismiss": "Zavřít upozornění o úpravách na malé obrazovce"
     },
     "inspector": {
@@ -1171,13 +1209,6 @@
       "badge": "Ukázka",
       "summary": "{count, plural, one {{count} blok · zkoušejte cokoli, nic se neukládá} few {{count} bloky · zkoušejte cokoli, nic se neukládá} many {{count} bloku · zkoušejte cokoli, nic se neukládá} other {{count} bloků · zkoušejte cokoli, nic se neukládá}}",
       "hide": "Skrýt ukázkovou výlohu"
-    },
-    "embed": {
-      "title": "Vložení výlohy na web",
-      "description": "Každá výloha, kterou vytvoříte, dostane vlastní kód pro vložení na váš web.",
-      "snippetLabel": "Kód vypadá takto",
-      "inDevelopment": "Widget je zatím ve vývoji a na jiných webech se ještě nezobrazuje.",
-      "create": "Vytvořit výlohu"
     },
     "list": {
       "show": "Zobrazit ukázkovou výlohu",
@@ -1457,7 +1488,11 @@
       "link": "Odkaz"
     },
     "buyButtonTipLabel": "Kam tlačítko vede",
-    "buyButtonTip": "Použije text a barvu tlačítka z vaší produktové stránky a otevře produktovou stránku.",
+    "buyButtonTip": "Otevře produktovou stránku. Nejdřív převezme text a barvu tlačítka z produktové stránky, které tu můžete pro karty změnit.",
+    "pageButton": {
+      "label": "Tlačítko produktové stránky",
+      "use": "Použít tlačítko produktové stránky"
+    },
     "rating": "Hodnocení hvězdičkami",
     "ratingTipLabel": "Odkud jsou hvězdičky",
     "ratingTip": "Z recenzí kupujících. Ukáže se pod názvem, jakmile má produkt recenzi.",
@@ -1471,5 +1506,43 @@
     "lineHeight": "Výška řádku",
     "normal": "Normální",
     "valueText": "{value} procent velikosti písma"
+  },
+  "shortcuts": {
+    "title": "Klávesové zkratky",
+    "tip": "Klávesové zkratky (?)",
+    "rows": {
+      "save": {
+        "label": "Uložit",
+        "keys": "<kbd>{mod}</kbd> <kbd>S</kbd>"
+      },
+      "copyPaste": {
+        "label": "Kopírovat a vložit bloky",
+        "keys": "<kbd>{mod}</kbd> <kbd>C</kbd> a pak <kbd>{mod}</kbd> <kbd>V</kbd>"
+      },
+      "remove": {
+        "label": "Odebrat vybrané bloky",
+        "keys": "<kbd>Delete</kbd>"
+      },
+      "move": {
+        "label": "Přesunout vybrané bloky",
+        "keys": "<kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd>"
+      },
+      "selectMore": {
+        "label": "Vybrat více bloků",
+        "keys": "<kbd>Shift</kbd> + kliknutí"
+      },
+      "selectUnder": {
+        "label": "Vybrat blok pod ním",
+        "keys": "<kbd>{alt}</kbd> + kliknutí"
+      },
+      "layer": {
+        "label": "Posunout dopředu nebo dozadu",
+        "keys": "<kbd>{mod}</kbd> <kbd>]</kbd> nebo <kbd>[</kbd>"
+      },
+      "pan": {
+        "label": "Pohyb po plátně",
+        "keys": "Podržte <kbd>mezerník</kbd> a táhněte"
+      }
+    }
   }
 }

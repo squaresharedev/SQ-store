@@ -38,6 +38,9 @@ export type OnboardingData = {
   seller: SellerPrefill | null;
   verificationOn: boolean;
   livePageUrl: string | null;
+  /** The storefront's public page URL, shown alongside the product page link
+   *  in the setup completion card so sellers can share their whole shop. */
+  liveStorefrontUrl: string | null;
   /** `?tour=1`: someone asked for the guided tour (the search action). */
   tourRequested: boolean;
 };
@@ -78,6 +81,7 @@ export function OnboardingPanel({
   seller,
   verificationOn,
   livePageUrl,
+  liveStorefrontUrl,
   tourRequested,
 }: OnboardingData) {
   const t = useTranslations();
@@ -174,6 +178,7 @@ export function OnboardingPanel({
         <SetupChecklist
           setup={setup}
           livePageUrl={livePageUrl}
+          liveStorefrontUrl={liveStorefrontUrl}
           celebrate={celebrate}
           onCelebrated={recordCelebration}
           freshSteps={freshSteps}

@@ -52,7 +52,8 @@
   },
   "recentOrders": {
     "title": "Nedávne objednávky",
-    "empty": "Zatiaľ žiadne objednávky. Predaje cez váš vlastný odkaz na nákup alebo e-mailom sa tu nezobrazujú."
+    "empty": "Zatiaľ žiadne objednávky. Keď sa spustí pokladňa, dokončené nákupy sa zobrazia tu.",
+    "emptyReady": "Zatiaľ žiadne objednávky. Váš prvý predaj sa zobrazí tu."
   },
   "attention": {
     "title": "Vyžaduje pozornosť",
@@ -74,7 +75,7 @@
       "descriptionUpdated": "Podmienky sa od vášho prijatia zmenili. Prečítajte si aktuálnu verziu a prijmite ju.",
       "descriptionTerms": "Prečítajte si Podmienky služby a prijmite ich.",
       "descriptionTermsUpdated": "Podmienky služby sa od vášho prijatia zmenili. Prečítajte si aktuálnu verziu a prijmite ju.",
-      "action": "Skontrolovať podmienky"
+      "action": "Súhlasiť s Podmienkami"
     },
     "noBuyPath": {
       "label": "{count, plural, one {{count} produkt bez možnosti nákupu} few {{count} produkty bez možnosti nákupu} many {{count} produktu bez možnosti nákupu} other {{count} produktov bez možnosti nákupu}}",
@@ -114,18 +115,18 @@
       "action": "Otvoriť editor"
     },
     "deadBlocks": {
-      "label": "{count, plural, one {{count} blok výkladu odkazujúci na zmazané produkty} few {{count} bloky výkladu odkazujúce na zmazané produkty} many {{count} bloku výkladu odkazujúceho na zmazané produkty} other {{count} blokov výkladu odkazujúcich na zmazané produkty}}",
-      "description": "Tieto bloky sa návštevníkom zobrazujú prázdne. Odoberte ich alebo nahraďte.",
-      "action": "Otvoriť výklad"
+      "label": "{count, plural, one {{count} miesto pre produkt odkazuje na zmazaný produkt} few {{count} miesta pre produkty odkazujú na zmazané produkty} many {{count} miesta pre produkty odkazuje na zmazané produkty} other {{count} miest pre produkty odkazuje na zmazané produkty}}",
+      "description": "Tieto miesta sa návštevníkom zobrazujú prázdne. Otvorte editor a odoberte ich alebo nahraďte.",
+      "action": "Otvoriť editor"
     },
     "toShip": {
       "description": "Kupujúci to čakajú. Zabaľte to a potom označte ako odoslané.",
       "action": "Odoslať objednávky"
     },
     "withdrawals": {
-      "label": "{count, plural, one {{count} kupujúci odstúpil} few {{count} kupujúci odstúpili} many {{count} kupujúceho odstúpilo} other {{count} kupujúcich odstúpilo}}",
-      "description": "Do 14 dní od odstúpenia im máte vrátiť peniaze. Dohodnite vrátenie tovaru a potom peniaze vráťte.",
-      "action": "Zobraziť odstúpenia"
+      "label": "{count, plural, one {{count} kupujúci zrušil nákup} few {{count} kupujúci zrušili nákup} many {{count} kupujúceho zrušilo nákup} other {{count} kupujúcich zrušilo nákup}}",
+      "description": "Do 14 dní im máte vrátiť peniaze. Dohodnite vrátenie tovaru a potom peniaze za objednávku vráťte.",
+      "action": "Zobraziť zrušené nákupy"
     },
     "restock": {
       "label": "{count, plural, one {{count} produkt sa čoskoro vypredá} few {{count} produkty sa čoskoro vypredajú} many {{count} produktu sa čoskoro vypredá} other {{count} produktov sa čoskoro vypredá}}",
@@ -138,6 +139,10 @@
       "label": "Nastavte ceny doručenia",
       "description": "Kupujúci nemôžu dokončiť nákup fyzického produktu, kým destinácia nemá sadzbu aj krajinu.",
       "action": "Nastaviť ceny"
+    },
+    "paused": {
+      "label": "{count, plural, one {{count} produkt je skrytý pred kupujúcimi} few {{count} produkty sú skryté pred kupujúcimi} many {{count} produktu je skrytých pred kupujúcimi} other {{count} produktov je skrytých pred kupujúcimi}}",
+      "description": "{count, plural, one {Square Share ho pozastavil alebo odstránil. Pozrite sa prečo a čo robiť ďalej.} few {Square Share ich pozastavil alebo odstránil. Pozrite sa prečo a čo robiť ďalej.} many {Square Share ich pozastavil alebo odstránil. Pozrite sa prečo a čo robiť ďalej.} other {Square Share ich pozastavil alebo odstránil. Pozrite sa prečo a čo robiť ďalej.}}"
     }
   }
 }

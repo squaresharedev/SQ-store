@@ -8,6 +8,7 @@ import {
   CARD_HOVER_EFFECTS,
   DEFAULT_PRODUCT_PAGE_CONFIG,
   DEFAULT_STOREFRONT_CONFIG,
+  PRODUCT_PAGE_CTA_MAX,
   TEXT_LETTER_SPACING_MAX,
   TEXT_LETTER_SPACING_MIN,
   TEXT_LINE_HEIGHT_MAX,
@@ -27,9 +28,13 @@ import { resolveTileLook } from "@/lib/storefront/tile-look";
 import { tileProduct, type TileProductRow } from "@/lib/storefront/storefront-page";
 import { ctaStyle, resolveCta } from "@/components/product-page/product-page-maps";
 import {
-  CARD_HOVER_FRAME_CLASSES,
+  cardHoverFrameClass,
+  cardHoverZoomClass,
+  hoverPhotoClass,
   textSizeStyle,
   textSpacingStyle,
+  tileBuyArrowClass,
+  tileBuyButtonPaint,
   tileBuyButtonStyle,
 } from "@/components/storefront/config-maps";
 import { contrastRatio } from "@/lib/format/color";
@@ -101,6 +106,30 @@ describe("the card extras in the schema", () => {
       false,
       false,
     ]);
+  });
+
+  it("takes the button's own words and colours, and holds them to the page button's rules", () => {
+    const own = { buyButtonLabel: "Grab it", buyButtonColor: "#0a7a3d", buyButtonTextColor: "#fffbe6" };
+    expect(parses(configWith([{ ...product, style: own }], own))).toBe(true);
+    expect(parses(configWith([{ ...product, style: { buyButtonLabel: "x".repeat(PRODUCT_PAGE_CTA_MAX) } }]))).toBe(true);
+    for (const bad of [
+      { buyButtonLabel: "x".repeat(PRODUCT_PAGE_CTA_MAX + 1) },
+      { buyButtonLabel: "" },
+      { buyButtonLabel: "Buy\u0007now" },
+      { buyButtonColor: "green" },
+      { buyButtonTextColor: "#12345" },
+    ]) {
+      expect(parses(configWith([{ ...product, style: bad } as StorefrontBlock]))).toBe(false);
+      expect(parses(configWith([], bad as Partial<StorefrontTheme>))).toBe(false);
+    }
+    // A tile follows the theme's cards, field by field, and the page past both.
+    const theme = configWith([], { buyButtonLabel: "Shop", buyButtonColor: "#111111" }).theme;
+    expect(resolveCardStyle(theme, { buyButtonColor: "#222222" })).toMatchObject({
+      buyButtonLabel: "Shop",
+      buyButtonColor: "#222222",
+      buyButtonTextColor: undefined,
+    });
+    expect(resolveCardStyle(configWith([]).theme).buyButtonLabel).toBeUndefined();
   });
 
   it("lets a tile turn off what the theme turned on", () => {
@@ -320,15 +349,65 @@ describe("what a card borrows from the product page", () => {
     expect(outline.backgroundColor).toBeUndefined();
   });
 
+  it("paints the seller's own colours exactly, and the words follow a fill of their own", () => {
+    const page = resolveCta({ ctaColor: "#ffe066" }, DEFAULT_STOREFRONT_CONFIG.theme);
+    // Nothing of its own: the page's button, as before.
+    expect(tileBuyButtonPaint("solid", page)).toEqual({ color: page.fill, ink: page.text });
+    // A dark fill of its own gets light words without being asked.
+    expect(tileBuyButtonPaint("solid", page, { buyButtonColor: "#0b3d2e" })).toEqual({ color: "#0b3d2e", ink: "#ffffff" });
+    expect(tileBuyButtonPaint("solid", page, { buyButtonColor: "#0b3d2e", buyButtonTextColor: "#ffd166" })).toEqual({
+      color: "#0b3d2e",
+      ink: "#ffd166",
+    });
+    // A pale colour the seller chose for an outline is theirs: no legibility nudge.
+    expect(tileBuyButtonPaint("outline", page, { buyButtonColor: "#ffe066" })).toEqual({ color: "#ffe066", ink: "#ffe066" });
+    expect(tileBuyButtonPaint("link", page, { buyButtonTextColor: "#c1121f" }).ink).toBe("#c1121f");
+
+    const solid = tileBuyButtonStyle("solid", page, { buyButtonColor: "#0b3d2e" });
+    expect(solid).toMatchObject({ backgroundColor: "#0b3d2e", color: "#ffffff" });
+    const outline = tileBuyButtonStyle("outline", page, { buyButtonColor: "#0b3d2e", buyButtonTextColor: "#c1121f" });
+    expect(outline).toMatchObject({ color: "#c1121f" });
+    expect(String(outline.boxShadow)).toContain("#0b3d2e");
+  });
+
+  it("keeps a page outline in the card's own ink once the card has its own colours", () => {
+    const outlined = resolveCta({ ctaColor: "#ffe066", ctaBorderWidth: 2 }, DEFAULT_STOREFRONT_CONFIG.theme);
+    expect(String(tileBuyButtonStyle("solid", outlined).boxShadow)).toContain(outlined.borderColor);
+    expect(String(tileBuyButtonStyle("solid", outlined, { buyButtonTextColor: "#c1121f" }).boxShadow)).toContain("#c1121f");
+  });
+
   it("moves only the frame for lift and tilt, and nothing for none or zoom", () => {
-    expect(CARD_HOVER_FRAME_CLASSES.none).toBe("");
-    expect(CARD_HOVER_FRAME_CLASSES.zoom).toBe("");
+    expect(cardHoverFrameClass("none", "board")).toBe("");
+    expect(cardHoverFrameClass("zoom", "board")).toBe("");
     // Every movement sits behind motion-safe, so reduced motion holds still.
     for (const effect of ["lift", "tilt"] as const) {
-      const moving = CARD_HOVER_FRAME_CLASSES[effect].split(" ").filter((name) => name.includes("group-"));
+      const moving = cardHoverFrameClass(effect, "board").split(" ").filter((name) => name.includes("group-"));
       expect(moving.length).toBeGreaterThan(0);
       expect(moving.every((name) => name.startsWith("motion-safe:"))).toBe(true);
     }
+    const arrow = tileBuyArrowClass("board").split(" ").filter((name) => name.includes("group-"));
+    expect(arrow).toEqual(["motion-safe:group-hover:translate-x-0.5", "motion-safe:group-focus-within:translate-x-0.5"]);
+  });
+
+  it("plays on a buyer's pointer and focus, the designer's pointer alone, and nothing mid-gesture", () => {
+    const classes = (trigger: "board" | "pointer" | "still") =>
+      [
+        cardHoverFrameClass("lift", trigger),
+        cardHoverFrameClass("tilt", trigger),
+        cardHoverZoomClass(trigger),
+        hoverPhotoClass(trigger),
+        hoverPhotoClass(trigger, true),
+        tileBuyArrowClass(trigger),
+      ].join(" ");
+    expect(classes("board")).toContain("group-hover:");
+    expect(classes("board")).toContain("group-focus-within:");
+    // A selected designer tile has focus: focus must not hold an effect on.
+    expect(classes("pointer")).toContain("group-hover:");
+    expect(classes("pointer")).not.toContain("group-focus-within:");
+    expect(classes("still")).not.toContain("group-");
+    // A sold-out card's second photo comes in faded, as its cover is.
+    expect(hoverPhotoClass("board", true)).toContain("group-hover:opacity-60");
+    expect(hoverPhotoClass("board", true)).not.toContain("opacity-100");
   });
 });
 
@@ -356,6 +435,8 @@ describe("finding a block's own setting", () => {
     expect(first("low stock")).toBe("setting:card-low-stock");
     expect(first("zoom on hover")).toBe("setting:card-hover-effect");
     expect(first("star rating")).toBe("setting:card-star-rating");
+    expect(first("card button text")).toBe("setting:card-buy-button");
+    expect(first("card button colour")).toBe("setting:card-buy-button");
   });
 });
 
@@ -371,6 +452,28 @@ describe("the card extras through an assistant", () => {
     expect(parses(config)).toBe(true);
   });
 
+  it("gives the buy button its own words and colours, and null hands them back to the page", () => {
+    const own = { buyButton: "solid", buyButtonLabel: "Grab it", buyButtonColor: "#0b3d2e", buyButtonTextColor: "#ffd166" };
+    const { config } = applyDesignOps(configWith([product]), [
+      { op: "style", block: ids.product, changes: own },
+      { op: "theme", changes: { buyButtonLabel: "Shop" } },
+    ]);
+    const tile = config.blocks[0];
+    expect(tile.type === "product" && tile.style).toEqual(own);
+    expect(config.theme.buyButtonLabel).toBe("Shop");
+    expect(parses(config)).toBe(true);
+
+    const back = applyDesignOps(config, [
+      { op: "style", block: ids.product, changes: { buyButtonLabel: null, buyButtonColor: null } },
+    ]).config.blocks[0];
+    expect(back.type === "product" && back.style).toEqual({ buyButton: "solid", buyButtonTextColor: "#ffd166" });
+    // Words the page's button could not have are refused at save, as on the page.
+    const tooLong = applyDesignOps(config, [
+      { op: "style", block: ids.product, changes: { buyButtonLabel: "x".repeat(PRODUCT_PAGE_CTA_MAX + 1) } },
+    ]).config;
+    expect(parses(tooLong)).toBe(false);
+  });
+
   it("adds text with its own spacing", () => {
     const { config } = applyDesignOps(
       configWith([]),
@@ -383,7 +486,18 @@ describe("the card extras through an assistant", () => {
 
   it("shows them in get_schema, generated from the same schema", () => {
     const schema = JSON.stringify(z.toJSONSchema(storefrontConfigSchema, { io: "input", unrepresentable: "any" }));
-    for (const field of ["hoverEffect", "hoverPhoto", "buyButton", "showRating", "showLowStock", "letterSpacing", "lineHeight"]) {
+    for (const field of [
+      "hoverEffect",
+      "hoverPhoto",
+      "buyButton",
+      "buyButtonLabel",
+      "buyButtonColor",
+      "buyButtonTextColor",
+      "showRating",
+      "showLowStock",
+      "letterSpacing",
+      "lineHeight",
+    ]) {
       expect(schema).toContain(`"${field}"`);
     }
     expect(schema).toContain('"tilt"');

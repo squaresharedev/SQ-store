@@ -1,7 +1,15 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { BarChart, HBarChart, LineChart, PieChart, formatNumber } from "@/components/charts";
+import {
+  BarChart,
+  CATEGORICAL,
+  HBarChart,
+  LineChart,
+  PieChart,
+  SCRUB,
+  formatNumber,
+} from "@/components/charts";
 import { formatBucketLabel, formatWeekdayLabel, isMonthlySeries } from "@/lib/analytics/buckets";
 import { CHANNEL_LABELS, type SignalKind } from "@/lib/analytics/signals";
 import type {
@@ -14,6 +22,9 @@ import type {
 import { CHART_HEIGHT } from "@/components/analytics/chart-layout";
 import { alignPrevious } from "@/components/analytics/compare";
 import { CHANNEL_TONE, TONE } from "@/components/analytics/palette";
+import { useAnalyticsLook } from "@/components/analytics/AnalyticsLookProvider";
+import { sumLine } from "@/components/analytics/look";
+import { ScrubTrend } from "@/components/analytics/ScrubTrend";
 
 // THE PANELS EVERY SIGNAL SOURCE SHARES.
 //
@@ -60,10 +71,36 @@ export function SignalTrendChart({
   previous?: SignalPoint[];
 }) {
   const { t, locale, label, count } = useSourceCopy(kind);
+  const look = useAnalyticsLook();
   const monthly = isMonthlySeries(series.map((point) => point.date));
   // Versus the previous period: the dashed line is the same days, one period
   // back, so "are views up" is answered by the gap between the two.
   const before = alignPrevious(series.length, (previous ?? []).map((point) => point.count));
+  // The Payments tab's way (look.trends "scrub"): the range's total as a
+  // figure, its change as a chip, and a plain line read by moving along it.
+  if (look.trends === "scrub") {
+    const sum = (points: SignalPoint[]) => points.reduce((total, point) => total + point.count, 0);
+    return (
+      <ScrubTrend
+        values={sumLine(
+          series.map((point) => point.count),
+          look.line,
+        )}
+        compare={before && sumLine(before, look.line)}
+        dates={series.map((point) => point.date)}
+        line={look.line}
+        total={sum(series)}
+        before={before && previous ? sum(previous) : null}
+        show={(value) => <span className="tabular-nums">{formatNumber(value, locale)}</span>}
+        showText={(value) => formatNumber(value, locale)}
+        color={CATEGORICAL[tone]}
+        height={SCRUB.cardHeight}
+        size="card"
+        legend={{ now: label, before: t("compare.previous") }}
+        ariaLabel={t(`sources.${kind}.overTime`)}
+      />
+    );
+  }
   const data = series.map((point, index) => ({ ...point, previousCount: before?.[index] ?? null }));
   return (
     <LineChart

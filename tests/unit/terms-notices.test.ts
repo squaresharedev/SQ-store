@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const versions = vi.hoisted(() => ({
-  list: [{ version: "tos-2026-10-11" }, { version: "tos-2026-10-31" }] as {
+  list: [{ version: "tos-2026-10-11" }, { version: "tos-2026-11-06" }] as {
     version: string;
     urgentReason?: "law" | "danger";
   }[],
@@ -28,7 +28,7 @@ import {
   type TermsVersionState,
 } from "@/lib/legal/terms-notices";
 
-const NEW = "tos-2026-10-31";
+const NEW = "tos-2026-11-06";
 const DAY = 24 * 60 * 60 * 1000;
 const START = new Date("2026-11-01T03:23:00Z");
 

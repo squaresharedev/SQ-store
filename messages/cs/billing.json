@@ -34,7 +34,7 @@
     "yearlyFree": "{count, plural, one {# měsíc zdarma} few {# měsíce zdarma} many {# měsíce zdarma} other {# měsíců zdarma}}",
     "launchNote": "Úvodní cena je zvýhodněná cena na začátku: běžná cena je ta přeškrtnutá.",
     "grantTitle": "{plan} je na naše náklady",
-    "autoRenew": "Placené plány se automaticky obnovují každý měsíc za zobrazenou cenu, dokud je nezrušíte."
+    "autoRenew": "Placené plány se automaticky obnovují {interval, select, year {jednou za rok} other {každý měsíc}} za zobrazenou cenu, dokud je nezrušíte."
   },
   "card": {
     "perMonth": "/ měsíc",
@@ -79,7 +79,8 @@
     "cheapest": "Při prodejích {sales} měsíčně vás nejlevněji vyjde {plan}.",
     "legendPrice": "Cena plánu",
     "legendFee": "Poplatek z vašich prodejů",
-    "cheapestTag": "Pro vás nejlevnější"
+    "cheapestTag": "Pro vás nejlevnější",
+    "stripeFeeNote": "K těmto částkám se u každého prodeje připočítává ještě poplatek Stripe za zpracování platby kartou."
   },
   "compare": {
     "eyebrow": "Porovnání",
@@ -160,17 +161,17 @@
   },
   "portal": {
     "opening": "Otevírá se Stripe",
-    "stepUp": "Než se otevřou vaše fakturační údaje, potvrďte svou totožnost."
+    "stepUp": "Máte zapnuté dvoufázové ověření, takže než se otevřou vaše fakturační údaje, potvrďte svou totožnost."
   },
   "chip": {
     "label": "Plán: {plan}",
-    "upgrade": "Upgradovat",
-    "pro": "Plán Pro"
+    "upgrade": "Upgradovat"
   },
   "banner": {
     "label": "Platba za plán",
     "pastDue": "Platba za plán {plan} selhala. Aktualizujte kartu, abyste si ho ponechali.",
     "pastDueMember": "Platba za plán {plan} tohoto obchodu selhala. Kartu může aktualizovat jen vlastník.",
+    "seeTeam": "Zobrazit členy týmu",
     "action": "Aktualizovat kartu"
   },
   "settings": {
@@ -197,7 +198,7 @@
       "over": "{count} nad limit",
       "full": "Plno"
     },
-    "overLimit": "Nad limitem tohoto plánu. Vše funguje dál; odeberte jednu položku nebo přejděte na vyšší plán, abyste mohli přidávat.",
+    "overLimit": "Nad limitem tohoto plánu. Vše funguje dál; odeberte jednu položku nebo <upgrade>přejděte na vyšší plán</upgrade>, abyste mohli přidávat další.",
     "invoicesTitle": "Fakturace a faktury",
     "invoicesDescription": "Vaše karta, fakturační adresa, DIČ a všechny faktury na zabezpečené stránce Stripe.",
     "manage": "Spravovat fakturaci a faktury",

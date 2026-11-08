@@ -6,7 +6,7 @@
   },
   "page": {
     "title": "Objednávky",
-    "subtitle": "Každá objednávka zadaná cez Square Share."
+    "subtitle": "Objednávky zadané cez pokladňu Square Share."
   },
   "status": {
     "paid": "Zaplatená",
@@ -17,7 +17,7 @@
   "channel": {
     "embed": "Na vašom webe",
     "marketplace": "Trhovisko",
-    "direct": "Vaša stránka",
+    "direct": "Priamy odkaz",
     "button": "Tlačidlo nákupu"
   },
   "empty": {
@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} objednávka} few {{total} objednávky} many {{total} objednávky} other {{total} objednávok}} · strana {page} z {totalPages}",
     "detailDialog": "Podrobnosti objednávky",
     "closeDetail": "Zavrieť podrobnosti objednávky",
-    "withdrawn": "Odstúpená",
+    "withdrawn": "Zrušil kupujúci",
+    "refundDue": "Vrátiť peniaze do {date}",
     "moreItems": "+{count} ďalších"
   },
   "table": {
@@ -52,12 +53,12 @@
     "shipping": "Doprava",
     "shipTo": "Odoslať na",
     "noAddress": "Bez adresy",
-    "feeLine": "Poplatok {amount}"
+    "feeLine": "Poplatok platformy {amount}"
   },
   "toolbar": {
     "region": "filtre objednávok",
     "channel": "kanál",
-    "searchPlaceholder": "vyhľadať e-mail, meno, mesto, produkt alebo zásielku",
+    "searchPlaceholder": "vyhľadať číslo objednávky, e-mail, meno, mesto, produkt alebo zásielku",
     "search": "hľadať",
     "status": "stav",
     "statusAriaLabel": "Filtrovať podľa stavu",
@@ -121,7 +122,7 @@
       "failed": "Telefónne číslo sa nepodarilo skopírovať. Vyberte ho ručne a skopírujte."
     },
     "giftMessage": "Darčekový odkaz",
-    "withdrawalNotice": "Kupujúci požiadal o odstúpenie od tohto nákupu dňa {date}. Dohodnite s ním vrátenie tovaru a refundáciu.",
+    "withdrawalNotice": "Kupujúci zrušil tento nákup dňa {date}. Dohodnite vrátenie tovaru a do 14 dní mu vráťte peniaze.",
     "noAddress": "Táto objednávka nemá doručovaciu adresu. Pošlite kupujúcemu e-mail a opýtajte sa, kam to má ísť.",
     "shipping": "Doprava",
     "shippedOn": "Odoslané {date}",
@@ -147,7 +148,7 @@
     },
     "emailBuyer": "Poslať e-mail kupujúcemu",
     "mailSubject": "Vaša objednávka {number}",
-    "withdrawnShipWarning": "Kupujúci odstúpil od tohto nákupu. Odošlite ju iba vtedy, ak ste sa na tom s ním dohodli.",
+    "withdrawnShipWarning": "Kupujúci tento nákup zrušil. Objednávku odošlite iba vtedy, ak ste sa na tom s ním dohodli.",
     "discount": "Zľava",
     "discountSale": "Akcia, -{amount}",
     "discountCode": "Kód {code}, -{amount}",
@@ -155,8 +156,10 @@
     "alsoBought": "Tiež v tejto objednávke"
   },
   "actions": {
-    "disputeInStripe": "Banka kupujúceho otvorila spor. Odpovedzte naň v paneli Stripe pred jeho termínom.",
+    "disputeInStripe": "Banka kupujúceho otvorila spor. Odpovedzte naň v paneli Stripe pred jeho termínom, inak kupujúci dostane peniaze späť.",
     "answerInStripe": "Odpovedať v Stripe",
+    "disputeOwnerOnly": "Odpovedať naň môže iba vlastník obchodu.",
+    "disputeOwnerOnlyNamed": "Odpovedať naň môže iba vlastník obchodu {store}. Dajte mu vedieť.",
     "pendingPayment": "Platba kupujúceho sa ešte potvrdzuje. Zatiaľ nič neposielajte: keď prejde, objednávka sa zobrazí ako zaplatená, a ak neprejde, sama sa uzavrie.",
     "none": "Pre túto objednávku nie sú k dispozícii žiadne akcie."
   },
@@ -179,8 +182,8 @@
     "refundedOnReason": "{reason, select, cancelled {Zrušené a vrátené {date}} returned {Vrátený tovar a peniaze {date}} other {Vrátené {date}}}",
     "ownerOnly": "Vrátiť peniaze alebo zrušiť objednávku môže len vlastník obchodu.",
     "ownerOnlyNamed": "Vrátiť peniaze alebo zrušiť objednávku môže len vlastník obchodu {store}. Požiadajte ho o to.",
-    "manual": "Táto platba neprebiehala cez Square Share. Vráťte kupujúcemu peniaze sami a potom to zaznamenajte tu.",
-    "viaProvider": "Plná suma sa cez Stripe vráti na kartu kupujúceho. Túto akciu nemožno vrátiť."
+    "manual": "Táto platba neprebiehala cez Square Share. Vráťte kupujúcemu celú sumu {amount} sami a potom to zaznamenajte tu.",
+    "viaProvider": "Celá objednávka, {amount}, sa cez Stripe vráti na kartu kupujúceho. Túto akciu nemožno vziať späť."
   },
   "skeleton": {
     "loading": "načítavajú sa objednávky"
@@ -289,8 +292,8 @@
       "buyerSubject": "Vaše odstúpenie od objednávky {number} u {store}",
       "buyerIntro": "Prijali sme vaše odstúpenie od objednávky {number} ({title}) dňa {date} a okamžite sme ho postúpili {store}.",
       "buyerNext": "{store} vás bude kontaktovať ohľadom vrátenia tovaru a vašej refundácie, ktorá je splatná do 14 dní od odstúpenia.",
-      "sellerSubject": "Odstúpenie: objednávka {number} ({title})",
-      "sellerIntro": "Kupujúci {email} odstúpil od objednávky {number} dňa {date} pomocou tlačidla na stránke objednávky.",
+      "sellerSubject": "Zrušenie (odstúpenie od zmluvy): objednávka {number} ({title})",
+      "sellerIntro": "Kupujúci {email} zrušil objednávku {number} dňa {date} pomocou tlačidla na odstúpenie od zmluvy na stránke objednávky.",
       "sellerName": "Uvedené meno: {name}",
       "sellerNext": "Kontaktujte ho ohľadom vrátenia tovaru a vykonajte refundáciu do 14 dní. Refundáciu môžete pozastaviť, kým tovar nie je späť alebo kupujúci nepreukáže jeho odoslanie. Objednávka: {url}"
     },

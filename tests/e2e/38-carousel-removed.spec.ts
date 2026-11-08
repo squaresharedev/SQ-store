@@ -79,7 +79,7 @@ test("the storefront canvas renders as a grid with no carousel toggle", async ({
 
   // The search field cannot find a "display mode" or "carousel" setting.
   await page.getByRole("button", { name: /^back to all settings/i }).first().click();
-  const field = page.getByRole("combobox", { name: "Find a setting or object" });
+  const field = page.getByRole("combobox", { name: "Find a setting or block" });
   await field.fill("carousel");
   const options = page.getByRole("option");
   await page.waitForTimeout(300);

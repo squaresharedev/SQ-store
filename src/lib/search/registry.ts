@@ -22,8 +22,10 @@ import {
   settingIndexFields,
 } from "@/lib/storefront/setting-ref";
 import type { TeamAction, TeamRole } from "@/lib/team/permissions";
-import { BILLING_SETTINGS_PATH, PLANS_PATH } from "@/lib/billing/paths";
+import { BILLING_SETTINGS_INVOICES_PATH, BILLING_SETTINGS_PATH, PLANS_PATH } from "@/lib/billing/paths";
+import { LANGUAGE_SETTINGS_PATH } from "@/lib/dashboard/paths";
 import { NEW_DISCOUNT_PATH } from "@/lib/discounts/paths";
+import { NEW_PRODUCT_PATH } from "@/lib/products/paths";
 import { REVIEWS_IMPORT_PATH, REVIEWS_PATH } from "@/lib/reviews/paths";
 
 /**
@@ -136,6 +138,7 @@ const PAGES: EntrySpec[] = [...MAIN_NAV, SETTINGS_LINK].map((link) => ({
   id: `page:${link.href}`,
   type: "page",
   title: link.label,
+  subtitle: link.description,
   href: link.href,
   synonyms: PAGE_SYNONYMS[link.href] ?? [],
 }));
@@ -166,13 +169,24 @@ const SUB_PAGES: EntrySpec[] = [
   },
 ];
 
-const SETTINGS_SECTIONS: EntrySpec[] = SETTINGS_NAV.map((link) => ({
-  id: `settings:${link.href}`,
-  type: "settings",
-  title: link.label,
-  subtitle: SETTINGS_LINK.label,
-  href: link.href,
-}));
+/** Other words for a settings section. The Delete account page is that one
+ *  card, so the section stands for it rather than a second, identical field. */
+const SECTION_SYNONYMS: Record<string, string[]> = {
+  "/settings/danger": ["close account", "remove account", "cancel account", "delete everything"],
+};
+
+// A rail entry that jumps to a card on another section's page (Language, on
+// Account) is that card's field below, so it is listed once, as the field.
+const SETTINGS_SECTIONS: EntrySpec[] = SETTINGS_NAV
+  .filter((link) => !link.href.includes("#"))
+  .map((link) => ({
+    id: `settings:${link.href}`,
+    type: "settings",
+    title: link.label,
+    subtitle: SETTINGS_LINK.label,
+    href: link.href,
+    synonyms: SECTION_SYNONYMS[link.href] ?? [],
+  }));
 
 /** The settings sections the fields below sit in, by the rail's own labels. */
 const ACCOUNT: MessageKey = "Nav.settings.account";
@@ -181,7 +195,6 @@ const BILLING: MessageKey = "Nav.settings.billing";
 const BUSINESS: MessageKey = "Nav.settings.tax";
 const NOTIFICATIONS: MessageKey = "Nav.settings.notifications";
 const LEGAL: MessageKey = "Nav.settings.legal";
-const DANGER: MessageKey = "Nav.settings.danger";
 
 /**
  * Individual settings CONTROLS. The `#hash` targets the element id on the
@@ -254,7 +267,7 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     type: "settings",
     title: "Search.fields.invoices",
     section: BILLING,
-    href: `${BILLING_SETTINGS_PATH}#invoices`,
+    href: BILLING_SETTINGS_INVOICES_PATH,
     synonyms: ["invoice", "receipt", "billing", "card", "payment method", "vat", "billing address"],
   },
   {
@@ -299,7 +312,7 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     title: "Search.fields.signOut",
     section: ACCOUNT,
     href: "/settings/account#sign-out",
-    synonyms: ["log out", "logout", "leave", "exit"],
+    synonyms: ["log out", "logout", "leave", "exit", "sign out everywhere", "all devices", "lost phone", "lost laptop"],
   },
   {
     id: "field:seller-bio",
@@ -310,9 +323,9 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     synonyms: ["seller bio", "about me", "about", "description", "who i am"],
   },
   // The page and its fields carry the names the page itself uses ("Business &
-  // seller details", "Trader name"), so a result never reads like a different
-  // screen from the one it opens. The old names stay as synonyms: people still
-  // type "tax" and "business name".
+  // seller details", "Your name or business name"), so a result never reads
+  // like a different screen from the one it opens. The old names stay as
+  // synonyms: people still type "tax" and "trader name".
   {
     id: "field:vat",
     type: "settings",
@@ -327,7 +340,7 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     title: "Search.fields.businessName",
     section: BUSINESS,
     href: `${TRADER_IDENTITY_HREF}#business-name`,
-    synonyms: ["business name", "company name", "legal name", "trading name", "seller details", "tax"],
+    synonyms: ["business name", "company name", "legal name", "trading name", "trader name", "seller details", "tax"],
   },
   {
     id: "field:tax-country",
@@ -406,7 +419,7 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     type: "settings",
     title: "Nav.settings.language",
     section: ACCOUNT,
-    href: "/settings/account#language",
+    href: LANGUAGE_SETTINGS_PATH,
     synonyms: ["change language", "locale", "translate", "translation", "english", "czech"],
   },
   {
@@ -417,14 +430,6 @@ const SETTINGS_FIELDS: EntrySpec[] = [
     href: "/settings/account#export",
     synonyms: ["download my data", "gdpr export", "backup", "data dump"],
   },
-  {
-    id: "field:delete-account",
-    type: "settings",
-    title: "Search.fields.deleteAccount",
-    section: DANGER,
-    href: "/settings/danger#delete",
-    synonyms: ["close account", "remove account", "cancel account", "delete everything"],
-  },
 ];
 
 /** Things you DO, not places you go. Ordered by how often they're wanted. */
@@ -433,7 +438,7 @@ const ACTIONS: EntrySpec[] = [
     id: "action:new-product",
     type: "action",
     title: "Search.actions.newProduct",
-    href: "/products/new",
+    href: NEW_PRODUCT_PATH,
     synonyms: ["add product", "create product", "sell something", "upload", "list an item"],
     permission: "products.write",
   },

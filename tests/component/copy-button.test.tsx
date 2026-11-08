@@ -108,7 +108,7 @@ describe("CopyButton", () => {
   it("names a disabled button with the caller's own sentence", () => {
     render(<CopyButton value="<script/>" messages={snippet} disabled />);
     expect(screen.getByRole("button")).toHaveAccessibleName(
-      "embed snippet cannot be copied yet",
+      "website code cannot be copied yet",
     );
   });
 });

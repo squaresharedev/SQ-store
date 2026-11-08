@@ -7,6 +7,7 @@ import { parseOrderSelection } from "@/lib/orders/selection";
 import { parseShipTo } from "@/lib/orders/ship-to";
 import { parseFulfilment } from "@/lib/orders/fulfilment";
 import { parseCarrier } from "@/lib/orders/carriers";
+import { orderNumberCondition } from "@/lib/orders/order-number";
 import { orderPhotoKey } from "@/lib/orders/photo";
 import { presignGetUrl } from "@/lib/r2";
 import { isContentVisible } from "@/lib/moderation/removal";
@@ -219,7 +220,8 @@ const TO_SHIP_MATCH = { status: "paid", fulfilment_status: "unfulfilled" } as co
 /** The column a buyer's withdrawal is recorded in. */
 const WITHDRAWN_AT = "withdrawal_requested_at";
 
-/** What the Orders search box matches, each as a case-insensitive substring. */
+/** What the Orders search box matches, each as a case-insensitive substring
+ *  (and the order number too, as a range of ids: orderNumberCondition). */
 const ORDER_SEARCH_COLUMNS = [
   "buyer_email",
   "ship_to->>name",
@@ -622,8 +624,11 @@ export async function listOrders(options?: {
   }
   if (filters?.search && filters.search.trim() !== "") {
     // Whatever a seller remembers about an order: who bought it, where it
-    // went, what it was, or the tracking number on the parcel.
-    query = query.or(ilikeAny(ORDER_SEARCH_COLUMNS, filters.search.trim()));
+    // went, what it was, the tracking number on the parcel, or the order
+    // number the buyer quotes when they write.
+    const term = filters.search.trim();
+    const byNumber = orderNumberCondition(term);
+    query = query.or(ilikeAny(ORDER_SEARCH_COLUMNS, term) + (byNumber ? `,${byNumber}` : ""));
   }
 
   // --- Sort ---

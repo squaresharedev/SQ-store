@@ -9,8 +9,9 @@
 import type { MessageKey } from "@/i18n/types";
 
 export const TERMS_CHANGES: Readonly<Record<string, readonly MessageKey[]>> = {
-  "tos-2026-10-31": [
+  "tos-2026-11-06": [
     "Settings.legal.notice.changes.regions",
+    "Settings.legal.notice.changes.northAmerica",
     "Settings.legal.notice.changes.disputes",
     "Settings.legal.notice.changes.plans",
     "Settings.legal.notice.changes.moderation",

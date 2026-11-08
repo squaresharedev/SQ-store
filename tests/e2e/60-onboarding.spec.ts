@@ -96,7 +96,7 @@ test.describe("onboarding", () => {
 
     await openSellerStep(page);
 
-    await dialog.getByLabel("Trader name").fill("Welcome Studio Ltd");
+    await dialog.getByLabel("Your name or business name").fill("Welcome Studio Ltd");
     await dialog.getByLabel("Business address").fill("12 Market Street\nDublin\nIreland");
     // squareshare.eu, because the save asks a resolver whether the domain takes
     // mail.
@@ -111,7 +111,7 @@ test.describe("onboarding", () => {
     await expect(codeRow).toHaveAttribute("data-proof-state", "awaitingCode");
     await expect(codeRow).toContainText(`Enter the 8-digit code we emailed to ${contact}.`);
     // Not typed yet: a seller can carry on and prove it later from Settings.
-    await dialog.getByRole("button", { name: "Continue" }).click();
+    await dialog.getByRole("button", { name: "Confirm later" }).click();
 
     // Forward out of the welcome is onto the checklist, not into a tour the
     // seller did not ask for. The tour is one click away there.
@@ -206,9 +206,7 @@ test.describe("onboarding", () => {
     // Settings › Legal shows it as the agreement for the CURRENT Terms (it only
     // says so when the stored version is the one the app is asking for).
     await gotoApp(page, "/settings/legal");
-    await expect(page.locator("[data-terms-agreed]")).toContainText(
-      `You agreed to version ${agreed.legal_accepted_version}`,
-    );
+    await expect(page.locator("[data-terms-agreed]")).toContainText("You agreed to these Terms on");
   });
 
   test("leaving the page instead of agreeing brings the welcome, and the Terms, back", async ({

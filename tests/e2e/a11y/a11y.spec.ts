@@ -216,7 +216,7 @@ test.describe("accessibility", () => {
 
   test("sample storefront and its designer tour", async ({ page }) => {
     test.setTimeout(150_000);
-    await signUp(page, freshUser("a11y-sample"));
+    await signUp(page, freshUser("a11y-sample"), { editorTour: "keep" });
     await gotoApp(page, "/storefront/sample");
     await expectTourStep(page, "editor-add");
     const card = page.locator(TOUR_LAYER).getByRole("dialog");

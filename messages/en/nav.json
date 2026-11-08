@@ -10,7 +10,7 @@
     },
     "storefront": {
       "label": "Storefront",
-      "description": "Design the grid your products sit on."
+      "description": "Design the grid your products sit on. It becomes a page buyers can open and share."
     },
     "orders": {
       "label": "Orders",
@@ -31,7 +31,8 @@
     "discounts": {
       "label": "Discounts",
       "description": "Run sales and share discount codes."
-    }
+    },
+    "help": "Help"
   },
   "settings": {
     "account": "Account",
@@ -42,17 +43,18 @@
     "notifications": "Notifications",
     "language": "Language",
     "team": "Team & access",
-    "danger": "Danger zone",
+    "danger": "Delete account",
     "billing": "Plan & billing",
-    "connectedApps": "Connected apps"
+    "connectedApps": "AI assistant"
   },
   "profileMenu": {
     "label": "Account menu",
     "account": "Account",
-    "switchAccounts": "Switch accounts",
+    "switchAccounts": "My stores",
     "yourStore": "Your store",
     "owner": "Owner",
     "logOut": "Sign out",
+    "logOutEverywhere": "Sign out everywhere",
     "plan": "Plan"
   },
   "viewingBanner": {

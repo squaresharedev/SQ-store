@@ -43,6 +43,14 @@ describe("local search registry — coverage", () => {
     }
   });
 
+  it("lists a rail entry that jumps to a card once, as that card's field", () => {
+    // Language is on the settings rail AND a field on Account: one row, not two.
+    const language = rows(searchLocalRegistry("language", AS_OWNER)).filter(
+      (result) => result.href === "/settings/account#language",
+    );
+    expect(language.map((result) => result.id)).toEqual(["field:language"]);
+  });
+
   it("gives every entry a unique id", () => {
     // Ids become DOM ids for aria-activedescendant; a duplicate silently points
     // the screen reader at the wrong row.
@@ -70,8 +78,11 @@ describe("local search registry — matching by intent", () => {
     ["translate", "/settings/account#language"],
     ["locale", "/settings/account#language"],
     ["vat", "/settings/business#vat"],
+    // The field's label is "Your name or business name" now; the legal word
+    // it replaced still has to land there.
+    ["trader name", "/settings/business#business-name"],
     ["gdpr export", "/settings/account#export"],
-    ["close account", "/settings/danger#delete"],
+    ["close account", "/settings/danger"],
     ["add product", "/products/new"],
     ["sell something", "/products/new"],
     ["add teammate", "/settings/team#invite"],
@@ -133,7 +144,7 @@ describe("local search registry — searching the way people type", () => {
     // ABBREVIATED and shortened.
     ["bg", "/storefront?setting=background"],
     ["profile pic", "/settings/account#avatar"],
-    ["delete my acct", "/settings/danger#delete"],
+    ["delete my acct", "/settings/danger"],
     ["cs", "/storefront?setting=canvas-size"],
 
     // SPELLED the other way round from the label.

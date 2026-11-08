@@ -52,7 +52,7 @@ function savedPayload() {
 async function saveWithDomains(text: string) {
   const user = userEvent.setup();
   renderSettings();
-  const input = screen.getByLabelText(/allowed domains/i);
+  const input = screen.getByLabelText(/your website addresses/i);
   await user.clear(input);
   if (text) await user.type(input, text);
   await user.click(screen.getByRole("button", { name: /save settings/i }));
@@ -83,7 +83,7 @@ describe("EmbedSettings - snippet", () => {
     // the seller can see it exists; its accessible label says it cannot be used yet.
     renderSettings();
     const btn = within(document.body).getByRole("button", {
-      name: /embed snippet/i,
+      name: /website code/i,
     });
     expect(btn).toBeInTheDocument();
     expect(btn).toBeDisabled();
@@ -96,11 +96,27 @@ describe("EmbedSettings - snippet", () => {
     // the steps pasted a dead tag.
     renderSettings(storefront({ enabled: true, domains: ["shop.example"] }));
     expect(
-      within(document.body).getByRole("button", { name: /embed snippet/i }),
+      within(document.body).getByRole("button", { name: /website code/i }),
     ).toBeDisabled();
     // Nor a hint that says the two steps already taken will unlock it.
     expect(document.body).not.toHaveTextContent(/to unlock the copy button/i);
-    expect(document.body).toHaveTextContent(/widget is in development/i);
+    expect(document.body).toHaveTextContent(/does not show on other websites yet/i);
+    // Nor an address in the code that a seller selecting it by hand could
+    // mistake for a working one.
+    expect(document.body).not.toHaveTextContent(/src="https?:/);
+  });
+
+  it("frames the steps as setup for later, under a heading of their own, naming the privacy step to come", () => {
+    renderSettings();
+    // A heading, so the notice reads as this section's and not the whole
+    // Share page's (the storefront link above it works today).
+    const heading = screen.getByRole("heading", { level: 2, name: "On your own website" });
+    expect(heading.parentElement).toHaveTextContent("Coming soon");
+    expect(screen.getAllByRole("heading", { level: 3 }).length).toBeGreaterThan(0);
+    // The privacy step only appears once there is a host, so the notice says
+    // it is coming rather than letting the setup look finished.
+    expect(document.body).toHaveTextContent(/add a short note to your privacy policy/i);
+    expect(document.querySelector("[data-embed-privacy]")).toBeNull();
   });
 });
 
@@ -111,11 +127,12 @@ describe("EmbedSettings - once the embed has a host", () => {
   beforeEach(() => vi.stubEnv("NEXT_PUBLIC_EMBED_URL", "https://embed.test"));
   afterEach(() => vi.unstubAllEnvs());
 
-  const copySnippet = () => within(document.body).getByRole("button", { name: /embed snippet/i });
+  const copySnippet = () => within(document.body).getByRole("button", { name: /website code/i });
 
   it("drops the in-development notice and points the snippet at that host", () => {
     renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
-    expect(document.body).not.toHaveTextContent(/widget is in development/i);
+    expect(document.body).not.toHaveTextContent(/does not show on other websites yet/i);
+    expect(document.body).not.toHaveTextContent("Coming soon");
     expect(document.body).toHaveTextContent('src="https://embed.test/widget.js"');
   });
 
@@ -128,7 +145,7 @@ describe("EmbedSettings - once the embed has a host", () => {
   it("offers a plain iframe for a site that removes scripts, naming the saved sites", async () => {
     const user = userEvent.setup();
     renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
-    await user.click(screen.getByRole("button", { name: /iframe only/i }));
+    await user.click(screen.getByRole("button", { name: /simple embed/i }));
     // The site and its www. twin, as the frame will check them, sandboxed
     // as the loader would sandbox it.
     expect(document.body).toHaveTextContent(
@@ -136,9 +153,10 @@ describe("EmbedSettings - once the embed has a host", () => {
     );
     expect(document.body).toHaveTextContent(/sandbox="allow-scripts allow-same-origin/);
     expect(document.body).not.toHaveTextContent("widget.js");
-    expect(document.body).toHaveTextContent(/removes scripts/i);
+    // When to reach for it, in the seller's terms rather than "scripts".
+    expect(document.body).toHaveTextContent(/if full embed did not appear on your site/i);
     expect(copySnippet()).toBeEnabled();
-    await user.click(screen.getByRole("button", { name: /^script$/i }));
+    await user.click(screen.getByRole("button", { name: /^full embed$/i }));
     expect(document.body).toHaveTextContent('src="https://embed.test/widget.js"');
   });
 
@@ -159,13 +177,29 @@ describe("EmbedSettings - once the embed has a host", () => {
     const user = userEvent.setup();
     renderSettings();
     await user.click(screen.getByRole("switch", { name: /show on my website/i }));
-    await user.type(screen.getByLabelText(/allowed domains/i), "shop.example.com");
+    await user.type(screen.getByLabelText(/your website addresses/i), "shop.example.com");
     expect(copySnippet()).toBeDisabled();
     expect(document.body).toHaveTextContent(/save your settings to unlock/i);
 
     await user.click(screen.getByRole("button", { name: /save settings/i }));
     await waitFor(() => expect(copySnippet()).toBeEnabled());
     expect(document.body).not.toHaveTextContent(/save your settings to unlock/i);
+  });
+
+  it("says beside Save that a second typed site is not saved, and holds Copy until it is", async () => {
+    // One site already saved: the chips show both, but the frame only knows
+    // the first, so a snippet pasted on the second would show nothing.
+    const user = userEvent.setup();
+    renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
+    expect(document.querySelector("[data-embed-unsaved]")).toBeNull();
+    await user.type(screen.getByLabelText(/your website addresses/i), ", blog.example.com");
+    expect(document.querySelector("[data-embed-unsaved]")).toHaveTextContent("Unsaved changes");
+    expect(copySnippet()).toBeDisabled();
+    expect(document.body).toHaveTextContent(/save your settings to unlock/i);
+
+    await user.click(screen.getByRole("button", { name: /save settings/i }));
+    await waitFor(() => expect(copySnippet()).toBeEnabled());
+    expect(document.querySelector("[data-embed-unsaved]")).toBeNull();
   });
 
   it("the switch alone locks and unlocks Copy, and saves as it is flipped", async () => {
@@ -198,7 +232,7 @@ describe("EmbedSettings - once the embed has a host", () => {
   it("flipping the switch does not publish a domain list that is only typed", async () => {
     const user = userEvent.setup();
     renderSettings(storefront({ enabled: false, domains: ["shop.example.com"] }));
-    const field = screen.getByLabelText(/allowed domains/i);
+    const field = screen.getByLabelText(/your website addresses/i);
     await user.clear(field);
     await user.type(field, "typed.example.com");
     await user.click(screen.getByRole("switch", { name: /show on my website/i }));
@@ -224,7 +258,7 @@ describe("EmbedSettings - once the embed has a host", () => {
     updateEmbedSettingsMock.mockImplementation(() => new Promise((resolve) => (finish = resolve)));
     const user = userEvent.setup();
     renderSettings(storefront({ enabled: true, domains: [] }));
-    const field = screen.getByLabelText(/allowed domains/i);
+    const field = screen.getByLabelText(/your website addresses/i);
     await user.type(field, "https://first.example.com/shop");
     await user.click(screen.getByRole("button", { name: /save settings/i }));
     await user.clear(field);
@@ -237,7 +271,7 @@ describe("EmbedSettings - once the embed has a host", () => {
   it("says what is missing when nothing is set up yet", () => {
     renderSettings();
     expect(copySnippet()).toBeDisabled();
-    expect(document.body).toHaveTextContent(/enable embedding and add at least one domain/i);
+    expect(document.body).toHaveTextContent(/enable embedding and add at least one website address/i);
   });
 
   it("keeps Copy locked while product pages are off, and says that is why", () => {
@@ -259,6 +293,54 @@ describe("EmbedSettings - once the embed has a host", () => {
     expect(document.body).toHaveTextContent(/storefront provided by square share/i);
     expect(document.body).toHaveTextContent("https://squareshare.eu/legal/privacy-policy/");
     expect(within(document.body).getByRole("button", { name: /copy privacy text/i })).toBeEnabled();
+  });
+
+  it("includes the escaped anchor in the script snippet when a link is provided", () => {
+    render(
+      <EmbedSettings
+        storefront={storefront({ enabled: true, domains: ["shop.example.com"] })}
+        onSaved={vi.fn()}
+        link={{ url: "https://squareshare.example/s/my-shop", label: "My Shop" }}
+      />,
+    );
+    // The pre displays the raw snippet text; the anchor must be there.
+    expect(document.body).toHaveTextContent('href="https://squareshare.example/s/my-shop"');
+    expect(document.body).toHaveTextContent("My Shop");
+  });
+
+  it("HTML-escapes special chars in the label and url when a link is provided", () => {
+    render(
+      <EmbedSettings
+        storefront={storefront({ enabled: true, domains: ["shop.example.com"] })}
+        onSaved={vi.fn()}
+        link={{ url: "https://example.com/s/abc?q=1&r=2", label: "Tom & Jerry's <Shop>" }}
+      />,
+    );
+    expect(document.body).toHaveTextContent("Tom &amp; Jerry&#39;s &lt;Shop&gt;");
+    expect(document.body).toHaveTextContent("q=1&amp;r=2");
+  });
+
+  it("produces a snippet with no anchor when no link is provided", () => {
+    renderSettings(storefront({ enabled: true, domains: ["shop.example.com"] }));
+    // The div attribute is present; no anchor should follow it.
+    expect(document.body).toHaveTextContent(`data-squareshare-storefront="${EMBED_KEY}"></div>`);
+    expect(document.body).not.toHaveTextContent("href=");
+  });
+
+  it("does not add the anchor to the plain-iframe snippet even when a link is provided", async () => {
+    const user = userEvent.setup();
+    render(
+      <EmbedSettings
+        storefront={storefront({ enabled: true, domains: ["shop.example.com"] })}
+        onSaved={vi.fn()}
+        link={{ url: "https://squareshare.example/s/my-shop", label: "My Shop" }}
+      />,
+    );
+    // Switch to the plain-iframe tab.
+    await user.click(screen.getByRole("button", { name: /simple embed/i }));
+    // The plain-iframe snippet is a bare <iframe>; it must not carry the anchor.
+    expect(document.body).not.toHaveTextContent('href="https://squareshare.example/s/my-shop"');
+    expect(document.body).toHaveTextContent("shop.example.com");
   });
 
   it("explains a storefront that does not show behind a tip, only once there is a snippet to paste", () => {
@@ -298,7 +380,7 @@ describe("EmbedSettings - saving", () => {
   it("adopts the stored settings on load", () => {
     renderSettings(storefront({ enabled: true, domains: ["a.com", "b.com"] }));
     expect(screen.getByRole("switch")).toBeChecked();
-    expect(screen.getByLabelText(/allowed domains/i)).toHaveValue("a.com, b.com");
+    expect(screen.getByLabelText(/your website addresses/i)).toHaveValue("a.com, b.com");
   });
 
   it("surfaces a server refusal instead of claiming success", async () => {
@@ -366,7 +448,7 @@ describe("EmbedSettings - domain sanitization", () => {
     // So the seller sees the canonical list, not their raw typing.
     await saveWithDomains(" HTTPS://A.com/x , a.com , B.com ");
     await waitFor(() =>
-      expect(screen.getByLabelText(/allowed domains/i)).toHaveValue("a.com, b.com"),
+      expect(screen.getByLabelText(/your website addresses/i)).toHaveValue("a.com, b.com"),
     );
   });
 });
@@ -382,7 +464,7 @@ describe("EmbedSettings - empty allowlist", () => {
   it("drops the warning once a domain is entered", async () => {
     const user = userEvent.setup();
     renderSettings(storefront({ enabled: true, domains: [] }));
-    await user.type(screen.getByLabelText(/allowed domains/i), "shop.example.com");
+    await user.type(screen.getByLabelText(/your website addresses/i), "shop.example.com");
     expect(screen.queryByText(/won't load anywhere/i)).not.toBeInTheDocument();
   });
 
@@ -397,17 +479,17 @@ describe("EmbedSettings - key rotation", () => {
     const user = userEvent.setup();
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: /rotate key/i }));
+    await user.click(screen.getByRole("button", { name: /get a new code/i }));
 
     expect(rotateEmbedKeyMock).not.toHaveBeenCalled();
-    expect(screen.getByText(/stops working immediately/i)).toBeInTheDocument();
+    expect(screen.getByText(/deactivates the old one/i)).toBeInTheDocument();
   });
 
   it("cancelling leaves the key alone", async () => {
     const user = userEvent.setup();
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: /rotate key/i }));
+    await user.click(screen.getByRole("button", { name: /get a new code/i }));
     await user.click(screen.getByRole("button", { name: /^cancel$/i }));
 
     expect(rotateEmbedKeyMock).not.toHaveBeenCalled();
@@ -418,8 +500,8 @@ describe("EmbedSettings - key rotation", () => {
     const user = userEvent.setup();
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: /rotate key/i }));
-    const confirm = screen.getAllByRole("button", { name: /rotate key/i }).at(-1)!;
+    await user.click(screen.getByRole("button", { name: /get a new code/i }));
+    const confirm = screen.getAllByRole("button", { name: /get a new code/i }).at(-1)!;
     await user.click(confirm);
 
     await waitFor(() => expect(rotateEmbedKeyMock).toHaveBeenCalledWith(STOREFRONT_ID));
@@ -437,8 +519,8 @@ describe("EmbedSettings - key rotation", () => {
     const user = userEvent.setup();
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: /rotate key/i }));
-    await user.click(screen.getAllByRole("button", { name: /rotate key/i }).at(-1)!);
+    await user.click(screen.getByRole("button", { name: /get a new code/i }));
+    await user.click(screen.getAllByRole("button", { name: /get a new code/i }).at(-1)!);
 
     await waitFor(() =>
       expect(screen.getByRole("alert")).toHaveTextContent(/can't edit storefronts/i),

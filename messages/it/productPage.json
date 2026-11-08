@@ -73,7 +73,7 @@
     "label": "Quantità"
   },
   "cta": {
-    "unwired": "Questo pulsante non ha ancora una destinazione. Aggiungi un link di acquisto al prodotto, oppure un’email di contatto in Attività e dati del venditore.",
+    "unwired": "Questo pulsante non ha ancora una destinazione. Aggiungi un link di acquisto al prodotto, oppure un’email di contatto nei tuoi dati venditore.",
     "unavailableIn": "Non disponibile per: {group}",
     "askAbout": "Chiedi informazioni su questo prodotto",
     "checkoutOn": "Vai al checkout su <strong>{host}</strong>",
@@ -374,8 +374,8 @@
       "testBody": "Questo è un checkout di sviluppo. Nessuna carta viene addebitata e nessun denaro si muove.",
       "stripeTitle": "Paga in modo sicuro con Stripe",
       "stripeBody": "Inserisci i dati della tua carta nella pagina sicura di Stripe nel passaggio successivo.",
-      "previewTitle": "Dati della carta",
-      "previewBody": "Carta, Apple Pay e Google Pay appariranno qui nei tuoi colori una volta connesso Stripe.",
+      "previewConnect": "Gli acquirenti pagano qui con carta una volta collegato Stripe in <link>Pagamenti</link>.",
+      "previewComingSoon": "I pagamenti con carta qui sono in arrivo. Nel frattempo, gli acquirenti ti pagano tramite il link di acquisto del tuo prodotto, o scrivendoti via email.",
       "cardNumber": "Numero carta",
       "expiry": "MM / AA",
       "cvc": "CVV",

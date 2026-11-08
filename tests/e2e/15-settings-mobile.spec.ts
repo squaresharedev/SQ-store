@@ -105,7 +105,7 @@ test.describe("settings — phone", () => {
 
     // And it scrolls: a swipe moves it and the far tab comes into reach.
     await nav.evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
-    await expect(page.getByRole("link", { name: /danger/i })).toBeInViewport();
+    await expect(nav.getByRole("link", { name: "Delete account" })).toBeInViewport();
   });
 
   test("a fade marks each end of the strip that still has tabs behind it", async ({

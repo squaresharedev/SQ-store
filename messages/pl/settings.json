@@ -11,7 +11,7 @@
       "title": "Ustawienia powiadomień"
     },
     "danger": {
-      "title": "Strefa niebezpieczna"
+      "title": "Usuń konto"
     },
     "legal": {
       "title": "Ustawienia prawne"
@@ -32,15 +32,17 @@
       "title": "Plan i rozliczenia"
     },
     "connectedApps": {
-      "title": "Połączone aplikacje"
+      "title": "Asystent AI"
     }
   },
   "loading": "Wczytywanie ustawień…",
   "shell": {
     "sectionsLabel": "Sekcje ustawień",
-    "recommended": "Zalecane"
+    "recommended": "Zalecane",
+    "actionNeeded": "Wymaga działania"
   },
   "continueToStorefront": "Przejdź do swojej witryny",
+  "confirmEmailNext": "Dalej: potwierdź swój e-mail",
   "account": {
     "fallbackName": "Konto",
     "avatar": {
@@ -73,7 +75,7 @@
     },
     "username": {
       "cardTitle": "Nazwa użytkownika",
-      "cardDescription": "Logujesz się nią zamiast adresem e-mail. Tylko litery, cyfry i znaki podkreślenia, każda nazwa jest unikalna.",
+      "cardDescription": "Logujesz się nią zamiast adresem e-mail, a do tego pojawia się w wiadomościach wysyłanych w twoim imieniu, np. w zaproszeniach do zespołu. Tylko litery, cyfry i znaki podkreślenia, każda nazwa jest unikalna.",
       "label": "Nazwa użytkownika",
       "placeholder": "twojanazwa",
       "available": "Dostępna.",
@@ -136,7 +138,7 @@
   "danger": {
     "export": {
       "cardTitle": "Eksportuj moje dane",
-      "cardDescription": "Wszystko, co o tobie przechowujemy: profil, produkty, witryny, sprzedane zamówienia, powiadomienia i dziennik zabezpieczeń, w jednym pliku JSON. To twoje dane, należą do ciebie.",
+      "cardDescription": "Wszystko, co o tobie przechowujemy: profil, produkty, witryny, sprzedane zamówienia, powiadomienia i dziennik zabezpieczeń, w jednym pliku, który otworzysz w dowolnym edytorze tekstu. To twoje dane, należą do ciebie.",
       "downloadButton": "Pobierz moje dane",
       "stepUpDescription": "Eksport zawiera całe twoje konto. Wpisz aktualny kod z aplikacji uwierzytelniającej, aby go pobrać."
     },
@@ -155,6 +157,7 @@
       "keepButton": "Zachowaj moje konto",
       "title": "Usuń konto",
       "description": "Twoje konto, produkty, witryny i zamówienia zostaną trwale usunięte {days} dni po zgłoszeniu. Do tego czasu możesz zmienić zdanie. Potem już nie.",
+      "exportFirst": "Zanim konto zniknie, możesz pobrać kopię swoich danych w <link>Ustawieniach konta</link>.",
       "deleteButton": "Usuń moje konto",
       "confirmLabel": "Wpisz <code>{phrase}</code>, aby potwierdzić",
       "flagging": "Oznaczanie…",
@@ -203,7 +206,8 @@
     "success": {
       "notificationsSaved": "Zapisano preferencje."
     },
-    "emailOff": "E-mail nie jest jeszcze włączony dla Square Share, więc nic poniżej nie zostanie wysłane. Nowe zamówienia nadal pojawiają się w sekcji Zamówienia i w twoich powiadomieniach."
+    "emailOff": "E-mail nie jest jeszcze włączony dla Square Share, więc nic poniżej nie zostanie wysłane. Nowe zamówienia nadal pojawiają się w sekcji Zamówienia i w twoich powiadomieniach.",
+    "inAppNote": "Te przełączniki dotyczą tylko e-maili. Nowe zamówienia i opinie zawsze pojawiają się w twoich powiadomieniach."
   },
   "legal": {
     "cardTitle": "Umowa sprzedawcy, warunki i prywatność",
@@ -225,18 +229,18 @@
       },
       "sellerDetails": {
         "title": "Twoje dane sprzedawcy i gdzie trafiają",
-        "body": "Twoja nazwa przedsiębiorcy, adres i e-mail kontaktowy są widoczne dla kupujących na stronach twoich produktów i są wymagane, aby móc cokolwiek opublikować lub sprzedać. To jedyne, do czego ich używamy: prawo konsumenckie UE wymaga, aby kupujący mógł zobaczyć, od kogo kupuje, i mógł się z nim skontaktować przed złożeniem zamówienia. Wysyłamy jeden link na twój adres kontaktowy, aby można było potwierdzić, że działa, i to jedyna wiadomość, jaką wysyłamy tam z własnej inicjatywy: żadnej listy mailingowej, żadnego marketingu, i nigdy nie sprzedajemy ani nie udostępniamy tych danych. Numer telefonu i numer VAT UE są opcjonalne i widoczne tylko wtedy, gdy je uzupełnisz."
+        "body": "Twoje imię i nazwisko lub nazwa firmy, adres i e-mail kontaktowy są widoczne dla kupujących na stronach twoich produktów i są wymagane, aby móc cokolwiek opublikować lub sprzedać. To jedyne, do czego ich używamy: prawo konsumenckie UE wymaga, aby kupujący mógł zobaczyć, od kogo kupuje, i mógł się z nim skontaktować przed złożeniem zamówienia. Wysyłamy jeden link na twój adres kontaktowy, aby można było potwierdzić, że działa, i to jedyna wiadomość, jaką wysyłamy tam z własnej inicjatywy: żadnej listy mailingowej, żadnego marketingu, i nigdy nie sprzedajemy ani nie udostępniamy tych danych. Numer telefonu i numer VAT UE są opcjonalne i widoczne tylko wtedy, gdy je uzupełnisz."
       }
     },
     "accepted": "Zaakceptowano wersję <code>{version}</code> dnia {date}. Nie musisz tu nic więcej robić.",
     "outdated": "Zaakceptowano wersję <code>{version}</code> dnia {date}, ale od tego czasu dokumenty się zmieniły. Przeczytaj je ponownie i zaakceptuj aktualną wersję.",
-    "agreed": "Zaakceptowano wersję <code>{version}</code> dnia {date}. Nic więcej nie trzeba tu robić.",
-    "agreedOutdated": "Zaakceptowano wersję <code>{version}</code> dnia {date}, ale od tego czasu Warunki się zmieniły. Przeczytaj je ponownie i zaakceptuj aktualną wersję.",
+    "agreed": "Zaakceptowano te Warunki dnia {date}. Nic więcej nie trzeba tu robić.",
+    "agreedOutdated": "Dnia {date} zaakceptowano wcześniejszą wersję Warunków. Przeczytaj powyższe Warunki i zaakceptuj je.",
+    "whatChanged": "Co się zmieniło:",
     "recording": "Zapisywanie…",
     "acceptButton": "Akceptuję",
     "agreeButton": "Akceptuję Warunki po zapoznaniu się z nimi",
     "acceptNote": "Akceptacja zapisuje na twoim koncie datę i wersję <code>{version}</code>.",
-    "agreeNote": "Akceptacja zapisuje na twoim koncie datę i wersję <code>{version}</code>.",
     "success": {
       "legalAccepted": "Zaakceptowano. Dziękujemy za przeczytanie drobnego druku.",
       "termsAgreed": "Warunki korzystania z usługi zostały zaakceptowane."
@@ -297,7 +301,7 @@
           "points": {
             "cap": "Square Share jest na wczesnym etapie i jest udostępniany użytkownikom biznesowym w stanie „takim, jaki jest”. W ich przypadku nasza odpowiedzialność jest ograniczona do opłat zapłaconych nam w ostatnich 12 miesiącach lub 100 EUR, zależnie od tego, która kwota jest wyższa, a sprzedawcy biznesowi zabezpieczają nas przed roszczeniami wynikającymi z ich produktów, stron internetowych lub naruszeń. Jeśli jesteś konsumentem, twoje prawa ustawowe pozostają nienaruszone.",
             "termination": "Możemy zawiesić lub zamknąć konta naruszające te Warunki. Możesz odejść w dowolnym momencie i zabrać swoje dane.",
-            "changesAndLaw": "O istotnych zmianach tego regulaminu informujemy z co najmniej 30-dniowym wyprzedzeniem. Do użytkowników biznesowych stosuje się prawo czeskie. Jeśli jesteś konsumentem, nadal chroni Cię prawo Twojego kraju, stanu lub prowincji.",
+            "changesAndLaw": "O istotnych zmianach tego regulaminu informujemy z co najmniej 30-dniowym wyprzedzeniem. Do użytkowników biznesowych stosuje się prawo czeskie, a w Kanadzie prawo Twojej prowincji lub terytorium. Jeśli jesteś konsumentem, nadal chroni Cię prawo Twojego kraju, stanu lub prowincji.",
             "policies": "Nasza Polityka prywatności i Polityka plików cookie stanowią część tych Warunków.",
             "disputes": "Spory w USA rozstrzygane są w drodze indywidualnego arbitrażu zamiast przed sądem, chyba że złożysz sprzeciw w ciągu 30 dni od akceptacji. Konsumenci z UE i Kanady mogą nadal dochodzić swoich praw w sądzie właściwym dla miejsca zamieszkania."
           }
@@ -311,12 +315,14 @@
       "titleSoon": "Nasze Warunki wkrótce się zmienią.",
       "body": "Do tego czasu obowiązują <current>aktualne Warunki</current>. Oto co zmieniają <next>nowe Warunki</next>:",
       "leave": "Jeśli się nie zgadzasz, możesz zamknąć swoje konto bezpłatnie przed wejściem ich w życie. Jeśli będziesz nadal korzystać z Square Share po tej dacie, nowe Warunki będą cię obowiązywać.",
+      "summaryIsNew": "Poniższe podsumowanie dotyczy nowych Warunków. Akceptując je teraz, przyjmujesz je przed terminem.",
       "changes": {
         "regions": "Działamy teraz tylko w UE, USA i Kanadzie, a każda z tych stref ma własną sekcję.",
         "disputes": "Spory w USA rozstrzygane są w drodze indywidualnego arbitrażu zamiast przed sądem, chyba że złożysz sprzeciw w ciągu 30 dni. Konsumenci z UE i Kanady mogą nadal dochodzić swoich praw w sądzie właściwym dla miejsca zamieszkania.",
         "plans": "Płatne plany i prowizje od sprzedaży są teraz szczegółowo opisane, łącznie z automatycznym odnowieniem i sposobem rezygnacji.",
         "moderation": "Wyjaśniamy, jak sprawdzamy treści, jak je zgłaszać, odwołać się od decyzji i złożyć skargę z tytułu naruszenia praw autorskich.",
-        "notice": "Teraz będziesz otrzymywać e-mail z co najmniej 30-dniowym wyprzedzeniem przed istotnymi zmianami Warunków."
+        "notice": "Teraz będziesz otrzymywać e-mail z co najmniej 30-dniowym wyprzedzeniem przed istotnymi zmianami Warunków.",
+        "northAmerica": "Sekcje dotyczące USA i Kanady opisują teraz, czego tamtejsze prawo wymaga od sprzedawców. Użytkowników biznesowych w Kanadzie obowiązuje teraz prawo i sądy ich prowincji."
       },
       "email": {
         "subject": "Aktualizujemy nasze Warunki korzystania z usługi",
@@ -334,19 +340,19 @@
     "cardDescription": "Ustawiane raz dla całego konta. Widoczne dla kupujących na każdej stronie produktu, na której sprzedajesz, i używane do faktur oraz VAT.",
     "memberScope": "To są twoje własne dane sprzedawcy. Te, które kupujący widzą w sklepie {store}, należą do jego właściciela, który ustawia je we własnych ustawieniach.",
     "gate": {
-      "required": "<strong>Twoja nazwa przedsiębiorcy, adres i e-mail kontaktowy są wymagane, aby móc cokolwiek opublikować lub sprzedać.</strong> Kupujący muszą wiedzieć, od kogo kupują, i jak się z tobą skontaktować, zanim złożą zamówienie.",
+      "required": "<strong>Twoje imię i nazwisko lub nazwa firmy, adres i e-mail kontaktowy są wymagane, aby móc cokolwiek opublikować lub sprzedać.</strong> Kupujący muszą wiedzieć, od kogo kupują, i jak się z tobą skontaktować, zanim złożą zamówienie.",
       "privacyNoteLinked": "Te dane są publicznie widoczne na stronach twoich produktów wyłącznie z tego powodu. Nigdy nie używamy ich do marketingu i nigdy ich nie sprzedajemy ani nie udostępniamy. Jedyna wiadomość, jaką wysyłamy na twój e-mail kontaktowy lub telefon, to kod potwierdzający. Zobacz <link>Politykę prywatności Square Share</link>."
     },
-    "countryUnset": "Wolę nie podawać",
+    "countryUnset": "Nie ustawiono",
     "vatAdvisory": {
       "noCountry": "Ten numer VAT wygląda na wydany przez {issuer}. Warto ustawić odpowiedni kraj.",
       "mismatch": "Ten numer VAT wygląda na wydany przez {issuer}, ale jako kraj ustawiono {selected}. Sprawdź, czy oba są poprawne."
     },
     "fields": {
       "businessName": {
-        "label": "Nazwa przedsiębiorcy",
+        "label": "Twoje imię i nazwisko lub nazwa firmy",
         "tipLabel": "Co tu wpisać",
-        "tipBody": "Nazwa, z którą kupujący zawierają umowę. Twoja zarejestrowana nazwa firmy, jeśli sprzedajesz jako firma; twoje pełne imię i nazwisko, jeśli sprzedajesz jako osoba prywatna. Nazwa twojej witryny to nazwa sklepu, co nie jest tym samym i nie może jej zastąpić.",
+        "tipBody": "Nazwa, pod którą sprzedajesz, albo twoje pełne imię i nazwisko: to nazwa przedsiębiorcy, której wymaga prawo UE. Jeśli sprzedajesz przez zarejestrowaną firmę, podaj jej nazwę; jeśli jako osoba prywatna, podaj swoje imię i nazwisko. Nazwa witryny to nazwa sklepu i nie może jej zastąpić.",
         "placeholder": "np. Anna Kowalska lub Ceramika Anny"
       },
       "address": {
@@ -359,20 +365,24 @@
         "label": "E-mail kontaktowy",
         "tipLabel": "Czym różni się od e-maila do logowania",
         "tipBody": "Widoczny dla kupujących jako link mailto i używany jako zapasowy przycisk zakupu, gdy produkt nie ma linku do zakupu. Celowo oddzielony od e-maila do logowania: użyj adresu, na który chcesz, żeby kupujący pisali. Musi to być adres, który faktycznie czytasz: adresy zastępcze, tymczasowe skrzynki i adresy no-reply są odrzucane, podobnie jak domena, która nie przyjmuje poczty.",
-        "placeholder": "np. kontakt@twojsklep.example"
+        "placeholder": "np. kontakt@twojsklep.example",
+        "codeHint": "Po zapisaniu wyślemy kod na ten adres. Wpisz go poniżej, aby potwierdzić adres."
       },
       "vatId": {
         "label": "Numer VAT UE",
+        "tipLabel": "Czy tego potrzebuję?",
+        "tipBody": "Opcjonalne i tylko wtedy, gdy masz rejestrację VAT w UE. Wpisz numer z prefiksem kraju, np. ATU12345678 dla Austrii. W przeciwnym razie zostaw puste: numer rejestrowy firmy ani inny numer podatkowy nie należą tutaj. Widoczny dla kupujących w sekcji Sprzedawca na stronach twoich produktów.",
         "placeholder": "np. PL1234567890"
       },
       "country": {
-        "hint": "Square Share działa w UE, USA i Kanadzie. Gdzie indziej jeszcze nie działamy.",
+        "hint": "Kraj, w którym działa twoja firma, widoczny dla kupujących obok twojej nazwy. Square Share działa w UE, USA i Kanadzie.",
         "label": "Kraj"
       },
       "phone": {
         "label": "Telefon",
         "tipLabel": "Kiedy kupujący to widzą",
-        "tipBody": "Opcjonalnie. Kupujący widzą go dopiero po potwierdzeniu kodem, który wysyłamy SMS-em, więc użyj numeru komórkowego z UE, EOG, Szwajcarii lub Wielkiej Brytanii.",
+        "tipBody": "Opcjonalnie. Kupujący widzą go dopiero po potwierdzeniu kodem, który wysyłamy SMS-em.",
+        "restriction": "Tylko numery komórkowe z UE, EOG, Szwajcarii i Wielkiej Brytanii. Zostaw puste, jeśli twój numer jest spoza tych regionów.",
         "placeholder": "np. +353 87 123 4567"
       },
       "bio": {
@@ -386,7 +396,8 @@
     "success": {
       "sellerDetailsSaved": "Zapisano dane firmy i sprzedawcy.",
       "savedCodeSent": "{which, select, email {Zapisano. Wysłaliśmy kod e-mailem na {email}: wpisz go poniżej, aby potwierdzić adres.} phone {Zapisano. Wysłaliśmy kod SMS-em na {phone}: wpisz go poniżej, aby potwierdzić numer.} other {Zapisano. Wysłaliśmy kody na {email} i {phone}: wpisz je poniżej, aby potwierdzić oba.}}"
-    }
+    },
+    "bioHint": "Twoje bio (krótka linijka o tobie lub o tym, co tworzysz) znajdziesz w <link>Ustawieniach konta</link>."
   },
   "contactVerification": {
     "heading": "Potwierdź dane kontaktowe",
@@ -440,7 +451,7 @@
       "label": "Dokąd wysyłasz i ile to trwa",
       "tipLabel": "Ile szczegółów podać",
       "tipBody": "Grupuj kierunki tak, jak faktycznie wysyłasz: jeden wiersz dla kraju, jeden dla reszty UE, jeden dla wszystkiego innego zwykle wystarczy. Zostaw koszt pusty, jeśli się zmienia.",
-      "flatRate": "Stawka jest naliczana raz za zamówienie, niezależnie od liczby sztuk i wagi. Kupujący zamawiają jeden produkt naraz: koszyka jeszcze nie ma.",
+      "costAndRate": "Każdy wiersz ma dwie ceny. Koszt wysyłki to tekst, który kupujący czytają na stronie produktu, np. „9,00 EUR”. Stawka to kwota, którą kasa faktycznie nalicza, raz na zamówienie, niezależnie od ilości czy wagi. Kasa realizuje dostawę tylko do wierszy, które mają stawkę i kraje.",
       "empty": "Nic tu jeszcze nie ma. Kupujący nie zobaczą czasu dostawy, dopóki nie dodasz wiersza.",
       "areaLabel": "Kierunek {number}",
       "areaPlaceholder": "np. Reszta UE",
@@ -450,7 +461,6 @@
       "costPlaceholder": "np. 9,00 EUR",
       "rateLabel": "Stawka {number}",
       "ratePlaceholder": "np. 4,50",
-      "rateHint": "Pozostaw puste, aby wyświetlać tylko.",
       "countriesLabel": "Kraje {number}",
       "countriesNone": "Brak krajów",
       "everywhereElse": "Wszędzie indziej",
@@ -461,13 +471,12 @@
       "needsRate": "Kasa nie może użyć tego wiersza, dopóki nie ma zarówno stawki, jak i kraju. Kupujący nadal widzą go na stronie produktu."
     },
     "rates": {
-      "title": "Stawki wysyłki",
-      "description": "Ceny dostawy naliczane przy realizacji zakupu, aby kupujący widzieli całą kwotę przed zapłatą.",
+      "title": "Waluta i darmowa wysyłka",
+      "description": "Waluta, w której kasa nalicza twoje stawki, i kiedy dostawa jest darmowa. Stawkę dla każdego kierunku ustawiasz wyżej, w sekcji Wysyłka.",
       "currencyLabel": "Waluta stawki",
       "freeOverLabel": "Darmowa wysyłka powyżej",
       "freeOverPlaceholder": "np. 50,00",
-      "freeOverHint": "Gdy łączna kwota zamówienia osiągnie tę wartość, dostawa jest bezpłatna.",
-      "hint": "Te stawki są tym, co kasa pobiera. Pozostaw stawkę miejsca docelowego pustą, aby zachować je tylko do wyświetlania."
+      "freeOverHint": "Gdy łączna kwota zamówienia osiągnie tę wartość, dostawa jest bezpłatna."
     },
     "notes": {
       "label": "Coś jeszcze o wysyłce",
@@ -475,15 +484,15 @@
     },
     "returnsCard": {
       "title": "Zwroty",
-      "description": "To, co oferujesz ponad ustawowe prawa, które już podane są na stronach twoich produktów."
+      "description": "To, co oferujesz ponad prawa kupujących, które strony twoich produktów już podają."
     },
     "returnsWindow": {
       "label": "Termin na zwrot",
-      "tipLabel": "Co już obejmuje prawo ustawowe",
+      "tipLabel": "Co kupującym już daje prawo",
       "tipBody": "Sprzedaż kupującym z UE na odległość daje im 14 dni na zmianę zdania i dwuletnią odpowiedzialność za brak zgodności towaru z umową, niezależnie od tego, co wybierzesz tutaj. Twoje strony produktów podają już oba te terminy, więc to, co ustawisz tu, jest ofertą ponad nie.",
-      "none": "Nic ponad prawo ustawowe",
+      "none": "Nic ponad to, czego wymaga prawo",
       "days": "{days, plural, one {# dzień} few {# dni} many {# dni} other {# dnia}}",
-      "statutoryMinimum": "Ustawowe minimum UE",
+      "statutoryMinimum": "Minimum wymagane prawem UE",
       "custom": "Coś innego",
       "customLabel": "Termin na zwrot w dniach",
       "daysUnit": "dni"
@@ -539,7 +548,8 @@
   "sellerDetails": {
     "bannerLabel": "Wymagane dane sprzedawcy",
     "memberHeadline": "Ten sklep nie może jeszcze publikować ani sprzedawać.",
-    "memberFix": "Jego właściciel musi uzupełnić dane sprzedawcy we własnych ustawieniach.",
+    "memberFix": "Właściciel sklepu {storeName} musi uzupełnić dane sprzedawcy we własnych ustawieniach.",
+    "memberFixGeneric": "Jego właściciel musi uzupełnić dane sprzedawcy we własnych ustawieniach.",
     "addLink": "Dodaj dane sprzedawcy",
     "opensInNewTab": " (otwiera się w nowej karcie)",
     "headline": {
@@ -552,7 +562,7 @@
     "reason": "Kupujący muszą wiedzieć, od kogo kupują, i jak się z tobą skontaktować, zanim złożą zamówienie. Dane te są widoczne na stronach twoich produktów tylko z tego powodu, nigdy nie są używane do marketingu.",
     "fields": {
       "businessName": {
-        "label": "Nazwa przedsiębiorcy",
+        "label": "Twoje imię i nazwisko lub nazwa firmy",
         "why": "Kupujący muszą wiedzieć, od kogo kupują: twoją nazwę firmy albo twoje pełne imię i nazwisko, jeśli sprzedajesz jako osoba prywatna."
       },
       "address": {
@@ -737,7 +747,7 @@
     },
     "approvals": {
       "title": "Zatwierdź z zalogowanego urządzenia",
-      "description": "Gdy logujesz się w nowym miejscu, zeskanuj kod QR telefonem, na którym jesteś już zalogowany, i dotknij pasującego numeru. Przydatne, gdy klucz dostępu jest na innym urządzeniu.",
+      "description": "Logujesz się na nowym urządzeniu, a klucz dostępu masz na innym? Telefon, na którym jesteś już zalogowany, może to zatwierdzić: zeskanuj nim kod QR i dotknij pasującego numeru.",
       "statusOn": "Włączone",
       "statusOff": "Wyłączone",
       "turnOn": "Włącz",
@@ -799,7 +809,6 @@
       "emailLabel": "Adres e-mail",
       "emailPlaceholder": "kolega@example.com",
       "roleLabel": "Rola",
-      "notificationNote": "Powiadomienia e-mail nie są jeszcze podłączone: zaproszenie zaczyna działać przy logowaniu. Warto dać tej osobie znać bezpośrednio.",
       "sendButton": "Wyślij zaproszenie"
     },
     "inviteRow": {
@@ -839,13 +848,17 @@
     "empty": "Nie połączono jeszcze żadnych aplikacji.",
     "connect": {
       "title": "Połącz asystenta",
-      "body": "Dodaj ten adres do Claude lub innej aplikacji MCP, a potem zatwierdź ją, gdy o to poprosi.",
+      "benefit": "Asystent AI, którego tu połączysz, może przeglądać twoje produkty, publikować wersje robocze, projektować witrynę, zarządzać rabatami i odpowiadać na twoje pytania, a wszystko zwykłym językiem.",
+      "body": "Dodaj ten adres do Claude lub dowolnego asystenta AI, a potem zatwierdź połączenie, gdy o to poprosi.",
+      "mcpHintLabel": "O tym adresie",
+      "mcpHint": "Twój asystent może poprosić o adres URL serwera MCP: wklej tam ten adres. MCP to otwarty standard, którego asystenci używają do łączenia się z aplikacjami.",
       "copy": "Kopiuj adres",
       "copied": "Skopiowano",
       "copyFailed": "Nie udało się skopiować. Zaznacz adres i skopiuj go ręcznie.",
       "openClaude": "Otwórz konektory w Claude",
       "capabilitiesTitle": "Co może robić asystent",
-      "offByDefault": "Domyślnie wyłączone"
+      "offByDefault": "Domyślnie wyłączone",
+      "required": "Wymagane"
     },
     "lastUsed": "Ostatnio użyto {when}",
     "neverUsed": "Jeszcze nieużywana",
@@ -858,15 +871,21 @@
       "metadataTitle": "Połącz aplikację",
       "title": "Połączyć {app} z twoim sklepem?",
       "sendsTo": "Dostęp trafi do <strong>{host}</strong>",
+      "sendsToTipLabel": "Dlaczego ten adres jest ważny",
+      "sendsToTipBody": "Aplikacja może nadać sobie dowolną nazwę, ale dostęp zawsze trafia tylko pod ten adres, a oszust nie jest w stanie go podrobić.",
       "store": "Sklep",
+      "storeHint": "Udostępniany jest tylko wybrany sklep. Twoje pozostałe sklepy pozostają prywatne.",
       "scopesTitle": "Co może robić",
       "note": "Łącz tylko wtedy, gdy zaczynasz to z {app}. W każdej chwili możesz to odłączyć w Ustawieniach.",
+      "stepUpDescription": "Połączenie {app} daje dostęp do twojego sklepu. Wpisz aktualny kod z aplikacji uwierzytelniającej, aby potwierdzić swoją tożsamość.",
       "approve": "Połącz",
       "approving": "Łączenie…",
-      "deny": "Anuluj",
+      "deny": "Nie łącz",
+      "denyHint": "„Nie łącz” przeniesie cię z powrotem do {app} i przekaże, że odmówiono połączenia.",
       "connected": "Połączono. Wracamy do {app}…",
       "refusedTitle": "Tej prośbie nie można ufać",
-      "refusedBody": "Aplikacja, która cię tu przysłała, jest źle skonfigurowana. Nic nie zostało połączone."
+      "refusedBody": "Aplikacja, która cię tu przysłała, jest źle skonfigurowana. Nic nie zostało połączone.",
+      "goToStore": "Przejdź do swojego sklepu"
     },
     "scopes": {
       "storeRead": {
@@ -915,12 +934,12 @@
       },
       "destructive": {
         "label": "Usuwaj rzeczy",
-        "hint": "Usuwaj produkty, witryny i rabaty oraz wymieniaj klucze osadzania. Tego nie da się cofnąć."
+        "hint": "Usuwaj produkty, witryny i rabaty oraz generuj nowe kody na stronę. Tego nie da się cofnąć."
       }
     },
     "app": {
       "capabilitiesLabel": "Co może robić {app}",
-      "changeHint": "Aby to zmienić, odłącz aplikację i połącz ją ponownie."
+      "changeHint": "Aby zmienić, co może robić {app}, odłącz aplikację tutaj, a potem połącz ją ponownie z poziomu {app} i przy zatwierdzaniu wybierz uprawnienia jeszcze raz."
     }
   }
 }

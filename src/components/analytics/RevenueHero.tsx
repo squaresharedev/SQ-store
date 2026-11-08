@@ -19,6 +19,8 @@ import { moneyCompact, moneyExact } from "@/components/analytics/chart-format";
 import { heroChartHeightClass, heroFrameClass } from "@/components/analytics/chart-layout";
 import { alignPrevious, changeRatio, formatChange } from "@/components/analytics/compare";
 import { TONE } from "@/components/analytics/palette";
+import { useAnalyticsLook } from "@/components/analytics/AnalyticsLookProvider";
+import { FIGURE_CLASS } from "@/components/analytics/look";
 import {
   heroCeiling,
   heroSide,
@@ -90,7 +92,7 @@ const FLAT_CEILING = CENTS_PER_UNIT;
  * dates under it says "nothing happened across these days". An unbounded range
  * has no dates to draw, and gets none.
  */
-function flatSeries(range: AnalyticsRange): RevenuePoint[] {
+export function flatSeries(range: AnalyticsRange): RevenuePoint[] {
   return planBuckets(range, null).keys.map((date) => ({
     date,
     revenueCents: 0,
@@ -212,14 +214,15 @@ export function RevenueHero({
   currency: string;
   /** No paid order in the range: the calm empty state, never a "0.00". */
   empty: boolean;
-  /** The period before the range: its revenue and its series, bucketed the
-   *  same way. Absent or empty means there is nothing to compare against. */
-  previous?: { revenueCents: number; series: RevenuePoint[] } | null;
+  /** The period before the range: its revenue, its series, and its date
+   *  bounds. Absent or empty means there is nothing to compare against. */
+  previous?: { revenueCents: number; series: RevenuePoint[]; range?: { from: string; to: string } } | null;
 }) {
   const t = useTranslations("Analytics");
   const locale = useLocale();
   const frameRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLDivElement>(null);
+  const look = useAnalyticsLook();
 
   const series = empty ? flatSeries(range) : salesSeries;
   const before = empty
@@ -378,7 +381,7 @@ export function RevenueHero({
                   visible one counts up over it. Otherwise the box would grow on
                   every frame, and the chart would re-fit itself around it each
                   time. */}
-              <p className="mt-1 text-4xl font-bold tabular-nums text-success sm:text-5xl">
+              <p className={cn("mt-1 text-4xl font-bold tabular-nums sm:text-5xl", FIGURE_CLASS[look.figure])}>
                 <FitText measure={figure}>
                   <span className="relative inline-block">
                     <CountUp value={figure} className="absolute inset-0" />
@@ -389,20 +392,30 @@ export function RevenueHero({
                 </FitText>
               </p>
               {change !== null && (
-                <p
-                  className={cn(
-                    infoTextClass,
-                    "mt-1 flex items-center gap-1",
-                    side === "right" && "justify-end",
+                <>
+                  <p
+                    className={cn(
+                      infoTextClass,
+                      "mt-1 flex items-center gap-1",
+                      side === "right" && "justify-end",
+                    )}
+                    data-analytics-change={change}
+                  >
+                    <ChangeIcon
+                      ratio={change}
+                      className={cn("size-3.5 shrink-0", change > 0 && "text-success")}
+                    />
+                    {t("compare.vsPrevious", { change: formatChange(change, locale) })}
+                  </p>
+                  {previous?.range && (
+                    <p className={cn(infoTextClass, "mt-0.5", side === "right" && "text-right")}>
+                      {t("compare.previousPeriodDates", {
+                        from: formatBucketLabel(previous.range.from, false, locale),
+                        to: formatBucketLabel(previous.range.to, false, locale),
+                      })}
+                    </p>
                   )}
-                  data-analytics-change={change}
-                >
-                  <ChangeIcon
-                    ratio={change}
-                    className={cn("size-3.5 shrink-0", change > 0 && "text-success")}
-                  />
-                  {t("compare.vsPrevious", { change: formatChange(change, locale) })}
-                </p>
+                </>
               )}
               <p className={cn(infoTextClass, "mt-1")}>
                 {t("tiles.afterFees", {

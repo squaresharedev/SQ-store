@@ -12,12 +12,17 @@
  * settings on mobile. Rather than let it scroll (a primary action nobody would
  * find), the bar is split by priority:
  *
- *   phone : insert · undo · Design · More
+ *   phone : insert · undo · redo · Style · More
  *   sm+   : the full bar
+ *   lg+   : the full bar, with the keyboard shortcuts where Style was
  *
- * "More" holds what a thumb rarely needs mid-edit — redo and tidy.
+ * "More" holds what a thumb rarely needs mid-edit: tidy and fit to screen. Redo
+ * stays on the bar beside undo, the pair every app keeps together, so getting
+ * back a step undone too many is one tap rather than two. On a phone every
+ * control wears its word under its icon, the way a tab bar does.
  * Zoom buttons are desktop-only: pinch handles it on touch, far better than
- * a pair of 36px targets.
+ * a pair of 36px targets. What a phone needs instead is the way back to the
+ * whole board after a pinch went too far, which is Fit to screen.
  *
  * z-40 - intentionally sits below modals/sheets (z-50) so a panel opening
  * over the canvas does not fight for the same layer.
@@ -34,18 +39,20 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatPercent } from "@/lib/format/intl";
 import {
+  AlignStartVertical,
   Ellipsis,
+  Keyboard,
   LoaderCircle,
   Minus,
   Plus,
   Redo2,
+  Scan,
   Shapes,
   ShoppingBag,
   SlidersHorizontal,
   Type,
   Undo2,
   Upload,
-  WandSparkles,
 } from "lucide-react";
 import { type ShapeKind } from "@/types/storefront";
 import { cn } from "@/lib/utils";
@@ -78,13 +85,22 @@ function ZoomReadout({ viewport }: { viewport: CanvasViewport }) {
   return <>{formatPercent(Math.round(zoom * 100), locale)}</>;
 }
 
-/** Labelled insert-tool button: icon + text label (label hidden on mobile).
+/** Labelled insert-tool button: icon + text label. On a phone the label sits
+ *  UNDER the icon, the way a tab bar labels its tabs: beside it, four labels
+ *  do not fit a 360px screen, and an unlabelled icon was a guess.
  *  `group/btn` lets the icon pop on hover/focus (see iconPopClass below);
- *  `group/tip relative` hosts a <ToolbarTip> child. */
+ *  `group/tip relative` hosts a <ToolbarTip> child. `aria-disabled` dims like
+ *  `disabled`, for a tool that stays pressable so it can say why it is off. */
 const INSERT_BTN =
   `group/btn group/tip relative inline-flex h-11 min-w-0 items-center justify-center gap-1.5 rounded-none px-2.5 text-xs font-medium sm:h-9 sm:shrink-0 ` +
+  `max-sm:min-w-9 max-sm:flex-col max-sm:gap-0.5 max-sm:px-0.5 ` +
   `text-muted-foreground hover:bg-accent hover:text-foreground ` +
-  `disabled:pointer-events-none disabled:opacity-50 ${TRANSITION} ${FOCUS_RING}`;
+  `disabled:pointer-events-none disabled:opacity-50 aria-disabled:opacity-50 ${TRANSITION} ${FOCUS_RING}`;
+
+/** An insert tool's label: the smallest type under the icon on a phone,
+ *  beside it from `sm` up. Truncated, so a long translation cannot push the
+ *  bar past the edge of the screen. */
+const INSERT_LABEL = "max-w-full truncate max-sm:text-2xs";
 
 /** The insert tools' icons all share the additive "pop" microinteraction. */
 const INSERT_ICON = `size-4 ${iconPopClass}`;
@@ -106,11 +122,23 @@ const ICON_BTN = `size-11 ${ICON_BTN_BASE}`;
  *  supposed to be part of. It cleared an iPhone 13's 390px by 18px and missed a
  *  360px Android by 12, which is a bar that fits by luck.
  *
- *  Only the two phone-only controls at the right end wear this. Height is what
- *  a thumb actually aims with on a row of controls this size, so keeping 44
- *  there and spending the width is the cheap half of the trade; the icon is
- *  unchanged at 16px, and 36px wide matches the insert buttons beside them. */
+ *  The two phone-only controls at the right end wear this, and so do undo and
+ *  redo, which is what made room for redo on the bar. Height is what a thumb
+ *  actually aims with on a row of controls this size, so keeping 44 there and
+ *  spending the width is the cheap half of the trade; the icon is unchanged at
+ *  16px, and 36px wide matches the insert buttons beside them. From `sm` up it
+ *  is the same 36px square as ICON_BTN. */
 const NARROW_ICON_BTN = `h-11 w-9 ${ICON_BTN_BASE}`;
+
+/** NARROW_ICON_BTN with room for its word under the icon on a phone (see
+ *  PHONE_LABEL): the history pair and the Style and More buttons. An
+ *  ellipsis or a row of sliders said nothing to a thumb, and the tip that
+ *  names them never shows on touch. */
+const LABELLED_ICON_BTN = `${NARROW_ICON_BTN} max-sm:flex-col max-sm:gap-0.5`;
+
+/** That word: the insert tools' label, on a phone only. From `sm` up the
+ *  button is icon-only again and its ToolbarTip names it. */
+const PHONE_LABEL = cn(INSERT_LABEL, "sm:hidden");
 
 /** Row inside the "More" sheet: the shared overlay row, a little roomier. */
 const MORE_ITEM = cn(overlayItemClass, "gap-3 py-2.5 font-medium");
@@ -167,10 +195,12 @@ export function EditorToolbar({
   onZoomIn,
   onZoomOut,
   onZoomReset,
+  onZoomFit,
   onTidy,
   canTidy,
   settingsOpen,
   onToggleSettings,
+  onShowShortcuts,
   sheetOpen = false,
   pagesOpen,
   canOpenPage,
@@ -204,12 +234,17 @@ export function EditorToolbar({
   onZoomIn: () => void;
   onZoomOut: () => void;
   onZoomReset: () => void;
+  /** Phone only (the More menu): the whole board back on screen, as it
+   *  opened. Reset to 100% left a phone more zoomed in than that. */
+  onZoomFit: () => void;
   /** Pack every block toward the top-left, in reading order. */
   onTidy: () => void;
   canTidy: boolean;
   /** Mobile only: the Design bottom sheet (global settings) toggle. */
   settingsOpen: boolean;
   onToggleSettings: () => void;
+  /** Desktop only: open the keyboard shortcuts list (ShortcutsDialog). */
+  onShowShortcuts: () => void;
   /** Mobile only: a panel is open as a bottom sheet over this bar's own strip,
    *  so the bar stands down until it closes. */
   sheetOpen?: boolean;
@@ -270,6 +305,9 @@ export function EditorToolbar({
     }
   }
 
+  // No product on the board, so no page to show (see the page node below).
+  const pageUnavailable = !canOpenPage && !pagesOpen;
+
   return (
     // Display-only wrapper, and a wrapper rather than a class on the bar
     // itself: the bar's own class list already sets `flex`, and two display
@@ -297,7 +335,7 @@ export function EditorToolbar({
         aria-label={t("toolbar.addProduct")}
       >
         <ShoppingBag className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
-        <span className="hidden sm:inline">{t("toolbar.product")}</span>
+        <span className={INSERT_LABEL}>{t("toolbar.product")}</span>
         <ToolbarTip>{t("toolbar.addProduct")}</ToolbarTip>
       </button>
 
@@ -310,7 +348,7 @@ export function EditorToolbar({
         aria-label={t("toolbar.addText")}
       >
         <Type className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
-        <span className="hidden sm:inline">{t("toolbar.text")}</span>
+        <span className={INSERT_LABEL}>{t("toolbar.text")}</span>
         <ToolbarTip>{t("toolbar.addText")}</ToolbarTip>
       </button>
 
@@ -333,7 +371,7 @@ export function EditorToolbar({
           aria-expanded={shapeMenuOpen}
         >
           <Shapes className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
-          <span className="hidden sm:inline">{t("toolbar.element")}</span>
+          <span className={INSERT_LABEL}>{t("toolbar.element")}</span>
           {/* NO ToolbarTip here, alone among the insert tools. Tips pop ABOVE
               the bar, and so does this button's own menu, which opens on the
               same hover, is far bigger, and is drawn on top. The tip was a
@@ -389,7 +427,8 @@ export function EditorToolbar({
               "flex shrink-0 items-center gap-1 bg-background/95 p-1.5 backdrop-blur",
             )}
           >
-            {/* Upload leads: it is the reason this tool is called Element.
+            {/* Upload leads: it is why this menu is named for shapes AND
+                images (the button's label is "Shapes" for width alone).
                 ICON ONLY — its label was the widest thing in the row and
                 pushed the last shape past the edge. The icon is the universal
                 one and the tooltip carries the detail, so nothing is lost. */}
@@ -486,59 +525,75 @@ export function EditorToolbar({
         />
       </div>
 
-      {/* -- The BUYER FLOW node: the product page, checkout and thank-you page.
-            Sits with the insert tools because that is what it does: it puts
-            more things on the canvas. The tiles have their own node (see
-            SelectionToolbar); this is the route in when nothing is selected. -- */}
+      {/* -- The PRODUCT PAGE node: the product page, checkout and thank-you
+            page. Sits with the insert tools because that is what it does: it
+            puts more things on the canvas. The tiles have their own node (see
+            SelectionToolbar); this is the route in when nothing is selected.
+            With no product on the board it is aria-disabled, not disabled:
+            `disabled` drops pointer events, so its tip could never say why,
+            and a press would get no answer (the designer gives one). -- */}
       <button
         type="button"
         suppressHydrationWarning
         className={`${INSERT_BTN} ${pagesOpen ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
         onClick={onTogglePages}
-        disabled={!canOpenPage && !pagesOpen}
         aria-pressed={pagesOpen}
+        aria-disabled={pageUnavailable || undefined}
         data-tour="editor-product-pages"
         aria-label={pagesOpen ? t("toolbar.closePages") : t("toolbar.showPageFull")}
       >
         <PageNodeIcon className={INSERT_ICON} strokeWidth={2} aria-hidden="true" />
+        {/* The whole name on a desktop; on a phone, under the icon, the one
+            word there is room for. */}
+        <span className={PHONE_LABEL}>{t("toolbar.pageMobile")}</span>
         <span className="hidden sm:inline">{t("toolbar.page")}</span>
-        <ToolbarTip>{pagesOpen ? t("toolbar.closePage") : t("toolbar.showPage")}</ToolbarTip>
+        <ToolbarTip>
+          {pageUnavailable
+            ? t("toolbar.pageDisabledTip")
+            : pagesOpen
+              ? t("toolbar.closePage")
+              : t("toolbar.showPage")}
+        </ToolbarTip>
       </button>
 
       <Divider />
 
-      {/* -- Group 2: HISTORY -- */}
-      <button
-        type="button"
-        suppressHydrationWarning
-        className={ICON_BTN}
-        onClick={onUndo}
-        disabled={!canUndo}
-        aria-label={t("toolbar.undo")}
-      >
-        <Undo2 className="size-4" strokeWidth={2} aria-hidden="true" />
-        <ToolbarTip>{t("toolbar.undoTip")}</ToolbarTip>
-      </button>
-
-      {/* Redo and Tidy move into "More" on a phone — a thumb mid-edit reaches
-          for undo far more often than either.
-          Hidden via a WRAPPER, not `hidden sm:inline-flex` on the buttons:
-          ICON_BTN already sets `inline-flex`, and two display utilities of
-          equal specificity are settled by stylesheet order, not class order —
-          `inline-flex` wins and the buttons never hide. */}
-      <div className="hidden items-center gap-1 sm:flex">
+      {/* -- Group 2: HISTORY. Undo and redo are one pair at every width,
+            redo dimmed while there is nothing to redo. Flush on a phone, like
+            the Style and More pair, to spend no width between them. -- */}
+      <div className="flex min-w-0 items-center sm:gap-1">
         <button
           type="button"
           suppressHydrationWarning
-          className={ICON_BTN}
+          className={LABELLED_ICON_BTN}
+          onClick={onUndo}
+          disabled={!canUndo}
+          aria-label={t("toolbar.undo")}
+        >
+          <Undo2 className="size-4" strokeWidth={2} aria-hidden="true" />
+          <span className={PHONE_LABEL}>{t("toolbar.undo")}</span>
+          <ToolbarTip>{t("toolbar.undoTip")}</ToolbarTip>
+        </button>
+        <button
+          type="button"
+          suppressHydrationWarning
+          className={LABELLED_ICON_BTN}
           onClick={onRedo}
           disabled={!canRedo}
           aria-label={t("toolbar.redo")}
         >
           <Redo2 className="size-4" strokeWidth={2} aria-hidden="true" />
+          <span className={PHONE_LABEL}>{t("toolbar.redo")}</span>
           <ToolbarTip>{t("toolbar.redoTip")}</ToolbarTip>
         </button>
+      </div>
 
+      {/* Tidy moves into "More" on a phone: a thumb mid-edit rarely needs it.
+          Hidden via a WRAPPER, not `hidden sm:inline-flex` on the button:
+          ICON_BTN already sets `inline-flex`, and two display utilities of
+          equal specificity are settled by stylesheet order, not class order,
+          so `inline-flex` wins and the button never hides. */}
+      <div className="hidden items-center sm:flex">
         <button
           type="button"
           suppressHydrationWarning
@@ -547,7 +602,7 @@ export function EditorToolbar({
           disabled={!canTidy}
           aria-label={t("toolbar.tidy")}
         >
-          <WandSparkles className="size-4" strokeWidth={2} aria-hidden="true" />
+          <AlignStartVertical className="size-4" strokeWidth={2} aria-hidden="true" />
           <ToolbarTip>{t("toolbar.tidyTip")}</ToolbarTip>
         </button>
       </div>
@@ -588,12 +643,30 @@ export function EditorToolbar({
         </button>
       </div>
 
+      {/* -- Group 4: the desktop tail. The keyboard shortcuts, where a
+            keyboard is the norm, in the seat the small-screen tail below
+            leaves empty from lg up, so the bar is no wider for it. -- */}
+      <div className="hidden items-center gap-1 lg:flex">
+        <Divider />
+        <button
+          type="button"
+          suppressHydrationWarning
+          className={ICON_BTN}
+          onClick={onShowShortcuts}
+          aria-label={t("shortcuts.title")}
+        >
+          <Keyboard className="size-4" strokeWidth={2} aria-hidden="true" />
+          <ToolbarTip>{t("shortcuts.tip")}</ToolbarTip>
+        </button>
+      </div>
+
       {/* -- Groups 5 and 6: the small-screen tail, and ONE group rather than
-            two. Design settings (on a phone the only route to them) and the
-            overflow menu are both phone-side controls sitting after the same
-            divider, and the toolbar's own `gap-1` between them was 4px spent
-            separating a pair that belongs together, and spent at the exact
-            end of the row that was hanging out of the pill. They sit
+            two. Style (on a phone the only route to the whole storefront's
+            settings) and the overflow menu are both phone-side controls
+            sitting after the same divider, and the toolbar's own `gap-1`
+            between them was 4px spent separating a pair that belongs together,
+            and spent at the exact end of the row that was hanging out of the
+            pill. They sit
             flush now, which reads as the pair they are and, with the narrower
             buttons, is what brings the row back inside its surface. -- */}
       <div className="flex min-w-0 items-center lg:hidden">
@@ -601,7 +674,7 @@ export function EditorToolbar({
         <button
           type="button"
           suppressHydrationWarning
-          className={`${NARROW_ICON_BTN} ${settingsOpen ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
+          className={`${LABELLED_ICON_BTN} ${settingsOpen ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
           onClick={onToggleSettings}
           aria-pressed={settingsOpen}
           data-tour="editor-design-settings"
@@ -612,6 +685,7 @@ export function EditorToolbar({
             strokeWidth={2}
             aria-hidden="true"
           />
+          <span className={PHONE_LABEL}>{t("toolbar.style")}</span>
           <ToolbarTip>{t("toolbar.designSettings")}</ToolbarTip>
         </button>
 
@@ -620,13 +694,14 @@ export function EditorToolbar({
         <button
           type="button"
           suppressHydrationWarning
-          className={`${NARROW_ICON_BTN} ${moreOpen ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
+          className={`${LABELLED_ICON_BTN} ${moreOpen ? PREVIEW_ACTIVE : PREVIEW_IDLE}`}
           onClick={() => setMoreOpen((open) => !open)}
           aria-haspopup="menu"
           aria-expanded={moreOpen}
           aria-label={t("toolbar.moreTools")}
         >
           <Ellipsis className="size-4" strokeWidth={2} aria-hidden="true" />
+          <span className={PHONE_LABEL}>{t("toolbar.more")}</span>
           <ToolbarTip>{t("toolbar.moreTools")}</ToolbarTip>
         </button>
 
@@ -645,26 +720,12 @@ export function EditorToolbar({
                 role="menuitem"
                 className={MORE_ITEM}
                 onClick={() => {
-                  onRedo();
-                  setMoreOpen(false);
-                }}
-                disabled={!canRedo}
-              >
-                <Redo2 className="size-4" strokeWidth={2} aria-hidden="true" />
-                {t("toolbar.redo")}
-              </button>
-              <button
-                type="button"
-                suppressHydrationWarning
-                role="menuitem"
-                className={MORE_ITEM}
-                onClick={() => {
                   onTidy();
                   setMoreOpen(false);
                 }}
                 disabled={!canTidy}
               >
-                <WandSparkles className="size-4" strokeWidth={2} aria-hidden="true" />
+                <AlignStartVertical className="size-4" strokeWidth={2} aria-hidden="true" />
                 {t("toolbar.tidyTip")}
               </button>
               <button
@@ -673,12 +734,12 @@ export function EditorToolbar({
                 role="menuitem"
                 className={MORE_ITEM}
                 onClick={() => {
-                  onZoomReset();
+                  onZoomFit();
                   setMoreOpen(false);
                 }}
               >
-                <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
-                {t("toolbar.zoomResetMenuItem")}
+                <Scan className="size-4" strokeWidth={2} aria-hidden="true" />
+                {t("toolbar.zoomFit")}
               </button>
               {/* NO "All shapes" row. It was here because the Element menu
                   opened on HOVER, which a thumb does not do. But that button

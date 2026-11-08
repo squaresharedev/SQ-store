@@ -7,6 +7,13 @@ export const PLANS_PATH = "/plans";
 /** Settings › Plan & billing: the store's own plan, usage and invoices. */
 export const BILLING_SETTINGS_PATH = "/settings/billing";
 
+/** Deep-links to the invoices card on the billing settings page. */
+export const BILLING_SETTINGS_INVOICES_PATH = `${BILLING_SETTINGS_PATH}#invoices`;
+
+/** Deep-links to the AI writing help card: the month's credit, and the switch
+ *  for the grey next words. */
+export const BILLING_SETTINGS_AI_PATH = `${BILLING_SETTINGS_PATH}#ai`;
+
 /** Stripe's billing webhook. Registered in the Stripe dashboard at this path. */
 export const BILLING_WEBHOOK_PATH = "/api/billing/webhook";
 

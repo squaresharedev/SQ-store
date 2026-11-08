@@ -72,7 +72,7 @@ describe("TaxSection — initial state", () => {
   it("seeds every text field from the saved props", () => {
     render(<TaxSection {...SAVED} />);
 
-    expect(screen.getByLabelText(/Trader name/)).toHaveValue(
+    expect(screen.getByLabelText(/Your name or business name/)).toHaveValue(
       "Root Labs Studio",
     );
     expect(screen.getByLabelText("Phone")).toHaveValue("+353 87 123 4567");
@@ -96,7 +96,7 @@ describe("TaxSection — SET-01: field retention after a failed save", () => {
     render(<TaxSection {...SAVED} />);
 
     // Type a new business name (perfectly valid, but the whole save fails).
-    const bizField = screen.getByLabelText(/Trader name/);
+    const bizField = screen.getByLabelText(/Your name or business name/);
     await user.clear(bizField);
     await user.type(bizField, "SHOULD SURVIVE Ltd");
 
@@ -128,7 +128,7 @@ describe("TaxSection — SET-01: field retention after a failed save", () => {
     const user = userEvent.setup();
     render(<TaxSection {...SAVED} />);
 
-    const bizField = screen.getByLabelText(/Trader name/);
+    const bizField = screen.getByLabelText(/Your name or business name/);
     await user.clear(bizField);
     await user.type(bizField, "SHOULD SURVIVE Ltd");
 
@@ -155,7 +155,7 @@ describe("TaxSection — SET-01: field state after a successful save", () => {
     const user = userEvent.setup();
     render(<TaxSection {...SAVED} />);
 
-    const bizField = screen.getByLabelText(/Trader name/);
+    const bizField = screen.getByLabelText(/Your name or business name/);
     await user.clear(bizField);
     await user.type(bizField, "ACME Corp Ltd");
 
@@ -183,7 +183,7 @@ describe("TaxSection — SET-04: VAT advisory", () => {
     ).toBeInTheDocument();
   });
 
-  it("warns when an EU VAT ID is paired with Not in the EU", async () => {
+  it("warns when an EU VAT ID is paired with no country", async () => {
     render(
       <TaxSection
         {...SAVED}
@@ -225,6 +225,64 @@ describe("TaxSection — SET-04: VAT advisory", () => {
 
     // EL is Greece's VAT prefix even though the ISO code is GR — no advisory.
     expect(screen.queryByText(/looks like/i)).toBeNull();
+  });
+});
+
+describe("TaxSection: said before the seller has to ask", () => {
+  it("points to Account settings for the bio buyers also see", () => {
+    render(<TaxSection {...SAVED} />);
+    expect(screen.getByRole("link", { name: "Account settings" })).toHaveAttribute(
+      "href",
+      "/settings/account#bio",
+    );
+  });
+
+  it("says which phone numbers can be confirmed, under the field rather than after a failed save", () => {
+    render(<TaxSection {...SAVED} />);
+    expect(screen.getByText(/mobile numbers only/)).toBeInTheDocument();
+  });
+
+  it("explains the VAT ID like every other field", () => {
+    render(<TaxSection {...SAVED} />);
+    expect(screen.getByRole("button", { name: "Do I need this?" })).toBeInTheDocument();
+  });
+
+  it("says a code follows the first save of a contact email, and stops once the code box takes over", () => {
+    const hint = /we email a code to this address/;
+    const { unmount } = render(<TaxSection {...SAVED} email="" verification={PROVABLE} />);
+    expect(screen.getByText(hint)).toBeInTheDocument();
+    unmount();
+
+    render(<TaxSection {...SAVED} verification={PROVABLE} />);
+    expect(screen.queryByText(hint)).toBeNull();
+  });
+});
+
+describe("TaxSection: the step after a save", () => {
+  beforeEach(() => {
+    mockSaveTaxInfo.mockResolvedValue(succeeded(msg("Settings.tax.success.sellerDetailsSaved")));
+  });
+
+  it("points at the code box, not the storefront, while the email still waits for its code", async () => {
+    const user = userEvent.setup();
+    render(<TaxSection {...SAVED} verification={PROVABLE} />);
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    const next = await screen.findByRole("link", { name: "Next: confirm your email" });
+    expect(next).toHaveAttribute("href", "#confirm-contact");
+    expect(screen.queryByRole("link", { name: /Continue to your storefront/ })).toBeNull();
+  });
+
+  it("sends the seller on to the storefront once the email is confirmed", async () => {
+    const user = userEvent.setup();
+    render(<TaxSection {...SAVED} verification={PROVABLE} emailVerified />);
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(await screen.findByRole("link", { name: /Continue to your storefront/ })).toHaveAttribute(
+      "href",
+      "/storefront",
+    );
+    expect(screen.queryByRole("link", { name: "Next: confirm your email" })).toBeNull();
   });
 });
 

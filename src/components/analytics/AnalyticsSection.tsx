@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { infoTextClass } from "@/components/ui/control-styles";
 import { leadLaneClass } from "@/components/analytics/chart-layout";
 
 /**
@@ -21,6 +22,7 @@ export function AnalyticsSection({
   id,
   title,
   description,
+  subtitle,
   icon: Icon,
   state,
   lead,
@@ -29,6 +31,9 @@ export function AnalyticsSection({
   id: string;
   title: string;
   description: string;
+  /** One-line context shown directly below the heading for sections where
+   *  the relationship to other sections needs an upfront word. */
+  subtitle?: string;
   icon: LucideIcon;
   /** live = real figures. awaiting = registered, nothing produces it yet. */
   state: "live" | "awaiting";
@@ -46,7 +51,7 @@ export function AnalyticsSection({
       data-analytics-state={state}
       className="space-y-4"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-start gap-3">
         <span
           aria-hidden="true"
           className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-sm bg-secondary text-secondary-foreground"
@@ -56,15 +61,22 @@ export function AnalyticsSection({
         {/* The description sits behind the "?" rather than under the
             heading. A page of five sections was five standing sentences
             explaining what each measures, read once and then permanently in
-            the way of the numbers they introduce. */}
-        <div className="flex min-w-0 items-center gap-1.5">
-          <h2
-            id={`analytics-${id}`}
-            className="text-lg font-semibold text-foreground"
-          >
-            {title}
-          </h2>
-          <InfoTip label={t("whatMeasures", { title })}>{description}</InfoTip>
+            the way of the numbers they introduce. The optional subtitle is
+            the one exception: when two sections need a visible context line
+            to tell them apart, it goes here. */}
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <h2
+              id={`analytics-${id}`}
+              className="text-lg font-semibold text-foreground"
+            >
+              {title}
+            </h2>
+            <InfoTip label={t("whatMeasures", { title })}>{description}</InfoTip>
+          </div>
+          {subtitle && (
+            <p className={infoTextClass}>{subtitle}</p>
+          )}
         </div>
       </div>
       {lead && <div className={leadLaneClass}>{lead}</div>}

@@ -106,10 +106,14 @@ describe("the hover controls", () => {
 });
 
 describe("the shopping controls", () => {
+  const page = { ...DEFAULT_PRODUCT_PAGE_CONFIG, ctaLabel: "Get one", ctaColor: "#123456" };
+
   it("emits only the field it changed", () => {
     const onChange = vi.fn();
-    render(<CardShoppingControls value={resolveCardStyle(themed())} onChange={onChange} reviewsShown />);
+    render(<CardShoppingControls theme={themed()} productPage={page} onChange={onChange} />);
     expect(screen.getByRole("group", { name: "Buy button on the card" })).toBeInTheDocument();
+    // Off: nothing about a button to set yet.
+    expect(screen.queryByLabelText("Button text")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Outline" }));
     expect(onChange).toHaveBeenLastCalledWith({ buyButton: "outline" });
     fireEvent.click(screen.getByRole("switch", { name: "Star rating" }));
@@ -118,8 +122,57 @@ describe("the shopping controls", () => {
     expect(onChange).toHaveBeenLastCalledWith({ showLowStock: true });
   });
 
+  it("starts the button's words and colour as the product page's, and clearing hands them back", () => {
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <CardShoppingControls theme={themed({ buyButton: "solid" })} productPage={page} onChange={onChange} />,
+    );
+    const words = screen.getByLabelText<HTMLInputElement>("Button text");
+    expect(words.value).toBe("");
+    expect(words.placeholder).toBe("Get one");
+    fireEvent.change(words, { target: { value: "Grab it" } });
+    expect(onChange).toHaveBeenLastCalledWith({ buyButtonLabel: "Grab it" });
+    // The fill follows the page's button until the seller picks one.
+    const pageDot = screen.getByRole("button", { name: "Use Product page button" });
+    expect(pageDot).toHaveAttribute("aria-pressed", "true");
+    expect(pageDot.style.backgroundColor).toBe("rgb(18, 52, 86)");
+    expect(screen.getByRole("button", { name: "Use Auto" })).toHaveAttribute("aria-pressed", "true");
+
+    rerender(
+      <CardShoppingControls
+        theme={themed({ buyButton: "solid", buyButtonLabel: "Grab it", buyButtonColor: "#0b3d2e" })}
+        productPage={page}
+        onChange={onChange}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText("Button text"), { target: { value: "  " } });
+    expect(onChange).toHaveBeenLastCalledWith({ buyButtonLabel: undefined });
+    fireEvent.click(screen.getByRole("button", { name: "Use Product page button" }));
+    expect(onChange).toHaveBeenLastCalledWith({ buyButtonColor: undefined });
+  });
+
+  it("falls back to the theme's cards on a tile, and offers a link only its words' colour", () => {
+    render(
+      <CardShoppingControls
+        theme={themed({ buyButton: "link", buyButtonLabel: "Shop", buyButtonTextColor: "#c1121f" })}
+        overrides={{}}
+        productPage={page}
+        onChange={() => {}}
+      />,
+    );
+    expect(screen.getByLabelText<HTMLInputElement>("Button text").placeholder).toBe("Shop");
+    expect(screen.queryByText("Button color")).toBeNull();
+    expect(screen.getByRole("button", { name: "Use Theme color" })).toHaveAttribute("aria-pressed", "true");
+  });
+
   it("says why the stars do nothing while the product page shows no reviews", () => {
-    render(<CardShoppingControls value={resolveCardStyle(themed())} onChange={() => {}} reviewsShown={false} />);
+    render(
+      <CardShoppingControls
+        theme={themed()}
+        productPage={{ ...DEFAULT_PRODUCT_PAGE_CONFIG, sections: [{ id: "reviews", show: false }] }}
+        onChange={() => {}}
+      />,
+    );
     fireEvent.click(screen.getByRole("button", { name: "Where the stars come from" }));
     expect(screen.getAllByText(/Reviews are off on your product page/).length).toBeGreaterThan(0);
   });
@@ -161,14 +214,22 @@ describe("a card's second photo and hover effect", () => {
     expect(plain.container.querySelector("[data-image-frame]")!.className).not.toContain("overflow-hidden");
   });
 
-  it("holds a selected card still in the designer, whose handles would not follow", () => {
-    const block: StorefrontBlock = { ...tile, style: { hoverEffect: "tilt" } };
+  it("plays on the selected card in the designer, on the pointer and never on focus", () => {
+    const block: StorefrontBlock = { ...tile, style: { hoverEffect: "tilt", hoverPhoto: true } };
     const { container, rerender } = render(
       <BlockTile blockKey="p" block={block} product={baseProduct} theme={themed()} editable isEditing />,
     );
-    expect(container.innerHTML).not.toContain("group-hover:rotate-1");
-    rerender(<BlockTile blockKey="p" block={block} product={baseProduct} theme={themed()} editable isEditing={false} />);
+    // A seller tries the effect by pointing at the card they are styling...
     expect(container.innerHTML).toContain("motion-safe:group-hover:rotate-1");
+    expect(container.querySelector("[data-tile-hover-photo]")!.className).toContain("group-hover:opacity-100");
+    // ...and the focus a selected tile holds does not keep it tipped.
+    expect(container.innerHTML).not.toContain("group-focus-within:rotate-1");
+    expect(container.querySelector("[data-tile-hover-photo]")!.className).not.toContain("group-focus-within:");
+
+    // Still while the grid carries or resizes it.
+    rerender(<BlockTile blockKey="p" block={block} product={baseProduct} theme={themed()} editable isEditing isGesture />);
+    expect(container.innerHTML).not.toContain("group-hover:rotate-1");
+    expect(container.querySelector("[data-tile-hover-photo]")!.className).not.toContain("group-hover:");
   });
 });
 
@@ -227,10 +288,34 @@ describe("a card's buy button", () => {
     expect(row.textContent).toBe(DEFAULT_PRODUCT_PAGE_CONFIG.ctaLabel);
     // Below the photo, never on it.
     expect(document.querySelector("[data-image-frame]")!.contains(row)).toBe(false);
+    // With its arrow, which a screen reader does not read out, stepping right
+    // on a buyer's pointer or focus.
+    const arrow = row.querySelector("[data-tile-buy-arrow]")!;
+    expect(arrow).toHaveAttribute("aria-hidden", "true");
+    expect(arrow.getAttribute("class")).toContain("motion-safe:group-hover:translate-x-0.5");
+    expect(arrow.getAttribute("class")).toContain("motion-safe:group-focus-within:translate-x-0.5");
     cleanup();
 
     renderBoard({ buyButton: "link" });
     expect(document.querySelector<HTMLElement>("[data-tile-buy]")!.dataset.tileBuy).toBe("link");
+  });
+
+  it("says the seller's own words in the seller's own colours, a tile's over the theme's", () => {
+    renderBoard(
+      { buyButtonColor: "#0b3d2e" },
+      { theme: { buyButton: "solid", buyButtonLabel: "Grab it", buyButtonTextColor: "#ffd166" } },
+    );
+    const button = document.querySelector<HTMLElement>("[data-tile-buy] > span")!;
+    expect(button.textContent).toBe("Grab it");
+    expect(button.style.backgroundColor).toBe("rgb(11, 61, 46)");
+    expect(button.style.color).toBe("rgb(255, 209, 102)");
+    cleanup();
+
+    // Long words give way to the arrow rather than pushing it off the card.
+    renderBoard({ buyButton: "outline", buyButtonLabel: "x".repeat(24) });
+    const label = document.querySelector("[data-tile-buy] > span > span")!;
+    expect(label.className).toContain("truncate");
+    expect(document.querySelector("[data-tile-buy-arrow]")!.getAttribute("class")).toContain("shrink-0");
   });
 
   it("is not drawn on a sold-out card, or with the button off", () => {
@@ -308,6 +393,20 @@ describe("the buyer's board", () => {
     expect(link.querySelector("[data-tile-rating]")).not.toBeNull();
     expect(link.querySelector("[data-tile-low-stock]")?.textContent).toBe("Low stock");
     expect(link.querySelector("[data-tile-buy]")?.textContent).toBe(DEFAULT_PRODUCT_PAGE_CONFIG.ctaLabel);
+  });
+
+  it("draws the button's own words, colours and arrow, as the hosted page and the assistant's preview do", () => {
+    render(
+      <StorefrontBoard
+        page={page({}, { buyButton: "solid", buyButtonLabel: "Grab it", buyButtonColor: "#0b3d2e", buyButtonTextColor: "#ffd166" })}
+        displayName="Shop"
+      />,
+    );
+    const button = document.querySelector<HTMLElement>("a[data-storefront-tile] [data-tile-buy] > span")!;
+    expect(button.textContent).toBe("Grab it");
+    expect(button.style.backgroundColor).toBe("rgb(11, 61, 46)");
+    expect(button.style.color).toBe("rgb(255, 209, 102)");
+    expect(button.querySelector("svg[data-tile-buy-arrow]")).not.toBeNull();
   });
 
   it("turns a sold-out state into the sold-out badge", () => {

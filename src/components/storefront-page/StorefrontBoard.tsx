@@ -11,7 +11,7 @@ import { phoneGridLayout } from "@/components/storefront/phone-grid";
 import { StorefrontMasthead } from "@/components/storefront/StorefrontMasthead";
 import { resolveBackgroundStyle } from "@/components/storefront/background-presets";
 import {
-  CARD_HOVER_FRAME_CLASSES,
+  cardHoverFrameClass,
   TILE_FACE_CLASS,
   blockBlurStyle,
   blockTileClipStyle,
@@ -224,10 +224,10 @@ export function StorefrontBoard({
                 {...(tilesOpenNewTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 className={cn(
                   tileFrameClass(block),
-                  // What the card does on hover (CARD_HOVER_FRAME_CLASSES):
-                  // the cell is the group, this link the thing that moves.
+                  // What the card does on hover (cardHoverFrameClass): the
+                  // cell is the group, this link the thing that moves.
                   block.type === "product" &&
-                    CARD_HOVER_FRAME_CLASSES[resolveCardStyle(theme, block.style).hoverEffect],
+                    cardHoverFrameClass(resolveCardStyle(theme, block.style).hoverEffect, "board"),
                   // The ring is the board's own ink, not the dashboard's grey:
                   // the ink is chosen to read on the seller's background, and
                   // the grey is 2.3:1 on a cream one, short of the 3:1 a focus

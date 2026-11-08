@@ -6,7 +6,7 @@
   },
   "page": {
     "title": "Ordini",
-    "subtitle": "Ogni ordine effettuato tramite Square Share."
+    "subtitle": "Ordini effettuati tramite il checkout di Square Share."
   },
   "status": {
     "paid": "Pagato",
@@ -17,7 +17,7 @@
   "channel": {
     "embed": "Sul tuo sito",
     "marketplace": "Marketplace",
-    "direct": "La tua pagina",
+    "direct": "Link diretto",
     "button": "Pulsante di acquisto"
   },
   "empty": {
@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} ordine} many {{total} di ordini} other {{total} ordini}} · pagina {page} di {totalPages}",
     "detailDialog": "Dettagli ordine",
     "closeDetail": "Chiudi dettagli ordine",
-    "withdrawn": "Recesso",
+    "withdrawn": "Annullato dall’acquirente",
+    "refundDue": "Rimborsa entro il {date}",
     "moreItems": "+{count} altri"
   },
   "table": {
@@ -52,12 +53,12 @@
     "shipping": "Spedizione",
     "shipTo": "Spedire a",
     "noAddress": "Nessun indirizzo",
-    "feeLine": "Commissione {amount}"
+    "feeLine": "Commissione della piattaforma {amount}"
   },
   "toolbar": {
     "region": "filtri ordini",
     "channel": "canale",
-    "searchPlaceholder": "cerca email, nome, città, prodotto o spedizione",
+    "searchPlaceholder": "cerca numero d’ordine, email, nome, città, prodotto o spedizione",
     "search": "cerca",
     "status": "stato",
     "statusAriaLabel": "Filtra per stato",
@@ -121,7 +122,7 @@
       "failed": "Non è stato possibile copiare il numero di telefono. Selezionalo e copialo manualmente."
     },
     "giftMessage": "Messaggio regalo",
-    "withdrawalNotice": "L'acquirente ha chiesto di recedere da questo acquisto il {date}. Concordate la restituzione e il rimborso.",
+    "withdrawalNotice": "L’acquirente ha annullato questo acquisto il {date}. Organizza il reso ed effettua il rimborso entro 14 giorni.",
     "noAddress": "Questo ordine non ha un indirizzo di consegna. Scrivi all'acquirente per sapere dove inviarlo.",
     "shipping": "Spedizione",
     "shippedOn": "Spedito {date}",
@@ -147,7 +148,7 @@
     },
     "emailBuyer": "Invia un’email all’acquirente",
     "mailSubject": "Il tuo ordine {number}",
-    "withdrawnShipWarning": "L’acquirente ha esercitato il recesso da questo acquisto. Spediscilo solo se vi siete accordati in tal senso.",
+    "withdrawnShipWarning": "L’acquirente ha annullato questo acquisto. Spediscilo solo se vi siete accordati in tal senso.",
     "discount": "Sconto",
     "discountSale": "Promozione, {amount} di sconto",
     "discountCode": "Codice {code}, {amount} di sconto",
@@ -155,8 +156,10 @@
     "alsoBought": "Anche in questo ordine"
   },
   "actions": {
-    "disputeInStripe": "La banca dell’acquirente ha aperto una contestazione. Rispondi nella tua dashboard Stripe prima della scadenza.",
+    "disputeInStripe": "La banca dell’acquirente ha aperto una contestazione. Rispondi nella tua dashboard Stripe prima della scadenza, altrimenti l’acquirente riceve indietro i soldi.",
     "answerInStripe": "Rispondi in Stripe",
+    "disputeOwnerOnly": "Solo il proprietario del negozio può rispondere.",
+    "disputeOwnerOnlyNamed": "Solo il proprietario di {store} può rispondere. Avvisalo.",
     "pendingPayment": "Il pagamento dell’acquirente è ancora in conferma. Non spedire ancora nulla: l’ordine risulterà pagato quando va a buon fine, e si chiuderà da solo se non ci va.",
     "none": "Nessuna azione disponibile per questo ordine."
   },
@@ -179,8 +182,8 @@
     "refundedOnReason": "{reason, select, cancelled {Annullato e rimborsato il {date}} returned {Restituito e rimborsato il {date}} other {Rimborsato il {date}}}",
     "ownerOnly": "Solo il proprietario del negozio può rimborsare o annullare un ordine.",
     "ownerOnlyNamed": "Solo il proprietario di {store} può rimborsare o annullare un ordine. Chiediglielo.",
-    "manual": "Questo pagamento non è passato tramite Square Share. Rimborsa tu stesso l'acquirente, poi registralo qui.",
-    "viaProvider": "L'intero importo torna sulla carta dell'acquirente tramite Stripe. L'operazione non può essere annullata."
+    "manual": "Questo pagamento non è passato tramite Square Share. Rimborsa tu stesso all’acquirente l’intero importo di {amount}, poi registralo qui.",
+    "viaProvider": "Rimborsa l’intero ordine, {amount}, sulla carta dell’acquirente tramite Stripe. L’operazione non può essere annullata."
   },
   "skeleton": {
     "loading": "caricamento ordini"
@@ -289,8 +292,8 @@
       "buyerSubject": "Il tuo recesso dall'ordine {number} presso {store}",
       "buyerIntro": "Abbiamo ricevuto il tuo recesso dall'ordine {number} ({title}) in data {date} e lo abbiamo trasmesso immediatamente a {store}.",
       "buyerNext": "{store} ti contatterà per la restituzione e il rimborso, dovuto entro 14 giorni dal tuo recesso.",
-      "sellerSubject": "Recesso: ordine {number} ({title})",
-      "sellerIntro": "L'acquirente {email} ha esercitato il recesso dall'ordine {number} in data {date}, utilizzando il pulsante di recesso sulla sua pagina dell'ordine.",
+      "sellerSubject": "Annullamento (recesso): ordine {number} ({title})",
+      "sellerIntro": "L’acquirente {email} ha annullato l’ordine {number} il {date}, utilizzando il pulsante di recesso sulla sua pagina dell’ordine.",
       "sellerName": "Nome indicato: {name}",
       "sellerNext": "Contattalo per organizzare la restituzione e rimborsa entro 14 giorni. Puoi trattenere il rimborso fino al rientro dell'articolo o alla prova di spedizione. L'ordine: {url}"
     },

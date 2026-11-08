@@ -52,9 +52,10 @@ export function AccountSection({
   // The ids are universal search's landing points: the registry maps "handle",
   // "log out", "change my email" and friends to /settings/account#<id>, so a
   // search lands on the CONTROL rather than the top of a long page. `scroll-mt`
-  // clears the sticky h-14 top bar, which would otherwise cover the anchor.
+  // (on every id, the controls that are anchors included) clears the sticky h-14
+  // top bar, which would otherwise cover the anchor.
   return (
-    <div className="flex flex-col gap-6 [&>div]:scroll-mt-20">
+    <div className="flex flex-col gap-6 [&_[id]]:scroll-mt-20">
       <div id="avatar">
         <AvatarUpload avatarUrl={avatarUrl} name={name} />
       </div>

@@ -21,6 +21,7 @@
   },
   "page": {
     "heading": "Producten",
+    "planUsage": "{used} van {cap, plural, one {# product} other {# producten}} in je abonnement. <link>Abonnementen bekijken</link>",
     "loading": "producten laden",
     "back": "Producten",
     "backToStorefront": "Etalage",
@@ -34,8 +35,13 @@
     },
     "import": {
       "heading": "Producten importeren",
-      "description": "Breng een catalogus over vanuit Shopify, of een andere tool die een CSV exporteert. Je ziet precies wat er binnenkomt voordat er iets wordt opgeslagen.",
-      "reviewsLink": "Verhuis je ook je reviews? Reviews importeren"
+      "description": "Breng een catalogus over vanuit Shopify, Etsy of een andere tool die een CSV exporteert. Je ziet precies wat er binnenkomt voordat er iets wordt opgeslagen.",
+      "reviewsLink": "Verhuis je ook je reviews? Reviews importeren",
+      "templateLink": "Download een leeg sjabloon",
+      "columnHint": "Vereiste kolommen: Titel en Prijs. Beschrijving, SKU en Voorraad zijn optioneel.",
+      "howToGetFile": "Zo krijg je je bestand",
+      "howToGetFileShopify": "Shopify: Producten > Exporteren > Alle producten als CSV.",
+      "howToGetFileEtsy": "Etsy: Shop Manager > Instellingen > Opties > Gegevens downloaden > CSV downloaden."
     },
     "formLoading": "Het productformulier laden",
     "importReviews": {
@@ -63,8 +69,10 @@
       "title": "Naam: A–Z"
     },
     "allStatuses": "Alle statussen",
+    "moderated": "In moderatie",
     "filterLabel": "Producten sorteren en filteren",
-    "sortResting": "Sorteren",
+    "sortResting": "Sorteren en filteren",
+    "viewOnlyHint": "Je hebt alleen leestoegang. Neem contact op met de eigenaar van de winkel om producten te bewerken.",
     "statusSection": "Status",
     "sortSection": "Sorteren op",
     "clear": "Wissen",
@@ -72,7 +80,8 @@
     "add": "Product toevoegen",
     "updating": "Bijwerken…",
     "pagination": "{total, plural, one {{total} product · pagina {page} van {pages}} other {{total} producten · pagina {page} van {pages}}}",
-    "reviews": "Reviews"
+    "reviews": "Reviews",
+    "orderHint": "Wil je de volgorde wijzigen die kopers zien? Sleep je producten op hun plek op je <link>etalage</link>."
   },
   "list": {
     "noMatch": {
@@ -81,6 +90,11 @@
       "clear": "Filters wissen"
     },
     "deleted": "\"{title}\" is verwijderd.",
+    "madeActive": "\"{title}\" is nu actief.",
+    "madeDraft": "\"{title}\" opgeslagen als concept.",
+    "duplicated": "Kopie van \"{title}\" aangemaakt als concept.",
+    "duplicateTitle": "Kopie van {title}",
+    "stockSaved": "Voorraad bijgewerkt.",
     "linkCopied": "Link gekopieerd.",
     "copyFailed": "Kopiëren is mislukt.",
     "copyFailedUrl": "De URL is: {url}",
@@ -97,6 +111,11 @@
       "copyTitle": "Link kopiëren voor welke etalage?",
       "description": "{count, plural, one {\"{title}\" staat op {count} etalage. Kies er een.} other {\"{title}\" staat op {count} etalages. Kies er een.}}",
       "hint": "Of annuleer en gebruik de etalage-editor om een standaard te kiezen."
+    },
+    "stockDialog": {
+      "title": "Aantal bijwerken",
+      "description": "Hoeveel \"{title}\" heb je nu op voorraad?",
+      "label": "Aantal op voorraad"
     }
   },
   "card": {
@@ -113,9 +132,14 @@
     "unitsSold": "{count, plural, one {{count} verkocht} other {{count} verkocht}}",
     "noSales": "Nog geen verkopen",
     "addToWebsite": "Toevoegen aan je website",
-    "unlimited": "Onbeperkt",
+    "editStock": "Voorraad bewerken voor {title}",
+    "addToWebsiteShort": "\"{title}\" toevoegen aan je website",
+    "unlimited": "Onbeperkte voorraad",
     "noStorefront": "Geen etalage",
-    "ship": "Verzenden"
+    "ship": "Verzenden",
+    "duplicate": "Dupliceren",
+    "makeActive": "Actief maken",
+    "makeDraft": "Op concept zetten"
   },
   "shareCard": {
     "scanToShop": "Scan om te kopen",
@@ -191,6 +215,7 @@
     "badgePendingHint": "Kopers zien het zodra de automatische controle het goedkeurt.",
     "badgeReview": "In beoordeling",
     "badgeReviewHint": "Een persoon bekijkt het. Kopers zien het zodra het is goedgekeurd.",
+    "badgeHintLabel": "Wat dit betekent",
     "titlePending": "{kind, select, product {Dit product wordt gecontroleerd} other {Deze etalage wordt gecontroleerd}}",
     "titleReview": "{kind, select, product {Iemand controleert dit product} other {Iemand controleert deze etalage}}",
     "hiddenPending": "Kopers kunnen het pas zien als de automatische controle klaar is. Dat duurt meestal een paar seconden: laad de pagina opnieuw om te zien hoe het ervoor staat.",
@@ -204,7 +229,7 @@
       "title": "Titel",
       "description": "Beschrijving",
       "price": "Prijs",
-      "sku": "SKU",
+      "sku": "Productcode (SKU)",
       "stock": "Voorraad"
     },
     "fileTooLarge": "Dat bestand is {size}. Importeer bestanden tot {max}.",
@@ -212,6 +237,10 @@
     "imported": "{count, plural, one {{count} product is geïmporteerd.} other {{count} producten zijn geïmporteerd.}}",
     "skippedRows": "{count, plural, one {{count} rij is overgeslagen.} other {{count} rijen zijn overgeslagen.}}",
     "checkingRows": "{count, plural, one {{count} product wordt nog gecontroleerd: kopers zien het zodra de automatische controle het goedkeurt.} other {{count} producten worden nog gecontroleerd: kopers zien ze zodra de automatische controle ze goedkeurt.}}",
+    "draftsImportedHint": "Het zijn concepten: kopers zien ze pas als je ze publiceert.",
+    "connectAiHint": "Wil je er veel tegelijk publiceren? <link>Koppel een AI-assistent</link>.",
+    "columnsNeeded": "Vereist",
+    "columnsOptional": "Optioneel",
     "dropPrompt": "Sleep een CSV hierheen of klik om er een te kiezen",
     "fileMeta": "{size} · kies een ander bestand om opnieuw te beginnen",
     "rowsLimit": "{max, plural, one {Tot {max} product per bestand} other {Tot {max} producten per bestand}}",
@@ -223,9 +252,9 @@
     "currencyHelp": "Elk geïmporteerd product krijgt hierin een prijs.",
     "importAs": "Importeren als",
     "asDrafts": "Concepten",
-    "asLive": "Online producten",
+    "asLive": "Actieve producten",
     "draftsHint": "Niets gaat online totdat je het publiceert.",
-    "liveHint": "Deze verschijnen meteen in je winkel.",
+    "liveHint": "Deze staan op Actief: kopers kunnen ze kopen zodra ze op een etalage staan.",
     "columns": "Kolommen",
     "needed": "(vereist)",
     "notSet": "Niet ingesteld",
@@ -244,7 +273,22 @@
     "run": "{count, plural, one {{count} product importeren} other {{count} producten importeren}}",
     "clear": "Wissen",
     "planRoom": "{max, plural, one {Je abonnement heeft ruimte voor # product extra} other {Je abonnement heeft ruimte voor # producten extra}}",
-    "droppedByPlan": "{count, plural, one {# rij wordt niet geïmporteerd: je abonnement heeft ruimte voor {max} extra.} other {# rijen worden niet geïmporteerd: je abonnement heeft ruimte voor {max} extra.}}"
+    "droppedByPlan": "{count, plural, one {# rij wordt niet geïmporteerd: je abonnement heeft ruimte voor {max} extra.} other {# rijen worden niet geïmporteerd: je abonnement heeft ruimte voor {max} extra.}}",
+    "story": {
+      "shelf": "Je winkel",
+      "items": {
+        "camera": "Camera",
+        "headphones": "Headset",
+        "succulent": "Plant",
+        "watch": "Horloge",
+        "sunglasses": "Bril",
+        "tshirt": "Shirt"
+      }
+    },
+    "columnsMatched": "{count, plural, one {# gekoppeld} other {# gekoppeld}}",
+    "undoImport": "{count, plural, one {Het geïmporteerde product verwijderen} other {Alle # geïmporteerde producten verwijderen}}",
+    "undoDone": "{count, plural, one {# geïmporteerd product is verwijderd.} other {# geïmporteerde producten zijn verwijderd.}}",
+    "goToProducts": "Naar producten"
   },
   "form": {
     "sections": {
@@ -259,7 +303,7 @@
         "about": "Waar Voorraad voor is"
       },
       "media": {
-        "label": "Levering"
+        "label": "Hoe kopers het krijgen"
       },
       "shipping": {
         "label": "Verzending",
@@ -273,7 +317,7 @@
       },
       "photos": {
         "label": "Foto's",
-        "description": "Extra invalshoeken voor de productpagina. Sleep foto's op een optie om ze alleen daarvoor te tonen.",
+        "description": "Extra invalshoeken, getoond op de productpagina (niet in de etalage). Sleep foto's op een optie om ze alleen daarvoor te tonen.",
         "about": "Waar Foto's voor is"
       },
       "specs": {
@@ -302,9 +346,9 @@
         "about": "Waar Badges voor is"
       },
       "addOns": {
-        "label": "Toevoegen aan bestelling",
+        "label": "Bied ook deze producten aan",
         "description": "Andere producten van jou die kopers met één tik kunnen toevoegen, vlak boven Nu kopen. Alleen producten van dezelfde soort en valuta staan hier, zodat het één bestelling blijft.",
-        "about": "Waar Toevoegen aan bestelling voor is"
+        "about": "Waar deze sectie voor is"
       }
     },
     "summary": {
@@ -382,19 +426,22 @@
       "asYouTypeAccept": "Voorgestelde woorden toevoegen",
       "asYouTypeAnnounce": "Suggestie:",
       "asYouTypeTurnOff": "Uitzetten",
-      "asYouTypeOff": "Suggesties tijdens het typen staan uit. Je zet ze weer aan in Instellingen, onder Abonnement en facturering.",
-      "upsellHint": "Zit in Pro: AI schrijft en vult beschrijvingen aan op basis van je gegevens. De abonnementen openen in een nieuw tabblad.",
-      "upsellBadge": "Pro"
+      "asYouTypeOff": "Suggesties tijdens het typen staan uit.",
+      "asYouTypeBackOn": "Zet ze weer aan in Instellingen, onder Abonnement en facturering.",
+      "upsellHint": "Zit in Pro: AI schrijft beschrijvingen op basis van je gegevens en stelt de volgende woorden voor terwijl je typt (Tab om toe te voegen). De abonnementen openen in een nieuw tabblad.",
+      "upsellBadge": "Pro",
+      "about": "Wat AI-schrijfhulp doet",
+      "aboutBody": "Schrijven met AI maakt een beschrijving op basis van je gegevens, of verbetert die. Grijze woorden stellen voor wat er komt terwijl je typt (Tab voegt ze toe). Beide gebruiken je maandelijkse AI-tegoed, te zien in Instellingen onder Abonnement en facturering."
     },
     "displayImage": "Hoofdafbeelding",
     "displayImageAbout": "Waar de hoofdafbeelding wordt gebruikt",
-    "displayImageHelp": "Wordt getoond in je etalage en in insluitingen.",
+    "displayImageHelp": "De enige foto die in je etalage en insluitingen wordt getoond. Voeg extra invalshoeken voor de productpagina toe bij Foto's hieronder.",
     "digitalFile": "Digitaal bestand",
     "digitalFileAbout": "Wat het digitale bestand is",
     "digitalFileHelp": "Het bestand dat kopers direct na het betalen downloaden. Een download heeft geen verzend- of productveiligheidsgegevens nodig.",
     "purchaseLink": "Aankooplink",
     "purchaseLinkAbout": "Waarheen de koopknop kopers stuurt",
-    "purchaseLinkHelp": "Laat het leeg en kopers rekenen af via Square Share, of mailen je waar afrekenen nog niet aan staat. Een link hier vervangt beide.",
+    "purchaseLinkHelp": "Laat het leeg en kopers {checkout, select, true {rekenen af via Square Share} other {mailen naar je contactadres}}. Voeg hier een link toe om ze in plaats daarvan naar je eigen afrekenpagina te sturen.",
     "purchaseLinkPlaceholder": "bijv. https://jouw-winkel.example/checkout/dit-product",
     "statusLabel": "Productstatus",
     "problems": "{count, plural, one {{count} ding om op te lossen voor je opslaat} other {{count} dingen om op te lossen voor je opslaat}}",
@@ -408,7 +455,8 @@
     "saveProduct": "Product opslaan",
     "savedToast": "\"{title}\" is opgeslagen.",
     "addedToast": "\"{title}\" is toegevoegd aan je producten.",
-    "checkingToast": "Kopers zien het zodra de automatische controle het goedkeurt.",
+    "checkingToast": "Kopers zien het zodra de automatische controle het goedkeurt, meestal binnen een paar seconden.",
+    "placeToast": "Zet het nu op een etalage om het een pagina te geven.",
     "documentFallbackLabel": "Document",
     "discard": {
       "title": "Wijzigingen negeren?",
@@ -438,6 +486,7 @@
       }
     },
     "coverPrompt": "Zet hier je beste foto neer",
+    "coverPromptTouch": "Tik om je beste foto toe te voegen",
     "kind": {
       "legend": "Wat verkoop je?",
       "physical": "Iets wat ik verstuur",
@@ -446,19 +495,21 @@
       "digitalHint": "Een bestand dat kopers direct na betaling krijgen"
     },
     "purchaseLinkAdd": "Verkoop je via je eigen afrekenpagina? Voeg de link toe",
+    "safetyPrompt": "Verzend je naar kopers in de EU? Voeg de gegevens van de fabrikant toe die de wet vraagt",
     "extras": {
-      "heading": "Laat het stralen",
+      "heading": "Meer details",
       "subheading": "Alles is optioneel. Voeg toe wat kopers helpt kiezen.",
-      "options": "Maten, kleuren, versies",
+      "options": "Maten, kleuren, versies, met een gedeelde prijs en voorraad",
       "photos": "Meer hoeken en close-ups",
-      "badges": "Handgemaakt, gratis verzending…",
+      "badges": "Korte kenmerken: Handgemaakt, Gratis verzending…",
       "specs": "Afmetingen, gewicht, materialen",
       "documents": "Handleidingen en certificaten",
       "safety": "Fabrikantgegevens voor EU-regels"
     },
     "visibility": {
       "activeHint": "Kopers kunnen het kopen zodra het in een etalage staat",
-      "draftHint": "Alleen jij ziet het, tot je er klaar voor bent"
+      "draftHint": "Alleen jij ziet het, tot je er klaar voor bent",
+      "buyButton": "{kind, select, link {De koopknop stuurt kopers naar {host} om te betalen.} checkout {Kopers betalen op de pagina, via het afrekenen van Square Share.} other {Nog geen manier om af te rekenen: met de koopknop kunnen kopers je mailen om ernaar te vragen.}}"
     },
     "preview": {
       "heading": "Live voorbeeld",
@@ -507,12 +558,12 @@
   "optionsField": {
     "display": {
       "swatch": "Kleurstalen",
-      "chip": "Chips",
+      "chip": "Tekstknoppen",
       "select": "Vervolgkeuzelijst"
     },
     "displayHint": {
       "swatch": "Kleurcirkels. Geef elke optie een kleurstaal, anders zien kopers de eerste letter.",
-      "chip": "Tekstknoppen, voor waarden die kopers lezen: maten, vermogens, lengtes.",
+      "chip": "Het best voor waarden die kopers lezen: maten, vermogens, lengtes.",
       "select": "Een vervolgkeuzelijst. Handig wanneer er meer waarden zijn dan als knoppen passen."
     },
     "presets": {
@@ -607,14 +658,15 @@
     "removePhoto": "Foto verwijderen",
     "movePhotoEarlier": "Foto naar voren verplaatsen",
     "movePhotoLater": "Foto naar achteren verplaatsen",
-    "altPlaceholder": "Alt-tekst",
+    "altPlaceholder": "Fotobeschrijving",
     "altLabel": "Beschrijf deze foto voor mensen die hem niet kunnen zien",
     "versionLabel": "Voor welke variant deze foto wordt getoond",
     "tally": "{max, plural, one {{count} van {max} foto} other {{count} van {max} foto's}}",
     "orderAbout": "Hoe deze foto's worden gesorteerd",
-    "orderHelp": "De hoofdafbeelding uit Media en levering staat altijd vooraan. Daarna verschijnen foto's in de volgorde waarin ze hier staan.",
+    "orderHelp": "De hoofdafbeelding, bovenaan het formulier, staat altijd vooraan. Daarna verschijnen foto's in de volgorde waarin ze hier staan.",
     "limitReached": "Limiet bereikt",
-    "dropOrClick": "Slepen of klikken"
+    "dropOrClick": "Slepen of klikken",
+    "dropOrClickTouch": "Tik om een foto toe te voegen"
   },
   "optionSpecsField": {
     "heading": "Verschilt per variant",
@@ -689,7 +741,7 @@
     "tooLarge": "Afbeelding moet kleiner zijn dan {max} MB.",
     "previewAlt": "Voorbeeld van hoofdafbeelding",
     "dropPrompt": "Sleep een afbeelding hierheen of klik om te uploaden",
-    "hint": "PNG, JPG, WEBP, GIF of AVIF, tot {max} MB",
+    "hint": "PNG, JPG, WEBP, GIF of AVIF, tot {max} MB. Vierkante foto's passen het best.",
     "remove": "Hoofdafbeelding verwijderen"
   },
   "photoFormat": {
@@ -698,7 +750,7 @@
   "fileDropzone": {
     "currentFile": "Huidig bestand",
     "dropPrompt": "Sleep een bestand hierheen of klik om te uploaden",
-    "hint": "ZIP, PDF en vergelijkbaar, tot {max} MB",
+    "hint": "PDF, EPUB, ZIP, MP3, WAV, MP4, JPG, PNG, WEBP of TXT, tot {max} MB",
     "remove": "Digitaal bestand verwijderen"
   },
   "statement": {
@@ -829,7 +881,7 @@
     },
     "editProduct": "Product bewerken",
     "goToStorefronts": "Naar etalages",
-    "embedPointer": "Verkoop je maar één product? Sluit dan niet de hele etalage in, maar geef het een koopknop op je eigen website: open in Producten het menu van het product en kies \"Toevoegen aan je website\".",
+    "embedPointer": "Verkoop je maar één product? Sluit dan niet de hele etalage in, maar geef het een koopknop op je eigen website: open in Producten het menu met drie puntjes op de kaart van het product en kies \"Toevoegen aan je website\".",
     "embedPointerLink": "Naar Producten",
     "demo": {
       "play": "Animatie afspelen",
@@ -923,6 +975,7 @@
       "pink": "Roze"
     },
     "placementFor": "Positie van badge {position}",
+    "placementLabel": "Positie",
     "placementPicker": "Waar het staat",
     "placements": {
       "beside": "Naast het product",
@@ -1107,12 +1160,11 @@
     },
     "story": {
       "product": "Keramische mok",
-      "customerReviews": "Klantbeoordelingen",
-      "addToCart": "In winkelwagen",
       "reviews": {
         "a": "“Prachtig glazuur, houdt mijn koffie warm.”",
         "b": "“In het echt nog mooier.”",
-        "c": "“Snel geleverd en goed verpakt.”"
+        "c": "“Snel geleverd en goed verpakt.”",
+        "d": "“Meteen een tweede als cadeau gekocht.”"
       }
     },
     "tally": {
@@ -1152,6 +1204,7 @@
   "reviewModeration": {
     "heading": "Reviews",
     "description": "Wat kopers over je producten zeggen. Elke review wordt automatisch gecontroleerd voordat hij verschijnt, en de reviews waarover de controle twijfelde, wachten hier op jou.",
+    "productPageLink": "Reviews tonen of verbergen op je productpagina",
     "importButton": "Overal vandaan importeren",
     "filtersLabel": "Reviews filteren",
     "filters": {
@@ -1164,7 +1217,7 @@
     "empty": {
       "all": {
         "title": "Nog geen reviews",
-        "body": "Als een koper een product beoordeelt vanaf de bestelpagina, verschijnt de review hier."
+        "body": "Kopers krijgen op hun bestelpagina de vraag om een review zodra ze het product hebben: bij een pakket zodra jij het als verzonden markeert. Hun reviews verschijnen hier."
       },
       "held": {
         "title": "Niets wacht op jou",
@@ -1242,7 +1295,7 @@
     "overview": {
       "label": "Winkelbeoordeling",
       "none": "Nog geen openbare reviews.",
-      "breakdown": "Reviews per aantal sterren",
+      "breakdown": "Filteren op aantal sterren",
       "showStars": "{stars, plural, one {Alleen reviews met {stars} ster tonen ({count})} other {Alleen reviews met {stars} sterren tonen ({count})}}"
     },
     "toolbar": {
@@ -1253,8 +1306,8 @@
       "anyRating": "Elke beoordeling",
       "product": "Product",
       "anyProduct": "Alle producten",
-      "origin": "Herkomst",
-      "anyOrigin": "Alle herkomsten",
+      "origin": "Soort",
+      "anyOrigin": "Alle soorten",
       "origins": {
         "verified": "Geverifieerde kopers",
         "imported": "Geïmporteerd"

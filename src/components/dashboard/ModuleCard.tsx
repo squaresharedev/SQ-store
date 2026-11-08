@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
-import { helpTextClass } from "@/components/ui/control-styles";
-import { cardClass } from "@/components/ui/surface-styles";
+import { ArrowRight } from "lucide-react";
+import Link from "@/components/ui/AppLink";
+import { helpTextClass, iconNudgeRightClass, moduleLinkClass } from "@/components/ui/control-styles";
+import { sharpCardClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import {
   CardBackdrop,
@@ -12,7 +14,7 @@ import {
  *  optional action link in the corner (styles.md §8.7).
  *
  *  Pass `decoration` to fade a dot-grid / grid / glow texture into the card's
- *  top-right corner (see CardBackdrop) — reserved for the modules that matter,
+ *  top-right corner (see CardBackdrop), reserved for the modules that matter,
  *  not every panel. */
 export function ModuleCard({
   title,
@@ -37,7 +39,7 @@ export function ModuleCard({
     <section
       id={id}
       className={cn(
-        cardClass,
+        sharpCardClass,
         "p-4",
         decoration && "relative overflow-hidden",
         className,
@@ -60,4 +62,18 @@ export function ModuleCard({
 /** Muted one-liner used by every module's empty state. */
 export function ModuleEmptyText({ children }: { children: ReactNode }) {
   return <p className={helpTextClass}>{children}</p>;
+}
+
+/** A module's small underlined "go" link, for the `action` slot or a row's end. */
+export function ModuleActionLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link href={href} className={moduleLinkClass}>
+      {children}
+      <ArrowRight
+        className={`size-3 ${iconNudgeRightClass}`}
+        strokeWidth={2}
+        aria-hidden="true"
+      />
+    </Link>
+  );
 }

@@ -2,6 +2,7 @@
   "pageTitle": "Płatności",
   "soon": "Wkrótce",
   "bankOnFile": "Twoje konto bankowe",
+  "invoicesPointer": "Faktury za twój plan Square Share znajdziesz w Ustawieniach, w sekcji <link>Plan i rozliczenia</link>.",
   "balance": {
     "available": {
       "label": "Dostępne",
@@ -24,10 +25,31 @@
       "hint": "Udział Square Share w twojej sprzedaży, po zwrotach"
     }
   },
+  "earnings": {
+    "label": "Zarobione, ostatnie {days} dni",
+    "labelOn": "Zarobione do {date}",
+    "vsBefore": "wobec {amount} w poprzednich {days} dniach",
+    "range": "Okres",
+    "rangeShort": "{days} d",
+    "rangeLong": "Ostatnie {days} dni",
+    "legendNow": "Te {days} dni",
+    "legendBefore": "Poprzednie {days} dni",
+    "today": "Dziś",
+    "empty": "Twoja pierwsza sprzedaż rozpocznie tę linię.",
+    "emptyRange": "Brak sprzedaży w ostatnich {days} dniach.",
+    "otherCurrencies": "W {currency}. Sprzedaż w innych walutach nie jest tu liczona."
+  },
+  "trends": {
+    "gross": "Sprzedaż brutto",
+    "sales": "Liczba sprzedaży",
+    "costs": "Zwroty i opłaty",
+    "paidOut": "Wypłacono",
+    "noBefore": "Pierwszy okres, brak porównania"
+  },
   "connection": {
     "label": "Połączenie ze Stripe",
     "comingSoonTitle": "Odbieranie płatności przez Stripe już wkrótce",
-    "comingSoonBody": "Do tego czasu kupujący płacą ci przez link do zakupu w produkcie albo pisząc do ciebie e-maila.",
+    "comingSoonBody": "Do tego czasu kupujący płacą ci bezpośrednio. Przycisk zakupu produktu otwiera <buyLink>link do zakupu</buyLink>, który mu ustawisz (twoją własną kasę), a jeśli go nie ma, wysyła e-mail na twój <email>adres kontaktowy</email>.",
     "connectTitle": "Połącz Stripe, aby otrzymywać płatności",
     "connectBody": "Wypłaty trafiają prosto na twoje konto bankowe. Konfiguracja odbywa się bezpiecznie na Stripe, nigdy nie widzimy ani nie przechowujemy danych twojego konta.",
     "connectButton": "Połącz ze Stripe",

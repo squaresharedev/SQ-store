@@ -516,10 +516,14 @@ test.describe("connecting and using an assistant", () => {
 
     const row = page.locator('[data-agent-scope="destructive"]');
     await expect(row.getByRole("switch")).toHaveAttribute("aria-checked", "false");
+    // Said on the row, not only behind its "?": why this one starts off.
+    await expect(row).toContainText("Off by default");
     await row.getByRole("switch").click();
     await expect(row.getByRole("switch")).toHaveAttribute("aria-checked", "true");
-    // The one everything needs cannot be turned off.
-    await expect(page.locator('[data-agent-scope="store:read"]').getByRole("switch")).toBeDisabled();
+    // The one everything needs cannot be turned off, and the row says so.
+    const required = page.locator('[data-agent-scope="store:read"]');
+    await expect(required.getByRole("switch")).toBeDisabled();
+    await expect(required).toContainText("Required");
 
     const landed = await approve(page);
     const res = await exchange(clientId, landed.searchParams.get("code") ?? "", verifier, resource);
@@ -762,6 +766,8 @@ test.describe("taking access away", () => {
     const resource = await resourceUrl();
     const { verifier, challenge } = pkce();
     await gotoApp(page, authorizeUrl(clientId, challenge, resource));
+    // Only the one picked is shared, and the picker says so.
+    await expect(page.getByText("Only the store you pick is shared.")).toBeVisible();
     await page.locator("#agent-consent-store").click();
     await page.getByRole("option").nth(1).click();
     // A viewer is offered nothing a viewer could not do.
@@ -853,7 +859,10 @@ test.describe("the code exchange", () => {
     const { challenge } = pkce();
 
     await gotoApp(page, authorizeUrl("app_nobody", challenge, resource));
-    await expect(page.locator('[data-agent-consent-refused="unknown_client"]')).toBeVisible();
+    const refused = page.locator('[data-agent-consent-refused="unknown_client"]');
+    await expect(refused).toBeVisible();
+    // Not a dead end: one way back into the store.
+    await expect(refused.getByRole("link", { name: "Go to your store" })).toHaveAttribute("href", "/dashboard");
 
     const clientId = await registerApp();
     const query = new URLSearchParams({
@@ -883,7 +892,10 @@ test.describe("the code exchange", () => {
         await route.fulfill({ status: 200, contentType: "text/html", body: "<p>back</p>" });
       });
     });
-    await page.getByRole("link", { name: /cancel/i }).click();
+    // Named for what it does: the app hears no, and the seller goes back to it.
+    const deny = page.getByRole("link", { name: "Don't connect" });
+    await expect(deny).toHaveAccessibleDescription(/tells it you said no/);
+    await deny.click();
     const url = await landed;
     expect(url.searchParams.get("error")).toBe("access_denied");
     expect(url.searchParams.has("code")).toBe(false);
@@ -931,9 +943,13 @@ test.describe("an account with two-factor on", () => {
     const { verifier, challenge } = pkce();
     await gotoApp(page, authorizeUrl(clientId, challenge, resource));
 
-    // On screen before Connect is pressed, as on every other step-up form.
+    // On screen before Connect is pressed, as on every other step-up form, and
+    // in the consent's own words rather than a settings change's.
     const codeBox = page.locator('[data-agent-consent="form"] input[name="mfa_code"]');
     await expect(codeBox).toBeVisible();
+    await expect(page.locator('[data-agent-consent="form"] [data-step-up-field]')).toContainText(
+      "Connecting Test Assistant gives it access to your store.",
+    );
     await codeBox.fill(await nextCode(app));
     await expectPastTwoFactorPolicy(clientId, await approve(page), verifier, resource);
   });

@@ -1,14 +1,20 @@
 /*
  * Square Share storefront embed: the loader a seller pastes into their site.
  *
- *   <div data-squareshare-storefront="EMBED KEY"></div>
+ *   <div data-squareshare-storefront="EMBED KEY"><a href="https://<shop page>">Shop name</a></div>
  *   <script async src="https://<embed host>/widget.js"></script>
  *
+ * The link inside the div is optional: a real link to the seller's hosted
+ * storefront, for crawlers (most never run a script) and for visitors whose
+ * browser did not run this one. It is hidden once the frame is showing, so a
+ * visitor sees one or the other, never both.
+ *
  * IT DOES ONE THING: puts a frame showing the seller's storefront where the
- * div is, and keeps the frame as tall as its content. It reads nothing from
- * the page it runs on but the hosts of that page and of the pages it sits
- * inside, stores nothing, sets no cookie, loads nothing else and exposes no
- * global.
+ * div is, keeps the frame as tall as its content, and hides what the div held
+ * once the frame is drawn. It reads nothing from the page it runs on but the
+ * hosts of that page and of the pages it sits inside, touches nothing outside
+ * its own div, stores nothing, sets no cookie, loads nothing else and exposes
+ * no global.
  *
  * WHAT THE FRAME MAY DO is fixed here, by the sandbox: run its own script and
  * open a link in a new tab. It cannot navigate this page, open a dialog or
@@ -110,7 +116,7 @@
     console.info(
       "[Square Share] The storefront is not showing on " +
         (here[here.length - 1] || "this page") +
-        ". Check that this site's address is in the storefront's allowed domains, that embedding is switched on, and that the site uses https. Pasted code shows on the published site, not in a site builder's editor or preview, unless that preview address is listed too.",
+        ". Check that this site's address is in the storefront's website addresses (Share, step 1), that embedding is switched on, and that the site uses https. Pasted code shows on the published site, not in a site builder's editor or preview, unless that preview address is listed too.",
     );
   }
 
@@ -138,6 +144,15 @@
     frame.style.height = "0";
     frame.style.border = "0";
 
+    // What the div held before the frame: the link to the hosted storefront
+    // the snippet carries for crawlers and visitors without scripts. Hidden,
+    // never removed, once the frame is drawn; a frame that never answers (a
+    // refused site, a blocked request) leaves it showing in the frame's place.
+    var fallbacks = [];
+    for (var ci = 0; ci < node.childNodes.length; ci++) {
+      if (node.childNodes[ci].nodeType === 1) fallbacks.push(node.childNodes[ci]);
+    }
+
     var heard = false;
     window.addEventListener("message", function (event) {
       // Only this frame's own window, from our own origin, saying the one
@@ -147,7 +162,15 @@
       if (!data || data.source !== MESSAGE_SOURCE) return;
       var height = data.height;
       if (typeof height !== "number" || !(height > 0)) return;
-      heard = true;
+      // The first height is the frame saying it is drawn: the link gives way
+      // to it. Every later one only resizes. Hidden with priority, as the
+      // site's own stylesheet may set display on its links with !important.
+      if (!heard) {
+        heard = true;
+        for (var fi = 0; fi < fallbacks.length; fi++) {
+          fallbacks[fi].style.setProperty("display", "none", "important");
+        }
+      }
       frame.style.height = Math.min(Math.ceil(height), MAX_HEIGHT) + "px";
       // Set as a property, so it can only ever be text.
       if (typeof data.title === "string" && data.title) frame.title = data.title.slice(0, TITLE_MAX);

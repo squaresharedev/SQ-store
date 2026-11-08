@@ -60,7 +60,8 @@ export type SetupStep = {
   /**
    * Where to go to take the step. Absent while the step is waiting on an
    * EARLIER one, so a row never offers a link to a surface that cannot help
-   * yet (publishing before there is anything placed to publish).
+   * yet (publishing before there is anything placed to publish). The one
+   * exception helps: a publish waiting only on the email code links to it.
    */
   action?: { href: string; label: MessageRef };
   /** The same destination phrased as a call to action, for the welcome flow's
@@ -332,8 +333,22 @@ function publishStep({
   if (live) {
     return { ...base, done: true, detail: msg("Onboarding.steps.publish.detailDone"), cta };
   }
-  // Blocked on an earlier step: say which, and offer no link of its own, since
-  // that step's row already carries the way to fix it.
+  // Blocked on the seller details. Still to type, their own row's link is the
+  // way (and the next step), so this row offers none. With a product placed and
+  // only the email code left, this row links to it too: that row is rows above,
+  // and its link is a quiet one, never put forward as the next step.
+  if (seller === "unconfirmed" && placed.length > 0) {
+    return {
+      ...base,
+      done: false,
+      detail: msg("Onboarding.steps.publish.detailNeedsSeller"),
+      action: {
+        href: traderIdentityHref(["emailVerified"]),
+        label: msg("Onboarding.steps.seller.actionUnconfirmed"),
+      },
+      cta: msg("Onboarding.steps.seller.ctaUnconfirmed"),
+    };
+  }
   if (seller !== "done") {
     return {
       ...base,

@@ -73,7 +73,7 @@
     "label": "Quantity"
   },
   "cta": {
-    "unwired": "This button has nowhere to go yet. Add a purchase link on the product, or a contact email under Seller details.",
+    "unwired": "This button has nowhere to go yet. Add a buy link to the product, or a contact email in your seller details.",
     "unavailableIn": "Unavailable in this {group}",
     "askAbout": "Ask about this product",
     "checkoutOn": "Checkout on <strong>{host}</strong>",
@@ -260,8 +260,8 @@
       "testBody": "This is a development checkout. No card is charged and no money moves.",
       "stripeTitle": "Pay securely with Stripe",
       "stripeBody": "You enter your card on Stripe's secure page in the next step.",
-      "previewTitle": "Card details",
-      "previewBody": "Card, Apple Pay and Google Pay appear here, in your colours, once Stripe is connected.",
+      "previewConnect": "Buyers pay here by card once Stripe is connected in <link>Payments</link>.",
+      "previewComingSoon": "Card payments here are coming soon. Until then, buyers pay you through your product's buy link, or by emailing you.",
       "cardNumber": "Card number",
       "expiry": "MM / YY",
       "cvc": "CVC",

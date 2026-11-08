@@ -1,11 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { SearchX, Store, Trash2, Truck } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { PackageOpen, SearchX, Store, Trash2, Truck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { emptyStateClass, productGridClass } from "@/components/ui/surface-styles";
 import type { Product, ProductSalesSummary } from "@/types/product";
 import { deleteProduct } from "@/lib/products/actions";
+import { duplicateProduct, setProductStatus } from "@/lib/products/card-actions";
+import { productEditPath } from "@/lib/products/paths";
+import { updateStockSettings } from "@/lib/stock/actions";
+import { STOCK_QUANTITY_MAX } from "@/lib/validation/product";
 import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -14,12 +19,16 @@ import { Modal, ModalActions } from "@/components/ui/modal";
 import { ProductThumb } from "@/components/ui/ProductThumb";
 import {
   dangerNoticeClass,
+  fieldBaseClass,
   ghostButtonClass,
   infoTextClass,
+  labelClass,
+  primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import type { StorefrontPlacement } from "@/lib/products/queries";
 import type { TraderIdentityField } from "@/lib/settings/trader-identity";
+import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
 import {
   productPagePath,
   productPageUrl,
@@ -65,14 +74,24 @@ export function ProductList({
   onClearFilters?: () => void;
 }) {
   const t = useTranslations("Products.list");
+  const tBuyButton = useTranslations("Products.buyButton");
   const tCommon = useTranslations("Common.actions");
   const toast = useToast();
   const showActionError = useActionErrorToast();
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>(initial);
   // The product awaiting confirmation. Deleting takes the product's file and
   // image with it and cannot be undone, so it is never a single click.
   const [pendingDelete, setPendingDelete] = useState<Product | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // The product whose stock is being quick-edited.
+  const [stockEditTarget, setStockEditTarget] = useState<Product | null>(null);
+  const [stockEditValue, setStockEditValue] = useState("");
+  const [stockSaving, setStockSaving] = useState(false);
+  // A whole number in range, or Save stays off.
+  const stockQty = stockEditValue.trim() === "" ? Number.NaN : Number(stockEditValue);
+  const stockValid = Number.isInteger(stockQty) && stockQty >= 0 && stockQty <= STOCK_QUANTITY_MAX;
 
   // When there are multiple storefronts for a product and the seller requests
   // a link action, this holds the pending choice until they pick one.
@@ -152,7 +171,11 @@ export function ProductList({
   function handleLinkAction(product: Product, action: "copy" | "open") {
     const sfList = placements[product.id] ?? [];
     if (sfList.length === 0) {
-      toast.info(t("notOnStorefront"));
+      // Not a dead end: the toast itself goes where a product gets its page.
+      toast.info(t("notOnStorefront"), {
+        lines: [tBuyButton("goToStorefronts")],
+        onClick: () => router.push(STOREFRONT_LIST_PATH),
+      });
       return;
     }
     if (sfList.length === 1) {
@@ -160,6 +183,54 @@ export function ProductList({
       return;
     }
     setLinkTarget({ product, action });
+  }
+
+  function handleEditStock(product: Product) {
+    setStockEditTarget(product);
+    setStockEditValue(String(product.stockQuantity ?? 0));
+  }
+
+  async function handleSaveStock() {
+    const target = stockEditTarget;
+    if (!target || stockSaving || !stockValid) return;
+    setStockSaving(true);
+    const result = await updateStockSettings(target.id, {
+      trackStock: target.trackStock,
+      stockQuantity: stockQty,
+      lowStockThreshold: target.lowStockThreshold,
+    });
+    setStockSaving(false);
+    if (!result.ok) {
+      showActionError(result.error);
+      return;
+    }
+    setStockEditTarget(null);
+    toast.success(t("stockSaved"));
+  }
+
+  async function handleSetStatus(product: Product, status: "active" | "draft") {
+    const result = await setProductStatus(product.id, status);
+    if (!result.ok) {
+      showActionError(result.error);
+      return;
+    }
+    toast.success(
+      status === "active"
+        ? t("madeActive", { title: product.title })
+        : t("madeDraft", { title: product.title }),
+    );
+    // The server revalidated /products; the new status arrives via the prop
+    // reset above on the next server render.
+  }
+
+  async function handleDuplicate(product: Product) {
+    const result = await duplicateProduct(product.id);
+    if (!result.ok) {
+      showActionError(result.error);
+      return;
+    }
+    toast.success(t("duplicated", { title: product.title }));
+    router.push(productEditPath(result.id));
   }
 
   if (products.length === 0) {
@@ -229,6 +300,10 @@ export function ProductList({
               onCopyLink={() => handleLinkAction(product, "copy")}
               onOpenPage={() => handleLinkAction(product, "open")}
               onBuyButton={() => setBuyButtonFor(product)}
+              onDuplicate={() => handleDuplicate(product)}
+              onMakeActive={() => handleSetStatus(product, "active")}
+              onMakeDraft={() => handleSetStatus(product, "draft")}
+              onEditStock={() => handleEditStock(product)}
             />
           </li>
         ))}
@@ -333,6 +408,61 @@ export function ProductList({
           onClose={() => setBuyButtonFor(null)}
         />
       )}
+
+      {/* Quick stock editor: a single number input so the seller can bump
+          quantity without opening the full editor. */}
+      <Modal
+        open={stockEditTarget !== null}
+        onClose={() => {
+          if (!stockSaving) setStockEditTarget(null);
+        }}
+        visual={<HeroMark icon={PackageOpen} />}
+        title={t("stockDialog.title")}
+        description={stockEditTarget ? t("stockDialog.description", { title: stockEditTarget.title }) : undefined}
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handleSaveStock();
+          }}
+          className="flex flex-col gap-4"
+        >
+          <div className="flex flex-col gap-1.5">
+            <label className={labelClass} htmlFor="stock-qty-input">
+              {t("stockDialog.label")}
+            </label>
+            <input
+              id="stock-qty-input"
+              type="number"
+              min={0}
+              max={STOCK_QUANTITY_MAX}
+              step={1}
+              value={stockEditValue}
+              onChange={(e) => setStockEditValue(e.target.value)}
+              aria-invalid={!stockValid}
+              className={fieldBaseClass}
+              autoFocus
+            />
+          </div>
+          <ModalActions>
+            <button
+              type="button"
+              onClick={() => setStockEditTarget(null)}
+              disabled={stockSaving}
+              className={ghostButtonClass}
+            >
+              {tCommon("cancel")}
+            </button>
+            <button
+              type="submit"
+              disabled={stockSaving || !stockValid}
+              className={primaryButtonClass}
+            >
+              {stockSaving ? tCommon("saving") : tCommon("save")}
+            </button>
+          </ModalActions>
+        </form>
+      </Modal>
     </>
   );
 }

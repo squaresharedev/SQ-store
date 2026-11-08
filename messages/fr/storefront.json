@@ -91,7 +91,7 @@
     "groups": {
       "theme": "Thème",
       "header": "En-tête",
-      "typography": "Typographie",
+      "typography": "Police",
       "cards": "Vignettes produit",
       "soldOut": "Épuisé",
       "productPage": "Page produit",
@@ -100,7 +100,7 @@
     "subtitle": {
       "theme": "Vitrine / Thème",
       "header": "Vitrine / En-tête",
-      "typography": "Vitrine / Typographie",
+      "typography": "Vitrine / Police",
       "cards": "Vitrine / Vignettes produit",
       "soldOut": "Vitrine / Épuisé",
       "productPage": "Vitrine / Page produit",
@@ -161,7 +161,8 @@
       "cardStarRating": "Note en étoiles sur les vignettes",
       "cardLowStock": "Étiquette Stock faible",
       "textSpacing": "Espacement des lettres et hauteur de ligne",
-      "elementBlur": "Flou"
+      "elementBlur": "Flou",
+      "phoneLayout": "Disposition pour mobile"
     }
   },
   "editorSearch": {
@@ -207,31 +208,37 @@
     "emptyHint": "Cette grille est vide",
     "removed": "Retiré par Square Share",
     "pausedInReview": "En pause · en cours d’examen par Square Share",
-    "pausedNeedsChanges": "Mise en pause par Square Share · modifications requises"
+    "pausedNeedsChanges": "Mise en pause par Square Share · modifications requises",
+    "status": {
+      "live": "En ligne",
+      "pagesOff": "Pas encore en ligne : activez les pages produit",
+      "detailsMissing": "Pas encore en ligne : ajoutez vos informations vendeur"
+    }
   },
   "embed": {
-    "inDevNotice": "Le widget d’intégration est en développement et ne s’affiche pas encore sur les sites externes. Configurez vos paramètres ci-dessous pour être prêt à coller le code dès sa sortie.",
+    "sectionTitle": "Sur votre propre site",
+    "inDevNotice": "Ceci ne s’affiche pas encore sur les autres sites. Configurez-le dès maintenant et tout sera prêt le jour de sa sortie. Vous ajouterez alors aussi une courte mention à votre politique de confidentialité : nous vous fournirons le texte.",
     "title": "Partager cette vitrine",
-    "description": "Envoyez un lien vers « {name} », ou collez un code sur votre propre site pour l’y afficher.",
+    "description": "Envoyez un lien vers « {name} », ou ajoutez le code pour votre site à vos pages pour l’y afficher.",
     "steps": {
       "site": "Choisissez les sites où elle s’affiche",
-      "snippet": "Collez le code dans votre site",
+      "snippet": "Ajoutez le code à votre site",
       "privacy": "Ajoutez ceci à votre politique de confidentialité"
     },
     "required": "Obligatoire",
     "enabledLabel": "Afficher sur mon site",
     "showingLabel": "Affiché sur votre site",
-    "domainsLabel": "Domaines autorisés",
+    "domainsLabel": "Adresses de vos sites",
     "domainsPlaceholder": "votresite.com, blog.votresite.com",
-    "domainsHint": "Jusqu’à {max}, séparés par des virgules. Collez une URL, nous la réduirons au domaine.",
-    "sameAsHint": "Copie les domaines autorisés de {title}.",
-    "emptyDomainsWarning": "Ajoutez au moins un domaine. Tant que ce champ est vide, la vitrine ne se charge nulle part, même si l’intégration est activée.",
+    "domainsHint": "L’intégration ne se charge que sur ces sites. Collez une URL complète, nous en extrairons l’adresse. Jusqu’à {max}, séparées par des virgules.",
+    "sameAsHint": "Copie les adresses de sites de {title}.",
+    "emptyDomainsWarning": "Ajoutez au moins une adresse de site. Tant que ce champ est vide, la vitrine ne se charge nulle part, même si l’intégration est activée.",
     "builderLabel": "Votre créateur de site",
     "builderOther": "Autre site",
     "builderSteps": {
       "other": "Collez-le dans le HTML de votre page, à l’endroit où la vitrine doit apparaître.",
       "wordpress": "Ajoutez un bloc « HTML personnalisé » à l’endroit où la vitrine doit apparaître, puis collez-y le code.",
-      "squarespace": "Ajoutez un bloc « Code » et collez-y le code. Si la vitrine n’apparaît qu’après un rechargement, passez à « Iframe uniquement ».",
+      "squarespace": "Ajoutez un bloc « Code » et collez-y le code. Si la vitrine n’apparaît qu’après un rechargement, passez à « Intégration simple ».",
       "wix": "Ajoutez « Embed Code », puis « Embed HTML », et collez-y le code. Étirez ensuite le cadre à la hauteur de votre vitrine.",
       "webflow": "Ajoutez un élément « Code Embed » et collez-y le code. Il s’affiche sur votre site publié.",
       "shopify": "Dans l’éditeur de thème, ajoutez une section « Custom Liquid » et collez-y le code.",
@@ -241,21 +248,21 @@
     },
     "snippetKinds": {
       "label": "Type de code",
-      "script": "Script",
-      "iframe": "Iframe uniquement"
+      "script": "Intégration complète",
+      "iframe": "Intégration simple"
     },
-    "snippetReadyHint": "Collez-le une seule fois. Il s’adapte à votre vitrine et suit ce que vous modifiez ici.",
-    "iframeHint": "Pour un site qui supprime les scripts. Il mesure {height} pixels de haut et défile à l’intérieur. Copiez-le à nouveau après avoir modifié vos domaines.",
-    "snippetLockedHint": "Activez l’intégration et ajoutez au moins un domaine pour débloquer le bouton Copier.",
+    "snippetReadyHint": "Fonctionne sur la plupart des sites. Collez-le une seule fois : il s’adapte à votre vitrine et suit ce que vous modifiez ici.",
+    "iframeHint": "Utilisez-le si l’intégration complète ne s’est pas affichée sur votre site. Il mesure {height} pixels de haut et défile à l’intérieur. Copiez-le à nouveau chaque fois que vous modifiez les adresses de vos sites.",
+    "snippetLockedHint": "Activez l’intégration et ajoutez au moins une adresse de site pour débloquer le bouton Copier.",
     "snippetSaveHint": "Enregistrez vos paramètres pour débloquer le bouton Copier.",
     "pagesOffHint": "Activez d’abord les pages produit dans l’éditeur. Un clic sur un produit ouvre sa page.",
     "notShowingLabel": "Si la vitrine ne s’affiche pas",
-    "notShowingTip": "L’adresse de votre site doit figurer dans les Domaines autorisés et le site doit utiliser https. Le code collé s’affiche sur votre site publié, pas dans l’éditeur d’un créateur de site. Pour le voir sur une adresse d’aperçu (comme votresite.webflow.io), ajoutez aussi cette adresse.",
+    "notShowingTip": "L’adresse de votre site doit figurer dans les adresses de vos sites ci-dessus, et le site doit utiliser https. Le code collé s’affiche sur votre site publié, pas dans l’éditeur d’un créateur de site. Si la vitrine ne s’affiche pas du tout, essayez le type de code Intégration simple. Pour la voir sur une adresse d’aperçu (comme votresite.webflow.io), ajoutez aussi cette adresse.",
     "copySnippet": {
-      "copy": "Copier le code d’intégration",
-      "copied": "Code d’intégration copié",
-      "failed": "Impossible de copier le code d’intégration. Sélectionnez-le et copiez-le manuellement.",
-      "cannotCopyYet": "le code d’intégration ne peut pas encore être copié"
+      "copy": "Copier le code pour votre site",
+      "copied": "Code pour votre site copié",
+      "failed": "Impossible de copier le code pour votre site. Sélectionnez-le et copiez-le manuellement.",
+      "cannotCopyYet": "le code pour votre site ne peut pas encore être copié"
     },
     "privacyHint": "Votre site charge désormais cette vitrine depuis Square Share, sa politique de confidentialité doit donc le mentionner. Collez-y ce texte :",
     "privacyTextLabel": "Texte de confidentialité",
@@ -265,20 +272,21 @@
       "copied": "Texte de confidentialité copié",
       "failed": "Impossible de copier le texte. Sélectionnez-le et copiez-le manuellement."
     },
-    "snippetKeyLabel": "Clé du code d’intégration",
-    "rotateConfirmText": "Renouveler la clé en émet une nouvelle. Chaque copie de l’ancien code cesse immédiatement de fonctionner, y compris sur les sites que vous voulez garder : vous devrez coller le nouveau code partout.",
-    "rotateKey": "Renouveler la clé",
-    "rotating": "Renouvellement…",
-    "revokeHint": "Collé quelque part où il ne devrait pas être ? Renouvelez la clé pour révoquer tous les codes existants.",
+    "snippetKeyLabel": "Code pour votre site",
+    "rotateConfirmText": "Obtenir un nouveau code désactive l’ancien partout où il a été collé. Sur les sites où vous intégrez encore la vitrine, il faudra coller le nouveau code.",
+    "rotateKey": "Obtenir un nouveau code",
+    "rotating": "Obtention d’un nouveau code…",
+    "revokeHint": "Le code pour votre site est fait pour être public : il ne s’affiche que sur les adresses de vos sites. N’obtenez un nouveau code que pour désactiver toutes les copies déjà collées.",
     "saveSettings": "Enregistrer les paramètres",
     "saving": "Enregistrement…",
     "saved": "Paramètres d’intégration enregistrés.",
-    "newKeyIssued": "Nouvelle clé d’intégration émise.",
-    "newKeyDetail": "Recollez le code partout où cette vitrine est intégrée."
+    "newKeyIssued": "Nouveau code pour votre site créé.",
+    "newKeyDetail": "Collez à nouveau le code partout où cette vitrine est intégrée."
   },
   "share": {
     "title": "Lien de la vitrine",
     "live": "Votre vitrine a sa propre page. Toute personne disposant de ce lien peut la parcourir, sans site web.",
+    "searchOff": "Invisible pour les moteurs de recherche comme Google.",
     "pagesOff": "Activez les pages produit dans l’éditeur et cette vitrine aura un lien à partager.",
     "detailsMissing": "Cette vitrine aura un lien à partager une fois vos informations vendeur complétées.",
     "open": "Ouvrir",
@@ -321,7 +329,7 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Page produit",
-    "closeAriaLabel": "Fermer le parcours d’achat de {title}",
+    "closeAriaLabel": "Fermer la page produit de {title}",
     "desktopSize": "Taille bureau",
     "mobileSize": "Taille mobile",
     "checkoutLabel": " · Paiement",
@@ -331,7 +339,7 @@
   "metadata": {
     "storefronts": {
       "title": "Vitrines",
-      "subtitle": "Chaque vitrine a sa propre grille et son propre thème. Créez-en autant que nécessaire, puis ouvrez-en une pour la modifier."
+      "subtitle": "Chaque vitrine a sa propre grille, son propre thème et son propre lien à partager. Créez-en autant que nécessaire, puis ouvrez-en une pour la modifier."
     },
     "editor": {
       "title": "Modifier la vitrine"
@@ -351,20 +359,20 @@
   "controls": {
     "off": "Désactivé",
     "layers": "Calques",
-    "objectCount": "{count, plural, one {1 objet} many {# objets} other {# objets}}",
+    "objectCount": "{count, plural, one {# bloc} many {# blocs} other {# blocs}}",
     "cardStyle": "Style de vignette",
     "priceTag": "Étiquette de prix",
     "theme": "Thème",
-    "canvas": "Canevas",
-    "design": "Design"
+    "themeHint": "Couleurs, taille de la grille et disposition mobile",
+    "canvas": "Canevas"
   },
   "designPanel": {
     "tabSelection": "Sélection",
-    "tabDesign": "Design",
+    "tabDesign": "Toute la vitrine",
     "show": "Afficher le panneau de design",
     "hide": "Masquer le panneau de design",
     "resize": "Redimensionner le panneau de design",
-    "closeSettings": "Fermer les paramètres de design",
+    "closeSettings": "Fermer le style de la vitrine",
     "scopeLabel": "Portée du panneau"
   },
   "library": {
@@ -434,10 +442,11 @@
     "sectionPalettes": "Palettes"
   },
   "themePanel": {
-    "accent": "Accent"
+    "accent": "Accent",
+    "accentHint": "S’applique aux boutons, aux étiquettes promo, aux titres et au nom de votre boutique."
   },
   "panelSearch": {
-    "placeholder": "Rechercher un paramètre ou un objet",
+    "placeholder": "Rechercher un paramètre ou un bloc",
     "clear": "Effacer la recherche",
     "noResults": "Rien dans l’éditeur ne correspond à cela.",
     "matchesLabel": "Résultats"
@@ -488,7 +497,7 @@
     "cornerValueText": "{n, plural, one {# pixel} many {# pixels} other {# pixels}}",
     "sharp": "Net",
     "circle": "Cercle",
-    "fineTuning": "Réglage fin",
+    "titleSection": "Titre",
     "showTitle": "Afficher le titre",
     "titleStyleLabel": "Style du titre",
     "edgeSpacing": "Marge de bord",
@@ -556,12 +565,13 @@
     "label": "Sur les grandes cartes",
     "tile": "Agrandir",
     "cell": "Même taille",
-    "everyCard": "S'applique à toutes les cartes de cette boutique."
+    "everyCard": "S’applique aux étiquettes de prix et aux étiquettes promo de toutes les vignettes."
   },
   "layout": {
     "canvasWidth": "Largeur du canevas",
     "canvasWidthAriaLabel": "Largeur du canevas en blocs",
     "blocksWide": "{n, plural, one {# bloc de large} many {# blocs de large} other {# blocs de large}}",
+    "blocksUnit": "blocs",
     "canvasHeight": "Hauteur du canevas",
     "heightTip": "Le plan ne peut pas rétrécir en dessous des blocs déjà présents : déplacez d’abord un bloc, puis raccourcissez le canevas.",
     "canvasHeightAriaLabel": "Hauteur du canevas en blocs",
@@ -570,6 +580,11 @@
     "gridDensityAriaLabel": "Densité de la grille",
     "gridGapValue": "{n, plural, one {# pixel d’écart} many {# pixels d’écart} other {# pixels d’écart}}",
     "noGap": "Aucun écart",
+    "phonesInfoLabel": "Comment les mobiles affichent ce plan",
+    "phonesInfoBody": "Désactivé, les mobiles réorganisent eux-mêmes le plan pour qu’il tienne. Activé, ouvrez la vue mobile et faites glisser ou redimensionnez les blocs pour les placer vous-même. Le plan pour ordinateur reste tel quel.",
+    "phonesAutomatic": "Les mobiles disposent ce plan automatiquement.",
+    "phoneWidth": "Largeur sur mobile",
+    "phoneWidthAriaLabel": "Largeur sur mobile, en blocs",
     "showGrid": "Afficher la grille",
     "gridInfoLabel": "Qui voit la grille",
     "gridInfoBody": "Un guide pour vous pendant que vous concevez : il dessine les emplacements vides pour que vous voyiez où un bloc va atterrir. Les acheteurs ne le voient jamais."
@@ -588,7 +603,8 @@
     "angle": "{n}°",
     "layerLabel": "Calque",
     "layerInfoLabel": "Comment fonctionnent les calques",
-    "layerInfoBody": "Les calques déterminent seulement ce qui s’affiche au-dessus là où les blocs se chevauchent ; l’ordre de lecture suivi par un lecteur d’écran ne change jamais.{multi, select, true { Cette sélection garde son propre ordre au sein de la pile lorsqu’elle se déplace.} other {}}{stacked, select, true { Alt-cliquez sur une pile du canevas pour atteindre le bloc en dessous.} other {}}",
+    "layerInfoBody": "Les calques déterminent seulement ce qui s’affiche au-dessus là où les blocs se chevauchent ; l’ordre de lecture suivi par un lecteur d’écran ne change jamais.{multi, select, true { Cette sélection garde son propre ordre au sein de la pile lorsqu’elle se déplace.} other {}}",
+    "stackedHint": "Alt + clic pour sélectionner le bloc en dessous. Sur un écran tactile, touchez à nouveau la pile.",
     "blocksSelected": "{count, plural, one {# bloc sélectionné} many {# blocs sélectionnés} other {# blocs sélectionnés}}",
     "layerOf": "Calque {index} sur {total}",
     "blockLayerLabel": "Calque du bloc",
@@ -596,7 +612,13 @@
     "sendBackward": "Reculer d’un niveau",
     "bringForward": "Avancer d’un niveau",
     "bringToFront": "Mettre au premier plan",
-    "seeAllLayers": "Voir tous les calques"
+    "seeAllLayers": "Voir tous les calques",
+    "phoneLabel": "Sur mobile",
+    "phoneInfoLabel": "Comment un bloc se place sur mobile",
+    "phoneInfoBody": "Faites glisser ou redimensionnez un bloc dans la vue mobile pour le placer vous-même. Revenir en automatique laisse la disposition mobile le replacer. Le plan pour ordinateur reste tel quel.",
+    "hideOnPhones": "Masquer sur mobile",
+    "showOnPhones": "Afficher sur mobile",
+    "phoneAutomatic": "Revenir en automatique"
   },
   "header": {
     "showHeader": "Afficher l’en-tête",
@@ -606,7 +628,8 @@
     "storeNamePlaceholder": "Nom de la boutique affiché aux acheteurs",
     "bio": "Bio",
     "bioPlaceholder": "Une courte phrase sur votre boutique",
-    "charsLeft": "{n, plural, one {# caractère restant} many {# caractères restants} other {# caractères restants}}"
+    "charsLeft": "{n, plural, one {# caractère restant} many {# caractères restants} other {# caractères restants}}",
+    "styleLine": "{line, select, name {Police et couleur du nom} other {Police et couleur de la bio}}"
   },
   "soldOut": {
     "hide": "Masquer aux acheteurs",
@@ -682,10 +705,12 @@
     "movePriceTo": "{spot, select, top_left {Déplacer le prix en haut à gauche} top_center {Déplacer le prix en haut au centre} top_right {Déplacer le prix en haut à droite} middle_center {Déplacer le prix au milieu} bottom_left {Déplacer le prix en bas à gauche} bottom_center {Déplacer le prix en bas au centre} bottom_right {Déplacer le prix en bas à droite} other {Déplacer le prix ici}}"
   },
   "productPage": {
+    "scopeNote": "Ces réglages s’appliquent à toutes les pages produit de cette vitrine.",
     "layout": {
       "title": "Page",
       "showPage": {
         "label": "Afficher une page produit",
+        "hint": "Donne aussi à votre vitrine son propre lien à partager.",
         "infoLabel": "Ce que fait ce bouton",
         "infoOn": "Toucher une vignette produit ouvre sa page, et la vitrine a sa propre page à partager.",
         "infoOff": "Les vignettes produit n’ont aucune page à ouvrir, et le lien de la vitrine elle-même ne fonctionne plus non plus."
@@ -702,7 +727,7 @@
         "label": "Police",
         "infoLabel": "Comment la police de cette page se rapporte à celle de la vitrine",
         "infoOwn": "Cette page s’affiche dans sa propre police, quelle que soit celle de la vitrine.",
-        "infoFollows": "Suit la police de votre vitrine. Modifiez-la dans Typographie.",
+        "infoFollows": "Suit la police de votre vitrine. Modifiez-la dans les réglages Police.",
         "inheritOption": "Identique à la vitrine ({name})"
       },
       "indexing": {
@@ -715,7 +740,8 @@
     "cta": {
       "title": "Bouton d’achat",
       "infoLabel": "Ce qui détermine si un bouton s’affiche",
-      "infoContent": "Le bouton suit le lien d’achat de chaque produit (défini sur le produit). En l’absence de lien, il envoie un e-mail à votre adresse de contact ci-dessous ; sans aucun des deux, aucun bouton ne s’affiche.",
+      "infoContent": "Le bouton suit le lien d’achat de chaque produit (défini sur le produit). En l’absence de lien, il envoie un e-mail à votre adresse de contact ci-dessous ; sans aucun des deux, aucun bouton ne s’affiche.",
+      "checkoutNote": "Le bouton Payer de votre page de paiement reprend celui-ci. <link>Aller à la page Paiement</link>",
       "buttonText": {
         "label": "Texte du bouton",
         "charsLeft": "{count, plural, one {# caractère restant} many {# caractères restants} other {# caractères restants}}"
@@ -844,6 +870,7 @@
   "productBlock": {
     "deleted": "Ce produit a été retiré de votre catalogue.",
     "removeFromGrid": "Retirer de la grille",
+    "details": "Détails du produit",
     "nameLabel": "Nom",
     "namePlaceholder": "Nom du produit",
     "priceLabel": "Prix ({currency})",
@@ -858,13 +885,14 @@
       "lowStock": "Stock faible : {count} en stock.",
       "inStock": "{count} en stock."
     },
-    "openProductPage": "Ouvrir le parcours d’achat",
-    "hideProductPage": "Masquer le parcours d’achat",
+    "openProductPage": "Ouvrir la page produit",
+    "hideProductPage": "Masquer la page produit",
+    "noCtaWarning": "Le bouton d’achat de sa page ne mène nulle part pour l’instant. Ajoutez un lien d’achat au produit, ou un e-mail de contact dans vos informations vendeur.",
     "tileStyle": {
       "title": "Style de vignette",
-      "reset": "Réinitialiser au thème",
+      "reset": "Utiliser le style du thème",
       "infoLabel": "Comment le style de cette vignette se rapporte au thème",
-      "infoWithOverrides": "Cette vignette a son propre style. Les paramètres que vous n’avez pas modifiés ici continuent de suivre le thème.",
+      "infoWithOverrides": "Cette vignette a son propre style ; tout ce qui n’est pas modifié ici suit le thème. Utiliser le style du thème efface uniquement les modifications de cette vignette : le thème reste tel quel.",
       "infoNoOverrides": "Stylez cette vignette indépendamment. Tout ce que vous ne modifiez pas continue de suivre le thème."
     },
     "priceTag": "Étiquette de prix",
@@ -876,6 +904,7 @@
       "updateEverywhere": "Mettre à jour partout"
     },
     "savedToast": "« {title} » a été mis à jour partout où il apparaît.",
+    "unsavedToast": "Votre nouveau nom ou prix pour « {title} » n’a pas été enregistré. Appuyez sur Enregistrer avant de continuer pour le conserver.",
     "validation": {
       "noTitle": "Donnez un titre à votre produit.",
       "noPrice": "Définissez un prix.",
@@ -983,7 +1012,7 @@
   "multiBlock": {
     "shapesContext": "Modification de {count, plural, one {# forme} many {# formes} other {# formes}} ensemble. Les valeurs affichées proviennent de la première forme sélectionnée ; chaque changement s’applique à toutes.",
     "textsContext": "Modification de {count, plural, one {# bloc de texte} many {# blocs de texte} other {# blocs de texte}} ensemble. Les valeurs affichées proviennent du premier bloc sélectionné ; chaque changement s’applique à tous. Chaque bloc garde son propre texte.",
-    "imagesContext": "Modification de {count, plural, one {# élément} many {# éléments} other {# éléments}} ensemble. Les valeurs affichées proviennent du premier élément sélectionné ; chaque changement s’applique à tous. Chacun garde sa propre image.",
+    "imagesContext": "Modification de {count, plural, one {# bloc} many {# blocs} other {# blocs}} ensemble. Les valeurs affichées proviennent du premier bloc sélectionné ; chaque changement s’applique à tous. Chacun garde sa propre image.",
     "productsContext": "Style de {count, plural, one {# vignette produit} many {# vignettes produit} other {# vignettes produit}} ensemble. Les valeurs affichées proviennent de la première vignette sélectionnée ; chaque changement s’applique à toutes.",
     "mixedContext": "{count, plural, one {# bloc} many {# blocs} other {# blocs}} de types différents sont sélectionnés. Sélectionnez des blocs d’un seul type pour modifier leurs paramètres ensemble.",
     "remove": "Retirer {count, plural, one {# bloc} many {# blocs} other {# blocs}}",
@@ -991,7 +1020,7 @@
     "productsNotDuplicated": "Les produits ne sont pas dupliqués.",
     "tileStyle": {
       "title": "Style de vignette",
-      "reset": "Réinitialiser au thème"
+      "reset": "Utiliser le style du thème"
     },
     "priceTag": "Étiquette de prix"
   },
@@ -1003,18 +1032,18 @@
     "ariaLabel": "Outils de l’éditeur",
     "addProduct": "Ajouter un produit",
     "addText": "Ajouter du texte",
-    "addElement": "Ajouter un élément",
+    "addElement": "Ajouter une forme ou une image",
     "product": "Produit",
     "text": "Texte",
-    "element": "Élément",
-    "elementsMenu": "Éléments",
+    "element": "Formes",
+    "elementsMenu": "Formes et images",
     "uploading": "Import…",
     "upload": "Importer",
     "uploadImage": "Importer une image",
     "allShapes": "Toutes les formes",
     "browseShapes": "Parcourir toute la bibliothèque de formes",
-    "closePage": "Fermer le parcours d’achat",
-    "showPage": "Afficher le parcours d’achat",
+    "closePage": "Fermer la page produit",
+    "showPage": "Afficher la page produit",
     "closePages": "Fermer la page produit, le paiement et la page de remerciement",
     "showPageFull": "Afficher la page produit, le paiement et la page de remerciement",
     "undo": "Annuler",
@@ -1027,22 +1056,26 @@
     "zoomOutTip": "Zoom arrière (Ctrl -)",
     "zoomReset": "Réinitialiser le zoom à 100 %",
     "zoomResetTip": "Réinitialiser le zoom (Ctrl 0)",
-    "zoomResetMenuItem": "Réinitialiser le zoom",
+    "zoomFit": "Ajuster à l’écran",
     "zoomIn": "Zoom avant",
     "zoomInTip": "Zoom avant (Ctrl +)",
-    "designSettings": "Paramètres de design",
-    "page": "Parcours d’achat",
-    "moreTools": "Plus d’outils"
+    "designSettings": "Style de la vitrine",
+    "style": "Style",
+    "page": "Page produit",
+    "pageMobile": "Page",
+    "pageDisabledTip": "Ajoutez un produit pour ouvrir sa page",
+    "moreTools": "Plus d’outils",
+    "more": "Plus"
   },
   "selectionToolbar": {
     "toolsFor": "Outils pour {name}",
-    "elements": "{count, plural, one {# élément} many {# éléments} other {# éléments}}",
-    "hidePage": "Masquer le parcours d’achat",
-    "openPage": "Ouvrir le parcours d’achat",
-    "openProductPage": "Ouvrir le parcours d’achat de {name}",
-    "closeProductPage": "Fermer le parcours d’achat de {name}",
-    "openProductPages": "Ouvrir le parcours d’achat de {count, plural, one {# produit} many {# produits} other {# produits}}",
-    "closeProductPages": "Fermer le parcours d’achat de {count, plural, one {# produit} many {# produits} other {# produits}}",
+    "elements": "{count, plural, one {# bloc} many {# blocs} other {# blocs}}",
+    "hidePage": "Masquer la page produit",
+    "openPage": "Ouvrir la page produit",
+    "openProductPage": "Ouvrir la page produit de {name}",
+    "closeProductPage": "Fermer la page produit de {name}",
+    "openProductPages": "Ouvrir la page produit de {count, plural, one {# produit} many {# produits} other {# produits}}",
+    "closeProductPages": "Fermer la page produit de {count, plural, one {# produit} many {# produits} other {# produits}}",
     "editText": "Modifier le texte",
     "editTextOf": "Modifier le texte de {name}",
     "color": "Couleur",
@@ -1059,24 +1092,26 @@
     "frameImageFor": "Recadrer et placer l’image de {name}",
     "duplicate": "Dupliquer",
     "duplicateNamed": "Dupliquer {name}",
-    "duplicateN": "Dupliquer {count, plural, one {# élément} many {# éléments} other {# éléments}}",
+    "duplicateN": "Dupliquer {count, plural, one {# bloc} many {# blocs} other {# blocs}}",
     "removeFrom": "Retirer {name} de la grille",
-    "removeN": "Retirer {count, plural, one {# élément} many {# éléments} other {# éléments}} de la grille"
+    "removeN": "Retirer {count, plural, one {# bloc} many {# blocs} other {# blocs}} de la grille"
   },
   "canvas": {
     "addSuggested": "Ajouter {title} à cette vitrine",
     "gridLabel": "Canevas de la vitrine",
     "emptyGrid": "Votre grille est vide",
-    "emptyGridHint": "Ajoutez un produit pour commencer à organiser votre vitrine. Le texte et les formes sont dans la barre d’outils ci-dessous.",
+    "emptyGridHint": "Ajoutez un produit pour commencer à organiser votre vitrine. Le texte, les formes et vos propres images sont dans la barre d’outils ci-dessous.",
     "addProduct": "Ajouter un produit",
     "desktopPreview": "Aperçu bureau",
-    "mobilePreview": "Aperçu mobile"
+    "mobilePreview": "Aperçu mobile",
+    "multiSelectTip": "Pour sélectionner plusieurs blocs, cliquez dessus en maintenant Maj ou faites glisser sur un espace vide. Sur un écran tactile, maintenez le doigt sur chacun.",
+    "sheetTip": "Fermez ce panneau pour retrouver la barre d’outils."
   },
   "blockTile": {
     "removedProduct": "Produit supprimé",
     "shape": "{kind, select, square {forme carrée} circle {forme ronde} ring {forme anneau} diamond {forme losange} rounded {forme carré arrondi} pill {forme pilule} half {forme demi-cercle} quarter {forme quart de cercle} bar {forme barre} triangle {forme triangle} wedge {forme biseau} pentagon {forme pentagone} hexagon {forme hexagone} octagon {forme octogone} star {forme étoile} sparkle {forme étincelle} cross {forme croix} arrow {forme flèche} chevron {forme chevron} trapezoid {forme trapèze} parallelogram {forme parallélogramme} burst {forme éclat} other {forme {kind}}}",
     "imageWithAlt": "Image : {alt}",
-    "imageElement": "Élément image",
+    "imageElement": "Bloc image",
     "textWithContent": "Texte : {text}",
     "textBlock": "Bloc de texte",
     "selected": "Sélectionné : {label}. Appuyez sur Entrée pour désélectionner.",
@@ -1109,11 +1144,14 @@
       "nameLabel": "Nom de la vitrine",
       "namePlaceholder": "Vitrine sans titre",
       "unsaved": "Modifications non enregistrées",
+      "saveTip": "Enregistrer (Ctrl+S)",
       "viewPage": "Voir la page",
+      "viewSavedPage": "Voir la page enregistrée",
+      "shareSetupNeeded": "Vos informations vendeur sont incomplètes : cette vitrine ne peut pas encore être partagée",
       "search": "Rechercher"
     },
     "mobileNotice": {
-      "body": "Pour la meilleure expérience de modification, ouvrez cet éditeur sur un ordinateur ou une tablette. Réordonner les blocs et modifier l’en-tête fonctionnent sur tous les appareils.",
+      "body": "Tout fonctionne ici : touchez un bloc pour le modifier, maintenez le doigt sur d’autres blocs pour les sélectionner ensemble, maintenez un outil pour voir ce qu’il fait, et pincez pour zoomer. Les réglages fins sont plus faciles sur un grand écran.",
       "dismiss": "Fermer la notification d’édition sur petit écran"
     },
     "inspector": {
@@ -1171,13 +1209,6 @@
       "badge": "Exemple",
       "summary": "{count, plural, one {{count} bloc · essayez ce que vous voulez, rien n’est enregistré} many {{count} de blocs · essayez ce que vous voulez, rien n’est enregistré} other {{count} blocs · essayez ce que vous voulez, rien n’est enregistré}}",
       "hide": "Masquer la vitrine d’exemple"
-    },
-    "embed": {
-      "title": "Intégrer une vitrine",
-      "description": "Chaque vitrine que vous créez a son propre code à coller dans votre site.",
-      "snippetLabel": "Un code d’intégration ressemble à ceci",
-      "inDevelopment": "Le widget est encore en développement et ne s’affiche pas encore sur d’autres sites.",
-      "create": "Créer une vitrine"
     },
     "list": {
       "show": "Afficher la vitrine d’exemple",
@@ -1457,7 +1488,11 @@
       "link": "Lien"
     },
     "buyButtonTipLabel": "Où mène le bouton",
-    "buyButtonTip": "Reprend le texte et la couleur du bouton de votre page produit, et ouvre la page produit.",
+    "buyButtonTip": "Ouvre la page produit. Reprend d’abord le texte et la couleur du bouton de cette page, que vous pouvez changer ici pour les vignettes.",
+    "pageButton": {
+      "label": "Bouton de la page produit",
+      "use": "Utiliser le bouton de la page produit"
+    },
     "rating": "Note en étoiles",
     "ratingTipLabel": "D’où viennent les étoiles",
     "ratingTip": "Issue des avis des acheteurs. S’affiche sous le nom dès qu’un produit a un avis.",
@@ -1471,5 +1506,43 @@
     "lineHeight": "Hauteur de ligne",
     "normal": "Normal",
     "valueText": "{value} pour cent de la taille du texte"
+  },
+  "shortcuts": {
+    "title": "Raccourcis clavier",
+    "tip": "Raccourcis clavier (?)",
+    "rows": {
+      "save": {
+        "label": "Enregistrer",
+        "keys": "<kbd>{mod}</kbd> <kbd>S</kbd>"
+      },
+      "copyPaste": {
+        "label": "Copier et coller des blocs",
+        "keys": "<kbd>{mod}</kbd> <kbd>C</kbd> puis <kbd>{mod}</kbd> <kbd>V</kbd>"
+      },
+      "remove": {
+        "label": "Retirer les blocs sélectionnés",
+        "keys": "<kbd>Suppr</kbd>"
+      },
+      "move": {
+        "label": "Déplacer les blocs sélectionnés",
+        "keys": "<kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd>"
+      },
+      "selectMore": {
+        "label": "Sélectionner plusieurs blocs",
+        "keys": "<kbd>Maj</kbd> + clic"
+      },
+      "selectUnder": {
+        "label": "Sélectionner le bloc en dessous",
+        "keys": "<kbd>{alt}</kbd> + clic"
+      },
+      "layer": {
+        "label": "Avancer ou reculer d’un niveau",
+        "keys": "<kbd>{mod}</kbd> <kbd>]</kbd> ou <kbd>[</kbd>"
+      },
+      "pan": {
+        "label": "Se déplacer sur le canevas",
+        "keys": "Maintenez <kbd>Espace</kbd> et faites glisser"
+      }
+    }
   }
 }

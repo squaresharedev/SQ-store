@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { freshUser, gotoApp, serviceRest, signUp, userIdByEmail } from "./helpers";
+import { expectToast, freshUser, gotoApp, serviceRest, signUp, userIdByEmail } from "./helpers";
 
 // Importing a catalogue from a CSV, end to end: the preview a seller reads
 // before committing, and the rows that actually reach the database.
@@ -34,6 +34,8 @@ test.describe("product import", () => {
     await gotoApp(page, "/products");
     await page.getByRole("link", { name: "Import", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Import products" })).toBeVisible();
+    // Before a file is chosen the page shows what a file needs.
+    await expect(page.locator("[data-import-column]")).toHaveCount(5);
 
     await upload(page, SHOPIFY_CSV);
 
@@ -62,7 +64,15 @@ test.describe("product import", () => {
     await expect(skipped).toContainText(/no price/i);
 
     await page.getByRole("button", { name: /^import 2 products$/i }).click();
-    await expect(page).toHaveURL(/\/products$/);
+    // The result takes the form's place: what landed, and that it is drafts.
+    const done = page.locator("[data-import-done]");
+    await expect(done).toContainText("2 products were imported.");
+    await expect(done).toContainText("1 row was skipped.");
+    await expect(done).toContainText("They are drafts, not visible to buyers until you publish them.");
+    await expect(done.getByRole("link", { name: "connect an AI assistant" })).toHaveAttribute(
+      "href",
+      "/settings/connected-apps",
+    );
 
     // What actually landed. Drafts by default, so nothing an import got wrong
     // is visible to a buyer before the seller has looked at it.
@@ -93,6 +103,10 @@ test.describe("product import", () => {
 
     const hook = rows.find((row) => row.title === "Wall hook")!;
     expect(hook.price_cents).toBe(1950);
+
+    // And the list is one click away.
+    await done.getByRole("link", { name: "Go to products" }).click();
+    await expect(page).toHaveURL(/\/products$/);
   });
 
   test("a file with unhelpful headers is rescued by the column mapping", async ({ page }) => {
@@ -116,7 +130,7 @@ test.describe("product import", () => {
 
     await expect(page.locator("[data-import-summary]")).toContainText("2 products ready");
     await page.getByRole("button", { name: /^import 2 products$/i }).click();
-    await expect(page).toHaveURL(/\/products$/);
+    await expect(page.locator("[data-import-done]")).toContainText("2 products were imported.");
 
     const rows = (await serviceRest(
       `/products?owner_id=eq.${sellerId}&select=title,price_cents&order=title`,
@@ -125,6 +139,31 @@ test.describe("product import", () => {
       ["Brass hook", 1950],
       ["Oak shelf", 4900],
     ]);
+  });
+
+  test("an import is taken back in one click, returning to the same file to fix", async ({ page }) => {
+    const user = freshUser("import-undo");
+    await signUp(page, user);
+    const sellerId = await userIdByEmail(user.email);
+    const productCount = async () =>
+      ((await serviceRest(`/products?owner_id=eq.${sellerId}&select=id`)) as unknown[]).length;
+
+    await gotoApp(page, "/products/import");
+    await upload(page, ["Title,Price", "Brass hook,19.50", "Oak shelf,49"].join("\n"));
+    // A file that maps itself keeps the column mapping folded away.
+    const columns = page.locator("[data-import-columns]");
+    await expect(columns).toContainText("2 matched");
+    await expect(columns).not.toHaveAttribute("open", "");
+
+    await page.getByRole("button", { name: /^import 2 products$/i }).click();
+    await expect(page.locator("[data-import-done]")).toBeVisible();
+    expect(await productCount()).toBe(2);
+
+    await page.getByRole("button", { name: "Delete all 2 imported products" }).click();
+    await expectToast(page, "2 imported products were deleted.");
+    expect(await productCount()).toBe(0);
+    // Back on the same file, ready to fix and import again.
+    await expect(page.locator("[data-import-summary]")).toContainText("2 products ready");
   });
 
   test("refuses a file that carries no products, without writing anything", async ({ page }) => {

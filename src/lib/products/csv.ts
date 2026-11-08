@@ -5,6 +5,7 @@ import { CURRENCIES, type Currency, type ProductStatus } from "@/types/product";
 import { parsePriceCents } from "./price";
 import { msg, type MessageRef } from "@/i18n/types";
 import { PLANS, PLAN_IDS } from "@/lib/billing/plans";
+import { PRODUCT_TITLE_MAX } from "@/lib/validation/product";
 export { parsePriceCents };
 
 /**
@@ -165,6 +166,12 @@ export const IMPORT_FIELDS: readonly ImportField[] = [
   "sku",
   "stock",
 ];
+
+/** The fields a row cannot become a product without. */
+export const IMPORT_REQUIRED_FIELDS: readonly ImportField[] = ["title", "price"];
+
+/** The fields in the order a seller meets them: what a row needs first, then the rest. */
+export const IMPORT_FIELDS_BY_NEED: readonly ImportField[] = ["title", "price", "description", "stock", "sku"];
 
 /** A mapping from each field to the CSV column index that feeds it, or null
  *  for "this file has nothing for that". */
@@ -391,7 +398,7 @@ export function buildImportPlan(
 
     let problem: ImportProblem | null = null;
     if (!title) problem = "noTitle";
-    else if (title.length > 200) problem = "titleTooLong";
+    else if (title.length > PRODUCT_TITLE_MAX) problem = "titleTooLong";
     else if (priceCents === null) problem = "noPrice";
     else if (priceCents < 1) problem = "priceZero";
     else if (seenTitles.has(title.toLowerCase())) problem = "duplicateTitle";

@@ -44,9 +44,9 @@ async function setUpBoardWithShape(page: Page, tag: string) {
 
   // A shape needs no seeded product and no photo, so it is the cheapest block
   // to put a handle on.
-  await page.getByRole("button", { name: "Add element" }).click();
+  await page.getByRole("button", { name: "Add shape or image" }).click();
   await page
-    .getByRole("menu", { name: "Elements" })
+    .getByRole("menu", { name: "Shapes and images" })
     .getByRole("menuitem", { name: "All shapes" })
     .click();
   await page.getByRole("button", { name: "Add square" }).click();

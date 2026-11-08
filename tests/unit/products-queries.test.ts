@@ -174,6 +174,25 @@ describe("listProducts - filters", () => {
     await listProducts({ filters: { search: "   " } });
     expect(argsOf("products", "ilike")).toHaveLength(0);
   });
+
+  it("narrows to what moderation is holding back, and only when asked", async () => {
+    stageResponse("products", { data: [], count: 0 });
+    await listProducts({ filters: { moderated: true } });
+    expect(argsOf("products", "neq")).toEqual([["moderation_status", "ok"]]);
+
+    recorded.length = 0;
+    stageResponse("products", { data: [], count: 0 });
+    await listProducts({});
+    expect(argsOf("products", "neq")).toHaveLength(0);
+  });
+
+  it("keeps a moderation filter on the plain path under a metric sort, which cannot narrow by it", async () => {
+    stageResponse("products", { data: [], count: 0 });
+    await listProducts({ filters: { moderated: true }, sort: "unitsSold" });
+    expect(rpcCalls).toHaveLength(0);
+    expect(argsOf("products", "neq")).toEqual([["moderation_status", "ok"]]);
+    expect(argsOf("products", "order")[0]).toEqual(["created_at", { ascending: false }]);
+  });
 });
 
 describe("listProducts - pagination", () => {

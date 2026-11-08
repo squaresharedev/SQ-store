@@ -37,9 +37,10 @@ import { RemovalNotice } from "@/components/products/RemovalNotice";
  * delete confirms, then removes the card optimistically and restores it if the
  * server rejects. `products` feeds the cards' live grid previews.
  *
- * THE SAMPLE STOREFRONT (lib/storefront/sample.ts) is a quiet link at the foot
- * of the list, never a card: the list holds the seller's own storefronts and
- * nothing else, and with none it is the empty state alone. The link opens the
+ * THE SAMPLE STOREFRONT (lib/storefront/sample.ts) is a quiet link, never a
+ * card: the list holds the seller's own storefronts and nothing else. With none
+ * it sits in the empty state, under the create card's hint, where it is seen
+ * without a scroll; otherwise at the foot of the list. The link opens the
  * sample in the designer, where nothing saves, and is what the guided tour's
  * "See how it's done" stop points at (`data-storefront-sample`). It is an
  * aid for someone with nothing of their own yet, so it goes away while the
@@ -80,7 +81,16 @@ export function StorefrontsList({
   const showActionError = useActionErrorToast();
   const [storefronts, setStorefronts] = useState(initial);
   const hasLiveStorefront = storefronts.some((storefront) => !storefront.removal);
-  const sampleLink = canWrite && sample === "shown" && !hasLiveStorefront;
+  // The tour's hook is on a wrapper that hugs the link, so its spotlight
+  // frames the link rather than a full-width row.
+  const sampleLink = canWrite && sample === "shown" && !hasLiveStorefront && (
+    <span data-storefront-sample="" className="inline-flex">
+      <Link href={SAMPLE_STOREFRONT_PATH} className={cn(ghostButtonClass, "px-3 py-2")}>
+        {tSample("open")}
+        <ArrowRight className={cn("size-4", iconNudgeRightClass)} strokeWidth={2} aria-hidden="true" />
+      </Link>
+    </span>
+  );
   // One press makes the storefront and opens it; `creating` holds until the
   // route change lands, so the buttons can't fire a second time behind it.
   const [create, creating] = useCreateStorefront();
@@ -195,7 +205,9 @@ export function StorefrontsList({
           data-tour="storefront-create"
           onCreate={() => void create()}
           creating={creating}
-        />
+        >
+          {sampleLink}
+        </StorefrontEmptyState>
       ) : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {storefronts.map((storefront) => (
@@ -235,24 +247,8 @@ export function StorefrontsList({
         </div>
       )}
 
-      {sampleLink && (
-        // The attribute is on a wrapper that hugs the link, so the tour's
-        // spotlight frames the link rather than a full-width row.
-        <div className="mt-6 flex justify-center">
-          <span data-storefront-sample="" className="inline-flex">
-            <Link
-              href={SAMPLE_STOREFRONT_PATH}
-              className={cn(ghostButtonClass, "px-3 py-2")}
-            >
-              {tSample("open")}
-              <ArrowRight
-                className={cn("size-4", iconNudgeRightClass)}
-                strokeWidth={2}
-                aria-hidden="true"
-              />
-            </Link>
-          </span>
-        </div>
+      {storefronts.length > 0 && sampleLink && (
+        <div className="mt-6 flex justify-center">{sampleLink}</div>
       )}
 
       <ConfirmDialog

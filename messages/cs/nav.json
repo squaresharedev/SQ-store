@@ -10,7 +10,7 @@
     },
     "storefront": {
       "label": "Výloha",
-      "description": "Navrhněte mřížku, na které budou vaše produkty."
+      "description": "Navrhněte mřížku, na které budou vaše produkty. Stane se z ní stránka, kterou kupující mohou otevřít a sdílet."
     },
     "orders": {
       "label": "Objednávky",
@@ -31,7 +31,8 @@
     "discounts": {
       "label": "Slevy",
       "description": "Spouštějte akce a sdílejte slevové kódy."
-    }
+    },
+    "help": "Nápověda"
   },
   "settings": {
     "account": "Účet",
@@ -42,17 +43,18 @@
     "notifications": "Oznámení",
     "language": "Jazyk",
     "team": "Tým a přístup",
-    "danger": "Nebezpečná zóna",
+    "danger": "Smazání účtu",
     "billing": "Plán a fakturace",
-    "connectedApps": "Připojené aplikace"
+    "connectedApps": "AI asistent"
   },
   "profileMenu": {
     "label": "Nabídka účtu",
     "account": "Účet",
-    "switchAccounts": "Přepnout účet",
+    "switchAccounts": "Moje obchody",
     "yourStore": "Váš obchod",
     "owner": "Vlastník",
     "logOut": "Odhlásit se",
+    "logOutEverywhere": "Odhlásit se všude",
     "plan": "Plán"
   },
   "viewingBanner": {

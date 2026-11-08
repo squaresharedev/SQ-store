@@ -34,7 +34,7 @@
     "yearlyFree": "{count, plural, one {# Monat gratis} other {# Monate gratis}}",
     "launchNote": "Ein Einführungspreis ist ein Preis zum Start: Der reguläre Preis ist der durchgestrichene.",
     "grantTitle": "{plan} geht auf uns",
-    "autoRenew": "Bezahlte Tarife verlängern sich automatisch jeden Monat zum angezeigten Preis, bis du kündigst."
+    "autoRenew": "Bezahlte Tarife verlängern sich automatisch {interval, select, year {einmal im Jahr} other {jeden Monat}} zum angezeigten Preis, bis du kündigst."
   },
   "card": {
     "perMonth": "/ Monat",
@@ -79,7 +79,8 @@
     "cheapest": "Bei einem Umsatz von {sales} im Monat kostet dich {plan} am wenigsten.",
     "legendPrice": "Tarifpreis",
     "legendFee": "Gebühr auf deine Verkäufe",
-    "cheapestTag": "Am günstigsten für dich"
+    "cheapestTag": "Am günstigsten für dich",
+    "stripeFeeNote": "Die eigene Kartengebühr von Stripe für jeden Verkauf kommt zu diesen Beträgen hinzu."
   },
   "compare": {
     "eyebrow": "Vergleich",
@@ -160,17 +161,17 @@
   },
   "portal": {
     "opening": "Stripe wird geöffnet",
-    "stepUp": "Bestätige, dass du es bist, bevor sich deine Abrechnungsdaten öffnen."
+    "stepUp": "Du hast die Zwei-Faktor-Authentifizierung eingeschaltet, also bestätige, dass du es bist, bevor sich deine Abrechnungsdaten öffnen."
   },
   "chip": {
     "label": "Tarif: {plan}",
-    "upgrade": "Upgraden",
-    "pro": "Pro-Tarif"
+    "upgrade": "Upgraden"
   },
   "banner": {
     "label": "Tarifzahlung",
     "pastDue": "Die Zahlung für deinen {plan}-Tarif ist fehlgeschlagen. Aktualisiere deine Karte, um ihn zu behalten.",
     "pastDueMember": "Die {plan}-Zahlung dieses Shops ist fehlgeschlagen. Nur der Inhaber kann die Karte aktualisieren.",
+    "seeTeam": "Teammitglieder ansehen",
     "action": "Karte aktualisieren"
   },
   "settings": {
@@ -197,7 +198,7 @@
       "over": "{count} zu viel",
       "full": "Voll"
     },
-    "overLimit": "Über der Grenze dieses Tarifs. Alles funktioniert weiter; entferne eines oder wechsle zu einem höheren Tarif, um mehr hinzuzufügen.",
+    "overLimit": "Über der Grenze dieses Tarifs. Alles funktioniert weiter; entferne eines oder <upgrade>wechsle zu einem höheren Tarif</upgrade>, um mehr hinzuzufügen.",
     "invoicesTitle": "Abrechnung und Rechnungen",
     "invoicesDescription": "Deine Karte, Rechnungsadresse, USt-IdNr. und alle Rechnungen, auf der sicheren Seite von Stripe.",
     "manage": "Abrechnung und Rechnungen verwalten",

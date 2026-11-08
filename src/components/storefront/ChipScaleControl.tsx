@@ -14,19 +14,17 @@ import { infoTextClass, strongLabelClass } from "@/components/ui/control-styles"
  * Whether bigger tiles wear bigger chips (CHIP_SCALES): one switch for the
  * whole board, shown wherever a seller sizes a chip: the theme's Price tag and
  * Sale chip sections, and the same two in a product's own settings, where most
- * sellers look for it. There it says that it is the board's, not the tile's
- * (`onEveryCard`). The default is stored as no key, like the other defaults
- * a theme can fall back to.
+ * sellers look for it. Four copies of one switch, so each says what it covers
+ * (both chips, every card): otherwise the second copy read as a setting of its
+ * own, and a product's copy as that tile's. The default is stored as no key,
+ * like the other defaults a theme can fall back to.
  */
 export function ChipScaleControl({
   theme,
   onChange,
-  onEveryCard = false,
 }: {
   theme: StorefrontTheme;
   onChange: (theme: StorefrontTheme) => void;
-  /** Shown in one product's settings: says the switch changes every card. */
-  onEveryCard?: boolean;
 }) {
   const t = useTranslations("Storefront.chipScale");
   const select = (chipScale: ChipScale) => {
@@ -44,7 +42,7 @@ export function ChipScaleControl({
         onChange={select}
         ariaLabel={t("label")}
       />
-      {onEveryCard && <p className={infoTextClass}>{t("everyCard")}</p>}
+      <p className={infoTextClass}>{t("everyCard")}</p>
     </div>
   );
 }

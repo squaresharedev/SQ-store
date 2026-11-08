@@ -148,7 +148,7 @@ export function OrderRefund({
         data-order-refund-how={order.paidThroughProvider ? "provider" : "manual"}
       >
         <Info className="mt-0.5 size-3.5 shrink-0" strokeWidth={2} aria-hidden="true" />
-        {t(order.paidThroughProvider ? "viaProvider" : "manual")}
+        {t(order.paidThroughProvider ? "viaProvider" : "manual", { amount })}
       </p>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={reasonId}>{t("reasonLabel")}</Label>

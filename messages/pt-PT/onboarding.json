@@ -20,10 +20,10 @@
     "storefront": {
       "label": "Coloque um produto numa montra",
       "detailDone": "Já tem um produto na sua montra.",
-      "detailNone": "Crie uma montra e depois adicione um produto à grelha.",
-      "detailEmpty": "Abra a sua montra e escolha Adicionar produto na barra de ferramentas.",
+      "detailNone": "Uma montra é a página da sua loja. Crie uma e depois adicione um produto à grelha.",
+      "detailEmpty": "Abra a sua montra e use o botão Adicionar produto, no topo.",
       "actionCreate": "Criar montra",
-      "actionOpen": "Abrir editor",
+      "actionOpen": "Abrir montra",
       "cta": "Abra a sua montra",
       "ctaCreate": "Crie uma montra"
     },
@@ -32,7 +32,7 @@
       "detailDone": "A sua página de produto está publicada.",
       "detailNeedsSeller": "Complete os seus dados de vendedor para poder publicar a página.",
       "detailNeedsStorefront": "Assim que um produto estiver numa montra, a página pode ser publicada.",
-      "detailNeedsActive": "Defina esse produto como Ativo para publicar a página.",
+      "detailNeedsActive": "Abra o produto e defina o estado como Ativo para publicar a página.",
       "detailChecking": "A sua página fica publicada assim que a verificação automática aprovar o produto.",
       "detailPaused": "A verificação automática colocou esse produto em pausa. Abra-o para ver o que alterar.",
       "detailPagesOff": "As páginas de produto estão desativadas nessa montra. Ative-as no editor.",
@@ -64,7 +64,7 @@
     "showMeAround": "Mostrar-me o essencial",
     "showSteps": "Mostrar passos",
     "hideSteps": "Ocultar passos",
-    "liveHint": "A sua primeira página de produto está publicada. Partilhe o link onde quiser.",
+    "liveHint": "A sua primeira página de produto está publicada. Partilhe os links onde quiser.",
     "copyLink": {
       "copy": "Copiar link da página de produto",
       "copied": "Link da página de produto copiado",
@@ -75,7 +75,12 @@
     "hide": "Ocultar",
     "progress": "{total, plural, one {{done} de {total} concluído} many {{done} de {total} concluídos} other {{done} de {total} concluídos}}",
     "stepDone": " (concluído)",
-    "stepToDo": " (por fazer)"
+    "stepToDo": " (por fazer)",
+    "copyStorefrontLink": {
+      "copy": "Copiar ligação da montra",
+      "copied": "Ligação da montra copiada",
+      "failed": "Não foi possível copiar a ligação da montra. Selecione-a e copie-a manualmente."
+    }
   },
   "welcome": {
     "steps": {
@@ -121,10 +126,10 @@
     "seller": {
       "namePlaceholder": "p. ex., Ana Silva ou Cerâmica Ana",
       "nameHelp": "A sua denominação social, ou o seu nome completo, se vender a título individual.",
-      "nameAlternative": "Ou o seu nome completo, se vende em nome próprio.",
+      "nameAlternative": "Se vende em nome próprio, use o seu nome completo.",
       "addressPlaceholder": "p. ex. Rua do Mercado, 12\n1200-109 Lisboa\nPortugal",
       "emailPlaceholder": "p. ex. ola@asualoja.example",
-      "emailHelp": "Para onde os compradores lhe escrevem. Pode ser diferente do seu e-mail de início de sessão.",
+      "emailHelp": "Para onde os compradores lhe escrevem. Pode ser diferente do seu e-mail de início de sessão.{verify, select, true { Vamos enviar um código para este endereço para o confirmar.} other {}}",
       "emailTipLabel": "Sobre este e-mail"
     },
     "confirm": {
@@ -140,12 +145,12 @@
     "nav": {
       "skipOnboarding": "Saltar a introdução",
       "next": "Seguinte",
-      "showMeAround": "Mostrar-me como funciona",
       "skipIntro": "Saltar introdução",
       "getStarted": "Começar",
       "skipForNow": "Saltar por agora",
       "saveAndContinue": "Guardar e continuar",
       "continue": "Continuar",
+      "confirmLater": "Confirmar mais tarde",
       "exploreOnMyOwn": "Explorar por conta própria",
       "notNow": "Agora não"
     },
@@ -205,16 +210,13 @@
       },
       "storefrontEmbed": {
         "title": "Incorpore uma montra no seu site",
-        "body": "Cada montra tem um botão de incorporação que lhe dá um código como este. O widget ainda está em desenvolvimento e ainda não aparece noutros sites.",
-        "bodyButton": "Este botão dá-lhe um código como o que se vê abaixo para colar no seu site. O widget ainda está em desenvolvimento e ainda não aparece noutros sites.",
-        "fallbackBody": "Quando tiver uma montra, o botão de incorporação no respetivo cartão dá-lhe um código como este. O widget ainda está em desenvolvimento e ainda não aparece noutros sites.",
-        "bodyLive": "Cada montra tem um botão de incorporação que lhe dá um código como este. Cole-o no seu próprio site e a montra aparece lá.",
-        "bodyButtonLive": "Este botão dá-lhe um código como o que se vê abaixo. Cole-o no seu próprio site e a montra aparece lá.",
-        "fallbackBodyLive": "Quando tiver uma montra, o botão de incorporação no respetivo cartão dá-lhe um código como este para colar no seu próprio site."
+        "bodyLive": "Cada montra tem um botão de incorporação que lhe dá um código para o site como este. Cole-o no seu próprio site e a montra aparece lá.",
+        "bodyButtonLive": "Este botão dá-lhe um código para o site como o que se vê abaixo. Cole-o no seu próprio site e a montra aparece lá.",
+        "fallbackBodyLive": "Quando tiver uma montra, o botão de incorporação no respetivo cartão dá-lhe um código para o site como este, para colar no seu próprio site."
       },
       "ordersSearch": {
         "title": "Encontre uma encomenda",
-        "body": "Pesquise nesta lista pelo e-mail do comprador. Para encontrar uma encomenda pelo número, um nome, uma cidade ou um número de rastreio, use a pesquisa no topo da página."
+        "body": "Pesquise nesta lista pelo número da encomenda, pelo e-mail ou nome do comprador, por uma cidade, um produto ou um número de rastreio."
       },
       "ordersFilters": {
         "title": "Filtre e ordene",
@@ -241,7 +243,7 @@
     "steps": {
       "editorAdd": {
         "title": "Adicione à grelha",
-        "body": "Adicione produtos, texto e formas a partir desta barra. Arraste qualquer elemento da grelha para o mover e puxe por um canto para o redimensionar."
+        "body": "Adicione produtos, texto, formas e imagens a partir desta barra. Toque ou clique num bloco para o selecionar e depois arraste para o mover. Puxe a pega de um canto para o redimensionar."
       },
       "editorDesign": {
         "title": "Defina o aspeto",
@@ -255,8 +257,13 @@
       },
       "editorFinish": {
         "title": "Torne-a sua",
-        "body": "O exemplo nunca é guardado, por isso experimente à vontade. Quando estiver pronto, crie uma montra própria."
+        "body": "O exemplo nunca é guardado, por isso experimente à vontade. Quando estiver pronto, crie uma montra própria.",
+        "bodySave": "Prima Guardar para manter o seu trabalho. Quando estiver satisfeito, Partilhar dá-lhe o link e o código para o seu site."
       }
     }
+  },
+  "install": {
+    "title": "Adicione a Square Share ao ecrã principal",
+    "add": "Adicionar"
   }
 }

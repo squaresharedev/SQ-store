@@ -153,6 +153,10 @@ export function BadgePlacementPreview({
 
   return (
     <div className="space-y-2">
+      {/* The how-to before the surface it is about, so it is read first. */}
+      <p className={infoTextClass}>
+        {t("preview.hint")}
+      </p>
       <div
         aria-hidden="true"
         className="rounded-md border border-border bg-background p-3"
@@ -217,10 +221,12 @@ export function BadgePlacementPreview({
           </div>
         </div>
       </div>
-      {/* Pointer-only copy above, so its one message is said here. */}
-      <p className={cn(infoTextClass, refused && "text-destructive")} aria-live="polite" data-badge-preview-hint="">
-        {refused ? t("photoFull", { max: BADGES_ON_PHOTO_MAX }) : t("preview.hint")}
-      </p>
+      {/* Only a refused drop is said under it: the how-to is above. */}
+      {refused && (
+        <p className={cn(infoTextClass, "text-destructive")} aria-live="polite" data-badge-preview-hint="">
+          {t("photoFull", { max: BADGES_ON_PHOTO_MAX })}
+        </p>
+      )}
       {/* The badge being dragged, following the pointer. */}
       {dragged && drag && (
         <div

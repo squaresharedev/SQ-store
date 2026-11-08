@@ -393,7 +393,9 @@ export function DiscountUsage({ facts }: { facts: DiscountRowFacts }) {
 /**
  * The controls, for owners and editors: a code is switched on and off, a
  * running sale is ended, and either is edited or deleted. Icons, each with its
- * word on hover and as its accessible name.
+ * word on hover and as its accessible name. End now also shows its word where
+ * the row has the room: a clock struck out is no convention, unlike the
+ * pencil and the bin, and a phone has no hover to ask it.
  */
 export function DiscountRowActions({
   item,
@@ -407,13 +409,16 @@ export function DiscountRowActions({
   const switchLabelId = useId();
   const { discount, status } = item;
   const isCode = discount.kind === "code";
+  // What pressing the switch does, not where it stands: the switch shows
+  // that, and a fixed "On" over a code that was off read as a contradiction.
+  const switchLabel = t(discount.enabled ? "turnOff" : "turnOn");
 
   return (
     <div className={cn("flex shrink-0 flex-wrap items-center gap-2", className)}>
       {isCode && status !== "ended" && (
-        <Tooltip label={t("switchLabel")} className="relative pr-1">
+        <Tooltip label={switchLabel} className="relative pr-1">
           <span id={switchLabelId} className="sr-only">
-            {t("switchLabel")}
+            {switchLabel}
           </span>
           <Switch
             checked={discount.enabled}
@@ -437,11 +442,14 @@ export function DiscountRowActions({
           <button
             type="button"
             aria-label={t("endNow")}
-            className={iconDangerButtonClass}
+            // Below `@2xl` the controls have a line of their own: the icon
+            // button widens to carry its word there, and is square above.
+            className={cn(iconDangerButtonClass, "w-auto gap-2 px-3 text-sm font-medium @2xl:w-9 @2xl:px-0")}
             onClick={onEnd}
             disabled={busy}
           >
             <TimerOff className="size-4" strokeWidth={2} aria-hidden="true" />
+            <span className="@2xl:hidden">{t("endNow")}</span>
           </button>
         </Tooltip>
       )}

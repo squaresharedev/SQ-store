@@ -54,6 +54,13 @@ describe("SellerDetailsBanner", () => {
     expect(screen.queryByRole("link")).toBeNull();
   });
 
+  it("names the store whose owner has to act, when its name is known", () => {
+    render(<SellerDetailsBanner missing={["businessName"]} audience="member" storeName="Acme Prints" />);
+    expect(screen.getByRole("note", { name: "Seller details required" })).toHaveTextContent(
+      "The owner of Acme Prints has to add their seller details in their own settings.",
+    );
+  });
+
   it("renders nothing when nothing is missing", () => {
     render(<SellerDetailsBanner missing={[]} />);
     expect(screen.queryByRole("note")).toBeNull();

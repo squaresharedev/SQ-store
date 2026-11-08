@@ -268,10 +268,15 @@ export function BadgesField({
                   className={cn(rowFieldClass, "text-sm")}
                 />
                 <span
-                  className="flex shrink-0"
+                  className="flex shrink-0 items-center gap-1"
                   data-product-field={`badge.${index}.placement`}
                   data-product-value={badge.placement}
                 >
+                  {/* A word beside the icon-only picker, so a phone (no hover
+                      label) says what it opens. The picker names itself. */}
+                  <span className={infoTextClass} aria-hidden="true">
+                    {t("placementLabel")}
+                  </span>
                   <BadgePlacementPicker
                     id={`${inputId}-place-${badge.localId}`}
                     value={badge.placement}

@@ -124,7 +124,7 @@ test.describe("guided tour on a phone", () => {
     page,
   }) => {
     test.setTimeout(180_000);
-    await signUp(page, freshUser("sample-phone"));
+    await signUp(page, freshUser("sample-phone"), { editorTour: "keep" });
     await gotoApp(page, "/storefront/sample");
 
     const stops = ["editor-add", "editor-design", "editor-page", "editor-finish"];

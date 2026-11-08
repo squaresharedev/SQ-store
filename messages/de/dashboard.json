@@ -52,7 +52,8 @@
   },
   "recentOrders": {
     "title": "Letzte Bestellungen",
-    "empty": "Noch keine Bestellungen. Verkäufe über deinen eigenen Kauflink oder per E-Mail werden hier nicht angezeigt."
+    "empty": "Noch keine Bestellungen. Sobald der Checkout öffnet, erscheinen abgeschlossene Käufe hier.",
+    "emptyReady": "Noch keine Bestellungen. Dein erster Verkauf erscheint hier."
   },
   "attention": {
     "title": "Handlungsbedarf",
@@ -74,7 +75,7 @@
       "descriptionUpdated": "Die Bedingungen haben sich seit deiner Zustimmung geändert. Lies die aktuelle Version und akzeptiere sie.",
       "descriptionTerms": "Lies die Nutzungsbedingungen und stimme ihnen zu.",
       "descriptionTermsUpdated": "Die Nutzungsbedingungen haben sich geändert, seit du ihnen zugestimmt hast. Lies die aktuelle Version und stimme ihr zu.",
-      "action": "Bedingungen prüfen"
+      "action": "Den Bedingungen zustimmen"
     },
     "noBuyPath": {
       "label": "{count, plural, one {{count} Produkt ohne Kaufmöglichkeit} other {{count} Produkte ohne Kaufmöglichkeit}}",
@@ -114,18 +115,18 @@
       "action": "Schaufenster-Editor öffnen"
     },
     "deadBlocks": {
-      "label": "{count, plural, one {{count} Schaufenster-Block mit Verweis auf gelöschte Produkte} other {{count} Schaufenster-Blöcke mit Verweis auf gelöschte Produkte}}",
-      "description": "Diese Blöcke erscheinen Besuchern leer. Entferne oder ersetze sie.",
-      "action": "Schaufenster öffnen"
+      "label": "{count, plural, one {{count} Produktplatz verweist auf ein gelöschtes Produkt} other {{count} Produktplätze verweisen auf gelöschte Produkte}}",
+      "description": "Diese Plätze erscheinen Besuchern leer. Öffne den Designer und entferne oder ersetze sie.",
+      "action": "Designer öffnen"
     },
     "toShip": {
       "description": "Käufer warten auf diese Bestellungen. Packe sie ein und markiere sie als versandt.",
       "action": "Bestellungen versenden"
     },
     "withdrawals": {
-      "label": "{count, plural, one {{count} Käufer hat widerrufen} other {{count} Käufer haben widerrufen}}",
-      "description": "Ihnen steht innerhalb von 14 Tagen nach dem Widerruf eine Erstattung zu. Kläre die Rücksendung und erstatte dann die Bestellung.",
-      "action": "Widerrufe ansehen"
+      "label": "{count, plural, one {{count} Käufer hat storniert} other {{count} Käufer haben storniert}}",
+      "description": "Ihnen steht innerhalb von 14 Tagen eine Erstattung zu. Kläre die Rücksendung und erstatte dann die Bestellung.",
+      "action": "Stornierungen ansehen"
     },
     "restock": {
       "label": "{count, plural, one {{count} Produkt bald ausverkauft} other {{count} Produkte bald ausverkauft}}",
@@ -138,6 +139,10 @@
       "label": "Lege deine Versandtarife fest",
       "description": "Käufer können ein physisches Produkt erst kaufen, wenn ein Lieferziel sowohl einen Tarif als auch ein Land hat.",
       "action": "Tarife festlegen"
+    },
+    "paused": {
+      "label": "{count, plural, one {{count} Produkt für Käufer ausgeblendet} other {{count} Produkte für Käufer ausgeblendet}}",
+      "description": "{count, plural, one {Square Share hat es pausiert oder entfernt. Sieh dir an, warum, und was du als Nächstes tun kannst.} other {Square Share hat sie pausiert oder entfernt. Sieh dir an, warum, und was du als Nächstes tun kannst.}}"
     }
   }
 }

@@ -23,7 +23,7 @@ function chain() {
 }
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => chain() }));
 
-const { countPlanUsage } = await import("@/lib/billing/limits");
+const { countPlanUsage, planRoomRunningLow } = await import("@/lib/billing/limits");
 
 beforeEach(() => {
   calls.length = 0;
@@ -52,5 +52,24 @@ describe("countPlanUsage", () => {
   it("answers null, not zero, when it cannot count", async () => {
     answer = { count: null, error: { message: "down" } };
     expect(await countPlanUsage("owner-1", "products")).toBeNull();
+  });
+});
+
+// The products list says how full the plan is once the cap is near.
+describe("planRoomRunningLow", () => {
+  const room = (used: number, cap = 20) => ({ plan: "free" as const, cap, used, left: Math.max(0, cap - used) });
+
+  it("stays quiet while most of the cap is free", () => {
+    expect(planRoomRunningLow(room(13))).toBe(false);
+  });
+
+  it("speaks from 70 per cent of the cap, and at or over it", () => {
+    expect(planRoomRunningLow(room(14))).toBe(true);
+    expect(planRoomRunningLow(room(20))).toBe(true);
+    expect(planRoomRunningLow(room(25))).toBe(true);
+  });
+
+  it("says nothing when nothing caps the store", () => {
+    expect(planRoomRunningLow(null)).toBe(false);
   });
 });

@@ -78,7 +78,7 @@ function setup(entries: readonly (typeof ENTRIES)[number][] = ENTRIES) {
   render(<PanelSearchField entries={entries} onPick={onPick} />);
   return {
     onPick,
-    input: screen.getByRole("combobox", { name: "Find a setting or object" }),
+    input: screen.getByRole("combobox", { name: "Find a setting or block" }),
   };
 }
 

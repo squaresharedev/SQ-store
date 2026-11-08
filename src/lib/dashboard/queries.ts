@@ -347,7 +347,7 @@ export type ProfileSummary = {
    * delivery rate and a country (lib/shipping/rates.ts hasPricedDestination).
    * Terms can be set without this, and then a physical product has no Pay
    * button however open checkout is.
-   * Fixed at Settings › Shipping › Checkout rates.
+   * Fixed in the destination rows of Settings › Shipping & returns.
    */
   shippingRatesSet: boolean;
   /**

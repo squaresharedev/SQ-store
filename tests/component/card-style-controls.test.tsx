@@ -27,11 +27,11 @@ afterEach(cleanup);
 
 const themed = () => structuredClone(DEFAULT_STOREFRONT_CONFIG.theme);
 
-/** Everything that shapes a label rather than placing it is folded away, so a
- *  test that wants those controls has to open the drawer first, exactly as a
- *  seller would. */
-async function openFineTuning(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(screen.getByRole("button", { name: /Fine tuning/ }));
+/** Everything that shapes the title rather than placing it is folded away
+ *  under Title, so a test that wants those controls has to open the drawer
+ *  first, exactly as a seller would. */
+async function openTitleSection(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "Title" }));
 }
 
 describe("CardStyleControls", () => {
@@ -42,7 +42,7 @@ describe("CardStyleControls", () => {
       <CardStyleControls value={resolveCardStyle(themed())} onChange={onChange} />,
     );
 
-    await openFineTuning(user);
+    await openTitleSection(user);
     await user.click(screen.getByRole("switch", { name: "Show title" }));
     expect(onChange).toHaveBeenLastCalledWith({ showTitle: false });
 
@@ -256,7 +256,7 @@ describe("CardStyleControls", () => {
       <CardStyleControls value={resolveCardStyle(themed())} onChange={onChange} />,
     );
 
-    await openFineTuning(user);
+    await openTitleSection(user);
     // Auto is a state, not a number: nothing is stored until it is moved.
     expect(screen.getByText(/^Auto/)).toBeVisible();
     // Keyboard rather than a click: a pointer press sets from its own x, and
@@ -300,7 +300,7 @@ describe("CardsSection (theme scope)", () => {
     const theme = themed();
     render(<CardsSection theme={theme} onChange={onChange} />);
 
-    await openFineTuning(user);
+    await openTitleSection(user);
     await user.click(screen.getByRole("switch", { name: "Show title" }));
     expect(onChange).toHaveBeenCalledWith({ ...theme, showTitle: false });
   });

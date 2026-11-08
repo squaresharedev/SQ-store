@@ -10,7 +10,7 @@
     },
     "storefront": {
       "label": "Vetrina",
-      "description": "Progetta la griglia su cui si trovano i tuoi prodotti."
+      "description": "Progetta la griglia su cui si trovano i tuoi prodotti. Diventa una pagina che gli acquirenti possono aprire e condividere."
     },
     "orders": {
       "label": "Ordini",
@@ -31,7 +31,8 @@
     "discounts": {
       "label": "Sconti",
       "description": "Crea promozioni e condividi codici sconto."
-    }
+    },
+    "help": "Aiuto"
   },
   "settings": {
     "account": "Account",
@@ -42,17 +43,18 @@
     "notifications": "Notifiche",
     "language": "Lingua",
     "team": "Team e accessi",
-    "danger": "Zona pericolosa",
+    "danger": "Elimina account",
     "billing": "Piano e fatturazione",
-    "connectedApps": "App collegate"
+    "connectedApps": "Assistente IA"
   },
   "profileMenu": {
     "label": "Menu account",
     "account": "Account",
-    "switchAccounts": "Cambia account",
+    "switchAccounts": "I miei negozi",
     "yourStore": "Il tuo negozio",
     "owner": "Proprietario",
     "logOut": "Esci",
+    "logOutEverywhere": "Esci ovunque",
     "plan": "Piano"
   },
   "viewingBanner": {

@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { emptyShowcaseClass } from "@/components/ui/surface-styles";
 import { AddShowcase } from "@/components/ui/AddShowcase";
+import { NEW_PRODUCT_PATH } from "@/lib/products/paths";
 
 /**
  * A real product, cut out of its photo: no background, no frame, just the
@@ -102,7 +103,7 @@ export function ProductEmptyState({
         <AddShowcase
           card={
             canWrite
-              ? { href: "/products/new", label: t("add"), className: "h-32 w-28 rounded-none sm:h-40 sm:w-36" }
+              ? { href: NEW_PRODUCT_PATH, label: t("add"), className: "h-32 w-28 rounded-none sm:h-40 sm:w-36" }
               : undefined
           }
           // Every gadget here is narrower under the card than a rectangular

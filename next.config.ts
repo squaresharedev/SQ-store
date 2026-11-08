@@ -5,6 +5,13 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 const isDev = process.env.NODE_ENV === "development";
 
 /**
+ * Turbopack's memory target under `next dev` (experimental.turbopackMemoryLimit):
+ * past it, it drops cached work rather than keep growing. A dev server left
+ * running reached 17 GB without one. scripts/dev.ts is the hard stop behind it.
+ */
+const DEV_TURBOPACK_MEMORY_BYTES = 4 * 1024 ** 3;
+
+/**
  * Next's default route file extensions, spelled out because the /dev harness
  * adds to them.
  */
@@ -191,6 +198,7 @@ const nextConfig: NextConfig = {
   // size; this only stops the framework refusing a file the import allows.
   experimental: {
     serverActions: { bodySizeLimit: "3mb" },
+    ...(isDev ? { turbopackMemoryLimit: DEV_TURBOPACK_MEMORY_BYTES } : {}),
   },
 
   // Out of the toast stack's corner (bottom-right): the badge sat directly on

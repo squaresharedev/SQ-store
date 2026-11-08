@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "../setup/render";
-import type { SellerShippingPolicy } from "@/types/shipping-policy";
+import { SHIPPING_RATES_ANCHOR, type SellerShippingPolicy } from "@/types/shipping-policy";
 
 // Two settings pages that used to let a seller believe something that was not
 // so: that email was going out, and that a finished-looking delivery row would
@@ -28,11 +28,20 @@ describe("the notification preferences", () => {
     expect(note).toHaveTextContent("Email isn't switched on for Square Share yet");
     // What still works is said too, so the seller knows where orders will show.
     expect(note).toHaveTextContent("Orders");
+    // Said once: the email-only note below the switches would only repeat it.
+    expect(document.querySelector("[data-email-inapp-note]")).toBeNull();
   });
 
   it("describe the sales email as the one that says what to pack and where it goes", () => {
     render(<NotificationsSection defaults={DEFAULTS} emailEnabled />);
     expect(screen.getByText(/with what to pack and where to send it/)).toBeInTheDocument();
+  });
+
+  it("say the switches only quiet email, so turning one off never hides an order", () => {
+    render(<NotificationsSection defaults={DEFAULTS} emailEnabled />);
+    const note = document.querySelector("[data-email-inapp-note]");
+    expect(note).toHaveTextContent("These switches only control email");
+    expect(note).toHaveTextContent("New orders and reviews always show up in your notifications");
   });
 });
 
@@ -69,5 +78,13 @@ describe("the delivery destinations", () => {
   it("do not scold a row that has not been named yet", () => {
     render(<ShippingSection policy={policyWith([{ area: "", time: "" }])} />);
     expect(document.querySelector("[data-destination-needs-rate]")).toBeNull();
+  });
+
+  it("say what each of the two prices is for, where the delivery-prices link lands", () => {
+    render(<ShippingSection policy={policyWith([row])} />);
+    const target = document.getElementById(SHIPPING_RATES_ANCHOR)!;
+    expect(target).toHaveTextContent("wording buyers read on your product page");
+    expect(target).toHaveTextContent("Rate is what checkout actually charges");
+    expect(target).toContainElement(screen.getByLabelText("Rate 1"));
   });
 });

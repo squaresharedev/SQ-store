@@ -48,7 +48,7 @@
     "securityActivity": "Beveiligingsactiviteit",
     "signOut": "Uitloggen",
     "vat": "Btw-id",
-    "businessName": "Handelsnaam",
+    "businessName": "Je naam of bedrijfsnaam",
     "country": "Land",
     "address": "Vestigingsadres",
     "contactEmail": "Contact-e-mailadres",
@@ -61,7 +61,6 @@
     "sellerAgreement": "Verkopersovereenkomst",
     "termsOfService": "Servicevoorwaarden",
     "exportData": "Mijn gegevens exporteren",
-    "deleteAccount": "Account verwijderen",
     "plan": "Abonnement en prijzen",
     "invoices": "Facturen en betaalgegevens"
   },

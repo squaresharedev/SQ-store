@@ -15,6 +15,8 @@ import {
 import { moderationNoticeId } from "@/lib/moderation/paths";
 import { storefrontEditorPath } from "@/lib/storefront/paths";
 import { buttonClassName } from "@/components/ui/button";
+import { photoControlClass } from "@/components/ui/control-styles";
+import { InfoTip } from "@/components/ui/InfoTip";
 import { photoChipClass } from "@/components/ui/surface-styles";
 import type { ProductRemoval } from "@/types/product";
 import { DecisionActions } from "./DecisionActions";
@@ -275,7 +277,7 @@ const BADGE_LABEL = {
   removed: "badge",
 } as const satisfies Record<TakedownKind, string>;
 
-/** The one-line why for the two waiting states, on hover. */
+/** The one-line why for the two waiting states, behind a "?" beside the chip. */
 const BADGE_HINT = {
   pending: "badgePendingHint",
   review: "badgeReviewHint",
@@ -289,7 +291,7 @@ export function RemovalBadge({
   className?: string;
 }) {
   const t = useTranslations("Products.removal");
-  return (
+  const chip = (
     <span
       className={cn(
         photoChipClass,
@@ -302,11 +304,20 @@ export function RemovalBadge({
         className,
       )}
       data-removal-badge={kind}
-      // The waiting states read as a fault without a word of why; the full
-      // statement is on the product itself.
-      title={kind === "pending" || kind === "review" ? t(BADGE_HINT[kind]) : undefined}
     >
       {t(BADGE_LABEL[kind])}
+    </span>
+  );
+  if (!isAwaitingCheck(kind)) return chip;
+  // The waiting states read as a fault without a word of why. The why opens on
+  // a tap as well as a hover (a title attribute never shows on a phone), and
+  // sits above the card's own link so the tap does not open the editor.
+  return (
+    <span className="inline-flex min-w-0 items-center gap-1">
+      {chip}
+      <InfoTip label={t("badgeHintLabel")} className={cn(photoControlClass, "relative z-10 size-6")}>
+        {t(BADGE_HINT[kind])}
+      </InfoTip>
     </span>
   );
 }

@@ -16,7 +16,12 @@ import { PendingSpinner } from "@/components/ui/PendingSpinner";
 import { AnimatedCheck } from "@/components/ui/animated-check";
 import { BrandMarkIcon } from "@/components/ui/BrandMarkIcon";
 import { StarRating } from "@/components/product-page/StarRating";
-import { cardClass, iconTileClass } from "@/components/ui/surface-styles";
+import {
+  cardClass,
+  iconTileClass,
+  importResultCardClass,
+  importResultTitleClass,
+} from "@/components/ui/surface-styles";
 import {
   errorTextClass,
   helpTextClass,
@@ -41,7 +46,7 @@ import {
   type MatchableProduct,
   type ReviewImportPlan,
 } from "@/lib/reviews/import";
-import { ReviewImportStory } from "./ReviewImportStory";
+import { ReviewImportBeams } from "./ReviewImportBeams";
 
 /**
  * Bringing a store's reviews over from a Shopify review app.
@@ -357,13 +362,13 @@ export function ReviewImport({ products }: { products: readonly MatchableProduct
   if (done) {
     const landed = done.imported > 0;
     return (
-      <section className={cn(cardClass, "space-y-5 p-5 @md:p-6")} data-review-import-result={landed ? "imported" : "nothing"}>
+      <section className={importResultCardClass} data-review-import-result={landed ? "imported" : "nothing"}>
         <div className="flex items-start gap-3">
           <span className={cn(iconTileClass, "size-10", landed ? TALLY_TONES.ink : TALLY_TONES.muted)} aria-hidden="true">
             {landed ? <AnimatedCheck className="size-5" /> : <CopyCheck className="size-5" strokeWidth={2} />}
           </span>
           <div className="space-y-1" role="status">
-            <h2 ref={doneHeadingRef} tabIndex={-1} className="font-inter text-lg font-semibold text-foreground outline-none">
+            <h2 ref={doneHeadingRef} tabIndex={-1} className={importResultTitleClass}>
               {landed ? t("done.title", { count: done.imported }) : t("done.nothingTitle")}
             </h2>
             <p className={helpTextClass}>
@@ -394,7 +399,7 @@ export function ReviewImport({ products }: { products: readonly MatchableProduct
   return (
     <div className="space-y-6" data-review-import="">
       {/* What the page does, shown until there is a file to work on. */}
-      {!file && <ReviewImportStory />}
+      {!file && <ReviewImportBeams />}
       <FileDropzone
         id="review-import-file"
         bold

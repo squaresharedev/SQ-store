@@ -473,7 +473,7 @@ export function WelcomeFlow({
                   <div className="flex items-center gap-1.5">
                     <Label htmlFor={`${fieldId}-email`}>{t(fieldLabel("email"))}</Label>
                     <InfoTip label={t("Onboarding.welcome.seller.emailTipLabel")}>
-                      {t("Onboarding.welcome.seller.emailHelp")}
+                      {t("Onboarding.welcome.seller.emailHelp", { verify: String(verificationOn) })}
                     </InfoTip>
                   </div>
                   <Input
@@ -601,9 +601,11 @@ export function WelcomeFlow({
               <ArrowLeft className={cn("size-4", iconNudgeLeftClass)} aria-hidden />
               {t("Common.actions.back")}
             </Button>
-            <Button onClick={close}>
-              {t("Onboarding.welcome.nav.continue")}
-              <ArrowRight className={cn("size-4", iconNudgeRightClass)} aria-hidden />
+            {/* Says what leaving now means: the pages wait for the code. Quiet,
+                like "Skip for now", since the code's own Confirm is the step's
+                one primary button. */}
+            <Button variant="ghost" onClick={close}>
+              {t("Onboarding.welcome.nav.confirmLater")}
             </Button>
           </>
         )}

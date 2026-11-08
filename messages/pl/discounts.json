@@ -51,7 +51,8 @@
     "noEnd": "Bez daty końca",
     "orders": "{orders, plural, =0 {Jeszcze żadnych zamówień} one {# zamówienie} few {# zamówienia} many {# zamówień} other {# zamówienia}}",
     "uses": "{uses} z {limit} użyć",
-    "switchLabel": "Włączony",
+    "turnOn": "Włącz",
+    "turnOff": "Wyłącz",
     "edit": "Edytuj",
     "endNow": "Zakończ teraz",
     "delete": "Usuń",
@@ -86,7 +87,7 @@
     "kind": {
       "title": "Jaki rodzaj rabatu?",
       "code": "Kod rabatowy",
-      "codeHint": "Kupujący wpisują go przy płatności, a ty widzisz, z którego kanału przyszli.",
+      "codeHint": "Kupujący wpisują go przy kasie, a ty widzisz, z którego kanału przyszli. Nie sumuje się z trwającą obniżką: kupujący dostają niższą cenę.",
       "automatic": "Obniżka",
       "automaticHint": "Obniża ceny dla wszystkich. Bez kodu."
     },
@@ -99,6 +100,7 @@
     },
     "channel": {
       "label": "Udostępniony w (opcjonalnie)",
+      "hint": "Na stronie Rabaty zobaczysz, ile zamówień przynosi każdy kanał.",
       "suggestions": "Sugerowane kanały",
       "newsletter": "Newsletter",
       "creator": "Twórca"
@@ -141,7 +143,7 @@
       }
     },
     "limit": {
-      "label": "Maksymalnie zamówień (opcjonalnie)",
+      "label": "Maksymalna liczba użyć (opcjonalnie)",
       "none": "Bez limitu"
     },
     "locked": "Ta obniżka już się rozpoczęła, więc można zmienić tylko jej koniec. Aby zmienić cokolwiek innego, zakończ ją i utwórz nową.",
@@ -153,7 +155,8 @@
       "noEnd": "Bez daty końca",
       "exampleLabel": "Przykład",
       "example": "Przykład: {title} w cenie {regular} kosztuje {now}.",
-      "chipLink": "Zmień wygląd obniżek w sklepie"
+      "exampleUnchanged": "{title} zostaje w cenie {price}: ma cenę w innej walucie.",
+      "chipLink": "Zmień wygląd obniżek w witrynie {storefront}"
     },
     "create": "Utwórz rabat",
     "save": "Zapisz zmiany",

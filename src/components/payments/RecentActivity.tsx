@@ -2,7 +2,7 @@
 
 import { ArrowDownLeft, ArrowUpRight, ReceiptText, Undo2 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { cardClass, eyebrowClass, iconTileClass } from "@/components/ui/surface-styles";
+import { sharpCardClass, eyebrowClass, iconTileClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/format/money";
 import { formatOrderDate } from "@/lib/format/date";
@@ -98,7 +98,7 @@ export function RecentActivity({
   const t = useTranslations("Payments.recentActivity");
   const locale = useLocale();
   return (
-    <section aria-label={t("label")} className={cardClass}>
+    <section aria-label={t("label")} className={sharpCardClass}>
       <div className="border-b border-border px-4 py-3">
         <h2 className="text-base font-semibold text-foreground">{t("title")}</h2>
       </div>

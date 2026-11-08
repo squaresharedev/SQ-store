@@ -6,7 +6,7 @@
   },
   "page": {
     "title": "Bestellungen",
-    "subtitle": "Alle Bestellungen über Square Share."
+    "subtitle": "Bestellungen über den Checkout von Square Share."
   },
   "status": {
     "paid": "Bezahlt",
@@ -17,7 +17,7 @@
   "channel": {
     "embed": "Auf deiner Website",
     "marketplace": "Marktplatz",
-    "direct": "Deine Seite",
+    "direct": "Direkter Link",
     "button": "Kauf-Button"
   },
   "empty": {
@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} Bestellung} other {{total} Bestellungen}} · Seite {page} von {totalPages}",
     "detailDialog": "Bestelldetails",
     "closeDetail": "Bestelldetails schließen",
-    "withdrawn": "Widerrufen",
+    "withdrawn": "Vom Käufer storniert",
+    "refundDue": "Erstatten bis {date}",
     "moreItems": "+{count} weitere"
   },
   "table": {
@@ -52,12 +53,12 @@
     "shipping": "Versand",
     "shipTo": "Versandadresse",
     "noAddress": "Keine Adresse",
-    "feeLine": "Gebühr {amount}"
+    "feeLine": "Plattformgebühr {amount}"
   },
   "toolbar": {
     "region": "Bestellfilter",
     "channel": "Kanal",
-    "searchPlaceholder": "E-Mail, Name, Ort, Produkt oder Sendung suchen",
+    "searchPlaceholder": "Bestellnummer, E-Mail, Name, Ort, Produkt oder Sendung suchen",
     "search": "Suche",
     "status": "Status",
     "statusAriaLabel": "Nach Status filtern",
@@ -121,7 +122,7 @@
       "failed": "Telefonnummer konnte nicht kopiert werden. Wähle sie aus und kopiere sie manuell."
     },
     "giftMessage": "Geschenknotiz",
-    "withdrawalNotice": "Der Käufer hat am {date} den Rücktritt von diesem Kauf beantragt. Kläre die Rücksendung und Erstattung mit ihm.",
+    "withdrawalNotice": "Der Käufer hat diesen Kauf am {date} storniert. Kläre die Rücksendung und erstatte den Betrag innerhalb von 14 Tagen.",
     "noAddress": "Diese Bestellung hat keine Lieferadresse. Schreibe dem Käufer eine E-Mail und frage, wohin es gehen soll.",
     "shipping": "Versand",
     "shippedOn": "Versandt am {date}",
@@ -147,7 +148,7 @@
     },
     "emailBuyer": "Dem Käufer eine E-Mail schreiben",
     "mailSubject": "Deine Bestellung {number}",
-    "withdrawnShipWarning": "Der Käufer ist von diesem Kauf zurückgetreten. Versende nur, wenn du das mit ihm vereinbart hast.",
+    "withdrawnShipWarning": "Der Käufer hat diesen Kauf storniert. Versende nur, wenn du das mit ihm vereinbart hast.",
     "discount": "Rabatt",
     "discountSale": "Aktion, {amount} Rabatt",
     "discountCode": "Code {code}, {amount} Rabatt",
@@ -155,8 +156,10 @@
     "alsoBought": "Auch in dieser Bestellung"
   },
   "actions": {
-    "disputeInStripe": "Die Bank des Käufers hat eine Zahlungsanfechtung eröffnet. Beantworte sie vor Ablauf der Frist in deinem Stripe-Dashboard.",
+    "disputeInStripe": "Die Bank des Käufers hat eine Zahlungsanfechtung eröffnet. Beantworte sie vor Ablauf der Frist in deinem Stripe-Dashboard, sonst bekommt der Käufer das Geld zurück.",
     "answerInStripe": "In Stripe beantworten",
+    "disputeOwnerOnly": "Nur der Inhaber des Shops kann sie beantworten.",
+    "disputeOwnerOnlyNamed": "Nur der Inhaber von {store} kann sie beantworten. Sag ihm Bescheid.",
     "pendingPayment": "Die Zahlung des Käufers wird noch bestätigt. Verschick noch nichts: Die Bestellung wird als bezahlt angezeigt, sobald sie durchgeht, und schließt sich von selbst, wenn nicht.",
     "none": "Für diese Bestellung sind keine Aktionen verfügbar."
   },
@@ -179,8 +182,8 @@
     "refundedOnReason": "{reason, select, cancelled {Storniert und erstattet am {date}} returned {Zurückgegeben und erstattet am {date}} other {Erstattet am {date}}}",
     "ownerOnly": "Nur der Inhaber des Shops kann eine Bestellung erstatten oder stornieren.",
     "ownerOnlyNamed": "Nur der Inhaber von {store} kann eine Bestellung erstatten oder stornieren. Wende dich dafür an den Inhaber.",
-    "manual": "Diese Zahlung lief nicht über Square Share. Erstatte dem Käufer das Geld selbst und erfasse es dann hier.",
-    "viaProvider": "Der volle Betrag wird über Stripe auf die Karte des Käufers zurückgebucht. Das kann nicht rückgängig gemacht werden."
+    "manual": "Diese Zahlung lief nicht über Square Share. Erstatte dem Käufer die vollen {amount} selbst und erfasse es dann hier.",
+    "viaProvider": "Erstattet die gesamte Bestellung, {amount}, über Stripe auf die Karte des Käufers. Das kann nicht rückgängig gemacht werden."
   },
   "skeleton": {
     "loading": "Bestellungen werden geladen"
@@ -289,8 +292,8 @@
       "buyerSubject": "Dein Widerruf von Bestellung {number} bei {store}",
       "buyerIntro": "Wir haben deinen Widerruf von Bestellung {number} ({title}) am {date} erhalten und sofort an {store} weitergeleitet.",
       "buyerNext": "{store} kontaktiert dich wegen der Rücksendung und deiner Erstattung, die innerhalb von 14 Tagen nach deinem Widerruf fällig ist.",
-      "sellerSubject": "Widerruf: Bestellung {number} ({title})",
-      "sellerIntro": "Der Käufer {email} hat am {date} über die Widerruf-Schaltfläche auf seiner Bestellseite von Bestellung {number} zurückgetreten.",
+      "sellerSubject": "Stornierung (Widerruf): Bestellung {number} ({title})",
+      "sellerIntro": "Der Käufer {email} hat Bestellung {number} am {date} über die Widerrufs-Schaltfläche auf seiner Bestellseite storniert.",
       "sellerName": "Angegebener Name: {name}",
       "sellerNext": "Kontaktiere ihn, um die Rücksendung zu regeln, und erstatte den Betrag innerhalb von 14 Tagen. Du kannst die Erstattung zurückhalten, bis die Ware zurück ist oder der Käufer den Versandnachweis erbringt. Die Bestellung: {url}"
     },

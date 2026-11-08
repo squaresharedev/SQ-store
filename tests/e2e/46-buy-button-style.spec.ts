@@ -97,7 +97,7 @@ async function openPage(page: Page, storefrontId: string, lamp: string) {
   // so it answers to its label, not to a role.
   await page.getByLabel(/^oak lamp\. press enter/i).click();
   await canvasStill(page);
-  await page.getByRole("button", { name: /^open the buyer flow for oak lamp$/i }).click();
+  await page.getByRole("button", { name: /^open the product page for oak lamp$/i }).click();
   const artboard = page.locator(`[data-artboard-id="${lamp}"]`);
   await expect(artboard).toBeVisible();
   return artboard;
@@ -227,7 +227,7 @@ test.describe("styling the buy button", () => {
     // Back to the root menu, where the search field lives.
     await page.getByRole("button", { name: /^back to all settings/i }).first().click();
     await canvasStill(page);
-    const field = page.getByRole("combobox", { name: "Find a setting or object" });
+    const field = page.getByRole("combobox", { name: "Find a setting or block" });
 
     // A seller does not search for the panel section a control happens to sit
     // in; they search for the thing they want to change. Each of these is a

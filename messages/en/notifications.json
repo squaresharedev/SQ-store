@@ -159,8 +159,8 @@
         "body": "It's a download, so there's nothing to ship."
       },
       "withdrawn": {
-        "title": "A buyer withdrew from order {number}",
-        "body": "{title}. Arrange the return and refund with them."
+        "title": "A buyer cancelled order {number}",
+        "body": "{title}. Arrange the return and refund them within 14 days."
       }
     },
     "billing": {

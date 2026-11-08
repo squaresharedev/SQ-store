@@ -4,13 +4,14 @@ import type { GridPlacement } from "@/components/grid/gridConstants";
 import { legibleInkOn, mixHex, readableInkOn } from "@/lib/format/color";
 import { isStrictHexColor } from "@/lib/validation/storefront";
 import { cn } from "@/lib/utils";
-import { ctaStyle, type CtaAppearance } from "@/components/product-page/product-page-maps";
+import { ctaStyle, readableOn, type CtaAppearance } from "@/components/product-page/product-page-maps";
 import {
   BLUR_MAX,
   CORNER_SPOT_LIMIT,
   TEXT_LINE_HEIGHT_DEFAULT,
   type CardBuyButton,
   type CardHoverEffect,
+  type CardStyle,
   type TextBlock,
   DEFAULT_BLUR_DIRECTION,
   PRICE_TAG_DEFAULT_BORDER,
@@ -784,47 +785,78 @@ export const TILE_FACE_CLASS =
   "flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[inherit] [contain:paint] [clip-path:var(--tile-cover-clip,none)]";
 
 /**
+ * WHAT PLAYS A CARD'S HOVER EFFECTS (the frame's, the photo's, the buy
+ * arrow's). On a buyer's board, "board": the pointer, and keyboard focus
+ * inside the card. In the designer, "pointer": the pointer alone, selected
+ * tile included, so a seller can try an effect on the card they are styling.
+ * Not focus there, because a designer tile takes focus when it is selected,
+ * and a selected card held mid-lift could never be seen at rest. "still"
+ * while the tile is carried, resized, framed or typed in, or one of its
+ * labels is being dragged: the gesture owns the tile then.
+ */
+export type CardHoverTrigger = "board" | "pointer" | "still";
+
+/**
  * WHAT A PRODUCT CARD DOES ON HOVER, on its frame (CARD_HOVER_EFFECTS): lift
  * raises it and lays a shadow under it, tilt tips it a little. Zoom works on
- * the photo instead (CARD_HOVER_ZOOM_CLASS), so its frame does nothing.
+ * the photo instead (cardHoverZoomClass), so its frame does nothing.
  *
- * Keyboard focus inside the card plays it too. `motion-safe` keeps every one
- * still for a reader who asked for less motion, and `group-hover` only answers
- * on a device that can hover, so a phone never leaves a card stuck mid-lift.
- * The cell is the `group` (Grid), the frame the thing that moves, because the
- * designer animates the cell itself while a tile is dragged.
+ * `motion-safe` keeps every one still for a reader who asked for less motion,
+ * and `group-hover` only answers on a device that can hover, so a phone never
+ * leaves a card stuck mid-lift. The cell is the `group` (Grid), the frame the
+ * thing that moves, because the designer animates the cell itself while a
+ * tile is dragged.
  */
-export const CARD_HOVER_FRAME_CLASSES: Record<CardHoverEffect, string> = {
+const CARD_HOVER_FRAME_ON_POINTER: Record<CardHoverEffect, string> = {
   none: "",
   lift: cn(
     "transition-[translate,box-shadow] duration-base ease-standard",
     "motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:shadow-lg",
-    "motion-safe:group-focus-within:-translate-y-1 motion-safe:group-focus-within:shadow-lg",
   ),
   zoom: "",
   tilt: cn(
     "transition-[rotate,scale] duration-base ease-standard",
     "motion-safe:group-hover:rotate-1 motion-safe:group-hover:scale-102",
-    "motion-safe:group-focus-within:rotate-1 motion-safe:group-focus-within:scale-102",
   ),
 };
+
+/** The same, played by keyboard focus inside the card (the "board" trigger). */
+const CARD_HOVER_FRAME_ON_FOCUS: Record<CardHoverEffect, string> = {
+  none: "",
+  lift: "motion-safe:group-focus-within:-translate-y-1 motion-safe:group-focus-within:shadow-lg",
+  zoom: "",
+  tilt: "motion-safe:group-focus-within:rotate-1 motion-safe:group-focus-within:scale-102",
+};
+
+export function cardHoverFrameClass(effect: CardHoverEffect, trigger: CardHoverTrigger): string {
+  if (trigger === "still") return "";
+  return cn(CARD_HOVER_FRAME_ON_POINTER[effect], trigger === "board" && CARD_HOVER_FRAME_ON_FOCUS[effect]);
+}
 
 /** The zoom effect, on the photo (and the second photo) inside its frame,
  *  which clips it. The CSS `scale` property, so it composes with the inline
  *  transform a framed photo already carries (imageStyle). */
-export const CARD_HOVER_ZOOM_CLASS = cn(
-  "transition-[scale] duration-slow ease-standard",
-  "motion-safe:group-hover:scale-105 motion-safe:group-focus-within:scale-105",
-);
+export function cardHoverZoomClass(trigger: CardHoverTrigger): string {
+  if (trigger === "still") return "";
+  return cn(
+    "transition-[scale] duration-slow ease-standard motion-safe:group-hover:scale-105",
+    trigger === "board" && "motion-safe:group-focus-within:scale-105",
+  );
+}
 
 /** The second photo, laid over the first and faded in while the card is
- *  pointed at or focused. A fade is not motion, so it stays under reduced
- *  motion, only instant. */
-export const HOVER_PHOTO_CLASS = cn(
-  "pointer-events-none absolute inset-0 size-full object-cover opacity-0",
-  "transition-opacity duration-slow ease-standard motion-reduce:transition-none",
-  "group-hover:opacity-100 group-focus-within:opacity-100",
-);
+ *  pointed at (or, on a buyer's board, focused). A fade is not motion, so it
+ *  stays under reduced motion, only instant. A sold-out card's comes in grey
+ *  and part way, as faded as the cover under it. */
+export function hoverPhotoClass(trigger: CardHoverTrigger, soldOut = false): string {
+  return cn(
+    "pointer-events-none absolute inset-0 size-full object-cover opacity-0",
+    "transition-opacity duration-slow ease-standard motion-reduce:transition-none",
+    soldOut && "grayscale",
+    trigger !== "still" && (soldOut ? "group-hover:opacity-60" : "group-hover:opacity-100"),
+    trigger === "board" && (soldOut ? "group-focus-within:opacity-60" : "group-focus-within:opacity-100"),
+  );
+}
 
 /**
  * The details line under a card's name (the stars, "Low stock"): a step
@@ -844,43 +876,102 @@ export const INLINE_ICON_STYLE: CSSProperties = { width: "1em", height: "1em" };
  *  the tile like the words in it. */
 const TILE_BUY_PADDING = "0.45em 1em";
 
+/** The room between the buy button's words and its arrow, in ems like the
+ *  padding. */
+const TILE_BUY_GAP = "0.35em";
+
 /** The surface a card's buy row sits on (bg-card), which an outline or a
  *  bare link is read against. */
 const TILE_BUY_SURFACE = "#ffffff";
 
+/** A card buy button's own colours (card style), each absent = the product
+ *  page button's. */
+export type TileBuyButtonOwn = Pick<CardStyle, "buyButtonColor" | "buyButtonTextColor">;
+
 /**
- * THE CARD'S BUY BUTTON (CARD_BUY_BUTTONS), drawn from the product page's own
- * button (resolveCta) so it is that button in small.
+ * THE CARD BUY BUTTON'S PAINT (CARD_BUY_BUTTONS): `color`, a solid button's
+ * fill or an outline's ring and words or a link's words, and `ink`, its
+ * words. ONE resolution, read by the card and by the pickers' inherit dots,
+ * so what a dot says it follows is what is drawn.
  *
- * Solid is the page's button exactly. Outline and link have no fill to carry
- * the page's colour on, so the colour moves to the words (and the ring), and
- * through legibleInkOn: a pale yellow button reads fine filled, but its words
- * alone on a white card would vanish, and then they take the ink that reads.
+ * A colour the seller chose for the cards is drawn exactly as chosen. One
+ * borrowed from the product page's button (resolveCta) is that button in
+ * small: solid is its fill and its ink, and outline and link, with no fill to
+ * carry it on, move it to the words through legibleInkOn, because a pale
+ * yellow button reads fine filled but its words alone on a white card would
+ * vanish. The words follow the colour unless they have their own, and on a
+ * fill of the seller's own, the ink that reads on it.
  */
-export function tileBuyButtonStyle(look: Exclude<CardBuyButton, "none">, cta: CtaAppearance): CSSProperties {
-  if (look === "solid") return { ...ctaStyle(cta), padding: TILE_BUY_PADDING };
-  const ink = legibleInkOn(cta.fill, TILE_BUY_SURFACE);
+export function tileBuyButtonPaint(
+  look: Exclude<CardBuyButton, "none">,
+  cta: CtaAppearance,
+  own: TileBuyButtonOwn = {},
+): { color: string; ink: string } {
+  if (look === "solid") {
+    const color = own.buyButtonColor ?? cta.fill;
+    const ink = own.buyButtonTextColor ?? (own.buyButtonColor === undefined ? cta.text : readableOn(color));
+    return { color, ink };
+  }
+  const color = own.buyButtonColor ?? legibleInkOn(cta.fill, TILE_BUY_SURFACE);
+  return { color, ink: own.buyButtonTextColor ?? color };
+}
+
+/** The card's buy button box, painted (tileBuyButtonPaint) in the product
+ *  page button's roundness and outline. A solid button with colours of its
+ *  own keeps the page's outline thickness in its own ink, so the outline
+ *  never stays behind in a colour the button no longer has. */
+export function tileBuyButtonStyle(
+  look: Exclude<CardBuyButton, "none">,
+  cta: CtaAppearance,
+  own: TileBuyButtonOwn = {},
+): CSSProperties {
+  const { color, ink } = tileBuyButtonPaint(look, cta, own);
+  const box = { padding: TILE_BUY_PADDING, gap: TILE_BUY_GAP };
+  if (look === "solid") {
+    const recoloured = own.buyButtonColor !== undefined || own.buyButtonTextColor !== undefined;
+    return {
+      ...ctaStyle({ ...cta, fill: color, text: ink, borderColor: recoloured ? ink : cta.borderColor }),
+      ...box,
+    };
+  }
   if (look === "outline") {
     return {
       color: ink,
       borderRadius: `${cta.radius}px`,
-      boxShadow: `inset 0 0 0 ${Math.max(cta.borderWidth, 1)}px ${ink}`,
-      padding: TILE_BUY_PADDING,
+      boxShadow: `inset 0 0 0 ${Math.max(cta.borderWidth, 1)}px ${color}`,
+      ...box,
     };
   }
-  return { color: ink, padding: TILE_BUY_PADDING };
+  return { color: ink, ...box };
 }
 
-/** The box around the buy button's words: one line, the band's weight. The
- *  link look underlines them, since it has no shape to say "press me". */
-export function tileBuyButtonClass(look: Exclude<CardBuyButton, "none">, cornerRadius: number): string {
+/** The box around the buy button's words and arrow: one line, the band's
+ *  weight. */
+export function tileBuyButtonClass(cornerRadius: number): string {
   return cn(
-    "flex min-w-0 items-center justify-center truncate font-semibold",
+    "flex min-w-0 items-center justify-center font-semibold",
     // A heavily rounded tile clips its bottom corners away, where a
     // full-width button would lose its ends: there it sizes to its words and
     // sits in the middle, where the curve leaves room.
     cornerRadius >= CORNER_SPOT_LIMIT ? "mx-auto w-fit max-w-full" : "w-full",
-    look === "link" && "underline underline-offset-2",
+  );
+}
+
+/** The button's words: they give way to the arrow rather than push it out.
+ *  The link look underlines them, since it has no shape to say "press me". */
+export function tileBuyLabelClass(look: Exclude<CardBuyButton, "none">): string {
+  return cn("min-w-0 truncate", look === "link" && "underline underline-offset-2");
+}
+
+/** The arrow after the words, pointing where the card goes. It steps a
+ *  hair to the right while the card is pointed at (or focused, on a buyer's
+ *  board), under motion-safe like every other card movement. */
+export function tileBuyArrowClass(trigger: CardHoverTrigger): string {
+  return cn(
+    "shrink-0",
+    trigger !== "still" &&
+      "transition-[translate] duration-base ease-standard motion-safe:group-hover:translate-x-0.5",
+    trigger === "board" && "motion-safe:group-focus-within:translate-x-0.5",
   );
 }
 

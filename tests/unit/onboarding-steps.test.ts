@@ -198,7 +198,7 @@ describe("buildSetupSteps", () => {
     });
     expect(action(step(data, "storefront").action)).toEqual({
       href: "/storefront/sf-newest",
-      label: "Open designer",
+      label: "Open storefront",
     });
   });
 
@@ -278,15 +278,36 @@ describe("buildSetupSteps", () => {
     });
   });
 
-  it("holds the publish step while the contact email is unconfirmed, with no link of its own", () => {
-    // An unconfirmed address 404s every product page, so nothing is live yet,
-    // and the seller-details row already carries the way to fix it.
+  it("holds the publish step while the contact email is unconfirmed, linking it to the code", () => {
+    // An unconfirmed address 404s every product page, so nothing is live yet.
+    // The seller-details row has the same link, rows above: the blocked row
+    // carries its own way to the fix, and with the rest done it is the next step.
     const data = buildSetupSteps(placedSeller({ traderMissing: ["emailVerified"] }));
     const publish = step(data, "publish");
     expect(publish.done).toBe(false);
-    expect(publish.action).toBeUndefined();
+    expect(action(publish.action)).toEqual({
+      href: "/settings/business#confirm-contact",
+      label: "Confirm email",
+    });
+    expect(text(publish.cta)).toBe("Confirm your email");
     expect(data.livePage).toBeNull();
+    expect(data.next?.id).toBe("publish");
+  });
+
+  it("offers no link on the publish step while the seller details are still to type", () => {
+    // Their own row's link is the way, and it is the next step.
+    const data = buildSetupSteps(placedSeller({ traderMissing: ["address"] }));
+    expect(step(data, "publish").action).toBeUndefined();
     expect(data.next?.id).toBe("seller-details");
+  });
+
+  it("offers no email link on the publish step before anything is placed to publish", () => {
+    // The seller-details row already carries it; a second one would help nothing yet.
+    const data = buildSetupSteps(
+      placedSeller({ traderMissing: ["emailVerified"], storefronts: [] }),
+    );
+    expect(step(data, "publish").action).toBeUndefined();
+    expect(data.next?.id).toBe("storefront");
   });
 
   it("treats a storefront with no stored product page options as the defaults", () => {

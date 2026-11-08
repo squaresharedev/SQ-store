@@ -23,11 +23,23 @@ export function isEmbedAvailable(): boolean {
 export const EMBED_LOADER_PATH = "/widget.js";
 
 /**
- * The host a snippet names while the embed has none of its own yet. Shown,
- * never copied (see isEmbedAvailable): it only keeps the picture of a snippet
- * honest about where the real one will point.
+ * What a snippet names in place of a host while the embed has none of its own
+ * yet. Shown, never offered for copying (see isEmbedAvailable), and visibly not
+ * an address: a planned hostname read as a live one, so a seller who selected
+ * the code by hand pasted a tag that loaded nothing.
  */
-const PLANNED_EMBED_ORIGIN = "https://embed.squareshare.eu";
+const NO_EMBED_HOST = "…";
+
+/**
+ * The link a snippet carries inside its div: the seller's hosted storefront,
+ * for crawlers (most AI crawlers never run a script) and for visitors whose
+ * browser did not run the loader. The loader hides it once the frame is
+ * showing, so a visitor sees one or the other, never both.
+ *
+ * Only for a storefront whose hosted page is live: a snippet must never ship a
+ * link to a 404.
+ */
+export type EmbedLink = { url: string; label: string };
 
 /**
  * The snippet sellers paste into their own site.
@@ -40,11 +52,19 @@ const PLANNED_EMBED_ORIGIN = "https://embed.squareshare.eu";
  *
  * Shared by the embed dialog and the guided tour's embed step, which shows a
  * sample so a seller with no storefront yet can still see what they will get.
+ *
+ * When `link` is provided, the div contains an anchor pointing at the hosted
+ * storefront page. Without one the output is byte-for-byte the same as before
+ * this parameter existed, so callers that pass nothing (the tour, existing
+ * snippets) are unaffected.
  */
-export function embedSnippet(embedKey: string): string {
+export function embedSnippet(embedKey: string, link?: EmbedLink | null): string {
+  const inner = link
+    ? `<a href="${escapeHtml(link.url)}">${escapeHtml(link.label)}</a>`
+    : "";
   return [
-    `<div data-squareshare-storefront="${embedKey}"></div>`,
-    `<script async src="${embedOrigin() ?? PLANNED_EMBED_ORIGIN}${EMBED_LOADER_PATH}"></script>`,
+    `<div data-squareshare-storefront="${embedKey}">${inner}</div>`,
+    `<script async src="${embedOrigin() ?? NO_EMBED_HOST}${EMBED_LOADER_PATH}"></script>`,
   ].join("\n");
 }
 
@@ -79,7 +99,7 @@ export function embedFrameSites(domains: readonly string[]): string[] {
  * fresh copy, and one removed stops it showing, which is the point.
  */
 export function embedFrameSnippet(embedKey: string, sites: readonly string[]): string {
-  const src = `${embedOrigin() ?? PLANNED_EMBED_ORIGIN}${embedFramePath(embedKey, sites)}`;
+  const src = `${embedOrigin() ?? NO_EMBED_HOST}${embedFramePath(embedKey, sites)}`;
   return [
     `<iframe src="${escapeHtml(src)}" title="Shop" loading="lazy"`,
     `  sandbox="${EMBED_FRAME_SANDBOX}" referrerpolicy="no-referrer"`,

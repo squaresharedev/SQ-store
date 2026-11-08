@@ -91,6 +91,14 @@ export function NotificationsSection({
             </div>
           ))}
         </div>
+        {/* A switch turned off only quiets the email: the bell row for an order
+            or a review is always written. Where mail is off, the note above
+            already says where orders show up. */}
+        {emailEnabled && (
+          <p className={helpTextClass} data-email-inapp-note="">
+            {t("inAppNote")}
+          </p>
+        )}
         <div>
           <SaveButton pending={isPending} state={saveResult} />
         </div>

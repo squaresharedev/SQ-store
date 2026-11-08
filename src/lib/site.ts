@@ -15,3 +15,6 @@
  * part of what failed), so change that one with this.
  */
 export const SUPPORT_EMAIL = "support@squareshare.eu";
+
+/** The help centre (FAQ, troubleshooting, contact details): the sidebar's Help row. */
+export const HELP_CENTER_URL = "https://docs.squareshare.eu";

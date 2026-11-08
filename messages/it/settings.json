@@ -11,7 +11,7 @@
       "title": "Impostazioni notifiche"
     },
     "danger": {
-      "title": "Zona pericolosa"
+      "title": "Elimina account"
     },
     "legal": {
       "title": "Impostazioni legali"
@@ -32,15 +32,17 @@
       "title": "Piano e fatturazione"
     },
     "connectedApps": {
-      "title": "App collegate"
+      "title": "Assistente IA"
     }
   },
   "loading": "Caricamento impostazioni…",
   "shell": {
     "sectionsLabel": "Sezioni delle impostazioni",
-    "recommended": "Consigliato"
+    "recommended": "Consigliato",
+    "actionNeeded": "Azione richiesta"
   },
   "continueToStorefront": "Vai alla tua vetrina",
+  "confirmEmailNext": "Prossimo passo: conferma la tua email",
   "account": {
     "fallbackName": "Account",
     "avatar": {
@@ -73,7 +75,7 @@
     },
     "username": {
       "cardTitle": "Nome utente",
-      "cardDescription": "Accedi con questo invece della tua email. Solo lettere, numeri e trattini bassi, e due account non possono condividerlo.",
+      "cardDescription": "Accedi con questo invece della tua email; compare anche nei messaggi inviati a tuo nome, come gli inviti al team. Solo lettere, numeri e trattini bassi, e due account non possono condividerlo.",
       "label": "Nome utente",
       "placeholder": "iltuonome",
       "available": "Disponibile.",
@@ -136,7 +138,7 @@
   "danger": {
     "export": {
       "cardTitle": "Esporta i miei dati",
-      "cardDescription": "Tutto ciò che conserviamo su di te: profilo, prodotti, vetrine, gli ordini che hai venduto, le notifiche e il registro di sicurezza, tutto in un unico file JSON. Sono i tuoi dati, e restano tuoi.",
+      "cardDescription": "Tutto ciò che conserviamo su di te: profilo, prodotti, vetrine, gli ordini che hai venduto, le notifiche e il registro di sicurezza, in un unico file che puoi aprire con qualsiasi editor di testo. Sono i tuoi dati, e restano tuoi.",
       "downloadButton": "Scarica i miei dati",
       "stepUpDescription": "L’esportazione contiene tutto il tuo account. Inserisci il codice attuale della tua app di autenticazione per scaricarla."
     },
@@ -155,6 +157,7 @@
       "keepButton": "Mantieni il mio account",
       "title": "Elimina account",
       "description": "Il tuo account, i prodotti, le vetrine e gli ordini vengono eliminati definitivamente {days} giorni dopo la richiesta. Fino ad allora puoi cambiare idea. Dopo, non c’è più.",
+      "exportFirst": "Prima che sparisca, puoi scaricare una copia dei tuoi dati da <link>Impostazioni account</link>.",
       "deleteButton": "Elimina il mio account",
       "confirmLabel": "Digita <code>{phrase}</code> per confermare",
       "flagging": "Segnalazione…",
@@ -203,7 +206,8 @@
     "success": {
       "notificationsSaved": "Preferenze salvate."
     },
-    "emailOff": "L’email non è ancora attiva per Square Share, quindi qui sotto non viene inviato nulla. I nuovi ordini compaiono comunque in Ordini e nelle tue notifiche."
+    "emailOff": "L’email non è ancora attiva per Square Share, quindi qui sotto non viene inviato nulla. I nuovi ordini compaiono comunque in Ordini e nelle tue notifiche.",
+    "inAppNote": "Questi interruttori controllano solo le email. I nuovi ordini e le recensioni compaiono sempre nelle tue notifiche."
   },
   "legal": {
     "cardTitle": "Accordo per i venditori, Termini e Privacy",
@@ -225,18 +229,18 @@
       },
       "sellerDetails": {
         "title": "I tuoi dati venditore, e dove vengono mostrati",
-        "body": "La tua ragione sociale (o il tuo nome, se vendi come persona fisica), l’indirizzo e l’email di contatto sono mostrati agli acquirenti sulle tue pagine prodotto, e sono obbligatori prima di poter pubblicare o vendere qualsiasi cosa. È l’unico uso che ne facciamo: la normativa UE sulla tutela dei consumatori prevede che un acquirente debba poter vedere da chi sta comprando e poterlo contattare prima di ordinare. Inviamo un solo link al tuo indirizzo di contatto per farti confermare che funziona, ed è l’unica email che inviamo lì di nostra iniziativa: nessuna lista, nessun marketing, e non li vendiamo né li condividiamo mai. Il numero di telefono e la partita IVA sono facoltativi e vengono mostrati solo se li inserisci."
+        "body": "Il tuo nome o il nome della tua attività, l’indirizzo e l’email di contatto sono mostrati agli acquirenti sulle tue pagine prodotto, e sono obbligatori prima di poter pubblicare o vendere qualsiasi cosa. È l’unico uso che ne facciamo: la normativa UE sulla tutela dei consumatori prevede che un acquirente debba poter vedere da chi sta comprando e poterlo contattare prima di ordinare. Inviamo un solo link al tuo indirizzo di contatto per farti confermare che funziona, ed è l’unica email che inviamo lì di nostra iniziativa: nessuna lista, nessun marketing, e non li vendiamo né li condividiamo mai. Il numero di telefono e la partita IVA sono facoltativi e vengono mostrati solo se li inserisci."
       }
     },
     "accepted": "Hai accettato la versione <code>{version}</code> il {date}. Non c’è altro da fare qui.",
     "outdated": "Hai accettato la versione <code>{version}</code> il {date}, ma i documenti sono cambiati da allora. Leggili di nuovo e accetta la versione attuale.",
-    "agreed": "Hai accettato la versione <code>{version}</code> il {date}. Qui non c’è altro da fare.",
-    "agreedOutdated": "Hai accettato la versione <code>{version}</code> il {date}, ma da allora i Termini sono cambiati. Rileggili e accetta la versione attuale.",
+    "agreed": "Hai accettato questi Termini il {date}. Qui non c’è altro da fare.",
+    "agreedOutdated": "Il {date} hai accettato una versione precedente dei Termini. Leggi i Termini qui sopra e accettali.",
+    "whatChanged": "Cosa è cambiato:",
     "recording": "Registrazione…",
     "acceptButton": "Accetto",
     "agreeButton": "Ho letto i Termini e li accetto",
     "acceptNote": "Accettando, registriamo la data e la versione <code>{version}</code> nel tuo account.",
-    "agreeNote": "Accettando, sul tuo account vengono registrate la data e la versione <code>{version}</code>.",
     "success": {
       "legalAccepted": "Accettato. Grazie per aver letto le condizioni.",
       "termsAgreed": "Hai accettato i Termini di servizio."
@@ -297,7 +301,7 @@
           "points": {
             "cap": "Square Share è in fase iniziale e viene offerto così com’è agli utenti business. Nei loro confronti, la nostra responsabilità è limitata alle commissioni che ci hanno pagato negli ultimi 12 mesi o a 100 EUR, se maggiori, e i venditori business ci tengono indenni da pretese causate dai loro prodotti, siti o violazioni. Se sei un consumatore, i tuoi diritti legali restano invariati.",
             "termination": "Possiamo sospendere o chiudere gli account che violano questi Termini. Puoi andartene in qualsiasi momento e portare con te i tuoi dati.",
-            "changesAndLaw": "Comunichiamo le modifiche sostanziali a questi termini con almeno 30 giorni di preavviso. Agli utenti professionali si applica la legge ceca. Se sei un consumatore, resti tutelato dalla legge del tuo paese, stato o provincia.",
+            "changesAndLaw": "Comunichiamo le modifiche sostanziali a questi termini con almeno 30 giorni di preavviso. Agli utenti professionali si applica la legge ceca, tranne in Canada, dove si applica la legge della tua provincia o territorio. Se sei un consumatore, resti tutelato dalla legge del tuo paese, stato o provincia.",
             "policies": "L’Informativa sulla privacy e l’Informativa sui cookie fanno parte di questi Termini.",
             "disputes": "Le controversie negli USA vengono risolte tramite arbitrato individuale invece che in tribunale, salvo che tu non ti opponga entro 30 giorni dall'accettazione. I consumatori dell'UE e del Canada possono ancora rivolgersi al tribunale del proprio paese di residenza."
           }
@@ -311,12 +315,14 @@
       "titleSoon": "I nostri Termini stanno per cambiare.",
       "body": "Nel frattempo si applicano i <current>Termini attuali</current>. Ecco cosa cambiano i <next>nuovi Termini</next>:",
       "leave": "Se non sei d'accordo, puoi chiudere il tuo account senza costi prima che entrino in vigore. Se continui a usare Square Share dopo quella data, i nuovi Termini ti si applicano.",
+      "summaryIsNew": "Il riepilogo qui sotto riguarda i nuovi Termini. Se li accetti ora, li accetti in anticipo.",
       "changes": {
         "regions": "Operiamo ora solo nell'UE, negli USA e in Canada, e ciascuna area ha la propria sezione.",
         "disputes": "Le controversie negli USA vengono risolte tramite arbitrato individuale invece che in tribunale, salvo che tu non ti opponga entro 30 giorni. I consumatori dell'UE e del Canada possono ancora rivolgersi al tribunale del proprio paese di residenza.",
         "plans": "I piani a pagamento e le commissioni per vendita sono ora descritti in dettaglio, incluso il rinnovo automatico e come disdire.",
         "moderation": "Spieghiamo come verifichiamo i contenuti, e come segnalarli, fare ricorso e presentare un reclamo per violazione del copyright.",
-        "notice": "Ricevi ora almeno 30 giorni di preavviso via e-mail prima di modifiche sostanziali ai Termini."
+        "notice": "Ricevi ora almeno 30 giorni di preavviso via e-mail prima di modifiche sostanziali ai Termini.",
+        "northAmerica": "Le sezioni su Stati Uniti e Canada spiegano ora cosa la legge locale richiede ai venditori. Gli utenti professionali in Canada sono ora soggetti alla legge e ai tribunali della propria provincia."
       },
       "email": {
         "subject": "Stiamo aggiornando i nostri Termini di servizio",
@@ -334,19 +340,19 @@
     "cardDescription": "Da impostare una volta sola per tutto il tuo account. Mostrato agli acquirenti su ogni pagina prodotto in cui vendi, e usato per le fatture e l’IVA.",
     "memberScope": "Questi sono i tuoi dati di venditore. Quelli che gli acquirenti vedono su {store} sono del proprietario, che li imposta nelle sue impostazioni.",
     "gate": {
-      "required": "<strong>La tua ragione sociale (o il tuo nome), l’indirizzo e l’email di contatto sono obbligatori prima di poter pubblicare o vendere qualsiasi cosa.</strong> Gli acquirenti devono poter vedere da chi stanno comprando e come contattarti prima di ordinare.",
+      "required": "<strong>Il tuo nome o il nome della tua attività, l’indirizzo e l’email di contatto sono obbligatori prima di poter pubblicare o vendere qualsiasi cosa.</strong> Gli acquirenti devono poter vedere da chi stanno comprando e come contattarti prima di ordinare.",
       "privacyNoteLinked": "Questi dati compaiono pubblicamente sulle tue pagine prodotto solo per questo motivo. Non li usiamo mai per il marketing e non li vendiamo né li condividiamo. L'unico messaggio che inviamo alla tua email di contatto o al tuo telefono è il codice che li conferma. Consulta la <link>Informativa sulla privacy di Square Share</link>."
     },
-    "countryUnset": "Preferisco non specificare",
+    "countryUnset": "Non impostato",
     "vatAdvisory": {
       "noCountry": "Questa partita IVA sembra rilasciata da {issuer}. Potresti voler impostare il tuo paese.",
       "mismatch": "Questa partita IVA sembra rilasciata da {issuer}, ma il tuo paese è impostato su {selected}. Verifica che siano entrambi corretti."
     },
     "fields": {
       "businessName": {
-        "label": "Ragione sociale o nome",
+        "label": "Il tuo nome o il nome dell’attività",
         "tipLabel": "Cosa scrivere qui",
-        "tipBody": "Il nome con cui gli acquirenti stipulano il contratto. La tua ragione sociale registrata, se vendi tramite un’attività; il tuo nome completo, se vendi come persona fisica. Il nome della tua vetrina è il nome del negozio, cosa diversa che non può sostituire questo campo.",
+        "tipBody": "Il nome con cui vendi, oppure il tuo nome completo: è il nome del venditore (il «professionista») richiesto dalla legge UE. Usa la ragione sociale registrata se vendi tramite un’attività; il tuo nome personale se vendi come persona fisica. Il nome della tua vetrina è il nome del negozio e non può sostituire questo campo.",
         "placeholder": "es. Giulia Rossi o Ceramiche Giulia"
       },
       "address": {
@@ -359,20 +365,24 @@
         "label": "Email di contatto",
         "tipLabel": "In cosa differisce dalla tua email di accesso",
         "tipBody": "Mostrata agli acquirenti come link mailto, e usata come alternativa al pulsante di acquisto quando un prodotto non ha un link di acquisto. Tenuta separata dalla tua email di accesso di proposito: usa l’indirizzo che preferisci farti scrivere dagli acquirenti. Deve essere un indirizzo che leggi davvero: indirizzi segnaposto, provider di email temporanee e indirizzi no-reply vengono rifiutati, così come un dominio che non accetta posta.",
-        "placeholder": "es. ciao@iltuonegozio.example"
+        "placeholder": "es. ciao@iltuonegozio.example",
+        "codeHint": "Quando salvi, inviamo un codice a questo indirizzo. Inseriscilo qui sotto per confermarlo."
       },
       "vatId": {
         "label": "Partita IVA",
+        "tipLabel": "Mi serve?",
+        "tipBody": "Facoltativa, e solo se sei registrato ai fini IVA nell’UE. Inserisci il numero con il prefisso del paese, ad esempio ATU12345678 per l’Austria. Altrimenti lasciala vuota: un numero di iscrizione al registro delle imprese o un altro codice fiscale non va inserito qui. Mostrata agli acquirenti nella sezione Venditore delle tue pagine prodotto.",
         "placeholder": "es. IT12345678901"
       },
       "country": {
-        "hint": "Square Share opera nell’UE, negli Stati Uniti e in Canada. Non operiamo ancora altrove.",
+        "hint": "Dove ha sede la tua attività, mostrato agli acquirenti insieme al tuo nome. Square Share opera nell’UE, negli Stati Uniti e in Canada.",
         "label": "Paese"
       },
       "phone": {
         "label": "Telefono",
         "tipLabel": "Quando gli acquirenti lo vedono",
-        "tipBody": "Facoltativo. Gli acquirenti lo vedono solo dopo che l'hai confermato con un codice che ti inviamo via SMS, quindi usa un numero di cellulare nell'UE, nello SEE, in Svizzera o nel Regno Unito.",
+        "tipBody": "Facoltativo. Gli acquirenti lo vedono solo dopo che l’hai confermato con un codice che ti inviamo via SMS.",
+        "restriction": "Solo numeri di cellulare di UE, SEE, Svizzera e Regno Unito. Lascia vuoto se il tuo è fuori da queste aree.",
         "placeholder": "es. +353 87 123 4567"
       },
       "bio": {
@@ -386,7 +396,8 @@
     "success": {
       "sellerDetailsSaved": "Attività e dati del venditore salvati.",
       "savedCodeSent": "{which, select, email {Salvato. Abbiamo inviato un codice via email a {email}: inseriscilo qui sotto per confermare l'indirizzo.} phone {Salvato. Abbiamo inviato un codice via SMS a {phone}: inseriscilo qui sotto per confermare il numero.} other {Salvato. Abbiamo inviato codici a {email} e a {phone}: inseriscili qui sotto per confermare entrambi.}}"
-    }
+    },
+    "bioHint": "La tua bio (una breve riga su di te o su ciò che crei) si trova in <link>Impostazioni account</link>."
   },
   "contactVerification": {
     "heading": "Conferma i tuoi dati di contatto",
@@ -440,7 +451,7 @@
       "label": "Dove spedisci, e quanto tempo ci vuole",
       "tipLabel": "Quanto dettaglio dare",
       "tipBody": "Raggruppa le destinazioni come spedisci davvero: una riga per il tuo paese, una per il resto dell’UE, una per tutto il resto può bastare. Lascia vuoto il costo se varia.",
-      "flatRate": "Ogni tariffa si applica una volta per ordine, qualunque siano quantità e peso. Gli acquirenti ordinano un prodotto alla volta: il carrello non c’è ancora.",
+      "costAndRate": "Ogni riga ha due prezzi. Il costo di spedizione è il testo che gli acquirenti leggono sulla tua pagina prodotto, ad esempio «9,00 €». La tariffa è ciò che il checkout addebita davvero, una volta per ordine, qualunque siano quantità e peso. Il checkout consegna solo verso una riga che ha una tariffa e dei paesi.",
       "empty": "Non c’è ancora nulla. Gli acquirenti non vedono tempi di consegna finché non aggiungi una riga.",
       "areaLabel": "Destinazione {number}",
       "areaPlaceholder": "es. Resto dell’UE",
@@ -450,7 +461,6 @@
       "costPlaceholder": "es. 9,00 €",
       "rateLabel": "Tariffa {number}",
       "ratePlaceholder": "es. 4,50",
-      "rateHint": "Lasciare vuoto per solo visualizzazione.",
       "countriesLabel": "Paesi {number}",
       "countriesNone": "Nessun paese",
       "everywhereElse": "Ovunque altro",
@@ -461,13 +471,12 @@
       "needsRate": "Il checkout non può usare questa riga finché non ha sia una tariffa sia un paese. Gli acquirenti la leggono comunque nella pagina prodotto."
     },
     "rates": {
-      "title": "Tariffe di spedizione",
-      "description": "I prezzi di spedizione applicati al checkout, così gli acquirenti vedono il totale prima di pagare.",
+      "title": "Valuta e spedizione gratuita",
+      "description": "La valuta in cui il checkout addebita le tue tariffe, e quando la consegna è gratuita. La tariffa di ogni destinazione si imposta in Spedizione, qui sopra.",
       "currencyLabel": "Valuta delle tariffe",
       "freeOverLabel": "Spedizione gratuita oltre",
       "freeOverPlaceholder": "es. 50,00",
-      "freeOverHint": "Quando il totale dell'ordine raggiunge questo importo, la consegna è gratuita.",
-      "hint": "Queste tariffe sono quelle addebitate al checkout. Lascia vuota la tariffa di una destinazione per mantenerla solo come visualizzazione."
+      "freeOverHint": "Quando il totale dell'ordine raggiunge questo importo, la consegna è gratuita."
     },
     "notes": {
       "label": "Altro sulla spedizione",
@@ -479,9 +488,9 @@
     },
     "returnsWindow": {
       "label": "Periodo di reso",
-      "tipLabel": "Cosa copre già il diritto previsto dalla legge",
+      "tipLabel": "Cosa la legge garantisce già agli acquirenti",
       "tipBody": "Vendere a distanza ad acquirenti UE dà loro 14 giorni per cambiare idea e una garanzia legale di due anni sui difetti, qualunque cosa tu scelga qui. Le tue pagine prodotto indicano già entrambi, quindi questo è ciò che offri in più.",
-      "none": "Nessuno oltre al diritto previsto dalla legge",
+      "none": "Niente oltre a quanto richiesto dalla legge",
       "days": "{days, plural, one {# giorno} many {# giorni} other {# giorni}}",
       "statutoryMinimum": "Il minimo previsto dalla legge UE",
       "custom": "Qualcos’altro",
@@ -539,7 +548,8 @@
   "sellerDetails": {
     "bannerLabel": "Dati venditore obbligatori",
     "memberHeadline": "Questo negozio non può ancora pubblicare o vendere.",
-    "memberFix": "Il proprietario deve aggiungere i propri dati venditore nelle sue impostazioni.",
+    "memberFix": "Il proprietario di {storeName} deve aggiungere i propri dati venditore nelle sue impostazioni.",
+    "memberFixGeneric": "Il proprietario deve aggiungere i propri dati venditore nelle sue impostazioni.",
     "addLink": "Aggiungi dati venditore",
     "opensInNewTab": " (si apre in una nuova scheda)",
     "headline": {
@@ -552,7 +562,7 @@
     "reason": "Gli acquirenti devono poter vedere da chi stanno comprando e come contattarti prima di ordinare. Questi dati sono mostrati sulle tue pagine prodotto solo per questo motivo, mai usati per il marketing.",
     "fields": {
       "businessName": {
-        "label": "Ragione sociale o nome",
+        "label": "Il tuo nome o il nome dell’attività",
         "why": "Gli acquirenti devono sapere da chi stanno comprando: la tua ragione sociale, o il tuo nome completo se vendi come persona fisica."
       },
       "address": {
@@ -737,7 +747,7 @@
     },
     "approvals": {
       "title": "Approva da un dispositivo già connesso",
-      "description": "Quando accedi in un nuovo posto, scansiona il codice QR con un telefono in cui hai già effettuato l’accesso e tocca il numero corrispondente. Utile quando la tua passkey è su un altro dispositivo.",
+      "description": "Accedi da un nuovo dispositivo e la tua passkey è su un altro? Un telefono su cui hai già effettuato l’accesso può approvarlo: scansiona il codice QR con quel telefono e tocca il numero corrispondente.",
       "statusOn": "Attiva",
       "statusOff": "Disattivata",
       "turnOn": "Attiva",
@@ -799,7 +809,6 @@
       "emailLabel": "Indirizzo email",
       "emailPlaceholder": "collega@example.com",
       "roleLabel": "Ruolo",
-      "notificationNote": "Le notifiche via email non sono ancora attive: l’invito diventa effettivo quando la persona accede. Potresti volerlo comunicare loro direttamente.",
       "sendButton": "Invia invito"
     },
     "inviteRow": {
@@ -839,13 +848,17 @@
     "empty": "Nessuna app collegata per ora.",
     "connect": {
       "title": "Collega un assistente",
-      "body": "Aggiungi questo indirizzo a Claude o a un’altra app MCP, poi approvalo quando te lo chiede.",
+      "benefit": "Un assistente IA collegato qui può elencare i tuoi prodotti, pubblicare bozze, progettare la tua vetrina, gestire gli sconti e rispondere alle tue domande, il tutto con parole semplici.",
+      "body": "Aggiungi questo indirizzo a Claude o a qualsiasi assistente IA, poi approvalo quando te lo chiede.",
+      "mcpHintLabel": "Informazioni su questo indirizzo",
+      "mcpHint": "Il tuo assistente potrebbe chiederti l’URL di un server MCP: incolla lì questo indirizzo. MCP è lo standard aperto che gli assistenti usano per collegarsi alle app.",
       "copy": "Copia indirizzo",
       "copied": "Copiato",
       "copyFailed": "Impossibile copiare. Seleziona l’indirizzo e copialo tu.",
       "openClaude": "Apri i connettori di Claude",
       "capabilitiesTitle": "Cosa può fare un assistente",
-      "offByDefault": "Disattivato per impostazione predefinita"
+      "offByDefault": "Disattivato per impostazione predefinita",
+      "required": "Obbligatorio"
     },
     "lastUsed": "Ultimo utilizzo {when}",
     "neverUsed": "Non ancora usata",
@@ -858,15 +871,21 @@
       "metadataTitle": "Collega un’app",
       "title": "Collegare {app} al tuo negozio?",
       "sendsTo": "L’accesso va a <strong>{host}</strong>",
+      "sendsToTipLabel": "Perché questo indirizzo è importante",
+      "sendsToTipBody": "Un’app può darsi qualsiasi nome, ma l’accesso va sempre e solo a questo indirizzo, e un impostore non può falsificarlo.",
       "store": "Negozio",
+      "storeHint": "Viene condiviso solo il negozio che scegli. Gli altri tuoi negozi restano privati.",
       "scopesTitle": "Cosa può fare",
       "note": "Collega solo se hai avviato tu questa richiesta da {app}. Puoi scollegarla in qualsiasi momento dalle Impostazioni.",
+      "stepUpDescription": "Collegare {app} gli dà accesso al tuo negozio. Inserisci il codice attuale della tua app di autenticazione per confermare che sei tu.",
       "approve": "Collega",
       "approving": "Collegamento…",
-      "deny": "Annulla",
+      "deny": "Non collegare",
+      "denyHint": "Non collegare ti riporta su {app} e gli comunica che hai rifiutato.",
       "connected": "Collegata. Ti riportiamo su {app}…",
       "refusedTitle": "Questa richiesta non è affidabile",
-      "refusedBody": "L’app che ti ha mandato qui non è configurata correttamente. Non è stato collegato nulla."
+      "refusedBody": "L’app che ti ha mandato qui non è configurata correttamente. Non è stato collegato nulla.",
+      "goToStore": "Vai al tuo negozio"
     },
     "scopes": {
       "storeRead": {
@@ -915,12 +934,12 @@
       },
       "destructive": {
         "label": "Eliminare elementi",
-        "hint": "Eliminare prodotti, vetrine e sconti, e sostituire le chiavi di incorporamento. Non si può annullare."
+        "hint": "Eliminare prodotti, vetrine e sconti, e ottenere nuovi codici per il sito. Non si può annullare."
       }
     },
     "app": {
       "capabilitiesLabel": "Cosa può fare {app}",
-      "changeHint": "Per cambiarlo, scollegala e ricollegala."
+      "changeHint": "Per cambiare cosa può fare {app}, scollegala qui, poi ricollegala da {app} e scegli di nuovo quando la approvi."
     }
   }
 }

@@ -332,7 +332,7 @@ export function PredictionsLab() {
 
   const now = new Date();
   const recent = products.map(toRecent);
-  const suggested = predictProductDefaults(recent, PROFILES);
+  const suggested = predictProductDefaults(recent, PROFILES, businessCountry || undefined);
   const discountsSaid = predictDiscountDefaults(discounts.map(toDiscount));
   const habits = carrierHabits(shipments);
   const restocks = forecastRestocks(

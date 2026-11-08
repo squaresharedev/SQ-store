@@ -782,3 +782,53 @@ could hide or publish reviews through `review_set_visibility` because it
 checked `store.read`. It checks `products.write`, in the migration (line 388)
 and in production. The `store.read` it saw belongs to the tables' SELECT
 policies.
+
+## 5. Third pass, 2026-11-07: input sanitization and rate-limit coverage
+
+Asked: every input, checked for any way to run code anywhere but the
+author's own machine, and every entry point checked for a rate limit. Three
+reviewers swept browser-side injection, server-side injection and limiter
+coverage; every claim below was re-read against the source. Code is left
+UNCOMMITTED for review, as in the earlier passes.
+
+**Fixed:**
+
+| # | Severity | Finding | Fix |
+|---|---|---|---|
+| 16 | Medium | CSV exports (orders, reviews, analytics) quoted a cell only for `,` `"` and line breaks. Excel in a comma-decimal locale (cs, de, pl, fr, ...) splits a double-clicked CSV on `;`, so a buyer- or seller-typed `Ada;=HYPERLINK(...)` became a second cell holding a live formula on the seller's machine | `lib/format/csv.ts` quotes `;` too, and the formula guard also catches a formula after leading spaces and the full-width `＝＋－＠`. `tests/unit/orders-csv.test.ts` |
+| 17 | Low | `/oauth/revoke` (public, no auth) buffered the whole body before checking its 4 KB cap, and ran a lookup for any string | `readBoundedText`, and only a token shaped like ours (`isCredential`, `lib/agent/oauth/crypto.ts`) reaches the database. `tests/unit/agent/request-bounds.test.ts` |
+| 18 | Low | `/mcp` had no body cap (the inline-image comment assumed one) and parsed the body twice: a token holder could make the Worker buffer the platform maximum per call | Read once, up to 5 MB (`MCP_REQUEST_BYTES_MAX`), 413 past it; the SDK gets the same bytes. Same test file |
+| 19 | Low | No limiter on: the product photo proxy (`api/products/[id]/photo`), the Stripe Connect return (one Stripe read on the platform key per hit), accepting a team invite (both surfaces) | `productPhoto` budget; `billingRead` on the Connect refresh (over it, the page shows what we last knew); `teamMembership` in `lib/team/accept.ts` |
+| 20 | Hardening | `lib/discounts/public.ts` had its own PostgREST quoting helper that escaped nothing (its callers only pass ISO timestamps) | Uses the shared `quotedFilterValue` |
+| 21 | Low | Home's `/api/waitlist` (forwards to n8n) and `/api/consent-log` had no limit | Workers Rate Limiting bindings (`WAITLIST_LIMITER` 5/min, `CONSENT_LIMITER` 20/min per client, IPv6 as its /64) in Home `wrangler.jsonc` + `src/lib/rate-limit.ts`; fail open. Not deployed |
+
+**Checked and sound (no change):** no raw-HTML sink in Store (React 19 SSR
+escapes `</script` and `</style` in raw-text elements, checked by rendering;
+JSON-LD also escapes `<`); every email is plain text, and SMTP bodies are
+base64 with RFC 2047 headers, so no header or `DATA` injection; storefront
+config, colours and fonts are re-validated on every read path (`parseStoredStorefrontConfig`
+in the embed, hosted page, buyer face and gates); custom fonts take a derived
+family name and a gated URL; seller URLs are https-only on the read side; SVGs
+are refused if scriptable, stored as `attachment` and only drawn through
+`<img>`; the photo proxy passes rasters only; `safeInternalPath` covers every
+redirect; every user-text PostgREST filter goes through `quotedFilterValue` /
+`escapeIlike`; no dynamic SQL takes a parameter; server fetches of user URLs go
+through `isPublicHttpsUrl` per hop; object keys are server-built and sanitized;
+webhooks verify signatures on the raw bounded body first; Content-Disposition
+names are server-built.
+
+**Left unlimited on purpose:** cheap reads of the caller's own data
+(notification snapshot and bootstrap, roster and storefront pages), sign-out,
+`setLocale`, `cancelAccountDeletion` (the undo of a destructive action must
+never be refused), `acceptLegal` (on the Terms gate's critical path; an
+idempotent upsert), `/api/csp-report` (already capped per request; a limiter
+would add a database write per report). Google sign-in and the passkey option
+calls make no server-side state (a URL; a sealed slip), so a reviewer's "costly"
+flag on them was rejected. For a raw request flood on public endpoints the
+right tool is a Cloudflare rate-limiting rule at the edge, not a database
+limiter.
+
+**Still open from earlier passes (owner):** `20261105_write_bounds.sql` is not
+applied (checked live 2026-11-07: `guard_anonymous_insert_rate` absent), so
+anyone with the public key can still insert waitlist and consent rows straight
+into PostgREST without limit, past Home's new route limits.

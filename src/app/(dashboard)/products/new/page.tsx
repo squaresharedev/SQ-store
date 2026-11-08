@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { ProductFormView } from "@/components/products/ProductFormView";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
+import { getSellerIdentity, getTraderIdentityStatus } from "@/lib/settings/seller-identity";
+import { checkoutProviderFor } from "@/lib/checkout/availability";
 import { getShippingChoices } from "@/lib/storefront/queries";
 import { getAddOnHabits, listAddOnChoices } from "@/lib/products/add-on-choices";
 import { predictProductDefaults } from "@/lib/predictions";
@@ -83,6 +84,11 @@ export default async function NewProductPage({
 
   // The shell has already read this store's plan for this request (cached).
   const ai = account ? await aiWritingFor(account.accountId, account.userId) : NO_AI_WRITING;
+  // The store's business country prices its first product (lib/predictions
+  // homeCurrency). A read that fails leaves the usual default.
+  const seller = account ? await getSellerIdentity(account.accountId).catch(() => null) : null;
+  // Where the buy button goes, as the form says it (cta-target.ts's order).
+  const checkoutOpen = account ? (await checkoutProviderFor(account.accountId)) !== null : false;
 
   return (
     <ProductFormView
@@ -99,8 +105,10 @@ export default async function NewProductPage({
       suggested={predictProductDefaults(
         recentProducts,
         shippingChoices.profiles.map((profile) => profile.id),
+        seller?.country,
       )}
       ai={ai}
+      checkoutOpen={checkoutOpen}
     />
   );
 }

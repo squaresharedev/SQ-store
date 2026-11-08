@@ -130,9 +130,9 @@ async function freeCellCentre(page: Page) {
 /** Put one shape on the board. Free cells are only drawn once the grid has
  *  something in it; an empty storefront shows its empty state instead. */
 async function addSquare(page: Page) {
-  await page.getByRole("button", { name: "Add element", exact: true }).click();
+  await page.getByRole("button", { name: "Add shape or image", exact: true }).click();
   await page
-    .getByRole("menu", { name: "Elements" })
+    .getByRole("menu", { name: "Shapes and images" })
     .getByRole("menuitem", { name: "All shapes" })
     .click();
   await page.getByRole("button", { name: "Add square" }).click();
@@ -143,7 +143,7 @@ async function addSquare(page: Page) {
   await page.getByRole("button", { name: /close shape panel/i }).click();
 }
 
-const NOTICE = /For the best editing experience/;
+const NOTICE = /Everything works here/;
 const DISMISS = "Dismiss the small-screen editing notice";
 
 test.describe("the storefront editor as a phone-only surface", () => {
@@ -200,8 +200,8 @@ test.describe("the storefront editor as a phone-only surface", () => {
     await settle(page);
     await openDesigner(page);
 
-    await page.getByRole("button", { name: "Add element", exact: true }).click();
-    const menu = page.getByRole("menu", { name: "Elements" });
+    await page.getByRole("button", { name: "Add shape or image", exact: true }).click();
+    const menu = page.getByRole("menu", { name: "Shapes and images" });
     await expect(menu).toBeVisible();
 
     // Centred on the BUTTON (third of eight controls) the row's left edge
@@ -223,7 +223,7 @@ test.describe("the storefront editor as a phone-only surface", () => {
     // pop into the space this menu already fills, and the menu is drawn on top
     // of it. A label nobody can read is not a label.
     const tips = await page.evaluate(() => {
-      const button = document.querySelector<HTMLElement>('[aria-label="Add element"]');
+      const button = document.querySelector<HTMLElement>('[aria-label="Add shape or image"]');
       return button ? button.querySelectorAll("span[aria-hidden='true']").length : -1;
     });
     expect(tips).toBe(0);
@@ -279,8 +279,8 @@ test.describe("the storefront editor as a phone-only surface", () => {
 
     // Global settings: the sheet takes 55vh off the bottom of the screen, which
     // is the exact strip this bar floats over.
-    await page.getByRole("button", { name: "Design settings" }).click();
-    const closeSettings = page.getByRole("button", { name: /close design settings/i });
+    await page.getByRole("button", { name: "Storefront style" }).click();
+    const closeSettings = page.getByRole("button", { name: /close storefront style/i });
     await expect(closeSettings).toBeVisible();
     await expect(toolbar).toBeHidden();
 
@@ -327,9 +327,9 @@ test.describe("the storefront editor as a phone-only surface", () => {
     await settle(page);
     await openDesigner(page);
 
-    await page.getByRole("button", { name: "Design settings" }).click();
+    await page.getByRole("button", { name: "Storefront style" }).click();
     await expect(
-      page.getByRole("button", { name: /close design settings/i }),
+      page.getByRole("button", { name: /close storefront style/i }),
     ).toBeVisible();
 
     // Looking away from a sheet has to be enough to close it. Pressing near the
@@ -339,7 +339,7 @@ test.describe("the storefront editor as a phone-only surface", () => {
     await page.mouse.click(main.x + main.width / 2, main.y + 12);
 
     await expect(
-      page.getByRole("button", { name: /close design settings/i }),
+      page.getByRole("button", { name: /close storefront style/i }),
     ).toHaveCount(0);
     await expect(page.getByRole("toolbar", { name: "Editor tools" })).toBeVisible();
   });

@@ -1,7 +1,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import type { Locale } from "@/i18n/locales";
 import { cn } from "@/lib/utils";
-import { cardClass, eyebrowClass } from "@/components/ui/surface-styles";
+import { sharpCardClass, eyebrowClass } from "@/components/ui/surface-styles";
 import { formatCents } from "@/lib/format/money";
 import { formatOrderDate } from "@/lib/format/date";
 import type { Balance, MoneyAmount, UpcomingPayout } from "@/lib/payments/types";
@@ -70,7 +70,7 @@ export function BalanceSummary({
   const locale = useLocale();
   const available = formatBuckets(balance.available, locale);
   return (
-    <section className={cn(cardClass, "grid grid-cols-1 lg:grid-cols-[3fr_2fr]")}>
+    <section className={cn(sharpCardClass, "grid grid-cols-1 lg:grid-cols-[3fr_2fr]")}>
       <div className="p-5 sm:p-6">
         <p className={cn(eyebrowClass, "tracking-widest")}>{t("available.label")}</p>
         {available ? (

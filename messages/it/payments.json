@@ -2,6 +2,7 @@
   "pageTitle": "Pagamenti",
   "soon": "Presto",
   "bankOnFile": "Il tuo conto bancario",
+  "invoicesPointer": "Le fatture del tuo piano Square Share si trovano in Impostazioni, sotto <link>Piano e fatturazione</link>.",
   "balance": {
     "available": {
       "label": "Disponibile",
@@ -24,10 +25,31 @@
       "hint": "La quota di Square Share sulle tue vendite, al netto dei rimborsi"
     }
   },
+  "earnings": {
+    "label": "Guadagnato, ultimi {days} giorni",
+    "labelOn": "Guadagnato fino al {date}",
+    "vsBefore": "rispetto a {amount} nei {days} giorni precedenti",
+    "range": "Periodo",
+    "rangeShort": "{days} g",
+    "rangeLong": "Ultimi {days} giorni",
+    "legendNow": "Questi {days} giorni",
+    "legendBefore": "I {days} precedenti",
+    "today": "Oggi",
+    "empty": "La tua prima vendita darà il via a questa linea.",
+    "emptyRange": "Nessuna vendita negli ultimi {days} giorni.",
+    "otherCurrencies": "In {currency}. Le vendite in altre valute non sono conteggiate qui."
+  },
+  "trends": {
+    "gross": "Vendite lorde",
+    "sales": "Vendite",
+    "costs": "Rimborsi e commissioni",
+    "paidOut": "Bonificato",
+    "noBefore": "Primo periodo, ancora nessun confronto"
+  },
   "connection": {
     "label": "Connessione Stripe",
     "comingSoonTitle": "Ricevere pagamenti tramite Stripe è in arrivo",
-    "comingSoonBody": "Nel frattempo, gli acquirenti ti pagano tramite il link di acquisto del tuo prodotto, o scrivendoti via email.",
+    "comingSoonBody": "Nel frattempo, gli acquirenti ti pagano direttamente. Il pulsante di acquisto di un prodotto apre il <buyLink>link di acquisto</buyLink> che gli assegni (il tuo checkout), oppure, se non ne ha uno, invia un’email al tuo <email>indirizzo di contatto</email>.",
     "connectTitle": "Collega Stripe per ricevere pagamenti",
     "connectBody": "I bonifici vanno direttamente sul tuo conto bancario. La configurazione avviene in sicurezza su Stripe: non vediamo né conserviamo mai i dati del tuo conto.",
     "connectButton": "Collega con Stripe",

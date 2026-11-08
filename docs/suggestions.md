@@ -105,7 +105,7 @@ Add one pure function in `lib/predictions.ts`, built on `suggestions/rules.ts` w
 - **The backstop:** a suggestion that shares no word with the title or any fact is dropped (`isGrounded`), whatever the model meant. It catches "This scarf is made from" + "wool" when no material was given, which got past the instructions in 1 run of 3.
 - **Model and settings:** effort `low`, thinking left on, `max_tokens` 2,000, a 5 s timeout. Thinking off was no faster (both about 1.2 s) and filled gaps with guesses: "made from wool", "warm and cosy", "on a gentle cycle", "suits all skin types".
 - **Measured** (16 cases, 6 languages, 3 runs after tuning): median about 1.0 s, p90 about 1.6 s, about $0.00016 a suggestion. Two runs had 0 failing. One flagged "a PDF file to download and print" for a sewing pattern, a mild added use, not a claim.
-- **Off switch:** `profiles.ai_suggest_as_you_type`, per person, on by default. "Turn off" sits under the field while it is in use; Settings › Plan & billing turns it back on.
+- **Off switch:** `profiles.ai_suggest_as_you_type`, per person, on by default. "Turn off" sits under the field, in sight before anyone types; the toast it raises opens Settings › Plan & billing, which turns it back on.
 - **The eval:** `COMPLETE_LIVE_TEST=1 ANTHROPIC_API_KEY=... npx vitest run --project unit tests/unit/complete-listing.live.test.ts`, with `COMPLETE_TABLE_FILE=<path>` and `COMPLETE_EVAL_THINKING=adaptive|off` like the draft's.
 
 ## The AI credit
@@ -175,7 +175,7 @@ The fixes:
 - **No invented claims.** The instructions forbid anything the listing does not say. That covers materials, origin, "handmade", certifications, health or safety claims, and environmental or ethical claims; generic environmental claims are unlawful under Directive (EU) 2024/825, applied since 27 September 2026. It also covers delivery, scarcity, reviews, competitor comparisons and superlatives. The eval checks this in ten languages.
 - **The seller publishes it.** The chip says "with AI", the hint says it is an AI draft to check, and the done label says "Written by AI". Nothing reaches buyers until the seller saves. The Terms already make sellers solely responsible for their listings, and the save runs the usual automatic content check.
 - **GDPR.**
-  - Only the listing's own words are sent: when the seller taps a chip, and, with suggestions as you type on (the default on Pro), while they type a description. The line under the field says so whenever it has focus, and turns it off.
+  - Only the listing's own words are sent: when the seller taps a chip, and, with suggestions as you type on (the default on Pro), while they type a description. The line under the field says so, focused or not, and turns it off.
   - Nothing is stored by us beyond what the seller saves.
   - Anthropic is already our processor for the content check: commercial terms with a DPA and SCCs, deletion within 30 days, no training by default.
   - The legal basis is the contract with the Pro seller (Art. 6(1)(b)).

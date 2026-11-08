@@ -26,24 +26,31 @@ export type SuggestDescription = (request: DescribeRequest) => Promise<{ ok: tru
  * hint as every other suggestion (ui/SuggestionChip), so it reads as one more
  * of them, never applied by itself.
  *
- * Offered only when there is something to write from (canDescribe): a title
- * alone has nothing an honest draft could add. A draft that arrives after the
- * seller has typed in the field is dropped: the AI never writes over them.
+ * Shown once there is a title, so a seller knows it is there. Until there is
+ * something to write from (canDescribe: a title alone has nothing an honest
+ * draft could add), or while the month's credit is spent, it is dimmed and
+ * says why on hover and focus, in the words the action would refuse with. A
+ * draft that arrives after the seller has typed in the field is dropped: the
+ * AI never writes over them.
  */
 export function DescriptionAiChip({
   title,
   description,
   facts,
+  creditUsed = false,
   onChange,
   suggest = suggestProductDescription,
 }: {
   title: string;
   description: string;
   facts: readonly ListingFact[];
+  /** The month's AI credit is spent (lib/ai-suggestions.ts aiWritingFor). */
+  creditUsed?: boolean;
   onChange: (description: string) => void;
   suggest?: SuggestDescription;
 }) {
   const t = useTranslations("Products.form.ai");
+  const tErrors = useTranslations("Errors.ai");
   const locale = useLocale();
   const showError = useActionErrorToast();
   const [busy, setBusy] = useState(false);
@@ -65,7 +72,24 @@ export function DescriptionAiChip({
     facts: [...facts],
     language: locale,
   });
-  if (!busy && !done && (!request.title || !canDescribe(request))) return null;
+  if (!busy && !done && !request.title) return null;
+  // Why a tap would be refused right now: the spent credit outranks the
+  // missing facts, since adding facts would not bring the credit back.
+  const blocked =
+    busy || done
+      ? null
+      : creditUsed
+        ? `${tErrors("creditUsed.message")} ${tErrors("creditUsed.fix")}`
+        : canDescribe(request)
+          ? null
+          : `${tErrors("tooLittle.message")} ${tErrors("tooLittle.fix")}`;
+  if (blocked) {
+    return (
+      <div className="flex" data-description-ai="">
+        <UnavailableChip label={t(mode === "write" ? "write" : "improve")} why={blocked} />
+      </div>
+    );
+  }
 
   async function apply() {
     const before = description;
@@ -114,25 +138,39 @@ export function DescriptionAiChip({
   );
 }
 
+/** The chip while it cannot be asked: dimmed, but focusable, so the reason
+ *  reaches a keyboard and a screen reader as well as a pointer. */
+function UnavailableChip({ label, why }: { label: string; why: string }) {
+  const whyId = useId();
+  return (
+    <Tooltip hint label={why} className="max-w-full">
+      <button
+        type="button"
+        aria-disabled="true"
+        aria-describedby={whyId}
+        className={cn(chipButtonClass, "max-w-full cursor-not-allowed opacity-50 hover:bg-background")}
+      >
+        <WandSparkles className="size-3.5 shrink-0" strokeWidth={2} aria-hidden="true" />
+        <span className="truncate">{label}</span>
+      </button>
+      <span id={whyId} hidden>
+        {why}
+      </span>
+    </Tooltip>
+  );
+}
+
 /**
  * The same chip on a plan without AI writing help: what Pro would do right
- * here, shown at the moment the real chip would be (a title and something to
- * write from), and never anything that pops up. It is a link to the plans
- * page in a new tab, so the product being written is not left behind.
+ * here, shown as soon as the real chip would be (once there is a title), and
+ * never anything that pops up. It is a link to the plans page in a new tab,
+ * so the product being written is not left behind.
  */
-export function AiUpsellChip({
-  title,
-  description,
-  facts,
-}: {
-  title: string;
-  description: string;
-  facts: readonly ListingFact[];
-}) {
+export function AiUpsellChip({ title, description }: { title: string; description: string }) {
   const t = useTranslations("Products.form.ai");
   const hintId = useId();
   const mode: DescribeMode = description.trim() ? "improve" : "write";
-  if (!title.trim() || !canDescribe({ mode, text: description, facts: [...facts] })) return null;
+  if (!title.trim()) return null;
   return (
     <div className="flex" data-description-ai-upsell="">
       <Tooltip hint label={t("upsellHint")} className="max-w-full">

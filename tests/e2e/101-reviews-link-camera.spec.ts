@@ -144,7 +144,7 @@ test("the rating on a canvas product page pans the camera to the reviews", async
   // The tile answers to its label, not to a role (see spec 46).
   await page.getByLabel(/^oak lamp\. press enter/i).click();
   await canvasStill(page);
-  await page.getByRole("button", { name: /^open the buyer flow for oak lamp$/i }).click();
+  await page.getByRole("button", { name: /^open the product page for oak lamp$/i }).click();
   const artboard = `[data-artboard-id="${oak}"]`;
   const rating = `${artboard} [data-product-rating]`;
   const reviews = `${artboard} [data-product-section='reviews']`;

@@ -93,7 +93,7 @@
     "createStorefronts": "Zbyt wiele prób utworzenia witryn w krótkim czasie.",
     "saveStorefronts": "Zbyt wiele prób zapisania witryn w krótkim czasie.",
     "deleteStorefronts": "Zbyt wiele prób usunięcia witryn w krótkim czasie.",
-    "rotateEmbedKeys": "Zbyt wiele zmian kodu do osadzenia w krótkim czasie.",
+    "rotateEmbedKeys": "Zbyt wiele prób uzyskania nowego kodu na stronę w krótkim czasie.",
     "updateStock": "Zbyt wiele prób aktualizacji stanu magazynowego w krótkim czasie.",
     "readProductPageSettings": "Zbyt wiele prób odczytania ustawień strony produktu w krótkim czasie.",
     "requestReview": "Zbyt wiele próśb o ponowne sprawdzenie w krótkim czasie.",
@@ -119,7 +119,7 @@
     "verifyDocumentUpload": "Nie udało się zweryfikować przesłanego dokumentu z powodu problemu po naszej stronie.",
     "verifyFileUpload": "Nie udało się zweryfikować przesłanego pliku z powodu problemu po naszej stronie.",
     "verifyFontUpload": "Nie udało się zweryfikować przesłanej czcionki z powodu problemu po naszej stronie.",
-    "verifyElementUpload": "Nie udało się zweryfikować przesłanego elementu z powodu problemu po naszej stronie.",
+    "verifyElementUpload": "Nie udało się zweryfikować przesłanego obrazu z powodu problemu po naszej stronie.",
     "verifyBackgroundImage": "Nie udało się zweryfikować obrazu tła z powodu problemu po naszej stronie.",
     "verifyFont": "Nie udało się zweryfikować czcionki z powodu problemu po naszej stronie.",
     "verifyImage": "Nie udało się zweryfikować obrazu z powodu problemu po naszej stronie.",
@@ -127,7 +127,7 @@
     "saveStorefront": "Nie udało się zapisać twojej witryny z powodu problemu po naszej stronie.",
     "saveEmbedSettings": "Nie udało się zapisać ustawień osadzenia z powodu problemu po naszej stronie.",
     "deleteStorefront": "Nie udało się usunąć witryny z powodu problemu po naszej stronie.",
-    "rotateEmbedKey": "Nie udało się wygenerować nowego klucza osadzenia z powodu problemu po naszej stronie.",
+    "rotateEmbedKey": "Nie udało się wygenerować nowego kodu na stronę z powodu problemu po naszej stronie.",
     "saveStockSettings": "Nie udało się zapisać ustawień stanu magazynowego z powodu problemu po naszej stronie.",
     "checkSellerDetails": "Nie udało się sprawdzić danych sprzedawcy z powodu problemu po naszej stronie.",
     "loadProductPageSettings": "Nie udało się wczytać ustawień strony produktu z powodu problemu po naszej stronie.",
@@ -166,8 +166,8 @@
     "message": "Nie możesz publikować ani sprzedawać, dopóki dane sprzedawcy nie są kompletne.",
     "action": "Dodaj dane sprzedawcy",
     "fix": {
-      "add": "{fields, select, businessName {Dodaj nazwę przedsiębiorcy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} address {Dodaj adres firmy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} email {Dodaj e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} businessName_address {Dodaj nazwę przedsiębiorcy i adres firmy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} businessName_email {Dodaj nazwę przedsiębiorcy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} address_email {Dodaj adres firmy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} other {Dodaj nazwę przedsiębiorcy, adres firmy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.}}",
-      "addAndConfirm": "{fields, select, businessName {Dodaj nazwę przedsiębiorcy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź e-mail kontaktowy za pomocą kodu, który na niego wysyłamy.} address {Dodaj adres firmy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź e-mail kontaktowy za pomocą kodu, który na niego wysyłamy.} email {Dodaj e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź go za pomocą kodu, który na niego wysyłamy.} businessName_address {Dodaj nazwę przedsiębiorcy i adres firmy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź e-mail kontaktowy za pomocą kodu, który na niego wysyłamy.} businessName_email {Dodaj nazwę przedsiębiorcy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź go za pomocą kodu, który na niego wysyłamy.} address_email {Dodaj adres firmy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź go za pomocą kodu, który na niego wysyłamy.} other {Dodaj nazwę przedsiębiorcy, adres firmy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź go za pomocą kodu, który na niego wysyłamy.}}",
+      "add": "{fields, select, businessName {Dodaj swoje imię i nazwisko lub nazwę firmy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} address {Dodaj adres firmy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} email {Dodaj e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} businessName_address {Dodaj swoje imię i nazwisko lub nazwę firmy oraz adres firmy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} businessName_email {Dodaj swoje imię i nazwisko lub nazwę firmy oraz e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} address_email {Dodaj adres firmy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.} other {Dodaj swoje imię i nazwisko lub nazwę firmy, adres firmy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy, a potem opublikuj.}}",
+      "addAndConfirm": "{fields, select, businessName {Dodaj swoje imię i nazwisko lub nazwę firmy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź e-mail kontaktowy za pomocą kodu, który na niego wysyłamy.} address {Dodaj adres firmy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź e-mail kontaktowy za pomocą kodu, który na niego wysyłamy.} email {Dodaj e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź go za pomocą kodu, który na niego wysyłamy.} businessName_address {Dodaj swoje imię i nazwisko lub nazwę firmy oraz adres firmy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź e-mail kontaktowy za pomocą kodu, który na niego wysyłamy.} businessName_email {Dodaj swoje imię i nazwisko lub nazwę firmy oraz e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź ten e-mail za pomocą kodu, który na niego wysyłamy.} address_email {Dodaj adres firmy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź ten e-mail za pomocą kodu, który na niego wysyłamy.} other {Dodaj swoje imię i nazwisko lub nazwę firmy, adres firmy i e-mail kontaktowy w sekcji Ustawienia › Firma i dane sprzedawcy i potwierdź ten e-mail za pomocą kodu, który na niego wysyłamy.}}",
       "confirm": "Potwierdź e-mail kontaktowy: wyślij sobie kod w sekcji Ustawienia › Firma i dane sprzedawcy, a potem wpisz go tam.",
       "complete": "Uzupełnij sekcję Ustawienia › Firma i dane sprzedawcy, a potem opublikuj."
     }
@@ -211,7 +211,7 @@
     "wrongPasswordGoogle": "To nie jest hasło do Square Share dla tego konta. Logujesz się przez Google, więc użyj zamiast tego opcji „Potwierdź przez Google”.",
     "passwordCheckUnavailable": "Nie udało się teraz sprawdzić hasła. Spróbuj ponownie za chwilę.",
     "reauthRequired": "Ze względów bezpieczeństwa zaloguj się ponownie, zanim włączysz uwierzytelnianie dwuskładnikowe.",
-    "setupRateLimited": "To bardzo dużo prób konfiguracji. Spróbuj ponownie nieco później.",
+    "setupRateLimited": "Zbyt wiele prób konfiguracji. Odczekaj minutę i spróbuj ponownie.",
     "tooManyFactors": "To konto ma już maksymalną liczbę aplikacji uwierzytelniających. Najpierw usuń jedną.",
     "setupFailed": "Nie udało się teraz rozpocząć konfiguracji. Spróbuj za chwilę.",
     "setupUnavailable": "Konfiguracja uwierzytelniania dwuskładnikowego jest teraz niedostępna. Spróbuj ponownie później.",
@@ -226,7 +226,7 @@
   "settings": {
     "usernameTaken": "Ta nazwa użytkownika jest zajęta. Spróbuj innej.",
     "emailUnchanged": "To już jest twój e-mail.",
-    "emailChangeRateLimited": "Zbyt wiele próśb o zmianę e-maila. Odczekaj chwilę przed kolejną próbą.",
+    "emailChangeRateLimited": "Zbyt wiele próśb o zmianę e-maila. Odczekaj minutę i spróbuj ponownie.",
     "emailChangeNeedsPassword": "Podaj aktualne hasło, aby zmienić e-mail.",
     "wrongPassword": "Aktualne hasło jest nieprawidłowe.",
     "passwordCheckUnavailable": "Nie udało się teraz sprawdzić hasła. Spróbuj ponownie.",
@@ -235,7 +235,7 @@
     "passwordUnchanged": "To już jest twoje hasło.",
     "passwordUpdateFailed": "Nie udało się zaktualizować hasła. Spróbuj ponownie.",
     "passwordReauthNeeded": "Ze względów bezpieczeństwa wyloguj się i zaloguj ponownie, a potem zmień hasło.",
-    "resetRateLimited": "Zbyt wiele e-maili resetujących. Odczekaj chwilę przed kolejną próbą.",
+    "resetRateLimited": "Zbyt wiele e-maili resetujących. Odczekaj minutę i spróbuj ponownie.",
     "resetSendRateLimited": "Zbyt wiele żądań. Odczekaj minutę i spróbuj ponownie.",
     "resetFailed": "Nie udało się wysłać e-maila resetującego. Spróbuj ponownie.",
     "contactEmailTakesNoMail": "Domena tego e-maila kontaktowego nie przyjmuje poczty. Sprawdź pisownię albo użyj adresu, na który kupujący faktycznie mogą pisać.",
@@ -294,7 +294,7 @@
     "serviceUnreachable": "Nie udało się połączyć z usługą uwierzytelniania. Spróbuj ponownie.",
     "invalidEmail": "Podaj prawidłowy adres e-mail.",
     "emailRequired": "Podaj swój e-mail.",
-    "tooManyAttempts": "Zbyt wiele prób. Odczekaj chwilę i spróbuj ponownie.",
+    "tooManyAttempts": "Zbyt wiele prób. Odczekaj minutę i spróbuj ponownie.",
     "magicLinkFailed": "Nie udało się wysłać e-maila. Sprawdź połączenie i spróbuj ponownie.",
     "resetEmailRequired": "Podaj e-mail, aby zresetować hasło.",
     "resetEmailFailed": "Nie udało się wysłać e-maila resetującego. Sprawdź połączenie i spróbuj ponownie.",
@@ -332,21 +332,21 @@
       "document": "Ten dokument jest za duży.",
       "file": "Ten plik jest za duży.",
       "font": "Ta czcionka jest za duża.",
-      "element": "Ten element jest za duży."
+      "element": "Ten obraz jest za duży."
     },
     "tooLargeFix": {
       "image": "Użyj obrazu mniejszego niż {maxMb} MB. Skompresuj go lub zmień rozmiar, a potem spróbuj ponownie.",
       "document": "Użyj dokumentu mniejszego niż {maxMb} MB. Skompresuj go lub zmień rozmiar, a potem spróbuj ponownie.",
       "file": "Użyj pliku mniejszego niż {maxMb} MB. Skompresuj go lub zmień rozmiar, a potem spróbuj ponownie.",
       "font": "Użyj czcionki mniejszej niż {maxMb} MB. Skompresuj ją lub zmień rozmiar, a potem spróbuj ponownie.",
-      "element": "Użyj elementu mniejszego niż {maxMb} MB. Skompresuj go lub zmień rozmiar, a potem spróbuj ponownie."
+      "element": "Użyj obrazu mniejszego niż {maxMb} MB. Skompresuj go lub zmień rozmiar, a potem spróbuj ponownie."
     },
     "neverReached": {
       "image": "Obraz nigdy nie dotarł do serwera.",
       "document": "Dokument nigdy nie dotarł do serwera.",
       "file": "Plik nigdy nie dotarł do serwera.",
       "font": "Czcionka nigdy nie dotarła do serwera.",
-      "element": "Element nigdy nie dotarł do serwera."
+      "element": "Obraz nie dotarł do serwera."
     },
     "neverReachedFix": "Sprawdź połączenie internetowe i spróbuj ponownie.",
     "rejected": {
@@ -354,7 +354,7 @@
       "document": "Nie udało się przesłać tego dokumentu.",
       "file": "Nie udało się przesłać tego pliku.",
       "font": "Nie udało się przesłać tej czcionki.",
-      "element": "Nie udało się przesłać tego elementu."
+      "element": "Nie udało się przesłać tego obrazu."
     },
     "rejectedFix": {
       "signedOut": "Zaloguj się ponownie, a potem spróbuj jeszcze raz.",
@@ -365,7 +365,7 @@
   "uploadRoute": {
     "signIn": {
       "image": "Zaloguj się, aby przesyłać obrazy.",
-      "element": "Zaloguj się, aby przesyłać elementy.",
+      "element": "Zaloguj się, aby przesyłać obrazy.",
       "document": "Zaloguj się, aby przesyłać dokumenty.",
       "file": "Zaloguj się, aby przesyłać pliki.",
       "font": "Zaloguj się, aby przesyłać czcionki."
@@ -378,7 +378,7 @@
     },
     "notConfigured": {
       "image": "Przesyłanie obrazów nie jest jeszcze skonfigurowane. Spróbuj ponownie później.",
-      "element": "Przesyłanie elementów nie jest jeszcze skonfigurowane. Spróbuj ponownie później.",
+      "element": "Przesyłanie obrazów jest teraz niedostępne. Spróbuj ponownie później.",
       "document": "Przesyłanie nie jest jeszcze skonfigurowane. Spróbuj ponownie później.",
       "file": "Przesyłanie plików nie jest jeszcze skonfigurowane. Spróbuj ponownie później.",
       "font": "Przesyłanie czcionek nie jest jeszcze skonfigurowane. Spróbuj ponownie później."
@@ -459,28 +459,28 @@
       "document": "Przesyłanie dokumentu nie zostało ukończone.",
       "file": "Przesyłanie pliku nie zostało ukończone.",
       "font": "Przesyłanie czcionki nie zostało ukończone.",
-      "element": "Przesyłanie elementu nie zostało ukończone."
+      "element": "Przesyłanie obrazu nie zostało ukończone."
     },
     "uploadUnfinishedFix": {
       "image": "Wybierz obraz ponownie i prześlij go przed zapisaniem.",
       "document": "Wybierz dokument ponownie i prześlij go przed zapisaniem.",
       "file": "Wybierz plik ponownie i prześlij go przed zapisaniem.",
       "font": "Wybierz czcionkę ponownie i prześlij ją przed zapisaniem.",
-      "element": "Wybierz element ponownie i prześlij go przed zapisaniem."
+      "element": "Wybierz obraz ponownie i prześlij go przed zapisaniem."
     },
     "uploadTooLarge": {
       "image": "Ten obraz jest za duży.",
       "document": "Ten dokument jest za duży.",
       "file": "Ten plik jest za duży.",
       "font": "Ta czcionka jest za duża.",
-      "element": "Ten element jest za duży."
+      "element": "Ten obraz jest za duży."
     },
     "uploadTooLargeFix": {
       "image": "Użyj obrazu mniejszego niż {maxMb} MB, a potem prześlij go ponownie.",
       "document": "Użyj dokumentu mniejszego niż {maxMb} MB, a potem prześlij go ponownie.",
       "file": "Użyj pliku mniejszego niż {maxMb} MB, a potem prześlij go ponownie.",
       "font": "Użyj czcionki mniejszej niż {maxMb} MB, a potem prześlij ją ponownie.",
-      "element": "Użyj elementu mniejszego niż {maxMb} MB, a potem prześlij go ponownie."
+      "element": "Użyj obrazu mniejszego niż {maxMb} MB, a potem prześlij go ponownie."
     },
     "wrongTypeFix": {
       "image": "Użyj obrazu w formacie JPEG, PNG, WebP, GIF lub AVIF.",

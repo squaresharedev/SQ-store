@@ -12,6 +12,7 @@ import {
   CARD_HOVER_EFFECTS,
   DEFAULT_PRODUCT_PAGE_CONFIG,
   PRICE_TAG_POSITIONS,
+  PRODUCT_PAGE_CTA_MAX,
   SALE_BADGES,
   SALE_BADGE_LOOKS,
   CHIP_SCALES,
@@ -43,7 +44,8 @@ import type { StorefrontPageData, StorefrontTileProduct } from "@/types/storefro
 //
 // The card extras: `?hover=<lift|zoom|tilt>`, `&hoverPhoto=1` (the sample's
 // products get a second photo, see withSampleCardExtras), `&buy=<solid|
-// outline|link>`, `&rating=1` and `&lowStock=1`, the last two with the
+// outline|link>` (with `&buyLabel=<words>`, `&buyColor=<hex>` and
+// `&buyText=<hex>` for its own), `&rating=1` and `&lowStock=1`, the last two with the
 // sample's dev-only ratings and stock. `&reviews=0` turns the product page's
 // reviews off, which takes the stars away. `&shown=1` shows the title and
 // price always (the sample reveals them on hover).
@@ -83,6 +85,9 @@ export default async function EmbedFrameDevPage({
     hover?: string;
     hoverPhoto?: string;
     buy?: string;
+    buyLabel?: string;
+    buyColor?: string;
+    buyText?: string;
     rating?: string;
     lowStock?: string;
     reviews?: string;
@@ -106,10 +111,15 @@ export default async function EmbedFrameDevPage({
   const blurFrom = BLUR_DIRECTIONS.find((direction) => direction === query.blurFrom);
   const hover = CARD_HOVER_EFFECTS.find((effect) => effect === query.hover);
   const buy = CARD_BUY_BUTTONS.find((button) => button === query.buy);
+  const buyColor = hexParam(query.buyColor);
+  const buyText = hexParam(query.buyText);
   const extras = {
     ...(hover ? { hoverEffect: hover } : {}),
     ...(query.hoverPhoto === "1" ? { hoverPhoto: true } : {}),
     ...(buy ? { buyButton: buy } : {}),
+    ...(query.buyLabel ? { buyButtonLabel: query.buyLabel.slice(0, PRODUCT_PAGE_CTA_MAX) } : {}),
+    ...(buyColor ? { buyButtonColor: buyColor } : {}),
+    ...(buyText ? { buyButtonTextColor: buyText } : {}),
     ...(query.rating === "1" ? { showRating: true } : {}),
     ...(query.lowStock === "1" ? { showLowStock: true } : {}),
     ...(query.shown === "1" ? ({ titleDisplay: "always", priceDisplay: "always" } as const) : {}),

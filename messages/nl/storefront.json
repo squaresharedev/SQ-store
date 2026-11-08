@@ -91,7 +91,7 @@
     "groups": {
       "theme": "Thema",
       "header": "Koptekst",
-      "typography": "Typografie",
+      "typography": "Lettertype",
       "cards": "Producttegels",
       "soldOut": "Uitverkocht",
       "productPage": "Productpagina",
@@ -100,7 +100,7 @@
     "subtitle": {
       "theme": "Etalage / Thema",
       "header": "Etalage / Koptekst",
-      "typography": "Etalage / Typografie",
+      "typography": "Etalage / Lettertype",
       "cards": "Etalage / Producttegels",
       "soldOut": "Etalage / Uitverkocht",
       "productPage": "Etalage / Productpagina",
@@ -161,7 +161,8 @@
       "cardStarRating": "Sterrenbeoordeling op tegels",
       "cardLowStock": "Label Bijna op",
       "textSpacing": "Letterafstand en regelhoogte",
-      "elementBlur": "Vervaging"
+      "elementBlur": "Vervaging",
+      "phoneLayout": "Indeling voor telefoons"
     }
   },
   "editorSearch": {
@@ -207,31 +208,37 @@
     "emptyHint": "Dit raster is leeg",
     "removed": "Verwijderd door Square Share",
     "pausedInReview": "Gepauzeerd · bij Square Share ter beoordeling",
-    "pausedNeedsChanges": "Gepauzeerd door Square Share · aanpassingen nodig"
+    "pausedNeedsChanges": "Gepauzeerd door Square Share · aanpassingen nodig",
+    "status": {
+      "live": "Online",
+      "pagesOff": "Nog niet online: zet productpagina's aan",
+      "detailsMissing": "Nog niet online: vul je verkopersgegevens in"
+    }
   },
   "embed": {
-    "inDevNotice": "De insluitingswidget is in ontwikkeling en wordt nog niet weergegeven op externe sites. Stel je instellingen hieronder in, zodat je klaar bent om de insluitcode te plakken zodra die beschikbaar is.",
+    "sectionTitle": "Op je eigen website",
+    "inDevNotice": "Dit verschijnt nog niet op andere websites. Stel het nu in, dan is het klaar zodra het beschikbaar is. Je voegt dan ook een korte notitie toe aan je privacybeleid: wij geven je de tekst.",
     "title": "Deze etalage delen",
-    "description": "Stuur mensen een link naar \"{name}\", of plak een insluitcode op je eigen site om hem daar te tonen.",
+    "description": "Stuur mensen een link naar \"{name}\", of plak de websitecode in je eigen site om hem daar te tonen.",
     "steps": {
       "site": "Kies de sites waarop hij verschijnt",
-      "snippet": "Plak de insluitcode in je site",
+      "snippet": "Voeg de websitecode toe aan je site",
       "privacy": "Zet dit in je privacybeleid"
     },
     "required": "Verplicht",
     "enabledLabel": "Tonen op mijn website",
     "showingLabel": "Zichtbaar op je website",
-    "domainsLabel": "Toegestane domeinen",
+    "domainsLabel": "Je websiteadressen",
     "domainsPlaceholder": "jouwsite.com, blog.jouwsite.com",
-    "domainsHint": "Tot {max}, gescheiden door komma's. Plak een URL en we knippen die terug tot het domein.",
-    "sameAsHint": "Neemt de toegestane domeinen van {title} over.",
-    "emptyDomainsWarning": "Voeg minstens één domein toe. Zolang dit leeg is, laadt de etalage nergens, ook al staat insluiten aan.",
+    "domainsHint": "De insluiting laadt alleen op deze sites. Plak een volledige URL en we halen het adres eruit. Maximaal {max}, gescheiden door komma's.",
+    "sameAsHint": "Neemt de websiteadressen van {title} over.",
+    "emptyDomainsWarning": "Voeg minstens één websiteadres toe. Zolang dit leeg is, laadt de etalage nergens, ook al staat insluiten aan.",
     "builderLabel": "Je sitebouwer",
     "builderOther": "Andere site",
     "builderSteps": {
       "other": "Plak de code in de HTML van je pagina, op de plek waar de etalage moet verschijnen.",
       "wordpress": "Voeg een blok “Aangepaste HTML” toe waar de etalage moet verschijnen en plak de code erin.",
-      "squarespace": "Voeg een “Code”-blok toe en plak de code erin. Verschijnt de etalage pas na herladen, kies dan “Alleen iframe”.",
+      "squarespace": "Voeg een “Code”-blok toe en plak de code erin. Verschijnt de etalage pas na herladen, kies dan “Eenvoudige insluiting”.",
       "wix": "Voeg “Embed Code” en daarna “Embed HTML” toe en plak de code erin. Sleep het vak daarna zo hoog als je etalage.",
       "webflow": "Voeg een “Code Embed”-element toe en plak de code erin. Het verschijnt op je gepubliceerde site.",
       "shopify": "Voeg in de thema-editor een sectie “Custom Liquid” toe en plak de code erin.",
@@ -241,21 +248,21 @@
     },
     "snippetKinds": {
       "label": "Soort code",
-      "script": "Script",
-      "iframe": "Alleen iframe"
+      "script": "Volledige insluiting",
+      "iframe": "Eenvoudige insluiting"
     },
-    "snippetReadyHint": "Eén keer plakken is genoeg. De code past zich aan je etalage aan en volgt wat je hier wijzigt.",
-    "iframeHint": "Voor een site die scripts verwijdert. Dit is {height} pixels hoog en scrolt vanbinnen. Kopieer het opnieuw nadat je je domeinen hebt gewijzigd.",
-    "snippetLockedHint": "Schakel insluiten in en voeg minstens één domein toe om de knop Kopiëren te ontgrendelen.",
+    "snippetReadyHint": "Werkt op de meeste sites. Eén keer plakken is genoeg: de code past zich aan je etalage aan en volgt wat je hier wijzigt.",
+    "iframeHint": "Gebruik dit als Volledige insluiting niet op je site verscheen. Dit is {height} pixels hoog en scrolt vanbinnen. Kopieer het opnieuw telkens als je je websiteadressen wijzigt.",
+    "snippetLockedHint": "Schakel insluiten in en voeg minstens één websiteadres toe om de knop Kopiëren te ontgrendelen.",
     "snippetSaveHint": "Sla je instellingen op om de knop Kopiëren te ontgrendelen.",
     "pagesOffHint": "Zet eerst productpagina's aan in de editor. Een klik op een product opent de pagina ervan.",
     "notShowingLabel": "Als de etalage niet verschijnt",
-    "notShowingTip": "Het adres van je site moet bij Toegestane domeinen staan en de site moet https gebruiken. Geplakte code verschijnt op je gepubliceerde site, niet in de editor van een sitebouwer. Wil je hem zien op een voorbeeldadres (zoals jouwsite.webflow.io), voeg dat adres dan ook toe.",
+    "notShowingTip": "Het adres van je site moet bij je websiteadressen hierboven staan en de site moet https gebruiken. Geplakte code verschijnt op je gepubliceerde site, niet in de editor van een sitebouwer. Verschijnt de etalage helemaal niet, probeer dan de codesoort Eenvoudige insluiting. Wil je hem zien op een voorbeeldadres (zoals jouwsite.webflow.io), voeg dat adres dan ook toe.",
     "copySnippet": {
-      "copy": "Insluitcode kopiëren",
-      "copied": "Insluitcode gekopieerd",
-      "failed": "Kopiëren van de insluitcode is mislukt. Selecteer en kopieer hem handmatig.",
-      "cannotCopyYet": "insluitcode kan nog niet worden gekopieerd"
+      "copy": "Websitecode kopiëren",
+      "copied": "Websitecode gekopieerd",
+      "failed": "Kopiëren van de websitecode is mislukt. Selecteer en kopieer hem handmatig.",
+      "cannotCopyYet": "websitecode kan nog niet worden gekopieerd"
     },
     "privacyHint": "Je site laadt deze etalage nu van Square Share, dus je privacybeleid moet dat vermelden. Plak deze tekst erin:",
     "privacyTextLabel": "Privacytekst",
@@ -265,20 +272,21 @@
       "copied": "Privacytekst gekopieerd",
       "failed": "Kopiëren van de tekst is mislukt. Selecteer en kopieer hem handmatig."
     },
-    "snippetKeyLabel": "Insluitingssleutel",
-    "rotateConfirmText": "Vernieuwen genereert een nieuwe sleutel. Elke kopie van de oude insluitcode stopt onmiddellijk met werken, ook op sites die je nog wilt gebruiken: je moet de nieuwe insluitcode overal opnieuw plakken.",
-    "rotateKey": "Sleutel vernieuwen",
-    "rotating": "Vernieuwen…",
-    "revokeHint": "Ergens geplakt waar het niet had gemoeten? Vernieuw de sleutel om elke bestaande insluitcode in te trekken.",
+    "snippetKeyLabel": "Websitecode",
+    "rotateConfirmText": "Een nieuwe code aanvragen schakelt de oude overal uit waar die geplakt is. Op sites waar je de etalage nog wilt tonen, moet je de nieuwe code opnieuw plakken.",
+    "rotateKey": "Nieuwe code aanvragen",
+    "rotating": "Nieuwe code aanvragen…",
+    "revokeHint": "Je websitecode is bedoeld om openbaar te zijn: hij werkt alleen op je websiteadressen. Vraag alleen een nieuwe code aan om elke kopie die al geplakt is uit te schakelen.",
     "saveSettings": "Instellingen opslaan",
     "saving": "Opslaan…",
     "saved": "Insluitingsinstellingen opgeslagen.",
-    "newKeyIssued": "Nieuwe insluitingssleutel gegenereerd.",
-    "newKeyDetail": "Plak de insluitcode overnieuw op elke plek waar deze etalage is ingesloten."
+    "newKeyIssued": "Nieuwe websitecode aangemaakt.",
+    "newKeyDetail": "Plak de websitecode opnieuw op elke plek waar deze etalage is ingesloten."
   },
   "share": {
     "title": "Link naar de etalage",
     "live": "Je etalage heeft een eigen pagina. Iedereen met deze link kan rondkijken, een website is niet nodig.",
+    "searchOff": "Verborgen voor zoekmachines zoals Google.",
     "pagesOff": "Zet productpagina's aan in de editor en deze etalage krijgt een link om te delen.",
     "detailsMissing": "Deze etalage krijgt een link om te delen zodra je verkopersgegevens compleet zijn.",
     "open": "Openen",
@@ -321,7 +329,7 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Productpagina",
-    "closeAriaLabel": "Het koopproces voor {title} sluiten",
+    "closeAriaLabel": "De productpagina voor {title} sluiten",
     "desktopSize": "Desktopformaat",
     "mobileSize": "Mobiel formaat",
     "checkoutLabel": " · Afrekenen",
@@ -331,7 +339,7 @@
   "metadata": {
     "storefronts": {
       "title": "Etalages",
-      "subtitle": "Elke etalage heeft een eigen raster en thema. Maak er zoveel als je nodig hebt, en open er een om te bewerken."
+      "subtitle": "Elke etalage heeft een eigen raster en thema, met een eigen link om te delen. Maak er zoveel als je nodig hebt, en open er een om te bewerken."
     },
     "editor": {
       "title": "Etalage bewerken"
@@ -351,20 +359,20 @@
   "controls": {
     "off": "Uit",
     "layers": "Lagen",
-    "objectCount": "{count, plural, one {1 object} other {# objecten}}",
+    "objectCount": "{count, plural, one {# blok} other {# blokken}}",
     "cardStyle": "Tegelstijl",
     "priceTag": "Prijslabel",
     "theme": "Thema",
-    "canvas": "Canvas",
-    "design": "Ontwerp"
+    "themeHint": "Kleuren, rastergrootte en telefoonindeling",
+    "canvas": "Canvas"
   },
   "designPanel": {
     "tabSelection": "Selectie",
-    "tabDesign": "Ontwerp",
+    "tabDesign": "Hele etalage",
     "show": "Ontwerppaneel tonen",
     "hide": "Ontwerppaneel verbergen",
     "resize": "Ontwerppaneel vergroten of verkleinen",
-    "closeSettings": "Ontwerpinstellingen sluiten",
+    "closeSettings": "Etalagestijl sluiten",
     "scopeLabel": "Bereik van paneel"
   },
   "library": {
@@ -434,10 +442,11 @@
     "sectionPalettes": "Paletten"
   },
   "themePanel": {
-    "accent": "Accent"
+    "accent": "Accent",
+    "accentHint": "Gebruikt voor knoppen, actielabels, koppen en je winkelnaam."
   },
   "panelSearch": {
-    "placeholder": "Zoek een instelling of object",
+    "placeholder": "Zoek een instelling of blok",
     "clear": "Zoekopdracht wissen",
     "noResults": "Niets in de editor komt hiermee overeen.",
     "matchesLabel": "Overeenkomsten"
@@ -488,7 +497,7 @@
     "cornerValueText": "{n, plural, one {# pixels} other {# pixels}}",
     "sharp": "Scherp",
     "circle": "Cirkel",
-    "fineTuning": "Fijnafstelling",
+    "titleSection": "Titel",
     "showTitle": "Titel tonen",
     "titleStyleLabel": "Titelstijl",
     "edgeSpacing": "Randafstand",
@@ -556,12 +565,13 @@
     "label": "Op grotere kaarten",
     "tile": "Meegroeien",
     "cell": "Even groot",
-    "everyCard": "Geldt voor alle kaarten in deze winkel."
+    "everyCard": "Geldt voor prijslabels en actielabels op elke kaart."
   },
   "layout": {
     "canvasWidth": "Canvasbreedte",
     "canvasWidthAriaLabel": "Canvasbreedte in blokken",
     "blocksWide": "{n, plural, one {# blok breed} other {# blokken breed}}",
+    "blocksUnit": "blokken",
     "canvasHeight": "Canvashoogte",
     "heightTip": "Het bord kan niet kleiner worden dan de blokken die er al op staan: sleep eerst een blok omhoog en verkort dan het canvas.",
     "canvasHeightAriaLabel": "Canvashoogte in blokken",
@@ -570,6 +580,11 @@
     "gridDensityAriaLabel": "Rasterdichtheid",
     "gridGapValue": "{n, plural, one {# pixel tussenruimte} other {# pixels tussenruimte}}",
     "noGap": "Geen tussenruimte",
+    "phonesInfoLabel": "Hoe telefoons dit bord tonen",
+    "phonesInfoBody": "Uit: telefoons delen het bord zelf opnieuw in zodat het past. Aan: open de telefoonweergave en sleep blokken of pas hun grootte aan om ze zelf te plaatsen. Het desktopbord blijft zoals het is.",
+    "phonesAutomatic": "Telefoons delen dit bord automatisch in.",
+    "phoneWidth": "Telefoonbreedte",
+    "phoneWidthAriaLabel": "Telefoonbreedte in blokken",
     "showGrid": "Raster tonen",
     "gridInfoLabel": "Wie het raster ziet",
     "gridInfoBody": "Een hulplijn voor jou tijdens het ontwerpen: het toont de lege vakken zodat je ziet waar een blok terechtkomt. Kopers zien het nooit."
@@ -588,7 +603,8 @@
     "angle": "{n}°",
     "layerLabel": "Laag",
     "layerInfoLabel": "Hoe lagen werken",
-    "layerInfoBody": "Lagen bepalen alleen wat bovenop wordt getekend waar blokken elkaar overlappen; de volgorde die een schermlezer aanhoudt, verandert nooit.{multi, select, true { Deze selectie behoudt haar eigen volgorde binnen de stapel terwijl ze wordt verplaatst.} other {}}{stacked, select, true { Alt-klik op een stapel op het canvas om het onderliggende blok te bereiken.} other {}}",
+    "layerInfoBody": "Lagen bepalen alleen wat bovenop wordt getekend waar blokken elkaar overlappen; de volgorde die een schermlezer aanhoudt, verandert nooit.{multi, select, true { Deze selectie behoudt haar eigen volgorde binnen de stapel terwijl ze wordt verplaatst.} other {}}",
+    "stackedHint": "Alt-klik om het onderliggende blok te selecteren. Tik op een touchscreen nog een keer op de stapel.",
     "blocksSelected": "{count, plural, one {# blok geselecteerd} other {# blokken geselecteerd}}",
     "layerOf": "Laag {index} van {total}",
     "blockLayerLabel": "Laag van blok",
@@ -596,7 +612,13 @@
     "sendBackward": "Eén laag naar achteren",
     "bringForward": "Eén laag naar voren",
     "bringToFront": "Naar voorgrond",
-    "seeAllLayers": "Alle lagen bekijken"
+    "seeAllLayers": "Alle lagen bekijken",
+    "phoneLabel": "Op telefoons",
+    "phoneInfoLabel": "Hoe een blok op telefoons staat",
+    "phoneInfoBody": "Sleep een blok of pas de grootte aan in de telefoonweergave om het daar zelf te plaatsen. Met Terug naar automatisch plaatst de telefoonindeling het weer zelf. Het desktopbord blijft zoals het is.",
+    "hideOnPhones": "Verbergen op telefoons",
+    "showOnPhones": "Tonen op telefoons",
+    "phoneAutomatic": "Terug naar automatisch"
   },
   "header": {
     "showHeader": "Koptekst tonen",
@@ -606,7 +628,8 @@
     "storeNamePlaceholder": "Winkelnaam getoond aan kopers",
     "bio": "Bio",
     "bioPlaceholder": "Een korte regel over je winkel",
-    "charsLeft": "{n, plural, one {# teken over} other {# tekens over}}"
+    "charsLeft": "{n, plural, one {# teken over} other {# tekens over}}",
+    "styleLine": "{line, select, name {Lettertype en kleur van de naam} other {Lettertype en kleur van de bio}}"
   },
   "soldOut": {
     "hide": "Verbergen voor kopers",
@@ -682,10 +705,12 @@
     "movePriceTo": "{spot, select, top_left {Verplaats de prijs naar linksboven} top_center {Verplaats de prijs naar bovenmidden} top_right {Verplaats de prijs naar rechtsboven} middle_center {Verplaats de prijs naar het midden} bottom_left {Verplaats de prijs naar linksonder} bottom_center {Verplaats de prijs naar ondermidden} bottom_right {Verplaats de prijs naar rechtsonder} other {Verplaats de prijs hierheen}}"
   },
   "productPage": {
+    "scopeNote": "Deze instellingen gelden voor elke productpagina in deze etalage.",
     "layout": {
       "title": "Pagina",
       "showPage": {
         "label": "Een productpagina tonen",
+        "hint": "Geeft je etalage ook een eigen link om te delen.",
         "infoLabel": "Wat deze schakelaar doet",
         "infoOn": "Tikken op een producttegel opent de pagina ervan, en de etalage heeft een eigen pagina om te delen.",
         "infoOff": "Producttegels hebben geen pagina om te openen, en ook de link naar de etalage zelf werkt dan niet meer."
@@ -702,7 +727,7 @@
         "label": "Lettertype",
         "infoLabel": "Hoe het lettertype van deze pagina zich verhoudt tot dat van de etalage",
         "infoOwn": "Deze pagina gebruikt zijn eigen lettertype, ongeacht wat de etalage gebruikt.",
-        "infoFollows": "Volgt het lettertype van je etalage. Wijzig dit onder Typografie.",
+        "infoFollows": "Volgt het lettertype van je etalage. Wijzig het in de instellingen onder Lettertype.",
         "inheritOption": "Zelfde als etalage ({name})"
       },
       "indexing": {
@@ -716,6 +741,7 @@
       "title": "Koopknop",
       "infoLabel": "Wat bepaalt of een knop wordt getoond",
       "infoContent": "De knop volgt de aankooplink van elk product (ingesteld op het product). Zonder aankooplink stuurt hij een e-mail naar je contactadres hieronder; zonder allebei wordt er geen knop getoond.",
+      "checkoutNote": "De betaalknop bij het afrekenen past bij deze knop. <link>Naar Afrekenen</link>",
       "buttonText": {
         "label": "Knoptekst",
         "charsLeft": "{count, plural, one {# teken over} other {# tekens over}}"
@@ -844,6 +870,7 @@
   "productBlock": {
     "deleted": "Dit product is verwijderd uit je catalogus.",
     "removeFromGrid": "Verwijderen uit raster",
+    "details": "Productgegevens",
     "nameLabel": "Naam",
     "namePlaceholder": "Productnaam",
     "priceLabel": "Prijs ({currency})",
@@ -858,13 +885,14 @@
       "lowStock": "Lage voorraad: {count} beschikbaar.",
       "inStock": "{count} op voorraad."
     },
-    "openProductPage": "Koopproces openen",
-    "hideProductPage": "Koopproces verbergen",
+    "openProductPage": "Productpagina openen",
+    "hideProductPage": "Productpagina verbergen",
+    "noCtaWarning": "De koopknop op de pagina heeft nog geen bestemming. Voeg een aankooplink toe aan het product, of een contact-e-mailadres in je verkopersgegevens.",
     "tileStyle": {
       "title": "Tegelstijl",
-      "reset": "Terugzetten naar thema",
+      "reset": "Themastijl gebruiken",
       "infoLabel": "Hoe de stijl van deze tegel zich verhoudt tot het thema",
-      "infoWithOverrides": "Deze tegel heeft een eigen stijl. Instellingen die je hier niet hebt gewijzigd, blijven het thema volgen.",
+      "infoWithOverrides": "Deze tegel heeft een eigen stijl; alles wat je hier niet wijzigt, volgt het thema. Themastijl gebruiken wist alleen de wijzigingen van deze tegel: het thema blijft zoals het is.",
       "infoNoOverrides": "Geef deze tegel een eigen stijl. Alles wat je niet wijzigt, blijft het thema volgen."
     },
     "priceTag": "Prijslabel",
@@ -876,6 +904,7 @@
       "updateEverywhere": "Overal bijwerken"
     },
     "savedToast": "\"{title}\" is overal bijgewerkt waar het verschijnt.",
+    "unsavedToast": "Je nieuwe naam of prijs voor \"{title}\" is niet opgeslagen. Druk op Opslaan voordat je verdergaat om die te bewaren.",
     "validation": {
       "noTitle": "Geef je product een titel.",
       "noPrice": "Stel een prijs in.",
@@ -983,7 +1012,7 @@
   "multiBlock": {
     "shapesContext": "Bezig met het bewerken van {count, plural, one {# vorm} other {# vormen}} tegelijk. De getoonde waarden komen van de eerst geselecteerde vorm; elke wijziging geldt voor alle vormen.",
     "textsContext": "Bezig met het bewerken van {count, plural, one {# tekstblok} other {# tekstblokken}} tegelijk. De getoonde waarden komen van het eerst geselecteerde blok; elke wijziging geldt voor alle blokken. Elk blok behoudt zijn eigen tekst.",
-    "imagesContext": "Bezig met het bewerken van {count, plural, one {# element} other {# elementen}} tegelijk. De getoonde waarden komen van het eerst geselecteerde element; elke wijziging geldt voor alle elementen. Elk element behoudt zijn eigen afbeelding.",
+    "imagesContext": "Bezig met het bewerken van {count, plural, one {# blok} other {# blokken}} tegelijk. De getoonde waarden komen van het eerst geselecteerde blok; elke wijziging geldt voor alle blokken. Elk blok behoudt zijn eigen afbeelding.",
     "productsContext": "Bezig met het stylen van {count, plural, one {# producttegel} other {# producttegels}} tegelijk. De getoonde waarden komen van de eerst geselecteerde tegel; elke wijziging geldt voor alle tegels.",
     "mixedContext": "{count, plural, one {# blok} other {# blokken}} van verschillende typen zijn geselecteerd. Selecteer blokken van één type om hun instellingen samen te bewerken.",
     "remove": "{count, plural, one {# blok} other {# blokken}} verwijderen",
@@ -991,7 +1020,7 @@
     "productsNotDuplicated": "Producten worden niet gedupliceerd.",
     "tileStyle": {
       "title": "Tegelstijl",
-      "reset": "Terugzetten naar thema"
+      "reset": "Themastijl gebruiken"
     },
     "priceTag": "Prijslabel"
   },
@@ -1003,18 +1032,18 @@
     "ariaLabel": "Editorwerkbalk",
     "addProduct": "Product toevoegen",
     "addText": "Tekst toevoegen",
-    "addElement": "Element toevoegen",
+    "addElement": "Vorm of afbeelding toevoegen",
     "product": "Product",
     "text": "Tekst",
-    "element": "Element",
-    "elementsMenu": "Elementen",
+    "element": "Vormen",
+    "elementsMenu": "Vormen en afbeeldingen",
     "uploading": "Uploaden…",
     "upload": "Uploaden",
     "uploadImage": "Afbeelding uploaden",
     "allShapes": "Alle vormen",
     "browseShapes": "Blader door de volledige vormenbibliotheek",
-    "closePage": "Koopproces sluiten",
-    "showPage": "Koopproces tonen",
+    "closePage": "Productpagina sluiten",
+    "showPage": "Productpagina tonen",
     "closePages": "Productpagina, afrekenen en bedankpagina sluiten",
     "showPageFull": "Productpagina, afrekenen en bedankpagina tonen",
     "undo": "Ongedaan maken",
@@ -1027,22 +1056,26 @@
     "zoomOutTip": "Uitzoomen (Ctrl -)",
     "zoomReset": "Zoom terugzetten naar 100%",
     "zoomResetTip": "Zoom terugzetten (Ctrl 0)",
-    "zoomResetMenuItem": "Zoom terugzetten",
+    "zoomFit": "Passend op scherm",
     "zoomIn": "Inzoomen",
     "zoomInTip": "Inzoomen (Ctrl +)",
-    "designSettings": "Ontwerpinstellingen",
-    "page": "Koopproces",
-    "moreTools": "Meer hulpmiddelen"
+    "designSettings": "Etalagestijl",
+    "style": "Stijl",
+    "page": "Productpagina",
+    "pageMobile": "Pagina",
+    "pageDisabledTip": "Voeg een product toe om de pagina te openen",
+    "moreTools": "Meer hulpmiddelen",
+    "more": "Meer"
   },
   "selectionToolbar": {
     "toolsFor": "Hulpmiddelen voor {name}",
-    "elements": "{count, plural, one {# element} other {# elementen}}",
-    "hidePage": "Koopproces verbergen",
-    "openPage": "Koopproces openen",
-    "openProductPage": "Het koopproces voor {name} openen",
-    "closeProductPage": "Het koopproces voor {name} sluiten",
-    "openProductPages": "Het koopproces openen voor {count, plural, one {# product} other {# producten}}",
-    "closeProductPages": "Het koopproces sluiten voor {count, plural, one {# product} other {# producten}}",
+    "elements": "{count, plural, one {# blok} other {# blokken}}",
+    "hidePage": "Productpagina verbergen",
+    "openPage": "Productpagina openen",
+    "openProductPage": "De productpagina voor {name} openen",
+    "closeProductPage": "De productpagina voor {name} sluiten",
+    "openProductPages": "De productpagina openen voor {count, plural, one {# product} other {# producten}}",
+    "closeProductPages": "De productpagina sluiten voor {count, plural, one {# product} other {# producten}}",
     "editText": "Tekst bewerken",
     "editTextOf": "De tekst van {name} bewerken",
     "color": "Kleur",
@@ -1059,24 +1092,26 @@
     "frameImageFor": "Afbeelding voor {name} bijsnijden en plaatsen",
     "duplicate": "Dupliceren",
     "duplicateNamed": "{name} dupliceren",
-    "duplicateN": "{count, plural, one {# element} other {# elementen}} dupliceren",
+    "duplicateN": "{count, plural, one {# blok} other {# blokken}} dupliceren",
     "removeFrom": "{name} verwijderen uit raster",
-    "removeN": "{count, plural, one {# element} other {# elementen}} verwijderen uit raster"
+    "removeN": "{count, plural, one {# blok} other {# blokken}} verwijderen uit raster"
   },
   "canvas": {
     "addSuggested": "{title} aan deze etalage toevoegen",
     "gridLabel": "Canvas van de etalage",
     "emptyGrid": "Je raster is leeg",
-    "emptyGridHint": "Voeg een product toe om je etalage in te richten. Tekst en vormen staan in de werkbalk hieronder.",
+    "emptyGridHint": "Voeg een product toe om je etalage in te richten. Tekst, vormen en je eigen afbeeldingen staan in de werkbalk hieronder.",
     "addProduct": "Product toevoegen",
     "desktopPreview": "Desktopvoorbeeld",
-    "mobilePreview": "Mobiel voorbeeld"
+    "mobilePreview": "Mobiel voorbeeld",
+    "multiSelectTip": "Shift-klik op blokken of sleep over een lege plek om er meerdere te selecteren. Houd op een touchscreen elk blok ingedrukt.",
+    "sheetTip": "Sluit dit paneel om de werkbalk terug te krijgen."
   },
   "blockTile": {
     "removedProduct": "Verwijderd product",
     "shape": "{kind, select, square {vierkante vorm} circle {ronde vorm} ring {ringvorm} diamond {ruitvorm} rounded {afgeronde vierkante vorm} pill {pilvorm} half {halve cirkelvorm} quarter {kwart cirkelvorm} bar {balkvorm} triangle {driehoekige vorm} wedge {taartpuntvorm} pentagon {vijfhoekige vorm} hexagon {zeshoekige vorm} octagon {achthoekige vorm} star {stervorm} sparkle {sprankelvorm} cross {kruisvorm} arrow {pijlvorm} chevron {chevronvorm} trapezoid {trapeziumvorm} parallelogram {parallellogramvorm} burst {uitbarstingvorm} other {{kind} vorm}}",
     "imageWithAlt": "Afbeelding: {alt}",
-    "imageElement": "Afbeeldingselement",
+    "imageElement": "Afbeeldingsblok",
     "textWithContent": "Tekst: {text}",
     "textBlock": "Tekstblok",
     "selected": "Geselecteerd: {label}. Druk op Enter om te deselecteren.",
@@ -1109,11 +1144,14 @@
       "nameLabel": "Etalagenaam",
       "namePlaceholder": "Naamloze etalage",
       "unsaved": "Niet-opgeslagen wijzigingen",
+      "saveTip": "Opslaan (Ctrl+S)",
       "viewPage": "Pagina bekijken",
+      "viewSavedPage": "Opgeslagen pagina bekijken",
+      "shareSetupNeeded": "Je verkopersgegevens zijn niet compleet, dus deze etalage kan nog niet worden gedeeld",
       "search": "Zoeken"
     },
     "mobileNotice": {
-      "body": "Voor de beste bewerkingservaring open je deze editor op een desktop of tablet. Blokken herordenen en de koptekst bewerken werken op elk apparaat.",
+      "body": "Alles werkt hier: tik op een blok om het te bewerken, houd meer blokken ingedrukt om ze samen te selecteren, houd een hulpmiddel ingedrukt om te zien wat het doet, en knijp om te zoomen. Fijne aanpassingen gaan makkelijker op een groter scherm.",
       "dismiss": "De melding over bewerken op kleine schermen sluiten"
     },
     "inspector": {
@@ -1171,13 +1209,6 @@
       "badge": "Voorbeeld",
       "summary": "{count, plural, one {{count} blok · probeer alles uit, er wordt niets opgeslagen} other {{count} blokken · probeer alles uit, er wordt niets opgeslagen}}",
       "hide": "De voorbeeldetalage verbergen"
-    },
-    "embed": {
-      "title": "Een etalage insluiten",
-      "description": "Elke etalage die je maakt krijgt een eigen insluitcode om op je website te plakken.",
-      "snippetLabel": "Een insluitcode ziet er zo uit",
-      "inDevelopment": "De widget is nog in ontwikkeling en wordt op andere sites nog niet getoond.",
-      "create": "Een etalage maken"
     },
     "list": {
       "show": "De voorbeeldetalage tonen",
@@ -1457,7 +1488,11 @@
       "link": "Link"
     },
     "buyButtonTipLabel": "Waar de knop heen gaat",
-    "buyButtonTip": "Gebruikt de tekst en kleur van de knop op je productpagina, en opent de productpagina.",
+    "buyButtonTip": "Opent de productpagina. Begint met de tekst en kleur van de knop op die pagina, die je hier voor de tegels kunt aanpassen.",
+    "pageButton": {
+      "label": "Knop van de productpagina",
+      "use": "Knop van de productpagina gebruiken"
+    },
     "rating": "Sterrenbeoordeling",
     "ratingTipLabel": "Waar de sterren vandaan komen",
     "ratingTip": "Uit reviews van kopers. Verschijnt onder de naam zodra een product een review heeft.",
@@ -1471,5 +1506,43 @@
     "lineHeight": "Regelhoogte",
     "normal": "Normaal",
     "valueText": "{value} procent van de lettergrootte"
+  },
+  "shortcuts": {
+    "title": "Sneltoetsen",
+    "tip": "Sneltoetsen (?)",
+    "rows": {
+      "save": {
+        "label": "Opslaan",
+        "keys": "<kbd>{mod}</kbd> <kbd>S</kbd>"
+      },
+      "copyPaste": {
+        "label": "Blokken kopiëren en plakken",
+        "keys": "<kbd>{mod}</kbd> <kbd>C</kbd> en dan <kbd>{mod}</kbd> <kbd>V</kbd>"
+      },
+      "remove": {
+        "label": "De geselecteerde blokken verwijderen",
+        "keys": "<kbd>Delete</kbd>"
+      },
+      "move": {
+        "label": "De geselecteerde blokken verplaatsen",
+        "keys": "<kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd>"
+      },
+      "selectMore": {
+        "label": "Meerdere blokken selecteren",
+        "keys": "<kbd>Shift</kbd> + klik"
+      },
+      "selectUnder": {
+        "label": "Het onderliggende blok selecteren",
+        "keys": "<kbd>{alt}</kbd> + klik"
+      },
+      "layer": {
+        "label": "Naar voren of naar achteren",
+        "keys": "<kbd>{mod}</kbd> <kbd>]</kbd> of <kbd>[</kbd>"
+      },
+      "pan": {
+        "label": "Over het canvas bewegen",
+        "keys": "Houd <kbd>Spatie</kbd> ingedrukt en sleep"
+      }
+    }
   }
 }

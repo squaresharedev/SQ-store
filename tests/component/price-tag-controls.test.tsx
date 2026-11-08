@@ -366,6 +366,9 @@ describe("PriceTagSection (theme scope)", () => {
     render(<PriceTagSection theme={theme} onChange={onChange} />);
     const scale = screen.getByRole("group", { name: "On bigger cards" });
     expect(within(scale).getByRole("button", { name: "Grow" })).toHaveAttribute("aria-pressed", "true");
+    // The Sale badge section shows this same switch, so each copy says it
+    // covers both chips rather than reading as a setting of its own.
+    expect(screen.getByText("Applies to price tags and sale badges on every card.")).toBeInTheDocument();
     await user.click(within(scale).getByRole("button", { name: "Stay the same" }));
     expect(onChange).toHaveBeenLastCalledWith({ ...theme, chipScale: "cell" });
     cleanup();

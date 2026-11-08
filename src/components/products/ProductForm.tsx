@@ -15,6 +15,7 @@ import {
   Images,
   Layers,
   Link2,
+  MousePointerClick,
   Package,
   PackagePlus,
   Pencil,
@@ -23,7 +24,6 @@ import {
   Send,
   ShieldCheck,
   Store,
-  Truck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -103,9 +103,10 @@ import {
   fieldBaseClass,
   ghostButtonClass,
   helpTextClass,
+  infoTextClass,
   labelClass,
   primaryButtonClass,
-  quietLinkClass,
+  quietIconLinkClass,
   secondaryButtonClass,
 } from "@/components/ui/control-styles";
 import { InfoTip } from "@/components/ui/InfoTip";
@@ -123,11 +124,14 @@ import { moderationNoticeId } from "@/lib/moderation/paths";
 import { requestModerationReview } from "@/lib/moderation/review-request";
 import { formatList } from "@/lib/format/intl";
 import { productEditPath } from "@/lib/products/paths";
+import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
+import { BILLING_SETTINGS_AI_PATH } from "@/lib/billing/paths";
 import { refusedBadgeLabel } from "@/lib/products/badges";
 import { FormSection, sectionAnchorId, type SectionFlag } from "./FormSection";
 import { EXTRA_SECTIONS, FormExtrasPicker, type ExtraSectionId } from "./FormExtrasPicker";
 import { ProductPreviewCard } from "./ProductPreviewCard";
 import { titleFromFileName } from "@/lib/products/title-guess";
+import { useIsTouch } from "@/lib/hooks/useIsTouch";
 import { useFixProgress } from "./useFixProgress";
 import { FormSectionNav, jumpToSection } from "./FormSectionNav";
 import { ProductFormSnapshotScript } from "./ProductFormSnapshotScript";
@@ -145,6 +149,8 @@ import { FileDropzone } from "./FileDropzone";
 import { StockFields } from "./StockFields";
 import { ShippingField } from "./ShippingField";
 import type { ShippingChoices } from "@/lib/storefront/queries";
+import { canQuoteShipping } from "@/lib/shipping/rates";
+import { purchaseLinkTarget } from "@/components/product-page/cta-target";
 import {
   EMPTY_SHIPPING_POLICY,
   SHIPPING_SETTINGS_HREF,
@@ -166,7 +172,7 @@ const NO_SHIPPING_CHOICES: ShippingChoices = {
 const STATUS_ORDER: readonly ProductStatus[] = ["active", "draft"];
 
 /** What a product is, as the seller answers it: a thing posted to the buyer,
- *  or a file they download. Decides which half of Delivery shows. */
+ *  or a file they download. Decides which half of "How buyers get it" shows. */
 type ProductKind = "physical" | "digital";
 
 /** The glyph each optional extra wears on its tile. */
@@ -374,7 +380,7 @@ function validatePage(
  * The index rail and the section headers report a problem where the seller has
  * to go to fix it, which means an error on a field has to name its section.
  * Spelled out rather than derived from the field id, because the two lists are
- * genuinely independent: `purchaseUrl` lives under Media and delivery, and
+ * genuinely independent: `purchaseUrl` lives under "How buyers get it", and
  * nothing about its name says so.
  */
 const FIELD_SECTIONS: Record<string, ProductFormSectionId> = {
@@ -529,6 +535,8 @@ export function ProductForm({
   aiSuggestions = false,
   suggestAsYouType = false,
   aiUpsell = false,
+  aiCreditUsed = false,
+  checkoutOpen = false,
 }: {
   product?: FormProduct;
   /** A new product's better defaults (lib/predictions). Ignored when editing. */
@@ -542,6 +550,12 @@ export function ProductForm({
   /** On a plan without AI writing help: the quiet "Write with AI · Pro" link
    *  where the chip would be. */
   aiUpsell?: boolean;
+  /** With aiSuggestions: the month's credit is spent, so the chip is dimmed
+   *  and says so, and no grey words are asked for. */
+  aiCreditUsed?: boolean;
+  /** Square Share checkout can take this store's payments: with delivery
+   *  priced, a buy button without a link of its own opens it. */
+  checkoutOpen?: boolean;
   /** The store's shipping terms and named profiles, read on the server. */
   shippingChoices?: ShippingChoices;
   /** The store's products for "Add to order", read on the server. Absent
@@ -742,7 +756,7 @@ export function ProductForm({
   const needsFile = isDigital && !hasDigitalFile;
 
   // AI WRITING HELP reads the form as facts, labelled the way the form shows
-  // them to this seller: the draft chip, the grey next words and the upsell.
+  // them to this seller: the draft chip and the grey next words.
   const listingFacts = descriptionFacts(
     { optionGroups, details, badges, isDigital },
     {
@@ -757,10 +771,12 @@ export function ProductForm({
       download: t("form.kind.digital"),
     },
   );
-  const [asYouType, setAsYouType] = useState(aiSuggestions && suggestAsYouType);
+  const [asYouType, setAsYouType] = useState(aiSuggestions && suggestAsYouType && !aiCreditUsed);
   const suggestNextWords = useDescriptionCompletion({ title: values.title, facts: listingFacts, enabled: asYouType });
 
-  /** "Turn off" under the field: this person's switch, saved at once. */
+  /** "Turn off" under the field: this person's switch, saved at once. The
+   *  toast is the way back: it opens that switch in Settings, through the
+   *  unsaved-changes guard like every other way out of the form. */
   async function turnOffAsYouType() {
     setAsYouType(false);
     const result = await saveSuggestAsYouType(false).catch(() => ({ error: unexpectedError() }));
@@ -769,7 +785,10 @@ export function ProductForm({
       showActionError(result.error);
       return;
     }
-    toast.success(t("form.ai.asYouTypeOff"));
+    toast.success(t("form.ai.asYouTypeOff"), {
+      lines: [t("form.ai.asYouTypeBackOn")],
+      onClick: () => requestLeave(BILLING_SETTINGS_AI_PATH),
+    });
   }
 
   // THE FORM AS ONE OBJECT, built from the state above and used twice: by the
@@ -821,6 +840,7 @@ export function ProductForm({
   const fixFields = pausedForFix ? takedown.fields : NO_FIX_FIELDS;
   const awaitingReview = Boolean(takedown?.reviewRequestedAt);
   const fixProgress = useFixProgress(pausedForFix ? takedown.decisionId : null);
+  const isTouch = useIsTouch();
   const initialPage = useMemo(() => JSON.parse(pristinePage) as Record<string, unknown>, [
     pristinePage,
   ]);
@@ -1282,17 +1302,30 @@ export function ProductForm({
       // Raised BEFORE the redirect on purpose: the toast provider lives at the
       // root layout, so this survives the navigation and lands on the product
       // list — where the seller can see the row it is talking about.
+      //
+      // A new product is on no storefront, so no buyer can reach it yet: the
+      // toast says so and is the way to the storefronts. Not for a seller who
+      // came from one: saving takes them back to place it there.
+      const unplaced = !product && !returnTo;
       toast.success(
         product
           ? t("form.savedToast", { title: input.title })
           : t("form.addedToast", { title: input.title }),
         {
-          // Saved as active but not approved yet: the list will say "Checking",
-          // and this says what that means before the seller goes looking.
-          lines:
-            result.checking && input.status === "active"
-              ? [t("form.checkingToast")]
-              : undefined,
+          lines: [
+            // Saved as active but not approved yet: the list will say
+            // "Checking", and this says what that means before the seller
+            // goes looking.
+            ...(result.checking && input.status === "active" ? [t("form.checkingToast")] : []),
+            ...(unplaced ? [t("form.placeToast")] : []),
+          ],
+          onClick: unplaced
+            ? () => {
+                // Clicked before the hold ran out: the list must not follow.
+                if (redirectTimer.current !== null) window.clearTimeout(redirectTimer.current);
+                router.push(STOREFRONT_LIST_PATH);
+              }
+            : undefined,
         },
       );
       redirectTimer.current = window.setTimeout(() => {
@@ -1384,6 +1417,16 @@ export function ProductForm({
     shippingChoices.profiles.find((profile) => profile.id === shippingProfileId)?.dispatch ||
     shippingChoices.fallback.dispatch;
 
+  /** What a tap on the buy button will do, in cta-target.ts's order: the
+   *  seller's own link, else checkout (with delivery priced for a parcel, as
+   *  checkoutAvailableFor asks), else an email to the seller. */
+  const buyLink = purchaseLinkTarget(purchaseUrl.trim() || null);
+  const buyButton = buyLink
+    ? "link"
+    : checkoutOpen && (isDigital || canQuoteShipping(shippingPolicy, values.currency))
+      ? "checkout"
+      : "mail";
+
   /** The required answers not given yet, named as their fields are. */
   const requiredLabels: Record<string, string> = {
     title: t("form.title"),
@@ -1470,7 +1513,7 @@ export function ProductForm({
               inputId={`${fieldId}-image`}
               initialPreviewUrl={product?.imageUrl ?? null}
               onFileChange={changeCover}
-              prompt={t("form.coverPrompt")}
+              prompt={t(isTouch ? "form.coverPromptTouch" : "form.coverPrompt")}
               frameClassName="aspect-[4/3] rounded-none sm:aspect-square"
             />
           </div>
@@ -1534,13 +1577,20 @@ export function ProductForm({
               className={cn("space-y-1.5", fieldFlagClass("description"))}
               data-fix-field-block="description"
             >
-              <label htmlFor={`${fieldId}-description`} className={labelClass}>
-                {t("form.description")}{" "}
-                <span className="font-normal text-muted-foreground">
-                  {t("form.optional")}
-                </span>
-                {fixMark("description")}
-              </label>
+              <div className="flex items-center gap-1.5">
+                <label htmlFor={`${fieldId}-description`} className={labelClass}>
+                  {t("form.description")}{" "}
+                  <span className="font-normal text-muted-foreground">
+                    {t("form.optional")}
+                  </span>
+                  {fixMark("description")}
+                </label>
+                {/* The chip and the grey words are one perk on one credit:
+                    said once, where both of them live. */}
+                {aiSuggestions && (
+                  <InfoTip label={t("form.ai.about")}>{t("form.ai.aboutBody")}</InfoTip>
+                )}
+              </div>
               <SuggestingTextarea
                 id={`${fieldId}-description`}
                 value={values.description}
@@ -1564,12 +1614,11 @@ export function ProductForm({
                   title={values.title}
                   description={values.description}
                   facts={listingFacts}
+                  creditUsed={aiCreditUsed}
                   onChange={(description) => updateField("description", description)}
                 />
               )}
-              {aiUpsell && (
-                <AiUpsellChip title={values.title} description={values.description} facts={listingFacts} />
-              )}
+              {aiUpsell && <AiUpsellChip title={values.title} description={values.description} />}
             </div>
           </div>
         </div>
@@ -1583,7 +1632,7 @@ export function ProductForm({
           what they sell. */}
       <FormSection
         {...section("media")}
-        icon={Truck}
+        icon={Send}
       >
         <ChoiceCards<ProductKind>
           name={`${fieldId}-kind`}
@@ -1680,6 +1729,21 @@ export function ProductForm({
           </div>
         )}
 
+        {/* The one extra a law can ask for, offered where the seller has just
+            said "something I ship": EU product-safety rules want the maker's
+            details on goods sold there. Gone once the section is open. */}
+        {!isDigital && !extraOpen("safety") && (
+          <button
+            type="button"
+            onClick={() => openExtra("safety")}
+            className={cn(quietIconLinkClass, "mt-4")}
+            data-product-reveal="safety"
+          >
+            <ShieldCheck className="size-3.5" strokeWidth={2} aria-hidden="true" />
+            {t("form.safetyPrompt")}
+          </button>
+        )}
+
         {/* Where the product page's buy button goes, when it is the seller's
             own checkout, payment link or marketplace listing rather than
             ours. Rare, so it is one quiet line until asked for. https only;
@@ -1694,7 +1758,7 @@ export function ProductForm({
                 {t("form.purchaseLink")}
               </label>
               <InfoTip label={t("form.purchaseLinkAbout")}>
-                {t("form.purchaseLinkHelp")}
+                {t("form.purchaseLinkHelp", { checkout: String(checkoutOpen) })}
               </InfoTip>
               {fixMark("purchaseLink")}
             </div>
@@ -1724,7 +1788,7 @@ export function ProductForm({
               setBuyLinkShown(true);
               window.setTimeout(() => document.getElementById(`${fieldId}-purchase`)?.focus(), 0);
             }}
-            className={cn(quietLinkClass, "mt-4 inline-flex items-center gap-1.5")}
+            className={cn(quietIconLinkClass, "mt-4")}
             data-product-reveal="purchaseUrl"
           >
             <Link2 className="size-3.5" strokeWidth={2} aria-hidden="true" />
@@ -1932,6 +1996,15 @@ export function ProductForm({
             blocks="putProductOnSale"
             detailed={false}
           />
+          {/* What buyers meet when they tap Buy, so nobody has to open their
+              own page to learn it asks for an email rather than a payment.
+              Not while the details above are missing: then nothing sells. */}
+          {canPublish && (
+            <p className={cn(infoTextClass, "flex items-start gap-1.5")} data-product-buy-button={buyButton}>
+              <MousePointerClick className="mt-0.5 size-3.5 shrink-0" strokeWidth={2} aria-hidden="true" />
+              <span>{t("form.visibility.buyButton", { kind: buyButton, host: buyLink?.host ?? "" })}</span>
+            </p>
+          )}
         </div>
       </FormSection>
 

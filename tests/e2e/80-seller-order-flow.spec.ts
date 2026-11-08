@@ -95,7 +95,7 @@ test("1. clearing the To ship queue, start to finish", async ({ page }) => {
   await expect.poll(() => new URL(page.url()).searchParams.get("view")).toBe("to-ship");
 
   // A buyer who withdrew is owed a refund, not a parcel: that order waits under
-  // "Withdrawn" (below), not in the queue.
+  // "Buyer cancelled" (below), not in the queue.
   const rows = page.locator("tbody tr");
   await expect(rows).toHaveCount(3);
   await expect(rows.nth(0)).toContainText("Oldest vase");
@@ -153,17 +153,19 @@ test("1. clearing the To ship queue, start to finish", async ({ page }) => {
   const buyerMail = await devEmails("old@example.test");
   expect(buyerMail.some((m) => m.text.includes("RR123456789IE"))).toBe(true);
 
-  // The withdrawn order is under "Withdrawn", marked as such. Its panel is
-  // fresh, with its own number and warning, and shipping it stays possible for
-  // a seller who has agreed that with the buyer.
+  // The withdrawn order is under "Buyer cancelled", marked as such, with the
+  // day its refund is due. Its panel is fresh, with its own number and
+  // warning, and shipping it stays possible for a seller who has agreed that
+  // with the buyer.
   await gotoApp(page, "/orders?view=all&status=withdrawn");
   const withdrawnRows = page.locator("tbody tr");
   await expect(withdrawnRows).toHaveCount(1);
   await expect(withdrawnRows.first()).toContainText("Withdrawn vase");
-  await expect(withdrawnRows.first().locator("[data-order-withdrawn]")).toHaveText("Withdrawn");
+  await expect(withdrawnRows.first().locator("[data-order-withdrawn]")).toHaveText("Buyer cancelled");
+  await expect(withdrawnRows.first().locator("[data-order-refund-due]")).toContainText("Refund by");
   await withdrawnRows.first().click();
   await expect(panel(page).locator("[data-order-number]")).toHaveText(`Order ${numberOf(await id("Withdrawn vase"))}`);
-  await expect(panel(page).getByRole("alert")).toContainText("withdraw");
+  await expect(panel(page).getByRole("alert")).toContainText("cancel");
   await expect(panel(page).getByRole("alert").getByRole("link", { name: "Email the buyer" })).toBeVisible();
   await expect(panel(page).getByLabel(/Tracking number/)).toHaveCount(0);
   const opener = panel(page).getByRole("button", { name: "Mark as shipped" });

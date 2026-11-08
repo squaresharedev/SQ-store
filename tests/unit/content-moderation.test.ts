@@ -256,7 +256,7 @@ describe("fix fields", () => {
     for (const field of STOREFRONT_FIX_FIELDS) {
       expect(english(fixFieldLabel("storefront", field)).length).toBeGreaterThan(2);
     }
-    expect(english(fixFieldLabel("product", "purchaseLink"))).toBe("Purchase link");
+    expect(english(fixFieldLabel("product", "purchaseLink"))).toBe("Buy link");
   });
 
   it("keeps only known fields, deduplicated, in display order", () => {

@@ -11,7 +11,7 @@ import { buyerWithdrawal } from "@/lib/orders/withdrawal";
 import { checkoutPageSchema, parseStoredStorefrontConfig } from "@/lib/validation/storefront";
 import { hasContactOrPaymentDetails } from "@/lib/validation/inputs";
 import { isDefaultCheckoutPage, resolveCheckoutPage } from "@/lib/storefront/checkout-page";
-import { resolveCtaTarget } from "@/components/product-page/cta-target";
+import { purchaseLinkTarget, resolveCtaTarget } from "@/components/product-page/cta-target";
 import { checkoutPath } from "@/lib/storefront/product-page-url";
 import { checkoutProviderFor, testPaymentsEnabled } from "@/lib/checkout/availability";
 import { DEFAULT_CHECKOUT_PAGE_CONFIG, DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
@@ -217,6 +217,18 @@ describe("where Buy now goes", () => {
     expect(resolveCtaTarget(null, "a@b.co", "Vase", "Q", ids).kind).toBe("checkout");
     expect(resolveCtaTarget(null, "a@b.co", "Vase", "Q", null).kind).toBe("mail");
     expect(resolveCtaTarget(null, undefined, "Vase", "Q", null).kind).toBe("none");
+  });
+
+  it("takes the seller's link only when it is https, and names its host", () => {
+    expect(purchaseLinkTarget("https://shop.example.com/x?y=1")).toEqual({
+      href: "https://shop.example.com/x?y=1",
+      host: "shop.example.com",
+    });
+    expect(purchaseLinkTarget("http://shop.example.com/x")).toBeNull();
+    expect(purchaseLinkTarget("not a link")).toBeNull();
+    expect(purchaseLinkTarget(null)).toBeNull();
+    // A link that is not https falls through to checkout, as the page does.
+    expect(resolveCtaTarget("http://shop.example.com/x", "a@b.co", "Vase", "Q", ids).kind).toBe("checkout");
   });
 
   it("carries the chosen version and quantity to the checkout", () => {

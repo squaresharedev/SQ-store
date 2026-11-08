@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { clampToCanvas, columnsThatFit, findFreeCell, reflowBlocks, type GridBlock } from "@/components/grid/gridConstants";
 import { LAYER_OPS, normalizeLayers, type LayerOp } from "@/lib/storefront/layers";
-import { PHONE_BOARD_WIDTH_PX, phoneLayout } from "@/lib/storefront/mobile-layout";
+import { PHONE_BOARD_WIDTH_PX, phoneLayout, phoneRect, unpinnedOnPhone } from "@/lib/storefront/mobile-layout";
 import {
   BLUR_DIRECTIONS,
   BLUR_MAX,
@@ -305,13 +305,7 @@ export function applyDesignOps(
     }
   };
   /** Where a block is on the phone right now: its own rect, or the one placed for it. */
-  const phoneRect = (block: StorefrontBlock): MobilePlacement => {
-    const spot = phoneLayout(theme, blocks)?.placed.find((candidate) => candidate.block === block);
-    if (spot) return { x: spot.x, y: spot.y, w: spot.w, h: spot.h };
-    const { hidden: _hidden, ...own } = block.mobile ?? { x: 0, y: 0, w: 1, h: 1 };
-    void _hidden;
-    return own;
-  };
+  const phoneRectOf = (block: StorefrontBlock): MobilePlacement => phoneRect(theme, blocks, block);
   const placeOnPhone = (block: StorefrontBlock, rect: MobilePlacement) => {
     replace(block, { ...block, mobile: rect });
   };
@@ -373,7 +367,7 @@ export function applyDesignOps(
         const block = find(op.block);
         if (op.viewport === "mobile") {
           startPhoneLayout();
-          placeOnPhone(block, { ...phoneRect(block), x: op.x, y: op.y });
+          placeOnPhone(block, { ...phoneRectOf(block), x: op.x, y: op.y });
         } else replace(block, { ...block, x: op.x, y: op.y });
         break;
       }
@@ -381,16 +375,14 @@ export function applyDesignOps(
         const block = find(op.block);
         if (op.viewport === "mobile") {
           startPhoneLayout();
-          const at = phoneRect(block);
+          const at = phoneRectOf(block);
           placeOnPhone(block, { x: op.x ?? at.x, y: op.y ?? at.y, w: op.w, h: op.h });
         } else replace(block, { ...block, w: op.w, h: op.h, x: op.x ?? block.x, y: op.y ?? block.y });
         break;
       }
       case "mobile_reset": {
         const block = find(op.block);
-        const { mobile: _mobile, ...rest } = block;
-        void _mobile;
-        replace(block, rest as StorefrontBlock);
+        replace(block, unpinnedOnPhone(block));
         break;
       }
       case "rotate": {
@@ -417,7 +409,7 @@ export function applyDesignOps(
         if (op.viewport === "mobile") {
           // Off phones only: it stays on the desktop board.
           startPhoneLayout();
-          placeOnPhone(block, { ...phoneRect(block), hidden: true });
+          placeOnPhone(block, { ...phoneRectOf(block), hidden: true });
         } else blocks = blocks.filter((candidate) => candidate !== block);
         break;
       }

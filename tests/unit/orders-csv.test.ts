@@ -21,6 +21,13 @@ describe("csvCell", () => {
     expect(csvCell("-2+3")).toBe("'-2+3");
     expect(csvCell("@SUM(A1)")).toBe("'@SUM(A1)");
     expect(csvCell("\tx")).toBe("'\tx");
+    expect(csvCell(" =1+1")).toBe("' =1+1");
+    expect(csvCell("\uFF1DSUM(A1)")).toBe("'\uFF1DSUM(A1)");
+  });
+
+  it("quotes a semicolon, so a semicolon-splitting Excel keeps one cell", () => {
+    expect(csvCell("Ada;=HYPERLINK(\"http://evil\")")).toBe("\"Ada;=HYPERLINK(\"\"http://evil\"\")\"");
+    expect(csvCell("a;b")).toBe('"a;b"');
   });
 
   it("leaves plain numbers alone so a column still sums", () => {

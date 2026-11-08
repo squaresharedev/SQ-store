@@ -10,7 +10,7 @@
     },
     "storefront": {
       "label": "Escaparate",
-      "description": "Diseña la cuadrícula donde van tus productos."
+      "description": "Diseña la cuadrícula donde van tus productos. Se convierte en una página que los compradores pueden abrir y compartir."
     },
     "orders": {
       "label": "Pedidos",
@@ -31,7 +31,8 @@
     "discounts": {
       "label": "Descuentos",
       "description": "Crea rebajas y comparte códigos de descuento."
-    }
+    },
+    "help": "Ayuda"
   },
   "settings": {
     "account": "Cuenta",
@@ -42,17 +43,18 @@
     "notifications": "Notificaciones",
     "language": "Idioma",
     "team": "Equipo y acceso",
-    "danger": "Zona de peligro",
+    "danger": "Eliminar cuenta",
     "billing": "Plan y facturación",
-    "connectedApps": "Aplicaciones conectadas"
+    "connectedApps": "Asistente de IA"
   },
   "profileMenu": {
     "label": "Menú de la cuenta",
     "account": "Cuenta",
-    "switchAccounts": "Cambiar de cuenta",
+    "switchAccounts": "Mis tiendas",
     "yourStore": "Tu tienda",
     "owner": "Propietario",
     "logOut": "Cerrar sesión",
+    "logOutEverywhere": "Cerrar sesión en todas partes",
     "plan": "Plan"
   },
   "viewingBanner": {

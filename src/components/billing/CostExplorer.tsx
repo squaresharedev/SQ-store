@@ -160,6 +160,9 @@ export function CostExplorer({
           <p className="sr-only" aria-live="polite">
             {t("calculator.cheapest", { sales: wholeMoney(salesCents), plan: t(`plans.${cheapest}.name`) })}
           </p>
+          <p className={cn(infoTextClass, "mt-3")}>
+            {t("calculator.stripeFeeNote")}
+          </p>
         </div>
       </div>
     </section>

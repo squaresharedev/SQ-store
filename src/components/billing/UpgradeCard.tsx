@@ -8,7 +8,7 @@ import { Button, buttonClassName } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { cardClass, eyebrowClass, inkBadgeClass } from "@/components/ui/surface-styles";
-import { helpTextClass, iconNudgeRightClass, stubBadgeClass } from "@/components/ui/control-styles";
+import { helpTextClass, iconNudgeUpRightClass, stubBadgeClass } from "@/components/ui/control-styles";
 import { PlanFeatureList } from "@/components/billing/PlanFeatureList";
 import { PortalButton } from "@/components/billing/PortalButton";
 import { PlanVisual } from "@/components/billing/PlanVisual";
@@ -128,7 +128,7 @@ function UpsellCard({
       <Button className="group/btn" disabled={leaving} onClick={upgrade} data-upsell-cta={target}>
         {leaving ? <Spinner /> : null}
         {leaving ? t("portal.opening") : t("upsell.cta", { plan: targetName, price })}
-        {!leaving && <ArrowUpRight className={cn("size-4", iconNudgeRightClass)} strokeWidth={2} aria-hidden />}
+        {!leaving && <ArrowUpRight className={cn("size-4", iconNudgeUpRightClass)} strokeWidth={2} aria-hidden />}
       </Button>
     );
   }

@@ -2,6 +2,7 @@
   "pageTitle": "Betalingen",
   "soon": "Binnenkort",
   "bankOnFile": "Je bankrekening",
+  "invoicesPointer": "Facturen voor je Square Share-abonnement vind je in Instellingen, onder <link>Abonnement en facturering</link>.",
   "balance": {
     "available": {
       "label": "Beschikbaar",
@@ -24,10 +25,31 @@
       "hint": "Het aandeel van Square Share in je verkopen, na terugbetalingen"
     }
   },
+  "earnings": {
+    "label": "Verdiend, laatste {days} dagen",
+    "labelOn": "Verdiend tot {date}",
+    "vsBefore": "tegenover {amount} in de {days} dagen ervoor",
+    "range": "Periode",
+    "rangeShort": "{days} d",
+    "rangeLong": "Laatste {days} dagen",
+    "legendNow": "Deze {days} dagen",
+    "legendBefore": "De {days} ervoor",
+    "today": "Vandaag",
+    "empty": "Met je eerste verkoop begint deze lijn.",
+    "emptyRange": "Geen verkopen in de laatste {days} dagen.",
+    "otherCurrencies": "In {currency}. Verkopen in andere valuta tellen hier niet mee."
+  },
+  "trends": {
+    "gross": "Brutoverkopen",
+    "sales": "Verkopen",
+    "costs": "Terugbetalingen en kosten",
+    "paidOut": "Uitbetaald",
+    "noBefore": "Eerste periode, nog geen vergelijking"
+  },
   "connection": {
     "label": "Stripe-koppeling",
     "comingSoonTitle": "Betaald worden via Stripe komt binnenkort",
-    "comingSoonBody": "Tot die tijd betalen kopers je via de aankooplink van je product, of door je te e-mailen.",
+    "comingSoonBody": "Tot die tijd betalen kopers je rechtstreeks. De koopknop van een product opent de <buyLink>aankooplink</buyLink> die je het geeft (je eigen afrekenpagina), of mailt naar je <email>contactadres</email> als er geen is.",
     "connectTitle": "Koppel Stripe om betaald te worden",
     "connectBody": "Uitbetalingen gaan rechtstreeks naar je bank. Het instellen gebeurt veilig op Stripe, we zien of bewaren je bankgegevens nooit.",
     "connectButton": "Stripe koppelen",

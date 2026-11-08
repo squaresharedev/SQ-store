@@ -117,7 +117,8 @@ describe("invite form constants", () => {
     expect(ASSIGNABLE_ROLES).not.toContain("owner");
   });
 
-  it("default invite role is least-privilege", () => {
-    expect(DEFAULT_INVITE_ROLE).toBe("viewer");
+  it("default invite role is editor, which is assignable and never owner", () => {
+    expect(DEFAULT_INVITE_ROLE).toBe("editor");
+    expect(ASSIGNABLE_ROLES).toContain(DEFAULT_INVITE_ROLE);
   });
 });

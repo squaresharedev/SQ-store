@@ -6,6 +6,7 @@ import { ExternalLink, Plug } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { AppLogo, ClaudeMark } from "@/components/agent/AppLogo";
 import { SCOPE_ICONS } from "@/components/agent/scope-icons";
+import { McpAddressSlab } from "@/components/settings/McpAddressSlab";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { useActionStateToast } from "@/components/ui/ActionErrorNotice";
 import { Button, buttonClassName } from "@/components/ui/button";
@@ -14,15 +15,16 @@ import { helpTextClass, infoTextClass, labelClass } from "@/components/ui/contro
 import { CopyButton } from "@/components/ui/CopyButton";
 import { Disclosure } from "@/components/ui/Disclosure";
 import { HeroMark } from "@/components/ui/HeroMark";
+import { InfoTip } from "@/components/ui/InfoTip";
 import {
-  badgeClass,
+  mutedBadgeClass,
   switchStateClass,
   switchStateOffClass,
   switchStateOnClass,
 } from "@/components/ui/surface-styles";
 import { revokeConnectedApp } from "@/lib/agent/consent-actions";
 import { CLAUDE_CONNECTORS_URL } from "@/lib/agent/paths";
-import { AGENT_SCOPES, AGENT_SCOPE_IDS, type AgentScope } from "@/lib/agent/scopes";
+import { AGENT_SCOPES, AGENT_SCOPE_IDS, scopeBadge, type AgentScope } from "@/lib/agent/scopes";
 import type { ActionState } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 
@@ -102,7 +104,7 @@ function AppRow({ app }: { app: ConnectedAppRow }) {
           );
         })}
       </ul>
-      <p className={infoTextClass}>{t("app.changeHint")}</p>
+      <p className={infoTextClass}>{t("app.changeHint", { app: app.name })}</p>
 
       <ConfirmDialog
         open={open}
@@ -128,13 +130,17 @@ export function ConnectedAppsSection({ mcpUrl, apps }: { mcpUrl: string; apps: C
 
   return (
     <div className="flex flex-col gap-6">
-      <SettingsCard title={t("connect.title")} description={t("connect.body")}>
+      <SettingsCard title={t("connect.title")} description={t("connect.benefit")}>
         <div className="flex flex-col gap-6">
+          {/* How to connect, before the address it is about. The protocol's
+              name waits behind the "?", for an assistant that asks for it. */}
+          <p className={cn(infoTextClass, "flex items-center gap-1.5")}>
+            <span>{t("connect.body")}</span>
+            <InfoTip label={t("connect.mcpHintLabel")}>{t("connect.mcpHint")}</InfoTip>
+          </p>
           <div className="flex flex-wrap items-center gap-2" data-mcp-url>
             {/* A line of its own, whole: the address is the thing to read and copy. */}
-            <code className="min-w-0 basis-full break-all rounded-sm border border-border bg-muted px-3 py-2 text-sm text-foreground">
-              {mcpUrl}
-            </code>
+            <McpAddressSlab mcpUrl={mcpUrl} className="min-w-0 basis-full" />
             <CopyButton value={mcpUrl} variant="labelled" messages={COPY_MESSAGES} />
             <a
               href={CLAUDE_CONNECTORS_URL}
@@ -152,25 +158,26 @@ export function ConnectedAppsSection({ mcpUrl, apps }: { mcpUrl: string; apps: C
           <div className="flex flex-col gap-3">
             <p className={labelClass}>{t("connect.capabilitiesTitle")}</p>
             <ul className={SCOPE_GRID_CLASS} data-mcp-capabilities>
-              {AGENT_SCOPE_IDS.map((scope) => (
-                <li key={scope} data-scope={scope}>
-                  <Disclosure
-                    summary={
-                      <span className="flex min-w-0 items-center gap-2">
-                        <ScopeName scope={scope} />
-                        {"optIn" in AGENT_SCOPES[scope] ? (
-                          <span className={cn(badgeClass, "ml-auto shrink-0 text-muted-foreground")}>{t("connect.offByDefault")}</span>
-                        ) : null}
-                      </span>
-                    }
-                  >
-                    {/* Under the name's words, past its icon. */}
-                    <p className={cn(infoTextClass, SCOPE_TEXT_INDENT_CLASS)} data-scope-hint>
-                      {resolve(AGENT_SCOPES[scope].hint)}
-                    </p>
-                  </Disclosure>
-                </li>
-              ))}
+              {AGENT_SCOPE_IDS.map((scope) => {
+                const badge = scopeBadge(scope);
+                return (
+                  <li key={scope} data-scope={scope}>
+                    <Disclosure
+                      summary={
+                        <span className="flex min-w-0 items-center gap-2">
+                          <ScopeName scope={scope} />
+                          {badge ? <span className={cn(mutedBadgeClass, "ml-auto")}>{resolve(badge)}</span> : null}
+                        </span>
+                      }
+                    >
+                      {/* Under the name's words, past its icon. */}
+                      <p className={cn(infoTextClass, SCOPE_TEXT_INDENT_CLASS)} data-scope-hint>
+                        {resolve(AGENT_SCOPES[scope].hint)}
+                      </p>
+                    </Disclosure>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>

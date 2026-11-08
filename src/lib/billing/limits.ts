@@ -114,6 +114,15 @@ export async function planRoom(accountId: string, key: PlanLimitKey): Promise<Pl
   return { plan, cap, used, left: Math.max(0, cap - used) };
 }
 
+/** The share of a cap from which a list says how much of it is used, so the
+ *  limit is seen coming rather than met at the add button. */
+export const PLAN_ROOM_NOTICE_SHARE = 0.7;
+
+/** Whether `room` is near enough its cap (or at it) to say so. */
+export function planRoomRunningLow(room: PlanRoom | null): room is PlanRoom {
+  return room !== null && room.used >= room.cap * PLAN_ROOM_NOTICE_SHARE;
+}
+
 /**
  * The error to return when `accountId` may not create `adding` more of `key`
  * (one, unless a batch is being written), or null when it may. Records a

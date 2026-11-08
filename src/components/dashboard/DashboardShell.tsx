@@ -10,9 +10,11 @@ import { NotificationsProvider } from "@/components/notifications/NotificationsP
 import { TourOverlay } from "@/components/onboarding/TourOverlay";
 import { SearchProvider } from "@/components/search/SearchProvider";
 import { SearchMobileTrigger } from "@/components/search/SearchMobileTrigger";
+import { OverviewAddButton } from "@/components/dashboard/OverviewAddButton";
 import { SellerDetailsBanner } from "@/components/settings/SellerDetailsNotice";
 import { TermsNoticeBanner } from "@/components/settings/TermsNoticeBanner";
 import { getTermsStatus } from "@/lib/legal/terms-status";
+import { LEGAL_SETTINGS_PATH } from "@/lib/legal/terms-versions";
 import { AccountPlanProvider } from "@/components/billing/plan-context";
 import { PlanStatusBanner } from "@/components/billing/PlanStatusBanner";
 import {
@@ -34,6 +36,10 @@ import { SkipLink } from "@/components/ui/SkipLink";
 /** Where the seller-details banner stands down for owners: the setup checklist
  *  on Overview states the same gap as a step. */
 const BANNER_HIDDEN_PATHS = ["/dashboard"] as const;
+
+/** Where the Terms banner stands down: the page its link leads to, which shows
+ *  the whole notice itself. */
+const TERMS_BANNER_HIDDEN_PATHS = [LEGAL_SETTINGS_PATH] as const;
 
 /** The element "Skip to main content" moves focus to. */
 const MAIN_CONTENT_ID = "main-content";
@@ -104,6 +110,7 @@ export async function DashboardShell({
     <SellerDetailsBanner
       missing={missingTraderDetails}
       audience={viewingOther ? "member" : "owner"}
+      storeName={viewingStoreKnownName}
     />
   );
 
@@ -115,9 +122,11 @@ export async function DashboardShell({
     billing?.ok && billing.billing.status === "past_due" && billing.billing.plan !== "free"
       ? billing.billing.plan
       : null;
-  // Mobile: search + bell + profile menu ride in the Sidebar's mobile header.
+  // Mobile: search + bell + profile menu ride in the Sidebar's mobile header,
+  // after Overview's Add product for anyone who may add one.
   const mobileControls = (
     <div className="flex items-center gap-1">
+      {can(account?.role, "products.write") && <OverviewAddButton />}
       <SearchMobileTrigger />
       <NotificationBell />
       <ProfileMenu
@@ -170,10 +179,12 @@ export async function DashboardShell({
                   {sellerDetailsBanner}
                 </HiddenOnPaths>
               )}
-              <TermsNoticeBanner
-                upcoming={terms?.upcoming}
-                acceptedVersion={profile?.legal_accepted_version ?? null}
-              />
+              <HiddenOnPaths paths={TERMS_BANNER_HIDDEN_PATHS}>
+                <TermsNoticeBanner
+                  upcoming={terms?.upcoming}
+                  acceptedVersion={profile?.legal_accepted_version ?? null}
+                />
+              </HiddenOnPaths>
               <PlanStatusBanner pastDuePlan={pastDuePlan} audience={viewingOther ? "member" : "owner"} />
               {/* Where "Skip to main content" lands. A plain wrapper: each page
                   brings its own <main>, and this only has to take focus. */}

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { emptyShowcaseClass } from "@/components/ui/surface-styles";
@@ -200,19 +201,22 @@ const PINOUT_BOARD = <Board config={PINOUT} />;
 /**
  * The storefront list with nothing in it. The create card is the call to
  * action. `data-tour` goes on that card: it is one of the list's two create
- * buttons.
+ * buttons. `children` is the quieter way on, under the hint (the sample
+ * storefront's link), so it is met with the card, not past it.
  */
 export function StorefrontEmptyState({
   canWrite,
   onCreate,
   creating = false,
   "data-tour": dataTour,
+  children,
 }: {
   canWrite: boolean;
   onCreate: () => void;
   /** The storefront is being made and the route change is under way. */
   creating?: boolean;
   "data-tour"?: string;
+  children?: ReactNode;
 }) {
   const t = useTranslations("Storefront.list");
   return (
@@ -241,6 +245,7 @@ export function StorefrontEmptyState({
         <p className="mt-1 max-w-sm font-inter text-sm text-muted-foreground">
           {canWrite ? t("emptyHintOwner") : t("emptyHintGuest")}
         </p>
+        {children && <div className="mt-4">{children}</div>}
       </div>
     </div>
   );

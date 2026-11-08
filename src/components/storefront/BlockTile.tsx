@@ -28,10 +28,11 @@ import { cn } from "@/lib/utils";
 import { BlockFace } from "./BlockFace";
 import { BlockBlurCopies } from "./BlockBlurCopies";
 import {
-  CARD_HOVER_FRAME_CLASSES,
   TILE_FACE_CLASS,
   blockBlurStyle,
+  cardHoverFrameClass,
   tileFrameClass,
+  type CardHoverTrigger,
 } from "./config-maps";
 import type { TileLook } from "@/lib/storefront/tile-look";
 import type {
@@ -48,14 +49,15 @@ import {
 } from "./TileSpotDragLayer";
 
 /**
- * How long a finger has to rest on a tile before the press means "add this one
- * to the selection" rather than "select this one". Long enough that a tap
- * never trips it and a drag has always started moving first (the grid begins a
- * move after 4px of travel, which a hand covers in far less than this), short
- * enough to feel like a gesture rather than a wait — the same 450ms window a
- * phone's own long-press uses.
+ * How long a finger has to rest before a press becomes a HOLD: on a tile, "add
+ * this one to the selection" rather than "select this one"; on a quick-bar
+ * tool, "say what you do" rather than "do it" (SelectionToolbar). Long enough
+ * that a tap never trips it and a drag has always started moving first (the
+ * grid begins a move after 4px of travel, which a hand covers in far less than
+ * this), short enough to feel like a gesture rather than a wait: the same
+ * 450ms window a phone's own long-press uses.
  */
-const HOLD_TO_ADD_MS = 450;
+export const LONG_PRESS_MS = 450;
 /** How far a finger may wander during that hold and still be holding. Larger
  *  than the grid's own 4px drag threshold on purpose: a finger resting on a
  *  tile is never perfectly still, and cancelling on the first pixel of tremor
@@ -128,6 +130,7 @@ export const BlockTile = memo(function BlockTile({
   isFraming = false,
   isSoleSelection = false,
   isTyping = false,
+  isGesture = false,
   typingSelectAll = false,
   onToggleEdit,
   onFrame,
@@ -161,6 +164,8 @@ export const BlockTile = memo(function BlockTile({
   isSoleSelection?: boolean;
   /** True when this text tile's words are being typed on the tile. */
   isTyping?: boolean;
+  /** True while the grid is carrying or resizing this tile. */
+  isGesture?: boolean;
   /** Open the editor with everything selected (a block whose text is still
    *  the placeholder it was inserted with). */
   typingSelectAll?: boolean;
@@ -300,13 +305,6 @@ export const BlockTile = memo(function BlockTile({
     ? resolveCardStyle(theme, block.type === "product" ? block.style : undefined)
     : null;
 
-  // The card's hover effect (CARD_HOVER_FRAME_CLASSES), and whether it may
-  // play: never on a selected tile, while framing, typing or dragging a label,
-  // since the selection's chrome sits outside the tile and would not follow.
-  const cardHover =
-    block.type === "product" ? resolveCardStyle(theme, block.style).hoverEffect : null;
-  const hoverMotion = !(editable && isEditing) && !isFraming && !isTyping;
-
   // Where the two tokens sit right now, resolved exactly as the face resolves
   // them, so a drag starts from what the seller can see.
   const titleAt = card
@@ -356,6 +354,20 @@ export const BlockTile = memo(function BlockTile({
   // unmount mid-drag cannot leave them behind.
   const untrackRef = useRef<(() => void) | null>(null);
   useEffect(() => () => untrackRef.current?.(), []);
+
+  // The card's hover effect (cardHoverFrameClass), and what plays it. In the
+  // designer that is the pointer, on a selected tile too: trying an effect
+  // means pointing at the card being styled. Never its focus, which a tile
+  // takes on being selected and would hold the effect on. Nothing while a
+  // gesture owns the tile: carried, resized, framed, typed in, or a label
+  // in flight, which measures the tile and must not have it moving.
+  const cardHover =
+    block.type === "product" ? resolveCardStyle(theme, block.style).hoverEffect : null;
+  const hover: CardHoverTrigger = !editable
+    ? "board"
+    : isFraming || isTyping || isGesture || flying
+      ? "still"
+      : "pointer";
 
   function setFlight(next: Flight | null) {
     flyingRef.current = next;
@@ -622,7 +634,7 @@ export const BlockTile = memo(function BlockTile({
                 holdTimer.current = null;
                 heldRef.current = true;
                 onToggleEdit?.(blockKey, true);
-              }, HOLD_TO_ADD_MS);
+              }, LONG_PRESS_MS);
             }
           : undefined
       }
@@ -660,9 +672,8 @@ export const BlockTile = memo(function BlockTile({
         isTyping &&
           "outline-2 outline-dashed outline-ring -outline-offset-2",
         // What the card does on hover, played on the board as a buyer would
-        // see it, EXCEPT on a selected tile or mid-gesture: the selection's
-        // handles live outside the tile and would be left behind.
-        hoverMotion && cardHover && CARD_HOVER_FRAME_CLASSES[cardHover],
+        // see it, the selected tile included; held still mid-gesture.
+        cardHover && cardHoverFrameClass(cardHover, hover),
         selectable &&
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
         // In the designer, a block buyers won't see (sold out + hideSoldOut)
@@ -748,7 +759,7 @@ export const BlockTile = memo(function BlockTile({
           imageRef={isFraming ? imageRef : undefined}
           spotDrag={spotDrag}
           look={look}
-          hoverMotion={hoverMotion}
+          hover={hover}
           textEditing={typable && isTyping}
           textSelectAll={typingSelectAll}
           onTextChange={

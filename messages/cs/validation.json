@@ -524,11 +524,11 @@
     "addOnNotYours": "Jeden z nabízených produktů už v tomto obchodě není. Odeberte ho a uložte znovu."
   },
   "productImport": {
-    "noTitle": "Chybí název.",
+    "noTitle": "Chybí název. Zkontrolujte, že je výše nastavený sloupec Název.",
     "titleTooLong": "Název je delší než 200 znaků.",
-    "noPrice": "Cenu se nepodařilo přečíst.",
+    "noPrice": "Cenu se nepodařilo přečíst. Zkontrolujte, že sloupec Cena výše ukazuje na správný sloupec.",
     "priceZero": "Cena je nulová.",
-    "duplicateTitle": "Stejný název má i jiný řádek."
+    "duplicateTitle": "Stejný název má i jiný řádek. Duplicitní názvy se přeskočí; jeden z nich v tabulce přejmenujte."
   },
   "shipping": {
     "shipsFromInvalid": "Z této země zatím odesílat nelze.",

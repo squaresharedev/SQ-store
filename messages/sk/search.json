@@ -48,7 +48,7 @@
     "securityActivity": "Bezpečnostná aktivita",
     "signOut": "Odhlásiť sa",
     "vat": "IČ DPH",
-    "businessName": "Obchodné meno",
+    "businessName": "Vaše meno alebo názov firmy",
     "country": "Krajina",
     "address": "Adresa sídla",
     "contactEmail": "Kontaktný e-mail",
@@ -61,7 +61,6 @@
     "sellerAgreement": "Zmluva s predajcom",
     "termsOfService": "Podmienky služby",
     "exportData": "Exportovať moje dáta",
-    "deleteAccount": "Zmazať účet",
     "plan": "Plán a cenník",
     "invoices": "Faktúry a platobné údaje"
   },

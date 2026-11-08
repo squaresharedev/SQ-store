@@ -20,9 +20,9 @@ import { can, type TeamAction, type TeamRole } from "@/lib/team/permissions";
  *
  * Copy is short on purpose (one idea per stop), and honest about what is not
  * built or not switched on yet: checkout and Stripe payouts are said to be
- * coming rather than implied to work, and so is the embed for as long as it
- * has no host to be served from. It is message keys, resolved by the overlay
- * in the reader's language.
+ * coming rather than implied to work, and the embed stop is skipped for as
+ * long as the embed has no host to be served from. It is message keys,
+ * resolved by the overlay in the reader's language.
  *
  * Nothing here is stored: the tour's position is session state
  * (tour-store.ts), and this module stays pure so it can be tested in node.
@@ -102,6 +102,9 @@ export type TourStep<Id extends string = TourStepId> = {
   side?: "bottom" | "top" | "right" | "left";
   /** Only shown to roles that can do the thing it points at. */
   requires?: TeamAction;
+  /** False while the thing it points at is not switched on: the stop is
+   *  skipped rather than spent on a promise. */
+  available?: boolean;
   reveal?: TourReveal;
 };
 
@@ -182,7 +185,8 @@ export const TOUR_STEPS: readonly TourStep[] = [
     page: "storefront",
     title: "Onboarding.guidedTour.steps.storefrontSample.title",
     body: "Onboarding.guidedTour.steps.storefrontSample.body",
-    // The quiet link to the sample at the foot of the list (StorefrontsList).
+    // The quiet link to the sample, in the empty list's frame or at the foot of
+    // the list (StorefrontsList).
     targets: [{ selector: "main [data-storefront-sample]" }],
     // No link: this person hid the sample back when it was a card, or the flag
     // could not be read. Nothing to point at, so just say what the page is for.
@@ -196,31 +200,26 @@ export const TOUR_STEPS: readonly TourStep[] = [
     path: "/storefront",
     page: "storefront",
     title: "Onboarding.guidedTour.steps.storefrontEmbed.title",
-    // Says what is true right now, like the payments stop: the embed is either
-    // something to paste today or something still on its way.
-    body: EMBED_AVAILABLE
-      ? "Onboarding.guidedTour.steps.storefrontEmbed.bodyLive"
-      : "Onboarding.guidedTour.steps.storefrontEmbed.body",
+    body: "Onboarding.guidedTour.steps.storefrontEmbed.bodyLive",
     targets: [
       {
         selector: 'main [data-tour="storefront-embed"]',
-        body: EMBED_AVAILABLE
-          ? "Onboarding.guidedTour.steps.storefrontEmbed.bodyButtonLive"
-          : "Onboarding.guidedTour.steps.storefrontEmbed.bodyButton",
+        body: "Onboarding.guidedTour.steps.storefrontEmbed.bodyButtonLive",
         extra: "embed-snippet",
       },
     ],
     // The first of the seller's own cards. A new seller has none (the sample is
     // a link, not a card), so they get the fallback, snippet and all.
-    fallbackBody: EMBED_AVAILABLE
-      ? "Onboarding.guidedTour.steps.storefrontEmbed.fallbackBodyLive"
-      : "Onboarding.guidedTour.steps.storefrontEmbed.fallbackBody",
+    fallbackBody: "Onboarding.guidedTour.steps.storefrontEmbed.fallbackBodyLive",
     fallbackExtra: "embed-snippet",
     // The create button renders with the list, so its presence means "no card"
     // really is no card rather than a list still on its way.
     waitFor: '[data-tour="storefront-create"]',
     scroll: true,
     requires: "storefront.write",
+    // Until the embed has a host, a stop about pasting it would point at a
+    // widget that shows nowhere.
+    available: EMBED_AVAILABLE,
   },
   {
     id: "orders-search",
@@ -287,10 +286,13 @@ export const TOUR_STEPS: readonly TourStep[] = [
   },
 ];
 
-/** The steps this role gets: a stop pointing at something they cannot do is
- *  dropped rather than shown as a control they will never find. */
+/** The steps this role gets: a stop pointing at something they cannot do, or
+ *  at something not switched on yet, is dropped rather than shown as a control
+ *  they will never find. */
 export function tourStepsFor(role: TeamRole | null | undefined): TourStep[] {
-  return TOUR_STEPS.filter((step) => !step.requires || can(role, step.requires));
+  return TOUR_STEPS.filter(
+    (step) => step.available !== false && (!step.requires || can(role, step.requires)),
+  );
 }
 
 export function tourStep(id: string): TourStep | undefined {

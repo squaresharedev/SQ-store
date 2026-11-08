@@ -45,6 +45,16 @@ The next run carries on. Nobody who was already emailed gets a second copy.
 
 Only if the law forces the change, or it stops an unforeseen and imminent danger, set `urgentReason` to `"law"` or `"danger"` on the version in `terms-versions.ts`. Emails still go out, then it takes effect at once. Ask a lawyer first. Being in a hurry is not a reason.
 
+## Replacing a version before its notice starts
+
+The job emails versions one at a time, oldest first, so two waiting versions mean two rounds of emails, 30 days or more apart. If a published version has not been emailed to anyone yet (no `notice_started_at` in `terms_versions`) and nobody has agreed to it (no `profiles.legal_accepted_version` names it), you can replace it instead:
+
+1. Start the new version as usual (`npm run terms:new` on Home).
+2. Keep the old file. Never delete a published version. In Home's `src/content/legal/terms/index.ts`, give it `replacedBy: "<new version>"`. Its page then says it never took effect, and Home never treats it as in force or coming.
+3. In this repo, leave it out of `TERMS_VERSIONS` and `TERMS_CHANGES`, so nobody is emailed about it, and describe the changes from the version in force in the new version's entry.
+
+Once any email has gone out or anyone has agreed to it, this no longer applies: the old version runs its course, and the new one follows it.
+
 ## Not covered
 
 - The Privacy Policy and Cookie Policy are notices, not contracts, so they do not use this. Tell users about material changes anyway.

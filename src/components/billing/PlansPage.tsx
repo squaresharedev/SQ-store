@@ -9,7 +9,7 @@ import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { pageShellClass, savingBadgeClass, savingBadgeOnInkClass } from "@/components/ui/surface-styles";
-import { helpTextClass, iconNudgeRightClass, infoTextClass, noteStripClass, stubBadgeClass } from "@/components/ui/control-styles";
+import { helpTextClass, iconNudgeUpRightClass, infoTextClass, noteStripClass, stubBadgeClass } from "@/components/ui/control-styles";
 import { PlanCard } from "@/components/billing/PlanCard";
 import { GrantBanner } from "@/components/billing/GrantBanner";
 import { CostExplorer } from "@/components/billing/CostExplorer";
@@ -195,7 +195,7 @@ function PlansPageBody({ context, source, actions = SERVER_BILLING_ACTIONS }: Pl
       <PlanComparison interval={interval} currentPlan={context.plan} />
       <PlansFaq />
       <p className={cn(infoTextClass, "mx-auto max-w-3xl text-center")}>
-        {t("page.autoRenew")} {t("page.finePrint")}
+        {t("page.autoRenew", { interval })} {t("page.finePrint")}
         {/* What a struck-through price is, wherever one is shown. */}
         {hasLaunchPrice && <> {t("page.launchNote")}</>}
       </p>
@@ -286,7 +286,7 @@ function planAction({
     >
       {leaving ? <Spinner /> : null}
       {leaving ? t("portal.opening") : t("card.upgrade", { plan: name })}
-      {!leaving && <ArrowUpRight className={cn("size-4", iconNudgeRightClass)} strokeWidth={2} aria-hidden />}
+      {!leaving && <ArrowUpRight className={cn("size-4", iconNudgeUpRightClass)} strokeWidth={2} aria-hidden />}
     </Button>
   );
 }

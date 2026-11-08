@@ -51,7 +51,8 @@
     "noEnd": "Nessuna data di fine",
     "orders": "{orders, plural, =0 {Ancora nessun ordine} one {# ordine} other {# ordini}}",
     "uses": "{uses} di {limit} utilizzi",
-    "switchLabel": "Attivo",
+    "turnOn": "Attiva",
+    "turnOff": "Disattiva",
     "edit": "Modifica",
     "endNow": "Termina ora",
     "delete": "Elimina",
@@ -86,7 +87,7 @@
     "kind": {
       "title": "Che tipo di sconto?",
       "code": "Codice sconto",
-      "codeHint": "Gli acquirenti lo inseriscono al pagamento, e vedi da quale canale sono arrivati.",
+      "codeHint": "Gli acquirenti lo inseriscono al pagamento, e vedi da quale canale sono arrivati. Non si somma a una promozione in corso: gli acquirenti ottengono il prezzo più basso.",
       "automatic": "Promo",
       "automaticHint": "Abbassa i prezzi per tutti. Senza codice."
     },
@@ -99,6 +100,7 @@
     },
     "channel": {
       "label": "Condiviso su (facoltativo)",
+      "hint": "Vedi quanti ordini porta ogni canale nella tua pagina Sconti.",
       "suggestions": "Canali suggeriti",
       "newsletter": "Newsletter",
       "creator": "Creatore"
@@ -141,7 +143,7 @@
       }
     },
     "limit": {
-      "label": "Ordini massimi (facoltativo)",
+      "label": "Utilizzi massimi (facoltativo)",
       "none": "Nessun limite"
     },
     "locked": "Questa promozione è già iniziata, quindi solo la data di fine può essere modificata. Per cambiare qualsiasi altra cosa, terminala e crea una nuova promozione.",
@@ -153,7 +155,8 @@
       "noEnd": "Nessuna data di fine",
       "exampleLabel": "Esempio",
       "example": "Esempio: {title} a {regular} costa {now}.",
-      "chipLink": "Cambia l'aspetto delle promo nel tuo negozio"
+      "exampleUnchanged": "{title} resta a {price}: ha un prezzo in un’altra valuta.",
+      "chipLink": "Cambia l’aspetto delle promo su {storefront}"
     },
     "create": "Crea sconto",
     "save": "Salva modifiche",

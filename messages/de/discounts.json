@@ -51,7 +51,8 @@
     "noEnd": "Kein Enddatum",
     "orders": "{orders, plural, =0 {Noch keine Bestellungen} one {# Bestellung} other {# Bestellungen}}",
     "uses": "{uses} von {limit} Nutzungen",
-    "switchLabel": "An",
+    "turnOn": "Einschalten",
+    "turnOff": "Ausschalten",
     "edit": "Bearbeiten",
     "endNow": "Jetzt beenden",
     "delete": "Löschen",
@@ -86,7 +87,7 @@
     "kind": {
       "title": "Welche Art von Rabatt?",
       "code": "Rabattcode",
-      "codeHint": "Käufer geben ihn an der Kasse ein, und Sie sehen, über welchen Kanal sie kamen.",
+      "codeHint": "Käufer geben ihn an der Kasse ein, und du siehst, über welchen Kanal sie kamen. Er kommt nicht zu einer laufenden Aktion hinzu: Käufer bekommen den niedrigeren Preis.",
       "automatic": "Aktion",
       "automaticHint": "Senkt Ihre Preise für alle. Ohne Code."
     },
@@ -99,6 +100,7 @@
     },
     "channel": {
       "label": "Geteilt auf (optional)",
+      "hint": "Auf deiner Seite „Rabatte“ siehst du, wie viele Bestellungen jeder Kanal bringt.",
       "suggestions": "Vorgeschlagene Kanäle",
       "newsletter": "Newsletter",
       "creator": "Creator"
@@ -141,7 +143,7 @@
       }
     },
     "limit": {
-      "label": "Höchstens Bestellungen (optional)",
+      "label": "Maximale Nutzungen (optional)",
       "none": "Kein Limit"
     },
     "locked": "Diese Aktion hat bereits begonnen, daher kann nur ihr Ende geändert werden. Um etwas anderes zu ändern, beende sie und erstelle eine neue Aktion.",
@@ -153,7 +155,8 @@
       "noEnd": "Kein Enddatum",
       "exampleLabel": "Beispiel",
       "example": "Beispiel: {title} für {regular} kostet {now}.",
-      "chipLink": "Ändern, wie Aktionen in Ihrem Shop aussehen"
+      "exampleUnchanged": "{title} bleibt bei {price}: Es hat einen Preis in einer anderen Währung.",
+      "chipLink": "Ändern, wie Aktionen auf {storefront} aussehen"
     },
     "create": "Rabatt erstellen",
     "save": "Änderungen speichern",

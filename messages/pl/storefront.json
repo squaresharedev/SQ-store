@@ -91,7 +91,7 @@
     "groups": {
       "theme": "Motyw",
       "header": "Nagłówek",
-      "typography": "Typografia",
+      "typography": "Czcionka",
       "cards": "Kafelki produktów",
       "soldOut": "Wyprzedane",
       "productPage": "Strona produktu",
@@ -100,7 +100,7 @@
     "subtitle": {
       "theme": "Witryna / Motyw",
       "header": "Witryna / Nagłówek",
-      "typography": "Witryna / Typografia",
+      "typography": "Witryna / Czcionka",
       "cards": "Witryna / Kafelki produktów",
       "soldOut": "Witryna / Wyprzedane",
       "productPage": "Witryna / Strona produktu",
@@ -161,7 +161,8 @@
       "cardStarRating": "Ocena w gwiazdkach na kafelkach",
       "cardLowStock": "Etykieta Ostatnie sztuki",
       "textSpacing": "Odstęp między literami i wysokość wiersza",
-      "elementBlur": "Rozmycie"
+      "elementBlur": "Rozmycie",
+      "phoneLayout": "Układ na telefonach"
     }
   },
   "editorSearch": {
@@ -207,31 +208,37 @@
     "emptyHint": "Ta siatka jest pusta",
     "removed": "Usunięto przez Square Share",
     "pausedInReview": "Wstrzymane · w Square Share do sprawdzenia",
-    "pausedNeedsChanges": "Wstrzymane przez Square Share · wymaga zmian"
+    "pausedNeedsChanges": "Wstrzymane przez Square Share · wymaga zmian",
+    "status": {
+      "live": "Opublikowana",
+      "pagesOff": "Jeszcze nieopublikowana: włącz strony produktów",
+      "detailsMissing": "Jeszcze nieopublikowana: uzupełnij dane sprzedawcy"
+    }
   },
   "embed": {
-    "inDevNotice": "Widget osadzenia jest w trakcie tworzenia i nie renderuje się jeszcze na zewnętrznych stronach. Skonfiguruj ustawienia poniżej, aby być gotowym wkleić kod, gdy tylko zostanie wdrożony.",
+    "sectionTitle": "Na twojej własnej stronie internetowej",
+    "inDevNotice": "Na innych stronach internetowych to się jeszcze nie wyświetla. Skonfiguruj to teraz, a będzie gotowe w chwili uruchomienia. Wtedy dodasz też krótką notkę do swojej polityki prywatności: podamy ci gotowy tekst.",
     "title": "Udostępnij tę witrynę",
-    "description": "Wyślij link do witryny „{name}” albo wklej kod na swoją stronę, aby ją tam wyświetlić.",
+    "description": "Wyślij link do witryny „{name}” albo wklej kod na swoją stronę internetową, aby ją tam wyświetlić.",
     "steps": {
       "site": "Wybierz strony, na których się wyświetla",
-      "snippet": "Wklej kod na swojej stronie",
+      "snippet": "Dodaj kod na swoją stronę internetową",
       "privacy": "Dodaj to do swojej polityki prywatności"
     },
     "required": "Wymagane",
     "enabledLabel": "Pokaż na mojej stronie internetowej",
     "showingLabel": "Widoczne na twojej stronie",
-    "domainsLabel": "Dozwolone domeny",
+    "domainsLabel": "Adresy twoich stron internetowych",
     "domainsPlaceholder": "twojastrona.com, blog.twojastrona.com",
-    "domainsHint": "Maksymalnie {max}, oddzielone przecinkami. Wklej adres URL, a przytniemy go do samej domeny.",
-    "sameAsHint": "Kopiuje dozwolone domeny, które ma {title}.",
-    "emptyDomainsWarning": "Dodaj co najmniej jedną domenę. Dopóki lista jest pusta, witryna nie wczyta się nigdzie, mimo że osadzenie jest włączone.",
+    "domainsHint": "Osadzenie wczytuje się tylko na tych stronach. Wklej pełny adres URL, a wyodrębnimy z niego adres. Maksymalnie {max}, oddzielone przecinkami.",
+    "sameAsHint": "Kopiuje adresy stron internetowych, które ma {title}.",
+    "emptyDomainsWarning": "Dodaj co najmniej jeden adres strony internetowej. Dopóki lista jest pusta, witryna nie wczyta się nigdzie, mimo że osadzenie jest włączone.",
     "builderLabel": "Twój kreator stron",
     "builderOther": "Inna strona",
     "builderSteps": {
       "other": "Wklej go do kodu HTML strony w miejscu, w którym ma się pojawić witryna.",
       "wordpress": "Dodaj blok „Własny HTML” w miejscu, w którym ma się pojawić witryna, i wklej do niego kod.",
-      "squarespace": "Dodaj blok „Code” i wklej do niego kod. Jeśli witryna pojawia się dopiero po odświeżeniu, przełącz na „Tylko iframe”.",
+      "squarespace": "Dodaj blok „Code” i wklej do niego kod. Jeśli witryna pojawia się dopiero po odświeżeniu, przełącz na „Proste osadzenie”.",
       "wix": "Dodaj „Embed Code”, a potem „Embed HTML”, i wklej kod. Następnie rozciągnij pole na wysokość witryny.",
       "webflow": "Dodaj element „Code Embed” i wklej do niego kod. Pojawi się na opublikowanej stronie.",
       "shopify": "W edytorze motywu dodaj sekcję „Custom Liquid” i wklej do niej kod.",
@@ -241,21 +248,21 @@
     },
     "snippetKinds": {
       "label": "Rodzaj kodu",
-      "script": "Skrypt",
-      "iframe": "Tylko iframe"
+      "script": "Pełne osadzenie",
+      "iframe": "Proste osadzenie"
     },
-    "snippetReadyHint": "Wystarczy wkleić go raz. Dopasowuje się do witryny i uwzględnia zmiany, które wprowadzasz tutaj.",
-    "iframeHint": "Dla stron, które usuwają skrypty. Ma {height} pikseli wysokości i przewija się wewnątrz. Skopiuj go ponownie po zmianie domen.",
-    "snippetLockedHint": "Włącz osadzenie i dodaj co najmniej jedną domenę, aby odblokować przycisk Kopiuj.",
+    "snippetReadyHint": "Działa na większości stron. Wystarczy wkleić go raz: dopasowuje się do witryny i uwzględnia zmiany, które wprowadzasz tutaj.",
+    "iframeHint": "Użyj tego, jeśli „Pełne osadzenie” nie pojawiło się na twojej stronie. Ma {height} pikseli wysokości i przewija się wewnątrz. Skopiuj go ponownie za każdym razem, gdy zmienisz adresy swoich stron internetowych.",
+    "snippetLockedHint": "Włącz osadzenie i dodaj co najmniej jeden adres strony internetowej, aby odblokować przycisk Kopiuj.",
     "snippetSaveHint": "Zapisz ustawienia, aby odblokować przycisk Kopiuj.",
     "pagesOffHint": "Najpierw włącz strony produktów w edytorze. Kliknięcie produktu otwiera jego stronę.",
     "notShowingLabel": "Jeśli witryna się nie wyświetla",
-    "notShowingTip": "Adres twojej strony musi być na liście Dozwolone domeny, a strona musi używać https. Wklejony kod pojawia się na opublikowanej stronie, a nie w edytorze kreatora. Aby zobaczyć go pod adresem podglądu (np. twojastrona.webflow.io), dodaj również ten adres.",
+    "notShowingTip": "Adres twojej strony musi być wśród adresów twoich stron internetowych powyżej, a strona musi używać https. Wklejony kod pojawia się na opublikowanej stronie, a nie w edytorze kreatora. Jeśli witryna w ogóle się nie pojawia, wypróbuj rodzaj kodu „Proste osadzenie”. Aby zobaczyć ją pod adresem podglądu (np. twojastrona.webflow.io), dodaj również ten adres.",
     "copySnippet": {
-      "copy": "Kopiuj kod do osadzenia",
-      "copied": "Skopiowano kod do osadzenia",
-      "failed": "Nie udało się skopiować kodu do osadzenia. Zaznacz i skopiuj ręcznie.",
-      "cannotCopyYet": "kodu do osadzenia nie można jeszcze skopiować"
+      "copy": "Kopiuj kod na stronę",
+      "copied": "Skopiowano kod na stronę",
+      "failed": "Nie udało się skopiować kodu na stronę. Zaznacz i skopiuj ręcznie.",
+      "cannotCopyYet": "kodu na stronę nie można jeszcze skopiować"
     },
     "privacyHint": "Twoja strona wczytuje teraz tę witrynę ze Square Share, więc jej polityka prywatności musi o tym mówić. Wklej do niej ten tekst:",
     "privacyTextLabel": "Tekst o prywatności",
@@ -265,20 +272,21 @@
       "copied": "Skopiowano tekst o prywatności",
       "failed": "Nie udało się skopiować tekstu. Zaznacz i skopiuj ręcznie."
     },
-    "snippetKeyLabel": "Klucz kodu",
-    "rotateConfirmText": "Wygenerowanie nowego klucza od razu unieważnia każdą kopię starego kodu, również te na stronach, które nadal chcesz używać: nowy kod trzeba będzie wkleić wszędzie.",
-    "rotateKey": "Wygeneruj nowy klucz",
-    "rotating": "Generowanie…",
-    "revokeHint": "Wklejono gdzieś, gdzie nie powinno być? Wygeneruj nowy klucz, aby unieważnić każdy istniejący kod.",
+    "snippetKeyLabel": "Kod na stronę",
+    "rotateConfirmText": "Nowy kod wyłącza stary wszędzie, gdzie został wklejony. Na stronach, na których nadal chcesz pokazywać witrynę, trzeba będzie ponownie wkleić nowy kod.",
+    "rotateKey": "Wygeneruj nowy kod",
+    "rotating": "Generowanie nowego kodu...",
+    "revokeHint": "Twój kod na stronę może być publiczny: wyświetla się tylko pod adresami twoich stron internetowych. Generuj nowy kod tylko po to, by wyłączyć wszystkie już wklejone kopie.",
     "saveSettings": "Zapisz ustawienia",
     "saving": "Zapisywanie…",
     "saved": "Zapisano ustawienia osadzenia.",
-    "newKeyIssued": "Wygenerowano nowy klucz osadzenia.",
+    "newKeyIssued": "Wygenerowano nowy kod na stronę.",
     "newKeyDetail": "Wklej kod ponownie wszędzie tam, gdzie ta witryna jest osadzona."
   },
   "share": {
     "title": "Link do witryny",
     "live": "Twoja witryna ma własną stronę. Każdy, kto ma ten link, może ją przeglądać, bez własnej strony internetowej.",
+    "searchOff": "Ukryta przed wyszukiwarkami, takimi jak Google.",
     "pagesOff": "Włącz strony produktów w edytorze, a ta witryna dostanie link, który możesz udostępnić.",
     "detailsMissing": "Ta witryna dostanie link do udostępnienia, gdy uzupełnisz dane sprzedawcy.",
     "open": "Otwórz",
@@ -321,7 +329,7 @@
   "pageConnectors": {},
   "artboard": {
     "productPageLabel": " · Strona produktu",
-    "closeAriaLabel": "Zamknij ścieżkę zakupu: {title}",
+    "closeAriaLabel": "Zamknij stronę produktu: {title}",
     "desktopSize": "Rozmiar na komputer",
     "mobileSize": "Rozmiar na telefon",
     "checkoutLabel": " · Kasa",
@@ -331,7 +339,7 @@
   "metadata": {
     "storefronts": {
       "title": "Witryny",
-      "subtitle": "Każda witryna ma własną siatkę i motyw. Utwórz ich tyle, ile potrzebujesz, a potem otwórz jedną, aby ją edytować."
+      "subtitle": "Każda witryna ma własną siatkę i motyw oraz własny link do udostępniania. Utwórz ich tyle, ile potrzebujesz, a potem otwórz jedną, aby ją edytować."
     },
     "editor": {
       "title": "Edytuj witrynę"
@@ -351,20 +359,20 @@
   "controls": {
     "off": "Wyłączone",
     "layers": "Warstwy",
-    "objectCount": "{count, plural, one {1 obiekt} few {# obiekty} many {# obiektów} other {# obiektu}}",
+    "objectCount": "{count, plural, one {# blok} few {# bloki} many {# bloków} other {# bloku}}",
     "cardStyle": "Styl kafelka",
     "priceTag": "Etykieta z ceną",
     "theme": "Motyw",
-    "canvas": "Obszar roboczy",
-    "design": "Projekt"
+    "themeHint": "Kolory, rozmiar siatki i układ na telefonach",
+    "canvas": "Obszar roboczy"
   },
   "designPanel": {
     "tabSelection": "Zaznaczenie",
-    "tabDesign": "Projekt",
+    "tabDesign": "Cała witryna",
     "show": "Pokaż panel projektu",
     "hide": "Ukryj panel projektu",
     "resize": "Zmień rozmiar panelu projektu",
-    "closeSettings": "Zamknij ustawienia projektu",
+    "closeSettings": "Zamknij styl witryny",
     "scopeLabel": "Zakres panelu"
   },
   "library": {
@@ -434,10 +442,11 @@
     "sectionPalettes": "Palety"
   },
   "themePanel": {
-    "accent": "Akcent"
+    "accent": "Akcent",
+    "accentHint": "Używany w przyciskach, etykietach obniżek, nagłówkach i nazwie sklepu."
   },
   "panelSearch": {
-    "placeholder": "Znajdź ustawienie lub obiekt",
+    "placeholder": "Znajdź ustawienie lub blok",
     "clear": "Wyczyść wyszukiwanie",
     "noResults": "Nic w edytorze nie pasuje do tego.",
     "matchesLabel": "Wyniki"
@@ -488,7 +497,7 @@
     "cornerValueText": "{n, plural, one {# piksel} few {# piksele} many {# pikseli} other {# piksela}}",
     "sharp": "Ostre",
     "circle": "Koło",
-    "fineTuning": "Dostrajanie",
+    "titleSection": "Tytuł",
     "showTitle": "Pokaż tytuł",
     "titleStyleLabel": "Styl tytułu",
     "edgeSpacing": "Odstęp od krawędzi",
@@ -556,12 +565,13 @@
     "label": "Na większych kartach",
     "tile": "Powiększ",
     "cell": "Ten sam rozmiar",
-    "everyCard": "Dotyczy wszystkich kart w tym sklepie."
+    "everyCard": "Dotyczy etykiet z ceną i etykiet obniżek na wszystkich kafelkach."
   },
   "layout": {
     "canvasWidth": "Szerokość obszaru roboczego",
     "canvasWidthAriaLabel": "Szerokość obszaru roboczego w blokach",
     "blocksWide": "{n, plural, one {# blok szerokości} few {# bloki szerokości} many {# bloków szerokości} other {# bloku szerokości}}",
+    "blocksUnit": "bloków",
     "canvasHeight": "Wysokość obszaru roboczego",
     "heightTip": "Plansza nie może zmniejszyć się poniżej bloków już na niej umieszczonych: najpierw przeciągnij blok wyżej, a potem skróć obszar roboczy.",
     "canvasHeightAriaLabel": "Wysokość obszaru roboczego w blokach",
@@ -570,6 +580,11 @@
     "gridDensityAriaLabel": "Gęstość siatki",
     "gridGapValue": "{n, plural, one {# piksel odstępu} few {# piksele odstępu} many {# pikseli odstępu} other {# piksela odstępu}}",
     "noGap": "Bez odstępu",
+    "phonesInfoLabel": "Jak telefony wyświetlają tę planszę",
+    "phonesInfoBody": "Gdy wyłączone, telefony same przestawiają planszę, aby się zmieściła. Gdy włączone, otwórz widok telefonu i przeciągaj bloki lub zmieniaj ich rozmiar, aby samodzielnie je rozmieścić. Plansza na komputerze pozostaje bez zmian.",
+    "phonesAutomatic": "Telefony układają tę planszę automatycznie.",
+    "phoneWidth": "Szerokość na telefonie",
+    "phoneWidthAriaLabel": "Szerokość na telefonie w blokach",
     "showGrid": "Pokaż siatkę",
     "gridInfoLabel": "Kto widzi siatkę",
     "gridInfoBody": "Pomoc podczas projektowania: rysuje puste miejsca, dzięki czemu widzisz, gdzie wyląduje blok. Kupujący nigdy jej nie widzą."
@@ -588,7 +603,8 @@
     "angle": "{n}°",
     "layerLabel": "Warstwa",
     "layerInfoLabel": "Jak działają warstwy",
-    "layerInfoBody": "Warstwy decydują tylko o tym, co jest malowane na wierzchu tam, gdzie bloki się nakładają; kolejność odczytu przez czytnik ekranu nigdy się nie zmienia.{multi, select, true { To zaznaczenie zachowuje własną kolejność w stosie podczas przenoszenia.} other {}}{stacked, select, true { Kliknij Alt na stos na obszarze roboczym, aby dotrzeć do bloku pod spodem.} other {}}",
+    "layerInfoBody": "Warstwy decydują tylko o tym, co jest na wierzchu tam, gdzie bloki się nakładają; kolejność odczytu przez czytnik ekranu nigdy się nie zmienia.{multi, select, true { To zaznaczenie zachowuje własną kolejność w stosie podczas przenoszenia.} other {}}",
+    "stackedHint": "Kliknij z wciśniętym Alt, aby zaznaczyć blok pod spodem. Na ekranie dotykowym stuknij stos ponownie.",
     "blocksSelected": "{count, plural, one {# blok zaznaczony} few {# bloki zaznaczone} many {# bloków zaznaczonych} other {# bloku zaznaczonego}}",
     "layerOf": "Warstwa {index} z {total}",
     "blockLayerLabel": "Warstwa bloku",
@@ -596,7 +612,13 @@
     "sendBackward": "Przesuń o warstwę niżej",
     "bringForward": "Przesuń o warstwę wyżej",
     "bringToFront": "Przesuń na wierzch",
-    "seeAllLayers": "Zobacz wszystkie warstwy"
+    "seeAllLayers": "Zobacz wszystkie warstwy",
+    "phoneLabel": "Na telefonach",
+    "phoneInfoLabel": "Jak blok układa się na telefonach",
+    "phoneInfoBody": "Przeciągnij blok lub zmień jego rozmiar w widoku telefonu, aby samodzielnie go tam umieścić. „Przywróć układ automatyczny” pozwala, by układ na telefonie znów sam go rozmieścił. Plansza na komputerze pozostaje bez zmian.",
+    "hideOnPhones": "Ukryj na telefonach",
+    "showOnPhones": "Pokaż na telefonach",
+    "phoneAutomatic": "Przywróć układ automatyczny"
   },
   "header": {
     "showHeader": "Pokaż nagłówek",
@@ -606,7 +628,8 @@
     "storeNamePlaceholder": "Nazwa sklepu widoczna dla kupujących",
     "bio": "Bio",
     "bioPlaceholder": "Krótka linijka o twoim sklepie",
-    "charsLeft": "{n, plural, one {Pozostał # znak} few {Pozostały # znaki} many {Pozostało # znaków} other {Pozostało # znaku}}"
+    "charsLeft": "{n, plural, one {Pozostał # znak} few {Pozostały # znaki} many {Pozostało # znaków} other {Pozostało # znaku}}",
+    "styleLine": "{line, select, name {Czcionka i kolor nazwy} other {Czcionka i kolor bio}}"
   },
   "soldOut": {
     "hide": "Ukryj przed kupującymi",
@@ -682,10 +705,12 @@
     "movePriceTo": "{spot, select, top_left {Przesuń cenę w lewy górny róg} top_center {Przesuń cenę na górny środek} top_right {Przesuń cenę w prawy górny róg} middle_center {Przesuń cenę na środek} bottom_left {Przesuń cenę w lewy dolny róg} bottom_center {Przesuń cenę na dolny środek} bottom_right {Przesuń cenę w prawy dolny róg} other {Przesuń cenę tutaj}}"
   },
   "productPage": {
+    "scopeNote": "Te ustawienia dotyczą każdej strony produktu w tej witrynie.",
     "layout": {
       "title": "Strona",
       "showPage": {
         "label": "Pokaż stronę produktu",
+        "hint": "Daje też twojej witrynie własny link do udostępniania.",
         "infoLabel": "Co robi ten przełącznik",
         "infoOn": "Stuknięcie w kafelek produktu otwiera jego stronę, a witryna ma własną stronę do udostępnienia.",
         "infoOff": "Kafelki produktów nie mają strony do otwarcia, a link do samej witryny też przestaje działać."
@@ -702,7 +727,7 @@
         "label": "Czcionka",
         "infoLabel": "Jak czcionka tej strony wiąże się z czcionką witryny",
         "infoOwn": "Ta strona wyświetla się własną czcionką, niezależnie od tego, jakiej używa witryna.",
-        "infoFollows": "Podąża za czcionką twojej witryny. Zmień ją w sekcji Typografia.",
+        "infoFollows": "Podąża za czcionką twojej witryny. Zmień ją w ustawieniach Czcionka.",
         "inheritOption": "Tak samo jak witryna ({name})"
       },
       "indexing": {
@@ -716,6 +741,7 @@
       "title": "Przycisk zakupu",
       "infoLabel": "Co decyduje o tym, czy przycisk się pokazuje",
       "infoContent": "Przycisk prowadzi pod link do zakupu każdego produktu (ustawiany na produkcie). Bez niego wysyła e-mail na twój adres kontaktowy poniżej; bez żadnego z nich przycisk się nie pokazuje.",
+      "checkoutNote": "Przycisk płatności w twojej kasie wygląda tak samo jak ten. <link>Przejdź do kasy</link>",
       "buttonText": {
         "label": "Tekst przycisku",
         "charsLeft": "{count, plural, one {Pozostał # znak} few {Pozostały # znaki} many {Pozostało # znaków} other {Pozostało # znaku}}"
@@ -844,6 +870,7 @@
   "productBlock": {
     "deleted": "Ten produkt został usunięty z twojego katalogu.",
     "removeFromGrid": "Usuń z siatki",
+    "details": "Szczegóły produktu",
     "nameLabel": "Nazwa",
     "namePlaceholder": "Nazwa produktu",
     "priceLabel": "Cena ({currency})",
@@ -858,13 +885,14 @@
       "lowStock": "Niski stan: {count} sztuk.",
       "inStock": "{count} dostępnych."
     },
-    "openProductPage": "Otwórz ścieżkę zakupu",
-    "hideProductPage": "Ukryj ścieżkę zakupu",
+    "openProductPage": "Otwórz stronę produktu",
+    "hideProductPage": "Ukryj stronę produktu",
+    "noCtaWarning": "Przycisk zakupu na jego stronie nie ma jeszcze dokąd prowadzić. Dodaj link do zakupu w produkcie albo e-mail kontaktowy w swoich danych sprzedawcy.",
     "tileStyle": {
       "title": "Styl kafelka",
-      "reset": "Przywróć motyw",
+      "reset": "Użyj stylu motywu",
       "infoLabel": "Jak styl tego kafelka wiąże się z motywem",
-      "infoWithOverrides": "Ten kafelek ma własny styl. Ustawienia, których tu nie zmieniono, nadal podążają za motywem.",
+      "infoWithOverrides": "Ten kafelek ma własny styl; wszystko, czego tu nie zmieniono, podąża za motywem. „Użyj stylu motywu” usuwa tylko zmiany tego kafelka: motyw pozostaje bez zmian.",
       "infoNoOverrides": "Ostyluj ten kafelek osobno. Wszystko, czego nie zmienisz, nadal podąża za motywem."
     },
     "priceTag": "Etykieta z ceną",
@@ -875,7 +903,8 @@
       "priceLabel": "Cena:",
       "updateEverywhere": "Zaktualizuj wszędzie"
     },
-    "savedToast": "Produkt ~L~{title}~R~ został zaktualizowany wszędzie tam, gdzie się pojawia.",
+    "savedToast": "Produkt „{title}” został zaktualizowany wszędzie tam, gdzie się pojawia.",
+    "unsavedToast": "Nowa nazwa lub cena produktu „{title}” nie została zapisana. Aby ją zachować, naciśnij Zapisz, zanim przejdziesz dalej.",
     "validation": {
       "noTitle": "Nadaj produktowi nazwę.",
       "noPrice": "Ustaw cenę.",
@@ -983,7 +1012,7 @@
   "multiBlock": {
     "shapesContext": "{count, plural, one {Edycja # kształtu razem.} few {Edycja # kształtów razem.} many {Edycja # kształtów razem.} other {Edycja # kształtu razem.}} Pokazane wartości pochodzą z pierwszego zaznaczonego kształtu; każda zmiana dotyczy ich wszystkich.",
     "textsContext": "{count, plural, one {Edycja # bloku tekstowego razem.} few {Edycja # bloków tekstowych razem.} many {Edycja # bloków tekstowych razem.} other {Edycja # bloku tekstowego razem.}} Pokazane wartości pochodzą z pierwszego zaznaczonego bloku; każda zmiana dotyczy ich wszystkich. Każdy blok zachowuje własny tekst.",
-    "imagesContext": "{count, plural, one {Edycja # elementu razem.} few {Edycja # elementów razem.} many {Edycja # elementów razem.} other {Edycja # elementu razem.}} Pokazane wartości pochodzą z pierwszego zaznaczonego elementu; każda zmiana dotyczy ich wszystkich. Każdy zachowuje własny obraz.",
+    "imagesContext": "{count, plural, one {Edytujesz # blok naraz.} few {Edytujesz # bloki naraz.} many {Edytujesz # bloków naraz.} other {Edytujesz # bloku naraz.}} Pokazane wartości pochodzą z pierwszego zaznaczonego bloku; każda zmiana dotyczy ich wszystkich. Każdy zachowuje własny obraz.",
     "productsContext": "{count, plural, one {Stylowanie # kafelka produktu razem.} few {Stylowanie # kafelków produktów razem.} many {Stylowanie # kafelków produktów razem.} other {Stylowanie # kafelka produktu razem.}} Pokazane wartości pochodzą z pierwszego zaznaczonego kafelka; każda zmiana dotyczy ich wszystkich.",
     "mixedContext": "{count, plural, one {Zaznaczony jest # blok różnych typów.} few {Zaznaczone są # bloki różnych typów.} many {Zaznaczonych jest # bloków różnych typów.} other {Zaznaczone jest # bloku różnych typów.}} Zaznacz bloki jednego typu, aby edytować ich ustawienia razem.",
     "remove": "Usuń {count, plural, one {# blok} few {# bloki} many {# bloków} other {# bloku}}",
@@ -991,7 +1020,7 @@
     "productsNotDuplicated": "Produkty nie są duplikowane.",
     "tileStyle": {
       "title": "Styl kafelka",
-      "reset": "Przywróć motyw"
+      "reset": "Użyj stylu motywu"
     },
     "priceTag": "Etykieta z ceną"
   },
@@ -1003,18 +1032,18 @@
     "ariaLabel": "Narzędzia edytora",
     "addProduct": "Dodaj produkt",
     "addText": "Dodaj tekst",
-    "addElement": "Dodaj element",
+    "addElement": "Dodaj kształt lub obraz",
     "product": "Produkt",
     "text": "Tekst",
-    "element": "Element",
-    "elementsMenu": "Elementy",
+    "element": "Kształty",
+    "elementsMenu": "Kształty i obrazy",
     "uploading": "Przesyłanie…",
     "upload": "Prześlij",
     "uploadImage": "Prześlij obraz",
     "allShapes": "Wszystkie kształty",
     "browseShapes": "Przeglądaj pełną bibliotekę kształtów",
-    "closePage": "Zamknij ścieżkę zakupu",
-    "showPage": "Pokaż ścieżkę zakupu",
+    "closePage": "Zamknij stronę produktu",
+    "showPage": "Pokaż stronę produktu",
     "closePages": "Zamknij stronę produktu, kasę i stronę z podziękowaniem",
     "showPageFull": "Pokaż stronę produktu, kasę i stronę z podziękowaniem",
     "undo": "Cofnij",
@@ -1027,22 +1056,26 @@
     "zoomOutTip": "Pomniejsz (Ctrl -)",
     "zoomReset": "Przywróć powiększenie do 100%",
     "zoomResetTip": "Przywróć powiększenie (Ctrl 0)",
-    "zoomResetMenuItem": "Przywróć powiększenie",
+    "zoomFit": "Dopasuj do ekranu",
     "zoomIn": "Powiększ",
     "zoomInTip": "Powiększ (Ctrl +)",
-    "designSettings": "Ustawienia projektu",
-    "page": "Ścieżka zakupu",
-    "moreTools": "Więcej narzędzi"
+    "designSettings": "Styl witryny",
+    "style": "Styl",
+    "page": "Strona produktu",
+    "pageMobile": "Strona",
+    "pageDisabledTip": "Dodaj produkt, aby otworzyć jego stronę",
+    "moreTools": "Więcej narzędzi",
+    "more": "Więcej"
   },
   "selectionToolbar": {
     "toolsFor": "Narzędzia dla: {name}",
-    "elements": "{count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}",
-    "hidePage": "Ukryj ścieżkę zakupu",
-    "openPage": "Otwórz ścieżkę zakupu",
-    "openProductPage": "Otwórz ścieżkę zakupu: {name}",
-    "closeProductPage": "Zamknij ścieżkę zakupu: {name}",
-    "openProductPages": "Otwórz ścieżkę zakupu dla: {count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}}",
-    "closeProductPages": "Zamknij ścieżkę zakupu dla: {count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}}",
+    "elements": "{count, plural, one {# blok} few {# bloki} many {# bloków} other {# bloku}}",
+    "hidePage": "Ukryj stronę produktu",
+    "openPage": "Otwórz stronę produktu",
+    "openProductPage": "Otwórz stronę produktu: {name}",
+    "closeProductPage": "Zamknij stronę produktu: {name}",
+    "openProductPages": "Otwórz strony produktów dla: {count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}}",
+    "closeProductPages": "Zamknij strony produktów dla: {count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}}",
     "editText": "Edytuj tekst",
     "editTextOf": "Edytuj tekst: {name}",
     "color": "Kolor",
@@ -1059,24 +1092,26 @@
     "frameImageFor": "Przytnij i ustaw obraz: {name}",
     "duplicate": "Duplikuj",
     "duplicateNamed": "Duplikuj: {name}",
-    "duplicateN": "Duplikuj {count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}",
+    "duplicateN": "Duplikuj {count, plural, one {# blok} few {# bloki} many {# bloków} other {# bloku}}",
     "removeFrom": "Usuń z siatki: {name}",
-    "removeN": "Usuń z siatki: {count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}"
+    "removeN": "Usuń z siatki: {count, plural, one {# blok} few {# bloki} many {# bloków} other {# bloku}}"
   },
   "canvas": {
     "addSuggested": "Dodaj {title} do tej witryny",
     "gridLabel": "Obszar roboczy witryny",
     "emptyGrid": "Twoja siatka jest pusta",
-    "emptyGridHint": "Dodaj produkt, aby zacząć układać witrynę. Tekst i kształty znajdziesz na pasku narzędzi poniżej.",
+    "emptyGridHint": "Dodaj produkt, aby zacząć układać witrynę. Tekst, kształty i własne obrazy znajdziesz na pasku narzędzi poniżej.",
     "addProduct": "Dodaj produkt",
     "desktopPreview": "Podgląd na komputer",
-    "mobilePreview": "Podgląd na telefon"
+    "mobilePreview": "Podgląd na telefon",
+    "multiSelectTip": "Aby zaznaczyć kilka bloków, klikaj je z wciśniętym Shift albo przeciągnij po pustym miejscu. Na ekranie dotykowym przytrzymaj każdy z nich.",
+    "sheetTip": "Zamknij ten panel, aby wrócić do paska narzędzi."
   },
   "blockTile": {
     "removedProduct": "Usunięty produkt",
     "shape": "{kind, select, square {kwadratowy kształt} circle {okrągły kształt} ring {kształt pierścienia} diamond {kształt rombu} rounded {zaokrąglony kształt} pill {kształt kapsułki} half {kształt półkola} quarter {kształt ćwiartki koła} bar {kształt paska} triangle {kształt trójkąta} wedge {kształt wycinka} pentagon {kształt pięciokąta} hexagon {kształt sześciokąta} octagon {kształt ośmiokąta} star {kształt gwiazdy} sparkle {kształt iskierki} cross {kształt krzyża} arrow {kształt strzałki} chevron {kształt szewronu} trapezoid {kształt trapezu} parallelogram {kształt równoległoboku} burst {kształt rozbłysku} other {kształt {kind}}}",
     "imageWithAlt": "Obraz: {alt}",
-    "imageElement": "Element obrazu",
+    "imageElement": "Blok obrazu",
     "textWithContent": "Tekst: {text}",
     "textBlock": "Blok tekstowy",
     "selected": "Zaznaczone: {label}. Naciśnij Enter, aby odznaczyć.",
@@ -1109,11 +1144,14 @@
       "nameLabel": "Nazwa witryny",
       "namePlaceholder": "Witryna bez nazwy",
       "unsaved": "Niezapisane zmiany",
+      "saveTip": "Zapisz (Ctrl+S)",
       "viewPage": "Zobacz stronę",
+      "viewSavedPage": "Zobacz zapisaną stronę",
+      "shareSetupNeeded": "Twoje dane sprzedawcy są niekompletne, więc nie można jeszcze udostępnić tej witryny",
       "search": "Szukaj"
     },
     "mobileNotice": {
-      "body": "Aby uzyskać najlepsze wrażenia podczas edycji, otwórz ten edytor na komputerze lub tablecie. Zmiana kolejności bloków i edycja nagłówka działają na każdym urządzeniu.",
+      "body": "Tutaj wszystko działa: stuknij blok, aby go edytować, przytrzymaj kolejne bloki, aby zaznaczyć je razem, przytrzymaj narzędzie, aby zobaczyć, co robi, i rozsuń palce, aby powiększyć. Precyzyjne poprawki łatwiej zrobić na większym ekranie.",
       "dismiss": "Zamknij powiadomienie o edycji na małym ekranie"
     },
     "inspector": {
@@ -1171,13 +1209,6 @@
       "badge": "Przykład",
       "summary": "{count, plural, one {{count} blok · próbuj czego chcesz, nic się nie zapisuje} few {{count} bloki · próbuj czego chcesz, nic się nie zapisuje} many {{count} bloków · próbuj czego chcesz, nic się nie zapisuje} other {{count} bloku · próbuj czego chcesz, nic się nie zapisuje}}",
       "hide": "Ukryj przykładową witrynę"
-    },
-    "embed": {
-      "title": "Osadź witrynę",
-      "description": "Każda utworzona witryna dostaje własny kod do wklejenia na twojej stronie internetowej.",
-      "snippetLabel": "Kod wygląda tak",
-      "inDevelopment": "Widget jest jeszcze w trakcie tworzenia i nie wyświetla się jeszcze na innych stronach.",
-      "create": "Utwórz witrynę"
     },
     "list": {
       "show": "Pokaż przykładową witrynę",
@@ -1457,7 +1488,11 @@
       "link": "Link"
     },
     "buyButtonTipLabel": "Dokąd prowadzi przycisk",
-    "buyButtonTip": "Używa tekstu i koloru przycisku z Twojej strony produktu i otwiera stronę produktu.",
+    "buyButtonTip": "Otwiera stronę produktu. Na początek bierze tekst i kolor przycisku z tej strony, które tutaj możesz zmienić dla kafelków.",
+    "pageButton": {
+      "label": "Przycisk strony produktu",
+      "use": "Użyj: przycisk strony produktu"
+    },
     "rating": "Ocena w gwiazdkach",
     "ratingTipLabel": "Skąd biorą się gwiazdki",
     "ratingTip": "Z opinii kupujących. Pojawia się pod nazwą, gdy produkt ma pierwszą opinię.",
@@ -1471,5 +1506,43 @@
     "lineHeight": "Wysokość wiersza",
     "normal": "Normalny",
     "valueText": "{value} procent rozmiaru tekstu"
+  },
+  "shortcuts": {
+    "title": "Skróty klawiszowe",
+    "tip": "Skróty klawiszowe (?)",
+    "rows": {
+      "save": {
+        "label": "Zapisz",
+        "keys": "<kbd>{mod}</kbd> <kbd>S</kbd>"
+      },
+      "copyPaste": {
+        "label": "Kopiuj i wklejaj bloki",
+        "keys": "<kbd>{mod}</kbd> <kbd>C</kbd>, potem <kbd>{mod}</kbd> <kbd>V</kbd>"
+      },
+      "remove": {
+        "label": "Usuń zaznaczone bloki",
+        "keys": "<kbd>Delete</kbd>"
+      },
+      "move": {
+        "label": "Przesuń zaznaczone bloki",
+        "keys": "<kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd>"
+      },
+      "selectMore": {
+        "label": "Zaznacz kilka bloków",
+        "keys": "<kbd>Shift</kbd> + kliknięcie"
+      },
+      "selectUnder": {
+        "label": "Zaznacz blok pod spodem",
+        "keys": "<kbd>{alt}</kbd> + kliknięcie"
+      },
+      "layer": {
+        "label": "Przesuń o warstwę wyżej lub niżej",
+        "keys": "<kbd>{mod}</kbd> <kbd>]</kbd> lub <kbd>[</kbd>"
+      },
+      "pan": {
+        "label": "Poruszaj się po obszarze roboczym",
+        "keys": "Przytrzymaj <kbd>Spację</kbd> i przeciągnij"
+      }
+    }
   }
 }

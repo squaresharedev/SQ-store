@@ -91,7 +91,11 @@
     "proportional": "Proportional breakdown",
     "other": "Other",
     "total": "Total",
-    "category": "Category"
+    "category": "Category",
+    "changeUp": "Up {percent} on the period before",
+    "changeDown": "Down {percent} on the period before",
+    "vsBefore": "vs {amount} before",
+    "spark": "{label}, day by day"
   },
   "legal": {
     "cookies": {

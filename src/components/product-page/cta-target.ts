@@ -66,6 +66,19 @@ export function mailtoHref(
   return `mailto:${email}?subject=${subject}&body=${body}`;
 }
 
+/** Where a seller's own purchase link sends buyers, or null when it is not a
+ *  usable https link (the product form reads it the same way). */
+export function purchaseLinkTarget(purchaseUrl: string | null): { href: string; host: string } | null {
+  if (!purchaseUrl) return null;
+  try {
+    const url = new URL(purchaseUrl);
+    if (url.protocol === "https:") return { href: url.href, host: url.host };
+  } catch {
+    // A stored value that no longer parses is treated as no link at all.
+  }
+  return null;
+}
+
 /**
  * Where the buy button goes, in order: the seller's OWN purchase link, then
  * Square Share checkout, then an enquiry email, then nowhere.
@@ -85,17 +98,11 @@ export function resolveCtaTarget(
   enquirySubject: string,
   checkout: CheckoutTarget | null = null,
 ): CtaTarget {
-  if (purchaseUrl) {
-    try {
-      const url = new URL(purchaseUrl);
-      // A seller's own checkout owns its variant choice, so nothing is appended
-      // to their link: a guessed parameter is either ignored or breaks a signed
-      // URL, and the buyer picks again on the far side either way.
-      if (url.protocol === "https:") return { kind: "link", href: url.href, host: url.host };
-    } catch {
-      // A stored value that no longer parses is treated as no link at all.
-    }
-  }
+  // A seller's own checkout owns its variant choice, so nothing is appended
+  // to their link: a guessed parameter is either ignored or breaks a signed
+  // URL, and the buyer picks again on the far side either way.
+  const link = purchaseLinkTarget(purchaseUrl);
+  if (link) return { kind: "link", ...link };
   if (checkout) return { kind: "checkout", ...checkout };
   if (sellerEmail) {
     // The version-less href, which is what a server render can honestly build.

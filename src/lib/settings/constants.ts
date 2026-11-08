@@ -156,3 +156,10 @@ export const BIO_MAX = 100;
 /** The Supabase Storage bucket profile photos live in, one folder per user.
  *  Written by lib/settings/avatar.ts, emptied by the account deletion job. */
 export const AVATAR_BUCKET = "avatars";
+
+/** Account settings Bio card: linked to from Business settings as a cross-reference. */
+export const ACCOUNT_BIO_PATH = "/settings/account#bio";
+
+/** Account settings data export card: linked to from the Danger zone, so a
+ *  seller about to delete their account can take a copy first. */
+export const ACCOUNT_EXPORT_PATH = "/settings/account#export";

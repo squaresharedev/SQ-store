@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import dynamic from "next/dynamic";
-import { Ticket, TimerOff, Trash2 } from "lucide-react";
+import { Ticket, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { HeroMark } from "@/components/ui/HeroMark";
@@ -15,6 +15,7 @@ import type { DiscountsSummary } from "@/lib/discounts/summary";
 import type { DiscountProductChoice } from "@/types/discount";
 import { DiscountEmptyState } from "./DiscountEmptyState";
 import { DiscountRow } from "./DiscountRow";
+import { EndSaleDialog } from "./EndSaleDialog";
 
 /** The performance chart pulls in recharts, and only a page with orders needs
  *  it: loaded on demand, not on every visit to the discounts page. */
@@ -70,6 +71,10 @@ export function DiscountsPage({
   }
 
   const pendingItem = pending ? summary.items.find((item) => item.discount.id === pending.id) : null;
+  // Cancel and Esc close a confirm, but not while its write is under way.
+  const closePending = () => {
+    if (!busyId) setPending(null);
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -105,24 +110,26 @@ export function DiscountsPage({
         )}
       </section>
 
-      <ConfirmDialog
-        open={pendingItem != null}
-        onClose={() => {
-          if (!busyId) setPending(null);
+      <EndSaleDialog
+        open={pending?.kind === "end" && pendingItem != null}
+        pending={busyId !== null}
+        onClose={closePending}
+        onConfirm={() => {
+          if (pending) run(pending.id, () => endSale(pending.id), t("toast.ended"));
         }}
+      />
+      <ConfirmDialog
+        open={pending?.kind === "delete" && pendingItem != null}
+        onClose={closePending}
         tone="danger"
-        // The ticket, with what is about to happen to it: stopped, or binned.
-        visual={
-          <HeroMark icon={Ticket} tone="danger" badge={pending?.kind === "end" ? TimerOff : Trash2} />
-        }
-        title={pending?.kind === "end" ? t("confirmEnd.title") : t("confirmDelete.title")}
-        description={pending?.kind === "end" ? t("confirmEnd.body") : t("confirmDelete.body")}
-        confirmLabel={pending?.kind === "end" ? t("confirmEnd.confirm") : t("confirmDelete.confirm")}
+        // The ticket, binned.
+        visual={<HeroMark icon={Ticket} tone="danger" badge={Trash2} />}
+        title={t("confirmDelete.title")}
+        description={t("confirmDelete.body")}
+        confirmLabel={t("confirmDelete.confirm")}
         pending={busyId !== null}
         onConfirm={() => {
-          if (!pending) return;
-          if (pending.kind === "end") run(pending.id, () => endSale(pending.id), t("toast.ended"));
-          else run(pending.id, () => deleteDiscount(pending.id), t("toast.deleted"));
+          if (pending) run(pending.id, () => deleteDiscount(pending.id), t("toast.deleted"));
         }}
       />
     </div>

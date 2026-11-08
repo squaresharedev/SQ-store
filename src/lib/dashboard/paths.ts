@@ -16,3 +16,7 @@ export const NOTIFICATIONS_PATH = "/notifications";
 
 /** The settings area; each section is a sub-path of it. */
 export const SETTINGS_PATH = "/settings";
+
+/** The language picker: a card on Settings › Account, named in the settings
+ *  rail too (lib/search/nav-constants) and where /settings/language lands. */
+export const LANGUAGE_SETTINGS_PATH = "/settings/account#language";

@@ -18,6 +18,11 @@
 // NOT YET READ: the bank account on file (payoutMethod), which stays empty
 // and is drawn as "nothing yet". Changing it happens in Stripe's own
 // dashboard either way.
+//
+// THE HISTORY (the earnings chart and trend tiles) is the ledger read back
+// HISTORY_DAYS, page by page, up to HISTORY_PAGES. A store that has done more
+// than that in the window gets a chart that starts where the reading stopped,
+// rather than a page that waits on Stripe for seconds.
 
 import {
   stripeRequest,
@@ -28,11 +33,13 @@ import {
 } from "@/lib/billing/stripe-api";
 import { readPaymentAccount, type PaymentAccount } from "@/lib/payments/connect/account";
 import { stripeConnectLive } from "@/lib/payments/connect/config";
+import { buildHistory, HISTORY_DAYS, shiftDay, utcDay } from "@/lib/payments/history";
 import type {
   AccountStatus,
   BalanceTransaction,
   Payout,
   PayoutStatus,
+  PaymentsHistory,
   PaymentsOverview,
   TransactionType,
 } from "@/lib/payments/types";
@@ -41,6 +48,14 @@ import type {
  *  recent-activity view, not a ledger. */
 const PAYOUT_LIMIT = 10;
 const TRANSACTION_LIMIT = 10;
+
+/** Ledger lines per request when reading the history: Stripe's maximum. */
+const HISTORY_PAGE_SIZE = 100;
+/** How many requests the history may take, one after another. */
+const HISTORY_PAGES = 5;
+/** The currency to chart when the store has sold nothing yet. */
+const FALLBACK_CURRENCY = "EUR";
+const MS_PER_DAY = 86_400_000;
 
 const NOT_CONNECTED: AccountStatus = {
   connected: false,
@@ -96,6 +111,10 @@ const TRANSACTION_TYPES: Record<string, TransactionType> = {
   refund: "refund",
   payment_refund: "refund",
   payout: "payout",
+  // A payout that bounced or was called off puts its money back: still a
+  // payout movement, so "paid out" nets to what really reached the bank.
+  payout_failure: "payout",
+  payout_cancel: "payout",
   stripe_fee: "stripe_fee",
 };
 
@@ -113,6 +132,35 @@ function toTransaction(entry: StripeBalanceTransaction): BalanceTransaction {
   };
 }
 
+/** The ledger back HISTORY_DAYS (see THE HISTORY above). Null when Stripe cannot be asked. */
+async function readHistory(stripeAccountId: string, fallbackCurrency: string): Promise<PaymentsHistory | null> {
+  const now = new Date();
+  const since = Math.floor((now.getTime() - HISTORY_DAYS * MS_PER_DAY) / 1000);
+  const rows: BalanceTransaction[] = [];
+  let startingAfter: string | undefined;
+  try {
+    for (let page = 0; page < HISTORY_PAGES; page += 1) {
+      const list = await stripeRequest<StripeList<StripeBalanceTransaction>>(
+        "GET",
+        "/balance_transactions",
+        { limit: HISTORY_PAGE_SIZE, created: { gte: since }, starting_after: startingAfter },
+        { account: stripeAccountId },
+      );
+      rows.push(...list.data.map(toTransaction));
+      const last = list.data.at(-1);
+      if (!list.has_more || !last) return buildHistory(rows, now, { fallbackCurrency });
+      startingAfter = last.id;
+    }
+  } catch (error) {
+    console.error("[payments] could not read the ledger history from Stripe:", error instanceof Error ? error.message : error);
+    return null;
+  }
+  // Stopped short. The oldest day read may hold more than was read, so the
+  // history starts the day after it.
+  const oldest = rows.at(-1);
+  return buildHistory(rows, now, { fallbackCurrency, from: oldest ? shiftDay(utcDay(oldest.createdAt), 1) : null });
+}
+
 /** Everything the Payments page shows, for this seller. Never throws. */
 export async function realPaymentsOverview(ownerId: string | null): Promise<PaymentsOverview> {
   const empty: PaymentsOverview = {
@@ -122,6 +170,7 @@ export async function realPaymentsOverview(ownerId: string | null): Promise<Paym
     payoutMethod: null,
     payouts: [],
     transactions: [],
+    history: null,
   };
   if (!ownerId || !stripeConnectLive()) return empty;
 
@@ -129,6 +178,7 @@ export async function realPaymentsOverview(ownerId: string | null): Promise<Paym
   if (!account) return empty;
   const overview: PaymentsOverview = { ...empty, account: statusOf(account) };
 
+  const history = readHistory(account.stripeAccountId, FALLBACK_CURRENCY);
   try {
     const on = { account: account.stripeAccountId };
     const [balance, payouts, transactions] = await Promise.all([
@@ -149,5 +199,6 @@ export async function realPaymentsOverview(ownerId: string | null): Promise<Paym
   } catch (error) {
     console.error("[payments] could not read the account from Stripe:", error instanceof Error ? error.message : error);
   }
+  overview.history = await history;
   return overview;
 }

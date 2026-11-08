@@ -21,6 +21,7 @@
   },
   "page": {
     "heading": "Produkty",
+    "planUsage": "{used} z {cap, plural, one {# produktu} few {# produktov} many {# produktu} other {# produktov}} vo vašom pláne. <link>Zobraziť plány</link>",
     "loading": "načítavajú sa produkty",
     "back": "Produkty",
     "backToStorefront": "Výklad",
@@ -34,8 +35,13 @@
     },
     "import": {
       "heading": "Import produktov",
-      "description": "Preneste katalóg zo Shopify alebo z ľubovoľného nástroja exportujúceho CSV. Pred uložením uvidíte presne, čo sa naimportuje.",
-      "reviewsLink": "Sťahujete aj recenzie? Importovať recenzie"
+      "description": "Preneste katalóg zo Shopify, Etsy alebo z ľubovoľného nástroja exportujúceho CSV. Pred uložením uvidíte presne, čo sa naimportuje.",
+      "reviewsLink": "Sťahujete aj recenzie? Importovať recenzie",
+      "templateLink": "Stiahnuť prázdnu šablónu",
+      "columnHint": "Potrebné stĺpce: Názov a Cena. Popis, SKU a Zásoby sú voliteľné.",
+      "howToGetFile": "Ako získať súbor",
+      "howToGetFileShopify": "Shopify: Products > Export > All products as CSV.",
+      "howToGetFileEtsy": "Etsy: Shop Manager > Settings > Options > Download Data > Download CSV."
     },
     "formLoading": "Načítava sa formulár produktu",
     "importReviews": {
@@ -63,8 +69,10 @@
       "title": "Názov: A–Z"
     },
     "allStatuses": "Všetky stavy",
+    "moderated": "Na kontrole",
     "filterLabel": "Triediť a filtrovať produkty",
-    "sortResting": "Triediť",
+    "sortResting": "Triediť a filtrovať",
+    "viewOnlyHint": "Máte prístup len na prezeranie. Ak chcete upravovať produkty, obráťte sa na vlastníka obchodu.",
     "statusSection": "Stav",
     "sortSection": "Triediť podľa",
     "clear": "Vymazať",
@@ -72,7 +80,8 @@
     "add": "Pridať produkt",
     "updating": "Aktualizuje sa…",
     "pagination": "{total, plural, one {{total} produkt · strana {page} z {pages}} few {{total} produkty · strana {page} z {pages}} many {{total} produktu · strana {page} z {pages}} other {{total} produktov · strana {page} z {pages}}}",
-    "reviews": "Recenzie"
+    "reviews": "Recenzie",
+    "orderHint": "Ak chcete zmeniť poradie, ktoré vidia kupujúci, presuňte produkty na správne miesto vo svojom <link>výklade</link>."
   },
   "list": {
     "noMatch": {
@@ -81,6 +90,11 @@
       "clear": "Vymazať filtre"
     },
     "deleted": "Produkt „{title}“ bol zmazaný.",
+    "madeActive": "Produkt „{title}“ je teraz aktívny.",
+    "madeDraft": "Produkt „{title}“ bol uložený ako koncept.",
+    "duplicated": "Kópia produktu „{title}“ bola vytvorená ako koncept.",
+    "duplicateTitle": "{title} (kópia)",
+    "stockSaved": "Zásoby boli aktualizované.",
     "linkCopied": "Odkaz bol skopírovaný.",
     "copyFailed": "Kopírovanie zlyhalo.",
     "copyFailedUrl": "URL adresa je: {url}",
@@ -97,6 +111,11 @@
       "copyTitle": "Skopírovať odkaz pre ktorý výklad?",
       "description": "{count, plural, one {„{title}“ je v {count} výklade. Vyberte jeden.} few {„{title}“ je v {count} výkladoch. Vyberte jeden.} many {„{title}“ je v {count} výkladu. Vyberte jeden.} other {„{title}“ je v {count} výkladoch. Vyberte jeden.}}",
       "hint": "Alebo zrušte akciu a v editore výkladu zvoľte predvolenú možnosť."
+    },
+    "stockDialog": {
+      "title": "Upraviť množstvo",
+      "description": "Koľko kusov produktu „{title}“ máte práve na sklade?",
+      "label": "Množstvo na sklade"
     }
   },
   "card": {
@@ -113,9 +132,14 @@
     "unitsSold": "{count, plural, one {{count} predaný kus} few {{count} predané kusy} many {{count} predaného kusa} other {{count} predaných kusov}}",
     "noSales": "Zatiaľ žiadny predaj",
     "addToWebsite": "Pridať na váš web",
-    "unlimited": "Neobmedzené",
+    "editStock": "Upraviť zásoby pre {title}",
+    "addToWebsiteShort": "Pridať „{title}“ na váš web",
+    "unlimited": "Neobmedzené zásoby",
     "noStorefront": "Bez výkladu",
-    "ship": "Odoslať"
+    "ship": "Odoslať",
+    "duplicate": "Duplikovať",
+    "makeActive": "Nastaviť ako aktívny",
+    "makeDraft": "Zmeniť na koncept"
   },
   "shareCard": {
     "scanToShop": "Naskenujte a nakúpte",
@@ -191,6 +215,7 @@
     "badgePendingHint": "Kupujúci ho uvidia, keď ho automatická kontrola schváli.",
     "badgeReview": "V posudzovaní",
     "badgeReviewHint": "Kontroluje ho človek. Kupujúci ho uvidia, keď bude schválený.",
+    "badgeHintLabel": "Čo to znamená",
     "titlePending": "{kind, select, product {Tento produkt sa práve kontroluje} other {Tento výklad sa práve kontroluje}}",
     "titleReview": "{kind, select, product {Tento produkt kontroluje človek} other {Tento výklad kontroluje človek}}",
     "hiddenPending": "Kupujúci ho neuvidia, kým sa neskončí automatická kontrola. Zvyčajne to trvá pár sekúnd: načítajte stránku znova a uvidíte, ako to dopadlo.",
@@ -204,7 +229,7 @@
       "title": "Názov",
       "description": "Popis",
       "price": "Cena",
-      "sku": "SKU",
+      "sku": "Kód produktu (SKU)",
       "stock": "Zásoby"
     },
     "fileTooLarge": "Tento súbor má {size}. Importujte súbory do veľkosti {max}.",
@@ -212,6 +237,10 @@
     "imported": "{count, plural, one {{count} produkt bol naimportovaný.} few {{count} produkty boli naimportované.} many {{count} produktu bolo naimportovaných.} other {{count} produktov bolo naimportovaných.}}",
     "skippedRows": "{count, plural, one {{count} riadok bol preskočený.} few {{count} riadky boli preskočené.} many {{count} riadku bolo preskočených.} other {{count} riadkov bolo preskočených.}}",
     "checkingRows": "{count, plural, one {{count} produkt sa ešte kontroluje: kupujúci ho uvidia, keď ho automatická kontrola schváli.} few {{count} produkty sa ešte kontrolujú: kupujúci ich uvidia, keď ich automatická kontrola schváli.} many {{count} produktu sa ešte kontroluje: kupujúci ich uvidia, keď ich automatická kontrola schváli.} other {{count} produktov sa ešte kontroluje: kupujúci ich uvidia, keď ich automatická kontrola schváli.}}",
+    "draftsImportedHint": "Sú to koncepty: kupujúci ich neuvidia, kým ich nezverejníte.",
+    "connectAiHint": "Ak chcete zverejniť veľa naraz, <link>pripojte AI asistenta</link>.",
+    "columnsNeeded": "Potrebné",
+    "columnsOptional": "Voliteľné",
     "dropPrompt": "Presuňte sem CSV alebo kliknutím vyberte súbor",
     "fileMeta": "{size} · vyberte iný na začatie odznova",
     "rowsLimit": "{max, plural, one {Až {max} produkt na súbor} few {Až {max} produkty na súbor} many {Až {max} produktu na súbor} other {Až {max} produktov na súbor}}",
@@ -223,9 +252,9 @@
     "currencyHelp": "Každý naimportovaný produkt bude mať cenu v tejto mene.",
     "importAs": "Importovať ako",
     "asDrafts": "Koncepty",
-    "asLive": "Zverejnené produkty",
+    "asLive": "Aktívne produkty",
     "draftsHint": "Nič sa nezverejní, kým to sami nezverejníte.",
-    "liveHint": "Tieto produkty sa okamžite zobrazia vo vašom obchode.",
+    "liveHint": "Tieto produkty budú nastavené ako Aktívne: kupujúci ich môžu kúpiť, keď budú vo výklade.",
     "columns": "Stĺpce",
     "needed": "(povinné)",
     "notSet": "Nenastavené",
@@ -244,7 +273,22 @@
     "run": "{count, plural, one {Importovať {count} produkt} few {Importovať {count} produkty} many {Importovať {count} produktu} other {Importovať {count} produktov}}",
     "clear": "Vymazať",
     "planRoom": "{max, plural, one {Váš plán má miesto pre # ďalší produkt} few {Váš plán má miesto pre # ďalšie produkty} many {Váš plán má miesto pre # ďalšieho produktu} other {Váš plán má miesto pre # ďalších produktov}}",
-    "droppedByPlan": "{count, plural, one {# riadok sa nenaimportuje: váš plán má miesto pre {max} ďalších.} few {# riadky sa nenaimportujú: váš plán má miesto pre {max} ďalších.} many {# riadku sa nenaimportuje: váš plán má miesto pre {max} ďalších.} other {# riadkov sa nenaimportuje: váš plán má miesto pre {max} ďalších.}}"
+    "droppedByPlan": "{count, plural, one {# riadok sa nenaimportuje: váš plán má miesto pre {max} ďalších.} few {# riadky sa nenaimportujú: váš plán má miesto pre {max} ďalších.} many {# riadku sa nenaimportuje: váš plán má miesto pre {max} ďalších.} other {# riadkov sa nenaimportuje: váš plán má miesto pre {max} ďalších.}}",
+    "story": {
+      "shelf": "Váš obchod",
+      "items": {
+        "camera": "Kamera",
+        "headphones": "Slúchadlá",
+        "succulent": "Rastlina",
+        "watch": "Hodinky",
+        "sunglasses": "Okuliare",
+        "tshirt": "Tričko"
+      }
+    },
+    "columnsMatched": "{count, plural, one {# priradený} few {# priradené} many {# priradeného} other {# priradených}}",
+    "undoImport": "{count, plural, one {Zmazať naimportovaný produkt} few {Zmazať všetky # naimportované produkty} many {Zmazať všetkých # naimportovaných produktov} other {Zmazať všetkých # naimportovaných produktov}}",
+    "undoDone": "{count, plural, one {# naimportovaný produkt bol zmazaný.} few {# naimportované produkty boli zmazané.} many {# naimportovaného produktu bolo zmazaných.} other {# naimportovaných produktov bolo zmazaných.}}",
+    "goToProducts": "Prejsť na produkty"
   },
   "form": {
     "sections": {
@@ -259,7 +303,7 @@
         "about": "Na čo slúži sekcia Zásoby"
       },
       "media": {
-        "label": "Doručenie"
+        "label": "Ako to kupujúci dostanú"
       },
       "shipping": {
         "label": "Doprava",
@@ -273,7 +317,7 @@
       },
       "photos": {
         "label": "Fotky",
-        "description": "Ďalšie pohľady na stránke produktu. Presuňte fotku na niektorú možnosť, ak chcete zobraziť ju iba pri nej.",
+        "description": "Ďalšie pohľady, zobrazené na stránke produktu (nie vo výklade). Presuňte fotku na niektorú možnosť, ak ju chcete zobraziť iba pri nej.",
         "about": "Na čo slúži sekcia Fotky"
       },
       "specs": {
@@ -302,9 +346,9 @@
         "about": "Na čo slúžia odznaky"
       },
       "addOns": {
-        "label": "Pridať k objednávke",
+        "label": "Ponúknuť aj tieto produkty",
         "description": "Vaše ďalšie produkty, ktoré si kupujúci pridajú jedným ťuknutím, hneď nad tlačidlom Kúpiť. Zobrazujú sa len produkty rovnakého druhu a meny, aby všetko zostalo v jednej objednávke.",
-        "about": "Na čo slúži sekcia Pridať k objednávke"
+        "about": "Na čo slúži táto sekcia"
       }
     },
     "summary": {
@@ -382,19 +426,22 @@
       "asYouTypeAccept": "Vložiť navrhnuté slová",
       "asYouTypeAnnounce": "Návrh:",
       "asYouTypeTurnOff": "Vypnúť",
-      "asYouTypeOff": "Návrhy počas písania sú vypnuté. Znova ich zapnete v Nastaveniach, v časti Plán a fakturácia.",
-      "upsellHint": "Súčasť plánu Pro: AI podľa vašich údajov napíše a dokončí popisy. Plány sa otvoria na novej karte.",
-      "upsellBadge": "Pro"
+      "asYouTypeOff": "Návrhy počas písania sú vypnuté.",
+      "asYouTypeBackOn": "Znova ich zapnete v Nastaveniach, v časti Plán a fakturácia.",
+      "upsellHint": "Súčasť plánu Pro: AI podľa vašich údajov napíše popisy a počas písania navrhuje ďalšie slová (pridáte ich klávesom Tab). Plány sa otvoria na novej karte.",
+      "upsellBadge": "Pro",
+      "about": "Čo robí pomoc AI s písaním",
+      "aboutBody": "Napísať s AI pripraví alebo vylepší popis z vašich údajov. Sivé slová počas písania navrhujú, čo nasleduje (Tab ich pridá). Obe funkcie čerpajú z vášho mesačného kreditu na AI, ktorý nájdete v Nastaveniach v časti Plán a fakturácia."
     },
     "displayImage": "Hlavný obrázok",
     "displayImageAbout": "Kde sa hlavný obrázok používa",
-    "displayImageHelp": "Zobrazuje sa vo vašom výklade a vo vloženiach na web.",
+    "displayImageHelp": "Jediná fotka zobrazená vo vašom výklade a vo vloženiach na web. Ďalšie pohľady pre stránku produktu pridáte nižšie v sekcii Fotky.",
     "digitalFile": "Digitálny súbor",
     "digitalFileAbout": "Čo je digitálny súbor",
     "digitalFileHelp": "Súbor, ktorý si kupujúci stiahnu hneď po zaplatení. Produkt na stiahnutie nepotrebuje údaje o doprave ani bezpečnosti produktu.",
     "purchaseLink": "Odkaz na nákup",
     "purchaseLinkAbout": "Kam tlačidlo na nákup presmeruje kupujúcich",
-    "purchaseLinkHelp": "Ak ho necháte prázdny, kupujúci zaplatia cez pokladňu Square Share, alebo vám napíšu e-mail, kde pokladňa ešte nie je zapnutá. Odkaz tu nahradí oboje.",
+    "purchaseLinkHelp": "Ak ho necháte prázdny, kupujúci {checkout, select, true {zaplatia cez pokladňu Square Share} other {vám napíšu na kontaktnú adresu}}. Ak ich chcete namiesto toho poslať do vlastnej pokladne, pridajte sem odkaz.",
     "purchaseLinkPlaceholder": "napr. https://your-shop.example/checkout/this-product",
     "statusLabel": "Stav produktu",
     "problems": "{count, plural, one {{count} vec na opravu pred uložením} few {{count} veci na opravu pred uložením} many {{count} veci na opravu pred uložením} other {{count} vecí na opravu pred uložením}}",
@@ -408,7 +455,8 @@
     "saveProduct": "Uložiť produkt",
     "savedToast": "Produkt „{title}“ bol uložený.",
     "addedToast": "Produkt „{title}“ bol pridaný k vašim produktom.",
-    "checkingToast": "Kupujúci ho uvidia, keď ho automatická kontrola schváli.",
+    "checkingToast": "Kupujúci ho uvidia, keď ho automatická kontrola schváli, zvyčajne o pár sekúnd.",
+    "placeToast": "Ďalej ho umiestnite do výkladu, aby získal vlastnú stránku.",
     "documentFallbackLabel": "Dokument",
     "discard": {
       "title": "Zahodiť zmeny?",
@@ -438,6 +486,7 @@
       }
     },
     "coverPrompt": "Sem pretiahnite svoju najlepšiu fotku",
+    "coverPromptTouch": "Ťuknutím pridajte svoju najlepšiu fotku",
     "kind": {
       "legend": "Čo predávate?",
       "physical": "Niečo, čo posielam",
@@ -446,19 +495,21 @@
       "digitalHint": "Súbor, ktorý kupujúci dostane hneď po zaplatení"
     },
     "purchaseLinkAdd": "Predávate cez vlastnú pokladňu? Pridajte odkaz",
+    "safetyPrompt": "Posielate kupujúcim v EÚ? Pridajte údaje o výrobcovi, ktoré vyžaduje zákon",
     "extras": {
-      "heading": "Nech vynikne",
+      "heading": "Ďalšie podrobnosti",
       "subheading": "Všetko je voliteľné. Pridajte, čo kupujúcim pomôže rozhodnúť sa.",
-      "options": "Veľkosti, farby, varianty",
+      "options": "Veľkosti, farby, varianty so spoločnou cenou a zásobami",
       "photos": "Ďalšie pohľady a detaily",
-      "badges": "Ručná výroba, doprava zadarmo…",
+      "badges": "Krátke zvýraznenia: Ručná výroba, Doprava zadarmo…",
       "specs": "Rozmery, hmotnosť, materiály",
       "documents": "Návody a certifikáty",
       "safety": "Údaje o výrobcovi pre pravidlá EÚ"
     },
     "visibility": {
       "activeHint": "Kupujúci ho môžu kúpiť, hneď ako je vo výklade",
-      "draftHint": "Vidíte ho len vy, kým nebudete pripravení"
+      "draftHint": "Vidíte ho len vy, kým nebudete pripravení",
+      "buyButton": "{kind, select, link {Tlačidlo nákupu presmeruje kupujúcich na {host}, kde zaplatia.} checkout {Kupujúci zaplatia na jeho stránke cez pokladňu Square Share.} other {Zatiaľ preň nie je pokladňa: cez tlačidlo nákupu vám kupujúci môžu napísať e-mail a opýtať sa naň.}}"
     },
     "preview": {
       "heading": "Živý náhľad",
@@ -507,12 +558,12 @@
   "optionsField": {
     "display": {
       "swatch": "Farebné vzorky",
-      "chip": "Čipy",
+      "chip": "Textové tlačidlá",
       "select": "Rozbaľovací zoznam"
     },
     "displayHint": {
       "swatch": "Farebné kruhy. Dajte každej možnosti farebnú vzorku, inak kupujúci uvidí jej prvé písmeno.",
-      "chip": "Textové tlačidlá pre hodnoty, ktoré kupujúci čítajú: veľkosti, wattáže, dĺžky.",
+      "chip": "Najvhodnejšie pre hodnoty, ktoré kupujúci čítajú: veľkosti, wattáže, dĺžky.",
       "select": "Rozbaľovací zoznam. Najvhodnejší, keď je hodnôt viac, než sa zmestí ako tlačidlá."
     },
     "presets": {
@@ -607,14 +658,15 @@
     "removePhoto": "Odobrať fotku",
     "movePhotoEarlier": "Posunúť fotku skôr",
     "movePhotoLater": "Posunúť fotku neskôr",
-    "altPlaceholder": "Alternatívny text",
+    "altPlaceholder": "Popis fotky",
     "altLabel": "Popíšte túto fotku pre ľudí, ktorí ju nevidia",
     "versionLabel": "Pre ktorý variant sa táto fotka zobrazuje",
     "tally": "{max, plural, one {{count} z {max} fotky} few {{count} z {max} fotiek} many {{count} z {max} fotky} other {{count} z {max} fotiek}}",
     "orderAbout": "Ako sú tieto fotky zoradené",
-    "orderHelp": "Hlavný obrázok zo sekcie Médiá a doručenie je vždy prvý. Za ním sa fotky zobrazujú v poradí, v akom sú tu usporiadané.",
+    "orderHelp": "Hlavný obrázok v hornej časti formulára je vždy prvý. Za ním sa fotky zobrazujú v poradí, v akom sú tu usporiadané.",
     "limitReached": "Dosiahnutý limit",
-    "dropOrClick": "Presuňte sem alebo kliknite"
+    "dropOrClick": "Presuňte sem alebo kliknite",
+    "dropOrClickTouch": "Ťuknutím pridajte fotku"
   },
   "optionSpecsField": {
     "heading": "Iné pre každý variant",
@@ -689,7 +741,7 @@
     "tooLarge": "Obrázok musí mať menej ako {max} MB.",
     "previewAlt": "Náhľad hlavného obrázka",
     "dropPrompt": "Presuňte sem obrázok alebo kliknutím nahrajte",
-    "hint": "PNG, JPG, WEBP, GIF alebo AVIF, najviac {max} MB",
+    "hint": "PNG, JPG, WEBP, GIF alebo AVIF, najviac {max} MB. Najlepšie sa hodia štvorcové fotky.",
     "remove": "Odobrať hlavný obrázok"
   },
   "photoFormat": {
@@ -698,7 +750,7 @@
   "fileDropzone": {
     "currentFile": "Aktuálny súbor",
     "dropPrompt": "Presuňte sem súbor alebo kliknutím nahrajte",
-    "hint": "ZIP, PDF a podobné, najviac {max} MB",
+    "hint": "PDF, EPUB, ZIP, MP3, WAV, MP4, JPG, PNG, WEBP alebo TXT, najviac {max} MB",
     "remove": "Odobrať digitálny súbor"
   },
   "statement": {
@@ -829,7 +881,7 @@
     },
     "editProduct": "Upraviť produkt",
     "goToStorefronts": "Prejsť na výklady",
-    "embedPointer": "Predávate len jeden produkt? Namiesto vloženia celého výkladu mu dajte tlačidlo na nákup na vašom webe: v Produktoch otvorte jeho ponuku a zvoľte „Pridať na váš web“.",
+    "embedPointer": "Predávate len jeden produkt? Namiesto vloženia celého výkladu mu dajte tlačidlo na nákup na vašom webe: v Produktoch otvorte ponuku s tromi bodkami na jeho karte a zvoľte „Pridať na váš web“.",
     "embedPointerLink": "Prejsť na Produkty",
     "demo": {
       "play": "Prehrať animáciu",
@@ -923,6 +975,7 @@
       "pink": "Ružová"
     },
     "placementFor": "Kde je odznak {position}",
+    "placementLabel": "Umiestnenie",
     "placementPicker": "Kde bude",
     "placements": {
       "beside": "Vedľa produktu",
@@ -1107,12 +1160,11 @@
     },
     "story": {
       "product": "Keramický hrnček",
-      "customerReviews": "Hodnotenia zákazníkov",
-      "addToCart": "Pridať do košíka",
       "reviews": {
         "a": "„Krásna glazúra, káva dlho drží teplo.“",
         "b": "„Naživo ešte krajší.“",
-        "c": "„Prišiel rýchlo a dobre zabalený.“"
+        "c": "„Prišiel rýchlo a dobre zabalený.“",
+        "d": "„Kúpil som druhý ako darček.“"
       }
     },
     "tally": {
@@ -1152,6 +1204,7 @@
   "reviewModeration": {
     "heading": "Recenzie",
     "description": "Čo kupujúci hovoria o vašich produktoch. Každá recenzia sa pred zverejnením automaticky kontroluje a tie, pri ktorých si kontrola nebola istá, tu čakajú na vás.",
+    "productPageLink": "Zobraziť alebo skryť recenzie na produktovej stránke",
     "importButton": "Importovať odkiaľkoľvek",
     "filtersLabel": "Filtrovať recenzie",
     "filters": {
@@ -1164,7 +1217,7 @@
     "empty": {
       "all": {
         "title": "Zatiaľ žiadne recenzie",
-        "body": "Keď kupujúci ohodnotí produkt na stránke objednávky, recenzia sa zobrazí tu."
+        "body": "Kupujúcich o recenziu požiadame na stránke objednávky, keď už produkt majú: pri balíku, keď ho označíte ako odoslaný. Ich recenzie sa zobrazia tu."
       },
       "held": {
         "title": "Nič na vás nečaká",
@@ -1242,7 +1295,7 @@
     "overview": {
       "label": "Hodnotenie obchodu",
       "none": "Zatiaľ žiadne verejné recenzie.",
-      "breakdown": "Recenzie podľa počtu hviezdičiek",
+      "breakdown": "Filtrovať podľa počtu hviezdičiek",
       "showStars": "{stars, plural, one {Zobraziť len recenzie s {stars} hviezdičkou ({count})} few {Zobraziť len recenzie s {stars} hviezdičkami ({count})} other {Zobraziť len recenzie s {stars} hviezdičkami ({count})}}"
     },
     "toolbar": {
@@ -1253,8 +1306,8 @@
       "anyRating": "Akékoľvek hodnotenie",
       "product": "Produkt",
       "anyProduct": "Všetky produkty",
-      "origin": "Zdroj",
-      "anyOrigin": "Všetky zdroje",
+      "origin": "Typ",
+      "anyOrigin": "Všetky typy",
       "origins": {
         "verified": "Overení kupujúci",
         "imported": "Importované"

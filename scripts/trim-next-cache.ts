@@ -24,10 +24,10 @@ import { fileURLToPath } from "node:url";
 const REPO = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 /** Above this, <distDir>/dev is deleted before the next dev server starts. */
-const MAX_DEV_DIR_BYTES = 3 * 1024 ** 3;
+export const MAX_DEV_DIR_BYTES = 3 * 1024 ** 3;
 
 /** Every build dir `next dev` writes to (see distDir in next.config.ts). */
-const DIST_DIRS = [".next", ".next-e2e"];
+export const DIST_DIRS = [".next", ".next-e2e"];
 
 const gb = (bytes: number): string => `${(bytes / 1024 ** 3).toFixed(1)} GB`;
 
@@ -60,6 +60,16 @@ function inUse(devDir: string): boolean {
   } catch (err) {
     // EPERM: the process exists but belongs to someone else.
     return (err as NodeJS.ErrnoException).code === "EPERM";
+  }
+}
+
+/** How big <distDir>/dev is now; 0 when there is none or it cannot be read. */
+export function devDirBytes(distDir: string): number {
+  const devDir = join(REPO, distDir, "dev");
+  try {
+    return existsSync(devDir) ? dirBytes(devDir) : 0;
+  } catch {
+    return 0;
   }
 }
 

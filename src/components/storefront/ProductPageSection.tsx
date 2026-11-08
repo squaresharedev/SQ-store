@@ -15,7 +15,8 @@ import { buildShippingProse, hasShippingPolicy } from "@/lib/shipping/policy-pro
 import { hasSellerDetails } from "@/components/product-page/SellerBlock";
 import { SellerDetailsNotice } from "@/components/settings/SellerDetailsNotice";
 import { missingTraderIdentity } from "@/lib/settings/trader-identity";
-import type { ProductPagePanelSection } from "@/lib/storefront/setting-ref";
+import { CHECKOUT_PAGE_HOTSPOTS, type ProductPagePanelSection } from "@/lib/storefront/setting-ref";
+import { useSettingTarget } from "@/lib/storefront/setting-context";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import {
   DEFAULT_PRODUCT_PAGE_SALE_STYLE,
@@ -47,6 +48,7 @@ import {
   ghostButtonClass,
   helpTextClass,
   infoTextClass,
+  inlineLinkClass,
   panelCaptionClass,
   panelSettingClass,
   secondaryButtonClass,
@@ -159,6 +161,9 @@ export function ProductPageSection({
   const t = useTranslations("Storefront");
   const tRoot = useTranslations();
   const locale = useLocale();
+  // Null outside the designer (the dev gallery, tests): the checkout note then
+  // says what it says without the way there.
+  const setting = useSettingTarget();
 
   // Exactly what the page paints, resolved by the same functions the buyer's
   // page calls — so a slider's number, an inherit dot's colour and what the
@@ -214,6 +219,10 @@ export function ProductPageSection({
         summon={summoned === "layout"}
       >
         <div className="space-y-5">
+          {/* THE SCOPE, said once at the top: the way in is often one
+              product's tile, which reads as "this product's page". Add-ons
+              say their own per-product scope in their section. */}
+          <p className={infoTextClass}>{t("productPage.scopeNote")}</p>
           {/* WHETHER THE PAGE EXISTS, and who may find it: yes-or-no lines,
               first, because everything below only matters if the first one is
               on. */}
@@ -227,6 +236,9 @@ export function ProductPageSection({
                   ? t("productPage.layout.showPage.infoOn")
                   : t("productPage.layout.showPage.infoOff"),
               }}
+              // In sight, not behind the "?": switching pages off also takes
+              // away the storefront's own link.
+              hint={t("productPage.layout.showPage.hint")}
             >
               <Switch
                 id={`${fieldId}-enabled`}
@@ -335,6 +347,22 @@ export function ProductPageSection({
         }
       >
         <div className="space-y-5">
+          {/* The checkout's pay button wears this paint (its swatch there
+              leads here), so the way back sits where that swatch lands. */}
+          <p className={infoTextClass}>
+            {t.rich("productPage.cta.checkoutNote", {
+              link: (chunks) =>
+                setting ? (
+                  <button
+                    type="button"
+                    onClick={() => setting.open(CHECKOUT_PAGE_HOTSPOTS.layout)}
+                    className={inlineLinkClass}
+                  >
+                    {chunks}
+                  </button>
+                ) : null,
+            })}
+          </p>
           <PanelTextField
             id={`${fieldId}-cta`}
             label={t("productPage.cta.buttonText.label")}

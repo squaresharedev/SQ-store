@@ -146,7 +146,7 @@ describe("the copy the gate hands every surface", () => {
       "business address and contact email",
     );
     expect(english(traderIdentityFix(["businessName", "address", "email"]))).toContain(
-      "trader name, business address and contact email",
+      "name or business name, your business address and your contact email",
     );
   });
 

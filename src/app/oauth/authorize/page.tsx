@@ -5,14 +5,17 @@ import { ShieldAlert } from "lucide-react";
 import { ConsentForm } from "@/components/agent/ConsentForm";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { StepUpProvider } from "@/components/auth/StepUp";
+import Link from "@/components/ui/AppLink";
 import { HeroMark } from "@/components/ui/HeroMark";
+import { buttonClassName } from "@/components/ui/button";
 import { agentAccessEnabled, agentAccessAllowedForStore } from "@/lib/agent/access";
 import { deniedRedirect, judgeAuthorizeRequest } from "@/lib/agent/oauth/authorize";
 import { redirectDisplayHost } from "@/lib/agent/oauth/redirects";
 import { OAUTH_AUTHORIZE_PATH } from "@/lib/agent/paths";
-import { AGENT_SCOPES, AGENT_SCOPE_IDS, initialScopes } from "@/lib/agent/scopes";
+import { AGENT_SCOPES, AGENT_SCOPE_IDS, initialScopes, scopeBadge } from "@/lib/agent/scopes";
 import { stepUpProviderProps } from "@/lib/auth/assurance";
 import { getAssurance, requireUser } from "@/lib/auth/session";
+import { OVERVIEW_PATH } from "@/lib/dashboard/paths";
 import { getAccessibleAccounts } from "@/lib/team/account-context";
 import { TEAM_PERMISSIONS } from "@/lib/team/permissions";
 
@@ -55,10 +58,14 @@ export default async function AuthorizePage({ searchParams }: { searchParams: Se
     const t = await getTranslations("Settings.connectedApps.consent");
     return (
       <AuthPageShell>
-        <div className="flex flex-col items-center gap-3 text-center" data-agent-consent-refused={judged.reason}>
+        <div className="flex flex-col items-center gap-4 text-center" data-agent-consent-refused={judged.reason}>
           <HeroMark icon={ShieldAlert} />
           <h1 className="text-lg font-semibold text-foreground">{t("refusedTitle")}</h1>
           <p className="text-sm text-muted-foreground">{t("refusedBody")}</p>
+          {/* Nothing was connected, so there is nothing to undo: just a way out. */}
+          <Link href={OVERVIEW_PATH} className={buttonClassName()}>
+            {t("goToStore")}
+          </Link>
         </div>
       </AuthPageShell>
     );
@@ -94,7 +101,7 @@ export default async function AuthorizePage({ searchParams }: { searchParams: Se
             hint: AGENT_SCOPES[id].hint,
             requires: AGENT_SCOPES[id].requires,
             required: "required" in AGENT_SCOPES[id],
-            optIn: "optIn" in AGENT_SCOPES[id],
+            badge: scopeBadge(id),
             ticked: ticked.includes(id),
           }))}
         />

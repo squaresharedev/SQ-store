@@ -11,6 +11,7 @@ import {
 import { ChevronDown, ChevronUp, ImagePlus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { isHeicPhoto } from "@/lib/uploads/heic";
+import { useIsTouch } from "@/lib/hooks/useIsTouch";
 import { cn } from "@/lib/utils";
 import {
   fieldBaseClass,
@@ -378,6 +379,7 @@ function AddPhotoTile({
   heading?: ReactNode;
 }) {
   const t = useTranslations("Products.galleryField");
+  const isTouch = useIsTouch();
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -446,7 +448,7 @@ function AddPhotoTile({
           slim ? "ml-auto shrink-0 pl-2" : "px-2",
         )}
       >
-        {disabled ? t("limitReached") : t("dropOrClick")}
+        {disabled ? t("limitReached") : t(isTouch ? "dropOrClickTouch" : "dropOrClick")}
       </span>
     </label>
   );

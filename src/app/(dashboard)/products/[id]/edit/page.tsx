@@ -14,6 +14,7 @@ import { getShippingPolicy } from "@/lib/settings/shipping-policy";
 import { EMPTY_SHIPPING_POLICY } from "@/types/shipping-policy";
 import { requireUser } from "@/lib/auth/session";
 import { aiWritingFor, NO_AI_WRITING } from "@/lib/ai-suggestions";
+import { checkoutProviderFor } from "@/lib/checkout/availability";
 import { PRODUCTS_PATH } from "@/lib/products/paths";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -70,6 +71,8 @@ export default async function EditProductPage({
   const t = await getTranslations("Products.page.edit");
   // The shell has already read this store's plan for this request (cached).
   const ai = account ? await aiWritingFor(account.accountId, account.userId) : NO_AI_WRITING;
+  // Where the buy button goes, as the form says it (cta-target.ts's order).
+  const checkoutOpen = account ? (await checkoutProviderFor(account.accountId)) !== null : false;
 
   return (
     <ProductFormView
@@ -82,6 +85,7 @@ export default async function EditProductPage({
       addOnChoices={addOnChoices}
       addOnHabits={addOnHabits}
       ai={ai}
+      checkoutOpen={checkoutOpen}
     />
   );
 }

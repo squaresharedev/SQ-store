@@ -38,11 +38,24 @@ export function changeRatio(current: number, previous: number): number | null {
 /** Under ten percent a decimal is worth reading; past it, it is noise. */
 const DECIMAL_BELOW = 10;
 
-/** A change as people write it: "+12%", "-8.4%", and "0%" with no sign. */
-export function formatChange(ratio: number, locale: Locale): string {
+/** A change's size rounded the way it is printed, and how many decimals that takes. */
+function changeSize(ratio: number): { rounded: number; digits: number } {
   const percent = Math.abs(ratio) * 100;
   const digits = percent < DECIMAL_BELOW ? 1 : 0;
   const rounded = Number(percent.toFixed(digits));
+  return { rounded, digits: rounded === 0 ? 0 : digits };
+}
+
+/** A change as people write it: "+12%", "-8.4%", and "0%" with no sign. */
+export function formatChange(ratio: number, locale: Locale): string {
+  const { rounded, digits } = changeSize(ratio);
   const sign = rounded === 0 ? "" : ratio > 0 ? "+" : "-";
-  return `${sign}${formatPercent(rounded, locale, rounded === 0 ? 0 : digits)}`;
+  return `${sign}${formatPercent(rounded, locale, digits)}`;
+}
+
+/** The same change with no sign, for a mark that shows the direction itself
+ *  (an arrow): "12%", "8.4%". */
+export function formatChangeSize(ratio: number, locale: Locale): string {
+  const { rounded, digits } = changeSize(ratio);
+  return formatPercent(rounded, locale, digits);
 }

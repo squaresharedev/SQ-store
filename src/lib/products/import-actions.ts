@@ -1,12 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { createClient } from "@/lib/supabase/server";
 import {
   failure,
   invalidInput,
+  notFound,
   permissionDenied,
   rateLimited,
   serverError,
@@ -16,11 +18,12 @@ import {
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { publishBlockedError } from "@/lib/settings/seller-identity";
 import { checkMany } from "@/lib/moderation/auto/check";
-import { productWriteSchema } from "@/lib/validation/product";
+import { productIdSchema, productWriteSchema } from "@/lib/validation/product";
 import { firstIssue } from "@/lib/validation/messages";
 import { msg, type MessageRef } from "@/i18n/types";
 import { CURRENCIES, PRODUCT_STATUSES, type Currency, type ProductStatus } from "@/types/product";
 import { planLimitError, planLimitErrorFromTrigger, planLimitKeyOf, planRoom } from "@/lib/billing/limits";
+import { PRODUCTS_PATH } from "./paths";
 import {
   IMPORT_BYTES_MAX,
   IMPORT_ROWS_MAX,
@@ -51,6 +54,9 @@ export type ImportResult =
   | {
       ok: true;
       imported: number;
+      /** The products this import created, which is what `undoProductImport`
+       *  is handed to take it back. */
+      ids: string[];
       /** Imported as active but not approved by the automatic check yet, so
        *  buyers cannot see them for now. Zero for a draft import. */
       checking: number;
@@ -58,6 +64,8 @@ export type ImportResult =
       skipped: { line: number; title: string; reason: MessageRef }[];
     }
   | { ok: false; error: ActionError };
+
+export type UndoImportResult = { ok: true; deleted: number } | { ok: false; error: ActionError };
 
 export type ImportInput = {
   /** The uploaded file's text. Re-parsed here; the client's rows are ignored. */
@@ -259,24 +267,83 @@ export async function importProducts(input: unknown): Promise<ImportResult> {
     return failure(serverError("importProducts"));
   }
 
+  const ids = (written ?? []).map((row) => row.id);
   // Imported rows land behind the moderation wall like any other. The first
   // few are checked now so a small file is live when the page reloads; the
   // rest are picked up by the sweep (lib/moderation/auto).
-  await checkMany("product", (written ?? []).map((row) => row.id));
+  await checkMany("product", ids);
 
-  revalidatePath("/products");
+  revalidatePath(PRODUCTS_PATH);
   return {
     ok: true,
     imported: written?.length ?? inserts.length,
+    ids,
     checking: status === "active" ? await countStillChecking(supabase, account.accountId, startedAt) : 0,
     skipped,
   };
 }
 
+/** What an undo is handed: the ids one import returned, at most a file's worth. */
+const importedIdsSchema = z.array(productIdSchema).min(1).max(IMPORT_ROWS_MAX);
+
+/** Ids per delete: an `in` list rides in the request URL, and a whole import's
+ *  worth of them would not fit in one. */
+const UNDO_IDS_PER_QUERY = 100;
+
+/**
+ * Taking an import back: the products it created, deleted in one go, so a file
+ * imported with the wrong currency or columns costs one click instead of a
+ * delete per product.
+ *
+ * Only a product still exactly as the import wrote it goes: one given a photo,
+ * a file or documents since is kept, so nothing in storage is left behind
+ * without a row and no stored key has to be trusted. The undo is offered on
+ * the import page right after the import, before any of them has a storefront
+ * to be bought from.
+ */
+export async function undoProductImport(input: unknown): Promise<UndoImportResult> {
+  const account = await getActiveAccount();
+  if (!account) return failure(sessionExpired());
+  if (!can(account.role, "products.write")) {
+    return failure(permissionDenied(account.role, "deleteProducts"));
+  }
+  // The import's own budget: one call here is an import's worth of rows, and
+  // taking one back is part of getting a file right.
+  if (!(await rateLimit("product_import", RATE_LIMITS.productImport))) {
+    return failure(rateLimited("deleteProducts"));
+  }
+  const parsed = importedIdsSchema.safeParse(input);
+  if (!parsed.success) return failure(notFound("product"));
+
+  const supabase = await createClient();
+  let deleted = 0;
+  for (let start = 0; start < parsed.data.length; start += UNDO_IDS_PER_QUERY) {
+    const { data, error } = await supabase
+      .from("products")
+      .delete()
+      .in("id", parsed.data.slice(start, start + UNDO_IDS_PER_QUERY))
+      .eq("owner_id", account.accountId)
+      .is("image_key", null)
+      .is("digital_file_key", null)
+      .eq("gallery", "[]")
+      .eq("documents", "[]")
+      .select("id");
+    if (error) {
+      console.error("[products] import undo failed", error);
+      if (deleted > 0) revalidatePath(PRODUCTS_PATH);
+      return failure(serverError("deleteProduct"));
+    }
+    deleted += data?.length ?? 0;
+  }
+
+  revalidatePath(PRODUCTS_PATH);
+  return { ok: true, deleted };
+}
+
 /**
  * How many of an account's products created since `since` are still waiting
  * on the automatic check (or a person). Best effort: an unknown count is 0,
- * which only costs the import's toast a line.
+ * which only costs the import's result a line.
  */
 async function countStillChecking(
   supabase: Awaited<ReturnType<typeof createClient>>,

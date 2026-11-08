@@ -13,8 +13,9 @@
   },
   "firstRun": {
     "title": "Rien à mesurer pour l’instant",
-    "body": "Les visites sur vos pages produit apparaissent ici dès qu’une page est en ligne.",
-    "backToSetup": "Retour à la configuration"
+    "body": "Publiez une vitrine pour voir les vues, ou réalisez votre première vente pour voir le chiffre d’affaires.",
+    "publishStorefront": "Publier une vitrine",
+    "goToProducts": "Aller aux produits"
   },
   "range": {
     "ariaLabel": "Période",
@@ -73,12 +74,20 @@
   },
   "compare": {
     "previous": "Période précédente",
-    "vsPrevious": "{change} par rapport à la période précédente"
+    "vsPrevious": "{change} par rapport à la période précédente",
+    "previousPeriodDates": "{from} - {to}"
+  },
+  "scrub": {
+    "on": "Le {date}",
+    "inMonth": "En {date}",
+    "upTo": "Jusqu’à {date}",
+    "noSales": "Aucune vente"
   },
   "funnel": {
     "label": "Entonnoir de la vitrine",
     "description": "De l'affichage de votre vitrine sur votre propre site jusqu'à la commande payée. Ce sont des événements qui sont comptés, pas des personnes.",
-    "views": "Vues sur votre site",
+    "subtitle": "Visiteurs qui ont vu votre vitrine intégrée sur votre propre site (hors liens directs), de la première vue jusqu’à la commande payée.",
+    "views": "Vues via l’intégration",
     "viewsEmpty": "Aucune vue sur cette période",
     "opens": "Produits ouverts",
     "opensEmpty": "Aucun ouvert sur cette période",
@@ -91,7 +100,7 @@
     "abandonment": "Paiements non terminés",
     "abandonmentCounts": "Non aboutis : {expired}, commencés : {started}",
     "notEnough": "Pas encore assez de données",
-    "notEnoughHint": "Les taux apparaissent dès que cette période compte {min} vues."
+    "notEnoughHint": "Les taux apparaissent dès que cette période compte {min} vues : en dessous, une seule commande fausserait le pourcentage."
   },
   "tiles": {
     "revenue": "Chiffre d’affaires",
@@ -110,7 +119,7 @@
   "channels": {
     "embed": "Sur votre site",
     "marketplace": "Marketplace",
-    "direct": "Votre page",
+    "direct": "Lien direct",
     "button": "Bouton d’achat"
   },
   "signalsUnavailable": {
@@ -119,7 +128,8 @@
   },
   "upcoming": {
     "needProducts": "{labels} apparaissent ici dès qu’un produit est sur l’une de vos vitrines.",
-    "needBlocks": "{labels} apparaissent ici dès que leur bloc est sur l’une de vos vitrines."
+    "needBlocks": "{labels} apparaissent ici dès que leur bloc est sur l’une de vos vitrines.",
+    "recordedOnly": "{labels} apparaissent ici dès qu’un acheteur ouvre le paiement de l’un de vos produits."
   },
   "signal": {
     "visitors": "Visiteurs",
@@ -168,6 +178,7 @@
     "product_view": {
       "label": "Vues des pages produit",
       "description": "Visiteurs ouvrant l’une de vos pages produit hébergées.",
+      "subtitle": "Comprend les clics depuis les vignettes de vitrine et les liens directs.",
       "count": "{count, plural, one {{formatted} vue} many {{formatted} vues} other {{formatted} vues}}",
       "total": "Total des vues",
       "emptyRange": "Aucune vue sur cette période",

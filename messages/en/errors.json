@@ -93,7 +93,7 @@
     "createStorefronts": "Too many attempts to create storefronts in a short time.",
     "saveStorefronts": "Too many attempts to save storefronts in a short time.",
     "deleteStorefronts": "Too many attempts to delete storefronts in a short time.",
-    "rotateEmbedKeys": "Too many embed code resets in a short time.",
+    "rotateEmbedKeys": "Too many attempts to get a new website code in a short time.",
     "updateStock": "Too many attempts to update stock in a short time.",
     "readProductPageSettings": "Too many attempts to read product page settings in a short time.",
     "requestReview": "Too many attempts to ask for a review in a short time.",
@@ -119,7 +119,7 @@
     "verifyDocumentUpload": "Could not verify your document upload because of a problem on our side.",
     "verifyFileUpload": "Could not verify your file upload because of a problem on our side.",
     "verifyFontUpload": "Could not verify your font upload because of a problem on our side.",
-    "verifyElementUpload": "Could not verify your element upload because of a problem on our side.",
+    "verifyElementUpload": "Could not verify your image upload because of a problem on our side.",
     "verifyBackgroundImage": "Could not verify your background image because of a problem on our side.",
     "verifyFont": "Could not verify your font because of a problem on our side.",
     "verifyImage": "Could not verify your image because of a problem on our side.",
@@ -127,7 +127,7 @@
     "saveStorefront": "Could not save your storefront because of a problem on our side.",
     "saveEmbedSettings": "Could not save the embed settings because of a problem on our side.",
     "deleteStorefront": "Could not delete the storefront because of a problem on our side.",
-    "rotateEmbedKey": "Could not rotate the embed key because of a problem on our side.",
+    "rotateEmbedKey": "Could not get a new website code because of a problem on our side.",
     "saveStockSettings": "Could not save the stock settings because of a problem on our side.",
     "checkSellerDetails": "Could not check your seller details because of a problem on our side.",
     "loadProductPageSettings": "Could not load your product page settings because of a problem on our side.",
@@ -166,8 +166,8 @@
     "message": "You can't publish or sell until your seller details are complete.",
     "action": "Add seller details",
     "fix": {
-      "add": "{fields, select, businessName {Add your trader name in Settings › Business & seller details, then publish.} address {Add your business address in Settings › Business & seller details, then publish.} email {Add your contact email in Settings › Business & seller details, then publish.} businessName_address {Add your trader name and business address in Settings › Business & seller details, then publish.} businessName_email {Add your trader name and contact email in Settings › Business & seller details, then publish.} address_email {Add your business address and contact email in Settings › Business & seller details, then publish.} other {Add your trader name, business address and contact email in Settings › Business & seller details, then publish.}}",
-      "addAndConfirm": "{fields, select, businessName {Add your trader name in Settings › Business & seller details, and confirm your contact email with the code we send to it.} address {Add your business address in Settings › Business & seller details, and confirm your contact email with the code we send to it.} email {Add your contact email in Settings › Business & seller details, and confirm it with the code we send to it.} businessName_address {Add your trader name and business address in Settings › Business & seller details, and confirm your contact email with the code we send to it.} businessName_email {Add your trader name and contact email in Settings › Business & seller details, and confirm the email with the code we send to it.} address_email {Add your business address and contact email in Settings › Business & seller details, and confirm the email with the code we send to it.} other {Add your trader name, business address and contact email in Settings › Business & seller details, and confirm the email with the code we send to it.}}",
+      "add": "{fields, select, businessName {Add your name or business name in Settings › Business & seller details, then publish.} address {Add your business address in Settings › Business & seller details, then publish.} email {Add your contact email in Settings › Business & seller details, then publish.} businessName_address {Add your name or business name and your business address in Settings › Business & seller details, then publish.} businessName_email {Add your name or business name and your contact email in Settings › Business & seller details, then publish.} address_email {Add your business address and contact email in Settings › Business & seller details, then publish.} other {Add your name or business name, your business address and your contact email in Settings › Business & seller details, then publish.}}",
+      "addAndConfirm": "{fields, select, businessName {Add your name or business name in Settings › Business & seller details, and confirm your contact email with the code we send to it.} address {Add your business address in Settings › Business & seller details, and confirm your contact email with the code we send to it.} email {Add your contact email in Settings › Business & seller details, and confirm it with the code we send to it.} businessName_address {Add your name or business name and your business address in Settings › Business & seller details, and confirm your contact email with the code we send to it.} businessName_email {Add your name or business name and your contact email in Settings › Business & seller details, and confirm the email with the code we send to it.} address_email {Add your business address and contact email in Settings › Business & seller details, and confirm the email with the code we send to it.} other {Add your name or business name, your business address and your contact email in Settings › Business & seller details, and confirm the email with the code we send to it.}}",
       "confirm": "Confirm your contact email: send yourself a code from Settings › Business & seller details, then type it in there.",
       "complete": "Complete Settings › Business & seller details, then publish."
     }
@@ -211,7 +211,7 @@
     "wrongPasswordGoogle": "That isn't this account's Square Share password. You sign in with Google, so use “Confirm with Google” instead.",
     "passwordCheckUnavailable": "We couldn't check your password just now. Try again in a moment.",
     "reauthRequired": "For your security, sign in again before turning on two-factor authentication.",
-    "setupRateLimited": "That's a lot of setup attempts. Try again a bit later.",
+    "setupRateLimited": "Too many setup attempts. Wait a minute and try again.",
     "tooManyFactors": "This account has as many authenticators as it can hold. Remove one first.",
     "setupFailed": "We couldn't start setup just now. Try again in a moment.",
     "setupUnavailable": "Two-factor setup isn't available right now. Try again later.",
@@ -226,7 +226,7 @@
   "settings": {
     "usernameTaken": "That username is taken. Try another.",
     "emailUnchanged": "That's already your email.",
-    "emailChangeRateLimited": "Too many email-change requests. Wait a while before trying again.",
+    "emailChangeRateLimited": "Too many email-change requests. Wait a minute and try again.",
     "emailChangeNeedsPassword": "Enter your current password to change your email.",
     "wrongPassword": "Current password is incorrect.",
     "passwordCheckUnavailable": "Could not check your password right now. Try again.",
@@ -235,7 +235,7 @@
     "passwordUnchanged": "That's already your password.",
     "passwordUpdateFailed": "Could not update the password. Try again.",
     "passwordReauthNeeded": "For your security, sign out and back in, then change your password.",
-    "resetRateLimited": "Too many reset emails. Wait a while before trying again.",
+    "resetRateLimited": "Too many reset emails. Wait a minute and try again.",
     "resetSendRateLimited": "Too many requests. Wait a minute and try again.",
     "resetFailed": "Could not send the reset email. Try again.",
     "contactEmailTakesNoMail": "That contact email's domain doesn't accept mail. Check the spelling, or use an address buyers can actually reach.",
@@ -294,7 +294,7 @@
     "serviceUnreachable": "Could not connect to authentication service. Please try again.",
     "invalidEmail": "Enter a valid email address.",
     "emailRequired": "Enter your email.",
-    "tooManyAttempts": "Too many attempts. Wait a while and try again.",
+    "tooManyAttempts": "Too many attempts. Wait a minute and try again.",
     "magicLinkFailed": "Could not send email. Please check your connection and try again.",
     "resetEmailRequired": "Enter your email to reset your password.",
     "resetEmailFailed": "Could not send reset email. Please check your connection and try again.",
@@ -307,7 +307,7 @@
     "signUpFailed": "Could not create account. Please check your connection and try again.",
     "signInFailed": "Could not sign in. Please check your connection and try again.",
     "badCredentials": "Incorrect email, username or password.",
-    "emailNotConfirmed": "Confirm your email first — check your inbox for the link.",
+    "emailNotConfirmed": "Confirm your email first: check your inbox for the link.",
     "weakPassword": "That password is too weak. At least 8 characters, mixing cases, numbers or symbols (or a passphrase of 16+).",
     "rateLimited": "Too many attempts. Wait a minute and try again.",
     "accountNotCreated": "Someone just took that username. Pick another one.",
@@ -332,21 +332,21 @@
       "document": "That document is too large.",
       "file": "That file is too large.",
       "font": "That font is too large.",
-      "element": "That element is too large."
+      "element": "That image is too large."
     },
     "tooLargeFix": {
       "image": "Use an image under {maxMb} MB. Compress or resize it, then try again.",
       "document": "Use a document under {maxMb} MB. Compress or resize it, then try again.",
       "file": "Use a file under {maxMb} MB. Compress or resize it, then try again.",
       "font": "Use a font under {maxMb} MB. Compress or resize it, then try again.",
-      "element": "Use an element under {maxMb} MB. Compress or resize it, then try again."
+      "element": "Use an image under {maxMb} MB. Compress or resize it, then try again."
     },
     "neverReached": {
       "image": "The image never reached the server.",
       "document": "The document never reached the server.",
       "file": "The file never reached the server.",
       "font": "The font never reached the server.",
-      "element": "The element never reached the server."
+      "element": "The image never reached the server."
     },
     "neverReachedFix": "Check your internet connection and try again.",
     "rejected": {
@@ -354,7 +354,7 @@
       "document": "Could not upload that document.",
       "file": "Could not upload that file.",
       "font": "Could not upload that font.",
-      "element": "Could not upload that element."
+      "element": "Could not upload that image."
     },
     "rejectedFix": {
       "signedOut": "Sign in again, then retry.",
@@ -365,7 +365,7 @@
   "uploadRoute": {
     "signIn": {
       "image": "Sign in to upload images.",
-      "element": "Sign in to upload elements.",
+      "element": "Sign in to upload images.",
       "document": "Sign in to upload documents.",
       "file": "Sign in to upload files.",
       "font": "Sign in to upload fonts."
@@ -378,7 +378,7 @@
     },
     "notConfigured": {
       "image": "Image uploads aren't available right now. Try again later.",
-      "element": "Element uploads aren't available right now. Try again later.",
+      "element": "Image uploads aren't available right now. Try again later.",
       "document": "Uploads aren't available right now. Try again later.",
       "file": "File uploads aren't available right now. Try again later.",
       "font": "Font uploads aren't available right now. Try again later."
@@ -459,28 +459,28 @@
       "document": "Your document upload didn't finish.",
       "file": "Your file upload didn't finish.",
       "font": "Your font upload didn't finish.",
-      "element": "Your element upload didn't finish."
+      "element": "Your image upload didn't finish."
     },
     "uploadUnfinishedFix": {
       "image": "Select the image again and re-upload it before saving.",
       "document": "Select the document again and re-upload it before saving.",
       "file": "Select the file again and re-upload it before saving.",
       "font": "Select the font again and re-upload it before saving.",
-      "element": "Select the element again and re-upload it before saving."
+      "element": "Select the image again and re-upload it before saving."
     },
     "uploadTooLarge": {
       "image": "That image is too large.",
       "document": "That document is too large.",
       "file": "That file is too large.",
       "font": "That font is too large.",
-      "element": "That element is too large."
+      "element": "That image is too large."
     },
     "uploadTooLargeFix": {
       "image": "Use an image under {maxMb} MB, then re-upload it.",
       "document": "Use a document under {maxMb} MB, then re-upload it.",
       "file": "Use a file under {maxMb} MB, then re-upload it.",
       "font": "Use a font under {maxMb} MB, then re-upload it.",
-      "element": "Use an element under {maxMb} MB, then re-upload it."
+      "element": "Use an image under {maxMb} MB, then re-upload it."
     },
     "wrongTypeFix": {
       "image": "Use a JPEG, PNG, WebP, GIF, or AVIF image.",

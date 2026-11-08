@@ -198,6 +198,15 @@ test.describe("storefront designer on a phone", () => {
     // Apple's 44px minimum: the bar is the primary touch surface.
     expect(bar!.controls.filter((c) => c.height < 44)).toEqual([]);
 
+    // --- each insert tool says what it is, in a word under its icon: four
+    // bare icons left the seller tapping each one to find out ---
+    const tools = page.getByRole("toolbar", { name: "Editor tools" });
+    // And so does every control after them: an ellipsis and a row of sliders
+    // said nothing to a thumb, and their tips only show on hover.
+    for (const word of ["Product", "Text", "Shapes", "Page", "Undo", "Redo", "Style", "More"]) {
+      await expect(tools.getByText(word, { exact: true })).toBeVisible();
+    }
+
     // --- the board starts near the top rather than floating mid-screen ---
     const gapAbove = await page.evaluate(() => {
       const main = document.querySelector("main");
@@ -210,18 +219,25 @@ test.describe("storefront designer on a phone", () => {
     expect(gapAbove).not.toBeNull();
     expect(gapAbove!).toBeLessThanOrEqual(40);
 
-    // --- Design settings: the regression that made this file exist ---
-    const design = page.getByRole("button", { name: "Design settings" });
+    // --- Storefront style: the regression that made this file exist ---
+    const design = page.getByRole("button", { name: "Storefront style" });
     await expect(design).toBeVisible();
     await design.click();
-    await expect(page.getByRole("button", { name: /close design settings/i })).toBeVisible();
-    await page.getByRole("button", { name: /close design settings/i }).click();
+    await expect(page.getByRole("button", { name: /close storefront style/i })).toBeVisible();
+    // The sheet covers the toolbar's strip, so the toolbar stands down; the
+    // first sheet in this browser says how to get it back.
+    await expectToast(page, "Close this panel to get the toolbar back.");
+    await page.getByRole("button", { name: /close storefront style/i }).click();
+
+    // --- redo stays on the bar beside undo: one tap back after one undo too
+    //     many, not two through a menu ---
+    await expect(tools.getByRole("button", { name: "Redo", exact: true })).toBeVisible();
 
     // --- the phone-only overflow menu holds what the bar gave up ---
     await page.getByRole("button", { name: "More tools" }).click();
     const menu = page.getByRole("menu", { name: "More tools" });
     await expect(menu).toBeVisible();
-    for (const name of ["Redo", "Tidy up", "Reset zoom"]) {
+    for (const name of ["Tidy up", "Fit to screen"]) {
       await expect(menu.getByRole("menuitem", { name })).toBeVisible();
     }
     // Tapping the canvas dismisses it. A `fixed inset-0` backdrop cannot do
@@ -345,8 +361,8 @@ test.describe("storefront designer on a phone", () => {
     // bottom-0` bottom sheets, and inserting a shape auto-selects it — which
     // used to pop the inspector sheet up over the library that was still
     // open, hiding the very shapes the seller was choosing from.
-    await page.getByRole("button", { name: "Add element", exact: true }).click();
-    await page.getByRole("menu", { name: "Elements" }).getByRole("menuitem", { name: "All shapes" }).click();
+    await page.getByRole("button", { name: "Add shape or image", exact: true }).click();
+    await page.getByRole("menu", { name: "Shapes and images" }).getByRole("menuitem", { name: "All shapes" }).click();
     await expect(page.getByRole("button", { name: "Add square" })).toBeVisible();
 
     await page.getByRole("button", { name: "Add square" }).click();
@@ -366,8 +382,8 @@ test.describe("storefront designer on a phone", () => {
     await settle(page);
     await openDesigner(page);
 
-    await page.getByRole("button", { name: "Add element", exact: true }).click();
-    await page.getByRole("menu", { name: "Elements" }).getByRole("menuitem", { name: "All shapes" }).click();
+    await page.getByRole("button", { name: "Add shape or image", exact: true }).click();
+    await page.getByRole("menu", { name: "Shapes and images" }).getByRole("menuitem", { name: "All shapes" }).click();
     await page.getByRole("button", { name: "Add square" }).click();
     await page.getByRole("button", { name: "Add circle" }).click();
     await expect(page.locator("li[data-grid-cell]")).toHaveCount(2);

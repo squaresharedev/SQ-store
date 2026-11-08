@@ -52,7 +52,8 @@
   },
   "recentOrders": {
     "title": "Ordini recenti",
-    "empty": "Ancora nessun ordine. Le vendite tramite il tuo link di acquisto personale o via email non compariranno qui."
+    "empty": "Ancora nessun ordine. Quando il checkout sarà aperto, gli acquisti completati compariranno qui.",
+    "emptyReady": "Ancora nessun ordine. La tua prima vendita comparirà qui."
   },
   "attention": {
     "title": "Richiede attenzione",
@@ -74,7 +75,7 @@
       "descriptionUpdated": "Le condizioni sono cambiate da quando le hai accettate. Leggi e accetta la versione attuale.",
       "descriptionTerms": "Leggi i Termini di servizio e accettali.",
       "descriptionTermsUpdated": "I Termini di servizio sono cambiati dopo la tua accettazione. Leggi la versione attuale e accettala.",
-      "action": "Rivedi le condizioni"
+      "action": "Accetta i Termini"
     },
     "noBuyPath": {
       "label": "{count, plural, one {{count} prodotto senza modo di acquistarlo} many {{count} prodotti senza modo di acquistarli} other {{count} prodotti senza modo di acquistarli}}",
@@ -114,18 +115,18 @@
       "action": "Apri editor"
     },
     "deadBlocks": {
-      "label": "{count, plural, one {{count} blocco della vetrina che fa riferimento a prodotti eliminati} many {{count} blocchi della vetrina che fanno riferimento a prodotti eliminati} other {{count} blocchi della vetrina che fanno riferimento a prodotti eliminati}}",
-      "description": "Questi blocchi appaiono vuoti ai visitatori. Rimuovili o sostituiscili.",
-      "action": "Apri vetrina"
+      "label": "{count, plural, one {{count} spazio prodotto che punta a un prodotto eliminato} many {{count} di spazi prodotto che puntano a prodotti eliminati} other {{count} spazi prodotto che puntano a prodotti eliminati}}",
+      "description": "Questi spazi appaiono vuoti ai visitatori. Apri l’editor e rimuovili o sostituiscili.",
+      "action": "Apri editor"
     },
     "toShip": {
       "description": "Gli acquirenti li stanno aspettando. Imballali e segnali come spediti.",
       "action": "Spedisci gli ordini"
     },
     "withdrawals": {
-      "label": "{count, plural, one {{count} acquirente ha esercitato il recesso} many {{count} di acquirenti hanno esercitato il recesso} other {{count} acquirenti hanno esercitato il recesso}}",
-      "description": "Hanno diritto al rimborso entro 14 giorni dal recesso. Organizza il reso, poi rimborsa l’ordine.",
-      "action": "Vedi i recessi"
+      "label": "{count, plural, one {{count} acquirente ha annullato l’acquisto} many {{count} di acquirenti hanno annullato l’acquisto} other {{count} acquirenti hanno annullato l’acquisto}}",
+      "description": "Hanno diritto al rimborso entro 14 giorni. Organizza il reso, poi rimborsa l’ordine.",
+      "action": "Vedi gli annullamenti"
     },
     "restock": {
       "label": "{count, plural, one {{count} prodotto quasi esaurito} many {{count} prodotti quasi esauriti} other {{count} prodotti quasi esauriti}}",
@@ -138,6 +139,10 @@
       "label": "Imposta i prezzi di consegna",
       "description": "Gli acquirenti non possono completare l’acquisto di un prodotto fisico finché una destinazione non ha sia una tariffa sia un paese.",
       "action": "Imposta prezzi"
+    },
+    "paused": {
+      "label": "{count, plural, one {{count} prodotto nascosto agli acquirenti} many {{count} di prodotti nascosti agli acquirenti} other {{count} prodotti nascosti agli acquirenti}}",
+      "description": "{count, plural, one {Square Share lo ha messo in pausa o rimosso. Scopri perché e cosa fare dopo.} many {Square Share li ha messi in pausa o rimossi. Scopri perché e cosa fare dopo.} other {Square Share li ha messi in pausa o rimossi. Scopri perché e cosa fare dopo.}}"
     }
   }
 }

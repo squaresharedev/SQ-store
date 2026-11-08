@@ -124,7 +124,7 @@ test.describe("the selection toolbar", () => {
     await page.locator("li[data-grid-cell] [data-block-tile]").click();
 
     const bar = page.locator("[data-selection-toolbar]");
-    await expect(bar.getByRole("button", { name: /open the buyer flow/i })).toBeVisible();
+    await expect(bar.getByRole("button", { name: /open the product page/i })).toBeVisible();
     await expect(bar.getByRole("button", { name: /crop and position the image/i })).toBeVisible();
     await expect(bar.getByRole("button", { name: /remove .* from grid/i })).toBeVisible();
     // The block's name is in the accessible names, not drawn on the bar: it
@@ -142,9 +142,9 @@ test.describe("the selection toolbar", () => {
     await setUpBoard(page, "seltoolbarshape");
     // The Element menu carries the common shapes itself; the library behind it
     // is a panel away and not needed for one square.
-    await page.getByRole("button", { name: "Add element" }).click();
+    await page.getByRole("button", { name: "Add shape or image" }).click();
     await page
-      .getByRole("menu", { name: "Elements" })
+      .getByRole("menu", { name: "Shapes and images" })
       .getByRole("menuitem", { name: "Add square" })
       .click();
 

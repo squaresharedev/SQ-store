@@ -123,3 +123,14 @@ export function initialScopes(requested: readonly string[]): AgentScope[] {
     (id) => !("optIn" in AGENT_SCOPES[id]) && (picked.includes(id) || "required" in AGENT_SCOPES[id]),
   );
 }
+
+/**
+ * The word pinned beside a scope wherever it is listed (the consent page and
+ * Settings): why its switch cannot move, or why it starts off. Null otherwise.
+ */
+export function scopeBadge(scope: AgentScope): MessageKey | null {
+  const definition: AgentScopeDefinition = AGENT_SCOPES[scope];
+  if (definition.required) return "Settings.connectedApps.connect.required";
+  if (definition.optIn) return "Settings.connectedApps.connect.offByDefault";
+  return null;
+}

@@ -25,6 +25,7 @@ import { ChartTooltipContent } from "@/components/charts/ChartTooltip";
 import { ChartLegend } from "@/components/charts/ChartLegend";
 import { ChartDataTable } from "@/components/charts/ChartDataTable";
 import type { ChartDatum, ChartSeries } from "@/components/charts/types";
+import { useChartStyle, type ChartAxes } from "@/components/charts/style";
 
 // Vertical columns — compare magnitude across categories. Subtypes via
 // `variant`:
@@ -51,6 +52,10 @@ export interface BarChartProps {
    *  numbers. Without it a week with one sale gets gridlines at 0.25, 0.5 and
    *  0.75 of a sale. */
   whole?: boolean;
+  /** How much scale to print: "quiet" drops the value axis (the tooltip and
+   *  the table twin carry the values) and dots the guides. Default: the page's
+   *  ChartStyle ("full"). */
+  axes?: ChartAxes;
   animate?: boolean;
   ariaLabel?: string;
   className?: string;
@@ -68,6 +73,7 @@ export function BarChart({
   axisValueFormatter: axisValueFormatterProp,
   xFormatter,
   whole = false,
+  axes: axesProp,
   animate = true,
   ariaLabel: ariaLabelProp,
   className,
@@ -84,6 +90,8 @@ export function BarChart({
   const reducedMotion = useReducedMotion();
   const animationActive = animate && !reducedMotion;
   const stacked = variant === "stacked";
+  const style = useChartStyle();
+  const quiet = (axesProp ?? style.axes) === "quiet";
   const r = MARK.barRadius;
 
   const colorFor = (key: string) =>
@@ -98,7 +106,11 @@ export function BarChart({
       barGap={MARK.surfaceGap}
       {...dims}
     >
-      <CartesianGrid vertical={false} stroke={CHART.gridStroke} />
+      <CartesianGrid
+        vertical={false}
+        stroke={CHART.gridStroke}
+        strokeDasharray={quiet ? MARK.guideDash : undefined}
+      />
       <XAxis
         dataKey={xKey}
         axisLine={false}
@@ -117,6 +129,8 @@ export function BarChart({
         width="auto"
         allowDecimals={!whole}
         tickFormatter={axisValueFormatter}
+        // Hidden, it still sets the levels the guides are drawn at.
+        hide={quiet}
       />
       <Tooltip
         cursor={{ fill: "var(--muted)" }}

@@ -2,9 +2,11 @@
 
 import { useId } from "react";
 import { useTranslations } from "next-intl";
+import { Palette } from "lucide-react";
 import {
   HEADER_BIO_MAX,
   HEADER_NAME_MAX,
+  type HeaderLine,
   type StorefrontHeader,
 } from "@/types/storefront";
 import { sanitizeHeaderText } from "@/lib/storefront/header-text";
@@ -13,28 +15,49 @@ import {
   fieldBaseClass,
   helpTextClass,
   labelClass,
+  quietIconLinkClass,
 } from "@/components/ui/control-styles";
 import { InfoTip } from "@/components/ui/InfoTip";
 
 /**
  * Store header controls: a show toggle plus the plain text of the two lines
- * rendered as a masthead above the grid. Client caps are UX only — the save
+ * rendered as a masthead above the grid. Client caps are UX only: the save
  * path re-validates with the header schema (lengths + control-character rules).
  *
- * The words can also be typed on the canvas itself (click a line), and how
- * they LOOK is only set there: font, size, colour, formatting and alignment
- * come from that same click, which opens this panel on it — the same place
- * every other colour in the storefront is chosen.
+ * The words can also be typed on the canvas itself (click a line). How they
+ * LOOK (font, size, colour, formatting and alignment) is set in the colour
+ * panel, aimed at that line, the same place every other colour in the
+ * storefront is chosen. Clicking the line opens it, and so does the link under
+ * each field here, which is how a seller who never thought to click the
+ * canvas finds it.
  */
 export function HeaderSection({
   header,
   onChange,
+  onStyleLine,
 }: {
   header: StorefrontHeader;
   onChange: (header: StorefrontHeader) => void;
+  /** Open the colour panel on one line, as clicking it on the canvas does.
+   *  Absent (the dev gallery) drops the links rather than show dead ones. */
+  onStyleLine?: (line: HeaderLine) => void;
 }) {
   const t = useTranslations("Storefront.header");
   const fieldId = useId();
+
+  /** The way to a line's font and colour, under its field. */
+  const styleLink = (line: HeaderLine) =>
+    onStyleLine && (
+      <button
+        type="button"
+        onClick={() => onStyleLine(line)}
+        className={quietIconLinkClass}
+        data-header-style={line}
+      >
+        <Palette className="size-3.5" strokeWidth={2} aria-hidden="true" />
+        {t("styleLine", { line })}
+      </button>
+    );
 
   return (
     <div className="space-y-4">
@@ -73,6 +96,7 @@ export function HeaderSection({
           }
           className={fieldBaseClass}
         />
+        {styleLink("name")}
       </div>
 
       <div className="space-y-1.5">
@@ -96,6 +120,7 @@ export function HeaderSection({
         <p className={helpTextClass}>
           {t("charsLeft", { n: HEADER_BIO_MAX - header.bio.length })}
         </p>
+        {styleLink("bio")}
       </div>
 
     </div>

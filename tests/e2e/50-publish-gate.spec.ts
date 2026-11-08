@@ -75,7 +75,7 @@ test.describe("the publish gate", () => {
     await expect(banner).toBeVisible();
     await expect(banner).toContainText(/can't publish or sell/i);
     // It names what is missing rather than sending them off to hunt for it.
-    await expect(banner).toContainText(/trader name/i);
+    await expect(banner).toContainText(/your name or business name/i);
     await expect(banner).toContainText(/business address/i);
     await expect(banner).toContainText(/contact email/i);
 
@@ -98,7 +98,7 @@ test.describe("the publish gate", () => {
     // --- and the button in the warning lands on the field that fixes it ---
     await banner.getByRole("link", { name: /add seller details/i }).click();
     await page.waitForURL(/\/settings\/tax/, { timeout: 30_000 });
-    await expect(page.getByLabel(/Trader name/)).toBeVisible();
+    await expect(page.getByLabel(/Your name or business name/)).toBeVisible();
   });
 
   test("filling the details in lifts the gate, and clearing one puts it back", async ({
@@ -113,7 +113,7 @@ test.describe("the publish gate", () => {
 
     // --- fill the three required fields on the real settings form ---
     await gotoApp(page, "/settings/tax");
-    await page.getByLabel(/Trader name/).fill("Gate Studio Ltd");
+    await page.getByLabel(/Your name or business name/).fill("Gate Studio Ltd");
     await page.getByLabel("Address").fill("12 Market Street\nDublin\nIreland");
     // squareshare.eu, because the save asks a public resolver whether the
     // domain takes mail at all and a made-up one would be refused. (That check
@@ -219,7 +219,7 @@ test.describe("the publish gate", () => {
   }) => {
     await signUp(page, freshUser("gate-email"));
     await gotoApp(page, "/settings/tax");
-    await page.getByLabel(/Trader name/).fill("Gate Studio Ltd");
+    await page.getByLabel(/Your name or business name/).fill("Gate Studio Ltd");
     await page.getByLabel("Address").fill("12 Market Street\nDublin");
 
     const email = page.getByLabel(/Contact email/);
@@ -251,7 +251,7 @@ test.describe("the publish gate", () => {
   test("the address has to be a real one too", async ({ page }) => {
     await signUp(page, freshUser("gate-address"));
     await gotoApp(page, "/settings/tax");
-    await page.getByLabel(/Trader name/).fill("Gate Studio Ltd");
+    await page.getByLabel(/Your name or business name/).fill("Gate Studio Ltd");
     await page.getByLabel(/Contact email/).fill("hello@squareshare.eu");
     const address = page.getByLabel("Address");
     const save = page.getByRole("button", { name: "Save" });

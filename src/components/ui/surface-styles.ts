@@ -19,6 +19,27 @@ export const cardClass = "rounded-md border border-border bg-card shadow-xs";
 export const sharpCardClass = "border border-border bg-card shadow-xs";
 
 /**
+ * Sharp cards joined into one block with no gap (a chart and the tiles that go
+ * with it): one outline around the lot and a hairline between each cell. The
+ * hairlines are the block's own colour showing through a `gap-px`, so a nested
+ * grid of cells inside it also takes `gap-px` and no background of its own.
+ */
+export const joinedCardsClass = "grid gap-px border border-border bg-border shadow-xs";
+
+/** One cell of `joinedCardsClass`: the card surface, no outline (the block
+ *  draws it). Padding is the caller's, as with cardClass. */
+export const joinedCellClass = "bg-card";
+
+/** The card an import's result takes the form's place with (products and
+ *  reviews alike): what landed, what is next, and the way on. */
+export const importResultCardClass = `${cardClass} space-y-5 p-5 @md:p-6`;
+
+/** The heading of `importResultCardClass`. Focused when the card appears, so
+ *  the result is read out where the pressed button was; it takes no ring, since
+ *  it is not a control. */
+export const importResultTitleClass = "font-inter text-lg font-semibold text-foreground outline-none";
+
+/**
  * "Nothing here yet" box: a dashed outline, so it reads as a slot waiting to be
  * filled rather than as a card that failed to load.
  */
@@ -29,10 +50,16 @@ export const emptyStateClass =
  * The frame around an empty list that leads with an AddShowcase (products,
  * storefronts): a plain hairline card, no dashes and no texture, so the add
  * card's glow and the examples beside it are the only decoration on it.
- * `overflow-hidden` keeps the glow inside the frame.
+ * `overflow-hidden` keeps the glow inside the frame. A list a seller cannot
+ * add to (orders) wears it too, led by `emptyIconClass` instead.
  */
 export const emptyShowcaseClass =
   "relative flex flex-col items-center justify-center overflow-hidden rounded-md border border-border bg-background px-6 py-16 text-center";
+
+/** The round mark that leads an empty state with nothing to add from it (no
+ *  orders yet, analytics before the first visit). Give its icon `size-6`. */
+export const emptyIconClass =
+  "flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground";
 
 /** A real product's tile standing in as a suggestion, not yet on the board. */
 export const suggestedTileFaceClass = "opacity-60 grayscale";
@@ -101,6 +128,18 @@ export const badgeClass =
   "rounded-full bg-secondary px-2 py-0.5 font-inter text-xs font-medium";
 
 /**
+ * Status chip as a square tag with a tinted fill and a hairline (an invoice's
+ * Paid / Payment failed): the badge's sharp sibling for a list of records.
+ * The tone (fill, text and ring) is the caller's, as with badgeClass.
+ */
+export const squareTagClass =
+  "inline-flex items-center whitespace-nowrap px-2 py-0.5 font-inter text-xs font-medium ring-1 ring-inset";
+
+/** The status chip in its neutral tone, for a plain fact pinned beside a label
+ *  ("Off by default"); never squeezed by a long label next to it. */
+export const mutedBadgeClass = `${badgeClass} shrink-0 text-muted-foreground`;
+
+/**
  * The On / Off mark beside something switchable (sign-in approval, what a
  * connected app may do). Outlined and monochrome: ink when on, muted when off,
  * and the word itself says which. Pair with switchStateOnClass or
@@ -160,6 +199,20 @@ export const bannerStripClass =
  */
 export const attentionCountClass =
   "inline-flex min-w-5 items-center justify-center rounded-full bg-foreground px-1.5 font-inter text-xs font-medium leading-5 tabular-nums text-background";
+
+/**
+ * A dot on a control's corner: what that control leads to is blocked until the
+ * seller acts (the designer's Share while seller details are missing). Red, the
+ * seller-details banner's colour. The control is `relative` and carries the
+ * words as screen-reader text: a dot alone names nothing.
+ */
+export const attentionDotClass =
+  "pointer-events-none absolute -right-0.5 -top-0.5 size-2 rounded-full bg-destructive";
+
+/** The green dot before a word that says something is live for buyers (a
+ *  storefront card's "Live", the embed picture's "Showing"). The word carries
+ *  the meaning; the dot is decoration, so mark it aria-hidden. */
+export const liveDotClass = "size-1.5 shrink-0 rounded-full bg-success";
 
 /** Dashboard page column: centred, capped, with the page gutters. */
 export const pageShellClass = "mx-auto max-w-7xl px-6 py-8";
@@ -276,10 +329,22 @@ export const posterPhotoClass =
   "size-full object-cover transition-transform duration-slow ease-standard " +
   "group-hover/card:scale-105 motion-reduce:transition-none motion-reduce:group-hover/card:scale-100";
 
-/** Darkens the foot of a photo so white type on it reads on any picture. Fixed
- *  black like overlayScrimClass: its job is the same on either theme. */
+/** Blurs and shades the foot of a photo so white type on it reads on any
+ *  picture. The blur is progressive: two backdrop layers, a light one reaching
+ *  higher and a stronger one under the text, each fading out upwards; the
+ *  shade is a light tint under both. Fixed black like overlayScrimClass: its
+ *  job is the same on either theme. The layer itself must carry no opacity,
+ *  filter or mask, or it becomes its layers' backdrop root and they blur nothing. */
 export const posterScrimClass =
-  "pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-linear-to-t from-black/85 via-black/60 via-45% to-transparent";
+  "pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-linear-to-t from-black/50 via-black/25 via-40% to-transparent to-75% " +
+  "before:absolute before:inset-0 before:backdrop-blur-xs before:mask-t-from-45% before:mask-t-to-85% " +
+  "after:absolute after:inset-0 after:backdrop-blur-md after:mask-t-from-30% after:mask-t-to-60%";
+
+/** `posterScrimClass` without the blur: the same shade at the foot of a photo, for a
+ *  poster in a PICTURE of the page drawn scaled down (a story), where the blur
+ *  layers smear instead of softening. */
+export const posterScrimFlatClass =
+  "pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-linear-to-t from-black/60 via-black/30 via-40% to-transparent to-80%";
 
 /** Ink on a scrimmed photo: white holds on any picture; the muted step is for
  *  the quieter lines under the name. */

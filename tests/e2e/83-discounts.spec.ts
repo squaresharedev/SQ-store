@@ -509,10 +509,13 @@ test.describe("discounts", () => {
     await gotoApp(page, "/discounts");
     const instaRow = page.locator(`[data-discount-row='${insta.id}']`);
     await expect(async () => {
-      await instaRow.getByRole("switch", { name: "On" }).click();
-      await expectToast(page, "Code switched off.", 3_000);
+      // Pressed only while it still offers to turn off: a retry after a click
+      // that landed (its toast missed) must not look for a switch that now
+      // says "Turn on".
+      const toggle = instaRow.getByRole("switch", { name: "Turn off" });
+      if ((await toggle.count()) > 0) await toggle.click();
+      await expect(instaRow).toHaveAttribute("data-discount-status", "paused", { timeout: 3_000 });
     }).toPass({ timeout: 20_000 });
-    await expect(instaRow).toHaveAttribute("data-discount-status", "paused");
     const off = await page.request.post(`${checkoutApi(s, s.vase)}/discount`, {
       headers: SAME_ORIGIN,
       data: { code: "INSTA10" },

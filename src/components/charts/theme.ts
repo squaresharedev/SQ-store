@@ -27,6 +27,8 @@ export const CHART = {
   ink: "var(--chart-1)",
   /** The one chromatic accent (blue) — a deliberate highlight, never filler. */
   accent: "var(--chart-accent)",
+  /** The store's own money over time (the Payments tab's earnings). */
+  earnings: "var(--chart-earnings)",
   /** The surface charts sit on; used for the 2px gaps between touching fills
    *  and the ring around overlapping markers (white does the separating —
    *  never a contrasting stroke). */
@@ -125,6 +127,11 @@ export const MARK = {
   loneDotRadius: 5,
   loneLevelDash: "2 4",
   loneLevelOpacity: 0.5,
+  /** ScrubChart: its faint level guides, the rule that follows the pointer,
+   *  and the dot on the line under it. */
+  guideDash: "2 4",
+  crosshairDash: "3 3",
+  scrubDotRadius: 4.5,
 } as const;
 
 /** Plot geometry the cartesian charts share, in px. */
@@ -178,6 +185,30 @@ export const BLEED = {
   blurBy: 0.5,
   /** The blur's radius, in px. */
   blur: 4,
+} as const;
+
+/** Quiet axes (ChartStyle "quiet", style.tsx): the Payments tab's look on a
+ *  Recharts plot. */
+export const QUIET = {
+  /** The value axis is hidden but still sets the guides: this many levels,
+   *  baseline included, so three dotted guides stand over it. */
+  guideCount: 4,
+  /** The wash under an area at its full strength, as ScrubChart draws it:
+   *  with no axis framing the plot, the fill is what gives the line body. */
+  areaWash: BLEED.areaWash,
+  areaFillOpacity: 1,
+} as const;
+
+/** ScrubChart's sizes where it is a page's chart (px). */
+export const SCRUB = {
+  /** A headline chart: a page's lead figure over its line. */
+  leadHeight: 220,
+  /** A trend inside a card, under the card's own figure. */
+  cardHeight: 160,
+  /** A tile's sparkline. */
+  sparkHeight: 52,
+  /** A sparkline is a hint, not a chart: a thinner line than the main one. */
+  sparkStroke: 1.5,
 } as const;
 
 /** The width of each end's tail, in px, for a bled plot `width` px wide. */

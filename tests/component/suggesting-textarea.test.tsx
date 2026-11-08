@@ -7,7 +7,8 @@ import { SuggestingTextarea } from "@/components/ui/SuggestingTextarea";
 // The grey next words, as a seller meets them: asked after a pause with the
 // cursor at the end, Tab takes them, typing the same letters keeps the rest,
 // anything else or Esc makes them go, an answer for old text is dropped, and
-// "Turn off" is there while the field is in use. The model is a stub.
+// the line saying so, with "Turn off", is there before the field is used. The
+// model is a stub.
 
 afterEach(cleanup);
 
@@ -118,12 +119,12 @@ describe("SuggestingTextarea", () => {
     expect(suggest).not.toHaveBeenCalled();
   });
 
-  it("offers the way out while the field is in use, and is a plain field when off", async () => {
+  it("says what it does and offers the way out before the field is used, and is a plain field when off", async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     const onTurnOff = vi.fn();
     const { rerender } = render(<Field suggest={async () => null} onTurnOff={onTurnOff} />);
-    expect(screen.queryByRole("button", { name: LABELS.turnOff })).toBeNull();
-    await user.click(field());
+    expect(field()).not.toHaveFocus();
+    expect(screen.getByText(LABELS.idle)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: LABELS.turnOff }));
     expect(onTurnOff).toHaveBeenCalled();
 

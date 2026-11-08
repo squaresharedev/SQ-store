@@ -11,6 +11,7 @@
 
 import { saleFee } from "@/lib/billing/fees";
 import { PLAN_PRICE_SEED } from "@/lib/billing/pricing-seed";
+import { buildHistory } from "./history";
 import type {
   AccountStatus,
   Balance,
@@ -447,6 +448,7 @@ export function buildScenario(
 
   const newestFirst = <T extends { createdAt: string }>(rows: T[]) =>
     [...rows].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const transactions = newestFirst(ledgers.flatMap(({ ledger }) => ledger.transactions));
 
   const balance: Balance = {
     available: ledgers.flatMap(({ currency, ledger }) => bucket(ledger.available, currency)),
@@ -466,10 +468,9 @@ export function buildScenario(
     upcomingPayout,
     payoutMethod: spec.method,
     payouts: newestFirst(ledgers.flatMap(({ ledger }) => ledger.payouts)).slice(0, limits.payouts ?? PAYOUT_LIMIT),
-    transactions: newestFirst(ledgers.flatMap(({ ledger }) => ledger.transactions)).slice(
-      0,
-      limits.transactions ?? TRANSACTION_LIMIT,
-    ),
+    transactions: transactions.slice(0, limits.transactions ?? TRANSACTION_LIMIT),
+    // From the WHOLE ledger, not the tab's slice: the chart reaches back months.
+    history: spec.account.connected ? buildHistory(transactions, now, { fallbackCurrency: EUR }) : null,
   };
 }
 

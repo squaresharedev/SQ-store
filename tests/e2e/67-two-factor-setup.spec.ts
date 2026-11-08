@@ -30,17 +30,17 @@ async function expectNoSeriousViolations(page: import("@playwright/test").Page) 
 test.describe.configure({ timeout: 180_000 });
 
 test.describe("two-factor setup", () => {
-  test("a seller without 2FA is pushed towards it from three places", async ({ page }) => {
+  test("a seller without 2FA is pushed towards it in Settings, not over the setup checklist", async ({
+    page,
+  }) => {
     const user = freshUser("nudge");
     await signUp(page, user);
 
-    // 1. The dashboard's Needs attention list.
-    const row = page.getByText("Turn on two-factor authentication").first();
-    await expect(row).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole("link", { name: "Turn on", exact: true })).toHaveAttribute(
-      "href",
-      "/settings/security#two-factor",
-    );
+    // 1. Overview's Needs attention list leaves it out while the setup
+    //    checklist is up, so a new seller meets one list of things to do. It
+    //    comes back once setup is done (tests/unit/dashboard-attention.test.ts).
+    await expect(page.locator("[data-setup-checklist]")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("Turn on two-factor authentication")).toHaveCount(0);
 
     // 2. The settings rail marks Security as recommended.
     await page.goto("/settings/account");

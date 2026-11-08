@@ -182,20 +182,19 @@ describe("PlacementSection layering", () => {
     expect(button("Bring forward")).not.toBeDisabled();
   });
 
-  it("points at Alt-click only once something is actually stacked", async () => {
-    const user = userEvent.setup();
-    const hint = "Alt-click a stack on the canvas to reach the block underneath";
+  it("says how to reach the block underneath only once something is actually stacked", () => {
+    // In plain sight, not behind the "How layering works" tip: a seller stuck
+    // under a stack never thought to open it. Touch gets its own gesture.
+    const hint = /Alt-click to select the block underneath\. On a touch screen, tap the stack again\./;
     // Three blocks side by side: depth exists, but nothing is hidden by it.
     renderSection([board[0]], board);
-    await user.click(screen.getByRole("button", { name: "How layering works" }));
-    expect(screen.getByRole("tooltip").textContent).not.toContain(hint);
+    expect(screen.queryByText(hint)).toBeNull();
     cleanup();
 
     // Now one lies on another, and reaching the lower one needs the shortcut.
     const stack = [shapeAt(0), { ...shapeAt(0), id: "second" } as ShapeBlock];
     renderSection([stack[1]], stack);
-    await user.click(screen.getByRole("button", { name: "How layering works" }));
-    expect(screen.getByRole("tooltip").textContent).toContain(hint);
+    expect(screen.getByText(hint)).toBeInTheDocument();
   });
 
   it("disables everything when the whole board is selected", () => {
@@ -208,5 +207,50 @@ describe("PlacementSection layering", () => {
     ]) {
       expect(button(name)).toBeDisabled();
     }
+  });
+});
+
+describe("PlacementSection on phones", () => {
+  function renderWithPhone(blocks: StorefrontBlock[]) {
+    const onPhoneChange = vi.fn();
+    render(
+      <PlacementSection
+        blocks={blocks}
+        board={blocks}
+        onRotate={vi.fn()}
+        onReorder={vi.fn()}
+        onPhoneChange={onPhoneChange}
+      />,
+    );
+    return onPhoneChange;
+  }
+
+  it("is not offered while the board has no phone arrangement", () => {
+    renderSection([shape()]);
+    expect(screen.queryByText("On phones")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Hide on phones" })).toBeNull();
+  });
+
+  it("hides an automatically placed block, with nothing to go back from yet", async () => {
+    const onPhoneChange = renderWithPhone([shape()]);
+    expect(screen.getByRole("button", { name: "Back to automatic" })).toBeDisabled();
+    await userEvent.click(screen.getByRole("button", { name: "Hide on phones" }));
+    expect(onPhoneChange).toHaveBeenCalledWith("hide");
+  });
+
+  it("shows a hidden block again, or hands a placed one back to automatic", async () => {
+    const onPhoneChange = renderWithPhone([{ ...shape(), mobile: { x: 0, y: 0, w: 1, h: 1, hidden: true } }]);
+    await userEvent.click(screen.getByRole("button", { name: "Show on phones" }));
+    expect(onPhoneChange).toHaveBeenCalledWith("show");
+    await userEvent.click(screen.getByRole("button", { name: "Back to automatic" }));
+    expect(onPhoneChange).toHaveBeenCalledWith("automatic");
+  });
+
+  it("offers Hide while any block in the selection still shows on phones", () => {
+    renderWithPhone([
+      { ...shapeAt(0), mobile: { x: 0, y: 0, w: 1, h: 1, hidden: true } },
+      shapeAt(1),
+    ]);
+    expect(screen.getByRole("button", { name: "Hide on phones" })).toBeInTheDocument();
   });
 });

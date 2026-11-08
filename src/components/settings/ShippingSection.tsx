@@ -61,10 +61,10 @@ const INITIAL: ActionState = {};
  * The returns window as a small set of answers rather than a free number.
  *
  * 14 is the EU statutory minimum for distance selling and the right default;
- * 30 is what most sellers who advertise returns actually offer. "None beyond
- * the statutory right" is a REAL and common answer, not a failure to fill the
- * form in, so it is on the list rather than something you express by leaving a
- * field blank. "Custom" is the escape hatch for the rest.
+ * 30 is what most sellers who advertise returns actually offer. "Nothing
+ * beyond what the law requires" is a REAL and common answer, not a failure to
+ * fill the form in, so it is on the list rather than something you express by
+ * leaving a field blank. "Custom" is the escape hatch for the rest.
  */
 const WINDOW_CHOICES = ["0", "14", "30", "custom"] as const;
 
@@ -413,16 +413,20 @@ export function ShippingSection({
               sellers do not agree on whether the count includes dispatch, and
               a number field would make the page state something they did not
               mean. */}
-          <div id="destinations" className="flex flex-col gap-2">
+          {/* The rates checkout charges are set HERE, row by row, so the
+              "set your delivery prices" links (SHIPPING_RATES_HREF) land here. */}
+          <div id={SHIPPING_RATES_ANCHOR} className="flex flex-col gap-2">
             <span className="flex items-center gap-1.5">
               <Label>{t("shipping.destinations.label")}</Label>
               <InfoTip label={t("shipping.destinations.tipLabel")}>
                 {t("shipping.destinations.tipBody")}
               </InfoTip>
             </span>
-            {/* Said where the rate is set, not in a tip: a seller who expects
-                a per-item or per-kilo rate undercharges on every order. */}
-            <p className={helpTextClass}>{t("shipping.destinations.flatRate")}</p>
+            {/* Said before the rows, not in a tip or once a row is half done:
+                each row has two money fields, and a seller who fills only the
+                words, or expects a per-item or per-kilo rate, loses sales or
+                undercharges on every order. */}
+            <p className={helpTextClass}>{t("shipping.destinations.costAndRate")}</p>
             {destinations.length === 0 ? (
               <p className={helpTextClass}>{t("shipping.destinations.empty")}</p>
             ) : (
@@ -562,42 +566,38 @@ export function ShippingSection({
         </div>
       </SettingsCard>
 
-      {/* CHECKOUT RATES: the machine-readable numbers checkout uses to quote a
-          delivery total before the buyer pays (EU CRD art. 6(1)(e)). Optional:
-          a seller who leaves this blank still gets the display-only prose from
-          the destination rows above. The card is separate so it stays out of
-          the way of sellers who do not need it yet. */}
+      {/* THE RATES' CURRENCY AND FREE-SHIPPING LINE, which checkout quotes a
+          delivery total with before the buyer pays (EU CRD art. 6(1)(e)). The
+          rates themselves are per destination, in the rows above; the title
+          says what is here so nobody looks for them in this card. Separate so
+          it stays out of the way of sellers who do not need it yet. */}
       <SettingsCard
-        id={SHIPPING_RATES_ANCHOR}
         fold={compact ? "closed" : undefined}
         title={t("shipping.rates.title")}
         description={t("shipping.rates.description")}
       >
-        <div className="flex flex-col gap-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="rates_currency">{t("shipping.rates.currencyLabel")}</Label>
-              <Select
-                id="rates_currency"
-                value={ratesCurrency}
-                options={currencyOptions}
-                onChange={(v) => setRatesCurrency(v as Currency)}
-                disabled={isPending}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="free_over">{t("shipping.rates.freeOverLabel")}</Label>
-              <Input
-                id="free_over"
-                value={freeOverInput}
-                onChange={(event) => setFreeOverInput(event.target.value)}
-                placeholder={t("shipping.rates.freeOverPlaceholder")}
-                inputMode="decimal"
-              />
-              <p className={helpTextClass}>{t("shipping.rates.freeOverHint")}</p>
-            </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="rates_currency">{t("shipping.rates.currencyLabel")}</Label>
+            <Select
+              id="rates_currency"
+              value={ratesCurrency}
+              options={currencyOptions}
+              onChange={(v) => setRatesCurrency(v as Currency)}
+              disabled={isPending}
+            />
           </div>
-          <p className={helpTextClass}>{t("shipping.rates.hint")}</p>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="free_over">{t("shipping.rates.freeOverLabel")}</Label>
+            <Input
+              id="free_over"
+              value={freeOverInput}
+              onChange={(event) => setFreeOverInput(event.target.value)}
+              placeholder={t("shipping.rates.freeOverPlaceholder")}
+              inputMode="decimal"
+            />
+            <p className={helpTextClass}>{t("shipping.rates.freeOverHint")}</p>
+          </div>
         </div>
       </SettingsCard>
 

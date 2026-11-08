@@ -93,7 +93,7 @@
     "createStorefronts": "Te veel pogingen om etalages aan te maken in korte tijd.",
     "saveStorefronts": "Te veel pogingen om etalages op te slaan in korte tijd.",
     "deleteStorefronts": "Te veel pogingen om etalages te verwijderen in korte tijd.",
-    "rotateEmbedKeys": "Te vaak een nieuwe insluitcode aangemaakt in korte tijd.",
+    "rotateEmbedKeys": "Te vaak een nieuwe websitecode aangevraagd in korte tijd.",
     "updateStock": "Te veel pogingen om de voorraad bij te werken in korte tijd.",
     "readProductPageSettings": "Te veel pogingen om productpagina-instellingen te lezen in korte tijd.",
     "requestReview": "Je hebt in korte tijd te vaak om een beoordeling gevraagd.",
@@ -119,7 +119,7 @@
     "verifyDocumentUpload": "Je documentupload kon niet worden geverifieerd door een probleem aan onze kant.",
     "verifyFileUpload": "Je bestandsupload kon niet worden geverifieerd door een probleem aan onze kant.",
     "verifyFontUpload": "Je lettertype-upload kon niet worden geverifieerd door een probleem aan onze kant.",
-    "verifyElementUpload": "Je elementupload kon niet worden geverifieerd door een probleem aan onze kant.",
+    "verifyElementUpload": "Je afbeeldingsupload kon niet worden geverifieerd door een probleem aan onze kant.",
     "verifyBackgroundImage": "Je achtergrondafbeelding kon niet worden geverifieerd door een probleem aan onze kant.",
     "verifyFont": "Je lettertype kon niet worden geverifieerd door een probleem aan onze kant.",
     "verifyImage": "Je afbeelding kon niet worden geverifieerd door een probleem aan onze kant.",
@@ -127,7 +127,7 @@
     "saveStorefront": "Je etalage kon niet worden opgeslagen door een probleem aan onze kant.",
     "saveEmbedSettings": "De insluitingsinstellingen konden niet worden opgeslagen door een probleem aan onze kant.",
     "deleteStorefront": "De etalage kon niet worden verwijderd door een probleem aan onze kant.",
-    "rotateEmbedKey": "De insluitingssleutel kon niet worden vernieuwd door een probleem aan onze kant.",
+    "rotateEmbedKey": "Er kon geen nieuwe websitecode worden aangemaakt door een probleem aan onze kant.",
     "saveStockSettings": "De voorraadinstellingen konden niet worden opgeslagen door een probleem aan onze kant.",
     "checkSellerDetails": "Je verkopersgegevens konden niet worden gecontroleerd door een probleem aan onze kant.",
     "loadProductPageSettings": "Je productpagina-instellingen konden niet worden geladen door een probleem aan onze kant.",
@@ -166,8 +166,8 @@
     "message": "Je kunt niet publiceren of verkopen totdat je verkopersgegevens compleet zijn.",
     "action": "Verkopersgegevens toevoegen",
     "fix": {
-      "add": "{fields, select, businessName {Voeg je handelsnaam toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} address {Voeg je vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} email {Voeg je contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} businessName_address {Voeg je handelsnaam en vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} businessName_email {Voeg je handelsnaam en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} address_email {Voeg je vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} other {Voeg je handelsnaam, vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.}}",
-      "addAndConfirm": "{fields, select, businessName {Voeg je handelsnaam toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres met de code die we ernaar sturen.} address {Voeg je vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres met de code die we ernaar sturen.} email {Voeg je contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig het met de code die we ernaar sturen.} businessName_address {Voeg je handelsnaam en vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres met de code die we ernaar sturen.} businessName_email {Voeg je handelsnaam en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig het e-mailadres met de code die we ernaar sturen.} address_email {Voeg je vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig het e-mailadres met de code die we ernaar sturen.} other {Voeg je handelsnaam, vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig het e-mailadres met de code die we ernaar sturen.}}",
+      "add": "{fields, select, businessName {Voeg je naam of bedrijfsnaam toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} address {Voeg je vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} email {Voeg je contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} businessName_address {Voeg je naam of bedrijfsnaam en je vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} businessName_email {Voeg je naam of bedrijfsnaam en je contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} address_email {Voeg je vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.} other {Voeg je naam of bedrijfsnaam, je vestigingsadres en je contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens en publiceer dan.}}",
+      "addAndConfirm": "{fields, select, businessName {Voeg je naam of bedrijfsnaam toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres met de code die we ernaar sturen.} address {Voeg je vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres met de code die we ernaar sturen.} email {Voeg je contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig het met de code die we ernaar sturen.} businessName_address {Voeg je naam of bedrijfsnaam en je vestigingsadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig je contact-e-mailadres met de code die we ernaar sturen.} businessName_email {Voeg je naam of bedrijfsnaam en je contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig het e-mailadres met de code die we ernaar sturen.} address_email {Voeg je vestigingsadres en contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig het e-mailadres met de code die we ernaar sturen.} other {Voeg je naam of bedrijfsnaam, je vestigingsadres en je contact-e-mailadres toe in Instellingen › Bedrijfs- en verkopersgegevens, en bevestig het e-mailadres met de code die we ernaar sturen.}}",
       "confirm": "Bevestig je contact-e-mailadres: stuur jezelf een code vanuit Instellingen › Bedrijfs- en verkopersgegevens, en typ hem daar in.",
       "complete": "Rond Instellingen › Bedrijfs- en verkopersgegevens af en publiceer dan."
     }
@@ -211,7 +211,7 @@
     "wrongPasswordGoogle": "Dat is niet het Square Share-wachtwoord van dit account. Je logt in met Google, dus kies in plaats daarvan “Bevestigen met Google”.",
     "passwordCheckUnavailable": "We konden je wachtwoord nu niet controleren. Probeer het zo meteen opnieuw.",
     "reauthRequired": "Log voor je veiligheid opnieuw in voordat je tweestapsverificatie aanzet.",
-    "setupRateLimited": "Dat zijn veel pogingen om het in te stellen. Probeer het later opnieuw.",
+    "setupRateLimited": "Te veel pogingen om het in te stellen. Wacht een minuut en probeer het opnieuw.",
     "tooManyFactors": "Dit account heeft het maximale aantal authenticators. Verwijder er eerst een.",
     "setupFailed": "We konden het instellen nu niet starten. Probeer het zo meteen opnieuw.",
     "setupUnavailable": "Tweestapsverificatie instellen is nu niet beschikbaar. Probeer het later opnieuw.",
@@ -226,7 +226,7 @@
   "settings": {
     "usernameTaken": "Die gebruikersnaam is al bezet. Probeer een andere.",
     "emailUnchanged": "Dat is al je e-mailadres.",
-    "emailChangeRateLimited": "Te veel verzoeken om je e-mailadres te wijzigen. Wacht even voordat je het opnieuw probeert.",
+    "emailChangeRateLimited": "Te veel verzoeken om je e-mailadres te wijzigen. Wacht een minuut en probeer het opnieuw.",
     "emailChangeNeedsPassword": "Vul je huidige wachtwoord in om je e-mailadres te wijzigen.",
     "wrongPassword": "Huidig wachtwoord is onjuist.",
     "passwordCheckUnavailable": "We konden je wachtwoord nu niet controleren. Probeer het opnieuw.",
@@ -235,7 +235,7 @@
     "passwordUnchanged": "Dat is al je wachtwoord.",
     "passwordUpdateFailed": "Het wachtwoord kon niet worden bijgewerkt. Probeer het opnieuw.",
     "passwordReauthNeeded": "Log voor je veiligheid uit en weer in, en wijzig daarna je wachtwoord.",
-    "resetRateLimited": "Te veel herstel-e-mails. Wacht even voordat je het opnieuw probeert.",
+    "resetRateLimited": "Te veel herstel-e-mails. Wacht een minuut en probeer het opnieuw.",
     "resetSendRateLimited": "Te veel verzoeken. Wacht een minuut en probeer het opnieuw.",
     "resetFailed": "De herstel-e-mail kon niet worden verzonden. Probeer het opnieuw.",
     "contactEmailTakesNoMail": "Het domein van dat contact-e-mailadres accepteert geen e-mail. Controleer de spelling, of gebruik een adres dat kopers echt kunnen bereiken.",
@@ -294,7 +294,7 @@
     "serviceUnreachable": "Kon geen verbinding maken met de authenticatieservice. Probeer het opnieuw.",
     "invalidEmail": "Vul een geldig e-mailadres in.",
     "emailRequired": "Vul je e-mailadres in.",
-    "tooManyAttempts": "Te veel pogingen. Wacht even en probeer het opnieuw.",
+    "tooManyAttempts": "Te veel pogingen. Wacht een minuut en probeer het opnieuw.",
     "magicLinkFailed": "De e-mail kon niet worden verstuurd. Controleer je verbinding en probeer het opnieuw.",
     "resetEmailRequired": "Vul je e-mailadres in om je wachtwoord opnieuw in te stellen.",
     "resetEmailFailed": "De herstel-e-mail kon niet worden verstuurd. Controleer je verbinding en probeer het opnieuw.",
@@ -332,21 +332,21 @@
       "document": "Dat document is te groot.",
       "file": "Dat bestand is te groot.",
       "font": "Dat lettertype is te groot.",
-      "element": "Dat element is te groot."
+      "element": "Die afbeelding is te groot."
     },
     "tooLargeFix": {
       "image": "Gebruik een afbeelding onder {maxMb} MB. Comprimeer of verklein hem en probeer het opnieuw.",
       "document": "Gebruik een document onder {maxMb} MB. Comprimeer of verklein het en probeer het opnieuw.",
       "file": "Gebruik een bestand onder {maxMb} MB. Comprimeer of verklein het en probeer het opnieuw.",
       "font": "Gebruik een lettertype onder {maxMb} MB. Comprimeer of verklein het en probeer het opnieuw.",
-      "element": "Gebruik een element onder {maxMb} MB. Comprimeer of verklein het en probeer het opnieuw."
+      "element": "Gebruik een afbeelding onder {maxMb} MB. Comprimeer of verklein hem en probeer het opnieuw."
     },
     "neverReached": {
       "image": "De afbeelding heeft de server nooit bereikt.",
       "document": "Het document heeft de server nooit bereikt.",
       "file": "Het bestand heeft de server nooit bereikt.",
       "font": "Het lettertype heeft de server nooit bereikt.",
-      "element": "Het element heeft de server nooit bereikt."
+      "element": "De afbeelding heeft de server nooit bereikt."
     },
     "neverReachedFix": "Controleer je internetverbinding en probeer het opnieuw.",
     "rejected": {
@@ -354,7 +354,7 @@
       "document": "Dat document kon niet worden geüpload.",
       "file": "Dat bestand kon niet worden geüpload.",
       "font": "Dat lettertype kon niet worden geüpload.",
-      "element": "Dat element kon niet worden geüpload."
+      "element": "Die afbeelding kon niet worden geüpload."
     },
     "rejectedFix": {
       "signedOut": "Log opnieuw in en probeer het dan opnieuw.",
@@ -365,7 +365,7 @@
   "uploadRoute": {
     "signIn": {
       "image": "Log in om afbeeldingen te uploaden.",
-      "element": "Log in om elementen te uploaden.",
+      "element": "Log in om afbeeldingen te uploaden.",
       "document": "Log in om documenten te uploaden.",
       "file": "Log in om bestanden te uploaden.",
       "font": "Log in om lettertypen te uploaden."
@@ -378,7 +378,7 @@
     },
     "notConfigured": {
       "image": "Het uploaden van afbeeldingen is nog niet ingesteld. Probeer het later opnieuw.",
-      "element": "Het uploaden van elementen is nog niet ingesteld. Probeer het later opnieuw.",
+      "element": "Het uploaden van afbeeldingen is nu niet beschikbaar. Probeer het later opnieuw.",
       "document": "Uploaden is nog niet ingesteld. Probeer het later opnieuw.",
       "file": "Het uploaden van bestanden is nog niet ingesteld. Probeer het later opnieuw.",
       "font": "Het uploaden van lettertypen is nog niet ingesteld. Probeer het later opnieuw."
@@ -459,28 +459,28 @@
       "document": "Je documentupload is niet voltooid.",
       "file": "Je bestandsupload is niet voltooid.",
       "font": "Je lettertype-upload is niet voltooid.",
-      "element": "Je elementupload is niet voltooid."
+      "element": "Je afbeeldingsupload is niet voltooid."
     },
     "uploadUnfinishedFix": {
       "image": "Selecteer de afbeelding opnieuw en upload hem opnieuw voordat je opslaat.",
       "document": "Selecteer het document opnieuw en upload het opnieuw voordat je opslaat.",
       "file": "Selecteer het bestand opnieuw en upload het opnieuw voordat je opslaat.",
       "font": "Selecteer het lettertype opnieuw en upload het opnieuw voordat je opslaat.",
-      "element": "Selecteer het element opnieuw en upload het opnieuw voordat je opslaat."
+      "element": "Selecteer de afbeelding opnieuw en upload hem opnieuw voordat je opslaat."
     },
     "uploadTooLarge": {
       "image": "Die afbeelding is te groot.",
       "document": "Dat document is te groot.",
       "file": "Dat bestand is te groot.",
       "font": "Dat lettertype is te groot.",
-      "element": "Dat element is te groot."
+      "element": "Die afbeelding is te groot."
     },
     "uploadTooLargeFix": {
       "image": "Gebruik een afbeelding onder {maxMb} MB en upload hem opnieuw.",
       "document": "Gebruik een document onder {maxMb} MB en upload het opnieuw.",
       "file": "Gebruik een bestand onder {maxMb} MB en upload het opnieuw.",
       "font": "Gebruik een lettertype onder {maxMb} MB en upload het opnieuw.",
-      "element": "Gebruik een element onder {maxMb} MB en upload het opnieuw."
+      "element": "Gebruik een afbeelding onder {maxMb} MB en upload hem opnieuw."
     },
     "wrongTypeFix": {
       "image": "Gebruik een JPEG-, PNG-, WEBP-, GIF- of AVIF-afbeelding.",

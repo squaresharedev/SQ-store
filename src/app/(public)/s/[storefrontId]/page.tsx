@@ -6,10 +6,12 @@ import { after } from "next/server";
 import { BuyerBusy } from "@/components/product-page/BuyerNotice";
 import { PriceRefresh } from "@/components/product-page/PriceRefresh";
 import { StorefrontPageView } from "@/components/storefront-page/StorefrontPageView";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { recordSignal, viewDedupeKey, visitorHash } from "@/lib/analytics/record";
 import { PAGE_BUSY } from "@/lib/public/busy";
 import { clientKey } from "@/lib/rate-limit";
 import { storefrontDisplayName } from "@/lib/storefront/display-name";
+import { storefrontStructuredData } from "@/lib/seo/structured-data";
 import { getPublicStorefrontPage } from "@/lib/storefront/storefront-page";
 
 /**
@@ -76,8 +78,14 @@ export default async function StorefrontPage({ params }: { params: Promise<Param
     });
   });
 
+  const displayName = storefrontDisplayName(page);
+
   return (
     <>
+      {/* Emitted whether or not search indexing is on: the robots meta tag
+          already tells crawlers whether to index, and an AI assistant fetching
+          the page for someone still reads the structured data. */}
+      <JsonLd id="storefront-jsonld" data={storefrontStructuredData(page, displayName)} />
       <StorefrontPageView page={page} />
       {/* A tile on sale stops being true when its sale ends: read the board
           again then, rather than leave an open tab advertising it. */}

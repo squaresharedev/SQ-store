@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { parseDetails } from "@/lib/products/detail";
 import { presignGetUrl } from "@/lib/r2";
 import { PRODUCTS_PATH } from "@/lib/products/paths";
-import { REVIEWS_IMPORT_PATH } from "@/lib/reviews/paths";
+import { REVIEWS_IMPORT_PATH, REVIEWS_PATH } from "@/lib/reviews/paths";
 import { ghostButtonClass } from "@/components/ui/control-styles";
 import { ReviewImport } from "@/components/products/ReviewImport";
 import type { MatchableProduct } from "@/lib/reviews/import";
@@ -49,14 +49,19 @@ export default async function ImportReviewsPage() {
     imageUrl: row.image_key ? (imageUrls.get(row.image_key) ?? null) : null,
   }));
 
-  const t = await getTranslations("Products.page");
+  const [t, tReviews] = await Promise.all([
+    getTranslations("Products.page"),
+    getTranslations("Products.reviewModeration"),
+  ]);
 
   return (
     <div className="@container mx-auto w-full max-w-3xl space-y-6 p-4 @md:p-6">
       <div className="space-y-3">
-        <Link href={PRODUCTS_PATH} className={ghostButtonClass}>
+        {/* Back to the reviews page, where "Import from anywhere" brings a
+            seller here, whether or not they import anything. */}
+        <Link href={REVIEWS_PATH} className={ghostButtonClass}>
           <ArrowLeft className="size-4" strokeWidth={2} aria-hidden="true" />
-          {t("back")}
+          {tReviews("heading")}
         </Link>
         <div>
           <h1 className="font-inter text-2xl font-semibold text-foreground">{t("importReviews.heading")}</h1>

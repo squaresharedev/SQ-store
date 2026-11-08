@@ -21,9 +21,9 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-function renderDisputed(owner: boolean) {
+function renderDisputed(owner: boolean, storeName: string | null = null) {
   render(
-    <OrderRefundProvider allowed={owner}>
+    <OrderRefundProvider allowed={owner} storeName={storeName}>
       <OrderActions order={orderView({ status: "disputed" })} />
     </OrderRefundProvider>,
   );
@@ -36,9 +36,20 @@ describe("a disputed order", () => {
     await waitFor(() => expect(leaveForStripe).toHaveBeenCalledWith("https://stripe.test/express"));
   });
 
-  it("offers a member no button, only where it is answered", () => {
+  it("says what missing the deadline costs", () => {
+    renderDisputed(true);
+    expect(screen.getByText(/before its deadline, or the buyer gets the money back/)).toBeInTheDocument();
+  });
+
+  it("offers a member no button, only where it is answered and who can", () => {
     renderDisputed(false);
     expect(screen.getByText(/Answer it in your Stripe dashboard/)).toBeInTheDocument();
+    expect(screen.getByText("Only the store's owner can answer it.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Answer in Stripe" })).toBeNull();
+    cleanup();
+
+    // Working in someone else's store: who to tell, by the store's name.
+    renderDisputed(false, "Clay & Co");
+    expect(screen.getByText("Only the owner of Clay & Co can answer it. Let them know.")).toBeInTheDocument();
   });
 });

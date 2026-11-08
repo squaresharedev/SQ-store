@@ -34,7 +34,7 @@
     "yearlyFree": "{count, plural, one {# mês grátis} many {# de meses grátis} other {# meses grátis}}",
     "launchNote": "Um preço de lançamento é um preço introdutório: o preço normal é o que aparece riscado.",
     "grantTitle": "{plan} é oferta nossa",
-    "autoRenew": "Os planos pagos renovam-se automaticamente todos os meses ao preço apresentado, até cancelar."
+    "autoRenew": "Os planos pagos renovam-se automaticamente {interval, select, year {uma vez por ano} other {todos os meses}} ao preço apresentado, até cancelar."
   },
   "card": {
     "perMonth": "/ mês",
@@ -79,7 +79,8 @@
     "cheapest": "Com {sales} de vendas por mês, {plan} fica-lhe mais barato.",
     "legendPrice": "Preço do plano",
     "legendFee": "Taxa sobre as suas vendas",
-    "cheapestTag": "Mais barato para si"
+    "cheapestTag": "Mais barato para si",
+    "stripeFeeNote": "A taxa de processamento de cartões do próprio Stripe em cada venda acresce a estes valores."
   },
   "compare": {
     "eyebrow": "Comparar",
@@ -160,17 +161,17 @@
   },
   "portal": {
     "opening": "A abrir o Stripe",
-    "stepUp": "Confirme que é você antes de abrir os dados de faturação."
+    "stepUp": "Tem a autenticação de dois fatores ativada, por isso confirme que é você antes de abrir os dados de faturação."
   },
   "chip": {
     "label": "Plano: {plan}",
-    "upgrade": "Atualizar",
-    "pro": "Plano Pro"
+    "upgrade": "Atualizar"
   },
   "banner": {
     "label": "Pagamento do plano",
     "pastDue": "O pagamento do plano {plan} falhou. Atualize o cartão para o manter.",
     "pastDueMember": "O pagamento do plano {plan} desta loja falhou. Só o proprietário pode atualizar o cartão.",
+    "seeTeam": "Ver membros da equipa",
     "action": "Atualizar cartão"
   },
   "settings": {
@@ -197,7 +198,7 @@
       "over": "{count} a mais",
       "full": "Cheio"
     },
-    "overLimit": "Acima do limite deste plano. Tudo continua a funcionar; remova um ou atualize para adicionar mais.",
+    "overLimit": "Acima do limite deste plano. Tudo continua a funcionar; remova um ou <upgrade>mude de plano</upgrade> para adicionar mais.",
     "invoicesTitle": "Faturação e faturas",
     "invoicesDescription": "O seu cartão, morada de faturação, NIF e todas as faturas, na página segura do Stripe.",
     "manage": "Gerir faturação e faturas",

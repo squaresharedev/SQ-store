@@ -13,8 +13,9 @@
   },
   "firstRun": {
     "title": "Jeszcze nic do zmierzenia",
-    "body": "Wizyty na stronach twoich produktów pojawią się tutaj, gdy tylko jedna zostanie opublikowana.",
-    "backToSetup": "Wróć do konfiguracji"
+    "body": "Opublikuj witrynę, aby zobaczyć wyświetlenia, albo zrealizuj pierwszą sprzedaż, aby zobaczyć przychody.",
+    "publishStorefront": "Opublikuj witrynę",
+    "goToProducts": "Przejdź do produktów"
   },
   "range": {
     "ariaLabel": "Zakres dat",
@@ -73,12 +74,20 @@
   },
   "compare": {
     "previous": "Poprzedni okres",
-    "vsPrevious": "{change} względem poprzedniego okresu"
+    "vsPrevious": "{change} względem poprzedniego okresu",
+    "previousPeriodDates": "{from} - {to}"
+  },
+  "scrub": {
+    "on": "Dnia {date}",
+    "inMonth": "W okresie {date}",
+    "upTo": "Do {date}",
+    "noSales": "Brak sprzedaży"
   },
   "funnel": {
     "label": "Lejek witryny",
     "description": "Od wyświetlenia witryny na Twojej stronie do opłaconego zamówienia. Liczone są zdarzenia, nie osoby.",
-    "views": "Wyświetlenia na Twojej stronie",
+    "subtitle": "Odwiedzający, którzy zobaczyli twoją witrynę osadzoną na twojej własnej stronie internetowej (bez bezpośrednich linków), od pierwszego wyświetlenia do opłaconego zamówienia.",
+    "views": "Wyświetlenia z osadzenia",
     "viewsEmpty": "Brak wyświetleń w tym okresie",
     "opens": "Otwarte produkty",
     "opensEmpty": "Żadnego nie otwarto w tym okresie",
@@ -91,7 +100,7 @@
     "abandonment": "Niedokończone zakupy",
     "abandonmentCounts": "Nieukończone: {expired}, rozpoczęte: {started}",
     "notEnough": "Jeszcze za mało danych",
-    "notEnoughHint": "Wskaźniki pojawią się, gdy w tym okresie będzie {min} wyświetleń."
+    "notEnoughHint": "Wskaźniki pojawią się, gdy w tym okresie będzie {min} wyświetleń: przy mniejszej liczbie jedno zamówienie mocno zniekształciłoby procent."
   },
   "tiles": {
     "revenue": "Przychód",
@@ -110,7 +119,7 @@
   "channels": {
     "embed": "Na twojej stronie",
     "marketplace": "Marketplace",
-    "direct": "Twoja strona",
+    "direct": "Bezpośredni link",
     "button": "Przycisk zakupu"
   },
   "signalsUnavailable": {
@@ -119,7 +128,8 @@
   },
   "upcoming": {
     "needProducts": "{labels} pojawią się tutaj, gdy produkt znajdzie się w jednej z twoich witryn.",
-    "needBlocks": "{labels} pojawią się tutaj, gdy odpowiedni blok znajdzie się w jednej z twoich witryn."
+    "needBlocks": "{labels} pojawią się tutaj, gdy odpowiedni blok znajdzie się w jednej z twoich witryn.",
+    "recordedOnly": "{labels} pojawią się tutaj, gdy kupujący otworzy kasę przy jednym z twoich produktów."
   },
   "signal": {
     "visitors": "Odwiedzający",
@@ -168,6 +178,7 @@
     "product_view": {
       "label": "Wyświetlenia stron produktów",
       "description": "Odwiedzający otwierający jedną z hostowanych stron twoich produktów.",
+      "subtitle": "Obejmuje kliknięcia z kafelków witryny i z bezpośrednich linków.",
       "count": "{count, plural, one {{formatted} wyświetlenie} few {{formatted} wyświetlenia} many {{formatted} wyświetleń} other {{formatted} wyświetlenia}}",
       "total": "Łączne wyświetlenia",
       "emptyRange": "Brak wyświetleń w tym zakresie",

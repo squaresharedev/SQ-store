@@ -25,6 +25,7 @@ import { loadMessages, type Messages } from "@/i18n/messages";
 import { tourStep, TOUR_STEPS, type TourStepId } from "@/lib/onboarding/tour-steps";
 import { EDITOR_TOUR_STEPS, type EditorTourStepId } from "@/lib/onboarding/editor-tour-steps";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
+import { NEW_PRODUCT_PATH, PRODUCTS_IMPORT_PATH } from "@/lib/products/paths";
 import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { SearchMobileTrigger } from "@/components/search/SearchMobileTrigger";
@@ -159,10 +160,12 @@ function Toolbar({ pagesOpen = false }: { pagesOpen?: boolean }) {
       onZoomIn={vi.fn()}
       onZoomOut={vi.fn()}
       onZoomReset={vi.fn()}
+      onZoomFit={vi.fn()}
       onTidy={vi.fn()}
       canTidy
       settingsOpen={false}
       onToggleSettings={vi.fn()}
+      onShowShortcuts={vi.fn()}
       pagesOpen={pagesOpen}
       canOpenPage
       onTogglePages={vi.fn()}
@@ -214,6 +217,7 @@ const FROM_SOURCE: ReadonlySet<string> = new Set([
   "#tour",
   "[data-design-panel] [data-panel-menu]",
   "[data-sample-create]",
+  "[data-designer-save]",
   // Only a seller with no live storefront is shown it; checked on its own below.
   "main [data-storefront-sample]",
 ]);
@@ -252,13 +256,13 @@ describe.each(["en", "cs"] as const)("tour targets, with the UI in %s", (locale)
     expect(document.querySelector(selector("payments"))?.tagName).toBe("SECTION");
     expect(document.querySelector(editorSelector("editor-add"))).toHaveAttribute("role", "toolbar");
     // The embed stop has the seller's own card to itself: the sample is a
-    // link at the foot of the list, not a card with a button of its own.
+    // link, not a card with a button of its own.
     expect(document.querySelectorAll(selector("storefront-embed"))).toHaveLength(1);
     // With a live storefront of their own there is no sample link to point at.
     expect(document.querySelector(selector("storefront-sample"))).toBeNull();
   });
 
-  it("puts the sample stop on the link under a new seller's empty list", () => {
+  it("puts the sample stop on the link in a new seller's empty list", () => {
     renderIn(
       locale,
       <main>
@@ -323,10 +327,10 @@ describe("tour targets on the heavier pages", () => {
   it("keeps the anchors those pages render", () => {
     // Products: the toolbar's two links (whole-page component, in flux).
     const products = source("components/products/ProductsBrowser.tsx");
-    expect(products).toContain('href="/products/new"');
-    expect(products).toContain('href="/products/import"');
-    expect(selector("products-add")).toBe('main a[href="/products/new"]');
-    expect(selector("products-import")).toBe('main a[href="/products/import"]');
+    expect(products).toContain("href={NEW_PRODUCT_PATH}");
+    expect(products).toContain("href={PRODUCTS_IMPORT_PATH}");
+    expect(selector("products-add")).toBe(`main a[href="${NEW_PRODUCT_PATH}"]`);
+    expect(selector("products-import")).toBe(`main a[href="${PRODUCTS_IMPORT_PATH}"]`);
 
     // Storefront: both create buttons, and the sample's link.
     const list = source("components/storefront/StorefrontsList.tsx");
@@ -356,5 +360,8 @@ describe("tour targets on the heavier pages", () => {
     // The sample's way out, in place of Save.
     expect(source("components/storefront/StorefrontDesigner.tsx")).toContain('data-sample-create=""');
     expect(editorSelector("editor-finish")).toBe("[data-sample-create]");
+    // A real storefront's Save, where the same stop lands outside the sample.
+    expect(source("components/storefront/StorefrontDesigner.tsx")).toContain('data-designer-save=""');
+    expect(editorSelector("editor-finish", 1)).toBe("[data-designer-save]");
   });
 });

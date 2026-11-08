@@ -4,6 +4,7 @@ import { helpTextClass } from "@/components/ui/control-styles";
 import type { MessageKey } from "@/i18n/types";
 import type { Locale } from "@/i18n/locales";
 import { dateTimeFormat, intlTag } from "@/lib/format/intl";
+import { formatAge } from "@/lib/format/date";
 
 export type SecurityActivityItem = {
   id: string;
@@ -23,9 +24,11 @@ const ACTIVITY_TIME: Intl.DateTimeFormatOptions = {
 };
 
 /**
- * Fixed to UTC and said so. This renders on the server, which has no idea
- * where the reader is, and a time that is silently in the wrong zone is worse
- * than one that is plainly labelled.
+ * The exact time, fixed to UTC and said so. This renders on the server, which
+ * has no idea where the reader is, and a time that is silently in the wrong
+ * zone is worse than one that is plainly labelled. It is the hover detail: the
+ * row leads with how long ago it was ("3 hours ago"), which needs no zone to
+ * match against the owner's own memory.
  */
 function formatUtc(iso: string, locale: Locale): string | null {
   const date = new Date(iso);
@@ -61,8 +64,12 @@ export function SecurityActivityCard({ items }: { items: SecurityActivityItem[] 
                 <span className="font-inter text-sm text-foreground">
                   {item.label ? tAll(item.label) : item.event}
                 </span>
-                <time dateTime={item.at} className="font-inter text-xs text-muted-foreground">
-                  {time === null ? "" : t("timeUtc", { time })}
+                <time
+                  dateTime={item.at}
+                  title={time === null ? undefined : t("timeUtc", { time })}
+                  className="font-inter text-xs text-muted-foreground"
+                >
+                  {formatAge(item.at, locale) ?? ""}
                 </time>
               </li>
             );

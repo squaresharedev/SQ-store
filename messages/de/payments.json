@@ -2,6 +2,7 @@
   "pageTitle": "Zahlungen",
   "soon": "Bald",
   "bankOnFile": "Dein Bankkonto",
+  "invoicesPointer": "Rechnungen für deinen Square-Share-Tarif findest du in den Einstellungen unter <link>Tarif und Abrechnung</link>.",
   "balance": {
     "available": {
       "label": "Verfügbar",
@@ -24,10 +25,31 @@
       "hint": "Der Anteil von Square Share an deinen Verkäufen, nach Rückerstattungen"
     }
   },
+  "earnings": {
+    "label": "Verdient, letzte {days} Tage",
+    "labelOn": "Verdient bis {date}",
+    "vsBefore": "gegenüber {amount} in den {days} Tagen davor",
+    "range": "Zeitraum",
+    "rangeShort": "{days} T",
+    "rangeLong": "Letzte {days} Tage",
+    "legendNow": "Diese {days} Tage",
+    "legendBefore": "Die {days} davor",
+    "today": "Heute",
+    "empty": "Mit deinem ersten Verkauf beginnt diese Linie.",
+    "emptyRange": "Keine Verkäufe in den letzten {days} Tagen.",
+    "otherCurrencies": "In {currency}. Verkäufe in anderen Währungen sind hier nicht enthalten."
+  },
+  "trends": {
+    "gross": "Bruttoumsatz",
+    "sales": "Verkäufe",
+    "costs": "Rückerstattungen und Gebühren",
+    "paidOut": "Ausgezahlt",
+    "noBefore": "Erster Zeitraum, noch kein Vergleich"
+  },
   "connection": {
     "label": "Stripe-Verbindung",
     "comingSoonTitle": "Bezahlung über Stripe kommt bald",
-    "comingSoonBody": "Bis dahin zahlen Käufer dir über den Kauflink deines Produkts oder per E-Mail.",
+    "comingSoonBody": "Bis dahin zahlen Käufer direkt an dich. Der Kauf-Button eines Produkts öffnet den <buyLink>Kauflink</buyLink>, den du ihm gibst (deinen eigenen Checkout), oder schreibt an deine <email>Kontaktadresse</email>, wenn es keinen hat.",
     "connectTitle": "Stripe verbinden, um bezahlt zu werden",
     "connectBody": "Auszahlungen gehen direkt auf dein Bankkonto. Die Einrichtung erfolgt sicher bei Stripe, wir sehen oder speichern deine Bankdaten nie.",
     "connectButton": "Mit Stripe verbinden",

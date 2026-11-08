@@ -204,6 +204,19 @@ describe("TwoFactorChallenge", () => {
     await user.click(screen.getByRole("button", { name: "Use your authenticator app instead" }));
     expect(screen.getByLabelText("Authentication code")).toBeInTheDocument();
   });
+
+  it("recovery-code form gates Continue on an acknowledgment checkbox", async () => {
+    const user = userEvent.setup();
+    render(<TwoFactorChallenge next="/" email="" factors={[PHONE]} />);
+    await user.click(screen.getByRole("button", { name: "Use a recovery code instead" }));
+    // Continue is disabled until the seller ticks that they understand the consequence.
+    const continueBtn = screen.getByRole("button", { name: "Continue" });
+    expect(continueBtn).toBeDisabled();
+    await user.click(
+      screen.getByLabelText("I understand this turns off two-factor authentication and signs out my other devices."),
+    );
+    expect(continueBtn).toBeEnabled();
+  });
 });
 
 describe("RecoveryCodesCard", () => {
@@ -245,8 +258,9 @@ describe("RecoveryCodesDisplay", () => {
 });
 
 describe("SecurityActivityCard", () => {
-  it("labels known events, shows unknown ones as their slug, and times in UTC", () => {
+  it("labels known events, shows unknown ones as their slug, and says how long ago, with the UTC time on hover", () => {
     const at = "2026-07-02T14:05:00Z";
+    vi.useFakeTimers({ now: new Date("2026-07-02T17:05:00Z"), toFake: ["Date"] });
     render(
       <SecurityActivityCard
         items={[
@@ -267,7 +281,10 @@ describe("SecurityActivityCard", () => {
       minute: "2-digit",
       timeZone: "UTC",
     })} UTC`;
-    for (const time of list.querySelectorAll("time")) expect(time.textContent).toBe(before);
+    for (const time of list.querySelectorAll("time")) {
+      expect(time.textContent).toBe("3 hours ago");
+      expect(time).toHaveAttribute("title", before);
+    }
   });
 });
 

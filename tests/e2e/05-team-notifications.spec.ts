@@ -7,7 +7,7 @@ async function switchToStore(page: Page, storeName: RegExp) {
   await expect(async () => {
     await gotoApp(page, "/dashboard");
     await page.getByRole("button", { name: /account menu/i }).click();
-    await page.getByRole("button", { name: /switch accounts/i }).click();
+    await page.getByRole("button", { name: /my stores/i }).click();
     await page.getByRole("button", { name: storeName }).first().click({ timeout: 3_000 });
     await expect(
       page.getByRole("button", { name: /back to your store/i }),
@@ -92,6 +92,10 @@ test.describe("team & access + notifications", () => {
 
     await inviteByEmail(ownerPage, member.email, "editor");
     await acceptFirstInvite(memberPage);
+    // Accepting takes the member straight into the store they joined.
+    await expect(memberPage.getByRole("button", { name: /back to your store/i })).toBeVisible({
+      timeout: 20_000,
+    });
 
     // Member switches to the owner's store and sees its products.
     await switchToStore(memberPage, new RegExp(storeName, "i"));
@@ -142,8 +146,10 @@ test.describe("team & access + notifications", () => {
 
     await switchToStore(viewerPage, new RegExp(storeName, "i"));
 
-    // The banner marks it read-only and /products offers no Add CTA.
+    // The banner marks it read-only, and neither Overview (where the switch
+    // lands) nor /products offers an Add CTA.
     await expect(viewerPage.getByText(/read-only/i).first()).toBeVisible({ timeout: 10_000 });
+    await expect(viewerPage.getByRole("link", { name: /add product/i })).toHaveCount(0);
     await gotoApp(viewerPage, "/products");
     await expect(
       viewerPage.getByRole("link", { name: /add product/i }),

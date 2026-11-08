@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { listStorefrontProducts } from "@/lib/discounts/storefront-preview";
 import { firstPlaceable, rankProductsToPlace } from "@/lib/predictions";
 import { getLastTouchedProduct, getProductSales } from "@/lib/products/queries";
+import { getSampleStorefrontFlags } from "@/lib/onboarding/queries";
 import { getStorefront } from "@/lib/storefront/queries";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
 import { getActiveAccount } from "@/lib/team/account-context";
@@ -77,7 +78,7 @@ export default async function StorefrontEditorPage({
   // scoped to whichever account is active (the store being edited, which for
   // a team member is not necessarily their own). See
   // lib/settings/seller-identity.ts for why this is a service-role read.
-  const [storefront, products, sales, lastTouched, sellerIdentity, shippingPolicy, identity] = await Promise.all([
+  const [storefront, products, sales, lastTouched, sellerIdentity, shippingPolicy, identity, flags] = await Promise.all([
     getStorefront(id),
     // The catalogue as a storefront draws it: a running sale's price on the
     // tile, exactly as the published page shows it to buyers.
@@ -88,6 +89,8 @@ export default async function StorefrontEditorPage({
     account ? getShippingPolicy(account.accountId) : Promise.resolve({}),
     // Whether the publish gate would let this storefront's page answer.
     account ? getTraderIdentityStatus(account.accountId) : Promise.resolve(null),
+    // The person's own "has the designer tour started" flag, as on the sample.
+    getSampleStorefrontFlags(),
   ]);
   if (!storefront) notFound();
 
@@ -136,6 +139,10 @@ export default async function StorefrontEditorPage({
           ? storefrontPagePath(storefront.id)
           : null
       }
+      // The dashboard's seller-details banner has no seat in this full-screen
+      // editor, so Share carries the warning. A read failure is not "missing".
+      sellerDetailsMissing={identity?.ok === true && identity.missing.length > 0}
+      autoStartTour={flags?.editorTourPending === true}
     />
   );
 }

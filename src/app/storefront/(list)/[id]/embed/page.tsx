@@ -19,7 +19,9 @@ import { placedProductIds } from "@/lib/storefront/placed-products";
 import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
+import { getTraderIdentityStatus, getSellerIdentity } from "@/lib/settings/seller-identity";
+import { storefrontDisplayName } from "@/lib/storefront/display-name";
+import type { EmbedLink } from "@/lib/storefront/embed-snippet";
 
 export async function generateMetadata() {
   const t = await getTranslations("Storefront.embed");
@@ -39,7 +41,7 @@ export default async function StorefrontEmbedPage({
   const account = await getActiveAccount();
   if (!can(account?.role, "storefront.write")) redirect(STOREFRONT_LIST_PATH);
 
-  const [t, tDesigner, tButton, storefront, products, identity, embedDomains] = await Promise.all([
+  const [t, tDesigner, tButton, storefront, products, identity, embedDomains, sellerIdentity] = await Promise.all([
     getTranslations("Storefront.embed"),
     getTranslations("Storefront.designer.header"),
     getTranslations("Products.buyButton"),
@@ -49,6 +51,8 @@ export default async function StorefrontEmbedPage({
       ? getTraderIdentityStatus(account.accountId)
       : Promise.resolve({ ok: true as const, missing: [] }),
     listEmbedDomains(),
+    // The trader's name, which the hosted page puts first (embedLink below).
+    account ? getSellerIdentity(account.accountId) : Promise.resolve({}),
   ]);
   if (!storefront) notFound();
   // The hero draws this storefront's own products; the rest of the catalogue
@@ -58,11 +62,31 @@ export default async function StorefrontEmbedPage({
   // Whether the storefront has a page of its own right now, by the same two
   // facts its public loader asks for (lib/storefront/storefront-page.ts). An
   // identity that could not be read withholds the link, like the page would.
-  const pageState = !resolveProductPage(storefront.config).enabled
+  const productPage = resolveProductPage(storefront.config);
+  const pageState = !productPage.enabled
     ? "pages-off"
     : identity.ok && identity.missing.length === 0
       ? "live"
       : "details-missing";
+  // What is still owed, for both the link card's and the embed's way to Settings.
+  const missingTraderDetails = identity.ok ? identity.missing : [];
+
+  // The link the snippet carries for crawlers and visitors without scripts:
+  // the hosted storefront, named as that page names itself
+  // (storefrontDisplayName). Only while the page is live, which also means not
+  // taken down by staff (the public loader's first refusal): a seller's site
+  // must never link to a 404.
+  const embedLink: EmbedLink | null =
+    pageState === "live" && !storefront.removal
+      ? {
+          url: storefrontPageUrl(storefront.id),
+          label: storefrontDisplayName({
+            seller: sellerIdentity,
+            header: storefront.config.header,
+            name: storefront.name,
+          }),
+        }
+      : null;
 
   return (
     // A page like the others in the dashboard, from its left edge: back link,
@@ -78,13 +102,16 @@ export default async function StorefrontEmbedPage({
           storefrontId={storefront.id}
           url={storefrontPageUrl(storefront.id)}
           state={pageState}
+          searchable={productPage.allowIndexing}
+          missing={missingTraderDetails}
         />
         <EmbedSettings
           storefront={storefront}
           products={products.filter((product) => placed.has(product.id))}
-          missingTraderDetails={identity.ok ? identity.missing : []}
+          missingTraderDetails={missingTraderDetails}
           productPagesOn={pageState !== "pages-off"}
           suggestedDomains={embedDomainsElsewhere(embedDomains, storefront.id)}
+          link={embedLink}
         />
         {/* The other way onto a seller's own site, for someone selling one
             product: the buy button lives on the product, so this points there.

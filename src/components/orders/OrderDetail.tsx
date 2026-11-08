@@ -370,8 +370,8 @@ export function OrderDetail({
                   date: formatOrderDateTime(order.withdrawalRequestedAt, locale),
                 })}
               </p>
-              {/* "Arrange the return and refund with them" needs a way to reach
-                  them; the address is otherwise only a copy button further down. */}
+              {/* Arranging the return needs a way to reach the buyer; the
+                  address is otherwise only a copy button further down. */}
               <EmailBuyerLink order={order} />
             </div>
           </div>
@@ -463,9 +463,13 @@ export function OrderDetail({
                   {formatCents(order.amountCents, order.currency, locale)}
                 </LedgerLine>
               ) : (
-                // Stripe's card fee is Stripe's to take and is not on the
-                // order, so say it is still to come rather than hide it.
-                <LedgerLine label={t("detail.youReceive")} strong hint={t("detail.youReceiveHint")}>
+                // The Stripe card fee hint only applies when payment went
+                // through the provider; without Connect, nothing is deducted.
+                <LedgerLine
+                  label={t("detail.youReceive")}
+                  strong
+                  hint={order.paidThroughProvider ? t("detail.youReceiveHint") : undefined}
+                >
                   {formatCents(youReceiveCents, order.currency, locale)}
                 </LedgerLine>
               )}

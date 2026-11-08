@@ -185,11 +185,16 @@ export const SELLER_DIALOG = "Add your seller details";
  * yet been through the welcome.
  *
  * Pass `{ welcome: "keep" }` to land with the dialog still open.
+ *
+ * The designer's own tour starts by itself on the first designer a new seller
+ * opens, sample or not, and would sit over every designer spec's first clicks.
+ * So it is marked seen along with the welcome, unless `{ editorTour: "keep" }`
+ * leaves it to start.
  */
 export async function signUp(
   page: Page,
   user: TestUser,
-  options: { welcome?: "skip" | "keep" } = {},
+  options: { welcome?: "skip" | "keep"; editorTour?: "skip" | "keep" } = {},
 ) {
   await clearAuthRateLimits();
   await page.goto("/login");
@@ -215,9 +220,13 @@ export async function signUp(
   if (options.welcome === "keep") return;
 
   const id = await userIdByEmail(user.email);
+  const now = new Date().toISOString();
   await serviceRest(`/profiles?id=eq.${id}`, {
     method: "PATCH",
-    body: { onboarding_completed_at: new Date().toISOString() },
+    body: {
+      onboarding_completed_at: now,
+      ...(options.editorTour === "keep" ? {} : { editor_tour_seen_at: now }),
+    },
   });
   await page.reload();
   await page.waitForLoadState("networkidle").catch(() => {});

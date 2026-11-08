@@ -149,9 +149,15 @@ describe("ControlsPanel grouping", () => {
 
     // Theme and Canvas are merged under one top-level entry, and neither
     // half is a collapsible submenu: opening Theme shows the board's own
-    // guide right away, with no second click to find it.
-    await user.click(screen.getByRole("button", { name: /^Theme/ }));
+    // guide right away, with no second click to find it. The row says so,
+    // since "Theme" alone does not say it holds the grid's size or the
+    // phone arrangement.
+    const theme = screen.getByRole("button", { name: /^Theme/ });
+    expect(theme).toHaveTextContent("Colours, grid size and phone layout");
+    await user.click(theme);
 
+    // The back row names the tab these settings sit under, by its own name.
+    expect(screen.getByText(/^Whole storefront \//)).toBeVisible();
     expect(screen.getByText("Canvas width")).toBeVisible();
     expect(screen.getByText("Grid density")).toBeVisible();
     expect(screen.getByRole("switch", { name: "Show grid" })).toBeVisible();

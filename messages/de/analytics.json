@@ -13,8 +13,9 @@
   },
   "firstRun": {
     "title": "Noch nichts zu messen",
-    "body": "Besuche auf deinen Produktseiten werden hier angezeigt, sobald eine davon online ist.",
-    "backToSetup": "Zurück zur Einrichtung"
+    "body": "Veröffentliche ein Schaufenster, um Aufrufe zu sehen, oder mach deinen ersten Verkauf, um Umsatz zu sehen.",
+    "publishStorefront": "Schaufenster veröffentlichen",
+    "goToProducts": "Zu den Produkten"
   },
   "range": {
     "ariaLabel": "Zeitraum",
@@ -73,12 +74,20 @@
   },
   "compare": {
     "previous": "Vorheriger Zeitraum",
-    "vsPrevious": "{change} gegenüber dem vorherigen Zeitraum"
+    "vsPrevious": "{change} gegenüber dem vorherigen Zeitraum",
+    "previousPeriodDates": "{from} - {to}"
+  },
+  "scrub": {
+    "on": "Am {date}",
+    "inMonth": "Im {date}",
+    "upTo": "Bis {date}",
+    "noSales": "Keine Verkäufe"
   },
   "funnel": {
     "label": "Storefront-Trichter",
     "description": "Von der Anzeige deines Storefronts auf deiner eigenen Website bis zur bezahlten Bestellung. Gezählt werden Ereignisse, nicht Personen.",
-    "views": "Aufrufe auf deiner Website",
+    "subtitle": "Besucher, die dein eingebettetes Schaufenster auf deiner eigenen Website gesehen haben (keine direkten Links), vom ersten Aufruf bis zur bezahlten Bestellung.",
+    "views": "Aufrufe über Einbettung",
     "viewsEmpty": "Keine Aufrufe in diesem Zeitraum",
     "opens": "Geöffnete Produkte",
     "opensEmpty": "Keine geöffnet in diesem Zeitraum",
@@ -91,7 +100,7 @@
     "abandonment": "Nicht abgeschlossene Checkouts",
     "abandonmentCounts": "Unbezahlt: {expired}, begonnen: {started}",
     "notEnough": "Noch nicht genug Daten",
-    "notEnoughHint": "Quoten erscheinen, sobald dieser Zeitraum {min} Aufrufe enthält."
+    "notEnoughHint": "Quoten erscheinen, sobald dieser Zeitraum {min} Aufrufe enthält: Bei weniger würde eine einzige Bestellung den Prozentwert verzerren."
   },
   "tiles": {
     "revenue": "Umsatz",
@@ -110,7 +119,7 @@
   "channels": {
     "embed": "Auf deiner Website",
     "marketplace": "Marktplatz",
-    "direct": "Deine Seite",
+    "direct": "Direkter Link",
     "button": "Kauf-Button"
   },
   "signalsUnavailable": {
@@ -119,7 +128,8 @@
   },
   "upcoming": {
     "needProducts": "{labels} erscheinen hier, sobald ein Produkt auf einem deiner Schaufenster ist.",
-    "needBlocks": "{labels} erscheinen hier, sobald ihr Block auf einem deiner Schaufenster ist."
+    "needBlocks": "{labels} erscheinen hier, sobald ihr Block auf einem deiner Schaufenster ist.",
+    "recordedOnly": "{labels} erscheinen hier, sobald ein Käufer den Checkout bei einem deiner Produkte öffnet."
   },
   "signal": {
     "visitors": "Besucher",
@@ -168,6 +178,7 @@
     "product_view": {
       "label": "Produktseitenaufrufe",
       "description": "Besucher, die eine deiner gehosteten Produktseiten öffnen.",
+      "subtitle": "Einschließlich Klicks auf Schaufensterkacheln und direkte Links.",
       "count": "{count, plural, one {{formatted} Aufruf} other {{formatted} Aufrufe}}",
       "total": "Aufrufe gesamt",
       "emptyRange": "Keine Aufrufe in diesem Zeitraum",

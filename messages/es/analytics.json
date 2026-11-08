@@ -13,8 +13,9 @@
   },
   "firstRun": {
     "title": "Nada que medir todavía",
-    "body": "Las visitas a tus páginas de producto aparecerán aquí en cuanto una esté publicada.",
-    "backToSetup": "Volver a la configuración"
+    "body": "Publica un escaparate para ver las visitas, o haz tu primera venta para ver los ingresos.",
+    "publishStorefront": "Publica un escaparate",
+    "goToProducts": "Ir a productos"
   },
   "range": {
     "ariaLabel": "Intervalo de fechas",
@@ -73,12 +74,20 @@
   },
   "compare": {
     "previous": "Periodo anterior",
-    "vsPrevious": "{change} frente al periodo anterior"
+    "vsPrevious": "{change} frente al periodo anterior",
+    "previousPeriodDates": "{from} - {to}"
+  },
+  "scrub": {
+    "on": "El {date}",
+    "inMonth": "En {date}",
+    "upTo": "Hasta {date}",
+    "noSales": "Sin ventas"
   },
   "funnel": {
     "label": "Embudo del escaparate",
     "description": "Desde que tu escaparate se muestra en tu propio sitio hasta un pedido pagado. Se cuentan eventos, no personas.",
-    "views": "Vistas en tu sitio",
+    "subtitle": "Visitantes que vieron tu escaparate incorporado en tu propia web (no los enlaces directos), desde la primera vista hasta un pedido pagado.",
+    "views": "Vistas por incorporación",
     "viewsEmpty": "Sin vistas en este periodo",
     "opens": "Productos abiertos",
     "opensEmpty": "Ninguno abierto en este periodo",
@@ -91,7 +100,7 @@
     "abandonment": "Pagos sin terminar",
     "abandonmentCounts": "Sin completar: {expired}, iniciados: {started}",
     "notEnough": "Aún no hay datos suficientes",
-    "notEnoughHint": "Las tasas aparecen cuando este periodo tiene {min} vistas."
+    "notEnoughHint": "Las tasas aparecen cuando este periodo tiene {min} vistas: con menos, un solo pedido distorsionaría el porcentaje."
   },
   "tiles": {
     "revenue": "Ingresos",
@@ -110,7 +119,7 @@
   "channels": {
     "embed": "En tu web",
     "marketplace": "Marketplace",
-    "direct": "Tu página",
+    "direct": "Enlace directo",
     "button": "Botón de compra"
   },
   "signalsUnavailable": {
@@ -119,7 +128,8 @@
   },
   "upcoming": {
     "needProducts": "{labels} aparecen aquí en cuanto un producto esté en uno de tus escaparates.",
-    "needBlocks": "{labels} aparecen aquí en cuanto su bloque esté en uno de tus escaparates."
+    "needBlocks": "{labels} aparecen aquí en cuanto su bloque esté en uno de tus escaparates.",
+    "recordedOnly": "{labels} aparecen aquí en cuanto un comprador abre el pago de uno de tus productos."
   },
   "signal": {
     "visitors": "Visitantes",
@@ -168,6 +178,7 @@
     "product_view": {
       "label": "Visualizaciones de página de producto",
       "description": "Visitantes que abren una de tus páginas de producto alojadas.",
+      "subtitle": "Incluye los clics desde las tarjetas del escaparate y los enlaces directos.",
       "count": "{count, plural, one {{formatted} visualización} many {{formatted} visualizaciones} other {{formatted} visualizaciones}}",
       "total": "Visualizaciones totales",
       "emptyRange": "Sin visualizaciones en este intervalo",

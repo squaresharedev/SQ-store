@@ -6,7 +6,7 @@
   },
   "page": {
     "title": "Orders",
-    "subtitle": "Every order placed through Square Share."
+    "subtitle": "Orders placed through Square Share checkout."
   },
   "status": {
     "paid": "Paid",
@@ -17,7 +17,7 @@
   "channel": {
     "embed": "On your site",
     "marketplace": "Marketplace",
-    "direct": "Your page",
+    "direct": "Direct link",
     "button": "Buy button"
   },
   "empty": {
@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} order} other {{total} orders}} · page {page} of {totalPages}",
     "detailDialog": "Order details",
     "closeDetail": "Close order details",
-    "withdrawn": "Withdrawn",
+    "withdrawn": "Buyer cancelled",
+    "refundDue": "Refund by {date}",
     "moreItems": "+{count} more"
   },
   "table": {
@@ -52,13 +53,13 @@
     "shipping": "Shipping",
     "shipTo": "Ship to",
     "noAddress": "No address",
-    "feeLine": "Fee {amount}"
+    "feeLine": "Platform fee {amount}"
   },
   "toolbar": {
     "region": "order filters",
     "channel": "channel",
     "search": "search",
-    "searchPlaceholder": "search email, name, city, product or tracking",
+    "searchPlaceholder": "search order number, email, name, city, product or tracking",
     "status": "status",
     "statusAriaLabel": "Filter by status",
     "allStatuses": "All statuses",
@@ -121,7 +122,7 @@
       "failed": "Couldn't copy the phone number. Select and copy it manually."
     },
     "giftMessage": "Gift message",
-    "withdrawalNotice": "The buyer asked to withdraw from this purchase on {date}. Arrange the return and refund with them.",
+    "withdrawalNotice": "The buyer cancelled this purchase on {date}. Arrange the return and issue the refund within 14 days.",
     "noAddress": "There's no delivery address on this order. Email the buyer to ask where it should go.",
     "shipping": "Shipping",
     "shippedOn": "Shipped {date}",
@@ -147,7 +148,7 @@
     },
     "emailBuyer": "Email the buyer",
     "mailSubject": "Your order {number}",
-    "withdrawnShipWarning": "The buyer has withdrawn from this purchase. Ship it only if you've agreed that with them.",
+    "withdrawnShipWarning": "The buyer has cancelled this purchase. Ship it only if you've agreed that with them.",
     "discount": "Discount",
     "discountSale": "Sale, {amount} off",
     "discountCode": "Code {code}, {amount} off",
@@ -155,15 +156,17 @@
     "alsoBought": "Also in this order"
   },
   "actions": {
-    "disputeInStripe": "The buyer's bank opened a dispute. Answer it in your Stripe dashboard before its deadline.",
+    "disputeInStripe": "The buyer's bank opened a dispute. Answer it in your Stripe dashboard before its deadline, or the buyer gets the money back.",
     "answerInStripe": "Answer in Stripe",
+    "disputeOwnerOnly": "Only the store's owner can answer it.",
+    "disputeOwnerOnlyNamed": "Only the owner of {store} can answer it. Let them know.",
     "pendingPayment": "The buyer's payment is still being confirmed. Don't send anything yet: this order shows as paid once it goes through, and closes by itself if it doesn't.",
     "none": "No actions are available for this order."
   },
   "refund": {
     "open": "Refund or cancel",
-    "manual": "This payment didn't go through Square Share. Pay the buyer back yourself, then record it here.",
-    "viaProvider": "The full amount goes back to the buyer's card through Stripe. This can't be undone.",
+    "manual": "This payment didn't go through Square Share. Pay the buyer back the whole {amount} yourself, then record it here.",
+    "viaProvider": "Refunds the whole order, {amount}, to the buyer's card through Stripe. This can't be undone.",
     "reasonLabel": "Reason",
     "reasons": {
       "cancelled": "Cancelled before sending",
@@ -289,8 +292,8 @@
       "buyerSubject": "Your withdrawal from order {number} with {store}",
       "buyerIntro": "We received your withdrawal from order {number} ({title}) on {date} and passed it straight to {store}.",
       "buyerNext": "{store} will contact you about returning the item and your refund, which is due within 14 days of your withdrawal.",
-      "sellerSubject": "Withdrawal: order {number} ({title})",
-      "sellerIntro": "The buyer {email} withdrew from order {number} on {date}, using the withdrawal button on their order page.",
+      "sellerSubject": "Cancellation (withdrawal): order {number} ({title})",
+      "sellerIntro": "The buyer {email} cancelled order {number} on {date}, using the withdrawal button on their order page.",
       "sellerName": "Name they gave: {name}",
       "sellerNext": "Contact them to arrange the return, and refund them within 14 days. You may hold the refund until the item is back or they show it has been sent. The order: {url}"
     },

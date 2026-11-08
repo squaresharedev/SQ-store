@@ -27,7 +27,8 @@ const CHARS_LEFT_SHOWN_BELOW = 0.2;
  *               (a colour row, a slider, a text field, a select).
  *
  * An explanation a seller only sometimes needs rides beside the name as an
- * InfoTip (`info`), never as a paragraph under the control.
+ * InfoTip (`info`), never as a paragraph under the control. The one exception
+ * is a row's `hint`: a side effect they must see before flipping it.
  */
 
 type Info = { label: string; content: ReactNode };
@@ -72,18 +73,28 @@ export function PanelRow({
   label,
   htmlFor,
   info,
+  hint,
   children,
 }: {
   label: string;
   /** The control's id, when it is a labellable element (a switch, an input). */
   htmlFor?: string;
   info?: Info;
+  /** A side effect too important to keep behind `info`, in a line under the row. */
+  hint?: string;
   children: ReactNode;
 }) {
-  return (
+  const row = (
     <div className="flex min-h-9 items-center justify-between gap-3">
       <Name text={label} htmlFor={htmlFor} className={panelSettingClass} info={info} />
       <div className="flex shrink-0 items-center gap-2">{children}</div>
+    </div>
+  );
+  if (!hint) return row;
+  return (
+    <div className="space-y-1">
+      {row}
+      <p className={infoTextClass}>{hint}</p>
     </div>
   );
 }

@@ -524,11 +524,11 @@
     "addOnNotYours": "L'un des produits proposés n'est plus dans cette boutique. Retirez-le et enregistrez à nouveau."
   },
   "productImport": {
-    "noTitle": "Aucun titre.",
+    "noTitle": "Aucun titre. Vérifiez que la colonne Titre ci-dessus est bien choisie.",
     "titleTooLong": "Le titre dépasse 200 caractères.",
-    "noPrice": "Aucun prix n’a pu être lu.",
+    "noPrice": "Aucun prix n’a pu être lu. Vérifiez que la colonne Prix ci-dessus pointe vers la bonne colonne.",
     "priceZero": "Le prix est à zéro.",
-    "duplicateTitle": "Une autre ligne porte ce titre."
+    "duplicateTitle": "Une autre ligne porte ce titre. Les titres en double sont ignorés ; renommez-en un dans votre tableur."
   },
   "shipping": {
     "shipsFromInvalid": "Ce n’est pas un pays depuis lequel nous pouvons encore expédier.",

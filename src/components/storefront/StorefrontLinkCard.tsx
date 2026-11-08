@@ -4,10 +4,12 @@ import Link from "@/components/ui/AppLink";
 import { ArrowUpRight, Link2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { CopyButton } from "@/components/ui/CopyButton";
-import { helpTextClass, labelClass } from "@/components/ui/control-styles";
+import { helpTextClass, inlineLinkClass, labelClass } from "@/components/ui/control-styles";
 import { cardClass, iconTileClass } from "@/components/ui/surface-styles";
 import { buttonClassName } from "@/components/ui/button";
 import { storefrontEditorPath } from "@/lib/storefront/paths";
+import { INDEXING_SETTING_ID, settingHref } from "@/lib/storefront/setting-ref";
+import { traderIdentityHref, type TraderIdentityField } from "@/lib/settings/trader-identity";
 import { cn } from "@/lib/utils";
 
 /**
@@ -26,15 +28,25 @@ export function StorefrontLinkCard({
   storefrontId,
   url,
   state,
+  searchable,
+  missing = [],
 }: {
   storefrontId: string;
   /** The page's absolute address. */
   url: string;
-  /** Live, or the first thing in the way. Seller details missing has its own
-   *  notice on the page already, so here it only withholds the link. */
+  /** Live, or the first thing in the way, each with the way to fix it: the
+   *  page's notice further down frames missing details as an embedding
+   *  problem, so the link card carries its own way to Settings. */
   state: "live" | "pages-off" | "details-missing";
+  /** Whether search engines may list it (the designer's "Allow search
+   *  engines"). Said only when they may not, with the way to the switch. */
+  searchable: boolean;
+  /** The seller details still owed, so the fix lands on the first of them. */
+  missing?: readonly TraderIdentityField[];
 }) {
   const t = useTranslations("Storefront.share");
+  const tIndexing = useTranslations("Storefront.productPage.layout.indexing");
+  const tSellerDetails = useTranslations("Settings.sellerDetails");
   const live = state === "live";
 
   return (
@@ -50,6 +62,16 @@ export function StorefrontLinkCard({
               {url}
             </p>
             <p className={helpTextClass}>{t("live")}</p>
+            {/* Where a seller asks "can people find it?", rather than only
+                deep in the designer's Product page panel. */}
+            {!searchable && (
+              <p className={helpTextClass} data-storefront-link-search="off">
+                {t("searchOff")}{" "}
+                <Link href={settingHref(INDEXING_SETTING_ID, storefrontId)} className={inlineLinkClass}>
+                  {tIndexing("label")}
+                </Link>
+              </p>
+            )}
             <div className="flex flex-wrap items-center gap-2">
               <CopyButton
                 value={url}
@@ -74,9 +96,13 @@ export function StorefrontLinkCard({
         ) : (
           <>
             <p className={helpTextClass}>{t(state === "pages-off" ? "pagesOff" : "detailsMissing")}</p>
-            {state === "pages-off" && (
+            {state === "pages-off" ? (
               <Link href={storefrontEditorPath(storefrontId)} className={buttonClassName("secondary", "w-fit")}>
                 {t("openDesigner")}
+              </Link>
+            ) : (
+              <Link href={traderIdentityHref(missing)} className={buttonClassName("secondary", "w-fit")}>
+                {tSellerDetails("addLink")}
               </Link>
             )}
           </>

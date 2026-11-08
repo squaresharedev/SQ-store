@@ -6,7 +6,7 @@
   },
   "page": {
     "title": "Zamówienia",
-    "subtitle": "Każde zamówienie złożone przez Square Share."
+    "subtitle": "Zamówienia złożone przez kasę Square Share."
   },
   "status": {
     "paid": "Opłacone",
@@ -17,7 +17,7 @@
   "channel": {
     "embed": "Na twojej stronie",
     "marketplace": "Marketplace",
-    "direct": "Twoja strona",
+    "direct": "Bezpośredni link",
     "button": "Przycisk zakupu"
   },
   "empty": {
@@ -39,7 +39,8 @@
     "summary": "{total, plural, one {{total} zamówienie} few {{total} zamówienia} many {{total} zamówień} other {{total} zamówienia}} · strona {page} z {totalPages}",
     "detailDialog": "Szczegóły zamówienia",
     "closeDetail": "Zamknij szczegóły zamówienia",
-    "withdrawn": "Odstąpiono",
+    "withdrawn": "Anulowane przez kupującego",
+    "refundDue": "Zwrot do {date}",
     "moreItems": "+{count} więcej"
   },
   "table": {
@@ -52,12 +53,12 @@
     "shipping": "Wysyłka",
     "shipTo": "Adresat",
     "noAddress": "Brak adresu",
-    "feeLine": "Opłata {amount}"
+    "feeLine": "Opłata platformy {amount}"
   },
   "toolbar": {
     "region": "filtry zamówień",
     "channel": "kanał",
-    "searchPlaceholder": "szukaj e-maila, imienia, miasta, produktu lub przesyłki",
+    "searchPlaceholder": "szukaj numeru zamówienia, e-maila, imienia, miasta, produktu lub przesyłki",
     "search": "szukaj",
     "status": "status",
     "statusAriaLabel": "Filtruj według statusu",
@@ -121,7 +122,7 @@
       "failed": "Nie udało się skopiować numeru telefonu. Zaznacz i skopiuj ręcznie."
     },
     "giftMessage": "Wiadomość prezentowa",
-    "withdrawalNotice": "Kupujący poprosił o odstąpienie od zakupu w dniu {date}. Uzgodnij z nim zwrot i refundację.",
+    "withdrawalNotice": "Kupujący anulował ten zakup w dniu {date}. Ustal zwrot towaru i zwróć pieniądze w ciągu 14 dni.",
     "noAddress": "To zamówienie nie ma adresu dostawy. Napisz do kupującego i zapytaj, gdzie wysłać.",
     "shipping": "Wysyłka",
     "shippedOn": "Wysłano {date}",
@@ -147,7 +148,7 @@
     },
     "emailBuyer": "Wyślij e-mail do kupującego",
     "mailSubject": "Twoje zamówienie {number}",
-    "withdrawnShipWarning": "Kupujący odstąpił od tego zakupu. Wyślij zamówienie tylko wtedy, gdy uzgodniono to z kupującym.",
+    "withdrawnShipWarning": "Kupujący anulował ten zakup. Wyślij zamówienie tylko wtedy, gdy uzgodniono to z kupującym.",
     "discount": "Rabat",
     "discountSale": "Obniżka, -{amount}",
     "discountCode": "Kod {code}, -{amount}",
@@ -155,8 +156,10 @@
     "alsoBought": "Też w tym zamówieniu"
   },
   "actions": {
-    "disputeInStripe": "Bank kupującego otworzył spór. Odpowiedz na niego w panelu Stripe przed terminem.",
+    "disputeInStripe": "Bank kupującego otworzył spór. Odpowiedz na niego w panelu Stripe przed terminem, inaczej kupujący odzyska pieniądze.",
     "answerInStripe": "Odpowiedz w Stripe",
+    "disputeOwnerOnly": "Odpowiedzieć na niego może tylko właściciel sklepu.",
+    "disputeOwnerOnlyNamed": "Odpowiedzieć na niego może tylko właściciel sklepu {store}. Daj mu znać.",
     "pendingPayment": "Płatność kupującego jest jeszcze potwierdzana. Nie wysyłaj jeszcze niczego: zamówienie pokaże się jako opłacone, gdy płatność przejdzie, a jeśli nie przejdzie, zamknie się samo.",
     "none": "Dla tego zamówienia nie ma dostępnych żadnych akcji."
   },
@@ -179,8 +182,8 @@
     "refundedOnReason": "{reason, select, cancelled {Anulowano i zwrócono środki {date}} returned {Zwrócono towar i środki {date}} other {Zwrócono środki {date}}}",
     "ownerOnly": "Tylko właściciel sklepu może zwrócić środki lub anulować zamówienie.",
     "ownerOnlyNamed": "Tylko właściciel sklepu {store} może zwrócić środki lub anulować zamówienie. Poproś go o to.",
-    "manual": "Ta płatność nie przeszła przez Square Share. Sam zwróć kupującemu środki, a następnie odnotuj to tutaj.",
-    "viaProvider": "Pełna kwota wraca na kartę kupującego przez Stripe. Tej operacji nie można cofnąć."
+    "manual": "Ta płatność nie przeszła przez Square Share. Zwróć kupującemu całą kwotę {amount} samodzielnie, a następnie odnotuj to tutaj.",
+    "viaProvider": "Zwraca całe zamówienie, {amount}, na kartę kupującego przez Stripe. Tej operacji nie można cofnąć."
   },
   "skeleton": {
     "loading": "wczytywanie zamówień"
@@ -289,8 +292,8 @@
       "buyerSubject": "Twoje odstąpienie od zamówienia {number} w {store}",
       "buyerIntro": "Otrzymaliśmy Twoje odstąpienie od zamówienia {number} ({title}) w dniu {date} i natychmiast przekazaliśmy je do {store}.",
       "buyerNext": "{store} skontaktuje się z Tobą w sprawie zwrotu i refundacji, która jest należna w ciągu 14 dni od Twojego odstąpienia.",
-      "sellerSubject": "Odstąpienie: zamówienie {number} ({title})",
-      "sellerIntro": "Kupujący {email} odstąpił od zamówienia {number} w dniu {date}, używając przycisku odstąpienia na stronie zamówienia.",
+      "sellerSubject": "Anulowanie (odstąpienie od umowy): zamówienie {number} ({title})",
+      "sellerIntro": "Kupujący {email} anulował zamówienie {number} w dniu {date}, używając przycisku odstąpienia od umowy na stronie zamówienia.",
       "sellerName": "Podane imię i nazwisko: {name}",
       "sellerNext": "Skontaktuj się z nim, aby uzgodnić zwrot, i dokonaj refundacji w ciągu 14 dni. Możesz wstrzymać refundację do czasu otrzymania towaru lub udowodnienia jego wysyłki. Zamówienie: {url}"
     },

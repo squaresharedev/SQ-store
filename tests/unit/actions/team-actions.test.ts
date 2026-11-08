@@ -292,6 +292,27 @@ describe("acceptInvite - RPC result", () => {
     const result = await acceptInvite(PREV, makeAcceptForm());
 
     expect(errorText(result)).toMatch(/could not accept/i);
+    // A failed accept leaves the member where they were.
+    expect(cookiesSetMock).not.toHaveBeenCalled();
+  });
+
+  it("an accepted invite takes the member straight into the store they joined", async () => {
+    getUserMock.mockResolvedValue({ id: EDITOR_ID, email: "editor@example.com" });
+    dbFn.mockResolvedValueOnce({
+      data: {
+        id: INVITE_ID,
+        status: "invited",
+        invited_email: "editor@example.com",
+        account_owner_id: OWNER_ID,
+      },
+      error: null,
+    });
+    dbFn.mockResolvedValueOnce({ data: true, error: null });
+
+    const result = await acceptInvite(PREV, makeAcceptForm());
+
+    expect(result.success).toBeTruthy();
+    expect(cookiesSetMock).toHaveBeenCalledWith("ss_active_account", OWNER_ID, expect.any(Object));
   });
 
   it("signed out returns SIGNED_OUT error", async () => {

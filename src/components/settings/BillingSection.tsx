@@ -4,8 +4,9 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { CalendarClock, CreditCard, Gift, Percent, TriangleAlert, Wallet, type LucideIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import Link from "@/components/ui/AppLink";
 import { AnimatedCheck } from "@/components/ui/animated-check";
-import { helpTextClass, infoTextClass } from "@/components/ui/control-styles";
+import { helpTextClass, infoTextClass, inlineLinkClass } from "@/components/ui/control-styles";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { PlanWordmark } from "@/components/billing/PlanWordmark";
 import { PortalButton } from "@/components/billing/PortalButton";
@@ -24,7 +25,7 @@ import { directFeeBps } from "@/lib/billing/fees";
 import { formatFeeRate } from "@/lib/billing/format";
 import type { CheckoutReturn } from "@/lib/billing/checkout-return";
 import type { PricingContext } from "@/lib/billing/pricing-context";
-import { BILLING_SETTINGS_PATH } from "@/lib/billing/paths";
+import { BILLING_SETTINGS_PATH, LIMIT_SOURCE, plansHref } from "@/lib/billing/paths";
 import { BILLING_CURRENCY, PLANS, PLAN_LIMIT_KEYS, isPaidPlan } from "@/lib/billing/plans";
 
 /** One line of the plan card: a glyph, then the fact. */
@@ -187,6 +188,13 @@ function BillingSectionBody({ context, returned, actions = SERVER_BILLING_ACTION
   const t = useTranslations("Billing");
   const router = useRouter();
   const { plan, status, usage, canManage } = context;
+  // The first capped thing the store is past, if any: the note under the
+  // meters says so, and its "upgrade" opens the plans naming that limit.
+  const overKey = PLAN_LIMIT_KEYS.find((key) => {
+    const cap = PLANS[plan].limits[key];
+    const used = usage[key];
+    return cap !== null && used !== null && used > cap;
+  });
 
   // Back from Stripe Checkout: drop the session id from the address, so a
   // reload does not ask Stripe again, and refresh so the rail's plan chip
@@ -247,14 +255,18 @@ function BillingSectionBody({ context, returned, actions = SERVER_BILLING_ACTION
             );
           })}
         </ul>
-        {PLAN_LIMIT_KEYS.some((key) => {
-          const cap = PLANS[plan].limits[key];
-          const used = usage[key];
-          return cap !== null && used !== null && used > cap;
-        }) && (
+        {overKey && (
           <p role="note" data-billing-over-note className={cn(infoTextClass, "mt-4 flex items-start gap-1.5")}>
             <TriangleAlert aria-hidden className="mt-px size-3.5 shrink-0" />
-            <span>{t("settings.overLimit")}</span>
+            <span>
+              {t.rich("settings.overLimit", {
+                upgrade: (chunks) => (
+                  <Link href={plansHref(LIMIT_SOURCE[overKey])} className={inlineLinkClass}>
+                    {chunks}
+                  </Link>
+                ),
+              })}
+            </span>
           </p>
         )}
       </SettingsCard>

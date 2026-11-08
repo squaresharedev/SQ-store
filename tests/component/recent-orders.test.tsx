@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, cleanup, fireEvent } from "../setup/render";
+import { render, screen, cleanup, fireEvent, within } from "../setup/render";
 import { RecentOrders } from "@/components/dashboard/RecentOrders";
 import type { DashboardOrder } from "@/lib/dashboard/queries";
 import type { OrderView } from "@/types/order-view";
@@ -31,6 +31,15 @@ describe("RecentOrders", () => {
     expect(screen.queryAllByRole("link")).toHaveLength(0);
   });
 
+  it("says the first sale lands here only once checkout is open", () => {
+    const { rerender } = render(<RecentOrders orders={[]} />);
+    expect(
+      screen.getByText("No orders yet. When checkout opens, completed purchases appear here."),
+    ).toBeInTheDocument();
+    rerender(<RecentOrders orders={[]} checkoutOpen />);
+    expect(screen.getByText("No orders yet. Your first sale will appear here.")).toBeInTheDocument();
+  });
+
   it("links every row to that order's detail on /orders", () => {
     const orders = [
       order({ id: "aaaaaaaa-1111-4111-8111-111111111111", product_title: "Lamp" }),
@@ -42,7 +51,7 @@ describe("RecentOrders", () => {
     ];
     render(<RecentOrders orders={orders} />);
 
-    const links = screen.getAllByRole("link");
+    const links = within(screen.getByRole("list")).getAllByRole("link");
     expect(links).toHaveLength(2);
     expect(links[0]).toHaveAttribute(
       "href",
@@ -54,13 +63,32 @@ describe("RecentOrders", () => {
     );
   });
 
+  it("offers the full orders list beside the title once there are orders", () => {
+    render(<RecentOrders orders={[order()]} />);
+    expect(screen.getByRole("link", { name: "See all orders" })).toHaveAttribute("href", "/orders");
+  });
+
   it("keeps the whole row inside the link (title, meta, status, amount)", () => {
     render(<RecentOrders orders={[order({ product_title: "Lamp" })]} />);
-    const link = screen.getByRole("link");
+    const link = screen.getByRole("link", { name: /Lamp/ });
     expect(link).toHaveTextContent("Lamp");
     expect(link).toHaveTextContent("On your site");
     expect(link).toHaveTextContent("Paid");
     expect(link).toHaveTextContent("25");
+  });
+
+  it("colours a status as the Orders page does: a settled refund is muted, only a dispute is red", () => {
+    render(
+      <RecentOrders
+        orders={[
+          order({ id: "aaaaaaaa-1111-4111-8111-111111111111", status: "refunded" }),
+          order({ id: "bbbbbbbb-2222-4222-8222-222222222222", product_title: "Chair", status: "disputed" }),
+        ]}
+      />,
+    );
+    expect(screen.getByText("Refunded")).toHaveClass("text-muted-foreground");
+    expect(screen.getByText("Refunded")).not.toHaveClass("text-danger-strong");
+    expect(screen.getByText("Disputed")).toHaveClass("text-danger-strong");
   });
 
   describe("photo and quantity", () => {
@@ -75,7 +103,7 @@ describe("RecentOrders", () => {
       );
       const img = container.querySelector("img");
       expect(img).toHaveAttribute("src", "https://cdn.example/lamp.jpg");
-      const link = screen.getByRole("link");
+      const link = screen.getByRole("link", { name: /Lamp/ });
       expect(
         img!.compareDocumentPosition(screen.getByText("Lamp")) & Node.DOCUMENT_POSITION_FOLLOWING,
       ).toBeTruthy();
@@ -119,7 +147,7 @@ describe("RecentOrders", () => {
     const legacy = { ...order() } as Partial<DashboardOrder>;
     delete legacy.id;
     render(<RecentOrders orders={[legacy as DashboardOrder]} />);
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/orders");
+    expect(screen.getByRole("link", { name: /Lamp/ })).toHaveAttribute("href", "/orders");
   });
 
   describe("opening in place", () => {

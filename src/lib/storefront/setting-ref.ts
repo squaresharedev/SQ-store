@@ -38,6 +38,13 @@ export type BlockSettingType = "text" | "shape" | "image";
 /** The sale chip's own setting, which the discount form links to. */
 export const SALE_CHIP_SETTING_ID = "sale-chip";
 
+/** The search engines switch, which the storefront's Share page links to. */
+export const INDEXING_SETTING_ID = "product-page-indexing";
+
+/** The product page's Reviews section (shown or not, the star colour), which
+ *  the reviews page links to. */
+export const PRODUCT_PAGE_REVIEWS_SETTING_ID = "product-page-stars";
+
 /** The two halves of the Theme group: the published look, and the board
  *  itself (size, grid gap, and the seller-only grid guide). Merged into one
  *  top-of-menu entry because both are "how the whole storefront is shaped",
@@ -455,6 +462,21 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
     ref: { kind: "theme", section: "canvas" },
   },
   {
+    id: "phone-layout",
+    label: "Storefront.settings.labels.phoneLayout",
+    keywords: [
+      "phone",
+      "mobile",
+      "phone layout",
+      "mobile layout",
+      "small screen",
+      "phone columns",
+      "hide on phones",
+      "how it looks on a phone",
+    ],
+    ref: { kind: "theme", section: "canvas" },
+  },
+  {
     id: "tile-layout",
     label: "Storefront.settings.labels.tileLayout",
     keywords: [
@@ -636,6 +658,11 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "call to action on card",
       "cta on card",
       "purchase button",
+      "card button text",
+      "card button label",
+      "card button color",
+      "card button colour",
+      "arrow on card",
     ],
     ref: { kind: "cards", section: "shopping" },
   },
@@ -812,7 +839,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
     ref: { kind: "productPage", section: "layout" },
   },
   {
-    id: "product-page-indexing",
+    id: INDEXING_SETTING_ID,
     label: "Storefront.settings.labels.productPageIndexing",
     keywords: [
       "search engines",
@@ -952,7 +979,7 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
     ref: { kind: "productPage", section: "addOns" },
   },
   {
-    id: "product-page-stars",
+    id: PRODUCT_PAGE_REVIEWS_SETTING_ID,
     label: "Storefront.settings.labels.productPageStars",
     keywords: ["star colour", "rating colour", "yellow stars", "review stars", "reviews", "ratings"],
     ref: { kind: "productPage", section: "reviews" },

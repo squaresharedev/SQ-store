@@ -12,10 +12,15 @@
  * FORMULA INJECTION. A spreadsheet runs a cell that starts with `=`, `+`, `-`,
  * `@`, a tab or a carriage return as a formula, so text a buyer or seller
  * typed ("=HYPERLINK(...)" as a product title) would run on the machine of
- * whoever opens the export. Every TEXT cell that starts with one of those gets
- * a leading apostrophe, which spreadsheets read as "this is text". A plain
- * number ("12.50", "-3") cannot be a formula and is left as it is, so a column
- * of amounts still sums.
+ * whoever opens the export. Every TEXT cell that starts with one of those
+ * (after any leading spaces) gets a leading apostrophe, which spreadsheets read
+ * as "this is text". A plain number ("12.50", "-3") cannot be a formula and is
+ * left as it is, so a column of amounts still sums.
+ *
+ * SEMICOLONS ARE QUOTED TOO. Excel in a comma-decimal locale (Czech, German,
+ * Polish, French...) splits a double-clicked CSV on `;`, not `,`. An unquoted
+ * `Ada;=HYPERLINK(...)` would become two cells there, the second a formula the
+ * guard above never saw at the start of the value. Quoted, it stays one cell.
  */
 
 import { BRAND_NAME } from "@/lib/brand";
@@ -29,9 +34,9 @@ export const CSV_BOM = "\uFEFF";
 /** The media type a CSV download is served with. */
 export const CSV_CONTENT_TYPE = "text/csv; charset=utf-8";
 
-const FORMULA_START = /^[=+\-@\t\r]/;
+const FORMULA_START = /^[\t\r]|^\s*[=+\-@\uFF1D\uFF0B\uFF0D\uFF20]/;
 const PLAIN_NUMBER = /^-?\d+(\.\d+)?$/;
-const NEEDS_QUOTES = /[",\r\n]|^\s|\s$/;
+const NEEDS_QUOTES = /[",;\r\n]|^\s|\s$/;
 
 /** What ends every row, the last one included. */
 const CSV_ROW_END = "\r\n";

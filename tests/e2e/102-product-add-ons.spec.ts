@@ -431,7 +431,7 @@ test.describe("add to your order", () => {
     await gotoApp(page, `/storefront/${s.storefrontId}`);
     await page.getByLabel(/^stoneware vase. press enter/i).click();
     await canvasStill(page);
-    await page.getByRole("button", { name: /^open the buyer flow for stoneware vase$/i }).click();
+    await page.getByRole("button", { name: /^open the product page for stoneware vase$/i }).click();
     const artboard = page.locator(`[data-artboard-id="${s.vase}"]`);
     const onCanvas = artboard.locator("[data-product-add-ons]");
     await expect(onCanvas.getByRole("heading")).toHaveText("Add to your order");
@@ -496,7 +496,7 @@ test.describe("add to your order", () => {
       await gotoApp(page, `/storefront/${s.storefrontId}`);
       await page.getByLabel(/^stoneware vase. press enter/i).click();
       await canvasStill(page);
-      await page.getByRole("button", { name: /^open the buyer flow for stoneware vase$/i }).click();
+      await page.getByRole("button", { name: /^open the product page for stoneware vase$/i }).click();
       await expect(artboard).toBeVisible();
     }
 
@@ -569,7 +569,7 @@ test.describe("add to your order", () => {
     await gotoApp(page, `/storefront/${s.storefrontId}`);
     await page.getByLabel(/^stoneware vase. press enter/i).click();
     await canvasStill(page);
-    await page.getByRole("button", { name: /^open the buyer flow for stoneware vase$/i }).click();
+    await page.getByRole("button", { name: /^open the product page for stoneware vase$/i }).click();
     const artboard = page.locator(`[data-artboard-id="${s.vase}"]`);
     await artboard.locator("[data-product-add-ons='unset']").click();
     const field = page.locator("[data-add-ons-products='ready']");
@@ -702,7 +702,7 @@ test.describe("add to your order", () => {
     await gotoApp(page, `/storefront/${s.storefrontId}`);
     await page.getByLabel(/^stoneware vase. press enter/i).click();
     await canvasStill(page);
-    await page.getByRole("button", { name: /^open the buyer flow for stoneware vase$/i }).click();
+    await page.getByRole("button", { name: /^open the product page for stoneware vase$/i }).click();
     const artboard = page.locator(`[data-artboard-id="${s.vase}"]`);
     await artboard.locator("[data-product-add-ons='unset']").click();
     const panel = page.locator("[data-add-ons-products='ready']");
@@ -728,7 +728,7 @@ test.describe("add to your order", () => {
 
     // Opening the group puts the page out on the canvas, which is what the list
     // chooses for.
-    await page.getByRole("button", { name: "Design settings" }).click();
+    await page.getByRole("button", { name: "Storefront style" }).click();
     await page.getByRole("button", { name: /^Product page/ }).click();
     await expect(page.locator(`[data-artboard-id="${s.vase}"]`)).toBeAttached();
     await page.getByRole("button", { name: "Add to your order", exact: true }).click();

@@ -36,7 +36,8 @@ export function OrdersTable({
           <tr>
             <th className={headerCellClass}>{t("product")}</th>
             {toShip ? (
-              <th className={headerCellClass}>{t("shipTo")}</th>
+              // Hidden on small screens: ship-to city/country folds into the product cell there.
+              <th className={cn(headerCellClass, "hidden sm:table-cell")}>{t("shipTo")}</th>
             ) : (
               <>
                 <th className={cn(headerCellClass, "whitespace-nowrap")}>{t("amount")}</th>

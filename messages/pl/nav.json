@@ -10,7 +10,7 @@
     },
     "storefront": {
       "label": "Witryna",
-      "description": "Zaprojektuj siatkę, na której znajdą się twoje produkty."
+      "description": "Zaprojektuj siatkę, na której znajdą się twoje produkty. Stanie się stroną, którą kupujący mogą otworzyć i udostępnić."
     },
     "orders": {
       "label": "Zamówienia",
@@ -31,7 +31,8 @@
     "discounts": {
       "label": "Rabaty",
       "description": "Organizuj obniżki i udostępniaj kody rabatowe."
-    }
+    },
+    "help": "Pomoc"
   },
   "settings": {
     "account": "Konto",
@@ -42,17 +43,18 @@
     "notifications": "Powiadomienia",
     "language": "Język",
     "team": "Zespół i dostęp",
-    "danger": "Strefa niebezpieczna",
+    "danger": "Usuń konto",
     "billing": "Plan i rozliczenia",
-    "connectedApps": "Połączone aplikacje"
+    "connectedApps": "Asystent AI"
   },
   "profileMenu": {
     "label": "Menu konta",
     "account": "Konto",
-    "switchAccounts": "Przełącz konta",
+    "switchAccounts": "Moje sklepy",
     "yourStore": "Twój sklep",
     "owner": "Właściciel",
     "logOut": "Wyloguj się",
+    "logOutEverywhere": "Wyloguj się wszędzie",
     "plan": "Plan"
   },
   "viewingBanner": {

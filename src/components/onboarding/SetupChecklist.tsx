@@ -11,6 +11,7 @@ import {
   chipButtonClass,
   iconNudgeRightClass,
   infoTextClass,
+  moduleLinkClass,
 } from "@/components/ui/control-styles";
 import { useStoredFlag } from "@/lib/hooks/useStoredFlag";
 import type { SetupChecklistData, SetupStepId } from "@/lib/onboarding/steps";
@@ -25,11 +26,6 @@ import {
 
 /** Per-device: a seller who knows the way can fold the steps away. */
 export const SETUP_COLLAPSED_KEY = "sq.dashboard.setup-collapsed";
-
-/** Same treatment as NeedsAttention's row links, so the two modules' actions
- *  read as one family on the same page. */
-const ROW_LINK_CLASS =
-  "group/btn inline-flex items-center gap-1 font-inter text-xs font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none";
 
 const HEADER_BUTTON_CLASS = "px-2 py-1.5 text-xs";
 
@@ -52,7 +48,10 @@ const NEXT_BUTTON_CLASS = buttonClassName("primary", "px-3 py-1.5 text-xs");
  * (setup_celebrated_at, via `onCelebrated`), so it is gone from the next visit
  * on every device. "Hide" puts it away sooner, for this visit.
  *
- * The guided tour is replayed from Settings > Account, not from here.
+ * While setup is under way it offers the guided tour, as a button beside the
+ * progress, met before the steps: the best first look around should not read
+ * as one more quiet link. Once the card is gone, Overview keeps a quiet link to
+ * the tour (TourLink), and Settings > Account its replay card.
  *
  * Publishes itself for agents and specs: data-setup-* on the card and on each
  * row, from the same object the rows render.
@@ -60,6 +59,7 @@ const NEXT_BUTTON_CLASS = buttonClassName("primary", "px-3 py-1.5 text-xs");
 export function SetupChecklist({
   setup,
   livePageUrl,
+  liveStorefrontUrl = null,
   celebrate,
   onCelebrated,
   freshSteps = [],
@@ -70,6 +70,9 @@ export function SetupChecklist({
   setup: SetupChecklistData;
   /** The live product page as an absolute URL, when there is one. */
   livePageUrl: string | null;
+  /** The live storefront page URL, shown alongside the product link in the
+   *  completion card so sellers can share their whole shop. */
+  liveStorefrontUrl?: string | null;
   /** The finished card has not been shown to this person yet (latched by the
    *  caller for the visit). */
   celebrate: boolean;
@@ -192,6 +195,17 @@ export function SetupChecklist({
                   </a>
                 </>
               )}
+              {liveStorefrontUrl && (
+                <CopyButton
+                  value={liveStorefrontUrl}
+                  messages={{
+                    copy: "Onboarding.checklist.copyStorefrontLink.copy",
+                    copied: "Onboarding.checklist.copyStorefrontLink.copied",
+                    failed: "Onboarding.checklist.copyStorefrontLink.failed",
+                  }}
+                  variant="labelled"
+                />
+              )}
               <Button
                 variant="ghost"
                 className={cn(HEADER_BUTTON_CLASS, "ml-auto")}
@@ -211,8 +225,8 @@ export function SetupChecklist({
                 })}
               </p>
               {onTour && (
-                <button type="button" onClick={onTour} className={ROW_LINK_CLASS} data-setup-tour="">
-                  {t("Onboarding.welcome.nav.showMeAround")}
+                <button type="button" onClick={onTour} className={chipButtonClass} data-setup-tour="">
+                  {t("Onboarding.checklist.showMeAround")}
                 </button>
               )}
             </div>
@@ -268,7 +282,9 @@ export function SetupChecklist({
                         {!step.done && step.action && (
                           <Link
                             href={step.action.href}
-                            className={step.id === setup.next?.id ? NEXT_BUTTON_CLASS : ROW_LINK_CLASS}
+                            // A later step's link matches Needs attention's row links,
+                            // so the two modules' actions read as one family.
+                            className={step.id === setup.next?.id ? NEXT_BUTTON_CLASS : moduleLinkClass}
                           >
                             {t(step.action.label.key, step.action.label.values)}
                             <ArrowRight

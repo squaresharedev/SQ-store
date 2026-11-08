@@ -3,7 +3,7 @@
 import Link from "@/components/ui/AppLink";
 import { useTranslations, useLocale } from "next-intl";
 import { ExternalLink, Share2, Trash2 } from "lucide-react";
-import { cardClass } from "@/components/ui/surface-styles";
+import { cardClass, liveDotClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import {
   chipButtonClass,
@@ -16,6 +16,7 @@ import type { Product } from "@/types/product";
 import type { StorefrontSummary } from "@/lib/storefront/queries";
 import { resolveProductPage } from "@/lib/storefront/product-page";
 import { storefrontPagePath } from "@/lib/storefront/product-page-url";
+import { storefrontEditorPath } from "@/lib/storefront/paths";
 import { buyerVisibleBlocks } from "@/types/storefront";
 import {
   StorefrontPreview,
@@ -132,10 +133,13 @@ export function StorefrontCard({
   const tRemoval = useTranslations("Products.removal");
   const locale = useLocale();
   const { id, name, blockCount, updatedAt, config, removal } = storefront;
+  // Whether buyers can open it, said in words on the card, else the first thing
+  // in the way, in the order the Share page asks: product pages, then the
+  // seller's details. A takedown has its own line below instead.
+  const status = !resolveProductPage(config).enabled ? "pagesOff" : sellerDetailsComplete ? "live" : "detailsMissing";
   // The page buyers open, straight from the list: the same three conditions
   // the page itself asks (lib/storefront/storefront-page.ts).
-  const pagePath =
-    sellerDetailsComplete && !removal && resolveProductPage(config).enabled ? storefrontPagePath(id) : null;
+  const pagePath = status === "live" && !removal ? storefrontPagePath(id) : null;
 
   // A storefront with something to sell is previewed exactly as designed,
   // words and all — the text is part of how that shop looks. One with no
@@ -164,7 +168,7 @@ export function StorefrontCard({
     >
       {canWrite && (
         <Link
-          href={`/storefront/${id}`}
+          href={storefrontEditorPath(id)}
           aria-label={t("editAriaLabel", { name })}
           className={cn("absolute inset-0 z-10 rounded-md", focusRingClass)}
         />
@@ -204,7 +208,7 @@ export function StorefrontCard({
               pause. Under the metadata rather than over the preview because a
               paused storefront is still the seller's design and blanking it
               would hide what they are being asked to fix. */}
-          {removal && (
+          {removal ? (
             <p
               className={cn(
                 "mt-1.5 font-inter text-sm font-medium",
@@ -221,6 +225,20 @@ export function StorefrontCard({
                       ? t("pausedInReview")
                       : t("pausedNeedsChanges")
                     : t("removed")}
+            </p>
+          ) : (
+            // Live or not, in words: the open-page icon's absence said it to
+            // no one. The fix itself is one click away (the card opens the
+            // designer, Share explains the rest).
+            <p
+              className={cn(
+                "mt-1.5 flex items-center gap-1.5 font-inter text-sm",
+                pagePath ? "text-foreground" : "text-muted-foreground",
+              )}
+              data-storefront-status={status}
+            >
+              {pagePath && <span aria-hidden="true" className={liveDotClass} />}
+              {t(`status.${status}`)}
             </p>
           )}
         </div>

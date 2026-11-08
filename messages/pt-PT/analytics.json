@@ -13,8 +13,9 @@
   },
   "firstRun": {
     "title": "Ainda nada para medir",
-    "body": "As visitas às suas páginas de produto aparecem aqui assim que uma estiver publicada.",
-    "backToSetup": "Voltar à configuração"
+    "body": "Publique uma montra para ver visualizações, ou faça a sua primeira venda para ver receitas.",
+    "publishStorefront": "Publicar uma montra",
+    "goToProducts": "Ir para Produtos"
   },
   "range": {
     "ariaLabel": "Intervalo de datas",
@@ -73,12 +74,20 @@
   },
   "compare": {
     "previous": "Período anterior",
-    "vsPrevious": "{change} face ao período anterior"
+    "vsPrevious": "{change} face ao período anterior",
+    "previousPeriodDates": "{from} - {to}"
+  },
+  "scrub": {
+    "on": "A {date}",
+    "inMonth": "Em {date}",
+    "upTo": "Até {date}",
+    "noSales": "Sem vendas"
   },
   "funnel": {
     "label": "Funil da montra",
     "description": "Desde a montra ser mostrada no seu próprio site até uma encomenda paga. Contam-se eventos, não pessoas.",
-    "views": "Visualizações no seu site",
+    "subtitle": "Visitantes que viram a montra incorporada no seu próprio site (não links diretos), desde a primeira visualização até à encomenda paga.",
+    "views": "Visualizações via incorporação",
     "viewsEmpty": "Sem visualizações neste período",
     "opens": "Produtos abertos",
     "opensEmpty": "Nenhum aberto neste período",
@@ -91,7 +100,7 @@
     "abandonment": "Compras não concluídas",
     "abandonmentCounts": "Por concluir: {expired}, iniciados: {started}",
     "notEnough": "Ainda sem dados suficientes",
-    "notEnoughHint": "As taxas aparecem quando este período tiver {min} visualizações."
+    "notEnoughHint": "As taxas aparecem quando este período tiver {min} visualizações: com menos, uma única encomenda distorceria a percentagem."
   },
   "tiles": {
     "revenue": "Receita",
@@ -110,7 +119,7 @@
   "channels": {
     "embed": "No seu site",
     "marketplace": "Marketplace",
-    "direct": "A sua página",
+    "direct": "Link direto",
     "button": "Botão de compra"
   },
   "signalsUnavailable": {
@@ -119,7 +128,8 @@
   },
   "upcoming": {
     "needProducts": "{labels} aparecem aqui assim que um produto estiver numa das suas montras.",
-    "needBlocks": "{labels} aparecem aqui assim que o respetivo bloco estiver numa das suas montras."
+    "needBlocks": "{labels} aparecem aqui assim que o respetivo bloco estiver numa das suas montras.",
+    "recordedOnly": "{labels} aparecem aqui assim que um comprador abrir a finalização da compra de um dos seus produtos."
   },
   "signal": {
     "visitors": "Visitantes",
@@ -168,6 +178,7 @@
     "product_view": {
       "label": "Visualizações da página de produto",
       "description": "Visitantes que abrem uma das suas páginas de produto.",
+      "subtitle": "Inclui cliques nos cartões da montra e em links diretos.",
       "count": "{count, plural, one {{formatted} visualização} many {{formatted} de visualizações} other {{formatted} visualizações}}",
       "total": "Total de visualizações",
       "emptyRange": "Sem visualizações neste intervalo",

@@ -524,11 +524,11 @@
     "addOnNotYours": "Jeden z oferowanych produktów nie ma już w tym sklepie. Usuń go i zapisz ponownie."
   },
   "productImport": {
-    "noTitle": "Brak nazwy.",
+    "noTitle": "Brak nazwy. Sprawdź, czy kolumna Nazwa powyżej jest ustawiona.",
     "titleTooLong": "Nazwa jest dłuższa niż 200 znaków.",
-    "noPrice": "Nie udało się odczytać ceny.",
+    "noPrice": "Nie udało się odczytać ceny. Sprawdź, czy kolumna Cena powyżej wskazuje właściwą kolumnę.",
     "priceZero": "Cena wynosi zero.",
-    "duplicateTitle": "Inny wiersz ma tę samą nazwę."
+    "duplicateTitle": "Inny wiersz ma tę samą nazwę. Powtarzające się nazwy są pomijane; zmień jedną z nich w swoim arkuszu."
   },
   "shipping": {
     "shipsFromInvalid": "Z tego kraju nie obsługujemy jeszcze wysyłki.",

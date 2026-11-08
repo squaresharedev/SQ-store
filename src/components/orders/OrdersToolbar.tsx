@@ -40,8 +40,8 @@ interface OrdersToolbarProps {
 
 /** Status options with icon + colour tone reused from the status-badge palette
  *  (paid→success, disputed→destructive, refunded→muted). `""` is "no filter".
- *  "Withdrawn" is not a database status: paid orders a buyer withdrew from,
- *  waiting for their refund (lib/orders/queries.ts). */
+ *  "Buyer cancelled" (withdrawn) is not a database status: paid orders a buyer
+ *  withdrew from, waiting for their refund (lib/orders/queries.ts). */
 const STATUS_OPTIONS: Omit<FilterOption<OrderStatusFilter | "">, "label">[] = [
   { value: "", icon: ListFilter },
   { value: "paid", icon: CircleCheck, tone: "text-success" },

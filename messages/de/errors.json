@@ -93,7 +93,7 @@
     "createStorefronts": "Zu viele Versuche, in kurzer Zeit Schaufenster zu erstellen.",
     "saveStorefronts": "Zu viele Versuche, in kurzer Zeit Schaufenster zu speichern.",
     "deleteStorefronts": "Zu viele Versuche, in kurzer Zeit Schaufenster zu löschen.",
-    "rotateEmbedKeys": "Zu viele Erneuerungen des Einbettungscodes in kurzer Zeit.",
+    "rotateEmbedKeys": "Zu viele Versuche, in kurzer Zeit einen neuen Website-Code zu erstellen.",
     "updateStock": "Zu viele Versuche, in kurzer Zeit den Lagerbestand zu aktualisieren.",
     "readProductPageSettings": "Zu viele Versuche, in kurzer Zeit die Produktseiteneinstellungen abzurufen.",
     "requestReview": "Zu viele Überprüfungsanfragen in kurzer Zeit.",
@@ -119,7 +119,7 @@
     "verifyDocumentUpload": "Dein Dokument-Upload konnte aufgrund eines Fehlers auf unserer Seite nicht verifiziert werden.",
     "verifyFileUpload": "Dein Datei-Upload konnte aufgrund eines Fehlers auf unserer Seite nicht verifiziert werden.",
     "verifyFontUpload": "Dein Schriftart-Upload konnte aufgrund eines Fehlers auf unserer Seite nicht verifiziert werden.",
-    "verifyElementUpload": "Dein Element-Upload konnte aufgrund eines Fehlers auf unserer Seite nicht verifiziert werden.",
+    "verifyElementUpload": "Dein Bild-Upload konnte aufgrund eines Fehlers auf unserer Seite nicht verifiziert werden.",
     "verifyBackgroundImage": "Dein Hintergrundbild konnte aufgrund eines Fehlers auf unserer Seite nicht verifiziert werden.",
     "verifyFont": "Deine Schriftartdatei konnte aufgrund eines Fehlers auf unserer Seite nicht verifiziert werden.",
     "verifyImage": "Dein Bild konnte aufgrund eines Fehlers auf unserer Seite nicht verifiziert werden.",
@@ -127,7 +127,7 @@
     "saveStorefront": "Dein Schaufenster konnte aufgrund eines Fehlers auf unserer Seite nicht gespeichert werden.",
     "saveEmbedSettings": "Die Einbettungseinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht gespeichert werden.",
     "deleteStorefront": "Das Schaufenster konnte aufgrund eines Fehlers auf unserer Seite nicht gelöscht werden.",
-    "rotateEmbedKey": "Der Schlüssel konnte aufgrund eines Fehlers auf unserer Seite nicht erneuert werden.",
+    "rotateEmbedKey": "Ein neuer Website-Code konnte aufgrund eines Fehlers auf unserer Seite nicht erstellt werden.",
     "saveStockSettings": "Die Lagerbestandseinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht gespeichert werden.",
     "checkSellerDetails": "Deine Verkäuferangaben konnten aufgrund eines Fehlers auf unserer Seite nicht geprüft werden.",
     "loadProductPageSettings": "Deine Produktseiteneinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht geladen werden.",
@@ -166,8 +166,8 @@
     "message": "Du kannst nicht veröffentlichen oder verkaufen, bis deine Verkäuferangaben vollständig sind.",
     "action": "Verkäuferangaben hinzufügen",
     "fix": {
-      "add": "{fields, select, businessName {Trage deinen Händlernamen unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} address {Trage deine Geschäftsadresse unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} email {Trage deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} businessName_address {Trage deinen Händlernamen und deine Geschäftsadresse unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} businessName_email {Trage deinen Händlernamen und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} address_email {Trage deine Geschäftsadresse und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} other {Trage deinen Händlernamen, deine Geschäftsadresse und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.}}",
-      "addAndConfirm": "{fields, select, businessName {Trage deinen Händlernamen unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail mit dem Code, den wir dorthin senden.} address {Trage deine Geschäftsadresse unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail mit dem Code, den wir dorthin senden.} email {Trage deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige sie mit dem Code, den wir dorthin senden.} businessName_address {Trage deinen Händlernamen und deine Geschäftsadresse unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail mit dem Code, den wir dorthin senden.} businessName_email {Trage deinen Händlernamen und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige die E-Mail mit dem Code, den wir dorthin senden.} address_email {Trage deine Geschäftsadresse und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige die E-Mail mit dem Code, den wir dorthin senden.} other {Trage deinen Händlernamen, deine Geschäftsadresse und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige die E-Mail mit dem Code, den wir dorthin senden.}}",
+      "add": "{fields, select, businessName {Trage deinen Namen oder Firmennamen unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} address {Trage deine Geschäftsadresse unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} email {Trage deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} businessName_address {Trage deinen Namen oder Firmennamen und deine Geschäftsadresse unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} businessName_email {Trage deinen Namen oder Firmennamen und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} address_email {Trage deine Geschäftsadresse und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.} other {Trage deinen Namen oder Firmennamen, deine Geschäftsadresse und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und veröffentliche dann.}}",
+      "addAndConfirm": "{fields, select, businessName {Trage deinen Namen oder Firmennamen unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail mit dem Code, den wir dorthin senden.} address {Trage deine Geschäftsadresse unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail mit dem Code, den wir dorthin senden.} email {Trage deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige sie mit dem Code, den wir dorthin senden.} businessName_address {Trage deinen Namen oder Firmennamen und deine Geschäftsadresse unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige deine Kontakt-E-Mail mit dem Code, den wir dorthin senden.} businessName_email {Trage deinen Namen oder Firmennamen und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige die E-Mail mit dem Code, den wir dorthin senden.} address_email {Trage deine Geschäftsadresse und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige die E-Mail mit dem Code, den wir dorthin senden.} other {Trage deinen Namen oder Firmennamen, deine Geschäftsadresse und deine Kontakt-E-Mail unter Einstellungen › Unternehmen und Verkäuferangaben ein und bestätige die E-Mail mit dem Code, den wir dorthin senden.}}",
       "confirm": "Bestätige deine Kontakt-E-Mail: Sende dir unter Einstellungen › Unternehmen und Verkäuferangaben einen Code und gib ihn dort ein.",
       "complete": "Vervollständige Einstellungen › Unternehmen und Verkäuferangaben und veröffentliche dann."
     }
@@ -211,7 +211,7 @@
     "wrongPasswordGoogle": "Das ist nicht das Square-Share-Passwort dieses Kontos. Du meldest dich mit Google an, nutze also stattdessen „Mit Google bestätigen“.",
     "passwordCheckUnavailable": "Wir konnten dein Passwort gerade nicht prüfen. Versuche es gleich noch einmal.",
     "reauthRequired": "Zu deiner Sicherheit: Melde dich erneut an, bevor du die Zwei-Faktor-Authentifizierung einschaltest.",
-    "setupRateLimited": "Das waren viele Einrichtungsversuche. Versuche es später noch einmal.",
+    "setupRateLimited": "Zu viele Einrichtungsversuche. Warte eine Minute und versuche es erneut.",
     "tooManyFactors": "Dieses Konto hat die Höchstzahl an Authenticatoren erreicht. Entferne zuerst einen.",
     "setupFailed": "Wir konnten die Einrichtung gerade nicht starten. Versuche es gleich noch einmal.",
     "setupUnavailable": "Die Einrichtung der Zwei-Faktor-Authentifizierung ist gerade nicht verfügbar. Versuche es später noch einmal.",
@@ -226,7 +226,7 @@
   "settings": {
     "usernameTaken": "Dieser Benutzername ist bereits vergeben. Versuche einen anderen.",
     "emailUnchanged": "Das ist bereits deine E-Mail-Adresse.",
-    "emailChangeRateLimited": "Zu viele Anfragen zur E-Mail-Änderung. Warte eine Weile, bevor du es erneut versuchst.",
+    "emailChangeRateLimited": "Zu viele Anfragen zur E-Mail-Änderung. Warte eine Minute und versuche es erneut.",
     "emailChangeNeedsPassword": "Gib dein aktuelles Passwort ein, um deine E-Mail-Adresse zu ändern.",
     "wrongPassword": "Das aktuelle Passwort ist falsch.",
     "passwordCheckUnavailable": "Dein Passwort konnte gerade nicht geprüft werden. Versuche es noch einmal.",
@@ -235,7 +235,7 @@
     "passwordUnchanged": "Das ist bereits dein Passwort.",
     "passwordUpdateFailed": "Das Passwort konnte nicht aktualisiert werden. Versuche es erneut.",
     "passwordReauthNeeded": "Zu deiner Sicherheit: Melde dich ab und wieder an, und ändere dann dein Passwort.",
-    "resetRateLimited": "Zu viele Zurücksetzungs-E-Mails. Warte eine Weile, bevor du es erneut versuchst.",
+    "resetRateLimited": "Zu viele Zurücksetzungs-E-Mails. Warte eine Minute und versuche es erneut.",
     "resetSendRateLimited": "Zu viele Anfragen. Warte eine Minute und versuche es erneut.",
     "resetFailed": "Die Zurücksetzungs-E-Mail konnte nicht gesendet werden. Versuche es erneut.",
     "contactEmailTakesNoMail": "Die Domain dieser Kontakt-E-Mail akzeptiert keine E-Mails. Überprüfe die Schreibweise oder verwende eine Adresse, die Käufer tatsächlich erreichen können.",
@@ -294,7 +294,7 @@
     "serviceUnreachable": "Die Verbindung zum Authentifizierungsdienst konnte nicht hergestellt werden. Bitte versuche es erneut.",
     "invalidEmail": "Gib eine gültige E-Mail-Adresse ein.",
     "emailRequired": "Gib deine E-Mail-Adresse ein.",
-    "tooManyAttempts": "Zu viele Versuche. Warte eine Weile und versuche es erneut.",
+    "tooManyAttempts": "Zu viele Versuche. Warte eine Minute und versuche es erneut.",
     "magicLinkFailed": "Die E-Mail konnte nicht gesendet werden. Bitte überprüfe deine Verbindung und versuche es erneut.",
     "resetEmailRequired": "Gib deine E-Mail-Adresse ein, um dein Passwort zurückzusetzen.",
     "resetEmailFailed": "Die Zurücksetzungs-E-Mail konnte nicht gesendet werden. Bitte überprüfe deine Verbindung und versuche es erneut.",
@@ -332,21 +332,21 @@
       "document": "Dieses Dokument ist zu groß.",
       "file": "Diese Datei ist zu groß.",
       "font": "Diese Schriftartdatei ist zu groß.",
-      "element": "Dieses Element ist zu groß."
+      "element": "Dieses Bild ist zu groß."
     },
     "tooLargeFix": {
       "image": "Verwende ein Bild unter {maxMb} MB. Komprimiere oder verkleinere es und versuche es erneut.",
       "document": "Verwende ein Dokument unter {maxMb} MB. Komprimiere oder verkleinere es und versuche es erneut.",
       "file": "Verwende eine Datei unter {maxMb} MB. Komprimiere oder verkleinere sie und versuche es erneut.",
       "font": "Verwende eine Schriftartdatei unter {maxMb} MB. Komprimiere oder verkleinere sie und versuche es erneut.",
-      "element": "Verwende ein Element unter {maxMb} MB. Komprimiere oder verkleinere es und versuche es erneut."
+      "element": "Verwende ein Bild unter {maxMb} MB. Komprimiere oder verkleinere es und versuche es erneut."
     },
     "neverReached": {
       "image": "Das Bild hat den Server nicht erreicht.",
       "document": "Das Dokument hat den Server nicht erreicht.",
       "file": "Die Datei hat den Server nicht erreicht.",
       "font": "Die Schriftartdatei hat den Server nicht erreicht.",
-      "element": "Das Element hat den Server nicht erreicht."
+      "element": "Das Bild hat den Server nicht erreicht."
     },
     "neverReachedFix": "Überprüfe deine Internetverbindung und versuche es erneut.",
     "rejected": {
@@ -354,7 +354,7 @@
       "document": "Dieses Dokument konnte nicht hochgeladen werden.",
       "file": "Diese Datei konnte nicht hochgeladen werden.",
       "font": "Diese Schriftartdatei konnte nicht hochgeladen werden.",
-      "element": "Dieses Element konnte nicht hochgeladen werden."
+      "element": "Dieses Bild konnte nicht hochgeladen werden."
     },
     "rejectedFix": {
       "signedOut": "Melde dich erneut an und versuche es dann noch einmal.",
@@ -365,7 +365,7 @@
   "uploadRoute": {
     "signIn": {
       "image": "Melde dich an, um Bilder hochzuladen.",
-      "element": "Melde dich an, um Elemente hochzuladen.",
+      "element": "Melde dich an, um Bilder hochzuladen.",
       "document": "Melde dich an, um Dokumente hochzuladen.",
       "file": "Melde dich an, um Dateien hochzuladen.",
       "font": "Melde dich an, um Schriftarten hochzuladen."
@@ -378,7 +378,7 @@
     },
     "notConfigured": {
       "image": "Das Hochladen von Bildern ist noch nicht eingerichtet. Versuch es später noch einmal.",
-      "element": "Das Hochladen von Elementen ist noch nicht eingerichtet. Versuch es später noch einmal.",
+      "element": "Das Hochladen von Bildern ist gerade nicht verfügbar. Versuch es später noch einmal.",
       "document": "Das Hochladen ist noch nicht eingerichtet. Versuch es später noch einmal.",
       "file": "Das Hochladen von Dateien ist noch nicht eingerichtet. Versuch es später noch einmal.",
       "font": "Das Hochladen von Schriftarten ist noch nicht eingerichtet. Versuch es später noch einmal."
@@ -459,28 +459,28 @@
       "document": "Dein Dokument-Upload wurde nicht abgeschlossen.",
       "file": "Dein Datei-Upload wurde nicht abgeschlossen.",
       "font": "Dein Schriftart-Upload wurde nicht abgeschlossen.",
-      "element": "Dein Element-Upload wurde nicht abgeschlossen."
+      "element": "Dein Bild-Upload wurde nicht abgeschlossen."
     },
     "uploadUnfinishedFix": {
       "image": "Wähle das Bild erneut aus und lade es hoch, bevor du speicherst.",
       "document": "Wähle das Dokument erneut aus und lade es hoch, bevor du speicherst.",
       "file": "Wähle die Datei erneut aus und lade sie hoch, bevor du speicherst.",
       "font": "Wähle die Schriftartdatei erneut aus und lade sie hoch, bevor du speicherst.",
-      "element": "Wähle das Element erneut aus und lade es hoch, bevor du speicherst."
+      "element": "Wähle das Bild erneut aus und lade es hoch, bevor du speicherst."
     },
     "uploadTooLarge": {
       "image": "Dieses Bild ist zu groß.",
       "document": "Dieses Dokument ist zu groß.",
       "file": "Diese Datei ist zu groß.",
       "font": "Diese Schriftartdatei ist zu groß.",
-      "element": "Dieses Element ist zu groß."
+      "element": "Dieses Bild ist zu groß."
     },
     "uploadTooLargeFix": {
       "image": "Verwende ein Bild unter {maxMb} MB und lade es dann erneut hoch.",
       "document": "Verwende ein Dokument unter {maxMb} MB und lade es dann erneut hoch.",
       "file": "Verwende eine Datei unter {maxMb} MB und lade sie dann erneut hoch.",
       "font": "Verwende eine Schriftartdatei unter {maxMb} MB und lade sie dann erneut hoch.",
-      "element": "Verwende ein Element unter {maxMb} MB und lade es dann erneut hoch."
+      "element": "Verwende ein Bild unter {maxMb} MB und lade es dann erneut hoch."
     },
     "wrongTypeFix": {
       "image": "Verwende ein JPEG-, PNG-, WebP-, GIF- oder AVIF-Bild.",

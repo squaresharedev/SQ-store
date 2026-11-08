@@ -24,6 +24,7 @@ export function ProductFormView({
   addOnHabits,
   suggested,
   ai,
+  checkoutOpen = false,
 }: {
   title: string;
   subtitle: string;
@@ -49,6 +50,9 @@ export function ProductFormView({
   suggested?: ProductSuggestions;
   /** What AI writing help the form offers (lib/ai-suggestions.ts aiWritingFor). */
   ai?: AiWriting;
+  /** Square Share checkout can take this store's payments
+   *  (lib/checkout/availability.ts checkoutProviderFor). */
+  checkoutOpen?: boolean;
 }) {
   const t = useTranslations("Products.page");
   return (
@@ -94,6 +98,7 @@ export function ProductFormView({
         addOnChoices={addOnChoices}
         addOnHabits={addOnHabits}
         suggested={suggested}
+        checkoutOpen={checkoutOpen}
         {...ai}
       />
     </main>

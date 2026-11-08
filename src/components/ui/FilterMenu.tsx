@@ -37,9 +37,8 @@ export interface FilterMenuSection {
  *
  * The trigger has to earn that consolidation, so it always states what is
  * applied: it reads as its resting label until a group moves off its default,
- * then summarises the applied groups ("Draft · Price: high to low"). Collapsed
- * to an icon on mobile it can't say that, so an accent dot marks "something is
- * filtering here" instead.
+ * then summarises the applied groups ("Draft · Price: high to low"), at every
+ * width: an icon alone is not something every reader recognises.
  *
  * Selecting does NOT close the panel: these groups compose (pick a status, then
  * an ordering), and a menu that dismissed itself after the first pick would
@@ -50,7 +49,6 @@ export function FilterMenu({
   sections,
   restingLabel,
   triggerIcon,
-  iconOnlyOnMobile = false,
   triggerClassName,
   panelClassName = "sm:w-64",
 }: {
@@ -60,8 +58,6 @@ export function FilterMenu({
   /** Trigger text while every group sits at its default. */
   restingLabel: string;
   triggerIcon?: React.ReactNode;
-  /** Collapse the trigger to its icon below `sm` (label stays sr-only). */
-  iconOnlyOnMobile?: boolean;
   triggerClassName?: string;
   panelClassName?: string;
 }) {
@@ -99,40 +95,24 @@ export function FilterMenu({
           onClick={() => setOpen((prev) => !prev)}
           className={cn(
             secondaryButtonClass,
-            "relative justify-between",
+            "justify-between",
             // A filtered list looks like a short list, so the control that did
             // it stops being a quiet neutral until it is cleared.
             applied.length > 0 && "border-foreground",
-            iconOnlyOnMobile && "max-sm:gap-0 max-sm:px-2.5",
             triggerClassName,
           )}
         >
           <span className="flex min-w-0 items-center gap-2">
             {triggerIcon}
-            <span
-              className={cn(
-                "truncate text-sm",
-                iconOnlyOnMobile && "max-sm:sr-only",
-              )}
-            >
-              {summary}
-            </span>
+            <span className="truncate text-sm">{summary}</span>
           </span>
           <ChevronDown
             aria-hidden="true"
             className={cn(
               "size-4 shrink-0 text-muted-foreground transition-transform duration-base",
               open && "rotate-180",
-              iconOnlyOnMobile && "max-sm:hidden",
             )}
           />
-          {/* Only where the summary can't be read: the icon-only trigger. */}
-          {applied.length > 0 && iconOnlyOnMobile && (
-            <span
-              aria-hidden="true"
-              className="absolute -right-1 -top-1 size-2 rounded-full bg-acid sm:hidden"
-            />
-          )}
         </button>
       }
     >

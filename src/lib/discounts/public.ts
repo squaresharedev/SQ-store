@@ -26,6 +26,7 @@
 //     the amount is still right.
 
 import type { createAdminClient } from "@/lib/supabase/admin";
+import { quotedFilterValue } from "@/lib/supabase/ilike";
 import { bestSale, offerPercentOff } from "@/lib/discounts/pricing";
 import {
   priorPriceCents,
@@ -69,11 +70,6 @@ const READ_ROWS_MAX = 1000;
  *  cost a buyer the page; a second failure is a real one. */
 const SALES_READ_ATTEMPTS = 2;
 
-/** A PostgREST filter value, quoted so a timestamp's dots and colons stay data. */
-function quoted(value: string): string {
-  return `"${value}"`;
-}
-
 /** Whether a list read returned every row that matched. */
 function isWhole(returned: number, count: number | null | undefined): boolean {
   // No count to go by: whole only if the read stopped short of its ceiling.
@@ -108,7 +104,7 @@ export async function readStoreSales(admin: Admin, ownerId: string, now: Date): 
         .eq("kind", "automatic")
         .is("archived_at", null)
         .lte("starts_at", at)
-        .or(`ends_at.is.null,ends_at.gt.${quoted(at)}`)
+        .or(`ends_at.is.null,ends_at.gt.${quotedFilterValue(at)}`)
         .order("created_at", { ascending: true })
         .order("id", { ascending: true })
         .limit(READ_ROWS_MAX);
@@ -266,7 +262,7 @@ async function readEarlierSales(
     .eq("owner_id", ownerId)
     .eq("kind", "automatic")
     .lt("starts_at", before)
-    .or(`ends_at.is.null,ends_at.gt.${quoted(runningAfter)}`)
+    .or(`ends_at.is.null,ends_at.gt.${quotedFilterValue(runningAfter)}`)
     .order("starts_at", { ascending: true })
     .order("id", { ascending: true })
     .limit(READ_ROWS_MAX);

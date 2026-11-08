@@ -136,8 +136,8 @@ describe("MultiBlockEditor", () => {
       productBlock(1),
     ]);
     // Show title shapes the label rather than placing it, so it lives in the
-    // fine-tuning drawer now.
-    await user.click(screen.getByRole("button", { name: /Fine tuning/ }));
+    // Title drawer now.
+    await user.click(screen.getByRole("button", { name: "Title" }));
     await user.click(screen.getByRole("switch", { name: "Show title" }));
     expect(callbacks.onProductStyleChange).toHaveBeenCalledWith({
       showTitle: false,
@@ -150,14 +150,14 @@ describe("MultiBlockEditor", () => {
     expect(callbacks.onProductStyleChange).toHaveBeenCalledWith({
       priceTagFont: "mono",
     });
-    await user.click(screen.getByRole("button", { name: "Reset to theme" }));
+    await user.click(screen.getByRole("button", { name: "Use theme style" }));
     expect(callbacks.onProductStyleReset).toHaveBeenCalledTimes(1);
   });
 
   it("all products with no overrides hides the reset affordance", () => {
     renderMulti([productBlock(0), productBlock(1)]);
     expect(
-      screen.queryByRole("button", { name: "Reset to theme" }),
+      screen.queryByRole("button", { name: "Use theme style" }),
     ).not.toBeInTheDocument();
   });
 

@@ -159,8 +159,8 @@
         "body": "Je to stiahnutie, takže nie je nič na odoslanie."
       },
       "withdrawn": {
-        "title": "Kupujúci odstúpil od objednávky {number}",
-        "body": "{title}. Dohodnite s ním vrátenie tovaru a refundáciu."
+        "title": "Kupujúci zrušil objednávku {number}",
+        "body": "{title}. Dohodnite vrátenie tovaru a do 14 dní mu vráťte peniaze."
       }
     },
     "billing": {

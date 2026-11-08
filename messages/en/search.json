@@ -48,7 +48,7 @@
     "securityActivity": "Security activity",
     "signOut": "Sign out",
     "vat": "VAT ID",
-    "businessName": "Trader name",
+    "businessName": "Your name or business name",
     "country": "Country",
     "address": "Business address",
     "contactEmail": "Contact email",
@@ -61,7 +61,6 @@
     "sellerAgreement": "Seller agreement",
     "termsOfService": "Terms of Service",
     "exportData": "Export my data",
-    "deleteAccount": "Delete account",
     "plan": "Plan and pricing",
     "invoices": "Invoices and payment details"
   },

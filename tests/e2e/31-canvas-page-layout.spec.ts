@@ -142,7 +142,7 @@ async function openPageFor(page: Page, title: string) {
   await canvasStill(page);
   await pressCanvasButton(
     page,
-    new RegExp(`^open the buyer flow for ${title}$`, "i"),
+    new RegExp(`^open the product page for ${title}$`, "i"),
   );
 }
 

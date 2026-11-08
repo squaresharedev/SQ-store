@@ -112,7 +112,7 @@ test.describe("orders + analytics (seeded)", () => {
     await expect(card.getByRole("link", { name: /Recent two/ })).toBeVisible();
 
     // Every row is a link, and each one carries its own order id.
-    const hrefs = await card.getByRole("link").evaluateAll((nodes) =>
+    const hrefs = await card.getByRole("list").getByRole("link").evaluateAll((nodes) =>
       nodes.map((n) => n.getAttribute("href") ?? ""),
     );
     expect(hrefs.length).toBe(2);
@@ -120,6 +120,8 @@ test.describe("orders + analytics (seeded)", () => {
       expect(href).toMatch(/^\/orders\?order=[0-9a-f-]{36}$/);
     }
     expect(new Set(hrefs).size).toBe(2);
+    // Beside the title, the way on to the whole list.
+    await expect(card.getByRole("link", { name: "See all orders" })).toHaveAttribute("href", "/orders");
 
     // A plain click opens the order's panel RIGHT HERE: the detail came with
     // the page, so there is no trip to /orders and nothing to wait on.
@@ -221,6 +223,15 @@ test.describe("orders + analytics (seeded)", () => {
     });
     await expect(page.getByText(/embed/i).first()).toBeVisible();
     await expect(page.getByText(/marketplace/i).first()).toBeVisible();
+    // What is not measured yet says what brings it: checkout views come by
+    // themselves (there is no checkout block), product numbers once a product
+    // is on a storefront.
+    await expect(
+      page.getByText("Checkout views appear here once a buyer opens checkout on one of your products."),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Product clicks, Product page views appear here once a product is on one of your storefronts."),
+    ).toBeVisible();
   });
 
   test("sales by weekday: each bar is a stack of the products sold that day", async ({ page }, testInfo) => {

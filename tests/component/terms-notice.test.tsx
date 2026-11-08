@@ -6,7 +6,7 @@ import { TermsNoticeBanner } from "@/components/settings/TermsNoticeBanner";
 afterEach(cleanup);
 
 const OLD = "tos-2026-10-11";
-const NEW = "tos-2026-10-31";
+const NEW = "tos-2026-11-06";
 const DATED = { version: NEW, effectiveAt: "2026-12-02T03:23:00Z" };
 
 describe("TermsNoticeBanner", () => {

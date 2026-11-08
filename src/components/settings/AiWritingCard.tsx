@@ -5,7 +5,7 @@ import { ArrowUpRight, PenLine, Sparkles, TextCursorInput, type LucideIcon } fro
 import { useLocale, useTranslations } from "next-intl";
 import Link from "@/components/ui/AppLink";
 import { buttonClassName } from "@/components/ui/button";
-import { helpTextClass, iconNudgeRightClass, infoTextClass, labelClass, stubBadgeClass } from "@/components/ui/control-styles";
+import { helpTextClass, iconNudgeUpRightClass, infoTextClass, labelClass, stubBadgeClass } from "@/components/ui/control-styles";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { Meter } from "@/components/ui/Meter";
 import { Switch } from "@/components/ui/switch";
@@ -121,7 +121,7 @@ function AiUpsell() {
       <div className="flex flex-wrap items-center gap-3">
         <Link href={plansHref("ai_writing")} className={cn(buttonClassName("secondary"), "group/btn")}>
           {t("upsellCta")}
-          <ArrowUpRight className={cn("size-4", iconNudgeRightClass)} strokeWidth={2} aria-hidden />
+          <ArrowUpRight className={cn("size-4", iconNudgeUpRightClass)} strokeWidth={2} aria-hidden />
         </Link>
         <span className={cn(stubBadgeClass, "ml-0 normal-case tracking-normal")}>{t("upsellCredit", { credit })}</span>
       </div>

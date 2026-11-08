@@ -32,10 +32,12 @@ function Harness(props: Partial<Parameters<typeof EditorToolbar>[0]> = {}) {
       onZoomIn={vi.fn()}
       onZoomOut={vi.fn()}
       onZoomReset={vi.fn()}
+      onZoomFit={vi.fn()}
       onTidy={vi.fn()}
       canTidy
       settingsOpen={false}
       onToggleSettings={vi.fn()}
+      onShowShortcuts={vi.fn()}
       pagesOpen={false}
       canOpenPage
       onTogglePages={vi.fn()}
@@ -65,12 +67,24 @@ describe("EditorToolbar overflow menu", () => {
     // hover cannot be done with a thumb, and lost it again when the Element
     // button turned out to take a press as well. Asserting the whole list is
     // what stops that argument being re-made one row at a time.
+    // Redo left it for the bar, beside undo.
     const items = within(moreMenu()!).getAllByRole("menuitem");
     expect(items.map((item) => item.textContent?.trim())).toEqual([
-      "Redo",
       "Tidy up",
-      "Reset zoom",
+      "Fit to screen",
     ]);
+  });
+
+  it("fits the whole board back on screen, not 100%, which on a phone is zoomed in", async () => {
+    const onZoomFit = vi.fn();
+    const onZoomReset = vi.fn();
+    const user = userEvent.setup();
+    render(<Harness onZoomFit={onZoomFit} onZoomReset={onZoomReset} />);
+    await user.click(screen.getByRole("button", { name: "More tools" }));
+    await user.click(within(moreMenu()!).getByRole("menuitem", { name: "Fit to screen" }));
+    expect(onZoomFit).toHaveBeenCalledTimes(1);
+    expect(onZoomReset).not.toHaveBeenCalled();
+    expect(moreMenu()).toBeNull();
   });
 
   it("each item fires its action and closes the menu", async () => {
@@ -83,13 +97,11 @@ describe("EditorToolbar overflow menu", () => {
     expect(moreMenu()).toBeNull();
   });
 
-  it("disabled history actions stay disabled inside the menu", async () => {
+  it("disabled actions stay disabled inside the menu", async () => {
     const user = userEvent.setup();
-    render(<Harness canRedo={false} canTidy={false} />);
+    render(<Harness canTidy={false} />);
     await user.click(screen.getByRole("button", { name: "More tools" }));
-    const menu = moreMenu()!;
-    expect(within(menu).getByRole("menuitem", { name: "Redo" })).toBeDisabled();
-    expect(within(menu).getByRole("menuitem", { name: "Tidy up" })).toBeDisabled();
+    expect(within(moreMenu()!).getByRole("menuitem", { name: "Tidy up" })).toBeDisabled();
   });
 
   /**
@@ -139,17 +151,67 @@ describe("EditorToolbar overflow menu", () => {
     render(<Harness />);
     await user.click(screen.getByRole("button", { name: "More tools" }));
     fireEvent.pointerDown(
-      within(moreMenu()!).getByRole("menuitem", { name: "Redo" }),
+      within(moreMenu()!).getByRole("menuitem", { name: "Tidy up" }),
     );
     expect(moreMenu()).toBeInTheDocument();
   });
 });
 
-describe("EditorToolbar zoom-to-fit removal", () => {
-  it("no fit-to-screen control exists", () => {
+describe("EditorToolbar phone words", () => {
+  it("names the icon-only controls in words, since their tips never show on touch", () => {
     render(<Harness />);
-    expect(screen.queryByRole("button", { name: /fit the canvas/i })).toBeNull();
-    expect(screen.queryByRole("button", { name: /zoom to fit/i })).toBeNull();
+    // Shown under the icon below `sm` only (CSS jsdom cannot see), and never
+    // the accessible name: that stays the button's own label.
+    const word = (button: string, text: string) =>
+      within(screen.getByRole("button", { name: button })).getByText(text);
+    expect(word("Undo", "Undo")).toBeInTheDocument();
+    expect(word("Redo", "Redo")).toBeInTheDocument();
+    expect(word("Storefront style", "Style")).toBeInTheDocument();
+    expect(word("More tools", "More")).toBeInTheDocument();
+  });
+});
+
+describe("EditorToolbar history pair", () => {
+  it("keeps redo beside undo, outside every width-gated group", () => {
+    render(<Harness />);
+    // The responsive split is CSS jsdom cannot see, so this pins the
+    // structure instead: one group holds both, and nothing hides it. Redo in
+    // the phone's More menu cost a second tap after every undo too many.
+    const undo = screen.getByRole("button", { name: "Undo" });
+    const redo = screen.getByRole("button", { name: "Redo" });
+    expect(redo.parentElement).toBe(undo.parentElement);
+    expect(undo.parentElement!.className).not.toMatch(/\bhidden\b/);
+  });
+
+  it("dims redo while there is nothing to redo, and fires it otherwise", async () => {
+    const onRedo = vi.fn();
+    const user = userEvent.setup();
+    const { unmount } = render(<Harness canRedo={false} onRedo={onRedo} />);
+    expect(screen.getByRole("button", { name: "Redo" })).toBeDisabled();
+    unmount();
+
+    render(<Harness onRedo={onRedo} />);
+    await user.click(screen.getByRole("button", { name: "Redo" }));
+    expect(onRedo).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("EditorToolbar keyboard shortcuts", () => {
+  it("opens the shortcuts list, naming the ? key in its tip", async () => {
+    const onShowShortcuts = vi.fn();
+    const user = userEvent.setup();
+    render(<Harness onShowShortcuts={onShowShortcuts} />);
+    const button = screen.getByRole("button", { name: "Keyboard shortcuts" });
+    expect(within(button).getByText("Keyboard shortcuts (?)")).toBeInTheDocument();
+    await user.click(button);
+    expect(onShowShortcuts).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("EditorToolbar zoom controls", () => {
+  it("keeps fit to screen off the bar: it is the phone's, inside More", () => {
+    render(<Harness />);
+    expect(screen.queryByRole("button", { name: /fit/i })).toBeNull();
   });
 
   it("the remaining zoom controls are still there", () => {
@@ -162,6 +224,35 @@ describe("EditorToolbar zoom-to-fit removal", () => {
   });
 });
 
+describe("EditorToolbar product page node", () => {
+  const pageNode = () =>
+    screen.getByRole("button", { name: "Show the product page, checkout and thank-you page" });
+
+  it("says why it cannot open a page, rather than doing nothing", async () => {
+    // A board with no product has no page to show. A `disabled` button drops
+    // pointer events, so its tip never showed and a press got no answer: this
+    // one dims, keeps its tip, and hands the press on for the designer to
+    // explain.
+    const onTogglePages = vi.fn();
+    const user = userEvent.setup();
+    render(<Harness canOpenPage={false} onTogglePages={onTogglePages} />);
+    const node = pageNode();
+    expect(node).not.toBeDisabled();
+    expect(node).toHaveAttribute("aria-disabled", "true");
+    expect(within(node).getByText("Add a product to open its page")).toBeInTheDocument();
+    await user.click(node);
+    expect(onTogglePages).toHaveBeenCalledTimes(1);
+  });
+
+  it("is an ordinary toggle once there is a product to show", () => {
+    render(<Harness />);
+    const node = pageNode();
+    expect(node).not.toHaveAttribute("aria-disabled");
+    expect(node).toHaveAttribute("aria-pressed", "false");
+    expect(within(node).getByText("Show product page")).toBeInTheDocument();
+  });
+});
+
 /**
  * The Element tool. It replaced the Shape tool when uploading your own artwork
  * moved into the toolbar, and the library it used to hold moved OUT: the menu
@@ -169,7 +260,7 @@ describe("EditorToolbar zoom-to-fit removal", () => {
  * left panel. The hover mechanics are unchanged, so what is covered here is
  * the contents and the wiring.
  */
-const elementMenu = () => screen.queryByRole("menu", { name: "Elements" });
+const elementMenu = () => screen.queryByRole("menu", { name: "Shapes and images" });
 
 /**
  * Unlike the More menu, this one is always MOUNTED — it reveals on hover, which
@@ -178,20 +269,20 @@ const elementMenu = () => screen.queryByRole("menu", { name: "Elements" });
  * screen reader goes by.
  */
 const elementMenuOpen = () =>
-  screen.getByRole("button", { name: "Add element" }).getAttribute("aria-expanded") ===
+  screen.getByRole("button", { name: "Add shape or image" }).getAttribute("aria-expanded") ===
   "true";
 
 describe("EditorToolbar element tool", () => {
-  it("is labelled Element, not Shape", () => {
+  it("is labelled Add shape or image, not Add element", () => {
     render(<Harness />);
-    expect(screen.getByRole("button", { name: "Add element" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Add shape" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Add shape or image" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add element" })).toBeNull(); // old label gone
   });
 
   it("leads with uploading your own image", async () => {
     const user = userEvent.setup();
     render(<Harness />);
-    await user.click(screen.getByRole("button", { name: "Add element" }));
+    await user.click(screen.getByRole("button", { name: "Add shape or image" }));
     expect(
       within(elementMenu()!).getByRole("menuitem", { name: "Upload" }),
     ).toBeInTheDocument();
@@ -200,7 +291,7 @@ describe("EditorToolbar element tool", () => {
   it("says so while an upload is in flight, rather than looking inert", async () => {
     const user = userEvent.setup();
     render(<Harness uploadingElement />);
-    await user.click(screen.getByRole("button", { name: "Add element" }));
+    await user.click(screen.getByRole("button", { name: "Add shape or image" }));
     const item = within(elementMenu()!).getByRole("menuitem", { name: "Uploading…" });
     expect(item).toBeDisabled();
   });
@@ -209,7 +300,7 @@ describe("EditorToolbar element tool", () => {
     const onAddShape = vi.fn();
     const user = userEvent.setup();
     render(<Harness onAddShape={onAddShape} />);
-    await user.click(screen.getByRole("button", { name: "Add element" }));
+    await user.click(screen.getByRole("button", { name: "Add shape or image" }));
     const menu = elementMenu()!;
     for (const name of ["Add square", "Add circle"]) {
       expect(within(menu).getByRole("menuitem", { name })).toBeInTheDocument();
@@ -225,7 +316,7 @@ describe("EditorToolbar element tool", () => {
     // undone the point of moving the library into the panel.
     const user = userEvent.setup();
     render(<Harness />);
-    await user.click(screen.getByRole("button", { name: "Add element" }));
+    await user.click(screen.getByRole("button", { name: "Add shape or image" }));
     const items = within(elementMenu()!).getAllByRole("menuitem");
     expect(items).toHaveLength(4);
     expect(items.map((item) => item.getAttribute("aria-label") ?? item.textContent)).toEqual(
@@ -236,7 +327,7 @@ describe("EditorToolbar element tool", () => {
   it("no longer carries the whole library — that is what the panel is for", async () => {
     const user = userEvent.setup();
     render(<Harness />);
-    await user.click(screen.getByRole("button", { name: "Add element" }));
+    await user.click(screen.getByRole("button", { name: "Add shape or image" }));
     const menu = elementMenu()!;
     // A kind deliberately left out of QUICK_SHAPE_KINDS.
     expect(within(menu).queryByRole("menuitem", { name: "Add hexagon" })).toBeNull();
@@ -246,7 +337,7 @@ describe("EditorToolbar element tool", () => {
     const onOpenShapesPanel = vi.fn();
     const user = userEvent.setup();
     render(<Harness onOpenShapesPanel={onOpenShapesPanel} />);
-    await user.click(screen.getByRole("button", { name: "Add element" }));
+    await user.click(screen.getByRole("button", { name: "Add shape or image" }));
     await user.click(
       within(elementMenu()!).getByRole("menuitem", { name: "All shapes" }),
     );
@@ -275,7 +366,7 @@ describe("EditorToolbar element tool", () => {
       screen
         .getByRole("button", { name })
         .querySelector("span[aria-hidden='true']");
-    expect(tip("Add element")).toBeNull();
+    expect(tip("Add shape or image")).toBeNull();
     expect(tip("Add text")).not.toBeNull();
     expect(tip("Add product")).not.toBeNull();
   });
@@ -311,7 +402,7 @@ describe("EditorToolbar element tool", () => {
 
   it("disables inserting at the block cap", async () => {
     render(<Harness canAddBlocks={false} />);
-    expect(screen.getByRole("button", { name: "Add element" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Add shape or image" })).toBeDisabled();
     // The panel route stays open: browsing the library is not an insert. The
     // menu is always mounted (it reveals on hover), so this reads it without
     // opening the trigger, which the line above just disabled.

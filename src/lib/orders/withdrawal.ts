@@ -22,6 +22,8 @@ import type { BuyerWithdrawal } from "@/types/checkout";
 export const STATUTORY_WITHDRAWAL_DAYS = 14;
 /** Added after "shipped" to stand in for "received", which nobody records. */
 export const WITHDRAWAL_DELIVERY_ALLOWANCE_DAYS = 14;
+/** Days the seller has to refund a buyer who withdrew, from the withdrawal (CRD art. 13(1)). */
+export const WITHDRAWAL_REFUND_DAYS = 14;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

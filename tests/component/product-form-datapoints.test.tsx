@@ -249,7 +249,7 @@ describe("product form — the machine-readable contract", () => {
     }
   });
 
-  it("says which shipping terms apply, inside the Delivery card", () => {
+  it("says which shipping terms apply, inside the How buyers get it card", () => {
     render(<ProductForm product={PRODUCT} />);
     const shipping = document.querySelector('[data-product-section="shipping"]')!;
     expect(shipping.closest('[data-product-section="media"]')).not.toBeNull();

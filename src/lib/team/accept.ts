@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getProfile, getUser } from "@/lib/auth/session";
 import { createNotification } from "@/lib/notifications/create";
+import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { SETTINGS_TEAM_PATH } from "@/lib/team/paths";
 import { actionError, invalidInput, type ActionError } from "@/lib/errors";
 import { msg } from "@/i18n/types";
@@ -45,6 +46,14 @@ export async function acceptTeamInvite(inviteId: string): Promise<AcceptInviteRe
   }
   if (!user.email) {
     return { ok: false, error: invalidInput(msg("Errors.team.noVerifiedEmail")), accountOwnerId: null };
+  }
+  // Joining a store is a membership change like the owner's own: same budget.
+  if (!(await rateLimit("team_membership", RATE_LIMITS.teamMembership))) {
+    return {
+      ok: false,
+      error: actionError("rate_limited", msg("Errors.team.membershipRateLimited")),
+      accountOwnerId: null,
+    };
   }
 
   const supabase = await createClient();

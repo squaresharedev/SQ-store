@@ -137,7 +137,7 @@ test.describe("storefront typography", () => {
     await gotoApp(page, "/storefront");
     await createStorefrontViaUI(page);
 
-    await openSection(page, "Typography");
+    await openSection(page, "Font");
     await page.getByRole("combobox", { name: "Font" }).click();
     await page.getByRole("option", { name: /montserrat/i }).click();
 
@@ -173,7 +173,7 @@ test.describe("storefront typography", () => {
     await gotoApp(page, "/storefront");
     await createStorefrontViaUI(page);
 
-    await openSection(page, "Typography");
+    await openSection(page, "Font");
     await page.locator('input[type="file"][accept*="woff2"]').setInputFiles({
       name: "Seller.woff2",
       mimeType: "font/woff2",
@@ -197,7 +197,7 @@ test.describe("storefront typography", () => {
     await expectToast(page, /storefront saved/i, 20_000);
     await page.reload();
 
-    await openSection(page, "Typography");
+    await openSection(page, "Font");
     await expect(page.getByText("Seller.woff2")).toBeVisible({ timeout: 20_000 });
     // The face is registered from a SIGNED url, never one the config carried.
     expect(

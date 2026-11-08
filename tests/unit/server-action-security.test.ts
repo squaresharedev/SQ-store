@@ -142,10 +142,15 @@ const REGISTRY: Record<string, Classification> = {
   "lib/products/actions.ts::createProduct": limited(),
   "lib/products/actions.ts::updateProduct": limited(),
   "lib/products/actions.ts::deleteProduct": limited(),
+  "lib/products/card-actions.ts::setProductStatus": limited(),
+  "lib/products/card-actions.ts::duplicateProduct": limited(),
   // Its own budget, not productWrite's: one call parses a file and inserts up
   // to IMPORT_ROWS_MAX rows, so pricing it as a single product write would let
   // a script drive thousands of inserts through the cheapest budget there is.
   "lib/products/import-actions.ts::importProducts": limited(),
+  // Taking an import back: the same budget, since one call deletes an import's
+  // worth of rows.
+  "lib/products/import-actions.ts::undoProductImport": limited(),
   // A seller sending a paused item back to staff. Limited because each call
   // that lands pings the admin panel and can reach staff phones.
   "lib/moderation/review-request.ts::requestModerationReview": limited(),

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ComponentProps, type ReactNode, type RefObject } from "react";
 import { MousePointer2, Pause, Play } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { cubicBezier, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { iconButtonClass } from "./control-styles";
 import { EASE_STANDARD, POP, PRESS_SCALE } from "./motion-tokens";
@@ -19,7 +19,9 @@ const GLIDE = { duration: 0.7, ease: EASE_STANDARD };
 /** The ring a click leaves behind. */
 const RIPPLE = { duration: 0.45, ease: EASE_STANDARD };
 /** The pointer's tip sits this far inside its own box (px), so the TIP lands on the target. */
-const CURSOR_TIP = 3;
+export const CURSOR_TIP = 3;
+/** How many points an eased path (`easedPath`) is drawn through. */
+const EASED_PATH_STEPS = 24;
 /** Where on a button the cursor clicks, as a fraction of the button: right of
  *  and below its centre, so the pointer never covers the label. */
 const AIM = { x: 0.78, y: 0.8 };
@@ -37,6 +39,34 @@ export function aimWithin(node: HTMLElement, root: HTMLElement): StoryPoint {
     y += el.offsetTop;
   }
   return { x, y };
+}
+
+const ease = cubicBezier(...EASE_STANDARD);
+
+/**
+ * The points something passes through on a curve (`at`: 0 to 1 along it), evenly
+ * in time, so it travels the curve at the pace of `EASE_STANDARD` however the
+ * curve bends: by distance along it, eased. Play the points as keyframes with a
+ * linear ease and it keeps pace with anything else eased the same way.
+ */
+export function easedPath(at: (t: number) => StoryPoint, steps = EASED_PATH_STEPS): StoryPoint[] {
+  const samples = Array.from({ length: 101 }, (_, index) => at(index / 100));
+  const lengths = [0];
+  for (let index = 1; index < samples.length; index++) {
+    const step = Math.hypot(samples[index].x - samples[index - 1].x, samples[index].y - samples[index - 1].y);
+    lengths.push(lengths[index - 1] + step);
+  }
+  const total = lengths[lengths.length - 1] || 1;
+  return Array.from({ length: steps + 1 }, (_, step) => {
+    const wanted = ease(step / steps) * total;
+    const index = Math.max(1, lengths.findIndex((length) => length >= wanted));
+    const before = lengths[index - 1];
+    const share = (wanted - before) / (lengths[index] - before || 1);
+    return {
+      x: samples[index - 1].x + (samples[index].x - samples[index - 1].x) * share,
+      y: samples[index - 1].y + (samples[index].y - samples[index - 1].y) * share,
+    };
+  });
 }
 
 /** The beat the cursor last pressed on, or null before its first click. It keys
@@ -134,8 +164,18 @@ export function StoryCursor({
           transition={RIPPLE}
         />
       )}
-      <MousePointer2 className="relative size-5 fill-foreground stroke-background drop-shadow-sm" strokeWidth={1.5} />
+      <StoryPointerIcon className="relative" />
     </motion.span>
+  );
+}
+
+/** The pointer itself: ink, outlined in paper so it reads over any picture. Its tip is CURSOR_TIP in from the box's corner. */
+export function StoryPointerIcon({ className }: { className?: string }) {
+  return (
+    <MousePointer2
+      className={cn("size-5 fill-foreground stroke-background drop-shadow-sm", className)}
+      strokeWidth={1.5}
+    />
   );
 }
 

@@ -49,7 +49,8 @@ import {
   type StorefrontSeller,
 } from "@/types/storefront";
 import { LAYER_OPS, moveLayerTo, type LayerOp } from "@/lib/storefront/layers";
-import { isDefaultProductPage, isProductPageSectionShown } from "@/lib/storefront/product-page";
+import { pinOnPhone, unpinnedOnPhone, withPhoneColumns } from "@/lib/storefront/mobile-layout";
+import { isDefaultProductPage } from "@/lib/storefront/product-page";
 import { isDefaultCheckoutPage, resolveCheckoutPage } from "@/lib/storefront/checkout-page";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { applyFormatToRange } from "@/lib/storefront/text-spans";
@@ -73,6 +74,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { Button } from "@/components/ui/button";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { UnsavedChangesDialog } from "@/components/ui/UnsavedChangesDialog";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { HeroMark } from "@/components/ui/HeroMark";
@@ -85,6 +87,7 @@ import {
   iconNudgeRightClass,
   primaryButtonClass,
 } from "@/components/ui/control-styles";
+import { attentionDotClass } from "@/components/ui/surface-styles";
 import { ColorTargetProvider } from "@/lib/theme/color-context";
 import {
   PRICE_TAG_COLOR_KEYS,
@@ -137,6 +140,7 @@ import {
 import { useEditorSurface } from "./useEditorSurface";
 import { DesignerCanvas } from "./DesignerCanvas";
 import { EditorToolbar } from "./EditorToolbar";
+import { ShortcutsDialog } from "./ShortcutsDialog";
 import { TakedownStrip } from "./TakedownStrip";
 import { SelectionToolbar } from "./SelectionToolbar";
 import {
@@ -148,7 +152,7 @@ import {
 } from "./SummonedField";
 import { ImageBlockEditor, type ImageBlockPatch } from "./ImageBlockEditor";
 import { MultiBlockEditor } from "./MultiBlockEditor";
-import { PlacementSection } from "./PlacementSection";
+import { PlacementSection, type PhoneChange } from "./PlacementSection";
 import { LayersPanel } from "./LayersPanel";
 import { ProductPicker } from "./ProductPicker";
 import { ProductBlockEditor } from "./ProductBlockEditor";
@@ -163,6 +167,8 @@ import {
 import { CANVAS_MARGIN, safeSpan } from "./canvas-geometry";
 import { useEditorHistory } from "./useEditorHistory";
 import { useUnsavedChangesGuard } from "@/lib/hooks/useUnsavedChangesGuard";
+import { useStoredFlag } from "@/lib/hooks/useStoredFlag";
+import { useIsTouch } from "@/lib/hooks/useIsTouch";
 import { SearchProvider, useSearch } from "@/components/search/SearchProvider";
 import type { TeamRole } from "@/lib/team/permissions";
 
@@ -344,6 +350,19 @@ function dismissMobileNotice() {
   for (const listener of noticeListeners) listener();
 }
 
+/** The strip under the header that says one thing about the editor itself:
+ *  the sample notice, or the small-screen notice. */
+const NOTICE_STRIP_CLASS =
+  "flex shrink-0 items-center gap-2 border-b border-border bg-muted px-4 py-1.5 font-inter text-xs text-foreground sm:px-6";
+
+/** Whether this browser has been told, once, how to select several blocks
+ *  (see selectBlock). */
+const MULTISELECT_TIP_KEY = "sq.storefront.multiselect-tip-shown";
+
+/** Whether this browser has been told, once, that closing a phone sheet brings
+ *  the toolbar it covers back (see the sheet tip effect). */
+const SHEET_TIP_KEY = "sq.storefront.sheet-tip-shown";
+
 /**
  * Page-level composition + state owner for the storefront designer. Content is
  * inserted from the bottom toolbar. The RIGHT panel holds the selected block's
@@ -370,17 +389,23 @@ export function StorefrontDesigner({
   sellerIdentity = {},
   shippingPolicy = {},
   sample = null,
+  autoStartTour = false,
   takedown = null,
   publicPagePath = null,
+  sellerDetailsMissing = false,
   initialVersion = null,
 }: {
   /**
    * Set when this is the SAMPLE storefront (lib/storefront/sample.ts), never a
    * row: nothing saves, nothing uploads, no product is edited, the header offers
-   * "Create your own" instead of Save, and the designer tour runs here.
+   * "Create your own" instead of Save, and its notice replays the designer tour.
    * `autoStartTour` is the person's `editor_tour_seen_at` still being null.
    */
   sample?: { autoStartTour: boolean } | null;
+  /** A real storefront's `sample.autoStartTour`: the designer tour starts by
+   *  itself on the person's first designer visit, whichever storefront that is,
+   *  since a seller who never opens the sample would otherwise never see it. */
+  autoStartTour?: boolean;
   storefrontId: string;
   initialName: string;
   initialConfig: StorefrontConfig;
@@ -425,6 +450,10 @@ export function StorefrontDesigner({
    * seller just made is one tap away instead of behind the Embed screen.
    */
   publicPagePath?: string | null;
+  /** The account's seller details are incomplete, so the publish gate keeps
+   *  this storefront from being shared or sold. Marks the Share button: the
+   *  page it opens says what is missing. */
+  sellerDetailsMissing?: boolean;
   /**
    * Controls the route adds to the header, beside search: the notification
    * bell, so an order that comes in during an hour of design work is not
@@ -549,10 +578,16 @@ export function StorefrontDesigner({
     noticeIsDismissed,
     () => false,
   );
+  const [multiSelectTipShown, setMultiSelectTipShown] = useStoredFlag(MULTISELECT_TIP_KEY);
+  const [sheetTipShown, setSheetTipShown] = useStoredFlag(SHEET_TIP_KEY);
+  // The keyboard shortcuts list, opened by "?" or the toolbar's keyboard button.
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   // Where the panels are columns beside the canvas ("regular") and where they
   // are sheets stacked over it ("compact"). Only BEHAVIOUR reads this; layout
   // stays on `lg:` classes. See useEditorSurface.
   const surface = useEditorSurface();
+  // A finger rather than a mouse, where Share opens the system share sheet.
+  const isTouch = useIsTouch();
   // Dashed empty-slot guides on the canvas. A VIEW preference: buyers never
   // see them, so it stays out of the saved config (and out of undo history).
   const [showGrid, setShowGrid] = useState(true);
@@ -1245,6 +1280,21 @@ export function StorefrontDesigner({
       inspector?.kind === "blocks" &&
       inspector.keys.length === 1 &&
       inspector.keys[0] === key;
+    // A plain click that swaps one selected block for another is where a
+    // seller trying to pick several finds only the last one kept: the moment,
+    // once per browser, to say how. Not for a block that was just inserted,
+    // which selects itself.
+    if (
+      !additive &&
+      !justInserted &&
+      !multiSelectTipShown &&
+      inspector?.kind === "blocks" &&
+      inspector.keys.length === 1 &&
+      inspector.keys[0] !== key
+    ) {
+      setMultiSelectTipShown(true);
+      toast.info(tKey("Storefront.canvas.multiSelectTip"));
+    }
     setInspector((current) => {
       const keys = current?.kind === "blocks" ? current.keys : [];
       if (additive) {
@@ -1440,6 +1490,8 @@ export function StorefrontDesigner({
     moveBlock,
     moveBlocks,
     resizeBlock,
+    moveOnPhone,
+    resizeOnPhone,
     rotateBlocks,
     reorderLayers,
     removeBlock,
@@ -1466,6 +1518,8 @@ export function StorefrontDesigner({
       moveBlock,
       moveBlocks,
       resizeBlock,
+      moveOnPhone,
+      resizeOnPhone,
       rotateBlocks,
       reorderLayers,
       removeBlock,
@@ -1499,6 +1553,15 @@ export function StorefrontDesigner({
   );
   const onResizeBlock = useCallback((key: string, placement: BlockPlacement) => {
     canvasActions.current.resizeBlock(key, placement);
+  }, []);
+  const onMoveOnPhone = useCallback(
+    (moves: readonly { key: string; x: number; y: number }[]) => {
+      canvasActions.current.moveOnPhone(moves);
+    },
+    [],
+  );
+  const onResizeOnPhone = useCallback((key: string, placement: BlockPlacement) => {
+    canvasActions.current.resizeOnPhone(key, placement);
   }, []);
   const onRotateBlock = useCallback((key: string, rotation: number) => {
     // The handle turns ONE tile, even when several are selected: the tile the
@@ -1567,16 +1630,22 @@ export function StorefrontDesigner({
   }, []);
 
   /**
-   * Scale the whole board to fit the window, then centre it. Used ONLY for the
-   * first paint, when the board is wider than the workspace (always the case on
-   * a phone) — without it the editor would open cropped at 100% with the
-   * content off-screen. There is deliberately no "zoom to fit" control: zoom is
-   * a per-gesture thing, and the toolbar reads better with fewer buttons.
+   * The whole board on screen: centred at 100% when it fits the window, and
+   * scaled down to fit first when it is wider (always the case on a phone),
+   * since otherwise the editor would open cropped with the content off-screen.
+   * Runs on first paint, and is the phone's Fit to screen in the toolbar's
+   * More menu: pinching is the only zoom there, and Reset to 100% left a phone
+   * more zoomed in than this. The desktop bar has no such button: zoom is a
+   * per-gesture thing there, and the bar reads better with fewer buttons.
    */
-  function fitOnFirstPaint() {
+  function showWholeBoard() {
     const view = measureView();
     const room = safeWindow();
     if (!view || !room) return;
+    if (view.width + CANVAS_MARGIN * 2 <= room.width) {
+      centerCanvas(1);
+      return;
+    }
     const zoom = clampZoom(
       Math.min(
         (room.width - CANVAS_MARGIN * 2) / view.width,
@@ -1974,8 +2043,7 @@ export function StorefrontDesigner({
         return;
       }
       placedInitialView.current = true;
-      if (view.width + CANVAS_MARGIN * 2 > room.width) fitOnFirstPaint();
-      else centerCanvas(1);
+      showWholeBoard();
     }
     place(0);
     return () => cancelAnimationFrame(frame);
@@ -2351,15 +2419,17 @@ export function StorefrontDesigner({
       }
       // Placement field by field rather than spread: the copy keeps the
       // source's tilt and depth, and a spot that ever carried either of them
-      // would silently overwrite the copy's.
-      const copy: StorefrontBlock = {
+      // would silently overwrite the copy's. Not its phone rect: on a phone
+      // the copy would sit exactly on top of its source, so it is placed there
+      // automatically instead.
+      const copy: StorefrontBlock = unpinnedOnPhone({
         ...structuredClone(source),
         id: crypto.randomUUID(),
         x: spot.x,
         y: spot.y,
         w: spot.w,
         h: spot.h,
-      };
+      });
       added.push(copy);
       working.push({
         key: blockKey(copy),
@@ -2496,6 +2566,49 @@ export function StorefrontDesigner({
     setBlocks((current) =>
       current.map((b) => (blockKey(b) === key ? { ...b, ...placement } : b)),
     );
+  }
+
+  // THE BOARD'S OWN PHONE ARRANGEMENT (theme.mobileColumns). A move or resize
+  // on the phone view pins the block there (pinOnPhone) and never touches its
+  // desktop rect; coalesced like the desktop gestures.
+
+  function moveOnPhone(moves: readonly { key: string; x: number; y: number }[]) {
+    if (moves.length === 0) return;
+    recordChange(`phone-move:${moves.map((m) => m.key).sort().join(",")}`);
+    const changes = new Map(moves.map(({ key, x, y }) => [key, { x, y }]));
+    setBlocks((current) => pinOnPhone(theme, current, changes));
+  }
+
+  function resizeOnPhone(key: string, { x, y, w, h }: BlockPlacement) {
+    recordChange(`phone-size:${key}`);
+    setBlocks((current) => pinOnPhone(theme, current, new Map([[key, { x, y, w, h }]])));
+  }
+
+  /** Hide the selection on phones, show it there again, or hand it back to
+   *  automatic placement, as one undo step. */
+  function changeOnPhone(keys: readonly string[], change: PhoneChange) {
+    recordChange();
+    const wanted = new Set(keys);
+    setBlocks((current) =>
+      change === "automatic"
+        ? current.map((b) => (wanted.has(blockKey(b)) ? unpinnedOnPhone(b) : b))
+        : pinOnPhone(theme, current, new Map(keys.map((key) => [key, { hidden: change === "hide" }]))),
+    );
+  }
+
+  /**
+   * The phone arrangement on at `columns` wide, a new width for it, or off
+   * (null): back to automatic. Turning it on opens the phone view, where it is
+   * arranged. A width scrub is one undo step; on and off are steps of their own.
+   */
+  function setPhoneColumns(columns: number | null) {
+    if (columns === (theme.mobileColumns ?? null)) return;
+    const arranged = theme.mobileColumns !== undefined;
+    recordChange(columns !== null && arranged ? "phone-columns" : undefined);
+    const next = withPhoneColumns(theme, blocks, columns);
+    setTheme(next.theme);
+    setBlocks(next.blocks);
+    if (columns !== null && !arranged) setPreviewMode("mobile");
   }
 
   /**
@@ -3395,13 +3508,15 @@ export function StorefrontDesigner({
   }
 
   /** The toolbar's button: show the flow for whatever the seller is on, or put
-   *  everything that is out away. */
+   *  everything that is out away. With no product on the board there is no
+   *  page to show, and the press says why rather than doing nothing. */
   function toggleDefaultBuyerFlow() {
     if (pageOpen) {
       setOpenPages([]);
       return;
     }
     if (defaultPageProductId) openBuyerFlow(defaultPageProductId);
+    else toast.info(tKey("Storefront.toolbar.pageDisabledTip"));
   }
 
   /**
@@ -3666,6 +3781,33 @@ export function StorefrontDesigner({
     else leaveGuard.cancel();
   }
 
+  /** The page buyers open, while its saved state is public and pages are on:
+   *  the header links to it, and a phone shares it. */
+  const livePagePath = publicPagePath && productPage.enabled ? publicPagePath : null;
+
+  /**
+   * Share. On a touch device with the system share sheet, and a live page to
+   * share, it opens that sheet with the page's link, as every other app's share
+   * icon does. Otherwise, or if the sheet fails, it goes to the Share page (the
+   * link and the website code) through the leave guard, so unsaved work is
+   * never dropped. That page stays one tap away on the storefront list.
+   */
+  async function shareStorefront() {
+    if (isTouch && livePagePath && typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: name,
+          url: new URL(livePagePath, window.location.origin).href,
+        });
+        return;
+      } catch (error) {
+        // Closing the sheet is an answer, not a failure.
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      }
+    }
+    leaveGuard.requestLeave(storefrontEmbedPath(storefrontId));
+  }
+
   const inspectorKind =
     inspector?.kind === "picker"
       ? "addProduct"
@@ -3709,6 +3851,17 @@ export function StorefrontDesigner({
     inspector: showInspector,
   });
 
+  // A phone's sheets are drawn over the toolbar's strip, so the toolbar stands
+  // down while one is up (EditorToolbar's `sheetOpen`). The first time that
+  // happens in this browser, say how to get it back: nothing else on screen
+  // ties the sheet's close button to the toolbar that went missing.
+  const toolbarCovered = surface === "compact" && mobileSheet !== null;
+  useEffect(() => {
+    if (!toolbarCovered || sheetTipShown) return;
+    setSheetTipShown(true);
+    toast.info(tKey("Storefront.canvas.sheetTip"));
+  }, [toolbarCovered, sheetTipShown, setSheetTipShown, toast, tKey]);
+
   return (
     // Universal search, mounted here rather than inherited: the editor renders
     // full-screen OUTSIDE the dashboard shell (see storefront/layout.tsx), so
@@ -3738,7 +3891,7 @@ export function StorefrontDesigner({
         close: () => setSettingTarget(null),
       }}
     >
-    <ProductAddOnsEditorProvider catalog={catalog} openPages={openPages}>
+    <ProductAddOnsEditorProvider catalog={catalog} openPages={openPages} canOpenPage={defaultPageProductId !== null}>
     <SearchProvider
       role={role}
       accountId={accountId}
@@ -3825,15 +3978,15 @@ export function StorefrontDesigner({
                 `hidden sm:inline`, so tapping Save on a 390px screen confirmed
                 nothing at all. */}
             {dirty && !saving && (
-              // A PHONE GETS THE WORDS OR NOTHING, never a bare dot. There was
-              // one, between the search button and Save, and a lone ● in a row
-              // of two framed controls reads as a third control with its label
-              // missing rather than as a state. The phrase itself has no room
-              // there, so on a phone this is announced and not drawn.
+              // A PHONE GETS NO WORDS HERE, and never a bare dot: a lone dot in
+              // a row of framed controls reads as a control with its label
+              // missing rather than as a state. The phrase has no room on a
+              // phone, so there it is announced and not drawn, and Save itself
+              // carries the state (it fills in only while there is work to save).
               //
               // `max-sm:sr-only` rather than a second element: sr-only is
               // absolutely positioned, so it stops being a flex item too, and
-              // the row closes up instead of keeping the gap the dot sat in.
+              // the row closes up instead of keeping a gap.
               <span
                 role="status"
                 className={`shrink-0 max-sm:sr-only ${helpTextClass}`}
@@ -3841,35 +3994,55 @@ export function StorefrontDesigner({
                 {t("header.unsaved")}
               </span>
             )}
-            {/* What buyers see, once there is something saved to see: not
-                while edits are pending (the page would not show them yet),
-                and not with product pages switched off here. */}
-            {publicPagePath && productPage.enabled && !dirty && (
+            {/* What buyers see, once there is something saved to see. While
+                edits are pending it stays, and says it is the SAVED page: a
+                link that vanished read as the page having gone. */}
+            {livePagePath && (
               <a
-                href={publicPagePath}
+                href={livePagePath}
                 target="_blank"
                 rel="noopener"
                 className={cn(ghostButtonClass, barButtonSizeClass, "gap-1.5 px-3")}
                 data-designer-view-page=""
               >
                 <ExternalLink className="size-4" strokeWidth={2} aria-hidden="true" />
-                <span className="max-sm:sr-only">{t("header.viewPage")}</span>
+                <span className="max-sm:sr-only">
+                  {dirty ? t("header.viewSavedPage") : t("header.viewPage")}
+                </span>
               </a>
             )}
-            {/* Where its link and embed live, one click from the design. Through
-                the leave guard, so unsaved work is never dropped on the way. */}
+            {/* Where its link and embed live, one click from the design, or
+                the phone's own share sheet (see shareStorefront). The
+                dashboard's seller-details banner has no seat in this editor,
+                so while details are missing Share wears the dot; the page it
+                opens names what is missing. */}
             <button
               type="button"
-              onClick={() => leaveGuard.requestLeave(storefrontEmbedPath(storefrontId))}
-              className={cn(ghostButtonClass, barButtonSizeClass, "gap-1.5 px-3")}
+              onClick={() => void shareStorefront()}
+              className={cn(ghostButtonClass, barButtonSizeClass, "relative gap-1.5 px-3")}
               data-designer-share=""
             >
               <Share2 className="size-4" strokeWidth={2} aria-hidden="true" />
               <span className="max-sm:sr-only">{tKey("Storefront.card.share")}</span>
+              {sellerDetailsMissing && (
+                <>
+                  <span className={attentionDotClass} aria-hidden="true" />
+                  <span className="sr-only">{t("header.shareSetupNeeded")}</span>
+                </>
+              )}
             </button>
-            <Button onClick={() => void handleSave()} disabled={saving} className={barButtonSizeClass}>
-              {saving ? tCommon("saving") : tCommon("save")}
-            </Button>
+            {/* Names its shortcut on hover, like undo and redo below. */}
+            <Tooltip label={t("header.saveTip")}>
+              <Button
+                variant={dirty ? "primary" : "secondary"}
+                onClick={() => void handleSave()}
+                disabled={saving}
+                className={barButtonSizeClass}
+                data-designer-save=""
+              >
+                {saving ? tCommon("saving") : tCommon("save")}
+              </Button>
+            </Tooltip>
           </div>
           )}
         </div>
@@ -3887,10 +4060,7 @@ export function StorefrontDesigner({
           spend a phone's workspace on advice before the seller has touched
           anything. */}
       {isSample && (
-        <div
-          data-sample-notice=""
-          className="flex shrink-0 items-center gap-2 border-b border-border bg-muted px-4 py-1.5 font-inter text-xs text-foreground sm:px-6"
-        >
+        <div data-sample-notice="" className={NOTICE_STRIP_CLASS}>
           <Sparkles className="size-3.5 shrink-0" strokeWidth={2} aria-hidden="true" />
           <p className="min-w-0 flex-1">{tKey("Storefront.sample.designer.notice")}</p>
           <button
@@ -3903,11 +4073,14 @@ export function StorefrontDesigner({
         </div>
       )}
 
-      {/* SF-09: Mobile editing notice. The designer is functional on a phone
-          but 55px cells and 24px control chips make precise editing hard.
-          This banner only appears below the lg breakpoint where full layout
-          is not available, and links to the storefront list rather than
-          implying features that are not there.
+      {/* SF-09: Mobile editing notice, below the lg breakpoint only. The
+          designer works on a phone, so the notice LEADS with that, and with
+          the touch gestures nothing on screen shows (holding blocks to select
+          several, holding a tool to see its name, pinching to zoom); that a
+          bigger screen helps comes last.
+          It used to open with "open this on a desktop", and a seller with no
+          desktop to hand read that as "this does not work here" and left.
+          Plain, not amber: it is a how-to, not a warning.
 
           IT CLOSES. It used to be permanent furniture, which is fine advice
           for someone who can act on it and a two-line tax on the workspace for
@@ -3915,7 +4088,7 @@ export function StorefrontDesigner({
           once and then owns it forever. See noticeDismissed for why the answer
           is remembered rather than asked again on the next load. */}
       {!noticeDismissed && !isSample && (
-        <div className="flex shrink-0 items-start gap-2 border-b border-amber-200 bg-amber-50 px-4 py-2 font-inter text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300 lg:hidden">
+        <div className={cn(NOTICE_STRIP_CLASS, "lg:hidden")}>
           <p className="min-w-0 flex-1">{t("mobileNotice.body")}</p>
           {/* -my-1 keeps a 44px touch target from making the banner taller than
               the text needs: the button overflows into the row's own padding
@@ -3925,7 +4098,7 @@ export function StorefrontDesigner({
             suppressHydrationWarning
             onClick={dismissMobileNotice}
             aria-label={t("mobileNotice.dismiss")}
-            className="-my-1 -mr-2 inline-flex size-9 shrink-0 items-center justify-center rounded-sm text-amber-800 transition-colors duration-base ease-standard hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-amber-300 dark:hover:bg-amber-900/40 motion-reduce:transition-none"
+            className="-my-1 -mr-2 inline-flex size-9 shrink-0 items-center justify-center rounded-sm text-foreground transition-colors duration-base ease-standard hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
           >
             <X className="size-4" strokeWidth={2} aria-hidden="true" />
           </button>
@@ -4106,6 +4279,8 @@ export function StorefrontDesigner({
             onMoveBlock={onMoveBlock}
             onMoveBlocks={onMoveBlocks}
             onResizeBlock={onResizeBlock}
+            onMoveOnPhone={onMoveOnPhone}
+            onResizeOnPhone={onResizeOnPhone}
             onRotateBlock={onRotateBlock}
             onEmptyCellClick={onInsertAt}
             onAddProduct={togglePicker}
@@ -4190,6 +4365,9 @@ export function StorefrontDesigner({
               onOpenSetting={(_keys, field) => openBlockField(field)}
               onDuplicate={duplicateBlocks}
               onRemove={removeBlocks}
+              // A held tool says what it does, at full size: the bar scales
+              // with the board, so its own tips are tiny on a phone.
+              onHoldTool={(toolName) => toast.info(toolName)}
             />
           )}
         </main>
@@ -4249,6 +4427,7 @@ export function StorefrontDesigner({
               header={header}
               onThemeChange={updateTheme}
               onHeaderChange={updateHeader}
+              onStyleHeaderLine={onSelectHeaderLine}
               backgroundImageUrl={backgroundImageUrl}
               onBackgroundImageChange={setBackgroundImageUrl}
               customFontUrl={customFontUrl}
@@ -4256,6 +4435,7 @@ export function StorefrontDesigner({
               showGrid={showGrid}
               onShowGridChange={setShowGrid}
               onCanvasChange={updateCanvas}
+              onPhoneColumnsChange={setPhoneColumns}
               blockCount={blocks.length}
               onOpenLayers={() => setLayersOpen(true)}
               searchEntries={editorSearchEntries}
@@ -4289,6 +4469,11 @@ export function StorefrontDesigner({
                         }
                         onReorder={(op) => reorderLayers(selectedKeys, op)}
                         onOpenLayers={() => setLayersOpen(true)}
+                        onPhoneChange={
+                          theme.mobileColumns === undefined
+                            ? undefined
+                            : (change) => changeOnPhone(selectedKeys, change)
+                        }
                       />
                     </div>
                   )}
@@ -4315,7 +4500,7 @@ export function StorefrontDesigner({
                     <MultiBlockEditor
                       blocks={selectedBlocks}
                       theme={theme}
-                      reviewsShown={isProductPageSectionShown(productPage, "reviews")}
+                      productPage={productPage}
                       // The selection toolbar points at a control rather than
                       // opening one over the board, and with several blocks
                       // selected that control is in HERE.
@@ -4365,7 +4550,8 @@ export function StorefrontDesigner({
                       pageOpen={openPages.includes(selectedBlock.productId)}
                       onDesignPage={() => toggleBuyerFlow(selectedBlock.productId)}
                       onThemeChange={updateTheme}
-                      reviewsShown={isProductPageSectionShown(productPage, "reviews")}
+                      productPage={productPage}
+                      sellerEmail={sellerIdentity.email}
                     />
                   ) : selectedBlock?.type === "shape" ? (
                     <ShapeBlockEditor
@@ -4447,6 +4633,7 @@ export function StorefrontDesigner({
         onZoomIn={() => zoomBy(ZOOM_STEP)}
         onZoomOut={() => zoomBy(-ZOOM_STEP)}
         onZoomReset={resetZoom}
+        onZoomFit={showWholeBoard}
         onTidy={tidyBlocks}
         canTidy={blocks.length > 0}
         canUndo={history.canUndo}
@@ -4455,11 +4642,14 @@ export function StorefrontDesigner({
         onRedo={redo}
         settingsOpen={settingsOpen}
         onToggleSettings={toggleSettings}
+        onShowShortcuts={() => setShortcutsOpen(true)}
         sheetOpen={mobileSheet !== null}
         pagesOpen={pageOpen}
         canOpenPage={defaultPageProductId !== null}
         onTogglePages={toggleDefaultBuyerFlow}
       />
+
+      <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
 
       <ConfirmDialog
         open={savedElsewhere}
@@ -4489,8 +4679,10 @@ export function StorefrontDesigner({
         onDiscard={leaveGuard.leave}
         onStay={leaveGuard.cancel}
       />
-      {/* Inside the search provider on purpose: opening search ends the tour. */}
-      {sample && <EditorTour autoStart={sample.autoStartTour} />}
+      {/* Inside the search provider on purpose: opening search ends the tour.
+          On every designer, not only the sample's, so a refresh mid-tour
+          resumes on whichever storefront it started. */}
+      <EditorTour autoStart={sample ? sample.autoStartTour : autoStartTour} />
       </div>
     </SearchProvider>
     </ProductAddOnsEditorProvider>

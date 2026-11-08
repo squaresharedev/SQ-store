@@ -7,6 +7,7 @@ import {
   patchThemeCardStyle,
   resolveCardStyle,
   type CheckoutPageConfig,
+  type HeaderLine,
   type ProductPageConfig,
   type StorefrontHeader,
   type StorefrontSeller,
@@ -33,7 +34,6 @@ import { PriceTagSection } from "./PriceTagSection";
 import { SaleBadgeControls } from "./SaleBadgeControls";
 import { CardHoverControls } from "./CardHoverControls";
 import { CardShoppingControls } from "./CardShoppingControls";
-import { isProductPageSectionShown } from "@/lib/storefront/product-page";
 import { ChipScaleControl } from "./ChipScaleControl";
 import { LayoutSection } from "./LayoutSection";
 import { TypographySection } from "./TypographySection";
@@ -76,6 +76,7 @@ export function ControlsPanel({
   header,
   onThemeChange,
   onHeaderChange,
+  onStyleHeaderLine,
   backgroundImageUrl,
   onBackgroundImageChange,
   customFontUrl,
@@ -83,6 +84,7 @@ export function ControlsPanel({
   showGrid,
   onShowGridChange,
   onCanvasChange,
+  onPhoneColumnsChange,
   blockCount,
   onOpenLayers,
   searchEntries,
@@ -101,6 +103,9 @@ export function ControlsPanel({
   header: StorefrontHeader;
   onThemeChange: (theme: StorefrontTheme) => void;
   onHeaderChange: (header: StorefrontHeader) => void;
+  /** Open the colour panel on a masthead line, where its font and colour are
+   *  set. Absent (the dev gallery) leaves the Header group without the links. */
+  onStyleHeaderLine?: (line: HeaderLine) => void;
   /** The product page's own options. */
   productPage: ProductPageConfig;
   onProductPageChange: (next: ProductPageConfig) => void;
@@ -125,6 +130,9 @@ export function ControlsPanel({
   sellerIdentity: StorefrontSeller;
   /** Canvas resize, guarded against cutting off placed blocks. */
   onCanvasChange: (columns: number, rows: number) => void;
+  /** The phone arrangement on at a width, or off (null). Absent (the dev
+   *  gallery) leaves the Canvas section without it. */
+  onPhoneColumnsChange?: (columns: number | null) => void;
   /** Display URL for an image background (signed or local object URL). */
   backgroundImageUrl: string | null;
   onBackgroundImageChange: (url: string | null) => void;
@@ -229,17 +237,20 @@ export function ControlsPanel({
           <PanelMenuItem
             key={id}
             label={tKey(GROUP_TITLES[id])}
-            // Only where one value really represents the group. "Theme" has a
-            // background that may be a gradient or a photo, with no single
-            // thing to show, so it shows nothing.
+            // Where one value really represents the group, that value. "Theme"
+            // has none (its background may be a gradient or a photo), and its
+            // name does not say it holds the grid's size, so it says what it
+            // holds instead.
             hint={
               id === "typography"
                 ? theme.customFont && theme.font === "custom"
                   ? theme.customFont.name
                   : tKey(FONT_LABELS[theme.font])
-                : id === "productPage" && !productPage.enabled
-                  ? t("off")
-                  : undefined
+                : id === "theme"
+                  ? t("themeHint")
+                  : id === "productPage" && !productPage.enabled
+                    ? t("off")
+                    : undefined
             }
             // The product page group turns the canvas to the page it edits, so
             // it opens through the setting opener (the designer owns that
@@ -277,7 +288,8 @@ export function ControlsPanel({
   return (
     <PanelSubmenu
       title={tKey(GROUP_TITLES[group])}
-      path={t("design")}
+      // The tab these settings sit under, by the same name.
+      path={tKey("Storefront.designPanel.tabDesign")}
       onBack={() => setGroup(null)}
     >
 
@@ -332,9 +344,9 @@ export function ControlsPanel({
             summon={summoned === "shopping"}
           >
             <CardShoppingControls
-              value={resolveCardStyle(theme)}
+              theme={theme}
+              productPage={productPage}
               onChange={(patch) => onThemeChange(patchThemeCardStyle(theme, patch))}
-              reviewsShown={isProductPageSectionShown(productPage, "reviews")}
             />
           </CollapsibleSection>
         </>
@@ -389,6 +401,7 @@ export function ControlsPanel({
               theme={theme}
               onChange={onThemeChange}
               onCanvasChange={onCanvasChange}
+              onPhoneColumnsChange={onPhoneColumnsChange}
               showGrid={showGrid}
               onShowGridChange={onShowGridChange}
             />
@@ -399,7 +412,11 @@ export function ControlsPanel({
            already names them, so a heading here would say it twice. */
         <div className="py-4 lg:px-4">
           {group === "header" && (
-            <HeaderSection header={header} onChange={onHeaderChange} />
+            <HeaderSection
+              header={header}
+              onChange={onHeaderChange}
+              onStyleLine={onStyleHeaderLine}
+            />
           )}
 
           {group === "typography" && (

@@ -5,7 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 import { buttonClassName } from "@/components/ui/button";
 import { useResolveMessage } from "@/components/ui/ActionErrorNotice";
 import { cardClass } from "@/components/ui/surface-styles";
-import { helpTextClass, iconNudgeRightClass } from "@/components/ui/control-styles";
+import { helpTextClass, iconNudgeUpRightClass } from "@/components/ui/control-styles";
 import { PlanVisual } from "@/components/billing/PlanVisual";
 import { cn } from "@/lib/utils";
 import { nextPlanUp, type PlanId, type PlanLimitKey } from "@/lib/billing/plans";
@@ -48,7 +48,7 @@ export function PlanLimitNotice({
         {error.action && (
           <Link href={error.action.href} className={cn(buttonClassName("primary"), "mt-5")}>
             {resolve(error.action.label)}
-            <ArrowUpRight className={cn("size-4", iconNudgeRightClass)} strokeWidth={2} aria-hidden />
+            <ArrowUpRight className={cn("size-4", iconNudgeUpRightClass)} strokeWidth={2} aria-hidden />
           </Link>
         )}
       </div>

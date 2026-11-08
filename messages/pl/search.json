@@ -48,7 +48,7 @@
     "securityActivity": "Aktywność związana z bezpieczeństwem",
     "signOut": "Wyloguj się",
     "vat": "Numer VAT UE",
-    "businessName": "Nazwa przedsiębiorcy",
+    "businessName": "Twoje imię i nazwisko lub nazwa firmy",
     "country": "Kraj",
     "address": "Adres firmy",
     "contactEmail": "E-mail kontaktowy",
@@ -61,7 +61,6 @@
     "sellerAgreement": "Umowa sprzedawcy",
     "termsOfService": "Warunki korzystania z usługi",
     "exportData": "Eksportuj moje dane",
-    "deleteAccount": "Usuń konto",
     "plan": "Plan i cennik",
     "invoices": "Faktury i dane płatnicze"
   },

@@ -281,9 +281,9 @@ export async function inviteMember(
 /**
  * Accept a pending invite addressed to the calling user's verified email.
  *
- * The form half only: field whitelist and parse. The checks and the accept
- * itself live in acceptTeamInvite (lib/team/accept.ts), shared with the
- * Accept button on the invite's notification.
+ * The form half: field whitelist and parse, then the switch into the store.
+ * The checks and the accept itself live in acceptTeamInvite (lib/team/accept.ts),
+ * shared with the Accept button on the invite's notification.
  */
 export async function acceptInvite(
   _prev: ActionState,
@@ -305,6 +305,11 @@ export async function acceptInvite(
 
   const result = await acceptTeamInvite(parsed.data.invite_id);
   if (!result.ok) return failed(result.error);
+  // Straight into the store just joined: left on their own, a new member
+  // reads the accept as having done nothing. The viewing banner then names the
+  // store and offers the way back. (The bell's Accept offers "Open store"
+  // instead, since it can be pressed from any page.)
+  await enterAccount(result.accountOwnerId);
   return succeeded(msg("Settings.team.success.inviteAccepted"));
 }
 
@@ -482,6 +487,13 @@ export async function setActiveAccount(
     if (!role) return { ok: false }; // not a member — refuse to switch
   }
 
+  await enterAccount(accountId);
+  return { ok: true };
+}
+
+/** Persist the switch to a store the caller is already known to belong to.
+ *  Not exported, so not an endpoint: every caller checks membership first. */
+async function enterAccount(accountId: string): Promise<void> {
   const store = await cookies();
   store.set(ACTIVE_ACCOUNT_COOKIE, accountId, {
     httpOnly: true,
@@ -490,9 +502,8 @@ export async function setActiveAccount(
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
   });
-  // Everything under the dashboard reads account-scoped data — refresh it all.
+  // Everything under the dashboard reads account-scoped data: refresh it all.
   revalidatePath("/", "layout");
-  return { ok: true };
 }
 
 /**

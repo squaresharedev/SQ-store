@@ -10,7 +10,7 @@
     },
     "storefront": {
       "label": "Výklad",
-      "description": "Navrhnite mriežku, na ktorej sú vaše produkty."
+      "description": "Navrhnite mriežku, na ktorej sú vaše produkty. Stane sa z nej stránka, ktorú môžu kupujúci otvoriť a zdieľať."
     },
     "orders": {
       "label": "Objednávky",
@@ -31,7 +31,8 @@
     "discounts": {
       "label": "Zľavy",
       "description": "Spúšťajte akcie a zdieľajte zľavové kódy."
-    }
+    },
+    "help": "Pomoc"
   },
   "settings": {
     "account": "Účet",
@@ -42,17 +43,18 @@
     "notifications": "Upozornenia",
     "language": "Jazyk",
     "team": "Tím a prístup",
-    "danger": "Nebezpečná zóna",
+    "danger": "Zmazať konto",
     "billing": "Plán a fakturácia",
-    "connectedApps": "Pripojené aplikácie"
+    "connectedApps": "AI asistent"
   },
   "profileMenu": {
     "label": "Ponuka účtu",
     "account": "Účet",
-    "switchAccounts": "Prepnúť účty",
+    "switchAccounts": "Moje obchody",
     "yourStore": "Váš obchod",
     "owner": "Vlastník",
     "logOut": "Odhlásiť sa",
+    "logOutEverywhere": "Odhlásiť sa všade",
     "plan": "Plán"
   },
   "viewingBanner": {

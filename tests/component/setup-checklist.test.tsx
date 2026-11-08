@@ -87,16 +87,32 @@ describe("SetupChecklist", () => {
     expect(within(publish).queryByRole("link")).toBeNull();
   });
 
-  it("no longer carries the tour: that is replayed from Settings", () => {
-    render(
+  it("offers the tour before the steps, when it is given a way to start it", async () => {
+    const user = userEvent.setup();
+    const onTour = vi.fn();
+    const setup = buildSetupSteps(NEW_SELLER);
+    const { rerender } = render(
+      <SetupChecklist setup={setup} livePageUrl={null} celebrate onCelebrated={vi.fn()} />,
+    );
+    expect(screen.queryByRole("button", { name: /show me around/i })).toBeNull();
+
+    rerender(
       <SetupChecklist
-        setup={buildSetupSteps(NEW_SELLER)}
+        setup={setup}
         livePageUrl={null}
         celebrate
         onCelebrated={vi.fn()}
+        onTour={onTour}
       />,
     );
-    expect(screen.queryByRole("button", { name: /show me around/i })).toBeNull();
+    const tour = screen.getByRole("button", { name: "Show me around" });
+    // Met before the first step, not after the list.
+    expect(
+      tour.compareDocumentPosition(screen.getAllByRole("listitem")[0]) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    await user.click(tour);
+    expect(onTour).toHaveBeenCalledTimes(1);
   });
 
   it("folds its steps away on this device, and remembers", async () => {
@@ -137,6 +153,7 @@ describe("SetupChecklist", () => {
       <SetupChecklist
         setup={buildSetupSteps(COMPLETE)}
         livePageUrl={LIVE_URL}
+        liveStorefrontUrl="https://store.example/s/sf-1"
         celebrate
         onCelebrated={onCelebrated}
       />,
@@ -145,6 +162,8 @@ describe("SetupChecklist", () => {
     expect(screen.getByRole("heading", { name: "You're set up" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Copy product page link" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /open page/i })).toHaveAttribute("href", LIVE_URL);
+    // The whole shop's link too, beside the product's.
+    expect(screen.getByRole("button", { name: "Copy storefront link" })).toBeInTheDocument();
     // Recorded without waiting for a click, and only once however often it renders.
     expect(onCelebrated).toHaveBeenCalledTimes(1);
     rerender(

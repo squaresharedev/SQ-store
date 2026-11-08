@@ -502,6 +502,22 @@ describe("BillingSection", () => {
     expect(screen.getByRole("button", { name: /Manage billing/ })).toBeTruthy();
   });
 
+  it("links the over-limit note's upgrade to the plans, naming the limit, even while a payment is failing", () => {
+    render(
+      <BillingSection
+        context={{ ...STARTER, status: "past_due", usage: { ...STARTER.usage, products: 70 } }}
+        returned={null}
+        actions={stubActions()}
+      />,
+    );
+    const note = document.querySelector("[data-billing-over-note]") as HTMLElement;
+    expect(within(note).getByRole("link", { name: "upgrade" }).getAttribute("href")).toBe("/plans?from=product_limit");
+    cleanup();
+    // Within every limit: no note at all.
+    render(<BillingSection context={FREE} returned={null} actions={stubActions()} />);
+    expect(document.querySelector("[data-billing-over-note]")).toBeNull();
+  });
+
   it("gives a subscribed owner a quiet Cancel plan on the plan card, and a teammate none", () => {
     render(<BillingSection context={STARTER} returned={null} actions={stubActions()} />);
     const controls = document.querySelector("[data-plan-controls]") as HTMLElement;

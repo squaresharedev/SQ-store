@@ -52,7 +52,8 @@
   },
   "recentOrders": {
     "title": "Ostatnie zamówienia",
-    "empty": "Jeszcze żadnych zamówień. Sprzedaż przez twój własny link do zakupu albo e-mail się tu nie pojawi."
+    "empty": "Jeszcze żadnych zamówień. Gdy uruchomisz kasę, zrealizowane zakupy pojawią się tutaj.",
+    "emptyReady": "Jeszcze żadnych zamówień. Twoja pierwsza sprzedaż pojawi się tutaj."
   },
   "attention": {
     "title": "Wymaga uwagi",
@@ -74,7 +75,7 @@
       "descriptionUpdated": "Warunki zmieniły się od czasu ich akceptacji. Przeczytaj i zaakceptuj aktualną wersję.",
       "descriptionTerms": "Przeczytaj Warunki korzystania z usługi i je zaakceptuj.",
       "descriptionTermsUpdated": "Warunki korzystania z usługi zmieniły się od czasu ich akceptacji. Przeczytaj i zaakceptuj aktualną wersję.",
-      "action": "Sprawdź warunki"
+      "action": "Zaakceptuj Warunki"
     },
     "noBuyPath": {
       "label": "{count, plural, one {{count} produkt bez sposobu na zakup} few {{count} produkty bez sposobu na zakup} many {{count} produktów bez sposobu na zakup} other {{count} produktu bez sposobu na zakup}}",
@@ -114,18 +115,18 @@
       "action": "Otwórz edytor"
     },
     "deadBlocks": {
-      "label": "{count, plural, one {{count} blok witryny odwołujący się do usuniętych produktów} few {{count} bloki witryny odwołujące się do usuniętych produktów} many {{count} bloków witryny odwołujących się do usuniętych produktów} other {{count} bloku witryny odwołującego się do usuniętych produktów}}",
-      "description": "Te bloki wyglądają dla odwiedzających na puste. Usuń je lub zastąp innymi.",
-      "action": "Otwórz witrynę"
+      "label": "{count, plural, one {{count} miejsce na produkt wskazuje usunięty produkt} few {{count} miejsca na produkty wskazują usunięte produkty} many {{count} miejsc na produkty wskazuje usunięte produkty} other {{count} miejsca na produkty wskazującego usunięte produkty}}",
+      "description": "Te miejsca wyglądają dla odwiedzających na puste. Otwórz edytor i usuń je lub zastąp innymi.",
+      "action": "Otwórz edytor"
     },
     "toShip": {
       "description": "Kupujący czekają na przesyłki. Zapakuj i oznacz jako wysłane.",
       "action": "Wyślij zamówienia"
     },
     "withdrawals": {
-      "label": "{count, plural, one {{count} kupujący odstąpił od umowy} few {{count} kupujących odstąpiło od umowy} many {{count} kupujących odstąpiło od umowy} other {{count} kupującego odstąpiło od umowy}}",
-      "description": "Należy im się zwrot pieniędzy w ciągu 14 dni od odstąpienia. Ustal zwrot towaru, a potem zwróć pieniądze za zamówienie.",
-      "action": "Zobacz odstąpienia"
+      "label": "{count, plural, one {{count} kupujący anulował zakup} few {{count} kupujących anulowało zakup} many {{count} kupujących anulowało zakup} other {{count} kupującego anulowało zakup}}",
+      "description": "Należy im się zwrot pieniędzy w ciągu 14 dni. Ustal zwrot towaru, a potem zwróć pieniądze za zamówienie.",
+      "action": "Zobacz anulowane"
     },
     "restock": {
       "label": "{count, plural, one {{count} produkt wkrótce się wyprzeda} few {{count} produkty wkrótce się wyprzedadzą} many {{count} produktów wkrótce się wyprzeda} other {{count} produktu wkrótce się wyprzeda}}",
@@ -138,6 +139,10 @@
       "label": "Ustaw stawki dostawy",
       "description": "Kupujący nie mogą sfinalizować zakupu fizycznego produktu, dopóki kierunek nie ma zarówno stawki, jak i kraju.",
       "action": "Ustaw stawki"
+    },
+    "paused": {
+      "label": "{count, plural, one {{count} produkt ukryty przed kupującymi} few {{count} produkty ukryte przed kupującymi} many {{count} produktów ukrytych przed kupującymi} other {{count} produktu ukrytego przed kupującymi}}",
+      "description": "{count, plural, one {Square Share go wstrzymał lub usunął. Zobacz dlaczego i co zrobić dalej.} few {Square Share je wstrzymał lub usunął. Zobacz dlaczego i co zrobić dalej.} many {Square Share je wstrzymał lub usunął. Zobacz dlaczego i co zrobić dalej.} other {Square Share je wstrzymał lub usunął. Zobacz dlaczego i co zrobić dalej.}}"
     }
   }
 }

@@ -127,7 +127,7 @@ the "?" beside the heading reveals — the form does not print it. One copy, so
 the explanation a person is shown and the one a reader gets from
 `PRODUCT_FORM_SECTIONS` cannot drift. An **empty** `description` means the
 section shows no "?" at all, for one whose own fields already explain it
-(`media`, shown as Delivery).
+(`media`, shown as "How buyers get it").
 
 | State | Means |
 |---|---|
@@ -141,10 +141,10 @@ Section ids, in render order:
 basics  media  shipping  stock  options  photos  badges  specs  documents  safety  addOns  visibility
 ```
 
-`media` is shown to the seller as **Delivery**: a physical-or-digital choice
-(`data-product-field="kind"`, `physical` | `digital`), then the download for a
-digital product or the shipping terms for a physical one, then the optional
-buy link. **`shipping` renders inside the Delivery card**, as a block that
+`media` is shown to the seller as **How buyers get it**: a physical-or-digital
+choice (`data-product-field="kind"`, `physical` | `digital`), then the download
+for a digital product or the shipping terms for a physical one, then the
+optional buy link. **`shipping` renders inside the `media` card**, as a block that
 still carries its own `data-product-section="shipping"` and anchor. The cover
 photo leads `basics`, beside the title and price.
 
@@ -157,12 +157,14 @@ until it has its file (`requiredMissing` does not list it; the save says
 
 **The optional extras start folded.** `options`, `photos`, `badges`, `specs`,
 `documents` and `safety` are each a tile (`[data-product-extra="<id>"]`) in a
-"Make it shine" grid until pressed; pressing one renders the section in its
+"More details" grid until pressed; pressing one renders the section in its
 place in the order above. A section that already holds something, carries a
 problem, or was flagged by staff is open from the start, so a folded section is
 always an empty one. To fill a folded section, press its tile (or its entry in
-the index rail, which opens it too), then address its fields as below. The
-snapshot reports every section either way.
+the index rail, which opens it too), then address its fields as below. A
+physical product's `media` card also offers `safety` while it is folded
+(`[data-product-reveal="safety"]`), which opens it the same way. The snapshot
+reports every section either way.
 
 Two more folds, for answers that start on a default: the stock fine print
 (`[data-stock-fine-tune]`, a `<details>` holding `lowStockThreshold` and

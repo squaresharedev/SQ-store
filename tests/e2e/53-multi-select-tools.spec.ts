@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   canvasStill,
   createStorefrontViaUI,
+  expectToast,
   freshUser,
   gotoApp,
   seedProducts,
@@ -47,9 +48,9 @@ async function newStorefront(page: Page, tag: string) {
 /** The Element menu carries the common shapes itself; the library behind it is
  *  a panel away and not needed for a square. */
 async function addShape(page: Page, name: RegExp) {
-  await page.getByRole("button", { name: "Add element" }).click();
+  await page.getByRole("button", { name: "Add shape or image" }).click();
   await page
-    .getByRole("menu", { name: "Elements" })
+    .getByRole("menu", { name: "Shapes and images" })
     .getByRole("menuitem", { name })
     .click();
   // Closing the menu makes the board step back out from under it; a click
@@ -116,8 +117,14 @@ test.describe("tools for a multiple selection", () => {
     // Shift-click builds the selection, the same gesture 03-storefront uses.
     const tiles = tile(page, "square shape");
     await tiles.first().click();
+    // That plain click swapped the square just inserted (which selected itself)
+    // for the other one: the moment a seller picking several finds only the
+    // last kept, and the designer says, once, how to keep both.
+    await expectToast(page, /to select several blocks, shift-click them/i);
     await tiles.nth(1).click({ modifiers: ["Shift"] });
-    await expect(page.getByText("2 blocks", { exact: true })).toBeVisible();
+    // The visible one: the Design tab's hidden Layers row counts the board in
+    // the same words.
+    await expect(page.getByText("2 blocks", { exact: true }).filter({ visible: true })).toBeVisible();
 
     // CANVA'S FOUR, for a group, in Canva's order — and named for the group
     // rather than for whichever block happens to be first.
@@ -130,10 +137,10 @@ test.describe("tools for a multiple selection", () => {
             .filter((name) => !/remove|duplicate/i.test(name)),
         ),
     ).resolves.toEqual([
-      "Change the colour of 2 elements",
-      "Edit the border of 2 elements",
-      "Edit the corner roundness of 2 elements",
-      "Edit the opacity of 2 elements",
+      "Change the colour of 2 blocks",
+      "Edit the border of 2 blocks",
+      "Edit the corner roundness of 2 blocks",
+      "Edit the opacity of 2 blocks",
     ]);
 
     // THE COLOUR PANEL THAT IS ALREADY OPEN. Selecting the first shape opened
@@ -209,7 +216,7 @@ test.describe("tools for a multiple selection", () => {
     await tile(page, "circle shape")
       .first()
       .click({ modifiers: ["Shift"] });
-    await expect(page.getByText("2 blocks", { exact: true })).toBeVisible();
+    await expect(page.getByText("2 blocks", { exact: true }).filter({ visible: true })).toBeVisible();
 
     await expect(
       bar(page).getByRole("button", { name: /corner roundness/i }),
@@ -234,7 +241,7 @@ test.describe("tools for a multiple selection", () => {
 
     await tile(page, "Enamel Mug").click();
     await tile(page, "Canvas Tote").click({ modifiers: ["Shift"] });
-    await expect(page.getByText("2 blocks", { exact: true })).toBeVisible();
+    await expect(page.getByText("2 blocks", { exact: true }).filter({ visible: true })).toBeVisible();
 
     // THE DIVIDER. With two products the left-hand group is the page door and
     // nothing else, so the seam has something on both sides of it — and the
@@ -245,7 +252,7 @@ test.describe("tools for a multiple selection", () => {
     expect(firstChild, "the bar opens with a divider").toBe("BUTTON");
 
     const open = bar(page).getByRole("button", {
-      name: /open the buyer flow for 2 products/i,
+      name: /open the product page for 2 products/i,
     });
     await expect(open).toBeVisible();
     await open.click();
@@ -263,7 +270,7 @@ test.describe("tools for a multiple selection", () => {
 
     // And it is a toggle for the group: pressing it again puts them all away.
     await bar(page)
-      .getByRole("button", { name: /close the buyer flow for 2 products/i })
+      .getByRole("button", { name: /close the product page for 2 products/i })
       .click();
     await expect(page.locator("[data-artboard-id]")).toHaveCount(0);
   });

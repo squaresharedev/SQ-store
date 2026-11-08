@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { cleanup, render, screen, waitFor, within } from "../setup/render";
 import { english } from "../setup/translate";
+import { TERMS_CHANGES } from "@/lib/legal/terms-changes";
 import { TERMS_LAST_UPDATED, TERMS_SUMMARY } from "@/lib/legal/terms-summary";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 
@@ -147,6 +148,8 @@ describe("LegalSection (Settings › Legal)", () => {
 
     const agree = screen.getByRole("button", { name: AGREE });
     expect(agree).toBeEnabled();
+    // The welcome flow's own words under the button, and no version slug.
+    expect(agree).toHaveAccessibleDescription(/records the date and this version/i);
     await user.click(agree);
 
     await waitFor(() => expect(acceptLegalMock).toHaveBeenCalledTimes(1));
@@ -159,13 +162,68 @@ describe("LegalSection (Settings › Legal)", () => {
     render(
       <LegalSection acceptedAt="2026-09-24T10:00:00.000Z" acceptedVersion={LEGAL_VERSION} />,
     );
-    expect(screen.getByText(/you agreed to version/i)).toHaveTextContent("24 September 2026");
+    expect(screen.getByText(/you agreed to these terms/i)).toHaveTextContent("24 September 2026");
+    // Recorded, never shown: the slug reads as a database key.
+    expect(document.body).not.toHaveTextContent(LEGAL_VERSION);
     expect(screen.queryByRole("button", { name: AGREE })).toBeNull();
   });
 
   it("asks again when the Terms changed since the agreement on file", () => {
     render(<LegalSection acceptedAt="2026-09-01T10:00:00.000Z" acceptedVersion="2026-09-draft.2" />);
-    expect(screen.getByText(/have changed since/i)).toBeInTheDocument();
+    // An older shape of version is never echoed back, only the date it was given.
+    expect(screen.getByText(/agreed to an earlier version/i)).toHaveTextContent("1 September 2026");
+    expect(document.body).not.toHaveTextContent("draft");
     expect(screen.getByRole("button", { name: AGREE })).toBeEnabled();
+  });
+
+  it("once the new Terms apply, says what changed in them beside the request to agree again", () => {
+    render(<LegalSection acceptedAt="2026-09-01T10:00:00.000Z" acceptedVersion="2026-09-draft.2" />);
+    const outdated = document.querySelector<HTMLElement>("[data-terms-outdated]")!;
+    expect(within(outdated).getByText("What changed:")).toBeInTheDocument();
+    expect(within(outdated).getAllByRole("listitem").map((item) => item.textContent)).toEqual(
+      TERMS_CHANGES[LEGAL_VERSION].map((key) => english(key)),
+    );
+  });
+
+  it("leaves the list to the notice while the change is still on its way", () => {
+    render(
+      <LegalSection
+        acceptedAt="2026-09-01T10:00:00.000Z"
+        acceptedVersion="2026-09-draft.2"
+        upcoming={{ version: LEGAL_VERSION, effectiveAt: "2026-12-02T03:23:00Z" }}
+      />,
+    );
+    const firstChange = english(TERMS_CHANGES[LEGAL_VERSION][0]);
+    expect(screen.getAllByText(firstChange)).toHaveLength(1);
+    expect(screen.queryByText("What changed:")).toBeNull();
+  });
+
+  it("says the summary is of the new Terms while the current ones still apply", () => {
+    const label = /summary below is of the new Terms/;
+    const { unmount } = render(
+      <LegalSection
+        acceptedAt="2026-09-01T10:00:00.000Z"
+        acceptedVersion="2026-09-draft.2"
+        upcoming={{ version: LEGAL_VERSION, effectiveAt: "2026-12-02T03:23:00Z" }}
+      />,
+    );
+    expect(screen.getByText(label)).toBeInTheDocument();
+    unmount();
+
+    // With nothing on its way, the summary is simply the Terms.
+    render(<LegalSection acceptedAt={null} acceptedVersion={null} />);
+    expect(screen.queryByText(label)).toBeNull();
+  });
+
+  it("drops the change notice once the new Terms are agreed to early", () => {
+    render(
+      <LegalSection
+        acceptedAt="2026-11-07T10:00:00.000Z"
+        acceptedVersion={LEGAL_VERSION}
+        upcoming={{ version: LEGAL_VERSION, effectiveAt: "2026-12-02T03:23:00Z" }}
+      />,
+    );
+    expect(document.querySelector("[data-terms-change-notice]")).toBeNull();
+    expect(document.querySelector("[data-terms-agreed]")).toHaveTextContent("7 November 2026");
   });
 });

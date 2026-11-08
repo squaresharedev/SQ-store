@@ -21,6 +21,7 @@
   },
   "page": {
     "heading": "Products",
+    "planUsage": "{used} of {cap, plural, one {# product} other {# products}} on your plan. <link>See plans</link>",
     "loading": "loading products",
     "back": "Products",
     "backToStorefront": "Storefront",
@@ -34,8 +35,13 @@
     },
     "import": {
       "heading": "Import products",
-      "description": "Bring a catalogue over from Shopify, or any tool that exports a CSV. You will see exactly what lands before anything is saved.",
-      "reviewsLink": "Moving your reviews too? Import reviews"
+      "description": "Bring a catalogue over from Shopify, Etsy, or any tool that exports a CSV. You will see exactly what lands before anything is saved.",
+      "reviewsLink": "Moving your reviews too? Import reviews",
+      "templateLink": "Download a blank template",
+      "columnHint": "Columns needed: Title and Price. Description, SKU and Stock are optional.",
+      "howToGetFile": "How to get your file",
+      "howToGetFileShopify": "Shopify: Products > Export > All products as CSV.",
+      "howToGetFileEtsy": "Etsy: Shop Manager > Settings > Options > Download Data > Download CSV."
     },
     "formLoading": "Loading the product form",
     "importReviews": {
@@ -63,8 +69,10 @@
       "title": "Name: A–Z"
     },
     "allStatuses": "All statuses",
+    "moderated": "In moderation",
     "filterLabel": "Sort and filter products",
-    "sortResting": "Sort",
+    "sortResting": "Sort and filter",
+    "viewOnlyHint": "You have view-only access. Contact the store owner to edit products.",
     "statusSection": "Status",
     "sortSection": "Sort by",
     "clear": "Clear",
@@ -72,7 +80,8 @@
     "add": "Add product",
     "updating": "Updating…",
     "pagination": "{total, plural, one {{total} product · page {page} of {pages}} other {{total} products · page {page} of {pages}}}",
-    "reviews": "Reviews"
+    "reviews": "Reviews",
+    "orderHint": "To change the order buyers see, drag your products into place on your <link>storefront</link>."
   },
   "list": {
     "noMatch": {
@@ -81,10 +90,20 @@
       "clear": "Clear filters"
     },
     "deleted": "\"{title}\" was deleted.",
+    "madeActive": "\"{title}\" is now active.",
+    "madeDraft": "\"{title}\" saved as draft.",
+    "duplicated": "Copy of \"{title}\" created as a draft.",
+    "duplicateTitle": "Copy of {title}",
+    "stockSaved": "Stock updated.",
     "linkCopied": "Link copied.",
     "copyFailed": "Could not copy.",
     "copyFailedUrl": "The URL is: {url}",
     "notOnStorefront": "This product is not on any storefront yet.",
+    "stockDialog": {
+      "title": "Update quantity",
+      "description": "How many \"{title}\" do you have in stock right now?",
+      "label": "Quantity in stock"
+    },
     "deleteDialog": {
       "title": "Delete this product?",
       "description": "{storefronts, plural, =0 {\"{title}\" and its uploaded image and file will be permanently removed. Existing orders keep their record of the sale.} one {\"{title}\" and its uploaded image and file will be permanently removed. Existing orders keep their record of the sale. It is on {storefronts} storefront. The block stays until you remove it.} other {\"{title}\" and its uploaded image and file will be permanently removed. Existing orders keep their record of the sale. It is on {storefronts} storefronts. The blocks stay until you remove them.}}",
@@ -113,9 +132,14 @@
     "unitsSold": "{count, plural, one {{count} sold} other {{count} sold}}",
     "noSales": "No sales yet",
     "addToWebsite": "Add to your website",
-    "unlimited": "Unlimited",
+    "editStock": "Edit stock for {title}",
+    "addToWebsiteShort": "Add \"{title}\" to your website",
+    "unlimited": "Unlimited stock",
     "noStorefront": "No storefront",
-    "ship": "Ship"
+    "ship": "Ship",
+    "duplicate": "Duplicate",
+    "makeActive": "Make active",
+    "makeDraft": "Make draft"
   },
   "shareCard": {
     "scanToShop": "Scan to shop",
@@ -164,7 +188,7 @@
     "concerned": "What it concerned",
     "showField": "Show {field} on this page",
     "fields": {
-      "product": "{field, select, title {Title} description {Description} price {Price} image {Display image} file {Digital file} purchaseLink {Purchase link} shipping {Shipping} options {Options} photos {Photos} specs {Badges and specifications} documents {Documents} safety {Safety and compliance} other {Something else}}",
+      "product": "{field, select, title {Title} description {Description} price {Price} image {Display image} file {Digital file} purchaseLink {Buy link} shipping {Shipping} options {Options} photos {Photos} specs {Badges and specifications} documents {Documents} safety {Safety and compliance} other {Something else}}",
       "storefront": "{field, select, name {Storefront name} header {Header} text {Text} images {Images} products {Products shown} background {Background} productPage {Product pages} other {Something else}}"
     },
     "reference": "Reference",
@@ -191,6 +215,7 @@
     "badgePendingHint": "Buyers see it once the automatic check approves it.",
     "badgeReview": "In review",
     "badgeReviewHint": "A person is checking it. Buyers see it once it is approved.",
+    "badgeHintLabel": "What this means",
     "titlePending": "{kind, select, product {This product is being checked} other {This storefront is being checked}}",
     "titleReview": "{kind, select, product {A person is checking this product} other {A person is checking this storefront}}",
     "hiddenPending": "Buyers cannot see it until the automatic check finishes. That usually takes a few seconds: reload the page to see where it stands.",
@@ -204,7 +229,7 @@
       "title": "Title",
       "description": "Description",
       "price": "Price",
-      "sku": "SKU",
+      "sku": "Product code (SKU)",
       "stock": "Stock"
     },
     "fileTooLarge": "That file is {size}. Import files up to {max}.",
@@ -212,6 +237,25 @@
     "imported": "{count, plural, one {{count} product was imported.} other {{count} products were imported.}}",
     "skippedRows": "{count, plural, one {{count} row was skipped.} other {{count} rows were skipped.}}",
     "checkingRows": "{count, plural, one {{count} product is still being checked: buyers see it once the automatic check approves it.} other {{count} products are still being checked: buyers see them once the automatic check approves them.}}",
+    "draftsImportedHint": "They are drafts, not visible to buyers until you publish them.",
+    "connectAiHint": "To publish many at once, <link>connect an AI assistant</link>.",
+    "columnsNeeded": "Needed",
+    "columnsOptional": "Optional",
+    "story": {
+      "shelf": "Your shop",
+      "items": {
+        "camera": "Camera",
+        "headphones": "Headset",
+        "succulent": "Plant",
+        "watch": "Watch",
+        "sunglasses": "Shades",
+        "tshirt": "T-shirt"
+      }
+    },
+    "columnsMatched": "{count, plural, one {# matched} other {# matched}}",
+    "undoImport": "{count, plural, one {Delete the imported product} other {Delete all # imported products}}",
+    "undoDone": "{count, plural, one {# imported product was deleted.} other {# imported products were deleted.}}",
+    "goToProducts": "Go to products",
     "dropPrompt": "Drop a CSV or click to choose one",
     "fileMeta": "{size} · choose another to start over",
     "rowsLimit": "{max, plural, one {Up to {max} product per file} other {Up to {max} products per file}}",
@@ -223,9 +267,9 @@
     "currencyHelp": "Every imported product is priced in this.",
     "importAs": "Import as",
     "asDrafts": "Drafts",
-    "asLive": "Live products",
+    "asLive": "Active products",
     "draftsHint": "Nothing goes live until you publish it.",
-    "liveHint": "These appear in your store straight away.",
+    "liveHint": "These are set to Active: buyers can buy them once they are on a storefront.",
     "columns": "Columns",
     "needed": "(needed)",
     "notSet": "Not set",
@@ -259,7 +303,7 @@
         "about": "What Stock is for"
       },
       "media": {
-        "label": "Delivery"
+        "label": "How buyers get it"
       },
       "shipping": {
         "label": "Shipping",
@@ -273,7 +317,7 @@
       },
       "photos": {
         "label": "Photos",
-        "description": "More angles for the product page. Drop photos onto an option to show them only for it.",
+        "description": "More angles, shown on the product page (not the storefront). Drop photos onto an option to show them only for it.",
         "about": "What Photos is for"
       },
       "specs": {
@@ -302,9 +346,9 @@
         "about": "What Badges is for"
       },
       "addOns": {
-        "label": "Add to order",
+        "label": "Also offer these products",
         "description": "Other products of yours that buyers can add with one tap, right above Buy now. Only products of the same kind and currency are listed, so it all stays one order.",
-        "about": "What Add to order is for"
+        "about": "What this section is for"
       }
     },
     "summary": {
@@ -342,7 +386,7 @@
       "lowStockWhole": "The low-stock alert must be a whole number of 0 or more.",
       "maxPerOrderRequired": "Enter how many one buyer can order — 1 to {max}.",
       "maxPerOrderRange": "The maximum per order must be a whole number from 1 to {max}.",
-      "purchaseUrl": "The purchase link must be a full https:// address.",
+      "purchaseUrl": "The buy link must be a full https:// address.",
       "optionGroupUnnamed": "Say what each option group varies, or remove it.",
       "optionGroupEmpty": "Add at least one {group} option, or remove the group.",
       "optionUnnamed": "Give every option a name, or remove the empty row.",
@@ -382,19 +426,22 @@
       "asYouTypeAccept": "Add the suggested words",
       "asYouTypeAnnounce": "Suggestion:",
       "asYouTypeTurnOff": "Turn off",
-      "asYouTypeOff": "Suggestions as you type are off. You can turn them back on in Settings, under Plan & billing.",
-      "upsellHint": "Comes with Pro: AI drafts and finishes descriptions from your details. The plans open in a new tab.",
-      "upsellBadge": "Pro"
+      "asYouTypeOff": "Suggestions as you type are off.",
+      "asYouTypeBackOn": "Turn them back on in Settings, under Plan & billing.",
+      "upsellHint": "Comes with Pro: AI drafts descriptions from your details, and suggests the next words as you type (Tab to add). The plans open in a new tab.",
+      "upsellBadge": "Pro",
+      "about": "What AI writing help does",
+      "aboutBody": "Write with AI drafts or improves the description from your details. Grey words suggest what comes next as you type (Tab adds them). Both use your monthly AI credit, shown in Settings under Plan & billing."
     },
     "displayImage": "Display image",
     "displayImageAbout": "Where the display image is used",
-    "displayImageHelp": "Shown on your storefront and embeds.",
+    "displayImageHelp": "The only photo shown on your storefront and embeds. Add more angles for the product page in Photos below.",
     "digitalFile": "Digital file",
     "digitalFileAbout": "What the digital file is",
     "digitalFileHelp": "The file buyers download right after paying. A download needs no shipping or product-safety details.",
-    "purchaseLink": "Purchase link",
+    "purchaseLink": "Buy link",
     "purchaseLinkAbout": "Where the buy button sends buyers",
-    "purchaseLinkHelp": "Leave it empty and buyers pay through Square Share checkout, or email you where checkout isn't on yet. A link here replaces both.",
+    "purchaseLinkHelp": "Leave it empty and buyers {checkout, select, true {pay through Square Share checkout} other {email your contact address}}. Add a link here to send them to your own checkout instead.",
     "purchaseLinkPlaceholder": "e.g. https://your-shop.example/checkout/this-product",
     "statusLabel": "Product status",
     "problems": "{count, plural, one {{count} thing to fix before saving} other {{count} things to fix before saving}}",
@@ -408,7 +455,8 @@
     "saveProduct": "Save product",
     "savedToast": "\"{title}\" was saved.",
     "addedToast": "\"{title}\" was added to your products.",
-    "checkingToast": "Buyers will see it once the automatic check approves it.",
+    "checkingToast": "Buyers will see it once the automatic check approves it, usually in a few seconds.",
+    "placeToast": "Next, put it on a storefront to give it a page.",
     "documentFallbackLabel": "Document",
     "discard": {
       "title": "Discard your changes?",
@@ -438,6 +486,7 @@
       }
     },
     "coverPrompt": "Drop your best photo here",
+    "coverPromptTouch": "Tap to add your best photo",
     "kind": {
       "legend": "What are you selling?",
       "physical": "Something I ship",
@@ -446,19 +495,21 @@
       "digitalHint": "A file buyers get right after paying"
     },
     "purchaseLinkAdd": "Selling through your own checkout? Add its link",
+    "safetyPrompt": "Shipping to EU buyers? Add the maker's details the law asks for",
     "extras": {
-      "heading": "Make it shine",
+      "heading": "More details",
       "subheading": "All optional. Add whatever helps buyers decide.",
-      "options": "Sizes, colours, versions",
+      "options": "Sizes, colours, versions, sharing one price and stock",
       "photos": "More angles and close-ups",
-      "badges": "Handmade, free shipping…",
+      "badges": "Short highlights: Handmade, Free shipping…",
       "specs": "Size, weight, materials",
       "documents": "Manuals and certificates",
       "safety": "Maker details for EU rules"
     },
     "visibility": {
       "activeHint": "Buyers can buy it once it is on a storefront",
-      "draftHint": "Only you can see it until you are ready"
+      "draftHint": "Only you can see it until you are ready",
+      "buyButton": "{kind, select, link {The buy button takes buyers to {host} to pay.} checkout {Buyers pay on its page, through Square Share checkout.} other {No checkout for it yet: the buy button lets buyers email you to ask about it.}}"
     },
     "preview": {
       "heading": "Live preview",
@@ -507,12 +558,12 @@
   "optionsField": {
     "display": {
       "swatch": "Swatches",
-      "chip": "Chips",
+      "chip": "Text buttons",
       "select": "Dropdown"
     },
     "displayHint": {
       "swatch": "Colour circles. Give each option a swatch, or buyers see its first letter.",
-      "chip": "Text buttons, for values buyers read: sizes, wattages, lengths.",
+      "chip": "Best for values buyers read: sizes, wattages, lengths.",
       "select": "A dropdown. Best when there are more values than fit as buttons."
     },
     "presets": {
@@ -607,14 +658,15 @@
     "removePhoto": "Remove photo",
     "movePhotoEarlier": "Move photo earlier",
     "movePhotoLater": "Move photo later",
-    "altPlaceholder": "Alt text",
+    "altPlaceholder": "Photo description",
     "altLabel": "Describe this photo, for people who cannot see it",
     "versionLabel": "Which version this photo is shown for",
     "tally": "{max, plural, one {{count} of {max} photo} other {{count} of {max} photos}}",
     "orderAbout": "How these photos are ordered",
-    "orderHelp": "The display image from Media and delivery is always first. After it, photos show in the order they sit in here.",
+    "orderHelp": "The display image, at the top of the form, is always first. After it, photos show in the order they sit in here.",
     "limitReached": "Limit reached",
-    "dropOrClick": "Drop or click"
+    "dropOrClick": "Drop or click",
+    "dropOrClickTouch": "Tap to add a photo"
   },
   "optionSpecsField": {
     "heading": "Different for each version",
@@ -689,7 +741,7 @@
     "tooLarge": "Image must be under {max} MB.",
     "previewAlt": "Display image preview",
     "dropPrompt": "Drop an image or click to upload",
-    "hint": "PNG, JPG, WEBP, GIF, or AVIF, up to {max} MB",
+    "hint": "PNG, JPG, WEBP, GIF, or AVIF, up to {max} MB. Square photos fit best.",
     "remove": "Remove display image"
   },
   "photoFormat": {
@@ -698,7 +750,7 @@
   "fileDropzone": {
     "currentFile": "Current file",
     "dropPrompt": "Drop a file or click to upload",
-    "hint": "ZIP, PDF, and similar, up to {max} MB",
+    "hint": "PDF, EPUB, ZIP, MP3, WAV, MP4, JPG, PNG, WEBP, or TXT, up to {max} MB",
     "remove": "Remove digital file"
   },
   "statement": {
@@ -829,7 +881,7 @@
     },
     "editProduct": "Edit product",
     "goToStorefronts": "Go to storefronts",
-    "embedPointer": "Selling just one product? Skip the embed and give it a buy button on your own website: in Products, open its menu and choose “Add to your website”.",
+    "embedPointer": "Selling just one product? Skip the embed and give it a buy button on your own website: in Products, open the three-dot menu on its card and choose “Add to your website”.",
     "embedPointerLink": "Go to Products",
     "demo": {
       "play": "Play the animation",
@@ -923,6 +975,7 @@
       "pink": "Pink"
     },
     "placementFor": "Where badge {position} goes",
+    "placementLabel": "Placement",
     "placementPicker": "Where it goes",
     "placements": {
       "beside": "Beside the product",
@@ -1107,12 +1160,11 @@
     },
     "story": {
       "product": "Ceramic mug",
-      "customerReviews": "Customer reviews",
-      "addToCart": "Add to cart",
       "reviews": {
         "a": "“Lovely glaze, keeps my coffee hot.”",
         "b": "“Even nicer in person.”",
-        "c": "“Arrived fast and well packed.”"
+        "c": "“Arrived fast and well packed.”",
+        "d": "“Bought a second one as a gift.”"
       }
     },
     "tally": {
@@ -1152,6 +1204,7 @@
   "reviewModeration": {
     "heading": "Reviews",
     "description": "What buyers said about your products. Every review is checked automatically before it appears, and the ones the check was unsure about wait here for you.",
+    "productPageLink": "Show or hide reviews on your product page",
     "importButton": "Import from anywhere",
     "filtersLabel": "Filter reviews",
     "filters": {
@@ -1164,7 +1217,7 @@
     "empty": {
       "all": {
         "title": "No reviews yet",
-        "body": "When a buyer reviews a product from their order page, it shows up here."
+        "body": "Buyers are asked for a review on their order page once they have the product: for a parcel, once you mark it shipped. Their reviews show up here."
       },
       "held": {
         "title": "Nothing waiting for you",
@@ -1242,7 +1295,7 @@
     "overview": {
       "label": "Store rating",
       "none": "No public reviews yet.",
-      "breakdown": "Reviews by star rating",
+      "breakdown": "Filter by star rating",
       "showStars": "{stars, plural, one {Show only {stars}-star reviews ({count})} other {Show only {stars}-star reviews ({count})}}"
     },
     "toolbar": {
@@ -1253,8 +1306,8 @@
       "anyRating": "Any rating",
       "product": "Product",
       "anyProduct": "All products",
-      "origin": "Source",
-      "anyOrigin": "All sources",
+      "origin": "Type",
+      "anyOrigin": "All types",
       "origins": {
         "verified": "Verified buyers",
         "imported": "Imported"

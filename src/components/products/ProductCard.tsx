@@ -1,10 +1,11 @@
 import Link from "@/components/ui/AppLink";
 import { useTranslations, useLocale } from "next-intl";
-import { ArrowRight, Image as ImageIcon, Pencil, TrendingUp } from "lucide-react";
+import { ArrowRight, Image as ImageIcon, MousePointerClick, Pencil, TrendingUp } from "lucide-react";
 import type { Product, ProductSales } from "@/types/product";
 import { cn } from "@/lib/utils";
 import { productEditPath } from "@/lib/products/paths";
 import { ordersViewPath } from "@/lib/orders/paths";
+import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
 import { focusRingClass, iconButtonClass, iconNudgeRightClass, photoControlClass } from "@/components/ui/control-styles";
 import {
   attentionCountClass,
@@ -22,12 +23,16 @@ import { ProductCardMenu } from "./ProductCardMenu";
 import { RemovalBadge } from "./RemovalNotice";
 import { StatusBadge, UnplacedBadge } from "./StatusBadge";
 
+/** A one-icon control on the card's photo (the buy button, the editor), above
+ *  the card's stretched editor link. */
+const cardIconButtonClass = cn(iconButtonClass, photoControlClass, "relative z-10 size-7");
+
 // Presentational card (styles.md §8.7). Interactive handlers come from the
 // parent list, which owns product state.
 //
 // A POSTER, in two zones on one 12px inset. TOP: why buyers can't see it (one
 // chip, only when that is true) on the left, every control (Ship, the menu) on
-// the right. BOTTOM: the facts as one left-aligned column on a dark fade:
+// the right. BOTTOM: the facts as one left-aligned column on a shaded blur:
 // bestseller, name, price, sales, stock. Nothing hangs off the right edge to
 // line up against. The whole card opens the editor (the title is the link,
 // stretched over it); everything else sits above that link.
@@ -42,6 +47,10 @@ export function ProductCard({
   onCopyLink,
   onOpenPage,
   onBuyButton,
+  onDuplicate,
+  onMakeActive,
+  onMakeDraft,
+  onEditStock,
 }: {
   product: Product;
   /** Read-only members get no editor link and no delete: the card is inert. */
@@ -67,6 +76,15 @@ export function ProductCard({
   onOpenPage: () => void;
   /** Called when the seller asks for a buy button for their own website. */
   onBuyButton: () => void;
+  /** Called when the seller duplicates this product. */
+  onDuplicate: () => void;
+  /** Called when the seller makes this draft product active. */
+  onMakeActive: () => void;
+  /** Called when the seller moves this active product back to draft. */
+  onMakeDraft: () => void;
+  /** Called when the seller presses the stock count to change it (a writer's
+   *  card, stock tracked). */
+  onEditStock: () => void;
 }) {
   const { id, title, price, currency, status, imageUrl, trackStock, stockQuantity, lowStockThreshold, removal } = product;
   const stockBadge = deriveStockBadge({ trackStock, stockQuantity, lowStockThreshold });
@@ -137,7 +155,7 @@ export function ProductCard({
           ) : status === "draft" ? (
             <StatusBadge status={status} />
           ) : storefrontCount === 0 ? (
-            <UnplacedBadge />
+            <UnplacedBadge href={canWrite ? STOREFRONT_LIST_PATH : undefined} />
           ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-1">
@@ -157,24 +175,41 @@ export function ProductCard({
               <ArrowRight className={cn("size-3.5 shrink-0", iconNudgeRightClass)} strokeWidth={2} aria-hidden="true" />
             </Link>
           )}
+          {/* Website buy button: only shown for active products already on a
+              storefront so the action is immediately useful. Writers only;
+              the full "Add to your website" is still in the menu for all roles. */}
+          {canWrite && status === "active" && storefrontCount > 0 && (
+            <button
+              type="button"
+              aria-label={t("addToWebsiteShort", { title })}
+              onClick={onBuyButton}
+              className={cardIconButtonClass}
+            >
+              <MousePointerClick className="size-3.5" strokeWidth={2} aria-hidden="true" />
+            </button>
+          )}
           {/* The editor, as a button of its own as well as the whole card: the
               one control a seller looks for. Writers only. */}
           {canWrite && (
             <Link
               href={productEditPath(id)}
               aria-label={t("edit", { title })}
-              className={cn(iconButtonClass, photoControlClass, "relative z-10 size-7")}
+              className={cardIconButtonClass}
             >
               <Pencil className="size-3.5" strokeWidth={2} aria-hidden="true" />
             </Link>
           )}
           <ProductCardMenu
             title={title}
+            status={status}
             canWrite={canWrite}
             storefrontCount={storefrontCount}
             onCopyLink={onCopyLink}
             onOpenPage={onOpenPage}
             onBuyButton={onBuyButton}
+            onDuplicate={onDuplicate}
+            onMakeActive={onMakeActive}
+            onMakeDraft={onMakeDraft}
             onDelete={onDelete}
           />
         </div>
@@ -205,7 +240,22 @@ export function ProductCard({
               t("noSales")
             )}
           </span>
-          {stockLine}
+          {/* When the seller can edit and stock is tracked, the count is a
+              button (dotted, so it reads as one on a phone too) that changes
+              the number without opening the full editor. Its name keeps the
+              visible count, then says what pressing it does. */}
+          {canWrite && trackStock ? (
+            <button
+              type="button"
+              onClick={onEditStock}
+              className={cn("relative z-10 self-start text-left underline decoration-dotted underline-offset-4", focusRingClass)}
+            >
+              {stockLine}
+              <span className="sr-only"> {t("editStock", { title })}</span>
+            </button>
+          ) : (
+            stockLine
+          )}
         </div>
       </div>
     </div>

@@ -13,6 +13,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  type XAxisTickContentProps,
   type YAxisTickContentProps,
 } from "recharts";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ import {
   CHART_ANIMATION,
   MARK,
   PLOT,
+  QUIET,
   TOOLTIP,
   bleedFade,
   dimmableClass,
@@ -32,6 +34,7 @@ import { resolveSeries, useReducedMotion, useSeriesHighlight } from "@/component
 import { ChartTooltipContent } from "@/components/charts/ChartTooltip";
 import { ChartLegend } from "@/components/charts/ChartLegend";
 import { ChartDataTable } from "@/components/charts/ChartDataTable";
+import { useChartStyle, type ChartAxes } from "@/components/charts/style";
 import type { ChartDatum, ChartSeries } from "@/components/charts/types";
 
 // Trend over time. Subtypes via `variant`:
@@ -49,6 +52,10 @@ import type { ChartDatum, ChartSeries } from "@/components/charts/types";
 //
 // VERSUS. A series marked `reference` is what the others are read against
 // (the previous period): dashed, thin, no wash, drawn behind them.
+//
+// QUIET AXES (ChartStyle, style.tsx): no value axis, the dates at the two
+// ends and the middle only, dotted guides over a solid baseline, a dashed rule
+// under the pointer and a fuller wash. A bled plot keeps its own axes.
 //
 // ONE VALUE. A line needs two points. A series with a single value gets its
 // point marked and a dotted level through it instead of an empty plot, so one
@@ -99,6 +106,8 @@ export interface LineChartProps {
   yDomain?: [number, number];
   /** Value-axis tick values, for a caller that set `yDomain` (see niceTicks). */
   yTicks?: number[];
+  /** How much scale to print. Default: the page's ChartStyle ("full"). */
+  axes?: ChartAxes;
   /** Show the legend under the plot (two or more series). Off for a caller
    *  that names its series somewhere of its own. */
   legend?: boolean;
@@ -126,6 +135,7 @@ export function LineChart({
   valueSide = "left",
   yDomain,
   yTicks,
+  axes: axesProp,
   legend = true,
   animate = true,
   ariaLabel: ariaLabelProp,
@@ -156,6 +166,15 @@ export function LineChart({
   const animationActive = animate && !reducedMotion;
   const gradientId = useId().replace(/:/g, "");
   const fill = height === "fill";
+  const style = useChartStyle();
+  const quiet = !bleed && (axesProp ?? style.axes) === "quiet";
+  // Quiet axes date the two ends and the middle, and nothing between.
+  const xValues = data.map((datum) => datum[xKey]);
+  const quietTicks = quiet
+    ? [...new Set([xValues[0], xValues[Math.floor((xValues.length - 1) / 2)], xValues[xValues.length - 1]])].filter(
+        (value): value is string | number => value != null,
+      )
+    : undefined;
 
   // The chart's own size in px. A bled plot needs it: its tails are a number
   // of px wide, and they are drawn down to the plot's floor.
@@ -243,6 +262,18 @@ export function LineChart({
     </text>
   );
 
+  // A quiet date sits under its point, except at the ends, where it is
+  // tucked inward so the box's edges never clip it.
+  const quietDate = (tick: XAxisTickContentProps) => {
+    const value = tick.payload.value;
+    const anchor = value === xValues[0] ? "start" : value === xValues[xValues.length - 1] ? "end" : "middle";
+    return (
+      <text x={tick.x} y={tick.y} dy="0.71em" textAnchor={xValues.length > 1 ? anchor : "middle"} {...CHART.axisTick}>
+        {xFormatter ? xFormatter(String(value)) : String(value)}
+      </text>
+    );
+  };
+
   const axes = (
     <>
       {/* A bled plot draws a line per value label and nothing else: the
@@ -251,20 +282,23 @@ export function LineChart({
         vertical={false}
         stroke={CHART.gridStroke}
         syncWithTicks={bleed}
+        strokeDasharray={quiet ? MARK.guideDash : undefined}
         mask={fadeMask}
       />
+      {quiet && <ReferenceLine y={0} stroke={CHART.gridStroke} />}
       <XAxis
         dataKey={xKey}
         axisLine={false}
         tickLine={false}
-        tick={CHART.axisTick}
+        tick={quiet ? quietDate : CHART.axisTick}
         tickMargin={8}
         minTickGap={32}
         height={PLOT.xAxisHeight}
         // A bled plot keeps its data clear of both ends: the room is the
         // tails', and the first and last dates sit under real points.
         padding={bleed ? { left: tail, right: tail } : undefined}
-        interval="preserveStartEnd"
+        ticks={quietTicks}
+        interval={quiet ? 0 : "preserveStartEnd"}
         tickFormatter={xFormatter}
       />
       <YAxis
@@ -283,9 +317,16 @@ export function LineChart({
         ticks={yTicks}
         allowDecimals={!whole}
         tickFormatter={axisValueFormatter}
+        // Hidden, it still sets the levels the guides are drawn at.
+        hide={quiet}
+        tickCount={quiet && !yTicks ? QUIET.guideCount : undefined}
       />
       <Tooltip
-        cursor={{ stroke: CHART.gridStroke }}
+        cursor={
+          quiet
+            ? { stroke: CHART.series3, strokeDasharray: MARK.crosshairDash }
+            : { stroke: CHART.gridStroke }
+        }
         isAnimationActive={TOOLTIP.animated}
         wrapperStyle={TOOLTIP.wrapperStyle}
         content={({ active, payload, label }) => (
@@ -368,6 +409,7 @@ export function LineChart({
     stroke: s.resolvedColor,
     strokeWidth: s.reference ? MARK.referenceWidth : MARK.lineWidth,
     strokeDasharray: s.reference ? MARK.referenceDash : undefined,
+    ...(quiet && { strokeLinecap: "round" as const, strokeLinejoin: "round" as const }),
     // Legend hover dims siblings via CSS opacity on the series layer — an
     // interruptible 180ms fade rather than an instant attribute swap.
     className: cn(dimmableClass, highlighted !== null && highlighted !== s.key && dimmedClass),
@@ -415,10 +457,13 @@ export function LineChart({
     />
   ));
 
+  // With no value axis beside it, the plot keeps the same air on its left as
+  // on its right, so the first point's hover dot is not clipped either.
   const margin = bleed
     ? { top: BLEED.top, right: 0, bottom: 0, left: 0 }
-    : { top: PLOT.top, right: PLOT.right, bottom: 0, left: 0 };
-  const areaWash = bleed ? BLEED.areaWash : MARK.areaWash;
+    : { top: PLOT.top, right: PLOT.right, bottom: 0, left: quiet ? PLOT.right : 0 };
+  const areaWash = bleed ? BLEED.areaWash : quiet ? QUIET.areaWash : MARK.areaWash;
+  const areaFillOpacity = quiet ? QUIET.areaFillOpacity : MARK.areaFillOpacity;
   // Standalone charts (fixed `width`) need explicit dimensions; inside
   // ResponsiveContainer the container injects them.
   const renderChart = (dims?: { width: number; height: number }) =>
@@ -451,7 +496,7 @@ export function LineChart({
             key={s.key}
             {...markProps(s)}
             fill={s.reference ? "none" : `url(#${gradientId}-${i})`}
-            fillOpacity={MARK.areaFillOpacity}
+            fillOpacity={areaFillOpacity}
           />
         ))}
       </AreaChart>

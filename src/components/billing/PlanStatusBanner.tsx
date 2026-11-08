@@ -4,7 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { bannerActionClass, iconNudgeRightClass } from "@/components/ui/control-styles";
 import { bannerStripClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
-import { BILLING_SETTINGS_PATH } from "@/lib/billing/paths";
+import { BILLING_SETTINGS_INVOICES_PATH } from "@/lib/billing/paths";
+import { SETTINGS_TEAM_PATH } from "@/lib/team/paths";
 import type { PaidPlanId } from "@/lib/billing/plans";
 
 /**
@@ -16,8 +17,8 @@ import type { PaidPlanId } from "@/lib/billing/plans";
  * their own decision, stated on the settings page and in the plans, not
  * repeated on every page.
  *
- * Owners get the link to fix it; a teammate gets the fact, since only the
- * owner can reach the card.
+ * Owners get the link to fix it; a teammate, who cannot reach the card, gets
+ * the fact and the team page, where the owner to tell is named.
  */
 export async function PlanStatusBanner({
   pastDuePlan,
@@ -41,15 +42,13 @@ export async function PlanStatusBanner({
       <p className="min-w-0 flex-1 font-inter text-foreground">
         {audience === "owner" ? t("banner.pastDue", { plan }) : t("banner.pastDueMember", { plan })}
       </p>
-      {audience === "owner" && (
-        <Link
-          href={BILLING_SETTINGS_PATH}
-          className={bannerActionClass}
-        >
-          {t("banner.action")}
-          <ArrowRight className={cn("size-3.5", iconNudgeRightClass)} strokeWidth={2} aria-hidden />
-        </Link>
-      )}
+      <Link
+        href={audience === "owner" ? BILLING_SETTINGS_INVOICES_PATH : SETTINGS_TEAM_PATH}
+        className={bannerActionClass}
+      >
+        {t(audience === "owner" ? "banner.action" : "banner.seeTeam")}
+        <ArrowRight className={cn("size-3.5", iconNudgeRightClass)} strokeWidth={2} aria-hidden />
+      </Link>
     </div>
   );
 }

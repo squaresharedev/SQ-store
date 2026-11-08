@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { presignGetUrl } from "@/lib/r2";
+import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { RASTER_IMAGE_TYPES } from "@/lib/uploads/sniff";
@@ -43,6 +44,7 @@ export async function GET(
   const account = await getActiveAccount();
   if (!account) return refuse(401);
   if (!can(account.role, "store.read")) return refuse(403);
+  if (!(await rateLimit("product_photo", RATE_LIMITS.productPhoto))) return refuse(429);
 
   const supabase = await createClient();
   const { data } = await supabase

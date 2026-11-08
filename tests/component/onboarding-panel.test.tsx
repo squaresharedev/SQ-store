@@ -7,7 +7,8 @@
  * way forward records it and starts the tour carrying the checklist's next
  * step; `?tour=1` starts the tour for someone past the welcome (never over it)
  * and drops the query either way; a welcome that opens ends a tour left
- * running; and the finished card is recorded once and stays up for the visit.
+ * running; the finished card is recorded once and stays up for the visit; and
+ * Overview's quiet tour link (TourLink, once the checklist is gone) starts it.
  */
 
 import type { ReactNode } from "react";
@@ -78,6 +79,7 @@ vi.mock("motion/react", async (importOriginal) => ({
 }));
 
 const { OnboardingPanel } = await import("@/components/onboarding/OnboardingPanel");
+const { TourLink } = await import("@/components/onboarding/TourLink");
 const store = await import("@/lib/onboarding/tour-store");
 
 const NEW_SELLER: SetupFacts = {
@@ -116,6 +118,7 @@ function data(overrides: Partial<OnboardingData> = {}): OnboardingData {
     seller: { businessName: "", address: "", email: "" },
     verificationOn: false,
     livePageUrl: null,
+    liveStorefrontUrl: null,
     tourRequested: false,
     ...overrides,
   };
@@ -345,5 +348,19 @@ describe("OnboardingPanel", () => {
     view.rerender(<OnboardingPanel {...finished} celebrationPending={false} />);
     expect(screen.getByRole("heading", { name: "You're set up" })).toBeInTheDocument();
     expect(actions.markSetupCelebrated).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("TourLink", () => {
+  it("starts the tour from Overview once the checklist is gone", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <TourLink />
+        <TourProbe />
+      </>,
+    );
+    await user.click(screen.getByRole("button", { name: "Show me around" }));
+    expect(tourState()).toMatchObject({ status: "active", stepId: "overview-nav" });
   });
 });

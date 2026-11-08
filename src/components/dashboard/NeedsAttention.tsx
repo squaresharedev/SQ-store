@@ -1,13 +1,21 @@
-import Link from "@/components/ui/AppLink";
 import { useTranslations } from "next-intl";
-import { AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
-import { iconNudgeRightClass, infoTextClass } from "@/components/ui/control-styles";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { infoTextClass } from "@/components/ui/control-styles";
 import type { AttentionItem } from "@/lib/dashboard/attention";
-import { ModuleCard } from "./ModuleCard";
+import { ModuleActionLink, ModuleCard } from "./ModuleCard";
 
 /** Real, data-backed action items; quiet "all clear" when there are none. */
-export function NeedsAttention({ items }: { items: AttentionItem[] }) {
+export function NeedsAttention({
+  items,
+  setupVisible = false,
+}: {
+  items: AttentionItem[];
+  /** The setup checklist is on screen. Its open steps are the to-do list then,
+   *  and an "All clear" beside them would contradict it, so nothing renders. */
+  setupVisible?: boolean;
+}) {
   const t = useTranslations();
+  if (items.length === 0 && setupVisible) return null;
   return (
     <ModuleCard title={t("Dashboard.attention.title")} decoration="dots">
       {items.length === 0 ? (
@@ -41,17 +49,9 @@ export function NeedsAttention({ items }: { items: AttentionItem[] }) {
                   </p>
                 </div>
               </div>
-              <Link
-                href={item.href}
-                className="group/btn inline-flex items-center gap-1 font-inter text-xs font-medium text-foreground underline decoration-border underline-offset-4 transition-colors duration-base ease-standard hover:decoration-foreground motion-reduce:transition-none"
-              >
+              <ModuleActionLink href={item.href}>
                 {t(item.actionLabel.key, item.actionLabel.values)}
-                <ArrowRight
-                  className={`size-3 ${iconNudgeRightClass}`}
-                  strokeWidth={2}
-                  aria-hidden="true"
-                />
-              </Link>
+              </ModuleActionLink>
             </li>
           ))}
         </ul>
