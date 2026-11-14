@@ -212,6 +212,89 @@
     "grantUntil": "Até {date}. Quando terminar, nada é removido.",
     "grantNoEnd": "Sem data de fim."
   },
+  "invoices": {
+    "description": "O seu cartão, a quem vão as faturas e todas as faturas que lhe enviámos.",
+    "loading": "A carregar as suas faturas",
+    "loadError": "As suas faturas não podem ser carregadas agora. O seu plano e a sua loja não são afetados.",
+    "retry": "Tentar novamente",
+    "granted": "A Square Share ofereceu este plano à sua loja, por isso não há nada a pagar nem faturas.",
+    "sections": {
+      "card": "Método de pagamento",
+      "billing": "Dados de faturação",
+      "history": "Histórico de faturas"
+    },
+    "update": "Atualizar",
+    "addCard": "Adicionar cartão",
+    "brands": {
+      "visa": "Visa",
+      "mastercard": "Mastercard",
+      "amex": "Amex",
+      "other": "Cartão"
+    },
+    "card": {
+      "line": "{brand} a terminar em {last4}",
+      "expires": "Expira em {month}",
+      "expiring": "Expira em {month}, em breve",
+      "expired": "Expirou em {month}",
+      "none": "Sem cartão guardado"
+    },
+    "billing": {
+      "none": "Adicionado no primeiro pagamento.",
+      "vatId": "NIF {id}",
+      "vatNone": "Sem NIF"
+    },
+    "attention": {
+      "payment_failed": "O pagamento de {amount} em {date} não foi processado. {reason}",
+      "due": "A fatura {number} no valor de {amount} está a aguardar pagamento.",
+      "cardExpired": "O seu cartão expirou em {month}. Adicione um novo antes do próximo pagamento.",
+      "updateCard": "Atualizar cartão",
+      "pay": "Pagar agora"
+    },
+    "failure": {
+      "card_declined": "O seu banco recusou o cartão.",
+      "expired_card": "O cartão expirou.",
+      "insufficient_funds": "O cartão não tem fundos suficientes.",
+      "authentication_required": "O seu banco precisa que confirme o pagamento."
+    },
+    "retryOn": "Vamos tentar novamente em {date}.",
+    "status": {
+      "paid": "Paga",
+      "partially_refunded": "Parcialmente reembolsada",
+      "refunded": "Reembolsada",
+      "due": "Pendente",
+      "payment_failed": "Pagamento falhado",
+      "void": "Anulada",
+      "uncollectible": "Incobrável"
+    },
+    "list": {
+      "label": "Histórico de faturas",
+      "empty": "Ainda não há faturas. A primeira aparece quando o plano for cobrado.",
+      "openRow": "Abrir fatura {number}",
+      "download": "Descarregar fatura {number} como PDF",
+      "showAll": "Mostrar todas as {count} faturas",
+      "describe": "Plano {plan}, {interval, select, year {anual} other {mensal}}",
+      "change": "Mudar para {plan}"
+    },
+    "dialog": {
+      "title": "Fatura {number}",
+      "paidWith": "Paga em {date} com {card}",
+      "paid": "Paga em {date}",
+      "issued": "Emitida em {date}",
+      "plan": "Plano {plan}, {interval, select, year {1 ano} other {1 mês}}",
+      "unused": "Tempo não utilizado no {plan}",
+      "remaining": "Tempo restante no {plan}",
+      "period": "De {start} a {end}",
+      "subtotal": "Subtotal",
+      "vat": "IVA ({rate})",
+      "reverseCharge": "IVA (autoliquidação)",
+      "tax": "Imposto",
+      "total": "Total",
+      "refunded": "Reembolsado",
+      "download": "Descarregar PDF",
+      "receipt": "Ver recibo",
+      "pay": "Pagar agora"
+    }
+  },
   "ai": {
     "title": "Ajuda da IA na escrita",
     "description": "Rascunhos, reformulações e as palavras seguintes enquanto escreve, a partir dos dados que introduz. Não acrescenta afirmações próprias.",

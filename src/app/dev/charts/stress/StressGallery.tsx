@@ -49,6 +49,11 @@ function months(count: number, cents: (month: number) => number): RevenuePoint[]
 }
 
 const total = (series: RevenuePoint[]) => series.reduce((sum, point) => sum + point.revenueCents, 0);
+/** The range's average order, as the analytics query computes it: revenue over sales. */
+const aovOf = (series: RevenuePoint[]) => {
+  const sales = series.reduce((sum, point) => sum + point.sales, 0);
+  return sales > 0 ? Math.round(total(series) / sales) : 0;
+};
 const rangeOf = (series: RevenuePoint[]) => ({
   from: series[0]?.date ?? null,
   to: series[series.length - 1]?.date ?? null,
@@ -171,6 +176,8 @@ function Case({ id, what, children }: { id: string; what: string; children: Reac
 
 export function StressGallery() {
   const oneSaleDay = days(30, (day) => (day === 11 ? 12_990 : 0), 12_990);
+  const millionsAov = days(30, (day) => 450_000_000 + Math.sin(day) * 120_000_000, 450_000_000);
+  const centsAov = days(30, () => 250, 250);
   const signals = (count: (day: number) => number) =>
     days(30, () => 0).map((point, day) => ({ date: point.date, count: count(day), valueCents: 0 }));
 
@@ -209,15 +216,17 @@ export function StressGallery() {
 
         <Case id="aov-one-sale-day" what="One day with a sale in thirty: an average with a single value">
           <ChartCard title="Average order value">
-            <AovTrendChart series={oneSaleDay} currency="EUR" />
+            <AovTrendChart series={oneSaleDay} aovCents={aovOf(oneSaleDay)} currency="EUR" />
           </ChartCard>
         </Case>
 
         <Case id="aov-millions" what="Orders worth millions, against a previous period worth cents">
           <ChartCard title="Average order value">
             <AovTrendChart
-              series={days(30, (day) => 450_000_000 + Math.sin(day) * 120_000_000, 450_000_000)}
-              previous={days(30, () => 250, 250)}
+              series={millionsAov}
+              previous={centsAov}
+              aovCents={aovOf(millionsAov)}
+              previousAovCents={aovOf(centsAov)}
               currency="EUR"
             />
           </ChartCard>

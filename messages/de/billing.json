@@ -212,6 +212,89 @@
     "grantUntil": "Bis zum {date}. Wenn er endet, wird nichts offline genommen.",
     "grantNoEnd": "Ohne Enddatum."
   },
+  "invoices": {
+    "description": "Deine Karte, die Rechnungsadresse und alle Rechnungen, die wir dir gesendet haben.",
+    "loading": "Rechnungen werden geladen",
+    "loadError": "Deine Rechnungen können gerade nicht geladen werden. Dein Tarif und dein Shop sind nicht betroffen.",
+    "retry": "Erneut versuchen",
+    "granted": "Square Share hat deinem Shop diesen Tarif gegeben, daher gibt es nichts zu zahlen und keine Rechnungen.",
+    "sections": {
+      "card": "Zahlungsmethode",
+      "billing": "Rechnungsangaben",
+      "history": "Rechnungsverlauf"
+    },
+    "update": "Aktualisieren",
+    "addCard": "Karte hinzufügen",
+    "brands": {
+      "visa": "Visa",
+      "mastercard": "Mastercard",
+      "amex": "Amex",
+      "other": "Karte"
+    },
+    "card": {
+      "line": "{brand} endet auf {last4}",
+      "expires": "Läuft ab {month}",
+      "expiring": "Läuft ab {month}, bald",
+      "expired": "Abgelaufen {month}",
+      "none": "Keine Karte hinterlegt"
+    },
+    "billing": {
+      "none": "Wird bei deiner ersten Zahlung ergänzt.",
+      "vatId": "USt-IdNr. {id}",
+      "vatNone": "Keine USt-IdNr."
+    },
+    "attention": {
+      "payment_failed": "Deine Zahlung über {amount} am {date} ist fehlgeschlagen. {reason}",
+      "due": "Rechnung {number} über {amount} wartet auf Bezahlung.",
+      "cardExpired": "Deine Karte ist {month} abgelaufen. Füge eine neue hinzu, bevor die nächste Zahlung fällig wird.",
+      "updateCard": "Karte aktualisieren",
+      "pay": "Jetzt bezahlen"
+    },
+    "failure": {
+      "card_declined": "Deine Bank hat die Karte abgelehnt.",
+      "expired_card": "Die Karte ist abgelaufen.",
+      "insufficient_funds": "Die Karte hat nicht ausreichend Guthaben.",
+      "authentication_required": "Deine Bank muss die Zahlung noch bestätigen."
+    },
+    "retryOn": "Wir versuchen es am {date} erneut.",
+    "status": {
+      "paid": "Bezahlt",
+      "partially_refunded": "Teilweise erstattet",
+      "refunded": "Erstattet",
+      "due": "Offen",
+      "payment_failed": "Zahlung fehlgeschlagen",
+      "void": "Storniert",
+      "uncollectible": "Abgeschrieben"
+    },
+    "list": {
+      "label": "Rechnungsverlauf",
+      "empty": "Noch keine Rechnungen. Die erste erscheint, wenn dein Tarif abgerechnet wird.",
+      "openRow": "Rechnung {number} öffnen",
+      "download": "Rechnung {number} als PDF herunterladen",
+      "showAll": "Alle {count} Rechnungen anzeigen",
+      "describe": "{plan}-Tarif, {interval, select, year {jährlich} other {monatlich}}",
+      "change": "Zu {plan} wechseln"
+    },
+    "dialog": {
+      "title": "Rechnung {number}",
+      "paidWith": "Bezahlt am {date} mit {card}",
+      "paid": "Bezahlt am {date}",
+      "issued": "Ausgestellt am {date}",
+      "plan": "{plan}-Tarif, {interval, select, year {1 Jahr} other {1 Monat}}",
+      "unused": "Nicht genutzte Zeit für {plan}",
+      "remaining": "Verbleibende Zeit für {plan}",
+      "period": "{start} bis {end}",
+      "subtotal": "Zwischensumme",
+      "vat": "MwSt. ({rate})",
+      "reverseCharge": "MwSt. (Reverse-Charge)",
+      "tax": "Steuer",
+      "total": "Gesamt",
+      "refunded": "Erstattet",
+      "download": "PDF herunterladen",
+      "receipt": "Quittung anzeigen",
+      "pay": "Jetzt bezahlen"
+    }
+  },
   "ai": {
     "title": "KI-Schreibhilfe",
     "description": "Entwürfe, Überarbeitungen und die nächsten Wörter beim Tippen, aus deinen Angaben. Eigene Behauptungen fügt sie nicht hinzu.",

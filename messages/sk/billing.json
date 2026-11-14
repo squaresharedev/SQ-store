@@ -212,6 +212,89 @@
     "grantUntil": "Do {date}. Keď skončí, nič sa neodstráni.",
     "grantNoEnd": "Bez dátumu ukončenia."
   },
+  "invoices": {
+    "description": "Vaša karta, komu idú faktúry a každá faktúra, ktorú sme vám poslali.",
+    "loading": "Načítavame vaše faktúry",
+    "loadError": "Vaše faktúry sa teraz nedajú načítať. Váš plán ani obchod nie sú ovplyvnené.",
+    "retry": "Skúsiť znova",
+    "granted": "Square Share daroval vášmu obchodu tento plán, takže nie je čo platiť a žiadne faktúry nevznikajú.",
+    "sections": {
+      "card": "Platobná metóda",
+      "billing": "Fakturačné údaje",
+      "history": "História faktúr"
+    },
+    "update": "Aktualizovať",
+    "addCard": "Pridať kartu",
+    "brands": {
+      "visa": "Visa",
+      "mastercard": "Mastercard",
+      "amex": "Amex",
+      "other": "Karta"
+    },
+    "card": {
+      "line": "{brand} končiaca na {last4}",
+      "expires": "Platí do {month}",
+      "expiring": "Platí do {month}, čoskoro vyprší",
+      "expired": "Platnosť vypršala {month}",
+      "none": "Žiadna karta nie je uložená"
+    },
+    "billing": {
+      "none": "Doplní sa pri prvej platbe.",
+      "vatId": "IČ DPH {id}",
+      "vatNone": "Žiadne IČ DPH"
+    },
+    "attention": {
+      "payment_failed": "Vaša platba {amount} dňa {date} sa neuskutočnila. {reason}",
+      "due": "Faktúra {number} na {amount} čaká na úhradu.",
+      "cardExpired": "Vaša karta vypršala v {month}. Pred ďalšou platbou pridajte novú.",
+      "updateCard": "Aktualizovať kartu",
+      "pay": "Zaplatiť teraz"
+    },
+    "failure": {
+      "card_declined": "Vaša banka zamietla platbu kartou.",
+      "expired_card": "Platnosť karty vypršala.",
+      "insufficient_funds": "Na karte nie je dostatok prostriedkov.",
+      "authentication_required": "Vaša banka vyžaduje potvrdenie platby."
+    },
+    "retryOn": "Skúsime to znova {date}.",
+    "status": {
+      "paid": "Zaplatené",
+      "partially_refunded": "Čiastočne vrátené",
+      "refunded": "Vrátené",
+      "due": "Na úhradu",
+      "payment_failed": "Platba zlyhala",
+      "void": "Stornované",
+      "uncollectible": "Odpísané"
+    },
+    "list": {
+      "label": "História faktúr",
+      "empty": "Zatiaľ žiadne faktúry. Prvá sa zobrazí, keď bude plán prvýkrát zaúčtovaný.",
+      "openRow": "Otvoriť faktúru {number}",
+      "download": "Stiahnuť faktúru {number} ako PDF",
+      "showAll": "Zobraziť všetkých {count} faktúr",
+      "describe": "Plán {plan}, {interval, select, year {ročne} other {mesačne}}",
+      "change": "Prejsť na {plan}"
+    },
+    "dialog": {
+      "title": "Faktúra {number}",
+      "paidWith": "Zaplatené {date} kartou {card}",
+      "paid": "Zaplatené {date}",
+      "issued": "Vystavené {date}",
+      "plan": "Plán {plan}, {interval, select, year {1 rok} other {1 mesiac}}",
+      "unused": "Nevyužitý čas na {plan}",
+      "remaining": "Zostatok času na {plan}",
+      "period": "{start} až {end}",
+      "subtotal": "Medzisúčet",
+      "vat": "DPH ({rate})",
+      "reverseCharge": "DPH (prenesenie daňovej povinnosti)",
+      "tax": "Daň",
+      "total": "Celkom",
+      "refunded": "Vrátené",
+      "download": "Stiahnuť PDF",
+      "receipt": "Zobraziť doklad",
+      "pay": "Zaplatiť teraz"
+    }
+  },
   "ai": {
     "title": "Pomoc AI s písaním",
     "description": "Návrhy popisov, úpravy a ďalšie slová počas písania, z údajov, ktoré zadáte. Nepridáva žiadne vlastné tvrdenia.",

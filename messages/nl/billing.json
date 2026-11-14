@@ -212,6 +212,89 @@
     "grantUntil": "Tot {date}. Als het afloopt, wordt er niets verwijderd.",
     "grantNoEnd": "Zonder einddatum."
   },
+  "invoices": {
+    "description": "Je kaart, aan wie facturen worden gericht en alle facturen die we je hebben gestuurd.",
+    "loading": "Facturen worden geladen",
+    "loadError": "Je facturen kunnen nu niet worden geladen. Je abonnement en je winkel zijn niet beïnvloed.",
+    "retry": "Opnieuw proberen",
+    "granted": "Square Share heeft je winkel dit abonnement gegeven, dus er is niets te betalen en geen facturen.",
+    "sections": {
+      "card": "Betaalmethode",
+      "billing": "Factuurgegevens",
+      "history": "Factuurgeschiedenis"
+    },
+    "update": "Bijwerken",
+    "addCard": "Kaart toevoegen",
+    "brands": {
+      "visa": "Visa",
+      "mastercard": "Mastercard",
+      "amex": "Amex",
+      "other": "Kaart"
+    },
+    "card": {
+      "line": "{brand} eindigend op {last4}",
+      "expires": "Verloopt {month}",
+      "expiring": "Verloopt {month}, binnenkort",
+      "expired": "Verlopen {month}",
+      "none": "Geen kaart opgeslagen"
+    },
+    "billing": {
+      "none": "Wordt toegevoegd bij je eerste betaling.",
+      "vatId": "Btw-nummer {id}",
+      "vatNone": "Geen btw-nummer"
+    },
+    "attention": {
+      "payment_failed": "Je betaling van {amount} op {date} is mislukt. {reason}",
+      "due": "Factuur {number} voor {amount} wacht op betaling.",
+      "cardExpired": "Je kaart is verlopen in {month}. Voeg een nieuwe toe voor je volgende betaling.",
+      "updateCard": "Kaart bijwerken",
+      "pay": "Nu betalen"
+    },
+    "failure": {
+      "card_declined": "Je bank heeft de kaart geweigerd.",
+      "expired_card": "De kaart is verlopen.",
+      "insufficient_funds": "De kaart heeft onvoldoende saldo.",
+      "authentication_required": "Je bank heeft je bevestiging nodig voor deze betaling."
+    },
+    "retryOn": "We proberen het opnieuw op {date}.",
+    "status": {
+      "paid": "Betaald",
+      "partially_refunded": "Gedeeltelijk terugbetaald",
+      "refunded": "Terugbetaald",
+      "due": "Openstaand",
+      "payment_failed": "Betaling mislukt",
+      "void": "Geannuleerd",
+      "uncollectible": "Oninbaar"
+    },
+    "list": {
+      "label": "Factuurgeschiedenis",
+      "empty": "Nog geen facturen. De eerste verschijnt wanneer je abonnement wordt gefactureerd.",
+      "openRow": "Factuur {number} openen",
+      "download": "Factuur {number} downloaden als pdf",
+      "showAll": "Alle {count} facturen tonen",
+      "describe": "{plan}-abonnement, {interval, select, year {jaarlijks} other {maandelijks}}",
+      "change": "Overstappen naar {plan}"
+    },
+    "dialog": {
+      "title": "Factuur {number}",
+      "paidWith": "Betaald op {date} met {card}",
+      "paid": "Betaald op {date}",
+      "issued": "Opgemaakt op {date}",
+      "plan": "{plan}-abonnement, {interval, select, year {1 jaar} other {1 maand}}",
+      "unused": "Ongebruikte tijd voor {plan}",
+      "remaining": "Resterende tijd voor {plan}",
+      "period": "{start} tot {end}",
+      "subtotal": "Subtotaal",
+      "vat": "Btw ({rate})",
+      "reverseCharge": "Btw (verlegd)",
+      "tax": "Belasting",
+      "total": "Totaal",
+      "refunded": "Terugbetaald",
+      "download": "Pdf downloaden",
+      "receipt": "Bon bekijken",
+      "pay": "Nu betalen"
+    }
+  },
   "ai": {
     "title": "Schrijfhulp met AI",
     "description": "Concepten, herschrijvingen en de volgende woorden terwijl je typt, op basis van wat je invult. Eigen beweringen voegt het niet toe.",

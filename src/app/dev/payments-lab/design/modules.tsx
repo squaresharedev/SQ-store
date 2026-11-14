@@ -59,8 +59,8 @@ export function RangeTabs({
             design.radius === "sharp" ? "rounded-none" : "rounded-full",
             value === range
               ? onDark
-                ? "bg-white text-neutral-950"
-                : "bg-card text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
+                ? "bg-white text-card-base"
+                : "bg-card text-foreground shadow-sm"
               : onDark
                 ? "text-white/70 hover:text-white"
                 : "text-muted-foreground hover:text-foreground",
@@ -85,8 +85,8 @@ const TYPE_TONE: Record<TransactionType, string> = {
   charge: "bg-emerald-50 text-emerald-600",
   refund: "bg-amber-50 text-amber-600",
   payout: "bg-[var(--lab-accent-soft)] text-[var(--lab-accent)]",
-  stripe_fee: "bg-neutral-100 text-neutral-500",
-  adjustment: "bg-neutral-100 text-neutral-500",
+  stripe_fee: "bg-muted text-muted-foreground",
+  adjustment: "bg-muted text-muted-foreground",
 };
 
 const INITIAL_TONES = [
@@ -114,7 +114,7 @@ export function Avatar({ transaction, design, size = 36 }: { transaction: Balanc
     return (
       <span className="relative shrink-0" style={style}>
         {/* eslint-disable-next-line @next/next/no-img-element -- lab stand-in photo */}
-        <img src={labPhoto(name)} alt="" className={cn("size-full bg-neutral-100 object-cover ring-1 ring-black/5", round)} />
+        <img src={labPhoto(name)} alt="" className={cn("size-full bg-muted object-cover ring-1 ring-black/5", round)} />
         {transaction.type === "refund" && (
           <span className="absolute -right-1 -bottom-1 flex size-4 items-center justify-center rounded-full bg-amber-500 text-white ring-2 ring-card">
             <Undo2 className="size-2.5" strokeWidth={3} aria-hidden />
@@ -380,7 +380,7 @@ export function BankCard({ method, design, className, compact = false }: { metho
   return (
     <section className={cn("space-y-3", className)}>
       <div
-        className={cn("relative overflow-hidden p-5 text-white shadow-[0_18px_40px_-18px_rgba(0,0,0,0.45)]", compact ? "aspect-[2/1]" : "aspect-[1.586/1]", design.radius === "sharp" ? "rounded-none" : "rounded-2xl")}
+        className={cn("relative overflow-hidden p-5 text-white shadow-lg", compact ? "aspect-[2/1]" : "aspect-[1.586/1]", design.radius === "sharp" ? "rounded-none" : "rounded-2xl")}
         style={{
           background: ink
             ? "radial-gradient(120% 120% at 100% 0%, #3f3f46, transparent 55%), linear-gradient(135deg, #18181b, #000)"

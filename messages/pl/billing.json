@@ -212,6 +212,89 @@
     "grantUntil": "Do {date}. Gdy się skończy, nic nie zostanie usunięte.",
     "grantNoEnd": "Bez daty zakończenia."
   },
+  "invoices": {
+    "description": "Twoja karta, kto jest adresatem faktur i każda faktura, którą ci wysłaliśmy.",
+    "loading": "Wczytujemy twoje faktury",
+    "loadError": "Nie można teraz wczytać twoich faktur. Twój plan i sklep nie są dotknięte.",
+    "retry": "Spróbuj ponownie",
+    "granted": "Square Share podarował twojemu sklepowi ten plan, więc nie ma nic do zapłacenia ani żadnych faktur.",
+    "sections": {
+      "card": "Metoda płatności",
+      "billing": "Dane rozliczeniowe",
+      "history": "Historia faktur"
+    },
+    "update": "Zaktualizuj",
+    "addCard": "Dodaj kartę",
+    "brands": {
+      "visa": "Visa",
+      "mastercard": "Mastercard",
+      "amex": "Amex",
+      "other": "Karta"
+    },
+    "card": {
+      "line": "{brand} kończąca się na {last4}",
+      "expires": "Ważna do {month}",
+      "expiring": "Ważna do {month}, wkrótce wygasa",
+      "expired": "Wygasła {month}",
+      "none": "Brak karty"
+    },
+    "billing": {
+      "none": "Uzupełniane przy pierwszej płatności.",
+      "vatId": "NIP {id}",
+      "vatNone": "Brak NIP"
+    },
+    "attention": {
+      "payment_failed": "Twoja płatność {amount} z dnia {date} nie powiodła się. {reason}",
+      "due": "Faktura {number} na kwotę {amount} czeka na zapłatę.",
+      "cardExpired": "Twoja karta wygasła w {month}. Dodaj nową przed kolejną płatnością.",
+      "updateCard": "Zaktualizuj kartę",
+      "pay": "Zapłać teraz"
+    },
+    "failure": {
+      "card_declined": "Twój bank odrzucił płatność kartą.",
+      "expired_card": "Karta straciła ważność.",
+      "insufficient_funds": "Niewystarczające środki na karcie.",
+      "authentication_required": "Twój bank wymaga potwierdzenia płatności."
+    },
+    "retryOn": "Ponowimy próbę {date}.",
+    "status": {
+      "paid": "Opłacona",
+      "partially_refunded": "Częściowo zwrócona",
+      "refunded": "Zwrócona",
+      "due": "Do zapłaty",
+      "payment_failed": "Płatność nieudana",
+      "void": "Anulowana",
+      "uncollectible": "Odpisana"
+    },
+    "list": {
+      "label": "Historia faktur",
+      "empty": "Brak faktur. Pierwsza pojawi się, gdy plan zostanie rozliczony.",
+      "openRow": "Otwórz fakturę {number}",
+      "download": "Pobierz fakturę {number} jako PDF",
+      "showAll": "Pokaż wszystkie faktury ({count})",
+      "describe": "Plan {plan}, {interval, select, year {rocznie} other {miesięcznie}}",
+      "change": "Zmień na {plan}"
+    },
+    "dialog": {
+      "title": "Faktura {number}",
+      "paidWith": "Opłacona {date} kartą {card}",
+      "paid": "Opłacona {date}",
+      "issued": "Wystawiona {date}",
+      "plan": "Plan {plan}, {interval, select, year {1 rok} other {1 miesiąc}}",
+      "unused": "Niewykorzystany czas na {plan}",
+      "remaining": "Pozostały czas na {plan}",
+      "period": "{start} do {end}",
+      "subtotal": "Suma częściowa",
+      "vat": "VAT ({rate})",
+      "reverseCharge": "VAT (odwrotne obciążenie)",
+      "tax": "Podatek",
+      "total": "Łącznie",
+      "refunded": "Zwrócona",
+      "download": "Pobierz PDF",
+      "receipt": "Wyświetl paragon",
+      "pay": "Zapłać teraz"
+    }
+  },
   "ai": {
     "title": "Pomoc AI w pisaniu",
     "description": "Szkice, poprawki i kolejne słowa podczas pisania, na podstawie wprowadzonych danych. Nie dodaje własnych twierdzeń.",

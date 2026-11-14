@@ -212,6 +212,89 @@
     "grantUntil": "Do {date}. Až skončí, nic se neodstraní.",
     "grantNoEnd": "Bez data ukončení."
   },
+  "invoices": {
+    "description": "Vaše karta, komu jdou faktury a každá faktura, kterou jsme vám poslali.",
+    "loading": "Načítáme vaše faktury",
+    "loadError": "Vaše faktury teď nejde načíst. Váš plán ani obchod nejsou ovlivněny.",
+    "retry": "Zkusit znovu",
+    "granted": "Square Share daroval vašemu obchodu tento plán, takže není co platit a žádné faktury nevznikají.",
+    "sections": {
+      "card": "Platební metoda",
+      "billing": "Fakturační údaje",
+      "history": "Historie faktur"
+    },
+    "update": "Aktualizovat",
+    "addCard": "Přidat kartu",
+    "brands": {
+      "visa": "Visa",
+      "mastercard": "Mastercard",
+      "amex": "Amex",
+      "other": "Karta"
+    },
+    "card": {
+      "line": "{brand} končící na {last4}",
+      "expires": "Platí do {month}",
+      "expiring": "Platí do {month}, brzy vyprší",
+      "expired": "Platnost vypršela {month}",
+      "none": "Žádná karta uložena"
+    },
+    "billing": {
+      "none": "Doplní se při první platbě.",
+      "vatId": "DIČ {id}",
+      "vatNone": "Žádné DIČ"
+    },
+    "attention": {
+      "payment_failed": "Vaše platba {amount} ze dne {date} se nezdařila. {reason}",
+      "due": "Faktura {number} na {amount} čeká na úhradu.",
+      "cardExpired": "Vaše karta vypršela v {month}. Přidejte novou před příští platbou.",
+      "updateCard": "Aktualizovat kartu",
+      "pay": "Zaplatit nyní"
+    },
+    "failure": {
+      "card_declined": "Vaše banka kartu odmítla.",
+      "expired_card": "Platnost karty vypršela.",
+      "insufficient_funds": "Na kartě není dostatek prostředků.",
+      "authentication_required": "Vaše banka vyžaduje potvrzení platby."
+    },
+    "retryOn": "Zkusíme to znovu {date}.",
+    "status": {
+      "paid": "Zaplaceno",
+      "partially_refunded": "Částečně vráceno",
+      "refunded": "Vráceno",
+      "due": "K úhradě",
+      "payment_failed": "Platba selhala",
+      "void": "Stornováno",
+      "uncollectible": "Odepsáno"
+    },
+    "list": {
+      "label": "Historie faktur",
+      "empty": "Zatím žádné faktury. První se zobrazí, jakmile proběhne fakturace plánu.",
+      "openRow": "Otevřít fakturu {number}",
+      "download": "Stáhnout fakturu {number} jako PDF",
+      "showAll": "Zobrazit všech {count} faktur",
+      "describe": "Plán {plan}, {interval, select, year {ročně} other {měsíčně}}",
+      "change": "Přejít na {plan}"
+    },
+    "dialog": {
+      "title": "Faktura {number}",
+      "paidWith": "Zaplaceno {date} kartou {card}",
+      "paid": "Zaplaceno {date}",
+      "issued": "Vystaveno {date}",
+      "plan": "Plán {plan}, {interval, select, year {1 rok} other {1 měsíc}}",
+      "unused": "Nevyužitý čas na {plan}",
+      "remaining": "Zbývající čas na {plan}",
+      "period": "{start} až {end}",
+      "subtotal": "Mezisoučet",
+      "vat": "DPH ({rate})",
+      "reverseCharge": "DPH (přenesená daňová povinnost)",
+      "tax": "Daň",
+      "total": "Celkem",
+      "refunded": "Vráceno",
+      "download": "Stáhnout PDF",
+      "receipt": "Zobrazit doklad",
+      "pay": "Zaplatit nyní"
+    }
+  },
   "ai": {
     "title": "Pomoc AI s psaním",
     "description": "Návrhy popisů, úpravy a další slova při psaní, z údajů, které zadáte. Žádná vlastní tvrzení nepřidává.",

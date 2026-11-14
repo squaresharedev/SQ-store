@@ -34,7 +34,7 @@ export function designVars(props: PaymentsDesignProps): CSSProperties {
   } as CSSProperties;
 }
 
-export const pageClass = (props: PaymentsDesignProps) => (props.page === "grey" ? "bg-[#f6f6f7]" : "bg-background");
+export const pageClass = (props: PaymentsDesignProps) => (props.page === "grey" ? "bg-muted" : "bg-background");
 
 export const radiusClass = (props: PaymentsDesignProps) =>
   props.radius === "sharp" ? "rounded-none" : props.radius === "soft" ? "rounded-lg" : "rounded-2xl";
@@ -49,10 +49,10 @@ export function cardClass(props: PaymentsDesignProps): string {
     props.cards === "hairline"
       ? "border border-border bg-card"
       : props.cards === "shadow"
-        ? "bg-card ring-1 ring-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-16px_rgba(0,0,0,0.16)]"
+        ? "bg-card ring-1 ring-black/[0.06] shadow-md"
         : props.page === "grey"
           ? "bg-card"
-          : "bg-[#f6f6f7]";
+          : "bg-muted";
   return `${surface} ${radiusClass(props)}`;
 }
 
@@ -65,7 +65,7 @@ export function heroSurface(props: PaymentsDesignProps, hero: LabHero = props.he
     case "tint":
       return { className: "bg-[var(--lab-accent-soft)] ring-1 ring-[var(--lab-accent-line)]", dark: false };
     case "ink":
-      return { className: "bg-neutral-950 text-white ring-1 ring-white/10", dark: true };
+      return { className: "bg-card-base text-white ring-1 ring-white/10", dark: true };
     case "gradient":
       return {
         className: "text-[var(--lab-on-accent)]",

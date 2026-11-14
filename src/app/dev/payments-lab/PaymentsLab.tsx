@@ -152,8 +152,8 @@ function ColourField({ label, value, onChange, allowEmpty = false }: { label: st
  */
 function PhoneFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="flex justify-center rounded-md border border-border bg-[#f6f6f7] py-8">
-      <div className="overflow-hidden rounded-[2.5rem] border-[10px] border-neutral-900 bg-background shadow-xl">
+    <div className="flex justify-center rounded-md border border-border bg-muted py-8">
+      <div className="overflow-hidden rounded-[2.5rem] border-[10px] border-card-base bg-background shadow-xl">
         <div className="overflow-x-hidden overflow-y-auto" style={{ width: PHONE.width, height: PHONE.height }} data-lab-phone>
           {children}
         </div>

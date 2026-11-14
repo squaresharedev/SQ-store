@@ -240,7 +240,7 @@ function Panel({
         {!flush && children}
       </div>
       {flush && children}
-      <div className="flex flex-col gap-3 border-t border-border bg-neutral-50 px-5 py-3 @xl:flex-row @xl:items-center @xl:justify-between">
+      <div className="flex flex-col gap-3 border-t border-border bg-muted/60 px-5 py-3 @xl:flex-row @xl:items-center @xl:justify-between">
         <p className="font-inter text-sm text-muted-foreground">{footer}</p>
         {action}
       </div>
@@ -310,7 +310,7 @@ function Bill({ view }: { view: View }) {
       {view.banner}
       <section className={cn(cardClass(props), "grid @2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]")}>
         <div className="p-5">
-          <p className={cn(EYEBROW, words.due && "text-red-700")}>{words.due ? "Due now" : "Upcoming bill"}</p>
+          <p className={cn(EYEBROW, words.due && "text-danger-strong")}>{words.due ? "Due now" : "Upcoming bill"}</p>
           <p className="mt-2 text-4xl font-bold tabular-nums text-foreground">{words.figure}</p>
           <p className="mt-1 font-inter text-sm text-muted-foreground">{words.line}</p>
         </div>
@@ -343,8 +343,8 @@ function Bill({ view }: { view: View }) {
                 <dd className="tabular-nums text-foreground">{money(view.outstanding.taxCents, "EUR", locale)}</dd>
               </div>
               <div className="flex justify-between gap-3 border-t border-border pt-2 font-semibold">
-                <dt className="text-red-700">Due now</dt>
-                <dd className="tabular-nums text-red-700">{money(invoiceTotalCents(view.outstanding), "EUR", locale)}</dd>
+                <dt className="text-danger-strong">Due now</dt>
+                <dd className="tabular-nums text-danger-strong">{money(invoiceTotalCents(view.outstanding), "EUR", locale)}</dd>
               </div>
             </dl>
           ) : (
@@ -390,7 +390,7 @@ function History({ view }: { view: View }) {
   const { props } = view;
   const box = (title: string, what: string, body: React.ReactNode) => (
     <section className={cardClass(props)}>
-      <div className="flex items-center justify-between gap-3 border-b border-border bg-neutral-50 px-4 py-2.5">
+      <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/60 px-4 py-2.5">
         <h3 className="text-sm font-semibold text-foreground">{title}</h3>
         <Btn props={props} className="h-7 px-2.5 text-xs" onClick={() => view.portal(what)}>
           Edit
@@ -486,7 +486,7 @@ function Split({ view }: { view: View }) {
       <div className="grid gap-5 @2xl:grid-cols-[17rem_minmax(0,1fr)]">
         <aside className={cn(cardClass(props), "space-y-5 self-start p-5")}>
           <div>
-            <p className={cn(EYEBROW, words.due && "text-red-700")}>{words.due ? "Due now" : "Next payment"}</p>
+            <p className={cn(EYEBROW, words.due && "text-danger-strong")}>{words.due ? "Due now" : "Next payment"}</p>
             <p className="mt-1.5 text-3xl font-bold tabular-nums text-foreground">{words.figure}</p>
             <p className="font-inter text-sm text-muted-foreground">{words.line}</p>
             {words.note && <p className="font-inter text-xs text-muted-foreground">{words.note}</p>}
@@ -537,7 +537,7 @@ function Ledger({ view }: { view: View }) {
       <section className={cn(cardClass(props), "grid @2xl:grid-cols-[3fr_2fr]")}>
         <div className="flex flex-col justify-between gap-6 p-5 @2xl:p-6">
           <div>
-            <p className={cn(EYEBROW, "tracking-widest", words.due && "text-red-700")}>{words.due ? "Due now" : "Next payment"}</p>
+            <p className={cn(EYEBROW, "tracking-widest", words.due && "text-danger-strong")}>{words.due ? "Due now" : "Next payment"}</p>
             <p className="mt-2 text-4xl font-bold tabular-nums text-foreground @2xl:text-5xl">{words.figure}</p>
             <p className="mt-2 font-inter text-sm text-muted-foreground">
               <span className="font-medium text-foreground">{words.line}</span>

@@ -81,8 +81,8 @@ export const STATUS_TONE: Record<PayoutStatus, { dot: string; text: string; pill
   paid: { dot: "bg-emerald-500", text: "text-emerald-700", pill: "bg-emerald-50 text-emerald-700 ring-emerald-600/15", label: "Paid" },
   in_transit: { dot: "bg-sky-500", text: "text-sky-700", pill: "bg-sky-50 text-sky-700 ring-sky-600/15", label: "On its way" },
   pending: { dot: "bg-amber-500", text: "text-amber-700", pill: "bg-amber-50 text-amber-800 ring-amber-600/20", label: "Pending" },
-  failed: { dot: "bg-red-500", text: "text-red-700", pill: "bg-red-50 text-red-700 ring-red-600/15", label: "Failed" },
-  canceled: { dot: "bg-neutral-400", text: "text-neutral-500", pill: "bg-neutral-100 text-neutral-600 ring-neutral-500/15", label: "Canceled" },
+  failed: { dot: "bg-destructive", text: "text-danger-strong", pill: "bg-destructive/5 text-danger-strong ring-destructive/30", label: "Failed" },
+  canceled: { dot: "bg-muted-foreground/60", text: "text-muted-foreground", pill: "bg-secondary text-muted-foreground ring-border", label: "Canceled" },
 };
 
 /** A payout's status as a tinted pill or a coloured dot with its word. */
@@ -121,7 +121,7 @@ export function DeltaChip({ now, before, invert = false, className }: { now: num
     <span
       className={cn(
         "inline-flex items-center rounded-full px-1.5 py-0.5 font-inter text-xs font-semibold tabular-nums",
-        good ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700",
+        good ? "bg-emerald-50 text-emerald-700" : "bg-destructive/5 text-danger-strong",
         className,
       )}
     >

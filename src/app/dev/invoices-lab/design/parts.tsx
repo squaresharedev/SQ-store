@@ -49,7 +49,7 @@ export function cardClass(props: Design): string {
   const surface =
     props.cards === "hairline"
       ? "border border-border bg-card"
-      : "bg-card ring-1 ring-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-16px_rgba(0,0,0,0.16)]";
+      : "bg-card ring-1 ring-black/[0.06] shadow-md";
   return cn(surface, radiusClass(props), "overflow-hidden");
 }
 
@@ -134,7 +134,7 @@ export function CardExpiry({ method, state }: { method: PaymentMethod; state: "o
     <span
       className={cn(
         "font-inter text-xs",
-        state === "expired" ? "font-medium text-red-700" : state === "expiring" ? "font-medium text-amber-700" : "text-muted-foreground",
+        state === "expired" ? "font-medium text-danger-strong" : state === "expiring" ? "font-medium text-amber-700" : "text-muted-foreground",
       )}
     >
       {state === "expired" ? `Expired ${formatCardMonth(method)}` : `Expires ${formatCardMonth(method)}${state === "expiring" ? ", soon" : ""}`}
@@ -143,13 +143,13 @@ export function CardExpiry({ method, state }: { method: PaymentMethod; state: "o
 }
 
 const TONE: Record<InvoiceDisplayStatus, { pill: string; dot: string; text: string; Icon: typeof CircleCheck }> = {
-  paid: { pill: "bg-green-50 text-green-700 ring-green-600/20", dot: "bg-green-600", text: "text-green-700", Icon: CircleCheck },
-  partially_refunded: { pill: "bg-neutral-100 text-neutral-700 ring-neutral-500/20", dot: "bg-neutral-400", text: "text-neutral-600", Icon: RotateCcw },
-  refunded: { pill: "bg-neutral-100 text-neutral-700 ring-neutral-500/20", dot: "bg-neutral-400", text: "text-neutral-600", Icon: RotateCcw },
+  paid: { pill: "bg-success/10 text-success ring-success/20", dot: "bg-success", text: "text-success", Icon: CircleCheck },
+  partially_refunded: { pill: "bg-secondary text-muted-foreground ring-border", dot: "bg-muted-foreground/60", text: "text-muted-foreground", Icon: RotateCcw },
+  refunded: { pill: "bg-secondary text-muted-foreground ring-border", dot: "bg-muted-foreground/60", text: "text-muted-foreground", Icon: RotateCcw },
   due: { pill: "bg-amber-50 text-amber-800 ring-amber-600/25", dot: "bg-amber-500", text: "text-amber-700", Icon: Clock },
-  payment_failed: { pill: "bg-red-50 text-red-700 ring-red-600/20", dot: "bg-red-600", text: "text-red-700", Icon: CircleX },
-  void: { pill: "bg-neutral-100 text-neutral-500 ring-neutral-500/20", dot: "bg-neutral-300", text: "text-neutral-500", Icon: Ban },
-  uncollectible: { pill: "bg-neutral-100 text-neutral-500 ring-neutral-500/20", dot: "bg-neutral-300", text: "text-neutral-500", Icon: Ban },
+  payment_failed: { pill: "bg-destructive/5 text-danger-strong ring-destructive/30", dot: "bg-destructive", text: "text-danger-strong", Icon: CircleX },
+  void: { pill: "bg-secondary text-muted-foreground ring-border", dot: "bg-border", text: "text-muted-foreground", Icon: Ban },
+  uncollectible: { pill: "bg-secondary text-muted-foreground ring-border", dot: "bg-border", text: "text-muted-foreground", Icon: Ban },
 };
 
 /** An invoice's status, drawn the design's way. */
@@ -435,13 +435,13 @@ export function AttentionBanner({
   return (
     <div
       role="alert"
-      className={cn("flex flex-col gap-3 border border-red-200 bg-red-50 px-4 py-3 @xl:flex-row @xl:items-center @xl:justify-between", innerRadiusClass(props))}
+      className={cn("flex flex-col gap-3 border border-destructive/40 bg-destructive/5 px-4 py-3 @xl:flex-row @xl:items-center @xl:justify-between", innerRadiusClass(props))}
     >
-      <p className="flex items-start gap-2.5 font-inter text-sm text-red-900">
-        <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-red-600" />
+      <p className="flex items-start gap-2.5 font-inter text-sm text-foreground">
+        <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-destructive" />
         {message}
       </p>
-      <Btn props={props} variant="primary" className="shrink-0 bg-red-700 hover:bg-red-700/90" onClick={() => onFix(pay ? "pay" : "card")}>
+      <Btn props={props} variant="primary" className="shrink-0 bg-danger-strong hover:bg-danger-strong/90" onClick={() => onFix(pay ? "pay" : "card")}>
         {pay ? "Pay now" : "Update card"}
       </Btn>
     </div>

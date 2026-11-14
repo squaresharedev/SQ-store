@@ -212,6 +212,89 @@
     "grantUntil": "Hasta el {date}. Cuando termine, nada se elimina.",
     "grantNoEnd": "Sin fecha de fin."
   },
+  "invoices": {
+    "description": "Tu tarjeta, a quién van las facturas y todas las facturas que te hemos enviado.",
+    "loading": "Cargando tus facturas",
+    "loadError": "Tus facturas no pueden cargarse ahora mismo. Tu plan y tu tienda no se ven afectados.",
+    "retry": "Volver a intentarlo",
+    "granted": "Square Share le ha regalado este plan a tu tienda, así que no hay nada que pagar ni facturas.",
+    "sections": {
+      "card": "Método de pago",
+      "billing": "Datos de facturación",
+      "history": "Historial de facturas"
+    },
+    "update": "Actualizar",
+    "addCard": "Añadir tarjeta",
+    "brands": {
+      "visa": "Visa",
+      "mastercard": "Mastercard",
+      "amex": "Amex",
+      "other": "Tarjeta"
+    },
+    "card": {
+      "line": "{brand} que termina en {last4}",
+      "expires": "Caduca en {month}",
+      "expiring": "Caduca en {month}, pronto",
+      "expired": "Caducó en {month}",
+      "none": "Sin tarjeta guardada"
+    },
+    "billing": {
+      "none": "Se añade cuando hagas tu primer pago.",
+      "vatId": "NIF/CIF {id}",
+      "vatNone": "Sin NIF/CIF"
+    },
+    "attention": {
+      "payment_failed": "El pago de {amount} del {date} no se procesó. {reason}",
+      "due": "La factura {number} de {amount} está pendiente de pago.",
+      "cardExpired": "Tu tarjeta caducó en {month}. Añade una nueva antes de tu próximo pago.",
+      "updateCard": "Actualizar tarjeta",
+      "pay": "Pagar ahora"
+    },
+    "failure": {
+      "card_declined": "Tu banco rechazó la tarjeta.",
+      "expired_card": "La tarjeta ha caducado.",
+      "insufficient_funds": "La tarjeta no tiene fondos suficientes.",
+      "authentication_required": "Tu banco necesita que confirmes el pago."
+    },
+    "retryOn": "Lo volveremos a intentar el {date}.",
+    "status": {
+      "paid": "Pagada",
+      "partially_refunded": "Parcialmente reembolsada",
+      "refunded": "Reembolsada",
+      "due": "Pendiente",
+      "payment_failed": "Pago fallido",
+      "void": "Anulada",
+      "uncollectible": "Incobrable"
+    },
+    "list": {
+      "label": "Historial de facturas",
+      "empty": "Aún no hay facturas. La primera aparece cuando se cobra tu plan.",
+      "openRow": "Abrir factura {number}",
+      "download": "Descargar factura {number} como PDF",
+      "showAll": "Ver todas las {count} facturas",
+      "describe": "Plan {plan}, {interval, select, year {anual} other {mensual}}",
+      "change": "Cambiar a {plan}"
+    },
+    "dialog": {
+      "title": "Factura {number}",
+      "paidWith": "Pagada el {date} con {card}",
+      "paid": "Pagada el {date}",
+      "issued": "Emitida el {date}",
+      "plan": "Plan {plan}, {interval, select, year {1 año} other {1 mes}}",
+      "unused": "Tiempo no usado de {plan}",
+      "remaining": "Tiempo restante de {plan}",
+      "period": "Del {start} al {end}",
+      "subtotal": "Subtotal",
+      "vat": "IVA ({rate})",
+      "reverseCharge": "IVA (inversión del sujeto pasivo)",
+      "tax": "Impuesto",
+      "total": "Total",
+      "refunded": "Reembolsado",
+      "download": "Descargar PDF",
+      "receipt": "Ver recibo",
+      "pay": "Pagar ahora"
+    }
+  },
   "ai": {
     "title": "Ayuda de IA para escribir",
     "description": "Borradores, reescrituras y las siguientes palabras mientras escribes, a partir de los datos que introduces. No añade afirmaciones propias.",

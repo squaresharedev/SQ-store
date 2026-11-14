@@ -87,7 +87,7 @@ const ENGLISH_SUMMARY: readonly { heading: string; points: readonly string[] }[]
     points: [
       "Square Share is early and offered as is to business users. For them, our liability is capped at the fees paid to us in the last 12 months or EUR 100, whichever is greater, and business sellers cover us for claims caused by their products, sites or breaches. If you are a consumer, your legal rights are unaffected.",
       "We can suspend or close accounts that break these Terms. You can leave at any time and take your data with you.",
-      "We give at least 30 days' notice of material changes to these Terms. Czech law applies to business users. If you are a consumer, the protections of your home country, state or province still apply.",
+      "We give at least 30 days' notice of material changes to these Terms. Czech law applies to business users, except in Canada, where the law of your province or territory applies. If you are a consumer, the protections of your home country, state or province still apply.",
       "Disputes in the USA go to individual arbitration instead of court, unless you opt out within 30 days of agreeing. Consumers in the EU and Canada can still go to court where they live.",
       "Our Privacy Policy and Cookie Policy form part of these Terms.",
     ],
@@ -121,9 +121,9 @@ describe("TermsSummary English copy", () => {
     render(<TermsSummary />);
     const intro = document.querySelector("[data-terms-full-link]")!.closest("p")!;
     expect(intro.textContent).toBe(
-      "The short version, in plain language. Last updated 31 October 2026. Read the full Terms of Service (opens in a new tab)",
+      "The short version, in plain language. Last updated 6 November 2026. Read the full Terms of Service (opens in a new tab)",
     );
-    expect(TERMS_LAST_UPDATED).toBe("2026-10-31");
+    expect(TERMS_LAST_UPDATED).toBe("2026-11-06");
 
     const region = screen.getByRole("region", { name: "Terms of Service, short version" });
     const footer = region.querySelector("p")!;

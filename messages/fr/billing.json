@@ -212,6 +212,89 @@
     "grantUntil": "Jusqu'au {date}. Rien n'est supprimé quand il prend fin.",
     "grantNoEnd": "Sans date de fin."
   },
+  "invoices": {
+    "description": "Votre carte, à qui les factures sont adressées et toutes les factures que nous vous avons envoyées.",
+    "loading": "Chargement de vos factures",
+    "loadError": "Vos factures ne peuvent pas être chargées pour l'instant. Votre forfait et votre boutique ne sont pas affectés.",
+    "retry": "Réessayer",
+    "granted": "Square Share a offert ce forfait à votre boutique, il n'y a donc rien à payer et aucune facture.",
+    "sections": {
+      "card": "Moyen de paiement",
+      "billing": "Informations de facturation",
+      "history": "Historique des factures"
+    },
+    "update": "Mettre à jour",
+    "addCard": "Ajouter une carte",
+    "brands": {
+      "visa": "Visa",
+      "mastercard": "Mastercard",
+      "amex": "Amex",
+      "other": "Carte"
+    },
+    "card": {
+      "line": "{brand} se terminant par {last4}",
+      "expires": "Expire {month}",
+      "expiring": "Expire {month}, bientôt",
+      "expired": "Expirée {month}",
+      "none": "Aucune carte enregistrée"
+    },
+    "billing": {
+      "none": "Ajouté lors de votre premier paiement.",
+      "vatId": "N° TVA {id}",
+      "vatNone": "Pas de numéro de TVA"
+    },
+    "attention": {
+      "payment_failed": "Votre paiement de {amount} du {date} n'a pas abouti. {reason}",
+      "due": "La facture {number} de {amount} attend d'être payée.",
+      "cardExpired": "Votre carte a expiré en {month}. Ajoutez-en une nouvelle avant votre prochain paiement.",
+      "updateCard": "Mettre à jour la carte",
+      "pay": "Payer maintenant"
+    },
+    "failure": {
+      "card_declined": "Votre banque a refusé la carte.",
+      "expired_card": "La carte a expiré.",
+      "insufficient_funds": "La carte ne dispose pas de fonds suffisants.",
+      "authentication_required": "Votre banque a besoin que vous confirmiez le paiement."
+    },
+    "retryOn": "Nous réessaierons le {date}.",
+    "status": {
+      "paid": "Payée",
+      "partially_refunded": "Partiellement remboursée",
+      "refunded": "Remboursée",
+      "due": "En attente",
+      "payment_failed": "Paiement échoué",
+      "void": "Annulée",
+      "uncollectible": "Irrécouvrable"
+    },
+    "list": {
+      "label": "Historique des factures",
+      "empty": "Aucune facture pour l'instant. La première apparaît quand votre forfait est facturé.",
+      "openRow": "Ouvrir la facture {number}",
+      "download": "Télécharger la facture {number} en PDF",
+      "showAll": "Afficher toutes les factures ({count})",
+      "describe": "Forfait {plan}, {interval, select, year {annuel} other {mensuel}}",
+      "change": "Passer à {plan}"
+    },
+    "dialog": {
+      "title": "Facture {number}",
+      "paidWith": "Payée le {date} avec {card}",
+      "paid": "Payée le {date}",
+      "issued": "Émise le {date}",
+      "plan": "Forfait {plan}, {interval, select, year {1 an} other {1 mois}}",
+      "unused": "Temps non utilisé sur {plan}",
+      "remaining": "Temps restant sur {plan}",
+      "period": "Du {start} au {end}",
+      "subtotal": "Sous-total",
+      "vat": "TVA ({rate})",
+      "reverseCharge": "TVA (autoliquidation)",
+      "tax": "Taxe",
+      "total": "Total",
+      "refunded": "Remboursée",
+      "download": "Télécharger le PDF",
+      "receipt": "Voir le reçu",
+      "pay": "Payer maintenant"
+    }
+  },
   "ai": {
     "title": "Aide à la rédaction par IA",
     "description": "Brouillons, reformulations et mots suivants pendant la saisie, à partir des informations que vous saisissez. Elle n’ajoute aucune affirmation de son cru.",

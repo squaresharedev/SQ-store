@@ -130,8 +130,8 @@ function PresetTile({
 
 function PhoneFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="flex justify-center rounded-md border border-border bg-neutral-100 py-8">
-      <div className="overflow-hidden rounded-[2.5rem] border-[10px] border-neutral-900 bg-background shadow-xl">
+    <div className="flex justify-center rounded-md border border-border bg-muted py-8">
+      <div className="overflow-hidden rounded-[2.5rem] border-[10px] border-card-base bg-background shadow-xl">
         <div className="h-[780px] overflow-y-auto overflow-x-hidden" style={{ width: PHONE_WIDTH }} data-lab-phone>
           {children}
         </div>
@@ -289,7 +289,7 @@ export function InvoicesLab() {
             {state.frame === "phone" ? (
               <PhoneFrame>{design}</PhoneFrame>
             ) : (
-              <div className="rounded-md border border-border bg-neutral-100 p-6">
+              <div className="rounded-md border border-border bg-muted p-6">
                 <div className="mx-auto max-w-[860px] overflow-hidden rounded-md">{design}</div>
               </div>
             )}

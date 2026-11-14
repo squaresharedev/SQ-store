@@ -212,6 +212,89 @@
     "grantUntil": "Fino al {date}. Quando termina non viene rimosso nulla.",
     "grantNoEnd": "Senza data di fine."
   },
+  "invoices": {
+    "description": "La tua carta, a chi vanno le fatture e tutte le fatture che ti abbiamo inviato.",
+    "loading": "Caricamento delle fatture in corso",
+    "loadError": "Le tue fatture non possono essere caricate al momento. Il tuo piano e il tuo negozio non sono interessati.",
+    "retry": "Riprova",
+    "granted": "Square Share ha regalato questo piano al tuo negozio, quindi non c'è nulla da pagare e nessuna fattura.",
+    "sections": {
+      "card": "Metodo di pagamento",
+      "billing": "Dati di fatturazione",
+      "history": "Storico fatture"
+    },
+    "update": "Aggiorna",
+    "addCard": "Aggiungi carta",
+    "brands": {
+      "visa": "Visa",
+      "mastercard": "Mastercard",
+      "amex": "Amex",
+      "other": "Carta"
+    },
+    "card": {
+      "line": "{brand} che termina con {last4}",
+      "expires": "Scade {month}",
+      "expiring": "Scade {month}, a breve",
+      "expired": "Scaduta {month}",
+      "none": "Nessuna carta salvata"
+    },
+    "billing": {
+      "none": "Viene aggiunta al tuo primo pagamento.",
+      "vatId": "Partita IVA {id}",
+      "vatNone": "Nessuna partita IVA"
+    },
+    "attention": {
+      "payment_failed": "Il pagamento di {amount} del {date} non è andato a buon fine. {reason}",
+      "due": "La fattura {number} di {amount} è in attesa di pagamento.",
+      "cardExpired": "La tua carta è scaduta a {month}. Aggiungine una nuova prima del prossimo pagamento.",
+      "updateCard": "Aggiorna carta",
+      "pay": "Paga ora"
+    },
+    "failure": {
+      "card_declined": "La tua banca ha rifiutato la carta.",
+      "expired_card": "La carta è scaduta.",
+      "insufficient_funds": "La carta non ha fondi sufficienti.",
+      "authentication_required": "La tua banca richiede che tu confermi il pagamento."
+    },
+    "retryOn": "Riproveremo il {date}.",
+    "status": {
+      "paid": "Pagata",
+      "partially_refunded": "Parzialmente rimborsata",
+      "refunded": "Rimborsata",
+      "due": "Da pagare",
+      "payment_failed": "Pagamento non riuscito",
+      "void": "Annullata",
+      "uncollectible": "Irrecuperabile"
+    },
+    "list": {
+      "label": "Storico fatture",
+      "empty": "Nessuna fattura ancora. La prima compare quando il piano viene addebitato.",
+      "openRow": "Apri fattura {number}",
+      "download": "Scarica fattura {number} come PDF",
+      "showAll": "Mostra tutte le {count} fatture",
+      "describe": "Piano {plan}, {interval, select, year {annuale} other {mensile}}",
+      "change": "Cambia in {plan}"
+    },
+    "dialog": {
+      "title": "Fattura {number}",
+      "paidWith": "Pagata il {date} con {card}",
+      "paid": "Pagata il {date}",
+      "issued": "Emessa il {date}",
+      "plan": "Piano {plan}, {interval, select, year {1 anno} other {1 mese}}",
+      "unused": "Tempo non utilizzato su {plan}",
+      "remaining": "Tempo rimanente su {plan}",
+      "period": "Dal {start} al {end}",
+      "subtotal": "Subtotale",
+      "vat": "IVA ({rate})",
+      "reverseCharge": "IVA (inversione contabile)",
+      "tax": "Imposta",
+      "total": "Totale",
+      "refunded": "Rimborsato",
+      "download": "Scarica PDF",
+      "receipt": "Visualizza ricevuta",
+      "pay": "Paga ora"
+    }
+  },
   "ai": {
     "title": "Aiuto dell'IA nella scrittura",
     "description": "Bozze, riscritture e le parole successive mentre scrivi, a partire dai dati che inserisci. Non aggiunge affermazioni sue.",

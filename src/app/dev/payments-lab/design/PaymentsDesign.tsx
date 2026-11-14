@@ -568,7 +568,7 @@ function Studio({ ctx }: { ctx: Ctx }) {
             {best.map((product) => (
               <li key={product.name} className="min-w-0">
                 {/* eslint-disable-next-line @next/next/no-img-element -- lab stand-in photo */}
-                <img src={product.photo} alt="" className={cn("aspect-square w-full bg-neutral-100 object-cover", innerRadiusClass(design))} />
+                <img src={product.photo} alt="" className={cn("aspect-square w-full bg-muted object-cover", innerRadiusClass(design))} />
                 <p className="mt-2 truncate text-sm font-medium text-foreground">{product.name}</p>
                 <p className="flex justify-between gap-2 font-inter text-xs text-muted-foreground">
                   <span>{product.count} sold</span>
