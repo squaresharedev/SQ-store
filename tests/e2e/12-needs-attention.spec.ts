@@ -16,7 +16,9 @@ import {
  */
 
 /**
- * Click a row's action, wait for the navigation, and return where it landed.
+ * Click a row (each Needs attention row is one link, named by its label; a
+ * setup checklist step by its action), wait for the navigation, and return
+ * where it landed.
  *
  * ONE click, on purpose. A link pressed while the notification bell was still
  * starting up used to be answered by the server and never navigate (the bell
@@ -75,7 +77,7 @@ test.describe("needs attention links", () => {
     await expect(page.getByText(/1 product missing an image/i)).toBeVisible();
     url = await followAction(
       page,
-      /add an image/i,
+      /^1 product missing an image$/i,
       /\/products\/[0-9a-f-]{36}\/edit/,
     );
     expect(url.pathname).toMatch(/^\/products\/[0-9a-f-]{36}\/edit$/);
@@ -87,7 +89,7 @@ test.describe("needs attention links", () => {
     // --- several imageless products -> the product list ---
     await createProductViaUI(page, { title: "Second imageless", price: "13.00" });
     await gotoApp(page, "/dashboard");
-    url = await followAction(page, /fix products/i, /\/products$/);
+    url = await followAction(page, /^2 products missing an image$/i, /\/products$/);
     expect(url.pathname).toBe("/products");
 
     // --- one flagged status -> the orders list, already filtered by it ---
@@ -97,7 +99,7 @@ test.describe("needs attention links", () => {
     ]);
     await gotoApp(page, "/dashboard");
     await expect(page.getByText(/1 order to review/i)).toBeVisible();
-    url = await followAction(page, /review orders/i, /\/orders\?status=disputed/);
+    url = await followAction(page, /^1 order to review$/i, /\/orders\?status=disputed/);
     expect(url.pathname).toBe("/orders");
     expect(url.searchParams.get("status")).toBe("disputed");
     await expect(page.getByText("Disputed one").first()).toBeVisible();
@@ -108,7 +110,7 @@ test.describe("needs attention links", () => {
     ]);
     await gotoApp(page, "/dashboard");
     await expect(page.getByText(/2 orders to review/i)).toBeVisible();
-    url = await followAction(page, /review orders/i, /\/orders(\?view=[a-z-]+)?$/);
+    url = await followAction(page, /^2 orders to review$/i, /\/orders(\?view=[a-z-]+)?$/);
     expect(url.pathname).toBe("/orders");
     expect(url.searchParams.get("status")).toBeNull();
     await expect(page.getByText("Disputed one").first()).toBeVisible();

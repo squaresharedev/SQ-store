@@ -81,6 +81,7 @@
     "updating": "Aktualizuje sa…",
     "pagination": "{total, plural, one {{total} produkt · strana {page} z {pages}} few {{total} produkty · strana {page} z {pages}} many {{total} produktu · strana {page} z {pages}} other {{total} produktov · strana {page} z {pages}}}",
     "reviews": "Recenzie",
+    "moreActions": "Ďalšie akcie",
     "orderHint": "Ak chcete zmeniť poradie, ktoré vidia kupujúci, presuňte produkty na správne miesto vo svojom <link>výklade</link>."
   },
   "list": {

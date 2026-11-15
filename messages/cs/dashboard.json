@@ -58,6 +58,8 @@
   "attention": {
     "title": "Vyžaduje pozornost",
     "allClear": "Vše v pořádku. Teď nic nevyžaduje vaši pozornost.",
+    "showMore": "Zobrazit další {count}",
+    "showFewer": "Zobrazit méně",
     "twoFactor": {
       "label": "Zapněte dvoufázové ověření",
       "description": "Při přihlášení kód z telefonu, aby se do vašeho obchodu nedalo dostat jen s odcizeným heslem.",

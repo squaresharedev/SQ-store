@@ -81,6 +81,7 @@
     "updating": "Actualizando…",
     "pagination": "{total, plural, one {{total} producto · página {page} de {pages}} many {{total} productos · página {page} de {pages}} other {{total} productos · página {page} de {pages}}}",
     "reviews": "Reseñas",
+    "moreActions": "Más acciones",
     "orderHint": "Para cambiar el orden que ven los compradores, arrastra tus productos a su sitio en tu <link>escaparate</link>."
   },
   "list": {

@@ -81,6 +81,7 @@
     "updating": "A atualizar…",
     "pagination": "{total, plural, one {{total} produto · página {page} de {pages}} many {{total} de produtos · página {page} de {pages}} other {{total} produtos · página {page} de {pages}}}",
     "reviews": "Avaliações",
+    "moreActions": "Mais ações",
     "orderHint": "Para mudar a ordem que os compradores veem, arraste os seus produtos para o lugar certo na sua <link>montra</link>."
   },
   "list": {

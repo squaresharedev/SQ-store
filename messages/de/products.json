@@ -81,6 +81,7 @@
     "updating": "Wird aktualisiert…",
     "pagination": "{total, plural, one {{total} Produkt · Seite {page} von {pages}} other {{total} Produkte · Seite {page} von {pages}}}",
     "reviews": "Bewertungen",
+    "moreActions": "Weitere Aktionen",
     "orderHint": "Um die Reihenfolge zu ändern, die Käufer sehen, zieh deine Produkte auf deinem <link>Schaufenster</link> an ihren Platz."
   },
   "list": {

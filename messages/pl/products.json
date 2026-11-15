@@ -81,6 +81,7 @@
     "updating": "Aktualizowanie…",
     "pagination": "{total, plural, one {{total} produkt · strona {page} z {pages}} few {{total} produkty · strona {page} z {pages}} many {{total} produktów · strona {page} z {pages}} other {{total} produktu · strona {page} z {pages}}}",
     "reviews": "Opinie",
+    "moreActions": "Więcej działań",
     "orderHint": "Aby zmienić kolejność widoczną dla kupujących, przeciągnij produkty na właściwe miejsca w swojej <link>witrynie</link>."
   },
   "list": {

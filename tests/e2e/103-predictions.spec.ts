@@ -548,9 +548,12 @@ test("the overview warns before a product sells out", async ({ page }) => {
   ]);
 
   await gotoApp(page, "/dashboard");
-  await expect(page.getByText("1 product selling out soon")).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText('At this pace "Glaze kit" sells out in about 4 days.')).toBeVisible();
-  await expect(page.getByRole("link", { name: "Update stock" })).toHaveAttribute("href", `/products/${id}/edit`);
+  // The row is one link named by its label; the forecast sentence is its
+  // description (read out, not drawn).
+  const row = page.getByRole("link", { name: "1 product selling out soon" });
+  await expect(row).toBeVisible({ timeout: 20_000 });
+  await expect(row).toHaveAccessibleDescription('At this pace "Glaze kit" sells out in about 4 days.');
+  await expect(row).toHaveAttribute("href", `/products/${id}/edit`);
 });
 
 test("the buy button starts on the storefront edited last", async ({ page }) => {

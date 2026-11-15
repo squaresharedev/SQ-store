@@ -68,7 +68,9 @@ test.describe("order fulfilment", () => {
     // 2. The dashboard says so, first thing, and so does the rail.
     await gotoApp(page, "/dashboard");
     await expect(page.getByRole("link", { name: /Orders\s*1 order to ship/ })).toBeVisible();
-    const row = page.getByRole("link", { name: "Ship orders" });
+    // The Needs attention row is one link named by its label (the rail's is
+    // "Orders 1 order to ship", so exact).
+    const row = page.getByRole("link", { name: "1 order to ship", exact: true });
     await expect(row).toHaveAttribute("href", "/orders?view=to-ship");
 
     // 3. Orders opens on the queue, with where each parcel goes.

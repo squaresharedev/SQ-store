@@ -4,7 +4,7 @@
  * edit is told in place of the buttons they do not get.
  */
 import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
-import { render, screen, cleanup } from "../setup/render";
+import { render, screen, cleanup, within } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 
 vi.mock("@/lib/products/actions", () => ({
@@ -118,6 +118,24 @@ describe("ProductsBrowser toolbar", () => {
     expect(screen.getByRole("link", { name: "Add product" })).toHaveAttribute("href", "/products/new");
     expect(screen.getByRole("link", { name: "Import" })).toHaveAttribute("href", "/products/import");
     expect(screen.queryByText(/view-only access/)).not.toBeInTheDocument();
+  });
+
+  it("keeps Reviews and Import behind More where the row is narrow", async () => {
+    const user = userEvent.setup();
+    renderBrowser();
+    await user.click(screen.getByRole("button", { name: "More actions" }));
+    const menu = screen.getByRole("dialog", { name: "More actions" });
+    expect(within(menu).getByRole("link", { name: "Reviews" })).toHaveAttribute("href", "/products/reviews");
+    expect(within(menu).getByRole("link", { name: "Import" })).toHaveAttribute("href", "/products/import");
+  });
+
+  it("gives a member who cannot edit only Reviews behind More", async () => {
+    const user = userEvent.setup();
+    renderBrowser({ canWrite: false });
+    await user.click(screen.getByRole("button", { name: "More actions" }));
+    const menu = screen.getByRole("dialog", { name: "More actions" });
+    expect(within(menu).getByRole("link", { name: "Reviews" })).toBeInTheDocument();
+    expect(within(menu).queryByRole("link", { name: "Import" })).not.toBeInTheDocument();
   });
 
   it("points at the way to publish many at once when several drafts are in view", () => {

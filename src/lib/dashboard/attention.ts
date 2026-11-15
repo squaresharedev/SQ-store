@@ -10,18 +10,46 @@ import { ORDERS_PATH, PAYMENTS_PATH } from "./paths";
 import type { RestockForecast } from "@/lib/predictions";
 import type { DashboardOrdersData, ProductsSummary, ProfileSummary } from "./queries";
 
+/** Every row the module can show, by its stable key (the card picks each row's
+ *  icon by it, components/dashboard/attention-icons.ts). */
+export type AttentionKey =
+  | "to-ship"
+  | "withdrawals"
+  | "paused"
+  | "restock"
+  | "two-factor"
+  | "stripe"
+  | "no-legal"
+  | "no-buy-path"
+  | "no-shipping"
+  | "checkout-rates"
+  | "storefront"
+  | "images"
+  | "flagged-orders"
+  | "noindex-product-pages"
+  | "dead-blocks";
+
+/** Rows the overview's card shows before "Show N more". One row past it shows
+ *  rather than hide behind a button of its own. */
+export const ATTENTION_VISIBLE_ROWS = 4;
+
 /**
  * One row of the overview's "Needs attention" module. The copy is MessageRefs,
  * resolved in the reader's language by the component that renders the row.
  */
 export type AttentionItem = {
-  key: string;
+  key: AttentionKey;
   label: MessageRef;
+  /** Why it matters. Not drawn on the card (the row is its label and a
+   *  chevron); a screen reader hears it as the row's description. */
   description: MessageRef;
   /** In-app destination. Every href must resolve to a real route, and land on
    *  the surface that actually fixes the thing the row is complaining about. */
   href: string;
   actionLabel: MessageRef;
+  /** A buyer is waiting or money is owed (orders to ship, a cancellation to
+   *  refund, a product hidden from buyers): the card flags the row. */
+  urgent?: boolean;
 };
 
 /**
@@ -157,6 +185,7 @@ export function buildAttentionItems({
       description: msg("Dashboard.attention.toShip.description"),
       href: ordersViewPath("to-ship"),
       actionLabel: msg("Dashboard.attention.toShip.action"),
+      urgent: true,
     });
   }
 
@@ -169,6 +198,7 @@ export function buildAttentionItems({
       description: msg("Dashboard.attention.withdrawals.description"),
       href: ordersStatusPath(WITHDRAWN_STATUS_FILTER),
       actionLabel: msg("Dashboard.attention.withdrawals.action"),
+      urgent: true,
     });
   }
 
@@ -185,6 +215,7 @@ export function buildAttentionItems({
       description: msg("Dashboard.attention.paused.description", { count: paused.length }),
       href: only ? productEditPath(paused[0]) : MODERATED_PRODUCTS_PATH,
       actionLabel: msg(only ? "Products.form.moderation.seeWhy" : "Dashboard.attention.noBuyPath.action"),
+      urgent: true,
     });
   }
 

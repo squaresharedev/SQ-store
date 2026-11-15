@@ -58,6 +58,8 @@
   "attention": {
     "title": "Wymaga uwagi",
     "allClear": "Wszystko w porządku. Nic teraz nie wymaga twojej uwagi.",
+    "showMore": "Pokaż jeszcze {count}",
+    "showFewer": "Pokaż mniej",
     "twoFactor": {
       "label": "Włącz uwierzytelnianie dwuskładnikowe",
       "description": "Kod z telefonu przy logowaniu sprawia, że samo skradzione hasło nie wystarczy, by wejść do twojego sklepu.",

@@ -266,7 +266,7 @@ test("4. terms written but no delivery prices: the seller is told, in two places
     // Checkout is open, so a missing price costs a sale and the dashboard says so.
     await gotoApp(page, "/dashboard");
     await expect(page.getByText("Set your delivery prices")).toBeVisible({ timeout: 20_000 });
-    await page.getByRole("link", { name: "Set prices" }).click();
+    await page.getByRole("link", { name: "Set your delivery prices" }).click();
     await expect(page).toHaveURL(/\/settings\/shipping#checkout-rates/);
   } else {
     await gotoApp(page, "/settings/shipping");

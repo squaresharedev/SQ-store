@@ -58,6 +58,8 @@
   "attention": {
     "title": "Nécessite votre attention",
     "allClear": "Tout est en ordre. Rien ne nécessite votre attention pour le moment.",
+    "showMore": "Afficher {count} de plus",
+    "showFewer": "Afficher moins",
     "twoFactor": {
       "label": "Activer l’authentification à deux facteurs",
       "description": "Un code envoyé par votre téléphone à la connexion, pour qu’un mot de passe volé ne suffise pas à accéder à votre boutique.",

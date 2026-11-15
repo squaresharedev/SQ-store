@@ -58,6 +58,8 @@
   "attention": {
     "title": "Needs attention",
     "allClear": "All clear. Nothing needs your attention right now.",
+    "showMore": "Show {count} more",
+    "showFewer": "Show fewer",
     "twoFactor": {
       "label": "Turn on two-factor authentication",
       "description": "A code from your phone at sign-in, so a stolen password alone can't get into your store.",

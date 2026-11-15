@@ -58,6 +58,8 @@
   "attention": {
     "title": "Richiede attenzione",
     "allClear": "Tutto a posto. Niente richiede la tua attenzione al momento.",
+    "showMore": "Mostra altri {count}",
+    "showFewer": "Mostra meno",
     "twoFactor": {
       "label": "Attiva l’autenticazione a due fattori",
       "description": "Un codice dal telefono all’accesso, così una password rubata da sola non basta per entrare nel tuo negozio.",

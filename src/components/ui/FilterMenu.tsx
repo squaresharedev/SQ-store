@@ -38,7 +38,9 @@ export interface FilterMenuSection {
  * The trigger has to earn that consolidation, so it always states what is
  * applied: it reads as its resting label until a group moves off its default,
  * then summarises the applied groups ("Draft · Price: high to low"), at every
- * width: an icon alone is not something every reader recognises.
+ * width: an icon alone is not something every reader recognises. The one
+ * exception is opt-in (`iconOnlyAtRestOnPhone`): a trigger joined to the end
+ * of a search bar, where the sliders icon is the convention.
  *
  * Selecting does NOT close the panel: these groups compose (pick a status, then
  * an ordering), and a menu that dismissed itself after the first pick would
@@ -50,7 +52,9 @@ export function FilterMenu({
   restingLabel,
   triggerIcon,
   triggerClassName,
+  rootClassName = "w-auto shrink-0",
   panelClassName = "sm:w-64",
+  iconOnlyAtRestOnPhone = false,
 }: {
   /** Accessible name for the trigger and the panel. */
   ariaLabel: string;
@@ -59,7 +63,17 @@ export function FilterMenu({
   restingLabel: string;
   triggerIcon?: React.ReactNode;
   triggerClassName?: string;
+  /** The positioning wrapper. Hugs its trigger and never shrinks by default;
+   *  a row that must fit a phone lets it shrink (the summary truncates). */
+  rootClassName?: string;
   panelClassName?: string;
+  /**
+   * On a phone, while nothing is applied, the trigger is its icon alone. Only
+   * for a trigger joined to a search bar (the products toolbar), where a
+   * sliders icon at the bar's end is the convention a reader already knows.
+   * Anything applied still reads out in words, at every width.
+   */
+  iconOnlyAtRestOnPhone?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const headingId = useId();
@@ -75,13 +89,14 @@ export function FilterMenu({
     .filter((label): label is string => Boolean(label));
 
   const summary = applied.length > 0 ? applied.join(" · ") : restingLabel;
+  const iconOnPhone = iconOnlyAtRestOnPhone && applied.length === 0;
 
   return (
     <Popover
       open={open}
       onOpenChange={setOpen}
       label={ariaLabel}
-      rootClassName="w-auto shrink-0"
+      rootClassName={rootClassName}
       panelClassName={panelClassName}
       trigger={
         <button
@@ -104,13 +119,14 @@ export function FilterMenu({
         >
           <span className="flex min-w-0 items-center gap-2">
             {triggerIcon}
-            <span className="truncate text-sm">{summary}</span>
+            <span className={cn("truncate text-sm", iconOnPhone && "max-sm:hidden")}>{summary}</span>
           </span>
           <ChevronDown
             aria-hidden="true"
             className={cn(
               "size-4 shrink-0 text-muted-foreground transition-transform duration-base",
               open && "rotate-180",
+              iconOnPhone && "max-sm:hidden",
             )}
           />
         </button>

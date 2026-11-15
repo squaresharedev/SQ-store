@@ -81,6 +81,7 @@
     "updating": "Mise à jour…",
     "pagination": "{total, plural, one {{total} produit · page {page} sur {pages}} many {{total} produits · page {page} sur {pages}} other {{total} produits · page {page} sur {pages}}}",
     "reviews": "Avis",
+    "moreActions": "Plus d’actions",
     "orderHint": "Pour changer l’ordre que voient les acheteurs, faites glisser vos produits à leur place sur votre <link>vitrine</link>."
   },
   "list": {

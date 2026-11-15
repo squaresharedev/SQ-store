@@ -669,3 +669,17 @@ describe("route resolver", () => {
     expect(routeExists("/products/anything")).toBe(false);
   });
 });
+
+describe("urgent rows", () => {
+  // The overview's card puts an ink bar on these, so the flag has to mean one
+  // thing: a buyer is waiting or money is owed, never a setup chore.
+  it("flags only orders to ship, cancellations to refund and products hidden from buyers", () => {
+    const urgent = new Set<string>();
+    const calm = new Set<string>();
+    for (const items of ALL_BRANCHES) {
+      for (const item of items.values()) (item.urgent ? urgent : calm).add(item.key);
+    }
+    expect([...urgent].sort()).toEqual(["paused", "to-ship", "withdrawals"]);
+    expect(calm.size).toBeGreaterThan(10);
+  });
+});

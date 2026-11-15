@@ -81,6 +81,7 @@
     "updating": "Updating…",
     "pagination": "{total, plural, one {{total} product · page {page} of {pages}} other {{total} products · page {page} of {pages}}}",
     "reviews": "Reviews",
+    "moreActions": "More actions",
     "orderHint": "To change the order buyers see, drag your products into place on your <link>storefront</link>."
   },
   "list": {

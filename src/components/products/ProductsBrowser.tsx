@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useTransition } from "react";
+import { useTransition } from "react";
 import Link from "@/components/ui/AppLink";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
@@ -49,6 +49,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ConnectAiHint } from "./ConnectAiHint";
 import { ProductList } from "./ProductList";
+import { ProductsMoreMenu } from "./ProductsMoreMenu";
 
 // Owns the products page toolbar + paging. Status/sort/page live in the URL
 // (the server page reads them and re-queries), so this component only wires
@@ -192,115 +193,155 @@ export function ProductsBrowser({
 
   const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
   const filtered = filters.status !== undefined || filters.moderated === true;
+  // Anything off its default in the filter menu, the ordering included: the
+  // trigger then reads it out, so the search half gives up its word on a phone.
+  const narrowed = filtered || sort !== "default";
   // The toolbar stays available whenever the seller has products OR is
   // filtering: hiding it on a no-results page would strand them there.
   const showToolbar = data.total > 0 || filtered;
 
   return (
     <>
-      {/* items-end from sm up sits the actions on the title's baseline rather
-          than its top edge, which matters now the title is the tallest thing
-          in the row. */}
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-3 sm:items-end">
+      {/* TWO ARRANGEMENTS OF ONE SET OF CONTROLS, so nothing is drawn twice.
+          Below xl (a phone, a tablet, a laptop with the rail open), the row
+          used to wrap right-aligned into a ragged triangle of buttons, so:
+            line 1: the heading, Add product at its right
+            line 2: search and filter as one bar, then Clear and "More"
+                    (Reviews, Import)
+          From xl, where everything fits on one line, it is the one row it
+          always was: heading, then the tools, then Add product last. Only
+          `order` and `basis` change between the two. That row never wraps
+          (a wrap would strand Add product alone under it): a long filter
+          summary truncates instead, and a long heading subtitle wraps. */}
+      <div className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-4 xl:flex-nowrap xl:items-end">
         {/* Keyed wrapper, not decoration. `heading` is an element built in a
             Server Component and handed over as a PROP, so React's JSX runtime
             never key-validates it — it crosses the RSC boundary with no key and
-            `_store.validated === 0`. Sitting here as one of two children, it
+            `_store.validated === 0`. Sitting here among the row's children, it
             gets reconciled as an array, and React demands a key of every array
             member: "Each child in a list should have a unique key prop... it
             was passed a child from ProductsPage". The key belongs on this
             wrapper rather than on the element in page.tsx, because it is this
-            array that creates the requirement. Renders no DOM. */}
-        <Fragment key="heading">{heading}</Fragment>
-        {/* Mobile: own full-width row, so the CTA lands on the right edge of the
-            grid below it. Desktop: hugs its content beside the heading. Wraps
-            at every width rather than run past a narrow content column. */}
-        <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
-          {/* Universal search, from where a seller looks for it on this page:
-              it finds any product by name and opens it. */}
-          {showToolbar && search && (
-            <button
-              type="button"
-              onClick={search.open}
-              aria-haspopup="dialog"
-              aria-expanded={search.isOpen}
-              className={toolbarButtonClass}
-            >
-              <Search className="size-4" strokeWidth={2} aria-hidden="true" />
-              {tSearch("label")}
-            </button>
-          )}
+            array that creates the requirement. `flex-auto` (not flex-1): the
+            heading keeps its own width, so a long Add label wraps under it
+            rather than squeezing the title. On the one unwrapped row (xl) its
+            minimum is its longest word, so the title never breaks: the filter
+            summary gives way first. */}
+        <div key="heading" className="order-1 min-w-0 flex-auto xl:min-w-auto">
+          {heading}
+        </div>
+
+        {canWrite ? (
+          // Beside the heading below xl (ml-auto keeps it right-aligned if a
+          // long label sends it under the title), last in the row from xl.
+          <Link href={NEW_PRODUCT_PATH} className={cn(primaryButtonClass, "order-2 ml-auto h-10 shrink-0 xl:order-3")}>
+            <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
+            {t("browser.add")}
+          </Link>
+        ) : (
+          // Where the add and import buttons would be, the reason they are
+          // not: a missing control with no word of why reads as a fault.
+          <p
+            className={cn(infoTextClass, "order-2 max-w-xs basis-full xl:order-3 xl:basis-auto")}
+            data-products-view-only=""
+          >
+            {t("browser.viewOnlyHint")}
+          </p>
+        )}
+
+        {/* The tools: a line of their own below xl, between the heading and
+            Add product from xl. */}
+        <div className="order-3 flex min-w-0 basis-full items-center gap-2 xl:order-2 xl:basis-auto">
+          {/* Search and filter as ONE bar: the search half stretches like a
+              field on a narrow screen, the filter sits at its end. */}
           {showToolbar && (
-            <FilterMenu
-              ariaLabel={t("browser.filterLabel")}
-              restingLabel={t("browser.sortResting")}
-              sections={[
-                {
-                  label: t("browser.statusSection"),
-                  value: filters.moderated ? MODERATED_FILTER : (filters.status ?? ""),
-                  options: statusOptions,
-                  onChange: handleStatus,
-                  defaultValue: "",
-                },
-                {
-                  label: t("browser.sortSection"),
-                  value: sort,
-                  options: sortOptions,
-                  onChange: handleSort,
-                  defaultValue: "default",
-                },
-              ]}
-              // Always the sliders icon (not the selected option's): it is the
-              // control's identity, and its handles animate on hover.
-              triggerIcon={<SortSlidersIcon className="size-4 shrink-0" />}
-              // h-10 on both controls: the outlined trigger's border would
-              // otherwise make it 2px taller than the CTA. The label shows at
-              // every width, a phone included: a sliders icon alone is not
-              // something every seller reads as "filter". `max-w-[13rem]`
-              // keeps a two-group summary from crowding the CTA: it
-              // truncates, the panel and the tooltip carry the full text.
-              // `group/sort` is the hover/focus scope the handle motion keys off.
-              triggerClassName="group/sort h-10 max-w-[13rem] shrink-0"
-              panelClassName="sm:w-64"
-            />
+            <div className="flex min-w-0 flex-1 xl:flex-initial">
+              {/* Universal search, from where a seller looks for it on this
+                  page: it finds any product by name and opens it. On a phone
+                  its word gives way to the filter's summary once one is on. */}
+              {search && (
+                <button
+                  type="button"
+                  onClick={search.open}
+                  aria-haspopup="dialog"
+                  aria-expanded={search.isOpen}
+                  aria-label={tSearch("label")}
+                  className={cn(toolbarButtonClass, "min-w-10 flex-1 justify-start border-r-0 xl:flex-none")}
+                >
+                  <Search className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+                  <span className={cn("truncate", narrowed && "max-sm:hidden")}>{tSearch("label")}</span>
+                </button>
+              )}
+              <FilterMenu
+                ariaLabel={t("browser.filterLabel")}
+                restingLabel={t("browser.sortResting")}
+                sections={[
+                  {
+                    label: t("browser.statusSection"),
+                    value: filters.moderated ? MODERATED_FILTER : (filters.status ?? ""),
+                    options: statusOptions,
+                    onChange: handleStatus,
+                    defaultValue: "",
+                  },
+                  {
+                    label: t("browser.sortSection"),
+                    value: sort,
+                    options: sortOptions,
+                    onChange: handleSort,
+                    defaultValue: "default",
+                  },
+                ]}
+                // Always the sliders icon (not the selected option's): it is the
+                // control's identity, and its handles animate on hover.
+                triggerIcon={<SortSlidersIcon className="size-4 shrink-0" />}
+                // On a phone, at rest, the icon alone at the search bar's end,
+                // which is where a reader expects the filter; anything applied
+                // still reads out in words. Elsewhere the label shows.
+                iconOnlyAtRestOnPhone
+                // h-10 on both controls: the outlined trigger's border would
+                // otherwise make it 2px taller than the CTA. `max-w-[13rem]`
+                // keeps a two-group summary from crowding the row: it
+                // truncates, the panel and the tooltip carry the full text.
+                // `group/sort` is the hover/focus scope the handle motion keys off.
+                triggerClassName="group/sort h-10 max-w-[13rem] shrink-0 max-sm:px-3"
+                // Shrinks before the search half does: a long summary
+                // truncates rather than push the row past a phone's edge.
+                rootClassName="w-auto min-w-0 shrink"
+                panelClassName="sm:w-64"
+              />
+            </div>
           )}
-          {/* Reset, kept beside the menu now the search row that used to hold
-              it is gone. Only while a filter is actually on: a permanent
-              Clear next to the CTA is a control that does nothing most of
-              the time. The menu's own "All statuses" does the same job; this
-              is the one-click version of it. */}
+          {/* Reset, only while a filter is actually on: a permanent Clear is a
+              control that does nothing most of the time. The menu's own "All
+              statuses" does the same job; this is the one-click version. */}
           {filtered && (
             <button type="button" onClick={handleClear} className={toolbarButtonClass}>
               {t("browser.clear")}
             </button>
           )}
-          {/* Every member reads the store's reviews; the page itself decides
-              who may hide or publish them. */}
-          <Link href={REVIEWS_PATH} className={toolbarButtonClass} data-products-reviews-link="">
-            <MessageSquareQuote className="size-4" strokeWidth={2} aria-hidden="true" />
-            {t("browser.reviews")}
-          </Link>
-          {canWrite ? (
-            <>
-              {/* Beside "Add product", not buried in a menu: someone arriving
-                  with a catalogue elsewhere is deciding whether this is worth
-                  the typing, and that is exactly when they need to find it. */}
+          {/* Below xl, Reviews and Import behind one "More" button. */}
+          <ProductsMoreMenu
+            canWrite={canWrite}
+            className="ml-auto xl:hidden"
+            triggerClassName={cn(toolbarButtonClass, "w-10 px-0")}
+          />
+          {/* From xl, the same two as labelled buttons. Every member reads the
+              store's reviews; the page itself decides who may hide or publish
+              them. Import sits beside Add product, not buried in a menu, where
+              there is room: someone arriving with a catalogue elsewhere is
+              deciding whether this is worth the typing. */}
+          <div className="hidden items-center gap-2 xl:flex">
+            <Link href={REVIEWS_PATH} className={toolbarButtonClass} data-products-reviews-link="">
+              <MessageSquareQuote className="size-4" strokeWidth={2} aria-hidden="true" />
+              {t("browser.reviews")}
+            </Link>
+            {canWrite && (
               <Link href={PRODUCTS_IMPORT_PATH} className={toolbarButtonClass}>
                 <UploadIcon className="size-4" />
                 {t("browser.import")}
               </Link>
-              <Link href={NEW_PRODUCT_PATH} className={`${primaryButtonClass} h-10 shrink-0`}>
-                <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
-                {t("browser.add")}
-              </Link>
-            </>
-          ) : (
-            // Where the add and import buttons would be, the reason they are
-            // not: a missing control with no word of why reads as a fault.
-            <p className={cn(infoTextClass, "max-w-xs")} data-products-view-only="">
-              {t("browser.viewOnlyHint")}
-            </p>
-          )}
+            )}
+          </div>
         </div>
       </div>
 

@@ -132,7 +132,7 @@ test.describe("everyday seller friction", () => {
     await gotoApp(page, "/dashboard");
     // One parcel to send, and one refund owed: two rows, not "2 orders to ship".
     await expect(page.getByText("1 order to ship").first()).toBeVisible();
-    const refundRow = page.getByRole("link", { name: "See cancellations" });
+    const refundRow = page.getByRole("link", { name: "1 buyer cancelled" });
     await expect(refundRow).toBeVisible();
     await expect(page.getByText("1 buyer cancelled")).toBeVisible();
 

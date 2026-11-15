@@ -81,6 +81,7 @@
     "updating": "Bijwerken…",
     "pagination": "{total, plural, one {{total} product · pagina {page} van {pages}} other {{total} producten · pagina {page} van {pages}}}",
     "reviews": "Reviews",
+    "moreActions": "Meer acties",
     "orderHint": "Wil je de volgorde wijzigen die kopers zien? Sleep je producten op hun plek op je <link>etalage</link>."
   },
   "list": {

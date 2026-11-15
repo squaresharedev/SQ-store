@@ -58,6 +58,8 @@
   "attention": {
     "title": "Vraagt om aandacht",
     "allClear": "Alles in orde. Er is nu niets dat je aandacht nodig heeft.",
+    "showMore": "Nog {count} tonen",
+    "showFewer": "Minder tonen",
     "twoFactor": {
       "label": "Zet tweestapsverificatie aan",
       "description": "Een code van je telefoon bij het inloggen, zodat een gestolen wachtwoord alleen niet genoeg is om in je winkel te komen.",

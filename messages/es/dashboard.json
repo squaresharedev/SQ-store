@@ -58,6 +58,8 @@
   "attention": {
     "title": "Necesita atención",
     "allClear": "Todo en orden. No hay nada que necesite tu atención ahora mismo.",
+    "showMore": "Mostrar {count} más",
+    "showFewer": "Mostrar menos",
     "twoFactor": {
       "label": "Activa la verificación en dos pasos",
       "description": "Un código de tu móvil al iniciar sesión, para que una contraseña robada no baste para entrar en tu tienda.",

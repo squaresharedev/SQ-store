@@ -58,6 +58,8 @@
   "attention": {
     "title": "Handlungsbedarf",
     "allClear": "Alles in Ordnung. Gerade ist nichts zu tun.",
+    "showMore": "{count} weitere anzeigen",
+    "showFewer": "Weniger anzeigen",
     "twoFactor": {
       "label": "Zwei-Faktor-Authentifizierung einschalten",
       "description": "Bei der Anmeldung ein Code von deinem Handy, damit ein gestohlenes Passwort allein nicht reicht, um in deinen Shop zu kommen.",

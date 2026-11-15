@@ -58,6 +58,8 @@
   "attention": {
     "title": "Precisa de atenção",
     "allClear": "Tudo em ordem. Não há nada que precise da sua atenção neste momento.",
+    "showMore": "Mostrar mais {count}",
+    "showFewer": "Mostrar menos",
     "twoFactor": {
       "label": "Ative a autenticação de dois fatores",
       "description": "Um código do seu telemóvel ao iniciar sessão, para que uma palavra-passe roubada, por si só, não dê acesso à sua loja.",

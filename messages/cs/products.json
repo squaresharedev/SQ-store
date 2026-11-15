@@ -81,6 +81,7 @@
     "updating": "Aktualizace…",
     "pagination": "{total, plural, one {{total} produkt · strana {page} z {pages}} few {{total} produkty · strana {page} z {pages}} many {{total} produktu · strana {page} z {pages}} other {{total} produktů · strana {page} z {pages}}}",
     "reviews": "Recenze",
+    "moreActions": "Další akce",
     "orderHint": "Pořadí, které vidí kupující, změníte přetažením produktů na místo ve své <link>výloze</link>."
   },
   "list": {

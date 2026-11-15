@@ -58,6 +58,8 @@
   "attention": {
     "title": "Vyžaduje pozornosť",
     "allClear": "Všetko v poriadku. Momentálne nie je nič, čo by si vyžadovalo vašu pozornosť.",
+    "showMore": "Zobraziť ďalšie {count}",
+    "showFewer": "Zobraziť menej",
     "twoFactor": {
       "label": "Zapnite dvojfaktorové overenie",
       "description": "Pri prihlásení kód z vášho telefónu, aby sa do vášho obchodu nedalo dostať iba s odcudzeným heslom.",
