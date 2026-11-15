@@ -165,7 +165,6 @@ function Toolbar({ pagesOpen = false }: { pagesOpen?: boolean }) {
       canTidy
       settingsOpen={false}
       onToggleSettings={vi.fn()}
-      onShowShortcuts={vi.fn()}
       pagesOpen={pagesOpen}
       canOpenPage
       onTogglePages={vi.fn()}

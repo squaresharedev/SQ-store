@@ -549,6 +549,10 @@
     "title": "Aktionslabel",
     "says": "Anzeige",
     "hint": "Wird am Produkt angezeigt, solange eine Aktion seinen Preis senkt.",
+    "noSaleBoard": "In diesem Schaufenster ist nichts in Aktion, daher erscheint kein Label.",
+    "noSaleProduct": "Dieses Produkt ist nicht in Aktion, daher erscheint kein Label.",
+    "startSale": "Aktion starten",
+    "hardToRead": "Auf dieser Füllung schwer lesbar.",
     "percent": "Prozent",
     "amount": "Betrag",
     "hidden": "Verborgen",
@@ -1509,7 +1513,6 @@
   },
   "shortcuts": {
     "title": "Tastenkürzel",
-    "tip": "Tastenkürzel (?)",
     "rows": {
       "save": {
         "label": "Speichern",

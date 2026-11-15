@@ -549,6 +549,10 @@
     "title": "Etiqueta de rebaja",
     "says": "Mostrar",
     "hint": "Se muestra en el producto mientras una rebaja reduce su precio.",
+    "noSaleBoard": "Nada de este escaparate está rebajado, así que no se muestra ninguna etiqueta.",
+    "noSaleProduct": "Este producto no está rebajado, así que no se muestra ninguna etiqueta.",
+    "startSale": "Crear una rebaja",
+    "hardToRead": "Difícil de leer sobre este relleno.",
     "percent": "Porcentaje",
     "amount": "Importe",
     "hidden": "Oculta",
@@ -1509,7 +1513,6 @@
   },
   "shortcuts": {
     "title": "Atajos de teclado",
-    "tip": "Atajos de teclado (?)",
     "rows": {
       "save": {
         "label": "Guardar",

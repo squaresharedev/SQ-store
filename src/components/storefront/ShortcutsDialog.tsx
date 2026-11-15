@@ -44,8 +44,9 @@ function isTyping(target: EventTarget | null): boolean {
 
 /**
  * The designer's keyboard shortcuts on one screen. "?" opens it from anywhere
- * outside a field, and so does the toolbar's keyboard button. A reference
- * only: it lists the shortcuts the designer already has and adds none.
+ * outside a field (the toolbar's keyboard button was retired: too few sellers
+ * open it to spend a seat on that bar). A reference only: it lists the
+ * shortcuts the designer already has and adds none.
  */
 export function ShortcutsDialog({
   open,

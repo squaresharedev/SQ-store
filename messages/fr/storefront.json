@@ -549,6 +549,10 @@
     "title": "Étiquette promo",
     "says": "Afficher",
     "hint": "S'affiche sur le produit tant qu'une promotion réduit son prix.",
+    "noSaleBoard": "Rien n'est en promotion sur cette vitrine, donc aucune étiquette ne s'affiche.",
+    "noSaleProduct": "Ce produit n'est pas en promotion, donc aucune étiquette ne s'affiche.",
+    "startSale": "Lancer une promotion",
+    "hardToRead": "Difficile à lire sur ce fond.",
     "percent": "Pourcentage",
     "amount": "Montant",
     "hidden": "Masquée",
@@ -1509,7 +1513,6 @@
   },
   "shortcuts": {
     "title": "Raccourcis clavier",
-    "tip": "Raccourcis clavier (?)",
     "rows": {
       "save": {
         "label": "Enregistrer",

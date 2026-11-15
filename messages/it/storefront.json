@@ -549,6 +549,10 @@
     "title": "Etichetta promo",
     "says": "Mostra",
     "hint": "Appare sul prodotto finché una promozione ne riduce il prezzo.",
+    "noSaleBoard": "Niente in questa vetrina è in promozione, quindi non appare nessuna etichetta.",
+    "noSaleProduct": "Questo prodotto non è in promozione, quindi non appare nessuna etichetta.",
+    "startSale": "Avvia una promozione",
+    "hardToRead": "Difficile da leggere su questo riempimento.",
     "percent": "Percentuale",
     "amount": "Importo",
     "hidden": "Nascosta",
@@ -1509,7 +1513,6 @@
   },
   "shortcuts": {
     "title": "Scorciatoie da tastiera",
-    "tip": "Scorciatoie da tastiera (?)",
     "rows": {
       "save": {
         "label": "Salva",

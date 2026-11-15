@@ -156,7 +156,7 @@ describe("the sale chip on a tile", () => {
     expect(badge()!.style.color).not.toBe("rgb(255, 255, 255)");
   });
 
-  it("prints its words in the seller's colour, unless that colour would vanish into the fill", () => {
+  it("prints its words in the seller's colour, exactly as picked", () => {
     tile(ON_SALE, { accent: "#1f4d3a", saleBadgeTextColor: "#fde047" });
     expect(badge()!.style.color).toBe("rgb(253, 224, 71)");
     cleanup();
@@ -164,10 +164,11 @@ describe("the sale chip on a tile", () => {
     tile(ON_SALE, { accent: "#1f4d3a", saleBadgeTextColor: "#fde047" }, { overrides: { saleBadgeTextColor: "#ffffff" } });
     expect(badge()!.style.color).toBe("rgb(255, 255, 255)");
     cleanup();
-    // The fill's own colour for its words would leave a blank chip: the ink
-    // that reads on it is used instead, as it is for the price.
+    // Even a pick that is hard to read on the fill: swapping it for another
+    // ink looked to the seller like a picker that did nothing. The controls
+    // say it is hard to read instead (SaleBadgeControls).
     tile(ON_SALE, { accent: "#1f4d3a", saleBadgeColor: "#fde047", saleBadgeTextColor: "#fde047" });
-    expect(badge()!.style.color).toBe("rgb(23, 23, 23)");
+    expect(badge()!.style.color).toBe("rgb(253, 224, 71)");
   });
 
   it("can be set for one tile alone, over the storefront's own choice", () => {

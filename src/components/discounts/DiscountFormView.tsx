@@ -16,6 +16,7 @@ export function DiscountFormView({
   products,
   chip,
   suggested,
+  forProduct,
 }: {
   discount: DiscountView | null;
   products: readonly DiscountProductChoice[];
@@ -23,6 +24,8 @@ export function DiscountFormView({
   chip: SaleChipLink | null;
   /** See DiscountForm. */
   suggested?: DiscountSuggestions;
+  /** See DiscountForm. */
+  forProduct?: string | null;
 }) {
   const t = useTranslations("Discounts.form");
   return (
@@ -34,7 +37,13 @@ export function DiscountFormView({
       >
         {discount ? t(discount.kind === "code" ? "editCode" : "editSale") : t("newTitle")}
       </h1>
-      <DiscountForm discount={discount} products={products} chip={chip} suggested={suggested} />
+      <DiscountForm
+        discount={discount}
+        products={products}
+        chip={chip}
+        suggested={suggested}
+        forProduct={forProduct}
+      />
     </main>
   );
 }

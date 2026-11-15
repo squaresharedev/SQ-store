@@ -1544,8 +1544,8 @@ export type StorefrontTheme = {
   saleBadgePosition?: TileSpot;
   /** Chip fill, strict #rrggbb. Absent follows the theme accent. */
   saleBadgeColor?: string;
-  /** Chip words, strict #rrggbb. Absent is whichever ink reads on the fill;
-   *  a pick that would vanish into it is replaced the same way (legibleInkOn). */
+  /** Chip words, strict #rrggbb, drawn exactly as chosen. Absent is whichever
+   *  ink reads on the fill. */
   saleBadgeTextColor?: string;
   showTitle: boolean;
   /** How big chips are on bigger tiles (CHIP_SCALES). Absent is

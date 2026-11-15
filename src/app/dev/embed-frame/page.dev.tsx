@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { EmbedFrameView } from "@/components/storefront-page/EmbedFrameView";
 import { buildSampleStorefront } from "@/lib/storefront/sample";
 import { withSampleCardExtras } from "@/lib/storefront/sample-card-extras";
+import { SAMPLE_SALE_PERCENT } from "@/lib/storefront/sample-sale";
 import { resolveTileLook } from "@/lib/storefront/tile-look";
 import { deriveTileStockState } from "@/lib/stock/badge";
 import {
@@ -51,9 +52,6 @@ import type { StorefrontPageData, StorefrontTileProduct } from "@/types/storefro
 // price always (the sample reveals them on hover).
 
 export const metadata = { title: "Embed frame: dev gallery" };
-
-/** What the harness's sale takes off, in percent. */
-const SALE_PERCENT = 20;
 
 /** A blur amount from the query: a whole number in range, or nothing. */
 function blurParam(value: string | undefined): number | undefined {
@@ -178,8 +176,8 @@ export default async function EmbedFrameDevPage({
         href: "#",
       };
       if (!onSale) return tile;
-      const price = Math.round(product.price * (100 - SALE_PERCENT)) / 100;
-      return { ...tile, price, regularPrice: product.price, offerPercent: SALE_PERCENT };
+      const price = Math.round(product.price * (100 - SAMPLE_SALE_PERCENT)) / 100;
+      return { ...tile, price, regularPrice: product.price, offerPercent: SAMPLE_SALE_PERCENT };
     }),
     tileLook: resolveTileLook({ theme: saleTheme, productPage }),
     imageUrls: {},

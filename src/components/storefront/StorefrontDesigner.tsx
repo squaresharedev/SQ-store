@@ -580,7 +580,7 @@ export function StorefrontDesigner({
   );
   const [multiSelectTipShown, setMultiSelectTipShown] = useStoredFlag(MULTISELECT_TIP_KEY);
   const [sheetTipShown, setSheetTipShown] = useStoredFlag(SHEET_TIP_KEY);
-  // The keyboard shortcuts list, opened by "?" or the toolbar's keyboard button.
+  // The keyboard shortcuts list, opened by "?" (see ShortcutsDialog).
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   // Where the panels are columns beside the canvas ("regular") and where they
   // are sheets stacked over it ("compact"). Only BEHAVIOUR reads this; layout
@@ -655,6 +655,15 @@ export function StorefrontDesigner({
   const productsById = useMemo(
     () => new Map(catalog.map((product) => [product.id, product])),
     [catalog],
+  );
+  // Whether a sale chip shows anywhere on the board: without one, the theme's
+  // sale badge controls offer to start a sale instead (SaleBadgeControls).
+  const saleOnBoard = useMemo(
+    () =>
+      blocks.some(
+        (block) => block.type === "product" && productsById.get(block.productId)?.sale !== undefined,
+      ),
+    [blocks, productsById],
   );
 
   /** Whether a buyer flow is out on the canvas: a product page, and the
@@ -4449,6 +4458,7 @@ export function StorefrontDesigner({
               onPlayCelebration={() => setCelebrationPlays((count) => count + 1)}
               shippingPolicy={shippingPolicy}
               sellerIdentity={sellerIdentity}
+              saleOnBoard={saleOnBoard}
             />
           }
           inspector={
@@ -4642,7 +4652,6 @@ export function StorefrontDesigner({
         onRedo={redo}
         settingsOpen={settingsOpen}
         onToggleSettings={toggleSettings}
-        onShowShortcuts={() => setShortcutsOpen(true)}
         sheetOpen={mobileSheet !== null}
         pagesOpen={pageOpen}
         canOpenPage={defaultPageProductId !== null}

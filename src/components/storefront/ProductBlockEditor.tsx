@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { ArrowRight, Trash2 } from "lucide-react";
+import { ArrowRight, SquarePen, Trash2 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import type { Product } from "@/types/product";
 import {
@@ -15,6 +15,7 @@ import {
 import { formatPrice } from "@/lib/format";
 import { currencySymbol } from "@/lib/format/money";
 import { updateProduct } from "@/lib/products/actions";
+import { productEditPath } from "@/lib/products/paths";
 import {
   PRICE_CENTS_MAX,
   type ProductWriteInput,
@@ -22,7 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
-import { cautionNoticeClass, destructiveButtonClass, errorTextClass, fieldBaseClass, ghostButtonClass, infoTextClass, panelEyebrowClass, primaryButtonClass } from "@/components/ui/control-styles";
+import { cautionNoticeClass, destructiveButtonClass, errorTextClass, fieldBaseClass, ghostButtonClass, infoTextClass, panelEyebrowClass, primaryButtonClass, quietIconLinkClass } from "@/components/ui/control-styles";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { resolveCtaTarget } from "@/components/product-page/cta-target";
 import { useSettingTarget } from "@/lib/storefront/setting-context";
@@ -103,6 +104,7 @@ export function ProductBlockEditor({
 }) {
   const fieldId = useId();
   const t = useTranslations("Storefront");
+  const tProducts = useTranslations("Products");
   const locale = useLocale();
   const [draftTitle, setDraftTitle] = useState(product?.title ?? "");
   const [draftPrice, setDraftPrice] = useState(
@@ -259,7 +261,25 @@ export function ProductBlockEditor({
           eyebrow says so before a Save button appears: everything under the
           rule below is this tile's style, which applies at once. */}
       <div className="space-y-1.5">
-        <p className={panelEyebrowClass}>{t("productBlock.details")}</p>
+        {/* The rest of the product (photos, description, options, stock) is
+            edited in its own form, one press away rather than a trip through
+            Products. A new tab, so the board and its unsaved changes stay put.
+            Not on the sample, whose products exist only in code. */}
+        <div className="flex items-center justify-between gap-2">
+          <p className={panelEyebrowClass}>{t("productBlock.details")}</p>
+          {!sample && (
+            <a
+              href={productEditPath(product.id)}
+              target="_blank"
+              rel="noopener"
+              className={quietIconLinkClass}
+              data-product-edit-link=""
+            >
+              <SquarePen className="size-3.5" strokeWidth={2} aria-hidden="true" />
+              {tProducts("buyButton.editProduct")}
+            </a>
+          )}
+        </div>
         <div className="flex items-start gap-2.5">
           {/* Two h-8 fields plus their gap-1.5, so the photo lines up with both. */}
           <ProductThumb src={product.imageUrl} className="size-[4.375rem]" />

@@ -549,6 +549,10 @@
     "title": "Actielabel",
     "says": "Weergave",
     "hint": "Staat op het product zolang een actie de prijs verlaagt.",
+    "noSaleBoard": "Niets in deze etalage is in de aanbieding, dus er verschijnt geen label.",
+    "noSaleProduct": "Dit product is niet in de aanbieding, dus er verschijnt geen label.",
+    "startSale": "Start een actie",
+    "hardToRead": "Slecht leesbaar op deze vulling.",
     "percent": "Percentage",
     "amount": "Bedrag",
     "hidden": "Verborgen",
@@ -1509,7 +1513,6 @@
   },
   "shortcuts": {
     "title": "Sneltoetsen",
-    "tip": "Sneltoetsen (?)",
     "rows": {
       "save": {
         "label": "Opslaan",

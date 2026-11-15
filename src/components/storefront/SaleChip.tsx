@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 import type { tileSpotTokenProps } from "./TileSpotDragLayer";
 import { useLocale, useTranslations } from "next-intl";
 import { formatPriceShort } from "@/lib/format";
-import { legibleInkOn, readableInkOn } from "@/lib/format/color";
+import { MIN_LEGIBLE_CONTRAST, contrastRatio, readableInkOn } from "@/lib/format/color";
 import { cn } from "@/lib/utils";
 import type { Currency } from "@/types/product";
 import {
@@ -102,6 +102,13 @@ export function saleChipWidth(look: SaleBadgeLook, spot: TileSpot, label: string
   }
 }
 
+/** Whether the seller's own words colour is too faint to read on the chip's
+ *  fill (under MIN_LEGIBLE_CONTRAST). Drawn as chosen all the same (see
+ *  SaleChip); this is what the controls warn on. */
+export function saleChipInkIsFaint(textColor: string, fill: string): boolean {
+  return contrastRatio(textColor, fill) < MIN_LEGIBLE_CONTRAST;
+}
+
 /** What a chip on one product has to say: the reduction in money and, where
  *  it is at least 1%, in percent (ProductTileSale.offerPercent). */
 export type SaleChipOffer = { amountCents: number; percent: number | null; currency: Currency };
@@ -127,8 +134,11 @@ export function useSaleChipWords(): (says: Exclude<SaleBadge, "hidden">, offer: 
  *
  * Sized from `size` (the price tag's own type size on a tile), every measure
  * in it a share of that, so it scales with its tile. Its words are the
- * seller's colour where it carries on the fill, and whichever ink reads on it
- * otherwise (legibleInkOn): a chip whose words vanish says nothing.
+ * seller's own colour EXACTLY as chosen, like the card's buy button: a pick
+ * that was swapped for "a colour that reads" looked to the seller like a
+ * picker that did nothing. The controls say when a pick is hard to read
+ * (saleChipInkIsFaint) instead. Unset, they are whichever ink reads on the
+ * fill.
  *
  * `besidePrice` is given when it SHARES ITS ROW with the floated price (see
  * resolveSaleBadgePosition). Side by side the two fit a desktop tile and
@@ -158,7 +168,8 @@ export function SaleChip({
   /** Where it renders (resolveSaleBadgePosition). */
   spot: TileSpot;
   fill: string;
-  /** Its words' colour, strict hex. Absent is whichever ink reads on the fill. */
+  /** Its words' colour, strict hex, drawn exactly. Absent is whichever ink
+   *  reads on the fill. */
   textColor?: string;
   /** The price tag's typeface (PRICE_TAG_FONT_CLASSES). */
   fontClass: string;
@@ -173,7 +184,7 @@ export function SaleChip({
    *  token (tileSpotTokenProps). Absent, it takes no pointer at all. */
   token?: ReturnType<typeof tileSpotTokenProps>;
 }) {
-  const ink = legibleInkOn(textColor ?? readableInkOn(fill), fill);
+  const ink = textColor ?? readableInkOn(fill);
   const words = [...label].length * CHIP_CHAR_WIDTH;
   // Zero when the row cannot hold both chips, unbounded when it can.
   const room = besidePrice

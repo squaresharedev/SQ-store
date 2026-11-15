@@ -99,9 +99,12 @@ function initialState(
   products: readonly DiscountProductChoice[],
   suggested: DiscountSuggestions,
   now: Date,
+  forProduct: string | null,
 ): FormState {
   if (!discount) {
-    // A sale first: the discount most sellers come here to make.
+    // A sale first: the discount most sellers come here to make. On the one
+    // product the designer asked for, when it did.
+    const only = forProduct ? products.find((product) => product.id === forProduct) : undefined;
     return {
       kind: "automatic",
       code: "",
@@ -109,9 +112,9 @@ function initialState(
       valueType: "percent",
       percent: String(suggested.percent ?? 10),
       amount: "",
-      currency: products[0]?.currency ?? "EUR",
-      appliesTo: "all",
-      productIds: [],
+      currency: only?.currency ?? products[0]?.currency ?? "EUR",
+      appliesTo: only ? "products" : "all",
+      productIds: only ? [only.id] : [],
       start: { mode: "open" },
       end: suggested.days ? at(shiftInstant(now.toISOString(), { days: suggested.days })) : { mode: "open" },
       usageLimit: "",
@@ -230,9 +233,18 @@ type DiscountFormProps = {
   chip?: SaleChipLink | null;
   /** A new discount's better defaults (lib/predictions). */
   suggested?: DiscountSuggestions;
+  /** A new sale on this one product (newSalePath, from the designer). */
+  forProduct?: string | null;
 };
 
-function DiscountFormFields({ discount, products, chip = null, suggested = {}, now }: DiscountFormProps & { now: Date }) {
+function DiscountFormFields({
+  discount,
+  products,
+  chip = null,
+  suggested = {},
+  forProduct = null,
+  now,
+}: DiscountFormProps & { now: Date }) {
   const t = useTranslations("Discounts.form");
   const tDiscounts = useTranslations("Discounts");
   const words = useDiscountWording();
@@ -241,7 +253,9 @@ function DiscountFormFields({ discount, products, chip = null, suggested = {}, n
   const toast = useToast();
   const showError = useActionErrorToast();
   const ids = { code: useId(), channel: useId(), value: useId(), limit: useId() };
-  const [state, setState] = useState<FormState>(() => initialState(discount, products, suggested, now));
+  const [state, setState] = useState<FormState>(() =>
+    initialState(discount, products, suggested, now, forProduct),
+  );
   const [error, setError] = useState<ActionError | null>(null);
   const [saving, startSaving] = useTransition();
   const [confirmingEnd, setConfirmingEnd] = useState(false);

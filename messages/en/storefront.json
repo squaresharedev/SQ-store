@@ -549,6 +549,10 @@
     "title": "Sale badge",
     "says": "Shows",
     "hint": "Shown on a product while a sale lowers its price.",
+    "noSaleBoard": "Nothing on this storefront is on sale, so no badge shows.",
+    "noSaleProduct": "This product is not on sale, so no badge shows.",
+    "startSale": "Start a sale",
+    "hardToRead": "Hard to read on this fill.",
     "percent": "Percentage",
     "amount": "Amount",
     "hidden": "Hidden",
@@ -1069,7 +1073,6 @@
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
-    "tip": "Keyboard shortcuts (?)",
     "rows": {
       "save": {
         "label": "Save",

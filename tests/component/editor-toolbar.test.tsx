@@ -37,7 +37,6 @@ function Harness(props: Partial<Parameters<typeof EditorToolbar>[0]> = {}) {
       canTidy
       settingsOpen={false}
       onToggleSettings={vi.fn()}
-      onShowShortcuts={vi.fn()}
       pagesOpen={false}
       canOpenPage
       onTogglePages={vi.fn()}
@@ -197,14 +196,9 @@ describe("EditorToolbar history pair", () => {
 });
 
 describe("EditorToolbar keyboard shortcuts", () => {
-  it("opens the shortcuts list, naming the ? key in its tip", async () => {
-    const onShowShortcuts = vi.fn();
-    const user = userEvent.setup();
-    render(<Harness onShowShortcuts={onShowShortcuts} />);
-    const button = screen.getByRole("button", { name: "Keyboard shortcuts" });
-    expect(within(button).getByText("Keyboard shortcuts (?)")).toBeInTheDocument();
-    await user.click(button);
-    expect(onShowShortcuts).toHaveBeenCalledTimes(1);
+  it("spends no seat on the shortcuts list: \"?\" opens it (ShortcutsDialog)", () => {
+    render(<Harness />);
+    expect(screen.queryByRole("button", { name: /keyboard shortcuts/i })).toBeNull();
   });
 });
 

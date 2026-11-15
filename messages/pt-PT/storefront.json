@@ -549,6 +549,10 @@
     "title": "Etiqueta de promoção",
     "says": "Mostrar",
     "hint": "Aparece no produto enquanto uma promoção lhe reduz o preço.",
+    "noSaleBoard": "Nada nesta montra está em promoção, por isso nenhuma etiqueta aparece.",
+    "noSaleProduct": "Este produto não está em promoção, por isso nenhuma etiqueta aparece.",
+    "startSale": "Criar uma promoção",
+    "hardToRead": "Difícil de ler sobre este preenchimento.",
     "percent": "Percentagem",
     "amount": "Valor",
     "hidden": "Oculta",
@@ -1509,7 +1513,6 @@
   },
   "shortcuts": {
     "title": "Atalhos de teclado",
-    "tip": "Atalhos de teclado (?)",
     "rows": {
       "save": {
         "label": "Guardar",

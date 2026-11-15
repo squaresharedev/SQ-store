@@ -2,6 +2,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { BadgePercent } from "lucide-react";
 import type { Product } from "@/types/product";
 import {
   SALE_BADGES,
@@ -18,13 +19,14 @@ import {
 } from "@/types/storefront";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
-import { infoTextClass, strongLabelClass } from "@/components/ui/control-styles";
+import { infoTextClass, secondaryButtonClass, strongLabelClass } from "@/components/ui/control-styles";
+import { newSalePath } from "@/lib/discounts/paths";
 import { readableInkOn } from "@/lib/format/color";
 import { saleChipSpots } from "@/lib/storefront/tile-spots";
 import { cn } from "@/lib/utils";
 import { PRICE_TAG_FONT_CLASSES } from "./config-maps";
 import { OptionCardPicker, optionGlyphFrameClass } from "./OptionCardPicker";
-import { SaleChip, useSaleChipWords, type SaleChipOffer } from "./SaleChip";
+import { SaleChip, saleChipInkIsFaint, useSaleChipWords, type SaleChipOffer } from "./SaleChip";
 import { TileSpotPicker } from "./TileSpotPicker";
 
 /** What the pictures say where there is no real sale to show: a fifth off, or
@@ -51,12 +53,18 @@ const GLYPH_CHIP_SIZE = "7px";
  *
  * Nothing here is typed by the seller: what the chip says is worked out from
  * the prices, so there is no text to check and no number to get wrong.
+ *
+ * With NO SALE RUNNING there is no chip to style: none is drawn, so a colour
+ * picked here changed nothing anywhere the seller could see. The controls give
+ * way to one line saying so and the way to start a sale (newSalePath), on
+ * this product when the section is a tile's.
  */
 export function SaleBadgeControls({
   theme,
   overrides,
   onChange,
   product,
+  onSale = true,
   afterLook,
 }: {
   theme: StorefrontTheme;
@@ -64,8 +72,12 @@ export function SaleBadgeControls({
   overrides?: CardStyleOverrides;
   onChange: (patch: CardStyleOverrides) => void;
   /** The tile's product, when editing one: its sale (or its currency) words
-   *  the pictures. */
+   *  the pictures, and whether it has one decides whether there is a chip. */
   product?: Product;
+  /** At theme scope: whether any product on the board is on sale, so that a
+   *  chip shows somewhere. Absent counts as yes (the dev gallery). A tile's
+   *  section asks its `product` instead. */
+  onSale?: boolean;
   /** Shown under the looks: the theme's chip scale (ChipScaleControl), at
    *  theme scope only. */
   afterLook?: ReactNode;
@@ -74,6 +86,23 @@ export function SaleBadgeControls({
   const tRoot = useTranslations();
   const words = useSaleChipWords();
   const value = resolveCardStyle(theme, overrides);
+
+  if (!(product ? product.sale !== undefined : onSale)) {
+    return (
+      <div className="space-y-3" data-sale-badge-controls="" data-sale-badge-no-sale="">
+        <p className={infoTextClass}>{t(product ? "noSaleProduct" : "noSaleBoard")}</p>
+        <a
+          href={newSalePath(product?.id)}
+          target="_blank"
+          rel="noopener"
+          className={cn(secondaryButtonClass, "w-full")}
+        >
+          <BadgePercent className="size-4" strokeWidth={2} aria-hidden="true" />
+          {t("startSale")}
+        </a>
+      </div>
+    );
+  }
 
   const saysLabels: Record<SaleBadge, string> = {
     percent: t("percent"),
@@ -116,6 +145,9 @@ export function SaleBadgeControls({
   const storedText = editingTile ? overrides.saleBadgeTextColor : theme.saleBadgeTextColor;
   const themeText = editingTile ? theme.saleBadgeTextColor : undefined;
   const inheritedText = themeText ?? readableInkOn(fill);
+  // The words as the chip will draw them, and whether a buyer could read them.
+  const drawnText = storedText ?? themeText;
+  const faintText = drawnText !== undefined && saleChipInkIsFaint(drawnText, fill);
 
   // What the pictures say: this product's own sale where there is one.
   const offer: SaleChipOffer = product?.sale
@@ -214,6 +246,11 @@ export function SaleBadgeControls({
               onSelect: () => onChange({ saleBadgeTextColor: undefined }),
             }}
           />
+          {faintText && (
+            <p className={infoTextClass} data-sale-badge-faint="">
+              {t("hardToRead")}
+            </p>
+          )}
         </>
       )}
     </div>

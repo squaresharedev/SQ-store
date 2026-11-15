@@ -549,6 +549,10 @@
     "title": "Etykieta obniżki",
     "says": "Pokaż",
     "hint": "Widoczna na produkcie, dopóki obniżka zmniejsza jego cenę.",
+    "noSaleBoard": "Nic w tej witrynie nie jest przecenione, więc etykieta się nie pojawia.",
+    "noSaleProduct": "Ten produkt nie jest przeceniony, więc etykieta się nie pojawia.",
+    "startSale": "Uruchom obniżkę",
+    "hardToRead": "Trudno czytelne na tym wypełnieniu.",
     "percent": "Procent",
     "amount": "Kwota",
     "hidden": "Ukryta",
@@ -1509,7 +1513,6 @@
   },
   "shortcuts": {
     "title": "Skróty klawiszowe",
-    "tip": "Skróty klawiszowe (?)",
     "rows": {
       "save": {
         "label": "Zapisz",

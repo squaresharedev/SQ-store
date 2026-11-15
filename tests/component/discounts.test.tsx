@@ -341,6 +341,22 @@ describe("the discount form", () => {
     });
   });
 
+  it("starts a sale on the one product the storefront designer asked for", async () => {
+    const user = userEvent.setup();
+    render(<DiscountForm discount={null} products={PRODUCTS} forProduct={APRON} />);
+    expect(summaryBox()).toHaveTextContent("10% off each item · 1 product");
+
+    await user.click(screen.getByRole("button", { name: "Create discount" }));
+    expect(actions.createDiscount).toHaveBeenCalledWith({
+      kind: "automatic",
+      value: { type: "percent", percentOff: 10 },
+      appliesTo: "products",
+      productIds: [APRON],
+      startsAt: null,
+      endsAt: null,
+    });
+  });
+
   it("shows the server's refusal and stays on the page", async () => {
     const user = userEvent.setup();
     actions.createDiscount.mockResolvedValue({

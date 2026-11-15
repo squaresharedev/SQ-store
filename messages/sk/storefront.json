@@ -549,6 +549,10 @@
     "title": "Štítok akcie",
     "says": "Zobraziť",
     "hint": "Zobrazuje sa pri produkte, kým jeho cenu znižuje akcia.",
+    "noSaleBoard": "Nič v tomto výklade nie je v akcii, takže sa štítok nezobrazí.",
+    "noSaleProduct": "Tento produkt nie je v akcii, takže sa štítok nezobrazí.",
+    "startSale": "Spustiť akciu",
+    "hardToRead": "Na tejto výplni sa zle číta.",
     "percent": "Percentá",
     "amount": "Suma",
     "hidden": "Skrytý",
@@ -1509,7 +1513,6 @@
   },
   "shortcuts": {
     "title": "Klávesové skratky",
-    "tip": "Klávesové skratky (?)",
     "rows": {
       "save": {
         "label": "Uložiť",

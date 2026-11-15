@@ -76,6 +76,14 @@ describe("the product tile's inspector", () => {
     expect(getByText("Product details")).toBeInTheDocument();
   });
 
+  it("goes straight to the product's own form beside its details, in a new tab", () => {
+    // Photos, description and stock live there: no trip out through Products.
+    const { getByRole } = renderEditor(null);
+    const link = getByRole("link", { name: "Edit product" });
+    expect(link).toHaveAttribute("href", `/products/${PRODUCT_ID}/edit`);
+    expect(link).toHaveAttribute("target", "_blank");
+  });
+
   it("opens on the tile's style, leaving the other groups shut", () => {
     // With every group shut, a selected tile read as a product form with no
     // styling in it at all.

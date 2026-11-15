@@ -14,7 +14,11 @@
  *
  *   phone : insert · undo · redo · Style · More
  *   sm+   : the full bar
- *   lg+   : the full bar, with the keyboard shortcuts where Style was
+ *   lg+   : the full bar, without Style (the design panel is a column there)
+ *
+ * The keyboard shortcuts list has no seat here: few sellers open it twice,
+ * and this bar is the editor's most valuable strip. "?" opens it (see
+ * ShortcutsDialog), and undo, redo and save name their keys on hover.
  *
  * "More" holds what a thumb rarely needs mid-edit: tidy and fit to screen. Redo
  * stays on the bar beside undo, the pair every app keeps together, so getting
@@ -41,7 +45,6 @@ import { formatPercent } from "@/lib/format/intl";
 import {
   AlignStartVertical,
   Ellipsis,
-  Keyboard,
   LoaderCircle,
   Minus,
   Plus,
@@ -200,7 +203,6 @@ export function EditorToolbar({
   canTidy,
   settingsOpen,
   onToggleSettings,
-  onShowShortcuts,
   sheetOpen = false,
   pagesOpen,
   canOpenPage,
@@ -243,8 +245,6 @@ export function EditorToolbar({
   /** Mobile only: the Design bottom sheet (global settings) toggle. */
   settingsOpen: boolean;
   onToggleSettings: () => void;
-  /** Desktop only: open the keyboard shortcuts list (ShortcutsDialog). */
-  onShowShortcuts: () => void;
   /** Mobile only: a panel is open as a bottom sheet over this bar's own strip,
    *  so the bar stands down until it closes. */
   sheetOpen?: boolean;
@@ -643,24 +643,7 @@ export function EditorToolbar({
         </button>
       </div>
 
-      {/* -- Group 4: the desktop tail. The keyboard shortcuts, where a
-            keyboard is the norm, in the seat the small-screen tail below
-            leaves empty from lg up, so the bar is no wider for it. -- */}
-      <div className="hidden items-center gap-1 lg:flex">
-        <Divider />
-        <button
-          type="button"
-          suppressHydrationWarning
-          className={ICON_BTN}
-          onClick={onShowShortcuts}
-          aria-label={t("shortcuts.title")}
-        >
-          <Keyboard className="size-4" strokeWidth={2} aria-hidden="true" />
-          <ToolbarTip>{t("shortcuts.tip")}</ToolbarTip>
-        </button>
-      </div>
-
-      {/* -- Groups 5 and 6: the small-screen tail, and ONE group rather than
+      {/* -- Groups 4 and 5: the small-screen tail, and ONE group rather than
             two. Style (on a phone the only route to the whole storefront's
             settings) and the overflow menu are both phone-side controls
             sitting after the same divider, and the toolbar's own `gap-1`

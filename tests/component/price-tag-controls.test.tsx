@@ -199,6 +199,69 @@ describe("PriceTagControls", () => {
     expect(look.style.color).toBe("rgb(253, 224, 71)");
   });
 
+  it("draws the seller's own words colour exactly, and says when it is hard to read", () => {
+    // Ink words on an ink fill: the chip used to swap them for white, which
+    // looked to the seller like a picker that did nothing.
+    renderChip({ saleBadgeColor: "#171717", saleBadgeTextColor: "#171717" });
+    const chip = within(document.querySelector<HTMLElement>("[data-sale-badge-controls]")!);
+    const look = chip.getByRole("group", { name: "Style" }).querySelector<HTMLElement>("[data-tile-sale-badge]")!;
+    expect(look.style.color).toBe("rgb(23, 23, 23)");
+    expect(chip.getByText("Hard to read on this fill.")).toBeInTheDocument();
+    cleanup();
+
+    renderChip({ saleBadgeColor: "#171717", saleBadgeTextColor: "#ffffff" });
+    expect(screen.queryByText("Hard to read on this fill.")).toBeNull();
+    cleanup();
+
+    // Unset, the words are whichever ink reads, so there is nothing to warn on.
+    renderChip({ saleBadgeColor: "#171717" });
+    expect(screen.queryByText("Hard to read on this fill.")).toBeNull();
+  });
+
+  it("offers to start a sale instead of styling a badge nobody can see", () => {
+    render(<SaleBadgeControls theme={themed()} onSale={false} onChange={vi.fn()} />);
+    expect(screen.getByText("Nothing on this storefront is on sale, so no badge shows.")).toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: "Shows" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "Fill swatches" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Start a sale" })).toHaveAttribute("href", "/discounts/new");
+    cleanup();
+
+    // A tile's own section asks its product, and starts the sale on it.
+    const product: Product = {
+      id: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+      title: "Alder rocking chair",
+      description: "",
+      price: 745,
+      currency: "EUR",
+      status: "active",
+      imageUrl: null,
+      digitalFileName: null,
+      trackStock: false,
+      stockQuantity: null,
+      lowStockThreshold: 3,
+      maxPerOrder: 10,
+    };
+    render(<SaleBadgeControls theme={themed()} overrides={{}} onChange={vi.fn()} product={product} />);
+    expect(screen.getByText("This product is not on sale, so no badge shows.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Start a sale" })).toHaveAttribute(
+      "href",
+      `/discounts/new?product=${product.id}`,
+    );
+    cleanup();
+
+    // On sale, the controls are back.
+    render(
+      <SaleBadgeControls
+        theme={themed()}
+        overrides={{}}
+        onChange={vi.fn()}
+        product={{ ...product, sale: { price: 670.5, offerPercent: 10 } }}
+      />,
+    );
+    expect(screen.getByRole("group", { name: "Shows" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Start a sale" })).toBeNull();
+  });
+
   it("offers the sale chip no spot on the price's row, and none of its controls once hidden", () => {
     renderChip({ priceTagPosition: "top-left" });
     const chip = within(document.querySelector<HTMLElement>("[data-sale-badge-controls]")!);

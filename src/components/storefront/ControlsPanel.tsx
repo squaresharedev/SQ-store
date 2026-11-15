@@ -98,7 +98,11 @@ export function ControlsPanel({
   onPlayCelebration,
   shippingPolicy,
   sellerIdentity,
+  saleOnBoard,
 }: {
+  /** Whether any product on the board is on sale, so the sale badge shows
+   *  somewhere (see SaleBadgeControls). Absent (the dev gallery) counts as yes. */
+  saleOnBoard?: boolean;
   theme: StorefrontTheme;
   header: StorefrontHeader;
   onThemeChange: (theme: StorefrontTheme) => void;
@@ -322,6 +326,7 @@ export function ControlsPanel({
           >
             <SaleBadgeControls
               theme={theme}
+              onSale={saleOnBoard}
               onChange={(patch) => onThemeChange(patchThemeCardStyle(theme, patch))}
               afterLook={<ChipScaleControl theme={theme} onChange={onThemeChange} />}
             />
