@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import type { SelectOption } from "@/components/ui/select";
 import { StepUpField } from "@/components/auth/StepUp";
+import { SuccessMark } from "@/components/auth/SuccessMark";
 import { usePlanLimitRedirect } from "@/components/billing/usePlanLimitRedirect";
 import {
   canGrant,
@@ -23,25 +24,33 @@ import {
   ROLE_DESCRIPTIONS,
 } from "@/lib/team/permissions";
 import type { TeamRole } from "@/lib/team/permissions";
-import { inviteMember } from "@/lib/team/actions";
+import { inviteMember, type InviteState } from "@/lib/team/actions";
 import type { ActionState } from "@/lib/errors";
 
-const INITIAL: ActionState = {};
+const INITIAL: InviteState = {};
+
+/** The invite that just went out, as the "sent" view shows it. */
+type SentInvite = NonNullable<InviteState["invited"]>;
 
 export function InviteModal({
   accountOwnerId,
   actorRole,
   open,
   onClose,
+  initialSent = null,
 }: {
   accountOwnerId: string;
   actorRole: TeamRole | null;
   open: boolean;
   onClose: () => void;
+  /** Open on the "sent" view, for the /dev/modals gallery. */
+  initialSent?: SentInvite | null;
 }) {
   const t = useTranslations();
   const [state, formAction, isPending] = useActionState(inviteMember, INITIAL);
-  useActionStateToast(state);
+  // A failure is toasted; a success is not, because the dialog itself turns
+  // into the confirmation (below), right where the eye already is.
+  useActionStateToast(state, { announceSuccess: false });
   const saveResult = useSaveResult(state);
   const toPlansFor = usePlanLimitRedirect();
 
@@ -67,16 +76,72 @@ export function InviteModal({
       description: t(ROLE_DESCRIPTIONS[r]),
     }));
 
-  // Reset the email field once, each time a submit succeeds.
-  const prevSuccess = React.useRef<ActionState["success"]>(undefined);
-  React.useEffect(() => {
-    if (state.success && state.success !== prevSuccess.current) {
+  // A sent invite turns the dialog into its confirmation: the opening mark
+  // becomes the SuccessMark (same glyph, same size, so it lands on it), and
+  // the address it went to is named. Watched by identity, because every
+  // dispatch settles into a fresh state object, so a second invite in a row
+  // shows its own confirmation. The email field empties for "Invite another".
+  const [sent, setSent] = React.useState<SentInvite | null>(initialSent);
+  const [seenState, setSeenState] = React.useState(state);
+  if (state !== seenState) {
+    setSeenState(state);
+    if (state.invited) {
+      setSent(state.invited);
       setEmail("");
-      prevSuccess.current = state.success;
     }
-  }, [state.success]);
+  }
+
+  // Closing ends the confirmation, so the next open starts on a fresh form.
+  const close = () => {
+    setSent(null);
+    onClose();
+  };
 
   if (grantableOptions.length === 0) return null;
+
+  // The same <Modal> at the same spot in both views, so swapping views keeps
+  // the dialog mounted: no flash, no focus thrown back to the page behind.
+  if (sent) {
+    const title = t(
+      sent.emailed
+        ? "Settings.team.inviteModal.sent.title"
+        : "Settings.team.inviteModal.sent.notEmailedTitle",
+    );
+    const body = t(
+      sent.emailed
+        ? "Settings.team.inviteModal.sent.body"
+        : "Settings.team.inviteModal.sent.notEmailedBody",
+      { email: sent.email },
+    );
+    return (
+      <Modal
+        open={open}
+        onClose={close}
+        visual={<SuccessMark kind="invite" size="md" />}
+        title={title}
+        description={body}
+      >
+        <div data-invite-state={sent.emailed ? "sent" : "created"}>
+          {/* The visible header is not a live region, and the mark is
+              decorative: this is what a screen reader hears when the form
+              turns into the confirmation. */}
+          <p role="status" className="sr-only">
+            {title} {body}
+          </p>
+          <ModalActions>
+            <Button type="button" variant="ghost" onClick={() => setSent(null)}>
+              {t("Settings.team.inviteModal.sent.inviteAnother")}
+            </Button>
+            {/* autoFocus: the Send button that held focus is gone with the
+                form, and focus must not fall to the page behind. */}
+            <Button type="button" onClick={close} autoFocus>
+              {t("Common.actions.done")}
+            </Button>
+          </ModalActions>
+        </div>
+      </Modal>
+    );
+  }
 
   // Derive (don't store) the role that actually submits, so it's always one the
   // actor may grant even if `selectedRole` is stale — no effect/setState needed.
@@ -89,7 +154,7 @@ export function InviteModal({
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={close}
       visual={<HeroMark icon={UserPlus} />}
       title={t("Settings.team.inviteModal.title")}
       description={t("Settings.team.inviteModal.description")}
@@ -133,7 +198,7 @@ export function InviteModal({
         <StepUpField id="invite-step-up" state={state} />
 
         <ModalActions>
-          <Button type="button" variant="ghost" onClick={onClose}>
+          <Button type="button" variant="ghost" onClick={close}>
             {t("Common.actions.cancel")}
           </Button>
           <SaveButton

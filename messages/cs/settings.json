@@ -809,7 +809,14 @@
       "emailLabel": "E-mailová adresa",
       "emailPlaceholder": "kolega@example.com",
       "roleLabel": "Role",
-      "sendButton": "Poslat pozvánku"
+      "sendButton": "Poslat pozvánku",
+      "sent": {
+        "title": "Pozvánka odeslána",
+        "body": "Na {email} jsme poslali postup, jak pozvánku přijmout.",
+        "notEmailedTitle": "Pozvánka vytvořena",
+        "notEmailedBody": "Na {email} se nepodařilo poslat e-mail, dejte jim proto vědět sami.",
+        "inviteAnother": "Pozvat další osobu"
+      }
     },
     "inviteRow": {
       "invitedAs": "<store>{storeName}</store> vás zve do role <strong>{role, select, owner {Vlastník} editor {Editor} viewer {Čtenář} other {{role}}}</strong>",

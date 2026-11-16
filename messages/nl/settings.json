@@ -809,7 +809,14 @@
       "emailLabel": "E-mailadres",
       "emailPlaceholder": "collega@example.com",
       "roleLabel": "Rol",
-      "sendButton": "Uitnodiging versturen"
+      "sendButton": "Uitnodiging versturen",
+      "sent": {
+        "title": "Uitnodiging verstuurd",
+        "body": "We hebben {email} gemaild hoe ze kunnen accepteren.",
+        "notEmailedTitle": "Uitnodiging aangemaakt",
+        "notEmailedBody": "We konden {email} niet mailen, dus laat het ze zelf weten.",
+        "inviteAnother": "Nog iemand uitnodigen"
+      }
     },
     "inviteRow": {
       "invitedAs": "<store>{storeName}</store> heeft je uitgenodigd als <strong>{role, select, owner {Eigenaar} editor {Bewerker} viewer {Lezer} other {{role}}}</strong>",

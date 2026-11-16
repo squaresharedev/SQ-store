@@ -156,6 +156,36 @@ export const PRODUCTS: readonly Specimen[] = [
     ),
   },
   {
+    id: "team-invite-sent",
+    group: "Team",
+    label: "Invite sent",
+    kind: "dialog",
+    render: ({ onClose }) => (
+      <InviteModal
+        accountOwnerId="00000000-0000-4000-9000-0000000000b1"
+        actorRole="owner"
+        open
+        onClose={onClose}
+        initialSent={{ email: "sam.rivera@parallelgoods.example", emailed: true }}
+      />
+    ),
+  },
+  {
+    id: "team-invite-not-emailed",
+    group: "Team",
+    label: "Invite created, email failed",
+    kind: "dialog",
+    render: ({ onClose }) => (
+      <InviteModal
+        accountOwnerId="00000000-0000-4000-9000-0000000000b1"
+        actorRole="owner"
+        open
+        onClose={onClose}
+        initialSent={{ email: "sam.rivera@parallelgoods.example", emailed: false }}
+      />
+    ),
+  },
+  {
     id: "team-invited",
     group: "Team",
     label: "You have a team invite",

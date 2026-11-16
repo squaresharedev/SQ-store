@@ -809,7 +809,14 @@
       "emailLabel": "Adres e-mail",
       "emailPlaceholder": "kolega@example.com",
       "roleLabel": "Rola",
-      "sendButton": "Wyślij zaproszenie"
+      "sendButton": "Wyślij zaproszenie",
+      "sent": {
+        "title": "Zaproszenie wysłane",
+        "body": "Wysłaliśmy na {email} instrukcję, jak przyjąć zaproszenie.",
+        "notEmailedTitle": "Zaproszenie utworzone",
+        "notEmailedBody": "Nie udało się wysłać e-maila na {email}, więc daj znać tej osobie.",
+        "inviteAnother": "Zaproś kolejną osobę"
+      }
     },
     "inviteRow": {
       "invitedAs": "<store>{storeName}</store> zaprasza cię jako <strong>{role, select, owner {właściciela} editor {edytora} viewer {przeglądającego} other {{role}}}</strong>",

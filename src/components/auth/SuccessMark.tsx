@@ -1,17 +1,17 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import { MonitorSmartphone, Smartphone } from "lucide-react";
+import { MonitorSmartphone, Smartphone, UserPlus } from "lucide-react";
 import { AnimatedFingerprint } from "@/components/auth/AnimatedFingerprint";
 import { MARK_SIZES, type MarkSize } from "@/components/ui/HeroMark";
 import { DURATION, EASE_ENTRANCE, EASE_STANDARD, POP } from "@/components/ui/motion-tokens";
 import { cn } from "@/lib/utils";
 
 /**
- * The two-factor flow's moment of success, played once on mount: a ring draws
- * itself around the mark, the mark arrives (a passkey's ridges record
- * themselves in; an authenticator app's phone settles in), a check badge pops
- * onto the ring and a ripple leaves it.
+ * A dialog's moment of success, played once on mount: a ring draws itself
+ * around the mark, the mark arrives (a passkey's ridges record themselves in;
+ * any other glyph settles in), a check badge pops onto the ring and a ripple
+ * leaves it. Born in the two-factor flow; a team invite going out uses it too.
  *
  * Mount it exactly when the success happens. Decorative (aria-hidden): the
  * words beside it carry the news, and reduced motion shows the finished mark
@@ -31,12 +31,15 @@ import { cn } from "@/lib/utils";
  */
 const TIMING = { ring: 0.6, glyphAt: 0.15, glyph: 0.4, badgeAt: 0.7, ripple: 0.8 } as const;
 
-/** The glyph for each way through that is not a passkey (which has its own). */
+/** The glyph for each success that is not a passkey (which has its own). Each
+ *  matches the HeroMark its dialog opened with, so the success lands on it. */
 const GLYPHS = {
   /** An authenticator app. */
   app: Smartphone,
   /** An approval from another signed-in device. */
   device: MonitorSmartphone,
+  /** A team invite sent (settings/team/InviteModal). */
+  invite: UserPlus,
 } as const;
 
 export type SuccessKind = "passkey" | keyof typeof GLYPHS;

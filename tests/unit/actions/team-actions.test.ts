@@ -228,6 +228,11 @@ describe("inviteMember - auth / role gates", () => {
 
     expect(result.success).toBeTruthy();
     expect(db.insert).toHaveBeenCalled();
+    // The dialog's "sent" view names the address the invite went to.
+    expect(result.invited).toEqual({
+      email: "someone-else@example.com",
+      emailed: expect.any(Boolean),
+    });
   });
 });
 

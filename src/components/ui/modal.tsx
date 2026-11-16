@@ -238,7 +238,10 @@ export function Modal({
             {description && (
               <p
                 id={descId}
-                className={cn(helpTextClass, "mt-1")}
+                // wrap-anywhere: a sentence naming an address (the invite's
+                // "We've emailed ...") must break the address before it pushes
+                // a phone-width sheet sideways. Ordinary words never break.
+                className={cn(helpTextClass, "mt-1 wrap-anywhere")}
               >
                 {description}
               </p>

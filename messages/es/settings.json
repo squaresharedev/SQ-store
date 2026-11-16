@@ -809,7 +809,14 @@
       "emailLabel": "Correo electrónico",
       "emailPlaceholder": "compi@example.com",
       "roleLabel": "Rol",
-      "sendButton": "Enviar invitación"
+      "sendButton": "Enviar invitación",
+      "sent": {
+        "title": "Invitación enviada",
+        "body": "Hemos explicado por correo a {email} cómo aceptarla.",
+        "notEmailedTitle": "Invitación creada",
+        "notEmailedBody": "No hemos podido escribir a {email}, así que avísale tú.",
+        "inviteAnother": "Invitar a otra persona"
+      }
     },
     "inviteRow": {
       "invitedAs": "<store>{storeName}</store> te invitó como <strong>{role, select, owner {propietario} editor {editor} viewer {lector} other {{role}}}</strong>",

@@ -49,12 +49,16 @@ async function inviteByEmail(ownerPage: Page, email: string, role?: "editor" | "
       .click();
   }
   await ownerPage.getByRole("button", { name: /send invite/i }).click();
+  // The dialog turns into its confirmation, naming the address it went to.
+  const dialog = ownerPage.getByRole("dialog");
+  await expect(dialog.getByRole("heading", { name: /^invite (sent|created)$/i })).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(dialog.getByText(email).first()).toBeVisible();
+  await dialog.getByRole("button", { name: /^done$/i }).click();
+  await expect(dialog).toBeHidden();
+  // And the invite is listed on the page behind it.
   await expect(ownerPage.getByText(email).first()).toBeVisible({ timeout: 15_000 });
-  // Close the invite modal so it doesn't trap focus for later steps.
-  const close = ownerPage.getByRole("button", { name: /^close$/i }).first();
-  if (await close.isVisible().catch(() => false)) {
-    await close.click().catch(() => {});
-  }
 }
 
 test.describe("team & access + notifications", () => {

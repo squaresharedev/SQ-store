@@ -809,7 +809,14 @@
       "emailLabel": "Endereço de e-mail",
       "emailPlaceholder": "colega@example.com",
       "roleLabel": "Função",
-      "sendButton": "Enviar convite"
+      "sendButton": "Enviar convite",
+      "sent": {
+        "title": "Convite enviado",
+        "body": "Explicámos por e-mail a {email} como aceitar.",
+        "notEmailedTitle": "Convite criado",
+        "notEmailedBody": "Não foi possível enviar o e-mail para {email}, por isso avise a pessoa.",
+        "inviteAnother": "Convidar outra pessoa"
+      }
     },
     "inviteRow": {
       "invitedAs": "<store>{storeName}</store> enviou-lhe um convite para a função de <strong>{role, select, owner {proprietário} editor {editor} viewer {leitor} other {{role}}}</strong>",

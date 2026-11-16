@@ -108,10 +108,19 @@ const MEMBERSHIP_RATE_LIMITED: ActionState = failed(
  * says whether the email went, so the inviter knows when to pass the word on
  * themselves.
  */
+/**
+ * The invite form's state. On success it also says who was invited and
+ * whether the email reached them, so the dialog can turn into its "sent" view
+ * naming the address (settings/team/InviteModal).
+ */
+export type InviteState = ActionState & {
+  invited?: { email: string; emailed: boolean };
+};
+
 export async function inviteMember(
-  _prev: ActionState,
+  _prev: InviteState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<InviteState> {
   const user = await getUser();
   if (!user) return SIGNED_OUT;
 
@@ -273,9 +282,12 @@ export async function inviteMember(
   }
 
   revalidatePath(SETTINGS_TEAM_PATH);
-  return succeeded(
-    msg(emailed ? "Settings.team.success.inviteEmailed" : "Settings.team.success.inviteCreated"),
-  );
+  return {
+    ...succeeded(
+      msg(emailed ? "Settings.team.success.inviteEmailed" : "Settings.team.success.inviteCreated"),
+    ),
+    invited: { email: invited_email, emailed },
+  };
 }
 
 /**

@@ -54,15 +54,19 @@ export function useActionErrorToast(): (error: ActionError) => void {
  *
  * Whatever state is present at mount is never announced: that is a page load,
  * not something the user just did.
+ *
+ * `announceSuccess: false` is for a dialog that turns into its own success
+ * view (the invite dialog's "sent" state): the news is already where the eye
+ * is, so a toast would only say it twice. Failures are still toasted.
  */
 export function useActionStateToast(
   state: ActionState | undefined,
-  options: { values?: MessageValues } = {},
+  options: { values?: MessageValues; announceSuccess?: boolean } = {},
 ) {
   const toast = useToast();
   const resolve = useResolveMessage();
   const announced = useRef(state);
-  const { values } = options;
+  const { values, announceSuccess = true } = options;
 
   useEffect(() => {
     if (state === announced.current) return;
@@ -74,8 +78,8 @@ export function useActionStateToast(
       });
       return;
     }
-    if (state.success) toast.success(resolve(state.success, values));
-  }, [state, toast, resolve, values]);
+    if (state.success && announceSuccess) toast.success(resolve(state.success, values));
+  }, [state, toast, resolve, values, announceSuccess]);
 }
 
 /**
