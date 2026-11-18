@@ -191,8 +191,10 @@ describe("WelcomeFlow", () => {
       "tax_business_name",
     ]);
     expect(formData.get("tax_business_name")).toBe("Welcome Studio");
-    // Overview renders the checklist and the gate on the server.
-    await waitFor(() => expect(mockRefresh).toHaveBeenCalled());
+    // Overview renders the checklist and the gate on the server; saveTaxInfo
+    // revalidates it (lib/settings/actions.ts), which re-renders the page in
+    // the action's own response, so no second render is asked for.
+    expect(mockRefresh).not.toHaveBeenCalled();
   });
 
   it("asks for the code the save sent, and a right one ends the dialog", async () => {

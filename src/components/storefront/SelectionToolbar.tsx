@@ -340,6 +340,12 @@ function useAnchorToSelection({
       return insets;
     }
 
+    // Cache of grid cell elements by block key. Re-queried only when the
+    // cached element has left the DOM (data-grid-key attributes are stable
+    // for the lifetime of a block), keeping most frames to a simple
+    // isConnected check rather than a full document.querySelector call.
+    const cellCache = new Map<string, Element>();
+
     function place() {
       if (!frame || !bar) return;
       const area = frame.getBoundingClientRect();
@@ -348,9 +354,18 @@ function useAnchorToSelection({
       let right = -Infinity;
       let bottom = -Infinity;
       for (const key of anchorKeys) {
-        const cell = document.querySelector(
-          `li[data-grid-cell][data-grid-key="${cssEscape(key)}"]`,
-        );
+        let cell = cellCache.get(key);
+        if (!cell || !cell.isConnected) {
+          const found = document.querySelector(
+            `li[data-grid-cell][data-grid-key="${cssEscape(key)}"]`,
+          );
+          if (found) {
+            cellCache.set(key, found);
+            cell = found;
+          } else {
+            cell = undefined;
+          }
+        }
         if (!cell) continue;
         const box = cell.getBoundingClientRect();
         if (box.width <= 0 || box.height <= 0) continue;

@@ -10,7 +10,6 @@ import {
   useTransition,
   type ReactNode,
 } from "react";
-import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useToast } from "@/components/ui/Toast";
 import {
@@ -51,7 +50,6 @@ const LocaleSwitchContext = createContext<LocaleSwitch | null>(null);
  */
 export function LocaleSwitchProvider({ children }: { children: ReactNode }) {
   const locale = useLocale() as Locale;
-  const router = useRouter();
   const toast = useToast();
   const t = useTranslations("LocaleSwitcher");
   const [pending, startTransition] = useTransition();
@@ -69,11 +67,12 @@ export function LocaleSwitchProvider({ children }: { children: ReactNode }) {
         } catch {
           ok = false;
         }
-        if (ok) router.refresh();
-        else setRun((current) => current && { ...current, failed: true });
+        if (!ok) setRun((current) => current && { ...current, failed: true });
+        // The cookie write in setLocale triggers a client-side re-render via
+        // the NEXT_ACTION_REVALIDATED_HEADER; no explicit router.refresh() needed.
       });
     },
-    [locale, run, router],
+    [locale, run],
   );
 
   // Leave once the page behind is in the new language (or the switch failed),

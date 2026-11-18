@@ -287,7 +287,7 @@ function validate(
   const errors: FieldErrors = {};
 
   if (!values.title.trim()) {
-    errors.title = t("form.errors.titleRequired");
+    errors.title = t("errors.titleRequired");
   }
 
   const priceResult = parseFormPriceCents(values.price);
@@ -300,12 +300,12 @@ function validate(
   if (values.trackStock) {
     const trimmedQty = values.stockQuantity.trim();
     if (!trimmedQty) {
-      errors.stockQuantity = t("form.errors.stockRequired");
+      errors.stockQuantity = t("errors.stockRequired");
     } else if (
       !Number.isInteger(Number(trimmedQty)) ||
       Number(trimmedQty) < 0
     ) {
-      errors.stockQuantity = t("form.errors.stockWhole");
+      errors.stockQuantity = t("errors.stockWhole");
     }
   }
 
@@ -315,7 +315,7 @@ function validate(
       !Number.isInteger(Number(trimmedThreshold)) ||
       Number(trimmedThreshold) < 0
     ) {
-      errors.lowStockThreshold = t("form.errors.lowStockWhole");
+      errors.lowStockThreshold = t("errors.lowStockWhole");
     }
   }
 
@@ -324,13 +324,13 @@ function validate(
   // having cleared it rather than a seller who has not answered yet.
   const trimmedMax = values.maxPerOrder.trim();
   if (!trimmedMax) {
-    errors.maxPerOrder = t("form.errors.maxPerOrderRequired", { max: PURCHASE_QUANTITY_MAX });
+    errors.maxPerOrder = t("errors.maxPerOrderRequired", { max: PURCHASE_QUANTITY_MAX });
   } else if (
     !Number.isInteger(Number(trimmedMax)) ||
     Number(trimmedMax) < 1 ||
     Number(trimmedMax) > PURCHASE_QUANTITY_MAX
   ) {
-    errors.maxPerOrder = t("form.errors.maxPerOrderRange", { max: PURCHASE_QUANTITY_MAX });
+    errors.maxPerOrder = t("errors.maxPerOrderRange", { max: PURCHASE_QUANTITY_MAX });
   }
 
   return errors;
@@ -348,28 +348,28 @@ function validatePage(
   // A download with nothing to download: the seller said "digital" and has
   // not added the file yet. Without this the save would quietly store a
   // physical product with no shipping section on screen.
-  if (needsFile) errors.digitalFile = t("form.errors.digitalFileRequired");
+  if (needsFile) errors.digitalFile = t("errors.digitalFileRequired");
   const badgeProblem = validateBadges(badges, t);
   if (badgeProblem) errors.badges = badgeProblem;
   const link = purchaseUrl.trim();
   if (link && !/^https:\/\/[^\s/$.?#].[^\s]*$/i.test(link)) {
-    errors.purchaseUrl = t("form.errors.purchaseUrl");
+    errors.purchaseUrl = t("errors.purchaseUrl");
   }
   // Each message names the ONE thing to fix, in the order a seller would hit
   // them: an unnamed axis, an axis with nothing to pick, then an unnamed
   // choice. The schema refuses all three, but a rejected save that only says
   // "didn't pass validation" is not a fix.
   if (optionGroups.some((group) => !group.name.trim())) {
-    errors.optionGroups = t("form.errors.optionGroupUnnamed");
+    errors.optionGroups = t("errors.optionGroupUnnamed");
   } else if (optionGroups.some((group) => group.options.length === 0)) {
     const empty = optionGroups.find((group) => group.options.length === 0)!;
-    errors.optionGroups = t("form.errors.optionGroupEmpty", {
+    errors.optionGroups = t("errors.optionGroupEmpty", {
       group: empty.name.trim().toLowerCase(),
     });
   } else if (optionGroups.some((group) => group.options.some((option) => !option.name.trim()))) {
-    errors.optionGroups = t("form.errors.optionUnnamed");
+    errors.optionGroups = t("errors.optionUnnamed");
   } else if (optionGroups.some((group) => group.options.length > OPTIONS_PER_GROUP_MAX)) {
-    errors.optionGroups = t("form.errors.optionGroupFull", { max: OPTIONS_PER_GROUP_MAX });
+    errors.optionGroups = t("errors.optionGroupFull", { max: OPTIONS_PER_GROUP_MAX });
   }
   return errors;
 }
@@ -576,7 +576,10 @@ export function ProductForm({
   returnTo?: string | null;
 }) {
   const router = useRouter();
-  const t = useTranslations("Products");
+  const t = useTranslations("Products.form");
+  const tStatus = useTranslations("Products.status");
+  const tPriceField = useTranslations("Products.priceField");
+  const tStockFields = useTranslations("Products.stockFields");
   const locale = useLocale();
   const tCommon = useTranslations("Common.actions");
   const fieldId = useId();
@@ -760,15 +763,15 @@ export function ProductForm({
   const listingFacts = descriptionFacts(
     { optionGroups, details, badges, isDigital },
     {
-      materials: t("form.summary.materials"),
-      madeIn: t("form.summary.madeIn"),
-      care: t("form.summary.care"),
-      contents: t("form.summary.contents"),
-      dimensions: t("form.summary.dimensions"),
-      weight: t("form.summary.weight"),
-      badges: t("form.sections.badges.label"),
-      kind: t("form.kind.legend"),
-      download: t("form.kind.digital"),
+      materials: t("summary.materials"),
+      madeIn: t("summary.madeIn"),
+      care: t("summary.care"),
+      contents: t("summary.contents"),
+      dimensions: t("summary.dimensions"),
+      weight: t("summary.weight"),
+      badges: t("sections.badges.label"),
+      kind: t("kind.legend"),
+      download: t("kind.digital"),
     },
   );
   const [asYouType, setAsYouType] = useState(aiSuggestions && suggestAsYouType && !aiCreditUsed);
@@ -785,8 +788,8 @@ export function ProductForm({
       showActionError(result.error);
       return;
     }
-    toast.success(t("form.ai.asYouTypeOff"), {
-      lines: [t("form.ai.asYouTypeBackOn")],
+    toast.success(t("ai.asYouTypeOff"), {
+      lines: [t("ai.asYouTypeBackOn")],
       onClick: () => requestLeave(BILLING_SETTINGS_AI_PATH),
     });
   }
@@ -926,7 +929,7 @@ export function ProductForm({
   const fixMark = (field: ProductFixField) =>
     fixFields.includes(field) && !awaitingReview && !fixDone(field) ? (
       <span className={cn(flagChipClass, "ml-2")} data-fix-mark={field}>
-        {t("form.moderation.fieldBadge")}
+        {t("moderation.fieldBadge")}
       </span>
     ) : null;
 
@@ -999,7 +1002,7 @@ export function ProductForm({
     const flat = validateDetails(nextDetails, isDigital, t);
     const count = Object.keys(byOption).length;
     if (count > 0) {
-      flat.optionDetails = t("form.errors.versionSpecs", { count });
+      flat.optionDetails = t("errors.versionSpecs", { count });
     }
     return { flat, byOption };
   }
@@ -1036,7 +1039,7 @@ export function ProductForm({
       setErrors((previous) => {
         const next = { ...previous };
         if (file) delete next.digitalFile;
-        else next.digitalFile = t("form.errors.digitalFileRequired");
+        else next.digitalFile = t("errors.digitalFileRequired");
         return next;
       });
     }
@@ -1180,7 +1183,7 @@ export function ProductForm({
         if (!key) continue;
         documentsInput.push({
           key,
-          label: document.label.trim() || t("form.documentFallbackLabel"),
+          label: document.label.trim() || t("documentFallbackLabel"),
         });
       }
       setUpload(null);
@@ -1309,15 +1312,15 @@ export function ProductForm({
       const unplaced = !product && !returnTo;
       toast.success(
         product
-          ? t("form.savedToast", { title: input.title })
-          : t("form.addedToast", { title: input.title }),
+          ? t("savedToast", { title: input.title })
+          : t("addedToast", { title: input.title }),
         {
           lines: [
             // Saved as active but not approved yet: the list will say
             // "Checking", and this says what that means before the seller
             // goes looking.
-            ...(result.checking && input.status === "active" ? [t("form.checkingToast")] : []),
-            ...(unplaced ? [t("form.placeToast")] : []),
+            ...(result.checking && input.status === "active" ? [t("checkingToast")] : []),
+            ...(unplaced ? [t("placeToast")] : []),
           ],
           onClick: unplaced
             ? () => {
@@ -1429,14 +1432,14 @@ export function ProductForm({
 
   /** The required answers not given yet, named as their fields are. */
   const requiredLabels: Record<string, string> = {
-    title: t("form.title"),
-    price: t("priceField.label"),
-    stockQuantity: t("stockFields.inStock"),
-    maxPerOrder: t("stockFields.maxPerOrder"),
+    title: t("title"),
+    price: tPriceField("label"),
+    stockQuantity: tStockFields("inStock"),
+    maxPerOrder: tStockFields("maxPerOrder"),
   };
   const stillNeeded = [
     ...snapshot.requiredMissing.map((field) => requiredLabels[field] ?? field),
-    ...(needsFile ? [t("form.digitalFile")] : []),
+    ...(needsFile ? [t("digitalFile")] : []),
   ];
 
   /** The extras that apply to this product: a download has no safety block. */
@@ -1464,8 +1467,8 @@ export function ProductForm({
     title: resolveMessage(sectionLabel(id)),
     // Media has no description, and so no "?": its three fields each carry
     // their own, and a fourth restating them in the header is noise.
-    description: id === "media" ? "" : t(`form.sections.${id}.description`),
-    about: id === "media" ? "" : t(`form.sections.${id}.about`),
+    description: id === "media" ? "" : t(`sections.${id}.description`),
+    about: id === "media" ? "" : t(`sections.${id}.about`),
     state: sectionInfo[id]?.state ?? ("empty" as const),
     summary: sectionInfo[id] ? summaryText(summaries[id], resolveMessage) : undefined,
     flag: sectionFlag(id),
@@ -1502,10 +1505,10 @@ export function ProductForm({
           <div className={cn("space-y-1.5", fieldFlagClass("image"))} data-fix-field-block="image">
             <div className="flex items-center gap-1.5">
               <label htmlFor={`${fieldId}-image`} className={labelClass}>
-                {t("form.displayImage")}
+                {t("displayImage")}
               </label>
-              <InfoTip label={t("form.displayImageAbout")}>
-                {t("form.displayImageHelp")}
+              <InfoTip label={t("displayImageAbout")}>
+                {t("displayImageHelp")}
               </InfoTip>
               {fixMark("image")}
             </div>
@@ -1513,7 +1516,7 @@ export function ProductForm({
               inputId={`${fieldId}-image`}
               initialPreviewUrl={product?.imageUrl ?? null}
               onFileChange={changeCover}
-              prompt={t(isTouch ? "form.coverPromptTouch" : "form.coverPrompt")}
+              prompt={t(isTouch ? "coverPromptTouch" : "coverPrompt")}
               frameClassName="aspect-[4/3] rounded-none sm:aspect-square"
             />
           </div>
@@ -1522,7 +1525,7 @@ export function ProductForm({
             <div className={cn("space-y-1.5", fieldFlagClass("title"))} data-fix-field-block="title">
               <div className="flex items-center">
                 <label htmlFor={`${fieldId}-title`} className={labelClass}>
-                  {t("form.title")}
+                  {t("title")}
                 </label>
                 <RequiredMark />
                 {fixMark("title")}
@@ -1533,7 +1536,7 @@ export function ProductForm({
                 type="text"
                 value={values.title}
                 onChange={(event) => updateField("title", event.target.value)}
-                placeholder={t("form.titlePlaceholder")}
+                placeholder={t("titlePlaceholder")}
                 required
                 aria-invalid={errors.title ? true : undefined}
                 aria-describedby={errors.title ? titleErrorId : undefined}
@@ -1579,16 +1582,16 @@ export function ProductForm({
             >
               <div className="flex items-center gap-1.5">
                 <label htmlFor={`${fieldId}-description`} className={labelClass}>
-                  {t("form.description")}{" "}
+                  {t("description")}{" "}
                   <span className="font-normal text-muted-foreground">
-                    {t("form.optional")}
+                    {t("optional")}
                   </span>
                   {fixMark("description")}
                 </label>
                 {/* The chip and the grey words are one perk on one credit:
                     said once, where both of them live. */}
                 {aiSuggestions && (
-                  <InfoTip label={t("form.ai.about")}>{t("form.ai.aboutBody")}</InfoTip>
+                  <InfoTip label={t("ai.about")}>{t("ai.aboutBody")}</InfoTip>
                 )}
               </div>
               <SuggestingTextarea
@@ -1597,15 +1600,15 @@ export function ProductForm({
                 onChange={(description) => updateField("description", description)}
                 suggest={suggestNextWords}
                 labels={{
-                  idle: t("form.ai.asYouTypeIdle"),
-                  offered: t("form.ai.asYouTypeOffered"),
-                  accept: t("form.ai.asYouTypeAccept"),
-                  announce: t("form.ai.asYouTypeAnnounce"),
-                  turnOff: t("form.ai.asYouTypeTurnOff"),
+                  idle: t("ai.asYouTypeIdle"),
+                  offered: t("ai.asYouTypeOffered"),
+                  accept: t("ai.asYouTypeAccept"),
+                  announce: t("ai.asYouTypeAnnounce"),
+                  turnOff: t("ai.asYouTypeTurnOff"),
                 }}
                 onTurnOff={() => void turnOffAsYouType()}
                 rows={3}
-                placeholder={t("form.descriptionPlaceholder")}
+                placeholder={t("descriptionPlaceholder")}
                 data-product-field="description"
                 className={cn(fieldBaseClass, "resize-y")}
               />
@@ -1636,7 +1639,7 @@ export function ProductForm({
       >
         <ChoiceCards<ProductKind>
           name={`${fieldId}-kind`}
-          legend={t("form.kind.legend")}
+          legend={t("kind.legend")}
           legendHidden
           variant="showcase"
           columns={2}
@@ -1647,14 +1650,14 @@ export function ProductForm({
           options={[
             {
               value: "physical",
-              label: t("form.kind.physical"),
-              hint: t("form.kind.physicalHint"),
+              label: t("kind.physical"),
+              hint: t("kind.physicalHint"),
               glyph: Package,
             },
             {
               value: "digital",
-              label: t("form.kind.digital"),
-              hint: t("form.kind.digitalHint"),
+              label: t("kind.digital"),
+              hint: t("kind.digitalHint"),
               glyph: FileDown,
             },
           ]}
@@ -1667,11 +1670,11 @@ export function ProductForm({
           >
             <div className="flex items-center gap-1.5">
               <label htmlFor={`${fieldId}-file`} className={labelClass}>
-                {t("form.digitalFile")}
+                {t("digitalFile")}
               </label>
               <RequiredMark />
-              <InfoTip label={t("form.digitalFileAbout")}>
-                {t("form.digitalFileHelp")}
+              <InfoTip label={t("digitalFileAbout")}>
+                {t("digitalFileHelp")}
               </InfoTip>
               {fixMark("file")}
             </div>
@@ -1705,8 +1708,8 @@ export function ProductForm({
           >
             <div className="flex items-center gap-1.5">
               <h3 className={labelClass}>{resolveMessage(sectionLabel("shipping"))}</h3>
-              <InfoTip label={t("form.sections.shipping.about")}>
-                {t("form.sections.shipping.description")}
+              <InfoTip label={t("sections.shipping.about")}>
+                {t("sections.shipping.description")}
               </InfoTip>
               {/* The same summary a section header carries ("Store terms"),
                   so the block says which terms apply at a glance. */}
@@ -1740,7 +1743,7 @@ export function ProductForm({
             data-product-reveal="safety"
           >
             <ShieldCheck className="size-3.5" strokeWidth={2} aria-hidden="true" />
-            {t("form.safetyPrompt")}
+            {t("safetyPrompt")}
           </button>
         )}
 
@@ -1755,10 +1758,10 @@ export function ProductForm({
           >
             <div className="flex items-center gap-1.5">
               <label htmlFor={`${fieldId}-purchase`} className={labelClass}>
-                {t("form.purchaseLink")}
+                {t("purchaseLink")}
               </label>
-              <InfoTip label={t("form.purchaseLinkAbout")}>
-                {t("form.purchaseLinkHelp", { checkout: String(checkoutOpen) })}
+              <InfoTip label={t("purchaseLinkAbout")}>
+                {t("purchaseLinkHelp", { checkout: String(checkoutOpen) })}
               </InfoTip>
               {fixMark("purchaseLink")}
             </div>
@@ -1768,7 +1771,7 @@ export function ProductForm({
               inputMode="url"
               value={purchaseUrl}
               onChange={(event) => updatePurchaseUrl(event.target.value)}
-              placeholder={t("form.purchaseLinkPlaceholder")}
+              placeholder={t("purchaseLinkPlaceholder")}
               spellCheck={false}
               aria-invalid={errors.purchaseUrl ? true : undefined}
               aria-describedby={errors.purchaseUrl ? purchaseErrorId : undefined}
@@ -1792,7 +1795,7 @@ export function ProductForm({
             data-product-reveal="purchaseUrl"
           >
             <Link2 className="size-3.5" strokeWidth={2} aria-hidden="true" />
-            {t("form.purchaseLinkAdd")}
+            {t("purchaseLinkAdd")}
           </button>
         )}
       </FormSection>
@@ -1966,7 +1969,7 @@ export function ProductForm({
         <div className="space-y-3">
           <ChoiceCards<ProductStatus>
             name={`${fieldId}-status`}
-            legend={t("form.statusLabel")}
+            legend={t("statusLabel")}
             legendHidden
             variant="tiles"
             sharp
@@ -1977,8 +1980,8 @@ export function ProductForm({
             fieldsetData={{ "data-product-field": "status", "data-product-value": values.status }}
             options={STATUS_ORDER.map((status) => ({
               value: status,
-              label: t(`status.${status}`),
-              hint: t(`form.visibility.${status}Hint`),
+              label: tStatus(`${status}`),
+              hint: t(`visibility.${status}Hint`),
               icon:
                 status === "active" ? (
                   <HeroMark icon={Store} badge={Check} tone="success" />
@@ -2002,7 +2005,7 @@ export function ProductForm({
           {canPublish && (
             <p className={cn(infoTextClass, "flex items-start gap-1.5")} data-product-buy-button={buyButton}>
               <MousePointerClick className="mt-0.5 size-3.5 shrink-0" strokeWidth={2} aria-hidden="true" />
-              <span>{t("form.visibility.buyButton", { kind: buyButton, host: buyLink?.host ?? "" })}</span>
+              <span>{t("visibility.buyButton", { kind: buyButton, host: buyLink?.host ?? "" })}</span>
             </p>
           )}
         </div>
@@ -2026,7 +2029,7 @@ export function ProductForm({
           >
             <div className="flex items-center justify-between gap-3">
               <span>
-                {t("form.problems", { count: allProblems.length })}
+                {t("problems", { count: allProblems.length })}
               </span>
               {firstErrField && (
                 <button
@@ -2034,7 +2037,7 @@ export function ProductForm({
                   onClick={() => focusProductField(firstErrField)}
                   className="shrink-0 font-medium underline underline-offset-2 hover:no-underline"
                 >
-                  {t("form.jumpToFirst")}
+                  {t("jumpToFirst")}
                 </button>
               )}
             </div>
@@ -2051,8 +2054,8 @@ export function ProductForm({
             <div className="flex items-center justify-between gap-3">
               <span className={helpTextClass}>
                 {upload.fraction === null
-                  ? t("form.processing", { what: uploadNoun })
-                  : t("form.uploading", { what: uploadNoun })}
+                  ? t("processing", { what: uploadNoun })
+                  : t("uploading", { what: uploadNoun })}
               </span>
               {upload.fraction !== null && (
                 <span className="font-mono text-xs tabular-nums text-muted-foreground">
@@ -2064,8 +2067,8 @@ export function ProductForm({
               value={upload.fraction}
               label={
                 upload.fraction === null
-                  ? t("form.processingLabel", { what: uploadNoun })
-                  : t("form.uploadingLabel", { what: uploadNoun })
+                  ? t("processingLabel", { what: uploadNoun })
+                  : t("uploadingLabel", { what: uploadNoun })
               }
             />
           </div>
@@ -2092,13 +2095,13 @@ export function ProductForm({
             {stillNeeded.length === 0 ? (
               <>
                 <Check className="size-4 shrink-0 text-success" strokeWidth={2.5} aria-hidden="true" />
-                {t("form.ready")}
+                {t("ready")}
               </>
             ) : (
               <>
                 <Plus className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" />
                 <span className="truncate">
-                  {t("form.stillNeeded", {
+                  {t("stillNeeded", {
                     fields: formatList(stillNeeded, locale, { englishSeparator: ", " }),
                   })}
                 </span>
@@ -2121,10 +2124,10 @@ export function ProductForm({
           >
             {/* A draft says so on the button: Save is never a silent publish. */}
             {values.status === "draft"
-              ? t("form.saveDraft")
+              ? t("saveDraft")
               : product
-                ? t("form.saveChanges")
-                : t("form.saveProduct")}
+                ? t("saveChanges")
+                : t("saveProduct")}
           </SaveButton>
         </div>
       </div>
@@ -2134,8 +2137,8 @@ export function ProductForm({
           open={reviewPromptOpen}
           onClose={keepEditing}
           visual={<HeroMark icon={Send} />}
-          title={t("form.moderation.reviewPrompt.title")}
-          description={t("form.moderation.reviewPrompt.body")}
+          title={t("moderation.reviewPrompt.title")}
+          description={t("moderation.reviewPrompt.body")}
         >
           <div className="flex flex-col gap-4" data-review-prompt="">
             {reviewError && <ActionErrorNotice error={reviewError} />}
@@ -2146,7 +2149,7 @@ export function ProductForm({
                 disabled={reviewPending}
                 className={cn(ghostButtonClass, "whitespace-nowrap")}
               >
-                {t("form.moderation.reviewPrompt.keepEditing")}
+                {t("moderation.reviewPrompt.keepEditing")}
               </button>
               <button
                 type="button"
@@ -2155,7 +2158,7 @@ export function ProductForm({
                 className={cn(primaryButtonClass, "whitespace-nowrap")}
                 data-review-prompt-send=""
               >
-                {reviewPending ? tCommon("sending") : t("form.moderation.reviewPrompt.send")}
+                {reviewPending ? tCommon("sending") : t("moderation.reviewPrompt.send")}
               </button>
             </ModalActions>
           </div>
@@ -2164,14 +2167,14 @@ export function ProductForm({
 
       <UnsavedChangesDialog
         open={leaveGuard.promptOpen}
-        title={t("form.discard.title")}
+        title={t("discard.title")}
         description={
-          product ? t("form.discard.editDescription") : t("form.discard.newDescription")
+          product ? t("discard.editDescription") : t("discard.newDescription")
         }
-        saveLabel={t("form.discard.saveAndLeave")}
+        saveLabel={t("discard.saveAndLeave")}
         savingLabel={tCommon("saving")}
-        discardLabel={t("form.discard.discard")}
-        stayLabel={t("form.discard.keepEditing")}
+        discardLabel={t("discard.discard")}
+        stayLabel={t("discard.keepEditing")}
         saving={submitting}
         onSave={handleSaveAndLeave}
         onDiscard={leaveGuard.leave}

@@ -9,7 +9,7 @@
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
-import { readAccountBilling, readDirectSales30d } from "@/lib/billing/account-plan";
+import { getAccountBilling, readDirectSales30d } from "@/lib/billing/account-plan";
 import { billingProvider } from "@/lib/billing/availability";
 import { getPlanPrices } from "@/lib/billing/catalog";
 import type { PlanPrices } from "@/lib/billing/fees";
@@ -72,7 +72,7 @@ export async function getPricingContext(source?: PricingSource | null): Promise<
   // Every member can see the plan their store is on (store.read is every role).
   if (!can(account.role, "store.read")) return { ok: false, reason: "signed_out" };
 
-  const [billing, prices] = await Promise.all([readAccountBilling(account.accountId), getPlanPrices()]);
+  const [billing, prices] = await Promise.all([getAccountBilling(account.accountId), getPlanPrices()]);
   // No prices, no page: a plan shown at a guessed price is worse than none.
   if (!billing.ok || !prices) return { ok: false, reason: "unavailable" };
 

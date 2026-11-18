@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { ShieldAlert } from "lucide-react";
 import { ConsentForm } from "@/components/agent/ConsentForm";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
-import { StepUpProvider } from "@/components/auth/StepUp";
+import { StepUpProvider } from "@/components/auth/StepUpProvider";
 import Link from "@/components/ui/AppLink";
 import { HeroMark } from "@/components/ui/HeroMark";
 import { buttonClassName } from "@/components/ui/button";

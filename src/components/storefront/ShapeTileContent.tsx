@@ -6,7 +6,7 @@ import {
   type ShapeBlock,
   type ShapeKind,
 } from "@/types/storefront";
-import { isStrictHexColor } from "@/lib/validation/storefront";
+import { isStrictHexColor } from "@/lib/validation/predicates";
 import { cn } from "@/lib/utils";
 import { SHAPE_SPECS } from "./shape-specs";
 import { defaultRoundness, shapePath, supportsRoundness } from "./shape-geometry";

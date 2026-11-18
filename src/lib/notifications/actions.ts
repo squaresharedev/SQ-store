@@ -156,7 +156,7 @@ export async function markNotificationRead(
   if (!user) return { ok: false, unreadCount: 0 };
 
   const parsed = markReadSchema.safeParse({ id });
-  if (!parsed.success) return { ok: false, unreadCount: await getUnreadCount() };
+  if (!parsed.success) return { ok: false, unreadCount: await getUnreadCount(user) };
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -168,7 +168,7 @@ export async function markNotificationRead(
     // future policy slip would let a guessed UUID mark someone else's row read.
     .eq("user_id", user.id);
 
-  return { ok: !error, unreadCount: await getUnreadCount() };
+  return { ok: !error, unreadCount: await getUnreadCount(user) };
 }
 
 /** Mark every unread notification read for the current user. */

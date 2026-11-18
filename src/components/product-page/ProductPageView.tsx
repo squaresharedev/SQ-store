@@ -20,7 +20,6 @@ import {
 } from "@/types/storefront";
 import { resolveCtaTarget } from "./cta-target";
 import { DocumentsList } from "./DocumentsList";
-import { BadgeDropZone } from "./BadgeDrag";
 import { PhotoBadges, ProductBadges } from "./ProductBadges";
 import { ProductCta } from "./ProductCta";
 import { ProductDescription } from "./ProductDescription";
@@ -84,6 +83,7 @@ export function ProductPageView({
   initialAddOns = NO_ADD_ONS,
   via = null,
   reviews = null,
+  wrapBadges,
 }: {
   page: ProductPageData;
   mode: "public" | "preview";
@@ -102,6 +102,11 @@ export function ProductPageView({
    *  unknown or unreadable, which leaves the section out rather than showing
    *  an empty state that might not be true. */
   reviews?: ProductReviews | null;
+  /** Optional wrapper for badge zones: the editor passes a BadgeDropZone so
+   *  dragged badges can land; the buyer's page and public route leave it
+   *  unset (identity, renders the node as-is). Keeping BadgeDropZone out of
+   *  this module removes it from buyer-page bundles. */
+  wrapBadges?: (kind: "photo" | "beside", node: ReactNode) => ReactNode;
 }) {
   const { storefront, product } = page;
   const { theme, productPage, shippingPolicy, seller } = storefront;
@@ -170,10 +175,9 @@ export function ProductPageView({
   const badges = product.details.badges ?? [];
   const besideBadges = badges.filter((badge) => !isOnPhoto(badge));
   const photoBadges = badges.filter(isOnPhoto);
-  // In the editor each of the two places is also where a dragged badge can
-  // land (BadgeDrag); a buyer's page draws the badges and nothing else.
-  const movable = (kind: "photo" | "beside", node: ReactNode) =>
-    preview ? <BadgeDropZone kind={kind}>{node || null}</BadgeDropZone> : node;
+  // In the editor each badge zone is also a drag target (see BadgeDrag in
+  // ProductPageArtboard); a buyer's page draws the badges as plain markup.
+  const movable = wrapBadges ?? ((_kind: "photo" | "beside", node: ReactNode) => node);
 
   const ink = resolveInk(theme, productPage);
   // The buy button's fill, roundness and outline, resolved ONCE for both the

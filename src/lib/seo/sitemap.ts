@@ -74,6 +74,25 @@ function inRuns(ids: readonly string[]): string[][] {
 }
 
 /**
+ * Run `tasks` with at most `concurrency` in flight at a time. Returns all
+ * results in the same order as the input, or rejects on the first failure
+ * (same fail-fast behaviour as Promise.all).
+ */
+async function pooled<T>(tasks: readonly (() => Promise<T>)[], concurrency: number): Promise<T[]> {
+  const results: T[] = new Array(tasks.length);
+  let next = 0;
+  async function worker(): Promise<void> {
+    while (next < tasks.length) {
+      const i = next++;
+      results[i] = await tasks[i]!();
+    }
+  }
+  const pool = Array.from({ length: Math.min(concurrency, tasks.length) }, worker);
+  await Promise.all(pool);
+  return results;
+}
+
+/**
  * Every page that renders and may be indexed: storefronts by id, each followed
  * by its products in the order its board shows them. Null when a read failed,
  * so the caller can answer "not right now" instead of an empty list.
@@ -82,17 +101,22 @@ export async function listIndexablePages(
   admin: ReturnType<typeof createAdminClient>,
 ): Promise<SitemapPage[] | null> {
   // 1. Storefronts whose product pages are on and open to search engines.
+  //    Keyset pagination on id: advances past the last seen id rather than
+  //    using offset arithmetic, which is O(n^2) on large tables.
   const listings: OpenListing[] = [];
-  for (let start = 0; ; ) {
-    const { data, error } = await admin
+  // The first page has NO cursor: ids are uuids, and `id > ''` is not a
+  // filter Postgres accepts ("invalid input syntax for type uuid"), so a
+  // starting cursor of "" failed every sitemap request.
+  for (let last: string | null = null; ; ) {
+    let read = admin
       .from("storefronts")
       .select("id, owner_id, config, moderation_status, updated_at")
       // Narrows the read; openStorefront below decides. A config that never
       // stored the choice stays out of search by default, so skipping it here
       // agrees with the page.
-      .filter("config->productPage->>allowIndexing", "eq", "true")
-      .order("id")
-      .range(start, start + STOREFRONTS_PER_READ - 1);
+      .filter("config->productPage->>allowIndexing", "eq", "true");
+    if (last !== null) read = read.gt("id", last);
+    const { data, error } = await read.order("id").limit(STOREFRONTS_PER_READ);
     if (error) {
       console.error("[sitemap] storefront read failed", error.message);
       return null;
@@ -112,15 +136,20 @@ export async function listIndexablePages(
         productIds: [...new Set(productIds)],
       });
     }
-    start += rows.length;
+    last = rows[rows.length - 1]!.id;
   }
   if (listings.length === 0) return [];
 
   // 2. Their sellers, through the read side of the publish gate. A seller with
-  //    no row is a seller who has disclosed nothing.
+  //    no row is a seller who has disclosed nothing. Runs are issued
+  //    concurrently (up to 6 in flight) rather than sequentially.
   const sellers = new Set<string>();
-  for (const ids of inRuns([...new Set(listings.map((listing) => listing.ownerId))])) {
-    const { data, error } = await admin.from("profiles").select(`id, ${TRADER_GATE_SELECT}`).in("id", ids);
+  const ownerRuns = inRuns([...new Set(listings.map((listing) => listing.ownerId))]);
+  const profileResults = await pooled(
+    ownerRuns.map((ids) => async () => admin.from("profiles").select(`id, ${TRADER_GATE_SELECT}`).in("id", ids)),
+    6,
+  );
+  for (const { data, error } of profileResults) {
     if (error) {
       console.error("[sitemap] seller identity read failed", error.message);
       return null;
@@ -132,14 +161,17 @@ export async function listIndexablePages(
   const listed = listings.filter((listing) => sellers.has(listing.ownerId));
 
   // 3. Their tiles' products: active and not taken down. Whose they are is
-  //    asked per storefront below, as the product page asks it.
+  //    asked per storefront below, as the product page asks it. Runs are
+  //    issued concurrently (up to 6 in flight) rather than sequentially.
   const products = new Map<string, ProductRow>();
-  for (const ids of inRuns([...new Set(listed.flatMap((listing) => listing.productIds))])) {
-    const { data, error } = await admin
-      .from("products")
-      .select("id, owner_id, moderation_status, updated_at")
-      .in("id", ids)
-      .eq("status", "active");
+  const productRuns = inRuns([...new Set(listed.flatMap((listing) => listing.productIds))]);
+  const productResults = await pooled(
+    productRuns.map((ids) => async () =>
+      admin.from("products").select("id, owner_id, moderation_status, updated_at").in("id", ids).eq("status", "active"),
+    ),
+    6,
+  );
+  for (const { data, error } of productResults) {
     if (error) {
       console.error("[sitemap] product read failed", error.message);
       return null;

@@ -93,7 +93,10 @@ beforeEach(() => {
 
 describe("GET /api/search/snapshot — gates", () => {
   it("401 when signed out, before any query runs", async () => {
+    // The route uses getActiveAccount() as the single auth gate; mocking both
+    // matches a real sign-out where both return null.
     getUser.mockResolvedValue(null);
+    getActiveAccount.mockResolvedValue(null);
     const res = await GET();
     expect(res.status).toBe(401);
     expect(tableCalls).toHaveLength(0);

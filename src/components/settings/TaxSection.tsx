@@ -162,14 +162,16 @@ export function TaxSection({
   /** Where "Continue to your storefront" goes once these details are saved. */
   continueHref: string;
 }) {
-  const t = useTranslations("Settings");
+  const t = useTranslations("Settings.tax");
+  const tVerif = useTranslations("Settings.contactVerification");
+  const tSettings = useTranslations();
   const { countries, countryName } = useOperatingCountries();
   // "" (not set) is a real choice, so it leads the list. Worded as a plain
   // empty state, not as declining: the US and Canada are on the list, and an
   // unset country makes product pages state EU buyer rights (mayOweEuRights).
   const countryOptions: readonly SelectOption<string>[] = useMemo(
     () => [
-      { value: "", label: t("tax.countryUnset") },
+      { value: "", label: t("countryUnset") },
       ...countries.map((c) => ({ value: c.code, label: c.name })),
     ],
     [countries, t],
@@ -212,8 +214,8 @@ export function TaxSection({
 
   return (
     <SettingsCard
-      title={t("tax.cardTitle")}
-      description={t("tax.cardDescription")}
+      title={t("cardTitle")}
+      description={t("cardDescription")}
     >
       {/* THE GATE, STATED WHERE IT IS RESOLVED. The three starred fields are
           what lib/settings/trader-identity.ts requires before anything of this
@@ -225,12 +227,12 @@ export function TaxSection({
           would have to go and find. */}
       <div className="mb-4 rounded-md border border-border bg-muted/40 px-4 py-3">
         <p className="font-inter text-sm text-foreground">
-          {t.rich("tax.gate.required", {
+          {t.rich("gate.required", {
             strong: (chunks) => <span className="font-medium">{chunks}</span>,
           })}
         </p>
         <p className={`${helpTextClass} mt-1`}>
-          {t.rich("tax.gate.privacyNoteLinked", {
+          {t.rich("gate.privacyNoteLinked", {
             link: (chunks) => (
               <a
                 href={LEGAL_LINKS.privacy.href}
@@ -255,11 +257,11 @@ export function TaxSection({
         <div id="business-name" className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1.5">
             <Label htmlFor="tax_business_name">
-              {t("tax.fields.businessName.label")}
+              {t("fields.businessName.label")}
               <RequiredMark />
             </Label>
-            <InfoTip label={t("tax.fields.businessName.tipLabel")}>
-              {t("tax.fields.businessName.tipBody")}
+            <InfoTip label={t("fields.businessName.tipLabel")}>
+              {t("fields.businessName.tipBody")}
             </InfoTip>
           </span>
           <Input
@@ -267,7 +269,7 @@ export function TaxSection({
             name="tax_business_name"
             value={businessName}
             onChange={(e) => setBusinessName(e.target.value)}
-            placeholder={t("tax.fields.businessName.placeholder")}
+            placeholder={t("fields.businessName.placeholder")}
             maxLength={200}
             autoComplete="organization"
             aria-required="true"
@@ -277,11 +279,11 @@ export function TaxSection({
         <div id="address" className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1.5">
             <Label htmlFor="seller_address">
-              {t("tax.fields.address.label")}
+              {t("fields.address.label")}
               <RequiredMark />
             </Label>
-            <InfoTip label={t("tax.fields.address.tipLabel")}>
-              {t("tax.fields.address.tipBody")}
+            <InfoTip label={t("fields.address.tipLabel")}>
+              {t("fields.address.tipBody")}
             </InfoTip>
           </span>
           <Textarea
@@ -289,7 +291,7 @@ export function TaxSection({
             name="seller_address"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            placeholder={t("tax.fields.address.placeholder")}
+            placeholder={t("fields.address.placeholder")}
             maxLength={SELLER_FIELD_MAX.address}
             rows={3}
             aria-required="true"
@@ -299,11 +301,11 @@ export function TaxSection({
         <div id="contact-email" className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1.5">
             <Label htmlFor="seller_email">
-              {t("tax.fields.email.label")}
+              {t("fields.email.label")}
               <RequiredMark />
             </Label>
-            <InfoTip label={t("tax.fields.email.tipLabel")}>
-              {t("tax.fields.email.tipBody")}
+            <InfoTip label={t("fields.email.tipLabel")}>
+              {t("fields.email.tipBody")}
             </InfoTip>
           </span>
           <Input
@@ -312,7 +314,7 @@ export function TaxSection({
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder={t("tax.fields.email.placeholder")}
+            placeholder={t("fields.email.placeholder")}
             maxLength={254}
             autoComplete="email"
             aria-required="true"
@@ -321,15 +323,15 @@ export function TaxSection({
           {/* Said before the first save: once an address is saved, the code
               box below takes over and says what is left to do. */}
           {verification.email && savedEmail.trim() === "" && (
-            <p className={helpTextClass}>{t("tax.fields.email.codeHint")}</p>
+            <p className={helpTextClass}>{t("fields.email.codeHint")}</p>
           )}
         </div>
 
         <div id="vat" className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1.5">
-            <Label htmlFor="tax_vat_id">{t("tax.fields.vatId.label")}</Label>
-            <InfoTip label={t("tax.fields.vatId.tipLabel")}>
-              {t("tax.fields.vatId.tipBody")}
+            <Label htmlFor="tax_vat_id">{t("fields.vatId.label")}</Label>
+            <InfoTip label={t("fields.vatId.tipLabel")}>
+              {t("fields.vatId.tipBody")}
             </InfoTip>
           </span>
           <Input
@@ -337,7 +339,7 @@ export function TaxSection({
             name="tax_vat_id"
             value={vatId}
             onChange={(e) => setVatId(e.target.value)}
-            placeholder={t("tax.fields.vatId.placeholder")}
+            placeholder={t("fields.vatId.placeholder")}
             maxLength={32}
             disabled={isPending}
           />
@@ -348,8 +350,8 @@ export function TaxSection({
           {vatWarning && (
             <p className={helpTextClass} aria-live="polite">
               {vatWarning.kind === "noCountry"
-                ? t("tax.vatAdvisory.noCountry", { issuer: vatWarning.issuer })
-                : t("tax.vatAdvisory.mismatch", {
+                ? t("vatAdvisory.noCountry", { issuer: vatWarning.issuer })
+                : t("vatAdvisory.mismatch", {
                     issuer: vatWarning.issuer,
                     selected: vatWarning.selected,
                   })}
@@ -357,7 +359,7 @@ export function TaxSection({
           )}
         </div>
         <div id="country" className="flex flex-col gap-1.5">
-          <Label htmlFor="tax_country">{t("tax.fields.country.label")}</Label>
+          <Label htmlFor="tax_country">{t("fields.country.label")}</Label>
           <input type="hidden" name="tax_country" value={countryCode} />
           <Select
             id="tax_country"
@@ -366,13 +368,13 @@ export function TaxSection({
             onChange={setCountryCode}
             disabled={isPending}
           />
-          <p className={helpTextClass}>{t("tax.fields.country.hint")}</p>
+          <p className={helpTextClass}>{t("fields.country.hint")}</p>
         </div>
         <div id="phone" className="flex flex-col gap-1.5">
           <span className="flex items-center gap-1.5">
-            <Label htmlFor="seller_phone">{t("tax.fields.phone.label")}</Label>
-            <InfoTip label={t("tax.fields.phone.tipLabel")}>
-              {t("tax.fields.phone.tipBody")}
+            <Label htmlFor="seller_phone">{t("fields.phone.label")}</Label>
+            <InfoTip label={t("fields.phone.tipLabel")}>
+              {t("fields.phone.tipBody")}
             </InfoTip>
           </span>
           <Input
@@ -381,12 +383,12 @@ export function TaxSection({
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder={t("tax.fields.phone.placeholder")}
+            placeholder={t("fields.phone.placeholder")}
             maxLength={SELLER_FIELD_MAX.phone}
             autoComplete="tel"
             disabled={isPending}
           />
-          <p className={helpTextClass}>{t("tax.fields.phone.restriction")}</p>
+          <p className={helpTextClass}>{t("fields.phone.restriction")}</p>
         </div>
         <StepUpField id="business-details" state={state} />
         <div className="flex flex-wrap items-center gap-3">
@@ -399,12 +401,12 @@ export function TaxSection({
           {justSaved &&
             (confirmEmailNext ? (
               <a href={`#${CONFIRM_CONTACT_ANCHOR}`} className={cn(secondaryButtonClass, "w-fit")}>
-                {t("confirmEmailNext")}
+                {tSettings("Settings.confirmEmailNext")}
                 <ArrowDown className="size-4" strokeWidth={2} aria-hidden />
               </a>
             ) : (
               <Link href={continueHref} className={cn(secondaryButtonClass, "w-fit")}>
-                {t("continueToStorefront")}
+                {tSettings("Settings.continueToStorefront")}
                 <ArrowRight
                   className={cn("size-4", iconNudgeRightClass)}
                   strokeWidth={2}
@@ -426,9 +428,9 @@ export function TaxSection({
         >
           <div>
             <h3 id="confirm-contact-heading" className={strongLabelClass}>
-              {t("contactVerification.heading")}
+              {tVerif("heading")}
             </h3>
-            <p className={`${helpTextClass} mt-1`}>{t("contactVerification.description")}</p>
+            <p className={`${helpTextClass} mt-1`}>{tVerif("description")}</p>
           </div>
           {proveEmail && (
             <ContactVerification
@@ -456,7 +458,7 @@ export function TaxSection({
       {/* Buyers see the bio too, but it is written in Account settings: said
           at the foot of the details buyers see, so nobody hunts for it here. */}
       <p className={`${helpTextClass} mt-6`}>
-        {t.rich("tax.bioHint", {
+        {t.rich("bioHint", {
           link: (chunks) => (
             <Link href={ACCOUNT_BIO_PATH} className={inlineLinkClass}>
               {chunks}

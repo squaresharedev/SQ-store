@@ -25,8 +25,11 @@ vi.mock("@/lib/rate-limit", async (importOriginal) => ({
 }));
 
 const getOrderByIdMock = vi.fn();
+const getOrderByIdWithEmailFieldsMock = vi.fn();
 vi.mock("@/lib/orders/queries", () => ({
   getOrderById: (...args: unknown[]) => getOrderByIdMock(...args),
+  getOrderByIdWithEmailFields: (...args: unknown[]) => getOrderByIdWithEmailFieldsMock(...args),
+  isProviderPayment: (ref: unknown) => typeof ref === "string" && ref.startsWith("pi_"),
 }));
 
 const sendShippedEmailMock = vi.fn();
@@ -46,17 +49,14 @@ vi.mock("@/lib/settings/seller-identity", () => ({
   getSellerIdentity: (...args: unknown[]) => getSellerIdentityMock(...args),
 }));
 
-// The request client: the RPC, and the one read of the buyer's language and
-// the storefront their order page lives under.
+// The request client: the RPC only (the separate buyer_locale/storefront_id
+// read has been merged into getOrderByIdWithEmailFields, so no DB chain mock
+// is needed here). When identity.businessName is absent, the action calls
+// supabase.rpc("team_my_accounts") -- also handled by rpcMock.
 const rpcMock = vi.fn();
-const localeRead = vi.fn();
-const db: Record<string, unknown> = {};
-for (const m of ["from", "select", "eq"]) db[m] = vi.fn(() => db);
-db.maybeSingle = () => localeRead();
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
     rpc: (...args: unknown[]) => rpcMock(...args),
-    from: (...args: unknown[]) => (db.from as (...a: unknown[]) => unknown)(...args),
   }),
 }));
 
@@ -90,9 +90,15 @@ beforeEach(() => {
     { accountId: OWNER_ID, role: "owner", storeName: "harbourpottery", isSelf: true },
   ]);
   rateLimitMock.mockResolvedValue(true);
+  // Scope check (one call): non-null means the order is in this store.
   getOrderByIdMock.mockResolvedValue(waiting);
+  // Post-RPC combined read: order view + email fields (one call, replaces the
+  // old separate getOrderById + supabase buyer_locale/storefront_id chain).
+  getOrderByIdWithEmailFieldsMock.mockResolvedValue({
+    order: shipped("RR123456789IE"),
+    email: { buyerLocale: "de", storefrontId: STOREFRONT_ID },
+  });
   rpcMock.mockResolvedValue({ data: "shipped", error: null });
-  localeRead.mockResolvedValue({ data: { buyer_locale: "de", storefront_id: STOREFRONT_ID }, error: null });
   orderLinkUrlMock.mockResolvedValue(ORDER_URL);
   getSellerIdentityMock.mockResolvedValue({ businessName: "Harbour Pottery", email: "hello@harbour.example" });
   sendShippedEmailMock.mockResolvedValue({ sent: true });
@@ -153,7 +159,8 @@ describe("markOrderShipped - gates", () => {
 
 describe("markOrderShipped - outcomes", () => {
   it("ships it, with the trimmed number, and emails the buyer in their language", async () => {
-    getOrderByIdMock.mockResolvedValueOnce(waiting).mockResolvedValueOnce(shipped("RR123456789IE"));
+    // getOrderByIdMock returns waiting for the scope check;
+    // getOrderByIdWithEmailFieldsMock is already set up in beforeEach.
     const result = await markOrderShipped(ORDER_ID, "  RR123456789IE ");
 
     expect(rpcMock).toHaveBeenCalledWith("order_mark_shipped", {
@@ -182,7 +189,10 @@ describe("markOrderShipped - outcomes", () => {
   });
 
   it("names the carrier beside the number, and tells the buyer where to follow it", async () => {
-    getOrderByIdMock.mockResolvedValueOnce(waiting).mockResolvedValueOnce(shipped("RR123456789IE", "an-post"));
+    getOrderByIdWithEmailFieldsMock.mockResolvedValue({
+      order: shipped("RR123456789IE", "an-post"),
+      email: { buyerLocale: "de", storefrontId: STOREFRONT_ID },
+    });
     await markOrderShipped(ORDER_ID, "RR123456789IE", "an-post");
 
     expect(rpcMock.mock.calls[0]![1]).toEqual({
@@ -204,7 +214,10 @@ describe("markOrderShipped - outcomes", () => {
   });
 
   it("sends no order link for an order that has no storefront to open it under", async () => {
-    localeRead.mockResolvedValue({ data: { buyer_locale: "de", storefront_id: null }, error: null });
+    getOrderByIdWithEmailFieldsMock.mockResolvedValue({
+      order: shipped("RR123456789IE"),
+      email: { buyerLocale: "de", storefrontId: null },
+    });
     await markOrderShipped(ORDER_ID, "");
     expect(orderLinkUrlMock).not.toHaveBeenCalled();
     expect(sendShippedEmailMock.mock.calls[0]![2]).toMatchObject({ orderUrl: null });
@@ -212,7 +225,10 @@ describe("markOrderShipped - outcomes", () => {
 
   it("tells the buyer when only the carrier changed, since that is what gives them a link", async () => {
     rpcMock.mockResolvedValue({ data: "tracking_updated", error: null });
-    getOrderByIdMock.mockResolvedValue(shipped("RR000000001IE", "dhl"));
+    getOrderByIdWithEmailFieldsMock.mockResolvedValue({
+      order: shipped("RR000000001IE", "dhl"),
+      email: { buyerLocale: "de", storefrontId: STOREFRONT_ID },
+    });
     const result = await markOrderShipped(ORDER_ID, "RR000000001IE", "dhl");
     expect(result).toMatchObject({ ok: true, buyerEmailed: true });
     expect(sendShippedEmailMock.mock.calls[0]![2]).toMatchObject({ kind: "tracking", carrier: "dhl" });
@@ -220,7 +236,10 @@ describe("markOrderShipped - outcomes", () => {
 
   it("tells the buyer about a tracking number added later", async () => {
     rpcMock.mockResolvedValue({ data: "tracking_updated", error: null });
-    getOrderByIdMock.mockResolvedValue(shipped("RR000000001IE"));
+    getOrderByIdWithEmailFieldsMock.mockResolvedValue({
+      order: shipped("RR000000001IE"),
+      email: { buyerLocale: "de", storefrontId: STOREFRONT_ID },
+    });
     const result = await markOrderShipped(ORDER_ID, "RR000000001IE");
     expect(result).toMatchObject({ ok: true, buyerEmailed: true });
     expect(sendShippedEmailMock.mock.calls[0]![2]).toMatchObject({ kind: "tracking" });
@@ -228,11 +247,19 @@ describe("markOrderShipped - outcomes", () => {
 
   it("says nothing to the buyer when a number is cleared or re-saved as it was", async () => {
     rpcMock.mockResolvedValue({ data: "tracking_updated", error: null });
-    getOrderByIdMock.mockResolvedValue(shipped(null));
+    // tracking_updated with null trackingNumber => tellBuyer = false
+    getOrderByIdWithEmailFieldsMock.mockResolvedValueOnce({
+      order: shipped(null),
+      email: { buyerLocale: "de", storefrontId: STOREFRONT_ID },
+    });
     expect(await markOrderShipped(ORDER_ID, "")).toMatchObject({ ok: true, buyerEmailed: false });
 
     rpcMock.mockResolvedValue({ data: "unchanged", error: null });
-    getOrderByIdMock.mockResolvedValue(shipped("RR000000001IE"));
+    // "unchanged" => tellBuyer = false regardless of tracking number
+    getOrderByIdWithEmailFieldsMock.mockResolvedValueOnce({
+      order: shipped("RR000000001IE"),
+      email: { buyerLocale: "de", storefrontId: STOREFRONT_ID },
+    });
     expect(await markOrderShipped(ORDER_ID, "RR000000001IE")).toMatchObject({ ok: true, buyerEmailed: false });
 
     expect(sendShippedEmailMock).not.toHaveBeenCalled();
@@ -243,13 +270,26 @@ describe("markOrderShipped - outcomes", () => {
     expect(await markOrderShipped(ORDER_ID, "")).toMatchObject({ ok: true, buyerEmailed: false });
 
     sendShippedEmailMock.mockClear();
-    getOrderByIdMock.mockResolvedValue(orderView({ id: ORDER_ID, buyerEmail: null }));
+    // No buyer email: emailBuyer returns false without calling sendShippedEmail.
+    getOrderByIdWithEmailFieldsMock.mockResolvedValue({
+      order: orderView({ id: ORDER_ID, buyerEmail: null }),
+      email: { buyerLocale: "de", storefrontId: STOREFRONT_ID },
+    });
     expect(await markOrderShipped(ORDER_ID, "")).toMatchObject({ ok: true, buyerEmailed: false });
     expect(sendShippedEmailMock).not.toHaveBeenCalled();
   });
 
   it("names the store by its handle when no trading name is set", async () => {
     getSellerIdentityMock.mockResolvedValue({});
+    // When businessName is absent, emailBuyer calls supabase.rpc("team_my_accounts")
+    // on the existing session client (no extra getUser() / getAccessibleAccounts).
+    // rpcMock is called twice: once for order_mark_shipped, once for team_my_accounts.
+    rpcMock
+      .mockResolvedValueOnce({ data: "shipped", error: null }) // order_mark_shipped
+      .mockResolvedValueOnce({ // team_my_accounts
+        data: [{ account_owner_id: OWNER_ID, store_name: "harbourpottery" }],
+        error: null,
+      });
     await markOrderShipped(ORDER_ID, "");
     expect(sendShippedEmailMock.mock.calls[0]![2]).toMatchObject({
       store: { name: "harbourpottery", contactEmail: null },
@@ -257,9 +297,21 @@ describe("markOrderShipped - outcomes", () => {
   });
 
   it("falls back to English for a buyer whose language is unknown", async () => {
-    localeRead.mockResolvedValue({ data: { buyer_locale: null }, error: null });
+    getOrderByIdWithEmailFieldsMock.mockResolvedValue({
+      order: shipped("RR123456789IE"),
+      email: { buyerLocale: null, storefrontId: STOREFRONT_ID },
+    });
     await markOrderShipped(ORDER_ID, "");
     expect(sendShippedEmailMock.mock.calls[0]![1]).toBe("en");
+  });
+
+  it("makes exactly one scope-check read and one combined post-RPC read per mark-shipped", async () => {
+    // The refactoring collapsed three separate round-trips (scope check,
+    // post-RPC order view, and email fields) into two (scope check, then
+    // getOrderByIdWithEmailFields). Verify the new counts hold.
+    await markOrderShipped(ORDER_ID, "RR123456789IE");
+    expect(getOrderByIdMock).toHaveBeenCalledTimes(1); // scope check only
+    expect(getOrderByIdWithEmailFieldsMock).toHaveBeenCalledTimes(1); // post-RPC combined read
   });
 
   it("turns the database's refusals into the seller's words", async () => {

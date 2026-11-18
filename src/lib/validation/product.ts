@@ -17,7 +17,6 @@ import {
   BADGE_PLACEMENTS,
   BADGES_MAX,
   BADGES_ON_PHOTO_MAX,
-  type BadgePlacement,
   CURRENCIES,
   DIMENSION_UNITS,
   DOCUMENT_LABEL_MAX,
@@ -25,6 +24,7 @@ import {
   GALLERY_ALT_MAX,
   GALLERY_MAX,
   INCLUDED_MAX,
+  MAX_PER_ORDER_DEFAULT,
   OPTION_DISPLAYS,
   OPTION_GROUP_NAME_MAX,
   OPTION_GROUPS_MAX,
@@ -34,9 +34,14 @@ import {
   OPTIONS_PER_GROUP_MAX,
   OPTIONS_TOTAL_MAX,
   PRODUCT_STATUSES,
+  PURCHASE_QUANTITY_MAX,
   SPECS_MAX,
   WEIGHT_UNITS,
 } from "@/types/product";
+import { isOnPhoto } from "@/lib/validation/predicates";
+// Re-export the constants and predicate so server callers keep their existing
+// import paths unchanged.
+export { PURCHASE_QUANTITY_MAX, MAX_PER_ORDER_DEFAULT, isOnPhoto };
 
 // Zod schemas shared by client (UX feedback) and server (the security
 // boundary). Every product write and every presign request is parsed with
@@ -220,28 +225,6 @@ export const STOCK_QUANTITY_MAX = 1_000_000;
  *  "Copy of" title keep to it too). */
 export const PRODUCT_TITLE_MAX = 200;
 
-/**
- * THE PLATFORM CEILING on how many units one buyer may take in one order, and
- * the ONLY number in this file a buyer's request is measured against.
- *
- * A seller sets their own `maxPerOrder` inside this range; nothing — not a
- * form, not an import, not a service-role write — may store a higher one, and
- * the products_max_per_order_range CHECK repeats it at the database. It is the
- * bound that keeps `priceCents * quantity` (100_000_000 * 100) an exact integer
- * well inside what the money path has to hold, and it is what makes the
- * quantity picker a closed list rather than a number field.
- */
-export const PURCHASE_QUANTITY_MAX = 100;
-
-/**
- * What a product's per-order ceiling is when the seller has not said. Ten is a
- * real answer rather than "unlimited": a buyer who genuinely wants more than
- * ten of one thing is having a conversation with the seller, not clicking a
- * dropdown. Mirrors the column's DB default so a row written by either side
- * says the same number.
- */
-export const MAX_PER_ORDER_DEFAULT = 10;
-
 /** Where the "Only N left" badge starts when the seller has not said: a
  *  handful, the column's DB default. */
 export const LOW_STOCK_THRESHOLD_DEFAULT = 5;
@@ -386,11 +369,6 @@ export const badgeSchema = z.strictObject({
   color: z.enum(BADGE_COLORS).optional(),
   placement: z.enum(BADGE_PLACEMENTS).optional(),
 });
-
-/** True for a badge drawn on the photo rather than beside the product. */
-export function isOnPhoto(badge: { placement?: BadgePlacement }): boolean {
-  return badge.placement !== undefined && badge.placement !== "beside";
-}
 
 export const badgesSchema = z
   .array(badgeSchema)

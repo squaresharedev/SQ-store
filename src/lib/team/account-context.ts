@@ -88,8 +88,11 @@ export const getActiveAccount = cache(async (): Promise<ActiveAccount | null> =>
 /**
  * Accounts the caller can switch to: their own store + every store they're an
  * active member of. Self-gated at the DB (team_my_accounts). Empty on error.
+ *
+ * Wrapped in React `cache()` so DashboardShell and any settings page that
+ * also needs the account list share one team_my_accounts RPC call per render.
  */
-export async function getAccessibleAccounts(): Promise<AccountOption[]> {
+export const getAccessibleAccounts = cache(async (): Promise<AccountOption[]> => {
   const user = await getUser();
   if (!user) return [];
   const supabase = await createClient();
@@ -104,4 +107,4 @@ export async function getAccessibleAccounts(): Promise<AccountOption[]> {
     storeName: row.store_name,
     isSelf: row.is_self,
   }));
-}
+});

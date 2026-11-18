@@ -1,6 +1,8 @@
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAccount } from "@/lib/team/account-context";
+import { getProfile } from "@/lib/auth/session";
 import { toCurrency } from "@/lib/format/money";
 import { toChannel } from "@/lib/orders/queries";
 import { buildShippingPolicy } from "@/lib/settings/shipping-policy";
@@ -200,6 +202,60 @@ export async function getDashboardOrders(): Promise<DashboardOrdersData> {
   };
 }
 
+// --- Unified products read ---------------------------------------------------
+//
+// All three dashboard product functions (getProductsSummary,
+// getExistingProductIds, getRestockForecasts) previously fired their own
+// separate reads. One React-cached read now serves all three: it selects the
+// union of all needed columns and is deduped across the render tree.
+//
+// Plans cap products at 500 (Pro, the top plan), and ACTIVE_PRODUCTS_LIMIT
+// is 1000, so the fallback (count > rows.length) is effectively unreachable
+// in production. It is kept so callers remain correct if limits ever change.
+
+/** Union of every column the three product functions need. */
+const ALL_PRODUCTS_COLUMNS =
+  "id, title, status, image_key, purchase_url, digital_file_key, moderation_status, track_stock, stock_quantity, low_stock_threshold" as const;
+
+type AllProductsRow = {
+  id: string;
+  title: string;
+  status: string;
+  image_key: string | null;
+  purchase_url: string | null;
+  digital_file_key: string | null;
+  moderation_status: string | null;
+  track_stock: boolean | null;
+  stock_quantity: number | null;
+  low_stock_threshold: number | null;
+};
+
+/**
+ * All of this account's products in one read, selecting the union of columns
+ * the dashboard functions need. React-cached so getProductsSummary,
+ * getExistingProductIds and getRestockForecasts share one round-trip per render.
+ *
+ * Returns an error string rather than throwing, so each caller can decide its
+ * own error behaviour (getProductsSummary throws, the others soft-fail).
+ */
+const loadAllProducts = cache(async (): Promise<{
+  rows: AllProductsRow[];
+  count: number;
+  error: string | null;
+}> => {
+  const account = await getActiveAccount();
+  if (!account) return { rows: [], count: 0, error: null };
+  const supabase = await createClient();
+  const { data, count, error } = await supabase
+    .from("products")
+    .select(ALL_PRODUCTS_COLUMNS, { count: "exact" })
+    .eq("owner_id", account.accountId)
+    .order("created_at", { ascending: false })
+    .limit(ACTIVE_PRODUCTS_LIMIT);
+  if (error) return { rows: [], count: 0, error: error.message };
+  return { rows: (data ?? []) as unknown as AllProductsRow[], count: count ?? 0, error: null };
+});
+
 export type ProductsSummary = {
   total: number;
   missingImage: { id: string; title: string }[];
@@ -241,10 +297,11 @@ const ACTIVE_PRODUCTS_LIMIT = 1000;
  * (rather than listProducts) so "missing image" reflects the DB, not whether
  * R2 credentials happen to be configured; RLS scopes rows to the owner.
  *
- * Bounded on purpose: `total` is a head-only exact count (no rows leave the
- * database), and the missing-image list is capped at MISSING_IMAGE_LIMIT
- * newest. The active-products list caps at ACTIVE_PRODUCTS_LIMIT (still a
- * small payload: UUID strings only).
+ * Derives everything from ONE shared read (loadAllProducts, React-cached),
+ * which is also reused by getExistingProductIds and getRestockForecasts within
+ * the same render. Falls back to three per-purpose reads only when the
+ * account holds more than ACTIVE_PRODUCTS_LIMIT products (unreachable in
+ * practice: plans cap at 500).
  */
 export async function getProductsSummary(): Promise<ProductsSummary> {
   const account = await getActiveAccount();
@@ -257,44 +314,76 @@ export async function getProductsSummary(): Promise<ProductsSummary> {
     checkingProductIds: [],
     pausedProductIds: [],
   };
+
+  const result = await loadAllProducts();
+  if (result.error) throw new Error(`Failed to load products: ${result.error}`);
+
+  // If the unified read did not cover all rows, fall back to per-purpose reads
+  // so each function still works correctly on a very large catalogue.
+  if (result.count > result.rows.length) {
+    return getProductsSummaryFallback(account.accountId);
+  }
+
+  const rows = result.rows;
+  const activeRows = rows.filter((r) => r.status === "active");
+
+  // Missing-image list: imageless products, newest first, capped. The unified
+  // read is already sorted by created_at desc, so slicing is equivalent to
+  // the former order().limit() read.
+  const missingImage = rows
+    .filter((r) => r.image_key === null)
+    .slice(0, MISSING_IMAGE_LIMIT)
+    .map((r) => ({ id: r.id, title: r.title }));
+
+  return {
+    total: result.count,
+    missingImage,
+    noBuyPathCount: activeRows.filter((r) => !r.purchase_url).length,
+    hasPhysicalProducts: activeRows.some((r) => !r.digital_file_key),
+    activeProductIds: activeRows.map((r) => r.id),
+    checkingProductIds: activeRows
+      .filter((r) => r.moderation_status === "pending" || r.moderation_status === "review")
+      .map((r) => r.id),
+    pausedProductIds: activeRows
+      .filter((r) => r.moderation_status === "paused" || r.moderation_status === "removed")
+      .map((r) => r.id),
+  };
+}
+
+/**
+ * Per-purpose fallback for getProductsSummary when the unified read did not
+ * cover all rows (count > ACTIVE_PRODUCTS_LIMIT). Preserves the original three
+ * reads so a very large catalogue still returns correct data.
+ */
+async function getProductsSummaryFallback(ownerId: string): Promise<ProductsSummary> {
   const supabase = await createClient();
   const [counted, missing, active] = await Promise.all([
     supabase
       .from("products")
       .select("id", { count: "exact", head: true })
-      .eq("owner_id", account.accountId),
+      .eq("owner_id", ownerId),
     supabase
       .from("products")
       .select("id, title")
-      .eq("owner_id", account.accountId)
+      .eq("owner_id", ownerId)
       .is("image_key", null)
       .order("created_at", { ascending: false })
       .limit(MISSING_IMAGE_LIMIT),
-    // Fetch buy-path and physical-product facts for all active products.
-    // `purchase_url` is null for products with no external link (only the
-    // seller's contact email, if set, gives a buyer a way to reach them).
-    // `digital_file_key` null = a physical item that needs shipping terms.
     supabase
       .from("products")
       .select("id, purchase_url, digital_file_key, moderation_status")
-      .eq("owner_id", account.accountId)
+      .eq("owner_id", ownerId)
       .eq("status", "active")
       .limit(ACTIVE_PRODUCTS_LIMIT),
   ]);
-  if (counted.error)
-    throw new Error(`Failed to count products: ${counted.error.message}`);
-  if (missing.error)
-    throw new Error(`Failed to load products: ${missing.error.message}`);
-  if (active.error)
-    throw new Error(`Failed to load active products: ${active.error.message}`);
+  if (counted.error) throw new Error(`Failed to count products: ${counted.error.message}`);
+  if (missing.error) throw new Error(`Failed to load products: ${missing.error.message}`);
+  if (active.error) throw new Error(`Failed to load active products: ${active.error.message}`);
 
   const activeRows = active.data ?? [];
   return {
     total: counted.count ?? 0,
-    missingImage: (missing.data ?? []).map((row) => ({
-      id: row.id,
-      title: row.title,
-    })),
+    missingImage: (missing.data ?? []).map((row) => ({ id: row.id, title: row.title })),
     noBuyPathCount: activeRows.filter((row) => !row.purchase_url).length,
     hasPhysicalProducts: activeRows.some((row) => !row.digital_file_key),
     activeProductIds: activeRows.map((row) => row.id),
@@ -363,7 +452,9 @@ export type ProfileSummary = {
  * subset that still exist in the database (any status -- draft products are
  * not deleted). The complement is the dead-block set.
  *
- * One IN query, no N+1. Empty input returns immediately without hitting the DB.
+ * Uses the unified loadAllProducts read when it has covered all rows; falls
+ * back to its own IN query when the catalogue is too large (unreachable in
+ * practice: plans cap at 500). Empty input returns immediately.
  * RLS scopes the read to the active account, so a forged product ID returns no
  * row and is safely counted as dead.
  *
@@ -375,6 +466,16 @@ export async function getExistingProductIds(
   if (referencedIds.length === 0) return [];
   const account = await getActiveAccount();
   if (!account) return [];
+
+  // Check the unified read first: if it covered all rows, there is no need
+  // for a second query.
+  const cached = await loadAllProducts();
+  if (!cached.error && cached.count <= cached.rows.length) {
+    const ownedIds = new Set(cached.rows.map((r) => r.id));
+    return referencedIds.filter((id) => ownedIds.has(id));
+  }
+
+  // Fall back when the unified read truncated the catalogue.
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
@@ -396,27 +497,63 @@ const RESTOCK_ORDERS_LIMIT = 5000;
 /**
  * The overview's restock forecast (forecastRestocks in lib/predictions.ts):
  * live, counted products with stock left, against the units each sold in paid
- * orders over the last RESTOCK_PACE_DAYS. Two reads, no N+1. An order's
- * add-ons are not counted, so a product sold mostly as an add-on is forecast
- * late rather than early. Fails soft to none: the row is advisory.
+ * orders over the last RESTOCK_PACE_DAYS. Two reads at most, no N+1.
+ *
+ * Uses the unified loadAllProducts read for the product candidates; falls back
+ * to its own query only when the catalogue exceeds ACTIVE_PRODUCTS_LIMIT (not
+ * reachable in practice). Reads orders ONLY when at least one restock candidate
+ * exists: stock tracking is opt-in, so most sellers skip the orders read
+ * entirely. An order's add-ons are not counted, so a product sold mostly as an
+ * add-on is forecast late rather than early. Fails soft to none: the row is
+ * advisory.
  */
 export async function getRestockForecasts(now = new Date()): Promise<RestockForecast[]> {
   const account = await getActiveAccount();
   if (!account) return [];
-  const supabase = await createClient();
-  const { data: products, error } = await supabase
-    .from("products")
-    .select("id, title, stock_quantity, low_stock_threshold")
-    .eq("owner_id", account.accountId)
-    .eq("status", "active")
-    .eq("track_stock", true)
-    .gt("stock_quantity", 0)
-    .limit(RESTOCK_PRODUCTS_LIMIT);
-  if (error || !products || products.length === 0) {
-    if (error) console.warn("[dashboard] restock products failed:", error.message);
-    return [];
+
+  // Restock candidates: active, stock-tracked, with units remaining.
+  let candidates: { id: string; title: string; stock_quantity: number; low_stock_threshold: number | null }[] = [];
+
+  const cached = await loadAllProducts();
+  if (!cached.error && cached.count <= cached.rows.length) {
+    // Unified read has all rows: filter in memory, no extra DB round-trip.
+    candidates = cached.rows
+      .filter(
+        (r) =>
+          r.status === "active" &&
+          r.track_stock === true &&
+          (r.stock_quantity ?? 0) > 0,
+      )
+      .slice(0, RESTOCK_PRODUCTS_LIMIT)
+      .map((r) => ({
+        id: r.id,
+        title: r.title,
+        stock_quantity: r.stock_quantity ?? 0,
+        low_stock_threshold: r.low_stock_threshold,
+      }));
+  } else {
+    // Fall back: the cache missed or was truncated; read candidates directly.
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("products")
+      .select("id, title, stock_quantity, low_stock_threshold")
+      .eq("owner_id", account.accountId)
+      .eq("status", "active")
+      .eq("track_stock", true)
+      .gt("stock_quantity", 0)
+      .limit(RESTOCK_PRODUCTS_LIMIT);
+    if (error || !data || data.length === 0) {
+      if (error) console.warn("[dashboard] restock products failed:", error.message);
+      return [];
+    }
+    candidates = data as typeof candidates;
   }
 
+  if (candidates.length === 0) return [];
+
+  // Orders read is deferred to here: skip it entirely when no product tracks
+  // stock (the common case for digital sellers).
+  const supabase = await createClient();
   const since = new Date(now.getTime() - RESTOCK_PACE_DAYS * 24 * 60 * 60 * 1000).toISOString();
   const { data: orders, error: ordersError } = await (supabase as SupabaseClient)
     .from("orders")
@@ -436,20 +573,49 @@ export async function getRestockForecasts(now = new Date()): Promise<RestockFore
     unitsSold[order.product_id] = (unitsSold[order.product_id] ?? 0) + (order.quantity ?? 1);
   }
   return forecastRestocks(
-    products.map((product) => ({
-      id: product.id,
-      title: product.title,
-      stockQuantity: product.stock_quantity ?? 0,
-      lowStockThreshold: product.low_stock_threshold ?? LOW_STOCK_THRESHOLD_DEFAULT,
+    candidates.map((p) => ({
+      id: p.id,
+      title: p.title,
+      stockQuantity: p.stock_quantity,
+      lowStockThreshold: p.low_stock_threshold ?? LOW_STOCK_THRESHOLD_DEFAULT,
     })),
     unitsSold,
   );
 }
 
-/** Returns null when there is no active account or the read fails softly. */
+/**
+ * Returns null when there is no active account or the read fails softly.
+ *
+ * Owner path: getProfile() (cached, select *) is already in-flight for this
+ * render; derive the summary from that result rather than a second read.
+ *
+ * Team-member path: the active account is the owner's store, so the owner's
+ * profile row must be read directly by its id. The signed-in member's own
+ * getProfile() row is a different record; the original targeted read applies.
+ */
 export async function getProfileSummary(): Promise<ProfileSummary | null> {
   const account = await getActiveAccount();
   if (!account) return null;
+
+  if (account.isOwner) {
+    // The signed-in owner: getProfile() already read their row (select *)
+    // in this render, so no extra round-trip is needed.
+    const profile = await getProfile();
+    if (!profile) return null;
+    return {
+      taxBusinessName: profile.tax_business_name ?? null,
+      sellerEmail: profile.seller_email ?? null,
+      sellerAddress: profile.seller_address ?? null,
+      shippingPolicySet: profile.shipping_policy !== null,
+      shippingRatesSet: hasPricedDestination(
+        buildShippingPolicy({ shipping_policy: profile.shipping_policy }),
+      ),
+      legalAcceptedVersion: profile.legal_accepted_version ?? null,
+    };
+  }
+
+  // Team member: the owner's profile row is read by the owner's account id.
+  // The signed-in member's getProfile() is a different row; skip it.
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
@@ -459,8 +625,8 @@ export async function getProfileSummary(): Promise<ProfileSummary | null> {
     .eq("id", account.accountId)
     .maybeSingle();
   if (error) {
-    // Soft-fail: attention rows are advisory. A read error should not break the
-    // overview page or hide the revenue metrics the seller actually came for.
+    // Soft-fail: attention rows are advisory. A read error should not break
+    // the overview page or hide the revenue metrics the seller came for.
     console.warn("[dashboard] profile summary read failed:", error.message);
     return null;
   }

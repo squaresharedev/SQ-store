@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties, RefObject } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { ArrowRight, Image as ImageIcon, Star } from "lucide-react";
 import type { Locale } from "@/i18n/locales";
@@ -27,7 +27,8 @@ import {
   type SpotRow,
   type StorefrontTheme,
 } from "@/types/storefront";
-import { priceTagAutoTextColor } from "@/lib/theme/color-target";
+// Buyer-safe: core file has no designer-panel code.
+import { priceTagAutoTextColor } from "@/lib/theme/color-target-core";
 import { imageStyle } from "@/lib/images/placement";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -60,11 +61,7 @@ import {
   titleShadowStyle,
 } from "./config-maps";
 import { SaleChip, saleChipWidth, useSaleChipWords } from "./SaleChip";
-import {
-  tileSpotTokenLabel,
-  tileSpotTokenProps,
-  type TileSpotDrag,
-} from "./TileSpotDragLayer";
+import type { TileSpotDrag } from "./TileSpotDragLayer";
 
 // Reveal-on-hover also reveals on keyboard focus within the tile; with
 // reduced motion the change is instant instead of faded.
@@ -197,10 +194,10 @@ export function ProductTileContent({
    *  while a gesture owns the tile. */
   hover?: CardHoverTrigger;
 }) {
-  const t = useTranslations("Storefront.spotDrag");
   const tCommon = useTranslations("Common");
   const tSale = useTranslations("ProductPage.sale");
   const tAddOns = useTranslations("ProductPage.addOns");
+  const tSpotDrag = useTranslations("Storefront.spotDrag");
   const saleWords = useSaleChipWords();
   const locale = useLocale();
   const card = resolveCardStyle(theme, overrides);
@@ -223,6 +220,30 @@ export function ProductTileContent({
   const zoom = card.hoverEffect === "zoom" && hover !== "still" && !imageRef;
   const hoverPhotoUrl =
     card.hoverPhoto && product.imageUrl && product.hoverImageUrl && !imageRef ? product.hoverImageUrl : null;
+
+  // The hover image mounts only after the first pointer-enter or focus on
+  // this tile. loading="lazy" on an opacity-0 element does not defer the
+  // fetch: browsers treat lazy as an off-screen gate, not an invisible-
+  // element gate, so a full grid of tiles fetched all their hover photos on
+  // load. Deferring the mount itself is the correct fix.
+  // Set once and never cleared, so a hovered tile keeps its photo.
+  const [hoverImageMounted, setHoverImageMounted] = useState(false);
+  const revealHoverImage =
+    hoverPhotoUrl && !hoverImageMounted ? () => setHoverImageMounted(true) : undefined;
+  // On the buyer's board the tile's LINK wraps this face (StorefrontBoard), so
+  // a keyboard visitor focuses the link, an ancestor, and the face's own
+  // onFocus never fires. The photo shows on group-focus-within, so it has to
+  // be mounted by then: listen on the enclosing link too.
+  const faceRef = useRef<HTMLDivElement>(null);
+  const awaitingReveal = revealHoverImage !== undefined;
+  useEffect(() => {
+    if (!awaitingReveal) return;
+    const link = faceRef.current?.closest("a");
+    if (!link) return;
+    const reveal = () => setHoverImageMounted(true);
+    link.addEventListener("focus", reveal);
+    return () => link.removeEventListener("focus", reveal);
+  }, [awaitingReveal]);
 
   // A token in flight is drawn where it is GOING, not where it is stored: the
   // whole point of dragging the thing is watching it move. Nothing is written
@@ -338,7 +359,7 @@ export function ProductTileContent({
   // it, or press it for its own settings.
   const saleToken =
     spotDrag?.sale && saleBadgeSpot
-      ? tileSpotTokenProps("sale", spotDrag, tileSpotTokenLabel("sale", saleBadgeSpot, t))
+      ? (spotDrag.getToken?.("sale", saleBadgeSpot, tSpotDrag("tokenLabel", { token: "sale", drop: saleBadgeSpot.replace(/-/g, "_") })) ?? null)
       : null;
   const saleBadge = saleBadgeSpot && (
     <SaleChip
@@ -390,11 +411,11 @@ export function ProductTileContent({
   // buyer's: absent, both spans render exactly as they always have.
   const priceToken =
     spotDrag?.price && !priceHidden && tagPosition !== "hidden"
-      ? tileSpotTokenProps("price", spotDrag, tileSpotTokenLabel("price", tagPosition, t))
+      ? (spotDrag.getToken?.("price", tagPosition, tSpotDrag("tokenLabel", { token: "price", drop: tagPosition.replace(/-/g, "_") })) ?? null)
       : null;
   const titleToken =
     spotDrag?.title && card.showTitle
-      ? tileSpotTokenProps("title", spotDrag, tileSpotTokenLabel("title", titleSpot, t))
+      ? (spotDrag.getToken?.("title", titleSpot, tSpotDrag("tokenLabel", { token: "title", drop: titleSpot.replace(/-/g, "_") })) ?? null)
       : null;
 
   // Every pixel of the chip is inline (see priceTagChipStyle); the classes
@@ -628,7 +649,12 @@ export function ProductTileContent({
     // at half the tile's side, and cq units are the only way to say "half the
     // tile" from in here. The face is stretched by its parent, so containment
     // costs it nothing.
-    <div className="relative flex min-h-0 flex-1 flex-col [container-type:size]">
+    <div
+      ref={faceRef}
+      className="relative flex min-h-0 flex-1 flex-col [container-type:size]"
+      onPointerEnter={revealHoverImage}
+      onFocus={revealHoverImage}
+    >
       {barAbove && titleArea}
       <div
         // THE BOX THE PHOTO IS ACTUALLY CROPPED TO, and the reason it is
@@ -653,6 +679,10 @@ export function ProductTileContent({
             // Images are natively draggable, which hijacks a tile drag on the
             // canvas and shows a not-allowed cursor.
             draggable={false}
+            // No loading="lazy" here: this is the visible cover photo; lazy
+            // loading above-the-fold tiles delays first paint. decoding="async"
+            // keeps the decode off the main thread without delaying layout.
+            decoding="async"
             // Empty for an unframed tile, so the overwhelmingly common case
             // carries no inline style and renders exactly as it always has.
             style={imageStyle(imagePlacement)}
@@ -673,8 +703,13 @@ export function ProductTileContent({
         )}
         {/* The product's second photo, over the first, shown while the card
             is pointed at (hoverPhotoClass). Unframed: the seller framed the
-            cover, not this one. Lazy, since most visits never hover. */}
-        {hoverPhotoUrl && (
+            cover, not this one. Mounted only after the first pointer-enter or
+            focus on this tile: loading="lazy" on an opacity-0 element does
+            not defer its fetch (lazy is an off-screen gate, not an invisible-
+            element gate), so we defer the mount instead. The fade transition
+            still plays because the element enters the DOM while the pointer
+            is already over its group ancestor. */}
+        {hoverPhotoUrl && hoverImageMounted && (
           // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
           <img
             src={hoverPhotoUrl}

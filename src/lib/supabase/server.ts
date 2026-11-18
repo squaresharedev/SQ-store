@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { agentContext } from "@/lib/agent/context";
@@ -21,8 +22,19 @@ import type { Database } from "@/types";
  * against a genuinely missing session should catch around the auth *call*
  * (e.g. `supabase.auth.getUser()`), not around `createClient()` itself — see
  * `unstable_rethrow` in lib/auth/session.ts.
+ *
+ * Wrapped in React `cache()` so every helper in one render (loadUser,
+ * getProfile, getActiveAccount, etc.) shares a single client instance rather
+ * than each building its own. This matters most when the access token is
+ * expired: without sharing, every caller would trigger its own refresh call.
+ * React `cache()` is a no-op outside a render (Route Handlers, Server
+ * Actions), so those keep creating a fresh client on each invocation.
+ *
+ * Verified safe: nothing in a render path signs in, signs out, or mutates
+ * the session on this client. Those operations are confined to Route Handlers
+ * and Server Actions, which are not affected by the cache.
  */
-export async function createClient() {
+export const createClient = cache(async () => {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) {
@@ -76,4 +88,4 @@ export async function createClient() {
       },
     },
   });
-}
+});

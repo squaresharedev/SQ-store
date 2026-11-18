@@ -17,6 +17,9 @@ import { act, cleanup, render, screen, waitFor, within } from "../setup/render";
 import { english } from "../setup/translate";
 import type { TourStep } from "@/lib/onboarding/tour-steps";
 
+// Pre-load the lazy ActiveTour so next/dynamic's loadable resolves instantly in tests.
+await import("@/components/onboarding/ActiveTour");
+
 const router = vi.hoisted(() => ({
   push: vi.fn(),
   replace: vi.fn(),

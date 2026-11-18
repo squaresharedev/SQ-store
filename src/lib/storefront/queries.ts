@@ -2,7 +2,7 @@ import { storefrontVersion } from "@/lib/storefront/version";
 import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAccount } from "@/lib/team/account-context";
-import { getShippingPolicy } from "@/lib/settings/shipping-policy";
+import { getAccountShippingPolicy } from "@/lib/settings/shipping-policy";
 import { buildShippingProse } from "@/lib/shipping/policy-prose";
 import { SHIPPING_SETTINGS_HREF } from "@/types/shipping-policy";
 import {
@@ -268,7 +268,7 @@ export async function getShippingChoices(): Promise<ShippingChoices> {
   const account = await getActiveAccount();
   if (!account) return empty;
 
-  const policy = await getShippingPolicy(account.accountId);
+  const policy = await getAccountShippingPolicy(account.accountId);
   // The seller reads this preview, so it is in the seller's language.
   const t = await getTranslations();
   const locale = await getLocale();

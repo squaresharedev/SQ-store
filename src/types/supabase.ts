@@ -3163,6 +3163,21 @@ export type Database = {
         Args: { p_product_ids: string[] }
         Returns: undefined
       }
+      record_signal: {
+        Args: {
+          p_account_id: string
+          p_kind: string
+          p_channel?: string
+          p_storefront_id?: string | null
+          p_block_id?: string | null
+          p_visitor_hash?: string | null
+          p_value_cents?: number | null
+          p_currency?: string | null
+          p_dedupe_key?: string | null
+          p_metadata?: Json | null
+        }
+        Returns: boolean
+      }
       redeem_contact_verification: {
         Args: {
           p_channel: string

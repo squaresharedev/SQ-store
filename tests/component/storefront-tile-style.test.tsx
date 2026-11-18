@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeAll, afterAll } from "vitest";
-import { render, screen, cleanup, within } from "../setup/render";
+import { render, screen, cleanup, within, fireEvent } from "../setup/render";
 import type { Product } from "@/types/product";
 import {
   DEFAULT_STOREFRONT_CONFIG,
@@ -16,6 +16,7 @@ import {
 } from "@/components/grid/gridConstants";
 import { MAX_BLOCKS } from "@/lib/validation/storefront";
 import { StorefrontPreview } from "@/components/storefront/StorefrontPreview";
+import { ProductTileContent } from "@/components/storefront/ProductTileContent";
 
 /**
  * Per-tile style overrides through the REAL render path (StorefrontPreview →
@@ -580,5 +581,74 @@ describe("block layering through the render path", () => {
     expect(layerZIndex(5_000)).toBe(LAYER_Z_CEILING);
     expect(LAYER_Z_CEILING).toBeLessThan(GESTURE_Z);
     expect(GESTURE_Z).toBeLessThanOrEqual(OVERLAY_Z);
+  });
+});
+
+/**
+ * Hover image deferred mount: the second photo must NOT be in the DOM before
+ * the first pointer-enter or focus on the tile face. loading="lazy" does not
+ * defer the fetch for an opacity-0 element (lazy is an off-screen gate), so
+ * the mount itself is deferred.
+ */
+describe("hover image deferred mount", () => {
+  afterEach(cleanup);
+
+  it("does not render the hover image before pointer-enter", () => {
+    const hoverProduct: Product = {
+      ...product(PRODUCT_A, "Hover tile"),
+      imageUrl: "https://example.com/cover.jpg",
+      hoverImageUrl: "https://example.com/hover.jpg",
+    };
+    const { container } = render(
+      <StorefrontPreview
+        config={configWith([
+          {
+            type: "product",
+            productId: PRODUCT_A,
+            x: 0,
+            y: 0,
+            w: 1,
+            h: 1,
+            style: { hoverPhoto: true },
+          },
+        ])}
+        productsById={new Map([[PRODUCT_A, hoverProduct]])}
+      />,
+    );
+
+    // The hover photo must not be in the DOM at all on initial render.
+    expect(container.querySelector("[data-tile-hover-photo]")).toBeNull();
+
+    // Fire pointer-enter on the tile face (ProductTileContent's root div,
+    // which is the parent of the data-image-frame box).
+    const frame = container.querySelector("[data-image-frame]")!;
+    fireEvent.pointerEnter(frame.parentElement!);
+
+    // The element is now mounted and present in the DOM.
+    expect(container.querySelector("[data-tile-hover-photo]")).toBeInTheDocument();
+  });
+
+  it("mounts the hover image when keyboard focus lands on the enclosing link", () => {
+    // The buyer's board wraps each product face in its link
+    // (StorefrontBoard), so a keyboard visitor focuses an ANCESTOR of the
+    // face. The second photo shows on group-focus-within, so it must mount
+    // on that focus too, not only on pointer-enter.
+    const hoverProduct: Product = {
+      ...product(PRODUCT_A, "Focus tile"),
+      imageUrl: "https://example.com/cover.jpg",
+      hoverImageUrl: "https://example.com/hover.jpg",
+    };
+    const { container } = render(
+      <a href="#tile">
+        <ProductTileContent
+          product={hoverProduct}
+          theme={configWith([]).theme}
+          overrides={{ hoverPhoto: true }}
+        />
+      </a>,
+    );
+    expect(container.querySelector("[data-tile-hover-photo]")).toBeNull();
+    fireEvent.focus(container.querySelector("a")!);
+    expect(container.querySelector("[data-tile-hover-photo]")).toBeInTheDocument();
   });
 });

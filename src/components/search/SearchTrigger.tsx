@@ -37,6 +37,8 @@ export function SearchTrigger() {
       ref={buttonRef}
       type="button"
       onClick={search.open}
+      onPointerEnter={search.warm}
+      onFocus={search.warm}
       aria-haspopup="dialog"
       aria-expanded={search.isOpen}
       aria-keyshortcuts="Meta+K Control+K"

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAccount } from "@/lib/team/account-context";
@@ -17,6 +18,57 @@ const ADD_ON_CHOICES_MAX = 300;
 
 /** How many of the newest paid orders the picker's suggestion learns from. */
 const ADD_ON_HABIT_ORDERS = 1000;
+
+// --- Shared product read for the add-on picker ------------------------------
+//
+// listAddOnChoices (unfiltered) and getAddOnHabits previously fired separate
+// reads for the same account's products. One React-cached read now serves
+// both when called in the same render (the product-form page). The `only`
+// path in listAddOnChoices (a filtered preview) bypasses this and reads its
+// own slice, since the unfiltered cache would over-fetch for a one-product
+// preview.
+
+/** Merged columns: union of what listAddOnChoices and getAddOnHabits need. */
+const ALL_ADD_ON_COLUMNS =
+  `id, title, price_cents, currency, image_key, status, digital_file_key, created_at, add_on_ids, ${MODERATION_GATE_SELECT}, ${PUBLIC_STOCK_SELECT}` as const;
+
+type AllAddOnRow = {
+  id: string;
+  title: string;
+  price_cents: number;
+  currency: string;
+  image_key: string | null;
+  status: string;
+  digital_file_key: string | null;
+  created_at: string | null;
+  add_on_ids: unknown;
+  moderation_status: string | null;
+  track_stock: boolean | null;
+  stock_quantity: number | null;
+  low_stock_threshold: number | null;
+};
+
+/**
+ * All of this account's products for the add-on picker and habit read, in one
+ * round-trip. React-cached (keyed by owner id) so listAddOnChoices (unfiltered)
+ * and getAddOnHabits share one read per product-form render.
+ *
+ * Soft-fails to []: the picker and suggestion each produce calm zero states.
+ */
+const loadAllAddOnProducts = cache(async (ownerId: string): Promise<AllAddOnRow[]> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select(ALL_ADD_ON_COLUMNS)
+    .eq("owner_id", ownerId)
+    .order("created_at", { ascending: false })
+    .limit(ADD_ON_CHOICES_MAX);
+  if (error) {
+    console.error("[products] add-on products read failed", error.message);
+    return [];
+  }
+  return (data ?? []) as unknown as AllAddOnRow[];
+});
 
 /** One of the store's products, as the product form's "Add to order" picker
  *  lists it. Seller-side only (the dashboard), so status and kind ride along. */
@@ -46,25 +98,39 @@ export type AddOnChoice = {
  * other kind); scoped to the active account like every products read. `only`
  * narrows it to the products named (what one product has chosen), for a
  * preview that draws them.
+ *
+ * Unfiltered path: uses loadAllAddOnProducts (React-cached), shared with
+ * getAddOnHabits so a product-form render costs one products read, not two.
+ * Filtered path (`only` provided): its own read, since the full-catalogue
+ * cache would over-fetch for a small preview.
  */
 export async function listAddOnChoices(only?: readonly string[]): Promise<AddOnChoice[]> {
   const account = await getActiveAccount();
   if (!account) return [];
   if (only?.length === 0) return [];
-  const supabase = await createClient();
-  let query = supabase
-    .from("products")
-    .select(
-      `id, title, price_cents, currency, image_key, status, digital_file_key, created_at, ${MODERATION_GATE_SELECT}, ${PUBLIC_STOCK_SELECT}`,
-    )
-    .eq("owner_id", account.accountId);
-  if (only) query = query.in("id", [...only]);
-  const { data, error } = await query.order("created_at", { ascending: false }).limit(ADD_ON_CHOICES_MAX);
-  if (error) {
-    console.error("[products] add-on choices failed", error.message);
-    return [];
+
+  let rows: AllAddOnRow[];
+  if (only) {
+    // Filtered preview: read only the named ids, no need for the full cache.
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("products")
+      .select(
+        `id, title, price_cents, currency, image_key, status, digital_file_key, created_at, add_on_ids, ${MODERATION_GATE_SELECT}, ${PUBLIC_STOCK_SELECT}`,
+      )
+      .eq("owner_id", account.accountId)
+      .in("id", [...only])
+      .order("created_at", { ascending: false })
+      .limit(ADD_ON_CHOICES_MAX);
+    if (error) {
+      console.error("[products] add-on choices failed", error.message);
+      return [];
+    }
+    rows = (data ?? []) as unknown as AllAddOnRow[];
+  } else {
+    // Unfiltered: share the per-render cache with getAddOnHabits.
+    rows = await loadAllAddOnProducts(account.accountId);
   }
-  const rows = data ?? [];
 
   // Priced the way a buyer's page prices them. Sales that cannot be read show
   // the regular prices, like the designer's preview (preview-actions.ts).
@@ -93,7 +159,10 @@ export async function listAddOnChoices(only?: readonly string[]): Promise<AddOnC
         imageUrl: row.image_key ? await presignGetUrl(row.image_key) : null,
         status: row.status === "active" ? ("active" as const) : ("draft" as const),
         isDigital: row.digital_file_key !== null,
-        soldOut: toPublicStockBadge(row)?.state === "sold_out",
+        // AllAddOnRow has track_stock: boolean | null; cast to satisfy
+        // PublicStockRow (toPublicStockBadge returns null for a falsy
+        // track_stock, so the null case is handled correctly).
+        soldOut: toPublicStockBadge(row as unknown as import("@/lib/stock/public").PublicStockRow)?.state === "sold_out",
         takenDown: !isContentVisible(row.moderation_status),
       };
     }),
@@ -106,14 +175,19 @@ export async function listAddOnChoices(only?: readonly string[]): Promise<AddOnC
  * addOnHabits): its newest paid orders, main products and add-ons by buyer,
  * and what each of its products offers. Buyers' emails stay on the server;
  * only counts per product leave. Soft-fails to none, which offers nothing.
+ *
+ * Uses loadAllAddOnProducts (React-cached) for the per-product offers, shared
+ * with listAddOnChoices so a product-form render costs one products read.
  */
 export async function getAddOnHabits(productId: string | null): Promise<AddOnHabits> {
   const account = await getActiveAccount();
   if (!account) return NO_ADD_ON_HABITS;
+
+  // Load offers from the shared cache; read orders only when a product id is
+  // given (nobody has bought a product that is not saved yet).
   const supabase = await createClient();
-  const [offers, orders] = await Promise.all([
-    supabase.from("products").select("id, add_on_ids").eq("owner_id", account.accountId).limit(ADD_ON_CHOICES_MAX),
-    // Nobody has bought a product that is not saved yet.
+  const [offerRows, orders] = await Promise.all([
+    loadAllAddOnProducts(account.accountId),
     productId
       ? (supabase as SupabaseClient)
           .from("orders")
@@ -125,8 +199,8 @@ export async function getAddOnHabits(productId: string | null): Promise<AddOnHab
           .limit(ADD_ON_HABIT_ORDERS)
       : null,
   ]);
-  if (offers.error || orders?.error) {
-    console.error("[products] add-on habits failed", (offers.error ?? orders?.error)?.message);
+  if (orders?.error) {
+    console.error("[products] add-on habits failed", orders.error.message);
     return NO_ADD_ON_HABITS;
   }
   type OrderRow = { buyer_email: string | null; product_id: string | null; add_ons: { product_id: string | null }[] | null };
@@ -138,7 +212,7 @@ export async function getAddOnHabits(productId: string | null): Promise<AddOnHab
         (id): id is string => id !== null,
       ),
     })),
-    (offers.data ?? []).map((row) => ({ id: row.id, addOnIds: parseAddOnIds(row.add_on_ids) })),
+    offerRows.map((row) => ({ id: row.id, addOnIds: parseAddOnIds(row.add_on_ids) })),
   );
 }
 

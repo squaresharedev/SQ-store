@@ -1,6 +1,12 @@
 // Reusable analytics chart kit — Recharts 3 under the hood, app tokens on the
 // surface (ScrubChart aside, plain SVG). The families, each with subtypes:
 //
+// RECHARTS-FREE CONSUMERS: import from the leaf modules directly (e.g.
+// "@/components/charts/ScrubChart", "/theme", "/format", "/CompareLegend").
+// This barrel re-exports LineChart, BarChart, HBarChart, and PieChart, all of
+// which pull in recharts (~451 KB raw / ~130 KB gz), so a page that only uses
+// ScrubChart and theme tokens must bypass it to stay recharts-free.
+//
 //   LineChart       variant="line" | "area"            trend over time
 //                   (+ `bleed`: edge to edge, on the page instead of in a card)
 //   BarChart        variant="grouped" | "stacked"      vertical columns

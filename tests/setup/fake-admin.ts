@@ -55,6 +55,26 @@ function orTerm(term: string): Predicate {
   return (row) => test(row[column], wanted);
 }
 
+/** A parsed embedded select spec: `alias:table(cols)` or `table(cols)`. */
+type EmbedSpec = { alias: string; table: string };
+
+/**
+ * Parse `alias:table(cols)` and `table(cols)` patterns from a PostgREST
+ * column-select string. Used by the fake admin to simulate embedded joins.
+ * Returns an empty array when the string contains no embedded table syntax.
+ */
+function parseEmbeds(columns: string): EmbedSpec[] {
+  const result: EmbedSpec[] = [];
+  // Matches optional `alias:` prefix, then `table(anything)`.
+  const pattern = /(?:(\w+):)?(\w+)\([^)]+\)/g;
+  let match;
+  while ((match = pattern.exec(columns)) !== null) {
+    const [, alias, table] = match;
+    result.push({ alias: alias ?? table, table });
+  }
+  return result;
+}
+
 export function createFakeAdmin(tables: Record<string, Row[]> = {}) {
   const state = {
     tables,
@@ -71,8 +91,10 @@ export function createFakeAdmin(tables: Record<string, Row[]> = {}) {
     const predicates: Predicate[] = [];
     const sorts: { column: string; ascending: boolean }[] = [];
     let limit: number | null = null;
+    let rangeOffset = 0;
     let wantsCount = false;
     let head = false;
+    let embeds: EmbedSpec[] = [];
 
     const note = (filter: string, value: unknown) => state.filters.push([table, filter, value]);
 
@@ -90,10 +112,23 @@ export function createFakeAdmin(tables: Record<string, Row[]> = {}) {
         }
         return 0;
       });
-      const rows = sorted.slice(0, Math.min(limit ?? Number.POSITIVE_INFINITY, state.maxRows));
+      const rows = sorted.slice(rangeOffset, rangeOffset + Math.min(limit ?? Number.POSITIVE_INFINITY, state.maxRows));
+      const copied = head ? null : rows.map((row) => {
+        const r = structuredClone(row);
+        // Apply embedded joins: for each `alias:table(cols)` spec, find the
+        // matching row in the embedded table by the convention this codebase
+        // uses (child.owner_id === main.id) and merge it under the alias key.
+        // Returns null when no matching row exists, matching PostgREST's
+        // behaviour for a one-to-one join with no child row.
+        for (const { alias, table: embedTable } of embeds) {
+          const embeddedRows = state.tables[embedTable] ?? [];
+          const matched2 = embeddedRows.find((er) => er.owner_id === r.id);
+          r[alias] = matched2 ? structuredClone(matched2) : null;
+        }
+        return r;
+      });
       return {
-        // A copy of each row: a reader that changed one would otherwise change the store.
-        data: head ? null : rows.map((row) => structuredClone(row)),
+        data: copied,
         error: null,
         count: wantsCount ? matched.length : null,
       };
@@ -106,9 +141,12 @@ export function createFakeAdmin(tables: Record<string, Row[]> = {}) {
     };
 
     const chain = {
-      select(_columns?: string, options?: { count?: string; head?: boolean }) {
+      select(columns?: string, options?: { count?: string; head?: boolean }) {
         wantsCount = options?.count === "exact";
         head = options?.head === true;
+        // Parse any embedded table specs from the column string so run() can
+        // join them. No-op when columns is omitted or has no `table(...)` patterns.
+        if (columns) embeds = parseEmbeds(columns);
         return chain;
       },
       eq: filter("eq"),
@@ -144,6 +182,11 @@ export function createFakeAdmin(tables: Record<string, Row[]> = {}) {
       },
       limit(count: number) {
         limit = count;
+        return chain;
+      },
+      range(from: number, to: number) {
+        rangeOffset = from;
+        limit = to - from + 1;
         return chain;
       },
       async maybeSingle() {

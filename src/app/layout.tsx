@@ -30,11 +30,19 @@ const geist = localFont({
   display: "swap",
 });
 
+// Not preloaded: JetBrains Mono is used for code, IDs, discount codes and
+// security keys: none of those are on the first paint of most routes, and they
+// are absent entirely from the buyer product page. Declaring the face here
+// still makes the CSS variable available; the browser fetches the file only
+// when something actually renders in font-mono (the first auth code field, the
+// first order-ID row, etc.). Font-mono IS used in error.tsx and BrandFooter
+// (buyer-visible error pages), but those are fallback paths, not first paint.
 const jetbrainsMono = localFont({
   src: "./fonts/JetBrainsMono.woff2",
   weight: "100 800",
   variable: "--font-jetbrains-mono",
   display: "swap",
+  preload: false,
 });
 
 // Inter — used for the muted caption/label texts (eyebrows, footer notes, form

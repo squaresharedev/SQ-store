@@ -10,6 +10,7 @@ import { STEP_UP_FIELDS, requireStepUpState } from "@/lib/auth/mfa";
 import { checkPassword } from "@/lib/auth/reauth";
 import { LEGAL_VERSION } from "@/lib/settings/constants";
 import { TRADER_IDENTITY_HREF } from "@/lib/settings/trader-identity";
+import { OVERVIEW_PATH } from "@/lib/dashboard/paths";
 import { RATE_LIMITS, clientKey, rateLimit, rateLimitKey } from "@/lib/rate-limit";
 import { alertSecurityEvent } from "@/lib/security/events";
 import { accountHasPassword } from "@/lib/auth/has-password";
@@ -546,6 +547,10 @@ export async function saveTaxInfo(
 
   if (!(await updateOwnProfile(user.id, update))) return SAVE_FAILED;
   revalidatePath(TRADER_IDENTITY_HREF);
+  // The welcome dialog lives on OVERVIEW_PATH (/dashboard) and shows the
+  // publish checklist from the server; revalidate it so the gate updates
+  // immediately without a router.refresh() on the client.
+  revalidatePath(OVERVIEW_PATH);
 
   // A code goes out for each changed detail this deployment can prove. The
   // DETAILS ARE SAVED either way: reporting a failed send as a failed save

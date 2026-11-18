@@ -27,7 +27,7 @@
 // download, so no provider is offered at all.
 
 import { emailSendingEnabled } from "@/lib/email/send";
-import { canTakePayments, readPaymentAccount } from "@/lib/payments/connect/account";
+import { canTakePayments, getPaymentAccount } from "@/lib/payments/connect/account";
 import { stripeConnectLive } from "@/lib/payments/connect/config";
 import { orderLinksAvailable } from "@/lib/orders/order-link";
 import { turnstileEnabled } from "@/lib/turnstile";
@@ -75,10 +75,25 @@ export async function checkoutProviderFor(ownerId: string): Promise<CheckoutProv
   if (testPaymentsEnabled()) return "test";
   if (stripeConnectLive() && realPaymentsGuarded()) {
     // The seller has connected an account, and Stripe says it may take
-    // payments (in this deployment's mode).
-    if (canTakePayments(await readPaymentAccount(ownerId))) return "stripe";
+    // payments (in this deployment's mode). getPaymentAccount is React-cached
+    // so a render that calls this more than once pays for one read.
+    if (canTakePayments(await getPaymentAccount(ownerId))) return "stripe";
   }
   return null;
+}
+
+/**
+ * Whether delivery can be priced for this product right now: a physical
+ * product without a delivery price in its currency cannot show an honest
+ * total (EU CRD art. 6(1)(e)), so it falls back to the product page's own
+ * CTA. This is the cheap, synchronous half of checkoutAvailableFor; the
+ * checkout POST route uses it directly so it can skip a second provider read.
+ */
+export function canPriceDelivery(
+  gate: Pick<Purchasable, "shippingPolicy"> & { row: Pick<Purchasable["row"], "digital_file_key" | "currency"> },
+): boolean {
+  const isDigital = gate.row.digital_file_key !== null;
+  return isDigital || canQuoteShipping(gate.shippingPolicy, toCurrency(gate.row.currency));
 }
 
 /**
@@ -91,9 +106,6 @@ export async function checkoutProviderFor(ownerId: string): Promise<CheckoutProv
 export async function checkoutAvailableFor(
   gate: Pick<Purchasable, "ownerId" | "shippingPolicy"> & { row: Pick<Purchasable["row"], "digital_file_key" | "currency"> },
 ): Promise<boolean> {
-  // The cheap, local answer first: a physical product with no delivery price
-  // has no checkout whoever would take the money.
-  const isDigital = gate.row.digital_file_key !== null;
-  if (!isDigital && !canQuoteShipping(gate.shippingPolicy, toCurrency(gate.row.currency))) return false;
+  if (!canPriceDelivery(gate)) return false;
   return (await checkoutProviderFor(gate.ownerId)) !== null;
 }

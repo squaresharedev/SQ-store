@@ -7,11 +7,13 @@ import { issueKey } from "@/lib/validation/messages";
  * settings handle field. Safe to import from a Client Component: it is pure
  * schema with no server dependency, so the browser can pre-empt an obviously
  * bad handle while the server actions still re-parse everything.
+ *
+ * LoginForm imports the zod-free constants from auth-constants.ts instead of
+ * this file, to avoid pulling zod into the buyer-facing bundle.
  */
 
 /** Mirrors the DB's format check and profiles_username_lower_idx. */
-export const USERNAME_MIN_LENGTH = 3;
-export const USERNAME_MAX_LENGTH = 30;
+export { USERNAME_MIN_LENGTH, USERNAME_MAX_LENGTH, looksLikeEmail } from "@/lib/validation/auth-constants";
 
 /**
  * Handles nobody may claim. These read as the product, the platform, or a route
@@ -68,18 +70,6 @@ export const usernameSchema = z.strictObject({
     { error: issueKey("Validation.auth.usernameReserved") },
   ),
 });
-
-/**
- * Does this identifier want the email path or the handle path?
- *
- * An "@" is the whole test, and it is the RIGHT test: "@" cannot appear in a
- * handle, so anything containing one is an attempt at an email and should be
- * handed to Supabase to accept or reject as such. Whether it is a WELL-FORMED
- * email is not decided here.
- */
-export function looksLikeEmail(identifier: string): boolean {
-  return identifier.includes("@");
-}
 
 /**
  * Which flow the auth screen is asking for, carried by the clicked submit

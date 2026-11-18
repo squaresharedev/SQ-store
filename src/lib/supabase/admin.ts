@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { resilientFetch } from "./fetch";
 import type { Database } from "@/types";
@@ -15,8 +16,15 @@ import type { Database } from "@/types";
  * which must never reach the browser. The runtime guard below fails loudly if it
  * is ever bundled into client code. Do not add "use client" to any file that
  * imports this.
+ *
+ * Wrapped in React `cache()` so render paths that call this multiple times
+ * (e.g. DashboardShell calling getTraderIdentityStatus and getAccountBilling,
+ * both of which use the admin client) share one instance per render. The
+ * client is stateless (persistSession: false, autoRefreshToken: false), so
+ * sharing is always safe. React `cache()` is a no-op outside a render, so
+ * Route Handlers and Server Actions are unaffected.
  */
-export function createAdminClient() {
+export const createAdminClient = cache(function createAdminClient() {
   if (typeof window !== "undefined") {
     throw new Error("createAdminClient() must never run in the browser.");
   }
@@ -34,4 +42,4 @@ export function createAdminClient() {
     auth: { persistSession: false, autoRefreshToken: false },
     global: { fetch: resilientFetch },
   });
-}
+});

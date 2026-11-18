@@ -105,14 +105,24 @@ export default async function DashboardOverviewPage({
     ),
   );
 
-  // One extra query each (not N+1), side by side: which referenced product IDs
-  // still exist, and the full detail behind the Recent orders rows, so a click
-  // on one opens its panel in place instead of a trip to /orders.
+  // Three more reads can join the dead-block and order-glance queries because
+  // they depend only on `account`, already resolved from the first batch.
+  //
+  // identity: feeds the setup checklist's traderMissing and step logic.
+  // termsStatus: drives the terms banner (termsInForce).
+  // checkoutOpen: decides the buy-button Needs-attention row and the checkout
+  //   set-up step; the payment-account read inside checkoutProviderFor will be
+  //   per-request cached by a companion change to lib/payments/connect/account.ts.
   const recentOrderIds = orders.recentOrders.map((order) => order.id).filter(Boolean);
-  const [existingIds, recentOrderDetails, recentOrderGlances] = await Promise.all([
+  const [existingIds, recentOrderDetails, recentOrderGlances, identity, termsStatus, checkoutOpen] = await Promise.all([
     getExistingProductIds(referencedProductIds),
     getOrdersByIds(recentOrderIds),
     getOrderGlances(recentOrderIds),
+    account ? getTraderIdentityStatus(account.accountId) : Promise.resolve(null),
+    getTermsStatus(),
+    account
+      ? checkoutProviderFor(account.accountId).then((p) => p !== null)
+      : Promise.resolve(false),
   ]);
   const existingSet = new Set(existingIds);
   const deadBlockCount = referencedProductIds.filter(
@@ -147,11 +157,11 @@ export default async function DashboardOverviewPage({
 
   // --- Setup: the checklist and the welcome flow ------------------------
   //
+  // `identity` was read alongside existingIds and recentOrderDetails above.
   // The gate's own answer for the ACTIVE account, deduped with the chrome's
   // banner, which asked the same question during this render. The checklist is
   // an OWNER's: a member on someone else's store cannot do that store's setup,
   // and a read failure shows no checklist rather than a wrong one.
-  const identity = account ? await getTraderIdentityStatus(account.accountId) : null;
   const tour = Array.isArray(params.tour) ? params.tour[0] : params.tour;
   const tourRequested = tour === "1";
 
@@ -232,7 +242,7 @@ export default async function DashboardOverviewPage({
   return (
     <main>
       <DashboardHome
-        termsInForce={(await getTermsStatus())?.inForce ?? null}
+        termsInForce={termsStatus?.inForce ?? null}
         orders={orders}
         products={products}
         storefronts={storefrontInfo}
@@ -250,7 +260,7 @@ export default async function DashboardOverviewPage({
         restocks={restocks}
         canFulfil={can(account?.role, "orders.fulfil")}
         canAddProducts={can(account?.role, "products.write")}
-        checkoutOpen={account ? (await checkoutProviderFor(account.accountId)) !== null : false}
+        checkoutOpen={checkoutOpen}
       />
     </main>
   );

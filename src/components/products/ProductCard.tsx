@@ -90,7 +90,7 @@ export function ProductCard({
   const stockBadge = deriveStockBadge({ trackStock, stockQuantity, lowStockThreshold });
   const t = useTranslations("Products.card");
   const tStock = useTranslations("Common.stock");
-  const tOrders = useTranslations("Orders");
+  const tOrders = useTranslations();
   const locale = useLocale();
 
   // Stock, as the line under the sales: plenty is quiet, few is white, none is
@@ -116,6 +116,7 @@ export function ProductCard({
     <Link
       href={productEditPath(id)}
       data-card-link=""
+      prefetch={false}
       className="outline-none after:absolute after:inset-0 after:content-['']"
     >
       {title}
@@ -163,7 +164,8 @@ export function ProductCard({
             <Link
               href={ordersViewPath("to-ship", id)}
               data-card-to-ship={toShip}
-              aria-label={tOrders("toShipCount", { count: toShip })}
+              prefetch={false}
+              aria-label={tOrders("Orders.toShipCount", { count: toShip })}
               className={cn(
                 "group/btn relative z-10 inline-flex shrink-0 items-center gap-1.5 px-2 font-inter text-xs font-medium",
                 photoControlClass,
@@ -194,6 +196,7 @@ export function ProductCard({
             <Link
               href={productEditPath(id)}
               aria-label={t("edit", { title })}
+              prefetch={false}
               className={cardIconButtonClass}
             >
               <Pencil className="size-3.5" strokeWidth={2} aria-hidden="true" />

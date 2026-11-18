@@ -110,11 +110,12 @@ export function ShippingSection({
    *  link to go, so it is left out entirely rather than shown and disabled. */
   continueHref?: string;
 }) {
-  const t = useTranslations("Settings");
+  const t = useTranslations("Settings.shipping");
+  const tSettings = useTranslations();
   const { countries, countryName } = useOperatingCountries();
   const fromOptions: readonly SelectOption<string>[] = useMemo(
     () => [
-      { value: "", label: t("shipping.shipsFrom.notSet") },
+      { value: "", label: t("shipsFrom.notSet") },
       ...countries.map((country) => ({ value: country.code, label: country.name })),
     ],
     [countries, t],
@@ -122,23 +123,23 @@ export function ShippingSection({
   const windowOptions: readonly SelectOption<string>[] = useMemo(
     () =>
       WINDOW_CHOICES.map((value) => {
-        if (value === "0") return { value, label: t("shipping.returnsWindow.none") };
-        if (value === "custom") return { value, label: t("shipping.returnsWindow.custom") };
+        if (value === "0") return { value, label: t("returnsWindow.none") };
+        if (value === "custom") return { value, label: t("returnsWindow.custom") };
         const days = Number(value);
         return days === 14
           ? {
               value,
-              label: t("shipping.returnsWindow.days", { days }),
-              description: t("shipping.returnsWindow.statutoryMinimum"),
+              label: t("returnsWindow.days", { days }),
+              description: t("returnsWindow.statutoryMinimum"),
             }
-          : { value, label: t("shipping.returnsWindow.days", { days }) };
+          : { value, label: t("returnsWindow.days", { days }) };
       }),
     [t],
   );
   const paidByOptions: readonly SelectOption<string>[] = useMemo(
     () => [
-      { value: "buyer", label: t("shipping.returnsPaidBy.buyer") },
-      { value: "seller", label: t("shipping.returnsPaidBy.seller") },
+      { value: "buyer", label: t("returnsPaidBy.buyer") },
+      { value: "seller", label: t("returnsPaidBy.seller") },
     ],
     [t],
   );
@@ -353,13 +354,13 @@ export function ShippingSection({
       <SettingsCard
         id="shipping"
         fold={compact ? "open" : undefined}
-        title={t("shipping.shippingCard.title")}
-        description={t("shipping.shippingCard.description")}
+        title={t("shippingCard.title")}
+        description={t("shippingCard.description")}
         art={<TransitFlow />}
       >
         <div className="flex flex-col gap-4 [&>div]:scroll-mt-20">
           <div id="ships-from" className="flex flex-col gap-1.5">
-            <Label htmlFor="ships_from">{t("shipping.shipsFrom.label")}</Label>
+            <Label htmlFor="ships_from">{t("shipsFrom.label")}</Label>
             <Select
               id="ships_from"
               value={shipsFrom}
@@ -375,8 +376,8 @@ export function ShippingSection({
               <span className="self-start">
                 <SuggestionChip
                   icon={MapPin}
-                  label={t("shipping.shipsFrom.sameAsBusiness", { country: countryName(suggestedFrom) })}
-                  hint={t("shipping.shipsFrom.sameAsBusinessHint")}
+                  label={t("shipsFrom.sameAsBusiness", { country: countryName(suggestedFrom) })}
+                  hint={t("shipsFrom.sameAsBusinessHint")}
                   done={tookFrom && shipsFrom === suggestedFrom}
                   onApply={() => {
                     setShipsFrom(suggestedFrom);
@@ -393,16 +394,16 @@ export function ShippingSection({
 
           <div id="dispatch-time" className="flex flex-col gap-1.5">
             <span className="flex items-center gap-1.5">
-              <Label htmlFor="dispatch">{t("shipping.dispatch.label")}</Label>
-              <InfoTip label={t("shipping.dispatch.tipLabel")}>
-                {t("shipping.dispatch.tipBody")}
+              <Label htmlFor="dispatch">{t("dispatch.label")}</Label>
+              <InfoTip label={t("dispatch.tipLabel")}>
+                {t("dispatch.tipBody")}
               </InfoTip>
             </span>
             <Input
               id="dispatch"
               value={dispatch}
               onChange={(event) => setDispatch(event.target.value)}
-              placeholder={t("shipping.dispatch.placeholder")}
+              placeholder={t("dispatch.placeholder")}
               maxLength={SHIPPING_DISPATCH_MAX}
             />
           </div>
@@ -417,26 +418,26 @@ export function ShippingSection({
               "set your delivery prices" links (SHIPPING_RATES_HREF) land here. */}
           <div id={SHIPPING_RATES_ANCHOR} className="flex flex-col gap-2">
             <span className="flex items-center gap-1.5">
-              <Label>{t("shipping.destinations.label")}</Label>
-              <InfoTip label={t("shipping.destinations.tipLabel")}>
-                {t("shipping.destinations.tipBody")}
+              <Label>{t("destinations.label")}</Label>
+              <InfoTip label={t("destinations.tipLabel")}>
+                {t("destinations.tipBody")}
               </InfoTip>
             </span>
             {/* Said before the rows, not in a tip or once a row is half done:
                 each row has two money fields, and a seller who fills only the
                 words, or expects a per-item or per-kilo rate, loses sales or
                 undercharges on every order. */}
-            <p className={helpTextClass}>{t("shipping.destinations.costAndRate")}</p>
+            <p className={helpTextClass}>{t("destinations.costAndRate")}</p>
             {destinations.length === 0 ? (
-              <p className={helpTextClass}>{t("shipping.destinations.empty")}</p>
+              <p className={helpTextClass}>{t("destinations.empty")}</p>
             ) : (
               <ul className="flex flex-col gap-3">
                 {destinations.map((row, index) => {
                   const pickerSummary = countryPickerSummary(
                     row.countries ?? [],
                     {
-                      noneLabel: t("shipping.destinations.countriesNone"),
-                      anywhereLabel: t("shipping.destinations.everywhereElse"),
+                      noneLabel: t("destinations.countriesNone"),
+                      anywhereLabel: t("destinations.everywhereElse"),
                       countryName,
                     },
                   );
@@ -445,24 +446,24 @@ export function ShippingSection({
                     <div className="flex min-w-0 flex-1 flex-col gap-2">
                       <div className="grid gap-2 sm:grid-cols-[1fr_1fr_0.6fr]">
                         <Input
-                          aria-label={t("shipping.destinations.areaLabel", { number: index + 1 })}
+                          aria-label={t("destinations.areaLabel", { number: index + 1 })}
                           value={row.area}
                           onChange={(event) => setDestination(index, { area: event.target.value })}
-                          placeholder={t("shipping.destinations.areaPlaceholder")}
+                          placeholder={t("destinations.areaPlaceholder")}
                           maxLength={DESTINATION_AREA_MAX}
                         />
                         <Input
-                          aria-label={t("shipping.destinations.timeLabel", { number: index + 1 })}
+                          aria-label={t("destinations.timeLabel", { number: index + 1 })}
                           value={row.time}
                           onChange={(event) => setDestination(index, { time: event.target.value })}
-                          placeholder={t("shipping.destinations.timePlaceholder")}
+                          placeholder={t("destinations.timePlaceholder")}
                           maxLength={DESTINATION_TIME_MAX}
                         />
                         <Input
-                          aria-label={t("shipping.destinations.costLabel", { number: index + 1 })}
+                          aria-label={t("destinations.costLabel", { number: index + 1 })}
                           value={row.cost ?? ""}
                           onChange={(event) => setDestination(index, { cost: event.target.value })}
-                          placeholder={t("shipping.destinations.costPlaceholder")}
+                          placeholder={t("destinations.costPlaceholder")}
                           maxLength={DESTINATION_COST_MAX}
                         />
                       </div>
@@ -473,7 +474,7 @@ export function ShippingSection({
                             htmlFor={`dest-rate-${index}`}
                             className="font-inter text-xs text-muted-foreground"
                           >
-                            {t("shipping.destinations.rateLabel", { number: index + 1 })}
+                            {t("destinations.rateLabel", { number: index + 1 })}
                           </label>
                           <Input
                             id={`dest-rate-${index}`}
@@ -481,13 +482,13 @@ export function ShippingSection({
                             onChange={(event) =>
                               setDestinationRateInput(index, event.target.value)
                             }
-                            placeholder={t("shipping.destinations.ratePlaceholder")}
+                            placeholder={t("destinations.ratePlaceholder")}
                             inputMode="decimal"
                           />
                         </div>
                         <div className="flex flex-col gap-1">
                           <span className="font-inter text-xs text-muted-foreground">
-                            {t("shipping.destinations.countriesLabel", { number: index + 1 })}
+                            {t("destinations.countriesLabel", { number: index + 1 })}
                           </span>
                           <CountryPicker
                             value={row.countries ?? []}
@@ -505,7 +506,7 @@ export function ShippingSection({
                           just added is not scolded before it is started. */}
                       {row.area.trim() !== "" && !isPriced(destinationsWithRates[index] ?? row) && (
                         <p className={helpTextClass} data-destination-needs-rate="">
-                          {t("shipping.destinations.needsRate")}
+                          {t("destinations.needsRate")}
                         </p>
                       )}
                     </div>
@@ -521,8 +522,8 @@ export function ShippingSection({
                       }}
                       aria-label={
                         row.area.trim()
-                          ? t("shipping.destinations.removeNamed", { area: row.area.trim() })
-                          : t("shipping.destinations.removeNumbered", { number: index + 1 })
+                          ? t("destinations.removeNamed", { area: row.area.trim() })
+                          : t("destinations.removeNumbered", { number: index + 1 })
                       }
                       className={cn(iconButtonClass, "mt-6 shrink-0")}
                     >
@@ -543,23 +544,23 @@ export function ShippingSection({
                 className={cn(secondaryButtonClass, "w-fit")}
               >
                 <Plus className="size-4" aria-hidden="true" />
-                {t("shipping.destinations.add")}
+                {t("destinations.add")}
               </button>
             ) : (
               <p className={helpTextClass}>
-                {t("shipping.destinations.limitReached", { max: SHIPPING_DESTINATIONS_MAX })}
+                {t("destinations.limitReached", { max: SHIPPING_DESTINATIONS_MAX })}
               </p>
             )}
           </div>
 
           <div id="shipping-notes" className="flex flex-col gap-1.5">
-            <Label htmlFor="shipping_notes">{t("shipping.notes.label")}</Label>
+            <Label htmlFor="shipping_notes">{t("notes.label")}</Label>
             <Textarea
               id="shipping_notes"
               value={shippingNotes}
               onChange={(event) => setShippingNotes(event.target.value)}
               rows={3}
-              placeholder={t("shipping.notes.placeholder")}
+              placeholder={t("notes.placeholder")}
               maxLength={POLICY_TEXT_MAX}
             />
           </div>
@@ -573,12 +574,12 @@ export function ShippingSection({
           it stays out of the way of sellers who do not need it yet. */}
       <SettingsCard
         fold={compact ? "closed" : undefined}
-        title={t("shipping.rates.title")}
-        description={t("shipping.rates.description")}
+        title={t("rates.title")}
+        description={t("rates.description")}
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="rates_currency">{t("shipping.rates.currencyLabel")}</Label>
+            <Label htmlFor="rates_currency">{t("rates.currencyLabel")}</Label>
             <Select
               id="rates_currency"
               value={ratesCurrency}
@@ -588,15 +589,15 @@ export function ShippingSection({
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="free_over">{t("shipping.rates.freeOverLabel")}</Label>
+            <Label htmlFor="free_over">{t("rates.freeOverLabel")}</Label>
             <Input
               id="free_over"
               value={freeOverInput}
               onChange={(event) => setFreeOverInput(event.target.value)}
-              placeholder={t("shipping.rates.freeOverPlaceholder")}
+              placeholder={t("rates.freeOverPlaceholder")}
               inputMode="decimal"
             />
-            <p className={helpTextClass}>{t("shipping.rates.freeOverHint")}</p>
+            <p className={helpTextClass}>{t("rates.freeOverHint")}</p>
           </div>
         </div>
       </SettingsCard>
@@ -604,15 +605,15 @@ export function ShippingSection({
       <SettingsCard
         id="returns"
         fold={compact ? "closed" : undefined}
-        title={t("shipping.returnsCard.title")}
-        description={t("shipping.returnsCard.description")}
+        title={t("returnsCard.title")}
+        description={t("returnsCard.description")}
       >
         <div className="flex flex-col gap-4 [&>div]:scroll-mt-20">
           <div id="returns-window" className="flex flex-col gap-1.5">
             <span className="flex items-center gap-1.5">
-              <Label htmlFor="returns_window">{t("shipping.returnsWindow.label")}</Label>
-              <InfoTip label={t("shipping.returnsWindow.tipLabel")}>
-                {t("shipping.returnsWindow.tipBody")}
+              <Label htmlFor="returns_window">{t("returnsWindow.label")}</Label>
+              <InfoTip label={t("returnsWindow.tipLabel")}>
+                {t("returnsWindow.tipBody")}
               </InfoTip>
             </span>
             <Select
@@ -625,7 +626,7 @@ export function ShippingSection({
             {windowChoice === "custom" && (
               <div className="mt-2 flex items-center gap-2 sm:max-w-40">
                 <Input
-                  aria-label={t("shipping.returnsWindow.customLabel")}
+                  aria-label={t("returnsWindow.customLabel")}
                   value={customDays}
                   onChange={(event) => setCustomDays(event.target.value.replace(/[^0-9]/g, ""))}
                   inputMode="numeric"
@@ -638,7 +639,7 @@ export function ShippingSection({
                   className="flex-1 placeholder:text-muted-foreground/50"
                 />
                 <span className="text-sm text-muted-foreground">
-                  {t("shipping.returnsWindow.daysUnit")}
+                  {t("returnsWindow.daysUnit")}
                 </span>
               </div>
             )}
@@ -649,7 +650,7 @@ export function ShippingSection({
               drops it for the same reason. */}
           {returnsWindowDays !== undefined && returnsWindowDays > 0 && (
             <div id="returns-postage" className="flex flex-col gap-1.5">
-              <Label htmlFor="returns_paid_by">{t("shipping.returnsPaidBy.label")}</Label>
+              <Label htmlFor="returns_paid_by">{t("returnsPaidBy.label")}</Label>
               <Select
                 id="returns_paid_by"
                 value={paidBy}
@@ -662,9 +663,9 @@ export function ShippingSection({
 
           <div id="returns-notes" className="flex flex-col gap-1.5">
             <span className="flex items-center gap-1.5">
-              <Label htmlFor="returns_notes">{t("shipping.exceptions.label")}</Label>
-              <InfoTip label={t("shipping.exceptions.tipLabel")}>
-                {t("shipping.exceptions.tipBody")}
+              <Label htmlFor="returns_notes">{t("exceptions.label")}</Label>
+              <InfoTip label={t("exceptions.tipLabel")}>
+                {t("exceptions.tipBody")}
               </InfoTip>
             </span>
             <Textarea
@@ -672,7 +673,7 @@ export function ShippingSection({
               value={returnsNotes}
               onChange={(event) => setReturnsNotes(event.target.value)}
               rows={3}
-              placeholder={t("shipping.exceptions.placeholder")}
+              placeholder={t("exceptions.placeholder")}
               maxLength={POLICY_TEXT_MAX}
             />
           </div>
@@ -686,15 +687,15 @@ export function ShippingSection({
       <SettingsCard
         id="preview"
         fold={compact ? "closed" : undefined}
-        title={t("shipping.preview.title")}
-        description={t("shipping.preview.description")}
+        title={t("preview.title")}
+        description={t("preview.description")}
       >
         {preview.shipping || preview.returns ? (
           <div className="flex flex-col gap-4">
             {preview.shipping && (
               <div>
                 <h3 className="font-inter text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {t("shipping.preview.shippingHeading")}
+                  {t("preview.shippingHeading")}
                 </h3>
                 <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-foreground">
                   {preview.shipping}
@@ -704,7 +705,7 @@ export function ShippingSection({
             {preview.returns && (
               <div>
                 <h3 className="font-inter text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {t("shipping.preview.returnsHeading")}
+                  {t("preview.returnsHeading")}
                 </h3>
                 <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-foreground">
                   {preview.returns}
@@ -713,7 +714,7 @@ export function ShippingSection({
             )}
           </div>
         ) : (
-          <p className={helpTextClass}>{t("shipping.preview.empty")}</p>
+          <p className={helpTextClass}>{t("preview.empty")}</p>
         )}
       </SettingsCard>
 
@@ -726,29 +727,29 @@ export function ShippingSection({
       <SettingsCard
         id="own-words"
         fold={compact ? "closed" : undefined}
-        title={t("shipping.ownWords.title")}
-        description={t("shipping.ownWords.description")}
+        title={t("ownWords.title")}
+        description={t("ownWords.description")}
       >
         <div className="flex flex-col gap-4 [&>div]:scroll-mt-20">
           <div id="shipping-text" className="flex flex-col gap-1.5">
-            <Label htmlFor="shipping_text">{t("shipping.ownWords.shippingLabel")}</Label>
+            <Label htmlFor="shipping_text">{t("ownWords.shippingLabel")}</Label>
             <Textarea
               id="shipping_text"
               value={shippingText}
               onChange={(event) => setShippingText(event.target.value)}
               rows={4}
-              placeholder={t("shipping.ownWords.placeholder")}
+              placeholder={t("ownWords.placeholder")}
               maxLength={POLICY_TEXT_MAX}
             />
           </div>
           <div id="returns-text" className="flex flex-col gap-1.5">
-            <Label htmlFor="returns_text">{t("shipping.ownWords.returnsLabel")}</Label>
+            <Label htmlFor="returns_text">{t("ownWords.returnsLabel")}</Label>
             <Textarea
               id="returns_text"
               value={returnsText}
               onChange={(event) => setReturnsText(event.target.value)}
               rows={4}
-              placeholder={t("shipping.ownWords.placeholder")}
+              placeholder={t("ownWords.placeholder")}
               maxLength={POLICY_TEXT_MAX}
             />
           </div>
@@ -765,12 +766,12 @@ export function ShippingSection({
       <SettingsCard
         id="profiles"
         fold={compact ? "closed" : undefined}
-        title={t("shipping.profiles.title")}
-        description={t("shipping.profiles.description")}
+        title={t("profiles.title")}
+        description={t("profiles.description")}
       >
         <div className="flex flex-col gap-3">
           {profiles.length === 0 ? (
-            <p className={helpTextClass}>{t("shipping.profiles.empty")}</p>
+            <p className={helpTextClass}>{t("profiles.empty")}</p>
           ) : (
             <ul className="flex flex-col gap-3">
               {profiles.map((profile, index) => (
@@ -782,13 +783,13 @@ export function ShippingSection({
                   <div className="flex items-start gap-2">
                     <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                       <Label htmlFor={`profile-name-${profile.id}`}>
-                        {t("shipping.profiles.nameLabel")}
+                        {t("profiles.nameLabel")}
                       </Label>
                       <Input
                         id={`profile-name-${profile.id}`}
                         value={profile.name}
                         onChange={(event) => setProfile(index, { name: event.target.value })}
-                        placeholder={t("shipping.profiles.namePlaceholder")}
+                        placeholder={t("profiles.namePlaceholder")}
                         maxLength={SHIPPING_PROFILE_NAME_MAX}
                       />
                     </div>
@@ -804,8 +805,8 @@ export function ShippingSection({
                       }}
                       aria-label={
                         profile.name.trim()
-                          ? t("shipping.profiles.removeNamed", { name: profile.name.trim() })
-                          : t("shipping.profiles.removeUnnamed")
+                          ? t("profiles.removeNamed", { name: profile.name.trim() })
+                          : t("profiles.removeUnnamed")
                       }
                       className={cn(iconButtonClass, "mt-7 shrink-0")}
                     >
@@ -814,46 +815,46 @@ export function ShippingSection({
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor={`profile-dispatch-${profile.id}`}>
-                      {t("shipping.profiles.dispatchLabel")}
+                      {t("profiles.dispatchLabel")}
                     </Label>
                     <Input
                       id={`profile-dispatch-${profile.id}`}
                       value={profile.dispatch ?? ""}
                       onChange={(event) => setProfile(index, { dispatch: event.target.value })}
-                      placeholder={t("shipping.profiles.dispatchPlaceholder")}
+                      placeholder={t("profiles.dispatchPlaceholder")}
                       maxLength={SHIPPING_DISPATCH_MAX}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor={`profile-rate-${profile.id}`}>
-                      {t("shipping.profiles.rateLabel")}
+                      {t("profiles.rateLabel")}
                     </Label>
                     <Input
                       id={`profile-rate-${profile.id}`}
                       value={profileRateInputs[index] ?? ""}
                       onChange={(event) => setProfileRateInput(index, event.target.value)}
-                      placeholder={t("shipping.profiles.ratePlaceholder")}
+                      placeholder={t("profiles.ratePlaceholder")}
                       inputMode="decimal"
                     />
-                    <p className={helpTextClass}>{t("shipping.profiles.rateHint")}</p>
+                    <p className={helpTextClass}>{t("profiles.rateHint")}</p>
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor={`profile-body-${profile.id}`}>
-                      {t("shipping.profiles.bodyLabel")}
+                      {t("profiles.bodyLabel")}
                     </Label>
                     <Textarea
                       id={`profile-body-${profile.id}`}
                       value={profile.body}
                       onChange={(event) => setProfile(index, { body: event.target.value })}
                       rows={3}
-                      placeholder={t("shipping.profiles.bodyPlaceholder")}
+                      placeholder={t("profiles.bodyPlaceholder")}
                       maxLength={POLICY_TEXT_MAX}
                     />
                     {/* A profile with no terms is dropped on save rather than
                         stored as a name pointing at nothing, so this says so
                         before the seller finds out by saving. */}
                     {profile.body.trim() === "" && (
-                      <p className={helpTextClass}>{t("shipping.profiles.noTerms")}</p>
+                      <p className={helpTextClass}>{t("profiles.noTerms")}</p>
                     )}
                   </div>
                 </li>
@@ -873,11 +874,11 @@ export function ShippingSection({
               className={cn(secondaryButtonClass, "w-fit")}
             >
               <Plus className="size-4" aria-hidden="true" />
-              {t("shipping.profiles.add")}
+              {t("profiles.add")}
             </button>
           ) : (
             <p className={helpTextClass}>
-              {t("shipping.profiles.limitReached", { max: SHIPPING_PROFILES_MAX })}
+              {t("profiles.limitReached", { max: SHIPPING_PROFILES_MAX })}
             </p>
           )}
         </div>
@@ -892,7 +893,7 @@ export function ShippingSection({
             doesn't vanish before it's used. */}
         {justSaved && continueHref && (
           <Link href={continueHref} className={cn(secondaryButtonClass, "w-fit")}>
-            {t("continueToStorefront")}
+            {tSettings("Settings.continueToStorefront")}
             <ArrowRight
               className={cn("size-4", iconNudgeRightClass)}
               strokeWidth={2}

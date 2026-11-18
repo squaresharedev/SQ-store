@@ -17,6 +17,9 @@ import {
 } from "@/components/onboarding/EditorTour";
 import { __resetTourForTests, dashboardTour, editorTour } from "@/lib/onboarding/tour-store";
 
+// Pre-load the lazy ActiveTour so next/dynamic's loadable resolves instantly in tests.
+await import("@/components/onboarding/ActiveTour");
+
 beforeAll(() => {
   Object.defineProperty(window, "matchMedia", {
     writable: true,

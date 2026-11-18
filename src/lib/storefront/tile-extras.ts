@@ -23,6 +23,11 @@ import type { TileStockState } from "@/types/stock";
  *  PUBLIC_STOCK_SELECT, the public seam's own list, never by hand. */
 export const TILE_EXTRAS_SELECT = `gallery, ${PUBLIC_STOCK_SELECT}`;
 
+/** Like TILE_EXTRAS_SELECT but without gallery: for boards where no tile asks
+ *  for a hover photo, sparing the JSON column (up to 24 objects) from every
+ *  product read. */
+export const TILE_EXTRAS_SELECT_LEAN = PUBLIC_STOCK_SELECT;
+
 export type TileExtrasRow = PublicStockRow & {
   id: string;
   image_key: string | null;

@@ -3,13 +3,13 @@ import {
   boundedInt,
   hexColor,
   hostname,
-  isStrictHexColor,
   multiLineText,
   sellerProse,
   singleLineText,
   uniqueList,
   uuidField,
 } from "@/lib/validation/inputs";
+import { isStrictHexColor } from "@/lib/validation/predicates";
 import { SHIPPING_RATE_MAX_CENTS } from "@/types/shipping-policy";
 import { issueKey } from "@/lib/validation/messages";
 import { isOnBoard } from "@/lib/geometry/rotated-box";

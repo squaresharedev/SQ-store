@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
-import { StepUpProvider } from "@/components/auth/StepUp";
+import { StepUpProvider } from "@/components/auth/StepUpProvider";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { stepUpProviderProps } from "@/lib/auth/assurance";
-import { getAssurance, getProfile, requireUser } from "@/lib/auth/session";
+import { getAssurance, requireUser } from "@/lib/auth/session";
 import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
 import { NavigationBlockerProvider } from "@/lib/hooks/useNavigationBlocker";
 
@@ -38,9 +38,15 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const user = await requireUser("/");
-  const [profile, assurance] = await Promise.all([getProfile(), getAssurance()]);
-  const t = await getTranslations("Dashboard.shell");
-  const username = profile?.username || user.email?.split("@")[0] || t("accountFallback");
+  // getProfile() is not needed here: DashboardShell calls it in its own
+  // parallel batch and prefers profile.username over this fallback anyway
+  // (see DashboardShell: name = profile?.username || email || username).
+  // Removing it shaves one sequential round trip off the shell's start.
+  const [assurance, t] = await Promise.all([
+    getAssurance(),
+    getTranslations("Dashboard.shell"),
+  ]);
+  const username = user.email?.split("@")[0] || t("accountFallback");
 
   // Toasts come from the ROOT layout (app/layout.tsx), not from here: they
   // have to outlive a navigation out of this route group.
@@ -55,7 +61,7 @@ export default async function DashboardLayout({
   // StepUpProvider: the step-up forms in this group (the welcome flow, the plan
   // buttons) have to know what the account confirms with (components/auth/StepUp.tsx).
   return (
-    <ScopedIntlProvider scope="app">
+    <ScopedIntlProvider scope="appChrome">
       <NavigationBlockerProvider>
         <StepUpProvider {...stepUpProviderProps(assurance)}>
           <DashboardShell username={username}>{children}</DashboardShell>

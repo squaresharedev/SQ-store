@@ -59,7 +59,7 @@ describe("SuggestingTextarea", () => {
     expect(suggest).not.toHaveBeenCalled();
     await pause();
     expect(suggest).toHaveBeenCalledTimes(1);
-    expect(suggest).toHaveBeenCalledWith("A mug that holds ");
+    expect(suggest).toHaveBeenCalledWith("A mug that holds ", expect.any(AbortSignal));
     expect(grey()).toBe("350 ml.");
     expect(field()).toHaveAccessibleDescription("Tab adds the grey text. Esc hides it.");
     expect(screen.getByText("Suggestion: 350 ml.")).toBeInTheDocument();

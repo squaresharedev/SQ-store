@@ -181,6 +181,9 @@ describe("the shopping controls", () => {
 describe("a card's second photo and hover effect", () => {
   it("lays the second photo over the first only when asked for and there is one", () => {
     const { container } = renderBoard({ hoverPhoto: true });
+    // The hover photo is deferred: it is not in the DOM until pointer-enter.
+    expect(container.querySelector("[data-tile-hover-photo]")).toBeNull();
+    fireEvent.pointerEnter(container.querySelector("[data-image-frame]")!.parentElement!);
     const hover = container.querySelector<HTMLImageElement>("[data-tile-hover-photo]");
     expect(hover?.getAttribute("src")).toBe(baseProduct.hoverImageUrl);
     expect(hover).toHaveAttribute("aria-hidden", "true");
@@ -219,6 +222,8 @@ describe("a card's second photo and hover effect", () => {
     const { container, rerender } = render(
       <BlockTile blockKey="p" block={block} product={baseProduct} theme={themed()} editable isEditing />,
     );
+    // Mount the hover image by simulating pointer-enter on the tile face.
+    fireEvent.pointerEnter(container.querySelector("[data-image-frame]")!.parentElement!);
     // A seller tries the effect by pointing at the card they are styling...
     expect(container.innerHTML).toContain("motion-safe:group-hover:rotate-1");
     expect(container.querySelector("[data-tile-hover-photo]")!.className).toContain("group-hover:opacity-100");
@@ -226,7 +231,9 @@ describe("a card's second photo and hover effect", () => {
     expect(container.innerHTML).not.toContain("group-focus-within:rotate-1");
     expect(container.querySelector("[data-tile-hover-photo]")!.className).not.toContain("group-focus-within:");
 
-    // Still while the grid carries or resizes it.
+    // Still while the grid carries or resizes it. The state hoverImageMounted
+    // persists across the rerender, so the img stays in the DOM with "still"
+    // classes (no group-hover triggers when a gesture owns the tile).
     rerender(<BlockTile blockKey="p" block={block} product={baseProduct} theme={themed()} editable isEditing isGesture />);
     expect(container.innerHTML).not.toContain("group-hover:rotate-1");
     expect(container.querySelector("[data-tile-hover-photo]")!.className).not.toContain("group-hover:");
@@ -389,6 +396,9 @@ describe("the buyer's board", () => {
     expect(link.className).toContain("motion-safe:group-hover:-translate-y-1");
     // One link, with everything inside it: no link in a link.
     expect(link.querySelectorAll("a")).toHaveLength(0);
+    // The hover photo is deferred: it is not in the DOM until pointer-enter.
+    expect(link.querySelector("[data-tile-hover-photo]")).toBeNull();
+    fireEvent.pointerEnter(link.querySelector("[data-image-frame]")!.parentElement!);
     expect(link.querySelector("[data-tile-hover-photo]")).not.toBeNull();
     expect(link.querySelector("[data-tile-rating]")).not.toBeNull();
     expect(link.querySelector("[data-tile-low-stock]")?.textContent).toBe("Low stock");

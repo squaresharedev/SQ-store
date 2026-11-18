@@ -27,6 +27,7 @@ import { DEV_PREVIEW_PARAM, previewsEmptyList } from "@/lib/dev/preview";
 import { requireUser } from "@/lib/auth/session";
 import { toShipByProduct } from "@/lib/orders/queries";
 import { settleWaitingProducts } from "@/lib/products/settle-waiting";
+import { isAwaitingCheck } from "@/lib/moderation/removal";
 import { PRODUCTS_PATH } from "@/lib/products/paths";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -103,7 +104,13 @@ export default async function ProductsPage({
   // Products the automatic check has not judged yet get a few more asked
   // about after this page is sent, so a list of "Checking" badges catches up
   // as the seller looks at it instead of waiting for the sweep.
-  if (account && !previewEmpty) {
+  // Gated on the CURRENT PAGE including at least one waiting product: if none
+  // are visible here the scheduled sweep handles them, and the service-role
+  // products read is skipped for the common case.
+  const hasCheckingRows = !previewEmpty && data.rows.some(
+    (p) => p.removal !== undefined && isAwaitingCheck(p.removal.kind),
+  );
+  if (account && hasCheckingRows) {
     const ownerId = account.accountId;
     after(() => settleWaitingProducts(ownerId));
   }
@@ -119,18 +126,44 @@ export default async function ProductsPage({
     account && canWrite && !previewEmpty ? await planRoom(account.accountId, "products") : null;
   const t = await getTranslations("Products.page");
 
+  // Trim the JSON island: sales.byProduct, placements and toShip are keyed by
+  // product id across the WHOLE catalogue, but only the current page's cards
+  // read them. Filter to the rendered row ids to avoid sending every product's
+  // metrics on every page load. bestsellerId is kept regardless (the badge can
+  // land on a product not in the current slice).
+  //
+  // description is not read by ProductCard or ProductList; blank it on list
+  // rows to cut the per-row payload.
+  const rowIds = new Set(data.rows.map((p) => p.id));
+  const pageData = {
+    ...data,
+    rows: data.rows.map((p) => ({ ...p, description: "" })),
+  };
+  const pageSales = {
+    byProduct: Object.fromEntries(
+      Object.entries(sales.byProduct).filter(([id]) => rowIds.has(id)),
+    ),
+    bestsellerId: sales.bestsellerId,
+  };
+  const pagePlacements = Object.fromEntries(
+    Object.entries(placements).filter(([id]) => rowIds.has(id)),
+  );
+  const pageToShip = Object.fromEntries(
+    Object.entries(toShip).filter(([id]) => rowIds.has(id)),
+  );
+
   return (
     <main className={pageShellClass}>
       {/* The toolbar and the grid share URL state, so the header actions live
           in ProductsBrowser; the title block stays server-rendered here. */}
       <ProductsBrowser
-        data={data}
+        data={pageData}
         filters={filters}
         sort={sort}
         canWrite={canWrite}
-        sales={sales}
-        placements={placements}
-        toShip={toShip}
+        sales={pageSales}
+        placements={pagePlacements}
+        toShip={pageToShip}
         missingTraderDetails={identity.ok ? identity.missing : []}
         heading={
           <div>

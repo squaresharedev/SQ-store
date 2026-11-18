@@ -19,7 +19,9 @@ import { cn } from "@/lib/utils";
  * upgrade to) and when the plan could not be read, rather than guessing one.
  */
 export function PlanChip({ className, onNavigate }: { className?: string; onNavigate?: () => void }) {
-  const t = useTranslations("Billing");
+  const tChip = useTranslations("Billing.chip");
+  const tPlans = useTranslations("Billing.plans");
+  const tCard = useTranslations("Billing.card");
   const plan = useAccountPlan();
   const [loopScope, playLoop] = useArrowLoop();
   const next = plan ? nextPlanUp(plan) : null;
@@ -42,11 +44,11 @@ export function PlanChip({ className, onNavigate }: { className?: string; onNavi
       // (the label needs the width: "Upgrade to Starter" fits the 256px rail).
       className={cn(className, "mr-3 rounded-full bg-muted py-1.5 pr-1 text-foreground hover:bg-border")}
     >
-      <span className="sr-only">{t("chip.label", { plan: t(`plans.${plan}.name`) })}. </span>
+      <span className="sr-only">{tChip("label", { plan: tPlans(`${plan}.name`) })}. </span>
       {/* An empty icon slot, so the label starts where the labels of the items
           around it (Settings below) start, not under their icons. */}
       <span aria-hidden className="size-5 shrink-0" />
-      <span className="min-w-0 truncate">{t("card.upgrade", { plan: t(`plans.${next}.name`) })}</span>
+      <span className="min-w-0 truncate">{tCard("upgrade", { plan: tPlans(`${next}.name`) })}</span>
       <span aria-hidden className="ml-auto flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-foreground text-background">
         <ArrowLoopIcon scope={loopScope} className="size-3.5" strokeWidth={2.25} />
       </span>

@@ -44,6 +44,7 @@ import {
   type TraderIdentityField,
   type TraderIdentityInput,
 } from "@/lib/settings/trader-identity";
+import { getAccountRow } from "@/lib/settings/account-row";
 import type { StorefrontSeller } from "@/types/storefront";
 
 /**
@@ -99,15 +100,21 @@ function plausibleEmail(email: string): boolean {
  * would refuse (see above, and addressQualityProblem) counts as absent, so the
  * gate is the same wall whichever way the row was written. Verification is a
  * boolean here; when it was proven is nobody's business but the audit trail's.
+ *
+ * Builds ONLY the four fields missingTraderIdentity reads (businessName,
+ * address, email, emailVerified) directly from the row, applying the same
+ * normalisation buildSellerIdentity uses. This avoids the libphonenumber call
+ * inside buildSellerIdentity, which is irrelevant to the publish gate.
  */
 export function buildTraderIdentityInput(
   row: TraderGateRow | null,
 ): TraderIdentityInput {
-  const { address, email, ...rest } = buildSellerIdentity(row);
+  const rawAddress = row?.seller_address || undefined;
+  const rawEmail = row?.seller_email || undefined;
   return {
-    ...rest,
-    ...(address && !addressQualityProblem(address) ? { address } : {}),
-    ...(email && plausibleEmail(email) ? { email } : {}),
+    ...(row?.tax_business_name ? { businessName: row.tax_business_name } : {}),
+    ...(rawAddress && !addressQualityProblem(rawAddress) ? { address: rawAddress } : {}),
+    ...(rawEmail && plausibleEmail(rawEmail) ? { email: rawEmail } : {}),
     emailVerified: Boolean(row?.seller_email_verified_at),
   };
 }
@@ -156,10 +163,10 @@ export function buildSellerIdentity(row: SellerIdentityRow | null): StorefrontSe
 /**
  * One account's trader identity, read with the service role.
  *
- * For a single-use caller (the storefront designer's page load). A caller
- * already holding an admin client for other reads in the same request (the
- * public product page) should select `SELLER_IDENTITY_SELECT` on its own
- * client instead of spinning up a second one — see lib/products/public.ts.
+ * For a single-use caller (the public product page, route handlers) that
+ * issues its own narrow read. Dashboard pages should call
+ * {@link getAccountSellerIdentity} instead to share the account row read that
+ * the shell has already issued.
  */
 export async function getSellerIdentity(ownerId: string): Promise<StorefrontSeller> {
   const admin = createAdminClient();
@@ -176,67 +183,105 @@ export async function getSellerIdentity(ownerId: string): Promise<StorefrontSell
 }
 
 /**
+ * The account's seller identity, derived from the React-cached account row
+ * (getAccountRow). Use on dashboard pages where the shell has already
+ * fetched the account row; prefer {@link getSellerIdentity} for public pages
+ * and route handlers that issue their own narrow read.
+ */
+export const getAccountSellerIdentity = cache(async (accountId: string): Promise<StorefrontSeller> => {
+  const result = await getAccountRow(accountId);
+  if (!result.ok || !result.row) return {};
+  return buildSellerIdentity(result.row as SellerIdentityRow);
+});
+
+/**
  * Whether this account may publish or sell, and what it is still missing.
  *
  * The WRITE-SIDE half of the publish gate (lib/settings/trader-identity.ts owns
  * the rule itself). Every action that puts something on sale asks this before
  * it writes: creating or editing an `active` product, switching a storefront's
- * embed on. The public READ side does not call this — the buyer-facing paths
+ * embed on. The public READ side does not call this -- the buyer-facing paths
  * already hold the profile row and apply `missingTraderIdentity` to it
  * directly, so a page render never pays for a second query.
  *
  * `{ ok: false }` is a read failure, kept distinct from "nothing filled in":
  * a seller whose details are complete must not be told to go and add them
  * because a query blipped, and equally must not be waved through. Callers turn
- * it into a plain server error and the write is refused either way — a legal
+ * it into a plain server error and the write is refused either way -- a legal
  * disclosure gate is the wrong place to fail open.
  *
- * Deduped per render (some pages check this and also render the warning).
+ * Deduped per render via the account row cache (getAccountRow), so the shell
+ * and the page reading this together cost one round trip, not two.
  */
 export const getTraderIdentityStatus = cache(
   async (
     ownerId: string,
   ): Promise<{ ok: true; missing: TraderIdentityField[] } | { ok: false }> => {
-    try {
-      const admin = createAdminClient();
-      const { data, error } = await admin
-        .from("profiles")
-        .select(TRADER_GATE_SELECT)
-        .eq("id", ownerId)
-        .maybeSingle();
-      if (error) {
-        // Fields spelled out: a PostgrestError logged whole prints as `{}` in
-        // the dev overlay, which hides the one thing worth reading (a missing
-        // column is how an unapplied migration shows up here).
-        console.error(
-          "[seller-identity] publish-gate read failed:",
-          error.code,
-          error.message,
-        );
-        return { ok: false };
-      }
-      return {
-        ok: true,
-        missing: missingTraderIdentity(
-          buildTraderIdentityInput(data as TraderGateRow | null),
-          { requireVerifiedEmail: emailProofRequired() },
-        ),
-      };
-    } catch (err) {
-      // createAdminClient THROWS when the service-role env is missing or
-      // wrong, and this gate now sits in front of a save the seller pressed.
-      // An unhandled throw there is a crashed action with no message; a caught
-      // one is a refusal that says something. (This is not hypothetical: a bad
-      // prod SUPABASE_SERVICE_ROLE_KEY has taken buyer-facing paths down here
-      // before.)
+    const result = await getAccountRow(ownerId);
+    if (!result.ok) {
+      console.error("[seller-identity] publish-gate read failed: account row unavailable");
+      return { ok: false };
+    }
+    return {
+      ok: true,
+      missing: missingTraderIdentity(
+        buildTraderIdentityInput(result.row as TraderGateRow | null),
+        { requireVerifiedEmail: emailProofRequired() },
+      ),
+    };
+  },
+);
+
+/**
+ * Narrow UNCACHED read of the trader gate columns, for publishBlockedError.
+ *
+ * The publish gate must never depend on the billing join or on the React
+ * render cache: it runs inside server actions where cache() is a no-op, and
+ * its security guarantee is that any read failure refuses rather than waves
+ * through. A fresh narrow read of only the columns it needs is the safest
+ * expression of that guarantee.
+ *
+ * Fields spelled out in the error log: a PostgrestError printed whole shows
+ * as `{}` in the dev overlay, hiding the one thing worth reading (a missing
+ * column signals an unapplied migration).
+ */
+async function readTraderGateUncached(
+  ownerId: string,
+): Promise<{ ok: true; missing: TraderIdentityField[] } | { ok: false }> {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("profiles")
+      .select(TRADER_GATE_SELECT)
+      .eq("id", ownerId)
+      .maybeSingle();
+    if (error) {
       console.error(
-        "[seller-identity] publish-gate client unavailable:",
-        err instanceof Error ? err.message : String(err),
+        "[seller-identity] publish-gate read failed:",
+        error.code,
+        error.message,
       );
       return { ok: false };
     }
-  },
-);
+    return {
+      ok: true,
+      missing: missingTraderIdentity(
+        buildTraderIdentityInput(data as TraderGateRow | null),
+        { requireVerifiedEmail: emailProofRequired() },
+      ),
+    };
+  } catch (err) {
+    // createAdminClient THROWS when the service-role env is missing or wrong.
+    // An unhandled throw here is a crashed action with no message; a caught
+    // one is a refusal that says something. (A bad prod service-role key has
+    // taken buyer-facing paths down here before.)
+    console.error(
+      "[seller-identity] publish-gate client unavailable:",
+      err instanceof Error ? err.message : String(err),
+    );
+    return { ok: false };
+  }
+}
 
 /**
  * The publish gate as one call, for every server action that puts something in
@@ -250,13 +295,18 @@ export const getTraderIdentityStatus = cache(
  * Always pass the ACCOUNT id, never the signed-in user's: the details a buyer
  * needs belong to the trader whose store this is, and a team member cannot
  * stand in for them.
+ *
+ * Uses an UNCACHED narrow profiles read (readTraderGateUncached), not the
+ * account row cache: actions run outside a render, the billing join is
+ * irrelevant here, and the gate must not depend on cached state from an
+ * earlier render that may be stale.
  */
 export async function publishBlockedError(
   accountId: string,
 ): Promise<ActionError | null> {
-  const identity = await getTraderIdentityStatus(accountId);
-  // A read failure refuses rather than waving the publish through: see
-  // getTraderIdentityStatus for why this end fails closed.
+  const identity = await readTraderGateUncached(accountId);
+  // A read failure refuses rather than waving the publish through: see the
+  // comments in readTraderGateUncached for why this end fails closed.
   if (!identity.ok) return serverError("checkSellerDetails");
   if (identity.missing.length === 0) return null;
   return traderIdentityRequired(identity.missing);

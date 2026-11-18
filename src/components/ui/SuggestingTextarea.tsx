@@ -90,8 +90,10 @@ export function SuggestingTextarea({
 }: Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange"> & {
   value: string;
   onChange: (value: string) => void;
-  /** The words to offer after `text` (the cursor is at its end), or null. */
-  suggest: ((text: string) => Promise<string | null>) | null;
+  /** The words to offer after `text` (the cursor is at its end), or null.
+   *  Receives an AbortSignal that fires when the ask is cancelled: a stale
+   *  request that arrives after the signal fires is dropped before it shows. */
+  suggest: ((text: string, signal?: AbortSignal) => Promise<string | null>) | null;
   labels: SuggestingTextareaLabels;
   onTurnOff?: () => void;
 }) {
@@ -100,6 +102,8 @@ export function SuggestingTextarea({
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   // Bumped whenever an answer on its way stops being wanted.
   const asked = useRef(0);
+  // Aborted (and replaced) whenever a pending ask is cancelled.
+  const abort = useRef<AbortController | undefined>(undefined);
   const [offer, setOffer] = useState<Offer | null>(null);
   const [focused, setFocused] = useState(false);
   const [atEnd, setAtEnd] = useState(true);
@@ -143,16 +147,24 @@ export function SuggestingTextarea({
   function forget() {
     clearTimeout(timer.current);
     asked.current += 1;
+    // Abort any in-flight request so the hook can skip the network call early.
+    abort.current?.abort();
+    abort.current = undefined;
   }
 
   function ask(text: string) {
     forget();
     if (!suggest) return;
+    // Create the controller before the timer so a rapid forget() during the
+    // 500 ms debounce aborts before the request is ever sent.
+    const controller = new AbortController();
+    abort.current = controller;
     timer.current = setTimeout(() => {
       const area = field.current;
       if (!area || area.value !== text || area.selectionStart !== text.length || area.selectionEnd !== text.length) return;
+      if (controller.signal.aborted) return;
       const id = asked.current;
-      void suggest(text)
+      void suggest(text, controller.signal)
         .catch(() => null)
         .then((words) => {
           if (id !== asked.current || field.current?.value !== text) return;

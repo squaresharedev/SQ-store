@@ -105,7 +105,7 @@ export function ProductImport({
   intro?: ReactNode;
 } = {}) {
   const t = useTranslations("Products.import");
-  const tErrors = useTranslations("Errors");
+  const tErrors = useTranslations("Errors.planLimit");
   const tActions = useTranslations("Common.actions");
   const locale = useLocale();
   const toast = useToast();
@@ -341,7 +341,7 @@ export function ProductImport({
                     <>
                       {" "}
                       <Link href={plansHref("product_limit")} className={quietLinkClass}>
-                        {tErrors("planLimit.action")}
+                        {tErrors("action")}
                       </Link>
                     </>
                   )}

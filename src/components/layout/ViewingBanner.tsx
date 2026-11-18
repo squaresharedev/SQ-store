@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ArrowLeft, Eye } from "lucide-react";
 import {
@@ -31,7 +30,6 @@ export function ViewingBanner({
   ownAccountId: string;
 }) {
   const t = useTranslations("Nav.viewingBanner");
-  const router = useRouter();
   const [pending, startTransition] = React.useTransition();
   const showSpinner = useDelayedPending(pending);
   const readOnly = role === "viewer";
@@ -39,7 +37,6 @@ export function ViewingBanner({
   function backToOwn() {
     startTransition(async () => {
       await setActiveAccount(ownAccountId);
-      router.refresh();
     });
   }
 

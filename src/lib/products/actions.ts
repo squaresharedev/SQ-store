@@ -676,11 +676,11 @@ async function fileStillSold(
   if (!key) return false;
   // An order's own download, or one sold as an "Add to your order" line.
   const [orders, addOns] = await Promise.all([
-    supabase.from("orders").select("id", { count: "exact", head: true }).eq("digital_file_key", key),
-    supabase.from("order_add_ons").select("id", { count: "exact", head: true }).eq("digital_file_key", key),
+    supabase.from("orders").select("id").eq("digital_file_key", key).limit(1),
+    supabase.from("order_add_ons").select("id").eq("digital_file_key", key).limit(1),
   ]);
   return (
-    Boolean(orders.error || addOns.error) || (orders.count ?? 0) > 0 || (addOns.count ?? 0) > 0
+    Boolean(orders.error || addOns.error) || (orders.data?.length ?? 0) > 0 || (addOns.data?.length ?? 0) > 0
   );
 }
 

@@ -1,6 +1,5 @@
 import {
   PRICE_TAG_DEFAULT_BORDER,
-  PRICE_TAG_SHADOW_TEXT,
   TITLE_SHADOW_DEFAULT_COLOR,
   blockKey,
   defaultPriceTagFill,
@@ -13,10 +12,19 @@ import {
   type StorefrontTheme,
   type TextBlock,
 } from "@/types/storefront";
-import { isStrictHexColor } from "@/lib/validation/storefront";
+import { isStrictHexColor } from "@/lib/validation/predicates";
 import { rangeColor } from "@/lib/storefront/text-spans";
-import { readableInkOn } from "@/lib/format/color";
 import type { MessageKey } from "@/i18n/types";
+// Buyer-safe primitives live in the core file; this module re-exports them
+// for all existing importers while importing them locally so internal
+// functions (resolveColorTarget, textBlockThemeColor, priceTagAutoColor) can
+// reference them directly.
+import {
+  DEFAULT_TEXT_COLOR,
+  headerThemeColors,
+  priceTagAutoTextColor,
+} from "./color-target-core";
+export { DEFAULT_TEXT_COLOR, headerThemeColors, priceTagAutoTextColor } from "./color-target-core";
 
 /**
  * WHICH color the left-hand ColorPanel is editing.
@@ -67,23 +75,6 @@ export type PriceTagPart = "fill" | "text" | "border";
  *  Shared with ShapeBlockEditor so the panel and the field cannot disagree
  *  about what "no override" looks like. */
 export const DEFAULT_SHAPE_BORDER_COLOR = "#171717";
-
-/** What a non-heading text block renders in with no color override. Also what
- *  the masthead's bio follows, for the same reason: it is body copy. */
-export const DEFAULT_TEXT_COLOR = "#171717";
-
-/**
- * The colors the masthead follows when its two lines carry no override of their
- * own: the store name tracks the theme accent (it is the storefront's heading),
- * the bio the default ink. Shared by the renderer, the inline pickers and the
- * color panel, so none of them can disagree about what inheriting looks like.
- */
-export function headerThemeColors(accent: string): {
-  name: string;
-  bio: string;
-} {
-  return { name: gate(accent, DEFAULT_TEXT_COLOR), bio: DEFAULT_TEXT_COLOR };
-}
 
 /** Whether one masthead line is actually rendered right now. Mirrors what
  *  StorefrontMasthead draws: nothing while hidden, nothing for a line with no
@@ -155,22 +146,6 @@ const INHERIT = {
     useLabel: "Storefront.colors.inherit.blockColor.use",
   },
 } as const satisfies Record<string, ColorInheritLabels>;
-
-/**
- * What the price actually paints while `priceTagTextColor` is unset: the theme
- * accent, unless the tag sits unbacked in a `shadow` title area, whose gradient
- * is dark by construction and would swallow it. Shared by the renderer and
- * both pickers so none of them can disagree about what "Auto" looks like.
- */
-export function priceTagAutoTextColor(card: CardStyle, accent: string): string {
-  if (card.priceTagPosition !== "below" || card.titleStyle !== "shadow") {
-    return gate(accent, DEFAULT_TEXT_COLOR);
-  }
-  // A seller-tinted shade can be light, and then white would sink into it.
-  return card.titleShadowColor === undefined
-    ? PRICE_TAG_SHADOW_TEXT
-    : readableInkOn(gate(card.titleShadowColor, TITLE_SHADOW_DEFAULT_COLOR));
-}
 
 /**
  * The `shadow` title area's tint, resolved for a picker. Same layering rule

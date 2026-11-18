@@ -135,23 +135,24 @@ export function ProductsBrowser({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const t = useTranslations("Products");
+  const t = useTranslations("Products.browser");
+  const tStatus = useTranslations("Products.status");
   const tSearch = useTranslations("Search.trigger");
   const tPagination = useTranslations("Common.pagination");
   const search = useSearch();
 
   const sortOptions: FilterOption<ProductSort>[] = SORT_ICONS.map(({ value, icon }) => ({
     value,
-    label: t(`browser.sort.${value}`),
+    label: t(`sort.${value}`),
     icon,
   }));
   const statusOptions: FilterOption<ProductStatus | typeof MODERATED_FILTER | "">[] = [
-    { value: "", label: t("browser.allStatuses"), icon: ListFilter },
-    { value: "active", label: t("status.active"), icon: CircleDot, tone: "text-success" },
-    { value: "draft", label: t("status.draft"), icon: FileEdit, tone: "text-muted-foreground" },
+    { value: "", label: t("allStatuses"), icon: ListFilter },
+    { value: "active", label: tStatus("active"), icon: CircleDot, tone: "text-success" },
+    { value: "draft", label: tStatus("draft"), icon: FileEdit, tone: "text-muted-foreground" },
     // Checking, in review, paused and removed together: whatever buyers
     // cannot see because of moderation, gathered in one place to work through.
-    { value: MODERATED_FILTER, label: t("browser.moderated"), icon: ShieldAlert },
+    { value: MODERATED_FILTER, label: t("moderated"), icon: ShieldAlert },
   ];
 
   // Every remaining control navigates on the spot (no typing to debounce), so
@@ -236,7 +237,7 @@ export function ProductsBrowser({
           // long label sends it under the title), last in the row from xl.
           <Link href={NEW_PRODUCT_PATH} className={cn(primaryButtonClass, "order-2 ml-auto h-10 shrink-0 xl:order-3")}>
             <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
-            {t("browser.add")}
+            {t("add")}
           </Link>
         ) : (
           // Where the add and import buttons would be, the reason they are
@@ -245,7 +246,7 @@ export function ProductsBrowser({
             className={cn(infoTextClass, "order-2 max-w-xs basis-full xl:order-3 xl:basis-auto")}
             data-products-view-only=""
           >
-            {t("browser.viewOnlyHint")}
+            {t("viewOnlyHint")}
           </p>
         )}
 
@@ -273,18 +274,18 @@ export function ProductsBrowser({
                 </button>
               )}
               <FilterMenu
-                ariaLabel={t("browser.filterLabel")}
-                restingLabel={t("browser.sortResting")}
+                ariaLabel={t("filterLabel")}
+                restingLabel={t("sortResting")}
                 sections={[
                   {
-                    label: t("browser.statusSection"),
+                    label: t("statusSection"),
                     value: filters.moderated ? MODERATED_FILTER : (filters.status ?? ""),
                     options: statusOptions,
                     onChange: handleStatus,
                     defaultValue: "",
                   },
                   {
-                    label: t("browser.sortSection"),
+                    label: t("sortSection"),
                     value: sort,
                     options: sortOptions,
                     onChange: handleSort,
@@ -316,7 +317,7 @@ export function ProductsBrowser({
               statuses" does the same job; this is the one-click version. */}
           {filtered && (
             <button type="button" onClick={handleClear} className={toolbarButtonClass}>
-              {t("browser.clear")}
+              {t("clear")}
             </button>
           )}
           {/* Below xl, Reviews and Import behind one "More" button. */}
@@ -333,12 +334,12 @@ export function ProductsBrowser({
           <div className="hidden items-center gap-2 xl:flex">
             <Link href={REVIEWS_PATH} className={toolbarButtonClass} data-products-reviews-link="">
               <MessageSquareQuote className="size-4" strokeWidth={2} aria-hidden="true" />
-              {t("browser.reviews")}
+              {t("reviews")}
             </Link>
             {canWrite && (
               <Link href={PRODUCTS_IMPORT_PATH} className={toolbarButtonClass}>
                 <UploadIcon className="size-4" />
-                {t("browser.import")}
+                {t("import")}
               </Link>
             )}
           </div>
@@ -358,7 +359,7 @@ export function ProductsBrowser({
           way to reorder. */}
       {canWrite && !filtered && data.total > 0 && (
         <p className={listNoteClass}>
-          {t.rich("browser.orderHint", {
+          {t.rich("orderHint", {
             link: (chunks) => (
               <Link href={STOREFRONT_LIST_PATH} className={inlineLinkClass}>
                 {chunks}
@@ -381,7 +382,7 @@ export function ProductsBrowser({
           <div className="pointer-events-none absolute right-3 top-3 z-10 flex items-center gap-2 rounded-sm border border-border bg-background/90 px-2 py-1 shadow-sm backdrop-blur">
             <Spinner className="size-3.5 text-muted-foreground" />
             <span className={infoTextClass}>
-              {t("browser.updating")}
+              {t("updating")}
             </span>
           </div>
         )}
@@ -400,7 +401,7 @@ export function ProductsBrowser({
         {totalPages > 1 && (
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
             <p className={helpTextClass}>
-              {t("browser.pagination", {
+              {t("pagination", {
                 total: data.total,
                 page: data.page,
                 pages: totalPages,

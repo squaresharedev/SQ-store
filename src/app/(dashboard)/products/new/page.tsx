@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { ProductFormView } from "@/components/products/ProductFormView";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { getSellerIdentity, getTraderIdentityStatus } from "@/lib/settings/seller-identity";
+import { getAccountSellerIdentity, getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { checkoutProviderFor } from "@/lib/checkout/availability";
 import { getShippingChoices } from "@/lib/storefront/queries";
 import { getAddOnHabits, listAddOnChoices } from "@/lib/products/add-on-choices";
@@ -67,28 +67,37 @@ export default async function NewProductPage({
     );
   }
 
-  // What the form needs to know before it offers "Active": the server refuses
-  // that status without the store's trader details (lib/products/actions.ts),
-  // so the control says so up front rather than letting a seller fill in a
-  // whole product and find out at Save.
-  const identity = account
-    ? await getTraderIdentityStatus(account.accountId)
-    : { ok: true as const, missing: [] };
-
-  // Scoped to the SIGNED-IN user (`account.userId`), not the active account:
-  // that is what `saveShippingPolicy` writes to, same as Settings › Shipping
-  // itself. The shipping-terms modal edits this document directly.
-  const shippingPolicy = account
-    ? await getShippingPolicy(account.userId)
-    : EMPTY_SHIPPING_POLICY;
-
-  // The shell has already read this store's plan for this request (cached).
-  const ai = account ? await aiWritingFor(account.accountId, account.userId) : NO_AI_WRITING;
-  // The store's business country prices its first product (lib/predictions
-  // homeCurrency). A read that fails leaves the usual default.
-  const seller = account ? await getSellerIdentity(account.accountId).catch(() => null) : null;
-  // Where the buy button goes, as the form says it (cta-target.ts's order).
-  const checkoutOpen = account ? (await checkoutProviderFor(account.accountId)) !== null : false;
+  // All five reads are independent of each other and of the room check: run
+  // them in one round trip. Each falls back to its safe default when no active
+  // account is present.
+  //
+  // identity: the server refuses "Active" without trader details (lib/products/
+  // actions.ts), so the form says so up front rather than at Save.
+  //
+  // shippingPolicy: scoped to the signed-in user (account.userId), not the
+  // active account, same as Settings > Shipping writes it.
+  //
+  // ai: the shell already read this store's plan this request (cached).
+  //
+  // seller: the business country prices the first product (lib/predictions
+  // homeCurrency); a read failure leaves the usual default.
+  //
+  // checkoutOpen: where the buy button goes (cta-target.ts order).
+  const [identity, shippingPolicy, ai, seller, checkoutOpen] = await Promise.all([
+    account
+      ? getTraderIdentityStatus(account.accountId)
+      : Promise.resolve({ ok: true as const, missing: [] }),
+    account ? getShippingPolicy(account.userId) : Promise.resolve(EMPTY_SHIPPING_POLICY),
+    account
+      ? aiWritingFor(account.accountId, account.userId)
+      : Promise.resolve(NO_AI_WRITING),
+    account
+      ? getAccountSellerIdentity(account.accountId)
+      : Promise.resolve(null),
+    account
+      ? checkoutProviderFor(account.accountId).then((p) => p !== null)
+      : Promise.resolve(false),
+  ]);
 
   return (
     <ProductFormView

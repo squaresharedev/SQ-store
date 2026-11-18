@@ -401,6 +401,13 @@ export type SweepReport = {
  *  each row is a handful of database calls and up to a call per new file. */
 const SWEEP_BATCH = 8;
 
+/** Soft wall-clock budget (ms) for one sweep run. The curl in the GitHub
+ *  Actions workflow gives up at 60 s; leaving ~20 s for database calls and
+ *  network round-trips means rows whose classifier calls are slow (up to
+ *  CLASSIFY_TIMEOUT_MS = 12 s each) do not block the next curl from starting.
+ *  Only skips starting NEW rows; the row in progress still finishes. */
+const SWEEP_BUDGET_MS = 40_000;
+
 /** The worst verdict among a row's parts, or null while one is unjudged. */
 function wouldBe(parts: Parts, judged: Judged): Verdict | null {
   const subjects = [
@@ -439,8 +446,17 @@ export async function sweep(options: { dryRun?: boolean } = {}): Promise<SweepRe
   const rows = (due ?? []).filter((row) => isAutoTarget(row.target_type)).slice(0, limit);
   if (options.dryRun) report.preview = [];
   let settledAny = false;
+  const sweepStart = Date.now();
+  let budgetExceeded = false;
 
   for (const row of rows) {
+    // Stop starting new rows once the wall-clock budget runs out. The curl in
+    // the GitHub Actions workflow gives up at 60 s; breaking here leaves the
+    // in-progress row to finish and surfaces the remaining rows on the next run.
+    if (!options.dryRun && Date.now() - sweepStart > SWEEP_BUDGET_MS) {
+      budgetExceeded = true;
+      break;
+    }
     const type = row.target_type as AutoTarget;
     report.checked += 1;
     if (options.dryRun) {
@@ -461,7 +477,8 @@ export async function sweep(options: { dryRun?: boolean } = {}): Promise<SweepRe
 
   // Only worth calling again if this run got somewhere: with the classifier
   // down every row stays waiting, and a caller told "more" would spin.
-  report.more = !options.dryRun && settledAny && (due ?? []).length > limit;
+  // If the time budget ran out, there is definitely more to do.
+  report.more = !options.dryRun && (budgetExceeded || (settledAny && (due ?? []).length > limit));
   return report;
 }
 

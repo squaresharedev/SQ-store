@@ -57,6 +57,7 @@ import {
 import { openStorefront } from "@/lib/storefront/public-gate";
 import {
   TILE_EXTRAS_SELECT,
+  TILE_EXTRAS_SELECT_LEAN,
   loadTileExtras,
   tileExtrasWanted,
   type TileExtras,
@@ -94,6 +95,11 @@ export type StorefrontPageRow = {
  *  two the gate reads. */
 export const TILE_PRODUCT_SELECT = `id, title, price_cents, currency, image_key, created_at, ${TILE_EXTRAS_SELECT}, ${MODERATION_GATE_SELECT}`;
 
+/** Like TILE_PRODUCT_SELECT but without gallery: when no tile on the board
+ *  asks for a hover photo, the JSON array (up to 24 objects) is not needed
+ *  and is worth omitting from every product read. */
+const TILE_PRODUCT_SELECT_NO_GALLERY = `id, title, price_cents, currency, image_key, created_at, ${TILE_EXTRAS_SELECT_LEAN}, ${MODERATION_GATE_SELECT}`;
+
 export type TileProductRow = TileExtrasRow & {
   id: string;
   title: string;
@@ -111,11 +117,14 @@ const idSchema = uuidField();
  *  what a proxy will carry however many tiles a board holds. */
 const TILE_PRODUCTS_PER_READ = 100;
 
-/** The board's live products, read in runs: every row, or the first error. */
+/** The board's live products, read in runs: every row, or the first error.
+ *  `select` defaults to TILE_PRODUCT_SELECT; pass TILE_PRODUCT_SELECT_NO_GALLERY
+ *  when no tile needs a hover photo to skip the gallery JSON column. */
 async function readTileProducts(
   admin: ReturnType<typeof createAdminClient>,
   ownerId: string,
   productIds: readonly string[],
+  select: string = TILE_PRODUCT_SELECT,
 ): Promise<{ data: TileProductRow[]; error: { message: string } | null }> {
   const runs: string[][] = [];
   for (let start = 0; start < productIds.length; start += TILE_PRODUCTS_PER_READ) {
@@ -123,7 +132,7 @@ async function readTileProducts(
   }
   const answers = await Promise.all(
     runs.map((ids) =>
-      admin.from("products").select(TILE_PRODUCT_SELECT).in("id", ids).eq("owner_id", ownerId).eq("status", "active"),
+      admin.from("products").select(select).in("id", ids).eq("owner_id", ownerId).eq("status", "active"),
     ),
   );
   const failed = answers.find((answer) => answer.error);
@@ -198,13 +207,22 @@ export async function buildStorefrontPage(
     ...new Set(visible.flatMap((block) => (block.type === "product" ? [block.productId] : []))),
   ];
 
+  // Compute which extras each tile wants BEFORE reading tile products, so the
+  // gallery column (up to 24 JSON objects per product) is included in the
+  // select only when at least one tile shows a hover photo. Using `visible`
+  // rather than the live-filtered `blocks` is safe: for every live product id
+  // the two sets agree, and non-live products are never in the `live` rows that
+  // `loadTileExtras` processes (see equivalence proof in tile-extras.ts).
+  const wanted = tileExtrasWanted({ theme: config.theme, blocks: visible });
+  const tileSelect = wanted.hoverPhoto.size > 0 ? TILE_PRODUCT_SELECT : TILE_PRODUCT_SELECT_NO_GALLERY;
+
   // The seller's identity, the tiles' products and the store's running sales
   // depend only on the owner already in hand, so they are read together. One
   // `now` prices the whole board.
   const now = new Date();
   const [{ data: sellerRow, error: sellerError }, products, storeSales] = await Promise.all([
     admin.from("profiles").select(TRADER_GATE_SELECT).eq("id", storefront.owner_id).maybeSingle(),
-    readTileProducts(admin, storefront.owner_id, productIds),
+    readTileProducts(admin, storefront.owner_id, productIds, tileSelect),
     // A board with no products has no prices to get wrong.
     productIds.length === 0 ? Promise.resolve([]) : readStoreSales(admin, storefront.owner_id, now),
   ]);
@@ -246,7 +264,10 @@ export async function buildStorefrontPage(
         listedAt: row.created_at ?? null,
       })),
     }),
-    loadTileExtras(admin, live, tileExtrasWanted({ theme: config.theme, blocks }), {
+    // Reuse the `wanted` computed before the product read above. For every
+    // live product the sets are identical to those from `blocks`, so no
+    // extra presigns run and no needed ones are skipped.
+    loadTileExtras(admin, live, wanted, {
       reviewsShown: tileLook.reviewsShown,
       context: "storefront page",
     }),

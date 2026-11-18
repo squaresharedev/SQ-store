@@ -1,7 +1,12 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { CHART, formatNumber, SCRUB, ScrubChart } from "@/components/charts";
+// Leaf imports instead of the barrel: the barrel re-exports LineChart,
+// BarChart, etc. which pull in recharts (~130 KB gz). ScrubChart, theme
+// tokens, and formatNumber are recharts-free.
+import { ScrubChart } from "@/components/charts/ScrubChart";
+import { CHART, SCRUB } from "@/components/charts/theme";
+import { formatNumber } from "@/components/charts/format";
 import { MoneyFigure } from "@/components/ui/MoneyFigure";
 import { joinedCellClass } from "@/components/ui/surface-styles";
 import { formatCents } from "@/lib/format/money";

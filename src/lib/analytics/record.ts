@@ -1,4 +1,4 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+﻿import { createAdminClient } from "@/lib/supabase/admin";
 import type { SignalChannel, SignalKind } from "@/lib/analytics/signals";
 
 // SERVER ONLY. Writes to public.storefront_signals with the SERVICE ROLE, so
@@ -45,6 +45,10 @@ export type SignalInput = {
 
 /** Postgres unique_violation. Expected whenever a dedupe key does its job. */
 const UNIQUE_VIOLATION = "23505";
+
+/** PostgREST code for a function not in the schema cache: the
+ *  record_signal migration has not been applied yet. */
+const PGRST_FUNCTION_NOT_FOUND = "PGRST202";
 
 /** Hex digest of a UTF-8 string. */
 async function sha256Hex(value: string): Promise<string> {
@@ -172,26 +176,53 @@ export async function recordSignal(
 ): Promise<"written" | "duplicate" | "failed"> {
   try {
     const admin = createAdminClient();
-    // Built field by field rather than spread: this row is written from
-    // untrusted request data on a public route, and a field added to
-    // SignalInput later must not reach the database without someone deciding
-    // it should. Same discipline as the embed payload builder.
+
+    // Prefer the RPC: ON CONFLICT DO NOTHING checks the arbiter index before
+    // touching the heap, so a repeat visit within the dedupe window costs one
+    // index probe rather than a burned transaction id and dead tuple.
+    const { data, error: rpcError } = await admin.rpc("record_signal", {
+      p_account_id:    input.accountId,
+      p_kind:          input.kind,
+      p_channel:       input.channel ?? "embed",
+      p_storefront_id: input.storefrontId ?? null,
+      p_block_id:      input.blockId ?? null,
+      p_visitor_hash:  input.visitorHash ?? null,
+      p_value_cents:   input.valueCents ?? null,
+      p_currency:      input.currency ?? null,
+      p_dedupe_key:    input.dedupeKey ?? null,
+      p_metadata:      (input.metadata ?? {}) as Record<string, string | number | boolean>,
+    });
+
+    if (!rpcError) return data === true ? "written" : "duplicate";
+
+    // If the migration has not been applied yet PostgREST returns PGRST202.
+    // Fall back to the plain insert so a deploy ahead of its migration loses
+    // no data.
+    if (rpcError.code !== PGRST_FUNCTION_NOT_FOUND) {
+      console.warn(`[signals] ${input.kind} rpc failed:`, rpcError.message);
+      return "failed";
+    }
+
+    // Fallback path (pre-migration): plain insert. Built field by field rather
+    // than spread: this row is written from untrusted request data on a public
+    // route, and a field added to SignalInput later must not reach the database
+    // without someone deciding it should.
     const { error } = await admin.from("storefront_signals").insert({
-      account_id: input.accountId,
-      kind: input.kind,
+      account_id:    input.accountId,
+      kind:          input.kind,
       storefront_id: input.storefrontId ?? null,
-      channel: input.channel ?? "embed",
-      block_id: input.blockId ?? null,
-      visitor_hash: input.visitorHash ?? null,
-      value_cents: input.valueCents ?? null,
-      currency: input.currency ?? null,
-      dedupe_key: input.dedupeKey ?? null,
-      metadata: input.metadata ?? {},
+      channel:       input.channel ?? "embed",
+      block_id:      input.blockId ?? null,
+      visitor_hash:  input.visitorHash ?? null,
+      value_cents:   input.valueCents ?? null,
+      currency:      input.currency ?? null,
+      dedupe_key:    input.dedupeKey ?? null,
+      metadata:      input.metadata ?? {},
     });
 
     if (!error) return "written";
     if (error.code === UNIQUE_VIOLATION) return "duplicate";
-    console.warn(`[signals] ${input.kind} write failed:`, error.message);
+    console.warn(`[signals] ${input.kind} write (fallback) failed:`, error.message);
     return "failed";
   } catch (err) {
     console.warn(

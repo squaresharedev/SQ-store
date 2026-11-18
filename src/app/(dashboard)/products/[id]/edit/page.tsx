@@ -55,24 +55,30 @@ export default async function EditProductPage({
     after(() => checkMany("product", [productId]));
   }
 
-  // See the create route: the form disables "Active" for a store that may not
-  // publish yet, and says why.
-  const identity = account
-    ? await getTraderIdentityStatus(account.accountId)
-    : { ok: true as const, missing: [] };
-
-  // Scoped to the SIGNED-IN user (`account.userId`), not the active account:
-  // that is what `saveShippingPolicy` writes to, same as Settings › Shipping
-  // itself. The shipping-terms modal edits this document directly.
-  const shippingPolicy = account
-    ? await getShippingPolicy(account.userId)
-    : EMPTY_SHIPPING_POLICY;
-
+  // All four reads are independent of each other: run them in one round trip.
+  //
+  // identity: the form disables "Active" for a store that may not publish yet
+  // (see the create route for why this check is here up front).
+  //
+  // shippingPolicy: scoped to the signed-in user (account.userId), not the
+  // active account, same as Settings > Shipping writes it.
+  //
+  // ai: the shell already read this store's plan this request (cached).
+  //
+  // checkoutOpen: where the buy button goes (cta-target.ts order).
+  const [identity, shippingPolicy, ai, checkoutOpen] = await Promise.all([
+    account
+      ? getTraderIdentityStatus(account.accountId)
+      : Promise.resolve({ ok: true as const, missing: [] }),
+    account ? getShippingPolicy(account.userId) : Promise.resolve(EMPTY_SHIPPING_POLICY),
+    account
+      ? aiWritingFor(account.accountId, account.userId)
+      : Promise.resolve(NO_AI_WRITING),
+    account
+      ? checkoutProviderFor(account.accountId).then((p) => p !== null)
+      : Promise.resolve(false),
+  ]);
   const t = await getTranslations("Products.page.edit");
-  // The shell has already read this store's plan for this request (cached).
-  const ai = account ? await aiWritingFor(account.accountId, account.userId) : NO_AI_WRITING;
-  // Where the buy button goes, as the form says it (cta-target.ts's order).
-  const checkoutOpen = account ? (await checkoutProviderFor(account.accountId)) !== null : false;
 
   return (
     <ProductFormView

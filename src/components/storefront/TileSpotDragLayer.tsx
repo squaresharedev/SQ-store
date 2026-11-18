@@ -31,6 +31,10 @@ export type SpotToken = "title" | "price" | "sale";
  */
 export type SpotDrop = TileSpot | "below";
 
+/** The DOM props that tileSpotTokenProps returns, exported so callers can
+ *  type their pre-computed result without importing the function itself. */
+export type TokenDragAttrs = ReturnType<typeof tileSpotTokenProps>;
+
 /**
  * Everything a tile face needs to make its tokens draggable. Absent means a
  * read-only render (a preview, a buyer's page), which is why every field lives
@@ -60,6 +64,13 @@ export type TileSpotDrag = {
    * it reaching the surface underneath.
    */
   onTokenClick: (token: SpotToken, event: React.MouseEvent) => void;
+  /**
+   * Pre-compute the full DOM props for a token at a given drop position.
+   * `label` is the aria-label for the token, computed by the caller (which
+   * has translation context) so this function can stay out of the buyer
+   * bundle. Set by BlockTile; returns null for an unarmed token.
+   */
+  getToken?: (token: SpotToken, drop: SpotDrop, label: string) => TokenDragAttrs | null;
 };
 
 const ARROWS: readonly string[] = [

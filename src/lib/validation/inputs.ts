@@ -4,6 +4,12 @@ import { issueKey, isValidationKey } from "@/lib/validation/messages";
 import { dropHiddenCharacters } from "@/lib/validation/hidden-characters";
 import { isDiscountCode, normalizeDiscountCode } from "@/lib/discounts/code";
 import { DISCOUNT_CODE_MAX, DISCOUNT_CODE_MIN } from "@/types/discount";
+import {
+  hasContactOrPaymentDetails,
+  isStrictHexColor,
+} from "@/lib/validation/predicates";
+// Re-export so server callers keep their existing import paths.
+export { hasContactOrPaymentDetails, isStrictHexColor };
 
 /**
  * THE input primitives. Every user-supplied field in the product is built from
@@ -128,20 +134,8 @@ export function optionalSingleLineText(options: { field: TextField; max: number 
 
 // ── Seller prose beside a payment ───────────────────────────────────────
 
-/** A scheme, a `www.`, or a bare host on a TLD a shop link would use. A short
- *  list on purpose: it has to catch "pay at mystore.shop" without refusing a
- *  sentence that merely lacks a space after its full stop. */
-const LINK_LIKE =
-  /(?:\b[a-z][a-z0-9+.-]*:\/\/|\bwww\.|\b[a-z0-9-]+\.(?:com|net|org|info|biz|io|co|eu|ie|uk|de|at|ch|fr|be|nl|lu|it|es|pt|pl|cz|sk|dk|se|no|fi|shop|store|me|app|link|ly|gl|to|page|site|xyz|online|live|tech|dev|art|world|club|top|pro|ai|fm|tv|cc|ws|gg|ru|cn|br|in|jp|kr|us|ca|au|nz|za|mx|health|shopping|market|bio|social|website|space|cloud|digital)\b)/i;
-const EMAIL_LIKE = /[^\s@]+@[^\s@]+\.[^\s@]+/;
-/** Two letters, two check digits, then the account: the shape of an IBAN,
- *  spaced or not. */
-const IBAN_LIKE = /\b[a-z]{2}\d{2}(?:\s?[a-z0-9]){11,30}\b/i;
-
-/** Whether text reads as a link, an address to write to, or bank details. */
-export function hasContactOrPaymentDetails(value: string): boolean {
-  return LINK_LIKE.test(value) || EMAIL_LIKE.test(value) || IBAN_LIKE.test(value);
-}
+// hasContactOrPaymentDetails is imported from predicates.ts above and
+// re-exported at the top of this file. It is also used directly below.
 
 /**
  * Words a SELLER writes that a BUYER reads on the way to paying: the checkout
@@ -338,10 +332,8 @@ export function hexColor(field: HexColorField = "colors") {
   });
 }
 
-/** Predicate form, for the render path's re-gate before a style attribute. */
-export function isStrictHexColor(value: string): boolean {
-  return HEX_COLOR_PATTERN.test(value);
-}
+// isStrictHexColor is imported from predicates.ts above and re-exported at
+// the top of this file; HEX_COLOR_PATTERN above is kept for hexColor() only.
 
 /** A whole number inside explicit bounds. Rejects floats, NaN and Infinity. */
 export function boundedInt(options: {

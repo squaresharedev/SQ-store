@@ -43,6 +43,7 @@ import type {
 import { TileImageFramer, TileImageGhost } from "./TileImageFramer";
 import {
   TileSpotDragLayer,
+  tileSpotTokenProps,
   type SpotDrop,
   type SpotToken,
   type TileSpotDrag,
@@ -523,6 +524,16 @@ export const BlockTile = memo(function BlockTile({
           const dragged = movedRef.current;
           movedRef.current = false;
           if (!dragged) onOpenSpotSetting?.(blockKey, token);
+        },
+        // Pre-computes the token's DOM props so ProductTileContent does not
+        // need to import tileSpotTokenProps directly, keeping it out of
+        // buyer-page bundles. The label is computed by the caller (which has
+        // translation context) and passed in as the third argument.
+        getToken: (token, drop, label) => {
+          if (token === "title" && !card!.showTitle) return null;
+          if (token === "price" && card!.priceTagPosition === "hidden") return null;
+          if (token === "sale" && card!.saleBadge === "hidden") return null;
+          return tileSpotTokenProps(token, spotDrag!, label);
         },
       }
     : undefined;

@@ -311,13 +311,19 @@ export async function actionUser(): Promise<{
 export const getProfile = cache(async (): Promise<Profile | null> => {
   const user = await getUser();
   if (!user) return null;
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  const { data } = await readOwnProfile(user.id);
   return data;
+});
+
+/**
+ * The one profiles read a render makes, shared by getProfile and
+ * requireProfile (a settings page calls both: the shell one, the page the
+ * other). It keeps the error, which getProfile drops by design and
+ * requireProfile reports.
+ */
+const readOwnProfile = cache(async (userId: string) => {
+  const supabase = await createClient();
+  return supabase.from("profiles").select("*").eq("id", userId).single();
 });
 
 /**
@@ -325,6 +331,9 @@ export const getProfile = cache(async (): Promise<Profile | null> => {
  * by the surrounding layout's requireUser gate before this runs; here a
  * missing row means the read failed (signup provisions the row), so throw to
  * the error boundary rather than seed a form with blanks.
+ *
+ * Shares one read with `getProfile()` (readOwnProfile), so a settings page
+ * that calls both fires one profiles read, not two.
  */
 export const requireProfile = cache(async (): Promise<Profile> => {
   const user = await getUser();
@@ -333,12 +342,7 @@ export const requireProfile = cache(async (): Promise<Profile> => {
     // guards direct misuse from an unguarded call site.
     redirect("/login");
   }
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  const { data, error } = await readOwnProfile(user.id);
   if (error || !data) {
     throw new Error(
       `Your profile is unavailable right now: ${error?.message ?? "row missing"}`,

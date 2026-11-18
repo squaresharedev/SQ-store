@@ -22,6 +22,7 @@ import { usePlanPrices } from "@/components/billing/plan-context";
 import { MarkedPlanName } from "@/components/billing/PlanWordmark";
 import { cn } from "@/lib/utils";
 import { formatBytes } from "@/lib/format";
+import { numberFormat } from "@/lib/format/intl";
 import { formatCents } from "@/lib/format/money";
 import { formatFeeRate } from "@/lib/billing/format";
 import { COMPARE_GROUPS, planHas, type CompareRowKey, type IncludedFeatureKey } from "@/lib/billing/features";
@@ -66,7 +67,7 @@ export function PlanComparison({ interval, currentPlan }: { interval: BillingInt
   const t = useTranslations("Billing");
   const locale = useLocale();
   const prices = usePlanPrices();
-  const number = new Intl.NumberFormat(locale);
+  const number = numberFormat(locale);
 
   const label = (key: CompareRowKey): string =>
     key === "digitalDownloads"

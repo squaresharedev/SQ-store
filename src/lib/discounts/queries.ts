@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveAccount } from "@/lib/team/account-context";
+import { getActiveAccount, type ActiveAccount } from "@/lib/team/account-context";
 import { toCurrency } from "@/lib/format/money";
 import { presignGetUrl } from "@/lib/r2";
 import { DISCOUNT_COLUMNS, toDiscountView, type DiscountRow } from "@/lib/discounts/row";
@@ -39,17 +39,23 @@ export const listDiscounts = cache(async (): Promise<DiscountView[]> => {
   return ((data ?? []) as DiscountRow[]).flatMap((row) => toDiscountView(row) ?? []);
 });
 
-/** One discount of the active store, or null (malformed id, someone else's,
- *  or deleted: all "nothing to edit"). */
-export async function getDiscount(id: string): Promise<DiscountView | null> {
+/**
+ * One discount of the active store, or null (malformed id, someone else's,
+ * or deleted: all "nothing to edit").
+ *
+ * Accepts an already-resolved `account` to avoid a second Auth round-trip
+ * when the caller (updateDiscount) has already called getActiveAccount().
+ * When omitted, resolves the account itself as usual.
+ */
+export async function getDiscount(id: string, account?: ActiveAccount): Promise<DiscountView | null> {
   if (!UUID.test(id)) return null;
-  const account = await getActiveAccount();
-  if (!account) return null;
+  const resolvedAccount = account ?? (await getActiveAccount());
+  if (!resolvedAccount) return null;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("discounts")
     .select(DISCOUNT_COLUMNS)
-    .eq("owner_id", account.accountId)
+    .eq("owner_id", resolvedAccount.accountId)
     .eq("id", id)
     .is("archived_at", null)
     .maybeSingle();

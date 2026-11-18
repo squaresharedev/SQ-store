@@ -166,7 +166,9 @@ export async function updateDiscount(id: string, raw: unknown): Promise<Discount
   const { input } = parsed;
   const now = new Date();
 
-  const existing = await getDiscount(id);
+  // Pass the already-resolved account so getDiscount skips its own
+  // getActiveAccount() call (a second Auth round-trip in Server Actions).
+  const existing = await getDiscount(id, account);
   if (!existing) return failure(notFound("discount"));
   if (existing.kind !== input.kind) return failure(INVALID);
 

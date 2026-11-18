@@ -1,4 +1,4 @@
-// @vitest-environment node
+﻿// @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { english } from "../../setup/translate";
 import { traderIdentityRequired, type ActionError } from "@/lib/errors";
@@ -30,7 +30,7 @@ vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 // supabase would receive dbFn()'s value instead of the chain object.
 const dbFn = vi.fn();
 const db: any = {};
-for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in"]) {
+for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in", "limit"]) {
   db[m] = vi.fn(() => db);
 }
 db.single = vi.fn(() => dbFn());
@@ -136,7 +136,7 @@ beforeEach(() => {
   dbFn.mockResolvedValue({ data: null, error: null });
   deleteObjectMock.mockResolvedValue(undefined);
   headObjectMock.mockResolvedValue({ size: 512, contentType: "image/png" });
-  for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in"]) {
+  for (const m of ["from", "select", "insert", "update", "delete", "eq", "neq", "in", "limit"]) {
     (db[m] as ReturnType<typeof vi.fn>).mockReturnValue(db);
   }
   db.single.mockImplementation(() => dbFn());

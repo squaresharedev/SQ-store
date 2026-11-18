@@ -14,6 +14,7 @@
 // keeps the seller, not Square Share, the merchant of record
 // (lib/checkout/stripe-provider.ts).
 
+import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { appUrl } from "@/lib/app-url";
 import {
@@ -69,6 +70,17 @@ export async function readPaymentAccount(ownerId: string): Promise<PaymentAccoun
   }
   return data ? toAccount(data as Row) : null;
 }
+
+/**
+ * Per-request memoised reader for a seller's connected account. Use this in
+ * render functions so a request that checks the account in several places
+ * (the product page, the checkout, the payments tab) makes at most one read.
+ * Leave `readPaymentAccount` for write-then-read-back helpers
+ * (refreshPaymentAccount, ensurePaymentAccount) that need a fresh value.
+ *
+ * React's cache() is a no-op in route handlers, so do not rely on it there.
+ */
+export const getPaymentAccount = cache((ownerId: string) => readPaymentAccount(ownerId));
 
 /** The seller a connected account belongs to, or null when it is not one of
  *  ours. How an event from Stripe finds its store. */

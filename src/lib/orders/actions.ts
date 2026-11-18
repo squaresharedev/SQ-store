@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAccessibleAccounts, getActiveAccount } from "@/lib/team/account-context";
+import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import {
   actionError,
@@ -20,7 +20,7 @@ import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { uuidField } from "@/lib/validation/inputs";
 import { firstIssue } from "@/lib/validation/messages";
 import { carrierSchema, refundReasonSchema, trackingNumberSchema } from "@/lib/validation/orders";
-import { getOrderById, isProviderPayment } from "@/lib/orders/queries";
+import { getOrderById, getOrderByIdWithEmailFields, isProviderPayment, type OrderEmailFields } from "@/lib/orders/queries";
 import { sendRefundEmail, sendShippedEmail } from "@/lib/orders/emails";
 import { orderLinkUrl } from "@/lib/orders/order-link";
 import { getSellerIdentity } from "@/lib/settings/seller-identity";
@@ -95,7 +95,9 @@ export async function markOrderShipped(
   // In THIS store. The database function would also ship an order in any other
   // store the caller may fulfil, and the page only ever acts on the active one,
   // so an order from elsewhere is "not found" here (getOrderById is scoped).
-  if (!(await getOrderById(id.data))) return failure(notFound("order"));
+  // Pass the already-resolved account so getOrderById does not call
+  // getActiveAccount() (and therefore getUser()) a second and third time.
+  if (!(await getOrderById(id.data, account))) return failure(notFound("order"));
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("order_mark_shipped", {
@@ -112,14 +114,18 @@ export async function markOrderShipped(
   if (outcome === "not_found") return failure(notFound("order"));
   if (outcome === "not_shippable") return failure(NOT_SHIPPABLE);
 
-  const order = await getOrderById(id.data);
-  if (!order) return failure(notFound("order"));
+  // Combined post-RPC read: order view + email fields in one round-trip.
+  // order_mark_shipped only writes fulfilment_status, shipped_at, and
+  // tracking_number, so buyer_locale and storefront_id are stable across it.
+  const postRpc = await getOrderByIdWithEmailFields(id.data, account);
+  if (!postRpc) return failure(notFound("order"));
+  const { order, email } = postRpc;
 
   const tellBuyer =
     outcome === "shipped" ||
     (outcome === "tracking_updated" && order.fulfilment.trackingNumber !== null);
   const buyerEmailed = tellBuyer
-    ? await emailBuyer(account.accountId, order, outcome === "shipped" ? "shipped" : "tracking")
+    ? await emailBuyer(account, order, email, outcome === "shipped" ? "shipped" : "tracking")
     : false;
 
   revalidatePath(ORDERS_PATH);
@@ -128,42 +134,45 @@ export async function markOrderShipped(
 }
 
 /**
- * The shipping notice, on the seller's behalf. Reads the things the view does
- * not carry: the language the buyer checked out in, the storefront their order
- * page lives under, and who they bought from. The seller identity is a
- * service-role read, gated here by everything markOrderShipped has already
- * checked (a member of this store who may fulfil its orders).
+ * The shipping notice, on the seller's behalf. `email` carries the buyer
+ * locale and storefront id already read by getOrderByIdWithEmailFields, so
+ * this function makes no extra DB round-trip for them.
+ *
+ * The store name comes from the trading name in getSellerIdentity (a
+ * service-role read). Only when that is absent does this call
+ * supabase.rpc("team_my_accounts") on the existing session client, skipping
+ * the extra getUser() that getAccessibleAccounts() would impose in a Server
+ * Action where React cache() is a no-op.
  */
 async function emailBuyer(
-  accountId: string,
+  account: Awaited<ReturnType<typeof getActiveAccount>> & {},
   order: OrderView,
+  email: OrderEmailFields,
   kind: "shipped" | "tracking",
 ): Promise<boolean> {
   if (!order.buyerEmail) return false;
 
-  const supabase = await createClient();
-  const [{ data: row }, identity, accounts] = await Promise.all([
-    supabase
-      .from("orders")
-      .select("buyer_locale, storefront_id")
-      .eq("id", order.id)
-      .eq("seller_id", accountId)
-      .maybeSingle(),
-    getSellerIdentity(accountId),
-    getAccessibleAccounts(),
-  ]);
+  const { accountId } = account;
   // The buyer's own order page, where the parcel is followed. Null for an
   // order recorded without a storefront, or where no link key is configured.
-  const orderUrl = row?.storefront_id ? await orderLinkUrl(row.storefront_id, order.id) : null;
-  // The trading name buyers see on the product page, else the store's name.
-  const storeName =
-    identity.businessName ??
-    accounts.find((option) => option.accountId === accountId)?.storeName ??
-    "";
+  const orderUrl = email.storefrontId ? await orderLinkUrl(email.storefrontId, order.id) : null;
+  const identity = await getSellerIdentity(accountId);
+  // The trading name buyers see on the product page, else the store handle.
+  // Only look up accounts when the trading name is absent, to avoid the extra
+  // getUser() call that getAccessibleAccounts() imposes in Server Actions.
+  let storeName = identity.businessName ?? "";
+  if (!storeName) {
+    const supabase = await createClient();
+    const { data: accts } = await supabase.rpc("team_my_accounts");
+    storeName =
+      (accts as { account_owner_id: string; store_name: string }[] | null)?.find(
+        (a) => a.account_owner_id === accountId,
+      )?.store_name ?? "";
+  }
 
   const result = await sendShippedEmail(
     order.buyerEmail,
-    parseLocale(row?.buyer_locale) ?? DEFAULT_LOCALE,
+    parseLocale(email.buyerLocale) ?? DEFAULT_LOCALE,
     {
       kind,
       productTitle: order.productTitle,
@@ -238,18 +247,30 @@ export async function refundOrder(
   const why = refundReasonSchema.safeParse(reason);
   if (!why.success) return failure(NOT_REFUNDABLE);
 
-  // In THIS store, for the same reason markOrderShipped checks it.
-  const before = await getOrderById(id.data);
-  if (!before) return failure(notFound("order"));
-  // Not refundable is said before any money is asked to move.
-  if (before.status !== "paid") return failure(NOT_REFUNDABLE);
-
+  // Narrow pre-check: scope (seller_id), status, and payment_ref in one read.
+  // This replaces two separate round-trips: the old getOrderById scope check
+  // and the payment_ref read inside refundWithProvider.
+  // order_apply_refund / order_refund only write status, refunded_at, and
+  // refund_reason (20261021_order_refund_provider_first.sql), so payment_ref
+  // stays stable across the call and is safe to pass forward.
   const supabase = await createClient();
+  const { data: preCheck, error: preErr } = await supabase
+    .from("orders")
+    .select("id, status, payment_ref")
+    .eq("seller_id", account.accountId)
+    .eq("id", id.data)
+    .maybeSingle();
+  if (preErr || !preCheck) return failure(notFound("order"));
+  const preRow = preCheck as unknown as { id: string; status: string; payment_ref: string | null };
+  if (preRow.status !== "paid") return failure(NOT_REFUNDABLE);
+  const paymentRef = preRow.payment_ref;
+  const paidThroughProvider = isProviderPayment(paymentRef);
+
   // THE MONEY FIRST. An order a payment provider took the money for is
   // refunded WITH that provider, and recorded only when that succeeded: a row
   // saying "refunded" over money that never went back is the one outcome a
   // buyer cannot be left with.
-  if (!(await refundWithProvider(supabase, account.accountId, id.data))) {
+  if (!(await refundWithProvider(paymentRef, account.accountId, id.data))) {
     return failure(REFUND_REFUSED);
   }
 
@@ -263,7 +284,7 @@ export async function refundOrder(
     p_reason: why.data,
     p_restock: restock === true,
   };
-  const { data, error } = before.paidThroughProvider
+  const { data, error } = paidThroughProvider
     ? await createAdminClient().rpc("order_apply_refund", refundArgs)
     : await supabase.rpc("order_refund", refundArgs);
   if (error) {
@@ -276,11 +297,13 @@ export async function refundOrder(
   // Our fee goes back with the sale. A provider's payment reports that itself
   // (the webhook writes it from Stripe's own figures); an order no provider
   // charged has nobody else to say so.
-  if (!before.paidThroughProvider) await reverseOrderFees(id.data);
+  if (!paidThroughProvider) await reverseOrderFees(id.data);
 
-  const order = await getOrderById(id.data);
-  if (!order) return failure(notFound("order"));
-  const buyerEmailed = await emailBuyerRefund(account.accountId, order);
+  // Combined post-RPC read: order view + email fields in one round-trip.
+  const postRpc = await getOrderByIdWithEmailFields(id.data, account);
+  if (!postRpc) return failure(notFound("order"));
+  const { order, email } = postRpc;
+  const buyerEmailed = await emailBuyerRefund(account, order, email, paymentRef);
 
   revalidatePath(ORDERS_PATH);
   revalidatePath(OVERVIEW_PATH);
@@ -288,32 +311,26 @@ export async function refundOrder(
 }
 
 /**
- * Give the money back through whoever took it. True when there is nothing to
- * give back that way (no provider charged this order: the seller pays the
- * buyer back themselves) or when the provider has refunded it; false when the
- * provider refused or could not be reached, and nothing may be recorded.
+ * Give the money back through whoever took it. `paymentRef` is the
+ * orders.payment_ref read by the caller's pre-check, so this function makes
+ * no extra DB round-trip.
+ *
+ * Returns true when there is nothing to give back through a provider (the
+ * seller pays the buyer back themselves), or when the provider has refunded
+ * it; false when the provider refused or could not be reached, and nothing
+ * may be recorded.
  *
  * The whole payment, and our fee with it (`refund_application_fee`): a seller
  * is not charged a fee on a sale that did not stand. Idempotent on the order,
  * so a second press, or a retry after a timeout, cannot refund twice.
  */
 async function refundWithProvider(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  paymentRef: string | null,
   accountId: string,
   orderId: string,
 ): Promise<boolean> {
-  const { data: row, error } = await supabase
-    .from("orders")
-    .select("payment_ref")
-    .eq("id", orderId)
-    .eq("seller_id", accountId)
-    .maybeSingle();
-  if (error) {
-    console.error("[orders] could not read the payment to refund:", error.message);
-    return false;
-  }
   // Anything but a provider's payment was never charged by one.
-  if (!row?.payment_ref || !isProviderPayment(row.payment_ref)) return true;
+  if (!paymentRef || !isProviderPayment(paymentRef)) return true;
 
   const paymentAccount = await readPaymentAccount(accountId);
   if (!paymentAccount) {
@@ -324,7 +341,7 @@ async function refundWithProvider(
     await stripeRequest<StripeRefund>(
       "POST",
       "/refunds",
-      { payment_intent: row.payment_ref, refund_application_fee: true },
+      { payment_intent: paymentRef, refund_application_fee: true },
       { account: paymentAccount.stripeAccountId, idempotencyKey: `refund_${orderId}` },
     );
     return true;
@@ -340,31 +357,35 @@ async function refundWithProvider(
   }
 }
 
-/** The refund notice, on the seller's behalf. Gated by everything refundOrder
- *  has already checked, like emailBuyer above. */
-async function emailBuyerRefund(accountId: string, order: OrderView): Promise<boolean> {
+/**
+ * The refund notice, on the seller's behalf. `email` and `paymentRef` are
+ * read by refundOrder's pre-check, so no extra DB round-trip is needed here.
+ * Store name resolution follows the same pattern as emailBuyer.
+ */
+async function emailBuyerRefund(
+  account: Awaited<ReturnType<typeof getActiveAccount>> & {},
+  order: OrderView,
+  email: OrderEmailFields,
+  paymentRef: string | null,
+): Promise<boolean> {
   if (!order.buyerEmail) return false;
 
-  const supabase = await createClient();
-  const [{ data: row }, identity, accounts] = await Promise.all([
-    supabase
-      .from("orders")
-      .select("buyer_locale, storefront_id, payment_ref")
-      .eq("id", order.id)
-      .eq("seller_id", accountId)
-      .maybeSingle(),
-    getSellerIdentity(accountId),
-    getAccessibleAccounts(),
-  ]);
-  const orderUrl = row?.storefront_id ? await orderLinkUrl(row.storefront_id, order.id) : null;
-  const storeName =
-    identity.businessName ??
-    accounts.find((option) => option.accountId === accountId)?.storeName ??
-    "";
+  const { accountId } = account;
+  const orderUrl = email.storefrontId ? await orderLinkUrl(email.storefrontId, order.id) : null;
+  const identity = await getSellerIdentity(accountId);
+  let storeName = identity.businessName ?? "";
+  if (!storeName) {
+    const supabase = await createClient();
+    const { data: accts } = await supabase.rpc("team_my_accounts");
+    storeName =
+      (accts as { account_owner_id: string; store_name: string }[] | null)?.find(
+        (a) => a.account_owner_id === accountId,
+      )?.store_name ?? "";
+  }
 
   const result = await sendRefundEmail(
     order.buyerEmail,
-    parseLocale(row?.buyer_locale) ?? DEFAULT_LOCALE,
+    parseLocale(email.buyerLocale) ?? DEFAULT_LOCALE,
     {
       productTitle: order.productTitle,
       quantity: order.quantity,
@@ -374,7 +395,7 @@ async function emailBuyerRefund(accountId: string, order: OrderView): Promise<bo
       amountCents: order.amountCents,
       currency: order.currency,
       // No provider took this payment, so none can give it back.
-      manual: !isProviderPayment(row?.payment_ref),
+      manual: !isProviderPayment(paymentRef),
       orderUrl,
       store: { name: storeName, contactEmail: identity.email ?? null },
     },

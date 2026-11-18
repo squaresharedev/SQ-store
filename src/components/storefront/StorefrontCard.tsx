@@ -170,6 +170,7 @@ export function StorefrontCard({
         <Link
           href={storefrontEditorPath(id)}
           aria-label={t("editAriaLabel", { name })}
+          prefetch={false}
           className={cn("absolute inset-0 z-10 rounded-md", focusRingClass)}
         />
       )}

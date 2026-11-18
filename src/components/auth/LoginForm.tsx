@@ -18,7 +18,7 @@ import { LastUsedBadge } from "@/components/auth/LastUsedBadge";
 import { PasswordResetModal } from "@/components/auth/PasswordResetModal";
 import { Turnstile } from "@/components/auth/Turnstile";
 import type { SignInMethod } from "@/lib/auth/last-method";
-import { USERNAME_MAX_LENGTH, looksLikeEmail } from "@/lib/validation/auth";
+import { USERNAME_MAX_LENGTH, looksLikeEmail } from "@/lib/validation/auth-constants";
 import { resilientAction, SIGN_IN_UNREACHABLE } from "@/lib/resilient-action";
 import { LEGAL_LINKS } from "@/lib/legal/links";
 import { cn } from "@/lib/utils";

@@ -18,13 +18,17 @@ import type { PaymentAccount } from "@/lib/payments/connect/account";
 const state = vi.hoisted(() => ({ account: null as PaymentAccount | null, reads: 0 }));
 
 vi.mock("@/lib/payments/availability", () => ({ STRIPE_CONNECT_AVAILABLE: true }));
-vi.mock("@/lib/payments/connect/account", async (importActual) => ({
-  ...(await importActual<typeof import("@/lib/payments/connect/account")>()),
-  readPaymentAccount: vi.fn(async () => {
+vi.mock("@/lib/payments/connect/account", async (importActual) => {
+  const actual = await importActual<typeof import("@/lib/payments/connect/account")>();
+  // Both the raw reader and the React-cached wrapper must point at the same
+  // mock so tests that control state.account see consistent results whether
+  // checkoutProviderFor calls getPaymentAccount or readPaymentAccount.
+  const mockRead = vi.fn(async () => {
     state.reads += 1;
     return state.account;
-  }),
-}));
+  });
+  return { ...actual, readPaymentAccount: mockRead, getPaymentAccount: mockRead };
+});
 
 import { checkoutProviderFor } from "@/lib/checkout/availability";
 

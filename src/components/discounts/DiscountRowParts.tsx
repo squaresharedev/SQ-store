@@ -432,7 +432,7 @@ export function DiscountRowActions({
           code can still be given more time. */}
       {(isCode || status !== "ended") && (
         <Tooltip label={t("edit")}>
-          <Link href={discountEditPath(discount.id)} aria-label={t("edit")} className={iconButtonClass}>
+          <Link href={discountEditPath(discount.id)} aria-label={t("edit")} prefetch={false} className={iconButtonClass}>
             <Pencil className="size-4" strokeWidth={2} aria-hidden="true" />
           </Link>
         </Tooltip>

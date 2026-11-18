@@ -73,7 +73,11 @@ export function NotificationsPageClient({
   }
 
   function markOne(id: string) {
-    if (items.some((n) => n.id === id && !n.read)) setReadHere((count) => count + 1);
+    // Skip the server action when the row is already read: the action costs a
+    // DB round-trip even when there is nothing to update, and the readHere
+    // increment would over-count the unread badge correction.
+    if (!items.some((n) => n.id === id && !n.read)) return;
+    setReadHere((count) => count + 1);
     setItems((prev) =>
       prev.map((n) => (n.id === id && !n.read ? { ...n, read: true } : n)),
     );

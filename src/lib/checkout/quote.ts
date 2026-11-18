@@ -245,6 +245,7 @@ export async function quoteFromGate(
       currency: line.currency,
       now: gate.now,
       unreadableSales: "busy",
+      storeSales: gate.storeSales,
     });
     if (lines === PAGE_BUSY) return { ok: false, reason: "add_on_unavailable" };
     for (const pick of picks) {

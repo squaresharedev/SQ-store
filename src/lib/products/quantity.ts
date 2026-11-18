@@ -14,7 +14,7 @@
 // input, and they are all measured against the same stored `max_per_order`.
 
 import { deriveStockBadge } from "@/lib/stock/badge";
-import { MAX_PER_ORDER_DEFAULT, PURCHASE_QUANTITY_MAX } from "@/lib/validation/product";
+import { MAX_PER_ORDER_DEFAULT, PURCHASE_QUANTITY_MAX } from "@/types/product";
 
 /** `?q=` carries the chosen quantity, so a shared or reloaded link opens on
  *  the same order the sender was looking at. Declared beside the other product

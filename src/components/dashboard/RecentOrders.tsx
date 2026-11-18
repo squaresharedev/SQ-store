@@ -82,6 +82,7 @@ export function RecentOrders({
                     than a dead link. */}
                 <Link
                   href={order.id ? orderDetailPath(order.id) : ORDERS_PATH}
+                  prefetch={false}
                   onClick={(event) => {
                     if (!detail || isModifiedClick(event)) return;
                     event.preventDefault();

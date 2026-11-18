@@ -36,13 +36,22 @@ export const getCheckoutPage = cache(
       budget: RATE_LIMITS.checkoutPage,
     });
     if (gate === PAGE_BUSY) return PAGE_BUSY;
-    if (!gate || !(await checkoutAvailableFor(gate))) return null;
+    if (!gate) return null;
     const { config, productPage, block, row, seller, shippingPolicy } = gate;
+
+    // Availability (one DB read for the payment account) and pricing (one or
+    // more reads for sales history) can both be resolved from the gate result
+    // without depending on each other: run them together.
+    const [available, pricing] = await Promise.all([
+      checkoutAvailableFor(gate),
+      gatePricing(gate),
+    ]);
+    if (!available) return null;
 
     const product = await buildProductPageProduct(row, {
       soldOutFlag: block?.soldOut,
       showStock: productPage.showStock,
-      pricing: await gatePricing(gate),
+      pricing,
     });
     // The add-ons the product page offered, read by the same rules. Which of
     // them are in this order is the route's `?a=`, limited to these.
@@ -55,6 +64,7 @@ export const getCheckoutPage = cache(
             currency: product.currency,
             now: gate.now,
             unreadableSales: "busy",
+            storeSales: gate.storeSales,
           })
         : [];
 

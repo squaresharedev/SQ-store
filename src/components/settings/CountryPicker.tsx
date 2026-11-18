@@ -27,12 +27,12 @@ type CountryPickerProps = {
 };
 
 export function CountryPicker({ value, onChange, summaryLabel, disabled }: CountryPickerProps) {
-  const t = useTranslations("Settings");
+  const t = useTranslations("Settings.shipping");
   const { countryName } = useOperatingCountries();
 
   const items: CheckboxListItem<string>[] = [
     // Catch-all "*" first.
-    { value: SHIP_ANYWHERE, label: t("shipping.destinations.everywhereElse") },
+    { value: SHIP_ANYWHERE, label: t("destinations.everywhereElse") },
     ...(SHIPPING_COUNTRY_CODES as readonly string[]).map((code) => ({
       value: code,
       label: countryName(code),

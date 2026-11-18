@@ -26,10 +26,10 @@ const REPORT_PLAN = cheapestPlanWith("analyticsExport");
  */
 export function AnalyticsExportButton({ enabled, snapshot }: { enabled: boolean; snapshot: AnalyticsSnapshot }) {
   const t = useTranslations("Analytics.export");
-  const tBilling = useTranslations("Billing");
+  const tBilling = useTranslations("Billing.plans");
 
   if (!enabled) {
-    const plan = tBilling(`plans.${REPORT_PLAN}.name`);
+    const plan = tBilling(`${REPORT_PLAN}.name`);
     return (
       <Link
         href={plansHref("analytics_nudge")}

@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import type { StorefrontCustomFont } from "@/types/storefront";
-import { customFontFamily, isSafeFontUrl } from "@/lib/theme/storefront-fonts";
+import { customFontFamily, isSafeFontUrl } from "@/lib/theme/custom-font";
 
 /**
  * Registers a seller's uploaded typeface with the document, so anything set in

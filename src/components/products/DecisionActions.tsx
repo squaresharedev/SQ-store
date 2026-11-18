@@ -1,7 +1,6 @@
 "use client";
 
 import { useId, useState, useTransition, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { Download, Scale } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { HeroMark } from "@/components/ui/HeroMark";
@@ -103,7 +102,6 @@ function AppealForm({
   const tCommon = useTranslations("Common.actions");
   const resolve = useResolveMessage();
   const toast = useToast();
-  const router = useRouter();
   const fieldId = useId();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
@@ -130,9 +128,8 @@ function AppealForm({
       setOpen(false);
       onFiled(result.appeal);
       toast.success(tForm("sent"));
-      // The server revalidated the page; this pulls the fresh render so the
-      // rest of the banner agrees with the status shown above.
-      router.refresh();
+      // fileModerationAppeal revalidates the product paths; the action's
+      // revalidatePath calls trigger the re-render as part of the response.
     });
   }
 

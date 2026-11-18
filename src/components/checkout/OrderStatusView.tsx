@@ -2,6 +2,7 @@ import { Check, Download, ExternalLink, MapPin } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/format/money";
+import { dateTimeFormat } from "@/lib/format/intl";
 import { regionName } from "@/lib/format/country";
 import { orderDownloadApiPath } from "@/lib/checkout/paths";
 import { storefrontPagePath } from "@/lib/storefront/product-page-url";
@@ -71,7 +72,7 @@ export function OrderStatusView({
   const sellerName = seller.businessName || storefront.name;
   const storeName =
     storefront.header?.show && storefront.header.name ? storefront.header.name : storefront.name;
-  const date = (iso: string) => new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(new Date(iso));
+  const date = (iso: string) => dateTimeFormat(locale, { dateStyle: "long" }).format(new Date(iso));
   // What the heading reads as while the seller has not written their own.
   const defaultHeadline = order.firstName ? t("thanksNamed", { name: order.firstName }) : t("thanks");
 

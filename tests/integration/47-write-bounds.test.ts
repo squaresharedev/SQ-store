@@ -55,8 +55,21 @@ describe("sizes", () => {
 });
 
 describe("how many rows one account holds", () => {
+  // The bulk rows below are service-role writes, which land on the moderation
+  // audit list (moderation_due) and outlive this file in the shared database:
+  // left behind, 2,000 products and 200 storefronts push a later file's row
+  // out of moderation_due(200). Every file must leave the list as it found it.
+  const bulkOwners: string[] = [];
+  afterAll(() =>
+    asSuper(async (q) => {
+      await q.query(`delete from public.products where owner_id = any($1::uuid[])`, [bulkOwners]);
+      await q.query(`delete from public.storefronts where owner_id = any($1::uuid[])`, [bulkOwners]);
+    }),
+  );
+
   it("stops a client at the ceiling, plan switch off, and lets the service role past it", async () => {
     const owner = await createUser();
+    bulkOwners.push(owner.id);
     await asService((q) =>
       q.query(
         `insert into public.storefronts (owner_id, name) select $1, 'Shop ' || g from generate_series(1, 200) g`,
@@ -75,6 +88,7 @@ describe("how many rows one account holds", () => {
 
   it("counts products the same way", async () => {
     const owner = await createUser();
+    bulkOwners.push(owner.id);
     await asService((q) =>
       q.query(
         `insert into public.products (owner_id, title, price_cents) select $1, 'P' || g, 100 from generate_series(1, 2000) g`,
@@ -91,6 +105,21 @@ describe("how many rows one account holds", () => {
 });
 
 describe("anonymous inserts", () => {
+  // The caps are per minute ACROSS THE PLATFORM, so rows left behind here
+  // refuse any other file's anonymous insert for the rest of that minute (the
+  // waitlist and consent tests elsewhere). Remove what this block put in.
+  afterAll(() =>
+    asSuper(async (q) => {
+      await q.query(
+        `delete from public.waitlist_signups where email like 'w-%@example.com' or email like 'early-%@example.com'`,
+      );
+      await q.query(
+        `delete from public.consent_logs
+          where policy_version = 'v1' and method = 'reject_all' and received_at > now() - interval '15 minutes'`,
+      );
+    }),
+  );
+
   /** Insert until refused, each in its own transaction; how many went in. */
   async function fillUntilRefused(insert: () => Promise<unknown>, max: number): Promise<{ taken: number; error: string }> {
     for (let taken = 0; taken <= max; taken++) {

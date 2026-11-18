@@ -91,9 +91,31 @@ export function classifierConfigured(): boolean {
 let cachedClient: Anthropic | undefined;
 function client(): Anthropic | null {
   if (!process.env.ANTHROPIC_API_KEY) return null;
-  cachedClient ??= new Anthropic({ timeout: CLASSIFY_TIMEOUT_MS, maxRetries: 1 });
+  cachedClient ??= new Anthropic({ timeout: CLASSIFY_TIMEOUT_MS, maxRetries: 0 });
   return cachedClient;
 }
+
+// ---- Prompt-cache warm-up gate ----------------------------------------
+// A cache entry becomes readable only after the first response STARTS. When
+// several concurrent callers all fire cold, they all miss the cache and each
+// pay full input price. The gate serialises only the very first call after a
+// cold gap: one warm-up caller goes alone while the rest wait; once its
+// response lands (success OR failure) all waiters are released and proceed in
+// parallel against the now-live entry.
+
+/** How long (ms) a completed call's cache entry is treated as live. Slightly
+ *  under the five-minute TTL so the gate re-arms before the entry expires. */
+const CACHE_WARM_WINDOW_MS = 4 * 60 * 1_000;
+
+/** Timestamp (ms since epoch) of the last call that finished. Zero until a
+ *  call completes in this isolate. */
+let lastCallFinishedAt = 0;
+
+/** Non-null while a warm-up caller is in flight. Concurrent callers await
+ *  this; the warm-up caller's finally block always resolves it and sets it
+ *  back to null, so a deadlock is impossible. */
+let warmUpGate: Promise<void> | null = null;
+// ---- end of warm-up gate state -----------------------------------------
 
 /**
  * Bring an answer inside its own rules: a clean answer names no ground and no
@@ -118,6 +140,9 @@ export function normalizeVerdict(answer: RawAnswer | PartVerdict, knownPaths: re
 
 type UserContent = Anthropic.MessageParam["content"];
 
+/** Part kind used in usage log lines for cost auditing. */
+type PartKind = "text" | "image" | "pdf" | "review";
+
 async function ask(
   content: UserContent,
   knownPaths: readonly string[],
@@ -126,9 +151,29 @@ async function ask(
   unreadableIsVerdict: boolean,
   /** Which policy: the listing one, or the buyer-review one. */
   policy: string = POLICY_PROMPT,
+  /** What kind of part this is, written to the usage log for cost auditing. */
+  kind: PartKind = "text",
 ): Promise<ClassifyResult> {
   const anthropic = client();
   if (!anthropic) return null;
+
+  // Warm-up gate: if no call has finished within CACHE_WARM_WINDOW_MS, the
+  // first caller goes alone and warms the cache while concurrent callers
+  // wait. Once the warm-up response arrives (success or failure) the waiters
+  // are released and proceed in parallel against the now-live cache entry.
+  const now = Date.now();
+  let resolveWarmUp: (() => void) | null = null;
+  if (now - lastCallFinishedAt > CACHE_WARM_WINDOW_MS) {
+    if (warmUpGate) {
+      await warmUpGate;
+    } else {
+      // Taken from withResolvers rather than assigned inside an executor
+      // callback, so the compiler can see resolveWarmUp is set from here on.
+      const gate = Promise.withResolvers<void>();
+      warmUpGate = gate.promise;
+      resolveWarmUp = gate.resolve;
+    }
+  }
 
   try {
     const response = await anthropic.messages.parse({
@@ -142,6 +187,23 @@ async function ask(
       // No temperature or top_p: this model answers them with a 400.
       output_config: { effort: MODERATION_EFFORT, format: zodOutputFormat(answerSchema) },
     });
+
+    // The cache entry is now readable: record the finish time before releasing
+    // the gate so waiters do not re-arm it and queue up again.
+    lastCallFinishedAt = Date.now();
+    // Compact line for cost auditing: in = uncached input, cacheWrite = newly
+    // written at 1.25x, cacheRead = cache hit at 0.1x.
+    const { usage } = response;
+    // Info, not error: a successful call is not a failure, and error-level
+    // lines are what anyone watching for trouble filters on.
+    console.info(
+      `[moderation] usage kind=${kind}` +
+      ` in=${usage?.input_tokens ?? 0}` +
+      ` cacheWrite=${usage?.cache_creation_input_tokens ?? 0}` +
+      ` cacheRead=${usage?.cache_read_input_tokens ?? 0}` +
+      ` out=${usage?.output_tokens ?? 0}`,
+    );
+
     // The model's own safety check declined to read it. Asking again gets the
     // same answer, and it is neither proof the content is fine nor proof it is
     // not: a person looks. Logged by category, because how often this happens
@@ -187,6 +249,13 @@ async function ask(
       error instanceof Error ? error.message : String(error),
     );
     return null;
+  } finally {
+    // If this was the warm-up caller, release the gate whether the call
+    // succeeded or not: waiters must never be blocked permanently.
+    if (resolveWarmUp) {
+      resolveWarmUp();
+      warmUpGate = null;
+    }
   }
 }
 
@@ -295,6 +364,8 @@ export async function classifyText(
     ],
     judged.map(linePath),
     false,
+    POLICY_PROMPT,
+    "text",
   );
 }
 
@@ -326,6 +397,7 @@ export async function classifyReview(review: {
     lines.map(linePath),
     false,
     REVIEW_POLICY_PROMPT,
+    "review",
   );
 }
 
@@ -352,6 +424,8 @@ export async function classifyMedia(
     ],
     [],
     true,
+    POLICY_PROMPT,
+    kind,
   );
 }
 
@@ -373,5 +447,7 @@ export async function classifyMediaBytes(
     ],
     [],
     true,
+    POLICY_PROMPT,
+    file.kind,
   );
 }

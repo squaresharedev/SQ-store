@@ -2,7 +2,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/locales";
 import { formatFixed } from "@/lib/format/intl";
-import { getUser } from "@/lib/auth/session";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import { escapeIlike } from "@/lib/supabase/ilike";
@@ -84,9 +83,11 @@ function money(cents: number | null, currency: string | null, locale: Locale): s
 }
 
 export async function GET(request: Request) {
-  // 1. Session. Never trust the client for identity.
-  const user = await getUser();
-  if (!user) {
+  // 1. Session + active account in one call. getActiveAccount() calls getUser()
+  // internally; in a route handler React.cache() is a no-op, so calling
+  // getUser() separately beforehand would be a second real Auth round-trip.
+  const account = await getActiveAccount();
+  if (!account) {
     return Response.json({ error: "Sign in required." }, { status: 401 });
   }
 
@@ -96,12 +97,6 @@ export async function GET(request: Request) {
       { error: "Searching too fast. Try again shortly." },
       { status: 429 },
     );
-  }
-
-  // 3. Which store are we searching? Re-validated server-side every request.
-  const account = await getActiveAccount();
-  if (!account) {
-    return Response.json({ error: "Sign in required." }, { status: 401 });
   }
 
   // 4. Input.

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -14,7 +14,6 @@ import {
   visitorHash,
 } from "@/lib/analytics/record";
 import { getPublicProductPage, resolveDisplayName } from "@/lib/products/public";
-import { getProductReviews } from "@/lib/reviews/queries";
 import { PAGE_BUSY } from "@/lib/public/busy";
 import { appUrl } from "@/lib/app-url";
 import { clipText } from "@/lib/format/text";
@@ -133,11 +132,8 @@ export default async function ProductPage({
   const result = await getPublicProductPage(storefrontId, productId);
   if (result === PAGE_BUSY) return <BuyerBusy />;
   if (!result) notFound();
-  const { page, ownerId, saleEndsInMs } = result;
+  const { page, ownerId, saleEndsInMs, reviews } = result;
   const via = requestedVia(query);
-  // Read after the gate above, never before it: a product the page refuses
-  // has no reviews to show. Null (a failed read) just leaves the section out.
-  const reviews = await getProductReviews(page.product.id);
 
   // A served page is a product view. Recorded after the response so a counter
   // can never slow a buyer down, deduped per visitor per product per hour, and
@@ -148,15 +144,23 @@ export default async function ProductPage({
   const userAgent = requestHeaders.get("user-agent");
   after(async () => {
     const hash = await visitorHash(ownerId, [ip, userAgent]);
-    await recordSignal({
-      accountId: ownerId,
-      kind: "product_view",
-      storefrontId: page.storefront.id,
-      channel: via ?? "direct",
-      blockId: `p_${page.product.id}`,
-      visitorHash: hash,
-      dedupeKey: await productViewDedupeKey(page.product.id, hash),
-    });
+    // Both dedupe keys computed up front so the two signal writes can run
+    // concurrently when via === "embed".
+    const [viewKey, clickKey] = await Promise.all([
+      productViewDedupeKey(page.product.id, hash),
+      productClickDedupeKey(page.product.id, hash),
+    ]);
+    const writes: Promise<"written" | "duplicate" | "failed">[] = [
+      recordSignal({
+        accountId: ownerId,
+        kind: "product_view",
+        storefrontId: page.storefront.id,
+        channel: via ?? "direct",
+        blockId: `p_${page.product.id}`,
+        visitorHash: hash,
+        dedupeKey: viewKey,
+      }),
+    ];
     // A CLICK ON AN EMBED TILE, counted where it lands. The tile is a plain
     // link to this page carrying `via=embed`, so the request the buyer asked
     // for IS the click: nothing on the seller's site has to report it, which
@@ -165,16 +169,19 @@ export default async function ProductPage({
     // marker is attribution and anyone can type it, so read the figure as a
     // guide, like the channel split it belongs to.
     if (via === "embed") {
-      await recordSignal({
-        accountId: ownerId,
-        kind: "product_click",
-        storefrontId: page.storefront.id,
-        channel: "embed",
-        blockId: `p_${page.product.id}`,
-        visitorHash: hash,
-        dedupeKey: await productClickDedupeKey(page.product.id, hash),
-      });
+      writes.push(
+        recordSignal({
+          accountId: ownerId,
+          kind: "product_click",
+          storefrontId: page.storefront.id,
+          channel: "embed",
+          blockId: `p_${page.product.id}`,
+          visitorHash: hash,
+          dedupeKey: clickKey,
+        }),
+      );
     }
+    await Promise.all(writes);
   });
 
   const displayName = resolveDisplayName(page);

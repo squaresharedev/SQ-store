@@ -11,7 +11,7 @@ import {
   type TextSpan,
   type TextStyle,
 } from "@/types/storefront";
-import { isStrictHexColor } from "@/lib/validation/storefront";
+import { isStrictHexColor } from "@/lib/validation/predicates";
 import { segmentText } from "@/lib/storefront/text-spans";
 import { fontPresentation } from "@/lib/theme/storefront-fonts";
 import { cn } from "@/lib/utils";
@@ -23,12 +23,15 @@ import {
 } from "./config-maps";
 import { useAutoFitRegistry } from "./text-autofit-registry";
 import { useAutoFitTextSize } from "./useAutoFitTextSize";
-import {
-  InlineTextEditor,
-  type InlineFormatKey,
-  type TextEditSource,
-  type TextRange,
+// Type-only: erased at compile time, so the InlineTextEditor module is never
+// evaluated on the buyer-facing path. The actual component is delivered
+// through the editor-slots context.
+import type {
+  InlineFormatKey,
+  TextEditSource,
+  TextRange,
 } from "./InlineTextEditor";
+import { useEditorSlots } from "./editor-slots";
 
 /**
  * The text face of a grid tile — always plain React text nodes, never markup.
@@ -69,6 +72,7 @@ export function TextTileContent({
   onEditEnd?: () => void;
 }) {
   const t = useTranslations("Storefront.tiles");
+  const { InlineTextEditor } = useEditorSlots();
   // An explicit block color wins; else headings pick up the accent and other
   // variants stay foreground. Every color is re-gated before touching style.
   const color =
@@ -159,7 +163,7 @@ export function TextTileContent({
       )}
       style={font.style}
     >
-      {editing && onTextChange && onToggleBlockFormat && onRangeChange && onEditEnd ? (
+      {editing && InlineTextEditor && onTextChange && onToggleBlockFormat && onRangeChange && onEditEnd ? (
         // Keyed apart from the static paragraph so entering edit mode MOUNTS a
         // fresh node: the editor owns its own DOM content and must never
         // inherit a node React was still writing into.

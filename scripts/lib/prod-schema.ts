@@ -156,6 +156,18 @@ export const SCHEMA_REQUIREMENTS: readonly SchemaRequirement[] = [
   { kind: "function", signature: "guard_account_ceiling()", migration: "20261105_write_bounds.sql" },
   { kind: "function", signature: "guard_anonymous_insert_rate()", migration: "20261105_write_bounds.sql" },
   { kind: "function", signature: "guard_avatar_url()", migration: "20261105_write_bounds.sql" },
+  // 20261117_perf_indexes: function rewrites and new FK / review indexes.
+  { kind: "body", signature: "storefront_signals_aggregate(uuid,date,date)", includes: "with recursive ls", migration: "20261117_perf_indexes.sql" },
+  // 20261117_record_signal: on-conflict-do-nothing write path for signals.
+  { kind: "function", signature: "record_signal(uuid,text,text,uuid,text,text,integer,text,text,jsonb)", migration: "20261117_record_signal.sql" },
+  { kind: "body", signature: "dashboard_orders_aggregate(uuid,timestamp with time zone)", includes: "filter (where status = 'paid'", migration: "20261117_perf_indexes.sql" },
+  { kind: "body", signature: "analytics_aggregate(uuid,date,date)", includes: "platform_fee_cents, buyer_email", migration: "20261117_perf_indexes.sql" },
+  { kind: "relation", name: "storefront_signals_storefront_id_idx", migration: "20261117_perf_indexes.sql" },
+  { kind: "relation", name: "storefront_funnel_daily_day_idx", migration: "20261117_perf_indexes.sql" },
+  { kind: "relation", name: "seller_funnel_events_account_id_idx", migration: "20261117_perf_indexes.sql" },
+  { kind: "relation", name: "reviews_seller_reviewed_idx", migration: "20261117_perf_indexes.sql" },
+  { kind: "relation", name: "reviews_seller_external_idx", migration: "20261117_perf_indexes.sql" },
+  { kind: "relation", name: "reviews_seller_held_idx", migration: "20261117_perf_indexes.sql" },
 ];
 
 /** A SQL string literal. Every value below is a constant from this file, and

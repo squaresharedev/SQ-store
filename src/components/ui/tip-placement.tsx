@@ -55,27 +55,16 @@ export function useTipPlacement(
   bubbleRef: React.RefObject<HTMLElement | null>,
 ): TipPlacement | null {
   const [placement, setPlacement] = React.useState<TipPlacement | null>(null);
-  // Bumped every animation frame while open, so the placement below re-runs
-  // and the bubble stays glued to its trigger. Scroll and resize events alone
-  // are not enough: the storefront canvas pans and zooms by writing a CSS
-  // transform straight to the stage element every frame (see
-  // useCanvasViewport), with no scroll or resize event at all — a trigger
-  // riding that transform would otherwise leave its tooltip stranded at the
-  // spot it opened at. Re-measuring every frame catches that transform along
-  // with anything else that moves a trigger without dispatching either event.
-  const [reflow, setReflow] = React.useState(0);
 
-  React.useEffect(() => {
-    if (!open) return;
-    let frame = requestAnimationFrame(function tick() {
-      setReflow((n) => n + 1);
-      frame = requestAnimationFrame(tick);
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [open]);
-
-  React.useLayoutEffect(() => {
-    if (!open) return;
+  // Measure the bubble against the trigger and call setPlacement. The equal-
+  // value check inside the setter means nothing re-renders when the trigger
+  // did not move. Called from both the layout effect (first placement before
+  // paint) and the rAF loop (every subsequent frame, while open).
+  //
+  // Re-measuring every frame catches canvas pan/zoom transforms that are
+  // written straight to the DOM without dispatching any scroll or resize event
+  // (see useCanvasViewport). Scroll and resize events alone would miss those.
+  function measure() {
     const trigger = triggerRef.current;
     const bubble = bubbleRef.current;
     if (!trigger || !bubble) return;
@@ -109,7 +98,7 @@ export function useTipPlacement(
     const side = flip ? "top" : "bottom";
 
     // Bail when nothing moved. A tooltip's content is a fresh ReactNode every
-    // render, so this effect must never be the thing that causes the next one.
+    // render, so this must never be the thing that causes the next one.
     setPlacement((prev) =>
       prev &&
       prev.top === top &&
@@ -119,7 +108,28 @@ export function useTipPlacement(
         ? prev
         : { top, left, side, arrowLeft },
     );
-  }, [open, reflow, triggerRef, bubbleRef]);
+  }
+
+  // First placement: runs synchronously before the browser paints so the
+  // bubble never flashes in the wrong position on its first open.
+  React.useLayoutEffect(() => {
+    if (!open) return;
+    measure();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Subsequent frames: keep the bubble glued to the trigger while it moves.
+  // measure() ends in the equal-value-skipping setPlacement, so frames where
+  // nothing changed produce no React re-render.
+  React.useEffect(() => {
+    if (!open) return;
+    let frame = requestAnimationFrame(function tick() {
+      measure();
+      frame = requestAnimationFrame(tick);
+    });
+    return () => cancelAnimationFrame(frame);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   return placement;
 }

@@ -3,6 +3,10 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from "../setup/re
 import { ReportDialog } from "@/components/product-page/ReportDialog";
 import { RemovalBadge, RemovalNotice } from "@/components/products/RemovalNotice";
 
+// Pre-load the lazy panel so next/dynamic's loadable resolves instantly in tests
+// rather than compiling on first open (which can exceed findByRole's timeout).
+await import("@/components/product-page/ReportDialogPanel");
+
 /**
  * The words around content reports and takedowns, as a reader sees them.
  *
@@ -26,10 +30,10 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function openDialog() {
+async function openDialog() {
   render(<ReportDialog {...PAGE} />);
   fireEvent.click(screen.getByRole("button", { name: "Report this product" }));
-  return screen.getByRole("dialog");
+  return screen.findByRole("dialog");
 }
 
 /** The body the dialog posted to /api/report. */
@@ -39,8 +43,8 @@ function posted(fetchMock: ReturnType<typeof vi.fn>): Record<string, unknown> {
 }
 
 describe("ReportDialog", () => {
-  it("asks its question in the words it always used", () => {
-    const dialog = openDialog();
+  it("asks its question in the words it always used", async () => {
+    const dialog = await openDialog();
 
     expect(within(dialog).getByRole("heading", { name: "Report this product" })).toBeVisible();
     expect(
@@ -82,7 +86,7 @@ describe("ReportDialog", () => {
       "fetch",
       vi.fn(async () => Response.json({ ok: true, message: "ignored" }, { status: 202 })),
     );
-    const dialog = openDialog();
+    const dialog = await openDialog();
     fireEvent.click(within(dialog).getByRole("radio", { name: /Spam/ }));
     fireEvent.click(within(dialog).getByRole("button", { name: "Send report" }));
 
@@ -103,7 +107,7 @@ describe("ReportDialog", () => {
       Response.json({ error: "Too many reports from here. Try again later." }, { status: 429 }),
     );
     vi.stubGlobal("fetch", fetchMock);
-    const dialog = openDialog();
+    const dialog = await openDialog();
     fireEvent.click(within(dialog).getByRole("radio", { name: /Spam/ }));
     fireEvent.click(within(dialog).getByRole("button", { name: "Send report" }));
     expect((await within(dialog).findByRole("alert")).textContent).toBe(
@@ -129,8 +133,8 @@ describe("ReportDialog", () => {
     );
   });
 
-  it("offers only the product when the seller sells one thing from one storefront", () => {
-    const dialog = openDialog();
+  it("offers only the product when the seller sells one thing from one storefront", async () => {
+    const dialog = await openDialog();
     expect(dialog.querySelector("[data-report-scopes]")).toBeNull();
     // The eight reasons, and nothing else to choose.
     expect(within(dialog).getAllByRole("radio")).toHaveLength(8);
@@ -142,7 +146,7 @@ describe("ReportDialog", () => {
     render(<ReportDialog {...PAGE} scopes={{ storefront: true, seller: true }} />);
     // With a choice to make, the link no longer claims to be about the product.
     fireEvent.click(screen.getByRole("button", { name: "Report a problem" }));
-    const dialog = screen.getByRole("dialog");
+    const dialog = await screen.findByRole("dialog");
 
     const scopes = dialog.querySelector<HTMLElement>("[data-report-scopes]")!;
     expect(within(scopes).getByText("What do you want to report?").tagName).toBe("LEGEND");
@@ -183,7 +187,7 @@ describe("ReportDialog", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<ReportDialog {...PAGE} scopes={{ storefront: true, seller: false }} />);
     fireEvent.click(screen.getByRole("button", { name: "Report a problem" }));
-    const dialog = screen.getByRole("dialog");
+    const dialog = await screen.findByRole("dialog");
     expect(
       within(dialog.querySelector<HTMLElement>("[data-report-scopes]")!).getAllByRole("radio"),
     ).toHaveLength(2);
@@ -194,12 +198,13 @@ describe("ReportDialog", () => {
     expect(posted(fetchMock)).toMatchObject({ targetType: "storefront", targetId: STOREFRONT });
   });
 
-  it("starts over on the product after closing", () => {
+  it("starts over on the product after closing", async () => {
     render(<ReportDialog {...PAGE} scopes={{ storefront: false, seller: true }} />);
     fireEvent.click(screen.getByRole("button", { name: "Report a problem" }));
-    fireEvent.click(within(screen.getByRole("dialog")).getByRole("radio", { name: /This seller/ }));
-    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Cancel" }));
-    return waitFor(() => {
+    const dialog = await screen.findByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("radio", { name: /This seller/ }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    await waitFor(() => {
       fireEvent.click(screen.getByRole("button", { name: "Report a problem" }));
       expect(
         within(screen.getByRole("dialog")).getByRole("radio", { name: /This product/ }),

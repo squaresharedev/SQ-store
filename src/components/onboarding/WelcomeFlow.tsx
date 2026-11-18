@@ -2,7 +2,6 @@
 
 import { useActionState, useCallback, useEffect, useId, useRef, useState } from "react";
 import type { MessageKey } from "@/i18n/types";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -148,7 +147,6 @@ export function WelcomeFlow({
   confirmCodeAction?: FormAction;
 }) {
   const t = useTranslations();
-  const router = useRouter();
   const reducedMotion = useReducedMotion();
   const formId = useId();
   const termsFormId = useId();
@@ -279,12 +277,9 @@ export function WelcomeFlow({
     if (finished) onClose();
   }, [finished, onClose]);
 
-  // saveTaxInfo revalidates /settings/business only. The page this dialog sits on
-  // renders the checklist and the gate on the server, so it asks for a fresh
-  // render itself; client state (this dialog, its step) survives a refresh.
-  useEffect(() => {
-    if (saveState.success) router.refresh();
-  }, [saveState, router]);
+  // saveTaxInfo now revalidates both /settings/business and /dashboard, so the
+  // checklist and the publish gate render fresh as part of the action response.
+  // No router.refresh() is needed; the action's revalidatePath calls cover it.
 
   // Closing mid-save would drop the result on the floor. The pending flag
   // lives in a ref so the handler handed to Modal stays the same function.

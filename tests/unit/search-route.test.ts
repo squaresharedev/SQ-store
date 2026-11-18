@@ -124,7 +124,11 @@ beforeEach(() => {
 
 describe("GET /api/search — gates", () => {
   it("401 when signed out, before any query runs", async () => {
+    // The route no longer calls getUser() separately; getActiveAccount() is the
+    // single auth gate (it calls getUser() internally). Mocking both keeps the
+    // test honest: a real sign-out sets both to null.
     getUser.mockResolvedValue(null);
+    getActiveAccount.mockResolvedValue(null);
     const res = await GET(request("shoes"));
     expect(res.status).toBe(401);
     expect(tableCalls).toHaveLength(0);

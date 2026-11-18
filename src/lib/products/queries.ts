@@ -31,6 +31,7 @@ import { productQuantityCap } from "@/lib/products/quantity";
 import { MODERATION_DETAIL_SELECT, takedownFromRow } from "@/lib/moderation/removal";
 import { appealsByDecision, withAppeal } from "@/lib/moderation/appeals-read";
 import { productIdSchema } from "@/lib/validation/product";
+import { cache } from "react";
 
 // Server-side reads for the ACTIVE account's products (your own store, or one
 // you're a team member of). Server Components / Route Handlers only. RLS now
@@ -77,6 +78,21 @@ type ProductListRow = Pick<
 
 const PRODUCT_LIST_COLUMNS =
   `id, title, description, price_cents, currency, status, image_key, digital_file_key, track_stock, stock_quantity, low_stock_threshold, max_per_order, purchase_url, ${MODERATION_DETAIL_SELECT}` as const;
+
+
+/**
+ * The list columns plus the extra fields the full-catalogue reads need:
+ * created_at (sale-percentage origin date), updated_at (last-touched prediction)
+ * and gallery (hover photo for the designer's card). Kept separate from
+ * PRODUCT_LIST_COLUMNS so the paginated /products list stays lean.
+ */
+const PRODUCT_ALL_COLUMNS =
+  `${PRODUCT_LIST_COLUMNS}, created_at, updated_at, gallery` as const;
+
+/** Extended row type for the full-catalogue read. Satisfies ProductListRow so
+ *  rowToProduct accepts it without widening. */
+export type ProductAllRow = ProductListRow &
+  Pick<ProductRow, "created_at" | "updated_at" | "gallery">;
 
 /**
  * The list columns plus the product-page jsonb. Only the single-product read
@@ -177,21 +193,22 @@ export const PRODUCTS_DEFAULT_PAGE_SIZE = 24;
 export const PRODUCTS_MAX_PAGE_SIZE = 96;
 
 /**
- * The ACTIVE account's whole catalogue, newest first, bounded by
- * PRODUCT_LIST_LIMIT.
+ * The ACTIVE account's whole catalogue as extended rows, React-cached so
+ * every caller within one request render shares one round-trip. Selects
+ * PRODUCT_ALL_COLUMNS (the list columns plus created_at, updated_at, gallery)
+ * so callers that need those fields do not need a second read.
  *
- * For consumers that genuinely need every product at once and cannot paginate:
- * the storefront designer's picker (you must be able to place any product on
- * the canvas) and the storefront list's previews. The products PAGE uses
- * `listProducts` instead, which pages and only presigns what it shows.
+ * For consumers that need every product at once: the storefront designer's
+ * picker, the list's previews, and the sale/prediction helpers. The products
+ * PAGE uses listProducts instead, which pages and only presigns what it shows.
  */
-export async function listAllProducts(): Promise<Product[]> {
+export const listAllProductRows = cache(async (): Promise<ProductAllRow[]> => {
   const account = await getActiveAccount();
   if (!account) return [];
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select(PRODUCT_LIST_COLUMNS)
+    .select(PRODUCT_ALL_COLUMNS)
     .eq("owner_id", account.accountId)
     .order("created_at", { ascending: false })
     .limit(PRODUCT_LIST_LIMIT);
@@ -201,7 +218,25 @@ export async function listAllProducts(): Promise<Product[]> {
       `[products] listAllProducts hit the ${PRODUCT_LIST_LIMIT}-product cap; the storefront picker is showing the newest ${PRODUCT_LIST_LIMIT} only.`,
     );
   }
-  return Promise.all(data.map(rowToProduct));
+  return data as ProductAllRow[];
+});
+
+/**
+ * The ACTIVE account's whole catalogue as Product objects. Calls the
+ * React-cached listAllProductRows so a render that needs both raw rows and
+ * typed products pays for one database round-trip.
+ */
+export async function listAllProducts(): Promise<Product[]> {
+  return productsFromRows(await listAllProductRows());
+}
+
+/**
+ * Build signed Product objects from a set of already-fetched rows. Used by
+ * listAllProducts and by callers that restrict signing to a subset (for
+ * example, only the products placed on a board).
+ */
+export function productsFromRows(rows: readonly ProductAllRow[]): Promise<Product[]> {
+  return Promise.all(rows.map(rowToProduct));
 }
 
 /** Column each DB-orderable sort maps to, with its direction. */
@@ -405,19 +440,20 @@ export async function getProductSales(): Promise<ProductSalesSummary> {
  * The product most recently written to. updated_at also moves on a sale, a
  * restock or a moderation pass, so this is "last touched", not "last edited by a
  * person". Fails soft: it only ever refines a suggestion (lib/predictions).
+ *
+ * Derived from the React-cached listAllProductRows so it costs nothing on a
+ * page that already called listAllProducts (the storefront designer, for one).
  */
 export async function getLastTouchedProduct(): Promise<{ id: string; at: string } | null> {
-  const account = await getActiveAccount();
-  if (!account) return null;
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("products")
-    .select("id, updated_at")
-    .eq("owner_id", account.accountId)
-    .order("updated_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return data ? { id: data.id, at: data.updated_at } : null;
+  const rows = await listAllProductRows();
+  if (rows.length === 0) return null;
+  // updated_at is non-nullable in the schema; a scan over at most PRODUCT_LIST_LIMIT
+  // rows is fast in memory.
+  let best = rows[0]!;
+  for (const row of rows) {
+    if (row.updated_at > best.updated_at) best = row;
+  }
+  return { id: best.id, at: best.updated_at };
 }
 
 /**

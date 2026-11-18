@@ -31,7 +31,7 @@ import {
   type StripeList,
   type StripePayout,
 } from "@/lib/billing/stripe-api";
-import { readPaymentAccount, type PaymentAccount } from "@/lib/payments/connect/account";
+import { getPaymentAccount, type PaymentAccount } from "@/lib/payments/connect/account";
 import { stripeConnectLive } from "@/lib/payments/connect/config";
 import { buildHistory, HISTORY_DAYS, shiftDay, utcDay } from "@/lib/payments/history";
 import type {
@@ -81,7 +81,7 @@ function statusOf(account: PaymentAccount | null): AccountStatus {
 /** Where this seller's Stripe connection stands. Never throws. */
 export async function realAccountStatus(ownerId: string | null): Promise<AccountStatus> {
   if (!ownerId || !stripeConnectLive()) return NOT_CONNECTED;
-  return statusOf(await readPaymentAccount(ownerId));
+  return statusOf(await getPaymentAccount(ownerId));
 }
 
 const PAYOUT_STATUSES: readonly PayoutStatus[] = ["paid", "pending", "in_transit", "canceled", "failed"];
@@ -174,7 +174,7 @@ export async function realPaymentsOverview(ownerId: string | null): Promise<Paym
   };
   if (!ownerId || !stripeConnectLive()) return empty;
 
-  const account = await readPaymentAccount(ownerId);
+  const account = await getPaymentAccount(ownerId);
   if (!account) return empty;
   const overview: PaymentsOverview = { ...empty, account: statusOf(account) };
 

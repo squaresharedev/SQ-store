@@ -17,7 +17,7 @@ import { badgeLabelKey, isOnPhoto, type ProductDetailsInput } from "@/lib/valida
 import type { useTranslations } from "next-intl";
 
 /** The seller-side translator the form validators write their messages with. */
-export type ProductsTranslator = ReturnType<typeof useTranslations<"Products">>;
+export type ProductsTranslator = ReturnType<typeof useTranslations<"Products.form">>;
 
 // The product form's in-progress strings for the page-detail fields, and the
 // two mappings around them: stored details -> strings for editing, and strings
@@ -155,22 +155,22 @@ export function validateDetails(
   const errors: DetailsFieldErrors = {};
   for (const key of ["length", "width", "height", "weight"] as const) {
     if (parseMeasure(values[key]) === "invalid") {
-      errors[key] = t("form.errors.measure");
+      errors[key] = t("errors.measure");
     }
   }
   if (values.specs.some((spec) => spec.label.trim() !== "" && spec.value.trim() === "")) {
-    errors.specs = t("form.errors.specValue");
+    errors.specs = t("errors.specValue");
   }
   if (!isDigital && safetyStarted(values.safety)) {
     const { manufacturerName, manufacturerAddress, manufacturerEmail, responsibleEmail } =
       values.safety;
-    if (!manufacturerName.trim()) errors.manufacturerName = t("form.errors.manufacturerName");
-    if (!manufacturerAddress.trim()) errors.manufacturerAddress = t("form.errors.manufacturerAddress");
+    if (!manufacturerName.trim()) errors.manufacturerName = t("errors.manufacturerName");
+    if (!manufacturerAddress.trim()) errors.manufacturerAddress = t("errors.manufacturerAddress");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(manufacturerEmail.trim())) {
-      errors.manufacturerEmail = t("form.errors.manufacturerEmail");
+      errors.manufacturerEmail = t("errors.manufacturerEmail");
     }
     if (responsibleEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(responsibleEmail.trim())) {
-      errors.responsibleEmail = t("form.errors.responsibleEmail");
+      errors.responsibleEmail = t("errors.responsibleEmail");
     }
   }
   return errors;
@@ -295,9 +295,9 @@ export function validateOptionDetails(
       (key) => parseMeasure(values[key]) === "invalid",
     );
     if (badMeasure) {
-      errors[optionId] = t("form.errors.measure");
+      errors[optionId] = t("errors.measure");
     } else if (values.specs.some((spec) => spec.label.trim() && !spec.value.trim())) {
-      errors[optionId] = t("form.errors.specValue");
+      errors[optionId] = t("errors.specValue");
     }
   }
   return errors;
@@ -405,13 +405,13 @@ export function badgesToInput(badges: readonly BadgeFormValue[]): ProductBadge[]
  *  seller would want named. */
 export function validateBadges(badges: readonly BadgeFormValue[], t: ProductsTranslator): string | undefined {
   if (badges.filter(isOnPhoto).length > BADGES_ON_PHOTO_MAX) {
-    return t("form.errors.badgesOnPhoto", { max: BADGES_ON_PHOTO_MAX });
+    return t("errors.badgesOnPhoto", { max: BADGES_ON_PHOTO_MAX });
   }
   const seen = new Set<string>();
   for (const badge of badges) {
     const key = badgeLabelKey(badge.label);
     if (!key) continue;
-    if (seen.has(key)) return t("form.errors.badgeDuplicate");
+    if (seen.has(key)) return t("errors.badgeDuplicate");
     seen.add(key);
   }
   return undefined;

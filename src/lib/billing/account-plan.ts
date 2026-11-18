@@ -31,6 +31,7 @@ import {
   type PaidPlanId,
   type PlanId,
 } from "@/lib/billing/plans";
+import { getAccountRow } from "@/lib/settings/account-row";
 
 /** An account's billing as the server holds it. */
 export type AccountBilling = {
@@ -80,6 +81,57 @@ export type AccountBillingResult = { ok: true; billing: AccountBilling } | { ok:
 const BILLING_SELECT =
   "plan, paid_until, status, billing_interval, price_cents, currency, current_period_end, cancel_at_period_end, stripe_customer_id, stripe_subscription_id" as const;
 
+/** A seller_billing row as BILLING_SELECT returns it. */
+type BillingRow = {
+  plan: string | null;
+  paid_until: string | null;
+  status: string | null;
+  billing_interval: string | null;
+  price_cents: number | null;
+  currency: string | null;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+};
+
+/**
+ * Map raw billing and grant rows to AccountBillingResult. Shared by both
+ * readAccountBilling (which issues its own queries) and getAccountBilling
+ * (which derives from getAccountRow), so the two can never produce different
+ * results from the same data.
+ *
+ * `grant` is `undefined` on a grant read error (surfaces as `{ ok: false }`);
+ * `null` when no grant applies (the paid plan or Free carries through).
+ */
+function billingResultFromRows(
+  data: BillingRow | null,
+  grant: ActiveGrant | null | undefined,
+  now: Date,
+): AccountBillingResult {
+  if (grant === undefined) return { ok: false };
+  const inForce = grantedPlan(effectivePlan(data, now), grant);
+  if (!data) return { ok: true, billing: { ...FREE_BILLING, plan: inForce.plan, planSource: inForce.source, grant } };
+  return {
+    ok: true,
+    billing: {
+      plan: inForce.plan,
+      planSource: inForce.source,
+      grant,
+      storedPlan: parsePaidPlanId(data.plan),
+      status: parseSubscriptionStatus(data.status) ?? "none",
+      interval: parseBillingInterval(data.billing_interval),
+      priceCents: data.price_cents,
+      currency: data.currency,
+      currentPeriodEnd: data.current_period_end,
+      cancelAtPeriodEnd: data.cancel_at_period_end,
+      paidUntil: data.paid_until,
+      customerId: data.stripe_customer_id,
+      subscriptionId: data.stripe_subscription_id,
+    },
+  };
+}
+
 /**
  * The plan staff granted `accountId`, if one applies at `now`. `undefined` on
  * a read error. A database without the table (20261019_plan_grants not
@@ -104,6 +156,11 @@ async function readActiveGrant(accountId: string, now: Date): Promise<ActiveGran
  * when it has neither. `{ ok: false }` on a read error: callers decide which
  * way to fail (the checkout refuses to price a sale; the shell simply shows
  * no plan chip).
+ *
+ * UNCHANGED: actions, the checkout and webhooks call this directly because
+ * they run outside a render where the React cache is a no-op, and they need
+ * a fresh read that is not joined with other profile columns. Dashboard pages
+ * call getAccountBilling instead.
  */
 export async function readAccountBilling(accountId: string, now: Date = new Date()): Promise<AccountBillingResult> {
   try {
@@ -115,27 +172,7 @@ export async function readAccountBilling(accountId: string, now: Date = new Date
       console.error("[billing] reading the billing row failed:", error.message);
       return { ok: false };
     }
-    if (grant === undefined) return { ok: false };
-    const inForce = grantedPlan(effectivePlan(data, now), grant);
-    if (!data) return { ok: true, billing: { ...FREE_BILLING, plan: inForce.plan, planSource: inForce.source, grant } };
-    return {
-      ok: true,
-      billing: {
-        plan: inForce.plan,
-        planSource: inForce.source,
-        grant,
-        storedPlan: parsePaidPlanId(data.plan),
-        status: parseSubscriptionStatus(data.status) ?? "none",
-        interval: parseBillingInterval(data.billing_interval),
-        priceCents: data.price_cents,
-        currency: data.currency,
-        currentPeriodEnd: data.current_period_end,
-        cancelAtPeriodEnd: data.cancel_at_period_end,
-        paidUntil: data.paid_until,
-        customerId: data.stripe_customer_id,
-        subscriptionId: data.stripe_subscription_id,
-      },
-    };
+    return billingResultFromRows(data as BillingRow | null, grant, now);
   } catch (error) {
     // createAdminClient throws without the service role key.
     console.error("[billing] reading the billing row threw:", error instanceof Error ? error.message : error);
@@ -162,6 +199,14 @@ export async function readDirectSales30d(accountId: string): Promise<number | nu
   }
 }
 
-/** readAccountBilling, once per request: the shell, the page and the Orders
- *  export check all ask on the same render. */
-export const getAccountBilling = cache((accountId: string) => readAccountBilling(accountId));
+/** The account's billing, once per render (React cache): derived from the
+ *  cached account row so the shell and billing pages converge on one profiles
+ *  round-trip. For actions and webhooks, use readAccountBilling. */
+export const getAccountBilling = cache(async (accountId: string): Promise<AccountBillingResult> => {
+  const result = await getAccountRow(accountId);
+  if (!result.ok) return { ok: false };
+  const now = new Date();
+  const { row } = result;
+  const grant = activeGrant(row?.plan_grant ?? null, now);
+  return billingResultFromRows(row?.billing ?? null, grant, now);
+});

@@ -23,11 +23,14 @@ const st: {
   profilesResult: DbResult;
   productsResult: DbResult;
   storefrontPageIndex: number;
+  /** Every keyset cursor the storefront reads sent, in order. */
+  cursors: unknown[];
 } = {
   storefrontPages: [{ data: [], error: null }],
   profilesResult: { data: [], error: null },
   productsResult: { data: [], error: null },
   storefrontPageIndex: 0,
+  cursors: [],
 };
 
 function resetSt() {
@@ -35,6 +38,7 @@ function resetSt() {
   st.profilesResult = { data: [], error: null };
   st.productsResult = { data: [], error: null };
   st.storefrontPageIndex = 0;
+  st.cursors = [];
 }
 
 function getStorefrontPage(): DbResult {
@@ -43,15 +47,19 @@ function getStorefrontPage(): DbResult {
   return page;
 }
 
-/** A simple chain mock. Terminal: range() for storefronts (paginated),
+/** A simple chain mock. Terminal: limit() for storefronts (keyset-paginated),
  *  then() for profiles and products (awaited after the last method). */
 function chainFor(table: string): Record<string, unknown> {
   const chain: Record<string, unknown> = {};
   for (const m of ["select", "filter", "order", "in", "eq", "not"]) {
     chain[m] = () => chain;
   }
-  chain["range"] = () => Promise.resolve(getStorefrontPage());
-  // profiles and products are awaited with await chain (no range/maybeSingle):
+  chain["gt"] = (_column: string, value: unknown) => {
+    st.cursors.push(value);
+    return chain;
+  };
+  chain["limit"] = () => Promise.resolve(getStorefrontPage());
+  // profiles and products are awaited with await chain (no limit/maybeSingle):
   // that calls chain.then().
   chain["then"] = (resolve: (v: DbResult) => void, reject: (e: unknown) => void) => {
     const r = table === "profiles" ? st.profilesResult : st.productsResult;
@@ -325,6 +333,9 @@ describe("listIndexablePages", () => {
     expect(urls.some((u) => u.includes(SF_ID_2))).toBe(true);
     // Two pages with rows, then the empty answer that ends the walk.
     expect(st.storefrontPageIndex).toBe(3);
+    // The first read carries NO cursor (`id > ''` is invalid for a uuid
+    // column and failed every sitemap request); each later one the last id.
+    expect(st.cursors).toEqual([dummies.at(-1)!.id, SF_ID_2]);
   });
 
   it("keeps paging when the server caps an answer below the page size", async () => {

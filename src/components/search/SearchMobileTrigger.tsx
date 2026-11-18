@@ -23,6 +23,8 @@ export function SearchMobileTrigger() {
     <button
       type="button"
       onClick={search.open}
+      onPointerEnter={search.warm}
+      onFocus={search.warm}
       data-tour="search-phone"
       aria-label={t("label")}
       aria-haspopup="dialog"

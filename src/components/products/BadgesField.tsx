@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import { numberFormat } from "@/lib/format/intl";
 import {
   chipButtonClass,
   errorTextClass,
@@ -52,7 +53,7 @@ export function useLocalBadgePresets(): LocalBadgePreset[] {
       label: count === undefined ? t(`${preset.id}.label`) : t(`${preset.id}.label`, { count }),
       keywords: splitKeywords(t(`${preset.id}.keywords`)),
       // Formatted the way ICU prints the "#" in the label, so it can be found.
-      countText: count === undefined ? null : new Intl.NumberFormat(locale).format(count),
+      countText: count === undefined ? null : numberFormat(locale).format(count),
     };
   });
 }

@@ -16,3 +16,22 @@
 # public build output, so any origin may have them.
 /_next/static/media/*
   Access-Control-Allow-Origin: *
+
+# Build output chunks carry a content hash in the filename, so they are safe
+# to cache for a year. Without this rule, Cloudflare Static Assets serves them
+# with `public, max-age=0, must-revalidate` by default, and every full page
+# load (every buyer product page, every embed frame) revalidates every JS/CSS
+# chunk. With the year cache, those files are fetched once and kept until the
+# next deploy changes the hash.
+#
+# /sw.js is intentionally NOT listed here: the service worker spec requires it
+# to be revalidated on every page load so the browser picks up updates.
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The storefront embed loader. Sellers paste this URL into their own sites, so
+# an hour of caching keeps load off the origin without delaying a widget fix
+# by more than one hour. The file has no content hash in its name, so a year
+# cache is not appropriate.
+/widget.js
+  Cache-Control: public, max-age=3600

@@ -12,11 +12,13 @@ import { infoTextClass, quietLinkClass } from "@/components/ui/control-styles";
 import { AnimatedFingerprint } from "@/components/auth/AnimatedFingerprint";
 import { FactorPicker, type FactorChoice } from "@/components/auth/FactorPicker";
 import { OneTimeCodeInput } from "@/components/auth/OneTimeCodeInput";
-import { STEP_UP_HINT_COOKIE, STEP_UP_WINDOW_SECONDS } from "@/lib/auth/assurance";
+import { STEP_UP_HINT_COOKIE } from "@/lib/auth/assurance";
 import { passkeyStepUpOptions } from "@/lib/auth/mfa-actions";
 import { assertPasskey, passkeysSupported } from "@/lib/auth/webauthn-client";
 import type { ActionError } from "@/lib/errors";
 import { FORM_UNREACHABLE, resilientAction } from "@/lib/resilient-action";
+import { StepUpContext, EARLY_SECONDS } from "@/components/auth/StepUpProvider";
+export { StepUpProvider } from "@/components/auth/StepUpProvider";
 
 /**
  * Client half of the step-up ("confirm it's you") check that sensitive
@@ -28,70 +30,15 @@ import { FORM_UNREACHABLE, resilientAction } from "@/lib/resilient-action";
  * after submitting would wipe a half-typed password change and make them
  * start again. If the two ever disagree (a clock drifted, the window closed
  * mid-typing), the action's own `stepUp` answer brings the field up anyway.
+ *
+ * StepUpProvider and StepUpContext live in StepUpProvider.tsx so layouts can
+ * mount the provider without pulling in this file's heavy bundle (mfa-actions,
+ * webauthn, AnimatedFingerprint, motion).
  */
-
-type StepUpContextValue = {
-  enrolled: boolean;
-  /** Unix seconds when the current window closes; 0 = closed now. */
-  freshUntil: number | null;
-  factors: FactorChoice[];
-  /** A code just went through: the server's window reopened. */
-  markFresh: () => void;
-};
-
-/**
- * With no StepUpProvider above it, a form believes the account has no factors,
- * so a passkey-only account is shown a code box it can never fill. Every route
- * holding a step-up form needs a provider (the dashboard and settings layouts
- * have one; the consent page brings its own).
- */
-const StepUpContext = React.createContext<StepUpContextValue>({
-  enrolled: false,
-  freshUntil: null,
-  factors: [],
-  markFresh: () => {},
-});
-
-/**
- * Ask for the code this long before the server's window actually closes, so
- * someone who starts typing at 9m50s is not refused at 10m05s.
- */
-const EARLY_SECONDS = 60;
 
 // A passkey challenge is sealed and single-use, so asking again for one is
 // always safe (lib/resilient-action.ts).
 const loadPasskeyOptions = resilientAction(passkeyStepUpOptions, { error: FORM_UNREACHABLE.error });
-
-export function StepUpProvider({
-  enrolled,
-  freshUntil: serverFreshUntil,
-  factors,
-  children,
-}: {
-  enrolled: boolean;
-  freshUntil: number | null;
-  factors: FactorChoice[];
-  children: React.ReactNode;
-}) {
-  // What this browser has seen happen since the layout rendered: a code that
-  // went through reopened the window. Combined with the server's value rather
-  // than replacing it, so a re-render (after a revalidation) that carries the
-  // authoritative figure wins whenever it is the later of the two, and a stale
-  // layout can never close a window the browser just watched reopen.
-  const [reopenedUntil, setReopenedUntil] = React.useState<number | null>(null);
-  const freshUntil =
-    serverFreshUntil === null ? null : Math.max(serverFreshUntil, reopenedUntil ?? 0);
-
-  const markFresh = React.useCallback(() => {
-    setReopenedUntil(Math.floor(Date.now() / 1000) + STEP_UP_WINDOW_SECONDS);
-  }, []);
-
-  const value = React.useMemo(
-    () => ({ enrolled, freshUntil, factors, markFresh }),
-    [enrolled, freshUntil, factors, markFresh],
-  );
-  return <StepUpContext.Provider value={value}>{children}</StepUpContext.Provider>;
-}
 
 /** Unix seconds from the step-up hint cookie, or 0. See STEP_UP_HINT_COOKIE. */
 function readStepUpHint(): number {

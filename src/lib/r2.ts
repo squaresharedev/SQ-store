@@ -249,6 +249,24 @@ export async function deleteObject(key: string): Promise<void> {
 const GET_ANCHOR_MS = 60 * 60 * 1000;
 const GET_EXPIRY_SECONDS = 2 * 60 * 60;
 
+/** Maximum number of presigned GET URLs kept in the per-isolate memo. */
+const PRESIGN_GET_CACHE_MAX = 4096;
+/** The clock-hour anchor the current cache entries were signed for (ms). */
+let presignGetCacheAnchor = 0;
+/** Memo: object key -> signed URL, cleared when the anchor hour rolls over. */
+const presignGetCache = new Map<string, string>();
+
+/**
+ * Reset the GET-URL memo to its initial state.
+ *
+ * TEST USE ONLY: exported so unit tests can clear state between cases
+ * without reloading the module.
+ */
+export function resetPresignGetCache(): void {
+  presignGetCache.clear();
+  presignGetCacheAnchor = 0;
+}
+
 /**
  * Signed GET URL for rendering a stored object in the DASHBOARD (seller's own
  * assets: product images in the products list / storefront designer preview).
@@ -257,6 +275,12 @@ const GET_EXPIRY_SECONDS = 2 * 60 * 60;
  *
  * Buyer-side post-purchase downloads are a separate, stricter path
  * (presignDownloadUrl below, behind a purchase check) and must not reuse this.
+ *
+ * URL is memoised per isolate: the signed URL for (key, hour) is byte-identical
+ * on every call because the anchor, credentials, and query parameters are all
+ * fixed, so the same key within the same clock hour always produces the same
+ * signature. The memo is cleared when the anchor hour rolls over. null (missing
+ * credentials or a caught error) is never stored.
  */
 export async function presignGetUrl(key: string): Promise<string | null> {
   // Seeded dev data stores full https:// stock-photo URLs in image_key (see
@@ -264,7 +288,7 @@ export async function presignGetUrl(key: string): Promise<string | null> {
   //
   // This is NOT a user-reachable path: every app write validates image_key
   // against OBJECT_KEY_PATTERN (lib/validation/product.ts), which only admits
-  // `images/<uuid>/<uuid>-<name>` — a URL can never survive it — and a write
+  // `images/<uuid>/<uuid>-<name>` (a URL can never survive it), and a write
   // made around the app, straight through PostgREST, is refused by the
   // guard_object_keys trigger (20261021_object_key_ownership), which admits a
   // new key only when it is the writer's own upload. That trigger is what
@@ -275,13 +299,38 @@ export async function presignGetUrl(key: string): Promise<string | null> {
     return key;
   }
   if (!hasR2Credentials()) return null;
+  const anchorMs = Math.floor(Date.now() / GET_ANCHOR_MS) * GET_ANCHOR_MS;
+  // Clear the memo when the anchor hour rolls over so stale URLs are never served.
+  if (anchorMs !== presignGetCacheAnchor) {
+    presignGetCache.clear();
+    presignGetCacheAnchor = anchorMs;
+  }
+  const cached = presignGetCache.get(key);
+  if (cached !== undefined) return cached;
   try {
     const url = objectUrl(key);
     url.searchParams.set("X-Amz-Expires", String(GET_EXPIRY_SECONDS));
-    const anchorMs = Math.floor(Date.now() / GET_ANCHOR_MS) * GET_ANCHOR_MS;
+    // Tell the browser (and only the browser: `private`) to cache the object
+    // for 59 minutes. This must be set BEFORE signing so the parameter is
+    // covered by the signature. The 1-minute margin below GET_ANCHOR_MS
+    // (3600 s) ensures a cached copy always expires before the signed URL
+    // does: in the worst case the URL was signed right before the anchor
+    // rolls over, leaving only ~3600 s of validity, while the cache expires
+    // at 3540 s. Moderation takedowns are still effective within that window
+    // because every URL expires within two hours of its anchor regardless.
+    url.searchParams.set("response-cache-control", "private, max-age=3540");
     const signed = await r2Client().sign(new Request(url, { method: "GET" }), {
       aws: { signQuery: true, datetime: amzDatetime(anchorMs) },
     });
+    // Guard against a clock jump during the sign: only store if the anchor is
+    // still the same, so a URL for a past anchor is never served from cache.
+    if (Math.floor(Date.now() / GET_ANCHOR_MS) * GET_ANCHOR_MS === anchorMs) {
+      if (presignGetCache.size >= PRESIGN_GET_CACHE_MAX) {
+        // Evict the oldest entry (Map iterates in insertion order).
+        presignGetCache.delete(presignGetCache.keys().next().value!);
+      }
+      presignGetCache.set(key, signed.url);
+    }
     return signed.url;
   } catch (error) {
     console.error("[r2] presign GET failed", error);

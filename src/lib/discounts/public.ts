@@ -25,6 +25,7 @@
 //     called the regular price: nothing is claimed that was not checked, and
 //     the amount is still right.
 
+import { cache } from "react";
 import type { createAdminClient } from "@/lib/supabase/admin";
 import { quotedFilterValue } from "@/lib/supabase/ilike";
 import { bestSale, offerPercentOff } from "@/lib/discounts/pricing";
@@ -91,8 +92,19 @@ function chunked<T>(items: readonly T[], size: number): T[][] {
  *
  * The order is fixed (oldest first), so when two sales make a product equally
  * cheap every surface credits the same one.
+ *
+ * Wrapped in React's `cache` so a product page and its add-ons share one read
+ * when they call with the same (admin, ownerId, now) triple. The gate creates
+ * `now` once and passes it through, and `createAdminClient` is itself cached,
+ * so reference equality holds for both object arguments within a render.
+ * Outside a render (the quote, tests) `cache` is a no-op and the function
+ * runs normally.
  */
-export async function readStoreSales(admin: Admin, ownerId: string, now: Date): Promise<StoreSale[] | null> {
+export const readStoreSales = cache(async function readStoreSales(
+  admin: Admin,
+  ownerId: string,
+  now: Date,
+): Promise<StoreSale[] | null> {
   const at = now.toISOString();
   const instant = now.getTime();
   for (let attempt = 1; attempt <= SALES_READ_ATTEMPTS; attempt++) {
@@ -143,7 +155,7 @@ export async function readStoreSales(admin: Admin, ownerId: string, now: Date): 
     }
   }
   return null;
-}
+});
 
 /** The sales among `sales` that cover one product, in the same order. */
 export function salesCovering(sales: readonly StoreSale[], productId: string): ActiveSale[] {

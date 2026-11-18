@@ -230,7 +230,10 @@ describe("RemovalNotice with a decision on record", () => {
     expect(status).toHaveAttribute("data-appeal-status", "open");
     expect(status).toHaveTextContent(/You appealed on 25 September 2026\. A person will review it/);
     expect(screen.queryByRole("button", { name: "Appeal this decision" })).toBeNull();
-    expect(refresh).toHaveBeenCalled();
+    // fileAppeal revalidates the pages that show the decision, which already
+    // re-renders this one in the action's own response: a router.refresh()
+    // on top would be a second full render (lib/moderation/appeals.ts).
+    expect(refresh).not.toHaveBeenCalled();
   });
 
   it("shows an answered appeal with our answer, and no second appeal", () => {

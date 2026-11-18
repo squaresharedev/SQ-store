@@ -102,7 +102,7 @@ export function ReviewCard({
       {/* The product's photo tells reviews apart at a glance, faster than its
           name. A shortcut for the pointer: the named link below is the one
           keyboards and screen readers use. */}
-      <Link href={productEditPath(review.productId)} tabIndex={-1} aria-hidden="true" className="shrink-0">
+      <Link href={productEditPath(review.productId)} tabIndex={-1} aria-hidden="true" prefetch={false} className="shrink-0">
         <ProductThumb src={review.productImageUrl} className="size-14 @md:size-16" />
       </Link>
 
@@ -157,6 +157,7 @@ export function ReviewCard({
         <div className="flex flex-wrap items-center gap-1.5 pt-1">
           <Link
             href={productEditPath(review.productId)}
+            prefetch={false}
             className={cn(
               "inline-flex max-w-full items-center gap-1 rounded-full border border-border px-2 py-0.5 font-inter text-xs font-medium text-foreground hover:bg-accent",
               transitionClass,

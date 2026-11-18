@@ -28,19 +28,22 @@ export default async function StorefrontsPage({
   const t = await getTranslations("Storefront.metadata");
   // Dev only: `?preview=empty` shows the new-seller empty state on a real account.
   const previewEmpty = previewsEmptyList((await searchParams)[DEV_PREVIEW_PARAM]);
+  // Load storefronts first so the placed-product ids are known before products
+  // are signed: signing is per-URL HMAC and skipping unplaced products (up to
+  // 500 total minus the handful on the board) is worth the sequential step.
+  const { rows: storefrontRows, total: storefrontTotal } =
+    previewEmpty ? { rows: [], total: 0 } : await listStorefronts();
+  // The previews draw only the products placed on these storefronts, so only
+  // those get their gallery images signed and their ratings read.
+  const placed = placedProductIds(storefrontRows);
   // Products feed the cards' live grid previews (image tiles).
-  const [storefronts, products, account, sampleFlags] = await Promise.all([
-    previewEmpty ? { rows: [], total: 0 } : listStorefronts(),
-    listStorefrontProducts(),
+  const [products, account, sampleFlags] = await Promise.all([
+    listStorefrontProducts({ only: placed }),
     getActiveAccount(),
     // The person's own flag, not the store's: see getSampleStorefrontFlags.
     getSampleStorefrontFlags(),
   ]);
   const canWrite = can(account?.role, "storefront.write");
-  const { rows: storefrontRows, total: storefrontTotal } = storefronts;
-  // The previews draw only the products placed on these storefronts, so only
-  // those travel to the browser.
-  const placed = placedProductIds(storefrontRows);
   // The publish gate's answer for this store: with it, a live storefront's
   // card links straight to its page.
   const identity = account ? await getTraderIdentityStatus(account.accountId) : null;

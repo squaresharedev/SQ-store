@@ -1,10 +1,8 @@
-import { createTranslator } from "next-intl";
 import type { Locale } from "@/i18n/locales";
 import type { MessageKey, MessageValues } from "@/i18n/types";
 import { countryName as localCountryName } from "@/lib/format/country";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { formatCents } from "@/lib/format/money";
-import productPage from "../../../messages/en/productPage.json";
 
 /**
  * THE STRUCTURED ANSWERS, AS THE PARAGRAPHS A BUYER READS.
@@ -60,15 +58,15 @@ function prose(key: ProseKey, values: MessageValues): ProseRef {
   return { key, values };
 }
 
-const englishCatalogue = createTranslator({
-  locale: "en",
-  messages: { ProductPage: productPage },
-  timeZone: "UTC",
-});
-
-/** English, for {@link hasShippingPolicy}, whose answer is the same in every language. */
-function english(ref: ProseRef): string {
-  return englishCatalogue(ref.key, ref.values);
+/**
+ * A resolver that returns the message key itself (not the English text).
+ * Any non-empty string signals "this ref was resolved", which is all
+ * hasShippingPolicy needs. The resolver is only called when the generator
+ * actually creates prose, so the emptiness answer is the same in every
+ * language and identical to the previous English-based check.
+ */
+function keyOnly(ref: ProseRef): string {
+  return ref.key;
 }
 
 /** The country's printable name in the reader's language, or the raw code when
@@ -220,11 +218,15 @@ export function buildShippingProse(
  * exist) produces no prose, and a settings page that called that "set" would
  * be telling a seller they are done when their page still says nothing.
  * `dispatch` counts too, since it prints beside the buy button even when the
- * fold below has no section. Language-independent: a generated sentence is
- * never empty in any language.
+ * fold below has no section.
+ *
+ * Language-independent: the resolver is only called when the generator would
+ * produce a non-empty paragraph, so returning the key string (always
+ * non-empty) gives the same true/false answer as the English text would. This
+ * avoids importing the ~23 KB productPage.json just for an emptiness check.
  */
 export function hasShippingPolicy(policy: SellerShippingPolicy | null | undefined): boolean {
   if (!policy) return false;
-  const generated = buildShippingProse(policy, english, "en");
+  const generated = buildShippingProse(policy, keyOnly, "en");
   return Boolean(generated.shipping || generated.returns || policy.dispatch?.trim());
 }

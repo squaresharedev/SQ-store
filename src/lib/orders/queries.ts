@@ -2,7 +2,7 @@ import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { ilikeAny } from "@/lib/supabase/ilike";
-import { getActiveAccount } from "@/lib/team/account-context";
+import { getActiveAccount, type ActiveAccount } from "@/lib/team/account-context";
 import { parseOrderSelection } from "@/lib/orders/selection";
 import { parseShipTo } from "@/lib/orders/ship-to";
 import { parseFulfilment } from "@/lib/orders/fulfilment";
@@ -278,18 +278,25 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  * DB). Returns null when the id is malformed, the order does not exist, or it
  * belongs to someone else — all three are "nothing to show", never an error:
  * this backs a deep link (/orders?order=<id>) whose id can be stale.
+ *
+ * `account` may be passed when the caller has already resolved it (actions.ts
+ * does this for markOrderShipped / refundOrder), avoiding a second Auth call
+ * per getOrderById invocation. When omitted, the account is resolved here.
  */
-export async function getOrderById(id: string): Promise<OrderView | null> {
+export async function getOrderById(
+  id: string,
+  account?: ActiveAccount,
+): Promise<OrderView | null> {
   if (!UUID.test(id)) return null;
 
-  const account = await getActiveAccount();
-  if (!account) return null;
+  const resolvedAccount = account ?? (await getActiveAccount());
+  if (!resolvedAccount) return null;
 
   const supabase = await createClient();
   const { data, error } = await (supabase as SupabaseClient)
     .from("orders")
     .select(ORDER_COLUMNS)
-    .eq("seller_id", account.accountId)
+    .eq("seller_id", resolvedAccount.accountId)
     .eq("id", id)
     .maybeSingle();
 
@@ -297,8 +304,83 @@ export async function getOrderById(id: string): Promise<OrderView | null> {
   return toOrderView(data as Record<string, unknown>);
 }
 
+/**
+ * The buyer's language and the storefront their order page lives under.
+ * These columns are set at order creation and are never touched by
+ * order_mark_shipped (writes only fulfilment_status, shipped_at,
+ * tracking_number) or order_apply_refund (writes only status, refunded_at,
+ * refund_reason), so a value read before the RPC is still valid after it.
+ */
+export type OrderEmailFields = {
+  buyerLocale: string | null;
+  storefrontId: string | null;
+};
+
+/**
+ * The full order view PLUS the email fields in one round-trip, for use
+ * immediately after order_mark_shipped or order_apply_refund. Avoids the
+ * separate buyer_locale/storefront_id read that emailBuyer previously made.
+ *
+ * Returns null for a malformed id, an order not in this store, or a DB error.
+ * Accepts the already-resolved account to avoid a third getUser() call.
+ */
+export async function getOrderByIdWithEmailFields(
+  id: string,
+  account: ActiveAccount,
+): Promise<{ order: OrderView; email: OrderEmailFields } | null> {
+  if (!UUID.test(id)) return null;
+  const supabase = await createClient();
+  const { data, error } = await (supabase as SupabaseClient)
+    .from("orders")
+    .select(`${ORDER_COLUMNS}, buyer_locale, storefront_id`)
+    .eq("seller_id", account.accountId)
+    .eq("id", id)
+    .maybeSingle();
+  if (error || !data) return null;
+  const row = data as Record<string, unknown>;
+  return {
+    order: toOrderView(row),
+    email: {
+      buyerLocale: row.buyer_locale != null ? String(row.buyer_locale) : null,
+      storefrontId: row.storefront_id != null ? String(row.storefront_id) : null,
+    },
+  };
+}
+
 /** The dashboard only ever asks about its Recent orders card's handful. */
 const MAX_BATCH_IDS = 20;
+
+// --- Shared photo read for the Recent orders card ---------------------------
+//
+// getOrdersByIds and getOrderGlances were previously two separate queries
+// against the same id list. One React-cached read now serves both: it selects
+// ORDER_COLUMNS plus ORDER_PHOTO_EMBED, and the two functions derive from it.
+//
+// The cache key is the sorted, comma-joined UUID list plus the account id.
+// React cache() uses === for string arguments, so two calls with the same ids
+// (the same array values, whatever the object reference) will share one result.
+
+/**
+ * ORDER_COLUMNS + ORDER_PHOTO_EMBED for a set of order ids, keyed by the
+ * sorted id string and the account. Deduplicates getOrdersByIds and
+ * getOrderGlances when both are called in the same render (the dashboard page).
+ * Soft-fails to []: the callers produce their own calm zero states on a miss.
+ */
+const loadOrdersWithPhoto = cache(async (
+  sortedKey: string,
+  accountId: string,
+): Promise<Record<string, unknown>[]> => {
+  if (!sortedKey) return [];
+  const ids = sortedKey.split(",");
+  const supabase = await createClient();
+  const { data, error } = await (supabase as SupabaseClient)
+    .from("orders")
+    .select(`${ORDER_COLUMNS}, ${ORDER_PHOTO_EMBED}`)
+    .eq("seller_id", accountId)
+    .in("id", ids);
+  if (error || !data) return [];
+  return data as Record<string, unknown>[];
+});
 
 /**
  * Several orders by id in one query, scoped like getOrderById. Backs the
@@ -306,6 +388,9 @@ const MAX_BATCH_IDS = 20;
  * and so needs the full order up front, not just the aggregate's summary.
  * Soft-fails to [] (malformed ids are dropped): a row without its detail still
  * links to /orders?order=<id>, so a failed read here costs speed, not access.
+ *
+ * Uses loadOrdersWithPhoto (React-cached), which is shared with getOrderGlances
+ * so the two calls on a dashboard render cost one DB round-trip.
  */
 export async function getOrdersByIds(ids: string[]): Promise<OrderView[]> {
   const valid = Array.from(new Set(ids.filter((id) => UUID.test(id)))).slice(0, MAX_BATCH_IDS);
@@ -314,14 +399,7 @@ export async function getOrdersByIds(ids: string[]): Promise<OrderView[]> {
   const account = await getActiveAccount();
   if (!account) return [];
 
-  const supabase = await createClient();
-  const { data, error } = await (supabase as SupabaseClient)
-    .from("orders")
-    .select(ORDER_COLUMNS)
-    .eq("seller_id", account.accountId)
-    .in("id", valid);
-
-  if (error || !data) return [];
+  const data = await loadOrdersWithPhoto(valid.sort().join(","), account.accountId);
   return (data as Record<string, unknown>[]).map(toOrderView);
 }
 
@@ -335,10 +413,11 @@ export type OrderGlance = {
 };
 
 /**
- * Photo and quantity for several orders in one query (the photo comes embedded,
- * see ORDER_PHOTO_EMBED), keyed by order id. Scoped like getOrdersByIds.
- * Soft-fails to {}: the card reads fine without thumbnails, so a blip costs
- * polish only.
+ * Photo and quantity for several orders, keyed by order id. Scoped like
+ * getOrdersByIds. Soft-fails to {}: the card reads fine without thumbnails.
+ *
+ * Uses loadOrdersWithPhoto (React-cached), shared with getOrdersByIds so both
+ * calls on a dashboard render cost one DB round-trip instead of two.
  */
 export async function getOrderGlances(ids: string[]): Promise<Record<string, OrderGlance>> {
   const valid = Array.from(new Set(ids.filter((id) => UUID.test(id)))).slice(0, MAX_BATCH_IDS);
@@ -347,13 +426,8 @@ export async function getOrderGlances(ids: string[]): Promise<Record<string, Ord
   const account = await getActiveAccount();
   if (!account) return {};
 
-  const supabase = await createClient();
-  const { data, error } = await (supabase as SupabaseClient)
-    .from("orders")
-    .select(`id, quantity, selected_options, ${ORDER_PHOTO_EMBED}`)
-    .eq("seller_id", account.accountId)
-    .in("id", valid);
-  if (error || !data) return {};
+  const data = await loadOrdersWithPhoto(valid.sort().join(","), account.accountId);
+  if (data.length === 0) return {};
 
   const sign = signOncePerKey();
   const glances: Record<string, OrderGlance> = {};

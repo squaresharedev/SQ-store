@@ -6,7 +6,7 @@ import { ArrowLeft, Download } from "lucide-react";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { ProductImport } from "@/components/products/ProductImport";
-import { getSellerIdentity, getTraderIdentityStatus } from "@/lib/settings/seller-identity";
+import { getAccountSellerIdentity, getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { ghostButtonClass, quietLinkClass, secondaryButtonClass } from "@/components/ui/control-styles";
 import { ImportFileHelp } from "@/components/products/ImportFileHelp";
 import { planRoom } from "@/lib/billing/limits";
@@ -49,7 +49,7 @@ export default async function ImportProductsPage() {
   // already prices in, else its business country's (lib/predictions.ts).
   const [recentProducts, seller] = await Promise.all([
     listRecentProductFacts(account?.accountId),
-    account ? getSellerIdentity(account.accountId) : null,
+    account ? getAccountSellerIdentity(account.accountId) : null,
   ]);
 
   const t = await getTranslations("Products.page");

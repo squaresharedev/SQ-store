@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
-import { getProfile, getUser } from "@/lib/auth/session";
+import { getUser } from "@/lib/auth/session";
 
 /**
  * Chrome for the storefront LIST only.
@@ -33,11 +33,13 @@ export default async function StorefrontListLayout({
 }: {
   children: ReactNode;
 }) {
-  const [user, profile] = await Promise.all([getUser(), getProfile()]);
+  // getProfile() is not needed here: DashboardShell calls it in its own
+  // parallel batch and prefers profile.username over this fallback anyway.
+  // Removing it and running the remaining reads in parallel shaves one
+  // sequential step off the shell's start.
+  const [user, t] = await Promise.all([getUser(), getTranslations("Dashboard.shell")]);
   // The same fallback, and the same message, as the dashboard layout.
-  const t = await getTranslations("Dashboard.shell");
-  const username =
-    profile?.username || user?.email?.split("@")[0] || t("accountFallback");
+  const username = user?.email?.split("@")[0] || t("accountFallback");
 
   return (
     <ScopedIntlProvider scope="storefrontList">

@@ -21,6 +21,7 @@ import { RATE_LIMITS } from "@/lib/rate-limit";
 import { purchaseUrlSchema } from "@/lib/validation/product";
 import { toPublicStockBadge } from "@/lib/stock/public";
 import { publicQuantityLimit } from "@/lib/products/quantity";
+import { getProductReviews } from "@/lib/reviews/queries";
 import {
   parseDetails,
   parseDocuments,
@@ -43,6 +44,7 @@ import type {
   ProductSale,
 } from "@/types/product";
 import type { ProductPageData, ProductPageReportScopes } from "@/types/product-page";
+import type { ProductReviews } from "@/types/review";
 
 // The select and the row type live with the gate (lib/products/purchasable.ts),
 // which reads them for every buyer-facing surface; re-exported for the editor
@@ -202,6 +204,10 @@ export type PublicProductPageResult = {
    *  sale that ends. The page reads itself again then
    *  (components/product-page/PriceRefresh). */
   saleEndsInMs: number | null;
+  /** Reviews for the product page. Read in parallel with pricing and
+   *  availability inside getPublicProductPage, only when the reviews section
+   *  is shown. Null when the section is hidden or the read failed. */
+  reviews: ProductReviews | null;
 };
 
 /**
@@ -227,19 +233,30 @@ export const getPublicProductPage = cache(
     if (!gate || gate === PAGE_BUSY) return gate;
     const { config, productPage, block, row, seller, shippingPolicy } = gate;
 
-    const pricing = await gatePricing(gate);
+    // Pricing, checkout availability, reviews and theme-asset signing all
+    // depend only on the gate result and are independent of each other: run
+    // them in one round trip. buildProductPageProduct waits for pricing, and
+    // add-ons wait for the product and the checkout flag; those are the only
+    // two remaining sequential steps after this batch.
+    const theme = config.theme;
+    const [pricing, checkout, reviews, backgroundImageUrl, customFontUrl, pagePhoto] = await Promise.all([
+      gatePricing(gate),
+      checkoutAvailableFor(gate),
+      isProductPageSectionShown(productPage, "reviews")
+        ? getProductReviews(row.id)
+        : Promise.resolve(null),
+      theme.background.kind === "image"
+        ? presignGetUrl(theme.background.key)
+        : Promise.resolve(null),
+      theme.customFont ? presignGetUrl(theme.customFont.key) : Promise.resolve(null),
+      signPagePhoto(productPage.backgroundImage),
+    ]);
+
     const product = await buildProductPageProduct(row, {
       soldOutFlag: block?.soldOut,
       showStock: productPage.showStock,
       pricing,
     });
-
-    const theme = config.theme;
-    const backgroundImageUrl =
-      theme.background.kind === "image" ? await presignGetUrl(theme.background.key) : null;
-    const customFontUrl = theme.customFont ? await presignGetUrl(theme.customFont.key) : null;
-    const pagePhoto = await signPagePhoto(productPage.backgroundImage);
-    const checkout = await checkoutAvailableFor(gate);
     const placed = new Set(
       config.blocks.flatMap((candidate) => (candidate.type === "product" ? [candidate.productId] : [])),
     );
@@ -255,6 +272,7 @@ export const getPublicProductPage = cache(
             currency: product.currency,
             now: gate.now,
             unreadableSales: "busy",
+            storeSales: gate.storeSales,
             // A tile's add-ons each have a page here (the gate admits a
             // product a tile offers). This page may itself be an add-on's,
             // whose own add-ons have one only where they are tiles.
@@ -289,9 +307,32 @@ export const getPublicProductPage = cache(
       ownerId: gate.ownerId,
       // An add-on's sale ending changes this page's prices too.
       saleEndsInMs: msUntilSaleEnds([pricing, ...addOns], gate.now),
+      reviews,
     };
   },
 );
+
+// --- report-scopes per-owner cache -------------------------------------------
+
+/** How long a seller's report-scope answer stays cached per isolate. The data
+ *  (whether a seller has more than one product or storefront) changes at most
+ *  every few hours; 10 minutes is a safe and invisible delay on a rarely
+ *  opened dialog. */
+const REPORT_SCOPES_TTL_MS = 10 * 60 * 1000;
+
+/** Upper bound on distinct seller ids cached at once per isolate. Isolates
+ *  serve a small number of concurrent sessions; this cap prevents unbounded
+ *  growth on a heavily trafficked isolate. */
+const REPORT_SCOPES_MAX_OWNERS = 300;
+
+type ScopesEntry = { result: ProductPageReportScopes; expiresAt: number };
+const reportScopesMap = new Map<string, ScopesEntry>();
+
+/** Reset the report-scopes module cache. For tests that need a clean slate
+ *  between cases. */
+export function resetReportScopesCache(): void {
+  reportScopesMap.clear();
+}
 
 /**
  * Which of the report dialog's wider options apply to this seller: the whole
@@ -301,23 +342,37 @@ export const getPublicProductPage = cache(
  *
  * A failed count offers the narrower dialog: the product can always be
  * reported, and a wider option the page cannot justify is noise.
+ *
+ * Result is module-cached per owner for REPORT_SCOPES_TTL_MS (not sensitive:
+ * it only records whether a seller has more than one product or storefront).
  */
 async function reportScopesFor(
   admin: ReturnType<typeof createAdminClient>,
   ownerId: string,
 ): Promise<ProductPageReportScopes> {
+  const now = Date.now();
+  const cached = reportScopesMap.get(ownerId);
+  if (cached && now < cached.expiresAt) return cached.result;
+
+  // limit(2) rather than a HEAD exact-count: we only need to know "more than
+  // one", so fetching two rows and testing the length costs one fewer field
+  // in the query and skips the separate COUNT(*) the database would otherwise
+  // run. A failed read leaves the scope narrow (the product can always be
+  // reported; the wider options are the ones that need justification).
   const [products, storefronts] = await Promise.all([
     admin
       .from("products")
-      .select("id", { count: "exact", head: true })
+      .select("id")
       .eq("owner_id", ownerId)
       .eq("status", "active")
-      .eq("moderation_status", "ok"),
+      .eq("moderation_status", "ok")
+      .limit(2),
     admin
       .from("storefronts")
-      .select("id", { count: "exact", head: true })
+      .select("id")
       .eq("owner_id", ownerId)
-      .eq("moderation_status", "ok"),
+      .eq("moderation_status", "ok")
+      .limit(2),
   ]);
   if (products.error || storefronts.error) {
     console.error(
@@ -325,8 +380,16 @@ async function reportScopesFor(
       products.error?.message ?? storefronts.error?.message,
     );
   }
-  return {
-    storefront: (products.count ?? 0) > 1,
-    seller: (storefronts.count ?? 0) > 1,
+  const result: ProductPageReportScopes = {
+    storefront: (products.data?.length ?? 0) > 1,
+    seller: (storefronts.data?.length ?? 0) > 1,
   };
+
+  // Evict the oldest entry before inserting a new one when the map is full.
+  if (reportScopesMap.size >= REPORT_SCOPES_MAX_OWNERS) {
+    const oldest = reportScopesMap.keys().next().value;
+    if (oldest !== undefined) reportScopesMap.delete(oldest);
+  }
+  reportScopesMap.set(ownerId, { result, expiresAt: now + REPORT_SCOPES_TTL_MS });
+  return result;
 }

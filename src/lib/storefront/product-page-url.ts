@@ -1,6 +1,6 @@
 import { appUrl } from "@/lib/app-url";
 import { QUANTITY_QUERY_PARAM } from "@/lib/products/quantity";
-import { uuidField } from "@/lib/validation/inputs";
+import { isUuid } from "@/lib/validation/predicates";
 import type { OrderChannel } from "@/types/order-view";
 import type { ReviewDialog } from "@/lib/reviews/reminders";
 import { ADD_ONS_MAX, OPTIONS_TOTAL_MAX } from "@/types/product";
@@ -55,8 +55,6 @@ export const PUBLIC_PAGES_PREFIX = "/s/";
 /** A route's query string, as Next hands it to a page. */
 export type SearchParams = { [key: string]: string | string[] | undefined };
 
-const optionIdSchema = uuidField("option");
-
 /** A repeated parameter arrives as an array; take the first, as one address
  *  bar can only mean one selection. */
 export function firstValue(raw: string | string[] | undefined): string | undefined {
@@ -108,7 +106,7 @@ export function requestedOptions(searchParams: SearchParams, optionIds: Readonly
   for (const value of raw) {
     const id = value.trim();
     if (!id || wanted.has(id) || !optionIds.has(id)) continue;
-    if (!optionIdSchema.safeParse(id).success) continue;
+    if (!isUuid(id)) continue;
     wanted.add(id);
   }
   return [...wanted];
@@ -125,8 +123,6 @@ export const ADD_ON_QUERY_PARAM = "a";
 
 /** One add-on a buyer picked, and which version of it. */
 export type AddOnPick = { productId: string; optionIds: string[] };
-
-const productIdSchema = uuidField("product");
 
 /** The `?a=` value for these picks (empty for none). */
 export function addOnsParam(picks: readonly AddOnPick[]): string {
@@ -148,14 +144,14 @@ export function requestedAddOns(
   const picks: AddOnPick[] = [];
   for (const entry of raw.split(",").slice(0, ADD_ONS_MAX)) {
     const [productId = "", ...options] = entry.trim().split(".");
-    if (!productIdSchema.safeParse(productId).success) continue;
+    if (!isUuid(productId)) continue;
     if (!allowedIds.includes(productId)) continue;
     if (picks.some((pick) => pick.productId === productId)) continue;
     const optionIds = [
       ...new Set(
         options
           .slice(0, OPTIONS_TOTAL_MAX)
-          .filter((id) => optionIdSchema.safeParse(id).success),
+          .filter(isUuid),
       ),
     ];
     picks.push({ productId, optionIds });

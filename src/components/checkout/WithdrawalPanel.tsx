@@ -3,6 +3,7 @@
 import { useId, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import { dateTimeFormat } from "@/lib/format/intl";
 import { fieldBaseClass } from "@/components/ui/control-styles";
 import { CTA_BUTTON_CLASS, ctaGhostStyle, type CtaAppearance } from "@/components/product-page/product-page-maps";
 import { ORDER_WITHDRAW_API_PATH } from "@/lib/checkout/paths";
@@ -54,7 +55,7 @@ export function WithdrawalPanel({
   const [error, setError] = useState<string | null>(null);
   const [requestedAt, setRequestedAt] = useState(withdrawal.requestedAt);
 
-  const date = (iso: string) => new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(new Date(iso));
+  const date = (iso: string) => dateTimeFormat(locale, { dateStyle: "long" }).format(new Date(iso));
 
   if (requestedAt) {
     return (

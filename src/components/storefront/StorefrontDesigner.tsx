@@ -867,7 +867,13 @@ export function StorefrontDesigner({
     return [...byKey.values()];
   }, [blocks, elementUrls]);
 
+  // Monotonically increasing. markDirty() bumps it; handleSave captures it
+  // before the async call and only clears the dirty flag when the counter has
+  // not moved, so an edit made while a save is in flight keeps the flag set.
+  const dirtyCounter = useRef(0);
+
   function markDirty() {
+    dirtyCounter.current++;
     setDirty(true);
   }
 
@@ -1521,6 +1527,15 @@ export function StorefrontDesigner({
     beginHeaderEdit,
     setHeaderLineText,
     endHeaderEdit,
+    // These six close over state that changes often; keeping them in a ref
+    // lets the useCallback wrappers below stay stable (empty dep array) so
+    // they never bypass DesignerCanvas.memo().
+    togglePicker,
+    addProduct,
+    placeTileSpot,
+    openTileLabelSetting,
+    closeBuyerFlow,
+    updateCheckoutPage,
   });
   useEffect(() => {
     canvasActions.current = {
@@ -1549,6 +1564,12 @@ export function StorefrontDesigner({
       beginHeaderEdit,
       setHeaderLineText,
       endHeaderEdit,
+      togglePicker,
+      addProduct,
+      placeTileSpot,
+      openTileLabelSetting,
+      closeBuyerFlow,
+      updateCheckoutPage,
     };
   });
   const onMoveBlock = useCallback((key: string, x: number, y: number) => {
@@ -1636,6 +1657,46 @@ export function StorefrontDesigner({
   );
   const onTypeEnd = useCallback(() => {
     canvasActions.current.endTyping();
+  }, []);
+  // Stable callbacks for the six DesignerCanvas props that were previously
+  // plain (non-useCallback) functions and so bypassed memo() on every render.
+  const onAddProduct = useCallback(() => {
+    canvasActions.current.togglePicker();
+  }, []);
+  const onAcceptSuggestion = useCallback((productId: string) => {
+    canvasActions.current.addProduct(productId);
+  }, []);
+  const onSpotChange = useCallback(
+    (key: string, token: SpotToken, drop: SpotDrop) => {
+      canvasActions.current.placeTileSpot(key, token, drop);
+    },
+    [],
+  );
+  const onOpenSpotSetting = useCallback((key: string, token: SpotToken) => {
+    canvasActions.current.openTileLabelSetting(key, token);
+  }, []);
+  const onClosePage = useCallback((productId: string) => {
+    canvasActions.current.closeBuyerFlow(productId);
+  }, []);
+  const onCheckoutPageChange = useCallback((next: CheckoutPageConfig) => {
+    canvasActions.current.updateCheckoutPage(next);
+  }, []);
+  // Wrapper that bails early when start/end are equal, so a cursor move that
+  // stays inside the same character position does not re-render the designer.
+  // `setTypingRange` itself is stable (useState setter), but every rAF from
+  // InlineTextEditor hands it a fresh object even on a motionless cursor.
+  const onTextRangeChange = useCallback((next: TextRange | null) => {
+    setTypingRange((prev) => {
+      if (prev === null && next === null) return prev;
+      if (
+        prev !== null &&
+        next !== null &&
+        prev.start === next.start &&
+        prev.end === next.end
+      )
+        return prev;
+      return next;
+    });
   }, []);
 
   /**
@@ -3686,7 +3747,17 @@ export function StorefrontDesigner({
   async function handleSave(overwrite = false): Promise<boolean> {
     // The sample has no Save button, and nothing else may write it either.
     if (isSample) return false;
+    // Nothing to write and no forced overwrite: show the saved toast and bail
+    // early so the action's eight Supabase calls are never made.
+    if (!dirty && !overwrite) {
+      toast.success(t("toasts.saved"));
+      return true;
+    }
     setSaving(true);
+    // Snapshot the counter NOW. If markDirty() fires while the await below is
+    // in flight (the seller keeps editing), the counter will have moved by the
+    // time we come back, and we must NOT clear the dirty flag.
+    const counterAtStart = dirtyCounter.current;
     // Policies travel trimmed and without empty fields; nothing at all when
     // every field is blank. The product page's options are written once they
     // differ from the defaults (or were already stored), so a storefront
@@ -3752,7 +3823,12 @@ export function StorefrontDesigner({
         ),
       );
     }
-    setDirty(false);
+    // Only clear the flag when no edit arrived while the save was in flight.
+    // If the counter moved, the seller made a change after we started; keeping
+    // dirty=true lets the leave guard and the Save button reflect reality.
+    if (dirtyCounter.current === counterAtStart) {
+      setDirty(false);
+    }
     // Blocks silently vanishing from the canvas needs saying out loud --
     // otherwise a save that quietly removed tiles reads as a save that broke
     // the design.
@@ -4292,11 +4368,11 @@ export function StorefrontDesigner({
             onResizeOnPhone={onResizeOnPhone}
             onRotateBlock={onRotateBlock}
             onEmptyCellClick={onInsertAt}
-            onAddProduct={togglePicker}
+            onAddProduct={onAddProduct}
             suggestedProduct={
               isSample ? null : (catalog.find((product) => product.id === suggestedProductId) ?? null)
             }
-            onAcceptSuggestion={addProduct}
+            onAcceptSuggestion={onAcceptSuggestion}
             selectedKeys={selectedKeys}
             onSelectBlock={onSelectBlock}
             onSelectMany={onSelectMany}
@@ -4317,21 +4393,21 @@ export function StorefrontDesigner({
             onTypeStart={onTypeStart}
             onTextChange={onTextChange}
             onToggleBlockFormat={onToggleBlockFormat}
-            onTextRangeChange={setTypingRange}
+            onTextRangeChange={onTextRangeChange}
             onTypeEnd={onTypeEnd}
-            onSpotChange={placeTileSpot}
-            onOpenSpotSetting={openTileLabelSetting}
+            onSpotChange={onSpotChange}
+            onOpenSpotSetting={onOpenSpotSetting}
             // Space is the hold-to-pan tool; while held, a drag on the frame
             // pans the workspace instead of drawing a marquee.
             disableMarquee={spaceHeld}
             // The product pages the seller has out, beside the board.
             openPages={openPages}
-            onClosePage={closeBuyerFlow}
+            onClosePage={onClosePage}
             storefrontId={storefrontId}
             storefrontName={name}
             productPage={productPage}
             checkoutPage={checkoutPage}
-            onCheckoutPageChange={updateCheckoutPage}
+            onCheckoutPageChange={onCheckoutPageChange}
             celebrationPlays={celebrationPlays}
             shippingPolicy={shippingPolicy}
             seller={sellerIdentity}

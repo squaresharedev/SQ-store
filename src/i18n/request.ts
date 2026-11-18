@@ -22,6 +22,22 @@ import { loadMessages } from "./messages";
  * page. The account's saved choice reaches the cookie at sign-in instead
  * (src/i18n/sign-in.ts).
  */
+
+/**
+ * The isolate's own time zone, computed once and reused. Without this,
+ * next-intl calls Intl.DateTimeFormat().resolvedOptions().timeZone per request
+ * to discover the runtime default. Computing it once per isolate avoids that
+ * overhead on every request. Never hard-coded: the value is always what the
+ * runtime actually reports.
+ */
+let isolateTimeZone: string | undefined;
+function getIsolateTimeZone(): string {
+  if (isolateTimeZone === undefined) {
+    isolateTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
+  return isolateTimeZone;
+}
+
 export default getRequestConfig(async () => {
   const locale =
     (await readLocaleCookie()) ??
@@ -31,5 +47,6 @@ export default getRequestConfig(async () => {
   return {
     locale,
     messages: await loadMessages(locale),
+    timeZone: getIsolateTimeZone(),
   };
 });

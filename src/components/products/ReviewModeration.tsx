@@ -84,7 +84,6 @@ export function ReviewModeration({
         toast.success(t(`done.${action}`));
         setHiding(null);
         setReason(null);
-        router.refresh();
       } finally {
         setActing(null);
       }

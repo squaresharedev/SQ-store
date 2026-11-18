@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { CHART, CompareLegend, SCRUB, ScrubChart } from "@/components/charts";
+// Leaf imports instead of the barrel: the barrel re-exports LineChart,
+// BarChart, etc. which pull in recharts (~130 KB gz). ScrubChart, theme
+// tokens, and CompareLegend are plain SVG/CSS with no recharts dependency.
+import { ScrubChart } from "@/components/charts/ScrubChart";
+import { CHART, SCRUB } from "@/components/charts/theme";
+import { CompareLegend } from "@/components/charts/CompareLegend";
 import { MoneyFigure } from "@/components/ui/MoneyFigure";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { eyebrowClass, joinedCellClass } from "@/components/ui/surface-styles";

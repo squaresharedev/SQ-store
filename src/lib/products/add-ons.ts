@@ -25,18 +25,65 @@ import type { createAdminClient } from "@/lib/supabase/admin";
 import { isContentVisible } from "@/lib/moderation/removal";
 import { toPublicStockBadge } from "@/lib/stock/public";
 import { toCurrency } from "@/lib/format/money";
-import { parseAddOnIds } from "@/lib/products/detail";
+import { parseAddOnIds, parseOptionGroups } from "@/lib/products/detail";
 import { addOnHiddenReason } from "@/lib/products/add-on-visibility";
 import { PUBLIC_PRODUCT_SELECT, type PublicProductRow } from "@/lib/products/purchasable";
-import { buildProductPageProduct } from "@/lib/products/public";
-import { loadProductSales, readStoreSales, salesCovering } from "@/lib/discounts/public";
-import type { ActiveSale } from "@/types/discount";
+import { presignGetUrl } from "@/lib/r2";
+import { loadProductSales, readStoreSales, salesCovering, type ProductPricing } from "@/lib/discounts/public";
+import type { ActiveSale, StoreSale } from "@/types/discount";
 import { PAGE_BUSY, type PageBusy } from "@/lib/public/busy";
 import { productPagePath } from "@/lib/storefront/product-page-url";
-import type { AddOnCard, Currency, ProductRating } from "@/types/product";
+import type { AddOnCard, Currency, ProductPageImage, ProductRating } from "@/types/product";
 import { readRatingSummaries } from "@/lib/reviews/ratings";
 
 type Admin = ReturnType<typeof createAdminClient>;
+
+/** "PDF", "ZIP"... from a key's extension. Same logic as formatFromKey in
+ *  lib/products/public.ts; duplicated here to avoid exporting a private
+ *  function from that module. */
+function fileFormatFromKey(key: string | null): string | null {
+  if (!key) return null;
+  const lastSegment = key.split("/").pop() ?? "";
+  const dot = lastSegment.lastIndexOf(".");
+  if (dot === -1) return null;
+  const extension = lastSegment.slice(dot + 1);
+  return /^[A-Za-z0-9]{1,5}$/.test(extension) ? extension.toUpperCase() : null;
+}
+
+/**
+ * A lean add-on card built from a raw row and its pricing. Signs only the
+ * cover image (no gallery, no documents), which is all an add-on card shows.
+ * Pass `lean = true` to skip signing entirely for callers (the quote) that
+ * use only optionGroups and never render images.
+ */
+async function buildLeanAddOnCard(
+  row: PublicProductRow,
+  pricing: ProductPricing | undefined,
+  pagePath: string | null,
+  rating: ProductRating | null,
+  lean?: boolean,
+): Promise<AddOnCard> {
+  const images: ProductPageImage[] = [];
+  if (!lean && row.image_key) {
+    const url = await presignGetUrl(row.image_key);
+    if (url) images.push({ url, alt: row.title });
+  }
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description ?? "",
+    priceCents: pricing?.priceCents ?? row.price_cents,
+    currency: toCurrency(row.currency),
+    sale: pricing?.sale ?? null,
+    images,
+    optionGroups: parseOptionGroups(row.option_groups),
+    isDigital: row.digital_file_key !== null,
+    digitalFormat: fileFormatFromKey(row.digital_file_key),
+    shippingProfileId: row.shipping_profile_id,
+    pagePath,
+    rating,
+  };
+}
 
 /** One add-on a buyer may be offered: the card for the page, and (server side
  *  only) what the quote prices it from. */
@@ -67,6 +114,13 @@ export async function loadAddOns(
     pages?: { storefrontId: string; linked: (productId: string) => boolean };
     /** Read their reviews' numbers too, for a page that shows them. */
     withRatings?: boolean;
+    /** Store-wide sales already read by the caller's gate; skips a second
+     *  read of readStoreSales for the same owner and time. `undefined` means
+     *  "not provided, read them here"; `null` means "read failed". */
+    storeSales?: StoreSale[] | null;
+    /** Skip signing images entirely (cover and gallery). The quote uses
+     *  `lean: true` because it only needs optionGroups, never images. */
+    lean?: boolean;
   },
 ): Promise<AddOnLine[] | PageBusy> {
   const ids = parseAddOnIds(input.ids);
@@ -79,7 +133,9 @@ export async function loadAddOns(
       .in("id", ids)
       .eq("owner_id", input.ownerId)
       .eq("status", "active"),
-    readStoreSales(admin, input.ownerId, input.now),
+    input.storeSales !== undefined
+      ? Promise.resolve(input.storeSales)
+      : readStoreSales(admin, input.ownerId, input.now),
   ]);
   if (error) {
     console.error("[add-ons] read failed", error.message);
@@ -124,25 +180,17 @@ export async function loadAddOns(
 
   return Promise.all(
     offered.map(async ({ row, sales }) => {
-      const product = await buildProductPageProduct(row, { pricing: pricing.get(row.id) });
-      const card: AddOnCard = {
-        id: product.id,
-        title: product.title,
-        description: product.description,
-        priceCents: product.priceCents,
-        currency: product.currency,
-        sale: product.sale,
-        images: product.images,
-        optionGroups: product.optionGroups,
-        isDigital: product.isDigital,
-        digitalFormat: product.digitalFormat,
-        shippingProfileId: product.shippingProfileId,
-        pagePath:
-          input.pages && input.pages.linked(product.id)
-            ? productPagePath(input.pages.storefrontId, product.id)
-            : null,
-        rating: ratings.get(product.id) ?? null,
-      };
+      const pagePath =
+        input.pages && input.pages.linked(row.id)
+          ? productPagePath(input.pages.storefrontId, row.id)
+          : null;
+      const card = await buildLeanAddOnCard(
+        row,
+        pricing.get(row.id),
+        pagePath,
+        ratings.get(row.id) ?? null,
+        input.lean,
+      );
       return { card, row, sales };
     }),
   );

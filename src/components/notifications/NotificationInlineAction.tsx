@@ -87,7 +87,6 @@ export function NotificationInlineAction({
         return;
       }
       router.push("/dashboard");
-      router.refresh();
     });
   }
 

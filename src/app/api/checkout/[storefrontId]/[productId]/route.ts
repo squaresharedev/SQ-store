@@ -6,7 +6,7 @@ import { readBoundedJson } from "@/lib/security/read-json";
 import { turnstileEnabled, verifyTurnstile } from "@/lib/turnstile";
 import { placeOrderSchema } from "@/lib/validation/checkout";
 import { quoteCheckout } from "@/lib/checkout/quote";
-import { checkoutAvailableFor, checkoutProviderFor } from "@/lib/checkout/availability";
+import { canPriceDelivery, checkoutProviderFor } from "@/lib/checkout/availability";
 import { placeOrder } from "@/lib/checkout/provider";
 import { orderLinkPath } from "@/lib/orders/order-link";
 import { PLACED_QUERY_PARAM } from "@/lib/storefront/product-page-url";
@@ -127,8 +127,15 @@ export async function POST(request: Request, { params }: { params: Promise<Param
   // Checkout must still be open for this product: a provider can take the
   // money, and delivery is priced. The page asked the same question when it
   // rendered; the answer can change between the two.
+  //
+  // React.cache() is a no-op in route handlers, so checkoutProviderFor would
+  // read the payment account a second time if we also called
+  // checkoutAvailableFor. Instead: run the synchronous delivery-pricing check
+  // first, then call checkoutProviderFor exactly once and use its answer for
+  // both the "is a provider available" gate and the placeOrder call.
+  if (!canPriceDelivery(quote.gate)) return refuse("unavailable", 409);
   const provider = await checkoutProviderFor(quote.gate.ownerId);
-  if (!provider || !(await checkoutAvailableFor(quote.gate))) return refuse("unavailable", 409);
+  if (!provider) return refuse("unavailable", 409);
 
   // What the kind of product demands of the body. A parcel needs an address;
   // a download needs the buyer's consent to have it straight away (and gives

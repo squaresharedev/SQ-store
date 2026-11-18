@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { hasContactOrPaymentDetails } from "@/lib/validation/inputs";
+import { hasContactOrPaymentDetails } from "@/lib/validation/predicates";
 import { PlainTextEditor } from "@/components/storefront/PlainTextEditor";
 import type { CheckoutPageConfig } from "@/types/storefront";
 

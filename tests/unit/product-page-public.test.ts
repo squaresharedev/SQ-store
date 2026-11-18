@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PAGE_BUSY } from "@/lib/public/busy";
 import { DEFAULT_PRODUCT_PAGE_CONFIG, DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
+import { resetReportScopesCache } from "@/lib/products/public";
 
 // The public product read is the one place that decides what a buyer may see
 // of a product. These tests pin the gate order and the exclusion list.
@@ -40,6 +41,23 @@ function builder(table: string) {
       (state.filters[table] ??= []).push([column, value]);
       return chain;
     },
+    limit: () => chain,
+    order: () => chain,
+    range: () => chain,
+    // Supports direct-await list reads (e.g. reportScopesFor's .limit(2)).
+    // Returns the table's row wrapped in an array, or an empty array for null.
+    then<T>(
+      resolve: (value: { data: unknown[] | null; error: { message: string } | null }) => T,
+      reject?: (reason: unknown) => T,
+    ) {
+      try {
+        if (state.errors[table]) return Promise.resolve(resolve({ data: null, error: state.errors[table] }));
+        const row = state.rows[table];
+        return Promise.resolve(resolve({ data: row ? [row] : [], error: null }));
+      } catch (err) {
+        return reject ? Promise.resolve(reject(err)) : Promise.reject(err);
+      }
+    },
     maybeSingle: async () =>
       state.errors[table]
         ? { data: null, error: state.errors[table] }
@@ -54,13 +72,26 @@ vi.mock("@/lib/supabase/admin", () => ({
 
 // The discount reads have their own tests (discount-public); here they only
 // decide what the page is told about a sale.
-const readActiveSales = vi.fn(async (): Promise<unknown[] | null> => []);
+// purchasable.ts now calls readStoreSales (store-wide) + salesCovering (product
+// filter), not readActiveSales.  The two together are semantically identical
+// to readActiveSales: null means "could not be read -> PAGE_BUSY".
+const readStoreSales = vi.fn(async (): Promise<unknown[] | null> => []);
 const loadProductSale = vi.fn(async (_admin: unknown, input: { regularPriceCents: number }) => ({
   priceCents: input.regularPriceCents,
   sale: null as unknown,
 }));
 vi.mock("@/lib/discounts/public", () => ({
-  readActiveSales: (...args: unknown[]) => readActiveSales(...(args as [])),
+  readStoreSales: (...args: unknown[]) => readStoreSales(...(args as [])),
+  // salesCovering is pure: strip the StoreSale-only fields, keep all entries.
+  // Tests set readStoreSales to return sales with appliesTo: "all" so they all
+  // pass the filter; this mirrors what readActiveSales returned directly.
+  salesCovering: (
+    sales: Array<{ id: unknown; value: unknown; startsAt: unknown; endsAt: unknown; appliesTo: string; productIds: string[] }>,
+    productId: string,
+  ) =>
+    sales
+      .filter((s) => s.appliesTo === "all" || s.productIds.includes(productId))
+      .map(({ id, value, startsAt, endsAt }) => ({ id, value, startsAt, endsAt })),
   loadProductSale: (...args: [unknown, { regularPriceCents: number }]) => loadProductSale(...args),
   // The real one: it is pure, and the page's countdown to a sale's end is part
   // of what these tests hold the loader to.
@@ -159,8 +190,10 @@ beforeEach(() => {
   from.mockClear();
   rateLimitKey.mockClear();
   rateLimitKey.mockResolvedValue(true);
-  readActiveSales.mockClear();
+  readStoreSales.mockClear();
   loadProductSale.mockClear();
+  // Reset the report-scopes module cache so each test drives a fresh read.
+  resetReportScopesCache();
 });
 
 describe("buildProductPageProduct", () => {
@@ -290,8 +323,11 @@ describe("getPublicProductPage gates", () => {
 
   it("prices the page from the store's running sale, and never hands the browser a discount id", async () => {
     const SALE_ID = "99999999-9999-4999-8999-999999999999";
-    readActiveSales.mockResolvedValueOnce([
-      { id: SALE_ID, value: { type: "percent", percentOff: 20 }, startsAt: "2026-01-01T00:00:00Z", endsAt: null },
+    // readStoreSales returns store-wide StoreSale (with appliesTo/productIds);
+    // salesCovering strips those fields, producing the same ActiveSale the old
+    // readActiveSales returned directly.
+    readStoreSales.mockResolvedValueOnce([
+      { id: SALE_ID, appliesTo: "all", productIds: [], value: { type: "percent", percentOff: 20 }, startsAt: "2026-01-01T00:00:00Z", endsAt: null },
     ]);
     loadProductSale.mockResolvedValueOnce({
       priceCents: 10320,
@@ -299,8 +335,9 @@ describe("getPublicProductPage gates", () => {
     });
     const result = await loadedPage();
 
-    // The sale read is the gate's, scoped to this storefront's owner and this product.
-    expect(readActiveSales).toHaveBeenCalledWith(expect.anything(), OWNER_ID, PRODUCT_ID, expect.any(Date));
+    // The sale read is the gate's, scoped to this storefront's owner.
+    // No productId: readStoreSales reads store-wide sales; salesCovering filters.
+    expect(readStoreSales).toHaveBeenCalledWith(expect.anything(), OWNER_ID, expect.any(Date));
     expect(loadProductSale).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ ownerId: OWNER_ID, productId: PRODUCT_ID, regularPriceCents: 12900 }),
@@ -321,24 +358,24 @@ describe("getPublicProductPage gates", () => {
   });
 
   it("is 'not right now' when the store's sales cannot be read: the regular price is not a safe guess", async () => {
-    // readActiveSales answers null for 'could not be read' (it has its own
+    // readStoreSales answers null for 'could not be read' (it has its own
     // tests). A page drawn at the listed price then would show, and the quote
     // behind it charge, more than the seller is advertising.
-    readActiveSales.mockResolvedValueOnce(null);
+    readStoreSales.mockResolvedValueOnce(null);
     expect(await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID)).toBe(PAGE_BUSY);
     expect(loadProductSale).not.toHaveBeenCalled();
   });
 
   it("still refuses plainly a product that is not for sale, whatever the sales read did", async () => {
-    readActiveSales.mockResolvedValueOnce(null);
+    readStoreSales.mockResolvedValueOnce(null);
     state.rows.products = null;
     expect(await getPublicProductPage(STOREFRONT_ID, PRODUCT_ID)).toBeNull();
   });
 
   it("tells the page how long its sale price has left, so an open tab reads it again", async () => {
     const endsAt = new Date(Date.now() + 90_000).toISOString();
-    readActiveSales.mockResolvedValueOnce([
-      { id: "99999999-9999-4999-8999-999999999999", value: { type: "percent", percentOff: 20 }, startsAt: "2026-01-01T00:00:00Z", endsAt },
+    readStoreSales.mockResolvedValueOnce([
+      { id: "99999999-9999-4999-8999-999999999999", appliesTo: "all", productIds: [], value: { type: "percent", percentOff: 20 }, startsAt: "2026-01-01T00:00:00Z", endsAt },
     ]);
     loadProductSale.mockResolvedValueOnce({
       priceCents: 10320,

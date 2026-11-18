@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/session";
+import type { User } from "@supabase/supabase-js";
 import {
   NO_NOTIFICATION_FILTER,
   isNotificationType,
@@ -28,9 +29,17 @@ export const HISTORY_PAGE_SIZE = 20;
 
 const SELECT_COLS = "id, user_id, type, title, body, data, read, created_at";
 
-/** Recent notifications + authoritative unread count for the bell/provider. */
-export async function getNotificationSnapshot(): Promise<NotificationSnapshot | null> {
-  const user = await getUser();
+/**
+ * Recent notifications + authoritative unread count for the bell/provider.
+ *
+ * Accepts an already-resolved `user` to avoid a second Auth round-trip when
+ * the caller (the bootstrap route handler) has already called getUser(). When
+ * omitted, resolves the user itself as usual.
+ */
+export async function getNotificationSnapshot(
+  resolvedUser?: User,
+): Promise<NotificationSnapshot | null> {
+  const user = resolvedUser ?? (await getUser());
   if (!user) return null;
 
   const supabase = await createClient();
@@ -64,9 +73,15 @@ export async function getNotificationSnapshot(): Promise<NotificationSnapshot | 
   };
 }
 
-/** Authoritative unread count on its own (cheap, uses the (user_id, read) index). */
-export async function getUnreadCount(): Promise<number> {
-  const user = await getUser();
+/**
+ * Authoritative unread count on its own (cheap, uses the (user_id, read) index).
+ *
+ * Accepts an already-resolved `resolvedUser` to avoid a second Auth round-trip
+ * when the caller (markNotificationRead) has already called getUser(). When
+ * omitted, resolves the user itself as usual.
+ */
+export async function getUnreadCount(resolvedUser?: User): Promise<number> {
+  const user = resolvedUser ?? (await getUser());
   if (!user) return 0;
   const supabase = await createClient();
   const { count, error } = await supabase

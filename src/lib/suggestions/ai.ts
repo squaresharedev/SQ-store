@@ -173,7 +173,11 @@ export async function askClaude<T>(client: Anthropic, ask: Ask<T>): Promise<Answ
   const params = {
     model: SUGGESTION_MODEL,
     max_tokens: ask.maxTokens ?? RESPONSE_MAX_TOKENS,
-    system: ask.system,
+    // The system prompt is 500-1,250 tokens (above Haiku 5.5's 512-token
+    // minimum) and identical on every call for a given task, so marking it
+    // ephemeral lets the second and subsequent calls read it at 0.1x the
+    // normal input price.
+    system: [{ type: "text" as const, text: ask.system, cache_control: { type: "ephemeral" as const } }],
     messages: [{ role: "user" as const, content: ask.prompt }],
     ...(ask.thinking === "off" ? { thinking: { type: "disabled" as const } } : {}),
     // No temperature or top_p: this model answers them with a 400.

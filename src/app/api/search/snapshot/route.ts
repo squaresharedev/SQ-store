@@ -1,5 +1,4 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { getUser } from "@/lib/auth/session";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAccount } from "@/lib/team/account-context";
@@ -38,8 +37,11 @@ import {
 const CAPS = { products: 300, orders: 100, notifications: 50 } as const;
 
 export async function GET() {
-  const user = await getUser();
-  if (!user) {
+  // Single auth call: getActiveAccount() calls getUser() internally. Calling
+  // getUser() first and getActiveAccount() second would be two Auth round-trips
+  // (React.cache() is a no-op in route handlers).
+  const account = await getActiveAccount();
+  if (!account) {
     return Response.json({ error: "Sign in required." }, { status: 401 });
   }
 
@@ -50,10 +52,6 @@ export async function GET() {
     );
   }
 
-  const account = await getActiveAccount();
-  if (!account) {
-    return Response.json({ error: "Sign in required." }, { status: 401 });
-  }
   const { accountId, role, userId } = account;
 
   const supabase = await createClient();

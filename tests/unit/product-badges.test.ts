@@ -90,7 +90,8 @@ function localPresets(locale: Locale): LocalBadgePreset[] {
 const tEnglish = createTranslator({
   locale: "en",
   messages: en,
-  namespace: "Products",
+  // The form validators translate under Products.form (ProductsTranslator).
+  namespace: "Products.form",
   timeZone: "UTC",
 }) as unknown as ProductsTranslator;
 

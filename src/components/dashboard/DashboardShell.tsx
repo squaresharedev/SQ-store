@@ -45,6 +45,18 @@ const TERMS_BANNER_HIDDEN_PATHS = [LEGAL_SETTINGS_PATH] as const;
 const MAIN_CONTENT_ID = "main-content";
 
 /**
+ * The active store's publish-gate status and plan, read together once its
+ * account is known. No account (signed out mid-render) reads nothing.
+ */
+async function identityAndBillingFor(account: Awaited<ReturnType<typeof getActiveAccount>>) {
+  if (!account) return [null, null] as const;
+  return Promise.all([
+    getTraderIdentityStatus(account.accountId),
+    getAccountBilling(account.accountId),
+  ]);
+}
+
+/**
  * The dashboard chrome: fixed left Sidebar + content offset by the rail width,
  * the notification bell, and the profile/account menu (which also holds the
  * multi-tenant store switcher). Resolves the active account + accessible stores
@@ -59,16 +71,29 @@ export async function DashboardShell({
   username: string;
   children: ReactNode;
 }) {
-  const [account, accounts, profile, user, toShipCount, terms, carrierHabits] = await Promise.all([
-    getActiveAccount(),
-    getAccessibleAccounts(),
-    getProfile(),
-    getUser(),
-    // Cached per request, so the Orders page and the overview reuse it.
-    countOrdersToShip(),
-    getTermsStatus(),
-    getCarrierHabits(),
-  ]);
+  // getActiveAccount() is React-cached, so calling it twice returns the same
+  // promise. The .then() below attaches to that shared promise so identity
+  // and billing start the moment the account resolves, in parallel with the
+  // other reads, rather than sequentially after the first batch completes.
+  const [account, accounts, profile, user, toShipCount, terms, carrierHabits, identityAndBilling] =
+    await Promise.all([
+      getActiveAccount(),
+      getAccessibleAccounts(),
+      getProfile(),
+      getUser(),
+      // Cached per request, so the Orders page and the overview reuse it.
+      countOrdersToShip(),
+      getTermsStatus(),
+      getCarrierHabits(),
+      // The publish gate and plan banner both depend on the active account.
+      // Starting them here (via .then on the cached getActiveAccount promise)
+      // overlaps them with the reads above instead of sequencing after.
+      //
+      // Both reads are independent, so they run together (one round trip, not
+      // two). A read failure shows nothing rather than a guessed value.
+      getActiveAccount().then(identityAndBillingFor),
+    ]);
+  const [identity, billing] = identityAndBilling;
   const t = await getTranslations("Dashboard.shell");
   const tOrders = await getTranslations("Orders");
   // Parcels people have paid for and are waiting on, beside Orders on the
@@ -88,23 +113,6 @@ export async function DashboardShell({
     ? (accounts.find((a) => a.accountId === viewingOther.accountId)?.storeName ?? null)
     : null;
   const viewingStoreName = viewingOther ? (viewingStoreKnownName ?? t("anotherStore")) : null;
-
-  // The publish gate, stated once in the chrome so it is visible from whatever
-  // page the seller is on rather than only from the one they happen to be
-  // blocked by. Scoped to the ACTIVE account: a team member working on someone
-  // else's store sees that store's gap, because it is that store's listings the
-  // gap is holding back, but in words that do not send them to fix it (their
-  // Settings edits their own profile, never the owner's).
-  //
-  // Owners do not get it on Overview: the setup checklist there states the same
-  // gap as a step to take (lib/onboarding/steps.ts), and a red strip above a
-  // welcome is exactly the first impression that checklist replaced. A read
-  // failure shows nothing: the write paths still refuse, and a banner that
-  // appears because a query blipped is worse than no banner at all.
-  // Both reads are independent, so they run together (one round trip, not two).
-  const [identity, billing] = account
-    ? await Promise.all([getTraderIdentityStatus(account.accountId), getAccountBilling(account.accountId)])
-    : [null, null];
   const missingTraderDetails = identity?.ok ? identity.missing : [];
   const sellerDetailsBanner = (
     <SellerDetailsBanner
@@ -140,7 +148,7 @@ export async function DashboardShell({
   );
 
   return (
-    <NotificationsProvider>
+    <NotificationsProvider userId={user?.id ?? ""}>
       {/* Universal search wraps the whole shell so ⌘K works from any page that
           wears it, and the palette renders above the sidebar and its drawer. */}
       <SearchProvider

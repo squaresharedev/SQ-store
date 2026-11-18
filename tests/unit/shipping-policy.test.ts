@@ -322,3 +322,62 @@ describe("buildShippingPolicy", () => {
     expect(buildShippingPolicy({ shipping_policy: "not an object" })).toEqual({});
   });
 });
+
+describe("hasShippingPolicy: resolver-independent emptiness", () => {
+  // hasShippingPolicy now resolves prose refs to their key strings rather than
+  // translating them into English. The emptiness answer must be identical to
+  // the English-resolver approach on every input, because the resolver is only
+  // called when the generator actually emits a paragraph.
+
+  it("is false for an entirely empty policy", () => {
+    expect(hasShippingPolicy({})).toBe(false);
+    expect(hasShippingPolicy(null)).toBe(false);
+    expect(hasShippingPolicy(undefined)).toBe(false);
+  });
+
+  it("is false when only returnsPaidBy is set (no window means no prose)", () => {
+    // A policy holding who-pays for a window that does not exist produces no
+    // prose. A settings page that called this "set" would tell a seller they
+    // were done while their page still said nothing.
+    expect(hasShippingPolicy({ returnsPaidBy: "buyer" })).toBe(false);
+    expect(hasShippingPolicy({ returnsPaidBy: "seller" })).toBe(false);
+  });
+
+  it("is false for whitespace-only dispatch", () => {
+    expect(hasShippingPolicy({ dispatch: "   " })).toBe(false);
+    expect(hasShippingPolicy({ dispatch: "" })).toBe(false);
+  });
+
+  it("is false when only profiles are set (they do not appear in the prose section)", () => {
+    expect(hasShippingPolicy({ profiles: [{ id: "a", name: "Bulky", body: "By pallet." }] })).toBe(false);
+  });
+
+  it("is true when shipsFrom is set", () => {
+    expect(hasShippingPolicy({ shipsFrom: "IE" })).toBe(true);
+  });
+
+  it("is true when destinations are set", () => {
+    expect(hasShippingPolicy({ destinations: [{ area: "Ireland", time: "2 days" }] })).toBe(true);
+  });
+
+  it("is true when a returns window is set", () => {
+    expect(hasShippingPolicy({ returnsWindowDays: 30 })).toBe(true);
+    expect(hasShippingPolicy({ returnsWindowDays: 1, returnsPaidBy: "seller" })).toBe(true);
+  });
+
+  it("is true when only dispatch is set", () => {
+    expect(hasShippingPolicy({ dispatch: "Ships Fridays" })).toBe(true);
+  });
+
+  it("is true when seller typed their own shipping text", () => {
+    expect(hasShippingPolicy({ shippingText: "Ask us." })).toBe(true);
+  });
+
+  it("is true when seller typed their own returns text", () => {
+    expect(hasShippingPolicy({ returnsText: "30 days." })).toBe(true);
+  });
+
+  it("is true when freeOverCents produces a threshold sentence", () => {
+    expect(hasShippingPolicy({ freeOverCents: 5000 })).toBe(true);
+  });
+});

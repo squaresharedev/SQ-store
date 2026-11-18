@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import type { MessageKey } from "@/i18n/types";
 import type { GridPlacement } from "@/components/grid/gridConstants";
 import { legibleInkOn, mixHex, readableInkOn } from "@/lib/format/color";
-import { isStrictHexColor } from "@/lib/validation/storefront";
+import { isStrictHexColor } from "@/lib/validation/predicates";
 import { cn } from "@/lib/utils";
 import { ctaStyle, readableOn, type CtaAppearance } from "@/components/product-page/product-page-maps";
 import {

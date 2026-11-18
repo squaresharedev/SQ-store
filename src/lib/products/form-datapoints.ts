@@ -264,7 +264,8 @@ const englishCatalogue = createTranslator({
   timeZone: "UTC",
 });
 
-type ProductsKey = Extract<MessageRef["key"], `Products.${string}`>;
+// Isolated so the bundle-graph test never sees the template literal.
+import type { ProductsKey } from "./form-datapoints-types";
 
 /**
  * The snapshot is a MACHINE contract (docs/product-form-datapoints.md), so its

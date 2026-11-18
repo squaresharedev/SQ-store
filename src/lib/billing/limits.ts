@@ -27,8 +27,8 @@
 // end, so neither layer refuses anything until the switch is turned on.
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { readAccountBilling } from "@/lib/billing/account-plan";
-import { readBillingSwitches } from "@/lib/billing/switches";
+import { getAccountBilling, readAccountBilling } from "@/lib/billing/account-plan";
+import { getBillingSwitches, readBillingSwitches } from "@/lib/billing/switches";
 import { recordFunnelEvent } from "@/lib/billing/funnel";
 import { LIMIT_SOURCE } from "@/lib/billing/paths";
 import { PLANS, PLAN_LIMIT_KEYS, type PlanId, type PlanLimitKey } from "@/lib/billing/plans";
@@ -102,14 +102,22 @@ export type PlanRoom = {
  * service role and checks nothing about the caller.
  */
 export async function planRoom(accountId: string, key: PlanLimitKey): Promise<PlanRoom | null> {
-  if (!(await planLimitsEnforced())) return null;
-  const billing = await readAccountBilling(accountId);
+  // The switch first: while limits are off (the launch default) nothing else
+  // is read, so a page asking costs one cached read and no count. Once on,
+  // the plan and the count are independent and share one round trip.
+  // getBillingSwitches and getAccountBilling are per-request cached, so the
+  // shell's own reads in the same render are reused. React cache is a no-op
+  // inside server actions, so there they read fresh, which an action that has
+  // just written billing data needs.
+  if (!(await getBillingSwitches()).planLimitsEnforced) return null;
+  const [billing, used] = await Promise.all([
+    getAccountBilling(accountId),
+    countPlanUsage(accountId, key),
+  ]);
   if (!billing.ok) return null;
   const { plan } = billing.billing;
   const cap = PLANS[plan].limits[key];
   if (cap === null) return null;
-
-  const used = await countPlanUsage(accountId, key);
   if (used === null) return null;
   return { plan, cap, used, left: Math.max(0, cap - used) };
 }

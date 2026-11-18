@@ -328,8 +328,10 @@ describe("TaxSection — proving the contact details", () => {
     expect(posted.get("channel")).toBe("email");
     expect(posted.get("code")).toBe("1234 5678");
     await waitFor(() => expect(row("email")).toHaveAttribute("data-proof-state", "confirmed"));
-    // The gate and the buyer page are server-rendered: they are asked to refresh.
-    expect(mockRefresh).toHaveBeenCalled();
+    // The gate and the buyer page are server-rendered; confirmContactCode
+    // revalidates them, which already re-renders this page in the action's
+    // own response, so no second render is asked for.
+    expect(mockRefresh).not.toHaveBeenCalled();
   });
 
   it("keeps the code box open after a wrong code", async () => {

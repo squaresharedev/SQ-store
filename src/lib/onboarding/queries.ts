@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { getUser } from "@/lib/auth/session";
+import { getProfile } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 
@@ -19,21 +19,15 @@ export async function getSampleStorefrontFlags(): Promise<{
   hidden: boolean;
   editorTourPending: boolean;
 } | null> {
-  const user = await getUser();
-  if (!user) return null;
-
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("sample_storefront_hidden_at, editor_tour_seen_at")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (error || !data) {
-    if (error) console.warn("[onboarding] sample storefront flags read failed:", error.message);
-    return null;
-  }
-  const hiddenAt: unknown = data.sample_storefront_hidden_at;
-  const tourSeenAt: unknown = data.editor_tour_seen_at;
+  // getProfile is React-cached: free when the shell or any other component has
+  // already read the profile this render (which the dashboard shell does).
+  const profile = await getProfile();
+  if (!profile) return null;
+  // Cast through unknown to defend against a deployment ahead of the migration
+  // that added these columns: PostgREST omits unknown columns from select("*"),
+  // so they would be undefined rather than the declared string | null.
+  const hiddenAt: unknown = profile.sample_storefront_hidden_at;
+  const tourSeenAt: unknown = profile.editor_tour_seen_at;
   // `undefined` means the row came back without the column: no answer.
   if (hiddenAt === undefined || tourSeenAt === undefined) return null;
   return { hidden: hiddenAt !== null, editorTourPending: tourSeenAt === null };

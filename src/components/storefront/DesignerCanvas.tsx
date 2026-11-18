@@ -48,11 +48,18 @@ import {
   type GridBlock,
   type GridPlacement,
 } from "@/components/grid/gridConstants";
-import type {
-  InlineFormatKey,
-  TextEditSource,
-  TextRange,
+import {
+  InlineTextEditor,
+  type InlineFormatKey,
+  type TextEditSource,
+  type TextRange,
 } from "./InlineTextEditor";
+import { MastheadLineEditor } from "./MastheadLineEditor";
+import {
+  offsetAtPoint,
+  wordRangeAt,
+} from "@/lib/storefront/text-selection";
+import { EditorSlotsContext } from "./editor-slots";
 import { BlockTile } from "./BlockTile";
 import type { SpotDrop, SpotToken } from "./TileSpotDragLayer";
 import { CustomFontFace } from "./CustomFontFace";
@@ -132,6 +139,31 @@ const PRODUCT_PAGE_DESKTOP_WIDTH = 1280;
  * of open pages.
  */
 const CONNECTOR_ARC_BAND_PX = 240;
+
+/**
+ * Module-level constant: the editor slots provided to every node under the
+ * designer canvas. Stable by construction (the components are defined once at
+ * module load), so the context value never causes a re-render of its subtree.
+ *
+ * computeEditRange packages offsetAtPoint + wordRangeAt so StorefrontMasthead
+ * never imports them directly and they stay out of buyer-page bundles.
+ */
+const EDITOR_SLOTS = {
+  InlineTextEditor,
+  MastheadLineEditor,
+  computeEditRange: (
+    node: HTMLElement | null,
+    event: { clientX: number; clientY: number; detail: number } | null,
+    text: string,
+  ): TextRange | null => {
+    if (!node || !event) return null;
+    const offset = offsetAtPoint(node, event.clientX, event.clientY);
+    if (offset === null) return null;
+    return event.detail > 1
+      ? wordRangeAt(text, offset)
+      : { start: offset, end: offset };
+  },
+} as const;
 
 export const DesignerCanvas = memo(function DesignerCanvas({
   blocks,
@@ -842,6 +874,10 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   );
 
   const canvas = (
+    // The provider is on this variable so both return paths (the mobile-only
+    // column and the pannable Stage) get the editor slots without a second
+    // wrapper element in the DOM.
+    <EditorSlotsContext.Provider value={EDITOR_SLOTS}>
     <div
       ref={frameRef}
       // The storefront itself, as opposed to the chrome around it. Both the
@@ -1049,6 +1085,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
           />
         )}
     </div>
+    </EditorSlotsContext.Provider>
   );
 
   // A page open beside the board needs somewhere to actually go, which the

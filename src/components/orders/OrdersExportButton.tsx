@@ -27,10 +27,10 @@ const EXPORT_PLAN = cheapestPlanWith("ordersExport");
 export function OrdersExportButton({ enabled }: { enabled: boolean }) {
   const t = useTranslations("Orders.export");
   const tExport = useTranslations("Common.export");
-  const tBilling = useTranslations("Billing");
+  const tBilling = useTranslations("Billing.plans");
 
   if (!enabled) {
-    const plan = tBilling(`plans.${EXPORT_PLAN}.name`);
+    const plan = tBilling(`${EXPORT_PLAN}.name`);
     return (
       <Link
         href={plansHref("orders_export")}

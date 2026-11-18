@@ -150,6 +150,33 @@ export const GALLERY_ALT_MAX = 160;
 export const DOCUMENTS_MAX = 8;
 export const DOCUMENT_LABEL_MAX = 80;
 
+// ── Per-order quantity limits ─────────────────────────────────────────────
+//
+// Kept in the type contract (not in the schema module) so the render path and
+// the checkout can read them without pulling in zod. lib/validation/product.ts
+// re-exports both so server callers need not change their import path.
+
+/**
+ * THE PLATFORM CEILING on how many units one buyer may take in one order.
+ *
+ * A seller sets their own `maxPerOrder` inside this range; nothing -- not a
+ * form, not an import, not a service-role write -- may store a higher one, and
+ * the products_max_per_order_range CHECK repeats it at the database. It is the
+ * bound that keeps `priceCents * quantity` (100_000_000 * 100) an exact integer
+ * well inside what the money path has to hold, and it is what makes the
+ * quantity picker a closed list rather than a number field.
+ */
+export const PURCHASE_QUANTITY_MAX = 100;
+
+/**
+ * What a product's per-order ceiling is when the seller has not said. Ten is a
+ * real answer rather than "unlimited": a buyer who genuinely wants more than
+ * ten of one thing is having a conversation with the seller, not clicking a
+ * dropdown. Mirrors the column's DB default so a row written by either side
+ * says the same number.
+ */
+export const MAX_PER_ORDER_DEFAULT = 10;
+
 // ── Options ─────────────────────────────────────────────────────────────
 //
 // A product is sold in versions, and what separates them is the SELLER's

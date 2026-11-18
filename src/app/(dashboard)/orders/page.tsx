@@ -170,12 +170,17 @@ export default async function OrdersRoutePage({
       : storeToShip;
   const view = resolveView(params, filters, toShipCount);
 
-  const [data, deepLinked, billing] = await Promise.all([
+  const [data, deepLinked, billing, checkoutOpen] = await Promise.all([
     listOrders({ view, filters, productId: product?.id, sort, page, pageSize: DEFAULT_PAGE_SIZE }),
     // A stale or foreign id resolves to null: the list still renders, just
     // without a detail panel.
     deepLinkedId ? getOrderById(deepLinkedId) : Promise.resolve(null),
     account ? getAccountBilling(account.accountId) : Promise.resolve(null),
+    // Runs in parallel with the list and billing reads: it only needs `account`
+    // which is known from the first batch.
+    account
+      ? checkoutProviderFor(account.accountId).then((p) => p !== null)
+      : Promise.resolve(false),
   ]);
   // Only decides which button shows; the export route re-checks the plan.
   const canExport = billing?.ok === true && planHas(billing.billing.plan, "ordersExport");
@@ -191,7 +196,7 @@ export default async function OrdersRoutePage({
         view={view}
         toShipCount={toShipCount}
         canFulfil={can(account?.role, "orders.fulfil")}
-        checkoutOpen={account ? (await checkoutProviderFor(account.accountId)) !== null : false}
+        checkoutOpen={checkoutOpen}
         data={data}
         filters={view === "all" ? filters : {}}
         product={product}

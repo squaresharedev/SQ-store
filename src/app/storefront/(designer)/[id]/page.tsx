@@ -8,10 +8,10 @@ import { getStorefront } from "@/lib/storefront/queries";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { getSellerIdentity, getTraderIdentityStatus } from "@/lib/settings/seller-identity";
+import { getAccountSellerIdentity, getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { resolveProductPage } from "@/lib/storefront/product-page";
 import { storefrontPagePath } from "@/lib/storefront/product-page-url";
-import { getShippingPolicy } from "@/lib/settings/shipping-policy";
+import { getAccountShippingPolicy } from "@/lib/settings/shipping-policy";
 import { presignGetUrl } from "@/lib/r2";
 import { blockKey, type StorefrontConfig } from "@/types/storefront";
 
@@ -23,10 +23,11 @@ export async function generateMetadata() {
 /**
  * Display URLs for every uploaded element on the canvas, keyed by blockKey.
  *
- * Signing is pure HMAC with no network call (see presignGetUrl), so doing all
- * of them costs microseconds even on a full board, and the signatures are
- * anchored to the top of the clock hour — so the same block yields the same
- * URL across renders and the browser can actually cache the artwork.
+ * Signing is HMAC with no network call (see presignGetUrl), measured at a few
+ * hundred microseconds per URL, so a full board is not free; presignGetUrl
+ * therefore keeps each signed URL for the rest of its hour in the isolate.
+ * The signatures are anchored to the top of the clock hour, so the same block
+ * yields the same URL across renders and the browser can cache the artwork.
  */
 async function signElementUrls(
   blocks: StorefrontConfig["blocks"],
@@ -85,8 +86,8 @@ export default async function StorefrontEditorPage({
     listStorefrontProducts(),
     getProductSales(),
     getLastTouchedProduct(),
-    account ? getSellerIdentity(account.accountId) : Promise.resolve({}),
-    account ? getShippingPolicy(account.accountId) : Promise.resolve({}),
+    account ? getAccountSellerIdentity(account.accountId) : Promise.resolve({}),
+    account ? getAccountShippingPolicy(account.accountId) : Promise.resolve({}),
     // Whether the publish gate would let this storefront's page answer.
     account ? getTraderIdentityStatus(account.accountId) : Promise.resolve(null),
     // The person's own "has the designer tour started" flag, as on the sample.

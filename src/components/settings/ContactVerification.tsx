@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useEffect, useId, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Check, Mail, Phone } from "lucide-react";
 import { SaveButton } from "@/components/ui/SaveButton";
@@ -78,7 +77,6 @@ export function ContactVerification({
   const t = useTranslations("Settings.contactVerification");
   const tCommon = useTranslations("Common.actions");
   const tErrors = useTranslations("Errors.contactVerification");
-  const router = useRouter();
   const statusId = useId();
   const codeId = useId();
 
@@ -109,12 +107,13 @@ export function ContactVerification({
   }
 
   // The proof changes the gate (banners, checklist) and what buyers see, all
-  // rendered on the server: ask for fresh data, then tell the caller.
+  // rendered on the server. confirmContactCode revalidates TRADER_IDENTITY_HREF
+  // and "/dashboard", so no router.refresh() is needed here: the action's own
+  // revalidatePath calls trigger the re-render as part of the action response.
   useEffect(() => {
     if (!confirmedHere) return;
-    router.refresh();
     onConfirmed?.();
-  }, [confirmedHere, router, onConfirmed]);
+  }, [confirmedHere, onConfirmed]);
 
   const state: ProofState = dirty
     ? "dirty"

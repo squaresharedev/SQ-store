@@ -8,17 +8,17 @@ import {
   type StorefrontHeader,
   type StorefrontTheme,
 } from "@/types/storefront";
-import { isStrictHexColor } from "@/lib/validation/storefront";
-import { headerThemeColors } from "@/lib/theme/color-target";
+import { isStrictHexColor } from "@/lib/validation/predicates";
+// Buyer-safe: core file has no designer-panel code.
+import { headerThemeColors } from "@/lib/theme/color-target-core";
 import { fontPresentation } from "@/lib/theme/storefront-fonts";
-import {
-  offsetAtPoint,
-  wordRangeAt,
-  type TextRange,
-} from "@/lib/storefront/text-selection";
+// Type-only: erased at compile time, so the text-selection module is never
+// evaluated on the buyer-facing path. The actual function is delivered through
+// the editor-slots context.
+import type { TextRange } from "@/lib/storefront/text-selection";
 import { cn } from "@/lib/utils";
 import { TEXT_ALIGN_CLASSES, textSizeStyle } from "./config-maps";
-import { MastheadLineEditor } from "./MastheadLineEditor";
+import { useEditorSlots } from "./editor-slots";
 
 /**
  * The storefront masthead (store name + bio) rendered above the grid — shared
@@ -73,6 +73,7 @@ export function StorefrontMasthead({
   onEditDone?: () => void;
 }) {
   const t = useTranslations("Storefront.masthead");
+  const { MastheadLineEditor, computeEditRange } = useEditorSlots();
   // Editor only: a buyer-facing render has no lines to type in.
   const editable = Boolean(onEditLine);
 
@@ -148,16 +149,11 @@ export function StorefrontMasthead({
    * so that a drag across the board rubber-bands instead of selecting text.
    */
   const beginEdit = (line: HeaderLine, event: MouseEvent<HTMLElement> | null) => {
-    const node = event?.currentTarget ?? null;
-    const offset = node
-      ? offsetAtPoint(node, event!.clientX, event!.clientY)
+    // computeEditRange is provided by DesignerCanvas via editor-slots context;
+    // it wraps offsetAtPoint + wordRangeAt so this module never imports them.
+    const range = computeEditRange
+      ? computeEditRange(event?.currentTarget ?? null, event, header[line])
       : null;
-    const range =
-      offset === null
-        ? null
-        : event!.detail > 1
-          ? wordRangeAt(header[line], offset)
-          : { start: offset, end: offset };
     onEditLine?.(line, range);
   };
 
@@ -231,7 +227,7 @@ export function StorefrontMasthead({
 
   return (
     <div className={cn("space-y-1", compact ? "mb-2" : "mb-4")}>
-      {editing("name") ? (
+      {editing("name") && MastheadLineEditor ? (
         <MastheadLineEditor
           line="name"
           value={header.name}
@@ -262,7 +258,7 @@ export function StorefrontMasthead({
           </h2>
         )
       )}
-      {editing("bio") ? (
+      {editing("bio") && MastheadLineEditor ? (
         <MastheadLineEditor
           line="bio"
           value={header.bio}

@@ -19,7 +19,7 @@ import { placedProductIds } from "@/lib/storefront/placed-products";
 import { STOREFRONT_LIST_PATH } from "@/lib/storefront/paths";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { getTraderIdentityStatus, getSellerIdentity } from "@/lib/settings/seller-identity";
+import { getTraderIdentityStatus, getAccountSellerIdentity } from "@/lib/settings/seller-identity";
 import { storefrontDisplayName } from "@/lib/storefront/display-name";
 import type { EmbedLink } from "@/lib/storefront/embed-snippet";
 
@@ -52,7 +52,7 @@ export default async function StorefrontEmbedPage({
       : Promise.resolve({ ok: true as const, missing: [] }),
     listEmbedDomains(),
     // The trader's name, which the hosted page puts first (embedLink below).
-    account ? getSellerIdentity(account.accountId) : Promise.resolve({}),
+    account ? getAccountSellerIdentity(account.accountId) : Promise.resolve({}),
   ]);
   if (!storefront) notFound();
   // The hero draws this storefront's own products; the rest of the catalogue

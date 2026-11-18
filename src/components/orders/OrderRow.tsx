@@ -36,8 +36,9 @@ export function OrderRow({
   const t = useTranslations("Orders");
   const locale = useLocale();
   // How long it has waited, for the queue only. Null until the browser has a
-  // clock (see useNow), so the server render and hydration agree.
-  const now = useNow();
+  // clock (see useNow), so the server render and hydration agree. Only
+  // subscribe to the shared timer in the view that actually reads `now`.
+  const now = useNow(view === "to-ship");
   const waiting = view === "to-ship" && now ? formatAge(order.createdAt, locale, now) : null;
   const overdue = view === "to-ship" && now ? isOverdue(order.createdAt, now) : false;
   // A buyer who withdrew is owed their refund by this day, while it is unsent.

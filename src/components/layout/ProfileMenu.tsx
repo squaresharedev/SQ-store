@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "@/components/ui/AppLink";
-import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
   Check,
@@ -52,7 +51,6 @@ export function ProfileMenu({
   accounts: AccountOption[];
   currentAccountId: string;
 }) {
-  const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [showAccounts, setShowAccounts] = React.useState(false);
   const [showLanguages, setShowLanguages] = React.useState(false);
@@ -88,7 +86,6 @@ export function ProfileMenu({
     if (id === currentAccountId) return;
     startTransition(async () => {
       await setActiveAccount(id);
-      router.refresh();
     });
   }
 

@@ -9,7 +9,7 @@ import { usePreviewAddOns, usePreviewProduct } from "./usePreviewProduct";
 import { usePreviewReviews } from "./usePreviewReviews";
 import { isProductPageSectionShown } from "@/lib/storefront/product-page";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
-import { BadgeMoveProvider } from "@/components/product-page/BadgeDrag";
+import { BadgeDropZone, BadgeMoveProvider } from "@/components/product-page/BadgeDrag";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { useToast } from "@/components/ui/Toast";
 import { canPlaceBadge, withBadgePlacement } from "@/lib/products/badges";
@@ -171,7 +171,14 @@ export function ProductPageArtboard({
         onRefused={() => toast.error(tBadges("photoFull", { max: BADGES_ON_PHOTO_MAX }))}
         copy={badgeCopy}
       >
-        <ProductPageView page={page} mode="preview" reviews={reviews} />
+        <ProductPageView
+          page={page}
+          mode="preview"
+          reviews={reviews}
+          wrapBadges={(kind, node) => (
+            <BadgeDropZone kind={kind}>{node || null}</BadgeDropZone>
+          )}
+        />
       </BadgeMoveProvider>
     </ArtboardFrame>
   );

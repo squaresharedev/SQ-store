@@ -23,9 +23,11 @@
 // existence gate, or `can(account.role, "storefront.write")` behind an
 // active-account check).
 
+import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { shippingPolicySchema } from "@/lib/validation/shipping-policy";
 import { EMPTY_SHIPPING_POLICY, type SellerShippingPolicy } from "@/types/shipping-policy";
+import { getAccountRow } from "@/lib/settings/account-row";
 
 /** The one column a shipping policy is built from. */
 export const SHIPPING_POLICY_SELECT = "shipping_policy" as const;
@@ -60,11 +62,9 @@ export function buildShippingPolicy(row: ShippingPolicyRow | null): SellerShippi
 /**
  * One account's shipping terms, read with the service role.
  *
- * For a single-use caller (the storefront designer's page load, the product
- * form's picker). A caller already holding an admin client for other reads in
- * the same request should select `SHIPPING_POLICY_SELECT` on its own client
- * instead of spinning up a second one — see lib/products/public.ts, which
- * takes this column alongside the seller identity in one select.
+ * For a single-use caller (public pages, route handlers). Dashboard pages
+ * should call {@link getAccountShippingPolicy} instead to share the account
+ * row read that the shell has already issued.
  */
 export async function getShippingPolicy(ownerId: string): Promise<SellerShippingPolicy> {
   const admin = createAdminClient();
@@ -79,3 +79,15 @@ export async function getShippingPolicy(ownerId: string): Promise<SellerShipping
   }
   return buildShippingPolicy(data as ShippingPolicyRow | null);
 }
+
+/**
+ * The account's shipping policy, derived from the React-cached account row
+ * (getAccountRow). Use on dashboard pages where the shell has already
+ * fetched the account row; prefer {@link getShippingPolicy} for public pages
+ * and route handlers that issue their own narrow read.
+ */
+export const getAccountShippingPolicy = cache(async (accountId: string): Promise<SellerShippingPolicy> => {
+  const result = await getAccountRow(accountId);
+  if (!result.ok || !result.row) return EMPTY_SHIPPING_POLICY;
+  return buildShippingPolicy({ shipping_policy: result.row.shipping_policy });
+});

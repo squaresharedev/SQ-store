@@ -15,11 +15,15 @@ import {
 const NotificationsContext = React.createContext<UseNotifications | null>(null);
 
 export function NotificationsProvider({
+  userId,
   children,
 }: {
+  /** The signed-in user the shell was rendered for: the bell's store belongs
+   *  to them and is never handed to anyone else (lib/notifications/bell-store). */
+  userId: string;
   children: React.ReactNode;
 }) {
-  const value = useNotifications();
+  const value = useNotifications(userId);
   return (
     <NotificationsContext.Provider value={value}>
       {children}

@@ -155,7 +155,12 @@ export async function fileModerationAppeal(
         .select("status, created_at, decided_at, decision_note")
         .eq("decision_id", decision.id)
         .maybeSingle();
-      if (existing) return { ok: true, appeal: appealSummary(existing) };
+      if (existing) {
+        // Revalidate the same paths the main path would have; a duplicate
+        // submit (double-click, teammate race) must leave the page as fresh.
+        for (const path of target.paths(decision.target_id)) revalidatePath(path);
+        return { ok: true, appeal: appealSummary(existing) };
+      }
     }
     console.error("[moderation] appeal insert failed", insertError.message);
     return failure(serverError("fileAppeal"));

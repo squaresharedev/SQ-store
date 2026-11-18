@@ -5,7 +5,7 @@ import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { ProductOption, ProductOptionGroup } from "@/types/product";
-import { isStrictHexColor } from "@/lib/validation/inputs";
+import { isStrictHexColor } from "@/lib/validation/predicates";
 import { controlRadius, readableOn, subtleFill } from "./product-page-maps";
 import { PageSelect } from "./PageSelect";
 import { useOptionSelection } from "./OptionContext";

@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { ScopedIntlProvider } from "@/i18n/ScopedIntlProvider";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SettingsShell } from "@/components/settings/SettingsShell";
-import { StepUpProvider } from "@/components/auth/StepUp";
+import { StepUpProvider } from "@/components/auth/StepUpProvider";
 import { stepUpProviderProps } from "@/lib/auth/assurance";
 import { getAssurance, getProfile, requireUser } from "@/lib/auth/session";
 import { getTermsStatus } from "@/lib/legal/terms-status";
@@ -60,7 +60,7 @@ export default async function SettingsLayout({
   // those forms when that is, so the code box is on screen BEFORE they submit
   // (see components/auth/StepUp.tsx for why that matters).
   return (
-    <ScopedIntlProvider scope="app">
+    <ScopedIntlProvider scope="settings">
     <DashboardShell username={username}>
       <StepUpProvider {...stepUpProviderProps(assurance)}>
         <SettingsShell

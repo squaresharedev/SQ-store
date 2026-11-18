@@ -7,7 +7,10 @@ import {
   type StorefrontTheme,
 } from "@/types/storefront";
 import { ProductTileContent } from "@/components/storefront/ProductTileContent";
-import type { TileSpotDrag } from "@/components/storefront/TileSpotDragLayer";
+import {
+  tileSpotTokenProps,
+  type TileSpotDrag,
+} from "@/components/storefront/TileSpotDragLayer";
 
 /**
  * Dragging the title and the price ON the tile.
@@ -42,7 +45,7 @@ const theme = (over: Partial<StorefrontTheme> = {}): StorefrontTheme => ({
 });
 
 function dragBag(over: Partial<TileSpotDrag> = {}): TileSpotDrag {
-  return {
+  const bag: TileSpotDrag = {
     title: true,
     price: true,
     sale: true,
@@ -53,6 +56,17 @@ function dragBag(over: Partial<TileSpotDrag> = {}): TileSpotDrag {
     onTokenClick: vi.fn(),
     ...over,
   };
+  // Build getToken the same way BlockTile does so the test exercises the
+  // real production path. The label arrives from the caller (ProductTileContent
+  // calls useTranslations and passes it in), so this helper just builds the
+  // DOM props with whatever label the render tree provides.
+  bag.getToken ??= (token, _drop, label) => {
+    if (token === "title" && !bag.title) return null;
+    if (token === "price" && !bag.price) return null;
+    if (token === "sale" && !bag.sale) return null;
+    return tileSpotTokenProps(token, bag, label);
+  };
+  return bag;
 }
 
 function renderTile(opts: {

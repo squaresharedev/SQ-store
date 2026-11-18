@@ -84,14 +84,20 @@ export default async function AnalyticsRoutePage({
   // publishes it verbatim as machine-readable JSON, so the two cannot drift.
   const t = await getTranslations("Analytics.page");
   const account = await getActiveAccount();
-  const [snapshot, activity, billing] = await Promise.all([
+  const [snapshot, billing] = await Promise.all([
     getAnalyticsSnapshot(effective, preset),
-    getAccountActivity(),
     account ? getAccountBilling(account.accountId) : Promise.resolve(null),
   ]);
   // Which button shows: the report download, or the locked one naming the
   // plan that has it. The figures themselves are everyone's either way.
   const canExport = billing?.ok === true && planHas(billing.billing.plan, "analyticsExport");
+  // getAccountActivity checks for ANY order and ANY storefront (two reads).
+  // Most sellers have both, so it is only called when the snapshot says nothing
+  // has ever been signalled -- the only case where firstRun could be true.
+  // The same rendered output is produced either way.
+  const needsActivity =
+    snapshot.signals.available && snapshot.signals.everRecorded.length === 0;
+  const activity = needsActivity ? await getAccountActivity() : null;
   // A store that has not started: no order ever, no storefront, and no signal
   // ever recorded. Its page is one honest empty state rather than a wall of
   // zero tiles and blank charts. A storefront alone is enough to show the real
