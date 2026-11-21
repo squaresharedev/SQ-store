@@ -284,10 +284,15 @@ test.describe("add to your order", () => {
       expect(await response.json()).toMatchObject({ ok: false, error });
     };
 
-    // Another store's product, a download beside a parcel, a version not given.
+    // Another store's product, a version not given.
     await refused({ addOns: [{ productId: other.mug, optionIds: [] }] }, "add_on_unavailable");
-    await refused({ addOns: [{ productId: s.zine, optionIds: [] }] }, "add_on_unavailable");
     await refused({ addOns: [{ productId: s.coasters, optionIds: [] }] }, "add_on_unavailable");
+    // A download beside a parcel is one order now (the cart's rule: posted
+    // goods and downloads mix), and like any download it needs the buyer's
+    // consent to have it at once before anything is charged.
+    const mixed = await post({ addOns: [{ productId: s.zine, optionIds: [] }] });
+    expect(mixed.status()).toBe(400);
+    expect(await mixed.json()).toMatchObject({ ok: false, error: "consent" });
     // A price in the body is refused outright.
     expect((await post({ addOns: [{ productId: s.mug, optionIds: [], amountCents: 1 }] })).status()).toBe(400);
     // A total the buyer was not shown.
@@ -756,8 +761,12 @@ test.describe("add to your order", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     const s = await seed(page, "addon-a11y", (p) => [p.mug, p.coasters]);
     test.skip(!(await checkoutOffered(page, s)), "stack started without CHECKOUT_TEST_PAYMENTS=1");
-    const scan = async () =>
-      (await new AxeBuilder({ page }).exclude("iframe").withTags(["wcag2a", "wcag2aa"]).analyze()).violations;
+    // Past every fade first (the checkout's sticky bar fades in): axe mid-fade
+    // invents contrast failures.
+    const scan = async () => {
+      await page.waitForFunction(() => document.getAnimations().every((animation) => animation.playState !== "running"));
+      return (await new AxeBuilder({ page }).exclude("iframe").withTags(["wcag2a", "wcag2aa"]).analyze()).violations;
+    };
 
     await page.goto(productUrl(s));
     const section = page.locator("[data-product-add-ons]");
