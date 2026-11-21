@@ -761,10 +761,17 @@ test.describe("add to your order", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     const s = await seed(page, "addon-a11y", (p) => [p.mug, p.coasters]);
     test.skip(!(await checkoutOffered(page, s)), "stack started without CHECKOUT_TEST_PAYMENTS=1");
-    // Past every fade first (the checkout's sticky bar fades in): axe mid-fade
-    // invents contrast failures.
+    // Past every fade first: axe mid-fade invents contrast failures. The
+    // checkout's sticky bar starts its fade-in a moment after the page settles
+    // (it watches the pay button), so it is waited for by its own opacity.
     const scan = async () => {
-      await page.waitForFunction(() => document.getAnimations().every((animation) => animation.playState !== "running"));
+      await page.waitForFunction(
+        () =>
+          document.getAnimations().every((animation) => animation.playState !== "running") &&
+          [...document.querySelectorAll("[data-sticky-bar='shown']")].every(
+            (bar) => getComputedStyle(bar).opacity === "1",
+          ),
+      );
       return (await new AxeBuilder({ page }).exclude("iframe").withTags(["wcag2a", "wcag2aa"]).analyze()).violations;
     };
 
