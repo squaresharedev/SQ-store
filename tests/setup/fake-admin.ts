@@ -170,6 +170,15 @@ export function createFakeAdmin(tables: Record<string, Row[]> = {}) {
         });
         return chain;
       },
+      /** An array column holding at least one of `wanted` (PostgREST `ov`). */
+      overlaps(column: string, wanted: readonly unknown[]) {
+        note(`overlaps:${column}`, wanted);
+        predicates.push((row) => {
+          const held = row[column];
+          return Array.isArray(held) && wanted.some((value) => held.includes(value));
+        });
+        return chain;
+      },
       or(expression: string) {
         note("or", expression);
         const terms = expression.split(",").map(orTerm);

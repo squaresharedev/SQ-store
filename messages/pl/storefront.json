@@ -95,6 +95,7 @@
       "cards": "Kafelki produktów",
       "soldOut": "Wyprzedane",
       "productPage": "Strona produktu",
+      "cartPage": "Koszyk",
       "checkoutPage": "Kasa"
     },
     "subtitle": {
@@ -104,6 +105,7 @@
       "cards": "Witryna / Kafelki produktów",
       "soldOut": "Witryna / Wyprzedane",
       "productPage": "Witryna / Strona produktu",
+      "cartPage": "Witryna / Koszyk",
       "checkoutPage": "Witryna / Kasa",
       "blocks": "Witryna / Bloki"
     },
@@ -1547,5 +1549,29 @@
         "keys": "Przytrzymaj <kbd>Spację</kbd> i przeciągnij"
       }
     }
+  },
+  "cartPage": {
+    "on": "Koszyk",
+    "onHint": "Kupujący zbierają produkty i płacą za jednym razem. Kup teraz pozostaje.",
+    "mainButton": {
+      "label": "Główny przycisk",
+      "buyNow": "Kup teraz",
+      "addToCart": "Dodaj do koszyka"
+    },
+    "afterAdd": {
+      "label": "Po dodaniu",
+      "openCart": "Otwórz koszyk",
+      "note": "Pokaż notatkę"
+    },
+    "quickAdd": "Dodawanie z kart",
+    "quickAddHint": "Przycisk na karcie od razu dodaje produkt do koszyka, gdy nie ma wersji do wyboru.",
+    "addLabel": "Tekst przycisku",
+    "title": "Nagłówek koszyka",
+    "note": "Notatka w koszyku",
+    "notePlaceholder": "Zamówienia wysyłamy w poniedziałki",
+    "deliveryBar": "Postęp darmowej dostawy",
+    "deliveryBarHint": "Pokazuje się, gdy dostawa jest bezpłatna od określonej kwoty.",
+    "suggestions": "Pasuje do tego",
+    "suggestionsHint": "Pod koszykiem: to, co wybrano w Dodaj do swojego zamówienia przy produktach w nim."
   }
 }

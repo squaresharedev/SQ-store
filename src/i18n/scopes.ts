@@ -78,6 +78,8 @@ const APP_CHROME = [
   "Products.metadata",
   // lib/storefront/setting-ref.ts pulled in transitively via ActiveTour chain
   "Storefront.settings",
+  // ...whose cart entries are named by the Cart panel's own labels
+  "Storefront.cartPage",
   // lib/auth/actions.ts + lib/auth/signup.ts in shell closure
   "Auth.success",
   // lib/security/events.ts in shell closure
@@ -402,9 +404,11 @@ export const CLIENT_SCOPES = {
     "Storefront",
     // SellerDetailsNotice.tsx uses Settings.sellerDetails.* beyond just .fields
     "Settings.sellerDetails",
-    // ProductTileContent.tsx uses ProductPage.sale and ProductPage.addOns
+    // ProductTileContent.tsx uses ProductPage.sale and ProductPage.addOns,
+    // and ProductPage.cart for a card that adds to the cart
     "ProductPage.sale",
     "ProductPage.addOns",
+    "ProductPage.cart",
     // lib/shipping/policy-prose.ts in closure via product tile shipping info
     "ProductPage.shippingProse",
     // ProductCard, FormSectionNav, form-datapoints, price.ts, DecisionActions, etc.

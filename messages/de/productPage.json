@@ -282,6 +282,8 @@
       "nameLabel": "Angezeigter Name",
       "nameHelp": "Wird mit deiner Bewertung angezeigt. Deine E-Mail-Adresse und deine Bestellung bleiben privat.",
       "send": "Bewertung veröffentlichen",
+      "pickLegend": "Wähle, was du bewerten möchtest",
+      "reviewed": "Bewertet",
       "errors": {
         "notEligible": "Diese Bestellung kann nicht mehr bewertet werden.",
         "rateLimited": "Zu viele Bewertungen von dieser Verbindung. Versuch es in einer Stunde noch einmal.",
@@ -412,7 +414,8 @@
       "discount_invalid": "Dieser Rabattcode kann nicht mehr verwendet werden. Entferne ihn, um den vollen Preis zu zahlen.",
       "price_changed": "Der Preis hat sich geändert, während diese Seite geöffnet war, daher wurde nichts berechnet. Prüfe den neuen Gesamtbetrag und zahle dann.",
       "turnstile": "Die Sicherheitsprüfung wurde nicht abgeschlossen, daher wurde nichts belastet. Sie läuft jetzt erneut: Warte einen Moment und versuche es dann noch einmal.",
-      "add_on_unavailable": "Etwas, das du hinzugefügt hast, kann mit dieser Bestellung nicht mehr verkauft werden, daher wurde nichts berechnet. Überprüfe deine Bestellung und den neuen Gesamtbetrag und bezahle dann."
+      "add_on_unavailable": "Etwas, das du hinzugefügt hast, kann mit dieser Bestellung nicht mehr verkauft werden, daher wurde nichts berechnet. Überprüfe deine Bestellung und den neuen Gesamtbetrag und bezahle dann.",
+      "currency": "Bei einer Bestellung kann nur eine Währung akzeptiert werden, daher wurde nichts belastet. Prüfe deinen Warenkorb und bezahle dann."
     },
     "editHeadline": "Überschrift der Kasse",
     "discount": {
@@ -494,6 +497,62 @@
       "takenDown": "Entfernt",
       "otherKind": "Andere Art",
       "otherCurrency": "Andere Währung"
+    }
+  },
+  "cart": {
+    "title": "Dein Warenkorb",
+    "button": "Warenkorb, {count, plural, =0 {leer} one {# Artikel} other {# Artikel}}",
+    "add": "In den Warenkorb",
+    "addShort": "Hinzufügen",
+    "addTitle": "{title} in den Warenkorb legen",
+    "adding": "Wird hinzugefügt",
+    "added": "Hinzugefügt",
+    "addedNote": "In deinen Warenkorb gelegt",
+    "choose": "Auswählen",
+    "view": "Warenkorb ansehen",
+    "checkout": "Zur Kasse",
+    "keepShopping": "Weiter einkaufen",
+    "empty": "Dein Warenkorb ist leer",
+    "subtotal": "Zwischensumme",
+    "delivery": "Versand",
+    "deliveryTo": "Versand nach {area}",
+    "free": "Kostenlos",
+    "atCheckout": "An der Kasse",
+    "freeGap": "Noch {amount} bis zum kostenlosen Versand",
+    "freeReached": "Versand ist kostenlos",
+    "gone": "Wird hier nicht mehr verkauft",
+    "quantity": "Menge von {title}",
+    "fewer": "Ein weniger von {title}",
+    "more": "Ein mehr von {title}",
+    "remove": "{title} entfernen",
+    "removed": "{title} aus deinem Warenkorb entfernt.",
+    "undo": "Rückgängig",
+    "addedAnnounce": "{title} hinzugefügt. {count, plural, one {# Artikel} other {# Artikel}} in deinem Warenkorb.",
+    "busy": "Dein Warenkorb konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "suggestionsTitle": "Passt dazu",
+    "problem": {
+      "not_found": "Wird hier nicht mehr verkauft. Entferne es, um zur Kasse zu gehen.",
+      "sold_out": "Ausverkauft. Entferne es, um zur Kasse zu gehen.",
+      "options": "Diese Version ist nicht verfügbar. Entferne es, um zur Kasse zu gehen.",
+      "quantity": "Das ist mehr als eine Bestellung enthalten kann. Reduziere die Menge.",
+      "insufficient_stock": "Nicht so viele auf Lager. Reduziere die Menge.",
+      "currency": "In einer anderen Währung bepreist als der Rest deines Warenkorbs.",
+      "no_shipping_rates": "Kann gerade nicht geliefert werden."
+    },
+    "refusal": {
+      "not_found": "Das kann gerade nicht hinzugefügt werden.",
+      "sold_out": "Ausverkauft.",
+      "options": "Wähle zuerst eine Version.",
+      "quantity": "Das ist mehr als eine Bestellung enthalten kann.",
+      "insufficient_stock": "Nicht so viele auf Lager.",
+      "currency": "Das ist in einer anderen Währung bepreist als dein Warenkorb. Gehe zuerst zur Kasse oder leere deinen Warenkorb.",
+      "no_shipping_rates": "Das kann gerade nicht geliefert werden.",
+      "full": "Dein Warenkorb ist voll. Gehe zuerst zur Kasse.",
+      "unavailable": "Der Warenkorb ist gerade nicht verfügbar.",
+      "gone": "Dein Warenkorb ist abgelaufen. Versuche es erneut.",
+      "invalid": "Das hat nicht funktioniert. Versuche es erneut.",
+      "rate_limited": "Zu viele Änderungen auf einmal. Warte kurz und versuche es dann erneut."
     }
   }
 }

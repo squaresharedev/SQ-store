@@ -16,7 +16,7 @@ import type {
   TextRange,
 } from "./InlineTextEditor";
 import { ImageTileContent } from "./ImageTileContent";
-import { ProductTileContent } from "./ProductTileContent";
+import { ProductTileContent, type TileQuickAddAction } from "./ProductTileContent";
 import { ShapeTileContent } from "./ShapeTileContent";
 import { TextTileContent } from "./TextTileContent";
 import type { TileSpotDrag } from "./TileSpotDragLayer";
@@ -46,6 +46,7 @@ export function BlockFace({
   spotDrag,
   look,
   hover,
+  quickAddAction,
   onTextChange,
   onToggleBlockFormat,
   onTextRangeChange,
@@ -71,6 +72,9 @@ export function BlockFace({
    *  what plays this one's hover effects (see ProductTileContent). */
   look?: TileLook;
   hover?: CardHoverTrigger;
+  /** Product blocks on a buyer's board: the card's "Add to cart" (see
+   *  ProductTileContent). */
+  quickAddAction?: TileQuickAddAction;
   /** Text and the spans that format parts of it, always together. */
   onTextChange?: (text: string, spans: TextSpan[], source: TextEditSource) => void;
   /** Ctrl+B / I / U with nothing selected: the whole block. */
@@ -117,6 +121,7 @@ export function BlockFace({
         spotDrag={spotDrag}
         look={look}
         hover={hover}
+        quickAddAction={quickAddAction}
       />
     );
   }

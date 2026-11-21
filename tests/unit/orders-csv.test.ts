@@ -142,8 +142,8 @@ describe("ordersCsv", () => {
     const [, line] = ordersCsv([
       row({
         addOns: [
-          { productTitle: "Mug", selection: [{ label: "Size", value: "Large" }], quantity: 1, amountCents: 1200 },
-          { productTitle: "Coasters", selection: [], quantity: 2, amountCents: 3600 },
+          { id: "l1", refunded: false, productTitle: "Mug", selection: [{ label: "Size", value: "Large" }], quantity: 1, amountCents: 1200 },
+          { id: "l2", refunded: false, productTitle: "Coasters", selection: [], quantity: 2, amountCents: 3600 },
         ],
       }),
     ])

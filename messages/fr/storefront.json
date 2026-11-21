@@ -95,6 +95,7 @@
       "cards": "Vignettes produit",
       "soldOut": "Épuisé",
       "productPage": "Page produit",
+      "cartPage": "Panier",
       "checkoutPage": "Paiement"
     },
     "subtitle": {
@@ -104,6 +105,7 @@
       "cards": "Vitrine / Vignettes produit",
       "soldOut": "Vitrine / Épuisé",
       "productPage": "Vitrine / Page produit",
+      "cartPage": "Vitrine / Panier",
       "checkoutPage": "Vitrine / Paiement",
       "blocks": "Vitrine / Blocs"
     },
@@ -1547,5 +1549,29 @@
         "keys": "Maintenez <kbd>Espace</kbd> et faites glisser"
       }
     }
+  },
+  "cartPage": {
+    "on": "Panier",
+    "onHint": "Les acheteurs ajoutent des produits et paient en une fois. Acheter reste disponible.",
+    "mainButton": {
+      "label": "Bouton principal",
+      "buyNow": "Acheter",
+      "addToCart": "Ajouter au panier"
+    },
+    "afterAdd": {
+      "label": "Après ajout",
+      "openCart": "Ouvrir le panier",
+      "note": "Afficher une note"
+    },
+    "quickAdd": "Ajouter depuis les cartes",
+    "quickAddHint": "Le bouton d'une carte met le produit directement dans le panier quand il n'y a pas de version à choisir.",
+    "addLabel": "Texte du bouton",
+    "title": "Titre du panier",
+    "note": "Note dans le panier",
+    "notePlaceholder": "Les commandes sont expédiées le lundi",
+    "deliveryBar": "Progression livraison gratuite",
+    "deliveryBarHint": "Affiché quand votre livraison est gratuite à partir d'un montant.",
+    "suggestions": "Va bien avec",
+    "suggestionsHint": "Sous le panier : ce que vous avez choisi dans Ajouter à votre commande pour ses produits."
   }
 }

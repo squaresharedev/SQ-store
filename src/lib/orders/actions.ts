@@ -26,7 +26,7 @@ import { orderLinkUrl } from "@/lib/orders/order-link";
 import { getSellerIdentity } from "@/lib/settings/seller-identity";
 import { StripeApiError, stripeRequest, type StripeRefund } from "@/lib/billing/stripe-api";
 import { readPaymentAccount } from "@/lib/payments/connect/account";
-import { reverseOrderFees } from "@/lib/billing/fee-ledger";
+import { reverseOrderFees, reverseOrderFeesShare } from "@/lib/billing/fee-ledger";
 import { ORDERS_PATH, OVERVIEW_PATH } from "@/lib/dashboard/paths";
 import { DEFAULT_LOCALE, parseLocale } from "@/i18n/locales";
 import { msg } from "@/i18n/types";
@@ -264,40 +264,18 @@ export async function refundOrder(
   const preRow = preCheck as unknown as { id: string; status: string; payment_ref: string | null };
   if (preRow.status !== "paid") return failure(NOT_REFUNDABLE);
   const paymentRef = preRow.payment_ref;
-  const paidThroughProvider = isProviderPayment(paymentRef);
 
-  // THE MONEY FIRST. An order a payment provider took the money for is
-  // refunded WITH that provider, and recorded only when that succeeded: a row
-  // saying "refunded" over money that never went back is the one outcome a
-  // buyer cannot be left with.
-  if (!(await refundWithProvider(paymentRef, account.accountId, id.data))) {
-    return failure(REFUND_REFUSED);
-  }
-
-  // Recorded by the service role once the provider has refunded it: the
-  // client-callable order_refund refuses an order a provider charged, so a
-  // seller calling it directly can never mark one refunded over money that
-  // stayed put (20261021_order_refund_provider_first). Who may refund, and
-  // that this is an order of THIS store, was settled above.
-  const refundArgs = {
-    p_order_id: id.data,
-    p_reason: why.data,
-    p_restock: restock === true,
-  };
-  const { data, error } = paidThroughProvider
-    ? await createAdminClient().rpc("order_apply_refund", refundArgs)
-    : await supabase.rpc("order_refund", refundArgs);
-  if (error) {
-    console.error("[orders] order_refund failed", error.message);
-    return failure(serverError("refundOrder"));
-  }
-  const outcome = data as RefundOutcome;
-  if (outcome === "not_found") return failure(notFound("order"));
-  if (outcome === "not_refundable") return failure(NOT_REFUNDABLE);
-  // Our fee goes back with the sale. A provider's payment reports that itself
-  // (the webhook writes it from Stripe's own figures); an order no provider
-  // charged has nobody else to say so.
-  if (!paidThroughProvider) await reverseOrderFees(id.data);
+  const settled = await refundWhatIsLeft(supabase, {
+    orderId: id.data,
+    reason: why.data,
+    restock: restock === true,
+    paymentRef,
+    accountId: account.accountId,
+  });
+  if (settled === "refused") return failure(REFUND_REFUSED);
+  if (settled === "error") return failure(serverError("refundOrder"));
+  if (settled === "not_found") return failure(notFound("order"));
+  if (settled === "not_refundable") return failure(NOT_REFUNDABLE);
 
   // Combined post-RPC read: order view + email fields in one round-trip.
   const postRpc = await getOrderByIdWithEmailFields(id.data, account);
@@ -308,6 +286,160 @@ export async function refundOrder(
   revalidatePath(ORDERS_PATH);
   revalidatePath(OVERVIEW_PATH);
   return { ok: true, order, buyerEmailed };
+}
+
+/**
+ * Refund ONE line of an order (a cart's order holds several products, and "one
+ * arrived broken" is a refund of that line). `lineId` is the line's
+ * order_add_ons id, or null for the order's own first line. The same rules as
+ * refundOrder: the store's owner only, rate limited, the money back through
+ * the provider FIRST (a partial refund of exactly this line, keyed on it so a
+ * retry cannot refund twice) and recorded only when that succeeded. What the
+ * line gives back is the database's answer (order_line_refund_amount): its
+ * own amount, and everything left (delivery too) when it is the last line
+ * standing, so refunding every line gives back everything that was paid.
+ */
+export async function refundOrderLine(
+  orderId: string,
+  lineId: string | null,
+  reason: RefundReason,
+  restock: boolean,
+): Promise<RefundOrderResult> {
+  const account = await getActiveAccount();
+  if (!account) return failure(sessionExpired());
+  if (!can(account.role, "orders.refund")) {
+    return failure(permissionDenied(account.role, "refundOrders"));
+  }
+  if (!(await rateLimit("order_refund", RATE_LIMITS.orderRefund))) {
+    return failure(rateLimited("refundOrders"));
+  }
+
+  const id = uuidField().safeParse(orderId);
+  if (!id.success) return failure(notFound("order"));
+  const line = lineId === null ? null : uuidField().safeParse(lineId);
+  if (line && !line.success) return failure(notFound("order"));
+  const lineKey = line ? line.data : null;
+  const why = refundReasonSchema.safeParse(reason);
+  if (!why.success) return failure(NOT_REFUNDABLE);
+
+  // Scope (this store's order, read through the seller's own session and its
+  // two-factor rule), status and how it was paid, in one read.
+  const supabase = await createClient();
+  const { data: preCheck, error: preErr } = await supabase
+    .from("orders")
+    .select("id, status, payment_ref, amount_cents")
+    .eq("seller_id", account.accountId)
+    .eq("id", id.data)
+    .maybeSingle();
+  if (preErr || !preCheck) return failure(notFound("order"));
+  const preRow = preCheck as unknown as { status: string; payment_ref: string | null; amount_cents: number };
+  if (preRow.status !== "paid") return failure(NOT_REFUNDABLE);
+  const paymentRef = preRow.payment_ref;
+  const paidThroughProvider = isProviderPayment(paymentRef);
+
+  const admin = createAdminClient();
+  const { data: owed, error: owedError } = await admin.rpc("order_line_refund_amount", {
+    p_order_id: id.data,
+    p_line_id: lineKey,
+  });
+  if (owedError) {
+    console.error("[orders] order_line_refund_amount failed", owedError.message);
+    return failure(serverError("refundOrder"));
+  }
+  if (typeof owed !== "number") return failure(NOT_REFUNDABLE);
+
+  // THE MONEY FIRST, exactly this line's.
+  if (
+    owed > 0 &&
+    !(await refundWithProvider(paymentRef, account.accountId, id.data, { amountCents: owed, lineKey: lineKey ?? "first" }))
+  ) {
+    return failure(REFUND_REFUSED);
+  }
+
+  const { data, error } = await admin.rpc("order_apply_line_refund", {
+    p_order_id: id.data,
+    p_line_id: lineKey,
+    p_reason: why.data,
+    p_restock: restock === true,
+    p_amount_cents: owed,
+  });
+  if (error) {
+    console.error("[orders] order_apply_line_refund failed", error.message);
+    return failure(serverError("refundOrder"));
+  }
+  let outcome = data as "line_refunded" | "refunded" | "rest" | "already" | "not_found" | "not_refundable";
+  if (outcome === "not_found") return failure(notFound("order"));
+  if (outcome === "not_refundable" || outcome === "already") return failure(NOT_REFUNDABLE);
+
+  if (outcome === "rest") {
+    // Every line is back but not all the money: another line was refunded at
+    // the same moment, so neither took the delivery. What is left goes back as
+    // the whole order's refund (which also gives back our fee).
+    const settled = await refundWhatIsLeft(supabase, {
+      orderId: id.data,
+      reason: why.data,
+      restock: false,
+      paymentRef,
+      accountId: account.accountId,
+    });
+    if (settled === "refused") return failure(REFUND_REFUSED);
+    if (settled === "error") return failure(serverError("refundOrder"));
+    if (settled !== "refunded") return failure(NOT_REFUNDABLE);
+    outcome = "refunded";
+  } else if (!paidThroughProvider) {
+    // Our fee on this part goes back with it. A provider's payment reports
+    // that itself (the webhook writes it from Stripe's own figures).
+    if (outcome === "refunded") await reverseOrderFees(id.data);
+    else await reverseOrderFeesShare(id.data, { refundedCents: owed, orderCents: preRow.amount_cents, key: lineKey ?? "first" });
+  }
+
+  const postRpc = await getOrderByIdWithEmailFields(id.data, account);
+  if (!postRpc) return failure(notFound("order"));
+  const { order, email } = postRpc;
+  // The buyer hears once the whole order is refunded (the refund email says
+  // the order was). A single line's refund shows on their order page.
+  const buyerEmailed = outcome === "refunded" ? await emailBuyerRefund(account, order, email, paymentRef) : false;
+
+  revalidatePath(ORDERS_PATH);
+  revalidatePath(OVERVIEW_PATH);
+  return { ok: true, order, buyerEmailed };
+}
+
+/**
+ * Give back whatever of an order's payment is left, then record the whole order
+ * refunded: refundOrder's job, and the end of refundOrderLine when two lines
+ * refunded at once left the delivery behind.
+ *
+ * THE MONEY FIRST. An order a payment provider took the money for is refunded
+ * WITH that provider, and recorded only when that succeeded: a row saying
+ * "refunded" over money that never went back is the one outcome a buyer cannot
+ * be left with. Recorded by the service role then: the client-callable
+ * order_refund refuses an order a provider charged, so a seller calling it
+ * directly can never mark one refunded over money that stayed put
+ * (20261021_order_refund_provider_first). Who may refund, and that this is an
+ * order of THIS store, is the caller's pre-check.
+ */
+async function refundWhatIsLeft(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  refund: { orderId: string; reason: RefundReason; restock: boolean; paymentRef: string | null; accountId: string },
+): Promise<RefundOutcome | "refused" | "error"> {
+  const paidThroughProvider = isProviderPayment(refund.paymentRef);
+  if (!(await refundWithProvider(refund.paymentRef, refund.accountId, refund.orderId))) return "refused";
+
+  const refundArgs = { p_order_id: refund.orderId, p_reason: refund.reason, p_restock: refund.restock };
+  const { data, error } = paidThroughProvider
+    ? await createAdminClient().rpc("order_apply_refund", refundArgs)
+    : await supabase.rpc("order_refund", refundArgs);
+  if (error) {
+    console.error("[orders] order_refund failed", error.message);
+    return "error";
+  }
+  const outcome = data as RefundOutcome;
+  // Our fee goes back with the sale. A provider's payment reports that itself
+  // (the webhook writes it from Stripe's own figures); an order no provider
+  // charged has nobody else to say so.
+  if (outcome === "refunded" && !paidThroughProvider) await reverseOrderFees(refund.orderId);
+  return outcome;
 }
 
 /**
@@ -328,6 +460,9 @@ async function refundWithProvider(
   paymentRef: string | null,
   accountId: string,
   orderId: string,
+  /** One line of the order: how much, and which line (for the idempotency
+   *  key). Absent = whatever of the payment is left. */
+  part?: { amountCents: number; lineKey: string },
 ): Promise<boolean> {
   // Anything but a provider's payment was never charged by one.
   if (!paymentRef || !isProviderPayment(paymentRef)) return true;
@@ -341,8 +476,16 @@ async function refundWithProvider(
     await stripeRequest<StripeRefund>(
       "POST",
       "/refunds",
-      { payment_intent: paymentRef, refund_application_fee: true },
-      { account: paymentAccount.stripeAccountId, idempotencyKey: `refund_${orderId}` },
+      {
+        payment_intent: paymentRef,
+        // Our fee goes back in proportion with the part (Stripe works it out).
+        refund_application_fee: true,
+        ...(part ? { amount: part.amountCents } : {}),
+      },
+      {
+        account: paymentAccount.stripeAccountId,
+        idempotencyKey: part ? `refund_${orderId}_${part.lineKey}` : `refund_${orderId}`,
+      },
     );
     return true;
   } catch (failed) {

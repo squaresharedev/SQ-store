@@ -79,6 +79,11 @@ export interface Product {
   hoverImageUrl?: string;
   rating?: ProductRating;
   stockState?: TileStockState;
+  /** The version a storefront card puts straight in the cart, where it can
+   *  (lib/cart/quick-add.ts): set by the buyer's board from its tile, and by
+   *  the designer's product list, so both draw the same card. Absent: the
+   *  card opens the product's page. */
+  quickAdd?: { optionIds: string[] };
 }
 
 /**

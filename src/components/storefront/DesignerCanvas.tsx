@@ -8,6 +8,7 @@ import type { Product } from "@/types/product";
 import type { PagePhotoView } from "@/types/product-page";
 import { pagePhotoView } from "@/lib/storefront/product-page";
 import { resolveTileLook } from "@/lib/storefront/tile-look";
+import { CART_SWITCHED_OFF } from "@/lib/storefront/cart-page";
 import {
   CANVAS_ROWS_MAX,
   blockKey,
@@ -17,6 +18,7 @@ import {
   type HeaderLine,
   type ImagePlacement,
   type PagePhoto,
+  type CartPageConfig,
   type CheckoutPageConfig,
   type ProductPageConfig,
   type StorefrontBlock,
@@ -219,6 +221,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   storefrontName = "",
   productPage,
   checkoutPage,
+  cartPage,
   onCheckoutPageChange,
   celebrationPlays = 0,
   shippingPolicy = {},
@@ -345,6 +348,8 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   productPage?: ProductPageConfig;
   /** The checkout's design. Absent leaves the checkout artboards unrendered. */
   checkoutPage?: CheckoutPageConfig;
+  /** The cart's design: its buttons and its cart button on the page artboards. */
+  cartPage?: CartPageConfig;
   /** The checkout's words, typed straight onto its artboards. */
   onCheckoutPageChange?: (next: CheckoutPageConfig) => void;
   /** Bumped by the panel's "Play it": replays the thank-you celebration. */
@@ -701,7 +706,12 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   const covers = useMemo(() => tileCovers(theme, blocks), [theme, blocks]);
   // What the cards borrow from the product page (its button, its stars),
   // once per board and kept stable so the memoised tiles do not re-render.
-  const tileLook = useMemo(() => resolveTileLook({ theme, productPage }), [theme, productPage]);
+  // Cards add to the cart as the cart's own options say; with no cart here
+  // (none passed: not launched, or a gallery) they open the page.
+  const tileLook = useMemo(
+    () => resolveTileLook({ theme, productPage, cartPage: cartPage ?? CART_SWITCHED_OFF }),
+    [theme, productPage, cartPage],
+  );
 
   // Whether this board is arranged in a way a straight line cannot express.
   // Cheap enough to run per render on a 120-block board, and it has to follow
@@ -823,6 +833,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             theme={theme}
             header={header}
             productPage={productPage}
+            cartPage={cartPage}
             shippingPolicy={shippingPolicy}
             seller={seller}
             backgroundImageUrl={backgroundImageUrl}

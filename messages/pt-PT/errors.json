@@ -102,6 +102,7 @@
     "refundOrders": "Demasiados reembolsos em pouco tempo.",
     "connectPayments": "Demasiadas tentativas de ligação ao Stripe em pouco tempo.",
     "readCheckoutSettings": "Demasiadas tentativas de ler as definições de pagamento num curto espaço de tempo.",
+    "readCartSettings": "Demasiadas tentativas de ler as definições do carrinho num curto espaço de tempo.",
     "changePlan": "Demasiadas alterações de plano iniciadas num curto espaço de tempo.",
     "saveDiscounts": "Demasiadas alterações de descontos num curto espaço de tempo.",
     "moderateReviews": "Demasiadas alterações a avaliações em pouco tempo.",
@@ -139,6 +140,8 @@
     "connectPayments": "Não foi possível abrir o Stripe devido a um problema do nosso lado.",
     "loadCheckoutSettings": "Não foi possível carregar as definições de pagamento devido a um problema do nosso lado.",
     "saveCheckoutSettings": "Não foi possível guardar as definições de pagamento devido a um problema do nosso lado.",
+    "loadCartSettings": "Não foi possível carregar as definições do carrinho devido a um problema do nosso lado.",
+    "saveCartSettings": "Não foi possível guardar as definições do carrinho devido a um problema do nosso lado.",
     "loadPlans": "Não foi possível carregar o seu plano devido a um problema da nossa parte.",
     "startCheckout": "Não foi possível abrir a finalização de compra devido a um problema da nossa parte.",
     "openBillingPortal": "Não foi possível abrir os dados de faturação devido a um problema da nossa parte.",
@@ -667,6 +670,11 @@
   "checkoutPageApi": {
     "notObjectFix": "Envie um objeto JSON, p. ex. '{'\"layout\": \"compact\"'}'.",
     "invalid": "Essas definições de pagamento não são válidas.",
+    "invalidFix": "Verifique o campo indicado acima em relação a `limits`, obtido através de um GET a este URL, e tente novamente."
+  },
+  "cartPageApi": {
+    "notObjectFix": "Envie um objeto JSON, p. ex. '{'\"quickAdd\": false'}'.",
+    "invalid": "Essas definições do carrinho não são válidas.",
     "invalidFix": "Verifique o campo indicado acima em relação a `limits`, obtido através de um GET a este URL, e tente novamente."
   },
   "billing": {

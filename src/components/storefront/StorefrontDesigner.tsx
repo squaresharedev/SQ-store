@@ -45,6 +45,7 @@ import {
   type TextSpan,
   DEFAULT_PRODUCT_PAGE_CONFIG,
   type ProductPageConfig,
+  type CartPageConfig,
   type CheckoutPageConfig,
   type StorefrontSeller,
 } from "@/types/storefront";
@@ -52,6 +53,7 @@ import { LAYER_OPS, moveLayerTo, type LayerOp } from "@/lib/storefront/layers";
 import { pinOnPhone, unpinnedOnPhone, withPhoneColumns } from "@/lib/storefront/mobile-layout";
 import { isDefaultProductPage } from "@/lib/storefront/product-page";
 import { isDefaultCheckoutPage, resolveCheckoutPage } from "@/lib/storefront/checkout-page";
+import { isDefaultCartPage, resolveCartPage } from "@/lib/storefront/cart-page";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { applyFormatToRange } from "@/lib/storefront/text-spans";
 import { isDefaultPlacement } from "@/lib/images/placement";
@@ -185,6 +187,7 @@ type EditorSnapshot = {
   blocks: StorefrontBlock[];
   productPage: ProductPageConfig;
   checkoutPage: CheckoutPageConfig;
+  cartPage: CartPageConfig;
   // NO `policies` OR `shippingProfiles` HERE either, for the same reason as
   // `seller`: shipping and returns terms are account-level and read-only in
   // this editor, so there is nothing about them to undo.
@@ -394,7 +397,14 @@ export function StorefrontDesigner({
   publicPagePath = null,
   sellerDetailsMissing = false,
   initialVersion = null,
+  cartOffered = false,
 }: {
+  /** Whether buyers can have a cart at all yet (lib/cart/availability.ts
+   *  cartLaunched). Until then the designer shows none of it: no Cart group,
+   *  no cart buttons on the page artboards, cards that open the page. Absent
+   *  counts as not yet, so a surface that forgets it cannot preview a cart
+   *  buyers will not get. */
+  cartOffered?: boolean;
   /**
    * Set when this is the SAMPLE storefront (lib/storefront/sample.ts), never a
    * row: nothing saves, nothing uploads, no product is edited, the header offers
@@ -528,6 +538,8 @@ export function StorefrontDesigner({
   const [checkoutPage, setCheckoutPage] = useState<CheckoutPageConfig>(() =>
     resolveCheckoutPage(initialConfig),
   );
+  // The cart's design, the same way.
+  const [cartPage, setCartPage] = useState<CartPageConfig>(() => resolveCartPage(initialConfig));
   // Bumped by the panel's "Play it" to replay the thank-you celebration.
   const [celebrationPlays, setCelebrationPlays] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -679,8 +691,8 @@ export function StorefrontDesigner({
   // collapse to a single row each that opens the flow, so the same words still
   // answer and what they answer with is the step that has to come first anyway.
   const editorSearchEntries = useMemo(
-    () => editorEntries(blocks, productsById, tKey, { pageOpen, checkoutOpen: pageOpen }),
-    [blocks, productsById, tKey, pageOpen],
+    () => editorEntries(blocks, productsById, tKey, { pageOpen, checkoutOpen: pageOpen, cartOffered }),
+    [blocks, productsById, tKey, pageOpen, cartOffered],
   );
   const usedProductIds = useMemo(
     () =>
@@ -884,6 +896,7 @@ export function StorefrontDesigner({
     blocks,
     productPage,
     checkoutPage,
+    cartPage,
   });
 
   /** Every undoable mutation calls this FIRST with an optional coalesce key. */
@@ -898,6 +911,7 @@ export function StorefrontDesigner({
     setBlocks(next.blocks);
     setProductPage(next.productPage);
     setCheckoutPage(next.checkoutPage);
+    setCartPage(next.cartPage);
     markDirty();
   }
 
@@ -3659,6 +3673,11 @@ export function StorefrontDesigner({
     setCheckoutPage(next);
   }
 
+  function updateCartPage(next: CartPageConfig) {
+    recordChange(`cartPage:${changedField(cartPage, next)}`);
+    setCartPage(next);
+  }
+
 
   function updateName(next: string) {
     markDirty();
@@ -3786,6 +3805,9 @@ export function StorefrontDesigner({
       ...(initialConfig.checkoutPage || !isDefaultCheckoutPage(checkoutPage)
         ? { checkoutPage }
         : {}),
+      // The cart's design: sent once it was ever stored or moved off the
+      // defaults (every member optional, so the defaults are an empty one).
+      ...(initialConfig.cartPage || !isDefaultCartPage(cartPage) ? { cartPage } : {}),
     };
     // SF-01: Warn when any block in the grid points at a draft product.
     // Draft products are hidden from buyers, so a grid tile that points at one
@@ -4407,6 +4429,7 @@ export function StorefrontDesigner({
             storefrontName={name}
             productPage={productPage}
             checkoutPage={checkoutPage}
+            cartPage={cartOffered ? cartPage : undefined}
             onCheckoutPageChange={onCheckoutPageChange}
             celebrationPlays={celebrationPlays}
             shippingPolicy={shippingPolicy}
@@ -4529,6 +4552,9 @@ export function StorefrontDesigner({
               onProductPageChange={updateProductPage}
               checkoutPage={checkoutPage}
               onCheckoutPageChange={updateCheckoutPage}
+              cartPage={cartPage}
+              onCartPageChange={updateCartPage}
+              cartOffered={cartOffered}
               pagePhotoUrls={pagePhotoUrls}
               onPagePhotoUrl={(key, url) => setPagePhotoUrls((current) => ({ ...current, [key]: url }))}
               onPlayCelebration={() => setCelebrationPlays((count) => count + 1)}

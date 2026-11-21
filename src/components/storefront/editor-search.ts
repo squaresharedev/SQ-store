@@ -335,15 +335,19 @@ export function editorEntries(
   blocks: readonly StorefrontBlock[],
   productsById: ReadonlyMap<string, Product>,
   t: KeyTranslator,
-  options: { pageOpen?: boolean; checkoutOpen?: boolean } = {},
+  options: { pageOpen?: boolean; checkoutOpen?: boolean; cartOffered?: boolean } = {},
 ): EditorSearchEntry[] {
   const rows = staticRows(t);
+  // The cart's settings only once buyers can have a cart (absent: offered).
+  const offered = (row: EditorSearchEntry) =>
+    options.cartOffered !== false ||
+    !(row.payload.kind === "setting" && row.payload.ref.kind === "group" && row.payload.ref.group === "cartPage");
   // A block's own setting only while the board holds a block that has it:
   // "line height" with no text on the board has nothing to open.
   const kinds = new Set<string>(blocks.map((block) => block.type));
   return [
     ...canvasEntries(blocks, productsById, t),
-    ...rows.settings,
+    ...rows.settings.filter(offered),
     ...rows.blockSettings.filter(
       (row) =>
         row.payload.kind === "setting" &&

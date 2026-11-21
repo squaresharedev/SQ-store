@@ -150,6 +150,11 @@ export function OrderStatusView({
   const current = steps.findIndex((step) => !step.done);
   const asksForReview =
     (order.review === "open" || order.review === "done") && isProductPageSectionShown(productPage, "reviews");
+  // A product to review: the first line's, or (a cart's order) any of them.
+  const reviewable = order.productId !== null || (order.reviewItems?.length ?? 0) > 0;
+  // Each line's own file: a cart can pair a download with a parcel.
+  const firstDownload = order.hasDownload ?? order.isDigital;
+  const lineDownloads = addOns.filter((line) => line.download ?? order.isDigital);
 
   return (
     <PageShell
@@ -263,6 +268,7 @@ export function OrderStatusView({
           )}
           <div className="flex min-w-0 flex-1 flex-col gap-1.5">
             <p className="font-semibold leading-tight">{order.productTitle}</p>
+            {order.firstLineRefunded && <RefundedMark />}
             {/* The words the order was sold in, verbatim (never re-read from
                 the product, which may have changed since), as chips. */}
             <VersionChips chips={order.selection} ink={theme.ink} cornerRadius={theme.cornerRadius} />
@@ -307,6 +313,7 @@ export function OrderStatusView({
                       {line.quantity > 1 ? t("lineQuantity", { quantity: line.quantity, title: line.productTitle }) : line.productTitle}
                     </p>
                     <VersionChips chips={line.selection} ink={theme.ink} cornerRadius={theme.cornerRadius} />
+                    {line.refunded && <RefundedMark />}
                   </div>
                 </li>
               ))}
@@ -374,7 +381,7 @@ export function OrderStatusView({
           </ol>
         </section>
 
-        {order.isDigital && paid && (
+        {firstDownload && paid && (
           <a
             href={preview ? undefined : orderDownloadApiPath(order.ref)}
             aria-disabled={preview || undefined}
@@ -389,9 +396,8 @@ export function OrderStatusView({
         )}
         {/* Each download added to the order has its own, named, since "Download
             PDF" twice would not say which is which. */}
-        {order.isDigital &&
-          paid &&
-          addOns.map((line) => (
+        {paid &&
+          lineDownloads.map((line) => (
             <a
               key={line.id}
               href={preview ? undefined : orderDownloadApiPath(order.ref, line.id)}
@@ -410,10 +416,10 @@ export function OrderStatusView({
             legal small print. Only while the product page shows reviews: a
             review nobody will see is not worth asking for. And only once the
             buyer has what they bought: before that, the reminder (ReviewAsk). */}
-        {((asksForReview && order.productId) || reviewDialog === "stop") && (
+        {((asksForReview && reviewable) || reviewDialog === "stop") && (
           <ReviewAsk
             order={order}
-            asks={asksForReview && order.productId !== null}
+            asks={asksForReview && reviewable}
             hasGoods={buyerHasGoods(order, placed)}
             dialog={reviewDialog}
             storeName={sellerName}
@@ -445,5 +451,16 @@ export function OrderStatusView({
       </div>
       </div>
     </PageShell>
+  );
+}
+
+/** "Refunded", under a line the seller refunded on its own while the rest of
+ *  the order stands. At the page's one muted level (opacity-70). */
+function RefundedMark() {
+  const t = useTranslations("ProductPage.order");
+  return (
+    <p className="text-xs font-medium opacity-70" data-order-line-refunded="">
+      {t("timeline.refunded")}
+    </p>
   );
 }

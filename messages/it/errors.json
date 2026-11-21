@@ -102,6 +102,7 @@
     "refundOrders": "Troppi rimborsi in poco tempo.",
     "connectPayments": "Troppi tentativi di collegamento a Stripe in poco tempo.",
     "readCheckoutSettings": "Troppi tentativi di leggere le impostazioni del checkout in poco tempo.",
+    "readCartSettings": "Troppi tentativi di leggere le impostazioni del carrello in poco tempo.",
     "changePlan": "Hai avviato troppe modifiche di piano in poco tempo.",
     "saveDiscounts": "Troppe modifiche agli sconti in poco tempo.",
     "moderateReviews": "Troppe modifiche alle recensioni in poco tempo.",
@@ -139,6 +140,8 @@
     "connectPayments": "Impossibile aprire Stripe a causa di un problema da parte nostra.",
     "loadCheckoutSettings": "Non è stato possibile caricare le impostazioni del tuo checkout per un problema dalla nostra parte.",
     "saveCheckoutSettings": "Non è stato possibile salvare le impostazioni del tuo checkout per un problema dalla nostra parte.",
+    "loadCartSettings": "Non è stato possibile caricare le impostazioni del tuo carrello per un problema dalla nostra parte.",
+    "saveCartSettings": "Non è stato possibile salvare le impostazioni del tuo carrello per un problema dalla nostra parte.",
     "loadPlans": "Non è stato possibile caricare il tuo piano a causa di un problema da parte nostra.",
     "startCheckout": "Non è stato possibile aprire il checkout a causa di un problema da parte nostra.",
     "openBillingPortal": "Non è stato possibile aprire i tuoi dati di fatturazione a causa di un problema da parte nostra.",
@@ -667,6 +670,11 @@
   "checkoutPageApi": {
     "notObjectFix": "Invia un oggetto JSON, ad es. '{'\"layout\": \"compact\"'}'.",
     "invalid": "Quelle impostazioni del checkout non sono valide.",
+    "invalidFix": "Controlla il campo indicato sopra rispetto a `limits` da una GET di questo URL, poi riprova."
+  },
+  "cartPageApi": {
+    "notObjectFix": "Invia un oggetto JSON, ad es. '{'\"quickAdd\": false'}'.",
+    "invalid": "Quelle impostazioni del carrello non sono valide.",
     "invalidFix": "Controlla il campo indicato sopra rispetto a `limits` da una GET di questo URL, poi riprova."
   },
   "billing": {

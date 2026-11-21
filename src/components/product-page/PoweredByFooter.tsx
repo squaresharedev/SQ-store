@@ -45,8 +45,11 @@ import { quietLinkClass } from "./product-page-maps";
 // boilerplate that contradicts the structured settings. Do not add a
 // seller-ToS URL field here without a reason those sections cannot serve.
 //
-// WHY NO COOKIE LINK, precisely: this page stores NOTHING on the buyer's
-// device: no cookie, no localStorage, no sessionStorage. The one thing it
+// WHY NO COOKIE LINK, precisely: this page stores nothing on the buyer's
+// device (no cookie, no sessionStorage) until the buyer presses "Add to
+// cart", which keeps one cart id in localStorage (lib/cart/storage.ts):
+// storage for a service the buyer asked for, strictly necessary, so no
+// consent and no cookie notice (the privacy policy says so). The one thing it
 // processes is a salted, server-side digest of IP + user agent for the seller's
 // view count (lib/analytics/record.ts), which needs a privacy notice (GDPR
 // Art. 13) but not ePrivacy consent, because consent attaches to storing or

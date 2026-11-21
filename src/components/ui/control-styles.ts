@@ -141,6 +141,18 @@ export const modalSizeClass = {
   "2xl": "sm:max-w-2xl",
 } as const;
 
+/** Where a dialog opens from `sm` up. Below `sm` every dialog is a bottom
+ *  sheet. `side`: a full-height panel against the right edge, for something
+ *  the page stays visible beside (the cart). Each is the overlay's own row and
+ *  the panel's own shape, so a placement is one word at the call site. */
+export const modalPlacementClass = {
+  center: { overlay: "items-end justify-center sm:items-center sm:p-4", panel: "max-h-[90vh]" },
+  side: {
+    overlay: "items-end justify-center sm:items-stretch sm:justify-end",
+    panel: "max-h-[90vh] sm:h-full sm:max-h-none sm:border-y-0 sm:border-r-0",
+  },
+} as const;
+
 /** The row a dialog ends on. The primary action is LAST in the markup: on a
  *  phone the row stacks in reverse so it sits on top, under the thumb; from
  *  `sm` up it is a right-aligned row with the primary at the far end. */

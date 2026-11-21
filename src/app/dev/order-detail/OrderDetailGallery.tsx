@@ -43,6 +43,7 @@ const BASE: OrderView = {
   stockReserved: 0,
   paidThroughProvider: false,
   addOns: [],
+  firstLineRefunded: false,
 };
 
 const SPECIMENS: { key: string; title: string; order: OrderView; mail?: boolean }[] = [
@@ -84,8 +85,8 @@ const SPECIMENS: { key: string; title: string; order: OrderView; mail?: boolean 
       amountCents: 55400,
       stockReserved: 3,
       addOns: [
-        { productTitle: "Oak coasters", selection: [{ label: "Set", value: "Four" }], quantity: 1, amountCents: 2400 },
-        { productTitle: "Table oil", selection: [], quantity: 1, amountCents: 5000 },
+        { id: "a1", refunded: false, productTitle: "Oak coasters", selection: [{ label: "Set", value: "Four" }], quantity: 1, amountCents: 2400 },
+        { id: "a2", refunded: true, productTitle: "Table oil", selection: [], quantity: 1, amountCents: 5000 },
       ],
     },
   },

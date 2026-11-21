@@ -32,23 +32,26 @@ vi.mock("@/lib/rate-limit", async (importOriginal) => ({
   }),
 }));
 vi.mock("@/lib/products/purchasable", () => ({
-  loadPurchasable: vi.fn(async () => {
+  gatePurchasableLines: vi.fn(async () => {
     state.calls.push("gate");
     return state.gate
-      ? { ownerId: OWNER, row: { id: PRODUCT, currency: "EUR" }, now: new Date("2026-10-03T12:00:00Z") }
+      ? {
+          store: { ownerId: OWNER, now: new Date("2026-10-03T12:00:00Z") },
+          items: new Map([[PRODUCT, { row: { id: PRODUCT, currency: "EUR" } }]]),
+        }
       : null;
   }),
 }));
 // Async like the real one: a synchronous stand-in hid a missing `await` in the
 // route, where a Promise (always truthy) let a closed checkout through.
 vi.mock("@/lib/checkout/availability", () => ({
-  checkoutAvailableFor: async () => state.available,
+  checkoutProviderFor: async () => (state.available ? "test" : null),
 }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => ({}) }));
 vi.mock("@/lib/discounts/public", () => ({
-  findCodeFor: vi.fn(async (_admin: unknown, input: { ownerId: string; productId: string; code: string }) => {
-    state.calls.push(`find:${input.ownerId}:${input.productId}:${input.code}`);
-    return state.code;
+  findCodeForLines: vi.fn(async (_admin: unknown, input: { ownerId: string; productIds: string[]; code: string }) => {
+    state.calls.push(`find:${input.ownerId}:${input.productIds.join(",")}:${input.code}`);
+    return state.code ? { ...state.code, covers: input.productIds } : null;
   }),
 }));
 
@@ -78,7 +81,10 @@ describe("discount check route", () => {
     const response = await post({ code: " summer10 " });
     expect(response.status).toBe(200);
     const body = await response.json();
-    expect(body).toEqual({ ok: true, terms: { code: "SUMMER10", value: { type: "percent", percentOff: 10 } } });
+    expect(body).toEqual({
+      ok: true,
+      terms: { code: "SUMMER10", value: { type: "percent", percentOff: 10 }, covers: [PRODUCT] },
+    });
     expect(JSON.stringify(body)).not.toContain(CODE_ID);
     expect(state.calls).toEqual(["limit:discount_check", "gate", `find:${OWNER}:${PRODUCT}:SUMMER10`]);
     expect(response.headers.get("cache-control")).toBe("no-store");
@@ -91,7 +97,13 @@ describe("discount check route", () => {
   });
 
   it("refuses a body that is not one code in the code shape, before spending the budget", async () => {
-    for (const body of ["not json", { code: "a b" }, { code: "SUMMER10", productId: PRODUCT }, []]) {
+    for (const body of [
+      "not json",
+      { code: "a b" },
+      { code: "SUMMER10", productId: PRODUCT },
+      { code: "SUMMER10", productIds: ["not-an-id"] },
+      [],
+    ]) {
       const response = await post(body);
       expect(response.status).toBe(400);
       expect(await response.json()).toEqual({ ok: false, error: "discount_invalid" });

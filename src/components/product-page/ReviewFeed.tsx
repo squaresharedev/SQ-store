@@ -11,7 +11,7 @@ import { ReviewItem } from "./ReviewItem";
 import {
   CTA_BUTTON_CLASS,
   REVIEW_FEED_SCROLL_CLASS,
-  ctaGhostStyle,
+  ctaOutlineStyle,
   surfaceRadius,
   type CtaAppearance,
 } from "./product-page-maps";
@@ -153,7 +153,7 @@ export function ReviewFeed({
             onClick={() => void load(sort, page + 1)}
             disabled={loading}
             className={cn(CTA_BUTTON_CLASS, "my-4 w-auto shrink-0 self-start hover:opacity-90 disabled:opacity-60")}
-            style={ctaGhostStyle(cta, ink)}
+            style={ctaOutlineStyle(cta, ink)}
             data-reviews-more=""
           >
             {loading ? t("loading") : t("more")}

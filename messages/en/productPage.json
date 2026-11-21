@@ -298,7 +298,8 @@
       "discount_invalid": "This discount code can't be used any more. Remove it to pay the full price.",
       "price_changed": "The price changed while this page was open, so nothing was charged. Check the new total, then pay.",
       "turnstile": "The security check didn't finish, so nothing was charged. It's running again now: wait a moment, then try again.",
-      "add_on_unavailable": "Something you added can't be sold with this order any more, so nothing was charged. Check your order and the new total, then pay."
+      "add_on_unavailable": "Something you added can't be sold with this order any more, so nothing was charged. Check your order and the new total, then pay.",
+      "currency": "Everything in one order has to be paid in one currency, so nothing was charged. Check your cart, then pay."
     },
     "editHeadline": "Checkout headline",
     "discount": {
@@ -401,6 +402,8 @@
       "nameLabel": "Name to show",
       "nameHelp": "Shown with your review. Your email address and order stay private.",
       "send": "Post review",
+      "pickLegend": "Choose what to review",
+      "reviewed": "Reviewed",
       "errors": {
         "notEligible": "This order can no longer be reviewed.",
         "rateLimited": "Too many reviews from this connection. Try again in an hour.",
@@ -494,6 +497,62 @@
       "takenDown": "Taken down",
       "otherKind": "Other kind",
       "otherCurrency": "Other currency"
+    }
+  },
+  "cart": {
+    "title": "Your cart",
+    "button": "Cart, {count, plural, =0 {empty} one {# item} other {# items}}",
+    "add": "Add to cart",
+    "addShort": "Add",
+    "addTitle": "Add {title} to your cart",
+    "adding": "Adding",
+    "added": "Added",
+    "addedNote": "Added to your cart",
+    "choose": "Choose",
+    "view": "View cart",
+    "checkout": "Check out",
+    "keepShopping": "Keep shopping",
+    "empty": "Your cart is empty",
+    "subtotal": "Subtotal",
+    "delivery": "Delivery",
+    "deliveryTo": "Delivery to {area}",
+    "free": "Free",
+    "atCheckout": "At checkout",
+    "freeGap": "{amount} more for free delivery",
+    "freeReached": "Delivery is free",
+    "gone": "No longer sold here",
+    "quantity": "Quantity of {title}",
+    "fewer": "One fewer {title}",
+    "more": "One more {title}",
+    "remove": "Remove {title}",
+    "removed": "{title} taken out of your cart.",
+    "undo": "Undo",
+    "addedAnnounce": "{title} added. {count, plural, one {# item} other {# items}} in your cart.",
+    "busy": "Your cart couldn't be loaded.",
+    "retry": "Try again",
+    "suggestionsTitle": "Goes well with",
+    "problem": {
+      "not_found": "No longer sold here. Take it out to check out.",
+      "sold_out": "Sold out. Take it out to check out.",
+      "options": "This version isn't available. Take it out to check out.",
+      "quantity": "That's more than one order can hold. Lower the quantity.",
+      "insufficient_stock": "Not that many in stock. Lower the quantity.",
+      "currency": "Priced in another currency than the rest of your cart.",
+      "no_shipping_rates": "Can't be delivered right now."
+    },
+    "refusal": {
+      "not_found": "This can't be added right now.",
+      "sold_out": "Sold out.",
+      "options": "Choose a version first.",
+      "quantity": "That's more than one order can hold.",
+      "insufficient_stock": "Not that many in stock.",
+      "currency": "This is priced in another currency than your cart. Check out first, or empty your cart.",
+      "no_shipping_rates": "This can't be delivered right now.",
+      "full": "Your cart is full. Check out first.",
+      "unavailable": "The cart isn't available right now.",
+      "gone": "Your cart has expired. Try again.",
+      "invalid": "That didn't work. Try again.",
+      "rate_limited": "Too many changes at once. Wait a moment, then try again."
     }
   }
 }

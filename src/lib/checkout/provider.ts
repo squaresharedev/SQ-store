@@ -23,7 +23,8 @@ import type { SaleFee } from "@/lib/billing/fees";
 import { sellerSaleFee } from "@/lib/billing/sale-fee";
 import { testPaymentsEnabled, type CheckoutProviderId } from "@/lib/checkout/availability";
 import { placeStripeOrder } from "@/lib/checkout/stripe-provider";
-import { paidAddOns, type CheckoutQuote } from "@/lib/checkout/quote";
+import { paidCheckoutFor, sameAttempt } from "@/lib/checkout/paid-checkout";
+import type { CheckoutQuote } from "@/lib/checkout/quote";
 import type { OrderChannel, ShipTo } from "@/types/order-view";
 
 /** Who is buying and where it goes, as validated by the order route. */
@@ -38,6 +39,8 @@ export type CheckoutBuyer = {
    *  that pays another (`marketplace`) cannot be claimed by a request (see
    *  lib/billing/origin.ts). */
   channel: OrderChannel;
+  /** The cart this order is paid from, if any: payment closes it. */
+  cartId?: string | null;
 };
 
 export type PlaceResult =
@@ -61,7 +64,7 @@ const TEST_SESSION_PREFIX = "cs_sstest_";
  * rate.
  */
 function sellerFee(quote: CheckoutQuote, buyer: CheckoutBuyer): Promise<SaleFee | null> {
-  return sellerSaleFee({ sellerId: quote.gate.ownerId, amountCents: quote.totalCents, channel: buyer.channel });
+  return sellerSaleFee({ sellerId: quote.store.ownerId, amountCents: quote.totalCents, channel: buyer.channel });
 }
 
 /**
@@ -102,42 +105,19 @@ async function placeTestOrder(
   if (!fee) return { ok: false, reason: "failed" };
 
   const checkoutSessionId = `${TEST_SESSION_PREFIX}${attemptId.replace(/-/g, "")}`;
-  const result = await recordPaidOrder({
-    checkoutSessionId,
-    productId: quote.productId,
-    sellerId: quote.gate.ownerId,
-    storefrontId: quote.gate.storefront.id,
-    channel: buyer.channel,
-    quantity: quote.quantity,
-    selection: quote.selection,
-    unitPriceCents: quote.regularUnitCents,
-    discountId: quote.discount?.id ?? null,
-    credit: quote.credit,
-    amountCents: quote.totalCents,
-    shippingCents: quote.shippingCents,
-    ...fee,
-    currency: quote.currency,
-    buyerEmail: buyer.email,
-    buyerLocale: buyer.locale,
-    shipTo: buyer.shipTo,
-    giftMessage: buyer.giftMessage,
-    supplyConsent: buyer.supplyConsent,
-    addOns: paidAddOns(quote),
-  });
+  const checkout = await paidCheckoutFor(quote, buyer, checkoutSessionId, fee);
+  const result = await recordPaidOrder(checkout);
   if (!result.ok) return { ok: false, reason: result.reason === "sold_out" ? "sold_out" : "failed" };
   if (!result.duplicate) return { ok: true, orderId: result.orderId };
 
   // A REPEAT of an attempt answers with its order only for the same buyer
-  // buying the same thing. The attempt id lives in one buyer's page and
+  // buying the same lines. The attempt id lives in one buyer's page and
   // nowhere else, but an order link is a credential, and a request that merely
   // guessed or copied an attempt id must not be handed someone else's.
   const { data: existing } = await createAdminClient()
     .from("orders")
-    .select("buyer_email, product_id")
+    .select("buyer_email, lines_digest")
     .eq("id", result.orderId)
     .maybeSingle();
-  const same =
-    existing?.product_id === quote.productId &&
-    existing?.buyer_email?.toLowerCase() === buyer.email.toLowerCase();
-  return same ? { ok: true, orderId: result.orderId } : { ok: false, reason: "failed" };
+  return sameAttempt(existing, checkout) ? { ok: true, orderId: result.orderId } : { ok: false, reason: "failed" };
 }

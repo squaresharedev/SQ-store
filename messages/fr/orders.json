@@ -165,6 +165,14 @@
   },
   "refund": {
     "open": "Rembourser ou annuler",
+    "what": "Que rembourser",
+    "whole": "La commande entière",
+    "item": "{quantity, plural, one {{title}} many {# × {title}} other {# × {title}}}",
+    "itemHow": "Rembourse le prix de cet article. Le dernier article restant reprend aussi les frais de livraison.",
+    "itemRestock": "Remettre en stock",
+    "confirmItem": "Rembourser cet article",
+    "itemRefunded": "Article remboursé",
+    "lineRefunded": "Remboursé",
     "reasonLabel": "Motif",
     "reasons": {
       "cancelled": "Annulé avant l'expédition",

@@ -2,6 +2,7 @@ import type { Currency, ProductRating } from "@/types/product";
 import type { TileStockState } from "@/types/stock";
 import type { TileLook } from "@/lib/storefront/tile-look";
 import type {
+  CartPageConfig,
   StorefrontBlock,
   StorefrontHeader,
   StorefrontSeller,
@@ -42,6 +43,11 @@ export type StorefrontTileProduct = {
   stockState?: TileStockState;
   /** Where the tile leads: the product's hosted page. */
   href: string;
+  /** The version the card's button puts straight in the cart (one option per
+   *  group, or none), present only where it can: the cart is on here, the
+   *  product needs no choice, and the checkout would sell one now
+   *  (lib/cart/quick-add.ts). Absent: the card opens the product's page. */
+  quickAdd?: { optionIds: string[] };
 };
 
 export type StorefrontPageData = {
@@ -68,4 +74,7 @@ export type StorefrontPageData = {
   allowIndexing: boolean;
   /** The page's own absolute address. */
   url: string;
+  /** The storefront's cart, when buyers here have one (lib/cart/availability.ts
+   *  cartFor). Absent otherwise. */
+  cart?: CartPageConfig;
 };

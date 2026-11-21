@@ -282,6 +282,8 @@
       "nameLabel": "Zobrazované jméno",
       "nameHelp": "Zobrazí se u vaší recenze. Váš e-mail a objednávka zůstanou soukromé.",
       "send": "Zveřejnit recenzi",
+      "pickLegend": "Vyberte, co chcete ohodnotit",
+      "reviewed": "Ohodnoceno",
       "errors": {
         "notEligible": "Tuto objednávku už nelze hodnotit.",
         "rateLimited": "Z tohoto připojení přišlo příliš mnoho recenzí. Zkuste to znovu za hodinu.",
@@ -412,7 +414,8 @@
       "discount_invalid": "Tento slevový kód již nelze použít. Odeberte ho a zaplaťte plnou cenu.",
       "price_changed": "Cena se během otevřené stránky změnila, takže nic nebylo účtováno. Zkontrolujte nový součet a pak zaplaťte.",
       "turnstile": "Bezpečnostní kontrola neproběhla, takže nic nebylo účtováno. Právě běží znovu: chvíli počkejte a zkuste to znovu.",
-      "add_on_unavailable": "Něco, co jste přidali, k této objednávce prodat nelze, takže vám nebyla odečtena žádná částka. Zkontrolujte objednávku a novou celkovou cenu a pak zaplaťte."
+      "add_on_unavailable": "Něco, co jste přidali, k této objednávce prodat nelze, takže vám nebyla odečtena žádná částka. Zkontrolujte objednávku a novou celkovou cenu a pak zaplaťte.",
+      "currency": "Vše v jedné objednávce musí být zaplaceno v jedné měně, takže nic nebylo účtováno. Zkontrolujte košík a pak zaplaťte."
     },
     "editHeadline": "Nadpis pokladny",
     "discount": {
@@ -494,6 +497,62 @@
       "takenDown": "Staženo",
       "otherKind": "Jiný druh",
       "otherCurrency": "Jiná měna"
+    }
+  },
+  "cart": {
+    "title": "Váš košík",
+    "button": "Košík, {count, plural, =0 {prázdný} one {# položka} few {# položky} many {# položky} other {# položek}}",
+    "add": "Přidat do košíku",
+    "addShort": "Přidat",
+    "addTitle": "Přidat {title} do košíku",
+    "adding": "Přidává se",
+    "added": "Přidáno",
+    "addedNote": "Přidáno do košíku",
+    "choose": "Vyberte",
+    "view": "Zobrazit košík",
+    "checkout": "Přejít k pokladně",
+    "keepShopping": "Pokračovat v nákupu",
+    "empty": "Váš košík je prázdný",
+    "subtotal": "Mezisoučet",
+    "delivery": "Doručení",
+    "deliveryTo": "Doručení do {area}",
+    "free": "Zdarma",
+    "atCheckout": "Při pokladně",
+    "freeGap": "Ještě {amount} do dopravy zdarma",
+    "freeReached": "Doprava je zdarma",
+    "gone": "Zde se již neprodává",
+    "quantity": "Množství: {title}",
+    "fewer": "Jeden méně: {title}",
+    "more": "Jeden více: {title}",
+    "remove": "Odebrat {title}",
+    "removed": "{title} odebráno z košíku.",
+    "undo": "Zpět",
+    "addedAnnounce": "{title} přidáno. {count, plural, one {# položka} few {# položky} many {# položky} other {# položek}} v košíku.",
+    "busy": "Košík se nepodařilo načíst.",
+    "retry": "Zkusit znovu",
+    "suggestionsTitle": "Hodí se k tomu",
+    "problem": {
+      "not_found": "Zde se již neprodává. Odeberte z košíku a pokračujte.",
+      "sold_out": "Vyprodáno. Odeberte z košíku a pokračujte.",
+      "options": "Tato varianta není dostupná. Odeberte z košíku a pokračujte.",
+      "quantity": "Překračuje limit jedné objednávky. Snižte množství.",
+      "insufficient_stock": "Na skladě není dostatek kusů. Snižte množství.",
+      "currency": "Cena je v jiné měně než zbytek košíku.",
+      "no_shipping_rates": "Momentálně nelze doručit."
+    },
+    "refusal": {
+      "not_found": "Momentálně nelze přidat.",
+      "sold_out": "Vyprodáno.",
+      "options": "Nejprve vyberte variantu.",
+      "quantity": "Překračuje limit jedné objednávky.",
+      "insufficient_stock": "Na skladě není dostatek kusů.",
+      "currency": "Cena je v jiné měně než váš košík. Nejprve zaplaťte, nebo košík vyprázdněte.",
+      "no_shipping_rates": "Momentálně nelze doručit.",
+      "full": "Košík je plný. Nejprve zaplaťte.",
+      "unavailable": "Košík momentálně není dostupný.",
+      "gone": "Košík vypršel. Zkuste to znovu.",
+      "invalid": "Nepodařilo se to. Zkuste to znovu.",
+      "rate_limited": "Příliš mnoho změn najednou. Chvíli počkejte a zkuste to znovu."
     }
   }
 }

@@ -331,6 +331,21 @@
       "required": "Nadpis je povinný.",
       "tooLong": "Nadpis môže mať najviac {maximum} znakov.",
       "unsupported": "Nadpis obsahuje nepodporované znaky."
+    },
+    "cartTitle": {
+      "required": "Nadpis košíka je povinný.",
+      "tooLong": "Nadpis košíka musí mať najviac {maximum} znakov.",
+      "unsupported": "Nadpis košíka obsahuje nepodporované znaky."
+    },
+    "cartNote": {
+      "required": "Poznámka košíka je povinná.",
+      "tooLong": "Poznámka košíka musí mať najviac {maximum} znakov.",
+      "unsupported": "Poznámka košíka obsahuje nepodporované znaky."
+    },
+    "cartAddLabel": {
+      "required": "Text tlačidla Pridať do košíka je povinný.",
+      "tooLong": "Text tlačidla Pridať do košíka musí mať najviac {maximum} znakov.",
+      "unsupported": "Text tlačidla Pridať do košíka obsahuje nepodporované znaky."
     }
   },
   "email": {
@@ -391,6 +406,7 @@
     "reportTarget": "Táto položka nie je platná.",
     "moderationDecision": "Toto rozhodnutie nie je platné.",
     "checkoutAttempt": "Táto relácia pokladne vypršala. Načítajte stránku znova a skúste to.",
+    "cart": "Tento košík vypršal. Načítajte stránku znova a skúste to.",
     "product": "Tento produkt sa nepodarilo nájsť."
   },
   "handle": {

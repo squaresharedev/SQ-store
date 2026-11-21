@@ -173,6 +173,8 @@ const REGISTRY: Record<string, Classification> = {
   // Taking an order back mails the buyer too, and for an order a provider
   // charged it moves money: its own budget (orderRefund).
   "lib/orders/actions.ts::refundOrder": limited(),
+  // One line of an order, the same way: the same budget (orderRefund).
+  "lib/orders/actions.ts::refundOrderLine": limited(),
   "lib/reviews/actions.ts::setReviewVisibility": limited(),
   // Creates a connected account at Stripe and a link into its onboarding, on
   // the platform's key: the billing write budget, like starting a checkout.

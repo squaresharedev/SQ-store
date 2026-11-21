@@ -282,6 +282,8 @@
       "nameLabel": "Wyświetlane imię",
       "nameHelp": "Widoczne przy twojej opinii. Twój adres e-mail i zamówienie pozostają prywatne.",
       "send": "Opublikuj opinię",
+      "pickLegend": "Wybierz, co chcesz ocenić",
+      "reviewed": "Oceniono",
       "errors": {
         "notEligible": "Tego zamówienia nie można już ocenić.",
         "rateLimited": "Za dużo opinii z tego połączenia. Spróbuj ponownie za godzinę.",
@@ -412,7 +414,8 @@
       "discount_invalid": "Ten kod rabatowy nie może być już użyty. Usuń go, aby zapłacić pełną cenę.",
       "price_changed": "Cena zmieniła się, gdy ta strona była otwarta, więc nic nie zostało pobrane. Sprawdź nową kwotę i zapłać.",
       "turnstile": "Kontrola bezpieczeństwa nie została ukończona, więc nic nie zostało obciążone. Właśnie uruchamia się ponownie: poczekaj chwilę i spróbuj jeszcze raz.",
-      "add_on_unavailable": "Coś, co dodałeś, nie może już być sprzedane z tym zamówieniem, więc nic nie zostało obciążone. Sprawdź zamówienie i nową kwotę, a potem zapłać."
+      "add_on_unavailable": "Coś, co dodałeś, nie może już być sprzedane z tym zamówieniem, więc nic nie zostało obciążone. Sprawdź zamówienie i nową kwotę, a potem zapłać.",
+      "currency": "Wszystko w jednym zamówieniu musi być opłacone w jednej walucie, więc nic nie zostało pobrane. Sprawdz koszyk i zapłać."
     },
     "editHeadline": "Nagłówek kasy",
     "discount": {
@@ -494,6 +497,62 @@
       "takenDown": "Usunięty",
       "otherKind": "Inny rodzaj",
       "otherCurrency": "Inna waluta"
+    }
+  },
+  "cart": {
+    "title": "Twój koszyk",
+    "button": "Koszyk, {count, plural, =0 {pusty} one {# produkt} few {# produkty} many {# produktów} other {# produktu}}",
+    "add": "Dodaj do koszyka",
+    "addShort": "Dodaj",
+    "addTitle": "Dodaj {title} do koszyka",
+    "adding": "Dodawanie",
+    "added": "Dodano",
+    "addedNote": "Dodano do koszyka",
+    "choose": "Wybierz",
+    "view": "Zobacz koszyk",
+    "checkout": "Przejdź do kasy",
+    "keepShopping": "Kontynuuj zakupy",
+    "empty": "Twój koszyk jest pusty",
+    "subtotal": "Suma częściowa",
+    "delivery": "Dostawa",
+    "deliveryTo": "Dostawa do {area}",
+    "free": "Bezpłatna",
+    "atCheckout": "Przy kasie",
+    "freeGap": "Jeszcze {amount} do bezpłatnej dostawy",
+    "freeReached": "Dostawa jest bezpłatna",
+    "gone": "Już niedostępne w tym sklepie",
+    "quantity": "Ilość: {title}",
+    "fewer": "O jeden mniej: {title}",
+    "more": "O jeden więcej: {title}",
+    "remove": "Usuń {title}",
+    "removed": "{title} usunięto z koszyka.",
+    "undo": "Cofnij",
+    "addedAnnounce": "{title} dodano. {count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}} w koszyku.",
+    "busy": "Nie udało się wczytać koszyka.",
+    "retry": "Spróbuj ponownie",
+    "suggestionsTitle": "Pasuje do tego",
+    "problem": {
+      "not_found": "Już niedostępne. Usuń z koszyka, by sfinalizować zakup.",
+      "sold_out": "Wyprzedany. Usuń z koszyka, by sfinalizować zakup.",
+      "options": "Ta wersja nie jest dostępna. Usuń z koszyka, by sfinalizować zakup.",
+      "quantity": "Przekracza limit jednego zamówienia. Zmniejsz ilość.",
+      "insufficient_stock": "Nie ma tylu sztuk w magazynie. Zmniejsz ilość.",
+      "currency": "Cena jest w innej walucie niż reszta koszyka.",
+      "no_shipping_rates": "Teraz nie można dostarczyć."
+    },
+    "refusal": {
+      "not_found": "Teraz nie można dodać.",
+      "sold_out": "Wyprzedany.",
+      "options": "Najpierw wybierz wersję.",
+      "quantity": "Przekracza limit jednego zamówienia.",
+      "insufficient_stock": "Nie ma tylu sztuk w magazynie.",
+      "currency": "Cena jest w innej walucie niż twój koszyk. Najpierw sfinalizuj zakup albo opróżnij koszyk.",
+      "no_shipping_rates": "Teraz nie można dostarczyć.",
+      "full": "Koszyk jest pełny. Najpierw sfinalizuj zakup.",
+      "unavailable": "Koszyk jest teraz niedostępny.",
+      "gone": "Koszyk wygasł. Spróbuj ponownie.",
+      "invalid": "Coś poszło nie tak. Spróbuj ponownie.",
+      "rate_limited": "Zbyt wiele zmian naraz. Poczekaj chwilę i spróbuj ponownie."
     }
   }
 }

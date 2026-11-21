@@ -218,11 +218,14 @@ describe("review columns", () => {
     expect(seller).toBe(owner.id);
   });
 
-  it("takes one review per order", async () => {
+  it("takes one review per product of an order", async () => {
     const product = await seedProduct();
     const order = await seedOrder(product);
     await addNative(product, 5, order);
-    expect(await expectDbError(addNative(product, 4, order))).toMatch(/reviews_order_unique/);
+    expect(await expectDbError(addNative(product, 4, order))).toMatch(/reviews_order_product_unique/);
+    // A cart's order holds other products, each reviewed on its own.
+    const other = await seedProduct();
+    await addNative(other, 4, order);
   });
 
   it("lands an imported review once, however often its file is imported", async () => {

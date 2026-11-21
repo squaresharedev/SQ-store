@@ -188,6 +188,18 @@
       "byWeekday": "Product page views by weekday",
       "byStorefront": "Product page views by storefront"
     },
+    "cart_add": {
+      "label": "Added to cart",
+      "description": "Buyers putting one of your products in their cart.",
+      "count": "{count, plural, one {{formatted} add} other {{formatted} adds}}",
+      "total": "Total cart adds",
+      "emptyRange": "Nothing added to a cart in this range",
+      "overTime": "Added to cart over time",
+      "acrossRange": "Products added to a cart across the selected range.",
+      "byChannel": "Added to cart by channel",
+      "byWeekday": "Added to cart by weekday",
+      "byStorefront": "Added to cart by storefront"
+    },
     "checkout_view": {
       "label": "Checkout views",
       "description": "Buyers opening checkout for one of your products.",

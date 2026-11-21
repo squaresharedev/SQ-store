@@ -438,6 +438,18 @@ export const RATE_LIMITS = {
    * anyone guessing at a store's codes.
    */
   discountCheck: { max: 30, windowSeconds: 60 * 60 },
+  /**
+   * Changes to a cart (add, a new quantity, remove), per client IP. Each is a
+   * database write: a buyer filling a cart makes a few dozen, and a script
+   * trying to fill the carts table pays like one shopper.
+   */
+  cartWrite: { max: 300, windowSeconds: 60 * 60 },
+  /**
+   * Opens of a cart (the drawer, the cart page, a tab coming back to it), per
+   * client IP. Priced like a page of its products, so the product page's
+   * ceiling.
+   */
+  cartRead: { max: 600, windowSeconds: 60 * 60 },
   /** Opens of an order page (the thank-you and order status), per client IP. */
   orderPage: { max: 240, windowSeconds: 60 * 60 },
   /** Download links handed out from order pages, per client IP. */

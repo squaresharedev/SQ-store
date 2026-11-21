@@ -95,6 +95,7 @@
       "cards": "Riquadri prodotto",
       "soldOut": "Esaurito",
       "productPage": "Pagina prodotto",
+      "cartPage": "Carrello",
       "checkoutPage": "Checkout"
     },
     "subtitle": {
@@ -104,6 +105,7 @@
       "cards": "Vetrina / Riquadri prodotto",
       "soldOut": "Vetrina / Esaurito",
       "productPage": "Vetrina / Pagina prodotto",
+      "cartPage": "Vetrina / Carrello",
       "checkoutPage": "Vetrina / Checkout",
       "blocks": "Vetrina / Blocchi"
     },
@@ -1547,5 +1549,29 @@
         "keys": "Tieni premuto <kbd>Spazio</kbd> e trascina"
       }
     }
+  },
+  "cartPage": {
+    "on": "Carrello",
+    "onHint": "I compratori raccolgono prodotti e pagano in una volta. Acquista ora rimane.",
+    "mainButton": {
+      "label": "Pulsante principale",
+      "buyNow": "Acquista ora",
+      "addToCart": "Aggiungi al carrello"
+    },
+    "afterAdd": {
+      "label": "Dopo l'aggiunta",
+      "openCart": "Apri il carrello",
+      "note": "Mostra una nota"
+    },
+    "quickAdd": "Aggiungi dalle schede",
+    "quickAddHint": "Il pulsante di una scheda mette il prodotto direttamente nel carrello quando non c'è una versione da scegliere.",
+    "addLabel": "Testo del pulsante",
+    "title": "Titolo del carrello",
+    "note": "Nota nel carrello",
+    "notePlaceholder": "Gli ordini vengono spediti il lunedi",
+    "deliveryBar": "Avanzamento spedizione gratuita",
+    "deliveryBarHint": "Mostrato quando la tua spedizione è gratuita oltre una certa cifra.",
+    "suggestions": "Si abbina bene a",
+    "suggestionsHint": "Sotto il carrello: ciò che hai scelto in Aggiungi al tuo ordine per i suoi prodotti."
   }
 }

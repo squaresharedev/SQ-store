@@ -216,6 +216,18 @@
       "awaiting": "Pojawi się wraz z blokiem rezerwacji kalendarza.",
       "readyToChart": "Gotowe do wykresu, gdy tylko zaczną napływać rezerwacje."
     },
+    "cart_add": {
+      "label": "Dodane do koszyka",
+      "description": "Kupujący, którzy dodali jeden z Twoich produktów do koszyka.",
+      "count": "{count, plural, one {{formatted} dodanie} few {{formatted} dodania} many {{formatted} dodań} other {{formatted} dodania}}",
+      "total": "Łączna liczba dodań do koszyka",
+      "emptyRange": "Brak dodań do koszyka w tym okresie",
+      "overTime": "Dodania do koszyka w czasie",
+      "acrossRange": "Produkty dodane do koszyka w wybranym okresie.",
+      "byChannel": "Dodania do koszyka według kanału",
+      "byWeekday": "Dodania do koszyka według dnia tygodnia",
+      "byStorefront": "Dodania do koszyka według witryny"
+    },
     "checkout_view": {
       "label": "Wyświetlenia kasy",
       "description": "Kupujący, którzy otworzyli kasę dla jednego z Twoich produktów.",

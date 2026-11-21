@@ -68,6 +68,10 @@ import { productPagePath, storefrontPageUrl } from "@/lib/storefront/product-pag
 import { uuidField } from "@/lib/validation/inputs";
 import { blockKey, buyerVisibleBlocks, type StorefrontBlock, type StorefrontConfig } from "@/types/storefront";
 import type { StorefrontPageData, StorefrontTileProduct } from "@/types/storefront-page";
+import { cartFor, cartLaunched } from "@/lib/cart/availability";
+import { QUICK_ADD_SELECT, quickAddFor, type QuickAdd, type QuickAddRow } from "@/lib/cart/quick-add";
+import { cartSwitchedOn, resolveCartPage } from "@/lib/storefront/cart-page";
+import { SHIPPING_POLICY_SELECT, buildShippingPolicy, type ShippingPolicyRow } from "@/lib/settings/shipping-policy";
 
 export type PublicStorefrontPageResult = {
   page: StorefrontPageData;
@@ -194,6 +198,11 @@ export async function buildStorefrontPage(
     /** One more refusal, asked of the parsed config before anything is read
      *  about the seller or the products. */
     allow?: (config: StorefrontConfig) => boolean;
+    /** Whether a card's buy button may put its product in the cart from this
+     *  page (lib/cart/quick-add.ts). The embed frame can only while the cart
+     *  routes are served on its own host (lib/cart/availability.ts
+     *  embedCartWritable). Absent = yes. */
+    quickAdd?: boolean;
   },
 ): Promise<PublicStorefrontPageResult | PageBusy | null> {
   const open = openStorefront(storefront);
@@ -214,14 +223,31 @@ export async function buildStorefrontPage(
   // the two sets agree, and non-live products are never in the `live` rows that
   // `loadTileExtras` processes (see equivalence proof in tile-extras.ts).
   const wanted = tileExtrasWanted({ theme: config.theme, blocks: visible });
-  const tileSelect = wanted.hoverPhoto.size > 0 ? TILE_PRODUCT_SELECT : TILE_PRODUCT_SELECT_NO_GALLERY;
+  // Cards that may put their product in the cart need the few columns the
+  // quote asks of one line, and the seller's delivery (can a parcel be
+  // priced?), read on the rows and the profile already being read. Only while
+  // a cart can exist here at all, so a board without one reads what it did.
+  const quickAddWanted =
+    options.quickAdd !== false &&
+    cartLaunched() &&
+    cartSwitchedOn(config) &&
+    resolveCartPage(config).quickAdd !== false &&
+    productIds.length > 0;
+  const tileSelect = [
+    wanted.hoverPhoto.size > 0 ? TILE_PRODUCT_SELECT : TILE_PRODUCT_SELECT_NO_GALLERY,
+    ...(quickAddWanted ? [QUICK_ADD_SELECT] : []),
+  ].join(", ");
 
   // The seller's identity, the tiles' products and the store's running sales
   // depend only on the owner already in hand, so they are read together. One
   // `now` prices the whole board.
   const now = new Date();
   const [{ data: sellerRow, error: sellerError }, products, storeSales] = await Promise.all([
-    admin.from("profiles").select(TRADER_GATE_SELECT).eq("id", storefront.owner_id).maybeSingle(),
+    admin
+      .from("profiles")
+      .select(quickAddWanted ? `${TRADER_GATE_SELECT}, ${SHIPPING_POLICY_SELECT}` : TRADER_GATE_SELECT)
+      .eq("id", storefront.owner_id)
+      .maybeSingle(),
     readTileProducts(admin, storefront.owner_id, productIds, tileSelect),
     // A board with no products has no prices to get wrong.
     productIds.length === 0 ? Promise.resolve([]) : readStoreSales(admin, storefront.owner_id, now),
@@ -274,9 +300,24 @@ export async function buildStorefrontPage(
   ]);
 
   const { theme } = config;
+  const cart = await cartFor({ ownerId: storefront.owner_id, config });
+  // Which cards put their product straight in the cart: only where the cart
+  // truly exists (launched, switched on, and our checkout takes this seller's
+  // payments), and only what the quote would sell as one item now.
+  const shippingPolicy =
+    cart && quickAddWanted ? buildShippingPolicy(sellerError ? null : (sellerRow as ShippingPolicyRow | null)) : null;
+  const quickAdds = new Map<string, QuickAdd>();
+  if (shippingPolicy) {
+    for (const row of live) {
+      const quick = quickAddFor(row as unknown as QuickAddRow, null, { shippingPolicy });
+      if (quick) quickAdds.set(row.id, quick);
+    }
+  }
   const [tiles, imageUrls, backgroundImageUrl, customFontUrl] = await Promise.all([
     Promise.all(
-      live.map((row) => tileProduct(row, options.tileHref(row.id), pricing.get(row.id), extras.get(row.id))),
+      live.map((row) =>
+        tileProduct(row, options.tileHref(row.id), pricing.get(row.id), extras.get(row.id), quickAdds.get(row.id)),
+      ),
     ),
     signImageBlocks(blocks),
     theme.background.kind === "image" ? presignGetUrl(theme.background.key) : null,
@@ -298,6 +339,7 @@ export async function buildStorefrontPage(
       seller: buildSellerIdentity(gateRow as SellerIdentityRow | null),
       allowIndexing: productPage.allowIndexing,
       url: storefrontPageUrl(storefront.id),
+      ...(cart ? { cart } : {}),
     },
     ownerId: storefront.owner_id,
     saleEndsInMs: msUntilSaleEnds(pricing.values(), now),
@@ -313,12 +355,16 @@ export async function buildStorefrontPage(
  *
  * `extras` is what its card shows beyond that (loadTileExtras), copied field
  * by field too, so the stock COUNT the row carries can never ride along.
+ *
+ * `quickAdd` is the version its card puts in the cart, when it can
+ * (lib/cart/quick-add.ts): option ids the product page shows anyway.
  */
 export async function tileProduct(
   row: TileProductRow,
   href: string,
   pricing: ProductPricing | undefined,
   extras?: TileExtras,
+  quickAdd?: QuickAdd,
 ): Promise<StorefrontTileProduct> {
   const sale = pricing?.sale ?? null;
   return {
@@ -332,6 +378,7 @@ export async function tileProduct(
     ...(extras?.hoverImageUrl ? { hoverImageUrl: extras.hoverImageUrl } : {}),
     ...(extras?.rating ? { rating: { average: extras.rating.average, count: extras.rating.count } } : {}),
     ...(extras?.stockState ? { stockState: extras.stockState } : {}),
+    ...(quickAdd ? { quickAdd: { optionIds: [...quickAdd.optionIds] } } : {}),
     href,
   };
 }

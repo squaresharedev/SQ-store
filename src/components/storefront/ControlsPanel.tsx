@@ -3,9 +3,11 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
+  DEFAULT_CART_PAGE_CONFIG,
   DEFAULT_CHECKOUT_PAGE_CONFIG,
   patchThemeCardStyle,
   resolveCardStyle,
+  type CartPageConfig,
   type CheckoutPageConfig,
   type HeaderLine,
   type ProductPageConfig,
@@ -40,6 +42,7 @@ import { TypographySection } from "./TypographySection";
 import { SoldOutSection } from "./SoldOutSection";
 import { ProductPageSection } from "./ProductPageSection";
 import { CheckoutPageSection } from "./CheckoutPageSection";
+import { CartPageSection } from "./CartPageSection";
 
 /**
  * GLOBAL design settings, as a menu of named groups rather than one column of
@@ -93,6 +96,9 @@ export function ControlsPanel({
   onProductPageChange,
   checkoutPage = DEFAULT_CHECKOUT_PAGE_CONFIG,
   onCheckoutPageChange,
+  cartPage = DEFAULT_CART_PAGE_CONFIG,
+  onCartPageChange,
+  cartOffered = true,
   pagePhotoUrls = {},
   onPagePhotoUrl = () => {},
   onPlayCelebration,
@@ -117,6 +123,12 @@ export function ControlsPanel({
    *  with no owner to keep them. */
   checkoutPage?: CheckoutPageConfig;
   onCheckoutPageChange?: (next: CheckoutPageConfig) => void;
+  /** The cart's design (its own group). */
+  cartPage?: CartPageConfig;
+  onCartPageChange?: (next: CartPageConfig) => void;
+  /** Whether the Cart group is offered: not before buyers can have a cart
+   *  (StorefrontDesigner's cartOffered). Absent (the dev gallery) offers it. */
+  cartOffered?: boolean;
   /** Display URLs of the hosted pages' photo backdrops by object key, and a
    *  way to report one just uploaded. Absent (the dev gallery) shows none. */
   pagePhotoUrls?: Record<string, string>;
@@ -237,7 +249,7 @@ export function ControlsPanel({
             }
           }}
         />
-        {GROUPS.map((id) => (
+        {GROUPS.filter((id) => cartOffered || id !== "cartPage").map((id) => (
           <PanelMenuItem
             key={id}
             label={tKey(GROUP_TITLES[id])}
@@ -372,6 +384,8 @@ export function ControlsPanel({
           onPagePhotoUrl={onPagePhotoUrl}
           summoned={summonedPage}
         />
+      ) : group === "cartPage" ? (
+        <CartPageSection cartPage={cartPage} onCartPageChange={(next) => onCartPageChange?.(next)} />
       ) : group === "checkoutPage" ? (
         /* Three full-width sections, like the product page's. */
         <CheckoutPageSection

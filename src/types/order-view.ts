@@ -196,10 +196,16 @@ export type OrderView = {
   /** "Add to your order": what else was sold in this order, in the seller's
    *  order. Empty for most orders. Snapshots, like the fields above. */
   addOns: OrderAddOnLine[];
+  /** The order's own first line was refunded on its own. */
+  firstLineRefunded: boolean;
 };
 
 /** One add-on line of an order (order_add_ons), as the seller packs it. */
 export type OrderAddOnLine = {
+  /** The line's own id (order_add_ons.id): what a line refund names. */
+  id: string;
+  /** Refunded on its own (order_line_refunds). */
+  refunded: boolean;
   productTitle: string;
   selection: OrderSelection[];
   quantity: number;

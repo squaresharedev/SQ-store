@@ -16,7 +16,7 @@ import type { MessageKey } from "@/i18n/types";
 import type { BlockField } from "@/components/storefront/SummonedField";
 import type { ProductPageSectionId } from "@/types/storefront";
 
-/** The design panel's seven groups, mirrored from ControlsPanel. */
+/** The design panel's groups, mirrored from ControlsPanel. */
 export const CONTROLS_GROUPS = [
   "theme",
   "header",
@@ -24,6 +24,7 @@ export const CONTROLS_GROUPS = [
   "cards",
   "soldOut",
   "productPage",
+  "cartPage",
   "checkoutPage",
 ] as const;
 export type ControlsGroup = (typeof CONTROLS_GROUPS)[number];
@@ -294,6 +295,7 @@ export const GROUP_LABELS: Record<ControlsGroup, MessageKey> = {
   cards: "Storefront.settings.groups.cards",
   soldOut: "Storefront.settings.groups.soldOut",
   productPage: "Storefront.settings.groups.productPage",
+  cartPage: "Storefront.settings.groups.cartPage",
   checkoutPage: "Storefront.settings.groups.checkoutPage",
 };
 
@@ -306,6 +308,7 @@ export const GROUP_SUBTITLES: Record<ControlsGroup, MessageKey> = {
   cards: "Storefront.settings.subtitle.cards",
   soldOut: "Storefront.settings.subtitle.soldOut",
   productPage: "Storefront.settings.subtitle.productPage",
+  cartPage: "Storefront.settings.subtitle.cartPage",
   checkoutPage: "Storefront.settings.subtitle.checkoutPage",
 };
 
@@ -1057,6 +1060,53 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
 
   // ---------------------------------------------------------------------
+  // CART. One group with a handful of controls; each entry opens it. The
+  // labels are the Cart panel's own words, so search and panel agree.
+  // ---------------------------------------------------------------------
+  {
+    id: "cart-on",
+    label: "Storefront.cartPage.on",
+    keywords: ["cart", "shopping cart", "basket", "bag", "turn off cart", "switch off cart", "buy several"],
+    ref: { kind: "group", group: "cartPage" },
+  },
+  {
+    id: "cart-buttons",
+    label: "Storefront.cartPage.mainButton.label",
+    keywords: ["add to cart button", "buy now button", "main button", "which button first", "button order"],
+    ref: { kind: "group", group: "cartPage" },
+  },
+  {
+    id: "cart-after-add",
+    label: "Storefront.cartPage.afterAdd.label",
+    keywords: ["after adding", "open the cart", "added note", "cart drawer", "what happens on add"],
+    ref: { kind: "group", group: "cartPage" },
+  },
+  {
+    id: "cart-words",
+    label: "Storefront.cartPage.addLabel",
+    keywords: ["add to cart words", "cart button text", "cart heading", "cart title", "cart note"],
+    ref: { kind: "group", group: "cartPage" },
+  },
+  {
+    id: "cart-delivery-bar",
+    label: "Storefront.cartPage.deliveryBar",
+    keywords: ["free delivery bar", "free shipping progress", "spend more for free delivery"],
+    ref: { kind: "group", group: "cartPage" },
+  },
+  {
+    id: "cart-quick-add",
+    label: "Storefront.cartPage.quickAdd",
+    keywords: ["quick add", "add from the card", "card button adds to cart", "one tap add"],
+    ref: { kind: "group", group: "cartPage" },
+  },
+  {
+    id: "cart-suggestions",
+    label: "Storefront.cartPage.suggestions",
+    keywords: ["goes well with", "suggestions in the cart", "cross sell", "upsell in cart", "you may also like"],
+    ref: { kind: "group", group: "cartPage" },
+  },
+
+  // ---------------------------------------------------------------------
   // CHECKOUT. Gated like the product page's settings: inside the editor they
   // are offered once the checkout is on the canvas, and before that one row
   // puts it there.
@@ -1069,8 +1119,6 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "check out",
       "payment page",
       "pay page",
-      "basket",
-      "cart",
       "showcase",
       "compact",
       "big product photo at checkout",

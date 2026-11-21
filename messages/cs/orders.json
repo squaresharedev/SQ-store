@@ -165,6 +165,14 @@
   },
   "refund": {
     "open": "Vrátit peníze nebo zrušit",
+    "what": "Co refundovat",
+    "whole": "Celá objednávka",
+    "item": "{quantity, plural, one {{title}} few {# × {title}} many {# × {title}} other {# × {title}}}",
+    "itemHow": "Vrátí zpět cenu této položky. Poslední zbývající položka s sebou vrátí i poštovné.",
+    "itemRestock": "Vrátit zpět na sklad",
+    "confirmItem": "Refundovat tuto položku",
+    "itemRefunded": "Položka refundována",
+    "lineRefunded": "Vráceno",
     "reasonLabel": "Důvod",
     "reasons": {
       "cancelled": "Zrušeno před odesláním",

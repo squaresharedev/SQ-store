@@ -216,6 +216,18 @@
       "awaiting": "Verfügbar mit dem Kalender-Buchungs-Block.",
       "readyToChart": "Bereit zur Darstellung, sobald Buchungen eintreffen."
     },
+    "cart_add": {
+      "label": "In den Warenkorb gelegt",
+      "description": "Käufer, die eines deiner Produkte in den Warenkorb legen.",
+      "count": "{count, plural, one {{formatted} Warenkorb-Hinzufügung} other {{formatted} Warenkorb-Hinzufügungen}}",
+      "total": "Warenkorb-Hinzufügungen gesamt",
+      "emptyRange": "In diesem Zeitraum nichts in den Warenkorb gelegt",
+      "overTime": "In den Warenkorb gelegt im Zeitverlauf",
+      "acrossRange": "In den Warenkorb gelegte Produkte im ausgewählten Zeitraum.",
+      "byChannel": "In den Warenkorb gelegt nach Kanal",
+      "byWeekday": "In den Warenkorb gelegt nach Wochentag",
+      "byStorefront": "In den Warenkorb gelegt nach Schaufenster"
+    },
     "checkout_view": {
       "label": "Checkout-Aufrufe",
       "description": "Käufer, die den Checkout für eines deiner Produkte öffnen.",

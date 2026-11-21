@@ -72,12 +72,13 @@ const sum = <T,>(list: T[], of: (item: T) => number) => list.reduce((total, item
 
 const PRODUCTS = ["Riso print 'Night swim'", "Ceramic mug", "Sticker pack", "Linen tote", "Zine, issue 4"];
 
-/** Every signal kind, zero-filled, with the four the sample store records filled in. */
+/** Every signal kind, zero-filled, with the five the sample store records filled in. */
 function signalsFor(dates: string[], scale: number, seed: number): Record<SignalKind, SignalBreakdown> {
   const filled: Partial<Record<SignalKind, number>> = {
     storefront_view: 60 * scale,
     product_view: 22 * scale,
     product_click: 9 * scale,
+    cart_add: 6 * scale,
     checkout_view: 4 * scale,
   };
   return Object.fromEntries(
@@ -289,7 +290,7 @@ export function buildSnapshot(scenario: LabScenario): AnalyticsSnapshot {
     signals: {
       available: true,
       byKind: signalsFor(shape.dates, shape.traffic, shape.seed + 300),
-      everRecorded: ["storefront_view", "product_view", "product_click", "checkout_view"],
+      everRecorded: ["storefront_view", "product_view", "product_click", "cart_add", "checkout_view"],
       activeBlockTypes: ["product"],
     },
     funnel: funnelFor(shape.traffic),

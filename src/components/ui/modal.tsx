@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import {
   helpTextClass,
   modalActionsClass,
+  modalPlacementClass,
   modalSizeClass,
   modalTitleClass,
   overlayCloseButtonClass,
@@ -19,6 +20,7 @@ const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 export type ModalSize = keyof typeof modalSizeClass;
+export type ModalPlacement = keyof typeof modalPlacementClass;
 
 /**
  * Lightweight accessible modal dialog. Renders nothing when closed. On mobile
@@ -43,6 +45,8 @@ export function Modal({
   initialFocus = "first-control",
   dismissible = true,
   themeVars,
+  placement = "center",
+  footer,
 }: {
   open: boolean;
   onClose: () => void;
@@ -80,6 +84,12 @@ export function Modal({
    * gets a dark dialog rather than a white card punched into it.
    */
   themeVars?: React.CSSProperties;
+  /** Where it opens from `sm` up (modalPlacementClass): a centred card, or a
+   *  full-height panel at the right edge. Below `sm` both are a bottom sheet. */
+  placement?: ModalPlacement;
+  /** Kept in view at the panel's foot while the rest scrolls (a cart's total
+   *  and its checkout button). */
+  footer?: React.ReactNode;
 }) {
   const t = useTranslations("Common.actions");
   const panelRef = React.useRef<HTMLDivElement>(null);
@@ -191,7 +201,7 @@ export function Modal({
   // overlay was always positioned `fixed` relative to the viewport, never to
   // its DOM parent, so moving it has no visual effect for any existing caller.
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4" style={themeVars}>
+    <div className={cn("fixed inset-0 z-50 flex", modalPlacementClass[placement].overlay)} style={themeVars}>
       <div
         aria-hidden
         onClick={dismissible ? onClose : undefined}
@@ -217,7 +227,9 @@ export function Modal({
         onSubmit={(event) => event.stopPropagation()}
         className={cn(
           overlaySurfaceClass,
-          "relative z-10 max-h-[90vh] w-full overflow-y-auto p-6",
+          "relative z-10 w-full overflow-y-auto p-6",
+          modalPlacementClass[placement].panel,
+          footer && "flex flex-col pb-0",
           modalSizeClass[size],
           className,
         )}
@@ -263,11 +275,16 @@ export function Modal({
             </button>
           )}
         </div>
-        {children}
+        {footer ? <div className="flex-1">{children}</div> : children}
+        {footer && (
+          // Pinned to the panel's foot while the content above scrolls under
+          // it; the panel's own colour, so nothing shows through.
+          <div className="sticky bottom-0 -mx-6 mt-4 border-t border-border bg-popover px-6 py-4">{footer}</div>
+        )}
         {/* A phone's sheet runs to the bottom edge: clear the home indicator.
             Its own element, because a padding utility on the panel would
             replace the panel's bottom padding rather than add to it. */}
-        <div aria-hidden className="pb-safe shrink-0 sm:hidden" />
+        <div aria-hidden className={cn("pb-safe shrink-0 sm:hidden", footer && "bg-popover")} />
       </div>
     </div>,
     document.body,

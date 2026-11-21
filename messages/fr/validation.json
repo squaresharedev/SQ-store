@@ -331,6 +331,21 @@
       "required": "Le titre est obligatoire.",
       "tooLong": "Le titre doit faire {maximum} caractères ou moins.",
       "unsupported": "Le titre contient des caractères non pris en charge."
+    },
+    "cartTitle": {
+      "required": "Le titre du panier est obligatoire.",
+      "tooLong": "Le titre du panier doit faire {maximum} caractères ou moins.",
+      "unsupported": "Le titre du panier contient des caractères non pris en charge."
+    },
+    "cartNote": {
+      "required": "La note du panier est obligatoire.",
+      "tooLong": "La note du panier doit faire {maximum} caractères ou moins.",
+      "unsupported": "La note du panier contient des caractères non pris en charge."
+    },
+    "cartAddLabel": {
+      "required": "Le texte du bouton Ajouter au panier est obligatoire.",
+      "tooLong": "Le texte du bouton Ajouter au panier doit faire {maximum} caractères ou moins.",
+      "unsupported": "Le texte du bouton Ajouter au panier contient des caractères non pris en charge."
     }
   },
   "email": {
@@ -391,6 +406,7 @@
     "reportTarget": "Cet élément n’est pas valide.",
     "moderationDecision": "Cette décision n'est pas valide.",
     "checkoutAttempt": "Ce paiement a expiré. Rechargez la page et réessayez.",
+    "cart": "Ce panier a expiré. Rechargez la page et réessayez.",
     "product": "Ce produit est introuvable."
   },
   "handle": {

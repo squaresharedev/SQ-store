@@ -1,3 +1,4 @@
+import { cartLaunched } from "@/lib/cart/availability";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -41,6 +42,7 @@ export default async function SampleStorefrontPage({
 
   return (
     <StorefrontDesigner
+      cartOffered={cartLaunched()}
       sample={{ autoStartTour: flags?.editorTourPending === true }}
       storefrontId="sample"
       initialName={sample.name}

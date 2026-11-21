@@ -6,6 +6,7 @@ import {
   GET as getCheckoutPageRoute,
   PATCH as patchCheckoutPageRoute,
 } from "@/app/api/storefronts/[id]/checkout-page/route";
+import { GET as getCartPageRoute, PATCH as patchCartPageRoute } from "@/app/api/storefronts/[id]/cart-page/route";
 import {
   GET as getProductPageRoute,
   PATCH as patchProductPageRoute,
@@ -196,6 +197,18 @@ export const storefrontTools = [
   }),
 
   defineTool({
+    name: "get_cart_page",
+    title: "Get cart settings",
+    description: "How a storefront's shopping cart behaves: on or off, which product page button leads, what follows Add to cart, whether cards add to the cart, its words, its delivery line and Goes well with. Absent fields are the defaults. `live` says whether buyers can have a cart yet; `options` lists the values each enum field accepts.",
+    scope: "store:read",
+    permission: "store.read",
+    annotations: READ,
+    input: z.strictObject({ id: storefrontId }),
+    handler: async ({ id }) =>
+      fromPageRoute(await getCartPageRoute(new Request("https://agent.invalid"), pageContext(id))),
+  }),
+
+  defineTool({
     name: "get_shipping_policy",
     title: "Get shipping and returns",
     description: "The store's shipping and returns terms and its named profiles. They belong to the store, not to any one storefront.",
@@ -378,6 +391,18 @@ export const storefrontTools = [
     input: z.strictObject({ id: storefrontId, settings: pageSettings }),
     handler: async ({ id, settings }) =>
       fromPageRoute(await patchCheckoutPageRoute(patchRequest(id, settings), pageContext(id))),
+  }),
+
+  defineTool({
+    name: "update_cart_page",
+    title: "Update cart settings",
+    description: "Change a storefront's shopping cart. Send only what changes; false switches a part off, and sending the default removes it. Words show to buyers, so links, email addresses and bank details are refused.",
+    scope: "storefronts:write",
+    permission: "storefront.write",
+    annotations: WRITE,
+    input: z.strictObject({ id: storefrontId, settings: pageSettings }),
+    handler: async ({ id, settings }) =>
+      fromPageRoute(await patchCartPageRoute(patchRequest(id, settings), pageContext(id))),
   }),
 
   defineTool({

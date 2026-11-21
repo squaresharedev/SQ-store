@@ -102,6 +102,7 @@
     "refundOrders": "Demasiados reembolsos en poco tiempo.",
     "connectPayments": "Demasiados intentos de conectar Stripe en poco tiempo.",
     "readCheckoutSettings": "Demasiados intentos de leer los ajustes del proceso de pago en poco tiempo.",
+    "readCartSettings": "Demasiados intentos de leer los ajustes del carrito en poco tiempo.",
     "changePlan": "Demasiados cambios de plan iniciados en poco tiempo.",
     "saveDiscounts": "Demasiados cambios de descuentos en poco tiempo.",
     "moderateReviews": "Demasiados cambios en reseñas en poco tiempo.",
@@ -139,6 +140,8 @@
     "connectPayments": "No se pudo abrir Stripe por un problema de nuestra parte.",
     "loadCheckoutSettings": "No se han podido cargar los ajustes de tu proceso de pago por un problema en nuestro sistema.",
     "saveCheckoutSettings": "No se han podido guardar los ajustes de tu proceso de pago por un problema en nuestro sistema.",
+    "loadCartSettings": "No se han podido cargar los ajustes de tu carrito por un problema en nuestro sistema.",
+    "saveCartSettings": "No se han podido guardar los ajustes de tu carrito por un problema en nuestro sistema.",
     "loadPlans": "No se ha podido cargar tu plan por un problema en nuestro lado.",
     "startCheckout": "No se ha podido abrir el proceso de pago por un problema en nuestro lado.",
     "openBillingPortal": "No se han podido abrir tus datos de facturación por un problema en nuestro lado.",
@@ -667,6 +670,11 @@
   "checkoutPageApi": {
     "notObjectFix": "Envía un objeto JSON, p. ej. '{'\"layout\": \"compact\"'}'.",
     "invalid": "Esos ajustes del proceso de pago no son válidos.",
+    "invalidFix": "Comprueba el campo indicado arriba contra `limits` en un GET de esta URL, e inténtalo de nuevo."
+  },
+  "cartPageApi": {
+    "notObjectFix": "Envía un objeto JSON, p. ej. '{'\"quickAdd\": false'}'.",
+    "invalid": "Esos ajustes del carrito no son válidos.",
     "invalidFix": "Comprueba el campo indicado arriba contra `limits` en un GET de esta URL, e inténtalo de nuevo."
   },
   "billing": {

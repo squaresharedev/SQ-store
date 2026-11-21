@@ -222,6 +222,11 @@
   //          (a site builder's frame above the embed, as Wix makes one)
   //        curl -sI https://dashboard.squareshare.eu/e/<any uuid>/example.com
   //          must show x-frame-options: DENY and NO content-security-policy
+  //   f. THE CART INSIDE THE EMBED (cards that add to the cart in the frame,
+  //      lib/cart/availability.ts embedCartWritable). One more Worker route,
+  //        embed.squareshare.eu/api/cart/*
+  //      then EMBED_CART_API="1" in `vars` and deploy. Until then the frame's
+  //      cards open the product's page and the frame stores nothing.
   // To take the embed down again, remove the variable and deploy.
   //
   // SIGN-UP GATE (src/lib/auth/signup-intent.ts). Supabase's own sign-up

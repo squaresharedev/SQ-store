@@ -95,6 +95,7 @@
       "cards": "Produktkacheln",
       "soldOut": "Ausverkauft",
       "productPage": "Produktseite",
+      "cartPage": "Warenkorb",
       "checkoutPage": "Kasse"
     },
     "subtitle": {
@@ -104,6 +105,7 @@
       "cards": "Schaufenster / Produktkacheln",
       "soldOut": "Schaufenster / Ausverkauft",
       "productPage": "Schaufenster / Produktseite",
+      "cartPage": "Schaufenster / Warenkorb",
       "checkoutPage": "Schaufenster / Kasse",
       "blocks": "Schaufenster / Blöcke"
     },
@@ -1547,5 +1549,29 @@
         "keys": "<kbd>Leertaste</kbd> gedrückt halten und ziehen"
       }
     }
+  },
+  "cartPage": {
+    "on": "Warenkorb",
+    "onHint": "Käufer sammeln Produkte und zahlen auf einmal. Jetzt kaufen bleibt.",
+    "mainButton": {
+      "label": "Hauptschaltfläche",
+      "buyNow": "Jetzt kaufen",
+      "addToCart": "In den Warenkorb"
+    },
+    "afterAdd": {
+      "label": "Nach dem Hinzufügen",
+      "openCart": "Warenkorb öffnen",
+      "note": "Hinweis anzeigen"
+    },
+    "quickAdd": "Aus Karten hinzufügen",
+    "quickAddHint": "Der Button auf einer Karte legt das Produkt direkt in den Warenkorb, wenn keine Variante zu wählen ist.",
+    "addLabel": "Button-Text",
+    "title": "Warenkorb-Überschrift",
+    "note": "Hinweis im Warenkorb",
+    "notePlaceholder": "Bestellungen werden montags verschickt",
+    "deliveryBar": "Fortschritt kostenloser Versand",
+    "deliveryBarHint": "Wird angezeigt, wenn dein Versand ab einem Betrag kostenlos ist.",
+    "suggestions": "Passt dazu",
+    "suggestionsHint": "Unter dem Warenkorb: was du bei seinen Produkten für Zu deiner Bestellung hinzufügen ausgewählt hast."
   }
 }

@@ -590,6 +590,7 @@ test.describe("connecting and using an assistant", () => {
     }
     await ok("get_product_page", { id: storefrontId });
     await ok("get_checkout_page", { id: storefrontId });
+    await ok("get_cart_page", { id: storefrontId });
     const shipping = await ok("get_shipping_policy");
     await ok("list_orders");
     await ok("list_orders", { view: "to-ship" });

@@ -8,6 +8,7 @@ import { parseShipTo } from "@/lib/orders/ship-to";
 import { parseFulfilment } from "@/lib/orders/fulfilment";
 import { parseCarrier } from "@/lib/orders/carriers";
 import { orderNumberCondition } from "@/lib/orders/order-number";
+import { anyOrderLineIs, isProductId } from "@/lib/supabase/order-lines";
 import { orderPhotoKey } from "@/lib/orders/photo";
 import { presignGetUrl } from "@/lib/r2";
 import { isContentVisible } from "@/lib/moderation/removal";
@@ -68,6 +69,12 @@ function toStatus(value: unknown): OrderStatus {
 function toOrderView(row: Record<string, unknown>): OrderView {
   const quantity = Number(row.quantity);
   const addOns = toAddOnLines(row.add_ons);
+  // Which lines were refunded on their own (null = the order's own line).
+  const refundedLines = new Set(
+    (Array.isArray(row.line_refunds) ? row.line_refunds : []).map((entry: Record<string, unknown>) =>
+      entry.line_id == null ? FIRST_LINE : String(entry.line_id),
+    ),
+  );
   return {
     id: String(row.id),
     productTitle: String(row.product_title ?? ""),
@@ -92,7 +99,10 @@ function toOrderView(row: Record<string, unknown>): OrderView {
     // what "put them back in stock" returns (order_apply_refund).
     stockReserved: reservedUnits(row.stock_reserved) + addOns.reduce((total, line) => total + line.reserved, 0),
     paidThroughProvider: isProviderPayment(row.payment_ref),
+    firstLineRefunded: refundedLines.has(FIRST_LINE),
     addOns: addOns.map((line) => ({
+      id: line.id,
+      refunded: refundedLines.has(line.id),
       productTitle: line.productTitle,
       selection: line.selection,
       quantity: line.quantity,
@@ -101,6 +111,9 @@ function toOrderView(row: Record<string, unknown>): OrderView {
   };
 }
 
+/** The order's own first line, in a set of refunded line ids. */
+const FIRST_LINE = "first";
+
 function reservedUnits(value: unknown): number {
   const units = Number(value);
   return Number.isInteger(units) ? Math.max(0, units) : 0;
@@ -108,13 +121,14 @@ function reservedUnits(value: unknown): number {
 
 /** The embedded order_add_ons rows, in the seller's order. Tolerates a read
  *  that did not embed them (an older caller, a test row): none. */
-function toAddOnLines(raw: unknown): (OrderAddOnLine & { reserved: number })[] {
+function toAddOnLines(raw: unknown): (Omit<OrderAddOnLine, "refunded"> & { reserved: number })[] {
   if (!Array.isArray(raw)) return [];
   return [...raw]
     .sort((a, b) => Number(a?.position ?? 0) - Number(b?.position ?? 0))
     .map((line: Record<string, unknown>) => {
       const quantity = Number(line.quantity);
       return {
+        id: String(line.id ?? ""),
         productTitle: String(line.product_title ?? ""),
         selection: parseOrderSelection(line.selected_options),
         quantity: Number.isInteger(quantity) && quantity >= 1 ? quantity : 1,
@@ -153,7 +167,7 @@ function toOrderDiscount(row: Record<string, unknown>): OrderDiscount | null {
 
 /** The column list every order read selects — one contract, one place. */
 const ORDER_COLUMNS =
-  "id, product_title, selected_options, quantity, ship_to, fulfilment_status, shipped_at, tracking_number, tracking_carrier, amount_cents, platform_fee_cents, platform_fee_bps, currency, channel, status, buyer_email, created_at, gift_message, withdrawal_requested_at, discount_id, discount_cents, discount_code_id, discount_code, refunded_at, refund_reason, stock_reserved, payment_ref, add_ons:order_add_ons(product_title, selected_options, quantity, amount_cents, stock_reserved, position)";
+  "id, product_title, selected_options, quantity, ship_to, fulfilment_status, shipped_at, tracking_number, tracking_carrier, amount_cents, platform_fee_cents, platform_fee_bps, currency, channel, status, buyer_email, created_at, gift_message, withdrawal_requested_at, discount_id, discount_cents, discount_code_id, discount_code, refunded_at, refund_reason, stock_reserved, payment_ref, add_ons:order_add_ons(id, product_title, selected_options, quantity, amount_cents, stock_reserved, position), line_refunds:order_line_refunds(line_id)";
 
 /** How a Stripe PaymentIntent id starts: the one payment_ref a refund can name. */
 export const PROVIDER_PAYMENT_PREFIX = "pi_";
@@ -227,6 +241,8 @@ const ORDER_SEARCH_COLUMNS = [
   "ship_to->>name",
   "ship_to->>city",
   "product_title",
+  // Every line after the first (a cart's, or an add-on's), on the order.
+  "more_titles",
   "tracking_number",
 ] as const;
 
@@ -546,18 +562,22 @@ export async function toShipByProduct(): Promise<Record<string, number>> {
   const { data, error } = await onlyToShip(
     (supabase as SupabaseClient)
       .from("orders")
-      .select("product_id")
+      .select("product_id, more_product_ids")
       .eq("seller_id", account.accountId)
-      .not("product_id", "is", null)
       .limit(TO_SHIP_TALLY_LIMIT),
   );
   if (error) {
     console.error("[orders] to-ship tally failed", error.message);
     return {};
   }
+  // Every product an order holds counts it once, whichever line it is on. A
+  // download in a cart beside a parcel counts too: its order is still owed.
   const tally: Record<string, number> = {};
-  for (const row of (data ?? []) as { product_id: string }[]) {
-    tally[row.product_id] = (tally[row.product_id] ?? 0) + 1;
+  for (const row of (data ?? []) as { product_id: string | null; more_product_ids: string[] | null }[]) {
+    const products = new Set([row.product_id, ...(row.more_product_ids ?? [])]);
+    for (const id of products) {
+      if (id) tally[id] = (tally[id] ?? 0) + 1;
+    }
   }
   return tally;
 }
@@ -571,13 +591,15 @@ export async function countToShipForProduct(
   accountId: string,
   productId: string,
 ): Promise<number | null> {
+  if (!isProductId(productId)) return null;
   const supabase = await createClient();
+  // Every order holding it on any line.
   const { count, error } = await onlyToShip(
     (supabase as SupabaseClient)
       .from("orders")
       .select("id", { count: "exact", head: true })
       .eq("seller_id", accountId),
-  ).eq("product_id", productId);
+  ).or(anyOrderLineIs(productId));
   if (error) {
     console.error("[orders] product to-ship count failed", error.message);
     return null;
@@ -679,7 +701,13 @@ export async function listOrders(options?: {
     .select(`${ORDER_COLUMNS}, ${ORDER_PHOTO_EMBED}`, { count: "exact" })
     .eq("seller_id", account.accountId);
   if (toShip) query = onlyToShip(query);
-  if (options?.productId) query = query.eq("product_id", options.productId);
+  if (options?.productId) {
+    // A product's orders are every order holding it on any line. (The id is
+    // a product row's own; anything else matches nothing.)
+    query = isProductId(options.productId)
+      ? query.or(anyOrderLineIs(options.productId))
+      : query.eq("product_id", options.productId);
+  }
 
   // --- Filters ---
   if (filters?.status === WITHDRAWN_STATUS_FILTER) {

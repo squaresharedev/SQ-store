@@ -7,7 +7,6 @@ import { FitText } from "@/components/ui/FitText";
 import { fieldBaseClass } from "@/components/ui/control-styles";
 import { PageTicket } from "@/components/product-page/PageTicket";
 import { formatCents } from "@/lib/format/money";
-import { checkoutDiscountApiPath } from "@/lib/checkout/paths";
 import { DISCOUNT_CODE_MAX } from "@/types/discount";
 import type { DiscountCheckResponse } from "@/types/checkout";
 import { useAppliedCode } from "./DiscountCodeContext";
@@ -33,14 +32,17 @@ type Notice = "invalid" | "rateLimited" | null;
  * sits, but never asks the server.
  */
 export function DiscountCodeField({
-  storefrontId,
-  productId,
+  checkPath,
+  productIds,
   preview,
   outdone,
   ink,
 }: {
-  storefrontId: string;
-  productId: string;
+  /** The checkout's own "Apply" route (lib/checkout/paths.ts). */
+  checkPath: string;
+  /** The order's products the route does not already name, so the answer
+   *  says which of them the code covers. */
+  productIds: readonly string[];
   preview: boolean;
   /** The applied code works, but the running sale is the better price. */
   outdone: boolean;
@@ -69,10 +71,10 @@ export function DiscountCodeField({
     setChecking(true);
     setNotice(null);
     try {
-      const response = await fetch(checkoutDiscountApiPath(storefrontId, productId), {
+      const response = await fetch(checkPath, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, ...(productIds.length > 0 ? { productIds } : {}) }),
       });
       const result = (await response.json().catch(() => null)) as DiscountCheckResponse | null;
       if (result?.ok) {

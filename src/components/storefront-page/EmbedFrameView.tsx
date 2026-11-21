@@ -3,7 +3,9 @@
 import { useRef } from "react";
 import { useTranslations } from "next-intl";
 import { FooterDot } from "@/components/product-page/PoweredByFooter";
-import { quietLinkClass, ruleColor } from "@/components/product-page/product-page-maps";
+import { chipStyle, quietLinkClass, ruleColor } from "@/components/product-page/product-page-maps";
+import { StorefrontCart } from "@/components/cart/StorefrontCart";
+import { CartButton } from "@/components/cart/CartButton";
 import { CustomFontFace } from "@/components/storefront/CustomFontFace";
 import { LEGAL_LINKS, SQUARESHARE_SITE } from "@/lib/legal/links";
 import { storefrontDisplayName } from "@/lib/storefront/display-name";
@@ -21,8 +23,9 @@ import { useEmbedFrameReport } from "./useEmbedFrameReport";
  * of its own: the seller's page stays put behind it, and buying happens on a
  * page whose address the buyer can read.
  *
- * NOTHING HERE DOES ANYTHING BUT LINK. No form, no dialog, no script-driven
- * navigation: the frame is sandboxed by the loader that creates it
+ * NOTHING HERE DOES ANYTHING BUT LINK, save a card's "Add to cart" (a
+ * button beside its link, never inside it: QuickAddTile). No form, no
+ * dialog, no script-driven navigation: the frame is sandboxed by the loader that creates it
  * (public/widget.js) to exactly "may run its own script and open a link in a
  * new tab", and every element below fits inside that. Every link is a plain
  * <a>, never next/link: a client-side navigation would swap this document for
@@ -46,7 +49,15 @@ export function EmbedFrameView({ page }: { page: StorefrontPageData }) {
   // says: one sentence, already in every language.
   useEmbedFrameReport(rootRef, t("storefront.gridLabel", { store: displayName }));
 
+  const cart = page.cart ?? null;
+
   return (
+    <StorefrontCart
+      storefrontId={page.id}
+      cart={cart}
+      embedded
+      theme={{ ink: surface.ink, cornerRadius: theme.cornerRadius, cta: page.tileLook.buy }}
+    >
     <div
       ref={rootRef}
       // No min-height: the frame is exactly as tall as this element says it is.
@@ -62,6 +73,18 @@ export function EmbedFrameView({ page }: { page: StorefrontPageData }) {
           part of that page. It is named one level down, and its two parts are
           plain boxes. (The hosted page, which IS the page, uses all three.) */}
       <h2 className="sr-only">{displayName}</h2>
+      {cart && (
+        // The cart on our page, in a new tab: a link like everything else
+        // here. The frame grows with its content, so no panel opens inside
+        // it. It stores nothing until a card adds to the cart (only while the
+        // cart routes answer on the embed's host, embedCartWritable), and then
+        // only the cart's id (lib/cart/storage.ts).
+        <div className="flex w-full justify-end px-4 pt-3 @md:px-6" data-embed-frame-cart="">
+          <span style={chipStyle(surface.ink, theme.cornerRadius)}>
+            <CartButton ink={surface.ink} />
+          </span>
+        </div>
+      )}
       <div className="w-full px-4 py-5 @md:px-6">
         <StorefrontBoard page={page} displayName={displayName} tilesOpenNewTab />
       </div>
@@ -101,5 +124,6 @@ export function EmbedFrameView({ page }: { page: StorefrontPageData }) {
         </div>
       </div>
     </div>
+    </StorefrontCart>
   );
 }

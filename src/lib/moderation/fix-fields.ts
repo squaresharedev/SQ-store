@@ -103,6 +103,10 @@ const PATH_FIX_FIELDS: Record<FixTarget, readonly (readonly [string, string])[]>
     ["config.blocks", "images"],
     ["config.theme.background", "background"],
     ["config.productPage", "productPage"],
+    // config.cartPage and config.checkoutPage (the seller's words on those
+    // pages) fall to "other" on purpose: a field of their own must first join
+    // the CHECKs on storefronts.moderation_fields and moderation_decisions
+    // (20260926), or an automatic pause naming it would fail to write.
   ],
 };
 

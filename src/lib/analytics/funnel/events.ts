@@ -29,7 +29,7 @@ export const FUNNEL_EVENTS = [
   "embed_view",
   /** A product was opened from it. */
   "product_open",
-  /** A product was put in a cart. Reserved: checkout is one product today. */
+  /** A product was put in a cart (app/api/cart). */
   "add_to_cart",
   /** A payment page was opened for an order (a Stripe Checkout Session). */
   "checkout_started",

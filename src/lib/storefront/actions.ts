@@ -293,6 +293,11 @@ export async function saveStorefront(
     // the schema and persisted only when sent. The designer sends it whenever
     // one was stored or the seller moved it off the defaults.
     ...(parsed.data.checkoutPage ? { checkoutPage: parsed.data.checkoutPage } : {}),
+    // The cart's design, the same way. Every member of it is optional, so an
+    // empty one is the defaults and is not stored.
+    ...(parsed.data.cartPage && Object.keys(parsed.data.cartPage).length > 0
+      ? { cartPage: parsed.data.cartPage }
+      : {}),
   };
 
   // Uploaded assets (image background, custom font): the config stores only the

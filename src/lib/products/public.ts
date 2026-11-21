@@ -36,6 +36,8 @@ import { productPageUrl } from "@/lib/storefront/product-page-url";
 import { toCurrency } from "@/lib/format/money";
 import { loadProductSale, msUntilSaleEnds } from "@/lib/discounts/public";
 import { loadAddOnCards } from "@/lib/products/add-ons";
+import { cartFor } from "@/lib/cart/availability";
+import { fileFormatFromKey } from "@/lib/products/file-format";
 import { isProductPageSectionShown } from "@/lib/storefront/product-page";
 import type {
   ProductPageDocument,
@@ -51,15 +53,6 @@ import type { ProductReviews } from "@/types/review";
 // preview, which builds the same payload from the same row.
 export { PUBLIC_PRODUCT_SELECT, type PublicProductRow } from "@/lib/products/purchasable";
 
-/** "PDF", "ZIP"... from a key's extension. Never the name, never the key. */
-function formatFromKey(key: string | null): string | null {
-  if (!key) return null;
-  const lastSegment = key.split("/").pop() ?? "";
-  const dot = lastSegment.lastIndexOf(".");
-  if (dot === -1) return null;
-  const extension = lastSegment.slice(dot + 1);
-  return /^[A-Za-z0-9]{1,5}$/.test(extension) ? extension.toUpperCase() : null;
-}
 
 /**
  * The buyer-safe product from a raw row. `soldOutFlag` is the tile's manual
@@ -114,7 +107,7 @@ export async function buildProductPageProduct(
   for (const document of parseDocuments(row.documents)) {
     const url = await presignGetUrl(document.key);
     if (!url) continue;
-    documents.push({ url, label: document.label, format: formatFromKey(document.key) });
+    documents.push({ url, label: document.label, format: fileFormatFromKey(document.key) });
   }
 
   const stock = toPublicStockBadge(row);
@@ -137,7 +130,7 @@ export async function buildProductPageProduct(
     details: parseDetails(row.details),
     documents,
     isDigital: row.digital_file_key !== null,
-    digitalFormat: formatFromKey(row.digital_file_key),
+    digitalFormat: fileFormatFromKey(row.digital_file_key),
     stock,
     soldOut,
     // A CEILING, not an inventory count. publicQuantityLimit narrows to the
@@ -239,7 +232,7 @@ export const getPublicProductPage = cache(
     // add-ons wait for the product and the checkout flag; those are the only
     // two remaining sequential steps after this batch.
     const theme = config.theme;
-    const [pricing, checkout, reviews, backgroundImageUrl, customFontUrl, pagePhoto] = await Promise.all([
+    const [pricing, checkout, reviews, backgroundImageUrl, customFontUrl, pagePhoto, cart] = await Promise.all([
       gatePricing(gate),
       checkoutAvailableFor(gate),
       isProductPageSectionShown(productPage, "reviews")
@@ -250,6 +243,7 @@ export const getPublicProductPage = cache(
         : Promise.resolve(null),
       theme.customFont ? presignGetUrl(theme.customFont.key) : Promise.resolve(null),
       signPagePhoto(productPage.backgroundImage),
+      cartFor(gate),
     ]);
 
     const product = await buildProductPageProduct(row, {
@@ -298,6 +292,7 @@ export const getPublicProductPage = cache(
           customFontUrl,
           pagePhoto,
           checkout,
+          ...(cart ? { cart } : {}),
         },
         product,
         productUrl: productPageUrl(gate.storefront.id, product.id),

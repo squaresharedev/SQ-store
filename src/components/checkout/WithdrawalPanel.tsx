@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { dateTimeFormat } from "@/lib/format/intl";
 import { fieldBaseClass } from "@/components/ui/control-styles";
-import { CTA_BUTTON_CLASS, ctaGhostStyle, type CtaAppearance } from "@/components/product-page/product-page-maps";
+import { CTA_BUTTON_CLASS, ctaOutlineStyle, type CtaAppearance } from "@/components/product-page/product-page-maps";
 import { ORDER_WITHDRAW_API_PATH } from "@/lib/checkout/paths";
 import type { BuyerWithdrawal } from "@/types/checkout";
 
@@ -113,7 +113,7 @@ export function WithdrawalPanel({
           type="button"
           onClick={() => setStage("form")}
           className={cn(CTA_BUTTON_CLASS, "w-auto self-start hover:opacity-90")}
-          style={ctaGhostStyle(cta, ink)}
+          style={ctaOutlineStyle(cta, ink)}
           data-order-withdraw-open=""
         >
           {t("open")}
@@ -161,7 +161,7 @@ export function WithdrawalPanel({
               type="submit"
               disabled={stage === "sending" || !name.trim() || !email.trim()}
               className={cn(CTA_BUTTON_CLASS, "w-auto disabled:opacity-60")}
-              style={ctaGhostStyle(cta, ink)}
+              style={ctaOutlineStyle(cta, ink)}
               data-order-withdraw-confirm=""
             >
               {stage === "sending" ? t("sending") : t("confirm")}

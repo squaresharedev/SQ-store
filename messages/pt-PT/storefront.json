@@ -95,6 +95,7 @@
       "cards": "Cartões de produto",
       "soldOut": "Esgotado",
       "productPage": "Página de produto",
+      "cartPage": "Carrinho",
       "checkoutPage": "Pagamento"
     },
     "subtitle": {
@@ -104,6 +105,7 @@
       "cards": "Montra / Cartões de produto",
       "soldOut": "Montra / Esgotado",
       "productPage": "Montra / Página de produto",
+      "cartPage": "Montra / Carrinho",
       "checkoutPage": "Montra / Pagamento",
       "blocks": "Montra / Blocos"
     },
@@ -1547,5 +1549,29 @@
         "keys": "Mantenha premido <kbd>Espaço</kbd> e arraste"
       }
     }
+  },
+  "cartPage": {
+    "on": "Carrinho",
+    "onHint": "Os compradores recolhem produtos e pagam de uma vez. Comprar agora mantém-se.",
+    "mainButton": {
+      "label": "Botão principal",
+      "buyNow": "Comprar agora",
+      "addToCart": "Adicionar ao carrinho"
+    },
+    "afterAdd": {
+      "label": "Após adicionar",
+      "openCart": "Abrir o carrinho",
+      "note": "Mostrar uma nota"
+    },
+    "quickAdd": "Adicionar a partir dos cartões",
+    "quickAddHint": "O botão de um cartão põe o produto diretamente no carrinho quando não há versão para escolher.",
+    "addLabel": "Texto do botão",
+    "title": "Título do carrinho",
+    "note": "Nota no carrinho",
+    "notePlaceholder": "As encomendas são enviadas às segundas-feiras",
+    "deliveryBar": "Progresso de entrega grátis",
+    "deliveryBarHint": "Mostrado quando a sua entrega é gratuita acima de um valor.",
+    "suggestions": "Combina bem com",
+    "suggestionsHint": "Por baixo do carrinho: o que escolheu em Adicionar à sua encomenda para os produtos nele."
   }
 }

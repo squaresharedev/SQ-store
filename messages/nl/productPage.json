@@ -282,6 +282,8 @@
       "nameLabel": "Naam die getoond wordt",
       "nameHelp": "Wordt bij je review getoond. Je e-mailadres en je bestelling blijven privé.",
       "send": "Review plaatsen",
+      "pickLegend": "Kies wat je wilt beoordelen",
+      "reviewed": "Beoordeeld",
       "errors": {
         "notEligible": "Deze bestelling kan niet meer worden beoordeeld.",
         "rateLimited": "Te veel reviews vanaf deze verbinding. Probeer het over een uur opnieuw.",
@@ -412,7 +414,8 @@
       "discount_invalid": "Deze kortingscode kan niet meer worden gebruikt. Verwijder hem om de volle prijs te betalen.",
       "price_changed": "De prijs is gewijzigd terwijl deze pagina open was, dus er is niets in rekening gebracht. Bekijk het nieuwe totaal en betaal dan.",
       "turnstile": "De beveiligingscontrole is niet afgerond, dus er is niets in rekening gebracht. Hij loopt nu opnieuw: wacht even en probeer het dan nog eens.",
-      "add_on_unavailable": "Iets wat je hebt toegevoegd kan niet meer bij deze bestelling worden verkocht, dus er is niets in rekening gebracht. Controleer je bestelling en het nieuwe totaal, en betaal dan."
+      "add_on_unavailable": "Iets wat je hebt toegevoegd kan niet meer bij deze bestelling worden verkocht, dus er is niets in rekening gebracht. Controleer je bestelling en het nieuwe totaal, en betaal dan.",
+      "currency": "In één bestelling kan maar één valuta worden gebruikt, dus er is niets in rekening gebracht. Controleer je winkelwagen en betaal daarna."
     },
     "editHeadline": "Koptekst van afrekenen",
     "discount": {
@@ -494,6 +497,62 @@
       "takenDown": "Verwijderd",
       "otherKind": "Ander soort",
       "otherCurrency": "Andere valuta"
+    }
+  },
+  "cart": {
+    "title": "Je winkelwagen",
+    "button": "Winkelwagen, {count, plural, =0 {leeg} one {# artikel} other {# artikelen}}",
+    "add": "In winkelwagen",
+    "addShort": "Toevoegen",
+    "addTitle": "{title} in je winkelwagen leggen",
+    "adding": "Wordt toegevoegd",
+    "added": "Toegevoegd",
+    "addedNote": "In je winkelwagen gelegd",
+    "choose": "Kiezen",
+    "view": "Winkelwagen bekijken",
+    "checkout": "Afrekenen",
+    "keepShopping": "Verder winkelen",
+    "empty": "Je winkelwagen is leeg",
+    "subtotal": "Subtotaal",
+    "delivery": "Bezorging",
+    "deliveryTo": "Bezorging naar {area}",
+    "free": "Gratis",
+    "atCheckout": "Bij afrekenen",
+    "freeGap": "Nog {amount} voor gratis bezorging",
+    "freeReached": "Bezorging is gratis",
+    "gone": "Wordt hier niet meer verkocht",
+    "quantity": "Aantal van {title}",
+    "fewer": "Eén minder van {title}",
+    "more": "Eén meer van {title}",
+    "remove": "{title} verwijderen",
+    "removed": "{title} uit je winkelwagen verwijderd.",
+    "undo": "Ongedaan maken",
+    "addedAnnounce": "{title} toegevoegd. {count, plural, one {# artikel} other {# artikelen}} in je winkelwagen.",
+    "busy": "Je winkelwagen kon niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "suggestionsTitle": "Past goed bij",
+    "problem": {
+      "not_found": "Wordt hier niet meer verkocht. Verwijder het om af te rekenen.",
+      "sold_out": "Uitverkocht. Verwijder het om af te rekenen.",
+      "options": "Deze versie is niet beschikbaar. Verwijder het om af te rekenen.",
+      "quantity": "Dat is meer dan één bestelling kan bevatten. Verlaag het aantal.",
+      "insufficient_stock": "Niet zoveel op voorraad. Verlaag het aantal.",
+      "currency": "Geprijsd in een andere valuta dan de rest van je winkelwagen.",
+      "no_shipping_rates": "Kan nu niet worden bezorgd."
+    },
+    "refusal": {
+      "not_found": "Dit kan nu niet worden toegevoegd.",
+      "sold_out": "Uitverkocht.",
+      "options": "Kies eerst een versie.",
+      "quantity": "Dat is meer dan één bestelling kan bevatten.",
+      "insufficient_stock": "Niet zoveel op voorraad.",
+      "currency": "Dit is geprijsd in een andere valuta dan je winkelwagen. Reken eerst af of maak je winkelwagen leeg.",
+      "no_shipping_rates": "Dit kan nu niet worden bezorgd.",
+      "full": "Je winkelwagen is vol. Reken eerst af.",
+      "unavailable": "De winkelwagen is nu niet beschikbaar.",
+      "gone": "Je winkelwagen is verlopen. Probeer het opnieuw.",
+      "invalid": "Dat werkte niet. Probeer het opnieuw.",
+      "rate_limited": "Te veel wijzigingen tegelijk. Wacht even en probeer het dan opnieuw."
     }
   }
 }

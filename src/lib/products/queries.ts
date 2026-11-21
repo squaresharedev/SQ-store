@@ -87,12 +87,12 @@ const PRODUCT_LIST_COLUMNS =
  * PRODUCT_LIST_COLUMNS so the paginated /products list stays lean.
  */
 const PRODUCT_ALL_COLUMNS =
-  `${PRODUCT_LIST_COLUMNS}, created_at, updated_at, gallery` as const;
+  `${PRODUCT_LIST_COLUMNS}, created_at, updated_at, gallery, option_groups` as const;
 
 /** Extended row type for the full-catalogue read. Satisfies ProductListRow so
  *  rowToProduct accepts it without widening. */
 export type ProductAllRow = ProductListRow &
-  Pick<ProductRow, "created_at" | "updated_at" | "gallery">;
+  Pick<ProductRow, "created_at" | "updated_at" | "gallery" | "option_groups">;
 
 /**
  * The list columns plus the product-page jsonb. Only the single-product read
@@ -195,7 +195,8 @@ export const PRODUCTS_MAX_PAGE_SIZE = 96;
 /**
  * The ACTIVE account's whole catalogue as extended rows, React-cached so
  * every caller within one request render shares one round-trip. Selects
- * PRODUCT_ALL_COLUMNS (the list columns plus created_at, updated_at, gallery)
+ * PRODUCT_ALL_COLUMNS (the list columns plus created_at, updated_at, gallery,
+ * and option_groups, for whether a storefront card can add to the cart)
  * so callers that need those fields do not need a second read.
  *
  * For consumers that need every product at once: the storefront designer's

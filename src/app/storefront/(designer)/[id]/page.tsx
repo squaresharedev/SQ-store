@@ -1,3 +1,4 @@
+import { cartLaunched } from "@/lib/cart/availability";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { listStorefrontProducts } from "@/lib/discounts/storefront-preview";
@@ -83,7 +84,8 @@ export default async function StorefrontEditorPage({
     getStorefront(id),
     // The catalogue as a storefront draws it: a running sale's price on the
     // tile, exactly as the published page shows it to buyers.
-    listStorefrontProducts(),
+    // And which cards put their product straight in the cart.
+    listStorefrontProducts({ cards: true }),
     getProductSales(),
     getLastTouchedProduct(),
     account ? getAccountSellerIdentity(account.accountId) : Promise.resolve({}),
@@ -112,6 +114,7 @@ export default async function StorefrontEditorPage({
 
   return (
     <StorefrontDesigner
+      cartOffered={cartLaunched()}
       storefrontId={storefront.id}
       initialName={storefront.name}
       initialConfig={storefront.config}

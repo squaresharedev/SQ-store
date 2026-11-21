@@ -102,6 +102,7 @@
     "refundOrders": "Zbyt wiele zwrotów środków w krótkim czasie.",
     "connectPayments": "Zbyt wiele prób połączenia ze Stripe w krótkim czasie.",
     "readCheckoutSettings": "Zbyt wiele prób odczytania ustawień kasy w krótkim czasie.",
+    "readCartSettings": "Zbyt wiele prób odczytania ustawień koszyka w krótkim czasie.",
     "changePlan": "Za dużo zmian planu w krótkim czasie.",
     "saveDiscounts": "Zbyt wiele zmian rabatów w krótkim czasie.",
     "moderateReviews": "Za dużo zmian w opiniach w krótkim czasie.",
@@ -139,6 +140,8 @@
     "connectPayments": "Nie udało się otworzyć Stripe z powodu problemu po naszej stronie.",
     "loadCheckoutSettings": "Nie udało się wczytać ustawień kasy z powodu problemu po naszej stronie.",
     "saveCheckoutSettings": "Nie udało się zapisać ustawień kasy z powodu problemu po naszej stronie.",
+    "loadCartSettings": "Nie udało się wczytać ustawień koszyka z powodu problemu po naszej stronie.",
+    "saveCartSettings": "Nie udało się zapisać ustawień koszyka z powodu problemu po naszej stronie.",
     "loadPlans": "Nie udało się wczytać twojego planu z powodu błędu po naszej stronie.",
     "startCheckout": "Nie udało się otworzyć realizacji zakupu z powodu błędu po naszej stronie.",
     "openBillingPortal": "Nie udało się otworzyć danych rozliczeniowych z powodu błędu po naszej stronie.",
@@ -667,6 +670,11 @@
   "checkoutPageApi": {
     "notObjectFix": "Wyślij obiekt JSON, np. '{'\"layout\": \"compact\"'}'.",
     "invalid": "Te ustawienia kasy są nieprawidłowe.",
+    "invalidFix": "Sprawdź pole wskazane powyżej względem `limits` z zapytania GET pod tym adresem URL, a potem spróbuj ponownie."
+  },
+  "cartPageApi": {
+    "notObjectFix": "Wyślij obiekt JSON, np. '{'\"quickAdd\": false'}'.",
+    "invalid": "Te ustawienia koszyka są nieprawidłowe.",
     "invalidFix": "Sprawdź pole wskazane powyżej względem `limits` z zapytania GET pod tym adresem URL, a potem spróbuj ponownie."
   },
   "billing": {

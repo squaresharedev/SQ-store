@@ -199,15 +199,15 @@ describe("order_place with add-ons", () => {
     expect(await stockOf(coasters)).toBe(5);
   });
 
-  it("writes nothing twice for a redelivered checkout, and refuses more than four lines", async () => {
+  it("writes nothing twice for a redelivered checkout", async () => {
     await setStock(mug, null);
     const sessionId = session();
     const first = await placeOrder([{ product: mug, title: "Mug", price: 1200 }], { sessionId });
     const again = await placeOrder([{ product: mug, title: "Mug", price: 1200 }], { sessionId });
     expect(again).toMatchObject({ order_id: first.order_id, duplicate: true });
     expect(await linesOf(first.order_id)).toHaveLength(1);
-    const five = Array.from({ length: 5 }, () => ({ product: mug, title: "Mug", price: 1200 }));
-    expect(await expectDbError(placeOrder(five))).toMatch(/at most 4/);
+    // How many lines an order may hold is a cart's question now (19 after the
+    // first): 50-shopping-cart.test.ts.
   });
 });
 

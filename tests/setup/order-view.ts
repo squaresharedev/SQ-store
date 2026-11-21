@@ -35,6 +35,7 @@ export function orderView(overrides: Partial<OrderListRow> = {}): OrderListRow {
     stockReserved: 0,
     paidThroughProvider: false,
     addOns: [],
+    firstLineRefunded: false,
     ...overrides,
   };
 }

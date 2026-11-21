@@ -68,6 +68,13 @@ function packLines(t: Translate, goods: Goods): string[] {
   return lines;
 }
 
+/** The goods as a subject line names them: the first product, and "+2 more"
+ *  when the order holds others (the same words as the orders list). */
+function goodsTitle(t: Translate, goods: Goods): string {
+  const more = goods.more?.length ?? 0;
+  return more > 0 ? `${goods.productTitle} ${t("Orders.list.moreItems", { count: more })}` : goods.productTitle;
+}
+
 /** The address as parcel-label lines, its country named in the reader's language. */
 function addressBlock(address: ShipTo, locale: Locale): string {
   return formatShipTo(address, regionName(address.country, locale));
@@ -154,7 +161,7 @@ export async function sendNewOrderEmail(
       }
       lines.push("");
     } else {
-      lines.push(t("Orders.email.newOrder.introDigital", { title: order.productTitle }), "");
+      lines.push(t("Orders.email.newOrder.introDigital", { title: goodsTitle(t, order) }), "");
       // Downloads added to the order: named, since the intro names only one.
       if (order.more && order.more.length > 0) lines.push(...packLines(t, order), "");
     }
@@ -176,14 +183,16 @@ export async function sendNewOrderEmail(
       t("Orders.email.signOff"),
     );
 
+    // "Ship 2 x Mug to Lyon" names one line; an order of several is named by
+    // its goods instead ("New order: Mug +2 more").
     const subject =
-      order.ships && order.shipTo
+      order.ships && order.shipTo && !order.more?.length
         ? t("Orders.email.newOrder.subjectShip", {
             quantity: order.quantity,
             title: order.productTitle,
             city: order.shipTo.city,
           })
-        : t("Orders.email.newOrder.subjectDigital", { title: order.productTitle });
+        : t("Orders.email.newOrder.subjectDigital", { title: goodsTitle(t, order) });
 
     const result = await sendEmail({ to, subject, text: lines.join("\n") });
     reportFailure("new-order", result);
@@ -450,7 +459,7 @@ export async function sendOrderConfirmation(
 
     const result = await sendEmail({
       to,
-      subject: t("Orders.email.confirmation.subject", { store, title: order.productTitle }),
+      subject: t("Orders.email.confirmation.subject", { store, title: goodsTitle(t, order) }),
       text: lines.join("\n"),
       fromName: t("Orders.email.fromName", { store }),
       ...(order.store.contactEmail ? { replyTo: order.store.contactEmail } : {}),
@@ -587,7 +596,9 @@ export async function sendOrderLinkEmail(
 
 // ── 7. The review reminder, to the buyer who asked for it ─────────────────
 
-export type ReviewReminderEmail = GoodsLine & {
+/** The goods still bought (a line refunded on its own is left out), named in
+ *  the subject the way the orders list names them. */
+export type ReviewReminderEmail = Goods & {
   /** When the buyer asked for it on their order page: what makes it theirs. */
   requestedAt: Date;
   /** The order page with the review dialog open. */
@@ -636,7 +647,7 @@ export async function sendReviewReminder(
     ];
     const result = await sendEmail({
       to,
-      subject: t("Orders.email.reviewReminder.subject", { title: reminder.productTitle }),
+      subject: t("Orders.email.reviewReminder.subject", { title: goodsTitle(t, reminder) }),
       text: lines.join("\n"),
       fromName: t("Orders.email.fromName", { store }),
       unsubscribeUrl: reminder.unsubscribeUrl,

@@ -165,6 +165,14 @@
   },
   "refund": {
     "open": "Reembolsar ou cancelar",
+    "what": "O que reembolsar",
+    "whole": "A encomenda completa",
+    "item": "{quantity, plural, one {{title}} many {# × {title}} other {# × {title}}}",
+    "itemHow": "Reembolsa o custo deste artigo. O último artigo restante inclui também o reembolso do envio.",
+    "itemRestock": "Repor no stock",
+    "confirmItem": "Reembolsar este artigo",
+    "itemRefunded": "Artigo reembolsado",
+    "lineRefunded": "Reembolsado",
     "reasonLabel": "Motivo",
     "reasons": {
       "cancelled": "Cancelado antes do envio",

@@ -95,6 +95,7 @@
       "cards": "Dlaždice produktů",
       "soldOut": "Vyprodáno",
       "productPage": "Produktová stránka",
+      "cartPage": "Košík",
       "checkoutPage": "Pokladna"
     },
     "subtitle": {
@@ -104,6 +105,7 @@
       "cards": "Výloha / Dlaždice produktů",
       "soldOut": "Výloha / Vyprodáno",
       "productPage": "Výloha / Produktová stránka",
+      "cartPage": "Výloha / Košík",
       "checkoutPage": "Výloha / Pokladna",
       "blocks": "Výloha / Bloky"
     },
@@ -1547,5 +1549,29 @@
         "keys": "Podržte <kbd>mezerník</kbd> a táhněte"
       }
     }
+  },
+  "cartPage": {
+    "on": "Košík",
+    "onHint": "Kupující si přidají produkty a zaplatí najednou. Tlačítko Koupit zůstane.",
+    "mainButton": {
+      "label": "Primární tlačítko",
+      "buyNow": "Koupit",
+      "addToCart": "Přidat do košíku"
+    },
+    "afterAdd": {
+      "label": "Po přidání",
+      "openCart": "Otevřít košík",
+      "note": "Zobrazit poznámku"
+    },
+    "quickAdd": "Přidávat z karet",
+    "quickAddHint": "Tlačítko na kartě vloží produkt rovnou do košíku, když není co vybírat.",
+    "addLabel": "Text tlačítka",
+    "title": "Nadpis košíku",
+    "note": "Poznámka v košíku",
+    "notePlaceholder": "Objednávky odesíláme v pondělí",
+    "deliveryBar": "Průběh dopravy zdarma",
+    "deliveryBarHint": "Zobrazuje se, když je doprava zdarma od určité částky.",
+    "suggestions": "Hodí se k tomu",
+    "suggestionsHint": "Pod košíkem: co jste u produktů v něm vybrali do Přidat k vaší objednávce."
   }
 }

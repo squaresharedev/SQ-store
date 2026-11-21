@@ -95,6 +95,7 @@
       "cards": "Producttegels",
       "soldOut": "Uitverkocht",
       "productPage": "Productpagina",
+      "cartPage": "Winkelwagen",
       "checkoutPage": "Afrekenen"
     },
     "subtitle": {
@@ -104,6 +105,7 @@
       "cards": "Etalage / Producttegels",
       "soldOut": "Etalage / Uitverkocht",
       "productPage": "Etalage / Productpagina",
+      "cartPage": "Etalage / Winkelwagen",
       "checkoutPage": "Etalage / Afrekenen",
       "blocks": "Etalage / Blokken"
     },
@@ -1547,5 +1549,29 @@
         "keys": "Houd <kbd>Spatie</kbd> ingedrukt en sleep"
       }
     }
+  },
+  "cartPage": {
+    "on": "Winkelwagen",
+    "onHint": "Kopers verzamelen producten en betalen in één keer. Nu kopen blijft.",
+    "mainButton": {
+      "label": "Hoofdknop",
+      "buyNow": "Nu kopen",
+      "addToCart": "In winkelwagen"
+    },
+    "afterAdd": {
+      "label": "Na toevoegen",
+      "openCart": "Winkelwagen openen",
+      "note": "Notitie tonen"
+    },
+    "quickAdd": "Toevoegen vanaf kaarten",
+    "quickAddHint": "De knop op een kaart legt het product direct in de winkelwagen als er geen versie te kiezen is.",
+    "addLabel": "Knoptekst",
+    "title": "Winkelwagen-koptekst",
+    "note": "Notitie in winkelwagen",
+    "notePlaceholder": "Bestellingen worden op maandag verzonden",
+    "deliveryBar": "Voortgang gratis bezorging",
+    "deliveryBarHint": "Getoond wanneer je bezorging gratis is boven een bedrag.",
+    "suggestions": "Past goed bij",
+    "suggestionsHint": "Onder de winkelwagen: wat je bij de producten erin koos voor Toevoegen aan je bestelling."
   }
 }

@@ -22,6 +22,7 @@ import { BADGES_ON_PHOTO_MAX, type BadgePlacement, type Product, type ProductBad
 import type { PagePhotoView, ProductPageData } from "@/types/product-page";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import type {
+  CartPageConfig,
   ProductPageConfig,
   StorefrontHeader,
   StorefrontSeller,
@@ -46,6 +47,7 @@ export function ProductPageArtboard({
   theme,
   header,
   productPage,
+  cartPage,
   shippingPolicy,
   seller,
   backgroundImageUrl,
@@ -64,6 +66,8 @@ export function ProductPageArtboard({
   theme: StorefrontTheme;
   header: StorefrontHeader;
   productPage: ProductPageConfig;
+  /** The cart's design; its buttons show while it is on. */
+  cartPage?: CartPageConfig;
   shippingPolicy: SellerShippingPolicy;
   seller: StorefrontSeller;
   backgroundImageUrl: string | null;
@@ -143,6 +147,7 @@ export function ProductPageArtboard({
       backgroundImageUrl,
       customFontUrl,
       pagePhoto,
+      ...(cartPage && cartPage.enabled !== false ? { cart: cartPage } : {}),
     },
     product: previewed,
     productUrl: "",

@@ -12,7 +12,12 @@ import { useToast } from "@/components/ui/Toast";
 import { ActionErrorNotice } from "@/components/ui/ActionErrorNotice";
 import { helpTextClass, infoTextClass, labelClass } from "@/components/ui/control-styles";
 import { cn } from "@/lib/utils";
-import { refundOrder } from "@/lib/orders/actions";
+import { refundOrder, refundOrderLine } from "@/lib/orders/actions";
+
+/** The refund form's "what": the whole order, or the order's own first line
+ *  (any other value is a line's id). */
+const WHOLE_ORDER = "whole";
+const FIRST_LINE = "first";
 import { formatOrderDate } from "@/lib/format/date";
 import { formatCents } from "@/lib/format/money";
 import type { ActionError } from "@/lib/errors";
@@ -64,6 +69,8 @@ export function OrderRefund({
   // Back on the shelf by default only when it never left it.
   const [restock, setRestock] = useState(!sent);
   const [error, setError] = useState<ActionError | null>(null);
+  const [what, setWhat] = useState<string>(WHOLE_ORDER);
+  const whatId = useId();
   const [pending, startTransition] = useTransition();
   // Set by Cancel, read once the opener is back on screen. A ref, not state:
   // nothing is drawn from it.
@@ -104,21 +111,39 @@ export function OrderRefund({
     value,
     label: t(`reasons.${value}`),
   }));
+  // An order of several lines (a cart's) can give back one of them. The
+  // order's own first line is WHOLE_FIRST; the rest are named by their id.
+  const lineOptions: SelectOption<string>[] =
+    order.addOns.length === 0
+      ? []
+      : [
+          { value: WHOLE_ORDER, label: t("whole") },
+          ...(order.firstLineRefunded
+            ? []
+            : [{ value: FIRST_LINE, label: t("item", { quantity: order.quantity, title: order.productTitle }) }]),
+          ...order.addOns
+            .filter((line) => !line.refunded)
+            .map((line) => ({ value: line.id, label: t("item", { quantity: line.quantity, title: line.productTitle }) })),
+        ];
+  const oneItem = what !== WHOLE_ORDER;
 
   function submit(event: FormEvent) {
     event.preventDefault();
     if (pending) return;
     setError(null);
     startTransition(async () => {
-      const result = await refundOrder(order.id, reason, restock && order.stockReserved > 0);
+      const result = oneItem
+        ? await refundOrderLine(order.id, what === FIRST_LINE ? null : what, reason, restock)
+        : await refundOrder(order.id, reason, restock && order.stockReserved > 0);
       if (!result.ok) {
         setError(result.error);
         return;
       }
-      toast.success(t(order.paidThroughProvider ? "refunded" : "recorded"), {
+      toast.success(t(oneItem ? "itemRefunded" : order.paidThroughProvider ? "refunded" : "recorded"), {
         lines: [t(result.buyerEmailed ? "buyerEmailed" : "buyerNotEmailed")],
       });
       setEditing(false);
+      setWhat(WHOLE_ORDER);
       onOrderChange?.(result.order);
     });
   }
@@ -148,8 +173,14 @@ export function OrderRefund({
         data-order-refund-how={order.paidThroughProvider ? "provider" : "manual"}
       >
         <Info className="mt-0.5 size-3.5 shrink-0" strokeWidth={2} aria-hidden="true" />
-        {t(order.paidThroughProvider ? "viaProvider" : "manual", { amount })}
+        {oneItem ? t("itemHow") : t(order.paidThroughProvider ? "viaProvider" : "manual", { amount })}
       </p>
+      {lineOptions.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor={whatId}>{t("what")}</Label>
+          <Select id={whatId} value={what} options={lineOptions} onChange={setWhat} disabled={pending} />
+        </div>
+      )}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={reasonId}>{t("reasonLabel")}</Label>
         <Select id={reasonId} value={reason} options={reasonOptions} onChange={setReason} disabled={pending} />
@@ -158,7 +189,7 @@ export function OrderRefund({
       {order.stockReserved > 0 && (
         <div className="flex items-center gap-3">
           <label htmlFor={restockId} className={cn(labelClass, "flex-1")}>
-            {t("restock", { count: order.stockReserved })}
+            {oneItem ? t("itemRestock") : t("restock", { count: order.stockReserved })}
           </label>
           <Switch id={restockId} checked={restock} onCheckedChange={setRestock} disabled={pending} />
         </div>
@@ -167,7 +198,7 @@ export function OrderRefund({
       <div className="flex flex-wrap items-center gap-2">
         <Button type="submit" variant="destructive" disabled={pending} data-order-refund-confirm="">
           {pending && <Spinner />}
-          {t(order.paidThroughProvider ? "confirmProvider" : "confirm", { amount })}
+          {oneItem ? t("confirmItem") : t(order.paidThroughProvider ? "confirmProvider" : "confirm", { amount })}
         </Button>
         <Button
           type="button"

@@ -33,7 +33,8 @@ import { parseFulfilment } from "@/lib/orders/fulfilment";
 import { trackingLinkFor } from "@/lib/orders/carriers";
 import { buyerWithdrawal } from "@/lib/orders/withdrawal";
 import { orderPhotoKey } from "@/lib/orders/photo";
-import { orderReviewState } from "@/lib/reviews/eligibility";
+import { orderReviewItems, orderReviewSummary } from "@/lib/reviews/eligibility";
+import { lineStatesOf } from "@/lib/orders/line-states";
 import { reviewRemindersAvailable } from "@/lib/reviews/reminder-job";
 import { reviewReminderOffered, reviewReminderShownDue, reviewReminderStatus } from "@/lib/reviews/reminders";
 import type { BuyerOrder, OrderPageData } from "@/types/checkout";
@@ -137,7 +138,15 @@ export const getOrderPage = cache(
     if (!detached && order.storefront_id !== storefrontId) return null;
 
     const admin = createAdminClient();
-    const [{ data: storefront }, seller, shippingPolicy, { data: product }, { data: review }, { data: addOnRows }] = await Promise.all([
+    const [
+      { data: storefront },
+      seller,
+      shippingPolicy,
+      { data: product },
+      { data: reviewRows },
+      { data: addOnRows },
+      lineRefunds,
+    ] = await Promise.all([
       detached
         ? Promise.resolve({ data: null })
         : admin
@@ -154,14 +163,17 @@ export const getOrderPage = cache(
             .eq("id", order.product_id)
             .maybeSingle()
         : Promise.resolve({ data: null }),
-      admin.from("reviews").select("id, rating").eq("order_id", order.id).maybeSingle(),
-      // "Add to your order": the order's other lines, read from their own
-      // snapshot like the main product.
+      // One review per product of the order (a cart's order holds several).
+      admin.from("reviews").select("product_id, rating").eq("order_id", order.id),
+      // Every line after the first ("Add to your order", or the rest of a
+      // cart), read from their own snapshot like the main product.
       admin
         .from("order_add_ons")
-        .select("id, product_id, product_title, quantity, selected_options, digital_file_key, position")
+        .select("id, order_id, product_id, product_title, quantity, selected_options, digital_file_key, position")
         .eq("order_id", order.id)
         .order("position", { ascending: true }),
+      // Lines the seller refunded on their own: no download, no review.
+      admin.from("order_line_refunds").select("order_id, line_id").eq("order_id", order.id),
     ]);
     if (!storefront && !detached) return null;
     // The order outlives the shop's moderation state, and the shop itself; the
@@ -186,7 +198,12 @@ export const getOrderPage = cache(
       if (url) photo = { url, alt: order.product_title };
     }
 
-    const addOns = await buyerAddOns(admin, addOnRows ?? []);
+    // A refunds read that failed shows every line as bought: the download
+    // route checks again, and refuses, before any file is handed out.
+    if (lineRefunds.error) console.error("[order-page] line refunds read failed", lineRefunds.error.message);
+    const lines = lineStatesOf([order], addOnRows ?? [], lineRefunds.data ?? []).get(order.id) ?? [];
+    const refundedLine = new Set(lines.flatMap((line) => (line.refunded ? [line.lineId] : [])));
+    const { lines: addOns, products: addOnProducts } = await buyerAddOns(admin, addOnRows ?? [], refundedLine);
 
     const theme = config.theme;
     const backgroundImageUrl =
@@ -203,8 +220,19 @@ export const getOrderPage = cache(
       : (findShippingProfile(shippingPolicy.profiles, product?.shipping_profile_id)?.dispatch ??
           shippingPolicy.dispatch ??
           null);
-    const reviewState = orderReviewState(order, product, review !== null);
+    // Every product of the order is reviewed on its own; the page's ask and
+    // the reminder go by the order as a whole (open while any product is).
+    const reviewItems = orderReviewItems(
+      order,
+      lines,
+      new Map([...addOnProducts, ...(order.product_id && product ? [[order.product_id, product] as const] : [])]),
+      new Set((reviewRows ?? []).flatMap((row) => (row.product_id ? [row.product_id] : []))),
+    );
+    const ratings = new Map((reviewRows ?? []).map((row) => [row.product_id, row.rating]));
+    const reviewState = orderReviewSummary(reviewItems);
+    const firstRating = reviewItems[0] ? ratings.get(reviewItems[0].productId) : undefined;
     const reviewReminder = buyerReviewReminder(order, reviewState);
+    const firstRefunded = refundedLine.has(null);
 
     return {
       storefront: {
@@ -236,7 +264,11 @@ export const getOrderPage = cache(
         firstName: shipTo?.name.split(/\s+/)[0] || null,
         destination: shipTo ? { city: shipTo.city, country: shipTo.country } : null,
         isDigital,
-        digitalFormat: isDigital ? formatFromKey(order.digital_file_key) : null,
+        digitalFormat: order.digital_file_key ? formatFromKey(order.digital_file_key) : null,
+        // The first line's own file, whatever else the order holds (a cart
+        // can pair a download with a parcel), unless it was refunded.
+        hasDownload: order.digital_file_key !== null && !firstRefunded,
+        ...(firstRefunded ? { firstLineRefunded: true as const } : {}),
         fulfilment: fulfilment.status,
         shippedAt: fulfilment.shippedAt,
         trackingNumber: fulfilment.trackingNumber,
@@ -251,7 +283,10 @@ export const getOrderPage = cache(
         // The same rules the review route applies, so the button is offered
         // exactly when pressing it can work.
         review: reviewState,
-        ...(review ? { reviewRating: review.rating } : {}),
+        ...(firstRating !== undefined ? { reviewRating: firstRating } : {}),
+        ...(reviewItems.length > 1
+          ? { reviewItems: buyerReviewItems(reviewItems, ratings, order, photo, addOnRows ?? [], addOns) }
+          : {}),
         ...(reviewReminder ? { reviewReminder } : {}),
         ...(addOns.length > 0 ? { addOns } : {}),
       },
@@ -274,8 +309,34 @@ function buyerReviewReminder(order: OrderRow, review: BuyerOrder["review"]): Buy
   return { status, dueAt: status === "on" ? reviewReminderShownDue(order, now) : null };
 }
 
+/** Each product's review as the order page offers it, named and pictured
+ *  from the line that sold it (its own snapshot, as the summary shows it). */
+function buyerReviewItems(
+  items: ReturnType<typeof orderReviewItems>,
+  ratings: ReadonlyMap<string | null, number>,
+  order: OrderRow,
+  photo: OrderPageData["order"]["photo"],
+  rows: readonly AddOnRow[],
+  lines: readonly NonNullable<OrderPageData["order"]["addOns"]>[number][],
+): NonNullable<BuyerOrder["reviewItems"]> {
+  return items.map((item) => {
+    const at = item.productId === order.product_id ? -1 : rows.findIndex((row) => row.product_id === item.productId);
+    const line = at >= 0 ? lines[at] : undefined;
+    const rating = ratings.get(item.productId);
+    return {
+      productId: item.productId,
+      title: line ? line.productTitle : order.product_title,
+      photo: line ? line.photo : photo,
+      review: item.state,
+      ...(rating !== undefined ? { rating } : {}),
+    };
+  });
+}
+
 type AddOnRow = {
   id: string;
+  order_id: string;
+  position: number;
   product_id: string | null;
   product_title: string;
   quantity: number;
@@ -283,23 +344,28 @@ type AddOnRow = {
   digital_file_key: string | null;
 };
 
-/** The order's add-on lines for its buyer, each with the photo of the version
- *  bought (when its product is still there and not taken down), built field
- *  by field like the main line. */
+/** The order's lines after the first, for its buyer, each with the photo of
+ *  the version bought (when its product is still there and not taken down),
+ *  built field by field like the main line; and those products' states, for
+ *  their reviews. `refunded` holds the line ids refunded on their own. */
 async function buyerAddOns(
   admin: ReturnType<typeof createAdminClient>,
   rows: readonly AddOnRow[],
-): Promise<NonNullable<OrderPageData["order"]["addOns"]>> {
-  if (rows.length === 0) return [];
+  refunded: ReadonlySet<string | null>,
+): Promise<{
+  lines: NonNullable<OrderPageData["order"]["addOns"]>;
+  products: Map<string, { status: string; moderation_status: string | null }>;
+}> {
+  if (rows.length === 0) return { lines: [], products: new Map() };
   const ids = rows.flatMap((row) => (row.product_id ? [row.product_id] : []));
   const { data: products } = ids.length
     ? await admin
         .from("products")
-        .select("id, image_key, gallery, option_groups, moderation_status")
+        .select("id, image_key, gallery, option_groups, status, moderation_status")
         .in("id", ids)
     : { data: [] };
   const byId = new Map((products ?? []).map((row) => [row.id, row]));
-  return Promise.all(
+  const lines = await Promise.all(
     rows.map(async (row) => {
       const selection = parseOrderSelection(row.selected_options);
       const product = row.product_id ? byId.get(row.product_id) : undefined;
@@ -309,6 +375,7 @@ async function buyerAddOns(
         const url = photoKey ? await presignGetUrl(photoKey) : null;
         if (url) photo = { url, alt: row.product_title };
       }
+      const lineRefunded = refunded.has(row.id);
       return {
         id: row.id,
         productTitle: row.product_title,
@@ -316,7 +383,15 @@ async function buyerAddOns(
         quantity: row.quantity,
         selection,
         digitalFormat: row.digital_file_key ? formatFromKey(row.digital_file_key) : null,
+        download: row.digital_file_key !== null && !lineRefunded,
+        ...(lineRefunded ? { refunded: true as const } : {}),
       };
     }),
   );
+  return {
+    lines,
+    products: new Map(
+      (products ?? []).map((row) => [row.id, { status: row.status, moderation_status: row.moderation_status }]),
+    ),
+  };
 }

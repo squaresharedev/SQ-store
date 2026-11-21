@@ -216,6 +216,18 @@
       "awaiting": "Začne se počítat s blokem pro rezervace v kalendáři.",
       "readyToChart": "Graf se zobrazí, jakmile začnou přicházet rezervace."
     },
+    "cart_add": {
+      "label": "Přidáno do košíku",
+      "description": "Kupující, kteří si vložili jeden z vašich produktů do košíku.",
+      "count": "{count, plural, one {{formatted} přidání} few {{formatted} přidání} many {{formatted} přidání} other {{formatted} přidání}}",
+      "total": "Celkem přidání do košíku",
+      "emptyRange": "V tomto období nebylo nic přidáno do košíku",
+      "overTime": "Přidání do košíku v čase",
+      "acrossRange": "Produkty přidané do košíku ve zvoleném období.",
+      "byChannel": "Přidání do košíku podle kanálu",
+      "byWeekday": "Přidání do košíku podle dne v týdnu",
+      "byStorefront": "Přidání do košíku podle výlohy"
+    },
     "checkout_view": {
       "label": "Zobrazení pokladny",
       "description": "Kupující, kteří otevřeli pokladnu pro jeden z vašich produktů.",

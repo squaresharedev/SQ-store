@@ -137,8 +137,26 @@ export async function resolveOrderQuantity(
   }
   if (!data) return { ok: false, reason: "unavailable" };
 
-  const row = data as OrderQuantityRow;
-  const wanted = parsed.data.quantity;
+  return checkOrderQuantity(data as OrderQuantityRow, parsed.data.quantity);
+}
+
+/** The columns checkOrderQuantity decides from. */
+export type OrderQuantityFacts = Pick<
+  OrderQuantityRow,
+  "price_cents" | "currency" | "track_stock" | "stock_quantity" | "max_per_order"
+>;
+
+/**
+ * THE RULE, on a row the caller has ALREADY read with the service role (the
+ * order gate reads every line's product in one go, so it decides here instead
+ * of reading each product again). `wanted` is how many of this product the
+ * whole order asks for: two lines of one product in two versions share one
+ * shelf and one per-order limit, so the caller passes their SUM.
+ */
+export function checkOrderQuantity(row: OrderQuantityFacts, wanted: number): OrderQuantityResult {
+  if (!Number.isInteger(wanted) || wanted < 1 || wanted > PURCHASE_QUANTITY_MAX) {
+    return { ok: false, reason: "invalid_request" };
+  }
 
   // The seller's ceiling, corrected into the legal range on the way out of the
   // database rather than believed (see productQuantityCap).

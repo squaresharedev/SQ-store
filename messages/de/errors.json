@@ -102,6 +102,7 @@
     "refundOrders": "Zu viele Rückerstattungen in kurzer Zeit.",
     "connectPayments": "Zu viele Versuche, Stripe in kurzer Zeit zu verbinden.",
     "readCheckoutSettings": "Zu viele Versuche, in kurzer Zeit die Kasseneinstellungen abzurufen.",
+    "readCartSettings": "Zu viele Versuche, in kurzer Zeit die Warenkorbeinstellungen abzurufen.",
     "changePlan": "Zu viele Tarifwechsel in kurzer Zeit gestartet.",
     "saveDiscounts": "Zu viele Rabattänderungen in kurzer Zeit.",
     "moderateReviews": "Zu viele Änderungen an Bewertungen in kurzer Zeit.",
@@ -139,6 +140,8 @@
     "connectPayments": "Stripe konnte aufgrund eines Problems auf unserer Seite nicht geöffnet werden.",
     "loadCheckoutSettings": "Deine Kasseneinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht geladen werden.",
     "saveCheckoutSettings": "Deine Kasseneinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht gespeichert werden.",
+    "loadCartSettings": "Deine Warenkorbeinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht geladen werden.",
+    "saveCartSettings": "Deine Warenkorbeinstellungen konnten aufgrund eines Fehlers auf unserer Seite nicht gespeichert werden.",
     "loadPlans": "Dein Tarif konnte wegen eines Problems auf unserer Seite nicht geladen werden.",
     "startCheckout": "Der Checkout konnte wegen eines Problems auf unserer Seite nicht geöffnet werden.",
     "openBillingPortal": "Deine Abrechnungsdaten konnten wegen eines Problems auf unserer Seite nicht geöffnet werden.",
@@ -667,6 +670,11 @@
   "checkoutPageApi": {
     "notObjectFix": "Sende ein JSON-Objekt, z. B. '{'\"layout\": \"compact\"'}'.",
     "invalid": "Diese Kasseneinstellungen sind ungültig.",
+    "invalidFix": "Überprüfe das oben genannte Feld anhand von `limits` aus einem GET dieser URL und versuche es dann erneut."
+  },
+  "cartPageApi": {
+    "notObjectFix": "Sende ein JSON-Objekt, z. B. '{'\"quickAdd\": false'}'.",
+    "invalid": "Diese Warenkorbeinstellungen sind ungültig.",
     "invalidFix": "Überprüfe das oben genannte Feld anhand von `limits` aus einem GET dieser URL und versuche es dann erneut."
   },
   "billing": {

@@ -165,6 +165,14 @@
   },
   "refund": {
     "open": "Erstatten oder stornieren",
+    "what": "Was erstatten",
+    "whole": "Die gesamte Bestellung",
+    "item": "{quantity, plural, one {{title}} other {# × {title}}}",
+    "itemHow": "Erstattet den Preis dieses Artikels. Der letzte verbleibende Artikel nimmt die Versandkosten mit zurück.",
+    "itemRestock": "Wieder einlagern",
+    "confirmItem": "Diesen Artikel erstatten",
+    "itemRefunded": "Artikel erstattet",
+    "lineRefunded": "Erstattet",
     "reasonLabel": "Grund",
     "reasons": {
       "cancelled": "Vor dem Versenden storniert",

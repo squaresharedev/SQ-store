@@ -165,6 +165,14 @@
   },
   "refund": {
     "open": "Zwróć środki lub anuluj",
+    "what": "Co zwrócić",
+    "whole": "Całe zamówienie",
+    "item": "{quantity, plural, one {{title}} few {# × {title}} many {# × {title}} other {# × {title}}}",
+    "itemHow": "Zwraca koszt tej pozycji. Ostatnia pozostała pozycja zwraca też koszty dostawy.",
+    "itemRestock": "Przywróć na stan",
+    "confirmItem": "Zwróć środki za tę pozycję",
+    "itemRefunded": "Pozycja zwrócona",
+    "lineRefunded": "Zwrócono",
     "reasonLabel": "Powód",
     "reasons": {
       "cancelled": "Anulowano przed wysyłką",

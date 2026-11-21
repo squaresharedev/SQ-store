@@ -13,6 +13,26 @@ export function checkoutDiscountApiPath(storefrontId: string, productId: string)
   return `${checkoutApiPath(storefrontId, productId)}/discount`;
 }
 
+/** POST: place an order for a cart's lines from one storefront. */
+export function checkoutCartApiPath(storefrontId: string): string {
+  return `/api/checkout/${encodeURIComponent(storefrontId)}`;
+}
+
+/** POST: check a discount code for a cart's products before paying. */
+export function checkoutCartDiscountApiPath(storefrontId: string): string {
+  return `${checkoutCartApiPath(storefrontId)}/discount`;
+}
+
+/** POST: change a buyer's cart on this storefront (app/api/cart). */
+export function cartApiPath(storefrontId: string): string {
+  return `/api/cart/${encodeURIComponent(storefrontId)}`;
+}
+
+/** POST: a buyer's cart, priced now. */
+export function cartViewApiPath(storefrontId: string): string {
+  return `${cartApiPath(storefrontId)}/view`;
+}
+
 /** POST: the withdrawal function on an order page (CRD art. 11a). */
 export const ORDER_WITHDRAW_API_PATH = "/api/orders/withdraw";
 

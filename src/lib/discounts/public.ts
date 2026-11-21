@@ -450,6 +450,24 @@ export async function findCodeFor(
   admin: Admin,
   input: { ownerId: string; productId: string; currency: Currency; code: string; now: Date },
 ): Promise<ResolvedCode | null> {
+  const found = await findCodeForLines(admin, { ...input, productIds: [input.productId] });
+  return found ? { id: found.id, code: found.code, value: found.value } : null;
+}
+
+/** A code good for an order of several products, and which of them it covers. */
+export type ResolvedLinesCode = ResolvedCode & { covers: string[] };
+
+/**
+ * findCodeFor for an order of several products (a cart): the code if it is
+ * good right now (live, switched on, inside its dates, in a currency that
+ * fits, under its usage limit) AND covers at least one of `productIds`, with
+ * the ones it covers. Null for every other answer, one refusal for all of
+ * them, as findCodeFor.
+ */
+export async function findCodeForLines(
+  admin: Admin,
+  input: { ownerId: string; productIds: readonly string[]; currency: Currency; code: string; now: Date },
+): Promise<ResolvedLinesCode | null> {
   const { data, error } = await admin
     .from("discounts")
     .select(DISCOUNT_COLUMNS)
@@ -468,7 +486,8 @@ export async function findCodeFor(
   const at = input.now.getTime();
   if (Date.parse(row.starts_at) > at) return null;
   if (row.ends_at !== null && Date.parse(row.ends_at) <= at) return null;
-  if (!coversProduct(row, input.productId)) return null;
+  const covers = [...new Set(input.productIds)].filter((productId) => coversProduct(row, productId));
+  if (covers.length === 0) return null;
   const value = discountValueOf(row);
   if (!value || !appliesInCurrency(value, input.currency)) return null;
 
@@ -483,5 +502,5 @@ export async function findCodeFor(
     if (countError || count === null || count >= row.usage_limit) return null;
   }
 
-  return { id: row.id, code: row.code, value };
+  return { id: row.id, code: row.code, value, covers };
 }

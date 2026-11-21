@@ -133,6 +133,10 @@ const COVERAGE: Record<string, Coverage> = {
   // --- orders, discounts, reviews, moderation -------------------------------
   "lib/orders/actions.ts::markOrderShipped": tool("mark_order_shipped"),
   "lib/orders/actions.ts::refundOrder": tool("refund_order"),
+  "lib/orders/actions.ts::refundOrderLine": {
+    kind: "deferred",
+    reason: "Refunding one line of a cart's order: an assistant tool once orders show their lines to agents (get_order).",
+  },
   "lib/discounts/actions.ts::createDiscount": tool("create_discount"),
   "lib/discounts/actions.ts::updateDiscount": tool("update_discount"),
   "lib/discounts/actions.ts::setCodeEnabled": tool("set_code_enabled"),
