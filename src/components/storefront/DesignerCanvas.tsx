@@ -222,6 +222,9 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   productPage,
   checkoutPage,
   cartPage,
+  onCartPageChange,
+  cartOpenOn = null,
+  onCartOpenChange,
   onCheckoutPageChange,
   celebrationPlays = 0,
   shippingPolicy = {},
@@ -350,6 +353,11 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   checkoutPage?: CheckoutPageConfig;
   /** The cart's design: its buttons and its cart button on the page artboards. */
   cartPage?: CartPageConfig;
+  /** The cart's words, typed straight onto the cart where it opens. */
+  onCartPageChange?: (next: CartPageConfig) => void;
+  /** The page whose cart is open (its product id), held by the designer. */
+  cartOpenOn?: string | null;
+  onCartOpenChange?: (productId: string, open: boolean) => void;
   /** The checkout's words, typed straight onto its artboards. */
   onCheckoutPageChange?: (next: CheckoutPageConfig) => void;
   /** Bumped by the panel's "Play it": replays the thank-you celebration. */
@@ -774,6 +782,24 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     [productPage, openPages, productsById],
   );
 
+  // What a page's sample cart is made of: the board's products, each once, in
+  // board order. Keyed by that list rather than by the blocks, so moving a
+  // tile does not hand the open cart a new sample (and forget its steps).
+  const boardProductKey = blocks
+    .flatMap((block) => (block.type === "product" ? [block.productId] : []))
+    .filter((id, index, ids) => ids.indexOf(id) === index)
+    .join(",");
+  const boardProducts = useMemo(
+    () =>
+      boardProductKey
+        .split(",")
+        .flatMap((id) => {
+          const product = productsById.get(id);
+          return product ? [product] : [];
+        }),
+    [boardProductKey, productsById],
+  );
+
   // The tile's manual sold-out flag is live in the editor, so the page has to
   // read it from the board rather than from the snapshot it loaded.
   const soldOutProducts = useMemo(() => {
@@ -840,6 +866,10 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             customFontUrl={customFontUrl}
             pagePhoto={photoView(productPage.backgroundImage)}
             onClose={() => onClosePage?.(id)}
+            boardProducts={boardProducts}
+            cartOpen={cartOpenOn === id}
+            onCartOpenChange={(open) => onCartOpenChange?.(id, open)}
+            onCartPageChange={onCartPageChange}
           />,
           // The checkout and its thank-you, right after the page they follow.
           ...(chain

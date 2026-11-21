@@ -1572,6 +1572,14 @@
     "deliveryBar": "Priebeh dopravy zdarma",
     "deliveryBarHint": "Zobrazuje sa, keď je doprava zdarma od určitej sumy.",
     "suggestions": "Hodí sa k tomu",
-    "suggestionsHint": "Pod košíkom: čo ste pri produktoch v ňom vybrali do Pridať k vašej objednávke."
+    "suggestionsHint": "Pod košíkom: čo ste pri produktoch v ňom vybrali do Pridať k vašej objednávke.",
+    "sections": {
+      "buttons": "Pridanie do košíka",
+      "cart": "V košíku"
+    },
+    "leadGuess": {
+      "label": "Na prvé miesto Pridať do košíka",
+      "hint": "{count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktov}} z vašej plochy ide rovno do košíka. Ťuknutím bude hlavným tlačidlom Pridať do košíka; Kúpiť hneď zostane vedľa."
+    }
   }
 }

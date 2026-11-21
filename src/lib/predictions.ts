@@ -23,7 +23,7 @@ import {
   type ProductSales,
   type WeightUnit,
 } from "@/types/product";
-import { DEFAULT_STOREFRONT_CONFIG, type StorefrontConfig } from "@/types/storefront";
+import { DEFAULT_STOREFRONT_CONFIG, type CartPageConfig, type StorefrontConfig } from "@/types/storefront";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -325,15 +325,15 @@ export function predictDiscountDefaults(discounts: readonly DiscountView[]): Dis
 
 /**
  * The design of a seller's last storefront, for their next one: its look, and
- * its product page and checkout as they set them up. The board starts at its
+ * its product page, cart and checkout as they set them up. The board starts at its
  * default height, and uploaded files stay behind: a new storefront must not
  * depend on a file another storefront owns and may delete. A page the last
  * storefront never set up is left out, so the new one keeps its own default.
  */
 export function carryOverDesign(previous: StorefrontConfig): Pick<StorefrontConfig, "theme"> &
-  Partial<Pick<StorefrontConfig, "productPage" | "checkoutPage">> {
+  Partial<Pick<StorefrontConfig, "productPage" | "cartPage" | "checkoutPage">> {
   const defaults = DEFAULT_STOREFRONT_CONFIG.theme;
-  const { theme, productPage, checkoutPage } = previous;
+  const { theme, productPage, cartPage, checkoutPage } = previous;
   const design: ReturnType<typeof carryOverDesign> = {
     theme: {
       ...theme,
@@ -349,12 +349,29 @@ export function carryOverDesign(previous: StorefrontConfig): Pick<StorefrontConf
     delete design.productPage.backgroundImage;
     if (productPage.font === "custom") delete design.productPage.font;
   }
+  // The cart has no files: all of it comes along, switched off included.
+  if (cartPage) design.cartPage = { ...cartPage };
   if (checkoutPage) {
     design.checkoutPage = { ...checkoutPage };
     delete design.checkoutPage.backgroundImage;
     delete design.checkoutPage.thanksBackgroundImage;
   }
   return design;
+}
+
+/** A board offering this many products a buyer can put straight in the cart
+ *  is a shop people fill a cart in, not a one-product page. */
+export const CART_LEAD_MIN_PRODUCTS = 3;
+
+/**
+ * Whether to offer "Add to cart" as the product page's main button, behind one
+ * tap: the cart is on, "Buy now" still leads (the default every storefront
+ * starts with), and the board holds at least CART_LEAD_MIN_PRODUCTS products
+ * a card can add (`addable`, the products the designer's cards would put
+ * straight in the cart).
+ */
+export function suggestCartLead(cartPage: CartPageConfig, addable: number): boolean {
+  return cartPage.enabled !== false && cartPage.mainButton !== "addToCart" && addable >= CART_LEAD_MIN_PRODUCTS;
 }
 
 /** Another storefront's embed domains, for one that has none yet. `storefronts`

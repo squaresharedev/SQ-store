@@ -1,10 +1,15 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
+import { ShoppingBag } from "lucide-react";
 import { sanitizeHeaderText } from "@/lib/storefront/header-text";
 import { hasContactOrPaymentDetails } from "@/lib/validation/inputs";
+import { suggestCartLead } from "@/lib/predictions";
+import type { CartPagePanelSection } from "@/lib/storefront/setting-ref";
+import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { SuggestionChip } from "@/components/ui/SuggestionChip";
 import { Switch } from "@/components/ui/switch";
 import {
   CART_ADD_LABEL_MAX,
@@ -30,12 +35,18 @@ function withoutKey<K extends keyof CartPageConfig>(config: CartPageConfig, key:
 }
 
 /**
- * THE CART, as a seller designs it: on or off, which of the product page's
- * two buttons leads, what follows "Add to cart", whether cards add to it,
- * the cart's own words, and its delivery line and "Goes well with".
+ * THE CART, as a seller designs it, in two short sections that a click on the
+ * product page artboard opens: "Adding to cart" (on or off, which of the
+ * page's two buttons leads, what follows a press, whether cards add, the
+ * button's words) and "Inside the cart" (its heading and note, which are also
+ * typed straight onto the cart where it opens, and its two optional parts).
  * The cart's colours and corners are the product page's (it opens over it),
  * so there is nothing to colour here. One line per control; what a control
  * does is in its hint, not in a paragraph.
+ *
+ * `addable` is how many products the board's cards put straight in the cart:
+ * with enough of them, "Add to cart" as the leading button is offered behind
+ * one tap (lib/predictions.ts suggestCartLead), and taken back with one.
  *
  * Every text is plain words held to the prose rule as it is typed (no links,
  * email addresses or bank details: sellerProse), like the checkout's.
@@ -43,15 +54,22 @@ function withoutKey<K extends keyof CartPageConfig>(config: CartPageConfig, key:
 export function CartPageSection({
   cartPage,
   onCartPageChange,
+  summoned = null,
+  addable = 0,
 }: {
   cartPage: CartPageConfig;
   onCartPageChange: (next: CartPageConfig) => void;
+  summoned?: CartPagePanelSection | null;
+  addable?: number;
 }) {
   const fieldId = useId();
   const t = useTranslations("Storefront.cartPage");
   const tRoot = useTranslations();
   const tCart = useTranslations("ProductPage.cart");
   const on = cartPage.enabled !== false;
+  // The guess as the tap left it: offered back only while it still is.
+  const [lead, setLead] = useState<{ before: CartPageConfig; after: CartPageConfig } | null>(null);
+  const leadDone = lead !== null && lead.after === cartPage;
 
   function textField(key: CartText, label: string, placeholder: string, max: number, multiline = false) {
     const value = cartPage[key];
@@ -87,46 +105,85 @@ export function CartPageSection({
   }
 
   return (
-    <div className="space-y-5 px-4 py-4" data-cart-page-section="">
-      <PanelRow label={t("on")} htmlFor={`${fieldId}-on`} info={{ label: t("on"), content: t("onHint") }}>
-        <Switch
-          id={`${fieldId}-on`}
-          checked={on}
-          onCheckedChange={(next) =>
-            onCartPageChange(next ? withoutKey(cartPage, "enabled") : { ...cartPage, enabled: false })
-          }
-        />
-      </PanelRow>
+    <div data-cart-page-section="">
+      <CollapsibleSection title={t("sections.buttons")} collapsible summon={summoned === "buttons"}>
+        <div className="space-y-5">
+          <PanelRow label={t("on")} htmlFor={`${fieldId}-on`} info={{ label: t("on"), content: t("onHint") }}>
+            <Switch
+              id={`${fieldId}-on`}
+              checked={on}
+              onCheckedChange={(next) =>
+                onCartPageChange(next ? withoutKey(cartPage, "enabled") : { ...cartPage, enabled: false })
+              }
+            />
+          </PanelRow>
+          {on && (
+            <>
+              <PanelField label={t("mainButton.label")}>
+                <SegmentedControl
+                  ariaLabel={t("mainButton.label")}
+                  value={cartPage.mainButton ?? "buyNow"}
+                  options={CART_MAIN_BUTTONS.map((value) => ({ value, label: t(`mainButton.${value}`) }))}
+                  onChange={(value) =>
+                    onCartPageChange(
+                      value === "buyNow" ? withoutKey(cartPage, "mainButton") : { ...cartPage, mainButton: value },
+                    )
+                  }
+                />
+              </PanelField>
+              {(leadDone || suggestCartLead(cartPage, addable)) && (
+                <div data-cart-lead-suggestion="">
+                  <SuggestionChip
+                    icon={ShoppingBag}
+                    label={t("leadGuess.label")}
+                    hint={t("leadGuess.hint", { count: addable })}
+                    done={leadDone}
+                    onApply={() => {
+                      const after: CartPageConfig = { ...cartPage, mainButton: "addToCart" };
+                      setLead({ before: cartPage, after });
+                      onCartPageChange(after);
+                    }}
+                    onUndo={() => {
+                      if (!lead) return;
+                      onCartPageChange(lead.before);
+                      setLead(null);
+                    }}
+                  />
+                </div>
+              )}
+              <PanelField label={t("afterAdd.label")}>
+                <SegmentedControl
+                  ariaLabel={t("afterAdd.label")}
+                  value={cartPage.afterAdd ?? "openCart"}
+                  options={CART_AFTER_ADD.map((value) => ({ value, label: t(`afterAdd.${value}`) }))}
+                  onChange={(value) =>
+                    onCartPageChange(
+                      value === "openCart" ? withoutKey(cartPage, "afterAdd") : { ...cartPage, afterAdd: value },
+                    )
+                  }
+                />
+              </PanelField>
+              {offSwitch("quickAdd", t("quickAdd"), t("quickAddHint"))}
+              {textField("addLabel", t("addLabel"), tCart("add"), CART_ADD_LABEL_MAX)}
+            </>
+          )}
+        </div>
+      </CollapsibleSection>
 
       {on && (
-        <>
-          <PanelField label={t("mainButton.label")}>
-            <SegmentedControl
-              ariaLabel={t("mainButton.label")}
-              value={cartPage.mainButton ?? "buyNow"}
-              options={CART_MAIN_BUTTONS.map((value) => ({ value, label: t(`mainButton.${value}`) }))}
-              onChange={(value) =>
-                onCartPageChange(value === "buyNow" ? withoutKey(cartPage, "mainButton") : { ...cartPage, mainButton: value })
-              }
-            />
-          </PanelField>
-          <PanelField label={t("afterAdd.label")}>
-            <SegmentedControl
-              ariaLabel={t("afterAdd.label")}
-              value={cartPage.afterAdd ?? "openCart"}
-              options={CART_AFTER_ADD.map((value) => ({ value, label: t(`afterAdd.${value}`) }))}
-              onChange={(value) =>
-                onCartPageChange(value === "openCart" ? withoutKey(cartPage, "afterAdd") : { ...cartPage, afterAdd: value })
-              }
-            />
-          </PanelField>
-          {offSwitch("quickAdd", t("quickAdd"), t("quickAddHint"))}
-          {textField("addLabel", t("addLabel"), tCart("add"), CART_ADD_LABEL_MAX)}
-          {textField("title", t("title"), tCart("title"), CART_TITLE_MAX)}
-          {textField("note", t("note"), t("notePlaceholder"), CART_NOTE_MAX, true)}
-          {offSwitch("deliveryBar", t("deliveryBar"), t("deliveryBarHint"))}
-          {offSwitch("suggestions", t("suggestions"), t("suggestionsHint"))}
-        </>
+        <CollapsibleSection
+          title={t("sections.cart")}
+          collapsible
+          defaultOpen={false}
+          summon={summoned === "cart"}
+        >
+          <div className="space-y-5">
+            {textField("title", t("title"), tCart("title"), CART_TITLE_MAX)}
+            {textField("note", t("note"), t("notePlaceholder"), CART_NOTE_MAX, true)}
+            {offSwitch("deliveryBar", t("deliveryBar"), t("deliveryBarHint"))}
+            {offSwitch("suggestions", t("suggestions"), t("suggestionsHint"))}
+          </div>
+        </CollapsibleSection>
       )}
     </div>
   );

@@ -14,11 +14,12 @@ import {
 import { useTranslations } from "next-intl";
 import { cartApiPath, cartViewApiPath } from "@/lib/checkout/paths";
 import { forgetCartHandle, isCartStorageEvent, readCartHandle, writeCartHandle } from "@/lib/cart/storage";
+import { NO_SAMPLE_CART_EDITS, withSampleEdits, type SampleCartEdits } from "@/lib/cart/sample";
 import { CART_QUERY_PARAM, type LinkChannel } from "@/lib/storefront/product-page-url";
 import type { OrderLineSource } from "@/lib/checkout/lines";
 import type { CartHandle, CartLineView, CartRefusal, CartResponse, CartView } from "@/types/cart";
 import type { CartPageConfig } from "@/types/storefront";
-import { CART_LOOK, CART_UNDO_MS, type CartLook } from "./cart-look";
+import { CART_LOOK, CART_UNDO_MS, type CartDrawerMode, type CartLook } from "./cart-look";
 
 // ONE BUYER'S CART ON ONE STOREFRONT, for every cart control on the page: the
 // cart button, the drawer, "Add to cart" on the product page and on tiles.
@@ -49,6 +50,9 @@ export type CartContextValue = {
   /** Inside the embed frame on the seller's own site: no panel opens there
    *  (the frame grows with its content), and the cart opens on our page. */
   embedded: boolean;
+  /** Where the panel opens (cart-look.ts CartDrawerMode): always "dialog" on
+   *  a buyer's page. */
+  drawer: CartDrawerMode;
   /** How many items the cart holds, for the cart button (before any view). */
   count: number;
   /** The cart as last shown; null until it has been read once. */
@@ -339,6 +343,7 @@ export function CartProvider({
       look,
       preview: false,
       embedded,
+      drawer: "dialog",
       count: view?.count ?? handle?.count ?? 0,
       view,
       status,
@@ -380,7 +385,13 @@ export function CartProvider({
 
 /**
  * A cart drawn from fixed data: the storefront designer's artboard and the
- * lab. Every control works on the page (open, close), nothing is sent.
+ * lab. Every control works on the page and nothing is sent: open and close,
+ * and on a sample the steppers, remove and its undo, and Add to cart (one
+ * more of a product already in it), so a seller can try the cart as a buyer
+ * would. What they did is forgotten when the sample changes.
+ *
+ * `open` with `onOpenChange` is controlled by the owner (the designer opens
+ * the cart from its panel); without them `initiallyOpen` seeds its own state.
  */
 export function CartPreviewProvider({
   storefrontId,
@@ -389,6 +400,9 @@ export function CartPreviewProvider({
   look = CART_LOOK,
   embedded = false,
   initiallyOpen = false,
+  open: openProp,
+  onOpenChange,
+  drawer = "dialog",
   children,
 }: {
   storefrontId: string;
@@ -397,32 +411,85 @@ export function CartPreviewProvider({
   look?: CartLook;
   embedded?: boolean;
   initiallyOpen?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** "inline" also plays an add: the panel opens as the seller chose (or the
+   *  note shows), so a seller can try "After adding" on the artboard. */
+  drawer?: CartDrawerMode;
   children: ReactNode;
 }) {
-  const [open, setOpen] = useState(initiallyOpen);
-  const value = useMemo<CartContextValue>(
-    () => ({
+  const [ownOpen, setOwnOpen] = useState(initiallyOpen);
+  const controlled = openProp !== undefined && onOpenChange !== undefined;
+  const open = controlled ? openProp : ownOpen;
+  const setOpen = controlled ? onOpenChange : setOwnOpen;
+
+  // The seller's steps on THIS sample; a new sample starts clean.
+  const [edits, setEdits] = useState<{ base: CartView | null; value: SampleCartEdits }>({
+    base: view,
+    value: NO_SAMPLE_CART_EDITS,
+  });
+  const current = edits.base === view ? edits.value : NO_SAMPLE_CART_EDITS;
+  const [undo, setUndo] = useState<CartUndo | null>(null);
+  if (edits.base !== view) {
+    setEdits({ base: view, value: NO_SAMPLE_CART_EDITS });
+    setUndo(null);
+  }
+  // The offer to put a line back lasts as long as a buyer's does.
+  useEffect(() => {
+    if (!undo) return;
+    const timer = setTimeout(() => setUndo(null), CART_UNDO_MS);
+    return () => clearTimeout(timer);
+  }, [undo]);
+  const shown = useMemo(() => (view ? withSampleEdits(view, current) : null), [view, current]);
+
+  const value = useMemo<CartContextValue>(() => {
+    const edit = (next: (before: SampleCartEdits) => SampleCartEdits) =>
+      setEdits((state) => ({ base: view, value: next(state.base === view ? state.value : NO_SAMPLE_CART_EDITS) }));
+    return {
       storefrontId,
       config,
       look,
       preview: true,
       embedded,
-      count: view?.count ?? 0,
-      view,
+      drawer,
+      count: shown?.count ?? 0,
+      view: shown,
       status: "idle",
       open,
       setOpen,
-      add: async () => ({ ok: true }),
-      setQuantity: async () => null,
-      remove: async () => {},
-      undo: null,
-      restore: async () => {},
+      add: async (request) => {
+        const line = shown?.lines.find((entry) => entry.productId === request.productId);
+        if (line && drawer === "inline") {
+          edit((before) => ({
+            ...before,
+            quantities: { ...before.quantities, [line.key]: Math.min(line.maxQuantity, line.quantity + 1) },
+          }));
+        }
+        if (drawer === "inline" && !embedded && config.afterAdd !== "note") setOpen(true);
+        return { ok: true };
+      },
+      setQuantity: async (key, quantity) => {
+        edit((before) => ({ ...before, quantities: { ...before.quantities, [key]: quantity } }));
+        return null;
+      },
+      remove: async (key) => {
+        const line = shown?.lines.find((entry) => entry.key === key);
+        if (!line) return;
+        setUndo({ line });
+        edit((before) => ({ ...before, removed: [...before.removed, key] }));
+      },
+      undo,
+      restore: async () => {
+        if (!undo) return;
+        const key = undo.line.key;
+        setUndo(null);
+        edit((before) => ({ ...before, removed: before.removed.filter((entry) => entry !== key) }));
+      },
       refresh: async () => {},
       lastAdded: null,
       announcement: "",
       cartId: view?.id ?? null,
-    }),
-    [storefrontId, config, look, embedded, view, open],
-  );
+    };
+  }, [storefrontId, config, look, embedded, drawer, view, shown, open, setOpen, undo]);
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

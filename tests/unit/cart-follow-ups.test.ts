@@ -187,3 +187,91 @@ describe("cartSuggestions", () => {
     expect(await cartSuggestions(open, cart([ID(1)]), "EUR")).toEqual([]);
   });
 });
+
+describe("sampleCartView", () => {
+  const product = (n: number, extra: Partial<{ priceCents: number; regularPriceCents: number; currency: "EUR" | "USD" }> = {}) => ({
+    id: ID(n),
+    title: `Product ${n}`,
+    priceCents: 1000,
+    currency: "EUR" as const,
+    image: null,
+    ...extra,
+  });
+  const products = [product(1), product(2, { priceCents: 500, regularPriceCents: 800 }), product(3, { currency: "USD" }), product(4), product(5), product(6)];
+
+  it("fills a cart from the seller's own products, the one on screen first, in its currency", async () => {
+    const { sampleCartView } = await import("@/lib/cart/sample");
+    const full = sampleCartView(products, { state: "full", freeOverCents: 5000 });
+    expect(full.lines.map((line) => [line.productId, line.quantity])).toEqual([
+      [ID(1), 1],
+      [ID(2), 2],
+      [ID(4), 1],
+    ]);
+    expect(full.lines[1]).toMatchObject({ unitCents: 500, regularUnitCents: 800, amountCents: 1000 });
+    expect(full).toMatchObject({ count: 4, itemsCents: 3000, freeDeliveryGapCents: 2000, canCheckout: true });
+    expect(full.suggestions.map((item) => item.productId)).toEqual([ID(5), ID(6)]);
+  });
+
+  it("offers the seller's own picks as Goes well with, never a line or another currency, at most three", async () => {
+    const { sampleCartView } = await import("@/lib/cart/sample");
+    const picks = [product(2), product(7), product(3, { currency: "USD" }), product(8), product(9), product(10)];
+    const view = sampleCartView([product(1), product(2)], { state: "full", suggestions: picks });
+    expect(view.suggestions.map((item) => item.productId)).toEqual([ID(7), ID(8), ID(9)]);
+  });
+
+  it("makes the designer's cart of the page on screen, then the board's products a card adds", async () => {
+    const { sampleCartProducts } = await import("@/lib/cart/sample");
+    const board = [
+      { ...product(1), addable: true },
+      { ...product(4), addable: false },
+      { ...product(5, { currency: "USD" }), addable: true },
+      { ...product(6), addable: true },
+      { ...product(6), addable: true },
+      { ...product(11), addable: true },
+      { ...product(12), addable: true },
+    ];
+    const { lines, suggestions } = sampleCartProducts(product(1), board, [product(6), product(13)]);
+    expect(lines.map((line) => line.id)).toEqual([ID(1), ID(6), ID(11)]);
+    expect(suggestions.map((pick) => pick.id)).toEqual([ID(13)]);
+    // Nothing else on the board: the page's own product alone.
+    expect(sampleCartProducts(product(1), [], []).lines.map((line) => line.id)).toEqual([ID(1)]);
+  });
+
+  it("reads a catalogue product's sale as what one costs now", async () => {
+    const { sampleFromProduct } = await import("@/lib/cart/sample");
+    const sale = { price: 8, offerPercent: 20 };
+    expect(
+      sampleFromProduct({ id: ID(1), title: "Mug", price: 10, currency: "EUR", imageUrl: "https://r2.test/m.webp", sale }),
+    ).toEqual({
+      id: ID(1),
+      title: "Mug",
+      priceCents: 800,
+      regularPriceCents: 1000,
+      currency: "EUR",
+      image: { url: "https://r2.test/m.webp", alt: "Mug" },
+    });
+  });
+
+  it("steps and removes lines on the canvas, working the figures out again", async () => {
+    const { sampleCartView, withSampleEdits, NO_SAMPLE_CART_EDITS } = await import("@/lib/cart/sample");
+    const full = sampleCartView(products, { state: "full", freeOverCents: 5000 });
+    expect(withSampleEdits(full, NO_SAMPLE_CART_EDITS)).toBe(full);
+    const stepped = withSampleEdits(full, { quantities: { [ID(1)]: 3 }, removed: [ID(4)] });
+    expect(stepped.lines.map((line) => [line.productId, line.quantity, line.amountCents])).toEqual([
+      [ID(1), 3, 3000],
+      [ID(2), 2, 1000],
+    ]);
+    expect(stepped).toMatchObject({ count: 5, itemsCents: 4000, freeDeliveryGapCents: 1000, canCheckout: true });
+    const emptied = withSampleEdits(full, { quantities: {}, removed: [ID(1), ID(2), ID(4)] });
+    expect(emptied).toMatchObject({ lines: [], count: 0, suggestions: [], canCheckout: false, delivery: { kind: "none" } });
+  });
+
+  it("shows the empty cart and a line that cannot be bought on request", async () => {
+    const { sampleCartView } = await import("@/lib/cart/sample");
+    const empty = sampleCartView(products, { state: "empty" });
+    expect(empty).toMatchObject({ lines: [], count: 0, suggestions: [], canCheckout: false, delivery: { kind: "none" } });
+    const problem = sampleCartView(products, { state: "problem" });
+    expect(problem.lines.at(-1)).toMatchObject({ problem: "sold_out", amountCents: null });
+    expect(problem.canCheckout).toBe(false);
+  });
+});

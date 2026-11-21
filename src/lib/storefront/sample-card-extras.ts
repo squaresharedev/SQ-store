@@ -43,5 +43,10 @@ const EXTRAS: Record<string, Partial<Product>> = {
 };
 
 export function withSampleCardExtras(products: readonly Product[]): Product[] {
-  return products.map((product) => ({ ...product, ...EXTRAS[product.id] }));
+  return products.map((product) => {
+    const next: Product = { ...product, ...EXTRAS[product.id] };
+    // None left: a card cannot put it in the cart (quickAddFor says the same).
+    if (next.trackStock && next.stockQuantity === 0) delete next.quickAdd;
+    return next;
+  });
 }

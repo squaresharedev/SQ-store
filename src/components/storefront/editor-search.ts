@@ -10,6 +10,7 @@ import {
   GROUP_SUBTITLES,
   PRODUCT_PAGE_SETTINGS,
   STOREFRONT_ONLY_SETTINGS,
+  settingGroup,
   settingIndexFields,
   type SettingEntry,
   type SettingRef,
@@ -341,7 +342,7 @@ export function editorEntries(
   // The cart's settings only once buyers can have a cart (absent: offered).
   const offered = (row: EditorSearchEntry) =>
     options.cartOffered !== false ||
-    !(row.payload.kind === "setting" && row.payload.ref.kind === "group" && row.payload.ref.group === "cartPage");
+    !(row.payload.kind === "setting" && settingGroup(row.payload.ref) === "cartPage");
   // A block's own setting only while the board holds a block that has it:
   // "line height" with no text on the board has nothing to open.
   const kinds = new Set<string>(blocks.map((block) => block.type));

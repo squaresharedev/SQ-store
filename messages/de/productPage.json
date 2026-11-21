@@ -553,6 +553,9 @@
       "gone": "Dein Warenkorb ist abgelaufen. Versuche es erneut.",
       "invalid": "Das hat nicht funktioniert. Versuche es erneut.",
       "rate_limited": "Zu viele Änderungen auf einmal. Warte kurz und versuche es dann erneut."
-    }
+    },
+    "notePlaceholder": "Hier eine Notiz für Ihre Käufer schreiben",
+    "editTitle": "Überschrift des Warenkorbs bearbeiten",
+    "editNote": "Notiz im Warenkorb bearbeiten"
   }
 }

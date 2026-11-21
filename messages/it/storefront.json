@@ -1572,6 +1572,14 @@
     "deliveryBar": "Avanzamento spedizione gratuita",
     "deliveryBarHint": "Mostrato quando la tua spedizione è gratuita oltre una certa cifra.",
     "suggestions": "Si abbina bene a",
-    "suggestionsHint": "Sotto il carrello: ciò che hai scelto in Aggiungi al tuo ordine per i suoi prodotti."
+    "suggestionsHint": "Sotto il carrello: ciò che hai scelto in Aggiungi al tuo ordine per i suoi prodotti.",
+    "sections": {
+      "buttons": "Aggiunta al carrello",
+      "cart": "Nel carrello"
+    },
+    "leadGuess": {
+      "label": "Metti Aggiungi al carrello in primo piano",
+      "hint": "{count, plural, one {# prodotto} other {# prodotti}} della tua bacheca possono andare dritti nel carrello. Un tocco rende Aggiungi al carrello il pulsante principale; Compra ora resta accanto."
+    }
   }
 }

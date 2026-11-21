@@ -1481,7 +1481,15 @@
     "deliveryBar": "Free delivery progress",
     "deliveryBarHint": "Shown when your delivery is free over an amount.",
     "suggestions": "Goes well with",
-    "suggestionsHint": "Under the cart: what you picked for Add to your order on the products in it."
+    "suggestionsHint": "Under the cart: what you picked for Add to your order on the products in it.",
+    "sections": {
+      "buttons": "Adding to cart",
+      "cart": "Inside the cart"
+    },
+    "leadGuess": {
+      "label": "Lead with Add to cart",
+      "hint": "{count, plural, one {# product} other {# products}} on your board can go straight in a cart. A tap makes Add to cart the main button; Buy now stays beside it."
+    }
   },
   "checkoutPage": {
     "charsLeft": "{count, plural, one {# character left} other {# characters left}}",

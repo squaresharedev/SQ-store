@@ -7,7 +7,7 @@ import type { CartPageConfig } from "@/types/storefront";
 import { CartPreviewProvider, CartProvider } from "./CartContext";
 import { CartAnnouncer, CartDrawer } from "./CartDrawer";
 import type { CartPanelTheme } from "./CartPanel";
-import type { CartLook } from "./cart-look";
+import type { CartDrawerMode, CartLook } from "./cart-look";
 
 /**
  * A buyer page's cart, in one element: the provider every cart control on the
@@ -26,6 +26,9 @@ export function StorefrontCart({
   via = null,
   preview = false,
   previewView = null,
+  previewOpen = false,
+  onPreviewOpenChange,
+  drawer = "dialog",
   look,
   children,
 }: {
@@ -37,15 +40,43 @@ export function StorefrontCart({
   via?: LinkChannel | null;
   preview?: boolean;
   previewView?: CartView | null;
+  /** A preview's cart open: where it starts, or, with onPreviewOpenChange,
+   *  held by the owner (the designer opens it from its panel). */
+  previewOpen?: boolean;
+  onPreviewOpenChange?: (open: boolean) => void;
+  /** Where a preview's panel opens (cart-look.ts): a buyer's page is always
+   *  "dialog". "inline" draws it over this page, inside the page's own box. */
+  drawer?: CartDrawerMode;
   look?: CartLook;
   children: ReactNode;
 }) {
   if (!cart) return <>{children}</>;
   if (preview) {
+    const panel = <CartDrawer theme={theme} />;
     return (
-      <CartPreviewProvider storefrontId={storefrontId} config={cart} view={previewView} look={look} embedded={embedded}>
-        {children}
-        <CartDrawer theme={theme} />
+      <CartPreviewProvider
+        storefrontId={storefrontId}
+        config={cart}
+        view={previewView}
+        look={look}
+        embedded={embedded}
+        initiallyOpen={previewOpen}
+        {...(onPreviewOpenChange ? { open: previewOpen, onOpenChange: onPreviewOpenChange } : {})}
+        drawer={drawer}
+      >
+        {drawer === "inline" ? (
+          // The page's own box: what the inline panel opens over, and the
+          // width it switches from panel to sheet by.
+          <div className="@container relative">
+            {children}
+            {panel}
+          </div>
+        ) : (
+          <>
+            {children}
+            {panel}
+          </>
+        )}
       </CartPreviewProvider>
     );
   }

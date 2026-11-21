@@ -1572,6 +1572,14 @@
     "deliveryBar": "Progresso de entrega grátis",
     "deliveryBarHint": "Mostrado quando a sua entrega é gratuita acima de um valor.",
     "suggestions": "Combina bem com",
-    "suggestionsHint": "Por baixo do carrinho: o que escolheu em Adicionar à sua encomenda para os produtos nele."
+    "suggestionsHint": "Por baixo do carrinho: o que escolheu em Adicionar à sua encomenda para os produtos nele.",
+    "sections": {
+      "buttons": "Adicionar ao carrinho",
+      "cart": "Dentro do carrinho"
+    },
+    "leadGuess": {
+      "label": "Destacar Adicionar ao carrinho",
+      "hint": "{count, plural, one {# produto} other {# produtos}} do seu quadro podem ir diretamente para um carrinho. Um toque torna Adicionar ao carrinho o botão principal; Comprar agora fica ao lado."
+    }
   }
 }

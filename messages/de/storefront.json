@@ -1572,6 +1572,14 @@
     "deliveryBar": "Fortschritt kostenloser Versand",
     "deliveryBarHint": "Wird angezeigt, wenn dein Versand ab einem Betrag kostenlos ist.",
     "suggestions": "Passt dazu",
-    "suggestionsHint": "Unter dem Warenkorb: was du bei seinen Produkten für Zu deiner Bestellung hinzufügen ausgewählt hast."
+    "suggestionsHint": "Unter dem Warenkorb: was du bei seinen Produkten für Zu deiner Bestellung hinzufügen ausgewählt hast.",
+    "sections": {
+      "buttons": "In den Warenkorb legen",
+      "cart": "Im Warenkorb"
+    },
+    "leadGuess": {
+      "label": "In den Warenkorb zuerst",
+      "hint": "{count, plural, one {# Produkt} other {# Produkte}} auf Ihrer Fläche können direkt in den Warenkorb. Ein Tippen macht In den Warenkorb zum Hauptbutton; Jetzt kaufen bleibt daneben."
+    }
   }
 }

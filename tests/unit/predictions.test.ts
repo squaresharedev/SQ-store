@@ -4,6 +4,7 @@ import {
   addOnHabits,
   carrierFor,
   carrierHabits,
+  CART_LEAD_MIN_PRODUCTS,
   carryOverDesign,
   embedDomainsElsewhere,
   firstPlaceable,
@@ -15,6 +16,7 @@ import {
   predictShippingDefaults,
   rankProductsToPlace,
   suggestAddOns,
+  suggestCartLead,
   withCarrier,
   type RecentProduct,
 } from "@/lib/predictions";
@@ -391,7 +393,26 @@ describe("carryOverDesign", () => {
   it("leaves out a page the last storefront never set up", () => {
     const carried = carryOverDesign(config({}));
     expect(carried).not.toHaveProperty("productPage");
+    expect(carried).not.toHaveProperty("cartPage");
     expect(carried).not.toHaveProperty("checkoutPage");
+  });
+
+  it("carries the cart as it was designed, switched off included", () => {
+    const cartPage = { mainButton: "addToCart", afterAdd: "note", title: "Your bag", suggestions: false } as const;
+    expect(carryOverDesign(config({ cartPage })).cartPage).toEqual(cartPage);
+    expect(carryOverDesign(config({ cartPage: { enabled: false } })).cartPage).toEqual({ enabled: false });
+  });
+});
+
+describe("suggestCartLead", () => {
+  it("offers Add to cart first once the board holds enough products a card can add", () => {
+    expect(suggestCartLead({}, CART_LEAD_MIN_PRODUCTS)).toBe(true);
+    expect(suggestCartLead({}, CART_LEAD_MIN_PRODUCTS - 1)).toBe(false);
+  });
+
+  it("stays quiet when it already leads or the cart is off", () => {
+    expect(suggestCartLead({ mainButton: "addToCart" }, 10)).toBe(false);
+    expect(suggestCartLead({ enabled: false }, 10)).toBe(false);
   });
 });
 

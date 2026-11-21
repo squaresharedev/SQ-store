@@ -1572,6 +1572,14 @@
     "deliveryBar": "Progreso de envío gratis",
     "deliveryBarHint": "Se muestra cuando tu envío es gratuito a partir de cierta cantidad.",
     "suggestions": "Combina bien con",
-    "suggestionsHint": "Debajo del carrito: lo que elegiste en Añadir a tu pedido para sus productos."
+    "suggestionsHint": "Debajo del carrito: lo que elegiste en Añadir a tu pedido para sus productos.",
+    "sections": {
+      "buttons": "Añadir al carrito",
+      "cart": "Dentro del carrito"
+    },
+    "leadGuess": {
+      "label": "Destacar Añadir al carrito",
+      "hint": "{count, plural, one {# producto} other {# productos}} de tu tablero pueden ir directos al carrito. Un toque convierte Añadir al carrito en el botón principal; Comprar ahora sigue al lado."
+    }
   }
 }

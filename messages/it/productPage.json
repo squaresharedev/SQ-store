@@ -553,6 +553,9 @@
       "gone": "Il tuo carrello è scaduto. Riprova.",
       "invalid": "Non ha funzionato. Riprova.",
       "rate_limited": "Troppe modifiche in una volta. Aspetta un momento, poi riprova."
-    }
+    },
+    "notePlaceholder": "Scrivi qui una nota per i tuoi acquirenti",
+    "editTitle": "Modifica il titolo del carrello",
+    "editNote": "Modifica la nota nel carrello"
   }
 }

@@ -553,6 +553,9 @@
       "gone": "Koszyk wygasł. Spróbuj ponownie.",
       "invalid": "Coś poszło nie tak. Spróbuj ponownie.",
       "rate_limited": "Zbyt wiele zmian naraz. Poczekaj chwilę i spróbuj ponownie."
-    }
+    },
+    "notePlaceholder": "Dodaj tutaj notatkę dla kupujących",
+    "editTitle": "Edytuj nagłówek koszyka",
+    "editNote": "Edytuj notatkę w koszyku"
   }
 }

@@ -9,7 +9,15 @@ import type { CartLineView, CartSuggestion, CartView } from "@/types/cart";
 export const LAB_STOREFRONT_ID = "5a000000-0000-4000-8000-00000000ca27";
 
 /** A shop the cart is drawn in: its backdrop, ink, corners and buy button. */
-export type LabShop = { id: string; label: string; background: string; ink: string; cornerRadius: number; cta: CtaAppearance };
+export type LabShop = {
+  id: string;
+  label: string;
+  background: string;
+  accent: string;
+  ink: string;
+  cornerRadius: number;
+  cta: CtaAppearance;
+};
 
 function shop(id: string, label: string, background: string, accent: string, cornerRadius: number): LabShop {
   const theme: StorefrontTheme = {
@@ -22,6 +30,7 @@ function shop(id: string, label: string, background: string, accent: string, cor
     id,
     label,
     background,
+    accent,
     ink: resolveInk(theme),
     cornerRadius,
     cta: resolveCta(DEFAULT_PRODUCT_PAGE_CONFIG, theme),

@@ -553,6 +553,9 @@
       "gone": "Je winkelwagen is verlopen. Probeer het opnieuw.",
       "invalid": "Dat werkte niet. Probeer het opnieuw.",
       "rate_limited": "Te veel wijzigingen tegelijk. Wacht even en probeer het dan opnieuw."
-    }
+    },
+    "notePlaceholder": "Schrijf hier een notitie voor je kopers",
+    "editTitle": "Kop van de winkelwagen bewerken",
+    "editNote": "Notitie in de winkelwagen bewerken"
   }
 }

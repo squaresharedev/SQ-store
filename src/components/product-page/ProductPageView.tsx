@@ -50,6 +50,8 @@ import { StickyBar } from "./StickyBar";
 import { StorefrontCart } from "@/components/cart/StorefrontCart";
 import { CartButton } from "@/components/cart/CartButton";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
+import type { CartDrawerMode } from "@/components/cart/cart-look";
+import type { CartView } from "@/types/cart";
 import { TrustList, buildTrustLines } from "./TrustList";
 import {
   DARK_INK,
@@ -87,6 +89,7 @@ export function ProductPageView({
   via = null,
   reviews = null,
   wrapBadges,
+  previewCart,
 }: {
   page: ProductPageData;
   mode: "public" | "preview";
@@ -110,6 +113,16 @@ export function ProductPageView({
    *  unset (identity, renders the node as-is). Keeping BadgeDropZone out of
    *  this module removes it from buyer-page bundles. */
   wrapBadges?: (kind: "photo" | "beside", node: ReactNode) => ReactNode;
+  /** A preview's cart: what is in it (a sample, lib/cart/sample.ts), whether
+   *  it is open (held by the owner when it passes onOpenChange, else where it
+   *  starts), and where its panel opens (cart-look.ts CartDrawerMode).
+   *  Absent: an empty cart in a dialog. Never on a buyer's page. */
+  previewCart?: {
+    view: CartView | null;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    drawer?: CartDrawerMode;
+  };
 }) {
   const { storefront, product } = page;
   const { theme, productPage, shippingPolicy, seller } = storefront;
@@ -427,7 +440,21 @@ export function ProductPageView({
           initialPicks={initialAddOns}
           syncUrl={!preview}
         >
-        <StorefrontCart storefrontId={storefront.id} cart={cartConfig} theme={cartTheme} preview={preview} via={via}>
+        <StorefrontCart
+          storefrontId={storefront.id}
+          cart={cartConfig}
+          theme={cartTheme}
+          preview={preview}
+          via={via}
+          {...(preview && previewCart
+            ? {
+                previewView: previewCart.view,
+                previewOpen: previewCart.open,
+                onPreviewOpenChange: previewCart.onOpenChange,
+                drawer: previewCart.drawer,
+              }
+            : {})}
+        >
         <PageShell
           storefront={storefront}
           shopHref={preview ? undefined : storefrontPagePath(storefront.id)}

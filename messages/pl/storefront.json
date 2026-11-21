@@ -1572,6 +1572,14 @@
     "deliveryBar": "Postęp darmowej dostawy",
     "deliveryBarHint": "Pokazuje się, gdy dostawa jest bezpłatna od określonej kwoty.",
     "suggestions": "Pasuje do tego",
-    "suggestionsHint": "Pod koszykiem: to, co wybrano w Dodaj do swojego zamówienia przy produktach w nim."
+    "suggestionsHint": "Pod koszykiem: to, co wybrano w Dodaj do swojego zamówienia przy produktach w nim.",
+    "sections": {
+      "buttons": "Dodawanie do koszyka",
+      "cart": "W koszyku"
+    },
+    "leadGuess": {
+      "label": "Najpierw Dodaj do koszyka",
+      "hint": "{count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}} z Twojej tablicy może trafić prosto do koszyka. Dotknięcie ustawia Dodaj do koszyka jako główny przycisk; Kup teraz zostaje obok."
+    }
   }
 }

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { StorefrontDesigner } from "@/components/storefront/StorefrontDesigner";
+import { cartLaunched } from "@/lib/cart/availability";
 import { buildSampleStorefront } from "@/lib/storefront/sample";
 import { withSampleCardExtras } from "@/lib/storefront/sample-card-extras";
 import { withSampleSale } from "@/lib/storefront/sample-sale";
@@ -36,6 +37,7 @@ export default async function SampleStorefrontDevPage({
       sellerIdentity={sample.seller}
       shippingPolicy={sample.shippingPolicy}
       initialSetting={setting ?? null}
+      cartOffered={cartLaunched()}
     />
   );
 }

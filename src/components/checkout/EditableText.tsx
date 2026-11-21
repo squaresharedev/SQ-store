@@ -1,45 +1,38 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useState, type ComponentType } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { hasContactOrPaymentDetails } from "@/lib/validation/predicates";
-import { PlainTextEditor } from "@/components/storefront/PlainTextEditor";
-import type { CheckoutPageConfig } from "@/types/storefront";
+import type { PlainTextEditor } from "@/components/storefront/PlainTextEditor";
 
 /** The checkout's words a seller can type straight onto the canvas. */
 export type CheckoutTextField = "headline" | "note" | "thanksHeadline" | "thanksMessage";
 
-type CheckoutEdit = {
-  /** Write one field; `undefined` clears it back to the default copy. */
-  edit: (field: CheckoutTextField, value: string | undefined) => void;
-};
+/** The cart's: its heading and the seller's line in it. */
+export type CartTextField = "cartTitle" | "cartNote";
 
-const CheckoutEditContext = createContext<CheckoutEdit | null>(null);
+export type EditableTextField = CheckoutTextField | CartTextField;
 
 /**
- * Makes the checkout's words editable in place. Only the editor's artboards
- * provide it; on a buyer's page there is no provider, and every EditableText
- * is plain text.
+ * What makes the words around here typeable: where a typed word goes, and the
+ * editor that takes it. Provided only by the editor's artboards
+ * (EditableTextProviders.tsx), which is also what hands the editor in: this
+ * module never imports it, so a buyer's page that draws an EditableText (the
+ * cart on every product page) never downloads it.
  */
-export function CheckoutEditProvider({
-  checkoutPage,
-  onChange,
-  children,
-}: {
-  checkoutPage: CheckoutPageConfig;
-  onChange: (next: CheckoutPageConfig) => void;
-  children: ReactNode;
-}) {
-  const edit: CheckoutEdit["edit"] = (field, value) => {
-    const next = { ...checkoutPage };
-    // An emptied field goes back to the default copy by being ABSENT, never
-    // stored as "" (which the schema refuses): see withoutKey in the panel.
-    if (value === undefined) delete next[field];
-    else next[field] = value;
-    onChange(next);
-  };
-  return <CheckoutEditContext.Provider value={{ edit }}>{children}</CheckoutEditContext.Provider>;
+export type TextEdit = {
+  /** Write one field; `undefined` clears it back to the default copy. */
+  edit: (field: EditableTextField, value: string | undefined) => void;
+  Editor: ComponentType<Parameters<typeof PlainTextEditor>[0]>;
+};
+
+export const TextEditContext = createContext<TextEdit | null>(null);
+
+/** Whether the words around here can be typed into (the editor's canvas),
+ *  for a line that shows only there, like an empty note's invitation. */
+export function useTextEditing(): boolean {
+  return useContext(TextEditContext) !== null;
 }
 
 /**
@@ -84,7 +77,7 @@ export function EditableText({
   className,
   attributes,
 }: {
-  field: CheckoutTextField;
+  field: EditableTextField;
   /** The seller's stored words, or undefined for the default. */
   value: string | undefined;
   fallback: string;
@@ -95,7 +88,7 @@ export function EditableText({
    * on the canvas, the way a placeholder is.
    */
   fallbackIsPlaceholder?: boolean;
-  as?: "h1" | "p" | "blockquote";
+  as?: "h1" | "h2" | "p" | "blockquote";
   multiline?: boolean;
   maxLength: number;
   /** What the field is, for a screen reader while it is being typed in. */
@@ -103,7 +96,7 @@ export function EditableText({
   className?: string;
   attributes?: Record<`data-${string}`, string>;
 }) {
-  const context = useContext(CheckoutEditContext);
+  const context = useContext(TextEditContext);
   const [editing, setEditing] = useState(false);
   const tRoot = useTranslations();
 
@@ -120,7 +113,7 @@ export function EditableText({
       value && hasContactOrPaymentDetails(value) ? tRoot("Validation.generic.sellerProse") : null;
     return (
       <div className="flex flex-col gap-1" data-setting-skip="">
-        <PlainTextEditor
+        <context.Editor
           as={Tag}
           value={value ?? ""}
           multiline={multiline}

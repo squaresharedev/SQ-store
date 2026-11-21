@@ -1,8 +1,13 @@
+import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { cleanup, render, screen } from "../setup/render";
 import { CartPreviewProvider, CartProvider } from "@/components/cart/CartContext";
 import { CartContents, type CartPanelTheme } from "@/components/cart/CartPanel";
+import { CartPanelSurface } from "@/components/cart/CartPanelSurface";
+import { CartEditProvider } from "@/components/checkout/EditableTextProviders";
+import { CartPageSection } from "@/components/storefront/CartPageSection";
+import { sampleCartView } from "@/lib/cart/sample";
 import { ProductTileContent } from "@/components/storefront/ProductTileContent";
 import { QuickAddTile } from "@/components/storefront-page/QuickAddTile";
 import { ReviewAsk } from "@/components/checkout/ReviewAsk";
@@ -210,5 +215,80 @@ describe("reviews on an order of several products", () => {
     await user.click(screen.getByRole("button", { name: "Studio headphones Reviewed" }));
     expect(visible().getAttribute("data-order-review-item")).toBe("p2");
     expect(visible().querySelector('[data-order-review="done"]')).not.toBeNull();
+  });
+});
+
+describe("the cart on the designer's canvas", () => {
+  const sample = (id: string, title: string, priceCents: number) => ({ id, title, priceCents, currency: "EUR" as const, image: null });
+  const view = sampleCartView(
+    [sample("p1", "Mug", 1000), sample("p2", "Bowl", 500), sample("p3", "Plate", 700)],
+    { state: "full", freeOverCents: 5000 },
+  );
+  const items = () => document.querySelector("[data-cart-items]")?.getAttribute("data-cart-items");
+
+  it("steps, removes and puts back a sample's lines, sending nothing", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const user = userEvent.setup();
+    render(
+      <CartPreviewProvider storefrontId={LAB_STOREFRONT_ID} config={{}} view={view} drawer="inline">
+        <CartPanelSurface theme={panelTheme} />
+      </CartPreviewProvider>,
+    );
+    expect(items()).toBe("2700");
+    await user.click(screen.getByRole("button", { name: "One more Mug" }));
+    expect(items()).toBe("3700");
+    await user.click(screen.getByRole("button", { name: "Remove Plate" }));
+    expect(document.querySelectorAll("[data-cart-lines] > li")).toHaveLength(2);
+    expect(items()).toBe("3000");
+    await user.click(screen.getByRole("button", { name: "Undo" }));
+    expect(document.querySelectorAll("[data-cart-lines] > li")).toHaveLength(3);
+    expect(items()).toBe("3700");
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("invites the seller's note on the canvas and never shows a buyer the invitation", () => {
+    render(
+      <CartEditProvider cartPage={{}} onChange={() => {}}>
+        <CartPreviewProvider storefrontId={LAB_STOREFRONT_ID} config={{}} view={view}>
+          <CartPanelSurface theme={panelTheme} />
+        </CartPreviewProvider>
+      </CartEditProvider>,
+    );
+    expect(document.querySelector('[data-cart-note="empty"]')?.textContent).toBe("Add a note for your buyers here");
+    expect(screen.getByRole("button", { name: "Edit the cart's heading" }).textContent).toBe("Your cart");
+    cleanup();
+    render(
+      <CartPreviewProvider storefrontId={LAB_STOREFRONT_ID} config={{}} view={view}>
+        <CartContents theme={panelTheme} />
+      </CartPreviewProvider>,
+    );
+    expect(document.querySelector("[data-cart-note]")).toBeNull();
+  });
+});
+
+describe("the Cart settings' guess", () => {
+  function Panel({ addable }: { addable: number }) {
+    const [cartPage, setCartPage] = useState<CartPageConfig>({});
+    return (
+      <>
+        <CartPageSection cartPage={cartPage} onCartPageChange={setCartPage} addable={addable} />
+        <output data-testid="config">{JSON.stringify(cartPage)}</output>
+      </>
+    );
+  }
+
+  it("offers Add to cart as the leading button behind one tap, and takes it back with one", async () => {
+    const user = userEvent.setup();
+    render(<Panel addable={4} />);
+    await user.click(screen.getByRole("button", { name: "Lead with Add to cart" }));
+    expect(screen.getByTestId("config").textContent).toBe('{"mainButton":"addToCart"}');
+    await user.click(screen.getByRole("button", { name: "Undo" }));
+    expect(screen.getByTestId("config").textContent).toBe("{}");
+  });
+
+  it("says nothing for a board with few products a card can add", () => {
+    render(<Panel addable={2} />);
+    expect(document.querySelector("[data-cart-lead-suggestion]")).toBeNull();
   });
 });

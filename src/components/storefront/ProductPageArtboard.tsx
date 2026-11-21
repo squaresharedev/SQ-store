@@ -10,6 +10,9 @@ import { usePreviewReviews } from "./usePreviewReviews";
 import { isProductPageSectionShown } from "@/lib/storefront/product-page";
 import { ProductPageView } from "@/components/product-page/ProductPageView";
 import { BadgeDropZone, BadgeMoveProvider } from "@/components/product-page/BadgeDrag";
+import { CartEditProvider } from "@/components/checkout/EditableTextProviders";
+import { sampleCartProducts, sampleCartView, sampleFromPageProduct, sampleFromProduct } from "@/lib/cart/sample";
+import { freeOverCentsIn } from "@/lib/shipping/rates";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { useToast } from "@/components/ui/Toast";
 import { canPlaceBadge, withBadgePlacement } from "@/lib/products/badges";
@@ -38,6 +41,14 @@ import type {
  * switches into. And a product page leads somewhere in turn: the checkout and
  * thank-you artboards come out beside it, chained on (see DesignerCanvas), so
  * the seller can design the whole way from tile to thank-you in one view.
+ *
+ * THE CART OPENS ON IT, as it opens for a buyer, FULL: a sample of the
+ * seller's own products (this one, then the board's others a card puts
+ * straight in the cart, with "Goes well with" from this product's own picks;
+ * lib/cart/sample.ts). Its steppers, remove and Add to cart all play on the
+ * page; its heading and note are typed straight onto it; a click anywhere
+ * else on it opens the Cart settings. Whether it is open is the designer's
+ * (it opens it from the Cart settings), so only one page has it open.
  */
 export function ProductPageArtboard({
   product,
@@ -56,6 +67,10 @@ export function ProductPageArtboard({
   onClose,
   widths,
   initialDevice,
+  boardProducts = [],
+  cartOpen = false,
+  onCartOpenChange,
+  onCartPageChange,
 }: {
   /** The product this page is for; from the editor's catalogue snapshot. */
   product: Product;
@@ -77,6 +92,13 @@ export function ProductPageArtboard({
   onClose: () => void;
   widths: Record<PreviewDevice, number>;
   initialDevice: PreviewDevice;
+  /** The board's products, in board order: what the sample cart is made of. */
+  boardProducts?: readonly Product[];
+  /** Whether this page's cart is open; held by the designer. */
+  cartOpen?: boolean;
+  onCartOpenChange?: (open: boolean) => void;
+  /** Writes the cart's words typed onto it. */
+  onCartPageChange?: (next: CartPageConfig) => void;
 }) {
   const t = useTranslations("Storefront.artboard");
   const tBadges = useTranslations("Products.badgesField");
@@ -95,6 +117,45 @@ export function ProductPageArtboard({
     () => shownAddOns.cards.map((card) => ({ ...card, pagePath: productPagePath(storefrontId, card.id) })),
     [shownAddOns.cards, storefrontId],
   );
+  // THE SAMPLE CART. Keyed by what it is made of rather than by the page's
+  // product object (rebuilt on many renders), so steps the seller took in it
+  // last until the sample itself changes.
+  const cartShown = cartPage !== undefined && cartPage.enabled !== false;
+  const imageUrl = loaded.images[0]?.url;
+  const imageAlt = loaded.images[0]?.alt;
+  const sampleCart = useMemo(() => {
+    if (!cartShown) return null;
+    const onScreen = {
+      id: loaded.id,
+      title: loaded.title,
+      priceCents: loaded.priceCents,
+      regularPriceCents: loaded.sale?.regularPriceCents ?? null,
+      currency: loaded.currency,
+      image: imageUrl ? { url: imageUrl, alt: imageAlt ?? loaded.title } : null,
+    };
+    const board = boardProducts.map((entry) => ({ ...sampleFromProduct(entry), addable: entry.quickAdd !== undefined }));
+    const { lines, suggestions } = sampleCartProducts(onScreen, board, shownAddOns.cards.map(sampleFromPageProduct));
+    return sampleCartView(lines, {
+      state: "full",
+      suggestions,
+      freeOverCents: freeOverCentsIn(shippingPolicy, onScreen.currency),
+      href: (productId) => productPagePath(storefrontId, productId),
+    });
+  }, [
+    cartShown,
+    loaded.id,
+    loaded.title,
+    loaded.priceCents,
+    loaded.sale?.regularPriceCents,
+    loaded.currency,
+    imageUrl,
+    imageAlt,
+    boardProducts,
+    shownAddOns.cards,
+    shippingPolicy,
+    storefrontId,
+  ]);
+
   // The product's real reviews, read only while the section is switched on.
   const reviews = usePreviewReviews(
     product.id,
@@ -167,7 +228,10 @@ export function ProductPageArtboard({
       resolveHotspot={(name) => {
         // The section clicked on THIS page is the one the panel should choose for.
         if (name === "addOns") addOnsEditor?.aim(product.id);
-        return isProductPageHotspot(name) ? PRODUCT_PAGE_HOTSPOTS[name] : null;
+        if (!isProductPageHotspot(name)) return null;
+        const ref = PRODUCT_PAGE_HOTSPOTS[name];
+        // The cart clicked on THIS page is the one to keep open.
+        return ref.kind === "cartPage" ? { ...ref, on: product.id } : ref;
       }}
     >
       <BadgeMoveProvider
@@ -176,14 +240,26 @@ export function ProductPageArtboard({
         onRefused={() => toast.error(tBadges("photoFull", { max: BADGES_ON_PHOTO_MAX }))}
         copy={badgeCopy}
       >
-        <ProductPageView
-          page={page}
-          mode="preview"
-          reviews={reviews}
-          wrapBadges={(kind, node) => (
-            <BadgeDropZone kind={kind}>{node || null}</BadgeDropZone>
-          )}
-        />
+        <CartEditProvider cartPage={cartPage ?? {}} onChange={(next) => onCartPageChange?.(next)}>
+          <ProductPageView
+            page={page}
+            mode="preview"
+            reviews={reviews}
+            wrapBadges={(kind, node) => (
+              <BadgeDropZone kind={kind}>{node || null}</BadgeDropZone>
+            )}
+            previewCart={
+              sampleCart
+                ? {
+                    view: sampleCart,
+                    open: cartOpen,
+                    onOpenChange: (open) => onCartOpenChange?.(open),
+                    drawer: "inline",
+                  }
+                : undefined
+            }
+          />
+        </CartEditProvider>
       </BadgeMoveProvider>
     </ArtboardFrame>
   );

@@ -553,6 +553,9 @@
       "gone": "Votre panier a expiré. Réessayez.",
       "invalid": "Cela n'a pas fonctionné. Réessayez.",
       "rate_limited": "Trop de modifications à la fois. Attendez un instant, puis réessayez."
-    }
+    },
+    "notePlaceholder": "Ajoutez ici une note pour vos acheteurs",
+    "editTitle": "Modifier le titre du panier",
+    "editNote": "Modifier la note du panier"
   }
 }

@@ -1,15 +1,13 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { overlayCloseButtonClass, overlaySurfaceClass, modalTitleClass } from "@/components/ui/control-styles";
-import { ruleColor, storefrontOverlayVars } from "@/components/product-page/product-page-maps";
+import { ruleColor } from "@/components/product-page/product-page-maps";
 import { OptionProvider } from "@/components/product-page/OptionContext";
 import { ProductCta } from "@/components/product-page/ProductCta";
 import { CartPreviewProvider } from "@/components/cart/CartContext";
 import { CartButton } from "@/components/cart/CartButton";
-import { CartContents, CartSummary, type CartPanelTheme } from "@/components/cart/CartPanel";
+import { type CartPanelTheme } from "@/components/cart/CartPanel";
+import { CartPanelSurface } from "@/components/cart/CartPanelSurface";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { CartAddedNote } from "@/components/cart/CartAddedNote";
 import { CartPageBody } from "@/components/cart/CartPageBody";
@@ -22,7 +20,8 @@ import { DEFAULT_PRODUCT_PAGE_CONFIG, DEFAULT_STOREFRONT_CONFIG, type Storefront
 import type { Product } from "@/types/product";
 import type { BuyerOrder } from "@/types/checkout";
 import { LAB_SCENARIOS, LAB_SHOPS, LAB_STOREFRONT_ID } from "./fixtures";
-import { lookOf, type CartLabState } from "./lab-model";
+import { DESIGNER_PLACEMENTS, lookOf, type CartLabState } from "./lab-model";
+import { DesignerPlacement } from "./DesignerPlacement";
 
 const NO_GROUPS: never[] = [];
 
@@ -79,7 +78,12 @@ const REVIEW_ORDER: Pick<
  * pinned summary.
  */
 export function Placement({ state, interactive = false }: { state: CartLabState; interactive?: boolean }) {
-  const t = useTranslations("ProductPage.cart");
+  if (DESIGNER_PLACEMENTS.includes(state.placement)) return <DesignerPlacement state={state} interactive={interactive} />;
+  return <PagePlacement state={state} interactive={interactive} />;
+}
+
+/** The cart where a buyer meets it (every placement but the designer's). */
+function PagePlacement({ state, interactive }: { state: CartLabState; interactive: boolean }) {
   const shop = LAB_SHOPS.find((entry) => entry.id === state.shop) ?? LAB_SHOPS[0];
   const view = LAB_SCENARIOS[state.scenario].view;
   const theme: CartPanelTheme = { ink: shop.ink, cornerRadius: shop.cornerRadius, cta: shop.cta };
@@ -121,23 +125,8 @@ export function Placement({ state, interactive = false }: { state: CartLabState;
         data-cart-lab-placement={state.placement}
       >
         {state.placement === "panel" && (
-          <div className="flex w-full justify-end py-6 pr-0" style={storefrontOverlayVars(shop.ink, shop.cornerRadius)}>
-            <div className={cn(overlaySurfaceClass, "flex h-[34rem] w-full max-w-md flex-col")}>
-              <div className="flex items-start justify-between gap-4 px-6 pt-6">
-                <h2 className={modalTitleClass}>{t("title")}</h2>
-                <span className={cn(overlayCloseButtonClass, "-mr-1.5 -mt-1.5")} aria-hidden="true">
-                  <X className="size-5" />
-                </span>
-              </div>
-              <div className="flex-1 overflow-y-auto px-6 pt-4">
-                <CartContents theme={theme} />
-              </div>
-              {view.lines.length > 0 && (
-                <div className="border-t border-border bg-popover px-6 py-4">
-                  <CartSummary theme={theme} />
-                </div>
-              )}
-            </div>
+          <div className="flex w-full justify-end py-6 pr-0">
+            <CartPanelSurface theme={theme} className="h-[34rem] w-full max-w-md" />
           </div>
         )}
 

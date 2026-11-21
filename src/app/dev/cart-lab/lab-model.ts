@@ -17,6 +17,7 @@ import {
 import { CART_AFTER_ADD, CART_MAIN_BUTTONS, type CartAfterAdd, type CartMainButton } from "@/types/storefront";
 import { changedProps, decodeLabHash, encodeLabHash, pick, toJsx } from "../lab-kit/state";
 import { LAB_SCENARIOS, LAB_SHOPS, type LabScenarioId, type LabShopId } from "./fixtures";
+import { SAMPLE_CART_STATES, type SampleCartState } from "@/lib/cart/sample";
 
 /** Where the lab draws the cart. */
 export const LAB_PLACEMENTS = [
@@ -26,7 +27,16 @@ export const LAB_PLACEMENTS = [
   { id: "page", label: "The cart page" },
   { id: "cards", label: "Cards on a board" },
   { id: "reviews", label: "Reviews on an order" },
+  { id: "above", label: "Designer: cart above the page" },
+  { id: "onPage", label: "Designer: cart on the page" },
 ] as const;
+
+/** The two ways the designer could show the cart. */
+export const DESIGNER_PLACEMENTS: readonly LabPlacementId[] = ["above", "onPage"];
+
+/** The artboard's device, as the designer's own switch names them. */
+export const LAB_DEVICES = ["desktop", "mobile"] as const;
+export type LabDevice = (typeof LAB_DEVICES)[number];
 export type LabPlacementId = (typeof LAB_PLACEMENTS)[number]["id"];
 
 export type CartLabState = CartLook & {
@@ -37,6 +47,11 @@ export type CartLabState = CartLook & {
   quickAdd: boolean;
   /** The seller's "Goes well with" (cartPage.suggestions). */
   suggest: boolean;
+  /** In the designer: what the sample cart holds, the artboard's device,
+   *  and whether the cart starts open on the page. */
+  sample: SampleCartState;
+  device: LabDevice;
+  open: boolean;
   shop: LabShopId;
   scenario: LabScenarioId;
   placement: LabPlacementId;
@@ -49,6 +64,9 @@ export const LAB_DEFAULTS: CartLabState = {
   deliveryBar: true,
   quickAdd: true,
   suggest: true,
+  sample: "full",
+  device: "desktop",
+  open: true,
   shop: "clay",
   scenario: "three",
   placement: "panel",
@@ -116,6 +134,9 @@ export function decodeState(hash: string): CartLabState {
     deliveryBar: typeof raw.deliveryBar === "boolean" ? raw.deliveryBar : LAB_DEFAULTS.deliveryBar,
     quickAdd: typeof raw.quickAdd === "boolean" ? raw.quickAdd : LAB_DEFAULTS.quickAdd,
     suggest: typeof raw.suggest === "boolean" ? raw.suggest : LAB_DEFAULTS.suggest,
+    sample: one(raw.sample, SAMPLE_CART_STATES, LAB_DEFAULTS.sample),
+    device: one(raw.device, LAB_DEVICES, LAB_DEFAULTS.device),
+    open: typeof raw.open === "boolean" ? raw.open : LAB_DEFAULTS.open,
     shop: one(raw.shop, LAB_SHOPS.map((entry) => entry.id), LAB_DEFAULTS.shop),
     scenario: one(raw.scenario, Object.keys(LAB_SCENARIOS) as LabScenarioId[], LAB_DEFAULTS.scenario),
     placement: one(raw.placement, LAB_PLACEMENTS.map((entry) => entry.id), LAB_DEFAULTS.placement),

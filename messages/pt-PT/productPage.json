@@ -553,6 +553,9 @@
       "gone": "O seu carrinho expirou. Tente novamente.",
       "invalid": "Não foi possível. Tente novamente.",
       "rate_limited": "Demasiadas alterações de uma vez. Aguarde um momento e tente novamente."
-    }
+    },
+    "notePlaceholder": "Escreva aqui uma nota para os seus compradores",
+    "editTitle": "Editar o título do carrinho",
+    "editNote": "Editar a nota do carrinho"
   }
 }

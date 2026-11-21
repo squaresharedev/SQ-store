@@ -19,6 +19,7 @@ export const SHORTLIST_GROUP = "shortlist";
 
 export const LAB_GROUPS = [
   { id: SHORTLIST_GROUP, label: "Shortlist" },
+  { id: "designer", label: "In the designer" },
   { id: "rows", label: "Line rows" },
   { id: "feedback", label: "Add feedback and icon" },
   { id: "buttons", label: "Page buttons" },
@@ -31,6 +32,18 @@ export const LAB_GROUPS = [
 ] as const;
 
 export const LAB_PRESETS: readonly LabPreset[] = [
+  // In the designer: the two ways a seller could see and design the cart.
+  { id: "des-onpage", group: "designer", name: "On the page, open", note: "The cart opens inside the product page artboard, over a dimmed first screen, full of the seller's own products.", fit: "on-brand", state: { placement: "onPage", open: true } },
+  { id: "des-onpage-closed", group: "designer", name: "On the page, closed", note: "The page as it loads: the cart button carries the count; pressing it, or Add to cart, opens the cart there.", fit: "on-brand", state: { placement: "onPage", open: false } },
+  { id: "des-onpage-phone", group: "designer", name: "On the page, phone", note: "At phone width the cart rises as a sheet from the bottom of the screen, as it does for a buyer.", fit: "on-brand", state: { placement: "onPage", open: true, device: "mobile" } },
+  { id: "des-onpage-note", group: "designer", name: "On the page, note after adding", note: "After adding is set to a note: pressing Add to cart on the artboard shows the note instead of opening the cart.", fit: "on-brand", state: { placement: "onPage", open: false, afterAdd: "note" } },
+  { id: "des-above", group: "designer", name: "Above the page", note: "The cart is an artboard of its own, stacked above the product page it opens over, at the panel's width and one screen tall.", fit: "on-brand", state: { placement: "above" } },
+  { id: "des-above-phone", group: "designer", name: "Above the page, phone", note: "Both artboards at phone width: the cart as the sheet a buyer gets.", fit: "on-brand", state: { placement: "above", device: "mobile" } },
+  { id: "des-above-problem", group: "designer", name: "Above, a line that cannot be bought", note: "The sample's last line sold out: the problem reads on the line and checkout waits.", fit: "on-brand", state: { placement: "above", sample: "problem" } },
+  { id: "des-onpage-empty", group: "designer", name: "On the page, empty", note: "The sample switched to empty: what a buyer sees before adding anything.", fit: "on-brand", state: { placement: "onPage", open: true, sample: "empty" } },
+  { id: "des-above-dark", group: "designer", name: "Above, dark shop", note: "The cart artboard in a dark shop's ink and round corners.", fit: "on-brand", state: { placement: "above", shop: "dark" } },
+  { id: "des-onpage-dark", group: "designer", name: "On the page, dark shop", note: "The cart open on a dark shop's product page.", fit: "on-brand", state: { placement: "onPage", open: true, shop: "dark" } },
+
   // Line rows.
   { id: "rows-photo", group: "rows", name: "Photo rows", note: "A 64 px photo beside each line; minus and plus under the title.", fit: "on-brand", state: { rows: "photo" } },
   { id: "rows-compact", group: "rows", name: "Compact rows", note: "A 40 px photo, one tight row per line: more lines in view.", fit: "on-brand", state: { rows: "compact" } },
@@ -86,6 +99,8 @@ export const LAB_PRESETS: readonly LabPreset[] = [
 
 /** The ranked shortlist: best first, each with why. */
 export const LAB_SHORTLIST: readonly { id: string; why: string }[] = [
+  { id: "des-onpage", why: "The cart is a layer of the product page, so it is designed where it opens, the way a buyer meets it." },
+  { id: "des-above", why: "Always in view without a click: every cart setting has something on screen to point at." },
   { id: "rows-photo", why: "Shows what is in the cart at a glance; the shop's photos carry it, not decoration." },
   { id: "btn-buy-leads", why: "Every existing page keeps its look at launch; the cart arrives as a second, quieter choice." },
   { id: "del-bar", why: "The commonest reason carts are abandoned is cost: the bar shows delivery before checkout." },

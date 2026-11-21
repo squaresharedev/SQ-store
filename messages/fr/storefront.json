@@ -1572,6 +1572,14 @@
     "deliveryBar": "Progression livraison gratuite",
     "deliveryBarHint": "Affiché quand votre livraison est gratuite à partir d'un montant.",
     "suggestions": "Va bien avec",
-    "suggestionsHint": "Sous le panier : ce que vous avez choisi dans Ajouter à votre commande pour ses produits."
+    "suggestionsHint": "Sous le panier : ce que vous avez choisi dans Ajouter à votre commande pour ses produits.",
+    "sections": {
+      "buttons": "Ajout au panier",
+      "cart": "Dans le panier"
+    },
+    "leadGuess": {
+      "label": "Mettre Ajouter au panier en avant",
+      "hint": "{count, plural, one {# produit} other {# produits}} de votre tableau peuvent aller directement dans un panier. Un appui fait d'Ajouter au panier le bouton principal ; Acheter maintenant reste à côté."
+    }
   }
 }

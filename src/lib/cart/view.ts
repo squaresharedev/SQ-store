@@ -8,7 +8,7 @@ import { assessLines, priceAssessedLines, type AssessedLine } from "@/lib/checko
 import { lineKey } from "@/lib/checkout/lines";
 import { bestSale } from "@/lib/discounts/pricing";
 import { publicQuantityLimit } from "@/lib/products/quantity";
-import { freeDeliveryGapCents, quoteOrderShipping } from "@/lib/shipping/rates";
+import { freeDeliveryGapCents, freeOverCentsIn, quoteOrderShipping } from "@/lib/shipping/rates";
 import { cartItemCount } from "@/lib/cart/lines";
 import { toCurrency } from "@/lib/format/money";
 import { productPagePath } from "@/lib/storefront/product-page-url";
@@ -81,10 +81,7 @@ export async function buildCartView(
   const currency = sellable[0]?.currency ?? null;
   const policy = store.shippingPolicy;
   // The seller's free-over threshold, when it is in the cart's currency.
-  const freeOver =
-    currency && typeof policy.freeOverCents === "number" && policy.freeOverCents > 0 && (policy.ratesCurrency ?? "EUR") === currency
-      ? policy.freeOverCents
-      : null;
+  const freeOver = freeOverCentsIn(policy, currency);
 
   let delivery: CartDelivery = { kind: "none" };
   let freeGap: number | null = null;

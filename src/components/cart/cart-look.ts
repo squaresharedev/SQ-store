@@ -59,6 +59,23 @@ export const CART_LOOK: CartLook = {
   suggestions: "cards",
 };
 
+/**
+ * Where the cart panel opens. A buyer's page: "dialog" (ui/Modal, over the
+ * whole screen). A preview inside an artboard: "inline" (over the page it
+ * belongs to, inside the artboard's frame), or "none" where the cart is drawn
+ * somewhere of its own (a cart artboard).
+ */
+export const CART_DRAWER_MODES = ["dialog", "inline", "none"] as const;
+export type CartDrawerMode = (typeof CART_DRAWER_MODES)[number];
+
+/** The cart panel's width from a tablet up, in px: ui/Modal's side panel
+ *  (max-w-md). A cart artboard is drawn at it. */
+export const CART_PANEL_WIDTH_PX = 448;
+
+/** The height of one screen, in px, that an inline cart opens over: a
+ *  preview page is as tall as its content, the cart is as tall as a screen. */
+export const CART_PREVIEW_SCREEN_PX = 800;
+
 /** How long "Added" stays on the button before it reads "Add to cart" again. */
 export const CART_ADDED_MS = 1800;
 

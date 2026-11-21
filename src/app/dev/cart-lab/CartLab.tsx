@@ -17,12 +17,14 @@ import {
 } from "@/components/cart/cart-look";
 import { StorefrontCart } from "@/components/cart/StorefrontCart";
 import { CART_AFTER_ADD, CART_MAIN_BUTTONS } from "@/types/storefront";
+import { SAMPLE_CART_STATES } from "@/lib/cart/sample";
 import { useCart } from "@/components/cart/CartContext";
 import { LabCopyButtons, LabFitBadge, LabGroup, LabJsx, LabTabs, LabToggle } from "../lab-kit/controls";
 import { LabLazy } from "../lab-kit/lazy";
 import { LAB_SCENARIOS, LAB_SHOPS, LAB_STOREFRONT_ID, type LabScenarioId, type LabShopId } from "./fixtures";
 import {
   LAB_DEFAULTS,
+  LAB_DEVICES,
   LAB_PLACEMENTS,
   decodeState,
   encodeState,
@@ -170,6 +172,9 @@ export function CartLab() {
                 options={LAB_SHOPS.map((entry) => ({ value: entry.id, label: entry.id }))}
                 onChange={(value: LabShopId) => set("shop", value)}
               />
+              <Choice label="Designer sample" value={state.sample} options={SAMPLE_CART_STATES} onChange={(value) => set("sample", value)} />
+              <Choice label="Designer device" value={state.device} options={LAB_DEVICES} onChange={(value) => set("device", value)} />
+              <LabToggle id="cart-lab-open" label="Designer: cart starts open" checked={state.open} onChange={(on) => set("open", on)} />
               <Choice
                 label="Cart"
                 value={state.scenario}

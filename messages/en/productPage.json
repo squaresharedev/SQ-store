@@ -553,6 +553,9 @@
       "gone": "Your cart has expired. Try again.",
       "invalid": "That didn't work. Try again.",
       "rate_limited": "Too many changes at once. Wait a moment, then try again."
-    }
+    },
+    "notePlaceholder": "Add a note for your buyers here",
+    "editTitle": "Edit the cart's heading",
+    "editNote": "Edit the note in the cart"
   }
 }

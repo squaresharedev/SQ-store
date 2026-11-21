@@ -82,7 +82,9 @@ export function AddToCartButton({
           : (label ?? t("add"));
 
   async function add() {
-    if (!cart || unavailable || state === "adding" || cart.preview) return;
+    // A preview sends nothing; one inside an artboard still plays the add
+    // (the morph, then the panel or the note), so a seller can try it.
+    if (!cart || unavailable || state === "adding" || (cart.preview && cart.drawer !== "inline")) return;
     setRefusal(null);
     setNoted(false);
     setState("adding");
@@ -102,7 +104,9 @@ export function AddToCartButton({
 
   const Icon = state === "added" && cart.look.feedback === "morph" ? Check : ShoppingBag;
   return (
-    <div className={cn("flex flex-col gap-1.5", className)} data-add-to-cart={state}>
+    // On the designer's canvas a press plays the add and opens the Cart
+    // settings that decide it (which button leads, what follows, its words).
+    <div className={cn("flex flex-col gap-1.5", className)} data-add-to-cart={state} data-setting-hotspot="cartButtons">
       <button
         type="button"
         onClick={() => void add()}

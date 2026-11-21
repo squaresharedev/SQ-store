@@ -1572,6 +1572,14 @@
     "deliveryBar": "Voortgang gratis bezorging",
     "deliveryBarHint": "Getoond wanneer je bezorging gratis is boven een bedrag.",
     "suggestions": "Past goed bij",
-    "suggestionsHint": "Onder de winkelwagen: wat je bij de producten erin koos voor Toevoegen aan je bestelling."
+    "suggestionsHint": "Onder de winkelwagen: wat je bij de producten erin koos voor Toevoegen aan je bestelling.",
+    "sections": {
+      "buttons": "In winkelwagen leggen",
+      "cart": "In de winkelwagen"
+    },
+    "leadGuess": {
+      "label": "In winkelwagen als hoofdknop",
+      "hint": "{count, plural, one {# product} other {# producten}} op je bord kunnen meteen in een winkelwagen. Eén tik maakt In winkelwagen de hoofdknop; Nu kopen blijft ernaast."
+    }
   }
 }

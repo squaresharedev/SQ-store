@@ -553,6 +553,9 @@
       "gone": "Tu carrito ha caducado. Inténtalo de nuevo.",
       "invalid": "No ha funcionado. Inténtalo de nuevo.",
       "rate_limited": "Demasiados cambios a la vez. Espera un momento e inténtalo de nuevo."
-    }
+    },
+    "notePlaceholder": "Escribe aquí una nota para tus compradores",
+    "editTitle": "Editar el título del carrito",
+    "editNote": "Editar la nota del carrito"
   }
 }

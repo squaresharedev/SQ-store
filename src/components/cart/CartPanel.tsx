@@ -12,6 +12,8 @@ import { useCart } from "./CartContext";
 import { CartLineRow } from "./CartLineRow";
 import { CART_ICON } from "./CartButton";
 import { CartSuggestions } from "./CartSuggestions";
+import { EditableText, useTextEditing } from "@/components/checkout/EditableText";
+import { CART_NOTE_MAX } from "@/types/storefront";
 
 /** What the panel's controls are painted with: the page's own. */
 export type CartPanelTheme = {
@@ -31,6 +33,7 @@ export function CartContents({ theme, onShop }: { theme: CartPanelTheme; onShop?
   const t = useTranslations("ProductPage.cart");
   const cart = useCart();
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const editing = useTextEditing();
   if (!cart) return null;
   const { view, look, config } = cart;
 
@@ -64,8 +67,24 @@ export function CartContents({ theme, onShop }: { theme: CartPanelTheme; onShop?
 
   return (
     <div className="flex flex-col">
-      {config.note && <p className="mb-2 whitespace-pre-line text-sm text-muted-foreground">{config.note}</p>}
-      <ul className="flex flex-col divide-y divide-border" data-cart-lines="">
+      {/* On the canvas an empty note invites the seller's words; a buyer
+          never sees the invitation. */}
+      {(config.note || editing) && (
+        <EditableText
+          field="cartNote"
+          value={config.note}
+          fallback={t("notePlaceholder")}
+          fallbackIsPlaceholder
+          multiline
+          maxLength={CART_NOTE_MAX}
+          ariaLabel={t("editNote")}
+          className="mb-2 whitespace-pre-line text-sm text-muted-foreground"
+          attributes={{ "data-cart-note": config.note ? "" : "empty" }}
+        />
+      )}
+      {/* A buyer's controls, not the cart's design: on the designer's canvas
+          they step and remove (on a sample) without opening its settings. */}
+      <ul className="flex flex-col divide-y divide-border" data-cart-lines="" data-setting-skip="">
         {lines.map((line) => (
           <CartLineRow
             key={line.key}
@@ -101,7 +120,11 @@ function UndoRow() {
   const cart = useCart();
   if (!cart?.undo) return null;
   return (
-    <p className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground" data-cart-undo="">
+    <p
+      className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground"
+      data-cart-undo=""
+      data-setting-skip=""
+    >
       <span>{t("removed", { title: cart.undo.line.title ?? t("gone") })}</span>
       <button type="button" onClick={() => void cart.restore()} className="font-semibold text-popover-foreground underline underline-offset-4">
         {t("undo")}

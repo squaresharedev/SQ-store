@@ -83,6 +83,8 @@ export function CartButton({ ink, className }: { ink: string; className?: string
       className={shared}
       style={{ color: ink, outlineColor: ink }}
       data-cart-button=""
+      // On the designer's canvas: opens the cart there and its settings.
+      data-setting-hotspot="cart"
     >
       {body}
     </button>

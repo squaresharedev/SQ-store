@@ -553,6 +553,9 @@
       "gone": "Košík vypršal. Skúste to znova.",
       "invalid": "Nepodarilo sa to. Skúste to znova.",
       "rate_limited": "Príliš veľa zmien naraz. Chvíľku počkajte a skúste to znova."
-    }
+    },
+    "notePlaceholder": "Sem napíšte poznámku pre kupujúcich",
+    "editTitle": "Upraviť nadpis košíka",
+    "editNote": "Upraviť poznámku v košíku"
   }
 }

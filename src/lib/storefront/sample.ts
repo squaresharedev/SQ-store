@@ -79,6 +79,10 @@ function sampleProduct(
     stockQuantity: null,
     lowStockThreshold: 3,
     maxPerOrder: 10,
+    // No versions to choose and "sold" by our checkout: a card puts it
+    // straight in the cart, as a real one would (lib/cart/quick-add.ts), so
+    // the designer's sample cart fills with them.
+    quickAdd: { optionIds: [] },
   };
 }
 

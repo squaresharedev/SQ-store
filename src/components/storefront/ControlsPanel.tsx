@@ -99,6 +99,7 @@ export function ControlsPanel({
   cartPage = DEFAULT_CART_PAGE_CONFIG,
   onCartPageChange,
   cartOffered = true,
+  cartAddable = 0,
   pagePhotoUrls = {},
   onPagePhotoUrl = () => {},
   onPlayCelebration,
@@ -129,6 +130,9 @@ export function ControlsPanel({
   /** Whether the Cart group is offered: not before buyers can have a cart
    *  (StorefrontDesigner's cartOffered). Absent (the dev gallery) offers it. */
   cartOffered?: boolean;
+  /** How many products the board's cards put straight in the cart, for the
+   *  Cart group's guess (CartPageSection). */
+  cartAddable?: number;
   /** Display URLs of the hosted pages' photo backdrops by object key, and a
    *  way to report one just uploaded. Absent (the dev gallery) shows none. */
   pagePhotoUrls?: Record<string, string>;
@@ -213,6 +217,8 @@ export function ControlsPanel({
   const summonedPage = activeRef?.kind === "productPage" ? activeRef.section : null;
   /** Which section of Checkout a summons is pointing at, if any. */
   const summonedCheckout = activeRef?.kind === "checkoutPage" ? activeRef.section : null;
+  /** Which section of Cart a summons is pointing at, if any. */
+  const summonedCart = activeRef?.kind === "cartPage" ? activeRef.section : null;
 
   // Never offer a row that would do nothing. Without an owner to jump for it,
   // this panel can only open a settings group, so that is all it indexes.
@@ -273,12 +279,15 @@ export function ControlsPanel({
             // switch), exactly as a search hit would. Without a provider it
             // simply opens the group.
             // Checkout does the same: it puts the checkout on the canvas.
+            // And the cart: a product page with its cart open.
             onClick={() =>
               id === "productPage" && setting
                 ? setting.open({ kind: "productPage", section: "layout" })
                 : id === "checkoutPage" && setting
                   ? setting.open({ kind: "checkoutPage", section: "layout" })
-                  : setGroup(id)
+                  : id === "cartPage" && setting
+                    ? setting.open({ kind: "cartPage", section: "buttons" })
+                    : setGroup(id)
             }
           />
         ))}
@@ -385,7 +394,12 @@ export function ControlsPanel({
           summoned={summonedPage}
         />
       ) : group === "cartPage" ? (
-        <CartPageSection cartPage={cartPage} onCartPageChange={(next) => onCartPageChange?.(next)} />
+        <CartPageSection
+          cartPage={cartPage}
+          onCartPageChange={(next) => onCartPageChange?.(next)}
+          summoned={summonedCart}
+          addable={cartAddable}
+        />
       ) : group === "checkoutPage" ? (
         /* Three full-width sections, like the product page's. */
         <CheckoutPageSection

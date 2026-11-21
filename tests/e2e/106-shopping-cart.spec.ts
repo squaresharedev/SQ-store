@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { expect, test, type Page } from "@playwright/test";
 import {
   PUBLISHABLE_SELLER,
+  expectToast,
   freshUser,
   gotoApp,
   seedProducts,
@@ -342,5 +343,53 @@ test.describe("the shopping cart", () => {
     await expect(page.locator("[data-cart-button]")).toBeVisible();
     await expect(page.locator("[data-tile-quick-add-tile]")).toHaveCount(0);
     await expect(page.locator(`a[data-storefront-tile='${s.mug}']`)).toContainText("Buy now");
+  });
+
+  test("the seller designs the cart where it opens, full of their own products, and buyers get what was saved", async ({
+    page,
+  }) => {
+    const s = await seed(page, "cart-design");
+    test.skip(!(await cartOffered(page, s)), "stack started without CHECKOUT_TEST_PAYMENTS=1");
+    await gotoApp(page, `/storefront/${s.storefrontId}`);
+    const panel = page.locator("[data-design-panel]").first();
+    await panel.locator("[data-panel-menu]").getByRole("button", { name: /^Cart/ }).click();
+
+    // The Cart settings put a product page out with its cart open, full: the
+    // page's own product, then the board's others a card adds (the coasters
+    // need a choice, so they stay out).
+    const onPage = page.locator(`[data-artboard-id="${s.mug}"]`);
+    const cart = onPage.locator("[data-cart-drawer-inline]");
+    await expect(cart).toBeVisible();
+    await expect(cart.locator("[data-cart-lines] > li")).toHaveCount(3);
+
+    // Three products a card adds: "Add to cart" leading is one tap away.
+    await panel.getByRole("button", { name: "Lead with Add to cart" }).click();
+    await expect(onPage.locator("[data-add-to-cart] button").first()).toHaveAttribute("data-cta-fill", /.+/);
+
+    // The heading is typed straight onto the cart...
+    await cart.locator("[data-editable-text='cartTitle']").click();
+    await page.keyboard.press("ControlOrMeta+A");
+    await page.keyboard.type("Your bag");
+    await page.keyboard.press("Enter");
+    await expect(cart.locator("h2[data-editable-text='cartTitle']")).toHaveText("Your bag");
+    // ...and a click on the cart opens the rest of its settings, holding the same words.
+    await cart.locator("[data-cart-summary] dl").click();
+    await expect(panel.getByRole("textbox", { name: "Cart heading" })).toHaveValue("Your bag");
+    // Steps on the sample play on the page and are never saved.
+    await cart.locator("[data-cart-lines] > li").first().getByRole("button", { name: /^One more/ }).click();
+
+    await page.getByRole("button", { name: /^save$/i }).click();
+    await expectToast(page, /storefront saved/i, 15_000);
+    const [row] = (await serviceRest(`/storefronts?id=eq.${s.storefrontId}&select=config`)) as {
+      config: { cartPage?: Record<string, unknown> };
+    }[];
+    expect(row.config.cartPage).toEqual({ mainButton: "addToCart", title: "Your bag" });
+
+    // A buyer gets the cart as it was designed.
+    await page.goto(`/s/${s.storefrontId}/p/${s.mug}`);
+    const add = page.locator("[data-add-to-cart] button").first();
+    await expect(add).toHaveAttribute("data-cta-fill", /.+/);
+    await add.click();
+    await expect(page.getByRole("dialog", { name: "Your bag" })).toBeVisible();
   });
 });

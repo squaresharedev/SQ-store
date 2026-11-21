@@ -533,6 +533,10 @@ export function StorefrontDesigner({
   // VIEW state: which pages the seller has open is not part of the design, so
   // it is never saved and never enters the undo history.
   const [openPages, setOpenPages] = useState<string[]>([]);
+  // The one product page whose cart is open on the canvas (its product id).
+  // The Cart settings open it; a click elsewhere on a page, or its own close,
+  // puts it away. View state: never saved, never in the undo history.
+  const [cartOpenOn, setCartOpenOn] = useState<string | null>(null);
   // The checkout's design: a config member like the product page's, on the
   // same undo history and the same save.
   const [checkoutPage, setCheckoutPage] = useState<CheckoutPageConfig>(() =>
@@ -731,6 +735,18 @@ export function StorefrontDesigner({
     );
     return first?.type === "product" ? first.productId : null;
   }, [selectedBlocks, blocks, productsById]);
+
+  // How many of the board's products a card puts straight in the cart: the
+  // Cart settings' guess about which button should lead (lib/predictions.ts).
+  const cartAddable = useMemo(
+    () =>
+      new Set(
+        blocks.flatMap((block) =>
+          block.type === "product" && productsById.get(block.productId)?.quickAdd ? [block.productId] : [],
+        ),
+      ).size,
+    [blocks, productsById],
+  );
 
   // The colors already on the canvas, for the left panel's "In this design".
   const colorsInDesign = useMemo(
@@ -1550,6 +1566,7 @@ export function StorefrontDesigner({
     openTileLabelSetting,
     closeBuyerFlow,
     updateCheckoutPage,
+    updateCartPage,
   });
   useEffect(() => {
     canvasActions.current = {
@@ -1584,6 +1601,7 @@ export function StorefrontDesigner({
       openTileLabelSetting,
       closeBuyerFlow,
       updateCheckoutPage,
+      updateCartPage,
     };
   });
   const onMoveBlock = useCallback((key: string, x: number, y: number) => {
@@ -1694,6 +1712,12 @@ export function StorefrontDesigner({
   }, []);
   const onCheckoutPageChange = useCallback((next: CheckoutPageConfig) => {
     canvasActions.current.updateCheckoutPage(next);
+  }, []);
+  const onCartPageChangeOnCanvas = useCallback((next: CartPageConfig) => {
+    canvasActions.current.updateCartPage(next);
+  }, []);
+  const onCartOpenChange = useCallback((productId: string, open: boolean) => {
+    setCartOpenOn((current) => (open ? productId : current === productId ? null : current));
   }, []);
   // Wrapper that bails early when start/end are equal, so a cursor move that
   // stays inside the same character position does not re-render the designer.
@@ -3507,6 +3531,24 @@ export function StorefrontDesigner({
       openBlockSetting(ref);
       return;
     }
+    // THE CART is designed while looking at it, full: a product page out with
+    // its cart open. A click on a page names that page (`on`); the panel and
+    // search open it on the newest page out, or put the buyer flow out first.
+    // A press of a page's Add to cart ("buttons" from the page) leaves the
+    // cart as the press left it (open, or the "Added" note).
+    if (ref.kind === "cartPage") {
+      const host = ref.on ?? openPages.at(-1) ?? defaultPageProductId;
+      if (host && (!ref.on || ref.section === "cart")) setCartOpenOn(host);
+      if (!pageOpen && host) {
+        openBuyerFlow(host, ref);
+      } else {
+        setSettingTarget(freshSettingRef(ref));
+        setPanelOpen(true);
+      }
+      return;
+    }
+    // Any other setting is about something the cart would cover.
+    setCartOpenOn(null);
     // A page's setting is edited while LOOKING at the page, so opening one puts
     // the buyer flow on the canvas if none is out yet. The mobile settings
     // sheet is left standing on purpose: it navigates in place.
@@ -4430,6 +4472,9 @@ export function StorefrontDesigner({
             productPage={productPage}
             checkoutPage={checkoutPage}
             cartPage={cartOffered ? cartPage : undefined}
+            onCartPageChange={onCartPageChangeOnCanvas}
+            cartOpenOn={cartOpenOn}
+            onCartOpenChange={onCartOpenChange}
             onCheckoutPageChange={onCheckoutPageChange}
             celebrationPlays={celebrationPlays}
             shippingPolicy={shippingPolicy}
@@ -4555,6 +4600,7 @@ export function StorefrontDesigner({
               cartPage={cartPage}
               onCartPageChange={updateCartPage}
               cartOffered={cartOffered}
+              cartAddable={cartAddable}
               pagePhotoUrls={pagePhotoUrls}
               onPagePhotoUrl={(key, url) => setPagePhotoUrls((current) => ({ ...current, [key]: url }))}
               onPlayCelebration={() => setCelebrationPlays((count) => count + 1)}
