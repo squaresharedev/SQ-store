@@ -68,6 +68,7 @@ export default async function EmbedFrameDevPage({
   searchParams,
 }: {
   searchParams: Promise<{
+    cart?: string;
     sale?: string;
     tag?: string;
     title?: string;
@@ -95,6 +96,10 @@ export default async function EmbedFrameDevPage({
   if (process.env.NODE_ENV === "production") notFound();
   const query = await searchParams;
   const onSale = query.sale === "1";
+  // `?cart=1`: the storefront has a cart, and every card whose product is
+  // not sold out adds to it (the sample's products have no versions). The
+  // sample storefront is not a real one, so an add answers "unavailable".
+  const withCart = query.cart === "1";
   const sample = buildSampleStorefront(await getTranslations());
   const tag = PRICE_TAG_POSITIONS.find((position) => position === query.tag);
   const title = TITLE_STYLES.find((style) => style === query.title);
@@ -173,19 +178,21 @@ export default async function EmbedFrameDevPage({
         ...(product.hoverImageUrl ? { hoverImageUrl: product.hoverImageUrl } : {}),
         ...(product.rating ? { rating: product.rating } : {}),
         ...(stockState ? { stockState } : {}),
+        ...(withCart && stockState !== "sold_out" ? { quickAdd: { optionIds: [] } } : {}),
         href: "#",
       };
       if (!onSale) return tile;
       const price = Math.round(product.price * (100 - SAMPLE_SALE_PERCENT)) / 100;
       return { ...tile, price, regularPrice: product.price, offerPercent: SAMPLE_SALE_PERCENT };
     }),
-    tileLook: resolveTileLook({ theme: saleTheme, productPage }),
+    tileLook: resolveTileLook({ theme: saleTheme, productPage, cartPage: withCart ? {} : { enabled: false } }),
     imageUrls: {},
     backgroundImageUrl: null,
     customFontUrl: null,
     seller: sample.seller,
     allowIndexing: false,
     url: "#",
+    ...(withCart ? { cart: {} } : {}),
   };
 
   // A real frame is exactly as tall as its content, so its document never

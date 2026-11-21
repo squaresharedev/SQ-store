@@ -6,6 +6,7 @@ import {
   Receipt,
   ScanEye,
   ShoppingBag,
+  ShoppingCart,
   type LucideIcon,
 } from "lucide-react";
 import type { SignalKind } from "@/lib/analytics/signals";
@@ -109,6 +110,15 @@ export const SIGNAL_SOURCES: AnalyticsSource[] = [
     icon: ScanEye,
     panels: ["trend", "storefronts", "channels"],
     blockType: "product",
+  },
+  {
+    // Recorded only where a cart exists (our checkout takes the seller's
+    // payments and the seller has not switched the cart off), so shown only
+    // once this seller has had one, like the checkout's views.
+    id: "cart_add",
+    icon: ShoppingCart,
+    panels: ["trend", "storefronts", "channels"],
+    recordedOnly: true,
   },
   {
     id: "checkout_view",

@@ -35,20 +35,10 @@ import { PAGE_BUSY, type PageBusy } from "@/lib/public/busy";
 import { productPagePath } from "@/lib/storefront/product-page-url";
 import type { AddOnCard, Currency, ProductPageImage, ProductRating } from "@/types/product";
 import { readRatingSummaries } from "@/lib/reviews/ratings";
+import { fileFormatFromKey } from "@/lib/products/file-format";
 
 type Admin = ReturnType<typeof createAdminClient>;
 
-/** "PDF", "ZIP"... from a key's extension. Same logic as formatFromKey in
- *  lib/products/public.ts; duplicated here to avoid exporting a private
- *  function from that module. */
-function fileFormatFromKey(key: string | null): string | null {
-  if (!key) return null;
-  const lastSegment = key.split("/").pop() ?? "";
-  const dot = lastSegment.lastIndexOf(".");
-  if (dot === -1) return null;
-  const extension = lastSegment.slice(dot + 1);
-  return /^[A-Za-z0-9]{1,5}$/.test(extension) ? extension.toUpperCase() : null;
-}
 
 /**
  * A lean add-on card built from a raw row and its pricing. Signs only the

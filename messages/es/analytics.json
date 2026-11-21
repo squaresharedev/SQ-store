@@ -216,6 +216,18 @@
       "awaiting": "Llega con el bloque de reserva de calendario.",
       "readyToChart": "Listo para graficarse en cuanto empiecen a llegar reservas."
     },
+    "cart_add": {
+      "label": "Añadidos al carrito",
+      "description": "Compradores que añadieron uno de tus productos a su carrito.",
+      "count": "{count, plural, one {{formatted} añadido} other {{formatted} añadidos}}",
+      "total": "Total de añadidos al carrito",
+      "emptyRange": "Nada añadido al carrito en este periodo",
+      "overTime": "Añadidos al carrito a lo largo del tiempo",
+      "acrossRange": "Productos añadidos al carrito en el periodo seleccionado.",
+      "byChannel": "Añadidos al carrito por canal",
+      "byWeekday": "Añadidos al carrito por día de la semana",
+      "byStorefront": "Añadidos al carrito por escaparate"
+    },
     "checkout_view": {
       "label": "Vistas de pago",
       "description": "Compradores que abrieron el pago de uno de tus productos.",

@@ -7,7 +7,7 @@ import type { PreviewDevice } from "./DeviceSizeSwitch";
 import { usePreviewProduct } from "./usePreviewProduct";
 import { CheckoutView } from "@/components/checkout/CheckoutView";
 import { OrderStatusView } from "@/components/checkout/OrderStatusView";
-import { CheckoutEditProvider } from "@/components/checkout/EditableText";
+import { CheckoutEditProvider } from "@/components/checkout/EditableTextProviders";
 import { CHECKOUT_PAGE_HOTSPOTS, isCheckoutPageHotspot } from "@/lib/storefront/setting-ref";
 import { optionSummaryRows } from "@/lib/products/option-details";
 import { photoForSelection, previewSelection } from "@/lib/checkout/selection";

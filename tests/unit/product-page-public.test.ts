@@ -41,6 +41,10 @@ function builder(table: string) {
       (state.filters[table] ??= []).push([column, value]);
       return chain;
     },
+    in: (column: string, values: unknown[]) => {
+      (state.filters[table] ??= []).push([column, values]);
+      return chain;
+    },
     limit: () => chain,
     order: () => chain,
     range: () => chain,
@@ -307,7 +311,7 @@ describe("getPublicProductPage gates", () => {
     expect(result).not.toBeNull();
     expect(state.filters.products).toEqual(
       expect.arrayContaining([
-        ["id", PRODUCT_ID],
+        ["id", [PRODUCT_ID]],
         ["owner_id", OWNER_ID],
         ["status", "active"],
       ]),

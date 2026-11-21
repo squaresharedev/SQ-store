@@ -270,8 +270,13 @@ const nextConfig: NextConfig = {
       },
       { source: "/s/:storefrontId/orders", headers: PURCHASE_PAGE_HEADERS },
       { source: "/s/:storefrontId/p/:productId/checkout", headers: PURCHASE_PAGE_HEADERS },
+      // A cart's checkout and the cart page: their address can carry the
+      // cart's id (the buyer's only key to it), arriving from the embed.
+      { source: "/s/:storefrontId/checkout", headers: PURCHASE_PAGE_HEADERS },
+      { source: "/s/:storefrontId/cart", headers: PURCHASE_PAGE_HEADERS },
       { source: "/api/orders/:path*", headers: PURCHASE_PAGE_HEADERS },
       { source: "/api/checkout/:path*", headers: PURCHASE_PAGE_HEADERS },
+      { source: "/api/cart/:path*", headers: PURCHASE_PAGE_HEADERS },
       // AN ASSISTANT'S STOREFRONT PREVIEW (lib/agent/preview). Its MCP Apps
       // view runs on the chat host's sandbox origin and reads this page with
       // fetch, so it may be read cross-origin. Safe to open to any origin: it

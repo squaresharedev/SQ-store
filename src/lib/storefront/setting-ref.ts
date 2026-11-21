@@ -16,7 +16,7 @@ import type { MessageKey } from "@/i18n/types";
 import type { BlockField } from "@/components/storefront/SummonedField";
 import type { ProductPageSectionId } from "@/types/storefront";
 
-/** The design panel's seven groups, mirrored from ControlsPanel. */
+/** The design panel's groups, mirrored from ControlsPanel. */
 export const CONTROLS_GROUPS = [
   "theme",
   "header",
@@ -24,6 +24,7 @@ export const CONTROLS_GROUPS = [
   "cards",
   "soldOut",
   "productPage",
+  "cartPage",
   "checkoutPage",
 ] as const;
 export type ControlsGroup = (typeof CONTROLS_GROUPS)[number];
@@ -60,6 +61,11 @@ export type ProductPagePanelSection = "layout" | "cta" | "sections" | "addOns" |
  *  what it says around the form, and the thank-you page. */
 export type CheckoutPagePanelSection = "layout" | "message" | "thanks";
 
+/** The two sections of the Cart group: the product page's buttons (which
+ *  leads, what follows an add, its words, the cards' button), and the cart
+ *  itself (its heading, note and parts). */
+export type CartPagePanelSection = "buttons" | "cart";
+
 export type SettingRef =
   /** A whole group of the design panel. */
   | { kind: "group"; group: ControlsGroup }
@@ -74,6 +80,12 @@ export type SettingRef =
   /** One section of the Checkout group. Opening any of these puts the
    *  checkout and thank-you artboards on the canvas. */
   | { kind: "checkoutPage"; section: CheckoutPagePanelSection }
+  /** One section of the Cart group. Opening it puts a product page on the
+   *  canvas with its cart open, so the seller sees the cart full while they
+   *  design it: on the page `on` (the one clicked), else the newest one out.
+   *  A click on the page's buttons ("buttons") leaves the cart as the press
+   *  left it. */
+  | { kind: "cartPage"; section: CartPagePanelSection; on?: string }
   /** One control of a BLOCK'S OWN inspector (a text block's spacing, a
    *  shape's blur), which has no storefront-wide copy at all. The designer
    *  opens it on the selected block when that block has it, else on the first
@@ -127,6 +139,10 @@ export const PRODUCT_PAGE_HOTSPOTS = {
   addOns: { kind: "productPage", section: "addOns" },
   /** The buyers' reviews: whether they show, and the colour of their stars. */
   reviews: { kind: "productPage", section: "reviews" },
+  /** The cart, open on the page, and the cart button that opens it. */
+  cart: { kind: "cartPage", section: "cart" },
+  /** "Add to cart": which button leads, what follows an add, its words. */
+  cartButtons: { kind: "cartPage", section: "buttons" },
 } as const satisfies Record<string, SettingRef>;
 
 export type ProductPageHotspot = keyof typeof PRODUCT_PAGE_HOTSPOTS;
@@ -197,6 +213,7 @@ export function settingGroup(ref: SettingRef): ControlsGroup | null {
   if (ref.kind === "cards") return "cards";
   if (ref.kind === "theme") return "theme";
   if (ref.kind === "checkoutPage") return "checkoutPage";
+  if (ref.kind === "cartPage") return "cartPage";
   return "productPage";
 }
 
@@ -216,6 +233,9 @@ export function isSameSettingRef(
   }
   if (a.kind === "checkoutPage" && b.kind === "checkoutPage") {
     return a.section === b.section;
+  }
+  if (a.kind === "cartPage" && b.kind === "cartPage") {
+    return a.section === b.section && a.on === b.on;
   }
   if (a.kind === "block" && b.kind === "block") {
     return a.field === b.field && a.types.join() === b.types.join();
@@ -294,6 +314,7 @@ export const GROUP_LABELS: Record<ControlsGroup, MessageKey> = {
   cards: "Storefront.settings.groups.cards",
   soldOut: "Storefront.settings.groups.soldOut",
   productPage: "Storefront.settings.groups.productPage",
+  cartPage: "Storefront.settings.groups.cartPage",
   checkoutPage: "Storefront.settings.groups.checkoutPage",
 };
 
@@ -306,6 +327,7 @@ export const GROUP_SUBTITLES: Record<ControlsGroup, MessageKey> = {
   cards: "Storefront.settings.subtitle.cards",
   soldOut: "Storefront.settings.subtitle.soldOut",
   productPage: "Storefront.settings.subtitle.productPage",
+  cartPage: "Storefront.settings.subtitle.cartPage",
   checkoutPage: "Storefront.settings.subtitle.checkoutPage",
 };
 
@@ -1057,6 +1079,60 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
   },
 
   // ---------------------------------------------------------------------
+  // CART. One group in two sections; each entry opens its section, with the
+  // cart open on a product page. The labels are the Cart panel's own words,
+  // so search and panel agree.
+  // ---------------------------------------------------------------------
+  {
+    id: "cart-on",
+    label: "Storefront.cartPage.on",
+    keywords: ["cart", "shopping cart", "basket", "bag", "turn off cart", "switch off cart", "buy several"],
+    ref: { kind: "cartPage", section: "buttons" },
+  },
+  {
+    id: "cart-buttons",
+    label: "Storefront.cartPage.mainButton.label",
+    keywords: ["add to cart button", "buy now button", "main button", "which button first", "button order"],
+    ref: { kind: "cartPage", section: "buttons" },
+  },
+  {
+    id: "cart-after-add",
+    label: "Storefront.cartPage.afterAdd.label",
+    keywords: ["after adding", "open the cart", "added note", "cart drawer", "what happens on add"],
+    ref: { kind: "cartPage", section: "buttons" },
+  },
+  {
+    id: "cart-words",
+    label: "Storefront.cartPage.addLabel",
+    keywords: ["add to cart words", "cart button text", "add to cart label"],
+    ref: { kind: "cartPage", section: "buttons" },
+  },
+  {
+    id: "cart-title",
+    label: "Storefront.cartPage.title",
+    keywords: ["cart heading", "cart title", "cart note", "message in the cart", "cart words"],
+    ref: { kind: "cartPage", section: "cart" },
+  },
+  {
+    id: "cart-delivery-bar",
+    label: "Storefront.cartPage.deliveryBar",
+    keywords: ["free delivery bar", "free shipping progress", "spend more for free delivery"],
+    ref: { kind: "cartPage", section: "cart" },
+  },
+  {
+    id: "cart-quick-add",
+    label: "Storefront.cartPage.quickAdd",
+    keywords: ["quick add", "add from the card", "card button adds to cart", "one tap add"],
+    ref: { kind: "cartPage", section: "buttons" },
+  },
+  {
+    id: "cart-suggestions",
+    label: "Storefront.cartPage.suggestions",
+    keywords: ["goes well with", "suggestions in the cart", "cross sell", "upsell in cart", "you may also like"],
+    ref: { kind: "cartPage", section: "cart" },
+  },
+
+  // ---------------------------------------------------------------------
   // CHECKOUT. Gated like the product page's settings: inside the editor they
   // are offered once the checkout is on the canvas, and before that one row
   // puts it there.
@@ -1069,8 +1145,6 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "check out",
       "payment page",
       "pay page",
-      "basket",
-      "cart",
       "showcase",
       "compact",
       "big product photo at checkout",

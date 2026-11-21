@@ -11,6 +11,7 @@ import { ControlsPanel } from "@/components/storefront/ControlsPanel";
 import { editorEntries } from "@/components/storefront/editor-search";
 import { SettingTargetProvider } from "@/lib/storefront/setting-context";
 import {
+  CONTROLS_GROUPS,
   PRODUCT_PAGE_HOTSPOTS,
   freshSettingRef,
   type SettingRef,
@@ -135,7 +136,8 @@ describe("ControlsPanel grouping", () => {
     // search field violated axe). Use the data attribute instead.
     const menu = document.querySelector("[data-panel-menu]")!;
     expect(menu).not.toBeNull();
-    expect(menu.querySelectorAll("[data-panel-menu-item]")).toHaveLength(7);
+    // One row per group, and nothing else.
+    expect(menu.querySelectorAll("[data-panel-menu-item]")).toHaveLength(CONTROLS_GROUPS.length);
     // Nothing editable until a group is chosen: that IS the fix.
     expect(screen.queryByRole("slider")).not.toBeInTheDocument();
     expect(screen.queryByRole("switch")).not.toBeInTheDocument();

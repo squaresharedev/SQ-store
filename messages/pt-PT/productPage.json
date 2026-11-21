@@ -282,6 +282,8 @@
       "nameLabel": "Nome a mostrar",
       "nameHelp": "Mostrado com a sua avaliação. O seu email e a sua encomenda continuam privados.",
       "send": "Publicar avaliação",
+      "pickLegend": "Escolha o que quer avaliar",
+      "reviewed": "Avaliado",
       "errors": {
         "notEligible": "Esta encomenda já não pode ser avaliada.",
         "rateLimited": "Demasiadas avaliações a partir desta ligação. Tente novamente dentro de uma hora.",
@@ -412,7 +414,8 @@
       "discount_invalid": "Este código de desconto já não pode ser utilizado. Remova-o para pagar o preço normal.",
       "price_changed": "O preço alterou-se enquanto esta página estava aberta, por isso nada foi cobrado. Verifique o novo total e pague.",
       "turnstile": "A verificação de segurança não foi concluída, por isso não foi cobrado nada. Está a ser repetida: aguarde um momento e tente novamente.",
-      "add_on_unavailable": "Algo que adicionou já não pode ser vendido com esta encomenda, por isso não foi cobrado nada. Verifique a sua encomenda e o novo total, e pague."
+      "add_on_unavailable": "Algo que adicionou já não pode ser vendido com esta encomenda, por isso não foi cobrado nada. Verifique a sua encomenda e o novo total, e pague.",
+      "currency": "Tudo numa encomenda tem de ser pago na mesma moeda, por isso não foi cobrado nada. Verifique o seu carrinho e pague."
     },
     "editHeadline": "Título do pagamento",
     "discount": {
@@ -495,5 +498,64 @@
       "otherKind": "Outro tipo",
       "otherCurrency": "Outra moeda"
     }
+  },
+  "cart": {
+    "title": "O seu carrinho",
+    "button": "Carrinho, {count, plural, =0 {vazio} one {# artigo} other {# artigos}}",
+    "add": "Adicionar ao carrinho",
+    "addShort": "Adicionar",
+    "addTitle": "Adicionar {title} ao carrinho",
+    "adding": "A adicionar",
+    "added": "Adicionado",
+    "addedNote": "Adicionado ao seu carrinho",
+    "choose": "Escolher",
+    "view": "Ver carrinho",
+    "checkout": "Finalizar compra",
+    "keepShopping": "Continuar a comprar",
+    "empty": "O seu carrinho está vazio",
+    "subtotal": "Subtotal",
+    "delivery": "Entrega",
+    "deliveryTo": "Entrega para {area}",
+    "free": "Gratuita",
+    "atCheckout": "No pagamento",
+    "freeGap": "Faltam {amount} para a entrega gratuita",
+    "freeReached": "A entrega é gratuita",
+    "gone": "Já não está à venda aqui",
+    "quantity": "Quantidade de {title}",
+    "fewer": "Menos um {title}",
+    "more": "Mais um {title}",
+    "remove": "Remover {title}",
+    "removed": "{title} removido do seu carrinho.",
+    "undo": "Desfazer",
+    "addedAnnounce": "{title} adicionado. {count, plural, one {# artigo} other {# artigos}} no seu carrinho.",
+    "busy": "Não foi possível carregar o seu carrinho.",
+    "retry": "Tentar novamente",
+    "suggestionsTitle": "Combina bem com",
+    "problem": {
+      "not_found": "Já não está à venda aqui. Retire-o para finalizar a compra.",
+      "sold_out": "Esgotado. Retire-o para finalizar a compra.",
+      "options": "Esta versão não está disponível. Retire-o para finalizar a compra.",
+      "quantity": "Ultrapassa o máximo por encomenda. Reduza a quantidade.",
+      "insufficient_stock": "Não há assim tantos em stock. Reduza a quantidade.",
+      "currency": "Tem um preço noutra moeda diferente do restante carrinho.",
+      "no_shipping_rates": "Não pode ser entregue agora."
+    },
+    "refusal": {
+      "not_found": "Não é possível adicionar agora.",
+      "sold_out": "Esgotado.",
+      "options": "Escolha primeiro uma versão.",
+      "quantity": "Ultrapassa o máximo por encomenda.",
+      "insufficient_stock": "Não há assim tantos em stock.",
+      "currency": "Este artigo tem um preço noutra moeda diferente do seu carrinho. Finalize a compra primeiro, ou esvazie o carrinho.",
+      "no_shipping_rates": "Não pode ser entregue agora.",
+      "full": "O seu carrinho está cheio. Finalize a compra primeiro.",
+      "unavailable": "O carrinho não está disponível agora.",
+      "gone": "O seu carrinho expirou. Tente novamente.",
+      "invalid": "Não foi possível. Tente novamente.",
+      "rate_limited": "Demasiadas alterações de uma vez. Aguarde um momento e tente novamente."
+    },
+    "notePlaceholder": "Escreva aqui uma nota para os seus compradores",
+    "editTitle": "Editar o título do carrinho",
+    "editNote": "Editar a nota do carrinho"
   }
 }

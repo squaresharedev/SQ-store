@@ -165,6 +165,14 @@
   },
   "refund": {
     "open": "Terugbetalen of annuleren",
+    "what": "Wat terugbetalen",
+    "whole": "De hele bestelling",
+    "item": "{quantity, plural, one {{title}} other {# × {title}}}",
+    "itemHow": "Betaalt de prijs van dit artikel terug. Het laatste resterende artikel neemt de verzendkosten mee terug.",
+    "itemRestock": "Terugzetten op voorraad",
+    "confirmItem": "Dit artikel terugbetalen",
+    "itemRefunded": "Artikel terugbetaald",
+    "lineRefunded": "Terugbetaald",
     "reasonLabel": "Reden",
     "reasons": {
       "cancelled": "Geannuleerd voor verzending",

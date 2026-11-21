@@ -15,6 +15,8 @@ import { GIFT_MESSAGE_MAX } from "@/types/storefront";
 import { SHIPPING_COUNTRY_CODES } from "@/lib/settings/constants";
 import { LINK_CHANNELS } from "@/lib/storefront/product-page-url";
 import { LOCALES } from "@/i18n/locales";
+import { CART_LINES_MAX, CART_OPTIONS_PER_LINE } from "@/lib/cart/limits";
+import { ORDER_LINE_SOURCES } from "@/lib/checkout/lines";
 
 // What the hosted checkout's order route accepts. The SERVER boundary for the
 // one public write that starts a payment: strict objects throughout (an
@@ -44,11 +46,10 @@ export const shipToSchema = z.strictObject({
     .optional(),
 });
 
-export const placeOrderSchema = z.strictObject({
+/** What every order body carries, whatever is being bought. */
+const orderBuyerFields = {
   /** Minted when the checkout rendered; keys the payment (see provider.ts). */
   attemptId: uuidField("checkoutAttempt"),
-  optionIds: z.array(uuidField("option")).max(OPTIONS_TOTAL_MAX),
-  quantity: z.number().int().min(1).max(PURCHASE_QUANTITY_MAX),
   email: emailAddress("buyer"),
   /** The buyer's language, for their mail. */
   locale: z.enum(LOCALES),
@@ -63,8 +64,16 @@ export const placeOrderSchema = z.strictObject({
   /** The total on the Pay button. Optional so a tab opened before this field
    *  existed still pays; when sent, a different quote refuses the order. */
   expectedTotalCents: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(),
+};
+
+/** "Buy now": one product, its version and quantity, and what was taken from
+ *  its "Add to your order". */
+export const placeOrderSchema = z.strictObject({
+  ...orderBuyerFields,
+  optionIds: z.array(uuidField("option")).max(OPTIONS_TOTAL_MAX),
+  quantity: z.number().int().min(1).max(PURCHASE_QUANTITY_MAX),
   /** "Add to your order": other products taken with this one, each with its
-   *  version. Only ids: the quote prices the main product's own add-ons. */
+   *  version. Only ids: the quote prices them. */
   addOns: z
     .array(
       z.strictObject({
@@ -76,12 +85,32 @@ export const placeOrderSchema = z.strictObject({
     .optional(),
 });
 
-/** The checkout's "Apply" for a discount code: just the code. */
+/** One line of a cart's order, exactly as the checkout showed it. */
+export const orderLineSchema = z.strictObject({
+  productId: uuidField("product"),
+  optionIds: z.array(uuidField("option")).max(CART_OPTIONS_PER_LINE),
+  quantity: z.number().int().min(1).max(PURCHASE_QUANTITY_MAX),
+  source: z.enum(ORDER_LINE_SOURCES),
+});
+
+/** A cart's order: the lines the checkout showed (re-priced by the quote,
+ *  never taken as they are), and the cart they came from, which payment
+ *  closes. */
+export const placeCartOrderSchema = z.strictObject({
+  ...orderBuyerFields,
+  cartId: uuidField("cart"),
+  lines: z.array(orderLineSchema).min(1).max(CART_LINES_MAX),
+});
+
+/** The checkout's "Apply" for a discount code: the code, and the order's
+ *  other products, so the answer can say which of them it covers. */
 export const discountCheckSchema = z.strictObject({
   code: discountCode("code"),
+  productIds: z.array(uuidField("product")).max(CART_LINES_MAX).optional(),
 });
 
 export type PlaceOrderInput = z.infer<typeof placeOrderSchema>;
+export type PlaceCartOrderInput = z.infer<typeof placeCartOrderSchema>;
 
 /** An order's credential or short number, as typed or carried by a page. The
  *  route proves it (lib/orders/order-link.ts); this only bounds it. */

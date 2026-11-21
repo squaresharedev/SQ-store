@@ -282,6 +282,8 @@
       "nameLabel": "Nom affiché",
       "nameHelp": "Affiché avec votre avis. Votre adresse e-mail et votre commande restent privées.",
       "send": "Publier l’avis",
+      "pickLegend": "Choisissez ce que vous voulez évaluer",
+      "reviewed": "Évalué",
       "errors": {
         "notEligible": "Cette commande ne peut plus être évaluée.",
         "rateLimited": "Trop d’avis depuis cette connexion. Réessayez dans une heure.",
@@ -412,7 +414,8 @@
       "discount_invalid": "Ce code de réduction ne peut plus être utilisé. Retirez-le pour payer le prix normal.",
       "price_changed": "Le prix a changé pendant que cette page était ouverte, rien n'a donc été débité. Vérifiez le nouveau total, puis payez.",
       "turnstile": "La vérification de sécurité n’a pas abouti, donc rien n’a été débité. Elle est relancée : patientez un instant, puis réessayez.",
-      "add_on_unavailable": "Un article que vous avez ajouté ne peut plus être vendu avec cette commande, rien n'a donc été débité. Vérifiez votre commande et le nouveau total, puis payez."
+      "add_on_unavailable": "Un article que vous avez ajouté ne peut plus être vendu avec cette commande, rien n'a donc été débité. Vérifiez votre commande et le nouveau total, puis payez.",
+      "currency": "Une seule devise est acceptée par commande, donc rien n'a été débité. Vérifiez votre panier, puis payez."
     },
     "editHeadline": "Titre du paiement",
     "discount": {
@@ -495,5 +498,64 @@
       "otherKind": "Autre type",
       "otherCurrency": "Autre devise"
     }
+  },
+  "cart": {
+    "title": "Votre panier",
+    "button": "Panier, {count, plural, =0 {vide} one {# article} other {# articles}}",
+    "add": "Ajouter au panier",
+    "addShort": "Ajouter",
+    "addTitle": "Ajouter {title} au panier",
+    "adding": "Ajout en cours",
+    "added": "Ajouté",
+    "addedNote": "Ajouté à votre panier",
+    "choose": "Choisir",
+    "view": "Voir le panier",
+    "checkout": "Payer",
+    "keepShopping": "Continuer les achats",
+    "empty": "Votre panier est vide",
+    "subtotal": "Sous-total",
+    "delivery": "Livraison",
+    "deliveryTo": "Livraison vers {area}",
+    "free": "Gratuit",
+    "atCheckout": "Au paiement",
+    "freeGap": "Plus que {amount} pour la livraison gratuite",
+    "freeReached": "La livraison est gratuite",
+    "gone": "Plus disponible ici",
+    "quantity": "Quantité de {title}",
+    "fewer": "Un de moins de {title}",
+    "more": "Un de plus de {title}",
+    "remove": "Retirer {title}",
+    "removed": "{title} retiré de votre panier.",
+    "undo": "Annuler",
+    "addedAnnounce": "{title} ajouté. {count, plural, one {# article} other {# articles}} dans votre panier.",
+    "busy": "Votre panier n'a pas pu être chargé.",
+    "retry": "Réessayer",
+    "suggestionsTitle": "Va bien avec",
+    "problem": {
+      "not_found": "Plus disponible ici. Retirez-le pour payer.",
+      "sold_out": "Épuisé. Retirez-le pour payer.",
+      "options": "Cette version n'est pas disponible. Retirez-la pour payer.",
+      "quantity": "C'est plus qu'une commande ne peut contenir. Réduisez la quantité.",
+      "insufficient_stock": "Pas autant en stock. Réduisez la quantité.",
+      "currency": "Proposé dans une devise différente du reste de votre panier.",
+      "no_shipping_rates": "Impossible de livrer cet article pour l'instant."
+    },
+    "refusal": {
+      "not_found": "Impossible d'ajouter cet article pour l'instant.",
+      "sold_out": "Épuisé.",
+      "options": "Choisissez d'abord une version.",
+      "quantity": "C'est plus qu'une commande ne peut contenir.",
+      "insufficient_stock": "Pas autant en stock.",
+      "currency": "Cet article est dans une devise différente de votre panier. Payez d'abord, ou videz votre panier.",
+      "no_shipping_rates": "Impossible de livrer cet article pour l'instant.",
+      "full": "Votre panier est plein. Payez d'abord.",
+      "unavailable": "Le panier n'est pas disponible pour l'instant.",
+      "gone": "Votre panier a expiré. Réessayez.",
+      "invalid": "Cela n'a pas fonctionné. Réessayez.",
+      "rate_limited": "Trop de modifications à la fois. Attendez un instant, puis réessayez."
+    },
+    "notePlaceholder": "Ajoutez ici une note pour vos acheteurs",
+    "editTitle": "Modifier le titre du panier",
+    "editNote": "Modifier la note du panier"
   }
 }

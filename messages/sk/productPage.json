@@ -282,6 +282,8 @@
       "nameLabel": "Zobrazované meno",
       "nameHelp": "Zobrazí sa pri vašej recenzii. Váš e-mail a objednávka zostanú súkromné.",
       "send": "Zverejniť recenziu",
+      "pickLegend": "Vyberte, čo chcete ohodnotiť",
+      "reviewed": "Ohodnotené",
       "errors": {
         "notEligible": "Túto objednávku už nie je možné hodnotiť.",
         "rateLimited": "Z tohto pripojenia prišlo príliš veľa recenzií. Skúste to znova o hodinu.",
@@ -412,7 +414,8 @@
       "discount_invalid": "Tento zľavový kód sa už nedá použiť. Odstráňte ho a zaplaťte plnú cenu.",
       "price_changed": "Cena sa počas otvorenej stránky zmenila, takže nič nebolo účtované. Skontrolujte nový súhrn a zaplaťte.",
       "turnstile": "Bezpečnostná kontrola neprebehla, takže nič nebolo účtované. Práve beží znova: chvíľu počkajte a skúste to znova.",
-      "add_on_unavailable": "Niečo, čo ste pridali, sa už nedá predať s touto objednávkou, takže vám nebolo nič účtované. Skontrolujte objednávku a nový celkový súčet a zaplaťte."
+      "add_on_unavailable": "Niečo, čo ste pridali, sa už nedá predať s touto objednávkou, takže vám nebolo nič účtované. Skontrolujte objednávku a nový celkový súčet a zaplaťte.",
+      "currency": "Všetko v jednej objednávke musí byť zaplatené v jednej mene, takže nič nebolo účtované. Skontrolujte košík a potom zaplaťte."
     },
     "editHeadline": "Nadpis pokladne",
     "discount": {
@@ -495,5 +498,64 @@
       "otherKind": "Iný druh",
       "otherCurrency": "Iná mena"
     }
+  },
+  "cart": {
+    "title": "Váš košík",
+    "button": "Košík, {count, plural, =0 {prázdny} one {# položka} few {# položky} many {# položky} other {# položiek}}",
+    "add": "Pridať do košíka",
+    "addShort": "Pridať",
+    "addTitle": "Pridať {title} do košíka",
+    "adding": "Pridáva sa",
+    "added": "Pridané",
+    "addedNote": "Pridané do košíka",
+    "choose": "Vybrať",
+    "view": "Zobraziť košík",
+    "checkout": "Prejsť k pokladni",
+    "keepShopping": "Pokračovať v nákupe",
+    "empty": "Váš košík je prázdny",
+    "subtotal": "Medzisúčet",
+    "delivery": "Doručenie",
+    "deliveryTo": "Doručenie do {area}",
+    "free": "Zadarmo",
+    "atCheckout": "Pri pokladni",
+    "freeGap": "Ešte {amount} do dopravy zadarmo",
+    "freeReached": "Doprava je zadarmo",
+    "gone": "Tu sa už nepredáva",
+    "quantity": "Množstvo: {title}",
+    "fewer": "O jedno menej: {title}",
+    "more": "O jedno viac: {title}",
+    "remove": "Odstrániť {title}",
+    "removed": "{title} bolo odstránené z košíka.",
+    "undo": "Späť",
+    "addedAnnounce": "{title} pridané. {count, plural, one {# položka} few {# položky} many {# položky} other {# položiek}} v košíku.",
+    "busy": "Košík sa nepodarilo načítať.",
+    "retry": "Skúsiť znova",
+    "suggestionsTitle": "Hodí sa k tomu",
+    "problem": {
+      "not_found": "Tu sa už nepredáva. Odstráňte z košíka a pokračujte.",
+      "sold_out": "Vypredané. Odstráňte z košíka a pokračujte.",
+      "options": "Táto verzia nie je dostupná. Odstráňte z košíka a pokračujte.",
+      "quantity": "Prekračuje limit jednej objednávky. Znížte množstvo.",
+      "insufficient_stock": "Na sklade nie je dostatok kusov. Znížte množstvo.",
+      "currency": "Cena je v inej mene ako zvyšok košíka.",
+      "no_shipping_rates": "Momentálne sa nedá doručiť."
+    },
+    "refusal": {
+      "not_found": "Momentálne sa to nedá pridať.",
+      "sold_out": "Vypredané.",
+      "options": "Najprv vyberte verziu.",
+      "quantity": "Prekračuje limit jednej objednávky.",
+      "insufficient_stock": "Na sklade nie je dostatok kusov.",
+      "currency": "Cena je v inej mene ako váš košík. Najprv zaplaťte alebo vyprázdnite košík.",
+      "no_shipping_rates": "Momentálne sa nedá doručiť.",
+      "full": "Košík je plný. Najprv zaplaťte.",
+      "unavailable": "Košík momentálne nie je dostupný.",
+      "gone": "Košík vypršal. Skúste to znova.",
+      "invalid": "Nepodarilo sa to. Skúste to znova.",
+      "rate_limited": "Príliš veľa zmien naraz. Chvíľku počkajte a skúste to znova."
+    },
+    "notePlaceholder": "Sem napíšte poznámku pre kupujúcich",
+    "editTitle": "Upraviť nadpis košíka",
+    "editNote": "Upraviť poznámku v košíku"
   }
 }

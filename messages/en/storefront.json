@@ -95,6 +95,7 @@
       "cards": "Product cards",
       "soldOut": "Sold out",
       "productPage": "Product page",
+      "cartPage": "Cart",
       "checkoutPage": "Checkout"
     },
     "subtitle": {
@@ -104,6 +105,7 @@
       "cards": "Storefront / Product cards",
       "soldOut": "Storefront / Sold out",
       "productPage": "Storefront / Product page",
+      "cartPage": "Storefront / Cart",
       "checkoutPage": "Storefront / Checkout",
       "blocks": "Storefront / Blocks"
     },
@@ -1455,6 +1457,38 @@
           "violet": "Candy Violet ({value})"
         }
       }
+    }
+  },
+  "cartPage": {
+    "on": "Cart",
+    "onHint": "Buyers collect products and pay once. Buy now stays.",
+    "mainButton": {
+      "label": "Leading button",
+      "buyNow": "Buy now",
+      "addToCart": "Add to cart"
+    },
+    "afterAdd": {
+      "label": "After adding",
+      "openCart": "Open the cart",
+      "note": "Show a note"
+    },
+    "quickAdd": "Add from cards",
+    "quickAddHint": "A card's button puts the product straight in the cart when there is no version to choose.",
+    "addLabel": "Button words",
+    "title": "Cart heading",
+    "note": "Note in the cart",
+    "notePlaceholder": "Orders ship on Mondays",
+    "deliveryBar": "Free delivery progress",
+    "deliveryBarHint": "Shown when your delivery is free over an amount.",
+    "suggestions": "Goes well with",
+    "suggestionsHint": "Under the cart: what you picked for Add to your order on the products in it.",
+    "sections": {
+      "buttons": "Adding to cart",
+      "cart": "Inside the cart"
+    },
+    "leadGuess": {
+      "label": "Lead with Add to cart",
+      "hint": "{count, plural, one {# product} other {# products}} on your board can go straight in a cart. A tap makes Add to cart the main button; Buy now stays beside it."
     }
   },
   "checkoutPage": {

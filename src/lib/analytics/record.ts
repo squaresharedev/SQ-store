@@ -145,6 +145,16 @@ export async function checkoutViewDedupeKey(
   return pageViewDedupeKey("checkout_view", productId, hash);
 }
 
+/** And for a product put in a cart: one per visitor, per product, per hour,
+ *  so pressing "Add to cart" again (a second version, a raised quantity
+ *  later) is still one buyer wanting it. */
+export async function cartAddDedupeKey(
+  productId: string,
+  hash: string | null,
+): Promise<string | null> {
+  return pageViewDedupeKey("cart_add", productId, hash);
+}
+
 /** And for a product opened from an embed tile (a click, counted where it
  *  lands: see the hosted product page). Its own kind in the key, so it never
  *  collides with the product page view written in the same request. */
@@ -156,7 +166,7 @@ export async function productClickDedupeKey(
 }
 
 async function pageViewDedupeKey(
-  kind: "product_view" | "checkout_view" | "product_click",
+  kind: "product_view" | "checkout_view" | "product_click" | "cart_add",
   productId: string,
   hash: string | null,
 ): Promise<string | null> {

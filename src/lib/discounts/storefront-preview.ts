@@ -20,6 +20,8 @@ import { toCurrency } from "@/lib/format/money";
 import { readRatingSummaries } from "@/lib/reviews/ratings";
 import { secondPhotoKey } from "@/lib/storefront/tile-extras";
 import type { Product, ProductTileSale } from "@/types/product";
+import { getAccountShippingPolicy } from "@/lib/settings/shipping-policy";
+import { quickAddFor } from "@/lib/cart/quick-add";
 
 /** One product to price for a preview. */
 type PreviewProduct = Pick<Product, "id" | "price" | "currency"> & {
@@ -100,6 +102,10 @@ export async function withRunningSales(ownerId: string, products: Product[]): Pr
  */
 export async function listStorefrontProducts(opts?: {
   only?: ReadonlySet<string>;
+  /** Mark each product a storefront card can put straight in the cart
+   *  (Product.quickAdd, lib/cart/quick-add.ts), so the designer draws the
+   *  card a buyer will see. Reads the account's delivery, request-cached. */
+  cards?: boolean;
 }): Promise<Product[]> {
   const [account, allRows] = await Promise.all([
     getActiveAccount(),
@@ -122,15 +128,21 @@ export async function listStorefrontProducts(opts?: {
     listedAt: r.created_at,
   }));
 
-  const [pricing, extras] = await Promise.all([
+  const [pricing, extras, shippingPolicy] = await Promise.all([
     loadPreviewPricing(account.accountId, allForPricing),
     loadSellerCardExtras(opts?.only),
+    opts?.cards ? getAccountShippingPolicy(account.accountId) : Promise.resolve(null),
   ]);
+  const rowById = new Map(targetRows.map((row) => [row.id, row]));
   return products.map((product) => {
     const p = pricing.get(product.id);
     const sale = p ? tileSaleOf(p) : undefined;
     const extra = extras.get(product.id);
-    return { ...product, ...(sale ? { sale } : {}), ...(extra ?? {}) };
+    const row = rowById.get(product.id);
+    // A draft has no card a buyer sees; the rest as the board decides it.
+    const quickAdd =
+      shippingPolicy && row && row.status === "active" ? quickAddFor(row, null, { shippingPolicy }) : null;
+    return { ...product, ...(sale ? { sale } : {}), ...(extra ?? {}), ...(quickAdd ? { quickAdd } : {}) };
   });
 }
 

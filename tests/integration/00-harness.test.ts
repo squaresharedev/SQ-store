@@ -47,6 +47,9 @@ describe("embedded supabase replica", () => {
       // The seller-plan launch switch: whether plan limits refuse creates
       // yet (20260930_seller_plans). Service-role only.
       "billing_switches",
+      // A buyer's cart on one storefront (20261120_shopping_cart). Reached
+      // only through app/api/cart by its random id: service-role only.
+      "carts",
       "collections",
       "consent_logs",
       // Pending codes proving a seller owns their buyer-facing email and
@@ -89,6 +92,9 @@ describe("embedded supabase replica", () => {
       // 20261028_product_add_ons). The store's team reads its own; written by
       // order_place only.
       "order_add_ons",
+      // One refunded line of an order (20261120_shopping_cart). The store's
+      // team reads its own; written by order_apply_line_refund only.
+      "order_line_refunds",
       "orders",
       // Why sellers cancelled a paid plan, for the admin panel
       // (20261003_plan_cancellations). Service-role only.

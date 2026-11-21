@@ -6,9 +6,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
  *
  * The database half (one review per order, the summary, the refund trigger)
  * is proven in tests/integration/42-reviews.test.ts. What this file pins is
- * the route's own gates, in order: same origin, shape, budget, an order OF
- * THIS PRODUCT, a paid and unrefunded order, a live product, and what is
- * written when all of that holds (verified, never anything the caller chose).
+ * the route's own gates, in order: same origin, shape, budget, an order with
+ * a line OF THIS PRODUCT (its own, or a cart's), a paid and unrefunded order
+ * whose lines of it were not all refunded on their own, a live product, and
+ * what is written when all of that holds (verified, never anything the
+ * caller chose).
  */
 
 const PRODUCT = "0b1f7b1e-6d3a-4f4e-9f6c-1a2b3c4d5e6f";
@@ -22,6 +24,10 @@ const state = vi.hoisted(() => ({
   reviewable: true as boolean | null,
   insertError: null as { code: string; message: string } | null,
   inserts: [] as Record<string, unknown>[],
+  /** The order's lines after its first (a cart's), and line refunds. */
+  moreLines: [] as { lineId: string; productId: string; refunded: boolean }[],
+  firstRefunded: false,
+  linesFail: false,
 }));
 
 vi.mock("next/headers", () => ({ headers: async () => new Headers({ "cf-connecting-ip": "203.0.113.7" }) }));
@@ -42,6 +48,13 @@ vi.mock("@/lib/rate-limit", async (importOriginal) => ({
   rateLimitKey: vi.fn(async () => state.allow),
 }));
 vi.mock("@/lib/orders/order-page", () => ({ readOrderByRef: vi.fn(async () => state.order) }));
+vi.mock("@/lib/orders/line-states", () => ({
+  readLineStates: vi.fn(async (_admin: unknown, order: { product_id: string | null }) =>
+    state.linesFail
+      ? null
+      : [{ lineId: null, productId: order.product_id, refunded: state.firstRefunded }, ...state.moreLines],
+  ),
+}));
 vi.mock("@/lib/reviews/queries", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/reviews/queries")>()),
   isReviewableProduct: vi.fn(async () => state.reviewable),
@@ -94,6 +107,9 @@ beforeEach(() => {
   state.reviewable = true;
   state.insertError = null;
   state.inserts = [];
+  state.moreLines = [];
+  state.firstRefunded = false;
+  state.linesFail = false;
   scheduled.tasks = [];
   moderation.checked = [];
 });
@@ -161,6 +177,26 @@ describe("POST /api/products/[id]/reviews", () => {
   it("refuses a product that is no longer live", async () => {
     state.reviewable = false;
     expect((await post(review)).status).toBe(409);
+  });
+
+  it("takes a review of a cart's other product, as its own", async () => {
+    state.moreLines = [{ lineId: "line-2", productId: OTHER_PRODUCT, refunded: false }];
+    expect((await post(review, { productId: OTHER_PRODUCT })).status).toBe(201);
+    expect(state.inserts[0]).toMatchObject({ product_id: OTHER_PRODUCT, order_id: ORDER, is_verified_buyer: true });
+  });
+
+  it("refuses a product whose every line was refunded on its own", async () => {
+    state.firstRefunded = true;
+    expect((await post(review)).status).toBe(409);
+    // Two versions of one product: one refunded leaves the other bought.
+    state.moreLines = [{ lineId: "line-2", productId: PRODUCT, refunded: false }];
+    expect((await post(review)).status).toBe(201);
+  });
+
+  it("answers busy, never a guess, when the lines cannot be read", async () => {
+    state.linesFail = true;
+    expect((await post(review)).status).toBe(503);
+    expect(state.inserts).toEqual([]);
   });
 
   it("says so when the order already has its review", async () => {

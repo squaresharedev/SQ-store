@@ -8,6 +8,7 @@ import { uuidField } from "@/lib/validation/inputs";
 import { parseReviewQuery, reviewSubmitSchema } from "@/lib/validation/reviews";
 import { readOrderByRef } from "@/lib/orders/order-page";
 import { isReviewableOrder } from "@/lib/reviews/eligibility";
+import { readLineStates } from "@/lib/orders/line-states";
 import { moderateReview } from "@/lib/reviews/moderation";
 import { getRatingSummary, isReviewableProduct, listReviews } from "@/lib/reviews/queries";
 
@@ -25,11 +26,13 @@ import { getRatingSummary, isReviewableProduct, listReviews } from "@/lib/review
  *
  *   - same origin only, bounded body, shape first;
  *   - a per-IP rate-limit token spent before any read;
- *   - the link must prove an order OF THIS PRODUCT (else the same 404 as a
- *     link that proves nothing);
- *   - the order must be paid and not refunded (lib/reviews/eligibility.ts),
- *     which is what earns the "Verified buyer" badge;
- *   - one review per order, enforced by a unique index rather than by asking;
+ *   - the link must prove an order with a line OF THIS PRODUCT, its own or
+ *     one of a cart's (else the same 404 as a link that proves nothing);
+ *   - the order must be paid and not refunded, and not every line of this
+ *     product refunded on its own (lib/reviews/eligibility.ts), which is what
+ *     earns the "Verified buyer" badge;
+ *   - one review per order and product, enforced by a unique index rather
+ *     than by asking;
  *   - written PENDING, so nothing a buyer types is public before the
  *     automatic check has read it (lib/reviews/moderation.ts, run after the
  *     response, so it appears within seconds; the sweep retries it otherwise).
@@ -90,13 +93,20 @@ export async function POST(request: Request, { params }: Params): Promise<Respon
   }
 
   const order = await readOrderByRef(orderRef);
-  if (!order || order.product_id !== id) return reply({ ok: false, error: "not_found" }, 404);
-  if (!isReviewableOrder(order)) return reply({ ok: false, error: "not_eligible" }, 409);
+  if (!order) return reply({ ok: false, error: "not_found" }, 404);
+  const admin = createAdminClient();
+  const lines = await readLineStates(admin, order);
+  if (lines === null) return reply({ ok: false, error: "failed" }, 503);
+  const own = lines.filter((line) => line.productId === id);
+  if (own.length === 0) return reply({ ok: false, error: "not_found" }, 404);
+  if (!isReviewableOrder({ ...order, product_id: id }) || own.every((line) => line.refunded)) {
+    return reply({ ok: false, error: "not_eligible" }, 409);
+  }
   const reviewable = await isReviewableProduct(id);
   if (reviewable === null) return reply({ ok: false, error: "failed" }, 503);
   if (!reviewable) return reply({ ok: false, error: "not_eligible" }, 409);
 
-  const { data, error } = await createAdminClient()
+  const { data, error } = await admin
     .from("reviews")
     .insert({
       product_id: id,
@@ -111,7 +121,8 @@ export async function POST(request: Request, { params }: Params): Promise<Respon
     .select("id")
     .single();
   if (error) {
-    // 23505 is reviews_order_unique: this order has its review already.
+    // 23505 is reviews_order_product_unique: this product of this order has
+    // its review already.
     if (error.code === "23505") return reply({ ok: false, error: "already_reviewed" }, 409);
     console.error("[reviews] insert failed", error.message);
     return reply({ ok: false, error: "failed" }, 500);

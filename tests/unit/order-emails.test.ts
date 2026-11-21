@@ -99,6 +99,19 @@ describe("the seller's new-order email", () => {
     expect(sent().text).not.toContain("What to pack");
   });
 
+  it("names a cart's order by its goods, and packs every line", async () => {
+    await sendNewOrderEmail("seller@example.test", "en", {
+      ...order,
+      more: [
+        { productTitle: "Linen napkin", quantity: 4, selection: [] },
+        { productTitle: "Oak board", quantity: 1, selection: [] },
+      ],
+    });
+    expect(sent().subject).toBe("New order: Blue mug +2 more");
+    expect(sent().text).toContain("4 × Linen napkin");
+    expect(sent().text).toContain("1 × Oak board");
+  });
+
   it("never throws when the mail cannot go", async () => {
     sendEmailMock.mockRejectedValueOnce(new Error("provider down"));
     await expect(sendNewOrderEmail("seller@example.test", "en", order)).resolves.toEqual({

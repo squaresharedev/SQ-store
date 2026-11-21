@@ -269,6 +269,15 @@ export function deliveryPriceRange(
   return { fromCents, uniform: rates.every((rate) => rate === fromCents) };
 }
 
+/** The seller's free-delivery threshold, when it is in `currency` (every rate
+ *  is in the policy's one currency), else null: nothing to measure against. */
+export function freeOverCentsIn(policy: SellerShippingPolicy, currency: Currency | null): number | null {
+  const threshold = policy.freeOverCents;
+  return currency && typeof threshold === "number" && threshold > 0 && (policy.ratesCurrency ?? "EUR") === currency
+    ? threshold
+    : null;
+}
+
 /**
  * How much more the buyer would have to spend for delivery to become free,
  * in cents, or null when that is not a thing worth saying: delivery is

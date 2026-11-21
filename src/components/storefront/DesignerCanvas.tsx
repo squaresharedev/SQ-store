@@ -8,6 +8,7 @@ import type { Product } from "@/types/product";
 import type { PagePhotoView } from "@/types/product-page";
 import { pagePhotoView } from "@/lib/storefront/product-page";
 import { resolveTileLook } from "@/lib/storefront/tile-look";
+import { CART_SWITCHED_OFF } from "@/lib/storefront/cart-page";
 import {
   CANVAS_ROWS_MAX,
   blockKey,
@@ -17,6 +18,7 @@ import {
   type HeaderLine,
   type ImagePlacement,
   type PagePhoto,
+  type CartPageConfig,
   type CheckoutPageConfig,
   type ProductPageConfig,
   type StorefrontBlock,
@@ -219,6 +221,10 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   storefrontName = "",
   productPage,
   checkoutPage,
+  cartPage,
+  onCartPageChange,
+  cartOpenOn = null,
+  onCartOpenChange,
   onCheckoutPageChange,
   celebrationPlays = 0,
   shippingPolicy = {},
@@ -345,6 +351,13 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   productPage?: ProductPageConfig;
   /** The checkout's design. Absent leaves the checkout artboards unrendered. */
   checkoutPage?: CheckoutPageConfig;
+  /** The cart's design: its buttons and its cart button on the page artboards. */
+  cartPage?: CartPageConfig;
+  /** The cart's words, typed straight onto the cart where it opens. */
+  onCartPageChange?: (next: CartPageConfig) => void;
+  /** The page whose cart is open (its product id), held by the designer. */
+  cartOpenOn?: string | null;
+  onCartOpenChange?: (productId: string, open: boolean) => void;
   /** The checkout's words, typed straight onto its artboards. */
   onCheckoutPageChange?: (next: CheckoutPageConfig) => void;
   /** Bumped by the panel's "Play it": replays the thank-you celebration. */
@@ -701,7 +714,12 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   const covers = useMemo(() => tileCovers(theme, blocks), [theme, blocks]);
   // What the cards borrow from the product page (its button, its stars),
   // once per board and kept stable so the memoised tiles do not re-render.
-  const tileLook = useMemo(() => resolveTileLook({ theme, productPage }), [theme, productPage]);
+  // Cards add to the cart as the cart's own options say; with no cart here
+  // (none passed: not launched, or a gallery) they open the page.
+  const tileLook = useMemo(
+    () => resolveTileLook({ theme, productPage, cartPage: cartPage ?? CART_SWITCHED_OFF }),
+    [theme, productPage, cartPage],
+  );
 
   // Whether this board is arranged in a way a straight line cannot express.
   // Cheap enough to run per render on a 120-block board, and it has to follow
@@ -764,6 +782,24 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     [productPage, openPages, productsById],
   );
 
+  // What a page's sample cart is made of: the board's products, each once, in
+  // board order. Keyed by that list rather than by the blocks, so moving a
+  // tile does not hand the open cart a new sample (and forget its steps).
+  const boardProductKey = blocks
+    .flatMap((block) => (block.type === "product" ? [block.productId] : []))
+    .filter((id, index, ids) => ids.indexOf(id) === index)
+    .join(",");
+  const boardProducts = useMemo(
+    () =>
+      boardProductKey
+        .split(",")
+        .flatMap((id) => {
+          const product = productsById.get(id);
+          return product ? [product] : [];
+        }),
+    [boardProductKey, productsById],
+  );
+
   // The tile's manual sold-out flag is live in the editor, so the page has to
   // read it from the board rather than from the snapshot it loaded.
   const soldOutProducts = useMemo(() => {
@@ -823,12 +859,17 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             theme={theme}
             header={header}
             productPage={productPage}
+            cartPage={cartPage}
             shippingPolicy={shippingPolicy}
             seller={seller}
             backgroundImageUrl={backgroundImageUrl}
             customFontUrl={customFontUrl}
             pagePhoto={photoView(productPage.backgroundImage)}
             onClose={() => onClosePage?.(id)}
+            boardProducts={boardProducts}
+            cartOpen={cartOpenOn === id}
+            onCartOpenChange={(open) => onCartOpenChange?.(id, open)}
+            onCartPageChange={onCartPageChange}
           />,
           // The checkout and its thank-you, right after the page they follow.
           ...(chain

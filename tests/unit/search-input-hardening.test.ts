@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { ilikeAny } from "@/lib/supabase/ilike";
+import { anyOrderLineIs, isProductId } from "@/lib/supabase/order-lines";
 
 /**
  * HARDENING INVARIANTS for the search surfaces.
@@ -190,15 +191,25 @@ describe("search — the SQL surface", () => {
     // `or=` takes a PARSED expression, so a comma, period or parenthesis in
     // the term corrupts it — the one place in this stack where user text
     // really does reach a query language. /api/search runs two ilike queries
-    // instead. The one way in is lib/supabase/ilike.ts `ilikeAny`, which
-    // double-quotes and escapes the term (its own test below proves it); a
-    // hand-built `.or(` anywhere in these paths is still refused.
+    // instead. The ways in are lib/supabase/ilike.ts `ilikeAny`, which
+    // double-quotes and escapes the term, and lib/supabase/order-lines.ts
+    // `anyOrderLineIs`, which takes nothing but a uuid (their own tests below
+    // prove both); a hand-built `.or(` anywhere in these paths is still refused.
     const offenders = ALL_SOURCES.filter(
       ({ path, source }) =>
         /\/(search|orders|products)\//.test(`/${path}`) &&
-        /\.or\((?!\s*ilikeAny\()/.test(code(source)),
+        /\.or\((?!\s*(?:ilikeAny|anyOrderLineIs)\()/.test(code(source)),
     ).map(({ path }) => path);
     expect(offenders).toEqual([]);
+  });
+
+  it("anyOrderLineIs writes only a uuid into its filter, and refuses anything else", () => {
+    const id = "5a000000-0000-4000-8000-0000000000ab";
+    expect(anyOrderLineIs(id)).toBe(`product_id.eq.${id},more_product_ids.cs.{${id}}`);
+    for (const hostile of ["", "x", `${id},buyer_email.ilike.*`, `${id})`, "1 or 1=1", `${id} `]) {
+      expect(isProductId(hostile), hostile).toBe(false);
+      expect(() => anyOrderLineIs(hostile), hostile).toThrow();
+    }
   });
 
   it("ilikeAny keeps whatever was typed inside one quoted value", () => {

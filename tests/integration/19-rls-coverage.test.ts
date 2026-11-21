@@ -93,6 +93,11 @@ const POLICY_FREE_BY_DESIGN = new Set([
   // without the two-factor step or the waiting period, or, by removing a row,
   // call off a deletion its owner asked for.
   "account_deletion_requests",
+  // Shopping carts (20261120_shopping_cart). A cart's random id is the buyer's
+  // only key to it, and only the cart routes read or write one, through the
+  // service role (lib/cart/store.ts). A client that could list them could read
+  // or change every buyer's cart.
+  "carts",
   // The automatic check's approved list (20261012_auto_moderation). A row is
   // public only while every part of it is 'clean' here, so a client that
   // could write it could approve its own content.

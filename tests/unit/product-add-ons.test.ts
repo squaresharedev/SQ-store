@@ -10,11 +10,16 @@ import { createFakeAdmin } from "../setup/fake-admin";
 
 vi.mock("@/lib/r2", () => ({ presignGetUrl: vi.fn(async (key: string) => `https://cdn.test/${key}`) }));
 vi.mock("next/headers", () => ({ headers: vi.fn(async () => new Headers()) }));
+vi.mock("@/lib/rate-limit", () => ({
+  RATE_LIMITS: new Proxy({}, { get: () => ({ max: 600, windowSeconds: 3600 }) }),
+  clientKey: vi.fn(async () => "203.0.113.9"),
+  rateLimitKey: vi.fn(async () => true),
+}));
 
 let fake = createFakeAdmin();
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => fake.admin }));
 
-const { quoteFromGate, paidAddOns } = await import("@/lib/checkout/quote");
+const { quoteOrder, buyNowLines, paidLines } = await import("@/lib/checkout/quote");
 const { loadAddOns } = await import("@/lib/products/add-ons");
 const { offeredByATile } = await import("@/lib/products/purchasable");
 import {
@@ -24,8 +29,7 @@ import {
   offeredAddOnCards,
 } from "@/lib/products/add-on-visibility";
 import type { AddOnChoice } from "@/lib/products/add-on-choices";
-import { priceAddOn } from "@/lib/discounts/pricing";
-import { priceBasket } from "@/lib/checkout/basket";
+import { priceLines } from "@/lib/discounts/pricing";
 import { quoteOrderShipping } from "@/lib/shipping/rates";
 import { addOnSelectionIds } from "@/lib/checkout/selection";
 import { parseAddOnIds } from "@/lib/products/detail";
@@ -34,10 +38,8 @@ import { productWriteSchema } from "@/lib/validation/product";
 import { placeOrderSchema } from "@/lib/validation/checkout";
 import { productPageSchema } from "@/lib/validation/storefront";
 import { PAGE_BUSY } from "@/lib/public/busy";
-import type { Purchasable } from "@/lib/products/purchasable";
 import { DEFAULT_PRODUCT_PAGE_CONFIG, DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
-import type { ResolvedCode } from "@/types/discount";
 
 const OWNER = "ffffffff-ffff-4fff-8fff-ffffffffffff";
 const OTHER_OWNER = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
@@ -59,7 +61,7 @@ const POLICY: SellerShippingPolicy = {
   ratesCurrency: "EUR",
   freeOverCents: 10_000,
   destinations: [{ area: "Ireland", time: "1-2 days", countries: ["IE"], rateCents: 450 }],
-  profiles: [{ id: HEAVY, name: "Heavy", body: "", rateCents: 900 }],
+  profiles: [{ id: HEAVY, name: "Heavy", body: "Sent by courier.", rateCents: 900 }],
 };
 
 /** A products row as the buyer path selects it. */
@@ -104,8 +106,37 @@ const COASTER_GROUPS = [
   },
 ];
 
+const STOREFRONT = "99999999-9999-4999-8999-999999999999";
+const BUDGET = { action: "test", budget: { max: 600, windowSeconds: 3600 } };
+const PROFILE = {
+  id: OWNER,
+  tax_business_name: "Studio Builderboy e.U.",
+  tax_vat_id: "ATU12345678",
+  tax_country: "AT",
+  seller_address: "12 Market Street\nVienna\nAustria",
+  seller_email: "hello@studio-builderboy.at",
+  seller_phone: "+43 1 234567",
+  shipping_policy: POLICY,
+};
+
+function storefrontRow(productPage = DEFAULT_PRODUCT_PAGE_CONFIG) {
+  return {
+    id: STOREFRONT,
+    name: "Studio",
+    owner_id: OWNER,
+    moderation_status: "ok",
+    config: {
+      ...DEFAULT_STOREFRONT_CONFIG,
+      blocks: [{ type: "product", productId: MAIN, x: 0, y: 0, w: 2, h: 2 }],
+      productPage,
+    },
+  };
+}
+
 function seed(extra: Record<string, unknown[]> = {}) {
   fake = createFakeAdmin({
+    storefronts: [storefrontRow()],
+    profiles: [PROFILE],
     products: [
       productRow(MAIN, { price_cents: 2400, add_on_ids: [MUG, COASTERS, ZINE, FOREIGN] }),
       productRow(MUG),
@@ -118,34 +149,21 @@ function seed(extra: Record<string, unknown[]> = {}) {
   });
 }
 
-function gate(overrides: Partial<Purchasable> = {}): Purchasable {
-  const main = (fake.state.tables.products as Record<string, unknown>[]).find((row) => row.id === MAIN)!;
-  return {
-    ownerId: OWNER,
-    storefront: { id: "99999999-9999-4999-8999-999999999999", name: "Studio" },
-    config: DEFAULT_STOREFRONT_CONFIG,
-    productPage: DEFAULT_PRODUCT_PAGE_CONFIG,
-    block: { type: "product", productId: MAIN, x: 0, y: 0, w: 2, h: 2 },
-    row: main,
-    seller: { businessName: "Studio" },
-    shippingPolicy: POLICY,
-    sales: [],
-    now: NOW,
-    ...overrides,
-  } as Purchasable;
-}
-
-function quote(addOns: { productId: string; optionIds?: string[] }[], options: { code?: ResolvedCode; g?: Purchasable } = {}) {
-  return quoteFromGate(
-    options.g ?? gate(),
+/** "Buy now" on MAIN with these add-ons taken, through the real gate. */
+function quote(addOns: { productId: string; optionIds?: string[] }[], options: { code?: string } = {}) {
+  return quoteOrder(
     {
-      optionIds: [],
-      quantity: 1,
+      storefrontId: STOREFRONT,
+      lines: buyNowLines({
+        productId: MAIN,
+        optionIds: [],
+        quantity: 1,
+        addOns: addOns.map((pick) => ({ productId: pick.productId, optionIds: pick.optionIds ?? [] })),
+      }),
       country: "IE",
-      addOns: addOns.map((pick) => ({ productId: pick.productId, optionIds: pick.optionIds ?? [] })),
+      discountCode: options.code ?? null,
     },
-    fake.admin,
-    options.code ?? null,
+    BUDGET,
   );
 }
 
@@ -153,35 +171,28 @@ beforeEach(() => seed());
 
 describe("pricing an add-on line", () => {
   it("takes its own sale, never below what the sale leaves", () => {
-    expect(priceAddOn({ regularUnitCents: 1200, saleUnitCents: 900, quantity: 1 })).toEqual({
-      unitPriceCents: 900,
-      amountCents: 900,
-      discountCents: 300,
-      applied: "sale",
-    });
+    const one = (saleUnitCents: number | null, quantity: number) =>
+      priceLines({
+        currency: "EUR",
+        code: null,
+        lines: [{ regularUnitCents: 1200, saleUnitCents, quantity, coveredByCode: false }],
+      }).lines[0];
+    expect(one(900, 1)).toMatchObject({ unitPriceCents: 900, amountCents: 900, discountCents: 300, applied: "sale" });
     // A "sale" that does not lower the price is no sale.
-    expect(priceAddOn({ regularUnitCents: 1200, saleUnitCents: 1500, quantity: 2 })).toEqual({
-      unitPriceCents: 1200,
-      amountCents: 2400,
-      discountCents: 0,
-      applied: null,
-    });
+    expect(one(1500, 2)).toMatchObject({ unitPriceCents: 1200, amountCents: 2400, discountCents: 0, applied: null });
   });
 
-  it("adds the lines to the main product, and the code stays on the main product", () => {
-    const basket = priceBasket({
-      main: {
-        regularUnitCents: 2400,
-        currency: "EUR",
-        quantity: 1,
-        saleUnitCents: null,
-        code: { type: "percent", percentOff: 10 },
-      },
-      addOns: [{ productId: MUG, regularUnitCents: 1200, saleUnitCents: null, quantity: 1 }],
+  it("adds the lines up, and a code takes off only the lines it covers", () => {
+    const priced = priceLines({
+      currency: "EUR",
+      code: { type: "percent", percentOff: 10 },
+      lines: [
+        { regularUnitCents: 2400, saleUnitCents: null, quantity: 1, coveredByCode: true },
+        { regularUnitCents: 1200, saleUnitCents: null, quantity: 1, coveredByCode: false },
+      ],
     });
-    expect(basket.main.itemsCents).toBe(2160);
-    expect(basket.addOns[0]?.amountCents).toBe(1200);
-    expect(basket.itemsCents).toBe(3360);
+    expect(priced.lines.map((line) => line.amountCents)).toEqual([2160, 1200]);
+    expect(priced.itemsCents).toBe(3360);
   });
 });
 
@@ -454,22 +465,62 @@ describe("how a storefront draws the section", () => {
 });
 
 describe("the quote with add-ons", () => {
+  const codeRow = (appliesTo: "all" | "products", productIds: string[]) => ({
+    id: CODE_ID,
+    owner_id: OWNER,
+    kind: "code",
+    code: "TEN",
+    share_channel: null,
+    value_type: "percent",
+    percent_off: 10,
+    amount_off_cents: null,
+    currency: null,
+    applies_to: appliesTo,
+    product_ids: productIds,
+    starts_at: "2026-10-01T00:00:00Z",
+    ends_at: null,
+    usage_limit: null,
+    enabled: true,
+    archived_at: null,
+    created_at: "2026-10-01T00:00:00Z",
+  });
+  const mugSale = {
+    id: SALE_ID,
+    owner_id: OWNER,
+    kind: "automatic",
+    code: null,
+    share_channel: null,
+    value_type: "percent",
+    percent_off: 25,
+    amount_off_cents: null,
+    currency: null,
+    applies_to: "products",
+    product_ids: [MUG],
+    starts_at: "2026-10-01T00:00:00Z",
+    ends_at: null,
+    usage_limit: null,
+    enabled: true,
+    archived_at: null,
+    created_at: "2026-10-01T00:00:00Z",
+  };
+
   it("charges the main product, each add-on and one delivery", async () => {
     const result = await quote([{ productId: MUG }, { productId: COASTERS, optionIds: [FOUR] }]);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.quote.itemsCents).toBe(2400);
-    expect(result.quote.addOnsCents).toBe(3000);
+    expect(result.quote.itemsCents).toBe(5400);
     expect(result.quote.shippingCents).toBe(450);
     expect(result.quote.totalCents).toBe(5850);
-    expect(result.quote.addOns.map((line) => [line.title, line.amountCents, line.selection])).toEqual([
+    expect(result.quote.lines.map((line) => [line.title, line.amountCents, line.selection])).toEqual([
+      ["Thing", 2400, []],
       ["Mug", 1200, []],
       ["Coasters", 1800, [{ label: "Set", value: "Four" }]],
     ]);
-    expect(paidAddOns(result.quote)).toEqual([
-      { productId: MUG, selection: [], unitPriceCents: 1200, quantity: 1, amountCents: 1200, discountId: null },
+    expect(paidLines(result.quote)).toEqual([
+      { productId: MUG, source: "add_on", selection: [], unitPriceCents: 1200, quantity: 1, amountCents: 1200, discountId: null },
       {
         productId: COASTERS,
+        source: "add_on",
         selection: [{ label: "Set", value: "Four" }],
         unitPriceCents: 1800,
         quantity: 1,
@@ -479,72 +530,65 @@ describe("the quote with add-ons", () => {
     ]);
   });
 
-  it("refuses anything the page would not have offered", async () => {
+  it("refuses a line that is not for sale here, by its own index", async () => {
     for (const pick of [
-      // Not on this product's list at all.
+      // Not on this product's list and not a tile: no page here, nothing to sell.
       { productId: "a9a9a9a9-a9a9-4a9a-8a9a-a9a9a9a9a9a9" },
       // On the list, but another store's.
       { productId: FOREIGN },
-      // On the list, but a download beside a parcel.
-      { productId: ZINE },
-      // A version it does not have in stock, or no version for a product with versions.
-      { productId: COASTERS, optionIds: [SOLD] },
-      { productId: COASTERS },
     ]) {
-      expect(await quote([pick]), pick.productId).toEqual({ ok: false, reason: "add_on_unavailable" });
+      expect(await quote([pick]), pick.productId).toEqual({ ok: false, reason: "not_found", line: 1 });
     }
-    expect(await quote([{ productId: MUG }, { productId: MUG }])).toEqual({ ok: false, reason: "add_on_unavailable" });
+    // A version it does not have in stock, or no version for a product with versions.
+    expect(await quote([{ productId: COASTERS, optionIds: [SOLD] }])).toEqual({ ok: false, reason: "options", line: 1 });
+    expect(await quote([{ productId: COASTERS }])).toEqual({ ok: false, reason: "options", line: 1 });
+  });
+
+  it("sells a download beside a parcel in one order", async () => {
+    const result = await quote([{ productId: ZINE }]);
+    expect(result).toMatchObject({ ok: true, quote: { ships: true, hasDownloads: true, itemsCents: 3600, shippingCents: 450 } });
   });
 
   it("refuses a sold-out add-on, and add-ons on a storefront that hides the section", async () => {
     const mug = (fake.state.tables.products as Record<string, unknown>[]).find((row) => row.id === MUG)!;
     mug.track_stock = true;
     mug.stock_quantity = 0;
-    expect(await quote([{ productId: MUG }])).toEqual({ ok: false, reason: "add_on_unavailable" });
+    expect(await quote([{ productId: MUG }])).toEqual({ ok: false, reason: "sold_out", line: 1 });
     mug.track_stock = false;
-    const hidden = gate({
-      productPage: {
+    fake.state.tables.storefronts = [
+      storefrontRow({
         ...DEFAULT_PRODUCT_PAGE_CONFIG,
         sections: DEFAULT_PRODUCT_PAGE_CONFIG.sections.map((entry) =>
           entry.id === "addOns" ? { ...entry, show: false } : entry,
         ),
-      },
-    });
-    expect(await quote([{ productId: MUG }], { g: hidden })).toEqual({ ok: false, reason: "add_on_unavailable" });
+      }),
+    ];
+    expect(await quote([{ productId: MUG }])).toEqual({ ok: false, reason: "not_found", line: 1 });
   });
 
-  it("prices an add-on by its own sale, credits the sale, and keeps a code on the main product", async () => {
-    seed({
-      discounts: [
-        {
-          id: SALE_ID,
-          owner_id: OWNER,
-          kind: "automatic",
-          code: null,
-          share_channel: null,
-          value_type: "percent",
-          percent_off: 25,
-          amount_off_cents: null,
-          currency: null,
-          applies_to: "products",
-          product_ids: [MUG],
-          starts_at: "2026-10-01T00:00:00Z",
-          ends_at: null,
-          usage_limit: null,
-          enabled: true,
-          archived_at: null,
-          created_at: "2026-10-01T00:00:00Z",
-        },
-      ],
-    });
-    const result = await quote([{ productId: MUG }], {
-      code: { id: CODE_ID, code: "TEN", value: { type: "percent", percentOff: 10 } } as ResolvedCode,
-    });
+  it("prices an add-on by its own sale, and a code only on the lines it covers", async () => {
+    seed({ discounts: [mugSale, codeRow("products", [MAIN])] });
+    const result = await quote([{ productId: MUG }], { code: "TEN" });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.quote.itemsCents).toBe(2160);
-    expect(result.quote.addOns[0]).toMatchObject({ unitPriceCents: 900, amountCents: 900, discount: { id: SALE_ID, cents: 300 } });
+    expect(result.quote.lines[0]).toMatchObject({ amountCents: 2160, discount: { id: CODE_ID, cents: 240 } });
+    expect(result.quote.lines[1]).toMatchObject({ unitPriceCents: 900, amountCents: 900, discount: { id: SALE_ID, cents: 300 } });
     expect(result.quote.totalCents).toBe(2160 + 900 + 450);
+  });
+
+  it("lets a code for everything compete with the sales over every line, as one block", async () => {
+    // Sales: 24.00 + 9.00 = 33.00. The code: 10% off 36.00 = 32.40. The code wins.
+    seed({ discounts: [mugSale, codeRow("all", [])] });
+    const result = await quote([{ productId: MUG }], { code: "TEN" });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.quote.lines.map((line) => line.amountCents)).toEqual([2160, 1080]);
+    expect(result.quote.codeCents).toBe(360);
+  });
+
+  it("refuses a code that covers none of the order", async () => {
+    seed({ discounts: [codeRow("products", [COASTERS])] });
+    expect(await quote([{ productId: MUG }], { code: "TEN" })).toEqual({ ok: false, reason: "discount_invalid" });
   });
 
   it("charges the heaviest parcel rate once when an add-on ships under its own terms", async () => {
@@ -556,6 +600,6 @@ describe("the quote with add-ons", () => {
 
   it("is the same quote as before for an order without add-ons", async () => {
     const result = await quote([]);
-    expect(result.ok && [result.quote.totalCents, result.quote.addOns, result.quote.addOnsCents]).toEqual([2850, [], 0]);
+    expect(result.ok && [result.quote.totalCents, result.quote.lines.length]).toEqual([2850, 1]);
   });
 });

@@ -25,10 +25,15 @@ import { StickyBar } from "@/components/product-page/StickyBar";
 import { Turnstile } from "@/components/auth/Turnstile";
 import { useRouter } from "next/navigation";
 import { formatCents } from "@/lib/format/money";
-import { priceBasket } from "@/lib/checkout/basket";
+import { priceLines } from "@/lib/discounts/pricing";
 import { freeDeliveryGapCents, quoteOrderShipping } from "@/lib/shipping/rates";
 import { useAddOns } from "@/components/product-page/AddOnsContext";
-import { checkoutApiPath } from "@/lib/checkout/paths";
+import {
+  checkoutApiPath,
+  checkoutCartApiPath,
+  checkoutCartDiscountApiPath,
+  checkoutDiscountApiPath,
+} from "@/lib/checkout/paths";
 import type { LinkChannel } from "@/lib/storefront/product-page-url";
 import { isCourierPhone } from "@/lib/orders/ship-to";
 import { SHIP_TO_MAX } from "@/types/order-view";
@@ -39,7 +44,7 @@ import { useAppliedCode } from "./DiscountCodeContext";
 import { checkoutTextButtonClass } from "./checkout-theme";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import type { Currency, ProductSale } from "@/types/product";
-import type { CheckoutErrorCode, PlaceOrderResponse } from "@/types/checkout";
+import type { CheckoutErrorCode, CheckoutLine, PlaceOrderResponse } from "@/types/checkout";
 
 /** Countries whose addresses carry a state or province a courier needs. */
 const REGION_COUNTRIES = new Set(["US", "CA", "AU"]);
@@ -124,11 +129,16 @@ export function CheckoutForm({
   payment,
   legal,
   trust,
+  cart = null,
 }: {
   preview: boolean;
   storefrontId: string;
   productId: string;
   optionIds: readonly string[];
+  /** A cart's checkout: its id and lines, priced and placed as they are (the
+   *  cart is where they change). Null for "Buy now", whose lines are the
+   *  product, its quantity and what was taken from "Add to your order". */
+  cart?: { id: string; lines: readonly CheckoutLine[] } | null;
   /** Minted when the page rendered, so a double click places one order. */
   attemptId: string | null;
   /** How the buyer arrived (`?via=`); sent as the order's channel when set. */
@@ -201,42 +211,75 @@ export function CheckoutForm({
     setTurnstileRound((round) => round + 1);
   }, []);
 
-  const ships = !product.isDigital;
+  // The order's lines: a cart's, or "Buy now"'s (the product at the chosen
+  // quantity, then what was taken from "Add to your order", one each).
+  const lines: readonly CheckoutLine[] = cart
+    ? cart.lines
+    : [
+        {
+          productId,
+          optionIds: [...optionIds],
+          quantity,
+          source: "cart",
+          regularUnitCents: product.sale?.regularPriceCents ?? product.priceCents,
+          saleUnitCents: product.sale ? product.priceCents : null,
+          isDigital: product.isDigital,
+          digitalFormat: product.digitalFormat,
+          shippingProfileId: product.shippingProfileId,
+        },
+        ...picks.flatMap((pick): CheckoutLine[] => {
+          const card = offered.find((candidate) => candidate.id === pick.productId);
+          return card
+            ? [
+                {
+                  productId: card.id,
+                  optionIds: pick.optionIds,
+                  quantity: 1,
+                  source: "add_on",
+                  regularUnitCents: card.sale?.regularPriceCents ?? card.priceCents,
+                  saleUnitCents: card.sale ? card.priceCents : null,
+                  isDigital: card.isDigital,
+                  digitalFormat: card.digitalFormat,
+                  shippingProfileId: card.shippingProfileId,
+                },
+              ]
+            : [];
+        }),
+      ];
+  // A parcel needs an address; a download needs consent. A cart can need both.
+  const ships = lines.some((line) => !line.isDigital);
+  const hasDownloads = lines.some((line) => line.isDigital);
   const showRegion = ships && REGION_COUNTRIES.has(country);
   const postcodeRequired = ships && !POSTCODE_OPTIONAL.has(country);
 
-  // The items, priced by the function the quote uses (lib/checkout/basket):
-  // the main product's sale, or an applied code when it does better, plus
-  // whatever was added to the order at its own price.
-  const pickedCards = picks.flatMap((pick) => {
-    const card = offered.find((candidate) => candidate.id === pick.productId);
-    return card ? [card] : [];
-  });
-  const basket = priceBasket({
-    main: {
-      regularUnitCents: product.sale?.regularPriceCents ?? product.priceCents,
-      currency: product.currency,
-      quantity,
-      saleUnitCents: product.sale ? product.priceCents : null,
-      code: code?.value ?? null,
-    },
-    addOns: pickedCards.map((card) => ({
-      productId: card.id,
-      regularUnitCents: card.sale?.regularPriceCents ?? card.priceCents,
-      saleUnitCents: card.sale ? card.priceCents : null,
-      quantity: 1,
+  // The items, priced by the function the quote charges with
+  // (lib/discounts/pricing.ts priceLines): each line's sale, or an applied
+  // code over the lines it covers when it does better. A code's terms from
+  // before it said what it covers cover the product alone.
+  const covered = code?.covers ?? [productId];
+  const priced = priceLines({
+    currency: product.currency,
+    code: code?.value ?? null,
+    lines: lines.map((line) => ({
+      regularUnitCents: line.regularUnitCents,
+      saleUnitCents: line.saleUnitCents,
+      quantity: line.quantity,
+      coveredByCode: covered.includes(line.productId),
     })),
   });
-  const priced = basket.main;
-  const addOnsCents = basket.itemsCents - priced.itemsCents;
-  const subtotal = priced.subtotalCents + addOnsCents;
-  const items = basket.itemsCents;
+  const subtotal = priced.subtotalCents;
+  const items = priced.itemsCents;
+  // Free delivery is earned on what ships.
+  const shippedItems = lines.reduce(
+    (total, line, index) => total + (line.isDigital ? 0 : (priced.lines[index]?.amountCents ?? 0)),
+    0,
+  );
   // One parcel, charged once: the highest of its products' rates.
   const shipping = ships
     ? quoteOrderShipping(shippingPolicy, {
-        profileIds: [product.shippingProfileId, ...pickedCards.map((card) => card.shippingProfileId)],
+        profileIds: lines.flatMap((line) => (line.isDigital ? [] : [line.shippingProfileId])),
         country,
-        subtotalCents: items,
+        subtotalCents: shippedItems,
         currency: product.currency,
       })
     : null;
@@ -245,11 +288,14 @@ export function CheckoutForm({
   const money = (cents: number) => formatCents(cents, product.currency, locale);
   const countryName = countries.find((entry) => entry.code === country)?.name ?? country;
   const deliverable = !shipping || shipping.ok;
-  // "€12 away from free delivery": only while one more of it could get there,
-  // since a nudge toward a quantity the buyer cannot pick is a tease.
-  const freeGap = quantity < limit ? freeDeliveryGapCents(shippingPolicy, shipping, items) : null;
+  // "€12 away from free delivery": for "Buy now" only while one more of it
+  // could get there, since a nudge toward a quantity the buyer cannot pick is
+  // a tease; a cart can always take something else.
+  const freeGap = cart || quantity < limit ? freeDeliveryGapCents(shippingPolicy, shipping, shippedItems) : null;
   const freeProgress =
-    freeGap !== null && shippingPolicy.freeOverCents ? (items / shippingPolicy.freeOverCents) * 100 : 0;
+    freeGap !== null && shippingPolicy.freeOverCents ? (shippedItems / shippingPolicy.freeOverCents) * 100 : 0;
+  // The single download's format, said before paying (CRD art. 6(1)(r)).
+  const onlyFormat = lines.length === 1 ? lines[0]!.digitalFormat : null;
 
   /**
    * After a failed submit, put the keyboard where the problem is: the first
@@ -292,7 +338,7 @@ export function CheckoutForm({
       case "giftMessage":
         return giftOn && !value ? t("errors.required") : undefined;
       case "consent":
-        return product.isDigital && !consent ? t("errors.consent") : undefined;
+        return hasDownloads && !consent ? t("errors.consent") : undefined;
       default:
         return undefined;
     }
@@ -336,15 +382,23 @@ export function CheckoutForm({
     setFormError(null);
     const body = {
       attemptId,
-      optionIds,
-      quantity,
+      // What is being bought: ids, versions and quantities only. The quote
+      // prices them from the database like everything else here.
+      ...(cart
+        ? {
+            cartId: cart.id,
+            lines: cart.lines.map((line) => ({
+              productId: line.productId,
+              optionIds: line.optionIds,
+              quantity: line.quantity,
+              source: line.source,
+            })),
+          }
+        : { optionIds, quantity, ...(picks.length > 0 ? { addOns: picks } : {}) }),
       email: values.email.trim(),
       locale,
       ...(via ? { channel: via } : {}),
       ...(code ? { discountCode: code.code } : {}),
-      // What was added on the product page: ids and versions only. The quote
-      // prices them from the database like everything else here.
-      ...(picks.length > 0 ? { addOns: picks } : {}),
       // The total on the Pay button: the route refuses rather than charge
       // anything else (a sale that ended while the page was open).
       expectedTotalCents: total,
@@ -363,11 +417,12 @@ export function CheckoutForm({
             },
             ...(giftOn && values.giftMessage.trim() ? { giftMessage: values.giftMessage.trim() } : {}),
           }
-        : { supplyConsent: consent }),
+        : {}),
+      ...(hasDownloads ? { supplyConsent: consent } : {}),
     };
 
     try {
-      const response = await fetch(checkoutApiPath(storefrontId, productId), {
+      const response = await fetch(cart ? checkoutCartApiPath(storefrontId) : checkoutApiPath(storefrontId, productId), {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(body),
@@ -390,8 +445,15 @@ export function CheckoutForm({
       // server, so the buyer pays the new total only after seeing it.
       if (reason === "discount_invalid") setCode(null);
       // An add-on that can no longer be sold drops out when the page is read
-      // again, and the buyer sees the new total before paying.
-      if (reason === "price_changed" || reason === "add_on_unavailable") router.refresh();
+      // again, and the buyer sees the new total before paying. A cart's line
+      // with a problem shows it the same way.
+      if (
+        reason === "price_changed" ||
+        reason === "add_on_unavailable" ||
+        (cart && result && !result.ok && result.line !== undefined)
+      ) {
+        router.refresh();
+      }
       setFormError(botCheckFailed ? t("errors.turnstile") : messageFor(reason));
     } catch {
       // No answer at all: the request may still have reached the route.
@@ -669,34 +731,37 @@ export function CheckoutForm({
         </Fieldset>
 
         <section className="flex flex-col gap-3" aria-label={t("sections.summary")} data-checkout-totals="">
-          <div data-setting-skip="">
-            <QuantityPicker
-              priceCents={product.priceCents}
-              currency={product.currency}
-              radius={cornerRadius}
-              ink={ink}
-              inline
-            />
-          </div>
+          {/* A cart's quantities change in the cart, not here. */}
+          {!cart && (
+            <div data-setting-skip="">
+              <QuantityPicker
+                priceCents={product.priceCents}
+                currency={product.currency}
+                radius={cornerRadius}
+                ink={ink}
+                inline
+              />
+            </div>
+          )}
           {/* Two lists with the notes between them, because a <dl> may hold
               only term and value pairs: the lines, then what is said about
               them, then the total. */}
           <div className="flex flex-col gap-2 border-t pt-4 text-sm" style={{ borderColor: rule }}>
             <DiscountCodeField
-              storefrontId={storefrontId}
-              productId={productId}
+              checkPath={cart ? checkoutCartDiscountApiPath(storefrontId) : checkoutDiscountApiPath(storefrontId, productId)}
+              productIds={(cart ? lines : lines.slice(1)).map((line) => line.productId)}
               preview={preview}
               outdone={priced.codeOutdone}
               ink={ink}
             />
             <dl className="flex flex-col gap-2">
               <Line term={t("summary.subtotal")} value={money(subtotal)} dataKey="subtotal" cents={subtotal} />
-              {code && priced.codeDiscountCents > 0 && (
+              {code && priced.codeCents > 0 && (
                 <Line
                   term={t("discount.line", { code: code.code })}
-                  value={`-${money(priced.codeDiscountCents)}`}
+                  value={`-${money(priced.codeCents)}`}
                   dataKey="discount"
-                  cents={priced.codeDiscountCents}
+                  cents={priced.codeCents}
                 />
               )}
               {ships && (
@@ -716,9 +781,7 @@ export function CheckoutForm({
             </dl>
             {!ships && (
               <p className="opacity-70">
-                {product.digitalFormat
-                  ? t("summary.digitalFormat", { format: product.digitalFormat })
-                  : t("summary.digital")}
+                {onlyFormat ? t("summary.digitalFormat", { format: onlyFormat }) : t("summary.digital")}
               </p>
             )}
             {freeGap !== null && (
@@ -756,7 +819,7 @@ export function CheckoutForm({
 
         <div className="flex flex-col gap-4">
           {legal}
-          {product.isDigital && (
+          {hasDownloads && (
             <div className="flex flex-col gap-1" data-setting-skip="">
               <label className="flex items-start gap-2.5 text-sm" data-checkout-consent="">
                 <input

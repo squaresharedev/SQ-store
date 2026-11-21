@@ -1,5 +1,6 @@
 import { resolveCta, type CtaAppearance } from "@/components/product-page/product-page-maps";
 import { isProductPageSectionShown, resolveProductPage } from "@/lib/storefront/product-page";
+import { cartSwitchedOn, resolveCartPage } from "@/lib/storefront/cart-page";
 import {
   DEFAULT_PRODUCT_PAGE_STAR_COLOR,
   type StorefrontConfig,
@@ -27,16 +28,24 @@ export type TileLook = {
    *  it: a rating a buyer could not go and read would be a claim, not a
    *  summary. */
   reviewsShown: boolean;
+  /** Cards put their product in the cart (the cart is on and the seller has
+   *  not switched cards off): the words the cart's button says, the seller's
+   *  own or absent for "Add to cart" in the buyer's language. Null: cards open
+   *  the product's page. A card also needs its product to allow it
+   *  (Product.quickAdd, lib/cart/quick-add.ts). */
+  quickAdd: { label?: string } | null;
 };
 
 export function resolveTileLook(
-  config: Pick<StorefrontConfig, "productPage"> & { theme: StorefrontTheme },
+  config: Pick<StorefrontConfig, "productPage" | "cartPage"> & { theme: StorefrontTheme },
 ): TileLook {
   const productPage = resolveProductPage(config);
+  const cart = resolveCartPage(config);
   return {
     buyLabel: productPage.ctaLabel,
     buy: resolveCta(productPage, config.theme),
     starColor: productPage.starColor ?? DEFAULT_PRODUCT_PAGE_STAR_COLOR,
     reviewsShown: isProductPageSectionShown(productPage, "reviews"),
+    quickAdd: cartSwitchedOn(config) && cart.quickAdd !== false ? (cart.addLabel ? { label: cart.addLabel } : {}) : null,
   };
 }

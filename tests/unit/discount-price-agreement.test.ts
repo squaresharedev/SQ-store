@@ -48,7 +48,7 @@ vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => fake.admin }))
 
 const { getPublicStorefrontPage } = await import("@/lib/storefront/storefront-page");
 const { getPublicProductPage } = await import("@/lib/products/public");
-const { quoteCheckout } = await import("@/lib/checkout/quote");
+const { quoteOrder } = await import("@/lib/checkout/quote");
 
 const NOW = Date.parse("2026-10-11T09:00:00.000Z");
 const DAY = 24 * 60 * 60 * 1000;
@@ -381,8 +381,8 @@ describe(`a discount's price, across ${STORES} random stores`, () => {
         const page = await askPage(product.id);
         if (!page || page === "busy") throw new Error(`${where(product)}: no page`);
         const quantity = 1 + (n % 3);
-        const quoted = await quoteCheckout(
-          { storefrontId: STOREFRONT, productId: product.id, optionIds: [], quantity, country: null },
+        const quoted = await quoteOrder(
+          { storefrontId: STOREFRONT, lines: [{ productId: product.id, optionIds: [], quantity }], country: null },
           BUDGET,
         );
         if (!quoted.ok) throw new Error(`${where(product)}: quote refused, ${quoted.reason}`);
@@ -391,9 +391,9 @@ describe(`a discount's price, across ${STORES} random stores`, () => {
         // 1 + 2: agreement, and correctness.
         expect(tile.cents, `${where(product)}: tile`).toBe(truth.cents);
         expect(page.page.product.priceCents, `${where(product)}: page`).toBe(truth.cents);
-        expect(quote.unitPriceCents, `${where(product)}: quote`).toBe(truth.cents);
+        expect(quote.lines[0]!.unitPriceCents, `${where(product)}: quote`).toBe(truth.cents);
         expect(quote.totalCents, `${where(product)}: charged`).toBe(truth.cents * quantity);
-        expect(quote.regularUnitCents).toBe(product.price_cents);
+        expect(quote.lines[0]!.regularUnitCents).toBe(product.price_cents);
 
         // Never above the listed price; never under the floor a discount stops at.
         expect(truth.cents).toBeLessThanOrEqual(product.price_cents);
@@ -401,11 +401,11 @@ describe(`a discount's price, across ${STORES} random stores`, () => {
 
         // The order is credited to a sale that really made that price, or to none.
         if (truth.cents < product.price_cents) {
-          expect(truth.winners.map((sale) => sale.id), `${where(product)}: credit`).toContain(quote.discount?.id);
-          expect(quote.discount?.cents).toBe((product.price_cents - truth.cents) * quantity);
+          expect(truth.winners.map((sale) => sale.id), `${where(product)}: credit`).toContain(quote.lines[0]!.discount?.id);
+          expect(quote.lines[0]!.discount?.cents).toBe((product.price_cents - truth.cents) * quantity);
           expect(page.page.product.sale?.regularPriceCents).toBe(product.price_cents);
         } else {
-          expect(quote.discount, `${where(product)}: credit`).toBeNull();
+          expect(quote.lines[0]!.discount, `${where(product)}: credit`).toBeNull();
           expect(page.page.product.sale, `${where(product)}: sale`).toBeNull();
         }
 
@@ -420,7 +420,7 @@ describe(`a discount's price, across ${STORES} random stores`, () => {
         // price, its own percentage where it applied in full and the share
         // rounded down otherwise. The tile and the page agree on it, and it
         // never says more came off than did.
-        const credited = onSaleNow ? truth.winners.find((winner) => winner.id === quote.discount?.id)! : null;
+        const credited = onSaleNow ? truth.winners.find((winner) => winner.id === quote.lines[0]!.discount?.id)! : null;
         const off = product.price_cents - truth.cents;
         const share = Math.floor((off * 100) / product.price_cents);
         const offer = !credited
@@ -440,7 +440,7 @@ describe(`a discount's price, across ${STORES} random stores`, () => {
         if (sale) {
           // The app credits the first of equally good sales, and measures from
           // when THAT one began.
-          const began = truth.winners.find((winner) => winner.id === quote.discount?.id)!;
+          const began = truth.winners.find((winner) => winner.id === quote.lines[0]!.discount?.id)!;
           const saleStart = Date.parse(began.starts_at);
           const from = oracleWindowStart(store, product, saleStart);
           const prior = sale.priorPriceCents;
@@ -454,7 +454,7 @@ describe(`a discount's price, across ${STORES} random stores`, () => {
         const prior = sale?.priorPriceCents ?? null;
         if (prior !== null && sale) {
           proven++;
-          const began = truth.winners.find((winner) => winner.id === quote.discount?.id)!;
+          const began = truth.winners.find((winner) => winner.id === quote.lines[0]!.discount?.id)!;
           const saleStart = Date.parse(began.starts_at);
           const from = oracleWindowStart(store, product, saleStart)!;
           // Lowest: no price charged anywhere in those days undercuts it. Probed
@@ -551,8 +551,8 @@ describe(`a discount's price, across ${STORES} random stores`, () => {
         seed(store);
         fake.state.fault = flaky;
         const page = await askPage(product.id);
-        const quoted = await quoteCheckout(
-          { storefrontId: STOREFRONT, productId: product.id, optionIds: [], quantity: 1, country: null },
+        const quoted = await quoteOrder(
+          { storefrontId: STOREFRONT, lines: [{ productId: product.id, optionIds: [], quantity: 1 }], country: null },
           BUDGET,
         );
         const truth = truthBoard.get(product.id)!;
@@ -614,8 +614,8 @@ describe(`a discount's price, across ${STORES} random stores`, () => {
       seed(store);
       const board = await askBoard();
       const page = await askPage(product.id);
-      const quoted = await quoteCheckout(
-        { storefrontId: STOREFRONT, productId: product.id, optionIds: [], quantity: 1, country: null },
+      const quoted = await quoteOrder(
+        { storefrontId: STOREFRONT, lines: [{ productId: product.id, optionIds: [], quantity: 1 }], country: null },
         BUDGET,
       );
       if (!board || board === "busy" || !page || page === "busy" || !quoted.ok) throw new Error(`no answer at ${iso(at)}`);

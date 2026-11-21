@@ -216,6 +216,18 @@
       "awaiting": "Arrive avec le bloc de réservation de calendrier.",
       "readyToChart": "Prêt à afficher dès que les réservations commencent à arriver."
     },
+    "cart_add": {
+      "label": "Ajouts au panier",
+      "description": "Acheteurs qui ont ajouté l'un de vos produits à leur panier.",
+      "count": "{count, plural, one {{formatted} ajout} other {{formatted} ajouts}}",
+      "total": "Total des ajouts au panier",
+      "emptyRange": "Aucun ajout au panier sur cette période",
+      "overTime": "Ajouts au panier dans le temps",
+      "acrossRange": "Produits ajoutés au panier sur la période sélectionnée.",
+      "byChannel": "Ajouts au panier par canal",
+      "byWeekday": "Ajouts au panier par jour de la semaine",
+      "byStorefront": "Ajouts au panier par vitrine"
+    },
     "checkout_view": {
       "label": "Vues de la commande",
       "description": "Acheteurs qui ont ouvert le paiement pour l'un de vos produits.",

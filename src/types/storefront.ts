@@ -1346,6 +1346,60 @@ export const DEFAULT_CHECKOUT_PAGE_CONFIG: CheckoutPageConfig = {
   celebrate: "confetti",
 };
 
+// ── Cart ────────────────────────────────────────────────────────────────
+//
+// A buyer collects products from this storefront and pays once. ON by default
+// wherever the storefront sells through our checkout; a seller can switch it
+// off, and "Buy now" stays beside it either way. Every member is optional and
+// absent means the default, so a storefront nobody touched saves no member.
+// The cart LOOKS like the product page it opens over (ink, corners, the buy
+// button's colours), so it has no colour of its own to choose.
+
+/** Which of the product page's two buttons is filled: "Buy now" keeps the
+ *  page as it was before the cart, "Add to cart" leads with collecting. */
+export const CART_MAIN_BUTTONS = ["buyNow", "addToCart"] as const;
+export type CartMainButton = (typeof CART_MAIN_BUTTONS)[number];
+
+/** What follows "Add to cart": the cart opens beside the page, or a short
+ *  "Added" note with a way to the cart while the buyer keeps looking. */
+export const CART_AFTER_ADD = ["openCart", "note"] as const;
+export type CartAfterAdd = (typeof CART_AFTER_ADD)[number];
+
+/** The seller's words on the "Add to cart" button. */
+export const CART_ADD_LABEL_MAX = 24;
+/** The cart's heading. */
+export const CART_TITLE_MAX = 40;
+/** A line from the seller in the cart ("Orders ship on Mondays"). */
+export const CART_NOTE_MAX = 160;
+
+export type CartPageConfig = {
+  /** The cart is on unless switched off. */
+  enabled?: false;
+  /** ABSENT = "buyNow". */
+  mainButton?: CartMainButton;
+  /** ABSENT = "Add to cart" in the buyer's language. */
+  addLabel?: string;
+  /** ABSENT = "openCart". The embed always says "Added" (an embedded frame
+   *  grows with its content, so a panel inside it could open off screen). */
+  afterAdd?: CartAfterAdd;
+  /** ABSENT = "Your cart" in the buyer's language. */
+  title?: string;
+  /** ABSENT = no note. */
+  note?: string;
+  /** The "X more for free delivery" line, when the seller's delivery has a
+   *  free-over threshold. ABSENT = shown. */
+  deliveryBar?: false;
+  /** A card's buy button puts the product in the cart, where the product
+   *  needs no choice (no versions to pick) and our checkout sells it.
+   *  ABSENT = on; false = cards open the product's page, as before. */
+  quickAdd?: false;
+  /** "Goes well with" under the cart's lines: the products the seller picked
+   *  for "Add to your order" on what is in the cart. ABSENT = shown. */
+  suggestions?: false;
+};
+
+export const DEFAULT_CART_PAGE_CONFIG: CartPageConfig = {};
+
 /**
  * Decorative shape blocks — a fixed allowlist of kinds, each mapping to
  * code-defined markup in ShapeTileContent. A legacy `spacer` kind existed
@@ -2097,6 +2151,8 @@ export type StorefrontConfig = {
   productPage?: ProductPageConfig;
   /** The hosted checkout and thank-you page. Absent = DEFAULT_CHECKOUT_PAGE_CONFIG. */
   checkoutPage?: CheckoutPageConfig;
+  /** The cart. Absent = DEFAULT_CART_PAGE_CONFIG (on, every default). */
+  cartPage?: CartPageConfig;
   // NO `seller`, `policies` OR `shippingProfiles` MEMBER. Trader identity (see
   // the StorefrontSeller doc comment above) and shipping/returns terms (see
   // SellerShippingPolicy in types/shipping-policy.ts) are both account-level

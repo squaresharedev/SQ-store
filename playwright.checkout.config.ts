@@ -46,6 +46,7 @@ export default defineConfig({
     "86-order-lifecycle.spec.ts",
     "90-device-sweep.spec.ts",
     "102-product-add-ons.spec.ts",
+    "106-shopping-cart.spec.ts",
   ],
   webServer: {
     ...STACK_SERVER,

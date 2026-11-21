@@ -1,5 +1,6 @@
 import type { AddOnCard, HiddenAddOn, ProductPageProduct } from "@/types/product";
 import type {
+  CartPageConfig,
   ProductPageConfig,
   StorefrontHeader,
   StorefrontSeller,
@@ -47,6 +48,12 @@ export type ProductPageStorefront = {
    * that must not read the environment. Absent = no.
    */
   checkout?: boolean;
+  /**
+   * The storefront's cart, when buyers here have one (launched, not switched
+   * off by the seller, and our checkout can take payment for this store).
+   * Absent otherwise. "Add to cart" on this page also needs `checkout`.
+   */
+  cart?: CartPageConfig;
 };
 
 export type ProductPageData = {

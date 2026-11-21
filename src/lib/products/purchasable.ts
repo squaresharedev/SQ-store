@@ -116,8 +116,30 @@ export type Purchasable = {
   now: Date;
 };
 
+/** The storefront half of a passed gate: everything a sale from this
+ *  storefront needs that is not about one product. */
+export type PurchasableStore = Omit<Purchasable, "block" | "row" | "sales">;
+
+/** One product that passed the gate, with what is particular to it. */
+export type PurchasableItem = Pick<Purchasable, "block" | "row" | "sales">;
+
+/** The gate passed for several products at once (a cart, an order of many
+ *  lines). `items` holds only the products that are for sale here; an id
+ *  missing from it is not, for any of the reasons the single gate refuses. */
+export type PurchasableLines<Extra = undefined> = {
+  store: PurchasableStore;
+  items: Map<string, PurchasableItem>;
+  extra: Extra;
+};
+
 /** Which rate-limit bucket a caller spends, and how much it holds. */
 export type GateBudget = { action: string; budget: RateLimitBudget };
+
+/** A caller that has ALREADY spent this request's token, from its own budget,
+ *  before a read the gate depends on (the cart routes read the cart first, to
+ *  learn which products to ask about). Never a way to skip the limit: the
+ *  token is spent, just earlier. */
+export type GateBudgetSpent = { spentBy: string };
 
 const idSchema = uuidField();
 
@@ -159,13 +181,53 @@ export async function gatePurchasable<Extra = undefined>(
   limit: GateBudget,
   alongside?: (admin: ReturnType<typeof createAdminClient>, ownerId: string) => Promise<Extra>,
 ): Promise<(Purchasable & { extra: Extra }) | PageBusy | null> {
-  if (!idSchema.safeParse(storefrontId).success) return null;
   if (!idSchema.safeParse(productId).success) return null;
+  const gate = await gatePurchasableLines(storefrontId, [productId], limit, alongside, { stopWhenNonePlaced: true });
+  if (gate === null || gate === PAGE_BUSY) return gate;
+  const item = gate.items.get(productId);
+  if (!item) return null;
+  return { ...gate.store, ...item, extra: gate.extra };
+}
+
+/**
+ * THE GATE for several products bought from one storefront at once: the cart,
+ * and every order (an order of one product is a list of one). Everything the
+ * single gate asks, asked once for the storefront and once for all the
+ * products together: ONE rate-limit token, one storefront read, one products
+ * read, one seller read and one read of the store's sales, however many lines.
+ *
+ * `null` is the storefront's refusal (no such storefront, taken down, its
+ * pages switched off, or a seller who has not said who they are): nothing
+ * from it is for sale. Otherwise each product that is for sale here is in
+ * `items`; one that is not (never placed, a draft, deleted, another store's,
+ * taken down) is simply absent, the same absence for every reason, so a cart
+ * line can say "no longer sold" without saying why.
+ *
+ * Ids that are not UUIDs are dropped before any I/O; the caller bounds how
+ * many it asks about (CART_LINES_MAX).
+ *
+ * `stopWhenNonePlaced`: answer null as soon as it is clear that none of the
+ * products is sold here, before the seller, sales and `alongside` reads. A
+ * product page asks for one product, so a scanner walking ids pays for one
+ * read; a cart still wants the storefront's half to show its lines as no
+ * longer sold.
+ */
+export async function gatePurchasableLines<Extra = undefined>(
+  storefrontId: string,
+  productIds: readonly string[],
+  limit: GateBudget | GateBudgetSpent,
+  alongside?: (admin: ReturnType<typeof createAdminClient>, ownerId: string) => Promise<Extra>,
+  options: { stopWhenNonePlaced?: boolean } = {},
+): Promise<PurchasableLines<Extra> | PageBusy | null> {
+  if (!idSchema.safeParse(storefrontId).success) return null;
+  const wanted = [...new Set(productIds.filter((id) => idSchema.safeParse(id).success))];
 
   // The budget is spent before the first read, so a scan pays before it learns
   // anything. rateLimitKey fails closed.
-  const key = await clientKey(await headers());
-  if (!(await rateLimitKey(key, limit.action, limit.budget))) return PAGE_BUSY;
+  if (!("spentBy" in limit)) {
+    const key = await clientKey(await headers());
+    if (!(await rateLimitKey(key, limit.action, limit.budget))) return PAGE_BUSY;
+  }
 
   const admin = createAdminClient();
   const { data: storefront, error: storefrontError } = await admin
@@ -187,56 +249,60 @@ export async function gatePurchasable<Extra = undefined>(
   if (!open) return null;
   const { config, productPage } = open;
 
-  // The page belongs to a tile, or to a product a tile offers in "Add to your
-  // order" (its details dialog links here). Any other product the seller has
-  // not placed on this storefront has no page here, whatever its status.
-  // Hidden sold-out tiles still count: the page then simply says sold out.
+  // A product is sold here when it is a tile, or a product a tile offers in
+  // "Add to your order" (its details dialog links here). Any other product the
+  // seller has not placed on this storefront has no page here, whatever its
+  // status. Hidden sold-out tiles still count: the page then simply says sold
+  // out.
   const tiles = config.blocks.flatMap((candidate) => (candidate.type === "product" ? [candidate] : []));
-  const block = tiles.find((candidate) => candidate.productId === productId) ?? null;
-  if (!block) {
-    const offered = await offeredByATile(admin, storefront.owner_id, productId, {
+  const blocks = new Map(tiles.map((tile) => [tile.productId, tile]));
+  const notTiles = wanted.filter((id) => !blocks.has(id));
+  let offered = new Set<string>();
+  if (notTiles.length > 0) {
+    const found = await offeredByTiles(admin, storefront.owner_id, notTiles, {
       tileProductIds: tiles.map((tile) => tile.productId),
       productPage,
     });
-    if (offered === null) return PAGE_BUSY;
-    if (!offered) return null;
+    if (found === null) return PAGE_BUSY;
+    offered = found;
   }
+  const placed = wanted.filter((id) => blocks.has(id) || offered.has(id));
+  if (options.stopWhenNonePlaced && placed.length === 0) return null;
 
-  // Product, seller identity and the store's running sales all depend only on
-  // the owner id already in hand, so they run together rather than one after
-  // the other.
+  // Products, seller identity and the store's running sales all depend only
+  // on the owner id already in hand, so they run together rather than one
+  // after the other.
   const now = new Date();
-  const [{ data: row, error: productError }, { data: sellerRow, error: sellerError }, storeSalesResult, extra] =
-    await Promise.all([
-      admin
-        .from("products")
-        .select(PUBLIC_PRODUCT_SELECT)
-        .eq("id", productId)
-        .eq("owner_id", storefront.owner_id)
-        .eq("status", "active")
-        .maybeSingle(),
-      admin
-        .from("profiles")
-        // Trader identity AND shipping terms, in ONE select: both are
-        // account-level facts read off the same row, and asking for that row
-        // twice on a public hot path would be two round trips for one read.
-        .select(`${TRADER_GATE_SELECT}, ${SHIPPING_POLICY_SELECT}`)
-        .eq("id", storefront.owner_id)
-        .maybeSingle(),
-      readStoreSales(admin, storefront.owner_id, now),
-      alongside ? alongside(admin, storefront.owner_id) : Promise.resolve(undefined as Extra),
-    ]);
-  if (productError) {
-    console.error("[purchasable] product read failed", productError);
+  const [productsResult, { data: sellerRow, error: sellerError }, storeSalesResult, extra] = await Promise.all([
+    placed.length > 0
+      ? admin
+          .from("products")
+          .select(PUBLIC_PRODUCT_SELECT)
+          .in("id", placed)
+          .eq("owner_id", storefront.owner_id)
+          .eq("status", "active")
+      : Promise.resolve({ data: [] as PublicProductRow[], error: null }),
+    admin
+      .from("profiles")
+      // Trader identity AND shipping terms, in ONE select: both are
+      // account-level facts read off the same row, and asking for that row
+      // twice on a public hot path would be two round trips for one read.
+      .select(`${TRADER_GATE_SELECT}, ${SHIPPING_POLICY_SELECT}`)
+      .eq("id", storefront.owner_id)
+      .maybeSingle(),
+    readStoreSales(admin, storefront.owner_id, now),
+    alongside ? alongside(admin, storefront.owner_id) : Promise.resolve(undefined as Extra),
+  ]);
+  if (productsResult.error) {
+    console.error("[purchasable] product read failed", productsResult.error);
     return PAGE_BUSY;
   }
-  if (!row) return null;
 
-  // THE REMOVAL GATE. Same null as every other refusal, so a takedown is
-  // indistinguishable from a product that never existed: a page that said
-  // "removed" would tell a scanner exactly which listings were worth looking at
-  // on an archive. The seller is told directly instead.
-  if (!isContentVisible((row as PublicProductRow).moderation_status)) return null;
+  // THE REMOVAL GATE. A taken-down product is absent like one that never
+  // existed: a page that said "removed" would tell a scanner exactly which
+  // listings were worth looking at on an archive. The seller is told directly
+  // instead.
+  const rows = visiblePlacedRows(productsResult.data, placed);
 
   if (sellerError) {
     console.error("[purchasable] seller identity read failed", sellerError);
@@ -255,29 +321,92 @@ export async function gatePurchasable<Extra = undefined>(
   const gateRow = sellerError ? null : (sellerRow as TraderGateRow | null);
   if (!sellerMaySell(gateRow)) return null;
 
-  // THE PRICE. Which sales are running decides what this product costs, so
+  // THE PRICE. Which sales are running decides what these products cost, so
   // sales that could not be read are a price that is not known: "not right
   // now", never the regular price. A buyer shown (or charged) the full price
   // while the seller is advertising a sale is the one mistake a blip here
-  // could otherwise make. Asked last, so a product that is not for sale at all
-  // is still the plain refusal above.
-  if (storeSalesResult === null) return PAGE_BUSY;
-  const activeSales = salesCovering(storeSalesResult, productId);
+  // could otherwise make. Asked last, and only when something here IS for
+  // sale, so a product that is not for sale at all is still the plain refusal.
+  if (storeSalesResult === null && rows.length > 0) return PAGE_BUSY;
+  const storeSales = storeSalesResult ?? [];
 
+  const items = itemsOf(rows, blocks, storeSales);
   return {
-    ownerId: storefront.owner_id,
-    storefront: { id: storefront.id, name: storefront.name },
-    config,
-    productPage,
-    block,
-    row: row as PublicProductRow,
-    seller: buildSellerIdentity(gateRow as SellerIdentityRow | null),
-    shippingPolicy: buildShippingPolicy(sellerError ? null : (sellerRow as ShippingPolicyRow | null)),
-    sales: activeSales,
-    storeSales: storeSalesResult,
-    now,
+    store: {
+      ownerId: storefront.owner_id,
+      storefront: { id: storefront.id, name: storefront.name },
+      config,
+      productPage,
+      seller: buildSellerIdentity(gateRow as SellerIdentityRow | null),
+      shippingPolicy: buildShippingPolicy(sellerError ? null : (sellerRow as ShippingPolicyRow | null)),
+      storeSales,
+      now,
+    },
+    items,
     extra: extra as Extra,
   };
+}
+
+/** The rows a products read returned that are for sale here: asked for
+ *  (placed on this storefront) and not taken down. A taken-down product is
+ *  absent like one that never existed. */
+function visiblePlacedRows(data: unknown, placed: readonly string[]): PublicProductRow[] {
+  return ((data ?? []) as PublicProductRow[]).filter(
+    (row) => placed.includes(row.id) && isContentVisible(row.moderation_status),
+  );
+}
+
+/** Each row as a gate item: its tile (the sold-out mark), and the store's
+ *  running sales that cover it. */
+function itemsOf(
+  rows: readonly PublicProductRow[],
+  blocks: ReadonlyMap<string, ProductBlock>,
+  storeSales: readonly StoreSale[],
+): Map<string, PurchasableItem> {
+  return new Map(
+    rows.map((row) => [row.id, { block: blocks.get(row.id) ?? null, row, sales: salesCovering(storeSales, row.id) }]),
+  );
+}
+
+/**
+ * MORE PRODUCTS FOR A GATE ALREADY PASSED: the cart's "Goes well with", which
+ * only knows which products to ask about once the cart's own are read (their
+ * add-on lists). The product half of the gate, asked again for these ids
+ * under the same storefront, seller and sales: placed here (a tile, or a
+ * tile's add-on), live, this owner's and not taken down. At most two reads
+ * (the add-on hosts, the products), however many ids. Null when the database
+ * did not answer.
+ */
+export async function loadStoreItems(
+  store: Pick<PurchasableStore, "ownerId" | "config" | "productPage" | "storeSales">,
+  productIds: readonly string[],
+): Promise<Map<string, PurchasableItem> | null> {
+  const wanted = [...new Set(productIds.filter((id) => idSchema.safeParse(id).success))];
+  if (wanted.length === 0) return new Map();
+  const admin = createAdminClient();
+  const tiles = store.config.blocks.flatMap((candidate) => (candidate.type === "product" ? [candidate] : []));
+  const blocks = new Map(tiles.map((tile) => [tile.productId, tile]));
+  const notTiles = wanted.filter((id) => !blocks.has(id));
+  const offered = notTiles.length
+    ? await offeredByTiles(admin, store.ownerId, notTiles, {
+        tileProductIds: tiles.map((tile) => tile.productId),
+        productPage: store.productPage,
+      })
+    : new Set<string>();
+  if (offered === null) return null;
+  const placed = wanted.filter((id) => blocks.has(id) || offered.has(id));
+  if (placed.length === 0) return new Map();
+  const { data, error } = await admin
+    .from("products")
+    .select(PUBLIC_PRODUCT_SELECT)
+    .in("id", placed)
+    .eq("owner_id", store.ownerId)
+    .eq("status", "active");
+  if (error) {
+    console.error("[purchasable] more products read failed", error);
+    return null;
+  }
+  return itemsOf(visiblePlacedRows(data, placed), blocks, store.storeSales);
 }
 
 /**
@@ -294,19 +423,40 @@ export async function offeredByATile(
   productId: string,
   here: { tileProductIds: readonly string[]; productPage: ProductPageConfig },
 ): Promise<boolean | null> {
-  if (here.tileProductIds.length === 0 || !isProductPageSectionShown(here.productPage, "addOns")) {
-    return false;
+  const found = await offeredByTiles(admin, ownerId, [productId], here);
+  return found === null ? null : found.has(productId);
+}
+
+/** offeredByATile for several products in ONE read: which of `productIds` a
+ *  live tile on this storefront offers. Null when the database did not answer. */
+export async function offeredByTiles(
+  admin: ReturnType<typeof createAdminClient>,
+  ownerId: string,
+  productIds: readonly string[],
+  here: { tileProductIds: readonly string[]; productPage: ProductPageConfig },
+): Promise<Set<string> | null> {
+  if (
+    productIds.length === 0 ||
+    here.tileProductIds.length === 0 ||
+    !isProductPageSectionShown(here.productPage, "addOns")
+  ) {
+    return new Set();
   }
   const { data, error } = await admin
     .from("products")
-    .select(`id, ${MODERATION_GATE_SELECT}`)
+    .select(`id, add_on_ids, ${MODERATION_GATE_SELECT}`)
     .eq("owner_id", ownerId)
     .eq("status", "active")
     .in("id", [...here.tileProductIds])
-    .contains("add_on_ids", [productId]);
+    .overlaps("add_on_ids", [...productIds]);
   if (error) {
     console.error("[purchasable] add-on host read failed", error);
     return null;
   }
-  return (data ?? []).some((row) => isContentVisible(row.moderation_status));
+  const offered = new Set<string>();
+  for (const host of (data ?? []) as { add_on_ids: string[] | null; moderation_status: string | null }[]) {
+    if (!isContentVisible(host.moderation_status)) continue;
+    for (const id of host.add_on_ids ?? []) if (productIds.includes(id)) offered.add(id);
+  }
+  return offered;
 }

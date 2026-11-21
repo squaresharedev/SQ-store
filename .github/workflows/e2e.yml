@@ -4,6 +4,8 @@
 #
 #   checkout and the order lifecycle   78-checkout, 80-seller-order-flow,
 #                                      86-order-lifecycle (test payments on)
+#   the cart and add-ons               102-product-add-ons, 106-shopping-cart
+#                                      (test payments on)
 #   the hosted product page            30-product-page
 #   sign-in returning to a deep link   97-deep-link-sign-in
 #
@@ -24,7 +26,7 @@ permissions:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
     steps:
@@ -62,6 +64,9 @@ jobs:
       # not hidden, and a real break still fails twice.
       - name: Checkout and the order lifecycle
         run: npx playwright test --config playwright.checkout.config.ts 78-checkout.spec.ts 80-seller-order-flow.spec.ts 86-order-lifecycle.spec.ts --retries=1 --reporter=line
+
+      - name: The cart and add-ons
+        run: npx playwright test --config playwright.checkout.config.ts 102-product-add-ons.spec.ts 106-shopping-cart.spec.ts --retries=1 --reporter=line
 
       - name: Product page and deep links
         run: npx playwright test 30-product-page.spec.ts 97-deep-link-sign-in.spec.ts --retries=1 --reporter=line

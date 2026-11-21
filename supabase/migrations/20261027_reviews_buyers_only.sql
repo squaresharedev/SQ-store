@@ -7,8 +7,12 @@
 -- refuse the same thing, so no future writer (a script, a new route, a bug)
 -- can put a "Verified buyer" review on a product nobody bought.
 --
--- A NATIVE review must name its order, and that order must be of the same
--- product, paid, and not refunded, AT THE MOMENT THE REVIEW IS WRITTEN.
+-- A NATIVE review must name its order, and that order must hold the same
+-- product (as its own first line or as one of its order_add_ons lines, which
+-- is how a cart's order carries the rest), paid, and not refunded, AT THE
+-- MOMENT THE REVIEW IS WRITTEN. A line refunded on its own is the route's
+-- call (lib/reviews/eligibility.ts): order_line_refunds is newer than this
+-- guard, and the guard must not depend on it.
 -- Insert only: an order refunded later keeps its review (the refund trigger
 -- in 20261025_reviews.sql takes the badge away), and an order deleted later
 -- sets order_id null on its review by foreign key, which must not fail.
@@ -32,7 +36,13 @@ begin
     select 1
       from public.orders o
      where o.id = new.order_id
-       and o.product_id = new.product_id
+       and (
+         o.product_id = new.product_id
+         or exists (
+           select 1 from public.order_add_ons a
+            where a.order_id = o.id and a.product_id = new.product_id
+         )
+       )
        and o.status = 'paid'
        and o.refunded_at is null
   ) then
@@ -51,4 +61,4 @@ create trigger reviews_require_purchase
   for each row execute function public.reviews_require_purchase();
 
 comment on function public.reviews_require_purchase() is
-  'Refuses a native review whose order is missing, of another product, unpaid or refunded. Insert only. Mirrors lib/reviews/eligibility.ts.';
+  'Refuses a native review whose order is missing, holds no line of this product, is unpaid or is refunded. Insert only. Mirrors lib/reviews/eligibility.ts.';

@@ -31,6 +31,7 @@ import { CheckoutForm } from "./CheckoutForm";
 import { Disclosure } from "@/components/ui/Disclosure";
 import { PaymentSlot } from "./PaymentSlot";
 import { CheckoutShowcase, CheckoutSummaryCard, MakerNote, type CheckoutItem } from "./CheckoutShowcase";
+import { CheckoutCartLines } from "./CheckoutCartLines";
 import { resolveCheckoutTheme } from "./checkout-theme";
 
 const NO_OPTIONS: readonly string[] = [];
@@ -81,9 +82,13 @@ export function CheckoutView({
   /** A country to start the delivery picker on (the buyer's, when known). */
   initialCountry?: string | null;
 }) {
-  const { storefront, product } = page;
+  const { storefront, product, cart } = page;
   const { productPage, checkoutPage, shippingPolicy, seller } = storefront;
   const preview = mode === "preview";
+  // A cart's checkout: its first line is shown large, the rest listed under
+  // it, and what ships or downloads is the whole cart's.
+  const firstLine = cart?.lines[0];
+  const isDigital = cart ? cart.lines.every((line) => line.isDigital) : product.isDigital;
   const t = useTranslations("ProductPage.checkout");
   const tPage = useTranslations("ProductPage");
   const tAll = useTranslations();
@@ -96,8 +101,8 @@ export function CheckoutView({
   const selection = (!preview && strictSelection(groups, optionIds)) || previewSelection(groups);
   const item: CheckoutItem = {
     title: product.title,
-    photo: photoForSelection(product.images, selection),
-    chips: selectionChips(groups, selection),
+    photo: firstLine ? firstLine.photo : photoForSelection(product.images, selection),
+    chips: firstLine ? firstLine.chips : selectionChips(groups, selection),
     priceCents: product.priceCents,
     currency: product.currency,
     sale: product.sale,
@@ -105,16 +110,21 @@ export function CheckoutView({
   };
 
   const resolveProse: ProseResolver = (ref) => tAll(ref.key, ref.values);
-  const shipping = product.isDigital
+  const shipping = isDigital
     ? null
-    : resolveProductShipping(product.shippingProfileId, shippingPolicy, resolveProse, locale);
+    : resolveProductShipping(
+        (cart?.lines.find((line) => !line.isDigital) ?? product).shippingProfileId,
+        shippingPolicy,
+        resolveProse,
+        locale,
+      );
   const isEu = isEuSeller(seller);
   // The EU line is left to the legal rows below, where it opens onto the
   // statutory text itself; beside the pay button it would say it twice.
   const trust = buildTrustLines({
     shipping,
     returnsText: resolveReturns(shippingPolicy, resolveProse, locale),
-    isDigital: product.isDigital,
+    isDigital,
     isEu: false,
     copy: { digitalDelivery: tPage("trust.digitalDelivery"), euRights: tPage("trust.euRights") },
   });
@@ -126,7 +136,7 @@ export function CheckoutView({
   // ("everywhere else") offers the platform's shipping list on top of the
   // countries the seller named.
   const reach = shippingCountries(shippingPolicy);
-  const showsEuRights = mayOweEuRights(seller, { isDigital: product.isDigital, reach });
+  const showsEuRights = mayOweEuRights(seller, { isDigital, reach });
   const codes = [...new Set([...reach.codes, ...(reach.anywhere ? SHIPPING_COUNTRY_CODES : [])])];
   const countries = codes
     .map((code) => ({ code, name: regionName(code, locale) ?? code }))
@@ -191,7 +201,7 @@ export function CheckoutView({
           attributes={{ "data-checkout-legal-row": "rights" }}
           summary={<span className="opacity-80">{isEu ? tPage("trust.euRights") : tPage("trust.euRightsForEu")}</span>}
         >
-          <StatutoryNotes isDigital={product.isDigital} />
+          <StatutoryNotes isDigital={isDigital} />
         </Disclosure>
       )}
       <Disclosure
@@ -264,12 +274,30 @@ export function CheckoutView({
       payment={<PaymentSlot provider={provider} ink={theme.ink} radius={theme.controlRadius} />}
       legal={legal}
       trust={<TrustList lines={trust} ruleColor={theme.rule} layout="badges" />}
+      cart={cart ? { id: cart.id, lines: cart.lines } : null}
     />
   );
+  const cartLines = cart
+    ? (ink: string, rule: string) => (
+        <CheckoutCartLines
+          cart={cart}
+          ink={ink}
+          rule={rule}
+          cornerRadius={theme.cornerRadius}
+          controlRadius={theme.controlRadius}
+          currency={product.currency}
+        />
+      )
+    : undefined;
 
   return (
-    <QuantityProvider limit={product.maxQuantity} initialQuantity={initialQuantity} syncUrl={!preview}>
-      <AddOnsProvider offered={page.addOns ?? NO_CARDS} initialPicks={initialAddOns} syncUrl={!preview}>
+    <QuantityProvider
+      // A cart's first line holds its own quantity (changed in the cart).
+      limit={firstLine ? Math.max(product.maxQuantity, firstLine.quantity) : product.maxQuantity}
+      initialQuantity={firstLine ? firstLine.quantity : initialQuantity}
+      syncUrl={!preview && !cart}
+    >
+      <AddOnsProvider offered={page.addOns ?? NO_CARDS} initialPicks={initialAddOns} syncUrl={!preview && !cart}>
       <DiscountCodeProvider>
         <PageShell
           storefront={storefront}
@@ -306,12 +334,12 @@ export function CheckoutView({
           <div className="mx-auto w-full max-w-[76rem] px-4 py-8 @md:px-6 @3xl:px-10 @3xl:py-12">
             {checkoutPage.layout === "showcase" ? (
               <div className="grid items-start gap-8 @3xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] @3xl:gap-14">
-                <CheckoutShowcase item={item} note={note} theme={theme} />
+                <CheckoutShowcase item={item} note={note} theme={theme} lines={cartLines} />
                 {form}
               </div>
             ) : (
               <div className="mx-auto flex w-full max-w-xl flex-col gap-8">
-                <CheckoutSummaryCard item={item} theme={theme} />
+                <CheckoutSummaryCard item={item} theme={theme} lines={cartLines} />
                 {note}
                 {form}
               </div>

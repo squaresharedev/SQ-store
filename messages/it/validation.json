@@ -331,6 +331,21 @@
       "required": "Il titolo è obbligatorio.",
       "tooLong": "Il titolo deve essere di {maximum} caratteri o meno.",
       "unsupported": "Il titolo contiene caratteri non supportati."
+    },
+    "cartTitle": {
+      "required": "Il titolo del carrello è obbligatorio.",
+      "tooLong": "Il titolo del carrello deve essere di {maximum} caratteri o meno.",
+      "unsupported": "Il titolo del carrello contiene caratteri non supportati."
+    },
+    "cartNote": {
+      "required": "La nota del carrello è obbligatoria.",
+      "tooLong": "La nota del carrello deve essere di {maximum} caratteri o meno.",
+      "unsupported": "La nota del carrello contiene caratteri non supportati."
+    },
+    "cartAddLabel": {
+      "required": "Le parole del pulsante Aggiungi al carrello sono obbligatorie.",
+      "tooLong": "Le parole del pulsante Aggiungi al carrello devono essere di {maximum} caratteri o meno.",
+      "unsupported": "Le parole del pulsante Aggiungi al carrello contengono caratteri non supportati."
     }
   },
   "email": {
@@ -391,6 +406,7 @@
     "reportTarget": "Quell’elemento non è valido.",
     "moderationDecision": "Questa decisione non è valida.",
     "checkoutAttempt": "Questo checkout è scaduto. Ricarica la pagina e riprova.",
+    "cart": "Questo carrello è scaduto. Ricarica la pagina e riprova.",
     "product": "Prodotto non trovato."
   },
   "handle": {

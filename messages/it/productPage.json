@@ -282,6 +282,8 @@
       "nameLabel": "Nome da mostrare",
       "nameHelp": "Mostrato con la tua recensione. Il tuo indirizzo email e il tuo ordine restano privati.",
       "send": "Pubblica recensione",
+      "pickLegend": "Scegli cosa recensire",
+      "reviewed": "Recensito",
       "errors": {
         "notEligible": "Questo ordine non può più essere recensito.",
         "rateLimited": "Troppe recensioni da questa connessione. Riprova tra un’ora.",
@@ -412,7 +414,8 @@
       "discount_invalid": "Questo codice sconto non può più essere usato. Rimuovilo per pagare il prezzo intero.",
       "price_changed": "Il prezzo è cambiato mentre questa pagina era aperta, quindi non è stato addebitato nulla. Controlla il nuovo totale, poi paga.",
       "turnstile": "Il controllo di sicurezza non è stato completato, quindi non è stato addebitato nulla. È ripartito ora: attendi un momento e riprova.",
-      "add_on_unavailable": "Qualcosa che hai aggiunto non può più essere venduto con questo ordine, quindi non è stato addebitato niente. Controlla il tuo ordine e il nuovo totale, poi paga."
+      "add_on_unavailable": "Qualcosa che hai aggiunto non può più essere venduto con questo ordine, quindi non è stato addebitato niente. Controlla il tuo ordine e il nuovo totale, poi paga.",
+      "currency": "Tutto in un ordine deve essere pagato in un'unica valuta, quindi non è stato addebitato nulla. Controlla il carrello, poi paga."
     },
     "editHeadline": "Titolo del checkout",
     "discount": {
@@ -495,5 +498,64 @@
       "otherKind": "Altro tipo",
       "otherCurrency": "Altra valuta"
     }
+  },
+  "cart": {
+    "title": "Il tuo carrello",
+    "button": "Carrello, {count, plural, =0 {vuoto} one {# articolo} other {# articoli}}",
+    "add": "Aggiungi al carrello",
+    "addShort": "Aggiungi",
+    "addTitle": "Aggiungi {title} al carrello",
+    "adding": "Aggiungendo",
+    "added": "Aggiunto",
+    "addedNote": "Aggiunto al tuo carrello",
+    "choose": "Scegli",
+    "view": "Vedi carrello",
+    "checkout": "Vai al checkout",
+    "keepShopping": "Continua gli acquisti",
+    "empty": "Il tuo carrello è vuoto",
+    "subtotal": "Subtotale",
+    "delivery": "Spedizione",
+    "deliveryTo": "Spedizione a {area}",
+    "free": "Gratuita",
+    "atCheckout": "Al checkout",
+    "freeGap": "Ancora {amount} per la spedizione gratuita",
+    "freeReached": "Spedizione gratuita",
+    "gone": "Non più in vendita qui",
+    "quantity": "Quantità di {title}",
+    "fewer": "Un {title} in meno",
+    "more": "Un {title} in più",
+    "remove": "Rimuovi {title}",
+    "removed": "{title} rimosso dal tuo carrello.",
+    "undo": "Annulla",
+    "addedAnnounce": "{title} aggiunto. {count, plural, one {# articolo} other {# articoli}} nel tuo carrello.",
+    "busy": "Impossibile caricare il carrello.",
+    "retry": "Riprova",
+    "suggestionsTitle": "Si abbina bene a",
+    "problem": {
+      "not_found": "Non più in vendita qui. Rimuovilo per fare il checkout.",
+      "sold_out": "Esaurito. Rimuovilo per fare il checkout.",
+      "options": "Questa versione non è disponibile. Rimuovila per fare il checkout.",
+      "quantity": "È più di quanto un ordine possa contenere. Riduci la quantità.",
+      "insufficient_stock": "Non ce ne sono così tanti in stock. Riduci la quantità.",
+      "currency": "Ha un prezzo in una valuta diversa rispetto al resto del tuo carrello.",
+      "no_shipping_rates": "Non può essere consegnato al momento."
+    },
+    "refusal": {
+      "not_found": "Non può essere aggiunto al momento.",
+      "sold_out": "Esaurito.",
+      "options": "Scegli prima una versione.",
+      "quantity": "È più di quanto un ordine possa contenere.",
+      "insufficient_stock": "Non ce ne sono così tanti in stock.",
+      "currency": "Ha un prezzo in una valuta diversa rispetto al tuo carrello. Fai prima il checkout oppure svuota il carrello.",
+      "no_shipping_rates": "Non può essere consegnato al momento.",
+      "full": "Il tuo carrello è pieno. Fai prima il checkout.",
+      "unavailable": "Il carrello non è disponibile al momento.",
+      "gone": "Il tuo carrello è scaduto. Riprova.",
+      "invalid": "Non ha funzionato. Riprova.",
+      "rate_limited": "Troppe modifiche in una volta. Aspetta un momento, poi riprova."
+    },
+    "notePlaceholder": "Scrivi qui una nota per i tuoi acquirenti",
+    "editTitle": "Modifica il titolo del carrello",
+    "editNote": "Modifica la nota nel carrello"
   }
 }

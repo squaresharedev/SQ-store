@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isContentVisible } from "@/lib/moderation/removal";
 import { ORDER_DOWNLOAD_ITEM_PARAM } from "@/lib/checkout/paths";
 import { uuidField } from "@/lib/validation/inputs";
+import { readLineStates } from "@/lib/orders/line-states";
 
 /**
  * GET /api/orders/[orderRef]/download: the file a buyer paid for.
@@ -25,7 +26,9 @@ import { uuidField } from "@/lib/validation/inputs";
  * main product: the same checks, on that line's own snapshot and product.
  *
  * It also stops serving when the buyer has withdrawn from the purchase (the
- * contract is over, and so is the file), and when moderation has taken the
+ * contract is over, and so is the file), when the seller refunded THAT LINE on
+ * its own (a cart's order: the money went back, so does the file), and when
+ * moderation has taken the
  * PRODUCT down: a removal for content that must not circulate has to stop the
  * file reaching earlier buyers too, or the takedown is a takedown in name only.
  * A deleted product (no row left) is not a takedown, so its buyers keep theirs.
@@ -68,6 +71,12 @@ export async function GET(request: Request, { params }: { params: Promise<Params
     file = { key: line.digital_file_key, productId: line.product_id, title: line.product_title };
   }
   if (!file.key) return NOT_FOUND();
+
+  // Refunded on its own: given back, so no longer the buyer's. Fail closed: a
+  // line we could not check might be one that was refunded.
+  const lines = await readLineStates(admin, order);
+  const line = lines?.find((state) => state.lineId === item);
+  if (!line || line.refunded) return NOT_FOUND();
 
   if (file.productId) {
     const { data: product, error } = await admin

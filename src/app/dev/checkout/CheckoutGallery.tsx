@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { CheckoutEditProvider } from "@/components/checkout/EditableText";
+import { CheckoutEditProvider } from "@/components/checkout/EditableTextProviders";
 import { CheckoutView } from "@/components/checkout/CheckoutView";
 import { OrderStatusView } from "@/components/checkout/OrderStatusView";
 import { ProductPageView } from "@/components/product-page/ProductPageView";

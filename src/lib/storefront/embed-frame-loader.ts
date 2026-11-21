@@ -18,6 +18,7 @@
 // response only where every page above it is one of them. See
 // lib/storefront/embed-frame.ts for both halves.
 
+import { embedCartWritable } from "@/lib/cart/availability";
 import { cache } from "react";
 import { headers } from "next/headers";
 import { embedOrigin } from "@/lib/app-url";
@@ -80,6 +81,9 @@ export const getEmbedFrame = cache(
       // own. `via=embed` files the visit, and any sale it leads to, under the
       // embed rather than "direct".
       tileHref: (productId) => productPageUrl(storefront.id, productId, { via: "embed" }),
+      // Cards add to the cart from inside the frame only once the cart routes
+      // answer on the embed's own host.
+      quickAdd: embedCartWritable(),
     });
   },
 );

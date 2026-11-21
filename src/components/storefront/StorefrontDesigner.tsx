@@ -45,6 +45,7 @@ import {
   type TextSpan,
   DEFAULT_PRODUCT_PAGE_CONFIG,
   type ProductPageConfig,
+  type CartPageConfig,
   type CheckoutPageConfig,
   type StorefrontSeller,
 } from "@/types/storefront";
@@ -52,6 +53,7 @@ import { LAYER_OPS, moveLayerTo, type LayerOp } from "@/lib/storefront/layers";
 import { pinOnPhone, unpinnedOnPhone, withPhoneColumns } from "@/lib/storefront/mobile-layout";
 import { isDefaultProductPage } from "@/lib/storefront/product-page";
 import { isDefaultCheckoutPage, resolveCheckoutPage } from "@/lib/storefront/checkout-page";
+import { isDefaultCartPage, resolveCartPage } from "@/lib/storefront/cart-page";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { applyFormatToRange } from "@/lib/storefront/text-spans";
 import { isDefaultPlacement } from "@/lib/images/placement";
@@ -185,6 +187,7 @@ type EditorSnapshot = {
   blocks: StorefrontBlock[];
   productPage: ProductPageConfig;
   checkoutPage: CheckoutPageConfig;
+  cartPage: CartPageConfig;
   // NO `policies` OR `shippingProfiles` HERE either, for the same reason as
   // `seller`: shipping and returns terms are account-level and read-only in
   // this editor, so there is nothing about them to undo.
@@ -394,7 +397,14 @@ export function StorefrontDesigner({
   publicPagePath = null,
   sellerDetailsMissing = false,
   initialVersion = null,
+  cartOffered = false,
 }: {
+  /** Whether buyers can have a cart at all yet (lib/cart/availability.ts
+   *  cartLaunched). Until then the designer shows none of it: no Cart group,
+   *  no cart buttons on the page artboards, cards that open the page. Absent
+   *  counts as not yet, so a surface that forgets it cannot preview a cart
+   *  buyers will not get. */
+  cartOffered?: boolean;
   /**
    * Set when this is the SAMPLE storefront (lib/storefront/sample.ts), never a
    * row: nothing saves, nothing uploads, no product is edited, the header offers
@@ -523,11 +533,17 @@ export function StorefrontDesigner({
   // VIEW state: which pages the seller has open is not part of the design, so
   // it is never saved and never enters the undo history.
   const [openPages, setOpenPages] = useState<string[]>([]);
+  // The one product page whose cart is open on the canvas (its product id).
+  // The Cart settings open it; a click elsewhere on a page, or its own close,
+  // puts it away. View state: never saved, never in the undo history.
+  const [cartOpenOn, setCartOpenOn] = useState<string | null>(null);
   // The checkout's design: a config member like the product page's, on the
   // same undo history and the same save.
   const [checkoutPage, setCheckoutPage] = useState<CheckoutPageConfig>(() =>
     resolveCheckoutPage(initialConfig),
   );
+  // The cart's design, the same way.
+  const [cartPage, setCartPage] = useState<CartPageConfig>(() => resolveCartPage(initialConfig));
   // Bumped by the panel's "Play it" to replay the thank-you celebration.
   const [celebrationPlays, setCelebrationPlays] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -679,8 +695,8 @@ export function StorefrontDesigner({
   // collapse to a single row each that opens the flow, so the same words still
   // answer and what they answer with is the step that has to come first anyway.
   const editorSearchEntries = useMemo(
-    () => editorEntries(blocks, productsById, tKey, { pageOpen, checkoutOpen: pageOpen }),
-    [blocks, productsById, tKey, pageOpen],
+    () => editorEntries(blocks, productsById, tKey, { pageOpen, checkoutOpen: pageOpen, cartOffered }),
+    [blocks, productsById, tKey, pageOpen, cartOffered],
   );
   const usedProductIds = useMemo(
     () =>
@@ -719,6 +735,18 @@ export function StorefrontDesigner({
     );
     return first?.type === "product" ? first.productId : null;
   }, [selectedBlocks, blocks, productsById]);
+
+  // How many of the board's products a card puts straight in the cart: the
+  // Cart settings' guess about which button should lead (lib/predictions.ts).
+  const cartAddable = useMemo(
+    () =>
+      new Set(
+        blocks.flatMap((block) =>
+          block.type === "product" && productsById.get(block.productId)?.quickAdd ? [block.productId] : [],
+        ),
+      ).size,
+    [blocks, productsById],
+  );
 
   // The colors already on the canvas, for the left panel's "In this design".
   const colorsInDesign = useMemo(
@@ -884,6 +912,7 @@ export function StorefrontDesigner({
     blocks,
     productPage,
     checkoutPage,
+    cartPage,
   });
 
   /** Every undoable mutation calls this FIRST with an optional coalesce key. */
@@ -898,6 +927,7 @@ export function StorefrontDesigner({
     setBlocks(next.blocks);
     setProductPage(next.productPage);
     setCheckoutPage(next.checkoutPage);
+    setCartPage(next.cartPage);
     markDirty();
   }
 
@@ -1536,6 +1566,7 @@ export function StorefrontDesigner({
     openTileLabelSetting,
     closeBuyerFlow,
     updateCheckoutPage,
+    updateCartPage,
   });
   useEffect(() => {
     canvasActions.current = {
@@ -1570,6 +1601,7 @@ export function StorefrontDesigner({
       openTileLabelSetting,
       closeBuyerFlow,
       updateCheckoutPage,
+      updateCartPage,
     };
   });
   const onMoveBlock = useCallback((key: string, x: number, y: number) => {
@@ -1680,6 +1712,12 @@ export function StorefrontDesigner({
   }, []);
   const onCheckoutPageChange = useCallback((next: CheckoutPageConfig) => {
     canvasActions.current.updateCheckoutPage(next);
+  }, []);
+  const onCartPageChangeOnCanvas = useCallback((next: CartPageConfig) => {
+    canvasActions.current.updateCartPage(next);
+  }, []);
+  const onCartOpenChange = useCallback((productId: string, open: boolean) => {
+    setCartOpenOn((current) => (open ? productId : current === productId ? null : current));
   }, []);
   // Wrapper that bails early when start/end are equal, so a cursor move that
   // stays inside the same character position does not re-render the designer.
@@ -3493,6 +3531,24 @@ export function StorefrontDesigner({
       openBlockSetting(ref);
       return;
     }
+    // THE CART is designed while looking at it, full: a product page out with
+    // its cart open. A click on a page names that page (`on`); the panel and
+    // search open it on the newest page out, or put the buyer flow out first.
+    // A press of a page's Add to cart ("buttons" from the page) leaves the
+    // cart as the press left it (open, or the "Added" note).
+    if (ref.kind === "cartPage") {
+      const host = ref.on ?? openPages.at(-1) ?? defaultPageProductId;
+      if (host && (!ref.on || ref.section === "cart")) setCartOpenOn(host);
+      if (!pageOpen && host) {
+        openBuyerFlow(host, ref);
+      } else {
+        setSettingTarget(freshSettingRef(ref));
+        setPanelOpen(true);
+      }
+      return;
+    }
+    // Any other setting is about something the cart would cover.
+    setCartOpenOn(null);
     // A page's setting is edited while LOOKING at the page, so opening one puts
     // the buyer flow on the canvas if none is out yet. The mobile settings
     // sheet is left standing on purpose: it navigates in place.
@@ -3659,6 +3715,11 @@ export function StorefrontDesigner({
     setCheckoutPage(next);
   }
 
+  function updateCartPage(next: CartPageConfig) {
+    recordChange(`cartPage:${changedField(cartPage, next)}`);
+    setCartPage(next);
+  }
+
 
   function updateName(next: string) {
     markDirty();
@@ -3786,6 +3847,9 @@ export function StorefrontDesigner({
       ...(initialConfig.checkoutPage || !isDefaultCheckoutPage(checkoutPage)
         ? { checkoutPage }
         : {}),
+      // The cart's design: sent once it was ever stored or moved off the
+      // defaults (every member optional, so the defaults are an empty one).
+      ...(initialConfig.cartPage || !isDefaultCartPage(cartPage) ? { cartPage } : {}),
     };
     // SF-01: Warn when any block in the grid points at a draft product.
     // Draft products are hidden from buyers, so a grid tile that points at one
@@ -4407,6 +4471,10 @@ export function StorefrontDesigner({
             storefrontName={name}
             productPage={productPage}
             checkoutPage={checkoutPage}
+            cartPage={cartOffered ? cartPage : undefined}
+            onCartPageChange={onCartPageChangeOnCanvas}
+            cartOpenOn={cartOpenOn}
+            onCartOpenChange={onCartOpenChange}
             onCheckoutPageChange={onCheckoutPageChange}
             celebrationPlays={celebrationPlays}
             shippingPolicy={shippingPolicy}
@@ -4529,6 +4597,10 @@ export function StorefrontDesigner({
               onProductPageChange={updateProductPage}
               checkoutPage={checkoutPage}
               onCheckoutPageChange={updateCheckoutPage}
+              cartPage={cartPage}
+              onCartPageChange={updateCartPage}
+              cartOffered={cartOffered}
+              cartAddable={cartAddable}
               pagePhotoUrls={pagePhotoUrls}
               onPagePhotoUrl={(key, url) => setPagePhotoUrls((current) => ({ ...current, [key]: url }))}
               onPlayCelebration={() => setCelebrationPlays((count) => count + 1)}

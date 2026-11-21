@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { optionSummaryRows } from "@/lib/products/option-details";
 import { checkoutPath } from "@/lib/storefront/product-page-url";
 import { mailtoHref, type CtaTarget } from "./cta-target";
-import { CTA_BUTTON_CLASS, ctaGhostStyle, ctaStyle, type CtaAppearance } from "./product-page-maps";
+import { CTA_BUTTON_CLASS, ctaOutlineStyle, ctaStyle, type CtaAppearance } from "./product-page-maps";
 import { useOptionSelection } from "./OptionContext";
 import { useQuantity } from "./QuantityContext";
 import { useAddOns } from "./AddOnsContext";
@@ -51,10 +51,14 @@ export function ProductCta({
   ink,
   soldOut,
   preview,
+  secondary = false,
   className,
 }: {
   target: CtaTarget;
   label: string;
+  /** Beside a cart's "Add to cart" that the seller leads with: the same
+   *  button, outlined (ctaOutlineStyle) rather than filled. */
+  secondary?: boolean;
   /** Fill, ink, roundness and outline, already resolved against the theme by
    *  `resolveCta` — this component paints what it is handed and decides none
    *  of it, so the artboard and the buyer's page cannot diverge. */
@@ -86,7 +90,7 @@ export function ProductCta({
       <div className={cn("flex flex-col gap-1.5", className)} data-product-cta="unset">
         <span
           className="inline-flex w-full items-center justify-center px-5 py-3 text-sm font-semibold opacity-55"
-          style={{ ...ctaGhostStyle(cta, ink), opacity: 0.45 }}
+          style={{ ...ctaOutlineStyle(cta, ink), opacity: 0.45 }}
         >
           {label}
         </span>
@@ -151,7 +155,7 @@ export function ProductCta({
   const button = (
     <span
       className={cn(CTA_BUTTON_CLASS, unavailable ? "opacity-50" : "hover:opacity-90")}
-      style={ctaStyle(cta)}
+      style={secondary ? ctaOutlineStyle(cta, ink) : ctaStyle(cta)}
     >
       {text}
       {!unavailable && <Icon className="size-4" strokeWidth={2.25} aria-hidden="true" />}

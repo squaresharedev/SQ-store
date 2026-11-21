@@ -47,6 +47,11 @@ import {
   type LinkChannel,
 } from "@/lib/storefront/product-page-url";
 import { StickyBar } from "./StickyBar";
+import { StorefrontCart } from "@/components/cart/StorefrontCart";
+import { CartButton } from "@/components/cart/CartButton";
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
+import type { CartDrawerMode } from "@/components/cart/cart-look";
+import type { CartView } from "@/types/cart";
 import { TrustList, buildTrustLines } from "./TrustList";
 import {
   DARK_INK,
@@ -84,6 +89,7 @@ export function ProductPageView({
   via = null,
   reviews = null,
   wrapBadges,
+  previewCart,
 }: {
   page: ProductPageData;
   mode: "public" | "preview";
@@ -107,6 +113,16 @@ export function ProductPageView({
    *  unset (identity, renders the node as-is). Keeping BadgeDropZone out of
    *  this module removes it from buyer-page bundles. */
   wrapBadges?: (kind: "photo" | "beside", node: ReactNode) => ReactNode;
+  /** A preview's cart: what is in it (a sample, lib/cart/sample.ts), whether
+   *  it is open (held by the owner when it passes onOpenChange, else where it
+   *  starts), and where its panel opens (cart-look.ts CartDrawerMode).
+   *  Absent: an empty cart in a dialog. Never on a buyer's page. */
+  previewCart?: {
+    view: CartView | null;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    drawer?: CartDrawerMode;
+  };
 }) {
   const { storefront, product } = page;
   const { theme, productPage, shippingPolicy, seller } = storefront;
@@ -196,6 +212,16 @@ export function ProductPageView({
     t("cta.mailSubject", { title: product.title }),
     storefront.checkout ? { storefrontId: storefront.id, productId: product.id, via } : null,
   );
+  // THE CART. Its button shows wherever the storefront has one; "Add to cart"
+  // only where this product's own button leads to our checkout (a seller's own
+  // buy link keeps selling it there). The seller decides which of the two
+  // buttons leads (CartPageConfig.mainButton).
+  const cartConfig = storefront.cart ?? null;
+  // The editor draws "Add to cart" whenever the cart is on, so the seller sees
+  // the pair of buttons they are designing (it sends nothing there).
+  const canAddToCart = cartConfig !== null && (target.kind === "checkout" || preview);
+  const cartLeads = canAddToCart && cartConfig?.mainButton === "addToCart";
+  const cartTheme = { ink, cornerRadius: theme.cornerRadius, cta };
   // The editor always shows the button, even with nowhere to send it, so the
   // seller can see the page's one action and be told how to wire it up.
   const hasCta = target.kind !== "none" || preview;
@@ -414,9 +440,25 @@ export function ProductPageView({
           initialPicks={initialAddOns}
           syncUrl={!preview}
         >
+        <StorefrontCart
+          storefrontId={storefront.id}
+          cart={cartConfig}
+          theme={cartTheme}
+          preview={preview}
+          via={via}
+          {...(preview && previewCart
+            ? {
+                previewView: previewCart.view,
+                previewOpen: previewCart.open,
+                onPreviewOpenChange: previewCart.onOpenChange,
+                drawer: previewCart.drawer,
+              }
+            : {})}
+        >
         <PageShell
           storefront={storefront}
           shopHref={preview ? undefined : storefrontPagePath(storefront.id)}
+          headerAside={cartConfig ? <CartButton ink={ink} /> : undefined}
           // The page's own backdrop when it has one, otherwise the storefront's
           // whole background. The page's font falls back to the storefront's
           // too: the product page is part of the shop, not a publication of its
@@ -461,9 +503,9 @@ export function ProductPageView({
                 <StickyBar
                   preview={preview}
                   hotspot="cta"
-                  // The buy box's own button: the bar steps aside while it is
-                  // on screen (the bar's copy is excluded from the lookup).
-                  watch="[data-product-cta]"
+                  // The buy box's own leading button: the bar steps aside while
+                  // it is on screen (the bar's copy is excluded from the lookup).
+                  watch={cartLeads ? "[data-add-to-cart]" : "[data-product-cta]"}
                   attributes={{ "data-product-sticky-cta": "" }}
                 >
                   <div className="min-w-0 flex-1">
@@ -484,15 +526,28 @@ export function ProductPageView({
                       sticky bar is a second place to press the one button, not a
                       second button. Only `ink` differs, because that belongs to
                       the white bar this one sits on rather than to the button. */}
-                  <ProductCta
-                    target={target}
-                    label={productPage.ctaLabel}
-                    cta={cta}
-                    ink={DARK_INK}
-                    soldOut={product.soldOut}
-                    preview={preview}
-                    className="w-44 shrink-0"
-                  />
+                  {cartLeads ? (
+                    <AddToCartButton
+                      productId={product.id}
+                      title={product.title}
+                      cta={cta}
+                      ink={DARK_INK}
+                      primary
+                      label={cartConfig?.addLabel}
+                      soldOut={product.soldOut}
+                      className="w-44 shrink-0"
+                    />
+                  ) : (
+                    <ProductCta
+                      target={target}
+                      label={productPage.ctaLabel}
+                      cta={cta}
+                      ink={DARK_INK}
+                      soldOut={product.soldOut}
+                      preview={preview}
+                      className="w-44 shrink-0"
+                    />
+                  )}
                 </StickyBar>
               )}
             </>
@@ -630,7 +685,18 @@ export function ProductPageView({
                     </div>
                   )}
                   {addOnsShown && addOnsPlacement === "beforeButton" && addOnsSection}
-                  <div data-setting-hotspot="cta">
+                  <div data-setting-hotspot="cta" className="flex flex-col gap-2.5">
+                    {cartLeads && (
+                      <AddToCartButton
+                        productId={product.id}
+                        title={product.title}
+                        cta={cta}
+                        ink={ink}
+                        primary
+                        label={cartConfig?.addLabel}
+                        soldOut={product.soldOut}
+                      />
+                    )}
                     <ProductCta
                       target={target}
                       label={productPage.ctaLabel}
@@ -638,7 +704,19 @@ export function ProductPageView({
                       ink={ink}
                       soldOut={product.soldOut}
                       preview={preview}
+                      secondary={cartLeads}
                     />
+                    {canAddToCart && !cartLeads && (
+                      <AddToCartButton
+                        productId={product.id}
+                        title={product.title}
+                        cta={cta}
+                        ink={ink}
+                        primary={false}
+                        label={cartConfig?.addLabel}
+                        soldOut={product.soldOut}
+                      />
+                    )}
                   </div>
                   {addOnsShown && addOnsPlacement === "afterButton" && addOnsSection}
                   <TrustList lines={trust} ruleColor={rule} />
@@ -710,6 +788,7 @@ export function ProductPageView({
             </article>
           </div>
         </PageShell>
+        </StorefrontCart>
         </AddOnsProvider>
       </QuantityProvider>
     </OptionProvider>

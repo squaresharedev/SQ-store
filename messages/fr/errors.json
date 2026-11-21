@@ -102,6 +102,7 @@
     "refundOrders": "Trop de remboursements en peu de temps.",
     "connectPayments": "Trop de tentatives de connexion à Stripe en peu de temps.",
     "readCheckoutSettings": "Trop de tentatives de lecture des paramètres de paiement en peu de temps.",
+    "readCartSettings": "Trop de tentatives de lecture des paramètres du panier en peu de temps.",
     "changePlan": "Trop de changements de forfait lancés en peu de temps.",
     "saveDiscounts": "Trop de modifications de réductions en peu de temps.",
     "moderateReviews": "Trop de modifications d’avis en peu de temps.",
@@ -139,6 +140,8 @@
     "connectPayments": "Impossible d'ouvrir Stripe en raison d'un problème de notre côté.",
     "loadCheckoutSettings": "Impossible de charger vos paramètres de paiement en raison d'un problème de notre côté.",
     "saveCheckoutSettings": "Impossible d'enregistrer vos paramètres de paiement en raison d'un problème de notre côté.",
+    "loadCartSettings": "Impossible de charger vos paramètres du panier en raison d'un problème de notre côté.",
+    "saveCartSettings": "Impossible d'enregistrer vos paramètres du panier en raison d'un problème de notre côté.",
     "loadPlans": "Impossible de charger votre forfait en raison d'un problème de notre côté.",
     "startCheckout": "Impossible d'ouvrir le paiement en raison d'un problème de notre côté.",
     "openBillingPortal": "Impossible d'ouvrir vos informations de facturation en raison d'un problème de notre côté.",
@@ -667,6 +670,11 @@
   "checkoutPageApi": {
     "notObjectFix": "Envoyez un objet JSON, par exemple '{'\"layout\": \"compact\"'}'.",
     "invalid": "Ces paramètres de paiement ne sont pas valides.",
+    "invalidFix": "Vérifiez le champ nommé ci-dessus par rapport à `limits` d'un GET de cette URL, puis réessayez."
+  },
+  "cartPageApi": {
+    "notObjectFix": "Envoyez un objet JSON, par exemple '{'\"quickAdd\": false'}'.",
+    "invalid": "Ces paramètres du panier ne sont pas valides.",
     "invalidFix": "Vérifiez le champ nommé ci-dessus par rapport à `limits` d'un GET de cette URL, puis réessayez."
   },
   "billing": {

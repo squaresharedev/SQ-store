@@ -102,6 +102,7 @@
     "refundOrders": "Too many refunds in a short time.",
     "connectPayments": "Too many attempts to connect Stripe in a short time.",
     "readCheckoutSettings": "Too many attempts to read checkout settings in a short time.",
+    "readCartSettings": "Too many attempts to read cart settings in a short time.",
     "changePlan": "Too many plan changes started in a short time.",
     "saveDiscounts": "Too many discount changes in a short time.",
     "moderateReviews": "Too many review changes in a short time.",
@@ -139,6 +140,8 @@
     "connectPayments": "Could not open Stripe because of a problem on our side.",
     "loadCheckoutSettings": "Could not load your checkout settings because of a problem on our side.",
     "saveCheckoutSettings": "Could not save your checkout settings because of a problem on our side.",
+    "loadCartSettings": "Could not load your cart settings because of a problem on our side.",
+    "saveCartSettings": "Could not save your cart settings because of a problem on our side.",
     "loadPlans": "Could not load your plan because of a problem on our side.",
     "startCheckout": "Could not open checkout because of a problem on our side.",
     "openBillingPortal": "Could not open your billing details because of a problem on our side.",
@@ -667,6 +670,11 @@
   "checkoutPageApi": {
     "notObjectFix": "Send a JSON object, e.g. '{'\"layout\": \"compact\"'}'.",
     "invalid": "Those checkout settings are invalid.",
+    "invalidFix": "Check the field named above against `limits` from a GET of this URL, then try again."
+  },
+  "cartPageApi": {
+    "notObjectFix": "Send a JSON object, e.g. '{'\"quickAdd\": false'}'.",
+    "invalid": "Those cart settings are invalid.",
     "invalidFix": "Check the field named above against `limits` from a GET of this URL, then try again."
   },
   "billing": {

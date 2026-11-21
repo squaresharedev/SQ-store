@@ -331,6 +331,21 @@
       "required": "Nagłówek jest wymagany.",
       "tooLong": "Limit długości nagłówka: {maximum}.",
       "unsupported": "Nagłówek zawiera nieobsługiwane znaki."
+    },
+    "cartTitle": {
+      "required": "Nagłówek koszyka jest wymagany.",
+      "tooLong": "Nagłówek koszyka może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Nagłówek koszyka zawiera nieobsługiwane znaki."
+    },
+    "cartNote": {
+      "required": "Notatka koszyka jest wymagana.",
+      "tooLong": "Notatka koszyka może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Notatka koszyka zawiera nieobsługiwane znaki."
+    },
+    "cartAddLabel": {
+      "required": "Tekst przycisku Dodaj do koszyka jest wymagany.",
+      "tooLong": "Tekst przycisku Dodaj do koszyka może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Tekst przycisku Dodaj do koszyka zawiera nieobsługiwane znaki."
     }
   },
   "email": {
@@ -391,6 +406,7 @@
     "reportTarget": "Ten element jest nieprawidłowy.",
     "moderationDecision": "Ta decyzja jest nieprawidłowa.",
     "checkoutAttempt": "Sesja kasy wygasła. Odśwież stronę i spróbuj ponownie.",
+    "cart": "Sesja koszyka wygasła. Odśwież stronę i spróbuj ponownie.",
     "product": "Nie znaleziono tego produktu."
   },
   "handle": {

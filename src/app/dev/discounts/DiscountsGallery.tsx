@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import { DiscountCodeField } from "@/components/checkout/DiscountCodeField";
+import { checkoutDiscountApiPath } from "@/lib/checkout/paths";
 import { DiscountCodeProvider } from "@/components/checkout/DiscountCodeContext";
 import { DiscountExample } from "@/components/discounts/DiscountExample";
 import { DiscountForm } from "@/components/discounts/DiscountForm";
@@ -389,8 +390,8 @@ export function DiscountsGallery({ fixtures, now }: { fixtures: DiscountFixtures
                   <Surface key={surface.key} hex={surface.hex} className="flex flex-col">
                     <DiscountCodeProvider initialTerms={code.terms}>
                       <DiscountCodeField
-                        storefrontId={STOREFRONT.id}
-                        productId={harnessProduct(false).id}
+                        checkPath={checkoutDiscountApiPath(STOREFRONT.id, harnessProduct(false).id)}
+                        productIds={[]}
                         preview
                         outdone={code.outdone}
                         ink={readableOn(surface.hex)}

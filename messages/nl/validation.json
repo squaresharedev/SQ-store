@@ -331,6 +331,21 @@
       "required": "De kop is verplicht.",
       "tooLong": "De kop mag hoogstens {maximum} tekens bevatten.",
       "unsupported": "De kop bevat niet-ondersteunde tekens."
+    },
+    "cartTitle": {
+      "required": "De koptekst van de winkelwagen is verplicht.",
+      "tooLong": "De koptekst van de winkelwagen mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "De koptekst van de winkelwagen bevat niet-ondersteunde tekens."
+    },
+    "cartNote": {
+      "required": "De notitie in de winkelwagen is verplicht.",
+      "tooLong": "De notitie in de winkelwagen mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "De notitie in de winkelwagen bevat niet-ondersteunde tekens."
+    },
+    "cartAddLabel": {
+      "required": "De tekst voor 'In winkelwagen' is verplicht.",
+      "tooLong": "De tekst voor 'In winkelwagen' mag hoogstens {maximum} tekens bevatten.",
+      "unsupported": "De tekst voor 'In winkelwagen' bevat niet-ondersteunde tekens."
     }
   },
   "email": {
@@ -391,6 +406,7 @@
     "reportTarget": "Dat item is niet geldig.",
     "moderationDecision": "Die beslissing is niet geldig.",
     "checkoutAttempt": "Deze afrekenpoging is verlopen. Laad de pagina opnieuw en probeer het opnieuw.",
+    "cart": "Deze winkelwagen is verlopen. Laad de pagina opnieuw en probeer het opnieuw.",
     "product": "Dat product kon niet worden gevonden."
   },
   "handle": {

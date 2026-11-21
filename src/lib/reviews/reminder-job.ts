@@ -25,7 +25,8 @@ import { orderPageUrl } from "@/lib/storefront/product-page-url";
 import { buyerFacingStorefront } from "@/lib/storefront/buyer-face";
 import { isProductPageSectionShown, resolveProductPage } from "@/lib/storefront/product-page";
 import { getSellerIdentity } from "@/lib/settings/seller-identity";
-import { orderReviewState } from "@/lib/reviews/eligibility";
+import { orderReviewItems, orderReviewSummary } from "@/lib/reviews/eligibility";
+import { lineStatesOf } from "@/lib/orders/line-states";
 import {
   reviewReminderCutoffs,
   reviewReminderDueAt,
@@ -116,20 +117,39 @@ export async function runReviewReminders(now: Date = new Date()): Promise<Review
   if (queue.length === 0) return run;
 
   const ids = queue.map((order) => order.id);
-  const productIds = [...new Set(queue.flatMap((order) => (order.product_id ? [order.product_id] : [])))];
   const storefrontIds = [...new Set(queue.flatMap((order) => (order.storefront_id ? [order.storefront_id] : [])))];
-  const [reviews, products, storefronts] = await Promise.all([
-    admin.from("reviews").select("order_id").in("order_id", ids),
-    productIds.length
-      ? admin.from("products").select("id, status, moderation_status").in("id", productIds)
-      : Promise.resolve({ data: [], error: null }),
+  // Every line of each order (a cart's order holds several products, each
+  // reviewed on its own), and which were refunded on their own.
+  const [reviews, extraLines, lineRefunds, storefronts] = await Promise.all([
+    admin.from("reviews").select("order_id, product_id").in("order_id", ids),
+    admin
+      .from("order_add_ons")
+      .select("id, order_id, product_id, product_title, quantity, selected_options, position")
+      .in("order_id", ids),
+    admin.from("order_line_refunds").select("order_id, line_id").in("order_id", ids),
     storefrontIds.length
       ? admin.from("storefronts").select("id, name, config, moderation_status").in("id", storefrontIds)
       : Promise.resolve({ data: [], error: null }),
   ]);
-  const readError = reviews.error ?? products.error ?? storefronts.error;
-  if (readError) throw new Error(`review reminder read failed: ${readError.message}`);
-  const reviewed = new Set((reviews.data ?? []).map((row) => row.order_id));
+  const firstError = reviews.error ?? extraLines.error ?? lineRefunds.error ?? storefronts.error;
+  if (firstError) throw new Error(`review reminder read failed: ${firstError.message}`);
+  const productIds = [
+    ...new Set([
+      ...queue.flatMap((order) => (order.product_id ? [order.product_id] : [])),
+      ...(extraLines.data ?? []).flatMap((line) => (line.product_id ? [line.product_id] : [])),
+    ]),
+  ];
+  const products = productIds.length
+    ? await admin.from("products").select("id, status, moderation_status").in("id", productIds)
+    : { data: [], error: null };
+  if (products.error) throw new Error(`review reminder read failed: ${products.error.message}`);
+  const reviewedBy = new Map<string, Set<string>>();
+  for (const row of reviews.data ?? []) {
+    if (!row.order_id || !row.product_id) continue;
+    if (!reviewedBy.has(row.order_id)) reviewedBy.set(row.order_id, new Set());
+    reviewedBy.get(row.order_id)!.add(row.product_id);
+  }
+  const lineStates = lineStatesOf(queue, extraLines.data ?? [], lineRefunds.data ?? []);
   const productById = new Map((products.data ?? []).map((row) => [row.id, row]));
   const storefrontById = new Map((storefronts.data ?? []).map((row) => [row.id, row]));
   const sellers = new Map<string, Promise<StorefrontSeller>>();
@@ -145,11 +165,14 @@ export async function runReviewReminders(now: Date = new Date()): Promise<Review
     // what the buyer would see there.
     const face = storefront ? buyerFacingStorefront(storefront, seller.businessName) : null;
     const dueAt = reviewReminderDueAt(order);
+    const lines = lineStates.get(order.id) ?? [];
+    const open =
+      orderReviewSummary(orderReviewItems(order, lines, productById, reviewedBy.get(order.id) ?? new Set())) === "open";
     const sendable =
       dueAt !== null &&
       !reviewReminderLate(dueAt, now) &&
       order.buyer_email !== null &&
-      orderReviewState(order, productById.get(order.product_id ?? "") ?? null, reviewed.has(order.id)) === "open" &&
+      open &&
       face !== null &&
       isProductPageSectionShown(resolveProductPage(face.config), "reviews");
     if (!sendable) {
@@ -176,12 +199,23 @@ export async function runReviewReminders(now: Date = new Date()): Promise<Review
     // Stopped, or taken by another run, since the queue was read.
     if (!claimed) continue;
 
+    // The goods still bought, in line order: a line refunded on its own is
+    // not asked about.
+    const goods = [
+      ...(lines[0]?.refunded
+        ? []
+        : [{ productTitle: order.product_title, quantity: order.quantity, selected_options: order.selected_options }]),
+      ...(extraLines.data ?? [])
+        .filter((line) => line.order_id === order.id && !lines.some((state) => state.lineId === line.id && state.refunded))
+        .sort((a, b) => a.position - b.position)
+        .map((line) => ({ productTitle: line.product_title, quantity: line.quantity, selected_options: line.selected_options })),
+    ].map((line) => ({ productTitle: line.productTitle, quantity: line.quantity, selection: parseOrderSelection(line.selected_options) }));
+    const [head, ...more] = goods;
     const ref = await orderRef(order.id);
-    const result = ref
+    const result = ref && head
       ? await sendReviewReminder(order.buyer_email!, parseLocale(order.buyer_locale) ?? DEFAULT_LOCALE, {
-          productTitle: order.product_title,
-          quantity: order.quantity,
-          selection: parseOrderSelection(order.selected_options),
+          ...head,
+          ...(more.length > 0 ? { more } : {}),
           requestedAt: new Date(order.review_reminder_requested_at!),
           reviewUrl: orderPageUrl(order.storefront_id!, ref, "write"),
           stopUrl: orderPageUrl(order.storefront_id!, ref, "stop"),

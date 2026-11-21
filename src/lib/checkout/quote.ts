@@ -1,7 +1,7 @@
 // SERVER ONLY. THE QUOTE: the one place that decides what an order costs.
 //
-// Everything a buyer's browser sends is a REQUEST: which product, which
-// version, how many, where to. None of it is a price. This function re-reads
+// Everything a buyer's browser sends is a REQUEST: which products, which
+// versions, how many, where to. None of it is a price. This module re-reads
 // every fact that sets the price from the database and either answers with
 // the exact amount to charge or refuses with a reason the checkout can put in
 // a sentence. It never adjusts a request to make it fit: an order silently
@@ -9,139 +9,140 @@
 // stock, is a dispute waiting to happen.
 //
 // A payment provider is handed the total that comes back from here and
-// nothing else. The test provider records it; Stripe (when it lands) will
-// create its checkout session from it. A charge built from anything the
-// request carried would be a checkout with a price field in it.
+// nothing else. A charge built from anything the request carried would be a
+// checkout with a price field in it.
 //
-// THE GATE IS THE PRODUCT PAGE'S. loadPurchasable decides whether this product
-// is for sale from this storefront at all (placed, active, not taken down,
-// seller identity disclosed), so a product the page would 404 is one nobody
-// can be charged for either.
+// ONE ORDER, ANY NUMBER OF LINES. "Buy now" is an order of one line (plus any
+// "Add to your order" lines); a cart is an order of up to CART_LINES_MAX.
+// Both are priced here, by the same rules, so there is one price authority.
+//
+// THE GATE IS THE PRODUCT PAGE'S. gatePurchasableLines decides whether each
+// product is for sale from this storefront at all (placed, active, not taken
+// down, seller identity disclosed), so a product the page would 404 is one
+// nobody can be charged for either. It reads every line's product in one go;
+// nothing below reads the database again.
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { loadPurchasable, type GateBudget, type Purchasable } from "@/lib/products/purchasable";
-import { resolveOrderQuantity } from "@/lib/products/order-quantity";
+import {
+  gatePurchasableLines,
+  type GateBudget,
+  type PurchasableItem,
+  type PurchasableLines,
+  type PurchasableStore,
+} from "@/lib/products/purchasable";
+import { checkOrderQuantity } from "@/lib/products/order-quantity";
 import { parseOptionGroups } from "@/lib/products/detail";
 import { optionSummaryRows } from "@/lib/products/option-details";
-import { quoteOrderShipping } from "@/lib/shipping/rates";
-import { strictSelection, type Selection } from "@/lib/checkout/selection";
-import { bestSale } from "@/lib/discounts/pricing";
-import { priceBasket, type BasketAddOn } from "@/lib/checkout/basket";
-import { findCodeFor } from "@/lib/discounts/public";
+import { canQuoteShipping, quoteOrderShipping } from "@/lib/shipping/rates";
+import { strictSelection } from "@/lib/checkout/selection";
+import { bestSale, priceLines } from "@/lib/discounts/pricing";
+import { findCodeForLines, type ResolvedLinesCode } from "@/lib/discounts/public";
 import { toCurrency } from "@/lib/format/money";
-import { parseAddOnIds } from "@/lib/products/detail";
-import { loadAddOns } from "@/lib/products/add-ons";
-import { isProductPageSectionShown } from "@/lib/storefront/product-page";
 import { PAGE_BUSY } from "@/lib/public/busy";
+import { purchaseLinkTarget } from "@/components/product-page/cta-target";
+import { CART_LINES_MAX } from "@/lib/cart/limits";
+import type { OrderLineSource } from "@/lib/checkout/lines";
+import type { LineProblem } from "@/lib/checkout/line-problem";
 import type { AddOnPick } from "@/lib/storefront/product-page-url";
-import { ADD_ONS_MAX, type Currency } from "@/types/product";
-import type { ResolvedCode } from "@/types/discount";
-import type { PaidAddOn } from "@/lib/orders/record";
+import type { Currency } from "@/types/product";
+import type { PaidLine } from "@/lib/orders/record";
 
-export type QuoteRequest = {
-  storefrontId: string;
+/** One line as the quote is asked for it. `quantity` is `unknown` because it
+ *  arrives from a request body. */
+export type QuoteLineInput = {
   productId: string;
   /** The version, as the option ids the buyer chose (one per group). */
   optionIds: readonly string[];
-  /** How many. `unknown` because it arrives from a request body. */
   quantity: unknown;
-  /** ISO 3166-1 alpha-2 delivery country. Ignored for a download. */
+  source?: OrderLineSource;
+};
+
+export type QuoteRequest = {
+  storefrontId: string;
+  /** The order's lines, in order. The first is the order's own row. */
+  lines: readonly QuoteLineInput[];
+  /** ISO 3166-1 alpha-2 delivery country. Ignored when nothing ships. */
   country: string | null;
   /** A discount code the buyer typed, already normalised (validation/checkout).
    *  A code is a REQUEST like the rest: it is looked up here, and a code that
    *  does not apply refuses the quote rather than being quietly dropped. */
   discountCode?: string | null;
-  /** "Add to your order": the other products the buyer took, each with its
-   *  version. Requests too: only the main product's own add-ons are priced,
-   *  and any one that cannot be sold refuses the whole quote. */
-  addOns?: readonly AddOnPick[];
 };
 
-/** One "Add to your order" line, as priced. */
-export type QuotedAddOn = {
+export type { LineProblem };
+
+export type QuoteRefusal =
+  | LineProblem
+  /** The seller does not deliver to that country (or no country given). */
+  | "not_shipped_here"
+  /** A discount code was given that does not apply to this order (unknown,
+   *  ended, used up, or for none of these products). One reason for all. */
+  | "discount_invalid";
+
+export type QuoteResult =
+  | { ok: true; quote: CheckoutQuote }
+  /** `line`: which line (by index) refused the order, when one did. */
+  | { ok: false; reason: QuoteRefusal; line?: number };
+
+/** One line, as priced. */
+export type QuotedLine = {
   productId: string;
+  source: OrderLineSource;
   title: string;
   /** The REGULAR price of one: what the line snapshots as product_price_cents. */
   regularUnitCents: number;
-  /** One item's price: its sale's when a sale lowers it. */
+  /** One item's price before any code: its sale's when a sale priced it. */
   unitPriceCents: number;
   quantity: number;
-  /** What the line is charged. */
+  /** unitPriceCents x quantity. */
+  subtotalCents: number;
+  /** What the line is charged, after its share of any code. */
   amountCents: number;
-  /** The sale that priced it, and how much it took off (null without one). */
+  /** The discount that set this line's price (a sale, or the code), and how
+   *  much less than the regular price it costs. Null without one. */
   discount: { id: string; cents: number } | null;
-  /** The version, in the seller's words. */
+  /** The version, in the seller's words, for the order and the receipt. */
   selection: { label: string; value: string }[];
+  /** The same version as option ids, in group order: what identifies it
+   *  whatever the seller later renames (the order's lines digest). */
+  optionIds: string[];
+  isDigital: boolean;
+  shippingProfileId: string | null;
 };
 
 export type CheckoutQuote = {
   /** Behind the gate, for the caller that records the order. Never sent to a
-   *  browser: it carries the owner id and the raw row. */
-  gate: Purchasable;
-  productId: string;
-  title: string;
+   *  browser: it carries the owner id and the raw rows. */
+  store: PurchasableStore;
+  /** The lines, in the order asked. The first is the order's own row. */
+  lines: QuotedLine[];
   currency: Currency;
-  /** The REGULAR price of one, what the order snapshots as
-   *  product_price_cents. Discounts are measured from it. */
-  regularUnitCents: number;
-  /** One item's price before any code: the sale price when a sale won. */
-  unitPriceCents: number;
-  quantity: number;
-  /** The version, in the seller's words, for the order and the receipt. */
-  selection: { label: string; value: string }[];
-  isDigital: boolean;
-  /** unitPriceCents x quantity. */
+  /** Something in the order is posted: it needs an address and delivery. */
+  ships: boolean;
+  /** Something in the order is a download: it needs the buyer's consent to
+   *  immediate supply (CRD art. 16(m)). */
+  hasDownloads: boolean;
+  /** The items before any code. */
   subtotalCents: number;
-  /** What the MAIN product's items cost after every discount. */
+  /** What the code took off the order (0 unless it won). */
+  codeCents: number;
+  /** What the items cost after every discount. */
   itemsCents: number;
-  /** The add-on lines, in the seller's order (empty for most orders). */
-  addOns: QuotedAddOn[];
-  /** What the add-on lines cost together. itemsCents + addOnsCents is what
-   *  delivery's free-over threshold is measured on. */
-  addOnsCents: number;
-  /** The discount that set the price, for the order (null without one).
-   *  `cents` is how much less than the regular price the items cost. When it
-   *  is the same discount as `credit`, the code set the price. */
-  discount: { id: string; cents: number } | null;
-  /** The valid code the buyer entered, credited to its channel even when a
-   *  better sale set the price. */
+  /** The valid code the buyer entered, credited to its channel even when the
+   *  sales did better. */
   credit: { id: string; code: string } | null;
-  /** Null for a download; 0 when delivery is free. */
+  /** Null when nothing ships; 0 when delivery is free. */
   shippingCents: number | null;
   /** The whole amount to charge, delivery included. */
   totalCents: number;
 };
 
-export type QuoteRefusal =
-  /** Not for sale here (any gate failure, including the rate limit). One
-   *  reason on purpose, as on the product page: nothing here is enumerable. */
-  | "not_found"
-  /** The storefront tile, or the stock, says there is none to sell. */
-  | "sold_out"
-  /** The version is missing, ambiguous, unknown or unavailable. */
-  | "options"
-  /** Not a whole number in range, or above this product's own limit. */
-  | "quantity"
-  /** Fewer in stock than asked for. */
-  | "insufficient_stock"
-  /** The seller does not deliver to that country (or no country given). */
-  | "not_shipped_here"
-  /** The seller has not priced delivery in this product's currency. */
-  | "no_shipping_rates"
-  /** A discount code was given that does not apply to this order (unknown,
-   *  ended, used up, or not for this product). One reason for all of them. */
-  | "discount_invalid"
-  /** An add-on the buyer took cannot be sold with this order right now (not
-   *  offered with this product, gone, sold out, or that version is not). */
-  | "add_on_unavailable";
-
-export type QuoteResult = { ok: true; quote: CheckoutQuote } | { ok: false; reason: QuoteRefusal };
-
-/** The quote's add-on lines, as the order writer (lib/orders/record.ts) takes
- *  them. One mapping for every payment provider. */
-export function paidAddOns(quote: CheckoutQuote): PaidAddOn[] {
-  return quote.addOns.map((line) => ({
+/** The quote's lines after the first, as the order writer (lib/orders/record.ts)
+ *  takes them. One mapping for every payment provider. */
+export function paidLines(quote: CheckoutQuote): PaidLine[] {
+  return quote.lines.slice(1).map((line) => ({
     productId: line.productId,
+    source: line.source,
     selection: line.selection,
     unitPriceCents: line.regularUnitCents,
     quantity: line.quantity,
@@ -152,166 +153,252 @@ export function paidAddOns(quote: CheckoutQuote): PaidAddOn[] {
 
 /**
  * Price one order, or refuse it. `limit` is the rate-limit bucket the caller
- * spends on the gate (placing an order spends the tighter checkoutPlace one).
+ * spends on the gate: ONE token for the whole order, however many lines.
  */
-export async function quoteCheckout(request: QuoteRequest, limit: GateBudget): Promise<QuoteResult> {
-  const gate = await loadPurchasable(request.storefrontId, request.productId, limit);
-  if (!gate) return { ok: false, reason: "not_found" };
-  const admin = createAdminClient();
-  let code: ResolvedCode | null = null;
+export async function quoteOrder(request: QuoteRequest, limit: GateBudget): Promise<QuoteResult> {
+  if (request.lines.length === 0 || request.lines.length > CART_LINES_MAX) {
+    return { ok: false, reason: "not_found" };
+  }
+  const gate = await gatePurchasableLines(
+    request.storefrontId,
+    request.lines.map((line) => line.productId),
+    limit,
+  );
+  if (!gate || gate === PAGE_BUSY) return { ok: false, reason: "not_found" };
+
+  let code: ResolvedLinesCode | null = null;
   if (request.discountCode) {
-    code = await findCodeFor(admin, {
-      ownerId: gate.ownerId,
-      productId: gate.row.id,
-      currency: toCurrency(gate.row.currency),
+    // The order's currency is its first line's; a line in another currency is
+    // refused below anyway.
+    const first = gate.items.get(request.lines[0]!.productId);
+    if (!first) return { ok: false, reason: "not_found", line: 0 };
+    code = await findCodeForLines(createAdminClient(), {
+      ownerId: gate.store.ownerId,
+      productIds: request.lines.map((line) => line.productId).filter((id) => gate.items.has(id)),
+      currency: toCurrency(first.row.currency),
       code: request.discountCode,
-      now: gate.now,
+      now: gate.store.now,
     });
     if (!code) return { ok: false, reason: "discount_invalid" };
   }
-  return quoteFromGate(gate, request, admin, code);
+  return quoteFromLines(gate, request, code);
+}
+
+/**
+ * "Buy now": one product, its version and quantity, and whatever was taken
+ * from its "Add to your order". An order of lines like any other.
+ */
+export function buyNowLines(input: {
+  productId: string;
+  optionIds: readonly string[];
+  quantity: unknown;
+  addOns?: readonly AddOnPick[];
+}): QuoteLineInput[] {
+  return [
+    { productId: input.productId, optionIds: input.optionIds, quantity: input.quantity, source: "cart" },
+    ...(input.addOns ?? []).map((pick) => ({
+      productId: pick.productId,
+      optionIds: pick.optionIds,
+      quantity: 1,
+      source: "add_on" as const,
+    })),
+  ];
+}
+
+/** One line after its checks: everything pricing needs, or its problem. */
+export type AssessedLine =
+  | {
+      ok: true;
+      productId: string;
+      source: OrderLineSource;
+      quantity: number;
+      item: PurchasableItem;
+      selection: { label: string; value: string }[];
+      optionIds: string[];
+      isDigital: boolean;
+      currency: Currency;
+    }
+  | { ok: false; productId: string; problem: LineProblem };
+
+/**
+ * Check every line against the gate's rows, without refusing: each line comes
+ * back with what pricing needs, or the one problem that stops it. The quote
+ * refuses on the first problem; the cart shows each line's own.
+ *
+ * Quantities are checked over every line of a product together: two lines of
+ * one product in two versions draw on ONE shelf and ONE per-order limit.
+ */
+export function assessLines(
+  gate: Pick<PurchasableLines, "store" | "items">,
+  lines: readonly QuoteLineInput[],
+): AssessedLine[] {
+  const first: AssessedLine[] = lines.map((line) => {
+    const item = gate.items.get(line.productId);
+    // Sold through the seller's own link: their page sends buyers there, so
+    // nothing of ours sells it.
+    if (!item || purchaseLinkTarget(item.row.purchase_url)) {
+      return { ok: false, productId: line.productId, problem: "not_found" };
+    }
+    // The tile's manual flag is a seller saying "not selling this here right
+    // now", which the stock cannot show: it is the storefront's, not the
+    // product's.
+    if (item.block?.soldOut) return { ok: false, productId: line.productId, problem: "sold_out" };
+    const quantity = line.quantity;
+    if (typeof quantity !== "number" || !Number.isInteger(quantity) || quantity < 1) {
+      return { ok: false, productId: line.productId, problem: "quantity" };
+    }
+    const groups = parseOptionGroups(item.row.option_groups);
+    const chosen = strictSelection(groups, line.optionIds);
+    if (!chosen) return { ok: false, productId: line.productId, problem: "options" };
+    const isDigital = item.row.digital_file_key !== null;
+    const currency = toCurrency(item.row.currency);
+    // A parcel without a delivery price in its currency cannot show an honest
+    // total (EU CRD art. 6(1)(e)).
+    if (!isDigital && !canQuoteShipping(gate.store.shippingPolicy, currency)) {
+      return { ok: false, productId: line.productId, problem: "no_shipping_rates" };
+    }
+    return {
+      ok: true,
+      productId: line.productId,
+      source: line.source ?? "cart",
+      quantity,
+      item,
+      selection: optionSummaryRows(groups, chosen),
+      optionIds: groups.map((group) => chosen[group.id]!.id),
+      isDigital,
+      currency,
+    };
+  });
+
+  // ONE currency per order: the first sellable line's.
+  const orderCurrency = first.find((line) => line.ok)?.currency ?? null;
+  const priced = first.map((line): AssessedLine =>
+    line.ok && line.currency !== orderCurrency
+      ? { ok: false, productId: line.productId, problem: "currency" }
+      : line,
+  );
+
+  // The shelf and the per-order limit, per PRODUCT over all its lines.
+  const wanted = new Map<string, number>();
+  for (const line of priced) {
+    if (line.ok) wanted.set(line.productId, (wanted.get(line.productId) ?? 0) + line.quantity);
+  }
+  const verdicts = new Map<string, LineProblem | null>();
+  for (const [productId, total] of wanted) {
+    const row = gate.items.get(productId)!.row;
+    const check = checkOrderQuantity(row, total);
+    verdicts.set(
+      productId,
+      check.ok
+        ? null
+        : check.reason === "insufficient_stock"
+          ? (row.stock_quantity ?? 0) <= 0
+            ? "sold_out"
+            : "insufficient_stock"
+          : check.reason === "unavailable"
+            ? "not_found"
+            : "quantity",
+    );
+  }
+  return priced.map((line) => {
+    if (!line.ok) return line;
+    const problem = verdicts.get(line.productId);
+    return problem ? { ok: false, productId: line.productId, problem } : line;
+  });
+}
+
+/** What pricing makes of the sellable lines: the priced lines, the items and
+ *  delivery. Shared by the quote and the cart, so they cannot disagree. */
+export type PricedOrderLines = {
+  lines: QuotedLine[];
+  currency: Currency;
+  subtotalCents: number;
+  codeCents: number;
+  itemsCents: number;
+  /** What the POSTED lines cost after discounts: free delivery is earned on
+   *  them (a download has no parcel to make free). */
+  shippedItemsCents: number;
+  ships: boolean;
+  hasDownloads: boolean;
+};
+
+/** Price lines that passed assessLines (all of them sellable, one currency). */
+export function priceAssessedLines(
+  sellable: readonly Extract<AssessedLine, { ok: true }>[],
+  code: ResolvedLinesCode | null,
+): PricedOrderLines {
+  const currency = sellable[0]?.currency ?? "EUR";
+  const sales = sellable.map((line) => bestSale(line.item.sales, line.item.row.price_cents, currency));
+  const priced = priceLines({
+    currency,
+    code: code?.value ?? null,
+    lines: sellable.map((line, index) => ({
+      regularUnitCents: line.item.row.price_cents,
+      saleUnitCents: sales[index]?.unitPriceCents ?? null,
+      quantity: line.quantity,
+      coveredByCode: code?.covers.includes(line.productId) ?? false,
+    })),
+  });
+  const lines: QuotedLine[] = sellable.map((line, index) => {
+    const at = priced.lines[index]!;
+    const discountId = at.applied === "code" ? code?.id : at.applied === "sale" ? sales[index]?.sale.id : undefined;
+    return {
+      productId: line.productId,
+      source: line.source,
+      title: line.item.row.title,
+      regularUnitCents: line.item.row.price_cents,
+      unitPriceCents: at.unitPriceCents,
+      quantity: line.quantity,
+      subtotalCents: at.subtotalCents,
+      amountCents: at.amountCents,
+      discount: discountId && at.discountCents > 0 ? { id: discountId, cents: at.discountCents } : null,
+      selection: line.selection,
+      optionIds: line.optionIds,
+      isDigital: line.isDigital,
+      shippingProfileId: line.item.row.shipping_profile_id,
+    };
+  });
+  return {
+    lines,
+    currency,
+    subtotalCents: priced.subtotalCents,
+    codeCents: priced.codeCents,
+    itemsCents: priced.itemsCents,
+    shippedItemsCents: lines.reduce((total, line) => total + (line.isDigital ? 0 : line.amountCents), 0),
+    ships: lines.some((line) => !line.isDigital),
+    hasDownloads: lines.some((line) => line.isDigital),
+  };
 }
 
 /**
  * The quote for a gate already passed. Split out so a caller holding the gate
  * (and a test) does not spend a second rate-limit token on the same request.
- * `code` is a code already found valid for this gate (quoteCheckout looks it
- * up), so pricing here never reads a discount itself.
+ * `code` is a code already found valid for these products (quoteOrder looks
+ * it up), so nothing here reads a discount. Pure: the gate read everything.
  */
-export async function quoteFromGate(
-  gate: Purchasable,
-  request: Pick<QuoteRequest, "optionIds" | "quantity" | "country" | "addOns">,
-  admin: ReturnType<typeof createAdminClient>,
-  code: ResolvedCode | null = null,
-): Promise<QuoteResult> {
-  // The tile's manual flag is a seller saying "not selling this here right
-  // now", which resolveOrderQuantity cannot see: it reads the product, not the
-  // storefront.
-  if (gate.block?.soldOut) return { ok: false, reason: "sold_out" };
-
-  const groups = parseOptionGroups(gate.row.option_groups);
-  const selection: Selection | null = strictSelection(groups, request.optionIds);
-  if (!selection) return { ok: false, reason: "options" };
-
-  const line = await resolveOrderQuantity(admin, gate.row.id, request.quantity);
-  if (!line.ok) {
-    switch (line.reason) {
-      case "unavailable":
-        return { ok: false, reason: "not_found" };
-      case "insufficient_stock":
-        // Nothing left at all reads as sold out; some left reads as "fewer".
-        return {
-          ok: false,
-          reason: gate.row.track_stock && (gate.row.stock_quantity ?? 0) <= 0 ? "sold_out" : "insufficient_stock",
-        };
-      case "invalid_request":
-      case "over_limit":
-        return { ok: false, reason: "quantity" };
-    }
+export function quoteFromLines(
+  gate: Pick<PurchasableLines, "store" | "items">,
+  request: Pick<QuoteRequest, "lines" | "country">,
+  code: ResolvedLinesCode | null = null,
+): QuoteResult {
+  const assessed = assessLines(gate, request.lines);
+  const refused = assessed.findIndex((line) => !line.ok);
+  if (refused !== -1) {
+    const line = assessed[refused] as Extract<AssessedLine, { ok: false }>;
+    return { ok: false, reason: line.problem, line: refused };
   }
-
-  const isDigital = gate.row.digital_file_key !== null;
-
-  // "ADD TO YOUR ORDER". Each line is re-read through the same rules the page
-  // offered it under (lib/products/add-ons.ts), held to an exact version like
-  // the main product, and checked against its own stock. Anything that does
-  // not pass refuses the whole quote: an order quietly missing a line the
-  // buyer saw in their total is the same dispute as a lowered quantity.
-  const picks = request.addOns ?? [];
-  const extras: (BasketAddOn & {
-    title: string;
-    saleId: string | null;
-    selection: { label: string; value: string }[];
-    shippingProfileId: string | null;
-  })[] = [];
-  if (picks.length > 0) {
-    // Offered only where the page offers them: this storefront shows the
-    // section, and the seller chose these for this product.
-    const offered = isProductPageSectionShown(gate.productPage, "addOns")
-      ? parseAddOnIds(gate.row.add_on_ids)
-      : [];
-    const ids = picks.map((pick) => pick.productId);
-    if (
-      picks.length > ADD_ONS_MAX ||
-      new Set(ids).size !== ids.length ||
-      ids.some((id) => !offered.includes(id))
-    ) {
-      return { ok: false, reason: "add_on_unavailable" };
-    }
-    const lines = await loadAddOns(admin, {
-      ownerId: gate.ownerId,
-      ids,
-      isDigital,
-      currency: line.currency,
-      now: gate.now,
-      unreadableSales: "busy",
-      storeSales: gate.storeSales,
-    });
-    if (lines === PAGE_BUSY) return { ok: false, reason: "add_on_unavailable" };
-    for (const pick of picks) {
-      const found = lines.find((candidate) => candidate.card.id === pick.productId);
-      if (!found) return { ok: false, reason: "add_on_unavailable" };
-      const chosen = strictSelection(found.card.optionGroups, pick.optionIds);
-      if (!chosen) return { ok: false, reason: "add_on_unavailable" };
-      const one = await resolveOrderQuantity(admin, pick.productId, 1);
-      if (!one.ok) return { ok: false, reason: "add_on_unavailable" };
-      const addOnSale = bestSale(found.sales, one.unitPriceCents, one.currency);
-      extras.push({
-        productId: pick.productId,
-        title: found.row.title,
-        regularUnitCents: one.unitPriceCents,
-        saleUnitCents: addOnSale?.unitPriceCents ?? null,
-        saleId: addOnSale?.sale.id ?? null,
-        quantity: one.quantity,
-        selection: optionSummaryRows(found.card.optionGroups, chosen),
-        shippingProfileId: found.row.shipping_profile_id,
-      });
-    }
-  }
-
-  // The discount, priced from this read's regular price (the one the line was
-  // just checked against), so a price change since the page loaded is priced
-  // here, not there. The same sum the checkout page shows (lib/checkout/basket).
-  const sale = bestSale(gate.sales, line.unitPriceCents, line.currency);
-  const basket = priceBasket({
-    main: {
-      regularUnitCents: line.unitPriceCents,
-      currency: line.currency,
-      quantity: line.quantity,
-      saleUnitCents: sale?.unitPriceCents ?? null,
-      code: code?.value ?? null,
-    },
-    addOns: extras,
-  });
-  const priced = basket.main;
-  const appliedId = priced.applied === "code" ? code?.id : priced.applied === "sale" ? sale?.sale.id : undefined;
-  const addOns: QuotedAddOn[] = extras.map((extra, index) => {
-    const lineAt = basket.addOns[index]!;
-    return {
-      productId: extra.productId,
-      title: extra.title,
-      regularUnitCents: extra.regularUnitCents,
-      unitPriceCents: lineAt.unitPriceCents,
-      quantity: extra.quantity,
-      amountCents: lineAt.amountCents,
-      discount:
-        lineAt.applied === "sale" && extra.saleId && lineAt.discountCents > 0
-          ? { id: extra.saleId, cents: lineAt.discountCents }
-          : null,
-      selection: extra.selection,
-    };
-  });
-  const addOnsCents = basket.itemsCents - priced.itemsCents;
+  const sellable = assessed as Extract<AssessedLine, { ok: true }>[];
+  const priced = priceAssessedLines(sellable, code);
 
   let shippingCents: number | null = null;
-  if (!isDigital) {
+  if (priced.ships) {
     // ONE parcel, charged once: the highest of its products' rates.
-    const shipping = quoteOrderShipping(gate.shippingPolicy, {
-      profileIds: [gate.row.shipping_profile_id, ...extras.map((extra) => extra.shippingProfileId)],
+    const shipping = quoteOrderShipping(gate.store.shippingPolicy, {
+      profileIds: priced.lines.flatMap((line) => (line.isDigital ? [] : [line.shippingProfileId])),
       country: request.country ?? "",
       // After discounts: free delivery is earned on what the buyer pays.
-      subtotalCents: basket.itemsCents,
-      currency: line.currency,
+      subtotalCents: priced.shippedItemsCents,
+      currency: priced.currency,
     });
     if (!shipping.ok) {
       return {
@@ -325,23 +412,17 @@ export async function quoteFromGate(
   return {
     ok: true,
     quote: {
-      gate,
-      productId: gate.row.id,
-      title: gate.row.title,
-      currency: line.currency,
-      regularUnitCents: line.unitPriceCents,
-      unitPriceCents: priced.unitPriceCents,
-      quantity: line.quantity,
-      selection: optionSummaryRows(groups, selection),
-      isDigital,
+      store: gate.store,
+      lines: priced.lines,
+      currency: priced.currency,
+      ships: priced.ships,
+      hasDownloads: priced.hasDownloads,
       subtotalCents: priced.subtotalCents,
+      codeCents: priced.codeCents,
       itemsCents: priced.itemsCents,
-      addOns,
-      addOnsCents,
-      discount: appliedId && priced.discountCents > 0 ? { id: appliedId, cents: priced.discountCents } : null,
       credit: code ? { id: code.id, code: code.code } : null,
       shippingCents,
-      totalCents: basket.itemsCents + (shippingCents ?? 0),
+      totalCents: priced.itemsCents + (shippingCents ?? 0),
     },
   };
 }

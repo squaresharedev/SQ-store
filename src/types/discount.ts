@@ -69,6 +69,9 @@ export type ResolvedCode = {
 export type CodeTerms = {
   code: string;
   value: DiscountValue;
+  /** Which of the order's products (as the checkout named them) it covers.
+   *  Absent = the one product the checkout is for. */
+  covers?: string[];
 };
 
 /** Where a discount stands right now, worked out by lib/discounts/status.ts. */

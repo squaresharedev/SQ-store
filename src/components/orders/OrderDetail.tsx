@@ -21,7 +21,7 @@ import {
   iconButtonClass,
   overlaySurfaceClass,
 } from "@/components/ui/control-styles";
-import { iconTileClass } from "@/components/ui/surface-styles";
+import { badgeClass, iconTileClass } from "@/components/ui/surface-styles";
 import { cn } from "@/lib/utils";
 import { CopyButton, type CopyButtonMessages } from "@/components/ui/CopyButton";
 import { formatOrderDateTime } from "@/lib/format/date";
@@ -268,11 +268,15 @@ export function OrderDetail({
           >
             <p className="break-words text-sm font-medium text-foreground" data-order-pack="">
               {packLine}
+              {order.firstLineRefunded && <RefundedMark />}
             </p>
             {order.selection.length > 0 && <SelectionList selection={order.selection} />}
             {order.addOns.map((line, index) => (
               <div key={index} className="mt-2" data-order-pack-add-on={index}>
-                <p className="break-words text-sm font-medium text-foreground">{linePack(line)}</p>
+                <p className="break-words text-sm font-medium text-foreground">
+                  {linePack(line)}
+                  {line.refunded && <RefundedMark />}
+                </p>
                 {line.selection.length > 0 && <SelectionList selection={line.selection} />}
               </div>
             ))}
@@ -302,7 +306,10 @@ export function OrderDetail({
           <DetailRow icon={PackagePlus} label={t("detail.alsoBought")}>
             {order.addOns.map((line, index) => (
               <div key={index} className={index > 0 ? "mt-2" : undefined} data-order-add-on={index}>
-                <p className="break-words text-sm font-medium text-foreground">{linePack(line)}</p>
+                <p className="break-words text-sm font-medium text-foreground">
+                  {linePack(line)}
+                  {line.refunded && <RefundedMark />}
+                </p>
                 {line.selection.length > 0 && <SelectionList selection={line.selection} />}
               </div>
             ))}
@@ -503,5 +510,15 @@ export function OrderDetail({
         </div>
       )}
     </div>
+  );
+}
+
+/** "Refunded" beside a line of the order that was refunded on its own. */
+function RefundedMark() {
+  const t = useTranslations("Orders.refund");
+  return (
+    <span className={cn(badgeClass, "ml-2 align-middle")} data-order-line-refunded="">
+      {t("lineRefunded")}
+    </span>
   );
 }

@@ -95,6 +95,7 @@
       "cards": "Produktové dlaždice",
       "soldOut": "Vypredané",
       "productPage": "Produktová stránka",
+      "cartPage": "Košík",
       "checkoutPage": "Pokladňa"
     },
     "subtitle": {
@@ -104,6 +105,7 @@
       "cards": "Výklad / Produktové dlaždice",
       "soldOut": "Výklad / Vypredané",
       "productPage": "Výklad / Produktová stránka",
+      "cartPage": "Výklad / Košík",
       "checkoutPage": "Výklad / Pokladňa",
       "blocks": "Výklad / Bloky"
     },
@@ -1546,6 +1548,38 @@
         "label": "Pohyb po plátne",
         "keys": "Podržte <kbd>Medzerník</kbd> a ťahajte"
       }
+    }
+  },
+  "cartPage": {
+    "on": "Košík",
+    "onHint": "Kupujúci si pridajú produkty a zaplatia naraz. Tlačidlo Kúpiť zostane.",
+    "mainButton": {
+      "label": "Primárne tlačidlo",
+      "buyNow": "Kúpiť",
+      "addToCart": "Pridať do košíka"
+    },
+    "afterAdd": {
+      "label": "Po pridaní",
+      "openCart": "Otvoriť košík",
+      "note": "Zobraziť poznámku"
+    },
+    "quickAdd": "Pridávať z kariet",
+    "quickAddHint": "Tlačidlo na karte vloží produkt rovno do košíka, keď nie je čo vyberať.",
+    "addLabel": "Text tlačidla",
+    "title": "Nadpis košíka",
+    "note": "Poznámka v košíku",
+    "notePlaceholder": "Objednávky odosielame v pondelok",
+    "deliveryBar": "Priebeh dopravy zdarma",
+    "deliveryBarHint": "Zobrazuje sa, keď je doprava zdarma od určitej sumy.",
+    "suggestions": "Hodí sa k tomu",
+    "suggestionsHint": "Pod košíkom: čo ste pri produktoch v ňom vybrali do Pridať k vašej objednávke.",
+    "sections": {
+      "buttons": "Pridanie do košíka",
+      "cart": "V košíku"
+    },
+    "leadGuess": {
+      "label": "Na prvé miesto Pridať do košíka",
+      "hint": "{count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktov}} z vašej plochy ide rovno do košíka. Ťuknutím bude hlavným tlačidlom Pridať do košíka; Kúpiť hneď zostane vedľa."
     }
   }
 }

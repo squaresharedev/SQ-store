@@ -252,6 +252,21 @@
       "tooLong": "The note to buyers must be {maximum} characters or fewer.",
       "unsupported": "The note to buyers contains unsupported characters."
     },
+    "cartTitle": {
+      "required": "The cart heading is required.",
+      "tooLong": "The cart heading must be {maximum} characters or fewer.",
+      "unsupported": "The cart heading contains unsupported characters."
+    },
+    "cartNote": {
+      "required": "The cart note is required.",
+      "tooLong": "The cart note must be {maximum} characters or fewer.",
+      "unsupported": "The cart note contains unsupported characters."
+    },
+    "cartAddLabel": {
+      "required": "The Add to cart words are required.",
+      "tooLong": "The Add to cart words must be {maximum} characters or fewer.",
+      "unsupported": "The Add to cart words contain unsupported characters."
+    },
     "thanksHeadline": {
       "required": "The thank-you headline is required.",
       "tooLong": "The thank-you headline must be {maximum} characters or fewer.",
@@ -391,6 +406,7 @@
     "reportTarget": "That item is not valid.",
     "moderationDecision": "That decision is not valid.",
     "checkoutAttempt": "This checkout has expired. Reload the page and try again.",
+    "cart": "This cart has expired. Reload the page and try again.",
     "product": "That product could not be found."
   },
   "handle": {

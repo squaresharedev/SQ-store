@@ -41,10 +41,14 @@ export function CheckoutShowcase({
   item,
   note,
   theme,
+  lines,
 }: {
   item: CheckoutItem;
   note: ReactNode;
   theme: CheckoutTheme;
+  /** What goes under the item: a cart's other lines. Absent = what was taken
+   *  from "Add to your order". Drawn in the panel's ink (`theme.panelInk`). */
+  lines?: (ink: string, rule: string) => ReactNode;
 }) {
   return (
     <section
@@ -69,19 +73,32 @@ export function CheckoutShowcase({
         />
         <ItemFacts item={item} ink={theme.panelInk} cornerRadius={theme.cornerRadius} size="lg" />
       </div>
-      <CheckoutAddOns
-        ink={theme.panelInk}
-        rule={theme.panelRule}
-        cornerRadius={theme.cornerRadius}
-        controlRadius={theme.controlRadius}
-      />
+      {lines ? (
+        lines(theme.panelInk, theme.panelRule)
+      ) : (
+        <CheckoutAddOns
+          ink={theme.panelInk}
+          rule={theme.panelRule}
+          cornerRadius={theme.cornerRadius}
+          controlRadius={theme.controlRadius}
+        />
+      )}
       {note}
     </section>
   );
 }
 
 /** The compact layout's summary: a receipt line, not a display. */
-export function CheckoutSummaryCard({ item, theme }: { item: CheckoutItem; theme: CheckoutTheme }) {
+export function CheckoutSummaryCard({
+  item,
+  theme,
+  lines,
+}: {
+  item: CheckoutItem;
+  theme: CheckoutTheme;
+  /** As CheckoutShowcase's, in the page's ink. */
+  lines?: (ink: string, rule: string) => ReactNode;
+}) {
   return (
     <section
       className="flex flex-col gap-3 border p-4"
@@ -93,12 +110,16 @@ export function CheckoutSummaryCard({ item, theme }: { item: CheckoutItem; theme
         <ItemPhoto item={item} theme={theme} className="size-20 shrink-0" />
         <ItemFacts item={item} ink={theme.ink} cornerRadius={theme.cornerRadius} size="sm" />
       </div>
-      <CheckoutAddOns
-        ink={theme.ink}
-        rule={theme.rule}
-        cornerRadius={theme.cornerRadius}
-        controlRadius={theme.controlRadius}
-      />
+      {lines ? (
+        lines(theme.ink, theme.rule)
+      ) : (
+        <CheckoutAddOns
+          ink={theme.ink}
+          rule={theme.rule}
+          cornerRadius={theme.cornerRadius}
+          controlRadius={theme.controlRadius}
+        />
+      )}
     </section>
   );
 }

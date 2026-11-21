@@ -19,6 +19,11 @@ import {
   BLUR_DIRECTIONS,
   BLUR_MAX,
   CHECKOUT_CELEBRATIONS,
+  CART_ADD_LABEL_MAX,
+  CART_AFTER_ADD,
+  CART_MAIN_BUTTONS,
+  CART_NOTE_MAX,
+  CART_TITLE_MAX,
   CHECKOUT_HEADLINE_MAX,
   CHECKOUT_LAYOUTS,
   CHECKOUT_NOTE_MAX,
@@ -650,6 +655,21 @@ export const checkoutPageSchema = z.preprocess((value) => {
   celebrate: z.enum(CHECKOUT_CELEBRATIONS),
 }));
 
+// The cart's design. Every member optional, absent = the default, so a
+// storefront nobody touched stores none; the words go through sellerProse,
+// like the checkout's, because the cart is one step from paying.
+export const cartPageSchema = z.strictObject({
+  enabled: z.literal(false).optional(),
+  mainButton: z.enum(CART_MAIN_BUTTONS).optional(),
+  addLabel: sellerProse({ field: "cartAddLabel", max: CART_ADD_LABEL_MAX }).optional(),
+  afterAdd: z.enum(CART_AFTER_ADD).optional(),
+  title: sellerProse({ field: "cartTitle", max: CART_TITLE_MAX }).optional(),
+  note: sellerProse({ field: "cartNote", max: CART_NOTE_MAX, multiline: true }).optional(),
+  deliveryBar: z.literal(false).optional(),
+  quickAdd: z.literal(false).optional(),
+  suggestions: z.literal(false).optional(),
+});
+
 // `policiesSchema` lived here. Shipping and returns terms are account-level
 // now (Settings › Shipping & returns, lib/validation/shipping-policy.ts) — a
 // storefront is a presentation of one catalogue rather than a business, so it
@@ -918,6 +938,7 @@ const configObjectSchema = z
     embed: embedSettingsSchema.optional(),
     productPage: productPageSchema.optional(),
     checkoutPage: checkoutPageSchema.optional(),
+    cartPage: cartPageSchema.optional(),
     // No `policies` or `shippingProfiles` member: shipping and returns terms
     // are account-level now (profiles.shipping_policy, bounded by
     // lib/validation/shipping-policy.ts). See RETIRED_TOP_LEVEL_FIELDS.
@@ -1145,6 +1166,7 @@ export function parseStoredStorefrontConfig(
     embed?: unknown;
     productPage?: unknown;
     checkoutPage?: unknown;
+    cartPage?: unknown;
     policies?: unknown;
     shippingProfiles?: unknown;
   };
@@ -1179,6 +1201,9 @@ export function parseStoredStorefrontConfig(
       : {}),
     ...(checkoutPageSchema.safeParse(candidate.checkoutPage).success
       ? { checkoutPage: candidate.checkoutPage }
+      : {}),
+    ...(cartPageSchema.safeParse(candidate.cartPage).success
+      ? { cartPage: candidate.cartPage }
       : {}),
     // Nothing to carry for policies or shipping profiles: they are not config
     // members any more, and the preprocess above has already dropped them.

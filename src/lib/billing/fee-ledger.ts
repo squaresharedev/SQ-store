@@ -104,19 +104,60 @@ export async function recordFeeRefund(
 export async function reverseOrderFees(orderId: string): Promise<void> {
   try {
     const admin = createAdminClient();
-    const { data, error } = await admin
-      .from("fee_ledger")
-      .select("kind, amount_cents")
-      .eq("order_id", orderId)
-      .gt("amount_cents", 0);
-    if (error) throw new Error(error.message);
-    for (const row of data ?? []) {
-      const kind: FeeEntryKind = row.kind === "ad_fee" ? "ad_fee_refund" : "platform_fee_refund";
-      await record(admin, orderId, kind, -row.amount_cents, `${orderId}:${kind}`, null);
+    // Only what is still owed back: lines refunded on their own earlier
+    // (reverseOrderFeesShare) already gave back their share.
+    for (const fee of await feesStanding(admin, orderId)) {
+      await record(admin, orderId, fee.refundKind, -fee.standingCents, `${orderId}:${fee.refundKind}`, null);
     }
   } catch (error) {
     console.error("[billing] reversing an order's fees failed:", error instanceof Error ? error.message : error);
   }
+}
+
+/**
+ * Give back the fees on PART of an order: one line refunded on its own
+ * (lib/orders/actions.ts refundOrderLine), for an order no provider charged
+ * (a provider reports its own partial refunds of the fee). The share is the
+ * refunded amount over the order's amount, rounded down, and never more than
+ * is still standing. `key` names the line, so a retry writes nothing twice.
+ * Best-effort and never throws, like reverseOrderFees.
+ */
+export async function reverseOrderFeesShare(
+  orderId: string,
+  share: { refundedCents: number; orderCents: number; key: string },
+): Promise<void> {
+  if (share.orderCents <= 0 || share.refundedCents <= 0) return;
+  try {
+    const admin = createAdminClient();
+    for (const fee of await feesStanding(admin, orderId)) {
+      // In BigInt: two integer-column amounts multiplied can pass 2^53.
+      const exact = (BigInt(fee.chargedCents) * BigInt(share.refundedCents)) / BigInt(share.orderCents);
+      const part = Math.min(fee.standingCents, Number(exact));
+      if (part <= 0) continue;
+      await record(admin, orderId, fee.refundKind, -part, `${orderId}:${fee.refundKind}:${share.key}`, null);
+    }
+  } catch (error) {
+    console.error("[billing] reversing a line's fees failed:", error instanceof Error ? error.message : error);
+  }
+}
+
+/** Each fee an order was charged, and how much of it has not been given back. */
+async function feesStanding(
+  admin: Admin,
+  orderId: string,
+): Promise<{ refundKind: FeeEntryKind; chargedCents: number; standingCents: number }[]> {
+  const { data, error } = await admin.from("fee_ledger").select("kind, amount_cents").eq("order_id", orderId);
+  if (error) throw new Error(error.message);
+  const rows = (data ?? []) as { kind: string; amount_cents: number }[];
+  return (["platform_fee", "ad_fee"] as const).flatMap((kind) => {
+    const refundKind: FeeEntryKind = kind === "ad_fee" ? "ad_fee_refund" : "platform_fee_refund";
+    const chargedCents = rows.filter((row) => row.kind === kind).reduce((total, row) => total + row.amount_cents, 0);
+    const returnedCents = -rows
+      .filter((row) => row.kind === refundKind)
+      .reduce((total, row) => total + row.amount_cents, 0);
+    const standingCents = chargedCents - returnedCents;
+    return chargedCents > 0 && standingCents > 0 ? [{ refundKind, chargedCents, standingCents }] : [];
+  });
 }
 
 /** What a store paid in fees over a period, in one currency. */

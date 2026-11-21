@@ -95,6 +95,7 @@
       "cards": "Tarjetas de producto",
       "soldOut": "Agotado",
       "productPage": "Página de producto",
+      "cartPage": "Carrito",
       "checkoutPage": "Proceso de pago"
     },
     "subtitle": {
@@ -104,6 +105,7 @@
       "cards": "Escaparate / Tarjetas de producto",
       "soldOut": "Escaparate / Agotado",
       "productPage": "Escaparate / Página de producto",
+      "cartPage": "Escaparate / Carrito",
       "checkoutPage": "Escaparate / Proceso de pago",
       "blocks": "Escaparate / Bloques"
     },
@@ -1546,6 +1548,38 @@
         "label": "Moverse por el lienzo",
         "keys": "Mantén pulsado <kbd>Espacio</kbd> y arrastra"
       }
+    }
+  },
+  "cartPage": {
+    "on": "Carrito",
+    "onHint": "Los compradores añaden productos y pagan de una vez. Comprar ahora se mantiene.",
+    "mainButton": {
+      "label": "Botón principal",
+      "buyNow": "Comprar ahora",
+      "addToCart": "Añadir al carrito"
+    },
+    "afterAdd": {
+      "label": "Al añadir",
+      "openCart": "Abrir el carrito",
+      "note": "Mostrar una nota"
+    },
+    "quickAdd": "Añadir desde las tarjetas",
+    "quickAddHint": "El botón de una tarjeta pone el producto directamente en el carrito cuando no hay versión que elegir.",
+    "addLabel": "Texto del botón",
+    "title": "Título del carrito",
+    "note": "Nota en el carrito",
+    "notePlaceholder": "Los pedidos se envían los lunes",
+    "deliveryBar": "Progreso de envío gratis",
+    "deliveryBarHint": "Se muestra cuando tu envío es gratuito a partir de cierta cantidad.",
+    "suggestions": "Combina bien con",
+    "suggestionsHint": "Debajo del carrito: lo que elegiste en Añadir a tu pedido para sus productos.",
+    "sections": {
+      "buttons": "Añadir al carrito",
+      "cart": "Dentro del carrito"
+    },
+    "leadGuess": {
+      "label": "Destacar Añadir al carrito",
+      "hint": "{count, plural, one {# producto} other {# productos}} de tu tablero pueden ir directos al carrito. Un toque convierte Añadir al carrito en el botón principal; Comprar ahora sigue al lado."
     }
   }
 }

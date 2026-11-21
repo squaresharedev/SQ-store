@@ -626,6 +626,44 @@ export type Database = {
         }
         Relationships: []
       }
+      carts: {
+        Row: {
+          created_at: string
+          id: string
+          lines: Json
+          ordered_at: string | null
+          rev: number
+          storefront_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lines?: Json
+          ordered_at?: string | null
+          rev?: number
+          storefront_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lines?: Json
+          ordered_at?: string | null
+          rev?: number
+          storefront_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carts_storefront_id_fkey"
+            columns: ["storefront_id"]
+            isOneToOne: false
+            referencedRelation: "storefronts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collections: {
         Row: {
           created_at: string
@@ -1278,6 +1316,7 @@ export type Database = {
           product_title: string
           quantity: number
           selected_options: Json
+          source: string
           seller_id: string
           stock_reserved: number
         }
@@ -1295,6 +1334,7 @@ export type Database = {
           product_title: string
           quantity?: number
           selected_options?: Json
+          source?: string
           seller_id: string
           stock_reserved?: number
         }
@@ -1312,6 +1352,7 @@ export type Database = {
           product_title?: string
           quantity?: number
           selected_options?: Json
+          source?: string
           seller_id?: string
           stock_reserved?: number
         }
@@ -1339,6 +1380,39 @@ export type Database = {
           },
         ]
       }
+      order_line_refunds: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          line_id: string | null
+          order_id: string
+          reason: string
+          restocked: number
+          seller_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          id?: string
+          line_id?: string | null
+          order_id: string
+          reason: string
+          restocked?: number
+          seller_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          line_id?: string | null
+          order_id?: string
+          reason?: string
+          restocked?: number
+          seller_id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           ad_fee_cents: number
@@ -1347,6 +1421,7 @@ export type Database = {
           application_fee_cents: number | null
           buyer_email: string | null
           buyer_locale: string | null
+          cart_id: string | null
           channel: string
           checkout_session_id: string | null
           confirmation_sent_at: string | null
@@ -1358,6 +1433,9 @@ export type Database = {
           discount_code_id: string | null
           discount_id: string | null
           fulfilment_status: string
+          lines_digest: string | null
+          more_product_ids: string[]
+          more_titles: string
           gift_message: string | null
           id: string
           payment_ref: string | null
@@ -1397,6 +1475,7 @@ export type Database = {
           application_fee_cents?: number | null
           buyer_email?: string | null
           buyer_locale?: string | null
+          cart_id?: string | null
           channel: string
           checkout_session_id?: string | null
           confirmation_sent_at?: string | null
@@ -1408,6 +1487,9 @@ export type Database = {
           discount_code_id?: string | null
           discount_id?: string | null
           fulfilment_status?: string
+          lines_digest?: string | null
+          more_product_ids?: string[]
+          more_titles?: string
           gift_message?: string | null
           id?: string
           payment_ref?: string | null
@@ -1447,6 +1529,7 @@ export type Database = {
           application_fee_cents?: number | null
           buyer_email?: string | null
           buyer_locale?: string | null
+          cart_id?: string | null
           channel?: string
           checkout_session_id?: string | null
           confirmation_sent_at?: string | null
@@ -1458,6 +1541,9 @@ export type Database = {
           discount_code_id?: string | null
           discount_id?: string | null
           fulfilment_status?: string
+          lines_digest?: string | null
+          more_product_ids?: string[]
+          more_titles?: string
           gift_message?: string | null
           id?: string
           payment_ref?: string | null
@@ -3118,6 +3204,12 @@ export type Database = {
         Returns: boolean
       }
       orders_release_expired: { Args: { p_now?: string }; Returns: number }
+      carts_sweep: { Args: { p_now?: string }; Returns: number }
+      order_line_refund_amount: { Args: { p_order_id: string; p_line_id: string | null }; Returns: number | null }
+      order_apply_line_refund: {
+        Args: { p_order_id: string; p_line_id: string | null; p_reason: string; p_restock: boolean; p_amount_cents: number }
+        Returns: string
+      }
       plan_grant_end: {
         Args: { p_actor: string; p_owners: string[] }
         Returns: {

@@ -44,7 +44,8 @@ import { translatorFor } from "@/i18n/translator";
 import { DEFAULT_LOCALE, parseLocale, type Locale } from "@/i18n/locales";
 import type { SaleFee } from "@/lib/billing/fees";
 import type { CheckoutBuyer, PlaceResult } from "@/lib/checkout/provider";
-import { paidAddOns, type CheckoutQuote } from "@/lib/checkout/quote";
+import type { CheckoutQuote } from "@/lib/checkout/quote";
+import { paidCheckoutFor, sameAttempt } from "@/lib/checkout/paid-checkout";
 
 /** The prefix of the checkout ids this provider mints for orders.checkout_session_id.
  *  Its own, so one is never mistaken for Stripe's (`cs_test_`, `cs_live_`) or
@@ -76,53 +77,29 @@ export async function placeStripeOrder(
   // Re-checked here, not only when the page decided to offer checkout: this is
   // the line that asks a payment provider for money.
   if (!stripeConnectLive()) return { ok: false, reason: "unavailable" };
-  const account = await readPaymentAccount(quote.gate.ownerId);
+  const account = await readPaymentAccount(quote.store.ownerId);
   if (!canTakePayments(account)) return { ok: false, reason: "unavailable" };
 
   const checkoutSessionId = stripeCheckoutId(attemptId);
-  const reserved = await reservePendingOrder({
-    checkoutSessionId,
-    productId: quote.productId,
-    sellerId: quote.gate.ownerId,
-    storefrontId: quote.gate.storefront.id,
-    channel: buyer.channel,
-    quantity: quote.quantity,
-    selection: quote.selection,
-    unitPriceCents: quote.regularUnitCents,
-    discountId: quote.discount?.id ?? null,
-    credit: quote.credit,
-    amountCents: quote.totalCents,
-    shippingCents: quote.shippingCents,
-    ...fee,
-    currency: quote.currency,
-    buyerEmail: buyer.email,
-    buyerLocale: buyer.locale,
-    shipTo: buyer.shipTo,
-    giftMessage: buyer.giftMessage,
-    supplyConsent: buyer.supplyConsent,
-    addOns: paidAddOns(quote),
-  });
+  const checkout = await paidCheckoutFor(quote, buyer, checkoutSessionId, fee);
+  const reserved = await reservePendingOrder(checkout);
   if (!reserved.ok) return { ok: false, reason: reserved.reason === "sold_out" ? "sold_out" : "failed" };
 
   const admin = createAdminClient();
   if (reserved.duplicate) {
     // A REPEAT of an attempt is answered only for the same buyer buying the
-    // same thing, and only while it is still unpaid (the same rule, and the
+    // same lines, and only while it is still unpaid (the same rule, and the
     // same reason, as the test provider's).
     const { data: existing } = await admin
       .from("orders")
-      .select("buyer_email, product_id, status")
+      .select("buyer_email, lines_digest, status")
       .eq("id", reserved.orderId)
       .maybeSingle();
-    const same =
-      existing?.status === "pending" &&
-      existing.product_id === quote.productId &&
-      existing.buyer_email?.toLowerCase() === buyer.email.toLowerCase();
-    if (!same) return { ok: false, reason: "failed" };
+    if (existing?.status !== "pending" || !sameAttempt(existing, checkout)) return { ok: false, reason: "failed" };
   }
 
   try {
-    const orderUrl = await orderLinkUrl(quote.gate.storefront.id, reserved.orderId);
+    const orderUrl = await orderLinkUrl(quote.store.storefront.id, reserved.orderId);
     if (!orderUrl) throw new Error("no order link could be built");
     const locale = parseLocale(buyer.locale) ?? DEFAULT_LOCALE;
     const t = await translatorFor(locale);
@@ -136,8 +113,8 @@ export async function placeStripeOrder(
       // closes after its order has already been released (the webhook then
       // has no order to read them from). Counted under the account the event
       // came from, so a seller rewriting these changes only their own count.
-      storefront_id: quote.gate.storefront.id,
-      product_id: quote.productId,
+      storefront_id: quote.store.storefront.id,
+      product_id: checkout.productId,
       origin: originForChannel(buyer.channel),
       plan_id: fee.sellerPlan,
       platform_fee_bps: String(fee.platformFeeBps),
@@ -152,18 +129,10 @@ export async function placeStripeOrder(
         locale: stripeLocale(locale),
         payment_method_types: ["card"],
         line_items: [
-          {
-            quantity: 1,
-            price_data: {
-              currency,
-              // What the items cost after every discount. One line for all of
-              // them: a per-item price would not always divide evenly.
-              unit_amount: quote.itemsCents,
-              product_data: { name: quote.quantity > 1 ? `${quote.quantity} × ${quote.title}` : quote.title },
-            },
-          },
-          // "Add to your order": one line each, at what the line is charged.
-          ...quote.addOns.map((line) => ({
+          // One Stripe line per order line, at what the line is charged after
+          // every discount, named "2 × Mug": a per-item price would not always
+          // divide evenly once a code's share is taken off.
+          ...quote.lines.map((line) => ({
             quantity: 1,
             price_data: {
               currency,
@@ -213,9 +182,9 @@ export async function placeStripeOrder(
     // the same page), and it cannot fail the checkout.
     if (!reserved.duplicate) {
       await recordFunnelPoint({
-        sellerId: quote.gate.ownerId,
-        storeId: quote.gate.storefront.id,
-        productId: quote.productId,
+        sellerId: quote.store.ownerId,
+        storeId: quote.store.storefront.id,
+        productId: checkout.productId,
         event: "checkout_started",
       });
     }

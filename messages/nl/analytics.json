@@ -216,6 +216,18 @@
       "awaiting": "Komt binnen met het reserveringsblok voor de kalender.",
       "readyToChart": "Klaar om weer te geven zodra de eerste reserveringen binnenkomen."
     },
+    "cart_add": {
+      "label": "In winkelwagen gelegd",
+      "description": "Kopers die een van jouw producten in hun winkelwagen legden.",
+      "count": "{count, plural, one {{formatted} keer toegevoegd} other {{formatted} keer toegevoegd}}",
+      "total": "Totaal in winkelwagen gelegd",
+      "emptyRange": "Niets in een winkelwagen gelegd in deze periode",
+      "overTime": "In winkelwagen gelegd in de tijd",
+      "acrossRange": "Producten in een winkelwagen gelegd over de geselecteerde periode.",
+      "byChannel": "In winkelwagen gelegd per kanaal",
+      "byWeekday": "In winkelwagen gelegd per weekdag",
+      "byStorefront": "In winkelwagen gelegd per etalage"
+    },
     "checkout_view": {
       "label": "Afrekenweergaven",
       "description": "Kopers die de afrekenpagina voor een van jouw producten hebben geopend.",

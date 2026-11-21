@@ -34,6 +34,9 @@ import {
   type StorefrontBlock,
 } from "@/types/storefront";
 import type { StorefrontPageData, StorefrontTileProduct } from "@/types/storefront-page";
+import type { TileQuickAddAction } from "@/components/storefront/ProductTileContent";
+import { useCart } from "@/components/cart/CartContext";
+import { QuickAddTile } from "./QuickAddTile";
 
 /**
  * A SELLER'S BOARD, AS A BUYER SEES IT: the masthead and the grid of tiles,
@@ -82,6 +85,7 @@ function asFaceProduct(tile: StorefrontTileProduct): Product {
     ...(tile.hoverImageUrl ? { hoverImageUrl: tile.hoverImageUrl } : {}),
     ...(tile.rating ? { rating: tile.rating } : {}),
     ...(tile.stockState ? { stockState: tile.stockState } : {}),
+    ...(tile.quickAdd ? { quickAdd: tile.quickAdd } : {}),
   };
 }
 
@@ -135,6 +139,8 @@ export function StorefrontBoard({
 }) {
   const t = useTranslations("ProductPage.storefront");
   const { theme, header } = page;
+  // Cards add to the cart only inside a page that has one.
+  const cart = useCart();
 
   const tiles = useMemo(
     () => new Map(page.products.map((tile) => [tile.id, { href: tile.href, product: asFaceProduct(tile) }])),
@@ -200,7 +206,7 @@ export function StorefrontBoard({
             const block = gridBlock.data;
             const tile = block.type === "product" ? tiles.get(block.productId) : undefined;
             const imageUrl = page.imageUrls[gridBlock.key] ?? null;
-            const face = (
+            const drawFace = (quickAddAction?: TileQuickAddAction) => (
               <>
                 <div className={TILE_FACE_CLASS} style={blockBlurStyle(block)}>
                   <BlockFace
@@ -209,11 +215,43 @@ export function StorefrontBoard({
                     theme={theme}
                     imageUrl={imageUrl}
                     look={page.tileLook}
+                    quickAddAction={quickAddAction}
                   />
                 </div>
                 <BlockBlurCopies block={block} theme={theme} imageUrl={imageUrl} />
               </>
             );
+            const card = block.type === "product" ? resolveCardStyle(theme, block.style) : null;
+            const frameClassName = cn(
+              tileFrameClass(block),
+              // What the card does on hover (cardHoverFrameClass): the cell is
+              // the group, the frame the thing that moves.
+              card && cardHoverFrameClass(card.hoverEffect, "board"),
+            );
+            // A card that puts its product in the cart (the cart is here, the
+            // seller's cards add to it, the product allows it, and the card
+            // shows a buy button): its link goes under the face, and its
+            // button is a button (QuickAddTile).
+            if (
+              tile?.product.quickAdd &&
+              block.type === "product" &&
+              cart &&
+              page.tileLook.quickAdd &&
+              card?.buyButton !== "none"
+            ) {
+              return (
+                <QuickAddTile
+                  href={tile.href}
+                  newTab={tilesOpenNewTab}
+                  frameClassName={frameClassName}
+                  productId={block.productId}
+                  optionIds={tile.product.quickAdd.optionIds}
+                  title={tile.product.title}
+                  renderFace={drawFace}
+                />
+              );
+            }
+            const face = drawFace();
             // A product tile is the way to its page. Every other block is
             // part of the picture and leads nowhere.
             return tile ? (
@@ -223,11 +261,7 @@ export function StorefrontBoard({
                 // neither this window nor the address of the page it was on.
                 {...(tilesOpenNewTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 className={cn(
-                  tileFrameClass(block),
-                  // What the card does on hover (cardHoverFrameClass): the
-                  // cell is the group, this link the thing that moves.
-                  block.type === "product" &&
-                    cardHoverFrameClass(resolveCardStyle(theme, block.style).hoverEffect, "board"),
+                  frameClassName,
                   // The ring is the board's own ink, not the dashboard's grey:
                   // the ink is chosen to read on the seller's background, and
                   // the grey is 2.3:1 on a cream one, short of the 3:1 a focus

@@ -74,7 +74,7 @@ async function fail(error: ActionError) {
   );
 }
 
-type Member = "productPage" | "checkoutPage";
+type Member = "productPage" | "checkoutPage" | "cartPage";
 
 export type PageConfigRouteSpec<Name extends Member> = {
   /** The StorefrontConfig member this route reads and writes. */

@@ -216,6 +216,28 @@ export function checkoutPath(
   return `${productPagePath(storefrontId, productId)}/checkout${query ? `?${query}` : ""}`;
 }
 
+/** `?cart=` carries a cart's id to one of our pages: the embedded shop's links
+ *  and the cart's own checkout. The page carries on with that cart, then
+ *  drops the id from the address (components/cart/CartContext.tsx). */
+export const CART_QUERY_PARAM = "cart";
+
+/** A storefront's cart as a page of its own (the embedded shop opens it). */
+export function cartPagePath(storefrontId: string, cartId?: string | null): string {
+  const path = `${PUBLIC_PAGES_PREFIX}${encodeURIComponent(storefrontId)}/cart`;
+  return cartId ? `${path}?${CART_QUERY_PARAM}=${encodeURIComponent(cartId)}` : path;
+}
+
+/** The checkout for a cart: its lines come from the cart, by its id. */
+export function cartCheckoutPath(storefrontId: string, cartId: string): string {
+  return `${PUBLIC_PAGES_PREFIX}${encodeURIComponent(storefrontId)}/checkout?${CART_QUERY_PARAM}=${encodeURIComponent(cartId)}`;
+}
+
+/** The same, absolute on the app's own origin: what the embed frame (on its
+ *  own origin) links to. */
+export function cartPageUrl(storefrontId: string, cartId?: string | null): string {
+  return appUrl(cartPagePath(storefrontId, cartId));
+}
+
 /**
  * An order's own page: the thank-you a buyer lands on, and the order status
  * page it stays afterwards. `orderRef` is the order's credential (see

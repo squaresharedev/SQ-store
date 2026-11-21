@@ -102,6 +102,7 @@
     "refundOrders": "Příliš mnoho vrácení peněz za krátkou dobu.",
     "connectPayments": "Příliš mnoho pokusů o propojení Stripe v krátké době.",
     "readCheckoutSettings": "Příliš mnoho pokusů o načtení nastavení pokladny v krátké době.",
+    "readCartSettings": "Příliš mnoho pokusů o načtení nastavení košíku v krátké době.",
     "changePlan": "Příliš mnoho změn plánu za krátkou dobu.",
     "saveDiscounts": "Příliš mnoho změn slev za krátkou dobu.",
     "moderateReviews": "Příliš mnoho změn recenzí v krátké době.",
@@ -139,6 +140,8 @@
     "connectPayments": "Stripe se kvůli problému na naší straně nepodařilo otevřít.",
     "loadCheckoutSettings": "Nastavení pokladny se kvůli problému na naší straně nepodařilo načíst.",
     "saveCheckoutSettings": "Nastavení pokladny se kvůli problému na naší straně nepodařilo uložit.",
+    "loadCartSettings": "Nastavení košíku se kvůli problému na naší straně nepodařilo načíst.",
+    "saveCartSettings": "Nastavení košíku se kvůli problému na naší straně nepodařilo uložit.",
     "loadPlans": "Váš plán se nepodařilo načíst kvůli chybě na naší straně.",
     "startCheckout": "Pokladnu se nepodařilo otevřít kvůli chybě na naší straně.",
     "openBillingPortal": "Fakturační údaje se nepodařilo otevřít kvůli chybě na naší straně.",
@@ -667,6 +670,11 @@
   "checkoutPageApi": {
     "notObjectFix": "Pošlete objekt JSON, např. '{'\"layout\": \"compact\"'}'.",
     "invalid": "Nastavení pokladny je neplatné.",
+    "invalidFix": "Zkontrolujte výše uvedené pole podle `limits` z požadavku GET na tuto adresu URL a zkuste to znovu."
+  },
+  "cartPageApi": {
+    "notObjectFix": "Pošlete objekt JSON, např. '{'\"quickAdd\": false'}'.",
+    "invalid": "Nastavení košíku je neplatné.",
     "invalidFix": "Zkontrolujte výše uvedené pole podle `limits` z požadavku GET na tuto adresu URL a zkuste to znovu."
   },
   "billing": {

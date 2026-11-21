@@ -331,6 +331,21 @@
       "required": "O título é obrigatório.",
       "tooLong": "O título deve ter {maximum} caracteres ou menos.",
       "unsupported": "O título contém caracteres não suportados."
+    },
+    "cartTitle": {
+      "required": "O título do carrinho é obrigatório.",
+      "tooLong": "O título do carrinho deve ter {maximum} caracteres ou menos.",
+      "unsupported": "O título do carrinho contém caracteres não suportados."
+    },
+    "cartNote": {
+      "required": "A nota do carrinho é obrigatória.",
+      "tooLong": "A nota do carrinho deve ter {maximum} caracteres ou menos.",
+      "unsupported": "A nota do carrinho contém caracteres não suportados."
+    },
+    "cartAddLabel": {
+      "required": "As palavras do botão Adicionar ao carrinho são obrigatórias.",
+      "tooLong": "As palavras do botão Adicionar ao carrinho devem ter {maximum} caracteres ou menos.",
+      "unsupported": "As palavras do botão Adicionar ao carrinho contêm caracteres não suportados."
     }
   },
   "email": {
@@ -391,6 +406,7 @@
     "reportTarget": "Esse item não é válido.",
     "moderationDecision": "Essa decisão não é válida.",
     "checkoutAttempt": "Esta tentativa de pagamento expirou. Recarregue a página e tente novamente.",
+    "cart": "Este carrinho expirou. Recarregue a página e tente novamente.",
     "product": "Esse produto não foi encontrado."
   },
   "handle": {

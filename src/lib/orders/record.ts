@@ -73,7 +73,9 @@ import { orderAddOnGoods } from "@/lib/orders/add-on-lines";
 import { PURCHASE_QUANTITY_MAX } from "@/lib/validation/product";
 import { DISCOUNT_CODE_PATTERN } from "@/lib/discounts/code";
 import { GIFT_MESSAGE_MAX } from "@/types/storefront";
-import { ADD_ONS_MAX } from "@/types/product";
+import { CART_LINES_MAX } from "@/lib/cart/limits";
+import { closeCart, closeOrderCart } from "@/lib/cart/store";
+import { ORDER_LINE_SOURCES, type OrderLineSource } from "@/lib/checkout/lines";
 import { DEFAULT_LOCALE, parseLocale } from "@/i18n/locales";
 import { PLAN_IDS, type PlanId } from "@/lib/billing/plans";
 import { recordOrderFees } from "@/lib/billing/fee-ledger";
@@ -135,15 +137,23 @@ export type PaidCheckout = {
   /** A download buyer agreed to immediate supply (and the loss of the right to
    *  withdraw). Recorded as the moment the order was written. */
   supplyConsent?: boolean;
-  /** "Add to your order": the other products sold in this order, in the
-   *  seller's order. Each must be the same seller's and the same kind as the
-   *  main product; their amounts are part of amountCents. */
-  addOns?: PaidAddOn[];
+  /** Every line after the first (a cart's other products, or what was taken
+   *  from "Add to your order"), in order. Each must be the same seller's; a
+   *  posted line and a download may share an order. Their amounts are part of
+   *  amountCents. */
+  moreLines?: PaidLine[];
+  /** A fingerprint of every line (lib/checkout/lines-digest.ts): a repeated
+   *  attempt is answered with its order only for the same lines. */
+  linesDigest?: string;
+  /** The cart this order was paid from, so payment can close it. */
+  cartId?: string | null;
 };
 
-/** One add-on line of a paid checkout, as the quote priced it. */
-export type PaidAddOn = {
+/** One line after the first of a paid checkout, as the quote priced it. */
+export type PaidLine = {
   productId: string;
+  /** Where the line came from, for the seller's numbers. */
+  source: OrderLineSource;
   /** The version, in the seller's words: [{ label, value }]. */
   selection: unknown;
   /** The REGULAR price of one, snapshotted as product_price_cents. */
@@ -215,10 +225,11 @@ const paidCheckoutSchema = z.object({
   // it back out of provider metadata.
   giftMessage: z.string().trim().min(1).max(GIFT_MESSAGE_MAX).nullable().optional(),
   supplyConsent: z.boolean().optional(),
-  addOns: z
+  moreLines: z
     .array(
       z.object({
         productId: z.uuid(),
+        source: z.enum(ORDER_LINE_SOURCES),
         selection: z.unknown(),
         unitPriceCents: z.number().int().min(0),
         quantity: z.number().int().min(1).max(PURCHASE_QUANTITY_MAX),
@@ -226,12 +237,16 @@ const paidCheckoutSchema = z.object({
         discountId: z.uuid().nullable().optional(),
       }),
     )
-    .max(ADD_ONS_MAX)
+    // The order's own row is the first line.
+    .max(CART_LINES_MAX - 1)
     .optional(),
+  // Mirror the orders.lines_digest CHECK.
+  linesDigest: z.string().regex(/^[0-9a-f]{64}$/).optional(),
+  cartId: z.uuid().nullable().optional(),
 });
 
-/** What the writer reads of an add-on's product. */
-type AddOnProductRow = {
+/** What the writer reads of a line's product. */
+type LineProductRow = {
   id: string;
   owner_id: string;
   title: string;
@@ -254,6 +269,8 @@ type ProductRow = {
  */
 export async function recordPaidOrder(input: PaidCheckout): Promise<RecordResult> {
   const result = await placeOrder(input, { status: "paid" });
+  // Paid at once: the cart it came from is done.
+  if (result.ok && input.cartId) await closeCart(createAdminClient(), input.cartId);
   if (result.ok) {
     // No provider collected this sale's fee, so nothing will report it: the
     // ledger is written from the order itself. Idempotent, and never the
@@ -297,7 +314,11 @@ export async function confirmPendingOrder(
     });
     if (error) throw error;
     const orderId = (data as { order_id: string | null } | null)?.order_id ?? null;
-    if (orderId) await afterResponse(() => announceOrder(orderId));
+    if (orderId) {
+      // Paid now: the cart it came from (if any) is done.
+      await closeOrderCart(createAdminClient(), orderId);
+      await afterResponse(() => announceOrder(orderId));
+    }
     return { ok: true, orderId };
   } catch (error) {
     console.error("[orders] confirming a paid checkout failed:", error instanceof Error ? error.message : error);
@@ -335,7 +356,7 @@ async function placeOrder(
     applicationFeeCents !== parsed.data.platformFeeCents + adFeeCents ||
     applicationFeeCents > parsed.data.amountCents ||
     (parsed.data.shippingCents ?? 0) +
-      (parsed.data.addOns ?? []).reduce((total, line) => total + line.amountCents, 0) >
+      (parsed.data.moreLines ?? []).reduce((total, line) => total + line.amountCents, 0) >
       parsed.data.amountCents
   ) {
     console.error("[orders] refused a malformed checkout", parsed.error?.issues[0]?.path);
@@ -372,35 +393,39 @@ async function placeOrder(
       storefrontId = storefront ? checkout.storefrontId : null;
     }
 
-    const ships = product.digital_file_key === null;
-
-    // The add-on lines: each one this seller's own product, and the same kind
-    // as the main one (an order is sent one way). Read here, not taken from the
-    // caller, like the main product: the title and the download are snapshots
-    // of the row as it is now.
-    const addOnInputs = checkout.addOns ?? [];
-    const addOnRows = new Map<string, AddOnProductRow>();
-    if (addOnInputs.length > 0) {
+    // The other lines: each one this seller's own product. Read here, not taken
+    // from the caller, like the first line: the title and the download are
+    // snapshots of the row as it is now.
+    const lineInputs = checkout.moreLines ?? [];
+    const lineRows = new Map<string, LineProductRow>();
+    if (lineInputs.length > 0) {
       const { data: rows, error: addOnError } = await admin
         .from("products")
         .select("id, owner_id, title, digital_file_key")
         .in(
           "id",
-          addOnInputs.map((line) => line.productId),
+          lineInputs.map((line) => line.productId),
         );
       if (addOnError) throw addOnError;
-      for (const row of (rows ?? []) as AddOnProductRow[]) addOnRows.set(row.id, row);
-      for (const line of addOnInputs) {
-        const row = addOnRows.get(line.productId);
+      for (const row of (rows ?? []) as LineProductRow[]) lineRows.set(row.id, row);
+      for (const line of lineInputs) {
+        const row = lineRows.get(line.productId);
         if (!row) return { ok: false, reason: "unknown_product" };
         if (row.owner_id !== sellerId) {
-          console.error("[orders] an add-on is another seller's product");
+          console.error("[orders] a line is another seller's product");
           return { ok: false, reason: "seller_mismatch" };
         }
-        if ((row.digital_file_key === null) !== ships) return { ok: false, reason: "invalid" };
       }
     }
-    const addOnsCharged = addOnInputs.reduce((total, line) => total + line.amountCents, 0);
+    // The order is SENT when anything in it is a parcel; a download in the
+    // same order is had straight away from the order page.
+    const ships =
+      product.digital_file_key === null ||
+      lineInputs.some((line) => lineRows.get(line.productId)!.digital_file_key === null);
+    const hasDownloads =
+      product.digital_file_key !== null ||
+      lineInputs.some((line) => lineRows.get(line.productId)!.digital_file_key !== null);
+    const linesCharged = lineInputs.reduce((total, line) => total + line.amountCents, 0);
 
     const shipTo = ships ? parseShipTo(input.shipTo) : null;
     const selection = parseOrderSelection(input.selection);
@@ -417,26 +442,27 @@ async function placeOrder(
     const regularItems = unitPriceCents * checkout.quantity;
     const discountCents = Math.min(
       regularItems,
-      Math.max(0, regularItems - (checkout.amountCents - (checkout.shippingCents ?? 0) - addOnsCharged)),
+      Math.max(0, regularItems - (checkout.amountCents - (checkout.shippingCents ?? 0) - linesCharged)),
     );
     const attribution = await verifyAttribution(admin, sellerId, checkout.discountId ?? null, checkout.credit ?? null);
-    const addOnSales = await ownedDiscountIds(
+    const lineDiscountIds = await ownedDiscountIds(
       admin,
       sellerId,
-      addOnInputs.flatMap((line) => (line.discountId ? [line.discountId] : [])),
+      lineInputs.flatMap((line) => (line.discountId ? [line.discountId] : [])),
     );
-    const addOns = addOnInputs.map((line) => {
-      const row = addOnRows.get(line.productId)!;
+    const extraLines = lineInputs.map((line) => {
+      const row = lineRows.get(line.productId)!;
       const regular = line.unitPriceCents * line.quantity;
       const lineDiscount = Math.min(regular, Math.max(0, regular - line.amountCents));
       return {
         product_id: line.productId,
+        source: line.source,
         product_title: row.title,
         product_price_cents: line.unitPriceCents,
         quantity: line.quantity,
         amount_cents: line.amountCents,
         discount_cents: lineDiscount,
-        discount_id: lineDiscount > 0 && line.discountId && addOnSales.has(line.discountId) ? line.discountId : null,
+        discount_id: lineDiscount > 0 && line.discountId && lineDiscountIds.has(line.discountId) ? line.discountId : null,
         selected_options: parseOrderSelection(line.selection),
         // Snapshotted for the same reason as the main product's download.
         digital_file_key: row.digital_file_key,
@@ -475,13 +501,16 @@ async function placeOrder(
         checkout_session_id: checkout.checkoutSessionId,
         // A gift message belongs with a parcel; a download has none to go in.
         gift_message: ships ? (checkout.giftMessage ?? null) : null,
-        supply_consent_at: !ships && checkout.supplyConsent ? new Date().toISOString() : null,
+        supply_consent_at: hasDownloads && checkout.supplyConsent ? new Date().toISOString() : null,
         // The file this order paid for, snapshotted so a replaced or deleted
         // product cannot take the buyer's download with it.
         digital_file_key: product.digital_file_key,
         pending_expires_at: as.status === "pending" ? as.expiresAt.toISOString() : null,
-        // Not an orders column: order_place writes these to order_add_ons.
-        add_ons: addOns,
+        lines_digest: checkout.linesDigest ?? null,
+        cart_id: checkout.cartId ?? null,
+        // Not an orders column: order_place writes these to order_add_ons, the
+        // table that holds every line after the first.
+        add_ons: extraLines,
       } as unknown as Json,
     });
     if (error) {
@@ -503,7 +532,7 @@ async function placeOrder(
     }
     if (!placed.duplicate) {
       for (const low of placed.add_on_low_stock ?? []) {
-        const title = addOnRows.get(low.product_id)?.title;
+        const title = lineRows.get(low.product_id)?.title;
         if (!title) continue;
         await afterResponse(() => tellSellerStockIsLow(sellerId, low.product_id, title, low.stock_left));
       }
@@ -517,7 +546,7 @@ async function placeOrder(
 
 /** Everything announceOrder reads off an order to say what it has to say. */
 const ANNOUNCE_SELECT =
-  "id, seller_id, product_id, storefront_id, status, product_title, quantity, selected_options, ship_to, amount_cents, shipping_cents, currency, buyer_email, buyer_locale, gift_message, discount_cents, discount_id, discount_code_id, discount_code, digital_file_key, supply_consent_at, created_at, seller_notified_at, confirmation_sent_at";
+  "id, seller_id, product_id, storefront_id, status, product_title, quantity, selected_options, ship_to, amount_cents, shipping_cents, currency, buyer_email, buyer_locale, gift_message, discount_cents, discount_id, discount_code_id, discount_code, digital_file_key, supply_consent_at, fulfilment_status, created_at, seller_notified_at, confirmation_sent_at";
 
 type AnnounceRow = {
   id: string;
@@ -541,6 +570,7 @@ type AnnounceRow = {
   discount_code: string | null;
   digital_file_key: string | null;
   supply_consent_at: string | null;
+  fulfilment_status: string;
   created_at: string;
   seller_notified_at: string | null;
   confirmation_sent_at: string | null;
@@ -566,7 +596,8 @@ export async function announceOrder(orderId: string): Promise<void> {
     // An order still waiting on its payment has nothing to announce yet.
     if (!order || order.status !== "paid") return;
 
-    const ships = order.digital_file_key === null;
+    // Anything posted makes it a parcel (a cart can mix parcels and downloads).
+    const ships = order.fulfilment_status !== "not_required";
     const shipTo = ships ? parseShipTo(order.ship_to) : null;
     const selection = parseOrderSelection(order.selected_options);
     // The buyer's own code, when it is what set the price.
@@ -620,7 +651,7 @@ export async function announceOrder(orderId: string): Promise<void> {
         codeDiscount: byCode && order.discount_code ? { code: order.discount_code, cents: order.discount_cents } : null,
         currency: order.currency,
         isDigital: !ships,
-        supplyConsent: !ships && order.supply_consent_at !== null,
+        supplyConsent: order.supply_consent_at !== null,
         placedAt: new Date(order.created_at),
       });
       if (sent) await markAnnounced(admin, order.id, "confirmation_sent_at");

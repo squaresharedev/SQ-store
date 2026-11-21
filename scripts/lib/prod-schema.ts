@@ -161,14 +161,46 @@ export const SCHEMA_REQUIREMENTS: readonly SchemaRequirement[] = [
   // 20261117_record_signal: on-conflict-do-nothing write path for signals.
   { kind: "function", signature: "record_signal(uuid,text,text,uuid,text,text,integer,text,text,jsonb)", migration: "20261117_record_signal.sql" },
   { kind: "body", signature: "dashboard_orders_aggregate(uuid,timestamp with time zone)", includes: "filter (where status = 'paid'", migration: "20261117_perf_indexes.sql" },
-  // A line of the narrowed in_range select (the old body used select *).
-  { kind: "body", signature: "analytics_aggregate(uuid,date,date)", includes: "o.amount_cents, o.platform_fee_cents,", migration: "20261117_perf_indexes.sql" },
+  // The narrowed in_range select (20261117) as 20261120 rewrote it: a paid
+  // order counts what it kept after its refunded lines.
+  { kind: "body", signature: "analytics_aggregate(uuid,date,date)", includes: "o.platform_fee_cents, o.buyer_email, o.channel", migration: "20261120_shopping_cart.sql" },
   { kind: "relation", name: "storefront_signals_storefront_id_idx", migration: "20261117_perf_indexes.sql" },
   { kind: "relation", name: "storefront_funnel_daily_day_idx", migration: "20261117_perf_indexes.sql" },
   { kind: "relation", name: "seller_funnel_events_account_id_idx", migration: "20261117_perf_indexes.sql" },
   { kind: "relation", name: "reviews_seller_reviewed_idx", migration: "20261117_perf_indexes.sql" },
   { kind: "relation", name: "reviews_seller_external_idx", migration: "20261117_perf_indexes.sql" },
   { kind: "relation", name: "reviews_seller_held_idx", migration: "20261117_perf_indexes.sql" },
+  // 20261120_shopping_cart: carts, every order line's source, a cart's worth
+  // of lines in order_place. The order writer sends lines_digest and cart_id
+  // on every order, so without these no order can be placed at all.
+  { kind: "relation", name: "carts", migration: "20261120_shopping_cart.sql" },
+  { kind: "column", table: "order_add_ons", column: "source", migration: "20261120_shopping_cart.sql" },
+  { kind: "column", table: "orders", column: "lines_digest", migration: "20261120_shopping_cart.sql" },
+  { kind: "column", table: "orders", column: "cart_id", migration: "20261120_shopping_cart.sql" },
+  // The orders lists match any line through these (lib/orders/queries.ts).
+  { kind: "column", table: "orders", column: "more_product_ids", migration: "20261120_shopping_cart.sql" },
+  { kind: "column", table: "orders", column: "more_titles", migration: "20261120_shopping_cart.sql" },
+  { kind: "body", signature: "order_place(jsonb)", includes: "more_product_ids", migration: "20261120_shopping_cart.sql" },
+  // Refunded lines leave the figures (section 7).
+  { kind: "body", signature: "dashboard_orders_aggregate(uuid,timestamp with time zone)", includes: "kept_cents", migration: "20261120_shopping_cart.sql" },
+  { kind: "function", signature: "carts_sweep(timestamp with time zone)", migration: "20261120_shopping_cart.sql" },
+  { kind: "body", signature: "order_place(jsonb)", includes: "at most 19", migration: "20261120_shopping_cart.sql" },
+  { kind: "relation", name: "order_line_refunds", migration: "20261120_shopping_cart.sql" },
+  {
+    kind: "function",
+    signature: "order_apply_line_refund(uuid,uuid,text,boolean,integer)",
+    migration: "20261120_shopping_cart.sql",
+  },
+  { kind: "function", signature: "order_line_refund_amount(uuid,uuid)", migration: "20261120_shopping_cart.sql" },
+  // A line refunded on its own takes its product's verified badge (section 6),
+  // "Added to cart" is a signal kind (section 8).
+  {
+    kind: "body",
+    signature: "order_apply_line_refund(uuid,uuid,text,boolean,integer)",
+    includes: "is_verified_buyer",
+    migration: "20261120_shopping_cart.sql",
+  },
+  { kind: "check", constraint: "storefront_signals_kind_check", allows: "cart_add", migration: "20261120_shopping_cart.sql" },
 ];
 
 /** A SQL string literal. Every value below is a constant from this file, and

@@ -41,11 +41,14 @@ export function useReviewDraft({
   state,
   givenRating,
   preview,
+  onSent,
 }: {
   orderRef: string;
   productId: string;
   defaultName: string | null;
   state: "open" | "done";
+  /** Told once the review is in (an order of several products ticks it). */
+  onSent?: () => void;
   /** The stars of the review this order already has. */
   givenRating: number | null;
   preview: boolean;
@@ -71,6 +74,7 @@ export function useReviewDraft({
     if (sending || rating === 0 || !body.trim() || !name.trim()) return;
     if (preview) {
       setStage("sent");
+      onSent?.();
       return;
     }
     setSending(true);
@@ -84,6 +88,7 @@ export function useReviewDraft({
       const result = (await response.json().catch(() => null)) as { ok: boolean; error?: string } | null;
       if (result?.ok || result?.error === "already_reviewed") {
         setStage("sent");
+        onSent?.();
         return;
       }
       setError(result?.error === "not_eligible" ? "notEligible" : result?.error === "rate_limited" ? "rateLimited" : "failed");
@@ -150,11 +155,14 @@ export function ReviewPanel({
   draft,
   theme,
   bare = false,
+  subject,
   onDone,
 }: {
   draft: ReviewDraft;
   theme: CheckoutTheme;
   bare?: boolean;
+  /** The product, named under the question, on an order of several. */
+  subject?: string;
   onDone?: () => void;
 }) {
   const t = useTranslations("ProductPage.order.review");
@@ -234,9 +242,16 @@ export function ReviewPanel({
     >
       {/* In the dialog, the dialog's own title asks the question. */}
       {!bare && (
-        <h2 id={ids.heading} className="text-lg font-semibold">
-          {t("title")}
-        </h2>
+        <div className="flex flex-col gap-1">
+          <h2 id={ids.heading} className="text-lg font-semibold">
+            {t("title")}
+          </h2>
+          {subject && (
+            <p className="text-sm opacity-75" data-order-review-subject="">
+              {subject}
+            </p>
+          )}
+        </div>
       )}
 
       <fieldset className="flex flex-col items-center gap-2">

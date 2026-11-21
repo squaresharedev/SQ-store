@@ -216,6 +216,18 @@
       "awaiting": "Arriva con il blocco di prenotazione calendario.",
       "readyToChart": "Pronto per il grafico non appena arrivano le prenotazioni."
     },
+    "cart_add": {
+      "label": "Aggiunte al carrello",
+      "description": "Acquirenti che hanno aggiunto uno dei tuoi prodotti al carrello.",
+      "count": "{count, plural, one {{formatted} aggiunta} other {{formatted} aggiunte}}",
+      "total": "Totale aggiunte al carrello",
+      "emptyRange": "Nessuna aggiunta al carrello in questo periodo",
+      "overTime": "Aggiunte al carrello nel tempo",
+      "acrossRange": "Prodotti aggiunti al carrello nel periodo selezionato.",
+      "byChannel": "Aggiunte al carrello per canale",
+      "byWeekday": "Aggiunte al carrello per giorno della settimana",
+      "byStorefront": "Aggiunte al carrello per vetrina"
+    },
     "checkout_view": {
       "label": "Visualizzazioni checkout",
       "description": "Acquirenti che hanno aperto il checkout per uno dei tuoi prodotti.",

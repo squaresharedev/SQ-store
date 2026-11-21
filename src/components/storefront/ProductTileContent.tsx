@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { ArrowRight, Image as ImageIcon, Star } from "lucide-react";
+import { ArrowRight, Check, Image as ImageIcon, Star } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { CART_ICON } from "@/components/cart/CartButton";
+import { CART_LOOK } from "@/components/cart/cart-look";
 import type { Locale } from "@/i18n/locales";
 import type { Product } from "@/types/product";
 import { formatFixed } from "@/lib/format/intl";
@@ -113,6 +116,16 @@ function priceBackdrop(card: CardStyle, position: PriceTagPosition): string {
     : CARD_SURFACE;
 }
 
+/** A buyer's board turning a card's buy button into a real "Add to cart"
+ *  (StorefrontBoard's quick-add tile). `words` stand in for the label for a
+ *  moment ("Added", or why it could not go in). */
+export type TileQuickAddAction = {
+  state: "idle" | "adding" | "added" | "refused";
+  words?: string;
+  ariaLabel: string;
+  onAdd: () => void;
+};
+
 /**
  * The product face of a grid tile. Card appearance comes from ONE resolved
  * CardStyle (the theme's card settings with the block's own overrides laid on
@@ -169,6 +182,7 @@ export function ProductTileContent({
   spotDrag,
   look,
   hover = "board",
+  quickAddAction,
 }: {
   product: Product;
   theme: StorefrontTheme;
@@ -193,11 +207,16 @@ export function ProductTileContent({
    *  pointer and focus by default, the pointer alone in the designer, nothing
    *  while a gesture owns the tile. */
   hover?: CardHoverTrigger;
+  /** A buyer's board making this card's buy button a real "Add to cart"
+   *  (StorefrontBoard). Everywhere else (the designer, previews) the same
+   *  button is drawn, inert. */
+  quickAddAction?: TileQuickAddAction;
 }) {
   const tCommon = useTranslations("Common");
   const tSale = useTranslations("ProductPage.sale");
   const tAddOns = useTranslations("ProductPage.addOns");
   const tSpotDrag = useTranslations("Storefront.spotDrag");
+  const tCart = useTranslations("ProductPage.cart");
   const saleWords = useSaleChipWords();
   const locale = useLocale();
   const card = resolveCardStyle(theme, overrides);
@@ -216,6 +235,13 @@ export function ProductTileContent({
   const lowStock = card.showLowStock && stock === "low_stock";
   const hasDetails = rating !== null || lowStock;
   const buyLook = card.buyButton !== "none" && !soldOut && !outOfStock ? card.buyButton : null;
+  // THE CARD LABEL RULE. A card whose product can go straight in the cart
+  // (Product.quickAdd) on a board whose cards add to it (TileLook.quickAdd)
+  // says what the cart's button says ("Add to cart", or the seller's words
+  // for it); every other card says what the product page's button says. The
+  // seller's own words for the cards win either way.
+  const quickAdd = tileLook.quickAdd && product.quickAdd ? tileLook.quickAdd : null;
+  const buyLabel = card.buyButtonLabel ?? (quickAdd ? (quickAdd.label ?? tCart("add")) : tileLook.buyLabel);
   // Framing (imageRef) shows the one photo being framed, still.
   const zoom = card.hoverEffect === "zoom" && hover !== "still" && !imageRef;
   const hoverPhotoUrl =
@@ -238,11 +264,18 @@ export function ProductTileContent({
   const awaitingReveal = revealHoverImage !== undefined;
   useEffect(() => {
     if (!awaitingReveal) return;
-    const link = faceRef.current?.closest("a");
-    if (!link) return;
+    // The tile's link wraps the face, or (a card that adds to the cart,
+    // QuickAddTile) lies UNDER it with the face letting the pointer through:
+    // either way the tile's frame hears the pointer and focus first.
+    const tile = faceRef.current?.closest("a, [data-storefront-tile]");
+    if (!tile) return;
     const reveal = () => setHoverImageMounted(true);
-    link.addEventListener("focus", reveal);
-    return () => link.removeEventListener("focus", reveal);
+    tile.addEventListener("focusin", reveal);
+    tile.addEventListener("pointerenter", reveal);
+    return () => {
+      tile.removeEventListener("focusin", reveal);
+      tile.removeEventListener("pointerenter", reveal);
+    };
   }, [awaitingReveal]);
 
   // A token in flight is drawn where it is GOING, not where it is stored: the
@@ -511,14 +544,26 @@ export function ProductTileContent({
   // cards their own words and colours, with an arrow that steps right on
   // hover. Not a link of its own: on a buyer's board the whole card already
   // is one, to the same page.
-  const buyRow = buyLook ? (
-    <div
-      data-tile-buy={buyLook}
-      className="shrink-0 bg-card py-1.5"
-      style={{ ...titleBandStyle(card.titleInset), ...titleBandFontStyle() }}
-    >
-      <span className={tileBuyButtonClass(card.cornerRadius)} style={tileBuyButtonStyle(buyLook, tileLook.buy, card)}>
-        <span className={tileBuyLabelClass(buyLook)}>{card.buyButtonLabel ?? tileLook.buyLabel}</span>
+  //
+  // A card that adds to the cart carries the cart's icon where the arrow was
+  // (an arrow says "goes somewhere"), turning to a spinner and a tick as it
+  // goes in. On a buyer's board (quickAddAction) it is a real button, which
+  // StorefrontBoard keeps OUT of the card's link.
+  const buyStyle = buyLook ? tileBuyButtonStyle(buyLook, tileLook.buy, card) : undefined;
+  const CartIcon = CART_ICON[CART_LOOK.icon];
+  const quickState = quickAdd ? (quickAddAction?.state ?? "idle") : null;
+  const buyInner = buyLook ? (
+    <>
+      <span className={tileBuyLabelClass(buyLook)}>{(quickAdd && quickAddAction?.words) || buyLabel}</span>
+      {quickState === "adding" ? (
+        <span className="inline-flex shrink-0" style={INLINE_ICON_STYLE}>
+          <Spinner className="size-full" />
+        </span>
+      ) : quickState === "added" ? (
+        <Check aria-hidden="true" className="shrink-0" style={INLINE_ICON_STYLE} strokeWidth={2.5} />
+      ) : quickState === "refused" ? null : quickState ? (
+        <CartIcon aria-hidden="true" data-tile-buy-cart="" className="shrink-0" style={INLINE_ICON_STYLE} strokeWidth={2.25} />
+      ) : (
         <ArrowRight
           aria-hidden="true"
           data-tile-buy-arrow=""
@@ -526,7 +571,41 @@ export function ProductTileContent({
           style={INLINE_ICON_STYLE}
           strokeWidth={2.25}
         />
-      </span>
+      )}
+    </>
+  ) : null;
+  const buyRow = buyLook ? (
+    <div
+      data-tile-buy={buyLook}
+      className="shrink-0 bg-card py-1.5"
+      style={{ ...titleBandStyle(card.titleInset), ...titleBandFontStyle() }}
+    >
+      {quickAdd && quickAddAction ? (
+        <button
+          type="button"
+          onClick={quickAddAction.onAdd}
+          aria-label={quickAddAction.ariaLabel}
+          aria-disabled={quickState === "adding" || undefined}
+          className={cn(
+            tileBuyButtonClass(card.cornerRadius),
+            // The card under it lets the pointer through to its link; this
+            // button takes it back.
+            "pointer-events-auto cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+          )}
+          style={{ ...buyStyle, outlineColor: buyStyle?.backgroundColor ?? buyStyle?.color }}
+          data-tile-quick-add={quickState ?? undefined}
+        >
+          {buyInner}
+        </button>
+      ) : (
+        <span
+          className={tileBuyButtonClass(card.cornerRadius)}
+          style={buyStyle}
+          data-tile-quick-add={quickState ?? undefined}
+        >
+          {buyInner}
+        </span>
+      )}
     </div>
   ) : null;
 

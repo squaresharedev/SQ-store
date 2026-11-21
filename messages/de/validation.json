@@ -331,6 +331,21 @@
       "required": "Die Überschrift ist erforderlich.",
       "tooLong": "Die Überschrift darf höchstens {maximum} Zeichen lang sein.",
       "unsupported": "Die Überschrift enthält nicht unterstützte Zeichen."
+    },
+    "cartTitle": {
+      "required": "Die Warenkorb-Überschrift ist erforderlich.",
+      "tooLong": "Die Warenkorb-Überschrift darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Die Warenkorb-Überschrift enthält nicht unterstützte Zeichen."
+    },
+    "cartNote": {
+      "required": "Die Warenkorb-Notiz ist erforderlich.",
+      "tooLong": "Die Warenkorb-Notiz darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Die Warenkorb-Notiz enthält nicht unterstützte Zeichen."
+    },
+    "cartAddLabel": {
+      "required": "Der Text für \"In den Warenkorb\" ist erforderlich.",
+      "tooLong": "Der Text für \"In den Warenkorb\" darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Der Text für \"In den Warenkorb\" enthält nicht unterstützte Zeichen."
     }
   },
   "email": {
@@ -391,6 +406,7 @@
     "reportTarget": "Dieses Element ist ungültig.",
     "moderationDecision": "Diese Entscheidung ist ungültig.",
     "checkoutAttempt": "Dieser Checkout ist abgelaufen. Lade die Seite neu und versuche es erneut.",
+    "cart": "Dieser Warenkorb ist abgelaufen. Lade die Seite neu und versuche es erneut.",
     "product": "Dieses Produkt konnte nicht gefunden werden."
   },
   "handle": {

@@ -89,7 +89,7 @@ the page is addressable without matching on a heading string.
 
 One per source: `data-analytics-section="<id>"`, where the id is `sales` or a
 signal kind (`storefront_view`, `product_click`, `email_signup`, `booking`,
-`product_view`, `checkout_view`).
+`product_view`, `cart_add`, `checkout_view`).
 
 **A section is absent when the seller does not run that source.** Registered is
 not the same as relevant: a source appears only if it has a live producer, or
@@ -245,7 +245,8 @@ did I earn".
 | `storefront_view` | the embed frame (`/e/[key]/[...sites]`) or the hosted storefront (`/s/[storefrontId]`) serving a visitor, recorded server-side after the response; also `GET /api/embed/[key]` serving a payload to an allowed origin | live |
 | `product_click` | the hosted product page serving a buyer who arrived from an embed tile (`?via=embed`), recorded server-side beside its `product_view` | live |
 | `product_view` | the hosted product page (`/s/[storefrontId]/p/[productId]`) serving a buyer, recorded server-side after the response | live |
-| `checkout_view` | the hosted checkout (`/s/[storefrontId]/p/[productId]/checkout`) serving a buyer, recorded the same way | live |
+| `cart_add` | the cart route (`POST /api/cart/[storefrontId]`) putting a line in a buyer's cart, recorded server-side after the response; one per visitor, per product, per hour | live (dark until the cart is switched on) |
+| `checkout_view` | the hosted checkout (`/s/[storefrontId]/p/[productId]/checkout`, or `/s/[storefrontId]/checkout` for a cart) serving a buyer, recorded the same way | live |
 | `email_signup` | The email signup block's server handler | not built |
 | `booking` | The calendar booking block's server handler | not built |
 | `funnel` views, opens | the `storefront_view` and `product_click` rows above, the embed channel's share | live |

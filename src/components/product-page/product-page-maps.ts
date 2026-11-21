@@ -199,13 +199,18 @@ export function ctaStyle(cta: CtaAppearance): CSSProperties {
 }
 
 /**
- * The editor's ghost button: what a page with nowhere to send a buyer draws.
+ * The buy button's shape with no fill: outlined and lettered in the PAGE's
+ * ink (which reads on the page by construction; the button's fill may not).
+ * Two uses, one look:
  *
- * Deliberately NOT the seller's colours. It is the absence of a destination
- * being reported, so it takes the page's ink and the button's shape and
- * nothing else — a fully styled button that does nothing would look finished.
+ *   - The page's SECOND action beside the buy button ("Add to cart" beside
+ *     "Buy now", whichever the seller leads with), so the two read as one
+ *     pair with one clear first choice.
+ *   - The editor's ghost button: what a page with nowhere to send a buyer
+ *     draws. Deliberately not the seller's colours: a fully styled button that
+ *     does nothing would look finished.
  */
-export function ctaGhostStyle(cta: CtaAppearance, ink: string): CSSProperties {
+export function ctaOutlineStyle(cta: CtaAppearance, ink: string): CSSProperties {
   return {
     backgroundColor: "transparent",
     color: ink,
