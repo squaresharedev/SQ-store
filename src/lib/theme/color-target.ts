@@ -7,14 +7,18 @@ import {
   type CardStyle,
   type CardStyleOverrides,
   type HeaderLine,
+  type PaletteSlot,
   type StorefrontBlock,
   type StorefrontHeader,
+  type StorefrontTextStyles,
   type StorefrontTheme,
   type TextBlock,
 } from "@/types/storefront";
 import { isStrictHexColor } from "@/lib/validation/predicates";
+import { derivePalette } from "@/lib/storefront/palette";
 import { rangeColor } from "@/lib/storefront/text-spans";
 import { cardLookColorField, type CardLookColorKind } from "@/lib/storefront/card-look-fields";
+import { PALETTE_SLOT_LABELS } from "./palette-swatches";
 import type { MessageKey } from "@/i18n/types";
 // Buyer-safe primitives live in the core file; this module re-exports them
 // for all existing importers while importing them locally so internal
@@ -68,7 +72,10 @@ export type ColorTargetRef =
   | { kind: "title-shadow"; blockKey?: string }
   // The card look's three colours (Photo cards: lib/storefront/card-look-fields),
   // on the same two scopes. One kind per field.
-  | { kind: CardLookColorKind; blockKey?: string };
+  | { kind: CardLookColorKind; blockKey?: string }
+  // One of the palette's five colours. Changing it recolours everything
+  // painted in the colour it replaces (lib/storefront/palette).
+  | { kind: "palette"; slot: PaletteSlot };
 // A "product-page-text" ref lived here. The product page's ink is derived from
 // the storefront background's lightness now, so there is no colour to pick.
 
@@ -103,7 +110,12 @@ export function headerLineVisible(
 export function textBlockThemeColor(
   accent: string,
   block: Pick<TextBlock, "variant">,
+  /** The storefront's saved text styles: a style with a colour of its own is
+   *  what its blocks follow. Absent = the coded defaults above. */
+  textStyles?: StorefrontTextStyles,
 ): string {
+  const saved = textStyles?.[block.variant]?.color;
+  if (saved && isStrictHexColor(saved)) return saved;
   return block.variant === "heading" ? accent : DEFAULT_TEXT_COLOR;
 }
 
@@ -379,7 +391,7 @@ export function resolveColorTarget(
       const block = find(blocks, ref.blockKey);
       if (block?.type !== "text") return null;
       const themeColor = gate(
-        textBlockThemeColor(theme.accent, block),
+        textBlockThemeColor(theme.accent, block, theme.textStyles),
         DEFAULT_TEXT_COLOR,
       );
       // Words selected in the in-place editor are what a colour would land on,
@@ -435,6 +447,13 @@ export function resolveColorTarget(
       if (block?.type !== "product") return null;
       return cardLookColorField(theme, block.style ?? {}, ref.kind);
     }
+    // Always resolves: a storefront without a palette of its own still has
+    // the one derived from what it wears, and that is what the swatch shows.
+    case "palette":
+      return {
+        label: PALETTE_SLOT_LABELS[ref.slot].name,
+        value: gate(derivePalette(theme)[ref.slot], DEFAULT_TEXT_COLOR),
+      };
   }
 }
 
@@ -445,7 +464,7 @@ export function resolveColorTarget(
  * share a kind, and two of them can share a block.
  */
 export function colorTargetKey(ref: ColorTargetRef): string {
-  const part = "part" in ref ? ref.part : "";
+  const part = "part" in ref ? ref.part : "slot" in ref ? ref.slot : "";
   return `${ref.kind}:${part}:${colorTargetBlockKey(ref) ?? ""}`;
 }
 

@@ -184,7 +184,8 @@ export function ColorPicker({
    * The fixed dots every field shows, unless this one has something more
    * specific to offer — a background field pulling its four quick picks from
    * the theme's own accent, say. Defaults to the three shared neutrals, so an
-   * ordinary field needs no opinion here at all.
+   * ordinary field needs no opinion here at all. Inside the storefront
+   * designer the palette takes their place (see `rowPresets` below).
    */
   presets?: readonly ColorPreset[];
   /**
@@ -227,6 +228,14 @@ export function ColorPicker({
   const panelHandlesThis = Boolean(target && colorTarget);
   const panelIsOnThisField =
     panelHandlesThis && isSameColorTarget(colorTarget!.activeRef, target!);
+
+  // PALETTE FIRST. Inside the designer the provider hands down the
+  // storefront's palette, and its five colours take the place of the fixed
+  // neutrals (and of any field's own quick picks): the swatches every field
+  // offers are the ones the design is built from. Free colours are one step
+  // away, behind the wheel. Outside the designer nothing changes.
+  const palette = colorTarget?.paletteSwatches;
+  const rowPresets = palette ?? presets;
 
   // What the value was when the popover opened, so closing it can record the
   // color the seller LANDED on. The saturation square emits on every pointer
@@ -336,7 +345,7 @@ export function ColorPicker({
   }
 
   const current = value.toLowerCase();
-  const isPreset = presets.some((preset) => preset.value === current);
+  const isPreset = rowPresets.some((preset) => preset.value === current);
   // A custom color earns its own dot so the row always shows what is selected.
   // Presets already have one, and an inherited field has no override to show.
   const showCustomDot = !inheriting && !isPreset && isStrictHexColor(current);
@@ -404,7 +413,7 @@ export function ColorPicker({
             </button>
           )}
           <div className="flex flex-1 items-center gap-1.5">
-            {presets.map((preset) => (
+            {rowPresets.map((preset) => (
               <button
                 key={preset.value}
                 type="button"
@@ -520,7 +529,7 @@ export function ColorPicker({
         />
       )}
 
-      {presets.map((preset) => (
+      {rowPresets.map((preset) => (
         <ColorDot
           key={preset.value}
           color={preset.value}
@@ -635,7 +644,10 @@ export function ColorPicker({
           {pickerBody}
         </Popover>
 
-        {hasEyeDropper && (
+        {/* With the palette in the row, sampling the screen is a free colour
+            like any other: it waits behind the wheel (the panel and the
+            popover both carry it), so the row stays the design's own five. */}
+        {hasEyeDropper && !palette && (
           <button
             type="button"
             onClick={pickFromScreen}

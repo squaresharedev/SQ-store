@@ -22,6 +22,8 @@ import {
   customFontVars,
   fontPresentation,
 } from "@/lib/theme/storefront-fonts";
+import { pairingFontPresentation } from "@/lib/theme/font-pairing-presentation";
+import { paletteInkStyle } from "@/lib/storefront/palette";
 import { Grid } from "@/components/grid/Grid";
 import type { GridBlock } from "@/components/grid/gridConstants";
 import { BlockTile } from "./BlockTile";
@@ -183,7 +185,7 @@ export function StorefrontPreview({
   const t = useTranslations("Storefront.preview");
   const { theme, header } = config;
   const { boxRef, contentRef, scale } = useFitToBox();
-  const canvasFont = fontPresentation(theme.font);
+  const canvasFont = pairingFontPresentation(theme) ?? fontPresentation(theme.font);
 
   // Buyer-facing view: hideSoldOut drops marked blocks entirely (the designer
   // canvas keeps showing them dimmed so the seller can manage them). Shared
@@ -268,6 +270,7 @@ export function StorefrontPreview({
         ...resolveBackgroundStyle(theme.background, backgroundImageUrl),
         ...gridGapStyle(theme.gridGap),
         ...customFontVars(theme.customFont, customFontUrl),
+        ...paletteInkStyle(theme),
         ...canvasFont.style,
       }}
     >

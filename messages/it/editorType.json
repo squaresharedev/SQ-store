@@ -1,4 +1,80 @@
 {
-  "panel": {},
+  "panel": {
+    "palette": {
+      "title": "Tavolozza",
+      "hint": "Cambia un colore qui e tutto ciò che lo usa cambia con lui.",
+      "group": "Colori della tavolozza",
+      "allColors": "Tutti i colori",
+      "slots": {
+        "background": {
+          "name": "Sfondo",
+          "label": "Sfondo della tavolozza ({value})"
+        },
+        "text": {
+          "name": "Testo",
+          "label": "Testo della tavolozza ({value})"
+        },
+        "accent": {
+          "name": "Accento",
+          "label": "Accento della tavolozza ({value})"
+        },
+        "surface": {
+          "name": "Superficie",
+          "label": "Superficie della tavolozza ({value})"
+        },
+        "muted": {
+          "name": "Tenue",
+          "label": "Colore tenue della tavolozza ({value})"
+        }
+      }
+    },
+    "pairings": {
+      "title": "Coppia di font",
+      "group": "Coppie di font",
+      "editorial": {
+        "name": "Editoriale",
+        "hint": "Un graziato morbido per i titoli e testo pulito sotto"
+      },
+      "classic": {
+        "name": "Classica",
+        "hint": "Un graziato elegante con un bastoni facile da leggere"
+      },
+      "modern": {
+        "name": "Moderna",
+        "hint": "Titoli geometrici con testo neutro"
+      },
+      "soft": {
+        "name": "Morbida",
+        "hint": "Un graziato tondo con un bastoni amichevole"
+      },
+      "studio": {
+        "name": "Studio",
+        "hint": "Un graziato sottile con un bastoni arioso"
+      }
+    },
+    "typography": {
+      "singleFont": "Un font per tutto",
+      "singleFontHint": "Scegliendo un font qui la coppia si disattiva."
+    },
+    "textStyles": {
+      "title": "Stili di testo",
+      "hint": "Imposta ogni stile una volta. Ogni blocco di testo in quello stile lo segue.",
+      "pick": "Stile da modificare",
+      "face": "Font",
+      "faceHeading": "Titolo",
+      "faceBody": "Corpo",
+      "uppercase": "Maiuscolo",
+      "colorDefault": "Predefinito dello stile",
+      "useColorDefault": "Usa il predefinito dello stile",
+      "reset": "Ripristina questo stile"
+    },
+    "valign": {
+      "label": "Allineamento verticale",
+      "group": "Allineamento verticale del testo",
+      "top": "Allinea in alto",
+      "middle": "Allinea al centro",
+      "bottom": "Allinea in basso"
+    }
+  },
   "board": {}
 }

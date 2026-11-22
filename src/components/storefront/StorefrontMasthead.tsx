@@ -12,6 +12,7 @@ import { isStrictHexColor } from "@/lib/validation/predicates";
 // Buyer-safe: core file has no designer-panel code.
 import { headerThemeColors } from "@/lib/theme/color-target-core";
 import { fontPresentation } from "@/lib/theme/storefront-fonts";
+import { headerLinePairingFont } from "@/lib/theme/font-pairings";
 // Type-only: erased at compile time, so the text-selection module is never
 // evaluated on the buyer-facing path. The actual function is delivered through
 // the editor-slots context.
@@ -113,6 +114,7 @@ export function StorefrontMasthead({
   /** A line's typeface. Absent (or an uploaded face this canvas could not
    *  resolve) leaves it inheriting, exactly as a text block does. */
   const fontOf = (line: HeaderLine) =>
+    headerLinePairingFont(theme, line, headerStyleValue(header, line, "font")) ??
     fontPresentation(headerStyleValue(header, line, "font"));
 
   const styleOf = (line: HeaderLine, color?: string): CSSProperties => {

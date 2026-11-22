@@ -110,10 +110,18 @@ export function useAutoFitTextSize({
     }
 
     measure();
-    if (typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(container);
-    return () => observer.disconnect();
+    // A web font arriving changes how much room the same words take without
+    // the box changing size, so no resize would tell us: a pairing's faces
+    // load lazily (app/fonts/pairing-faces), and words fitted in the fallback
+    // face would otherwise overflow once the real one swaps in.
+    const fonts = typeof document !== "undefined" ? document.fonts : undefined;
+    fonts?.addEventListener?.("loadingdone", measure);
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
+    observer?.observe(container);
+    return () => {
+      fonts?.removeEventListener?.("loadingdone", measure);
+      observer?.disconnect();
+    };
   }, [enabled, ceiling, floor, containerRef, textRef, ...deps]);
 
   return size;

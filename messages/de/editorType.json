@@ -1,4 +1,80 @@
 {
-  "panel": {},
+  "panel": {
+    "palette": {
+      "title": "Palette",
+      "hint": "Ändern Sie hier eine Farbe, und alles in dieser Farbe ändert sich mit.",
+      "group": "Palettenfarben",
+      "allColors": "Alle Farben",
+      "slots": {
+        "background": {
+          "name": "Hintergrund",
+          "label": "Palette: Hintergrund ({value})"
+        },
+        "text": {
+          "name": "Text",
+          "label": "Palette: Text ({value})"
+        },
+        "accent": {
+          "name": "Akzent",
+          "label": "Palette: Akzent ({value})"
+        },
+        "surface": {
+          "name": "Fläche",
+          "label": "Palette: Fläche ({value})"
+        },
+        "muted": {
+          "name": "Gedämpft",
+          "label": "Palette: Gedämpft ({value})"
+        }
+      }
+    },
+    "pairings": {
+      "title": "Schriftpaar",
+      "group": "Schriftpaare",
+      "editorial": {
+        "name": "Redaktionell",
+        "hint": "Weiche Serifen für Überschriften, klarer Text darunter"
+      },
+      "classic": {
+        "name": "Klassisch",
+        "hint": "Eine elegante Serifenschrift mit gut lesbarer Grotesk"
+      },
+      "modern": {
+        "name": "Modern",
+        "hint": "Geometrische Überschriften mit neutralem Text"
+      },
+      "soft": {
+        "name": "Sanft",
+        "hint": "Eine runde Serifenschrift mit freundlicher Grotesk"
+      },
+      "studio": {
+        "name": "Atelier",
+        "hint": "Eine schmale Serifenschrift mit offener Grotesk"
+      }
+    },
+    "typography": {
+      "singleFont": "Eine Schrift für alles",
+      "singleFontHint": "Wenn Sie hier eine Schrift wählen, wird das Schriftpaar ausgeschaltet."
+    },
+    "textStyles": {
+      "title": "Textstile",
+      "hint": "Legen Sie jeden Stil einmal fest. Jeder Textblock in diesem Stil folgt ihm.",
+      "pick": "Zu bearbeitender Stil",
+      "face": "Schrift",
+      "faceHeading": "Überschrift",
+      "faceBody": "Fließtext",
+      "uppercase": "Großbuchstaben",
+      "colorDefault": "Stilstandard",
+      "useColorDefault": "Stilstandard verwenden",
+      "reset": "Diesen Stil zurücksetzen"
+    },
+    "valign": {
+      "label": "Vertikale Ausrichtung",
+      "group": "Vertikale Textausrichtung",
+      "top": "Oben ausrichten",
+      "middle": "Mittig ausrichten",
+      "bottom": "Unten ausrichten"
+    }
+  },
   "board": {}
 }

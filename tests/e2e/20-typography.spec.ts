@@ -22,6 +22,13 @@ import {
  * reload, and a re-parse before it means anything.
  */
 
+/** A text block's own overrides (its size among them), and Typography's
+ *  single-font list, fold behind "More" until asked for. */
+async function openMore(page: Page) {
+  const more = page.getByRole("button", { name: "More", exact: true }).first();
+  if ((await more.getAttribute("aria-expanded")) === "false") await more.click();
+}
+
 /** Open one of the design panel's collapsed sections by its heading. */
 async function openSection(page: Page, name: string) {
   const toggle = page.getByRole("button", { name, exact: true });
@@ -44,6 +51,7 @@ test.describe("storefront typography", () => {
 
     // A size that is deliberately NOT one of the five old presets (14/16/20/
     // 30/36): if the enum were still in the way, this could not be stored.
+    await openMore(page);
     await page.getByLabel("Size", { exact: true }).fill("53");
     await expect
       .poll(async () =>
@@ -93,6 +101,8 @@ test.describe("storefront typography", () => {
     await expect(panel).toBeVisible();
 
     await page.getByLabel("Size", { exact: true }).fill("29");
+    // The panel opens on the palette; the standard grid is behind All colors.
+    await page.getByRole("button", { name: "All colors" }).click();
     await page
       .getByRole("group", { name: /standard colors/i })
       .getByRole("button", { name: /^white/i })
@@ -138,7 +148,10 @@ test.describe("storefront typography", () => {
     await createStorefrontViaUI(page);
 
     await openSection(page, "Font");
-    await page.getByRole("combobox", { name: "Font" }).click();
+    // A new storefront starts on a font pairing; one font for everything is
+    // behind More, and choosing it turns the pairing off.
+    await openMore(page);
+    await page.getByRole("combobox", { name: "One font for everything" }).click();
     await page.getByRole("option", { name: /montserrat/i }).click();
 
     // next/font hashes the family name, so assert on the family it resolved to

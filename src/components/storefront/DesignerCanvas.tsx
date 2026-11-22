@@ -42,6 +42,8 @@ import {
   customFontVars,
   fontPresentation,
 } from "@/lib/theme/storefront-fonts";
+import { pairingFontPresentation } from "@/lib/theme/font-pairing-presentation";
+import { paletteInkStyle } from "@/lib/storefront/palette";
 import { Grid } from "@/components/grid/Grid";
 import { phoneGridLayout } from "./phone-grid";
 import {
@@ -772,7 +774,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   // The canvas font. An uploaded face is declared here as a custom property
   // and applied through it, so text blocks that opt into the same face inherit
   // it without every tile having to be handed a font URL.
-  const canvasFont = fontPresentation(theme.font);
+  const canvasFont = pairingFontPresentation(theme) ?? fontPresentation(theme.font);
 
   // THE PAGES THE SELLER HAS OUT, as artboards beside the board — in design
   // view AND in mobile preview, the same way. A page whose product has left
@@ -952,6 +954,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
         ...resolveBackgroundStyle(theme.background, backgroundImageUrl),
         ...gridGapStyle(theme.gridGap),
         ...customFontVars(theme.customFont, customFontUrl),
+        ...paletteInkStyle(theme),
         ...canvasFont.style,
       }}
     >

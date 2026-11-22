@@ -190,6 +190,8 @@ describe("block blur controls", () => {
         onDuplicate={() => {}}
       />,
     );
+    // A text block's blur is one of its own overrides, behind "More".
+    fireEvent.click(screen.getByRole("button", { name: "More" }));
     fireEvent.keyDown(slider("Blur"), { key: "ArrowRight" });
     expect(onUpdate).toHaveBeenLastCalledWith({ blur: 5 });
   });

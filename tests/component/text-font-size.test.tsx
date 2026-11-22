@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup, within } from "../setup/render";
+import { render, screen, cleanup, within, fireEvent } from "../setup/render";
 import userEvent from "@testing-library/user-event";
 import {
   TEXT_SIZE_MAX,
@@ -48,6 +48,10 @@ function renderEditor(over: Partial<TextBlock> = {}) {
       onDuplicate={vi.fn()}
     />,
   );
+  // The size is one of the block's own overrides, folded behind "More" until
+  // asked for (it starts open only on a block that already has one).
+  const more = screen.getByRole("button", { name: "More" });
+  if (more.getAttribute("aria-expanded") === "false") fireEvent.click(more);
   return { onUpdate };
 }
 

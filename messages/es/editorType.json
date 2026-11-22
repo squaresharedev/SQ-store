@@ -1,4 +1,80 @@
 {
-  "panel": {},
+  "panel": {
+    "palette": {
+      "title": "Paleta",
+      "hint": "Cambia un color aquí y todo lo que lo usa cambia con él.",
+      "group": "Colores de la paleta",
+      "allColors": "Todos los colores",
+      "slots": {
+        "background": {
+          "name": "Fondo",
+          "label": "Fondo de la paleta ({value})"
+        },
+        "text": {
+          "name": "Texto",
+          "label": "Texto de la paleta ({value})"
+        },
+        "accent": {
+          "name": "Acento",
+          "label": "Acento de la paleta ({value})"
+        },
+        "surface": {
+          "name": "Superficie",
+          "label": "Superficie de la paleta ({value})"
+        },
+        "muted": {
+          "name": "Apagado",
+          "label": "Color apagado de la paleta ({value})"
+        }
+      }
+    },
+    "pairings": {
+      "title": "Pareja de fuentes",
+      "group": "Parejas de fuentes",
+      "editorial": {
+        "name": "Editorial",
+        "hint": "Una serif suave para los titulares y texto limpio debajo"
+      },
+      "classic": {
+        "name": "Clásica",
+        "hint": "Una serif elegante con una sans fácil de leer"
+      },
+      "modern": {
+        "name": "Moderna",
+        "hint": "Titulares geométricos con texto neutro"
+      },
+      "soft": {
+        "name": "Suave",
+        "hint": "Una serif redondeada con una sans amable"
+      },
+      "studio": {
+        "name": "Estudio",
+        "hint": "Una serif estilizada con una sans abierta"
+      }
+    },
+    "typography": {
+      "singleFont": "Una fuente para todo",
+      "singleFontHint": "Si eliges una fuente aquí, se desactiva la pareja."
+    },
+    "textStyles": {
+      "title": "Estilos de texto",
+      "hint": "Define cada estilo una vez. Todos los bloques de texto con ese estilo lo siguen.",
+      "pick": "Estilo que editar",
+      "face": "Fuente",
+      "faceHeading": "Titular",
+      "faceBody": "Cuerpo",
+      "uppercase": "Mayúsculas",
+      "colorDefault": "Predeterminado del estilo",
+      "useColorDefault": "Usar el predeterminado del estilo",
+      "reset": "Restablecer este estilo"
+    },
+    "valign": {
+      "label": "Alineación vertical",
+      "group": "Alineación vertical del texto",
+      "top": "Alinear arriba",
+      "middle": "Alinear al centro",
+      "bottom": "Alinear abajo"
+    }
+  },
   "board": {}
 }

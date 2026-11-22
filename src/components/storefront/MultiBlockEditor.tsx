@@ -129,6 +129,7 @@ export function MultiBlockEditor({
         <TextBlockEditor
           block={texts[0]}
           accent={theme.accent}
+          textStyles={theme.textStyles}
           hasCustomFont={theme.customFont !== undefined}
           multi
           summons={summons}
