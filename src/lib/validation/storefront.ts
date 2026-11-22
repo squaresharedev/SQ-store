@@ -308,14 +308,24 @@ const hoverTimingFields = {
  * strict hex like every other colour here.
  */
 const cardExtrasFields = {
-  hoverEffect: z.enum(CARD_HOVER_EFFECTS).optional(),
-  hoverPhoto: z.boolean().optional(),
-  buyButton: z.enum(CARD_BUY_BUTTONS).optional(),
-  buyButtonLabel: singleLineText({ field: "ctaLabel", max: PRODUCT_PAGE_CTA_MAX }).optional(),
-  buyButtonColor: hexColorSchema.optional(),
-  buyButtonTextColor: hexColorSchema.optional(),
-  showRating: z.boolean().optional(),
-  showLowStock: z.boolean().optional(),
+  hoverEffect: z.enum(CARD_HOVER_EFFECTS).optional().describe("What a card does on hover: none, lift, zoom or tilt."),
+  hoverPhoto: z.boolean().optional().describe("true shows the product's second photo on hover."),
+  buyButton: z
+    .enum(CARD_BUY_BUTTONS)
+    .optional()
+    .describe("A button on the card with an arrow after its words: none, solid, outline or link."),
+  buyButtonLabel: singleLineText({ field: "ctaLabel", max: PRODUCT_PAGE_CTA_MAX })
+    .optional()
+    .describe("The card button's own words. Absent follows the product page's button."),
+  buyButtonColor: hexColorSchema
+    .optional()
+    .describe("A solid button's fill, an outline's ring, unused by a link. Absent follows the product page's button."),
+  buyButtonTextColor: hexColorSchema.optional().describe("The card button's words. Absent follows the product page's button."),
+  showRating: z.boolean().optional().describe("Buyers' stars under the name, while the product page shows reviews."),
+  showLowStock: z
+    .boolean()
+    .optional()
+    .describe("The words Low stock at or below the product's own low-stock level, never a count."),
 };
 
 // ── Editor upgrade (EDITOR UPGRADE CONTRACT, types/storefront.ts) ────────
@@ -356,7 +366,7 @@ const paletteSchema = z
     muted: hexColorSchema,
   })
   .describe(
-    "The storefront's five named colours. Take every colour you set anywhere on this storefront from here, so one palette change recolours the whole design.",
+    "The storefront's five named colours. Take every colour you set anywhere on this storefront from here, so one palette change recolours the whole design. Set it with edit_storefront's palette operation, which recolours; stored here it recolours nothing.",
   );
 
 /** One saved text style. Bounded like a text block's own fields. */
@@ -444,7 +454,8 @@ const imageKeySchema = z
   });
 
 /** A band's backdrop: a colour, a gradient or a photo with an optional veil. */
-const bandBackgroundSchema = z.discriminatedUnion("kind", [
+const bandBackgroundSchema = z
+  .discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("solid"), color: hexColorSchema }),
   z.strictObject({
     kind: z.literal("gradient"),
@@ -461,7 +472,10 @@ const bandBackgroundSchema = z.discriminatedUnion("kind", [
     scale: z.number().int().min(IMAGE_SCALE_MIN).max(IMAGE_SCALE_MAX),
     dim: z.enum(BAND_DIMS).optional().describe("A veil over the photo so words on it stay readable: none, light (for dark words) or dark (for light words)."),
   }),
-]);
+  ])
+  .describe(
+    "A palette colour, a palette gradient, or a photo whose key is an upload_id from upload_image (or copy_product_photo as a photo).",
+  );
 
 /** A full-width band behind a run of the board's rows. */
 const bandSchema = z
@@ -512,7 +526,9 @@ const themeObjectSchema = z.strictObject({
   accent: hexColorSchema,
   font: z.enum(STOREFRONT_FONTS),
   // Optional: present only once the seller has uploaded a face.
-  customFont: customFontSchema.optional(),
+  customFont: customFontSchema
+    .optional()
+    .describe("The seller's own typeface: key is an upload_id from upload_font. Drawn where font is custom and no fontPairing is set."),
   columns: z.number().int().min(CANVAS_COLUMNS_MIN).max(CANVAS_COLUMNS_MAX),
   rows: z.number().int().min(CANVAS_ROWS_MIN).max(CANVAS_ROWS_MAX),
   cornerRadius: z.number().int().min(0).max(CORNER_RADIUS_MAX),
@@ -690,7 +706,10 @@ const headerSchema = z.strictObject({
       alt: singleLineText({ field: "elementAlt", max: IMAGE_ALT_MAX, min: 0 }).optional(),
       size: z.enum(HEADER_LOGO_SIZES).optional(),
     })
-    .optional(),
+    .optional()
+    .describe(
+      "The store's logo beside its name. key is an upload_id from upload_element (or copy_product_photo as artwork); size small, medium or large.",
+    ),
   // The menu: a few labelled links. Absent = no menu.
   links: z
     .array(
@@ -1055,7 +1074,9 @@ const textBlockSchema = z.strictObject({
   type: z.literal("text"),
   id: uuidField("blockId"),
   text: multiLineText({ field: "blockText", max: TEXT_MAX_LENGTH }),
-  variant: z.enum(TEXT_VARIANTS),
+  variant: z
+    .enum(TEXT_VARIANTS)
+    .describe("The saved text style it wears (theme.textStyles): heading, subheading, body or label."),
   align: z.enum(TEXT_ALIGNS),
   ...placementFields,
   // Inline formatting — optional so v1 blocks (without them) still parse.
@@ -1163,7 +1184,10 @@ const marqueeBlockSchema = z
     id: uuidField("blockId"),
     text: singleLineText({ field: "blockText", max: MARQUEE_TEXT_MAX }),
     speed: z.enum(MARQUEE_SPEEDS).optional().describe("slow or normal (the default)."),
-    variant: z.enum(TEXT_VARIANTS).optional(),
+    variant: z
+      .enum(TEXT_VARIANTS)
+      .optional()
+      .describe("The saved text style it wears (theme.textStyles): heading, subheading, body or label. Absent is label."),
     color: hexColorSchema.optional(),
     ...placementFields,
   })
@@ -1181,7 +1205,8 @@ const carouselBlockSchema = z
       .max(CAROUSEL_PRODUCTS_MAX)
       .refine((ids) => new Set(ids).size === ids.length, {
         error: issueKey("Validation.storefront.blocksDuplicate"),
-      }),
+      })
+      .describe("This store's products, in order, each once."),
     ...placementFields,
   })
   .describe("A row of products in one block: swiped on a phone, stepped with arrows on a desktop. Give it at least 3 columns.");
@@ -1223,7 +1248,8 @@ const configObjectSchema = z
       .refine((bands) => new Set(bands.map((band) => band.id)).size === bands.length, {
         error: issueKey("Validation.storefront.blocksDuplicate"),
       })
-      .optional(),
+      .optional()
+      .describe("Full-width strips behind runs of rows, at most 12."),
     // No `policies` or `shippingProfiles` member: shipping and returns terms
     // are account-level now (profiles.shipping_policy, bounded by
     // lib/validation/shipping-policy.ts). See RETIRED_TOP_LEVEL_FIELDS.
