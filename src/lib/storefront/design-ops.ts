@@ -14,6 +14,7 @@ import {
   CAROUSEL_PRODUCTS_MAX,
   DEFAULT_IMAGE_PLACEMENT,
   IMAGE_ALT_MAX,
+  LINK_TARGET_KINDS,
   LINK_URL_MAX,
   MARQUEE_SPEEDS,
   MARQUEE_TEXT_MAX,
@@ -45,6 +46,7 @@ import {
   type BandBackground,
   type CardStyleOverrides,
   type FinePlacement,
+  type LinkTarget,
   type MobilePlacement,
   type PaletteSlot,
   type StorefrontBand,
@@ -66,9 +68,10 @@ import {
 // (a link to something that is not there, a file of the wrong kind): those are
 // caught here, in words an assistant can act on.
 
-/** A cell position or size. Text, shape and button blocks may take half cells
- *  (2.5); everything else is refused one in words (see onWholeCells). */
-const cells = z.number().multipleOf(0.5);
+/** A cell position or size. Whole or half cells: text, shape and button blocks
+ *  may take half cells (2.5), and anything else is refused in words (see
+ *  onWholeCells), which the schema could only say in one generic sentence. */
+const cells = z.number();
 
 /** Where a new block goes. Leave out x and y to take the next free cells. */
 const placement = {
@@ -111,15 +114,17 @@ const viewport = z
 /** An id an assistant hands over: shape-checked by the real schema later. */
 const someId = z.string().max(64);
 
-/** Where a button leads (LinkTarget). Existence is checked here, shape by the schema. */
+/** Where a button leads (LinkTarget), flat so the tool list stays small:
+ *  existence is checked here, and the exact shape by the schema. */
 const link = z
-  .discriminatedUnion("kind", [
-    z.strictObject({ kind: z.literal("product"), productId: someId }),
-    z.strictObject({ kind: z.literal("storefront"), storefrontId: someId }),
-    z.strictObject({ kind: z.literal("band"), bandId: someId }),
-    z.strictObject({ kind: z.literal("url"), url: z.string().max(LINK_URL_MAX) }),
-  ])
-  .describe("A product on this board, another storefront of this store, a band on this page, or an https address.");
+  .strictObject({
+    kind: z.enum(LINK_TARGET_KINDS),
+    productId: someId.optional(),
+    storefrontId: someId.optional(),
+    bandId: someId.optional(),
+    url: z.string().max(LINK_URL_MAX).optional(),
+  })
+  .describe("{kind:product,productId} on this board, {kind:storefront,storefrontId} of this store, {kind:band,bandId} on this page, or {kind:url,url} (https).");
 
 /** A band's backdrop, flat: the kind follows from what is given, and a
  *  change without a kind is laid over the band's current backdrop. */
@@ -130,14 +135,16 @@ const bandBackground = z
     from: color.optional(),
     via: color.nullable().optional(),
     to: color.optional(),
-    angle: z.number().int().optional().describe("Degrees, 0 to 360."),
-    file: z.string().max(200).optional().describe("A photo: an upload_id from upload_image, or from copy_product_photo as a photo."),
-    x: z.number().int().optional().describe("The photo's focal point, percent from the left."),
-    y: z.number().int().optional().describe("The photo's focal point, percent from the top."),
-    scale: z.number().int().optional().describe("The photo's zoom in percent; 100 covers the band."),
-    dim: z.enum(BAND_DIMS).nullable().optional().describe("A veil over the photo: light under dark words, dark under light ones."),
+    angle: z.number().int().optional(),
+    file: z.string().max(200).optional().describe("An upload_id from upload_image, or from copy_product_photo as a photo."),
+    x: z.number().int().optional(),
+    y: z.number().int().optional(),
+    scale: z.number().int().optional(),
+    dim: z.enum(BAND_DIMS).nullable().optional().describe("A veil: light under dark words, dark under light ones."),
   })
-  .describe("A palette colour {color}, a gradient {from, via?, to, angle} or a photo {file, dim?}. Leave out for the palette's muted colour.");
+  .describe(
+    "A palette colour {color}, a gradient {from, via?, to, angle in degrees} or a photo {file, dim?, x and y its focal point in percent, scale its zoom in percent}. Leave out for the palette's muted colour; a change without kind keeps the rest.",
+  );
 
 const paletteColors = z
   .strictObject({
@@ -356,8 +363,12 @@ function refOf(block: StorefrontBlock): string {
 
 const isHalf = (value: number | undefined) => value !== undefined && !Number.isInteger(value);
 
-/** Refuse half cells for a kind that sits on whole ones, or on the phone board. */
+/** Refuse anything but whole or half cells, and half cells for a kind that
+ *  sits on whole ones, or on the phone board. */
 function onWholeCells(type: StorefrontBlock["type"], values: (number | undefined)[], phone = false): void {
+  if (values.some((value) => value !== undefined && !Number.isInteger(value * 2))) {
+    throw new DesignOpRefused("Blocks sit on whole or half cells.", "Give positions and sizes such as 2 or 2.5.");
+  }
   if (!values.some(isHalf)) return;
   if (phone) {
     throw new DesignOpRefused("The phone board places blocks on whole cells.", "Give whole numbers with viewport \"mobile\".");
@@ -785,7 +796,8 @@ export function applyDesignOps(
           type: "button",
           id: mintId(),
           label,
-          link: target,
+          // Its exact shape is the schema's to judge, after every operation.
+          link: target as LinkTarget,
           ...(look && look !== "solid" ? { look } : {}),
           ...place("button", { x, y, w, h, rotation }),
         });

@@ -411,6 +411,7 @@ describe("half cells", () => {
     expect(() => run([{ op: "add_product", productId: OTHER, x: 0.5, y: 2 }])).toThrow(/whole cells/);
     expect(() => run([{ op: "move", block: TEXT, x: 1.5, y: 0, viewport: "mobile" }])).toThrow(/phone board/);
     expect(() => run([{ op: "style", block: TEXT, changes: { fine: { left: true } } }])).toThrow(DesignOpRefused);
+    expect(() => run([{ op: "move", block: TEXT, x: 1.3, y: 0 }])).toThrow(/whole or half cells/);
   });
 });
 
