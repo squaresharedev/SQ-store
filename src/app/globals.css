@@ -2270,3 +2270,26 @@ textarea {
     transform: scaleX(0.6);
   }
 }
+
+/* ============================================================
+   EDITOR UPGRADE, WORKSTREAM 3 (layout and navigation):
+   FULL-WIDTH BANDS (lib/storefront/bands.ts, components/storefront/BandPaint)
+   A band sits in the board's grid, so it lines up with the rows exactly, but
+   paints out to the full width of the frame the board sits in (the hosted
+   page, the embed frame) while the board keeps its margins. That frame is a
+   size container, so 100cqw read ON IT is its width; REGISTERED, so it is
+   worked out there and inherited as a length (a plain custom property would
+   carry the cqw down and resolve it against the grid's own container). The
+   bleed keeps its `100%` unresolved until the band uses it, where it is the
+   board's width: the band reaches (frame - board) / 2 past each side. The
+   frame centres the board, which is what makes the two halves equal.
+   ============================================================ */
+@property --sf-frame-w {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+.sf-band-frame {
+  --sf-frame-w: 100cqw;
+  --sf-band-bleed: calc((var(--sf-frame-w) - 100%) / 2);
+}

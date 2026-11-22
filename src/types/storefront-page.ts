@@ -1,8 +1,10 @@
 import type { Currency, ProductRating } from "@/types/product";
 import type { TileStockState } from "@/types/stock";
 import type { TileLook } from "@/lib/storefront/tile-look";
+import type { ResolvedLink } from "@/lib/storefront/links";
 import type {
   CartPageConfig,
+  StorefrontBand,
   StorefrontBlock,
   StorefrontHeader,
   StorefrontSeller,
@@ -77,4 +79,18 @@ export type StorefrontPageData = {
   /** The storefront's cart, when buyers here have one (lib/cart/availability.ts
    *  cartFor). Absent otherwise. */
   cart?: CartPageConfig;
+  /** The full-width bands behind the board's rows (config.bands), copied on
+   *  purpose rather than spread with the config. Absent = none, which is every
+   *  storefront saved before them. */
+  bands?: StorefrontBand[];
+  /** Signed URLs for band photos, by band id. A band photo with no entry draws
+   *  its quiet placeholder rather than a broken picture. */
+  bandImageUrls?: Record<string, string>;
+  /** Where every link on the board goes, resolved on the server (lib/storefront/
+   *  links.ts): by button block key, and `header-<n>` for the header menu. A
+   *  button or menu entry whose link led nowhere a buyer may go was dropped
+   *  before this payload was built. Absent = the board has no links. */
+  links?: Record<string, ResolvedLink>;
+  /** The header logo's signed URL. Absent = no logo, or one R2 could not sign. */
+  logoUrl?: string;
 };

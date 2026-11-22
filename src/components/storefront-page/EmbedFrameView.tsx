@@ -9,6 +9,7 @@ import { CartButton } from "@/components/cart/CartButton";
 import { CustomFontFace } from "@/components/storefront/CustomFontFace";
 import { LEGAL_LINKS, SQUARESHARE_SITE } from "@/lib/legal/links";
 import { storefrontDisplayName } from "@/lib/storefront/display-name";
+import { BAND_FRAME_CLASS } from "@/lib/storefront/bands";
 import { REPORT_FRAGMENT } from "@/lib/storefront/product-page-url";
 import { cn } from "@/lib/utils";
 import type { StorefrontPageData } from "@/types/storefront-page";
@@ -50,6 +51,7 @@ export function EmbedFrameView({ page }: { page: StorefrontPageData }) {
   useEmbedFrameReport(rootRef, t("storefront.gridLabel", { store: displayName }));
 
   const cart = page.cart ?? null;
+  const bands = Boolean(page.bands?.length);
 
   return (
     <StorefrontCart
@@ -61,7 +63,13 @@ export function EmbedFrameView({ page }: { page: StorefrontPageData }) {
     <div
       ref={rootRef}
       // No min-height: the frame is exactly as tall as this element says it is.
-      className={cn("@container relative isolate flex w-full flex-col", surface.className)}
+      className={cn(
+        "@container relative isolate flex w-full flex-col",
+        surface.className,
+        // A band reaches exactly to the frame's edges; the clip only makes sure
+        // a rounding pixel can never become a sideways scroll in the frame.
+        bands && "overflow-x-clip",
+      )}
       style={surface.style}
       data-embed-frame={page.id}
       data-page-ink={surface.ink}
@@ -85,7 +93,9 @@ export function EmbedFrameView({ page }: { page: StorefrontPageData }) {
           </span>
         </div>
       )}
-      <div className="w-full px-4 py-5 @md:px-6">
+      {/* With bands, this box tells them how far the frame reaches past the
+          board (BAND_FRAME_CLASS), while the board keeps its margins. */}
+      <div className={cn("w-full px-4 py-5 @md:px-6", bands && BAND_FRAME_CLASS)}>
         <StorefrontBoard page={page} displayName={displayName} tilesOpenNewTab />
       </div>
       <div className="w-full border-t" style={{ borderColor: ruleColor(surface.ink) }} data-embed-frame-footer="">

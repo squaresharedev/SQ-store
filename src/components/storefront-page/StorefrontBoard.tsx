@@ -25,8 +25,8 @@ import { cn } from "@/lib/utils";
 import type { Product } from "@/types/product";
 import {
   EMPTY_STOREFRONT_HEADER,
+  blockFine,
   blockKey,
-  isFreelyArranged,
   layerOrder,
   readingOrder,
   resolveCardStyle,
@@ -36,7 +36,16 @@ import {
 import type { StorefrontPageData, StorefrontTileProduct } from "@/types/storefront-page";
 import type { TileQuickAddAction } from "@/components/storefront/ProductTileContent";
 import { useCart } from "@/components/cart/CartContext";
+import { bandUnderlays } from "@/components/storefront/band-underlays";
+import { bandsBottom, blockBackdrop } from "@/lib/storefront/bands";
+import { buttonLinkKey, linkAnchorProps } from "@/lib/storefront/links";
+import { isFreelyArrangedAsDrawn } from "@/lib/storefront/layout-blocks";
 import { QuickAddTile } from "./QuickAddTile";
+
+/** A link on a buyer's board takes focus in the board's own ink (see the
+ *  product tile's link below for why not the dashboard's grey). */
+const BOARD_LINK_FOCUS_CLASS =
+  "block outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-current";
 
 /**
  * A SELLER'S BOARD, AS A BUYER SEES IT: the masthead and the grid of tiles,
@@ -147,6 +156,7 @@ export function StorefrontBoard({
     [page.products],
   );
   const blocks = useMemo(() => readingOrder(page.blocks), [page.blocks]);
+  const { bands } = page;
 
   // Depth over the blocks this page DRAWS, like the preview: a tile that was
   // dropped on the server leaves no hole in the stack.
@@ -162,12 +172,19 @@ export function StorefrontBoard({
         h: block.h,
         rotation: block.rotation,
         z: depths.get(key),
+        // Half-cell insets, drawn by the grid (absent on every other block).
+        ...(blockFine(block) ? { inset: blockFine(block) } : {}),
         data: block,
       };
     });
   }, [blocks]);
+  // The full-width bands behind the rows, following their blocks on a phone.
+  const underlays = useMemo(
+    () => bandUnderlays(bands, blocks, { imageUrl: (band) => page.bandImageUrls?.[band.id], anchor: true }),
+    [bands, blocks, page.bandImageUrls],
+  );
   const covers = useMemo(() => tileCovers(theme, blocks), [theme, blocks]);
-  const freelyArranged = useMemo(() => isFreelyArranged(blocks), [blocks]);
+  const freelyArranged = useMemo(() => isFreelyArrangedAsDrawn(blocks), [blocks]);
   // The seller's own phone layout, when the board has one (types/storefront,
   // PHONE LAYOUT): drawn instead of the automatic reflow on a phone.
   const phone = useMemo(() => phoneGridLayout(theme, blocks), [theme, blocks]);
@@ -175,8 +192,8 @@ export function StorefrontBoard({
   // ones are room to build in; to a buyer they are a screen of nothing between
   // the last tile and the footer.
   const usedRows = useMemo(
-    () => Math.min(theme.rows, Math.max(1, ...blocks.map((block) => block.y + block.h))),
-    [blocks, theme.rows],
+    () => Math.min(theme.rows, Math.max(1, ...blocks.map((block) => block.y + block.h), bandsBottom(bands))),
+    [blocks, theme.rows, bands],
   );
 
   return (
@@ -194,6 +211,7 @@ export function StorefrontBoard({
           rows={usedRows}
           responsive={!freelyArranged}
           narrowLayout={phone}
+          underlays={underlays}
           assumedSize={assumedWidth ? { width: assumedWidth, gap: theme.gridGap } : undefined}
           // A block under a product on the same cells takes that card's
           // corners, exactly as it does on the canvas (blockTileClipStyle).
@@ -202,7 +220,7 @@ export function StorefrontBoard({
               ? blockTileClipStyle(theme, gridBlock.data, placement, covers.get(gridBlock.key))
               : tileClipStyle(scaledCornerRadius(theme.cornerRadius, placement))
           }
-          renderBlock={(gridBlock) => {
+          renderBlock={(gridBlock, state) => {
             const block = gridBlock.data;
             const tile = block.type === "product" ? tiles.get(block.productId) : undefined;
             const imageUrl = page.imageUrls[gridBlock.key] ?? null;
@@ -216,6 +234,9 @@ export function StorefrontBoard({
                     imageUrl={imageUrl}
                     look={page.tileLook}
                     quickAddAction={quickAddAction}
+                    // What the words are read against, where that is news: a
+                    // band under the block, or a kind new enough to ask.
+                    backdrop={blockBackdrop(theme, bands, block, state.underlayKey)}
                   />
                 </div>
                 <BlockBlurCopies block={block} theme={theme} imageUrl={imageUrl} />
@@ -252,6 +273,21 @@ export function StorefrontBoard({
               );
             }
             const face = drawFace();
+            // A button is the way to wherever its link leads, resolved on the
+            // server (page.links); the server already dropped one that leads
+            // nowhere.
+            const link = block.type === "button" ? page.links?.[buttonLinkKey(block)] : undefined;
+            if (link) {
+              return (
+                <a
+                  {...linkAnchorProps(link, { newTab: tilesOpenNewTab, pageUrl: page.url })}
+                  className={cn(tileFrameClass(block), BOARD_LINK_FOCUS_CLASS)}
+                  data-storefront-button={block.type === "button" ? block.id : undefined}
+                >
+                  {face}
+                </a>
+              );
+            }
             // A product tile is the way to its page. Every other block is
             // part of the picture and leads nowhere.
             return tile ? (
@@ -266,7 +302,7 @@ export function StorefrontBoard({
                   // the ink is chosen to read on the seller's background, and
                   // the grey is 2.3:1 on a cream one, short of the 3:1 a focus
                   // indicator needs.
-                  "block outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-current",
+                  BOARD_LINK_FOCUS_CLASS,
                 )}
                 data-storefront-tile={block.type === "product" ? block.productId : undefined}
               >

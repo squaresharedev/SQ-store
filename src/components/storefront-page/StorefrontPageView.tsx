@@ -6,6 +6,7 @@ import { StorefrontCart } from "@/components/cart/StorefrontCart";
 import { CartButton } from "@/components/cart/CartButton";
 import { CustomFontFace } from "@/components/storefront/CustomFontFace";
 import { storefrontDisplayName } from "@/lib/storefront/display-name";
+import { BAND_FRAME_CLASS } from "@/lib/storefront/bands";
 import { cn } from "@/lib/utils";
 import type { StorefrontPageData } from "@/types/storefront-page";
 import { StorefrontBoard, storefrontSurface } from "./StorefrontBoard";
@@ -32,6 +33,7 @@ export function StorefrontPageView({
   const displayName = storefrontDisplayName(page);
   const soldBy = page.seller.businessName || page.name;
   const cart = page.cart ?? null;
+  const bands = Boolean(page.bands?.length);
 
   return (
     <StorefrontCart
@@ -41,7 +43,13 @@ export function StorefrontPageView({
       theme={{ ink: surface.ink, cornerRadius: theme.cornerRadius, cta: page.tileLook.buy }}
     >
     <div
-      className={cn("@container relative isolate flex min-h-screen w-full flex-col", surface.className)}
+      className={cn(
+        "@container relative isolate flex min-h-screen w-full flex-col",
+        surface.className,
+        // A band reaches exactly to this page's edges; the clip only makes
+        // sure a rounding pixel can never become a sideways scroll.
+        bands && "overflow-x-clip",
+      )}
       style={surface.style}
       data-storefront-page={page.id}
       data-page-ink={surface.ink}
@@ -60,7 +68,9 @@ export function StorefrontPageView({
           </span>
         </div>
       )}
-      <main className="mx-auto w-full max-w-[76rem] flex-1 px-4 py-6 @md:px-6 @3xl:px-10">
+      {/* With bands, this box tells them how far past the board the page
+          reaches (BAND_FRAME_CLASS), while the board keeps its margins. */}
+      <main className={cn("mx-auto w-full max-w-[76rem] flex-1 px-4 py-6 @md:px-6 @3xl:px-10", bands && BAND_FRAME_CLASS)}>
         <StorefrontBoard page={page} displayName={displayName} assumedWidth={assumedWidth} />
       </main>
       <PoweredByFooter
