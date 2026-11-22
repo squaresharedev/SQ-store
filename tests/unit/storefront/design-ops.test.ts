@@ -412,6 +412,7 @@ describe("half cells", () => {
     expect(() => run([{ op: "move", block: TEXT, x: 1.5, y: 0, viewport: "mobile" }])).toThrow(/phone board/);
     expect(() => run([{ op: "style", block: TEXT, changes: { fine: { left: true } } }])).toThrow(DesignOpRefused);
     expect(() => run([{ op: "move", block: TEXT, x: 1.3, y: 0 }])).toThrow(/whole or half cells/);
+    expect(() => run([{ op: "resize", block: TEXT, w: 0, h: 1 }])).toThrow(/cannot be that small/);
   });
 });
 

@@ -381,6 +381,13 @@ function onWholeCells(type: StorefrontBlock["type"], values: (number | undefined
   }
 }
 
+/** A block is at least half a cell each way. */
+function assertSize(w: number | undefined, h: number | undefined): void {
+  if ((w !== undefined && w <= 0) || (h !== undefined && h <= 0)) {
+    throw new DesignOpRefused("A block cannot be that small.", "Give w and h of at least 1, or 0.5 for text, shapes and buttons.");
+  }
+}
+
 /**
  * Where a block is DRAWN, in cells: its own cells less the half-cell insets
  * it carries (FinePlacement). What an assistant reads in board.blocks and
@@ -689,6 +696,7 @@ export function applyDesignOps(
     spot: { x?: number; y?: number; w?: number; h?: number; rotation?: number },
   ) => {
     onWholeCells(type, [spot.x, spot.y, spot.w, spot.h]);
+    assertSize(spot.w, spot.h);
     const size = NEW_BLOCK_SIZE[type];
     const w = spot.w ?? Math.max(1, Math.min(size.w, theme.columns - (spot.x ?? 0)));
     const h = spot.h ?? size.h;
@@ -835,6 +843,7 @@ export function applyDesignOps(
       case "resize": {
         const block = find(op.block);
         onWholeCells(block.type, [op.x, op.y, op.w, op.h], op.viewport === "mobile");
+        assertSize(op.w, op.h);
         if (op.viewport === "mobile") {
           startPhoneLayout();
           const at = phoneRectOf(block);
