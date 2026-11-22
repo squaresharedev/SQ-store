@@ -17,7 +17,13 @@ import {
   type SnapshotOptions,
 } from "@/lib/agent/preview/snapshot";
 import { storefrontPreview, type StorefrontPreviewNotes } from "@/lib/agent/preview/storefront-preview";
-import { readMeasurements, type CellRegion, type PreviewMeasurements } from "@/lib/agent/preview/targets";
+import {
+  readMeasurements,
+  type CellRegion,
+  type MeasuredTile,
+  type PageBox,
+  type PreviewMeasurements,
+} from "@/lib/agent/preview/targets";
 import { LIVE_PREVIEW_TOKEN_SECONDS, mintPreviewToken, type PreviewSubject } from "@/lib/agent/preview/token";
 import { PAGE_PREVIEW_VIEW_HTML } from "@/lib/agent/preview/view";
 import { READ, ToolFailure, ToolMedia, defineTool } from "@/lib/agent/tool";
@@ -205,6 +211,20 @@ function screensFor(viewport: "both" | PreviewViewport): PreviewViewport[] {
   return viewport === "both" ? ["desktop", "mobile"] : [viewport];
 }
 
+/**
+ * The tiles over a region's crop, in the crop's own pixels: what the view's
+ * fallback picture lays its tile targets on, as a share of the "page" it was
+ * handed (here, the crop).
+ */
+function onCrop<Tile extends MeasuredTile>(tiles: Tile[], box: PageBox) {
+  return {
+    page: { width: box.w, height: box.h },
+    tiles: tiles
+      .filter((tile) => tile.x < box.x + box.w && box.x < tile.x + tile.w && tile.y < box.y + box.h && box.y < tile.y + tile.h)
+      .map((tile) => ({ ...tile, x: tile.x - box.x, y: tile.y - box.y })),
+  };
+}
+
 /** A region lies on the desktop board, refused in words before a preview is spent. */
 function assertRegionOnBoard(
   region: CellRegion,
@@ -355,7 +375,10 @@ export const previewTools = [
           viewport: wanted[0],
           imageIndex,
           viewports: Object.fromEntries(
-            measuredScreens.map((screen) => [screen, { page: measured[screen]?.page, tiles: tilesFor(screen) }]),
+            measuredScreens.map((screen) => {
+              const crop = region ? measured[screen]?.region : undefined;
+              return [screen, crop ? onCrop(tilesFor(screen), crop) : { page: measured[screen]?.page, tiles: tilesFor(screen) }];
+            }),
           ),
           links: { designer: appUrl(storefrontEditorPath(id)) },
           // The page the view draws live; `vp=mobile` gives its phone board.

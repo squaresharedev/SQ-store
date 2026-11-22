@@ -133,7 +133,12 @@ describe("preview_storefront at full resolution", () => {
 
 describe("preview_storefront of a region", () => {
   it("opens the page with the region, crops by the marker, and places the crop on the page", async () => {
-    answer = () => ({ screenshot: fakeJpeg(388, 388), content: renderedPage({ region: { x: 248, y: 318, w: 388, h: 388 } }) });
+    const lamp = { productId: "p", title: "Lamp", status: "active", x: 248, y: 318, w: 388, h: 388 };
+    const far = { productId: "q", title: "Far", status: "active", x: 900, y: 900, w: 100, h: 100 };
+    answer = () => ({
+      screenshot: fakeJpeg(388, 388),
+      content: renderedPage({ region: { x: 248, y: 318, w: 388, h: 388 }, tiles: [lamp, far] }),
+    });
     const result = await preview({ region: { x: 1, y: 1, w: 2, h: 2 } });
     expect(requests).toHaveLength(1);
     expect(requests[0]).toMatchObject({
@@ -148,6 +153,12 @@ describe("preview_storefront of a region", () => {
       pictureScale: { desktop: 1 },
     });
     expect(result.images).toHaveLength(1);
+    // The view's fallback picture is the crop, so its tile targets are in the crop's pixels.
+    expect((result.view as { viewports: Record<string, unknown> }).viewports.desktop).toMatchObject({
+      page: { width: 388, height: 388 },
+      tiles: [{ ...lamp, x: 0, y: 0 }],
+    });
+    expect((result.view as { viewports: { desktop: { tiles: unknown[] } } }).viewports.desktop.tiles).toHaveLength(1);
   });
 
   it("never passes off an uncropped picture as the region", async () => {
