@@ -10,6 +10,8 @@ import {
   type TextValign,
   type TextVariant,
 } from "@/types/storefront";
+import { contrastRatio, readableInkOn } from "@/lib/format/color";
+import { boardInk } from "@/lib/storefront/palette";
 import { isStrictHexColor } from "@/lib/validation/predicates";
 
 /**
@@ -76,6 +78,29 @@ export function textStyleColor(
   const saved = theme.textStyles?.[variant]?.color;
   if (saved && isStrictHexColor(saved)) return saved;
   return variant === "heading" && isStrictHexColor(theme.accent) ? theme.accent : undefined;
+}
+
+/** What body text needs against its background to pass WCAG AA. */
+const TEXT_CONTRAST_AA = 4.5;
+
+/**
+ * The ink for words on a BACKDROP they did not choose a colour for (a band,
+ * see lib/storefront/backdrop). `automatic` is what the words would wear
+ * anyway (textStyleColor: a style's colour, a heading's accent, or nothing,
+ * which is the board's own ink). It is kept wherever it reads on the backdrop
+ * at AA; where it does not, the words take whichever of the two inks does.
+ *
+ * With no backdrop the automatic colour comes straight back, so a block that
+ * is not on a band is drawn exactly as it always was.
+ */
+export function textInkOnBackdrop(
+  theme: StorefrontTheme,
+  automatic: string | undefined,
+  backdrop: string | undefined,
+): string | undefined {
+  if (!backdrop || !isStrictHexColor(backdrop)) return automatic;
+  const worn = automatic ?? boardInk(theme);
+  return contrastRatio(worn, backdrop) >= TEXT_CONTRAST_AA ? automatic : readableInkOn(backdrop);
 }
 
 /**

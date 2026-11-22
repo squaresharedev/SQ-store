@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { clampToCanvas, columnsThatFit, findFreeCell, reflowBlocks, type GridBlock } from "@/components/grid/gridConstants";
+import { isFreelyArrangedAsDrawn } from "@/lib/storefront/layout-blocks";
 import { LAYER_OPS, normalizeLayers, type LayerOp } from "@/lib/storefront/layers";
 import { PHONE_BOARD_WIDTH_PX, phoneLayout, phoneRect, unpinnedOnPhone } from "@/lib/storefront/mobile-layout";
 import { derivePalette, recolourPalettes } from "@/lib/storefront/palette";
@@ -40,7 +41,6 @@ import {
   blockFine,
   blockKey,
   boardProductIds,
-  isFreelyArranged,
   layerOrder,
   mergeCardStyleOverrides,
   withRotation,
@@ -1036,7 +1036,7 @@ export function phoneSummary(config: StorefrontConfig) {
     };
   }
   const { theme, blocks } = config;
-  if (isFreelyArranged(blocks)) return { layout: "scaled" as const, columns: theme.columns };
+  if (isFreelyArrangedAsDrawn(blocks)) return { layout: "scaled" as const, columns: theme.columns };
   const columns = columnsThatFit(PHONE_BOARD_WIDTH_PX, theme.gridGap, theme.columns);
   if (columns >= theme.columns) return { layout: "same" as const, columns };
   const reflowed = reflowBlocks(blocks.map(asGridBlock), theme.columns, columns);

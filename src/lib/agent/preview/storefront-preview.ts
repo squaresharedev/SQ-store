@@ -30,7 +30,14 @@ import { productPagePath, storefrontPageUrl } from "@/lib/storefront/product-pag
 import { getStorefront } from "@/lib/storefront/queries";
 import { loadTileExtras, tileExtrasWanted } from "@/lib/storefront/tile-extras";
 import { resolveTileLook } from "@/lib/storefront/tile-look";
-import { TILE_PRODUCT_SELECT, signImageBlocks, tileProduct, type TileProductRow } from "@/lib/storefront/storefront-page";
+import {
+  TILE_PRODUCT_SELECT,
+  boardLayout,
+  signImageBlocks,
+  tileProduct,
+  type TileProductRow,
+} from "@/lib/storefront/storefront-page";
+import { PAGE_BUSY } from "@/lib/public/busy";
 import { presignGetUrl } from "@/lib/r2";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { boardProductIds, buyerVisibleBlocks, type StorefrontBlock } from "@/types/storefront";
@@ -84,11 +91,21 @@ export async function storefrontPreview(
   // was taken down, is left out (a hole the buyer would not see either).
   const drawable = products.filter((row) => isContentVisible(row.moderation_status));
   const drawableIds = new Set(drawable.map((row) => row.id));
-  const blocks: StorefrontBlock[] = buyerVisibleBlocks(config).filter(
+  const drawnBlocks: StorefrontBlock[] = buyerVisibleBlocks(config).filter(
     (block) => block.type !== "product" || drawableIds.has(block.productId),
   );
 
   const admin = createAdminClient();
+  const hrefOf = (productId: string) => productPagePath(storefront.id, productId);
+  // The layout half, from the buyer page's own function: the bands and their
+  // photos, the logo, and every link resolved (a button or a menu entry that
+  // leads nowhere a buyer may go is left out, as on the page itself). A read
+  // that could not be made costs the preview its layout, never the picture.
+  const laidOut = await boardLayout(admin, account.accountId, config, drawnBlocks, (productId) =>
+    drawableIds.has(productId) ? hrefOf(productId) : null,
+  );
+  const layout = laidOut === PAGE_BUSY ? { blocks: drawnBlocks, header: config.header, extras: {} } : laidOut;
+  const { blocks } = layout;
   const now = new Date();
   const [{ data: sellerRow }, storeSales] = await Promise.all([
     admin.from("profiles").select(TRADER_GATE_SELECT).eq("id", account.accountId).maybeSingle(),
@@ -124,8 +141,12 @@ export async function storefrontPreview(
   }
   if (storefront.removal) notes.notPublic.push("taken_down");
 
-  const { theme } = config;
-  const hrefOf = (productId: string) => productPagePath(storefront.id, productId);
+  // A PREVIEW STANDS STILL. The board's arrival (theme.motion) hides blocks
+  // until they scroll into view, and a full-page picture is taken without
+  // scrolling: drawn with it, everything below the first screen could be
+  // missing from the picture the assistant judges the design by.
+  const { motion: _motion, ...theme } = config.theme;
+  void _motion;
   const [tiles, imageUrls, backgroundImageUrl, customFontUrl] = await Promise.all([
     Promise.all(drawable.map((row) => tileProduct(row, hrefOf(row.id), pricing.get(row.id), extras.get(row.id)))),
     signImageBlocks(blocks),
@@ -138,8 +159,9 @@ export async function storefrontPreview(
       id: storefront.id,
       name: storefront.name,
       theme,
-      ...(config.header ? { header: config.header } : {}),
+      ...(layout.header ? { header: layout.header } : {}),
       blocks,
+      ...layout.extras,
       products: tiles,
       tileLook,
       imageUrls,

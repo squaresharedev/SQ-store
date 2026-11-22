@@ -15,6 +15,7 @@ import { segmentText } from "@/lib/storefront/text-spans";
 import {
   TEXT_VALIGN_CLASSES,
   resolveTextStyle,
+  textInkOnBackdrop,
   textStyleColor,
   textStyleSpacing,
   textStyleWeightClass,
@@ -55,6 +56,7 @@ import { useEditorSlots } from "./editor-slots";
 export function TextTileContent({
   block,
   theme,
+  backdrop,
   editing = false,
   selectAllOnEdit = false,
   onTextChange,
@@ -90,11 +92,12 @@ export function TextTileContent({
   const style = resolveTextStyle(theme, block.variant);
   // An explicit block color wins; else the style's saved colour; else headings
   // pick up the accent and other variants stay foreground. Every color is
-  // re-gated before touching style.
+  // re-gated before touching style. On a band (`backdrop`) a colour the
+  // seller did not choose gives way to an ink that reads there.
   const color =
     block.color && isStrictHexColor(block.color)
       ? block.color
-      : textStyleColor(theme, block.variant);
+      : textInkOnBackdrop(theme, textStyleColor(theme, block.variant), backdrop);
 
   // Per-block font override; absent (or an uploaded face the canvas could not
   // resolve) leaves the block inheriting the canvas font. Under a font

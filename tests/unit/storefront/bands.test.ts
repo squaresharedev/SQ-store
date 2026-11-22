@@ -10,12 +10,11 @@ import {
   bandsForSave,
   bandSwatches,
   backgroundOfKind,
+  bandGradients,
   blockBackdrop,
-  gradientCss,
   linkedBandIds,
   newBand,
   newBandRows,
-  paletteGradients,
   photoBackground,
   placeBand,
 } from "@/lib/storefront/bands";
@@ -44,10 +43,12 @@ const button = (id: string, y: number): StorefrontBlock => ({
 describe("a band's paint", () => {
   it("is a colour, a gradient of two or three stops, or a photo under its veil", () => {
     expect(bandLayers({ kind: "solid", color: "#123456" })).toEqual({ fill: { backgroundColor: "#123456" } });
-    expect(gradientCss({ from: "#000000", to: "#ffffff", angle: 90 })).toBe("linear-gradient(90deg, #000000, #ffffff)");
-    expect(gradientCss({ from: "#000000", via: "#ff0000", to: "#ffffff", angle: 45 })).toBe(
-      "linear-gradient(45deg, #000000, #ff0000, #ffffff)",
-    );
+    expect(bandLayers({ kind: "gradient", from: "#000000", to: "#ffffff", angle: 90 })).toEqual({
+      fill: { backgroundImage: "linear-gradient(90deg, #000000, #ffffff)" },
+    });
+    expect(bandLayers({ kind: "gradient", from: "#000000", via: "#ff0000", to: "#ffffff", angle: 45 })).toEqual({
+      fill: { backgroundImage: "linear-gradient(45deg, #000000, #ff0000, #ffffff)" },
+    });
     const layers = bandLayers(photo.background, "https://r2.example/p.jpg");
     expect(layers.photo?.backgroundImage).toBe('url("https://r2.example/p.jpg")');
     expect(layers.photo?.backgroundSize).toBe("cover");
@@ -84,9 +85,9 @@ describe("the palette's offer for a band", () => {
     expect(swatches).toContain("#fef3c7");
   });
 
-  it("is a few ready-made gradients, none of them a flat colour", () => {
-    const fills = paletteGradients(theme);
-    expect(fills.length).toBeGreaterThanOrEqual(2);
+  it("is the board's own ready-made backdrop gradients, none of them a flat colour", () => {
+    const fills = bandGradients(theme);
+    expect(fills.length).toBeGreaterThanOrEqual(1);
     for (const fill of fills) expect(fill.from.toLowerCase() === fill.to.toLowerCase() && !fill.via).toBe(false);
   });
 

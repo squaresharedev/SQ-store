@@ -117,6 +117,7 @@ export function ProductPageSection({
   shippingPolicy,
   sellerIdentity,
   storefrontFont,
+  storefrontPairingName,
   customFontName,
   background,
   accent,
@@ -137,6 +138,9 @@ export function ProductPageSection({
   /** The storefront's own font, named in the inherit option so the seller can
    *  see what following it currently gets them. */
   storefrontFont: StorefrontFont;
+  /** The storefront's font pairing by name, when it is set in one: a pairing
+   *  wins over the single font, so it is what following the storefront gets. */
+  storefrontPairingName?: string;
   /** The uploaded face's name, when there is one. Without an upload there is
    *  nothing for "custom" to resolve to, so it is not offered. */
   customFontName: string | undefined;
@@ -172,9 +176,8 @@ export function ProductPageSection({
   const storefrontBackdrop = storefrontBackdropHex({ background });
 
   const storefrontFontName =
-    storefrontFont === "custom" && customFontName
-      ? customFontName
-      : tRoot(FONT_LABELS[storefrontFont]);
+    storefrontPairingName ??
+    (storefrontFont === "custom" && customFontName ? customFontName : tRoot(FONT_LABELS[storefrontFont]));
 
   const fontOptions: SelectOption<string>[] = [
     {

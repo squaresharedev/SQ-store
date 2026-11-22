@@ -1130,6 +1130,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                 return alt ? t("blockTile.imageWithAlt", { alt: alt.slice(0, 30) }) : t("blockTile.imageElement");
               }
               const text = blockWords(block);
+              if (block.type !== "text") return text.slice(0, 30) || t(`blockKinds.${block.type}`);
               return text ? t("blockTile.textWithContent", { text: text.slice(0, 30) }) : t("blockTile.textBlock");
             }}
             onMove={

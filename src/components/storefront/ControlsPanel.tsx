@@ -387,6 +387,7 @@ export function ControlsPanel({
           shippingPolicy={shippingPolicy}
           sellerIdentity={sellerIdentity}
           storefrontFont={theme.font}
+          storefrontPairingName={typographyMenuHint(theme, tKey)}
           customFontName={theme.customFont?.name}
           background={theme.background}
           accent={theme.accent}

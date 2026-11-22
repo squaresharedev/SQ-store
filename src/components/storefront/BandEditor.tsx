@@ -8,13 +8,8 @@ import { IMAGE_CONTENT_TYPES } from "@/lib/validation/product";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
 import { sampleObjectKey } from "@/lib/storefront/sample";
 import { useSampleMode } from "@/lib/storefront/sample-mode";
-import {
-  backgroundOfKind,
-  bandSwatches,
-  gradientCss,
-  paletteGradients,
-  photoBackground,
-} from "@/lib/storefront/bands";
+import { backgroundOfKind, bandGradients, bandSwatches, photoBackground } from "@/lib/storefront/bands";
+import { gradientCss, sameGradient } from "@/lib/storefront/gradients";
 import { cn } from "@/lib/utils";
 import { useActionErrorToast } from "@/components/ui/ActionErrorNotice";
 import { ColorPicker } from "@/components/ui/ColorPicker";
@@ -111,7 +106,7 @@ export function BandEditor({
   }
 
   const swatches = bandSwatches(theme);
-  const gradients = paletteGradients(theme);
+  const gradients = bandGradients(theme);
   const busy =
     progress === null
       ? tStorefront("background.processing")
@@ -154,10 +149,10 @@ export function BandEditor({
             <div className="flex flex-wrap items-center gap-2">
               {gradients.map((fill, index) => (
                 <SwatchButton
-                  key={gradientCss(fill)}
-                  fill={{ backgroundImage: gradientCss(fill) }}
+                  key={gradientCss(fill) ?? index}
+                  fill={{ backgroundImage: gradientCss(fill) ?? undefined }}
                   label={t("gradientOption", { n: index + 1 })}
-                  active={background.kind === "gradient" && gradientCss(background) === gradientCss(fill)}
+                  active={background.kind === "gradient" && sameGradient(background, fill)}
                   onClick={() => onPaint({ kind: "gradient", ...fill })}
                   wide
                 />

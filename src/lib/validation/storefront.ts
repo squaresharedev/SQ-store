@@ -491,6 +491,15 @@ const bandSchema = z
     "A strip of colour, gradient or photo running the full width of the page behind rows y to y+h. Blocks keep their places and sit on top of it; on a phone it follows them by itself.",
   );
 
+/** A storefront's bands as stored: what the config member holds, and what the
+ *  repair parse checks before carrying them over. */
+const storedBandsSchema = z
+  .array(bandSchema)
+  .max(BANDS_MAX)
+  .refine((bands) => new Set(bands.map((band) => band.id)).size === bands.length, {
+    error: issueKey("Validation.storefront.blocksDuplicate"),
+  });
+
 /** Legacy chip size enum -> px, matching the text sizes each one rendered at
  *  (text-[0.625rem] / text-xs / text-sm). */
 const LEGACY_PRICE_TAG_SIZE_PX: Record<string, number> = {
@@ -1250,12 +1259,7 @@ const configObjectSchema = z
     checkoutPage: checkoutPageSchema.optional(),
     cartPage: cartPageSchema.optional(),
     // Full-width bands. Optional: absent on every storefront saved before them.
-    bands: z
-      .array(bandSchema)
-      .max(BANDS_MAX)
-      .refine((bands) => new Set(bands.map((band) => band.id)).size === bands.length, {
-        error: issueKey("Validation.storefront.blocksDuplicate"),
-      })
+    bands: storedBandsSchema
       .optional()
       .describe("Full-width strips behind runs of rows, at most 12."),
     // No `policies` or `shippingProfiles` member: shipping and returns terms
@@ -1527,6 +1531,7 @@ export function parseStoredStorefrontConfig(
     productPage?: unknown;
     checkoutPage?: unknown;
     cartPage?: unknown;
+    bands?: unknown;
     policies?: unknown;
     shippingProfiles?: unknown;
   };
@@ -1565,6 +1570,9 @@ export function parseStoredStorefrontConfig(
     ...(cartPageSchema.safeParse(candidate.cartPage).success
       ? { cartPage: candidate.cartPage }
       : {}),
+    // Bands, on the same terms: a link may lead to one, so dropping them here
+    // would fail the retry's own link check and lose the whole storefront.
+    ...(storedBandsSchema.safeParse(candidate.bands).success ? { bands: candidate.bands } : {}),
     // Nothing to carry for policies or shipping profiles: they are not config
     // members any more, and the preprocess above has already dropped them.
   };

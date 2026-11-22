@@ -411,8 +411,11 @@ type BoardLayoutExtras = Pick<StorefrontPageData, "bands" | "bandImageUrls" | "l
  * band this page draws, an https address, or another storefront of THIS store
  * that is open to buyers (one read, only when a link names one). A button
  * whose link leads nowhere is dropped, and so is such a menu entry.
+ *
+ * Exported for the assistant's preview (lib/agent/preview/storefront-preview),
+ * which builds its own page data and must draw the same bands, links and logo.
  */
-async function boardLayout(
+export async function boardLayout(
   admin: ReturnType<typeof createAdminClient>,
   ownerId: string,
   config: StorefrontConfig,

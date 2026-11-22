@@ -212,9 +212,12 @@ export const BlockTile = memo(function BlockTile({
             block.alt.trim()
             ? t("blockTile.imageWithAlt", { alt: block.alt.trim().slice(0, 30) })
             : t("blockTile.imageElement")
-          : blockWords(block)
-            ? t("blockTile.textWithContent", { text: blockWords(block).slice(0, 30) })
-            : t("blockTile.textBlock");
+          : block.type === "text"
+            ? blockWords(block)
+              ? t("blockTile.textWithContent", { text: blockWords(block).slice(0, 30) })
+              : t("blockTile.textBlock")
+            : // A button, a scrolling strip: its own words, else what it is.
+              blockWords(block).slice(0, 30) || t(`blockKinds.${block.type}`);
 
   // While the words are being typed, the tile is a text field and nothing
   // else: a click inside them must not toggle the selection out from under
@@ -808,7 +811,7 @@ export const BlockTile = memo(function BlockTile({
       </div>
       {/* A block blurred from one edge is the face above plus these copies
           over it. Gone while typing, like the blur itself. */}
-      {!isTyping && <BlockBlurCopies block={block} theme={theme} imageUrl={imageUrl} />}
+      {!isTyping && <BlockBlurCopies block={block} theme={theme} imageUrl={imageUrl} backdrop={backdrop} />}
     </div>
   );
 });

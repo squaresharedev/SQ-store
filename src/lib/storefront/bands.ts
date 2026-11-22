@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { cssUrl } from "@/components/storefront/background-presets";
 import { storefrontBackdropHex } from "@/components/product-page/product-page-maps";
 import { bandBackdropHex, bandBehind } from "@/lib/storefront/backdrop";
+import { gradientCss, paletteGradients } from "@/lib/storefront/gradients";
 import { derivePalette } from "@/lib/storefront/palette";
 import {
   BANDS_MAX,
@@ -55,37 +56,14 @@ const BAND_PHOTO_BASE = "#d4d4d4";
 export const NEW_BAND_PHOTO_DIM: BandDim = "dark";
 
 /**
- * A gradient as CSS. THE SWAP POINT: the motion-and-finish workstream is
- * writing the shared gradient-to-CSS helper; this is the band's own copy until
- * the two are merged, kept to the same shape so it can simply be replaced.
+ * READY-MADE GRADIENTS for a band, the only gradients a seller is offered for
+ * one (never a gradient editor): the palette's BACKDROP gradients, the same
+ * ones the board's background offers (lib/storefront/gradients). Each is kept
+ * only where the board's words read across all of it, which is what lets a
+ * block on a gradient band take its ink from the colour the band starts in.
  */
-export function gradientCss(fill: GradientFill): string {
-  const stops = fill.via ? [fill.from, fill.via, fill.to] : [fill.from, fill.to];
-  return `linear-gradient(${fill.angle}deg, ${stops.join(", ")})`;
-}
-
-/**
- * READY-MADE GRADIENTS from the storefront's palette, the only gradients a
- * seller is offered for a band (never a gradient editor). Same swap point as
- * gradientCss: the shared palette gradients replace this list on merge. A
- * gradient between two equal colours is left out, since it is a solid.
- */
-export function paletteGradients(theme: StorefrontTheme): GradientFill[] {
-  const palette = derivePalette(theme);
-  const candidates: GradientFill[] = [
-    { from: palette.background, to: palette.muted, angle: 180 },
-    { from: palette.surface, to: palette.muted, angle: 135 },
-    { from: palette.muted, via: palette.surface, to: palette.background, angle: 90 },
-    { from: palette.accent, to: palette.text, angle: 135 },
-  ];
-  const seen = new Set<string>();
-  return candidates.filter((fill) => {
-    const key = gradientCss(fill).toLowerCase();
-    const flat = fill.from.toLowerCase() === fill.to.toLowerCase() && (!fill.via || fill.via.toLowerCase() === fill.to.toLowerCase());
-    if (flat || seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+export function bandGradients(theme: StorefrontTheme): GradientFill[] {
+  return paletteGradients(derivePalette(theme), "backdrop").map((ready) => ready.fill);
 }
 
 /** The palette's colours a band can be painted in, each once, in slot order. */
@@ -112,7 +90,7 @@ export function bandLayers(background: BandBackground, imageUrl?: string | null)
     case "solid":
       return { fill: { backgroundColor: background.color } };
     case "gradient":
-      return { fill: { backgroundImage: gradientCss(background) } };
+      return { fill: { backgroundImage: gradientCss(background) ?? undefined } };
     case "image": {
       const placement = { x: background.x, y: background.y, scale: background.scale };
       const origin = `${placement.x}% ${placement.y}%`;
@@ -273,7 +251,7 @@ export function backgroundOfKind(
   if (kind === current.kind) return current;
   if (kind === "solid") return { kind: "solid", color: bandSwatches(theme)[0] };
   if (kind === "gradient") {
-    const fill = paletteGradients(theme)[0];
+    const fill = bandGradients(theme)[0];
     return fill ? { kind: "gradient", ...fill } : null;
   }
   return null;

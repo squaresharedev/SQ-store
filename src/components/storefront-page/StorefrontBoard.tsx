@@ -251,6 +251,9 @@ export function StorefrontBoard({
             const block = gridBlock.data;
             const tile = block.type === "product" ? tiles.get(block.productId) : undefined;
             const imageUrl = page.imageUrls[gridBlock.key] ?? null;
+            // What the words are read against, where that is news: a band
+            // under the block, or a kind new enough to ask.
+            const backdrop = blockBackdrop(theme, bands, block, state.underlayKey);
             const drawFace = (quickAddAction?: TileQuickAddAction) => (
               <>
                 <div className={TILE_FACE_CLASS} style={blockBlurStyle(block)}>
@@ -261,12 +264,10 @@ export function StorefrontBoard({
                     imageUrl={imageUrl}
                     look={page.tileLook}
                     quickAddAction={quickAddAction}
-                    // What the words are read against, where that is news: a
-                    // band under the block, or a kind new enough to ask.
-                    backdrop={blockBackdrop(theme, bands, block, state.underlayKey)}
+                    backdrop={backdrop}
                   />
                 </div>
-                <BlockBlurCopies block={block} theme={theme} imageUrl={imageUrl} />
+                <BlockBlurCopies block={block} theme={theme} imageUrl={imageUrl} backdrop={backdrop} />
               </>
             );
             const card = block.type === "product" ? resolveCardStyle(theme, block.style) : null;

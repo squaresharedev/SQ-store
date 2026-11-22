@@ -515,6 +515,23 @@
     display: none;
   }
 }
+/* A CARD TOO NARROW FOR ITS NAME AND PRICE SIDE BY SIDE stacks them: the name
+   on its own line, the price under it. Labels are never drawn under a
+   readable size (TILE_LABEL_READABLE_PX), so on a phone's three-across row the
+   price alone fills the strip and the name beside it is cut to a letter. The
+   strip grows by a line and the photo gives that up, which is the right trade
+   for a card whose name could not be read. Only where the price sits in the
+   strip (a floated price is not in it), and never on a wider card. */
+@container (max-width: 8.5rem) {
+  [data-title-band]:has(> [data-tile-price]) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  [data-title-band] > [data-tile-price] {
+    align-self: flex-start;
+  }
+}
 /* ONE CELL'S SIDE, handed down to every tile for what should be the same
    size on all of them whatever their span: chips, when the theme asks for
    that (theme.chipScale "cell", tileLabelSize). REGISTERED, so it is worked

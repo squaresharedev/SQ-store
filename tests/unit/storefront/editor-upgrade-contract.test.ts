@@ -344,3 +344,29 @@ describe("the saved text styles", () => {
     expect(resolveTextStyle(upgradedConfig().theme, "heading")).toEqual({ font: "heading", size: 40, uppercase: true, color: "#7c2d12" });
   });
 });
+
+describe("words on a band", () => {
+  it("keep the ink they would wear anyway wherever it reads there", async () => {
+    const { textInkOnBackdrop } = await import("@/lib/storefront/text-styles");
+    const theme = legacyConfig().theme;
+    // Off a band (no backdrop) nothing is decided here: the automatic colour,
+    // or none, comes straight back, as it always was.
+    expect(textInkOnBackdrop(theme, undefined, undefined)).toBeUndefined();
+    expect(textInkOnBackdrop(theme, "#7c2d12", undefined)).toBe("#7c2d12");
+    // On a light band the board's own dark ink and a dark accent both read.
+    expect(textInkOnBackdrop(theme, undefined, "#fef3c7")).toBeUndefined();
+    expect(textInkOnBackdrop(theme, "#7c2d12", "#fef3c7")).toBe("#7c2d12");
+  });
+
+  it("take whichever ink reads where the automatic one would not", async () => {
+    const { textInkOnBackdrop } = await import("@/lib/storefront/text-styles");
+    const { contrastRatio } = await import("@/lib/format/color");
+    const theme = legacyConfig().theme;
+    // A dark band under dark words: the board's ink, and a dark accent, give way.
+    for (const automatic of [undefined, "#7c2d12"]) {
+      const ink = textInkOnBackdrop(theme, automatic, "#1c1917");
+      expect(ink).toBeDefined();
+      expect(contrastRatio(ink!, "#1c1917")).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+});
