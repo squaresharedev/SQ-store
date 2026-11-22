@@ -24,6 +24,14 @@
         "dusk": "Soumrak",
         "ink": "Inkoust"
       }
+    },
+    "more": "Další",
+    "texture": {
+      "label": "Papírová textura",
+      "none": "Vypnuto",
+      "light": "Jemná",
+      "strong": "Výrazná",
+      "hint": "Jemné zrno přes pozadí, jako tištěný papír."
     }
   },
   "board": {}

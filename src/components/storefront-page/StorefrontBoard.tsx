@@ -9,7 +9,7 @@ import { BlockFace } from "@/components/storefront/BlockFace";
 import { BlockBlurCopies } from "@/components/storefront/BlockBlurCopies";
 import { phoneGridLayout } from "@/components/storefront/phone-grid";
 import { StorefrontMasthead } from "@/components/storefront/StorefrontMasthead";
-import { resolveBackgroundStyle } from "@/components/storefront/background-presets";
+import { boardBackgroundStyle } from "@/components/storefront/background-presets";
 import {
   cardHoverFrameClass,
   TILE_FACE_CLASS,
@@ -113,7 +113,7 @@ export function storefrontSurface(page: StorefrontPageData): {
     // which clips, it is cut off. The product page does the same (PageShell).
     className: cn("wrap-anywhere", presentation.className),
     style: {
-      ...resolveBackgroundStyle(theme.background, page.backgroundImageUrl),
+      ...boardBackgroundStyle(theme, page.backgroundImageUrl),
       ...gridGapStyle(theme.gridGap),
       ...customFontVars(theme.customFont, page.customFontUrl),
       color: ink,

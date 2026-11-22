@@ -24,6 +24,14 @@
         "dusk": "Zmierzch",
         "ink": "Atrament"
       }
+    },
+    "more": "Więcej",
+    "texture": {
+      "label": "Faktura papieru",
+      "none": "Wył.",
+      "light": "Lekka",
+      "strong": "Mocna",
+      "hint": "Delikatne ziarno na tle, jak na zadrukowanym papierze."
     }
   },
   "board": {}

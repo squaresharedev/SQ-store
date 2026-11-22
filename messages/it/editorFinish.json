@@ -24,6 +24,14 @@
         "dusk": "Crepuscolo",
         "ink": "Inchiostro"
       }
+    },
+    "more": "Altro",
+    "texture": {
+      "label": "Texture carta",
+      "none": "No",
+      "light": "Leggera",
+      "strong": "Marcata",
+      "hint": "Una grana fine sullo sfondo, come carta stampata."
     }
   },
   "board": {}

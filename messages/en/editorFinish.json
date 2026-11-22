@@ -24,6 +24,14 @@
         "dusk": "Dusk",
         "ink": "Ink"
       }
+    },
+    "more": "More",
+    "texture": {
+      "label": "Paper texture",
+      "none": "Off",
+      "light": "Light",
+      "strong": "Strong",
+      "hint": "A fine grain over the background, like printed paper."
     }
   },
   "board": {}

@@ -24,6 +24,14 @@
         "dusk": "Dämmerung",
         "ink": "Tinte"
       }
+    },
+    "more": "Mehr",
+    "texture": {
+      "label": "Papierstruktur",
+      "none": "Aus",
+      "light": "Leicht",
+      "strong": "Stark",
+      "hint": "Eine feine Körnung über dem Hintergrund, wie bedrucktes Papier."
     }
   },
   "board": {}

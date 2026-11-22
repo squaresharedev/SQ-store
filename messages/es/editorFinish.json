@@ -24,6 +24,14 @@
         "dusk": "Crepúsculo",
         "ink": "Tinta"
       }
+    },
+    "more": "Más",
+    "texture": {
+      "label": "Textura de papel",
+      "none": "No",
+      "light": "Suave",
+      "strong": "Intensa",
+      "hint": "Un grano fino sobre el fondo, como papel impreso."
     }
   },
   "board": {}

@@ -8,6 +8,7 @@ import { resolveTileLook } from "@/lib/storefront/tile-look";
 import {
   DEFAULT_PRODUCT_PAGE_CONFIG,
   MOTION_PRESETS,
+  TEXTURES,
   buyerVisibleBlocks,
   type ShapeBlock,
   type StorefrontBlock,
@@ -31,6 +32,7 @@ import { GALLERY_PALETTES, GradientSheet, isGalleryPalette } from "./GradientShe
 //     &shapes=gradient        each showcase shape in a different fill gradient
 //     &freeform=1             two shapes tucked behind the words (stacked, so
 //                             a phone keeps the layout instead of reflowing)
+//     &texture=light|strong   theme.texture, the paper grain
 //     &embed=1                the embed frame instead of the hosted page
 //   ?view=legacy            the sample with NONE of this workstream's fields,
 //                           for the before/after comparison
@@ -47,6 +49,7 @@ type Query = {
   bg?: string;
   shapes?: string;
   freeform?: string;
+  texture?: string;
 };
 
 /** Fixed ids for the showcase rows, so a reload draws the same board. */
@@ -142,6 +145,7 @@ export default async function EditorFinishDevPage({
 
   const legacy = query.view === "legacy";
   const motion = MOTION_PRESETS.find((preset) => preset === query.motion);
+  const texture = TEXTURES.find((preset) => preset === query.texture);
   const palette = isGalleryPalette(query.palette) ? GALLERY_PALETTES[query.palette](config.theme) : null;
   const backdrop = palette ? paletteGradients(palette, "backdrop").find((ready) => ready.id === query.bg) : undefined;
   const fills = palette ? paletteGradients(palette, "fill") : [];
@@ -152,6 +156,7 @@ export default async function EditorFinishDevPage({
         ...config.theme,
         rows: config.theme.rows + 10,
         ...(motion ? { motion } : {}),
+        ...(texture ? { texture } : {}),
         ...(palette
           ? {
               palette,

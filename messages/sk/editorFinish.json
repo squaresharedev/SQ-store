@@ -24,6 +24,14 @@
         "dusk": "Súmrak",
         "ink": "Atrament"
       }
+    },
+    "more": "Viac",
+    "texture": {
+      "label": "Papierová textúra",
+      "none": "Vypnuté",
+      "light": "Jemná",
+      "strong": "Výrazná",
+      "hint": "Jemné zrno na pozadí, ako tlačený papier."
     }
   },
   "board": {}
