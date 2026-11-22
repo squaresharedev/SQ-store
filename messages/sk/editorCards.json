@@ -1,4 +1,36 @@
 {
-  "panel": {},
+  "panel": {
+    "cardColor": "Farba karty",
+    "blend": {
+      "label": "Prelínať biele pozadie",
+      "auto": "Automaticky",
+      "on": "Zapnuté",
+      "off": "Vypnuté",
+      "hint": "Farba karty presvitá bielym pozadím fotky. Automaticky prelína len fotky s bielymi okrajmi.",
+      "darkCard": "Na tmavej karte si fotky ponechajú bielu: prelínanie by stmavilo aj produkt."
+    },
+    "more": "Viac",
+    "nameStrip": "Pás s názvom",
+    "nameColor": "Farba názvu",
+    "nameFont": {
+      "label": "Písmo názvu",
+      "heading": "Nadpis",
+      "body": "Text"
+    },
+    "photoShape": {
+      "label": "Tvar fotky",
+      "rectangle": "Obdĺžnik",
+      "rounded": "Zaoblený",
+      "arch": "Oblúk",
+      "circle": "Kruh"
+    },
+    "imageShape": "Tvar",
+    "shadow": {
+      "label": "Tieň",
+      "none": "Žiadny",
+      "soft": "Jemný",
+      "lifted": "Výrazný"
+    }
+  },
   "board": {}
 }

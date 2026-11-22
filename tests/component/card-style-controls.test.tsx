@@ -258,7 +258,11 @@ describe("CardStyleControls", () => {
 
     await openTitleSection(user);
     // Auto is a state, not a number: nothing is stored until it is moved.
-    expect(screen.getByText(/^Auto/)).toBeVisible();
+    // (Outside the white-background blend's own "Auto", which is a choice.)
+    const notTheBlend = (element: HTMLElement) =>
+      !element.closest('[role="group"][aria-label="Blend white background"]');
+    expect(screen.getAllByText(/^Auto/).filter(notTheBlend)).toHaveLength(1);
+    expect(screen.getAllByText(/^Auto/).find(notTheBlend)).toBeVisible();
     // Keyboard rather than a click: a pointer press sets from its own x, and
     // what is being pinned here is that the slider STARTS where auto had it.
     const slider = screen.getByRole("slider", { name: "Title edge spacing" });
@@ -275,7 +279,7 @@ describe("CardStyleControls", () => {
         onChange={onChange}
       />,
     );
-    await user.click(screen.getByRole("button", { name: "Auto" }));
+    await user.click(screen.getAllByRole("button", { name: "Auto" }).find(notTheBlend)!);
     expect(onChange).toHaveBeenLastCalledWith({ titleInset: undefined });
   });
 

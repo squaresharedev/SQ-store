@@ -1,4 +1,36 @@
 {
-  "panel": {},
+  "panel": {
+    "cardColor": "Couleur de la carte",
+    "blend": {
+      "label": "Fondre le fond blanc",
+      "auto": "Automatique",
+      "on": "Activé",
+      "off": "Désactivé",
+      "hint": "La couleur de la carte apparaît à travers le fond blanc de la photo. Automatique ne fond que les photos aux bords blancs.",
+      "darkCard": "Sur une carte foncée, les photos gardent leur blanc : les fondre assombrirait aussi le produit."
+    },
+    "more": "Plus",
+    "nameStrip": "Bandeau du nom",
+    "nameColor": "Couleur du nom",
+    "nameFont": {
+      "label": "Police du nom",
+      "heading": "Titre",
+      "body": "Corps"
+    },
+    "photoShape": {
+      "label": "Forme de la photo",
+      "rectangle": "Rectangle",
+      "rounded": "Arrondie",
+      "arch": "Arche",
+      "circle": "Cercle"
+    },
+    "imageShape": "Forme",
+    "shadow": {
+      "label": "Ombre",
+      "none": "Aucune",
+      "soft": "Douce",
+      "lifted": "Surélevée"
+    }
+  },
   "board": {}
 }

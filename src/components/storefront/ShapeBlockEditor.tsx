@@ -25,6 +25,7 @@ import { BlockActions } from "./BlockActions";
 import { BlurSlider } from "./BlurSlider";
 import { SummonedField, type BlockFieldSummons } from "./SummonedField";
 import { ShapeKindGlyph } from "./ShapeTileContent";
+import { ShadowPicker } from "./CardLookControls";
 import {
   STAR_DEFAULTS,
   defaultRoundness,
@@ -44,6 +45,7 @@ export type ShapeBlockPatch = Partial<
     | "blurDirection"
     | "roundness"
     | "points"
+    | "shadow"
   >
 >;
 
@@ -247,6 +249,12 @@ export function ShapeBlockEditor({
           />
         )}
       </SummonedField>
+
+      {/* Photo cards: a drop shadow, drawn by the grid cell (blockShadowStyle). */}
+      <ShadowPicker
+        value={block.shadow ?? "none"}
+        onChange={(shadow) => onUpdate({ shadow: shadow === "none" ? undefined : shadow })}
+      />
 
       <BlockActions
         onDuplicate={onDuplicate}

@@ -1,4 +1,36 @@
 {
-  "panel": {},
+  "panel": {
+    "cardColor": "Colore della scheda",
+    "blend": {
+      "label": "Fondi lo sfondo bianco",
+      "auto": "Automatico",
+      "on": "Attivo",
+      "off": "Disattivo",
+      "hint": "Il colore della scheda traspare dallo sfondo bianco della foto. Automatico fonde solo le foto con i bordi bianchi.",
+      "darkCard": "Su una scheda scura le foto mantengono il bianco: fonderle scurirebbe anche il prodotto."
+    },
+    "more": "Altro",
+    "nameStrip": "Fascia del nome",
+    "nameColor": "Colore del nome",
+    "nameFont": {
+      "label": "Carattere del nome",
+      "heading": "Titolo",
+      "body": "Testo"
+    },
+    "photoShape": {
+      "label": "Forma della foto",
+      "rectangle": "Rettangolo",
+      "rounded": "Arrotondata",
+      "arch": "Arco",
+      "circle": "Cerchio"
+    },
+    "imageShape": "Forma",
+    "shadow": {
+      "label": "Ombra",
+      "none": "Nessuna",
+      "soft": "Morbida",
+      "lifted": "Sollevata"
+    }
+  },
   "board": {}
 }

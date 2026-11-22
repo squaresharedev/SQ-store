@@ -1,4 +1,36 @@
 {
-  "panel": {},
+  "panel": {
+    "cardColor": "Kartenfarbe",
+    "blend": {
+      "label": "Weißen Hintergrund angleichen",
+      "auto": "Automatisch",
+      "on": "An",
+      "off": "Aus",
+      "hint": "Die Kartenfarbe scheint durch den weißen Hintergrund eines Fotos. Automatisch gleicht nur Fotos mit weißen Rändern an.",
+      "darkCard": "Auf einer dunklen Karte behalten Fotos ihr Weiß: Angleichen würde auch das Produkt abdunkeln."
+    },
+    "more": "Mehr",
+    "nameStrip": "Namensleiste",
+    "nameColor": "Namensfarbe",
+    "nameFont": {
+      "label": "Schrift des Namens",
+      "heading": "Überschrift",
+      "body": "Fließtext"
+    },
+    "photoShape": {
+      "label": "Fotoform",
+      "rectangle": "Rechteck",
+      "rounded": "Abgerundet",
+      "arch": "Bogen",
+      "circle": "Kreis"
+    },
+    "imageShape": "Form",
+    "shadow": {
+      "label": "Schatten",
+      "none": "Keiner",
+      "soft": "Weich",
+      "lifted": "Angehoben"
+    }
+  },
   "board": {}
 }

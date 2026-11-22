@@ -18,6 +18,14 @@ import { infoTextClass, strongLabelClass } from "@/components/ui/control-styles"
  * (both chips, every card): otherwise the second copy read as a setting of its
  * own, and a product's copy as that tile's. The default is stored as no key,
  * like the other defaults a theme can fall back to.
+ *
+ * OUT OF THE EDITOR FOR EVERY BOARD THAT HAS NOT USED IT (Photo cards, editor
+ * upgrade). "Stay the same" sized every chip on a big card as on a 1x1, which
+ * is what made prices unreadable; with the labels' readable floor
+ * (TILE_LABEL_READABLE_PX) the choice changes little, and four copies of a
+ * switch that changes little were four things to read for nothing. It is drawn
+ * only on a board already set to "cell", so that seller can still switch back.
+ * The field itself keeps working, and an assistant can still set it.
  */
 export function ChipScaleControl({
   theme,
@@ -27,6 +35,7 @@ export function ChipScaleControl({
   onChange: (theme: StorefrontTheme) => void;
 }) {
   const t = useTranslations("Storefront.chipScale");
+  if ((theme.chipScale ?? DEFAULT_CHIP_SCALE) === DEFAULT_CHIP_SCALE) return null;
   const select = (chipScale: ChipScale) => {
     const next = { ...theme };
     if (chipScale === DEFAULT_CHIP_SCALE) delete next.chipScale;

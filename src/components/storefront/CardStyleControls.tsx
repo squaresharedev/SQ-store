@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/control-styles";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { BlurSlider } from "./BlurSlider";
+import { CardLookMainControls, CardLookMoreControls } from "./CardLookControls";
 import { LayoutPresetPicker } from "./LayoutPresetPicker";
 import { TileLayoutBoard } from "./TileLayoutBoard";
 import { TitleStylePicker } from "./TitleStylePicker";
@@ -94,10 +95,10 @@ export function CardStyleControls({
   value: CardStyle;
   onChange: (patch: CardStyleOverrides) => void;
   /**
-   * The layers behind `value`, for the one optional color here (the shadow
-   * tint): its inherit dot has to know whether THIS layer sets it, which the
-   * merged style cannot say. Same shape as PriceTagControls' props. Absent =
-   * no color field.
+   * The layers behind `value`, for the optional colors here (the shadow tint,
+   * and the card look's three): an inherit dot has to know whether THIS layer
+   * sets it, which the merged style cannot say. Same shape as
+   * PriceTagControls' props. Absent = no color fields.
    */
   colorScope?: {
     theme: StorefrontTheme;
@@ -176,6 +177,10 @@ export function CardStyleControls({
               : undefined
         }
       />
+
+      {/* The card's colour and the white-background blend: what makes a white
+          studio photo sit on a coloured board (CardLookControls). */}
+      <CardLookMainControls value={value} onChange={onChange} colorScope={colorScope} />
 
       {/* Out of the Title fold on purpose: a seller who picks Gallery sees the
           fade straight away and should find its color and its blur without
@@ -289,6 +294,10 @@ export function CardStyleControls({
           )}
         </div>
       </CollapsibleSection>
+
+      {/* The rest of the card look: name strip, name font, photo shape and
+          shadow, folded away until asked for. */}
+      <CardLookMoreControls value={value} onChange={onChange} colorScope={colorScope} />
     </div>
   );
 }

@@ -1,4 +1,36 @@
 {
-  "panel": {},
+  "panel": {
+    "cardColor": "Kaartkleur",
+    "blend": {
+      "label": "Witte achtergrond mengen",
+      "auto": "Automatisch",
+      "on": "Aan",
+      "off": "Uit",
+      "hint": "De kaartkleur schijnt door de witte achtergrond van een foto. Automatisch mengt alleen foto's met witte randen.",
+      "darkCard": "Op een donkere kaart houden foto's hun wit: mengen zou ook het product donkerder maken."
+    },
+    "more": "Meer",
+    "nameStrip": "Naambalk",
+    "nameColor": "Naamkleur",
+    "nameFont": {
+      "label": "Lettertype van de naam",
+      "heading": "Kop",
+      "body": "Tekst"
+    },
+    "photoShape": {
+      "label": "Fotovorm",
+      "rectangle": "Rechthoek",
+      "rounded": "Afgerond",
+      "arch": "Boog",
+      "circle": "Cirkel"
+    },
+    "imageShape": "Vorm",
+    "shadow": {
+      "label": "Schaduw",
+      "none": "Geen",
+      "soft": "Zacht",
+      "lifted": "Zwevend"
+    }
+  },
   "board": {}
 }
