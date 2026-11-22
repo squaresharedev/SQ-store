@@ -33,7 +33,7 @@ import { resolveTileLook } from "@/lib/storefront/tile-look";
 import { TILE_PRODUCT_SELECT, signImageBlocks, tileProduct, type TileProductRow } from "@/lib/storefront/storefront-page";
 import { presignGetUrl } from "@/lib/r2";
 import { getActiveAccount } from "@/lib/team/account-context";
-import { buyerVisibleBlocks, type StorefrontBlock } from "@/types/storefront";
+import { boardProductIds, buyerVisibleBlocks, type StorefrontBlock } from "@/types/storefront";
 import type { StorefrontPageData } from "@/types/storefront-page";
 
 /** A product tile the preview can point at: where it is, and what it is. */
@@ -58,9 +58,8 @@ export async function storefrontPreview(
   if (!account || !storefront) return null;
   const { config } = storefront;
 
-  const productIds = [
-    ...new Set(config.blocks.flatMap((block) => (block.type === "product" ? [block.productId] : []))),
-  ];
+  // Every product the board shows: its tiles and its carousels' members.
+  const productIds = boardProductIds(config.blocks);
   const supabase = await createClient();
   const { data: rows, error } =
     productIds.length === 0

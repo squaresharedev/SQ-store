@@ -9,9 +9,21 @@ import {
 } from "@/lib/agent/paths";
 import { productPagePreview, type ProductPagePreviewNotes } from "@/lib/agent/preview/product-page-preview";
 import { PUBLISH_CARD_VIEW_HTML } from "@/lib/agent/preview/publish-card";
-import { pictureScale, takeSnapshot, type PreviewViewport } from "@/lib/agent/preview/snapshot";
+import {
+  croppedAsAsked,
+  pictureScale,
+  takeSnapshot,
+  type PreviewViewport,
+  type SnapshotOptions,
+} from "@/lib/agent/preview/snapshot";
 import { storefrontPreview, type StorefrontPreviewNotes } from "@/lib/agent/preview/storefront-preview";
-import { readMeasurements, type PreviewMeasurements } from "@/lib/agent/preview/targets";
+import {
+  readMeasurements,
+  type CellRegion,
+  type MeasuredTile,
+  type PageBox,
+  type PreviewMeasurements,
+} from "@/lib/agent/preview/targets";
 import { LIVE_PREVIEW_TOKEN_SECONDS, mintPreviewToken, type PreviewSubject } from "@/lib/agent/preview/token";
 import { PAGE_PREVIEW_VIEW_HTML } from "@/lib/agent/preview/view";
 import { READ, ToolFailure, ToolMedia, defineTool } from "@/lib/agent/tool";
@@ -96,31 +108,62 @@ type Pictures = {
   imageIndex: Partial<Record<PreviewViewport, number>>;
   measured: Partial<Record<PreviewViewport, PreviewMeasurements>>;
   /** What the model is told about the pictures it did not get. */
-  report: { pictures: PreviewViewport[]; picturesTooLargeToSend?: PreviewViewport[]; picturesMissing?: PreviewViewport[] };
+  report: {
+    pictures: PreviewViewport[];
+    picturesTooLargeToSend?: PreviewViewport[];
+    picturesMissing?: PreviewViewport[];
+    regionNotCropped?: true;
+  };
+  /** The same, in sentences. */
+  pictureNotes: string[];
 };
 
-/** Photograph a preview page on each screen, within the result's budget. */
-async function takePictures(url: string, wanted: PreviewViewport[]): Promise<Pictures> {
-  const shots = await Promise.all(wanted.map((screen) => takeSnapshot(url, screen)));
+/**
+ * Photograph a preview page on each screen, within the result's budget. A
+ * picture past what is left of the budget is left out and said so, never cut
+ * down; a region the browser did not crop to is left out the same way, never
+ * passed off as the region.
+ */
+async function takePictures(url: string, wanted: PreviewViewport[], options: SnapshotOptions = {}): Promise<Pictures> {
+  const shots = await Promise.all(wanted.map((screen) => takeSnapshot(url, screen, options)));
   const images: Pictures["images"] = [];
   const imageIndex: Pictures["imageIndex"] = {};
   const measured: Pictures["measured"] = {};
   const tooLarge: PreviewViewport[] = [];
+  const notCropped: PreviewViewport[] = [];
+  const pictureNotes: string[] = [];
   let budget = PICTURE_BUDGET_CHARS;
   wanted.forEach((screen, index) => {
     const shot = shots[index];
     if (!shot) return;
     const found = readMeasurements(shot.html);
     if (found) measured[screen] = found;
+    if (options.region && !croppedAsAsked(shot.image, found?.region)) {
+      notCropped.push(screen);
+      pictureNotes.push(
+        "The picture could not be cropped to that region (the board was not found, or the browser did not crop), so it was left out. Ask for the whole page instead.",
+      );
+      return;
+    }
     if (shot.image.length > budget) {
       tooLarge.push(screen);
+      pictureNotes.push(
+        `The ${screen} picture is ${shot.image.length} characters, past the ${budget} a result can still carry, so it was left out. ` +
+          (options.region
+            ? "Ask for a smaller region."
+            : options.resolution === "full"
+              ? "Ask for a region of cells to see part of it at full resolution, or the standard resolution for all of it."
+              : "Ask for one screen at a time, or a region of cells."),
+      );
       return;
     }
     budget -= shot.image.length;
     imageIndex[screen] = 1 + images.length;
     images.push({ data: shot.image, mimeType: shot.mimeType });
   });
-  const missing = wanted.filter((screen) => imageIndex[screen] === undefined && !tooLarge.includes(screen));
+  const missing = wanted.filter(
+    (screen) => imageIndex[screen] === undefined && !tooLarge.includes(screen) && !notCropped.includes(screen),
+  );
   return {
     images,
     imageIndex,
@@ -129,7 +172,9 @@ async function takePictures(url: string, wanted: PreviewViewport[]): Promise<Pic
       pictures: wanted.filter((screen) => imageIndex[screen] !== undefined),
       ...(tooLarge.length ? { picturesTooLargeToSend: tooLarge } : {}),
       ...(missing.length ? { picturesMissing: missing } : {}),
+      ...(notCropped.length ? { regionNotCropped: true as const } : {}),
     },
+    pictureNotes,
   };
 }
 
@@ -147,8 +192,58 @@ function liveToken(subject: PreviewSubject, grantId: string): Promise<string> {
 
 const viewportInput = z.enum(["both", "desktop", "mobile"]).optional().describe("Which screens to take. Both by default.");
 
+const resolutionInput = z
+  .enum(["standard", "full"])
+  .optional()
+  .describe("full pictures the desktop at its real 1280 pixels instead of 800. A long page may then be too large to send, and the answer says so: ask for a region instead.");
+
+const regionInput = z
+  .strictObject({
+    x: z.number().int().min(0),
+    y: z.number().int().min(0),
+    w: z.number().int().min(1),
+    h: z.number().int().min(1),
+  })
+  .optional()
+  .describe("Crop to these board cells (x, y, w, h as in get_storefront), pictured at full resolution on the desktop: the way to judge type and spacing up close.");
+
 function screensFor(viewport: "both" | PreviewViewport): PreviewViewport[] {
   return viewport === "both" ? ["desktop", "mobile"] : [viewport];
+}
+
+/**
+ * The tiles over a region's crop, in the crop's own pixels: what the view's
+ * fallback picture lays its tile targets on, as a share of the "page" it was
+ * handed (here, the crop).
+ */
+function onCrop<Tile extends MeasuredTile>(tiles: Tile[], box: PageBox) {
+  return {
+    page: { width: box.w, height: box.h },
+    tiles: tiles
+      .filter((tile) => tile.x < box.x + box.w && box.x < tile.x + tile.w && tile.y < box.y + box.h && box.y < tile.y + tile.h)
+      .map((tile) => ({ ...tile, x: tile.x - box.x, y: tile.y - box.y })),
+  };
+}
+
+/** A region lies on the desktop board, refused in words before a preview is spent. */
+function assertRegionOnBoard(
+  region: CellRegion,
+  viewport: "both" | PreviewViewport,
+  theme: { columns: number; rows: number },
+): void {
+  const refuse = (message: string, fix: string) =>
+    new ToolFailure(
+      invalidInput(msg("Errors.agent.passThrough", { message }), msg("Errors.agent.passThrough", { message: fix })),
+    );
+  if (viewport === "mobile") {
+    throw refuse("A region is cut from the desktop board.", "Leave viewport out with a region, or ask for the whole phone page without one.");
+  }
+  if (region.x + region.w > theme.columns || region.y + region.h > theme.rows) {
+    throw refuse(
+      `The board is ${theme.columns} by ${theme.rows} cells, so that region is not on it.`,
+      `x + w may reach ${theme.columns} and y + h may reach ${theme.rows}, as in get_storefront.`,
+    );
+  }
 }
 
 /** The storefront notes in plain sentences, for the model and the view alike. */
@@ -198,8 +293,10 @@ function productNotesInWords(notes: ProductPagePreviewNotes, storefrontName: str
 }
 
 /** Picture pixels per page pixel on each screen taken, for reading `tiles` against a picture. */
-function scalesFor(screens: PreviewViewport[]): Partial<Record<PreviewViewport, number>> {
-  return Object.fromEntries(screens.map((screen) => [screen, pictureScale(screen)]));
+function scalesFor(screens: PreviewViewport[], options: SnapshotOptions = {}): Partial<Record<PreviewViewport, number>> {
+  return Object.fromEntries(
+    screens.map((screen) => [screen, options.region ? 1 : pictureScale(screen, options.resolution)]),
+  );
 }
 
 export const previewTools = [
@@ -210,6 +307,7 @@ export const previewTools = [
       "See a storefront the way a buyer's browser draws it: screenshots from a real browser using the live storefront renderer, on a desktop (laid out 1280 wide, pictured 800 wide) and on a phone (390 wide), " +
       "with where each product tile landed, and what keeps any of it from buyers (drafts, missing photos, the store not being public yet). " +
       "Use it after edit_storefront to check your work: overlaps, contrast, empty photo frames, text that does not fit, and how it reads on a phone. " +
+      "To judge type and spacing, ask for a region of cells (cropped at full resolution) or resolution full; a picture too large to send is left out and said so, never shrunk. " +
       "Drafts are drawn, because this is the seller's own preview; buyers do not see them. In a host with MCP Apps the seller sees the storefront itself, live, and can switch screens and pick a tile. " +
       "Each call drives a browser, so use it to check a batch of edits, not every one. Up to 30 previews an hour, shared with preview_product_page.",
     scope: "store:read",
@@ -220,21 +318,27 @@ export const previewTools = [
     input: z.strictObject({
       id: z.string().describe("The storefront's id."),
       viewport: viewportInput,
+      resolution: resolutionInput,
+      region: regionInput,
     }),
-    handler: async ({ id, viewport = "both" }, { grantId }) => {
+    handler: async ({ id, viewport = "both", resolution = "standard", region }, { grantId }) => {
       // Read under row level security first: a storefront of another store is
       // not found here, before any token is minted or browser started.
       const storefront = await getStorefront(id);
       if (!storefront) throw new ToolFailure(notFound("storefront"));
+      if (region) assertRegionOnBoard(region, viewport, storefront.config.theme);
       await spendPreview(grantId);
       const preview = await storefrontPreview(id);
       if (!preview) throw new ToolFailure(notFound("storefront"));
 
-      const wanted = screensFor(viewport);
+      // A region is cut from the desktop board alone.
+      const wanted: PreviewViewport[] = region ? ["desktop"] : screensFor(viewport);
+      const options: SnapshotOptions = region ? { region: true } : { resolution };
       const subject = { kind: "storefront", id } as const;
-      const { images, imageIndex, measured, report } = await takePictures(
-        storefrontPreviewUrl(id, await mintPreviewToken(subject, grantId)),
+      const { images, imageIndex, measured, report, pictureNotes } = await takePictures(
+        storefrontPreviewUrl(id, await mintPreviewToken(subject, grantId), region),
         wanted,
+        options,
       );
       const notes = storefrontNotesInWords(preview.notes);
       const isPublic = preview.notes.notPublic.length === 0;
@@ -249,11 +353,19 @@ export const previewTools = [
         {
           storefront: { id: storefront.id, name: storefront.name },
           ...report,
+          ...(pictureNotes.length ? { pictureNotes } : {}),
           notes,
-          // Where each product tile was drawn, in page pixels; times
-          // pictureScale for where it is on that screen's picture.
+          ...(region
+            ? {
+                // The crop's own place on the page: a tile's picture pixels are
+                // its page pixels less this box's x and y.
+                region: { cells: region, ...(measured.desktop?.region ? { page: measured.desktop.region } : {}) },
+              }
+            : { resolution }),
+          // Where each product tile (and the board's grid) was drawn, in page
+          // pixels; times pictureScale for where it is on that screen's picture.
           tiles: Object.fromEntries(measuredScreens.map((screen) => [screen, measured[screen]])),
-          pictureScale: scalesFor(measuredScreens),
+          pictureScale: scalesFor(measuredScreens, options),
           board: boardSummary(storefront.config),
         },
         images,
@@ -263,7 +375,10 @@ export const previewTools = [
           viewport: wanted[0],
           imageIndex,
           viewports: Object.fromEntries(
-            measuredScreens.map((screen) => [screen, { page: measured[screen]?.page, tiles: tilesFor(screen) }]),
+            measuredScreens.map((screen) => {
+              const crop = region ? measured[screen]?.region : undefined;
+              return [screen, crop ? onCrop(tilesFor(screen), crop) : { page: measured[screen]?.page, tiles: tilesFor(screen) }];
+            }),
           ),
           links: { designer: appUrl(storefrontEditorPath(id)) },
           // The page the view draws live; `vp=mobile` gives its phone board.
@@ -310,12 +425,12 @@ export const previewTools = [
 
       await spendPreview(grantId);
       const subject = { kind: "product", id } as const;
-      const { images, imageIndex, report } = await takePictures(
+      const { images, imageIndex, report, pictureNotes } = await takePictures(
         productPagePreviewUrl(id, page.storefront.id, await mintPreviewToken(subject, grantId)),
         screensFor(viewport),
       );
       const isPublic = preview.notes.notPublic.length === 0;
-      return new ToolMedia({ ...data, ...report }, images, {
+      return new ToolMedia({ ...data, ...report, ...(pictureNotes.length ? { pictureNotes } : {}) }, images, {
         kind: "product",
         product: { id, title: page.product.title },
         viewport: screensFor(viewport)[0],

@@ -7,6 +7,7 @@ import { contextForGrant } from "@/lib/agent/authenticate";
 import { runAsAgent } from "@/lib/agent/context";
 import { liveGrant } from "@/lib/agent/oauth/grants";
 import { storefrontPreview } from "@/lib/agent/preview/storefront-preview";
+import { PREVIEW_REGION_PARAM, parsePreviewRegion } from "@/lib/agent/preview/targets";
 import { verifyPreviewToken } from "@/lib/agent/preview/token";
 import { PHONE_BOARD_WIDTH_PX } from "@/lib/storefront/mobile-layout";
 
@@ -55,12 +56,15 @@ export default async function AgentStorefrontPreviewPage({
 
   // `vp=mobile` renders the phone board in the server's own HTML, for the
   // preview's live view, which shows this markup without running its scripts.
-  const viewport = (await searchParams).vp === "mobile" ? "mobile" : "desktop";
+  const query = await searchParams;
+  const viewport = query.vp === "mobile" ? "mobile" : "desktop";
+  // `region=x,y,w,h` (cells): the probe marks them for the picture to crop to.
+  const region = parsePreviewRegion(query[PREVIEW_REGION_PARAM]);
 
   return (
     <>
       <StorefrontPageView page={preview.page} assumedWidth={viewport === "mobile" ? PHONE_BOARD_WIDTH_PX : undefined} />
-      <PreviewProbe targets={preview.targets} />
+      <PreviewProbe targets={preview.targets} region={region} />
     </>
   );
 }
