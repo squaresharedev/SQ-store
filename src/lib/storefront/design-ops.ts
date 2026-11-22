@@ -11,7 +11,6 @@ import {
   BLUR_MAX,
   BUTTON_LABEL_MAX,
   BUTTON_LOOKS,
-  CAROUSEL_PRODUCTS_MAX,
   DEFAULT_IMAGE_PLACEMENT,
   IMAGE_ALT_MAX,
   LINK_TARGET_KINDS,
@@ -241,11 +240,6 @@ export const designOpSchema = z.discriminatedUnion("op", [
     speed: z.enum(MARQUEE_SPEEDS).optional(),
     variant: z.enum(TEXT_VARIANTS).optional().describe("The saved text style it wears. Leave out for label."),
     color: color.optional().describe("Leave out for an ink that reads on what is behind it."),
-    ...placement,
-  }),
-  z.strictObject({
-    op: z.literal("add_carousel"),
-    productIds: z.array(someId).min(1).max(CAROUSEL_PRODUCTS_MAX),
     ...placement,
   }),
   z.strictObject({ op: z.literal("move"), block: blockRef, x: cells, y: cells, viewport }),
@@ -611,7 +605,7 @@ function assertLinksLand(config: StorefrontConfig): void {
     if (kind === "product" && typeof productId === "string" && !shown.has(productId)) {
       throw new DesignOpRefused(
         `${who} leads to product ${productId}, which is not on this storefront.`,
-        "A product link opens that product's page here, so the product has to be on the board: add it with add_product or put it in a carousel, or link somewhere else.",
+        "A product link opens that product's page here, so the product has to be on the board: add it with add_product, or link somewhere else.",
       );
     }
     if (kind === "band" && typeof bandId === "string" && !bands.has(bandId)) {
@@ -834,12 +828,6 @@ export function applyDesignOps(
           ...(speed && speed !== "normal" ? { speed } : {}),
           ...place("marquee", { x, y, w, h, rotation }),
         });
-        break;
-      }
-      case "add_carousel": {
-        const { op: _op, x, y, w, h, rotation, productIds } = op;
-        void _op;
-        add({ type: "carousel", id: mintId(), productIds, ...place("carousel", { x, y, w, h, rotation }) });
         break;
       }
       case "move": {

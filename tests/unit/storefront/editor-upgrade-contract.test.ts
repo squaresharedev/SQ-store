@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseStoredStorefrontConfig, storefrontConfigSchema } from "@/lib/validation/storefront";
+import { carouselBlockSchema, parseStoredStorefrontConfig, storefrontConfigSchema } from "@/lib/validation/storefront";
 import { backdropHex, bandBehind } from "@/lib/storefront/backdrop";
 import {
   DEFAULT_STOREFRONT_CONFIG,
@@ -28,6 +28,11 @@ const BUTTON = "11111111-2222-4333-8444-555555555555";
 const MARQUEE = "22222222-3333-4444-8555-666666666666";
 const CAROUSEL = "33333333-4444-4555-8666-777777777777";
 const ELSEWHERE = "44444444-5555-4666-8777-888888888888";
+
+/** A carousel block, as the contract shapes it (not saveable yet, see below). */
+function carousel(): Extract<StorefrontBlock, { type: "carousel" }> {
+  return { type: "carousel", id: CAROUSEL, productIds: [ELSEWHERE, PRODUCT], x: 0, y: 6, w: 6, h: 2 };
+}
 
 /** A storefront as one was stored before the upgrade: every kind of block,
  *  a gradient, a styled tile, a masthead, and none of the new members. */
@@ -84,7 +89,7 @@ function upgradedConfig(): StorefrontConfig {
       { type: "image", id: IMAGE, key: `elements/${PRODUCT}/${IMAGE}-logo.svg`, alt: "Logo", x: 5, y: 0, w: 1, h: 1, shape: "circle", shadow: "soft" },
       { type: "button", id: BUTTON, label: "Shop the edit", link: { kind: "product", productId: PRODUCT }, look: "outline", x: 0, y: 2, w: 2, h: 1, fine: { top: true } },
       { type: "marquee", id: MARQUEE, text: "Free delivery this week", speed: "slow", x: 0, y: 3, w: 6, h: 1 },
-      { type: "carousel", id: CAROUSEL, productIds: [OTHER_PRODUCT, PRODUCT], x: 0, y: 4, w: 6, h: 2 },
+      { type: "product", productId: OTHER_PRODUCT, x: 0, y: 4, w: 2, h: 2 },
     ],
     header: {
       ...config.header!,
@@ -163,11 +168,13 @@ describe("editor upgrade contract: the new members", () => {
 
   it("keys every kind of block apart", () => {
     const keys = upgradedConfig().blocks.map(blockKey);
-    expect(keys).toEqual([`p_${PRODUCT}`, `t_${TEXT}`, `s_${SHAPE}`, `i_${IMAGE}`, `b_${BUTTON}`, `m_${MARQUEE}`, `c_${CAROUSEL}`]);
+    expect(keys).toEqual([`p_${PRODUCT}`, `t_${TEXT}`, `s_${SHAPE}`, `i_${IMAGE}`, `b_${BUTTON}`, `m_${MARQUEE}`, `p_${OTHER_PRODUCT}`]);
+    expect(blockKey(carousel())).toBe(`c_${CAROUSEL}`);
   });
 
-  it("counts a carousel's products as on the board", () => {
-    expect(boardProductIds(upgradedConfig().blocks).sort()).toEqual([PRODUCT, OTHER_PRODUCT].sort());
+  it("counts a carousel's products as on the board, each product once", () => {
+    const blocks = [...upgradedConfig().blocks, carousel()];
+    expect(boardProductIds(blocks).sort()).toEqual([PRODUCT, OTHER_PRODUCT, ELSEWHERE].sort());
   });
 
   it("reads half-cell steps only off the kinds that carry them", () => {
@@ -231,7 +238,7 @@ describe("editor upgrade contract: the new members", () => {
   it("refuses a link to a product or a band this storefront does not hold", () => {
     expect(refuses((c) => (c.blocks[4].link = { kind: "product", productId: ELSEWHERE }))).toBe(true);
     expect(refuses((c) => (c.header.links[0].link = { kind: "band", bandId: ELSEWHERE }))).toBe(true);
-    // A product only a carousel shows still has a page here.
+    // Any product the board shows will do.
     expect(refuses((c) => (c.blocks[4].link = { kind: "product", productId: OTHER_PRODUCT }))).toBe(false);
   });
 
@@ -245,9 +252,17 @@ describe("editor upgrade contract: the new members", () => {
     expect(refuses((c) => c.bands.push({ ...c.bands[0] }))).toBe(true);
   });
 
-  it("refuses a carousel naming a product twice, or none", () => {
-    expect(refuses((c) => (c.blocks[6].productIds = [PRODUCT, PRODUCT]))).toBe(true);
-    expect(refuses((c) => (c.blocks[6].productIds = []))).toBe(true);
+  // THE CAROUSEL IS IN THE CONTRACT BUT NOT BUILT. Its products are not yet
+  // owner-checked on save nor gated for buyers, so until it is built no
+  // storefront may hold one; its shape is pinned for the round that builds it.
+  it("refuses a carousel block: the kind is not saveable until it is built", () => {
+    expect(refuses((c) => c.blocks.push(carousel()))).toBe(true);
+  });
+
+  it("pins the carousel's shape: its own products, each once, at least one", () => {
+    expect(carouselBlockSchema.safeParse(carousel()).success).toBe(true);
+    expect(carouselBlockSchema.safeParse({ ...carousel(), productIds: [PRODUCT, PRODUCT] }).success).toBe(false);
+    expect(carouselBlockSchema.safeParse({ ...carousel(), productIds: [] }).success).toBe(false);
   });
 
   it("keeps the band's photo to an uploaded image, never an element or a product photo", () => {

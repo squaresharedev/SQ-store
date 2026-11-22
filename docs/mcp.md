@@ -101,7 +101,7 @@ operation of its own:
 | Operation | Why it is not a plain change |
 |---|---|
 | `palette` | Sets palette colours through `recolourPalettes`, so everything painted in the old colour follows. Two slots changing at once go through an unused colour first, so a light board turned dark does not merge its ink into its background. A `palette` given in `theme` changes takes the same path. |
-| `add_button`, `add_marquee`, `add_carousel` | New block kinds, placed like any other (a marquee and a carousel default to the board's full width). |
+| `add_button`, `add_marquee` | New block kinds, placed like any other (a marquee defaults to the board's full width). A product carousel is in the contract but not built yet, so there is no `add_carousel` and the schema refuses the kind. |
 | `add_band`, `edit_band`, `remove_band` | A band is not a block. `add_band` takes an optional own `id`, so a button in the same list can link to it. A background change without a `kind` is laid over the band's current one. |
 | half cells on `move`, `resize`, `add_*` | Text, shape and button blocks take `x: 2.5, w: 1.5`; design-ops turns that into whole cells plus `fine` insets, and `board.blocks` reports where blocks are drawn in the same half cells. Other kinds and the phone board are refused in words. |
 

@@ -104,7 +104,6 @@ describe("get_schema of storefront_config", () => {
       '"via"',
       '"const":"button"',
       '"const":"marquee"',
-      '"const":"carousel"',
     ]) {
       expect(schema, field).toContain(field);
     }
@@ -127,7 +126,7 @@ describe("edit_storefront as a tool", () => {
 
   it("offers every new operation in its input", () => {
     const input = JSON.stringify(z.toJSONSchema(tool().input, { io: "input" }));
-    for (const op of ["add_button", "add_marquee", "add_carousel", "add_band", "edit_band", "remove_band", "palette"]) {
+    for (const op of ["add_button", "add_marquee", "add_band", "edit_band", "remove_band", "palette"]) {
       expect(input, op).toContain(`"const":"${op}"`);
     }
   });
@@ -148,7 +147,7 @@ describe("edit_storefront as a tool", () => {
   });
 
   it("refuses a product that is not this store's by its id, rather than letting the save drop it", async () => {
-    expect(await refusal([{ op: "add_carousel", productIds: [OWNED, FOREIGN] }])).toContain(FOREIGN);
+    expect(await refusal([{ op: "add_product", productId: FOREIGN }])).toContain(FOREIGN);
     expect(stored.saves).toHaveLength(0);
   });
 

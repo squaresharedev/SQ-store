@@ -1195,9 +1195,15 @@ const marqueeBlockSchema = z
   })
   .describe("One line of text scrolling across its block. It pauses under the pointer and stands still under reduced motion.");
 
-// A product carousel: the seller's own products (ownership re-checked in
-// saveStorefront, like a product block's), each at most once.
-const carouselBlockSchema = z
+// A product carousel: the seller's own products, each at most once.
+//
+// NOT YET SAVEABLE: deliberately left out of blockSchema below. The block's
+// face is a stub, and its products are not yet owner-checked in saveStorefront
+// nor gated for buyers in buildStorefrontPage (a draft could reach a buyer's
+// page), nor counted where "is this product on this storefront" decides whether
+// it has a page and can be bought. The shape is settled and exported so the
+// round that builds the block adds it to the union and nothing else here.
+export const carouselBlockSchema = z
   .strictObject({
     type: z.literal("carousel"),
     id: uuidField("blockId"),
@@ -1220,7 +1226,7 @@ const blockSchema = z.discriminatedUnion("type", [
   imageBlockSchema,
   buttonBlockSchema,
   marqueeBlockSchema,
-  carouselBlockSchema,
+  // carouselBlockSchema joins here once the block is built (see its note).
 ]);
 
 const configObjectSchema = z

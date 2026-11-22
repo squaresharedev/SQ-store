@@ -208,7 +208,7 @@ const ARTWORK = `elements/${PRODUCT}/${OTHER}-logo.svg`;
 
 const bandOf = (config: StorefrontConfig, id: string) => config.bands?.find((band) => band.id === id);
 
-describe("buttons, scrolling text and carousels", () => {
+describe("buttons and scrolling text", () => {
   it("adds a button that leads to a product on the board, and drops the default look", () => {
     const { config, added, valid } = run([
       { op: "add_button", label: "Shop the lamp", link: { kind: "product", productId: PRODUCT }, x: 0, y: 2 },
@@ -234,7 +234,7 @@ describe("buttons, scrolling text and carousels", () => {
     );
     // Putting the product on the board in the same list is the fix.
     const fixed = run([
-      { op: "add_carousel", productIds: [OTHER] },
+      { op: "add_product", productId: OTHER },
       { op: "add_button", label: "Go", link: { kind: "product", productId: OTHER } },
     ]);
     expect(fixed.valid).toBe(true);
@@ -245,15 +245,14 @@ describe("buttons, scrolling text and carousels", () => {
     expect(() => run([{ op: "remove", block: PRODUCT }], linked)).toThrow(/The button "Buy"/);
   });
 
-  it("lays scrolling text and a carousel across the board's full width", () => {
-    const { config, added, valid } = run([
-      { op: "add_marquee", text: "Free delivery this week", speed: "normal" },
-      { op: "add_carousel", productIds: [PRODUCT, OTHER] },
-    ]);
+  it("lays scrolling text across the board's full width", () => {
+    const { config, added, valid } = run([{ op: "add_marquee", text: "Free delivery this week", speed: "normal" }]);
     expect(valid).toBe(true);
     expect(found(config, added[0])).toEqual({ type: "marquee", id: added[0], text: "Free delivery this week", x: 0, y: 1, w: 6, h: 1 });
-    expect(found(config, added[1])).toMatchObject({ type: "carousel", productIds: [PRODUCT, OTHER], x: 0, w: 6, h: 2 });
-    expect(boardSummary(config).blocks.find((block) => block.block === added[1])).toMatchObject({ productIds: [PRODUCT, OTHER] });
+  });
+
+  it("offers no carousel: the block is not built, so there is nothing to add", () => {
+    expect(designOpSchema.safeParse({ op: "add_carousel", productIds: [PRODUCT] }).success).toBe(false);
   });
 
   it("restyles the new kinds through style, like any block", () => {
